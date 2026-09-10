@@ -2,8 +2,17 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Gallery } from "@/components/gallery";
+import { CoverArtGallery } from "@/components/cover-art-gallery";
 import { CallToAction } from "@/components/call-to-action";
-import { PROJECTS, getProject, coverOf, enquiryTypeFor, nextAfter } from "@/lib/work";
+import {
+  PROJECTS,
+  COVER_ART,
+  COVER_RELEASES,
+  getProject,
+  coverOf,
+  enquiryTypeFor,
+  nextAfter,
+} from "@/lib/work";
 
 /* ── the case study ───────────────────────────────────────────────
  * The old site rendered a project as a grid of thumbnails with the credits
@@ -85,8 +94,14 @@ export default async function ProjectPage(props: PageProps<"/work/[slug]">) {
             </div>
           ) : null}
           <div>
-            <dt className="label text-muted-foreground">Frames</dt>
-            <dd className="mt-2 text-sm">{project.images.length}</dd>
+            <dt className="label text-muted-foreground">
+              {project.slug === COVER_ART?.slug ? "Releases" : "Frames"}
+            </dt>
+            <dd className="mt-2 text-sm">
+              {project.slug === COVER_ART?.slug
+                ? COVER_RELEASES.length
+                : project.images.length}
+            </dd>
           </div>
         </dl>
 
@@ -97,7 +112,14 @@ export default async function ProjectPage(props: PageProps<"/work/[slug]">) {
         ) : null}
       </header>
 
-      <Gallery project={project} />
+      {/* Cover art is a catalogue, not a sequence: every frame is 1:1 and two
+          of the releases are sleeves with two sides, so it gets a rack rather
+          than the paired-frame spread the photographic work uses. */}
+      {project.slug === COVER_ART?.slug ? (
+        <CoverArtGallery releases={COVER_RELEASES} />
+      ) : (
+        <Gallery project={project} />
+      )}
 
       {/* Credits at the end, not the top. Someone reads them once they have
           decided they like the work — putting them first asks a stranger to

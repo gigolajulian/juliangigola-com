@@ -2,8 +2,8 @@
 
 import * as React from "react";
 import Image from "next/image";
-import { Dialog, VisuallyHidden } from "radix-ui";
 import { Reveal } from "@/components/reveal";
+import { Lightbox, useLightbox } from "@/components/lightbox";
 import { cn } from "@/lib/utils";
 import type { Project } from "@/lib/work-types";
 
@@ -19,49 +19,11 @@ import type { Project } from "@/lib/work-types";
  * ─────────────────────────────────────────────────────────────── */
 
 export function Gallery({ project }: { project: Project }) {
-  const [open, setOpen] = React.useState(false);
-  const [index, setIndex] = React.useState(0);
   const frames = project.images;
-
-  // Radix returns focus to its own `Dialog.Trigger`, and there isn't one here
-  // — the lightbox is opened from whichever of eighteen frames was clicked.
-  // Without this, closing drops focus on <body> and a keyboard visitor has to
-  // tab from the top of the page again to get back to where they were.
-  const opener = React.useRef<HTMLElement | null>(null);
-
-  const show = (i: number) => {
-    opener.current = document.activeElement as HTMLElement | null;
-    setIndex(i);
-    setOpen(true);
-  };
-
-  const onOpenChange = (next: boolean) => {
-    setOpen(next);
-    if (!next) opener.current?.focus();
-  };
-
-  const step = React.useCallback(
-    (delta: number) => setIndex((i) => (i + delta + frames.length) % frames.length),
-    [frames.length],
-  );
-
-  // Arrow keys page through the sequence. Radix handles Escape and the focus
-  // trap; focus restoration is `onOpenChange` above.
-  React.useEffect(() => {
-    if (!open) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "ArrowRight") step(1);
-      else if (e.key === "ArrowLeft") step(-1);
-      else return;
-      e.preventDefault();
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [open, step]);
+  const lightbox = useLightbox(frames.length);
 
   // Rows of one or two, decided by each frame's own shape.
   const rows = React.useMemo(() => pair(frames), [frames]);
-  const current = frames[index];
 
   return (
     <>
@@ -82,7 +44,7 @@ export function Gallery({ project }: { project: Project }) {
                 <Reveal key={frame.src} delay={(i % 2) * 60}>
                   <button
                     type="button"
-                    onClick={() => show(i)}
+                    onClick={() => lightbox.show(i)}
                     aria-label={`Open frame ${i + 1} of ${frames.length}${
                       frame.alt ? `: ${frame.alt}` : ""
                     }`}
@@ -111,86 +73,8 @@ export function Gallery({ project }: { project: Project }) {
         ))}
       </div>
 
-      <Dialog.Root open={open} onOpenChange={onOpenChange}>
-        <Dialog.Portal>
-          <Dialog.Overlay className="fixed inset-0 z-50 bg-background/95 animate-in fade-in duration-200 ease-out motion-reduce:animate-none" />
-
-          <Dialog.Content
-            className={cn(
-              "fixed inset-0 z-50 flex flex-col outline-none",
-              // Modals keep a centred origin — they are not anchored to a
-              // trigger, so scaling from one would look arbitrary.
-              "animate-in fade-in zoom-in-[0.98] duration-200 ease-out motion-reduce:animate-none",
-            )}
-          >
-            <VisuallyHidden.Root>
-              <Dialog.Title>{`${project.name} — frame ${index + 1} of ${frames.length}`}</Dialog.Title>
-            </VisuallyHidden.Root>
-
-            <div className="flex min-h-0 flex-1 items-center justify-center p-4 sm:p-10">
-              {current ? (
-                <Image
-                  key={current.src}
-                  src={current.src}
-                  alt={current.alt || `${project.name} — frame ${index + 1}`}
-                  width={current.width}
-                  height={current.height}
-                  sizes="100vw"
-                  priority
-                  className="max-h-full w-auto max-w-full object-contain"
-                />
-              ) : null}
-            </div>
-
-            <div className="flex shrink-0 items-center justify-between gap-6 px-6 pb-6 sm:px-10 sm:pb-8">
-              <p className="label text-muted-foreground">
-                {index + 1} / {frames.length}
-              </p>
-
-              <div className="flex items-center gap-2">
-                <LightboxButton onClick={() => step(-1)} label="Previous frame">
-                  &larr;
-                </LightboxButton>
-                <LightboxButton onClick={() => step(1)} label="Next frame">
-                  &rarr;
-                </LightboxButton>
-                <Dialog.Close asChild>
-                  <button
-                    type="button"
-                    className="label ml-4 px-3 py-2 text-muted-foreground transition-[color,transform] duration-150 ease-out hoverable:hover:text-foreground active:scale-[0.97]"
-                  >
-                    Close
-                  </button>
-                </Dialog.Close>
-              </div>
-            </div>
-          </Dialog.Content>
-        </Dialog.Portal>
-      </Dialog.Root>
+      <Lightbox frames={frames} name={project.name} {...lightbox} />
     </>
-  );
-}
-
-function LightboxButton({
-  onClick,
-  label,
-  children,
-}: {
-  onClick: () => void;
-  label: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      aria-label={label}
-      // 44px minimum target — this is the control someone taps repeatedly on
-      // a phone, so it gets a real hit area rather than an icon's worth.
-      className="flex h-11 w-11 items-center justify-center border border-border text-base transition-[background-color,transform] duration-150 ease-out hoverable:hover:bg-card active:scale-[0.97]"
-    >
-      <span aria-hidden>{children}</span>
-    </button>
   );
 }
 
