@@ -55,9 +55,9 @@ export default function Home() {
           giving the page over to it. Six cells at this scale means the
           section is the body of the homepage rather than a strip in it.
 
-          Hairlines by `gap-px` over the border colour, the same device as the
-          discipline index — always correct however the grid wraps, and never
-          a stray rule on an outside edge.
+          No rules between the cells. The frames butt straight up against
+          each other so the section reads as one sheet of imagery rather than
+          as tiles in a frame — the photographs supply their own edges.
 
           Each cell scrubs through its own sequence under the pointer — see
           `work-band.tsx`. That answers the question a cover cannot: not "does
@@ -76,7 +76,7 @@ export default function Home() {
           </Link>
         </div>
 
-        <ul className="grid gap-px border-y border-border bg-border lg:grid-cols-2">
+        <ul className="grid lg:grid-cols-2">
           {FEATURED.map((project, i) => (
             <li key={project.slug}>
               <WorkBand project={project} index={i} priority={i < 2} />

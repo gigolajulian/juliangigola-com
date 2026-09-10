@@ -76,12 +76,12 @@ export function Hero({ disciplines }: { disciplines: Discipline[] }) {
 
   return (
     <section className="border-b border-border">
-      <div className="grid lg:min-h-[90dvh] lg:grid-cols-12">
+      <div className="grid lg:h-dvh lg:grid-cols-[1fr_auto]">
         {/* The photograph leads on a phone — it is the hook — but it is held
             to half the screen so the name and both ways in stay visible
             without scrolling. */}
         <div
-          className="relative order-first h-[52dvh] transition-colors duration-700 ease-[var(--ease-out-strong)] motion-reduce:transition-none lg:order-last lg:col-span-6 lg:h-auto"
+          className="relative order-first h-[55dvh] w-full lg:order-last lg:h-full lg:w-auto lg:aspect-[4/5]"
           style={{ backgroundColor: current.frame.color }}
         >
           {/* All four frames are mounted and crossfaded rather than swapped,
@@ -98,12 +98,13 @@ export function Hero({ disciplines }: { disciplines: Discipline[] }) {
                   : ""
               }
               fill
-              sizes="(min-width: 1024px) 50vw, 100vw"
+              sizes="(min-width: 1024px) 45vw, 100vw"
               priority={i === 0}
               aria-hidden={i === active ? undefined : true}
               className={cn(
-                // `contain`, not `cover` — the whole frame, never a crop.
-                "object-contain transition-opacity duration-700 ease-[var(--ease-out-strong)]",
+                // `cover` against a column already cut to the frame's ratio:
+                // fills it with no border of empty colour showing.
+                "object-cover transition-opacity duration-700 ease-[var(--ease-out-strong)]",
                 "motion-reduce:transition-none",
                 i === active ? "opacity-100" : "opacity-0",
               )}
@@ -121,11 +122,11 @@ export function Hero({ disciplines }: { disciplines: Discipline[] }) {
           </Link>
         </div>
 
-        <div className="flex flex-col lg:col-span-6 lg:border-r lg:border-border">
+        <div className="flex min-w-0 flex-col">
           {/* One: the standing details, as a running head. The tall top
               padding on desktop clears the fixed header so the nav never
               crowds the rule. */}
-          <div className="flex flex-wrap items-baseline gap-x-6 gap-y-1 border-b border-border px-6 pb-5 pt-10 sm:px-10 lg:pt-28">
+          <div className="flex flex-wrap items-baseline gap-x-6 gap-y-1 border-b border-border px-6 pb-5 pt-10 sm:px-10 lg:pt-24">
             <p className="label text-muted-foreground">Photographer &amp; creative director</p>
             {/* `ml-auto` rather than `justify-between`, so when the column is
                 too narrow for both — which it is at exactly the `lg`
