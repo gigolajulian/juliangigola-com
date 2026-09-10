@@ -48,3 +48,6 @@ next-env.d.ts
 
 # machine-local Claude Code settings
 .claude/settings.local.json
+
+# static export output
+/out/

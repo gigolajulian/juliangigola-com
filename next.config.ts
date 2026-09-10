@@ -37,6 +37,20 @@ const pageRedirects = [
   { source: "/store", destination: "/", permanent: true },
 ];
 
+/**
+ * Static-export mode, used only by the GitHub Pages preview workflow.
+ *
+ * Everything below is additive and gated on the env var, so a normal build —
+ * local, or on a host with a server — is byte-for-byte unaffected. It is a
+ * preview target, not the production one: a static host has no server, so the
+ * redirects below cannot run and the contact form falls back to a `mailto:`
+ * (see `app/contact/actions.static.ts`).
+ */
+const STATIC_EXPORT = process.env.STATIC_EXPORT === "1";
+
+/** Project Pages serve from a subpath, not the domain root. */
+const BASE_PATH = process.env.PAGES_BASE_PATH ?? "";
+
 const nextConfig: NextConfig = {
   // Hides the floating dev badge that sits over the bottom-left corner of
   // every page while `next dev` is running. It never shipped to production,
@@ -47,15 +61,30 @@ const nextConfig: NextConfig = {
   // idle indicator, not the error overlay.
   devIndicators: false,
 
-  async redirects() {
-    // Project slugs win over category slugs where a name is used for both.
-    const seen = new Set<string>();
-    return [...pageRedirects, ...categoryRedirects, ...projectRedirects].filter((r) => {
-      if (seen.has(r.source)) return false;
-      seen.add(r.source);
-      return true;
-    });
-  },
+  ...(STATIC_EXPORT
+    ? {
+        output: "export" as const,
+        // Trailing slashes so a static host resolves /work/dystopia/ to that
+        // directory's index.html rather than 404ing on an extensionless path.
+        trailingSlash: true,
+        basePath: BASE_PATH,
+        // No server means no optimizer. A custom loader rather than
+        // `unoptimized`, because `unoptimized` emits the `src` verbatim and
+        // so drops the basePath prefix that a project-pages subpath needs —
+        // which silently 404s every photograph. See `image-loader.ts`.
+        images: { loader: "custom" as const, loaderFile: "./image-loader.ts" },
+      }
+    : {
+        async redirects() {
+          // Project slugs win over category slugs where a name is used for both.
+          const seen = new Set<string>();
+          return [...pageRedirects, ...categoryRedirects, ...projectRedirects].filter((r) => {
+            if (seen.has(r.source)) return false;
+            seen.add(r.source);
+            return true;
+          });
+        },
+      }),
 };
 
 export default nextConfig;

@@ -3,6 +3,10 @@ import { PROJECTS } from "@/lib/work";
 
 const SITE = "https://www.juliangigola.com";
 
+// Required by `output: "export"`, which will not infer that a metadata route
+// is static. This route has no request-time input, so it always was.
+export const dynamic = "force-static";
+
 /**
  * Every project page is listed, including the ones the nav does not link —
  * they are real pages with real work on them, and leaving them out of the

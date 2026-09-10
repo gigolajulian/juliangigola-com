@@ -1,0 +1,72 @@
+name: Deploy preview to GitHub Pages
+
+# A preview target, not production. A static host has no server, so the old
+# Format URL redirects do not apply here and the contact form falls back to a
+# prefilled `mailto:`. Production belongs on a host that runs Next properly.
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Never let two deploys race; queue instead of cancelling, so a push during a
+# long image upload does not leave Pages half-updated.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: Swap the Server Action for its static stand-in
+        # `output: "export"` refuses to build while a `"use server"` module is
+        # in the graph, and a static host could not run it anyway. The stub
+        # keeps the form's validation and returns a working `mailto:`.
+        run: cp app/contact/actions.static.ts app/contact/actions.ts
+
+      - name: Build
+        env:
+          STATIC_EXPORT: "1"
+          # Project Pages serve from /<repo>, so every asset and link needs
+          # that prefix. Derived from the repo name rather than hardcoded.
+          PAGES_BASE_PATH: /${{ github.event.repository.name }}
+          # The image loader runs in the browser too, so the prefix has to be
+          # inlined at build time.
+          NEXT_PUBLIC_BASE_PATH: /${{ github.event.repository.name }}
+        run: npm run build
+
+      - name: Keep Jekyll away from Next's _next directory
+        # Pages would otherwise strip underscore-prefixed paths, which is
+        # every hashed asset the site loads.
+        run: touch out/.nojekyll
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: out
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
