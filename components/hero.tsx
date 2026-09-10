@@ -39,7 +39,7 @@ import type { Discipline } from "@/lib/work";
  * ─────────────────────────────────────────────────────────────── */
 
 /** Long enough to read the word and take in the picture before it moves on. */
-const DWELL_MS = 2600;
+const DWELL_MS = 3500;
 
 export function Hero({ disciplines }: { disciplines: Discipline[] }) {
   /**
