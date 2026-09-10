@@ -308,6 +308,15 @@ const COVER_OVERRIDES: Record<string, Frame> = {
     color: "#897A74",
     alt: "Model in a fur-trimmed hooded coat on the shoreline at sunset",
   },
+  editorial: {
+    // 1600x2000 is exactly 4:5, so it fills the cover column with nothing
+    // cropped at all — the only frame in the archive that does.
+    src: "/work/i-wanna-be-a-human/01.jpg",
+    width: 1600,
+    height: 2000,
+    color: "#696462",
+    alt: "Model in a sculptural black PVC and tulle look, flanked by motion-blurred figures",
+  },
   campaigns: {
     // Already in the archive at the right size, so it points there rather than
     // getting a copy in `/hero/` — the override exists to name the frame, and
