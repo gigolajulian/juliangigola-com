@@ -7,11 +7,47 @@
  * featured, what leads the homepage, and how the old site's three nav groups
  * collapse into the new two.
  */
-import { PROJECTS, CATEGORIES } from "./work-data";
+import { PROJECTS as HARVESTED, CATEGORIES } from "./work-data";
 import type { Project, Category, Frame } from "./work-types";
+import { COVER_RELEASES } from "./cover-art-data";
 
 export type { Project, Category, Frame };
-export { PROJECTS, CATEGORIES };
+export { CATEGORIES, COVER_RELEASES };
+
+/**
+ * The cover-art gallery, with the harvest's pictures replaced by Julian's own
+ * masters (`scripts/cover-art.mjs`).
+ *
+ * Same reason the homepage cover is overridden: the harvested copies are the
+ * old site's 1600px re-compressions, with the release titles buried in alt
+ * text and zero-width spaces baked into them, where the masters run to
+ * 7952px and are correctly named. The delivered set also holds a release the
+ * old site never published.
+ *
+ * Substituted into `PROJECTS` rather than exported alongside it, so the work
+ * index, the route, the lightbox and the discipline list cannot end up
+ * showing two different versions of the same gallery.
+ */
+const withCoverArt = (project: Project): Project => {
+  const images = COVER_RELEASES.flatMap((r) => r.frames);
+  if (!images.length) return project;
+
+  return {
+    ...project,
+    // "COVERART" was one word on the old site and reads as a typo set large —
+    // on the project page it is printed as the category too, so both go.
+    name: "Cover art",
+    categories: project.categories.map((c) =>
+      c.slug === "coverart" ? { ...c, name: "Cover art" } : c,
+    ),
+    cover: { ...images[0], src: "/covers/cover.jpg", width: 600, height: 600 },
+    images,
+  };
+};
+
+export const PROJECTS: Project[] = HARVESTED.map((p) =>
+  p.slug === "coverart" ? withCoverArt(p) : p,
+);
 
 /**
  * The old nav split commissioned work across WORK and MUSIC, which asked a
@@ -220,6 +256,17 @@ const DISCIPLINE_LABELS: Record<string, string> = {
   coverart: "Cover art",
 };
 
+/**
+ * Where the unit of work is not a frame.
+ *
+ * Cover art is counted in releases: two of them are sleeves with a front and
+ * a back, and counting those as two covers each both overstates the work and
+ * disagrees with the number the section's own link shows.
+ */
+const DISCIPLINE_COUNTS: Record<string, number> = {
+  coverart: COVER_RELEASES.length,
+};
+
 export const DISCIPLINES: Discipline[] = DISCIPLINE_SLUGS.map(
   (slug) => CATEGORIES.find((c) => c.slug === slug),
 )
@@ -240,7 +287,8 @@ export const DISCIPLINES: Discipline[] = DISCIPLINE_SLUGS.map(
     // the second kind always reports "1", which is true and useless — the
     // number a visitor wants is how much work is in there.
     const isOwnGallery = inCategory.length === 1 && project.slug === category.slug;
-    const count = isOwnGallery ? project.images.length : inCategory.length;
+    const count =
+      DISCIPLINE_COUNTS[category.slug] ?? (isOwnGallery ? project.images.length : inCategory.length);
 
     return {
       slug: category.slug,

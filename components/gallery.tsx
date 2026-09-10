@@ -196,22 +196,25 @@ function LightboxButton({
 
 /**
  * Groups frames into rows: a landscape frame stands alone at full width, and
- * consecutive portraits pair off.
+ * consecutive frames that are not landscape pair off.
+ *
+ * Squares pair as well as portraits. A square at full width is a picture as
+ * tall as the viewport is wide, so a gallery of them becomes a scroll with one
+ * frame per screen — and on the cover-art page it also splits a sleeve's two
+ * sides onto separate rows, when front and back are the one thing a visitor
+ * wants to see together. `scripts/cover-art.mjs` orders that set so each
+ * sleeve's sides land in the same pair.
  *
  * Sequence is preserved exactly — this only decides where the line breaks
  * are, never the order.
  */
 function pair<T extends { width: number; height: number }>(frames: T[]): T[][] {
+  const twoUp = (f: { width: number; height: number }) => f.height >= f.width;
   const rows: T[][] = [];
 
   for (const frame of frames) {
-    const isPortrait = frame.height > frame.width;
     const last = rows[rows.length - 1];
-
-    const canJoin =
-      isPortrait &&
-      last?.length === 1 &&
-      last[0].height > last[0].width;
+    const canJoin = twoUp(frame) && last?.length === 1 && twoUp(last[0]);
 
     if (canJoin) last.push(frame);
     else rows.push([frame]);
