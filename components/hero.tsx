@@ -38,27 +38,36 @@ import type { Discipline } from "@/lib/work";
  * the mount too.
  * ─────────────────────────────────────────────────────────────── */
 
-/** Long enough to read the word and look at the picture before it moves on. */
-const DWELL_MS = 4200;
+/** Long enough to read the word and take in the picture before it moves on. */
+const DWELL_MS = 2600;
 
 export function Hero({ disciplines }: { disciplines: Discipline[] }) {
-  const [active, setActive] = React.useState(0);
+  /**
+   * Which discipline is up, and which one it came from.
+   *
+   * One piece of state rather than two, because the pair has to move together
+   * — the outgoing frame is only outgoing relative to the incoming one, and as
+   * separate states they can render a frame mid-flight against the wrong
+   * predecessor.
+   *
+   * `previous` is also the whole loading strategy. All five frames used to be
+   * in the markup from the start so a switch would never wait on a request,
+   * and that was a megabyte and a half of full-size photographs downloaded
+   * before the visitor had done anything, competing with the one picture they
+   * could actually see. Only these two are ever mounted: the one on screen and
+   * the one crossfading out behind it.
+   */
+  const [slide, setSlide] = React.useState({ active: 0, previous: -1 });
+  const { active } = slide;
+
   // Once someone points at the index themselves, the cycle has done its job
   // and further movement would be fighting them for control.
   const [taken, setTaken] = React.useState(false);
 
-  // Which frames have been on screen. Only these are mounted.
-  //
-  // Every one of the five used to be in the markup from the start, so that a
-  // switch never waited on a request — but they are full-size frames and that
-  // was a megabyte and a half of photographs downloaded before the visitor had
-  // done anything, competing with the one picture they can actually see. Now
-  // the first is all that loads for first paint and the rest arrive as the
-  // cycle reaches them, which is still well ahead of a hover.
-  const [seen, setSeen] = React.useState<number[]>([0]);
-
-  const reveal = React.useCallback(
-    (i: number) => setSeen((s) => (s.includes(i) ? s : [...s, i])),
+  /** Pure — no side effects in the updater, which React may call twice. */
+  const go = React.useCallback(
+    (i: number) =>
+      setSlide((s) => (s.active === i ? s : { active: i, previous: s.active })),
     [],
   );
 
@@ -66,20 +75,20 @@ export function Hero({ disciplines }: { disciplines: Discipline[] }) {
     if (taken || disciplines.length < 2) return;
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
-    const id = window.setInterval(() => {
-      setActive((i) => {
-        const next = (i + 1) % disciplines.length;
-        reveal(next);
-        return next;
-      });
-    }, DWELL_MS);
+    const id = window.setInterval(
+      () =>
+        setSlide((s) => ({
+          active: (s.active + 1) % disciplines.length,
+          previous: s.active,
+        })),
+      DWELL_MS,
+    );
     return () => window.clearInterval(id);
-  }, [taken, disciplines.length, reveal]);
+  }, [taken, disciplines.length]);
 
   const take = (i: number) => {
     setTaken(true);
-    setActive(i);
-    reveal(i);
+    go(i);
   };
 
   /** Finds which row an event came from and switches to it. */
@@ -104,12 +113,12 @@ export function Hero({ disciplines }: { disciplines: Discipline[] }) {
           style={{ backgroundColor: current.frame.color }}
         >
           {/* Frames are crossfaded rather than swapped, so a switch never
-              shows a gap — but only the ones that have been reached are
+              shows a gap — but only the incoming and outgoing ones are
               mounted, so first paint costs one photograph instead of five.
               Only the first is `priority`; the rest load at normal priority
-              behind it, which they have four seconds to do. */}
+              as the cycle reaches them. */}
           {disciplines.map((discipline, i) =>
-            seen.includes(i) ? (
+            i === slide.active || i === slide.previous ? (
             <Image
               key={discipline.slug}
               src={discipline.frame.src}
@@ -125,7 +134,7 @@ export function Hero({ disciplines }: { disciplines: Discipline[] }) {
               className={cn(
                 // `cover` against a column already cut to the frame's ratio:
                 // fills it with no border of empty colour showing.
-                "object-cover transition-opacity duration-700 ease-[var(--ease-out-strong)]",
+                "object-cover transition-opacity duration-500 ease-[var(--ease-out-strong)]",
                 "motion-reduce:transition-none",
                 i === active ? "opacity-100" : "opacity-0",
               )}
@@ -203,7 +212,13 @@ export function Hero({ disciplines }: { disciplines: Discipline[] }) {
                     aria-current={i === active ? "true" : undefined}
                     className={cn(
                       "group flex items-baseline gap-4 px-6 py-4 transition-colors duration-300 sm:px-10",
-                      i === active ? "bg-card" : "hoverable:hover:bg-card",
+                      // `bg-secondary`, not `bg-card`. Card sits at L* 5.7
+                      // against a ground of L* 2.8 — a real step in the token
+                      // scale, and almost invisible as a band across a row.
+                      // This is the one place on the site where a surface has
+                      // to be legible as "this is the selected one" from
+                      // across the room, so it takes the next step up.
+                      i === active ? "bg-secondary" : "hoverable:hover:bg-card",
                     )}
                   >
                     <span className="label shrink-0 tabular-nums text-muted-foreground">

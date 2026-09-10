@@ -313,11 +313,11 @@ const COVER_OVERRIDES: Record<string, Frame> = {
     // getting a copy in `/hero/` — the override exists to name the frame, and
     // the frame is a UKIYOSUNKNOWN one rather than the first of the first
     // project filed under campaigns, which is what it would otherwise be.
-    src: "/work/ukiyosunknown/06.jpg",
+    src: "/work/ukiyosunknown/01.jpg",
     width: 1600,
     height: 2133,
-    color: "#9D9D9B",
-    alt: "Model in a distressed leather jacket holding a CRT television showing their own image",
+    color: "#A8A9A7",
+    alt: "Model crouched on a studio floor beside a CRT television, looking away from camera",
   },
 };
 
