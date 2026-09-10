@@ -30,12 +30,11 @@ const COVER = 600;
 /**
  * The releases, in the order they read on the page.
  *
- * Two-sided releases lead. That is editorial — they are the two vinyl
- * packages, and the only pieces here that are a whole sleeve rather than a
- * single square — but it is also load-bearing: the grid places a two-sided
- * release as one double-wide cell, and starting with them is what keeps the
- * rows full at every breakpoint, which the check at the end of `main`
- * enforces.
+ * Two-sided releases lead, which is editorial rather than structural: they
+ * are the two vinyl packages, and the only pieces here that are a whole
+ * sleeve rather than a single square. Reordering this list is safe — a
+ * release is one cell whether it has one side or two, and the second side
+ * lives inside that cell (see `components/cover-faces.tsx`).
  *
  * `file` is relative to SRC unless it contains a slash, in which case it is
  * relative to the repo root.
@@ -174,22 +173,6 @@ async function main() {
     }
 
     out.push({ slug, title: release.title, artist: release.artist, frames });
-  }
-
-  // The gallery lays square frames out two per row, in sequence. A sleeve
-  // therefore stays on one row only if its first side falls at an even index —
-  // which is why the two-sided releases lead the set. Checked here, where the
-  // ordering is decided, so reordering RELEASES fails loudly instead of
-  // quietly wrapping side B onto the next row.
-  let at = 0;
-  for (const release of out) {
-    if (release.frames.length > 1 && at % 2 !== 0) {
-      throw new Error(
-        `"${release.title}" has ${release.frames.length} sides but starts at frame ${at}, ` +
-          `which splits it across two rows. Move multi-side releases to the front of RELEASES.`,
-      );
-    }
-    at += release.frames.length;
   }
 
   // The thumbnail, from whatever leads the set.

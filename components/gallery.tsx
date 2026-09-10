@@ -83,11 +83,10 @@ export function Gallery({ project }: { project: Project }) {
  * consecutive frames that are not landscape pair off.
  *
  * Squares pair as well as portraits. A square at full width is a picture as
- * tall as the viewport is wide, so a gallery of them becomes a scroll with one
- * frame per screen — and on the cover-art page it also splits a sleeve's two
- * sides onto separate rows, when front and back are the one thing a visitor
- * wants to see together. `scripts/cover-art.mjs` orders that set so each
- * sleeve's sides land in the same pair.
+ * tall as the viewport is wide, which turns a run of them into a scroll with
+ * one frame per screen. Cover art has its own layout entirely; this is what
+ * keeps the odd square inside a photographic sequence in proportion with the
+ * portraits around it.
  *
  * Sequence is preserved exactly — this only decides where the line breaks
  * are, never the order.
