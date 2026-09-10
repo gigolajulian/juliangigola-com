@@ -53,6 +53,15 @@ const COVER_WIDTH = 600;
 /** Pages that are site furniture, not work. */
 const SKIP = new Set(["/", "/about", "/contact", "/rates", "/links", "/store", "/sessions"]);
 
+/**
+ * Projects deliberately excluded from this repo.
+ *
+ * These stay published on the old site if they are published there at all —
+ * this list only keeps them out of the migration, so a re-run cannot quietly
+ * pull one back in after it has been removed.
+ */
+const EXCLUDE = new Set(["/boudoir"]);
+
 /* ── plumbing ─────────────────────────────────────────────────── */
 
 /** Runs `fn` over `items`, `limit` at a time. Format rate-limits a flood. */
@@ -177,7 +186,8 @@ const paths = [...sitemap.matchAll(/<loc>(.*?)<\/loc>/g)]
   .map((p) => (p === "" ? "/" : p))
   // Format leaves duplicate routes behind, e.g. `/14181178-editorial`.
   .filter((p) => !/^\/\d+-/.test(p))
-  .filter((p) => !SKIP.has(p));
+  .filter((p) => !SKIP.has(p))
+  .filter((p) => !EXCLUDE.has(p));
 
 console.log(`sitemap: ${paths.length} candidate pages`);
 
