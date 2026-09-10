@@ -4,7 +4,8 @@ import * as React from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
-import type { Project, Category } from "@/lib/work-types";
+import type { Project } from "@/lib/work-types";
+import type { CategoryLink } from "@/lib/work";
 
 /* ── the contact sheet ────────────────────────────────────────────
  * The index is a typographic list, not a grid of thumbnails.
@@ -21,51 +22,47 @@ import type { Project, Category } from "@/lib/work-types";
  *
  * On a touch screen there is no pointer to follow, so each row carries its
  * own frame inline and the panel is not rendered at all.
+ *
+ * Filtering is routing, not state. Each category is a page of its own, which
+ * means a discipline can be linked, shared and indexed — and that the URL
+ * always describes what is on screen. The filtering itself then happens on
+ * the server, so this component only ever renders the list it is given.
  * ─────────────────────────────────────────────────────────────── */
 
 export function WorkIndex({
   projects,
   categories,
+  /** The category being shown, or null for everything. Marks the filter row. */
+  active: activeCategory = null,
 }: {
   projects: Project[];
-  categories: Category[];
+  categories: CategoryLink[];
+  active?: string | null;
 }) {
-  const [filter, setFilter] = React.useState<string | null>(null);
   const [active, setActive] = React.useState(0);
 
-  const shown = React.useMemo(
-    () => (filter ? projects.filter((p) => p.categories.some((c) => c.slug === filter)) : projects),
-    [projects, filter],
-  );
-
-  // A filter change can leave the highlight pointing past the end of the
-  // shorter list. Clamping on read covers that without a state sync, and the
-  // filter buttons reset it to the top so a new filter always previews its
-  // own first project rather than whatever row was last pointed at.
-  const preview = shown[Math.min(active, shown.length - 1)];
-
-  const applyFilter = (slug: string | null) => {
-    setFilter(slug);
-    setActive(0);
-  };
+  // The highlight can point past the end of a shorter list — the list changes
+  // with the route, and this is a fresh mount each time, but clamping on read
+  // costs nothing and removes the assumption.
+  const preview = projects[Math.min(active, projects.length - 1)];
 
   return (
     <>
-      {/* Filters. The old site's three dropdowns become one row that can be
-          ignored: the default is everything, so nobody has to make a choice
-          before they can look at anything. */}
-      <nav aria-label="Filter by category" className="mt-10 border-b border-border pb-5">
+      {/* The old site's three dropdowns become one row that can be ignored:
+          the default is everything, so nobody has to make a choice before
+          they can look at anything. */}
+      <nav aria-label="Categories" className="mt-10 border-b border-border pb-5">
         <ul className="flex flex-wrap gap-x-6 gap-y-3">
           <li>
-            <FilterButton active={filter === null} onClick={() => applyFilter(null)}>
+            <FilterLink href="/work" active={activeCategory === null}>
               All
-            </FilterButton>
+            </FilterLink>
           </li>
           {categories.map((c) => (
             <li key={c.slug}>
-              <FilterButton active={filter === c.slug} onClick={() => applyFilter(c.slug)}>
+              <FilterLink href={c.href} active={activeCategory === c.slug}>
                 {c.name}
-              </FilterButton>
+              </FilterLink>
             </li>
           ))}
         </ul>
@@ -73,7 +70,7 @@ export function WorkIndex({
 
       <div className="mt-8 gap-16 lg:flex lg:items-start">
         <ol className="lg:w-1/2 lg:min-w-0">
-          {shown.map((project, i) => {
+          {projects.map((project, i) => {
             const client = project.credits.find((c) => /client|model|artist/i.test(c.role));
 
             return (
@@ -124,7 +121,7 @@ export function WorkIndex({
             );
           })}
 
-          {shown.length === 0 ? (
+          {projects.length === 0 ? (
             <li className="py-10 text-sm text-muted-foreground">
               Nothing filed under that yet.
             </li>
@@ -163,26 +160,27 @@ export function WorkIndex({
   );
 }
 
-function FilterButton({
+function FilterLink({
+  href,
   active,
-  onClick,
   children,
 }: {
+  href: string;
   active: boolean;
-  onClick: () => void;
   children: React.ReactNode;
 }) {
   return (
-    <button
-      type="button"
-      onClick={onClick}
-      aria-pressed={active}
+    <Link
+      href={href}
+      // `page`, not `true` — this is a link to the page being viewed, which
+      // is what a screen reader should be told about the current filter.
+      aria-current={active ? "page" : undefined}
       className={cn(
-        "label py-1 transition-colors duration-200",
+        "label block py-1 transition-colors duration-200",
         active ? "text-foreground" : "text-muted-foreground hoverable:hover:text-foreground",
       )}
     >
       {children}
-    </button>
+    </Link>
   );
 }

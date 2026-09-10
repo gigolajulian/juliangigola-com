@@ -87,6 +87,79 @@ export const projectsIn = (categorySlug: string): Project[] =>
   PROJECTS.filter((p) => p.categories.some((c) => c.slug === categorySlug));
 
 /**
+ * Whether a nav leaf is one gallery rather than a listing of projects.
+ *
+ * The old nav mixed the two without saying so: EDITORIAL is eighteen separate
+ * projects, where COVERART and WEDDINGS are each a single gallery published
+ * under the category's own slug.
+ */
+const isOwnGallery = (categorySlug: string): boolean => {
+  const inCategory = projectsIn(categorySlug);
+  return inCategory.length === 1 && inCategory[0].slug === categorySlug;
+};
+
+/** Display names, where the old site's nav label does not read well. */
+const CATEGORY_LABELS: Record<string, string> = {
+  // One word on the old site, and it looks like a typo set large.
+  coverart: "Cover art",
+};
+
+/**
+ * A category's name as a heading.
+ *
+ * The old nav set every label in caps, which is a styling decision baked into
+ * the content: sentence case is what a page heading needs, and the `label`
+ * class puts the caps back where the design wants them.
+ */
+export const categoryLabel = (category: Category): string =>
+  CATEGORY_LABELS[category.slug] ??
+  category.name.charAt(0) + category.name.slice(1).toLowerCase();
+
+/**
+ * Where a category's work lives.
+ *
+ * A listing gets its own filtered index page — a real URL, so a discipline
+ * can be linked, shared and indexed, rather than a filter someone has to
+ * apply by hand after landing on everything at once.
+ *
+ * A category that is itself one gallery points at the gallery: the listing
+ * for it would be a page with a single row on it, which is a click for
+ * nothing. And a category with no work yet has no page to point at, so it
+ * falls back to the full index instead of a route that does not exist.
+ */
+export const categoryHref = (categorySlug: string): string => {
+  const inCategory = projectsIn(categorySlug);
+  if (inCategory.length === 0) return "/work";
+  if (isOwnGallery(categorySlug)) return `/work/${categorySlug}`;
+  return `/work/category/${categorySlug}`;
+};
+
+/** A category as the index renders it: name plus where it goes. */
+export type CategoryLink = { slug: string; name: string; href: string };
+
+/**
+ * The category row on the work index, resolved.
+ *
+ * Prepared here rather than passed as a `categoryHref` function, because the
+ * index is a client component and a server component cannot hand a function
+ * across that boundary — the href each category needs is data, so it travels
+ * as data.
+ */
+export const WORK_CATEGORY_LINKS: CategoryLink[] = WORK_CATEGORIES.filter(
+  // VIDEO and MUSIC VIDEO are in the old nav with nothing behind them — the
+  // work is on Vimeo and was never published here. A row that navigates
+  // nowhere is worse than one that is absent, so they wait until there is
+  // something to open.
+  (c) => projectsIn(c.slug).length > 0,
+).map((c) => ({
+  slug: c.slug,
+  // Through `categoryLabel`, so "COVERART" reads as "COVER ART" once the
+  // `label` class puts the caps back.
+  name: categoryLabel(c),
+  href: categoryHref(c.slug),
+}));
+
+/**
  * The frame a project is represented by elsewhere on the site — the small
  * derivative of its opening image.
  *
@@ -208,6 +281,8 @@ export type Discipline = {
   name: string;
   /** How many projects are filed under it, for the index. */
   count: number;
+  /** Where the row goes when clicked. */
+  href: string;
   project: Project;
   frame: Frame;
 };
@@ -248,13 +323,6 @@ const COVER_OVERRIDES: Record<string, Frame> = {
  */
 const DISCIPLINE_SLUGS = ["editorial", "campaigns", "portraits", "mixed-media", "coverart"];
 
-/**
- * Display names, where the old site's nav label does not read well.
- * "COVERART" was one word there and looks like a typo set large.
- */
-const DISCIPLINE_LABELS: Record<string, string> = {
-  coverart: "Cover art",
-};
 
 /**
  * Where the unit of work is not a frame.
@@ -286,14 +354,15 @@ export const DISCIPLINES: Discipline[] = DISCIPLINE_SLUGS.map(
     // themselves a single gallery (COVERART, WEDDINGS). Counting projects for
     // the second kind always reports "1", which is true and useless — the
     // number a visitor wants is how much work is in there.
-    const isOwnGallery = inCategory.length === 1 && project.slug === category.slug;
     const count =
-      DISCIPLINE_COUNTS[category.slug] ?? (isOwnGallery ? project.images.length : inCategory.length);
+      DISCIPLINE_COUNTS[category.slug] ??
+      (isOwnGallery(category.slug) ? project.images.length : inCategory.length);
 
     return {
       slug: category.slug,
-      name: DISCIPLINE_LABELS[category.slug] ?? category.name,
+      name: categoryLabel(category),
       count,
+      href: categoryHref(category.slug),
       project,
       frame,
     };

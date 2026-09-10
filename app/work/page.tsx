@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { WorkIndex } from "@/components/work-index";
 import { CallToAction } from "@/components/call-to-action";
-import { COMMISSIONS, WORK_CATEGORIES } from "@/lib/work";
+import { COMMISSIONS, WORK_CATEGORY_LINKS } from "@/lib/work";
 
 export const metadata: Metadata = {
   title: "Work",
@@ -24,7 +24,7 @@ export default function WorkPage() {
         </p>
       </header>
 
-      <WorkIndex projects={COMMISSIONS} categories={WORK_CATEGORIES} />
+      <WorkIndex projects={COMMISSIONS} categories={WORK_CATEGORY_LINKS} />
     </div>
 
     <CallToAction

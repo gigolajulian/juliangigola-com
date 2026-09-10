@@ -1,5 +1,6 @@
 import type { NextConfig } from "next";
 import { PROJECTS, CATEGORIES } from "./lib/work-data";
+import { categoryHref } from "./lib/work";
 
 /**
  * The old site published every project at the site root — `/wired-magazine`,
@@ -16,13 +17,14 @@ const projectRedirects = PROJECTS.map((p) => ({
 }));
 
 /**
- * Old category pages. They land on the work index rather than a filtered
- * view — the filter row is the first thing on that page, and every project is
- * already there, so nobody arrives at an empty screen.
+ * Old category pages. Each one lands on that discipline's own page now, so an
+ * indexed `/editorial` arrives at the editorial work rather than at seventy
+ * projects with a filter still to apply. `categoryHref` handles the two edge
+ * cases — a category that is itself one gallery, and one with no work yet.
  */
 const categoryRedirects = CATEGORIES.map((c) => ({
   source: `/${c.slug}`,
-  destination: c.section === "SESSIONS" ? "/sessions" : "/work",
+  destination: c.section === "SESSIONS" ? "/sessions" : categoryHref(c.slug),
   permanent: true,
 }));
 

@@ -157,8 +157,8 @@ export function Hero({ disciplines }: { disciplines: Discipline[] }) {
 
           {/* Three: the index. This is the switcher's control and the site's
               discipline navigation at the same time — hover previews, click
-              goes there. Numbering is what keeps it an index rather than a
-              row of buttons. */}
+              opens that discipline's own page. Numbering is what keeps it an
+              index rather than a row of buttons. */}
           {/* One delegated handler on the list rather than an
               `onPointerEnter` per row.
               `pointerenter` does not bubble — React synthesises it from
@@ -177,7 +177,7 @@ export function Hero({ disciplines }: { disciplines: Discipline[] }) {
                   data-discipline={i}
                 >
                   <Link
-                    href="/work"
+                    href={discipline.href}
                     aria-current={i === active ? "true" : undefined}
                     className={cn(
                       "group flex items-baseline gap-4 px-6 py-4 transition-colors duration-300 sm:px-10",

@@ -1,5 +1,5 @@
 import type { MetadataRoute } from "next";
-import { PROJECTS } from "@/lib/work";
+import { PROJECTS, WORK_CATEGORY_LINKS } from "@/lib/work";
 
 const SITE = "https://www.juliangigola.com";
 
@@ -19,11 +19,22 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: path === "" ? 1 : 0.8,
   }));
 
+  // The discipline pages. They sit above individual projects in priority:
+  // they are the pages a search for "bay area editorial photographer" should
+  // land on, and each one is a real destination rather than a filtered view.
+  const categories = WORK_CATEGORY_LINKS.filter((c) =>
+    c.href.startsWith("/work/category/"),
+  ).map((c) => ({
+    url: `${SITE}${c.href}`,
+    changeFrequency: "monthly" as const,
+    priority: 0.7,
+  }));
+
   const projects = PROJECTS.map((p) => ({
     url: `${SITE}/work/${p.slug}`,
     changeFrequency: "yearly" as const,
     priority: 0.6,
   }));
 
-  return [...pages, ...projects];
+  return [...pages, ...categories, ...projects];
 }
