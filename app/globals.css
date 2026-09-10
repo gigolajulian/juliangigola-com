@@ -80,6 +80,40 @@
   /* The built-in CSS easings are too weak to read as intentional. */
   --ease-out-strong: cubic-bezier(0.23, 1, 0.32, 1);
   --ease-in-out-strong: cubic-bezier(0.77, 0, 0.175, 1);
+
+  /* ── springs ──────────────────────────────────────────────────
+   * A bezier cannot overshoot and come back — it is bounded by its own end
+   * point — so a bounce is impossible to express as one. These are real
+   * damped-spring responses, sampled and written out as `linear()`, which is
+   * the one CSS easing that can describe an arbitrary curve.
+   *
+   * Parameterised the way Apple's are, by duration and bounce rather than by
+   * mass and stiffness: bounce 0 is critically damped, and above that it
+   * overshoots. Both are sampled past their nominal period so the tail
+   * settles on its own instead of being clipped back to 1, which is what
+   * makes a hand-written `linear()` land with a visible tick.
+   *
+   * `--ease-spring` (bounce 0.16, 0.8% overshoot) is the interface default:
+   * enough to feel physical, not enough to notice. `--ease-bounce`
+   * (bounce 0.32, 5.4%) is for the moments that should feel like something
+   * arriving — a press releasing, a panel opening. Anything a visitor sees
+   * dozens of times a session keeps the plain ease-out; a bounce seen that
+   * often stops reading as delight and starts reading as lag.
+   * ───────────────────────────────────────────────────────────── */
+  --ease-spring: linear(
+    0, 0.0228, 0.0803, 0.159, 0.2488, 0.3423, 0.4343, 0.5213, 0.6012, 0.6728,
+    0.7357, 0.7899, 0.8359, 0.8743, 0.9059, 0.9315, 0.9519, 0.9679, 0.9802,
+    0.9894, 0.9961, 1.0009, 1.0041, 1.0061, 1.0072, 1.0077, 1.0077, 1.0073,
+    1.0068, 1.0061, 1.0054, 1.0047, 1.004, 1.0033, 1.0028, 1.0022, 1.0018,
+    1.0014, 1.0011, 1.0008, 1
+  );
+  --ease-bounce: linear(
+    0, 0.0333, 0.1167, 0.2295, 0.3554, 0.4824, 0.6022, 0.7095, 0.8016, 0.8774,
+    0.9372, 0.9823, 1.0145, 1.0357, 1.048, 1.0535, 1.0539, 1.0509, 1.0456,
+    1.039, 1.0321, 1.0253, 1.0191, 1.0136, 1.009, 1.0052, 1.0023, 1.0002,
+    0.9987, 0.9977, 0.9972, 0.9971, 0.9971, 0.9973, 0.9977, 0.998, 0.9984,
+    0.9988, 0.9991, 0.9994, 1
+  );
 }
 
 :root {
@@ -213,16 +247,29 @@
  *     unclips them, which also covers text-only crawlers.
  */
 @utility reveal {
-  clip-path: inset(0 0 100% 0);
-  transform: translateY(0.5rem);
+  /* Transform and opacity only. `clip-path` was the original choice — a wipe
+     rather than a fade, so a photograph never sat semi-transparent over the
+     ground — but it animates through paint rather than on the compositor, and
+     six of them running past a full-height hero is where the judder came
+     from. Starting at 0.6 rather than 0 keeps the frame reading as a picture
+     settling into place instead of a loading state resolving.
+
+     The spring is what makes it land: it arrives, overshoots by under a
+     percent, and settles, which is a different feeling from decelerating to a
+     stop and simply ceasing. */
+  opacity: 0.6;
+  transform: translateY(1.25rem) scale(0.985);
   transition:
-    clip-path 900ms var(--ease-out-strong),
-    transform 900ms var(--ease-out-strong);
-  will-change: clip-path;
+    opacity 520ms var(--ease-out-strong),
+    transform 760ms var(--ease-spring);
+  will-change: transform, opacity;
 
   &[data-shown] {
-    clip-path: inset(0 0 0 0);
-    transform: translateY(0);
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    /* Nothing else animates this element once it has arrived, and leaving the
+       hint on keeps a compositor layer per frame for the life of the page. */
+    will-change: auto;
   }
 }
 
@@ -234,7 +281,7 @@
 
 @media (scripting: none) {
   .reveal {
-    clip-path: none;
+    opacity: 1;
     transform: none;
   }
 }
@@ -244,4 +291,86 @@
   line-height: var(--text-label--line-height);
   letter-spacing: var(--text-label--letter-spacing);
   text-transform: uppercase;
+}
+
+/**
+ * Press feedback: down fast, back with a spring.
+ *
+ * The asymmetry is the whole point. Going down has to be immediate — that is
+ * the interface acknowledging the finger, and any easing there reads as lag —
+ * so `:active` gets 90ms of plain ease-out. Coming back is the part that can
+ * be expressive, so it releases on the bounce curve and overshoots a few
+ * percent before settling, which is what makes a button feel like a physical
+ * thing rather than a rectangle changing size.
+ *
+ * The scale itself stays at the call site: a full-width button wants about
+ * 0.98, a photograph the size of half the viewport wants 0.995, and one number
+ * cannot serve both.
+ */
+@utility press {
+  /* `scale`, `translate` and `rotate`, not just `transform`: Tailwind v4
+     compiles `active:scale-[0.98]` to the standalone `scale` property, so a
+     transition on `transform` alone would animate nothing at all.
+
+     The colours ride along on a plain ease at their own speed. They were part
+     of the one transition each of these buttons declared by hand, and folding
+     them in here is what stops a `transition-colors` alongside this utility
+     from clobbering the spring — a shorthand and a longhand fighting over the
+     same declaration is not a fight worth having at ten call sites. */
+  transition:
+    transform 440ms var(--ease-bounce),
+    scale 440ms var(--ease-bounce),
+    translate 440ms var(--ease-bounce),
+    rotate 440ms var(--ease-bounce),
+    background-color 200ms ease-out,
+    border-color 200ms ease-out,
+    color 200ms ease-out,
+    opacity 200ms ease-out;
+
+  &:active {
+    /* Down is not the expressive part. It is the interface acknowledging the
+       finger, so it is fast and accelerating — a spring here would read as
+       the button hesitating. */
+    transition:
+      transform 90ms cubic-bezier(0.4, 0, 1, 1),
+      scale 90ms cubic-bezier(0.4, 0, 1, 1),
+      translate 90ms cubic-bezier(0.4, 0, 1, 1),
+      rotate 90ms cubic-bezier(0.4, 0, 1, 1),
+      background-color 200ms ease-out,
+      border-color 200ms ease-out,
+      color 200ms ease-out,
+      opacity 200ms ease-out;
+  }
+}
+
+/**
+ * The first paint.
+ *
+ * `@starting-style` rather than a mounted flag in React: the animation belongs
+ * to the element appearing, not to a state a component has to track, and this
+ * way it runs on the static HTML before any JavaScript has arrived — which is
+ * the only way a load animation can be honest about when the page loaded.
+ *
+ * Short, and opacity-and-transform only, so it never delays the thing it is
+ * animating. A load animation that makes a fast page feel slower has argued
+ * itself out of existence.
+ */
+@utility rise {
+  opacity: 1;
+  transform: translateY(0);
+  transition:
+    opacity 420ms var(--ease-out-strong),
+    transform 620ms var(--ease-spring);
+
+  @starting-style {
+    opacity: 0;
+    transform: translateY(0.75rem);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rise,
+  .press {
+    transition: none;
+  }
 }

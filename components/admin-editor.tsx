@@ -317,7 +317,7 @@ export function AdminEditor({
           onClick={() =>
             set("testimonials", [...draft.testimonials, { quote: "", name: "" }])
           }
-          className="label self-start border border-border px-5 py-3 transition-[background-color,transform] duration-150 ease-out hoverable:hover:bg-card active:scale-[0.98]"
+          className="label self-start border border-border px-5 py-3 press hoverable:hover:bg-card active:scale-[0.98]"
         >
           Add a quote
         </button>
@@ -393,7 +393,7 @@ export function AdminEditor({
           type="button"
           onClick={publish}
           disabled={status.kind === "working"}
-          className="label border border-foreground bg-foreground px-6 py-4 text-background transition-[opacity,transform] duration-150 ease-out hoverable:hover:opacity-90 active:scale-[0.98] disabled:opacity-50"
+          className="label border border-foreground bg-foreground px-6 py-4 text-background press hoverable:hover:opacity-90 active:scale-[0.98] disabled:opacity-50"
         >
           {status.kind === "working" ? "Publishing…" : "Publish"}
         </button>
@@ -406,7 +406,7 @@ export function AdminEditor({
             setSha(null);
             setStatus({ kind: "idle" });
           }}
-          className="label border border-border px-6 py-4 transition-[background-color,transform] duration-150 ease-out hoverable:hover:bg-card active:scale-[0.98]"
+          className="label border border-border px-6 py-4 press hoverable:hover:bg-card active:scale-[0.98]"
         >
           Forget token
         </button>
@@ -499,7 +499,7 @@ function Connect({
         <button
           type="submit"
           disabled={!token.trim() || status.kind === "working"}
-          className="label self-start border border-foreground bg-foreground px-6 py-4 text-background transition-[opacity,transform] duration-150 ease-out hoverable:hover:opacity-90 active:scale-[0.98] disabled:opacity-50"
+          className="label self-start border border-foreground bg-foreground px-6 py-4 text-background press hoverable:hover:opacity-90 active:scale-[0.98] disabled:opacity-50"
         >
           {status.kind === "working" ? "Connecting…" : "Connect"}
         </button>

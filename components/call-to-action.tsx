@@ -54,14 +54,14 @@ export function CallToAction({
         <div className="flex shrink-0 flex-wrap items-center gap-3">
           <Link
             href={href}
-            className="label border border-foreground bg-foreground px-6 py-4 text-background transition-[opacity,transform] duration-150 ease-out hoverable:hover:opacity-90 active:scale-[0.98]"
+            className="label border border-foreground bg-foreground px-6 py-4 text-background press hoverable:hover:opacity-90 active:scale-[0.98]"
           >
             Start an enquiry
           </Link>
           {secondary ? (
             <Link
               href={secondary.href}
-              className="label border border-border px-6 py-4 transition-[background-color,transform] duration-150 ease-out hoverable:hover:bg-card active:scale-[0.98]"
+              className="label border border-border px-6 py-4 press hoverable:hover:bg-card active:scale-[0.98]"
             >
               {secondary.label}
             </Link>

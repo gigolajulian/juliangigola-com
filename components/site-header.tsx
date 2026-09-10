@@ -146,7 +146,7 @@ export function SiteHeader() {
           aria-controls="mobile-nav"
           // 44px square: this is a thumb target, so it gets a real hit area
           // rather than the icon's own 24x16.
-          className="-mr-2 flex h-11 w-11 items-center justify-center transition-transform duration-150 active:scale-[0.94] lg:hidden"
+          className="-mr-2 flex h-11 w-11 items-center justify-center press active:scale-[0.94] lg:hidden"
         >
           {/* The label an icon cannot carry. */}
           <span className="sr-only">{open ? "Close menu" : "Open menu"}</span>
@@ -194,7 +194,10 @@ export function SiteHeader() {
       <div
         id="mobile-nav"
         hidden={!open}
-        className="fixed inset-0 -z-10 flex flex-col justify-center bg-background px-6 pb-20 lg:hidden"
+        // The ground fades; the items spring in over it. Toggling `hidden`
+        // takes the element through `display: none`, which restarts both
+        // animations, so the menu replays every time it opens.
+        className="fixed inset-0 -z-10 flex flex-col justify-center bg-background px-6 pb-20 animate-in fade-in duration-200 ease-out motion-reduce:animate-none lg:hidden"
       >
         <nav aria-label="Main">
           <ul className="flex flex-col gap-1 pl-4">
@@ -222,7 +225,12 @@ export function SiteHeader() {
                     // phone and an iPad alike without a stack of breakpoints.
                     "font-display block py-2 uppercase leading-[0.95] tracking-[0.01em]",
                     "text-[clamp(2.75rem,13vw,5.5rem)]",
-                    "animate-in fade-in slide-in-from-bottom-2 duration-300 fill-mode-both ease-out",
+                    // On the bounce curve, and far enough to see it land. A
+                    // menu is opened a handful of times a session, which is
+                    // exactly where a spring is worth spending: often enough
+                    // to be noticed, rare enough that it never wears out.
+                    "animate-in fade-in slide-in-from-bottom-4 duration-500 fill-mode-both",
+                    "ease-[var(--ease-bounce)]",
                     "motion-reduce:animate-none",
                     // Full strength, always. Dimming everything-but-current
                     // greys out the entire menu on any page that is not one of

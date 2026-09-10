@@ -48,7 +48,7 @@ export function Gallery({ project }: { project: Project }) {
                     aria-label={`Open frame ${i + 1} of ${frames.length}${
                       frame.alt ? `: ${frame.alt}` : ""
                     }`}
-                    className="group relative block w-full cursor-zoom-in overflow-hidden transition-transform duration-150 ease-out active:scale-[0.995]"
+                    className="group relative block w-full cursor-zoom-in overflow-hidden press active:scale-[0.995]"
                     style={{
                       backgroundColor: frame.color,
                       aspectRatio: `${frame.width} / ${frame.height}`,

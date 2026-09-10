@@ -180,7 +180,7 @@ export function ContactForm() {
         <button
           type="submit"
           disabled={pending}
-          className="label border border-foreground bg-foreground px-6 py-4 text-background transition-[opacity,transform] duration-150 ease-out active:scale-[0.98] disabled:opacity-50"
+          className="label border border-foreground bg-foreground px-6 py-4 text-background press active:scale-[0.98] disabled:opacity-50"
         >
           {pending ? "Sending…" : "Send enquiry"}
         </button>

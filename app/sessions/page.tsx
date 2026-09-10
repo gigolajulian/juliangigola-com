@@ -88,14 +88,14 @@ export default function SessionsPage() {
                             href={BOOKING_URL}
                             target="_blank"
                             rel="noreferrer"
-                            className="label border border-foreground bg-foreground px-5 py-3 text-background transition-[opacity,transform] duration-150 ease-out hoverable:hover:opacity-90 active:scale-[0.98]"
+                            className="label border border-foreground bg-foreground px-5 py-3 text-background press hoverable:hover:opacity-90 active:scale-[0.98]"
                           >
                             Check availability
                           </a>
                         ) : null}
                         <Link
                           href={`/contact?type=session&session=${session.slug}`}
-                          className="label inline-flex items-center gap-2 border border-border px-5 py-3 transition-[background-color,transform] duration-150 ease-out hoverable:hover:bg-card active:scale-[0.98]"
+                          className="label inline-flex items-center gap-2 border border-border px-5 py-3 press hoverable:hover:bg-card active:scale-[0.98]"
                         >
                           Enquire about {session.name.toLowerCase()}
                         </Link>

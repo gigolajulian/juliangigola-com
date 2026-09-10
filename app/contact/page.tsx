@@ -38,7 +38,7 @@ export default function ContactPage() {
               href={BOOKING_URL}
               target="_blank"
               rel="noreferrer"
-              className="label mt-8 inline-block border border-foreground bg-foreground px-6 py-4 text-background transition-[opacity,transform] duration-150 ease-out hoverable:hover:opacity-90 active:scale-[0.98]"
+              className="label mt-8 inline-block border border-foreground bg-foreground px-6 py-4 text-background press hoverable:hover:opacity-90 active:scale-[0.98]"
             >
               Check availability
             </a>

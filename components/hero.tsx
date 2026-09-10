@@ -47,20 +47,39 @@ export function Hero({ disciplines }: { disciplines: Discipline[] }) {
   // and further movement would be fighting them for control.
   const [taken, setTaken] = React.useState(false);
 
+  // Which frames have been on screen. Only these are mounted.
+  //
+  // Every one of the five used to be in the markup from the start, so that a
+  // switch never waited on a request — but they are full-size frames and that
+  // was a megabyte and a half of photographs downloaded before the visitor had
+  // done anything, competing with the one picture they can actually see. Now
+  // the first is all that loads for first paint and the rest arrive as the
+  // cycle reaches them, which is still well ahead of a hover.
+  const [seen, setSeen] = React.useState<number[]>([0]);
+
+  const reveal = React.useCallback(
+    (i: number) => setSeen((s) => (s.includes(i) ? s : [...s, i])),
+    [],
+  );
+
   React.useEffect(() => {
     if (taken || disciplines.length < 2) return;
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
-    const id = window.setInterval(
-      () => setActive((i) => (i + 1) % disciplines.length),
-      DWELL_MS,
-    );
+    const id = window.setInterval(() => {
+      setActive((i) => {
+        const next = (i + 1) % disciplines.length;
+        reveal(next);
+        return next;
+      });
+    }, DWELL_MS);
     return () => window.clearInterval(id);
-  }, [taken, disciplines.length]);
+  }, [taken, disciplines.length, reveal]);
 
   const take = (i: number) => {
     setTaken(true);
     setActive(i);
+    reveal(i);
   };
 
   /** Finds which row an event came from and switches to it. */
@@ -84,11 +103,13 @@ export function Hero({ disciplines }: { disciplines: Discipline[] }) {
           className="relative order-first h-[55dvh] w-full lg:order-last lg:h-full lg:w-auto lg:aspect-[4/5]"
           style={{ backgroundColor: current.frame.color }}
         >
-          {/* All four frames are mounted and crossfaded rather than swapped,
-              so a switch never waits on a network request and never shows a
-              gap. Only the first is `priority`; the rest load at normal
-              priority behind it, which they have four seconds to do. */}
-          {disciplines.map((discipline, i) => (
+          {/* Frames are crossfaded rather than swapped, so a switch never
+              shows a gap — but only the ones that have been reached are
+              mounted, so first paint costs one photograph instead of five.
+              Only the first is `priority`; the rest load at normal priority
+              behind it, which they have four seconds to do. */}
+          {disciplines.map((discipline, i) =>
+            seen.includes(i) ? (
             <Image
               key={discipline.slug}
               src={discipline.frame.src}
@@ -109,7 +130,8 @@ export function Hero({ disciplines }: { disciplines: Discipline[] }) {
                 i === active ? "opacity-100" : "opacity-0",
               )}
             />
-          ))}
+            ) : null,
+          )}
 
           <Link
             href={`/work/${current.project.slug}`}
@@ -210,13 +232,13 @@ export function Hero({ disciplines }: { disciplines: Discipline[] }) {
           <div className="mt-auto flex flex-wrap items-center gap-3 px-6 py-8 sm:px-10 sm:py-10">
             <Link
               href="/work"
-              className="label border border-foreground bg-foreground px-6 py-4 text-background transition-[opacity,transform] duration-150 ease-out hoverable:hover:opacity-90 active:scale-[0.98]"
+              className="label border border-foreground bg-foreground px-6 py-4 text-background press hoverable:hover:opacity-90 active:scale-[0.98]"
             >
               See the work
             </Link>
             <Link
               href="/sessions"
-              className="label border border-border px-6 py-4 transition-[background-color,transform] duration-150 ease-out hoverable:hover:bg-card active:scale-[0.98]"
+              className="label border border-border px-6 py-4 press hoverable:hover:bg-card active:scale-[0.98]"
             >
               Book a session
             </Link>

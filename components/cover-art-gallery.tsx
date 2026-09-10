@@ -51,7 +51,7 @@ export function CoverArtGallery({ releases }: { releases: CoverRelease[] }) {
                   lightbox.show(positions.get(frame.src) ?? 0);
                 }}
                 aria-label={`Open ${coverLabel(release.title, release.artist, release.frames)}`}
-                className="group relative block aspect-square w-full cursor-zoom-in overflow-hidden transition-transform duration-150 ease-out active:scale-[0.995]"
+                className="group relative block aspect-square w-full cursor-zoom-in overflow-hidden press active:scale-[0.995]"
                 style={{ backgroundColor: front.color }}
               >
                 <CoverFaces

@@ -126,7 +126,7 @@ export function Lightbox({
               <Dialog.Close asChild>
                 <button
                   type="button"
-                  className="label ml-4 px-3 py-2 text-muted-foreground transition-[color,transform] duration-150 ease-out hoverable:hover:text-foreground active:scale-[0.97]"
+                  className="label ml-4 px-3 py-2 text-muted-foreground press hoverable:hover:text-foreground active:scale-[0.97]"
                 >
                   Close
                 </button>
@@ -155,7 +155,7 @@ function LightboxButton({
       aria-label={label}
       // 44px minimum target — this is the control someone taps repeatedly on
       // a phone, so it gets a real hit area rather than an icon's worth.
-      className="flex h-11 w-11 items-center justify-center border border-border text-base transition-[background-color,transform] duration-150 ease-out hoverable:hover:bg-card active:scale-[0.97]"
+      className="flex h-11 w-11 items-center justify-center border border-border text-base press hoverable:hover:bg-card active:scale-[0.97]"
     >
       <span aria-hidden>{children}</span>
     </button>

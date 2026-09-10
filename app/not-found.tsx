@@ -14,13 +14,13 @@ export default function NotFound() {
       <div className="mt-10 flex flex-wrap gap-4">
         <Link
           href="/work"
-          className="label border border-foreground bg-foreground px-6 py-4 text-background transition-transform duration-150 ease-out active:scale-[0.98]"
+          className="label border border-foreground bg-foreground px-6 py-4 text-background press active:scale-[0.98]"
         >
           Browse the work
         </Link>
         <Link
           href="/"
-          className="label border border-border px-6 py-4 transition-[background-color,transform] duration-150 ease-out hoverable:hover:bg-card active:scale-[0.98]"
+          className="label border border-border px-6 py-4 press hoverable:hover:bg-card active:scale-[0.98]"
         >
           Home
         </Link>

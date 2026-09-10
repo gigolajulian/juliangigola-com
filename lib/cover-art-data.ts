@@ -13,6 +13,7 @@ export const COVER_RELEASES: CoverRelease[] = [
     "frames": [
       {
         "src": "/covers/est-modvs-in-rebvs-a.jpg",
+        "thumb": "/covers/est-modvs-in-rebvs-a-800.jpg",
         "width": 1600,
         "height": 1600,
         "color": "#6B7479",
@@ -21,6 +22,7 @@ export const COVER_RELEASES: CoverRelease[] = [
       },
       {
         "src": "/covers/est-modvs-in-rebvs-b.jpg",
+        "thumb": "/covers/est-modvs-in-rebvs-b-800.jpg",
         "width": 1600,
         "height": 1600,
         "color": "#848787",
@@ -36,6 +38,7 @@ export const COVER_RELEASES: CoverRelease[] = [
     "frames": [
       {
         "src": "/covers/jahannam-a.jpg",
+        "thumb": "/covers/jahannam-a-800.jpg",
         "width": 1600,
         "height": 1600,
         "color": "#140E09",
@@ -44,6 +47,7 @@ export const COVER_RELEASES: CoverRelease[] = [
       },
       {
         "src": "/covers/jahannam-b.jpg",
+        "thumb": "/covers/jahannam-b-800.jpg",
         "width": 1600,
         "height": 1600,
         "color": "#442D1C",
@@ -59,6 +63,7 @@ export const COVER_RELEASES: CoverRelease[] = [
     "frames": [
       {
         "src": "/covers/problem-child.jpg",
+        "thumb": "/covers/problem-child-800.jpg",
         "width": 1600,
         "height": 1600,
         "color": "#1B282E",
@@ -74,6 +79,7 @@ export const COVER_RELEASES: CoverRelease[] = [
     "frames": [
       {
         "src": "/covers/westside-shawty.jpg",
+        "thumb": "/covers/westside-shawty-800.jpg",
         "width": 1600,
         "height": 1600,
         "color": "#3A494E",
@@ -89,6 +95,7 @@ export const COVER_RELEASES: CoverRelease[] = [
     "frames": [
       {
         "src": "/covers/top-tier.jpg",
+        "thumb": "/covers/top-tier-800.jpg",
         "width": 1600,
         "height": 1600,
         "color": "#2D393D",
@@ -104,6 +111,7 @@ export const COVER_RELEASES: CoverRelease[] = [
     "frames": [
       {
         "src": "/covers/pop-out.jpg",
+        "thumb": "/covers/pop-out-800.jpg",
         "width": 1600,
         "height": 1600,
         "color": "#322E29",
@@ -119,6 +127,7 @@ export const COVER_RELEASES: CoverRelease[] = [
     "frames": [
       {
         "src": "/covers/do-what-i-want.jpg",
+        "thumb": "/covers/do-what-i-want-800.jpg",
         "width": 1600,
         "height": 1600,
         "color": "#2A2419",
@@ -134,6 +143,7 @@ export const COVER_RELEASES: CoverRelease[] = [
     "frames": [
       {
         "src": "/covers/savage.jpg",
+        "thumb": "/covers/savage-800.jpg",
         "width": 1600,
         "height": 1600,
         "color": "#748489",
@@ -149,6 +159,7 @@ export const COVER_RELEASES: CoverRelease[] = [
     "frames": [
       {
         "src": "/covers/rockstar.jpg",
+        "thumb": "/covers/rockstar-800.jpg",
         "width": 1600,
         "height": 1600,
         "color": "#777A7C",
@@ -164,6 +175,7 @@ export const COVER_RELEASES: CoverRelease[] = [
     "frames": [
       {
         "src": "/covers/took-time.jpg",
+        "thumb": "/covers/took-time-800.jpg",
         "width": 1600,
         "height": 1600,
         "color": "#474B4C",
@@ -179,6 +191,7 @@ export const COVER_RELEASES: CoverRelease[] = [
     "frames": [
       {
         "src": "/covers/whole-summer.jpg",
+        "thumb": "/covers/whole-summer-800.jpg",
         "width": 1600,
         "height": 1600,
         "color": "#717674",
@@ -194,6 +207,7 @@ export const COVER_RELEASES: CoverRelease[] = [
     "frames": [
       {
         "src": "/covers/10-shots.jpg",
+        "thumb": "/covers/10-shots-800.jpg",
         "width": 1600,
         "height": 1600,
         "color": "#313032",
@@ -209,6 +223,7 @@ export const COVER_RELEASES: CoverRelease[] = [
     "frames": [
       {
         "src": "/covers/the-description.jpg",
+        "thumb": "/covers/the-description-800.jpg",
         "width": 1600,
         "height": 1600,
         "color": "#1C1C1C",
@@ -224,6 +239,7 @@ export const COVER_RELEASES: CoverRelease[] = [
     "frames": [
       {
         "src": "/covers/faith-and-hustle.jpg",
+        "thumb": "/covers/faith-and-hustle-800.jpg",
         "width": 1600,
         "height": 1600,
         "color": "#75928A",
@@ -239,6 +255,7 @@ export const COVER_RELEASES: CoverRelease[] = [
     "frames": [
       {
         "src": "/covers/tomorrow-aint-promised.jpg",
+        "thumb": "/covers/tomorrow-aint-promised-800.jpg",
         "width": 1600,
         "height": 1600,
         "color": "#132137",
@@ -254,6 +271,7 @@ export const COVER_RELEASES: CoverRelease[] = [
     "frames": [
       {
         "src": "/covers/the-river.jpg",
+        "thumb": "/covers/the-river-800.jpg",
         "width": 1600,
         "height": 1600,
         "color": "#303E24",
@@ -269,6 +287,7 @@ export const COVER_RELEASES: CoverRelease[] = [
     "frames": [
       {
         "src": "/covers/new-home.jpg",
+        "thumb": "/covers/new-home-800.jpg",
         "width": 1600,
         "height": 1600,
         "color": "#4B5457",
@@ -284,6 +303,7 @@ export const COVER_RELEASES: CoverRelease[] = [
     "frames": [
       {
         "src": "/covers/your-way.jpg",
+        "thumb": "/covers/your-way-800.jpg",
         "width": 1600,
         "height": 1600,
         "color": "#1B1716",
@@ -299,6 +319,7 @@ export const COVER_RELEASES: CoverRelease[] = [
     "frames": [
       {
         "src": "/covers/hi-fi.jpg",
+        "thumb": "/covers/hi-fi-800.jpg",
         "width": 1600,
         "height": 1600,
         "color": "#9F978E",
@@ -314,6 +335,7 @@ export const COVER_RELEASES: CoverRelease[] = [
     "frames": [
       {
         "src": "/covers/wasted-years-parsia-remix.jpg",
+        "thumb": "/covers/wasted-years-parsia-remix-800.jpg",
         "width": 1000,
         "height": 1000,
         "color": "#192428",
@@ -329,6 +351,7 @@ export const COVER_RELEASES: CoverRelease[] = [
     "frames": [
       {
         "src": "/covers/area-51.jpg",
+        "thumb": "/covers/area-51-800.jpg",
         "width": 780,
         "height": 780,
         "color": "#806150",
@@ -344,6 +367,7 @@ export const COVER_RELEASES: CoverRelease[] = [
     "frames": [
       {
         "src": "/covers/beamin.jpg",
+        "thumb": "/covers/beamin-800.jpg",
         "width": 1000,
         "height": 1000,
         "color": "#858778",
@@ -359,6 +383,7 @@ export const COVER_RELEASES: CoverRelease[] = [
     "frames": [
       {
         "src": "/covers/hadaf.jpg",
+        "thumb": "/covers/hadaf-800.jpg",
         "width": 1600,
         "height": 1600,
         "color": "#080A0A",
@@ -374,6 +399,7 @@ export const COVER_RELEASES: CoverRelease[] = [
     "frames": [
       {
         "src": "/covers/in-the-hoodie-on-your-sleeve.jpg",
+        "thumb": "/covers/in-the-hoodie-on-your-sleeve-800.jpg",
         "width": 1600,
         "height": 1600,
         "color": "#8A3F36",

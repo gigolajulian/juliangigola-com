@@ -19,6 +19,10 @@ import type { CoverFrame } from "@/lib/cover-art-types";
  * — a tap is a tap — and the second side is reachable from the lightbox.
  * Focus turns it too, so a keyboard visitor is not the one person who cannot
  * see the back.
+ *
+ * Both layers use the 800px copy. There is no optimiser on a static host, so
+ * a cell asking for 285px is handed whatever file it names — and naming the
+ * 1600px master cost a quarter of a megabyte per thumbnail.
  * ─────────────────────────────────────────────────────────────── */
 
 export function CoverFaces({
@@ -37,7 +41,7 @@ export function CoverFaces({
   return (
     <>
       <Image
-        src={front.src}
+        src={front.thumb}
         alt=""
         fill
         sizes={sizes}
@@ -55,7 +59,7 @@ export function CoverFaces({
       {back ? (
         <>
           <Image
-            src={back.src}
+            src={back.thumb}
             alt=""
             fill
             sizes={sizes}

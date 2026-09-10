@@ -28,6 +28,20 @@ const QUALITY = 82;
 const COVER = 600;
 
 /**
+ * The size the grids actually render at.
+ *
+ * There is no image optimiser on a static host — `image-loader.ts` hands back
+ * whatever file it is given, at any requested width — so a cell 285px wide was
+ * downloading a 1600px master, a quarter of a megabyte for a thumbnail. Ten of
+ * those on the homepage was two megabytes of nothing.
+ *
+ * 800 covers the largest the grid ever gets (a third of a 1280 viewport is
+ * 420px) with a 2x screen still ahead of it. The 1600px file stays for the
+ * lightbox, which is the one place a cover is looked at properly.
+ */
+const THUMB = 800;
+
+/**
  * The releases, in the order they read on the page.
  *
  * Two-sided releases lead, which is editorial rather than structural: they
@@ -162,8 +176,15 @@ async function main() {
         .jpeg({ quality: QUALITY, mozjpeg: true })
         .toFile(path.join(OUT_DIR, name));
 
+      const thumbName = `${slug}${suffix}-${THUMB}.jpg`;
+      await sharp(src)
+        .resize(THUMB, THUMB, { fit: square ? "cover" : "inside", withoutEnlargement: true })
+        .jpeg({ quality: QUALITY, mozjpeg: true })
+        .toFile(path.join(OUT_DIR, thumbName));
+
       frames.push({
         src: `/covers/${name}`,
+        thumb: `/covers/${thumbName}`,
         width,
         height,
         color: await meanColor(sharp(src)),

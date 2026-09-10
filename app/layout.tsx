@@ -79,7 +79,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         </a>
 
         <SiteHeader />
-        <main id="main" className="flex flex-1 flex-col">
+        <main id="main" className="rise flex flex-1 flex-col">
           {children}
         </main>
         <SiteFooter />
