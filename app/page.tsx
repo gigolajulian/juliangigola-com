@@ -3,6 +3,7 @@ import { Hero } from "@/components/hero";
 import { CallToAction } from "@/components/call-to-action";
 import { Testimonials } from "@/components/testimonials";
 import { WorkBand } from "@/components/work-band";
+import { CoverArt } from "@/components/cover-art";
 import { FEATURED, PRESS, DISCIPLINES } from "@/lib/work";
 
 /* ── the homepage ─────────────────────────────────────────────────
@@ -84,6 +85,8 @@ export default function Home() {
           ))}
         </ul>
       </section>
+
+      <CoverArt />
 
       {/* The two audiences, split. This is the fix for the old site's single
           thirteen-item dropdown maze: an art director and someone pricing a

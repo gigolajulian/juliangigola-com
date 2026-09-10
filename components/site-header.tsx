@@ -100,7 +100,7 @@ export function SiteHeader() {
         className="pointer-events-none absolute inset-0 bg-gradient-to-b from-background/95 via-background/60 to-transparent"
       />
 
-      <div className="relative mx-auto flex max-w-[100rem] items-center justify-between px-6 py-5 sm:px-10">
+      <div className="relative mx-auto flex max-w-[100rem] items-center justify-between px-6 py-6 sm:px-10 sm:py-7">
         <Link
           href="/"
           // Caps, because that is what a bold condensed grotesque is for —
@@ -113,17 +113,22 @@ export function SiteHeader() {
           // it brings it back into view, so it is never an invisible focus
           // target.
           className={cn(
-            "font-display text-base uppercase leading-none tracking-[0.06em] sm:text-lg",
+            "font-display text-lg uppercase leading-none tracking-[0.05em] sm:text-2xl",
             "transition-opacity duration-300 ease-[var(--ease-out-strong)] hover:opacity-70",
             "focus-visible:opacity-100",
-            wordmarkVisible ? "opacity-100" : "opacity-0",
+            // Deferring only makes sense where the masthead is actually
+            // beside it. Below `lg` the cover stacks, so the masthead sits
+            // under a half-screen photograph — hiding the wordmark there
+            // leaves the header with nothing but a burger and no name on
+            // screen at all.
+            wordmarkVisible ? "opacity-100" : "opacity-0 max-lg:opacity-100",
           )}
         >
           Julian Gigola
         </Link>
 
-        <nav aria-label="Main" className="hidden sm:block">
-          <ul className="flex items-center gap-8">
+        <nav aria-label="Main" className="hidden lg:block">
+          <ul className="flex items-center gap-9">
             {LINKS.map((link) => (
               <li key={link.href}>
                 <NavLink href={link.href} current={isCurrent(link.href)}>
@@ -139,9 +144,48 @@ export function SiteHeader() {
           onClick={() => setOpen((v) => !v)}
           aria-expanded={open}
           aria-controls="mobile-nav"
-          className="label -mr-2 px-2 py-2 transition-transform duration-150 active:scale-[0.97] sm:hidden"
+          // 44px square: this is a thumb target, so it gets a real hit area
+          // rather than the icon's own 24x16.
+          className="-mr-2 flex h-11 w-11 items-center justify-center transition-transform duration-150 active:scale-[0.94] lg:hidden"
         >
-          {open ? "Close" : "Menu"}
+          {/* The label an icon cannot carry. */}
+          <span className="sr-only">{open ? "Close menu" : "Open menu"}</span>
+
+          {/* Three bars that morph into a cross rather than being swapped for
+              one. The middle bar fades while the outer two rotate onto the
+              centre line, so the control stays the same object through the
+              change — a straight icon swap reads as two different buttons.
+
+              Every bar is centred and moved with `translateY`, so only
+              transform and opacity animate and nothing touches layout. */}
+          <span aria-hidden className="relative block h-4 w-6">
+            {/* The outer bars are placed with `top`/`bottom` and carry no
+                base translate, so the only transform on them is the one that
+                animates. Giving one element two `translate-y` utilities makes
+                them fight — the later simply overrides the earlier, which
+                collapses the three bars into two. */}
+            <span
+              className={cn(
+                "absolute left-0 top-0 h-[1.5px] w-full bg-current",
+                "transition-transform duration-300 ease-[var(--ease-out-strong)] motion-reduce:transition-none",
+                open ? "translate-y-[7.25px] rotate-45" : "translate-y-0 rotate-0",
+              )}
+            />
+            <span
+              className={cn(
+                "absolute left-0 top-1/2 h-[1.5px] w-full -translate-y-1/2 bg-current",
+                "transition-opacity duration-200 ease-out motion-reduce:transition-none",
+                open ? "opacity-0" : "opacity-100",
+              )}
+            />
+            <span
+              className={cn(
+                "absolute bottom-0 left-0 h-[1.5px] w-full bg-current",
+                "transition-transform duration-300 ease-[var(--ease-out-strong)] motion-reduce:transition-none",
+                open ? "-translate-y-[7.25px] -rotate-45" : "translate-y-0 rotate-0",
+              )}
+            />
+          </span>
         </button>
       </div>
 
@@ -150,12 +194,21 @@ export function SiteHeader() {
       <div
         id="mobile-nav"
         hidden={!open}
-        className="fixed inset-0 -z-10 flex flex-col justify-center bg-background px-6 pb-20 sm:hidden"
+        className="fixed inset-0 -z-10 flex flex-col justify-center bg-background px-6 pb-20 lg:hidden"
       >
         <nav aria-label="Main">
-          <ul className="flex flex-col gap-2">
+          <ul className="flex flex-col gap-1 pl-4">
             {LINKS.map((link, i) => (
-              <li key={link.href}>
+              <li key={link.href} className="relative">
+                {/* The current page is marked, rather than the others being
+                    dimmed. The accent is the only saturated colour on the
+                    site and already means "you are here". */}
+                {isCurrent(link.href) ? (
+                  <span
+                    aria-hidden
+                    className="absolute -left-4 top-1/2 h-8 w-1 -translate-y-1/2 bg-accent"
+                  />
+                ) : null}
                 <Link
                   href={link.href}
                   aria-current={isCurrent(link.href) ? "page" : undefined}
@@ -164,10 +217,18 @@ export function SiteHeader() {
                   // gesture, 150ms reads as waiting.
                   style={{ animationDelay: `${i * 40}ms` }}
                   className={cn(
-                    "font-display block py-3 text-4xl leading-none transition-opacity",
+                    // This is a full-screen menu, so the type is sized to the
+                    // screen rather than to a nav bar — fluid, so it fills a
+                    // phone and an iPad alike without a stack of breakpoints.
+                    "font-display block py-2 uppercase leading-[0.95] tracking-[0.01em]",
+                    "text-[clamp(2.75rem,13vw,5.5rem)]",
                     "animate-in fade-in slide-in-from-bottom-2 duration-300 fill-mode-both ease-out",
                     "motion-reduce:animate-none",
-                    isCurrent(link.href) ? "opacity-100" : "opacity-55",
+                    // Full strength, always. Dimming everything-but-current
+                    // greys out the entire menu on any page that is not one of
+                    // these four — the homepage included — which reads as
+                    // disabled rather than as emphasis.
+                    "transition-opacity hoverable:hover:opacity-70",
                   )}
                 >
                   {link.label}
@@ -200,7 +261,7 @@ function NavLink({
       href={href}
       aria-current={current ? "page" : undefined}
       className={cn(
-        "label group relative block py-1 transition-colors duration-200",
+        "group relative block py-3 text-[0.9375rem] uppercase leading-none tracking-[0.08em] transition-colors duration-200",
         current ? "text-foreground" : "text-muted-foreground hover:text-foreground",
       )}
     >

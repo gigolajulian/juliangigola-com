@@ -202,7 +202,28 @@ const COVER_OVERRIDES: Record<string, Frame> = {
   },
 };
 
-export const DISCIPLINES: Discipline[] = WORK_CATEGORIES.slice(0, 4)
+/**
+ * The disciplines the cover cycles through, in order.
+ *
+ * Named explicitly rather than taken as the first N categories. The nav order
+ * puts `video` fifth, but cover art is the more representative fifth thing he
+ * does — and which five lead the site is an editorial call, not something to
+ * be decided by a `slice`.
+ */
+const DISCIPLINE_SLUGS = ["editorial", "campaigns", "portraits", "mixed-media", "coverart"];
+
+/**
+ * Display names, where the old site's nav label does not read well.
+ * "COVERART" was one word there and looks like a typo set large.
+ */
+const DISCIPLINE_LABELS: Record<string, string> = {
+  coverart: "Cover art",
+};
+
+export const DISCIPLINES: Discipline[] = DISCIPLINE_SLUGS.map(
+  (slug) => CATEGORIES.find((c) => c.slug === slug),
+)
+  .filter((c): c is Category => Boolean(c))
   .map((category) => {
     const inCategory = projectsIn(category.slug);
     const project = inCategory[0];
@@ -214,6 +235,29 @@ export const DISCIPLINES: Discipline[] = WORK_CATEGORIES.slice(0, 4)
       project.images[0];
     if (!frame) return null;
 
-    return { slug: category.slug, name: category.name, count: inCategory.length, project, frame };
+    // Some nav leaves are a listing of many projects (EDITORIAL); others are
+    // themselves a single gallery (COVERART, WEDDINGS). Counting projects for
+    // the second kind always reports "1", which is true and useless — the
+    // number a visitor wants is how much work is in there.
+    const isOwnGallery = inCategory.length === 1 && project.slug === category.slug;
+    const count = isOwnGallery ? project.images.length : inCategory.length;
+
+    return {
+      slug: category.slug,
+      name: DISCIPLINE_LABELS[category.slug] ?? category.name,
+      count,
+      project,
+      frame,
+    };
   })
   .filter((d): d is Discipline => d !== null);
+
+/**
+ * The cover-art work.
+ *
+ * It sits apart from the rest of the archive because its format does: every
+ * frame is exactly 1:1, because that is what a release needs. Shown in a
+ * square grid rather than folded into the portrait-shaped selected-work grid,
+ * where squares would have to be cropped to fit.
+ */
+export const COVER_ART: Project | undefined = getProject("coverart");

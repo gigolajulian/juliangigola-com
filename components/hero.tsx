@@ -126,7 +126,7 @@ export function Hero({ disciplines }: { disciplines: Discipline[] }) {
           {/* One: the standing details, as a running head. The tall top
               padding on desktop clears the fixed header so the nav never
               crowds the rule. */}
-          <div className="flex flex-wrap items-baseline gap-x-6 gap-y-1 border-b border-border px-6 pb-5 pt-10 sm:px-10 lg:pt-24">
+          <div className="flex flex-wrap items-baseline gap-x-6 gap-y-1 border-b border-border px-6 pb-5 pt-10 sm:px-10 lg:pt-32">
             <p className="label text-muted-foreground">Photographer &amp; creative director</p>
             {/* `ml-auto` rather than `justify-between`, so when the column is
                 too narrow for both — which it is at exactly the `lg`
