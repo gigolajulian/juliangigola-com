@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import Image from "next/image";
 import { notFound } from "next/navigation";
 import { WorkIndex } from "@/components/work-index";
 import { CallToAction } from "@/components/call-to-action";
@@ -10,6 +11,7 @@ import {
   projectsIn,
   categoryHref,
   categoryLabel,
+  categoryFrame,
   enquiryTypeFor,
 } from "@/lib/work";
 
@@ -71,24 +73,59 @@ export default async function CategoryPage(props: PageProps<"/work/category/[slu
   // not reshuffle work someone has already scrolled past.
   const projects = COMMISSIONS.filter((p) => p.categories.some((c) => c.slug === slug));
   const name = categoryLabel(category);
+  const frame = categoryFrame(slug);
 
   return (
     <>
       <div className="mx-auto w-full max-w-[100rem] px-6 pb-24 pt-28 sm:px-10 sm:pt-36">
-        <header>
-          <nav aria-label="Breadcrumb">
-            <Link
-              href="/work"
-              className="label text-muted-foreground transition-colors duration-200 hoverable:hover:text-foreground"
-            >
-              &larr; All work
-            </Link>
-          </nav>
+        {/* Type left, photograph right — the same shape as the cover, and
+            the same frame the cover's index shows for this discipline, so
+            clicking CAMPAIGNS lands on the picture that was just on screen.
 
-          <h1 className="mt-8 title">{name}</h1>
-          <p className="mt-4 max-w-prose text-sm leading-relaxed text-muted-foreground">
-            {projects.length} commissioned {projects.length === 1 ? "project" : "projects"}.
-          </p>
+            The frame is portrait, so it sits in a column rather than being
+            cropped into a banner, and the column is capped so the list of
+            projects is still reachable without scrolling past a full screen
+            of photograph. */}
+        <header className="grid gap-10 lg:grid-cols-[1fr_auto] lg:items-end lg:gap-16">
+          {/* Title first, unlike the cover — the photograph leads there
+              because it is the hook, but somebody who has clicked
+              "Campaigns" already knows what they came for, and what they
+              want next is the list. */}
+          <div>
+            <nav aria-label="Breadcrumb">
+              <Link
+                href="/work"
+                className="label text-muted-foreground transition-colors duration-200 hoverable:hover:text-foreground"
+              >
+                &larr; All work
+              </Link>
+            </nav>
+
+            <h1 className="mt-8 title">{name}</h1>
+            <p className="mt-4 max-w-prose text-sm leading-relaxed text-muted-foreground">
+              {projects.length} commissioned {projects.length === 1 ? "project" : "projects"}.
+            </p>
+          </div>
+
+          {frame ? (
+            <div
+              className="relative w-full overflow-hidden lg:h-[clamp(20rem,42vh,26rem)] lg:w-auto"
+              style={{
+                backgroundColor: frame.color,
+                aspectRatio: `${frame.width} / ${frame.height}`,
+              }}
+            >
+              <Image
+                src={frame.src}
+                alt={frame.alt || `${name} work by Julian Gigola`}
+                fill
+                sizes="(min-width: 1024px) 30vw, 100vw"
+                // The one photograph above the fold on this page.
+                priority
+                className="object-cover"
+              />
+            </div>
+          ) : null}
         </header>
 
         <WorkIndex projects={projects} categories={WORK_CATEGORY_LINKS} active={slug} />

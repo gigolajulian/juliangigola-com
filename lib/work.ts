@@ -322,6 +322,28 @@ const COVER_OVERRIDES: Record<string, Frame> = {
 };
 
 /**
+ * The photograph that stands for a category.
+ *
+ * Shared by the cover's index and the discipline page's header, so the frame
+ * a visitor sees for CAMPAIGNS on the homepage is the same one they land on
+ * when they click it. Overridden by hand where the derived choice is not the
+ * right one, and otherwise the opening frame of whatever project leads the
+ * category — Julian's own ordering, so it is already his pick.
+ *
+ * Prefers a portrait frame: both places put this in a tall column, where
+ * `object-cover` on a landscape frame crops away both sides.
+ */
+export const categoryFrame = (categorySlug: string): Frame | null => {
+  const override = COVER_OVERRIDES[categorySlug];
+  if (override) return override;
+
+  const project = projectsIn(categorySlug)[0];
+  if (!project) return null;
+
+  return project.images.find((f) => f.height > f.width) ?? project.images[0] ?? null;
+};
+
+/**
  * The disciplines the cover cycles through, in order.
  *
  * Named explicitly rather than taken as the first N categories. The nav order
@@ -352,10 +374,7 @@ export const DISCIPLINES: Discipline[] = DISCIPLINE_SLUGS.map(
     const project = inCategory[0];
     if (!project) return null;
 
-    const frame =
-      COVER_OVERRIDES[category.slug] ??
-      project.images.find((f) => f.height > f.width) ??
-      project.images[0];
+    const frame = categoryFrame(category.slug);
     if (!frame) return null;
 
     // Some nav leaves are a listing of many projects (EDITORIAL); others are
