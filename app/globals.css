@@ -1,0 +1,247 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+/**
+ * Hover, but only where hovering is real.
+ *
+ * Touch devices fire `:hover` on tap and then leave it stuck on whatever was
+ * last touched — an underline parked under the wrong nav item, a frame left
+ * scaled up. Every hover effect on the site goes through this variant, so the
+ * guard is one definition rather than a condition repeated at each call site.
+ */
+@custom-variant hoverable (@media (hover: hover) and (pointer: fine));
+
+/* ── the ground ───────────────────────────────────────────────────
+ * One theme, dark, no toggle.
+ *
+ * This is a gallery. The work is high-contrast and mostly low-key, and it
+ * glows against near-black the way prints do on a dark wall — on the old
+ * site's light grey it went muddy. A theme toggle would mean two sets of
+ * decisions about how photographs sit on a page, and only one of them can be
+ * the right one.
+ *
+ * The palette is deliberately almost neutral: a trace of warmth (hue 70) at
+ * very low chroma, so the ground reads as ink rather than as a colour, and
+ * nothing competes with what is in the frames.
+ * ─────────────────────────────────────────────────────────────── */
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-sans);
+  --font-mono: var(--font-geist-mono);
+  --font-display: var(--font-display);
+  --font-heading: var(--font-display);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
+
+  /* Display sizes. Fluid, because a masthead that is right at 1440 is
+     comically large at 390 — and clamp beats a stack of breakpoints.
+     Tracking is neutral: Univers Bold Condensed is already tight, and the
+     negative tracking a Didone wants closes it up into a smear. */
+  --text-display: clamp(2.75rem, 8vw, 7rem);
+  --text-title: clamp(1.875rem, 4.5vw, 3.5rem);
+
+  /* Nav, credits, captions. Small caps-ish tracking, set once. */
+  --text-label: 0.6875rem;
+  --text-label--line-height: 1.2;
+  --text-label--letter-spacing: 0.14em;
+
+  /* The built-in CSS easings are too weak to read as intentional. */
+  --ease-out-strong: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out-strong: cubic-bezier(0.77, 0, 0.175, 1);
+}
+
+:root {
+  color-scheme: dark;
+
+  --background: oklch(0.145 0.003 70);
+  --foreground: oklch(0.955 0.004 80);
+
+  /* Cards and popovers lift off the ground rather than sitting in a box —
+     a hair lighter, never outlined. */
+  --card: oklch(0.185 0.003 70);
+  --card-foreground: var(--foreground);
+  --popover: oklch(0.2 0.003 70);
+  --popover-foreground: var(--foreground);
+
+  --primary: oklch(0.955 0.004 80);
+  --primary-foreground: oklch(0.145 0.003 70);
+  --secondary: oklch(0.245 0.003 70);
+  --secondary-foreground: var(--foreground);
+
+  --muted: oklch(0.235 0.003 70);
+  /* 7.4:1 on the ground — captions and credits are real text, not decoration. */
+  --muted-foreground: oklch(0.655 0.005 80);
+
+  /* The one accent, sampled from the teal that recurs across his own work
+     (Oakley, Own Brand, the studio portraits). Focus and hover only — never a
+     fill. An accent taken from the work cannot date; a trend can. */
+  --accent: oklch(0.72 0.095 195);
+  --accent-foreground: oklch(0.145 0.003 70);
+
+  --destructive: oklch(0.62 0.2 25);
+
+  --border: oklch(1 0 0 / 11%);
+  --input: oklch(1 0 0 / 14%);
+  --ring: var(--accent);
+
+  /* Sharp. A gallery frame has corners; so does a photograph. Radius stays
+     for the few shadcn primitives that assume it. */
+  --radius: 0.125rem;
+
+  --sidebar: oklch(0.185 0.003 70);
+  --sidebar-foreground: var(--foreground);
+  --sidebar-primary: var(--accent);
+  --sidebar-primary-foreground: var(--accent-foreground);
+  --sidebar-accent: oklch(0.245 0.003 70);
+  --sidebar-accent-foreground: var(--foreground);
+  --sidebar-border: var(--border);
+  --sidebar-ring: var(--ring);
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
+
+  html {
+    @apply font-sans;
+    /* The nav is fixed; without this, an in-page jump lands under it. */
+    scroll-padding-top: 6rem;
+  }
+
+  /* Keyboard focus has to be obvious on a dark ground, and the accent is the
+     only saturated thing on the page — so it reads instantly as "you are
+     here" without being decorative. Mouse clicks get nothing. */
+  :focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 3px;
+  }
+
+  ::selection {
+    background: var(--accent);
+    color: var(--accent-foreground);
+  }
+
+  /* Photographs, not UI: never let a frame stretch. */
+  img,
+  video {
+    @apply max-w-full;
+  }
+}
+
+/* Reduced motion means fewer and gentler animations, not none.
+ *
+ * Deliberately NOT a blanket `animation: none !important` reset. Two things
+ * on this site handle the preference better than a global override could —
+ * the corridor freezes itself mid-flight as a finished still (a zeroed
+ * duration would instead stack every card at the exit), and `Reveal` shows
+ * its frame immediately rather than wiping it in. Colour and opacity
+ * transitions stay, because they carry meaning rather than movement.
+ *
+ * Anything that moves and does not handle this itself opts in at the call
+ * site with Tailwind's `motion-reduce:` variant. */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto !important;
+  }
+}
+
+/**
+ * The masthead. One utility rather than a size, a leading, and a tracking
+ * repeated at every call site — so retuning the display face is one edit.
+ */
+@utility display {
+  font-family: var(--font-display);
+  font-size: var(--text-display);
+  line-height: 0.92;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+/** Page and project titles. Same face, one step down. */
+@utility title {
+  font-family: var(--font-display);
+  font-size: var(--text-title);
+  line-height: 1;
+  letter-spacing: 0.005em;
+  text-transform: uppercase;
+}
+
+/**
+ * The scroll reveal used by `<Reveal>`. Lives in CSS rather than in the
+ * component so the two cases it has to survive are handled declaratively:
+ *
+ *   - reduced motion: the frame still appears, it just does not wipe.
+ *   - no scripting: the observer never runs, so without this the frames would
+ *     stay clipped to nothing and the site would look empty. `scripting: none`
+ *     unclips them, which also covers text-only crawlers.
+ */
+@utility reveal {
+  clip-path: inset(0 0 100% 0);
+  transform: translateY(0.5rem);
+  transition:
+    clip-path 900ms var(--ease-out-strong),
+    transform 900ms var(--ease-out-strong);
+  will-change: clip-path;
+
+  &[data-shown] {
+    clip-path: inset(0 0 0 0);
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal {
+    transition: none;
+  }
+}
+
+@media (scripting: none) {
+  .reveal {
+    clip-path: none;
+    transform: none;
+  }
+}
+
+@utility label {
+  font-size: var(--text-label);
+  line-height: var(--text-label--line-height);
+  letter-spacing: var(--text-label--letter-spacing);
+  text-transform: uppercase;
+}
