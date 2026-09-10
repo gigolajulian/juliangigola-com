@@ -38,6 +38,15 @@ const pageRedirects = [
 ];
 
 const nextConfig: NextConfig = {
+  // Hides the floating dev badge that sits over the bottom-left corner of
+  // every page while `next dev` is running. It never shipped to production,
+  // but it lands exactly where the masthead and the numbered index are, which
+  // makes it impossible to judge the cover honestly.
+  //
+  // Compile and runtime errors are still surfaced — this only removes the
+  // idle indicator, not the error overlay.
+  devIndicators: false,
+
   async redirects() {
     // Project slugs win over category slugs where a name is used for both.
     const seen = new Set<string>();
