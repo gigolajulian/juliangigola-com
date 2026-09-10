@@ -1,0 +1,67 @@
+{
+  "responseTime": "within 24 hours",
+  "bookingUrl": null,
+  "coverSlug": "wired-magazine",
+  "featured": [
+    "wired-magazine",
+    "oakley-x-nike",
+    "luxe-meets-future",
+    "dystopia",
+    "ukiyosunknown",
+    "sago"
+  ],
+  "testimonials": [],
+  "sessions": [
+    {
+      "slug": "graduation",
+      "name": "Graduation",
+      "blurb": "Cap and gown, on campus or in studio. Enough coverage for the family frame and the announcement.",
+      "from": null,
+      "includes": [
+        "1 hour on location",
+        "Two outfit changes",
+        "Edited gallery",
+        "Print release"
+      ],
+      "turnaround": "1 week"
+    },
+    {
+      "slug": "headshots",
+      "name": "Headshots",
+      "blurb": "Clean, current, and usable everywhere — LinkedIn, press, casting, a company about page.",
+      "from": null,
+      "includes": [
+        "Studio lighting",
+        "Multiple backgrounds",
+        "Retouched selects",
+        "Crops for web and print"
+      ],
+      "turnaround": "3 days"
+    },
+    {
+      "slug": "studio-digitals",
+      "name": "Studio digitals",
+      "blurb": "Agency-standard digitals: clean light, no retouching, accurate to how you actually look.",
+      "from": null,
+      "includes": [
+        "Full length, three-quarter, and close",
+        "Front and profile",
+        "Unretouched, as agencies require"
+      ],
+      "turnaround": "48 hours"
+    },
+    {
+      "slug": "weddings",
+      "name": "Weddings",
+      "blurb": "Coverage that reads as editorial rather than as a wedding album. Limited dates each year.",
+      "from": null,
+      "includes": [
+        "Full-day coverage",
+        "Second shooter available",
+        "Edited gallery",
+        "Print release"
+      ],
+      "turnaround": "4 weeks"
+    }
+  ]
+}

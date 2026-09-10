@@ -10,6 +10,7 @@
 import { PROJECTS as HARVESTED, CATEGORIES } from "./work-data";
 import type { Project, Category, Frame } from "./work-types";
 import { COVER_RELEASES } from "./cover-art-data";
+import { CONTENT } from "./content";
 
 export type { Project, Category, Frame };
 export { CATEGORIES, COVER_RELEASES };
@@ -171,20 +172,16 @@ export const coverOf = (p: Project): Frame => p.cover;
 
 /**
  * Homepage order. Named explicitly rather than derived, because "what leads"
- * is the most editorial decision on the site and it should be one obvious
- * line to change.
+ * is the most editorial decision on the site — which is also why it is in
+ * `content/site.json` and editable in `/admin` rather than in this file.
  *
  * WIRED first: it is the strongest credential, and the thing a new visitor
  * should see before anything else.
+ *
+ * A slug that does not match a project is dropped rather than rendered as a
+ * hole, so a typo in the editor costs a card and not the section.
  */
-export const FEATURED_SLUGS = [
-  "wired-magazine",
-  "oakley-x-nike",
-  "luxe-meets-future",
-  "dystopia",
-  "ukiyosunknown",
-  "sago",
-] as const;
+export const FEATURED_SLUGS: string[] = CONTENT.featured;
 
 export const FEATURED: Project[] = FEATURED_SLUGS.map((s) => bySlug.get(s)).filter(
   (p): p is Project => Boolean(p),
@@ -217,7 +214,7 @@ export const PRESS = [
  * The full-size frame, not the small cover derivative — this one runs the
  * full height of the page on a large display.
  */
-export const COVER_SLUG = "wired-magazine";
+export const COVER_SLUG: string = CONTENT.coverSlug;
 
 export const HERO: { project: Project; frame: Frame } | null = (() => {
   const project = bySlug.get(COVER_SLUG) ?? FEATURED[0] ?? COMMISSIONS[0];

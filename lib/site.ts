@@ -4,7 +4,13 @@
  * Everything here is a statement to the world made on Julian's behalf, or an
  * integration point waiting on a URL. Keeping them in one file means none of
  * it is buried in a component where it can quietly go out of date.
+ *
+ * The values come from `content/site.json` so the admin editor can change
+ * them; the exports stay, because the point of this file is that there is one
+ * name for each claim.
  */
+
+import { CONTENT } from "./content";
 
 /**
  * The reply-time promise shown beside the contact form.
@@ -14,7 +20,7 @@
  * something you will actually hit, and set it to `null` rather than let it
  * become untrue.
  */
-export const RESPONSE_TIME: string | null = "within 24 hours";
+export const RESPONSE_TIME: string | null = CONTENT.responseTime;
 
 /**
  * Direct booking link — a Google Calendar appointment schedule.
@@ -27,4 +33,4 @@ export const RESPONSE_TIME: string | null = "within 24 hours";
  * Use the public booking-page URL, the one that looks like
  * `https://calendar.app.google/…`, not a share or edit link.
  */
-export const BOOKING_URL: string | null = null;
+export const BOOKING_URL: string | null = CONTENT.bookingUrl;

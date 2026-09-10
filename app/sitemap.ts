@@ -13,6 +13,8 @@ export const dynamic = "force-static";
  * sitemap is how the older projects quietly stop being findable.
  */
 export default function sitemap(): MetadataRoute.Sitemap {
+  // Listed explicitly, so /admin cannot drift into the sitemap by being a
+  // route — it is unlisted on purpose.
   const pages = ["", "/work", "/sessions", "/studio", "/contact"].map((path) => ({
     url: `${SITE}${path}`,
     changeFrequency: "monthly" as const,
