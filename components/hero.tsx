@@ -23,10 +23,10 @@ import type { Discipline, Frame, Project } from "@/lib/work";
  *     it names a discipline and shows work from it — rather than a slideshow
  *     of pictures for their own sake.
  *   - Nothing moves. The change is a crossfade, no sliding, no zooming.
- *   - It is a control, not a decoration. The four disciplines are a real
- *     index: hovering one previews it, clicking one goes to that work. The
- *     cycle is what happens while nobody is using it, and it stops for good
- *     the moment somebody does.
+ *   - It is a control, not a decoration. The disciplines are a real index:
+ *     hovering one previews it, clicking one goes to that work. The cycle is
+ *     what happens while nobody is using it — it yields the moment somebody
+ *     does, and takes the cover back three seconds after the mouse stops.
  *   - It respects `prefers-reduced-motion` by not cycling at all.
  *
  * Nothing is cropped. The frames run 0.71 to 0.80 in aspect and the column
@@ -42,6 +42,9 @@ import type { Discipline, Frame, Project } from "@/lib/work";
 
 /** Long enough to read the word and take in the picture before it moves on. */
 const DWELL_MS = 3500;
+
+/** How still the mouse has to be before the cover goes back to cycling. */
+const IDLE_MS = 3000;
 
 /**
  * The opening frame. A title card, not a sixth discipline.
@@ -105,9 +108,23 @@ export function Hero({ disciplines }: { disciplines: Discipline[] }) {
   const [slide, setSlide] = React.useState({ active: 0, previous: -1 });
   const { active } = slide;
 
-  // Once someone points at the index themselves, the cycle has done its job
-  // and further movement would be fighting them for control.
-  const [taken, setTaken] = React.useState(false);
+  /** The cover itself — the surface whose pointer movement counts as use. */
+  const sectionRef = React.useRef<HTMLElement>(null);
+
+  /**
+   * Whether the visitor currently has the cover, rather than the cycle.
+   *
+   * Pointing at the index takes it — moving on its own while somebody is
+   * reading a row is fighting them for control. But this used to latch for
+   * the life of the page, so one stray hover killed the cover: land on
+   * COVER ART and the page simply stopped there, with four disciplines
+   * never shown again.
+   *
+   * So it expires instead. Three seconds without the mouse moving is the
+   * visitor having stopped, and the cycle picks up from wherever they left
+   * it — 05 wrapping round to 01 like any other step.
+   */
+  const [held, setHeld] = React.useState(false);
 
   /** Pure — no side effects in the updater, which React may call twice. */
   const go = React.useCallback(
@@ -117,7 +134,7 @@ export function Hero({ disciplines }: { disciplines: Discipline[] }) {
   );
 
   React.useEffect(() => {
-    if (taken || slides.length < 2) return;
+    if (held || slides.length < 2) return;
 
     // Nothing will advance, so the intro would be the whole cover: a picture
     // with no discipline named, no row current, and the running head below
@@ -139,10 +156,47 @@ export function Hero({ disciplines }: { disciplines: Discipline[] }) {
       DWELL_MS,
     );
     return () => window.clearInterval(id);
-  }, [taken, slides.length]);
+  }, [held, slides.length]);
+
+  /**
+   * Hands the cover back once the mouse has been still for `IDLE_MS`.
+   *
+   * The timer is re-armed by movement anywhere over the cover, not just over
+   * the index — someone reading the photograph with the pointer drifting
+   * across it is still using the page, and yanking the frame out from under
+   * them would be the same rudeness as moving while they read a row.
+   *
+   * Only mounted while held, so the listener does not exist at all in the
+   * common case of nobody having touched anything.
+   */
+  React.useEffect(() => {
+    if (!held) return;
+
+    let id = 0;
+    const rearm = () => {
+      window.clearTimeout(id);
+      id = window.setTimeout(() => {
+        // A keyboard visitor holds a row without ever moving a mouse, so "the
+        // mouse stopped" is not evidence they are done. Resuming under them
+        // would walk the cover forward while they tab it.
+        if (sectionRef.current?.contains(document.activeElement)) return rearm();
+        setHeld(false);
+      }, IDLE_MS);
+    };
+
+    rearm();
+    // On the section rather than the window: movement down in the footer is
+    // not somebody using a cover that is long since off screen.
+    const section = sectionRef.current;
+    section?.addEventListener("pointermove", rearm, { passive: true });
+    return () => {
+      window.clearTimeout(id);
+      section?.removeEventListener("pointermove", rearm);
+    };
+  }, [held]);
 
   const take = (i: number) => {
-    setTaken(true);
+    setHeld(true);
     go(i);
   };
 
@@ -158,7 +212,7 @@ export function Hero({ disciplines }: { disciplines: Discipline[] }) {
   if (!current) return null;
 
   return (
-    <section className="border-b border-border">
+    <section ref={sectionRef} className="border-b border-border">
       <div className="grid lg:h-dvh lg:grid-cols-[1fr_auto]">
         {/* The photograph leads on a phone — it is the hook — but it is held
             to half the screen so the name and both ways in stay visible
