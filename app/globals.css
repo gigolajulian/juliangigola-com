@@ -13,17 +13,22 @@
 @custom-variant hoverable (@media (hover: hover) and (pointer: fine));
 
 /* ── the ground ───────────────────────────────────────────────────
- * One theme, dark, no toggle.
+ * Dark, with light available and never assumed.
  *
  * This is a gallery. The work is high-contrast and mostly low-key, and it
  * glows against near-black the way prints do on a dark wall — on the old
- * site's light grey it went muddy. A theme toggle would mean two sets of
- * decisions about how photographs sit on a page, and only one of them can be
- * the right one.
+ * site's light grey it went muddy. So dark is the site, and it is what a
+ * visitor gets with no preference expressed, including one whose system is
+ * set to light.
  *
- * The palette is deliberately almost neutral: a trace of warmth (hue 70) at
- * very low chroma, so the ground reads as ink rather than as a colour, and
- * nothing competes with what is in the frames.
+ * The light palette further down is opt-in only, reached by the toggle in the
+ * bar. It is not an inversion: photographs are mounted on a warm off-white,
+ * because paper white beside a photograph reads as a blown highlight and
+ * makes every frame look underexposed.
+ *
+ * Both palettes are deliberately almost neutral: a trace of warmth (hue 70)
+ * at very low chroma, so the ground reads as ink or as paper rather than as a
+ * colour, and nothing competes with what is in the frames.
  * ─────────────────────────────────────────────────────────────── */
 
 @theme inline {

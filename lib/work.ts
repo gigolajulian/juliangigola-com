@@ -11,7 +11,13 @@ import { PROJECTS as HARVESTED, CATEGORIES } from "./work-data";
 import type { Project, Category, Frame } from "./work-types";
 import { COVER_RELEASES } from "./cover-art-data";
 import { CONTENT } from "./content";
-import { ADDED, HIDDEN, RECATEGORISED, type AddedProject } from "./added";
+import {
+  ADDED,
+  HIDDEN,
+  RECATEGORISED,
+  REFRAMED,
+  type AddedProject,
+} from "./added";
 
 export type { Project, Category, Frame };
 export { CATEGORIES, COVER_RELEASES };
@@ -157,12 +163,56 @@ const refile = (project: Project): Project => {
   return { ...project, categories: [category] };
 };
 
+/**
+ * Re-sequences a gallery that `/admin` has reordered, trimmed or added to.
+ *
+ * Applied last, after the merge and after the lead-frame and cover-art
+ * substitutions, because it is the most specific decision available: somebody
+ * looked at this gallery and said what it should be.
+ *
+ * Most entries are bare paths, and the frame they name is looked up in the
+ * archive so its dimensions and mat colour stay whatever the last harvest
+ * made them. A path that is no longer there is dropped rather than throwing —
+ * a re-harvest can renumber a gallery, and a stale entry should cost a frame
+ * and not the build. If that leaves nothing at all the override is ignored
+ * entirely, because a project rendering as a title over nothing is worse than
+ * one rendering in its original order.
+ *
+ * A whole `Frame` is a photograph added through the editor: it exists nowhere
+ * else, so its own numbers are the only ones there are.
+ */
+const reframe = (project: Project): Project => {
+  const wanted = REFRAMED[project.slug];
+  if (!wanted?.length) return project;
+
+  const archive = new Map(project.images.map((f) => [f.src, f]));
+  const images = wanted
+    .map((f) =>
+      typeof f === "string"
+        ? (archive.get(f) ?? null)
+        : (archive.get(f.src) ?? f),
+    )
+    .filter((f): f is Frame => f !== null);
+
+  if (!images.length) return project;
+
+  return {
+    ...project,
+    images,
+    // The cover is the opener — `coverOf` is built on that — so a gallery that
+    // now opens on a different photograph gets a card showing it. The full
+    // frame rather than the 600px derivative, because the derivative was cut
+    // from the frame that used to lead and still shows it.
+    cover: images[0].src === project.images[0]?.src ? project.cover : images[0],
+  };
+};
+
 export const ALL_PROJECTS: Project[] = [
   ...ADDED.map(fromAdded),
   ...HARVESTED.map((p) =>
     p.slug === "coverart" ? withCoverArt(p) : withLeadFrame(p),
   ),
-].map(refile);
+].map((p) => reframe(refile(p)));
 
 /**
  * Filtered here, at the one place every consumer reads from, rather than at

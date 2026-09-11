@@ -12,9 +12,10 @@ import { AdminSitemap } from "@/components/admin-sitemap";
 import { AdminPreview } from "@/components/admin-preview";
 import { AdminFeatured } from "@/components/admin-featured";
 import { AdminTrash } from "@/components/admin-trash";
-import type { TrashedProject } from "@/lib/added";
+import type { FrameRef, TrashedProject } from "@/lib/added";
 import { ADDED_PATH } from "@/lib/added";
-import { commitFiles, readFile } from "@/lib/admin-github";
+import type { PendingUpload } from "@/components/admin-frames";
+import { commitFiles, readFile, type CommitFile } from "@/lib/admin-github";
 import { cn } from "@/lib/utils";
 
 /* ── the editor ───────────────────────────────────────────────────
@@ -79,6 +80,7 @@ export function AdminEditor({
   categoryLinks,
   initialTrash,
   initialRecategorised,
+  initialReframed,
 }: {
   /** The content as it was at build time — what the live site is serving. */
   initial: SiteContent;
@@ -96,6 +98,8 @@ export function AdminEditor({
   initialTrash: TrashedProject[];
   /** Refilings the last build applied, slug → category slug. */
   initialRecategorised: Record<string, string>;
+  /** Re-sequenced galleries the last build applied, slug → frames. */
+  initialReframed: Record<string, FrameRef[]>;
 }) {
   const [token, setToken] = React.useState("");
   const [draft, setDraft] = React.useState<SiteContent>(initial);
@@ -110,6 +114,19 @@ export function AdminEditor({
   const [trash, setTrash] = React.useState<TrashedProject[]>(initialTrash);
   const [recategorised, setRecategorised] =
     React.useState<Record<string, string>>(initialRecategorised);
+  const [reframed, setReframed] =
+    React.useState<Record<string, FrameRef[]>>(initialReframed);
+  /**
+   * Photographs added to a gallery, processed and waiting, by repo path.
+   *
+   * Held rather than committed, so they land in the same commit as the
+   * sequence that refers to them. Two commits would mean a build in between
+   * with a manifest naming files the repo does not have — a project rendering
+   * holes — and an abandoned draft would leave the files behind for good.
+   */
+  const [uploads, setUploads] = React.useState<Record<string, PendingUpload>>(
+    {},
+  );
 
   /**
    * Whether anything is unpublished.
@@ -121,7 +138,8 @@ export function AdminEditor({
   const dirty =
     JSON.stringify(draft) !== JSON.stringify(initial) ||
     [...hidden].sort().join() !== [...initialHidden].sort().join() ||
-    JSON.stringify(recategorised) !== JSON.stringify(initialRecategorised);
+    JSON.stringify(recategorised) !== JSON.stringify(initialRecategorised) ||
+    JSON.stringify(reframed) !== JSON.stringify(initialReframed);
 
   /**
    * Where "Open live" points. Read after mount, because the server has no
@@ -232,7 +250,7 @@ export function AdminEditor({
         return;
       }
 
-      const files = [
+      const files: CommitFile[] = [
         {
           path: CONTENT_PATH,
           content: `${JSON.stringify(draft, null, 2)}\n`,
@@ -240,11 +258,13 @@ export function AdminEditor({
         },
       ];
 
-      const hiddenMoved =
+      const manifestMoved =
         [...hidden].sort().join() !== [...initialHidden].sort().join() ||
-        JSON.stringify(recategorised) !== JSON.stringify(initialRecategorised);
+        JSON.stringify(recategorised) !==
+          JSON.stringify(initialRecategorised) ||
+        JSON.stringify(reframed) !== JSON.stringify(initialReframed);
 
-      if (hiddenMoved) {
+      if (manifestMoved) {
         setStatus({ kind: "working", message: "Reading the project list…" });
         // Read fresh: a project may have been added or deleted since this page
         // loaded, and writing back a stale list would undo it.
@@ -254,10 +274,12 @@ export function AdminEditor({
               projects: unknown[];
               hidden?: string[];
               categories?: Record<string, string>;
+              frames?: Record<string, FrameRef[]>;
             })
-          : { projects: [], hidden: [], categories: {} };
+          : { projects: [], hidden: [], categories: {}, frames: {} };
         parsed.hidden = [...hidden].sort();
         parsed.categories = recategorised;
+        parsed.frames = reframed;
         files.push({
           path: ADDED_PATH,
           content: `${JSON.stringify(parsed, null, 2)}\n`,
@@ -265,13 +287,31 @@ export function AdminEditor({
         });
       }
 
+      // The photographs the sequences refer to, in the same commit as the
+      // sequences. Only the ones still in a gallery: staging a frame and then
+      // taking it out again should not leave the file in the repository.
+      const referenced = new Set(
+        Object.values(reframed)
+          .flat()
+          .map((f) => `public${typeof f === "string" ? f : f.src}`),
+      );
+      for (const [path, upload] of Object.entries(uploads)) {
+        if (!referenced.has(path)) continue;
+        files.push({ path, content: upload.base64, encoding: "base64" });
+      }
+
       setStatus({ kind: "working", message: "Committing…" });
       await commitFiles({
         token,
-        message: hiddenMoved
-          ? "Update site content and visibility from /admin"
+        message: manifestMoved
+          ? "Update site content and projects from /admin"
           : "Update site content from /admin",
         files,
+        onProgress: (done, total) =>
+          setStatus({
+            kind: "working",
+            message: `Uploading ${done} of ${total}`,
+          }),
       });
 
       // Re-read so a second publish in the same session compares against what
@@ -401,6 +441,24 @@ export function AdminEditor({
               recategorised={recategorised}
               onRecategorise={(slug, categorySlug) =>
                 setRecategorised((r) => ({ ...r, [slug]: categorySlug }))
+              }
+              reframed={reframed}
+              onReframe={(slug, frames) =>
+                setReframed((r) => {
+                  const next = { ...r };
+                  // Dropped rather than stored as null, so a gallery put back
+                  // the way it was leaves no entry behind to publish.
+                  if (frames) next[slug] = frames;
+                  else delete next[slug];
+                  return next;
+                })
+              }
+              uploads={uploads}
+              onUpload={(added) =>
+                setUploads((u) => ({
+                  ...u,
+                  ...Object.fromEntries(added.map((a) => [a.path, a])),
+                }))
               }
             />
             <AdminTrash token={token} trash={trash} onChanged={setTrash} />

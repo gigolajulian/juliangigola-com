@@ -87,6 +87,19 @@ const frame = (v: unknown, path: string): Frame => {
   };
 };
 
+/**
+ * A frame in a re-sequenced gallery: a path, or a whole frame.
+ *
+ * The path form is the common one by far — reordering a harvested gallery
+ * names frames that are already in `lib/work-data.ts`, and copying their
+ * dimensions here would be duplicating numbers that the next harvest can
+ * change. See `frames` on `AddedFile`.
+ */
+export type FrameRef = string | Frame;
+
+const frameRef = (v: unknown, path: string): FrameRef =>
+  typeof v === "string" ? src(v, path) : frame(v, path);
+
 const credit = (v: unknown, path: string): Credit => {
   if (!isRecord(v)) return fail(path, "an object", v);
   return {
@@ -160,6 +173,21 @@ export type AddedFile = {
    * `lib/work.ts` after both sources are merged.
    */
   categories: Record<string, string>;
+  /**
+   * Projects whose gallery has been re-sequenced by hand.
+   *
+   * A map for the same reason `categories` is one: it has to work for the 74
+   * harvested projects, whose frames live in the generated manifest. The value
+   * is the whole gallery in order — what is absent from it is not shown, which
+   * is how a frame is removed, and an entry not in the archive is a photograph
+   * added here.
+   *
+   * An entry is a bare path where the frame already exists — its dimensions
+   * and mat colour are read from the archive, so a re-harvest at a new
+   * resolution cannot leave a stale width behind — and a whole `Frame` only
+   * for a photograph added here, which exists nowhere else to be read from.
+   */
+  frames: Record<string, FrameRef[]>;
   /**
    * Slugs to leave off the site.
    *
@@ -237,10 +265,25 @@ function parse(v: unknown): AddedFile {
     categories[slug] = str(category, `categories["${slug}"]`);
   }
 
+  const rawFrames = v.frames === undefined ? {} : v.frames;
+  if (!isRecord(rawFrames)) return fail("frames", "an object", rawFrames);
+  const frames: Record<string, FrameRef[]> = {};
+  for (const [slug, list] of Object.entries(rawFrames)) {
+    if (!Array.isArray(list))
+      return fail(`frames["${slug}"]`, "an array", list);
+    // An empty override would publish a project as a title over nothing, and
+    // it is indistinguishable from "I removed every frame and meant it" — so
+    // it fails here rather than on the page.
+    if (!list.length)
+      return fail(`frames["${slug}"]`, "at least one frame", list);
+    frames[slug] = list.map((f, i) => frameRef(f, `frames["${slug}"][${i}]`));
+  }
+
   return {
     projects,
     trash,
     categories,
+    frames,
     hidden: hidden.map((s, i) => str(s, `hidden[${i}]`)),
   };
 }
@@ -250,6 +293,7 @@ const FILE = parse(raw);
 export const ADDED: AddedProject[] = FILE.projects;
 export const TRASH: TrashedProject[] = FILE.trash;
 export const RECATEGORISED: Readonly<Record<string, string>> = FILE.categories;
+export const REFRAMED: Readonly<Record<string, FrameRef[]>> = FILE.frames;
 export const HIDDEN: ReadonlySet<string> = new Set(FILE.hidden);
 
 /** Where the editor writes. Shown in the editor so it is not a mystery. */

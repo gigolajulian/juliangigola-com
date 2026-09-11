@@ -8,6 +8,8 @@ import {
   type TrashedProject,
 } from "@/lib/added";
 import { commitFiles, readFile } from "@/lib/admin-github";
+import { AdminFrames, type PendingUpload } from "@/components/admin-frames";
+import type { FrameRef } from "@/lib/added";
 import { cn } from "@/lib/utils";
 
 /* ── the project list ─────────────────────────────────────────────
@@ -35,7 +37,15 @@ export type AdminProject = {
   category: string;
   /** Its discipline's slug, for the refiling dropdown. */
   categorySlug: string;
-  frames: number;
+  /**
+   * Every frame in the gallery, in order — paths only.
+   *
+   * Paths and not whole frames: 1,152 of these ship with the page, and the
+   * dimensions and mat colour would triple that to render thumbnails in a
+   * fixed box that needs neither. `lib/work.ts` reads the real numbers back
+   * out of the archive when the sequence is applied.
+   */
+  images: string[];
   cover: { src: string; width: number; height: number; color: string };
   /** Added through this editor, so its files are ours to remove. */
   added: boolean;
@@ -56,6 +66,10 @@ export function AdminProjects({
   disciplines,
   recategorised,
   onRecategorise,
+  reframed,
+  onReframe,
+  uploads,
+  onUpload,
 }: {
   token: string;
   projects: AdminProject[];
@@ -69,11 +83,25 @@ export function AdminProjects({
   /** Draft refilings, slug → category slug. */
   recategorised: Record<string, string>;
   onRecategorise: (slug: string, categorySlug: string) => void;
+  /** Draft galleries, slug → sequence. Absent while it is the original. */
+  reframed: Record<string, FrameRef[]>;
+  onReframe: (slug: string, frames: FrameRef[] | null) => void;
+  /** Photographs staged for this publish, by repo path. */
+  uploads: Record<string, PendingUpload>;
+  onUpload: (added: PendingUpload[]) => void;
 }) {
   const [query, setQuery] = React.useState("");
   const [status, setStatus] = React.useState<Status>({ kind: "idle" });
   const [confirming, setConfirming] = React.useState<string | null>(null);
   const [gone, setGone] = React.useState<Set<string>>(new Set());
+  /**
+   * Which row is expanded, if any.
+   *
+   * One at a time. Each open gallery is up to thirty full-size frames on a
+   * host that is not resizing them yet, and a list where every row is open is
+   * the whole archive at once.
+   */
+  const [opened, setOpened] = React.useState<string | null>(null);
 
   const visible = projects.filter(
     (p) =>
@@ -203,94 +231,127 @@ export function AdminProjects({
       <ul className="mt-6 border-t border-border">
         {visible.map((p) => {
           const isHidden = hidden.has(p.slug);
+          const isOpen = opened === p.slug;
+          const frames = reframed[p.slug] ?? null;
           return (
-            <li
-              key={p.slug}
-              className={cn(
-                "flex items-center gap-4 border-b border-border py-3",
-                isHidden && "opacity-45",
-              )}
-            >
-              <span
-                className="relative block h-14 w-11 shrink-0 overflow-hidden"
-                style={{ backgroundColor: p.cover.color }}
+            <li key={p.slug} className="border-b border-border">
+              <div
+                className={cn(
+                  "flex items-center gap-4 py-3",
+                  isHidden && "opacity-45",
+                )}
               >
-                <Image
-                  src={p.cover.src}
-                  alt=""
-                  fill
-                  sizes="44px"
-                  className="object-cover"
-                  // Dozens of rows; none of them worth blocking the page.
-                  loading="lazy"
+                <span
+                  className="relative block h-14 w-11 shrink-0 overflow-hidden"
+                  style={{ backgroundColor: p.cover.color }}
+                >
+                  <Image
+                    src={p.cover.src}
+                    alt=""
+                    fill
+                    sizes="44px"
+                    className="object-cover"
+                    // Dozens of rows; none of them worth blocking the page.
+                    loading="lazy"
+                  />
+                </span>
+
+                <span className="min-w-0 flex-1">
+                  <span className="block truncate text-sm text-foreground">
+                    {p.name}
+                  </span>
+                  <span className="label block truncate text-muted-foreground">
+                    {p.category} · {(frames ?? p.images).length} frames · /
+                    {p.slug}
+                    {frames ? " · edited" : ""}
+                    {isHidden ? " · hidden" : ""}
+                  </span>
+                </span>
+
+                <span className="flex shrink-0 items-center gap-2">
+                  {/* Refiling works on migrated projects too, which is why it
+                      is an override map rather than a field: their categories
+                      come from the generated manifest, where an edit would last
+                      until the next harvest and no longer. */}
+                  <select
+                    value={recategorised[p.slug] ?? p.categorySlug}
+                    onChange={(e) => onRecategorise(p.slug, e.target.value)}
+                    aria-label={`Discipline for ${p.name}`}
+                    className="label max-w-[9rem] border border-border bg-transparent px-2 py-2 text-muted-foreground outline-none focus-visible:border-foreground"
+                  >
+                    {disciplines.map((d) => (
+                      <option key={d.slug} value={d.slug}>
+                        {d.name}
+                      </option>
+                    ))}
+                  </select>
+
+                  <button
+                    type="button"
+                    onClick={() => setOpened(isOpen ? null : p.slug)}
+                    aria-expanded={isOpen}
+                    className={cn(
+                      "label border px-3 py-2 press",
+                      isOpen
+                        ? "border-foreground"
+                        : "border-border hoverable:hover:bg-card",
+                    )}
+                  >
+                    Photos
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => toggleHidden(p.slug)}
+                    className="label border border-border px-3 py-2 press hoverable:hover:bg-card"
+                  >
+                    {isHidden ? "Show" : "Hide"}
+                  </button>
+
+                  {p.added ? (
+                    confirming === p.slug ? (
+                      <>
+                        <button
+                          type="button"
+                          onClick={() => void remove(p.slug)}
+                          className="label border border-destructive px-3 py-2 text-destructive press"
+                        >
+                          Really delete
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setConfirming(null)}
+                          className="label border border-border px-3 py-2 press hoverable:hover:bg-card"
+                        >
+                          Cancel
+                        </button>
+                      </>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => setConfirming(p.slug)}
+                        className="label border border-border px-3 py-2 text-muted-foreground press hoverable:hover:text-destructive"
+                      >
+                        Remove
+                      </button>
+                    )
+                  ) : null}
+                </span>
+              </div>
+
+              {/* Mounted only while open, so closing a gallery drops thirty
+                  decoded photographs rather than keeping them all in memory
+                  as the list is worked through. */}
+              {isOpen ? (
+                <AdminFrames
+                  slug={p.slug}
+                  original={p.images}
+                  frames={frames}
+                  uploads={uploads}
+                  onChange={(next) => onReframe(p.slug, next)}
+                  onUpload={onUpload}
                 />
-              </span>
-
-              <span className="min-w-0 flex-1">
-                <span className="block truncate text-sm text-foreground">
-                  {p.name}
-                </span>
-                <span className="label block truncate text-muted-foreground">
-                  {p.category} · {p.frames} frames · /{p.slug}
-                  {isHidden ? " · hidden" : ""}
-                </span>
-              </span>
-
-              <span className="flex shrink-0 items-center gap-2">
-                {/* Refiling works on migrated projects too, which is why it
-                    is an override map rather than a field: their categories
-                    come from the generated manifest, where an edit would last
-                    until the next harvest and no longer. */}
-                <select
-                  value={recategorised[p.slug] ?? p.categorySlug}
-                  onChange={(e) => onRecategorise(p.slug, e.target.value)}
-                  aria-label={`Discipline for ${p.name}`}
-                  className="label max-w-[9rem] border border-border bg-transparent px-2 py-2 text-muted-foreground outline-none focus-visible:border-foreground"
-                >
-                  {disciplines.map((d) => (
-                    <option key={d.slug} value={d.slug}>
-                      {d.name}
-                    </option>
-                  ))}
-                </select>
-
-                <button
-                  type="button"
-                  onClick={() => toggleHidden(p.slug)}
-                  className="label border border-border px-3 py-2 press hoverable:hover:bg-card"
-                >
-                  {isHidden ? "Show" : "Hide"}
-                </button>
-
-                {p.added ? (
-                  confirming === p.slug ? (
-                    <>
-                      <button
-                        type="button"
-                        onClick={() => void remove(p.slug)}
-                        className="label border border-destructive px-3 py-2 text-destructive press"
-                      >
-                        Really delete
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setConfirming(null)}
-                        className="label border border-border px-3 py-2 press hoverable:hover:bg-card"
-                      >
-                        Cancel
-                      </button>
-                    </>
-                  ) : (
-                    <button
-                      type="button"
-                      onClick={() => setConfirming(p.slug)}
-                      className="label border border-border px-3 py-2 text-muted-foreground press hoverable:hover:text-destructive"
-                    >
-                      Remove
-                    </button>
-                  )
-                ) : null}
-              </span>
+              ) : null}
             </li>
           );
         })}

@@ -9,7 +9,7 @@ import {
   categoryLabel,
   categoryHref,
 } from "@/lib/work";
-import { ADDED, TRASH, RECATEGORISED } from "@/lib/added";
+import { ADDED, TRASH, RECATEGORISED, REFRAMED } from "@/lib/added";
 
 /* ── admin ────────────────────────────────────────────────────────
  * Unlisted, not secret. Nothing in the nav points here and no crawler is
@@ -59,15 +59,17 @@ export default function AdminPage() {
             name: categoryLabel(c),
           }),
         )}
-        /* Trimmed deliberately. The editor needs a cover, a name and a count
-           per project — not every frame of all 74, which would serialise the
-           whole archive into this page's payload to render a list of rows. */
+        /* Frames as paths, and nothing else about them. The sequence editor
+           needs to show every frame of whichever gallery is opened, so the
+           paths have to travel — but their dimensions and mat colours do not,
+           since the thumbnails sit in a fixed box and `lib/work.ts` reads the
+           real numbers back out of the archive when a sequence is applied. */
         projects={ALL_PROJECTS.map((p) => ({
           slug: p.slug,
           name: p.name,
           category: p.categories[0]?.name ?? "Unfiled",
           categorySlug: p.categories[0]?.slug ?? "",
-          frames: p.images.length,
+          images: p.images.map((f) => f.src),
           cover: {
             src: p.cover.src,
             width: p.cover.width,
@@ -80,6 +82,7 @@ export default function AdminPage() {
         initialHidden={[...HIDDEN]}
         initialTrash={TRASH}
         initialRecategorised={RECATEGORISED}
+        initialReframed={REFRAMED}
         categoryLinks={CATEGORIES.filter((c) => c.section !== "SESSIONS").map(
           (c) => ({
             slug: c.slug,
