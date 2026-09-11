@@ -46,8 +46,51 @@ const withCoverArt = (project: Project): Project => {
   };
 };
 
+/** The width `scripts/harvest.mjs` cuts every cover derivative to. */
+const COVER_WIDTH = 600;
+
+/**
+ * Projects whose opener is not the frame the archive happens to lead with.
+ *
+ * The archive's order is the old site's order, and in a few places the frame
+ * that should introduce a project is not the one sitting first in it. Naming
+ * the frame here moves it to the front of the gallery *and* makes it the
+ * cover, because those are the same decision — `coverOf` exists on the
+ * premise that the cover is the opener, and a project whose card shows one
+ * photograph and whose page opens on another reads as a mistake.
+ *
+ * The derivative lives in `public/hero/` rather than beside the frame it came
+ * from. `harvest.mjs` owns `public/work/` and rebuilds `cover.jpg` from
+ * whatever is first in the archive whenever it is missing — so a cover put
+ * there would survive today and quietly revert to the wrong photograph on the
+ * next clean harvest.
+ */
+const LEAD_FRAMES: Record<string, string> = {
+  // Julian's pick: the second frame, not the first.
+  "luxe-meets-future": "/work/luxe-meets-future/02.jpg",
+};
+
+const withLeadFrame = (project: Project): Project => {
+  const wanted = LEAD_FRAMES[project.slug];
+  const lead = wanted ? project.images.find((f) => f.src === wanted) : undefined;
+  // Silently unchanged if the named frame is gone, rather than throwing a
+  // build that is otherwise fine — a re-harvest can renumber a gallery.
+  if (!lead) return project;
+
+  return {
+    ...project,
+    images: [lead, ...project.images.filter((f) => f.src !== lead.src)],
+    cover: {
+      ...lead,
+      src: `/hero/${project.slug}.jpg`,
+      width: COVER_WIDTH,
+      height: Math.round((COVER_WIDTH / lead.width) * lead.height),
+    },
+  };
+};
+
 export const PROJECTS: Project[] = HARVESTED.map((p) =>
-  p.slug === "coverart" ? withCoverArt(p) : p,
+  p.slug === "coverart" ? withCoverArt(p) : withLeadFrame(p),
 );
 
 /**
