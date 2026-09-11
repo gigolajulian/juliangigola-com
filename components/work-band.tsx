@@ -111,7 +111,7 @@ export function WorkBand({
           src={project.cover.src}
           alt={project.cover.alt || project.name}
           fill
-          sizes="(min-width: 1024px) 50vw, 100vw"
+          sizes="(min-width: 1024px) 33vw, (min-width: 768px) 50vw, 100vw"
           priority={priority}
           className="object-cover"
         />
@@ -126,7 +126,7 @@ export function WorkBand({
             src={frame.src}
             alt=""
             fill
-            sizes="(min-width: 1024px) 50vw, 100vw"
+            sizes="(min-width: 1024px) 33vw, (min-width: 768px) 50vw, 100vw"
             className="object-cover"
           />
         ) : null}

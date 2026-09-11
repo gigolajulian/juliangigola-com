@@ -43,6 +43,9 @@ export function ThemeToggle({ className }: { className?: string }) {
    */
   const [theme, setTheme] = React.useState<Theme | null>(null);
 
+  /** A mask needs a document-unique id, and the header renders on the server. */
+  const moonId = `moon${React.useId().replace(/:/g, "")}`;
+
   React.useEffect(() => setTheme(read()), []);
 
   const toggle = () => {
@@ -115,18 +118,34 @@ export function ThemeToggle({ className }: { className?: string }) {
           ))}
         </g>
 
-        {/* Moon. A crescent cut from two arcs rather than a borrowed path:
-            the left half of a 9-radius circle, closed by the bulge of a
-            7-radius one. */}
-        <path
-          d="M 12 3 A 9 9 0 1 0 12 21 A 7 7 0 1 1 12 3 Z"
+        {/* Moon: a disc with a bite taken out of it.
+         *
+         * Drawn as a mask rather than as one clever arc. A crescent written
+         * as two arcs needs the second radius to be at least half the chord
+         * it spans, and when it is not, SVG silently scales the radius to fit
+         * rather than failing — which is how the first attempt here rendered
+         * as a 7px splinter instead of a moon, visible in the markup and
+         * correct in every computed style.
+         *
+         * Two circles cannot go wrong that way: the shape is the first minus
+         * the second, whatever the numbers.
+         */}
+        <mask id={moonId}>
+          <rect x="0" y="0" width="24" height="24" fill="#fff" />
+          <circle cx="16.5" cy="7.5" r="7.75" fill="#000" />
+        </mask>
+        <circle
+          cx="12"
+          cy="12"
+          r="8.5"
+          mask={`url(#${moonId})`}
           className={cn(
             "origin-center transition-[opacity,transform] duration-300 ease-[var(--ease-out-strong)]",
             "motion-reduce:transition-none",
             showMoon ? "rotate-0 opacity-100" : "rotate-90 opacity-0",
           )}
-          // The crescent is a filled shape, not a stroked outline — an
-          // outlined one at this size reads as a fingernail.
+          // Filled, not stroked — an outlined crescent at 18px reads as a
+          // fingernail.
           fill="currentColor"
           stroke="none"
         />

@@ -77,10 +77,19 @@ export default function Home() {
           </Link>
         </div>
 
-        <ul className="grid lg:grid-cols-2">
+        {/* Three across, so the six featured projects read as two rows of a
+            set rather than a column of three pairs — the question this
+            section answers is "is the whole body of work good", and that is
+            easier to answer when more of it is on screen at once.
+
+            Ramped rather than jumped: one on a phone, two from `md`, three
+            from `lg`. Going straight to three at `lg` puts a 341px cell on a
+            1024px laptop, which is a thumbnail, not a photograph. */}
+        <ul className="grid md:grid-cols-2 lg:grid-cols-3">
           {FEATURED.map((project, i) => (
             <li key={project.slug}>
-              <WorkBand project={project} index={i} priority={i < 2} />
+              {/* Three are above the fold now, not two. */}
+              <WorkBand project={project} index={i} priority={i < 3} />
             </li>
           ))}
         </ul>
@@ -141,7 +150,9 @@ function PathCard({
       <div>
         <p className="label text-muted-foreground">{label}</p>
         <h3 className="mt-5 title">{title}</h3>
-        <p className="mt-4 max-w-sm text-sm leading-relaxed text-muted-foreground">{body}</p>
+        <p className="mt-4 max-w-sm text-sm leading-relaxed text-muted-foreground">
+          {body}
+        </p>
       </div>
 
       <span className="label inline-flex items-center gap-2 text-foreground">

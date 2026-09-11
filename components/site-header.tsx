@@ -14,9 +14,15 @@ import { ThemeToggle } from "@/components/theme-toggle";
  * they could look at anything. The categories still exist — they just live
  * inside /work as filters, where they cost nothing to ignore.
  *
- * The bar never gets a solid background. It sits on a downward gradient
- * instead, so it reads over a cover and over a gallery alike without logic
- * deciding when to switch — one appearance, always correct.
+ * The bar has no ground of its own until the page moves. At rest it is type
+ * on the photograph, which is what a full-bleed cover is for; on the first
+ * few pixels of scroll a surface arrives under it — the ground at 72% behind
+ * a heavy blur, closed with a hairline — so it belongs to the page rather
+ * than floating over it, and the work still shows through.
+ *
+ * This replaced a permanent downward gradient: a black wash over the top of
+ * every page so that pale type would always land on something dark. It
+ * worked, and it looked like a fix.
  *
  * The one exception is the wordmark on the homepage. The cover already sets
  * his name as a masthead, so printing it again 40px above reads as a mistake.
@@ -60,6 +66,41 @@ export function SiteHeader() {
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [open]);
+
+  /**
+   * Whether the page has moved at all.
+   *
+   * The bar used to sit on a downward gradient — a black wash over the top
+   * of every page, permanently, so that white type would land on something
+   * dark whatever was underneath. It worked, and it looked like a fix.
+   *
+   * Nothing over the cover instead: at rest the chrome is only type on the
+   * photograph, which is what a full-bleed cover is for. The moment the page
+   * moves, a real surface arrives under it — the ground at 72% with a heavy
+   * blur behind it and a hairline along the bottom, so the bar belongs to the
+   * page rather than floating above it, and the work keeps showing through.
+   */
+  const [scrolled, setScrolled] = React.useState(false);
+
+  React.useEffect(() => {
+    let frame = 0;
+    const onScroll = () => {
+      if (frame) return;
+      frame = requestAnimationFrame(() => {
+        frame = 0;
+        // A few pixels, not a threshold: the surface should arrive as soon as
+        // anything has moved, not at some invisible line down the page.
+        setScrolled(window.scrollY > 8);
+      });
+    };
+
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      cancelAnimationFrame(frame);
+    };
+  }, []);
 
   // Only the homepage sets the name in the cover, so only the homepage has
   // anything to defer to.
@@ -205,14 +246,22 @@ export function SiteHeader() {
     pathname === href || pathname.startsWith(href + "/");
 
   return (
-    <header className="fixed inset-x-0 top-0 z-40">
-      {/* The gradient is the header's only ground. Pointer-events off so it
-          never eats a click meant for the image underneath it. */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0 bg-gradient-to-b from-background/95 via-background/60 to-transparent"
-      />
-
+    <header
+      className={cn(
+        "fixed inset-x-0 top-0 z-40",
+        // Border and background rather than a gradient, and both animate from
+        // nothing. `border-b` is always present and only its colour changes,
+        // so the rule fading in never moves the bar by a pixel.
+        "border-b transition-[background-color,border-color,backdrop-filter] duration-300",
+        "ease-[var(--ease-out-strong)] motion-reduce:transition-none",
+        scrolled
+          ? "border-border bg-background/72 backdrop-blur-xl"
+          : "border-transparent bg-transparent",
+        // The panel is its own full-screen surface; a blurred bar on top of
+        // it reads as a seam across the menu.
+        open && "border-transparent bg-transparent backdrop-blur-none",
+      )}
+    >
       <div className="relative mx-auto flex max-w-[100rem] items-center justify-between px-6 py-6 sm:px-10 sm:py-7">
         <Link
           ref={wordmarkRef}
