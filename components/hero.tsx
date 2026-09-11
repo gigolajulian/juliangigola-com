@@ -181,7 +181,8 @@ export function Hero({ disciplines }: { disciplines: Discipline[] }) {
         // A keyboard visitor holds a row without ever moving a mouse, so "the
         // mouse stopped" is not evidence they are done. Resuming under them
         // would walk the cover forward while they tab it.
-        if (sectionRef.current?.contains(document.activeElement)) return rearm();
+        if (sectionRef.current?.contains(document.activeElement))
+          return rearm();
         setHeld(false);
       }, IDLE_MS);
     };
@@ -204,7 +205,9 @@ export function Hero({ disciplines }: { disciplines: Discipline[] }) {
 
   /** Finds which row an event came from and switches to it. */
   const takeFromEvent = (e: React.SyntheticEvent) => {
-    const row = (e.target as HTMLElement).closest<HTMLElement>("[data-discipline]");
+    const row = (e.target as HTMLElement).closest<HTMLElement>(
+      "[data-discipline]",
+    );
     if (!row) return;
     const i = Number(row.dataset.discipline);
     if (Number.isInteger(i)) take(i);
@@ -225,7 +228,15 @@ export function Hero({ disciplines }: { disciplines: Discipline[] }) {
        * placed explicitly above `lg`, where they reassemble into the left
        * column with the photograph beside them.
        */}
-      <div className="flex flex-col lg:grid lg:h-dvh lg:grid-cols-[1fr_auto] lg:grid-rows-[auto_1fr]">
+      {/* `min-h-dvh`, not `h-dvh`. The type column needs ~930px at its widest
+          setting, so on a viewport shorter than that — 860px is a 13" laptop
+          with a browser bar — a fixed height left the two buttons hanging
+          below the cover and overlapping the press strip. A minimum fills the
+          screen on every normal display and lets the section grow rather than
+          spill on a short one. It stays a single implicit row, which is what
+          keeps the row height definite enough for the picture's `h-full` to
+          resolve against. */}
+      <div className="flex flex-col lg:grid lg:min-h-dvh lg:grid-cols-[1fr_80dvh]">
         {/* The photograph leads on a phone — it is the hook — but it is held
             to half the screen so the name and both ways in stay visible
             without scrolling. */}
@@ -235,7 +246,26 @@ export function Hero({ disciplines }: { disciplines: Discipline[] }) {
           // screen so the index and both buttons are reachable without a
           // scroll. On the right and full height from `lg`, spanning both
           // text rows.
-          className="relative order-2 h-[55dvh] w-full lg:col-start-2 lg:row-span-2 lg:row-start-1 lg:h-full lg:w-auto lg:aspect-[4/5]"
+          // Second on a phone: the name introduces the picture rather than
+          // the picture arriving unattributed. Still held to roughly half the
+          // screen so the index and both buttons are reachable without a
+          // scroll. On the right and full height from `lg`.
+          //
+          // No width, height or aspect of its own above `lg` — all three are
+          // the column's job now, and giving the picture any of them is what
+          // kept breaking this.
+          //
+          // The 4:5 column used to come from `aspect-[4/5]` on the picture
+          // with an `auto` track beside it, which is circular: the height
+          // came from the width, the width came from the track, and the track
+          // came from the picture. Whenever the type column grew past one
+          // screen the loop resolved 70px too tall and the cover overflowed
+          // its own section into the press strip below.
+          //
+          // The track is now `80dvh` — 4:5 of a full-height column, stated in
+          // viewport units so it depends on nothing. The picture simply
+          // stretches to its row.
+          className="relative order-2 h-[55dvh] w-full lg:order-last lg:h-auto"
           style={{ backgroundColor: current.frame.color }}
         >
           {/* Frames are crossfaded rather than swapped, so a switch never
@@ -245,26 +275,27 @@ export function Hero({ disciplines }: { disciplines: Discipline[] }) {
               as the cycle reaches them. */}
           {slides.map((discipline, i) =>
             i === slide.active || i === slide.previous ? (
-            <Image
-              key={discipline.slug}
-              src={discipline.frame.src}
-              alt={
-                i === active
-                  ? discipline.frame.alt || `${discipline.name} work by Julian Gigola`
-                  : ""
-              }
-              fill
-              sizes="(min-width: 1024px) 45vw, 100vw"
-              priority={i === 0}
-              aria-hidden={i === active ? undefined : true}
-              className={cn(
-                // `cover` against a column already cut to the frame's ratio:
-                // fills it with no border of empty colour showing.
-                "object-cover transition-opacity duration-500 ease-[var(--ease-out-strong)]",
-                "motion-reduce:transition-none",
-                i === active ? "opacity-100" : "opacity-0",
-              )}
-            />
+              <Image
+                key={discipline.slug}
+                src={discipline.frame.src}
+                alt={
+                  i === active
+                    ? discipline.frame.alt ||
+                      `${discipline.name} work by Julian Gigola`
+                    : ""
+                }
+                fill
+                sizes="(min-width: 1024px) 45vw, 100vw"
+                priority={i === 0}
+                aria-hidden={i === active ? undefined : true}
+                className={cn(
+                  // `cover` against a column already cut to the frame's ratio:
+                  // fills it with no border of empty colour showing.
+                  "object-cover transition-opacity duration-500 ease-[var(--ease-out-strong)]",
+                  "motion-reduce:transition-none",
+                  i === active ? "opacity-100" : "opacity-0",
+                )}
+              />
             ) : null,
           )}
 
@@ -286,61 +317,75 @@ export function Hero({ disciplines }: { disciplines: Discipline[] }) {
           )}
         </div>
 
-        {/* First on a phone, and the top of the left column from `lg`. */}
-        <div className="order-1 flex min-w-0 flex-col lg:col-start-1 lg:row-start-1">
-          {/* One: the standing details, as a running head. The tall top
+        {/* `display: contents` on a phone, a real column from `lg`.
+         *
+         * The two halves of the type have to be separable on a phone — the
+         * name above the photograph, the index and buttons below it — and
+         * inseparable above `lg`, where they are one column beside it.
+         * `contents` gives both: the wrapper vanishes from the layout on a
+         * phone, so its children become items of the outer flex column and
+         * `order` interleaves them with the picture; from `lg` it becomes the
+         * column it looks like, and the grid is back to the single full-height
+         * row that made the cover fit the screen in the first place.
+         */}
+        <div className="contents lg:flex lg:min-w-0 lg:flex-col">
+          {/* First on a phone, and the top of the left column from `lg`. */}
+          <div className="order-1 flex min-w-0 flex-col">
+            {/* One: the standing details, as a running head. The tall top
               padding on desktop clears the fixed header so the nav never
               crowds the rule. */}
-          {/* `pt-24` on a phone, not `pt-10`: this is now the first thing in
+            {/* `pt-24` on a phone, not `pt-10`: this is now the first thing in
               the section rather than something sitting under a half-screen
               photograph, so it has to clear the fixed header itself — which
               is ~66px of wordmark and padding, and was printing straight
               through "SF BAY AREA" until it did. */}
-          <div className="flex flex-wrap items-baseline gap-x-6 gap-y-1 border-b border-border px-6 pb-5 pt-24 sm:px-10 lg:pt-32">
-            {/* Held back while the intro is up, because the intro is already
+            <div className="flex flex-wrap items-baseline gap-x-6 gap-y-1 border-b border-border px-6 pb-5 pt-24 sm:px-10 lg:pt-32">
+              {/* Held back while the intro is up, because the intro is already
                 saying these exact words in display type eighty pixels below.
                 Printing them twice at once is the small-scale version of what
                 the comment on the masthead warns about.
 
                 Faded rather than unmounted: the rule and the flush-right
                 `SF Bay Area` must not move when it arrives. */}
-            <p
-              className={cn(
-                "label text-muted-foreground transition-opacity duration-500 ease-[var(--ease-out-strong)] motion-reduce:transition-none",
-                active === 0 ? "opacity-0" : "opacity-100",
-              )}
-            >
-              Photographer &amp; creative director
-            </p>
-            {/* `ml-auto` rather than `justify-between`, so when the column is
+              <p
+                className={cn(
+                  "label text-muted-foreground transition-opacity duration-500 ease-[var(--ease-out-strong)] motion-reduce:transition-none",
+                  active === 0 ? "opacity-0" : "opacity-100",
+                )}
+              >
+                Photographer &amp; creative director
+              </p>
+              {/* `ml-auto` rather than `justify-between`, so when the column is
                 too narrow for both — which it is at exactly the `lg`
                 breakpoint — this drops to its own line and stays flush right
                 instead of the left label wrapping under a stranded item. */}
-            <p className="label ml-auto shrink-0 text-muted-foreground">SF Bay Area</p>
-          </div>
+              <p className="label ml-auto shrink-0 text-muted-foreground">
+                SF Bay Area
+              </p>
+            </div>
 
-          {/* Two: the masthead, set once. The header's wordmark holds back on
+            {/* Two: the masthead, set once. The header's wordmark holds back on
               this route until this has scrolled away — printing the name
               twice, forty pixels apart, is what made an earlier version of
               this page look amateur. */}
-          <h1 className="px-6 pt-8 sm:px-10 sm:pt-10">
-            {/* Tagged so the header can measure it. The header's own wordmark
+            <h1 className="px-6 pt-8 sm:px-10 sm:pt-10">
+              {/* Tagged so the header can measure it. The header's own wordmark
                 waits on this one and then takes over from where it left, and
                 it can only time that against the real element — the masthead's
                 size is a `clamp()` on the viewport and its position moves with
                 the running head above it. */}
-            <span data-masthead className="display block">
-              Julian Gigola
-            </span>
+              <span data-masthead className="display block">
+                Julian Gigola
+              </span>
 
-            {/* The switching half: the job title first, then each discipline.
+              {/* The switching half: the job title first, then each discipline.
                 Deliberately not a live region — it would announce a new line
                 every four seconds, which is noise rather than information.
                 Nothing is lost by hiding it: the title is real text in the
                 running head above and every discipline is a real link
                 immediately below, which is the accessible version of the same
                 content. */}
-            {/* Two lines of height, always. "Photographer & creative
+              {/* Two lines of height, always. "Photographer & creative
                 director" wraps to two at every width except ~768 and a wide
                 desktop column; every discipline is one word on one line. Left
                 to itself the block shrinks by a line the moment the intro
@@ -348,26 +393,25 @@ export function Hero({ disciplines }: { disciplines: Discipline[] }) {
                 3.5s after load, which is exactly when somebody is reading
                 them. `leading-none` makes a line exactly `1em`, so `2em` is
                 two of them and nothing has to be measured. */}
-            <span
-              aria-hidden
-              className="font-display mt-2 block min-h-[2em] text-3xl uppercase leading-none tracking-[0.02em] text-muted-foreground sm:mt-3 sm:text-4xl"
-            >
-              {current.name}
-            </span>
-          </h1>
+              <span
+                aria-hidden
+                className="font-display mt-2 block min-h-[2em] text-3xl uppercase leading-none tracking-[0.02em] text-muted-foreground sm:mt-3 sm:text-4xl"
+              >
+                {current.name}
+              </span>
+            </h1>
+          </div>
 
-        </div>
-
-        {/* Last on a phone, so the index and both buttons follow the
-            photograph rather than pushing it off the screen. The bottom of
-            the left column from `lg`, taking the `1fr` row so the buttons
-            still sit against the foot of the picture. */}
-        <div className="order-3 flex min-w-0 flex-col lg:col-start-1 lg:row-start-2">
-          {/* Three: the index. This is the switcher's control and the site's
+          {/* Last on a phone, so the index and both buttons follow the
+            photograph rather than pushing it off the screen. `flex-1` from
+            `lg` so it takes the rest of the column and the `mt-auto` on the
+            buttons still pins them to the foot of the picture. */}
+          <div className="order-3 flex min-w-0 flex-col lg:flex-1">
+            {/* Three: the index. This is the switcher's control and the site's
               discipline navigation at the same time — hover previews, click
               opens that discipline's own page. Numbering is what keeps it an
               index rather than a row of buttons. */}
-          {/* One delegated handler on the list rather than an
+            {/* One delegated handler on the list rather than an
               `onPointerEnter` per row.
               `pointerenter` does not bubble — React synthesises it from
               `pointerover`, and that synthesis did not fire reliably here
@@ -376,69 +420,77 @@ export function Hero({ disciplines }: { disciplines: Discipline[] }) {
               bubble, so a single listener on the list is both simpler and
               actually dependable. The row index rides on a data attribute
               instead of being captured in four closures. */}
-          <nav aria-label="Disciplines" className="mt-8 border-t border-border sm:mt-10">
-            <ul onPointerOver={takeFromEvent} onFocus={takeFromEvent}>
-              {disciplines.map((discipline, i) => (
-                // Offset by one: this list is the disciplines, the cycle is
-                // the intro plus the disciplines. Row `i` is slide `i + 1`,
-                // and while the intro is up no row is current — which is the
-                // honest reading, since the frame on screen is not one of
-                // these.
-                <li
-                  key={discipline.slug}
-                  className="border-b border-border"
-                  data-discipline={i + 1}
-                >
-                  <Link
-                    href={discipline.href}
-                    aria-current={i + 1 === active ? "true" : undefined}
-                    className={cn(
-                      "group flex items-baseline gap-4 px-6 py-4 transition-colors duration-300 sm:px-10",
-                      // `bg-secondary`, not `bg-card`. Card sits at L* 5.7
-                      // against a ground of L* 2.8 — a real step in the token
-                      // scale, and almost invisible as a band across a row.
-                      // This is the one place on the site where a surface has
-                      // to be legible as "this is the selected one" from
-                      // across the room, so it takes the next step up.
-                      i + 1 === active ? "bg-secondary" : "hoverable:hover:bg-card",
-                    )}
+            <nav
+              aria-label="Disciplines"
+              className="mt-8 border-t border-border sm:mt-10"
+            >
+              <ul onPointerOver={takeFromEvent} onFocus={takeFromEvent}>
+                {disciplines.map((discipline, i) => (
+                  // Offset by one: this list is the disciplines, the cycle is
+                  // the intro plus the disciplines. Row `i` is slide `i + 1`,
+                  // and while the intro is up no row is current — which is the
+                  // honest reading, since the frame on screen is not one of
+                  // these.
+                  <li
+                    key={discipline.slug}
+                    className="border-b border-border"
+                    data-discipline={i + 1}
                   >
-                    <span className="label shrink-0 tabular-nums text-muted-foreground">
-                      {String(i + 1).padStart(2, "0")}
-                    </span>
-                    <span
+                    <Link
+                      href={discipline.href}
+                      aria-current={i + 1 === active ? "true" : undefined}
                       className={cn(
-                        "font-display text-xl uppercase leading-none tracking-[0.02em] transition-colors duration-300 sm:text-2xl",
-                        i + 1 === active ? "text-foreground" : "text-muted-foreground",
+                        "group flex items-baseline gap-4 px-6 py-4 transition-colors duration-300 sm:px-10",
+                        // `bg-secondary`, not `bg-card`. Card sits at L* 5.7
+                        // against a ground of L* 2.8 — a real step in the token
+                        // scale, and almost invisible as a band across a row.
+                        // This is the one place on the site where a surface has
+                        // to be legible as "this is the selected one" from
+                        // across the room, so it takes the next step up.
+                        i + 1 === active
+                          ? "bg-secondary"
+                          : "hoverable:hover:bg-card",
                       )}
                     >
-                      {discipline.name}
-                    </span>
-                    <span className="label ml-auto shrink-0 tabular-nums text-muted-foreground">
-                      {discipline.count}
-                    </span>
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </nav>
+                      <span className="label shrink-0 tabular-nums text-muted-foreground">
+                        {String(i + 1).padStart(2, "0")}
+                      </span>
+                      <span
+                        className={cn(
+                          "font-display text-xl uppercase leading-none tracking-[0.02em] transition-colors duration-300 sm:text-2xl",
+                          i + 1 === active
+                            ? "text-foreground"
+                            : "text-muted-foreground",
+                        )}
+                      >
+                        {discipline.name}
+                      </span>
+                      <span className="label ml-auto shrink-0 tabular-nums text-muted-foreground">
+                        {discipline.count}
+                      </span>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </nav>
 
-          {/* Four: the two ways in, pinned to the foot of the column so the
+            {/* Four: the two ways in, pinned to the foot of the column so the
               type block is anchored at both ends against the full height of
               the picture rather than drifting in the middle. */}
-          <div className="mt-auto flex flex-wrap items-center gap-3 px-6 py-8 sm:px-10 sm:py-10">
-            <Link
-              href="/work"
-              className="label border border-foreground bg-foreground px-6 py-4 text-background press hoverable:hover:opacity-90 active:scale-[0.98]"
-            >
-              See the work
-            </Link>
-            <Link
-              href="/sessions"
-              className="label border border-border px-6 py-4 press hoverable:hover:bg-card active:scale-[0.98]"
-            >
-              Book a session
-            </Link>
+            <div className="mt-auto flex flex-wrap items-center gap-3 px-6 py-8 sm:px-10 sm:py-10">
+              <Link
+                href="/work"
+                className="label border border-foreground bg-foreground px-6 py-4 text-background press hoverable:hover:opacity-90 active:scale-[0.98]"
+              >
+                See the work
+              </Link>
+              <Link
+                href="/sessions"
+                className="label border border-border px-6 py-4 press hoverable:hover:bg-card active:scale-[0.98]"
+              >
+                Book a session
+              </Link>
+            </div>
           </div>
         </div>
       </div>

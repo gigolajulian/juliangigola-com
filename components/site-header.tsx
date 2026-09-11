@@ -4,6 +4,7 @@ import * as React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 /* ── the chrome ───────────────────────────────────────────────────
  * Four destinations, no dropdowns.
@@ -249,6 +250,11 @@ export function SiteHeader() {
                 </NavLink>
               </li>
             ))}
+            {/* Last, and set as a label rather than as a fifth destination —
+                it changes how the page looks, it does not go anywhere. */}
+            <li className="ml-2 border-l border-border pl-9">
+              <ThemeToggle />
+            </li>
           </ul>
         </nav>
 
@@ -358,6 +364,13 @@ export function SiteHeader() {
             ))}
           </ul>
         </nav>
+
+        {/* Below the destinations and separated from them, because it is not
+            one. Sits at the foot of the panel rather than in the cascade of
+            display type, which is the list of places to go. */}
+        <div className="mt-10 border-t border-border pl-4 pt-6">
+          <ThemeToggle />
+        </div>
       </div>
     </header>
   );

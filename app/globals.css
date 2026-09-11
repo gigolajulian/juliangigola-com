@@ -164,6 +164,66 @@
   --sidebar-ring: var(--ring);
 }
 
+/* ── light ────────────────────────────────────────────────────────
+ * Dark is the site. This is the alternative, and it is opt-in: the
+ * attribute is only ever set by someone choosing it, so no preference —
+ * including a system set to light — leaves the dark ground in place.
+ *
+ * Not an inversion. Photographs are mounted on a warm off-white rather
+ * than on paper white, because pure white next to a photograph reads as a
+ * blown highlight and makes every frame look underexposed. The hue stays
+ * in the same warm neutral family as the dark ground, so the mat colours
+ * pulled from the frames themselves still belong.
+ *
+ * `card` and `secondary` step *down* from the ground here, where in the
+ * dark they step up. The relationship is the same one — a surface lifts
+ * away from its background — expressed in the direction that reads as
+ * lift on a light ground.
+ * ───────────────────────────────────────────────────────────────── */
+:root[data-theme="light"] {
+  color-scheme: light;
+
+  --background: oklch(0.968 0.004 80);
+  --foreground: oklch(0.185 0.003 70);
+
+  --card: oklch(0.938 0.004 80);
+  --card-foreground: var(--foreground);
+  --popover: oklch(0.925 0.004 80);
+  --popover-foreground: var(--foreground);
+
+  --primary: oklch(0.185 0.003 70);
+  --primary-foreground: oklch(0.968 0.004 80);
+  --secondary: oklch(0.893 0.004 80);
+  --secondary-foreground: var(--foreground);
+
+  --muted: oklch(0.905 0.004 80);
+  /* Held to the same ~7:1 the dark ground gives, so credits and captions
+     are no less readable for the theme being lighter. */
+  --muted-foreground: oklch(0.44 0.006 80);
+
+  /* The same teal, taken down far enough to carry contrast against a light
+     ground. Still the only chromatic thing on the page. */
+  --accent: oklch(0.52 0.1 195);
+  --accent-foreground: oklch(0.968 0.004 80);
+
+  --destructive: oklch(0.51 0.2 25);
+
+  /* Black at low alpha, not white: `oklch(1 0 0 / 11%)` is invisible here,
+     which would take every hairline rule on the site with it. */
+  --border: oklch(0 0 0 / 13%);
+  --input: oklch(0 0 0 / 16%);
+  --ring: var(--accent);
+
+  --sidebar: oklch(0.938 0.004 80);
+  --sidebar-foreground: var(--foreground);
+  --sidebar-primary: var(--accent);
+  --sidebar-primary-foreground: var(--accent-foreground);
+  --sidebar-accent: oklch(0.893 0.004 80);
+  --sidebar-accent-foreground: var(--foreground);
+  --sidebar-border: var(--border);
+  --sidebar-ring: var(--ring);
+}
+
 @layer base {
   * {
     @apply border-border;

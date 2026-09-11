@@ -67,7 +67,32 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     <html
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} ${display.variable} h-full antialiased`}
+      // Dark is the default and is what the CSS already declares, so the
+      // server renders the correct theme for everyone except the visitor who
+      // has chosen light. That one case is what the script below fixes.
+      suppressHydrationWarning
     >
+      <head>
+        {/* Applies a stored light preference before the first paint.
+         *
+         * It has to be inline and it has to be here: an effect runs after
+         * hydration, which is several hundred milliseconds of a full-bleed
+         * dark page for somebody who asked for a light one — the flash that
+         * makes a theme switch feel broken.
+         *
+         * Only `light` is ever applied. Dark needs no attribute because it is
+         * what `:root` already is, which also means no preference and no
+         * JavaScript both land on the site as designed.
+         *
+         * `localStorage` throws outright in some privacy modes rather than
+         * returning null, so the whole thing is wrapped.
+         */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `try{if(localStorage.getItem("theme")==="light")document.documentElement.dataset.theme="light"}catch(e){}`,
+          }}
+        />
+      </head>
       <body className="min-h-full flex flex-col">
         {/* First stop for a keyboard or screen-reader visitor: the nav is
             fixed and the galleries are long, so skipping past the chrome
