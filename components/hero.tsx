@@ -268,11 +268,23 @@ export function Hero({ disciplines }: { disciplines: Discipline[] }) {
           className="relative order-2 h-[55dvh] w-full lg:order-last lg:h-auto"
           style={{ backgroundColor: current.frame.color }}
         >
-          {/* Frames are crossfaded rather than swapped, so a switch never
-              shows a gap — but only the incoming and outgoing ones are
-              mounted, so first paint costs one photograph instead of five.
-              Only the first is `priority`; the rest load at normal priority
-              as the cycle reaches them. */}
+          {/* One frame dissolves up over the one it replaces.
+           *
+           * Two things were wrong with fading them against each other. Both
+           * layers transitioned at once, so halfway through a switch each sat
+           * near 50% and the mat colour showed between them — every change
+           * dipped through a wash before recovering. And nothing set a stacking
+           * order, so paint order followed this array: moving *down* the index
+           * put the incoming frame on top, moving *up* put the outgoing one on
+           * top instead, and the same interaction looked like two different
+           * effects depending on which way the pointer travelled.
+           *
+           * Now only the incoming layer animates, and it is explicitly above
+           * the outgoing one. The frame being replaced stays fully opaque
+           * underneath until it is covered, so there is nothing to see through.
+           *
+           * Still only two are ever mounted, so first paint costs one
+           * photograph rather than six. */}
           {slides.map((discipline, i) =>
             i === slide.active || i === slide.previous ? (
               <Image
@@ -291,9 +303,17 @@ export function Hero({ disciplines }: { disciplines: Discipline[] }) {
                 className={cn(
                   // `cover` against a column already cut to the frame's ratio:
                   // fills it with no border of empty colour showing.
-                  "object-cover transition-opacity duration-500 ease-[var(--ease-out-strong)]",
-                  "motion-reduce:transition-none",
-                  i === active ? "opacity-100" : "opacity-0",
+                  "object-cover",
+                  // Incoming above outgoing, by role rather than by index.
+                  i === active ? "z-10" : "z-0",
+                  // The very first frame is the page's largest paint; fading it
+                  // up from nothing would cost half a second of blank column
+                  // for an effect nobody is there to see.
+                  i === active && slide.previous !== -1 && "dissolve",
+                  // Both fully opaque. The outgoing frame is not faded out —
+                  // it is covered. Fading it would be the second half of the
+                  // wash this change exists to remove.
+                  "opacity-100",
                 )}
               />
             ) : null,

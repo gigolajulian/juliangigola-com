@@ -101,18 +101,90 @@
    * often stops reading as delight and starts reading as lag.
    * ───────────────────────────────────────────────────────────── */
   --ease-spring: linear(
-    0, 0.0228, 0.0803, 0.159, 0.2488, 0.3423, 0.4343, 0.5213, 0.6012, 0.6728,
-    0.7357, 0.7899, 0.8359, 0.8743, 0.9059, 0.9315, 0.9519, 0.9679, 0.9802,
-    0.9894, 0.9961, 1.0009, 1.0041, 1.0061, 1.0072, 1.0077, 1.0077, 1.0073,
-    1.0068, 1.0061, 1.0054, 1.0047, 1.004, 1.0033, 1.0028, 1.0022, 1.0018,
-    1.0014, 1.0011, 1.0008, 1
+    0,
+    0.0228,
+    0.0803,
+    0.159,
+    0.2488,
+    0.3423,
+    0.4343,
+    0.5213,
+    0.6012,
+    0.6728,
+    0.7357,
+    0.7899,
+    0.8359,
+    0.8743,
+    0.9059,
+    0.9315,
+    0.9519,
+    0.9679,
+    0.9802,
+    0.9894,
+    0.9961,
+    1.0009,
+    1.0041,
+    1.0061,
+    1.0072,
+    1.0077,
+    1.0077,
+    1.0073,
+    1.0068,
+    1.0061,
+    1.0054,
+    1.0047,
+    1.004,
+    1.0033,
+    1.0028,
+    1.0022,
+    1.0018,
+    1.0014,
+    1.0011,
+    1.0008,
+    1
   );
   --ease-bounce: linear(
-    0, 0.0333, 0.1167, 0.2295, 0.3554, 0.4824, 0.6022, 0.7095, 0.8016, 0.8774,
-    0.9372, 0.9823, 1.0145, 1.0357, 1.048, 1.0535, 1.0539, 1.0509, 1.0456,
-    1.039, 1.0321, 1.0253, 1.0191, 1.0136, 1.009, 1.0052, 1.0023, 1.0002,
-    0.9987, 0.9977, 0.9972, 0.9971, 0.9971, 0.9973, 0.9977, 0.998, 0.9984,
-    0.9988, 0.9991, 0.9994, 1
+    0,
+    0.0333,
+    0.1167,
+    0.2295,
+    0.3554,
+    0.4824,
+    0.6022,
+    0.7095,
+    0.8016,
+    0.8774,
+    0.9372,
+    0.9823,
+    1.0145,
+    1.0357,
+    1.048,
+    1.0535,
+    1.0539,
+    1.0509,
+    1.0456,
+    1.039,
+    1.0321,
+    1.0253,
+    1.0191,
+    1.0136,
+    1.009,
+    1.0052,
+    1.0023,
+    1.0002,
+    0.9987,
+    0.9977,
+    0.9972,
+    0.9971,
+    0.9971,
+    0.9973,
+    0.9977,
+    0.998,
+    0.9984,
+    0.9988,
+    0.9991,
+    0.9994,
+    1
   );
 }
 
@@ -439,9 +511,32 @@
   }
 }
 
+/**
+ * A dissolve: this element fades up over whatever is behind it.
+ *
+ * `@starting-style` rather than a mounted-then-toggled class, because the
+ * element that fades in here is a brand new node every time — a CSS
+ * transition does not run on first render, so a freshly mounted frame set to
+ * `opacity-100` simply appears, with no fade at all.
+ *
+ * Only the incoming layer animates. Fading the outgoing one out at the same
+ * time looks like the obvious way to crossfade and is wrong: two layers at
+ * ~50% each let the ground show through between them, so every switch dips
+ * through a wash of the mat colour before recovering.
+ */
+@utility dissolve {
+  opacity: 1;
+  transition: opacity 520ms var(--ease-out-strong);
+
+  @starting-style {
+    opacity: 0;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .rise,
-  .press {
+  .press,
+  .dissolve {
     transition: none;
   }
 }
