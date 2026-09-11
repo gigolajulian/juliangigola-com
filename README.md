@@ -77,8 +77,30 @@ the archive moved from 1600px to 2500px.
 
 ## Hosting
 
-Cloudflare Workers, via `@opennextjs/cloudflare`. Push to `main` deploys
-(`.github/workflows/deploy.yml`).
+Cloudflare Workers, via `@opennextjs/cloudflare`. Push to `main` deploys —
+through **Workers Builds**, which is connected to this repository from the
+Cloudflare dashboard rather than driven by a workflow file. There is no
+`.github/workflows`: the previous GitHub Actions deploy needed a Cloudflare
+API token kept as a repository secret, and this needs no token at all.
+
+Build command `npx opennextjs-cloudflare build`, deploy command
+`npx opennextjs-cloudflare deploy`. Change those in the dashboard under the
+Worker's **Settings → Builds**, not here.
+
+That is also what makes `/admin` useful: it commits `content/site.json`, the
+push starts a build, and the edit is live in a couple of minutes.
+
+### /admin is behind Cloudflare Access
+
+The editor is a public page that holds a GitHub token, so it is gated by a
+Zero Trust policy rather than by anything in this codebase — there is no
+login code, no password, and no session handling to get wrong.
+
+Application: self-hosted, destination `…workers.dev/admin`, **path-scoped**,
+so only `/admin` is gated and the site stays public. Policy "Julian only":
+Allow where email is Julian's. Note that the Worker-level Access option
+protects *every* hostname on the Worker and would put the whole portfolio
+behind a login — it is the wrong tool here.
 
 | | |
 | --- | --- |
