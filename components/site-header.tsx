@@ -146,7 +146,10 @@ export function SiteHeader() {
         return;
       }
 
-      const raw = Math.min(1, Math.max(0, (window.scrollY - start) / (end - start || 1)));
+      const raw = Math.min(
+        1,
+        Math.max(0, (window.scrollY - start) / (end - start || 1)),
+      );
       // Ease out: quick off the mark, settling rather than stopping dead.
       const p = 1 - Math.pow(1 - raw, 3);
 
@@ -198,7 +201,8 @@ export function SiteHeader() {
 
   const wordmarkVisible = !deferWordmark || pastMasthead;
 
-  const isCurrent = (href: string) => pathname === href || pathname.startsWith(href + "/");
+  const isCurrent = (href: string) =>
+    pathname === href || pathname.startsWith(href + "/");
 
   return (
     <header className="fixed inset-x-0 top-0 z-40">
@@ -241,71 +245,84 @@ export function SiteHeader() {
           Julian Gigola
         </Link>
 
-        <nav aria-label="Main" className="hidden lg:block">
-          <ul className="flex items-center gap-9">
-            {LINKS.map((link) => (
-              <li key={link.href}>
-                <NavLink href={link.href} current={isCurrent(link.href)}>
-                  {link.label}
-                </NavLink>
-              </li>
-            ))}
-            {/* Last, and set as a label rather than as a fifth destination —
-                it changes how the page looks, it does not go anywhere. */}
-            <li className="ml-2 border-l border-border pl-9">
-              <ThemeToggle />
-            </li>
-          </ul>
-        </nav>
+        {/* The right-hand group. Grouping these rather than leaving them as
+            separate children of a `justify-between` row is what keeps the
+            nav pinned right instead of drifting to the middle once a third
+            item joins it. */}
+        <div className="flex items-center gap-1 lg:gap-8">
+          <nav aria-label="Main" className="hidden lg:block">
+            <ul className="flex items-center gap-9">
+              {LINKS.map((link) => (
+                <li key={link.href}>
+                  <NavLink href={link.href} current={isCurrent(link.href)}>
+                    {link.label}
+                  </NavLink>
+                </li>
+              ))}
+            </ul>
+          </nav>
 
-        <button
-          type="button"
-          onClick={() => setOpen((v) => !v)}
-          aria-expanded={open}
-          aria-controls="mobile-nav"
-          // 44px square: this is a thumb target, so it gets a real hit area
-          // rather than the icon's own 24x16.
-          className="-mr-2 flex h-11 w-11 items-center justify-center press active:scale-[0.94] lg:hidden"
-        >
-          {/* The label an icon cannot carry. */}
-          <span className="sr-only">{open ? "Close menu" : "Open menu"}</span>
+          {/* Outside the nav, at every width. It is not a destination — it
+              changes how the page looks rather than going anywhere — and on
+              a phone it has to be reachable without opening the menu first,
+              which is why it sits beside the burger rather than inside it.
+              `-mr-2` pulls the 44px target's padding back so the artwork
+              lines up with the margin, not the hit area. */}
+          <ThemeToggle className="-mr-2 lg:mr-0" />
 
-          {/* Three bars that morph into a cross rather than being swapped for
+          <button
+            type="button"
+            onClick={() => setOpen((v) => !v)}
+            aria-expanded={open}
+            aria-controls="mobile-nav"
+            // 44px square: this is a thumb target, so it gets a real hit area
+            // rather than the icon's own 24x16.
+            className="-mr-2 flex h-11 w-11 items-center justify-center press active:scale-[0.94] lg:hidden"
+          >
+            {/* The label an icon cannot carry. */}
+            <span className="sr-only">{open ? "Close menu" : "Open menu"}</span>
+
+            {/* Three bars that morph into a cross rather than being swapped for
               one. The middle bar fades while the outer two rotate onto the
               centre line, so the control stays the same object through the
               change — a straight icon swap reads as two different buttons.
 
               Every bar is centred and moved with `translateY`, so only
               transform and opacity animate and nothing touches layout. */}
-          <span aria-hidden className="relative block h-4 w-6">
-            {/* The outer bars are placed with `top`/`bottom` and carry no
+            <span aria-hidden className="relative block h-4 w-6">
+              {/* The outer bars are placed with `top`/`bottom` and carry no
                 base translate, so the only transform on them is the one that
                 animates. Giving one element two `translate-y` utilities makes
                 them fight — the later simply overrides the earlier, which
                 collapses the three bars into two. */}
-            <span
-              className={cn(
-                "absolute left-0 top-0 h-[1.5px] w-full bg-current",
-                "transition-transform duration-300 ease-[var(--ease-out-strong)] motion-reduce:transition-none",
-                open ? "translate-y-[7.25px] rotate-45" : "translate-y-0 rotate-0",
-              )}
-            />
-            <span
-              className={cn(
-                "absolute left-0 top-1/2 h-[1.5px] w-full -translate-y-1/2 bg-current",
-                "transition-opacity duration-200 ease-out motion-reduce:transition-none",
-                open ? "opacity-0" : "opacity-100",
-              )}
-            />
-            <span
-              className={cn(
-                "absolute bottom-0 left-0 h-[1.5px] w-full bg-current",
-                "transition-transform duration-300 ease-[var(--ease-out-strong)] motion-reduce:transition-none",
-                open ? "-translate-y-[7.25px] -rotate-45" : "translate-y-0 rotate-0",
-              )}
-            />
-          </span>
-        </button>
+              <span
+                className={cn(
+                  "absolute left-0 top-0 h-[1.5px] w-full bg-current",
+                  "transition-transform duration-300 ease-[var(--ease-out-strong)] motion-reduce:transition-none",
+                  open
+                    ? "translate-y-[7.25px] rotate-45"
+                    : "translate-y-0 rotate-0",
+                )}
+              />
+              <span
+                className={cn(
+                  "absolute left-0 top-1/2 h-[1.5px] w-full -translate-y-1/2 bg-current",
+                  "transition-opacity duration-200 ease-out motion-reduce:transition-none",
+                  open ? "opacity-0" : "opacity-100",
+                )}
+              />
+              <span
+                className={cn(
+                  "absolute bottom-0 left-0 h-[1.5px] w-full bg-current",
+                  "transition-transform duration-300 ease-[var(--ease-out-strong)] motion-reduce:transition-none",
+                  open
+                    ? "-translate-y-[7.25px] -rotate-45"
+                    : "translate-y-0 rotate-0",
+                )}
+              />
+            </span>
+          </button>
+        </div>
       </div>
 
       {/* Rendered always, toggled with `hidden`, so the links are in the DOM
@@ -364,13 +381,6 @@ export function SiteHeader() {
             ))}
           </ul>
         </nav>
-
-        {/* Below the destinations and separated from them, because it is not
-            one. Sits at the foot of the panel rather than in the cascade of
-            display type, which is the list of places to go. */}
-        <div className="mt-10 border-t border-border pl-4 pt-6">
-          <ThemeToggle />
-        </div>
       </div>
     </header>
   );
@@ -396,7 +406,9 @@ function NavLink({
       aria-current={current ? "page" : undefined}
       className={cn(
         "group relative block py-3 text-[0.9375rem] uppercase leading-none tracking-[0.08em] transition-colors duration-200",
-        current ? "text-foreground" : "text-muted-foreground hover:text-foreground",
+        current
+          ? "text-foreground"
+          : "text-muted-foreground hover:text-foreground",
       )}
     >
       {children}
