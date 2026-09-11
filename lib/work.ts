@@ -345,37 +345,54 @@ export type Discipline = {
  * letterbox bar instead of a mount.
  *
  * Add a full-resolution original to `PICS/`, then process it the same way the
- * archive is processed — 1600px wide, mozjpeg q82 — and add an entry here.
+ * archive is processed — 2500px wide, mozjpeg q82 — and add an entry here.
  */
+
+/**
+ * An override that names a frame already in the archive.
+ *
+ * Dimensions are read from the manifest rather than written here, because
+ * these two entries used to carry their own copy of them and a re-harvest
+ * silently invalidated it: raising the archive to 2500px turned every
+ * hardcoded `1600` into a lie, and a wrong `width`/`height` on a `fill` image
+ * is a wrong aspect ratio reserved before the picture loads — the cover
+ * column jumping the moment it arrives.
+ *
+ * Only `alt` is stated, because that is the one thing the harvest genuinely
+ * does not know: 1,084 frames came across with none.
+ */
+const archiveFrame = (src: string, alt: string): Frame => {
+  const found = PROJECTS.flatMap((p) => p.images).find((f) => f.src === src);
+  // Naming a frame that does not exist is an editorial mistake, not a runtime
+  // condition to paper over — and a silent fallback here would put the wrong
+  // photograph at the top of the homepage.
+  if (!found) throw new Error(`Cover override names a frame not in the archive: ${src}`);
+  return { ...found, alt };
+};
+
 const COVER_OVERRIDES: Record<string, Frame> = {
   portraits: {
     src: "/hero/cover.jpg",
-    width: 1600,
-    height: 2133,
+    width: 2500,
+    height: 3333,
     color: "#897A74",
     alt: "Model in a fur-trimmed hooded coat on the shoreline at sunset",
   },
-  editorial: {
-    // 1600x2000 is exactly 4:5, so it fills the cover column with nothing
-    // cropped at all — the only frame in the archive that does.
-    src: "/work/i-wanna-be-a-human/01.jpg",
-    width: 1600,
-    height: 2000,
-    color: "#696462",
-    alt: "Model in a sculptural black PVC and tulle look, flanked by motion-blurred figures",
-  },
-  campaigns: {
-    // Already in the archive at the right size, so it points there rather than
-    // getting a copy in `/hero/` — the override exists to name the frame, and
-    // the frame is a UKIYOSUNKNOWN one rather than the first of the first
-    // project filed under campaigns, which is what it would otherwise be.
-    // The credit follows the frame, via `frameProject` below.
-    src: "/work/ukiyosunknown/01.jpg",
-    width: 1600,
-    height: 2133,
-    color: "#A8A9A7",
-    alt: "Model crouched on a studio floor beside a CRT television, looking away from camera",
-  },
+  // Exactly 4:5, so it fills the cover column with nothing cropped at all —
+  // the only frame in the archive that does.
+  editorial: archiveFrame(
+    "/work/i-wanna-be-a-human/01.jpg",
+    "Model in a sculptural black PVC and tulle look, flanked by motion-blurred figures",
+  ),
+  // Already in the archive, so it points there rather than getting a copy in
+  // `/hero/` — the override exists to name the frame, and the frame is a
+  // UKIYOSUNKNOWN one rather than the first of the first project filed under
+  // campaigns, which is what it would otherwise be. The credit follows the
+  // frame, via `frameProject` below.
+  campaigns: archiveFrame(
+    "/work/ukiyosunknown/01.jpg",
+    "Model crouched on a studio floor beside a CRT television, looking away from camera",
+  ),
   coverart: {
     // The one discipline whose work is not a photograph but a released object,
     // so it is shown as one: sleeves laid out as prints, the lead release
@@ -383,8 +400,8 @@ const COVER_OVERRIDES: Record<string, Frame> = {
     // pulled from the archive says "here is a picture"; the spread says "here
     // is a body of covers", which is the claim the row is making.
     src: "/hero/coverart.jpg",
-    width: 1600,
-    height: 2000,
+    width: 2500,
+    height: 3125,
     color: "#65696A",
     alt: "Album sleeves laid out as prints, EST MODVS IN REBVS square to camera at the centre",
   },

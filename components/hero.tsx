@@ -59,16 +59,18 @@ const IDLE_MS = 3000;
  * The type imports above are erased, so they cost nothing.
  *
  * Cropped to 4:5 from a 16:9 original and processed the way the archive is
- * (1600px, mozjpeg q82) — see README, "Adding a cover image".
+ * (2500px, mozjpeg q82) — see README, "Adding a cover image".
  */
 const INTRO: Slide = {
   slug: "intro",
   name: "Photographer & creative director",
   frame: {
     src: "/hero/intro.jpg",
-    width: 1600,
-    height: 2000,
-    color: "#746F6A",
+    // 2456 rather than 2500: the 4:5 crop is capped by the original's 3070px
+    // height, and upscaling to hit a round number adds bytes, not detail.
+    width: 2456,
+    height: 3070,
+    color: "#867D74",
     alt: "Downtown San Francisco from the air at sunrise, the Transamerica Pyramid against the sun",
   },
 };

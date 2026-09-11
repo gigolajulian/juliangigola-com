@@ -3,7 +3,7 @@
 Portfolio and booking site for Julian Gigola — photographer and creative director,
 San Francisco Bay Area. Replaces a stock Format template.
 
-Next.js 16 (App Router) · Tailwind v4 · TypeScript · fully static.
+Next.js 16 (App Router) · Tailwind v4 · TypeScript · Cloudflare Workers.
 
 ## Running it
 
@@ -45,16 +45,62 @@ URLs, per-frame dominant colours and the credits block — so the script reads t
 rather than scraping markup. Page responses are cached under `.harvest-cache/`, and images
 already on disk are skipped, so re-runs are cheap. `--refresh` clears the cache.
 
-Frames are stored at 1600px wide, mozjpeg q82 — the widest a frame is ever displayed, with
-`next/image` deriving every smaller size. The originals average 2.5 MB each; storing them
-would put ~2.9 GB in this repo for pixels nothing can show.
+Frames are stored at 2500px wide, mozjpeg q82 — Format's largest render, and enough to
+stay sharp in the lightbox, which asks for `sizes="100vw"` and so wants ~2900 device
+pixels on a 1440px retina screen. Cloudflare cuts each one down per device at request
+time, so a larger source costs a visitor nothing.
+
+**The archive is not in this repo.** `public/work/` is ~690MB and git keeps every version
+of every blob forever. It lives in an R2 bucket, served from `images.juliangigola.com`;
+`lib/work-data.ts` is the manifest that points at it. After a harvest, push it:
+
+```bash
+node scripts/sync-r2.mjs
+```
+
+A fresh clone therefore has no photographs under `public/work/` until you either run the
+harvester or pull them down from R2. Everything else — `public/hero/`, `public/covers/` —
+ships with the app.
 
 ### Adding a cover image
 
-Drop the full-resolution original in `PICS/` (untracked), resize it to 1600px wide at
+Drop the full-resolution original in `PICS/` (untracked), resize it to 2500px wide at
 q82 into `public/hero/`, then add an entry to `COVER_OVERRIDES` in `lib/work.ts`. The
 `color` field is the image's **mean**, not its dominant — it is the mat drawn behind an
 `object-contain` frame, and on a sunset image the dominant bucket comes back near-black.
+Measure the mean from the **written file**, not the pipeline before it: the JPEG encode
+shifts it enough to matter.
+
+An override that names a frame already in the archive uses `archiveFrame()` instead, which
+reads the dimensions from the manifest — hardcoding them there is how they went stale when
+the archive moved from 1600px to 2500px.
+
+## Hosting
+
+Cloudflare Workers, via `@opennextjs/cloudflare`. Push to `main` deploys
+(`.github/workflows/deploy.yml`).
+
+| | |
+| --- | --- |
+| `wrangler.jsonc` | Worker name, `nodejs_compat`, and the static asset directory. |
+| `open-next.config.ts` | Deliberately bare — the defaults cover this site. |
+| `image-loader.ts` | Rewrites every frame onto Cloudflare Image Transformations. Off unless `NEXT_PUBLIC_IMAGE_CDN=1`, because `/cdn-cgi/` exists only on a real zone. |
+| `.env.example` | Every variable, and which are secrets. |
+
+```bash
+npx opennextjs-cloudflare build     # bundle the Worker
+npx wrangler dev --local            # serve it on :8787
+npx wrangler tail                   # live production logs
+```
+
+Two things only work on the custom domain, never on `*.workers.dev`: image
+transformations, and anything else behind `/cdn-cgi/`. Judge image quality on
+`www.juliangigola.com`.
+
+It was on GitHub Pages before this, as a static export. That had no image optimizer — the
+loader ignored `width` and every device downloaded the same file — and no redirects, and a
+build step that overwrote the contact form's Server Action with a stub so it could never
+send mail. All three are fixed by having a server.
 
 ## Still to wire up
 

@@ -51,3 +51,16 @@ next-env.d.ts
 
 # static export output
 /out/
+
+# Cloudflare Workers build output
+/.open-next/
+/.wrangler/
+
+# The harvested archive. ~690MB at 2500px, and git keeps every version of
+# every blob forever — committing it once would make every clone pay for it
+# for good. It lives in R2 instead; `lib/work-data.ts` is the manifest that
+# points at it, and `scripts/sync-r2.mjs` pushes it after a harvest.
+#
+# `public/hero/` and `public/covers/` are NOT ignored: a few megabytes of
+# hand-picked frames that ship with the app.
+/public/work/

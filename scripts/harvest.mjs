@@ -31,12 +31,25 @@ const OUT_MANIFEST = "lib/work-data.ts";
 const REFRESH = process.argv.includes("--refresh");
 
 /**
- * Format's largest render is 2500px, which averages 2.5 MB — about 2.7 GB
- * across the whole archive, and far more pixels than the site can ever show.
- * 1600px is the widest a frame gets on a 2x laptop, and `next/image` derives
- * every smaller size from it, so nothing downstream loses resolution.
+ * Format's largest render, and now what we keep.
+ *
+ * This was 1600px, on the reasoning that it is the widest a frame gets on a
+ * 2x laptop. That was wrong in one place and it is the place that matters
+ * most: the lightbox asks for `sizes="100vw"`, so a 1440px screen at 2x wants
+ * 2880 device pixels and got 1600 stretched over them. Full-screen frames
+ * were soft on every retina display.
+ *
+ * It cost nothing to notice, either, because the GitHub Pages export had no
+ * optimizer — every device downloaded the same 1600px file regardless, so the
+ * cap read as a bandwidth saving rather than as a ceiling on quality.
+ *
+ * Now that Cloudflare resizes per device, a larger source costs a visitor
+ * nothing: they are served a transform cut to their own viewport. Only
+ * storage grows, and storage is R2, which is free at this size.
+ *
+ * 2500 is Format's own maximum. Asking for more upscales.
  */
-const MAX_WIDTH = 1600;
+const MAX_WIDTH = 2500;
 const JPEG_QUALITY = 82;
 
 /**

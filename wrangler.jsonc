@@ -1,0 +1,33 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+
+  // The Worker that serves the site. Renaming this creates a second Worker
+  // rather than renaming the first, so the custom domain would have to be
+  // moved by hand — it is effectively permanent.
+  "name": "juliangigola",
+
+  "main": ".open-next/worker.js",
+
+  // Must be 2024-09-23 or later for the adapter. `nodejs_compat` is not
+  // optional: Next's server code reaches for Node built-ins, and without the
+  // flag the Worker fails at import time rather than at a request.
+  "compatibility_date": "2026-09-11",
+  "compatibility_flags": ["nodejs_compat"],
+
+  // Everything `next build` emits as a file — the photographs in
+  // `public/hero` and `public/covers`, the JS chunks, the prerendered HTML.
+  // Requests that resolve to one of these are served straight off
+  // Cloudflare's edge without invoking the Worker, and are free and
+  // unmetered. The archive itself is not here; it lives in R2, see
+  // `image-loader.ts`.
+  "assets": {
+    "directory": ".open-next/assets",
+    "binding": "ASSETS"
+  },
+
+  // Worker logs, so `wrangler tail` has something to show when a Server
+  // Action fails in production.
+  "observability": {
+    "enabled": true
+  }
+}
