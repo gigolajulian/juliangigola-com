@@ -125,8 +125,41 @@ const project = (v: unknown, path: string): AddedProject => {
   };
 };
 
+/**
+ * A removed project, kept for a week before its photographs go.
+ *
+ * Removal is not deletion. The entry leaves `projects` — so the route stops
+ * being built and the work leaves every index immediately — but the files
+ * stay in the repository, which makes recovery a matter of moving the entry
+ * back rather than of finding the originals again.
+ *
+ * The clean-up is not a timer. Nothing runs on a schedule here: the site is
+ * static and there is no server to tick. Anything past its week is purged the
+ * next time `/admin` is opened with a working token, which means "a week" is
+ * a floor, not a deadline — and that is the safer direction for the one
+ * operation that cannot be undone.
+ */
+export type TrashedProject = AddedProject & {
+  /** ISO 8601, set by the browser that removed it. */
+  deletedAt: string;
+};
+
+/** How long a removed project is recoverable. */
+export const TRASH_DAYS = 7;
+
 export type AddedFile = {
   projects: AddedProject[];
+  trash: TrashedProject[];
+  /**
+   * Projects filed under a different discipline than they arrived with.
+   *
+   * A map rather than a field on the project, because it has to work for the
+   * 74 harvested projects too — their categories live in `lib/work-data.ts`,
+   * which the harvester regenerates, so an edit there would last exactly
+   * until the next run. Keyed by slug, valued by category slug; applied in
+   * `lib/work.ts` after both sources are merged.
+   */
+  categories: Record<string, string>;
   /**
    * Slugs to leave off the site.
    *
@@ -166,8 +199,48 @@ function parse(v: unknown): AddedFile {
   const hidden = v.hidden === undefined ? [] : v.hidden;
   if (!Array.isArray(hidden)) return fail("hidden", "an array", hidden);
 
+  const rawTrash = v.trash === undefined ? [] : v.trash;
+  if (!Array.isArray(rawTrash)) return fail("trash", "an array", rawTrash);
+
+  const trash = rawTrash.map((t, i) => {
+    const p = project(t, `trash[${i}]`);
+    const at = isRecord(t) ? t.deletedAt : undefined;
+    // A removed project with no timestamp would never age out and would sit
+    // in the bin for good, so an unparseable date is treated as "just now"
+    // rather than as a reason to fail the build.
+    const when =
+      typeof at === "string" && !Number.isNaN(Date.parse(at))
+        ? at
+        : new Date().toISOString();
+    return { ...p, deletedAt: when };
+  });
+
+  // A slug cannot be live and in the bin at once: the bin holds the only copy
+  // of its manifest entry, and two entries would make recovery ambiguous.
+  const live = new Set(projects.map((p) => p.slug));
+  for (const t of trash) {
+    if (live.has(t.slug)) {
+      return fail(
+        "trash",
+        `slugs not also in projects — "${t.slug}" is in both`,
+        t.slug,
+      );
+    }
+  }
+
+  const rawCategories = v.categories === undefined ? {} : v.categories;
+  if (!isRecord(rawCategories)) {
+    return fail("categories", "an object", rawCategories);
+  }
+  const categories: Record<string, string> = {};
+  for (const [slug, category] of Object.entries(rawCategories)) {
+    categories[slug] = str(category, `categories["${slug}"]`);
+  }
+
   return {
     projects,
+    trash,
+    categories,
     hidden: hidden.map((s, i) => str(s, `hidden[${i}]`)),
   };
 }
@@ -175,6 +248,8 @@ function parse(v: unknown): AddedFile {
 const FILE = parse(raw);
 
 export const ADDED: AddedProject[] = FILE.projects;
+export const TRASH: TrashedProject[] = FILE.trash;
+export const RECATEGORISED: Readonly<Record<string, string>> = FILE.categories;
 export const HIDDEN: ReadonlySet<string> = new Set(FILE.hidden);
 
 /** Where the editor writes. Shown in the editor so it is not a mystery. */

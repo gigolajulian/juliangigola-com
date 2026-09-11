@@ -11,7 +11,7 @@ import { PROJECTS as HARVESTED, CATEGORIES } from "./work-data";
 import type { Project, Category, Frame } from "./work-types";
 import { COVER_RELEASES } from "./cover-art-data";
 import { CONTENT } from "./content";
-import { ADDED, HIDDEN, type AddedProject } from "./added";
+import { ADDED, HIDDEN, RECATEGORISED, type AddedProject } from "./added";
 
 export type { Project, Category, Frame };
 export { CATEGORIES, COVER_RELEASES };
@@ -136,12 +136,33 @@ const fromAdded = (p: AddedProject): Project => {
  * hidden project in order to offer to bring it back, which is the one context
  * where the filter below is wrong.
  */
+/**
+ * Refiles a project under the discipline `/admin` chose for it.
+ *
+ * Applied after the merge so it reaches harvested projects as well as added
+ * ones — their categories come from the generated manifest, where an edit
+ * would survive only until the next harvest.
+ *
+ * An unknown category slug is left alone rather than throwing. This map is
+ * keyed by project slug, and a re-harvest can retire a project entirely; a
+ * stale key should not be able to fail a build that is otherwise fine.
+ */
+const refile = (project: Project): Project => {
+  const wanted = RECATEGORISED[project.slug];
+  if (!wanted) return project;
+
+  const category = CATEGORIES.find((c) => c.slug === wanted);
+  if (!category) return project;
+
+  return { ...project, categories: [category] };
+};
+
 export const ALL_PROJECTS: Project[] = [
   ...ADDED.map(fromAdded),
   ...HARVESTED.map((p) =>
     p.slug === "coverart" ? withCoverArt(p) : withLeadFrame(p),
   ),
-];
+].map(refile);
 
 /**
  * Filtered here, at the one place every consumer reads from, rather than at

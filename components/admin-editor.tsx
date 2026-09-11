@@ -11,6 +11,8 @@ import { AdminProjects, type AdminProject } from "@/components/admin-projects";
 import { AdminSitemap } from "@/components/admin-sitemap";
 import { AdminPreview } from "@/components/admin-preview";
 import { AdminFeatured } from "@/components/admin-featured";
+import { AdminTrash } from "@/components/admin-trash";
+import type { TrashedProject } from "@/lib/added";
 import { ADDED_PATH } from "@/lib/added";
 import { commitFiles, readFile } from "@/lib/admin-github";
 import { cn } from "@/lib/utils";
@@ -75,6 +77,8 @@ export function AdminEditor({
   projects,
   initialHidden,
   categoryLinks,
+  initialTrash,
+  initialRecategorised,
 }: {
   /** The content as it was at build time — what the live site is serving. */
   initial: SiteContent;
@@ -88,6 +92,10 @@ export function AdminEditor({
   initialHidden: string[];
   /** Discipline pages, for the sitemap. */
   categoryLinks: { slug: string; name: string; href: string }[];
+  /** Removed projects awaiting their week. */
+  initialTrash: TrashedProject[];
+  /** Refilings the last build applied, slug → category slug. */
+  initialRecategorised: Record<string, string>;
 }) {
   const [token, setToken] = React.useState("");
   const [draft, setDraft] = React.useState<SiteContent>(initial);
@@ -99,6 +107,9 @@ export function AdminEditor({
   const [hidden, setHidden] = React.useState<Set<string>>(
     () => new Set(initialHidden),
   );
+  const [trash, setTrash] = React.useState<TrashedProject[]>(initialTrash);
+  const [recategorised, setRecategorised] =
+    React.useState<Record<string, string>>(initialRecategorised);
 
   /**
    * Whether anything is unpublished.
@@ -109,7 +120,8 @@ export function AdminEditor({
    */
   const dirty =
     JSON.stringify(draft) !== JSON.stringify(initial) ||
-    [...hidden].sort().join() !== [...initialHidden].sort().join();
+    [...hidden].sort().join() !== [...initialHidden].sort().join() ||
+    JSON.stringify(recategorised) !== JSON.stringify(initialRecategorised);
 
   /**
    * Where "Open live" points. Read after mount, because the server has no
@@ -229,7 +241,8 @@ export function AdminEditor({
       ];
 
       const hiddenMoved =
-        [...hidden].sort().join() !== [...initialHidden].sort().join();
+        [...hidden].sort().join() !== [...initialHidden].sort().join() ||
+        JSON.stringify(recategorised) !== JSON.stringify(initialRecategorised);
 
       if (hiddenMoved) {
         setStatus({ kind: "working", message: "Reading the project list…" });
@@ -237,9 +250,14 @@ export function AdminEditor({
         // loaded, and writing back a stale list would undo it.
         const current = await readFile(token, ADDED_PATH);
         const parsed = current
-          ? (JSON.parse(current) as { projects: unknown[]; hidden?: string[] })
-          : { projects: [], hidden: [] };
+          ? (JSON.parse(current) as {
+              projects: unknown[];
+              hidden?: string[];
+              categories?: Record<string, string>;
+            })
+          : { projects: [], hidden: [], categories: {} };
         parsed.hidden = [...hidden].sort();
+        parsed.categories = recategorised;
         files.push({
           path: ADDED_PATH,
           content: `${JSON.stringify(parsed, null, 2)}\n`,
@@ -372,12 +390,21 @@ export function AdminEditor({
         </nav>
 
         {view === "projects" ? (
-          <AdminProjects
-            token={token}
-            projects={projects}
-            hidden={hidden}
-            onHiddenChange={setHidden}
-          />
+          <>
+            <AdminProjects
+              token={token}
+              projects={projects}
+              hidden={hidden}
+              onHiddenChange={setHidden}
+              onRemoved={setTrash}
+              disciplines={categories}
+              recategorised={recategorised}
+              onRecategorise={(slug, categorySlug) =>
+                setRecategorised((r) => ({ ...r, [slug]: categorySlug }))
+              }
+            />
+            <AdminTrash token={token} trash={trash} onChanged={setTrash} />
+          </>
         ) : (
           <ContentForm />
         )}

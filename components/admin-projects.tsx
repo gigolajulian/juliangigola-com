@@ -2,13 +2,12 @@
 
 import * as React from "react";
 import Image from "next/image";
-import { ADDED_PATH } from "@/lib/added";
 import {
-  commitFiles,
-  listDirectory,
-  readFile,
-  type CommitFile,
-} from "@/lib/admin-github";
+  ADDED_PATH,
+  type AddedProject,
+  type TrashedProject,
+} from "@/lib/added";
+import { commitFiles, readFile } from "@/lib/admin-github";
 import { cn } from "@/lib/utils";
 
 /* ── the project list ─────────────────────────────────────────────
@@ -32,7 +31,10 @@ import { cn } from "@/lib/utils";
 export type AdminProject = {
   slug: string;
   name: string;
+  /** Display name of its discipline, for the row and the filter. */
   category: string;
+  /** Its discipline's slug, for the refiling dropdown. */
+  categorySlug: string;
   frames: number;
   cover: { src: string; width: number; height: number; color: string };
   /** Added through this editor, so its files are ours to remove. */
@@ -50,12 +52,23 @@ export function AdminProjects({
   projects,
   hidden,
   onHiddenChange,
+  onRemoved,
+  disciplines,
+  recategorised,
+  onRecategorise,
 }: {
   token: string;
   projects: AdminProject[];
   /** Slugs currently hidden, as the draft has them. */
   hidden: Set<string>;
   onHiddenChange: (next: Set<string>) => void;
+  /** Handed the new bin contents after a removal, so the panel below updates. */
+  onRemoved?: (trash: TrashedProject[]) => void;
+  /** Disciplines a project can be refiled under. */
+  disciplines: { slug: string; name: string }[];
+  /** Draft refilings, slug → category slug. */
+  recategorised: Record<string, string>;
+  onRecategorise: (slug: string, categorySlug: string) => void;
 }) {
   const [query, setQuery] = React.useState("");
   const [status, setStatus] = React.useState<Status>({ kind: "idle" });
@@ -79,12 +92,15 @@ export function AdminProjects({
   };
 
   /**
-   * Deletes the manifest entry and every file under the project's directory.
+   * Moves the project to Recently deleted.
    *
-   * The directory is listed from the repo rather than derived from the frame
-   * count: a re-upload or a half-finished commit can leave files the manifest
-   * never mentioned, and those would otherwise sit in `public/work/` forever
-   * with nothing pointing at them.
+   * The entry leaves `projects`, so the route stops being built and every
+   * index forgets it immediately — the work is off the site the moment this
+   * deploys. The photographs stay exactly where they are, which is what makes
+   * recovery a matter of moving the entry back rather than of finding the
+   * originals again. They go for good a week later; see `admin-trash.tsx`.
+   *
+   * One commit, and nothing is destroyed in it.
    */
   async function remove(slug: string) {
     setConfirming(null);
@@ -94,49 +110,45 @@ export function AdminProjects({
       const current = await readFile(token, ADDED_PATH);
       if (!current) throw new Error("Could not read the project list.");
       const parsed = JSON.parse(current) as {
-        projects: { slug: string }[];
+        projects: AddedProject[];
+        trash?: TrashedProject[];
         hidden?: string[];
       };
 
-      if (!parsed.projects.some((p) => p.slug === slug)) {
+      const entry = parsed.projects.find((p) => p.slug === slug);
+      if (!entry) {
         throw new Error(
-          `"${slug}" is not in the project list — it may already be deleted.`,
+          `"${slug}" is not in the project list — it may already be removed.`,
         );
       }
 
       parsed.projects = parsed.projects.filter((p) => p.slug !== slug);
-      // A hidden entry for a project that no longer exists is dead weight, and
-      // would silently suppress a future project that reused the slug.
-      parsed.hidden = (parsed.hidden ?? []).filter((s) => s !== slug);
-
-      setStatus({ kind: "working", message: "Listing its photographs…" });
-      const files = await listDirectory(token, `public/work/${slug}`);
-
-      const commit: CommitFile[] = [
-        ...files.map((path) => ({ path, remove: true as const })),
-        {
-          path: ADDED_PATH,
-          content: `${JSON.stringify(parsed, null, 2)}\n`,
-          encoding: "utf-8" as const,
-        },
+      parsed.trash = [
+        { ...entry, deletedAt: new Date().toISOString() },
+        ...(parsed.trash ?? []),
       ];
+      // Hiding something that is no longer published is dead weight, and would
+      // silently suppress a future project that reused the slug.
+      parsed.hidden = (parsed.hidden ?? []).filter((s) => s !== slug);
 
       await commitFiles({
         token,
-        message: `Delete ${slug} from /admin`,
-        files: commit,
-        onProgress: (done, total) =>
-          setStatus({
-            kind: "working",
-            message: `Removing ${done} of ${total}…`,
-          }),
+        message: `Remove ${slug} from /admin`,
+        files: [
+          {
+            path: ADDED_PATH,
+            content: `${JSON.stringify(parsed, null, 2)}\n`,
+            encoding: "utf-8" as const,
+          },
+        ],
       });
 
       setGone((g) => new Set(g).add(slug));
       onHiddenChange(new Set([...hidden].filter((s) => s !== slug)));
+      onRemoved?.(parsed.trash);
       setStatus({
         kind: "done",
-        message: `Deleted ${slug} and ${files.length} files. Live in a couple of minutes.`,
+        message: `${entry.name} moved to Recently deleted. Its photographs are kept for a week.`,
       });
     } catch (e) {
       setStatus({
@@ -161,10 +173,11 @@ export function AdminProjects({
       </div>
 
       <p className="mt-3 max-w-prose text-sm leading-relaxed text-muted-foreground">
-        Hiding takes a project off the site and can be undone. Deleting removes
-        its photographs from the repository and cannot — and is only offered for
-        projects added here, because the migrated archive is regenerated and a
-        deletion there would come back.
+        Hiding takes a project off the site and can be undone at any time.
+        Removing takes it off and puts it in Recently deleted, where its
+        photographs are kept for a week — offered only for projects added here,
+        because the migrated archive is regenerated and a removal there would
+        come back.
       </p>
 
       <input
@@ -224,6 +237,23 @@ export function AdminProjects({
               </span>
 
               <span className="flex shrink-0 items-center gap-2">
+                {/* Refiling works on migrated projects too, which is why it
+                    is an override map rather than a field: their categories
+                    come from the generated manifest, where an edit would last
+                    until the next harvest and no longer. */}
+                <select
+                  value={recategorised[p.slug] ?? p.categorySlug}
+                  onChange={(e) => onRecategorise(p.slug, e.target.value)}
+                  aria-label={`Discipline for ${p.name}`}
+                  className="label max-w-[9rem] border border-border bg-transparent px-2 py-2 text-muted-foreground outline-none focus-visible:border-foreground"
+                >
+                  {disciplines.map((d) => (
+                    <option key={d.slug} value={d.slug}>
+                      {d.name}
+                    </option>
+                  ))}
+                </select>
+
                 <button
                   type="button"
                   onClick={() => toggleHidden(p.slug)}
@@ -256,7 +286,7 @@ export function AdminProjects({
                       onClick={() => setConfirming(p.slug)}
                       className="label border border-border px-3 py-2 text-muted-foreground press hoverable:hover:text-destructive"
                     >
-                      Delete
+                      Remove
                     </button>
                   )
                 ) : null}

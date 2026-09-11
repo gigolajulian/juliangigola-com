@@ -9,7 +9,7 @@ import {
   categoryLabel,
   categoryHref,
 } from "@/lib/work";
-import { ADDED } from "@/lib/added";
+import { ADDED, TRASH, RECATEGORISED } from "@/lib/added";
 
 /* ── admin ────────────────────────────────────────────────────────
  * Unlisted, not secret. Nothing in the nav points here and no crawler is
@@ -66,6 +66,7 @@ export default function AdminPage() {
           slug: p.slug,
           name: p.name,
           category: p.categories[0]?.name ?? "Unfiled",
+          categorySlug: p.categories[0]?.slug ?? "",
           frames: p.images.length,
           cover: {
             src: p.cover.src,
@@ -77,6 +78,8 @@ export default function AdminPage() {
           added: addedSlugs.has(p.slug),
         }))}
         initialHidden={[...HIDDEN]}
+        initialTrash={TRASH}
+        initialRecategorised={RECATEGORISED}
         categoryLinks={CATEGORIES.filter((c) => c.section !== "SESSIONS").map(
           (c) => ({
             slug: c.slug,
