@@ -29,10 +29,18 @@ import { cn } from "@/lib/utils";
 const DWELL_MS = 2600;
 
 export function PhotoNotice() {
-  // A timestamp rather than a boolean: right-clicking a second photograph
-  // while the notice is already up has to restart the clock, and setting a
-  // flag that is already `true` changes nothing and re-runs no effect.
-  const [raisedAt, setRaisedAt] = React.useState(0);
+  /**
+   * When it was raised, and where.
+   *
+   * A timestamp rather than a boolean: right-clicking a second photograph
+   * while the notice is already up has to restart the clock, and setting a
+   * flag that is already `true` changes nothing and re-runs no effect.
+   *
+   * The point is the click, so the notice appears where the menu would have
+   * — answering the gesture where it was made, rather than making somebody
+   * look to the corner of the screen to find out why nothing happened.
+   */
+  const [raised, setRaised] = React.useState<{ at: number; x: number; y: number } | null>(null);
 
   React.useEffect(() => {
     const onContextMenu = (e: MouseEvent) => {
@@ -42,7 +50,7 @@ export function PhotoNotice() {
       if (!target?.closest("img")) return;
 
       e.preventDefault();
-      setRaisedAt(Date.now());
+      setRaised({ at: Date.now(), x: e.clientX, y: e.clientY });
     };
 
     // The one path that actually moves a file: dragging a frame to the
@@ -60,12 +68,35 @@ export function PhotoNotice() {
   }, []);
 
   React.useEffect(() => {
-    if (!raisedAt) return;
-    const id = window.setTimeout(() => setRaisedAt(0), DWELL_MS);
+    if (!raised) return;
+    const id = window.setTimeout(() => setRaised(null), DWELL_MS);
     return () => window.clearTimeout(id);
-  }, [raisedAt]);
+  }, [raised]);
 
-  const shown = raisedAt !== 0;
+  const shown = raised !== null;
+
+  /**
+   * Below and right of the pointer, like the menu it replaces — but never off
+   * the screen.
+   *
+   * Clamped against a fixed estimate of the box rather than a measurement of
+   * it. Measuring would mean rendering it at the click point, reading it back
+   * in a layout effect and moving it, which is a visible jump for the sake of
+   * a few pixels of precision on a label that is gone in under three seconds.
+   * The estimate is generous, so the worst case is a notice sitting slightly
+   * further inside the edge than it strictly needed to.
+   */
+  const BOX_W = 384; // `max-w-sm`
+  const BOX_H = 96; // three lines plus padding, at the narrowest sensible width
+  const GAP = 12;
+  const MARGIN = 16;
+
+  const position = raised
+    ? {
+        left: Math.max(MARGIN, Math.min(raised.x + GAP, window.innerWidth - BOX_W - MARGIN)),
+        top: Math.max(MARGIN, Math.min(raised.y + GAP, window.innerHeight - BOX_H - MARGIN)),
+      }
+    : undefined;
 
   return (
     <div
@@ -76,8 +107,11 @@ export function PhotoNotice() {
       // reliably announced.
       role="status"
       aria-live="polite"
+      style={position}
       className={cn(
-        "pointer-events-none fixed inset-x-0 bottom-6 z-50 flex justify-center px-6 sm:bottom-10",
+        "pointer-events-none fixed z-50",
+        // No transition on position: it is placed where the click was and
+        // must not be seen travelling there from wherever the last one was.
         "transition-opacity duration-200 ease-[var(--ease-out-strong)] motion-reduce:transition-none",
         shown ? "opacity-100" : "opacity-0",
       )}

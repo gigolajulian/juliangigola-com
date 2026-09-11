@@ -215,12 +215,27 @@ export function Hero({ disciplines }: { disciplines: Discipline[] }) {
 
   return (
     <section ref={sectionRef} className="border-b border-border">
-      <div className="grid lg:h-dvh lg:grid-cols-[1fr_auto]">
+      {/* A column on a phone, two columns from `lg`.
+       *
+       * Three children rather than two, because on a phone the photograph
+       * belongs *between* the name and the index — the name has to be the
+       * first thing on the screen, and the index and the buttons have to
+       * follow the picture rather than precede it. A single text column
+       * cannot be interrupted like that, so it is split and the pieces are
+       * placed explicitly above `lg`, where they reassemble into the left
+       * column with the photograph beside them.
+       */}
+      <div className="flex flex-col lg:grid lg:h-dvh lg:grid-cols-[1fr_auto] lg:grid-rows-[auto_1fr]">
         {/* The photograph leads on a phone — it is the hook — but it is held
             to half the screen so the name and both ways in stay visible
             without scrolling. */}
         <div
-          className="relative order-first h-[55dvh] w-full lg:order-last lg:h-full lg:w-auto lg:aspect-[4/5]"
+          // Second on a phone: the name introduces the picture rather than
+          // the picture arriving unattributed. Still held to roughly half the
+          // screen so the index and both buttons are reachable without a
+          // scroll. On the right and full height from `lg`, spanning both
+          // text rows.
+          className="relative order-2 h-[55dvh] w-full lg:col-start-2 lg:row-span-2 lg:row-start-1 lg:h-full lg:w-auto lg:aspect-[4/5]"
           style={{ backgroundColor: current.frame.color }}
         >
           {/* Frames are crossfaded rather than swapped, so a switch never
@@ -271,11 +286,17 @@ export function Hero({ disciplines }: { disciplines: Discipline[] }) {
           )}
         </div>
 
-        <div className="flex min-w-0 flex-col">
+        {/* First on a phone, and the top of the left column from `lg`. */}
+        <div className="order-1 flex min-w-0 flex-col lg:col-start-1 lg:row-start-1">
           {/* One: the standing details, as a running head. The tall top
               padding on desktop clears the fixed header so the nav never
               crowds the rule. */}
-          <div className="flex flex-wrap items-baseline gap-x-6 gap-y-1 border-b border-border px-6 pb-5 pt-10 sm:px-10 lg:pt-32">
+          {/* `pt-24` on a phone, not `pt-10`: this is now the first thing in
+              the section rather than something sitting under a half-screen
+              photograph, so it has to clear the fixed header itself — which
+              is ~66px of wordmark and padding, and was printing straight
+              through "SF BAY AREA" until it did. */}
+          <div className="flex flex-wrap items-baseline gap-x-6 gap-y-1 border-b border-border px-6 pb-5 pt-24 sm:px-10 lg:pt-32">
             {/* Held back while the intro is up, because the intro is already
                 saying these exact words in display type eighty pixels below.
                 Printing them twice at once is the small-scale version of what
@@ -335,6 +356,13 @@ export function Hero({ disciplines }: { disciplines: Discipline[] }) {
             </span>
           </h1>
 
+        </div>
+
+        {/* Last on a phone, so the index and both buttons follow the
+            photograph rather than pushing it off the screen. The bottom of
+            the left column from `lg`, taking the `1fr` row so the buttons
+            still sit against the foot of the picture. */}
+        <div className="order-3 flex min-w-0 flex-col lg:col-start-1 lg:row-start-2">
           {/* Three: the index. This is the switcher's control and the site's
               discipline navigation at the same time — hover previews, click
               opens that discipline's own page. Numbering is what keeps it an

@@ -91,7 +91,18 @@ export function WorkBand({
         onBlur={reset}
         onKeyDown={onKeyDown}
         aria-label={`${project.name} — ${project.images.length} frames`}
-        className="group relative block h-[62vh] min-h-[24rem] w-full overflow-hidden lg:h-[68vh]"
+        // 4:5, the ratio the work is shot and delivered in.
+        //
+        // This was sized by viewport height — `62vh`, `68vh` above `lg` —
+        // which made the cell's shape an accident of the browser window. At
+        // 1440x900 that is a 720x612 landscape box, so every portrait frame
+        // was centre-cropped by `object-cover` and roughly a third of each
+        // photograph never appeared on the homepage.
+        //
+        // Fixing the ratio to the frame's own means the crop is nil where the
+        // cover is 4:5 and slight where it is taller, instead of severe
+        // everywhere.
+        className="group relative block aspect-[4/5] w-full overflow-hidden"
         style={{ backgroundColor: project.cover.color }}
       >
         {/* Base layer: always loaded, never removed. It is what keeps the

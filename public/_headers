@@ -1,0 +1,25 @@
+# Cache headers for Cloudflare Workers static assets.
+#
+# Photographs were being served `max-age=0, must-revalidate`, which is the
+# default for anything under `public/` — so every repeat visitor re-validated
+# every frame on every page. On a site that is almost entirely photographs,
+# that is the difference between a second visit feeling instant and feeling
+# like the first one.
+#
+# A day, not a year, and deliberately not `immutable`. These paths are not
+# content-hashed: `/work/<slug>/01.jpg` keeps its name when the frame behind
+# it changes, and the archive is about to be re-harvested at 2500px. `immutable`
+# would pin the old version in every browser that had seen it, with no way to
+# reach in and correct it. A day bounds that to a day.
+#
+# Cloudflare's edge cache sits in front of this regardless and is already
+# returning HITs, so the origin is not what this is protecting.
+
+/work/*
+  Cache-Control: public, max-age=86400
+
+/covers/*
+  Cache-Control: public, max-age=86400
+
+/hero/*
+  Cache-Control: public, max-age=86400
