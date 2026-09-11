@@ -56,11 +56,17 @@ next-env.d.ts
 /.open-next/
 /.wrangler/
 
-# The harvested archive. ~690MB at 2500px, and git keeps every version of
-# every blob forever — committing it once would make every clone pay for it
-# for good. It lives in R2 instead; `lib/work-data.ts` is the manifest that
-# points at it, and `scripts/sync-r2.mjs` pushes it after a harvest.
+# The harvested archive is tracked again, for now.
 #
-# `public/hero/` and `public/covers/` are NOT ignored: a few megabytes of
-# hand-picked frames that ship with the app.
-/public/work/
+# It was ignored on the way to R2, which is still the right home for it: at
+# 2500px it is ~690MB, and git keeps every version of every blob forever.
+# But CI builds from a checkout, so while the archive lives outside the repo
+# only a machine with it on disk can deploy — which meant an edit made in
+# /admin committed fine and then never went live.
+#
+# Re-tracking cost nothing: these exact blobs were committed for months
+# before the move, so git already had every one of them and untracking never
+# shrank anything.
+#
+# Undo this — and only this line — once R2 is populated and the build reads
+# from `images.juliangigola.com`. See `scripts/sync-r2.mjs`.
