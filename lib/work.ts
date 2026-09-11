@@ -385,7 +385,7 @@ const COVER_OVERRIDES: Record<string, Frame> = {
     src: "/hero/coverart.jpg",
     width: 1600,
     height: 2000,
-    color: "#5E6263",
+    color: "#65696A",
     alt: "Album sleeves laid out as prints, EST MODVS IN REBVS square to camera at the centre",
   },
 };
