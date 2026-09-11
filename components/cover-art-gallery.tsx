@@ -22,12 +22,18 @@ import type { CoverRelease } from "@/lib/cover-art-types";
 export function CoverArtGallery({ releases }: { releases: CoverRelease[] }) {
   // The lightbox pages through every side in order, so arrowing off side A
   // lands on side B rather than skipping to the next release.
-  const frames = React.useMemo(() => releases.flatMap((r) => r.frames), [releases]);
+  const frames = React.useMemo(
+    () => releases.flatMap((r) => r.frames),
+    [releases],
+  );
   const lightbox = useLightbox(frames.length);
 
   // A cell opens at its own position in that flat sequence. Keyed by `src`,
   // which is unique per side.
-  const positions = React.useMemo(() => new Map(frames.map((f, i) => [f.src, i])), [frames]);
+  const positions = React.useMemo(
+    () => new Map(frames.map((f, i) => [f.src, i])),
+    [frames],
+  );
 
   return (
     <>
@@ -46,7 +52,8 @@ export function CoverArtGallery({ releases }: { releases: CoverRelease[] }) {
                   // cover that was actually clicked — and a keyboard Enter,
                   // where nothing is hovered, opens side A.
                   const turned =
-                    release.frames.length > 1 && e.currentTarget.matches(":hover");
+                    release.frames.length > 1 &&
+                    e.currentTarget.matches(":hover");
                   const frame = release.frames[turned ? 1 : 0];
                   lightbox.show(positions.get(frame.src) ?? 0);
                 }}
@@ -64,9 +71,11 @@ export function CoverArtGallery({ releases }: { releases: CoverRelease[] }) {
 
                 {/* The release, named on hover or on focus. A rack of covers
                     is scanned for a name you recognise. */}
-                <div className="pointer-events-none absolute inset-x-0 bottom-0 flex flex-col gap-1 bg-gradient-to-t from-background/90 to-transparent p-4 pb-7 opacity-0 transition-opacity duration-200 ease-out group-hover:opacity-100 group-focus-visible:opacity-100 motion-reduce:transition-none">
+                <div className="pointer-events-none absolute inset-x-0 bottom-0 flex flex-col gap-1 border-t border-border/60 bg-background/70 p-4 backdrop-blur-xl opacity-0 transition-opacity duration-200 ease-out group-hover:opacity-100 group-focus-visible:opacity-100 motion-reduce:transition-none">
                   <span className="label text-foreground">{release.title}</span>
-                  <span className="label text-muted-foreground">{release.artist}</span>
+                  <span className="label text-muted-foreground">
+                    {release.artist}
+                  </span>
                 </div>
               </button>
             </li>

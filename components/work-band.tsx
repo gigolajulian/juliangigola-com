@@ -42,12 +42,17 @@ export function WorkBand({
   index: number;
   priority?: boolean;
 }) {
-  const frames = React.useMemo(() => project.images.slice(0, MAX_SCRUB), [project.images]);
+  const frames = React.useMemo(
+    () => project.images.slice(0, MAX_SCRUB),
+    [project.images],
+  );
 
   const [active, setActive] = React.useState(0);
   const [scrubbing, setScrubbing] = React.useState(false);
 
-  const client = project.credits.find((c) => /client|artist|model/i.test(c.role));
+  const client = project.credits.find((c) =>
+    /client|artist|model/i.test(c.role),
+  );
 
   const onPointerMove = (e: React.PointerEvent<HTMLElement>) => {
     // Touch gets the cover and a plain tap through to the project. Scrubbing
@@ -57,7 +62,10 @@ export function WorkBand({
 
     const box = e.currentTarget.getBoundingClientRect();
     const ratio = (e.clientX - box.left) / box.width;
-    const next = Math.min(frames.length - 1, Math.max(0, Math.floor(ratio * frames.length)));
+    const next = Math.min(
+      frames.length - 1,
+      Math.max(0, Math.floor(ratio * frames.length)),
+    );
 
     setScrubbing(true);
     setActive(next);
@@ -131,30 +139,43 @@ export function WorkBand({
           />
         ) : null}
 
-        {/* The scrim is bottom-weighted only. A flat overlay across the cell
-            would dim the photograph everywhere to make type legible in one
-            corner. */}
-        <div
-          aria-hidden
-          className="absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-background via-background/50 to-transparent"
-        />
-
-        <p className="label absolute left-6 top-6 tabular-nums text-muted-foreground sm:left-8 sm:top-8">
-          {String(index + 1).padStart(2, "0")}
-        </p>
-
-        <div className="absolute inset-x-0 bottom-0 flex flex-col gap-4 p-6 sm:p-8">
-          <h3 className="font-display max-w-[16ch] text-3xl uppercase leading-[0.95] tracking-[0.01em] sm:text-4xl lg:text-5xl">
-            {project.name}
-          </h3>
+        {/* A plate under the type, not a wash over the picture.
+         *
+         * This was a gradient two-thirds of the cell tall, fading from the
+         * ground to transparent — so making four lines of type legible cost
+         * most of the photograph, and every frame was shown through a
+         * darkening that got heavier exactly where the subject usually is.
+         *
+         * The same material as the bar at the top of every page: the ground
+         * at 70%, a heavy blur behind it, closed with a hairline. It is the
+         * height of its own contents rather than a fixed fraction of the
+         * cell, so it covers what it needs to and no more — and being the
+         * site's one established translucent surface, it reads as chrome
+         * rather than as something wrong with the image.
+         */}
+        <div className="absolute inset-x-0 bottom-0 flex flex-col gap-3 border-t border-border/60 bg-background/70 p-5 backdrop-blur-xl sm:p-6">
+          <div className="flex items-baseline gap-4">
+            <span className="label shrink-0 tabular-nums text-muted-foreground">
+              {String(index + 1).padStart(2, "0")}
+            </span>
+            {/* Moved off the photograph and into the plate. On its own in the
+                top corner it needed either a second plate or a scrim of its
+                own to stay legible over a bright frame. */}
+            <h3 className="font-display min-w-0 truncate text-2xl uppercase leading-none tracking-[0.01em] sm:text-3xl">
+              {project.name}
+            </h3>
+          </div>
 
           <div className="flex flex-wrap items-baseline gap-x-6 gap-y-2">
-            {client ? <p className="label text-muted-foreground">{client.name}</p> : null}
+            {client ? (
+              <p className="label text-muted-foreground">{client.name}</p>
+            ) : null}
             <p className="label text-muted-foreground">
               {project.categories[0]?.name ?? "Project"}
             </p>
             <p className="label ml-auto tabular-nums text-muted-foreground">
-              {String(active + 1).padStart(2, "0")} / {String(frames.length).padStart(2, "0")}
+              {String(active + 1).padStart(2, "0")} /{" "}
+              {String(frames.length).padStart(2, "0")}
             </p>
           </div>
 
@@ -169,7 +190,9 @@ export function WorkBand({
                   key={f.src}
                   className={cn(
                     "h-px flex-1 transition-colors duration-150",
-                    i === active && scrubbing ? "bg-foreground" : "bg-foreground/25",
+                    i === active && scrubbing
+                      ? "bg-foreground"
+                      : "bg-foreground/25",
                   )}
                 />
               ))}

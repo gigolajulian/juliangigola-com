@@ -56,18 +56,27 @@ export function CoverArt() {
           <li key={release.slug}>
             <Link
               href={`/work/${project.slug}`}
-              aria-label={coverLabel(release.title, release.artist, release.frames)}
+              aria-label={coverLabel(
+                release.title,
+                release.artist,
+                release.frames,
+              )}
               className="group relative block aspect-square overflow-hidden"
               style={{ backgroundColor: release.frames[0]?.color }}
             >
-              <CoverFaces frames={release.frames} sizes="(min-width: 1024px) 20vw, 50vw" />
+              <CoverFaces
+                frames={release.frames}
+                sizes="(min-width: 1024px) 20vw, 50vw"
+              />
 
               {/* The release, named. A music client is scanning for something
                   they recognise, and a cover on its own does not say what it
                   is unless you already know it. */}
-              <div className="pointer-events-none absolute inset-x-0 bottom-0 flex flex-col gap-1 bg-gradient-to-t from-background/90 to-transparent p-4 pb-7 opacity-0 transition-opacity duration-200 ease-out group-hover:opacity-100 group-focus-visible:opacity-100 motion-reduce:transition-none">
+              <div className="pointer-events-none absolute inset-x-0 bottom-0 flex flex-col gap-1 border-t border-border/60 bg-background/70 p-4 backdrop-blur-xl opacity-0 transition-opacity duration-200 ease-out group-hover:opacity-100 group-focus-visible:opacity-100 motion-reduce:transition-none">
                 <span className="label text-foreground">{release.title}</span>
-                <span className="label text-muted-foreground">{release.artist}</span>
+                <span className="label text-muted-foreground">
+                  {release.artist}
+                </span>
               </div>
             </Link>
           </li>
