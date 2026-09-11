@@ -179,6 +179,17 @@
     scroll-padding-top: 6rem;
   }
 
+  /* The half of the copyright notice that JavaScript cannot do.
+     `touch-callout` is the long-press "Save Image" sheet on iOS, which never
+     raises a contextmenu event; `user-drag` is Safari's own drag-the-file-out,
+     which ignores a prevented `dragstart`. See `components/photo-notice.tsx`
+     — and the note there about what this is and is not. */
+  img {
+    -webkit-touch-callout: none;
+    -webkit-user-drag: none;
+    user-select: none;
+  }
+
   /* Keyboard focus has to be obvious on a dark ground, and the accent is the
      only saturated thing on the page — so it reads instantly as "you are
      here" without being decorative. Mouse clicks get nothing. */

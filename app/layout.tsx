@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import localFont from "next/font/local";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
+import { PhotoNotice } from "@/components/photo-notice";
 import "./globals.css";
 
 // `globals.css` resolves `font-sans` from `--font-sans` (shadcn's theme block
@@ -83,6 +84,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           {children}
         </main>
         <SiteFooter />
+        <PhotoNotice />
       </body>
     </html>
   );
