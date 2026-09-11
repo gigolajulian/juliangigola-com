@@ -301,7 +301,14 @@ export function Hero({ disciplines }: { disciplines: Discipline[] }) {
               twice, forty pixels apart, is what made an earlier version of
               this page look amateur. */}
           <h1 className="px-6 pt-8 sm:px-10 sm:pt-10">
-            <span className="display block">Julian Gigola</span>
+            {/* Tagged so the header can measure it. The header's own wordmark
+                waits on this one and then takes over from where it left, and
+                it can only time that against the real element — the masthead's
+                size is a `clamp()` on the viewport and its position moves with
+                the running head above it. */}
+            <span data-masthead className="display block">
+              Julian Gigola
+            </span>
 
             {/* The switching half: the job title first, then each discipline.
                 Deliberately not a live region — it would announce a new line

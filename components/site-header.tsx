@@ -64,25 +64,133 @@ export function SiteHeader() {
   // anything to defer to.
   const deferWordmark = pathname === "/";
   const [pastMasthead, setPastMasthead] = React.useState(false);
+  const wordmarkRef = React.useRef<HTMLAnchorElement>(null);
 
+  /**
+   * The handoff.
+   *
+   * The masthead and this wordmark are the same name in the same face, and
+   * they share a left edge — the cover sets it at 112px over two lines, the
+   * bar at 24px over one. So rather than one fading in once the other is
+   * gone, this one arrives from where that one was going: rising the short
+   * distance from below the bar and settling out of a slight oversize, timed
+   * to the masthead's own last line clearing the bar.
+   *
+   * Scroll-linked rather than a transition on a threshold, so it is tied to
+   * the hand doing the scrolling — scroll back up and it goes back, at the
+   * speed it was sent. A one-shot transition fires once at a line in the page
+   * and plays regardless of whether the visitor is still moving.
+   *
+   * Written straight to the node rather than held in state: this runs on
+   * every scroll frame, and a `setState` per frame would re-render the whole
+   * header — nav, burger and panel — to move one word.
+   */
   React.useEffect(() => {
-    if (!deferWordmark) return;
+    if (!deferWordmark) {
+      // Leaving the homepage: drop anything left on the node, or the wordmark
+      // keeps the cover's last frame on every other route.
+      const el = wordmarkRef.current;
+      if (el) el.style.cssText = "";
+      return;
+    }
 
-    // Reading scroll position in a rAF keeps this off the scroll handler's
-    // critical path — the listener only ever schedules, never measures.
+    const desktop = window.matchMedia("(min-width: 1024px)");
+    const still = window.matchMedia("(prefers-reduced-motion: reduce)");
+
+    /** Where the name rises from, and how much oversize it sheds. */
+    const RISE_PX = 20;
+    const GROW = 0.35;
+    /** How much scrolling the handoff is spread over. */
+    const TRAVEL_PX = 150;
+
     let frame = 0;
+    let start = 0;
+    let end = 1;
+
+    /**
+     * Measured off the masthead itself rather than a fraction of the
+     * viewport. Its size is a `clamp()` on the viewport and it sits under a
+     * running head that wraps at some widths, so "half a screen" is only ever
+     * accidentally the right moment.
+     */
+    const measure = () => {
+      const mast = document.querySelector<HTMLElement>("[data-masthead]");
+      const el = wordmarkRef.current;
+      if (!mast || !el) return;
+
+      // Measure the resting place, not the animation: whatever transform is
+      // on the node right now would otherwise be baked into the target.
+      const transform = el.style.transform;
+      el.style.transform = "";
+      const rest = el.getBoundingClientRect();
+      el.style.transform = transform;
+
+      // The scroll at which the masthead's last line clears this one's top —
+      // the first moment the name is not about to be printed twice.
+      end = mast.getBoundingClientRect().bottom + window.scrollY - rest.top;
+      start = Math.max(0, end - TRAVEL_PX);
+    };
+
+    const apply = () => {
+      const el = wordmarkRef.current;
+      if (!el) return;
+
+      // Below `lg` the cover stacks and the masthead sits under a half-screen
+      // photograph, so there is nothing beside the bar to hand off from — the
+      // class keeps the name visible there and inline styles must not fight
+      // it.
+      if (!desktop.matches) {
+        el.style.cssText = "";
+        setPastMasthead(true);
+        return;
+      }
+
+      const raw = Math.min(1, Math.max(0, (window.scrollY - start) / (end - start || 1)));
+      // Ease out: quick off the mark, settling rather than stopping dead.
+      const p = 1 - Math.pow(1 - raw, 3);
+
+      // No transition while the scroll is driving: a 300ms ease on a value
+      // that changes every frame lags the page by a third of a second, which
+      // reads as the name being dragged rather than moving with the scroll.
+      // It costs the hover fade on this one route, which is a fair trade for
+      // a handoff that tracks the hand.
+      el.style.transition = "none";
+      el.style.opacity = String(p);
+      el.style.transform = still.matches
+        ? ""
+        : `translateY(${(1 - p) * RISE_PX}px) scale(${1 + (1 - p) * GROW})`;
+
+      // Keeps it out of the tab order only while it is genuinely not there.
+      setPastMasthead(raw > 0);
+    };
+
     const onScroll = () => {
       if (frame) return;
       frame = requestAnimationFrame(() => {
         frame = 0;
-        setPastMasthead(window.scrollY > window.innerHeight * 0.5);
+        apply();
       });
     };
 
-    onScroll();
+    const onResize = () => {
+      measure();
+      apply();
+    };
+
+    measure();
+    apply();
+
+    // The display face lands after first paint and the masthead reflows with
+    // it, which moves the moment this is timed against.
+    document.fonts?.ready.then(onResize).catch(() => {});
+
     window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onResize);
+    desktop.addEventListener("change", onResize);
     return () => {
       window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onResize);
+      desktop.removeEventListener("change", onResize);
       cancelAnimationFrame(frame);
     };
   }, [deferWordmark]);
@@ -102,6 +210,7 @@ export function SiteHeader() {
 
       <div className="relative mx-auto flex max-w-[100rem] items-center justify-between px-6 py-6 sm:px-10 sm:py-7">
         <Link
+          ref={wordmarkRef}
           href="/"
           // Caps, because that is what a bold condensed grotesque is for —
           // and it is how the wordmark has always been set. A little tracking
@@ -114,6 +223,10 @@ export function SiteHeader() {
           // target.
           className={cn(
             "font-display text-lg uppercase leading-none tracking-[0.05em] sm:text-2xl",
+            // Scaling from the left edge, because that edge is shared with
+            // the masthead — growing from the centre would slide the name
+            // sideways out of the alignment the handoff depends on.
+            "origin-left will-change-[transform,opacity]",
             "transition-opacity duration-300 ease-[var(--ease-out-strong)] hover:opacity-70",
             "focus-visible:opacity-100",
             // Deferring only makes sense where the masthead is actually
