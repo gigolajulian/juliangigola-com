@@ -125,7 +125,24 @@ const project = (v: unknown, path: string): AddedProject => {
   };
 };
 
-function parse(v: unknown): AddedProject[] {
+export type AddedFile = {
+  projects: AddedProject[];
+  /**
+   * Slugs to leave off the site.
+   *
+   * Harvested projects cannot be deleted: `lib/work-data.ts` is regenerated
+   * from the old site, so a removal there comes back on the next harvest with
+   * nothing to indicate it ever went. Suppressing them here is the only kind
+   * of removal that survives, and it has the advantage of being reversible —
+   * the work is still in the archive, it is simply not published.
+   *
+   * Applies to added projects too, so "take this down for now" is one
+   * mechanism rather than two with different consequences.
+   */
+  hidden: string[];
+};
+
+function parse(v: unknown): AddedFile {
   if (!isRecord(v)) return fail("the file", "an object", v);
   const list = v.projects;
   if (!Array.isArray(list)) return fail("projects", "an array", list);
@@ -145,10 +162,20 @@ function parse(v: unknown): AddedProject[] {
     seen.add(p.slug);
   }
 
-  return projects;
+  // Absent in files written before hiding existed, which is not an error.
+  const hidden = v.hidden === undefined ? [] : v.hidden;
+  if (!Array.isArray(hidden)) return fail("hidden", "an array", hidden);
+
+  return {
+    projects,
+    hidden: hidden.map((s, i) => str(s, `hidden[${i}]`)),
+  };
 }
 
-export const ADDED: AddedProject[] = parse(raw);
+const FILE = parse(raw);
+
+export const ADDED: AddedProject[] = FILE.projects;
+export const HIDDEN: ReadonlySet<string> = new Set(FILE.hidden);
 
 /** Where the editor writes. Shown in the editor so it is not a mystery. */
 export const ADDED_PATH = "content/projects.json";

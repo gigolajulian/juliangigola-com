@@ -11,7 +11,7 @@ import { PROJECTS as HARVESTED, CATEGORIES } from "./work-data";
 import type { Project, Category, Frame } from "./work-types";
 import { COVER_RELEASES } from "./cover-art-data";
 import { CONTENT } from "./content";
-import { ADDED, type AddedProject } from "./added";
+import { ADDED, HIDDEN, type AddedProject } from "./added";
 
 export type { Project, Category, Frame };
 export { CATEGORIES, COVER_RELEASES };
@@ -73,7 +73,9 @@ const LEAD_FRAMES: Record<string, string> = {
 
 const withLeadFrame = (project: Project): Project => {
   const wanted = LEAD_FRAMES[project.slug];
-  const lead = wanted ? project.images.find((f) => f.src === wanted) : undefined;
+  const lead = wanted
+    ? project.images.find((f) => f.src === wanted)
+    : undefined;
   // Silently unchanged if the named frame is gone, rather than throwing a
   // build that is otherwise fine — a re-harvest can renumber a gallery.
   if (!lead) return project;
@@ -122,18 +124,37 @@ const fromAdded = (p: AddedProject): Project => {
 };
 
 /**
- * Added work leads.
+ * Every project, added work first — and including what is hidden.
  *
  * `projectsIn()` takes the first project in a category as that category's
  * lead — the frame its row shows, and what the discipline page opens with —
  * so putting new work at the front means a shoot added today is what the site
  * leads with, rather than sinking beneath a migration ordered by the old
  * site. The hand-picked cover overrides still win where they exist.
+ *
+ * Exported unfiltered for `/admin` only: the editor has to be able to show a
+ * hidden project in order to offer to bring it back, which is the one context
+ * where the filter below is wrong.
  */
-export const PROJECTS: Project[] = [
+export const ALL_PROJECTS: Project[] = [
   ...ADDED.map(fromAdded),
-  ...HARVESTED.map((p) => (p.slug === "coverart" ? withCoverArt(p) : withLeadFrame(p))),
+  ...HARVESTED.map((p) =>
+    p.slug === "coverart" ? withCoverArt(p) : withLeadFrame(p),
+  ),
 ];
+
+/**
+ * Filtered here, at the one place every consumer reads from, rather than at
+ * each index. A hidden project has to be absent from the work index, the
+ * discipline pages, the homepage band, `generateStaticParams`, the sitemap
+ * and the old-URL redirects — and a list that has to be remembered in six
+ * places is a list that will be forgotten in one.
+ */
+export const PROJECTS: Project[] = ALL_PROJECTS.filter(
+  (p) => !HIDDEN.has(p.slug),
+);
+
+export { HIDDEN };
 
 /**
  * The old nav split commissioned work across WORK and MUSIC, which asked a
@@ -144,7 +165,8 @@ export const PROJECTS: Project[] = [
  * different things from the first screen (price and dates vs. clients and
  * credits), and that is the one split worth keeping.
  */
-const inSessions = (p: Project) => p.categories.some((c) => c.section === "SESSIONS");
+const inSessions = (p: Project) =>
+  p.categories.some((c) => c.section === "SESSIONS");
 
 /** Commissioned work: editorial, campaigns, portraits, music, film. */
 export const COMMISSIONS: Project[] = PROJECTS.filter(
@@ -160,14 +182,21 @@ export const SESSIONS: Project[] = PROJECTS.filter(inSessions);
  * indexed breaks, but they stay out of the indexes until Julian files one
  * under a category by hand.
  */
-export const UNFILED: Project[] = PROJECTS.filter((p) => p.categories.length === 0);
+export const UNFILED: Project[] = PROJECTS.filter(
+  (p) => p.categories.length === 0,
+);
 
-export const WORK_CATEGORIES: Category[] = CATEGORIES.filter((c) => c.section !== "SESSIONS");
-export const SESSION_CATEGORIES: Category[] = CATEGORIES.filter((c) => c.section === "SESSIONS");
+export const WORK_CATEGORIES: Category[] = CATEGORIES.filter(
+  (c) => c.section !== "SESSIONS",
+);
+export const SESSION_CATEGORIES: Category[] = CATEGORIES.filter(
+  (c) => c.section === "SESSIONS",
+);
 
 const bySlug = new Map(PROJECTS.map((p) => [p.slug, p]));
 
-export const getProject = (slug: string): Project | undefined => bySlug.get(slug);
+export const getProject = (slug: string): Project | undefined =>
+  bySlug.get(slug);
 
 export const projectsIn = (categorySlug: string): Project[] =>
   PROJECTS.filter((p) => p.categories.some((c) => c.slug === categorySlug));
@@ -272,9 +301,9 @@ export const coverOf = (p: Project): Frame => p.cover;
  */
 export const FEATURED_SLUGS: string[] = CONTENT.featured;
 
-export const FEATURED: Project[] = FEATURED_SLUGS.map((s) => bySlug.get(s)).filter(
-  (p): p is Project => Boolean(p),
-);
+export const FEATURED: Project[] = FEATURED_SLUGS.map((s) =>
+  bySlug.get(s),
+).filter((p): p is Project => Boolean(p));
 
 /**
  * The press strip on the homepage. The old site buried these as plain text at
@@ -310,7 +339,8 @@ export const HERO: { project: Project; frame: Frame } | null = (() => {
   // Prefer a portrait frame. The cover sits in a half-width, full-height
   // column, and `object-cover` on a landscape frame in that shape crops away
   // both sides — usually most of the subject.
-  const frame = project?.images.find((f) => f.height > f.width) ?? project?.images[0];
+  const frame =
+    project?.images.find((f) => f.height > f.width) ?? project?.images[0];
   return project && frame ? { project, frame } : null;
 })();
 
@@ -325,7 +355,11 @@ export const HERO: { project: Project; frame: Frame } | null = (() => {
 export const enquiryTypeFor = (p: Project): string => {
   const slugs = p.categories.map((c) => c.slug);
 
-  if (slugs.some((s) => ["artist-presskit", "music-video", "coverart", "events"].includes(s)))
+  if (
+    slugs.some((s) =>
+      ["artist-presskit", "music-video", "coverart", "events"].includes(s),
+    )
+  )
     return "music";
   if (slugs.includes("campaigns")) return "campaign";
   if (slugs.includes("editorial")) return "editorial";
@@ -340,7 +374,9 @@ export const enquiryTypeFor = (p: Project): string => {
  * exit. Wrapping round at the end means there is always a next thing.
  */
 export const nextAfter = (p: Project): Project | undefined => {
-  const pool = p.categories.some((c) => c.section === "SESSIONS") ? SESSIONS : COMMISSIONS;
+  const pool = p.categories.some((c) => c.section === "SESSIONS")
+    ? SESSIONS
+    : COMMISSIONS;
   const i = pool.findIndex((x) => x.slug === p.slug);
   if (i === -1) return pool[0];
   return pool[(i + 1) % pool.length];
@@ -408,7 +444,8 @@ const archiveFrame = (src: string, alt: string): Frame => {
   // Naming a frame that does not exist is an editorial mistake, not a runtime
   // condition to paper over — and a silent fallback here would put the wrong
   // photograph at the top of the homepage.
-  if (!found) throw new Error(`Cover override names a frame not in the archive: ${src}`);
+  if (!found)
+    throw new Error(`Cover override names a frame not in the archive: ${src}`);
   return { ...found, alt };
 };
 
@@ -468,7 +505,9 @@ export const categoryFrame = (categorySlug: string): Frame | null => {
   const project = projectsIn(categorySlug)[0];
   if (!project) return null;
 
-  return project.images.find((f) => f.height > f.width) ?? project.images[0] ?? null;
+  return (
+    project.images.find((f) => f.height > f.width) ?? project.images[0] ?? null
+  );
 };
 
 /**
@@ -494,8 +533,13 @@ const frameProject = (frame: Frame): Project | undefined =>
  * does — and which five lead the site is an editorial call, not something to
  * be decided by a `slice`.
  */
-const DISCIPLINE_SLUGS = ["editorial", "campaigns", "portraits", "mixed-media", "coverart"];
-
+const DISCIPLINE_SLUGS = [
+  "editorial",
+  "campaigns",
+  "portraits",
+  "mixed-media",
+  "coverart",
+];
 
 /**
  * Where the unit of work is not a frame.
@@ -508,8 +552,8 @@ const DISCIPLINE_COUNTS: Record<string, number> = {
   coverart: COVER_RELEASES.length,
 };
 
-export const DISCIPLINES: Discipline[] = DISCIPLINE_SLUGS.map(
-  (slug) => CATEGORIES.find((c) => c.slug === slug),
+export const DISCIPLINES: Discipline[] = DISCIPLINE_SLUGS.map((slug) =>
+  CATEGORIES.find((c) => c.slug === slug),
 )
   .filter((c): c is Category => Boolean(c))
   .map((category) => {

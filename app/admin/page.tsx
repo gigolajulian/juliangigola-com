@@ -1,7 +1,15 @@
 import type { Metadata } from "next";
 import { AdminEditor } from "@/components/admin-editor";
 import { CONTENT, CONTENT_PATH } from "@/lib/content";
-import { PROJECTS, CATEGORIES, categoryLabel } from "@/lib/work";
+import {
+  PROJECTS,
+  ALL_PROJECTS,
+  HIDDEN,
+  CATEGORIES,
+  categoryLabel,
+  categoryHref,
+} from "@/lib/work";
+import { ADDED } from "@/lib/added";
 
 /* ── admin ────────────────────────────────────────────────────────
  * Unlisted, not secret. Nothing in the nav points here and no crawler is
@@ -23,6 +31,8 @@ export const metadata: Metadata = {
 };
 
 export default function AdminPage() {
+  const addedSlugs = new Set(ADDED.map((p) => p.slug));
+
   return (
     <div className="mx-auto w-full max-w-[64rem] px-6 pb-24 pt-28 sm:px-10 sm:pt-36">
       <header>
@@ -47,6 +57,31 @@ export default function AdminPage() {
           (c) => ({
             slug: c.slug,
             name: categoryLabel(c),
+          }),
+        )}
+        /* Trimmed deliberately. The editor needs a cover, a name and a count
+           per project — not every frame of all 74, which would serialise the
+           whole archive into this page's payload to render a list of rows. */
+        projects={ALL_PROJECTS.map((p) => ({
+          slug: p.slug,
+          name: p.name,
+          category: p.categories[0]?.name ?? "Unfiled",
+          frames: p.images.length,
+          cover: {
+            src: p.cover.src,
+            width: p.cover.width,
+            height: p.cover.height,
+            color: p.cover.color,
+          },
+          // Only these have files of ours to delete; the rest can be hidden.
+          added: addedSlugs.has(p.slug),
+        }))}
+        initialHidden={[...HIDDEN]}
+        categoryLinks={CATEGORIES.filter((c) => c.section !== "SESSIONS").map(
+          (c) => ({
+            slug: c.slug,
+            name: categoryLabel(c),
+            href: categoryHref(c.slug),
           }),
         )}
       />

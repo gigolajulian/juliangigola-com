@@ -109,6 +109,21 @@ points anywhere but `/work/`, an unknown discipline, or a duplicate slug fails
 the build rather than shipping. Failing the deploy leaves the last good build
 serving, which is the safe direction.
 
+### Taking work down
+
+**Hide** removes a project from the site — every index, the discipline pages,
+`sitemap.xml`, and its own route — and is reversible. It is the only kind of
+removal a harvested project can have: `lib/work-data.ts` is regenerated, so a
+deletion there returns on the next harvest with nothing to show it ever went.
+The list lives in `hidden` in `content/projects.json`, and `lib/work.ts`
+filters once, where every consumer reads, rather than at each index.
+
+**Delete** is offered only for projects added through `/admin`, because only
+those have files that are ours to remove. It takes the manifest entry and
+every file under `public/work/<slug>/` in one commit — listed from the repo
+rather than derived from the manifest, so a half-finished upload does not
+leave orphans behind.
+
 ### /admin is behind Cloudflare Access
 
 The editor is a public page that holds a GitHub token, so it is gated by a

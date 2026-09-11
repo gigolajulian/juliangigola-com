@@ -22,10 +22,41 @@ const API = "https://api.github.com";
 export type CommitFile = {
   /** Repo-relative, e.g. `public/work/new-thing/01.jpg`. */
   path: string;
-  /** Raw text, or base64 for binary. */
-  content: string;
-  encoding: "utf-8" | "base64";
+  /** Raw text, or base64 for binary. Omitted when deleting. */
+  content?: string;
+  encoding?: "utf-8" | "base64";
+  /**
+   * Remove the path instead of writing it.
+   *
+   * A tree entry with a null sha is how the Git Data API expresses a deletion,
+   * which is the only way to take a file out in the same commit that writes
+   * others. The Contents API can only delete one path per request, so removing
+   * a twelve-frame project would be twelve commits and twelve builds.
+   */
+  remove?: true;
 };
+
+/** Lists file paths under a directory at the branch head. Empty if absent. */
+export async function listDirectory(
+  token: string,
+  path: string,
+): Promise<string[]> {
+  const res = await fetch(
+    `${API}/repos/${REPO.owner}/${REPO.repo}/contents/${path}?ref=${REPO.branch}`,
+    { headers: headers(token), cache: "no-store" },
+  );
+  if (res.status === 404) return [];
+  const body = await res.json();
+  if (!res.ok)
+    throw new Error(
+      `GitHub said ${res.status}: ${body?.message ?? "unknown error"}`,
+    );
+  return Array.isArray(body)
+    ? body
+        .filter((e: { type: string }) => e.type === "file")
+        .map((e: { path: string }) => e.path)
+    : [];
+}
 
 const headers = (token: string) => ({
   Authorization: `Bearer ${token}`,
@@ -101,8 +132,14 @@ export async function commitFiles({
   // Sequential, not parallel. A dozen simultaneous multi-megabyte uploads
   // compete for the same upstream bandwidth and make the progress meaningless;
   // in order, each one finishes before the next starts and the count is true.
-  const blobs: string[] = [];
+  const blobs: (string | null)[] = [];
   for (const [i, file] of files.entries()) {
+    if (file.remove) {
+      // Nothing to upload: the deletion is expressed in the tree, below.
+      blobs.push(null);
+      onProgress?.(i + 1, files.length);
+      continue;
+    }
     const blob = await gh<{ sha: string }>(token, "/git/blobs", {
       method: "POST",
       body: { content: file.content, encoding: file.encoding },
@@ -120,6 +157,8 @@ export async function commitFiles({
         path: file.path,
         mode: "100644",
         type: "blob",
+        // `null` removes the path from the tree. It has to be sent, not
+        // omitted: leaving the key out would mean "unchanged".
         sha: blobs[i],
       })),
     },
