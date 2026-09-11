@@ -1,6 +1,10 @@
 import type { NextConfig } from "next";
-import { PROJECTS, CATEGORIES } from "./lib/work-data";
-import { categoryHref } from "./lib/work";
+// `work`, not `work-data`. The generated manifest is every project the old
+// site ever had; `work.ts` is the set actually published, with hidden ones
+// filtered out. Redirecting from a legacy URL to a page that is no longer
+// built sends a visitor 308 → 404, which is worse than the plain 404 they
+// would have got, because it looks like the site meant to take them there.
+import { PROJECTS, CATEGORIES, categoryHref } from "./lib/work";
 
 /**
  * The old site published every project at the site root — `/wired-magazine`,

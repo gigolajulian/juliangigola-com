@@ -10,6 +10,7 @@ import { AdminNewProject } from "@/components/admin-new-project";
 import { AdminProjects, type AdminProject } from "@/components/admin-projects";
 import { AdminSitemap } from "@/components/admin-sitemap";
 import { AdminPreview } from "@/components/admin-preview";
+import { AdminFeatured } from "@/components/admin-featured";
 import { ADDED_PATH } from "@/lib/added";
 import { commitFiles, readFile } from "@/lib/admin-github";
 import { cn } from "@/lib/utils";
@@ -93,9 +94,7 @@ export function AdminEditor({
   /** The blob SHA of the file being edited. Absent until connected. */
   const [sha, setSha] = React.useState<string | null>(null);
   const [status, setStatus] = React.useState<Status>({ kind: "idle" });
-  const [view, setView] = React.useState<"content" | "projects" | "sitemap">(
-    "content",
-  );
+  const [view, setView] = React.useState<"content" | "projects">("content");
 
   const [hidden, setHidden] = React.useState<Set<string>>(
     () => new Set(initialHidden),
@@ -307,6 +306,7 @@ export function AdminEditor({
             slug: p.slug,
             name: p.name,
             category: p.category,
+            cover: p.cover,
           }))}
           hidden={hidden}
           categories={categoryLinks}
@@ -317,7 +317,28 @@ export function AdminEditor({
   }
 
   return (
-    <div className="mt-10 grid gap-10 xl:grid-cols-[1fr_24rem] xl:items-start">
+    /* Three columns from `xl`: the site on the left, the work in the middle,
+       the result on the right. Below that they stack in the same order. */
+    <div className="mt-10 grid gap-10 xl:grid-cols-[15rem_1fr_22rem] xl:items-start">
+      {/* Not a tab any more. The sitemap is what the site currently is, which
+          is context for every edit rather than a place to go — and it redraws
+          as the draft changes, so it doubles as a readout of what hiding
+          something will actually do. */}
+      <aside className="min-w-0 xl:sticky xl:top-28 xl:max-h-[calc(100dvh-9rem)] xl:overflow-y-auto">
+        <AdminSitemap
+          projects={projects.map((p) => ({
+            slug: p.slug,
+            name: p.name,
+            category: p.category,
+            cover: p.cover,
+          }))}
+          hidden={hidden}
+          categories={categoryLinks}
+          origin={origin}
+          compact
+        />
+      </aside>
+
       <div className="min-w-0">
         {/* Three views over one draft, rather than three pages. Everything the
             tabs switch between edits the same object, and the preview beside
@@ -327,7 +348,7 @@ export function AdminEditor({
           className="flex gap-1 border-b border-border"
           aria-label="Editor sections"
         >
-          {(["content", "projects", "sitemap"] as const).map((v) => (
+          {(["content", "projects"] as const).map((v) => (
             <button
               key={v}
               type="button"
@@ -356,17 +377,6 @@ export function AdminEditor({
             projects={projects}
             hidden={hidden}
             onHiddenChange={setHidden}
-          />
-        ) : view === "sitemap" ? (
-          <AdminSitemap
-            projects={projects.map((p) => ({
-              slug: p.slug,
-              name: p.name,
-              category: p.category,
-            }))}
-            hidden={hidden}
-            categories={categoryLinks}
-            origin={origin}
           />
         ) : (
           <ContentForm />
@@ -428,13 +438,13 @@ export function AdminEditor({
 
           <Field
             label="Selected work, in order"
-            hint="One project slug per line. These are the six cards under the cover."
+            hint="The cards under the cover, three across. Reorder with the arrows."
           >
-            <textarea
-              rows={7}
-              value={draft.featured.join("\n")}
-              onChange={(e) => set("featured", splitLines(e.target.value))}
-              className={cn(inputClass, "font-mono text-xs")}
+            <AdminFeatured
+              featured={draft.featured}
+              projects={projects}
+              hidden={hidden}
+              onChange={(next) => set("featured", next)}
             />
           </Field>
 

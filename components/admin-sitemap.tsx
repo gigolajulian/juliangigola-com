@@ -1,31 +1,53 @@
 "use client";
 
 import * as React from "react";
+import Image from "next/image";
 import { cn } from "@/lib/utils";
 
 /* ── the sitemap ──────────────────────────────────────────────────
  * Every page the site publishes, as the draft would leave it.
  *
- * It reads from the same draft the rest of the editor is editing, so hiding a
- * project strikes its row through here before anything is committed — which
- * is the point. The question this answers is "what will the site be when I
- * press publish", and a sitemap generated from the last build cannot answer
- * that.
+ * Drawn rather than listed. A column of URLs is a thing to read; a grid of
+ * the actual covers is a thing to recognise, and recognising a photograph is
+ * how Julian knows which project a row is without decoding a slug. The
+ * disciplines keep their own colour-free grouping, so the shape of the site —
+ * five sections, wildly uneven in size — is visible at a glance rather than
+ * inferred from counting.
+ *
+ * It reads the draft, not the last build, so hiding a project dims it here
+ * before anything is committed. The question this answers is "what will the
+ * site be when I press publish", and a sitemap generated from the last deploy
+ * cannot answer that.
  * ─────────────────────────────────────────────────────────────── */
 
-export type SitemapProject = { slug: string; name: string; category: string };
+export type SitemapProject = {
+  slug: string;
+  name: string;
+  category: string;
+  cover?: { src: string; color: string };
+};
+
+const PAGES = [
+  { href: "/", label: "Home" },
+  { href: "/work", label: "Work" },
+  { href: "/sessions", label: "Sessions" },
+  { href: "/studio", label: "Studio" },
+  { href: "/contact", label: "Contact" },
+];
 
 export function AdminSitemap({
   projects,
   hidden,
   categories,
   origin,
+  compact,
 }: {
   projects: SitemapProject[];
   hidden: Set<string>;
   categories: { slug: string; name: string; href: string }[];
-  /** Where to open a page. Empty until the browser is there to ask. */
   origin: string;
+  /** For the narrow left rail: smaller tiles, no per-row link. */
+  compact?: boolean;
 }) {
   const live = projects.filter((p) => !hidden.has(p.slug));
 
@@ -34,76 +56,175 @@ export function AdminSitemap({
     byCategory.set(p.category, [...(byCategory.get(p.category) ?? []), p]);
   }
 
-  const pages = ["/", "/work", "/sessions", "/studio", "/contact"];
+  const withheld = projects.filter((p) => hidden.has(p.slug));
+  const total = PAGES.length + categories.length + live.length;
 
   return (
-    <section className="border-t border-border pt-10">
-      <div className="flex flex-wrap items-baseline justify-between gap-4">
-        <h2 className="title">Sitemap</h2>
-        <p className="label text-muted-foreground">
-          {pages.length + categories.length + live.length} pages
-          {hidden.size > 0 ? ` · ${hidden.size} withheld` : ""}
-        </p>
+    <section>
+      <div className="flex items-baseline justify-between gap-3 border-b border-border pb-2">
+        <h2
+          className={cn(
+            "font-display uppercase tracking-[0.02em]",
+            compact ? "text-lg" : "text-2xl",
+          )}
+        >
+          Sitemap
+        </h2>
+        <span className="label tabular-nums text-muted-foreground">
+          {total}
+        </span>
       </div>
 
-      <p className="mt-3 max-w-prose text-sm leading-relaxed text-muted-foreground">
-        As the draft would leave it — hidden projects are struck through and
-        will not be published, linked, or listed in{" "}
-        <code className="text-foreground">sitemap.xml</code>.
-      </p>
+      {!compact ? (
+        <p className="mt-3 max-w-prose text-sm leading-relaxed text-muted-foreground">
+          As the draft would leave it. Dimmed projects are hidden and will not
+          be published, linked, or listed in{" "}
+          <code className="text-foreground">sitemap.xml</code>.
+        </p>
+      ) : null}
 
+      {/* The fixed pages, as a plain column — there are five and they never
+          change, so a grid of identical rectangles would be decoration. */}
       <Group title="Pages">
-        {pages.map((href) => (
-          <Row key={href} href={href} origin={origin} label={href} />
-        ))}
+        <ul className="flex flex-col">
+          {PAGES.map((p) => (
+            <li key={p.href} className="border-b border-border last:border-0">
+              <Open
+                href={p.href}
+                origin={origin}
+                className="flex items-baseline gap-3 py-1.5"
+              >
+                <span className="flex-1 truncate text-sm">{p.label}</span>
+                <span className="label shrink-0 text-muted-foreground">
+                  {p.href}
+                </span>
+              </Open>
+            </li>
+          ))}
+        </ul>
       </Group>
 
-      <Group title="Disciplines">
-        {/* Keyed by slug, not href. `categoryHref` sends a discipline with no
-            work yet to `/work`, so several of them share a destination — and
-            keying on that silently collapses them into one row. */}
-        {categories.map((c) => (
-          <Row
-            key={c.slug}
-            href={c.href}
-            origin={origin}
-            label={c.name}
-            hint={c.href}
-          />
-        ))}
+      <Group title="Disciplines" count={categories.length}>
+        <ul className="flex flex-col">
+          {/* Keyed by slug, not href: `categoryHref` sends a discipline with
+              no work yet to `/work`, so several share a destination and
+              keying on that collapses them into one row. */}
+          {categories.map((c) => {
+            const n = byCategory.get(c.name)?.length ?? 0;
+            return (
+              <li key={c.slug} className="border-b border-border last:border-0">
+                <Open
+                  href={c.href}
+                  origin={origin}
+                  className="flex items-baseline gap-3 py-1.5"
+                >
+                  <span className="flex-1 truncate text-sm">{c.name}</span>
+                  <span className="label shrink-0 tabular-nums text-muted-foreground">
+                    {n || "—"}
+                  </span>
+                </Open>
+              </li>
+            );
+          })}
+        </ul>
       </Group>
 
       {[...byCategory.entries()].map(([category, list]) => (
         <Group key={category} title={category} count={list.length}>
-          {list.map((p) => (
-            <Row
-              key={p.slug}
-              href={`/work/${p.slug}`}
-              origin={origin}
-              label={p.name}
-              hint={`/work/${p.slug}`}
-            />
-          ))}
+          <Tiles projects={list} origin={origin} compact={compact} />
         </Group>
       ))}
 
-      {hidden.size > 0 ? (
-        <Group title="Withheld" count={hidden.size}>
-          {projects
-            .filter((p) => hidden.has(p.slug))
-            .map((p) => (
-              <Row
-                key={p.slug}
-                href={`/work/${p.slug}`}
-                origin={origin}
-                label={p.name}
-                hint={`/work/${p.slug}`}
-                struck
-              />
-            ))}
+      {withheld.length > 0 ? (
+        <Group title="Hidden" count={withheld.length}>
+          {/* Shown, not omitted. A project you have taken down is exactly the
+              one you will want to find again. */}
+          <Tiles projects={withheld} origin={origin} compact={compact} dim />
         </Group>
       ) : null}
     </section>
+  );
+}
+
+function Tiles({
+  projects,
+  origin,
+  compact,
+  dim,
+}: {
+  projects: SitemapProject[];
+  origin: string;
+  compact?: boolean;
+  dim?: boolean;
+}) {
+  return (
+    <ul className={cn("grid gap-1", compact ? "grid-cols-4" : "grid-cols-6")}>
+      {projects.map((p) => (
+        <li key={p.slug}>
+          <Open
+            href={`/work/${p.slug}`}
+            origin={origin}
+            className={cn("group block", dim && "opacity-40")}
+          >
+            <span
+              className="relative block aspect-[4/5] overflow-hidden"
+              style={{ backgroundColor: p.cover?.color ?? "transparent" }}
+              title={`${p.name} — /work/${p.slug}`}
+            >
+              {p.cover ? (
+                <Image
+                  src={p.cover.src}
+                  alt=""
+                  fill
+                  sizes="120px"
+                  loading="lazy"
+                  className="object-cover transition-opacity duration-200 hoverable:group-hover:opacity-75"
+                />
+              ) : null}
+            </span>
+            {!compact ? (
+              <span className="label mt-1 block truncate text-muted-foreground">
+                {p.name}
+              </span>
+            ) : null}
+          </Open>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+/**
+ * A link to the live page — which is the last build, not the draft.
+ *
+ * Falls back to a plain span before the origin is known, rather than
+ * rendering a relative link that would navigate away from the editor and
+ * lose an unpublished draft.
+ */
+function Open({
+  href,
+  origin,
+  className,
+  children,
+}: {
+  href: string;
+  origin: string;
+  className?: string;
+  children: React.ReactNode;
+}) {
+  if (!origin) return <span className={className}>{children}</span>;
+  return (
+    <a
+      href={`${origin}${href}`}
+      target="_blank"
+      rel="noreferrer"
+      className={cn(
+        "transition-colors duration-200 hoverable:hover:text-foreground",
+        className,
+      )}
+    >
+      {children}
+    </a>
   );
 }
 
@@ -117,59 +238,14 @@ function Group({
   children: React.ReactNode;
 }) {
   return (
-    <div className="mt-8">
-      <p className="label flex items-baseline gap-3 border-b border-border pb-2 text-muted-foreground">
-        {title}
+    <div className="mt-6">
+      <p className="label flex items-baseline justify-between gap-3 pb-2 text-muted-foreground">
+        <span className="truncate">{title}</span>
         {count !== undefined ? (
           <span className="tabular-nums">{count}</span>
         ) : null}
       </p>
-      <ul className="mt-1">{children}</ul>
+      {children}
     </div>
-  );
-}
-
-function Row({
-  href,
-  origin,
-  label,
-  hint,
-  struck,
-}: {
-  href: string;
-  origin: string;
-  label: string;
-  hint?: string;
-  struck?: boolean;
-}) {
-  return (
-    <li className="flex items-baseline gap-4 border-b border-border py-2">
-      <span
-        className={cn(
-          "min-w-0 flex-1 truncate text-sm",
-          struck && "line-through opacity-50",
-        )}
-      >
-        {label}
-      </span>
-      {hint ? (
-        <span className="label hidden shrink-0 text-muted-foreground sm:block">
-          {hint}
-        </span>
-      ) : null}
-      {/* Opens the live page, which is the last build — not the draft. Said
-          plainly rather than implied, because a link that quietly shows stale
-          content is worse than no link. */}
-      {origin && !struck ? (
-        <a
-          href={`${origin}${href}`}
-          target="_blank"
-          rel="noreferrer"
-          className="label shrink-0 text-muted-foreground underline underline-offset-4 hoverable:hover:text-foreground"
-        >
-          Open live
-        </a>
-      ) : null}
-    </li>
   );
 }
