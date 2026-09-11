@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { AdminEditor } from "@/components/admin-editor";
 import { CONTENT, CONTENT_PATH } from "@/lib/content";
-import { PROJECTS } from "@/lib/work";
+import { PROJECTS, CATEGORIES, categoryLabel } from "@/lib/work";
 
 /* ── admin ────────────────────────────────────────────────────────
  * Unlisted, not secret. Nothing in the nav points here and no crawler is
@@ -29,13 +29,27 @@ export default function AdminPage() {
         <h1 className="title">Content</h1>
         <p className="mt-4 max-w-prose text-sm leading-relaxed text-muted-foreground">
           Edits are committed to{" "}
-          <code className="text-foreground">{CONTENT_PATH}</code> and go live when the deploy
-          finishes, a couple of minutes later. The photographs are not editable here — those
-          come from the archive and from <code>scripts/cover-art.mjs</code>.
+          <code className="text-foreground">{CONTENT_PATH}</code> and go live
+          when the deploy finishes, a couple of minutes later. A new project is
+          committed to{" "}
+          <code className="text-foreground">content/projects.json</code> along
+          with its photographs, in a single commit.
         </p>
       </header>
 
-      <AdminEditor initial={CONTENT} slugs={PROJECTS.map((p) => p.slug)} />
+      <AdminEditor
+        initial={CONTENT}
+        slugs={PROJECTS.map((p) => p.slug)}
+        // Only the disciplines that are real sections of the site. `WORK` and
+        // `MUSIC` both file under Work; a session category is not somewhere a
+        // commissioned project belongs.
+        categories={CATEGORIES.filter((c) => c.section !== "SESSIONS").map(
+          (c) => ({
+            slug: c.slug,
+            name: categoryLabel(c),
+          }),
+        )}
+      />
     </div>
   );
 }

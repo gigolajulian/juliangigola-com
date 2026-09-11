@@ -1,26 +1,34 @@
 "use client";
 
 import * as React from "react";
-import { CONTENT_PATH, type SiteContent, type Testimonial } from "@/lib/content";
+import {
+  CONTENT_PATH,
+  type SiteContent,
+  type Testimonial,
+} from "@/lib/content";
+import { AdminNewProject } from "@/components/admin-new-project";
 import { cn } from "@/lib/utils";
 
 /* ── the editor ───────────────────────────────────────────────────
  * Edits `content/site.json` and commits it to the repo. The deploy does the
  * rest, so a save takes a couple of minutes to appear on the live site.
  *
- * There is no server behind this site — it is a static export on GitHub Pages
- * — so there is nowhere to keep a session and nothing to check a password
- * against. The authority is a GitHub token you make yourself and paste in
- * once; GitHub decides what it is allowed to do, which is the only opinion
- * that can be trusted here.
+ * Writing is authorised by a GitHub token you make yourself and paste in
+ * once. Nothing here checks it — GitHub does, which is the only opinion worth
+ * trusting about what a token may do to a repository.
  *
- * That is also why this page being unlisted is not the security. Anyone can
- * load it. Without a token it can read nothing and write nothing, and the
- * repo is public, so there is nothing on the page worth reaching. The token
- * is the lock.
+ * Reaching the page at all is a separate question, and it is no longer this
+ * code's to answer: `/admin` sits behind a Cloudflare Access policy, so the
+ * request is challenged before the Worker ever runs. There is deliberately no
+ * login here — no password to store, no session to forge, and nothing to get
+ * wrong. See the Hosting section of the README.
  * ─────────────────────────────────────────────────────────────── */
 
-const REPO = { owner: "gigolajulian", repo: "juliangigola-com", branch: "main" };
+const REPO = {
+  owner: "gigolajulian",
+  repo: "juliangigola-com",
+  branch: "main",
+};
 const API = "https://api.github.com";
 
 /**
@@ -57,11 +65,14 @@ type Status =
 export function AdminEditor({
   initial,
   slugs,
+  categories,
 }: {
   /** The content as it was at build time — what the live site is serving. */
   initial: SiteContent;
   /** Every project slug, so the cover and featured fields can be checked. */
   slugs: string[];
+  /** Disciplines a new project can be filed under. */
+  categories: { slug: string; name: string }[];
 }) {
   const [token, setToken] = React.useState("");
   const [draft, setDraft] = React.useState<SiteContent>(initial);
@@ -125,7 +136,10 @@ export function AdminEditor({
       window.localStorage.setItem(TOKEN_KEY, t);
       setStatus({ kind: "idle" });
     } catch (e) {
-      setStatus({ kind: "error", message: `Could not reach GitHub: ${String(e)}` });
+      setStatus({
+        kind: "error",
+        message: `Could not reach GitHub: ${String(e)}`,
+      });
     }
   }
 
@@ -161,10 +175,14 @@ export function AdminEditor({
       setSha(body.content.sha);
       setStatus({
         kind: "saved",
-        message: "Committed. The site rebuilds and goes live in a couple of minutes.",
+        message:
+          "Committed. The site rebuilds and goes live in a couple of minutes.",
       });
     } catch (e) {
-      setStatus({ kind: "error", message: `Could not reach GitHub: ${String(e)}` });
+      setStatus({
+        kind: "error",
+        message: `Could not reach GitHub: ${String(e)}`,
+      });
     }
   }
 
@@ -241,29 +259,41 @@ export function AdminEditor({
 
         {unknownSlugs.length ? (
           <p className="text-sm text-accent">
-            No project with {unknownSlugs.length === 1 ? "this slug" : "these slugs"}:{" "}
-            {unknownSlugs.join(", ")}. Anything unmatched is skipped on the page.
+            No project with{" "}
+            {unknownSlugs.length === 1 ? "this slug" : "these slugs"}:{" "}
+            {unknownSlugs.join(", ")}. Anything unmatched is skipped on the
+            page.
           </p>
         ) : null}
 
         <details className="text-sm text-muted-foreground">
-          <summary className="label cursor-pointer">Every project slug ({slugs.length})</summary>
-          <p className="mt-3 font-mono text-xs leading-relaxed">{slugs.join(" · ")}</p>
+          <summary className="label cursor-pointer">
+            Every project slug ({slugs.length})
+          </summary>
+          <p className="mt-3 font-mono text-xs leading-relaxed">
+            {slugs.join(" · ")}
+          </p>
         </details>
       </Section>
 
       <Section title="Testimonials" number="03">
         <p className="max-w-prose text-sm text-muted-foreground">
-          The section does not render at all while this is empty, so there is never invented
-          praise on the site. A specific detail beats an adjective — &ldquo;turned a two-hour
-          window into eighteen usable frames&rdquo; earns trust, &ldquo;great to work
-          with&rdquo; does not. Three to five is the useful range.
+          The section does not render at all while this is empty, so there is
+          never invented praise on the site. A specific detail beats an
+          adjective — &ldquo;turned a two-hour window into eighteen usable
+          frames&rdquo; earns trust, &ldquo;great to work with&rdquo; does not.
+          Three to five is the useful range.
         </p>
 
         {draft.testimonials.map((t, i) => (
-          <div key={i} className="flex flex-col gap-4 border-t border-border pt-6">
+          <div
+            key={i}
+            className="flex flex-col gap-4 border-t border-border pt-6"
+          >
             <div className="flex items-baseline justify-between gap-4">
-              <span className="label text-muted-foreground">{String(i + 1).padStart(2, "0")}</span>
+              <span className="label text-muted-foreground">
+                {String(i + 1).padStart(2, "0")}
+              </span>
               <button
                 type="button"
                 onClick={() =>
@@ -296,7 +326,9 @@ export function AdminEditor({
               <input
                 type="text"
                 value={t.role ?? ""}
-                onChange={(e) => updateTestimonial(i, { role: e.target.value || undefined })}
+                onChange={(e) =>
+                  updateTestimonial(i, { role: e.target.value || undefined })
+                }
                 placeholder="Art Director, WIRED"
                 className={inputClass}
               />
@@ -304,7 +336,9 @@ export function AdminEditor({
                 type="text"
                 list="project-slugs"
                 value={t.project ?? ""}
-                onChange={(e) => updateTestimonial(i, { project: e.target.value || undefined })}
+                onChange={(e) =>
+                  updateTestimonial(i, { project: e.target.value || undefined })
+                }
                 placeholder="project slug (optional)"
                 className={inputClass}
               />
@@ -315,7 +349,10 @@ export function AdminEditor({
         <button
           type="button"
           onClick={() =>
-            set("testimonials", [...draft.testimonials, { quote: "", name: "" }])
+            set("testimonials", [
+              ...draft.testimonials,
+              { quote: "", name: "" },
+            ])
           }
           className="label self-start border border-border px-5 py-3 press hoverable:hover:bg-card active:scale-[0.98]"
         >
@@ -325,17 +362,25 @@ export function AdminEditor({
 
       <Section title="Sessions" number="04">
         <p className="max-w-prose text-sm text-muted-foreground">
-          A price left empty reads as &ldquo;On request&rdquo;, which is honest — but a visible
-          number is the single biggest thing that stops a session client leaving without
-          enquiring.
+          A price left empty reads as &ldquo;On request&rdquo;, which is honest
+          — but a visible number is the single biggest thing that stops a
+          session client leaving without enquiring.
         </p>
 
         {draft.sessions.map((session, i) => (
-          <div key={session.slug} className="flex flex-col gap-4 border-t border-border pt-6">
-            <h3 className="font-display text-xl uppercase tracking-[0.02em]">{session.name}</h3>
+          <div
+            key={session.slug}
+            className="flex flex-col gap-4 border-t border-border pt-6"
+          >
+            <h3 className="font-display text-xl uppercase tracking-[0.02em]">
+              {session.name}
+            </h3>
 
             <div className="grid gap-4 sm:grid-cols-2">
-              <Field label="Starting price (USD)" hint="Empty means “On request”.">
+              <Field
+                label="Starting price (USD)"
+                hint="Empty means “On request”."
+              >
                 <input
                   type="number"
                   min={0}
@@ -343,7 +388,8 @@ export function AdminEditor({
                   value={session.from ?? ""}
                   onChange={(e) =>
                     updateSession(i, {
-                      from: e.target.value === "" ? null : Number(e.target.value),
+                      from:
+                        e.target.value === "" ? null : Number(e.target.value),
                     })
                   }
                   placeholder="On request"
@@ -354,7 +400,9 @@ export function AdminEditor({
                 <input
                   type="text"
                   value={session.turnaround}
-                  onChange={(e) => updateSession(i, { turnaround: e.target.value })}
+                  onChange={(e) =>
+                    updateSession(i, { turnaround: e.target.value })
+                  }
                   className={inputClass}
                 />
               </Field>
@@ -373,7 +421,9 @@ export function AdminEditor({
               <textarea
                 rows={4}
                 value={session.includes.join("\n")}
-                onChange={(e) => updateSession(i, { includes: splitLines(e.target.value) })}
+                onChange={(e) =>
+                  updateSession(i, { includes: splitLines(e.target.value) })
+                }
                 className={inputClass}
               />
             </Field>
@@ -413,6 +463,18 @@ export function AdminEditor({
 
         <StatusLine status={status} />
       </div>
+
+      {/* Only once the token has proved itself against the repo. The form
+          commits several files at once and a rejected token halfway through
+          would leave photographs in the branch with no manifest pointing at
+          them. */}
+      {sha ? (
+        <AdminNewProject
+          token={token}
+          categories={categories}
+          existingSlugs={known}
+        />
+      ) : null}
     </div>
   );
 
@@ -423,7 +485,10 @@ export function AdminEditor({
     );
   }
 
-  function updateSession(i: number, patch: Partial<SiteContent["sessions"][number]>) {
+  function updateSession(
+    i: number,
+    patch: Partial<SiteContent["sessions"][number]>,
+  ) {
     set(
       "sessions",
       draft.sessions.map((s, j) => (j === i ? { ...s, ...patch } : s)),
@@ -469,13 +534,14 @@ function Connect({
         </li>
         <li>
           <span className="text-foreground">2.</span> Repository access:{" "}
-          <em>Only select repositories</em> &rarr; <code>juliangigola-com</code>. Permissions:{" "}
-          <em>Contents</em> &rarr; <em>Read and write</em>. Nothing else — that is the only
-          thing this page does.
+          <em>Only select repositories</em> &rarr; <code>juliangigola-com</code>
+          . Permissions: <em>Contents</em> &rarr; <em>Read and write</em>.
+          Nothing else — that is the only thing this page does.
         </li>
         <li>
-          <span className="text-foreground">3.</span> Give it an expiry you are happy with, then
-          paste it below. It is kept in this browser only, and sent only to GitHub.
+          <span className="text-foreground">3.</span> Give it an expiry you are
+          happy with, then paste it below. It is kept in this browser only, and
+          sent only to GitHub.
         </li>
       </ol>
 
@@ -527,7 +593,9 @@ function StatusLine({ status }: { status: Status }) {
         <>
           {" "}
           <a
-            href={`https://github.com/${REPO.owner}/${REPO.repo}/actions`}
+            // Workers Builds, not GitHub Actions — the workflow file is gone
+            // and deploys are driven from the Cloudflare side now.
+            href={`https://github.com/${REPO.owner}/${REPO.repo}/commits/${REPO.branch}`}
             target="_blank"
             rel="noreferrer"
             className="text-foreground underline underline-offset-4"
@@ -552,8 +620,12 @@ function Section({
   return (
     <section className="flex flex-col gap-6">
       <div className="flex items-baseline gap-4 border-b border-border pb-4">
-        <span className="label tabular-nums text-muted-foreground">{number}</span>
-        <h2 className="font-display text-2xl uppercase tracking-[0.02em]">{title}</h2>
+        <span className="label tabular-nums text-muted-foreground">
+          {number}
+        </span>
+        <h2 className="font-display text-2xl uppercase tracking-[0.02em]">
+          {title}
+        </h2>
       </div>
       {children}
     </section>
@@ -572,7 +644,11 @@ function Field({
   return (
     <label className="flex flex-col gap-2">
       <span className="label text-muted-foreground">{label}</span>
-      {hint ? <span className="max-w-prose text-sm text-muted-foreground">{hint}</span> : null}
+      {hint ? (
+        <span className="max-w-prose text-sm text-muted-foreground">
+          {hint}
+        </span>
+      ) : null}
       {children}
     </label>
   );

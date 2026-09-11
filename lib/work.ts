@@ -11,6 +11,7 @@ import { PROJECTS as HARVESTED, CATEGORIES } from "./work-data";
 import type { Project, Category, Frame } from "./work-types";
 import { COVER_RELEASES } from "./cover-art-data";
 import { CONTENT } from "./content";
+import { ADDED, type AddedProject } from "./added";
 
 export type { Project, Category, Frame };
 export { CATEGORIES, COVER_RELEASES };
@@ -89,9 +90,50 @@ const withLeadFrame = (project: Project): Project => {
   };
 };
 
-export const PROJECTS: Project[] = HARVESTED.map((p) =>
-  p.slug === "coverart" ? withCoverArt(p) : withLeadFrame(p),
-);
+/**
+ * A project added through `/admin`, in the shape the rest of the site reads.
+ *
+ * The editor stores one category slug; everything downstream wants the whole
+ * `Category`, so it is looked up here against the manifest rather than being
+ * duplicated into the JSON where it could drift.
+ *
+ * An unknown slug throws. The alternative — filing the project under nothing —
+ * would put it in the archive but in no index, which is the kind of failure
+ * somebody only finds weeks later while wondering where a shoot went.
+ */
+const fromAdded = (p: AddedProject): Project => {
+  const category = CATEGORIES.find((c) => c.slug === p.categorySlug);
+  if (!category) {
+    throw new Error(
+      `content/projects.json: "${p.slug}" is filed under "${p.categorySlug}", which is not a category.`,
+    );
+  }
+
+  return {
+    slug: p.slug,
+    name: p.name,
+    headline: null,
+    intent: null,
+    credits: p.credits,
+    categories: [category],
+    cover: p.cover,
+    images: p.images,
+  };
+};
+
+/**
+ * Added work leads.
+ *
+ * `projectsIn()` takes the first project in a category as that category's
+ * lead — the frame its row shows, and what the discipline page opens with —
+ * so putting new work at the front means a shoot added today is what the site
+ * leads with, rather than sinking beneath a migration ordered by the old
+ * site. The hand-picked cover overrides still win where they exist.
+ */
+export const PROJECTS: Project[] = [
+  ...ADDED.map(fromAdded),
+  ...HARVESTED.map((p) => (p.slug === "coverart" ? withCoverArt(p) : withLeadFrame(p))),
+];
 
 /**
  * The old nav split commissioned work across WORK and MUSIC, which asked a

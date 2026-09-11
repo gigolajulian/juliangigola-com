@@ -90,6 +90,25 @@ Worker's **Settings → Builds**, not here.
 That is also what makes `/admin` useful: it commits `content/site.json`, the
 push starts a build, and the edit is live in a couple of minutes.
 
+### Adding a project from /admin
+
+New shoots go in `content/projects.json`, **not** `lib/work-data.ts` — the
+harvester overwrites that file, so a project written there survives exactly
+until the next harvest and then vanishes with nothing failing. `lib/work.ts`
+merges the two, added work first, so a shoot uploaded today leads its
+discipline.
+
+The photographs are resized in the browser to the same 2500px/q82 the
+harvester uses (`lib/admin-image.ts`) and committed under
+`public/work/<slug>/` **in the same commit as the manifest**, via the Git Data
+API (`lib/admin-github.ts`). One commit, one build, and the manifest is never
+in the repo describing files that are not.
+
+`content/projects.json` is validated as strictly as `site.json`: a frame that
+points anywhere but `/work/`, an unknown discipline, or a duplicate slug fails
+the build rather than shipping. Failing the deploy leaves the last good build
+serving, which is the safe direction.
+
 ### /admin is behind Cloudflare Access
 
 The editor is a public page that holds a GitHub token, so it is gated by a
