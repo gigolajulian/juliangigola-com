@@ -103,6 +103,10 @@ const isOwnGallery = (categorySlug: string): boolean => {
 const CATEGORY_LABELS: Record<string, string> = {
   // One word on the old site, and it looks like a typo set large.
   coverart: "Cover art",
+  // "Campaigns" alone is ambiguous next to EDITORIAL — it could as easily mean
+  // a political or fundraising one. The client is a brand, and saying so is
+  // what an art director is scanning the index for.
+  campaigns: "Brand campaigns",
 };
 
 /**
@@ -322,11 +326,24 @@ const COVER_OVERRIDES: Record<string, Frame> = {
     // getting a copy in `/hero/` — the override exists to name the frame, and
     // the frame is a UKIYOSUNKNOWN one rather than the first of the first
     // project filed under campaigns, which is what it would otherwise be.
+    // The credit follows the frame, via `frameProject` below.
     src: "/work/ukiyosunknown/01.jpg",
     width: 1600,
     height: 2133,
     color: "#A8A9A7",
     alt: "Model crouched on a studio floor beside a CRT television, looking away from camera",
+  },
+  coverart: {
+    // The one discipline whose work is not a photograph but a released object,
+    // so it is shown as one: sleeves laid out as prints, the lead release
+    // square to camera and the rest running off the edges. A single sleeve
+    // pulled from the archive says "here is a picture"; the spread says "here
+    // is a body of covers", which is the claim the row is making.
+    src: "/hero/coverart.jpg",
+    width: 1600,
+    height: 2000,
+    color: "#5E6263",
+    alt: "Album sleeves laid out as prints, EST MODVS IN REBVS square to camera at the centre",
   },
 };
 
@@ -351,6 +368,21 @@ export const categoryFrame = (categorySlug: string): Frame | null => {
 
   return project.images.find((f) => f.height > f.width) ?? project.images[0] ?? null;
 };
+
+/**
+ * The project a frame belongs to, read off the frame's own path.
+ *
+ * An override changes which photograph stands for a discipline, but it used to
+ * leave the credit pointing at whatever project led the category: the cover
+ * showed a UKIYOSUNKNOWN frame under CAMPAIGNS and captioned it "JUBO", which
+ * is the first project filed there. Deriving the owner from the path means the
+ * caption cannot disagree with the picture — for this override or the next one.
+ *
+ * Frames outside `/work/<slug>/` — the hand-made ones in `/hero/` — have no
+ * project, and the caller falls back to the category's lead.
+ */
+const frameProject = (frame: Frame): Project | undefined =>
+  bySlug.get(frame.src.split("/")[2] ?? "");
 
 /**
  * The disciplines the cover cycles through, in order.
@@ -380,11 +412,16 @@ export const DISCIPLINES: Discipline[] = DISCIPLINE_SLUGS.map(
   .filter((c): c is Category => Boolean(c))
   .map((category) => {
     const inCategory = projectsIn(category.slug);
-    const project = inCategory[0];
-    if (!project) return null;
+    const lead = inCategory[0];
+    if (!lead) return null;
 
     const frame = categoryFrame(category.slug);
     if (!frame) return null;
+
+    // Whatever the frame actually came from, so the cover's credit names the
+    // picture on screen. Only differs from the lead where an override has
+    // reached into another project for the frame.
+    const project = frameProject(frame) ?? lead;
 
     // Some nav leaves are a listing of many projects (EDITORIAL); others are
     // themselves a single gallery (COVERART, WEDDINGS). Counting projects for
@@ -392,7 +429,10 @@ export const DISCIPLINES: Discipline[] = DISCIPLINE_SLUGS.map(
     // number a visitor wants is how much work is in there.
     const count =
       DISCIPLINE_COUNTS[category.slug] ??
-      (isOwnGallery(category.slug) ? project.images.length : inCategory.length);
+      // `lead`, not `project`: where the category *is* a gallery, the number
+      // is that gallery's size — not the size of whatever project an override
+      // happened to borrow a frame from.
+      (isOwnGallery(category.slug) ? lead.images.length : inCategory.length);
 
     return {
       slug: category.slug,

@@ -4,16 +4,18 @@ import * as React from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
-import type { Discipline } from "@/lib/work";
+import type { Discipline, Frame, Project } from "@/lib/work";
 
 /* ── the cover ────────────────────────────────────────────────────
- * A masthead grid that cycles through the four things he actually does.
+ * A masthead grid that opens on the job title and then cycles through the
+ * things he actually does.
  *
  * "Photographer & creative director" is a job title; editorial, campaigns,
- * portraits and music are the four things somebody might be here to
- * commission. So the discipline is set large and switches, and the picture
- * switches with it — which says the range in the first few seconds in a way
- * one static cover cannot.
+ * portraits and music are the things somebody might be here to commission. So
+ * the title is set large over a picture of the city he works in, once, and
+ * then hands off to the disciplines — each one set large in turn with work
+ * from it behind — which says the range in the first few seconds in a way one
+ * static cover cannot.
  *
  * This is not the carousel it could easily have become:
  *
@@ -41,7 +43,50 @@ import type { Discipline } from "@/lib/work";
 /** Long enough to read the word and take in the picture before it moves on. */
 const DWELL_MS = 3500;
 
+/**
+ * The opening frame. A title card, not a sixth discipline.
+ *
+ * It states the job once, over the city the work is made in, and then never
+ * comes back — which is why it is absent from the numbered index below. A
+ * picture that corresponds to no row, returning every lap, reads as a fault.
+ *
+ * Declared here rather than beside `COVER_OVERRIDES` in `lib/work.ts` on
+ * purpose: this file is a client component, and importing a *value* from
+ * `lib/work` would pull the whole generated archive into the browser bundle.
+ * The type imports above are erased, so they cost nothing.
+ *
+ * Cropped to 4:5 from a 16:9 original and processed the way the archive is
+ * (1600px, mozjpeg q82) — see README, "Adding a cover image".
+ */
+const INTRO: Slide = {
+  slug: "intro",
+  name: "Photographer & creative director",
+  frame: {
+    src: "/hero/intro.jpg",
+    width: 1600,
+    height: 2000,
+    color: "#746F6A",
+    alt: "Downtown San Francisco from the air at sunrise, the Transamerica Pyramid against the sun",
+  },
+};
+
+/**
+ * A discipline, or the intro — which has no project behind it, because a
+ * cityscape is not a commission. The credit in the corner is absent rather
+ * than invented for that one frame.
+ */
+type Slide = { slug: string; name: string; frame: Frame; project?: Project };
+
 export function Hero({ disciplines }: { disciplines: Discipline[] }) {
+  /**
+   * What the cover runs through: the title card, then the disciplines.
+   *
+   * The index below still maps `disciplines`, so its rows are offset by one
+   * from this — row `i` is slide `i + 1`, and during the intro no row is
+   * current at all.
+   */
+  const slides: Slide[] = [INTRO, ...disciplines];
+
   /**
    * Which discipline is up, and which one it came from.
    *
@@ -72,19 +117,29 @@ export function Hero({ disciplines }: { disciplines: Discipline[] }) {
   );
 
   React.useEffect(() => {
-    if (taken || disciplines.length < 2) return;
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    if (taken || slides.length < 2) return;
+
+    // Nothing will advance, so the intro would be the whole cover: a picture
+    // with no discipline named, no row current, and the running head below
+    // held invisible for good. These visitors get the cover as it was before
+    // the title card existed — straight to the first discipline.
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      setSlide({ active: 1, previous: -1 });
+      return;
+    }
 
     const id = window.setInterval(
       () =>
         setSlide((s) => ({
-          active: (s.active + 1) % disciplines.length,
+          // Wraps to 1, not 0. The intro plays once and is then out of the
+          // rotation for the life of the page.
+          active: s.active + 1 >= slides.length ? 1 : s.active + 1,
           previous: s.active,
         })),
       DWELL_MS,
     );
     return () => window.clearInterval(id);
-  }, [taken, disciplines.length]);
+  }, [taken, slides.length]);
 
   const take = (i: number) => {
     setTaken(true);
@@ -99,7 +154,7 @@ export function Hero({ disciplines }: { disciplines: Discipline[] }) {
     if (Number.isInteger(i)) take(i);
   };
 
-  const current = disciplines[active];
+  const current = slides[active];
   if (!current) return null;
 
   return (
@@ -117,7 +172,7 @@ export function Hero({ disciplines }: { disciplines: Discipline[] }) {
               mounted, so first paint costs one photograph instead of five.
               Only the first is `priority`; the rest load at normal priority
               as the cycle reaches them. */}
-          {disciplines.map((discipline, i) =>
+          {slides.map((discipline, i) =>
             i === slide.active || i === slide.previous ? (
             <Image
               key={discipline.slug}
@@ -142,15 +197,22 @@ export function Hero({ disciplines }: { disciplines: Discipline[] }) {
             ) : null,
           )}
 
-          <Link
-            href={`/work/${current.project.slug}`}
-            // Credits the frame on screen, so the cover is attributable
-            // rather than anonymous decoration — and gives someone who likes
-            // it somewhere to go straight away.
-            className="label absolute bottom-4 right-4 z-10 bg-background/70 px-3 py-2 text-muted-foreground backdrop-blur-sm transition-colors duration-200 hoverable:hover:text-foreground sm:bottom-6 sm:right-6"
-          >
-            {current.project.name} &rarr;
-          </Link>
+          {/* Absent on the intro rather than faded: the credit exists to
+              attribute commissioned work, and the city is not any. It arrives
+              with the first discipline, under cover of that crossfade — a
+              second animation on a corner label would be motion for its own
+              sake. */}
+          {current.project && (
+            <Link
+              href={`/work/${current.project.slug}`}
+              // Credits the frame on screen, so the cover is attributable
+              // rather than anonymous decoration — and gives someone who likes
+              // it somewhere to go straight away.
+              className="label absolute bottom-4 right-4 z-10 bg-background/70 px-3 py-2 text-muted-foreground backdrop-blur-sm transition-colors duration-200 hoverable:hover:text-foreground sm:bottom-6 sm:right-6"
+            >
+              {current.project.name} &rarr;
+            </Link>
+          )}
         </div>
 
         <div className="flex min-w-0 flex-col">
@@ -158,12 +220,26 @@ export function Hero({ disciplines }: { disciplines: Discipline[] }) {
               padding on desktop clears the fixed header so the nav never
               crowds the rule. */}
           <div className="flex flex-wrap items-baseline gap-x-6 gap-y-1 border-b border-border px-6 pb-5 pt-10 sm:px-10 lg:pt-32">
-            <p className="label text-muted-foreground">Photographer &amp; creative director</p>
+            {/* Held back while the intro is up, because the intro is already
+                saying these exact words in display type eighty pixels below.
+                Printing them twice at once is the small-scale version of what
+                the comment on the masthead warns about.
+
+                Faded rather than unmounted: the rule and the flush-right
+                `SF Bay Area` must not move when it arrives. */}
+            <p
+              className={cn(
+                "label text-muted-foreground transition-opacity duration-500 ease-[var(--ease-out-strong)] motion-reduce:transition-none",
+                active === 0 ? "opacity-0" : "opacity-100",
+              )}
+            >
+              Photographer &amp; creative director
+            </p>
             {/* `ml-auto` rather than `justify-between`, so when the column is
                 too narrow for both — which it is at exactly the `lg`
                 breakpoint — this drops to its own line and stays flush right
                 instead of the left label wrapping under a stranded item. */}
-            <p className="label ml-auto shrink-0 text-muted-foreground">Bay Area</p>
+            <p className="label ml-auto shrink-0 text-muted-foreground">SF Bay Area</p>
           </div>
 
           {/* Two: the masthead, set once. The header's wordmark holds back on
@@ -173,14 +249,24 @@ export function Hero({ disciplines }: { disciplines: Discipline[] }) {
           <h1 className="px-6 pt-8 sm:px-10 sm:pt-10">
             <span className="display block">Julian Gigola</span>
 
-            {/* The switching half. Deliberately not a live region: it would
-                announce a new discipline every four seconds, which is noise
-                rather than information. Nothing is lost by hiding it — all
-                four disciplines are listed as real links immediately below,
-                which is the accessible version of the same content. */}
+            {/* The switching half: the job title first, then each discipline.
+                Deliberately not a live region — it would announce a new line
+                every four seconds, which is noise rather than information.
+                Nothing is lost by hiding it: the title is real text in the
+                running head above and every discipline is a real link
+                immediately below, which is the accessible version of the same
+                content. */}
+            {/* Two lines of height, always. "Photographer & creative
+                director" wraps to two at every width except ~768 and a wide
+                desktop column; every discipline is one word on one line. Left
+                to itself the block shrinks by a line the moment the intro
+                hands off, and the index and both buttons jump up with it —
+                3.5s after load, which is exactly when somebody is reading
+                them. `leading-none` makes a line exactly `1em`, so `2em` is
+                two of them and nothing has to be measured. */}
             <span
               aria-hidden
-              className="font-display mt-2 block text-3xl uppercase leading-none tracking-[0.02em] text-muted-foreground sm:mt-3 sm:text-4xl"
+              className="font-display mt-2 block min-h-[2em] text-3xl uppercase leading-none tracking-[0.02em] text-muted-foreground sm:mt-3 sm:text-4xl"
             >
               {current.name}
             </span>
@@ -202,14 +288,19 @@ export function Hero({ disciplines }: { disciplines: Discipline[] }) {
           <nav aria-label="Disciplines" className="mt-8 border-t border-border sm:mt-10">
             <ul onPointerOver={takeFromEvent} onFocus={takeFromEvent}>
               {disciplines.map((discipline, i) => (
+                // Offset by one: this list is the disciplines, the cycle is
+                // the intro plus the disciplines. Row `i` is slide `i + 1`,
+                // and while the intro is up no row is current — which is the
+                // honest reading, since the frame on screen is not one of
+                // these.
                 <li
                   key={discipline.slug}
                   className="border-b border-border"
-                  data-discipline={i}
+                  data-discipline={i + 1}
                 >
                   <Link
                     href={discipline.href}
-                    aria-current={i === active ? "true" : undefined}
+                    aria-current={i + 1 === active ? "true" : undefined}
                     className={cn(
                       "group flex items-baseline gap-4 px-6 py-4 transition-colors duration-300 sm:px-10",
                       // `bg-secondary`, not `bg-card`. Card sits at L* 5.7
@@ -218,7 +309,7 @@ export function Hero({ disciplines }: { disciplines: Discipline[] }) {
                       // This is the one place on the site where a surface has
                       // to be legible as "this is the selected one" from
                       // across the room, so it takes the next step up.
-                      i === active ? "bg-secondary" : "hoverable:hover:bg-card",
+                      i + 1 === active ? "bg-secondary" : "hoverable:hover:bg-card",
                     )}
                   >
                     <span className="label shrink-0 tabular-nums text-muted-foreground">
@@ -227,7 +318,7 @@ export function Hero({ disciplines }: { disciplines: Discipline[] }) {
                     <span
                       className={cn(
                         "font-display text-xl uppercase leading-none tracking-[0.02em] transition-colors duration-300 sm:text-2xl",
-                        i === active ? "text-foreground" : "text-muted-foreground",
+                        i + 1 === active ? "text-foreground" : "text-muted-foreground",
                       )}
                     >
                       {discipline.name}
