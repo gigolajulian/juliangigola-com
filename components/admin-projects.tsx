@@ -78,6 +78,8 @@ export function AdminProjects({
   onCredits,
   opened,
   onOpened,
+  query,
+  onQuery,
 }: {
   token: string;
   projects: AdminProject[];
@@ -110,8 +112,15 @@ export function AdminProjects({
    */
   opened: string | null;
   onOpened: (slug: string | null) => void;
+  /**
+   * The filter text, owned by the editor so a discipline row in the sitemap
+   * can narrow this list to it. Controlled rather than seeded: a local copy
+   * synced from a prop would be two states for one fact and an effect to keep
+   * them agreeing.
+   */
+  query: string;
+  onQuery: (next: string) => void;
 }) {
-  const [query, setQuery] = React.useState("");
   const [status, setStatus] = React.useState<Status>({ kind: "idle" });
   const [confirming, setConfirming] = React.useState<string | null>(null);
   const [gone, setGone] = React.useState<Set<string>>(new Set());
@@ -254,7 +263,7 @@ export function AdminProjects({
 
       <input
         value={query}
-        onChange={(e) => setQuery(e.target.value)}
+        onChange={(e) => onQuery(e.target.value)}
         placeholder="Filter by name, slug or discipline"
         className="mt-6 w-full border border-border bg-transparent px-4 py-3 text-sm outline-none focus-visible:border-foreground"
       />

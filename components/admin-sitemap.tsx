@@ -20,6 +20,20 @@ import { cn } from "@/lib/utils";
  * cannot answer that.
  * ─────────────────────────────────────────────────────────────── */
 
+/**
+ * Somewhere in the editor a sitemap row can send you.
+ *
+ * The sitemap is the index of the site and is on screen at all times, which
+ * makes it the natural way to get anywhere — so a row is a control rather
+ * than a link out. A project opens its own photographs and credits; a page
+ * goes to whichever fields actually drive it; a discipline narrows the list
+ * to the work filed under it.
+ */
+export type SitemapTarget =
+  | { kind: "project"; slug: string }
+  | { kind: "field"; anchor: string }
+  | { kind: "projects"; discipline?: string };
+
 export type SitemapProject = {
   slug: string;
   name: string;
@@ -27,12 +41,34 @@ export type SitemapProject = {
   cover?: { src: string; color: string };
 };
 
-const PAGES = [
-  { href: "/", label: "Home" },
-  { href: "/work", label: "Work" },
-  { href: "/sessions", label: "Sessions" },
-  { href: "/studio", label: "Studio" },
-  { href: "/contact", label: "Contact" },
+/**
+ * The fixed pages, and what editing each one actually means.
+ *
+ * `target` is absent for Studio on purpose: its copy — the biography, the
+ * vision, how a commission runs — lives in `app/studio/page.tsx` and not in
+ * `content/site.json`, so there is no field to send anybody to. A row that
+ * claimed to be editable and then went nowhere would be worse than one that
+ * honestly just opens the published page.
+ */
+const PAGES: {
+  href: string;
+  label: string;
+  target?: SitemapTarget;
+  note?: string;
+}[] = [
+  { href: "/", label: "Home", target: { kind: "field", anchor: "featured" } },
+  { href: "/work", label: "Work", target: { kind: "projects" } },
+  {
+    href: "/sessions",
+    label: "Sessions",
+    target: { kind: "field", anchor: "sessions" },
+  },
+  { href: "/studio", label: "Studio", note: "copy lives in the page itself" },
+  {
+    href: "/contact",
+    label: "Contact",
+    target: { kind: "field", anchor: "responseTime" },
+  },
 ];
 
 export function AdminSitemap({
@@ -40,22 +76,15 @@ export function AdminSitemap({
   hidden,
   categories,
   origin,
-  onOpen,
+  onGo,
   compact,
 }: {
   projects: SitemapProject[];
   hidden: Set<string>;
   categories: { slug: string; name: string; href: string }[];
   origin: string;
-  /**
-   * Opens a project in the editor instead of on the live site.
-   *
-   * When given, a cover is a button into the row that edits it — the sitemap
-   * is the index of the site and is on screen at all times, so it is the
-   * natural way in. Without it every tile links out, which is what the
-   * pre-connection view wants: there is nothing to edit yet.
-   */
-  onOpen?: (slug: string) => void;
+  /** Given, rows become controls into the editor rather than links out. */
+  onGo?: (target: SitemapTarget) => void;
   /** For the narrow left rail: smaller tiles, no per-row link. */
   compact?: boolean;
 }) {
@@ -97,20 +126,33 @@ export function AdminSitemap({
           change, so a grid of identical rectangles would be decoration. */}
       <Group title="Pages">
         <ul className="flex flex-col">
-          {PAGES.map((p) => (
-            <li key={p.href} className="border-b border-border last:border-0">
-              <Open
-                href={p.href}
-                origin={origin}
-                className="flex items-baseline gap-3 py-1.5"
-              >
+          {PAGES.map((p) => {
+            const body = (
+              <>
                 <span className="flex-1 truncate text-sm">{p.label}</span>
                 <span className="label shrink-0 text-muted-foreground">
-                  {p.href}
+                  {p.note ?? p.href}
                 </span>
-              </Open>
-            </li>
-          ))}
+              </>
+            );
+            return (
+              <li key={p.href} className="border-b border-border last:border-0">
+                {onGo && p.target ? (
+                  <button
+                    type="button"
+                    onClick={() => onGo(p.target!)}
+                    className={cn(row, "w-full text-left")}
+                  >
+                    {body}
+                  </button>
+                ) : (
+                  <Open href={p.href} origin={origin} className={row}>
+                    {body}
+                  </Open>
+                )}
+              </li>
+            );
+          })}
         </ul>
       </Group>
 
@@ -121,18 +163,31 @@ export function AdminSitemap({
               keying on that collapses them into one row. */}
           {categories.map((c) => {
             const n = byCategory.get(c.name)?.length ?? 0;
+            const body = (
+              <>
+                <span className="flex-1 truncate text-sm">{c.name}</span>
+                <span className="label shrink-0 tabular-nums text-muted-foreground">
+                  {n || "—"}
+                </span>
+              </>
+            );
             return (
               <li key={c.slug} className="border-b border-border last:border-0">
-                <Open
-                  href={c.href}
-                  origin={origin}
-                  className="flex items-baseline gap-3 py-1.5"
-                >
-                  <span className="flex-1 truncate text-sm">{c.name}</span>
-                  <span className="label shrink-0 tabular-nums text-muted-foreground">
-                    {n || "—"}
-                  </span>
-                </Open>
+                {onGo ? (
+                  <button
+                    type="button"
+                    onClick={() =>
+                      onGo({ kind: "projects", discipline: c.name })
+                    }
+                    className={cn(row, "w-full text-left")}
+                  >
+                    {body}
+                  </button>
+                ) : (
+                  <Open href={c.href} origin={origin} className={row}>
+                    {body}
+                  </Open>
+                )}
               </li>
             );
           })}
@@ -144,7 +199,7 @@ export function AdminSitemap({
           <Tiles
             projects={list}
             origin={origin}
-            onOpen={onOpen}
+            onGo={onGo}
             compact={compact}
           />
         </Group>
@@ -157,7 +212,7 @@ export function AdminSitemap({
           <Tiles
             projects={withheld}
             origin={origin}
-            onOpen={onOpen}
+            onGo={onGo}
             compact={compact}
             dim
           />
@@ -167,16 +222,20 @@ export function AdminSitemap({
   );
 }
 
+/** One row of the two plain lists, control or link alike. */
+const row =
+  "flex items-baseline gap-3 py-1.5 transition-colors duration-200 hoverable:hover:text-foreground";
+
 function Tiles({
   projects,
   origin,
-  onOpen,
+  onGo,
   compact,
   dim,
 }: {
   projects: SitemapProject[];
   origin: string;
-  onOpen?: (slug: string) => void;
+  onGo?: (target: SitemapTarget) => void;
   compact?: boolean;
   dim?: boolean;
 }) {
@@ -217,7 +276,7 @@ function Tiles({
 
         return (
           <li key={p.slug}>
-            {onOpen ? (
+            {onGo ? (
               /* A button, not a link. The draft lives in this page's memory
                  and navigating away loses it, so the sitemap's job while
                  editing is to move you around the editor rather than off it.
@@ -225,7 +284,7 @@ function Tiles({
                  link in the groups above. */
               <button
                 type="button"
-                onClick={() => onOpen(p.slug)}
+                onClick={() => onGo({ kind: "project", slug: p.slug })}
                 title={`Edit ${p.name} — /work/${p.slug}`}
                 className={cn(
                   "group block w-full cursor-pointer text-left press",

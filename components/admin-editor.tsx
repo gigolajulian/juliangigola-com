@@ -8,7 +8,7 @@ import {
 } from "@/lib/content";
 import { AdminNewProject } from "@/components/admin-new-project";
 import { AdminProjects, type AdminProject } from "@/components/admin-projects";
-import { AdminSitemap } from "@/components/admin-sitemap";
+import { AdminSitemap, type SitemapTarget } from "@/components/admin-sitemap";
 import { AdminPreview } from "@/components/admin-preview";
 import { AdminPicker, type PickerItem } from "@/components/admin-picker";
 import { AdminTrash } from "@/components/admin-trash";
@@ -130,6 +130,19 @@ export function AdminEditor({
    * abandoning the draft.
    */
   const [opened, setOpened] = React.useState<string | null>(null);
+  /** The project list's filter, held here so a discipline row can set it. */
+  const [filter, setFilter] = React.useState("");
+  /**
+   * A Content field the sitemap has asked for, cleared once it is reached.
+   *
+   * Held as a counter alongside the anchor so clicking the same row twice
+   * scrolls twice — an anchor compared by value would look unchanged the
+   * second time and do nothing.
+   */
+  const [wanted, setWanted] = React.useState<{
+    anchor: string;
+    nonce: number;
+  } | null>(null);
   /**
    * Photographs added to a gallery, processed and waiting, by repo path.
    *
@@ -173,10 +186,41 @@ export function AdminEditor({
    * both and clicking a cover while the content form is showing would open a
    * row nobody can see.
    */
-  const openProject = React.useCallback((slug: string) => {
-    setView("projects");
-    setOpened(slug);
+  const go = React.useCallback((target: SitemapTarget) => {
+    if (target.kind === "project") {
+      setView("projects");
+      setFilter("");
+      setOpened(target.slug);
+      return;
+    }
+    if (target.kind === "projects") {
+      setView("projects");
+      setOpened(null);
+      // The list already filters on name, slug and discipline, so the
+      // discipline's own label is the filter — no second mechanism needed.
+      setFilter(target.discipline ?? "");
+      return;
+    }
+    setView("content");
+    setWanted((w) => ({ anchor: target.anchor, nonce: (w?.nonce ?? 0) + 1 }));
   }, []);
+
+  /**
+   * Brings a requested Content field into view.
+   *
+   * DOM only — nothing here sets state, so it is the kind of work an effect is
+   * actually for. After a paint, because switching to the Content view is
+   * what renders the field in the first place.
+   */
+  React.useEffect(() => {
+    if (!wanted) return;
+    const id = requestAnimationFrame(() => {
+      document
+        .getElementById(`field-${wanted.anchor}`)
+        ?.scrollIntoView({ block: "start", behavior: "smooth" });
+    });
+    return () => cancelAnimationFrame(id);
+  }, [wanted]);
 
   // Reconnect on mount if a token is already stored, so the usual visit is a
   // page that is simply ready.
@@ -391,35 +435,6 @@ export function AdminEditor({
     (s) => s.trim() !== "" && !known.has(s),
   );
 
-  if (!sha) {
-    return (
-      <div className="flex flex-col gap-12">
-        <Connect
-          token={token}
-          setToken={setToken}
-          onConnect={() => load(token.trim())}
-          status={status}
-        />
-
-        {/* Shown before connecting, because it needs nothing a token
-            protects: it is the site as the last build left it, which is
-            exactly the question somebody opening this page usually has.
-            Editing is what requires GitHub's permission, not looking. */}
-        <AdminSitemap
-          projects={projects.map((p) => ({
-            slug: p.slug,
-            name: p.name,
-            category: p.category,
-            cover: p.cover,
-          }))}
-          hidden={hidden}
-          categories={categoryLinks}
-          origin={origin}
-        />
-      </div>
-    );
-  }
-
   return (
     /* Three columns from `xl`: the site on the left, the work in the middle,
        the result on the right. Below that they stack in the same order.
@@ -443,12 +458,29 @@ export function AdminEditor({
           hidden={hidden}
           categories={categoryLinks}
           origin={origin}
-          onOpen={openProject}
+          onGo={go}
           compact
         />
       </aside>
 
       <div className="min-w-0">
+        {/* Not a gate any more. The editor used to be hidden entirely until a
+            token proved itself, which meant arriving at /admin — or clicking
+            a project in the sitemap — showed a read-only index and a password
+            box. Everything on this page can be worked out from what the last
+            build published, so the form is the page and the token is only
+            asked for at the point it is actually needed: the commit. The
+            usual visit does not see this at all, because a stored token
+            reconnects on mount. */}
+        {!sha ? (
+          <Connect
+            token={token}
+            setToken={setToken}
+            onConnect={() => load(token.trim())}
+            status={status}
+          />
+        ) : null}
+
         {/* Three views over one draft, rather than three pages. Everything the
             tabs switch between edits the same object, and the preview beside
             them reflects all of it — so moving between them never loses work
@@ -525,6 +557,8 @@ export function AdminEditor({
               }
               opened={opened}
               onOpened={setOpened}
+              query={filter}
+              onQuery={setFilter}
             />
             <AdminTrash token={token} trash={trash} onChanged={setTrash} />
           </>
@@ -546,6 +580,7 @@ export function AdminEditor({
       <div className="mt-10 flex flex-col gap-14">
         <Section title="Contact" number="01">
           <Field
+            anchor="responseTime"
             label="Reply-time promise"
             hint='Shown beside the contact form as "Replies …". Leave empty to say nothing rather than to promise something you will miss.'
           >
@@ -559,6 +594,7 @@ export function AdminEditor({
           </Field>
 
           <Field
+            anchor="bookingUrl"
             label="Booking link"
             hint="The public Google Calendar booking page — calendar.app.google/…, not a share or edit link. Set it and a 'Check availability' button appears across the site; leave it empty and everything falls back to the enquiry form."
           >
@@ -574,6 +610,7 @@ export function AdminEditor({
 
         <Section title="Homepage" number="02">
           <Field
+            anchor="coverSlug"
             label="Cover project"
             hint="The photograph that opens the site."
           >
@@ -587,6 +624,7 @@ export function AdminEditor({
           </Field>
 
           <Field
+            anchor="featured"
             label="Selected work, in order"
             hint="The cards under the cover, three across. Reorder with the arrows."
           >
@@ -607,6 +645,7 @@ export function AdminEditor({
           </Field>
 
           <Field
+            anchor="coverArt"
             label="Cover art on the homepage"
             hint={`Which releases lead the rack, and in what order. The homepage shows ${releaseLimit}; anything you do not pick fills the rest in the order they were delivered, so the grid is always full.`}
           >
@@ -731,7 +770,7 @@ export function AdminEditor({
           </button>
         </Section>
 
-        <Section title="Sessions" number="04">
+        <Section anchor="sessions" title="Sessions" number="04">
           <p className="max-w-prose text-sm text-muted-foreground">
             A price left empty reads as &ldquo;On request&rdquo;, which is
             honest — but a visible number is the single biggest thing that stops
@@ -810,29 +849,41 @@ export function AdminEditor({
         </datalist>
 
         <div className="sticky bottom-0 flex flex-wrap items-center gap-4 border-t border-border bg-background py-6">
+          {/* The one thing a token is genuinely required for. Everything
+              above this line can be arranged without one; this is the commit,
+              and GitHub is what decides whether it is allowed. */}
           <button
             type="button"
             onClick={publish}
-            disabled={status.kind === "working"}
-            className="label border border-foreground bg-foreground px-6 py-4 text-background press hoverable:hover:opacity-90 active:scale-[0.98] disabled:opacity-50"
+            disabled={!sha || status.kind === "working"}
+            className="label border border-foreground bg-foreground px-6 py-4 text-background press hoverable:hover:opacity-90 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
           >
             {status.kind === "working" ? "Publishing…" : "Publish"}
           </button>
 
-          <button
-            type="button"
-            onClick={() => {
-              window.localStorage.removeItem(TOKEN_KEY);
-              setToken("");
-              setSha(null);
-              setStatus({ kind: "idle" });
-            }}
-            className="label border border-border px-6 py-4 press hoverable:hover:bg-card active:scale-[0.98]"
-          >
-            Forget token
-          </button>
+          {sha ? (
+            <button
+              type="button"
+              onClick={() => {
+                window.localStorage.removeItem(TOKEN_KEY);
+                setToken("");
+                setSha(null);
+                setStatus({ kind: "idle" });
+              }}
+              className="label border border-border px-6 py-4 press hoverable:hover:bg-card active:scale-[0.98]"
+            >
+              Forget token
+            </button>
+          ) : null}
 
-          <StatusLine status={status} />
+          {!sha ? (
+            <p className="label max-w-prose text-muted-foreground">
+              Arrange anything you like — publishing needs the GitHub token at
+              the top of this column, and nothing is committed until then.
+            </p>
+          ) : (
+            <StatusLine status={status} />
+          )}
         </div>
 
         {/* Reached only once the token has proved itself against the repo — the
@@ -982,13 +1033,19 @@ function Section({
   number,
   title,
   children,
+  /** Anchor, so a sitemap row can send the page to this section. */
+  anchor,
 }: {
   number: string;
   title: string;
   children: React.ReactNode;
+  anchor?: string;
 }) {
   return (
-    <section className="flex flex-col gap-6">
+    <section
+      id={anchor ? `field-${anchor}` : undefined}
+      className="flex scroll-mt-28 flex-col gap-6"
+    >
       <div className="flex items-baseline gap-4 border-b border-border pb-4">
         <span className="label tabular-nums text-muted-foreground">
           {number}
@@ -1006,13 +1063,19 @@ function Field({
   label,
   hint,
   children,
+  /** Anchor, so a sitemap row can send the page to this field. */
+  anchor,
 }: {
   label: string;
   hint?: string;
   children: React.ReactNode;
+  anchor?: string;
 }) {
   return (
-    <label className="flex flex-col gap-2">
+    <label
+      id={anchor ? `field-${anchor}` : undefined}
+      className="flex scroll-mt-28 flex-col gap-2"
+    >
       <span className="label text-muted-foreground">{label}</span>
       {hint ? (
         <span className="max-w-prose text-sm text-muted-foreground">
