@@ -104,3 +104,43 @@ export function projectsFile(
 
   return next;
 }
+
+/* ── comparing a draft with what is published ─────────────────────
+ * `same(a, b)` — deep equality that ignores the order keys happen to sit in.
+ *
+ * The editor decides whether anything is unpublished by comparing the draft
+ * against what the page was built with, which is the right way round: undoing
+ * an edit by hand clears the warning instead of leaving it stuck on. It did
+ * that with `JSON.stringify`, and `JSON.stringify` is not an equality test —
+ * it is a serialiser, and two objects carrying identical values in a
+ * different order produce different strings.
+ *
+ * Which is exactly what happened. `lib/content.ts` builds its object field by
+ * field, so `heroDisciplines` sits seventh; `content/site.json` has it last,
+ * because that is where it was appended. Reading the repo put the file's order
+ * into the draft, the comparison saw two different strings, and the editor
+ * said UNPUBLISHED from the moment it loaded — for ever, with nothing to undo.
+ *
+ * The record fields had the same fault waiting: `recategorised`, `covers` and
+ * the rest are keyed by slug and their insertion order is whatever order the
+ * edits arrived in, so refiling a project and then refiling it back read as a
+ * change. Sorting the keys fixes all seven comparisons at once.
+ * ─────────────────────────────────────────────────────────────── */
+
+/** Objects with their keys sorted, recursively; arrays keep their order. */
+const sorted = (_key: string, value: unknown): unknown =>
+  value && typeof value === "object" && !Array.isArray(value)
+    ? Object.fromEntries(
+        Object.entries(value).sort(([a], [b]) => (a < b ? -1 : 1)),
+      )
+    : value;
+
+/**
+ * Whether two JSON-shaped values carry the same content.
+ *
+ * Array order still counts — a running order is a sequence and reordering it
+ * is the edit. Key order does not, and `undefined` is absent either way,
+ * which is what `role: undefined` from an omitted field should mean.
+ */
+export const same = (a: unknown, b: unknown): boolean =>
+  JSON.stringify(a, sorted) === JSON.stringify(b, sorted);

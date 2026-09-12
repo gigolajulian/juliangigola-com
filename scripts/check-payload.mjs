@@ -17,7 +17,7 @@
  */
 
 import assert from "node:assert/strict";
-import { projectsFile, tidySequence } from "../lib/admin-payload.ts";
+import { projectsFile, tidySequence, same } from "../lib/admin-payload.ts";
 
 const edit = {
   hidden: [],
@@ -123,4 +123,39 @@ const edit = {
   );
 }
 
-console.log("admin payload: 16 cases pass");
+// Is anything unpublished? The comparison behind the Publish button.
+{
+  // The bug this replaced `JSON.stringify` over: `lib/content.ts` builds the
+  // object field by field, `content/site.json` carries `heroDisciplines` last,
+  // and the editor called that a change for ever.
+  const built = { coverSlug: "a", heroDisciplines: ["editorial"], featured: [] };
+  const fromRepo = { coverSlug: "a", featured: [], heroDisciplines: ["editorial"] };
+  assert.notEqual(
+    JSON.stringify(built),
+    JSON.stringify(fromRepo),
+    "the two really do serialise differently — otherwise this proves nothing",
+  );
+  assert.ok(same(built, fromRepo), "key order is not an edit");
+
+  // Records keyed by slug: refiling a project and refiling it back is not one
+  // either, whichever order the keys ended up in.
+  assert.ok(same({ a: "x", b: "y" }, { b: "y", a: "x" }), "slug order is not an edit");
+
+  // But a real change still is, at every depth.
+  assert.ok(!same(built, { ...built, coverSlug: "b" }), "a changed field is an edit");
+  assert.ok(!same({ a: "x" }, { a: "x", b: "y" }), "an added key is an edit");
+  assert.ok(!same({ a: "x", b: "y" }, { a: "x" }), "a removed key is an edit");
+  assert.ok(
+    !same({ s: [{ n: 1 }] }, { s: [{ n: 2 }] }),
+    "a change inside an array of objects is an edit",
+  );
+
+  // Array order counts — a running order is a sequence, and dragging is the edit.
+  assert.ok(!same(["a", "b"], ["b", "a"]), "reordering a list is an edit");
+
+  // An omitted optional field and one explicitly undefined mean the same thing;
+  // `lib/content.ts` produces the second from the first.
+  assert.ok(same({ q: "x" }, { q: "x", role: undefined }), "absent is undefined");
+}
+
+console.log("admin payload: 25 cases pass");

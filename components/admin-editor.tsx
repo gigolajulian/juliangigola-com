@@ -16,7 +16,7 @@ import { AdminTrash } from "@/components/admin-trash";
 import { isTextRef, type FrameRef, type TrashedProject } from "@/lib/added";
 import { ADDED_PATH } from "@/lib/added";
 import { type PendingUpload } from "@/components/admin-frames";
-import { projectsFile, type ProjectsFile } from "@/lib/admin-payload";
+import { projectsFile, same, type ProjectsFile } from "@/lib/admin-payload";
 import { commitFiles, readFile, type CommitFile } from "@/lib/admin-github";
 import type { Credit } from "@/lib/work-types";
 import { cn } from "@/lib/utils";
@@ -269,15 +269,20 @@ export function AdminEditor({
    * Compared against what the page was built with rather than tracked with a
    * flag, so undoing an edit by hand clears the warning instead of leaving it
    * stuck on — a dirty marker that lies is worse than none.
+   *
+   * Through `same`, not `JSON.stringify`: the draft comes back from the repo
+   * with the file's own key order while `initial` has `lib/content.ts`'s, so
+   * comparing the two strings said "unpublished" from the moment the token
+   * loaded and there was no edit to undo. See the note on `same`.
    */
   const dirty =
-    JSON.stringify(draft) !== JSON.stringify(initial) ||
+    !same(draft, initial) ||
     [...hidden].sort().join() !== [...initialHidden].sort().join() ||
-    JSON.stringify(recategorised) !== JSON.stringify(initialRecategorised) ||
-    JSON.stringify(reframed) !== JSON.stringify(initialReframed) ||
-    JSON.stringify(recredited) !== JSON.stringify(initialRecredited) ||
-    JSON.stringify(order) !== JSON.stringify(initialOrder) ||
-    JSON.stringify(covers) !== JSON.stringify(initialCovers);
+    !same(recategorised, initialRecategorised) ||
+    !same(reframed, initialReframed) ||
+    !same(recredited, initialRecredited) ||
+    !same(order, initialOrder) ||
+    !same(covers, initialCovers);
 
   /**
    * Where "Open live" points. Read after mount, because the server has no
