@@ -3,7 +3,10 @@
   "trash": [],
   "categories": {
     "light-play": "editorial",
-    "dark-matter": "editorial"
+    "dark-matter": "editorial",
+    "automotive": "automotive",
+    "places": "places",
+    "realestate": "realestate"
   },
   "frames": {
     "wrapped-up": [
@@ -80,5 +83,22 @@
         "instagram": "juliangigola"
       }
     ]
-  }
+  },
+  "disciplines": [
+    {
+      "slug": "automotive",
+      "name": "Automotive",
+      "section": "WORK"
+    },
+    {
+      "slug": "places",
+      "name": "Places",
+      "section": "WORK"
+    },
+    {
+      "slug": "realestate",
+      "name": "Real estate",
+      "section": "SESSIONS"
+    }
+  ]
 }

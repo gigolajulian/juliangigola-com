@@ -7,7 +7,10 @@
  * featured, what leads the homepage, and how the old site's three nav groups
  * collapse into the new two.
  */
-import { PROJECTS as HARVESTED, CATEGORIES } from "./work-data";
+import {
+  PROJECTS as HARVESTED,
+  CATEGORIES as HARVESTED_CATEGORIES,
+} from "./work-data";
 import type { Project, Category, Frame, TextBlock } from "./work-types";
 import { COVER_RELEASES } from "./cover-art-data";
 import { CONTENT } from "./content";
@@ -19,12 +22,32 @@ import {
   RECREDITED,
   ORDER,
   DISCIPLINE_COVERS,
+  ADDED_DISCIPLINES,
   isTextRef,
   type AddedProject,
 } from "./added";
 
 export type { Project, Category, Frame, TextBlock };
-export { CATEGORIES, COVER_RELEASES };
+/**
+ * Every discipline: the ones the old nav had, plus any added in /admin.
+ *
+ * Appended rather than merged in place, so the harvested order — which is the
+ * old site's nav order and what the work index reads — is untouched. A slug
+ * that already exists is dropped: `content/projects.json` is edited through a
+ * browser form, and a duplicate there should cost the new entry rather than
+ * put two rows with one slug into every index on the site.
+ *
+ * Declared here, above the consts that read it, rather than left as the
+ * re-export it used to be.
+ */
+export const CATEGORIES: Category[] = [
+  ...HARVESTED_CATEGORIES,
+  ...ADDED_DISCIPLINES.filter(
+    (d) => !HARVESTED_CATEGORIES.some((c) => c.slug === d.slug),
+  ),
+];
+
+export { COVER_RELEASES };
 
 /**
  * The cover-art gallery, with the harvest's pictures replaced by Julian's own

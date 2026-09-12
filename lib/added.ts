@@ -21,7 +21,7 @@
 // Relative, not `@/`: `next.config.ts` reaches this module through `work.ts`
 // and is transpiled outside the app's path mapping.
 import raw from "../content/projects.json";
-import type { Credit, Frame } from "./work-types";
+import type { Credit, Frame, Section } from "./work-types";
 
 export type AddedProject = {
   slug: string;
@@ -302,6 +302,27 @@ export type AddedFile = {
    */
   covers: Record<string, string>;
   /**
+   * Disciplines added here rather than harvested from the old site.
+   *
+   * `lib/work-data.ts` holds the thirteen the old nav had, and
+   * `scripts/harvest.mjs` regenerates that file — so a discipline invented
+   * now has to live somewhere the harvest cannot reach. Merged into
+   * `CATEGORIES` in `lib/work.ts`, after the harvested ones, and a slug that
+   * already exists there is ignored rather than duplicated.
+   *
+   * `section` decides where the discipline appears, and the two are not
+   * variations of one thing:
+   *
+   *   WORK      a /work category. An index of its projects, or a single grid
+   *             where the work is one set (see `isOwnGallery`).
+   *   SESSIONS  off /work entirely, onto /sessions as a bookable service.
+   *             Note this is half of a session: the page renders
+   *             `content/site.json`'s `sessions` array and finds its sample
+   *             frames by matching slug, so a SESSIONS discipline with no
+   *             entry there appears nowhere at all.
+   */
+  disciplines: { slug: string; name: string; section: Section }[];
+  /**
    * Slugs to leave off the site.
    *
    * Harvested projects cannot be deleted: `lib/work-data.ts` is regenerated
@@ -424,6 +445,31 @@ function parse(v: unknown): AddedFile {
     seenInOrder.add(slug);
   }
 
+  const rawDisciplines = v.disciplines === undefined ? [] : v.disciplines;
+  if (!Array.isArray(rawDisciplines))
+    return fail("disciplines", "an array", rawDisciplines);
+  const disciplines = rawDisciplines.map((d, i) => {
+    const at = `disciplines[${i}]`;
+    if (!isRecord(d)) return fail(at, "an object", d);
+    const slug = str(d.slug, `${at}.slug`);
+    // The slug becomes a route segment and is matched against project
+    // categories, so it is held to what can safely be both.
+    if (!/^[a-z0-9][a-z0-9-]*$/.test(slug)) {
+      return fail(`${at}.slug`, "lowercase letters, digits and hyphens", slug);
+    }
+    // Asserted, then immediately proved by the check below. `!==` against
+    // literals narrows a union and not a wide `string`, so without the
+    // annotation this stays `string` and the validated value does not type as
+    // the thing it has just been validated to be.
+    const section = str(d.section, `${at}.section`) as Section;
+    if (section !== "WORK" && section !== "SESSIONS") {
+      // MUSIC exists in the type but no longer in the nav, and inventing one
+      // here would file work into a section nothing renders.
+      return fail(`${at}.section`, '"WORK" or "SESSIONS"', section);
+    }
+    return { slug, name: str(d.name, `${at}.name`), section };
+  });
+
   const rawCovers = v.covers === undefined ? {} : v.covers;
   if (!isRecord(rawCovers)) return fail("covers", "an object", rawCovers);
   const covers: Record<string, string> = {};
@@ -439,6 +485,7 @@ function parse(v: unknown): AddedFile {
     credits,
     order,
     covers,
+    disciplines,
     hidden: hidden.map((s, i) => str(s, `hidden[${i}]`)),
   };
 }
@@ -453,6 +500,13 @@ export const RECREDITED: Readonly<Record<string, Credit[]>> = FILE.credits;
 
 /** The running order of the work, by slug. Partial; see `AddedFile.order`. */
 export const ORDER: readonly string[] = FILE.order;
+
+/** Disciplines invented in /admin, merged into `CATEGORIES`. */
+export const ADDED_DISCIPLINES: readonly {
+  slug: string;
+  name: string;
+  section: Section;
+}[] = FILE.disciplines;
 
 /** Hand-picked discipline covers, by category slug. Frame paths. */
 export const DISCIPLINE_COVERS: Readonly<Record<string, string>> = FILE.covers;
