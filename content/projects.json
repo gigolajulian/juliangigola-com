@@ -6,7 +6,9 @@
     "dark-matter": "editorial",
     "automotive": "automotive",
     "places": "places",
-    "realestate": "realestate"
+    "realestate": "realestate",
+    "byte-me": "editorial",
+    "dystopia": "editorial"
   },
   "frames": {
     "wrapped-up": [
