@@ -44,7 +44,7 @@
       "slug": "studio-digitals",
       "name": "Studio digitals",
       "blurb": "Agency-standard digitals: clean light, no retouching, accurate to how you actually look.",
-      "from": null,
+      "from": 500,
       "includes": [
         "Full length, three-quarter, and close",
         "Front and profile",

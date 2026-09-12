@@ -2,6 +2,17 @@
   "projects": [],
   "trash": [],
   "categories": {},
-  "frames": {},
-  "hidden": []
+  "frames": {
+    "rouge": [
+      "/work/rouge/01.jpg",
+      "/work/rouge/04.jpg",
+      "/work/rouge/03.jpg",
+      "/work/rouge/06.jpg",
+      "/work/rouge/07.jpg",
+      "/work/rouge/08.jpg",
+      "/work/rouge/10.jpg"
+    ]
+  },
+  "hidden": [],
+  "credits": {}
 }
