@@ -8,7 +8,11 @@
     "places": "places",
     "realestate": "realestate",
     "byte-me": "editorial",
-    "dystopia": "editorial"
+    "dystopia": "editorial",
+    "entangled": "editorial",
+    "frostbite": "editorial",
+    "fun-xyz": "headshots",
+    "goodcult": "campaigns"
   },
   "frames": {
     "wrapped-up": [
