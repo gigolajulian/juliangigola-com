@@ -430,8 +430,12 @@ export function Hero({ disciplines }: { disciplines: Discipline[] }) {
       {/* The type, on a plate.
        *
        * The same material as the bar at the top of every page and the cards
-       * on the homepage: the ground at 70%, a heavy blur, closed with a
-       * hairline. It is the site's one established translucent surface, so it
+       * on the homepage, thinned down: the ground at 45% rather than 70%, so
+       * more of the photograph comes through, with the blur taken up a step
+       * to hold the type legible against the extra detail now showing behind
+       * it. Transparency and blur trade against each other — dropping the
+       * ground without deepening the blur is how type over a picture becomes
+       * a texture. Closed with a hairline. It is the site's one established translucent surface, so it
        * reads as chrome over the photograph rather than as damage to it — and
        * unlike flipping the ink, it is legible on a frame that is pale in one
        * corner and black in another, which most of these are.
@@ -441,7 +445,7 @@ export function Hero({ disciplines }: { disciplines: Discipline[] }) {
        * type is closer to the photograph than the plate's own padding.
        */}
       <div className="relative z-10 flex min-h-dvh flex-col justify-end lg:justify-start">
-        <div className="flex min-w-0 flex-col border-t border-border/60 bg-background/70 backdrop-blur-xl lg:min-h-dvh lg:w-[min(40rem,48vw)] lg:border-r lg:border-t-0">
+        <div className="flex min-w-0 flex-col border-t border-border/60 bg-background/45 backdrop-blur-2xl lg:min-h-dvh lg:w-[min(40rem,48vw)] lg:border-r lg:border-t-0">
           {/* First on a phone, and the top of the left column from `lg`. */}
           <div className="flex min-w-0 flex-col">
             {/* One: the standing details, as a running head. The tall top
