@@ -359,22 +359,46 @@ export function AdminEditor({
   const known = React.useMemo(() => new Set(slugs), [slugs]);
 
   /**
-   * The projects in the draft's running order.
+   * The projects as the draft has them: refiled, and in running order.
    *
-   * `projects` arrives in the order the last build published. Dragging one
-   * changes `order` in memory, and the view has to redraw from that
-   * immediately rather than waiting for a deploy — so the sort happens here,
-   * mirroring `byRunningOrder` in `lib/work.ts`.
+   * One derivation, because there were three and they disagreed. `projects`
+   * arrives as the last build published it, and the draft can move a project
+   * two ways — refiling it into another discipline, and dragging it to another
+   * position — so every view that groups or orders projects has to apply both
+   * or contradict the ones that do.
    *
-   * `Infinity` for anything the order does not name, and a stable sort, so
-   * the undragged keep the position the manifest gave them.
+   * They did contradict. The select said Editorial while the row beside it
+   * said Unfiled; filing a project left the row stale; and the sitemap — whose
+   * own job is to show "the draft as it would publish" — kept a refiled
+   * project under its old discipline, because it read the server's label. Each
+   * was a small lie in a different place and they were all the same bug.
+   *
+   * Mirrors `relabel` and `byRunningOrder` in `lib/work.ts`: the same two
+   * operations the build applies, applied here so the editor shows what
+   * publishing would produce rather than what the last deploy did.
    */
   const orderedProjects = React.useMemo(() => {
     const rank = new Map(order.map((slug, i) => [slug, i]));
-    return [...projects].sort(
-      (a, b) => (rank.get(a.slug) ?? Infinity) - (rank.get(b.slug) ?? Infinity),
-    );
-  }, [projects, order]);
+    const named = new Map(categories.map((c) => [c.slug, c.name]));
+
+    return [...projects]
+      .map((p) => {
+        const filed = recategorised[p.slug] ?? p.categorySlug;
+        if (filed === p.categorySlug) return p;
+        return {
+          ...p,
+          categorySlug: filed,
+          // "Unfiled" is the same string `app/admin/page.tsx` uses for a
+          // project the manifest gives no category at all, so the sitemap can
+          // group both kinds under one heading.
+          category: named.get(filed) ?? "Unfiled",
+        };
+      })
+      .sort(
+        (a, b) =>
+          (rank.get(a.slug) ?? Infinity) - (rank.get(b.slug) ?? Infinity),
+      );
+  }, [projects, order, recategorised, categories]);
 
   /**
    * Sends the editor to a project, from anywhere that can name one.
@@ -681,7 +705,7 @@ export function AdminEditor({
           and the whole page grows again. */}
       <aside className="min-w-0 xl:min-h-0 xl:overflow-y-auto xl:pb-10">
         <AdminSitemap
-          projects={projects.map((p) => ({
+          projects={orderedProjects.map((p) => ({
             slug: p.slug,
             name: p.name,
             category: p.category,

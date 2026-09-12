@@ -285,6 +285,19 @@ export function AdminProjects({
         {visible.map((p) => {
           const isHidden = hidden.has(p.slug);
           const isOpen = opened === p.slug;
+          /** What the draft has it filed as — an override, or the manifest. */
+          const filedAs = recategorised[p.slug] ?? p.categorySlug;
+          const unfiled = filedAs === "";
+          /* The label has to follow the draft, not the build.
+           
+             `p.category` is computed on the server from the manifest, so
+             refiling a project left the row still reading "UNFILED" beside a
+             select that now said Editorial — the same disagreement this
+             select was just fixed for, pointing the other way. Derived from
+             `filedAs` instead, so the row, the control and the sitemap all
+             say one thing. */
+          const filedName =
+            disciplines.find((d) => d.slug === filedAs)?.name ?? "Unfiled";
           const frames = reframed[p.slug] ?? null;
           return (
             <li
@@ -318,7 +331,7 @@ export function AdminProjects({
                     {p.name}
                   </span>
                   <span className="label block truncate text-muted-foreground">
-                    {p.category} · {(frames ?? p.images).length} frames · /
+                    {filedName} · {(frames ?? p.images).length} frames · /
                     {p.slug}
                     {frames ? " · edited" : ""}
                     {isHidden ? " · hidden" : ""}
@@ -331,11 +344,42 @@ export function AdminProjects({
                       come from the generated manifest, where an edit would last
                       until the next harvest and no longer. */}
                   <select
-                    value={recategorised[p.slug] ?? p.categorySlug}
+                    value={filedAs}
                     onChange={(e) => onRecategorise(p.slug, e.target.value)}
                     aria-label={`Discipline for ${p.name}`}
-                    className="label max-w-[9rem] border border-border bg-transparent px-2 py-2 text-muted-foreground outline-none focus-visible:border-foreground"
+                    className={cn(
+                      "label max-w-[9rem] border bg-transparent px-2 py-2 outline-none focus-visible:border-foreground",
+                      // Unfiled is a state worth seeing across seventy-three
+                      // rows, not a value to read one at a time.
+                      unfiled
+                        ? "border-destructive text-foreground"
+                        : "border-border text-muted-foreground",
+                    )}
                   >
+                    {/* The option that has to exist for the control to tell
+                        the truth.
+                     
+                        An unfiled project's `categorySlug` is the empty
+                        string, which matches no option below — and a `select`
+                        whose value matches nothing displays its *first*
+                        option instead. So all twenty-one unfiled projects
+                        read "Editorial" while the row beside them read
+                        "Unfiled", and the two contradicted each other.
+                     
+                        Worse than cosmetic: because the control already read
+                        Editorial, choosing Editorial changed nothing and
+                        fired no event, so Editorial was the one discipline
+                        nothing could be filed into. Every other one worked.
+                     
+                        Disabled, so it can be shown as the current value but
+                        not chosen — there is no reason to deliberately unfile
+                        something, and `refile` ignores an empty override
+                        anyway. Filing the project makes it disappear. */}
+                    {unfiled ? (
+                      <option value="" disabled>
+                        Unfiled — pick one
+                      </option>
+                    ) : null}
                     {/* Grouped, because the two kinds are not interchangeable
                         and the list is long enough to get lost in: a
                         commission and a session sit on opposite sides of the
