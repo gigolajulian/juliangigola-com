@@ -75,8 +75,17 @@ export function ContactForm() {
 
   if (state.status === "sent") {
     return (
-      <div role="status" className="border border-border p-8">
-        <h2 className="font-display text-2xl uppercase tracking-[0]">Sent.</h2>
+      /* Centred, and the only block on this page that is.
+         
+         Everything else here is a form — labels, fields and errors all read
+         down a left edge, because that is what you scan while filling one in.
+         There is nothing left to fill in: this is one short piece of news,
+         and it is the last thing the visitor sees. */
+      <div
+        role="status"
+        className="flex flex-col items-center border border-border p-8 text-center"
+      >
+        <h2 className="font-display text-2xl uppercase tracking-[0]">Sent!</h2>
         <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
           {state.message}
         </p>

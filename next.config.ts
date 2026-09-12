@@ -1,4 +1,5 @@
 import type { NextConfig } from "next";
+import { initOpenNextCloudflareForDev } from "@opennextjs/cloudflare";
 // `work`, not `work-data`. The generated manifest is every project the old
 // site ever had; `work.ts` is the set actually published, with hidden ones
 // filtered out. Redirecting from a legacy URL to a page that is no longer
@@ -169,5 +170,17 @@ const nextConfig: NextConfig = {
     );
   },
 };
+
+/* Local bindings in `next dev`.
+ *
+ * Without this, `getCloudflareContext()` has no `env` outside a real Worker,
+ * so the contact form would take its "no inbox attached" branch on every
+ * submission here and the one path worth testing — an enquiry going in and
+ * coming back out of /admin — could only be tested in production. The adapter
+ * stands up Miniflare with the bindings from `wrangler.jsonc`, so the KV
+ * namespace is a local one on disk under `.wrangler/`.
+ *
+ * Development only; it is a no-op in a build. */
+void initOpenNextCloudflareForDev();
 
 export default nextConfig;

@@ -13,6 +13,7 @@ import { AdminDisciplines } from "@/components/admin-disciplines";
 import { AdminPreview } from "@/components/admin-preview";
 import { AdminPicker, type PickerItem } from "@/components/admin-picker";
 import { AdminTrash } from "@/components/admin-trash";
+import { AdminInbox } from "@/components/admin-inbox";
 import { isTextRef, type FrameRef, type TrashedProject } from "@/lib/added";
 import { ADDED_PATH } from "@/lib/added";
 import { type PendingUpload } from "@/components/admin-frames";
@@ -99,6 +100,13 @@ const TABS = [
     { id: "disciplines", label: "Disciplines" },
     { id: "projects", label: "Projects" },
   ],
+  /* Its own group, because it is not the same kind of visit at all.
+   *
+   * The first four tabs are pages and the next two are the work — both of
+   * them things you go in to change. This one is post: you go in to read it,
+   * and what you do afterwards happens in your mail. It also has nothing to
+   * publish, which is the one thing every other tab has in common. */
+  [{ id: "inbox", label: "Inbox" }],
 ] as const;
 
 type View = (typeof TABS)[number][number]["id"];
@@ -1087,6 +1095,8 @@ export function AdminEditor({
             </span>
           </nav>
         </div>
+
+        {view === "inbox" ? <AdminInbox /> : null}
 
         {view === "disciplines" ? (
           <AdminDisciplines

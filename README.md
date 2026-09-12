@@ -124,21 +124,53 @@ every file under `public/work/<slug>/` in one commit — listed from the repo
 rather than derived from the manifest, so a half-finished upload does not
 leave orphans behind.
 
-### Before turning the contact form on
+### Where enquiries go
 
-`app/contact/actions.ts` sends through Resend when `RESEND_API_KEY` is set,
-and it has no ceiling: a Server Action is a public endpoint, there is no rate
-limit in it, and a Worker has no durable state to keep one in. Unset, as it is
-today, the form returns "not connected" and hands back a `mailto:` — so the
-abuse costs nothing. Set, it becomes a way for anyone to burn the mail quota
-and flood the inbox at whatever rate they like.
+The contact form writes to a KV namespace and `/admin`'s **Inbox** tab reads
+it. Nothing is emailed, which is the point: an enquiry that is stored cannot
+bounce, cannot land in a spam folder, and needs no sending domain, no API key
+and no monthly bill. The sender needs no mail app either — the form used to
+hand back a prefilled `mailto:` and ask them to send it themselves, which is
+work for the one person you want to hear from.
 
-A honeypot field catches the indiscriminate bots. It is a floor, not a
-defence. **In the same sitting as adding the key**, add one of:
+Two things make it work, and only one of them is set up for you:
 
-- a Cloudflare **Rate Limiting** rule on `/contact` (a handful of requests per
-  minute per IP is generous for a form a human fills in), or
-- **Turnstile** in front of the form.
+- **`INBOX` namespace** — bound in `wrangler.jsonc`, created already. Writing
+  an enquiry needs nothing else, so the form captures messages from the first
+  deploy.
+- **`INBOX_KEY` secret** — `wrangler secret put INBOX_KEY`, any long random
+  string, then paste it into the Inbox tab once. Until it is set the route
+  **refuses every read**: an enquiry carries somebody's name, their address
+  and what they want, and the failure to avoid is the one where that is
+  readable by whoever asks. The GitHub token cannot stand in for it — GitHub
+  has no opinion about data held on this site.
+
+Cloudflare Access in front of `/admin` is still worth having, but it is not
+what protects this.
+
+#### What stops it being spammed
+
+A Server Action is a public endpoint, and this one writes to a store with a
+quota. Three things stand in front of it, in `lib/inbox.ts`:
+
+- **A five-minute cooldown per sender.** Read before anything is written, so a
+  sender inside the window costs one read and no writes. Keyed on a hash of
+  the address salted with the day, never the address itself.
+- **A ceiling of 200 a day**, across everybody — because the cooldown is per
+  sender and a spammer has more than one. KV allows a thousand writes a day
+  and each enquiry costs two, so the cap cannot exhaust the quota. Past it the
+  form says so and offers the `mailto:`; refusing a message is fine, pretending
+  to accept one is not.
+- **A honeypot field**, answered with the same success a real enquiry gets.
+  Telling a bot it was caught is telling whoever wrote it what to change.
+  Nothing is stored, so neither the inbox nor the quota pays for it.
+
+`scripts/check-inbox.mjs` covers all of that — 46 cases, including the
+cooldown's boundaries and a clock that runs backwards.
+
+A Cloudflare **Rate Limiting** rule on `/contact` is still the right thing to
+add on top, since the cooldown is enforced by a store the request can reach
+and a rule is enforced before it gets there.
 
 ### Security headers
 
@@ -217,8 +249,8 @@ send mail. All three are fixed by having a server.
 
 - **Booking** — set `BOOKING_URL` in `lib/site.ts` to a Google Calendar appointment
   schedule. "Check availability" buttons then appear on `/sessions` and `/contact`.
-- **Contact delivery** — set `RESEND_API_KEY` and `CONTACT_TO`. Until then the form
-  validates, refuses to fail silently, and hands back a working `mailto:`.
+- **The inbox key** — `wrangler secret put INBOX_KEY`, then paste it into /admin's
+  Inbox tab. Enquiries are captured either way; without the key they cannot be read.
 - **Session rates** — `from` is `null` on every entry in `lib/sessions.ts`.
 - **Alt text** — 1,084 frames came across without any. The ones that appear in indexes
   and covers are worth a pass by hand.

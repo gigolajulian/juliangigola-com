@@ -25,6 +25,22 @@
     "binding": "ASSETS"
   },
 
+  // Where the contact form's enquiries are kept, and what /admin's Inbox
+  // reads. One entry per enquiry, plus a short-lived key per sender for the
+  // five-minute cooldown and a counter per day for the ceiling behind it.
+  //
+  // KV rather than D1 because nothing here is relational: an enquiry is
+  // written once, read a few times and deleted. It is also the one store on
+  // the free plan whose limits are nowhere near what a photographer receives
+  // — and the cooldown and the daily cap in `lib/inbox.ts` exist to keep
+  // somebody else's script from spending that allowance.
+  "kv_namespaces": [
+    {
+      "binding": "INBOX",
+      "id": "e88c837945d84ec4b4fdb889c09149fe"
+    }
+  ],
+
   // Worker logs, so `wrangler tail` has something to show when a Server
   // Action fails in production.
   "observability": {

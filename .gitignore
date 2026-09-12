@@ -70,3 +70,8 @@ next-env.d.ts
 #
 # Undo this — and only this line — once R2 is populated and the build reads
 # from `images.juliangigola.com`. See `scripts/sync-r2.mjs`.
+
+# Local Worker secrets for `next dev` (see `types/cloudflare-secrets.d.ts`).
+# Never committed: the real values are set with `wrangler secret put`.
+.dev.vars
+.dev.vars.*
