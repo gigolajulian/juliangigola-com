@@ -81,7 +81,8 @@ export function AdminSitemap({
 }: {
   projects: SitemapProject[];
   hidden: Set<string>;
-  categories: { slug: string; name: string; href: string }[];
+  /** Disciplines, each naming the page it hangs off. */
+  categories: { slug: string; name: string; href: string; branch: string }[];
   origin: string;
   /** Given, rows become controls into the editor rather than links out. */
   onGo?: (target: SitemapTarget) => void;
@@ -104,33 +105,83 @@ export function AdminSitemap({
 
   const live = projects.filter((p) => !hidden.has(p.slug));
 
-  // Grouped before filtering, so a discipline whose name matches keeps all of
-  // its work — searching "portraits" should show the portraits, not only the
-  // ones with "portraits" in their own title.
-  const byCategory = new Map<string, SitemapProject[]>();
-  for (const p of live) {
-    if (!hit(p.name, p.slug, p.category)) continue;
-    byCategory.set(p.category, [...(byCategory.get(p.category) ?? []), p]);
-  }
-  for (const c of categories) {
-    if (needle !== "" && hit(c.name) && !byCategory.has(c.name)) {
-      byCategory.set(
-        c.name,
-        live.filter((p) => p.category === c.name),
-      );
-    }
-  }
+  /**
+   * The tree, filtered.
+   *
+   * Built as a tree rather than as three filtered lists, because the shape is
+   * what makes the filter correct. Drawn flat, a discipline could be kept on
+   * its own; nested, it renders inside its page — so filtering the pages
+   * independently meant searching "weddings" emptied the whole thing, since
+   * no page is called that and the branch it lives on was dropped before its
+   * children were ever considered.
+   *
+   * So a match keeps its ancestors, and it keeps its descendants:
+   *
+   *   - a page matching by name shows all of its disciplines and their work,
+   *     because "sessions" means the sessions, not the word;
+   *   - a discipline matching shows all of its work, for the same reason;
+   *   - a project matching keeps the discipline and the page above it, or it
+   *     would have nowhere to be drawn.
+   */
+  /** Every discipline name the tree can file something under. */
+  const named = new Set(categories.map((c) => c.name));
 
-  const pages = PAGES.filter((p) => hit(p.label, p.href));
-  const disciplines = categories.filter((c) => hit(c.name, c.slug));
+  const tree = PAGES.map((page) => {
+    const pageHit = hit(page.label, page.href);
+
+    const kids = categories
+      .filter((c) => c.branch === page.href)
+      .map((c) => {
+        const catHit = pageHit || hit(c.name, c.slug);
+        const work = live.filter(
+          (p) => p.category === c.name && (catHit || hit(p.name, p.slug)),
+        );
+        return { c, work, keep: catHit || work.length > 0 };
+      })
+      .filter((k) => k.keep);
+
+    /* Work filed under no discipline at all - twenty-one of seventy-three as
+       this is written.
+
+       They are not a rounding error and they are not invisible on the site:
+       /work lists every project regardless, so these are published, reachable
+       and real. What they lack is a discipline, which means they appear on no
+       discipline page and in none of the counts the cover index shows.
+
+       The flat sitemap gave them a group of their own because it grouped by
+       whatever string it found. A tree drawn only from the known disciplines
+       has nowhere to put them, and the first version of this dropped all
+       twenty-one without a word - a sitemap that quietly omits a quarter of
+       the work is worse than no sitemap. So they get a branch, named for what
+       is wrong with them. */
+    const orphans =
+      page.href === "/work"
+        ? live.filter(
+            (p) => !named.has(p.category) && (pageHit || hit(p.name, p.slug)),
+          )
+        : [];
+
+    return {
+      page,
+      kids,
+      orphans,
+      keep: pageHit || kids.length > 0 || orphans.length > 0,
+    };
+  }).filter((n) => n.keep);
+
   const withheld = projects.filter(
     (p) => hidden.has(p.slug) && hit(p.name, p.slug, p.category),
   );
+
   const total = PAGES.length + categories.length + live.length;
   const showing =
-    pages.length +
-    disciplines.length +
-    [...byCategory.values()].reduce((n, l) => n + l.length, 0) +
+    tree.length +
+    tree.reduce((n, t) => n + t.kids.length, 0) +
+    tree.reduce(
+      (n, t) =>
+        n + t.orphans.length + t.kids.reduce((m, k) => m + k.work.length, 0),
+      0,
+    ) +
     withheld.length;
 
   return (
@@ -181,11 +232,24 @@ export function AdminSitemap({
         </p>
       ) : null}
 
-      {/* The fixed pages, as a plain column — there are five and they never
-          change, so a grid of identical rectangles would be decoration. */}
-      <Group title="Pages" count={pages.length}>
-        <ul className="flex flex-col">
-          {pages.map((p) => {
+      {/* Drawn as a tree, because the site is one.
+       *
+       * This was three flat lists — Pages, then Disciplines, then a grid per
+       * discipline — which is accurate and tells you nothing about shape. A
+       * discipline is not a sibling of the homepage; it hangs off /work, and
+       * the eighteen editorial projects hang off that. Reading it as columns
+       * you had to already know the structure to see it.
+       *
+       * Indentation plus a rule down the left of each nested level, with a
+       * tick out to every row. Same device a file browser uses, for the same
+       * reason: it is the cheapest way to show containment, and nobody has to
+       * be taught it.
+       */}
+      <div className="mt-6">
+        <p className="label pb-2 text-muted-foreground">The site</p>
+
+        <Branch>
+          {tree.map(({ page: p, kids, orphans }) => {
             const body = (
               <>
                 <span className="flex-1 truncate text-sm">{p.label}</span>
@@ -194,8 +258,9 @@ export function AdminSitemap({
                 </span>
               </>
             );
+
             return (
-              <li key={p.href} className="border-b border-border last:border-0">
+              <Twig key={p.href}>
                 {onGo && p.target ? (
                   <button
                     type="button"
@@ -209,70 +274,112 @@ export function AdminSitemap({
                     {body}
                   </Open>
                 )}
-              </li>
+
+                {/* The disciplines that live under this page, and the work
+                    under each of them. Only rendered where there is
+                    something: /studio and /contact have no children, and an
+                    empty rule hanging below them would suggest otherwise. */}
+                {kids.length || orphans.length ? (
+                  <Branch>
+                    {kids.map(({ c, work }) => {
+                      return (
+                        <Twig key={c.slug}>
+                          {onGo ? (
+                            <button
+                              type="button"
+                              onClick={() =>
+                                onGo(
+                                  // Cover art is the exception, and for a
+                                  // reason rather than as a special case: it
+                                  // is one project holding every release, so
+                                  // filtering the list to it lands on a
+                                  // single row that tells you nothing. What
+                                  // is curated about cover art is which
+                                  // releases lead the homepage rack.
+                                  c.slug === "coverart" ||
+                                    c.slug === "cover-art"
+                                    ? { kind: "field", anchor: "coverArt" }
+                                    : { kind: "projects", discipline: c.name },
+                                )
+                              }
+                              className={cn(row, "w-full text-left")}
+                            >
+                              <span className="flex-1 truncate text-sm">
+                                {c.name}
+                              </span>
+                              <span className="label shrink-0 tabular-nums text-muted-foreground">
+                                {work.length || "—"}
+                              </span>
+                            </button>
+                          ) : (
+                            <Open href={c.href} origin={origin} className={row}>
+                              <span className="flex-1 truncate text-sm">
+                                {c.name}
+                              </span>
+                              <span className="label shrink-0 tabular-nums text-muted-foreground">
+                                {work.length || "—"}
+                              </span>
+                            </Open>
+                          )}
+
+                          {work.length ? (
+                            <div className="border-l border-border pl-4">
+                              <Tiles
+                                projects={work}
+                                origin={origin}
+                                onGo={onGo}
+                                compact={compact}
+                              />
+                            </div>
+                          ) : null}
+                        </Twig>
+                      );
+                    })}
+                    {orphans.length ? (
+                      <Twig>
+                        {onGo ? (
+                          <button
+                            type="button"
+                            onClick={() =>
+                              onGo({ kind: "projects", discipline: "Unfiled" })
+                            }
+                            className={cn(row, "w-full text-left")}
+                          >
+                            <span className="flex-1 truncate text-sm text-muted-foreground">
+                              Unfiled
+                            </span>
+                            <span className="label shrink-0 tabular-nums text-muted-foreground">
+                              {orphans.length}
+                            </span>
+                          </button>
+                        ) : (
+                          <span className={cn(row, "text-muted-foreground")}>
+                            <span className="flex-1 truncate text-sm">
+                              Unfiled
+                            </span>
+                            <span className="label shrink-0 tabular-nums">
+                              {orphans.length}
+                            </span>
+                          </span>
+                        )}
+                        <div className="border-l border-border pl-4">
+                          <Tiles
+                            projects={orphans}
+                            origin={origin}
+                            onGo={onGo}
+                            compact={compact}
+                            dim
+                          />
+                        </div>
+                      </Twig>
+                    ) : null}
+                  </Branch>
+                ) : null}
+              </Twig>
             );
           })}
-        </ul>
-      </Group>
-
-      <Group title="Disciplines" count={disciplines.length}>
-        <ul className="flex flex-col">
-          {/* Keyed by slug, not href: `categoryHref` sends a discipline with
-              no work yet to `/work`, so several share a destination and
-              keying on that collapses them into one row. */}
-          {disciplines.map((c) => {
-            const n = byCategory.get(c.name)?.length ?? 0;
-            const body = (
-              <>
-                <span className="flex-1 truncate text-sm">{c.name}</span>
-                <span className="label shrink-0 tabular-nums text-muted-foreground">
-                  {n || "—"}
-                </span>
-              </>
-            );
-            return (
-              <li key={c.slug} className="border-b border-border last:border-0">
-                {onGo ? (
-                  <button
-                    type="button"
-                    onClick={() =>
-                      onGo(
-                        // Cover art is the exception, and for a reason rather
-                        // than as a special case: it is one project holding
-                        // every release, so filtering the list to it lands on
-                        // a single row that tells you nothing. What is
-                        // actually curated about cover art is which releases
-                        // lead the homepage rack, so that is where it goes.
-                        c.slug === "coverart" || c.slug === "cover-art"
-                          ? { kind: "field", anchor: "coverArt" }
-                          : { kind: "projects", discipline: c.name },
-                      )
-                    }
-                    className={cn(row, "w-full text-left")}
-                  >
-                    {body}
-                  </button>
-                ) : (
-                  <Open href={c.href} origin={origin} className={row}>
-                    {body}
-                  </Open>
-                )}
-              </li>
-            );
-          })}
-        </ul>
-      </Group>
-
-      {[...byCategory.entries()].map(([category, list]) => (
-        <Group key={category} title={category} count={list.length}>
-          <Tiles
-            projects={list}
-            origin={origin}
-            onGo={onGo}
-            compact={compact}
-          />
-        </Group>
-      ))}
+        </Branch>
+      </div>
 
       {needle !== "" && showing === 0 ? (
         <p className="mt-6 text-sm text-muted-foreground">
@@ -297,7 +404,35 @@ export function AdminSitemap({
   );
 }
 
-/** One row of the two plain lists, control or link alike. */
+/**
+ * One level of nesting: a rule down the left, everything indented past it.
+ *
+ * The rule is on the container rather than on each row, so it is one
+ * continuous line rather than a stack of segments that can disagree by a
+ * pixel — and it stops naturally at the last child instead of needing to
+ * know which one that is.
+ */
+function Branch({ children }: { children: React.ReactNode }) {
+  return <ul className="flex flex-col border-l border-border">{children}</ul>;
+}
+
+/**
+ * A row on a branch, with the tick that joins it to the rule.
+ *
+ * The tick is a pseudo-element on the list item, drawn at the height of the
+ * first line of text rather than at the middle of the item — an item
+ * containing a nested branch is tall, and centring the tick on it would put
+ * the join halfway down a group instead of beside the row it belongs to.
+ */
+function Twig({ children }: { children: React.ReactNode }) {
+  return (
+    <li className="relative pl-4 before:absolute before:left-0 before:top-[0.95rem] before:h-px before:w-3 before:bg-border">
+      {children}
+    </li>
+  );
+}
+
+/** One row of the tree, control or link alike. */
 const row =
   "flex items-baseline gap-3 py-1.5 transition-colors duration-200 hoverable:hover:text-foreground";
 

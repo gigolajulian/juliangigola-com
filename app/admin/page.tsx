@@ -158,13 +158,17 @@ export default function AdminPage() {
             color: r.frames[0]?.color ?? "transparent",
           },
         }))}
-        categoryLinks={CATEGORIES.filter((c) => c.section !== "SESSIONS").map(
-          (c) => ({
-            slug: c.slug,
-            name: categoryLabel(c),
-            href: categoryHref(c.slug),
-          }),
-        )}
+        /* Every discipline, with the branch of the site it hangs off.
+           This used to filter SESSIONS out, which was right while the
+           sitemap was a flat list of links — the sessions are samples inside
+           one page rather than pages of their own. Drawn as a tree they have
+           somewhere to be: under /sessions, which is exactly what they are. */
+        categoryLinks={CATEGORIES.map((c) => ({
+          slug: c.slug,
+          name: categoryLabel(c),
+          href: categoryHref(c.slug),
+          branch: c.section === "SESSIONS" ? "/sessions" : "/work",
+        }))}
       />
     </div>
   );

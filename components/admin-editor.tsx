@@ -115,7 +115,13 @@ export function AdminEditor({
   /** Which slugs the last build was hiding. */
   initialHidden: string[];
   /** Discipline pages, for the sitemap. */
-  categoryLinks: { slug: string; name: string; href: string }[];
+  /** Disciplines for the sitemap, each under the page it hangs off. */
+  categoryLinks: {
+    slug: string;
+    name: string;
+    href: string;
+    branch: string;
+  }[];
   /** Removed projects awaiting their week. */
   initialTrash: TrashedProject[];
   /** Refilings the last build applied, slug → category slug. */
