@@ -68,6 +68,15 @@
       "/work/coral-synthmorph/04.jpg",
       "/work/coral-synthmorph/02.jpg",
       "/work/coral-synthmorph/01.jpg"
+    ],
+    "transmutate": [
+      "/work/transmutate/01.jpg",
+      "/work/transmutate/02.jpg",
+      "/work/transmutate/03.jpg",
+      "/work/transmutate/05.jpg",
+      "/work/transmutate/06.jpg",
+      "/work/transmutate/07.jpg",
+      "/work/transmutate/04.jpg"
     ]
   },
   "hidden": [],
@@ -127,7 +136,6 @@
     "events",
     "frostbite",
     "fun-xyz",
-    "giselle-studio-digitals",
     "goodcult",
     "graduation",
     "headshots",
@@ -144,6 +152,7 @@
     "luxe-meets-future",
     "metamorphosis",
     "mirage",
+    "giselle-studio-digitals",
     "mya",
     "nabu",
     "oakley-x-nike",
