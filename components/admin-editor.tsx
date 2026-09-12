@@ -438,11 +438,16 @@ export function AdminEditor({
   return (
     /* Three columns from `xl`: the site on the left, the work in the middle,
        the result on the right. Below that they stack in the same order.
-       The outer columns grow with the display rather than staying fixed while
-       the middle one runs away with the extra width — past about 1600px a
-       1fr centre becomes a form with half a metre of empty space beside each
-       field. */
-    <div className="mt-10 grid gap-10 xl:grid-cols-[17rem_1fr_23rem] xl:items-start 2xl:gap-12 2xl:grid-cols-[22rem_1fr_26rem]">
+       At `2xl` the sitemap shares the slack instead of the middle taking all
+       of it. A fixed rail beside a `1fr` centre means every pixel past the
+       breakpoint goes to the form — measured at 2000px that was a 1041px
+       column of fields next to a sitemap still four thumbnails wide, which is
+       the opposite of what the extra width is for. Two flex tracks in a 1:1.6
+       ratio grow together, so the map gets wider as the display does; the
+       34rem floor is what the fields need before the ratio takes over, and
+       the preview stays fixed because it is a picture of a page at a
+       plausible width rather than a panel to fill. */
+    <div className="mt-10 grid gap-10 xl:grid-cols-[17rem_1fr_23rem] xl:items-start 2xl:gap-12 2xl:grid-cols-[1fr_minmax(34rem,1.6fr)_26rem]">
       {/* Not a tab any more. The sitemap is what the site currently is, which
           is context for every edit rather than a place to go — and it redraws
           as the draft changes, so it doubles as a readout of what hiding
