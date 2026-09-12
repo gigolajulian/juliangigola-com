@@ -12,7 +12,8 @@
     "entangled": "editorial",
     "frostbite": "editorial",
     "fun-xyz": "headshots",
-    "goodcult": "campaigns"
+    "goodcult": "campaigns",
+    "liminal": "editorial"
   },
   "frames": {
     "wrapped-up": [
@@ -77,6 +78,16 @@
       "/work/transmutate/06.jpg",
       "/work/transmutate/07.jpg",
       "/work/transmutate/04.jpg"
+    ],
+    "lightbeam": [
+      "/work/lightbeam/03.jpg",
+      "/work/lightbeam/07.jpg",
+      "/work/lightbeam/01.jpg",
+      "/work/lightbeam/02.jpg",
+      "/work/lightbeam/04.jpg",
+      "/work/lightbeam/05.jpg",
+      "/work/lightbeam/06.jpg",
+      "/work/lightbeam/08.jpg"
     ]
   },
   "hidden": [],
