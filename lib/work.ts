@@ -47,9 +47,8 @@ const withCoverArt = (project: Project): Project => {
     // "COVERART" was one word on the old site and reads as a typo set large —
     // on the project page it is printed as the category too, so both go.
     name: "Cover art",
-    categories: project.categories.map((c) =>
-      c.slug === "coverart" ? { ...c, name: "Cover art" } : c,
-    ),
+    // The category used to be renamed here too. `relabel` does it now, for
+    // this category and every other one, from `CATEGORY_LABELS`.
     cover: { ...images[0], src: "/covers/cover.jpg", width: 600, height: 600 },
     images,
   };
@@ -247,12 +246,66 @@ const reframe = (project: Project): Project => {
   };
 };
 
+/* Moved above the pipeline below, which now calls it. A `const` arrow is not
+   hoisted, so `ALL_PROJECTS` evaluating at module load would reach into the
+   temporal dead zone and throw on import. */
+/** Display names, where the old site's nav label does not read well. */
+const CATEGORY_LABELS: Record<string, string> = {
+  // One word on the old site, and it looks like a typo set large.
+  coverart: "Cover art",
+  // "Campaigns" alone is ambiguous next to EDITORIAL — it could as easily mean
+  // a political or fundraising one. The client is a brand, and saying so is
+  // what an art director is scanning the index for.
+  campaigns: "Brand campaigns",
+  // A presskit is a folder an artist sends to press. Every other label here
+  // names a kind of work somebody would commission, so this one answered
+  // "what will I receive" on a cover that is asking "what could I hire you
+  // for". "Press shots" is what the client says out loud, and it sits next to
+  // Cover art as the other half of the music work. The slug is untouched, so
+  // /work/category/artist-presskit keeps resolving.
+  "artist-presskit": "Press shots",
+};
+
+/**
+ * A category's name as a heading.
+ *
+ * The old nav set every label in caps, which is a styling decision baked into
+ * the content: sentence case is what a page heading needs, and the `label`
+ * class puts the caps back where the design wants them.
+ */
+export const categoryLabel = (category: Category): string =>
+  CATEGORY_LABELS[category.slug] ??
+  category.name.charAt(0) + category.name.slice(1).toLowerCase();
+
+/**
+ * Prints every category under its display name, once, for good.
+ *
+ * The labels above were only being applied where somebody remembered to call
+ * `categoryLabel` — the cover index, the nav, a page heading. Everywhere that
+ * printed `project.categories[0].name` got the raw manifest name instead, so
+ * `/work` listed "CAMPAIGNS" while the nav above it said "Brand campaigns",
+ * and the homepage tiles did the same. That was true before Press shots
+ * existed and would have been true of every future rename.
+ *
+ * Fixed at the one place every consumer reads from rather than at each render
+ * site, because the render sites are the part that keeps growing. `withCoverArt`
+ * has been doing exactly this for `coverart` alone since the rebuild; this is
+ * that, generalised.
+ *
+ * After `refile`, so a project moved to another discipline in /admin is
+ * labelled by where it now is and not where it was.
+ */
+const relabel = (project: Project): Project => ({
+  ...project,
+  categories: project.categories.map((c) => ({ ...c, name: categoryLabel(c) })),
+});
+
 export const ALL_PROJECTS: Project[] = [
   ...ADDED.map(fromAdded),
   ...HARVESTED.map((p) =>
     p.slug === "coverart" ? withCoverArt(p) : withLeadFrame(p),
   ),
-].map((p) => reframe(recredit(refile(p))));
+].map((p) => relabel(reframe(recredit(refile(p)))));
 
 /**
  * Filtered here, at the one place every consumer reads from, rather than at
@@ -323,27 +376,6 @@ const isOwnGallery = (categorySlug: string): boolean => {
   const inCategory = projectsIn(categorySlug);
   return inCategory.length === 1 && inCategory[0].slug === categorySlug;
 };
-
-/** Display names, where the old site's nav label does not read well. */
-const CATEGORY_LABELS: Record<string, string> = {
-  // One word on the old site, and it looks like a typo set large.
-  coverart: "Cover art",
-  // "Campaigns" alone is ambiguous next to EDITORIAL — it could as easily mean
-  // a political or fundraising one. The client is a brand, and saying so is
-  // what an art director is scanning the index for.
-  campaigns: "Brand campaigns",
-};
-
-/**
- * A category's name as a heading.
- *
- * The old nav set every label in caps, which is a styling decision baked into
- * the content: sentence case is what a page heading needs, and the `label`
- * class puts the caps back where the design wants them.
- */
-export const categoryLabel = (category: Category): string =>
-  CATEGORY_LABELS[category.slug] ??
-  category.name.charAt(0) + category.name.slice(1).toLowerCase();
 
 /**
  * Where a category's work lives.
@@ -498,9 +530,9 @@ export const nextAfter = (p: Project): Project | undefined => {
  * it.
  *
  * This is what the cover is *for*: "photographer" is a job title, whereas
- * editorial, campaigns, portraits and music are the four things somebody
- * might actually be here to commission. Switching between them says the range
- * in the first few seconds, which one static cover cannot.
+ * editorial, campaigns, portraits, press shots and cover art are the things
+ * somebody might actually be here to commission. Switching between them says
+ * the range in the first few seconds, which one static cover cannot.
  *
  * Built from the nav's own category order rather than a hand-written list, so
  * it cannot drift out of step with the work. Each one takes its frame from the
@@ -640,15 +672,18 @@ const frameProject = (frame: Frame): Project | undefined =>
  * The disciplines the cover cycles through, in order.
  *
  * Named explicitly rather than taken as the first N categories. The nav order
- * puts `video` fifth, but cover art is the more representative fifth thing he
- * does — and which five lead the site is an editorial call, not something to
- * be decided by a `slice`.
+ * puts `video` fifth, and `video` has no projects at all — which ones lead the
+ * site is an editorial call, not something to be decided by a `slice`.
+ *
+ * A category with no lead project or no frame is dropped below, so this list
+ * cannot put an empty discipline on the cover even if one is added to it.
  */
 const DISCIPLINE_SLUGS = [
   "editorial",
   "campaigns",
   "portraits",
   "mixed-media",
+  "artist-presskit",
   "coverart",
 ];
 

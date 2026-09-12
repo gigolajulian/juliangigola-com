@@ -151,7 +151,7 @@ export function Hero({ disciplines }: { disciplines: Discipline[] }) {
    * Pointing at the index takes it — moving on its own while somebody is
    * reading a row is fighting them for control. But this used to latch for
    * the life of the page, so one stray hover killed the cover: land on
-   * COVER ART and the page simply stopped there, with four disciplines
+   * COVER ART and the page simply stopped there, with every other discipline
    * never shown again.
    *
    * So it expires instead. Three seconds without the mouse moving is the
@@ -561,7 +561,15 @@ export function Hero({ disciplines }: { disciplines: Discipline[] }) {
                       href={discipline.href}
                       aria-current={i + 1 === active ? "true" : undefined}
                       className={cn(
-                        "group flex items-baseline gap-4 px-6 py-4 transition-colors duration-300 sm:px-10",
+                        // `py-3`, not `py-4`. The type column is what sets
+                        // the height of this section — the 80dvh picture
+                        // track loses to it — so a sixth row at the old
+                        // padding pushed both buttons a further 57px under
+                        // the fold on a 700px screen, where they were already
+                        // 189px below it. Six rows at `py-3` cost nine pixels
+                        // against five at `py-4`, and the row is still a
+                        // comfortable target.
+                        "group flex items-baseline gap-4 px-6 py-3 transition-colors duration-300 sm:px-10",
                         // `bg-secondary`, not `bg-card`. Card sits at L* 5.7
                         // against a ground of L* 2.8 — a real step in the token
                         // scale, and almost invisible as a band across a row.
