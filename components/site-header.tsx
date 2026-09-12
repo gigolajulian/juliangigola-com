@@ -247,6 +247,18 @@ export function SiteHeader() {
 
   return (
     <header
+      /* Whether the bar has a ground of its own.
+       *
+       * False means it is transparent and sitting directly on whatever is
+       * behind it — which on the homepage is a photograph. `globals.css` uses
+       * this together with the cover tone the hero publishes to re-ink the
+       * bar over a pale frame.
+       *
+       * The menu counts as having a ground even though the bar itself is
+       * transparent then: the panel behind it is a full-screen
+       * `bg-background`, so the type is over the page colour and wants the
+       * page's own ink. */
+      data-plain={scrolled || open ? "true" : "false"}
       className={cn(
         "fixed inset-x-0 top-0 z-40",
         // Border and background rather than a gradient, and both animate from

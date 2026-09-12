@@ -40,6 +40,39 @@ import type { Discipline, Frame, Project } from "@/lib/work";
  * the mount too.
  * ─────────────────────────────────────────────────────────────── */
 
+/**
+ * How bright a frame is, 0 to 1, from the mean colour the harvester recorded.
+ *
+ * WCAG relative luminance rather than a plain average: the eye is far more
+ * sensitive to green than to blue, and a naive mean calls a saturated blue
+ * frame "light" when it reads as dark on screen.
+ *
+ * No canvas and no sampling at runtime. Every `Frame` already carries the
+ * image's mean as `color` — it is what the mat behind the photograph is
+ * painted with — so the number is in the data before the page loads.
+ */
+const brightness = (hex: string): number => {
+  const n = Number.parseInt(hex.replace("#", ""), 16);
+  if (!Number.isFinite(n)) return 0;
+  const channel = (v: number) => {
+    const s = v / 255;
+    return s <= 0.03928 ? s / 12.92 : ((s + 0.055) / 1.055) ** 2.4;
+  };
+  return (
+    0.2126 * channel((n >> 16) & 255) +
+    0.7152 * channel((n >> 8) & 255) +
+    0.0722 * channel(n & 255)
+  );
+};
+
+/**
+ * Above this, the header treats the cover as a light ground and inks itself
+ * dark. Below the midpoint on purpose: the bar is translucent nothing at the
+ * top of the page, and white type surviving on a mid-grey frame is a lower
+ * bar than dark type surviving on one.
+ */
+const LIGHT_COVER = 0.42;
+
 /** Long enough to read the word and take in the picture before it moves on. */
 const DWELL_MS = 3500;
 
@@ -154,6 +187,33 @@ export function Hero({ disciplines }: { disciplines: Discipline[] }) {
    */
   const [slide, setSlide] = React.useState({ active: 0, previous: -1 });
   const { active } = slide;
+
+  /**
+   * Tells the header how bright the picture behind it is.
+   *
+   * The bar is fixed and transparent while the page is at the top, so it sits
+   * directly on this photograph — and a nav in white over a pale frame is
+   * unreadable. The frames run from a near-black studio portrait to a sunlit
+   * cityscape, so no single ink works for all of them.
+   *
+   * An attribute on the document rather than a prop, because the header is
+   * not this component's child — it is a sibling in the root layout, and the
+   * alternative is lifting cover state into a context that exists to be read
+   * by one element. `app/globals.css` keys the header's tokens off it.
+   *
+   * Removed on unmount, so a route without a cover is not left inheriting the
+   * last frame's tone.
+   */
+  React.useEffect(() => {
+    const tone =
+      brightness(slides[active]?.frame.color ?? "#000") > LIGHT_COVER
+        ? "light"
+        : "dark";
+    document.documentElement.dataset.coverTone = tone;
+    return () => {
+      delete document.documentElement.dataset.coverTone;
+    };
+  }, [slides, active]);
 
   /** The cover itself — the surface whose pointer movement counts as use. */
   const sectionRef = React.useRef<HTMLElement>(null);

@@ -68,9 +68,15 @@ export function ThemeToggle({ className }: { className?: string }) {
       onClick={toggle}
       // A thumb target, like the burger beside it, rather than the 18px of
       // artwork.
+      // Constant colour, and no hover brighten. The mark is a ring, so
+      // taking it from muted to foreground on hover read as a thin white
+      // border appearing around the icon and staying until the pointer left
+      // — which is what a click looks like, since the cursor is still on it.
+      // The same brighten is right on a text link and wrong on an outline.
+      // Press is the feedback here, and the cursor is the affordance.
       className={cn(
-        "relative flex h-11 w-11 items-center justify-center text-muted-foreground",
-        "transition-colors duration-200 hoverable:hover:text-foreground press active:scale-[0.94]",
+        "relative flex h-11 w-11 items-center justify-center text-foreground",
+        "press active:scale-[0.94]",
         className,
       )}
     >
