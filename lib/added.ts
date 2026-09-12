@@ -276,6 +276,32 @@ export type AddedFile = {
    */
   credits: Record<string, Credit[]>;
   /**
+   * The running order of the work, by slug.
+   *
+   * One order for the whole site rather than one per discipline. A project
+   * filed under two disciplines has one position, `/work` and every discipline
+   * page agree, and there is a single list to reason about instead of nine
+   * that can disagree with each other.
+   *
+   * Partial on purpose. It names only what has been dragged; anything absent
+   * keeps the order the manifest gave it, after everything named here. So an
+   * empty list is the site as harvested, and moving one project to the front
+   * costs one entry rather than a snapshot of all seventy-three.
+   */
+  order: string[];
+  /**
+   * The photograph that stands for a discipline, by category slug.
+   *
+   * A frame path, not a whole `Frame`: the dimensions and mat colour are read
+   * back out of the archive when it is applied, the same way `frames` does it,
+   * so a re-harvest at a new resolution cannot leave a stale width behind.
+   *
+   * These used to be `COVER_OVERRIDES` in `lib/work.ts` — code, so choosing
+   * the picture that opens the site meant a commit by hand. That map is still
+   * there and still the default; this one wins over it.
+   */
+  covers: Record<string, string>;
+  /**
    * Slugs to leave off the site.
    *
    * Harvested projects cannot be deleted: `lib/work-data.ts` is regenerated
@@ -386,12 +412,33 @@ function parse(v: unknown): AddedFile {
     credits[slug] = list.map((c, i) => credit(c, `credits["${slug}"][${i}]`));
   }
 
+  const rawOrder = v.order === undefined ? [] : v.order;
+  if (!Array.isArray(rawOrder)) return fail("order", "an array", rawOrder);
+  const order = rawOrder.map((slug, i) => str(slug, `order[${i}]`));
+  // A slug listed twice has two positions, and which one wins would depend on
+  // the sort — so it is a mistake to catch here rather than a tie to break.
+  const seenInOrder = new Set<string>();
+  for (const slug of order) {
+    if (seenInOrder.has(slug))
+      return fail("order", `each slug at most once — "${slug}" is twice`, slug);
+    seenInOrder.add(slug);
+  }
+
+  const rawCovers = v.covers === undefined ? {} : v.covers;
+  if (!isRecord(rawCovers)) return fail("covers", "an object", rawCovers);
+  const covers: Record<string, string> = {};
+  for (const [category, src] of Object.entries(rawCovers)) {
+    covers[category] = str(src, `covers["${category}"]`);
+  }
+
   return {
     projects,
     trash,
     categories,
     frames,
     credits,
+    order,
+    covers,
     hidden: hidden.map((s, i) => str(s, `hidden[${i}]`)),
   };
 }
@@ -403,6 +450,12 @@ export const TRASH: TrashedProject[] = FILE.trash;
 export const RECATEGORISED: Readonly<Record<string, string>> = FILE.categories;
 export const REFRAMED: Readonly<Record<string, FrameRef[]>> = FILE.frames;
 export const RECREDITED: Readonly<Record<string, Credit[]>> = FILE.credits;
+
+/** The running order of the work, by slug. Partial; see `AddedFile.order`. */
+export const ORDER: readonly string[] = FILE.order;
+
+/** Hand-picked discipline covers, by category slug. Frame paths. */
+export const DISCIPLINE_COVERS: Readonly<Record<string, string>> = FILE.covers;
 export const HIDDEN: ReadonlySet<string> = new Set(FILE.hidden);
 
 /** Where the editor writes. Shown in the editor so it is not a mystery. */

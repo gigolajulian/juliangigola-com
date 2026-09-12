@@ -17,6 +17,8 @@ import {
   RECATEGORISED,
   REFRAMED,
   RECREDITED,
+  ORDER,
+  DISCIPLINE_COVERS,
   isTextRef,
   type AddedProject,
 } from "./added";
@@ -300,12 +302,32 @@ const relabel = (project: Project): Project => ({
   categories: project.categories.map((c) => ({ ...c, name: categoryLabel(c) })),
 });
 
+/**
+ * The running order of the work, as dragged in /admin.
+ *
+ * `ORDER` is partial — it names only what has been moved. Anything absent
+ * sorts after everything named, keeping the order the manifest gave it, so an
+ * empty list is the site as harvested and moving one project to the front
+ * costs one entry rather than a snapshot of all seventy-three.
+ *
+ * `Infinity` for the unnamed rather than a large number: it has to be greater
+ * than every real index without anybody having to know how many there are.
+ * Ties return 0, and `Array.prototype.sort` has been stable since ES2019, so
+ * the unnamed keep their relative order instead of being shuffled.
+ */
+const rank = new Map(ORDER.map((slug, i) => [slug, i]));
+
+const byRunningOrder = (a: Project, b: Project): number =>
+  (rank.get(a.slug) ?? Infinity) - (rank.get(b.slug) ?? Infinity);
+
 export const ALL_PROJECTS: Project[] = [
   ...ADDED.map(fromAdded),
   ...HARVESTED.map((p) =>
     p.slug === "coverart" ? withCoverArt(p) : withLeadFrame(p),
   ),
-].map((p) => relabel(reframe(recredit(refile(p)))));
+]
+  .map((p) => relabel(reframe(recredit(refile(p)))))
+  .sort(byRunningOrder);
 
 /**
  * Filtered here, at the one place every consumer reads from, rather than at
@@ -642,6 +664,23 @@ const COVER_OVERRIDES: Record<string, Frame> = {
  * `object-cover` on a landscape frame crops away both sides.
  */
 export const categoryFrame = (categorySlug: string): Frame | null => {
+  // Picked in /admin, and it wins: `COVER_OVERRIDES` below is the default
+  // somebody committed by hand, and a choice made in the editor should not
+  // lose to one made in code months ago.
+  //
+  // A path here rather than a whole frame, so the dimensions and mat colour
+  // come from the archive — and `?? null` rather than a throw, because
+  // `archiveFrame` throwing is right for a typo in code and wrong for a
+  // browser form: a frame that has since been removed from a gallery should
+  // cost this discipline its picked cover, not the whole build.
+  const picked = DISCIPLINE_COVERS[categorySlug];
+  if (picked) {
+    const found = PROJECTS.flatMap((p) => p.images).find(
+      (f) => f.src === picked,
+    );
+    if (found) return found;
+  }
+
   const override = COVER_OVERRIDES[categorySlug];
   if (override) return override;
 

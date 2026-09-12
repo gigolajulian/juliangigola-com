@@ -193,5 +193,63 @@ const instagramHandle = (raw) => {
   }
 }
 
+/* ── the running order ───────────────────────────────────────────
+ * `ORDER` in `content/projects.json` is partial: it names only what has been
+ * dragged in /admin, and everything else has to keep the order the manifest
+ * gave it. That "everything else" is the part that fails quietly — a sort
+ * that reshuffles the unnamed looks like an editorial decision, not a bug.
+ * Mirrors `byRunningOrder` in `lib/work.ts`.
+ * ─────────────────────────────────────────────────────────────── */
+function inRunningOrder(slugs, order) {
+  const rank = new Map(order.map((slug, i) => [slug, i]));
+  return [...slugs].sort(
+    (a, b) => (rank.get(a) ?? Infinity) - (rank.get(b) ?? Infinity),
+  );
+}
+
+{
+  const manifest = ["a", "b", "c", "d", "e"];
+
+  assert.deepEqual(
+    inRunningOrder(manifest, []),
+    manifest,
+    "no order named leaves the site exactly as harvested",
+  );
+
+  assert.deepEqual(
+    inRunningOrder(manifest, ["d"]),
+    ["d", "a", "b", "c", "e"],
+    "one entry moves that project to the front and disturbs nothing else",
+  );
+
+  assert.deepEqual(
+    inRunningOrder(manifest, ["e", "c"]),
+    ["e", "c", "a", "b", "d"],
+    "the named lead in the order given, the rest follow in manifest order",
+  );
+
+  assert.deepEqual(
+    inRunningOrder(manifest, manifest.toReversed()),
+    manifest.toReversed(),
+    "a full order is honoured exactly",
+  );
+
+  // The stability guarantee the partial case rests on. Sort has been stable
+  // since ES2019; this is here so a change of approach cannot quietly lose it.
+  assert.deepEqual(
+    inRunningOrder(manifest, ["b"]).slice(1),
+    ["a", "c", "d", "e"],
+    "unnamed projects keep their relative order rather than being shuffled",
+  );
+
+  // A slug that no longer exists must not drag a gap along with it.
+  assert.deepEqual(
+    inRunningOrder(manifest, ["gone", "c"]),
+    ["c", "a", "b", "d", "e"],
+    "an order naming a deleted project still orders the survivors",
+  );
+}
+
 console.log("sequence split: 6 cases pass");
+console.log("running order: 6 cases pass");
 console.log("instagram handles: 16 cases pass");
