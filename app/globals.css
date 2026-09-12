@@ -668,10 +668,36 @@
  */
 @utility dissolve {
   opacity: 1;
-  transition: opacity 520ms var(--ease-out-strong);
+  filter: blur(0);
+  transition:
+    opacity 520ms var(--ease-out-strong),
+    /* Shorter than the fade, so the picture is sharp before it is fully
+       opaque rather than arriving and then resolving — the focus should be
+       the first thing finished, not the last. */
+      filter 420ms var(--ease-out-strong);
 
   @starting-style {
     opacity: 0;
+    /* Why blur and not a slide or a zoom.
+     *
+     * A plain crossfade is two photographs on screen at once, and for the
+     * half-second it lasts you see both — a double image, which is the one
+     * thing a picture of a person cannot survive. The usual fixes are motion:
+     * push the incoming frame in, or wipe it across. Both are out here, and
+     * not by accident — this cover has never slid or zoomed, and a cover that
+     * moves its own photographs starts to look like a slideshow of pictures
+     * rather than an index of work.
+     *
+     * Blur solves the same problem without moving anything. The two frames
+     * stop reading as two objects and start reading as one resolving, because
+     * that is what a lens does — and on a photographer's cover, coming into
+     * focus is the one piece of motion that means something about the medium.
+     *
+     * 6px, not more. It is a full-bleed 2500px frame and `filter` puts it on
+     * its own compositor layer; heavy blur is expensive to composite and
+     * expensive in Safari especially. Six is enough to bridge the two images
+     * and cheap enough to hold 60fps. */
+    filter: blur(6px);
   }
 }
 

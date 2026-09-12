@@ -368,10 +368,21 @@ export function Hero({ disciplines }: { disciplines: Discipline[] }) {
                   // up from nothing would cost half a second of blank column
                   // for an effect nobody is there to see.
                   i === active && slide.previous !== -1 && "dissolve",
-                  // Both fully opaque. The outgoing frame is not faded out —
-                  // it is covered. Fading it would be the second half of the
-                  // wash this change exists to remove.
-                  "opacity-100",
+                  // No `opacity-100` here, and that matters: it used to be,
+                  // to say "both layers are fully opaque — the outgoing frame
+                  // is covered, not faded". The intent was right and the
+                  // implementation cancelled the transition it sat next to.
+                  //
+                  // `opacity-100` declares `opacity: 1` unconditionally, which
+                  // beats `dissolve`'s `@starting-style` in the cascade
+                  // whatever order the classes are written in. So the incoming
+                  // frame began at full opacity and there was no crossfade at
+                  // all — the pictures hard-cut, and only the mat colour and
+                  // the type ever moved.
+                  //
+                  // The outgoing layer needs no declaration to stay opaque: it
+                  // carries no `dissolve`, so its opacity is already 1. Saying
+                  // so out loud is what broke it.
                 )}
               />
             ) : null,
