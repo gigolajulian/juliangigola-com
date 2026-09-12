@@ -60,12 +60,53 @@ const TOKEN_KEY = "jg-admin-token";
  * before the form is, and so the numbers in the index and the numbers on the
  * headings cannot drift apart — they come from the same list.
  */
-const SECTIONS = [
-  { anchor: "contact", number: "01", title: "Contact" },
-  { anchor: "homepage", number: "02", title: "Homepage" },
-  { anchor: "testimonials", number: "03", title: "Testimonials" },
-  { anchor: "sessions", number: "04", title: "Sessions" },
+/**
+ * The tabs, in two groups.
+ *
+ * Content used to be one tab holding four sections, with an index above it to
+ * get between them. That is two mechanisms doing one job — a tab strip and a
+ * section strip, stacked — and it left the widest part of the tool as a long
+ * scroll of unrelated forms: the reply-time promise and the session prices
+ * have nothing to do with each other and were two screens apart.
+ *
+ * One tab per area instead, and the index goes: the tabs *are* the index.
+ *
+ * Grouped because the two halves are different kinds of thing. The first four
+ * are pages — a fixed set of fields, edited a few times a year. The last two
+ * are the work — seventy-three projects that change constantly. Running all
+ * six together would suggest they are the same kind of visit.
+ */
+const TABS = [
+  [
+    { id: "home", label: "Home" },
+    { id: "sessions", label: "Sessions" },
+    { id: "testimonials", label: "Quotes" },
+    { id: "contact", label: "Contact" },
+  ],
+  [
+    { id: "disciplines", label: "Disciplines" },
+    { id: "projects", label: "Projects" },
+  ],
 ] as const;
+
+type View = (typeof TABS)[number][number]["id"];
+
+/**
+ * Which tab a field lives on, so a sitemap row can still reach it.
+ *
+ * The sitemap sends you to a *field* — "Home" means the selected-work list,
+ * not the top of a page — and that field is now behind a tab. So a jump is
+ * two moves: switch to the tab that holds it, then scroll to it.
+ */
+const FIELD_TAB: Record<string, View> = {
+  responseTime: "contact",
+  bookingUrl: "contact",
+  coverSlug: "home",
+  featured: "home",
+  coverArt: "home",
+  sessions: "sessions",
+  testimonials: "testimonials",
+};
 
 const fromBase64 = (b64: string): string => {
   // The contents API wraps its base64 at 60 characters.
@@ -144,9 +185,7 @@ export function AdminEditor({
   /** The blob SHA of the file being edited. Absent until connected. */
   const [sha, setSha] = React.useState<string | null>(null);
   const [status, setStatus] = React.useState<Status>({ kind: "idle" });
-  const [view, setView] = React.useState<
-    "content" | "disciplines" | "projects"
-  >("content");
+  const [view, setView] = React.useState<View>("home");
   /** Which discipline is expanded in the Disciplines view. */
   const [openDiscipline, setOpenDiscipline] = React.useState<string | null>(
     null,
@@ -179,8 +218,7 @@ export function AdminEditor({
   const [opened, setOpened] = React.useState<string | null>(null);
   /** The project list's filter, held here so a discipline row can set it. */
   const [filter, setFilter] = React.useState("");
-  /** Which section of the Content form is being read, for the index. */
-  const [here, setHere] = React.useState<string>(SECTIONS[0].anchor);
+
   /**
    * A Content field the sitemap has asked for, cleared once it is reached.
    *
@@ -349,7 +387,11 @@ export function AdminEditor({
       setFilter(target.discipline ?? "");
       return;
     }
-    setView("content");
+    // A field is behind a tab now, so a jump is two moves: switch to the tab
+    // that holds it, then scroll to it. Unmapped anchors fall back to Home
+    // rather than leaving you on whatever tab you were on, which would look
+    // like the click did nothing.
+    setView(FIELD_TAB[target.anchor] ?? "home");
     setWanted((w) => ({ anchor: target.anchor, nonce: (w?.nonce ?? 0) + 1 }));
   }, []);
 
@@ -391,60 +433,6 @@ export function AdminEditor({
     });
     return () => cancelAnimationFrame(id);
   }, [wanted]);
-
-  /**
-   * Which section is being read, for the index above the form.
-   *
-   * A scroll listener that re-reads the sections each time, rather than an
-   * IntersectionObserver holding four nodes. An observer is the better
-   * instrument in general and was the first attempt here, but it observes
-   * *nodes*, and the nodes it was given on mount are not always the ones the
-   * page ends up with — a hydration that replaces an element leaves the
-   * observer watching something detached, which never intersects again and
-   * pins the index to whichever section happened to be current at mount.
-   * That is exactly how it failed. `getElementById` on every frame cannot go
-   * stale, and four `getBoundingClientRect` calls behind a rAF is nothing.
-   *
-   * Measured against the viewport, not the column. The column scrolls on its
-   * own from `xl` and the page scrolls below it, but either way the sections
-   * move relative to the window — so one listener covers both layouts.
-   *
-   * The band is near the top of the screen rather than the middle: a short
-   * last section can never reach the middle of a tall viewport, so the middle
-   * would leave the final entry permanently unreachable.
-   */
-  React.useEffect(() => {
-    if (view !== "content") return;
-
-    let frame = 0;
-    const read = () => {
-      frame = 0;
-      const line = window.innerHeight * 0.2;
-      // The last one to have started above the line — which is the one you
-      // are reading, including while its heading is off the top of the screen.
-      let found: string = SECTIONS[0].anchor;
-      for (const s of SECTIONS) {
-        const el = document.getElementById(`field-${s.anchor}`);
-        if (el && el.getBoundingClientRect().top <= line) found = s.anchor;
-      }
-      setHere(found);
-    };
-    const onScroll = () => {
-      if (!frame) frame = requestAnimationFrame(read);
-    };
-
-    read();
-    window.addEventListener("scroll", onScroll, {
-      passive: true,
-      capture: true,
-    });
-    window.addEventListener("resize", onScroll, { passive: true });
-    return () => {
-      if (frame) cancelAnimationFrame(frame);
-      window.removeEventListener("scroll", onScroll, { capture: true });
-      window.removeEventListener("resize", onScroll);
-    };
-  }, [view]);
 
   // Reconnect on mount if a token is already stored, so the usual visit is a
   // page that is simply ready.
@@ -787,24 +775,29 @@ export function AdminEditor({
              * one was legible only by a 2px rule. Filled, the current view is
              * obvious from across the desk — which is the same argument the
              * hero index makes for `bg-secondary` on its current row. */}
-            <span className="flex shrink-0 border border-border p-0.5">
-              {(["content", "disciplines", "projects"] as const).map((v) => (
-                <button
-                  key={v}
-                  type="button"
-                  onClick={() => setView(v)}
-                  aria-current={view === v ? "true" : undefined}
-                  className={cn(
-                    "label px-3 py-1.5 capitalize transition-colors duration-200",
-                    view === v
-                      ? "bg-foreground text-background"
-                      : "text-muted-foreground hoverable:hover:bg-card hoverable:hover:text-foreground",
-                  )}
-                >
-                  {v}
-                </button>
-              ))}
-            </span>
+            {TABS.map((group, g) => (
+              <span
+                key={g}
+                className="flex shrink-0 border border-border p-0.5"
+              >
+                {group.map((t) => (
+                  <button
+                    key={t.id}
+                    type="button"
+                    onClick={() => setView(t.id)}
+                    aria-current={view === t.id ? "true" : undefined}
+                    className={cn(
+                      "label px-3 py-1.5 transition-colors duration-200",
+                      view === t.id
+                        ? "bg-foreground text-background"
+                        : "text-muted-foreground hoverable:hover:bg-card hoverable:hover:text-foreground",
+                    )}
+                  >
+                    {t.label}
+                  </button>
+                ))}
+              </span>
+            ))}
             {/* Publish, where the work is.
              *
              * There is a second one at the foot of the column, and that is the
@@ -888,44 +881,6 @@ export function AdminEditor({
               </button>
             </span>
           </nav>
-
-          {/* The form's own index.
-           *
-           * The Content form used to be a single scroll with four headings in
-           * it and no way to get to one — finding the session prices meant
-           * scrolling past the homepage, and knowing where you were meant
-           * recognising the field you happened to be looking at.
-           *
-           * Sticky under the tabs, and the current section is marked as you
-           * scroll, so it answers both questions at once: where things are, and
-           * where you are. Content only — the projects view is one list with a
-           * filter above it and has no sections to index. */}
-          {view === "content" ? (
-            <div className="-mx-1 flex flex-wrap gap-x-1 border-b border-border px-1 py-2">
-              {SECTIONS.map((s) => (
-                <button
-                  key={s.anchor}
-                  type="button"
-                  onClick={() =>
-                    setWanted((w) => ({
-                      anchor: s.anchor,
-                      nonce: (w?.nonce ?? 0) + 1,
-                    }))
-                  }
-                  aria-current={here === s.anchor ? "true" : undefined}
-                  className={cn(
-                    "label flex items-baseline gap-2 px-3 py-1.5 transition-colors duration-200",
-                    here === s.anchor
-                      ? "bg-card text-foreground"
-                      : "text-muted-foreground hoverable:hover:text-foreground",
-                  )}
-                >
-                  <span className="tabular-nums opacity-60">{s.number}</span>
-                  {s.title}
-                </button>
-              ))}
-            </div>
-          ) : null}
         </div>
 
         {view === "disciplines" ? (
@@ -1007,10 +962,63 @@ export function AdminEditor({
               onQuery={setFilter}
             />
             <AdminTrash token={token} trash={trash} onChanged={setTrash} />
+
+            {/* Adding a project belongs with the projects, not on every tab.
+                Reached only once the token has proved itself against the repo:
+                the form commits several files at once, and a rejected token
+                halfway through would leave photographs in the branch with no
+                manifest pointing at them. */}
+            <AdminNewProject
+              token={token}
+              categories={categories}
+              existingSlugs={known}
+            />
           </>
-        ) : (
-          <ContentForm />
-        )}
+        ) : null}
+
+        {/* One area at a time. Each is its own component rather than a section
+            of one long form, so switching tabs is not a scroll and the widest
+            column holds only the fields you came for. */}
+        {view === "home" ? <HomeFields /> : null}
+        {view === "sessions" ? <SessionFields /> : null}
+        {view === "testimonials" ? <QuoteFields /> : null}
+        {view === "contact" ? <ContactFields /> : null}
+
+        {/* The slug list, shared by every field that takes one, so it has to
+            outlive the tab that uses it. */}
+        <datalist id="project-slugs">
+          {slugs.map((s) => (
+            <option key={s} value={s} />
+          ))}
+        </datalist>
+
+        {/* The token and the status line, under every tab. Publish itself is
+            up in the app bar; what stays down here is the thing you set once
+            and the thing you read after pressing it. */}
+        <div className="sticky bottom-0 mt-12 flex flex-wrap items-center gap-4 border-t border-border bg-background py-6">
+          {sha ? (
+            <>
+              <StatusLine status={status} />
+              <button
+                type="button"
+                onClick={() => {
+                  window.localStorage.removeItem(TOKEN_KEY);
+                  setToken("");
+                  setSha(null);
+                  setStatus({ kind: "idle" });
+                }}
+                className="label ml-auto border border-border px-4 py-2 press hoverable:hover:bg-card active:scale-[0.98]"
+              >
+                Forget token
+              </button>
+            </>
+          ) : (
+            <p className="label max-w-prose text-muted-foreground">
+              Arrange anything you like — publishing needs the GitHub token at
+              the top of this column, and nothing is committed until then.
+            </p>
+          )}
+        </div>
       </div>
 
       {/* Sticky, so it stays beside the field being edited on a long form.
@@ -1028,327 +1036,278 @@ export function AdminEditor({
     </div>
   );
 
-  function ContentForm() {
+  function HomeFields() {
     return (
-      <div className="mt-10 flex flex-col gap-14">
-        <Section anchor="contact" title="Contact" number="01">
-          <Field
-            anchor="responseTime"
-            label="Reply-time promise"
-            hint='Shown beside the contact form as "Replies …". Leave empty to say nothing rather than to promise something you will miss.'
-          >
-            <input
-              type="text"
-              value={draft.responseTime ?? ""}
-              onChange={(e) => set("responseTime", e.target.value || null)}
-              placeholder="within 24 hours"
-              className={inputClass}
-            />
-          </Field>
+      <Area title="Homepage">
+        <Field
+          anchor="coverSlug"
+          label="Cover project"
+          hint="The photograph that opens the site."
+        >
+          <input
+            type="text"
+            list="project-slugs"
+            value={draft.coverSlug}
+            onChange={(e) => set("coverSlug", e.target.value)}
+            className={inputClass}
+          />
+        </Field>
 
-          <Field
-            anchor="bookingUrl"
-            label="Booking link"
-            hint="The public Google Calendar booking page — calendar.app.google/…, not a share or edit link. Set it and a 'Check availability' button appears across the site; leave it empty and everything falls back to the enquiry form."
-          >
-            <input
-              type="url"
-              value={draft.bookingUrl ?? ""}
-              onChange={(e) => set("bookingUrl", e.target.value || null)}
-              placeholder="https://calendar.app.google/…"
-              className={inputClass}
-            />
-          </Field>
-        </Section>
+        <Field
+          anchor="featured"
+          label="Selected work, in order"
+          hint="The cards under the cover, three across. Reorder with the arrows."
+        >
+          <AdminPicker
+            chosen={draft.featured}
+            items={projects.map((p) => ({
+              slug: p.slug,
+              name: p.name,
+              detail: p.category,
+              cover: { src: p.cover.src, color: p.cover.color },
+            }))}
+            unavailable={hidden}
+            onChange={(next) => set("featured", next)}
+            addLabel="Add a project"
+            searchLabel="Search projects"
+            emptyNote="Nothing selected — the section is left out of the homepage entirely."
+          />
+        </Field>
 
-        <Section anchor="homepage" title="Homepage" number="02">
-          <Field
-            anchor="coverSlug"
-            label="Cover project"
-            hint="The photograph that opens the site."
-          >
-            <input
-              type="text"
-              list="project-slugs"
-              value={draft.coverSlug}
-              onChange={(e) => set("coverSlug", e.target.value)}
-              className={inputClass}
-            />
-          </Field>
+        <Field
+          anchor="coverArt"
+          label="Cover art on the homepage"
+          hint={`Which releases lead the rack, and in what order. The homepage shows ${releaseLimit}; anything you do not pick fills the rest in the order they were delivered, so the grid is always full.`}
+        >
+          <AdminPicker
+            chosen={draft.coverArt}
+            items={releases}
+            onChange={(next) => set("coverArt", next)}
+            limit={releaseLimit}
+            addLabel="Add a release"
+            searchLabel="Search releases"
+            emptyNote={`Nothing picked — the first ${releaseLimit} releases lead, as they always have.`}
+            shortfallNote="The rest of the rack fills from the remaining releases in order."
+          />
+        </Field>
 
-          <Field
-            anchor="featured"
-            label="Selected work, in order"
-            hint="The cards under the cover, three across. Reorder with the arrows."
-          >
-            <AdminPicker
-              chosen={draft.featured}
-              items={projects.map((p) => ({
-                slug: p.slug,
-                name: p.name,
-                detail: p.category,
-                cover: { src: p.cover.src, color: p.cover.color },
-              }))}
-              unavailable={hidden}
-              onChange={(next) => set("featured", next)}
-              addLabel="Add a project"
-              searchLabel="Search projects"
-              emptyNote="Nothing selected — the section is left out of the homepage entirely."
-            />
-          </Field>
-
-          <Field
-            anchor="coverArt"
-            label="Cover art on the homepage"
-            hint={`Which releases lead the rack, and in what order. The homepage shows ${releaseLimit}; anything you do not pick fills the rest in the order they were delivered, so the grid is always full.`}
-          >
-            <AdminPicker
-              chosen={draft.coverArt}
-              items={releases}
-              onChange={(next) => set("coverArt", next)}
-              limit={releaseLimit}
-              addLabel="Add a release"
-              searchLabel="Search releases"
-              emptyNote={`Nothing picked — the first ${releaseLimit} releases lead, as they always have.`}
-              shortfallNote="The rest of the rack fills from the remaining releases in order."
-            />
-          </Field>
-
-          {unknownSlugs.length ? (
-            <p className="text-sm text-accent">
-              No project with{" "}
-              {unknownSlugs.length === 1 ? "this slug" : "these slugs"}:{" "}
-              {unknownSlugs.join(", ")}. Anything unmatched is skipped on the
-              page.
-            </p>
-          ) : null}
-
-          <details className="text-sm text-muted-foreground">
-            <summary className="label cursor-pointer">
-              Every project slug ({slugs.length})
-            </summary>
-            <p className="mt-3 font-mono text-xs leading-relaxed">
-              {slugs.join(" · ")}
-            </p>
-          </details>
-        </Section>
-
-        <Section anchor="testimonials" title="Testimonials" number="03">
-          <p className="max-w-prose text-sm text-muted-foreground">
-            The section does not render at all while this is empty, so there is
-            never invented praise on the site. A specific detail beats an
-            adjective — &ldquo;turned a two-hour window into eighteen usable
-            frames&rdquo; earns trust, &ldquo;great to work with&rdquo; does
-            not. Three to five is the useful range.
+        {unknownSlugs.length ? (
+          <p className="text-sm text-accent">
+            No project with{" "}
+            {unknownSlugs.length === 1 ? "this slug" : "these slugs"}:{" "}
+            {unknownSlugs.join(", ")}. Anything unmatched is skipped on the
+            page.
           </p>
+        ) : null}
 
-          {draft.testimonials.map((t, i) => (
-            <div
-              key={i}
-              className="flex flex-col gap-4 border-t border-border pt-6"
-            >
-              <div className="flex items-baseline justify-between gap-4">
-                <span className="label text-muted-foreground">
-                  {String(i + 1).padStart(2, "0")}
-                </span>
-                <button
-                  type="button"
-                  onClick={() =>
-                    set(
-                      "testimonials",
-                      draft.testimonials.filter((_, j) => j !== i),
-                    )
-                  }
-                  className="label text-muted-foreground transition-colors duration-200 hoverable:hover:text-accent"
-                >
-                  Remove
-                </button>
-              </div>
+        <details className="text-sm text-muted-foreground">
+          <summary className="label cursor-pointer">
+            Every project slug ({slugs.length})
+          </summary>
+          <p className="mt-3 font-mono text-xs leading-relaxed">
+            {slugs.join(" · ")}
+          </p>
+        </details>
+      </Area>
+    );
+  }
 
-              <textarea
-                rows={3}
-                value={t.quote}
-                onChange={(e) =>
-                  updateTestimonial(i, { quote: e.target.value })
-                }
-                placeholder="What they said"
-                className={inputClass}
-              />
-              <div className="grid gap-4 sm:grid-cols-3">
+  function SessionFields() {
+    return (
+      <Area title="Sessions" anchor="sessions">
+        <p className="max-w-prose text-sm text-muted-foreground">
+          A price left empty reads as &ldquo;On request&rdquo;, which is honest
+          — but a visible number is the single biggest thing that stops a
+          session client leaving without enquiring.
+        </p>
+
+        {draft.sessions.map((session, i) => (
+          <div
+            key={session.slug}
+            className="flex flex-col gap-4 border-t border-border pt-6"
+          >
+            <h3 className="font-display text-xl uppercase tracking-[0.02em]">
+              {session.name}
+            </h3>
+
+            <div className="grid gap-4 sm:grid-cols-2">
+              <Field
+                label="Starting price (USD)"
+                hint="Empty means “On request”."
+              >
                 <input
-                  type="text"
-                  value={t.name}
+                  type="number"
+                  min={0}
+                  step={50}
+                  value={session.from ?? ""}
                   onChange={(e) =>
-                    updateTestimonial(i, { name: e.target.value })
-                  }
-                  placeholder="Name"
-                  className={inputClass}
-                />
-                <input
-                  type="text"
-                  value={t.role ?? ""}
-                  onChange={(e) =>
-                    updateTestimonial(i, { role: e.target.value || undefined })
-                  }
-                  placeholder="Art Director, WIRED"
-                  className={inputClass}
-                />
-                <input
-                  type="text"
-                  list="project-slugs"
-                  value={t.project ?? ""}
-                  onChange={(e) =>
-                    updateTestimonial(i, {
-                      project: e.target.value || undefined,
+                    updateSession(i, {
+                      from:
+                        e.target.value === "" ? null : Number(e.target.value),
                     })
                   }
-                  placeholder="project slug (optional)"
-                  className={inputClass}
-                />
-              </div>
-            </div>
-          ))}
-
-          <button
-            type="button"
-            onClick={() =>
-              set("testimonials", [
-                ...draft.testimonials,
-                { quote: "", name: "" },
-              ])
-            }
-            className="label self-start border border-border px-5 py-3 press hoverable:hover:bg-card active:scale-[0.98]"
-          >
-            Add a quote
-          </button>
-        </Section>
-
-        <Section anchor="sessions" title="Sessions" number="04">
-          <p className="max-w-prose text-sm text-muted-foreground">
-            A price left empty reads as &ldquo;On request&rdquo;, which is
-            honest — but a visible number is the single biggest thing that stops
-            a session client leaving without enquiring.
-          </p>
-
-          {draft.sessions.map((session, i) => (
-            <div
-              key={session.slug}
-              className="flex flex-col gap-4 border-t border-border pt-6"
-            >
-              <h3 className="font-display text-xl uppercase tracking-[0.02em]">
-                {session.name}
-              </h3>
-
-              <div className="grid gap-4 sm:grid-cols-2">
-                <Field
-                  label="Starting price (USD)"
-                  hint="Empty means “On request”."
-                >
-                  <input
-                    type="number"
-                    min={0}
-                    step={50}
-                    value={session.from ?? ""}
-                    onChange={(e) =>
-                      updateSession(i, {
-                        from:
-                          e.target.value === "" ? null : Number(e.target.value),
-                      })
-                    }
-                    placeholder="On request"
-                    className={inputClass}
-                  />
-                </Field>
-                <Field label="Turnaround">
-                  <input
-                    type="text"
-                    value={session.turnaround}
-                    onChange={(e) =>
-                      updateSession(i, { turnaround: e.target.value })
-                    }
-                    className={inputClass}
-                  />
-                </Field>
-              </div>
-
-              <Field label="Blurb">
-                <textarea
-                  rows={2}
-                  value={session.blurb}
-                  onChange={(e) => updateSession(i, { blurb: e.target.value })}
+                  placeholder="On request"
                   className={inputClass}
                 />
               </Field>
-
-              <Field label="What's included" hint="One per line.">
-                <textarea
-                  rows={4}
-                  value={session.includes.join("\n")}
+              <Field label="Turnaround">
+                <input
+                  type="text"
+                  value={session.turnaround}
                   onChange={(e) =>
-                    updateSession(i, { includes: splitLines(e.target.value) })
+                    updateSession(i, { turnaround: e.target.value })
                   }
                   className={inputClass}
                 />
               </Field>
             </div>
-          ))}
-        </Section>
 
-        {/* The slug list, shared by every field that takes one. */}
-        <datalist id="project-slugs">
-          {slugs.map((s) => (
-            <option key={s} value={s} />
-          ))}
-        </datalist>
+            <Field label="Blurb">
+              <textarea
+                rows={2}
+                value={session.blurb}
+                onChange={(e) => updateSession(i, { blurb: e.target.value })}
+                className={inputClass}
+              />
+            </Field>
 
-        <div className="sticky bottom-0 flex flex-wrap items-center gap-4 border-t border-border bg-background py-6">
-          {/* The one thing a token is genuinely required for. Everything
-              above this line can be arranged without one; this is the commit,
-              and GitHub is what decides whether it is allowed. */}
-          <button
-            type="button"
-            onClick={publish}
-            disabled={!sha || status.kind === "working"}
-            className="label border border-foreground bg-foreground px-6 py-4 text-background press hoverable:hover:opacity-90 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
+            <Field label="What's included" hint="One per line.">
+              <textarea
+                rows={4}
+                value={session.includes.join("\n")}
+                onChange={(e) =>
+                  updateSession(i, { includes: splitLines(e.target.value) })
+                }
+                className={inputClass}
+              />
+            </Field>
+          </div>
+        ))}
+      </Area>
+    );
+  }
+
+  function QuoteFields() {
+    return (
+      <Area title="Quotes" anchor="testimonials">
+        <p className="max-w-prose text-sm text-muted-foreground">
+          The section does not render at all while this is empty, so there is
+          never invented praise on the site. A specific detail beats an
+          adjective — &ldquo;turned a two-hour window into eighteen usable
+          frames&rdquo; earns trust, &ldquo;great to work with&rdquo; does not.
+          Three to five is the useful range.
+        </p>
+
+        {draft.testimonials.map((t, i) => (
+          <div
+            key={i}
+            className="flex flex-col gap-4 border-t border-border pt-6"
           >
-            {status.kind === "working" ? "Publishing…" : "Publish"}
-          </button>
+            <div className="flex items-baseline justify-between gap-4">
+              <span className="label text-muted-foreground">
+                {String(i + 1).padStart(2, "0")}
+              </span>
+              <button
+                type="button"
+                onClick={() =>
+                  set(
+                    "testimonials",
+                    draft.testimonials.filter((_, j) => j !== i),
+                  )
+                }
+                className="label text-muted-foreground transition-colors duration-200 hoverable:hover:text-accent"
+              >
+                Remove
+              </button>
+            </div>
 
-          {sha ? (
-            <button
-              type="button"
-              onClick={() => {
-                window.localStorage.removeItem(TOKEN_KEY);
-                setToken("");
-                setSha(null);
-                setStatus({ kind: "idle" });
-              }}
-              className="label border border-border px-6 py-4 press hoverable:hover:bg-card active:scale-[0.98]"
-            >
-              Forget token
-            </button>
-          ) : null}
+            <textarea
+              rows={3}
+              value={t.quote}
+              onChange={(e) => updateTestimonial(i, { quote: e.target.value })}
+              placeholder="What they said"
+              className={inputClass}
+            />
+            <div className="grid gap-4 sm:grid-cols-3">
+              <input
+                type="text"
+                value={t.name}
+                onChange={(e) => updateTestimonial(i, { name: e.target.value })}
+                placeholder="Name"
+                className={inputClass}
+              />
+              <input
+                type="text"
+                value={t.role ?? ""}
+                onChange={(e) =>
+                  updateTestimonial(i, { role: e.target.value || undefined })
+                }
+                placeholder="Art Director, WIRED"
+                className={inputClass}
+              />
+              <input
+                type="text"
+                list="project-slugs"
+                value={t.project ?? ""}
+                onChange={(e) =>
+                  updateTestimonial(i, {
+                    project: e.target.value || undefined,
+                  })
+                }
+                placeholder="project slug (optional)"
+                className={inputClass}
+              />
+            </div>
+          </div>
+        ))}
 
-          {!sha ? (
-            <p className="label max-w-prose text-muted-foreground">
-              Arrange anything you like — publishing needs the GitHub token at
-              the top of this column, and nothing is committed until then.
-            </p>
-          ) : (
-            <StatusLine status={status} />
-          )}
-        </div>
+        <button
+          type="button"
+          onClick={() =>
+            set("testimonials", [
+              ...draft.testimonials,
+              { quote: "", name: "" },
+            ])
+          }
+          className="label self-start border border-border px-5 py-3 press hoverable:hover:bg-card active:scale-[0.98]"
+        >
+          Add a quote
+        </button>
+      </Area>
+    );
+  }
 
-        {/* Reached only once the token has proved itself against the repo — the
-          form commits several files at once, and a rejected token halfway
-          through would leave photographs in the branch with no manifest
-          pointing at them. */}
-        <AdminNewProject
-          token={token}
-          categories={categories}
-          existingSlugs={known}
-        />
-      </div>
+  function ContactFields() {
+    return (
+      <Area title="Contact">
+        <Field
+          anchor="responseTime"
+          label="Reply-time promise"
+          hint='Shown beside the contact form as "Replies …". Leave empty to say nothing rather than to promise something you will miss.'
+        >
+          <input
+            type="text"
+            value={draft.responseTime ?? ""}
+            onChange={(e) => set("responseTime", e.target.value || null)}
+            placeholder="within 24 hours"
+            className={inputClass}
+          />
+        </Field>
+
+        <Field
+          anchor="bookingUrl"
+          label="Booking link"
+          hint="The public Google Calendar booking page — calendar.app.google/…, not a share or edit link. Set it and a 'Check availability' button appears across the site; leave it empty and everything falls back to the enquiry form."
+        >
+          <input
+            type="url"
+            value={draft.bookingUrl ?? ""}
+            onChange={(e) => set("bookingUrl", e.target.value || null)}
+            placeholder="https://calendar.app.google/…"
+            className={inputClass}
+          />
+        </Field>
+      </Area>
     );
   }
 
@@ -1482,14 +1441,29 @@ function StatusLine({ status }: { status: Status }) {
   );
 }
 
-function Section({
-  number,
+/**
+ * One tab's worth of fields, under its own heading.
+ *
+ * Replaces the numbered `Section` the single Content form used. The numbers
+ * were there to be read against an index — "03 Testimonials" told you where
+ * you were in a scroll of four — and with a tab per area there is no scroll to
+ * be lost in and nothing for a number to count against. The tab is lit; the
+ * heading repeats it at reading size, which is how you know the panel
+ * switched rather than emptied.
+ */
+function Area({
   title,
   children,
-  /** Anchor, so a sitemap row can send the page to this section. */
+  /**
+   * Anchor, where the area itself is what a sitemap row points at.
+   *
+   * Sessions and Quotes have no single field to land on — they are a list of
+   * four prices and a list of quotes — so the row points at the area. Home
+   * and Contact do not need one: their own fields carry anchors, and landing
+   * on the specific field you asked for beats landing on the heading above it.
+   */
   anchor,
 }: {
-  number: string;
   title: string;
   children: React.ReactNode;
   anchor?: string;
@@ -1497,16 +1471,11 @@ function Section({
   return (
     <section
       id={anchor ? `field-${anchor}` : undefined}
-      className="flex scroll-mt-28 flex-col gap-6"
+      className="mt-8 flex scroll-mt-28 flex-col gap-6"
     >
-      <div className="flex items-baseline gap-4 border-b border-border pb-4">
-        <span className="label tabular-nums text-muted-foreground">
-          {number}
-        </span>
-        <h2 className="font-display text-2xl uppercase tracking-[0.02em]">
-          {title}
-        </h2>
-      </div>
+      <h2 className="font-display border-b border-border pb-3 text-xl uppercase tracking-[0.02em]">
+        {title}
+      </h2>
       {children}
     </section>
   );
