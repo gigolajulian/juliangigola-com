@@ -849,3 +849,25 @@ body:has([data-workbench]) > footer {
     opacity: 0.4;
   }
 }
+
+/* ── native select popups ─────────────────────────────────────────
+ * A dropdown's list is drawn by the operating system, and it takes its
+ * colours from the control. `:root` declares `color-scheme: dark`, which is
+ * enough for scrollbars and checkboxes — but a `<select>` styled
+ * `bg-transparent` leaves the list with no background of its own, and Windows
+ * draws it white. With text coloured for a dark ground, that is white on
+ * white: the options were there and unreadable.
+ *
+ * So the options carry their own ground. Stated here rather than per select,
+ * because every one of them has the same problem and none of them wants a
+ * different answer.
+ * ─────────────────────────────────────────────────────────────── */
+option {
+  background-color: var(--background);
+  color: var(--foreground);
+}
+
+optgroup {
+  background-color: var(--background);
+  color: var(--muted-foreground);
+}

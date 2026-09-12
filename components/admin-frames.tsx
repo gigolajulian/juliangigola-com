@@ -296,8 +296,16 @@ export function AdminFrames({
                 // that render has committed would find it still null and do
                 // nothing. Frames apart in a real drag, instant in a test,
                 // and the platform is already carrying the answer.
-                const from = Number(e.dataTransfer.getData("text/plain"));
-                if (Number.isInteger(from)) reorder(from, i);
+                // `dataTransfer` first, state second, and both are needed.
+                // The drag carries the origin so a drop that lands before
+                // `dragstart`'s render has committed still knows where it
+                // came from. But the browser only exposes that data during a
+                // genuine user drag — in protected mode `getData` returns
+                // empty — so the state is the fallback, which is also what
+                // makes this reachable from a test.
+                const carried = e.dataTransfer.getData("text/plain");
+                const from = carried === "" ? dragging : Number(carried);
+                if (from !== null && Number.isInteger(from)) reorder(from, i);
                 setDragging(null);
                 setOver(null);
               }}

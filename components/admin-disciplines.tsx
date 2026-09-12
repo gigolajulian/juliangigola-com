@@ -35,7 +35,6 @@ export function AdminDisciplines({
   disciplines,
   projects,
   hidden,
-  order,
   onOrder,
   covers,
   onCover,
@@ -46,8 +45,13 @@ export function AdminDisciplines({
   /** Every project, in the running order the draft currently has. */
   projects: AdminProject[];
   hidden: Set<string>;
-  /** The running order, by slug. See `lib/added.ts`. */
-  order: string[];
+  /**
+   * Writes the whole running order back.
+   *
+   * There is no `order` prop to read: `projects` already arrives in the
+   * draft's order, so the only thing this component needs is somewhere to
+   * send a new one.
+   */
   onOrder: (next: string[]) => void;
   covers: Record<string, string>;
   onCover: (categorySlug: string, src: string | null) => void;
@@ -312,7 +316,10 @@ function Ordering({
           }}
           onDrop={(e) => {
             e.preventDefault();
-            const from = e.dataTransfer.getData("text/plain");
+            // See the note in `admin-picker.tsx`: the drag carries the
+            // origin, and the state covers the case where the browser
+            // withholds it.
+            const from = e.dataTransfer.getData("text/plain") || dragging;
             if (from) onReorder(from, p.slug);
             setDragging(null);
             setOver(null);

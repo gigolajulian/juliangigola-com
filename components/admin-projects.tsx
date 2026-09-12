@@ -348,7 +348,11 @@ export function AdminProjects({
                     onChange={(e) => onRecategorise(p.slug, e.target.value)}
                     aria-label={`Discipline for ${p.name}`}
                     className={cn(
-                      "label max-w-[9rem] border bg-transparent px-2 py-2 outline-none focus-visible:border-foreground",
+                      // `bg-background`, not `bg-transparent`. The popup list takes
+                      // its ground from the control, and a transparent one
+                      // gets whatever the OS picks — white, on Windows, under
+                      // text meant for a dark page.
+                      "label max-w-[9rem] border bg-background px-2 py-2 outline-none focus-visible:border-foreground",
                       // Unfiled is a state worth seeing across seventy-three
                       // rows, not a value to read one at a time.
                       unfiled

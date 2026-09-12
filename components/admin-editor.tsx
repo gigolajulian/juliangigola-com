@@ -285,6 +285,10 @@ export function AdminEditor({
    * a preview deployment.
    */
   const [origin, setOrigin] = React.useState("");
+  // Reading one value off `window` once is what an effect is for, and the
+  // alternative — seeding the state from `window` during render — is a
+  // hydration mismatch, because the server has no origin to render.
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   React.useEffect(() => setOrigin(window.location.origin), []);
 
   /**
@@ -307,7 +311,6 @@ export function AdminEditor({
    * live, which is better than claiming it wrongly.
    */
   const built = React.useRef<string | null>(null);
-  const [live, setLive] = React.useState(false);
   /** Set the moment a publish succeeds, so the wait has something to watch. */
   const [awaitingDeploy, setAwaitingDeploy] = React.useState(false);
   /**
@@ -357,7 +360,6 @@ export function AdminEditor({
         .then((next) => {
           if (!next || next.trim() === built.current) return;
           built.current = next.trim();
-          setLive(true);
           setCommitted(false);
           setAwaitingDeploy(false);
         })
@@ -664,7 +666,6 @@ export function AdminEditor({
 
       // A fresh publish is not live yet by definition, whatever the last one
       // was — so the green is dropped before the wait begins.
-      setLive(false);
       setCommitted(true);
       setAwaitingDeploy(built.current !== null);
       setStatus({
@@ -936,7 +937,6 @@ export function AdminEditor({
                in this session, which the manifest has never seen. */
             projects={orderedProjects}
             hidden={hidden}
-            order={order}
             onOrder={setOrder}
             covers={covers}
             onCover={(category, src) =>
@@ -1021,13 +1021,26 @@ export function AdminEditor({
           </>
         ) : null}
 
-        {/* One area at a time. Each is its own component rather than a section
-            of one long form, so switching tabs is not a scroll and the widest
-            column holds only the fields you came for. */}
-        {view === "home" ? <HomeFields /> : null}
-        {view === "sessions" ? <SessionFields /> : null}
-        {view === "testimonials" ? <QuoteFields /> : null}
-        {view === "contact" ? <ContactFields /> : null}
+        {/* One area at a time, so switching tabs is not a scroll and the
+            widest column holds only the fields you came for.
+         
+            Called, not rendered as `<HomeFields />`. These are closures over
+            the editor's state, so they are re-created on every render — and as
+            JSX that makes them a *different component type* each time, which
+            React handles by unmounting the subtree and mounting a fresh one.
+            Everything inside loses its state on every keystroke: the picker's
+            search panel snapped shut, its query cleared, and `dragging` reset
+            in the middle of a drag, which is why a card could be picked up and
+            never dropped.
+         
+            Calling them creates no component boundary. The elements land
+            directly in this component's tree, where React reconciles them by
+            position and the real components inside — `AdminPicker` and the
+            rest — keep their identity and their state. */}
+        {view === "home" ? HomeFields() : null}
+        {view === "sessions" ? SessionFields() : null}
+        {view === "testimonials" ? QuoteFields() : null}
+        {view === "contact" ? ContactFields() : null}
 
         {/* The slug list, shared by every field that takes one, so it has to
             outlive the tab that uses it. */}
@@ -1101,7 +1114,7 @@ export function AdminEditor({
         <Field
           anchor="featured"
           label="Selected work, in order"
-          hint="The cards under the cover, three across. Reorder with the arrows."
+          hint="The cards under the cover, three across. Drag to reorder, or use the arrows."
         >
           <AdminPicker
             chosen={draft.featured}

@@ -73,6 +73,9 @@ export function AdminPicker({
 }) {
   const [adding, setAdding] = React.useState(false);
   const [query, setQuery] = React.useState("");
+  /** The row being dragged, and the one it is over. By position. */
+  const [dragging, setDragging] = React.useState<number | null>(null);
+  const [over, setOver] = React.useState<number | null>(null);
 
   const bySlug = React.useMemo(
     () => new Map(items.map((p) => [p.slug, p])),
@@ -84,6 +87,22 @@ export function AdminPicker({
     if (j < 0 || j >= chosen.length) return;
     const next = [...chosen];
     [next[i], next[j]] = [next[j], next[i]];
+    onChange(next);
+  };
+
+  /**
+   * Lift and insert, for a drag.
+   *
+   * The arrows swap with a neighbour, which for one step is the same edit.
+   * A drag is not one step: dropping the seventh card on the first should put
+   * it first and push the rest down, where a swap would fling the old first
+   * card out to position seven — a second edit nobody asked for.
+   */
+  const reorder = (from: number, to: number) => {
+    if (from === to || from < 0 || to < 0) return;
+    const next = [...chosen];
+    const [held] = next.splice(from, 1);
+    next.splice(to, 0, held);
     onChange(next);
   };
 
@@ -109,7 +128,53 @@ export function AdminPicker({
           return (
             <li
               key={`${slug}-${i}`}
-              className="flex items-center gap-3 border-b border-border py-2"
+              draggable
+              onDragStart={(e) => {
+                setDragging(i);
+                e.dataTransfer.effectAllowed = "move";
+                // The authority on where the drag began. React state is set
+                // in the same event and a drop arriving before that render
+                // commits would read null and do nothing — frames apart in a
+                // real drag, instant in a test, and the platform is already
+                // carrying the answer.
+                e.dataTransfer.setData("text/plain", String(i));
+              }}
+              onDragOver={(e) => {
+                // Without this the browser refuses the drop.
+                e.preventDefault();
+                e.dataTransfer.dropEffect = "move";
+                if (over !== i) setOver(i);
+              }}
+              onDrop={(e) => {
+                e.preventDefault();
+                // `dataTransfer` first, state second, and both are needed.
+                // The drag carries the origin so a drop that lands before
+                // `dragstart`'s render has committed still knows where it
+                // came from. But the browser only exposes that data during a
+                // genuine user drag — in protected mode `getData` returns
+                // empty — so the state is the fallback, which is also what
+                // makes this reachable from a test.
+                const carried = e.dataTransfer.getData("text/plain");
+                const from = carried === "" ? dragging : Number(carried);
+                if (from !== null && Number.isInteger(from)) reorder(from, i);
+                setDragging(null);
+                setOver(null);
+              }}
+              onDragEnd={() => {
+                setDragging(null);
+                setOver(null);
+              }}
+              className={cn(
+                "flex cursor-grab items-center gap-3 border-b border-border py-2 transition-opacity duration-150 active:cursor-grabbing",
+                dragging === i && "opacity-30",
+                // The slot it would land in, outlined rather than nudged
+                // aside: rows reflowing under the pointer is motion sickness,
+                // and the outline says the same thing.
+                over === i &&
+                  dragging !== null &&
+                  dragging !== i &&
+                  "outline outline-2 outline-offset-2 outline-foreground",
+              )}
             >
               <span className="label w-6 shrink-0 tabular-nums text-muted-foreground">
                 {String(i + 1).padStart(2, "0")}
@@ -125,6 +190,7 @@ export function AdminPicker({
                     alt=""
                     fill
                     sizes="40px"
+                    draggable={false}
                     className="object-cover"
                   />
                 </span>
