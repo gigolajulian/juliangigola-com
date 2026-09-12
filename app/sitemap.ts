@@ -15,11 +15,13 @@ export const dynamic = "force-static";
 export default function sitemap(): MetadataRoute.Sitemap {
   // Listed explicitly, so /admin cannot drift into the sitemap by being a
   // route — it is unlisted on purpose.
-  const pages = ["", "/work", "/sessions", "/studio", "/contact"].map((path) => ({
-    url: `${SITE}${path}`,
-    changeFrequency: "monthly" as const,
-    priority: path === "" ? 1 : 0.8,
-  }));
+  const pages = ["", "/work", "/sessions", "/studio", "/contact"].map(
+    (path) => ({
+      url: `${SITE}${path}`,
+      changeFrequency: "monthly" as const,
+      priority: path === "" ? 1 : 0.8,
+    }),
+  );
 
   // The discipline pages. They sit above individual projects in priority:
   // they are the pages a search for "bay area editorial photographer" should

@@ -86,6 +86,21 @@
   --ease-out-strong: cubic-bezier(0.23, 1, 0.32, 1);
   --ease-in-out-strong: cubic-bezier(0.77, 0, 0.175, 1);
 
+  /* ── the calm pair ───────────────────────────────────────────
+   * How long type takes to arrive. Two values rather than a scale, because
+   * their whole purpose is that the scroll reveal and the cover's phase
+   * change agree with each other — a token with one call site is a literal
+   * with extra steps.
+   *
+   * The fade is shorter than the move on purpose: the text is fully legible
+   * while it is still travelling the last few pixels, so it reads as settling
+   * rather than as arriving late. No easing token to go with them — the curve
+   * wanted here is the plain `ease-in-out` keyword, and aliasing a keyword
+   * buys nothing.
+   * ─────────────────────────────────────────────────────────── */
+  --dur-fade: 300ms;
+  --dur-move: 400ms;
+
   /* ── springs ──────────────────────────────────────────────────
    * A bezier cannot overshoot and come back — it is bounded by its own end
    * point — so a bounce is impossible to express as one. These are real
@@ -410,6 +425,9 @@
   transition:
     opacity 520ms var(--ease-out-strong),
     transform 760ms var(--ease-spring);
+  /* Set by `stagger` on the parent, because `transition-delay` does not
+     inherit and the wrapper is usually nested inside an `<li>`. */
+  transition-delay: var(--reveal-delay, 0ms);
   will-change: transform, opacity;
 
   &[data-shown] {
@@ -421,14 +439,94 @@
   }
 }
 
+/**
+ * The same reveal, in the calm character: for type and interface, not pictures.
+ *
+ * A short fade under a slightly longer lift, symmetric easing, no scale and no
+ * spring. The spring on `reveal` is right for a photograph — it lands like a
+ * print being set down — and wrong for a paragraph, where an overshoot on a
+ * line of text reads as the page wobbling.
+ *
+ * **A modifier on `reveal`, never a replacement.** It rides the same
+ * `data-shown` toggle, so there is one observer and one mechanism rather than
+ * two that can disagree.
+ *
+ * It does *not* inherit the safety nets by being a modifier — both blocks at
+ * the foot of this section name `.reveal-calm` for itself. Add a third
+ * variant and it must be added there too, or a visitor with no scripting
+ * gets a blank page: the observer never runs, nothing is ever shown, and the
+ * site looks empty to them and to every text-only crawler.
+ *
+ * Declared directly after `reveal` so it wins on equal specificity.
+ *
+ * No `will-change`: a fade and a 28px lift on text does not need a compositor
+ * layer, and the layer is exactly what caused the judder described above.
+ */
+@utility reveal-calm {
+  opacity: 0;
+  transform: translateY(1.75rem);
+  transition:
+    opacity var(--dur-fade) ease-in-out,
+    transform var(--dur-move) ease-in-out;
+  transition-delay: var(--reveal-delay, 0ms);
+
+  &[data-shown] {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/**
+ * Staggers the reveals of a row or a grid.
+ *
+ * Blocks stacked down a page already stagger themselves — each has its own
+ * observer and crosses the fold at its own moment. This is for the other
+ * case: siblings that cross together and would otherwise fire as one flash
+ * of six simultaneous events instead of one gesture.
+ *
+ * A custom property rather than a `delay` prop, so a server-rendered `<ul>`
+ * can stagger its children by adding one class — no client boundary, no
+ * indexing in JavaScript, nothing threaded through props.
+ *
+ * Clamped at the fourth child. Six cells stepping 60ms apart take most of a
+ * second to finish, and past about three steps a stagger stops reading as one
+ * gesture and starts reading as a queue.
+ *
+ * **Only for a container where every child is revealed.** `nth-child` counts
+ * children, not reveals, so a grid that deliberately leaves its first cells
+ * unwrapped — the homepage band and the cover-art rack both skip the
+ * `priority` row — pushes every remaining cell into the clamp, where they all
+ * share one delay. That is a uniform lag with no stagger in it, which is
+ * worse than not stepping at all. Those grids leave this off on purpose.
+ */
+@utility stagger {
+  & > *:nth-child(2) {
+    --reveal-delay: 60ms;
+  }
+  & > *:nth-child(3) {
+    --reveal-delay: 120ms;
+  }
+  & > *:nth-child(n + 4) {
+    --reveal-delay: 180ms;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .reveal {
+  .reveal,
+  .reveal-calm {
     transition: none;
   }
 }
 
+/* Both variants named explicitly rather than relying on `.reveal` being
+   present on every wrapper and unlayered rules out-ranking layered ones.
+   That is what the cascade specifies, and it is still true — but this is the
+   rule that decides whether a visitor with no JavaScript sees the site or an
+   empty page, and it is not the place to be clever about specificity. Name
+   the classes. */
 @media (scripting: none) {
-  .reveal {
+  .reveal,
+  .reveal-calm {
     opacity: 1;
     transform: none;
   }

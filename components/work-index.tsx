@@ -51,7 +51,10 @@ export function WorkIndex({
       {/* The old site's three dropdowns become one row that can be ignored:
           the default is everything, so nobody has to make a choice before
           they can look at anything. */}
-      <nav aria-label="Categories" className="mt-10 border-b border-border pb-5">
+      <nav
+        aria-label="Categories"
+        className="mt-10 border-b border-border pb-5"
+      >
         <ul className="flex flex-wrap gap-x-6 gap-y-3">
           <li>
             <FilterLink href="/work" active={activeCategory === null}>
@@ -71,7 +74,9 @@ export function WorkIndex({
       <div className="mt-8 gap-16 lg:flex lg:items-start">
         <ol className="lg:w-1/2 lg:min-w-0">
           {projects.map((project, i) => {
-            const client = project.credits.find((c) => /client|model|artist/i.test(c.role));
+            const client = project.credits.find((c) =>
+              /client|model|artist/i.test(c.role),
+            );
 
             return (
               <li key={project.slug}>
@@ -177,7 +182,9 @@ function FilterLink({
       aria-current={active ? "page" : undefined}
       className={cn(
         "label block py-1 transition-colors duration-200",
-        active ? "text-foreground" : "text-muted-foreground hoverable:hover:text-foreground",
+        active
+          ? "text-foreground"
+          : "text-muted-foreground hoverable:hover:text-foreground",
       )}
     >
       {children}

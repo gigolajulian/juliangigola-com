@@ -65,7 +65,10 @@ export function ContactForm() {
   const [type, setType] = React.useState<string>(
     TYPES.some((t) => t.value === preset) ? (preset as string) : "editorial",
   );
-  const [state, formAction, pending] = React.useActionState(submitEnquiry, INITIAL);
+  const [state, formAction, pending] = React.useActionState(
+    submitEnquiry,
+    INITIAL,
+  );
 
   const followUp = FOLLOW_UP[type] ?? FOLLOW_UP.other;
   const values = state.values ?? {};
@@ -73,10 +76,16 @@ export function ContactForm() {
   if (state.status === "sent") {
     return (
       <div role="status" className="border border-border p-8">
-        <h2 className="font-display text-2xl uppercase tracking-[0.04em]">Sent.</h2>
-        <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{state.message}</p>
+        <h2 className="font-display text-2xl uppercase tracking-[0.04em]">
+          Sent.
+        </h2>
+        <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
+          {state.message}
+        </p>
         {RESPONSE_TIME ? (
-          <p className="label mt-4 text-muted-foreground">Replies {RESPONSE_TIME}</p>
+          <p className="label mt-4 text-muted-foreground">
+            Replies {RESPONSE_TIME}
+          </p>
         ) : null}
       </div>
     );
@@ -85,7 +94,9 @@ export function ContactForm() {
   return (
     <form action={formAction} className="flex flex-col gap-8" noValidate>
       <fieldset>
-        <legend className="label text-muted-foreground">What kind of shoot?</legend>
+        <legend className="label text-muted-foreground">
+          What kind of shoot?
+        </legend>
         <div className="mt-4 flex flex-wrap gap-2">
           {TYPES.map((t) => (
             <label
@@ -161,7 +172,9 @@ export function ContactForm() {
           role="alert"
           className={cn(
             "border p-5 text-sm leading-relaxed",
-            state.status === "error" ? "border-destructive/50" : "border-border",
+            state.status === "error"
+              ? "border-destructive/50"
+              : "border-border",
           )}
         >
           <p>{state.message}</p>

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Gallery } from "@/components/gallery";
+import { Reveal } from "@/components/reveal";
 import { CoverArtGallery } from "@/components/cover-art-gallery";
 import { CallToAction } from "@/components/call-to-action";
 import {
@@ -28,7 +29,9 @@ export function generateStaticParams() {
   return PROJECTS.map((p) => ({ slug: p.slug }));
 }
 
-export async function generateMetadata(props: PageProps<"/work/[slug]">): Promise<Metadata> {
+export async function generateMetadata(
+  props: PageProps<"/work/[slug]">,
+): Promise<Metadata> {
   const { slug } = await props.params;
   const project = getProject(slug);
   if (!project) return {};
@@ -36,7 +39,11 @@ export async function generateMetadata(props: PageProps<"/work/[slug]">): Promis
   const client = project.credits.find((c) => /client/i.test(c.role));
   const description =
     project.intent ??
-    [project.headline ?? project.name, client ? `for ${client.name}` : null, "by Julian Gigola"]
+    [
+      project.headline ?? project.name,
+      client ? `for ${client.name}` : null,
+      "by Julian Gigola",
+    ]
       .filter(Boolean)
       .join(" ");
 
@@ -49,7 +56,13 @@ export async function generateMetadata(props: PageProps<"/work/[slug]">): Promis
       description,
       // The opening frame is the project's cover everywhere else on the site;
       // it should be the card in a Slack paste too.
-      images: [{ url: coverOf(project).src, width: coverOf(project).width, height: coverOf(project).height }],
+      images: [
+        {
+          url: coverOf(project).src,
+          width: coverOf(project).width,
+          height: coverOf(project).height,
+        },
+      ],
     },
   };
 }
@@ -125,17 +138,22 @@ export default async function ProjectPage(props: PageProps<"/work/[slug]">) {
           decided they like the work — putting them first asks a stranger to
           care about a crew they have no reason to care about yet. */}
       {project.credits.length ? (
-        <footer className="mx-auto mt-24 max-w-[100rem] px-6 sm:px-10">
-          <h2 className="label text-muted-foreground">Credits</h2>
-          <dl className="mt-6 grid gap-x-12 gap-y-6 border-t border-border pt-8 sm:grid-cols-2 lg:grid-cols-3">
-            {project.credits.map((credit, i) => (
-              <div key={`${credit.role}-${i}`}>
-                <dt className="label text-muted-foreground">{credit.role}</dt>
-                <dd className="mt-2 text-sm">{credit.name}</dd>
-              </div>
-            ))}
-          </dl>
-        </footer>
+        <Reveal
+          variant="calm"
+          className="mx-auto mt-24 max-w-[100rem] px-6 sm:px-10"
+        >
+          <footer>
+            <h2 className="label text-muted-foreground">Credits</h2>
+            <dl className="mt-6 grid gap-x-12 gap-y-6 border-t border-border pt-8 sm:grid-cols-2 lg:grid-cols-3">
+              {project.credits.map((credit, i) => (
+                <div key={`${credit.role}-${i}`}>
+                  <dt className="label text-muted-foreground">{credit.role}</dt>
+                  <dd className="mt-2 text-sm">{credit.name}</dd>
+                </div>
+              ))}
+            </dl>
+          </footer>
+        </Reveal>
       ) : null}
 
       {/* The ask, at the point of peak interest: they have just looked at the
@@ -147,7 +165,11 @@ export default async function ProjectPage(props: PageProps<"/work/[slug]">) {
         body="Tell me the brief and I'll come back with an approach, a crew, and a quote."
         type={enquiryTypeFor(project)}
         detail={project.name}
-        secondary={next ? { href: `/work/${next.slug}`, label: `Next: ${next.name}` } : undefined}
+        secondary={
+          next
+            ? { href: `/work/${next.slug}`, label: `Next: ${next.name}` }
+            : undefined
+        }
       />
     </article>
   );

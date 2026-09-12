@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Reveal } from "@/components/reveal";
 import { COVER_ART, COVER_RELEASES } from "@/lib/work";
 import { CoverFaces, coverLabel } from "@/components/cover-faces";
 
@@ -33,55 +34,62 @@ export function CoverArt() {
 
   return (
     <section aria-labelledby="cover-art" className="border-t border-border">
-      <div className="mx-auto flex max-w-[100rem] items-baseline justify-between gap-6 px-6 pb-8 pt-20 sm:px-10 sm:pt-28">
-        <div className="flex items-baseline gap-4">
-          {/* Numbered to match the index on the cover, where cover art is 05. */}
-          <span className="label tabular-nums text-muted-foreground">05</span>
-          <h2 id="cover-art" className="label text-muted-foreground">
-            Cover art
-          </h2>
+      <Reveal variant="calm">
+        <div className="mx-auto flex max-w-[100rem] items-baseline justify-between gap-6 px-6 pb-8 pt-20 sm:px-10 sm:pt-28">
+          <div className="flex items-baseline gap-4">
+            {/* Numbered to match the index on the cover, where cover art is 05. */}
+            <span className="label tabular-nums text-muted-foreground">05</span>
+            <h2 id="cover-art" className="label text-muted-foreground">
+              Cover art
+            </h2>
+          </div>
+          <Link
+            href={`/work/${project.slug}`}
+            className="label text-muted-foreground transition-colors duration-200 hoverable:hover:text-foreground"
+          >
+            All {COVER_RELEASES.length} &rarr;
+          </Link>
         </div>
-        <Link
-          href={`/work/${project.slug}`}
-          className="label text-muted-foreground transition-colors duration-200 hoverable:hover:text-foreground"
-        >
-          All {COVER_RELEASES.length} &rarr;
-        </Link>
-      </div>
+      </Reveal>
 
       {/* Two columns, then five — both divide SHOWN exactly, so the last row
           is always full. */}
-      <ul className="grid grid-cols-2 lg:grid-cols-5">
-        {releases.map((release) => (
-          <li key={release.slug}>
-            <Link
-              href={`/work/${project.slug}`}
-              aria-label={coverLabel(
-                release.title,
-                release.artist,
-                release.frames,
-              )}
-              className="group relative block aspect-square overflow-hidden"
-              style={{ backgroundColor: release.frames[0]?.color }}
-            >
-              <CoverFaces
-                frames={release.frames}
-                sizes="(min-width: 1024px) 20vw, 50vw"
-              />
+      {/* One reveal around the rack rather than one per sleeve. Ten squares
+          arriving individually is confetti; the rack reads as a single shelf
+          of records, so it arrives as one. */}
+      <Reveal>
+        <ul className="grid grid-cols-2 lg:grid-cols-5">
+          {releases.map((release) => (
+            <li key={release.slug}>
+              <Link
+                href={`/work/${project.slug}`}
+                aria-label={coverLabel(
+                  release.title,
+                  release.artist,
+                  release.frames,
+                )}
+                className="group relative block aspect-square overflow-hidden"
+                style={{ backgroundColor: release.frames[0]?.color }}
+              >
+                <CoverFaces
+                  frames={release.frames}
+                  sizes="(min-width: 1024px) 20vw, 50vw"
+                />
 
-              {/* The release, named. A music client is scanning for something
+                {/* The release, named. A music client is scanning for something
                   they recognise, and a cover on its own does not say what it
                   is unless you already know it. */}
-              <div className="pointer-events-none absolute inset-x-0 bottom-0 flex flex-col gap-1 border-t border-border/60 bg-background/70 p-4 backdrop-blur-xl opacity-0 transition-opacity duration-200 ease-out group-hover:opacity-100 group-focus-visible:opacity-100 motion-reduce:transition-none">
-                <span className="label text-foreground">{release.title}</span>
-                <span className="label text-muted-foreground">
-                  {release.artist}
-                </span>
-              </div>
-            </Link>
-          </li>
-        ))}
-      </ul>
+                <div className="pointer-events-none absolute inset-x-0 bottom-0 flex flex-col gap-1 border-t border-border/60 bg-background/70 p-4 backdrop-blur-xl opacity-0 transition-opacity duration-200 ease-out group-hover:opacity-100 group-focus-visible:opacity-100 motion-reduce:transition-none">
+                  <span className="label text-foreground">{release.title}</span>
+                  <span className="label text-muted-foreground">
+                    {release.artist}
+                  </span>
+                </div>
+              </Link>
+            </li>
+          ))}
+        </ul>
+      </Reveal>
     </section>
   );
 }

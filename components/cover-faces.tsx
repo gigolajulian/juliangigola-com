@@ -72,7 +72,10 @@ export function CoverFaces({
           {/* Two ticks, the way the scrub tiles mark position. This is the
               affordance as much as the indicator — it is what says there is a
               second side before anyone has pointed at the cover. */}
-          <div aria-hidden className="absolute inset-x-4 bottom-3 hidden gap-1 hoverable:flex">
+          <div
+            aria-hidden
+            className="absolute inset-x-4 bottom-3 hidden gap-1 hoverable:flex"
+          >
             <span className="h-px flex-1 bg-foreground transition-colors duration-300 group-hover:bg-foreground/30" />
             <span className="h-px flex-1 bg-foreground/30 transition-colors duration-300 group-hover:bg-foreground" />
           </div>
@@ -83,7 +86,11 @@ export function CoverFaces({
 }
 
 /** How a release reads to a screen reader, sides included. */
-export function coverLabel(title: string, artist: string, frames: CoverFrame[]): string {
+export function coverLabel(
+  title: string,
+  artist: string,
+  frames: CoverFrame[],
+): string {
   const sides = frames
     .map((f) => f.side?.toLowerCase())
     .filter(Boolean)

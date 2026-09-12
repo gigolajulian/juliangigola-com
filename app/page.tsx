@@ -4,6 +4,7 @@ import { CallToAction } from "@/components/call-to-action";
 import { Testimonials } from "@/components/testimonials";
 import { WorkBand } from "@/components/work-band";
 import { CoverArt } from "@/components/cover-art";
+import { Reveal } from "@/components/reveal";
 import { FEATURED, PRESS, DISCIPLINES } from "@/lib/work";
 
 /* ── the homepage ─────────────────────────────────────────────────
@@ -65,17 +66,19 @@ export default function Home() {
           this project exist" but "is the whole set good", which is what an
           art director is actually deciding. */}
       <section aria-labelledby="featured">
-        <div className="mx-auto flex max-w-[100rem] items-baseline justify-between gap-6 px-6 pb-8 pt-20 sm:px-10 sm:pt-28">
-          <h2 id="featured" className="label text-muted-foreground">
-            Selected work
-          </h2>
-          <Link
-            href="/work"
-            className="label text-muted-foreground transition-colors duration-200 hoverable:hover:text-foreground"
-          >
-            All projects &rarr;
-          </Link>
-        </div>
+        <Reveal variant="calm">
+          <div className="mx-auto flex max-w-[100rem] items-baseline justify-between gap-6 px-6 pb-8 pt-20 sm:px-10 sm:pt-28">
+            <h2 id="featured" className="label text-muted-foreground">
+              Selected work
+            </h2>
+            <Link
+              href="/work"
+              className="label text-muted-foreground transition-colors duration-200 hoverable:hover:text-foreground"
+            >
+              All projects &rarr;
+            </Link>
+          </div>
+        </Reveal>
 
         {/* Three across, so the six featured projects read as two rows of a
             set rather than a column of three pairs — the question this
@@ -85,13 +88,34 @@ export default function Home() {
             Ramped rather than jumped: one on a phone, two from `md`, three
             from `lg`. Going straight to three at `lg` puts a 341px cell on a
             1024px laptop, which is a thumbnail, not a photograph. */}
+        {/* No `stagger`. It counts every child, and the three unwrapped cells
+            below still count — so cells four to six would all land in its
+            clamp and share one 180ms delay, which is a uniform lag rather
+            than a stagger. A row of photographs arriving together is right
+            anyway; the stepping exists for pairs and short lists. */}
         <ul className="grid md:grid-cols-2 lg:grid-cols-3">
-          {FEATURED.map((project, i) => (
-            <li key={project.slug}>
-              {/* Three are above the fold now, not two. */}
+          {FEATURED.map((project, i) => {
+            // Three are above the fold now, not two.
+            const band = (
               <WorkBand project={project} index={i} priority={i < 3} />
-            </li>
-          ))}
+            );
+            return (
+              <li key={project.slug}>
+                {/* The `priority` three are left unwrapped on purpose. They
+                    are at or above the fold, so a reveal would fire on the
+                    first observer callback and animate them at load — on top
+                    of the `rise` the whole page is already doing, which reads
+                    as a flicker rather than as either gesture. Keeping them
+                    plain also leaves the browser's largest-paint candidates
+                    without a compositor layer they have no use for.
+
+                    Everything further down gets the photographic reveal. The
+                    wrapper sits inside the `<li>` so the list item stays the
+                    grid cell. */}
+                {i < 3 ? band : <Reveal>{band}</Reveal>}
+              </li>
+            );
+          })}
         </ul>
       </section>
 
@@ -104,7 +128,14 @@ export default function Home() {
         <h2 id="paths" className="sr-only">
           Where to go next
         </h2>
-        <div className="mx-auto grid max-w-[100rem] sm:grid-cols-2">
+        {/* One reveal around the grid rather than one per card: the `<Link>`
+            inside `PathCard` is the grid item and `sm:odd:border-r` targets
+            it, so a wrapper per card would become the item and take both the
+            divider and the equal heights with it. */}
+        <Reveal
+          variant="calm"
+          className="mx-auto grid max-w-[100rem] sm:grid-cols-2"
+        >
           <PathCard
             href="/work"
             label="For art directors"
@@ -117,7 +148,7 @@ export default function Home() {
             title="Book a session"
             body="Graduation, headshots, weddings, and studio digitals. What's included and how long it takes."
           />
-        </div>
+        </Reveal>
       </section>
 
       <Testimonials />

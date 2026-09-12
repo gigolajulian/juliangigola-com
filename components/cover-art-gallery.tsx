@@ -3,6 +3,7 @@
 import * as React from "react";
 import { Lightbox, useLightbox } from "@/components/lightbox";
 import { CoverFaces, coverLabel } from "@/components/cover-faces";
+import { Reveal } from "@/components/reveal";
 import type { CoverRelease } from "@/lib/cover-art-types";
 
 /* ── the cover-art sheet ──────────────────────────────────────────
@@ -42,42 +43,50 @@ export function CoverArtGallery({ releases }: { releases: CoverRelease[] }) {
           const front = release.frames[0];
           if (!front) return null;
 
+          const cell = (
+            <button
+              type="button"
+              onClick={(e) => {
+                // Open whichever side is on screen. `:hover` is the same
+                // thing the crossfade is keyed on, so the lightbox shows the
+                // cover that was actually clicked — and a keyboard Enter,
+                // where nothing is hovered, opens side A.
+                const turned =
+                  release.frames.length > 1 &&
+                  e.currentTarget.matches(":hover");
+                const frame = release.frames[turned ? 1 : 0];
+                lightbox.show(positions.get(frame.src) ?? 0);
+              }}
+              aria-label={`Open ${coverLabel(release.title, release.artist, release.frames)}`}
+              className="group relative block aspect-square w-full cursor-zoom-in overflow-hidden press active:scale-[0.995]"
+              style={{ backgroundColor: front.color }}
+            >
+              <CoverFaces
+                frames={release.frames}
+                sizes="(min-width: 640px) 33vw, 50vw"
+                // The top row, eagerly — it is the largest thing above the
+                // fold. The rest of the rack loads as it is reached.
+                priority={i < 3}
+              />
+
+              {/* The release, named on hover or on focus. A rack of covers
+                    is scanned for a name you recognise. */}
+              <div className="pointer-events-none absolute inset-x-0 bottom-0 flex flex-col gap-1 border-t border-border/60 bg-background/70 p-4 backdrop-blur-xl opacity-0 transition-opacity duration-200 ease-out group-hover:opacity-100 group-focus-visible:opacity-100 motion-reduce:transition-none">
+                <span className="label text-foreground">{release.title}</span>
+                <span className="label text-muted-foreground">
+                  {release.artist}
+                </span>
+              </div>
+            </button>
+          );
+
           return (
             <li key={release.slug}>
-              <button
-                type="button"
-                onClick={(e) => {
-                  // Open whichever side is on screen. `:hover` is the same
-                  // thing the crossfade is keyed on, so the lightbox shows the
-                  // cover that was actually clicked — and a keyboard Enter,
-                  // where nothing is hovered, opens side A.
-                  const turned =
-                    release.frames.length > 1 &&
-                    e.currentTarget.matches(":hover");
-                  const frame = release.frames[turned ? 1 : 0];
-                  lightbox.show(positions.get(frame.src) ?? 0);
-                }}
-                aria-label={`Open ${coverLabel(release.title, release.artist, release.frames)}`}
-                className="group relative block aspect-square w-full cursor-zoom-in overflow-hidden press active:scale-[0.995]"
-                style={{ backgroundColor: front.color }}
-              >
-                <CoverFaces
-                  frames={release.frames}
-                  sizes="(min-width: 640px) 33vw, 50vw"
-                  // The top row, eagerly — it is the largest thing above the
-                  // fold. The rest of the rack loads as it is reached.
-                  priority={i < 3}
-                />
-
-                {/* The release, named on hover or on focus. A rack of covers
-                    is scanned for a name you recognise. */}
-                <div className="pointer-events-none absolute inset-x-0 bottom-0 flex flex-col gap-1 border-t border-border/60 bg-background/70 p-4 backdrop-blur-xl opacity-0 transition-opacity duration-200 ease-out group-hover:opacity-100 group-focus-visible:opacity-100 motion-reduce:transition-none">
-                  <span className="label text-foreground">{release.title}</span>
-                  <span className="label text-muted-foreground">
-                    {release.artist}
-                  </span>
-                </div>
-              </button>
+              {/* The top row carries `priority` and sits above the fold, so
+                  it is left unwrapped — revealing it would animate it at load
+                  on top of the page's own `rise`. The wrapper goes inside the
+                  `<li>` so the list item stays the grid cell. */}
+              {i < 3 ? cell : <Reveal>{cell}</Reveal>}
             </li>
           );
         })}

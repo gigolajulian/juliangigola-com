@@ -64,14 +64,18 @@ export async function generateMetadata(
   };
 }
 
-export default async function CategoryPage(props: PageProps<"/work/category/[slug]">) {
+export default async function CategoryPage(
+  props: PageProps<"/work/category/[slug]">,
+) {
   const { slug } = await props.params;
   const category = LISTED.find((c) => c.slug === slug);
   if (!category) notFound();
 
   // Ordered as the full index orders them, so moving between disciplines does
   // not reshuffle work someone has already scrolled past.
-  const projects = COMMISSIONS.filter((p) => p.categories.some((c) => c.slug === slug));
+  const projects = COMMISSIONS.filter((p) =>
+    p.categories.some((c) => c.slug === slug),
+  );
   const name = categoryLabel(category);
   const frame = categoryFrame(slug);
 
@@ -103,7 +107,8 @@ export default async function CategoryPage(props: PageProps<"/work/category/[slu
 
             <h1 className="mt-8 title">{name}</h1>
             <p className="mt-4 max-w-prose text-sm leading-relaxed text-muted-foreground">
-              {projects.length} commissioned {projects.length === 1 ? "project" : "projects"}.
+              {projects.length} commissioned{" "}
+              {projects.length === 1 ? "project" : "projects"}.
             </p>
           </div>
 
@@ -128,7 +133,11 @@ export default async function CategoryPage(props: PageProps<"/work/category/[slu
           ) : null}
         </header>
 
-        <WorkIndex projects={projects} categories={WORK_CATEGORY_LINKS} active={slug} />
+        <WorkIndex
+          projects={projects}
+          categories={WORK_CATEGORY_LINKS}
+          active={slug}
+        />
       </div>
 
       <CallToAction

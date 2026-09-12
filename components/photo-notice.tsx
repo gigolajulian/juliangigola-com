@@ -40,7 +40,11 @@ export function PhotoNotice() {
    * — answering the gesture where it was made, rather than making somebody
    * look to the corner of the screen to find out why nothing happened.
    */
-  const [raised, setRaised] = React.useState<{ at: number; x: number; y: number } | null>(null);
+  const [raised, setRaised] = React.useState<{
+    at: number;
+    x: number;
+    y: number;
+  } | null>(null);
 
   React.useEffect(() => {
     const onContextMenu = (e: MouseEvent) => {
@@ -93,8 +97,14 @@ export function PhotoNotice() {
 
   const position = raised
     ? {
-        left: Math.max(MARGIN, Math.min(raised.x + GAP, window.innerWidth - BOX_W - MARGIN)),
-        top: Math.max(MARGIN, Math.min(raised.y + GAP, window.innerHeight - BOX_H - MARGIN)),
+        left: Math.max(
+          MARGIN,
+          Math.min(raised.x + GAP, window.innerWidth - BOX_W - MARGIN),
+        ),
+        top: Math.max(
+          MARGIN,
+          Math.min(raised.y + GAP, window.innerHeight - BOX_H - MARGIN),
+        ),
       }
     : undefined;
 
@@ -126,8 +136,8 @@ export function PhotoNotice() {
         // sixty-odd characters of 11px caps at 0.14em is a thing to decipher
         // rather than read.
         <p className="max-w-sm bg-foreground px-5 py-4 text-sm leading-snug text-background">
-          This photo is Copyright &copy; {new Date().getFullYear()} Julian Gigola. All rights
-          reserved.
+          This photo is Copyright &copy; {new Date().getFullYear()} Julian
+          Gigola. All rights reserved.
         </p>
       ) : null}
     </div>

@@ -15,19 +15,20 @@ export default function ContactPage() {
     <div className="pb-24 pt-28 sm:pt-36">
       <div className="mx-auto grid max-w-[100rem] gap-16 px-6 sm:px-10 lg:grid-cols-[0.8fr_1fr] lg:gap-24">
         <header>
-          <h1 className="title">
-            Get in touch
-          </h1>
+          <h1 className="title">Get in touch</h1>
           <p className="mt-6 max-w-prose text-base leading-relaxed text-muted-foreground">
-            Commissions, sessions, or a question about a project. Tell me what kind of shoot it is
-            and I&rsquo;ll come back with an approach and a quote.
+            Commissions, sessions, or a question about a project. Tell me what
+            kind of shoot it is and I&rsquo;ll come back with an approach and a
+            quote.
           </p>
 
           {/* Answers "will this actually go anywhere?" before they decide
               whether to fill anything in, which is where most enquiries are
               abandoned. */}
           {RESPONSE_TIME ? (
-            <p className="mt-4 text-sm text-foreground">Replies {RESPONSE_TIME}.</p>
+            <p className="mt-4 text-sm text-foreground">
+              Replies {RESPONSE_TIME}.
+            </p>
           ) : null}
 
           {/* Self-serve booking, once the calendar exists. Shown alongside
@@ -58,7 +59,9 @@ export default function ContactPage() {
             </div>
             <div>
               <dt className="label text-muted-foreground">Based in</dt>
-              <dd className="mt-2 text-sm">San Francisco Bay Area &middot; available to travel</dd>
+              <dd className="mt-2 text-sm">
+                San Francisco Bay Area &middot; available to travel
+              </dd>
             </div>
             <div>
               <dt className="label text-muted-foreground">Instagram</dt>

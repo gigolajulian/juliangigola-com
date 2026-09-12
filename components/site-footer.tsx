@@ -19,7 +19,9 @@ export function SiteFooter() {
       <div className="mx-auto max-w-[100rem] px-6 py-16 sm:px-10 sm:py-24">
         <div className="flex flex-col gap-12 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <p className="label text-muted-foreground">Commissions and sessions</p>
+            <p className="label text-muted-foreground">
+              Commissions and sessions
+            </p>
             <h2 className="mt-4 title">
               <Link
                 href="/contact"

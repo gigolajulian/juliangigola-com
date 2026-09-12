@@ -27,12 +27,19 @@ export type ContactState = {
   values?: Record<string, string>;
 };
 
-const SHOOT_TYPES = ["editorial", "campaign", "music", "session", "other"] as const;
+const SHOOT_TYPES = [
+  "editorial",
+  "campaign",
+  "music",
+  "session",
+  "other",
+] as const;
 
 const MAX = { name: 100, email: 200, detail: 200, message: 5000 } as const;
 
 /** Deliberately loose — the only thing worth rejecting is what cannot be a address. */
-const looksLikeEmail = (value: string) => /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(value);
+const looksLikeEmail = (value: string) =>
+  /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(value);
 
 export async function submitEnquiry(
   _prev: ContactState,
@@ -51,19 +58,31 @@ export async function submitEnquiry(
   const errors: Record<string, string> = {};
 
   if (!values.name) errors.name = "Please add your name.";
-  else if (values.name.length > MAX.name) errors.name = "That is longer than we can send.";
+  else if (values.name.length > MAX.name)
+    errors.name = "That is longer than we can send.";
 
   if (!values.email) errors.email = "Please add an email so Julian can reply.";
-  else if (!looksLikeEmail(values.email)) errors.email = "That does not look like an email address.";
-  else if (values.email.length > MAX.email) errors.email = "That is longer than we can send.";
+  else if (!looksLikeEmail(values.email))
+    errors.email = "That does not look like an email address.";
+  else if (values.email.length > MAX.email)
+    errors.email = "That is longer than we can send.";
 
-  if (!values.message) errors.message = "Please say a little about the project.";
-  else if (values.message.length > MAX.message) errors.message = "Please trim this a little.";
+  if (!values.message)
+    errors.message = "Please say a little about the project.";
+  else if (values.message.length > MAX.message)
+    errors.message = "Please trim this a little.";
 
-  const type = (SHOOT_TYPES as readonly string[]).includes(values.type) ? values.type : "other";
+  const type = (SHOOT_TYPES as readonly string[]).includes(values.type)
+    ? values.type
+    : "other";
 
   if (Object.keys(errors).length) {
-    return { status: "error", errors, values, message: "Please check the fields marked below." };
+    return {
+      status: "error",
+      errors,
+      values,
+      message: "Please check the fields marked below.",
+    };
   }
 
   const subject = `${type} enquiry — ${values.name}`;
@@ -109,7 +128,10 @@ export async function submitEnquiry(
 
     if (!res.ok) throw new Error(`provider responded ${res.status}`);
 
-    return { status: "sent", message: "Thank you — Julian will come back to you shortly." };
+    return {
+      status: "sent",
+      message: "Thank you — Julian will come back to you shortly.",
+    };
   } catch (err) {
     // Never swallow this: hand back a route that definitely works.
     console.error("contact: delivery failed", err);

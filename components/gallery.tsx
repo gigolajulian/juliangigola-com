@@ -40,10 +40,26 @@ export function Gallery({ project }: { project: Project }) {
     return byPosition;
   }, [project.blocks]);
 
-  /* How many frames have been laid out once each row is done, so a block
-     saved as "after 4 frames" lands under the row holding the fourth. Rows
-     are one or two wide, so this is not the row index. */
-  let laid = 0;
+  /**
+   * How many frames have been laid out by the end of each row, so a passage
+   * saved as "after 4 frames" lands under the row holding the fourth. Rows
+   * are one or two wide, so this is not the row index.
+   *
+   * A running total built here rather than accumulated inside the render map
+   * below. React may call that map more than once for a single render, and a
+   * counter that survived between calls would push every passage further down
+   * the gallery each time — the sort of drift that looks like an editorial
+   * choice rather than a bug.
+   */
+  const laidByRow = React.useMemo(() => {
+    const totals: number[] = [];
+    let laid = 0;
+    for (const row of rows) {
+      laid += row.length;
+      totals.push(laid);
+    }
+    return totals;
+  }, [rows]);
 
   return (
     <>
@@ -52,22 +68,23 @@ export function Gallery({ project }: { project: Project }) {
         <Passages blocks={blocks.get(0)} />
 
         {rows.map((row, r) => {
-          laid += row.length;
-          const after = blocks.get(laid);
+          const after = blocks.get(laidByRow[r]);
           return (
             <React.Fragment key={r}>
               <div
                 className={cn(
-                  "mx-auto grid w-full max-w-[100rem] gap-4 px-6 sm:gap-6 sm:px-10",
+                  // `stagger` steps the pair in this row, so two frames
+                  // crossing the fold in the same frame arrive as one gesture
+                  // rather than as two simultaneous events. It replaces a
+                  // hand-computed delay prop: the row already knows the order.
+                  "stagger mx-auto grid w-full max-w-[100rem] gap-4 px-6 sm:gap-6 sm:px-10",
                   row.length === 2 ? "sm:grid-cols-2" : "grid-cols-1",
                 )}
               >
                 {row.map((frame) => {
                   const i = frames.indexOf(frame);
                   return (
-                    // Short, staggered delays inside a row so a pair arrives as
-                    // one gesture rather than two separate events.
-                    <Reveal key={frame.src} delay={(i % 2) * 60}>
+                    <Reveal key={frame.src}>
                       <button
                         type="button"
                         onClick={() => lightbox.show(i)}
@@ -126,7 +143,9 @@ function Passages({ blocks }: { blocks?: TextBlock[] }) {
   return (
     <>
       {blocks.map((block, i) => (
-        <Reveal key={`${block.after}-${i}`}>
+        // Calm, not the photographic spring: an overshoot on a line of text
+        // reads as the page wobbling rather than as a print being set down.
+        <Reveal key={`${block.after}-${i}`} variant="calm">
           <div className="mx-auto w-full max-w-[100rem] px-6 py-8 sm:px-10 sm:py-16">
             <div className="mx-auto max-w-prose">
               {block.heading ? (
