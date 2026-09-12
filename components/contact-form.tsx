@@ -93,6 +93,22 @@ export function ContactForm() {
 
   return (
     <form action={formAction} className="flex flex-col gap-8" noValidate>
+      {/* The honeypot. Hidden from sight, from the tab order and from
+          assistive technology, so anything that fills it is filling every
+          input on the page rather than reading the form. `app/contact/actions.ts`
+          decides what happens then.
+
+          `sr-only` is deliberately not used: that keeps a field available to
+          a screen reader, which is the one visitor this must never trouble.
+          `hidden` plus the rest means nobody real can reach it. */}
+      <input
+        type="text"
+        name="company"
+        tabIndex={-1}
+        autoComplete="off"
+        aria-hidden="true"
+        hidden
+      />
       <fieldset>
         <legend className="label text-muted-foreground">
           What kind of shoot?

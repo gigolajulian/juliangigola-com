@@ -124,6 +124,36 @@ every file under `public/work/<slug>/` in one commit — listed from the repo
 rather than derived from the manifest, so a half-finished upload does not
 leave orphans behind.
 
+### Before turning the contact form on
+
+`app/contact/actions.ts` sends through Resend when `RESEND_API_KEY` is set,
+and it has no ceiling: a Server Action is a public endpoint, there is no rate
+limit in it, and a Worker has no durable state to keep one in. Unset, as it is
+today, the form returns "not connected" and hands back a `mailto:` — so the
+abuse costs nothing. Set, it becomes a way for anyone to burn the mail quota
+and flood the inbox at whatever rate they like.
+
+A honeypot field catches the indiscriminate bots. It is a floor, not a
+defence. **In the same sitting as adding the key**, add one of:
+
+- a Cloudflare **Rate Limiting** rule on `/contact` (a handful of requests per
+  minute per IP is generous for a form a human fills in), or
+- **Turnstile** in front of the form.
+
+### Security headers
+
+Declared twice, in `next.config.ts` and in `public/_headers`, because both can
+serve a response: the Worker renders some, and Cloudflare serves prerendered
+pages straight off the edge without invoking it. Keep the two in step.
+
+`script-src` allows `'unsafe-inline'`, deliberately. Next inlines its
+hydration payload into every prerendered page and the theme script has to run
+before first paint; nonces need a dynamic render. So the CSP is not an XSS
+backstop here — it is a boundary on where script, frames and connections may
+come from. `connect-src` is the one that earns its keep: the `/admin` GitHub
+token lives in `localStorage`, and restricting connections to this origin and
+`api.github.com` means script that did somehow run has nowhere to send it.
+
 ### /admin is behind Cloudflare Access — on one hostname only
 
 > **Open right now.** The Access application covers

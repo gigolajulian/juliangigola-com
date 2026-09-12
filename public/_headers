@@ -1,25 +1,24 @@
-# Cache headers for Cloudflare Workers static assets.
+# Security headers, for the responses the Worker never sees.
 #
-# Photographs were being served `max-age=0, must-revalidate`, which is the
-# default for anything under `public/` — so every repeat visitor re-validated
-# every frame on every page. On a site that is almost entirely photographs,
-# that is the difference between a second visit feeling instant and feeling
-# like the first one.
+# `next.config.ts` declares the same set, and that covers anything Next
+# renders. It does not cover everything: `wrangler.jsonc` points the ASSETS
+# binding at the build output, and a request resolving to a static file is
+# served straight off Cloudflare's edge without invoking the Worker at all —
+# which is most of this site, since every page here is prerendered. Headers
+# declared in Next would simply not be on those responses.
 #
-# A day, not a year, and deliberately not `immutable`. These paths are not
-# content-hashed: `/work/<slug>/01.jpg` keeps its name when the frame behind
-# it changes, and the archive is about to be re-harvested at 2500px. `immutable`
-# would pin the old version in every browser that had seen it, with no way to
-# reach in and correct it. A day bounds that to a day.
+# So they are declared twice, in the two places that can serve a response.
+# Keep the two in step; `next.config.ts` carries the reasoning for each one.
 #
-# Cloudflare's edge cache sits in front of this regardless and is already
-# returning HITs, so the origin is not what this is protecting.
+# Cloudflare Workers Static Assets reads this file from the root of the assets
+# directory. `next build` copies `public/` into the output, so this lands
+# where it needs to be.
 
-/work/*
-  Cache-Control: public, max-age=86400
-
-/covers/*
-  Cache-Control: public, max-age=86400
-
-/hero/*
-  Cache-Control: public, max-age=86400
+/*
+  Content-Security-Policy: default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; form-action 'self'; img-src 'self' data: blob:; font-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline'; connect-src 'self' https://api.github.com; upgrade-insecure-requests
+  X-Frame-Options: DENY
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=()
+  Cross-Origin-Opener-Policy: same-origin
+  Strict-Transport-Security: max-age=31536000; includeSubDomains

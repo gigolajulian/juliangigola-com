@@ -43,6 +43,67 @@ const pageRedirects = [
   { source: "/store", destination: "/", permanent: true },
 ];
 
+/**
+ * Security headers.
+ *
+ * The site was sending none — no CSP, no framing policy, no sniff
+ * protection, no referrer policy, and `x-powered-by: Next.js` naming the
+ * stack to anyone who asked. Cloudflare terminates TLS and enforces HTTPS,
+ * which covers transport and nothing above it.
+ *
+ * `script-src` keeps `'unsafe-inline'`, and that is a deliberate limit rather
+ * than an oversight. Next inlines its hydration payload as `<script>` tags in
+ * every prerendered page, and the theme script in `app/layout.tsx` has to run
+ * before first paint — nonces need a dynamic render, which this build does
+ * not do. So CSP here is not an XSS backstop; it is a boundary on *where*
+ * script, frames and connections may come from, which is worth having on its
+ * own. The site renders no HTML from content, so there is no injection sink
+ * for the inline allowance to widen.
+ *
+ * The specific allowances, each for one real reason:
+ *   blob:            /admin previews a chosen photograph from an object URL
+ *                    before it has been uploaded anywhere.
+ *   api.github.com   /admin commits through the GitHub API from the browser.
+ *                    Nothing else on the site talks to another origin.
+ */
+const csp = [
+  "default-src 'self'",
+  "base-uri 'self'",
+  "object-src 'none'",
+  // Nothing here is meant to be embedded. Two spellings of one rule, because
+  // `frame-ancestors` is the real one and `X-Frame-Options` below is what
+  // older browsers read.
+  "frame-ancestors 'none'",
+  "form-action 'self'",
+  "img-src 'self' data: blob:",
+  "font-src 'self'",
+  "style-src 'self' 'unsafe-inline'",
+  "script-src 'self' 'unsafe-inline'",
+  "connect-src 'self' https://api.github.com",
+  "upgrade-insecure-requests",
+].join("; ");
+
+const securityHeaders = [
+  { key: "Content-Security-Policy", value: csp },
+  { key: "X-Frame-Options", value: "DENY" },
+  { key: "X-Content-Type-Options", value: "nosniff" },
+  // Send the origin cross-site, never the path — a project URL can name a
+  // client before the work is public.
+  { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+  {
+    key: "Permissions-Policy",
+    value: "camera=(), microphone=(), geolocation=(), payment=()",
+  },
+  { key: "Cross-Origin-Opener-Policy", value: "same-origin" },
+  // A year, subdomains included. No `preload`: that is a one-way door onto a
+  // list that is slow to leave, and it should be a deliberate decision rather
+  // than a side effect of hardening headers.
+  {
+    key: "Strict-Transport-Security",
+    value: "max-age=31536000; includeSubDomains",
+  },
+];
+
 const nextConfig: NextConfig = {
   // Hides the floating dev badge that sits over the bottom-left corner of
   // every page while `next dev` is running. It never shipped to production,
@@ -66,14 +127,24 @@ const nextConfig: NextConfig = {
    */
   images: { loader: "custom", loaderFile: "./image-loader.ts" },
 
+  // Stops naming the framework and its version to every request. Free, and
+  // one less thing pointing an attacker at the right CVE list.
+  poweredByHeader: false,
+
+  async headers() {
+    return [{ source: "/:path*", headers: securityHeaders }];
+  },
+
   async redirects() {
     // Project slugs win over category slugs where a name is used for both.
     const seen = new Set<string>();
-    return [...pageRedirects, ...categoryRedirects, ...projectRedirects].filter((r) => {
-      if (seen.has(r.source)) return false;
-      seen.add(r.source);
-      return true;
-    });
+    return [...pageRedirects, ...categoryRedirects, ...projectRedirects].filter(
+      (r) => {
+        if (seen.has(r.source)) return false;
+        seen.add(r.source);
+        return true;
+      },
+    );
   },
 };
 

@@ -150,12 +150,43 @@ const list = <T>(
     ? v.map((x, i) => each(x, `${path}[${i}]`))
     : fail(path, "an array", v);
 
+/**
+ * A link, held to a scheme a browser may safely follow.
+ *
+ * `bookingUrl` is printed straight into an `href` on the contact page and
+ * beside every session, and it was validated only as "a string" — so
+ * `javascript:` in that field would have been a script that runs on click.
+ * Reaching the field needs write access to the repo, so this was never the
+ * easy way in; it is also the exact shape of the hole already closed on
+ * Instagram handles, and a content file edited through a browser form should
+ * not be the last line of defence for what lands in an attribute.
+ *
+ * http and https only. Not a parser for what Google Calendar accepts — the
+ * hint beside the field does that — just a refusal of the schemes that
+ * execute.
+ */
+function httpUrlOrNull(value: unknown, path: string): string | null {
+  const raw = strOrNull(value, path);
+  if (raw === null) return null;
+
+  let parsed: URL;
+  try {
+    parsed = new URL(raw);
+  } catch {
+    return fail(path, "a full URL beginning http:// or https://", raw);
+  }
+  if (parsed.protocol !== "http:" && parsed.protocol !== "https:") {
+    return fail(path, "an http or https URL", raw);
+  }
+  return raw;
+}
+
 function parse(v: unknown): SiteContent {
   if (!isRecord(v)) return fail("the file", "an object", v);
 
   return {
     responseTime: strOrNull(v.responseTime, "responseTime"),
-    bookingUrl: strOrNull(v.bookingUrl, "bookingUrl"),
+    bookingUrl: httpUrlOrNull(v.bookingUrl, "bookingUrl"),
     coverSlug: str(v.coverSlug, "coverSlug"),
     featured: strList(v.featured, "featured"),
     // Absent in files written before the rack could be curated, which is not

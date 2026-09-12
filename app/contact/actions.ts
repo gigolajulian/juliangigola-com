@@ -47,6 +47,29 @@ export async function submitEnquiry(
 ): Promise<ContactState> {
   const read = (key: string) => String(formData.get(key) ?? "").trim();
 
+  /* The honeypot.
+   *
+   * A field no person can see or tab to, so anything in it was put there by
+   * something filling every input on the page. Answered with the same success
+   * the form gives a real enquiry — telling a bot it was caught is telling
+   * whoever wrote it what to change.
+   *
+   * This is a floor, not a defence. The real hole it stands in front of is
+   * that this action sends mail on anyone's request with no ceiling: there is
+   * no rate limit here and nowhere to keep one, since the Worker has no
+   * durable state. It costs nothing today because `RESEND_API_KEY` is unset
+   * and delivery is off — and it becomes a live way to burn a mail quota and
+   * flood an inbox on the day that key is added. Whoever adds it should add a
+   * Cloudflare Rate Limiting rule on /contact, or Turnstile in front of this
+   * form, in the same sitting. See the README.
+   */
+  if (read("company") !== "") {
+    return {
+      status: "sent",
+      message: "Thank you — Julian will come back to you shortly.",
+    };
+  }
+
   const values = {
     type: read("type"),
     name: read("name"),
