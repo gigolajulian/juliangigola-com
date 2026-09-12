@@ -181,7 +181,14 @@ function Tiles({
   dim?: boolean;
 }) {
   return (
-    <ul className={cn("grid gap-1", compact ? "grid-cols-4" : "grid-cols-6")}>
+    <ul
+      className={cn(
+        "grid gap-1",
+        // Wider rails on a big display mean more of the site visible without
+        // scrolling the panel, which is the whole point of it being a map.
+        compact ? "grid-cols-4 2xl:grid-cols-5" : "grid-cols-6 2xl:grid-cols-8",
+      )}
+    >
       {projects.map((p) => {
         const cover = (
           <>

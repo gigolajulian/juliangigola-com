@@ -36,9 +36,16 @@ export default function AdminPage() {
   const addedSlugs = new Set(ADDED.map((p) => p.slug));
 
   return (
-    <div className="mx-auto w-full max-w-[64rem] px-6 pb-24 pt-28 sm:px-10 sm:pt-36">
+    /* Full bleed. The reading pages are measured — a column of prose has a
+       right width and it is nowhere near the width of a monitor — but this is
+       a workbench, not something to read: three panels side by side, one of
+       them a grid of photographs. Capping it at 64rem left the sitemap four
+       thumbnails wide on a display with room for twelve. */
+    <div className="w-full px-6 pb-24 pt-28 sm:px-10 sm:pt-36">
       <header>
         <h1 className="title">Content</h1>
+        {/* The prose keeps its measure even though the page no longer has
+            one — this paragraph is the one thing here that is read. */}
         <p className="mt-4 max-w-prose text-sm leading-relaxed text-muted-foreground">
           Edits are committed to{" "}
           <code className="text-foreground">{CONTENT_PATH}</code> and go live
@@ -52,15 +59,20 @@ export default function AdminPage() {
       <AdminEditor
         initial={CONTENT}
         slugs={PROJECTS.map((p) => p.slug)}
-        // Only the disciplines that are real sections of the site. `WORK` and
-        // `MUSIC` both file under Work; a session category is not somewhere a
-        // commissioned project belongs.
-        categories={CATEGORIES.filter((c) => c.section !== "SESSIONS").map(
-          (c) => ({
-            slug: c.slug,
-            name: categoryLabel(c),
-          }),
-        )}
+        /* Every category a shoot can be, sessions included. `WORK` and
+           `MUSIC` both file under Work in the new nav, so they are one group
+           here; `SESSIONS` is its own, because filing a project there moves
+           it off /work and onto the session page as one of its samples.
+
+           Sessions used to be excluded on the grounds that a commissioned
+           project does not belong in one. True, but it is not the editor's
+           place to decide which of the two a given shoot was — a graduation
+           set is a real thing to have shot, and there was no way to say so. */
+        categories={CATEGORIES.map((c) => ({
+          slug: c.slug,
+          name: categoryLabel(c),
+          group: c.section === "SESSIONS" ? "Sessions" : "Work",
+        }))}
         /* Frames as paths, and nothing else about them. The sequence editor
            needs to show every frame of whichever gallery is opened, so the
            paths have to travel — but their dimensions and mat colours do not,

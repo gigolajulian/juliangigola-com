@@ -87,7 +87,7 @@ export function AdminProjects({
   /** Handed the new bin contents after a removal, so the panel below updates. */
   onRemoved?: (trash: TrashedProject[]) => void;
   /** Disciplines a project can be refiled under. */
-  disciplines: { slug: string; name: string }[];
+  disciplines: { slug: string; name: string; group: string }[];
   /** Draft refilings, slug → category slug. */
   recategorised: Record<string, string>;
   onRecategorise: (slug: string, categorySlug: string) => void;
@@ -327,11 +327,28 @@ export function AdminProjects({
                     aria-label={`Discipline for ${p.name}`}
                     className="label max-w-[9rem] border border-border bg-transparent px-2 py-2 text-muted-foreground outline-none focus-visible:border-foreground"
                   >
-                    {disciplines.map((d) => (
-                      <option key={d.slug} value={d.slug}>
-                        {d.name}
-                      </option>
-                    ))}
+                    {/* Grouped, because the two kinds are not interchangeable
+                        and the list is long enough to get lost in: a
+                        commission and a session sit on opposite sides of the
+                        site — `lib/work.ts` splits them on exactly this — so
+                        filing a shoot under Graduation moves it off /work and
+                        onto the session page, where it becomes one of that
+                        session's sample frames. That is the point of offering
+                        them, and also the reason for the heading above them.
+                        Sessions used to be filtered out here entirely. */}
+                    {[...new Set(disciplines.map((d) => d.group))].map(
+                      (group) => (
+                        <optgroup key={group} label={group}>
+                          {disciplines
+                            .filter((d) => d.group === group)
+                            .map((d) => (
+                              <option key={d.slug} value={d.slug}>
+                                {d.name}
+                              </option>
+                            ))}
+                        </optgroup>
+                      ),
+                    )}
                   </select>
 
                   <button

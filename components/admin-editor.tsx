@@ -82,8 +82,8 @@ export function AdminEditor({
   initial: SiteContent;
   /** Every project slug, so the cover and featured fields can be checked. */
   slugs: string[];
-  /** Disciplines a new project can be filed under. */
-  categories: { slug: string; name: string }[];
+  /** Disciplines a project can be filed under, sessions included. */
+  categories: { slug: string; name: string; group: string }[];
   /** Every project, hidden ones included, for the list and the preview. */
   projects: AdminProject[];
   /** Which slugs the last build was hiding. */
@@ -422,8 +422,12 @@ export function AdminEditor({
 
   return (
     /* Three columns from `xl`: the site on the left, the work in the middle,
-       the result on the right. Below that they stack in the same order. */
-    <div className="mt-10 grid gap-10 xl:grid-cols-[15rem_1fr_22rem] xl:items-start">
+       the result on the right. Below that they stack in the same order.
+       The outer columns grow with the display rather than staying fixed while
+       the middle one runs away with the extra width — past about 1600px a
+       1fr centre becomes a form with half a metre of empty space beside each
+       field. */
+    <div className="mt-10 grid gap-10 xl:grid-cols-[17rem_1fr_23rem] xl:items-start 2xl:gap-12 2xl:grid-cols-[22rem_1fr_26rem]">
       {/* Not a tab any more. The sitemap is what the site currently is, which
           is context for every edit rather than a place to go — and it redraws
           as the draft changes, so it doubles as a readout of what hiding
