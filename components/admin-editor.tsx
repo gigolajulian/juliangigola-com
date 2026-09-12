@@ -951,8 +951,23 @@ export function AdminEditor({
               )}
             </div>
           ) : null}
+          {/* Wraps, and the publish group never shrinks.
+            *
+            * This row was one unwrapping line of six shrink-0 tab groups
+            * followed by Publish, and Publish is the thing that gave. In the
+            * three-column workbench the middle column is 609px at 1440x900
+            * and this row wants 691, so the button sat from x=953 to x=1043
+            * against a column ending at 961: eighty-two pixels of it outside
+            * its own box, clipped, with no scrollbar to reach it. "I make a
+            * change and Publish doesn't show up" was exactly that, and the
+            * flag beside it was fine all along.
+            *
+            * Wrapping rather than scrolling the tabs. A scroller hides tabs
+            * behind a gesture nobody knows is available; a second line costs
+            * 36px on a tool that has the room, and everything stays visible
+            * and in the same place. */}
           <nav
-            className="flex items-center gap-3 border-b border-border py-2"
+            className="flex flex-wrap items-center gap-x-3 gap-y-2 border-b border-border py-2"
             aria-label="Editor sections"
           >
             {/* A segmented control rather than three underlined words.
@@ -1000,7 +1015,9 @@ export function AdminEditor({
              * in and has to be noticed before it can be used, whereas a greyed
              * one is a permanent answer to "where do I publish this". The
              * `title` says which of the two reasons it is grey. */}
-            <span className="ml-auto flex items-center gap-3 self-center">
+            {/* `shrink-0`, so if anything in this row has to give it is not
+              the one control the row exists for. */}
+            <span className="ml-auto flex shrink-0 items-center gap-3 self-center">
               {/* Three states, because there are three.
                *
                * "Unpublished" and "live" are not opposites with nothing in
