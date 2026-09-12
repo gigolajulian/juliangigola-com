@@ -155,7 +155,13 @@ export function AdminEditor({
   /** Every project slug, so the cover and featured fields can be checked. */
   slugs: string[];
   /** Disciplines a project can be filed under, sessions included. */
-  categories: { slug: string; name: string; group: string }[];
+  /** Disciplines a shoot can be filed under, with the cover each shows. */
+  categories: {
+    slug: string;
+    name: string;
+    group: string;
+    cover?: string;
+  }[];
   /** Every project, hidden ones included, for the list and the preview. */
   projects: AdminProject[];
   /** Which slugs the last build was hiding. */

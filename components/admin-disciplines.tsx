@@ -27,6 +27,8 @@ export type DisciplineGroup = {
   name: string;
   /** "Work" or "Sessions" — the two halves of the nav. */
   group: string;
+  /** The frame it shows today, picked here or derived from its lead project. */
+  cover?: string;
 };
 
 export function AdminDisciplines({
@@ -116,27 +118,46 @@ export function AdminDisciplines({
               const live = all.filter((p) => !hidden.has(p.slug));
               const isOpen = opened === d.slug;
               const cover = covers[d.slug];
+              // What the site is showing: a pick if there is one, otherwise
+              // whatever `categoryFrame` derived for it.
+              const shown = cover ?? d.cover;
 
               return (
                 <div key={d.slug} className="border border-border">
-                  <button
-                    type="button"
-                    onClick={() => onOpened(isOpen ? null : d.slug)}
-                    aria-expanded={isOpen}
+                  {/* Two controls in one row, not one.
+                   *
+                   * The row used to be a single button that opened the
+                   * discipline, with the cover inside it as decoration —
+                   * which put the one thing you might want to change behind
+                   * two clicks and a hunt, while showing you the picture the
+                   * whole time. So the picture is its own control now: click
+                   * the cover to change the cover, which is the only thing
+                   * anyone was ever going to try.
+                   *
+                   * It cannot be a button inside a button, so the row is a
+                   * flex container holding two — the thumbnail, and
+                   * everything else. */}
+                  <div
                     className={cn(
-                      "flex w-full items-center gap-4 px-4 py-3 text-left transition-colors duration-200",
+                      "flex items-stretch gap-4 px-4 py-3 transition-colors duration-200",
                       isOpen ? "bg-card" : "hoverable:hover:bg-card",
                     )}
                   >
-                    {/* The cover as it stands, at the size a decision about a
-                        photograph can actually be made at. */}
-                    <span
-                      className="relative block h-14 w-11 shrink-0 overflow-hidden bg-card"
-                      aria-hidden
+                    <button
+                      type="button"
+                      onClick={() => {
+                        // Expand as well as open the picker: the picker draws
+                        // inside the panel, so opening one without the other
+                        // would look like nothing happened.
+                        onOpened(d.slug);
+                        setPicking(d.slug);
+                      }}
+                      title={`Change the ${d.name} cover`}
+                      className="group relative block h-14 w-11 shrink-0 overflow-hidden bg-card press"
                     >
-                      {cover ? (
+                      {shown ? (
                         <Image
-                          src={cover}
+                          src={shown}
                           alt=""
                           fill
                           sizes="44px"
@@ -144,26 +165,38 @@ export function AdminDisciplines({
                           className="object-cover"
                         />
                       ) : null}
-                    </span>
-
-                    <span className="min-w-0 flex-1">
-                      <span className="font-display block truncate text-lg uppercase tracking-[0.02em]">
-                        {d.name}
+                      {/* Says so on hover rather than carrying a permanent
+                          badge over a photograph this small. */}
+                      <span className="label absolute inset-0 flex items-center justify-center bg-background/70 text-center text-[0.5rem] leading-tight opacity-0 transition-opacity duration-150 hoverable:group-hover:opacity-100">
+                        Change
                       </span>
-                      <span className="label block text-muted-foreground">
-                        {live.length}{" "}
-                        {live.length === 1 ? "project" : "projects"}
-                        {all.length !== live.length
-                          ? ` · ${all.length - live.length} hidden`
-                          : ""}
-                        {cover ? " · cover picked" : " · cover derived"}
-                      </span>
-                    </span>
+                    </button>
 
-                    <span className="label shrink-0 text-muted-foreground">
-                      {isOpen ? "Close" : "Open"}
-                    </span>
-                  </button>
+                    <button
+                      type="button"
+                      onClick={() => onOpened(isOpen ? null : d.slug)}
+                      aria-expanded={isOpen}
+                      className="flex min-w-0 flex-1 items-center gap-4 text-left"
+                    >
+                      <span className="min-w-0 flex-1">
+                        <span className="font-display block truncate text-lg uppercase tracking-[0.02em]">
+                          {d.name}
+                        </span>
+                        <span className="label block text-muted-foreground">
+                          {live.length}{" "}
+                          {live.length === 1 ? "project" : "projects"}
+                          {all.length !== live.length
+                            ? ` · ${all.length - live.length} hidden`
+                            : ""}
+                          {cover ? " · cover picked" : " · cover derived"}
+                        </span>
+                      </span>
+
+                      <span className="label shrink-0 text-muted-foreground">
+                        {isOpen ? "Close" : "Open"}
+                      </span>
+                    </button>
+                  </div>
 
                   {isOpen ? (
                     <div className="border-t border-border bg-card/40 p-4">
@@ -207,7 +240,7 @@ export function AdminDisciplines({
                           {picking === d.slug ? (
                             <CoverChoices
                               projects={all}
-                              chosen={cover}
+                              chosen={shown}
                               onPick={(src) => {
                                 onCover(d.slug, src);
                                 setPicking(null);
@@ -349,8 +382,22 @@ function CoverChoices({
   chosen?: string;
   onPick: (src: string) => void;
 }) {
+  // Three disciplines are covered by a hand-made file in `/hero/` rather than
+  // by a frame from a gallery, so the current cover is not among the choices
+  // and nothing here can be marked as it. Saying so beats a grid where the
+  // highlight is mysteriously missing.
+  const elsewhere =
+    chosen !== undefined && !projects.some((p) => p.images.includes(chosen));
+
   return (
     <div className="mt-4 max-h-80 overflow-y-auto border border-border p-3">
+      {elsewhere ? (
+        <p className="label mb-3 text-muted-foreground">
+          Showing <code className="text-foreground">{chosen}</code>, which is
+          not one of these — picking any frame below replaces it.
+        </p>
+      ) : null}
+
       {projects.map((p) => (
         <div key={p.slug} className="mb-4 last:mb-0">
           <p className="label mb-2 text-muted-foreground">{p.name}</p>

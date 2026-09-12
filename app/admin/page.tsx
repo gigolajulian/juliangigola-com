@@ -10,6 +10,7 @@ import {
   COVER_RELEASES,
   categoryLabel,
   categoryHref,
+  categoryFrame,
 } from "@/lib/work";
 import {
   ADDED,
@@ -101,6 +102,14 @@ export default function AdminPage() {
           slug: c.slug,
           name: categoryLabel(c),
           group: c.section === "SESSIONS" ? "Sessions" : "Work",
+          /* The frame this discipline is showing right now, whether that was
+             picked in here or derived from its lead project.
+
+             Without it the editor could only draw a cover it had been told
+             about — so a discipline nobody had picked for showed an empty grey
+             box, which is all thirteen of them. "Change the cover" is not a
+             question you can answer without seeing the cover. */
+          cover: categoryFrame(c.slug)?.src,
         }))}
         /* Frames as paths, and nothing else about them. The sequence editor
            needs to show every frame of whichever gallery is opened, so the
