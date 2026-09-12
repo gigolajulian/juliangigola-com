@@ -12,10 +12,11 @@ import { AdminSitemap } from "@/components/admin-sitemap";
 import { AdminPreview } from "@/components/admin-preview";
 import { AdminFeatured } from "@/components/admin-featured";
 import { AdminTrash } from "@/components/admin-trash";
-import type { FrameRef, TrashedProject } from "@/lib/added";
+import { isTextRef, type FrameRef, type TrashedProject } from "@/lib/added";
 import { ADDED_PATH } from "@/lib/added";
-import type { PendingUpload } from "@/components/admin-frames";
+import { tidySequence, type PendingUpload } from "@/components/admin-frames";
 import { commitFiles, readFile, type CommitFile } from "@/lib/admin-github";
+import type { Credit } from "@/lib/work-types";
 import { cn } from "@/lib/utils";
 
 /* ── the editor ───────────────────────────────────────────────────
@@ -50,14 +51,6 @@ const API = "https://api.github.com";
  */
 const TOKEN_KEY = "jg-admin-token";
 
-/** UTF-8 safe, because the copy is full of em dashes and curly quotes. */
-const toBase64 = (text: string): string => {
-  const bytes = new TextEncoder().encode(text);
-  let binary = "";
-  for (const byte of bytes) binary += String.fromCharCode(byte);
-  return btoa(binary);
-};
-
 const fromBase64 = (b64: string): string => {
   // The contents API wraps its base64 at 60 characters.
   const binary = atob(b64.replace(/\s/g, ""));
@@ -81,6 +74,7 @@ export function AdminEditor({
   initialTrash,
   initialRecategorised,
   initialReframed,
+  initialRecredited,
 }: {
   /** The content as it was at build time — what the live site is serving. */
   initial: SiteContent;
@@ -100,6 +94,8 @@ export function AdminEditor({
   initialRecategorised: Record<string, string>;
   /** Re-sequenced galleries the last build applied, slug → frames. */
   initialReframed: Record<string, FrameRef[]>;
+  /** Rewritten credits the last build applied, slug → list. */
+  initialRecredited: Record<string, Credit[]>;
 }) {
   const [token, setToken] = React.useState("");
   const [draft, setDraft] = React.useState<SiteContent>(initial);
@@ -116,6 +112,18 @@ export function AdminEditor({
     React.useState<Record<string, string>>(initialRecategorised);
   const [reframed, setReframed] =
     React.useState<Record<string, FrameRef[]>>(initialReframed);
+  const [recredited, setRecredited] =
+    React.useState<Record<string, Credit[]>>(initialRecredited);
+  /**
+   * The project whose row is expanded, if any.
+   *
+   * Held here rather than in `AdminProjects` so the sitemap can open one. The
+   * sitemap is the index of the site and is on screen at all times, which
+   * makes it the natural way in to a project — clicking a cover there opens
+   * that project's row instead of sending you to the published page and
+   * abandoning the draft.
+   */
+  const [opened, setOpened] = React.useState<string | null>(null);
   /**
    * Photographs added to a gallery, processed and waiting, by repo path.
    *
@@ -139,7 +147,8 @@ export function AdminEditor({
     JSON.stringify(draft) !== JSON.stringify(initial) ||
     [...hidden].sort().join() !== [...initialHidden].sort().join() ||
     JSON.stringify(recategorised) !== JSON.stringify(initialRecategorised) ||
-    JSON.stringify(reframed) !== JSON.stringify(initialReframed);
+    JSON.stringify(reframed) !== JSON.stringify(initialReframed) ||
+    JSON.stringify(recredited) !== JSON.stringify(initialRecredited);
 
   /**
    * Where "Open live" points. Read after mount, because the server has no
@@ -150,6 +159,18 @@ export function AdminEditor({
   React.useEffect(() => setOrigin(window.location.origin), []);
 
   const known = React.useMemo(() => new Set(slugs), [slugs]);
+
+  /**
+   * Sends the editor to a project, from anywhere that can name one.
+   *
+   * Switches to the Projects view first, because the sitemap is on screen in
+   * both and clicking a cover while the content form is showing would open a
+   * row nobody can see.
+   */
+  const openProject = React.useCallback((slug: string) => {
+    setView("projects");
+    setOpened(slug);
+  }, []);
 
   // Reconnect on mount if a token is already stored, so the usual visit is a
   // page that is simply ready.
@@ -262,7 +283,8 @@ export function AdminEditor({
         [...hidden].sort().join() !== [...initialHidden].sort().join() ||
         JSON.stringify(recategorised) !==
           JSON.stringify(initialRecategorised) ||
-        JSON.stringify(reframed) !== JSON.stringify(initialReframed);
+        JSON.stringify(reframed) !== JSON.stringify(initialReframed) ||
+        JSON.stringify(recredited) !== JSON.stringify(initialRecredited);
 
       if (manifestMoved) {
         setStatus({ kind: "working", message: "Reading the project list…" });
@@ -275,11 +297,26 @@ export function AdminEditor({
               hidden?: string[];
               categories?: Record<string, string>;
               frames?: Record<string, FrameRef[]>;
+              credits?: Record<string, Credit[]>;
             })
-          : { projects: [], hidden: [], categories: {}, frames: {} };
+          : {
+              projects: [],
+              hidden: [],
+              categories: {},
+              frames: {},
+              credits: {},
+            };
         parsed.hidden = [...hidden].sort();
         parsed.categories = recategorised;
-        parsed.frames = reframed;
+        // Passages nobody wrote in are dropped here rather than validated
+        // against at build time; see `tidySequence`. A sequence that is
+        // nothing but dropped passages leaves no entry at all.
+        parsed.frames = Object.fromEntries(
+          Object.entries(reframed)
+            .map(([slug, list]) => [slug, tidySequence(list)] as const)
+            .filter(([, list]) => list.length > 0),
+        );
+        parsed.credits = recredited;
         files.push({
           path: ADDED_PATH,
           content: `${JSON.stringify(parsed, null, 2)}\n`,
@@ -293,7 +330,10 @@ export function AdminEditor({
       const referenced = new Set(
         Object.values(reframed)
           .flat()
-          .map((f) => `public${typeof f === "string" ? f : f.src}`),
+          // A passage names no file, so it contributes nothing here.
+          .flatMap((f) =>
+            isTextRef(f) ? [] : [`public${typeof f === "string" ? f : f.src}`],
+          ),
       );
       for (const [path, upload] of Object.entries(uploads)) {
         if (!referenced.has(path)) continue;
@@ -393,6 +433,7 @@ export function AdminEditor({
           hidden={hidden}
           categories={categoryLinks}
           origin={origin}
+          onOpen={openProject}
           compact
         />
       </aside>
@@ -460,6 +501,20 @@ export function AdminEditor({
                   ...Object.fromEntries(added.map((a) => [a.path, a])),
                 }))
               }
+              credits={recredited}
+              onCredits={(slug, next) =>
+                setRecredited((c) => {
+                  const copy = { ...c };
+                  // Dropped rather than stored empty, so credits put back the
+                  // way they were leave no entry behind to publish. An
+                  // intentionally empty list is a different thing and is kept.
+                  if (next) copy[slug] = next;
+                  else delete copy[slug];
+                  return copy;
+                })
+              }
+              opened={opened}
+              onOpened={setOpened}
             />
             <AdminTrash token={token} trash={trash} onChanged={setTrash} />
           </>

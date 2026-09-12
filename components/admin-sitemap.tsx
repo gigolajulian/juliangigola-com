@@ -40,12 +40,22 @@ export function AdminSitemap({
   hidden,
   categories,
   origin,
+  onOpen,
   compact,
 }: {
   projects: SitemapProject[];
   hidden: Set<string>;
   categories: { slug: string; name: string; href: string }[];
   origin: string;
+  /**
+   * Opens a project in the editor instead of on the live site.
+   *
+   * When given, a cover is a button into the row that edits it — the sitemap
+   * is the index of the site and is on screen at all times, so it is the
+   * natural way in. Without it every tile links out, which is what the
+   * pre-connection view wants: there is nothing to edit yet.
+   */
+  onOpen?: (slug: string) => void;
   /** For the narrow left rail: smaller tiles, no per-row link. */
   compact?: boolean;
 }) {
@@ -131,7 +141,12 @@ export function AdminSitemap({
 
       {[...byCategory.entries()].map(([category, list]) => (
         <Group key={category} title={category} count={list.length}>
-          <Tiles projects={list} origin={origin} compact={compact} />
+          <Tiles
+            projects={list}
+            origin={origin}
+            onOpen={onOpen}
+            compact={compact}
+          />
         </Group>
       ))}
 
@@ -139,7 +154,13 @@ export function AdminSitemap({
         <Group title="Hidden" count={withheld.length}>
           {/* Shown, not omitted. A project you have taken down is exactly the
               one you will want to find again. */}
-          <Tiles projects={withheld} origin={origin} compact={compact} dim />
+          <Tiles
+            projects={withheld}
+            origin={origin}
+            onOpen={onOpen}
+            compact={compact}
+            dim
+          />
         </Group>
       ) : null}
     </section>
@@ -149,27 +170,24 @@ export function AdminSitemap({
 function Tiles({
   projects,
   origin,
+  onOpen,
   compact,
   dim,
 }: {
   projects: SitemapProject[];
   origin: string;
+  onOpen?: (slug: string) => void;
   compact?: boolean;
   dim?: boolean;
 }) {
   return (
     <ul className={cn("grid gap-1", compact ? "grid-cols-4" : "grid-cols-6")}>
-      {projects.map((p) => (
-        <li key={p.slug}>
-          <Open
-            href={`/work/${p.slug}`}
-            origin={origin}
-            className={cn("group block", dim && "opacity-40")}
-          >
+      {projects.map((p) => {
+        const cover = (
+          <>
             <span
               className="relative block aspect-[4/5] overflow-hidden"
               style={{ backgroundColor: p.cover?.color ?? "transparent" }}
-              title={`${p.name} — /work/${p.slug}`}
             >
               {p.cover ? (
                 <Image
@@ -187,9 +205,40 @@ function Tiles({
                 {p.name}
               </span>
             ) : null}
-          </Open>
-        </li>
-      ))}
+          </>
+        );
+
+        return (
+          <li key={p.slug}>
+            {onOpen ? (
+              /* A button, not a link. The draft lives in this page's memory
+                 and navigating away loses it, so the sitemap's job while
+                 editing is to move you around the editor rather than off it.
+                 The live page is still one click away, on the row's own
+                 link in the groups above. */
+              <button
+                type="button"
+                onClick={() => onOpen(p.slug)}
+                title={`Edit ${p.name} — /work/${p.slug}`}
+                className={cn(
+                  "group block w-full cursor-pointer text-left press",
+                  dim && "opacity-40",
+                )}
+              >
+                {cover}
+              </button>
+            ) : (
+              <Open
+                href={`/work/${p.slug}`}
+                origin={origin}
+                className={cn("group block", dim && "opacity-40")}
+              >
+                <span title={`${p.name} — /work/${p.slug}`}>{cover}</span>
+              </Open>
+            )}
+          </li>
+        );
+      })}
     </ul>
   );
 }

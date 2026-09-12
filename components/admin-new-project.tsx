@@ -10,6 +10,7 @@ import {
   toSlug,
 } from "@/lib/admin-image";
 import type { Credit, Frame } from "@/lib/work-types";
+import { AdminCredits, tidyCredits } from "@/components/admin-credits";
 import { cn } from "@/lib/utils";
 
 /* ── adding a project ─────────────────────────────────────────────
@@ -138,7 +139,7 @@ export function AdminNewProject({
         slug,
         name: name.trim(),
         categorySlug,
-        credits: credits.filter((c) => c.role.trim() && c.name.trim()),
+        credits: tidyCredits(credits),
         cover: {
           src: `/work/${slug}/cover.jpg`,
           width: cover.width,
@@ -333,7 +334,7 @@ export function AdminNewProject({
         </ol>
       ) : null}
 
-      <Credits credits={credits} onChange={setCredits} />
+      <AdminCredits credits={credits} onChange={setCredits} className="mt-8" />
 
       <div className="mt-8 flex flex-wrap items-center gap-4">
         <button
@@ -383,64 +384,5 @@ function Field({
         <span className="label mt-2 block text-muted-foreground">{hint}</span>
       ) : null}
     </label>
-  );
-}
-
-function Credits({
-  credits,
-  onChange,
-}: {
-  credits: Credit[];
-  onChange: (c: Credit[]) => void;
-}) {
-  return (
-    <div className="mt-8">
-      <p className="label text-muted-foreground">Credits</p>
-      <div className="mt-3 flex flex-col gap-2">
-        {credits.map((credit, i) => (
-          <div key={i} className="flex gap-2">
-            <input
-              value={credit.role}
-              onChange={(e) =>
-                onChange(
-                  credits.map((c, j) =>
-                    j === i ? { ...c, role: e.target.value } : c,
-                  ),
-                )
-              }
-              placeholder="Model"
-              className={cn(input, "sm:w-48")}
-            />
-            <input
-              value={credit.name}
-              onChange={(e) =>
-                onChange(
-                  credits.map((c, j) =>
-                    j === i ? { ...c, name: e.target.value } : c,
-                  ),
-                )
-              }
-              placeholder="@handle"
-              className={input}
-            />
-            <button
-              type="button"
-              onClick={() => onChange(credits.filter((_, j) => j !== i))}
-              className={tiny}
-              aria-label="Remove credit"
-            >
-              ✕
-            </button>
-          </div>
-        ))}
-      </div>
-      <button
-        type="button"
-        onClick={() => onChange([...credits, { role: "", name: "" }])}
-        className="label mt-3 border border-border px-4 py-2 press hoverable:hover:bg-card"
-      >
-        Add credit
-      </button>
-    </div>
   );
 }

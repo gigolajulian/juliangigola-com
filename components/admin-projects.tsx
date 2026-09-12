@@ -9,7 +9,9 @@ import {
 } from "@/lib/added";
 import { commitFiles, readFile } from "@/lib/admin-github";
 import { AdminFrames, type PendingUpload } from "@/components/admin-frames";
+import { AdminCredits } from "@/components/admin-credits";
 import type { FrameRef } from "@/lib/added";
+import type { Credit } from "@/lib/work-types";
 import { cn } from "@/lib/utils";
 
 /* ── the project list ─────────────────────────────────────────────
@@ -49,6 +51,8 @@ export type AdminProject = {
   cover: { src: string; width: number; height: number; color: string };
   /** Added through this editor, so its files are ours to remove. */
   added: boolean;
+  /** As the last build has them, so an override can be compared and undone. */
+  credits: Credit[];
 };
 
 type Status =
@@ -70,6 +74,10 @@ export function AdminProjects({
   onReframe,
   uploads,
   onUpload,
+  credits,
+  onCredits,
+  opened,
+  onOpened,
 }: {
   token: string;
   projects: AdminProject[];
@@ -89,6 +97,19 @@ export function AdminProjects({
   /** Photographs staged for this publish, by repo path. */
   uploads: Record<string, PendingUpload>;
   onUpload: (added: PendingUpload[]) => void;
+  /** Draft credits, slug → list. Absent while they are the harvested ones. */
+  credits: Record<string, Credit[]>;
+  /** Null puts a project back to the credits it arrived with. */
+  onCredits: (slug: string, next: Credit[] | null) => void;
+  /**
+   * The expanded row, or null.
+   *
+   * Owned by the editor rather than here so the sitemap can open a project
+   * directly. Controlled, not mirrored: a local copy synced from a prop would
+   * be two states for one fact and an effect to keep them agreeing.
+   */
+  opened: string | null;
+  onOpened: (slug: string | null) => void;
 }) {
   const [query, setQuery] = React.useState("");
   const [status, setStatus] = React.useState<Status>({ kind: "idle" });
@@ -101,12 +122,35 @@ export function AdminProjects({
    * host that is not resizing them yet, and a list where every row is open is
    * the whole archive at once.
    */
-  const [opened, setOpened] = React.useState<string | null>(null);
+  /**
+   * Brings the expanded row into view.
+   *
+   * The one thing here that genuinely belongs in an effect: it reads the DOM
+   * and scrolls it, which is a side effect on an external system rather than
+   * state this component owns. Nothing is set — `opened` came from above and
+   * the filter below simply never hides it.
+   *
+   * After a paint, so the row exists to be scrolled to even when it was the
+   * filter that had been keeping it off screen.
+   */
+  React.useEffect(() => {
+    if (!opened) return;
+    const id = requestAnimationFrame(() => {
+      document
+        .getElementById(`admin-row-${opened}`)
+        ?.scrollIntoView({ block: "center", behavior: "smooth" });
+    });
+    return () => cancelAnimationFrame(id);
+  }, [opened]);
 
+  /* The expanded row survives the filter. Opening a project from the sitemap
+     while the list is narrowed to something else would otherwise open a row
+     that is not rendered — and scroll to nothing. */
   const visible = projects.filter(
     (p) =>
       !gone.has(p.slug) &&
-      (query.trim() === "" ||
+      (p.slug === opened ||
+        query.trim() === "" ||
         `${p.name} ${p.slug} ${p.category}`
           .toLowerCase()
           .includes(query.toLowerCase())),
@@ -234,7 +278,11 @@ export function AdminProjects({
           const isOpen = opened === p.slug;
           const frames = reframed[p.slug] ?? null;
           return (
-            <li key={p.slug} className="border-b border-border">
+            <li
+              key={p.slug}
+              id={`admin-row-${p.slug}`}
+              className="border-b border-border scroll-mt-28"
+            >
               <div
                 className={cn(
                   "flex items-center gap-4 py-3",
@@ -288,7 +336,7 @@ export function AdminProjects({
 
                   <button
                     type="button"
-                    onClick={() => setOpened(isOpen ? null : p.slug)}
+                    onClick={() => onOpened(isOpen ? null : p.slug)}
                     aria-expanded={isOpen}
                     className={cn(
                       "label border px-3 py-2 press",
@@ -297,7 +345,7 @@ export function AdminProjects({
                         : "border-border hoverable:hover:bg-card",
                     )}
                   >
-                    Photos
+                    {isOpen ? "Close" : "Edit"}
                   </button>
 
                   <button
@@ -343,14 +391,39 @@ export function AdminProjects({
                   decoded photographs rather than keeping them all in memory
                   as the list is worked through. */}
               {isOpen ? (
-                <AdminFrames
-                  slug={p.slug}
-                  original={p.images}
-                  frames={frames}
-                  uploads={uploads}
-                  onChange={(next) => onReframe(p.slug, next)}
-                  onUpload={onUpload}
-                />
+                <>
+                  <AdminFrames
+                    slug={p.slug}
+                    original={p.images}
+                    frames={frames}
+                    uploads={uploads}
+                    onChange={(next) => onReframe(p.slug, next)}
+                    onUpload={onUpload}
+                  />
+                  <div className="border-t border-border bg-card/40 p-5">
+                    <div className="flex flex-wrap items-baseline justify-between gap-3">
+                      <p className="label">Credits</p>
+                      {credits[p.slug] ? (
+                        <button
+                          type="button"
+                          onClick={() => onCredits(p.slug, null)}
+                          className="label border border-border px-3 py-1.5 press hoverable:hover:bg-card"
+                        >
+                          Undo changes
+                        </button>
+                      ) : null}
+                    </div>
+                    {/* Seeded from the live project the first time a row is
+                        touched, so editing starts from what is published
+                        rather than from an empty list that would read as
+                        "this job had no crew". */}
+                    <AdminCredits
+                      title={null}
+                      credits={credits[p.slug] ?? p.credits}
+                      onChange={(next) => onCredits(p.slug, next)}
+                    />
+                  </div>
+                </>
               ) : null}
             </li>
           );

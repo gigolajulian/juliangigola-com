@@ -43,6 +43,24 @@ export type Credit = {
   name: string;
 };
 
+/**
+ * A passage of writing set into a gallery, between the photographs.
+ *
+ * Positioned rather than free-floating: `after` is how many frames precede
+ * it, so `0` opens the sequence and `images.length` closes it. The number is
+ * derived in `lib/work.ts` from where the block sat in the edited sequence —
+ * `/admin` stores one list of photographs and text together, because moving a
+ * paragraph three frames later is the same gesture as moving a photograph,
+ * and asking for a separate index field would be asking Julian to count.
+ */
+export type TextBlock = {
+  /** Optional — a block is often a caption with no title over it. */
+  heading: string | null;
+  body: string;
+  /** How many frames come before it. */
+  after: number;
+};
+
 export type Project = {
   slug: string;
   name: string;
@@ -51,6 +69,15 @@ export type Project = {
   /** Prose left over after the credits were parsed out. Usually null. */
   intent: string | null;
   credits: Credit[];
+  /**
+   * Writing set between the frames, in `after` order.
+   *
+   * Optional because `lib/work-data.ts` is generated and does not write it,
+   * and because it is genuinely absent on almost every project — only a
+   * gallery somebody has added a passage to has any. Read it as
+   * `blocks ?? []`.
+   */
+  blocks?: TextBlock[];
   /** Every category this project is listed under, old-site order. */
   categories: Category[];
   /**

@@ -95,10 +95,50 @@ const frame = (v: unknown, path: string): Frame => {
  * dimensions here would be duplicating numbers that the next harvest can
  * change. See `frames` on `AddedFile`.
  */
-export type FrameRef = string | Frame;
+export type FrameRef = string | Frame | TextRef;
 
-const frameRef = (v: unknown, path: string): FrameRef =>
-  typeof v === "string" ? src(v, path) : frame(v, path);
+/**
+ * A passage of writing sitting in a stored sequence.
+ *
+ * No position field: where it sits *is* its position. `/admin` sequences
+ * photographs and text in one list, so a block's place comes free with the
+ * order — and a stored index would be a second source of truth able to
+ * disagree with the list it sits in. `lib/work.ts` counts the frames before
+ * it and hands the render a number.
+ *
+ * `kind` is what tells the three arms of `FrameRef` apart. A bare string is a
+ * path, an object with `src` is a whole frame, and this is the only one
+ * carrying a tag — cheap to check and impossible to confuse with a frame.
+ */
+export type TextRef = {
+  kind: "text";
+  heading: string | null;
+  body: string;
+};
+
+export const isTextRef = (f: FrameRef): f is TextRef =>
+  typeof f !== "string" && "kind" in f && f.kind === "text";
+
+/** Optional prose: absent and empty both mean "no heading". */
+const maybe = (v: unknown, path: string): string | null => {
+  if (v === undefined || v === null) return null;
+  if (typeof v !== "string") return fail(path, "a string or null", v);
+  return v.trim() === "" ? null : v;
+};
+
+const textRef = (v: Record<string, unknown>, path: string): TextRef => ({
+  kind: "text",
+  heading: maybe(v.heading, `${path}.heading`),
+  // A block with nothing in it would render as a gap in the sequence that
+  // nobody put there on purpose.
+  body: str(v.body, `${path}.body`),
+});
+
+const frameRef = (v: unknown, path: string): FrameRef => {
+  if (typeof v === "string") return src(v, path);
+  if (!isRecord(v)) return fail(path, "a path, a frame or a text block", v);
+  return v.kind === "text" ? textRef(v, path) : frame(v, path);
+};
 
 const credit = (v: unknown, path: string): Credit => {
   if (!isRecord(v)) return fail(path, "an object", v);
@@ -189,6 +229,20 @@ export type AddedFile = {
    */
   frames: Record<string, FrameRef[]>;
   /**
+   * Projects whose credits have been edited by hand.
+   *
+   * A map for the same reason `categories` and `frames` are maps: the 74
+   * harvested projects keep their credits in the generated manifest, where
+   * `scripts/harvest.mjs` would overwrite an edit on the next run. The value
+   * replaces the list outright rather than merging into it — a crew changes
+   * by losing people as well as gaining them, and a merge could not express
+   * a removal.
+   *
+   * An empty array is meaningful and kept: it says "this project's harvested
+   * credits are wrong, publish none".
+   */
+  credits: Record<string, Credit[]>;
+  /**
    * Slugs to leave off the site.
    *
    * Harvested projects cannot be deleted: `lib/work-data.ts` is regenerated
@@ -276,7 +330,27 @@ function parse(v: unknown): AddedFile {
     // it fails here rather than on the page.
     if (!list.length)
       return fail(`frames["${slug}"]`, "at least one frame", list);
-    frames[slug] = list.map((f, i) => frameRef(f, `frames["${slug}"][${i}]`));
+    const sequence = list.map((f, i) => frameRef(f, `frames["${slug}"][${i}]`));
+    // Text alone is an essay, not a project, and `reframe` would discard the
+    // whole override rather than publish one — better to say so at the build
+    // than to silently restore the original sequence.
+    if (sequence.every(isTextRef)) {
+      return fail(
+        `frames["${slug}"]`,
+        "at least one photograph, not only text",
+        list,
+      );
+    }
+    frames[slug] = sequence;
+  }
+
+  const rawCredits = v.credits === undefined ? {} : v.credits;
+  if (!isRecord(rawCredits)) return fail("credits", "an object", rawCredits);
+  const credits: Record<string, Credit[]> = {};
+  for (const [slug, list] of Object.entries(rawCredits)) {
+    if (!Array.isArray(list))
+      return fail(`credits["${slug}"]`, "an array", list);
+    credits[slug] = list.map((c, i) => credit(c, `credits["${slug}"][${i}]`));
   }
 
   return {
@@ -284,6 +358,7 @@ function parse(v: unknown): AddedFile {
     trash,
     categories,
     frames,
+    credits,
     hidden: hidden.map((s, i) => str(s, `hidden[${i}]`)),
   };
 }
@@ -294,6 +369,7 @@ export const ADDED: AddedProject[] = FILE.projects;
 export const TRASH: TrashedProject[] = FILE.trash;
 export const RECATEGORISED: Readonly<Record<string, string>> = FILE.categories;
 export const REFRAMED: Readonly<Record<string, FrameRef[]>> = FILE.frames;
+export const RECREDITED: Readonly<Record<string, Credit[]>> = FILE.credits;
 export const HIDDEN: ReadonlySet<string> = new Set(FILE.hidden);
 
 /** Where the editor writes. Shown in the editor so it is not a mystery. */

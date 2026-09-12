@@ -9,7 +9,7 @@ import {
   categoryLabel,
   categoryHref,
 } from "@/lib/work";
-import { ADDED, TRASH, RECATEGORISED, REFRAMED } from "@/lib/added";
+import { ADDED, TRASH, RECATEGORISED, REFRAMED, RECREDITED } from "@/lib/added";
 
 /* ── admin ────────────────────────────────────────────────────────
  * Unlisted, not secret. Nothing in the nav points here and no crawler is
@@ -67,7 +67,14 @@ export default function AdminPage() {
         projects={ALL_PROJECTS.map((p) => ({
           slug: p.slug,
           name: p.name,
-          category: p.categories[0]?.name ?? "Unfiled",
+          /* Through `categoryLabel`, the same as `categoryLinks` below.
+             The raw manifest name is "EDITORIAL" and the label is
+             "Editorial"; the sitemap counts its tiles by this string and
+             looks them up by the label, so passing the raw name here made
+             every discipline count read "—". */
+          category: p.categories[0]
+            ? categoryLabel(p.categories[0])
+            : "Unfiled",
           categorySlug: p.categories[0]?.slug ?? "",
           images: p.images.map((f) => f.src),
           cover: {
@@ -78,11 +85,15 @@ export default function AdminPage() {
           },
           // Only these have files of ours to delete; the rest can be hidden.
           added: addedSlugs.has(p.slug),
+          // As published, so the editor can seed the form from what is live
+          // and offer to put an edit back.
+          credits: p.credits,
         }))}
         initialHidden={[...HIDDEN]}
         initialTrash={TRASH}
         initialRecategorised={RECATEGORISED}
         initialReframed={REFRAMED}
+        initialRecredited={RECREDITED}
         categoryLinks={CATEGORIES.filter((c) => c.section !== "SESSIONS").map(
           (c) => ({
             slug: c.slug,

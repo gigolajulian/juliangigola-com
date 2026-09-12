@@ -8,7 +8,7 @@
  * collapse into the new two.
  */
 import { PROJECTS as HARVESTED, CATEGORIES } from "./work-data";
-import type { Project, Category, Frame } from "./work-types";
+import type { Project, Category, Frame, TextBlock } from "./work-types";
 import { COVER_RELEASES } from "./cover-art-data";
 import { CONTENT } from "./content";
 import {
@@ -16,10 +16,12 @@ import {
   HIDDEN,
   RECATEGORISED,
   REFRAMED,
+  RECREDITED,
+  isTextRef,
   type AddedProject,
 } from "./added";
 
-export type { Project, Category, Frame };
+export type { Project, Category, Frame, TextBlock };
 export { CATEGORIES, COVER_RELEASES };
 
 /**
@@ -164,6 +166,22 @@ const refile = (project: Project): Project => {
 };
 
 /**
+ * Replaces the credits `/admin` has rewritten.
+ *
+ * A map for the same reason `refile` uses one: the harvested projects keep
+ * their credits in the generated manifest, and `scripts/harvest.mjs` would
+ * take an edit there back on its next run.
+ *
+ * Checked with `in` rather than by truthiness, so an empty array is honoured.
+ * "This project's harvested credits are wrong, publish none" is a real
+ * instruction and the only way to say it.
+ */
+const recredit = (project: Project): Project =>
+  project.slug in RECREDITED
+    ? { ...project, credits: RECREDITED[project.slug] }
+    : project;
+
+/**
  * Re-sequences a gallery that `/admin` has reordered, trimmed or added to.
  *
  * Applied last, after the merge and after the lead-frame and cover-art
@@ -186,19 +204,41 @@ const reframe = (project: Project): Project => {
   if (!wanted?.length) return project;
 
   const archive = new Map(project.images.map((f) => [f.src, f]));
-  const images = wanted
-    .map((f) =>
-      typeof f === "string"
-        ? (archive.get(f) ?? null)
-        : (archive.get(f.src) ?? f),
-    )
-    .filter((f): f is Frame => f !== null);
+
+  /* One pass, two outputs. The stored sequence interleaves photographs and
+     writing; the site wants them apart — `images` feeds the gallery, the
+     lightbox, the counts and the image sitemap, none of which have any use
+     for a paragraph — so a block's position is recorded as the number of
+     frames ahead of it and the lists part company here.
+
+     Counted against surviving frames rather than against the stored list, so
+     a frame dropped by a re-harvest pulls the writing after it up with it
+     instead of leaving a block stranded past the end of the gallery. */
+  const images: Frame[] = [];
+  const blocks: TextBlock[] = [];
+
+  for (const ref of wanted) {
+    if (isTextRef(ref)) {
+      blocks.push({
+        heading: ref.heading,
+        body: ref.body,
+        after: images.length,
+      });
+      continue;
+    }
+    const found =
+      typeof ref === "string"
+        ? (archive.get(ref) ?? null)
+        : (archive.get(ref.src) ?? ref);
+    if (found) images.push(found);
+  }
 
   if (!images.length) return project;
 
   return {
     ...project,
     images,
+    blocks,
     // The cover is the opener — `coverOf` is built on that — so a gallery that
     // now opens on a different photograph gets a card showing it. The full
     // frame rather than the 600px derivative, because the derivative was cut
@@ -212,7 +252,7 @@ export const ALL_PROJECTS: Project[] = [
   ...HARVESTED.map((p) =>
     p.slug === "coverart" ? withCoverArt(p) : withLeadFrame(p),
   ),
-].map((p) => reframe(refile(p)));
+].map((p) => reframe(recredit(refile(p))));
 
 /**
  * Filtered here, at the one place every consumer reads from, rather than at
