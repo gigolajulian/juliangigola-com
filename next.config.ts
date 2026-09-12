@@ -78,7 +78,12 @@ const csp = [
   "img-src 'self' data: blob:",
   "font-src 'self'",
   "style-src 'self' 'unsafe-inline'",
-  "script-src 'self' 'unsafe-inline'",
+  // Cloudflare Web Analytics. The beacon is injected by the zone, not by
+  // this app, so the first CSP blocked it and took the site's only analytics
+  // with it — found by reading the console after deploying, not by guessing.
+  // Its own POST goes to /cdn-cgi/rum on this origin, which `connect-src
+  // 'self'` already covers.
+  "script-src 'self' 'unsafe-inline' https://static.cloudflareinsights.com",
   "connect-src 'self' https://api.github.com",
   "upgrade-insecure-requests",
 ].join("; ");
