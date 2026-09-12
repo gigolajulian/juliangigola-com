@@ -3,14 +3,33 @@
   "trash": [],
   "categories": {},
   "frames": {
-    "rouge": [
-      "/work/rouge/01.jpg",
-      "/work/rouge/04.jpg",
-      "/work/rouge/03.jpg",
-      "/work/rouge/06.jpg",
-      "/work/rouge/07.jpg",
-      "/work/rouge/08.jpg",
-      "/work/rouge/10.jpg"
+    "wrapped-up": [
+      "/work/wrapped-up/01.jpg",
+      "/work/wrapped-up/02.jpg",
+      "/work/wrapped-up/04.jpg",
+      "/work/wrapped-up/03.jpg",
+      "/work/wrapped-up/05.jpg",
+      "/work/wrapped-up/06.jpg",
+      "/work/wrapped-up/07.jpg",
+      "/work/wrapped-up/08.jpg"
+    ],
+    "mirage": [
+      "/work/mirage/16.jpg",
+      "/work/mirage/01.jpg",
+      "/work/mirage/02.jpg",
+      "/work/mirage/03.jpg",
+      "/work/mirage/04.jpg",
+      "/work/mirage/05.jpg",
+      "/work/mirage/06.jpg",
+      "/work/mirage/07.jpg",
+      "/work/mirage/08.jpg",
+      "/work/mirage/09.jpg",
+      "/work/mirage/10.jpg",
+      "/work/mirage/11.jpg",
+      "/work/mirage/12.jpg",
+      "/work/mirage/13.jpg",
+      "/work/mirage/14.jpg",
+      "/work/mirage/15.jpg"
     ]
   },
   "hidden": [],
