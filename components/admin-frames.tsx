@@ -90,6 +90,9 @@ export function AdminFrames({
   const [error, setError] = React.useState("");
   /** Which passage is open for editing, by position. One at a time. */
   const [editing, setEditing] = React.useState<number | null>(null);
+  /** The tile being dragged, and the one it is currently over. */
+  const [dragging, setDragging] = React.useState<number | null>(null);
+  const [over, setOver] = React.useState<number | null>(null);
 
   const list: FrameRef[] = frames ?? original;
 
@@ -103,15 +106,35 @@ export function AdminFrames({
     onChange(same ? null : next);
   };
 
-  const move = (i: number, to: number) => {
-    if (to < 0 || to >= list.length) return;
+  /**
+   * Takes an item out and puts it back somewhere else.
+   *
+   * Lift-and-insert, not a swap. For the arrows the two are the same thing —
+   * moving one step and trading with your neighbour are the same edit — but
+   * for a drag they are not: dropping frame twelve on the cover slot should
+   * put it first and push the rest down, whereas a swap would fling the old
+   * cover out to position twelve, which is a second edit nobody asked for.
+   */
+  const reorder = (from: number, to: number) => {
+    if (to < 0 || to >= list.length || from === to) return;
     const next = [...list];
-    [next[i], next[to]] = [next[to], next[i]];
+    const [held] = next.splice(from, 1);
+    next.splice(to, 0, held);
     commit(next);
     // The open editor follows the passage it belongs to rather than staying
-    // on a position that now holds a photograph.
-    if (editing === i) setEditing(to);
-    else if (editing === to) setEditing(i);
+    // on a position that now holds something else. Every item between the two
+    // ends shifts by one, and which way depends on the direction of travel.
+    setEditing((at) =>
+      at === null
+        ? null
+        : at === from
+          ? to
+          : from < at && at <= to
+            ? at - 1
+            : to <= at && at < from
+              ? at + 1
+              : at,
+    );
   };
 
   const drop = (i: number) => {
@@ -244,7 +267,64 @@ export function AdminFrames({
           const locked = !text && photos.length === 1;
 
           return (
-            <li key={text ? `text-${i}` : src}>
+            /* Dragged by the tile itself rather than by a handle. The tile is
+               the photograph, and a grid of photographs you rearrange is the
+               one interface everybody already knows — a handle would be a
+               small target next to a large obvious one.
+
+               Native drag-and-drop, no library: the whole interaction is four
+               events and a splice, and this panel already ships a megabyte of
+               image processing without adding a drag engine to it.
+
+               It does not fire on touch, which is exactly why the arrows
+               below stay. They are also the keyboard path — a drag has no
+               keyboard equivalent, so removing them would make resequencing
+               a gallery impossible without a mouse. */
+            <li
+              key={text ? `text-${i}` : src}
+              draggable
+              onDragStart={(e) => {
+                setDragging(i);
+                e.dataTransfer.effectAllowed = "move";
+                // Where the item came from, and the only authority on it.
+                // Firefox also starts no drag at all unless something is set.
+                e.dataTransfer.setData("text/plain", String(i));
+              }}
+              onDragOver={(e) => {
+                // Without this the browser refuses the drop outright.
+                e.preventDefault();
+                e.dataTransfer.dropEffect = "move";
+                if (over !== i) setOver(i);
+              }}
+              onDrop={(e) => {
+                e.preventDefault();
+                // Read back out of the drag, not out of React state. The
+                // `dragging` state is for the dimming and nothing else — it
+                // is set during `dragstart` and a drop that arrives before
+                // that render has committed would find it still null and do
+                // nothing. Frames apart in a real drag, instant in a test,
+                // and the platform is already carrying the answer.
+                const from = Number(e.dataTransfer.getData("text/plain"));
+                if (Number.isInteger(from)) reorder(from, i);
+                setDragging(null);
+                setOver(null);
+              }}
+              onDragEnd={() => {
+                setDragging(null);
+                setOver(null);
+              }}
+              className={cn(
+                "cursor-grab transition-opacity duration-150 active:cursor-grabbing",
+                dragging === i && "opacity-30",
+                // The slot it would land in, outlined rather than nudged
+                // aside: seventy tiles reflowing on every pointer move is
+                // motion sickness, and the outline says the same thing.
+                over === i &&
+                  dragging !== null &&
+                  dragging !== i &&
+                  "outline outline-2 outline-offset-2 outline-foreground",
+              )}
+            >
               {text ? (
                 <button
                   type="button"
@@ -283,6 +363,7 @@ export function AdminFrames({
                     <img
                       src={pending.preview}
                       alt=""
+                      draggable={false}
                       className="absolute inset-0 h-full w-full object-cover"
                     />
                   ) : (
@@ -290,6 +371,7 @@ export function AdminFrames({
                       src={src}
                       alt=""
                       fill
+                      draggable={false}
                       sizes="160px"
                       // A gallery runs to thirty 2500px frames, and until the
                       // zone is transforming them that is what arrives. Lazy
@@ -312,7 +394,7 @@ export function AdminFrames({
               <span className="mt-1 flex items-center justify-between gap-1">
                 <button
                   type="button"
-                  onClick={() => move(i, i - 1)}
+                  onClick={() => reorder(i, i - 1)}
                   disabled={i === 0}
                   aria-label={`Move item ${i + 1} earlier`}
                   className="label flex-1 border border-border py-1 press hoverable:hover:bg-card disabled:opacity-30"
@@ -321,7 +403,7 @@ export function AdminFrames({
                 </button>
                 <button
                   type="button"
-                  onClick={() => move(i, i + 1)}
+                  onClick={() => reorder(i, i + 1)}
                   disabled={i === list.length - 1}
                   aria-label={`Move item ${i + 1} later`}
                   className="label flex-1 border border-border py-1 press hoverable:hover:bg-card disabled:opacity-30"
@@ -357,10 +439,12 @@ export function AdminFrames({
       ) : null}
 
       <p className="label mt-5 text-muted-foreground">
-        The first photograph opens the project and is the card shown on every
-        index. Text sits on the page exactly where it sits in this list.
-        Removing a photograph takes it out of the sequence and keeps the file.
-        Nothing here is live until you press Publish.
+        Drag a tile to move it, or use the arrows — the arrows are the way on
+        a touch screen and with a keyboard. The first photograph opens the
+        project and is the card shown on every index. Text sits on the page
+        exactly where it sits in this list. Removing a photograph takes it out
+        of the sequence and keeps the file. Nothing here is live until you
+        press Publish.
       </p>
     </div>
   );

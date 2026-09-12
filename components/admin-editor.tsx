@@ -516,11 +516,42 @@ export function AdminEditor({
               {v}
             </button>
           ))}
-          {dirty ? (
-            <span className="label ml-auto self-center text-muted-foreground">
-              unpublished changes
-            </span>
-          ) : null}
+          {/* Publish, where the work is.
+           *
+           * There is a second one at the foot of the column, and that is the
+           * point: the middle column is its own scroller now, so the bottom
+           * bar is only sticky to the bottom of a panel you may be nowhere
+           * near. An edit made near the top — dragging a frame, refiling a
+           * shoot — had no way to be committed without scrolling back down
+           * to look for the button.
+           *
+           * Always present and disabled rather than appearing when it has
+           * something to do: a control that materialises shifts the row it is
+           * in and has to be noticed before it can be used, whereas a greyed
+           * one is a permanent answer to "where do I publish this". The
+           * `title` says which of the two reasons it is grey. */}
+          <span className="ml-auto flex items-center gap-3 self-center">
+            {dirty ? (
+              <span className="label text-muted-foreground">
+                unpublished changes
+              </span>
+            ) : null}
+            <button
+              type="button"
+              onClick={publish}
+              disabled={!sha || !dirty || status.kind === "working"}
+              title={
+                !sha
+                  ? "Connect the GitHub token at the foot of this column first"
+                  : !dirty
+                    ? "Nothing to publish — the draft matches the live site"
+                    : undefined
+              }
+              className="label border border-foreground bg-foreground px-4 py-2 text-background press hoverable:hover:opacity-90 active:scale-[0.98] disabled:cursor-not-allowed disabled:border-border disabled:bg-transparent disabled:text-muted-foreground disabled:opacity-50"
+            >
+              {status.kind === "working" ? "Publishing…" : "Publish"}
+            </button>
+          </span>
         </nav>
 
         {view === "projects" ? (
