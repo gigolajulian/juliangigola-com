@@ -2,7 +2,8 @@
   "projects": [],
   "trash": [],
   "categories": {
-    "light-play": "editorial"
+    "light-play": "editorial",
+    "dark-matter": "editorial"
   },
   "frames": {
     "wrapped-up": [
@@ -50,6 +51,14 @@
       "/work/valgur/14.jpg",
       "/work/valgur/15.jpg",
       "/work/valgur/16.jpg"
+    ],
+    "coral-synthmorph": [
+      "/work/coral-synthmorph/06.jpg",
+      "/work/coral-synthmorph/05.jpg",
+      "/work/coral-synthmorph/03.jpg",
+      "/work/coral-synthmorph/04.jpg",
+      "/work/coral-synthmorph/02.jpg",
+      "/work/coral-synthmorph/01.jpg"
     ]
   },
   "hidden": [],
