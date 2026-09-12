@@ -3,64 +3,95 @@
 import * as React from "react";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
-import type { AdminProject } from "@/components/admin-projects";
 
-/* ── selected work ────────────────────────────────────────────────
- * Which projects lead the homepage, and in what order.
+/* ── a picker ─────────────────────────────────────────────────────
+ * Which things lead a section of the homepage, and in what order.
  *
  * This was a textarea of slugs, one per line. It worked, in the sense that
  * the right characters in the right order produced the right page — but it
  * asked Julian to remember what `oakley-x-nike` looks like as a photograph,
  * to know that a typo silently drops a card rather than failing, and to
- * reorder by cutting and pasting lines. For the single most editorial
- * decision on the homepage, that is the wrong instrument.
+ * reorder by cutting and pasting lines. For the most editorial decisions on
+ * the homepage, that is the wrong instrument.
  *
- * Now it is the photographs, in order, with the same two arrows the frame
- * list uses.
+ * Now it is the pictures, in order, with the same two arrows the frame list
+ * uses.
+ *
+ * One component for projects and for cover art, because the decision is the
+ * same shape in both cases — pick some things, put them in an order — and the
+ * only differences are what the second line says and how many are allowed.
+ * Callers map their own data down to `PickerItem`; nothing in here knows what
+ * a project or a release is.
  * ─────────────────────────────────────────────────────────────── */
 
-export function AdminFeatured({
-  featured,
-  projects,
-  hidden,
+export type PickerItem = {
+  slug: string;
+  name: string;
+  /** The second line: a discipline, or an artist. */
+  detail: string;
+  cover: { src: string; color: string };
+};
+
+export function AdminPicker({
+  chosen,
+  items,
   onChange,
+  /** Slugs that exist but will not render — a hidden project, say. */
+  unavailable,
+  unavailableNote = "hidden — will not appear",
+  /** Past this many, further picks would not be shown. Absent means no cap. */
+  limit,
+  addLabel,
+  searchLabel,
+  emptyNote,
+  /** Explains what happens with fewer than `limit` picks. */
+  shortfallNote,
 }: {
-  featured: string[];
-  projects: AdminProject[];
-  hidden: Set<string>;
+  chosen: string[];
+  items: PickerItem[];
   onChange: (next: string[]) => void;
+  unavailable?: ReadonlySet<string>;
+  unavailableNote?: string;
+  limit?: number;
+  addLabel: string;
+  searchLabel: string;
+  emptyNote: string;
+  shortfallNote?: string;
 }) {
   const [adding, setAdding] = React.useState(false);
   const [query, setQuery] = React.useState("");
 
   const bySlug = React.useMemo(
-    () => new Map(projects.map((p) => [p.slug, p])),
-    [projects],
+    () => new Map(items.map((p) => [p.slug, p])),
+    [items],
   );
 
   const move = (i: number, delta: number) => {
     const j = i + delta;
-    if (j < 0 || j >= featured.length) return;
-    const next = [...featured];
+    if (j < 0 || j >= chosen.length) return;
+    const next = [...chosen];
     [next[i], next[j]] = [next[j], next[i]];
     onChange(next);
   };
 
-  const candidates = projects.filter(
+  const candidates = items.filter(
     (p) =>
-      !featured.includes(p.slug) &&
+      !chosen.includes(p.slug) &&
       (query.trim() === "" ||
-        `${p.name} ${p.slug} ${p.category}`
+        `${p.name} ${p.slug} ${p.detail}`
           .toLowerCase()
           .includes(query.toLowerCase())),
   );
 
+  const full = limit !== undefined && chosen.length >= limit;
+
   return (
     <div className="flex flex-col gap-3">
       <ol className="border-t border-border">
-        {featured.map((slug, i) => {
-          const project = bySlug.get(slug);
-          const isHidden = hidden.has(slug);
+        {chosen.map((slug, i) => {
+          const item = bySlug.get(slug);
+          const isUnavailable = unavailable?.has(slug) ?? false;
+          const beyond = limit !== undefined && i >= limit;
 
           return (
             <li
@@ -71,13 +102,13 @@ export function AdminFeatured({
                 {String(i + 1).padStart(2, "0")}
               </span>
 
-              {project ? (
+              {item ? (
                 <span
                   className="relative block h-12 w-10 shrink-0 overflow-hidden"
-                  style={{ backgroundColor: project.cover.color }}
+                  style={{ backgroundColor: item.cover.color }}
                 >
                   <Image
-                    src={project.cover.src}
+                    src={item.cover.src}
                     alt=""
                     fill
                     sizes="40px"
@@ -90,25 +121,28 @@ export function AdminFeatured({
 
               <span className="min-w-0 flex-1">
                 <span className="block truncate text-sm">
-                  {project?.name ?? slug}
+                  {item?.name ?? slug}
                 </span>
-                {/* The two ways a row can be wrong are worth saying here
+                {/* The three ways a row can be wrong are worth saying here
                     rather than leaving to the preview: a slug that matches
-                    nothing is silently skipped, and a hidden project is
-                    skipped for a different reason entirely. */}
+                    nothing is silently skipped, something withheld is skipped
+                    for a different reason entirely, and a row past the limit
+                    is correct but will not be reached. */}
                 <span
                   className={cn(
                     "label block truncate",
-                    project && !isHidden
+                    item && !isUnavailable && !beyond
                       ? "text-muted-foreground"
                       : "text-destructive",
                   )}
                 >
-                  {!project
-                    ? "no project with this slug — will be skipped"
-                    : isHidden
-                      ? "hidden — will not appear"
-                      : project.category}
+                  {!item
+                    ? "nothing with this slug — will be skipped"
+                    : isUnavailable
+                      ? unavailableNote
+                      : beyond
+                        ? `past the first ${limit} — will not be shown`
+                        : item.detail}
                 </span>
               </span>
 
@@ -117,7 +151,7 @@ export function AdminFeatured({
                   type="button"
                   onClick={() => move(i, -1)}
                   disabled={i === 0}
-                  aria-label={`Move ${project?.name ?? slug} up`}
+                  aria-label={`Move ${item?.name ?? slug} up`}
                   className={arrow}
                 >
                   ↑
@@ -125,16 +159,16 @@ export function AdminFeatured({
                 <button
                   type="button"
                   onClick={() => move(i, 1)}
-                  disabled={i === featured.length - 1}
-                  aria-label={`Move ${project?.name ?? slug} down`}
+                  disabled={i === chosen.length - 1}
+                  aria-label={`Move ${item?.name ?? slug} down`}
                   className={arrow}
                 >
                   ↓
                 </button>
                 <button
                   type="button"
-                  onClick={() => onChange(featured.filter((_, j) => j !== i))}
-                  aria-label={`Remove ${project?.name ?? slug}`}
+                  onClick={() => onChange(chosen.filter((_, j) => j !== i))}
+                  aria-label={`Remove ${item?.name ?? slug}`}
                   className={arrow}
                 >
                   ✕
@@ -145,9 +179,11 @@ export function AdminFeatured({
         })}
       </ol>
 
-      {featured.length === 0 ? (
+      {chosen.length === 0 ? (
+        <p className="text-sm text-muted-foreground">{emptyNote}</p>
+      ) : shortfallNote && limit !== undefined && chosen.length < limit ? (
         <p className="text-sm text-muted-foreground">
-          Nothing selected — the section is left out of the homepage entirely.
+          {chosen.length} of {limit}. {shortfallNote}
         </p>
       ) : null}
 
@@ -157,7 +193,7 @@ export function AdminFeatured({
             autoFocus
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search projects"
+            placeholder={searchLabel}
             className="w-full border-b border-border bg-transparent px-3 py-2 text-sm outline-none focus-visible:border-foreground"
           />
           <ul className="max-h-64 overflow-y-auto">
@@ -166,7 +202,7 @@ export function AdminFeatured({
                 <button
                   type="button"
                   onClick={() => {
-                    onChange([...featured, p.slug]);
+                    onChange([...chosen, p.slug]);
                     setQuery("");
                     setAdding(false);
                   }}
@@ -187,8 +223,8 @@ export function AdminFeatured({
                   <span className="min-w-0 flex-1">
                     <span className="block truncate text-sm">{p.name}</span>
                     <span className="label block truncate text-muted-foreground">
-                      {p.category}
-                      {hidden.has(p.slug) ? " · hidden" : ""}
+                      {p.detail}
+                      {unavailable?.has(p.slug) ? " · withheld" : ""}
                     </span>
                   </span>
                 </button>
@@ -205,9 +241,10 @@ export function AdminFeatured({
         <button
           type="button"
           onClick={() => setAdding(true)}
-          className="label self-start border border-border px-4 py-2 press hoverable:hover:bg-card"
+          className="label self-start border border-border px-4 py-2 press hoverable:hover:bg-card disabled:cursor-not-allowed disabled:opacity-40"
+          disabled={full}
         >
-          Add a project
+          {full ? `That is all ${limit}` : addLabel}
         </button>
       )}
     </div>

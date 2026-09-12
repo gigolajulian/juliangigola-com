@@ -10,7 +10,7 @@ import { AdminNewProject } from "@/components/admin-new-project";
 import { AdminProjects, type AdminProject } from "@/components/admin-projects";
 import { AdminSitemap } from "@/components/admin-sitemap";
 import { AdminPreview } from "@/components/admin-preview";
-import { AdminFeatured } from "@/components/admin-featured";
+import { AdminPicker, type PickerItem } from "@/components/admin-picker";
 import { AdminTrash } from "@/components/admin-trash";
 import { isTextRef, type FrameRef, type TrashedProject } from "@/lib/added";
 import { ADDED_PATH } from "@/lib/added";
@@ -75,6 +75,8 @@ export function AdminEditor({
   initialRecategorised,
   initialReframed,
   initialRecredited,
+  releases,
+  releaseLimit,
 }: {
   /** The content as it was at build time — what the live site is serving. */
   initial: SiteContent;
@@ -96,6 +98,10 @@ export function AdminEditor({
   initialReframed: Record<string, FrameRef[]>;
   /** Rewritten credits the last build applied, slug → list. */
   initialRecredited: Record<string, Credit[]>;
+  /** Every cover-art release, for the homepage rack picker. */
+  releases: PickerItem[];
+  /** How many of them the homepage rack actually shows. */
+  releaseLimit: number;
 }) {
   const [token, setToken] = React.useState("");
   const [draft, setDraft] = React.useState<SiteContent>(initial);
@@ -580,11 +586,35 @@ export function AdminEditor({
             label="Selected work, in order"
             hint="The cards under the cover, three across. Reorder with the arrows."
           >
-            <AdminFeatured
-              featured={draft.featured}
-              projects={projects}
-              hidden={hidden}
+            <AdminPicker
+              chosen={draft.featured}
+              items={projects.map((p) => ({
+                slug: p.slug,
+                name: p.name,
+                detail: p.category,
+                cover: { src: p.cover.src, color: p.cover.color },
+              }))}
+              unavailable={hidden}
               onChange={(next) => set("featured", next)}
+              addLabel="Add a project"
+              searchLabel="Search projects"
+              emptyNote="Nothing selected — the section is left out of the homepage entirely."
+            />
+          </Field>
+
+          <Field
+            label="Cover art on the homepage"
+            hint={`Which releases lead the rack, and in what order. The homepage shows ${releaseLimit}; anything you do not pick fills the rest in the order they were delivered, so the grid is always full.`}
+          >
+            <AdminPicker
+              chosen={draft.coverArt}
+              items={releases}
+              onChange={(next) => set("coverArt", next)}
+              limit={releaseLimit}
+              addLabel="Add a release"
+              searchLabel="Search releases"
+              emptyNote={`Nothing picked — the first ${releaseLimit} releases lead, as they always have.`}
+              shortfallNote="The rest of the rack fills from the remaining releases in order."
             />
           </Field>
 

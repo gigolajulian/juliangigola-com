@@ -43,6 +43,14 @@ export type SiteContent = {
   bookingUrl: string | null;
   coverSlug: string;
   featured: string[];
+  /**
+   * Cover-art releases to lead the homepage rack, in order.
+   *
+   * May be shorter than the rack — `components/cover-art.tsx` fills the
+   * remainder from the manifest, so the grid is always full and an empty list
+   * means exactly what it did before this existed.
+   */
+  coverArt: string[];
   testimonials: Testimonial[];
   sessions: SessionType[];
 };
@@ -125,6 +133,9 @@ function parse(v: unknown): SiteContent {
     bookingUrl: strOrNull(v.bookingUrl, "bookingUrl"),
     coverSlug: str(v.coverSlug, "coverSlug"),
     featured: strList(v.featured, "featured"),
+    // Absent in files written before the rack could be curated, which is not
+    // an error — it simply means nothing has been picked.
+    coverArt: strList(v.coverArt ?? [], "coverArt"),
     testimonials: list(v.testimonials, "testimonials", testimonial),
     sessions: list(v.sessions, "sessions", session),
   };

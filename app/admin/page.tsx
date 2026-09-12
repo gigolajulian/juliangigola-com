@@ -1,11 +1,13 @@
 import type { Metadata } from "next";
 import { AdminEditor } from "@/components/admin-editor";
 import { CONTENT, CONTENT_PATH } from "@/lib/content";
+import { SHOWN as HOMEPAGE_RELEASES } from "@/components/cover-art";
 import {
   PROJECTS,
   ALL_PROJECTS,
   HIDDEN,
   CATEGORIES,
+  COVER_RELEASES,
   categoryLabel,
   categoryHref,
 } from "@/lib/work";
@@ -94,6 +96,21 @@ export default function AdminPage() {
         initialRecategorised={RECATEGORISED}
         initialReframed={REFRAMED}
         initialRecredited={RECREDITED}
+        /* Imported from the section itself rather than restated, so the
+           picker's limit cannot drift away from the number the grid is
+           actually built around. */
+        releaseLimit={HOMEPAGE_RELEASES}
+        releases={COVER_RELEASES.map((r) => ({
+          slug: r.slug,
+          name: r.title,
+          detail: r.artist,
+          // The thumbnail, not the master: these are 40px rows and the full
+          // sleeves are 1600px.
+          cover: {
+            src: r.frames[0]?.thumb ?? "",
+            color: r.frames[0]?.color ?? "transparent",
+          },
+        }))}
         categoryLinks={CATEGORIES.filter((c) => c.section !== "SESSIONS").map(
           (c) => ({
             slug: c.slug,

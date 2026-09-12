@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Reveal } from "@/components/reveal";
 import { COVER_ART, COVER_RELEASES } from "@/lib/work";
+import { CONTENT } from "@/lib/content";
 import { CoverFaces, coverLabel } from "@/components/cover-faces";
 
 /* ── cover art ────────────────────────────────────────────────────
@@ -24,13 +25,39 @@ import { CoverFaces, coverLabel } from "@/components/cover-faces";
  * shows page background through the gap, and that reads as a mistake rather
  * than as an edit.
  */
-const SHOWN = 10;
+export const SHOWN = 10;
+
+/**
+ * The releases on the homepage: the chosen ones, then the rest.
+ *
+ * Picks lead, and whatever is left fills the row out. That is what keeps this
+ * from being able to break the grid — the count is always `SHOWN` regardless
+ * of how many have been picked, so a half-finished edit in `/admin` cannot
+ * publish a rack with three gaps in the last row. Picking none is exactly the
+ * behaviour this section had before it could be curated.
+ *
+ * A slug matching nothing is dropped rather than throwing: `content/site.json`
+ * is edited through a browser form, and `scripts/cover-art.mjs` regenerates
+ * the release set, so a stale pick should cost its place in the rack and not
+ * the build.
+ */
+const homepageReleases = (picked: readonly string[]) => {
+  const bySlug = new Map(COVER_RELEASES.map((r) => [r.slug, r]));
+  const chosen = picked
+    .map((slug) => bySlug.get(slug))
+    .filter((r): r is (typeof COVER_RELEASES)[number] => r !== undefined);
+
+  const taken = new Set(chosen.map((r) => r.slug));
+  const rest = COVER_RELEASES.filter((r) => !taken.has(r.slug));
+
+  return [...chosen, ...rest].slice(0, SHOWN);
+};
 
 export function CoverArt() {
   const project = COVER_ART;
   if (!project?.images.length) return null;
 
-  const releases = COVER_RELEASES.slice(0, SHOWN);
+  const releases = homepageReleases(CONTENT.coverArt);
 
   return (
     <section aria-labelledby="cover-art" className="border-t border-border">

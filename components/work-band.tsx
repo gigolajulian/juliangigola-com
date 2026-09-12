@@ -170,10 +170,21 @@ export function WorkBand({
             {client ? (
               <p className="label text-muted-foreground">{client.name}</p>
             ) : null}
-            <p className="label text-muted-foreground">
+            {/* Pushed to the far side rather than sitting against the client
+                name. Who the work was for and what kind of work it is are two
+                different facts, and run together they read as one string —
+                "@rice666s editorial" looks like a handle with a suffix. The
+                gap is what separates them.
+
+                `ml-auto` here rather than on the counter after it: the first
+                automatic margin in a flex row takes all the free space, so
+                this one does the pushing and the counter simply follows at
+                the end. With no client, the tag is still on the right, which
+                is the point. */}
+            <p className="label ml-auto text-muted-foreground">
               {project.categories[0]?.name ?? "Project"}
             </p>
-            <p className="label ml-auto tabular-nums text-muted-foreground">
+            <p className="label tabular-nums text-muted-foreground">
               {String(active + 1).padStart(2, "0")} /{" "}
               {String(frames.length).padStart(2, "0")}
             </p>
