@@ -33,5 +33,23 @@
     ]
   },
   "hidden": [],
-  "credits": {}
+  "credits": {
+    "crave": [
+      {
+        "role": "3D Artist",
+        "name": "Nikoo Sheybani",
+        "instagram": "nikxdesigns"
+      },
+      {
+        "role": "Model",
+        "name": "Anya Pham",
+        "instagram": "rice666s"
+      },
+      {
+        "role": "Direction",
+        "name": "Julian Gigola",
+        "instagram": "juliangigola"
+      }
+    ]
+  }
 }
