@@ -321,7 +321,14 @@ export function Hero({ disciplines }: { disciplines: Discipline[] }) {
        * that choice gets made.
        */}
       <div
-        className="absolute inset-0 overflow-hidden"
+        className={cn(
+          "absolute inset-0 overflow-hidden",
+          // From `wide`, it stops being the whole canvas and becomes the
+          // right-hand column again: `80dvh` across is 4:5 at full height, so
+          // the frame is shown entire rather than cropped to the window. The
+          // type has the rest.
+          "wide:left-auto wide:right-0 wide:w-[80dvh]",
+        )}
         style={{ backgroundColor: current.frame.color }}
       >
         {/* One frame dissolves up over the one it replaces.
@@ -427,7 +434,8 @@ export function Hero({ disciplines }: { disciplines: Discipline[] }) {
         })}
       </div>
 
-      {/* The type, on a plate.
+      {/* The type: beside the picture where there is room, over it where
+       * there is not.
        *
        * The same material as the bar at the top of every page and the cards
        * on the homepage, thinned down: the ground at 45% rather than 70%, so
@@ -444,8 +452,20 @@ export function Hero({ disciplines }: { disciplines: Discipline[] }) {
        * from `lg`. Either way the picture is behind all of it and none of the
        * type is closer to the photograph than the plate's own padding.
        */}
-      <div className="relative z-10 flex min-h-dvh flex-col justify-end lg:justify-start">
-        <div className="flex min-w-0 flex-col border-t border-border/60 bg-background/45 backdrop-blur-2xl lg:min-h-dvh lg:w-[min(40rem,48vw)] lg:border-r lg:border-t-0">
+      <div className="relative z-10 flex min-h-dvh flex-col justify-end wide:justify-start">
+        <div
+          className={cn(
+            "flex min-w-0 flex-col border-t border-border/60",
+            // Over the photograph: thinned ground, deep blur.
+            "bg-background/45 backdrop-blur-2xl",
+            // Beside it: a real panel, opaque and unblurred, filling the
+            // width the picture does not take. Nothing is laid over the
+            // frame at this ratio, which is the design Julian had and asked
+            // to keep — the plate is what the narrow case falls back to.
+            "wide:min-h-dvh wide:w-[calc(100%-80dvh)] wide:border-r wide:border-t-0",
+            "wide:bg-background wide:backdrop-blur-none",
+          )}
+        >
           {/* First on a phone, and the top of the left column from `lg`. */}
           <div className="flex min-w-0 flex-col">
             {/* One: the standing details, as a running head. The tall top

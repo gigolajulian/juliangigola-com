@@ -12,6 +12,24 @@
  */
 @custom-variant hoverable (@media (hover: hover) and (pointer: fine));
 
+/**
+ * Wide enough for the cover to be two columns.
+ *
+ * A ratio, not a width, because the thing that breaks is a ratio. The
+ * picture column is `80dvh` across — 4:5 at full height, so the frame is
+ * never cropped — which means it is sized from the viewport's *height* while
+ * competing for its *width*. On a tall window 80dvh is most of the width, or
+ * more than all of it: at 1512x1877 it wants 1501px of 1512 and the type
+ * column is squeezed to nothing, which is how the discipline ended up clipped
+ * against the picture's edge.
+ *
+ * 5/4 is the frame's own 4:5 turned on its side: the split is available once
+ * the window is at least as landscape as the photograph is portrait. Below
+ * that the cover goes full bleed with the type on a plate over it, which
+ * needs no horizontal room at all.
+ */
+@custom-variant wide (@media (min-aspect-ratio: 5 / 4));
+
 /* ── the ground ───────────────────────────────────────────────────
  * Dark, with light available and never assumed.
  *
