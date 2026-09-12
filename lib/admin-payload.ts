@@ -61,16 +61,25 @@ export const tidySequence = <T>(list: T[]): T[] =>
  * through untouched, which is what makes it safe to publish a content edit
  * without having loaded the project list at all.
  */
+/**
+ * The editable half of the project list, in the shape the file is written in.
+ *
+ * Named because three things in the editor pass it around — the draft, the
+ * baseline it is compared against, and what gets written — and a tuple of six
+ * loose records is how those three drift apart.
+ */
+export type Manifest<Frame = unknown, Credit = unknown> = {
+  hidden: string[];
+  categories: Record<string, string>;
+  frames: Record<string, Frame[]>;
+  credits: Record<string, Credit[]>;
+  order: string[];
+  covers: Record<string, string>;
+};
+
 export function projectsFile(
   existing: ProjectsFile | null,
-  edit: {
-    hidden: Iterable<string>;
-    categories: Record<string, string>;
-    frames: Record<string, unknown[]>;
-    credits: Record<string, unknown[]>;
-    order: readonly string[];
-    covers: Record<string, string>;
-  },
+  edit: Manifest,
 ): ProjectsFile {
   const next: ProjectsFile = existing
     ? { ...existing }
@@ -144,3 +153,112 @@ const sorted = (_key: string, value: unknown): unknown =>
  */
 export const same = (a: unknown, b: unknown): boolean =>
   JSON.stringify(a, sorted) === JSON.stringify(b, sorted);
+
+/* ── reading the manifest back ────────────────────────────────────
+ * `adoptable` is the other direction: the file as the repository holds it,
+ * turned back into a draft the editor can hold and compare against.
+ *
+ * Needed because the editor was seeded only from the build that served the
+ * page. During the couple of minutes a deploy takes, the repository is ahead
+ * of that build — so the editor would call already-published work an
+ * unpublished edit, and publishing again would write the older list back over
+ * the newer one.
+ *
+ * A missing field means empty, not "keep what the build had": that is the
+ * convention `projectsFile` writes with, which deletes a field rather than
+ * writing `[]`. Confusing the two is how an absent `covers` would resurrect
+ * the covers from a build three publishes ago.
+ *
+ * The fallback is only for a field that is present and the wrong shape — a
+ * hand-edited file, or one from a future version of this editor. Better to
+ * keep a stale value there than to silently blank something real.
+ * ─────────────────────────────────────────────────────────────── */
+
+const isRecord = (v: unknown): v is Record<string, unknown> =>
+  typeof v === "object" && v !== null && !Array.isArray(v);
+
+const strings = (v: unknown): string[] | null =>
+  Array.isArray(v) && v.every((x) => typeof x === "string")
+    ? (v as string[])
+    : null;
+
+const stringMap = (v: unknown): Record<string, string> | null =>
+  isRecord(v) && Object.values(v).every((x) => typeof x === "string")
+    ? (v as Record<string, string>)
+    : null;
+
+const listMap = (v: unknown): Record<string, unknown[]> | null =>
+  isRecord(v) && Object.values(v).every((x) => Array.isArray(x))
+    ? (v as Record<string, unknown[]>)
+    : null;
+
+export function adoptable<F, C>(
+  file: ProjectsFile,
+  fallback: Manifest<F, C>,
+): Manifest<F, C> {
+  /* The sequences and credit lists come back as "a list of something": this
+     module does not know what a frame is, on purpose. `lib/added.ts` is what
+     validates them, at build time, where a bad one fails the deploy and the
+     live site keeps serving the last good build. The editor is not the last
+     line of defence for a file it wrote itself. */
+  const lists = <T>(v: Record<string, unknown[]>): Record<string, T[]> =>
+    v as Record<string, T[]>;
+
+  return {
+    hidden:
+      file.hidden === undefined
+        ? []
+        : (strings(file.hidden) ?? fallback.hidden),
+    categories:
+      file.categories === undefined
+        ? {}
+        : (stringMap(file.categories) ?? fallback.categories),
+    frames:
+      file.frames === undefined
+        ? {}
+        : (lists<F>(listMap(file.frames) ?? {}) ?? fallback.frames),
+    credits:
+      file.credits === undefined
+        ? {}
+        : (lists<C>(listMap(file.credits) ?? {}) ?? fallback.credits),
+    order:
+      file.order === undefined ? [] : (strings(file.order) ?? fallback.order),
+    covers:
+      file.covers === undefined
+        ? {}
+        : (stringMap(file.covers) ?? fallback.covers),
+  };
+}
+
+/* ── undoing an override ──────────────────────────────────────────
+ * A panel reports `null` when its draft is back to the way it found it — the
+ * sequence editor when the frames are in the published order again, the
+ * credits block when "Undo changes" is pressed.
+ *
+ * Both handlers took that as "delete the entry", and that is only right when
+ * the published order *is* the archive's. Where the repository already holds
+ * an override — and it holds seven of them — deleting the entry does not put
+ * the gallery back the way it was; it publishes "this gallery has no
+ * override", and the next build lays the frames out in the order the
+ * harvester found them. Undo would have quietly discarded an earlier edit.
+ *
+ * It also left the marker stuck: the entry was gone from the draft while the
+ * baseline still had it, which is a difference, so UNPUBLISHED stayed lit
+ * with the screen showing exactly what is published.
+ *
+ * So `null` restores what is published rather than removing it, and only
+ * removes where there was nothing published to keep.
+ * ─────────────────────────────────────────────────────────────── */
+
+export function withOverride<T>(
+  current: Record<string, T[]>,
+  slug: string,
+  next: T[] | null,
+  published: Record<string, T[]>,
+): Record<string, T[]> {
+  const copy = { ...current };
+  if (next) copy[slug] = next;
+  else if (published[slug]) copy[slug] = published[slug];
+  else delete copy[slug];
+  return copy;
+}

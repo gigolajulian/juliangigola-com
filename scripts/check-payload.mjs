@@ -17,7 +17,13 @@
  */
 
 import assert from "node:assert/strict";
-import { projectsFile, tidySequence, same } from "../lib/admin-payload.ts";
+import {
+  projectsFile,
+  tidySequence,
+  same,
+  adoptable,
+  withOverride,
+} from "../lib/admin-payload.ts";
 
 const edit = {
   hidden: [],
@@ -158,4 +164,94 @@ const edit = {
   assert.ok(same({ q: "x" }, { q: "x", role: undefined }), "absent is undefined");
 }
 
-console.log("admin payload: 25 cases pass");
+// Reading the repository's own list back in, which is what the editor
+// compares against — not the build that served the page.
+{
+  const build = {
+    hidden: ["old"],
+    categories: { a: "editorial" },
+    frames: { a: ["/work/a/01.jpg"] },
+    credits: { a: [{ role: "Model", name: "X" }] },
+    order: ["a", "b"],
+    covers: { editorial: "/work/a/01.jpg" },
+  };
+
+  // The round trip: what `projectsFile` writes is what `adoptable` reads.
+  const file = projectsFile(null, build);
+  assert.ok(same(adoptable(file, build), build), "a manifest survives the round trip");
+
+  // The one that matters — `projectsFile` deletes an empty field rather than
+  // writing it, so an absent field means empty and must not fall back to the
+  // build, or covers from three publishes ago come back from the dead.
+  const emptied = projectsFile(null, {
+    ...build,
+    order: [],
+    covers: {},
+  });
+  assert.ok(!("order" in emptied), "an empty order is not written");
+  const read = adoptable(emptied, build);
+  assert.deepEqual(read.order, [], "an absent order reads as empty");
+  assert.deepEqual(read.covers, {}, "an absent cover pick reads as empty");
+  assert.deepEqual(read.hidden, build.hidden, "the fields that were written survive");
+
+  // Present but malformed — a hand-edited file. Keeping the stale value beats
+  // blanking something real.
+  const bad = adoptable(
+    { projects: [], order: "a,b", covers: { editorial: 7 } },
+    build,
+  );
+  assert.deepEqual(bad.order, build.order, "a string where a list belongs falls back");
+  assert.deepEqual(bad.covers, build.covers, "a number where a path belongs falls back");
+
+  // A file this editor has never written to keeps nothing it did not say.
+  assert.ok(
+    same(adoptable({ projects: [] }, build), {
+      hidden: [],
+      categories: {},
+      frames: {},
+      credits: {},
+      order: [],
+      covers: {},
+    }),
+    "a bare file reads as a bare manifest",
+  );
+}
+
+// Undoing an edit on a gallery the repository already overrides.
+{
+  const published = { mirage: ["/work/mirage/16.jpg", "/work/mirage/01.jpg"] };
+
+  // The bug: the sequence editor reports null when the frames are back in the
+  // order it found them, and that order is the published override — so the
+  // override has to stand, not be deleted. Deleting it published "no
+  // override", which lays the gallery out in the harvester's order and throws
+  // away the earlier edit.
+  assert.deepEqual(
+    withOverride({ mirage: ["/work/mirage/01.jpg"] }, "mirage", null, published),
+    published,
+    "undo restores what is published",
+  );
+
+  // And nothing is left behind where there was nothing published to keep.
+  assert.deepEqual(
+    withOverride({ sago: ["/work/sago/02.jpg"] }, "sago", null, published),
+    {},
+    "undo on an un-overridden gallery leaves no entry",
+  );
+
+  // A real edit is stored, and the other galleries are untouched.
+  const edited = withOverride(published, "sago", ["/work/sago/02.jpg"], published);
+  assert.deepEqual(edited.sago, ["/work/sago/02.jpg"], "an edit is stored");
+  assert.deepEqual(edited.mirage, published.mirage, "other galleries are untouched");
+  assert.notEqual(edited, published, "the map is not mutated in place");
+
+  // An intentionally empty list is not an undo — it is a credit block someone
+  // emptied on purpose, and it publishes.
+  assert.deepEqual(
+    withOverride({}, "sago", [], published).sago,
+    [],
+    "an empty list is a value, not an absence",
+  );
+}
+
+console.log("admin payload: 41 cases pass");

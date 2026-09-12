@@ -16,7 +16,14 @@ import { AdminTrash } from "@/components/admin-trash";
 import { isTextRef, type FrameRef, type TrashedProject } from "@/lib/added";
 import { ADDED_PATH } from "@/lib/added";
 import { type PendingUpload } from "@/components/admin-frames";
-import { projectsFile, same, type ProjectsFile } from "@/lib/admin-payload";
+import {
+  adoptable,
+  projectsFile,
+  same,
+  withOverride,
+  type Manifest,
+  type ProjectsFile,
+} from "@/lib/admin-payload";
 import { commitFiles, readFile, type CommitFile } from "@/lib/admin-github";
 import type { Credit } from "@/lib/work-types";
 import { cn } from "@/lib/utils";
@@ -119,6 +126,15 @@ const fromBase64 = (b64: string): string => {
   const bytes = Uint8Array.from(binary, (c) => c.charCodeAt(0));
   return new TextDecoder().decode(bytes);
 };
+
+/**
+ * The manifest half of the draft, as the editor holds it.
+ *
+ * `Manifest` in `lib/admin-payload.ts` is loose about what a frame and a
+ * credit are — that module deliberately knows only that a sequence is a list,
+ * which is what lets the check script run it. Here they are the real things.
+ */
+type Draft = Manifest<FrameRef, Credit>;
 
 type Status =
   | { kind: "idle" }
@@ -266,23 +282,76 @@ export function AdminEditor({
   /**
    * Whether anything is unpublished.
    *
-   * Compared against what the page was built with rather than tracked with a
-   * flag, so undoing an edit by hand clears the warning instead of leaving it
-   * stuck on — a dirty marker that lies is worse than none.
+   * The manifest half of the draft, in the shape the file is written in.
+   *
+   * One object rather than six loose states, because three separate places
+   * need to ask the same question of all six — has the project list moved —
+   * and `projectsFile` takes exactly this shape.
+   */
+  const manifest: Draft = React.useMemo(
+    () => ({
+      // Sorted, so a set's iteration order is not mistaken for an edit.
+      hidden: [...hidden].sort(),
+      categories: recategorised,
+      frames: reframed,
+      credits: recredited,
+      order,
+      covers,
+    }),
+    [hidden, recategorised, reframed, recredited, order, covers],
+  );
+
+  /**
+   * What the repository holds, as far as this page knows.
+   *
+   * Seeded from the props — all this page knows before a token is in, which
+   * is the build that served it — and then advanced twice: when the token
+   * reads the repo, and when a publish makes the repo match the draft.
+   *
+   * That advancing is the whole fix for a marker that said UNPUBLISHED for
+   * ever. It used to compare against the props and nothing else, so a
+   * successful publish left it lit: the commit had landed, the draft and the
+   * repo agreed, and the only thing that still disagreed was the build this
+   * page happened to ship with — which a publish cannot change, because the
+   * deploy is minutes away. Reloading in that window did not help either;
+   * the new page came from the same stale build. The only way to clear it
+   * was to wait for the deploy and reload, and publishing again in the
+   * meantime looked like the thing to try.
+   *
+   * The repo is the right baseline in any case: it is what a publish writes
+   * to and what the next build is made from, and it is where a publish from
+   * another browser shows up.
+   */
+  const [baseline, setBaseline] = React.useState<{
+    content: SiteContent;
+    manifest: Draft;
+  }>(() => ({
+    content: initial,
+    manifest: {
+      hidden: [...initialHidden].sort(),
+      categories: initialRecategorised,
+      frames: initialReframed,
+      credits: initialRecredited,
+      order: initialOrder,
+      covers: initialCovers,
+    },
+  }));
+
+  /** Whether the project list has moved — the second file, written only if so. */
+  const manifestMoved = !same(manifest, baseline.manifest);
+
+  /**
+   * Whether anything is unpublished.
+   *
+   * Derived by comparing rather than tracked with a flag, so undoing an edit
+   * by hand clears the warning instead of leaving it stuck on — a dirty
+   * marker that lies is worse than none, which is exactly what this became.
    *
    * Through `same`, not `JSON.stringify`: the draft comes back from the repo
-   * with the file's own key order while `initial` has `lib/content.ts`'s, so
-   * comparing the two strings said "unpublished" from the moment the token
-   * loaded and there was no edit to undo. See the note on `same`.
+   * with the file's own key order while `lib/content.ts` builds its object
+   * field by field, and comparing the two strings called that a change.
    */
-  const dirty =
-    !same(draft, initial) ||
-    [...hidden].sort().join() !== [...initialHidden].sort().join() ||
-    !same(recategorised, initialRecategorised) ||
-    !same(reframed, initialReframed) ||
-    !same(recredited, initialRecredited) ||
-    !same(order, initialOrder) ||
-    !same(covers, initialCovers);
+  const dirty = manifestMoved || !same(draft, baseline.content);
 
   /**
    * Where "Open live" points. Read after mount, because the server has no
@@ -390,9 +459,9 @@ export function AdminEditor({
    * project under its old discipline, because it read the server's label. Each
    * was a small lie in a different place and they were all the same bug.
    *
-   * Mirrors `relabel` and `byRunningOrder` in `lib/work.ts`: the same two
-   * operations the build applies, applied here so the editor shows what
-   * publishing would produce rather than what the last deploy did.
+   * Mirrors `relabel`, `withSequence` and `byRunningOrder` in `lib/work.ts`:
+   * the same operations the build applies, applied here so the editor shows
+   * what publishing would produce rather than what the last deploy did.
    */
   const orderedProjects = React.useMemo(() => {
     const rank = new Map(order.map((slug, i) => [slug, i]));
@@ -401,7 +470,23 @@ export function AdminEditor({
     return [...projects]
       .map((p) => {
         const filed = recategorised[p.slug] ?? p.categorySlug;
-        if (filed === p.categorySlug) return p;
+        /* The frame the gallery now opens on.
+         *
+         * `withSequence` in `lib/work.ts` makes the first frame of a
+         * resequenced gallery its cover — the card and the discipline are
+         * meant to show what you actually opened on. The editor was not
+         * applying that half, so dragging a frame to the front changed the
+         * published cover and nothing here moved: the sitemap, the project
+         * row and the discipline all kept drawing the old opener, which reads
+         * as the edit not having taken. */
+        const opener = reframed[p.slug]?.flatMap((f) =>
+          // A passage is not a photograph, so it cannot be the opener.
+          isTextRef(f) ? [] : [typeof f === "string" ? f : f.src],
+        )[0];
+
+        if (filed === p.categorySlug && (!opener || opener === p.images[0]))
+          return p;
+
         return {
           ...p,
           categorySlug: filed,
@@ -409,13 +494,23 @@ export function AdminEditor({
           // project the manifest gives no category at all, so the sitemap can
           // group both kinds under one heading.
           category: named.get(filed) ?? "Unfiled",
+          /* Dimensions and mat carried over from the old cover rather than
+             looked up. The archive's numbers do not travel to the browser
+             (see `app/admin/page.tsx`), every thumbnail in here sits in a
+             fixed box under `object-cover`, and the mat is only what shows
+             for the instant before the frame paints. The build reads the
+             real frame. */
+          cover:
+            opener && opener !== p.images[0]
+              ? { ...p.cover, src: opener }
+              : p.cover,
         };
       })
       .sort(
         (a, b) =>
           (rank.get(a.slug) ?? Infinity) - (rank.get(b.slug) ?? Infinity),
       );
-  }, [projects, order, recategorised, categories]);
+  }, [projects, order, recategorised, categories, reframed]);
 
   /**
    * Sends the editor to a project, from anywhere that can name one.
@@ -535,7 +630,43 @@ export function AdminEditor({
       setSha(body.sha);
       // The repo is the truth, not the build this page shipped with: someone
       // may have published since, and editing the stale copy would revert it.
-      setDraft(JSON.parse(fromBase64(body.content)) as SiteContent);
+      const content = JSON.parse(fromBase64(body.content)) as SiteContent;
+      setDraft(content);
+
+      /* The project list, from the repo as well.
+       *
+       * Only `site.json` was read here, and the other half of the draft —
+       * hiding, filing, sequences, credits, the running order, the discipline
+       * covers — stayed on whatever the build that served this page was made
+       * with. Two consequences, both of which Julian hit. The marker called
+       * the gap an unpublished edit, so a page loaded inside the couple of
+       * minutes a deploy takes said UNPUBLISHED about work that was already
+       * committed. And publishing from that page wrote the stale list back
+       * over the fresh one, quietly undoing the previous publish.
+       *
+       * Read with the same call `publish` uses, and only adopted when there
+       * is nothing to lose: an untouched page is being brought up to date,
+       * whereas a page with edits on it asked to reconnect would be having
+       * them thrown away. */
+      const manifestJson = await readFile(t, ADDED_PATH);
+      const repo = manifestJson
+        ? adoptable(JSON.parse(manifestJson) as ProjectsFile, baseline.manifest)
+        : baseline.manifest;
+
+      if (!dirty) {
+        setHidden(new Set(repo.hidden));
+        setRecategorised(repo.categories);
+        setReframed(repo.frames);
+        setRecredited(repo.credits);
+        setOrder(repo.order);
+        setCovers(repo.covers);
+        setBaseline({ content, manifest: repo });
+      } else {
+        // The edits stay, and so does the baseline they are measured against
+        // for the project list — only the content half moves.
+        setBaseline((b) => ({ ...b, content }));
+      }
+
       setToken(t);
       window.localStorage.setItem(TOKEN_KEY, t);
       setStatus({ kind: "idle" });
@@ -585,6 +716,11 @@ export function AdminEditor({
         return;
       }
 
+      /* The manifest as committed, filled in only if one is written. Left
+         as the current baseline otherwise, because a content-only publish
+         does not touch the project list. */
+      let written: Draft = baseline.manifest;
+
       const files: CommitFile[] = [
         {
           path: CONTENT_PATH,
@@ -592,15 +728,6 @@ export function AdminEditor({
           encoding: "utf-8" as const,
         },
       ];
-
-      const manifestMoved =
-        [...hidden].sort().join() !== [...initialHidden].sort().join() ||
-        JSON.stringify(recategorised) !==
-          JSON.stringify(initialRecategorised) ||
-        JSON.stringify(reframed) !== JSON.stringify(initialReframed) ||
-        JSON.stringify(recredited) !== JSON.stringify(initialRecredited) ||
-        JSON.stringify(order) !== JSON.stringify(initialOrder) ||
-        JSON.stringify(covers) !== JSON.stringify(initialCovers);
 
       if (manifestMoved) {
         setStatus({ kind: "working", message: "Reading the project list…" });
@@ -613,15 +740,14 @@ export function AdminEditor({
         // publishes as "you never made that edit".
         const parsed = projectsFile(
           current ? (JSON.parse(current) as ProjectsFile) : null,
-          {
-            hidden,
-            categories: recategorised,
-            frames: reframed,
-            credits: recredited,
-            order,
-            covers,
-          },
+          manifest,
         );
+        // What the repo will hold, which is not quite what was asked for:
+        // `projectsFile` drops blank passages and empty sequences. Kept, so
+        // the baseline below is what was actually written rather than what
+        // was sent — otherwise a tidied-away passage reads as an edit still
+        // waiting to publish, for ever.
+        written = adoptable(parsed, manifest);
         files.push({
           path: ADDED_PATH,
           content: `${JSON.stringify(parsed, null, 2)}\n`,
@@ -668,6 +794,17 @@ export function AdminEditor({
         { headers: headers(token), cache: "no-store" },
       );
       setSha((await after.json())?.sha ?? null);
+
+      /* The repo now matches the draft, so this is the baseline. Without
+         this the marker stayed on UNPUBLISHED after a successful publish —
+         still comparing against the build that served the page, which the
+         publish cannot have changed and which is minutes behind. */
+      setBaseline({ content: draft, manifest: written });
+      /* And the draft takes back what was actually written, so the tidying
+         above is visible rather than hiding behind a diff that will not
+         clear. */
+      setReframed(written.frames);
+      setRecredited(written.credits);
 
       // A fresh publish is not live yet by definition, whatever the last one
       // was — so the green is dropped before the wait begins.
@@ -977,15 +1114,14 @@ export function AdminEditor({
                 setRecategorised((r) => ({ ...r, [slug]: categorySlug }))
               }
               reframed={reframed}
+              /* `null` is the sequence editor saying the frames are back in
+                 the order it found them — which is the published order, and
+                 that may itself be an override. `withOverride` puts that
+                 back rather than dropping it; see the note there. */
               onReframe={(slug, frames) =>
-                setReframed((r) => {
-                  const next = { ...r };
-                  // Dropped rather than stored as null, so a gallery put back
-                  // the way it was leaves no entry behind to publish.
-                  if (frames) next[slug] = frames;
-                  else delete next[slug];
-                  return next;
-                })
+                setReframed((r) =>
+                  withOverride(r, slug, frames, baseline.manifest.frames),
+                )
               }
               uploads={uploads}
               onUpload={(added) =>
@@ -995,16 +1131,13 @@ export function AdminEditor({
                 }))
               }
               credits={recredited}
+              /* Same as the sequences: "Undo changes" means back to what is
+                 published, and an intentionally empty list is a different
+                 thing which `withOverride` keeps. */
               onCredits={(slug, next) =>
-                setRecredited((c) => {
-                  const copy = { ...c };
-                  // Dropped rather than stored empty, so credits put back the
-                  // way they were leave no entry behind to publish. An
-                  // intentionally empty list is a different thing and is kept.
-                  if (next) copy[slug] = next;
-                  else delete copy[slug];
-                  return copy;
-                })
+                setRecredited((c) =>
+                  withOverride(c, slug, next, baseline.manifest.credits),
+                )
               }
               opened={opened}
               onOpened={setOpened}
