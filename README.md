@@ -124,17 +124,42 @@ every file under `public/work/<slug>/` in one commit — listed from the repo
 rather than derived from the manifest, so a half-finished upload does not
 leave orphans behind.
 
-### /admin is behind Cloudflare Access
+### /admin is behind Cloudflare Access — on one hostname only
 
-The editor is a public page that holds a GitHub token, so it is gated by a
-Zero Trust policy rather than by anything in this codebase — there is no
+> **Open right now.** The Access application covers
+> `juliangigola.jg-website-new.workers.dev/admin`, which challenges correctly.
+> It does **not** cover the custom domain, and that is the hostname anybody
+> actually reaches:
+>
+> | URL | |
+> | --- | --- |
+> | `juliangigola.jg-website-new.workers.dev/admin` | 302 to the Access login |
+> | `www.juliangigola.com/admin` | **200, the whole page** |
+> | `juliangigola.com/admin` | **200, the whole page** |
+>
+> Fix: Zero Trust → Access → Applications → this application → add
+> `juliangigola.com` and `www.juliangigola.com`, both path-scoped to `/admin`.
+> Three clicks, no code. A self-hosted Access application is scoped per
+> hostname, so adding a custom domain to the Worker does not extend a policy
+> written against `workers.dev` — which is exactly what happened here.
+>
+> What is and is not exposed meanwhile: the page renders the editor UI and the
+> content the last build published, all of which is already public on the
+> site. It cannot write anything. Every write is authorised by a GitHub
+> fine-grained token that lives in one browser's `localStorage` and is never
+> served with the page, so a stranger reaching `/admin` gets a form that
+> cannot commit. The hole is an unlisted UI left open, not a data leak or a
+> write path.
+
+The editor is a public page that a GitHub token is pasted into, so it is
+gated by a Zero Trust policy rather than by anything in this codebase — no
 login code, no password, and no session handling to get wrong.
 
-Application: self-hosted, destination `…workers.dev/admin`, **path-scoped**,
-so only `/admin` is gated and the site stays public. Policy "Julian only":
-Allow where email is Julian's. Note that the Worker-level Access option
-protects *every* hostname on the Worker and would put the whole portfolio
-behind a login — it is the wrong tool here.
+Application: self-hosted, **path-scoped** to `/admin` so the rest of the site
+stays public, with every hostname the site answers on listed. Policy "Julian
+only": Allow where email is Julian's. Note that the Worker-level Access
+option protects *every* hostname on the Worker and would put the whole
+portfolio behind a login — it is the wrong tool here.
 
 | | |
 | --- | --- |

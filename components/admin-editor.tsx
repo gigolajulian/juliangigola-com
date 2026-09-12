@@ -29,11 +29,16 @@ import { cn } from "@/lib/utils";
  * once. Nothing here checks it — GitHub does, which is the only opinion worth
  * trusting about what a token may do to a repository.
  *
- * Reaching the page at all is a separate question, and it is no longer this
- * code's to answer: `/admin` sits behind a Cloudflare Access policy, so the
- * request is challenged before the Worker ever runs. There is deliberately no
- * login here — no password to store, no session to forge, and nothing to get
- * wrong. See the Hosting section of the README.
+ * Reaching the page is meant to be a separate question, answered by a
+ * Cloudflare Access policy rather than by anything here: no password to
+ * store, no session to forge, nothing to get wrong.
+ *
+ * As of 2026-09-12 that policy covers the `workers.dev` hostname and not the
+ * custom domain, so `www.juliangigola.com/admin` serves this page to anyone
+ * who asks. See the warning in the README's Hosting section for the fix and
+ * for what is actually exposed — which is this UI and published content, not
+ * a write path: every commit is authorised by a token that lives in one
+ * browser and is never served with the page.
  * ─────────────────────────────────────────────────────────────── */
 
 const REPO = {
