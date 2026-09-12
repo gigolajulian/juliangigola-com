@@ -335,7 +335,17 @@ export function Hero({ disciplines }: { disciplines: Discipline[] }) {
       // arriving word mounts with these already in place rather than a
       // render late.
       style={held ? HURRIED : undefined}
-      className="relative flex min-h-dvh flex-col border-b border-border"
+      className={cn(
+        "relative flex min-h-dvh flex-col border-b border-border",
+        /* The masthead is `clamp(2.75rem, 8vw, 7rem)`, which is right when
+           the type has the window - stacked, or in `wide`'s panel, which
+           grows with it. The squarish panel does not grow: it is clamped at
+           40rem, and 8vw of a 2000px screen is 160px of Univers Bold
+           Condensed in a 640px column. Re-declared here rather than at the
+           masthead, because custom properties inherit and one declaration on
+           the section reaches the word wherever it is set. */
+        "squat:[--text-display:clamp(2.5rem,4vw,5rem)]",
+      )}
     >
       {/* The photograph is the whole canvas now, with the type on top of it.
        *
@@ -483,16 +493,27 @@ export function Hero({ disciplines }: { disciplines: Discipline[] }) {
        * from `lg`. Either way the picture is behind all of it and none of the
        * type is closer to the photograph than the plate's own padding.
        */}
-      <div className="relative z-10 flex min-h-dvh flex-col justify-end wide:justify-start">
+      <div className="relative z-10 flex min-h-dvh flex-col justify-end squat:justify-start wide:justify-start">
         <div
           className={cn(
             "flex min-w-0 flex-col border-t border-border/60",
             // Over the photograph: thinned ground, deep blur.
             "bg-background/45 backdrop-blur-2xl",
+            /* Squarish: a column like the one beside it in `wide`, but in
+               the ground of the one below — full height down the left, with
+               the photograph full bleed and entire behind it rather than
+               cropped to a band above it.
+
+               The width is clamped rather than a share of the window. `42%`
+               of a 2000px screen is 840px of panel for a masthead that wants
+               480, and the picture pays the difference; the floor stops that
+               same panel collapsing under the masthead at 1024px, which is
+               where this layout starts. */
+            "squat:min-h-dvh squat:w-[clamp(28rem,42%,40rem)] squat:border-r squat:border-t-0",
             // Beside it: a real panel, opaque and unblurred, filling the
             // width the picture does not take. Nothing is laid over the
             // frame at this ratio, which is the design Julian had and asked
-            // to keep — the plate is what the narrow case falls back to.
+            // to keep — the plate is what the other two fall back to.
             "wide:min-h-dvh wide:w-[calc(100%-80dvh)] wide:border-r wide:border-t-0",
             "wide:bg-background wide:backdrop-blur-none",
           )}
@@ -502,14 +523,17 @@ export function Hero({ disciplines }: { disciplines: Discipline[] }) {
             {/* One: the standing details, as a running head. The tall top
               padding on desktop clears the fixed header so the nav never
               crowds the rule. */}
-            {/* `pt-24` on a phone, not `pt-10`: this is now the first thing in
-              the section rather than something sitting under a half-screen
-              photograph, so it has to clear the fixed header itself — which
-              is ~66px of wordmark and padding, and was printing straight
-              through "SF BAY AREA" until it did. */}
+            {/* The tall padding is `wide:` only, and that is a correction.
+              It was unconditional, from the version where this block was the
+              first thing in the section and had to clear the fixed header
+              itself. In the overlay layout the plate sits at the *foot* of
+              the screen — measured, its top edge is 374px down a 1010px
+              phone — so there was nothing above it to clear and the 96px was
+              frosted glass with nothing on it. Beside the picture at `wide`
+              the block does start at the top, and there it stays. */}
             <div
               style={lands(HEAD_MS)}
-              className="rise flex flex-wrap items-baseline gap-x-6 gap-y-1 border-b border-border px-6 pb-4 pt-24 sm:px-10 lg:pt-28"
+              className="rise flex flex-wrap items-baseline gap-x-6 gap-y-1 border-b border-border px-6 pb-4 pt-6 sm:px-10 sm:pt-8 squat:pt-24 wide:pt-24 lg:wide:pt-28"
             >
               {/* Held back while the intro is up, because the intro is already
                 saying these exact words in display type eighty pixels below.
@@ -541,7 +565,7 @@ export function Hero({ disciplines }: { disciplines: Discipline[] }) {
               this page look amateur. */}
             <h1
               style={lands(NAME_MS)}
-              className="emerge px-6 pt-8 sm:px-10 sm:pt-10"
+              className="emerge px-6 pt-6 sm:px-10 squat:pt-10 wide:pt-10"
             >
               {/* Tagged so the header can measure it. The header's own wordmark
                 waits on this one and then takes over from where it left, and

@@ -30,6 +30,34 @@
  */
 @custom-variant wide (@media (min-aspect-ratio: 5 / 4));
 
+/* The squarish window: horizontal like `wide`, but laid over the picture.
+ *
+ * Three layouts, and this is the middle one.
+ *
+ * `wide` (5/4 and up) is the design proper: a 4:5 picture column with an
+ * opaque panel of type beside it, nothing overlapping. Below all of this — an
+ * iPhone, an iPad Mini held upright — the picture goes full bleed and the type
+ * stacks onto a plate over the foot of it, because a tall narrow screen has
+ * room for one column and not two.
+ *
+ * In between sits a squarish window, and it had the stacked layout by
+ * default. Measured at 1000x875 the type took 731 of 876 pixels and left the
+ * photograph a 145px band with the subject behind frosted glass: a cover that
+ * is 17% cover. There is width here for two columns — it is height that is
+ * short — so it stays horizontal, and the panel becomes the translucent
+ * blurred plate rather than an opaque column, so the photograph is whole
+ * behind it instead of cropped to a strip above it.
+ *
+ * `64rem` and not narrower: an iPad Mini upright is 768px across, which is
+ * wide enough for two columns arithmetically and not wide enough for a
+ * masthead beside a photograph. `9/10` at the bottom so a tall window on a
+ * wide monitor - someone with a browser at half height - snaps to the stacked
+ * version rather than squeezing two columns into a portrait shape. */
+@custom-variant squat (
+  @media (min-width: 64rem) and (min-aspect-ratio: 9 / 10) and
+    (max-aspect-ratio: 5 / 4)
+);
+
 /* ── the ground ───────────────────────────────────────────────────
  * Dark, with light available and never assumed.
  *
