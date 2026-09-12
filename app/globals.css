@@ -607,10 +607,33 @@
   transition:
     opacity 420ms var(--ease-out-strong),
     transform 620ms var(--ease-spring);
+  /* The same hook `reveal` uses, so a block can be held back a beat without
+     a second utility or a line of JavaScript. */
+  transition-delay: var(--reveal-delay, 0ms);
 
   @starting-style {
     opacity: 0;
     transform: translateY(0.75rem);
+  }
+}
+
+/**
+ * The first paint, for something that must not move.
+ *
+ * `rise` with the travel taken out. The masthead is measured live by
+ * `site-header.tsx` — it reads `[data-masthead]`'s rect every frame to time
+ * the handoff to the wordmark in the bar — so translating it during the load
+ * would feed the header a position that is 12px wrong for half a second.
+ * Opacity changes nothing about where an element is, so this arrives with
+ * everything around it and stays exactly where it was measured.
+ */
+@utility emerge {
+  opacity: 1;
+  transition: opacity 420ms var(--ease-out-strong);
+  transition-delay: var(--reveal-delay, 0ms);
+
+  @starting-style {
+    opacity: 0;
   }
 }
 
@@ -685,6 +708,7 @@
 
 @media (prefers-reduced-motion: reduce) {
   .rise,
+  .emerge,
   .press,
   .dissolve,
   .title-out,

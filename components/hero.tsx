@@ -47,6 +47,35 @@ const DWELL_MS = 3500;
 const IDLE_MS = 3000;
 
 /**
+ * How long the title card holds before the cover starts cycling.
+ *
+ * Longer than a `DWELL_MS` lap, because the first one is not like the others:
+ * the page is still arriving over the first second — the running head, the
+ * name, the index and the buttons each land a beat apart — and a discipline
+ * swap landing on top of that reads as one more thing moving rather than as
+ * the cover starting. This is the pause between the page settling and the
+ * cover beginning to speak.
+ */
+const INTRO_MS = 5200;
+
+/**
+ * The staggered arrival of the type, as a style object.
+ *
+ * A custom property rather than four utilities: `rise` and `emerge` both read
+ * `--reveal-delay`, so the order of the load is stated here as four numbers
+ * instead of spread across a stylesheet. The steps are 100ms, which is enough
+ * to read as a sequence and short enough that the whole cover is settled
+ * inside a second.
+ *
+ * The photograph is deliberately absent. It is the page's largest paint, and
+ * an element at `opacity: 0` is not painted at all — animating it in would
+ * hand the browser a worse LCP in exchange for an effect that happens before
+ * anybody is looking.
+ */
+const lands = (ms: number) =>
+  ({ "--reveal-delay": `${ms}ms` }) as React.CSSProperties;
+
+/**
  * The opening frame. A title card, not a sixth discipline.
  *
  * It states the job once, over the city the work is made in, and then never
@@ -113,6 +142,9 @@ export function Hero({ disciplines }: { disciplines: Discipline[] }) {
   /** The cover itself — the surface whose pointer movement counts as use. */
   const sectionRef = React.useRef<HTMLElement>(null);
 
+  /** Whether the cover has yet to make its first move. */
+  const opening = React.useRef(true);
+
   /**
    * Whether the visitor currently has the cover, rather than the cycle.
    *
@@ -147,17 +179,27 @@ export function Hero({ disciplines }: { disciplines: Discipline[] }) {
       return;
     }
 
-    const id = window.setInterval(
-      () =>
-        setSlide((s) => ({
-          // Wraps to 1, not 0. The intro plays once and is then out of the
-          // rotation for the life of the page.
-          active: s.active + 1 >= slides.length ? 1 : s.active + 1,
-          previous: s.active,
-        })),
-      DWELL_MS,
-    );
-    return () => window.clearInterval(id);
+    // A chain of timeouts rather than an interval, so the first lap can be
+    // longer than the rest. An interval cannot vary its own period, and
+    // reading `active` to decide would put it in this effect's dependencies
+    // and restart the timer on every switch.
+    let id = 0;
+    const advance = () => {
+      setSlide((s) => ({
+        // Wraps to 1, not 0. The intro plays once and is then out of the
+        // rotation for the life of the page.
+        active: s.active + 1 >= slides.length ? 1 : s.active + 1,
+        previous: s.active,
+      }));
+      id = window.setTimeout(advance, DWELL_MS);
+    };
+
+    // Only the very first run waits out the load; picking the cover back up
+    // after a hover should not sit there for five seconds.
+    id = window.setTimeout(advance, opening.current ? INTRO_MS : DWELL_MS);
+    opening.current = false;
+
+    return () => window.clearTimeout(id);
   }, [held, slides.length]);
 
   /**
@@ -382,7 +424,10 @@ export function Hero({ disciplines }: { disciplines: Discipline[] }) {
               photograph, so it has to clear the fixed header itself — which
               is ~66px of wordmark and padding, and was printing straight
               through "SF BAY AREA" until it did. */}
-            <div className="flex flex-wrap items-baseline gap-x-6 gap-y-1 border-b border-border px-6 pb-5 pt-24 sm:px-10 lg:pt-32">
+            <div
+              style={lands(120)}
+              className="rise flex flex-wrap items-baseline gap-x-6 gap-y-1 border-b border-border px-6 pb-5 pt-24 sm:px-10 lg:pt-32"
+            >
               {/* Held back while the intro is up, because the intro is already
                 saying these exact words in display type eighty pixels below.
                 Printing them twice at once is the small-scale version of what
@@ -411,7 +456,7 @@ export function Hero({ disciplines }: { disciplines: Discipline[] }) {
               this route until this has scrolled away — printing the name
               twice, forty pixels apart, is what made an earlier version of
               this page look amateur. */}
-            <h1 className="px-6 pt-8 sm:px-10 sm:pt-10">
+            <h1 style={lands(220)} className="emerge px-6 pt-8 sm:px-10 sm:pt-10">
               {/* Tagged so the header can measure it. The header's own wordmark
                 waits on this one and then takes over from where it left, and
                 it can only time that against the real element — the masthead's
@@ -497,7 +542,8 @@ export function Hero({ disciplines }: { disciplines: Discipline[] }) {
               instead of being captured in four closures. */}
             <nav
               aria-label="Disciplines"
-              className="mt-8 border-t border-border sm:mt-10"
+              style={lands(320)}
+              className="rise mt-8 border-t border-border sm:mt-10"
             >
               <ul onPointerOver={takeFromEvent} onFocus={takeFromEvent}>
                 {disciplines.map((discipline, i) => (
@@ -552,7 +598,10 @@ export function Hero({ disciplines }: { disciplines: Discipline[] }) {
             {/* Four: the two ways in, pinned to the foot of the column so the
               type block is anchored at both ends against the full height of
               the picture rather than drifting in the middle. */}
-            <div className="mt-auto flex flex-wrap items-center gap-3 px-6 py-8 sm:px-10 sm:py-10">
+            <div
+              style={lands(420)}
+              className="rise mt-auto flex flex-wrap items-center gap-3 px-6 py-8 sm:px-10 sm:py-10"
+            >
               <Link
                 href="/work"
                 className="label border border-foreground bg-foreground px-6 py-4 text-background press hoverable:hover:opacity-90 active:scale-[0.98]"
