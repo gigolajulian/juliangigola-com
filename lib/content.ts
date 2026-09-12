@@ -51,6 +51,21 @@ export type SiteContent = {
    * means exactly what it did before this existed.
    */
   coverArt: string[];
+  /**
+   * Which disciplines the cover cycles through, in order.
+   *
+   * Separate from which disciplines exist, because the two questions are
+   * different: every discipline gets a page and a row in the work index, and
+   * the cover shows a handful. Seven of the thirteen are already on the site
+   * without being on the cover — video, event coverage, music video and the
+   * four session types.
+   *
+   * Empty means the six `lib/work.ts` has always led with, so the homepage is
+   * unchanged until somebody decides otherwise. A slug naming a discipline
+   * with no work, or none at all, is dropped when the list is built: the
+   * cover needs a photograph to show for a discipline and cannot invent one.
+   */
+  heroDisciplines: string[];
   testimonials: Testimonial[];
   sessions: SessionType[];
 };
@@ -76,14 +91,18 @@ const isRecord = (v: unknown): v is Record<string, unknown> =>
 
 /** A non-empty string. Blank fields are a mistake, not a value. */
 const str = (v: unknown, path: string): string =>
-  typeof v === "string" && v.trim() !== "" ? v : fail(path, "a non-empty string", v);
+  typeof v === "string" && v.trim() !== ""
+    ? v
+    : fail(path, "a non-empty string", v);
 
 /** A string, or null for "not set yet" — which several fields treat as meaningful. */
 const strOrNull = (v: unknown, path: string): string | null =>
   v === null ? null : str(v, path);
 
 const strList = (v: unknown, path: string): string[] =>
-  Array.isArray(v) ? v.map((x, i) => str(x, `${path}[${i}]`)) : fail(path, "an array", v);
+  Array.isArray(v)
+    ? v.map((x, i) => str(x, `${path}[${i}]`))
+    : fail(path, "an array", v);
 
 const money = (v: unknown, path: string): number | null => {
   if (v === null) return null;
@@ -122,8 +141,14 @@ const session = (v: unknown, path: string): SessionType => {
   };
 };
 
-const list = <T>(v: unknown, path: string, each: (x: unknown, p: string) => T): T[] =>
-  Array.isArray(v) ? v.map((x, i) => each(x, `${path}[${i}]`)) : fail(path, "an array", v);
+const list = <T>(
+  v: unknown,
+  path: string,
+  each: (x: unknown, p: string) => T,
+): T[] =>
+  Array.isArray(v)
+    ? v.map((x, i) => each(x, `${path}[${i}]`))
+    : fail(path, "an array", v);
 
 function parse(v: unknown): SiteContent {
   if (!isRecord(v)) return fail("the file", "an object", v);
@@ -136,6 +161,7 @@ function parse(v: unknown): SiteContent {
     // Absent in files written before the rack could be curated, which is not
     // an error — it simply means nothing has been picked.
     coverArt: strList(v.coverArt ?? [], "coverArt"),
+    heroDisciplines: strList(v.heroDisciplines ?? [], "heroDisciplines"),
     testimonials: list(v.testimonials, "testimonials", testimonial),
     sessions: list(v.sessions, "sessions", session),
   };

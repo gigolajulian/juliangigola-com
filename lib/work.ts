@@ -733,7 +733,7 @@ const frameProject = (frame: Frame): Project | undefined =>
  * A category with no lead project or no frame is dropped below, so this list
  * cannot put an empty discipline on the cover even if one is added to it.
  */
-const DISCIPLINE_SLUGS = [
+const DEFAULT_DISCIPLINE_SLUGS = [
   "editorial",
   "campaigns",
   "portraits",
@@ -741,6 +741,23 @@ const DISCIPLINE_SLUGS = [
   "artist-presskit",
   "coverart",
 ];
+
+/**
+ * What the cover actually runs through.
+ *
+ * Curated in /admin now, falling back to the six above when nothing has been
+ * chosen — so the homepage is unchanged until somebody decides otherwise, and
+ * emptying the list in the editor restores the original rather than producing
+ * a cover with no disciplines on it.
+ *
+ * Which disciplines exist and which the cover shows are two different
+ * questions, and this is the second one. Every discipline gets a page and a
+ * row in the work index regardless; seven of the thirteen were already on the
+ * site without being on the cover before any of this was editable.
+ */
+const DISCIPLINE_SLUGS = CONTENT.heroDisciplines.length
+  ? CONTENT.heroDisciplines
+  : DEFAULT_DISCIPLINE_SLUGS;
 
 /**
  * Where the unit of work is not a frame.

@@ -156,6 +156,27 @@ export default function AdminPage() {
            picker's limit cannot drift away from the number the grid is
            actually built around. */
         releaseLimit={HOMEPAGE_RELEASES}
+        /* Only the disciplines that could actually lead the cover. One with
+           no work has no frame to show, and `DISCIPLINES` drops it — so
+           offering it here would be a pick that silently does nothing. */
+        heroChoices={CATEGORIES.filter(
+          (c) =>
+            PROJECTS.some((p) => p.categories.some((x) => x.slug === c.slug)) &&
+            categoryFrame(c.slug) !== null,
+        ).map((c) => ({
+          slug: c.slug,
+          name: categoryLabel(c),
+          detail: (() => {
+            const n = PROJECTS.filter((p) =>
+              p.categories.some((x) => x.slug === c.slug),
+            ).length;
+            return `${n} ${n === 1 ? "project" : "projects"}`;
+          })(),
+          cover: {
+            src: categoryFrame(c.slug)?.src ?? "",
+            color: categoryFrame(c.slug)?.color ?? "transparent",
+          },
+        }))}
         releases={COVER_RELEASES.map((r) => ({
           slug: r.slug,
           name: r.title,

@@ -46,6 +46,17 @@ export function AdminPicker({
   emptyNote,
   /** Explains what happens with fewer than `limit` picks. */
   shortfallNote,
+  /**
+   * A count past which this warns instead of refusing.
+   *
+   * `limit` is a hard cap — the rack shows ten and an eleventh would not be
+   * drawn, so offering it would be a lie. This is the other kind of ceiling:
+   * a seventh discipline on the cover renders fine and makes the cover taller
+   * than the screen, which is a cost worth naming and not a decision to take
+   * out of Julian's hands.
+   */
+  warnAfter,
+  warnNote,
 }: {
   chosen: string[];
   items: PickerItem[];
@@ -57,6 +68,8 @@ export function AdminPicker({
   searchLabel: string;
   emptyNote: string;
   shortfallNote?: string;
+  warnAfter?: number;
+  warnNote?: string;
 }) {
   const [adding, setAdding] = React.useState(false);
   const [query, setQuery] = React.useState("");
@@ -178,6 +191,12 @@ export function AdminPicker({
           );
         })}
       </ol>
+
+      {warnAfter !== undefined && chosen.length > warnAfter && warnNote ? (
+        <p className="text-sm text-destructive">
+          {chosen.length} chosen. {warnNote}
+        </p>
+      ) : null}
 
       {chosen.length === 0 ? (
         <p className="text-sm text-muted-foreground">{emptyNote}</p>

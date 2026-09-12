@@ -149,6 +149,7 @@ export function AdminEditor({
   initialCovers,
   releases,
   releaseLimit,
+  heroChoices,
 }: {
   /** The content as it was at build time — what the live site is serving. */
   initial: SiteContent;
@@ -188,6 +189,15 @@ export function AdminEditor({
   initialCovers: Record<string, string>;
   /** Every cover-art release, for the homepage rack picker. */
   releases: PickerItem[];
+  /**
+   * Disciplines the cover could show, which is not all of them.
+   *
+   * `DISCIPLINES` in `lib/work.ts` drops any category with no lead project or
+   * no frame, because the cover has to show a photograph for each one and
+   * cannot invent it. So Video and Music video, which have no work at all,
+   * are absent here rather than offered and silently ignored.
+   */
+  heroChoices: PickerItem[];
   /** How many of them the homepage rack actually shows. */
   releaseLimit: number;
 }) {
@@ -1106,6 +1116,27 @@ export function AdminEditor({
             addLabel="Add a project"
             searchLabel="Search projects"
             emptyNote="Nothing selected — the section is left out of the homepage entirely."
+          />
+        </Field>
+
+        <Field
+          anchor="heroDisciplines"
+          label="Disciplines on the cover"
+          hint="Which disciplines the cover cycles through, and in what order. Every discipline has a page and a row on /work whether or not it is here — this is only the cover. Pick none and it runs the six it always has."
+        >
+          <AdminPicker
+            chosen={draft.heroDisciplines}
+            items={heroChoices}
+            onChange={(next) => set("heroDisciplines", next)}
+            addLabel="Add a discipline"
+            searchLabel="Search disciplines"
+            emptyNote="Nothing picked — the cover runs Editorial, Brand campaigns, Portraits, Mixed media, Artist presskit and Cover art, as it always has."
+            /* A warning, not a cap. A seventh row renders perfectly well and
+               makes the cover taller than the screen — measured at 1280x700,
+               six rows already put both buttons 198px under the fold — which
+               is a cost to state rather than a decision to take away. */
+            warnAfter={6}
+            warnNote="Past six the cover is taller than a 1280x700 screen and the two buttons fall below the fold."
           />
         </Field>
 
