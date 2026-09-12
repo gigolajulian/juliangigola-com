@@ -88,6 +88,33 @@ const INDEX_MS = 720;
 const ROW_MS = 55;
 const BUTTONS_MS = INDEX_MS + 6 * ROW_MS + 60;
 
+/**
+ * The swap, at the speed a hover deserves.
+ *
+ * The automatic cycle hands off slowly and on purpose: the outgoing word
+ * clears the frame before the incoming one starts, which is why the arriving
+ * title waits 360ms and then takes 320. Nobody is waiting on it — the cover
+ * is talking to itself.
+ *
+ * A hover is the opposite. It is direct manipulation: the visitor is pointing
+ * at a row and expecting that row, and most of a second before the word has
+ * finished arriving reads as the page thinking about it. So while they have
+ * hold of the index the handoff is compressed to about 270ms and the picture
+ * with it — the same choreography, out still clearing before in arrives, at
+ * the speed of an answer rather than a performance.
+ *
+ * Set on the section, so one declaration reaches the word, the credit in the
+ * far corner and the photograph, none of which share a parent below it.
+ */
+const HURRIED = {
+  "--swap-out-delay": "0ms",
+  "--swap-out-dur": "120ms",
+  "--swap-in-delay": "90ms",
+  "--swap-in-dur": "180ms",
+  "--swap-pic-dur": "260ms",
+  "--swap-blur-dur": "220ms",
+} as React.CSSProperties;
+
 const lands = (ms: number) =>
   ({ "--reveal-delay": `${ms}ms` }) as React.CSSProperties;
 
@@ -304,6 +331,10 @@ export function Hero({ disciplines }: { disciplines: Discipline[] }) {
   return (
     <section
       ref={sectionRef}
+      // `held` is set in the same handler as the slide change, so the
+      // arriving word mounts with these already in place rather than a
+      // render late.
+      style={held ? HURRIED : undefined}
       className="relative flex min-h-dvh flex-col border-b border-border"
     >
       {/* The photograph is the whole canvas now, with the type on top of it.

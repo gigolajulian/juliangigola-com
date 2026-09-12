@@ -703,11 +703,11 @@
   opacity: 1;
   filter: blur(0);
   transition:
-    opacity 520ms var(--ease-out-strong),
+    opacity var(--swap-pic-dur, 520ms) var(--ease-out-strong),
     /* Shorter than the fade, so the picture is sharp before it is fully
        opaque rather than arriving and then resolving — the focus should be
        the first thing finished, not the last. */
-      filter 420ms var(--ease-out-strong);
+      filter var(--swap-blur-dur, 420ms) var(--ease-out-strong);
 
   @starting-style {
     opacity: 0;
@@ -759,7 +759,8 @@
  */
 @utility title-out {
   opacity: 0;
-  transition: opacity 200ms var(--ease-out-strong) 120ms;
+  transition: opacity var(--swap-out-dur, 200ms) var(--ease-out-strong)
+    var(--swap-out-delay, 120ms);
 }
 
 @utility title-in {
@@ -769,8 +770,15 @@
      list — taking the hover fade off the credit link with it. Tailwind's
      `transition-colors` cannot be used alongside: both declare
      `transition-property`, and whichever lands later in the sheet wins. */
+  /* Read from properties rather than written here, so the cover can hand off
+     at two speeds. The defaults are the unhurried ones the automatic cycle
+     wants; `components/hero.tsx` overrides them inline while the visitor has
+     hold of the index. Properties rather than a second utility: two utilities
+     both declaring `transition` fight over source order, which this file
+     already carries a scar from. An inline style cannot lose. */
   transition:
-    opacity 320ms var(--ease-out-strong) 360ms,
+    opacity var(--swap-in-dur, 320ms) var(--ease-out-strong)
+      var(--swap-in-delay, 360ms),
     color 200ms ease-out;
 
   /* The arriving word is a brand new node every phase, and a transition does
