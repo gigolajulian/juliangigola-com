@@ -52,6 +52,7 @@
   --color-destructive: var(--destructive);
   --color-accent-foreground: var(--accent-foreground);
   --color-accent: var(--accent);
+  --color-live: var(--live);
   --color-muted-foreground: var(--muted-foreground);
   --color-muted: var(--muted);
   --color-secondary-foreground: var(--secondary-foreground);
@@ -238,6 +239,17 @@
 
   --destructive: oklch(0.62 0.2 25);
 
+  /* Live. The one green on the site, and it earns its place by saying
+     something nothing else can: the deploy carrying your edit has landed and
+     the public site is serving it.
+
+     Not the teal accent, deliberately. The accent is identity and appears on
+     things you can click; this is a status, and a reader who has learned that
+     teal means "interactive" should not have to unlearn it for one label.
+     Same lightness and chroma as the accent so the two sit together, hue
+     rotated to where green actually reads as green. */
+  --live: oklch(0.74 0.115 152);
+
   --border: oklch(1 0 0 / 11%);
   --input: oklch(1 0 0 / 14%);
   --ring: var(--accent);
@@ -292,6 +304,10 @@
   /* Held to the same ~7:1 the dark ground gives, so credits and captions
      are no less readable for the theme being lighter. */
   --muted-foreground: oklch(0.44 0.006 80);
+
+  /* Darkened the same way the accent is below, for the same reason: a green
+     that reads on a dark ground is too pale to read on a light one. */
+  --live: oklch(0.52 0.115 152);
 
   /* The same teal, taken down far enough to carry contrast against a light
      ground. Still the only chromatic thing on the page. */
@@ -772,5 +788,38 @@ body:has([data-workbench]) > footer {
 @media (prefers-reduced-motion: reduce) {
   [data-found] {
     animation: none;
+  }
+}
+
+/* ── the publish bar ─────────────────────────────────────────────
+ * Two phases, and they are not the same kind of waiting.
+ *
+ * Committing is measurable — the editor knows how many files it is sending —
+ * so that half is a real proportion and the width means something. Deploying
+ * is not: Cloudflare builds on its own schedule and the page has no way to
+ * ask how far along it is. Faking a proportion there would be a lie that
+ * looks exactly like the truth, so it runs as a sweep instead, which says
+ * "working, duration unknown" and cannot be misread as "80% done".
+ * ─────────────────────────────────────────────────────────────── */
+@keyframes jg-sweep {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(400%);
+  }
+}
+
+@utility sweep {
+  animation: jg-sweep 1400ms var(--ease-in-out-strong) infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sweep {
+    animation: none;
+    /* Still visibly a bar rather than nothing at all. */
+    transform: none;
+    width: 100%;
+    opacity: 0.4;
   }
 }

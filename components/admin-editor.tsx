@@ -76,7 +76,15 @@ const fromBase64 = (b64: string): string => {
 
 type Status =
   | { kind: "idle" }
-  | { kind: "working"; message: string }
+  /**
+   * `done`/`total` where the work is countable, absent where it is not.
+   *
+   * Committing is measurable — the editor knows how many files it is sending.
+   * Reading the repo first, and waiting for Cloudflare afterwards, are not:
+   * neither can be asked how far along it is, and inventing a proportion for
+   * them would be a lie shaped exactly like the truth.
+   */
+  | { kind: "working"; message: string; done?: number; total?: number }
   | { kind: "error"; message: string }
   | { kind: "saved"; message: string };
 
@@ -213,6 +221,85 @@ export function AdminEditor({
    */
   const [origin, setOrigin] = React.useState("");
   React.useEffect(() => setOrigin(window.location.origin), []);
+
+  /**
+   * Whether the deploy carrying the last publish has landed.
+   *
+   * Committing to GitHub and the change being on the site are a couple of
+   * minutes apart, and until now the editor said nothing about that gap —
+   * "Committed" was the last word, and whether the public site had caught up
+   * was something to go and check by hand.
+   *
+   * `/BUILD_ID` is a file Next emits and the Worker serves as a static asset,
+   * so the build the site is running has a name this page can read. Recorded
+   * on mount, polled after a publish, and when it differs the deploy has
+   * landed. Strictly it means *a* new build is live rather than specifically
+   * yours — but the only thing that triggers a build is a commit to `main`,
+   * and you just made one.
+   *
+   * Null where it cannot be read at all. `next dev` does not serve the file,
+   * so locally this stays null and the indicator simply never claims to be
+   * live, which is better than claiming it wrongly.
+   */
+  const built = React.useRef<string | null>(null);
+  const [live, setLive] = React.useState(false);
+  /** Set the moment a publish succeeds, so the wait has something to watch. */
+  const [awaitingDeploy, setAwaitingDeploy] = React.useState(false);
+  /**
+   * Whether this session committed something whose deploy is unconfirmed.
+   *
+   * Distinct from `live` so the label can stop short of claiming green. If the
+   * watch times out, or `/BUILD_ID` cannot be read at all, the honest answer
+   * is "committed, and I do not know whether it has landed" — which is what
+   * "published" says and what "live" would not.
+   */
+  const [committed, setCommitted] = React.useState(false);
+
+  React.useEffect(() => {
+    let cancelled = false;
+    // The effect body only reads; state is set in the callback, after the
+    // request comes back, rather than synchronously during the effect.
+    void fetch("/BUILD_ID", { cache: "no-store" })
+      .then((r) => (r.ok ? r.text() : null))
+      .then((id) => {
+        if (!cancelled) built.current = id?.trim() ?? null;
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  /**
+   * Polls for the deploy, and stops as soon as it lands.
+   *
+   * Ten seconds, because a Cloudflare build is minutes: a tighter loop would
+   * be dozens of requests to learn nothing. It gives up after five minutes —
+   * a build that has not landed by then has failed or queued, and a bar that
+   * sweeps for ever is worse than one that stops and lets you look.
+   */
+  React.useEffect(() => {
+    if (!awaitingDeploy || built.current === null) return;
+
+    const started = Date.now();
+    const id = window.setInterval(() => {
+      if (Date.now() - started > 5 * 60_000) {
+        setAwaitingDeploy(false);
+        return;
+      }
+      void fetch("/BUILD_ID", { cache: "no-store" })
+        .then((r) => (r.ok ? r.text() : null))
+        .then((next) => {
+          if (!next || next.trim() === built.current) return;
+          built.current = next.trim();
+          setLive(true);
+          setCommitted(false);
+          setAwaitingDeploy(false);
+        })
+        .catch(() => {});
+    }, 10_000);
+    return () => window.clearInterval(id);
+  }, [awaitingDeploy]);
 
   const known = React.useMemo(() => new Set(slugs), [slugs]);
 
@@ -523,6 +610,8 @@ export function AdminEditor({
           setStatus({
             kind: "working",
             message: `Uploading ${done} of ${total}`,
+            done,
+            total,
           }),
       });
 
@@ -534,6 +623,11 @@ export function AdminEditor({
       );
       setSha((await after.json())?.sha ?? null);
 
+      // A fresh publish is not live yet by definition, whatever the last one
+      // was — so the green is dropped before the wait begins.
+      setLive(false);
+      setCommitted(true);
+      setAwaitingDeploy(built.current !== null);
       setStatus({
         kind: "saved",
         message:
@@ -633,6 +727,48 @@ export function AdminEditor({
             them. Nested inside one pinned container they simply sit together
             and nothing has to be measured. */}
         <div className="sticky top-0 z-20 bg-background">
+          {/* The bar, on the edge of the chrome rather than in the flow.
+           *
+           * Absolutely positioned on the header's own bottom border, the way
+           * a browser puts its loading bar on the edge of the toolbar: it
+           * appears and disappears without moving a single thing on the page,
+           * which a bar occupying a row cannot do — and a form that jumps two
+           * pixels every time you publish is worse than no bar at all.
+           *
+           * Proportional while committing, because that is countable. A sweep
+           * while the deploy runs, because it is not: Cloudflare cannot be
+           * asked how far along it is, and a bar creeping to 80% of nothing
+           * is a lie in the shape of the truth. */}
+          {status.kind === "working" || awaitingDeploy ? (
+            <div
+              role="progressbar"
+              aria-label={
+                awaitingDeploy ? "Waiting for the deploy" : "Publishing"
+              }
+              aria-valuenow={
+                status.kind === "working" && status.total
+                  ? status.done
+                  : undefined
+              }
+              aria-valuemax={
+                status.kind === "working" && status.total
+                  ? status.total
+                  : undefined
+              }
+              className="pointer-events-none absolute inset-x-0 -bottom-px z-30 h-px overflow-hidden bg-border"
+            >
+              {status.kind === "working" && status.total ? (
+                <span
+                  className="block h-full bg-foreground transition-[width] duration-300 ease-out"
+                  style={{
+                    width: `${Math.round(((status.done ?? 0) / status.total) * 100)}%`,
+                  }}
+                />
+              ) : (
+                <span className="sweep block h-full w-1/4 bg-foreground" />
+              )}
+            </div>
+          ) : null}
           <nav
             className="flex items-center gap-3 border-b border-border py-2"
             aria-label="Editor sections"
@@ -678,19 +814,57 @@ export function AdminEditor({
              * one is a permanent answer to "where do I publish this". The
              * `title` says which of the two reasons it is grey. */}
             <span className="ml-auto flex items-center gap-3 self-center">
-              {/* A dot as well as the words. The state that decides whether
-                  Publish does anything should be readable without reading —
-                  and at `label` size, six words of grey text next to a grey
-                  button is not. */}
-              {dirty ? (
-                <span className="label flex items-center gap-2 text-foreground">
-                  <span
-                    aria-hidden
-                    className="block size-1.5 rounded-full bg-foreground"
-                  />
-                  unpublished
-                </span>
-              ) : null}
+              {/* Three states, because there are three.
+               *
+               * "Unpublished" and "live" are not opposites with nothing in
+               * between: committing to GitHub and the change reaching the
+               * public site are a couple of minutes apart, and that gap is
+               * the one the editor used to say nothing about. So the middle
+               * state is its own — published, not yet live — and it is the
+               * one carrying the sweep.
+               *
+               * A dot as well as the words. The state that decides whether
+               * Publish does anything should be readable without reading, and
+               * at `label` size six words of grey text beside a grey button
+               * is not. Green only for live, never for committed: "your work
+               * is safe" and "the world can see it" are different promises
+               * and only one of them is what green means here.
+               *
+               * `aria-live` so the change is announced rather than only
+               * coloured — the whole point of this label is a state change you
+               * are not necessarily watching for. */}
+              <span
+                aria-live="polite"
+                className="label flex items-center gap-2"
+              >
+                <span
+                  aria-hidden
+                  className={cn(
+                    "block size-1.5 rounded-full",
+                    dirty || awaitingDeploy || committed
+                      ? "bg-foreground"
+                      : "bg-live",
+                  )}
+                />
+                {dirty ? (
+                  <span className="text-foreground">unpublished</span>
+                ) : awaitingDeploy ? (
+                  <span className="text-muted-foreground">
+                    published &middot; going live
+                  </span>
+                ) : committed ? (
+                  // The watch gave up, or there was no `/BUILD_ID` to watch.
+                  // The commit happened; whether it landed is unknown, and
+                  // green would claim otherwise.
+                  <span className="text-muted-foreground">published</span>
+                ) : (
+                  // Nothing pending. Either a deploy was seen landing, or this
+                  // page has published nothing — and it was itself served by
+                  // the current build, so what is on screen is what the public
+                  // site has.
+                  <span className="text-live">live</span>
+                )}
+              </span>
               <button
                 type="button"
                 onClick={publish}
