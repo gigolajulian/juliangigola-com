@@ -44,35 +44,44 @@ export default function AdminPage() {
   const addedSlugs = new Set(ADDED.map((p) => p.slug));
 
   return (
-    /* Full bleed. The reading pages are measured — a column of prose has a
-       right width and it is nowhere near the width of a monitor — but this is
-       a workbench, not something to read: three panels side by side, one of
-       them a grid of photographs. Capping it at 64rem left the sitemap four
-       thumbnails wide on a display with room for twelve. */
-    /* One screen, from `xl` up. A workbench that scrolls as one document
-       means the sitemap leaves the top of the screen while you edit the
-       thing it points at — so the page is pinned to the viewport and each
-       of the three columns scrolls its own contents instead. `data-workbench`
-       is what hides the site footer here (see `globals.css`); without that,
-       the footer alone would still make the document scrollable.
+    /* Full bleed, and as little of it spent on chrome as possible.
+       
+       The reading pages are measured — a column of prose has a right width
+       and it is nowhere near the width of a monitor — but this is a
+       workbench: three panels side by side, one of them a grid of
+       photographs. Capping it at 64rem left the sitemap four thumbnails wide
+       on a display with room for twelve.
+
+       One screen from `xl` up, with each of the three columns scrolling its
+       own contents, so the sitemap does not leave the top of the screen while
+       you edit the thing it points at. `data-workbench` is what hides the
+       site footer here (see `globals.css`); without it the footer alone would
+       still make the document scrollable.
+
+       The top padding was `pt-36` — inherited from the reading pages, where
+       it clears the fixed bar under a full masthead. Measured here it put the
+       first editable thing 324px down a 982px screen: a third of a
+       single-screen tool spent on a title and an explainer read once. `pt-20`
+       clears the bar and nothing more, and the title is a line rather than a
+       block.
 
        Below `xl` the columns stack, and a stack in a fixed box is three
        scrollers in a phone screen. There it stays an ordinary page. */
     <div
       data-workbench
-      className="w-full px-6 pb-24 pt-28 sm:px-10 sm:pt-36 xl:flex xl:h-dvh xl:flex-col xl:overflow-hidden xl:pb-0"
+      className="w-full px-6 pb-24 pt-20 sm:px-10 xl:flex xl:h-dvh xl:flex-col xl:overflow-hidden xl:pb-0"
     >
-      <header className="xl:shrink-0">
-        <h1 className="title">Content</h1>
-        {/* The prose keeps its measure even though the page no longer has
-            one — this paragraph is the one thing here that is read. */}
-        <p className="mt-4 max-w-prose text-sm leading-relaxed text-muted-foreground">
-          Edits are committed to{" "}
-          <code className="text-foreground">{CONTENT_PATH}</code> and go live
-          when the deploy finishes, a couple of minutes later. A new project is
-          committed to{" "}
-          <code className="text-foreground">content/projects.json</code> along
-          with its photographs, in a single commit.
+      {/* One line. The paragraph that used to be here said where edits are
+          committed, which matters at the moment you publish and not at the
+          moment you arrive — so it lives beside Publish now, where it is
+          actually load-bearing. */}
+      <header className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1 border-b border-border pb-3 xl:shrink-0">
+        <h1 className="font-display text-xl uppercase tracking-[0.02em]">
+          Content
+        </h1>
+        <p className="label text-muted-foreground">
+          commits to <code className="text-foreground">{CONTENT_PATH}</code>{" "}
+          &middot; live a couple of minutes after the deploy
         </p>
       </header>
 

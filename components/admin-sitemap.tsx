@@ -88,15 +88,50 @@ export function AdminSitemap({
   /** For the narrow left rail: smaller tiles, no per-row link. */
   compact?: boolean;
 }) {
+  /**
+   * Narrows the whole map, not one group of it.
+   *
+   * Eighty-seven rows is a scroll, and a scroll is the wrong instrument for
+   * "take me to L3NA" — you already know the name, so typing it should be the
+   * whole gesture. Held here rather than lifted to the editor because nothing
+   * else needs it: unlike the project list's filter, which a discipline row
+   * sets, this one is only ever driven by the person typing in it.
+   */
+  const [find, setFind] = React.useState("");
+  const needle = find.trim().toLowerCase();
+  const hit = (...fields: string[]) =>
+    needle === "" || fields.some((f) => f.toLowerCase().includes(needle));
+
   const live = projects.filter((p) => !hidden.has(p.slug));
 
+  // Grouped before filtering, so a discipline whose name matches keeps all of
+  // its work — searching "portraits" should show the portraits, not only the
+  // ones with "portraits" in their own title.
   const byCategory = new Map<string, SitemapProject[]>();
   for (const p of live) {
+    if (!hit(p.name, p.slug, p.category)) continue;
     byCategory.set(p.category, [...(byCategory.get(p.category) ?? []), p]);
   }
+  for (const c of categories) {
+    if (needle !== "" && hit(c.name) && !byCategory.has(c.name)) {
+      byCategory.set(
+        c.name,
+        live.filter((p) => p.category === c.name),
+      );
+    }
+  }
 
-  const withheld = projects.filter((p) => hidden.has(p.slug));
+  const pages = PAGES.filter((p) => hit(p.label, p.href));
+  const disciplines = categories.filter((c) => hit(c.name, c.slug));
+  const withheld = projects.filter(
+    (p) => hidden.has(p.slug) && hit(p.name, p.slug, p.category),
+  );
   const total = PAGES.length + categories.length + live.length;
+  const showing =
+    pages.length +
+    disciplines.length +
+    [...byCategory.values()].reduce((n, l) => n + l.length, 0) +
+    withheld.length;
 
   return (
     <section>
@@ -114,6 +149,30 @@ export function AdminSitemap({
         </span>
       </div>
 
+      <input
+        type="search"
+        value={find}
+        onChange={(e) => setFind(e.target.value)}
+        placeholder="Find a page, discipline or project"
+        aria-label="Filter the sitemap"
+        className="mt-3 w-full border border-border bg-transparent px-3 py-2 text-sm outline-none placeholder:text-muted-foreground focus-visible:border-foreground"
+      />
+
+      {needle !== "" ? (
+        <p className="label mt-2 flex items-baseline justify-between gap-3 text-muted-foreground">
+          <span>
+            {showing} of {total}
+          </span>
+          <button
+            type="button"
+            onClick={() => setFind("")}
+            className="hoverable:hover:text-foreground"
+          >
+            Clear
+          </button>
+        </p>
+      ) : null}
+
       {!compact ? (
         <p className="mt-3 max-w-prose text-sm leading-relaxed text-muted-foreground">
           As the draft would leave it. Dimmed projects are hidden and will not
@@ -124,9 +183,9 @@ export function AdminSitemap({
 
       {/* The fixed pages, as a plain column — there are five and they never
           change, so a grid of identical rectangles would be decoration. */}
-      <Group title="Pages">
+      <Group title="Pages" count={pages.length}>
         <ul className="flex flex-col">
-          {PAGES.map((p) => {
+          {pages.map((p) => {
             const body = (
               <>
                 <span className="flex-1 truncate text-sm">{p.label}</span>
@@ -156,12 +215,12 @@ export function AdminSitemap({
         </ul>
       </Group>
 
-      <Group title="Disciplines" count={categories.length}>
+      <Group title="Disciplines" count={disciplines.length}>
         <ul className="flex flex-col">
           {/* Keyed by slug, not href: `categoryHref` sends a discipline with
               no work yet to `/work`, so several share a destination and
               keying on that collapses them into one row. */}
-          {categories.map((c) => {
+          {disciplines.map((c) => {
             const n = byCategory.get(c.name)?.length ?? 0;
             const body = (
               <>
@@ -214,6 +273,12 @@ export function AdminSitemap({
           />
         </Group>
       ))}
+
+      {needle !== "" && showing === 0 ? (
+        <p className="mt-6 text-sm text-muted-foreground">
+          Nothing matches &ldquo;{find.trim()}&rdquo;.
+        </p>
+      ) : null}
 
       {withheld.length > 0 ? (
         <Group title="Hidden" count={withheld.length}>

@@ -634,25 +634,35 @@ export function AdminEditor({
             and nothing has to be measured. */}
         <div className="sticky top-0 z-20 bg-background">
           <nav
-            className="flex gap-1 border-b border-border"
+            className="flex items-center gap-3 border-b border-border py-2"
             aria-label="Editor sections"
           >
-            {(["content", "disciplines", "projects"] as const).map((v) => (
-              <button
-                key={v}
-                type="button"
-                onClick={() => setView(v)}
-                aria-current={view === v ? "true" : undefined}
-                className={cn(
-                  "label -mb-px border-b-2 px-4 py-3 capitalize transition-colors duration-200",
-                  view === v
-                    ? "border-foreground text-foreground"
-                    : "border-transparent text-muted-foreground hoverable:hover:text-foreground",
-                )}
-              >
-                {v}
-              </button>
-            ))}
+            {/* A segmented control rather than three underlined words.
+             *
+             * These are the three halves of the tool and the one thing you
+             * press most, so they get a surface: an underline on a lowercase
+             * word reads as a link among links, and at this size the selected
+             * one was legible only by a 2px rule. Filled, the current view is
+             * obvious from across the desk — which is the same argument the
+             * hero index makes for `bg-secondary` on its current row. */}
+            <span className="flex shrink-0 border border-border p-0.5">
+              {(["content", "disciplines", "projects"] as const).map((v) => (
+                <button
+                  key={v}
+                  type="button"
+                  onClick={() => setView(v)}
+                  aria-current={view === v ? "true" : undefined}
+                  className={cn(
+                    "label px-3 py-1.5 capitalize transition-colors duration-200",
+                    view === v
+                      ? "bg-foreground text-background"
+                      : "text-muted-foreground hoverable:hover:bg-card hoverable:hover:text-foreground",
+                  )}
+                >
+                  {v}
+                </button>
+              ))}
+            </span>
             {/* Publish, where the work is.
              *
              * There is a second one at the foot of the column, and that is the
@@ -668,9 +678,17 @@ export function AdminEditor({
              * one is a permanent answer to "where do I publish this". The
              * `title` says which of the two reasons it is grey. */}
             <span className="ml-auto flex items-center gap-3 self-center">
+              {/* A dot as well as the words. The state that decides whether
+                  Publish does anything should be readable without reading —
+                  and at `label` size, six words of grey text next to a grey
+                  button is not. */}
               {dirty ? (
-                <span className="label text-muted-foreground">
-                  unpublished changes
+                <span className="label flex items-center gap-2 text-foreground">
+                  <span
+                    aria-hidden
+                    className="block size-1.5 rounded-full bg-foreground"
+                  />
+                  unpublished
                 </span>
               ) : null}
               <button
