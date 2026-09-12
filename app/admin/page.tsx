@@ -11,7 +11,15 @@ import {
   categoryLabel,
   categoryHref,
 } from "@/lib/work";
-import { ADDED, TRASH, RECATEGORISED, REFRAMED, RECREDITED } from "@/lib/added";
+import {
+  ADDED,
+  TRASH,
+  RECATEGORISED,
+  REFRAMED,
+  RECREDITED,
+  ORDER,
+  DISCIPLINE_COVERS,
+} from "@/lib/added";
 
 /* ── admin ────────────────────────────────────────────────────────
  * Unlisted, not secret. Nothing in the nav points here and no crawler is
@@ -120,6 +128,12 @@ export default function AdminPage() {
         initialRecategorised={RECATEGORISED}
         initialReframed={REFRAMED}
         initialRecredited={RECREDITED}
+        /* The running order and the picked discipline covers, as the last
+           build applied them. Spread rather than passed through, because
+           both are frozen reads of the content file and the editor holds
+           them as ordinary state it can edit. */
+        initialOrder={[...ORDER]}
+        initialCovers={{ ...DISCIPLINE_COVERS }}
         /* Imported from the section itself rather than restated, so the
            picker's limit cannot drift away from the number the grid is
            actually built around. */

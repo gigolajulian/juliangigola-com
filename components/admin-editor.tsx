@@ -9,12 +9,14 @@ import {
 import { AdminNewProject } from "@/components/admin-new-project";
 import { AdminProjects, type AdminProject } from "@/components/admin-projects";
 import { AdminSitemap, type SitemapTarget } from "@/components/admin-sitemap";
+import { AdminDisciplines } from "@/components/admin-disciplines";
 import { AdminPreview } from "@/components/admin-preview";
 import { AdminPicker, type PickerItem } from "@/components/admin-picker";
 import { AdminTrash } from "@/components/admin-trash";
 import { isTextRef, type FrameRef, type TrashedProject } from "@/lib/added";
 import { ADDED_PATH } from "@/lib/added";
-import { tidySequence, type PendingUpload } from "@/components/admin-frames";
+import { type PendingUpload } from "@/components/admin-frames";
+import { projectsFile, type ProjectsFile } from "@/lib/admin-payload";
 import { commitFiles, readFile, type CommitFile } from "@/lib/admin-github";
 import type { Credit } from "@/lib/work-types";
 import { cn } from "@/lib/utils";
@@ -89,6 +91,8 @@ export function AdminEditor({
   initialRecategorised,
   initialReframed,
   initialRecredited,
+  initialOrder,
+  initialCovers,
   releases,
   releaseLimit,
 }: {
@@ -112,6 +116,10 @@ export function AdminEditor({
   initialReframed: Record<string, FrameRef[]>;
   /** Rewritten credits the last build applied, slug → list. */
   initialRecredited: Record<string, Credit[]>;
+  /** The running order the last build applied, by slug. */
+  initialOrder: string[];
+  /** Discipline covers the last build applied, category slug to frame path. */
+  initialCovers: Record<string, string>;
   /** Every cover-art release, for the homepage rack picker. */
   releases: PickerItem[];
   /** How many of them the homepage rack actually shows. */
@@ -122,7 +130,13 @@ export function AdminEditor({
   /** The blob SHA of the file being edited. Absent until connected. */
   const [sha, setSha] = React.useState<string | null>(null);
   const [status, setStatus] = React.useState<Status>({ kind: "idle" });
-  const [view, setView] = React.useState<"content" | "projects">("content");
+  const [view, setView] = React.useState<
+    "content" | "disciplines" | "projects"
+  >("content");
+  /** Which discipline is expanded in the Disciplines view. */
+  const [openDiscipline, setOpenDiscipline] = React.useState<string | null>(
+    null,
+  );
 
   const [hidden, setHidden] = React.useState<Set<string>>(
     () => new Set(initialHidden),
@@ -134,6 +148,11 @@ export function AdminEditor({
     React.useState<Record<string, FrameRef[]>>(initialReframed);
   const [recredited, setRecredited] =
     React.useState<Record<string, Credit[]>>(initialRecredited);
+  /** The running order of the work, by slug. Partial - see `lib/added.ts`. */
+  const [order, setOrder] = React.useState<string[]>(initialOrder);
+  /** The photograph standing for each discipline, by category slug. */
+  const [covers, setCovers] =
+    React.useState<Record<string, string>>(initialCovers);
   /**
    * The project whose row is expanded, if any.
    *
@@ -183,7 +202,9 @@ export function AdminEditor({
     [...hidden].sort().join() !== [...initialHidden].sort().join() ||
     JSON.stringify(recategorised) !== JSON.stringify(initialRecategorised) ||
     JSON.stringify(reframed) !== JSON.stringify(initialReframed) ||
-    JSON.stringify(recredited) !== JSON.stringify(initialRecredited);
+    JSON.stringify(recredited) !== JSON.stringify(initialRecredited) ||
+    JSON.stringify(order) !== JSON.stringify(initialOrder) ||
+    JSON.stringify(covers) !== JSON.stringify(initialCovers);
 
   /**
    * Where "Open live" points. Read after mount, because the server has no
@@ -194,6 +215,24 @@ export function AdminEditor({
   React.useEffect(() => setOrigin(window.location.origin), []);
 
   const known = React.useMemo(() => new Set(slugs), [slugs]);
+
+  /**
+   * The projects in the draft's running order.
+   *
+   * `projects` arrives in the order the last build published. Dragging one
+   * changes `order` in memory, and the view has to redraw from that
+   * immediately rather than waiting for a deploy — so the sort happens here,
+   * mirroring `byRunningOrder` in `lib/work.ts`.
+   *
+   * `Infinity` for anything the order does not name, and a stable sort, so
+   * the undragged keep the position the manifest gave them.
+   */
+  const orderedProjects = React.useMemo(() => {
+    const rank = new Map(order.map((slug, i) => [slug, i]));
+    return [...projects].sort(
+      (a, b) => (rank.get(a.slug) ?? Infinity) - (rank.get(b.slug) ?? Infinity),
+    );
+  }, [projects, order]);
 
   /**
    * Sends the editor to a project, from anywhere that can name one.
@@ -426,39 +465,30 @@ export function AdminEditor({
         JSON.stringify(recategorised) !==
           JSON.stringify(initialRecategorised) ||
         JSON.stringify(reframed) !== JSON.stringify(initialReframed) ||
-        JSON.stringify(recredited) !== JSON.stringify(initialRecredited);
+        JSON.stringify(recredited) !== JSON.stringify(initialRecredited) ||
+        JSON.stringify(order) !== JSON.stringify(initialOrder) ||
+        JSON.stringify(covers) !== JSON.stringify(initialCovers);
 
       if (manifestMoved) {
         setStatus({ kind: "working", message: "Reading the project list…" });
         // Read fresh: a project may have been added or deleted since this page
         // loaded, and writing back a stale list would undo it.
         const current = await readFile(token, ADDED_PATH);
-        const parsed = current
-          ? (JSON.parse(current) as {
-              projects: unknown[];
-              hidden?: string[];
-              categories?: Record<string, string>;
-              frames?: Record<string, FrameRef[]>;
-              credits?: Record<string, Credit[]>;
-            })
-          : {
-              projects: [],
-              hidden: [],
-              categories: {},
-              frames: {},
-              credits: {},
-            };
-        parsed.hidden = [...hidden].sort();
-        parsed.categories = recategorised;
-        // Passages nobody wrote in are dropped here rather than validated
-        // against at build time; see `tidySequence`. A sequence that is
-        // nothing but dropped passages leaves no entry at all.
-        parsed.frames = Object.fromEntries(
-          Object.entries(reframed)
-            .map(([slug, list]) => [slug, tidySequence(list)] as const)
-            .filter(([, list]) => list.length > 0),
+        // Built by `lib/admin-payload.ts`, covered by
+        // `scripts/check-payload.mjs`. That is the one part of publishing
+        // testable without a token, and the part where a dropped field
+        // publishes as "you never made that edit".
+        const parsed = projectsFile(
+          current ? (JSON.parse(current) as ProjectsFile) : null,
+          {
+            hidden,
+            categories: recategorised,
+            frames: reframed,
+            credits: recredited,
+            order,
+            covers,
+          },
         );
-        parsed.credits = recredited;
         files.push({
           path: ADDED_PATH,
           content: `${JSON.stringify(parsed, null, 2)}\n`,
@@ -607,7 +637,7 @@ export function AdminEditor({
             className="flex gap-1 border-b border-border"
             aria-label="Editor sections"
           >
-            {(["content", "projects"] as const).map((v) => (
+            {(["content", "disciplines", "projects"] as const).map((v) => (
               <button
                 key={v}
                 type="button"
@@ -700,11 +730,41 @@ export function AdminEditor({
           ) : null}
         </div>
 
+        {view === "disciplines" ? (
+          <AdminDisciplines
+            disciplines={categories}
+            /* In the draft's running order, so the list this view drags is
+               the list the site will publish — including the projects added
+               in this session, which the manifest has never seen. */
+            projects={orderedProjects}
+            hidden={hidden}
+            order={order}
+            onOrder={setOrder}
+            covers={covers}
+            onCover={(category, src) =>
+              setCovers((c) => {
+                const next = { ...c };
+                // Removed rather than stored as null, so going back to the
+                // derived cover leaves no entry behind to publish.
+                if (src) next[category] = src;
+                else delete next[category];
+                return next;
+              })
+            }
+            opened={openDiscipline}
+            onOpened={setOpenDiscipline}
+          />
+        ) : null}
+
         {view === "projects" ? (
           <>
             <AdminProjects
               token={token}
-              projects={projects}
+              /* The draft's running order, not the build's. The list here
+                 and the list in Disciplines are the same list, and showing
+                 one in an order the other has already changed is how you
+                 stop trusting either. */
+              projects={orderedProjects}
               hidden={hidden}
               onHiddenChange={setHidden}
               onRemoved={setTrash}
@@ -758,7 +818,14 @@ export function AdminEditor({
       {/* Sticky, so it stays beside the field being edited on a long form.
           Below `xl` it drops under the form rather than squeezing both. */}
       <aside className="min-w-0 xl:min-h-0 xl:overflow-y-auto xl:pb-10">
-        <AdminPreview draft={draft} projects={projects} hidden={hidden} />
+        {/* Ordered too: the preview's whole job is to be what publishing
+            would produce, and the homepage band it draws is in running
+            order. */}
+        <AdminPreview
+          draft={draft}
+          projects={orderedProjects}
+          hidden={hidden}
+        />
       </aside>
     </div>
   );

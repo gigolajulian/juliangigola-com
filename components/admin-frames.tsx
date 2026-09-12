@@ -44,18 +44,10 @@ export type PendingUpload = {
 const srcOf = (f: FrameRef): string =>
   typeof f === "string" ? f : isTextRef(f) ? "" : f.src;
 
-/**
- * Drops passages nobody wrote anything in.
- *
- * `lib/added.ts` refuses an empty body, and rightly — it would publish as a
- * gap in the sequence that nobody put there. But pressing "Add text" and
- * then changing your mind is an ordinary thing to do, and a draft that fails
- * the deploy because of it would be the editor's fault, not Julian's. So the
- * empties are dropped on the way out instead of being validated against on
- * the way in.
- */
-export const tidySequence = (list: FrameRef[]): FrameRef[] =>
-  list.filter((f) => !isTextRef(f) || f.body.trim() !== "");
+/* Re-exported so this panel's callers keep importing it from here. The
+   implementation moved to `lib/admin-payload.ts`, beside the publish payload
+   it is part of and where a test can reach it. */
+export { tidySequence } from "@/lib/admin-payload";
 
 /**
  * A name the harvester cannot collide with.
@@ -439,12 +431,12 @@ export function AdminFrames({
       ) : null}
 
       <p className="label mt-5 text-muted-foreground">
-        Drag a tile to move it, or use the arrows — the arrows are the way on
-        a touch screen and with a keyboard. The first photograph opens the
-        project and is the card shown on every index. Text sits on the page
-        exactly where it sits in this list. Removing a photograph takes it out
-        of the sequence and keeps the file. Nothing here is live until you
-        press Publish.
+        Drag a tile to move it, or use the arrows — the arrows are the way on a
+        touch screen and with a keyboard. The first photograph opens the project
+        and is the card shown on every index. Text sits on the page exactly
+        where it sits in this list. Removing a photograph takes it out of the
+        sequence and keeps the file. Nothing here is live until you press
+        Publish.
       </p>
     </div>
   );
