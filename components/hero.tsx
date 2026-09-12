@@ -40,39 +40,6 @@ import type { Discipline, Frame, Project } from "@/lib/work";
  * the mount too.
  * ─────────────────────────────────────────────────────────────── */
 
-/**
- * How bright a frame is, 0 to 1, from the mean colour the harvester recorded.
- *
- * WCAG relative luminance rather than a plain average: the eye is far more
- * sensitive to green than to blue, and a naive mean calls a saturated blue
- * frame "light" when it reads as dark on screen.
- *
- * No canvas and no sampling at runtime. Every `Frame` already carries the
- * image's mean as `color` — it is what the mat behind the photograph is
- * painted with — so the number is in the data before the page loads.
- */
-const brightness = (hex: string): number => {
-  const n = Number.parseInt(hex.replace("#", ""), 16);
-  if (!Number.isFinite(n)) return 0;
-  const channel = (v: number) => {
-    const s = v / 255;
-    return s <= 0.03928 ? s / 12.92 : ((s + 0.055) / 1.055) ** 2.4;
-  };
-  return (
-    0.2126 * channel((n >> 16) & 255) +
-    0.7152 * channel((n >> 8) & 255) +
-    0.0722 * channel(n & 255)
-  );
-};
-
-/**
- * Above this, the header treats the cover as a light ground and inks itself
- * dark. Below the midpoint on purpose: the bar is translucent nothing at the
- * top of the page, and white type surviving on a mid-grey frame is a lower
- * bar than dark type surviving on one.
- */
-const LIGHT_COVER = 0.42;
-
 /** Long enough to read the word and take in the picture before it moves on. */
 const DWELL_MS = 3500;
 
@@ -189,31 +156,31 @@ export function Hero({ disciplines }: { disciplines: Discipline[] }) {
   const { active } = slide;
 
   /**
-   * Tells the header how bright the picture behind it is.
+   * Tells the header there is a photograph behind it.
    *
-   * The bar is fixed and transparent while the page is at the top, so it sits
-   * directly on this photograph — and a nav in white over a pale frame is
-   * unreadable. The frames run from a near-black studio portrait to a sunlit
-   * cityscape, so no single ink works for all of them.
+   * Presence, not brightness. The first version of this published how light
+   * the frame was, from the mean colour the harvester records, so the bar
+   * could ink itself dark over a pale cover. It picked wrong on the first
+   * frame I checked: CYBER1A's mean is dark, because the outfit is black, and
+   * the part the bar actually sits on is a pale studio backdrop. A mean
+   * describes the whole picture and the bar occupies one corner of it.
    *
-   * An attribute on the document rather than a prop, because the header is
-   * not this component's child — it is a sibling in the root layout, and the
-   * alternative is lifting cover state into a context that exists to be read
-   * by one element. `app/globals.css` keys the header's tokens off it.
+   * Sampling that corner properly means a canvas read per frame, and it would
+   * still have nothing to say about a frame that is pale on the left and black
+   * on the right. Which is the argument already made for putting the hero type
+   * on a plate — so the bar gets the same plate, and needs to know only that
+   * there is something behind it worth covering.
    *
-   * Removed on unmount, so a route without a cover is not left inheriting the
-   * last frame's tone.
+   * An attribute on the document rather than a prop, because the header is a
+   * sibling in the root layout and not this component's child. Removed on
+   * unmount, so a route with no cover is not left plated over nothing.
    */
   React.useEffect(() => {
-    const tone =
-      brightness(slides[active]?.frame.color ?? "#000") > LIGHT_COVER
-        ? "light"
-        : "dark";
-    document.documentElement.dataset.coverTone = tone;
+    document.documentElement.dataset.cover = "true";
     return () => {
-      delete document.documentElement.dataset.coverTone;
+      delete document.documentElement.dataset.cover;
     };
-  }, [slides, active]);
+  }, []);
 
   /** The cover itself — the surface whose pointer movement counts as use. */
   const sectionRef = React.useRef<HTMLElement>(null);
@@ -335,125 +302,96 @@ export function Hero({ disciplines }: { disciplines: Discipline[] }) {
   if (!current) return null;
 
   return (
-    <section ref={sectionRef} className="border-b border-border">
-      {/* A column on a phone, two columns from `lg`.
+    <section
+      ref={sectionRef}
+      className="relative flex min-h-dvh flex-col border-b border-border"
+    >
+      {/* The photograph is the whole canvas now, with the type on top of it.
        *
-       * Three children rather than two, because on a phone the photograph
-       * belongs *between* the name and the index — the name has to be the
-       * first thing on the screen, and the index and the buttons have to
-       * follow the picture rather than precede it. A single text column
-       * cannot be interrupted like that, so it is split and the pieces are
-       * placed explicitly above `lg`, where they reassemble into the left
-       * column with the photograph beside them.
+       * It used to be a column beside the type — `1fr` of words against
+       * `80dvh` of picture, which is 4:5 at full height so nothing was ever
+       * cropped. That held the frame intact and spent half the screen on a
+       * panel, and at some window shapes the two collided: the discipline
+       * word was clipped by the picture's own edge.
+       *
+       * Full bleed crops, and that is the trade taken deliberately. A 4:5
+       * frame on a 16:9 screen loses roughly a third, top and bottom, from
+       * the centre — so a frame chosen for the cover now wants headroom in
+       * it. `COVER_OVERRIDES` and the discipline covers in /admin are where
+       * that choice gets made.
        */}
-      {/* `min-h-dvh`, not `h-dvh`. The type column needs ~930px at its widest
-          setting, so on a viewport shorter than that — 860px is a 13" laptop
-          with a browser bar — a fixed height left the two buttons hanging
-          below the cover and overlapping the press strip. A minimum fills the
-          screen on every normal display and lets the section grow rather than
-          spill on a short one. It stays a single implicit row, which is what
-          keeps the row height definite enough for the picture's `h-full` to
-          resolve against. */}
-      <div className="flex flex-col lg:grid lg:min-h-dvh lg:grid-cols-[1fr_80dvh]">
-        {/* The photograph leads on a phone — it is the hook — but it is held
-            to half the screen so the name and both ways in stay visible
-            without scrolling. */}
-        <div
-          // Second on a phone: the name introduces the picture rather than
-          // the picture arriving unattributed. Still held to roughly half the
-          // screen so the index and both buttons are reachable without a
-          // scroll. On the right and full height from `lg`, spanning both
-          // text rows.
-          // Second on a phone: the name introduces the picture rather than
-          // the picture arriving unattributed. Still held to roughly half the
-          // screen so the index and both buttons are reachable without a
-          // scroll. On the right and full height from `lg`.
-          //
-          // No width, height or aspect of its own above `lg` — all three are
-          // the column's job now, and giving the picture any of them is what
-          // kept breaking this.
-          //
-          // The 4:5 column used to come from `aspect-[4/5]` on the picture
-          // with an `auto` track beside it, which is circular: the height
-          // came from the width, the width came from the track, and the track
-          // came from the picture. Whenever the type column grew past one
-          // screen the loop resolved 70px too tall and the cover overflowed
-          // its own section into the press strip below.
-          //
-          // The track is now `80dvh` — 4:5 of a full-height column, stated in
-          // viewport units so it depends on nothing. The picture simply
-          // stretches to its row.
-          className="relative order-2 h-[55dvh] w-full lg:order-last lg:h-auto"
-          style={{ backgroundColor: current.frame.color }}
-        >
-          {/* One frame dissolves up over the one it replaces.
-           *
-           * Two things were wrong with fading them against each other. Both
-           * layers transitioned at once, so halfway through a switch each sat
-           * near 50% and the mat colour showed between them — every change
-           * dipped through a wash before recovering. And nothing set a stacking
-           * order, so paint order followed this array: moving *down* the index
-           * put the incoming frame on top, moving *up* put the outgoing one on
-           * top instead, and the same interaction looked like two different
-           * effects depending on which way the pointer travelled.
-           *
-           * Now only the incoming layer animates, and it is explicitly above
-           * the outgoing one. The frame being replaced stays fully opaque
-           * underneath until it is covered, so there is nothing to see through.
-           *
-           * Still only two are ever mounted, so first paint costs one
-           * photograph rather than six. */}
-          {slides.map((discipline, i) =>
-            i === slide.active || i === slide.previous ? (
-              <Image
-                key={discipline.slug}
-                src={discipline.frame.src}
-                alt={
-                  i === active
-                    ? discipline.frame.alt ||
-                      `${discipline.name} work by Julian Gigola`
-                    : ""
-                }
-                fill
-                sizes="(min-width: 1024px) 45vw, 100vw"
-                priority={i === 0}
-                aria-hidden={i === active ? undefined : true}
-                className={cn(
-                  // `cover` against a column already cut to the frame's ratio:
-                  // fills it with no border of empty colour showing.
-                  "object-cover",
-                  // Incoming above outgoing, by role rather than by index.
-                  i === active ? "z-10" : "z-0",
-                  // The very first frame is the page's largest paint; fading it
-                  // up from nothing would cost half a second of blank column
-                  // for an effect nobody is there to see.
-                  i === active && slide.previous !== -1 && "dissolve",
-                  // No `opacity-100` here, and that matters: it used to be,
-                  // to say "both layers are fully opaque — the outgoing frame
-                  // is covered, not faded". The intent was right and the
-                  // implementation cancelled the transition it sat next to.
-                  //
-                  // `opacity-100` declares `opacity: 1` unconditionally, which
-                  // beats `dissolve`'s `@starting-style` in the cascade
-                  // whatever order the classes are written in. So the incoming
-                  // frame began at full opacity and there was no crossfade at
-                  // all — the pictures hard-cut, and only the mat colour and
-                  // the type ever moved.
-                  //
-                  // The outgoing layer needs no declaration to stay opaque: it
-                  // carries no `dissolve`, so its opacity is already 1. Saying
-                  // so out loud is what broke it.
-                )}
-              />
-            ) : null,
-          )}
+      <div
+        className="absolute inset-0 overflow-hidden"
+        style={{ backgroundColor: current.frame.color }}
+      >
+        {/* One frame dissolves up over the one it replaces.
+         *
+         * Two things were wrong with fading them against each other. Both
+         * layers transitioned at once, so halfway through a switch each sat
+         * near 50% and the mat colour showed between them — every change
+         * dipped through a wash before recovering. And nothing set a stacking
+         * order, so paint order followed this array: moving *down* the index
+         * put the incoming frame on top, moving *up* put the outgoing one on
+         * top instead, and the same interaction looked like two different
+         * effects depending on which way the pointer travelled.
+         *
+         * Now only the incoming layer animates, and it is explicitly above
+         * the outgoing one. The frame being replaced stays fully opaque
+         * underneath until it is covered, so there is nothing to see through.
+         *
+         * Still only two are ever mounted, so first paint costs one
+         * photograph rather than six. */}
+        {slides.map((discipline, i) =>
+          i === slide.active || i === slide.previous ? (
+            <Image
+              key={discipline.slug}
+              src={discipline.frame.src}
+              alt={
+                i === active
+                  ? discipline.frame.alt ||
+                    `${discipline.name} work by Julian Gigola`
+                  : ""
+              }
+              fill
+              sizes="(min-width: 1024px) 45vw, 100vw"
+              priority={i === 0}
+              aria-hidden={i === active ? undefined : true}
+              className={cn(
+                // `cover` against a column already cut to the frame's ratio:
+                // fills it with no border of empty colour showing.
+                "object-cover",
+                // Incoming above outgoing, by role rather than by index.
+                i === active ? "z-10" : "z-0",
+                // The very first frame is the page's largest paint; fading it
+                // up from nothing would cost half a second of blank column
+                // for an effect nobody is there to see.
+                i === active && slide.previous !== -1 && "dissolve",
+                // No `opacity-100` here, and that matters: it used to be,
+                // to say "both layers are fully opaque — the outgoing frame
+                // is covered, not faded". The intent was right and the
+                // implementation cancelled the transition it sat next to.
+                //
+                // `opacity-100` declares `opacity: 1` unconditionally, which
+                // beats `dissolve`'s `@starting-style` in the cascade
+                // whatever order the classes are written in. So the incoming
+                // frame began at full opacity and there was no crossfade at
+                // all — the pictures hard-cut, and only the mat colour and
+                // the type ever moved.
+                //
+                // The outgoing layer needs no declaration to stay opaque: it
+                // carries no `dissolve`, so its opacity is already 1. Saying
+                // so out loud is what broke it.
+              )}
+            />
+          ) : null,
+        )}
 
-          {/* Absent on the intro rather than faded: the credit exists to
+        {/* Absent on the intro rather than faded: the credit exists to
               attribute commissioned work, and the city is not any. It arrives
               with the first discipline, under cover of that crossfade — a
               second animation on a corner label would be motion for its own
               sake. */}
-          {/* Credits the frame on screen, so the cover is attributable rather
+        {/* Credits the frame on screen, so the cover is attributable rather
               than anonymous decoration — and gives someone who likes it
               somewhere to go straight away.
 
@@ -462,47 +400,50 @@ export function Hero({ disciplines }: { disciplines: Discipline[] }) {
               leaving would split one change into two events. The outgoing copy
               is taken out of the tab order and hidden from the reader while it
               fades, so there are never two credits to land on. */}
-          {slides.map((discipline, i) => {
-            const project = discipline.project;
-            if (!project || (i !== active && i !== slide.previous)) return null;
-            const leaving = i !== active;
-            return (
-              <Link
-                key={discipline.slug}
-                href={`/work/${project.slug}`}
-                tabIndex={leaving ? -1 : undefined}
-                aria-hidden={leaving || undefined}
-                className={cn(
-                  "label absolute bottom-4 right-4 z-10 bg-background/70 px-3 py-2 text-muted-foreground backdrop-blur-sm hoverable:hover:text-foreground sm:bottom-6 sm:right-6",
-                  leaving
-                    ? "title-out pointer-events-none"
-                    : // Same guard as the photograph: on the intro there is no
-                      // outgoing phase, and fading the label up on first paint
-                      // would be an entry animation on a cover that is not
-                      // supposed to have one.
-                      slide.previous !== -1 && "title-in",
-                )}
-              >
-                {project.name} &rarr;
-              </Link>
-            );
-          })}
-        </div>
+        {slides.map((discipline, i) => {
+          const project = discipline.project;
+          if (!project || (i !== active && i !== slide.previous)) return null;
+          const leaving = i !== active;
+          return (
+            <Link
+              key={discipline.slug}
+              href={`/work/${project.slug}`}
+              tabIndex={leaving ? -1 : undefined}
+              aria-hidden={leaving || undefined}
+              className={cn(
+                "label absolute bottom-4 right-4 z-10 bg-background/70 px-3 py-2 text-muted-foreground backdrop-blur-sm hoverable:hover:text-foreground sm:bottom-6 sm:right-6",
+                leaving
+                  ? "title-out pointer-events-none"
+                  : // Same guard as the photograph: on the intro there is no
+                    // outgoing phase, and fading the label up on first paint
+                    // would be an entry animation on a cover that is not
+                    // supposed to have one.
+                    slide.previous !== -1 && "title-in",
+              )}
+            >
+              {project.name} &rarr;
+            </Link>
+          );
+        })}
+      </div>
 
-        {/* `display: contents` on a phone, a real column from `lg`.
-         *
-         * The two halves of the type have to be separable on a phone — the
-         * name above the photograph, the index and buttons below it — and
-         * inseparable above `lg`, where they are one column beside it.
-         * `contents` gives both: the wrapper vanishes from the layout on a
-         * phone, so its children become items of the outer flex column and
-         * `order` interleaves them with the picture; from `lg` it becomes the
-         * column it looks like, and the grid is back to the single full-height
-         * row that made the cover fit the screen in the first place.
-         */}
-        <div className="contents lg:flex lg:min-w-0 lg:flex-col">
+      {/* The type, on a plate.
+       *
+       * The same material as the bar at the top of every page and the cards
+       * on the homepage: the ground at 70%, a heavy blur, closed with a
+       * hairline. It is the site's one established translucent surface, so it
+       * reads as chrome over the photograph rather than as damage to it — and
+       * unlike flipping the ink, it is legible on a frame that is pale in one
+       * corner and black in another, which most of these are.
+       *
+       * A band across the foot on a phone, a full-height column on the left
+       * from `lg`. Either way the picture is behind all of it and none of the
+       * type is closer to the photograph than the plate's own padding.
+       */}
+      <div className="relative z-10 flex min-h-dvh flex-col justify-end lg:justify-start">
+        <div className="flex min-w-0 flex-col border-t border-border/60 bg-background/70 backdrop-blur-xl lg:min-h-dvh lg:w-[min(40rem,48vw)] lg:border-r lg:border-t-0">
           {/* First on a phone, and the top of the left column from `lg`. */}
-          <div className="order-1 flex min-w-0 flex-col">
+          <div className="flex min-w-0 flex-col">
             {/* One: the standing details, as a running head. The tall top
               padding on desktop clears the fixed header so the nav never
               crowds the rule. */}
@@ -513,7 +454,7 @@ export function Hero({ disciplines }: { disciplines: Discipline[] }) {
               through "SF BAY AREA" until it did. */}
             <div
               style={lands(HEAD_MS)}
-              className="rise flex flex-wrap items-baseline gap-x-6 gap-y-1 border-b border-border px-6 pb-5 pt-24 sm:px-10 lg:pt-32"
+              className="rise flex flex-wrap items-baseline gap-x-6 gap-y-1 border-b border-border px-6 pb-4 pt-24 sm:px-10 lg:pt-28"
             >
               {/* Held back while the intro is up, because the intro is already
                 saying these exact words in display type eighty pixels below.
@@ -616,7 +557,7 @@ export function Hero({ disciplines }: { disciplines: Discipline[] }) {
             photograph rather than pushing it off the screen. `flex-1` from
             `lg` so it takes the rest of the column and the `mt-auto` on the
             buttons still pins them to the foot of the picture. */}
-          <div className="order-3 flex min-w-0 flex-col lg:flex-1">
+          <div className="flex min-w-0 flex-col lg:flex-1">
             {/* Three: the index. This is the switcher's control and the site's
               discipline navigation at the same time — hover previews, click
               opens that discipline's own page. Numbering is what keeps it an
@@ -701,7 +642,7 @@ export function Hero({ disciplines }: { disciplines: Discipline[] }) {
               the picture rather than drifting in the middle. */}
             <div
               style={lands(BUTTONS_MS)}
-              className="rise mt-auto flex flex-wrap items-center gap-3 px-6 py-8 sm:px-10 sm:py-10"
+              className="rise mt-auto flex flex-wrap items-center gap-3 px-6 py-6 sm:px-10 sm:py-8"
             >
               <Link
                 href="/work"

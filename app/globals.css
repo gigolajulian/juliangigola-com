@@ -887,43 +887,27 @@ optgroup {
   color: var(--muted-foreground);
 }
 
-/* ── the bar over a pale cover ─────────────────────────────────────
+/* ── the bar over the cover ────────────────────────────────────────
  * The header is fixed and transparent while the page is at the top, so on the
- * homepage it sits directly on the cover photograph. Those frames run from a
- * near-black studio portrait to a sunlit cityscape, and white type does not
- * survive the second kind.
+ * homepage it sits directly on the cover photograph — and white type does not
+ * survive a pale frame.
  *
- * So the bar re-inks itself. `components/hero.tsx` publishes how bright the
- * frame on screen is as `data-cover-tone`, computed from the mean colour the
- * harvester already recorded for every frame — no canvas, no sampling, and the
- * answer is in the data before the page loads.
+ * It gets the same plate the hero type does: the ground at 72%, a heavy blur,
+ * closed with a hairline. The same material as the cards on the homepage, so
+ * it reads as chrome over the picture rather than as damage to it.
  *
- * Two declarations flip the whole bar. Every colour in here resolves from
- * `--foreground` and `--muted-foreground`, and custom properties inherit — so
- * redefining them on the header re-inks the wordmark, all five nav links, the
- * theme mark and the burger at once. Restating a dozen text utilities would
- * mean finding every one of them again the next time something is added.
+ * This replaced re-inking the bar from the frame's mean colour, which is the
+ * obvious cheap answer and is wrong: a mean describes a whole photograph and
+ * the bar occupies one corner. CYBER1A's mean is dark — the outfit is black —
+ * behind a pale studio backdrop, which is exactly where the bar sits. A plate
+ * needs to know nothing about the picture, which is why it cannot be wrong
+ * about it.
  *
- * Only while the bar has no ground of its own: `data-plain` is true once it is
- * scrolled, or while the menu is open, and then the type is over the page
- * colour and wants the page's ink. It transitions on the same curve as the
- * background it is replacing, so a cover changing discipline mid-fade does not
- * snap the nav from black to white.
+ * Only while the bar has no ground of its own. `data-plain` is true once it is
+ * scrolled, or while the menu is open, and the bar's own classes take over.
  * ─────────────────────────────────────────────────────────────── */
-:root[data-cover-tone="light"] header[data-plain="false"] {
-  /* The light theme's own ink, which is drawn to read on a pale ground. */
-  --foreground: oklch(0.185 0.003 70);
-  --muted-foreground: oklch(0.32 0.006 80);
-
-  transition:
-    background-color 300ms var(--ease-out-strong),
-    border-color 300ms var(--ease-out-strong),
-    backdrop-filter 300ms var(--ease-out-strong),
-    color 300ms var(--ease-out-strong);
-}
-
-@media (prefers-reduced-motion: reduce) {
-  :root[data-cover-tone="light"] header[data-plain="false"] {
-    transition: none;
-  }
+:root[data-cover] header[data-plain="false"] {
+  border-color: var(--border);
+  background-color: color-mix(in oklab, var(--background) 72%, transparent);
+  backdrop-filter: blur(24px);
 }
