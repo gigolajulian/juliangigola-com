@@ -7,18 +7,19 @@ import { cn } from "@/lib/utils";
  * Dark is the site and the default. This offers the alternative without
  * arguing for it.
  *
- * The mark is drawn here rather than imported. An icon library would be a
- * dependency and a whole visual family brought in for one 18px glyph, and
- * the two shapes are an arc and eight lines — less code than the import.
+ * A circle, half of it filled, that turns over when pressed. One shape, and
+ * the rotation is the state rather than a decoration on top of it — half
+ * light and half dark is the contrast mark, and which half is which says
+ * which way the page is set.
  *
- * It shows what you will get, not what you have: a sun while the page is
- * dark. That is the convention, and it is the only reading that makes the
- * button feel like a control rather than a status light. The `sr-only`
- * label says it in full for anyone the convention fails.
+ * That replaced a sun and a moon crossfading past each other: two marks
+ * always mounted, eight rays, an SVG mask with a document-unique id, and a
+ * quarter turn each. All of it to say one bit of information. The mark no
+ * longer previews the destination the way a sun-while-dark does — the
+ * `sr-only` label carries that, in full, which is also the only version a
+ * screen reader ever had.
  *
- * The swap is a crossfade with a quarter turn, on the same curve as the
- * cover's. Both marks are always mounted and stacked — animating opacity
- * and transform only, never layout, so the header never shifts.
+ * Opacity and transform only, never layout, so the header cannot shift.
  * ─────────────────────────────────────────────────────────────── */
 
 /** Kept in step with the inline script in `app/layout.tsx`. */
@@ -29,22 +30,17 @@ type Theme = "dark" | "light";
 const read = (): Theme =>
   document.documentElement.dataset.theme === "light" ? "light" : "dark";
 
-/** Eight rays, evenly spaced, drawn rather than listed. */
-const RAYS = Array.from({ length: 8 }, (_, i) => i * 45);
-
 export function ThemeToggle({ className }: { className?: string }) {
   /**
    * Starts as `null`, not as `"dark"`.
    *
-   * The server cannot know the choice — it lives in `localStorage`, which
-   * the inline script reads before first paint. Rendering a guess here and
-   * correcting it after hydration is how a toggle ends up briefly
-   * contradicting the page it sits on.
+   * The server cannot know the choice — it lives in `localStorage`, which the
+   * inline script reads before first paint. `null` is also what suppresses
+   * the turn on arrival: a visitor who chose light would otherwise watch the
+   * mark spin half a circle on every page load, animating a state it was
+   * already in.
    */
   const [theme, setTheme] = React.useState<Theme | null>(null);
-
-  /** A mask needs a document-unique id, and the header renders on the server. */
-  const moonId = `moon${React.useId().replace(/:/g, "")}`;
 
   React.useEffect(() => setTheme(read()), []);
 
@@ -65,10 +61,6 @@ export function ThemeToggle({ className }: { className?: string }) {
 
     setTheme(next);
   };
-
-  // Until the effect runs, neither mark is shown — see the note on `theme`.
-  const showSun = theme === "dark";
-  const showMoon = theme === "light";
 
   return (
     <button
@@ -91,64 +83,27 @@ export function ThemeToggle({ className }: { className?: string }) {
       <svg
         aria-hidden
         viewBox="0 0 24 24"
-        className="h-[1.125rem] w-[1.125rem] overflow-visible"
+        className={cn(
+          "h-[1.125rem] w-[1.125rem] origin-center",
+          // Only once the real theme is known — see the note on `theme`.
+          theme !== null &&
+            "transition-transform duration-500 ease-[var(--ease-out-strong)] motion-reduce:transition-none",
+          theme === "light" && "rotate-180",
+        )}
         fill="none"
         stroke="currentColor"
         strokeWidth="1.5"
-        strokeLinecap="round"
       >
-        {/* Sun. Shown while the page is dark. */}
-        <g
-          className={cn(
-            "origin-center transition-[opacity,transform] duration-300 ease-[var(--ease-out-strong)]",
-            "motion-reduce:transition-none",
-            showSun ? "rotate-0 opacity-100" : "-rotate-90 opacity-0",
-          )}
-        >
-          <circle cx="12" cy="12" r="4.25" />
-          {RAYS.map((deg) => (
-            <line
-              key={deg}
-              x1="12"
-              y1="1.75"
-              x2="12"
-              y2="4"
-              transform={`rotate(${deg} 12 12)`}
-            />
-          ))}
-        </g>
+        <circle cx="12" cy="12" r="8.5" />
+        {/* The filled half: top of the circle, clockwise round the right side
+            to the bottom, then straight back up the diameter.
 
-        {/* Moon: a disc with a bite taken out of it.
-         *
-         * Drawn as a mask rather than as one clever arc. A crescent written
-         * as two arcs needs the second radius to be at least half the chord
-         * it spans, and when it is not, SVG silently scales the radius to fit
-         * rather than failing — which is how the first attempt here rendered
-         * as a 7px splinter instead of a moon, visible in the markup and
-         * correct in every computed style.
-         *
-         * Two circles cannot go wrong that way: the shape is the first minus
-         * the second, whatever the numbers.
-         */}
-        <mask id={moonId}>
-          <rect x="0" y="0" width="24" height="24" fill="#fff" />
-          <circle cx="16.5" cy="7.5" r="7.75" fill="#000" />
-        </mask>
-        <circle
-          cx="12"
-          cy="12"
-          r="8.5"
-          mask={`url(#${moonId})`}
-          className={cn(
-            "origin-center transition-[opacity,transform] duration-300 ease-[var(--ease-out-strong)]",
-            "motion-reduce:transition-none",
-            showMoon ? "rotate-0 opacity-100" : "rotate-90 opacity-0",
-          )}
-          // Filled, not stroked — an outlined crescent at 18px reads as a
-          // fingernail.
-          fill="currentColor"
-          stroke="none"
-        />
+            An arc rather than a half-disc drawn some other way, because the
+            fill has to share an edge with the stroked circle exactly — a
+            rectangle clipped to the circle leaves a hairline of ground
+            showing along the curve at some sizes, and a second stroked path
+            doubles the outline down the middle. */}
+        <path d="M12 3.5A8.5 8.5 0 0 1 12 20.5Z" fill="currentColor" />
       </svg>
     </button>
   );
