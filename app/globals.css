@@ -636,10 +636,59 @@
   }
 }
 
+/**
+ * The cover's title, leaving and arriving — two halves of one swap.
+ *
+ * The gap between them is the whole point. The outgoing word clears the frame
+ * before its replacement starts, so the two names are never both legible and
+ * the eye is never asked to read through a dissolve. A single word crossfading
+ * into another prints one on top of the other; this reads as one word
+ * replacing another, which is what is actually happening.
+ *
+ *     0ms   the phase ticks — the photograph starts its 520ms dissolve
+ *   120ms   the outgoing word begins to leave
+ *   320ms   it is gone; the column is briefly empty and the picture carries it
+ *   360ms   the incoming word begins to arrive
+ *   680ms   it has settled, a beat after the picture
+ *
+ * That trailing beat is deliberate rather than slack. The photograph leads and
+ * the name follows it, which is the order they are actually read in — the
+ * picture is what catches the eye and the word is what explains it.
+ *
+ * Held apart from `dissolve` because they are a different gesture: `dissolve`
+ * is one layer fading up over another that stays put, where this is a handover
+ * between two nodes with a deliberate pause in the middle.
+ */
+@utility title-out {
+  opacity: 0;
+  transition: opacity 200ms var(--ease-out-strong) 120ms;
+}
+
+@utility title-in {
+  opacity: 1;
+  /* Colour rides along undelayed, because this class stays on the element
+     after the swap has settled and would otherwise be the whole transition
+     list — taking the hover fade off the credit link with it. Tailwind's
+     `transition-colors` cannot be used alongside: both declare
+     `transition-property`, and whichever lands later in the sheet wins. */
+  transition:
+    opacity 320ms var(--ease-out-strong) 360ms,
+    color 200ms ease-out;
+
+  /* The arriving word is a brand new node every phase, and a transition does
+     not run on first render — so, as with `dissolve`, the start has to be
+     declared rather than transitioned from. */
+  @starting-style {
+    opacity: 0;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .rise,
   .press,
-  .dissolve {
+  .dissolve,
+  .title-out,
+  .title-in {
     transition: none;
   }
 }

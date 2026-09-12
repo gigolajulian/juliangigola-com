@@ -324,30 +324,40 @@ export function Hero({ disciplines }: { disciplines: Discipline[] }) {
               with the first discipline, under cover of that crossfade — a
               second animation on a corner label would be motion for its own
               sake. */}
-          {current.project && (
-            <Link
-              // A new node per phase, which is the whole mechanism: React was
-              // only rewriting the text inside a node that persisted, and a
-              // CSS transition cannot run on a value that never changed on a
-              // live element. Keyed, the label is replaced rather than edited,
-              // and `dissolve`'s `@starting-style` has something to fire on.
-              key={current.slug}
-              href={`/work/${current.project.slug}`}
-              // Credits the frame on screen, so the cover is attributable
-              // rather than anonymous decoration — and gives someone who likes
-              // it somewhere to go straight away.
-              className={cn(
-                "label absolute bottom-4 right-4 z-10 bg-background/70 px-3 py-2 text-muted-foreground backdrop-blur-sm transition-colors duration-200 hoverable:hover:text-foreground sm:bottom-6 sm:right-6",
-                // Same guard as the photograph above: on the intro there is no
-                // outgoing phase, and fading the label up on first paint would
-                // be an entry animation on a cover that is not supposed to
-                // have one.
-                slide.previous !== -1 && "dissolve",
-              )}
-            >
-              {current.project.name} &rarr;
-            </Link>
-          )}
+          {/* Credits the frame on screen, so the cover is attributable rather
+              than anonymous decoration — and gives someone who likes it
+              somewhere to go straight away.
+
+              Mounted in pairs and timed with the title, for the same reason:
+              a label that swapped on the tick while the word below was still
+              leaving would split one change into two events. The outgoing copy
+              is taken out of the tab order and hidden from the reader while it
+              fades, so there are never two credits to land on. */}
+          {slides.map((discipline, i) => {
+            const project = discipline.project;
+            if (!project || (i !== active && i !== slide.previous)) return null;
+            const leaving = i !== active;
+            return (
+              <Link
+                key={discipline.slug}
+                href={`/work/${project.slug}`}
+                tabIndex={leaving ? -1 : undefined}
+                aria-hidden={leaving || undefined}
+                className={cn(
+                  "label absolute bottom-4 right-4 z-10 bg-background/70 px-3 py-2 text-muted-foreground backdrop-blur-sm hoverable:hover:text-foreground sm:bottom-6 sm:right-6",
+                  leaving
+                    ? "title-out pointer-events-none"
+                    : // Same guard as the photograph: on the intro there is no
+                      // outgoing phase, and fading the label up on first paint
+                      // would be an entry animation on a cover that is not
+                      // supposed to have one.
+                      slide.previous !== -1 && "title-in",
+                )}
+              >
+                {project.name} &rarr;
+              </Link>
+            );
+          })}
         </div>
 
         {/* `display: contents` on a phone, a real column from `lg`.
@@ -426,29 +436,43 @@ export function Hero({ disciplines }: { disciplines: Discipline[] }) {
                 3.5s after load, which is exactly when somebody is reading
                 them. `leading-none` makes a line exactly `1em`, so `2em` is
                 two of them and nothing has to be measured. */}
-              {/* Keyed, so the word is a new node each phase rather than the
-                  same node with different text — which is what was wrong here.
-                  The photograph beside it dissolved over 520ms while the word
-                  naming it changed in a single frame, and the two read as
-                  separate events instead of one. `dissolve` is the same
-                  transition on the same curve as the frame, deliberately: the
-                  point is that they finish together.
+              {/* Both words are mounted through the swap, the same way the
+                  picture mounts its outgoing and incoming frames — because a
+                  word that is unmounted the instant the phase ticks cannot be
+                  animated out at all, and half of this transition is the
+                  leaving. React keeps each node across the change by slug, so
+                  the one that was current simply changes class and transitions
+                  where it stands.
 
-                  Fade-through, not a crossfade. The outgoing word leaves and
-                  the incoming one fades up in its place; holding both at half
-                  opacity would print one word over another. (The frame's
-                  reasoning for covering rather than fading its outgoing layer
-                  is about a wash of mat colour between two photographs, which
-                  has no equivalent for a single line of type.) */}
+                  Stacked rather than in flow: the box is already a fixed two
+                  lines, so absolute children fill it without either word
+                  moving the index and buttons below. See `title-out` and
+                  `title-in` in `globals.css` for the timings — the outgoing
+                  word is gone before the incoming one starts, so the two names
+                  are never both legible. */}
               <span
-                key={current.slug}
                 aria-hidden
-                className={cn(
-                  "font-display mt-2 block min-h-[2em] text-3xl uppercase leading-none tracking-[0.02em] text-muted-foreground sm:mt-3 sm:text-4xl",
-                  slide.previous !== -1 && "dissolve",
-                )}
+                className="relative mt-2 block min-h-[2em] sm:mt-3"
               >
-                {current.name}
+                {slides.map((discipline, i) =>
+                  i === active || i === slide.previous ? (
+                    <span
+                      key={discipline.slug}
+                      className={cn(
+                        "font-display absolute inset-0 text-3xl uppercase leading-none tracking-[0.02em] text-muted-foreground sm:text-4xl",
+                        i === active
+                          ? // On the intro there is no outgoing word and
+                            // nothing to wait for, so the first title is
+                            // simply there — the cover still has no entry
+                            // animation of its own.
+                            slide.previous !== -1 && "title-in"
+                          : "title-out",
+                      )}
+                    >
+                      {discipline.name}
+                    </span>
+                  ) : null,
+                )}
               </span>
             </h1>
           </div>
