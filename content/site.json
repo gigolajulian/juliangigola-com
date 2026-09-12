@@ -8,6 +8,7 @@
     "valgur",
     "oakley-x-nike",
     "sago",
+    "i-wanna-be-a-human",
     "luxe-meets-future"
   ],
   "testimonials": [],
@@ -29,7 +30,7 @@
       "slug": "headshots",
       "name": "Headshots",
       "blurb": "Clean, current, and usable everywhere — LinkedIn, press, casting, a company about page.",
-      "from": null,
+      "from": 200,
       "includes": [
         "Studio lighting",
         "Multiple backgrounds",
