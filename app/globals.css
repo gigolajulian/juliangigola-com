@@ -403,6 +403,16 @@
   font-family: var(--font-display);
   font-size: var(--text-display);
   line-height: 0.92;
+  /* Zero, and everything else in this face matches it.
+   *
+   * The display type had drifted across four different trackings — 0.01,
+   * 0.02, 0.04 and 0.05em — set inline at sixteen call sites, against the 0
+   * declared here. The worst of it was the header wordmark at 0.05em, which
+   * takes over from the masthead at 0 as you scroll: the same name, in the
+   * same face, handing off between two different letter-spacings.
+   *
+   * Univers Bold Condensed is drawn tight on purpose. Opening it up reads as
+   * a different typeface set badly rather than as the same one breathing. */
   letter-spacing: 0;
   text-transform: uppercase;
 }
@@ -412,7 +422,12 @@
   font-family: var(--font-display);
   font-size: var(--text-title);
   line-height: 1;
-  letter-spacing: 0.005em;
+  /* Zero, like `display` above. Univers Bold Condensed was drawn tight and
+     the counters are already narrow; adding tracking to it does not make it
+     more legible, it makes it look like a different face set badly. The
+     half-percent that used to be here was the kind of number that survives
+     because nobody measures it. */
+  letter-spacing: 0;
   text-transform: uppercase;
 }
 

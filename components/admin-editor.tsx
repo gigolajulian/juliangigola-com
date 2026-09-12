@@ -1205,7 +1205,7 @@ export function AdminEditor({
             key={session.slug}
             className="flex flex-col gap-4 border-t border-border pt-6"
           >
-            <h3 className="font-display text-xl uppercase tracking-[0.02em]">
+            <h3 className="font-display text-xl uppercase tracking-[0]">
               {session.name}
             </h3>
 
@@ -1552,7 +1552,7 @@ function Area({
       id={anchor ? `field-${anchor}` : undefined}
       className="mt-8 flex scroll-mt-28 flex-col gap-6"
     >
-      <h2 className="font-display border-b border-border pb-3 text-xl uppercase tracking-[0.02em]">
+      <h2 className="font-display border-b border-border pb-3 text-xl uppercase tracking-[0]">
         {title}
       </h2>
       {children}

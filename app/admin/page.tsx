@@ -77,9 +77,7 @@ export default function AdminPage() {
           moment you arrive — so it lives beside Publish now, where it is
           actually load-bearing. */}
       <header className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1 border-b border-border pb-3 xl:shrink-0">
-        <h1 className="font-display text-xl uppercase tracking-[0.02em]">
-          Content
-        </h1>
+        <h1 className="font-display text-xl uppercase tracking-[0]">Content</h1>
         <p className="label text-muted-foreground">
           commits to <code className="text-foreground">{CONTENT_PATH}</code>{" "}
           &middot; live a couple of minutes after the deploy

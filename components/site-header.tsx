@@ -276,7 +276,7 @@ export function SiteHeader() {
           // it brings it back into view, so it is never an invisible focus
           // target.
           className={cn(
-            "font-display text-lg uppercase leading-none tracking-[0.05em] sm:text-2xl",
+            "font-display text-lg uppercase leading-none tracking-[0] sm:text-2xl",
             // Scaling from the left edge, because that edge is shared with
             // the masthead — growing from the centre would slide the name
             // sideways out of the alignment the handoff depends on.
@@ -408,7 +408,7 @@ export function SiteHeader() {
                     // This is a full-screen menu, so the type is sized to the
                     // screen rather than to a nav bar — fluid, so it fills a
                     // phone and an iPad alike without a stack of breakpoints.
-                    "font-display block py-2 uppercase leading-[0.95] tracking-[0.01em]",
+                    "font-display block py-2 uppercase leading-[0.95] tracking-[0]",
                     "text-[clamp(2.75rem,13vw,5.5rem)]",
                     // On the bounce curve, and far enough to see it land. A
                     // menu is opened a handful of times a session, which is

@@ -84,6 +84,7 @@ const csp = [
   // Its own POST goes to /cdn-cgi/rum on this origin, which `connect-src
   // 'self'` already covers.
   "script-src 'self' 'unsafe-inline' https://static.cloudflareinsights.com",
+  ,
   "connect-src 'self' https://api.github.com",
   "upgrade-insecure-requests",
 ].join("; ");
@@ -137,6 +138,22 @@ const nextConfig: NextConfig = {
   poweredByHeader: false,
 
   async headers() {
+    /* Production only, and not as a convenience — the dev server cannot run
+       under this policy.
+     
+       Three things broke when it did. React's development build calls
+       `eval()` for debugging; `connect-src 'self'` does not cover `ws:`,
+       which is a different scheme, so HMR's websocket was refused; and
+       `nosniff` rejected `_clientMiddlewareManifest.js`, which Next dev
+       serves as `application/json` and then loads as a script.
+     
+       Each has a dev-only allowance, and adding three holes to a production
+       policy so that a local toolchain is happy is how a policy stops meaning
+       anything. Nothing is lost by skipping it here: in production these
+       responses come from Cloudflare, which reads `public/_headers`, and from
+       this config for anything the Worker renders. The dev server serves
+       neither. */
+    if (process.env.NODE_ENV === "development") return [];
     return [{ source: "/:path*", headers: securityHeaders }];
   },
 

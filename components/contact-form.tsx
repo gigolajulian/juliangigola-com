@@ -76,9 +76,7 @@ export function ContactForm() {
   if (state.status === "sent") {
     return (
       <div role="status" className="border border-border p-8">
-        <h2 className="font-display text-2xl uppercase tracking-[0.04em]">
-          Sent.
-        </h2>
+        <h2 className="font-display text-2xl uppercase tracking-[0]">Sent.</h2>
         <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
           {state.message}
         </p>

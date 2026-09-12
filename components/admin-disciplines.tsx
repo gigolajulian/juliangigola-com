@@ -183,7 +183,7 @@ export function AdminDisciplines({
                       className="flex min-w-0 flex-1 items-center gap-4 text-left"
                     >
                       <span className="min-w-0 flex-1">
-                        <span className="font-display block truncate text-lg uppercase tracking-[0.02em]">
+                        <span className="font-display block truncate text-lg uppercase tracking-[0]">
                           {d.name}
                         </span>
                         <span className="label block text-muted-foreground">

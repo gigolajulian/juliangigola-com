@@ -36,8 +36,8 @@ const display = localFont({
   // is never synthetically emboldened on top of an already-bold face.
   weight: "700",
   style: "normal",
-  // A tight grotesque at display size sits better with slightly open
-  // tracking than the negative tracking a Didone wants.
+  // No tracking adjustment. The face is drawn tight and is set tight
+  // everywhere — see `display` in `globals.css`.
   adjustFontFallback: false,
 });
 

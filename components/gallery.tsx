@@ -149,7 +149,7 @@ function Passages({ blocks }: { blocks?: TextBlock[] }) {
           <div className="mx-auto w-full max-w-[100rem] px-6 py-8 sm:px-10 sm:py-16">
             <div className="mx-auto max-w-prose">
               {block.heading ? (
-                <h2 className="font-display text-2xl uppercase tracking-[0.02em]">
+                <h2 className="font-display text-2xl uppercase tracking-[0]">
                   {block.heading}
                 </h2>
               ) : null}

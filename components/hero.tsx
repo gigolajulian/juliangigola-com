@@ -534,7 +534,7 @@ export function Hero({ disciplines }: { disciplines: Discipline[] }) {
                     <span
                       key={discipline.slug}
                       className={cn(
-                        "font-display absolute inset-0 text-3xl uppercase leading-none tracking-[0.02em] text-muted-foreground sm:text-4xl",
+                        "font-display absolute inset-0 text-3xl uppercase leading-none tracking-[0] text-muted-foreground sm:text-4xl",
                         i === active
                           ? // On the intro there is no outgoing word and
                             // nothing to wait for, so the first title is
@@ -619,7 +619,7 @@ export function Hero({ disciplines }: { disciplines: Discipline[] }) {
                       </span>
                       <span
                         className={cn(
-                          "font-display text-xl uppercase leading-none tracking-[0.02em] transition-colors duration-300 sm:text-2xl",
+                          "font-display text-xl uppercase leading-none tracking-[0] transition-colors duration-300 sm:text-2xl",
                           i + 1 === active
                             ? "text-foreground"
                             : "text-muted-foreground",

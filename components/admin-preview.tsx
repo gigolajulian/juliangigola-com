@@ -77,7 +77,7 @@ export function AdminPreview({
             <div className="flex items-center gap-4">
               <Thumb project={cover} className="h-28 w-[5.5rem]" />
               <div className="min-w-0">
-                <p className="font-display text-2xl uppercase leading-none tracking-[0.02em]">
+                <p className="font-display text-2xl uppercase leading-none tracking-[0]">
                   Julian Gigola
                 </p>
                 <p className="label mt-2 text-muted-foreground">{cover.name}</p>
@@ -121,7 +121,7 @@ export function AdminPreview({
                   key={s.slug}
                   className="flex items-baseline justify-between gap-4 border-b border-border py-2 last:border-0"
                 >
-                  <span className="font-display text-lg uppercase tracking-[0.02em]">
+                  <span className="font-display text-lg uppercase tracking-[0]">
                     {s.name}
                   </span>
                   <span className="label shrink-0 text-muted-foreground">

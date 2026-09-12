@@ -189,7 +189,7 @@ export function AdminSitemap({
       <div className="flex items-baseline justify-between gap-3 border-b border-border pb-2">
         <h2
           className={cn(
-            "font-display uppercase tracking-[0.02em]",
+            "font-display uppercase tracking-[0]",
             compact ? "text-lg" : "text-2xl",
           )}
         >

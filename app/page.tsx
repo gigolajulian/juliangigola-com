@@ -40,7 +40,7 @@ export default function Home() {
               <li key={p.slug}>
                 <Link
                   href={`/work/${p.slug}`}
-                  className="font-display text-lg uppercase tracking-[0.04em] text-muted-foreground transition-colors duration-200 hoverable:hover:text-foreground sm:text-xl"
+                  className="font-display text-lg uppercase tracking-[0] text-muted-foreground transition-colors duration-200 hoverable:hover:text-foreground sm:text-xl"
                 >
                   {p.name}
                 </Link>

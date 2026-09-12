@@ -76,7 +76,7 @@ export default function StudioPage() {
                         href={`/work/${p.slug}`}
                         className="group flex items-baseline justify-between gap-6 py-4 transition-colors duration-200"
                       >
-                        <span className="font-display text-xl uppercase tracking-[0.04em]">
+                        <span className="font-display text-xl uppercase tracking-[0]">
                           {p.name}
                         </span>
                         <span

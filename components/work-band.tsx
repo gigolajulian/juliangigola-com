@@ -161,7 +161,7 @@ export function WorkBand({
             {/* Moved off the photograph and into the plate. On its own in the
                 top corner it needed either a second plate or a scrim of its
                 own to stay legible over a bright frame. */}
-            <h3 className="font-display min-w-0 truncate text-2xl uppercase leading-none tracking-[0.01em] sm:text-3xl">
+            <h3 className="font-display min-w-0 truncate text-2xl uppercase leading-none tracking-[0] sm:text-3xl">
               {project.name}
             </h3>
           </div>
