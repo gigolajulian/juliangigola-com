@@ -61,17 +61,33 @@ const INTRO_MS = 5200;
 /**
  * The staggered arrival of the type, as a style object.
  *
- * A custom property rather than four utilities: `rise` and `emerge` both read
- * `--reveal-delay`, so the order of the load is stated here as four numbers
- * instead of spread across a stylesheet. The steps are 100ms, which is enough
- * to read as a sequence and short enough that the whole cover is settled
- * inside a second.
+ * A custom property rather than a utility per step: `rise` and `emerge` both
+ * read `--reveal-delay`, so the order of the load is stated here as numbers
+ * instead of spread across a stylesheet.
  *
- * The photograph is deliberately absent. It is the page's largest paint, and
- * an element at `opacity: 0` is not painted at all — animating it in would
- * hand the browser a worse LCP in exchange for an effect that happens before
- * anybody is looking.
+ * These used to run 120-420ms and were all but invisible, for a reason that
+ * is only obvious once measured: `<main>` carries `rise` too, so the whole
+ * page fades as one slab from 0ms over 420ms — and every one of those delays
+ * fell inside that window. The cascade was happening underneath a blanket
+ * fade of itself.
+ *
+ * So it starts where the slab finishes. The photograph is in that slab and
+ * arrives with it, which is the right order anyway: the picture is what the
+ * page is, and the type introduces it rather than racing it.
+ *
+ * The index cascades row by row rather than arriving as a block — six rows at
+ * 55ms is the one place here where a stagger reads as deliberate instead of
+ * as lag, because they are identical objects in a list and the eye follows
+ * them down.
  */
+/** Where the page's own slab fade has finished and the cover can begin. */
+const HEAD_MS = 480;
+const NAME_MS = 600;
+const INDEX_MS = 720;
+/** Between one index row and the next. */
+const ROW_MS = 55;
+const BUTTONS_MS = INDEX_MS + 6 * ROW_MS + 60;
+
 const lands = (ms: number) =>
   ({ "--reveal-delay": `${ms}ms` }) as React.CSSProperties;
 
@@ -425,7 +441,7 @@ export function Hero({ disciplines }: { disciplines: Discipline[] }) {
               is ~66px of wordmark and padding, and was printing straight
               through "SF BAY AREA" until it did. */}
             <div
-              style={lands(120)}
+              style={lands(HEAD_MS)}
               className="rise flex flex-wrap items-baseline gap-x-6 gap-y-1 border-b border-border px-6 pb-5 pt-24 sm:px-10 lg:pt-32"
             >
               {/* Held back while the intro is up, because the intro is already
@@ -456,7 +472,10 @@ export function Hero({ disciplines }: { disciplines: Discipline[] }) {
               this route until this has scrolled away — printing the name
               twice, forty pixels apart, is what made an earlier version of
               this page look amateur. */}
-            <h1 style={lands(220)} className="emerge px-6 pt-8 sm:px-10 sm:pt-10">
+            <h1
+              style={lands(NAME_MS)}
+              className="emerge px-6 pt-8 sm:px-10 sm:pt-10"
+            >
               {/* Tagged so the header can measure it. The header's own wordmark
                 waits on this one and then takes over from where it left, and
                 it can only time that against the real element — the masthead's
@@ -542,8 +561,7 @@ export function Hero({ disciplines }: { disciplines: Discipline[] }) {
               instead of being captured in four closures. */}
             <nav
               aria-label="Disciplines"
-              style={lands(320)}
-              className="rise mt-8 border-t border-border sm:mt-10"
+              className="mt-8 border-t border-border sm:mt-10"
             >
               <ul onPointerOver={takeFromEvent} onFocus={takeFromEvent}>
                 {disciplines.map((discipline, i) => (
@@ -554,7 +572,11 @@ export function Hero({ disciplines }: { disciplines: Discipline[] }) {
                   // these.
                   <li
                     key={discipline.slug}
-                    className="border-b border-border"
+                    // Each row on its own beat. The rule above the list is
+                    // not faded with them — a border arriving is a border
+                    // twitching, and the list wants an edge to arrive into.
+                    style={lands(INDEX_MS + i * ROW_MS)}
+                    className="rise border-b border-border"
                     data-discipline={i + 1}
                   >
                     <Link
@@ -607,7 +629,7 @@ export function Hero({ disciplines }: { disciplines: Discipline[] }) {
               type block is anchored at both ends against the full height of
               the picture rather than drifting in the middle. */}
             <div
-              style={lands(420)}
+              style={lands(BUTTONS_MS)}
               className="rise mt-auto flex flex-wrap items-center gap-3 px-6 py-8 sm:px-10 sm:py-10"
             >
               <Link

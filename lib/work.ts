@@ -259,13 +259,6 @@ const CATEGORY_LABELS: Record<string, string> = {
   // a political or fundraising one. The client is a brand, and saying so is
   // what an art director is scanning the index for.
   campaigns: "Brand campaigns",
-  // A presskit is a folder an artist sends to press. Every other label here
-  // names a kind of work somebody would commission, so this one answered
-  // "what will I receive" on a cover that is asking "what could I hire you
-  // for". "Press shots" is what the client says out loud, and it sits next to
-  // Cover art as the other half of the music work. The slug is untouched, so
-  // /work/category/artist-presskit keeps resolving.
-  "artist-presskit": "Press shots",
 };
 
 /**
@@ -286,7 +279,7 @@ export const categoryLabel = (category: Category): string =>
  * `categoryLabel` — the cover index, the nav, a page heading. Everywhere that
  * printed `project.categories[0].name` got the raw manifest name instead, so
  * `/work` listed "CAMPAIGNS" while the nav above it said "Brand campaigns",
- * and the homepage tiles did the same. That was true before Press shots
+ * and the homepage tiles did the same. That was true before this function
  * existed and would have been true of every future rename.
  *
  * Fixed at the one place every consumer reads from rather than at each render
@@ -552,9 +545,9 @@ export const nextAfter = (p: Project): Project | undefined => {
  * it.
  *
  * This is what the cover is *for*: "photographer" is a job title, whereas
- * editorial, campaigns, portraits, press shots and cover art are the things
- * somebody might actually be here to commission. Switching between them says
- * the range in the first few seconds, which one static cover cannot.
+ * editorial, campaigns, portraits, artist presskits and cover art are the
+ * things somebody might actually be here to commission. Switching between them
+ * says the range in the first few seconds, which one static cover cannot.
  *
  * Built from the nav's own category order rather than a hand-written list, so
  * it cannot drift out of step with the work. Each one takes its frame from the
