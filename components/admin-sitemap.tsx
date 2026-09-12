@@ -177,7 +177,17 @@ export function AdminSitemap({
                   <button
                     type="button"
                     onClick={() =>
-                      onGo({ kind: "projects", discipline: c.name })
+                      onGo(
+                        // Cover art is the exception, and for a reason rather
+                        // than as a special case: it is one project holding
+                        // every release, so filtering the list to it lands on
+                        // a single row that tells you nothing. What is
+                        // actually curated about cover art is which releases
+                        // lead the homepage rack, so that is where it goes.
+                        c.slug === "coverart" || c.slug === "cover-art"
+                          ? { kind: "field", anchor: "coverArt" }
+                          : { kind: "projects", discipline: c.name },
+                      )
                     }
                     className={cn(row, "w-full text-left")}
                   >

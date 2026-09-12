@@ -51,6 +51,20 @@ const API = "https://api.github.com";
  */
 const TOKEN_KEY = "jg-admin-token";
 
+/**
+ * The Content form's own sections, in the order they are set.
+ *
+ * Declared here rather than read off the DOM so the index can be rendered
+ * before the form is, and so the numbers in the index and the numbers on the
+ * headings cannot drift apart — they come from the same list.
+ */
+const SECTIONS = [
+  { anchor: "contact", number: "01", title: "Contact" },
+  { anchor: "homepage", number: "02", title: "Homepage" },
+  { anchor: "testimonials", number: "03", title: "Testimonials" },
+  { anchor: "sessions", number: "04", title: "Sessions" },
+] as const;
+
 const fromBase64 = (b64: string): string => {
   // The contents API wraps its base64 at 60 characters.
   const binary = atob(b64.replace(/\s/g, ""));
@@ -132,6 +146,8 @@ export function AdminEditor({
   const [opened, setOpened] = React.useState<string | null>(null);
   /** The project list's filter, held here so a discipline row can set it. */
   const [filter, setFilter] = React.useState("");
+  /** Which section of the Content form is being read, for the index. */
+  const [here, setHere] = React.useState<string>(SECTIONS[0].anchor);
   /**
    * A Content field the sitemap has asked for, cleared once it is reached.
    *
@@ -215,12 +231,88 @@ export function AdminEditor({
   React.useEffect(() => {
     if (!wanted) return;
     const id = requestAnimationFrame(() => {
+      const el = document.getElementById(`field-${wanted.anchor}`);
+      if (!el) return;
+      // At most one field is ever the one you asked for. The listener below
+      // normally clears it, but it is attached to a node React is free to
+      // replace, so this is what actually guarantees it.
       document
-        .getElementById(`field-${wanted.anchor}`)
-        ?.scrollIntoView({ block: "start", behavior: "smooth" });
+        .querySelectorAll("[data-found]")
+        .forEach((n) => n.removeAttribute("data-found"));
+      el.scrollIntoView({ block: "start", behavior: "smooth" });
+      // An attribute, not a class. `className` on these elements is React's —
+      // it rewrites it on the next render and takes the highlight with it,
+      // and arriving from the sitemap re-renders by definition because it
+      // changes the tab. React leaves attributes it never set alone.
+      //
+      // Cleared first so it can fire twice: an animation does not restart
+      // because the attribute was set again while it was already there, which
+      // is exactly what clicking the same row twice does.
+      el.removeAttribute("data-found");
+      void el.offsetWidth;
+      el.setAttribute("data-found", "");
+      el.addEventListener(
+        "animationend",
+        () => el.removeAttribute("data-found"),
+        { once: true },
+      );
     });
     return () => cancelAnimationFrame(id);
   }, [wanted]);
+
+  /**
+   * Which section is being read, for the index above the form.
+   *
+   * A scroll listener that re-reads the sections each time, rather than an
+   * IntersectionObserver holding four nodes. An observer is the better
+   * instrument in general and was the first attempt here, but it observes
+   * *nodes*, and the nodes it was given on mount are not always the ones the
+   * page ends up with — a hydration that replaces an element leaves the
+   * observer watching something detached, which never intersects again and
+   * pins the index to whichever section happened to be current at mount.
+   * That is exactly how it failed. `getElementById` on every frame cannot go
+   * stale, and four `getBoundingClientRect` calls behind a rAF is nothing.
+   *
+   * Measured against the viewport, not the column. The column scrolls on its
+   * own from `xl` and the page scrolls below it, but either way the sections
+   * move relative to the window — so one listener covers both layouts.
+   *
+   * The band is near the top of the screen rather than the middle: a short
+   * last section can never reach the middle of a tall viewport, so the middle
+   * would leave the final entry permanently unreachable.
+   */
+  React.useEffect(() => {
+    if (view !== "content") return;
+
+    let frame = 0;
+    const read = () => {
+      frame = 0;
+      const line = window.innerHeight * 0.2;
+      // The last one to have started above the line — which is the one you
+      // are reading, including while its heading is off the top of the screen.
+      let found: string = SECTIONS[0].anchor;
+      for (const s of SECTIONS) {
+        const el = document.getElementById(`field-${s.anchor}`);
+        if (el && el.getBoundingClientRect().top <= line) found = s.anchor;
+      }
+      setHere(found);
+    };
+    const onScroll = () => {
+      if (!frame) frame = requestAnimationFrame(read);
+    };
+
+    read();
+    window.addEventListener("scroll", onScroll, {
+      passive: true,
+      capture: true,
+    });
+    window.addEventListener("resize", onScroll, { passive: true });
+    return () => {
+      if (frame) cancelAnimationFrame(frame);
+      window.removeEventListener("scroll", onScroll, { capture: true });
+      window.removeEventListener("resize", onScroll);
+    };
+  }, [view]);
 
   // Reconnect on mount if a token is already stored, so the usual visit is a
   // page that is simply ready.
@@ -496,63 +588,117 @@ export function AdminEditor({
             tabs switch between edits the same object, and the preview beside
             them reflects all of it — so moving between them never loses work
             and never needs saving first. */}
-        <nav
-          className="flex gap-1 border-b border-border"
-          aria-label="Editor sections"
-        >
-          {(["content", "projects"] as const).map((v) => (
-            <button
-              key={v}
-              type="button"
-              onClick={() => setView(v)}
-              aria-current={view === v ? "true" : undefined}
-              className={cn(
-                "label -mb-px border-b-2 px-4 py-3 capitalize transition-colors duration-200",
-                view === v
-                  ? "border-foreground text-foreground"
-                  : "border-transparent text-muted-foreground hoverable:hover:text-foreground",
-              )}
-            >
-              {v}
-            </button>
-          ))}
-          {/* Publish, where the work is.
+        {/* Sticky to the top of its own column.
+         *
+         * The column is a scroller now and the form inside it is long — four
+         * sections, a picker, seventy projects — so a tab row that scrolls
+         * away takes the only way between views with it, and Publish along
+         * with it. Pinned, the two things you always want are always there.
+         * `bg-background` is not decoration: without it the form scrolls
+         * through the row. */}
+        {/* One sticky block, not two stacked ones. Pinning the tabs and the
+            index separately means the second has to be offset by the height
+            of the first, and that number is a guess about a font — it was 13px
+            short, which is 13px of form scrolling through the gap between
+            them. Nested inside one pinned container they simply sit together
+            and nothing has to be measured. */}
+        <div className="sticky top-0 z-20 bg-background">
+          <nav
+            className="flex gap-1 border-b border-border"
+            aria-label="Editor sections"
+          >
+            {(["content", "projects"] as const).map((v) => (
+              <button
+                key={v}
+                type="button"
+                onClick={() => setView(v)}
+                aria-current={view === v ? "true" : undefined}
+                className={cn(
+                  "label -mb-px border-b-2 px-4 py-3 capitalize transition-colors duration-200",
+                  view === v
+                    ? "border-foreground text-foreground"
+                    : "border-transparent text-muted-foreground hoverable:hover:text-foreground",
+                )}
+              >
+                {v}
+              </button>
+            ))}
+            {/* Publish, where the work is.
+             *
+             * There is a second one at the foot of the column, and that is the
+             * point: the middle column is its own scroller now, so the bottom
+             * bar is only sticky to the bottom of a panel you may be nowhere
+             * near. An edit made near the top — dragging a frame, refiling a
+             * shoot — had no way to be committed without scrolling back down
+             * to look for the button.
+             *
+             * Always present and disabled rather than appearing when it has
+             * something to do: a control that materialises shifts the row it is
+             * in and has to be noticed before it can be used, whereas a greyed
+             * one is a permanent answer to "where do I publish this". The
+             * `title` says which of the two reasons it is grey. */}
+            <span className="ml-auto flex items-center gap-3 self-center">
+              {dirty ? (
+                <span className="label text-muted-foreground">
+                  unpublished changes
+                </span>
+              ) : null}
+              <button
+                type="button"
+                onClick={publish}
+                disabled={!sha || !dirty || status.kind === "working"}
+                title={
+                  !sha
+                    ? "Connect the GitHub token at the foot of this column first"
+                    : !dirty
+                      ? "Nothing to publish — the draft matches the live site"
+                      : undefined
+                }
+                className="label border border-foreground bg-foreground px-4 py-2 text-background press hoverable:hover:opacity-90 active:scale-[0.98] disabled:cursor-not-allowed disabled:border-border disabled:bg-transparent disabled:text-muted-foreground disabled:opacity-50"
+              >
+                {status.kind === "working" ? "Publishing…" : "Publish"}
+              </button>
+            </span>
+          </nav>
+
+          {/* The form's own index.
            *
-           * There is a second one at the foot of the column, and that is the
-           * point: the middle column is its own scroller now, so the bottom
-           * bar is only sticky to the bottom of a panel you may be nowhere
-           * near. An edit made near the top — dragging a frame, refiling a
-           * shoot — had no way to be committed without scrolling back down
-           * to look for the button.
+           * The Content form used to be a single scroll with four headings in
+           * it and no way to get to one — finding the session prices meant
+           * scrolling past the homepage, and knowing where you were meant
+           * recognising the field you happened to be looking at.
            *
-           * Always present and disabled rather than appearing when it has
-           * something to do: a control that materialises shifts the row it is
-           * in and has to be noticed before it can be used, whereas a greyed
-           * one is a permanent answer to "where do I publish this". The
-           * `title` says which of the two reasons it is grey. */}
-          <span className="ml-auto flex items-center gap-3 self-center">
-            {dirty ? (
-              <span className="label text-muted-foreground">
-                unpublished changes
-              </span>
-            ) : null}
-            <button
-              type="button"
-              onClick={publish}
-              disabled={!sha || !dirty || status.kind === "working"}
-              title={
-                !sha
-                  ? "Connect the GitHub token at the foot of this column first"
-                  : !dirty
-                    ? "Nothing to publish — the draft matches the live site"
-                    : undefined
-              }
-              className="label border border-foreground bg-foreground px-4 py-2 text-background press hoverable:hover:opacity-90 active:scale-[0.98] disabled:cursor-not-allowed disabled:border-border disabled:bg-transparent disabled:text-muted-foreground disabled:opacity-50"
-            >
-              {status.kind === "working" ? "Publishing…" : "Publish"}
-            </button>
-          </span>
-        </nav>
+           * Sticky under the tabs, and the current section is marked as you
+           * scroll, so it answers both questions at once: where things are, and
+           * where you are. Content only — the projects view is one list with a
+           * filter above it and has no sections to index. */}
+          {view === "content" ? (
+            <div className="-mx-1 flex flex-wrap gap-x-1 border-b border-border px-1 py-2">
+              {SECTIONS.map((s) => (
+                <button
+                  key={s.anchor}
+                  type="button"
+                  onClick={() =>
+                    setWanted((w) => ({
+                      anchor: s.anchor,
+                      nonce: (w?.nonce ?? 0) + 1,
+                    }))
+                  }
+                  aria-current={here === s.anchor ? "true" : undefined}
+                  className={cn(
+                    "label flex items-baseline gap-2 px-3 py-1.5 transition-colors duration-200",
+                    here === s.anchor
+                      ? "bg-card text-foreground"
+                      : "text-muted-foreground hoverable:hover:text-foreground",
+                  )}
+                >
+                  <span className="tabular-nums opacity-60">{s.number}</span>
+                  {s.title}
+                </button>
+              ))}
+            </div>
+          ) : null}
+        </div>
 
         {view === "projects" ? (
           <>
@@ -620,7 +766,7 @@ export function AdminEditor({
   function ContentForm() {
     return (
       <div className="mt-10 flex flex-col gap-14">
-        <Section title="Contact" number="01">
+        <Section anchor="contact" title="Contact" number="01">
           <Field
             anchor="responseTime"
             label="Reply-time promise"
@@ -650,7 +796,7 @@ export function AdminEditor({
           </Field>
         </Section>
 
-        <Section title="Homepage" number="02">
+        <Section anchor="homepage" title="Homepage" number="02">
           <Field
             anchor="coverSlug"
             label="Cover project"
@@ -722,7 +868,7 @@ export function AdminEditor({
           </details>
         </Section>
 
-        <Section title="Testimonials" number="03">
+        <Section anchor="testimonials" title="Testimonials" number="03">
           <p className="max-w-prose text-sm text-muted-foreground">
             The section does not render at all while this is empty, so there is
             never invented praise on the site. A specific detail beats an

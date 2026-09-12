@@ -738,3 +738,39 @@
 body:has([data-workbench]) > footer {
   display: none;
 }
+
+/* ── the field you asked for ──────────────────────────────────────
+ * A jump from the sitemap or the section index scrolls the editor, and a
+ * scroll that lands somewhere plausible is indistinguishable from one that
+ * landed somewhere wrong. This says which of the fields on screen is the one
+ * you clicked, then gets out of the way.
+ *
+ * An animation rather than a transition, because it has to run on an element
+ * that was already on screen and already styled — nothing changed about it
+ * except that you asked for it.
+ * ─────────────────────────────────────────────────────────────── */
+@keyframes jg-found {
+  from {
+    background-color: color-mix(in oklab, var(--foreground) 14%, transparent);
+  }
+  to {
+    background-color: transparent;
+  }
+}
+
+/* Not a utility, because nothing renders it as a class: the editor sets
+   `data-found` on the element it scrolled to. A class would be inside
+   React's `className`, which it rewrites on the next render — and arriving
+   from the sitemap re-renders by definition, because it changes the tab. */
+[data-found] {
+  animation: jg-found 1400ms var(--ease-out-strong);
+  /* So the wash reads as a highlight around the field rather than a box
+     drawn tightly on its text. */
+  box-shadow: 0 0 0 0.75rem transparent;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-found] {
+    animation: none;
+  }
+}
