@@ -140,11 +140,44 @@ const frameRef = (v: unknown, path: string): FrameRef => {
   return v.kind === "text" ? textRef(v, path) : frame(v, path);
 };
 
+/**
+ * An Instagram handle, from whatever was typed into the box.
+ *
+ * People paste three different things and mean one: `@rice666s`, `rice666s`,
+ * and the whole address off the browser bar. All three are the same account,
+ * so all three are accepted and stored the same way — bare, lowercase, no
+ * decoration — and the link is built from that rather than from the paste.
+ *
+ * Anything that survives is then held to Instagram's own alphabet: letters,
+ * digits, dots and underscores. That is a validation rule and a safety one at
+ * the same time — the result goes into an `href`, and refusing everything but
+ * those characters is what stops a pasted `javascript:` or a path of its own
+ * from ever reaching one. Nothing usable is returned as null.
+ */
+export const instagramHandle = (raw: string): string | null => {
+  const bare = raw
+    .trim()
+    .replace(/^https?:\/\/(www\.)?instagram\.com\//i, "")
+    .replace(/[/?#].*$/, "")
+    .replace(/^@+/, "")
+    .toLowerCase();
+  // The first character must be a letter, digit or underscore. Instagram
+  // allows none of its handles to open with a dot, and neither does this —
+  // which is also what stops a bare `..` getting through and pointing the
+  // link at Instagram's own root.
+  return /^[a-z0-9_][a-z0-9._]{0,29}$/.test(bare) ? bare : null;
+};
+
 const credit = (v: unknown, path: string): Credit => {
   if (!isRecord(v)) return fail(path, "an object", v);
   return {
     role: str(v.role, `${path}.role`),
     name: str(v.name, `${path}.name`),
+    // Absent and unusable are the same answer here, and both mean "print the
+    // name as text". A handle is a nicety on a credit, not a reason to fail a
+    // build that is otherwise fine.
+    instagram:
+      typeof v.instagram === "string" ? instagramHandle(v.instagram) : null,
   };
 };
 

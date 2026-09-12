@@ -134,4 +134,64 @@ const text = (body) => ({ kind: "text", heading: null, body });
   );
 }
 
+/* ── instagram handles ───────────────────────────────────────────
+ * The other piece of this feature that takes typed input and turns it into
+ * something structural — here, an `href`. Mirrors `instagramHandle` in
+ * `lib/added.ts` the same way the split above mirrors `reframe`.
+ * ─────────────────────────────────────────────────────────────── */
+const instagramHandle = (raw) => {
+  const bare = raw
+    .trim()
+    .replace(/^https?:\/\/(www\.)?instagram\.com\//i, "")
+    .replace(/[/?#].*$/, "")
+    .replace(/^@+/, "")
+    .toLowerCase();
+  // The first character must be a letter, digit or underscore. Instagram
+  // allows none of its handles to open with a dot, and neither does this —
+  // which is also what stops a bare `..` getting through and pointing the
+  // link at Instagram's own root.
+  return /^[a-z0-9_][a-z0-9._]{0,29}$/.test(bare) ? bare : null;
+};
+
+{
+  // The three things people paste meaning the same account.
+  for (const typed of [
+    "rice666s",
+    "@rice666s",
+    "  @rice666s  ",
+    "https://www.instagram.com/rice666s",
+    "https://instagram.com/rice666s/",
+    "https://www.instagram.com/rice666s/?hl=en",
+    "RICE666S",
+  ]) {
+    assert.equal(
+      instagramHandle(typed),
+      "rice666s",
+      `"${typed}" is the same account as the bare handle`,
+    );
+  }
+
+  // Instagram's own alphabet, and nothing else.
+  assert.equal(instagramHandle("a.b_c9"), "a.b_c9", "dots and underscores");
+
+  // Anything that would put something other than a handle in the href.
+  for (const bad of [
+    "",
+    "   ",
+    "@",
+    "javascript:alert(1)",
+    "../../etc",
+    "two words",
+    "hand<le>",
+    "a".repeat(31),
+  ]) {
+    assert.equal(
+      instagramHandle(bad),
+      null,
+      `"${bad}" never reaches an href`,
+    );
+  }
+}
+
 console.log("sequence split: 6 cases pass");
+console.log("instagram handles: 16 cases pass");

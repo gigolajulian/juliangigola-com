@@ -148,7 +148,36 @@ export default async function ProjectPage(props: PageProps<"/work/[slug]">) {
               {project.credits.map((credit, i) => (
                 <div key={`${credit.role}-${i}`}>
                   <dt className="label text-muted-foreground">{credit.role}</dt>
-                  <dd className="mt-2 text-sm">{credit.name}</dd>
+                  {/* The name links to them where there is somewhere to link.
+                      A crew credit is the one place on the site where the
+                      subject is a person rather than the work, and a name you
+                      then have to go and search for is a dead end — these are
+                      the people a client might want to book alongside him.
+
+                      A new tab on purpose: the visitor is at the end of a
+                      project they have just looked through, and taking the
+                      page out from under them to show someone else's feed
+                      would lose their place in it. Underlined rather than
+                      coloured, so which names are links is legible without
+                      hovering every one of them. */}
+                  <dd className="mt-2 text-sm">
+                    {credit.instagram ? (
+                      <a
+                        href={`https://www.instagram.com/${credit.instagram}/`}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="underline decoration-border underline-offset-4 transition-colors duration-200 hoverable:hover:decoration-foreground"
+                      >
+                        {credit.name}
+                        <span className="sr-only">
+                          {" "}
+                          on Instagram (opens in a new tab)
+                        </span>
+                      </a>
+                    ) : (
+                      credit.name
+                    )}
+                  </dd>
                 </div>
               ))}
             </dl>

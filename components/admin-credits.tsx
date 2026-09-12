@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import type { Credit } from "@/lib/work-types";
+import { instagramHandle } from "@/lib/added";
 import { cn } from "@/lib/utils";
 
 /* ── credits ──────────────────────────────────────────────────────
@@ -69,7 +70,7 @@ export function AdminCredits({
 
       <div className="mt-3 flex flex-col gap-2">
         {credits.map((credit, i) => (
-          <div key={i} className="flex items-center gap-2">
+          <div key={i} className="flex flex-wrap items-center gap-2">
             {/* A list, not a closed set. The roles above cover most jobs and
                 save the typing; anything can still be written in, because a
                 shoot invents a role now and then and a dropdown that refuses
@@ -85,10 +86,31 @@ export function AdminCredits({
             <input
               value={credit.name}
               onChange={(e) => set(i, { name: e.target.value })}
-              placeholder="Name or @handle"
+              placeholder="Name"
               aria-label={`Name for credit ${i + 1}`}
               className={field}
             />
+            {/* Kept raw while typing and normalised on the way out.
+                Rewriting the box under somebody's cursor — eating the `@` as
+                they type it, lowercasing mid-word — is the kind of helpful
+                that makes a field feel broken. `@` is printed beside it
+                instead of expected inside it, and a pasted profile URL is
+                accepted whole and reduced on blur. */}
+            <span className="relative shrink-0 sm:w-52">
+              <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
+                @
+              </span>
+              <input
+                value={credit.instagram ?? ""}
+                onChange={(e) => set(i, { instagram: e.target.value })}
+                onBlur={(e) =>
+                  set(i, { instagram: instagramHandle(e.target.value) })
+                }
+                placeholder="instagram"
+                aria-label={`Instagram handle for credit ${i + 1}`}
+                className={cn(field, "pl-7")}
+              />
+            </span>
             <span className="flex shrink-0 items-center gap-1">
               <button
                 type="button"
@@ -129,7 +151,9 @@ export function AdminCredits({
 
       <button
         type="button"
-        onClick={() => onChange([...credits, { role: "", name: "" }])}
+        onClick={() =>
+          onChange([...credits, { role: "", name: "", instagram: null }])
+        }
         className="label mt-3 border border-border px-4 py-2 press hoverable:hover:bg-card"
       >
         Add credit
@@ -144,6 +168,19 @@ export function AdminCredits({
   );
 }
 
-/** Drops the half-filled rows. Both halves of a credit or neither. */
+/**
+ * Drops the half-filled rows, and anything unusable in the handle.
+ *
+ * Role and name are both required — half a credit is not one. The handle is
+ * not: a crew member with no Instagram, or with one nobody could remember, is
+ * an ordinary credit and prints as plain text. Normalised here as well as on
+ * blur, because a row can be added and published without the field ever being
+ * focused, and `lib/added.ts` would then refuse the build over a stray `@`.
+ */
 export const tidyCredits = (credits: Credit[]): Credit[] =>
-  credits.filter((c) => c.role.trim() !== "" && c.name.trim() !== "");
+  credits
+    .filter((c) => c.role.trim() !== "" && c.name.trim() !== "")
+    .map((c) => ({
+      ...c,
+      instagram: c.instagram ? instagramHandle(c.instagram) : null,
+    }));
