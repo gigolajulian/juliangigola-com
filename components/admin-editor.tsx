@@ -447,12 +447,18 @@ export function AdminEditor({
        34rem floor is what the fields need before the ratio takes over, and
        the preview stays fixed because it is a picture of a page at a
        plausible width rather than a panel to fill. */
-    <div className="mt-10 grid gap-10 xl:grid-cols-[17rem_1fr_23rem] xl:items-start 2xl:gap-12 2xl:grid-cols-[1fr_minmax(34rem,1.6fr)_26rem]">
+    <div className="mt-10 grid gap-10 xl:min-h-0 xl:flex-1 xl:grid-cols-[17rem_1fr_23rem] 2xl:gap-12 2xl:grid-cols-[1fr_minmax(34rem,1.6fr)_26rem]">
       {/* Not a tab any more. The sitemap is what the site currently is, which
           is context for every edit rather than a place to go — and it redraws
           as the draft changes, so it doubles as a readout of what hiding
           something will actually do. */}
-      <aside className="min-w-0 xl:sticky xl:top-28 xl:max-h-[calc(100dvh-9rem)] xl:overflow-y-auto">
+      {/* Each column its own scroller. Sticky positioning did this job while
+          the page scrolled as one document; now the grid is exactly one
+          screen tall, so `min-h-0` is what lets a track shrink below its
+          content and `overflow-y-auto` is what gives that content somewhere
+          to go. Without `min-h-0` a grid track floors at its content height
+          and the whole page grows again. */}
+      <aside className="min-w-0 xl:min-h-0 xl:overflow-y-auto xl:pb-10">
         <AdminSitemap
           projects={projects.map((p) => ({
             slug: p.slug,
@@ -468,7 +474,7 @@ export function AdminEditor({
         />
       </aside>
 
-      <div className="min-w-0">
+      <div className="min-w-0 xl:min-h-0 xl:overflow-y-auto xl:pb-10">
         {/* Not a gate any more. The editor used to be hidden entirely until a
             token proved itself, which meant arriving at /admin — or clicking
             a project in the sitemap — showed a read-only index and a password
@@ -574,7 +580,7 @@ export function AdminEditor({
 
       {/* Sticky, so it stays beside the field being edited on a long form.
           Below `xl` it drops under the form rather than squeezing both. */}
-      <aside className="xl:sticky xl:top-28">
+      <aside className="min-w-0 xl:min-h-0 xl:overflow-y-auto xl:pb-10">
         <AdminPreview draft={draft} projects={projects} hidden={hidden} />
       </aside>
     </div>

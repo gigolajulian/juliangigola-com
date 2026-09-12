@@ -692,3 +692,25 @@
     transition: none;
   }
 }
+
+/* ── the workbench takes the screen ───────────────────────────────
+ * `/admin` pins itself to the viewport from `xl` up and scrolls its three
+ * columns internally. The site footer would defeat that on its own — a
+ * 100dvh page plus a footer is a document taller than the screen, so the
+ * whole thing scrolls by exactly the height of a footer nobody wants to
+ * reach from a workbench.
+ *
+ * Hidden at every width, not just where the page is pinned. The footer is a
+ * closing argument — "let's make something", the address, the social links —
+ * aimed at a visitor who has reached the end of the work. Julian editing his
+ * own site is not that visitor, and asking him to commission himself at the
+ * bottom of every screen of the editor is noise on a tool.
+ *
+ * Done here rather than by branching the root layout on a pathname: that
+ * would make every page in the site client-rendered to decide something one
+ * route cares about. `:has()` asks the question where it belongs, in the one
+ * rule that answers it, and costs nothing on any other page.
+ * ─────────────────────────────────────────────────────────────── */
+body:has([data-workbench]) > footer {
+  display: none;
+}

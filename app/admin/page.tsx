@@ -41,8 +41,20 @@ export default function AdminPage() {
        a workbench, not something to read: three panels side by side, one of
        them a grid of photographs. Capping it at 64rem left the sitemap four
        thumbnails wide on a display with room for twelve. */
-    <div className="w-full px-6 pb-24 pt-28 sm:px-10 sm:pt-36">
-      <header>
+    /* One screen, from `xl` up. A workbench that scrolls as one document
+       means the sitemap leaves the top of the screen while you edit the
+       thing it points at — so the page is pinned to the viewport and each
+       of the three columns scrolls its own contents instead. `data-workbench`
+       is what hides the site footer here (see `globals.css`); without that,
+       the footer alone would still make the document scrollable.
+
+       Below `xl` the columns stack, and a stack in a fixed box is three
+       scrollers in a phone screen. There it stays an ordinary page. */
+    <div
+      data-workbench
+      className="w-full px-6 pb-24 pt-28 sm:px-10 sm:pt-36 xl:flex xl:h-dvh xl:flex-col xl:overflow-hidden xl:pb-0"
+    >
+      <header className="xl:shrink-0">
         <h1 className="title">Content</h1>
         {/* The prose keeps its measure even though the page no longer has
             one — this paragraph is the one thing here that is read. */}
