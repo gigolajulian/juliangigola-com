@@ -1,7 +1,9 @@
 {
   "projects": [],
   "trash": [],
-  "categories": {},
+  "categories": {
+    "light-play": "editorial"
+  },
   "frames": {
     "wrapped-up": [
       "/work/wrapped-up/01.jpg",
