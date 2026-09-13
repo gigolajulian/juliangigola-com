@@ -563,15 +563,15 @@ export function Hero({ disciplines }: { disciplines: Discipline[] }) {
               again. */}
             <div
               style={lands(HEAD_MS)}
-              className="rise flex flex-wrap items-baseline gap-x-6 gap-y-1 border-b border-border px-6 pb-4 pt-6 sm:px-10 sm:pt-8 squat:pt-28 wide:pt-28"
+              className="rise flex flex-wrap items-baseline gap-x-6 gap-y-1 px-6 pb-4 pt-6 sm:px-10 sm:pt-8 squat:pt-28 wide:pt-28"
             >
               {/* Held back while the intro is up, because the intro is already
                 saying these exact words in display type eighty pixels below.
                 Printing them twice at once is the small-scale version of what
                 the comment on the masthead warns about.
 
-                Faded rather than unmounted: the rule and the flush-right
-                `SF Bay Area` must not move when it arrives. */}
+                Faded rather than unmounted: the flush-right `SF Bay Area`
+                must not move when it arrives. */}
               <p
                 className={cn(
                   "label text-muted-foreground transition-opacity duration-500 ease-[var(--ease-out-strong)] motion-reduce:transition-none",
@@ -704,6 +704,10 @@ export function Hero({ disciplines }: { disciplines: Discipline[] }) {
                     // Each row on its own beat. The rule above the list is
                     // not faded with them — a border arriving is a border
                     // twitching, and the list wants an edge to arrive into.
+                    // That rule is now the only one in the block: the running
+                    // head had a `border-b` of its own, which stacked a
+                    // second line 65px under the fixed bar's own border for
+                    // no work — two rules to separate one line of type.
                     style={lands(INDEX_MS + i * ROW_MS)}
                     className="rise border-b border-border"
                     data-discipline={i + 1}
