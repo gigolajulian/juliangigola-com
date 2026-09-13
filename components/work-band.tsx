@@ -134,63 +134,73 @@ export function WorkBand({
         {/* Base layer: always loaded, never removed. It is what keeps the
             cell from flashing empty the first time a scrub frame is fetched.
 
-            Named, so it is the thing that travels: clicking the tile does
-            not swap this page for that one, the cover lifts out of its cell
-            and settles into the first frame of the project — same `name` on
-            both ends, see `gallery.tsx`. Coming back, it returns. `share`
-            with `default="none"` so it morphs on that pair and does nothing
-            on every other navigation. */}
+            Named as one stack, so what travels is what is on screen: clicking
+            the tile does not swap this page for that one, the picture lifts
+            out of its cell and settles into the first frame of the project —
+            same `name` on both ends, see `gallery.tsx`. Coming back, it
+            returns. `share` with `default="none"` so it morphs on that pair
+            and does nothing on every other navigation.
+
+            With only the cover named, the trip opened on a cut: on a pointer
+            the cell is showing a scrub frame at the moment of the click, and
+            the morph set off with the cover from underneath it. Now the
+            cover and the three frames are one element, and whatever is
+            visible when it is pressed is what lifts out of the cell — and
+            dissolves into the project's first frame on the way, which is the
+            cover again. */}
         <ViewTransition
           name={`cover-${project.slug}`}
           share="morph"
           default="none"
         >
-          <Image
-            src={project.cover.src}
-            alt={project.cover.alt || project.name}
-            fill
-            sizes="(min-width: 1024px) 33vw, (min-width: 768px) 50vw, 100vw"
-            priority={priority}
-            // The blur-up under it while it loads, and — below the fold,
-            // where it is not the largest paint — a fade in when it lands
-            // rather than a pop. See `photo-fade.tsx`.
-            placeholder={project.cover.blur ? "blur" : "empty"}
-            blurDataURL={project.cover.blur}
-            data-fade={priority ? undefined : ""}
-            className="object-cover"
-          />
+          <div className="absolute inset-0">
+            <Image
+              src={project.cover.src}
+              alt={project.cover.alt || project.name}
+              fill
+              sizes="(min-width: 1024px) 33vw, (min-width: 768px) 50vw, 100vw"
+              priority={priority}
+              // The blur-up under it while it loads, and — below the fold,
+              // where it is not the largest paint — a fade in when it lands
+              // rather than a pop. See `photo-fade.tsx`.
+              placeholder={project.cover.blur ? "blur" : "empty"}
+              blurDataURL={project.cover.blur}
+              data-fade={priority ? undefined : ""}
+              className="object-cover"
+            />
+
+            {/* The scrub frames, stacked over the cover and dissolved between.
+
+                All three are mounted and only their opacity changes, which is
+                what makes the transition a crossfade rather than a swap: the
+                frame going out is still there while the one coming in fades up
+                over it, and the cover is under both. This used to mount one
+                keyed image at a time, which was a hard cut on every step —
+                Julian asked for it to be smoother. */}
+            {touched
+              ? frames.map((f, i) => (
+                  <Image
+                    key={f.src}
+                    src={f.src}
+                    alt=""
+                    fill
+                    loading="lazy"
+                    sizes="(min-width: 1024px) 33vw, (min-width: 768px) 50vw, 100vw"
+                    // Two photographs crossfading show both for a moment; a
+                    // couple of pixels of blur on whichever is mid-fade makes
+                    // them read as one picture resolving — the same trick the
+                    // cover's `dissolve` plays, at a fraction of the size.
+                    className={cn(
+                      "object-cover transition-[opacity,filter] duration-200 ease-[var(--ease-out-strong)] motion-reduce:transition-none",
+                      scrubbing && i === active
+                        ? "opacity-100 blur-none"
+                        : "opacity-0 blur-[2px]",
+                    )}
+                  />
+                ))
+              : null}
+          </div>
         </ViewTransition>
-
-        {/* The scrub frames, stacked over the cover and dissolved between.
-
-            All three are mounted and only their opacity changes, which is
-            what makes the transition a crossfade rather than a swap: the
-            frame going out is still there while the one coming in fades up
-            over it, and the cover is under both. This used to mount one
-            keyed image at a time, which was a hard cut on every step —
-            Julian asked for it to be smoother. */}
-        {touched
-          ? frames.map((f, i) => (
-              <Image
-                key={f.src}
-                src={f.src}
-                alt=""
-                fill
-                loading="lazy"
-                sizes="(min-width: 1024px) 33vw, (min-width: 768px) 50vw, 100vw"
-                // Two photographs crossfading show both for a moment; a
-                // couple of pixels of blur on whichever is mid-fade makes
-                // them read as one picture resolving — the same trick the
-                // cover's `dissolve` plays, at a fraction of the size.
-                className={cn(
-                  "object-cover transition-[opacity,filter] duration-200 ease-[var(--ease-out-strong)] motion-reduce:transition-none",
-                  scrubbing && i === active
-                    ? "opacity-100 blur-none"
-                    : "opacity-0 blur-[2px]",
-                )}
-              />
-            ))
-          : null}
 
         {/* A plate under the type, not a wash over the picture.
          *

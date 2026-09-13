@@ -1131,12 +1131,12 @@ optgroup {
  * for the 30% of the trip where it matters.
  * ─────────────────────────────────────────────────────────────── */
 ::view-transition-group(.morph) {
-  animation-duration: 480ms;
+  animation-duration: 400ms;
   animation-timing-function: var(--ease-out-strong);
 }
 ::view-transition-image-pair(.morph) {
   animation-name: jg-via-blur;
-  animation-duration: 480ms;
+  animation-duration: 400ms;
   animation-timing-function: var(--ease-out-strong);
 }
 @keyframes jg-via-blur {
