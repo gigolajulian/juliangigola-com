@@ -229,6 +229,31 @@ export type Summary = {
   country?: string;
 };
 
+/**
+ * The email that goes to Julian for an enquiry: the same lines the mailto
+ * fallback carries, so whichever way a message reaches him it reads the
+ * same, and a footer saying where the stored copy lives. Plain text only —
+ * it is a notification, not a newsletter, and plain text is what a photo-
+ * grapher's inbox on a phone reads fastest.
+ */
+export const emailCopy = (e: Enquiry): { subject: string; text: string } => ({
+  subject: `${e.type} enquiry — ${e.name}`,
+  text: [
+    `Type: ${e.type}`,
+    e.detail ? `Details: ${e.detail}` : null,
+    `From: ${e.name} <${e.email}>`,
+    e.country ? `Country: ${e.country}` : null,
+    "",
+    e.message,
+    "",
+    "—",
+    "Stored in the site's inbox: https://www.juliangigola.com/admin (Inbox tab).",
+    "Reply to this email to answer them directly.",
+  ]
+    .filter((line) => line !== null)
+    .join("\n"),
+});
+
 export const summary = (e: Enquiry): Summary => ({
   id: e.id,
   at: e.at,

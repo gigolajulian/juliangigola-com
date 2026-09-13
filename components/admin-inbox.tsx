@@ -3,6 +3,7 @@
 import * as React from "react";
 import { replyLink, type Enquiry, type Summary } from "@/lib/inbox";
 import { cn } from "@/lib/utils";
+import { TOKEN_STORE } from "@/lib/admin-github";
 
 /* ── the inbox ────────────────────────────────────────────────────
  * Enquiries from the contact form, which now has somewhere to put them.
@@ -22,6 +23,16 @@ import { cn } from "@/lib/utils";
 
 /** Where the key is kept between visits. Beside the GitHub token. */
 const KEY_STORE = "jg-inbox-key";
+
+/**
+ * What to send: the inbox key if one was pasted, else the GitHub token the
+ * editor signed in with. The API takes either — see `canPush` in the route.
+ */
+const credentials = (key: string): Record<string, string> => {
+  if (key) return { "x-inbox-key": key };
+  const token = window.localStorage.getItem(TOKEN_STORE);
+  return token ? { authorization: `Bearer ${token}` } : {};
+};
 
 type Row = Summary & { key: string };
 
@@ -51,7 +62,7 @@ export function AdminInbox() {
       const k = withKey ?? key;
       const res = await fetch(`/api/inbox${init.query ?? ""}`, {
         ...init,
-        headers: { "x-inbox-key": k, "content-type": "application/json" },
+        headers: { ...credentials(k), "content-type": "application/json" },
         cache: "no-store",
       });
       const parsed = (await res.json()) as { error?: string };
@@ -95,10 +106,13 @@ export function AdminInbox() {
    * `localStorage` during render, is a hydration mismatch, because the server
    * has no browser to read. The same exemption `admin-editor.tsx` takes for
    * the GitHub token, for the same reason. */
+  // Opens on its own: with a pasted key if there is one, otherwise with the
+  // GitHub token — which is the usual case, and means the tab just works.
   React.useEffect(() => {
     const saved = window.localStorage.getItem(KEY_STORE);
     // eslint-disable-next-line react-hooks/set-state-in-effect
     if (saved) void list(saved);
+    else if (window.localStorage.getItem(TOKEN_STORE)) void list();
   }, [list]);
 
   async function reveal(row: Row) {
@@ -337,11 +351,11 @@ function Unlock({
       className="flex max-w-prose flex-col gap-3 border border-border bg-card p-5"
     >
       <p className="text-sm text-muted-foreground">
-        Enquiries are kept on this site rather than emailed, so they need a key
-        of their own — the GitHub token opens the repository, not this. Set one
-        once with{" "}
-        <code className="text-foreground">wrangler secret put INBOX_KEY</code>,
-        then paste it here. It stays in this browser.
+        Enquiries are kept on this site rather than emailed. The inbox opens
+        with the GitHub token you signed in with, so normally there is nothing
+        to do here. If you would rather it use a key of its own, set one with{" "}
+        <code className="text-foreground">wrangler secret put INBOX_KEY</code>{" "}
+        and paste it below; it stays in this browser.
       </p>
       <input
         type="password"

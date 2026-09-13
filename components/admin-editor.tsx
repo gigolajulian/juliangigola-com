@@ -26,7 +26,7 @@ import {
   type Manifest,
   type ProjectsFile,
 } from "@/lib/admin-payload";
-import { commitFiles, readFile, type CommitFile } from "@/lib/admin-github";
+import { commitFiles, readFile, type CommitFile, TOKEN_STORE } from "@/lib/admin-github";
 import type { Credit } from "@/lib/work-types";
 import { cn } from "@/lib/utils";
 
@@ -65,7 +65,7 @@ const API = "https://api.github.com";
  * with this browser profile can use it, which is the trade for not having to
  * paste it every time. "Forget token" clears it.
  */
-const TOKEN_KEY = "jg-admin-token";
+const TOKEN_KEY = TOKEN_STORE;
 
 /**
  * The Content form's own sections, in the order they are set.

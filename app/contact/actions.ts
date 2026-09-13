@@ -10,6 +10,7 @@ import {
   cooldown,
   cooldownKey,
   dayKey,
+  emailCopy,
   enquiry,
   enquiryKey,
   problems,
@@ -52,6 +53,8 @@ export type ContactState = {
 };
 
 const TO = "hello@juliangigola.com";
+/** The sending subdomain onboarded to Cloudflare Email Sending. See wrangler.jsonc. */
+const FROM = "enquiries@notifications.juliangigola.com";
 
 /**
  * A sender's identity for the cooldown, as a hash.
@@ -205,6 +208,29 @@ export async function submitEnquiry(
     await inbox.put(dayKey(now), String(today + 1), {
       expirationTtl: 2 * 24 * 60 * 60,
     });
+
+    /* A copy to Julian's mail, so an enquiry reaches him where he already
+       looks. Strictly after the store and strictly best-effort: the stored
+       copy is the record, and a mail failure — the destination not yet
+       verified, a quota, an outage — must never turn a sent enquiry into an
+       error for the person who sent it. Logged so it shows in the Worker's
+       observability, not surfaced. `replyTo` is the enquirer, so a plain
+       reply in Gmail answers them. No binding in `next dev`; the optional
+       chain covers it. */
+    try {
+      const { subject, text } = emailCopy(stored);
+      await env.EMAIL?.send({
+        from: { name: "Julian Gigola — website", email: FROM },
+        subject,
+        text,
+        replyTo: { name: stored.name, email: stored.email },
+      });
+    } catch (err) {
+      console.error(
+        "contact: stored the enquiry but could not mail a copy",
+        err,
+      );
+    }
 
     return {
       status: "sent",

@@ -34,6 +34,17 @@
   // the free plan whose limits are nowhere near what a photographer receives
   // — and the cooldown and the daily cap in `lib/inbox.ts` exist to keep
   // somebody else's script from spending that allowance.
+  /* Cloudflare Email Sending. Each enquiry the form stores is also mailed
+     to Julian, from `enquiries@notifications.juliangigola.com` — a sending
+     subdomain onboarded on 2026-09-13 so the apex's own mail records, which
+     are Google's, were never touched. `destination_address` pins the
+     binding to the one address it may send to; `to` is left off the call
+     and the binding fills it in. The address had to be verified once
+     (Cloudflare emailed it a link). */
+  "send_email": [
+    { "name": "EMAIL", "destination_address": "hello@juliangigola.com" }
+  ],
+
   "kv_namespaces": [
     {
       "binding": "INBOX",

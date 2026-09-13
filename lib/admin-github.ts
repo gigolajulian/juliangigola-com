@@ -12,6 +12,14 @@
  * lands all of it as a single commit: one push, one build.
  */
 
+/**
+ * Where the editor keeps the GitHub token in the browser. Named here, not
+ * in the editor, because the inbox reads it too — the token proves the
+ * caller can push to this repository, which is the one thing that should
+ * open the inbox. See `app/api/inbox/route.ts`.
+ */
+export const TOKEN_STORE = "jg-admin-token";
+
 export const REPO = {
   owner: "gigolajulian",
   repo: "juliangigola-com",
