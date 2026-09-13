@@ -87,14 +87,21 @@ export default function cloudflareImageLoader({
   // An absolute URL is somebody else's and is already complete.
   if (!src.startsWith("/")) return src;
 
-  const source = onR2(src) ? R2_ORIGIN + src : src;
+  // The sized copy when there is one, with or without the resizer.
+  //
+  // Without transformations it is the whole answer: the archive's bare path
+  // and `width` unused, except for the pictures `make-hero` and `make-cards`
+  // sized at build. *With* them it still matters, and this was missed: the
+  // resizer never upscales, and every project's `cover.jpg` is a 600px
+  // harvest from the old site. Fed the original, a 769px tile on a 1.5x
+  // screen got a 600px picture stretched to 1150 — soft on the homepage,
+  // and visibly sharpening mid-trip as the morph landed on the project's
+  // 1920px frame. The 1080px copy exists for exactly this; hand the resizer
+  // that, and it only ever scales down.
+  const picked = sizedHero(src, width) ?? src;
+  const source = onR2(picked) ? R2_ORIGIN + picked : picked;
 
-  // Without transformations the bare path is the answer for the archive —
-  // and `width` goes unused, which is what it cost until Cloudflare's resizer
-  // is switched on. The cover's own frames are the exception: they are the
-  // first picture every visitor sees, so `scripts/make-hero.mjs` sizes them
-  // at build and this hands out the smallest copy that is wide enough.
-  if (!CDN) return sizedHero(src, width) ?? source;
+  if (!CDN) return source;
 
   const options = [
     `width=${width}`,
