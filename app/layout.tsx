@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import localFont from "next/font/local";
 import { SiteHeader } from "@/components/site-header";
@@ -50,6 +50,21 @@ const display = localFont({
 });
 
 const SITE = "https://www.juliangigola.com";
+
+/**
+ * `viewport-fit=cover`, which Next does not set by default. Without it an
+ * iPhone keeps the page out of the rounded corners and the home-indicator
+ * zone, so a band at the foot of the cover ended above the bottom edge with
+ * a strip of page colour under it — "make sure it covers all the way down".
+ * With it the page runs to the edges and `env(safe-area-inset-bottom)`
+ * becomes a real number, which the band's buttons pad by so they stay clear
+ * of the indicator.
+ */
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+};
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE),

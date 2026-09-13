@@ -1044,8 +1044,8 @@ optgroup {
   /* The same glass as `glass-surface`, which this rule out-ranks by
      specificity: saturation and the shine along the top edge, so the bar
      over a pale cover is the same material as the bar everywhere else. */
-  -webkit-backdrop-filter: blur(24px) saturate(1.5);
-  backdrop-filter: blur(24px) saturate(1.5);
+  -webkit-backdrop-filter: blur(18px) saturate(1.5);
+  backdrop-filter: blur(18px) saturate(1.5);
   box-shadow: inset 0 1px 0 color-mix(in oklab, white 16%, transparent);
 }
 
@@ -1120,7 +1120,9 @@ optgroup {
  * brightens where the pointer is. Julian asked for the glass effect and its
  * button style across the site.
  *
- * Three utilities, one material.
+ * Three utilities, one material. Blur at 15px on a control and 18px on a
+ * surface — a quarter under where they started, at Julian's ask: enough that
+ * the picture behind reads as a picture, not a haze.
  *
  *   glass            — a control over content: buttons, floating labels,
  *                      lightbox and video controls. Capsule shaped by the
@@ -1156,8 +1158,8 @@ optgroup {
   position: relative;
   isolation: isolate;
   background-color: var(--glass-fill);
-  -webkit-backdrop-filter: blur(20px) saturate(1.6);
-  backdrop-filter: blur(20px) saturate(1.6);
+  -webkit-backdrop-filter: blur(15px) saturate(1.6);
+  backdrop-filter: blur(15px) saturate(1.6);
   border: 1px solid var(--glass-edge);
   box-shadow:
     inset 0 1px 0 var(--glass-shine),
@@ -1209,8 +1211,8 @@ optgroup {
   isolation: isolate;
   color: var(--background);
   background-color: var(--glass-fill);
-  -webkit-backdrop-filter: blur(20px) saturate(1.6);
-  backdrop-filter: blur(20px) saturate(1.6);
+  -webkit-backdrop-filter: blur(15px) saturate(1.6);
+  backdrop-filter: blur(15px) saturate(1.6);
   border: 1px solid var(--glass-edge);
   box-shadow:
     inset 0 1px 0 var(--glass-shine),
@@ -1248,8 +1250,8 @@ optgroup {
 
 @utility glass-surface {
   background-color: color-mix(in oklab, var(--background) 62%, transparent);
-  -webkit-backdrop-filter: blur(24px) saturate(1.5);
-  backdrop-filter: blur(24px) saturate(1.5);
+  -webkit-backdrop-filter: blur(18px) saturate(1.5);
+  backdrop-filter: blur(18px) saturate(1.5);
   box-shadow: inset 0 1px 0 color-mix(in oklab, white 16%, transparent);
 }
 

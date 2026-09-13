@@ -348,6 +348,13 @@ export function Hero({ disciplines }: { disciplines: Discipline[] }) {
       style={held ? HURRIED : undefined}
       className={cn(
         "relative flex min-h-dvh flex-col border-b border-border",
+        /* `lvh`, not `dvh`, on an upright phone. Safari's bottom toolbar
+           collapses as the page moves and `dvh` follows it, so a band pinned
+           to the foot of a `dvh` section ends where the toolbar *was* and
+           leaves a strip of picture under it unblurred. The large viewport
+           is the screen with the toolbar out of the way; the band sits under
+           the toolbar until it goes, and covers to the bottom after. */
+        "tall:min-h-[100lvh]",
         /* The masthead is `clamp(2.75rem, 8vw, 7rem)`, which is right when
            the type has the window - stacked, or in `wide`'s panel, which
            grows with it. The squarish panel does not grow: it is clamped at
@@ -515,7 +522,7 @@ export function Hero({ disciplines }: { disciplines: Discipline[] }) {
        * from `lg`. Either way the picture is behind all of it and none of the
        * type is closer to the photograph than the plate's own padding.
        */}
-      <div className="relative z-10 flex min-h-dvh flex-col justify-end squat:justify-start wide:justify-start">
+      <div className="relative z-10 flex min-h-dvh flex-col justify-end tall:min-h-[100lvh] squat:justify-start wide:justify-start">
         <div
           className={cn(
             "flex min-w-0 flex-col border-t border-border/60",
@@ -530,7 +537,7 @@ export function Hero({ disciplines }: { disciplines: Discipline[] }) {
                plate 555px tall is off here (see the nav below) — the ticks
                are the same control at a thumb's size. Denser ground than the
                stacked default so the type holds on a bright frame. */
-            "tall:bg-background/[0.72] tall:backdrop-blur-xl",
+            "tall:bg-background/[0.72]",
             /* Less thin and less blurred where the panel is a full column.
 
                At 45% over a 40px blur the panel became a smear rather than a
@@ -543,7 +550,7 @@ export function Hero({ disciplines }: { disciplines: Discipline[] }) {
 
                72% and 24px keeps what Julian asked for — the picture reads
                through it — while giving the type a ground it can sit on. */
-            "squat:bg-background/[0.72] squat:backdrop-blur-xl",
+            "squat:bg-background/[0.72]",
             /* Squarish: a column like the one beside it in `wide`, but in
                the ground of the one below — full height down the left, with
                the photograph full bleed and entire behind it rather than
@@ -830,7 +837,7 @@ export function Hero({ disciplines }: { disciplines: Discipline[] }) {
               is centred instead (see the plate below). */}
             <div
               style={lands(BUTTONS_MS)}
-              className="rise mt-auto flex flex-wrap items-center gap-3 px-6 py-6 sm:px-10 sm:py-8 squat:mt-10 tall:mt-2 tall:pb-5 tall:pt-4"
+              className="rise mt-auto flex flex-wrap items-center gap-3 px-6 py-6 sm:px-10 sm:py-8 squat:mt-10 tall:mt-2 tall:pb-[max(1.25rem,env(safe-area-inset-bottom))] tall:pt-4"
             >
               <Link
                 href="/work"
