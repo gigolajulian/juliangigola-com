@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { ViewTransition } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
@@ -38,6 +39,55 @@ import type { CategoryLink, IndexRow } from "@/lib/work";
  * instead of sending the visitor off to a project page.
  * ─────────────────────────────────────────────────────────────── */
 
+/**
+ * The row that was last clicked, kept across navigations.
+ *
+ * The morph runs in both directions only if both ends exist. Going in, the
+ * panel is showing the cover of the row under the pointer, so it does. Coming
+ * back, this component mounts fresh with the highlight on row one — and the
+ * cover that should return has no cell to return to. Module state survives
+ * a client-side round trip where component state does not, so the panel
+ * reopens on the row that was left and the cover lands back in it.
+ */
+let lastLeft: string | null = null;
+
+/**
+ * Which cover carries the name: the panel's, or the row's.
+ *
+ * Above `lg` the panel is shown and each row's inline cover is `lg:hidden`;
+ * below, the reverse. Both are always in the DOM, and a `<ViewTransition>`
+ * name on an element that is not displayed is ignored by the browser — but
+ * React counts *mounts*, and two components with one name mounted at once is
+ * an error in its book. So the name goes on whichever is on screen, decided
+ * by the same query the classes use, and the other renders its picture bare.
+ * False on the server, which is the mobile answer; a desktop flips it on
+ * hydration, long before anything is clicked.
+ */
+const WIDE = "(min-width: 1024px)";
+const subscribeWide = (onChange: () => void) => {
+  const mq = window.matchMedia(WIDE);
+  mq.addEventListener("change", onChange);
+  return () => mq.removeEventListener("change", onChange);
+};
+
+/** The picture, named to travel when `on`, and plain otherwise. */
+function Travels({
+  on,
+  slug,
+  children,
+}: {
+  on: boolean;
+  slug: string;
+  children: React.ReactNode;
+}) {
+  if (!on) return <>{children}</>;
+  return (
+    <ViewTransition name={`cover-${slug}`} share="morph" default="none">
+      {children}
+    </ViewTransition>
+  );
+}
+
 export function WorkIndex({
   projects,
   categories,
@@ -52,7 +102,16 @@ export function WorkIndex({
   /** Rendered under the chips in place of the list. */
   children?: React.ReactNode;
 }) {
-  const [active, setActive] = React.useState(0);
+  const wide = React.useSyncExternalStore(
+    subscribeWide,
+    () => window.matchMedia(WIDE).matches,
+    () => false,
+  );
+
+  const [active, setActive] = React.useState(() => {
+    const at = lastLeft ? projects.findIndex((p) => p.slug === lastLeft) : -1;
+    return at === -1 ? 0 : at;
+  });
 
   // The highlight can point past the end of a shorter list — the list changes
   // with the route, and this is a fresh mount each time, but clamping on read
@@ -108,6 +167,9 @@ export function WorkIndex({
                     // panel would sit on whatever was hovered last.
                     onPointerEnter={() => setActive(i)}
                     onFocus={() => setActive(i)}
+                    onClick={() => {
+                      lastLeft = project.slug;
+                    }}
                     className={cn(
                       "group block border-b border-border py-5 transition-colors duration-200",
                       "hoverable:hover:border-foreground/30",
@@ -123,15 +185,19 @@ export function WorkIndex({
                         aspectRatio: `${project.cover.width} / ${project.cover.height}`,
                       }}
                     >
-                      <Image
-                        src={project.cover.src}
-                        alt={project.cover.alt || project.name}
-                        width={project.cover.width}
-                        height={project.cover.height}
-                        sizes="100vw"
-                        loading="lazy"
-                        className="h-full w-full object-cover"
-                      />
+                      {/* Named below `lg`, where this is the cover on screen; above it the
+                        panel's copy is the one that travels. See `Travels`. */}
+                      <Travels on={!wide} slug={project.slug}>
+                        <Image
+                          src={project.cover.src}
+                          alt={project.cover.alt || project.name}
+                          width={project.cover.width}
+                          height={project.cover.height}
+                          sizes="100vw"
+                          loading="lazy"
+                          className="h-full w-full object-cover"
+                        />
+                      </Travels>
                     </div>
 
                     <div className="flex items-baseline justify-between gap-6">
@@ -166,18 +232,20 @@ export function WorkIndex({
                   aspectRatio: `${preview.cover.width} / ${preview.cover.height}`,
                 }}
               >
-                <Image
-                  src={preview.cover.src}
-                  alt=""
-                  width={preview.cover.width}
-                  height={preview.cover.height}
-                  sizes="50vw"
-                  priority
-                  // `key` on the wrapper remounts this on every change, so the
-                  // fade runs from the start each time rather than retargeting
-                  // a transition that is already at its end.
-                  className="h-full w-full object-cover animate-in fade-in duration-300 ease-out motion-reduce:animate-none"
-                />
+                <Travels on={wide} slug={preview.slug}>
+                  <Image
+                    src={preview.cover.src}
+                    alt=""
+                    width={preview.cover.width}
+                    height={preview.cover.height}
+                    sizes="50vw"
+                    priority
+                    // `key` on the wrapper remounts this on every change, so the
+                    // fade runs from the start each time rather than retargeting
+                    // a transition that is already at its end.
+                    className="h-full w-full object-cover animate-in fade-in duration-300 ease-out motion-reduce:animate-none"
+                  />
+                </Travels>
               </div>
             ) : null}
           </div>

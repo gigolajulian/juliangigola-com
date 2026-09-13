@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { ViewTransition } from "react";
 import Image from "next/image";
 import { Reveal } from "@/components/reveal";
 import { PointerRing } from "@/components/pointer-ring";
@@ -84,8 +85,38 @@ export function Gallery({ project }: { project: Project }) {
               >
                 {row.map((frame) => {
                   const i = frames.indexOf(frame);
+                  /* The first frame is the cover again — measured, the same
+                     picture — so it is where the cover that was clicked
+                     lands: same `name` as the tile on the homepage and the
+                     panel on /work. Its picture is wrapped, not its button,
+                     so what travels is the photograph and not a control.
+
+                     The first row is left out of the scroll reveal for the
+                     same reason the cover-art rack leaves its top row out:
+                     it is above the fold, and a reveal firing on mount would
+                     have the cover arriving into a frame that is still
+                     fading itself in. */
+                  const landing = i === 0;
+                  const picture = (
+                    <Image
+                      src={frame.src}
+                      alt={frame.alt || `${project.name} — frame ${i + 1}`}
+                      width={frame.width}
+                      height={frame.height}
+                      sizes={
+                        row.length === 2
+                          ? "(min-width: 640px) 50vw, 100vw"
+                          : "100vw"
+                      }
+                      // The first two frames are the ones above the fold on
+                      // nearly every screen; everything after loads lazily.
+                      priority={i < 2}
+                      className="h-full w-full object-cover"
+                    />
+                  );
+                  const Wrap = r === 0 ? React.Fragment : Reveal;
                   return (
-                    <Reveal key={frame.src}>
+                    <Wrap key={frame.src}>
                       <button
                         data-ring
                         type="button"
@@ -99,23 +130,19 @@ export function Gallery({ project }: { project: Project }) {
                           aspectRatio: `${frame.width} / ${frame.height}`,
                         }}
                       >
-                        <Image
-                          src={frame.src}
-                          alt={frame.alt || `${project.name} — frame ${i + 1}`}
-                          width={frame.width}
-                          height={frame.height}
-                          sizes={
-                            row.length === 2
-                              ? "(min-width: 640px) 50vw, 100vw"
-                              : "100vw"
-                          }
-                          // The first two frames are the ones above the fold on
-                          // nearly every screen; everything after loads lazily.
-                          priority={i < 2}
-                          className="h-full w-full object-cover"
-                        />
+                        {landing ? (
+                          <ViewTransition
+                            name={`cover-${project.slug}`}
+                            share="morph"
+                            default="none"
+                          >
+                            {picture}
+                          </ViewTransition>
+                        ) : (
+                          picture
+                        )}
                       </button>
-                    </Reveal>
+                    </Wrap>
                   );
                 })}
               </div>

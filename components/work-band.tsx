@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { ViewTransition } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
@@ -130,15 +131,28 @@ export function WorkBand({
         style={{ backgroundColor: project.cover.color }}
       >
         {/* Base layer: always loaded, never removed. It is what keeps the
-            cell from flashing empty the first time a scrub frame is fetched. */}
-        <Image
-          src={project.cover.src}
-          alt={project.cover.alt || project.name}
-          fill
-          sizes="(min-width: 1024px) 33vw, (min-width: 768px) 50vw, 100vw"
-          priority={priority}
-          className="object-cover"
-        />
+            cell from flashing empty the first time a scrub frame is fetched.
+
+            Named, so it is the thing that travels: clicking the tile does
+            not swap this page for that one, the cover lifts out of its cell
+            and settles into the first frame of the project — same `name` on
+            both ends, see `gallery.tsx`. Coming back, it returns. `share`
+            with `default="none"` so it morphs on that pair and does nothing
+            on every other navigation. */}
+        <ViewTransition
+          name={`cover-${project.slug}`}
+          share="morph"
+          default="none"
+        >
+          <Image
+            src={project.cover.src}
+            alt={project.cover.alt || project.name}
+            fill
+            sizes="(min-width: 1024px) 33vw, (min-width: 768px) 50vw, 100vw"
+            priority={priority}
+            className="object-cover"
+          />
+        </ViewTransition>
 
         {/* The scrub frames, stacked over the cover and dissolved between.
 

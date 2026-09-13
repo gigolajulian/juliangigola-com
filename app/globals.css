@@ -1038,3 +1038,55 @@ optgroup {
   background-color: color-mix(in oklab, var(--background) 72%, transparent);
   backdrop-filter: blur(24px);
 }
+
+/* ── the cover that becomes the page ──────────────────────────────
+ * Clicking a cover on the homepage or the index does not swap one page for
+ * another. The photograph lifts out of its cell, travels, and settles into
+ * the first frame of the project — and comes back the same way. React's
+ * `<ViewTransition name>` pairs the two elements (see `work-band.tsx`,
+ * `work-index.tsx`, `gallery.tsx`); this is how the trip looks.
+ *
+ * `.morph` is the class the `share` prop assigns, so these rules touch only
+ * the travelling cover. Everything else on the page is the root crossfade
+ * below — and it is deliberately quicker than the cover, so the page is
+ * already in place when the photograph lands.
+ *
+ * A touch of blur mid-flight, because two snapshots interpolating between
+ * different sizes show their pixels at the halfway point; softened, the eye
+ * reads one object moving rather than two pictures blending. Three pixels,
+ * for the 30% of the trip where it matters.
+ * ─────────────────────────────────────────────────────────────── */
+::view-transition-group(.morph) {
+  animation-duration: 480ms;
+  animation-timing-function: var(--ease-out-strong);
+}
+::view-transition-image-pair(.morph) {
+  animation-name: jg-via-blur;
+  animation-duration: 480ms;
+  animation-timing-function: var(--ease-out-strong);
+}
+@keyframes jg-via-blur {
+  30% {
+    filter: blur(3px);
+  }
+}
+
+/* The rest of the page, on the same trip. Quicker than the cover on purpose:
+   the words are in place before the picture arrives, which is the order a
+   reader wants them in. The fixed bar is inside the root snapshot and
+   crossfades with itself, which is invisible. */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 240ms;
+  animation-timing-function: var(--ease-out-strong);
+}
+
+/* Reduced motion: no trip. The pages still swap; nothing travels. */
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*),
+  ::view-transition-image-pair(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
+  }
+}
