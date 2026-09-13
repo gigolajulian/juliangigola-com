@@ -1,49 +1,69 @@
 /**
- * Client logos, inlined from `public/clients/`.
+ * Client marks, from `assets/clients/` into something the site can draw.
  *
- * Drop `<slug>.svg` in there — the slug being the project's, so `wired.svg`
- * for WIRED, `oakley-x-nike.svg`, `jubo.svg` — and run this. The band under
- * the cover and the list on /studio draw the mark instead of the name.
- *
- * Inlined into a module rather than served as files, for the same reason
- * every other icon on this site is drawn in the markup: a mark in an `<img>`
- * is a fixed colour, and this one has to sit muted in a row, come up to full
- * contrast on hover, and work on both a near-black and a near-white ground.
- * `currentColor` does all three and an `<img>` does none of them — a black
- * logo is invisible on the dark theme, which is the default here.
- *
- * So every colour in the file is replaced by `currentColor`. That means the
- * source has to be a single-colour SVG: a two-tone mark comes out flat, and
- * a mark whose whole point is its colours belongs in an `<img>` and a
- * different design.
- *
- * Generated and committed, like `work-data.ts` and `cover-art-data.ts` — the
- * logos change when a client is added, which is not a build-time concern.
+ * Drop a file in named for the client's key — `wired-magazine.svg`,
+ * `ukiyosunknown.png` — and run this. The band under the cover and the wall on
+ * /studio draw the mark instead of the name; a client with no file keeps its
+ * wordmark, so the section is never half-built.
  *
  *   node scripts/make-clients.mjs
+ *
+ * Sources live outside `public/` on purpose: what a brand sends is a 1629px
+ * PNG with a page of transparent margin around it, and that is not what should
+ * be served. This reads the source, works out what to do with it, and writes
+ * the web version.
+ *
+ * ── one colour, whatever the file is ─────────────────────────────
+ * Every mark ends up drawn in `currentColor`, because three things need it and
+ * a plain `<img>` gives none of them: the marks sit muted so they do not
+ * compete with the work, each comes up to full contrast under the pointer, and
+ * a black logo would be invisible on the dark theme — which is the default
+ * here. Two routes to that:
+ *
+ *   SVG  inlined into `lib/clients-data.ts` with every fill and stroke
+ *        rewritten to `currentColor`. Needs a single-colour source: a two-tone
+ *        mark comes out flat.
+ *
+ *   PNG  trimmed to its own ink and served from `public/clients/`, then drawn
+ *        as a CSS mask over `currentColor`. The alpha channel *is* the mark, so
+ *        a transparent PNG needs no vector at all and keeps its antialiasing.
+ *        A PNG with a white background instead of transparency will come out
+ *        as a solid block, which is the one failure to look out for.
+ *
+ * Generated and committed, like `work-data.ts` and `cover-art-data.ts` — a
+ * client is added a few times a year, which is not a build-time concern.
  */
 
-import { readdirSync, readFileSync, writeFileSync, existsSync } from "node:fs";
+import {
+  existsSync,
+  mkdirSync,
+  readdirSync,
+  readFileSync,
+  writeFileSync,
+} from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
+import sharp from "sharp";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
-const from = join(root, "public/clients");
+const from = join(root, "assets/clients");
+const served = join(root, "public/clients");
 const to = join(root, "lib/clients-data.ts");
 
+mkdirSync(served, { recursive: true });
+
 const files = existsSync(from)
-  ? readdirSync(from).filter((f) => f.endsWith(".svg"))
+  ? readdirSync(from).filter((f) => /\.(svg|png)$/i.test(f))
   : [];
 
 /**
  * The inside of an SVG, with every colour handed to `currentColor`.
  *
- * Deliberately narrow: attributes and one-line style declarations. A mark
- * with a `<style>` block, a gradient or an embedded raster is refused rather
- * than half-converted — it would render, wrongly, and the failure would show
- * up as one logo that ignores hover.
+ * Deliberately narrow, and it refuses rather than half-converts: a mark that
+ * came through with a `<style>` block half-applied would render, wrongly, and
+ * the failure would show up as one logo that ignores hover.
  */
-function inline(svg, name) {
+function inlineSvg(svg, name) {
   const viewBox = svg.match(/viewBox="([^"]+)"/i)?.[1];
   if (!viewBox) throw new Error(`${name}: no viewBox — cannot scale it safely`);
 
@@ -57,9 +77,9 @@ function inline(svg, name) {
      `dangerouslySetInnerHTML`, and the site's CSP allows inline script
      (Next's hydration payload needs it), so such a script would run.
 
-     Refused rather than stripped. A logo has no reason to contain either, so
-     a file that does is either broken or not a logo, and quietly removing
-     part of it would publish a mark nobody had looked at. */
+     Refused rather than stripped. A logo has no reason to contain either, so a
+     file that does is either broken or not a logo, and quietly removing part
+     of it would publish a mark nobody had looked at. */
   if (/<script\b/i.test(svg) || /\son[a-z]+\s*=/i.test(svg))
     throw new Error(
       `${name}: contains script or an event handler. A logo needs neither — export it again as plain paths.`,
@@ -74,57 +94,136 @@ function inline(svg, name) {
     );
 
   const body = svg
-    // Everything between the outer <svg> tags.
     .replace(/^[\s\S]*?<svg[^>]*>/i, "")
     .replace(/<\/svg>[\s\S]*$/i, "")
-    // Comments and editor metadata.
     .replace(/<!--[\s\S]*?-->/g, "")
     .replace(/<(title|desc|metadata)\b[\s\S]*?<\/\1>/gi, "")
-    // Colours, in attributes and in inline styles.
     .replace(/(fill|stroke)="(?!none\b)[^"]*"/gi, '$1="currentColor"')
     .replace(/(fill|stroke):\s*(?!none\b)[^;"']+/gi, "$1:currentColor")
     .replace(/\s+/g, " ")
     .trim();
 
   if (!body) throw new Error(`${name}: nothing inside the svg`);
-  return { viewBox, body };
+  return { kind: "svg", viewBox, body };
+}
+
+/**
+ * A PNG, cropped to its own ink and written where it can be served.
+ *
+ * `sharp`'s own `trim` keys off the corner *colour*, which on a transparent
+ * file means it finds nothing to do — the Ukiyo mark arrived 1629px square
+ * with the logo occupying the middle third, and trim returned it unchanged.
+ * So the alpha bounding box is computed here: anything above a low threshold
+ * counts as ink, which ignores the stray near-zero pixels an export leaves
+ * behind without eating a soft edge.
+ */
+async function maskPng(file, slug, name) {
+  const { data, info } = await sharp(file)
+    .ensureAlpha()
+    .raw()
+    .toBuffer({ resolveWithObject: true });
+
+  let top = info.height;
+  let left = info.width;
+  let right = -1;
+  let bottom = -1;
+
+  for (let y = 0; y < info.height; y++) {
+    for (let x = 0; x < info.width; x++) {
+      if (data[(y * info.width + x) * 4 + 3] <= 8) continue;
+      if (y < top) top = y;
+      if (y > bottom) bottom = y;
+      if (x < left) left = x;
+      if (x > right) right = x;
+    }
+  }
+
+  if (right < 0)
+    throw new Error(
+      `${name}: every pixel is transparent. If the logo is dark on a white background rather than on transparency, it needs its background removing first.`,
+    );
+
+  const width = right - left + 1;
+  const height = bottom - top + 1;
+
+  /* Capped at 320px tall. A mark is drawn at 24px and at most twice that on a
+     dense screen, so a 1629px source is three orders of magnitude of bytes
+     nobody sees — and a mask is fetched by every visitor. */
+  const out = join(served, `${slug}.png`);
+  await sharp(file)
+    .extract({ left, top, width, height })
+    .resize({ height: Math.min(height, 320), withoutEnlargement: true })
+    .png({ compressionLevel: 9 })
+    .toFile(out);
+
+  const final = await sharp(out).metadata();
+  return {
+    kind: "mask",
+    src: `/clients/${slug}.png`,
+    width: final.width,
+    height: final.height,
+    trimmedFrom: `${info.width}x${info.height}`,
+  };
 }
 
 const marks = {};
 for (const file of files) {
-  const slug = file.replace(/\.svg$/, "");
-  marks[slug] = inline(readFileSync(join(from, file), "utf8"), file);
+  const slug = file.replace(/\.(svg|png)$/i, "");
+  const path = join(from, file);
+  marks[slug] = file.toLowerCase().endsWith(".svg")
+    ? inlineSvg(readFileSync(path, "utf8"), file)
+    : await maskPng(path, slug, file);
 }
 
 const entries = Object.entries(marks)
-  .map(
-    ([slug, m]) =>
-      `  ${JSON.stringify(slug)}: {\n    viewBox: ${JSON.stringify(m.viewBox)},\n    body: ${JSON.stringify(m.body)},\n  },`,
-  )
+  .map(([slug, m]) => {
+    const fields =
+      m.kind === "svg"
+        ? `    kind: "svg",\n    viewBox: ${JSON.stringify(m.viewBox)},\n    body: ${JSON.stringify(m.body)},`
+        : `    kind: "mask",\n    src: ${JSON.stringify(m.src)},\n    width: ${m.width},\n    height: ${m.height},`;
+    return `  ${JSON.stringify(slug)}: {\n${fields}\n  },`;
+  })
   .join("\n");
 
 writeFileSync(
   to,
-  `/* Generated by \`scripts/make-clients.mjs\` from \`public/clients/*.svg\`.
- * Do not edit: add or replace an SVG and run the script.
+  `/* Generated by \`scripts/make-clients.mjs\` from \`assets/clients/\`.
+ * Do not edit: add or replace a file there and run the script.
  *
- * Every colour is \`currentColor\`, so a mark sits muted in the row, comes up
- * to full contrast on hover, and works on either theme. See the script for
- * why these are inlined rather than served as files.
+ * Every mark is drawn in \`currentColor\` — an inlined SVG, or a PNG's alpha
+ * used as a CSS mask — so it sits muted in the row, comes up to full contrast
+ * on hover, and works on either theme. See the script for why.
  */
 
-/** One client's mark, ready to drop into an \`<svg>\`. */
-export type ClientMark = { viewBox: string; body: string };
+/** A mark drawn from paths. Colours are already \`currentColor\`. */
+export type VectorMark = { kind: "svg"; viewBox: string; body: string };
 
-/** By slug — the same slug the project has. Empty until a logo is added. */
-export const CLIENT_MARKS: Record<string, ClientMark> = {
+/** A mark drawn by masking \`currentColor\` with a PNG's alpha channel. */
+export type RasterMark = {
+  kind: "mask";
+  src: string;
+  width: number;
+  height: number;
+};
+
+export type ClientMarkData = VectorMark | RasterMark;
+
+/** By the client's key. Absent means that client keeps its wordmark. */
+export const CLIENT_MARKS: Record<string, ClientMarkData> = {
 ${entries}
 };
 `,
 );
 
+const summary = Object.entries(marks)
+  .map(
+    ([slug, m]) =>
+      `  ${slug}: ${m.kind === "svg" ? `svg, viewBox ${m.viewBox}` : `mask, ${m.width}x${m.height} (from ${m.trimmedFrom})`}`,
+  )
+  .join("\n");
+
 console.log(
   files.length
-    ? `${files.length} logo${files.length === 1 ? "" : "s"} inlined: ${Object.keys(marks).join(", ")}`
-    : "no logos in public/clients yet — every client keeps its wordmark",
+    ? `${files.length} mark${files.length === 1 ? "" : "s"}:\n${summary}`
+    : "no files in assets/clients yet — every client keeps its wordmark",
 );

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { CLIENT_MARKS } from "@/lib/clients-data";
+import type { Client } from "@/lib/work";
 import { cn } from "@/lib/utils";
 
 /* ── who he has worked with ───────────────────────────────────────
@@ -25,8 +26,6 @@ import { cn } from "@/lib/utils";
  * is how a typographer would set them, and it is why a row of five reads as
  * one line rather than five boxes.
  * ─────────────────────────────────────────────────────────────── */
-
-export type Client = { name: string; slug: string };
 
 export function ClientMarks({
   clients,
@@ -67,7 +66,7 @@ export function ClientMarks({
           )}
         >
           <Link
-            href={`/work/${client.slug}`}
+            href={client.href}
             aria-label={client.name}
             className={cn(
               "group relative flex items-center justify-center text-muted-foreground transition-colors duration-200 hoverable:hover:text-foreground",
@@ -128,27 +127,54 @@ function ClientMark({
     );
   }
 
-  /* The cap height is matched to the wordmark beside it rather than chosen:
-     `text-xl` in this face caps at about 15px, and a mark reads level with
-     type when their caps agree — not when their boxes do. */
+  /* One height for both kinds, measured against the wordmarks rather than
+     picked: the display face at `text-2xl` caps around 17px, so a mark in a
+     24px box reads a size larger than the names it shares a row with. These
+     sit level. Width is never set — logos come in every proportion, and
+     squeezing a wide wordmark into the same box as a round badge is the thing
+     that makes a client wall look amateur. */
+  const height = cn(layout === "row" ? "h-4 sm:h-[1.1rem]" : "h-5 sm:h-6");
+
+  /* A PNG whose alpha channel is the mark, used as a mask over
+     `currentColor`. That is what lets a raster logo behave like type: muted in
+     the row, full contrast on hover, and legible on either theme — none of
+     which an `<img>` can do with a black PNG on a near-black ground.
+
+     The aspect ratio comes from the trimmed file, so the width follows the
+     height with no second measurement and nothing to keep in step by hand. */
+  if (mark.kind === "mask") {
+    return (
+      <span
+        aria-hidden
+        className={cn("block w-auto bg-current", height)}
+        style={{
+          aspectRatio: `${mark.width} / ${mark.height}`,
+          maskImage: `url(${mark.src})`,
+          WebkitMaskImage: `url(${mark.src})`,
+          maskSize: "contain",
+          WebkitMaskSize: "contain",
+          maskRepeat: "no-repeat",
+          WebkitMaskRepeat: "no-repeat",
+          maskPosition: "center",
+          WebkitMaskPosition: "center",
+        }}
+      />
+    );
+  }
+
   return (
     <svg
       viewBox={mark.viewBox}
       role="img"
       aria-hidden
       focusable="false"
-      /* Measured against the wordmarks beside them rather than picked: the
-         display face at `text-2xl` caps around 17px, so a mark in a 24px box
-         reads a size larger than the names it shares a row with. These sit
-         level. Worth re-measuring once real logos are in — a mark with
-         descenders or a lot of air in its viewBox will want another pass. */
-      className={cn("w-auto max-w-full", layout === "row" ? "h-4 sm:h-[1.1rem]" : "h-5 sm:h-6")}
+      className={cn("w-auto max-w-full", height)}
       // Width comes from the viewBox and `preserveAspectRatio` is the
       // default, so a wide mark stays wide.
       fill="currentColor"
-      /* The markup is generated at build from files in this repository, and
-         the generator refuses script, event handlers and anything that
-         reaches outside the file. See `scripts/make-clients.mjs`. */
+      /* The markup is generated from files in this repository, and the
+         generator refuses script, event handlers and anything that reaches
+         outside the file. See `scripts/make-clients.mjs`. */
       dangerouslySetInnerHTML={{ __html: mark.body }}
     />
   );

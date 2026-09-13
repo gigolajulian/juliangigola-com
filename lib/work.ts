@@ -542,13 +542,41 @@ export const FEATURED: Project[] = FEATURED_SLUGS.map((s) =>
  * the bottom of /about; they are the reason an art director keeps reading, so
  * they move up and each links into the work it refers to.
  */
-export const PRESS = [
-  { name: "WIRED", slug: "wired-magazine" },
-  { name: "Oakley x Nike", slug: "oakley-x-nike" },
-  { name: "UKIYOSUNKNOWN", slug: "ukiyosunknown" },
-  { name: "JUBO", slug: "jubo" },
-  { name: "SAGO", slug: "sago" },
-].filter((p) => bySlug.has(p.slug));
+export type Client = {
+  name: string;
+  /** The key a logo file is named for, in `assets/clients/`. */
+  slug: string;
+  /** Where the mark goes. Not always a project — two of these are films. */
+  href: string;
+};
+
+/**
+ * The client wall, as Julian confirmed it.
+ *
+ * Hand-ordered rather than derived, and the order is an argument: the two
+ * names an art director recognises without thinking lead, and the brands he
+ * shot campaigns for follow.
+ *
+ * `href` rather than a slug, because a client is not always a project — Pear
+ * VC and Ladera Granola are films, and their work is on /work/video. Oakley x
+ * Nike came off the list on his say-so.
+ *
+ * A project link is checked against the manifest below, so a renamed or
+ * unpublished project costs that client its cell rather than publishing a row
+ * that 404s.
+ */
+export const PRESS: Client[] = [
+  { name: "WIRED", slug: "wired-magazine", href: "/work/wired-magazine" },
+  { name: "Pear VC", slug: "pear-vc", href: "/work/video" },
+  { name: "Ladera Granola", slug: "ladera-granola", href: "/work/video" },
+  { name: "SOLSWEAR", slug: "sols", href: "/work/sols" },
+  { name: "UKIYOSUNKNOWN", slug: "ukiyosunknown", href: "/work/ukiyosunknown" },
+  { name: "JUBO", slug: "jubo", href: "/work/jubo" },
+  { name: "SAGO", slug: "sago", href: "/work/sago" },
+].filter((c) => {
+  const project = /^\/work\/([a-z0-9-]+)$/.exec(c.href)?.[1];
+  return !project || project === "video" || bySlug.has(project);
+});
 
 /**
  * The homepage cover.
