@@ -37,75 +37,30 @@ export default function StudioPage() {
             <Reveal variant="calm">
               <section>
                 <h2 className="label text-muted-foreground">Biography</h2>
-                {/* Rewritten from copy that said nothing a hundred other
-                    photographers could not have said: "blends creativity with
-                    a keen eye for detail", "explore the world through a unique
-                    lens", "resonate and leave a lasting impression". Every
-                    sentence was an adjective doing a noun's work, and a reader
-                    finished it knowing no more than the page title had already
-                    told them.
-
-                    What replaces it is the specifics — who he shoots for,
-                    where, alone, and what that is like to hire. The one real
-                    thing in the old version was "as one person behind the
-                    lens", which was buried in the Vision paragraph; it is the
-                    most useful fact on the page for an art director costing a
-                    job, so it leads now. */}
-                <div className="mt-6 flex flex-col gap-5 text-base leading-relaxed">
-                  <p>
-                    I&rsquo;m Julian. I photograph people &mdash; for
-                    magazines, for brands, and for artists who need a cover
-                    that looks like the record sounds.
-                  </p>
-                  <p>
-                    I work out of the Bay Area, and I work alone. I light it, I
-                    shoot it, I cut it. That keeps a job small enough to move
-                    quickly and close enough that nothing gets lost between
-                    people, which is usually where a shoot goes wrong. When a
-                    day needs more hands, I bring them and tell you who they
-                    are.
-                  </p>
-                  <p>
-                    Editorial is where I started &mdash; WIRED ran a set
-                    &mdash; and campaigns are most of it now. In between there
-                    is a lot of studio: portraits, press kits, two dozen record
-                    sleeves, and a growing stack of film.
-                  </p>
-                  <p>
-                    If you are here for a session rather than a commission,
-                    it&rsquo;s the same camera and the same attention. Just a
-                    shorter day.
-                  </p>
-                </div>
+                <p className="mt-6 text-base leading-relaxed">
+                  Bay Area based creative director and photographer,
+                  specializing in editorial, commercial, and artist imagery. My
+                  work blends creativity with a keen eye for detail, focusing on
+                  everything from studio portraits to location shoots.
+                  Photography allows me to explore the world through a unique
+                  lens and I&rsquo;m dedicated to bringing out the beauty in
+                  every subject I work with. Whether it&rsquo;s a personal
+                  project or a collaboration, I strive to create images that
+                  resonate and leave a lasting impression.
+                </p>
               </section>
             </Reveal>
 
             <Reveal variant="calm">
               <section className="mt-16">
-                <h2 className="label text-muted-foreground">
-                  How I see it
-                </h2>
-                {/* "Vision" over "captivating visual stories that go beyond
-                    the surface" was the emptiest thing on the site: a heading
-                    that promises a point of view above a paragraph that has
-                    none. A point of view is a sentence somebody could
-                    disagree with, so this one says something that other
-                    photographers would argue with. */}
-                <div className="mt-6 flex flex-col gap-5 text-base leading-relaxed">
-                  <p>
-                    Most pictures fail because everyone was performing &mdash;
-                    the subject for the camera, the camera for the trend. I
-                    would rather spend the first twenty minutes getting past
-                    that than the last twenty fixing it in a retouch.
-                  </p>
-                  <p>
-                    So: fewer lights than you would expect, more patience than
-                    the schedule suggests, and people left recognisable rather
-                    than styled into someone else. A photograph that still
-                    holds up when the look it was shot in has passed is the
-                    only kind worth paying for twice.
-                  </p>
-                </div>
+                <h2 className="label text-muted-foreground">Vision</h2>
+                <p className="mt-6 text-base leading-relaxed">
+                  My vision is to create captivating visual stories that go
+                  beyond the surface. As one person behind the lens, I am
+                  dedicated to capturing the unique essence of each subject with
+                  authenticity, creativity, and a commitment to integrity,
+                  crafting images that resonate and inspire.
+                </p>
               </section>
             </Reveal>
 
