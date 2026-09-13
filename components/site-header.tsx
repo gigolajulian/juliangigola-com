@@ -278,6 +278,24 @@ export function SiteHeader() {
         <Link
           ref={wordmarkRef}
           href="/"
+          // On the homepage the name is a way back to the top, not a reload.
+          // Julian asked: a click there used to re-request `/`, which
+          // restarted the cover and threw away the scroll. Smooth unless the
+          // visitor has asked for reduced motion, in which case it jumps.
+          // Any other route still navigates home, and a modifier key still
+          // opens a new tab.
+          onClick={(e) => {
+            if (pathname !== "/") return;
+            if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+            e.preventDefault();
+            window.scrollTo({
+              top: 0,
+              behavior: window.matchMedia("(prefers-reduced-motion: reduce)")
+                .matches
+                ? "auto"
+                : "smooth",
+            });
+          }}
           // Caps, because that is what a bold condensed grotesque is for —
           // and it is how the wordmark has always been set. A little tracking
           // stops the condensed forms from fusing at small sizes.
