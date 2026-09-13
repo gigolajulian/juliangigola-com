@@ -18,7 +18,8 @@
     "purgatory": "editorial",
     "retro-reverie-vol-01": "editorial",
     "retro-reverie-vol-02": "editorial",
-    "bridal": "weddings"
+    "bridal": "weddings",
+    "hellamack": "campaigns"
   },
   "frames": {
     "wrapped-up": [
@@ -398,9 +399,18 @@
         "color": "#8C7359",
         "alt": ""
       }
+    ],
+    "light-play": [
+      "/work/light-play/01.jpg",
+      "/work/light-play/03.jpg",
+      "/work/light-play/04.jpg",
+      "/work/light-play/02.jpg",
+      "/work/light-play/05.jpg"
     ]
   },
-  "hidden": ["bridal"],
+  "hidden": [
+    "bridal"
+  ],
   "credits": {
     "crave": [
       {
