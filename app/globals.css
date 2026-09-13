@@ -833,7 +833,7 @@
 @utility title-out {
   opacity: 0;
   transition: opacity var(--swap-out-dur, 200ms) var(--ease-out-strong)
-    var(--swap-out-delay, 120ms);
+    var(--swap-out-delay, 60ms);
 }
 
 @utility title-in {
@@ -850,8 +850,12 @@
      both declaring `transition` fight over source order, which this file
      already carries a scar from. An inline style cannot lose. */
   transition:
+    /* 180ms, from 360: the title used to wait for the picture's dissolve
+       to all but finish before it arrived, and read as late — Julian asked
+       for less delay. Half keeps the order (picture first, then the word)
+       without the pause. */
     opacity var(--swap-in-dur, 320ms) var(--ease-out-strong)
-      var(--swap-in-delay, 360ms),
+      var(--swap-in-delay, 180ms),
     color 200ms ease-out;
 
   /* The arriving word is a brand new node every phase, and a transition does
