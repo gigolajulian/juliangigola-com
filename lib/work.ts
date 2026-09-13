@@ -584,14 +584,18 @@ export const PRESS: Client[] = [
   // Solid boxes, so it fills every pixel it is given and needs fewer of
   // them. It hits the width cap first in any case.
   { name: "WIRED", slug: "wired-magazine", href: "/work/wired-magazine", scale: 0.85 },
-  // Its bounding box is a leaf and a stem above the word, so the word itself
-  // is smaller than the box suggests.
-  { name: "Pear VC", slug: "pear-vc", href: "/work/video", scale: 1.1 },
+  /* Its bounding box is a leaf and a stem above the word, so the word is
+     smaller than the box suggests — but the pear is not, and at 1.1 it towered
+     over the row. Measured against all seven together rather than against the
+     three that were in first. */
+  { name: "Pear VC", slug: "pear-vc", href: "/work/video", scale: 0.95 },
   { name: "Ladera Granola", slug: "ladera-granola", href: "/work/video" },
   { name: "SOLSWEAR", slug: "sols", href: "/work/sols" },
   // A glyph rather than letterforms, and a heavy one.
   { name: "UKIYOSUNKNOWN", slug: "ukiyosunknown", href: "/work/ukiyosunknown", scale: 0.92 },
-  { name: "JUBO", slug: "jubo", href: "/work/jubo" },
+  // An arc with a heavy brush under it; full height reads as the largest
+  // thing in the row.
+  { name: "JUBO", slug: "jubo", href: "/work/jubo", scale: 0.9 },
   { name: "SAGO", slug: "sago", href: "/work/sago" },
 ].filter((c) => {
   const project = /^\/work\/([a-z0-9-]+)$/.exec(c.href)?.[1];

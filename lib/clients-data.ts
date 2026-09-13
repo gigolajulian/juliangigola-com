@@ -27,6 +27,12 @@ export const CLIENT_MARKS: Record<string, ClientMarkData> = {
     width: 183,
     height: 85,
   },
+  "ladera-granola": {
+    kind: "mask",
+    src: "/clients/ladera-granola.png",
+    width: 1129,
+    height: 190,
+  },
   "pear-vc": {
     kind: "mask",
     src: "/clients/pear-vc.png",
@@ -38,6 +44,12 @@ export const CLIENT_MARKS: Record<string, ClientMarkData> = {
     src: "/clients/sago.png",
     width: 171,
     height: 93,
+  },
+  "sols": {
+    kind: "mask",
+    src: "/clients/sols.png",
+    width: 400,
+    height: 300,
   },
   "ukiyosunknown": {
     kind: "mask",
