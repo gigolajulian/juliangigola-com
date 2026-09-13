@@ -98,7 +98,7 @@ const csp = [
   // Its own POST goes to /cdn-cgi/rum on this origin, which `connect-src
   // 'self'` already covers.
   /* `player.vimeo.com` is Vimeo's player API, and it is here for one reason:
-     the reel on /work/video starts at 15% volume, and Vimeo's embed takes no
+     the reel on /work/video starts at 5% volume, and Vimeo's embed takes no
      volume parameter — `muted` is all a URL can say. Setting a level needs
      `player.js`.
      

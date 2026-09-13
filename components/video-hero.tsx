@@ -13,14 +13,14 @@ import { cn } from "@/lib/utils";
  * an argument nobody hears.
  *
  * ── about the volume ─────────────────────────────────────────────
- * It starts at 15%, where the browser allows it.
+ * It starts at 5%, where the browser allows it.
  *
  * That "where" is not hedging. Every browser refuses to start a video with
  * sound on a page the visitor has not interacted with — Chrome relents on
  * sites somebody uses often, Safari almost never does — and there is no way
  * to ask in advance. So the sequence is: play muted, which always works, then
- * immediately try to turn it down to 15% and unmute. If that is refused, or
- * if the player pauses in protest, it goes back to muted and keeps playing
+ * unmute at zero and ramp to 5% over ten seconds. If the unmute is refused,
+ * or the player pauses in protest, it goes back to muted and keeps playing
  * with the press below offered instead.
  *
  * Which means one press is always enough, and on a permissive browser no
@@ -33,8 +33,32 @@ import { cn } from "@/lib/utils";
  * that one reason. It is loaded on this page only, after the frame is up.
  * ─────────────────────────────────────────────────────────────── */
 
-/** Julian's number. Present but under the room, not a soundtrack. */
-const VOLUME = 0.15;
+/** Julian's number. Under the room rather than in it. */
+const VOLUME = 0.05;
+
+/**
+ * How long the sound takes to arrive, and why there are two numbers.
+ *
+ * Ten seconds when the reel unmutes itself, which is what Julian asked for:
+ * the page opens silent and the room fills in behind the picture rather than
+ * starting mid-sentence. A cut to audio on arrival is the thing that makes a
+ * visitor reach for the tab close, even at 5%.
+ *
+ * Six hundred milliseconds when somebody presses Sound. They asked for it —
+ * a ten-second ramp there is not gentle, it is a control that appears not to
+ * work, and the second press would be them turning it off.
+ */
+const FADE_MS = { arriving: 10_000, asked: 600 };
+
+/**
+ * The ramp is stepped rather than continuous, and the steps are coarse.
+ *
+ * Every step is a `postMessage` into Vimeo's frame, so a per-frame ramp would
+ * be six hundred messages for ten seconds of fade. Every 250ms is forty, and
+ * between 0 and 5% each step moves the level by a fifth of a percent — well
+ * under what an ear can hear as a step.
+ */
+const STEP_MS = 250;
 
 type VimeoPlayer = {
   setVolume: (v: number) => Promise<number>;
@@ -126,19 +150,70 @@ export function VideoHero({
    * as the page. */
   const src = `https://player.vimeo.com/video/${videoId}?autoplay=1&loop=1&muted=1&controls=0&playsinline=1&dnt=1&title=0&byline=0&portrait=0`;
 
-  /** Turn it down, then turn it on. Reverts if the browser says no. */
-  const withSound = React.useCallback(async (p: VimeoPlayer) => {
-    // Volume first: unmuting before the level is set is how a page shouts for
-    // the one frame it takes to obey.
-    await p.setVolume(VOLUME);
-    await p.setMuted(false);
-    await p.play();
+  /** The running fade, so it can be called off. */
+  const ramp = React.useRef<number | null>(null);
 
-    /* Chrome's answer to an unrequested unmute is not an error — it pauses
-       the video. So the state is read back rather than assumed. */
-    if (await p.getPaused()) throw new Error("paused on unmute");
-    return true;
+  const stopRamp = React.useCallback(() => {
+    if (ramp.current !== null) {
+      window.clearInterval(ramp.current);
+      ramp.current = null;
+    }
   }, []);
+
+  /**
+   * Takes the level from nothing to `VOLUME` over `ms`.
+   *
+   * `t * t` rather than a straight line. Loudness is perceived closer to
+   * logarithmically than linearly, so a linear ramp does most of its audible
+   * rise in the first second and then appears to sit still — which sounds
+   * like a fade that finished early. Squaring it puts the movement where the
+   * ear is listening for it.
+   */
+  const fadeIn = React.useCallback(
+    (p: VimeoPlayer, ms: number) => {
+      stopRamp();
+      const steps = Math.max(1, Math.round(ms / STEP_MS));
+      let step = 0;
+
+      ramp.current = window.setInterval(
+        () => {
+          step += 1;
+          const t = step / steps;
+          void p.setVolume(VOLUME * t * t).catch(() => {});
+          if (step >= steps) stopRamp();
+        },
+        Math.round(ms / steps),
+      );
+    },
+    [stopRamp],
+  );
+
+  /**
+   * Turn it on at nothing, then bring it up. Reverts if the browser says no.
+   */
+  const withSound = React.useCallback(
+    async (p: VimeoPlayer, ms: number = FADE_MS.arriving) => {
+      // Silence first: unmuting before the level is set is how a page shouts
+      // for the one frame it takes to obey — and here the level *is* silence,
+      // so the fade has somewhere to start from.
+      await p.setVolume(0);
+      await p.setMuted(false);
+      await p.play();
+
+      /* Chrome's answer to an unrequested unmute is not an error — it pauses
+         the video. So the state is read back rather than assumed, and read
+         *before* the ramp starts: a fade into a paused player is ten seconds
+         of nothing followed by a wrong label. */
+      if (await p.getPaused()) throw new Error("paused on unmute");
+
+      fadeIn(p, ms);
+      return true;
+    },
+    [fadeIn],
+  );
+
+  // A fade outliving its component would keep talking to a frame that is gone.
+  React.useEffect(() => stopRamp, [stopRamp]);
 
   React.useEffect(() => {
     let cancelled = false;
@@ -171,7 +246,7 @@ export function VideoHero({
   }, [withSound]);
 
   /**
-   * Sound on at 15%, or off. The one control a silent autoplaying video owes
+   * Sound on at 5%, or off. The one control a silent autoplaying video owes
    * the visitor: it started without being asked, so turning it off has to be
    * one press and has to be visible without hunting.
    */
@@ -182,12 +257,16 @@ export function VideoHero({
     if (sounding) {
       wantsSound.current = false;
       setSounding(false);
+      // Called off, not left running: a ramp behind a mute would have the
+      // level at full by the time anybody pressed Sound again, and the fade
+      // would be over before it was asked for.
+      stopRamp();
       void p.setMuted(true).catch(() => {});
       return;
     }
 
     wantsSound.current = true;
-    void withSound(p)
+    void withSound(p, FADE_MS.asked)
       .then(() => setSounding(true))
       .catch(() => {});
   }
@@ -230,6 +309,7 @@ export function VideoHero({
       // Fullscreen is the one case where an observer can lie: the element is
       // reported as it was laid out, not as it is being shown.
       if (document.fullscreenElement) return;
+      stopRamp();
       setSounding(false);
       void p.setMuted(true).catch(() => {});
       void p.pause().catch(() => {});
@@ -240,7 +320,9 @@ export function VideoHero({
       if (!p || !onScreen || document.hidden) return;
       void p.play().catch(() => {});
       if (!wantsSound.current) return;
-      void withSound(p)
+      // Scrolling back to it is an arrival, not a press, so the room fills in
+      // again rather than cutting on.
+      void withSound(p, FADE_MS.arriving)
         .then(() => setSounding(true))
         // Refused on the way back, which is allowed: it keeps playing silently
         // and the button says what to press.
@@ -264,7 +346,7 @@ export function VideoHero({
       observer.disconnect();
       document.removeEventListener("visibilitychange", onVisibility);
     };
-  }, [withSound]);
+  }, [withSound, stopRamp]);
 
   return (
     <section
