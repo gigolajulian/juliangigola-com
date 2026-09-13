@@ -34,10 +34,14 @@ export default function VideoPage() {
       <div className="mx-auto w-full max-w-[100rem] px-6 pb-24 pt-28 sm:px-10 sm:pt-36">
         <header>
           <h1 className="title">Video</h1>
+          {/* The count and what it covers, which is the pattern /work and
+              /sessions set. It said "Press play — nothing loads from YouTube
+              or Vimeo until you do", which is a note about how the page is
+              built wearing the clothes of body copy: true, and no business of
+              a visitor's. The tiles already say press play by looking like it. */}
           <p className="mt-4 max-w-prose text-sm leading-relaxed text-muted-foreground">
-            {videos.length
-              ? "Music videos and commercials. Press play — nothing loads from YouTube or Vimeo until you do."
-              : "Music videos and commercials."}
+            {videos.length} {videos.length === 1 ? "film" : "films"}. Music
+            videos and commercials, directed and shot in the Bay Area.
           </p>
         </header>
 
