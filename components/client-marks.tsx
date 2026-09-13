@@ -152,7 +152,19 @@ function ClientMark({
      `scale` then nudges the optical weight, which no rule gets right: see the
      note on `Client.scale`. */
   const size = {
-    height: `calc(var(--mark-box) * ${client.scale ?? 1})`,
+    /* The box, times the mark's own evening factor, times any hand nudge.
+    
+       The evening factor is measured rather than chosen: the generator sums
+       each mark's alpha to get how much of its box is ink and levels the ink
+       *area* across the set. Equal height was the bug Julian caught — LADERA
+       came out 112x23 against Pear VC's 28x22, the same height and four times
+       the area, because the eye judges area and a wide wordmark has far more
+       of it than a compact glyph.
+       
+       `client.scale` survives as an override for a judgement the pixels
+       cannot make — a logo that should dominate, or one whose trademark has
+       rules about size. Nothing sets it now. */
+    height: `calc(var(--mark-box) * ${mark.scale} * ${client.scale ?? 1})`,
     maxWidth: "var(--mark-cap)",
     width: "auto",
   } as const;

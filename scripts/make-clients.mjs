@@ -246,13 +246,95 @@ async function maskPng(file, slug, name) {
   };
 }
 
+/* ── how much of a mark is actually ink ───────────────────────────
+ * The number that makes a row of logos look even.
+ *
+ * Set every mark to the same height and a wide wordmark gets four times the
+ * area of a compact glyph: measured in the band under the cover, LADERA came
+ * out 112x23 against Pear VC's 28x22 — 2,597 square pixels against 613. They
+ * are the same height and they do not look remotely the same size, because
+ * the eye judges area, and more precisely the area of the *ink* rather than
+ * of the bounding box. A 50%-covered square and a 10%-covered square of the
+ * same size are not the same weight on a page.
+ *
+ * So each mark is rendered and its alpha summed: `ink` is the fraction of its
+ * box that is actually drawn. With the aspect ratio that gives a weight, and
+ * the scale that equalises weights across the set is the square root of their
+ * ratio — area goes as the square of a linear scale.
+ *
+ * This is what a designer does by eye when they nudge each logo on a client
+ * wall. Doing it from the pixels is not more correct than a good eye; it is
+ * more *consistent*, and it does not need redoing every time a client is
+ * added.
+ * ─────────────────────────────────────────────────────────────── */
+async function inkCoverage(buffer) {
+  // A fixed width, so coverage is comparable between a 1600px export and a
+  // 120px one. Height follows the aspect.
+  const { data, info } = await sharp(buffer)
+    .resize({ width: 200 })
+    .ensureAlpha()
+    .raw()
+    .toBuffer({ resolveWithObject: true });
+
+  let alpha = 0;
+  for (let i = 3; i < data.length; i += 4) alpha += data[i];
+  return alpha / (255 * info.width * info.height);
+}
+
 const marks = {};
 for (const file of files) {
   const slug = file.replace(/\.(svg|png)$/i, "");
   const path = join(from, file);
-  marks[slug] = file.toLowerCase().endsWith(".svg")
+  const isSvg = file.toLowerCase().endsWith(".svg");
+
+  const mark = isSvg
     ? inlineSvg(readFileSync(path, "utf8"), file)
     : await maskPng(path, slug, file);
+
+  /* Measured off the rendered mark in both cases. An SVG is rasterised with
+     its colours intact and then read for alpha, which is why the source has
+     to be one colour on transparency — the same requirement the inlining
+     already imposes. */
+  const rendered = isSvg
+    ? Buffer.from(
+        `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${mark.viewBox}">${mark.body.replace(/currentColor/g, "#000")}</svg>`,
+      )
+    : readFileSync(join(served, `${slug}.png`));
+
+  mark.ink = await inkCoverage(rendered);
+  mark.aspect = isSvg
+    ? (() => {
+        const [, , w, h] = mark.viewBox.split(/[\s,]+/).map(Number);
+        return w / h;
+      })()
+    : mark.width / mark.height;
+
+  marks[slug] = mark;
+}
+
+/* The scale that evens the row out.
+ *
+ * Normalised against the *median* weight rather than the mean: one very heavy
+ * mark — a solid-box wordmark like WIRED — would drag a mean upwards and
+ * shrink everything else to compensate. The median keeps the typical mark at
+ * 1 and moves the outliers.
+ *
+ * Clamped, because the arithmetic does not know when a logo is meant to be
+ * dominant. Past about a third either way it stops reading as evening-out and
+ * starts reading as one logo being wrong.
+ */
+{
+  const weights = Object.values(marks).map((m) => m.aspect * m.ink);
+  const sorted = [...weights].sort((a, b) => a - b);
+  const median =
+    sorted.length % 2
+      ? sorted[(sorted.length - 1) / 2]
+      : (sorted[sorted.length / 2 - 1] + sorted[sorted.length / 2]) / 2;
+
+  for (const mark of Object.values(marks)) {
+    const raw = Math.sqrt(median / (mark.aspect * mark.ink));
+    mark.scale = Math.round(Math.min(1.45, Math.max(0.7, raw)) * 100) / 100;
+  }
 }
 
 const entries = Object.entries(marks)
@@ -261,7 +343,7 @@ const entries = Object.entries(marks)
       m.kind === "svg"
         ? `    kind: "svg",\n    viewBox: ${JSON.stringify(m.viewBox)},\n    body: ${JSON.stringify(m.body)},`
         : `    kind: "mask",\n    src: ${JSON.stringify(m.src)},\n    width: ${m.width},\n    height: ${m.height},`;
-    return `  ${JSON.stringify(slug)}: {\n${fields}\n  },`;
+    return `  ${JSON.stringify(slug)}: {\n${fields}\n    scale: ${m.scale},\n  },`;
   })
   .join("\n");
 
@@ -275,11 +357,25 @@ writeFileSync(
  * on hover, and works on either theme. See the script for why.
  */
 
+/**
+ * How much of the row's height this mark takes, so the set looks even.
+ *
+ * Measured, not chosen: the generator sums each mark's alpha to get the
+ * fraction of its box that is ink, and evens the *ink area* across the set —
+ * the eye judges area, and equal height gives a wide wordmark four times the
+ * area of a compact glyph. See \`scripts/make-clients.mjs\`.
+ */
+type Evened = { scale: number };
+
 /** A mark drawn from paths. Colours are already \`currentColor\`. */
-export type VectorMark = { kind: "svg"; viewBox: string; body: string };
+export type VectorMark = Evened & {
+  kind: "svg";
+  viewBox: string;
+  body: string;
+};
 
 /** A mark drawn by masking \`currentColor\` with a PNG's alpha channel. */
-export type RasterMark = {
+export type RasterMark = Evened & {
   kind: "mask";
   src: string;
   width: number;
@@ -298,7 +394,7 @@ ${entries}
 const summary = Object.entries(marks)
   .map(
     ([slug, m]) =>
-      `  ${slug}: ${m.kind === "svg" ? `svg, viewBox ${m.viewBox}` : `mask, ${m.width}x${m.height} (from ${m.trimmedFrom})`}`,
+      `  ${slug.padEnd(16)} ${m.kind === "svg" ? "svg " : "mask"} ink ${(m.ink * 100).toFixed(0).padStart(2)}%  aspect ${m.aspect.toFixed(2)}  scale ${m.scale}`,
   )
   .join("\n");
 
