@@ -22,7 +22,7 @@ import type { Project, TextBlock } from "@/lib/work-types";
 
 export function Gallery({ project }: { project: Project }) {
   const frames = project.images;
-  const lightbox = useLightbox(frames.length);
+  const lightbox = useLightbox(frames);
 
   // Rows of one or two, decided by each frame's own shape.
   const rows = React.useMemo(() => pair(frames), [frames]);
@@ -99,6 +99,7 @@ export function Gallery({ project }: { project: Project }) {
                   const landing = i === 0;
                   const picture = (
                     <Image
+                      data-frame={frame.src}
                       src={frame.src}
                       alt={frame.alt || `${project.name} — frame ${i + 1}`}
                       width={frame.width}

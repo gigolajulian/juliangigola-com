@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { flushSync } from "react-dom";
 import Image from "next/image";
 import { Dialog, VisuallyHidden } from "radix-ui";
 import { cn } from "@/lib/utils";
@@ -22,7 +23,64 @@ import type { Frame } from "@/lib/work-types";
  * is whatever the surrounding layout happens to be — a row of paired frames,
  * a grid of covers — and that has to stay the caller's business.
  */
-export function useLightbox(count: number) {
+/* ── the trip ─────────────────────────────────────────────────────
+ * Pressing a frame does not open a dialog over it. The frame lifts off the
+ * page and grows to the middle of the screen; closing sends it back.
+ *
+ * The browser's View Transitions API directly, not React's `<ViewTransition>`
+ * — and the difference is the point. React's component pairs a name that is
+ * *unmounting* with one that is *mounting*, which is what a route change is.
+ * Here the frame in the gallery stays on the page under the lightbox, so
+ * both ends exist at once and React refuses the pair as a duplicate. The
+ * browser has no such rule: it captures a snapshot, runs the update, and
+ * captures another, and a name is allowed to be on one element before and a
+ * different element after. So the name is put on the pressed picture, moved
+ * to the lightbox's picture inside the update, and taken off afterwards.
+ *
+ * Every frame that can open carries `data-frame` with its path, which is how
+ * the one to lift — or land in — is found. The route morph on the project's
+ * first frame (`cover-<slug>`, see `gallery.tsx`) is React's and untouched:
+ * that one crosses pages, and this one never does.
+ * ─────────────────────────────────────────────────────────────── */
+
+/** The one name the trip uses. On one element at a time, by construction. */
+const NAME = "lightbox-frame";
+
+const pictureFor = (src: string): HTMLElement | null =>
+  document.querySelector<HTMLElement>(`img[data-frame="${CSS.escape(src)}"]`);
+
+/**
+ * Runs `update` as a view transition with the name travelling from `from`
+ * to `to`. Either end may be absent; the lightbox's own picture carries the
+ * name in its style, so it is never passed here. Without the API, or with
+ * reduced motion, the update simply runs.
+ */
+function travel(
+  from: HTMLElement | null,
+  update: () => void,
+  to: HTMLElement | null,
+) {
+  if (
+    typeof document.startViewTransition !== "function" ||
+    window.matchMedia("(prefers-reduced-motion: reduce)").matches
+  ) {
+    update();
+    return;
+  }
+  if (from) from.style.viewTransitionName = NAME;
+  const transition = document.startViewTransition(() => {
+    // Synchronous, so the new snapshot is of the updated page.
+    flushSync(update);
+    if (from) from.style.viewTransitionName = "";
+    if (to) to.style.viewTransitionName = NAME;
+  });
+  transition.finished.finally(() => {
+    if (to) to.style.viewTransitionName = "";
+  });
+}
+
+export function useLightbox(frames: Frame[]) {
+  const count = frames.length;
   const [open, setOpen] = React.useState(false);
   const [index, setIndex] = React.useState(0);
 
@@ -34,13 +92,27 @@ export function useLightbox(count: number) {
 
   const show = (i: number) => {
     opener.current = document.activeElement as HTMLElement | null;
-    setIndex(i);
-    setOpen(true);
+    const src = frames[i]?.src;
+    travel(
+      src ? pictureFor(src) : null,
+      () => {
+        setIndex(i);
+        setOpen(true);
+      },
+      null,
+    );
   };
 
   const onOpenChange = (next: boolean) => {
-    setOpen(next);
-    if (!next) opener.current?.focus();
+    if (next) {
+      setOpen(true);
+      return;
+    }
+    // Back to whichever frame is showing now, which after a few arrow keys
+    // is not the one that was pressed.
+    const src = frames[index]?.src;
+    travel(null, () => setOpen(false), src ? pictureFor(src) : null);
+    opener.current?.focus();
   };
 
   const step = React.useCallback(
@@ -89,7 +161,9 @@ export function Lightbox({
             "fixed inset-0 z-50 flex flex-col outline-none",
             // Modals keep a centred origin — they are not anchored to a
             // trigger, so scaling from one would look arbitrary.
-            "animate-in fade-in zoom-in-[0.98] duration-200 ease-out motion-reduce:animate-none",
+            // A fade only. The scale it used to carry is the frame's own
+            // job now: it arrives from where it was pressed.
+            "animate-in fade-in duration-200 ease-out motion-reduce:animate-none",
           )}
         >
           <VisuallyHidden.Root>
@@ -100,6 +174,9 @@ export function Lightbox({
             {current ? (
               <Image
                 key={current.src}
+                // The destination on the way in and the origin on the way out —
+                // see `travel`. Only one of these is ever mounted.
+                style={{ viewTransitionName: NAME }}
                 src={current.src}
                 alt={current.alt || `${name} — frame ${index + 1}`}
                 width={current.width}

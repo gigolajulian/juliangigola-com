@@ -28,7 +28,7 @@ export function CoverArtGallery({ releases }: { releases: CoverRelease[] }) {
     () => releases.flatMap((r) => r.frames),
     [releases],
   );
-  const lightbox = useLightbox(frames.length);
+  const lightbox = useLightbox(frames);
 
   // A cell opens at its own position in that flat sequence. Keyed by `src`,
   // which is unique per side.

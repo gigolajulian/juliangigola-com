@@ -1071,6 +1071,19 @@ optgroup {
   }
 }
 
+/* The frame that lifts into the lightbox, and back. The same trip as the
+   cover's, addressed by name rather than class because this one is run by
+   the browser's API directly — see `lightbox.tsx` for why. */
+::view-transition-group(lightbox-frame) {
+  animation-duration: 420ms;
+  animation-timing-function: var(--ease-out-strong);
+}
+::view-transition-image-pair(lightbox-frame) {
+  animation-name: jg-via-blur;
+  animation-duration: 420ms;
+  animation-timing-function: var(--ease-out-strong);
+}
+
 /* The rest of the page, on the same trip. Quicker than the cover on purpose:
    the words are in place before the picture arrives, which is the order a
    reader wants them in. The fixed bar is inside the root snapshot and

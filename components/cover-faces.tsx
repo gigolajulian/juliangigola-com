@@ -41,6 +41,7 @@ export function CoverFaces({
   return (
     <>
       <Image
+        data-frame={front.src}
         src={front.thumb}
         alt=""
         fill
@@ -59,6 +60,7 @@ export function CoverFaces({
       {back ? (
         <>
           <Image
+            data-frame={back.src}
             src={back.thumb}
             alt=""
             fill
