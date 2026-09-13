@@ -128,6 +128,8 @@ function Tile({
       type="button"
       onClick={onPlay}
       aria-label={`Play ${video.title}`}
+      // `group` drives three things now: the picture's zoom, the outline
+      // drawing itself, and the play mark arriving.
       className="group relative aspect-video w-full overflow-hidden bg-card press active:scale-[0.995]"
     >
       {poster ? (
@@ -152,14 +154,55 @@ function Tile({
         />
       ) : null}
 
-      {/* The scrim exists for the play mark, not for the picture: a white
+      {/* The outline, on hover only.
+
+          It was an SVG rect with `pathLength="1"` and a dash offset taken to
+          zero, which is the usual way to draw a line on. It does not survive
+          `vector-effect: non-scaling-stroke`: Chrome then computes dash
+          lengths in *screen* pixels and ignores `pathLength` entirely, so
+          `stroke-dasharray: 1px` painted a 1px dotted line all the way round
+          — visible at rest, which is the opposite of the point. Measured: a
+          396-unit perimeter, `pathLength="1"`, and a computed dasharray of
+          `1px`.
+
+          Without the non-scaling stroke the geometry is worse, not better: a
+          viewBox stretched to a 16:9 cell renders a nominal 1px stroke at
+          3.8px across the top and 2.1px down the side. An uneven outline.
+
+          So it is a border, and what animates is the frame arriving rather
+          than a line being drawn: it settles from 2% small onto its edge as
+          it fades up. Two properties, both on the compositor, no geometry to
+          get wrong at any cell size — and it reverses when the pointer
+          leaves instead of cutting.
+
+          Inset, so it reads as a mat inside the frame rather than as a box
+          around the tile, which the grid gap already implies. */}
+      <span
+        aria-hidden
+        className="pointer-events-none absolute inset-3 border border-white/80 opacity-0 transition-[opacity,scale] duration-300 ease-[var(--ease-out-strong)] scale-[0.98] group-hover:scale-100 group-hover:opacity-100 group-focus-visible:scale-100 group-focus-visible:opacity-100 motion-reduce:transition-none"
+      />
+
+      {/* The play mark, on request.
+
+          Hidden until the pointer is on the tile — the poster is the work and
+          a disc parked in the middle of every one of them is furniture. But
+          hidden *only where there is a pointer*: `hoverable` is a hover-and-
+          fine-pointer query, so on a touch screen, where hover never happens
+          and nothing would ever reveal it, the mark stays where it is. That
+          inversion is the whole reason this is two classes rather than
+          `opacity-0` and a hover.
+
+          It also comes back for a keyboard: a tile you can reach with Tab has
+          to show what pressing it does.
+
+          The disc exists for the mark and not for the picture: a white
           triangle on a pale still is invisible, and a mark with its own dark
           disc under it is legible on anything. */}
       <span
         aria-hidden
         className="absolute inset-0 flex items-center justify-center"
       >
-        <span className="flex size-16 items-center justify-center rounded-full bg-background/70 backdrop-blur-sm transition-all duration-300 ease-[var(--ease-out-strong)] group-hover:scale-110 group-hover:bg-background/90 motion-reduce:transition-none">
+        <span className="flex size-16 items-center justify-center rounded-full bg-background/70 backdrop-blur-sm transition-all duration-300 ease-[var(--ease-out-strong)] hoverable:scale-90 hoverable:opacity-0 hoverable:group-hover:scale-100 hoverable:group-hover:opacity-100 group-focus-visible:scale-100 group-focus-visible:opacity-100 motion-reduce:transition-none">
           {/* Drawn, not imported — the same rule the rest of the icons here
               follow. A triangle, optically centred: a shape with a flat left
               edge and a point on the right reads as off-centre when its
