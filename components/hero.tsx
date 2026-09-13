@@ -505,6 +505,19 @@ export function Hero({ disciplines }: { disciplines: Discipline[] }) {
             "flex min-w-0 flex-col border-t border-border/60",
             // Over the photograph: thinned ground, deep blur.
             "bg-background/45 backdrop-blur-2xl",
+            /* Less thin and less blurred where the panel is a full column.
+
+               At 45% over a 40px blur the panel became a smear rather than a
+               surface: on a pale frame the ground goes near-white, the muted
+               type in the index drops to a contrast nobody can read, and the
+               photograph behind is unrecognisable — so it is neither legible
+               chrome nor a visible picture. The stacked layout is a band at
+               the foot of a screen and gets away with it; a column running
+               the full height does not.
+
+               72% and 24px keeps what Julian asked for — the picture reads
+               through it — while giving the type a ground it can sit on. */
+            "squat:bg-background/[0.72] squat:backdrop-blur-xl",
             /* Squarish: a column like the one beside it in `wide`, but in
                the ground of the one below — full height down the left, with
                the photograph full bleed and entire behind it rather than
@@ -514,8 +527,14 @@ export function Hero({ disciplines }: { disciplines: Discipline[] }) {
                of a 2000px screen is 840px of panel for a masthead that wants
                480, and the picture pays the difference; the floor stops that
                same panel collapsing under the masthead at 1024px, which is
-               where this layout starts. */
-            "squat:min-h-dvh squat:w-[clamp(28rem,42%,40rem)] squat:border-r squat:border-t-0",
+               where this layout starts.
+
+               `justify-center`, because a window in this band can be far
+               taller than it is wide and a block stretched top-to-bottom
+               leaves a hole in the middle of itself. Centred, the head, the
+               name, the index and the buttons read as one block with the
+               panel around them. */
+            "squat:min-h-dvh squat:w-[clamp(28rem,42%,40rem)] squat:justify-center squat:border-r squat:border-t-0",
             // Beside it: a real panel, opaque and unblurred, filling the
             // width the picture does not take. Nothing is laid over the
             // frame at this ratio, which is the design Julian had and asked
@@ -529,17 +548,22 @@ export function Hero({ disciplines }: { disciplines: Discipline[] }) {
             {/* One: the standing details, as a running head. The tall top
               padding on desktop clears the fixed header so the nav never
               crowds the rule. */}
-            {/* The tall padding is `wide:` only, and that is a correction.
-              It was unconditional, from the version where this block was the
-              first thing in the section and had to clear the fixed header
-              itself. In the overlay layout the plate sits at the *foot* of
-              the screen — measured, its top edge is 374px down a 1010px
-              phone — so there was nothing above it to clear and the 96px was
-              frosted glass with nothing on it. Beside the picture at `wide`
-              the block does start at the top, and there it stays. */}
+            {/* The tall padding is for the two layouts where this block
+              starts at the top of the screen, under the fixed bar. In the
+              stacked layout the plate sits at the *foot* — measured, its top
+              edge is 374px down a 1010px phone — so there is nothing above it
+              to clear and the padding would be frosted glass with nothing on
+              it.
+
+              `pt-28` and not `pt-24`, which is a bug fixed: the bar measures
+              101px tall at these widths and 96px of clearance put the running
+              head five pixels *under* it. `wide` had 112px through a
+              `lg:wide:` stack and cleared; `squat` had 96 and did not. Both
+              are 112 now, from one class, so they cannot drift apart
+              again. */}
             <div
               style={lands(HEAD_MS)}
-              className="rise flex flex-wrap items-baseline gap-x-6 gap-y-1 border-b border-border px-6 pb-4 pt-6 sm:px-10 sm:pt-8 squat:pt-24 wide:pt-24 lg:wide:pt-28"
+              className="rise flex flex-wrap items-baseline gap-x-6 gap-y-1 border-b border-border px-6 pb-4 pt-6 sm:px-10 sm:pt-8 squat:pt-28 wide:pt-28"
             >
               {/* Held back while the intro is up, because the intro is already
                 saying these exact words in display type eighty pixels below.
@@ -639,10 +663,18 @@ export function Hero({ disciplines }: { disciplines: Discipline[] }) {
           </div>
 
           {/* Last on a phone, so the index and both buttons follow the
-            photograph rather than pushing it off the screen. `flex-1` from
-            `lg` so it takes the rest of the column and the `mt-auto` on the
-            buttons still pins them to the foot of the picture. */}
-          <div className="flex min-w-0 flex-col lg:flex-1">
+            photograph rather than pushing it off the screen.
+            
+            `wide:flex-1`, where it used to be `lg:`. It takes the rest of the
+            column so `mt-auto` on the buttons can pin them to the foot of the
+            picture — which is the design at `wide` and wrong in the squarish
+            band, where a window can be much taller than it is wide. Growing
+            there is what defeated `justify-center` on the panel: the two
+            children already filled it, so there was nothing left to centre
+            and the block sat against the top with 350px of panel under the
+            buttons. `lg` is a width and could not tell those two cases
+            apart. */}
+          <div className="flex min-w-0 flex-col wide:flex-1">
             {/* Three: the index. This is the switcher's control and the site's
               discipline navigation at the same time — hover previews, click
               opens that discipline's own page. Numbering is what keeps it an
@@ -722,12 +754,19 @@ export function Hero({ disciplines }: { disciplines: Discipline[] }) {
               </ul>
             </nav>
 
-            {/* Four: the two ways in, pinned to the foot of the column so the
-              type block is anchored at both ends against the full height of
-              the picture rather than drifting in the middle. */}
+            {/* Four: the two ways in.
+
+              `mt-auto` pins them to the foot, which anchors the type block at
+              both ends against a full-height picture — right at `wide`, where
+              the panel is 982px and the gap is a margin. In the squarish band
+              a window can be much taller than it is wide: measured at
+              1200x1180, the index ended at 639px and the buttons sat at
+              1069px, leaving 430px of blurred nothing in the middle of the
+              panel. So there the buttons follow the index and the whole block
+              is centred instead (see the plate below). */}
             <div
               style={lands(BUTTONS_MS)}
-              className="rise mt-auto flex flex-wrap items-center gap-3 px-6 py-6 sm:px-10 sm:py-8"
+              className="rise mt-auto flex flex-wrap items-center gap-3 px-6 py-6 sm:px-10 sm:py-8 squat:mt-10"
             >
               <Link
                 href="/work"
