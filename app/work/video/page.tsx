@@ -41,23 +41,37 @@ export default function VideoPage() {
           one screen that sells the page. This is the same move the cover
           makes, and it is plated the same way. */}
       <VideoHero videoId={REEL.videoId} title={REEL.title} year={REEL.year}>
+        {/* On the film, so everything here is white — `text-muted-foreground`
+            is a token for the page's ground and has no meaning on a
+            photograph.
+
+            And set at display scale. `title` gives 45px, which is right above
+            a column of prose and looks stranded on a full screen of moving
+            image: the cover's masthead is 80px at the same width, and this is
+            the same job. */}
         <div className="flex min-w-0 flex-col gap-2">
-          <p className="label text-muted-foreground">
+          <p className="label text-white/60">
             {REEL.title} &middot; {REEL.year}
           </p>
-          <h1 className="title">Video</h1>
+          <h1 className="font-display text-[clamp(2.75rem,7vw,6rem)] uppercase leading-[0.92] tracking-[0] text-white">
+            Video
+          </h1>
           {/* Julian's line. It replaced "8 films. Music videos and
               commercials, directed and shot in the Bay Area" — the count is
               on each section's own heading, where it counts something the
-              reader can see, and the disciplines are the two headings
-              below. What was left worth saying is whose work it is. */}
-          <p className="label text-muted-foreground">
+              reader can see, and the disciplines are the two headings below.
+              What was left worth saying is whose work it is. */}
+          <p className="label text-white/70">
             Directed &amp; shot by Julian Gigola
           </p>
         </div>
       </VideoHero>
 
-      <div className="mx-auto w-full max-w-[100rem] px-6 pb-24 pt-16 sm:px-10 sm:pt-20">
+      {/* `pt-10`, not `pt-16`. After a full-screen banner there was 137px of
+          black before the first heading, which reads as a gap rather than as
+          space: the banner already ends in a wide scrim, so the section under
+          it needs a breath and not a pause. */}
+      <div className="mx-auto w-full max-w-[100rem] px-6 pb-24 pt-10 sm:px-10 sm:pt-12">
         {videos.length === 0 ? (
           /* Not an error state and not a placeholder pretending to be work.
              The page exists so the discipline has somewhere to be the moment
@@ -83,7 +97,10 @@ export default function VideoPage() {
             </p>
           </div>
         ) : (
-          <div className="mt-14 flex flex-col gap-16">
+          /* No top margin of its own: the container above already sets the
+             space under the banner, and the two together were 105px of dark
+             ground between a full-screen film and the first heading. */
+          <div className="flex flex-col gap-16">
             {SECTIONS.map((section) => {
               const inThis = inSection(videos, section.id);
               // A section with nothing in it is left out rather than drawn

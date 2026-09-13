@@ -227,20 +227,33 @@ export function VideoHero({
           className="absolute inset-0 z-0"
         />
 
-        {/* The page's heading, on the lower third of the film.
+        {/* A scrim, not a plate — and that is a correction.
 
-            The same plate the cover uses — the ground at 45% under a heavy
-            blur — rather than a gradient scrim. A gradient dims the
-            photograph to make type survive it; a plate admits it is chrome
-            and leaves the picture above it alone. This site made that trade
-            once already on the cover and it is the same trade here.
+            The cover's plate is right for a photograph: a still frame is
+            chosen, and a panel of ground over the foot of it reads as chrome
+            laid on a picture. A film is not chosen, it is thirty seconds of
+            frames, and the plate did two things wrong here at once. Its
+            40px blur turned the bottom third of a moving image into a smear,
+            and its ground — near-black at 45% — had no edge at all against a
+            dark shot, so the "lower third" was an intention nobody could see.
+            Measured on the red frame in the reel: plate and film were
+            indistinguishable.
 
-            `pointer-events-none` on the plate with the controls inside it
-            switched back on: the film underneath stays pressable through the
-            dead space, so the whole banner is one target except where there
-            is something else to press. */}
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 flex min-h-[33%] flex-col justify-end border-t border-border/60 bg-background/45 px-6 py-8 backdrop-blur-2xl sm:px-10 sm:py-10">
-          <div className="mx-auto flex w-full max-w-[100rem] flex-wrap items-end justify-between gap-x-10 gap-y-6">
+            A gradient is the honest material for video. It costs the film no
+            detail, it reads on a bright frame and a dark one alike, and it
+            does not pretend to be a surface. Type goes white, because it now
+            sits on the picture rather than on the page's own ground.
+
+            `pointer-events-none` with the controls switched back on: the film
+            underneath stays pressable through the dead space. */}
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 flex flex-col justify-end bg-gradient-to-t from-black/90 via-black/60 to-transparent px-6 pb-8 pt-40 sm:px-10 sm:pb-12 sm:pt-48">
+          {/* One block, left-aligned, everything in it.
+
+              It was the heading at one end of a 985px row and the controls at
+              the other, which on any screen wider than a phone reads as two
+              unrelated islands. They belong together: the controls are what
+              you do to the thing the heading names. */}
+          <div className="mx-auto flex w-full max-w-[100rem] flex-col items-start gap-6">
             {children}
 
             {/* Two controls, because they are two decisions.
@@ -257,8 +270,11 @@ export function VideoHero({
                 onClick={toggleSound}
                 aria-pressed={sounding}
                 className={cn(
-                  "flex items-center gap-3 border border-border px-4 py-2.5",
-                  "transition-colors duration-200 hoverable:hover:bg-card press",
+                  // On the film, so the border and the type are white and the
+                  // ground is a wash rather than a card: the page's own
+                  // `border-border` disappears against a photograph.
+                  "flex items-center gap-3 border border-white/40 bg-black/30 px-4 py-2.5 text-white backdrop-blur-sm",
+                  "transition-colors duration-200 hoverable:hover:border-white/80 hoverable:hover:bg-black/50 press",
                 )}
               >
                 {/* Drawn, like every other icon here. The wave is the state:
@@ -296,8 +312,8 @@ export function VideoHero({
                 onClick={goFullscreen}
                 aria-label="Play fullscreen"
                 className={cn(
-                  "flex items-center gap-3 border border-border px-4 py-2.5",
-                  "transition-colors duration-200 hoverable:hover:bg-card press",
+                  "flex items-center gap-3 border border-white/40 bg-black/30 px-4 py-2.5 text-white backdrop-blur-sm",
+                  "transition-colors duration-200 hoverable:hover:border-white/80 hoverable:hover:bg-black/50 press",
                 )}
               >
                 {/* Four corners, which is what fullscreen looks like
