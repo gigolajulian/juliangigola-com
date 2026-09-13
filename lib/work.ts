@@ -548,6 +548,21 @@ export type Client = {
   slug: string;
   /** Where the mark goes. Not always a project — two of these are films. */
   href: string;
+  /**
+   * How much of the row's mark height this one takes. 1 by default.
+   *
+   * Equal height is the wrong rule for a wall of logos and this is the
+   * correction. Measured at a common 48px: WIRED is letters knocked out of
+   * solid boxes, so the full height is *filled* and it reads at twice the
+   * weight of anything beside it; Pear VC's bounding box includes a leaf and
+   * a stem above the wordmark, so the word itself comes out small; Ukiyo is a
+   * compact glyph with no letterforms to compare against at all.
+   *
+   * So each mark is nudged until the row looks even, which is what a designer
+   * does by hand on a client wall and what no single rule gets right. The
+   * numbers are only meaningful next to each other.
+   */
+  scale?: number;
 };
 
 /**
@@ -566,11 +581,16 @@ export type Client = {
  * that 404s.
  */
 export const PRESS: Client[] = [
-  { name: "WIRED", slug: "wired-magazine", href: "/work/wired-magazine" },
-  { name: "Pear VC", slug: "pear-vc", href: "/work/video" },
+  // Solid boxes, so it fills every pixel it is given and needs fewer of
+  // them. It hits the width cap first in any case.
+  { name: "WIRED", slug: "wired-magazine", href: "/work/wired-magazine", scale: 0.85 },
+  // Its bounding box is a leaf and a stem above the word, so the word itself
+  // is smaller than the box suggests.
+  { name: "Pear VC", slug: "pear-vc", href: "/work/video", scale: 1.1 },
   { name: "Ladera Granola", slug: "ladera-granola", href: "/work/video" },
   { name: "SOLSWEAR", slug: "sols", href: "/work/sols" },
-  { name: "UKIYOSUNKNOWN", slug: "ukiyosunknown", href: "/work/ukiyosunknown" },
+  // A glyph rather than letterforms, and a heavy one.
+  { name: "UKIYOSUNKNOWN", slug: "ukiyosunknown", href: "/work/ukiyosunknown", scale: 0.92 },
   { name: "JUBO", slug: "jubo", href: "/work/jubo" },
   { name: "SAGO", slug: "sago", href: "/work/sago" },
 ].filter((c) => {

@@ -27,8 +27,8 @@
  *   PNG  trimmed to its own ink and served from `public/clients/`, then drawn
  *        as a CSS mask over `currentColor`. The alpha channel *is* the mark, so
  *        a transparent PNG needs no vector at all and keeps its antialiasing.
- *        A PNG with a white background instead of transparency will come out
- *        as a solid block, which is the one failure to look out for.
+ *        A file with no transparency — black on white, or white on black —
+ *        has its alpha taken from its own contrast, so either lockup works.
  *
  * Generated and committed, like `work-data.ts` and `cover-art-data.ts` — a
  * client is added a few times a year, which is not a build-time concern.
@@ -64,8 +64,22 @@ const files = existsSync(from)
  * the failure would show up as one logo that ignores hover.
  */
 function inlineSvg(svg, name) {
-  const viewBox = svg.match(/viewBox="([^"]+)"/i)?.[1];
-  if (!viewBox) throw new Error(`${name}: no viewBox — cannot scale it safely`);
+  /* A viewBox, or the width and height to build one from.
+
+     Plenty of real brand files carry only `width`/`height` — WIRED's own
+     `logo.svg` is 125x25 with no viewBox — and refusing those would mean
+     hand-editing every asset a client sends. Derived rather than assumed: if
+     there is no viewBox and no numeric size, there is no way to scale the
+     mark and it is refused. */
+  const declared = svg.match(/viewBox="([^"]+)"/i)?.[1];
+  const width = Number(svg.match(/\swidth="(\d*\.?\d+)(?:px)?"/i)?.[1]);
+  const height = Number(svg.match(/\sheight="(\d*\.?\d+)(?:px)?"/i)?.[1]);
+  const viewBox =
+    declared ?? (width && height ? `0 0 ${width} ${height}` : undefined);
+  if (!viewBox)
+    throw new Error(
+      `${name}: no viewBox and no width/height — nothing to scale it by`,
+    );
 
   if (/<(style|linearGradient|radialGradient|image)\b/i.test(svg))
     throw new Error(
@@ -118,7 +132,73 @@ function inlineSvg(svg, name) {
  * behind without eating a soft edge.
  */
 async function maskPng(file, slug, name) {
-  const { data, info } = await sharp(file)
+  let source = file;
+
+  /* A file with no transparency at all, turned into one.
+   *
+   * Half of what a brand sends is the logo flattened onto a ground — black on
+   * white from a print file, or white on black from a dark lockup. The alpha
+   * channel is then uniformly opaque and the crop below would find the whole
+   * canvas, so the mark would render as a solid rectangle.
+   *
+   * The ink is recoverable, because these files are one colour on one ground:
+   * the *contrast* is the alpha. Which way round it goes is read off the four
+   * corners rather than assumed — a dark corner means light ink, a light
+   * corner means dark ink — and using luminance rather than a threshold keeps
+   * the antialiased edge that a threshold would turn into a staircase.
+   */
+  /* `stats()` reads the file as it is on disk and ignores anything queued in
+     the pipeline, so `ensureAlpha().stats()` reports three channels for a file
+     that has three — which is the very case being tested for. Metadata first,
+     then the alpha channel only where there is one. */
+  const meta = await sharp(file).metadata();
+  const opaque =
+    !meta.hasAlpha ||
+    (await sharp(file).stats().then((st) => st.channels[3].min >= 250));
+
+  if (opaque) {
+    const flat = await sharp(file)
+      .removeAlpha()
+      .raw()
+      .toBuffer({ resolveWithObject: true });
+    const { width, height, channels } = flat.info;
+    const lum = (x, y) => {
+      const i = (y * width + x) * channels;
+      return (flat.data[i] + flat.data[i + 1] + flat.data[i + 2]) / 3;
+    };
+    const corners = [
+      lum(0, 0),
+      lum(width - 1, 0),
+      lum(0, height - 1),
+      lum(width - 1, height - 1),
+    ];
+    const ground = corners.reduce((a, b) => a + b, 0) / 4;
+    const inkIsLight = ground < 128;
+
+    const rgba = Buffer.alloc(width * height * 4);
+    for (let i = 0; i < width * height; i++) {
+      const l =
+        (flat.data[i * channels] +
+          flat.data[i * channels + 1] +
+          flat.data[i * channels + 2]) /
+        3;
+      // The mark is always written as black ink; only the alpha carries the
+      // shape, and `currentColor` supplies the colour at render.
+      rgba[i * 4] = 0;
+      rgba[i * 4 + 1] = 0;
+      rgba[i * 4 + 2] = 0;
+      rgba[i * 4 + 3] = Math.round(inkIsLight ? l : 255 - l);
+    }
+
+    source = await sharp(rgba, { raw: { width, height, channels: 4 } })
+      .png()
+      .toBuffer();
+    console.log(
+      `  ${name}: no transparency — alpha taken from contrast (${inkIsLight ? "light" : "dark"} ink on a ${inkIsLight ? "dark" : "light"} ground)`,
+    );
+  }
+
+  const { data, info } = await sharp(source)
     .ensureAlpha()
     .raw()
     .toBuffer({ resolveWithObject: true });
@@ -140,7 +220,7 @@ async function maskPng(file, slug, name) {
 
   if (right < 0)
     throw new Error(
-      `${name}: every pixel is transparent. If the logo is dark on a white background rather than on transparency, it needs its background removing first.`,
+      `${name}: nothing in it. An empty canvas, or a mark the same colour as its own ground.`,
     );
 
   const width = right - left + 1;
@@ -150,7 +230,7 @@ async function maskPng(file, slug, name) {
      dense screen, so a 1629px source is three orders of magnitude of bytes
      nobody sees — and a mask is fetched by every visitor. */
   const out = join(served, `${slug}.png`);
-  await sharp(file)
+  await sharp(source)
     .extract({ left, top, width, height })
     .resize({ height: Math.min(height, 320), withoutEnlargement: true })
     .png({ compressionLevel: 9 })

@@ -45,15 +45,17 @@ export function ClientMarks({
   return (
     <ul
       className={cn(
+        /* `--mark-box` is the box every mark is fitted into — height first,
+           width as the cap. See the note in `ClientMark` for why both. */
         layout === "row"
-          ? "flex flex-wrap items-center gap-x-8 gap-y-4"
+          ? "flex flex-wrap items-center gap-x-8 gap-y-4 [--mark-box:1.45rem] [--mark-cap:7rem]"
           : /* Even cells, and the count comes from the width rather than from
                a breakpoint: two on a phone, three by 30rem, five by 60rem.
                `auto-fit` is right here and not in the video grid — an empty
                cell in a logo wall is a hole in a rhythm, so collapsing the
                spare tracks is what keeps a row of seven from leaving three
                gaps at the end. */
-            "grid items-center justify-items-center gap-x-8 gap-y-12 [grid-template-columns:repeat(auto-fit,minmax(min(9rem,45%),1fr))]",
+            "grid items-center justify-items-center gap-x-8 gap-y-12 [--mark-box:2.75rem] [--mark-cap:9rem] [grid-template-columns:repeat(auto-fit,minmax(min(9rem,45%),1fr))]",
         className,
       )}
     >
@@ -73,7 +75,7 @@ export function ClientMarks({
               // A whole cell to aim at in the wall, so the target is the
               // logo's space rather than its ink — a wordmark's letterforms
               // are mostly holes.
-              layout === "grid" && "h-10 w-full",
+              layout === "grid" && "h-12 w-full",
             )}
           >
             <ClientMark client={client} layout={layout} />
@@ -116,10 +118,15 @@ function ClientMark({
 
   if (!mark) {
     return (
+      /* A size down from where it was in the wall, and `leading-none`.
+
+         `text-2xl` put LADERA GRANOLA at 165x64 — two lines, and half again
+         the width of every logo beside it. A wordmark is a mark here, not a
+         heading, so it takes the same band as the rest. */
       <span
         className={cn(
-          "font-display text-center uppercase tracking-[0]",
-          layout === "row" ? "text-lg sm:text-xl" : "text-xl sm:text-2xl",
+          "font-display max-w-full text-center uppercase leading-none tracking-[0]",
+          layout === "row" ? "text-lg sm:text-xl" : "text-lg sm:text-xl",
         )}
       >
         {client.name}
@@ -127,13 +134,28 @@ function ClientMark({
     );
   }
 
-  /* One height for both kinds, measured against the wordmarks rather than
-     picked: the display face at `text-2xl` caps around 17px, so a mark in a
-     24px box reads a size larger than the names it shares a row with. These
-     sit level. Width is never set — logos come in every proportion, and
-     squeezing a wide wordmark into the same box as a round badge is the thing
-     that makes a client wall look amateur. */
-  const height = cn(layout === "row" ? "h-4 sm:h-[1.1rem]" : "h-5 sm:h-6");
+  /* Every mark is fitted into one box: as tall as the box allows, and no
+     wider than the cap.
+
+     Sizing by height alone was wrong, and measurably so. In the wall, WIRED
+     came out 94x19 while the Pear mark — which is nearly square — came out
+     39x31 and Ukiyo 41x21, against wordmarks running 117px and 165px wide.
+     Equal height gives a narrow logo a fraction of the *area* of a long
+     wordmark, so the marks read as thumbnails dropped in among type.
+
+     A cap on the width is what fixes it, and it is what makes a client wall
+     on any other site look even: a wide mark hits the width and loses height,
+     a squarish one takes the full height and stays narrow, and both end up
+     occupying a similar amount of the cell. `aspect-ratio` keeps the
+     proportions while both limits apply — nothing is ever stretched.
+
+     `scale` then nudges the optical weight, which no rule gets right: see the
+     note on `Client.scale`. */
+  const size = {
+    height: `calc(var(--mark-box) * ${client.scale ?? 1})`,
+    maxWidth: "var(--mark-cap)",
+    width: "auto",
+  } as const;
 
   /* A PNG whose alpha channel is the mark, used as a mask over
      `currentColor`. That is what lets a raster logo behave like type: muted in
@@ -146,8 +168,9 @@ function ClientMark({
     return (
       <span
         aria-hidden
-        className={cn("block w-auto bg-current", height)}
+        className="block max-w-full bg-current"
         style={{
+          ...size,
           aspectRatio: `${mark.width} / ${mark.height}`,
           maskImage: `url(${mark.src})`,
           WebkitMaskImage: `url(${mark.src})`,
@@ -168,7 +191,8 @@ function ClientMark({
       role="img"
       aria-hidden
       focusable="false"
-      className={cn("w-auto max-w-full", height)}
+      className="max-w-full"
+      style={size}
       // Width comes from the viewBox and `preserveAspectRatio` is the
       // default, so a wide mark stays wide.
       fill="currentColor"
