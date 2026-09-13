@@ -6,8 +6,7 @@
  *
  *   app/favicon.ico          16, 32 and 48, for /favicon.ico and old browsers
  *   app/apple-icon.png       180, for an iOS home screen
- *   app/opengraph-image.png  1200x630, the card when the site is shared
- *
+ * *
  * Committed rather than generated at build time. They change when the mark
  * changes, which is roughly never, and a build step that needs `sharp` on the
  * Cloudflare builder is a dependency for nothing.
@@ -97,34 +96,10 @@ await writeFile(
  * ─────────────────────────────────────────────────────────────── */
 await writeFile(join(root, "app/apple-icon.png"), await png(180));
 
-/* ── the share card ──────────────────────────────────────────────
- * 1200x630 is what every unfurler crops to, and `twitter: card:
- * summary_large_image` was already declared in `app/layout.tsx` with no image
- * behind it — a large-image card with nothing in it, which unfurls as a blank
- * slab with the title beside it.
- *
- * The mark on its own ground rather than a photograph. A photograph would say
- * more about the work, and it would also be one photograph standing for
- * thirteen disciplines and seventy-three projects, chosen once and then wrong
- * for every link that is not about it. The title and description travel with
- * the card and say what the site is; the image says whose it is.
- *
- * Sized so the eye reads at the width a link preview actually gets — a third
- * of the card, which in a phone's chat window is about 40px of mark.
- * ─────────────────────────────────────────────────────────────── */
-const OG = { width: 1200, height: 630, mark: 380 };
+/* The share card is not made here any more. It is the cover photograph
+ * cropped by `scripts/make-og.mjs`, which runs on every build so that
+ * changing the cover in /admin changes the thumbnail. A mark is right for a
+ * 16px tab; a card is 500px wide in a feed and should be the work.
+ */
 
-await sharp({
-  create: {
-    width: OG.width,
-    height: OG.height,
-    channels: 3,
-    // The same #000 as the mark's own ground, so there is no seam.
-    background: { r: 0, g: 0, b: 0 },
-  },
-})
-  .composite([{ input: await png(OG.mark), gravity: "centre" }])
-  .png({ compressionLevel: 9 })
-  .toFile(join(root, "app/opengraph-image.png"));
-
-console.log("icons written: favicon.ico (16/32/48), apple-icon.png, opengraph-image.png");
+console.log("icons written: favicon.ico (16/32/48), apple-icon.png");

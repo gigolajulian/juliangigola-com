@@ -57,8 +57,34 @@ export const metadata: Metadata = {
     siteName: "Julian Gigola",
     locale: "en_US",
     url: SITE,
+    /* The cover photograph, cropped to a card.
+     *
+     * `scripts/make-og.mjs` makes it from whatever `coverSlug` names, and it
+     * runs as `prebuild` — so changing the cover in /admin changes the
+     * thumbnail on the next deploy with nothing else to do. The file is
+     * committed as well, so a build where the crop could not run ships a card
+     * one cover out of date rather than none at all.
+     *
+     * This replaced the eye mark. A mark is the right answer for a tab, where
+     * it is 16px and has to be recognised; a share card is 500px wide in a
+     * feed and should be the work. */
+    images: [
+      {
+        url: "/og.jpg",
+        width: 1200,
+        height: 630,
+        alt: "Photography by Julian Gigola",
+      },
+    ],
   },
-  twitter: { card: "summary_large_image" },
+  /* Named rather than inherited: Next fills `twitter:image` from the
+     `opengraph-image` *file convention* on its own, but not from an
+     `openGraph.images` written here — and a `summary_large_image` card with
+     no image unfurls as a blank slab with the title beside it. */
+  twitter: {
+    card: "summary_large_image",
+    images: ["/og.jpg"],
+  },
   alternates: { canonical: "/" },
 };
 
