@@ -6,6 +6,7 @@ import { WorkBand } from "@/components/work-band";
 import { CoverArt } from "@/components/cover-art";
 import { Reveal } from "@/components/reveal";
 import { FEATURED, PRESS, DISCIPLINES } from "@/lib/work";
+import { ClientMarks } from "@/components/client-marks";
 
 /* ── the homepage ─────────────────────────────────────────────────
  * Four moves, in the order a first-time visitor asks for them.
@@ -35,18 +36,9 @@ export default function Home() {
           <h2 id="press" className="label shrink-0 text-muted-foreground">
             Published &amp; commissioned by
           </h2>
-          <ul className="flex flex-wrap items-center gap-x-8 gap-y-3">
-            {PRESS.map((p) => (
-              <li key={p.slug}>
-                <Link
-                  href={`/work/${p.slug}`}
-                  className="font-display text-lg uppercase tracking-[0] text-muted-foreground transition-colors duration-200 hoverable:hover:text-foreground sm:text-xl"
-                >
-                  {p.name}
-                </Link>
-              </li>
-            ))}
-          </ul>
+          {/* One component with /studio's wall, so a logo added once shows
+              in both places and neither can be the one still set in type. */}
+          <ClientMarks clients={PRESS} layout="row" />
         </div>
       </section>
 

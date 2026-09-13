@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { Reveal } from "@/components/reveal";
 import Image from "next/image";
 import { PRESS, FEATURED, coverOf } from "@/lib/work";
+import { ClientMarks } from "@/components/client-marks";
 
 /* ── studio ───────────────────────────────────────────────────────
  * The old site split this across /about (real, and decent) and /rates
@@ -69,26 +69,20 @@ export default function StudioPage() {
                 <h2 className="label text-muted-foreground">
                   Selected clients &amp; press
                 </h2>
-                <ul className="mt-6 flex flex-col divide-y divide-border border-y border-border">
-                  {PRESS.map((p) => (
-                    <li key={p.slug}>
-                      <Link
-                        href={`/work/${p.slug}`}
-                        className="group flex items-baseline justify-between gap-6 py-4 transition-colors duration-200"
-                      >
-                        <span className="font-display text-xl uppercase tracking-[0]">
-                          {p.name}
-                        </span>
-                        <span
-                          aria-hidden
-                          className="label text-muted-foreground transition-transform duration-200 ease-[var(--ease-out-strong)] hoverable:group-hover:translate-x-1 motion-reduce:transition-none"
-                        >
-                          View &rarr;
-                        </span>
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
+                <p className="mt-4 max-w-prose text-sm leading-relaxed text-muted-foreground">
+                  A few of the people who have trusted me with the work. Each
+                  one goes to what we made.
+                </p>
+                {/* A wall rather than a list of rows. Client logos are read as
+                    a set — the eye is counting names it recognises, not
+                    reading them in order — and a stack of full-width rows with
+                    "View →" on each made five clients look like a menu of
+                    five destinations. */}
+                <ClientMarks
+                  clients={PRESS}
+                  layout="grid"
+                  className="mt-10 border-y border-border py-12"
+                />
               </section>
             </Reveal>
 
