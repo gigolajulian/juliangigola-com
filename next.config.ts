@@ -163,7 +163,18 @@ const nextConfig: NextConfig = {
    * loader ignored `width` entirely and every device downloaded the same
    * 1600px file. See `image-loader.ts`.
    */
-  images: { loader: "custom", loaderFile: "./image-loader.ts" },
+  images: {
+    loader: "custom",
+    loaderFile: "./image-loader.ts",
+    /* Three widths, not Next's eight. Every width a browser can ask for is
+       a separate transformation, billed per unique source-and-size and
+       counted against 5,000 a month included. 640 covers a phone, 1080 a
+       laptop and a phone at 2x, 1920 everything else; the loader rounds a
+       request up to the next one. `imageSizes` is kept for the small slots
+       — the index panel, a picker thumbnail. */
+    deviceSizes: [640, 1080, 1920],
+    imageSizes: [128, 256],
+  },
 
   // Stops naming the framework and its version to every request. Free, and
   // one less thing pointing an attacker at the right CVE list.

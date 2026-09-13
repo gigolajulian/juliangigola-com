@@ -104,5 +104,9 @@ export default function cloudflareImageLoader({
     "format=auto",
   ];
 
-  return `/cdn-cgi/image/${options.join(",")}/${source}`;
+  // The source goes in without its leading slash: the format is
+  // `/cdn-cgi/image/<options>/<path>`, and a second slash in the path is a
+  // different URL — a different cache key and a different counted
+  // transformation for the same picture.
+  return `/cdn-cgi/image/${options.join(",")}/${source.replace(/^\//, "")}`;
 }
