@@ -404,6 +404,46 @@
     user-select: none;
   }
 
+  /* ── the text is not selectable ─────────────────────────────────
+   * Julian's call, and the same instinct as the notice on the photographs:
+   * the writing on this site is his as much as the frames are.
+   *
+   * Four exceptions, and each one would be a bug without it:
+   *
+   *   form controls   /admin is a text editor. `user-select: none` on an
+   *                   ancestor leaves an `<input>` editable in every current
+   *                   engine, but selecting inside one — double-clicking a
+   *                   word to replace it — is a different question, and the
+   *                   answer has varied by browser and version. Named here so
+   *                   it cannot vary.
+   *   the workbench   the same page, outside the fields: a slug to copy, a
+   *                   path, an error to paste into a search.
+   *   mailto and tel  a visitor copying his address is the whole point of the
+   *                   contact page. Blocking that to protect body copy is
+   *                   protecting the wrong thing.
+   *
+   * What this does *not* do is stop anyone taking the text. View source, or
+   * the accessibility tree, or a screenshot and OCR. It stops the accidental
+   * drag-select that comes of scrolling with a held mouse button, and it says
+   * the text is not a free asset — the same thing the photo notice says, with
+   * the same limits.
+   * ─────────────────────────────────────────────────────────────── */
+  body {
+    -webkit-user-select: none;
+    user-select: none;
+  }
+
+  input,
+  textarea,
+  select,
+  [contenteditable],
+  [data-workbench],
+  a[href^="mailto:"],
+  a[href^="tel:"] {
+    -webkit-user-select: text;
+    user-select: text;
+  }
+
   /* Keyboard focus has to be obvious on a dark ground, and the accent is the
      only saturated thing on the page — so it reads instantly as "you are
      here" without being decorative. Mouse clicks get nothing. */
