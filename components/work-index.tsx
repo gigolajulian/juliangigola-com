@@ -4,8 +4,7 @@ import * as React from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
-import type { Project } from "@/lib/work-types";
-import type { CategoryLink } from "@/lib/work";
+import type { CategoryLink, IndexRow } from "@/lib/work";
 
 /* ── the contact sheet ────────────────────────────────────────────
  * The index is a typographic list, not a grid of thumbnails.
@@ -46,7 +45,8 @@ export function WorkIndex({
   active: activeCategory = null,
   children,
 }: {
-  projects: Project[];
+  /** Trimmed on the server to what a row shows — see `indexRow`. */
+  projects: IndexRow[];
   categories: CategoryLink[];
   active?: string | null;
   /** Rendered under the chips in place of the list. */
@@ -88,10 +88,6 @@ export function WorkIndex({
         <div className="mt-8 gap-16 lg:flex lg:items-start">
           <ol className="lg:w-1/2 lg:min-w-0">
             {projects.map((project, i) => {
-              const client = project.credits.find((c) =>
-                /client|model|artist/i.test(c.role),
-              );
-
               return (
                 <li
                   key={project.slug}
@@ -143,7 +139,7 @@ export function WorkIndex({
                         {project.name}
                       </h2>
                       <span className="label shrink-0 text-muted-foreground">
-                        {client ? client.name : project.categories[0]?.name}
+                        {project.credit}
                       </span>
                     </div>
                   </Link>

@@ -5,7 +5,7 @@ import { Testimonials } from "@/components/testimonials";
 import { WorkBand } from "@/components/work-band";
 import { CoverArt } from "@/components/cover-art";
 import { Reveal } from "@/components/reveal";
-import { FEATURED, PRESS, DISCIPLINES } from "@/lib/work";
+import { FEATURED, PRESS, DISCIPLINES, bandTile } from "@/lib/work";
 import { ClientMarks } from "@/components/client-marks";
 
 /* ── the homepage ─────────────────────────────────────────────────
@@ -89,7 +89,11 @@ export default function Home() {
           {FEATURED.map((project, i) => {
             // Three are above the fold now, not two.
             const band = (
-              <WorkBand project={project} index={i} priority={i < 3} />
+              <WorkBand
+                project={bandTile(project)}
+                index={i}
+                priority={i < 3}
+              />
             );
             return (
               <li key={project.slug}>

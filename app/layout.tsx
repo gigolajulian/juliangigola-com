@@ -14,9 +14,16 @@ const geistSans = Geist({
   subsets: ["latin"],
 });
 
+// Declared but not preloaded. `font-mono` is set in three places and all
+// three are in /admin — a token field, a key field, a log — yet the 29kB
+// woff2 was in a `<link rel="preload">` on every page of the site, fetched
+// before first paint for text nobody outside /admin ever sees. Without the
+// preload the browser fetches it when a page first uses it, which is what a
+// font that one route needs should do.
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
+  preload: false,
 });
 
 // Univers Bold Condensed for the masthead and project titles.

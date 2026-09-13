@@ -530,6 +530,76 @@ export const WORK_CATEGORY_LINKS: CategoryLink[] = WORK_CATEGORIES.filter(
   // the reel after Places and wraps to Editorial from there.
   .sort((a, b) => Number(a.slug === "video") - Number(b.slug === "video"));
 
+/* ── what a list is handed ────────────────────────────────────────
+ * The index on /work and the band on the homepage are client components,
+ * and a client component's props travel in the page: serialised into the
+ * HTML as the hydration payload. Handing them whole `Project`s meant every
+ * frame of every project went along — measured on /work: 55 projects, 772
+ * frame references, every credit, every passage of writing, 111kB of inline
+ * data on a page that shows a name and a client per row. Brotli takes most
+ * of it back on the wire (the HTML is 13kB), but the browser still parses
+ * all of it before the page is interactive.
+ *
+ * So each list gets a shape that is exactly what it renders, built here on
+ * the server where the archive is free to read.
+ * ─────────────────────────────────────────────────────────────── */
+
+/** The person or company a row is credited to, when there is one. */
+const billing = (p: Project): string | undefined =>
+  p.credits.find((c) => /client|model|artist/i.test(c.role))?.name;
+
+/** One row of the /work index: a name, a cover for the panel, a credit. */
+export type IndexRow = {
+  slug: string;
+  name: string;
+  cover: Frame;
+  /** The credit shown against the name; the discipline when there is none. */
+  credit: string;
+};
+
+export const indexRow = (p: Project): IndexRow => ({
+  slug: p.slug,
+  name: p.name,
+  cover: p.cover,
+  credit: billing(p) ?? p.categories[0]?.name ?? "",
+});
+
+/**
+ * One tile of the homepage band: the cover, the three frames it scrubs
+ * through, and the words on its plate.
+ *
+ * Three, after the cover: Julian asked for the top three photographs and
+ * nothing more, and three is enough to answer "what is the range of this
+ * set" without a tile becoming a slideshow. They start at the *second*
+ * frame because the first is the cover again — measured on all seven
+ * featured projects, `images[0]` is the same picture as `cover` (a 16px
+ * greyscale difference of 0.4–2.7, against 20–105 for every other frame),
+ * so scrubbing onto it would be a transition to nothing.
+ */
+export type BandTile = {
+  slug: string;
+  name: string;
+  cover: Frame;
+  frames: Frame[];
+  /** How many frames the project has in all, for the label. */
+  total: number;
+  client?: string;
+  discipline: string;
+};
+
+export const bandTile = (p: Project): BandTile => {
+  const client = billing(p);
+  return {
+    slug: p.slug,
+    name: p.name,
+    cover: p.cover,
+    frames: p.images.slice(1, 4),
+    total: p.images.length,
+    ...(client ? { client } : {}),
+    discipline: p.categories[0]?.name ?? "Project",
+  };
+};
+
 /**
  * The frame a project is represented by elsewhere on the site — the small
  * derivative of its opening image.

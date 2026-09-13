@@ -12,6 +12,7 @@ import {
   categoryHref,
   categoryLabel,
   enquiryTypeFor,
+  indexRow,
   isDisciplineGallery,
 } from "@/lib/work";
 import { COVER_RELEASES } from "@/lib/cover-art-data";
@@ -127,7 +128,7 @@ export default async function CategoryPage(
         </header>
 
         <WorkIndex
-          projects={projects}
+          projects={projects.map(indexRow)}
           categories={WORK_CATEGORY_LINKS}
           active={slug}
         >

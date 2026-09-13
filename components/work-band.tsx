@@ -4,7 +4,7 @@ import * as React from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
-import type { Project } from "@/lib/work-types";
+import type { BandTile } from "@/lib/work";
 
 /* ── the scrub tile ───────────────────────────────────────────────
  * One featured project as a grid cell, and moving across it scrubs through
@@ -25,20 +25,6 @@ import type { Project } from "@/lib/work-types";
  * beyond the cover.
  * ─────────────────────────────────────────────────────────────── */
 
-/**
- * How many frames a tile scrubs through, and which.
- *
- * Three, after the cover: Julian asked for the top three photographs and
- * nothing more, and three is enough to answer "what is the range of this
- * set" without a tile becoming a slideshow. They start at the *second*
- * frame because the first is the cover again — measured on all seven
- * featured projects, `images[0]` is the same picture as `cover` (a 16px
- * greyscale difference of 0.4–2.7, against 20–105 for every other frame),
- * so scrubbing onto it would be a transition to nothing.
- */
-const SCRUB_FROM = 1;
-const SCRUB_COUNT = 3;
-
 /** The same query `hoverable:` compiles to in `globals.css`. */
 const HOVERABLE = "(hover: hover) and (pointer: fine)";
 const subscribeHoverable = (onChange: () => void) => {
@@ -53,14 +39,13 @@ export function WorkBand({
   /** The cells above the fold on most screens. */
   priority = false,
 }: {
-  project: Project;
+  /** Trimmed on the server to the cover, three frames and the plate's words
+      — which three, and why, is with `bandTile` in `lib/work.ts`. */
+  project: BandTile;
   index: number;
   priority?: boolean;
 }) {
-  const frames = React.useMemo(
-    () => project.images.slice(SCRUB_FROM, SCRUB_FROM + SCRUB_COUNT),
-    [project.images],
-  );
+  const frames = project.frames;
 
   const [active, setActive] = React.useState(0);
   const [scrubbing, setScrubbing] = React.useState(false);
@@ -81,10 +66,6 @@ export function WorkBand({
     subscribeHoverable,
     () => window.matchMedia(HOVERABLE).matches,
     () => false,
-  );
-
-  const client = project.credits.find((c) =>
-    /client|artist|model/i.test(c.role),
   );
 
   const onPointerMove = (e: React.PointerEvent<HTMLElement>) => {
@@ -133,7 +114,7 @@ export function WorkBand({
         onPointerLeave={reset}
         onBlur={reset}
         onKeyDown={onKeyDown}
-        aria-label={`${project.name} — ${project.images.length} frames`}
+        aria-label={`${project.name} — ${project.total} frames`}
         // 4:5, the ratio the work is shot and delivered in.
         //
         // This was sized by viewport height — `62vh`, `68vh` above `lg` —
@@ -212,8 +193,8 @@ export function WorkBand({
           </div>
 
           <div className="flex flex-wrap items-baseline gap-x-6 gap-y-2">
-            {client ? (
-              <p className="label text-muted-foreground">{client.name}</p>
+            {project.client ? (
+              <p className="label text-muted-foreground">{project.client}</p>
             ) : null}
             {/* The discipline reads from the left, with the client, and the
                 frame count is what gets pushed away.
@@ -232,9 +213,7 @@ export function WorkBand({
                 margin in a flex row takes all of the space, so with no client
                 the discipline still starts at the left edge instead of
                 splitting the difference. */}
-            <p className="label text-muted-foreground">
-              {project.categories[0]?.name ?? "Project"}
-            </p>
+            <p className="label text-muted-foreground">{project.discipline}</p>
             {/* Only while scrubbing: at rest the cover is on screen and it
                 is not one of the three, so a counter would be pointing at
                 nothing. */}
