@@ -1144,6 +1144,19 @@ optgroup {
     filter: blur(3px);
   }
 }
+/* Both ends fill the box they travel in.
+ *
+ * The band's cell is 4:5 and crops the picture; the project's first frame
+ * is the picture's own shape. Left to the defaults each snapshot keeps its
+ * own aspect — its width follows the group, its height does not — so for
+ * the whole trip one of the two hangs out of the box, and the morph reads
+ * as two pictures sliding past each other. Filled and cover-cropped, they
+ * are one picture changing shape, which is what the trip is meant to be. */
+::view-transition-old(.morph),
+::view-transition-new(.morph) {
+  block-size: 100%;
+  object-fit: cover;
+}
 
 /* The frame that lifts into the lightbox, and back. The same trip as the
    cover's, addressed by name rather than class because this one is run by

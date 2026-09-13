@@ -114,6 +114,16 @@ export function Gallery({ project }: { project: Project }) {
                       // and fades in when it lands, see `photo-fade.tsx`.
                       priority={i < 2}
                       data-fade={i < 2 ? undefined : ""}
+                      // The landing frame is where the cover arrives, and it
+                      // is a bigger file than the cover that set off — so it
+                      // is rarely loaded by the time the morph lands. With the
+                      // cover's blur-up under it the trip ends on a picture
+                      // that then sharpens, instead of on the plate colour
+                      // with the frame popping in a beat later.
+                      placeholder={
+                        landing && project.cover.blur ? "blur" : "empty"
+                      }
+                      blurDataURL={landing ? project.cover.blur : undefined}
                       className="h-full w-full object-cover"
                     />
                   );
