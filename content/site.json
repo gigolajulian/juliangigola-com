@@ -64,19 +64,6 @@
         "Print release"
       ],
       "turnaround": "4 weeks"
-    },
-    {
-      "slug": "realestate",
-      "name": "Real estate",
-      "blurb": "Interiors, exteriors and detail for listings, agents and developers.",
-      "from": null,
-      "includes": [
-        "Wide interiors",
-        "Exterior and approach",
-        "Detail and finish",
-        "Web and print crops"
-      ],
-      "turnaround": "3 days"
     }
   ],
   "heroDisciplines": [],

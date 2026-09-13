@@ -62,11 +62,6 @@ export const CATEGORIES: Category[] = [
     "section": "MUSIC"
   },
   {
-    "slug": "music-video",
-    "name": "MUSIC VIDEO",
-    "section": "MUSIC"
-  },
-  {
     "slug": "coverart",
     "name": "COVERART",
     "section": "MUSIC"
