@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import Image from "next/image";
 import { notFound } from "next/navigation";
 import { WorkIndex } from "@/components/work-index";
 import { CallToAction } from "@/components/call-to-action";
@@ -8,12 +7,16 @@ import {
   WORK_CATEGORIES,
   WORK_CATEGORY_LINKS,
   COMMISSIONS,
+  COVER_ART,
   projectsIn,
   categoryHref,
   categoryLabel,
-  categoryFrame,
   enquiryTypeFor,
+  isDisciplineGallery,
 } from "@/lib/work";
+import { COVER_RELEASES } from "@/lib/cover-art-data";
+import { Gallery } from "@/components/gallery";
+import { CoverArtGallery } from "@/components/cover-art-gallery";
 
 /* ── a discipline ─────────────────────────────────────────────────
  * One page per category, so a discipline is a place rather than a filter
@@ -31,11 +34,13 @@ import {
  * ─────────────────────────────────────────────────────────────── */
 
 /**
- * Only categories that have a listing to show.
+ * Only categories that have something to show.
  *
- * A category that is itself a single gallery is its own project page, and an
- * empty one has nothing to put on a page — `categoryHref` sends both
- * somewhere real, so neither is ever linked here.
+ * An empty one has nothing to put on a page — `categoryHref` sends it back to
+ * `/work`, so it is never linked here. A category that is itself a single
+ * gallery *is* listed: it renders its frames under the filter row where the
+ * project list would be, which is what Julian asked for — click Automotive
+ * and the cars load right there.
  */
 const LISTED = WORK_CATEGORIES.filter(
   (c) => categoryHref(c.slug) === `/work/category/${c.slug}`,
@@ -53,13 +58,16 @@ export async function generateMetadata(
   if (!category) return {};
 
   const name = categoryLabel(category);
-  const count = projectsIn(slug).length;
+  const gallery = projectsIn(slug).find(isDisciplineGallery);
+  const count = gallery ? gallery.images.length : projectsIn(slug).length;
 
   return {
     title: name,
-    description: `${count} commissioned ${name.toLowerCase()} ${
-      count === 1 ? "project" : "projects"
-    } by Julian Gigola — with clients and credits.`,
+    description: gallery
+      ? `${count} ${name.toLowerCase()} frames by Julian Gigola.`
+      : `${count} commissioned ${name.toLowerCase()} ${
+          count === 1 ? "project" : "projects"
+        } by Julian Gigola — with clients and credits.`,
     alternates: { canonical: `/work/category/${slug}` },
   };
 }
@@ -76,26 +84,26 @@ export default async function CategoryPage(
   const projects = COMMISSIONS.filter((p) =>
     p.categories.some((c) => c.slug === slug),
   );
+  // The discipline that is one gallery rather than a list of projects —
+  // Cover art, Automotive, Places, Event coverage. `COMMISSIONS` leaves these
+  // out on purpose, so they are looked up on their own.
+  const gallery = projectsIn(slug).find(isDisciplineGallery);
+  const isCoverArt = gallery?.slug === COVER_ART?.slug;
   const name = categoryLabel(category);
-  const frame = categoryFrame(slug);
 
   return (
     <>
       <div className="mx-auto w-full max-w-[100rem] px-6 pb-24 pt-28 sm:px-10 sm:pt-36">
-        {/* Type left, photograph right — the same shape as the cover, and
-            the same frame the cover's index shows for this discipline, so
-            clicking CAMPAIGNS lands on the picture that was just on screen.
+        {/* The same head as /work, so a chip click changes the words and
+            not the shape of the page. This used to carry the discipline's
+            cover frame on the right, the way the cover's index does — Julian
+            asked for it to go: somebody who has clicked "Campaigns" already
+            knows what they came for, and what they want next is the list.
 
-            The frame is portrait, so it sits in a column rather than being
-            cropped into a banner, and the column is capped so the list of
-            projects is still reachable without scrolling past a full screen
-            of photograph. */}
-        <header className="grid gap-10 lg:grid-cols-[1fr_auto] lg:items-end lg:gap-16">
-          {/* Title first, unlike the cover — the photograph leads there
-              because it is the hook, but somebody who has clicked
-              "Campaigns" already knows what they came for, and what they
-              want next is the list. */}
-          <div>
+            `rise` on the block, not the header: the header is new DOM on
+            every navigation, so the title arrives with the rows below it. */}
+        <header>
+          <div className="rise">
             <nav aria-label="Breadcrumb">
               <Link
                 href="/work"
@@ -107,43 +115,39 @@ export default async function CategoryPage(
 
             <h1 className="mt-8 title">{name}</h1>
             <p className="mt-4 max-w-prose text-sm leading-relaxed text-muted-foreground">
-              {projects.length} commissioned{" "}
-              {projects.length === 1 ? "project" : "projects"}.
+              {gallery
+                ? `${isCoverArt ? COVER_RELEASES.length : gallery.images.length} ${
+                    isCoverArt ? "releases" : "frames"
+                  }.`
+                : `${projects.length} commissioned ${
+                    projects.length === 1 ? "project" : "projects"
+                  }.`}
             </p>
           </div>
-
-          {frame ? (
-            <div
-              className="relative w-full overflow-hidden lg:h-[clamp(20rem,42vh,26rem)] lg:w-auto"
-              style={{
-                backgroundColor: frame.color,
-                aspectRatio: `${frame.width} / ${frame.height}`,
-              }}
-            >
-              <Image
-                src={frame.src}
-                alt={frame.alt || `${name} work by Julian Gigola`}
-                fill
-                sizes="(min-width: 1024px) 30vw, 100vw"
-                // The one photograph above the fold on this page.
-                priority
-                className="object-cover"
-              />
-            </div>
-          ) : null}
         </header>
 
         <WorkIndex
           projects={projects}
           categories={WORK_CATEGORY_LINKS}
           active={slug}
-        />
+        >
+          {/* Under the chips, in place of the list. Cover art is a catalogue
+              of 1:1 sleeves and gets its rack; the rest are photographic
+              sequences and get the paired-frame spread. */}
+          {gallery ? (
+            isCoverArt ? (
+              <CoverArtGallery releases={COVER_RELEASES} />
+            ) : (
+              <Gallery project={gallery} />
+            )
+          ) : undefined}
+        </WorkIndex>
       </div>
 
       <CallToAction
         title={`Commission ${name.toLowerCase()}`}
         body="Send the brief and I'll come back with an approach, a crew, and a quote."
-        type={projects[0] ? enquiryTypeFor(projects[0]) : "editorial"}
+        type={enquiryTypeFor(projects[0] ?? gallery ?? COMMISSIONS[0])}
         secondary={{ href: "/work", label: "See all the work" }}
       />
     </>

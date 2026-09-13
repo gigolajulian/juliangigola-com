@@ -481,7 +481,13 @@ export const categoryHref = (categorySlug: string): string => {
 
   const inCategory = projectsIn(categorySlug);
   if (inCategory.length === 0) return "/work";
-  if (isOwnGallery(categorySlug)) return `/work/${categorySlug}`;
+  /* A one-gallery discipline used to go to its project page instead —
+     `/work/coverart` — which took a visitor who had just clicked a chip on
+     the index off to a different page with a different shape. Julian asked
+     for the gallery to open under the filters instead, so it goes through
+     the category route like every other chip; that page renders the frames
+     where the listing would be. `/work/coverart` still resolves for
+     anything already linked to it. */
   return `/work/category/${categorySlug}`;
 };
 
@@ -942,7 +948,13 @@ const videoFrame = (): Frame | null => {
       : null);
   if (!still) return null;
 
-  return { src: still, width: 1280, height: 720, color: "transparent", alt: `${film.title} — a film by Julian Gigola` };
+  return {
+    src: still,
+    width: 1280,
+    height: 720,
+    color: "transparent",
+    alt: `${film.title} — a film by Julian Gigola`,
+  };
 };
 
 export const DISCIPLINES: Discipline[] = DISCIPLINE_SLUGS.map((slug) =>

@@ -14,7 +14,7 @@ export default function WorkPage() {
   return (
     <>
       <div className="mx-auto w-full max-w-[100rem] px-6 pb-24 pt-28 sm:px-10 sm:pt-36">
-        <header>
+        <header className="rise">
           <h1 className="title">Work</h1>
           <p className="mt-4 max-w-prose text-sm leading-relaxed text-muted-foreground">
             {COMMISSIONS.length} commissioned projects. Editorial, campaigns,
