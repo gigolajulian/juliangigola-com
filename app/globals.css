@@ -886,6 +886,39 @@ body:has([data-workbench]) > footer {
   }
 }
 
+/* ── a line that draws itself ────────────────────────────────────
+ * For the confirmation on /contact, and nothing else yet.
+ *
+ * The one place on this site where a flourish is the right answer: the
+ * visitor has just handed over their name and a description of a job, the
+ * form has vanished, and what replaces it has to feel like a receipt rather
+ * than an empty page. A mark that draws in front of them is the difference
+ * between "it went" and "something happened".
+ *
+ * An animation and not a transition, because the length being animated is the
+ * path's own and is set on the element: `stroke-dasharray` and
+ * `stroke-dashoffset` are written inline per path, and this only says "take
+ * that offset to zero". One keyframe covers a check, a circle, or any other
+ * length of line added later.
+ * ─────────────────────────────────────────────────────────────── */
+@keyframes jg-draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@utility draw {
+  animation: jg-draw var(--draw-dur, 520ms) var(--ease-out-strong)
+    var(--draw-delay, 0ms) forwards;
+
+  /* Drawn already, rather than drawing. The mark is the confirmation, so it
+     has to be there — it is the motion that is optional. */
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+    stroke-dashoffset: 0;
+  }
+}
+
 /* ── the publish bar ─────────────────────────────────────────────
  * Two phases, and they are not the same kind of waiting.
  *

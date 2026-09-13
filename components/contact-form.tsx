@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { submitEnquiry, type ContactState } from "@/app/contact/actions";
 import { RESPONSE_TIME } from "@/lib/site";
@@ -76,24 +77,62 @@ export function ContactForm() {
   if (state.status === "sent") {
     return (
       /* Centred, and the only block on this page that is.
-         
+
          Everything else here is a form — labels, fields and errors all read
          down a left edge, because that is what you scan while filling one in.
          There is nothing left to fill in: this is one short piece of news,
-         and it is the last thing the visitor sees. */
+         and it is the last thing the visitor sees.
+
+         `self-start` because the form sits in a grid column and a grid
+         stretches its items by default: with the form gone, this box grew to
+         the height of the contact details beside it, and four lines of text
+         sat at the top of seven hundred pixels of nothing. It hugs its
+         content now.
+
+         Everything inside arrives in order — mark, heading, line, promise —
+         on the same `rise` and `--reveal-delay` the rest of the site uses.
+         The stagger is what makes it read as something that just happened
+         rather than a screen that was always there. */
       <div
         role="status"
-        className="flex flex-col items-center border border-border p-8 text-center"
+        className="flex flex-col items-center self-start border border-border px-8 py-12 text-center sm:px-12"
       >
-        <h2 className="font-display text-2xl uppercase tracking-[0]">Sent!</h2>
-        <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
+        <SentMark />
+
+        <h2
+          style={{ "--reveal-delay": "260ms" } as React.CSSProperties}
+          className="rise font-display mt-6 text-3xl uppercase tracking-[0]"
+        >
+          Sent!
+        </h2>
+
+        <p
+          style={{ "--reveal-delay": "360ms" } as React.CSSProperties}
+          className="rise mt-3 max-w-[30ch] text-sm leading-relaxed text-muted-foreground"
+        >
           {state.message}
         </p>
+
         {RESPONSE_TIME ? (
-          <p className="label mt-4 text-muted-foreground">
+          <p
+            style={{ "--reveal-delay": "460ms" } as React.CSSProperties}
+            className="rise label mt-8 border-t border-border pt-6 text-muted-foreground"
+          >
             Replies {RESPONSE_TIME}
           </p>
         ) : null}
+
+        {/* Somewhere to go. The form was the only thing on this half of the
+            page, so without this the confirmation is a dead end — and the
+            person who has just written in is the likeliest visitor on the
+            site to want another look at the work. */}
+        <Link
+          href="/work"
+          style={{ "--reveal-delay": "560ms" } as React.CSSProperties}
+          className="rise label mt-8 text-muted-foreground transition-colors duration-200 hoverable:hover:text-foreground"
+        >
+          See the work &rarr;
+        </Link>
       </div>
     );
   }
@@ -281,5 +320,63 @@ function Field({
         </p>
       ) : null}
     </div>
+  );
+}
+
+/**
+ * The mark that draws itself when an enquiry lands.
+ *
+ * A ring and a check, in the green this site reserves for state — `--live`
+ * rather than the teal accent, on the same reasoning the token carries: the
+ * accent is identity and belongs on things you can press, while this is a
+ * report on something that just happened.
+ *
+ * The ring closes first and the check follows into it. That order reads as
+ * *completing* something; both at once reads as two lines appearing. Each is
+ * the one `jg-draw` keyframe taking that path's own `stroke-dashoffset` to
+ * zero, and the lengths are written inline because they are facts about the
+ * geometry rather than about the animation: 2*pi*r at r=15 is 94.25, and the
+ * check's two segments measure about 22. Both are rounded *up* where they are
+ * uncertain — a length a shade too long finishes a hair early, where one too
+ * short leaves the line permanently unfinished.
+ */
+function SentMark() {
+  return (
+    <svg
+      viewBox="0 0 36 36"
+      aria-hidden
+      className="size-14 text-live"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <circle
+        cx="18"
+        cy="18"
+        r="15"
+        className="draw"
+        style={
+          {
+            strokeDasharray: 94.25,
+            strokeDashoffset: 94.25,
+            "--draw-dur": "560ms",
+          } as React.CSSProperties
+        }
+      />
+      <path
+        d="M11.5 18.5 L16 23 L24.5 13.5"
+        className="draw"
+        style={
+          {
+            strokeDasharray: 22,
+            strokeDashoffset: 22,
+            "--draw-dur": "300ms",
+            "--draw-delay": "340ms",
+          } as React.CSSProperties
+        }
+      />
+    </svg>
   );
 }
