@@ -12,6 +12,13 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // The Cloudflare adapter's output and wrangler's local state. Neither is
+    // in the default list because eslint-config-next has never heard of
+    // them, and a local `opennextjs-cloudflare build` otherwise puts eleven
+    // thousand findings from the bundled worker in front of the four real
+    // ones.
+    ".open-next/**",
+    ".wrangler/**",
   ]),
 ]);
 
