@@ -135,6 +135,13 @@ export default function AdminPage() {
             : "Unfiled",
           categorySlug: p.categories[0]?.slug ?? "",
           images: p.images.map((f) => f.src),
+          frames: p.images.map((f) => ({
+            src: f.src,
+            width: f.width,
+            height: f.height,
+            color: f.color,
+          })),
+          intent: p.intent,
           cover: {
             src: p.cover.src,
             width: p.cover.width,

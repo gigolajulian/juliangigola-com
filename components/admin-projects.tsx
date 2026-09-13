@@ -48,7 +48,16 @@ export type AdminProject = {
    * out of the archive when the sequence is applied.
    */
   images: string[];
+  /**
+   * The same frames with their dimensions and mat colour, for the page
+   * view — which lays them out at the page's own sizes and shapes, and so
+   * needs both. It is the tripling the note above declined, accepted now
+   * that there is a view that draws the frames as frames. Admin only.
+   */
+  frames: { src: string; width: number; height: number; color: string }[];
   cover: { src: string; width: number; height: number; color: string };
+  /** The paragraph under the meta row, when the project has one. */
+  intent: string | null;
   /** Added through this editor, so its files are ours to remove. */
   added: boolean;
   /** As the last build has them, so an override can be compared and undone. */
@@ -78,6 +87,7 @@ export function AdminProjects({
   onCredits,
   opened,
   onOpened,
+  onOpenPage,
   query,
   onQuery,
 }: {
@@ -112,6 +122,8 @@ export function AdminProjects({
    */
   opened: string | null;
   onOpened: (slug: string | null) => void;
+  /** Open the page-shaped editor for one project. */
+  onOpenPage: (slug: string) => void;
   /**
    * The filter text, owned by the editor so a discipline row in the sitemap
    * can narrow this list to it. Controlled rather than seeded: a local copy
@@ -343,6 +355,13 @@ export function AdminProjects({
                       is an override map rather than a field: their categories
                       come from the generated manifest, where an edit would last
                       until the next harvest and no longer. */}
+                  <button
+                    type="button"
+                    onClick={() => onOpenPage(p.slug)}
+                    className="label border border-border px-3 py-2 press hoverable:hover:bg-card"
+                  >
+                    Edit page
+                  </button>
                   <select
                     value={filedAs}
                     onChange={(e) => onRecategorise(p.slug, e.target.value)}

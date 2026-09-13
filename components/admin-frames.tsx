@@ -3,7 +3,7 @@
 import * as React from "react";
 import Image from "next/image";
 import { isTextRef, type FrameRef, type TextRef } from "@/lib/added";
-import { MAX_WIDTH, processImage } from "@/lib/admin-image";
+import { useSequence, srcOf, type PendingUpload } from "@/lib/admin-sequence";
 import { cn } from "@/lib/utils";
 
 /* ── a project's sequence ─────────────────────────────────────────
@@ -31,19 +31,9 @@ import { cn } from "@/lib/utils";
  * ─────────────────────────────────────────────────────────────── */
 
 /** A photograph processed in the browser and waiting for Publish. */
-export type PendingUpload = {
-  /** Repo-relative, e.g. `public/work/luxe/a1757000000-1.jpg`. */
-  path: string;
-  base64: string;
-  /** An object URL, so the tile can show it before it exists anywhere. */
-  preview: string;
-  bytes: number;
-};
+export type { PendingUpload };
 
 /** The path of a photograph. Empty for a passage, which has no file. */
-const srcOf = (f: FrameRef): string =>
-  typeof f === "string" ? f : isTextRef(f) ? "" : f.src;
-
 /* Re-exported so this panel's callers keep importing it from here. The
    implementation moved to `lib/admin-payload.ts`, beside the publish payload
    it is part of and where a test can reach it. */
@@ -57,9 +47,6 @@ export { tidySequence } from "@/lib/admin-payload";
  * either be silently adopted as one of Format's or be overwritten by it. The
  * prefix keeps the two sets of files apart for good.
  */
-const uploadPath = (slug: string, i: number) =>
-  `public/work/${slug}/a${Date.now().toString(36)}-${i + 1}.jpg`;
-
 export function AdminFrames({
   slug,
   original,
@@ -78,102 +65,23 @@ export function AdminFrames({
   onChange: (next: FrameRef[] | null) => void;
   onUpload: (added: PendingUpload[]) => void;
 }) {
-  const [busy, setBusy] = React.useState("");
-  const [error, setError] = React.useState("");
-  /** Which passage is open for editing, by position. One at a time. */
-  const [editing, setEditing] = React.useState<number | null>(null);
-  /** The tile being dragged, and the one it is currently over. */
-  const [dragging, setDragging] = React.useState<number | null>(null);
-  const [over, setOver] = React.useState<number | null>(null);
-
-  const list: FrameRef[] = frames ?? original;
-
-  /** Null when the draft is back to the original, so Publish stops seeing a change. */
-  const commit = (next: FrameRef[]) => {
-    const same =
-      next.length === original.length &&
-      // A passage never matches a path, so a sequence carrying one can never
-      // compare equal — which is correct: it is a change.
-      next.every((f, i) => !isTextRef(f) && srcOf(f) === original[i]);
-    onChange(same ? null : next);
-  };
-
-  /**
-   * Takes an item out and puts it back somewhere else.
-   *
-   * Lift-and-insert, not a swap. For the arrows the two are the same thing —
-   * moving one step and trading with your neighbour are the same edit — but
-   * for a drag they are not: dropping frame twelve on the cover slot should
-   * put it first and push the rest down, whereas a swap would fling the old
-   * cover out to position twelve, which is a second edit nobody asked for.
-   */
-  const reorder = (from: number, to: number) => {
-    if (to < 0 || to >= list.length || from === to) return;
-    const next = [...list];
-    const [held] = next.splice(from, 1);
-    next.splice(to, 0, held);
-    commit(next);
-    // The open editor follows the passage it belongs to rather than staying
-    // on a position that now holds something else. Every item between the two
-    // ends shifts by one, and which way depends on the direction of travel.
-    setEditing((at) =>
-      at === null
-        ? null
-        : at === from
-          ? to
-          : from < at && at <= to
-            ? at - 1
-            : to <= at && at < from
-              ? at + 1
-              : at,
-    );
-  };
-
-  const drop = (i: number) => {
-    commit(list.filter((_, n) => n !== i));
-    if (editing === i) setEditing(null);
-    else if (editing !== null && editing > i) setEditing(editing - 1);
-  };
-
-  const addText = () => {
-    commit([...list, { kind: "text", heading: null, body: "" } as TextRef]);
-    // Opened straight away — a passage is added in order to write it, and an
-    // empty tile you then have to find and click is a step for nothing.
-    setEditing(list.length);
-  };
-
-  const setText = (i: number, patch: Partial<TextRef>) =>
-    commit(
-      list.map((f, n) => (n === i && isTextRef(f) ? { ...f, ...patch } : f)),
-    );
-
-  async function add(files: FileList | null) {
-    if (!files?.length) return;
-    setError("");
-    const chosen = [...files];
-    const made: PendingUpload[] = [];
-
-    for (const [i, file] of chosen.entries()) {
-      setBusy(`Reading ${i + 1} of ${chosen.length}…`);
-      try {
-        const image = await processImage(file, MAX_WIDTH);
-        made.push({
-          path: uploadPath(slug, i),
-          base64: image.base64,
-          preview: URL.createObjectURL(file),
-          bytes: image.bytes,
-        });
-      } catch (e) {
-        setError(e instanceof Error ? e.message : String(e));
-      }
-    }
-
-    setBusy("");
-    if (!made.length) return;
-    onUpload(made);
-    // `public/work/x.jpg` in the repo is `/work/x.jpg` on the site.
-    commit([...list, ...made.map((u) => u.path.replace(/^public/, ""))]);
-  }
+  const seq = useSequence({ slug, original, frames, onChange, onUpload });
+  const {
+    list,
+    busy,
+    error,
+    editing,
+    setEditing,
+    dragging,
+    over,
+    reorder,
+    drop,
+    addText,
+    setText,
+    add,
+    reset,
+    dragProps,
+  } = seq;
 
   const photos = list.filter((f) => !isTextRef(f));
   const passages = list.length - photos.length;
@@ -205,10 +113,7 @@ export function AdminFrames({
           {frames ? (
             <button
               type="button"
-              onClick={() => {
-                onChange(null);
-                setEditing(null);
-              }}
+              onClick={reset}
               className="label border border-border px-3 py-2 press hoverable:hover:bg-card"
             >
               Undo changes
@@ -216,7 +121,7 @@ export function AdminFrames({
           ) : null}
           <button
             type="button"
-            onClick={addText}
+            onClick={() => addText()}
             className="label border border-border px-3 py-2 press hoverable:hover:bg-card"
           >
             Add text
@@ -274,45 +179,7 @@ export function AdminFrames({
                a gallery impossible without a mouse. */
             <li
               key={text ? `text-${i}` : src}
-              draggable
-              onDragStart={(e) => {
-                setDragging(i);
-                e.dataTransfer.effectAllowed = "move";
-                // Where the item came from, and the only authority on it.
-                // Firefox also starts no drag at all unless something is set.
-                e.dataTransfer.setData("text/plain", String(i));
-              }}
-              onDragOver={(e) => {
-                // Without this the browser refuses the drop outright.
-                e.preventDefault();
-                e.dataTransfer.dropEffect = "move";
-                if (over !== i) setOver(i);
-              }}
-              onDrop={(e) => {
-                e.preventDefault();
-                // Read back out of the drag, not out of React state. The
-                // `dragging` state is for the dimming and nothing else — it
-                // is set during `dragstart` and a drop that arrives before
-                // that render has committed would find it still null and do
-                // nothing. Frames apart in a real drag, instant in a test,
-                // and the platform is already carrying the answer.
-                // `dataTransfer` first, state second, and both are needed.
-                // The drag carries the origin so a drop that lands before
-                // `dragstart`'s render has committed still knows where it
-                // came from. But the browser only exposes that data during a
-                // genuine user drag — in protected mode `getData` returns
-                // empty — so the state is the fallback, which is also what
-                // makes this reachable from a test.
-                const carried = e.dataTransfer.getData("text/plain");
-                const from = carried === "" ? dragging : Number(carried);
-                if (from !== null && Number.isInteger(from)) reorder(from, i);
-                setDragging(null);
-                setOver(null);
-              }}
-              onDragEnd={() => {
-                setDragging(null);
-                setOver(null);
-              }}
+              {...dragProps(i)}
               className={cn(
                 "cursor-grab transition-opacity duration-150 active:cursor-grabbing",
                 dragging === i && "opacity-30",

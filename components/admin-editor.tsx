@@ -11,6 +11,7 @@ import { AdminProjects, type AdminProject } from "@/components/admin-projects";
 import { AdminSitemap, type SitemapTarget } from "@/components/admin-sitemap";
 import { AdminDisciplines } from "@/components/admin-disciplines";
 import { AdminPreview } from "@/components/admin-preview";
+import { AdminPage } from "@/components/admin-page";
 import { AdminPicker, type PickerItem } from "@/components/admin-picker";
 import { AdminTrash } from "@/components/admin-trash";
 import { AdminInbox } from "@/components/admin-inbox";
@@ -276,6 +277,9 @@ export function AdminEditor({
    * abandoning the draft.
    */
   const [opened, setOpened] = React.useState<string | null>(null);
+  /** The project open in the page-shaped editor, which replaces the tabs
+      and the preview while it is up. */
+  const [page, setPage] = React.useState<string | null>(null);
   /** The project list's filter, held here so a discipline row can set it. */
   const [filter, setFilter] = React.useState("");
 
@@ -868,7 +872,16 @@ export function AdminEditor({
        34rem floor is what the fields need before the ratio takes over, and
        the preview stays fixed because it is a picture of a page at a
        plausible width rather than a panel to fill. */
-    <div className="mt-10 grid gap-10 xl:min-h-0 xl:flex-1 xl:grid-cols-[17rem_1fr_23rem] 2xl:gap-12 2xl:grid-cols-[1fr_minmax(34rem,1.6fr)_26rem]">
+    <div
+      className={cn(
+        "mt-10 grid gap-10 xl:min-h-0 xl:flex-1 2xl:gap-12",
+        // The page editor takes the preview's column as well: it is the
+        // preview, of one page, and it wants the width.
+        page
+          ? "xl:grid-cols-[17rem_1fr] 2xl:grid-cols-[1fr_5fr]"
+          : "xl:grid-cols-[17rem_1fr_23rem] 2xl:grid-cols-[1fr_minmax(34rem,1.6fr)_26rem]",
+      )}
+    >
       {/* Not a tab any more. The sitemap is what the site currently is, which
           is context for every edit rather than a place to go — and it redraws
           as the draft changes, so it doubles as a readout of what hiding
@@ -1120,16 +1133,56 @@ export function AdminEditor({
           </nav>
         </div>
 
-        {view === "inbox" ? <AdminInbox /> : null}
+        {page
+          ? (() => {
+              const p = orderedProjects.find((x) => x.slug === page);
+              if (!p) return null;
+              return (
+                <AdminPage
+                  project={p}
+                  disciplines={categories}
+                  filedAs={recategorised[p.slug] ?? p.categorySlug}
+                  onRecategorise={(categorySlug) =>
+                    setRecategorised((r) => ({ ...r, [p.slug]: categorySlug }))
+                  }
+                  frames={reframed[p.slug] ?? null}
+                  uploads={uploads}
+                  onReframe={(next) =>
+                    setReframed((r) =>
+                      withOverride(r, p.slug, next, baseline.manifest.frames),
+                    )
+                  }
+                  onUpload={(added) =>
+                    setUploads((u) => ({
+                      ...u,
+                      ...Object.fromEntries(added.map((a) => [a.path, a])),
+                    }))
+                  }
+                  credits={recredited[p.slug] ?? p.credits}
+                  onCredits={(next) =>
+                    setRecredited((c) =>
+                      withOverride(c, p.slug, next, baseline.manifest.credits),
+                    )
+                  }
+                  onClose={() => {
+                    setPage(null);
+                    setView("projects");
+                    setOpened(p.slug);
+                  }}
+                />
+              );
+            })()
+          : null}
+        {!page && view === "inbox" ? <AdminInbox /> : null}
 
-        {view === "video" ? (
+        {!page && view === "video" ? (
           <AdminVideos
             videos={draft.videos}
             onChange={(next) => set("videos", next)}
           />
         ) : null}
 
-        {view === "disciplines" ? (
+        {!page && view === "disciplines" ? (
           <AdminDisciplines
             disciplines={categories}
             /* In the draft's running order, so the list this view drags is
@@ -1154,7 +1207,7 @@ export function AdminEditor({
           />
         ) : null}
 
-        {view === "projects" ? (
+        {!page && view === "projects" ? (
           <>
             <AdminProjects
               token={token}
@@ -1199,6 +1252,10 @@ export function AdminEditor({
               }
               opened={opened}
               onOpened={setOpened}
+              onOpenPage={(slug) => {
+                setOpened(slug);
+                setPage(slug);
+              }}
               query={filter}
               onQuery={setFilter}
             />
@@ -1233,11 +1290,11 @@ export function AdminEditor({
             directly in this component's tree, where React reconciles them by
             position and the real components inside — `AdminPicker` and the
             rest — keep their identity and their state. */}
-        {view === "home" ? HomeFields() : null}
-        {view === "clients" ? ClientFields() : null}
-        {view === "sessions" ? SessionFields() : null}
-        {view === "testimonials" ? QuoteFields() : null}
-        {view === "contact" ? ContactFields() : null}
+        {!page && view === "home" ? HomeFields() : null}
+        {!page && view === "clients" ? ClientFields() : null}
+        {!page && view === "sessions" ? SessionFields() : null}
+        {!page && view === "testimonials" ? QuoteFields() : null}
+        {!page && view === "contact" ? ContactFields() : null}
 
         {/* The slug list, shared by every field that takes one, so it has to
             outlive the tab that uses it. */}
@@ -1278,16 +1335,18 @@ export function AdminEditor({
 
       {/* Sticky, so it stays beside the field being edited on a long form.
           Below `xl` it drops under the form rather than squeezing both. */}
-      <aside className="min-w-0 xl:min-h-0 xl:overflow-y-auto xl:pb-10">
-        {/* Ordered too: the preview's whole job is to be what publishing
+      {page ? null : (
+        <aside className="min-w-0 xl:min-h-0 xl:overflow-y-auto xl:pb-10">
+          {/* Ordered too: the preview's whole job is to be what publishing
             would produce, and the homepage band it draws is in running
             order. */}
-        <AdminPreview
-          draft={draft}
-          projects={orderedProjects}
-          hidden={hidden}
-        />
-      </aside>
+          <AdminPreview
+            draft={draft}
+            projects={orderedProjects}
+            hidden={hidden}
+          />
+        </aside>
+      )}
     </div>
   );
 

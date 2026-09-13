@@ -232,7 +232,9 @@ function Passages({ blocks }: { blocks?: TextBlock[] }) {
  * Sequence is preserved exactly — this only decides where the line breaks
  * are, never the order.
  */
-function pair<T extends { width: number; height: number }>(frames: T[]): T[][] {
+export function pair<T extends { width: number; height: number }>(
+  frames: T[],
+): T[][] {
   const twoUp = (f: { width: number; height: number }) => f.height >= f.width;
   const rows: T[][] = [];
 
