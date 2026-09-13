@@ -13,12 +13,10 @@ const SOCIAL = [
   { href: "https://www.linkedin.com/in/juliangigola", label: "LinkedIn" },
 ] as const;
 
-/** The two pages every commercial site owes its visitors, and the one line
-    on this one that says the photographs are not training data. */
-const LEGAL = [
-  { href: "/legal#terms", label: "Terms" },
-  { href: "/legal#privacy", label: "Privacy" },
-] as const;
+/** The page every commercial site owes its visitors — terms and privacy,
+    side by side — and the one line on it that says the photographs are
+    not training data. One link, at Julian's ask. */
+const LEGAL = [{ href: "/legal", label: "Legal" }] as const;
 
 export function SiteFooter() {
   return (
