@@ -48,6 +48,19 @@ export type Video = {
   poster?: string;
 };
 
+/**
+ * The reel that opens /work/video.
+ *
+ * Named here rather than held in `content/site.json` with the rest, because
+ * it is not one of the films in a section — it is the argument for the page,
+ * and there is exactly one of it. Changing it is changing this line.
+ */
+export const REEL = {
+  provider: "vimeo" as const,
+  videoId: "895502238",
+  title: "Director's Reel 2023",
+};
+
 export const SECTIONS: { id: VideoSection; name: string }[] = [
   { id: "music", name: "Music video" },
   { id: "commercial", name: "Commercial" },

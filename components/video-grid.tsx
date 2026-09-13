@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import Image from "next/image";
+import { Reveal } from "@/components/reveal";
 import { embedUrl, posterFor, type Video } from "@/lib/videos";
 import { cn } from "@/lib/utils";
 
@@ -30,6 +31,10 @@ export function VideoGrid({ videos }: { videos: Video[] }) {
     <ul
       className={cn(
         "mt-8 grid gap-x-6 gap-y-10",
+        // Siblings that cross the fold together, so they arrive as one
+        // gesture rather than a flash of four simultaneous events. Every
+        // child is revealed here, which is what this utility requires.
+        "stagger",
         /* No breakpoints: a floor of 22rem gives one column on a phone, two
            around 44rem and three around 66rem, with the tiles absorbing the
            slack in between rather than jumping at a width somebody picked.
@@ -44,31 +49,40 @@ export function VideoGrid({ videos }: { videos: Video[] }) {
       )}
     >
       {videos.map((video) => (
-        <li key={video.id} className="flex min-w-0 flex-col">
-          <Tile
-            video={video}
-            playing={playing === video.id}
-            onPlay={() => setPlaying(video.id)}
-            /* The first still in a section is above the fold and it *is* the
+        <li key={video.id} className="group/cell flex min-w-0 flex-col">
+          <Reveal className="flex min-w-0 flex-col">
+            <Tile
+              video={video}
+              playing={playing === video.id}
+              onPlay={() => setPlaying(video.id)}
+              /* The first still in a section is above the fold and it *is* the
                content — lazy-loading the thing the page is for costs a beat
                on arrival for nothing. The rest wait until they are scrolled
                to. */
-            eager={videos.indexOf(video) === 0}
-          />
+              eager={videos.indexOf(video) === 0}
+            />
 
-          <div className="mt-3 flex flex-wrap items-baseline gap-x-4 gap-y-1">
-            <h3 className="font-display text-lg uppercase tracking-[0]">
-              {video.title}
-            </h3>
-            {video.client ? (
-              <p className="label text-muted-foreground">{video.client}</p>
-            ) : null}
-            {video.year ? (
-              <p className="label ml-auto shrink-0 tabular-nums text-muted-foreground">
-                {video.year}
-              </p>
-            ) : null}
-          </div>
+            {/* The caption reacts with the tile: everything in here is muted
+                until the pointer is on the cell, which ties the words to the
+                picture they belong to rather than leaving them as a separate
+                thing below it. `group` is on the `<li>`'s child so the
+                caption is inside the same hover as the frame. */}
+            <div className="mt-3 flex flex-wrap items-baseline gap-x-4 gap-y-1">
+              <h3 className="font-display text-lg uppercase tracking-[0] transition-colors duration-200">
+                {video.title}
+              </h3>
+              {video.client ? (
+                <p className="label text-muted-foreground transition-colors duration-200 group-hover/cell:text-foreground">
+                  {video.client}
+                </p>
+              ) : null}
+              {video.year ? (
+                <p className="label ml-auto shrink-0 tabular-nums text-muted-foreground transition-colors duration-200 group-hover/cell:text-foreground">
+                  {video.year}
+                </p>
+              ) : null}
+            </div>
+          </Reveal>
         </li>
       ))}
     </ul>
@@ -114,7 +128,7 @@ function Tile({
       type="button"
       onClick={onPlay}
       aria-label={`Play ${video.title}`}
-      className="group relative aspect-video w-full overflow-hidden bg-card press"
+      className="group relative aspect-video w-full overflow-hidden bg-card press active:scale-[0.995]"
     >
       {poster ? (
         <Image
@@ -125,7 +139,12 @@ function Tile({
           // the viewport on a phone.
           sizes="(min-width: 66rem) 33vw, (min-width: 44rem) 50vw, 100vw"
           loading={eager ? "eager" : "lazy"}
-          className="object-cover transition-opacity duration-300 group-hover:opacity-90"
+          /* A slow zoom, and only the picture moves. 500ms rather than the
+             200 a control would take: this is a large surface and a fast
+             scale on a photograph reads as a jolt, where a slow one reads as
+             the frame leaning in. Transform and opacity only, so it stays on
+             the compositor. */
+          className="object-cover transition-transform duration-500 ease-[var(--ease-out-strong)] group-hover:scale-[1.04] motion-reduce:transition-none motion-reduce:group-hover:scale-100"
           // These are 16:9 thumbnails from a CDN, not frames from the
           // archive, so the loader that rewrites archive paths must not touch
           // them — `unoptimized` hands the URL through as it is.
@@ -140,7 +159,7 @@ function Tile({
         aria-hidden
         className="absolute inset-0 flex items-center justify-center"
       >
-        <span className="flex size-16 items-center justify-center rounded-full bg-background/70 backdrop-blur-sm transition-transform duration-300 ease-[var(--ease-out-strong)] group-hover:scale-105">
+        <span className="flex size-16 items-center justify-center rounded-full bg-background/70 backdrop-blur-sm transition-all duration-300 ease-[var(--ease-out-strong)] group-hover:scale-110 group-hover:bg-background/90 motion-reduce:transition-none">
           {/* Drawn, not imported — the same rule the rest of the icons here
               follow. A triangle, optically centred: a shape with a flat left
               edge and a point on the right reads as off-centre when its

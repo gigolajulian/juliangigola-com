@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { VideoGrid } from "@/components/video-grid";
+import { VideoHero } from "@/components/video-hero";
 import { CallToAction } from "@/components/call-to-action";
 import { CONTENT } from "@/lib/content";
-import { SECTIONS, inSection } from "@/lib/videos";
+import { REEL, SECTIONS, inSection } from "@/lib/videos";
 
 /* ── /work/video ──────────────────────────────────────────────────
  * The moving work, in two sections: music videos and commercials.
@@ -31,7 +32,21 @@ export default function VideoPage() {
 
   return (
     <>
-      <div className="mx-auto w-full max-w-[100rem] px-6 pb-24 pt-28 sm:px-10 sm:pt-36">
+      {/* The reel opens the page, full bleed, silent, looping.
+
+          Below the fixed header rather than under it: the cover has a plate
+          the masthead can sit on and this does not, so a reel running behind
+          the nav would be a moving ground under small type.
+
+          The heading follows it instead of preceding it, which is the right
+          order here — the reel says what this page is faster than a word can,
+          and a title above a video the visitor has already started watching
+          is a label on something they have moved past. */}
+      <div className="pt-20 sm:pt-24">
+        <VideoHero videoId={REEL.videoId} title={REEL.title} />
+      </div>
+
+      <div className="mx-auto w-full max-w-[100rem] px-6 pb-24 pt-14 sm:px-10 sm:pt-20">
         <header>
           <h1 className="title">Video</h1>
           {/* The count and what it covers, which is the pattern /work and
@@ -85,8 +100,7 @@ export default function VideoPage() {
                       {section.name}
                     </h2>
                     <p className="label text-muted-foreground">
-                      {inThis.length}{" "}
-                      {inThis.length === 1 ? "film" : "films"}
+                      {inThis.length} {inThis.length === 1 ? "film" : "films"}
                     </p>
                   </div>
 
