@@ -207,13 +207,29 @@ function FilterLink({
       // is what a screen reader should be told about the current filter.
       aria-current={active ? "page" : undefined}
       className={cn(
-        "label block py-1 transition-colors duration-200",
+        "group relative block py-1 transition-colors duration-200",
+        "label",
         active
           ? "text-foreground"
           : "text-muted-foreground hoverable:hover:text-foreground",
       )}
     >
       {children}
+      {/* The same hairline the main nav draws under the current page, so the
+          chosen filter is marked the way the rest of the site marks "you are
+          here" — ink alone was not enough to find in a row of eleven. Scales
+          in from the left on selection and on hover, and touch is excluded
+          from the hover for the reason the nav gives: a tap would leave the
+          rule stuck under whatever was last touched. */}
+      <span
+        aria-hidden
+        className={cn(
+          "absolute bottom-0 left-0 h-px w-full origin-left bg-current",
+          "transition-transform duration-200 ease-[var(--ease-out-strong)]",
+          active ? "scale-x-100" : "scale-x-0",
+          "hoverable:group-hover:scale-x-100",
+        )}
+      />
     </Link>
   );
 }

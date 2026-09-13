@@ -516,13 +516,19 @@ export const WORK_CATEGORY_LINKS: CategoryLink[] = WORK_CATEGORIES.filter(
     c.slug === "video"
       ? HAS_VIDEOS
       : c.slug !== "music-video" && projectsIn(c.slug).length > 0,
-).map((c) => ({
-  slug: c.slug,
-  // Through `categoryLabel`, so "COVERART" reads as "COVER ART" once the
-  // `label` class puts the caps back.
-  name: categoryLabel(c),
-  href: categoryHref(c.slug),
-}));
+)
+  .map((c) => ({
+    slug: c.slug,
+    // Through `categoryLabel`, so "COVERART" reads as "COVER ART" once the
+    // `label` class puts the caps back.
+    name: categoryLabel(c),
+    href: categoryHref(c.slug),
+  }))
+  // Video at the end of the row, where Julian wants it: the photographic
+  // disciplines first and the one that is not photographs last. Stable, so
+  // nothing else moves. `nextDiscipline` follows this order too, which puts
+  // the reel after Places and wraps to Editorial from there.
+  .sort((a, b) => Number(a.slug === "video") - Number(b.slug === "video"));
 
 /**
  * The frame a project is represented by elsewhere on the site — the small
