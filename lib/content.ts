@@ -16,6 +16,12 @@
 // `work.ts`, for the old category redirects) and is transpiled outside the
 // app's path mapping, where `@/` does not resolve.
 import raw from "../content/site.json";
+import {
+  isValidId,
+  type Provider,
+  type Video,
+  type VideoSection,
+} from "./videos";
 
 export type Testimonial = {
   quote: string;
@@ -68,6 +74,13 @@ export type SiteContent = {
   heroDisciplines: string[];
   testimonials: Testimonial[];
   sessions: SessionType[];
+  /**
+   * The moving work, in the order the page shows it.
+   *
+   * Absent in files written before there was a video page, which is not an
+   * error — it means nothing has been added yet, and the page says so.
+   */
+  videos: Video[];
 };
 
 /* ── validation ───────────────────────────────────────────────────
@@ -181,6 +194,80 @@ function httpUrlOrNull(value: unknown, path: string): string | null {
   return raw;
 }
 
+/* ── a video ──────────────────────────────────────────────────────
+ * Stricter than the rest of this file, because two of these fields end up
+ * inside a URL that becomes an iframe `src` and an `img` `src`. The id is
+ * matched against what the provider actually issues, and the poster is held
+ * to https on the two hosts that serve provider stills — the same two the
+ * Content-Security-Policy allows, so anything else would have been a broken
+ * image at best and is refused outright here.
+ *
+ * Every failure throws, like the rest: a bad field fails the build and the
+ * live site keeps serving the last good one.
+ * ─────────────────────────────────────────────────────────────── */
+
+const PROVIDERS: Provider[] = ["youtube", "vimeo"];
+const VIDEO_SECTIONS: VideoSection[] = ["music", "commercial"];
+
+/** The hosts that serve provider stills. Nothing else may be a poster. */
+const POSTER_HOSTS = ["i.ytimg.com", "i.vimeocdn.com"];
+
+function posterOrUndefined(value: unknown, path: string): string | undefined {
+  if (value === undefined || value === null || value === "") return undefined;
+  const url = str(value, path);
+
+  let parsed: URL;
+  try {
+    parsed = new URL(url);
+  } catch {
+    return fail(path, "a full https URL", url);
+  }
+  if (parsed.protocol !== "https:") return fail(path, "an https URL", url);
+  if (!POSTER_HOSTS.includes(parsed.hostname))
+    return fail(path, `a still on ${POSTER_HOSTS.join(" or ")}`, url);
+
+  return url;
+}
+
+function year(value: unknown, path: string): number | undefined {
+  if (value === undefined || value === null || value === "") return undefined;
+  return typeof value === "number" &&
+    Number.isInteger(value) &&
+    value >= 1990 &&
+    value <= 2100
+    ? value
+    : fail(path, "a four-digit year", value);
+}
+
+function video(v: unknown, path: string): Video {
+  if (!isRecord(v)) return fail(path, "an object", v);
+
+  const provider = PROVIDERS.includes(v.provider as Provider)
+    ? (v.provider as Provider)
+    : fail(path + ".provider", PROVIDERS.join(" or "), v.provider);
+
+  const videoId = str(v.videoId, `${path}.videoId`);
+  if (!isValidId(provider, videoId))
+    fail(`${path}.videoId`, `a ${provider} id`, videoId);
+
+  const section = VIDEO_SECTIONS.includes(v.section as VideoSection)
+    ? (v.section as VideoSection)
+    : fail(path + ".section", VIDEO_SECTIONS.join(" or "), v.section);
+
+  return {
+    // Falls back to the provider's id, so a file hand-edited without one
+    // still has something stable per row.
+    id: v.id === undefined ? `${provider}-${videoId}` : str(v.id, `${path}.id`),
+    title: str(v.title, `${path}.title`),
+    provider,
+    videoId,
+    section,
+    client: optional(v.client, `${path}.client`),
+    year: year(v.year, `${path}.year`),
+    poster: posterOrUndefined(v.poster, `${path}.poster`),
+  };
+}
+
 function parse(v: unknown): SiteContent {
   if (!isRecord(v)) return fail("the file", "an object", v);
 
@@ -195,6 +282,7 @@ function parse(v: unknown): SiteContent {
     heroDisciplines: strList(v.heroDisciplines ?? [], "heroDisciplines"),
     testimonials: list(v.testimonials, "testimonials", testimonial),
     sessions: list(v.sessions, "sessions", session),
+    videos: list(v.videos ?? [], "videos", video),
   };
 }
 

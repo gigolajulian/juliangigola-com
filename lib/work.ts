@@ -444,6 +444,17 @@ export const getProject = (slug: string): Project | undefined =>
   bySlug.get(slug);
 
 /**
+ * Whether the Video discipline has anything behind it.
+ *
+ * Video is the one discipline whose work is not projects in the archive —
+ * it is embeds, held in `content/site.json` and edited in /admin, because a
+ * film lives on the client's channel and what this site owns is the poster
+ * and the arrangement. So "does it have work" is a different question for
+ * this one row, and this is it.
+ */
+const HAS_VIDEOS = CONTENT.videos.length > 0;
+
+/**
  * Where a category's work lives.
  *
  * A listing gets its own filtered index page — a real URL, so a discipline
@@ -456,6 +467,10 @@ export const getProject = (slug: string): Project | undefined =>
  * falls back to the full index instead of a route that does not exist.
  */
 export const categoryHref = (categorySlug: string): string => {
+  // Video's page is the work rather than a listing of it, like `/work/coverart`
+  // — and unlike every other discipline, what fills it is not in the archive.
+  if (categorySlug === "video") return "/work/video";
+
   const inCategory = projectsIn(categorySlug);
   if (inCategory.length === 0) return "/work";
   if (isOwnGallery(categorySlug)) return `/work/${categorySlug}`;
@@ -474,11 +489,19 @@ export type CategoryLink = { slug: string; name: string; href: string };
  * as data.
  */
 export const WORK_CATEGORY_LINKS: CategoryLink[] = WORK_CATEGORIES.filter(
-  // VIDEO and MUSIC VIDEO are in the old nav with nothing behind them — the
-  // work is on Vimeo and was never published here. A row that navigates
-  // nowhere is worse than one that is absent, so they wait until there is
-  // something to open.
-  (c) => projectsIn(c.slug).length > 0,
+  /* A row that navigates nowhere is worse than one that is absent, so a
+     discipline waits until there is something to open.
+
+     Which was all of VIDEO and MUSIC VIDEO until now: both were in the old
+     nav with nothing behind them. Video has a page as soon as one link is
+     pasted into /admin — its work is embeds, not projects, so it is asked a
+     different question. Music video is not a row at all any more: it is a
+     section *inside* that page, which is how Julian asked for it and how six
+     films read better than two thin pages. */
+  (c) =>
+    c.slug === "video"
+      ? HAS_VIDEOS
+      : c.slug !== "music-video" && projectsIn(c.slug).length > 0,
 ).map((c) => ({
   slug: c.slug,
   // Through `categoryLabel`, so "COVERART" reads as "COVER ART" once the

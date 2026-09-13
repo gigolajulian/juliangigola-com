@@ -14,6 +14,7 @@ import { AdminPreview } from "@/components/admin-preview";
 import { AdminPicker, type PickerItem } from "@/components/admin-picker";
 import { AdminTrash } from "@/components/admin-trash";
 import { AdminInbox } from "@/components/admin-inbox";
+import { AdminVideos } from "@/components/admin-videos";
 import { isTextRef, type FrameRef, type TrashedProject } from "@/lib/added";
 import { ADDED_PATH } from "@/lib/added";
 import { type PendingUpload } from "@/components/admin-frames";
@@ -99,6 +100,9 @@ const TABS = [
   [
     { id: "disciplines", label: "Disciplines" },
     { id: "projects", label: "Projects" },
+    // With the work rather than with the pages: it is a discipline whose
+    // contents change, not a page whose copy does.
+    { id: "video", label: "Video" },
   ],
   /* Its own group, because it is not the same kind of visit at all.
    *
@@ -1097,6 +1101,13 @@ export function AdminEditor({
         </div>
 
         {view === "inbox" ? <AdminInbox /> : null}
+
+        {view === "video" ? (
+          <AdminVideos
+            videos={draft.videos}
+            onChange={(next) => set("videos", next)}
+          />
+        ) : null}
 
         {view === "disciplines" ? (
           <AdminDisciplines

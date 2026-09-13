@@ -26,8 +26,13 @@ export default function sitemap(): MetadataRoute.Sitemap {
   // The discipline pages. They sit above individual projects in priority:
   // they are the pages a search for "bay area editorial photographer" should
   // land on, and each one is a real destination rather than a filtered view.
-  const categories = WORK_CATEGORY_LINKS.filter((c) =>
-    c.href.startsWith("/work/category/"),
+  const categories = WORK_CATEGORY_LINKS.filter(
+    // The listings, plus Video — whose page is the work itself rather than a
+    // listing of projects, and which is a destination in exactly the same way
+    // ("bay area music video director" is the search it answers). The other
+    // one-gallery disciplines arrive below as projects, because that is what
+    // they are.
+    (c) => c.href.startsWith("/work/category/") || c.href === "/work/video",
   ).map((c) => ({
     url: `${SITE}${c.href}`,
     changeFrequency: "monthly" as const,

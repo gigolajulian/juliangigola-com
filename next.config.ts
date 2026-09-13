@@ -65,7 +65,18 @@ const pageRedirects = [
  *   blob:            /admin previews a chosen photograph from an object URL
  *                    before it has been uploaded anywhere.
  *   api.github.com   /admin commits through the GitHub API from the browser.
- *                    Nothing else on the site talks to another origin.
+ *   youtube/vimeo    /work/video embeds films from both. Four allowances,
+ *                    each narrow: the two player origins in `frame-src`, the
+ *                    two thumbnail CDNs in `img-src`, and the two oEmbed
+ *                    endpoints in `connect-src` — which only /admin uses, to
+ *                    read a title and a poster off a pasted link.
+ *
+ *                    `youtube-nocookie.com` rather than `youtube.com` for the
+ *                    player: the ordinary domain sets an advertising cookie
+ *                    on load, and this site has no cookie banner to justify
+ *                    one. Nothing from either loads until a visitor presses
+ *                    play (see `components/video-grid.tsx`), so the policy is
+ *                    the boundary and the click is the consent.
  */
 const csp = [
   "default-src 'self'",
@@ -76,7 +87,9 @@ const csp = [
   // older browsers read.
   "frame-ancestors 'none'",
   "form-action 'self'",
-  "img-src 'self' data: blob:",
+  // The provider stills for the video page, which are 16:9 thumbnails on
+  // their own CDNs rather than frames from the archive.
+  "img-src 'self' data: blob: https://i.ytimg.com https://i.vimeocdn.com",
   "font-src 'self'",
   "style-src 'self' 'unsafe-inline'",
   // Cloudflare Web Analytics. The beacon is injected by the zone, not by
@@ -85,8 +98,13 @@ const csp = [
   // Its own POST goes to /cdn-cgi/rum on this origin, which `connect-src
   // 'self'` already covers.
   "script-src 'self' 'unsafe-inline' https://static.cloudflareinsights.com",
-  ,
-  "connect-src 'self' https://api.github.com",
+  // The two players, and only as an embed — `frame-ancestors 'none'` above
+  // is the other direction and still says nobody may frame this site.
+  "frame-src https://www.youtube-nocookie.com https://player.vimeo.com",
+  // `vimeo.com` and `youtube.com` are oEmbed lookups made by /admin when a
+  // link is pasted: the title, and the poster Vimeo does not publish at a
+  // guessable URL. No page on the site fetches either.
+  "connect-src 'self' https://api.github.com https://vimeo.com https://www.youtube.com",
   "upgrade-insecure-requests",
 ].join("; ");
 
