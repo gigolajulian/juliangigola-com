@@ -39,14 +39,16 @@ export function CoverArtGallery({ releases }: { releases: CoverRelease[] }) {
 
   return (
     <>
-      <ul className="mt-12 grid grid-cols-2 sm:mt-16 sm:grid-cols-3">
+      <ul
+        data-ring
+        className="mt-12 grid grid-cols-2 hoverable:cursor-none sm:mt-16 sm:grid-cols-3"
+      >
         {releases.map((release, i) => {
           const front = release.frames[0];
           if (!front) return null;
 
           const cell = (
             <button
-              data-ring
               type="button"
               onClick={(e) => {
                 // Open whichever side is on screen. `:hover` is the same
@@ -60,7 +62,7 @@ export function CoverArtGallery({ releases }: { releases: CoverRelease[] }) {
                 lightbox.show(positions.get(frame.src) ?? 0);
               }}
               aria-label={`Open ${coverLabel(release.title, release.artist, release.frames)}`}
-              className="group relative block aspect-square w-full hoverable:cursor-none overflow-hidden press active:scale-[0.995]"
+              className="group relative block aspect-square w-full overflow-hidden press active:scale-[0.995]"
               style={{ backgroundColor: front.color }}
             >
               <CoverFaces

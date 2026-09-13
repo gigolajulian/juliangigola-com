@@ -39,6 +39,14 @@ import type { Project } from "@/lib/work-types";
 const SCRUB_FROM = 1;
 const SCRUB_COUNT = 3;
 
+/** The same query `hoverable:` compiles to in `globals.css`. */
+const HOVERABLE = "(hover: hover) and (pointer: fine)";
+const subscribeHoverable = (onChange: () => void) => {
+  const mq = window.matchMedia(HOVERABLE);
+  mq.addEventListener("change", onChange);
+  return () => mq.removeEventListener("change", onChange);
+};
+
 export function WorkBand({
   project,
   index,
@@ -56,9 +64,24 @@ export function WorkBand({
 
   const [active, setActive] = React.useState(0);
   const [scrubbing, setScrubbing] = React.useState(false);
-  // Once a tile has been scrubbed its frames stay mounted, so coming back to
-  // it is instant and the fade never waits on a fetch.
-  const [touched, setTouched] = React.useState(false);
+
+  /* The three frames are mounted from the start wherever there is a pointer
+     to scrub with, not on the first move. Mounted on first move, the fade
+     had nothing to fade to: the image was still downloading, so the cover
+     sat there for the 300ms and the frame popped in afterwards without a
+     transition — a cut on exactly the first pass, which is the one a
+     visitor judges. Mounted at rest, `loading="lazy"` fetches them as the
+     tile scrolls near, and every crossfade has a decoded picture on both
+     sides.
+
+     Gated on the pointer rather than always-on because a phone never
+     scrubs, and three extra frames on seven tiles at full width is a few
+     megabytes it would download for nothing. */
+  const touched = React.useSyncExternalStore(
+    subscribeHoverable,
+    () => window.matchMedia(HOVERABLE).matches,
+    () => false,
+  );
 
   const client = project.credits.find((c) =>
     /client|artist|model/i.test(c.role),
@@ -77,7 +100,6 @@ export function WorkBand({
       Math.max(0, Math.floor(ratio * frames.length)),
     );
 
-    setTouched(true);
     setScrubbing(true);
     setActive(next);
   };
@@ -96,7 +118,6 @@ export function WorkBand({
     const delta = e.key === "ArrowRight" ? 1 : e.key === "ArrowLeft" ? -1 : 0;
     if (!delta) return;
     e.preventDefault();
-    setTouched(true);
     // The first press lands on the first frame rather than skipping it.
     setActive(
       (i) => (scrubbing ? i + delta + frames.length : 0) % frames.length,
@@ -140,12 +161,12 @@ export function WorkBand({
 
         {/* The scrub frames, stacked over the cover and dissolved between.
 
-            All three are mounted from the first move and only their opacity
-            changes, which is what makes the transition a crossfade rather
-            than a swap: the frame going out is still there while the one
-            coming in fades up over it, and the cover is under both. This
-            used to mount one keyed image at a time, which was a hard cut on
-            every step — Julian asked for it to be smoother. */}
+            All three are mounted and only their opacity changes, which is
+            what makes the transition a crossfade rather than a swap: the
+            frame going out is still there while the one coming in fades up
+            over it, and the cover is under both. This used to mount one
+            keyed image at a time, which was a hard cut on every step —
+            Julian asked for it to be smoother. */}
         {touched
           ? frames.map((f, i) => (
               <Image
@@ -153,6 +174,7 @@ export function WorkBand({
                 src={f.src}
                 alt=""
                 fill
+                loading="lazy"
                 sizes="(min-width: 1024px) 33vw, (min-width: 768px) 50vw, 100vw"
                 className={cn(
                   "object-cover transition-opacity duration-300 ease-out motion-reduce:transition-none",
