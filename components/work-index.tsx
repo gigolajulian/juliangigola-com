@@ -189,6 +189,9 @@ export function WorkIndex({
                         panel's copy is the one that travels. See `Travels`. */}
                       <Travels on={!wide} slug={project.slug}>
                         <Image
+                          placeholder={project.cover.blur ? "blur" : "empty"}
+                          blurDataURL={project.cover.blur}
+                          data-fade=""
                           src={project.cover.src}
                           alt={project.cover.alt || project.name}
                           width={project.cover.width}
@@ -234,6 +237,8 @@ export function WorkIndex({
               >
                 <Travels on={wide} slug={preview.slug}>
                   <Image
+                    placeholder={preview.cover.blur ? "blur" : "empty"}
+                    blurDataURL={preview.cover.blur}
                     src={preview.cover.src}
                     alt=""
                     width={preview.cover.width}

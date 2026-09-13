@@ -5,6 +5,7 @@ import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { PhotoNotice } from "@/components/photo-notice";
 import { GlassLight } from "@/components/glass-light";
+import { PhotoFade } from "@/components/photo-fade";
 import "./globals.css";
 
 // `globals.css` resolves `font-sans` from `--font-sans` (shadcn's theme block
@@ -157,6 +158,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         {/* Writes the pointer's position onto whichever glass control is
             under it — see `glass` in globals.css. Renders nothing. */}
         <GlassLight />
+        {/* Marks lazily loaded pictures as they land so they fade in rather
+            than pop — see `photo-fade.tsx`. Renders nothing. */}
+        <PhotoFade />
         <main id="main" className="rise flex flex-1 flex-col">
           {children}
         </main>

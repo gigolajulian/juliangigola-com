@@ -134,6 +134,7 @@ function Tile({
     >
       {poster ? (
         <Image
+          data-fade=""
           src={poster}
           alt=""
           fill

@@ -1,4 +1,5 @@
 import type { ImageLoaderProps } from "next/image";
+import SIZED from "./public/work/sized.json";
 
 /**
  * Every photograph on the site goes through here.
@@ -60,14 +61,22 @@ const onR2 = (src: string) => src.startsWith("/work/");
 const HERO_WIDTHS = [640, 1080, 1920];
 
 /**
- * `/hero/intro.jpg` at 900px → `/hero/intro-w1080.jpg`; past the largest
- * copy, the original. Anything that is not a hand-made hero frame gets null.
+ * The sized copy of a picture for a slot `width` wide, or null when it has
+ * none. Two sources of copies, one rule: the hero's four frames by name, and
+ * whatever `scripts/make-cards.mjs` listed in `sized.json` — project covers
+ * and the frames the homepage tiles scrub through.
+ *
+ * The smallest copy that is wide enough; past the widest, the widest. Never
+ * the original for a picture that has copies: the original of a scrub frame
+ * is 1.6MB, and a 5K screen is not a reason to send it.
  */
 function sizedHero(src: string, width: number): string | null {
   const m = /^\/hero\/([a-z0-9-]+)\.jpg$/i.exec(src);
-  if (!m) return null;
-  const w = HERO_WIDTHS.find((candidate) => candidate >= width);
-  return w ? `/hero/${m[1]}-w${w}.jpg` : null;
+  const widths = m ? HERO_WIDTHS : (SIZED as Record<string, number[]>)[src];
+  if (!widths) return null;
+  const w =
+    widths.find((candidate) => candidate >= width) ?? widths[widths.length - 1];
+  return src.replace(/\.jpg$/i, `-w${w}.jpg`);
 }
 
 export default function cloudflareImageLoader({

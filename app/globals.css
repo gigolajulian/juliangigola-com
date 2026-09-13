@@ -1272,3 +1272,27 @@ optgroup {
     background-color: var(--foreground);
   }
 }
+
+/* ── pictures arrive ──────────────────────────────────────────────
+ * A lazily loaded picture fades up once its bytes have landed, instead of
+ * appearing between one frame and the next. `photo-fade.tsx` sets
+ * `data-loaded`; without scripting there is nothing to wait for and the
+ * picture is simply shown. Not used above the fold — see the component.
+ * ─────────────────────────────────────────────────────────────── */
+img[data-fade] {
+  opacity: 0;
+  transition: opacity 480ms var(--ease-out-strong);
+}
+img[data-fade][data-loaded] {
+  opacity: 1;
+}
+@media (scripting: none) {
+  img[data-fade] {
+    opacity: 1;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  img[data-fade] {
+    transition: none;
+  }
+}

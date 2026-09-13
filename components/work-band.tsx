@@ -150,6 +150,12 @@ export function WorkBand({
             fill
             sizes="(min-width: 1024px) 33vw, (min-width: 768px) 50vw, 100vw"
             priority={priority}
+            // The blur-up under it while it loads, and — below the fold,
+            // where it is not the largest paint — a fade in when it lands
+            // rather than a pop. See `photo-fade.tsx`.
+            placeholder={project.cover.blur ? "blur" : "empty"}
+            blurDataURL={project.cover.blur}
+            data-fade={priority ? undefined : ""}
             className="object-cover"
           />
         </ViewTransition>

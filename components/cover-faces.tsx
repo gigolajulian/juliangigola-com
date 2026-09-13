@@ -41,6 +41,7 @@ export function CoverFaces({
   return (
     <>
       <Image
+        data-fade={priority ? undefined : ""}
         data-frame={front.src}
         src={front.thumb}
         alt=""

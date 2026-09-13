@@ -110,8 +110,10 @@ export function Gallery({ project }: { project: Project }) {
                           : "100vw"
                       }
                       // The first two frames are the ones above the fold on
-                      // nearly every screen; everything after loads lazily.
+                      // nearly every screen; everything after loads lazily —
+                      // and fades in when it lands, see `photo-fade.tsx`.
                       priority={i < 2}
+                      data-fade={i < 2 ? undefined : ""}
                       className="h-full w-full object-cover"
                     />
                   );

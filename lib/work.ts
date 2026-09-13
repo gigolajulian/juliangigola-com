@@ -544,6 +544,17 @@ export const WORK_CATEGORY_LINKS: CategoryLink[] = WORK_CATEGORIES.filter(
  * the server where the archive is free to read.
  * ─────────────────────────────────────────────────────────────── */
 
+// Relative, not `@/`: `next.config.ts` imports this module for the redirect
+// table, and Node loads that outside the bundler, where the alias does not
+// exist and an aliased import is a module-not-found on `next dev`.
+import COVER_BLUR from "../public/work/blur.json";
+
+/** The cover with its blur-up attached, when the generator made one. */
+const withBlur = (cover: Frame): Frame => {
+  const blur = (COVER_BLUR as Record<string, string>)[cover.src];
+  return blur ? { ...cover, blur } : cover;
+};
+
 /** The person or company a row is credited to, when there is one. */
 const billing = (p: Project): string | undefined =>
   p.credits.find((c) => /client|model|artist/i.test(c.role))?.name;
@@ -560,7 +571,7 @@ export type IndexRow = {
 export const indexRow = (p: Project): IndexRow => ({
   slug: p.slug,
   name: p.name,
-  cover: p.cover,
+  cover: withBlur(p.cover),
   credit: billing(p) ?? p.categories[0]?.name ?? "",
 });
 
@@ -592,7 +603,7 @@ export const bandTile = (p: Project): BandTile => {
   return {
     slug: p.slug,
     name: p.name,
-    cover: p.cover,
+    cover: withBlur(p.cover),
     frames: p.images.slice(1, 4),
     total: p.images.length,
     ...(client ? { client } : {}),

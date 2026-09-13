@@ -35,6 +35,13 @@ export type Frame = {
   color: string;
   /** Empty on most frames — the old site never filled these in. */
   alt: string;
+  /**
+   * A 16px copy inlined as a data URL, painted under the picture while it
+   * loads. Only covers have one (`scripts/make-cards.mjs`), attached where
+   * a list is built for a client component so only the ones a page shows
+   * travel with it.
+   */
+  blur?: string;
 };
 
 export type Credit = {
