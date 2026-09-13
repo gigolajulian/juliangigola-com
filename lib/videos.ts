@@ -58,7 +58,10 @@ export type Video = {
 export const REEL = {
   provider: "vimeo" as const,
   videoId: "895502238",
-  title: "Director's Reel 2023",
+  /* The title without the year in it, because the year is its own field now
+     and printing 2023 twice on one line is how a caption looks careless. */
+  title: "Director's Reel",
+  year: 2023,
 };
 
 export const SECTIONS: { id: VideoSection; name: string }[] = [

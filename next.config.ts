@@ -97,7 +97,17 @@ const csp = [
   // with it — found by reading the console after deploying, not by guessing.
   // Its own POST goes to /cdn-cgi/rum on this origin, which `connect-src
   // 'self'` already covers.
-  "script-src 'self' 'unsafe-inline' https://static.cloudflareinsights.com",
+  /* `player.vimeo.com` is Vimeo's player API, and it is here for one reason:
+     the reel on /work/video starts at 15% volume, and Vimeo's embed takes no
+     volume parameter — `muted` is all a URL can say. Setting a level needs
+     `player.js`.
+     
+     Weighed rather than waved through: it is one origin, loaded on one route,
+     after the frame is already playing, and the page works without it (the
+     reel stays silent, which is the safe direction). The alternative was
+     dropping the volume request or shipping sound at whatever level the
+     visitor's last Vimeo session left it at. */
+  "script-src 'self' 'unsafe-inline' https://static.cloudflareinsights.com https://player.vimeo.com",
   // The two players, and only as an embed — `frame-ancestors 'none'` above
   // is the other direction and still says nobody may frame this site.
   "frame-src https://www.youtube-nocookie.com https://player.vimeo.com",

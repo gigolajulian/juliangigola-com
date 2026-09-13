@@ -32,34 +32,32 @@ export default function VideoPage() {
 
   return (
     <>
-      {/* The reel opens the page, full bleed, silent, looping.
+      {/* The reel opens the page: the whole screen, under the bar, with the
+          page's own heading on its lower third.
 
-          Below the fixed header rather than under it: the cover has a plate
-          the masthead can sit on and this does not, so a reel running behind
-          the nav would be a moving ground under small type.
-
-          The heading follows it instead of preceding it, which is the right
-          order here — the reel says what this page is faster than a word can,
-          and a title above a video the visitor has already started watching
-          is a label on something they have moved past. */}
-      <div className="pt-20 sm:pt-24">
-        <VideoHero videoId={REEL.videoId} title={REEL.title} />
-      </div>
-
-      <div className="mx-auto w-full max-w-[100rem] px-6 pb-24 pt-14 sm:px-10 sm:pt-20">
-        <header>
-          <h1 className="title">Video</h1>
-          {/* The count and what it covers, which is the pattern /work and
-              /sessions set. It said "Press play — nothing loads from YouTube
-              or Vimeo until you do", which is a note about how the page is
-              built wearing the clothes of body copy: true, and no business of
-              a visitor's. The tiles already say press play by looking like it. */}
-          <p className="mt-4 max-w-prose text-sm leading-relaxed text-muted-foreground">
-            {videos.length} {videos.length === 1 ? "film" : "films"}. Music
-            videos and commercials, directed and shot in the Bay Area.
+          The heading belongs *on* the film rather than above or below it. A
+          title above a video somebody has already started watching is a label
+          on something they have moved past, and a title below it wastes the
+          one screen that sells the page. This is the same move the cover
+          makes, and it is plated the same way. */}
+      <VideoHero videoId={REEL.videoId} title={REEL.title} year={REEL.year}>
+        <div className="flex min-w-0 flex-col gap-2">
+          <p className="label text-muted-foreground">
+            {REEL.title} &middot; {REEL.year}
           </p>
-        </header>
+          <h1 className="title">Video</h1>
+          {/* Julian's line. It replaced "8 films. Music videos and
+              commercials, directed and shot in the Bay Area" — the count is
+              on each section's own heading, where it counts something the
+              reader can see, and the disciplines are the two headings
+              below. What was left worth saying is whose work it is. */}
+          <p className="label text-muted-foreground">
+            Directed &amp; shot by Julian Gigola
+          </p>
+        </div>
+      </VideoHero>
 
+      <div className="mx-auto w-full max-w-[100rem] px-6 pb-24 pt-16 sm:px-10 sm:pt-20">
         {videos.length === 0 ? (
           /* Not an error state and not a placeholder pretending to be work.
              The page exists so the discipline has somewhere to be the moment
