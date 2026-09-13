@@ -35,6 +35,28 @@ const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), { status, headers: NO_STORE });
 
 /**
+ * The request body, or null when it is not JSON.
+ *
+ * `request.json()` throws on a malformed body, and an exception out of a
+ * route handler is a 500 — the Worker's generic error page, for a request
+ * that was simply wrong. Anything past the key check is the admin panel and
+ * sends well-formed JSON, but a route that can be made to throw is a route
+ * that can be made to log, and a 400 says what happened.
+ */
+async function parsed(
+  request: Request,
+): Promise<Record<string, unknown> | null> {
+  try {
+    const parsed: unknown = await request.json();
+    return parsed && typeof parsed === "object"
+      ? (parsed as Record<string, unknown>)
+      : null;
+  } catch {
+    return null;
+  }
+}
+
+/**
  * Whether the request carries the right key.
  *
  * Constant-time, so the comparison cannot be used to learn the key one
@@ -138,10 +160,9 @@ export async function PATCH(request: Request) {
   const gate = await guard(request);
   if (gate.error) return gate.error;
 
-  const { key, read } = (await request.json()) as {
-    key?: string;
-    read?: boolean;
-  };
+  const given = await parsed(request);
+  if (!given) return json({ error: "Not JSON." }, 400);
+  const { key, read } = given as { key?: string; read?: boolean };
   if (!key?.startsWith("msg:") || typeof read !== "boolean")
     return json({ error: "Unknown." }, 400);
 
@@ -169,7 +190,9 @@ export async function DELETE(request: Request) {
   const gate = await guard(request);
   if (gate.error) return gate.error;
 
-  const { key } = (await request.json()) as { key?: string };
+  const given = await parsed(request);
+  if (!given) return json({ error: "Not JSON." }, 400);
+  const { key } = given as { key?: string };
   if (!key?.startsWith("msg:")) return json({ error: "Unknown." }, 400);
 
   await gate.inbox.delete(key);

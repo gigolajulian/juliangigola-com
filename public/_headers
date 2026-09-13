@@ -22,3 +22,45 @@
   Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=()
   Cross-Origin-Opener-Policy: same-origin
   Strict-Transport-Security: max-age=31536000; includeSubDomains
+
+# Caching, for the same responses.
+#
+# Workers Static Assets serves every file with `max-age=0, must-revalidate`
+# unless told otherwise — measured on the live site: the hashed script
+# chunks, the stylesheet, the fonts and every photograph all came back with
+# it. Cloudflare's edge caches them regardless (`CF-Cache-Status: HIT`), but
+# the *browser* does not: on every page a returning visitor opens, it
+# re-asks for each of them and waits for a 304. Dozens of round trips per
+# page for files that have not changed.
+#
+# Two policies, because the two kinds of file change differently.
+#
+# `_next/static` is content-hashed: a changed file is a new name, so the old
+# one can be kept forever. `immutable` also tells the browser not to
+# revalidate on a reload, which is the one case `max-age` alone does not
+# cover.
+#
+# The photographs keep their names — a re-harvest or a re-crop overwrites
+# `cover.jpg` in place — so they get a day, not a year, with a week of
+# stale-while-revalidate: a returning visitor sees the picture at once and
+# the browser refreshes it in the background. The cost is that a replaced
+# photograph can be a day old for someone who saw the old one; the
+# alternative was every visit re-asking for every frame.
+
+/_next/static/*
+  Cache-Control: public, max-age=31536000, immutable
+
+/work/*
+  Cache-Control: public, max-age=86400, stale-while-revalidate=604800
+
+/covers/*
+  Cache-Control: public, max-age=86400, stale-while-revalidate=604800
+
+/hero/*
+  Cache-Control: public, max-age=86400, stale-while-revalidate=604800
+
+/clients/*
+  Cache-Control: public, max-age=86400, stale-while-revalidate=604800
+
+/og.jpg
+  Cache-Control: public, max-age=86400, stale-while-revalidate=604800
