@@ -12,7 +12,9 @@ import {
   getProject,
   coverOf,
   enquiryTypeFor,
+  isDisciplineGallery,
   nextAfter,
+  nextDiscipline,
 } from "@/lib/work";
 
 /* ── the case study ───────────────────────────────────────────────
@@ -73,7 +75,32 @@ export default async function ProjectPage(props: PageProps<"/work/[slug]">) {
   if (!project) notFound();
 
   const client = project.credits.find((c) => /client/i.test(c.role));
-  const next = nextAfter(project);
+
+  /* Four of these pages are not projects at all: Event coverage, Cover art,
+     Automotive and Places are each one gallery published under a
+     discipline's own slug, because there are no separate commissions behind
+     them to list. Dressed as an ordinary project, Event coverage read:
+
+       EVENT COVERAGE
+       Category      Event coverage
+       Frames        22
+       Next: ÆRA:WRAITH
+
+     A category row repeating the title, and a "next project" that leaves the
+     subject for an unrelated mixed-media shoot. Both are fixed below. */
+  const isDiscipline = isDisciplineGallery(project);
+
+  /* Where the foot of the page goes. A discipline has no sibling project, so
+     it follows the chips on /work to the next discipline instead of being
+     handed whatever sits next in the running order. */
+  const onwards = isDiscipline
+    ? nextDiscipline(project.categories[0]?.slug ?? "")
+    : (() => {
+        const next = nextAfter(project);
+        return next
+          ? { href: `/work/${next.slug}`, name: `Next: ${next.name}` }
+          : undefined;
+      })();
 
   return (
     <article className="pt-28 sm:pt-36">
@@ -98,7 +125,8 @@ export default async function ProjectPage(props: PageProps<"/work/[slug]">) {
               <dd className="mt-2 text-sm">{client.name}</dd>
             </div>
           ) : null}
-          {project.categories.length ? (
+          {/* Not on a discipline page, where it would repeat the title. */}
+          {project.categories.length && !isDiscipline ? (
             <div>
               <dt className="label text-muted-foreground">Category</dt>
               <dd className="mt-2 text-sm">
@@ -118,7 +146,14 @@ export default async function ProjectPage(props: PageProps<"/work/[slug]">) {
           </div>
         </dl>
 
-        {project.intent ? (
+        {/* The intent, unless it is the title again. The harvester wrote
+            `intent: "EVENT COVERAGE"` for the Event coverage gallery and
+            `"REAL ESTATE"` for real estate — a paragraph that repeats the
+            heading in sentence case is worse than no paragraph, because a
+            reader stops to check whether they misread it. */}
+        {project.intent &&
+        project.intent.trim().toLowerCase() !==
+          project.name.trim().toLowerCase() ? (
           <p className="mt-10 max-w-prose text-base leading-relaxed text-muted-foreground">
             {project.intent}
           </p>
@@ -195,9 +230,7 @@ export default async function ProjectPage(props: PageProps<"/work/[slug]">) {
         type={enquiryTypeFor(project)}
         detail={project.name}
         secondary={
-          next
-            ? { href: `/work/${next.slug}`, label: `Next: ${next.name}` }
-            : undefined
+          onwards ? { href: onwards.href, label: onwards.name } : undefined
         }
       />
     </article>

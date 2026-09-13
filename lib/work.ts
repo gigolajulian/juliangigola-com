@@ -396,9 +396,17 @@ const isOwnGallery = (categorySlug: string): boolean => {
  * gallery under the discipline's own slug — twenty-four record sleeves in one
  * page, a folder of cars — because there are no separate commissions behind
  * them to list. They are the discipline, drawn as a gallery.
+ *
+ * Exported because the project page has to know. Dressed as an ordinary
+ * project, one of these reads as a work called "Event coverage" filed under a
+ * category called "Event coverage", with a "next project" that leaves the
+ * subject entirely.
  */
-const isDiscipline = (p: Project) =>
+export const isDisciplineGallery = (p: Project) =>
   p.categories.some((c) => c.slug === p.slug && isOwnGallery(c.slug));
+
+/** Kept for the two uses below, which read better unqualified. */
+const isDiscipline = isDisciplineGallery;
 
 /**
  * Commissioned work: editorial, campaigns, portraits, music, film.
@@ -639,6 +647,27 @@ export const enquiryTypeFor = (p: Project): string => {
   if (slugs.includes("editorial")) return "editorial";
   if (p.categories.some((c) => c.section === "SESSIONS")) return "session";
   return "other";
+};
+
+/**
+ * The discipline after this one, for a page that *is* a discipline.
+ *
+ * A gallery published under its own slug has no sibling project to go to —
+ * `nextAfter` would hand it whatever happens to sit next in the running
+ * order, which from Event coverage was a mixed-media project called
+ * ÆRA:WRAITH. Following the chips instead keeps a visitor moving through the
+ * work the way the index presents it, and wraps at the end so there is always
+ * somewhere to go.
+ *
+ * Declared after `WORK_CATEGORY_LINKS`, whose order it follows.
+ */
+export const nextDiscipline = (
+  slug: string,
+): { href: string; name: string } | undefined => {
+  const at = WORK_CATEGORY_LINKS.findIndex((c) => c.slug === slug);
+  if (at === -1 || WORK_CATEGORY_LINKS.length < 2) return undefined;
+  const next = WORK_CATEGORY_LINKS[(at + 1) % WORK_CATEGORY_LINKS.length];
+  return { href: next.href, name: next.name };
 };
 
 /**
