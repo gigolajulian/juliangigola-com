@@ -22,6 +22,9 @@
   Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=()
   Cross-Origin-Opener-Policy: same-origin
   Strict-Transport-Security: max-age=31536000; includeSubDomains
+  X-Robots-Tag: noai, noimageai
+  TDM-Reservation: 1
+  TDM-Policy: https://www.juliangigola.com/terms
 
 # Caching, for the same responses.
 #

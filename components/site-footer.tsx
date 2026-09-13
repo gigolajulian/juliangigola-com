@@ -13,6 +13,13 @@ const SOCIAL = [
   { href: "https://www.linkedin.com/in/juliangigola", label: "LinkedIn" },
 ] as const;
 
+/** The two pages every commercial site owes its visitors, and the one line
+    on this one that says the photographs are not training data. */
+const LEGAL = [
+  { href: "/terms", label: "Terms" },
+  { href: "/privacy", label: "Privacy" },
+] as const;
+
 export function SiteFooter() {
   return (
     <footer className="border-t border-border">
@@ -58,9 +65,24 @@ export function SiteFooter() {
 
         <div className="mt-16 flex flex-col gap-2 border-t border-border pt-6 sm:flex-row sm:justify-between">
           <p className="label text-muted-foreground">
-            &copy; {new Date().getFullYear()} Julian Gigola
+            &copy; {new Date().getFullYear()} Julian Gigola. All rights
+            reserved.
           </p>
-          <p className="label text-muted-foreground">San Francisco Bay Area</p>
+          <nav aria-label="Legal" className="label text-muted-foreground">
+            <ul className="flex flex-wrap gap-x-6 gap-y-2">
+              {LEGAL.map((l) => (
+                <li key={l.href}>
+                  <Link
+                    href={l.href}
+                    className="transition-colors duration-200 hoverable:hover:text-foreground"
+                  >
+                    {l.label}
+                  </Link>
+                </li>
+              ))}
+              <li>San Francisco Bay Area</li>
+            </ul>
+          </nav>
         </div>
       </div>
     </footer>

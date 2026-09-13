@@ -140,6 +140,17 @@ const securityHeaders = [
     key: "Strict-Transport-Security",
     value: "max-age=31536000; includeSubDomains",
   },
+  // The rights reservation, in the two machine-readable forms that exist.
+  // `noai`/`noimageai` is the de-facto signal (DeviantArt's, honoured by a
+  // growing list of crawlers); `TDM-Reservation: 1` is the W3C TDMRep
+  // protocol, which is what makes the opt-out in Article 4(3) of the EU
+  // copyright directive "machine-readable" and therefore effective. The
+  // human-readable version is clause 5 of /terms; `/robots.txt` names the
+  // crawlers. None of this stops a crawler that ignores it — it makes
+  // ignoring it a breach from the first request, which is the point.
+  { key: "X-Robots-Tag", value: "noai, noimageai" },
+  { key: "TDM-Reservation", value: "1" },
+  { key: "TDM-Policy", value: "https://www.juliangigola.com/terms" },
 ];
 
 const nextConfig: NextConfig = {
