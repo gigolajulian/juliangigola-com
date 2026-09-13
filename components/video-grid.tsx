@@ -147,7 +147,7 @@ function Tile({
              scale on a photograph reads as a jolt, where a slow one reads as
              the frame leaning in. Transform and opacity only, so it stays on
              the compositor. */
-          className="object-cover transition-transform duration-500 ease-[var(--ease-out-strong)] group-hover:scale-[1.04] motion-reduce:transition-none motion-reduce:group-hover:scale-100"
+          className="object-cover transition-transform duration-500 ease-[var(--ease-out-strong)] hoverable:group-hover:scale-[1.04] motion-reduce:transition-none motion-reduce:group-hover:scale-100"
           // These are 16:9 thumbnails from a CDN, not frames from the
           // archive, so the loader that rewrites archive paths must not touch
           // them — `unoptimized` hands the URL through as it is.

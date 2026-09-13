@@ -255,7 +255,7 @@ export function WorkIndex({
                     // `key` on the wrapper remounts this on every change, so the
                     // fade runs from the start each time rather than retargeting
                     // a transition that is already at its end.
-                    className="h-full w-full object-cover animate-in fade-in duration-300 ease-out motion-reduce:animate-none"
+                    className="h-full w-full object-cover animate-in fade-in duration-300 ease-[var(--ease-out-strong)] motion-reduce:animate-none"
                   />
                 </Travels>
               </div>

@@ -311,7 +311,7 @@ export function SiteHeader() {
             // the masthead — growing from the centre would slide the name
             // sideways out of the alignment the handoff depends on.
             "origin-left will-change-[transform,opacity]",
-            "transition-opacity duration-300 ease-[var(--ease-out-strong)] hover:opacity-70",
+            "transition-opacity duration-300 ease-[var(--ease-out-strong)] hoverable:hover:opacity-70",
             "focus-visible:opacity-100",
             // Deferring only makes sense where the masthead is actually
             // beside it. Below `lg` the cover stacks, so the masthead sits

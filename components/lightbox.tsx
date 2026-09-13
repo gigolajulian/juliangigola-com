@@ -74,9 +74,13 @@ function travel(
     if (from) from.style.viewTransitionName = "";
     if (to) to.style.viewTransitionName = NAME;
   });
-  transition.finished.finally(() => {
-    if (to) to.style.viewTransitionName = "";
-  });
+  transition.finished
+    .finally(() => {
+      if (to) to.style.viewTransitionName = "";
+    })
+    // A skipped transition — hidden tab, a second one starting — rejects
+    // `finished`; the update still ran, and nothing here needs the promise.
+    .catch(() => {});
 }
 
 export function useLightbox(frames: Frame[]) {
@@ -137,6 +141,166 @@ export function useLightbox(frames: Frame[]) {
   return { open, index, show, onOpenChange, step };
 }
 
+/* ── the swipe ────────────────────────────────────────────────────
+ * On a phone the frame follows the finger. Sideways pages the sequence,
+ * down lets go of it; either commits on a flick regardless of distance,
+ * because a flick is a decision and making it travel a third of the screen
+ * as well is asking twice. Under that, the picture stays glued to the
+ * finger — 1:1, from where it was grabbed — and springs back from wherever
+ * it is if the gesture is abandoned.
+ *
+ * Pointer Events with capture, so a swipe that leaves the picture's box
+ * keeps tracking. Mice are left out: with a pointer the arrows, the keys and
+ * a click outside are all quicker than a drag, and a mouse-down that pans a
+ * photograph is not what anyone expects.
+ *
+ * The pull past the ends of a one-frame sequence, and upward, rubber-bands
+ * rather than stopping — a hard stop reads as frozen, resistance reads as
+ * "nothing further this way".
+ * ─────────────────────────────────────────────────────────────── */
+
+/** Above this, in px per ms, a release commits whatever it was doing. */
+const FLICK = 0.11;
+/** Before this many px the gesture has no axis; a tap stays a tap. */
+const SLOP = 10;
+
+const rubberband = (over: number, dim: number, c = 0.55) =>
+  (over * dim * c) / (dim + c * Math.abs(over));
+
+type Sample = { t: number; x: number; y: number };
+
+function useSwipe({
+  onStep,
+  onDismiss,
+}: {
+  onStep: (delta: 1 | -1) => void;
+  onDismiss: () => void;
+}) {
+  const ref = React.useRef<HTMLDivElement>(null);
+  const drag = React.useRef<{
+    id: number;
+    x0: number;
+    y0: number;
+    axis: "x" | "y" | null;
+    samples: Sample[];
+  } | null>(null);
+  // Set while a gesture moved, so the click that can follow a release does
+  // not also close the lightbox.
+  const moved = React.useRef(false);
+
+  const place = (x: number, y: number, opacity: number, settle: boolean) => {
+    const el = ref.current;
+    if (!el) return;
+    const still = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    el.style.transition =
+      settle && !still
+        ? "transform 360ms var(--ease-spring), opacity 200ms var(--ease-out-strong)"
+        : "none";
+    el.style.transform = x || y ? `translate(${x}px, ${y}px)` : "";
+    el.style.opacity = opacity === 1 ? "" : String(opacity);
+  };
+
+  const onPointerDown: React.PointerEventHandler<HTMLDivElement> = (e) => {
+    if (e.pointerType === "mouse" || !e.isPrimary) return;
+    // Capture keeps the swipe tracking past the picture's edge. It throws
+    // when the pointer is already gone, and a swipe without capture still
+    // works — it just lets go at the edge.
+    try {
+      e.currentTarget.setPointerCapture(e.pointerId);
+    } catch {}
+    drag.current = {
+      id: e.pointerId,
+      x0: e.clientX,
+      y0: e.clientY,
+      axis: null,
+      samples: [{ t: e.timeStamp, x: e.clientX, y: e.clientY }],
+    };
+    moved.current = false;
+    // Grabbing a picture mid-spring stops it where it is.
+    place(0, 0, 1, false);
+  };
+
+  const onPointerMove: React.PointerEventHandler<HTMLDivElement> = (e) => {
+    const d = drag.current;
+    if (!d || e.pointerId !== d.id) return;
+    const dx = e.clientX - d.x0;
+    const dy = e.clientY - d.y0;
+    d.samples.push({ t: e.timeStamp, x: e.clientX, y: e.clientY });
+    if (d.samples.length > 6) d.samples.shift();
+
+    if (!d.axis) {
+      if (Math.hypot(dx, dy) < SLOP) return;
+      d.axis = Math.abs(dx) >= Math.abs(dy) ? "x" : "y";
+      moved.current = true;
+    }
+    const el = e.currentTarget;
+    if (d.axis === "x") {
+      place(dx, 0, 1, false);
+    } else {
+      // Down is the gesture; up is resisted.
+      const y = dy > 0 ? dy : rubberband(dy, el.clientHeight);
+      place(0, y, Math.max(0.3, 1 - Math.max(0, dy) / el.clientHeight), false);
+    }
+  };
+
+  const onPointerUp: React.PointerEventHandler<HTMLDivElement> = (e) => {
+    const d = drag.current;
+    if (!d || e.pointerId !== d.id) return;
+    drag.current = null;
+    const el = e.currentTarget;
+    const dx = e.clientX - d.x0;
+    const dy = e.clientY - d.y0;
+    const first = d.samples[0];
+    const last = d.samples[d.samples.length - 1];
+    const dt = Math.max(1, last.t - first.t);
+    const vx = (last.x - first.x) / dt;
+    const vy = (last.y - first.y) / dt;
+
+    if (d.axis === "x") {
+      const commit =
+        Math.abs(dx) > el.clientWidth * 0.3 || Math.abs(vx) > FLICK;
+      // Sign, not position: a flick back the way it came reverses.
+      const dir: 1 | -1 = (Math.abs(vx) > FLICK ? vx : dx) < 0 ? 1 : -1;
+      if (commit) {
+        onStep(dir);
+        // The next frame starts a little in from the side it is coming from
+        // and settles — one strip moving, not one picture replaced by another.
+        place(dir * -el.clientWidth * 0.2, 0, 0, false);
+        requestAnimationFrame(() => place(0, 0, 1, true));
+        return;
+      }
+    } else if (d.axis === "y") {
+      const commit = dy > el.clientHeight * 0.25 || vy > FLICK;
+      if (commit) {
+        // Clean before the trip home, so the snapshot is of the frame and
+        // not of the frame half off the screen.
+        place(0, 0, 1, false);
+        onDismiss();
+        return;
+      }
+    }
+    place(0, 0, 1, true);
+  };
+
+  const onClickCapture: React.MouseEventHandler<HTMLDivElement> = (e) => {
+    if (moved.current) {
+      e.stopPropagation();
+      moved.current = false;
+    }
+  };
+
+  return {
+    ref,
+    handlers: {
+      onPointerDown,
+      onPointerMove,
+      onPointerUp,
+      onPointerCancel: onPointerUp,
+      onClickCapture,
+    },
+  };
+}
+
 export function Lightbox({
   frames,
   name,
@@ -150,6 +314,10 @@ export function Lightbox({
   name: string;
 } & Omit<ReturnType<typeof useLightbox>, "show">) {
   const current = frames[index];
+  const { ref: picture, handlers: swipe } = useSwipe({
+    onStep: step,
+    onDismiss: () => onOpenChange(false),
+  });
 
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
@@ -179,21 +347,34 @@ export function Lightbox({
             }}
             className="flex min-h-0 flex-1 items-center justify-center p-4 sm:p-10"
           >
-            {current ? (
-              <Image
-                key={current.src}
-                // The destination on the way in and the origin on the way out —
-                // see `travel`. Only one of these is ever mounted.
-                style={{ viewTransitionName: NAME }}
-                src={current.src}
-                alt={current.alt || `${name} — frame ${index + 1}`}
-                width={current.width}
-                height={current.height}
-                sizes="100vw"
-                priority
-                className="max-h-full w-auto max-w-full object-contain"
-              />
-            ) : null}
+            {/* What the finger moves. The wrapper stays mounted across a
+                step, so the offset it was released at is where the next
+                frame starts from. `touch-none` hands every touch to the
+                swipe; the page underneath is a dialog and does not scroll. */}
+            <div
+              ref={picture}
+              {...swipe}
+              onClick={(e) => {
+                if (e.target === e.currentTarget) onOpenChange(false);
+              }}
+              className="flex h-full w-full touch-none select-none items-center justify-center will-change-transform"
+            >
+              {current ? (
+                <Image
+                  key={current.src}
+                  // The destination on the way in and the origin on the way out —
+                  // see `travel`. Only one of these is ever mounted.
+                  style={{ viewTransitionName: NAME }}
+                  src={current.src}
+                  alt={current.alt || `${name} — frame ${index + 1}`}
+                  width={current.width}
+                  height={current.height}
+                  sizes="100vw"
+                  priority
+                  className="max-h-full w-auto max-w-full object-contain"
+                />
+              ) : null}
+            </div>
           </div>
 
           <div

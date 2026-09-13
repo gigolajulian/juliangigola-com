@@ -147,7 +147,7 @@ export default function SessionsPage() {
                                         ? "(min-width: 1024px) 25vw, 50vw"
                                         : "(min-width: 1024px) 50vw, 100vw"
                                     }
-                                    className="h-full w-full object-cover transition-transform duration-700 ease-[var(--ease-out-strong)] hoverable:group-hover:scale-[1.02] motion-reduce:transition-none"
+                                    className="h-full w-full object-cover transition-transform duration-500 ease-[var(--ease-out-strong)] hoverable:group-hover:scale-[1.02] motion-reduce:transition-none"
                                   />
                                 </Link>
                               );

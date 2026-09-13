@@ -26,7 +26,12 @@ import {
   type Manifest,
   type ProjectsFile,
 } from "@/lib/admin-payload";
-import { commitFiles, readFile, type CommitFile, TOKEN_STORE } from "@/lib/admin-github";
+import {
+  commitFiles,
+  readFile,
+  type CommitFile,
+  TOKEN_STORE,
+} from "@/lib/admin-github";
 import type { Credit } from "@/lib/work-types";
 import { cn } from "@/lib/utils";
 
@@ -959,9 +964,13 @@ export function AdminEditor({
             >
               {status.kind === "working" && status.total ? (
                 <span
-                  className="block h-full bg-foreground transition-[width] duration-300 ease-out"
+                  // `scaleX` from the left rather than `width`: a width
+                  // change lays the row out again on every tick, a scale is
+                  // a compositor-only move. Linear, because progress is a
+                  // constant rate and an ease on it reads as stalling.
+                  className="block h-full w-full origin-left bg-foreground transition-transform duration-300 ease-linear"
                   style={{
-                    width: `${Math.round(((status.done ?? 0) / status.total) * 100)}%`,
+                    transform: `scaleX(${(status.done ?? 0) / status.total})`,
                   }}
                 />
               ) : (
@@ -1068,23 +1077,28 @@ export function AdminEditor({
                       : "bg-live",
                   )}
                 />
+                {/* Each word is a new node when the state changes, so
+                    `emerge` fades it in — "published" is the one completion
+                    moment the workbench has, and it used to swap in as text. */}
                 {dirty ? (
-                  <span className="text-foreground">unpublished</span>
+                  <span className="emerge text-foreground">unpublished</span>
                 ) : awaitingDeploy ? (
-                  <span className="text-muted-foreground">
+                  <span className="emerge text-muted-foreground">
                     published &middot; going live
                   </span>
                 ) : committed ? (
                   // The watch gave up, or there was no `/BUILD_ID` to watch.
                   // The commit happened; whether it landed is unknown, and
                   // green would claim otherwise.
-                  <span className="text-muted-foreground">published</span>
+                  <span className="emerge text-muted-foreground">
+                    published
+                  </span>
                 ) : (
                   // Nothing pending. Either a deploy was seen landing, or this
                   // page has published nothing — and it was itself served by
                   // the current build, so what is on screen is what the public
                   // site has.
-                  <span className="text-live">live</span>
+                  <span className="emerge text-live">live</span>
                 )}
               </span>
               <button

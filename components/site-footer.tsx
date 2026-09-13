@@ -25,14 +25,14 @@ export function SiteFooter() {
             <h2 className="mt-4 title">
               <Link
                 href="/contact"
-                className="transition-opacity duration-200 hover:opacity-70"
+                className="transition-opacity duration-200 hoverable:hover:opacity-70"
               >
                 Let&rsquo;s make something.
               </Link>
             </h2>
             <a
               href="mailto:hello@juliangigola.com"
-              className="mt-4 inline-block text-sm text-muted-foreground underline decoration-border underline-offset-4 transition-colors duration-200 hover:text-foreground hover:decoration-current"
+              className="mt-4 inline-block text-sm text-muted-foreground underline decoration-border underline-offset-4 transition-colors duration-200 hoverable:hover:text-foreground hoverable:hover:decoration-current"
             >
               hello@juliangigola.com
             </a>
@@ -46,7 +46,7 @@ export function SiteFooter() {
                     href={s.href}
                     target="_blank"
                     rel="me noreferrer"
-                    className="label text-muted-foreground transition-colors duration-200 hover:text-foreground"
+                    className="label text-muted-foreground transition-colors duration-200 hoverable:hover:text-foreground"
                   >
                     {s.label}
                   </a>

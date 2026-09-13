@@ -232,8 +232,10 @@ export function ContactForm() {
       {state.status === "error" || state.status === "unconfigured" ? (
         <div
           role="alert"
+          // `emerge`: it is a new node when a submit fails, so it fades in
+          // instead of snapping into the column above the button.
           className={cn(
-            "border p-5 text-sm leading-relaxed",
+            "emerge border p-5 text-sm leading-relaxed",
             state.status === "error"
               ? "border-destructive/50"
               : "border-border",

@@ -49,8 +49,24 @@ export function ThemeToggle({ className }: { className?: string }) {
 
     // The attribute is the source of truth and what the CSS keys off;
     // `localStorage` is only how it survives a reload.
-    if (next === "light") document.documentElement.dataset.theme = "light";
-    else delete document.documentElement.dataset.theme;
+    const flip = () => {
+      if (next === "light") document.documentElement.dataset.theme = "light";
+      else delete document.documentElement.dataset.theme;
+    };
+    // As a view transition, so the whole page crossfades over the root's
+    // 240ms (see `globals.css`) instead of every surface jumping from black
+    // to white between two frames — the one brightness change on the site
+    // that is large enough to hurt. Reduced motion, or no API: the switch.
+    if (
+      typeof document.startViewTransition === "function" &&
+      !window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    ) {
+      // `finished` rejects when the transition is skipped (a hidden tab);
+      // the flip still ran, and an unhandled rejection is all the catch saves.
+      document.startViewTransition(flip).finished.catch(() => {});
+    } else {
+      flip();
+    }
 
     try {
       window.localStorage.setItem(STORAGE_KEY, next);
