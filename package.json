@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "prebuild": "node scripts/make-og.mjs"
+    "prebuild": "node scripts/make-og.mjs && node scripts/make-hero.mjs"
   },
   "dependencies": {
     "@opennextjs/cloudflare": "^1.20.6",

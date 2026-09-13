@@ -53,16 +53,39 @@ const R2_ORIGIN = process.env.NEXT_PUBLIC_IMAGE_ORIGIN ?? "";
  */
 const onR2 = (src: string) => src.startsWith("/work/");
 
-export default function cloudflareImageLoader({ src, width, quality }: ImageLoaderProps): string {
+/**
+ * The widths `scripts/make-hero.mjs` writes for `public/hero/*.jpg`. Keep the
+ * two lists in step: a width named here that was not generated is a 404.
+ */
+const HERO_WIDTHS = [640, 1080, 1920];
+
+/**
+ * `/hero/intro.jpg` at 900px → `/hero/intro-w1080.jpg`; past the largest
+ * copy, the original. Anything that is not a hand-made hero frame gets null.
+ */
+function sizedHero(src: string, width: number): string | null {
+  const m = /^\/hero\/([a-z0-9-]+)\.jpg$/i.exec(src);
+  if (!m) return null;
+  const w = HERO_WIDTHS.find((candidate) => candidate >= width);
+  return w ? `/hero/${m[1]}-w${w}.jpg` : null;
+}
+
+export default function cloudflareImageLoader({
+  src,
+  width,
+  quality,
+}: ImageLoaderProps): string {
   // An absolute URL is somebody else's and is already complete.
   if (!src.startsWith("/")) return src;
 
   const source = onR2(src) ? R2_ORIGIN + src : src;
 
-  // Locally the archive is still on disk under `public/`, so the bare path is
-  // the whole answer and `width` goes unused — exactly the old behaviour,
-  // now confined to the one place it is correct.
-  if (!CDN) return source;
+  // Without transformations the bare path is the answer for the archive —
+  // and `width` goes unused, which is what it cost until Cloudflare's resizer
+  // is switched on. The cover's own frames are the exception: they are the
+  // first picture every visitor sees, so `scripts/make-hero.mjs` sizes them
+  // at build and this hands out the smallest copy that is wide enough.
+  if (!CDN) return sizedHero(src, width) ?? source;
 
   const options = [
     `width=${width}`,

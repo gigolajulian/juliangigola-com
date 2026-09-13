@@ -29,6 +29,11 @@
  * needs no horizontal room at all.
  */
 @custom-variant wide (@media (min-aspect-ratio: 5 / 4));
+/* Upright: a phone, or a tablet in portrait — anything at least a quarter
+   taller than it is wide. The cover stops overlaying its type on the picture
+   here and stacks them instead; see `hero.tsx`. Aspect, not width, like the
+   other two, so a phone turned sideways is `wide` and not this. */
+@custom-variant tall (@media (max-aspect-ratio: 4 / 5));
 
 /* The squarish window: horizontal like `wide`, but laid over the picture.
  *

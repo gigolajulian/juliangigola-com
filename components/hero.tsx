@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import BLUR from "@/public/hero/blur.json";
 import Link from "next/link";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
@@ -57,6 +58,10 @@ const IDLE_MS = 3000;
  * cover beginning to speak.
  */
 const INTRO_MS = 5200;
+
+/** The inlined blur-up for a hand-made hero frame, if it has one. */
+const blurFor = (src: string): string | undefined =>
+  (BLUR as Record<string, string>)[src];
 
 /**
  * The staggered arrival of the type, as a style object.
@@ -373,11 +378,11 @@ export function Hero({ disciplines }: { disciplines: Discipline[] }) {
           /* A phone gets a photograph, not a sliver. Overlaid, the plate
              took 555 of 812px on an iPhone — masthead, seven rows of index
              and the buttons stacked on frosted glass — and the picture was
-             a 90px band under the bar. So below `sm` the picture is the top
-             56dvh of the screen and the type sits under it in the flow
-             (see the overlay below), the way a phone reads a magazine: the
-             image, then the words. */
-          "max-sm:bottom-auto max-sm:h-[56dvh]",
+             a 90px band under the bar. So on a `tall` screen — a phone, or
+             a tablet held upright — the picture is the top 56dvh and the
+             type sits under it in the flow (see the overlay below), the way
+             a phone reads a magazine: the image, then the words. */
+          "tall:bottom-auto tall:h-[56dvh]",
           // From `wide`, it stops being the whole canvas and becomes the
           // right-hand column again: `80dvh` across is 4:5 at full height, so
           // the frame is shown entire rather than cropped to the window. The
@@ -417,6 +422,13 @@ export function Hero({ disciplines }: { disciplines: Discipline[] }) {
               fill
               sizes="(min-width: 1024px) 45vw, 100vw"
               priority={i === 0}
+              // A 16px copy of the frame, inlined, under the picture while it
+              // loads — so the cover is never a flat block of the frame's
+              // colour. Only the hand-made frames in `/hero/` have one
+              // (`scripts/make-hero.mjs`); the archive's arrive under a
+              // crossfade and can wait for Cloudflare's resizer.
+              placeholder={blurFor(discipline.frame.src) ? "blur" : "empty"}
+              blurDataURL={blurFor(discipline.frame.src)}
               aria-hidden={i === active ? undefined : true}
               className={cn(
                 // `cover` against a column already cut to the frame's ratio:
@@ -507,7 +519,7 @@ export function Hero({ disciplines }: { disciplines: Discipline[] }) {
        * from `lg`. Either way the picture is behind all of it and none of the
        * type is closer to the photograph than the plate's own padding.
        */}
-      <div className="relative z-10 flex min-h-dvh flex-col justify-end max-sm:min-h-0 max-sm:justify-start max-sm:pt-[56dvh] squat:justify-start wide:justify-start">
+      <div className="relative z-10 flex min-h-dvh flex-col justify-end tall:min-h-0 tall:justify-start tall:pt-[56dvh] squat:justify-start wide:justify-start">
         <div
           className={cn(
             "flex min-w-0 flex-col border-t border-border/60",
@@ -515,7 +527,7 @@ export function Hero({ disciplines }: { disciplines: Discipline[] }) {
             "bg-background/45 backdrop-blur-2xl",
             // Solid on a phone: the plate is under the picture there, not
             // over it, and frosted glass with nothing behind it is a smear.
-            "max-sm:border-t-0 max-sm:bg-background max-sm:backdrop-blur-none",
+            "tall:border-t-0 tall:bg-background tall:backdrop-blur-none",
             /* Less thin and less blurred where the panel is a full column.
 
                At 45% over a 40px blur the panel became a smear rather than a
