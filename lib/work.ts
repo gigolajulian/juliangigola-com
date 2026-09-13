@@ -688,6 +688,7 @@ export const PRESS: Client[] = [
   { name: "UKIYOSUNKNOWN", slug: "ukiyosunknown", href: "/work/ukiyosunknown" },
   { name: "JUBO", slug: "jubo", href: "/work/jubo" },
   { name: "SAGO", slug: "sago", href: "/work/sago" },
+  { name: "GOOD CULT", slug: "goodcult", href: "/work/goodcult" },
 ].filter((c) => {
   const project = /^\/work\/([a-z0-9-]+)$/.exec(c.href)?.[1];
   return !project || project === "video" || bySlug.has(project);
