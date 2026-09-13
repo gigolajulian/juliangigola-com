@@ -370,6 +370,14 @@ export function Hero({ disciplines }: { disciplines: Discipline[] }) {
       <div
         className={cn(
           "absolute inset-0 overflow-hidden",
+          /* A phone gets a photograph, not a sliver. Overlaid, the plate
+             took 555 of 812px on an iPhone — masthead, seven rows of index
+             and the buttons stacked on frosted glass — and the picture was
+             a 90px band under the bar. So below `sm` the picture is the top
+             56dvh of the screen and the type sits under it in the flow
+             (see the overlay below), the way a phone reads a magazine: the
+             image, then the words. */
+          "max-sm:bottom-auto max-sm:h-[56dvh]",
           // From `wide`, it stops being the whole canvas and becomes the
           // right-hand column again: `80dvh` across is 4:5 at full height, so
           // the frame is shown entire rather than cropped to the window. The
@@ -499,12 +507,15 @@ export function Hero({ disciplines }: { disciplines: Discipline[] }) {
        * from `lg`. Either way the picture is behind all of it and none of the
        * type is closer to the photograph than the plate's own padding.
        */}
-      <div className="relative z-10 flex min-h-dvh flex-col justify-end squat:justify-start wide:justify-start">
+      <div className="relative z-10 flex min-h-dvh flex-col justify-end max-sm:min-h-0 max-sm:justify-start max-sm:pt-[56dvh] squat:justify-start wide:justify-start">
         <div
           className={cn(
             "flex min-w-0 flex-col border-t border-border/60",
             // Over the photograph: thinned ground, deep blur.
             "bg-background/45 backdrop-blur-2xl",
+            // Solid on a phone: the plate is under the picture there, not
+            // over it, and frosted glass with nothing behind it is a smear.
+            "max-sm:border-t-0 max-sm:bg-background max-sm:backdrop-blur-none",
             /* Less thin and less blurred where the panel is a full column.
 
                At 45% over a 40px blur the panel became a smear rather than a
