@@ -1375,7 +1375,7 @@ export function AdminEditor({
         <Field
           anchor="coverArt"
           label="Cover art on the homepage"
-          hint={`Which releases lead the rack, and in what order. The homepage shows ${releaseLimit}; anything you do not pick fills the rest in the order they were delivered, so the grid is always full.`}
+          hint={`Exactly what the homepage rack shows, in this order — nothing fills in. Up to ${releaseLimit}. The rack runs two across on a phone and, on a wide screen, however many divide your count (five, four or three), so eight, nine and ten all sit in full rows.`}
         >
           <AdminPicker
             chosen={draft.coverArt}
@@ -1384,7 +1384,7 @@ export function AdminEditor({
             limit={releaseLimit}
             addLabel="Add a release"
             searchLabel="Search releases"
-            emptyNote={`Nothing picked — the first ${releaseLimit} releases lead, as they always have.`}
+            emptyNote={`Nothing picked — the first ${releaseLimit} releases show, as they always have.`}
             shortfallNote="The rest of the rack fills from the remaining releases in order."
           />
         </Field>

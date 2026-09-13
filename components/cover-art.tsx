@@ -28,13 +28,15 @@ import { CoverFaces, coverLabel } from "@/components/cover-faces";
 export const SHOWN = 10;
 
 /**
- * The releases on the homepage: the chosen ones, then the rest.
+ * The releases on the homepage: exactly the chosen ones, in that order.
  *
- * Picks lead, and whatever is left fills the row out. That is what keeps this
- * from being able to break the grid — the count is always `SHOWN` regardless
- * of how many have been picked, so a half-finished edit in `/admin` cannot
- * publish a rack with three gaps in the last row. Picking none is exactly the
- * behaviour this section had before it could be curated.
+ * This used to top the picks up to `SHOWN` from the rest of the catalogue so
+ * the grid was always full — and that is how a release Julian had not picked
+ * turned up on his homepage: "WESTSIDE SHAWTY IS NOT IN THE ADMIN PANEL".
+ * What the panel shows is what the page shows, full stop. Picking none is
+ * the state before the rack could be curated and shows the first `SHOWN`.
+ *
+ * A full last row is the grid's job now, not the list's — see `columnsFor`.
  *
  * A slug matching nothing is dropped rather than throwing: `content/site.json`
  * is edited through a browser form, and `scripts/cover-art.mjs` regenerates
@@ -46,11 +48,23 @@ const homepageReleases = (picked: readonly string[]) => {
   const chosen = picked
     .map((slug) => bySlug.get(slug))
     .filter((r): r is (typeof COVER_RELEASES)[number] => r !== undefined);
+  return chosen.length ? chosen : COVER_RELEASES.slice(0, SHOWN);
+};
 
-  const taken = new Set(chosen.map((r) => r.slug));
-  const rest = COVER_RELEASES.filter((r) => !taken.has(r.slug));
-
-  return [...chosen, ...rest].slice(0, SHOWN);
+/**
+ * How many across on a wide screen, so the last row is full.
+ *
+ * Five when five divides the count, else four, else three, else five with a
+ * short last row — which only a count like seven or eleven produces. Phones
+ * stay at two, which every even pick divides. Written as whole class names
+ * rather than built from a number, because Tailwind finds classes by reading
+ * the source.
+ */
+const columnsFor = (n: number): string => {
+  if (n % 5 === 0) return "lg:grid-cols-5";
+  if (n % 4 === 0) return "lg:grid-cols-4";
+  if (n % 3 === 0) return "lg:grid-cols-3";
+  return "lg:grid-cols-5";
 };
 
 export function CoverArt() {
@@ -79,13 +93,13 @@ export function CoverArt() {
         </div>
       </Reveal>
 
-      {/* Two columns, then five — both divide SHOWN exactly, so the last row
-          is always full. */}
+      {/* Two columns on a phone, and on a wide screen whatever divides the
+          pick so the last row is full. */}
       {/* One reveal around the rack rather than one per sleeve. Ten squares
           arriving individually is confetti; the rack reads as a single shelf
           of records, so it arrives as one. */}
       <Reveal>
-        <ul className="grid grid-cols-2 lg:grid-cols-5">
+        <ul className={`grid grid-cols-2 ${columnsFor(releases.length)}`}>
           {releases.map((release) => (
             <li key={release.slug}>
               <Link
