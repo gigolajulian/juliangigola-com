@@ -61,13 +61,16 @@ export function ClientMarks({
       {clients.map((client) => (
         <li
           key={client.slug}
-          className={cn("flex items-center", layout === "grid" && "w-full justify-center")}
+          className={cn(
+            "flex items-center",
+            layout === "grid" && "w-full justify-center",
+          )}
         >
           <Link
             href={`/work/${client.slug}`}
             aria-label={client.name}
             className={cn(
-              "flex items-center justify-center text-muted-foreground transition-colors duration-200 hoverable:hover:text-foreground",
+              "group relative flex items-center justify-center text-muted-foreground transition-colors duration-200 hoverable:hover:text-foreground",
               // A whole cell to aim at in the wall, so the target is the
               // logo's space rather than its ink — a wordmark's letterforms
               // are mostly holes.
@@ -75,6 +78,27 @@ export function ClientMarks({
             )}
           >
             <ClientMark client={client} layout={layout} />
+
+            {/* The name, on hover.
+              
+                A logo asks the viewer to recognise it, and a viewer who does
+                not is left looking at an abstract shape with no way to find
+                out whose it is. So the name arrives under the mark when the
+                pointer does — and on keyboard focus, which is the same
+                question asked a different way.
+
+                Absolutely positioned, so nothing in the row moves when it
+                appears: the grid's row gap is what reserves the space. Only
+                where there *is* a logo — under a wordmark the name would be
+                the name printed twice. */}
+            {layout === "grid" && CLIENT_MARKS[client.slug] ? (
+              <span
+                aria-hidden
+                className="label pointer-events-none absolute -bottom-6 left-1/2 -translate-x-1/2 whitespace-nowrap text-muted-foreground opacity-0 transition-opacity duration-200 ease-[var(--ease-out-strong)] group-focus-visible:opacity-100 hoverable:group-hover:opacity-100 motion-reduce:transition-none"
+              >
+                {client.name}
+              </span>
+            ) : null}
           </Link>
         </li>
       ))}
