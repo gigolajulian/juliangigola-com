@@ -233,4 +233,24 @@ const eq = (a, b, what) => {
   ok(DAILY_CAP >= 100, "and is nowhere near real traffic");
 }
 
+// A name or a detail line cannot smuggle a header into the email copy.
+{
+  const e = enquiry(
+    {
+      type: "other",
+      name: "Eve\r\nBcc: x@y.z",
+      email: "e@x.yz",
+      detail: "a\nb\tc",
+      message: "hi\nthere",
+    },
+    1_700_000_000_000,
+    "id",
+  );
+  ok(
+    !/[\r\n\t]/.test(e.name) && !/[\r\n\t]/.test(e.detail),
+    "control characters stripped from header fields",
+  );
+  eq(e.message, "hi\nthere", "the body keeps its newlines");
+}
+
 console.log(`inbox: ${n} cases pass`);

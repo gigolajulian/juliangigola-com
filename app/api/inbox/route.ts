@@ -129,7 +129,16 @@ async function canPush(token: string): Promise<boolean> {
   }
 }
 
+/**
+ * The shapes GitHub tokens come in. Anything else is refused before the
+ * fetch: otherwise every request with a made-up bearer string costs a call
+ * to GitHub, and enough of those from one origin gets the Worker's egress
+ * rate-limited there — which closes the inbox to the real token too.
+ */
+const GITHUB_TOKEN = /^(gh[pousr]_[A-Za-z0-9]{20,255}|github_pat_[A-Za-z0-9_]{20,255})$/;
+
 async function vouch(token: string): Promise<boolean> {
+  if (!GITHUB_TOKEN.test(token)) return false;
   const id = await digest(token);
   const until = vouched.get(id);
   if (until && until > Date.now()) return true;

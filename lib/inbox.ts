@@ -179,6 +179,15 @@ export function problems(values: {
  * character and a field cut to the limit are both fine, whereas a field that
  * skipped validation is not, and this is the last place before the write.
  */
+/**
+ * One line, no control characters. `name` and `detail` are put into the
+ * email's Subject and Reply-To by the copy sent to Julian, and a header is
+ * ended by a newline — a name of `x\r\nBcc: ...` must not be able to add
+ * one. The message body may keep its newlines; it is a body.
+ */
+const oneLine = (s: string): string =>
+  s.replace(/[\u0000-\u001f\u007f]+/g, " ").trim();
+
 export function enquiry(
   values: {
     type: string;
@@ -197,9 +206,9 @@ export function enquiry(
     type: (SHOOT_TYPES as readonly string[]).includes(values.type)
       ? values.type
       : "other",
-    name: values.name.slice(0, MAX.name),
+    name: oneLine(values.name).slice(0, MAX.name),
     email: values.email.slice(0, MAX.email),
-    detail: values.detail.slice(0, MAX.detail),
+    detail: oneLine(values.detail).slice(0, MAX.detail),
     message: values.message.slice(0, MAX.message),
     read: false,
     ...(country ? { country } : {}),
