@@ -40,6 +40,7 @@ type VimeoPlayer = {
   setVolume: (v: number) => Promise<number>;
   setMuted: (m: boolean) => Promise<boolean>;
   play: () => Promise<void>;
+  pause: () => Promise<void>;
   getPaused: () => Promise<boolean>;
   unload: () => Promise<void>;
 };
@@ -107,6 +108,16 @@ export function VideoHero({
   /** Whether sound is actually on, which is not the same as wanting it on. */
   const [sounding, setSounding] = React.useState(false);
 
+  /**
+   * Whether sound *should* be on — which is the thing worth remembering.
+   *
+   * A ref and not state, because the listeners below are attached once and
+   * would otherwise close over a stale value; re-subscribing an observer on
+   * every sound toggle is a lot of machinery for a boolean. `sounding` stays
+   * as what the label reads, this is what the reel is restored to.
+   */
+  const wantsSound = React.useRef(false);
+
   /* Starts muted in the markup and stays that way in the URL.
    *
    * `muted=1` is what makes autoplay legal everywhere; the volume is set
@@ -140,7 +151,9 @@ export function VideoHero({
 
         try {
           await withSound(p);
-          if (!cancelled) setSounding(true);
+          if (cancelled) return;
+          wantsSound.current = true;
+          setSounding(true);
         } catch {
           // Refused. Back to wallpaper, and the press below is the way in.
           await p.setMuted(true).catch(() => {});
@@ -167,11 +180,13 @@ export function VideoHero({
     if (!p) return;
 
     if (sounding) {
+      wantsSound.current = false;
       setSounding(false);
       void p.setMuted(true).catch(() => {});
       return;
     }
 
+    wantsSound.current = true;
     void withSound(p)
       .then(() => setSounding(true))
       .catch(() => {});
@@ -181,6 +196,75 @@ export function VideoHero({
   function goFullscreen() {
     void frame.current?.requestFullscreen?.().catch(() => {});
   }
+
+  /* ── out of sight, out of earshot ──────────────────────────────
+   * Scrolled away or in a tab nobody is looking at, the reel mutes and
+   * pauses. Back in view, it picks up where it was — with sound only if sound
+   * was on when it left.
+   *
+   * Two signals, because "not being watched" has two causes and neither
+   * covers the other. An observer catches the scroll; `visibilitychange`
+   * catches the tab switch, which no observer reports because the element is
+   * still perfectly visible in a hidden tab.
+   *
+   * This matters more than it sounds. A muted video off-screen is a decoded
+   * frame every 40ms for a picture nobody is looking at — battery on a laptop,
+   * and a whole core on a phone — and an *unmuted* one is a voice coming from
+   * a page the visitor has scrolled past, which is the single rudest thing a
+   * site can do.
+   *
+   * A quarter visible is the threshold rather than none: a reel with a sliver
+   * of itself on screen is not being watched either, and pausing exactly at
+   * the edge makes a slow scroll flicker between states.
+   * ─────────────────────────────────────────────────────────── */
+  React.useEffect(() => {
+    const el = frame.current;
+    if (!el) return;
+
+    /** Whether it is on screen, so the two signals do not fight. */
+    let onScreen = true;
+
+    const suspend = () => {
+      const p = player.current;
+      if (!p) return;
+      // Fullscreen is the one case where an observer can lie: the element is
+      // reported as it was laid out, not as it is being shown.
+      if (document.fullscreenElement) return;
+      setSounding(false);
+      void p.setMuted(true).catch(() => {});
+      void p.pause().catch(() => {});
+    };
+
+    const resume = () => {
+      const p = player.current;
+      if (!p || !onScreen || document.hidden) return;
+      void p.play().catch(() => {});
+      if (!wantsSound.current) return;
+      void withSound(p)
+        .then(() => setSounding(true))
+        // Refused on the way back, which is allowed: it keeps playing silently
+        // and the button says what to press.
+        .catch(() => {});
+    };
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        onScreen = entry.isIntersecting;
+        if (onScreen) resume();
+        else suspend();
+      },
+      { threshold: 0.25 },
+    );
+    observer.observe(el);
+
+    const onVisibility = () => (document.hidden ? suspend() : resume());
+    document.addEventListener("visibilitychange", onVisibility);
+
+    return () => {
+      observer.disconnect();
+      document.removeEventListener("visibilitychange", onVisibility);
+    };
+  }, [withSound]);
 
   return (
     <section
