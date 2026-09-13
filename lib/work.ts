@@ -370,9 +370,52 @@ export { HIDDEN };
 const inSessions = (p: Project) =>
   p.categories.some((c) => c.section === "SESSIONS");
 
-/** Commissioned work: editorial, campaigns, portraits, music, film. */
+export const projectsIn = (categorySlug: string): Project[] =>
+  PROJECTS.filter((p) => p.categories.some((c) => c.slug === categorySlug));
+
+/**
+ * Whether a nav leaf is one gallery rather than a listing of projects.
+ *
+ * The old nav mixed the two without saying so: EDITORIAL is eighteen separate
+ * projects, where COVERART and WEDDINGS are each a single gallery published
+ * under the category's own slug.
+ *
+ * Moved up here from below `COMMISSIONS`, which now needs it. A `const` arrow
+ * is not hoisted, so the definition has to precede the first use or the
+ * module throws on import.
+ */
+const isOwnGallery = (categorySlug: string): boolean => {
+  const inCategory = projectsIn(categorySlug);
+  return inCategory.length === 1 && inCategory[0].slug === categorySlug;
+};
+
+/**
+ * Whether a project *is* a discipline rather than a piece of work in one.
+ *
+ * Cover art, Automotive, Places and Event coverage are published as a single
+ * gallery under the discipline's own slug — twenty-four record sleeves in one
+ * page, a folder of cars — because there are no separate commissions behind
+ * them to list. They are the discipline, drawn as a gallery.
+ */
+const isDiscipline = (p: Project) =>
+  p.categories.some((c) => c.slug === p.slug && isOwnGallery(c.slug));
+
+/**
+ * Commissioned work: editorial, campaigns, portraits, music, film.
+ *
+ * Projects, and only projects. The four disciplines that are themselves one
+ * gallery used to sit in here as a card apiece, so the index that says "59
+ * commissioned projects" counted Cover art as one project and Editorial as
+ * twenty-eight — and a grid of individual commissions had four whole
+ * disciplines shuffled in among them, sorted by nothing a visitor could see.
+ *
+ * They keep their chip at the top of the index, which is where Julian wants
+ * them and where they already went somewhere sensible: `categoryHref` sends a
+ * one-gallery discipline straight to its gallery rather than to a listing
+ * page with a single row on it.
+ */
 export const COMMISSIONS: Project[] = PROJECTS.filter(
-  (p) => p.categories.length > 0 && !inSessions(p),
+  (p) => p.categories.length > 0 && !inSessions(p) && !isDiscipline(p),
 );
 
 /** Client-session work: graduation, headshots, weddings, studio digitals. */
@@ -399,21 +442,6 @@ const bySlug = new Map(PROJECTS.map((p) => [p.slug, p]));
 
 export const getProject = (slug: string): Project | undefined =>
   bySlug.get(slug);
-
-export const projectsIn = (categorySlug: string): Project[] =>
-  PROJECTS.filter((p) => p.categories.some((c) => c.slug === categorySlug));
-
-/**
- * Whether a nav leaf is one gallery rather than a listing of projects.
- *
- * The old nav mixed the two without saying so: EDITORIAL is eighteen separate
- * projects, where COVERART and WEDDINGS are each a single gallery published
- * under the category's own slug.
- */
-const isOwnGallery = (categorySlug: string): boolean => {
-  const inCategory = projectsIn(categorySlug);
-  return inCategory.length === 1 && inCategory[0].slug === categorySlug;
-};
 
 /**
  * Where a category's work lives.
