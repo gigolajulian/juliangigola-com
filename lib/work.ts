@@ -637,7 +637,17 @@ export type Discipline = {
   count: number;
   /** Where the row goes when clicked. */
   href: string;
-  project: Project;
+  /**
+   * What the frame on screen is, and where it goes.
+   *
+   * A project, for every discipline whose frame comes out of the archive.
+   * Video's frame can be a film's poster instead, and then the thing to
+   * credit is the film — so this is a name and an href rather than a
+   * `Project`, and it is optional: a frame nobody can be credited for draws
+   * no label, which the cover already handled (`if (!project) return null`)
+   * before there was a case that reached it.
+   */
+  credit?: { name: string; href: string };
   frame: Frame;
 };
 
@@ -791,6 +801,10 @@ const DEFAULT_DISCIPLINE_SLUGS = [
   "mixed-media",
   "artist-presskit",
   "coverart",
+  // The moving work, added last so the six the cover has always opened with
+  // keep their numbers. It carries its own frame rather than one from the
+  // archive — see `videoFrame`.
+  "video",
 ];
 
 /**
@@ -819,6 +833,45 @@ const DISCIPLINE_SLUGS = CONTENT.heroDisciplines.length
  */
 const DISCIPLINE_COUNTS: Record<string, number> = {
   coverart: COVER_RELEASES.length,
+  // Films, not projects: Video has no projects in the archive at all.
+  video: CONTENT.videos.length,
+};
+
+/**
+ * The cover frame for Video, which has no work in the archive to derive one
+ * from.
+ *
+ * A picked frame first — /admin's Disciplines tab writes one into
+ * `DISCIPLINE_COVERS`, and a photograph of his own at full resolution with a
+ * real mat colour is the better cover by a distance.
+ *
+ * Failing that, the first film's own still, so the row works the moment a
+ * link is pasted rather than waiting on a second decision. `maxresdefault`
+ * and not the default `hqdefault`: 1280x720 against 480x360, and this is the
+ * largest paint on the page. The mat is left transparent because a provider
+ * still comes with no colour analysis — the section's own ground shows
+ * through while it decodes, which is the theme-appropriate answer rather than
+ * a guessed one.
+ *
+ * The loader already handles the remote URL: "an absolute URL is somebody
+ * else's and is already complete" (`image-loader.ts`), so it passes through
+ * untransformed.
+ */
+const videoFrame = (): Frame | null => {
+  const picked = categoryFrame("video");
+  if (picked) return picked;
+
+  const film = CONTENT.videos[0];
+  if (!film) return null;
+
+  const still =
+    film.poster ??
+    (film.provider === "youtube"
+      ? `https://i.ytimg.com/vi/${film.videoId}/maxresdefault.jpg`
+      : null);
+  if (!still) return null;
+
+  return { src: still, width: 1280, height: 720, color: "transparent", alt: `${film.title} — a film by Julian Gigola` };
 };
 
 export const DISCIPLINES: Discipline[] = DISCIPLINE_SLUGS.map((slug) =>
@@ -828,9 +881,17 @@ export const DISCIPLINES: Discipline[] = DISCIPLINE_SLUGS.map((slug) =>
   .map((category) => {
     const inCategory = projectsIn(category.slug);
     const lead = inCategory[0];
-    if (!lead) return null;
 
-    const frame = categoryFrame(category.slug);
+    /* Video is the one discipline with no work in the archive: its films live
+       on YouTube and Vimeo and its frame comes from `videoFrame`. So the
+       "no lead project" test cannot be the gate for it — what gates it is
+       having a film at all, which is the same rule the work index applies to
+       its chip. */
+    const isVideo = category.slug === "video";
+    if (!lead && !isVideo) return null;
+    if (isVideo && CONTENT.videos.length === 0) return null;
+
+    const frame = isVideo ? videoFrame() : categoryFrame(category.slug);
     if (!frame) return null;
 
     // Whatever the frame actually came from, so the cover's credit names the
@@ -847,14 +908,24 @@ export const DISCIPLINES: Discipline[] = DISCIPLINE_SLUGS.map((slug) =>
       // `lead`, not `project`: where the category *is* a gallery, the number
       // is that gallery's size — not the size of whatever project an override
       // happened to borrow a frame from.
-      (isOwnGallery(category.slug) ? lead.images.length : inCategory.length);
+      (isOwnGallery(category.slug) ? lead!.images.length : inCategory.length);
+
+    /* Credit the thing on screen. A photograph credits its project; a film's
+       poster credits the film, and goes to the page it plays on. */
+    const credit = project
+      ? { name: project.name, href: `/work/${project.slug}` }
+      : isVideo && CONTENT.videos[0]
+        ? { name: CONTENT.videos[0].title, href: "/work/video" }
+        : undefined;
 
     return {
       slug: category.slug,
       name: categoryLabel(category),
       count,
       href: categoryHref(category.slug),
-      project,
+      // Spread rather than assigned: `credit?:` means absent, and `strict`
+      // will not take `undefined` for it.
+      ...(credit ? { credit } : {}),
       frame,
     };
   })

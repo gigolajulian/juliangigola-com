@@ -4,7 +4,7 @@ import * as React from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
-import type { Discipline, Frame, Project } from "@/lib/work";
+import type { Discipline, Frame } from "@/lib/work";
 
 /* ── the cover ────────────────────────────────────────────────────
  * A masthead grid that opens on the job title and then cycles through the
@@ -152,7 +152,13 @@ const INTRO: Slide = {
  * cityscape is not a commission. The credit in the corner is absent rather
  * than invented for that one frame.
  */
-type Slide = { slug: string; name: string; frame: Frame; project?: Project };
+type Slide = {
+  slug: string;
+  name: string;
+  frame: Frame;
+  /** What the frame is and where it goes. The intro card credits nothing. */
+  credit?: { name: string; href: string };
+};
 
 export function Hero({ disciplines }: { disciplines: Discipline[] }) {
   /**
@@ -449,13 +455,13 @@ export function Hero({ disciplines }: { disciplines: Discipline[] }) {
               is taken out of the tab order and hidden from the reader while it
               fades, so there are never two credits to land on. */}
         {slides.map((discipline, i) => {
-          const project = discipline.project;
-          if (!project || (i !== active && i !== slide.previous)) return null;
+          const credit = discipline.credit;
+          if (!credit || (i !== active && i !== slide.previous)) return null;
           const leaving = i !== active;
           return (
             <Link
               key={discipline.slug}
-              href={`/work/${project.slug}`}
+              href={credit.href}
               tabIndex={leaving ? -1 : undefined}
               aria-hidden={leaving || undefined}
               className={cn(
@@ -469,7 +475,7 @@ export function Hero({ disciplines }: { disciplines: Discipline[] }) {
                     slide.previous !== -1 && "title-in",
               )}
             >
-              {project.name} &rarr;
+              {credit.name} &rarr;
             </Link>
           );
         })}

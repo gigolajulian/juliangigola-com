@@ -80,5 +80,79 @@
     }
   ],
   "heroDisciplines": [],
-  "videos": []
+  "videos": [
+    {
+      "id": "youtube-lmR6-qjutn0",
+      "title": "Clean",
+      "provider": "youtube",
+      "videoId": "lmR6-qjutn0",
+      "poster": "https://i.ytimg.com/vi/lmR6-qjutn0/maxresdefault.jpg",
+      "client": "CAMR",
+      "section": "music"
+    },
+    {
+      "id": "youtube-E7N7HDnQjfI",
+      "title": "The Description",
+      "provider": "youtube",
+      "videoId": "E7N7HDnQjfI",
+      "poster": "https://i.ytimg.com/vi/E7N7HDnQjfI/maxresdefault.jpg",
+      "client": "Sammy Shiblaq",
+      "section": "music"
+    },
+    {
+      "id": "youtube-9QGO20Jgz7s",
+      "title": "Wonderland",
+      "provider": "youtube",
+      "videoId": "9QGO20Jgz7s",
+      "poster": "https://i.ytimg.com/vi/9QGO20Jgz7s/maxresdefault.jpg",
+      "client": "Nic at Night",
+      "section": "music"
+    },
+    {
+      "id": "youtube-pwzi7LKu-_I",
+      "title": "Dide O Del",
+      "provider": "youtube",
+      "videoId": "pwzi7LKu-_I",
+      "poster": "https://i.ytimg.com/vi/pwzi7LKu-_I/maxresdefault.jpg",
+      "client": "Imanemun",
+      "section": "music"
+    },
+    {
+      "id": "vimeo-895734192",
+      "title": "Ladera Granola",
+      "provider": "vimeo",
+      "videoId": "895734192",
+      "section": "commercial",
+      "client": "Ladera Granola",
+      "poster": "https://i.vimeocdn.com/video/1770614733-3d69b472e5ab7063c1197e1645f9ceb7d00f19c1db0222854107ab501e3d4d78-d_1280x720"
+    },
+    {
+      "id": "youtube-ym7xEK50OT0",
+      "title": "Campaign",
+      "provider": "youtube",
+      "videoId": "ym7xEK50OT0",
+      "poster": "https://i.ytimg.com/vi/ym7xEK50OT0/maxresdefault.jpg",
+      "client": "Pear VC",
+      "section": "commercial"
+    },
+    {
+      "id": "youtube-bqw03DYQavM",
+      "title": "Iranian Americans of Silicon Valley",
+      "provider": "youtube",
+      "videoId": "bqw03DYQavM",
+      "poster": "https://i.ytimg.com/vi/bqw03DYQavM/maxresdefault.jpg",
+      "client": "Immigrant Stories",
+      "section": "commercial"
+    },
+    {
+      "id": "youtube-1e1fYalqTJs",
+      "title": "Purgation",
+      "provider": "youtube",
+      "videoId": "1e1fYalqTJs",
+      "poster": "https://i.ytimg.com/vi/1e1fYalqTJs/maxresdefault.jpg",
+      "client": "After Dark Fashion",
+      "year": 2022,
+      "section": "commercial"
+    }
+  ]
 }
