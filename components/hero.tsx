@@ -375,14 +375,10 @@ export function Hero({ disciplines }: { disciplines: Discipline[] }) {
       <div
         className={cn(
           "absolute inset-0 overflow-hidden",
-          /* A phone gets a photograph, not a sliver. Overlaid, the plate
-             took 555 of 812px on an iPhone — masthead, seven rows of index
-             and the buttons stacked on frosted glass — and the picture was
-             a 90px band under the bar. So on a `tall` screen — a phone, or
-             a tablet held upright — the picture is the top 56dvh and the
-             type sits under it in the flow (see the overlay below), the way
-             a phone reads a magazine: the image, then the words. */
-          "tall:bottom-auto tall:h-[56dvh]",
+          /* Full bleed on every layout, including upright screens: the
+             plate at the foot is a band there now (see below), so the
+             photograph has the screen. */
+
           // From `wide`, it stops being the whole canvas and becomes the
           // right-hand column again: `80dvh` across is 4:5 at full height, so
           // the frame is shown entire rather than cropped to the window. The
@@ -519,15 +515,22 @@ export function Hero({ disciplines }: { disciplines: Discipline[] }) {
        * from `lg`. Either way the picture is behind all of it and none of the
        * type is closer to the photograph than the plate's own padding.
        */}
-      <div className="relative z-10 flex min-h-dvh flex-col justify-end tall:min-h-0 tall:justify-start tall:pt-[56dvh] squat:justify-start wide:justify-start">
+      <div className="relative z-10 flex min-h-dvh flex-col justify-end squat:justify-start wide:justify-start">
         <div
           className={cn(
             "flex min-w-0 flex-col border-t border-border/60",
             // Over the photograph: thinned ground, deep blur.
             "bg-background/45 backdrop-blur-2xl",
-            // Solid on a phone: the plate is under the picture there, not
-            // over it, and frosted glass with nothing behind it is a smear.
-            "tall:border-t-0 tall:bg-background tall:backdrop-blur-none",
+            /* Upright screens — a phone, a tablet held tall — asked for the
+               picture: "show the images … with julian gigola on the bottom
+               fourth and the phases". So the photograph is the whole screen
+               and this plate is a band at its foot: the running head, the
+               name with the phase under it, a strip of seven ticks for the
+               phases, and the two buttons. The seven-row index that made the
+               plate 555px tall is off here (see the nav below) — the ticks
+               are the same control at a thumb's size. Denser ground than the
+               stacked default so the type holds on a bright frame. */
+            "tall:bg-background/[0.72] tall:backdrop-blur-xl",
             /* Less thin and less blurred where the panel is a full column.
 
                At 45% over a 40px blur the panel became a smear rather than a
@@ -713,7 +716,7 @@ export function Hero({ disciplines }: { disciplines: Discipline[] }) {
               instead of being captured in four closures. */}
             <nav
               aria-label="Disciplines"
-              className="mt-8 border-t border-border sm:mt-10"
+              className="mt-8 border-t border-border sm:mt-10 tall:hidden"
             >
               <ul onPointerOver={takeFromEvent} onFocus={takeFromEvent}>
                 {disciplines.map((discipline, i) => (
@@ -781,6 +784,40 @@ export function Hero({ disciplines }: { disciplines: Discipline[] }) {
               </ul>
             </nav>
 
+            {/* The phases, at a thumb's size. One tick per discipline, the
+                current one lit, each a link to its page and each a target for
+                the same delegated handler the rows use — so tapping a tick
+                switches the cover the way hovering a row does. Only where the
+                rows are hidden. */}
+            <ol
+              aria-label="Disciplines"
+              onPointerOver={takeFromEvent}
+              onFocus={takeFromEvent}
+              className="mt-5 hidden gap-1 px-6 tall:flex"
+            >
+              {disciplines.map((discipline, i) => (
+                <li
+                  key={discipline.slug}
+                  data-discipline={i + 1}
+                  className="flex-1"
+                >
+                  <Link
+                    href={discipline.href}
+                    aria-label={discipline.name}
+                    aria-current={i + 1 === active ? "true" : undefined}
+                    className="block py-3"
+                  >
+                    <span
+                      className={cn(
+                        "block h-px transition-colors duration-300",
+                        i + 1 === active ? "bg-foreground" : "bg-foreground/25",
+                      )}
+                    />
+                  </Link>
+                </li>
+              ))}
+            </ol>
+
             {/* Four: the two ways in.
 
               `mt-auto` pins them to the foot, which anchors the type block at
@@ -793,7 +830,7 @@ export function Hero({ disciplines }: { disciplines: Discipline[] }) {
               is centred instead (see the plate below). */}
             <div
               style={lands(BUTTONS_MS)}
-              className="rise mt-auto flex flex-wrap items-center gap-3 px-6 py-6 sm:px-10 sm:py-8 squat:mt-10"
+              className="rise mt-auto flex flex-wrap items-center gap-3 px-6 py-6 sm:px-10 sm:py-8 squat:mt-10 tall:mt-2 tall:pb-5 tall:pt-4"
             >
               <Link
                 href="/work"

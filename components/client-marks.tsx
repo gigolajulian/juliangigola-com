@@ -48,7 +48,7 @@ export function ClientMarks({
         /* `--mark-box` is the box every mark is fitted into — height first,
            width as the cap. See the note in `ClientMark` for why both. */
         layout === "row"
-          ? "flex flex-wrap items-center gap-x-8 gap-y-4 [--mark-box:1.45rem] [--mark-cap:7rem]"
+          ? "flex flex-wrap items-center justify-center gap-x-8 gap-y-4 [--mark-box:1.45rem] [--mark-cap:7rem]"
           : /* Even cells, and the count comes from the width rather than from
                a breakpoint: two on a phone, three by 30rem, five by 60rem.
                `auto-fit` is right here and not in the video grid — an empty

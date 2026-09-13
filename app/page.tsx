@@ -32,7 +32,7 @@ export default function Home() {
       {/* Proof, in its own band directly under the cover — so it is the first
           thing past the fold rather than something to be scrolled past. */}
       <section aria-labelledby="press" className="border-b border-border">
-        <div className="mx-auto flex max-w-[100rem] flex-wrap items-baseline gap-x-8 gap-y-4 px-6 py-8 sm:px-10 sm:py-10">
+        <div className="mx-auto flex max-w-[100rem] flex-wrap items-baseline justify-center gap-x-8 gap-y-4 px-6 py-8 sm:px-10 sm:py-10">
           <h2 id="press" className="label shrink-0 text-muted-foreground">
             Published &amp; commissioned by
           </h2>
