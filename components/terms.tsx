@@ -1,20 +1,13 @@
-import type { Metadata } from "next";
 import Link from "next/link";
-import { LegalPage, Clause } from "@/components/legal";
-
-export const metadata: Metadata = {
-  title: "Terms of Service",
-  description:
-    "The terms on which juliangigola.com and the photographs on it may be used — including that none of it may be used to train, tune or evaluate AI.",
-};
+import { LegalColumn, Clause } from "@/components/legal";
 
 const SITE = "juliangigola.com";
 const EMAIL = "hello@juliangigola.com";
 
-export default function TermsPage() {
+export function TermsColumn() {
   return (
-    <LegalPage
-      eyebrow="Legal"
+    <LegalColumn
+      id="terms"
       title="Terms of Service"
       effective="2026-09-13"
       intro={
@@ -31,7 +24,7 @@ export default function TermsPage() {
             {SITE} (the &ldquo;Site&rdquo;). &ldquo;You&rdquo; means anyone or
             anything that accesses the Site, whether a person, a company, or
             software acting for either. The{" "}
-            <Link href="/privacy" className="underline underline-offset-4">
+            <Link href="#privacy" className="underline underline-offset-4">
               Privacy Policy
             </Link>{" "}
             is part of these terms.
@@ -256,7 +249,7 @@ export default function TermsPage() {
           you send for the purpose of responding to you, evaluating and
           performing the work discussed, and keeping records of it. How that
           information is stored and for how long is set out in the{" "}
-          <Link href="/privacy" className="underline underline-offset-4">
+          <Link href="#privacy" className="underline underline-offset-4">
             Privacy Policy
           </Link>
           .
@@ -414,6 +407,6 @@ export default function TermsPage() {
           .
         </p>
       </Clause>
-    </LegalPage>
+    </LegalColumn>
   );
 }

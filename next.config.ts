@@ -45,6 +45,10 @@ const pageRedirects = [
   // "Wedding" (33 frames) was folded into the Weddings gallery; the project
   // is hidden now and its frames live in the gallery's sequence.
   { source: "/work/bridal", destination: "/work/weddings", permanent: true },
+  // The terms and the privacy policy were two pages for a day; they are two
+  // columns of one now, and the footer links straight to the anchors.
+  { source: "/terms", destination: "/legal#terms", permanent: true },
+  { source: "/privacy", destination: "/legal#privacy", permanent: true },
 ];
 
 /**
@@ -145,12 +149,12 @@ const securityHeaders = [
   // growing list of crawlers); `TDM-Reservation: 1` is the W3C TDMRep
   // protocol, which is what makes the opt-out in Article 4(3) of the EU
   // copyright directive "machine-readable" and therefore effective. The
-  // human-readable version is clause 5 of /terms; `/robots.txt` names the
+  // human-readable version is clause 5 of /legal#terms; `/robots.txt` names the
   // crawlers. None of this stops a crawler that ignores it — it makes
   // ignoring it a breach from the first request, which is the point.
   { key: "X-Robots-Tag", value: "noai, noimageai" },
   { key: "TDM-Reservation", value: "1" },
-  { key: "TDM-Policy", value: "https://www.juliangigola.com/terms" },
+  { key: "TDM-Policy", value: "https://www.juliangigola.com/legal#terms" },
 ];
 
 const nextConfig: NextConfig = {

@@ -13,7 +13,7 @@ export default function robots(): MetadataRoute.Robots {
       // indexing is unaffected: Googlebot and Bingbot are not in this list,
       // and Google-Extended / Applebot-Extended are the switches those two
       // companies publish for training use specifically. The legal version
-      // of this list is clause 5 of /terms; the headers carry it too.
+      // of this list is clause 5 of /legal#terms; the headers carry it too.
       {
         userAgent: [
           "GPTBot",

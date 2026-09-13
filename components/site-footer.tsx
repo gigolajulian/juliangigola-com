@@ -16,8 +16,8 @@ const SOCIAL = [
 /** The two pages every commercial site owes its visitors, and the one line
     on this one that says the photographs are not training data. */
 const LEGAL = [
-  { href: "/terms", label: "Terms" },
-  { href: "/privacy", label: "Privacy" },
+  { href: "/legal#terms", label: "Terms" },
+  { href: "/legal#privacy", label: "Privacy" },
 ] as const;
 
 export function SiteFooter() {

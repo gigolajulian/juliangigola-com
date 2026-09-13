@@ -1,19 +1,12 @@
-import type { Metadata } from "next";
 import Link from "next/link";
-import { LegalPage, Clause } from "@/components/legal";
-
-export const metadata: Metadata = {
-  title: "Privacy Policy",
-  description:
-    "What juliangigola.com collects, why, who sees it, how long it is kept, and how to exercise your rights over it.",
-};
+import { LegalColumn, Clause } from "@/components/legal";
 
 const EMAIL = "hello@juliangigola.com";
 
-export default function PrivacyPage() {
+export function PrivacyColumn() {
   return (
-    <LegalPage
-      eyebrow="Legal"
+    <LegalColumn
+      id="privacy"
       title="Privacy Policy"
       effective="2026-09-13"
       intro={
@@ -106,7 +99,7 @@ export default function PrivacyPage() {
           <li>
             <strong>To establish, exercise or defend legal claims</strong>,
             including enforcing the{" "}
-            <Link href="/terms" className="underline underline-offset-4">
+            <Link href="#terms" className="underline underline-offset-4">
               Terms of Service
             </Link>
             . Basis: legitimate interest.
@@ -329,6 +322,6 @@ export default function PrivacyPage() {
           the subject line and it will be handled first.
         </p>
       </Clause>
-    </LegalPage>
+    </LegalColumn>
   );
 }
