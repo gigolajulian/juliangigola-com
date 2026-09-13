@@ -300,7 +300,18 @@ export function SiteHeader() {
             // under a half-screen photograph — hiding the wordmark there
             // leaves the header with nothing but a burger and no name on
             // screen at all.
-            wordmarkVisible ? "opacity-100" : "opacity-0 max-lg:opacity-100",
+            //
+            // `pointer-events-none` while faded, because opacity alone hides
+            // a link from the eye and not from the mouse. Measured on the
+            // live homepage at scroll 0: a 214x32 invisible anchor to `/`
+            // over the top-left of the cover photograph, so clicking that
+            // patch of picture reloaded the homepage and restarted the
+            // cover. Keyboard access is untouched — pointer-events does not
+            // affect the tab order, and `focus-visible:opacity-100` above
+            // still brings it back into view when tabbed to.
+            wordmarkVisible
+              ? "opacity-100"
+              : "pointer-events-none opacity-0 max-lg:pointer-events-auto max-lg:opacity-100",
           )}
         >
           Julian Gigola
