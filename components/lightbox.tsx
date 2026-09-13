@@ -170,7 +170,15 @@ export function Lightbox({
             <Dialog.Title>{`${name} — frame ${index + 1} of ${frames.length}`}</Dialog.Title>
           </VisuallyHidden.Root>
 
-          <div className="flex min-h-0 flex-1 items-center justify-center p-4 sm:p-10">
+          {/* Anywhere that is not the picture closes it — Julian asked. The
+              check is against the element itself, so a click on the frame
+              stays put and the controls below keep their own jobs. */}
+          <div
+            onClick={(e) => {
+              if (e.target === e.currentTarget) onOpenChange(false);
+            }}
+            className="flex min-h-0 flex-1 items-center justify-center p-4 sm:p-10"
+          >
             {current ? (
               <Image
                 key={current.src}
@@ -188,7 +196,12 @@ export function Lightbox({
             ) : null}
           </div>
 
-          <div className="flex shrink-0 items-center justify-between gap-6 px-6 pb-6 sm:px-10 sm:pb-8">
+          <div
+            onClick={(e) => {
+              if (e.target === e.currentTarget) onOpenChange(false);
+            }}
+            className="flex shrink-0 items-center justify-between gap-6 px-6 pb-6 sm:px-10 sm:pb-8"
+          >
             <p className="label text-muted-foreground">
               {index + 1} / {frames.length}
             </p>
