@@ -125,9 +125,282 @@
       "/work/purgatory/15.jpg",
       "/work/purgatory/02.jpg",
       "/work/purgatory/03.jpg"
+    ],
+    "weddings": [
+      "/work/weddings/01.jpg",
+      "/work/weddings/02.jpg",
+      "/work/weddings/03.jpg",
+      "/work/weddings/04.jpg",
+      "/work/weddings/05.jpg",
+      "/work/weddings/06.jpg",
+      "/work/weddings/07.jpg",
+      "/work/weddings/08.jpg",
+      "/work/weddings/09.jpg",
+      "/work/weddings/10.jpg",
+      "/work/weddings/11.jpg",
+      "/work/weddings/12.jpg",
+      "/work/weddings/13.jpg",
+      "/work/weddings/14.jpg",
+      "/work/weddings/15.jpg",
+      "/work/weddings/16.jpg",
+      "/work/weddings/17.jpg",
+      "/work/weddings/18.jpg",
+      "/work/weddings/19.jpg",
+      "/work/weddings/20.jpg",
+      "/work/weddings/21.jpg",
+      "/work/weddings/22.jpg",
+      "/work/weddings/23.jpg",
+      "/work/weddings/24.jpg",
+      "/work/weddings/25.jpg",
+      "/work/weddings/26.jpg",
+      "/work/weddings/27.jpg",
+      "/work/weddings/28.jpg",
+      "/work/weddings/29.jpg",
+      "/work/weddings/30.jpg",
+      "/work/weddings/31.jpg",
+      "/work/weddings/32.jpg",
+      "/work/weddings/33.jpg",
+      "/work/weddings/34.jpg",
+      "/work/weddings/35.jpg",
+      "/work/weddings/36.jpg",
+      "/work/weddings/37.jpg",
+      "/work/weddings/38.jpg",
+      "/work/weddings/39.jpg",
+      "/work/weddings/40.jpg",
+      {
+        "src": "/work/bridal/01.jpg",
+        "width": 1600,
+        "height": 2399,
+        "color": "#F3F3F3",
+        "alt": ""
+      },
+      {
+        "src": "/work/bridal/02.jpg",
+        "width": 1600,
+        "height": 1067,
+        "color": "#C0C0C0",
+        "alt": ""
+      },
+      {
+        "src": "/work/bridal/03.jpg",
+        "width": 1600,
+        "height": 2398,
+        "color": "#D9D9D9",
+        "alt": ""
+      },
+      {
+        "src": "/work/bridal/04.jpg",
+        "width": 1600,
+        "height": 2398,
+        "color": "#C0C0C0",
+        "alt": ""
+      },
+      {
+        "src": "/work/bridal/05.jpg",
+        "width": 1600,
+        "height": 2399,
+        "color": "#F3F3F3",
+        "alt": ""
+      },
+      {
+        "src": "/work/bridal/06.jpg",
+        "width": 1600,
+        "height": 2398,
+        "color": "#F3F3F3",
+        "alt": ""
+      },
+      {
+        "src": "/work/bridal/07.jpg",
+        "width": 1600,
+        "height": 2398,
+        "color": "#262626",
+        "alt": ""
+      },
+      {
+        "src": "/work/bridal/08.jpg",
+        "width": 1600,
+        "height": 1067,
+        "color": "#C0C0C0",
+        "alt": ""
+      },
+      {
+        "src": "/work/bridal/09.jpg",
+        "width": 1600,
+        "height": 2399,
+        "color": "#F3F3F3",
+        "alt": ""
+      },
+      {
+        "src": "/work/bridal/10.jpg",
+        "width": 1600,
+        "height": 2399,
+        "color": "#C0C0A6",
+        "alt": ""
+      },
+      {
+        "src": "/work/bridal/11.jpg",
+        "width": 1600,
+        "height": 1067,
+        "color": "#737373",
+        "alt": ""
+      },
+      {
+        "src": "/work/bridal/12.jpg",
+        "width": 1600,
+        "height": 2398,
+        "color": "#F3F3F3",
+        "alt": ""
+      },
+      {
+        "src": "/work/bridal/13.jpg",
+        "width": 1600,
+        "height": 2399,
+        "color": "#F3F3F3",
+        "alt": ""
+      },
+      {
+        "src": "/work/bridal/14.jpg",
+        "width": 1600,
+        "height": 2398,
+        "color": "#F3F3F3",
+        "alt": ""
+      },
+      {
+        "src": "/work/bridal/15.jpg",
+        "width": 1600,
+        "height": 1067,
+        "color": "#D9C0A6",
+        "alt": ""
+      },
+      {
+        "src": "/work/bridal/16.jpg",
+        "width": 1600,
+        "height": 1067,
+        "color": "#F3F3F3",
+        "alt": ""
+      },
+      {
+        "src": "/work/bridal/17.jpg",
+        "width": 1600,
+        "height": 1067,
+        "color": "#F3F3F3",
+        "alt": ""
+      },
+      {
+        "src": "/work/bridal/18.jpg",
+        "width": 1600,
+        "height": 2399,
+        "color": "#D9D9D9",
+        "alt": ""
+      },
+      {
+        "src": "/work/bridal/19.jpg",
+        "width": 1600,
+        "height": 2398,
+        "color": "#C0C0C0",
+        "alt": ""
+      },
+      {
+        "src": "/work/bridal/20.jpg",
+        "width": 1600,
+        "height": 2399,
+        "color": "#C0A68C",
+        "alt": ""
+      },
+      {
+        "src": "/work/bridal/21.jpg",
+        "width": 1600,
+        "height": 2398,
+        "color": "#735940",
+        "alt": ""
+      },
+      {
+        "src": "/work/bridal/22.jpg",
+        "width": 1600,
+        "height": 1067,
+        "color": "#737373",
+        "alt": ""
+      },
+      {
+        "src": "/work/bridal/23.jpg",
+        "width": 1600,
+        "height": 1067,
+        "color": "#8C8C73",
+        "alt": ""
+      },
+      {
+        "src": "/work/bridal/24.jpg",
+        "width": 1600,
+        "height": 1067,
+        "color": "#8C7373",
+        "alt": ""
+      },
+      {
+        "src": "/work/bridal/25.jpg",
+        "width": 1600,
+        "height": 1067,
+        "color": "#262626",
+        "alt": ""
+      },
+      {
+        "src": "/work/bridal/26.jpg",
+        "width": 1600,
+        "height": 1067,
+        "color": "#262626",
+        "alt": ""
+      },
+      {
+        "src": "/work/bridal/27.jpg",
+        "width": 1600,
+        "height": 2398,
+        "color": "#262626",
+        "alt": ""
+      },
+      {
+        "src": "/work/bridal/28.jpg",
+        "width": 1600,
+        "height": 2399,
+        "color": "#262626",
+        "alt": ""
+      },
+      {
+        "src": "/work/bridal/29.jpg",
+        "width": 1600,
+        "height": 2398,
+        "color": "#C0C0C0",
+        "alt": ""
+      },
+      {
+        "src": "/work/bridal/30.jpg",
+        "width": 1600,
+        "height": 2398,
+        "color": "#262626",
+        "alt": ""
+      },
+      {
+        "src": "/work/bridal/31.jpg",
+        "width": 1600,
+        "height": 2399,
+        "color": "#26260C",
+        "alt": ""
+      },
+      {
+        "src": "/work/bridal/32.jpg",
+        "width": 1600,
+        "height": 2399,
+        "color": "#262626",
+        "alt": ""
+      },
+      {
+        "src": "/work/bridal/33.jpg",
+        "width": 1600,
+        "height": 1067,
+        "color": "#8C7359",
+        "alt": ""
+      }
     ]
   },
-  "hidden": [],
+  "hidden": ["bridal"],
   "credits": {
     "crave": [
       {

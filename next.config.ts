@@ -42,6 +42,9 @@ const pageRedirects = [
   { source: "/links", destination: "/contact", permanent: true },
   // There was a cart in the header but nothing behind it.
   { source: "/store", destination: "/", permanent: true },
+  // "Wedding" (33 frames) was folded into the Weddings gallery; the project
+  // is hidden now and its frames live in the gallery's sequence.
+  { source: "/work/bridal", destination: "/work/weddings", permanent: true },
 ];
 
 /**

@@ -105,10 +105,31 @@ export function AdminDisciplines({
     onOrder(full);
   };
 
+  /* The filter, matched against a discipline's name and slug and against
+     the names and slugs of the projects filed in it — so typing a project
+     finds the discipline it lives in, which is usually the question. */
+  const [query, setQuery] = React.useState("");
+  const q = query.trim().toLowerCase();
+  const matches = (d: DisciplineGroup) =>
+    q === "" ||
+    d.name.toLowerCase().includes(q) ||
+    d.slug.toLowerCase().includes(q) ||
+    (inDiscipline.get(d.slug) ?? []).some(
+      (p) =>
+        p.name.toLowerCase().includes(q) || p.slug.toLowerCase().includes(q),
+    );
+
   return (
     <div className="mt-10 flex flex-col gap-10">
+      <input
+        value={query}
+        onChange={(e) => setQuery(e.target.value)}
+        placeholder="Filter by discipline or project"
+        className="w-full border border-border bg-transparent px-4 py-3 text-sm outline-none focus-visible:border-foreground"
+      />
+
       {["Work", "Sessions"].map((group) => {
-        const rows = disciplines.filter((d) => d.group === group);
+        const rows = disciplines.filter((d) => d.group === group && matches(d));
         if (!rows.length) return null;
 
         return (
