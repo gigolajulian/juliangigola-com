@@ -420,10 +420,18 @@ export function SiteHeader() {
       <div
         id="mobile-nav"
         hidden={!open}
-        // The ground fades; the items spring in over it. Toggling `hidden`
-        // takes the element through `display: none`, which restarts both
-        // animations, so the menu replays every time it opens.
-        className="fixed inset-0 -z-10 flex flex-col justify-center bg-background px-6 pb-20 animate-in fade-in duration-200 ease-out motion-reduce:animate-none lg:hidden"
+        // The ground fades in, and leaves the way the items came: a fade and
+        // a few pixels down, so closing reads as the menu going back where it
+        // rose from rather than being switched off. `display` is in the
+        // transition with `allow-discrete`, which is what lets the `hidden`
+        // attribute wait for the fade before it takes the panel out of the
+        // page; browsers without it cut, which is what it did before.
+        className={cn(
+          "fixed inset-0 -z-10 flex flex-col justify-center bg-background px-6 pb-20 lg:hidden",
+          "transition-[opacity,transform,display] transition-discrete duration-150 ease-[var(--ease-out-strong)]",
+          "starting:opacity-0 [&[hidden]]:translate-y-2 [&[hidden]]:opacity-0",
+          "motion-reduce:transition-none",
+        )}
       >
         <nav aria-label="Main">
           <ul className="flex flex-col gap-1 pl-4">
@@ -444,25 +452,20 @@ export function SiteHeader() {
                   // Staggered so the list cascades in rather than landing all
                   // at once. Short delays only — 40ms a step reads as one
                   // gesture, 150ms reads as waiting.
-                  style={{ animationDelay: `${i * 40}ms` }}
+                  style={{ "--reveal-delay": `${i * 40}ms` } as React.CSSProperties}
                   className={cn(
                     // This is a full-screen menu, so the type is sized to the
                     // screen rather than to a nav bar — fluid, so it fills a
                     // phone and an iPad alike without a stack of breakpoints.
                     "font-display block py-2 uppercase leading-[0.95] tracking-[0]",
                     "text-[clamp(2.75rem,13vw,5.5rem)]",
-                    // On the bounce curve, and far enough to see it land. A
-                    // menu is opened a handful of times a session, which is
-                    // exactly where a spring is worth spending: often enough
-                    // to be noticed, rare enough that it never wears out.
-                    "animate-in fade-in slide-in-from-bottom-4 duration-500 fill-mode-both",
-                    "ease-[var(--ease-bounce)]",
-                    "motion-reduce:animate-none",
+                    // See `menu-in` in globals.css: the bounce, at menu speed.
+                    "menu-in",
                     // Full strength, always. Dimming everything-but-current
                     // greys out the entire menu on any page that is not one of
                     // these four — the homepage included — which reads as
                     // disabled rather than as emphasis.
-                    "transition-opacity hoverable:hover:opacity-70",
+                    "hoverable:hover:opacity-70",
                   )}
                 >
                   {link.label}

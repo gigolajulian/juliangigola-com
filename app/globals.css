@@ -711,6 +711,41 @@
   }
 }
 
+/* In the workbench the release is quick and plain.
+ *
+ * The spring above is for a button pressed a few times a visit. /admin's are
+ * pressed dozens of times a day, and at that frequency a 440ms settle reads
+ * as the button being slow rather than alive — the tokens block says exactly
+ * this. Unlayered, so it outranks the utility; `:active` is restated because
+ * this rule would otherwise outrank the utility's own down-stroke as well. */
+[data-workbench] .press {
+  transition:
+    transform 160ms var(--ease-out-strong),
+    scale 160ms var(--ease-out-strong),
+    translate 160ms var(--ease-out-strong),
+    rotate 160ms var(--ease-out-strong),
+    background-color 200ms ease-out,
+    border-color 200ms ease-out,
+    color 200ms ease-out,
+    opacity 200ms ease-out;
+}
+[data-workbench] .press:active {
+  transition:
+    transform 90ms cubic-bezier(0.4, 0, 1, 1),
+    scale 90ms cubic-bezier(0.4, 0, 1, 1),
+    translate 90ms cubic-bezier(0.4, 0, 1, 1),
+    rotate 90ms cubic-bezier(0.4, 0, 1, 1),
+    background-color 200ms ease-out,
+    border-color 200ms ease-out,
+    color 200ms ease-out,
+    opacity 200ms ease-out;
+}
+@media (prefers-reduced-motion: reduce) {
+  [data-workbench] .press {
+    transition: none;
+  }
+}
+
 /**
  * The first paint.
  *
@@ -866,13 +901,38 @@
   }
 }
 
+/**
+ * A line of the phone menu arriving.
+ *
+ * `rise`, tuned for a menu: quicker, from a little further down, and on the
+ * bounce curve — a menu is opened a handful of times a session, which is
+ * exactly where a spring is worth spending. A transition and not a keyframe
+ * so it retargets if the menu is closed mid-arrival, and `@starting-style`
+ * so it replays each time the panel comes back from `display: none`.
+ * Opacity is in the list, so the hover fade on the link rides along.
+ */
+@utility menu-in {
+  opacity: 1;
+  transform: translateY(0);
+  transition:
+    opacity 200ms var(--ease-out-strong),
+    transform 320ms var(--ease-bounce);
+  transition-delay: var(--reveal-delay, 0ms);
+
+  @starting-style {
+    opacity: 0;
+    transform: translateY(1rem);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .rise,
   .emerge,
   .press,
   .dissolve,
   .title-out,
-  .title-in {
+  .title-in,
+  .menu-in {
     transition: none;
   }
 }

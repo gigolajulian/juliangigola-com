@@ -178,9 +178,15 @@ export function WorkBand({
                 fill
                 loading="lazy"
                 sizes="(min-width: 1024px) 33vw, (min-width: 768px) 50vw, 100vw"
+                // Two photographs crossfading show both for a moment; a
+                // couple of pixels of blur on whichever is mid-fade makes
+                // them read as one picture resolving — the same trick the
+                // cover's `dissolve` plays, at a fraction of the size.
                 className={cn(
-                  "object-cover transition-opacity duration-300 ease-out motion-reduce:transition-none",
-                  scrubbing && i === active ? "opacity-100" : "opacity-0",
+                  "object-cover transition-[opacity,filter] duration-200 ease-[var(--ease-out-strong)] motion-reduce:transition-none",
+                  scrubbing && i === active
+                    ? "opacity-100 blur-none"
+                    : "opacity-0 blur-[2px]",
                 )}
               />
             ))
