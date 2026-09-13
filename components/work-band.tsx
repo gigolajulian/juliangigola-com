@@ -110,6 +110,7 @@ export function WorkBand({
   return (
     <article className="bg-background">
       <Link
+        prefetch={false}
         href={`/work/${project.slug}`}
         onPointerMove={onPointerMove}
         onPointerLeave={reset}

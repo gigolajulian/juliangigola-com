@@ -85,6 +85,7 @@ export function CoverArt() {
             </h2>
           </div>
           <Link
+            prefetch={false}
             href={`/work/${project.slug}`}
             className="label text-muted-foreground transition-colors duration-200 hoverable:hover:text-foreground"
           >
@@ -103,6 +104,7 @@ export function CoverArt() {
           {releases.map((release) => (
             <li key={release.slug}>
               <Link
+                prefetch={false}
                 href={`/work/${project.slug}`}
                 aria-label={coverLabel(
                   release.title,

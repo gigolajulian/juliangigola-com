@@ -34,6 +34,12 @@ import type { CategoryLink, IndexRow } from "@/lib/work";
  * with no mounted flag to track. The delay steps down the first few rows so
  * a filter click reads as the list arriving rather than snapping.
  *
+ * No prefetch on the rows. Next prefetches every link that scrolls into
+ * view, and this list has fifty-five: one visitor scrolling it cost ~55
+ * Worker requests before they clicked anything, on a plan capped at a
+ * hundred thousand a day — which the site hit (Cloudflare error 1027). A
+ * row fetches on click instead, which the cover's morph covers.
+ *
  * `children`, when given, takes the place of the list: a discipline that is
  * one gallery (Cover art, Automotive) shows its frames under the same chips
  * instead of sending the visitor off to a project page.
@@ -161,6 +167,7 @@ export function WorkIndex({
                   }
                 >
                   <Link
+                    prefetch={false}
                     href={`/work/${project.slug}`}
                     // Focus updates the panel too, so a keyboard visitor sees
                     // exactly what a pointer visitor sees. Without this the
@@ -271,6 +278,7 @@ function FilterLink({
 }) {
   return (
     <Link
+      prefetch={false}
       href={href}
       // `page`, not `true` — this is a link to the page being viewed, which
       // is what a screen reader should be told about the current filter.

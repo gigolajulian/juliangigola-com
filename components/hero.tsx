@@ -746,6 +746,7 @@ export function Hero({ disciplines }: { disciplines: Discipline[] }) {
                     data-discipline={i + 1}
                   >
                     <Link
+                      prefetch={false}
                       href={discipline.href}
                       aria-current={i + 1 === active ? "true" : undefined}
                       className={cn(
@@ -809,6 +810,7 @@ export function Hero({ disciplines }: { disciplines: Discipline[] }) {
                   className="flex-1"
                 >
                   <Link
+                    prefetch={false}
                     href={discipline.href}
                     aria-label={discipline.name}
                     aria-current={i + 1 === active ? "true" : undefined}

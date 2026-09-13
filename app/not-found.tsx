@@ -192,6 +192,7 @@ export default function NotFound() {
                 {places.map((p, i) => (
                   <li key={p.href}>
                     <Link
+                      prefetch={false}
                       href={p.href}
                       className="group flex items-baseline gap-3.5 border-t border-border px-0.5 py-3 text-foreground transition-colors duration-200 hoverable:hover:text-[var(--leather)]"
                     >
