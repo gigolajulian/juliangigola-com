@@ -439,7 +439,7 @@ export function VideoHero({
                   // On the film, so the border and the type are white and the
                   // ground is a wash rather than a card: the page's own
                   // `border-border` disappears against a photograph.
-                  "flex items-center gap-3 border border-white/40 bg-black/30 px-4 py-2.5 text-white backdrop-blur-sm",
+                  "glass flex items-center gap-3 rounded-full px-4 py-2.5 text-white [--glass-fill:rgb(0_0_0/0.32)] [--glass-edge:rgb(255_255_255/0.35)]",
                   "transition-colors duration-200 hoverable:hover:border-white/80 hoverable:hover:bg-black/50 press",
                 )}
               >
@@ -478,7 +478,7 @@ export function VideoHero({
                 onClick={goFullscreen}
                 aria-label="Play fullscreen"
                 className={cn(
-                  "flex items-center gap-3 border border-white/40 bg-black/30 px-4 py-2.5 text-white backdrop-blur-sm",
+                  "glass flex items-center gap-3 rounded-full px-4 py-2.5 text-white [--glass-fill:rgb(0_0_0/0.32)] [--glass-edge:rgb(255_255_255/0.35)]",
                   "transition-colors duration-200 hoverable:hover:border-white/80 hoverable:hover:bg-black/50 press",
                 )}
               >

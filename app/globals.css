@@ -1041,7 +1041,12 @@ optgroup {
 :root[data-cover] header[data-plain="false"] {
   border-color: var(--border);
   background-color: color-mix(in oklab, var(--background) 72%, transparent);
-  backdrop-filter: blur(24px);
+  /* The same glass as `glass-surface`, which this rule out-ranks by
+     specificity: saturation and the shine along the top edge, so the bar
+     over a pale cover is the same material as the bar everywhere else. */
+  -webkit-backdrop-filter: blur(24px) saturate(1.5);
+  backdrop-filter: blur(24px) saturate(1.5);
+  box-shadow: inset 0 1px 0 color-mix(in oklab, white 16%, transparent);
 }
 
 /* ── the cover that becomes the page ──────────────────────────────
@@ -1106,5 +1111,158 @@ optgroup {
   ::view-transition-old(*),
   ::view-transition-new(*) {
     animation: none !important;
+  }
+}
+
+/* ── Liquid glass ─────────────────────────────────────────────────
+ * Apple's material, in CSS: a surface that blurs and saturates what is
+ * behind it, catches light along its top edge, shades along its bottom, and
+ * brightens where the pointer is. Julian asked for the glass effect and its
+ * button style across the site.
+ *
+ * Three utilities, one material.
+ *
+ *   glass            — a control over content: buttons, floating labels,
+ *                      lightbox and video controls. Capsule shaped by the
+ *                      caller (`rounded-full`), which is the shape the
+ *                      material is known by.
+ *   glass-prominent  — the same, tinted with the page's ink. The primary
+ *                      button: the one action on a screen that should read
+ *                      as solid.
+ *   glass-surface    — a bar or a plate: the header, the cover's band, the
+ *                      plates under the homepage tiles. Square, no outer
+ *                      shadow, the shine only. These already had blur; this
+ *                      gives them the rest of the material so a button and
+ *                      the bar it sits on are visibly the same glass.
+ *
+ * Where it goes, and where it does not: on the controls layer, over
+ * pictures — which is the whole reason for a material that lets the picture
+ * through. Over a flat page it still reads, through the edge and the
+ * highlight, which is why the buttons on /contact and /studio take it too:
+ * one button style. The admin panel keeps its plain borders.
+ *
+ * The highlight follows the pointer through `--gx` / `--gy`, written by
+ * `glass-light.tsx`; without them it rests at the top edge, which is where
+ * light would sit on a phone. Reduced transparency turns the blur off and
+ * the fill opaque, and every colour is mixed from the theme's own tokens so
+ * the material is the same material in light and dark.
+ * ─────────────────────────────────────────────────────────────── */
+@utility glass {
+  --glass-fill: color-mix(in oklab, var(--background) 52%, transparent);
+  --glass-edge: color-mix(in oklab, var(--foreground) 18%, transparent);
+  --glass-shine: color-mix(in oklab, white 42%, transparent);
+  --glass-shade: color-mix(in oklab, black 26%, transparent);
+  --glass-light: color-mix(in oklab, white 26%, transparent);
+  position: relative;
+  isolation: isolate;
+  background-color: var(--glass-fill);
+  -webkit-backdrop-filter: blur(20px) saturate(1.6);
+  backdrop-filter: blur(20px) saturate(1.6);
+  border: 1px solid var(--glass-edge);
+  box-shadow:
+    inset 0 1px 0 var(--glass-shine),
+    inset 0 -1px 0 var(--glass-shade),
+    0 12px 32px -14px color-mix(in oklab, black 55%, transparent);
+  transition:
+    background-color 200ms var(--ease-out-strong),
+    border-color 200ms var(--ease-out-strong);
+
+  /* The light. A radial highlight at the pointer, or resting at the top
+     edge; painted between the fill and the content. */
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    border-radius: inherit;
+    pointer-events: none;
+    background: radial-gradient(
+      140px circle at var(--gx, 50%) var(--gy, 0%),
+      var(--glass-light),
+      transparent 70%
+    );
+    opacity: 0;
+    transition: opacity 260ms var(--ease-out-strong);
+  }
+  @media (hover: hover) and (pointer: fine) {
+    &:hover::before {
+      opacity: 1;
+    }
+  }
+  &:focus-visible::before {
+    opacity: 1;
+  }
+  /* Pressed: the glass firms up under the finger. The scale is the `press`
+     utility's job, alongside. */
+  &:active {
+    background-color: color-mix(in oklab, var(--background) 72%, transparent);
+  }
+}
+
+@utility glass-prominent {
+  --glass-fill: color-mix(in oklab, var(--foreground) 86%, transparent);
+  --glass-edge: color-mix(in oklab, var(--foreground) 60%, transparent);
+  --glass-shine: color-mix(in oklab, white 34%, transparent);
+  --glass-shade: color-mix(in oklab, black 30%, transparent);
+  --glass-light: color-mix(in oklab, white 22%, transparent);
+  position: relative;
+  isolation: isolate;
+  color: var(--background);
+  background-color: var(--glass-fill);
+  -webkit-backdrop-filter: blur(20px) saturate(1.6);
+  backdrop-filter: blur(20px) saturate(1.6);
+  border: 1px solid var(--glass-edge);
+  box-shadow:
+    inset 0 1px 0 var(--glass-shine),
+    inset 0 -1px 0 var(--glass-shade),
+    0 12px 32px -14px color-mix(in oklab, black 55%, transparent);
+  transition: background-color 200ms var(--ease-out-strong);
+
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    border-radius: inherit;
+    pointer-events: none;
+    background: radial-gradient(
+      140px circle at var(--gx, 50%) var(--gy, 0%),
+      var(--glass-light),
+      transparent 70%
+    );
+    opacity: 0;
+    transition: opacity 260ms var(--ease-out-strong);
+  }
+  @media (hover: hover) and (pointer: fine) {
+    &:hover::before {
+      opacity: 1;
+    }
+  }
+  &:focus-visible::before {
+    opacity: 1;
+  }
+  &:active {
+    background-color: var(--foreground);
+  }
+}
+
+@utility glass-surface {
+  background-color: color-mix(in oklab, var(--background) 62%, transparent);
+  -webkit-backdrop-filter: blur(24px) saturate(1.5);
+  backdrop-filter: blur(24px) saturate(1.5);
+  box-shadow: inset 0 1px 0 color-mix(in oklab, white 16%, transparent);
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .glass,
+  .glass-surface {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    background-color: var(--background);
+  }
+  .glass-prominent {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    background-color: var(--foreground);
   }
 }

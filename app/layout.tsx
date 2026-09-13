@@ -4,6 +4,7 @@ import localFont from "next/font/local";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { PhotoNotice } from "@/components/photo-notice";
+import { GlassLight } from "@/components/glass-light";
 import "./globals.css";
 
 // `globals.css` resolves `font-sans` from `--font-sans` (shadcn's theme block
@@ -138,6 +139,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         </a>
 
         <SiteHeader />
+        {/* Writes the pointer's position onto whichever glass control is
+            under it — see `glass` in globals.css. Renders nothing. */}
+        <GlassLight />
         <main id="main" className="rise flex flex-1 flex-col">
           {children}
         </main>

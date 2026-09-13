@@ -267,7 +267,7 @@ export function SiteHeader() {
         "border-b transition-[background-color,border-color,backdrop-filter] duration-300",
         "ease-[var(--ease-out-strong)] motion-reduce:transition-none",
         scrolled
-          ? "border-border bg-background/72 backdrop-blur-xl"
+          ? "glass-surface border-border bg-background/72"
           : "border-transparent bg-transparent",
         // The panel is its own full-screen surface; a blurred bar on top of
         // it reads as a seam across the menu.

@@ -75,7 +75,7 @@ export function CoverArtGallery({ releases }: { releases: CoverRelease[] }) {
 
               {/* The release, named on hover or on focus. A rack of covers
                     is scanned for a name you recognise. */}
-              <div className="pointer-events-none absolute inset-x-0 bottom-0 flex flex-col gap-1 border-t border-border/60 bg-background/70 p-4 backdrop-blur-xl opacity-0 transition-opacity duration-200 ease-out group-hover:opacity-100 group-focus-visible:opacity-100 motion-reduce:transition-none">
+              <div className="pointer-events-none absolute inset-x-0 bottom-0 flex flex-col gap-1 border-t border-border/60 glass-surface bg-background/70 p-4 opacity-0 transition-opacity duration-200 ease-out group-hover:opacity-100 group-focus-visible:opacity-100 motion-reduce:transition-none">
                 <span className="label text-foreground">{release.title}</span>
                 <span className="label text-muted-foreground">
                   {release.artist}

@@ -481,7 +481,7 @@ export function Hero({ disciplines }: { disciplines: Discipline[] }) {
               tabIndex={leaving ? -1 : undefined}
               aria-hidden={leaving || undefined}
               className={cn(
-                "label absolute bottom-4 right-4 z-10 bg-background/70 px-3 py-2 text-muted-foreground backdrop-blur-sm hoverable:hover:text-foreground sm:bottom-6 sm:right-6",
+                "label glass absolute bottom-4 right-4 z-10 rounded-full px-4 py-2.5 text-muted-foreground hoverable:hover:text-foreground sm:bottom-6 sm:right-6",
                 leaving
                   ? "title-out pointer-events-none"
                   : // Same guard as the photograph: on the intro there is no
@@ -520,7 +520,7 @@ export function Hero({ disciplines }: { disciplines: Discipline[] }) {
           className={cn(
             "flex min-w-0 flex-col border-t border-border/60",
             // Over the photograph: thinned ground, deep blur.
-            "bg-background/45 backdrop-blur-2xl",
+            "glass-surface bg-background/45",
             /* Upright screens — a phone, a tablet held tall — asked for the
                picture: "show the images … with julian gigola on the bottom
                fourth and the phases". So the photograph is the whole screen
@@ -834,13 +834,13 @@ export function Hero({ disciplines }: { disciplines: Discipline[] }) {
             >
               <Link
                 href="/work"
-                className="label border border-foreground bg-foreground px-6 py-4 text-background press hoverable:hover:opacity-90 active:scale-[0.98]"
+                className="label glass-prominent rounded-full px-6 py-4 press active:scale-[0.97]"
               >
                 See the work
               </Link>
               <Link
                 href="/sessions"
-                className="label border border-border px-6 py-4 press hoverable:hover:bg-card active:scale-[0.98]"
+                className="label glass rounded-full px-6 py-4 press active:scale-[0.97]"
               >
                 Book a session
               </Link>

@@ -202,7 +202,7 @@ function Tile({
         aria-hidden
         className="absolute inset-0 flex items-center justify-center"
       >
-        <span className="flex size-16 items-center justify-center rounded-full bg-background/70 backdrop-blur-sm transition-all duration-300 ease-[var(--ease-out-strong)] hoverable:scale-90 hoverable:opacity-0 hoverable:group-hover:scale-100 hoverable:group-hover:opacity-100 group-focus-visible:scale-100 group-focus-visible:opacity-100 motion-reduce:transition-none">
+        <span className="flex size-16 items-center justify-center glass rounded-full transition-all duration-300 ease-[var(--ease-out-strong)] hoverable:scale-90 hoverable:opacity-0 hoverable:group-hover:scale-100 hoverable:group-hover:opacity-100 group-focus-visible:scale-100 group-focus-visible:opacity-100 motion-reduce:transition-none">
           {/* Drawn, not imported — the same rule the rest of the icons here
               follow. A triangle, optically centred: a shape with a flat left
               edge and a point on the right reads as off-centre when its
