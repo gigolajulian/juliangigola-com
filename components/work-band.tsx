@@ -16,21 +16,28 @@ import type { Project } from "@/lib/work-types";
  * actually asking. It is direct manipulation, so nothing moves unless the
  * visitor moves it, and there is no autoplay to sit through.
  *
- * Loading is the constraint that shapes it. These cells are half the viewport
- * wide and most of it tall, so eagerly loading every frame of six projects
- * would cost tens of megabytes. Instead the cover sits underneath as a
- * permanent base layer and exactly one scrub frame is requested — the one
- * being looked at. Scrubbing costs one image per frame you actually visit,
- * the base never blanks, and a visitor who does not interact pays nothing
+ * Loading is the constraint that shapes it. These cells are a third of the
+ * viewport wide and most of it tall, so eagerly loading every frame of six
+ * projects would cost tens of megabytes. Instead the cover sits underneath
+ * as a permanent base layer and the three scrub frames are requested on the
+ * first move across the tile — all three, so the crossfade between them has
+ * both pictures to hand. A visitor who does not interact pays nothing
  * beyond the cover.
  * ─────────────────────────────────────────────────────────────── */
 
 /**
- * Frames a tile will scrub through. Capped because the useful signal is "what
- * is the range of this set", which eight frames answer as well as thirty, and
- * because it sets a ceiling on what a determined scrub can download.
+ * How many frames a tile scrubs through, and which.
+ *
+ * Three, after the cover: Julian asked for the top three photographs and
+ * nothing more, and three is enough to answer "what is the range of this
+ * set" without a tile becoming a slideshow. They start at the *second*
+ * frame because the first is the cover again — measured on all seven
+ * featured projects, `images[0]` is the same picture as `cover` (a 16px
+ * greyscale difference of 0.4–2.7, against 20–105 for every other frame),
+ * so scrubbing onto it would be a transition to nothing.
  */
-const MAX_SCRUB = 8;
+const SCRUB_FROM = 1;
+const SCRUB_COUNT = 3;
 
 export function WorkBand({
   project,
@@ -43,12 +50,15 @@ export function WorkBand({
   priority?: boolean;
 }) {
   const frames = React.useMemo(
-    () => project.images.slice(0, MAX_SCRUB),
+    () => project.images.slice(SCRUB_FROM, SCRUB_FROM + SCRUB_COUNT),
     [project.images],
   );
 
   const [active, setActive] = React.useState(0);
   const [scrubbing, setScrubbing] = React.useState(false);
+  // Once a tile has been scrubbed its frames stay mounted, so coming back to
+  // it is instant and the fade never waits on a fetch.
+  const [touched, setTouched] = React.useState(false);
 
   const client = project.credits.find((c) =>
     /client|artist|model/i.test(c.role),
@@ -58,7 +68,7 @@ export function WorkBand({
     // Touch gets the cover and a plain tap through to the project. Scrubbing
     // with a finger would fight the page scroll, and a "hover" on touch is
     // just a tap that has not decided what it is yet.
-    if (e.pointerType === "touch" || frames.length < 2) return;
+    if (e.pointerType === "touch" || frames.length === 0) return;
 
     const box = e.currentTarget.getBoundingClientRect();
     const ratio = (e.clientX - box.left) / box.width;
@@ -67,10 +77,13 @@ export function WorkBand({
       Math.max(0, Math.floor(ratio * frames.length)),
     );
 
+    setTouched(true);
     setScrubbing(true);
     setActive(next);
   };
 
+  // Back to the cover. The frames stay mounted and fade out under it — see
+  // `touched` — so leaving is the same dissolve as arriving, not a cut.
   const reset = () => {
     setScrubbing(false);
     setActive(0);
@@ -79,16 +92,17 @@ export function WorkBand({
   // Keyboard parity: the tile is a link, so once it is focused the arrow keys
   // should walk the sequence the same way the pointer does.
   const onKeyDown = (e: React.KeyboardEvent) => {
-    if (frames.length < 2) return;
+    if (frames.length === 0) return;
     const delta = e.key === "ArrowRight" ? 1 : e.key === "ArrowLeft" ? -1 : 0;
     if (!delta) return;
     e.preventDefault();
+    setTouched(true);
+    // The first press lands on the first frame rather than skipping it.
+    setActive(
+      (i) => (scrubbing ? i + delta + frames.length : 0) % frames.length,
+    );
     setScrubbing(true);
-    setActive((i) => (i + delta + frames.length) % frames.length);
   };
-
-  const frame = frames[active] ?? project.cover;
-  const showScrub = scrubbing && active > 0;
 
   return (
     <article className="bg-background">
@@ -124,20 +138,29 @@ export function WorkBand({
           className="object-cover"
         />
 
-        {/* Scrub layer: one frame, the one under the pointer. Keyed on `src`
-            so React swaps the element rather than mutating it, which lets the
-            browser keep the decoded previous frame on screen until the next
-            one is ready. */}
-        {showScrub ? (
-          <Image
-            key={frame.src}
-            src={frame.src}
-            alt=""
-            fill
-            sizes="(min-width: 1024px) 33vw, (min-width: 768px) 50vw, 100vw"
-            className="object-cover"
-          />
-        ) : null}
+        {/* The scrub frames, stacked over the cover and dissolved between.
+
+            All three are mounted from the first move and only their opacity
+            changes, which is what makes the transition a crossfade rather
+            than a swap: the frame going out is still there while the one
+            coming in fades up over it, and the cover is under both. This
+            used to mount one keyed image at a time, which was a hard cut on
+            every step — Julian asked for it to be smoother. */}
+        {touched
+          ? frames.map((f, i) => (
+              <Image
+                key={f.src}
+                src={f.src}
+                alt=""
+                fill
+                sizes="(min-width: 1024px) 33vw, (min-width: 768px) 50vw, 100vw"
+                className={cn(
+                  "object-cover transition-opacity duration-300 ease-out motion-reduce:transition-none",
+                  scrubbing && i === active ? "opacity-100" : "opacity-0",
+                )}
+              />
+            ))
+          : null}
 
         {/* A plate under the type, not a wash over the picture.
          *
@@ -190,7 +213,15 @@ export function WorkBand({
             <p className="label text-muted-foreground">
               {project.categories[0]?.name ?? "Project"}
             </p>
-            <p className="label ml-auto tabular-nums text-muted-foreground">
+            {/* Only while scrubbing: at rest the cover is on screen and it
+                is not one of the three, so a counter would be pointing at
+                nothing. */}
+            <p
+              className={cn(
+                "label ml-auto tabular-nums text-muted-foreground transition-opacity duration-200",
+                scrubbing ? "opacity-100" : "opacity-0",
+              )}
+            >
               {String(active + 1).padStart(2, "0")} /{" "}
               {String(frames.length).padStart(2, "0")}
             </p>
@@ -200,7 +231,7 @@ export function WorkBand({
               affordance — it is what tells you the cell is scrubbable before
               you have moved across it. Hidden where there is no pointer to
               scrub with. */}
-          {frames.length > 1 ? (
+          {frames.length > 0 ? (
             <div aria-hidden className="hidden w-full gap-1 hoverable:flex">
               {frames.map((f, i) => (
                 <span

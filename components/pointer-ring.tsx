@@ -67,20 +67,34 @@ export function PointerRing() {
       // here cannot disagree.
       style={{ width: RADIUS * 2, height: RADIUS * 2 }}
       className={[
-        "pointer-events-none fixed left-0 top-0 z-50 rounded-full border border-foreground",
+        // Grey, not the page's ink: Julian asked for it. `muted-foreground`
+        // is the grey the labels and the credits are already set in, so the
+        // ring belongs to the same family as the type around it — and over a
+        // photograph a mid grey reads as a mark laid on the picture rather
+        // than a hole punched in it, the way full white did.
+        "pointer-events-none fixed left-0 top-0 z-50 rounded-full border border-muted-foreground",
         // Arrives from slightly small, like everything else pressable here.
         "opacity-0 scale-75 transition-[opacity,scale] duration-200 ease-[var(--ease-out-strong)]",
         "data-over:opacity-100 data-over:scale-100",
         "motion-reduce:transition-none",
       ].join(" ")}
     >
+      {/* A glow, feathered to nothing. Five times the ring and faint — the
+          same grey at 12% at the centre, gone by two-thirds of the way out —
+          so it lifts the sleeve under the pointer a shade rather than putting
+          a torch on it. A radial gradient, not a blur filter: it costs
+          nothing to move and it needs no compositor layer. */}
+      <div
+        aria-hidden
+        className="absolute left-1/2 top-1/2 -z-10 size-[180px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-radial from-muted-foreground/12 to-transparent to-66%"
+      />
       {/* The fill. Grows from the centre on press and lets go on release —
           a transition, so a quick tap still reads as a fill and not a
           flash. */}
       <div
         className={[
-          "h-full w-full rounded-full bg-foreground",
-          "scale-0 transition-[scale] duration-260 ease-[var(--ease-out-strong)]",
+          "h-full w-full rounded-full bg-muted-foreground",
+          "scale-0 transition-[scale] duration-[260ms] ease-[var(--ease-out-strong)]",
           "in-data-pressed:scale-100",
           "motion-reduce:transition-none",
         ].join(" ")}
