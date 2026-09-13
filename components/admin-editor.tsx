@@ -93,6 +93,7 @@ const TOKEN_KEY = "jg-admin-token";
 const TABS = [
   [
     { id: "home", label: "Home" },
+    { id: "clients", label: "Clients" },
     { id: "sessions", label: "Sessions" },
     { id: "testimonials", label: "Quotes" },
     { id: "contact", label: "Contact" },
@@ -128,6 +129,8 @@ const FIELD_TAB: Record<string, View> = {
   coverSlug: "home",
   featured: "home",
   coverArt: "home",
+  clientsHome: "clients",
+  clientsStudio: "clients",
   sessions: "sessions",
   testimonials: "testimonials",
 };
@@ -178,6 +181,7 @@ export function AdminEditor({
   releases,
   releaseLimit,
   heroChoices,
+  clients,
 }: {
   /** The content as it was at build time — what the live site is serving. */
   initial: SiteContent;
@@ -226,6 +230,8 @@ export function AdminEditor({
    * are absent here rather than offered and silently ignored.
    */
   heroChoices: PickerItem[];
+  /** Every client with a mark on file, for the two wall pickers. */
+  clients: PickerItem[];
   /** How many of them the homepage rack actually shows. */
   releaseLimit: number;
 }) {
@@ -964,20 +970,20 @@ export function AdminEditor({
             </div>
           ) : null}
           {/* Wraps, and the publish group never shrinks.
-            *
-            * This row was one unwrapping line of six shrink-0 tab groups
-            * followed by Publish, and Publish is the thing that gave. In the
-            * three-column workbench the middle column is 609px at 1440x900
-            * and this row wants 691, so the button sat from x=953 to x=1043
-            * against a column ending at 961: eighty-two pixels of it outside
-            * its own box, clipped, with no scrollbar to reach it. "I make a
-            * change and Publish doesn't show up" was exactly that, and the
-            * flag beside it was fine all along.
-            *
-            * Wrapping rather than scrolling the tabs. A scroller hides tabs
-            * behind a gesture nobody knows is available; a second line costs
-            * 36px on a tool that has the room, and everything stays visible
-            * and in the same place. */}
+           *
+           * This row was one unwrapping line of six shrink-0 tab groups
+           * followed by Publish, and Publish is the thing that gave. In the
+           * three-column workbench the middle column is 609px at 1440x900
+           * and this row wants 691, so the button sat from x=953 to x=1043
+           * against a column ending at 961: eighty-two pixels of it outside
+           * its own box, clipped, with no scrollbar to reach it. "I make a
+           * change and Publish doesn't show up" was exactly that, and the
+           * flag beside it was fine all along.
+           *
+           * Wrapping rather than scrolling the tabs. A scroller hides tabs
+           * behind a gesture nobody knows is available; a second line costs
+           * 36px on a tool that has the room, and everything stays visible
+           * and in the same place. */}
           <nav
             className="flex flex-wrap items-center gap-x-3 gap-y-2 border-b border-border py-2"
             aria-label="Editor sections"
@@ -1214,6 +1220,7 @@ export function AdminEditor({
             position and the real components inside — `AdminPicker` and the
             rest — keep their identity and their state. */}
         {view === "home" ? HomeFields() : null}
+        {view === "clients" ? ClientFields() : null}
         {view === "sessions" ? SessionFields() : null}
         {view === "testimonials" ? QuoteFields() : null}
         {view === "contact" ? ContactFields() : null}
@@ -1269,6 +1276,42 @@ export function AdminEditor({
       </aside>
     </div>
   );
+
+  function ClientFields() {
+    return (
+      <Area title="Clients">
+        <Field
+          anchor="clientsHome"
+          label="On the homepage, in order"
+          hint="The strip of logos under the cover. Drag to reorder, or use the arrows; remove one to keep it off the homepage only."
+        >
+          <AdminPicker
+            chosen={draft.clientsHome}
+            items={clients}
+            onChange={(next) => set("clientsHome", next)}
+            addLabel="Add a client"
+            searchLabel="Search clients"
+            emptyNote="Nothing chosen — the strip shows every client, in the order they are filed."
+          />
+        </Field>
+
+        <Field
+          anchor="clientsStudio"
+          label="On the studio page, in order"
+          hint="The wall of logos on /studio. Its own list, so it can differ from the homepage."
+        >
+          <AdminPicker
+            chosen={draft.clientsStudio}
+            items={clients}
+            onChange={(next) => set("clientsStudio", next)}
+            addLabel="Add a client"
+            searchLabel="Search clients"
+            emptyNote="Nothing chosen — the wall shows every client, in the order they are filed."
+          />
+        </Field>
+      </Area>
+    );
+  }
 
   function HomeFields() {
     return (

@@ -680,6 +680,11 @@ export type Client = {
  * unpublished project costs that client its cell rather than publishing a row
  * that 404s.
  */
+/**
+ * Every client with a mark on file, as the catalogue the editor picks from.
+ * The order here is the fallback; the walls themselves follow
+ * `content/site.json` — see `PRESS_HOME` and `PRESS_STUDIO`.
+ */
 export const PRESS: Client[] = [
   { name: "WIRED", slug: "wired-magazine", href: "/work/wired-magazine" },
   { name: "Pear VC", slug: "pear-vc", href: "/work/video" },
@@ -693,6 +698,24 @@ export const PRESS: Client[] = [
   const project = /^\/work\/([a-z0-9-]+)$/.exec(c.href)?.[1];
   return !project || project === "video" || bySlug.has(project);
 });
+
+/**
+ * A wall in the editor's order. An order that names nothing is the state
+ * before the editor existed and means the whole catalogue; one that names
+ * anything is exactly what appears, so a client can be dropped from one
+ * wall and kept on the other. A slug the catalogue does not know is skipped
+ * rather than rendered as a hole — a mark that was removed from the repo
+ * should not leave a gap in the row.
+ */
+const wall = (order: string[]): Client[] =>
+  order.length === 0
+    ? PRESS
+    : order.flatMap((slug) => PRESS.filter((c) => c.slug === slug));
+
+/** The strip under the cover on the homepage. */
+export const PRESS_HOME: Client[] = wall(CONTENT.clientsHome);
+/** The grid on /studio. */
+export const PRESS_STUDIO: Client[] = wall(CONTENT.clientsStudio);
 
 /**
  * The homepage cover.

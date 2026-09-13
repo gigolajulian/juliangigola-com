@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Reveal } from "@/components/reveal";
 import Image from "next/image";
-import { PRESS, FEATURED, coverOf } from "@/lib/work";
+import { PRESS_STUDIO, FEATURED, coverOf } from "@/lib/work";
 import { ClientMarks } from "@/components/client-marks";
 
 /* ── studio ───────────────────────────────────────────────────────
@@ -79,7 +79,7 @@ export default function StudioPage() {
                     "View →" on each made five clients look like a menu of
                     five destinations. */}
                 <ClientMarks
-                  clients={PRESS}
+                  clients={PRESS_STUDIO}
                   layout="grid"
                   className="mt-10 border-y border-border py-12"
                 />

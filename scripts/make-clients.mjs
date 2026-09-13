@@ -154,7 +154,9 @@ async function maskPng(file, slug, name) {
   const meta = await sharp(file).metadata();
   const opaque =
     !meta.hasAlpha ||
-    (await sharp(file).stats().then((st) => st.channels[3].min >= 250));
+    (await sharp(file)
+      .stats()
+      .then((st) => st.channels[3].min >= 250));
 
   if (opaque) {
     const flat = await sharp(file)
@@ -302,6 +304,20 @@ for (const file of files) {
     : readFileSync(join(served, `${slug}.png`));
 
   mark.ink = await inkCoverage(rendered);
+
+  /* A preview for the editor's picker, which shows a picture per item. A
+     PNG mark already has its file in `public/clients/`; an SVG one is
+     inlined and has none, so one is rendered here — white on transparent,
+     as the wall draws it on a dark ground. */
+  if (isSvg) {
+    await sharp(
+      Buffer.from(
+        `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${mark.viewBox}" width="480">${mark.body.replace(/currentColor/g, "#fff")}</svg>`,
+      ),
+    )
+      .png()
+      .toFile(join(served, `${slug}.png`));
+  }
   mark.aspect = isSvg
     ? (() => {
         const [, , w, h] = mark.viewBox.split(/[\s,]+/).map(Number);

@@ -11,6 +11,7 @@ import {
   categoryLabel,
   categoryHref,
   categoryFrame,
+  PRESS,
 } from "@/lib/work";
 import {
   ADDED,
@@ -86,6 +87,13 @@ export default function AdminPage() {
 
       <AdminEditor
         initial={CONTENT}
+        clients={PRESS.map((c) => ({
+          slug: c.slug,
+          name: c.name,
+          detail: c.href,
+          // The mark, white on transparent, over the editor's dark ground.
+          cover: { src: `/clients/${c.slug}.png`, color: "#111111" },
+        }))}
         slugs={PROJECTS.map((p) => p.slug)}
         /* Every category a shoot can be, sessions included. `WORK` and
            `MUSIC` both file under Work in the new nav, so they are one group

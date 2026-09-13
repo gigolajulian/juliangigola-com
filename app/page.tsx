@@ -5,7 +5,7 @@ import { Testimonials } from "@/components/testimonials";
 import { WorkBand } from "@/components/work-band";
 import { CoverArt } from "@/components/cover-art";
 import { Reveal } from "@/components/reveal";
-import { FEATURED, PRESS, DISCIPLINES, bandTile } from "@/lib/work";
+import { FEATURED, PRESS_HOME, DISCIPLINES, bandTile } from "@/lib/work";
 import { ClientMarks } from "@/components/client-marks";
 
 /* ── the homepage ─────────────────────────────────────────────────
@@ -38,7 +38,7 @@ export default function Home() {
           </h2>
           {/* One component with /studio's wall, so a logo added once shows
               in both places and neither can be the one still set in type. */}
-          <ClientMarks clients={PRESS} layout="row" />
+          <ClientMarks clients={PRESS_HOME} layout="row" />
         </div>
       </section>
 

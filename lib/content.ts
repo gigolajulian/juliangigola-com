@@ -72,6 +72,15 @@ export type SiteContent = {
    * cover needs a photograph to show for a discipline and cannot invent one.
    */
   heroDisciplines: string[];
+  /**
+   * The client walls, in order: the strip under the cover and the grid on
+   * /studio, each its own list of slugs from the catalogue in `lib/work.ts`.
+   * Empty means "the catalogue as written" — the state before the editor
+   * could touch them; once either is set, it is authoritative, so a client
+   * can be left off one wall and kept on the other.
+   */
+  clientsHome: string[];
+  clientsStudio: string[];
   testimonials: Testimonial[];
   sessions: SessionType[];
   /**
@@ -280,6 +289,8 @@ function parse(v: unknown): SiteContent {
     // an error — it simply means nothing has been picked.
     coverArt: strList(v.coverArt ?? [], "coverArt"),
     heroDisciplines: strList(v.heroDisciplines ?? [], "heroDisciplines"),
+    clientsHome: strList(v.clientsHome ?? [], "clientsHome"),
+    clientsStudio: strList(v.clientsStudio ?? [], "clientsStudio"),
     testimonials: list(v.testimonials, "testimonials", testimonial),
     sessions: list(v.sessions, "sessions", session),
     videos: list(v.videos ?? [], "videos", video),

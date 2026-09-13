@@ -141,5 +141,25 @@
       "year": 2022,
       "section": "commercial"
     }
+  ],
+  "clientsHome": [
+    "wired-magazine",
+    "pear-vc",
+    "ladera-granola",
+    "sols",
+    "ukiyosunknown",
+    "jubo",
+    "sago",
+    "goodcult"
+  ],
+  "clientsStudio": [
+    "wired-magazine",
+    "pear-vc",
+    "ladera-granola",
+    "sols",
+    "ukiyosunknown",
+    "jubo",
+    "sago",
+    "goodcult"
   ]
 }
