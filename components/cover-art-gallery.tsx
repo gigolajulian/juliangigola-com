@@ -4,6 +4,7 @@ import * as React from "react";
 import { Lightbox, useLightbox } from "@/components/lightbox";
 import { CoverFaces, coverLabel } from "@/components/cover-faces";
 import { Reveal } from "@/components/reveal";
+import { PointerRing } from "@/components/pointer-ring";
 import type { CoverRelease } from "@/lib/cover-art-types";
 
 /* ── the cover-art sheet ──────────────────────────────────────────
@@ -45,6 +46,7 @@ export function CoverArtGallery({ releases }: { releases: CoverRelease[] }) {
 
           const cell = (
             <button
+              data-ring
               type="button"
               onClick={(e) => {
                 // Open whichever side is on screen. `:hover` is the same
@@ -58,7 +60,7 @@ export function CoverArtGallery({ releases }: { releases: CoverRelease[] }) {
                 lightbox.show(positions.get(frame.src) ?? 0);
               }}
               aria-label={`Open ${coverLabel(release.title, release.artist, release.frames)}`}
-              className="group relative block aspect-square w-full cursor-open overflow-hidden press active:scale-[0.995]"
+              className="group relative block aspect-square w-full hoverable:cursor-none overflow-hidden press active:scale-[0.995]"
               style={{ backgroundColor: front.color }}
             >
               <CoverFaces
@@ -92,6 +94,7 @@ export function CoverArtGallery({ releases }: { releases: CoverRelease[] }) {
         })}
       </ul>
 
+      <PointerRing />
       <Lightbox frames={frames} name="Cover art" {...lightbox} />
     </>
   );

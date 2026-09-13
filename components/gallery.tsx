@@ -3,6 +3,7 @@
 import * as React from "react";
 import Image from "next/image";
 import { Reveal } from "@/components/reveal";
+import { PointerRing } from "@/components/pointer-ring";
 import { Lightbox, useLightbox } from "@/components/lightbox";
 import { cn } from "@/lib/utils";
 import type { Project, TextBlock } from "@/lib/work-types";
@@ -86,12 +87,13 @@ export function Gallery({ project }: { project: Project }) {
                   return (
                     <Reveal key={frame.src}>
                       <button
+                        data-ring
                         type="button"
                         onClick={() => lightbox.show(i)}
                         aria-label={`Open frame ${i + 1} of ${frames.length}${
                           frame.alt ? `: ${frame.alt}` : ""
                         }`}
-                        className="group relative block w-full cursor-open overflow-hidden press active:scale-[0.995]"
+                        className="group relative block w-full hoverable:cursor-none overflow-hidden press active:scale-[0.995]"
                         style={{
                           backgroundColor: frame.color,
                           aspectRatio: `${frame.width} / ${frame.height}`,
@@ -123,6 +125,7 @@ export function Gallery({ project }: { project: Project }) {
         })}
       </div>
 
+      <PointerRing />
       <Lightbox frames={frames} name={project.name} {...lightbox} />
     </>
   );

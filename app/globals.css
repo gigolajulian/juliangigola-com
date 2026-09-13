@@ -670,27 +670,6 @@
  * 0.98, a photograph the size of half the viewport wants 0.995, and one number
  * cannot serve both.
  */
-/**
- * The cursor over something that opens large.
- *
- * The browser's `zoom-in` is a magnifying glass drawn by the operating
- * system: a different picture on every platform and, on all of them, a
- * loupe — which says "inspect", not "open". Over a rack of record sleeves
- * it read as a lab tool. This is a plain disc with a plus in it, the mark
- * galleries have used for "see this bigger" for as long as there have been
- * galleries on screens, drawn once so it is the same everywhere.
- *
- * Inline as a data URI rather than a file, so it arrives with the
- * stylesheet and the first hover does not wait on a fetch. `pointer`
- * behind it for anything that refuses a custom cursor.
- */
-@utility cursor-open {
-  cursor:
-    url("data:image/svg+xml;utf8,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%2732%27 height=%2732%27 viewBox=%270 0 32 32%27%3E%3Ccircle cx=%2716%27 cy=%2716%27 r=%2714%27 fill=%27white%27 stroke=%27black%27 stroke-opacity=%27.85%27 stroke-width=%271.5%27/%3E%3Cpath d=%27M16 10v12M10 16h12%27 stroke=%27black%27 stroke-width=%271.75%27 stroke-linecap=%27round%27/%3E%3C/svg%3E")
-      16 16,
-    pointer;
-}
-
 @utility press {
   /* `scale`, `translate` and `rotate`, not just `transform`: Tailwind v4
      compiles `active:scale-[0.98]` to the standalone `scale` property, so a
