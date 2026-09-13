@@ -1296,3 +1296,36 @@ img[data-fade][data-loaded] {
     transition: none;
   }
 }
+
+/* ── the 404's room ───────────────────────────────────────────────
+ * Two glows that drift, and a dot that blinks like a record light. Used by
+ * `app/not-found.tsx` and nowhere else; both stop under reduced motion at
+ * the call site. */
+@keyframes jg-drift-a {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(5vw, -4vh, 0) scale(1.16);
+  }
+}
+@keyframes jg-drift-b {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) scale(1.08);
+  }
+  50% {
+    transform: translate3d(-6vw, 4vh, 0) scale(0.94);
+  }
+}
+@keyframes jg-blink {
+  0%,
+  48% {
+    opacity: 1;
+  }
+  49%,
+  100% {
+    opacity: 0.18;
+  }
+}
