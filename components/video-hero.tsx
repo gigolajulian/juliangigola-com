@@ -111,14 +111,16 @@ export function VideoHero({
   /** When it was cut. Printed in the label the screen reader hears. */
   year?: number;
 }) {
-  /* Tells the fixed header it is over a picture, so it plates itself the
-     way it does on the cover: the same attribute `hero.tsx` sets, for the
-     same reason. Without it the bar is transparent over a moving image and
-     its type survives exactly as long as the shot it happens to be on. */
+  /* Tells the fixed header it is over the film. Not `data-cover`, which
+     plates the bar the way the homepage does over a pale photograph:
+     Julian wants the reel as the whole background from the top down, and
+     a plate cuts the top of it off. `globals.css` turns the bar's type
+     white over `data-film` instead and leaves it transparent; the wash
+     below is heavy enough at the top for that to read. */
   React.useEffect(() => {
-    document.documentElement.dataset.cover = "true";
+    document.documentElement.dataset.film = "true";
     return () => {
-      delete document.documentElement.dataset.cover;
+      delete document.documentElement.dataset.film;
     };
   }, []);
 

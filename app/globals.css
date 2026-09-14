@@ -1113,6 +1113,22 @@ optgroup {
   box-shadow: inset 0 1px 0 color-mix(in oklab, white 16%, transparent);
 }
 
+/* ── the bar over the reel ─────────────────────────────────────────
+ * On /work/video the reel is the background from the top of the page down,
+ * and the bar sits on it with no plate: Julian did not want the film cut
+ * off under a blurred strip. So the bar keeps its transparent ground and
+ * its type goes white, by re-pointing the tokens its classes already use.
+ * Only while it has no ground of its own, as above; scrolled, or with the
+ * menu open, the bar's own colours come back. */
+:root[data-film] header[data-plain="false"] {
+  --foreground: #fff;
+  --muted-foreground: rgb(255 255 255 / 0.72);
+  /* Set here as well as re-pointed: the wordmark carries no colour of its
+     own and inherits the body's, which was resolved before the token
+     changed. */
+  color: var(--foreground);
+}
+
 /* ── the cover that becomes the page ──────────────────────────────
  * Clicking a cover on the homepage or the index does not swap one page for
  * another. The photograph lifts out of its cell, travels, and settles into
