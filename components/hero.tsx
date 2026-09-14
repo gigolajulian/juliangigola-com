@@ -59,6 +59,66 @@ const IDLE_MS = 3000;
  */
 const INTRO_MS = 5200;
 
+/**
+ * The two ways in.
+ *
+ * Mounted twice, the way the disciplines are: a list of rows and a strip of
+ * ticks. From `wide` these float over the foot of the photograph, bottom
+ * right, which is a place the plate cannot reach — it blurs its ground, and
+ * an element with a backdrop filter is the containing block for anything
+ * absolute inside it, so a button in the plate can only ever reach the
+ * plate's own corner. The copy that floats is a child of the type column
+ * instead, which spans the whole section. Julian: place the buttons on the
+ * bottom right.
+ *
+ * The other copy stays in the plate, under the name, for the two layouts
+ * where the photograph is the whole canvas rather than a column beside the
+ * type: floating over the far right of a full-bleed frame there would put
+ * them across the picture and on top of the frame's credit.
+ */
+function Ways({
+  className,
+  style,
+  onPicture = false,
+}: {
+  className?: string;
+  style?: React.CSSProperties;
+  /**
+   * Over the photograph rather than on the panel. `glass` is 52% of the
+   * ground by default, which is a window onto whatever is behind it: right
+   * for a pill on a plate, and not enough under a booking link that has
+   * seven frames passing behind it, some of them dark. The fill goes to 84%
+   * there, so the second action reads on any of them and still looks like
+   * the same material as the first.
+   */
+  onPicture?: boolean;
+}) {
+  return (
+    <div style={style} className={cn("flex flex-wrap items-center gap-3", className)}>
+      <Link
+        href="/work"
+        className="label glass-prominent rounded-full px-6 py-4 press active:scale-[0.97]"
+      >
+        See the work
+      </Link>
+      <Link
+        href="/sessions"
+        style={
+          onPicture
+            ? ({
+                "--glass-fill":
+                  "color-mix(in oklab, var(--background) 84%, transparent)",
+              } as React.CSSProperties)
+            : undefined
+        }
+        className="label glass rounded-full px-6 py-4 press active:scale-[0.97]"
+      >
+        Book a session
+      </Link>
+    </div>
+  );
+}
+
 /** The inlined blur-up for a hand-made hero frame, if it has one. */
 const blurFor = (src: string): string | undefined =>
   (BLUR as Record<string, string>)[src];
@@ -492,7 +552,12 @@ export function Hero({ disciplines }: { disciplines: Discipline[] }) {
               tabIndex={leaving ? -1 : undefined}
               aria-hidden={leaving || undefined}
               className={cn(
-                "label glass absolute bottom-4 right-4 z-10 rounded-full px-4 py-2.5 text-muted-foreground hoverable:hover:text-foreground sm:bottom-6 sm:right-6",
+                /* Bottom right of the frame, except from `wide`, where the
+                   two buttons have that corner: there it takes the other
+                   one. The picture is its own column at that width, so its
+                   left edge is the panel's border and the pill sits on the
+                   frame either way. */
+                "label glass absolute bottom-4 right-4 z-10 rounded-full px-4 py-2.5 text-muted-foreground hoverable:hover:text-foreground sm:bottom-6 sm:right-6 wide:left-10 wide:right-auto",
                 leaving
                   ? "title-out pointer-events-none"
                   : // Same guard as the photograph: on the intro there is no
@@ -532,6 +597,26 @@ export function Hero({ disciplines }: { disciplines: Discipline[] }) {
           used to sit under this column and take nothing. Julian: when the
           pill is clicked, open the project. The plate takes them back. */}
       <div className="pointer-events-none relative z-10 flex min-h-dvh flex-col justify-end tall:min-h-[100lvh] squat:justify-start wide:justify-start">
+        {/* Bottom right of the screen, over the foot of the photograph.
+
+            The box is the first screen and nothing else, because the section
+            is not: it runs `min-h-dvh` and grows past the window whenever
+            the panel's index does, so `bottom` measured against the column
+            is the section's foot rather than the screen's — at 1280x700
+            that put the buttons 148px under the fold and out of reach. A
+            `h-dvh` box pinned to the top of the section is the window, and
+            its corner is the window's corner at any height.
+
+            `pointer-events-auto` on the buttons because everything around
+            them passes presses through to the picture. */}
+        <div className="pointer-events-none absolute inset-x-0 top-0 hidden h-dvh wide:block">
+          <Ways
+            onPicture
+            style={lands(BUTTONS_MS)}
+            className="rise pointer-events-auto absolute bottom-6 right-6 z-20 sm:bottom-8 sm:right-10"
+          />
+        </div>
+
         <div
           className={cn(
             "pointer-events-auto flex min-w-0 flex-col border-t border-border/60",
@@ -716,38 +801,13 @@ export function Hero({ disciplines }: { disciplines: Discipline[] }) {
             and the block sat against the top with 350px of panel under it.
             `lg` is a width and could not tell those two cases apart. */}
           <div className="flex min-w-0 flex-col wide:flex-1">
-            {/* Two: the two ways in, under the name rather than under the
-                index.
-
-                They used to be pinned to the foot of the screen, and an
-                opaque bar across the foot of a panel the index overruns is
-                a bar over the index: measured at 1280x700 it covered three
-                rows and put four of the seven out of reach — a pointer
-                landed on the bar, and the rows under it could not be
-                scrolled clear because the bar was pinned. At 1440x900 it
-                covered two. So they come up here, where they are above the
-                fold on every screen, nothing is under them, and the index
-                keeps the foot of the panel to itself.
-
-                It also reads better: who, then what to do about it, then
-                the work to look through. */}
-            <div
+            {/* Two: the ways in, under the name. Where the photograph is
+                the whole canvas this is the only copy; from `wide` the one
+                over the picture's foot takes over and this one goes. */}
+            <Ways
               style={lands(BUTTONS_MS)}
-              className="rise flex flex-wrap items-center gap-3 px-6 pb-2 pt-6 sm:px-10 sm:pb-4 sm:pt-8 tall:pb-0 tall:pt-5"
-            >
-              <Link
-                href="/work"
-                className="label glass-prominent rounded-full px-6 py-4 press active:scale-[0.97]"
-              >
-                See the work
-              </Link>
-              <Link
-                href="/sessions"
-                className="label glass rounded-full px-6 py-4 press active:scale-[0.97]"
-              >
-                Book a session
-              </Link>
-            </div>
+              className="rise px-6 pb-2 pt-6 sm:px-10 sm:pb-4 sm:pt-8 tall:pb-0 tall:pt-5 wide:hidden"
+            />
 
             {/* Three: the index. This is the switcher's control and the site's
               discipline navigation at the same time — hover previews, click
