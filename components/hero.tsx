@@ -80,18 +80,22 @@ const blurFor = (src: string): string | undefined =>
  * arrives with it, which is the right order anyway: the picture is what the
  * page is, and the type introduces it rather than racing it.
  *
- * The index cascades row by row rather than arriving as a block — six rows at
- * 55ms is the one place here where a stagger reads as deliberate instead of
- * as lag, because they are identical objects in a list and the eye follows
+ * The index cascades row by row rather than arriving as a block — seven rows
+ * at 55ms is the one place here where a stagger reads as deliberate instead
+ * of as lag, because they are identical objects in a list and the eye follows
  * them down.
  */
 /** Where the page's own slab fade has finished and the cover can begin. */
 const HEAD_MS = 480;
 const NAME_MS = 600;
-const INDEX_MS = 720;
+/* The buttons sit under the name now rather than under the index, so they
+   land there too: third, and before the rows below them. A button arriving
+   above seven rows that are already on the page reads as one that was
+   forgotten, whatever the timing says. */
+const BUTTONS_MS = 720;
+const INDEX_MS = 840;
 /** Between one index row and the next. */
 const ROW_MS = 55;
-const BUTTONS_MS = INDEX_MS + 6 * ROW_MS + 60;
 
 /**
  * The swap, at the speed a hover deserves.
@@ -700,19 +704,51 @@ export function Hero({ disciplines }: { disciplines: Discipline[] }) {
             </h1>
           </div>
 
-          {/* Last on a phone, so the index and both buttons follow the
+          {/* Last on a phone, so the buttons and the index follow the
             photograph rather than pushing it off the screen.
-            
+
             `wide:flex-1`, where it used to be `lg:`. It takes the rest of the
-            column so `mt-auto` on the buttons can pin them to the foot of the
-            picture — which is the design at `wide` and wrong in the squarish
-            band, where a window can be much taller than it is wide. Growing
-            there is what defeated `justify-center` on the panel: the two
+            column so the spacer inside it can push the index to the foot of
+            the picture — which is the design at `wide` and wrong in the
+            squarish band, where a window can be much taller than it is wide.
+            Growing there is what defeated `justify-center` on the panel: the
             children already filled it, so there was nothing left to centre
-            and the block sat against the top with 350px of panel under the
-            buttons. `lg` is a width and could not tell those two cases
-            apart. */}
+            and the block sat against the top with 350px of panel under it.
+            `lg` is a width and could not tell those two cases apart. */}
           <div className="flex min-w-0 flex-col wide:flex-1">
+            {/* Two: the two ways in, under the name rather than under the
+                index.
+
+                They used to be pinned to the foot of the screen, and an
+                opaque bar across the foot of a panel the index overruns is
+                a bar over the index: measured at 1280x700 it covered three
+                rows and put four of the seven out of reach — a pointer
+                landed on the bar, and the rows under it could not be
+                scrolled clear because the bar was pinned. At 1440x900 it
+                covered two. So they come up here, where they are above the
+                fold on every screen, nothing is under them, and the index
+                keeps the foot of the panel to itself.
+
+                It also reads better: who, then what to do about it, then
+                the work to look through. */}
+            <div
+              style={lands(BUTTONS_MS)}
+              className="rise flex flex-wrap items-center gap-3 px-6 pb-2 pt-6 sm:px-10 sm:pb-4 sm:pt-8 tall:pb-0 tall:pt-5"
+            >
+              <Link
+                href="/work"
+                className="label glass-prominent rounded-full px-6 py-4 press active:scale-[0.97]"
+              >
+                See the work
+              </Link>
+              <Link
+                href="/sessions"
+                className="label glass rounded-full px-6 py-4 press active:scale-[0.97]"
+              >
+                Book a session
+              </Link>
+            </div>
+
             {/* Three: the index. This is the switcher's control and the site's
               discipline navigation at the same time — hover previews, click
               opens that discipline's own page. Numbering is what keeps it an
@@ -818,7 +854,7 @@ export function Hero({ disciplines }: { disciplines: Discipline[] }) {
               aria-label="Disciplines"
               onPointerOver={takeFromEvent}
               onFocus={takeFromEvent}
-              className="mt-5 hidden gap-1 px-6 tall:flex"
+              className="mt-5 hidden gap-1 px-6 tall:flex tall:pb-[max(0.5rem,env(safe-area-inset-bottom))]"
             >
               {disciplines.map((discipline, i) => (
                 <li
@@ -844,39 +880,6 @@ export function Hero({ disciplines }: { disciplines: Discipline[] }) {
               ))}
             </ol>
 
-            {/* Four: the two ways in.
-
-              `mt-auto` pins them to the foot, which anchors the type block at
-              both ends against a full-height picture — right at `wide`, where
-              the panel is 982px and the gap is a margin. In the squarish band
-              a window can be much taller than it is wide: measured at
-              1200x1180, the index ended at 639px and the buttons sat at
-              1069px, leaving 430px of blurred nothing in the middle of the
-              panel. So there the buttons follow the index and the whole block
-              is centred instead (see the plate below). */}
-            <div
-              style={lands(BUTTONS_MS)}
-              /* Pinned to the foot of the screen from `lg`: the column runs
-                 taller than the window now that the index rows have their
-                 air, so the buttons would sit under the fold. Sticky keeps
-                 them in flow and at the bottom left of the screen until the
-                 column's own foot scrolls up to meet them. Julian: move them
-                 to the bottom left of the page. */
-              className="rise flex flex-wrap items-center gap-3 px-6 py-6 sm:px-10 sm:py-6 lg:sticky lg:bottom-0 lg:z-10 lg:bg-background squat:mt-10 tall:mt-2 tall:pb-[max(1.25rem,env(safe-area-inset-bottom))] tall:pt-4"
-            >
-              <Link
-                href="/work"
-                className="label glass-prominent rounded-full px-6 py-4 press active:scale-[0.97]"
-              >
-                See the work
-              </Link>
-              <Link
-                href="/sessions"
-                className="label glass rounded-full px-6 py-4 press active:scale-[0.97]"
-              >
-                Book a session
-              </Link>
-            </div>
           </div>
         </div>
       </div>
