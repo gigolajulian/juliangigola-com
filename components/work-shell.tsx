@@ -63,7 +63,10 @@ export function WorkShell({
         <div
           className={cn(
             "relative z-10 mx-auto w-full max-w-[100rem] px-6 pt-28 sm:px-10 sm:pt-36",
-            film && "pb-2",
+            /* Taller over the film, Julian asked: most of a screen of reel,
+               with the head and the chips at its foot. The other filters
+               keep the head's natural height. */
+            film && "flex min-h-[78dvh] flex-col justify-end pb-4",
           )}
         >
           <header className="rise">
