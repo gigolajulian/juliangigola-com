@@ -39,10 +39,10 @@ const VOLUME = 0.05;
 /**
  * How long the sound takes to arrive, and why there are two numbers.
  *
- * Ten seconds when the reel unmutes itself, which is what Julian asked for:
- * the page opens silent and the room fills in behind the picture rather than
- * starting mid-sentence. A cut to audio on arrival is the thing that makes a
- * visitor reach for the tab close, even at 5%.
+ * Ten seconds when the reel comes back into view with sound already asked
+ * for: the room fills in behind the picture rather than starting
+ * mid-sentence. The page itself opens silent and stays so until the Sound
+ * button is pressed; Julian asked for the background muted.
  *
  * Six hundred milliseconds when somebody presses Sound. They asked for it —
  * a ten-second ramp there is not gentle, it is a control that appears not to
@@ -223,16 +223,13 @@ export function VideoHero({
         const p = new Vimeo.Player(iframe.current);
         player.current = p;
 
-        try {
-          await withSound(p);
-          if (cancelled) return;
-          wantsSound.current = true;
-          setSounding(true);
-        } catch {
-          // Refused. Back to wallpaper, and the press below is the way in.
-          await p.setMuted(true).catch(() => {});
-          await p.play().catch(() => {});
-        }
+        /* Muted, and it stays muted: Julian asked for the background to
+           be silent. It used to unmute itself here, ramping to 5% over
+           ten seconds where the browser allowed; now the Sound button is
+           the only way in, and the ramp on arrival is kept for scrolling
+           back to a reel somebody has already turned up. */
+        await p.setMuted(true).catch(() => {});
+        await p.play().catch(() => {});
       })
       .catch(() => {
         // No API — an ad blocker, or the script blocked. The frame is still
@@ -242,7 +239,7 @@ export function VideoHero({
     return () => {
       cancelled = true;
     };
-  }, [withSound]);
+  }, []);
 
   /**
    * Sound on at 5%, or off. The one control a silent autoplaying video owes
