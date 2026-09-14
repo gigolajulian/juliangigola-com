@@ -136,7 +136,7 @@ export default function Home() {
             href="/work"
             label="For art directors"
             title="Commissioned work"
-            body="Editorial, campaigns, portraits, and artist imagery — with clients and credits."
+            body="Editorial, campaigns, portraits, and artist imagery."
           />
           <PathCard
             href="/sessions"

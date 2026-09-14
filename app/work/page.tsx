@@ -15,7 +15,13 @@ export default function WorkPage() {
     <>
       <div className="mx-auto w-full max-w-[100rem] px-6 pb-24 pt-28 sm:px-10 sm:pt-36">
         <header className="rise">
-          <h1 className="title">Work</h1>
+          {/* The same slot the category pages give their "← All work"
+              crumb, so a chip click moves the words and not the title —
+              Julian: the All page and a filter did not match in height. */}
+          <div>
+            <span className="label text-muted-foreground">All work</span>
+          </div>
+          <h1 className="mt-8 title">Work</h1>
           <p className="mt-4 max-w-prose text-sm leading-relaxed text-muted-foreground">
             {COMMISSIONS.length} commissioned projects. Editorial, campaigns,
             portraits, artist imagery, and film.
