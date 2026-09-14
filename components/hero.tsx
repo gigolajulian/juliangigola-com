@@ -522,10 +522,15 @@ export function Hero({ disciplines }: { disciplines: Discipline[] }) {
        * from `lg`. Either way the picture is behind all of it and none of the
        * type is closer to the photograph than the plate's own padding.
        */}
-      <div className="relative z-10 flex min-h-dvh flex-col justify-end tall:min-h-[100lvh] squat:justify-start wide:justify-start">
+      {/* The column is layout, not a surface: `pointer-events-none` so the
+          picture's empty acres pass a press through to what is under them,
+          which is how the credit pill in the corner gets clicked at all. It
+          used to sit under this column and take nothing. Julian: when the
+          pill is clicked, open the project. The plate takes them back. */}
+      <div className="pointer-events-none relative z-10 flex min-h-dvh flex-col justify-end tall:min-h-[100lvh] squat:justify-start wide:justify-start">
         <div
           className={cn(
-            "flex min-w-0 flex-col border-t border-border/60",
+            "pointer-events-auto flex min-w-0 flex-col border-t border-border/60",
             // Over the photograph: thinned ground, deep blur.
             "glass-surface bg-background/45",
             /* Upright screens — a phone, a tablet held tall — asked for the
