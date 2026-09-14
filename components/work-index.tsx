@@ -233,7 +233,11 @@ export function WorkIndex({
 
         <div
           ref={listColumn}
-          className="list-scroll lg:h-full lg:w-1/2 lg:min-w-0 lg:overflow-y-auto"
+          /* The column clips what it scrolls, and the hover box below sits a
+             little wider than its row: so the column is let out 1rem each
+             side and padded back, and the rows sit where they did while the
+             box has room. */
+          className="list-scroll lg:-mx-4 lg:h-full lg:w-[calc(50%+2rem)] lg:min-w-0 lg:overflow-y-auto lg:px-4"
         >
           <ol
             onPointerEnter={() => setHovering(true)}
