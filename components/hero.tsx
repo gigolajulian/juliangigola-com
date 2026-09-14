@@ -107,12 +107,17 @@ function Ways({
          material is only itself at a radius like this, and it is the one
          place on the page borrowed from somewhere else deliberately.
 
-         The fill is denser than `glass` gives by default. Seven
-         photographs pass behind this, some of them dark, and the type in
-         the rows has to read on all of them — measured below. */
+         The fill is 50%, at Julian's ask: half the ground, so the
+         photograph reads through it. That is thin, and what holds the type
+         up is its size — bold condensed capitals at 18-20px are large
+         text, which asks 3:1 and not 4.5:1. Measured on the rendered
+         pixels over all seven frames in both themes, the worst is 3.2:1,
+         on the dark theme over the fourth frame. It clears the bar it has
+         to clear and there is nothing left over: anything that makes this
+         thinner needs the type bigger or the frames behind it darker. */
       className={cn(
         "glass glass-liquid flex w-fit flex-col overflow-hidden rounded-[1.375rem]",
-        "[--glass-fill:color-mix(in_oklab,var(--background)_74%,transparent)]",
+        "[--glass-fill:color-mix(in_oklab,var(--background)_50%,transparent)]",
         className,
       )}
     >
