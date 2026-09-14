@@ -726,6 +726,19 @@ export function Hero({ disciplines }: { disciplines: Discipline[] }) {
               bubble, so a single listener on the list is both simpler and
               actually dependable. The row index rides on a data attribute
               instead of being captured in four closures. */}
+            {/* Whatever height the panel has spare, this takes, so the
+                index and the two buttons under it sit at the foot of the
+                left panel rather than packed under the name. Julian: the
+                phases feel clustered there, move them to the bottom left.
+
+                A spacer and not `mt-auto` on the index, because an auto
+                margin that finds no spare height collapses to nothing and
+                the index would end up touching the subtitle on a screen
+                where the panel is already full. `basis-0 shrink-0` is a
+                box that is either the spare height or zero, never less,
+                so the index keeps its own `sm:mt-6` when there is none. */}
+            <div aria-hidden className="hidden basis-0 shrink-0 wide:block wide:grow" />
+
             <nav
               aria-label="Disciplines"
               className="mt-8 border-t border-border sm:mt-6 tall:hidden"
@@ -849,7 +862,7 @@ export function Hero({ disciplines }: { disciplines: Discipline[] }) {
                  them in flow and at the bottom left of the screen until the
                  column's own foot scrolls up to meet them. Julian: move them
                  to the bottom left of the page. */
-              className="rise mt-auto flex flex-wrap items-center gap-3 px-6 py-6 sm:px-10 sm:py-6 lg:sticky lg:bottom-0 lg:z-10 lg:bg-background squat:mt-10 tall:mt-2 tall:pb-[max(1.25rem,env(safe-area-inset-bottom))] tall:pt-4"
+              className="rise flex flex-wrap items-center gap-3 px-6 py-6 sm:px-10 sm:py-6 lg:sticky lg:bottom-0 lg:z-10 lg:bg-background squat:mt-10 tall:mt-2 tall:pb-[max(1.25rem,env(safe-area-inset-bottom))] tall:pt-4"
             >
               <Link
                 href="/work"
