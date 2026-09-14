@@ -2,6 +2,18 @@
   "/work/aera-wraith/cover.jpg": [
     1080
   ],
+  "/work/aera-wraith/02.jpg": [
+    640,
+    1080
+  ],
+  "/work/aera-wraith/03.jpg": [
+    640,
+    1080
+  ],
+  "/work/aera-wraith/04.jpg": [
+    640,
+    1080
+  ],
   "/work/aether/cover.jpg": [
     1080
   ],
@@ -101,18 +113,6 @@
   "/work/luxe-meets-future/cover.jpg": [
     1080
   ],
-  "/work/luxe-meets-future/02.jpg": [
-    640,
-    1080
-  ],
-  "/work/luxe-meets-future/03.jpg": [
-    640,
-    1080
-  ],
-  "/work/luxe-meets-future/04.jpg": [
-    640,
-    1080
-  ],
   "/work/metamorphosis/cover.jpg": [
     1080
   ],
@@ -123,18 +123,6 @@
     1080
   ],
   "/work/oakley-x-nike/cover.jpg": [
-    1080
-  ],
-  "/work/oakley-x-nike/02.jpg": [
-    640,
-    1080
-  ],
-  "/work/oakley-x-nike/03.jpg": [
-    640,
-    1080
-  ],
-  "/work/oakley-x-nike/04.jpg": [
-    640,
     1080
   ],
   "/work/obscura/cover.jpg": [
@@ -150,12 +138,6 @@
     1080
   ],
   "/work/retro-reverie-vol-01/cover.jpg": [
-    1080
-  ],
-  "/work/retro-reverie-vol-02/cover.jpg": [
-    1080
-  ],
-  "/work/revelo/cover.jpg": [
     1080
   ],
   "/work/rouge/cover.jpg": [
