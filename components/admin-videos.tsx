@@ -130,7 +130,7 @@ export function AdminVideos({
   return (
     <div className="mt-10 flex flex-col gap-8">
       <div className="flex flex-col gap-3">
-        <h2 className="font-display text-xl uppercase tracking-[0]">Video</h2>
+        <h2 className="font-display text-xl uppercase tracking-[0]">Motion</h2>
         <p className="max-w-prose text-sm leading-relaxed text-muted-foreground">
           Paste a YouTube or Vimeo link. The title comes across on its own and
           the cover is picked from the stills below. Nothing loads from either

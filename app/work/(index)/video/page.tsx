@@ -7,7 +7,7 @@ import { SECTIONS, inSection } from "@/lib/videos";
 
 /* ── /work/video ──────────────────────────────────────────────────
  * The moving work, as one more filter on the work index: the `(index)`
- * layout draws the head and the chip row with Video lit, and the films
+ * layout draws the head and the chip row with Motion lit, and the films
  * sit under the chips where a discipline's projects would be.
  *
  * Still a real route, at `/work/video` and not `/work/category/video`,
@@ -20,7 +20,7 @@ import { SECTIONS, inSection } from "@/lib/videos";
  * ─────────────────────────────────────────────────────────────── */
 
 export const metadata: Metadata = {
-  title: "Video",
+  title: "Motion",
   description:
     "Music videos and commercials, directed and shot in the San Francisco Bay Area. Selected moving work with clients and credits.",
   alternates: { canonical: "/work/video" },

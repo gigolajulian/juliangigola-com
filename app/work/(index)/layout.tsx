@@ -24,7 +24,7 @@ const HEADS: Record<string, Head> = {
     sub: `${COMMISSIONS.length} projects. Editorial, campaigns, portraits, artist imagery, and film.`,
   },
   video: {
-    title: "Video",
+    title: "Motion",
     sub: `${CONTENT.videos.length + 1} films. Directed and shot by Julian Gigola.`,
   },
 };

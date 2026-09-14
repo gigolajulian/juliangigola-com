@@ -291,6 +291,12 @@ const CATEGORY_LABELS: Record<string, string> = {
   // a political or fundraising one. The client is a brand, and saying so is
   // what an art director is scanning the index for.
   campaigns: "Brand campaigns",
+  /* Julian: rename Video to Motion. "Video" names a file format; the row
+     next to EDITORIAL and PORTRAITS should name a kind of work, and the
+     moving work here is direction, not footage. The slug stays `video`, so
+     /work/video and every link into it keep working — only the label
+     moves. */
+  video: "Motion",
 };
 
 /**

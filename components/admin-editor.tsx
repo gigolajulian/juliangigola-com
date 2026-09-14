@@ -109,7 +109,7 @@ const TABS = [
     { id: "projects", label: "Projects" },
     // With the work rather than with the pages: it is a discipline whose
     // contents change, not a page whose copy does.
-    { id: "video", label: "Video" },
+    { id: "video", label: "Motion" },
   ],
   /* Its own group, because it is not the same kind of visit at all.
    *
