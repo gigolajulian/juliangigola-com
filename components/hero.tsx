@@ -728,7 +728,7 @@ export function Hero({ disciplines }: { disciplines: Discipline[] }) {
               instead of being captured in four closures. */}
             <nav
               aria-label="Disciplines"
-              className="mt-8 border-t border-border sm:mt-10 tall:hidden"
+              className="mt-8 border-t border-border sm:mt-6 tall:hidden"
             >
               <ul onPointerOver={takeFromEvent} onFocus={takeFromEvent}>
                 {disciplines.map((discipline, i) => (
@@ -755,15 +755,16 @@ export function Hero({ disciplines }: { disciplines: Discipline[] }) {
                       href={discipline.href}
                       aria-current={i + 1 === active ? "true" : undefined}
                       className={cn(
-                        // `py-2`. The type column is what sets the height
+                        // `py-2.5`. The type column is what sets the height
                         // of this section, the 80dvh picture track loses to
                         // it, so every pixel of row height is a pixel the
                         // buttons drop. Julian asked for bigger type on the
                         // rows (text-2xl / text-3xl): the padding gives back
-                        // what the type took, and on a 900px screen both
-                        // buttons still clear the fold. 46px a row is still
+                        // what the type took, with the index and the buttons
+                        // each pulled in a little, and on a 900px screen both
+                        // buttons still clear the fold. 50px a row is still
                         // a comfortable target.
-                        "group flex items-baseline gap-4 px-6 py-2 transition-colors duration-300 sm:px-10",
+                        "group flex items-baseline gap-4 px-6 py-2.5 transition-colors duration-300 sm:px-10",
                         // `bg-secondary`, not `bg-card`. Card sits at L* 5.7
                         // against a ground of L* 2.8 — a real step in the token
                         // scale, and almost invisible as a band across a row.
@@ -844,7 +845,7 @@ export function Hero({ disciplines }: { disciplines: Discipline[] }) {
               is centred instead (see the plate below). */}
             <div
               style={lands(BUTTONS_MS)}
-              className="rise mt-auto flex flex-wrap items-center gap-3 px-6 py-6 sm:px-10 sm:py-8 squat:mt-10 tall:mt-2 tall:pb-[max(1.25rem,env(safe-area-inset-bottom))] tall:pt-4"
+              className="rise mt-auto flex flex-wrap items-center gap-3 px-6 py-6 sm:px-10 sm:py-6 squat:mt-10 tall:mt-2 tall:pb-[max(1.25rem,env(safe-area-inset-bottom))] tall:pt-4"
             >
               <Link
                 href="/work"
