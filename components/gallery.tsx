@@ -127,7 +127,7 @@ export function Gallery({ project }: { project: Project }) {
                   return (
                     <Wrap key={frame.src}>
                       <button
-                        data-ring
+                        data-ring="Zoom in"
                         type="button"
                         onClick={() => lightbox.show(i)}
                         aria-label={`Open frame ${i + 1} of ${frames.length}${

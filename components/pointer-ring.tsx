@@ -19,6 +19,10 @@ import { createPortal } from "react-dom";
  * `data-ring` and hides the system cursor with `hoverable:cursor-none`; the
  * ring appears over those and nowhere else, and a lightbox opening under a
  * click hides it by the same rule — the pointer is no longer over a sleeve.
+ * The attribute's value, if it has one, is a word set under the ring —
+ * "Zoom in" over a frame, "Next project" over the cell that leads on —
+ * which is the label the reference site (remyshoots.co.za) hangs off its
+ * pointer, and which Julian asked for.
  *
  * Portalled to `<body>`, and this is a bug fixed. `position: fixed` is
  * relative to the viewport only while no ancestor has a transform — and
@@ -46,6 +50,7 @@ const useMounted = () =>
 
 export function PointerRing() {
   const ref = React.useRef<HTMLDivElement>(null);
+  const word = React.useRef<HTMLSpanElement>(null);
   const mounted = useMounted();
 
   React.useEffect(() => {
@@ -59,11 +64,16 @@ export function PointerRing() {
 
     const move = (e: PointerEvent) => {
       el.style.transform = `translate3d(${e.clientX - RADIUS}px, ${e.clientY - RADIUS}px, 0)`;
-      const hit = !!(e.target as Element | null)?.closest?.("[data-ring]");
+      const on = (e.target as Element | null)?.closest?.("[data-ring]");
+      const hit = !!on;
       if (hit === over) return;
       over = hit;
       el.toggleAttribute("data-over", hit);
       if (!hit) el.removeAttribute("data-pressed");
+      // The word stays while the ring fades out, so it never blanks first.
+      if (hit && word.current) {
+        word.current.textContent = on?.getAttribute("data-ring") ?? "";
+      }
     };
     const down = () => {
       if (over) el.setAttribute("data-pressed", "");
@@ -140,6 +150,21 @@ export function PointerRing() {
           ].join(" ")}
         />
       </div>
+      {/* The word. Set in ink rather than inverted, because a word under
+          `difference` on a mid-grey photograph is unreadable. Below and to
+          the right of the ring, the way a tag hangs off a pointer; a hair
+          later than the ring so the ring leads. Empty when the element gave
+          no word, and `empty:` hides the pill rather than leaving a dot. */}
+      <span
+        ref={word}
+        className={[
+          "absolute left-full top-full -ml-1 -mt-1 whitespace-nowrap rounded-full bg-foreground px-2 py-1",
+          "text-[0.625rem] font-medium uppercase leading-none tracking-[0.14em] text-background",
+          "opacity-0 translate-y-1 transition-[opacity,translate] duration-200 ease-[var(--ease-out-strong)]",
+          "in-data-over:opacity-100 in-data-over:translate-y-0 in-data-over:delay-[40ms]",
+          "empty:hidden motion-reduce:transition-none",
+        ].join(" ")}
+      />
     </div>,
     document.body,
   );

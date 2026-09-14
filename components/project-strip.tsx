@@ -2,6 +2,8 @@
 
 import * as React from "react";
 import Image from "next/image";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { PointerRing } from "@/components/pointer-ring";
 import { Lightbox, useLightbox } from "@/components/lightbox";
 import { cn } from "@/lib/utils";
@@ -30,23 +32,48 @@ import type { Project, TextBlock, Frame } from "@/lib/work-types";
  * handover the work index uses, which is the behaviour Julian asked for
  * there. And the strip can be dragged: grab a frame and pull, and let go to
  * send it coasting. See "how it moves" below.
+ *
+ * The sequence ends on the next project, not on nothing: its cover and its
+ * name are the last cell of the strip, and a wheel that keeps turning once
+ * the strip and the page have both run out goes there. Julian's reference
+ * for the whole page is remyshoots.co.za, where this is how one project
+ * leads to the next; see "the way on" below.
  * ─────────────────────────────────────────────────────────────── */
 
 type Cell =
   | { kind: "frame"; frame: Frame; n: number }
-  | { kind: "text"; block: TextBlock };
+  | { kind: "text"; block: TextBlock }
+  | { kind: "next" };
+
+export type NextUp = {
+  href: string;
+  name: string;
+  client?: string;
+  frame?: Frame;
+};
+
+/** How far past the end a wheel has to push before it leads on, in px of
+    wheel delta. Three notches on a mouse: an overshoot of one is a
+    reader arriving at the end, not asking to leave it. */
+const LEAVE_AFTER = 300;
 
 export function ProjectStrip({
   project,
+  next,
   className,
 }: {
   project: Project;
+  /** What the strip ends on and where a wheel past the end goes. */
+  next?: NextUp;
   className?: string;
 }) {
   const frames = project.images;
-  const lightbox = useLightbox(frames);
   const scroller = React.useRef<HTMLDivElement>(null);
+  const lightbox = useLightbox(frames, scroller);
   const [at, setAt] = React.useState(0);
+  const router = useRouter();
+  // Stable for the life of the strip: the page keys it by project.
+  const nextHref = next?.href;
 
   /* The photographs with the writing back in its place. `lib/work.ts` pulls
      the two apart — the lightbox and the counts have no use for a paragraph
@@ -65,8 +92,9 @@ export function ProjectStrip({
     for (const block of byPosition.get(frames.length) ?? []) {
       out.push({ kind: "text", block });
     }
+    if (next) out.push({ kind: "next" });
     return out;
-  }, [frames, project.blocks]);
+  }, [frames, project.blocks, next]);
 
   /* Which cell is nearest the middle of the window. Read off the scroll
      position rather than with an observer, because the counter and the
@@ -190,10 +218,34 @@ export function ProjectStrip({
        would move. The end is read off the target rather than off
        `scrollLeft`, or a notch that arrives while the strip is still
        gliding into the last frame would be handed to the page. */
+    /* ── the way on ──
+       Past the end, the page gets the wheel and scrolls to its foot. With
+       the page at its foot too, the wheel is asking for what comes next,
+       and three notches of it go there: the strip slides off to the left
+       and the next project's strip arrives from the right (`strip-scroll`
+       in `globals.css`). A notch back cancels the count. */
+    let over = 0;
+    let leaving = false;
+    const leave = () => {
+      if (!nextHref || leaving) return;
+      leaving = true;
+      el.dataset.leaving = "";
+      window.setTimeout(() => router.push(nextHref), 260);
+    };
+
     const onWheel = (e: WheelEvent) => {
       // A pinch is a zoom, and a trackpad's sideways swipe already works.
       if (e.ctrlKey || Math.abs(e.deltaX) > Math.abs(e.deltaY)) return;
+      if (e.deltaY < 0) over = 0;
+      if (e.deltaY > 0 && target >= room() - 1) {
+        const foot =
+          window.innerHeight + window.scrollY >=
+          document.documentElement.scrollHeight - 1;
+        if (foot && (over += e.deltaY) >= LEAVE_AFTER) leave();
+        return;
+      }
       if (e.deltaY > 0 ? target >= room() - 1 : target <= 0) return;
+      over = 0;
       e.preventDefault();
       /* Firefox can report lines rather than pixels. A flat 160ms
          whatever the distance: notches that stack while the wheel spins
@@ -293,7 +345,7 @@ export function ProjectStrip({
       el.removeEventListener("scroll", sync);
       if (frame) cancelAnimationFrame(frame);
     };
-  }, []);
+  }, [router, nextHref]);
 
   /** Puts a cell in the middle of the window. */
   const goTo = (i: number) => {
@@ -333,7 +385,50 @@ export function ProjectStrip({
           )}
         >
           {cells.map((cell) =>
-            cell.kind === "text" ? (
+            cell.kind === "next" ? (
+              /* The last cell: the next project's cover at the strip's
+                 height with its name beside it, the whole thing one link.
+                 A portrait frame where the project has one, so it reads
+                 as a cover and not as the sequence carrying on. */
+              <Link
+                key="next"
+                href={next!.href}
+                data-ring="Next project"
+                className="group flex h-full shrink-0 items-center gap-6 pr-6 sm:gap-8 sm:pr-10 hoverable:cursor-none"
+              >
+                {next!.frame ? (
+                  <span
+                    className="relative block h-full shrink-0 overflow-hidden"
+                    style={{
+                      backgroundColor: next!.frame.color,
+                      aspectRatio: `${next!.frame.width} / ${next!.frame.height}`,
+                    }}
+                  >
+                    <Image
+                      src={next!.frame.src}
+                      alt=""
+                      fill
+                      sizes="(min-width: 1024px) 40vw, 70vw"
+                      draggable={false}
+                      className="h-full w-full object-cover transition-transform duration-700 ease-[var(--ease-out-strong)] hoverable:group-hover:scale-[1.03]"
+                    />
+                  </span>
+                ) : null}
+                <span className="flex flex-col gap-2">
+                  <span className="label text-muted-foreground">
+                    Next project
+                  </span>
+                  <span className="font-display text-2xl uppercase leading-none tracking-[0] sm:text-4xl">
+                    {next!.name}
+                  </span>
+                  {next!.client ? (
+                    <span className="label text-muted-foreground">
+                      {next!.client}
+                    </span>
+                  ) : null}
+                </span>
+              </Link>
+            ) : cell.kind === "text" ? (
               <div
                 key={`text-${cell.block.after}-${cell.block.heading ?? ""}`}
                 className="flex h-full w-[min(24rem,80vw)] shrink-0 flex-col justify-center"
@@ -353,7 +448,7 @@ export function ProjectStrip({
                  much of the strip it takes. */
               <button
                 key={cell.frame.src}
-                data-ring
+                data-ring="Zoom in"
                 type="button"
                 onClick={() => lightbox.show(cell.n)}
                 aria-label={`Open frame ${cell.n + 1} of ${frames.length}${
@@ -366,6 +461,9 @@ export function ProjectStrip({
                 }}
               >
                 <Image
+                  // How the lightbox finds the frame to lift out of the
+                  // strip, and to land back in. See `lightbox.tsx`.
+                  data-frame={cell.frame.src}
                   src={cell.frame.src}
                   alt={cell.frame.alt || `${project.name}, frame ${cell.n + 1}`}
                   fill
@@ -402,7 +500,8 @@ export function ProjectStrip({
             aria-hidden
             className="flex min-w-0 flex-1 items-end justify-between gap-px"
           >
-            {cells.map((cell, i) => (
+            {cells.map((cell, i) =>
+              cell.kind === "next" ? null : (
               <button
                 key={`tick-${i}`}
                 type="button"
@@ -419,7 +518,8 @@ export function ProjectStrip({
                   )}
                 />
               </button>
-            ))}
+              ),
+            )}
           </div>
         </div>
       </div>

@@ -49,16 +49,30 @@ const NAME = "lightbox-frame";
 const pictureFor = (src: string): HTMLElement | null =>
   document.querySelector<HTMLElement>(`img[data-frame="${CSS.escape(src)}"]`);
 
+/** The layout the frame lifts out of, when it spreads; see `travel`. */
+const STAGE = "lightbox-stage";
+
 /**
  * Runs `update` as a view transition with the name travelling from `from`
  * to `to`. Either end may be absent; the lightbox's own picture carries the
  * name in its style, so it is never passed here. Without the API, or with
  * reduced motion, the update simply runs.
+ *
+ * `stage`, when given, is the layout the frame is lifted out of — the
+ * filmstrip. It is named on the side of the trip where the lightbox is
+ * closed and only there, so the browser sees it leave on the way in and
+ * arrive on the way out, and `globals.css` scales it about the pressed
+ * frame: the neighbours spread away from the one that is growing, and
+ * gather back round it on the way home. Julian's reference for this is
+ * remyshoots.co.za, studied frame by frame. The origin is handed over as a
+ * custom property on the root, which the transition pseudo-elements
+ * inherit.
  */
 function travel(
   from: HTMLElement | null,
   update: () => void,
   to: HTMLElement | null,
+  stage?: HTMLElement | null,
 ) {
   if (
     typeof document.startViewTransition !== "function" ||
@@ -68,22 +82,43 @@ function travel(
     return;
   }
   if (from) from.style.viewTransitionName = NAME;
+  const anchor = from ?? to;
+  if (stage && anchor) {
+    const r = anchor.getBoundingClientRect();
+    const s = stage.getBoundingClientRect();
+    document.documentElement.style.setProperty(
+      "--lift-x",
+      `${r.left + r.width / 2 - s.left}px`,
+    );
+  }
+  // Named while closed (the old side going in, the new side coming out),
+  // never while open: a named element is drawn above the root snapshot, so
+  // named on the open side it would show through the lightbox's overlay for
+  // the length of the trip.
+  if (stage && from) stage.style.viewTransitionName = STAGE;
   const transition = document.startViewTransition(() => {
     // Synchronous, so the new snapshot is of the updated page.
     flushSync(update);
     if (from) from.style.viewTransitionName = "";
     if (to) to.style.viewTransitionName = NAME;
+    if (stage) stage.style.viewTransitionName = to ? STAGE : "";
   });
   transition.finished
     .finally(() => {
       if (to) to.style.viewTransitionName = "";
+      if (stage) stage.style.viewTransitionName = "";
     })
     // A skipped transition — hidden tab, a second one starting — rejects
     // `finished`; the update still ran, and nothing here needs the promise.
     .catch(() => {});
 }
 
-export function useLightbox(frames: Frame[]) {
+export function useLightbox(
+  frames: Frame[],
+  /** The layout the frames sit in, if it should spread around the one
+      that opens. */
+  stage?: React.RefObject<HTMLElement | null>,
+) {
   const count = frames.length;
   const [open, setOpen] = React.useState(false);
   const [index, setIndex] = React.useState(0);
@@ -104,6 +139,7 @@ export function useLightbox(frames: Frame[]) {
         setOpen(true);
       },
       null,
+      stage?.current,
     );
   };
 
@@ -115,7 +151,12 @@ export function useLightbox(frames: Frame[]) {
     // Back to whichever frame is showing now, which after a few arrow keys
     // is not the one that was pressed.
     const src = frames[index]?.src;
-    travel(null, () => setOpen(false), src ? pictureFor(src) : null);
+    travel(
+      null,
+      () => setOpen(false),
+      src ? pictureFor(src) : null,
+      stage?.current,
+    );
     opener.current?.focus();
   };
 

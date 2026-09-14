@@ -552,6 +552,31 @@ body:has([data-quiet-footer]) .site-footer-row {
   &::-webkit-scrollbar {
     display: none;
   }
+  /* Arrives from the right and settles, which is how the reference site
+     brings the next project in when the wheel runs off the end of the last
+     one; and since the page is keyed by project, the same arrival greets a
+     first visit. `backwards`, not `both`: a forwards fill would hold the
+     transform and the leaving transition below could never move it. */
+  animation: jg-strip-in 640ms var(--ease-out-strong) backwards;
+  &[data-leaving] {
+    transition:
+      transform 260ms var(--ease-in-out-strong),
+      opacity 260ms var(--ease-in-out-strong);
+    transform: translateX(-14vw);
+    opacity: 0;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+    &[data-leaving] {
+      transition: none;
+    }
+  }
+}
+@keyframes jg-strip-in {
+  from {
+    transform: translateX(24vw);
+    opacity: 0;
+  }
 }
 
 @utility label {
@@ -1090,6 +1115,34 @@ optgroup {
   animation-name: jg-via-blur;
   animation-duration: 420ms;
   animation-timing-function: var(--ease-out-strong);
+}
+
+/* The strip the frame lifts out of. Named only on the closed side of the
+   trip (see `travel` in `lightbox.tsx`), so on the way in it is an old
+   snapshot leaving and on the way out a new one arriving. Scaled about the
+   pressed frame — `--lift-x` is set on the root as the trip starts — so
+   the frames either side spread away from the one that is growing, and
+   close back round it on the way home. That spread is the part of the
+   reference's zoom that a plain lift does not give. */
+::view-transition-old(lightbox-stage) {
+  animation: jg-stage-spread 420ms var(--ease-out-strong) both;
+  transform-origin: var(--lift-x, 50%) 50%;
+}
+::view-transition-new(lightbox-stage) {
+  animation: jg-stage-gather 420ms var(--ease-out-strong) both;
+  transform-origin: var(--lift-x, 50%) 50%;
+}
+@keyframes jg-stage-spread {
+  to {
+    transform: scale(1.18);
+    opacity: 0;
+  }
+}
+@keyframes jg-stage-gather {
+  from {
+    transform: scale(1.18);
+    opacity: 0;
+  }
 }
 
 /* The rest of the page, on the same trip. Quicker than the cover on purpose:

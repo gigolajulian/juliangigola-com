@@ -40,7 +40,7 @@ export function CoverArtGallery({ releases }: { releases: CoverRelease[] }) {
   return (
     <>
       <ul
-        data-ring
+        data-ring="Zoom in"
         className="mt-12 grid grid-cols-2 hoverable:cursor-none sm:mt-16 sm:grid-cols-3"
       >
         {releases.map((release, i) => {

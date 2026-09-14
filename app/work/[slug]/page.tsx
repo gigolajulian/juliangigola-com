@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ProjectStrip } from "@/components/project-strip";
+import { ProjectStrip, type NextUp } from "@/components/project-strip";
 import { CoverArtGallery } from "@/components/cover-art-gallery";
 import { CallToAction } from "@/components/call-to-action";
 import {
@@ -101,6 +101,25 @@ export default async function ProjectPage(props: PageProps<"/work/[slug]">) {
           : undefined;
       })();
 
+  /* The strip's last cell and where the wheel goes past the end: the next
+     project with a portrait frame of it, or the next discipline's gallery
+     when this page is a discipline. */
+  const nextProject = isDiscipline
+    ? onwards && getProject(onwards.href.replace(/^\/work\//, ""))
+    : nextAfter(project);
+  const nextUp: NextUp | undefined = onwards
+    ? {
+        href: onwards.href,
+        name: nextProject?.name ?? onwards.name,
+        client: nextProject?.credits.find((c) => /client/i.test(c.role))
+          ?.name,
+        frame: nextProject
+          ? (nextProject.images.find((f) => f.height > f.width) ??
+            coverOf(nextProject))
+          : undefined,
+      }
+    : undefined;
+
   /* Cover art keeps the rack it was given: twenty-four sleeves at 1:1, two
      of them two-sided, which is a catalogue and not a sequence. Everything
      else is a sequence and gets the strip. */
@@ -190,7 +209,16 @@ export default async function ProjectPage(props: PageProps<"/work/[slug]">) {
           ) : null}
         </header>
 
-        <ProjectStrip project={project} className="mt-6 flex-1" />
+        {/* Keyed, because the way from one project to the next is this same
+            page with a new slug, and a strip that kept its scroll position
+            and its counter across that would arrive at the end of the new
+            sequence rather than the start. */}
+        <ProjectStrip
+          key={project.slug}
+          project={project}
+          next={nextUp}
+          className="mt-6 flex-1"
+        />
 
         {/* The panel under the ruler: the crew on the left, where to go next
             on the right. One line each rather than the column of rows this
