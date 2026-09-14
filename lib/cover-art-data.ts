@@ -7,405 +7,405 @@ import type { CoverRelease } from "./cover-art-types";
 
 export const COVER_RELEASES: CoverRelease[] = [
   {
-    slug: "est-modvs-in-rebvs",
-    title: "Est Modvs In Rebvs",
-    artist: "Nameera",
-    frames: [
+    "slug": "est-modvs-in-rebvs",
+    "title": "Est Modvs In Rebvs",
+    "artist": "Nameera",
+    "frames": [
       {
-        src: "/covers/est-modvs-in-rebvs-a.jpg",
-        thumb: "/covers/est-modvs-in-rebvs-a-800.jpg",
-        width: 1600,
-        height: 1600,
-        color: "#6B7479",
-        alt: "Cover art for “Est Modvs In Rebvs” by Nameera, front",
-        side: "Front",
+        "src": "/covers/est-modvs-in-rebvs-a.jpg",
+        "thumb": "/covers/est-modvs-in-rebvs-a-800.jpg",
+        "width": 1600,
+        "height": 1600,
+        "color": "#6B7479",
+        "alt": "Cover art for “Est Modvs In Rebvs” by Nameera, front",
+        "side": "Front"
       },
       {
-        src: "/covers/est-modvs-in-rebvs-b.jpg",
-        thumb: "/covers/est-modvs-in-rebvs-b-800.jpg",
-        width: 1600,
-        height: 1600,
-        color: "#848787",
-        alt: "Cover art for “Est Modvs In Rebvs” by Nameera, back",
-        side: "Back",
-      },
-    ],
+        "src": "/covers/est-modvs-in-rebvs-b.jpg",
+        "thumb": "/covers/est-modvs-in-rebvs-b-800.jpg",
+        "width": 1600,
+        "height": 1600,
+        "color": "#848787",
+        "alt": "Cover art for “Est Modvs In Rebvs” by Nameera, back",
+        "side": "Back"
+      }
+    ]
   },
   {
-    slug: "jahannam",
-    title: "Jahannam",
-    artist: "Nameera",
-    frames: [
+    "slug": "jahannam",
+    "title": "Jahannam",
+    "artist": "Nameera",
+    "frames": [
       {
-        src: "/covers/jahannam-a.jpg",
-        thumb: "/covers/jahannam-a-800.jpg",
-        width: 1600,
-        height: 1600,
-        color: "#140E09",
-        alt: "Cover art for “Jahannam” by Nameera, side a",
-        side: "Side A",
+        "src": "/covers/jahannam-a.jpg",
+        "thumb": "/covers/jahannam-a-800.jpg",
+        "width": 1600,
+        "height": 1600,
+        "color": "#140E09",
+        "alt": "Cover art for “Jahannam” by Nameera, side a",
+        "side": "Side A"
       },
       {
-        src: "/covers/jahannam-b.jpg",
-        thumb: "/covers/jahannam-b-800.jpg",
-        width: 1600,
-        height: 1600,
-        color: "#442D1C",
-        alt: "Cover art for “Jahannam” by Nameera, side b",
-        side: "Side B",
-      },
-    ],
+        "src": "/covers/jahannam-b.jpg",
+        "thumb": "/covers/jahannam-b-800.jpg",
+        "width": 1600,
+        "height": 1600,
+        "color": "#442D1C",
+        "alt": "Cover art for “Jahannam” by Nameera, side b",
+        "side": "Side B"
+      }
+    ]
   },
   {
-    slug: "problem-child",
-    title: "Problem Child",
-    artist: "BANX",
-    frames: [
+    "slug": "problem-child",
+    "title": "Problem Child",
+    "artist": "BANX",
+    "frames": [
       {
-        src: "/covers/problem-child.jpg",
-        thumb: "/covers/problem-child-800.jpg",
-        width: 1600,
-        height: 1600,
-        color: "#1B282E",
-        alt: "Cover art for “Problem Child” by BANX",
-        side: null,
-      },
-    ],
+        "src": "/covers/problem-child.jpg",
+        "thumb": "/covers/problem-child-800.jpg",
+        "width": 1600,
+        "height": 1600,
+        "color": "#1B282E",
+        "alt": "Cover art for “Problem Child” by BANX",
+        "side": null
+      }
+    ]
   },
   {
-    slug: "westside-shawty",
-    title: "Westside Shawty",
-    artist: "BANX",
-    frames: [
+    "slug": "westside-shawty",
+    "title": "Westside Shawty",
+    "artist": "BANX",
+    "frames": [
       {
-        src: "/covers/westside-shawty.jpg",
-        thumb: "/covers/westside-shawty-800.jpg",
-        width: 1600,
-        height: 1600,
-        color: "#3A494E",
-        alt: "Cover art for “Westside Shawty” by BANX",
-        side: null,
-      },
-    ],
+        "src": "/covers/westside-shawty.jpg",
+        "thumb": "/covers/westside-shawty-800.jpg",
+        "width": 1600,
+        "height": 1600,
+        "color": "#3A494E",
+        "alt": "Cover art for “Westside Shawty” by BANX",
+        "side": null
+      }
+    ]
   },
   {
-    slug: "top-tier",
-    title: "Top Tier",
-    artist: "BANX",
-    frames: [
+    "slug": "top-tier",
+    "title": "Top Tier",
+    "artist": "BANX",
+    "frames": [
       {
-        src: "/covers/top-tier.jpg",
-        thumb: "/covers/top-tier-800.jpg",
-        width: 1600,
-        height: 1600,
-        color: "#2D393D",
-        alt: "Cover art for “Top Tier” by BANX",
-        side: null,
-      },
-    ],
+        "src": "/covers/top-tier.jpg",
+        "thumb": "/covers/top-tier-800.jpg",
+        "width": 1600,
+        "height": 1600,
+        "color": "#2D393D",
+        "alt": "Cover art for “Top Tier” by BANX",
+        "side": null
+      }
+    ]
   },
   {
-    slug: "pop-out",
-    title: "Pop Out",
-    artist: "BANX",
-    frames: [
+    "slug": "pop-out",
+    "title": "Pop Out",
+    "artist": "BANX",
+    "frames": [
       {
-        src: "/covers/pop-out.jpg",
-        thumb: "/covers/pop-out-800.jpg",
-        width: 1600,
-        height: 1600,
-        color: "#322E29",
-        alt: "Cover art for “Pop Out” by BANX",
-        side: null,
-      },
-    ],
+        "src": "/covers/pop-out.jpg",
+        "thumb": "/covers/pop-out-800.jpg",
+        "width": 1600,
+        "height": 1600,
+        "color": "#322E29",
+        "alt": "Cover art for “Pop Out” by BANX",
+        "side": null
+      }
+    ]
   },
   {
-    slug: "do-what-i-want",
-    title: "Do What I Want",
-    artist: "BANX",
-    frames: [
+    "slug": "do-what-i-want",
+    "title": "Do What I Want",
+    "artist": "BANX",
+    "frames": [
       {
-        src: "/covers/do-what-i-want.jpg",
-        thumb: "/covers/do-what-i-want-800.jpg",
-        width: 1600,
-        height: 1600,
-        color: "#2A2419",
-        alt: "Cover art for “Do What I Want” by BANX",
-        side: null,
-      },
-    ],
+        "src": "/covers/do-what-i-want.jpg",
+        "thumb": "/covers/do-what-i-want-800.jpg",
+        "width": 1600,
+        "height": 1600,
+        "color": "#2A2419",
+        "alt": "Cover art for “Do What I Want” by BANX",
+        "side": null
+      }
+    ]
   },
   {
-    slug: "savage",
-    title: "Savage",
-    artist: "BANX",
-    frames: [
+    "slug": "savage",
+    "title": "Savage",
+    "artist": "BANX",
+    "frames": [
       {
-        src: "/covers/savage.jpg",
-        thumb: "/covers/savage-800.jpg",
-        width: 1600,
-        height: 1600,
-        color: "#748489",
-        alt: "Cover art for “Savage” by BANX",
-        side: null,
-      },
-    ],
+        "src": "/covers/savage.jpg",
+        "thumb": "/covers/savage-800.jpg",
+        "width": 1600,
+        "height": 1600,
+        "color": "#748489",
+        "alt": "Cover art for “Savage” by BANX",
+        "side": null
+      }
+    ]
   },
   {
-    slug: "rockstar",
-    title: "Rockstar",
-    artist: "BANX",
-    frames: [
+    "slug": "rockstar",
+    "title": "Rockstar",
+    "artist": "BANX",
+    "frames": [
       {
-        src: "/covers/rockstar.jpg",
-        thumb: "/covers/rockstar-800.jpg",
-        width: 1600,
-        height: 1600,
-        color: "#777A7C",
-        alt: "Cover art for “Rockstar” by BANX",
-        side: null,
-      },
-    ],
+        "src": "/covers/rockstar.jpg",
+        "thumb": "/covers/rockstar-800.jpg",
+        "width": 1600,
+        "height": 1600,
+        "color": "#777A7C",
+        "alt": "Cover art for “Rockstar” by BANX",
+        "side": null
+      }
+    ]
   },
   {
-    slug: "took-time",
-    title: "Took Time",
-    artist: "BANX",
-    frames: [
+    "slug": "took-time",
+    "title": "Took Time",
+    "artist": "BANX",
+    "frames": [
       {
-        src: "/covers/took-time.jpg",
-        thumb: "/covers/took-time-800.jpg",
-        width: 1600,
-        height: 1600,
-        color: "#474B4C",
-        alt: "Cover art for “Took Time” by BANX",
-        side: null,
-      },
-    ],
+        "src": "/covers/took-time.jpg",
+        "thumb": "/covers/took-time-800.jpg",
+        "width": 1600,
+        "height": 1600,
+        "color": "#474B4C",
+        "alt": "Cover art for “Took Time” by BANX",
+        "side": null
+      }
+    ]
   },
   {
-    slug: "whole-summer",
-    title: "Whole Summer",
-    artist: "BANX",
-    frames: [
+    "slug": "whole-summer",
+    "title": "Whole Summer",
+    "artist": "BANX",
+    "frames": [
       {
-        src: "/covers/whole-summer.jpg",
-        thumb: "/covers/whole-summer-800.jpg",
-        width: 1600,
-        height: 1600,
-        color: "#717674",
-        alt: "Cover art for “Whole Summer” by BANX",
-        side: null,
-      },
-    ],
+        "src": "/covers/whole-summer.jpg",
+        "thumb": "/covers/whole-summer-800.jpg",
+        "width": 1600,
+        "height": 1600,
+        "color": "#717674",
+        "alt": "Cover art for “Whole Summer” by BANX",
+        "side": null
+      }
+    ]
   },
   {
-    slug: "10-shots",
-    title: "10 Shots",
-    artist: "Sammy Shiblaq",
-    frames: [
+    "slug": "10-shots",
+    "title": "10 Shots",
+    "artist": "Sammy Shiblaq",
+    "frames": [
       {
-        src: "/covers/10-shots.jpg",
-        thumb: "/covers/10-shots-800.jpg",
-        width: 1600,
-        height: 1600,
-        color: "#313032",
-        alt: "Cover art for “10 Shots” by Sammy Shiblaq",
-        side: null,
-      },
-    ],
+        "src": "/covers/10-shots.jpg",
+        "thumb": "/covers/10-shots-800.jpg",
+        "width": 1600,
+        "height": 1600,
+        "color": "#313032",
+        "alt": "Cover art for “10 Shots” by Sammy Shiblaq",
+        "side": null
+      }
+    ]
   },
   {
-    slug: "the-description",
-    title: "The Description",
-    artist: "Sammy Shiblaq",
-    frames: [
+    "slug": "the-description",
+    "title": "The Description",
+    "artist": "Sammy Shiblaq",
+    "frames": [
       {
-        src: "/covers/the-description.jpg",
-        thumb: "/covers/the-description-800.jpg",
-        width: 1600,
-        height: 1600,
-        color: "#1C1C1C",
-        alt: "Cover art for “The Description” by Sammy Shiblaq",
-        side: null,
-      },
-    ],
+        "src": "/covers/the-description.jpg",
+        "thumb": "/covers/the-description-800.jpg",
+        "width": 1600,
+        "height": 1600,
+        "color": "#1C1C1C",
+        "alt": "Cover art for “The Description” by Sammy Shiblaq",
+        "side": null
+      }
+    ]
   },
   {
-    slug: "faith-and-hustle",
-    title: "Faith & Hustle",
-    artist: "Sammy Shiblaq",
-    frames: [
+    "slug": "faith-and-hustle",
+    "title": "Faith & Hustle",
+    "artist": "Sammy Shiblaq",
+    "frames": [
       {
-        src: "/covers/faith-and-hustle.jpg",
-        thumb: "/covers/faith-and-hustle-800.jpg",
-        width: 1600,
-        height: 1600,
-        color: "#75928A",
-        alt: "Cover art for “Faith & Hustle” by Sammy Shiblaq",
-        side: null,
-      },
-    ],
+        "src": "/covers/faith-and-hustle.jpg",
+        "thumb": "/covers/faith-and-hustle-800.jpg",
+        "width": 1600,
+        "height": 1600,
+        "color": "#75928A",
+        "alt": "Cover art for “Faith & Hustle” by Sammy Shiblaq",
+        "side": null
+      }
+    ]
   },
   {
-    slug: "tomorrow-aint-promised",
-    title: "Tomorrow Ain't Promised",
-    artist: "Sammy Shiblaq",
-    frames: [
+    "slug": "tomorrow-aint-promised",
+    "title": "Tomorrow Ain't Promised",
+    "artist": "Sammy Shiblaq",
+    "frames": [
       {
-        src: "/covers/tomorrow-aint-promised.jpg",
-        thumb: "/covers/tomorrow-aint-promised-800.jpg",
-        width: 1600,
-        height: 1600,
-        color: "#132137",
-        alt: "Cover art for “Tomorrow Ain't Promised” by Sammy Shiblaq",
-        side: null,
-      },
-    ],
+        "src": "/covers/tomorrow-aint-promised.jpg",
+        "thumb": "/covers/tomorrow-aint-promised-800.jpg",
+        "width": 1600,
+        "height": 1600,
+        "color": "#132137",
+        "alt": "Cover art for “Tomorrow Ain't Promised” by Sammy Shiblaq",
+        "side": null
+      }
+    ]
   },
   {
-    slug: "the-river",
-    title: "The River",
-    artist: "TMEUPTEDDY",
-    frames: [
+    "slug": "the-river",
+    "title": "The River",
+    "artist": "TMEUPTEDDY",
+    "frames": [
       {
-        src: "/covers/the-river.jpg",
-        thumb: "/covers/the-river-800.jpg",
-        width: 1600,
-        height: 1600,
-        color: "#303E24",
-        alt: "Cover art for “The River” by TMEUPTEDDY",
-        side: null,
-      },
-    ],
+        "src": "/covers/the-river.jpg",
+        "thumb": "/covers/the-river-800.jpg",
+        "width": 1600,
+        "height": 1600,
+        "color": "#303E24",
+        "alt": "Cover art for “The River” by TMEUPTEDDY",
+        "side": null
+      }
+    ]
   },
   {
-    slug: "new-home",
-    title: "New Home",
-    artist: "Rechi",
-    frames: [
+    "slug": "new-home",
+    "title": "New Home",
+    "artist": "Rechi",
+    "frames": [
       {
-        src: "/covers/new-home.jpg",
-        thumb: "/covers/new-home-800.jpg",
-        width: 1600,
-        height: 1600,
-        color: "#4B5457",
-        alt: "Cover art for “New Home” by Rechi",
-        side: null,
-      },
-    ],
+        "src": "/covers/new-home.jpg",
+        "thumb": "/covers/new-home-800.jpg",
+        "width": 1600,
+        "height": 1600,
+        "color": "#4B5457",
+        "alt": "Cover art for “New Home” by Rechi",
+        "side": null
+      }
+    ]
   },
   {
-    slug: "your-way",
-    title: "Your Way",
-    artist: "The Szns ft. Swavie",
-    frames: [
+    "slug": "your-way",
+    "title": "Your Way",
+    "artist": "The Szns ft. Swavie",
+    "frames": [
       {
-        src: "/covers/your-way.jpg",
-        thumb: "/covers/your-way-800.jpg",
-        width: 1600,
-        height: 1600,
-        color: "#1B1716",
-        alt: "Cover art for “Your Way” by The Szns ft. Swavie",
-        side: null,
-      },
-    ],
+        "src": "/covers/your-way.jpg",
+        "thumb": "/covers/your-way-800.jpg",
+        "width": 1600,
+        "height": 1600,
+        "color": "#1B1716",
+        "alt": "Cover art for “Your Way” by The Szns ft. Swavie",
+        "side": null
+      }
+    ]
   },
   {
-    slug: "hi-fi",
-    title: "Hi-Fi",
-    artist: "Parsia",
-    frames: [
+    "slug": "hi-fi",
+    "title": "Hi-Fi",
+    "artist": "Parsia",
+    "frames": [
       {
-        src: "/covers/hi-fi.jpg",
-        thumb: "/covers/hi-fi-800.jpg",
-        width: 1600,
-        height: 1600,
-        color: "#9F978E",
-        alt: "Cover art for “Hi-Fi” by Parsia",
-        side: null,
-      },
-    ],
+        "src": "/covers/hi-fi.jpg",
+        "thumb": "/covers/hi-fi-800.jpg",
+        "width": 1600,
+        "height": 1600,
+        "color": "#9F978E",
+        "alt": "Cover art for “Hi-Fi” by Parsia",
+        "side": null
+      }
+    ]
   },
   {
-    slug: "wasted-years-parsia-remix",
-    title: "Wasted Years (Parsia Remix)",
-    artist: "London Grammar",
-    frames: [
+    "slug": "wasted-years-parsia-remix",
+    "title": "Wasted Years (Parsia Remix)",
+    "artist": "London Grammar",
+    "frames": [
       {
-        src: "/covers/wasted-years-parsia-remix.jpg",
-        thumb: "/covers/wasted-years-parsia-remix-800.jpg",
-        width: 1000,
-        height: 1000,
-        color: "#192428",
-        alt: "Cover art for “Wasted Years (Parsia Remix)” by London Grammar",
-        side: null,
-      },
-    ],
+        "src": "/covers/wasted-years-parsia-remix.jpg",
+        "thumb": "/covers/wasted-years-parsia-remix-800.jpg",
+        "width": 1000,
+        "height": 1000,
+        "color": "#192428",
+        "alt": "Cover art for “Wasted Years (Parsia Remix)” by London Grammar",
+        "side": null
+      }
+    ]
   },
   {
-    slug: "area-51",
-    title: "Area 51",
-    artist: "KXP",
-    frames: [
+    "slug": "area-51",
+    "title": "Area 51",
+    "artist": "KXP",
+    "frames": [
       {
-        src: "/covers/area-51.jpg",
-        thumb: "/covers/area-51-800.jpg",
-        width: 780,
-        height: 780,
-        color: "#806150",
-        alt: "Cover art for “Area 51” by KXP",
-        side: null,
-      },
-    ],
+        "src": "/covers/area-51.jpg",
+        "thumb": "/covers/area-51-800.jpg",
+        "width": 780,
+        "height": 780,
+        "color": "#806150",
+        "alt": "Cover art for “Area 51” by KXP",
+        "side": null
+      }
+    ]
   },
   {
-    slug: "beamin",
-    title: "Beamin",
-    artist: "Karson",
-    frames: [
+    "slug": "beamin",
+    "title": "Beamin",
+    "artist": "Karson",
+    "frames": [
       {
-        src: "/covers/beamin.jpg",
-        thumb: "/covers/beamin-800.jpg",
-        width: 1000,
-        height: 1000,
-        color: "#858778",
-        alt: "Cover art for “Beamin” by Karson",
-        side: null,
-      },
-    ],
+        "src": "/covers/beamin.jpg",
+        "thumb": "/covers/beamin-800.jpg",
+        "width": 1000,
+        "height": 1000,
+        "color": "#858778",
+        "alt": "Cover art for “Beamin” by Karson",
+        "side": null
+      }
+    ]
   },
   {
-    slug: "hadaf",
-    title: "Hadaf",
-    artist: "Imanemun × Pooyan Ardalan",
-    frames: [
+    "slug": "hadaf",
+    "title": "Hadaf",
+    "artist": "Imanemun × Pooyan Ardalan",
+    "frames": [
       {
-        src: "/covers/hadaf.jpg",
-        thumb: "/covers/hadaf-800.jpg",
-        width: 1600,
-        height: 1600,
-        color: "#080A0A",
-        alt: "Cover art for “Hadaf” by Imanemun × Pooyan Ardalan",
-        side: null,
-      },
-    ],
+        "src": "/covers/hadaf.jpg",
+        "thumb": "/covers/hadaf-800.jpg",
+        "width": 1600,
+        "height": 1600,
+        "color": "#080A0A",
+        "alt": "Cover art for “Hadaf” by Imanemun × Pooyan Ardalan",
+        "side": null
+      }
+    ]
   },
   {
-    slug: "in-the-hoodie-on-your-sleeve",
-    title: "In the Hoodie on Your Sleeve",
-    artist: "Ericalisa",
-    frames: [
+    "slug": "in-the-hoodie-on-your-sleeve",
+    "title": "In the Hoodie on Your Sleeve",
+    "artist": "Ericalisa",
+    "frames": [
       {
-        src: "/covers/in-the-hoodie-on-your-sleeve.jpg",
-        thumb: "/covers/in-the-hoodie-on-your-sleeve-800.jpg",
-        width: 1600,
-        height: 1600,
-        color: "#8A3F36",
-        alt: "Cover art for “In the Hoodie on Your Sleeve” by Ericalisa",
-        side: null,
-      },
-    ],
-  },
+        "src": "/covers/in-the-hoodie-on-your-sleeve.jpg",
+        "thumb": "/covers/in-the-hoodie-on-your-sleeve-800.jpg",
+        "width": 1600,
+        "height": 1600,
+        "color": "#8A3F36",
+        "alt": "Cover art for “In the Hoodie on Your Sleeve” by Ericalisa",
+        "side": null
+      }
+    ]
+  }
 ];
