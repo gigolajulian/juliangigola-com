@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Inter, Geist_Mono } from "next/font/google";
 import localFont from "next/font/local";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
@@ -8,10 +8,21 @@ import { GlassLight } from "@/components/glass-light";
 import { PhotoFade } from "@/components/photo-fade";
 import "./globals.css";
 
-// `globals.css` resolves `font-sans` from `--font-sans` (shadcn's theme block
-// names it that), so the Geist variable has to match — the create-next-app
-// default of `--font-geist-sans` would leave `font-sans` unresolved.
-const geistSans = Geist({
+/* Inter for everything that is read rather than announced, at Julian's ask.
+   It pairs with the masthead the way the Swiss posters did: one condensed
+   and heavy face for the name and the titles, one neutral face at text
+   sizes underneath, and no third voice competing with either.
+
+   Inter rather than the Geist it replaces for two things it does that the
+   site actually uses. Its figures can be set to one width, so the counts
+   down the cover's index and the frame counters no longer shuffle sideways
+   as they change. And it carries an optical size axis, so the same family
+   is drawn for a 11px label and a 16px paragraph instead of one drawing
+   being scaled to both.
+
+   `globals.css` resolves `font-sans` from `--font-sans` (shadcn's theme
+   block names it that), so the variable has to match. */
+const sans = Inter({
   variable: "--font-sans",
   subsets: ["latin"],
 });
@@ -116,7 +127,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} ${display.variable} h-full antialiased`}
+      className={`${sans.variable} ${geistMono.variable} ${display.variable} h-full antialiased`}
       // Dark is the default and is what the CSS already declares, so the
       // server renders the correct theme for everyone except the visitor who
       // has chosen light. That one case is what the script below fixes.
