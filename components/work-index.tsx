@@ -233,7 +233,7 @@ export function WorkIndex({
 
         <div
           ref={listColumn}
-          className="lg:h-full lg:w-1/2 lg:min-w-0 lg:overflow-y-auto lg:[scrollbar-width:thin]"
+          className="list-scroll lg:h-full lg:w-1/2 lg:min-w-0 lg:overflow-y-auto"
         >
           <ol
             onPointerEnter={() => setHovering(true)}
@@ -265,10 +265,19 @@ export function WorkIndex({
                       lastLeft = project.slug;
                     }}
                     className={cn(
-                      "group block border-b border-border py-5 transition-colors duration-200",
+                      "group relative block border-b border-border py-5 transition-colors duration-200",
                       "hoverable:hover:border-foreground/30",
                     )}
                   >
+                    {/* The row's ground under a pointer: a soft rounded box
+                        a little wider than the row, in the page's own ink
+                        at 6%, so it reads as light on the dark theme and as
+                        a shade on the light one. Behind the words, and the
+                        hairline stays straight. Julian's ask. */}
+                    <span
+                      aria-hidden
+                      className="pointer-events-none absolute -inset-x-4 inset-y-2 -z-10 rounded-[14px] bg-foreground/[0.06] opacity-0 transition-opacity duration-200 ease-[var(--ease-out-strong)] hoverable:group-hover:opacity-100 group-focus-visible:opacity-100"
+                    />
                     {/* Touch screens have no pointer to follow, so the frame
                         comes to the row. Lazy and display:none above `lg`, so a
                         desktop visit does not pay for seventy of these. */}
