@@ -1246,64 +1246,65 @@ optgroup {
   }
 }
 
-/* ── liquid glass, turned up ──────────────────────────────────────
- * The cover's two actions are one slab of this with two rows in it, which
- * is how the material is used in iOS: a grouped container, a hairline
- * between its rows, and the row under the finger lit rather than a
- * separate button per action. Julian asked for that look.
+/* ── the site's two buttons ───────────────────────────────────────
+ * The chip in the work index's filter row is this site's own control: ink on
+ * paper when it is the one you are on, a soft fill under the pointer when it
+ * is not. These are that chip at button size, and nothing else.
  *
- * A modifier, not a fourth material: it rides on `glass` and inherits its
- * tokens. What it adds is what the material is known by.
+ * Flat on purpose. Glass is a material for floating over a photograph, which
+ * is what the lightbox and the player controls do and these do not: a button
+ * in the flow of a page is page furniture, and page furniture here is ink,
+ * paper and a hairline. Julian: the CTA buttons do not match the website
+ * design at all.
  *
- *   - Refraction. The blur goes from 15px to 28px with more saturation and
- *     a little brightness, so what is behind bends rather than softens.
- *   - A rim, not a border. Light along the top and down the left, shade
- *     along the bottom and the right, which is where light falls on a
- *     convex body. A flat 1px edge all the way round reads as a border.
- *   - A sheen at rest. The pointer light only lights up under a pointer,
- *     and a slab at rest had no light on it at all — which is the one
- *     thing every photograph of this material has.
- *   - Depth. A wider, softer drop shadow so the slab floats over the
- *     picture rather than sitting on it.
- *
- * Declared after `glass` so it wins on equal specificity: it re-declares
- * `backdrop-filter` and `box-shadow`, and being later is what carries it.
+ * Shape and padding stay at the call site, as they already were. These carry
+ * the colour and what it does under a pointer, so the eight buttons on the
+ * site cannot drift apart again.
  * ─────────────────────────────────────────────────────────────── */
-@utility glass-liquid {
-  -webkit-backdrop-filter: blur(28px) saturate(2) brightness(1.04);
-  backdrop-filter: blur(28px) saturate(2) brightness(1.04);
-  box-shadow:
-    inset 0 1.5px 0 var(--glass-shine),
-    inset 1.5px 0 0 color-mix(in oklab, var(--glass-shine) 55%, transparent),
-    inset 0 -1.5px 0 var(--glass-shade),
-    inset -1.5px 0 0 color-mix(in oklab, var(--glass-shade) 50%, transparent),
-    inset 0 12px 24px -16px color-mix(in oklab, white 50%, transparent),
-    0 24px 60px -20px color-mix(in oklab, black 55%, transparent);
+@utility action {
+  /* A transparent border, so this and `action-quiet` are the same height
+     when they sit side by side: the quiet one has a real hairline, and
+     without this the pair differed by the two pixels it adds. */
+  border: 1px solid transparent;
+  background-color: var(--foreground);
+  color: var(--background);
+  transition: background-color 200ms var(--ease-out-strong);
 
-  /* The sheen. `::after`, because `::before` is the pointer light and this
-     sits at rest alongside it rather than in place of it. */
-  &::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    z-index: -1;
-    border-radius: inherit;
-    pointer-events: none;
-    background: linear-gradient(
-      to bottom,
-      color-mix(in oklab, white 26%, transparent),
-      color-mix(in oklab, white 6%, transparent) 40%,
-      transparent 60%
-    );
+  /* Off the full ink under a pointer and back to it on the press: hover is
+     the button noticing you, press is the button answering. The same pair
+     the chips use, and the same direction. */
+  @media (hover: hover) and (pointer: fine) {
+    &:hover {
+      background-color: color-mix(in oklab, var(--foreground) 84%, var(--background));
+    }
+  }
+  &:focus-visible {
+    background-color: color-mix(in oklab, var(--foreground) 84%, var(--background));
+  }
+  &:active {
+    background-color: var(--foreground);
   }
 }
 
-/* Reduced transparency takes the blur off the material everywhere else; the
-   rim and the sheen are light, not transparency, so they stay. */
-@media (prefers-reduced-transparency: reduce) {
-  .glass-liquid {
-    -webkit-backdrop-filter: none;
-    backdrop-filter: none;
+@utility action-quiet {
+  border: 1px solid var(--border);
+  color: var(--foreground);
+  transition:
+    background-color 200ms var(--ease-out-strong),
+    border-color 200ms var(--ease-out-strong);
+
+  @media (hover: hover) and (pointer: fine) {
+    &:hover {
+      background-color: color-mix(in oklab, var(--foreground) 7%, transparent);
+      border-color: color-mix(in oklab, var(--foreground) 30%, transparent);
+    }
+  }
+  &:focus-visible {
+    background-color: color-mix(in oklab, var(--foreground) 7%, transparent);
+    border-color: color-mix(in oklab, var(--foreground) 30%, transparent);
+  }
+  &:active {
+    background-color: color-mix(in oklab, var(--foreground) 12%, transparent);
   }
 }
 

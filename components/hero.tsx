@@ -62,26 +62,23 @@ const INTRO_MS = 5200;
 /**
  * The two ways in.
  *
- * Not a pair of pills. This site is rectangles and condensed capitals — the
- * photographs, the index, the plate, the bar — and a capsule of frosted
- * glass was the one thing on the cover borrowed from somewhere else. So the
- * two actions are made of what the cover already is: an index. Two rows in
- * the page's ink, a hairline between them, the name in display capitals and
- * an arrow at the far edge, and the row under the pointer inverts to paper,
- * which is what the index does to the discipline you are on.
+ * The site's own two buttons (`action` and `action-quiet` in `globals.css`),
+ * which are the work index's filter chip at button size: ink on paper for
+ * the first, a hairline for the second. Julian: the CTA buttons did not
+ * match the website design.
  *
- * Solid ink is also the only thing that can promise its own contrast with
- * seven photographs passing behind it — the reason the glass fill had to
- * keep climbing.
+ * The one thing added here that the same pair on a page does not need: the
+ * quiet button takes a paper ground. Everywhere else it sits on the page and
+ * a hairline round nothing is enough; here it sits on a photograph, and a
+ * hairline round a photograph is a window, not a button.
  *
  * Mounted twice, the way the disciplines are: a list of rows and a strip of
- * ticks. From `wide` these float over the foot of the photograph, bottom
+ * ticks. From `wide` these sit over the foot of the photograph, bottom
  * right, which is a place the plate cannot reach — it blurs its ground, and
  * an element with a backdrop filter is the containing block for anything
  * absolute inside it, so a button in the plate can only ever reach the
  * plate's own corner. The copy that floats is a child of the type column
- * instead, which spans the whole section. Julian: place the buttons on the
- * bottom right.
+ * instead, which spans the whole section.
  *
  * The other copy stays in the plate, under the name, for the two layouts
  * where the photograph is the whole canvas rather than a column beside the
@@ -98,76 +95,21 @@ function Ways({
   return (
     <div
       style={style}
-      /* One slab of glass with two rows in it, which is how iOS groups the
-         material: a container, a hairline between its rows, and the row
-         under the pointer lit rather than a separate button per action.
-
-         `rounded-[1.375rem]` is this element's own radius and not the
-         theme's 2px. Everywhere else the site is square on purpose; the
-         material is only itself at a radius like this, and it is the one
-         place on the page borrowed from somewhere else deliberately.
-
-         The fill is 50%, at Julian's ask: half the ground, so the
-         photograph reads through it. That is thin, and what holds the type
-         up is its size — bold condensed capitals at 18-20px are large
-         text, which asks 3:1 and not 4.5:1. Measured on the rendered
-         pixels over all seven frames in both themes, the worst is 3.2:1,
-         on the dark theme over the fourth frame. It clears the bar it has
-         to clear and there is nothing left over: anything that makes this
-         thinner needs the type bigger or the frames behind it darker. */
-      className={cn(
-        "glass glass-liquid flex w-fit flex-col overflow-hidden rounded-[1.375rem]",
-        "[--glass-fill:color-mix(in_oklab,var(--background)_50%,transparent)]",
-        className,
-      )}
+      className={cn("flex flex-wrap items-center gap-3", className)}
     >
-      <Way href="/work">See the work</Way>
-      <Way href="/sessions">Book a session</Way>
-    </div>
-  );
-}
-
-/** One row of it: the name, an arrow at the far edge, and the invert. */
-function Way({
-  href,
-  children,
-}: {
-  href: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <Link
-      prefetch={false}
-      href={href}
-      className={cn(
-        "group flex items-center justify-between gap-10 px-6 py-4",
-        // The index's type, a size down from it: these are two more rows of
-        // the same object, not a heading.
-        "font-display text-lg uppercase leading-none tracking-[0] sm:text-xl",
-        // A hairline between the two, and none above the first.
-        "border-t border-foreground/10 first:border-t-0",
-        /* The row lights rather than the slab moving, which is what a row
-           of this material does under a finger: 140ms, because a press has
-           to answer inside the time it takes to notice you pressed. */
-        "transition-colors duration-150 ease-[var(--ease-out-strong)]",
-        "hoverable:hover:bg-foreground/[0.14] focus-visible:bg-foreground/[0.14] focus-visible:outline-none",
-        /* Both, and the compound one on purpose: `:hover` and `:active` are
-           one pseudo-class each, so on a pointer they tie on specificity
-           and the hover rule wins the press — measured, the press moved the
-           row by 0.2% and read as nothing at all. `:hover:active` is two
-           and carries. The plain one is for a touch screen, where there is
-           no hover to tie with. */
-        "active:bg-foreground/[0.24] hoverable:hover:active:bg-foreground/[0.24]",
-      )}
-    >
-      {children}
-      <span
-        aria-hidden
-        className="transition-transform duration-200 ease-[var(--ease-out-strong)] hoverable:group-hover:translate-x-1.5 motion-reduce:transition-none"
+      <Link
+        href="/work"
+        className="label action rounded-full px-7 py-5 press active:scale-[0.97]"
       >
-        &rarr;
-      </span>
-    </Link>
+        See the work
+      </Link>
+      <Link
+        href="/sessions"
+        className="label action-quiet rounded-full bg-background px-7 py-5 press active:scale-[0.97]"
+      >
+        Book a session
+      </Link>
+    </div>
   );
 }
 

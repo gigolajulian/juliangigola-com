@@ -118,14 +118,14 @@ export default function SessionsPage() {
                         href={BOOKING_URL}
                         target="_blank"
                         rel="noreferrer"
-                        className="label glass-prominent rounded-full px-5 py-3 press active:scale-[0.97]"
+                        className="label action rounded-full px-5 py-3 press active:scale-[0.97]"
                       >
                         Check availability
                       </a>
                     ) : null}
                     <Link
                       href={`/contact?type=session&session=${session.slug}`}
-                      className="label glass inline-flex items-center gap-2 rounded-full px-5 py-3 press active:scale-[0.97]"
+                      className="label action-quiet inline-flex items-center gap-2 rounded-full px-5 py-3 press active:scale-[0.97]"
                     >
                       Enquire
                     </Link>

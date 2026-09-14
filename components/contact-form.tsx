@@ -257,7 +257,7 @@ export function ContactForm() {
         <button
           type="submit"
           disabled={pending}
-          className="label glass-prominent rounded-full px-6 py-4 press active:scale-[0.97] disabled:opacity-50"
+          className="label action rounded-full px-6 py-4 press active:scale-[0.97] disabled:opacity-50"
         >
           {pending ? "Sending…" : "Send enquiry"}
         </button>

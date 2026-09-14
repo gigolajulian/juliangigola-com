@@ -39,7 +39,7 @@ export default function ContactPage() {
               href={BOOKING_URL}
               target="_blank"
               rel="noreferrer"
-              className="label mt-8 inline-block glass-prominent rounded-full px-6 py-4 press active:scale-[0.97]"
+              className="label mt-8 inline-block action rounded-full px-6 py-4 press active:scale-[0.97]"
             >
               Check availability
             </a>

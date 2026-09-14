@@ -176,7 +176,7 @@ export default function NotFound() {
                 </Link>
                 <Link
                   href="/"
-                  className={`${MONO} glass inline-flex items-center gap-3 rounded-full px-6 py-4 font-bold text-foreground press active:scale-[0.97]`}
+                  className={`${MONO} action-quiet inline-flex items-center gap-3 rounded-full px-6 py-4 font-bold press active:scale-[0.97]`}
                 >
                   <span className="opacity-60">02</span>
                   Back to home
