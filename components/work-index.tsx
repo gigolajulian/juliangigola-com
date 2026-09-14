@@ -134,10 +134,25 @@ export function WorkIndex({
           {/* Two wrappers that outlive the keyed picture inside them, so the
               zoom transitions rather than restarts on every row change.
               Same numbers as `video-grid.tsx`: 4% over 500ms. The mat frame
-              that used to settle onto the picture is gone, at Julian's ask. */}
+              that used to settle onto the picture is gone, at Julian's ask.
+
+              Never taller than the screen it pins on. A portrait cover at
+              half the column ran to 825px on a 900px window, so the scroll
+              read as three moves: the head leaving, the panel pinning with
+              its foot cut off, the panel letting go at the end. Julian
+              called it jarring. The width is capped so the cover's own
+              aspect fits under the bar with room to spare, and the pinned
+              state is a picture sitting still, whole. */}
           <div
             className="relative overflow-hidden"
             data-hover={hovering ? "" : undefined}
+            style={
+              preview
+                ? {
+                    maxWidth: `calc((100dvh - 8.5rem) * ${preview.cover.width} / ${preview.cover.height})`,
+                  }
+                : undefined
+            }
           >
             <div className="transition-transform duration-500 ease-[var(--ease-out-strong)] in-data-hover:scale-[1.04] motion-reduce:transition-none motion-reduce:in-data-hover:scale-100">
               {preview ? (
