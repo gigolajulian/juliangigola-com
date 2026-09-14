@@ -483,11 +483,11 @@ export function SiteHeader() {
 
 /**
  * Hover is a soft pill of light behind the word, fading in; the current
- * page is the word in full ink with a dot beneath it. The underline that
- * grew from the left is gone — Julian called it tacky, and he was right: a
- * rule drawing itself under a word is a nineties link, and a fixed bar of
- * five words has no room for a flourish per hover. A pill is what every
- * native toolbar does, and the dot marks "here" without moving anything.
+ * page is the word in full ink with a hairline beneath it. The underline
+ * that grew from the left on hover is gone — Julian called it tacky, and
+ * he was right: a rule drawing itself under a word is a nineties link. The
+ * rule stays as a mark of the current page, drawn once and never moved;
+ * the hover is a pill, which is what every native toolbar does.
  */
 function NavLink({
   href,
@@ -510,9 +510,12 @@ function NavLink({
         "hoverable:hover:bg-foreground/[0.07] hoverable:hover:text-foreground",
         "focus-visible:bg-foreground/[0.07] focus-visible:text-foreground",
         current ? "text-foreground" : "text-muted-foreground",
-        // The dot: 3px, centred under the word, only on the current page.
+        // The current page keeps its hairline — Julian preferred it to a
+        // dot — but it is a mark now, not a motion: drawn once under the
+        // word, inset to the word's own width, and never animated. The
+        // hover is the pill; the rule is "you are here".
         current &&
-          "after:absolute after:bottom-0 after:left-1/2 after:size-[3px] after:-translate-x-1/2 after:rounded-full after:bg-current after:content-['']",
+          "after:absolute after:bottom-1 after:left-3 after:right-3 after:h-px after:bg-current after:content-['']",
       )}
     >
       {children}
