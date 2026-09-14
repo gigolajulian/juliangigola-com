@@ -20,6 +20,24 @@ import { cn } from "@/lib/utils";
  * a second, weaker keyboard model.
  * ─────────────────────────────────────────────────────────────── */
 
+/* Where the list is showing through the window, in one place: the rail is
+   pinned where the list starts, so the part on screen runs from the rail's
+   top to the foot of the window. Outside the component because it closes
+   over nothing — which is also why it needs no memoizing. */
+function geometry(el: HTMLElement, rail: HTMLElement) {
+  const box = rail.getBoundingClientRect();
+  const listTop = el.getBoundingClientRect().top + window.scrollY;
+  const shown = window.innerHeight - box.top;
+  return {
+    listTop,
+    shown,
+    travel: Math.max(0, el.offsetHeight - shown),
+    railTop: box.top,
+    railH: box.height,
+    listH: el.offsetHeight,
+  };
+}
+
 export function ListRail({
   list,
   count,
@@ -38,25 +56,12 @@ export function ListRail({
   const [moving, setMoving] = React.useState(false);
   const still = React.useRef(0);
 
-  /* Where the list is showing through: from the rail's top (it is pinned
-     where the list starts) to the foot of the window. */
-  const measure = React.useCallback(() => {
-    const el = list.current;
-    const r = rail.current;
-    if (!el || !r) return null;
-    const railBox = r.getBoundingClientRect();
-    const listTop = el.getBoundingClientRect().top + window.scrollY;
-    const shown = window.innerHeight - railBox.top;
-    const travel = Math.max(0, el.offsetHeight - shown);
-    return { listTop, shown, travel, railTop: railBox.top, railH: railBox.height, listH: el.offsetHeight };
-  }, [list]);
-
   React.useEffect(() => {
     let frame = 0;
     const update = () => {
       frame = 0;
-      const g = measure();
-      if (!g) return;
+      if (!list.current || !rail.current) return;
+      const g = geometry(list.current, rail.current);
       const p =
         g.travel === 0
           ? 0
@@ -79,12 +84,13 @@ export function ListRail({
       if (frame) cancelAnimationFrame(frame);
       window.clearTimeout(still.current);
     };
-  }, [measure, count]);
+  }, [list, count]);
 
   /* A press goes to that point in the list; a drag follows the pointer. */
   const go = (clientY: number) => {
-    const g = measure();
-    if (!g || g.railH === 0) return;
+    if (!list.current || !rail.current) return;
+    const g = geometry(list.current, rail.current);
+    if (g.railH === 0) return;
     const f = Math.min(1, Math.max(0, (clientY - g.railTop) / g.railH));
     window.scrollTo({ top: g.listTop - g.railTop + f * g.travel });
   };
