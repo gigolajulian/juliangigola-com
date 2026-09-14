@@ -133,7 +133,7 @@ export function WorkIndex({
         aria-label="Categories"
         className="mt-10 border-b border-border pb-5"
       >
-        <ul className="flex flex-wrap gap-x-6 gap-y-3">
+        <ul className="-mx-3 flex flex-wrap gap-x-1 gap-y-2">
           <li>
             <FilterLink href="/work" active={activeCategory === null}>
               All
@@ -297,30 +297,19 @@ function FilterLink({
       // `page`, not `true` — this is a link to the page being viewed, which
       // is what a screen reader should be told about the current filter.
       aria-current={active ? "page" : undefined}
+      /* Chips. The chosen filter is filled — ink on ground — which is the
+         one mark that can be found at a glance in a row of eleven; the rest
+         light up as a soft pill under a pointer. The hairline that used to
+         grow under each word went with the nav's: same reason, same day. */
       className={cn(
-        "group relative block py-1 transition-colors duration-200",
-        "label",
+        "label block rounded-full px-3 py-1.5",
+        "transition-colors duration-200 ease-[var(--ease-out-strong)]",
         active
-          ? "text-foreground"
-          : "text-muted-foreground hoverable:hover:text-foreground",
+          ? "bg-foreground text-background"
+          : "text-muted-foreground hoverable:hover:bg-foreground/[0.07] hoverable:hover:text-foreground focus-visible:bg-foreground/[0.07] focus-visible:text-foreground",
       )}
     >
       {children}
-      {/* The same hairline the main nav draws under the current page, so the
-          chosen filter is marked the way the rest of the site marks "you are
-          here" — ink alone was not enough to find in a row of eleven. Scales
-          in from the left on selection and on hover, and touch is excluded
-          from the hover for the reason the nav gives: a tap would leave the
-          rule stuck under whatever was last touched. */}
-      <span
-        aria-hidden
-        className={cn(
-          "absolute bottom-0 left-0 h-px w-full origin-left bg-current",
-          "transition-transform duration-200 ease-[var(--ease-out-strong)]",
-          active ? "scale-x-100" : "scale-x-0",
-          "hoverable:group-hover:scale-x-100",
-        )}
-      />
     </Link>
   );
 }

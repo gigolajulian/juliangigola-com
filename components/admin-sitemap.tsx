@@ -77,6 +77,7 @@ export function AdminSitemap({
   categories,
   origin,
   onGo,
+  onReorder,
   compact,
 }: {
   projects: SitemapProject[];
@@ -86,6 +87,8 @@ export function AdminSitemap({
   origin: string;
   /** Given, rows become controls into the editor rather than links out. */
   onGo?: (target: SitemapTarget) => void;
+  /** Drop one project on another to move it there in the running order. */
+  onReorder?: (from: string, to: string) => void;
   /** For the narrow left rail: smaller tiles, no per-row link. */
   compact?: boolean;
 }) {
@@ -328,6 +331,7 @@ export function AdminSitemap({
                                 projects={work}
                                 origin={origin}
                                 onGo={onGo}
+                                onReorder={onReorder}
                                 compact={compact}
                               />
                             </div>
@@ -440,15 +444,23 @@ function Tiles({
   projects,
   origin,
   onGo,
+  onReorder,
   compact,
   dim,
 }: {
   projects: SitemapProject[];
   origin: string;
   onGo?: (target: SitemapTarget) => void;
+  onReorder?: (from: string, to: string) => void;
   compact?: boolean;
   dim?: boolean;
 }) {
+  /* Native drag-and-drop, the same four events the frames grid uses. A
+     drop on a tile puts the dragged project where that tile is; the
+     running order is one list for the whole site, and `onReorder` above
+     turns "this before that" into a position in it. */
+  const [dragging, setDragging] = React.useState<string | null>(null);
+  const [over, setOver] = React.useState<string | null>(null);
   return (
     <ul
       className={cn(
@@ -476,16 +488,59 @@ function Tiles({
                 />
               ) : null}
             </span>
-            {!compact ? (
-              <span className="label mt-1 block truncate text-muted-foreground">
-                {p.name}
-              </span>
-            ) : null}
+            {/* The name, always — Julian asked: a rail of covers is a thing
+                to recognise, and a name under each is what makes the ones
+                that look alike tell apart. Smaller in the rail, where a tile
+                is three rems wide. */}
+            <span
+              className={cn(
+                "mt-1 block truncate text-muted-foreground",
+                compact ? "text-[0.55rem] leading-tight" : "label",
+              )}
+            >
+              {p.name}
+            </span>
           </>
         );
 
         return (
-          <li key={p.slug}>
+          <li
+            key={p.slug}
+            draggable={!!onReorder}
+            onDragStart={(e) => {
+              if (!onReorder) return;
+              setDragging(p.slug);
+              e.dataTransfer.effectAllowed = "move";
+              e.dataTransfer.setData("text/plain", p.slug);
+            }}
+            onDragOver={(e) => {
+              if (!onReorder) return;
+              e.preventDefault();
+              e.dataTransfer.dropEffect = "move";
+              if (over !== p.slug) setOver(p.slug);
+            }}
+            onDrop={(e) => {
+              if (!onReorder) return;
+              e.preventDefault();
+              const from = e.dataTransfer.getData("text/plain") || dragging;
+              if (from && from !== p.slug) onReorder(from, p.slug);
+              setDragging(null);
+              setOver(null);
+            }}
+            onDragEnd={() => {
+              setDragging(null);
+              setOver(null);
+            }}
+            className={cn(
+              onReorder && "cursor-grab active:cursor-grabbing",
+              "transition-opacity duration-150",
+              dragging === p.slug && "opacity-30",
+              over === p.slug &&
+                dragging !== null &&
+                dragging !== p.slug &&
+                "outline outline-2 outline-offset-1 outline-foreground",
+            )}
+          >
             {onGo ? (
               /* A button, not a link. The draft lives in this page's memory
                  and navigating away loses it, so the sitemap's job while

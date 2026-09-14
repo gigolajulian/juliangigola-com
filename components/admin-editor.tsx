@@ -630,6 +630,21 @@ export function AdminEditor({
   });
 
   /** Reads the file as it is in the repo right now, and proves the token works. */
+  /* A drop in the sitemap: put `from` where `to` is, in the running order.
+     The same arithmetic the Disciplines tab does, on the same list — the
+     projects as currently displayed, since `order` may name only some of
+     them — and written back whole for the same reason it is there. */
+  const reorderSlugs = (from: string, to: string) => {
+    if (from === to) return;
+    const full = orderedProjects.map((p) => p.slug);
+    const at = full.indexOf(from);
+    const onto = full.indexOf(to);
+    if (at === -1 || onto === -1) return;
+    full.splice(at, 1);
+    full.splice(full.indexOf(to) + (onto > at ? 1 : 0), 0, from);
+    setOrder(full);
+  };
+
   async function load(t: string) {
     setStatus({ kind: "working", message: "Reading the current content…" });
     try {
@@ -904,6 +919,7 @@ export function AdminEditor({
           categories={categoryLinks}
           origin={origin}
           onGo={go}
+          onReorder={reorderSlugs}
           compact
         />
       </aside>

@@ -452,7 +452,9 @@ export function SiteHeader() {
                   // Staggered so the list cascades in rather than landing all
                   // at once. Short delays only — 40ms a step reads as one
                   // gesture, 150ms reads as waiting.
-                  style={{ "--reveal-delay": `${i * 40}ms` } as React.CSSProperties}
+                  style={
+                    { "--reveal-delay": `${i * 40}ms` } as React.CSSProperties
+                  }
                   className={cn(
                     // This is a full-screen menu, so the type is sized to the
                     // screen rather than to a nav bar — fluid, so it fills a
@@ -480,9 +482,12 @@ export function SiteHeader() {
 }
 
 /**
- * The underline grows from the left on hover and stays put when the link is
- * the current page. `scaleX` rather than a width or a border, so it animates
- * on the GPU and never nudges the text.
+ * Hover is a soft pill of light behind the word, fading in; the current
+ * page is the word in full ink with a dot beneath it. The underline that
+ * grew from the left is gone — Julian called it tacky, and he was right: a
+ * rule drawing itself under a word is a nineties link, and a fixed bar of
+ * five words has no room for a flourish per hover. A pill is what every
+ * native toolbar does, and the dot marks "here" without moving anything.
  */
 function NavLink({
   href,
@@ -498,24 +503,19 @@ function NavLink({
       href={href}
       aria-current={current ? "page" : undefined}
       className={cn(
-        "group relative block py-3 text-[0.9375rem] uppercase leading-none tracking-[0.08em] transition-colors duration-200",
-        current
-          ? "text-foreground"
-          : "text-muted-foreground hover:text-foreground",
+        "relative -mx-3 block rounded-full px-3 py-2 text-[0.9375rem] uppercase leading-none tracking-[0.08em]",
+        "transition-colors duration-200 ease-[var(--ease-out-strong)]",
+        // Touch fires hover on a tap, which would leave the pill lit under
+        // whatever was last touched — so the pill is for pointers only.
+        "hoverable:hover:bg-foreground/[0.07] hoverable:hover:text-foreground",
+        "focus-visible:bg-foreground/[0.07] focus-visible:text-foreground",
+        current ? "text-foreground" : "text-muted-foreground",
+        // The dot: 3px, centred under the word, only on the current page.
+        current &&
+          "after:absolute after:bottom-0 after:left-1/2 after:size-[3px] after:-translate-x-1/2 after:rounded-full after:bg-current after:content-['']",
       )}
     >
       {children}
-      <span
-        aria-hidden
-        className={cn(
-          "absolute -bottom-0.5 left-0 h-px w-full origin-left bg-current",
-          "transition-transform duration-200 ease-[var(--ease-out-strong)]",
-          current ? "scale-x-100" : "scale-x-0",
-          // Touch devices fire hover on tap, which would leave an underline
-          // stuck under whatever was last touched.
-          "hoverable:group-hover:scale-x-100",
-        )}
-      />
     </Link>
   );
 }
