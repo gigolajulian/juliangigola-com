@@ -119,7 +119,7 @@ export function ProjectStrip({
   /* ── how it moves ───────────────────────────────────────────────
      Every way of moving the strip writes to one target and a single rAF
      loop eases the scroller towards it. A wheel notch is ~100px of jump
-     if it is applied straight to `scrollLeft`; chased instead, the same
+     if it is applied straight to `scrollLeft`; eased instead, the same
      notch is a glide, and notches that arrive together blend into one
      movement rather than stacking into a jolt. Julian asked for the
      horizontal scroll to be super smooth and to allow drag to scroll.
@@ -142,27 +142,38 @@ export function ProjectStrip({
     const clamp = (v: number) => Math.min(room(), Math.max(0, v));
     let target = el.scrollLeft;
     let frame = 0;
+    let from = 0;
+    let began = 0;
+    let span = 0;
 
-    const chase = () => {
-      const gap = target - el.scrollLeft;
-      /* A whole pixel, not a fraction of one. Some elements quantise
-         `scrollLeft` to integers, and a 3px gap eased at 0.16 asks for 0.48
-         of a pixel: the write rounds to nothing, the gap never closes, and
-         the loop runs for as long as the page is open. So the step has a
-         floor of 1px and the last pixel is snapped. */
-      if (Math.abs(gap) < 1) {
-        el.scrollLeft = target;
-        frame = 0;
-        return;
-      }
-      el.scrollLeft += Math.sign(gap) * Math.max(1, Math.abs(gap) * 0.16);
-      frame = requestAnimationFrame(chase);
+    /* A fixed duration and an ease-out, not a proportional lerp. A lerp
+       that closes a sixth of the gap each frame trails a spinning wheel by
+       six frames of travel, and each notch ends in a pixel-a-frame crawl,
+       which reads as lag. This one starts at full speed from wherever the
+       strip is, arrives inside the duration and stops with the velocity at
+       zero. A notch that lands mid-glide restarts the ease from the current
+       position towards the new target, so notches stack without a jolt and
+       the strip is never more than a fraction of one behind the hand. Time
+       based, so a 60Hz and a 144Hz display feel the same. */
+    const step = (now: number) => {
+      const p = Math.min(1, (now - began) / span);
+      const eased = 1 - (1 - p) ** 3;
+      el.scrollLeft = from + (target - from) * eased;
+      frame = p < 1 ? requestAnimationFrame(step) : 0;
     };
 
-    const to = (v: number) => {
+    const to = (v: number, ms?: number) => {
       target = clamp(v);
-      if (!eased) el.scrollLeft = target;
-      else if (!frame) frame = requestAnimationFrame(chase);
+      if (!eased) {
+        el.scrollLeft = target;
+        return;
+      }
+      from = el.scrollLeft;
+      began = performance.now();
+      // A tick's jump goes for longer the further it is, within reason:
+      // about half a second to the far end.
+      span = ms ?? 200 + Math.min(400, Math.abs(target - from) * 0.16);
+      if (!frame) frame = requestAnimationFrame(step);
     };
     glide.current = to;
 
@@ -184,7 +195,11 @@ export function ProjectStrip({
       if (e.ctrlKey || Math.abs(e.deltaX) > Math.abs(e.deltaY)) return;
       if (e.deltaY > 0 ? target >= room() - 1 : target <= 0) return;
       e.preventDefault();
-      to(target + e.deltaY);
+      /* Firefox can report lines rather than pixels. A flat 160ms
+         whatever the distance: notches that stack while the wheel spins
+         then make the strip move faster, not for longer, so it stays
+         within about one notch of the hand however fast the wheel turns. */
+      to(target + (e.deltaMode === 1 ? e.deltaY * 40 : e.deltaY), 160);
     };
 
     /* Drag, for a mouse. A touchscreen is left alone: the platform's own
@@ -241,9 +256,10 @@ export function ProjectStrip({
       if (!down) return;
       down = false;
       dragging = false;
-      // A flick keeps going. 220ms of coasting at the speed it was let go,
-      // which the chase above then decays into a stop.
-      if (eased && Math.abs(speed) > 0.05) to(target + speed * 220);
+      // A flick keeps going. The ease-out above leaves at three times the
+      // distance over the duration, so 220ms of travel over 660ms sets off
+      // at exactly the speed the hand let go and decays from there.
+      if (eased && Math.abs(speed) > 0.05) to(target + speed * 220, 660);
       // After the click that this release is about to fire, not before.
       requestAnimationFrame(() => delete el.dataset.dragged);
     };

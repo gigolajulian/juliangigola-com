@@ -130,7 +130,11 @@ export default async function ProjectPage(props: PageProps<"/work/[slug]">) {
   }
 
   return (
-    <article>
+    /* `data-quiet-footer`: the site footer under this page is the one line
+       of housekeeping. The ask that every other page ends on came off here
+       at Julian's request; the page is the sequence and its panel, and the
+       "next" link in the panel is where it goes on to. */
+    <article data-quiet-footer>
       {/* One screen: the head over the sequence, the sequence across it, and
           a panel under it. Julian asked for the project pages to work like
           remyshoots.co.za, where a project is a filmstrip rather than a page
@@ -253,19 +257,6 @@ export default async function ProjectPage(props: PageProps<"/work/[slug]">) {
           ) : null}
         </footer>
       </div>
-
-      {/* The ask, at the point of peak interest. Below the first screen, and
-          the strip hands the wheel over once the sequence runs out, so
-          carrying on down the page is how you reach it. */}
-      <CallToAction
-        title="Want something like this?"
-        body="Tell me what you have in mind and I will come back with an approach and a quote."
-        type={enquiryTypeFor(project)}
-        detail={project.name}
-        secondary={
-          onwards ? { href: onwards.href, label: onwards.name } : undefined
-        }
-      />
     </article>
   );
 }

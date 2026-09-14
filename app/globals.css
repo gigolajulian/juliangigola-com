@@ -531,6 +531,21 @@
  * `overscroll-x: contain` so reaching the end of the sequence does not hand
  * the gesture to the browser and trigger a back-swipe.
  * ─────────────────────────────────────────────────────────────── */
+/* The project strips ask for the footer without the ask: one line of
+   housekeeping under the sequence, nothing selling. The page marks itself
+   and the footer, which lives in the root layout, reads the mark. */
+body:has([data-quiet-footer]) .site-footer-ask {
+  display: none;
+}
+body:has([data-quiet-footer]) .site-footer-body {
+  padding-block: 1.5rem;
+}
+body:has([data-quiet-footer]) .site-footer-row {
+  margin-top: 0;
+  border-top: 0;
+  padding-top: 0;
+}
+
 @utility strip-scroll {
   scrollbar-width: none;
   overscroll-behavior-x: contain;
