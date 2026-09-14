@@ -1,10 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { VideoHero } from "@/components/video-hero";
 import { VideoShowcase } from "@/components/video-showcase";
 import { CallToAction } from "@/components/call-to-action";
 import { CONTENT } from "@/lib/content";
-import { REEL, SECTIONS, inSection } from "@/lib/videos";
+import { SECTIONS, inSection } from "@/lib/videos";
 
 /* ── /work/video ──────────────────────────────────────────────────
  * The moving work, as one more filter on the work index: the `(index)`
@@ -15,9 +14,9 @@ import { REEL, SECTIONS, inSection } from "@/lib/videos";
  * because it is not a listing of projects: there are no project pages
  * behind it, so the page is the work, the way `/work/coverart` is.
  *
- * The reel plays first, under the chips, on its own: muted until asked,
- * fullscreen on a press. Then the music videos and the commercials as
- * headings on the same page, each film opening in the viewer.
+ * The reel plays behind the head, muted until asked; that is the
+ * layout's doing (`work-shell.tsx`). Under the chips, the music videos
+ * and the commercials as headings, each film opening in the viewer.
  * ─────────────────────────────────────────────────────────────── */
 
 export const metadata: Metadata = {
@@ -33,14 +32,6 @@ export default function VideoPage() {
   return (
     <>
       <div className="mx-auto w-full max-w-[100rem] px-6 pb-24 sm:px-10">
-        <div className="mt-8">
-          <VideoHero videoId={REEL.videoId} title={REEL.title} year={REEL.year}>
-            <p className="label text-white/70">
-              {REEL.title} &middot; {REEL.year}
-            </p>
-          </VideoHero>
-        </div>
-
         {videos.length === 0 ? (
           /* Not an error state and not a placeholder pretending to be
              work. Until a link is pasted into /admin the page says so

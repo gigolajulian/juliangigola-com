@@ -6,6 +6,8 @@ import Link from "next/link";
 import { useSelectedLayoutSegments } from "next/navigation";
 import { cn } from "@/lib/utils";
 import type { CategoryLink } from "@/lib/work";
+import { VideoHero } from "@/components/video-hero";
+import { REEL } from "@/lib/videos";
 
 /* ── the frame around the work ────────────────────────────────────
  * The head and the chip row, mounted once for the whole of /work, its
@@ -42,53 +44,92 @@ export function WorkShell({
   // [] on /work, ["category", slug] on a discipline, ["video"] on the films.
   const key = segments[1] ?? segments[0] ?? "all";
   const head = heads[key] ?? heads.all;
+  /* On the video filter the reel plays behind all of this, so the head
+     goes white and the chips take their colours from the film rather
+     than the page. Julian asked for the reel in the background, muted. */
+  const film = key === "video";
 
   return (
     <>
-      <div className="mx-auto w-full max-w-[100rem] px-6 pt-28 sm:px-10 sm:pt-36">
-        <header className="rise">
-          {/* The crumb, or the same-height slot where it would be, so the
-              title sits at one height on every filter. */}
-          <div>
-            {key === "all" ? (
-              <span className="label text-muted-foreground">All work</span>
-            ) : (
-              <Link
-                href="/work"
-                className="label text-muted-foreground transition-colors duration-200 hoverable:hover:text-foreground"
-              >
-                &larr; All work
-              </Link>
-            )}
-          </div>
-          <h1 className="mt-8 title">{head.title}</h1>
-          <p className="mt-4 max-w-prose text-sm leading-relaxed text-muted-foreground">
-            {head.sub}
-          </p>
-        </header>
+      <div className="relative">
+        {film ? (
+          <VideoHero
+            videoId={REEL.videoId}
+            title={REEL.title}
+            year={REEL.year}
+          />
+        ) : null}
 
-        {/* The old site's three dropdowns become one row that can be
-            ignored: the default is everything, so nobody has to make a
-            choice before they can look at anything. */}
-        <nav
-          aria-label="Categories"
-          className="mt-10 border-b border-border pb-5"
+        <div
+          className={cn(
+            "relative z-10 mx-auto w-full max-w-[100rem] px-6 pt-28 sm:px-10 sm:pt-36",
+            film && "pb-2",
+          )}
         >
-          <ul className="-mx-3 flex flex-wrap gap-x-1 gap-y-2">
-            <li>
-              <FilterLink href="/work" active={key === "all"}>
-                All
-              </FilterLink>
-            </li>
-            {categories.map((c) => (
-              <li key={c.slug}>
-                <FilterLink href={c.href} active={key === c.slug}>
-                  {c.name}
+          <header className="rise">
+            {/* The crumb, or the same-height slot where it would be, so the
+                title sits at one height on every filter. */}
+            <div>
+              {key === "all" ? (
+                <span className="label text-muted-foreground">All work</span>
+              ) : (
+                <Link
+                  href="/work"
+                  className={cn(
+                    "label transition-colors duration-200",
+                    film
+                      ? "text-white/70 hoverable:hover:text-white"
+                      : "text-muted-foreground hoverable:hover:text-foreground",
+                  )}
+                >
+                  &larr; All work
+                </Link>
+              )}
+            </div>
+            <h1
+              className={cn(
+                "mt-8 title transition-colors duration-200",
+                film && "text-white",
+              )}
+            >
+              {head.title}
+            </h1>
+            <p
+              className={cn(
+                "mt-4 max-w-prose text-sm leading-relaxed transition-colors duration-200",
+                film ? "text-white/70" : "text-muted-foreground",
+              )}
+            >
+              {head.sub}
+            </p>
+          </header>
+
+          {/* The old site's three dropdowns become one row that can be
+              ignored: the default is everything, so nobody has to make a
+              choice before they can look at anything. */}
+          <nav
+            aria-label="Categories"
+            className={cn(
+              "mt-10 border-b pb-5 transition-colors duration-200",
+              film ? "border-white/20" : "border-border",
+            )}
+          >
+            <ul className="-mx-3 flex flex-wrap gap-x-1 gap-y-2">
+              <li>
+                <FilterLink href="/work" active={key === "all"} film={film}>
+                  All
                 </FilterLink>
               </li>
-            ))}
-          </ul>
-        </nav>
+              {categories.map((c) => (
+                <li key={c.slug}>
+                  <FilterLink href={c.href} active={key === c.slug} film={film}>
+                    {c.name}
+                  </FilterLink>
+                </li>
+              ))}
+            </ul>
+          </nav>
+        </div>
       </div>
 
       {/* Out, then in. Keyed on the filter so React sees one page leave and
@@ -105,10 +146,13 @@ export function WorkShell({
 function FilterLink({
   href,
   active,
+  film,
   children,
 }: {
   href: string;
   active: boolean;
+  /** Over the reel: white on the film instead of ink on the page. */
+  film: boolean;
   children: React.ReactNode;
 }) {
   return (
@@ -124,9 +168,13 @@ function FilterLink({
       className={cn(
         "label block rounded-full px-3 py-1.5",
         "transition-colors duration-200 ease-[var(--ease-out-strong)]",
-        active
-          ? "bg-foreground text-background"
-          : "text-muted-foreground hoverable:hover:bg-foreground/[0.07] hoverable:hover:text-foreground focus-visible:bg-foreground/[0.07] focus-visible:text-foreground",
+        film
+          ? active
+            ? "bg-white text-black"
+            : "text-white/70 hoverable:hover:bg-white/10 hoverable:hover:text-white focus-visible:bg-white/10 focus-visible:text-white"
+          : active
+            ? "bg-foreground text-background"
+            : "text-muted-foreground hoverable:hover:bg-foreground/[0.07] hoverable:hover:text-foreground focus-visible:bg-foreground/[0.07] focus-visible:text-foreground",
       )}
     >
       {children}

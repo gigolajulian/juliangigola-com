@@ -4,7 +4,7 @@ import * as React from "react";
 import { cn } from "@/lib/utils";
 
 /* ── the reel ─────────────────────────────────────────────────────
- * The director's reel, running across the top of /work/video.
+ * The director's reel, playing behind the head of /work/video.
  *
  * Everything below it is a still with a play button, because eight
  * autoplaying players would be a megabyte of somebody else's JavaScript and a
@@ -105,16 +105,24 @@ export function VideoHero({
   videoId,
   title,
   year,
-  children,
 }: {
   videoId: string;
   title: string;
   /** When it was cut. Printed in the label the screen reader hears. */
   year?: number;
-  /** The page's own heading, which sits on the lower third of the film. */
-  children?: React.ReactNode;
 }) {
-  const frame = React.useRef<HTMLDivElement>(null);
+  /* Tells the fixed header it is over a picture, so it plates itself the
+     way it does on the cover: the same attribute `hero.tsx` sets, for the
+     same reason. Without it the bar is transparent over a moving image and
+     its type survives exactly as long as the shot it happens to be on. */
+  React.useEffect(() => {
+    document.documentElement.dataset.cover = "true";
+    return () => {
+      delete document.documentElement.dataset.cover;
+    };
+  }, []);
+
+  const frame = React.useRef<HTMLElement>(null);
   const iframe = React.useRef<HTMLIFrameElement>(null);
   const player = React.useRef<VimeoPlayer | null>(null);
 
@@ -338,150 +346,104 @@ export function VideoHero({
   }, [withSound, stopRamp]);
 
   return (
-    <section aria-label={title} className="relative bg-card">
-      {/* A 16:9 band the width of the column, under the chips. It used to
-          be the whole screen under the bar; now the page's head and the
-          filters come first and the reel plays where the work starts.
+    /* Behind the head of /work/video: `work-shell.tsx` lays this over the
+       full width and puts the title, the count and the chips on top of it.
+       Julian: the reel playing in the background, started muted.
 
-          `pointer-events-none` on the frame so the press below always lands
-          here rather than in Vimeo's own frame — and because a control bar
-          we have switched off cannot be reached in any case. */}
+       `container-type: size` so the film can cover a box whose height is
+       the head's and not the viewport's: an iframe cannot be told to
+       `object-fit: cover`, so it is given the larger of the two dimensions
+       it could need in container units and centred on the overflow. */
+    <section
+      ref={frame}
+      aria-label={title}
+      className="absolute inset-0 overflow-hidden bg-black [container-type:size]"
+    >
+      <iframe
+        ref={iframe}
+        src={src}
+        title={title}
+        allow="autoplay; fullscreen; picture-in-picture; encrypted-media"
+        allowFullScreen
+        aria-hidden
+        tabIndex={-1}
+        className="pointer-events-none absolute left-1/2 top-1/2 h-[max(100cqh,56.25cqw)] w-[max(100cqw,177.78cqh)] -translate-x-1/2 -translate-y-1/2 border-0"
+      />
+
+      {/* A wash, heavier at the foot where the chips sit, so white type
+          reads on a bright frame and a dark one alike. */}
       <div
-        ref={frame}
-        className="relative aspect-video w-full overflow-hidden bg-black"
-      >
-        <iframe
-          ref={iframe}
-          src={src}
-          title={title}
-          allow="autoplay; fullscreen; picture-in-picture; encrypted-media"
-          allowFullScreen
-          aria-hidden
-          tabIndex={-1}
-          className="pointer-events-none absolute inset-0 h-full w-full border-0"
-        />
+        aria-hidden
+        className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/75 via-black/45 to-black/30"
+      />
 
-        {/* The film itself means fullscreen, which is the one thing a press
-            on a video without controls should do. Under the plate in the
-            stack, never over it — a button covering the heading would swallow
-            a press meant for something in it. */}
+      {/* Two controls, because they are two decisions: sound, and the size
+          of everything. Bottom right, level with the chips, and above the
+          head in the stack so they can be pressed. Icons only: the labels
+          are for the screen reader, and two pills of text beside a row of
+          eleven chips is a second row of chips. */}
+      <div className="absolute bottom-5 right-6 z-20 flex items-center gap-2 sm:right-10">
+        <button
+          type="button"
+          onClick={toggleSound}
+          aria-pressed={sounding}
+          aria-label={sounding ? "Mute the reel" : "Sound on"}
+          title={sounding ? "Mute" : "Sound"}
+          className={cn(
+            "glass flex size-11 items-center justify-center rounded-full text-white [--glass-fill:rgb(0_0_0/0.32)] [--glass-edge:rgb(255_255_255/0.35)]",
+            "transition-colors duration-200 hoverable:hover:bg-black/50 press",
+          )}
+        >
+          <svg
+            aria-hidden
+            viewBox="0 0 24 24"
+            className="size-4"
+            fill="currentColor"
+          >
+            <path d="M4 9h3l5-4v14l-5-4H4z" />
+            {sounding ? (
+              <path
+                d="M16.5 8.5a5 5 0 0 1 0 7"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.6"
+                strokeLinecap="round"
+              />
+            ) : (
+              <path
+                d="M16 9.5l5 5m0-5l-5 5"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.6"
+                strokeLinecap="round"
+              />
+            )}
+          </svg>
+        </button>
+
         <button
           type="button"
           onClick={goFullscreen}
           aria-label={`${year ? `${title}, ${year}` : title}, fullscreen`}
-          className="absolute inset-0 z-0"
-        />
-
-        {/* A scrim, not a plate — and that is a correction.
-
-            The cover's plate is right for a photograph: a still frame is
-            chosen, and a panel of ground over the foot of it reads as chrome
-            laid on a picture. A film is not chosen, it is thirty seconds of
-            frames, and the plate did two things wrong here at once. Its
-            40px blur turned the bottom third of a moving image into a smear,
-            and its ground — near-black at 45% — had no edge at all against a
-            dark shot, so the "lower third" was an intention nobody could see.
-            Measured on the red frame in the reel: plate and film were
-            indistinguishable.
-
-            A gradient is the honest material for video. It costs the film no
-            detail, it reads on a bright frame and a dark one alike, and it
-            does not pretend to be a surface. Type goes white, because it now
-            sits on the picture rather than on the page's own ground.
-
-            `pointer-events-none` with the controls switched back on: the film
-            underneath stays pressable through the dead space. */}
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 flex flex-col justify-end bg-gradient-to-t from-black/90 via-black/60 to-transparent px-6 pb-8 pt-40 sm:px-10 sm:pb-12 sm:pt-48">
-          {/* One block, left-aligned, everything in it.
-
-              It was the heading at one end of a 985px row and the controls at
-              the other, which on any screen wider than a phone reads as two
-              unrelated islands. They belong together: the controls are what
-              you do to the thing the heading names. */}
-          <div className="mx-auto flex w-full max-w-[100rem] flex-col items-start gap-6">
-            {children}
-
-            {/* Two controls, because they are two decisions.
-
-                Sound first and always visible: the film starts on its own, so
-                the press that stops it being heard cannot be the same press
-                that changes the size of everything. The label says what will
-                happen, not what is happening — a button that reads "Sound"
-                while it is already playing is a status light pretending to be
-                a control. */}
-            <div className="pointer-events-auto flex shrink-0 items-center gap-3">
-              <button
-                type="button"
-                onClick={toggleSound}
-                aria-pressed={sounding}
-                className={cn(
-                  // On the film, so the border and the type are white and the
-                  // ground is a wash rather than a card: the page's own
-                  // `border-border` disappears against a photograph.
-                  "glass flex items-center gap-3 rounded-full px-4 py-2.5 text-white [--glass-fill:rgb(0_0_0/0.32)] [--glass-edge:rgb(255_255_255/0.35)]",
-                  "transition-colors duration-200 hoverable:hover:border-white/80 hoverable:hover:bg-black/50 press",
-                )}
-              >
-                {/* Drawn, like every other icon here. The wave is the state:
-                    one arc when it is audible, a cross when it is not. */}
-                <svg
-                  aria-hidden
-                  viewBox="0 0 24 24"
-                  className="size-4"
-                  fill="currentColor"
-                >
-                  <path d="M4 9h3l5-4v14l-5-4H4z" />
-                  {sounding ? (
-                    <path
-                      d="M16.5 8.5a5 5 0 0 1 0 7"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="1.6"
-                      strokeLinecap="round"
-                    />
-                  ) : (
-                    <path
-                      d="M16 9.5l5 5m0-5l-5 5"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="1.6"
-                      strokeLinecap="round"
-                    />
-                  )}
-                </svg>
-                <span className="label">{sounding ? "Mute" : "Sound"}</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={goFullscreen}
-                aria-label="Play fullscreen"
-                className={cn(
-                  "glass flex items-center gap-3 rounded-full px-4 py-2.5 text-white [--glass-fill:rgb(0_0_0/0.32)] [--glass-edge:rgb(255_255_255/0.35)]",
-                  "transition-colors duration-200 hoverable:hover:border-white/80 hoverable:hover:bg-black/50 press",
-                )}
-              >
-                {/* Four corners, which is what fullscreen looks like
-                    everywhere and therefore needs no label to be understood —
-                    though it has one, because an icon alone in a row with a
-                    labelled sibling reads as an afterthought. */}
-                <svg
-                  aria-hidden
-                  viewBox="0 0 24 24"
-                  className="size-4"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.6"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <path d="M9 4H4v5M15 4h5v5M15 20h5v-5M9 20H4v-5" />
-                </svg>
-                <span className="label">Fullscreen</span>
-              </button>
-            </div>
-          </div>
-        </div>
+          title="Fullscreen"
+          className={cn(
+            "glass flex size-11 items-center justify-center rounded-full text-white [--glass-fill:rgb(0_0_0/0.32)] [--glass-edge:rgb(255_255_255/0.35)]",
+            "transition-colors duration-200 hoverable:hover:bg-black/50 press",
+          )}
+        >
+          <svg
+            aria-hidden
+            viewBox="0 0 24 24"
+            className="size-4"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.6"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="M9 4H4v5M15 4h5v5M15 20h5v-5M9 20H4v-5" />
+          </svg>
+        </button>
       </div>
     </section>
   );
