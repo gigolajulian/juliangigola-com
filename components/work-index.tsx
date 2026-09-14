@@ -163,7 +163,9 @@ export function WorkIndex({
              its height and the list scrolls inside its own column, so the
              page does not scroll at all while the visitor is reading the
              list. Julian: contain the scroll in this section and keep the
-             photo full height. `--block-top` is measured below. */
+             photo full height. Once the list reaches its end the wheel
+             carries on down the page, as he asked next. `--block-top` is
+             measured below. */
           "lg:h-[calc(100dvh-var(--block-top)-1.5rem)]",
         )}
       >
@@ -231,7 +233,7 @@ export function WorkIndex({
 
         <div
           ref={listColumn}
-          className="lg:h-full lg:w-1/2 lg:min-w-0 lg:overflow-y-auto lg:overscroll-y-contain lg:[scrollbar-width:thin]"
+          className="lg:h-full lg:w-1/2 lg:min-w-0 lg:overflow-y-auto lg:[scrollbar-width:thin]"
         >
           <ol
             onPointerEnter={() => setHovering(true)}
