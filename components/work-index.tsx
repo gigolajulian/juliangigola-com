@@ -106,6 +106,12 @@ export function WorkIndex({
     () => false,
   );
 
+  /* Whether the pointer is on the list at all. The panel leans in while
+     it is: the slow zoom and the inset frame the video tiles have, which
+     Julian liked and asked for a touch of here. Held on the list rather
+     than on a row so moving between rows does not reset it. */
+  const [hovering, setHovering] = React.useState(false);
+
   const [active, setActive] = React.useState(() => {
     const at = lastLeft ? projects.findIndex((p) => p.slug === lastLeft) : -1;
     return at === -1 ? 0 : at;
@@ -125,37 +131,55 @@ export function WorkIndex({
               than fixed, so it scrolls out with the section instead of
               hanging over the footer. */}
         <div className="hidden lg:sticky lg:top-28 lg:block lg:w-1/2">
-          {preview ? (
-            <div
-              key={preview.slug}
-              className="relative overflow-hidden"
-              style={{
-                backgroundColor: preview.cover.color,
-                aspectRatio: `${preview.cover.width} / ${preview.cover.height}`,
-              }}
-            >
-              <Travels on={wide} slug={preview.slug}>
-                <Image
-                  placeholder={preview.cover.blur ? "blur" : "empty"}
-                  blurDataURL={preview.cover.blur}
-                  src={preview.cover.src}
-                  alt=""
-                  width={preview.cover.width}
-                  height={preview.cover.height}
-                  sizes="50vw"
-                  priority
-                  // `key` on the wrapper remounts this on every change, so the
-                  // fade runs from the start each time rather than retargeting
-                  // a transition that is already at its end.
-                  className="h-full w-full object-cover animate-in fade-in duration-300 ease-[var(--ease-out-strong)] motion-reduce:animate-none"
-                />
-              </Travels>
+          {/* Two wrappers that outlive the keyed picture inside them, so the
+              zoom and the frame transition rather than restart on every row
+              change. Same numbers as `video-grid.tsx`: 4% over 500ms, and a
+              mat inset 12px settling from 2% small as it fades up. */}
+          <div
+            className="relative overflow-hidden"
+            data-hover={hovering ? "" : undefined}
+          >
+            <div className="transition-transform duration-500 ease-[var(--ease-out-strong)] in-data-hover:scale-[1.04] motion-reduce:transition-none motion-reduce:in-data-hover:scale-100">
+              {preview ? (
+                <div
+                  key={preview.slug}
+                  className="relative overflow-hidden"
+                  style={{
+                    backgroundColor: preview.cover.color,
+                    aspectRatio: `${preview.cover.width} / ${preview.cover.height}`,
+                  }}
+                >
+                  <Travels on={wide} slug={preview.slug}>
+                    <Image
+                      placeholder={preview.cover.blur ? "blur" : "empty"}
+                      blurDataURL={preview.cover.blur}
+                      src={preview.cover.src}
+                      alt=""
+                      width={preview.cover.width}
+                      height={preview.cover.height}
+                      sizes="50vw"
+                      priority
+                      // `key` on the wrapper remounts this on every change, so the
+                      // fade runs from the start each time rather than retargeting
+                      // a transition that is already at its end.
+                      className="h-full w-full object-cover animate-in fade-in duration-300 ease-[var(--ease-out-strong)] motion-reduce:animate-none"
+                    />
+                  </Travels>
+                </div>
+              ) : null}
             </div>
-          ) : null}
+            <span
+              aria-hidden
+              className="pointer-events-none absolute inset-3 border border-white/80 opacity-0 scale-[0.98] transition-[opacity,scale] duration-300 ease-[var(--ease-out-strong)] in-data-hover:scale-100 in-data-hover:opacity-100 motion-reduce:transition-none"
+            />
+          </div>
         </div>
 
         <div className="lg:w-1/2 lg:min-w-0">
-          <ol>
+          <ol
+            onPointerEnter={() => setHovering(true)}
+            onPointerLeave={() => setHovering(false)}
+          >
             {projects.map((project, i) => {
               return (
                 <li
