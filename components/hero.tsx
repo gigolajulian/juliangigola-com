@@ -97,7 +97,7 @@ function Ways({
     <div style={style} className={cn("flex flex-wrap items-center gap-3", className)}>
       <Link
         href="/work"
-        className="label glass-prominent rounded-full px-6 py-4 press active:scale-[0.97]"
+        className="label glass-prominent glass-liquid rounded-full px-7 py-5 press active:scale-[0.97]"
       >
         See the work
       </Link>
@@ -111,7 +111,7 @@ function Ways({
               } as React.CSSProperties)
             : undefined
         }
-        className="label glass rounded-full px-6 py-4 press active:scale-[0.97]"
+        className="label glass glass-liquid rounded-full px-7 py-5 press active:scale-[0.97]"
       >
         Book a session
       </Link>

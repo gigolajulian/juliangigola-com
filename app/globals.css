@@ -1246,6 +1246,67 @@ optgroup {
   }
 }
 
+/* ── more of the same material, for the cover's chips ─────────────
+ * Julian asked for the cover's chips to be more liquid glass and a bit
+ * bigger. A modifier rather than a fourth material: it rides on `glass` or
+ * `glass-prominent` and inherits their tokens, so the fill and the type
+ * colour are untouched and the contrast measured over the cover's seven
+ * frames still holds. What it adds is the part that makes the material read
+ * as glass rather than as a tinted box.
+ *
+ *   - Deeper refraction. The blur goes from 15px to 24px with more
+ *     saturation and a little brightness, so what is behind bends rather
+ *     than merely softens.
+ *   - A rim instead of a border. Light along the top edge and down the
+ *     left, shade along the bottom and the right, which is where light
+ *     falls on a convex body. A flat 1px edge all the way round reads as a
+ *     border; this reads as a thickness.
+ *   - A sheen that is always there. The pointer light only lights up under
+ *     a pointer, so a chip at rest had no light on it at all — which is the
+ *     one thing every photograph of this material has.
+ *
+ * Declared after the two it modifies so it wins on equal specificity: it
+ * re-declares `backdrop-filter` and `box-shadow`, and a later rule is the
+ * only thing that carries there.
+ * ─────────────────────────────────────────────────────────────── */
+@utility glass-liquid {
+  -webkit-backdrop-filter: blur(24px) saturate(1.9) brightness(1.03);
+  backdrop-filter: blur(24px) saturate(1.9) brightness(1.03);
+  box-shadow:
+    inset 0 1.5px 0 var(--glass-shine),
+    inset 1.5px 0 0 color-mix(in oklab, var(--glass-shine) 55%, transparent),
+    inset 0 -1.5px 0 var(--glass-shade),
+    inset -1.5px 0 0 color-mix(in oklab, var(--glass-shade) 50%, transparent),
+    inset 0 10px 20px -14px color-mix(in oklab, white 45%, transparent),
+    0 16px 40px -16px color-mix(in oklab, black 58%, transparent);
+
+  /* The sheen. `::after`, because `::before` is the pointer light and this
+     has to sit at rest alongside it rather than in place of it. */
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    border-radius: inherit;
+    pointer-events: none;
+    background: linear-gradient(
+      to bottom,
+      color-mix(in oklab, white 24%, transparent),
+      color-mix(in oklab, white 5%, transparent) 44%,
+      transparent 64%
+    );
+  }
+}
+
+/* Reduced transparency takes the blur off the material everywhere else; the
+   rim and the sheen are light, not transparency, so they stay. */
+@media (prefers-reduced-transparency: reduce) {
+  .glass-liquid {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+}
+
 @utility glass-surface {
   background-color: color-mix(in oklab, var(--background) 62%, transparent);
   -webkit-backdrop-filter: blur(18px) saturate(1.5);
