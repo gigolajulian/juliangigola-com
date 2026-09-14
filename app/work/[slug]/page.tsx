@@ -110,7 +110,7 @@ export default async function ProjectPage(props: PageProps<"/work/[slug]">) {
             href="/work"
             className="label text-muted-foreground transition-colors duration-200 hoverable:hover:text-foreground"
           >
-            &larr; Work
+            &larr; Back to all
           </Link>
         </nav>
 

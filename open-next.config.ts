@@ -27,14 +27,15 @@ import staticAssetsIncrementalCache from "@opennextjs/cloudflare/overrides/incre
  * pages are read straight from the ASSETS binding — which is served off
  * Cloudflare's edge, free and unmetered, and never invokes anything.
  *
- * `enableCacheInterception` is the other half: it answers a cacheable request
- * before Next's routing and rendering pipeline runs, rather than after. Safe
- * here because the site does not use PPR — the one case the adapter says to
- * keep it off for.
- *
- * Neither costs anything and neither needs a dashboard. Whether it is *enough*
- * to keep a free Worker under 10ms is a question only the deployed error count
- * can answer.
+ * `enableCacheInterception` is OFF, and must stay off. It answers a cacheable
+ * request before Next's router runs — and answered Next 16's segment
+ * prefetches (`Next-Router-Segment-Prefetch: /_tree`) with the full-page
+ * flight payload instead of the small tree segment. The client's segment
+ * cache could not use it and re-requested every link on the page, every
+ * frame: ~80 requests a second from any open tab, which is what blew the
+ * 100k/day Free cap on 2026-09-13. With it off the router gets the segment
+ * it asked for and goes quiet after a dozen prefetches. Pages still come
+ * out of the static-assets cache; they just go through the router first.
  *
  * ── still not configured, still on purpose ───────────────────────
  *   - No R2 or KV cache. Those exist for revalidation, which this site has
@@ -45,5 +46,5 @@ import staticAssetsIncrementalCache from "@opennextjs/cloudflare/overrides/incre
  */
 export default defineCloudflareConfig({
   incrementalCache: staticAssetsIncrementalCache,
-  enableCacheInterception: true,
+  enableCacheInterception: false,
 });

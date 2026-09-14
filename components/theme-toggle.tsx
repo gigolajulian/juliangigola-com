@@ -179,6 +179,12 @@ export function ThemeToggle({ className }: { className?: string }) {
           // Only once the real theme is known — see the note on `theme`.
           theme !== null &&
             "transition-transform duration-300 ease-[var(--ease-out-strong)] motion-reduce:transition-none",
+          // The way in is on the bounce: the quarter turn overshoots by a few
+          // degrees and settles back, a thing tipped that nearly goes over —
+          // Julian asked for the rubber band. The way back and the press
+          // keep the plain curve, so letting go feels like letting go and the
+          // turn itself lands square.
+          "hoverable:group-hover:duration-500 hoverable:group-hover:ease-[var(--ease-bounce)]",
           // Hover turns it halfway — a quarter turn, the mark tipping toward
           // the other half — and the press completes the turn. From either
           // side, so the light mark leans on from 180 the way the dark one

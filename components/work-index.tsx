@@ -157,11 +157,48 @@ export function WorkIndex({
           frames and only the rows' own `rise` softened it — "too skippy",
           Julian said. `default="none"` so nothing else about the page
           animates on the way. */}
-      <ViewTransition enter="work-in" exit="work-out" default="none">
-        <div key={activeCategory ?? "all"}>
-          {children ?? (
-            <div className="mt-8 gap-16 lg:flex lg:items-start">
-              <ol className="lg:w-1/2 lg:min-w-0">
+      {children ? (
+        <ViewTransition enter="work-in" exit="work-out" default="none">
+          <div key={activeCategory ?? "all"}>{children}</div>
+        </ViewTransition>
+      ) : (
+        <div className="mt-8 gap-16 lg:flex lg:items-start">
+          {/* The panel, on the left — Julian moved it there. Sticky rather
+              than fixed, so it scrolls out with the section instead of
+              hanging over the footer. */}
+          <div className="hidden lg:sticky lg:top-28 lg:block lg:w-1/2">
+            {preview ? (
+              <div
+                key={preview.slug}
+                className="relative overflow-hidden"
+                style={{
+                  backgroundColor: preview.cover.color,
+                  aspectRatio: `${preview.cover.width} / ${preview.cover.height}`,
+                }}
+              >
+                <Travels on={wide} slug={preview.slug}>
+                  <Image
+                    placeholder={preview.cover.blur ? "blur" : "empty"}
+                    blurDataURL={preview.cover.blur}
+                    src={preview.cover.src}
+                    alt=""
+                    width={preview.cover.width}
+                    height={preview.cover.height}
+                    sizes="50vw"
+                    priority
+                    // `key` on the wrapper remounts this on every change, so the
+                    // fade runs from the start each time rather than retargeting
+                    // a transition that is already at its end.
+                    className="h-full w-full object-cover animate-in fade-in duration-300 ease-[var(--ease-out-strong)] motion-reduce:animate-none"
+                  />
+                </Travels>
+              </div>
+            ) : null}
+          </div>
+
+          <div className="lg:w-1/2 lg:min-w-0">
+            <ViewTransition enter="work-in" exit="work-out" default="none">
+              <ol key={activeCategory ?? "all"}>
                 {projects.map((project, i) => {
                   return (
                     <li
@@ -193,8 +230,8 @@ export function WorkIndex({
                         )}
                       >
                         {/* Touch screens have no pointer to follow, so the frame
-                      comes to the row. Lazy and display:none above `lg`, so a
-                      desktop visit does not pay for seventy of these. */}
+                        comes to the row. Lazy and display:none above `lg`, so a
+                        desktop visit does not pay for seventy of these. */}
                         <div
                           className="relative mb-4 overflow-hidden lg:hidden"
                           style={{
@@ -203,7 +240,7 @@ export function WorkIndex({
                           }}
                         >
                           {/* Named below `lg`, where this is the cover on screen; above it the
-                        panel's copy is the one that travels. See `Travels`. */}
+                          panel's copy is the one that travels. See `Travels`. */}
                           <Travels on={!wide} slug={project.slug}>
                             <Image
                               placeholder={
@@ -241,42 +278,10 @@ export function WorkIndex({
                   </li>
                 ) : null}
               </ol>
-
-              {/* The panel. Sticky rather than fixed, so it scrolls out with the
-            section instead of hanging over the footer. */}
-              <div className="hidden lg:sticky lg:top-28 lg:block lg:w-1/2">
-                {preview ? (
-                  <div
-                    key={preview.slug}
-                    className="relative overflow-hidden"
-                    style={{
-                      backgroundColor: preview.cover.color,
-                      aspectRatio: `${preview.cover.width} / ${preview.cover.height}`,
-                    }}
-                  >
-                    <Travels on={wide} slug={preview.slug}>
-                      <Image
-                        placeholder={preview.cover.blur ? "blur" : "empty"}
-                        blurDataURL={preview.cover.blur}
-                        src={preview.cover.src}
-                        alt=""
-                        width={preview.cover.width}
-                        height={preview.cover.height}
-                        sizes="50vw"
-                        priority
-                        // `key` on the wrapper remounts this on every change, so the
-                        // fade runs from the start each time rather than retargeting
-                        // a transition that is already at its end.
-                        className="h-full w-full object-cover animate-in fade-in duration-300 ease-[var(--ease-out-strong)] motion-reduce:animate-none"
-                      />
-                    </Travels>
-                  </div>
-                ) : null}
-              </div>
-            </div>
-          )}
+            </ViewTransition>
+          </div>
         </div>
-      </ViewTransition>
+      )}
     </>
   );
 }
