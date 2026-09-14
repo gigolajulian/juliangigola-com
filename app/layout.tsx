@@ -92,23 +92,23 @@ export const metadata: Metadata = {
     siteName: "Julian Gigola",
     locale: "en_US",
     url: SITE,
-    /* The cover photograph, cropped to a card.
+    /* The eye mark on black, at 1200x630. Julian's pick for the thumbnail.
      *
-     * `scripts/make-og.mjs` makes it from whatever `coverSlug` names, and it
-     * runs as `prebuild` — so changing the cover in /admin changes the
-     * thumbnail on the next deploy with nothing else to do. The file is
-     * committed as well, so a build where the crop could not run ships a card
-     * one cover out of date rather than none at all.
+     * It used to be the cover photograph, cropped from whatever `coverSlug`
+     * named by a `prebuild` script. The mark does not change with the cover,
+     * so there is nothing left to generate per deploy and the script is gone:
+     * `public/og.jpg` is now a committed file, made from `app/icon.svg`.
      *
-     * This replaced the eye mark. A mark is the right answer for a tab, where
-     * it is 16px and has to be recognised; a share card is 500px wide in a
-     * feed and should be the work. */
+     * The trade: an unfurl in a feed is 500px wide and a photograph sells the
+     * work harder than a logo does. It is the same mark as the tab, though,
+     * which is the other thing a share card can be worth — a site you
+     * recognise before you have read the title. */
     images: [
       {
         url: "/og.jpg",
         width: 1200,
         height: 630,
-        alt: "Photography by Julian Gigola",
+        alt: "Julian Gigola",
       },
     ],
   },

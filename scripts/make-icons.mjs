@@ -96,10 +96,10 @@ await writeFile(
  * ─────────────────────────────────────────────────────────────── */
 await writeFile(join(root, "app/apple-icon.png"), await png(180));
 
-/* The share card is not made here any more. It is the cover photograph
- * cropped by `scripts/make-og.mjs`, which runs on every build so that
- * changing the cover in /admin changes the thumbnail. A mark is right for a
- * 16px tab; a card is 500px wide in a feed and should be the work.
+/* The share card is not made here, but it is this same mark: `public/og.jpg`
+ * is the eye on a 1200x630 black field, committed rather than generated,
+ * since a mark has nothing to regenerate from. Remake it from `app/icon.svg`
+ * if the mark ever changes.
  */
 
 console.log("icons written: favicon.ico (16/32/48), apple-icon.png");

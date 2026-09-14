@@ -15,7 +15,7 @@
  * small files and one JSON, all committed: the script is for regenerating
  * them when a frame changes, and runs on every build so it cannot go stale.
  *
- * Like `make-og.mjs`, this must never fail a build. Anything wrong logs a
+ * This must never fail a build. Anything wrong logs a
  * warning and exits 0 with whatever is already on disk.
  */
 import { readdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
