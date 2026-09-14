@@ -1181,6 +1181,31 @@ optgroup {
   animation-timing-function: var(--ease-out-strong);
 }
 
+/* The work index changing filter: the old list leaves, then the new one
+   arrives. Two boundaries, not one morph — a list of seventy rows has no
+   shape worth interpolating — and the arrival waits for the departure, so
+   there is a beat of empty ground between them rather than two lists
+   crossfading through each other. Short on both sides: this is pressed a
+   dozen times a visit. */
+::view-transition-old(.work-out) {
+  animation: jg-work-out 160ms var(--ease-out-strong) both;
+}
+::view-transition-new(.work-in) {
+  animation: jg-work-in 260ms var(--ease-out-strong) 140ms both;
+}
+@keyframes jg-work-out {
+  to {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+}
+@keyframes jg-work-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+}
+
 /* Reduced motion: no trip. The pages still swap; nothing travels. */
 @media (prefers-reduced-motion: reduce) {
   ::view-transition-group(*),
@@ -1312,7 +1337,19 @@ optgroup {
     opacity: 0;
     transition: opacity 260ms var(--ease-out-strong);
   }
+  /* The pointer light alone was too quiet to read as a hover on a pill
+     this bright — Julian could not see it. So the fill itself steps a
+     little off-white (off-black in the light theme) under a pointer, and
+     the press still goes to the full colour: hover is the pill noticing
+     you, press is the pill answering. */
   @media (hover: hover) and (pointer: fine) {
+    &:hover {
+      background-color: color-mix(
+        in oklab,
+        var(--foreground) 78%,
+        var(--background)
+      );
+    }
     &:hover::before {
       opacity: 1;
     }

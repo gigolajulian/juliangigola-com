@@ -30,6 +30,31 @@ type Theme = "dark" | "light";
 const read = (): Theme =>
   document.documentElement.dataset.theme === "light" ? "light" : "dark";
 
+/**
+ * Sets the attribute the CSS keys off — the source of truth; `localStorage`
+ * is only how a choice survives a reload. As a view transition, so the
+ * whole page crossfades over the root's 240ms (see `globals.css`) instead
+ * of every surface jumping from black to white between two frames — the
+ * one brightness change on the site that is large enough to hurt. Reduced
+ * motion, or no API: the switch.
+ */
+function apply(next: Theme) {
+  const flip = () => {
+    if (next === "light") document.documentElement.dataset.theme = "light";
+    else delete document.documentElement.dataset.theme;
+  };
+  if (
+    typeof document.startViewTransition === "function" &&
+    !window.matchMedia("(prefers-reduced-motion: reduce)").matches
+  ) {
+    // `finished` rejects when the transition is skipped (a hidden tab);
+    // the flip still ran, and an unhandled rejection is all the catch saves.
+    document.startViewTransition(flip).finished.catch(() => {});
+  } else {
+    flip();
+  }
+}
+
 export function ThemeToggle({ className }: { className?: string }) {
   /**
    * Starts as `null`, not as `"dark"`.
@@ -44,29 +69,32 @@ export function ThemeToggle({ className }: { className?: string }) {
 
   React.useEffect(() => setTheme(read()), []);
 
+  /* Until the toggle is pressed the site follows the system, live: a
+     visitor whose phone goes dark at sunset sees the site go with it, as
+     every native app does. The inline script in `app/layout.tsx` made the
+     same decision for the first paint; this keeps making it. A stored
+     choice is a choice, and ends the following. */
+  React.useEffect(() => {
+    const chosen = (() => {
+      try {
+        return window.localStorage.getItem(STORAGE_KEY);
+      } catch {
+        return null;
+      }
+    })();
+    if (chosen === "light" || chosen === "dark") return;
+    const mq = window.matchMedia("(prefers-color-scheme: light)");
+    const follow = () => {
+      apply(mq.matches ? "light" : "dark");
+      setTheme(mq.matches ? "light" : "dark");
+    };
+    mq.addEventListener("change", follow);
+    return () => mq.removeEventListener("change", follow);
+  }, []);
+
   const toggle = () => {
     const next: Theme = read() === "dark" ? "light" : "dark";
-
-    // The attribute is the source of truth and what the CSS keys off;
-    // `localStorage` is only how it survives a reload.
-    const flip = () => {
-      if (next === "light") document.documentElement.dataset.theme = "light";
-      else delete document.documentElement.dataset.theme;
-    };
-    // As a view transition, so the whole page crossfades over the root's
-    // 240ms (see `globals.css`) instead of every surface jumping from black
-    // to white between two frames — the one brightness change on the site
-    // that is large enough to hurt. Reduced motion, or no API: the switch.
-    if (
-      typeof document.startViewTransition === "function" &&
-      !window.matchMedia("(prefers-reduced-motion: reduce)").matches
-    ) {
-      // `finished` rejects when the transition is skipped (a hidden tab);
-      // the flip still ran, and an unhandled rejection is all the catch saves.
-      document.startViewTransition(flip).finished.catch(() => {});
-    } else {
-      flip();
-    }
+    apply(next);
 
     try {
       window.localStorage.setItem(STORAGE_KEY, next);
@@ -91,7 +119,7 @@ export function ThemeToggle({ className }: { className?: string }) {
       // The same brighten is right on a text link and wrong on an outline.
       // Press is the feedback here, and the cursor is the affordance.
       className={cn(
-        "relative flex h-11 w-11 items-center justify-center text-foreground",
+        "group relative flex h-11 w-11 items-center justify-center text-foreground",
         "press active:scale-[0.94]",
         className,
       )}
@@ -109,8 +137,14 @@ export function ThemeToggle({ className }: { className?: string }) {
           "h-[1.125rem] w-[1.125rem] origin-center",
           // Only once the real theme is known — see the note on `theme`.
           theme !== null &&
-            "transition-transform duration-500 ease-[var(--ease-out-strong)] motion-reduce:transition-none",
-          theme === "light" && "rotate-180",
+            "transition-transform duration-300 ease-[var(--ease-out-strong)] motion-reduce:transition-none",
+          // Hover turns it halfway — a quarter turn, the mark tipping toward
+          // the other half — and the press completes the turn. From either
+          // side, so the light mark leans on from 180 the way the dark one
+          // leans from 0. Pointer only: a tap on a phone is the press itself.
+          theme === "light"
+            ? "rotate-180 hoverable:group-hover:rotate-[270deg]"
+            : "hoverable:group-hover:rotate-90",
         )}
         fill="none"
         stroke="currentColor"

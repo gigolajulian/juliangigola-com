@@ -123,23 +123,24 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       suppressHydrationWarning
     >
       <head>
-        {/* Applies a stored light preference before the first paint.
+        {/* Applies the theme before the first paint: a choice made with the
+         * toggle if there is one, otherwise whatever the visitor's system is
+         * set to — Julian asked for the site to match how they have it set
+         * up. Dark is the design and the fallback; light needs the attribute.
          *
          * It has to be inline and it has to be here: an effect runs after
          * hydration, which is several hundred milliseconds of a full-bleed
-         * dark page for somebody who asked for a light one — the flash that
-         * makes a theme switch feel broken.
-         *
-         * Only `light` is ever applied. Dark needs no attribute because it is
-         * what `:root` already is, which also means no preference and no
-         * JavaScript both land on the site as designed.
+         * dark page for somebody whose system is light — the flash that
+         * makes a theme feel broken. `theme-toggle.tsx` keeps following the
+         * system after that, until the toggle is pressed.
          *
          * `localStorage` throws outright in some privacy modes rather than
-         * returning null, so the whole thing is wrapped.
+         * returning null, so the whole thing is wrapped; a failure there
+         * still leaves the system check to run.
          */}
         <script
           dangerouslySetInnerHTML={{
-            __html: `try{if(localStorage.getItem("theme")==="light")document.documentElement.dataset.theme="light"}catch(e){}`,
+            __html: `(function(){var t=null;try{t=localStorage.getItem("theme")}catch(e){}if(t==="light"||(t!=="dark"&&matchMedia("(prefers-color-scheme: light)").matches))document.documentElement.dataset.theme="light"})()`,
           }}
         />
       </head>
