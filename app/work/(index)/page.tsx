@@ -18,12 +18,16 @@ export default function WorkPage() {
         <WorkIndex projects={COMMISSIONS.map(indexRow)} />
       </div>
 
-      <CallToAction
-        title="Commission a shoot"
-        body="Tell me what you have in mind and I'll come back with an approach and a quote."
-        type="editorial"
-        secondary={{ href: "/studio", label: "How a commission runs" }}
-      />
+      {/* Over the pinned head in the stack, so at the end of the list this
+          slides up over it and the head is gone with the list. */}
+      <div className="relative z-30 bg-background">
+        <CallToAction
+          title="Commission a shoot"
+          body="Tell me what you have in mind and I'll come back with an approach and a quote."
+          type="editorial"
+          secondary={{ href: "/studio", label: "How a commission runs" }}
+        />
+      </div>
     </>
   );
 }

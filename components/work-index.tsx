@@ -112,10 +112,10 @@ export function WorkIndex({
      moving between rows does not reset it. */
   const [hovering, setHovering] = React.useState(false);
 
-  /* Where the block starts, so its height can be the rest of the screen.
-     Read once the layout is settled and again on resize; written as a
-     custom property so the height stays a CSS calculation. At scroll 0
-     the block's top is exactly under the chips. */
+  /* Where the block starts, which is also where the cover pins: under
+     the head, which is pinned itself (`work-shell.tsx`). Read once the
+     layout is settled and again on resize; written as a custom property
+     so the cover's height stays a CSS calculation. */
   const block = React.useRef<HTMLDivElement>(null);
   const listColumn = React.useRef<HTMLDivElement>(null);
   React.useLayoutEffect(() => {
@@ -131,8 +131,8 @@ export function WorkIndex({
     return () => window.removeEventListener("resize", measure);
   }, []);
 
-  /* Coming back from a project, the list scrolls itself to the row that
-     was left, since the page can no longer do that for it. */
+  /* Coming back from a project, the page scrolls to the row that was
+     left. */
   React.useLayoutEffect(() => {
     if (!lastLeft || !listColumn.current) return;
     const row = listColumn.current.querySelector<HTMLElement>(
@@ -157,22 +157,13 @@ export function WorkIndex({
           and so is the out-then-in between filters; this is the list. */}
       <div
         ref={block}
-        className={cn(
-          "mt-6 gap-16 lg:flex lg:items-start",
-          /* From `lg` the block is the rest of the screen: the cover fills
-             its height and the list scrolls inside its own column, so the
-             page does not scroll at all while the visitor is reading the
-             list. Julian: contain the scroll in this section and keep the
-             photo full height. Once the list reaches its end the wheel
-             carries on down the page, as he asked next. `--block-top` is
-             measured below. */
-          "lg:h-[calc(100dvh-var(--block-top)-1.5rem)]",
-        )}
+        className="mt-6 gap-16 lg:flex lg:items-start"
       >
-        {/* The panel, on the left — Julian moved it there. Sticky rather
-              than fixed, so it scrolls out with the section instead of
-              hanging over the footer. */}
-        <div className="hidden lg:block lg:h-full lg:w-1/2">
+        {/* The panel, on the left, Julian moved it there. Pinned under the
+            pinned head, the rest of the screen tall, and it lets go with
+            the section rather than hanging over the footer. The list rolls
+            past it with the page: one scroll. */}
+        <div className="hidden lg:sticky lg:top-[var(--block-top)] lg:block lg:w-1/2">
           {/* Two wrappers that outlive the keyed picture inside them, so the
               zoom transitions rather than restarts on every row change.
               Same numbers as `video-grid.tsx`: 4% over 500ms. The mat frame
@@ -233,11 +224,7 @@ export function WorkIndex({
 
         <div
           ref={listColumn}
-          /* The column clips what it scrolls, and the hover box below sits a
-             little wider than its row: so the column is let out 1rem each
-             side and padded back, and the rows sit where they did while the
-             box has room. */
-          className="list-scroll lg:-mx-4 lg:h-full lg:w-[calc(50%+2rem)] lg:min-w-0 lg:overflow-y-auto lg:px-4"
+          className="lg:w-1/2 lg:min-w-0"
         >
           <ol
             onPointerEnter={() => setHovering(true)}

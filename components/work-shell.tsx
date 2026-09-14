@@ -51,7 +51,17 @@ export function WorkShell({
 
   return (
     <>
-      <div className="relative">
+      {/* Pinned from `lg`: the head and the chips stay at the top of the
+          screen while the list under them scrolls with the page, so the
+          page is the only thing that scrolls. Julian found two scrolls (the
+          list in its own box, then the page) confusing. Not over the film,
+          which is most of a screen tall. */}
+      <div
+        className={cn(
+          "relative",
+          !film && "bg-background lg:sticky lg:top-0 lg:z-30",
+        )}
+      >
         {film ? (
           <VideoHero
             videoId={REEL.videoId}
