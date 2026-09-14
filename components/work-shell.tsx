@@ -62,7 +62,7 @@ export function WorkShell({
 
         <div
           className={cn(
-            "relative z-10 mx-auto w-full max-w-[100rem] px-6 pt-28 sm:px-10 sm:pt-36",
+            "relative z-10 mx-auto w-full max-w-[100rem] px-6 pt-24 sm:px-10 sm:pt-28",
             /* Taller over the film, Julian asked: most of a screen of reel,
                with the head and the chips at its foot. The other filters
                keep the head's natural height. */
@@ -91,7 +91,7 @@ export function WorkShell({
             </div>
             <h1
               className={cn(
-                "mt-8 title transition-colors duration-200",
+                "mt-5 title transition-colors duration-200",
                 film && "text-white",
               )}
             >
@@ -99,7 +99,7 @@ export function WorkShell({
             </h1>
             <p
               className={cn(
-                "mt-4 max-w-prose text-sm leading-relaxed transition-colors duration-200",
+                "mt-3 max-w-prose text-sm leading-relaxed transition-colors duration-200",
                 film ? "text-white/70" : "text-muted-foreground",
               )}
             >
@@ -113,7 +113,7 @@ export function WorkShell({
           <nav
             aria-label="Categories"
             className={cn(
-              "mt-10 border-b pb-5 transition-colors duration-200",
+              "mt-6 border-b pb-4 transition-colors duration-200",
               film ? "border-white/20" : "border-border",
             )}
           >

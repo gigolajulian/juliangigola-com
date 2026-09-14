@@ -112,6 +112,35 @@ export function WorkIndex({
      moving between rows does not reset it. */
   const [hovering, setHovering] = React.useState(false);
 
+  /* Where the block starts, so its height can be the rest of the screen.
+     Read once the layout is settled and again on resize; written as a
+     custom property so the height stays a CSS calculation. At scroll 0
+     the block's top is exactly under the chips. */
+  const block = React.useRef<HTMLDivElement>(null);
+  const listColumn = React.useRef<HTMLDivElement>(null);
+  React.useLayoutEffect(() => {
+    const el = block.current;
+    if (!el) return;
+    const measure = () =>
+      el.style.setProperty(
+        "--block-top",
+        `${el.getBoundingClientRect().top + window.scrollY}px`,
+      );
+    measure();
+    window.addEventListener("resize", measure);
+    return () => window.removeEventListener("resize", measure);
+  }, []);
+
+  /* Coming back from a project, the list scrolls itself to the row that
+     was left, since the page can no longer do that for it. */
+  React.useLayoutEffect(() => {
+    if (!lastLeft || !listColumn.current) return;
+    const row = listColumn.current.querySelector<HTMLElement>(
+      `a[href="/work/${lastLeft}"]`,
+    );
+    row?.scrollIntoView({ block: "center" });
+  }, []);
+
   const [active, setActive] = React.useState(() => {
     const at = lastLeft ? projects.findIndex((p) => p.slug === lastLeft) : -1;
     return at === -1 ? 0 : at;
@@ -126,11 +155,22 @@ export function WorkIndex({
     <>
       {/* The head and the chips are the layout's now (`work-shell.tsx`),
           and so is the out-then-in between filters; this is the list. */}
-      <div className="mt-8 gap-16 lg:flex lg:items-start">
+      <div
+        ref={block}
+        className={cn(
+          "mt-6 gap-16 lg:flex lg:items-start",
+          /* From `lg` the block is the rest of the screen: the cover fills
+             its height and the list scrolls inside its own column, so the
+             page does not scroll at all while the visitor is reading the
+             list. Julian: contain the scroll in this section and keep the
+             photo full height. `--block-top` is measured below. */
+          "lg:h-[calc(100dvh-var(--block-top)-1.5rem)]",
+        )}
+      >
         {/* The panel, on the left — Julian moved it there. Sticky rather
               than fixed, so it scrolls out with the section instead of
               hanging over the footer. */}
-        <div className="hidden lg:sticky lg:top-28 lg:block lg:w-1/2">
+        <div className="hidden lg:block lg:h-full lg:w-1/2">
           {/* Two wrappers that outlive the keyed picture inside them, so the
               zoom transitions rather than restarts on every row change.
               Same numbers as `video-grid.tsx`: 4% over 500ms. The mat frame
@@ -149,7 +189,10 @@ export function WorkIndex({
             style={
               preview
                 ? {
-                    maxWidth: `calc((100dvh - 8.5rem) * ${preview.cover.width} / ${preview.cover.height})`,
+                    /* As wide as the block's height allows for this
+                       cover's shape, and no wider than the column: full
+                       height on most screens, never cropped. */
+                    maxWidth: `min(100%, calc((100dvh - var(--block-top) - 1.5rem) * ${preview.cover.width} / ${preview.cover.height}))`,
                   }
                 : undefined
             }
@@ -186,7 +229,10 @@ export function WorkIndex({
           </div>
         </div>
 
-        <div className="lg:w-1/2 lg:min-w-0">
+        <div
+          ref={listColumn}
+          className="lg:h-full lg:w-1/2 lg:min-w-0 lg:overflow-y-auto lg:overscroll-y-contain lg:[scrollbar-width:thin]"
+        >
           <ol
             onPointerEnter={() => setHovering(true)}
             onPointerLeave={() => setHovering(false)}
