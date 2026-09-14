@@ -21,7 +21,15 @@ import { cn } from "@/lib/utils";
  * before the still loads and nothing shifts when it does.
  * ─────────────────────────────────────────────────────────────── */
 
-export function VideoGrid({ videos }: { videos: Video[] }) {
+export function VideoGrid({
+  videos,
+  onOpen,
+}: {
+  videos: Video[];
+  /** When given, a press opens the film here instead of playing it in
+      its tile; see `video-viewer.tsx`. */
+  onOpen?: (video: Video) => void;
+}) {
   /** Which tile has been asked to play. One at a time. */
   const [playing, setPlaying] = React.useState<string | null>(null);
 
@@ -54,7 +62,7 @@ export function VideoGrid({ videos }: { videos: Video[] }) {
             <Tile
               video={video}
               playing={playing === video.id}
-              onPlay={() => setPlaying(video.id)}
+              onPlay={() => (onOpen ? onOpen(video) : setPlaying(video.id))}
               /* The first still in a section is above the fold and it *is* the
                content — lazy-loading the thing the page is for costs a beat
                on arrival for nothing. The rest wait until they are scrolled
@@ -128,8 +136,9 @@ function Tile({
       type="button"
       onClick={onPlay}
       aria-label={`Play ${video.title}`}
-      // `group` drives three things now: the picture's zoom, the outline
-      // drawing itself, and the play mark arriving.
+      // `group` drives two things: the picture's zoom and the play mark
+      // arriving. The inset outline that used to draw itself on hover is
+      // gone, at Julian's ask.
       className="group relative aspect-video w-full overflow-hidden bg-card press active:scale-[0.995]"
     >
       {poster ? (
@@ -154,34 +163,6 @@ function Tile({
           unoptimized
         />
       ) : null}
-
-      {/* The outline, on hover only.
-
-          It was an SVG rect with `pathLength="1"` and a dash offset taken to
-          zero, which is the usual way to draw a line on. It does not survive
-          `vector-effect: non-scaling-stroke`: Chrome then computes dash
-          lengths in *screen* pixels and ignores `pathLength` entirely, so
-          `stroke-dasharray: 1px` painted a 1px dotted line all the way round
-          — visible at rest, which is the opposite of the point. Measured: a
-          396-unit perimeter, `pathLength="1"`, and a computed dasharray of
-          `1px`.
-
-          Without the non-scaling stroke the geometry is worse, not better: a
-          viewBox stretched to a 16:9 cell renders a nominal 1px stroke at
-          3.8px across the top and 2.1px down the side. An uneven outline.
-
-          So it is a border, and what animates is the frame arriving rather
-          than a line being drawn: it settles from 2% small onto its edge as
-          it fades up. Two properties, both on the compositor, no geometry to
-          get wrong at any cell size — and it reverses when the pointer
-          leaves instead of cutting.
-
-          Inset, so it reads as a mat inside the frame rather than as a box
-          around the tile, which the grid gap already implies. */}
-      <span
-        aria-hidden
-        className="pointer-events-none absolute inset-3 border border-white/80 opacity-0 transition-[opacity,scale] duration-300 ease-[var(--ease-out-strong)] scale-[0.98] group-hover:scale-100 group-hover:opacity-100 group-focus-visible:scale-100 group-focus-visible:opacity-100 motion-reduce:transition-none"
-      />
 
       {/* The play mark, on request.
 
