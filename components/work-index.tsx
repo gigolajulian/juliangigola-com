@@ -5,7 +5,7 @@ import { ViewTransition } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
-import type { CategoryLink, IndexRow } from "@/lib/work";
+import type { IndexRow } from "@/lib/work";
 
 /* ── the contact sheet ────────────────────────────────────────────
  * The index is a typographic list, not a grid of thumbnails.
@@ -96,17 +96,9 @@ function Travels({
 
 export function WorkIndex({
   projects,
-  categories,
-  /** The category being shown, or null for everything. Marks the filter row. */
-  active: activeCategory = null,
-  children,
 }: {
   /** Trimmed on the server to what a row shows — see `indexRow`. */
   projects: IndexRow[];
-  categories: CategoryLink[];
-  active?: string | null;
-  /** Rendered under the chips in place of the list. */
-  children?: React.ReactNode;
 }) {
   const wide = React.useSyncExternalStore(
     subscribeWide,
@@ -126,195 +118,123 @@ export function WorkIndex({
 
   return (
     <>
-      {/* The old site's three dropdowns become one row that can be ignored:
-          the default is everything, so nobody has to make a choice before
-          they can look at anything. */}
-      <nav
-        aria-label="Categories"
-        className="mt-10 border-b border-border pb-5"
-      >
-        <ul className="-mx-3 flex flex-wrap gap-x-1 gap-y-2">
-          <li>
-            <FilterLink href="/work" active={activeCategory === null}>
-              All
-            </FilterLink>
-          </li>
-          {categories.map((c) => (
-            <li key={c.slug}>
-              <FilterLink href={c.href} active={activeCategory === c.slug}>
-                {c.name}
-              </FilterLink>
-            </li>
-          ))}
-        </ul>
-      </nav>
-
-      {/* Out, then in. A filter is a navigation, so the list below is new
-          DOM on every click; keyed on the category so React sees one list
-          leave and another arrive, and the boundary names the two halves
-          for `globals.css`: the old list drops away in 160ms, the new one
-          rises in after it. Without this the page swapped between two
-          frames and only the rows' own `rise` softened it — "too skippy",
-          Julian said. `default="none"` so nothing else about the page
-          animates on the way. */}
-      {children ? (
-        <ViewTransition enter="work-in" exit="work-out" default="none">
-          <div key={activeCategory ?? "all"}>{children}</div>
-        </ViewTransition>
-      ) : (
-        <div className="mt-8 gap-16 lg:flex lg:items-start">
-          {/* The panel, on the left — Julian moved it there. Sticky rather
+      {/* The head and the chips are the layout's now (`work-shell.tsx`),
+          and so is the out-then-in between filters; this is the list. */}
+      <div className="mt-8 gap-16 lg:flex lg:items-start">
+        {/* The panel, on the left — Julian moved it there. Sticky rather
               than fixed, so it scrolls out with the section instead of
               hanging over the footer. */}
-          <div className="hidden lg:sticky lg:top-28 lg:block lg:w-1/2">
-            {preview ? (
-              <div
-                key={preview.slug}
-                className="relative overflow-hidden"
-                style={{
-                  backgroundColor: preview.cover.color,
-                  aspectRatio: `${preview.cover.width} / ${preview.cover.height}`,
-                }}
-              >
-                <Travels on={wide} slug={preview.slug}>
-                  <Image
-                    placeholder={preview.cover.blur ? "blur" : "empty"}
-                    blurDataURL={preview.cover.blur}
-                    src={preview.cover.src}
-                    alt=""
-                    width={preview.cover.width}
-                    height={preview.cover.height}
-                    sizes="50vw"
-                    priority
-                    // `key` on the wrapper remounts this on every change, so the
-                    // fade runs from the start each time rather than retargeting
-                    // a transition that is already at its end.
-                    className="h-full w-full object-cover animate-in fade-in duration-300 ease-[var(--ease-out-strong)] motion-reduce:animate-none"
-                  />
-                </Travels>
-              </div>
-            ) : null}
-          </div>
+        <div className="hidden lg:sticky lg:top-28 lg:block lg:w-1/2">
+          {preview ? (
+            <div
+              key={preview.slug}
+              className="relative overflow-hidden"
+              style={{
+                backgroundColor: preview.cover.color,
+                aspectRatio: `${preview.cover.width} / ${preview.cover.height}`,
+              }}
+            >
+              <Travels on={wide} slug={preview.slug}>
+                <Image
+                  placeholder={preview.cover.blur ? "blur" : "empty"}
+                  blurDataURL={preview.cover.blur}
+                  src={preview.cover.src}
+                  alt=""
+                  width={preview.cover.width}
+                  height={preview.cover.height}
+                  sizes="50vw"
+                  priority
+                  // `key` on the wrapper remounts this on every change, so the
+                  // fade runs from the start each time rather than retargeting
+                  // a transition that is already at its end.
+                  className="h-full w-full object-cover animate-in fade-in duration-300 ease-[var(--ease-out-strong)] motion-reduce:animate-none"
+                />
+              </Travels>
+            </div>
+          ) : null}
+        </div>
 
-          <div className="lg:w-1/2 lg:min-w-0">
-            <ViewTransition enter="work-in" exit="work-out" default="none">
-              <ol key={activeCategory ?? "all"}>
-                {projects.map((project, i) => {
-                  return (
-                    <li
-                      key={project.slug}
-                      // Stepped for the first eight rows and flat after: that is
-                      // about what fits above the fold, and a stagger that runs
-                      // to seventy rows is a queue, not a gesture.
-                      className="rise"
-                      style={
-                        {
-                          "--reveal-delay": `${Math.min(i, 8) * 40}ms`,
-                        } as React.CSSProperties
-                      }
-                    >
-                      <Link
-                        prefetch={false}
-                        href={`/work/${project.slug}`}
-                        // Focus updates the panel too, so a keyboard visitor sees
-                        // exactly what a pointer visitor sees. Without this the
-                        // panel would sit on whatever was hovered last.
-                        onPointerEnter={() => setActive(i)}
-                        onFocus={() => setActive(i)}
-                        onClick={() => {
-                          lastLeft = project.slug;
-                        }}
-                        className={cn(
-                          "group block border-b border-border py-5 transition-colors duration-200",
-                          "hoverable:hover:border-foreground/30",
-                        )}
-                      >
-                        {/* Touch screens have no pointer to follow, so the frame
+        <div className="lg:w-1/2 lg:min-w-0">
+          <ol>
+            {projects.map((project, i) => {
+              return (
+                <li
+                  key={project.slug}
+                  // Stepped for the first eight rows and flat after: that is
+                  // about what fits above the fold, and a stagger that runs
+                  // to seventy rows is a queue, not a gesture.
+                  className="rise"
+                  style={
+                    {
+                      "--reveal-delay": `${Math.min(i, 8) * 40}ms`,
+                    } as React.CSSProperties
+                  }
+                >
+                  <Link
+                    prefetch={false}
+                    href={`/work/${project.slug}`}
+                    // Focus updates the panel too, so a keyboard visitor sees
+                    // exactly what a pointer visitor sees. Without this the
+                    // panel would sit on whatever was hovered last.
+                    onPointerEnter={() => setActive(i)}
+                    onFocus={() => setActive(i)}
+                    onClick={() => {
+                      lastLeft = project.slug;
+                    }}
+                    className={cn(
+                      "group block border-b border-border py-5 transition-colors duration-200",
+                      "hoverable:hover:border-foreground/30",
+                    )}
+                  >
+                    {/* Touch screens have no pointer to follow, so the frame
                         comes to the row. Lazy and display:none above `lg`, so a
                         desktop visit does not pay for seventy of these. */}
-                        <div
-                          className="relative mb-4 overflow-hidden lg:hidden"
-                          style={{
-                            backgroundColor: project.cover.color,
-                            aspectRatio: `${project.cover.width} / ${project.cover.height}`,
-                          }}
-                        >
-                          {/* Named below `lg`, where this is the cover on screen; above it the
+                    <div
+                      className="relative mb-4 overflow-hidden lg:hidden"
+                      style={{
+                        backgroundColor: project.cover.color,
+                        aspectRatio: `${project.cover.width} / ${project.cover.height}`,
+                      }}
+                    >
+                      {/* Named below `lg`, where this is the cover on screen; above it the
                           panel's copy is the one that travels. See `Travels`. */}
-                          <Travels on={!wide} slug={project.slug}>
-                            <Image
-                              placeholder={
-                                project.cover.blur ? "blur" : "empty"
-                              }
-                              blurDataURL={project.cover.blur}
-                              data-fade=""
-                              src={project.cover.src}
-                              alt={project.cover.alt || project.name}
-                              width={project.cover.width}
-                              height={project.cover.height}
-                              sizes="100vw"
-                              loading="lazy"
-                              className="h-full w-full object-cover"
-                            />
-                          </Travels>
-                        </div>
+                      <Travels on={!wide} slug={project.slug}>
+                        <Image
+                          placeholder={project.cover.blur ? "blur" : "empty"}
+                          blurDataURL={project.cover.blur}
+                          data-fade=""
+                          src={project.cover.src}
+                          alt={project.cover.alt || project.name}
+                          width={project.cover.width}
+                          height={project.cover.height}
+                          sizes="100vw"
+                          loading="lazy"
+                          className="h-full w-full object-cover"
+                        />
+                      </Travels>
+                    </div>
 
-                        <div className="flex items-baseline justify-between gap-6">
-                          <h2 className="font-display text-xl leading-tight sm:text-2xl">
-                            {project.name}
-                          </h2>
-                          <span className="label shrink-0 text-muted-foreground">
-                            {project.credit}
-                          </span>
-                        </div>
-                      </Link>
-                    </li>
-                  );
-                })}
+                    <div className="flex items-baseline justify-between gap-6">
+                      <h2 className="font-display text-xl leading-tight sm:text-2xl">
+                        {project.name}
+                      </h2>
+                      <span className="label shrink-0 text-muted-foreground">
+                        {project.credit}
+                      </span>
+                    </div>
+                  </Link>
+                </li>
+              );
+            })}
 
-                {projects.length === 0 ? (
-                  <li className="py-10 text-sm text-muted-foreground">
-                    Nothing filed under that yet.
-                  </li>
-                ) : null}
-              </ol>
-            </ViewTransition>
-          </div>
+            {projects.length === 0 ? (
+              <li className="py-10 text-sm text-muted-foreground">
+                Nothing filed under that yet.
+              </li>
+            ) : null}
+          </ol>
         </div>
-      )}
+      </div>
     </>
-  );
-}
-
-function FilterLink({
-  href,
-  active,
-  children,
-}: {
-  href: string;
-  active: boolean;
-  children: React.ReactNode;
-}) {
-  return (
-    <Link
-      prefetch={false}
-      href={href}
-      // `page`, not `true` — this is a link to the page being viewed, which
-      // is what a screen reader should be told about the current filter.
-      aria-current={active ? "page" : undefined}
-      /* Chips. The chosen filter is filled — ink on ground — which is the
-         one mark that can be found at a glance in a row of eleven; the rest
-         light up as a soft pill under a pointer. The hairline that used to
-         grow under each word went with the nav's: same reason, same day. */
-      className={cn(
-        "label block rounded-full px-3 py-1.5",
-        "transition-colors duration-200 ease-[var(--ease-out-strong)]",
-        active
-          ? "bg-foreground text-background"
-          : "text-muted-foreground hoverable:hover:bg-foreground/[0.07] hoverable:hover:text-foreground focus-visible:bg-foreground/[0.07] focus-visible:text-foreground",
-      )}
-    >
-      {children}
-    </Link>
   );
 }

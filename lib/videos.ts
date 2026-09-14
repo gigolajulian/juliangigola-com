@@ -62,6 +62,11 @@ export const REEL = {
      and printing 2023 twice on one line is how a caption looks careless. */
   title: "Director's Reel",
   year: 2023,
+  /* Vimeo's stills are behind its API, so the URL is written down the way
+     /admin writes it down for every other Vimeo film: looked up once, from
+     vimeo.com/api/oembed.json, at 1280x720. */
+  poster:
+    "https://i.vimeocdn.com/video/1770237389-9fb949e4fc9ee6c2136b9caf48c7c7de06dd3aac39042d4b6b642f4d12dac397-d_1280x720",
 };
 
 export const SECTIONS: { id: VideoSection; name: string }[] = [

@@ -5,7 +5,7 @@ import { createPortal } from "react-dom";
 
 /* ── the ring ─────────────────────────────────────────────────────
  * The cursor over something that opens large: a hollow circle that fills
- * when pressed.
+ * when pressed, drawn in the inverse of whatever it is over.
  *
  * Not a `cursor:` image. Those are bitmaps handed to the operating system,
  * so they cannot animate, cannot read a CSS variable, and are drawn the same
@@ -116,34 +116,24 @@ export function PointerRing() {
     >
       <div
         className={[
-          // Grey, not the page's ink: Julian asked for it. `muted-foreground`
-          // is the grey the labels and the credits are already set in, so
-          // the ring belongs to the same family as the type around it — and
-          // over a photograph a mid grey reads as a mark laid on the picture
-          // rather than a hole punched in it, the way full white did.
-          "relative h-full w-full rounded-full border border-muted-foreground",
+          // Inverted, not coloured: a white ring under `difference` takes
+          // the opposite of whatever is behind it, so it is dark on a bright
+          // sky and light on a black sleeve, with no colour of its own and
+          // nothing to tune per theme. Julian asked for the outline to
+          // invert and for the glow that used to sit under it to go.
+          "relative h-full w-full rounded-full border border-white mix-blend-difference",
           // Arrives from slightly small, like everything else pressable here.
           "opacity-0 scale-75 transition-[opacity,scale] duration-200 ease-[var(--ease-out-strong)]",
           "in-data-over:opacity-100 in-data-over:scale-100",
           "motion-reduce:transition-none",
         ].join(" ")}
       >
-        {/* A glow, feathered to nothing. Five times the ring and faint — the
-            same grey at 12% at the centre, gone by two-thirds of the way
-            out — so it lifts the sleeve under the pointer a shade rather
-            than putting a torch on it. A radial gradient, not a blur
-            filter: it costs nothing to move and it needs no compositor
-            layer. */}
-        <div
-          aria-hidden
-          className="absolute left-1/2 top-1/2 -z-10 size-[180px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-radial from-muted-foreground/12 to-transparent to-66%"
-        />
         {/* The fill. Grows from the centre on press and lets go on release —
             a transition, so a quick tap still reads as a fill and not a
             flash. */}
         <div
           className={[
-            "h-full w-full rounded-full bg-muted-foreground",
+            "h-full w-full rounded-full bg-white",
             "scale-0 transition-[scale] duration-[260ms] ease-[var(--ease-out-strong)]",
             "in-data-pressed:scale-100",
             "motion-reduce:transition-none",

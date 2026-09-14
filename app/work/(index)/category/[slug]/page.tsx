@@ -1,11 +1,9 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { WorkIndex } from "@/components/work-index";
 import { CallToAction } from "@/components/call-to-action";
 import {
   WORK_CATEGORIES,
-  WORK_CATEGORY_LINKS,
   COMMISSIONS,
   COVER_ART,
   projectsIn,
@@ -25,22 +23,25 @@ import { CoverArtGallery } from "@/components/cover-art-gallery";
  *
  * That is what the cover's index links to, it is what the old site's
  * `/editorial` and `/campaigns` URLs redirect to, and it is what an art
- * director can be sent directly — "here is the editorial work" is a link,
+ * director can be sent directly: "here is the editorial work" is a link,
  * not an instruction.
  *
  * A static segment, `/work/category/…`, rather than sharing `/work/[slug]`
  * with the projects: five categories are published under the same slug as a
  * project (COVERART, WEDDINGS), and one route serving both would have to pick
  * a winner and silently shadow the loser.
+ *
+ * The head and the chip row are the `(index)` layout's, so a click on a
+ * chip changes the list and nothing else.
  * ─────────────────────────────────────────────────────────────── */
 
 /**
  * Only categories that have something to show.
  *
- * An empty one has nothing to put on a page — `categoryHref` sends it back to
+ * An empty one has nothing to put on a page: `categoryHref` sends it back to
  * `/work`, so it is never linked here. A category that is itself a single
  * gallery *is* listed: it renders its frames under the filter row where the
- * project list would be, which is what Julian asked for — click Automotive
+ * project list would be, which is what Julian asked for. Click Automotive
  * and the cars load right there.
  */
 const LISTED = WORK_CATEGORIES.filter(
@@ -85,7 +86,7 @@ export default async function CategoryPage(
   const projects = COMMISSIONS.filter((p) =>
     p.categories.some((c) => c.slug === slug),
   );
-  // The discipline that is one gallery rather than a list of projects —
+  // The discipline that is one gallery rather than a list of projects:
   // Cover art, Automotive, Places, Event coverage. `COMMISSIONS` leaves these
   // out on purpose, so they are looked up on their own.
   const gallery = projectsIn(slug).find(isDisciplineGallery);
@@ -94,55 +95,19 @@ export default async function CategoryPage(
 
   return (
     <>
-      <div className="mx-auto w-full max-w-[100rem] px-6 pb-24 pt-28 sm:px-10 sm:pt-36">
-        {/* The same head as /work, so a chip click changes the words and
-            not the shape of the page. This used to carry the discipline's
-            cover frame on the right, the way the cover's index does — Julian
-            asked for it to go: somebody who has clicked "Campaigns" already
-            knows what they came for, and what they want next is the list.
-
-            `rise` on the block, not the header: the header is new DOM on
-            every navigation, so the title arrives with the rows below it. */}
-        <header>
-          <div className="rise">
-            <nav aria-label="Breadcrumb">
-              <Link
-                href="/work"
-                className="label text-muted-foreground transition-colors duration-200 hoverable:hover:text-foreground"
-              >
-                &larr; All work
-              </Link>
-            </nav>
-
-            <h1 className="mt-8 title">{name}</h1>
-            <p className="mt-4 max-w-prose text-sm leading-relaxed text-muted-foreground">
-              {gallery
-                ? `${isCoverArt ? COVER_RELEASES.length : gallery.images.length} ${
-                    isCoverArt ? "releases" : "frames"
-                  }.`
-                : `${projects.length} commissioned ${
-                    projects.length === 1 ? "project" : "projects"
-                  }.`}
-            </p>
-          </div>
-        </header>
-
-        <WorkIndex
-          projects={projects.map(indexRow)}
-          categories={WORK_CATEGORY_LINKS}
-          active={slug}
-        >
-          {/* Under the chips, in place of the list. Cover art is a catalogue
-              of 1:1 sleeves and gets its rack; the rest are photographic
-              sequences and get the paired-frame spread. */}
-          {gallery ? (
-            isCoverArt ? (
-              <CoverArtGallery releases={COVER_RELEASES} />
-            ) : (
-              <Gallery project={gallery} />
-            )
-          ) : undefined}
-        </WorkIndex>
+      <div className="mx-auto w-full max-w-[100rem] px-6 pb-24 sm:px-10">
+        {/* Under the chips, in place of the list. Cover art is a catalogue
+            of 1:1 sleeves and gets its rack; the other galleries are
+            photographic sequences and get the paired-frame spread. */}
+        {gallery ? (
+          isCoverArt ? (
+            <CoverArtGallery releases={COVER_RELEASES} />
+          ) : (
+            <Gallery project={gallery} />
+          )
+        ) : (
+          <WorkIndex projects={projects.map(indexRow)} />
+        )}
       </div>
 
       <CallToAction
