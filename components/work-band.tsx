@@ -116,7 +116,7 @@ export function WorkBand({
         onPointerLeave={reset}
         onBlur={reset}
         onKeyDown={onKeyDown}
-        aria-label={`${project.name} — ${project.total} frames`}
+        aria-label={`${project.name}, ${project.total} frames`}
         // 4:5, the ratio the work is shot and delivered in.
         //
         // This was sized by viewport height — `62vh`, `68vh` above `lg` —

@@ -78,7 +78,9 @@ export function SiteFooter() {
                   </Link>
                 </li>
               ))}
-              <li className="font-bold text-foreground">San Francisco Bay Area</li>
+              <li className="font-bold text-foreground">
+                San Francisco Bay Area
+              </li>
             </ul>
           </nav>
         </div>

@@ -101,7 +101,7 @@ export function Gallery({ project }: { project: Project }) {
                     <Image
                       data-frame={frame.src}
                       src={frame.src}
-                      alt={frame.alt || `${project.name} — frame ${i + 1}`}
+                      alt={frame.alt || `${project.name}, frame ${i + 1}`}
                       width={frame.width}
                       height={frame.height}
                       sizes={

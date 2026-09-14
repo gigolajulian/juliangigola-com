@@ -97,7 +97,7 @@ async function gh<T>(
       (body as { message?: string } | null)?.message ?? "unknown error";
     throw new Error(
       res.status === 401
-        ? "GitHub rejected the token — it has probably expired."
+        ? "GitHub rejected the token. It has probably expired."
         : res.status === 403
           ? `GitHub refused: ${detail}. The token needs Contents: read and write on this repo.`
           : `GitHub said ${res.status}: ${detail}`,

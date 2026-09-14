@@ -125,7 +125,7 @@ export async function submitEnquiry(
     : "other";
 
   /** The hand-written route, for every path that cannot store the enquiry. */
-  const subject = `${type} enquiry — ${values.name}`;
+  const subject = `${type} enquiry from ${values.name}`;
   const body = [
     `Type: ${type}`,
     values.detail ? `Details: ${values.detail.slice(0, MAX.detail)}` : null,
@@ -149,7 +149,7 @@ export async function submitEnquiry(
         status: "unconfigured",
         values,
         message:
-          "This build has no inbox attached, so nothing was stored. Your message is ready below — open it and it will reach Julian directly.",
+          "This build has no inbox attached, so nothing was stored. Your message is ready below. Open it and it will reach Julian directly.",
         mailto,
       };
     }
@@ -170,7 +170,7 @@ export async function submitEnquiry(
       return {
         status: "error",
         values,
-        message: `That has been sent. If you have something to add, you can write again in ${waitPhrase(gate.waitSeconds)} — or reply to the email link below any time.`,
+        message: `That has been sent. If you have something to add, you can write again in ${waitPhrase(gate.waitSeconds)}, or reply to the email link below any time.`,
         mailto,
       };
     }
@@ -185,7 +185,7 @@ export async function submitEnquiry(
         status: "unconfigured",
         values,
         message:
-          "The form has taken an unusual number of messages today and has stopped accepting more. Nothing is lost — use the email link below and it will reach him directly.",
+          "The form has taken an unusual number of messages today and has stopped accepting more. Nothing is lost. Use the email link below and it will reach him directly.",
         mailto,
       };
     }
@@ -220,7 +220,7 @@ export async function submitEnquiry(
     try {
       const { subject, text } = emailCopy(stored);
       await env.EMAIL?.send({
-        from: { name: "Julian Gigola — website", email: FROM },
+        from: { name: "Julian Gigola website", email: FROM },
         subject,
         text,
         replyTo: { name: stored.name, email: stored.email },
@@ -243,7 +243,7 @@ export async function submitEnquiry(
       status: "unconfigured",
       values,
       message:
-        "Something went wrong storing that. Nothing was lost — use the email link below and it will reach him directly.",
+        "Something went wrong storing that. Nothing was lost. Use the email link below and it will reach him directly.",
       mailto,
     };
   }

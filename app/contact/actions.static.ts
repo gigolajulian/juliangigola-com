@@ -82,7 +82,7 @@ export async function submitEnquiry(
     };
   }
 
-  const subject = `${type} enquiry — ${values.name}`;
+  const subject = `${type} enquiry from ${values.name}`;
   const body = [
     `Type: ${type}`,
     values.detail ? `Details: ${values.detail.slice(0, MAX.detail)}` : null,
@@ -97,7 +97,7 @@ export async function submitEnquiry(
     status: "unconfigured",
     values,
     message:
-      "This is a static preview, so the form cannot send on its own. Your message is ready below — open it and it will reach Julian directly.",
+      "This is a static preview, so the form cannot send on its own. Your message is ready below. Open it and it will reach Julian directly.",
     mailto: `mailto:${TO}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`,
   };
 }

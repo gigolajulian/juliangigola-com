@@ -33,7 +33,7 @@ export default function SessionsPage() {
           <h1 className="title">Sessions</h1>
           <p className="mt-4 max-w-prose text-sm leading-relaxed text-muted-foreground">
             Studio and location sessions across the San Francisco Bay Area.
-            Everything below is booked directly &mdash; no packages to decode.
+            Everything below is booked directly, with no packages to decode.
           </p>
         </header>
 

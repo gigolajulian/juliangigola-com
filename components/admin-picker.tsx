@@ -38,7 +38,7 @@ export function AdminPicker({
   onChange,
   /** Slugs that exist but will not render — a hidden project, say. */
   unavailable,
-  unavailableNote = "hidden — will not appear",
+  unavailableNote = "hidden, will not appear",
   /** Past this many, further picks would not be shown. Absent means no cap. */
   limit,
   addLabel,
@@ -216,11 +216,11 @@ export function AdminPicker({
                   )}
                 >
                   {!item
-                    ? "nothing with this slug — will be skipped"
+                    ? "nothing with this slug, will be skipped"
                     : isUnavailable
                       ? unavailableNote
                       : beyond
-                        ? `past the first ${limit} — will not be shown`
+                        ? `past the first ${limit}, will not be shown`
                         : item.detail}
                 </span>
               </span>

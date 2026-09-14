@@ -70,9 +70,9 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   metadataBase: new URL(SITE),
   title: {
-    default: "Julian Gigola — Photographer & Creative Director, Bay Area",
+    default: "Julian Gigola, Photographer & Creative Director, Bay Area",
     // Project and section pages set only their own name; this frames it.
-    template: "%s — Julian Gigola",
+    template: "%s | Julian Gigola",
   },
   description:
     "Editorial, campaign, and artist photography from the San Francisco Bay Area. Published in WIRED. Available for commissions and sessions.",

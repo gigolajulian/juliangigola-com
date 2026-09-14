@@ -23,8 +23,8 @@ export function LegalPage({ children }: { children: React.ReactNode }) {
         <h1 className="mt-4 max-w-[20ch] title">Legal</h1>
         <p className="mt-6 max-w-prose text-base leading-relaxed text-muted-foreground">
           Two documents, one page. The terms say what you may do with the work
-          on this site &mdash; and that none of it is training data. The privacy
-          policy says what the site knows about you, which is very little.
+          on this site, and that none of it is training data. The privacy policy
+          says what the site knows about you, which is very little.
         </p>
 
         {/* Two columns from `xl`: below that, two long documents beside each

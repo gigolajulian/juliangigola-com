@@ -274,8 +274,9 @@ export function AdminDisciplines({
                           ) : null}
 
                           <p className="label mt-5 text-muted-foreground">
-                            Drag to reorder. The order is the whole site&rsquo;s
-                            — a project moved here moves on /work too.
+                            Drag to reorder. The order is the whole
+                            site&rsquo;s, so a project moved here moves on /work
+                            too.
                           </p>
 
                           <Ordering
@@ -422,7 +423,7 @@ function CoverChoices({
       {elsewhere ? (
         <p className="label mb-3 text-muted-foreground">
           Showing <code className="text-foreground">{chosen}</code>, which is
-          not one of these — picking any frame below replaces it.
+          not one of these. Picking any frame below replaces it.
         </p>
       ) : null}
 

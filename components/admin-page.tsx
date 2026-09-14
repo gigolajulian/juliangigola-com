@@ -332,7 +332,7 @@ export function AdminPage({
 
       <p className="label mx-auto mt-12 max-w-[100rem] px-6 pb-10 text-muted-foreground sm:px-10">
         This is the page as it will be published, with the controls on it. Drag
-        a photograph to move it, or use its arrows — the arrows are the way on a
+        a photograph to move it, or use its arrows. The arrows are the way on a
         touch screen and with a keyboard. The title and the paragraph under it
         are typed in place; the credits are edited at the foot. The first
         photograph opens the project and is the card shown on every index. A

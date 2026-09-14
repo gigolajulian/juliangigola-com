@@ -246,7 +246,7 @@ export type Summary = {
  * grapher's inbox on a phone reads fastest.
  */
 export const emailCopy = (e: Enquiry): { subject: string; text: string } => ({
-  subject: `${e.type} enquiry — ${e.name}`,
+  subject: `${e.type} enquiry from ${e.name}`,
   text: [
     `Type: ${e.type}`,
     e.detail ? `Details: ${e.detail}` : null,
@@ -255,7 +255,7 @@ export const emailCopy = (e: Enquiry): { subject: string; text: string } => ({
     "",
     e.message,
     "",
-    "—",
+    "",
     "Stored in the site's inbox: https://www.juliangigola.com/admin (Inbox tab).",
     "Reply to this email to answer them directly.",
   ]

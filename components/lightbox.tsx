@@ -335,7 +335,7 @@ export function Lightbox({
           )}
         >
           <VisuallyHidden.Root>
-            <Dialog.Title>{`${name} — frame ${index + 1} of ${frames.length}`}</Dialog.Title>
+            <Dialog.Title>{`${name}, frame ${index + 1} of ${frames.length}`}</Dialog.Title>
           </VisuallyHidden.Root>
 
           {/* Anywhere that is not the picture closes it — Julian asked. The
@@ -366,7 +366,7 @@ export function Lightbox({
                   // see `travel`. Only one of these is ever mounted.
                   style={{ viewTransitionName: NAME }}
                   src={current.src}
-                  alt={current.alt || `${name} — frame ${index + 1}`}
+                  alt={current.alt || `${name}, frame ${index + 1}`}
                   width={current.width}
                   height={current.height}
                   sizes="100vw"

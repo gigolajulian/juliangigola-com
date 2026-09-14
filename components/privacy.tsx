@@ -246,9 +246,8 @@ export function PrivacyColumn() {
           correct it, ask me to delete it, object to my using it, or ask for a
           copy of it in a portable form. Write to {EMAIL}. I will answer within
           thirty days, or within the shorter period your local law sets, and I
-          will need enough information to be sure the request comes from you
-          &mdash; ordinarily, that it comes from the email address the enquiry
-          did.
+          will need enough information to be sure the request comes from you:
+          ordinarily, that it comes from the email address the enquiry did.
         </p>
         <p>
           <strong>If you are in the EEA, the UK, or Switzerland</strong>, you

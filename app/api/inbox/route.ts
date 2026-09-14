@@ -135,7 +135,8 @@ async function canPush(token: string): Promise<boolean> {
  * to GitHub, and enough of those from one origin gets the Worker's egress
  * rate-limited there — which closes the inbox to the real token too.
  */
-const GITHUB_TOKEN = /^(gh[pousr]_[A-Za-z0-9]{20,255}|github_pat_[A-Za-z0-9_]{20,255})$/;
+const GITHUB_TOKEN =
+  /^(gh[pousr]_[A-Za-z0-9]{20,255}|github_pat_[A-Za-z0-9_]{20,255})$/;
 
 async function vouch(token: string): Promise<boolean> {
   if (!GITHUB_TOKEN.test(token)) return false;

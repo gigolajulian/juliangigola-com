@@ -668,7 +668,7 @@ export function AdminEditor({
           kind: "error",
           message:
             res.status === 401
-              ? "GitHub rejected that token — it has probably expired. Make a new one and paste it in."
+              ? "GitHub rejected that token. It has probably expired. Make a new one and paste it in."
               : res.status === 404
                 ? "Token is valid but cannot see this repo's contents. It needs Contents: read and write on juliangigola-com."
                 : `GitHub said ${res.status}: ${body?.message ?? "unknown error"}`,
@@ -1147,7 +1147,7 @@ export function AdminEditor({
                   !sha
                     ? "Connect the GitHub token at the foot of this column first"
                     : !dirty
-                      ? "Nothing to publish — the draft matches the live site"
+                      ? "Nothing to publish: the draft matches the live site"
                       : undefined
                 }
                 className="label border border-foreground bg-foreground px-4 py-2 text-background press hoverable:hover:opacity-90 active:scale-[0.98] disabled:cursor-not-allowed disabled:border-border disabled:bg-transparent disabled:text-muted-foreground disabled:opacity-50"
@@ -1357,7 +1357,7 @@ export function AdminEditor({
             </>
           ) : (
             <p className="label max-w-prose text-muted-foreground">
-              Arrange anything you like — publishing needs the GitHub token at
+              Arrange anything you like. Publishing needs the GitHub token at
               the top of this column, and nothing is committed until then.
             </p>
           )}
@@ -1395,7 +1395,7 @@ export function AdminEditor({
             onChange={(next) => set("clientsHome", next)}
             addLabel="Add a client"
             searchLabel="Search clients"
-            emptyNote="Nothing chosen — the strip shows every client, in the order they are filed."
+            emptyNote="Nothing chosen, so the strip shows every client, in the order they are filed."
           />
         </Field>
 
@@ -1410,7 +1410,7 @@ export function AdminEditor({
             onChange={(next) => set("clientsStudio", next)}
             addLabel="Add a client"
             searchLabel="Search clients"
-            emptyNote="Nothing chosen — the wall shows every client, in the order they are filed."
+            emptyNote="Nothing chosen, so the wall shows every client, in the order they are filed."
           />
         </Field>
       </Area>
@@ -1451,14 +1451,14 @@ export function AdminEditor({
             onChange={(next) => set("featured", next)}
             addLabel="Add a project"
             searchLabel="Search projects"
-            emptyNote="Nothing selected — the section is left out of the homepage entirely."
+            emptyNote="Nothing selected, so the section is left out of the homepage entirely."
           />
         </Field>
 
         <Field
           anchor="heroDisciplines"
           label="Disciplines on the cover"
-          hint="Which disciplines the cover cycles through, and in what order. Every discipline has a page and a row on /work whether or not it is here — this is only the cover. Pick none and it runs the six it always has."
+          hint="Which disciplines the cover cycles through, and in what order. Every discipline has a page and a row on /work whether or not it is here. This is only the cover. Pick none and it runs the six it always has."
         >
           <AdminPicker
             chosen={draft.heroDisciplines}
@@ -1466,7 +1466,7 @@ export function AdminEditor({
             onChange={(next) => set("heroDisciplines", next)}
             addLabel="Add a discipline"
             searchLabel="Search disciplines"
-            emptyNote="Nothing picked — the cover runs Editorial, Brand campaigns, Portraits, Mixed media, Artist presskit and Cover art, as it always has."
+            emptyNote="Nothing picked, so the cover runs Editorial, Brand campaigns, Portraits, Mixed media, Artist presskit and Cover art, as it always has."
             /* A warning, not a cap. A seventh row renders perfectly well and
                makes the cover taller than the screen — measured at 1280x700,
                six rows already put both buttons 198px under the fold — which
@@ -1479,7 +1479,7 @@ export function AdminEditor({
         <Field
           anchor="coverArt"
           label="Cover art on the homepage"
-          hint={`Exactly what the homepage rack shows, in this order — nothing fills in. Up to ${releaseLimit}. The rack runs two across on a phone and, on a wide screen, however many divide your count (five, four or three), so eight, nine and ten all sit in full rows.`}
+          hint={`Exactly what the homepage rack shows, in this order. Nothing fills in. Up to ${releaseLimit}. The rack runs two across on a phone and, on a wide screen, however many divide your count (five, four or three), so eight, nine and ten all sit in full rows.`}
         >
           <AdminPicker
             chosen={draft.coverArt}
@@ -1488,7 +1488,7 @@ export function AdminEditor({
             limit={releaseLimit}
             addLabel="Add a release"
             searchLabel="Search releases"
-            emptyNote={`Nothing picked — the first ${releaseLimit} releases show, as they always have.`}
+            emptyNote={`Nothing picked, so the first ${releaseLimit} releases show, as they always have.`}
             shortfallNote="The rest of the rack fills from the remaining releases in order."
           />
         </Field>
@@ -1518,9 +1518,9 @@ export function AdminEditor({
     return (
       <Area title="Sessions" anchor="sessions">
         <p className="max-w-prose text-sm text-muted-foreground">
-          A price left empty reads as &ldquo;On request&rdquo;, which is honest
-          — but a visible number is the single biggest thing that stops a
-          session client leaving without enquiring.
+          A price left empty reads as &ldquo;On request&rdquo;, which is honest,
+          but a visible number is the single biggest thing that stops a session
+          client leaving without enquiring.
         </p>
 
         {draft.sessions.map((session, i) => (
@@ -1595,7 +1595,7 @@ export function AdminEditor({
         <p className="max-w-prose text-sm text-muted-foreground">
           The section does not render at all while this is empty, so there is
           never invented praise on the site. A specific detail beats an
-          adjective — &ldquo;turned a two-hour window into eighteen usable
+          adjective: &ldquo;turned a two-hour window into eighteen usable
           frames&rdquo; earns trust, &ldquo;great to work with&rdquo; does not.
           Three to five is the useful range.
         </p>
@@ -1699,7 +1699,7 @@ export function AdminEditor({
         <Field
           anchor="bookingUrl"
           label="Booking link"
-          hint="The public Google Calendar booking page — calendar.app.google/…, not a share or edit link. Set it and a 'Check availability' button appears across the site; leave it empty and everything falls back to the enquiry form."
+          hint="The public Google Calendar booking page (calendar.app.google/…), not a share or edit link. Set it and a 'Check availability' button appears across the site; leave it empty and everything falls back to the enquiry form."
         >
           <input
             type="url"
@@ -1771,7 +1771,7 @@ function Connect({
           <span className="text-foreground">2.</span> Repository access:{" "}
           <em>Only select repositories</em> &rarr; <code>juliangigola-com</code>
           . Permissions: <em>Contents</em> &rarr; <em>Read and write</em>.
-          Nothing else — that is the only thing this page does.
+          Nothing else. That is the only thing this page does.
         </li>
         <li>
           <span className="text-foreground">3.</span> Give it an expiry you are

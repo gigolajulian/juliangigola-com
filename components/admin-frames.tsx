@@ -214,7 +214,7 @@ export function AdminFrames({
                       </span>
                     ) : null}
                     <span className="mt-1 line-clamp-4 block text-[0.7rem] leading-snug text-muted-foreground">
-                      {text.body || "Empty — click to write"}
+                      {text.body || "Empty. Click to write"}
                     </span>
                   </span>
                 </button>
@@ -306,7 +306,7 @@ export function AdminFrames({
       ) : null}
 
       <p className="label mt-5 text-muted-foreground">
-        Drag a tile to move it, or use the arrows — the arrows are the way on a
+        Drag a tile to move it, or use the arrows. The arrows are the way on a
         touch screen and with a keyboard. The first photograph opens the project
         and is the card shown on every index. Text sits on the page exactly
         where it sits in this list. Removing a photograph takes it out of the

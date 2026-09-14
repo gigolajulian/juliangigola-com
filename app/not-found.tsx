@@ -164,7 +164,7 @@ export default function NotFound() {
               <p className="mt-4 text-sm leading-[1.7] text-muted-foreground [text-wrap:pretty]">
                 The page you were looking for has been moved, renamed, or cut
                 from the selects. Drag your cursor across the numerals to pull
-                them into focus &mdash; or head back to the work.
+                them into focus, or head back to the work.
               </p>
               <div className="mt-6 flex flex-wrap gap-3 sm:mt-7">
                 <Link

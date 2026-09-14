@@ -311,7 +311,7 @@ export function AdminSitemap({
                                 {c.name}
                               </span>
                               <span className="label shrink-0 tabular-nums text-muted-foreground">
-                                {work.length || "—"}
+                                {work.length || "0"}
                               </span>
                             </button>
                           ) : (
@@ -320,7 +320,7 @@ export function AdminSitemap({
                                 {c.name}
                               </span>
                               <span className="label shrink-0 tabular-nums text-muted-foreground">
-                                {work.length || "—"}
+                                {work.length || "0"}
                               </span>
                             </Open>
                           )}
@@ -550,7 +550,7 @@ function Tiles({
               <button
                 type="button"
                 onClick={() => onGo({ kind: "project", slug: p.slug })}
-                title={`Edit ${p.name} — /work/${p.slug}`}
+                title={`Edit ${p.name} (/work/${p.slug})`}
                 className={cn(
                   "group block w-full cursor-pointer text-left press",
                   dim && "opacity-40",
@@ -564,7 +564,7 @@ function Tiles({
                 origin={origin}
                 className={cn("group block", dim && "opacity-40")}
               >
-                <span title={`${p.name} — /work/${p.slug}`}>{cover}</span>
+                <span title={`${p.name} (/work/${p.slug})`}>{cover}</span>
               </Open>
             )}
           </li>

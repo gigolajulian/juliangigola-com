@@ -6,7 +6,7 @@ import { COMMISSIONS, WORK_CATEGORY_LINKS, indexRow } from "@/lib/work";
 export const metadata: Metadata = {
   title: "Work",
   description:
-    "Commissioned photography — editorial, campaigns, portraits, artist imagery, and film. Selected projects with clients and credits.",
+    "Commissioned photography: editorial, campaigns, portraits, artist imagery, and film. Selected projects with clients and credits.",
   alternates: { canonical: "/work" },
 };
 

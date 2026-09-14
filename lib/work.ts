@@ -1073,7 +1073,7 @@ const videoFrame = (): Frame | null => {
     width: 1280,
     height: 720,
     color: "transparent",
-    alt: `${film.title} — a film by Julian Gigola`,
+    alt: `${film.title}, a film by Julian Gigola`,
   };
 };
 

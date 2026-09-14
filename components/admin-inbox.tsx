@@ -203,8 +203,8 @@ export function AdminInbox() {
       ) : rows.length === 0 ? (
         <p className="max-w-prose text-sm text-muted-foreground">
           Nothing yet. The contact form writes here the moment somebody sends
-          something — they do not need a mail app, and you do not need to be
-          told twice.
+          something. They do not need a mail app, and you do not need to be told
+          twice.
         </p>
       ) : (
         <ul className="border-t border-border">

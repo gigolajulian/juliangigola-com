@@ -213,7 +213,7 @@ export function AdminProjects({
       const entry = parsed.projects.find((p) => p.slug === slug);
       if (!entry) {
         throw new Error(
-          `"${slug}" is not in the project list — it may already be removed.`,
+          `"${slug}" is not in the project list. It may already be removed.`,
         );
       }
 
@@ -270,7 +270,7 @@ export function AdminProjects({
       <p className="mt-3 max-w-prose text-sm leading-relaxed text-muted-foreground">
         Hiding takes a project off the site and can be undone at any time.
         Removing takes it off and puts it in Recently deleted, where its
-        photographs are kept for a week — offered only for projects added here,
+        photographs are kept for a week. Offered only for projects added here,
         because the migrated archive is regenerated and a removal there would
         come back.
       </p>
@@ -402,7 +402,7 @@ export function AdminProjects({
                         anyway. Filing the project makes it disappear. */}
                     {unfiled ? (
                       <option value="" disabled>
-                        Unfiled — pick one
+                        Unfiled: pick one
                       </option>
                     ) : null}
                     {/* Grouped, because the two kinds are not interchangeable
@@ -532,7 +532,7 @@ export function AdminProjects({
       ) : null}
 
       <p className="label mt-6 text-muted-foreground">
-        Hiding is part of the draft — it publishes with the rest when you press
+        Hiding is part of the draft. It publishes with the rest when you press
         Publish. Deleting commits on its own, immediately.
       </p>
     </section>

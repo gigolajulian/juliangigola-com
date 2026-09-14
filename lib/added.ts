@@ -358,7 +358,7 @@ function parse(v: unknown): AddedFile {
     if (seen.has(p.slug))
       return fail(
         "projects",
-        `unique slugs — "${p.slug}" appears twice`,
+        `unique slugs; "${p.slug}" appears twice`,
         p.slug,
       );
     seen.add(p.slug);
@@ -391,7 +391,7 @@ function parse(v: unknown): AddedFile {
     if (live.has(t.slug)) {
       return fail(
         "trash",
-        `slugs not also in projects — "${t.slug}" is in both`,
+        `slugs not also in projects; "${t.slug}" is in both`,
         t.slug,
       );
     }
@@ -462,7 +462,7 @@ function parse(v: unknown): AddedFile {
   const seenInOrder = new Set<string>();
   for (const slug of order) {
     if (seenInOrder.has(slug))
-      return fail("order", `each slug at most once — "${slug}" is twice`, slug);
+      return fail("order", `each slug at most once; "${slug}" is twice`, slug);
     seenInOrder.add(slug);
   }
 

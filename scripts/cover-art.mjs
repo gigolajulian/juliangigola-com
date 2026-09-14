@@ -70,26 +70,82 @@ const RELEASES = [
       { file: "JAHANNAM - NAMEERA SIDE B.jpg", side: "Side B" },
     ],
   },
-  { title: "Problem Child", artist: "BANX", sides: [{ file: "PROBLEM_CHILD_-_BANX_wex0nt.png" }] },
-  { title: "Westside Shawty", artist: "BANX", sides: [{ file: "WESTSIDE SHAWTY-BANxx copy 3d@3 (Custom).png" }] },
-  { title: "Top Tier", artist: "BANX", sides: [{ file: "TOP TIER - BANX.PNG" }] },
-  { title: "Pop Out", artist: "BANX", sides: [{ file: "POP OUT - BANX [COVER].jpg" }] },
-  { title: "Do What I Want", artist: "BANX", sides: [{ file: "ORIGINAL.png" }] },
+  {
+    title: "Problem Child",
+    artist: "BANX",
+    sides: [{ file: "PROBLEM_CHILD_-_BANX_wex0nt.png" }],
+  },
+  {
+    title: "Westside Shawty",
+    artist: "BANX",
+    sides: [{ file: "WESTSIDE SHAWTY-BANxx copy 3d@3 (Custom).png" }],
+  },
+  {
+    title: "Top Tier",
+    artist: "BANX",
+    sides: [{ file: "TOP TIER - BANX.PNG" }],
+  },
+  {
+    title: "Pop Out",
+    artist: "BANX",
+    sides: [{ file: "POP OUT - BANX [COVER].jpg" }],
+  },
+  {
+    title: "Do What I Want",
+    artist: "BANX",
+    sides: [{ file: "ORIGINAL.png" }],
+  },
   { title: "Savage", artist: "BANX", sides: [{ file: "SAVAGE - BANX.png" }] },
-  { title: "Rockstar", artist: "BANX", sides: [{ file: "BANX - Rockstar.png" }] },
-  { title: "Took Time", artist: "BANX", sides: [{ file: "TOOK TIME - BANX.jpg" }] },
-  { title: "Whole Summer", artist: "BANX", sides: [{ file: "Whole Summer - Banx copy 2.jpg" }] },
-  { title: "10 Shots", artist: "Sammy Shiblaq", sides: [{ file: "10 SHOTS - SAMMY SHIBLAQ_MAIN.jpg" }] },
-  { title: "The Description", artist: "Sammy Shiblaq", sides: [{ file: "THE DESCRIPTION - SAMMY SHIBLAq.png" }] },
-  { title: "Faith & Hustle", artist: "Sammy Shiblaq", sides: [{ file: "FAITH_HUSTLE_4.jpg" }] },
+  {
+    title: "Rockstar",
+    artist: "BANX",
+    sides: [{ file: "BANX - Rockstar.png" }],
+  },
+  {
+    title: "Took Time",
+    artist: "BANX",
+    sides: [{ file: "TOOK TIME - BANX.jpg" }],
+  },
+  {
+    title: "Whole Summer",
+    artist: "BANX",
+    sides: [{ file: "Whole Summer - Banx copy 2.jpg" }],
+  },
+  {
+    title: "10 Shots",
+    artist: "Sammy Shiblaq",
+    sides: [{ file: "10 SHOTS - SAMMY SHIBLAQ_MAIN.jpg" }],
+  },
+  {
+    title: "The Description",
+    artist: "Sammy Shiblaq",
+    sides: [{ file: "THE DESCRIPTION - SAMMY SHIBLAq.png" }],
+  },
+  {
+    title: "Faith & Hustle",
+    artist: "Sammy Shiblaq",
+    sides: [{ file: "FAITH_HUSTLE_4.jpg" }],
+  },
   {
     title: "Tomorrow Ain't Promised",
     artist: "Sammy Shiblaq",
     sides: [{ file: "TOMORROW AINT PROMISED - SAMMY SHIBLAQ.png" }],
   },
-  { title: "The River", artist: "TMEUPTEDDY", sides: [{ file: "RIVER - TMEUPTEDDY.jpg" }] },
-  { title: "New Home", artist: "Rechi", sides: [{ file: "NEW HOME - RECHI FINAL.jpg" }] },
-  { title: "Your Way", artist: "The Szns ft. Swavie", sides: [{ file: "YOUR WAY - THE SZNS (@filmedbyjulian).jpg" }] },
+  {
+    title: "The River",
+    artist: "TMEUPTEDDY",
+    sides: [{ file: "RIVER - TMEUPTEDDY.jpg" }],
+  },
+  {
+    title: "New Home",
+    artist: "Rechi",
+    sides: [{ file: "NEW HOME - RECHI FINAL.jpg" }],
+  },
+  {
+    title: "Your Way",
+    artist: "The Szns ft. Swavie",
+    sides: [{ file: "YOUR WAY - THE SZNS (@filmedbyjulian).jpg" }],
+  },
   { title: "Hi-Fi", artist: "Parsia", sides: [{ file: "Hi-Fi.png" }] },
   {
     title: "Wasted Years (Parsia Remix)",
@@ -97,8 +153,16 @@ const RELEASES = [
     sides: [{ file: "Wasted_Years_-_Parsia_Remix.png" }],
   },
   { title: "Area 51", artist: "KXP", sides: [{ file: "AREA_51_KXP.png" }] },
-  { title: "Beamin", artist: "Karson", sides: [{ file: "BEAMIN_-_KARSON.png" }] },
-  { title: "Hadaf", artist: "Imanemun × Pooyan Ardalan", sides: [{ file: "hadaf_barf_final.png" }] },
+  {
+    title: "Beamin",
+    artist: "Karson",
+    sides: [{ file: "BEAMIN_-_KARSON.png" }],
+  },
+  {
+    title: "Hadaf",
+    artist: "Imanemun × Pooyan Ardalan",
+    sides: [{ file: "hadaf_barf_final.png" }],
+  },
   {
     title: "In the Hoodie on Your Sleeve",
     artist: "Ericalisa",
@@ -163,7 +227,9 @@ async function main() {
       // 1% of square is squared off; anything genuinely not square is left
       // exactly as it is.
       const meta = await sharp(src).metadata();
-      const square = Math.abs(meta.width - meta.height) / Math.max(meta.width, meta.height) < 0.01;
+      const square =
+        Math.abs(meta.width - meta.height) / Math.max(meta.width, meta.height) <
+        0.01;
 
       // `withoutEnlargement` so a 780px cover is not upscaled into mush;
       // the manifest records what actually landed on disk.
@@ -178,7 +244,10 @@ async function main() {
 
       const thumbName = `${slug}${suffix}-${THUMB}.jpg`;
       await sharp(src)
-        .resize(THUMB, THUMB, { fit: square ? "cover" : "inside", withoutEnlargement: true })
+        .resize(THUMB, THUMB, {
+          fit: square ? "cover" : "inside",
+          withoutEnlargement: true,
+        })
         .jpeg({ quality: QUALITY, mozjpeg: true })
         .toFile(path.join(OUT_DIR, thumbName));
 
@@ -188,7 +257,7 @@ async function main() {
         width,
         height,
         color: await meanColor(sharp(src)),
-        alt: `Cover art for “${release.title}” by ${release.artist}${side ? ` — ${side.toLowerCase()}` : ""}`,
+        alt: `Cover art for “${release.title}” by ${release.artist}${side ? `, ${side.toLowerCase()}` : ""}`,
         side: side ?? null,
       });
     }
@@ -216,7 +285,9 @@ export const COVER_RELEASES: CoverRelease[] = ${JSON.stringify(out, null, 2)};
   await writeFile(DATA, ts, "utf8");
 
   const frameCount = out.reduce((n, r) => n + r.frames.length, 0);
-  console.log(`${out.length} releases, ${frameCount} frames → ${OUT_DIR} + ${DATA}`);
+  console.log(
+    `${out.length} releases, ${frameCount} frames → ${OUT_DIR} + ${DATA}`,
+  );
 }
 
 await main();

@@ -34,12 +34,12 @@ export function TermsColumn() {
     >
       <Clause title="Agreement">
         <p>
-          By accessing or using the Site in any way &mdash; including through a
+          By accessing or using the Site in any way, including through a
           browser, a script, a crawler, an API client, a proxy, a cache, an
-          archive, a model, or an agent &mdash; you agree to these terms. If you
-          do not agree, do not access the Site. If you access it on behalf of a
-          company or other organisation, you confirm you have authority to bind
-          it, and &ldquo;you&rdquo; includes it.
+          archive, a model, or an agent, you agree to these terms. If you do not
+          agree, do not access the Site. If you access it on behalf of a company
+          or other organisation, you confirm you have authority to bind it, and
+          &ldquo;you&rdquo; includes it.
         </p>
         <p>
           Automated access is agreement too. A program that requests pages from
@@ -120,11 +120,11 @@ export function TermsColumn() {
             others;
           </li>
           <li>
-            access the Site by any automated means &mdash; crawlers, spiders,
-            scrapers, bots, headless browsers, download managers, or scripts
-            &mdash; for any purpose, except a search engine indexing the Site in
-            accordance with my robots.txt for the sole purpose of returning
-            links to the Site in search results;
+            access the Site by any automated means (crawlers, spiders, scrapers,
+            bots, headless browsers, download managers, or scripts) for any
+            purpose, except a search engine indexing the Site in accordance with
+            my robots.txt for the sole purpose of returning links to the Site in
+            search results;
           </li>
           <li>
             circumvent, disable, or interfere with any technical measure on the
@@ -155,11 +155,11 @@ export function TermsColumn() {
             evaluate, benchmark, align, prompt, ground, or otherwise develop or
             operate any artificial intelligence or machine learning system.
           </strong>{" "}
-          This applies to every kind of system &mdash; image generators,
-          image-to-image and video models, multimodal and language models,
-          classifiers, embedding and retrieval systems, recommendation systems,
-          style-transfer tools, and anything else that learns from data &mdash;
-          and to every stage of their life: collecting, crawling, scraping,
+          This applies to every kind of system (image generators, image-to-image
+          and video models, multimodal and language models, classifiers,
+          embedding and retrieval systems, recommendation systems,
+          style-transfer tools, and anything else that learns from data) and to
+          every stage of their life: collecting, crawling, scraping,
           downloading, copying, mirroring, caching, labelling, annotating,
           captioning, embedding, vectorising, indexing, tokenising, compiling
           into a dataset or corpus, using as a reference image, or generating
@@ -235,10 +235,10 @@ export function TermsColumn() {
           confirmed agreement, creates a contract for licensing or for services.
         </p>
         <p>
-          Where a separate written agreement between us exists &mdash; a
-          licence, an estimate, a booking confirmation, or a contract for
-          services &mdash; its terms govern that work and prevail over these
-          terms to the extent they conflict.
+          Where a separate written agreement between us exists (a licence, an
+          estimate, a booking confirmation, or a contract for services), its
+          terms govern that work and prevail over these terms to the extent they
+          conflict.
         </p>
       </Clause>
 

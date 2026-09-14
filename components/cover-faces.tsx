@@ -98,5 +98,5 @@ export function coverLabel(
     .map((f) => f.side?.toLowerCase())
     .filter(Boolean)
     .join(" and ");
-  return `${title} — ${artist}${sides ? `, ${sides}` : ""}`;
+  return `${title} by ${artist}${sides ? `, ${sides}` : ""}`;
 }

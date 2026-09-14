@@ -213,7 +213,7 @@ export function AdminTrash({
       <p className="mt-3 max-w-prose text-sm leading-relaxed text-muted-foreground">
         Removed projects are already off the site. Their photographs stay in the
         repository for {TRASH_DAYS} days so they can be brought back, then go
-        for good — cleaned up the next time you open this page, since nothing
+        for good, cleaned up the next time you open this page, since nothing
         runs on a schedule here.
       </p>
 
@@ -258,7 +258,7 @@ export function AdminTrash({
                   {t.images.length} frames ·{" "}
                   {left > 0
                     ? `${left} ${left === 1 ? "day" : "days"} left`
-                    : "past its week — clearing now"}
+                    : "past its week, clearing now"}
                 </span>
               </span>
 

@@ -6,7 +6,7 @@ import { PrivacyColumn } from "@/components/privacy";
 export const metadata: Metadata = {
   title: "Legal",
   description:
-    "The terms on which juliangigola.com and the photographs on it may be used — none of it is AI training data — and what the site knows about you.",
+    "The terms on which juliangigola.com and the photographs on it may be used, none of it as AI training data, and what the site knows about you.",
 };
 
 /* Julian asked for the terms and the privacy policy on one page, in two

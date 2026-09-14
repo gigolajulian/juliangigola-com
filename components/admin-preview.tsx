@@ -53,7 +53,7 @@ export function AdminPreview({
   return (
     <div className="border border-border">
       <p className="label border-b border-border px-4 py-3 text-muted-foreground">
-        Preview — the draft, not the live site
+        Preview: the draft, not the live site
       </p>
 
       <div className="flex flex-col gap-10 p-4">
@@ -89,7 +89,7 @@ export function AdminPreview({
         </Block>
 
         <Block
-          label={`Selected work — ${featured.filter((p) => !hidden.has(p.slug)).length}`}
+          label={`Selected work: ${featured.filter((p) => !hidden.has(p.slug)).length}`}
         >
           {featured.length ? (
             // Three across, as the homepage lays it out.
@@ -113,7 +113,7 @@ export function AdminPreview({
           )}
         </Block>
 
-        <Block label={`Sessions — ${draft.sessions.length}`}>
+        <Block label={`Sessions: ${draft.sessions.length}`}>
           {draft.sessions.length ? (
             <ul className="flex flex-col">
               {draft.sessions.map((s) => (
@@ -135,7 +135,7 @@ export function AdminPreview({
           )}
         </Block>
 
-        <Block label={`Testimonials — ${draft.testimonials.length}`}>
+        <Block label={`Testimonials: ${draft.testimonials.length}`}>
           {draft.testimonials.length ? (
             <ul className="flex flex-col gap-4">
               {draft.testimonials.map((t, i) => (
@@ -145,7 +145,7 @@ export function AdminPreview({
                   </p>
                   <p className="label mt-2 text-muted-foreground">
                     {t.name}
-                    {t.role ? ` — ${t.role}` : ""}
+                    {t.role ? `, ${t.role}` : ""}
                   </p>
                 </li>
               ))}
@@ -162,7 +162,7 @@ export function AdminPreview({
               : "No response time set."}{" "}
             {draft.bookingUrl
               ? "Booking link shown."
-              : "No booking link — those buttons stay off."}
+              : "No booking link, so those buttons stay off."}
           </p>
         </Block>
       </div>

@@ -23,7 +23,7 @@ import { REEL, SECTIONS, inSection } from "@/lib/videos";
 export const metadata: Metadata = {
   title: "Video",
   description:
-    "Music videos and commercials — directed and shot in the San Francisco Bay Area. Selected moving work with clients and credits.",
+    "Music videos and commercials, directed and shot in the San Francisco Bay Area. Selected moving work with clients and credits.",
   alternates: { canonical: "/work/video" },
 };
 

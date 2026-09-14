@@ -68,7 +68,7 @@ export async function generateMetadata(
       ? `${count} ${name.toLowerCase()} frames by Julian Gigola.`
       : `${count} commissioned ${name.toLowerCase()} ${
           count === 1 ? "project" : "projects"
-        } by Julian Gigola — with clients and credits.`,
+        } by Julian Gigola, with clients and credits.`,
     alternates: { canonical: `/work/category/${slug}` },
   };
 }

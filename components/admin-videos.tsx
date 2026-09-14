@@ -83,7 +83,10 @@ export function AdminVideos({
         // `hqdefault`, which `posterFor` already derives, and storing it
         // would pin the tile to the one still rather than leaving the choice
         // open below.
-        if (parsed.provider === "vimeo" && body.thumbnail_url?.startsWith("https://i.vimeocdn.com/"))
+        if (
+          parsed.provider === "vimeo" &&
+          body.thumbnail_url?.startsWith("https://i.vimeocdn.com/")
+        )
           poster = body.thumbnail_url;
       }
     } catch {
@@ -116,7 +119,11 @@ export function AdminVideos({
     const onto = next.findIndex((v) => v.id === to);
     if (at === -1 || onto === -1) return;
     const [held] = next.splice(at, 1);
-    next.splice(next.findIndex((v) => v.id === to) + (onto > at ? 1 : 0), 0, held);
+    next.splice(
+      next.findIndex((v) => v.id === to) + (onto > at ? 1 : 0),
+      0,
+      held,
+    );
     onChange(next);
   };
 
@@ -126,7 +133,7 @@ export function AdminVideos({
         <h2 className="font-display text-xl uppercase tracking-[0]">Video</h2>
         <p className="max-w-prose text-sm leading-relaxed text-muted-foreground">
           Paste a YouTube or Vimeo link. The title comes across on its own and
-          the cover is picked from the stills below — nothing loads from either
+          the cover is picked from the stills below. Nothing loads from either
           site on the public page until a visitor presses play.
         </p>
 
@@ -229,7 +236,9 @@ export function AdminVideos({
                       <input
                         value={video.client ?? ""}
                         onChange={(e) =>
-                          patch(video.id, { client: e.target.value || undefined })
+                          patch(video.id, {
+                            client: e.target.value || undefined,
+                          })
                         }
                         placeholder="Artist or brand"
                         className="w-40 border border-border bg-background px-3 py-2 text-sm"
@@ -239,7 +248,8 @@ export function AdminVideos({
                         onChange={(e) => {
                           const n = Number(e.target.value);
                           patch(video.id, {
-                            year: Number.isInteger(n) && n > 1989 ? n : undefined,
+                            year:
+                              Number.isInteger(n) && n > 1989 ? n : undefined,
                           });
                         }}
                         placeholder="Year"

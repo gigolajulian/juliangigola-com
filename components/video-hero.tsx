@@ -389,7 +389,7 @@ export function VideoHero({
         <button
           type="button"
           onClick={goFullscreen}
-          aria-label={`${year ? `${title}, ${year}` : title} — fullscreen`}
+          aria-label={`${year ? `${title}, ${year}` : title}, fullscreen`}
           className="absolute inset-0 z-0"
         />
 
