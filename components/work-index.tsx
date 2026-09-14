@@ -107,9 +107,9 @@ export function WorkIndex({
   );
 
   /* Whether the pointer is on the list at all. The panel leans in while
-     it is: the slow zoom and the inset frame the video tiles have, which
-     Julian liked and asked for a touch of here. Held on the list rather
-     than on a row so moving between rows does not reset it. */
+     it is: the slow zoom the video tiles have, which Julian liked and
+     asked for a touch of here. Held on the list rather than on a row so
+     moving between rows does not reset it. */
   const [hovering, setHovering] = React.useState(false);
 
   const [active, setActive] = React.useState(() => {
@@ -132,9 +132,9 @@ export function WorkIndex({
               hanging over the footer. */}
         <div className="hidden lg:sticky lg:top-28 lg:block lg:w-1/2">
           {/* Two wrappers that outlive the keyed picture inside them, so the
-              zoom and the frame transition rather than restart on every row
-              change. Same numbers as `video-grid.tsx`: 4% over 500ms, and a
-              mat inset 12px settling from 2% small as it fades up. */}
+              zoom transitions rather than restarts on every row change.
+              Same numbers as `video-grid.tsx`: 4% over 500ms. The mat frame
+              that used to settle onto the picture is gone, at Julian's ask. */}
           <div
             className="relative overflow-hidden"
             data-hover={hovering ? "" : undefined}
@@ -168,10 +168,6 @@ export function WorkIndex({
                 </div>
               ) : null}
             </div>
-            <span
-              aria-hidden
-              className="pointer-events-none absolute inset-3 border border-white/80 opacity-0 scale-[0.98] transition-[opacity,scale] duration-300 ease-[var(--ease-out-strong)] in-data-hover:scale-100 in-data-hover:opacity-100 motion-reduce:transition-none"
-            />
           </div>
         </div>
 
