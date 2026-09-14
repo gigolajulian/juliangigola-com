@@ -482,12 +482,9 @@ export function SiteHeader() {
 }
 
 /**
- * Hover is a soft pill of light behind the word, fading in; the current
- * page is the word in full ink with a hairline beneath it. The underline
- * that grew from the left on hover is gone — Julian called it tacky, and
- * he was right: a rule drawing itself under a word is a nineties link. The
- * rule stays as a mark of the current page, drawn once and never moved;
- * the hover is a pill, which is what every native toolbar does.
+ * The underline grows from the left on hover and stays put when the link is
+ * the current page. `scaleX` rather than a width or a border, so it animates
+ * on the GPU and never nudges the text.
  */
 function NavLink({
   href,
@@ -503,22 +500,24 @@ function NavLink({
       href={href}
       aria-current={current ? "page" : undefined}
       className={cn(
-        "relative -mx-3 block rounded-full px-3 py-2 text-[0.9375rem] uppercase leading-none tracking-[0.08em]",
-        "transition-colors duration-200 ease-[var(--ease-out-strong)]",
-        // Touch fires hover on a tap, which would leave the pill lit under
-        // whatever was last touched — so the pill is for pointers only.
-        "hoverable:hover:bg-foreground/[0.07] hoverable:hover:text-foreground",
-        "focus-visible:bg-foreground/[0.07] focus-visible:text-foreground",
-        current ? "text-foreground" : "text-muted-foreground",
-        // The current page keeps its hairline — Julian preferred it to a
-        // dot — but it is a mark now, not a motion: drawn once under the
-        // word, inset to the word's own width, and never animated. The
-        // hover is the pill; the rule is "you are here".
-        current &&
-          "after:absolute after:bottom-1 after:left-3 after:right-3 after:h-px after:bg-current after:content-['']",
+        "group relative block py-3 text-[0.9375rem] uppercase leading-none tracking-[0.08em] transition-colors duration-200",
+        current
+          ? "text-foreground"
+          : "text-muted-foreground hover:text-foreground",
       )}
     >
       {children}
+      <span
+        aria-hidden
+        className={cn(
+          "absolute -bottom-0.5 left-0 h-px w-full origin-left bg-current",
+          "transition-transform duration-200 ease-[var(--ease-out-strong)]",
+          current ? "scale-x-100" : "scale-x-0",
+          // Touch devices fire hover on tap, which would leave an underline
+          // stuck under whatever was last touched.
+          "hoverable:group-hover:scale-x-100",
+        )}
+      />
     </Link>
   );
 }
