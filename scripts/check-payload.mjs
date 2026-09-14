@@ -30,6 +30,7 @@ const edit = {
   categories: {},
   frames: {},
   credits: {},
+  copy: {},
   order: [],
   covers: {},
 };
@@ -65,7 +66,11 @@ const edit = {
 // original order leaves the old order in the file.
 {
   const out = projectsFile(
-    { projects: [], order: ["a", "b"], covers: { portraits: "/work/x/01.jpg" } },
+    {
+      projects: [],
+      order: ["a", "b"],
+      covers: { portraits: "/work/x/01.jpg" },
+    },
     edit,
   );
   assert.ok(!("order" in out), "emptying the order removes it");
@@ -134,8 +139,16 @@ const edit = {
   // The bug this replaced `JSON.stringify` over: `lib/content.ts` builds the
   // object field by field, `content/site.json` carries `heroDisciplines` last,
   // and the editor called that a change for ever.
-  const built = { coverSlug: "a", heroDisciplines: ["editorial"], featured: [] };
-  const fromRepo = { coverSlug: "a", featured: [], heroDisciplines: ["editorial"] };
+  const built = {
+    coverSlug: "a",
+    heroDisciplines: ["editorial"],
+    featured: [],
+  };
+  const fromRepo = {
+    coverSlug: "a",
+    featured: [],
+    heroDisciplines: ["editorial"],
+  };
   assert.notEqual(
     JSON.stringify(built),
     JSON.stringify(fromRepo),
@@ -145,10 +158,16 @@ const edit = {
 
   // Records keyed by slug: refiling a project and refiling it back is not one
   // either, whichever order the keys ended up in.
-  assert.ok(same({ a: "x", b: "y" }, { b: "y", a: "x" }), "slug order is not an edit");
+  assert.ok(
+    same({ a: "x", b: "y" }, { b: "y", a: "x" }),
+    "slug order is not an edit",
+  );
 
   // But a real change still is, at every depth.
-  assert.ok(!same(built, { ...built, coverSlug: "b" }), "a changed field is an edit");
+  assert.ok(
+    !same(built, { ...built, coverSlug: "b" }),
+    "a changed field is an edit",
+  );
   assert.ok(!same({ a: "x" }, { a: "x", b: "y" }), "an added key is an edit");
   assert.ok(!same({ a: "x", b: "y" }, { a: "x" }), "a removed key is an edit");
   assert.ok(
@@ -161,7 +180,10 @@ const edit = {
 
   // An omitted optional field and one explicitly undefined mean the same thing;
   // `lib/content.ts` produces the second from the first.
-  assert.ok(same({ q: "x" }, { q: "x", role: undefined }), "absent is undefined");
+  assert.ok(
+    same({ q: "x" }, { q: "x", role: undefined }),
+    "absent is undefined",
+  );
 }
 
 // Reading the repository's own list back in, which is what the editor
@@ -172,13 +194,17 @@ const edit = {
     categories: { a: "editorial" },
     frames: { a: ["/work/a/01.jpg"] },
     credits: { a: [{ role: "Model", name: "X" }] },
+    copy: { a: { title: "A", intent: null } },
     order: ["a", "b"],
     covers: { editorial: "/work/a/01.jpg" },
   };
 
   // The round trip: what `projectsFile` writes is what `adoptable` reads.
   const file = projectsFile(null, build);
-  assert.ok(same(adoptable(file, build), build), "a manifest survives the round trip");
+  assert.ok(
+    same(adoptable(file, build), build),
+    "a manifest survives the round trip",
+  );
 
   // The one that matters — `projectsFile` deletes an empty field rather than
   // writing it, so an absent field means empty and must not fall back to the
@@ -192,7 +218,11 @@ const edit = {
   const read = adoptable(emptied, build);
   assert.deepEqual(read.order, [], "an absent order reads as empty");
   assert.deepEqual(read.covers, {}, "an absent cover pick reads as empty");
-  assert.deepEqual(read.hidden, build.hidden, "the fields that were written survive");
+  assert.deepEqual(
+    read.hidden,
+    build.hidden,
+    "the fields that were written survive",
+  );
 
   // Present but malformed — a hand-edited file. Keeping the stale value beats
   // blanking something real.
@@ -200,8 +230,16 @@ const edit = {
     { projects: [], order: "a,b", covers: { editorial: 7 } },
     build,
   );
-  assert.deepEqual(bad.order, build.order, "a string where a list belongs falls back");
-  assert.deepEqual(bad.covers, build.covers, "a number where a path belongs falls back");
+  assert.deepEqual(
+    bad.order,
+    build.order,
+    "a string where a list belongs falls back",
+  );
+  assert.deepEqual(
+    bad.covers,
+    build.covers,
+    "a number where a path belongs falls back",
+  );
 
   // A file this editor has never written to keeps nothing it did not say.
   assert.ok(
@@ -210,6 +248,7 @@ const edit = {
       categories: {},
       frames: {},
       credits: {},
+      copy: {},
       order: [],
       covers: {},
     }),
@@ -227,7 +266,12 @@ const edit = {
   // override", which lays the gallery out in the harvester's order and throws
   // away the earlier edit.
   assert.deepEqual(
-    withOverride({ mirage: ["/work/mirage/01.jpg"] }, "mirage", null, published),
+    withOverride(
+      { mirage: ["/work/mirage/01.jpg"] },
+      "mirage",
+      null,
+      published,
+    ),
     published,
     "undo restores what is published",
   );
@@ -240,9 +284,18 @@ const edit = {
   );
 
   // A real edit is stored, and the other galleries are untouched.
-  const edited = withOverride(published, "sago", ["/work/sago/02.jpg"], published);
+  const edited = withOverride(
+    published,
+    "sago",
+    ["/work/sago/02.jpg"],
+    published,
+  );
   assert.deepEqual(edited.sago, ["/work/sago/02.jpg"], "an edit is stored");
-  assert.deepEqual(edited.mirage, published.mirage, "other galleries are untouched");
+  assert.deepEqual(
+    edited.mirage,
+    published.mirage,
+    "other galleries are untouched",
+  );
   assert.notEqual(edited, published, "the map is not mutated in place");
 
   // An intentionally empty list is not an undo — it is a credit block someone
@@ -255,3 +308,13 @@ const edit = {
 }
 
 console.log("admin payload: 41 cases pass");
+
+// A rewritten title that was cleared is dropped rather than published.
+{
+  const file = projectsFile(null, {
+    ...edit,
+    copy: { a: { title: "  ", intent: "x" }, b: { title: "B", intent: null } },
+  });
+  assert.deepEqual(file.copy, { b: { title: "B", intent: null } });
+  assert.equal(projectsFile(null, edit).copy, undefined, "no copy, no key");
+}

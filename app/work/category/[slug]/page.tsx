@@ -147,7 +147,7 @@ export default async function CategoryPage(
 
       <CallToAction
         title={`Commission ${name.toLowerCase()}`}
-        body="Send the brief and I'll come back with an approach, a crew, and a quote."
+        body="Tell me what you have in mind and I'll come back with an approach and a quote."
         type={enquiryTypeFor(projects[0] ?? gallery ?? COMMISSIONS[0])}
         secondary={{ href: "/work", label: "See all the work" }}
       />

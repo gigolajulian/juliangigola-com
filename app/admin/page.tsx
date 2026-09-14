@@ -19,6 +19,7 @@ import {
   RECATEGORISED,
   REFRAMED,
   RECREDITED,
+  RECOPIED,
   ORDER,
   DISCIPLINE_COVERS,
 } from "@/lib/added";
@@ -142,6 +143,7 @@ export default function AdminPage() {
             color: f.color,
           })),
           intent: p.intent,
+          title: p.headline ?? p.name,
           cover: {
             src: p.cover.src,
             width: p.cover.width,
@@ -159,6 +161,7 @@ export default function AdminPage() {
         initialRecategorised={RECATEGORISED}
         initialReframed={REFRAMED}
         initialRecredited={RECREDITED}
+        initialRecopied={RECOPIED}
         /* The running order and the picked discipline covers, as the last
            build applied them. Spread rather than passed through, because
            both are frozen reads of the content file and the editor holds

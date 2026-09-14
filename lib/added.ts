@@ -21,7 +21,7 @@
 // Relative, not `@/`: `next.config.ts` reaches this module through `work.ts`
 // and is transpiled outside the app's path mapping.
 import raw from "../content/projects.json";
-import type { Credit, Frame, Section } from "./work-types";
+import type { Copy, Credit, Frame, Section } from "./work-types";
 
 export type AddedProject = {
   slug: string;
@@ -276,6 +276,13 @@ export type AddedFile = {
    */
   credits: Record<string, Credit[]>;
   /**
+   * Projects whose title or intent has been rewritten by hand. Same
+   * reasoning as `credits`: the harvested words live in the generated
+   * manifest, so an edit has to live here. The title replaces both `name`
+   * and `headline`; `intent: null` publishes no paragraph.
+   */
+  copy: Record<string, Copy>;
+  /**
    * The running order of the work, by slug.
    *
    * One order for the whole site rather than one per discipline. A project
@@ -433,6 +440,20 @@ function parse(v: unknown): AddedFile {
     credits[slug] = list.map((c, i) => credit(c, `credits["${slug}"][${i}]`));
   }
 
+  const rawCopy = v.copy === undefined ? {} : v.copy;
+  if (!isRecord(rawCopy)) return fail("copy", "an object", rawCopy);
+  const copy: Record<string, Copy> = {};
+  for (const [slug, c] of Object.entries(rawCopy)) {
+    if (!isRecord(c)) return fail(`copy["${slug}"]`, "an object", c);
+    copy[slug] = {
+      title: str(c.title, `copy["${slug}"].title`),
+      intent:
+        c.intent === null || c.intent === undefined
+          ? null
+          : text(c.intent, `copy["${slug}"].intent`),
+    };
+  }
+
   const rawOrder = v.order === undefined ? [] : v.order;
   if (!Array.isArray(rawOrder)) return fail("order", "an array", rawOrder);
   const order = rawOrder.map((slug, i) => str(slug, `order[${i}]`));
@@ -483,6 +504,7 @@ function parse(v: unknown): AddedFile {
     categories,
     frames,
     credits,
+    copy,
     order,
     covers,
     disciplines,
@@ -497,6 +519,7 @@ export const TRASH: TrashedProject[] = FILE.trash;
 export const RECATEGORISED: Readonly<Record<string, string>> = FILE.categories;
 export const REFRAMED: Readonly<Record<string, FrameRef[]>> = FILE.frames;
 export const RECREDITED: Readonly<Record<string, Credit[]>> = FILE.credits;
+export const RECOPIED: Readonly<Record<string, Copy>> = FILE.copy;
 
 /** The running order of the work, by slug. Partial; see `AddedFile.order`. */
 export const ORDER: readonly string[] = FILE.order;

@@ -30,7 +30,7 @@ export default function WorkPage() {
 
       <CallToAction
         title="Commission a shoot"
-        body="Editorial, campaign, or artist imagery. Send the brief and I'll come back with an approach, a crew, and a quote."
+        body="Tell me what you have in mind and I'll come back with an approach and a quote."
         type="editorial"
         secondary={{ href: "/studio", label: "How a commission runs" }}
       />

@@ -58,6 +58,8 @@ export type AdminProject = {
   cover: { src: string; width: number; height: number; color: string };
   /** The paragraph under the meta row, when the project has one. */
   intent: string | null;
+  /** The heading the page shows — `headline ?? name`, as published. */
+  title: string;
   /** Added through this editor, so its files are ours to remove. */
   added: boolean;
   /** As the last build has them, so an override can be compared and undone. */

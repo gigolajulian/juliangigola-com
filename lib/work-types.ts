@@ -78,6 +78,13 @@ export type TextBlock = {
   after: number;
 };
 
+/**
+ * A project's words, rewritten in /admin: the title on the page and the
+ * paragraph under the meta row. Both replace outright; `intent: null`
+ * means "publish no paragraph".
+ */
+export type Copy = { title: string; intent: string | null };
+
 export type Project = {
   slug: string;
   name: string;

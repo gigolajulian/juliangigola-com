@@ -20,6 +20,7 @@ import {
   RECATEGORISED,
   REFRAMED,
   RECREDITED,
+  RECOPIED,
   ORDER,
   DISCIPLINE_COVERS,
   ADDED_DISCIPLINES,
@@ -200,6 +201,14 @@ const refile = (project: Project): Project => {
  * "This project's harvested credits are wrong, publish none" is a real
  * instruction and the only way to say it.
  */
+/** Rewritten title and intent from `/admin`; see `AddedFile.copy`. */
+const recopy = (project: Project): Project => {
+  const c = RECOPIED[project.slug];
+  return c
+    ? { ...project, name: c.title, headline: null, intent: c.intent }
+    : project;
+};
+
 const recredit = (project: Project): Project =>
   project.slug in RECREDITED
     ? { ...project, credits: RECREDITED[project.slug] }
@@ -342,7 +351,7 @@ export const ALL_PROJECTS: Project[] = [
     p.slug === "coverart" ? withCoverArt(p) : withLeadFrame(p),
   ),
 ]
-  .map((p) => relabel(reframe(recredit(refile(p)))))
+  .map((p) => relabel(reframe(recopy(recredit(refile(p))))))
   .sort(byRunningOrder);
 
 /**

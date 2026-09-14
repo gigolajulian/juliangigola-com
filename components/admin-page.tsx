@@ -7,7 +7,7 @@ import { useSequence, srcOf, type PendingUpload } from "@/lib/admin-sequence";
 import { pair } from "@/components/gallery";
 import { AdminCredits } from "@/components/admin-credits";
 import type { AdminProject } from "@/components/admin-projects";
-import type { Credit } from "@/lib/work-types";
+import type { Copy, Credit } from "@/lib/work-types";
 import { cn } from "@/lib/utils";
 
 /* ── the page, editable ───────────────────────────────────────────
@@ -37,6 +37,8 @@ export function AdminPage({
   onUpload,
   credits,
   onCredits,
+  copy,
+  onCopy,
   onClose,
 }: {
   project: AdminProject;
@@ -49,6 +51,9 @@ export function AdminPage({
   onUpload: (added: PendingUpload[]) => void;
   credits: Credit[];
   onCredits: (next: Credit[] | null) => void;
+  /** The rewritten title and intent, or null while they match what is published. */
+  copy: Copy | null;
+  onCopy: (next: Copy | null) => void;
   onClose: () => void;
 }) {
   const seq = useSequence({
@@ -107,6 +112,21 @@ export function AdminPage({
     return list.map((f) => (isTextRef(f) ? 0 : ++n));
   })();
   const client = credits.find((c) => /client/i.test(c.role));
+
+  /* The words, as they will publish. Reported as an override only while
+     they differ from the page as built, so putting a title back by hand
+     clears the "edited" mark the same way it does for the frames. */
+  const published: Copy = { title: project.title, intent: project.intent };
+  const words = copy ?? published;
+  const setWords = (patch: Partial<Copy>) => {
+    const next = { ...words, ...patch };
+    onCopy(
+      next.title === published.title && next.intent === published.intent
+        ? null
+        : next,
+    );
+  };
+  const edited = frames !== null || copy !== null;
   const staged = list.filter((f) => uploads[`public${srcOf(f)}`]).length;
 
   return (
@@ -128,14 +148,17 @@ export function AdminPage({
               ? ` · ${list.length - photos.length} ${list.length - photos.length === 1 ? "passage" : "passages"}`
               : ""}
             {staged > 0 ? ` · ${staged} not yet uploaded` : ""}
-            {frames ? " · edited" : ""}
+            {edited ? " · edited" : ""}
           </p>
         </div>
         <div className="flex items-center gap-2">
-          {frames ? (
+          {edited ? (
             <button
               type="button"
-              onClick={seq.reset}
+              onClick={() => {
+                seq.reset();
+                onCopy(null);
+              }}
               className="label border border-border px-3 py-2 press hoverable:hover:bg-card"
             >
               Undo changes
@@ -178,7 +201,19 @@ export function AdminPage({
       {/* ── the header, as the page has it ── */}
       <header className="mx-auto max-w-[100rem] px-6 pt-12 sm:px-10 sm:pt-16">
         <p className="label text-muted-foreground">/work/{project.slug}</p>
-        <h1 className="mt-4 max-w-[20ch] title">{project.name}</h1>
+        {/* The title and the intent, typed on the page in the page's own
+            type. A textarea rather than an input so a long title wraps the
+            way the published one does. */}
+        <textarea
+          value={words.title}
+          onChange={(e) =>
+            setWords({ title: e.target.value.replace(/\n/g, " ") })
+          }
+          rows={1}
+          aria-label="Title"
+          placeholder="Title"
+          className="title mt-4 block w-full max-w-[20ch] resize-none border-0 border-b border-transparent bg-transparent p-0 field-sizing-content text-foreground outline-none placeholder:text-muted-foreground/50 focus-visible:border-border"
+        />
 
         <dl className="mt-8 flex flex-wrap gap-x-12 gap-y-4 border-t border-border pt-6">
           {client ? (
@@ -213,13 +248,13 @@ export function AdminPage({
           </div>
         </dl>
 
-        {project.intent &&
-        project.intent.trim().toLowerCase() !==
-          project.name.trim().toLowerCase() ? (
-          <p className="mt-10 max-w-prose text-base leading-relaxed text-muted-foreground">
-            {project.intent}
-          </p>
-        ) : null}
+        <textarea
+          value={words.intent ?? ""}
+          onChange={(e) => setWords({ intent: e.target.value || null })}
+          aria-label="Intent"
+          placeholder="A paragraph under the meta row, if the project wants one."
+          className="mt-10 block w-full max-w-prose resize-y border-0 border-b border-transparent bg-transparent p-0 field-sizing-content text-base leading-relaxed text-muted-foreground outline-none placeholder:text-muted-foreground/50 focus-visible:border-border"
+        />
       </header>
 
       {/* ── the sequence, in the page's own rows ── */}
@@ -298,10 +333,12 @@ export function AdminPage({
       <p className="label mx-auto mt-12 max-w-[100rem] px-6 pb-10 text-muted-foreground sm:px-10">
         This is the page as it will be published, with the controls on it. Drag
         a photograph to move it, or use its arrows — the arrows are the way on a
-        touch screen and with a keyboard. The first photograph opens the project
-        and is the card shown on every index. A passage sits on the page exactly
-        where it sits here. Removing a photograph takes it out of the sequence
-        and keeps the file. Nothing is live until you press Publish.
+        touch screen and with a keyboard. The title and the paragraph under it
+        are typed in place; the credits are edited at the foot. The first
+        photograph opens the project and is the card shown on every index. A
+        passage sits on the page exactly where it sits here. Removing a
+        photograph takes it out of the sequence and keeps the file. Nothing is
+        live until you press Publish.
       </p>
     </article>
   );

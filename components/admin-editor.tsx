@@ -33,7 +33,7 @@ import {
   type CommitFile,
   TOKEN_STORE,
 } from "@/lib/admin-github";
-import type { Credit } from "@/lib/work-types";
+import type { Copy, Credit } from "@/lib/work-types";
 import { cn } from "@/lib/utils";
 
 /* ── the editor ───────────────────────────────────────────────────
@@ -155,7 +155,7 @@ const fromBase64 = (b64: string): string => {
  * credit are — that module deliberately knows only that a sequence is a list,
  * which is what lets the check script run it. Here they are the real things.
  */
-type Draft = Manifest<FrameRef, Credit>;
+type Draft = Manifest<FrameRef, Credit, Copy>;
 
 type Status =
   | { kind: "idle" }
@@ -182,6 +182,7 @@ export function AdminEditor({
   initialRecategorised,
   initialReframed,
   initialRecredited,
+  initialRecopied,
   initialOrder,
   initialCovers,
   releases,
@@ -221,6 +222,8 @@ export function AdminEditor({
   initialReframed: Record<string, FrameRef[]>;
   /** Rewritten credits the last build applied, slug → list. */
   initialRecredited: Record<string, Credit[]>;
+  /** Rewritten titles and intents the last build applied, slug → copy. */
+  initialRecopied: Record<string, Copy>;
   /** The running order the last build applied, by slug. */
   initialOrder: string[];
   /** Discipline covers the last build applied, category slug to frame path. */
@@ -262,6 +265,8 @@ export function AdminEditor({
     React.useState<Record<string, FrameRef[]>>(initialReframed);
   const [recredited, setRecredited] =
     React.useState<Record<string, Credit[]>>(initialRecredited);
+  const [recopied, setRecopied] =
+    React.useState<Record<string, Copy>>(initialRecopied);
   /** The running order of the work, by slug. Partial - see `lib/added.ts`. */
   const [order, setOrder] = React.useState<string[]>(initialOrder);
   /** The photograph standing for each discipline, by category slug. */
@@ -322,10 +327,11 @@ export function AdminEditor({
       categories: recategorised,
       frames: reframed,
       credits: recredited,
+      copy: recopied,
       order,
       covers,
     }),
-    [hidden, recategorised, reframed, recredited, order, covers],
+    [hidden, recategorised, reframed, recredited, recopied, order, covers],
   );
 
   /**
@@ -359,6 +365,7 @@ export function AdminEditor({
       categories: initialRecategorised,
       frames: initialReframed,
       credits: initialRecredited,
+      copy: initialRecopied,
       order: initialOrder,
       covers: initialCovers,
     },
@@ -700,6 +707,7 @@ export function AdminEditor({
         setRecategorised(repo.categories);
         setReframed(repo.frames);
         setRecredited(repo.credits);
+        setRecopied(repo.copy);
         setOrder(repo.order);
         setCovers(repo.covers);
         setBaseline({ content, manifest: repo });
@@ -847,6 +855,7 @@ export function AdminEditor({
          clear. */
       setReframed(written.frames);
       setRecredited(written.credits);
+      setRecopied(written.copy);
 
       // A fresh publish is not live yet by definition, whatever the last one
       // was — so the green is dropped before the wait begins.
@@ -1178,6 +1187,12 @@ export function AdminEditor({
                   onCredits={(next) =>
                     setRecredited((c) =>
                       withOverride(c, p.slug, next, baseline.manifest.credits),
+                    )
+                  }
+                  copy={recopied[p.slug] ?? null}
+                  onCopy={(next) =>
+                    setRecopied((c) =>
+                      withOverride(c, p.slug, next, baseline.manifest.copy),
                     )
                   }
                   onClose={() => {

@@ -24,6 +24,7 @@ export type ProjectsFile = {
   categories?: Record<string, string>;
   frames?: Record<string, unknown[]>;
   credits?: Record<string, unknown[]>;
+  copy?: Record<string, unknown>;
   order?: string[];
   covers?: Record<string, string>;
 };
@@ -68,11 +69,13 @@ export const tidySequence = <T>(list: T[]): T[] =>
  * baseline it is compared against, and what gets written — and a tuple of six
  * loose records is how those three drift apart.
  */
-export type Manifest<Frame = unknown, Credit = unknown> = {
+export type Manifest<Frame = unknown, Credit = unknown, Copy = unknown> = {
   hidden: string[];
   categories: Record<string, string>;
   frames: Record<string, Frame[]>;
   credits: Record<string, Credit[]>;
+  /** Rewritten titles and intents, slug → copy. */
+  copy: Record<string, Copy>;
   order: string[];
   covers: Record<string, string>;
 };
@@ -100,6 +103,17 @@ export function projectsFile(
   );
 
   next.credits = edit.credits;
+
+  // A title cleared and left that way would fail the build in `lib/added.ts`;
+  // like an empty passage, it is dropped on the way out rather than
+  // validated against on the way in.
+  const copy = Object.fromEntries(
+    Object.entries(edit.copy).filter(
+      ([, c]) => isRecord(c) && typeof c.title === "string" && c.title.trim(),
+    ),
+  );
+  if (Object.keys(copy).length) next.copy = copy;
+  else delete next.copy;
 
   // The running order, and the picked discipline covers. Both are absent from
   // the file entirely when empty rather than written as `[]` and `{}`: the
@@ -192,10 +206,10 @@ const listMap = (v: unknown): Record<string, unknown[]> | null =>
     ? (v as Record<string, unknown[]>)
     : null;
 
-export function adoptable<F, C>(
+export function adoptable<F, C, P>(
   file: ProjectsFile,
-  fallback: Manifest<F, C>,
-): Manifest<F, C> {
+  fallback: Manifest<F, C, P>,
+): Manifest<F, C, P> {
   /* The sequences and credit lists come back as "a list of something": this
      module does not know what a frame is, on purpose. `lib/added.ts` is what
      validates them, at build time, where a bad one fails the deploy and the
@@ -221,6 +235,12 @@ export function adoptable<F, C>(
       file.credits === undefined
         ? {}
         : (lists<C>(listMap(file.credits) ?? {}) ?? fallback.credits),
+    copy:
+      file.copy === undefined
+        ? {}
+        : isRecord(file.copy)
+          ? (file.copy as Record<string, P>)
+          : fallback.copy,
     order:
       file.order === undefined ? [] : (strings(file.order) ?? fallback.order),
     covers:
@@ -251,11 +271,11 @@ export function adoptable<F, C>(
  * ─────────────────────────────────────────────────────────────── */
 
 export function withOverride<T>(
-  current: Record<string, T[]>,
+  current: Record<string, T>,
   slug: string,
-  next: T[] | null,
-  published: Record<string, T[]>,
-): Record<string, T[]> {
+  next: T | null,
+  published: Record<string, T>,
+): Record<string, T> {
   const copy = { ...current };
   if (next) copy[slug] = next;
   else if (published[slug]) copy[slug] = published[slug];

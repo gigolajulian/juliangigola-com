@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Gallery } from "@/components/gallery";
-import { Reveal } from "@/components/reveal";
 import { CoverArtGallery } from "@/components/cover-art-gallery";
 import { CallToAction } from "@/components/call-to-action";
 import {
@@ -114,9 +113,62 @@ export default async function ProjectPage(props: PageProps<"/work/[slug]">) {
           </Link>
         </nav>
 
-        <h1 className="mt-8 max-w-[24ch] title">
-          {project.headline ?? project.name}
-        </h1>
+        {/* The title on the left, the crew on the right — Julian moved the
+            credits up here from the foot of the page. Each credit is a row
+            of its own: role, then name, both in the label face, the name a
+            link to the person where there is one. Rows respond to the
+            pointer the way the index's rows do. */}
+        <div className="mt-8 lg:flex lg:items-start lg:justify-between lg:gap-16">
+          <h1 className="max-w-[24ch] title">
+            {project.headline ?? project.name}
+          </h1>
+
+          {project.credits.length ? (
+            <dl
+              aria-label="Credits"
+              className="mt-10 lg:mt-2 lg:w-[24rem] lg:shrink-0"
+            >
+              {project.credits.map((credit, i) => {
+                /* Six harvested credits carry the handle as the name
+                   ("@apricotsss3") with no instagram field; they link too. */
+                const handle =
+                  credit.instagram ??
+                  (credit.name.startsWith("@") ? credit.name.slice(1) : null);
+                return (
+                  <div
+                    key={`${credit.role}-${i}`}
+                    className="group flex items-baseline justify-between gap-6 border-b border-border py-2.5 transition-colors duration-200 hoverable:hover:border-foreground/30"
+                  >
+                    <dt className="label text-muted-foreground">
+                      {credit.role}
+                    </dt>
+                    <dd className="label text-right">
+                      {handle ? (
+                        /* A new tab on purpose: the visitor is on a project
+                         and taking the page out from under them to show
+                         someone else's feed would lose their place in it. */
+                        <a
+                          href={`https://www.instagram.com/${handle}/`}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="text-muted-foreground transition-colors duration-200 hoverable:group-hover:text-foreground"
+                        >
+                          {credit.name}
+                          <span className="sr-only">
+                            {" "}
+                            on Instagram (opens in a new tab)
+                          </span>
+                        </a>
+                      ) : (
+                        credit.name
+                      )}
+                    </dd>
+                  </div>
+                );
+              })}
+            </dl>
+          ) : null}
+        </div>
 
         <dl className="mt-8 flex flex-wrap gap-x-12 gap-y-4 border-t border-border pt-6">
           {client ? (
@@ -146,12 +198,13 @@ export default async function ProjectPage(props: PageProps<"/work/[slug]">) {
           </div>
         </dl>
 
-        {/* The intent, unless it is the title again. The harvester wrote
-            `intent: "EVENT COVERAGE"` for the Event coverage gallery and
-            `"REAL ESTATE"` for real estate — a paragraph that repeats the
-            heading in sentence case is worse than no paragraph, because a
-            reader stops to check whether they misread it. */}
+        {/* The intent, unless it is the title again — the harvester wrote
+            `intent: "EVENT COVERAGE"` for the Event coverage gallery — or a
+            leftover credit line ("styling: @handle"), which five projects
+            carry and the credits beside the title already say. Either can
+            be rewritten in /admin. */}
         {project.intent &&
+        !project.intent.includes("@") &&
         project.intent.trim().toLowerCase() !==
           project.name.trim().toLowerCase() ? (
           <p className="mt-10 max-w-prose text-base leading-relaxed text-muted-foreground">
@@ -169,64 +222,13 @@ export default async function ProjectPage(props: PageProps<"/work/[slug]">) {
         <Gallery project={project} />
       )}
 
-      {/* Credits at the end, not the top. Someone reads them once they have
-          decided they like the work — putting them first asks a stranger to
-          care about a crew they have no reason to care about yet. */}
-      {project.credits.length ? (
-        <Reveal
-          variant="calm"
-          className="mx-auto mt-24 max-w-[100rem] px-6 sm:px-10"
-        >
-          <footer>
-            <h2 className="label text-muted-foreground">Credits</h2>
-            <dl className="mt-6 grid gap-x-12 gap-y-6 border-t border-border pt-8 sm:grid-cols-2 lg:grid-cols-3">
-              {project.credits.map((credit, i) => (
-                <div key={`${credit.role}-${i}`}>
-                  <dt className="label text-muted-foreground">{credit.role}</dt>
-                  {/* The name links to them where there is somewhere to link.
-                      A crew credit is the one place on the site where the
-                      subject is a person rather than the work, and a name you
-                      then have to go and search for is a dead end — these are
-                      the people a client might want to book alongside him.
-
-                      A new tab on purpose: the visitor is at the end of a
-                      project they have just looked through, and taking the
-                      page out from under them to show someone else's feed
-                      would lose their place in it. Underlined rather than
-                      coloured, so which names are links is legible without
-                      hovering every one of them. */}
-                  <dd className="mt-2 text-sm">
-                    {credit.instagram ? (
-                      <a
-                        href={`https://www.instagram.com/${credit.instagram}/`}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="underline decoration-border underline-offset-4 transition-colors duration-200 hoverable:hover:decoration-foreground"
-                      >
-                        {credit.name}
-                        <span className="sr-only">
-                          {" "}
-                          on Instagram (opens in a new tab)
-                        </span>
-                      </a>
-                    ) : (
-                      credit.name
-                    )}
-                  </dd>
-                </div>
-              ))}
-            </dl>
-          </footer>
-        </Reveal>
-      ) : null}
-
       {/* The ask, at the point of peak interest: they have just looked at the
           whole sequence. The form opens on this project's own branch, and the
           project name rides along so the enquiry says what prompted it. */}
       <CallToAction
         className="mt-24"
         title="Want something like this?"
-        body="Tell me the brief and I'll come back with an approach, a crew, and a quote."
+        body="Tell me what you have in mind and I'll come back with an approach and a quote."
         type={enquiryTypeFor(project)}
         detail={project.name}
         secondary={

@@ -151,7 +151,7 @@ export default function Home() {
 
       <CallToAction
         title="Have something in mind?"
-        body="Editorial, campaign, music, or a session. Tell me what it is and I'll come back with an approach and a quote."
+        body="Tell me what you have in mind and I'll come back with an approach and a quote."
         secondary={{ href: "/work", label: "Browse the work" }}
       />
     </>
