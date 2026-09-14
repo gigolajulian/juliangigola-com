@@ -92,47 +92,8 @@ export function ThemeToggle({ className }: { className?: string }) {
     return () => mq.removeEventListener("change", follow);
   }, []);
 
-  /* The peek — see `globals.css`. Armed by a pointer arriving, dropped by
-     the press (the page is turning for real now, and holding the half
-     state under a pointer that is still there would turn it half back),
-     and not armed again until the pointer has left and returned. The
-     transition attribute outlives the peek by its own duration, so the
-     way back is animated too; the timer is cleared on every change so a
-     quick in-and-out cannot strip it mid-flight. */
-  const anim = React.useRef<number | null>(null);
-  const armed = React.useRef(false);
-  const root = () => document.documentElement;
-  const peek = (on: boolean) => {
-    if (anim.current) window.clearTimeout(anim.current);
-    root().setAttribute("data-peek-anim", "");
-    if (on) root().setAttribute("data-peek", "");
-    else root().removeAttribute("data-peek");
-    anim.current = window.setTimeout(
-      () => root().removeAttribute("data-peek-anim"),
-      460,
-    );
-  };
-  const onPointerEnter = (e: React.PointerEvent) => {
-    if (e.pointerType !== "mouse" && e.pointerType !== "pen") return;
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    armed.current = true;
-    peek(true);
-  };
-  const onPointerLeave = () => {
-    if (!armed.current) return;
-    armed.current = false;
-    peek(false);
-  };
-
   const toggle = () => {
     const next: Theme = read() === "dark" ? "light" : "dark";
-    // The half state ends here; the crossfade below carries the page the
-    // rest of the way. No transition attribute for it — the view
-    // transition is the motion, and two at once would fight.
-    if (anim.current) window.clearTimeout(anim.current);
-    root().removeAttribute("data-peek");
-    root().removeAttribute("data-peek-anim");
-    armed.current = false;
     apply(next);
 
     try {
@@ -149,8 +110,6 @@ export function ThemeToggle({ className }: { className?: string }) {
     <button
       type="button"
       onClick={toggle}
-      onPointerEnter={onPointerEnter}
-      onPointerLeave={onPointerLeave}
       // A thumb target, like the burger beside it, rather than the 18px of
       // artwork.
       // Constant colour, and no hover brighten. The mark is a ring, so
