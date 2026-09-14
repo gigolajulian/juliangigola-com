@@ -1,8 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { cn } from "@/lib/utils";
 import Image from "next/image";
-import { Reveal } from "@/components/reveal";
 import { CallToAction } from "@/components/call-to-action";
 import { Testimonials } from "@/components/testimonials";
 import { SESSION_TYPES, formatPrice } from "@/lib/sessions";
@@ -38,141 +36,100 @@ export default function SessionsPage() {
           </p>
         </header>
 
+        {/* The four of them across the page rather than down it: one
+            column each, the photograph on top, the three facts that decide
+            it under, and the enquiry at the foot. Julian asked for the
+            sessions more horizontal, and they are four comparable things —
+            a row is how you compare four of anything, where a stack of
+            full-width bands makes you scroll and remember.
+
+            Four across from `xl`, two from `sm`, one on a phone. */}
         <div className="mx-auto mt-10 max-w-[100rem] px-6 sm:mt-12 sm:px-10">
-          <ul className="flex flex-col gap-12 sm:gap-16">
-            {SESSION_TYPES.map((session, i) => {
-              const samples = projectsIn(session.slug).slice(0, 2);
+          <ul className="grid gap-8 sm:grid-cols-2 sm:gap-6 xl:grid-cols-4">
+            {SESSION_TYPES.map((session) => {
+              const sample = projectsIn(session.slug)[0];
+              const cover = sample ? coverOf(sample) : null;
 
               return (
-                <li key={session.slug}>
-                  <Reveal>
-                    <div className="grid gap-6 lg:grid-cols-2 lg:gap-12">
-                      {/* Facts first, image second — on a phone the price
-                        should not be below a full-height photograph. */}
-                      <div className={i % 2 === 1 ? "lg:order-2" : undefined}>
-                        <h2 className="font-display text-3xl leading-tight sm:text-4xl">
-                          {session.name}
-                        </h2>
-                        <p className="mt-4 max-w-prose text-sm leading-relaxed text-muted-foreground">
-                          {session.blurb}
-                        </p>
+                /* `flex flex-col` on the card and `mt-auto` on the button,
+                   so the four buttons line up across the row however much
+                   the lists above them differ. */
+                <li key={session.slug} className="flex flex-col">
+                  {cover && sample ? (
+                    <Link
+                      href={`/work/${sample.slug}`}
+                      /* One ratio for all four, not each frame's own: a row
+                         of four photographs that each set their own height
+                         is not a row. 4:5 upright from `sm`, which is what
+                         most of the archive is shot at, so the crop is
+                         slight. On a phone the four cards are a column and
+                         four upright frames is 1700px of photograph to
+                         scroll, so there it crops to 3:2. */
+                      className="group relative block aspect-[3/2] overflow-hidden sm:aspect-[4/5]"
+                      style={{ backgroundColor: cover.color }}
+                    >
+                      <Image
+                        src={cover.src}
+                        alt={cover.alt || sample.name}
+                        width={cover.width}
+                        height={cover.height}
+                        sizes="(min-width: 1280px) 25vw, (min-width: 640px) 50vw, 100vw"
+                        className="h-full w-full object-cover object-[50%_25%] transition-transform duration-500 ease-[var(--ease-out-strong)] hoverable:group-hover:scale-[1.02] motion-reduce:transition-none"
+                      />
+                    </Link>
+                  ) : null}
 
-                        <dl className="mt-6 flex flex-wrap gap-x-12 gap-y-4 border-t border-border pt-5">
-                          <div>
-                            <dt className="label text-muted-foreground">
-                              Rate
-                            </dt>
-                            <dd className="mt-2 text-sm">
-                              {formatPrice(session.from)}
-                            </dd>
-                          </div>
-                          <div>
-                            <dt className="label text-muted-foreground">
-                              Turnaround
-                            </dt>
-                            <dd className="mt-2 text-sm">
-                              {session.turnaround}
-                            </dd>
-                          </div>
-                        </dl>
-
-                        <h3 className="label mt-6 text-muted-foreground">
-                          Includes
-                        </h3>
-                        <ul className="mt-2 flex flex-col gap-1.5">
-                          {session.includes.map((item) => (
-                            <li
-                              key={item}
-                              className="text-sm text-muted-foreground"
-                            >
-                              {item}
-                            </li>
-                          ))}
-                        </ul>
-
-                        {/* Once a booking calendar exists, a session client can
-                          take a slot without waiting on a reply — which is the
-                          whole point for this audience. Until then the enquiry
-                          form is the path. */}
-                        <div className="mt-8 flex flex-wrap items-center gap-3">
-                          {BOOKING_URL ? (
-                            <a
-                              href={BOOKING_URL}
-                              target="_blank"
-                              rel="noreferrer"
-                              className="label glass-prominent rounded-full px-5 py-3 press active:scale-[0.97]"
-                            >
-                              Check availability
-                            </a>
-                          ) : null}
-                          <Link
-                            href={`/contact?type=session&session=${session.slug}`}
-                            className="label inline-flex items-center gap-2 glass rounded-full px-5 py-3 press active:scale-[0.97]"
-                          >
-                            Enquire about {session.name.toLowerCase()}
-                          </Link>
-                        </div>
-                      </div>
-
-                      <div
-                        className={cn(
-                          /* From `lg` the photographs take the height of the
-                             facts beside them and no more: the column is the
-                             grid row's height and the samples fill it, cropped
-                             with object-cover. Julian wanted the page more
-                             compact, and a full portrait beside four lines of
-                             facts was where its height went. Under `lg` they
-                             keep their own shape. */
-                          "relative lg:min-h-[22rem]",
-                          i % 2 === 1 && "lg:order-1",
-                        )}
-                      >
-                        {/* Most session categories are a single gallery, so a hard
-                          two-column grid would render one sample at half width
-                          against empty space. */}
-                        {samples.length ? (
-                          <div
-                            className={cn(
-                              "grid lg:absolute lg:inset-0",
-                              samples.length === 2
-                                ? "grid-cols-2 gap-4"
-                                : "grid-cols-1",
-                            )}
-                          >
-                            {samples.map((project) => {
-                              const cover = coverOf(project);
-                              return (
-                                <Link
-                                  key={project.slug}
-                                  href={`/work/${project.slug}`}
-                                  // `aspect-auto!` because the ratio is inline, and from `lg` the height is the row and the width the column.
-                                  className="group relative block overflow-hidden lg:aspect-auto! lg:h-full lg:w-full"
-                                  style={{
-                                    backgroundColor: cover.color,
-                                    aspectRatio: `${cover.width} / ${cover.height}`,
-                                  }}
-                                >
-                                  <Image
-                                    src={cover.src}
-                                    alt={cover.alt || project.name}
-                                    width={cover.width}
-                                    height={cover.height}
-                                    sizes={
-                                      samples.length === 2
-                                        ? "(min-width: 1024px) 25vw, 50vw"
-                                        : "(min-width: 1024px) 50vw, 100vw"
-                                    }
-                                    // Cropped from a little above centre, so a face stays in the frame.
-                                    className="h-full w-full object-cover lg:object-[50%_25%] transition-transform duration-500 ease-[var(--ease-out-strong)] hoverable:group-hover:scale-[1.02] motion-reduce:transition-none"
-                                  />
-                                </Link>
-                              );
-                            })}
-                          </div>
-                        ) : null}
-                      </div>
+                  <h2 className="mt-5 font-display text-2xl leading-tight sm:text-3xl">
+                    {session.name}
+                  </h2>
+                  <dl className="mt-3 flex flex-wrap gap-x-8 gap-y-3 border-t border-border pt-4">
+                    <div>
+                      <dt className="label text-muted-foreground">Rate</dt>
+                      <dd className="mt-1.5 text-sm">
+                        {formatPrice(session.from)}
+                      </dd>
                     </div>
-                  </Reveal>
+                    <div>
+                      <dt className="label text-muted-foreground">Turnaround</dt>
+                      <dd className="mt-1.5 text-sm">{session.turnaround}</dd>
+                    </div>
+                  </dl>
+
+                  <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
+                    {session.blurb}
+                  </p>
+
+                  <h3 className="label mt-4 text-muted-foreground">Includes</h3>
+                  <ul className="mt-2 flex flex-col gap-1.5">
+                    {session.includes.map((item) => (
+                      <li key={item} className="text-sm text-muted-foreground">
+                        {item}
+                      </li>
+                    ))}
+                  </ul>
+
+                  {/* Once a booking calendar exists, a session client can
+                      take a slot without waiting on a reply — which is the
+                      whole point for this audience. Until then the enquiry
+                      form is the path. */}
+                  <div className="mt-auto flex flex-wrap items-center gap-3 pt-6">
+                    {BOOKING_URL ? (
+                      <a
+                        href={BOOKING_URL}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="label glass-prominent rounded-full px-5 py-3 press active:scale-[0.97]"
+                      >
+                        Check availability
+                      </a>
+                    ) : null}
+                    <Link
+                      href={`/contact?type=session&session=${session.slug}`}
+                      className="label glass inline-flex items-center gap-2 rounded-full px-5 py-3 press active:scale-[0.97]"
+                    >
+                      Enquire
+                    </Link>
+                  </div>
                 </li>
               );
             })}
