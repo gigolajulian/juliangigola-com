@@ -64,6 +64,35 @@ export default function StudioPage() {
               </section>
             </Reveal>
 
+            {/* What he is hired for, in his own order. A ruled list rather
+                than prose: somebody deciding whether to brief him is
+                scanning for one word, and six of them in a paragraph is six
+                words to find. Two columns from `sm` so the set reads as a
+                set rather than as a six-deep menu.
+
+                Hard-coded, like the biography and the commission steps
+                above and below it. The copy on this page is not in /admin. */}
+            <section className="mt-16">
+              <h2 className="label text-muted-foreground">Services</h2>
+              <ul className="mt-6 grid gap-x-10 sm:grid-cols-2">
+                {[
+                  "Camera operating",
+                  "Photography",
+                  "Producing",
+                  "Post production",
+                  "Art direction",
+                  "Creative direction",
+                ].map((service) => (
+                  <li
+                    key={service}
+                    className="label border-b border-border py-3.5"
+                  >
+                    {service}
+                  </li>
+                ))}
+              </ul>
+            </section>
+
             <Reveal variant="calm">
               <section className="mt-16">
                 <h2 className="label text-muted-foreground">
