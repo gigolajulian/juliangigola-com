@@ -75,11 +75,7 @@ export function Gallery({ project }: { project: Project }) {
             <React.Fragment key={r}>
               <div
                 className={cn(
-                  // `stagger` steps the pair in this row, so two frames
-                  // crossing the fold in the same frame arrive as one gesture
-                  // rather than as two simultaneous events. It replaces a
-                  // hand-computed delay prop: the row already knows the order.
-                  "stagger mx-auto grid w-full max-w-[100rem] gap-4 px-6 sm:gap-6 sm:px-10",
+                  "mx-auto grid w-full max-w-[100rem] gap-4 px-6 sm:gap-6 sm:px-10",
                   row.length === 2 ? "sm:grid-cols-2" : "grid-cols-1",
                 )}
               >
