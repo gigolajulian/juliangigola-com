@@ -62,6 +62,18 @@ const INTRO_MS = 5200;
 /**
  * The two ways in.
  *
+ * Not a pair of pills. This site is rectangles and condensed capitals — the
+ * photographs, the index, the plate, the bar — and a capsule of frosted
+ * glass was the one thing on the cover borrowed from somewhere else. So the
+ * two actions are made of what the cover already is: an index. Two rows in
+ * the page's ink, a hairline between them, the name in display capitals and
+ * an arrow at the far edge, and the row under the pointer inverts to paper,
+ * which is what the index does to the discipline you are on.
+ *
+ * Solid ink is also the only thing that can promise its own contrast with
+ * seven photographs passing behind it — the reason the glass fill had to
+ * keep climbing.
+ *
  * Mounted twice, the way the disciplines are: a list of rows and a strip of
  * ticks. From `wide` these float over the foot of the photograph, bottom
  * right, which is a place the plate cannot reach — it blurs its ground, and
@@ -79,43 +91,78 @@ const INTRO_MS = 5200;
 function Ways({
   className,
   style,
-  onPicture = false,
 }: {
   className?: string;
   style?: React.CSSProperties;
-  /**
-   * Over the photograph rather than on the panel. `glass` is 52% of the
-   * ground by default, which is a window onto whatever is behind it: right
-   * for a pill on a plate, and not enough under a booking link that has
-   * seven frames passing behind it, some of them dark. The fill goes to 84%
-   * there, so the second action reads on any of them and still looks like
-   * the same material as the first.
-   */
-  onPicture?: boolean;
 }) {
   return (
-    <div style={style} className={cn("flex flex-wrap items-center gap-3", className)}>
-      <Link
-        href="/work"
-        className="label glass-prominent glass-liquid rounded-full px-7 py-5 press active:scale-[0.97]"
-      >
-        See the work
-      </Link>
-      <Link
-        href="/sessions"
-        style={
-          onPicture
-            ? ({
-                "--glass-fill":
-                  "color-mix(in oklab, var(--background) 84%, transparent)",
-              } as React.CSSProperties)
-            : undefined
-        }
-        className="label glass glass-liquid rounded-full px-7 py-5 press active:scale-[0.97]"
-      >
-        Book a session
-      </Link>
+    <div
+      style={style}
+      /* One slab of glass with two rows in it, which is how iOS groups the
+         material: a container, a hairline between its rows, and the row
+         under the pointer lit rather than a separate button per action.
+
+         `rounded-[1.375rem]` is this element's own radius and not the
+         theme's 2px. Everywhere else the site is square on purpose; the
+         material is only itself at a radius like this, and it is the one
+         place on the page borrowed from somewhere else deliberately.
+
+         The fill is denser than `glass` gives by default. Seven
+         photographs pass behind this, some of them dark, and the type in
+         the rows has to read on all of them — measured below. */
+      className={cn(
+        "glass glass-liquid flex w-fit flex-col overflow-hidden rounded-[1.375rem]",
+        "[--glass-fill:color-mix(in_oklab,var(--background)_74%,transparent)]",
+        className,
+      )}
+    >
+      <Way href="/work">See the work</Way>
+      <Way href="/sessions">Book a session</Way>
     </div>
+  );
+}
+
+/** One row of it: the name, an arrow at the far edge, and the invert. */
+function Way({
+  href,
+  children,
+}: {
+  href: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <Link
+      prefetch={false}
+      href={href}
+      className={cn(
+        "group flex items-center justify-between gap-10 px-6 py-4",
+        // The index's type, a size down from it: these are two more rows of
+        // the same object, not a heading.
+        "font-display text-lg uppercase leading-none tracking-[0] sm:text-xl",
+        // A hairline between the two, and none above the first.
+        "border-t border-foreground/10 first:border-t-0",
+        /* The row lights rather than the slab moving, which is what a row
+           of this material does under a finger: 140ms, because a press has
+           to answer inside the time it takes to notice you pressed. */
+        "transition-colors duration-150 ease-[var(--ease-out-strong)]",
+        "hoverable:hover:bg-foreground/[0.14] focus-visible:bg-foreground/[0.14] focus-visible:outline-none",
+        /* Both, and the compound one on purpose: `:hover` and `:active` are
+           one pseudo-class each, so on a pointer they tie on specificity
+           and the hover rule wins the press — measured, the press moved the
+           row by 0.2% and read as nothing at all. `:hover:active` is two
+           and carries. The plain one is for a touch screen, where there is
+           no hover to tie with. */
+        "active:bg-foreground/[0.24] hoverable:hover:active:bg-foreground/[0.24]",
+      )}
+    >
+      {children}
+      <span
+        aria-hidden
+        className="transition-transform duration-200 ease-[var(--ease-out-strong)] hoverable:group-hover:translate-x-1.5 motion-reduce:transition-none"
+      >
+        &rarr;
+      </span>
+    </Link>
   );
 }
 
@@ -611,7 +658,6 @@ export function Hero({ disciplines }: { disciplines: Discipline[] }) {
             them passes presses through to the picture. */}
         <div className="pointer-events-none absolute inset-x-0 top-0 hidden h-dvh wide:block">
           <Ways
-            onPicture
             style={lands(BUTTONS_MS)}
             className="rise pointer-events-auto absolute bottom-6 right-6 z-20 sm:bottom-8 sm:right-10"
           />
@@ -806,7 +852,10 @@ export function Hero({ disciplines }: { disciplines: Discipline[] }) {
                 over the picture's foot takes over and this one goes. */}
             <Ways
               style={lands(BUTTONS_MS)}
-              className="rise px-6 pb-2 pt-6 sm:px-10 sm:pb-4 sm:pt-8 tall:pb-0 tall:pt-5 wide:hidden"
+              /* Margins, not padding: the block is ink now, and padding on
+                 it would be ink around the rows rather than air around the
+                 block. */
+              className="rise mx-6 mb-2 mt-6 sm:mx-10 sm:mb-4 sm:mt-8 tall:mb-0 tall:mt-5 wide:hidden"
             />
 
             {/* Three: the index. This is the switcher's control and the site's
