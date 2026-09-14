@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import { Reveal } from "@/components/reveal";
-import Image from "next/image";
 import { PRESS_STUDIO, FEATURED, coverOf } from "@/lib/work";
 import { ClientMarks } from "@/components/client-marks";
+import { StudioReel } from "@/components/studio-reel";
 
 /* ── studio ───────────────────────────────────────────────────────
  * The old site split this across /about (real, and decent) and /rates
@@ -19,7 +19,21 @@ export const metadata: Metadata = {
 };
 
 export default function StudioPage() {
-  const portrait = FEATURED[0] ? coverOf(FEATURED[0]) : null;
+  /* Six of the shoots that lead the homepage, in the same order, each one
+     linking into itself. A portrait frame where the project has one: the
+     reel's box is portrait, so a landscape opener would be cropped to a
+     band of its own middle. */
+  const shoots = FEATURED.slice(0, 6).map((project) => {
+    const frame =
+      project.images.find((f) => f.height > f.width) ?? coverOf(project);
+    return {
+      href: `/work/${project.slug}`,
+      name: project.name,
+      src: frame.src,
+      alt: frame.alt || `Frame from ${project.name}`,
+      color: frame.color,
+    };
+  });
 
   return (
     <div className="pb-24 pt-28 sm:pt-36">
@@ -161,28 +175,11 @@ export default function StudioPage() {
             </Reveal>
           </div>
 
-          {portrait ? (
-            <div className="lg:sticky lg:top-28 lg:self-start">
-              <div
-                className="relative overflow-hidden"
-                style={{
-                  backgroundColor: portrait.color,
-                  aspectRatio: `${portrait.width} / ${portrait.height}`,
-                }}
-              >
-                <Image
-                  src={portrait.src}
-                  alt={portrait.alt || "Frame from a recent commission"}
-                  width={portrait.width}
-                  height={portrait.height}
-                  sizes="(min-width: 1024px) 40vw, 100vw"
-                  className="h-full w-full object-cover"
-                />
-              </div>
-              <p className="label mt-4 text-muted-foreground">
-                {FEATURED[0]?.name} &middot; recent
-              </p>
-            </div>
+          {shoots.length ? (
+            <StudioReel
+              shoots={shoots}
+              className="lg:sticky lg:top-28 lg:self-start"
+            />
           ) : null}
         </div>
       </div>

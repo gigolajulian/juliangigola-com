@@ -1,0 +1,122 @@
+"use client";
+
+import * as React from "react";
+import Image from "next/image";
+import Link from "next/link";
+import { cn } from "@/lib/utils";
+
+/* ── the reel beside the writing ──────────────────────────────────
+ * The studio page showed one photograph, pinned beside the biography for
+ * the whole scroll. Julian asked for a carousel of five to eight shoots
+ * instead, so somebody reading about how a commission runs is looking at
+ * six of them rather than the same frame for four sections.
+ *
+ * A crossfade rather than a strip: the slot is a narrow pinned column, so
+ * there is nowhere to scroll sideways, and the frames are different shapes.
+ * One box, one shape, the pictures changing inside it.
+ *
+ * It turns itself over, and stops the moment a pointer or a focus ring
+ * arrives — a picture must not change under somebody who is deciding
+ * whether to click it. Reduced motion holds the first frame and leaves the
+ * ticks as the way through.
+ * ─────────────────────────────────────────────────────────────── */
+
+export type Shoot = {
+  href: string;
+  name: string;
+  src: string;
+  alt: string;
+  color?: string;
+};
+
+const DWELL_MS = 4600;
+
+export function StudioReel({
+  shoots,
+  className,
+}: {
+  shoots: Shoot[];
+  className?: string;
+}) {
+  const [at, setAt] = React.useState(0);
+  const [held, setHeld] = React.useState(false);
+
+  React.useEffect(() => {
+    if (held || shoots.length < 2) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const t = window.setTimeout(
+      () => setAt((i) => (i + 1) % shoots.length),
+      DWELL_MS,
+    );
+    return () => window.clearTimeout(t);
+  }, [at, held, shoots.length]);
+
+  const here = shoots[at];
+  if (!here) return null;
+
+  return (
+    <div
+      className={className}
+      onPointerEnter={() => setHeld(true)}
+      onPointerLeave={() => setHeld(false)}
+      onFocusCapture={() => setHeld(true)}
+      onBlurCapture={() => setHeld(false)}
+    >
+      {/* One shape for the set. The frames are a mix of portraits and
+          squares, and a box that resized with each one would move four
+          sections of writing every few seconds. */}
+      <div className="relative aspect-[4/5] overflow-hidden">
+        {shoots.map((shoot, i) => (
+          <Link
+            key={shoot.href}
+            href={shoot.href}
+            aria-hidden={i !== at}
+            tabIndex={i === at ? undefined : -1}
+            style={{ backgroundColor: shoot.color }}
+            className={cn(
+              "absolute inset-0 block transition-opacity duration-700 ease-[var(--ease-out-strong)] motion-reduce:transition-none",
+              i === at ? "opacity-100" : "pointer-events-none opacity-0",
+            )}
+          >
+            <Image
+              src={shoot.src}
+              alt={shoot.alt}
+              fill
+              sizes="(min-width: 1024px) 40vw, 100vw"
+              priority={i === 0}
+              className="h-full w-full object-cover"
+            />
+          </Link>
+        ))}
+      </div>
+
+      {/* Whose it is on the left, the way through on the right. The ticks
+          are the same instrument the project pages use under the strip. */}
+      <div className="mt-4 flex items-end justify-between gap-6">
+        <p className="label min-w-0 truncate">{here.name}</p>
+
+        <div className="flex shrink-0 items-end gap-1.5">
+          {shoots.map((shoot, i) => (
+            <button
+              key={shoot.href}
+              type="button"
+              onClick={() => setAt(i)}
+              aria-label={shoot.name}
+              aria-current={i === at}
+              className="group flex h-4 w-5 items-end"
+            >
+              <span
+                className={cn(
+                  "block w-full rounded-full transition-[height,background-color] duration-200 ease-[var(--ease-out-strong)]",
+                  i === at
+                    ? "h-2.5 bg-foreground"
+                    : "h-1 bg-foreground/20 hoverable:group-hover:bg-foreground/50",
+                )}
+              />
+            </button>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
