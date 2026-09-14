@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { cn } from "@/lib/utils";
 import Image from "next/image";
 import { Reveal } from "@/components/reveal";
 import { CallToAction } from "@/components/call-to-action";
@@ -28,7 +29,7 @@ export const metadata: Metadata = {
 export default function SessionsPage() {
   return (
     <>
-      <div className="pb-24 pt-28 sm:pt-36">
+      <div className="pb-16 pt-24 sm:pt-28">
         <header className="mx-auto max-w-[100rem] px-6 sm:px-10">
           <h1 className="title">Sessions</h1>
           <p className="mt-4 max-w-prose text-sm leading-relaxed text-muted-foreground">
@@ -37,15 +38,15 @@ export default function SessionsPage() {
           </p>
         </header>
 
-        <div className="mx-auto mt-16 max-w-[100rem] px-6 sm:mt-24 sm:px-10">
-          <ul className="flex flex-col gap-20 sm:gap-32">
+        <div className="mx-auto mt-10 max-w-[100rem] px-6 sm:mt-12 sm:px-10">
+          <ul className="flex flex-col gap-12 sm:gap-16">
             {SESSION_TYPES.map((session, i) => {
               const samples = projectsIn(session.slug).slice(0, 2);
 
               return (
                 <li key={session.slug}>
                   <Reveal>
-                    <div className="grid gap-8 lg:grid-cols-2 lg:gap-16">
+                    <div className="grid gap-6 lg:grid-cols-2 lg:gap-12">
                       {/* Facts first, image second — on a phone the price
                         should not be below a full-height photograph. */}
                       <div className={i % 2 === 1 ? "lg:order-2" : undefined}>
@@ -56,7 +57,7 @@ export default function SessionsPage() {
                           {session.blurb}
                         </p>
 
-                        <dl className="mt-8 flex flex-wrap gap-x-12 gap-y-4 border-t border-border pt-6">
+                        <dl className="mt-6 flex flex-wrap gap-x-12 gap-y-4 border-t border-border pt-5">
                           <div>
                             <dt className="label text-muted-foreground">
                               Rate
@@ -75,10 +76,10 @@ export default function SessionsPage() {
                           </div>
                         </dl>
 
-                        <h3 className="label mt-8 text-muted-foreground">
+                        <h3 className="label mt-6 text-muted-foreground">
                           Includes
                         </h3>
-                        <ul className="mt-3 flex flex-col gap-2">
+                        <ul className="mt-2 flex flex-col gap-1.5">
                           {session.includes.map((item) => (
                             <li
                               key={item}
@@ -93,7 +94,7 @@ export default function SessionsPage() {
                           take a slot without waiting on a reply — which is the
                           whole point for this audience. Until then the enquiry
                           form is the path. */}
-                        <div className="mt-10 flex flex-wrap items-center gap-3">
+                        <div className="mt-8 flex flex-wrap items-center gap-3">
                           {BOOKING_URL ? (
                             <a
                               href={BOOKING_URL}
@@ -113,17 +114,30 @@ export default function SessionsPage() {
                         </div>
                       </div>
 
-                      <div className={i % 2 === 1 ? "lg:order-1" : undefined}>
+                      <div
+                        className={cn(
+                          /* From `lg` the photographs take the height of the
+                             facts beside them and no more: the column is the
+                             grid row's height and the samples fill it, cropped
+                             with object-cover. Julian wanted the page more
+                             compact, and a full portrait beside four lines of
+                             facts was where its height went. Under `lg` they
+                             keep their own shape. */
+                          "relative lg:min-h-[22rem]",
+                          i % 2 === 1 && "lg:order-1",
+                        )}
+                      >
                         {/* Most session categories are a single gallery, so a hard
                           two-column grid would render one sample at half width
                           against empty space. */}
                         {samples.length ? (
                           <div
-                            className={
+                            className={cn(
+                              "grid lg:absolute lg:inset-0",
                               samples.length === 2
-                                ? "grid grid-cols-2 gap-4"
-                                : "grid grid-cols-1"
-                            }
+                                ? "grid-cols-2 gap-4"
+                                : "grid-cols-1",
+                            )}
                           >
                             {samples.map((project) => {
                               const cover = coverOf(project);
@@ -131,7 +145,8 @@ export default function SessionsPage() {
                                 <Link
                                   key={project.slug}
                                   href={`/work/${project.slug}`}
-                                  className="group relative block overflow-hidden"
+                                  // `aspect-auto!` because the ratio is inline, and from `lg` the height is the row and the width the column.
+                                  className="group relative block overflow-hidden lg:aspect-auto! lg:h-full lg:w-full"
                                   style={{
                                     backgroundColor: cover.color,
                                     aspectRatio: `${cover.width} / ${cover.height}`,
@@ -147,7 +162,8 @@ export default function SessionsPage() {
                                         ? "(min-width: 1024px) 25vw, 50vw"
                                         : "(min-width: 1024px) 50vw, 100vw"
                                     }
-                                    className="h-full w-full object-cover transition-transform duration-500 ease-[var(--ease-out-strong)] hoverable:group-hover:scale-[1.02] motion-reduce:transition-none"
+                                    // Cropped from a little above centre, so a face stays in the frame.
+                                    className="h-full w-full object-cover lg:object-[50%_25%] transition-transform duration-500 ease-[var(--ease-out-strong)] hoverable:group-hover:scale-[1.02] motion-reduce:transition-none"
                                   />
                                 </Link>
                               );
