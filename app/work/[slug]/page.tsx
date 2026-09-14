@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Gallery } from "@/components/gallery";
+import { ProjectStrip } from "@/components/project-strip";
 import { CoverArtGallery } from "@/components/cover-art-gallery";
 import { CallToAction } from "@/components/call-to-action";
 import {
@@ -101,32 +101,104 @@ export default async function ProjectPage(props: PageProps<"/work/[slug]">) {
           : undefined;
       })();
 
+  /* Cover art keeps the rack it was given: twenty-four sleeves at 1:1, two
+     of them two-sided, which is a catalogue and not a sequence. Everything
+     else is a sequence and gets the strip. */
+  if (project.slug === COVER_ART?.slug) {
+    return (
+      <article className="pt-24 sm:pt-28">
+        <header className="mx-auto max-w-[100rem] px-6 sm:px-10">
+          <Crumb />
+          <h1 className="mt-6 title">{project.headline ?? project.name}</h1>
+          <p className="label mt-3 text-muted-foreground">
+            {COVER_RELEASES.length} releases
+          </p>
+        </header>
+        <CoverArtGallery releases={COVER_RELEASES} />
+        <CallToAction
+          className="mt-24"
+          title="Want something like this?"
+          body="Tell me what you have in mind and I will come back with an approach and a quote."
+          type={enquiryTypeFor(project)}
+          detail={project.name}
+          secondary={
+            onwards ? { href: onwards.href, label: onwards.name } : undefined
+          }
+        />
+      </article>
+    );
+  }
+
   return (
-    <article className="pt-28 sm:pt-36">
-      <header className="mx-auto max-w-[100rem] px-6 sm:px-10">
-        <nav aria-label="Breadcrumb">
-          <Link
-            href="/work"
-            className="label text-muted-foreground transition-colors duration-200 hoverable:hover:text-foreground"
-          >
-            &larr; Back to all
-          </Link>
-        </nav>
+    <article>
+      {/* One screen: the head over the sequence, the sequence across it, and
+          a panel under it. Julian asked for the project pages to work like
+          remyshoots.co.za, where a project is a filmstrip rather than a page
+          you scroll down.
 
-        {/* The title on the left, the crew on the right — Julian moved the
-            credits up here from the foot of the page. Each credit is a row
-            of its own: role, then name, both in the label face, the name a
-            link to the person where there is one. Rows respond to the
-            pointer the way the index's rows do. */}
-        <div className="mt-8 lg:flex lg:items-start lg:justify-between lg:gap-16">
-          <h1 className="max-w-[24ch] title">
-            {project.headline ?? project.name}
-          </h1>
+          `h-dvh` with the three children sized to fit inside it: the head
+          and the panel take what they need, the strip takes the rest. So the
+          photographs are as tall as the window allows on every screen
+          without a single height being written down. */}
+      <div className="flex h-dvh flex-col pt-24 sm:pt-28">
+        <header className="mx-auto w-full max-w-[100rem] shrink-0 px-6 sm:px-10">
+          {/* Three columns, the outer two the same width, so the title is
+              centred on the page and not on whatever is left over. */}
+          <div className="flex items-start justify-between gap-6">
+            <div className="w-28 shrink-0 sm:w-44">
+              <Crumb />
+            </div>
 
+            <div className="min-w-0 text-center">
+              <h1 className="font-display text-2xl uppercase leading-none tracking-[0] sm:text-4xl">
+                {project.headline ?? project.name}
+              </h1>
+              {client ? (
+                <p className="label mt-2 text-muted-foreground">
+                  {client.name}
+                </p>
+              ) : null}
+            </div>
+
+            {/* What it is and how much of it there is, opposite the crumb. */}
+            <p className="label w-28 shrink-0 text-right text-muted-foreground sm:w-44">
+              {[
+                project.categories.length && !isDiscipline
+                  ? project.categories.map((c) => c.name).join(", ")
+                  : null,
+                `${project.images.length} frames`,
+              ]
+                .filter(Boolean)
+                .join(" · ")}
+            </p>
+          </div>
+
+          {/* The intent, unless it is the title again, or a leftover credit
+              line ("styling: @handle") which five projects carry and the
+              credits below already say. Either can be rewritten in /admin. */}
+          {project.intent &&
+          !project.intent.includes("@") &&
+          project.intent.trim().toLowerCase() !==
+            project.name.trim().toLowerCase() ? (
+            <p className="mx-auto mt-4 max-w-prose text-center text-sm leading-relaxed text-muted-foreground">
+              {project.intent}
+            </p>
+          ) : null}
+        </header>
+
+        <ProjectStrip project={project} className="mt-6 flex-1" />
+
+        {/* The panel under the ruler: the crew on the left, where to go next
+            on the right. One line each rather than the column of rows this
+            page used to carry beside the title, since a column that tall
+            would take the height the photographs are using. Still all
+            capitals and still a link per person, which is what Julian asked
+            for when the credits moved up out of the footer. */}
+        <footer className="mx-auto flex w-full max-w-[100rem] shrink-0 items-end justify-between gap-8 px-6 pb-5 pt-4 sm:px-10">
           {project.credits.length ? (
             <dl
               aria-label="Credits"
-              className="mt-10 lg:mt-2 lg:w-[24rem] lg:shrink-0"
+              className="flex min-w-0 flex-wrap gap-x-6 gap-y-1"
             >
               {project.credits.map((credit, i) => {
                 /* Six harvested credits carry the handle as the name
@@ -137,21 +209,21 @@ export default async function ProjectPage(props: PageProps<"/work/[slug]">) {
                 return (
                   <div
                     key={`${credit.role}-${i}`}
-                    className="group flex items-baseline justify-between gap-6 border-b border-border py-2.5 transition-colors duration-200 hoverable:hover:border-foreground/30"
+                    className="group flex items-baseline gap-2"
                   >
-                    <dt className="label text-muted-foreground">
+                    <dt className="label text-muted-foreground/70">
                       {credit.role}
                     </dt>
-                    <dd className="label text-right">
+                    <dd className="label">
                       {handle ? (
                         /* A new tab on purpose: the visitor is on a project
-                         and taking the page out from under them to show
-                         someone else's feed would lose their place in it. */
+                           and taking the page out from under them to show
+                           someone else's feed would lose their place. */
                         <a
                           href={`https://www.instagram.com/${handle}/`}
                           target="_blank"
                           rel="noreferrer"
-                          className="text-muted-foreground transition-colors duration-200 hoverable:group-hover:text-foreground"
+                          className="text-muted-foreground transition-colors duration-200 hoverable:hover:text-foreground"
                         >
                           {credit.name}
                           <span className="sr-only">
@@ -167,68 +239,27 @@ export default async function ProjectPage(props: PageProps<"/work/[slug]">) {
                 );
               })}
             </dl>
+          ) : (
+            <span />
+          )}
+
+          {onwards ? (
+            <Link
+              href={onwards.href}
+              className="label shrink-0 text-muted-foreground transition-colors duration-200 hoverable:hover:text-foreground"
+            >
+              {onwards.name} &rarr;
+            </Link>
           ) : null}
-        </div>
+        </footer>
+      </div>
 
-        <dl className="mt-8 flex flex-wrap gap-x-12 gap-y-4 border-t border-border pt-6">
-          {client ? (
-            <div>
-              <dt className="label text-muted-foreground">Client</dt>
-              <dd className="mt-2 text-sm">{client.name}</dd>
-            </div>
-          ) : null}
-          {/* Not on a discipline page, where it would repeat the title. */}
-          {project.categories.length && !isDiscipline ? (
-            <div>
-              <dt className="label text-muted-foreground">Category</dt>
-              <dd className="mt-2 text-sm">
-                {project.categories.map((c) => c.name).join(", ")}
-              </dd>
-            </div>
-          ) : null}
-          <div>
-            <dt className="label text-muted-foreground">
-              {project.slug === COVER_ART?.slug ? "Releases" : "Frames"}
-            </dt>
-            <dd className="mt-2 text-sm">
-              {project.slug === COVER_ART?.slug
-                ? COVER_RELEASES.length
-                : project.images.length}
-            </dd>
-          </div>
-        </dl>
-
-        {/* The intent, unless it is the title again — the harvester wrote
-            `intent: "EVENT COVERAGE"` for the Event coverage gallery — or a
-            leftover credit line ("styling: @handle"), which five projects
-            carry and the credits beside the title already say. Either can
-            be rewritten in /admin. */}
-        {project.intent &&
-        !project.intent.includes("@") &&
-        project.intent.trim().toLowerCase() !==
-          project.name.trim().toLowerCase() ? (
-          <p className="mt-10 max-w-prose text-base leading-relaxed text-muted-foreground">
-            {project.intent}
-          </p>
-        ) : null}
-      </header>
-
-      {/* Cover art is a catalogue, not a sequence: every frame is 1:1 and two
-          of the releases are sleeves with two sides, so it gets a rack rather
-          than the paired-frame spread the photographic work uses. */}
-      {project.slug === COVER_ART?.slug ? (
-        <CoverArtGallery releases={COVER_RELEASES} />
-      ) : (
-        <Gallery project={project} />
-      )}
-
-      {/* The ask, at the point of peak interest: they have just looked at the
-          whole sequence. The form opens on this project's own branch, and the
-          project name rides along so the enquiry says what prompted it. */}
+      {/* The ask, at the point of peak interest. Below the first screen, and
+          the strip hands the wheel over once the sequence runs out, so
+          carrying on down the page is how you reach it. */}
       <CallToAction
-        className="mt-24"
         title="Want something like this?"
-        body="Tell me what you have in mind and I'll come back with an approach and a quote."
+        body="Tell me what you have in mind and I will come back with an approach and a quote."
         type={enquiryTypeFor(project)}
         detail={project.name}
         secondary={
@@ -236,5 +267,19 @@ export default async function ProjectPage(props: PageProps<"/work/[slug]">) {
         }
       />
     </article>
+  );
+}
+
+/** Back where they came from, in the corner both layouts put it. */
+function Crumb() {
+  return (
+    <nav aria-label="Breadcrumb">
+      <Link
+        href="/work"
+        className="label text-muted-foreground transition-colors duration-200 hoverable:hover:text-foreground"
+      >
+        &larr; All work
+      </Link>
+    </nav>
   );
 }

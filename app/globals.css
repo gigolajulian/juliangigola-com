@@ -522,6 +522,23 @@
   text-transform: uppercase;
 }
 
+/* ── the project strip's scroller ─────────────────────────────────
+ * No scrollbar. The strip runs sideways and the ruler under it says both how
+ * long the sequence is and where in it you are, in the same glance; a
+ * horizontal bar beside that ruler is the same fact drawn twice, and on a
+ * Mac it is not drawn at all until you move.
+ *
+ * `overscroll-x: contain` so reaching the end of the sequence does not hand
+ * the gesture to the browser and trigger a back-swipe.
+ * ─────────────────────────────────────────────────────────────── */
+@utility strip-scroll {
+  scrollbar-width: none;
+  overscroll-behavior-x: contain;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
 @utility label {
   /* Inter's figures, set to one width. Every number on the site that is in a
      column or changes under a pointer wears this face — the counts down the
