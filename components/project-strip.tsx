@@ -22,11 +22,14 @@ import type { Project, TextBlock, Frame } from "@/lib/work-types";
  *
  * Native scrolling, not a transform driven by pointer events. It costs
  * nothing to a keyboard (arrow keys and Home/End land for free), a
- * touchscreen swipes it, and a trackpad's own horizontal gesture works
- * without being interpreted. The one thing added is the mouse wheel: a
- * vertical wheel moves the strip sideways until it runs out, and then the
- * page has it back — the same handover the work index uses, which is the
- * behaviour Julian asked for there.
+ * touchscreen swipes it with the platform's own momentum, and a trackpad's
+ * horizontal gesture works without being interpreted.
+ *
+ * Two things are added, both for a mouse. A vertical wheel moves the strip
+ * sideways until it runs out, and then the page has it back — the same
+ * handover the work index uses, which is the behaviour Julian asked for
+ * there. And the strip can be dragged: grab a frame and pull, and let go to
+ * send it coasting. See "how it moves" below.
  * ─────────────────────────────────────────────────────────────── */
 
 type Cell =
@@ -113,24 +116,167 @@ export function ProjectStrip({
     };
   }, [cells.length]);
 
-  /* A vertical wheel moves the strip sideways, and stops doing so at either
-     end so the page can carry on to the enquiry below. `passive: false`
-     because it has to be able to take the event; left passive, the browser
-     would scroll the page at the same time and both would move. */
+  /* ── how it moves ───────────────────────────────────────────────
+     Every way of moving the strip writes to one target and a single rAF
+     loop eases the scroller towards it. A wheel notch is ~100px of jump
+     if it is applied straight to `scrollLeft`; chased instead, the same
+     notch is a glide, and notches that arrive together blend into one
+     movement rather than stacking into a jolt. Julian asked for the
+     horizontal scroll to be super smooth and to allow drag to scroll.
+
+     A drag is the exception: while a pointer is down the strip tracks it
+     exactly, because anything eased there feels like the picture is
+     lagging behind the hand. The easing comes back on release, as
+     momentum — the strip carries on at the speed it was let go.
+
+     Reduced motion gets the same controls with the interpolation off. */
+  const glide = React.useRef<(to: number) => void>(() => {});
+
   React.useEffect(() => {
     const el = scroller.current;
     if (!el) return;
+    const eased = !window.matchMedia("(prefers-reduced-motion: reduce)")
+      .matches;
+
+    const room = () => el.scrollWidth - el.clientWidth;
+    const clamp = (v: number) => Math.min(room(), Math.max(0, v));
+    let target = el.scrollLeft;
+    let frame = 0;
+
+    const chase = () => {
+      const gap = target - el.scrollLeft;
+      /* A whole pixel, not a fraction of one. Some elements quantise
+         `scrollLeft` to integers, and a 3px gap eased at 0.16 asks for 0.48
+         of a pixel: the write rounds to nothing, the gap never closes, and
+         the loop runs for as long as the page is open. So the step has a
+         floor of 1px and the last pixel is snapped. */
+      if (Math.abs(gap) < 1) {
+        el.scrollLeft = target;
+        frame = 0;
+        return;
+      }
+      el.scrollLeft += Math.sign(gap) * Math.max(1, Math.abs(gap) * 0.16);
+      frame = requestAnimationFrame(chase);
+    };
+
+    const to = (v: number) => {
+      target = clamp(v);
+      if (!eased) el.scrollLeft = target;
+      else if (!frame) frame = requestAnimationFrame(chase);
+    };
+    glide.current = to;
+
+    const stop = () => {
+      if (frame) cancelAnimationFrame(frame);
+      frame = 0;
+      target = el.scrollLeft;
+    };
+
+    /* A vertical wheel moves the strip sideways, and stops doing so at
+       either end so the page can carry on to the enquiry below.
+       `passive: false` because it has to be able to take the event; left
+       passive, the browser would scroll the page at the same time and both
+       would move. The end is read off the target rather than off
+       `scrollLeft`, or a notch that arrives while the strip is still
+       gliding into the last frame would be handed to the page. */
     const onWheel = (e: WheelEvent) => {
       // A pinch is a zoom, and a trackpad's sideways swipe already works.
       if (e.ctrlKey || Math.abs(e.deltaX) > Math.abs(e.deltaY)) return;
-      const room = el.scrollWidth - el.clientWidth;
-      const ended = e.deltaY > 0 ? el.scrollLeft >= room - 1 : el.scrollLeft <= 0;
-      if (ended) return;
+      if (e.deltaY > 0 ? target >= room() - 1 : target <= 0) return;
       e.preventDefault();
-      el.scrollLeft = Math.min(room, Math.max(0, el.scrollLeft + e.deltaY));
+      to(target + e.deltaY);
     };
+
+    /* Drag, for a mouse. A touchscreen is left alone: the platform's own
+       flick and momentum are better than anything reimplemented here, and
+       taking the gesture would break the vertical swipe out of the strip. */
+    let down = false;
+    let dragging = false;
+    let fromX = 0;
+    let fromScroll = 0;
+    let lastX = 0;
+    let lastAt = 0;
+    let speed = 0;
+
+    const onDown = (e: PointerEvent) => {
+      if (e.pointerType !== "mouse" || e.button !== 0) return;
+      down = true;
+      dragging = false;
+      stop();
+      fromX = lastX = e.clientX;
+      fromScroll = el.scrollLeft;
+      lastAt = e.timeStamp;
+      speed = 0;
+      delete el.dataset.dragged;
+    };
+
+    const onMove = (e: PointerEvent) => {
+      if (!down) return;
+      const dt = e.timeStamp - lastAt;
+      // px per ms, positive when the sequence is being pulled leftwards.
+      if (dt > 0) speed = (lastX - e.clientX) / dt;
+      lastX = e.clientX;
+      lastAt = e.timeStamp;
+      target = clamp(fromScroll - (e.clientX - fromX));
+      el.scrollLeft = target;
+
+      /* Past a few pixels this is a drag rather than a press, and two
+         things change. The frame under the pointer must not open when the
+         button comes back up. And the pointer is captured, so a hand that
+         leaves the strip mid-pull keeps pulling it.
+
+         Capture only from here, never on the press itself: capturing
+         retargets the compatibility mouse events too, so the `click` that
+         follows is delivered to the scroller instead of the frame — which
+         is exactly how the first version of this stopped the lightbox from
+         opening at all. */
+      if (!dragging && Math.abs(e.clientX - fromX) > 4) {
+        dragging = true;
+        el.dataset.dragged = "";
+        el.setPointerCapture(e.pointerId);
+      }
+    };
+
+    const onUp = () => {
+      if (!down) return;
+      down = false;
+      dragging = false;
+      // A flick keeps going. 220ms of coasting at the speed it was let go,
+      // which the chase above then decays into a stop.
+      if (eased && Math.abs(speed) > 0.05) to(target + speed * 220);
+      // After the click that this release is about to fire, not before.
+      requestAnimationFrame(() => delete el.dataset.dragged);
+    };
+
+    const swallowClick = (e: MouseEvent) => {
+      if (el.dataset.dragged === undefined) return;
+      e.preventDefault();
+      e.stopPropagation();
+    };
+
     el.addEventListener("wheel", onWheel, { passive: false });
-    return () => el.removeEventListener("wheel", onWheel);
+    el.addEventListener("pointerdown", onDown);
+    el.addEventListener("pointermove", onMove);
+    el.addEventListener("pointerup", onUp);
+    el.addEventListener("pointercancel", onUp);
+    el.addEventListener("click", swallowClick, true);
+    // The keyboard and a touchscreen write `scrollLeft` themselves; the
+    // target has to follow, or the next wheel notch would spring back.
+    const sync = () => {
+      if (!down && !frame) target = el.scrollLeft;
+    };
+    el.addEventListener("scroll", sync, { passive: true });
+
+    return () => {
+      el.removeEventListener("wheel", onWheel);
+      el.removeEventListener("pointerdown", onDown);
+      el.removeEventListener("pointermove", onMove);
+      el.removeEventListener("pointerup", onUp);
+      el.removeEventListener("pointercancel", onUp);
+      el.removeEventListener("click", swallowClick, true);
+      el.removeEventListener("scroll", sync);
+      if (frame) cancelAnimationFrame(frame);
+    };
   }, []);
 
   /** Puts a cell in the middle of the window. */
@@ -138,12 +284,7 @@ export function ProjectStrip({
     const el = scroller.current;
     const cell = el?.children[i] as HTMLElement | undefined;
     if (!el || !cell) return;
-    el.scrollTo({
-      left: cell.offsetLeft - (el.clientWidth - cell.offsetWidth) / 2,
-      behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches
-        ? "auto"
-        : "smooth",
-    });
+    glide.current(cell.offsetLeft - (el.clientWidth - cell.offsetWidth) / 2);
   };
 
   // The number under the strip counts photographs, so a paragraph between
@@ -164,12 +305,13 @@ export function ProjectStrip({
           ref={scroller}
           tabIndex={0}
           aria-label={`${project.name}: ${frames.length} frames, left and right`}
-          /* `snap-proximity`, not mandatory: the wheel handler above writes
-             `scrollLeft` directly, and a mandatory snap fights a scroll it
-             did not start. Proximity lets a flick settle on a frame without
-             dragging every movement to the nearest one. */
+          /* No scroll snapping. Every movement here is a scroll the strip
+             started itself — a wheel notch, a drag, a flick's momentum, a
+             tick — and snap re-aims each one as it settles, which reads as
+             the sequence being tugged out of your hand. The momentum stops
+             where it is let go instead. */
           className={cn(
-            "flex min-h-0 flex-1 snap-x snap-proximity items-center gap-3 overflow-x-auto overflow-y-hidden sm:gap-4",
+            "flex min-h-0 flex-1 select-none items-center gap-3 overflow-x-auto overflow-y-hidden sm:gap-4",
             "px-6 sm:px-10",
             "strip-scroll focus-visible:outline-none",
           )}
@@ -178,7 +320,7 @@ export function ProjectStrip({
             cell.kind === "text" ? (
               <div
                 key={`text-${cell.block.after}-${cell.block.heading ?? ""}`}
-                className="flex h-full w-[min(24rem,80vw)] shrink-0 snap-center flex-col justify-center"
+                className="flex h-full w-[min(24rem,80vw)] shrink-0 flex-col justify-center"
               >
                 {cell.block.heading ? (
                   <h2 className="font-display text-xl uppercase leading-none tracking-[0]">
@@ -201,7 +343,7 @@ export function ProjectStrip({
                 aria-label={`Open frame ${cell.n + 1} of ${frames.length}${
                   cell.frame.alt ? `: ${cell.frame.alt}` : ""
                 }`}
-                className="group relative h-full shrink-0 snap-center overflow-hidden press hoverable:cursor-none active:scale-[0.995]"
+                className="group relative h-full shrink-0 overflow-hidden press hoverable:cursor-none active:scale-[0.995]"
                 style={{
                   backgroundColor: cell.frame.color,
                   aspectRatio: `${cell.frame.width} / ${cell.frame.height}`,
@@ -219,6 +361,7 @@ export function ProjectStrip({
                     cell.n === 0 && project.cover.blur ? "blur" : "empty"
                   }
                   blurDataURL={cell.n === 0 ? project.cover.blur : undefined}
+                  draggable={false}
                   className="h-full w-full object-cover"
                 />
               </button>
