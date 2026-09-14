@@ -91,7 +91,7 @@ export default function StudioPage() {
                 <h2 className="label text-muted-foreground">
                   How a commission runs
                 </h2>
-                <ol className="mt-6 flex flex-col gap-6">
+                <ol className="mt-6 flex flex-col gap-8">
                   {[
                     {
                       step: "Brief",
@@ -111,12 +111,17 @@ export default function StudioPage() {
                     },
                   ].map((phase, i) => (
                     <li key={phase.step} className="flex gap-6">
-                      <span className="label shrink-0 pt-1 text-muted-foreground tabular-nums">
+                      <span className="label shrink-0 pt-2 text-muted-foreground tabular-nums">
                         {String(i + 1).padStart(2, "0")}
                       </span>
                       <div>
-                        <h3 className="text-sm font-medium">{phase.step}</h3>
-                        <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
+                        {/* The display face, at the size the section
+                            headings use: Julian wanted the step names
+                            large. */}
+                        <h3 className="font-display text-2xl uppercase leading-none tracking-[0] sm:text-3xl">
+                          {phase.step}
+                        </h3>
+                        <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
                           {phase.body}
                         </p>
                       </div>
