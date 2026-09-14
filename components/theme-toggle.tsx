@@ -55,6 +55,10 @@ function apply(next: Theme) {
   }
 }
 
+/* Both halves of the mark share the fade; see the second path below. */
+const HALF =
+  "transition-opacity duration-300 ease-[var(--ease-out-strong)] motion-reduce:transition-none hoverable:group-hover:opacity-50";
+
 export function ThemeToggle({ className }: { className?: string }) {
   /**
    * Starts as `null`, not as `"dark"`.
@@ -165,7 +169,21 @@ export function ThemeToggle({ className }: { className?: string }) {
             rectangle clipped to the circle leaves a hairline of ground
             showing along the curve at some sizes, and a second stroked path
             doubles the outline down the middle. */}
-        <path d="M12 3.5A8.5 8.5 0 0 1 12 20.5Z" fill="currentColor" />
+        <path
+          d="M12 3.5A8.5 8.5 0 0 1 12 20.5Z"
+          fill="currentColor"
+          className={HALF}
+        />
+        {/* The other half, empty at rest. Under a pointer the mark goes
+            halfway to its inverse — this half fills to 50% while the filled
+            half fades to 50% — so the hover previews the press the way the
+            tilt does: the mark half turned, half inverted. Julian asked for
+            the inversion to start on hover. */}
+        <path
+          d="M12 3.5A8.5 8.5 0 0 0 12 20.5Z"
+          fill="currentColor"
+          className={cn(HALF, "opacity-0")}
+        />
       </svg>
     </button>
   );
