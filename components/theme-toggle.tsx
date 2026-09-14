@@ -55,9 +55,13 @@ function apply(next: Theme) {
   }
 }
 
-/* Both halves of the mark share the fade; see the second path below. */
+/* The mark is a circle with one half filled. Which half is the theme:
+   right for dark, left for light. Hover fades the fill to the other side —
+   a preview of the press — and the press makes it so. Julian asked for
+   the sides to swap with a fade; the earlier tilt-and-rotate is gone,
+   since a turn and a swap at once read as two things happening. */
 const HALF =
-  "transition-opacity duration-300 ease-[var(--ease-out-strong)] motion-reduce:transition-none hoverable:group-hover:opacity-50";
+  "transition-opacity duration-300 ease-[var(--ease-out-strong)] motion-reduce:transition-none";
 
 export function ThemeToggle({ className }: { className?: string }) {
   /**
@@ -137,52 +141,38 @@ export function ThemeToggle({ className }: { className?: string }) {
       <svg
         aria-hidden
         viewBox="0 0 24 24"
-        className={cn(
-          "h-[1.125rem] w-[1.125rem] origin-center",
-          // Only once the real theme is known — see the note on `theme`.
-          theme !== null &&
-            "transition-transform duration-300 ease-[var(--ease-out-strong)] motion-reduce:transition-none",
-          // The way in is on the bounce: the quarter turn overshoots by a few
-          // degrees and settles back, a thing tipped that nearly goes over —
-          // Julian asked for the rubber band. The way back and the press
-          // keep the plain curve, so letting go feels like letting go and the
-          // turn itself lands square.
-          "hoverable:group-hover:duration-500 hoverable:group-hover:ease-[var(--ease-bounce)]",
-          // Hover turns it halfway — a quarter turn, the mark tipping toward
-          // the other half — and the press completes the turn. From either
-          // side, so the light mark leans on from 180 the way the dark one
-          // leans from 0. Pointer only: a tap on a phone is the press itself.
-          theme === "light"
-            ? "rotate-180 hoverable:group-hover:rotate-[270deg]"
-            : "hoverable:group-hover:rotate-90",
-        )}
+        className="h-[1.125rem] w-[1.125rem]"
         fill="none"
         stroke="currentColor"
         strokeWidth="1.5"
       >
         <circle cx="12" cy="12" r="8.5" />
-        {/* The filled half: top of the circle, clockwise round the right side
-            to the bottom, then straight back up the diameter.
-
-            An arc rather than a half-disc drawn some other way, because the
-            fill has to share an edge with the stroked circle exactly — a
-            rectangle clipped to the circle leaves a hairline of ground
-            showing along the curve at some sizes, and a second stroked path
-            doubles the outline down the middle. */}
+        {/* The two halves as arcs rather than half-discs drawn some other
+            way, because the fill has to share an edge with the stroked
+            circle exactly — a rectangle clipped to the circle leaves a
+            hairline of ground showing along the curve at some sizes.
+            Pointer only: a tap on a phone is the press itself. Until the
+            real theme is known the dark half shows, without a transition,
+            so nothing fades on load. */}
         <path
           d="M12 3.5A8.5 8.5 0 0 1 12 20.5Z"
           fill="currentColor"
-          className={HALF}
+          className={cn(
+            theme !== null && HALF,
+            theme === "light"
+              ? "opacity-0 hoverable:group-hover:opacity-100"
+              : "hoverable:group-hover:opacity-0",
+          )}
         />
-        {/* The other half, empty at rest. Under a pointer the mark goes
-            halfway to its inverse — this half fills to 50% while the filled
-            half fades to 50% — so the hover previews the press the way the
-            tilt does: the mark half turned, half inverted. Julian asked for
-            the inversion to start on hover. */}
         <path
           d="M12 3.5A8.5 8.5 0 0 0 12 20.5Z"
           fill="currentColor"
-          className={cn(HALF, "opacity-0")}
+          className={cn(
+            theme !== null && HALF,
+            theme === "light"
+              ? "hoverable:group-hover:opacity-0"
+              : "opacity-0 hoverable:group-hover:opacity-100",
+          )}
         />
       </svg>
     </button>
