@@ -755,15 +755,15 @@ export function Hero({ disciplines }: { disciplines: Discipline[] }) {
                       href={discipline.href}
                       aria-current={i + 1 === active ? "true" : undefined}
                       className={cn(
-                        // `py-3`, not `py-4`. The type column is what sets
-                        // the height of this section — the 80dvh picture
-                        // track loses to it — so a sixth row at the old
-                        // padding pushed both buttons a further 57px under
-                        // the fold on a 700px screen, where they were already
-                        // 189px below it. Six rows at `py-3` cost nine pixels
-                        // against five at `py-4`, and the row is still a
-                        // comfortable target.
-                        "group flex items-baseline gap-4 px-6 py-3 transition-colors duration-300 sm:px-10",
+                        // `py-2`. The type column is what sets the height
+                        // of this section, the 80dvh picture track loses to
+                        // it, so every pixel of row height is a pixel the
+                        // buttons drop. Julian asked for bigger type on the
+                        // rows (text-2xl / text-3xl): the padding gives back
+                        // what the type took, and on a 900px screen both
+                        // buttons still clear the fold. 46px a row is still
+                        // a comfortable target.
+                        "group flex items-baseline gap-4 px-6 py-2 transition-colors duration-300 sm:px-10",
                         // `bg-secondary`, not `bg-card`. Card sits at L* 5.7
                         // against a ground of L* 2.8 — a real step in the token
                         // scale, and almost invisible as a band across a row.
@@ -780,7 +780,7 @@ export function Hero({ disciplines }: { disciplines: Discipline[] }) {
                       </span>
                       <span
                         className={cn(
-                          "font-display text-xl uppercase leading-none tracking-[0] transition-colors duration-300 sm:text-2xl",
+                          "font-display text-2xl uppercase leading-none tracking-[0] transition-colors duration-300 sm:text-3xl",
                           i + 1 === active
                             ? "text-foreground"
                             : "text-muted-foreground",
