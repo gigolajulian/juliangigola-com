@@ -101,9 +101,9 @@ export default async function ProjectPage(props: PageProps<"/work/[slug]">) {
           : undefined;
       })();
 
-  /* The strip's last cell and where the wheel goes past the end: the next
-     project with a portrait frame of it, or the next discipline's gallery
-     when this page is a discipline. */
+  /* The strip's last cell and where the wheel goes past the end: the name
+     of the next project, or of the next discipline's gallery when this page
+     is a discipline. Its name and its client, not its pictures. */
   const nextProject = isDiscipline
     ? onwards && getProject(onwards.href.replace(/^\/work\//, ""))
     : nextAfter(project);
@@ -113,10 +113,6 @@ export default async function ProjectPage(props: PageProps<"/work/[slug]">) {
         name: nextProject?.name ?? onwards.name,
         client: nextProject?.credits.find((c) => /client/i.test(c.role))
           ?.name,
-        frame: nextProject
-          ? (nextProject.images.find((f) => f.height > f.width) ??
-            coverOf(nextProject))
-          : undefined,
       }
     : undefined;
 
@@ -172,12 +168,17 @@ export default async function ProjectPage(props: PageProps<"/work/[slug]">) {
               <Crumb />
             </div>
 
+            {/* Set like the reference's masthead: the title in small
+                capitals rather than at display size, the client under it
+                in the muted tone, both centred. Julian asked for the
+                titles to be like the reference. The photographs are the
+                big thing on this page and the title is a caption to them. */}
             <div className="min-w-0 text-center">
-              <h1 className="font-display text-2xl uppercase leading-none tracking-[0] sm:text-4xl">
+              <h1 className="label font-semibold text-foreground">
                 {project.headline ?? project.name}
               </h1>
               {client ? (
-                <p className="label mt-2 text-muted-foreground">
+                <p className="label mt-1 text-muted-foreground">
                   {client.name}
                 </p>
               ) : null}
