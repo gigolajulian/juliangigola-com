@@ -5,6 +5,7 @@ import { ViewTransition } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
+import { ListRail } from "@/components/list-rail";
 import type { IndexRow } from "@/lib/work";
 
 /* ── the contact sheet ────────────────────────────────────────────
@@ -317,6 +318,15 @@ export function WorkIndex({
             ) : null}
           </ol>
         </div>
+
+        {/* How long the list is and where you are in it, pinned beside the
+            list where its scrollbar would be. Pulled in against the gap so
+            it reads as the list's edge. */}
+        <ListRail
+          list={listColumn}
+          count={projects.length}
+          className="hidden lg:sticky lg:top-[var(--block-top)] lg:-ml-10 lg:block lg:h-[calc(100dvh-var(--block-top)-1.5rem)]"
+        />
       </div>
     </>
   );
