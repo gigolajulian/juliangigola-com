@@ -843,7 +843,13 @@ export function Hero({ disciplines }: { disciplines: Discipline[] }) {
               is centred instead (see the plate below). */}
             <div
               style={lands(BUTTONS_MS)}
-              className="rise mt-auto flex flex-wrap items-center gap-3 px-6 py-6 sm:px-10 sm:py-6 squat:mt-10 tall:mt-2 tall:pb-[max(1.25rem,env(safe-area-inset-bottom))] tall:pt-4"
+              /* Pinned to the foot of the screen from `lg`: the column runs
+                 taller than the window now that the index rows have their
+                 air, so the buttons would sit under the fold. Sticky keeps
+                 them in flow and at the bottom left of the screen until the
+                 column's own foot scrolls up to meet them. Julian: move them
+                 to the bottom left of the page. */
+              className="rise mt-auto flex flex-wrap items-center gap-3 px-6 py-6 sm:px-10 sm:py-6 lg:sticky lg:bottom-0 lg:z-10 lg:bg-background squat:mt-10 tall:mt-2 tall:pb-[max(1.25rem,env(safe-area-inset-bottom))] tall:pt-4"
             >
               <Link
                 href="/work"
