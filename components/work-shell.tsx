@@ -68,6 +68,11 @@ export function WorkShell({
             title={head.title}
             live
             aside={head.aside}
+            /* On /work the strip opens on a discipline, so the page's own
+               title lives here, in the middle of the head, from the first
+               frame. A category page still opens on its name set large and
+               the head waits for that cell to go. */
+            open={all}
           />
 
           {/* The old site's three dropdowns become one row that can be

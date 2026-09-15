@@ -71,6 +71,14 @@ export function PointerRing() {
       if (hit === over) return;
       over = hit;
       el.toggleAttribute("data-over", hit);
+      /* And the system cursor goes, from the root rather than from the
+         element under the pointer. `hoverable:cursor-none` on the target
+         only reaches what inherits from it: a button, a link or anything
+         with a cursor of its own inside that target draws the arrow back
+         on top of the ring, which is two pointers at once. One attribute
+         and one rule in `globals.css` covers the page for as long as the
+         ring is up. */
+      document.documentElement.toggleAttribute("data-ring-over", hit);
       if (!hit) el.removeAttribute("data-pressed");
       // The word stays while the ring fades out, so it never blanks first.
       if (hit && word.current) {
@@ -87,6 +95,7 @@ export function PointerRing() {
     document.addEventListener("pointerup", up, { passive: true });
     document.addEventListener("pointercancel", up, { passive: true });
     return () => {
+      document.documentElement.removeAttribute("data-ring-over");
       document.removeEventListener("pointermove", move);
       document.removeEventListener("pointerdown", down);
       document.removeEventListener("pointerup", up);

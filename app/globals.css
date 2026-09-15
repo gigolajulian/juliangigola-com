@@ -58,6 +58,12 @@
  * masthead beside a photograph. `9/10` at the bottom so a tall window on a
  * wide monitor - someone with a browser at half height - snaps to the stacked
  * version rather than squeezing two columns into a portrait shape. */
+/* A short window. A 13in laptop at 1280x700 leaves a strip 421px tall where
+   a 1440x900 leaves 621, and a screen composed for the taller one runs over
+   its own foot on the shorter. Things that can be set smaller say so with
+   this rather than being sized for the worst case everywhere. */
+@custom-variant short (@media (max-height: 52rem));
+
 @custom-variant squat (
   @media (min-width: 64rem) and (min-aspect-ratio: 9 / 10) and
     (max-aspect-ratio: 5 / 4)
@@ -551,6 +557,18 @@ body:has([data-quiet-footer]) .site-footer-row {
    without this the first screen carries the same words twice. Opacity and
    not `display`, so the header keeps its height and nothing reflows as it
    comes and goes. The attribute is set by the strip's own scroll reader. */
+/* While the ring is up, nothing draws a system cursor. The ring sets this
+   on the root as the pointer crosses onto anything carrying `data-ring`.
+   `cursor-none` on the target alone was not enough: it is inherited, so a
+   nested link, a button or anything with a cursor of its own put the arrow
+   back on top of the ring. */
+@media (hover: hover) and (pointer: fine) {
+  html[data-ring-over],
+  html[data-ring-over] * {
+    cursor: none !important;
+  }
+}
+
 .running-head {
   opacity: 0;
   transition: opacity 240ms var(--ease-out-strong);

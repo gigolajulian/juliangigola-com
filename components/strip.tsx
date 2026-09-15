@@ -874,7 +874,10 @@ export function Strip({
           the one under the pointer. */}
       <div
         className={cn(
-          "mt-4 flex items-end gap-6 px-6 sm:px-10",
+          // The gap has to hold a tick word: 16px did not, and the word's
+          // top two pixels sat inside the strip, over the bottom edge of
+          // whatever cell was there.
+          "mt-6 flex items-end gap-6 px-6 sm:px-10",
           stack && "max-sm:hidden",
         )}
       >
@@ -904,7 +907,7 @@ export function Strip({
                 {word ? (
                   <span
                     className={cn(
-                      "label pointer-events-none absolute bottom-full mb-1.5 whitespace-nowrap text-[0.625rem] text-muted-foreground transition-opacity duration-200",
+                      "label pointer-events-none absolute bottom-full mb-1 whitespace-nowrap text-[0.625rem] text-muted-foreground transition-opacity duration-200",
                       end ? "right-0" : "left-0",
                       i === at
                         ? "opacity-100"

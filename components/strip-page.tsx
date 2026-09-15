@@ -114,13 +114,18 @@ export function TitleCell({
     head, and it waits its turn: the sequence opens on the title set large,
     so this would be the same words twice on the first screen. `running-head`
     fades it in once that cell has been scrolled past — the rule is in
-    `globals.css`, keyed off an attribute the strip sets. */
+    `globals.css`, keyed off an attribute the strip sets.
+
+    `open` is for a strip that has no title cell of its own: the title is
+    the page's, it is here from the start, and it rises into place when the
+    page arrives and again whenever the word changes. */
 export function StripHead({
   crumb,
   title,
   sub,
   live,
   aside,
+  open = false,
 }: {
   crumb: React.ReactNode;
   title: string;
@@ -131,23 +136,52 @@ export function StripHead({
   live?: boolean;
   /** What it is and how much of it there is, opposite the crumb. */
   aside?: React.ReactNode;
+  /** The title is the page's own, shown from the first frame rather than
+      after the opening cell has gone. */
+  open?: boolean;
 }) {
   return (
     <header className="mx-auto w-full max-w-[100rem] shrink-0 px-6 sm:px-10">
       <div className="flex items-start justify-between gap-6">
         <div className="w-28 shrink-0 sm:w-44">{crumb}</div>
 
-        <div className="running-head min-w-0 text-center">
+        <div className={cn("min-w-0 text-center", !open && "running-head")}>
           {/* Set in the display face at a size that reads as a title and
               not a caption. Julian asked for the top title bigger and in
-              the display face, with the client or model under it. */}
-          <h1 className="font-display line-clamp-2 text-xl uppercase leading-none tracking-[0] sm:line-clamp-none sm:text-3xl">
-            {title}
+              the display face, with the client or model under it.
+
+              An open head reveals: each word rises out from under a clip,
+              one after the other, the same move a title cell makes, so the
+              page still opens on its title arriving — it arrives here
+              instead of in the first cell. Keyed on the word, so a head
+              whose title changes under it plays the reveal again rather
+              than swapping the word in place. */}
+          <h1
+            key={open ? title : undefined}
+            className="font-display line-clamp-2 text-xl uppercase leading-none tracking-[0] sm:line-clamp-none sm:text-3xl"
+          >
+            {open
+              ? title.split(" ").map((word, i) => (
+                  <React.Fragment key={i}>
+                    <span className="inline-block overflow-hidden align-top">
+                      <span
+                        className="title-word inline-block"
+                        style={{ "--i": i } as React.CSSProperties}
+                      >
+                        {word}
+                      </span>
+                    </span>{" "}
+                  </React.Fragment>
+                ))
+              : title}
           </h1>
           {sub ? (
             <p className="label mt-1.5 text-muted-foreground">{sub}</p>
           ) : live ? (
-            <p data-strip-at className="label mt-1.5 min-h-[1lh] text-muted-foreground" />
+            <p
+              data-strip-at
+              className="label mt-1.5 min-h-[1lh] text-muted-foreground"
+            />
           ) : null}
         </div>
 

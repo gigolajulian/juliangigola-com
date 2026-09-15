@@ -42,10 +42,17 @@ import { ClientMarks } from "@/components/client-marks";
  *   3. Cover art, the two doors, and the ask, which leads on to the work.
  * ─────────────────────────────────────────────────────────────── */
 
-/* The nine are one screen, three across and three down. The question the
-   section answers is "is the whole set good", and a set is something you
-   see at once — split over two screens it was a set of six and a set of
-   three, and the second one was a page nobody knew was there. */
+/* The nine are one screen. The question the section answers is "is the
+   whole set good", and a set is something you see at once — split over two
+   screens it was a set of six and a set of three, and the second one was a
+   page nobody knew was there.
+
+   Five along the top and four under it, rather than three rows of three.
+   The previews are upright, and three rows of an upright tile in the height
+   a screen has left is a tile 155 wide: small enough that UKIYOSUNKNOWN came
+   out UKIYOS... Two rows of a taller tile is the same nine pictures at half
+   again the size, and the short row centres itself under the long one. */
+const ROWS = [5, 4];
 
 export default function Home() {
   return (
@@ -96,23 +103,34 @@ export default function Home() {
             </Link>
           </div>
 
-          {/* Nine tiles of the same shape, so the grid is three of them
-              wide by three tall and therefore 4:3 itself. Sizing the block
-              rather than the cells is what keeps every tile at the ratio:
-              it takes the height it is given, takes four thirds of that in
-              width, and hands each tile a ninth of itself. The top pad is
-              the bar — the first row used to run under it. */}
-          <div className="flex min-h-0 flex-1 items-center justify-center px-0 pt-0 sm:px-8 sm:pb-6 sm:pt-32">
-            <div className="grid w-full grid-cols-1 sm:aspect-[4/3] sm:h-full sm:w-auto sm:max-w-full sm:grid-cols-3">
-              {FEATURED.map((project, i) => (
-                <WorkBand
-                  key={project.slug}
-                  project={bandTile(project)}
-                  index={i}
-                  priority={i < 3}
-                />
-              ))}
-            </div>
+          {/* Two rows, each half the height it is given, and every tile
+              4:5 against that height. Sizing the tiles from the height is
+              what keeps the ratio exact at any window: the width follows,
+              and a row of five is still inside a 1280 screen. The top pad
+              is the bar — the first row used to run under it. */}
+          <div className="flex min-h-0 flex-1 flex-col justify-center px-0 pt-0 sm:px-8 sm:pb-6 sm:pt-32">
+            {ROWS.map((count, r) => {
+              const from = ROWS.slice(0, r).reduce((n, c) => n + c, 0);
+              return (
+                <div
+                  key={`row-${r}`}
+                  className="flex min-h-0 flex-1 flex-col justify-center sm:flex-row"
+                >
+                  {FEATURED.slice(from, from + count).map((project, i) => (
+                    <div
+                      key={project.slug}
+                      className="min-h-0 sm:aspect-[4/5] sm:h-full"
+                    >
+                      <WorkBand
+                        project={bandTile(project)}
+                        index={from + i}
+                        priority={r === 0 && i < 3}
+                      />
+                    </div>
+                  ))}
+                </div>
+              );
+            })}
           </div>
 
           {/* The proof, where the proof is. It had a screen to itself and a

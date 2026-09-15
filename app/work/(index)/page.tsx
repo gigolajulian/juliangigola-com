@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { Strip } from "@/components/strip";
-import { TitleCell } from "@/components/strip-page";
 import { CoverCell } from "@/components/cover-cell";
 import { GroupCell } from "@/components/work-cells";
 import { EnquiryCell } from "@/components/enquiry-cell";
@@ -36,14 +35,11 @@ export const metadata: Metadata = {
  * The head and the chips are the layout's; this is the sequence.
  * ─────────────────────────────────────────────────────────────── */
 export default function WorkPage() {
-  const cells: React.ReactNode[] = [
-    <TitleCell key="title" title="Work" hash="work">
-      <p className="max-w-prose text-sm leading-relaxed text-muted-foreground">
-        {COMMISSIONS.length} projects. Editorial, campaigns, portraits, artist
-        imagery, and film.
-      </p>
-    </TitleCell>,
-  ];
+  /* No title cell. "Work" set large next to "Editorial" set large was two
+     titles on one screen arguing about which page you were on; the word is
+     in the middle of the head now, where it rises into place as the page
+     arrives, and the strip opens on the first discipline. */
+  const cells: React.ReactNode[] = [];
   let i = 0;
 
   for (const c of WORK_CATEGORY_LINKS) {
