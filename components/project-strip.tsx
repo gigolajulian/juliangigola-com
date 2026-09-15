@@ -50,11 +50,18 @@ type Cell =
     take no number, no tick, and no place in the count. */
 const isWords = (c: Cell) => c.kind === "title" || c.kind === "next";
 
+/** A project either side of this one: where the wheel goes past an end. */
 export type NextUp = {
   href: string;
   name: string;
   client?: string;
 };
+
+/** Set by a strip on its way out backwards and read by the next one on its
+    way in, so the previous project arrives from the left and opens at its
+    end, which is the side the visitor came in by. Module state rather than
+    storage: it only has to survive one client navigation. */
+let cameBack = false;
 
 /** How far past the end a wheel has to push before it leads on, in px of
     wheel delta. Three notches on a mouse: an overshoot of one is a
@@ -71,15 +78,24 @@ const HOLD = 200;
 const RELAX = 120;
 /** The most the band ever shows, in px. Resistance, not travel. */
 const STRETCH = 160;
+/** How far a wheel notch carries the strip, as a multiple of its delta. A
+    notch is 100px in Chrome, and a sequence is four to nine thousand px
+    wide: at one to one a mouse took forty notches to cross it, and Julian
+    asked for it faster on a mouse with a slow wheel. The band's count stays
+    in raw delta, so this does not make leaving any easier. */
+const WHEEL = 1.8;
 
 export function ProjectStrip({
   project,
   next,
+  prev,
   className,
 }: {
   project: Project;
   /** What the strip ends on and where a wheel past the end goes. */
   next?: NextUp;
+  /** Where a wheel past the start goes. Julian asked for the way back too. */
+  prev?: NextUp;
   className?: string;
 }) {
   const frames = project.images;
@@ -89,6 +105,18 @@ export function ProjectStrip({
   const router = useRouter();
   // Stable for the life of the strip: the page keys it by project.
   const nextHref = next?.href;
+  const prevHref = prev?.href;
+
+  /* Arriving backwards: from the left, and open at the end. Before the first
+     paint, so the arrival animation is created with the right direction
+     and there is no frame of the strip at its start. */
+  React.useLayoutEffect(() => {
+    const el = scroller.current;
+    if (!el || !cameBack) return;
+    cameBack = false;
+    el.dataset.arrive = "back";
+    el.scrollLeft = el.scrollWidth;
+  }, []);
   // The frames' click handler reaches the lightbox through a ref, so the
   // cells below can be built once and not again for every counter change.
   const show = React.useRef(lightbox.show);
@@ -128,8 +156,25 @@ export function ProjectStrip({
     const el = scroller.current;
     if (!el) return;
     let queued = 0;
+    /* ── the lean ──
+       How fast the strip is moving, in px a frame, smoothed, and handed to
+       the frames as a custom property: they lean and zoom with it
+       (`strip-frame` in `globals.css`) and come upright as it stops. Read
+       off the scroll position rather than the wheel so a drag, a flick, a
+       touch and the keyboard all lean the same. It keeps asking for frames
+       after the scrolling has stopped until the lean has run out, or the
+       frames would stay leaning. Julian asked for the scroll to feel
+       interactive: the pictures answer the hand. */
+    let lastLeft = el.scrollLeft;
+    let drift = 0;
     const read = () => {
       queued = 0;
+      const dx = el.scrollLeft - lastLeft;
+      lastLeft = el.scrollLeft;
+      drift += (Math.max(-24, Math.min(24, dx)) - drift) * 0.22;
+      if (Math.abs(drift) < 0.05) drift = 0;
+      el.style.setProperty("--drift", drift.toFixed(2));
+      if (drift) queued = requestAnimationFrame(read);
       const room = el.scrollWidth - el.clientWidth;
       /* Whether the opening plate has gone. The page header carries the same
          name in small capitals and it waits for this: two titles on one
@@ -371,14 +416,16 @@ export function ProjectStrip({
        without this one hard spin skipped a project and then the one after
        it. Half a second of quiet makes each step a decision. */
     const arrived = performance.now();
-    const leave = () => {
-      if (!nextHref || leaving || performance.now() - arrived < 500) return;
+    const leave = (dir: 1 | -1) => {
+      const href = dir > 0 ? nextHref : prevHref;
+      if (!href || leaving || performance.now() - arrived < 500) return;
       leaving = true;
       // The band holds where it is and the slide starts from it.
       if (band) cancelAnimationFrame(band);
       band = 0;
-      el.dataset.leaving = "";
-      window.setTimeout(() => router.push(nextHref), 260);
+      el.dataset.leaving = dir > 0 ? "on" : "back";
+      cameBack = dir < 0;
+      window.setTimeout(() => router.push(href), 260);
     };
 
     const onWheel = (e: WheelEvent) => {
@@ -408,11 +455,9 @@ export function ProjectStrip({
         }
         e.preventDefault();
         push(dy);
-        // Only ever at the right-hand end: a negative count cannot reach
-        // it. The left end resists and springs back, and that is all — the
-        // strip starts there, and a visitor who has just opened a project
-        // should not be thrown out of it backwards.
-        if (over >= LEAVE_AFTER) leave();
+        // Past the end, on; past the start, back. Julian asked for both.
+        if (over >= LEAVE_AFTER) leave(1);
+        if (over <= -LEAVE_AFTER) leave(-1);
         return;
       }
       e.preventDefault();
@@ -421,7 +466,7 @@ export function ProjectStrip({
         over = 0;
         release();
       }
-      to(target + dy);
+      to(target + dy * WHEEL);
     };
 
     /* Drag, for a mouse. A touchscreen is left alone: the platform's own
@@ -535,7 +580,7 @@ export function ProjectStrip({
       el.style.translate = "";
       delete el.dataset.release;
     };
-  }, [router, nextHref]);
+  }, [router, nextHref, prevHref]);
 
   /** Puts a cell in the middle of the window. */
   const goTo = (i: number) => {
@@ -579,8 +624,23 @@ export function ProjectStrip({
                 key="title"
                 className="flex h-full w-[min(30rem,82vw)] shrink-0 flex-col justify-center gap-5 pr-2 sm:pr-6"
               >
+                {/* Each word rises into place from under a clip, one after
+                    another, and the credits follow it up. Julian asked for
+                    the title to animate as a project opens. The clip is on
+                    the word, not the line, so the words can wrap. */}
                 <h2 className="font-display text-4xl uppercase leading-[0.95] tracking-[0] sm:text-6xl">
-                  {project.headline ?? project.name}
+                  {(project.headline ?? project.name).split(" ").map((word, i) => (
+                    <React.Fragment key={i}>
+                      <span className="inline-block overflow-hidden align-top">
+                        <span
+                          className="title-word inline-block"
+                          style={{ "--i": i } as React.CSSProperties}
+                        >
+                          {word}
+                        </span>
+                      </span>{" "}
+                    </React.Fragment>
+                  ))}
                 </h2>
 
                 {/* The writing about the work, when there is any. It used to
@@ -593,7 +653,7 @@ export function ProjectStrip({
                 !project.intent.includes("@") &&
                 project.intent.trim().toLowerCase() !==
                   project.name.trim().toLowerCase() ? (
-                  <p className="max-w-prose text-sm leading-relaxed text-muted-foreground">
+                  <p className="title-rest max-w-prose text-sm leading-relaxed text-muted-foreground">
                     {project.intent}
                   </p>
                 ) : null}
@@ -601,7 +661,7 @@ export function ProjectStrip({
                 {project.credits.length ? (
                   <dl
                     aria-label="Credits"
-                    className="flex flex-col gap-1 border-t border-border pt-4"
+                    className="title-rest flex flex-col gap-1 border-t border-border pt-4"
                   >
                     {project.credits.map((credit, i) => {
                       /* Six harvested credits carry the handle as the name
@@ -702,11 +762,17 @@ export function ProjectStrip({
                 aria-label={`Open frame ${cell.n + 1} of ${frames.length}${
                   cell.frame.alt ? `: ${cell.frame.alt}` : ""
                 }`}
-                className="group relative h-full shrink-0 overflow-hidden press hoverable:cursor-none active:scale-[0.995]"
-                style={{
-                  backgroundColor: cell.frame.color,
-                  aspectRatio: `${cell.frame.width} / ${cell.frame.height}`,
-                }}
+                className="group strip-cell relative h-full shrink-0 overflow-hidden press hoverable:cursor-none active:scale-[0.995]"
+                style={
+                  {
+                    backgroundColor: cell.frame.color,
+                    aspectRatio: `${cell.frame.width} / ${cell.frame.height}`,
+                    // Its place in the order, for the stagger of the arrival
+                    // (`strip-cell` in `globals.css`). The pictures are all
+                    // fetched at once as before; only the reveal is in turn.
+                    "--i": cell.n,
+                  } as React.CSSProperties
+                }
               >
                 <Image
                   // How the lightbox finds the frame to lift out of the
@@ -730,7 +796,7 @@ export function ProjectStrip({
                   }
                   blurDataURL={cell.n === 0 ? project.cover.blur : undefined}
                   draggable={false}
-                  className="h-full w-full object-cover"
+                  className="strip-frame h-full w-full object-cover"
                 />
               </button>
             ),

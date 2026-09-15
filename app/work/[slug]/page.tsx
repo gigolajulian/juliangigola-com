@@ -13,6 +13,7 @@ import {
   enquiryTypeFor,
   isDisciplineGallery,
   nextAfter,
+  prevBefore,
   billing,
   nextDiscipline,
 } from "@/lib/work";
@@ -117,6 +118,13 @@ export default async function ProjectPage(props: PageProps<"/work/[slug]">) {
       }
     : undefined;
 
+  /* And where a wheel pushed past the start goes: the project before, by
+     the same walk. A discipline gallery has no project before it. */
+  const prevProject = isDiscipline ? undefined : prevBefore(project);
+  const prevUp: NextUp | undefined = prevProject
+    ? { href: `/work/${prevProject.slug}`, name: prevProject.name }
+    : undefined;
+
   /* Cover art keeps the rack it was given: twenty-four sleeves at 1:1, two
      of them two-sided, which is a catalogue and not a sequence. Everything
      else is a sequence and gets the strip. */
@@ -216,6 +224,7 @@ export default async function ProjectPage(props: PageProps<"/work/[slug]">) {
         key={project.slug}
         project={project}
         next={nextUp}
+        prev={prevUp}
         className="mt-6 flex-1"
       />
     </article>

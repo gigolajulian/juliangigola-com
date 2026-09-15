@@ -842,35 +842,40 @@ const commissionsIn = (categorySlug: string): Project[] =>
  * the same thing twice and drift the first time a discipline is added; if a
  * pair ever reads wrong, reorder that one list and everything follows.
  *
- * It wraps, because a dead end is an exit.
+ * It wraps, because a dead end is an exit. And it runs both ways: the same
+ * walk backwards is the project before, for a wheel pushed past the start.
  */
-export const nextAfter = (p: Project): Project | undefined => {
+const neighbour = (p: Project, dir: 1 | -1): Project | undefined => {
   /* Sessions keep their own pool, unchanged. A graduation client and an art
      director are not looking at the same thing, and a headshot should not
      lead into a campaign. */
   if (p.categories.some((c) => c.section === "SESSIONS")) {
     const i = SESSIONS.findIndex((x) => x.slug === p.slug);
-    return i === -1 ? SESSIONS[0] : SESSIONS[(i + 1) % SESSIONS.length];
+    const n = SESSIONS.length;
+    return i === -1 ? SESSIONS[0] : SESSIONS[(i + dir + n) % n];
   }
 
   const here = disciplineOf(p);
   const siblings = here ? commissionsIn(here) : [];
   const i = siblings.findIndex((x) => x.slug === p.slug);
-  if (i !== -1 && i + 1 < siblings.length) return siblings[i + 1];
+  if (i !== -1 && siblings[i + dir]) return siblings[i + dir];
 
   /* The discipline has run out, so the next one along the row — hopping any
      that has a chip but no projects behind it, which is how a one-gallery
-     discipline like Cover art is filed. An unfiled project starts the walk
-     at the first discipline, which is where the old running order put it
-     too. */
+     discipline like Cover art is filed. Going back, it is the last project
+     of the discipline before. An unfiled project starts the walk at the
+     first discipline, which is where the old running order put it too. */
   const at = WORK_CATEGORY_LINKS.findIndex((l) => l.slug === here);
   const n = WORK_CATEGORY_LINKS.length;
   for (let hop = 1; hop <= n; hop++) {
-    const first = commissionsIn(WORK_CATEGORY_LINKS[(at + hop + n) % n].slug)[0];
-    if (first) return first;
+    const run = commissionsIn(WORK_CATEGORY_LINKS[(at + dir * hop + 2 * n) % n].slug);
+    const found = run[dir > 0 ? 0 : run.length - 1];
+    if (found) return found;
   }
   return COMMISSIONS[0];
 };
+export const nextAfter = (p: Project) => neighbour(p, 1);
+export const prevBefore = (p: Project) => neighbour(p, -1);
 
 /**
  * The disciplines the homepage cycles through, each with a frame to show for

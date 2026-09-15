@@ -621,6 +621,14 @@ article:has(.strip-scroll[data-past-title]) .running-head {
     transform: translateX(-14vw);
     opacity: 0;
   }
+  /* Backwards: out to the right, and the previous project's strip comes in
+     from the left (`data-arrive`, set by the strip before first paint). */
+  &[data-leaving="back"] {
+    transform: translateX(14vw);
+  }
+  &[data-arrive="back"] {
+    animation-name: jg-strip-in-back;
+  }
   @media (prefers-reduced-motion: reduce) {
     animation: none;
     transition: none;
@@ -633,6 +641,67 @@ article:has(.strip-scroll[data-past-title]) .running-head {
   from {
     transform: translateX(24vw);
     opacity: 0;
+  }
+}
+@keyframes jg-strip-in-back {
+  from {
+    transform: translateX(-24vw);
+    opacity: 0;
+  }
+}
+
+/* ── how a project opens ──
+   The strip slides in (above), and inside it the title's words rise one
+   after another from under their clips, the credits fade up after them,
+   and the frames arrive in order, each a beat behind the one before. The
+   stagger is capped: the seventh frame and after come together, since
+   past the first screen nobody is watching the order. Julian asked for the
+   title to animate and for the images to come in with a delay in order.
+
+   `translate` and `opacity`, never `transform`: the frames lean with the
+   scroll through `transform` (below), and a finished animation that filled
+   `transform` would hold them upright for good. */
+.title-word {
+  animation: jg-rise 720ms var(--ease-out-strong) both;
+  animation-delay: calc(140ms + var(--i, 0) * 70ms);
+}
+.title-rest {
+  animation: jg-fade-up 640ms var(--ease-out-strong) both;
+  animation-delay: 460ms;
+}
+.strip-cell {
+  animation: jg-fade-up 760ms var(--ease-out-strong) both;
+  animation-delay: calc(180ms + min(var(--i, 0), 6) * 90ms);
+}
+@keyframes jg-rise {
+  from {
+    translate: 0 110%;
+  }
+}
+@keyframes jg-fade-up {
+  from {
+    opacity: 0;
+    translate: 3vw 0;
+  }
+}
+/* The lean: the strip's speed, in px a frame, set on the scroller by
+   `project-strip.tsx`. The picture skews with it and zooms enough to keep
+   its corners covered inside the frame, and stands up as the strip stops.
+   On the picture and not the cell, because the cell's `press` transition
+   would smooth every frame of it into lag. */
+.strip-frame {
+  transform: skewX(calc(var(--drift, 0) * -0.16deg))
+    scale(calc(1 + var(--drift, 0) * var(--drift, 0) * 0.00012));
+  will-change: transform;
+}
+@media (prefers-reduced-motion: reduce) {
+  .title-word,
+  .title-rest,
+  .strip-cell {
+    animation: none;
+  }
+  .strip-frame {
+    transform: none;
   }
 }
 
