@@ -220,25 +220,40 @@ export function WorkBand({
        * site's one established translucent surface, it reads as chrome
        * rather than as something wrong with the image.
        */}
-      <div className="absolute inset-x-0 bottom-0 flex flex-col gap-2 border-t border-border/60 glass-surface bg-background/70 p-4 sm:gap-3 sm:p-5">
-        <div className="flex items-baseline gap-4">
+      <div className="absolute inset-x-0 bottom-0 flex flex-col gap-1.5 border-t border-border/60 glass-surface bg-background/70 p-3 sm:gap-2 sm:p-4">
+        <div className="flex items-baseline gap-3 sm:gap-4">
           <span className="label shrink-0 tabular-nums text-muted-foreground">
             {String(index + 1).padStart(2, "0")}
           </span>
           {/* Moved off the photograph and into the plate. On its own in the
                 top corner it needed either a second plate or a scrim of its
                 own to stay legible over a bright frame. */}
-          {/* Sized for a tile in a grid of six rather than for a cell the
-                height of the screen: at `text-3xl` the plate took a third
-                of the picture it was labelling. */}
-          <h3 className="font-display min-w-0 truncate text-xl uppercase leading-none tracking-[0] sm:text-2xl">
+          {/* Sized for a tile in a grid of nine rather than for a cell the
+                height of the screen. All nine sit on one screen now, so a
+                tile is about 260 by 195 on a laptop: at `text-2xl` with a
+                20px surround the plate was taking half of the photograph
+                it was labelling. */}
+          <h3 className="font-display min-w-0 truncate text-lg uppercase leading-none tracking-[0] sm:text-xl">
             {project.name}
           </h3>
+          {/* There was a frame counter here, reading 03 / 12 while the
+              pointer scrubbed. Invisible at rest it still held its width,
+              and at nine tiles to a screen that width was the end of every
+              name: WIRED MAGAZINE came out WIRED MAG... The ticks under
+              the name say the same thing and say it without taking a
+              letter. */}
         </div>
 
-        <div className="flex flex-wrap items-baseline gap-x-6 gap-y-2">
+        <div className="hidden flex-wrap items-baseline gap-x-4 gap-y-1.5 max-sm:flex">
+          {/* The credits are a phone thing now. Stacked, a tile is the
+              width of the screen and has room for them; in the nine-up
+              grid a tile is about 260 wide and the plate was taking half
+              the photograph to print two lines that are on the project's
+              own page and on the work index anyway. */}
           {project.client ? (
-            <p className="label text-muted-foreground">{project.client}</p>
+            <p className="label hidden text-muted-foreground max-sm:block">
+              {project.client}
+            </p>
           ) : null}
           {/* The discipline reads from the left, with the client, and the
                 frame count is what gets pushed away.
@@ -257,18 +272,8 @@ export function WorkBand({
                 margin in a flex row takes all of the space, so with no client
                 the discipline still starts at the left edge instead of
                 splitting the difference. */}
-          <p className="label text-muted-foreground">{project.discipline}</p>
-          {/* Only while scrubbing: at rest the cover is on screen and it
-                is not one of the three, so a counter would be pointing at
-                nothing. */}
-          <p
-            className={cn(
-              "label ml-auto tabular-nums text-muted-foreground transition-opacity duration-200",
-              scrubbing ? "opacity-100" : "opacity-0",
-            )}
-          >
-            {String(active + 1).padStart(2, "0")} /{" "}
-            {String(frames.length).padStart(2, "0")}
+          <p className="label hidden text-muted-foreground max-sm:block">
+            {project.discipline}
           </p>
         </div>
 

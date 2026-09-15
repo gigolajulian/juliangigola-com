@@ -29,7 +29,7 @@ import { cn, rubberband } from "@/lib/utils";
  *   `.strip-cell` + `--i` the staggered arrival (`globals.css`)
  * Inside a cell:
  *   `data-n={i}` on a button   the delegated `onOpen(i)` (a lightbox)
- *   `.strip-frame` on an image the lean
+ *   `.strip-frame` on an image the parallax slide
  *   `data-ring="Open"`         the word under the pointer ring
  *   `[data-scroll]` box        the wheel scrolls it first, then the strip
  * ─────────────────────────────────────────────────────────────── */
@@ -196,17 +196,6 @@ export function Strip({
     const el = scroller.current;
     if (!el || !live) return;
     let queued = 0;
-    /* ── the lean ──
-       How fast the strip is moving, in px a frame, smoothed, and handed to
-       the frames as a custom property: they lean and zoom with it
-       (`strip-frame` in `globals.css`) and come upright as it stops. Read
-       off the scroll position rather than the wheel so a drag, a flick, a
-       touch and the keyboard all lean the same. It keeps asking for frames
-       after the scrolling has stopped until the lean has run out, or the
-       frames would stay leaning. Julian asked for the scroll to feel
-       interactive: the pictures answer the hand. */
-    let lastLeft = el.scrollLeft;
-    let drift = 0;
     /* The cell in the middle, and its word. The word goes two places by
        hand rather than through state: onto the scroller as `data-at`, and
        into whatever `[data-strip-at]` the page put in its head, so the
@@ -232,12 +221,6 @@ export function Strip({
     };
     const read = () => {
       queued = 0;
-      const dx = el.scrollLeft - lastLeft;
-      lastLeft = el.scrollLeft;
-      drift += (Math.max(-24, Math.min(24, dx)) - drift) * 0.22;
-      if (Math.abs(drift) < 0.05) drift = 0;
-      el.style.setProperty("--drift", drift.toFixed(2));
-      if (drift) queued = requestAnimationFrame(read);
       const room = el.scrollWidth - el.clientWidth;
       /* Whether the opening cell has gone. A page's running head waits for
          this: the sequence opens on its title set large, and two titles on

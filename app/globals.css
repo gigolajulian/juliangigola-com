@@ -755,19 +755,22 @@ body:has(.strip-scroll[data-past-first]) .home-wordmark,
     translate: 3vw 0;
   }
 }
-/* The lean: the strip's speed, in px a frame, set on the scroller by
-   `project-strip.tsx`. The picture skews with it and zooms enough to keep
-   its corners covered inside the frame, and stands up as the strip stops.
-   On the picture and not the cell, because the cell's `press` transition
-   would smooth every frame of it into lag. */
+/* The parallax: where the cell is against the middle of the window, set on
+   the cell by the strip. The picture slides against its frame by a share of
+   that, so the pictures cross the screen a touch slower than the frames
+   holding them and sit behind them. On the picture and not the cell,
+   because the cell's `press` transition would smooth every frame of it
+   into lag.
+
+   It used to skew and breathe with the strip's speed as well. That was a
+   move made by how fast you scrolled rather than by where you were, so a
+   picture arrived bent and straightened itself once it had stopped, which
+   is the one thing a photograph should never do. Position only now. */
 .strip-frame {
-  /* Three moves in one: the parallax slide against `--par` (set per cell
-     by the strip), the lean against `--drift`, and a standing zoom of 8%
-     so the slide has picture to reveal at the edges: at a full window
-     away the slide is 3% of the picture, which the zoom covers. */
-  transform: translateX(calc(var(--par, 0) * -3%))
-    skewX(calc(var(--drift, 0) * -0.16deg))
-    scale(calc(1.08 + var(--drift, 0) * var(--drift, 0) * 0.00012));
+  /* The slide, and a standing zoom of 10% so it has picture to reveal at
+     the edges: a window away the slide is 4% of the picture and the zoom
+     covers 5% on each side. */
+  transform: translateX(calc(var(--par, 0) * -4%)) scale(1.1);
 }
 @media (prefers-reduced-motion: reduce) {
   .title-word,

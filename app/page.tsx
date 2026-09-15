@@ -8,6 +8,7 @@ import { WorkBand } from "@/components/work-band";
 import { CoverArt } from "@/components/cover-art";
 import {
   FEATURED,
+  COMMISSIONS,
   PRESS_HOME,
   DISCIPLINES,
   WORK_PAGE,
@@ -17,9 +18,9 @@ import { ClientMarks } from "@/components/client-marks";
 
 /* ── the homepage ─────────────────────────────────────────────────
  * One screen at a time, sideways. Each screen is a whole section rather
- * than a slice of one — the cover, the proof, the work three frames at a
- * time, the rack of sleeves, the two doors, the ask — and a notch, a swipe
- * or an arrow moves exactly one of them. Julian asked for the page to be
+ * than a slice of one — the cover, the whole of the selected work, the rack
+ * of sleeves, the two doors, the ask — and a notch, a swipe or an arrow
+ * moves exactly one of them. Julian asked for the page to be
  * sectioned off, with the movement between sections meaning something:
  * a gesture is "the next thing", never "a bit further along".
  *
@@ -31,31 +32,22 @@ import { ClientMarks } from "@/components/client-marks";
  *      first screen and it is the whole screen, so nothing about the first
  *      impression changes. `arrive="none"`: nothing slides the photograph
  *      in, and nothing moves inside it.
- *   2. Proof — the names that make an art director keep reading.
- *   3. Selected work — a grid of six a screen, edge to edge, each tile
- *      scrubbing through its own sequence under the pointer. That answers
- *      the question a cover cannot: not "does this project exist" but "is
- *      the whole set good", which is a question about a set and so wants
- *      the set on one screen.
- *   4. Cover art, the two doors, and the ask, which leads on to the work.
+ *   2. Selected work — all nine on one screen, three across and three
+ *      down, each tile scrubbing through its own sequence under the
+ *      pointer. That answers the question a cover cannot: not "does this
+ *      project exist" but "is the whole set good", which is a question
+ *      about a set, so the set is on one screen with nothing behind it,
+ *      and the client marks run in a line under it: the names that make an
+ *      art director keep reading, beside what he made for them.
+ *   3. Cover art, the two doors, and the ask, which leads on to the work.
  * ─────────────────────────────────────────────────────────────── */
 
-/** Tiles to a screen: a grid three across and two down. Six at a time is
-    what the section is for — the question it answers is "is the whole set
-    good", and a set is something you see at once. A screen that does not
-    fill both rows keeps the same cells and centres the row it has, so the
-    tiles are one size across the whole section. */
-const COLUMNS = 3;
-const PER_SCREEN = COLUMNS * 2;
-
-const screensOf = <T,>(all: T[], n: number) =>
-  Array.from({ length: Math.ceil(all.length / n) }, (_, i) =>
-    all.slice(i * n, i * n + n),
-  );
+/* The nine are one screen, three across and three down. The question the
+   section answers is "is the whole set good", and a set is something you
+   see at once — split over two screens it was a set of six and a set of
+   three, and the second one was a page nobody knew was there. */
 
 export default function Home() {
-  const screens = screensOf(FEATURED, PER_SCREEN);
-
   return (
     <StripPage>
       <Strip
@@ -75,80 +67,70 @@ export default function Home() {
           className="w-full shrink-0 max-sm:h-[100lvh] sm:h-full"
         />
 
-        {PRESS_HOME.length ? (
-          <section
-            data-tick
-            data-label="Clients"
-            data-hash="clients"
-            aria-labelledby="press"
-            className="flex w-full shrink-0 flex-col justify-center gap-10 border-l border-border px-6 py-16 sm:h-full sm:px-16 sm:pb-0 sm:pt-24"
-          >
-            <h2 id="press" className="label text-muted-foreground">
-              Published &amp; commissioned by
-            </h2>
-            {/* One component with /studio's wall, so a logo added once shows
-                in both places and neither can be the one still set in type.
-                Held to a column rather than the whole screen: eight marks
-                spread across 1440px is a row of stragglers, and at this
-                width they read as a wall of four. */}
-            <ClientMarks
-              clients={PRESS_HOME}
-              layout="grid"
-              className="max-w-[56rem] gap-x-16 gap-y-16"
-            />
-          </section>
-        ) : null}
-
         {/* A grid, butting against itself: the section reads as one sheet
             of imagery rather than as cards in a frame, and the plate over
-            each tile says whose it is. The label in the corner says which
-            screen of the section you are on. */}
-        {screens.map((screen, s) => (
-          <section
-            key={`work-${s}`}
-            data-tick
-            data-label="Selected work"
-            data-hash={s === 0 ? "work" : undefined}
-            aria-label={`Selected work, screen ${s + 1} of ${screens.length}`}
-            className="relative flex w-full shrink-0 flex-col sm:h-full"
-          >
-            {/* Which section this is and how far through it, over the
-                photographs and under the fixed bar. The ruler says the
-                section too; this says the count, and carries the way out
-                to all of the work. */}
-            <div className="pointer-events-none absolute inset-x-0 top-0 z-10 flex items-baseline justify-between gap-6 px-6 py-4 sm:px-8 sm:pt-24">
-              <p className="label glass-surface bg-background/70 px-3 py-1.5 text-muted-foreground">
-                Selected work
-                <span className="ml-3 tabular-nums text-foreground">
-                  {String(s + 1).padStart(2, "0")} /{" "}
-                  {String(screens.length).padStart(2, "0")}
-                </span>
-              </p>
-              <Link
-                prefetch={false}
-                href="/work"
-                className="label pointer-events-auto glass-surface bg-background/70 px-3 py-1.5 text-muted-foreground transition-colors duration-200 hoverable:hover:text-foreground"
-              >
-                All {FEATURED.length} &rarr;
-              </Link>
-            </div>
+            each tile says whose it is. */}
+        <section
+          data-tick
+          data-label="Selected work"
+          data-hash="work"
+          aria-label={`Selected work, ${FEATURED.length} projects`}
+          className="relative flex w-full shrink-0 flex-col sm:h-full"
+        >
+          {/* Which section this is, and the way out to all of the work.
+              Both sit in the band the bar occupies, which is why the grid
+              below starts under it. */}
+          <div className="pointer-events-none absolute inset-x-0 top-0 z-10 flex items-baseline justify-between gap-6 px-6 py-4 sm:px-8 sm:pt-24">
+            <p className="label glass-surface bg-background/70 px-3 py-1.5 text-muted-foreground">
+              Selected work
+              <span className="ml-3 tabular-nums text-foreground">
+                {String(FEATURED.length).padStart(2, "0")}
+              </span>
+            </p>
+            <Link
+              prefetch={false}
+              href="/work"
+              className="label pointer-events-auto glass-surface bg-background/70 px-3 py-1.5 text-muted-foreground transition-colors duration-200 hoverable:hover:text-foreground"
+            >
+              All {COMMISSIONS.length} &rarr;
+            </Link>
+          </div>
 
-            {/* Rows are half the screen each, whether the screen has one
-                of them or two, so every tile in the section is the same
-                size; a short last screen centres its row rather than
-                leaving a hole under it. */}
-            <div className="grid min-h-0 flex-1 content-center grid-cols-1 sm:grid-cols-3 sm:[grid-auto-rows:50%]">
-              {screen.map((project, i) => (
+          {/* Nine tiles of the same shape, so the grid is three of them
+              wide by three tall and therefore 4:3 itself. Sizing the block
+              rather than the cells is what keeps every tile at the ratio:
+              it takes the height it is given, takes four thirds of that in
+              width, and hands each tile a ninth of itself. The top pad is
+              the bar — the first row used to run under it. */}
+          <div className="flex min-h-0 flex-1 items-center justify-center px-0 pt-0 sm:px-8 sm:pb-6 sm:pt-32">
+            <div className="grid w-full grid-cols-1 sm:aspect-[4/3] sm:h-full sm:w-auto sm:max-w-full sm:grid-cols-3">
+              {FEATURED.map((project, i) => (
                 <WorkBand
                   key={project.slug}
                   project={bandTile(project)}
-                  index={s * PER_SCREEN + i}
-                  priority={s === 0 && i < PER_SCREEN}
+                  index={i}
+                  priority={i < 3}
                 />
               ))}
             </div>
-          </section>
-        ))}
+          </div>
+
+          {/* The proof, where the proof is. It had a screen to itself and a
+              screen of logos is a page a visitor swipes past to get back to
+              photographs; a line under the work is read in the second it
+              takes to pass it, which is all a logo needs. */}
+          {PRESS_HOME.length ? (
+            <div
+              aria-labelledby="press"
+              className="flex shrink-0 flex-col items-center gap-4 border-t border-border px-6 py-5 sm:flex-row sm:justify-center sm:gap-10 sm:px-8"
+            >
+              <h2 id="press" className="label shrink-0 text-muted-foreground">
+                Published &amp; commissioned by
+              </h2>
+              <ClientMarks clients={PRESS_HOME} layout="row" />
+            </div>
+          ) : null}
+        </section>
 
         <CoverArt />
 
