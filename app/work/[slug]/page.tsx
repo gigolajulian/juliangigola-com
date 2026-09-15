@@ -13,6 +13,7 @@ import {
   enquiryTypeFor,
   isDisciplineGallery,
   nextAfter,
+  billing,
   nextDiscipline,
 } from "@/lib/work";
 
@@ -73,7 +74,7 @@ export default async function ProjectPage(props: PageProps<"/work/[slug]">) {
   const project = getProject(slug);
   if (!project) notFound();
 
-  const client = project.credits.find((c) => /client/i.test(c.role));
+  const client = billing(project);
 
   /* Four of these pages are not projects at all: Event coverage, Cover art,
      Automotive and Places are each one gallery published under a
@@ -177,11 +178,14 @@ export default async function ProjectPage(props: PageProps<"/work/[slug]">) {
               `globals.css`, keyed off an attribute the strip sets. Julian
               asked for the top title to appear when the card goes away. */}
           <div className="running-head min-w-0 text-center">
-            <h1 className="label font-semibold text-foreground">
+            {/* Set in the display face at a size that reads as a title and
+                not a caption, with whoever the work was for under it, or
+                who is in it. Julian asked for both. */}
+            <h1 className="font-display line-clamp-2 text-xl uppercase leading-none tracking-[0] sm:line-clamp-none sm:text-3xl">
               {project.headline ?? project.name}
             </h1>
             {client ? (
-              <p className="label mt-1 text-muted-foreground">{client.name}</p>
+              <p className="label mt-1.5 text-muted-foreground">{client}</p>
             ) : null}
           </div>
 

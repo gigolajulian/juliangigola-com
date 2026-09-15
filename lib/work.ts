@@ -570,8 +570,9 @@ const withBlur = (cover: Frame): Frame => {
   return blur ? { ...cover, blur } : cover;
 };
 
-/** The person or company a row is credited to, when there is one. */
-const billing = (p: Project): string | undefined =>
+/** The person or company a project is credited to, when there is one: the
+    client, or the model or artist in front of the lens. */
+export const billing = (p: Project): string | undefined =>
   p.credits.find((c) => /client|model|artist/i.test(c.role))?.name;
 
 /** One row of the /work index: a name, a cover for the panel, a credit. */

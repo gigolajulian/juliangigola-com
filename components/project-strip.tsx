@@ -70,7 +70,7 @@ const LEAVE_AFTER = 300;
 const HOLD = 200;
 const RELAX = 120;
 /** The most the band ever shows, in px. Resistance, not travel. */
-const STRETCH = 90;
+const STRETCH = 160;
 
 export function ProjectStrip({
   project,
@@ -232,12 +232,10 @@ export function ProjectStrip({
        the exit slide simply starts from wherever the band had got to. */
     const paint = () => {
       if (leaving) return;
-      // Softer than the lightbox's swipe: a wheel notch is 100px of delta
-      // where a finger's pull is a few, and at the swipe's firmness two
-      // notches hit the cap before the third could lead on. At this one
-      // the three notches read 25, 48 and 71px, so the band is still
-      // growing at the moment it goes.
-      const pull = eased && over ? rubberband(over, el.clientWidth, 0.25) : 0;
+      // Three notches read 48, 94 and 136px, so the band is still growing
+      // at the moment it goes. It was half that and Julian said it did not
+      // feel like a rubber band: give that cannot be seen is a stop.
+      const pull = eased && over ? rubberband(over, el.clientWidth, 0.5) : 0;
       el.style.translate = pull
         ? `${-Math.max(-STRETCH, Math.min(STRETCH, pull))}px`
         : "";
@@ -302,17 +300,26 @@ export function ProjectStrip({
         the band would overwrite a keyboard or touch scroll for as long as
         the band took to settle — seen in the test, where a jump to the end
         was put straight back to the start. */
+    /** Lets the band go: CSS springs it back (`[data-release]` in
+        `globals.css`), so nothing here paints the return frame by frame. */
+    const release = () => {
+      if (leaving || "release" in el.dataset) return;
+      el.dataset.release = "";
+      el.style.translate = "";
+    };
     const relax = (now: number) => {
       if (now - pushed > HOLD) {
+        release();
+        // The count drains on its own clock, unseen.
         over *= Math.exp(-16 / RELAX);
         if (Math.abs(over) < 1) over = 0;
-        paint();
       }
       band = over ? requestAnimationFrame(relax) : 0;
     };
     const push = (by: number) => {
       over += by;
       pushed = performance.now();
+      delete el.dataset.release;
       paint();
       if (!band) band = requestAnimationFrame(relax);
     };
@@ -412,7 +419,7 @@ export function ProjectStrip({
       // A notch the other way lets go of the band, and of the count.
       if (over) {
         over = 0;
-        paint();
+        release();
       }
       to(target + dy);
     };
@@ -526,6 +533,7 @@ export function ProjectStrip({
       if (frame) cancelAnimationFrame(frame);
       if (band) cancelAnimationFrame(band);
       el.style.translate = "";
+      delete el.dataset.release;
     };
   }, [router, nextHref]);
 

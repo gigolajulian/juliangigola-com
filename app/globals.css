@@ -602,6 +602,18 @@ article:has(.strip-scroll[data-past-title]) .running-head {
      first visit. `backwards`, not `both`: a forwards fill would hold the
      transform and the leaving transition below could never move it. */
   animation: jg-strip-in 640ms var(--ease-out-strong) backwards;
+  /* The band at the ends (`project-strip.tsx` writes `translate`). Each
+     notch stretches it over a short ease rather than jumping, and on
+     release it springs back on a curve that overshoots: the snap is what
+     makes it read as rubber and not as a stop. Under the hand there is no
+     easing at all, the band goes where the hand is. */
+  transition: translate 140ms var(--ease-out-strong);
+  &[data-release] {
+    transition: translate 560ms cubic-bezier(0.2, 1.7, 0.4, 1);
+  }
+  &[data-dragged] {
+    transition-duration: 0s;
+  }
   &[data-leaving] {
     transition:
       transform 260ms var(--ease-in-out-strong),
@@ -611,6 +623,7 @@ article:has(.strip-scroll[data-past-title]) .running-head {
   }
   @media (prefers-reduced-motion: reduce) {
     animation: none;
+    transition: none;
     &[data-leaving] {
       transition: none;
     }
