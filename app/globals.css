@@ -916,12 +916,11 @@ body:has(.strip-scroll[data-past-first]) .home-wordmark,
 /**
  * The first paint, for something that must not move.
  *
- * `rise` with the travel taken out. The masthead is measured live by
- * `site-header.tsx` — it reads `[data-masthead]`'s rect every frame to time
- * the handoff to the wordmark in the bar — so translating it during the load
- * would feed the header a position that is 12px wrong for half a second.
- * Opacity changes nothing about where an element is, so this arrives with
- * everything around it and stays exactly where it was measured.
+ * `rise` with the travel taken out. The masthead is the largest thing on the
+ * first screen and the one piece of type the eye lands on before the page has
+ * finished arriving; sliding it in is the one entrance that reads as a jolt
+ * rather than as a welcome. Opacity changes nothing about where an element
+ * is, so this arrives with everything around it and stays put.
  */
 @utility emerge {
   opacity: 1;

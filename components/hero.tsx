@@ -722,12 +722,11 @@ export function Hero({
               style={lands(NAME_MS)}
               className="emerge px-6 pt-6 sm:px-10 squat:pt-10 wide:pt-10"
             >
-              {/* Tagged so the header can measure it. The header's own wordmark
-                waits on this one and then takes over from where it left, and
-                it can only time that against the real element — the masthead's
-                size is a `clamp()` on the viewport and its position moves with
-                the running head above it. */}
-              <span data-masthead className="display block">
+              {/* The header's own wordmark waits on this one and takes over
+                once it has gone by. It used to be measured live from the
+                header; the moment is the strip's now, so nothing reads this
+                element but the eye. */}
+              <span className="display block">
                 Julian Gigola
               </span>
 
