@@ -1,22 +1,22 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { VideoShowcase } from "@/components/video-showcase";
-import { CallToAction } from "@/components/call-to-action";
+import { EnquiryCell } from "@/components/enquiry-cell";
 import { CONTENT } from "@/lib/content";
+import { STUDIO } from "@/lib/work";
 import { SECTIONS, inSection } from "@/lib/videos";
 
 /* ── /work/video ──────────────────────────────────────────────────
  * The moving work, as one more filter on the work index: the `(index)`
  * layout draws the head and the chip row with Motion lit, and the films
- * sit under the chips where a discipline's projects would be.
+ * run across the strip under the chips where a discipline's covers would.
  *
  * Still a real route, at `/work/video` and not `/work/category/video`,
  * because it is not a listing of projects: there are no project pages
  * behind it, so the page is the work, the way `/work/coverart` is.
  *
- * The reel plays behind the head, muted until asked; that is the
- * layout's doing (`work-shell.tsx`). Under the chips, the music videos
- * and the commercials as headings, each film opening in the viewer.
+ * The strip opens on the reel, playing muted, then the music videos and
+ * the commercials two rows deep, each film opening in the viewer, and it
+ * ends on the ask and leads on to the studio.
  * ─────────────────────────────────────────────────────────────── */
 
 export const metadata: Metadata = {
@@ -30,39 +30,23 @@ export default function VideoPage() {
   const videos = CONTENT.videos;
 
   return (
-    <>
-      <div className="mx-auto w-full max-w-[100rem] px-6 pb-24 sm:px-10">
-        {videos.length === 0 ? (
-          /* Not an error state and not a placeholder pretending to be
-             work. Until a link is pasted into /admin the page says so
-             plainly and sends the visitor to the stills. */
-          <p className="mt-8 max-w-prose text-sm leading-relaxed text-muted-foreground">
-            The rest of the moving work is not up here yet.{" "}
-            <Link
-              href="/contact"
-              className="text-foreground underline decoration-border underline-offset-4 hoverable:hover:decoration-foreground"
-            >
-              Ask for more
-            </Link>{" "}
-            and it comes back the same day.
-          </p>
-        ) : (
-          <VideoShowcase
-            sections={SECTIONS.map((s) => ({
-              id: s.id,
-              name: s.name,
-              films: inSection(videos, s.id),
-            }))}
-          />
-        )}
-      </div>
-
-      <CallToAction
-        title="Commission a film"
-        body="Tell me what you have in mind and I'll come back with an approach and a quote."
-        type="editorial"
-        secondary={{ href: "/work", label: "See the stills" }}
-      />
-    </>
+    <VideoShowcase
+      sections={SECTIONS.map((s) => ({
+        id: s.id,
+        name: s.name,
+        films: inSection(videos, s.id),
+      }))}
+      next={STUDIO}
+      ask={
+        <EnquiryCell
+          key="enquire"
+          title="Commission a film"
+          body="Tell me what you have in mind and I'll come back with an approach and a quote."
+          type="editorial"
+          secondary={{ href: "/work", label: "See the stills" }}
+          next={STUDIO}
+        />
+      }
+    />
   );
 }

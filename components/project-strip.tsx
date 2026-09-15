@@ -3,6 +3,7 @@
 import * as React from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { ViewTransition } from "react";
 import { Lightbox, useLightbox } from "@/components/lightbox";
 import { Strip, type Lead } from "@/components/strip";
 import type { Project, TextBlock, Frame } from "@/lib/work-types";
@@ -36,6 +37,25 @@ type Cell =
   | { kind: "frame"; frame: Frame; n: number }
   | { kind: "text"; block: TextBlock }
   | { kind: "next" };
+
+/** The morph's landing side. The index covers and the homepage tiles carry
+    `cover-<slug>`; the frame that answers to it is the first one here, so
+    the picture travels rather than the page cutting to it. Without a slug
+    it is nothing at all, which is what every other frame wants. */
+function Frame({
+  slug,
+  children,
+}: {
+  slug?: string;
+  children: React.ReactNode;
+}) {
+  if (!slug) return children;
+  return (
+    <ViewTransition name={`cover-${slug}`} share="morph" default="none">
+      {children}
+    </ViewTransition>
+  );
+}
 
 /** The name it had before the machine was lifted out; pages still use it. */
 export type NextUp = Lead;
@@ -71,7 +91,8 @@ export function ProjectStrip({
        where a printed portfolio puts them: the plate before the plates. */
     const out: Cell[] = [{ kind: "title" }];
     frames.forEach((frame, i) => {
-      for (const block of byPosition.get(i) ?? []) out.push({ kind: "text", block });
+      for (const block of byPosition.get(i) ?? [])
+        out.push({ kind: "text", block });
       out.push({ kind: "frame", frame, n: i });
     });
     for (const block of byPosition.get(frames.length) ?? []) {
@@ -117,7 +138,7 @@ export function ProjectStrip({
     () =>
       cells.map((cell) =>
         cell.kind === "title" ? (
-              /* The opening plate: the name of the work, large, with whoever
+          /* The opening plate: the name of the work, large, with whoever
                  made it under it. These used to be a row of small capitals
                  under the sequence; they open it instead, which is what
                  Julian asked for and which hands the page back most of the
@@ -126,188 +147,192 @@ export function ProjectStrip({
                  Four of the seventy-three projects carry credits, so this is
                  usually a title alone. That is the point of putting it
                  somewhere worth filling in: they are added in /admin. */
-              <div
-                key="title"
-                className="flex h-full w-[min(30rem,82vw)] shrink-0 flex-col justify-center gap-5 pr-2 sm:pr-6"
-              >
-                {/* Each word rises into place from under a clip, one after
+          <div
+            key="title"
+            className="flex h-full w-[min(30rem,82vw)] shrink-0 flex-col justify-center gap-5 pr-2 sm:pr-6"
+          >
+            {/* Each word rises into place from under a clip, one after
                     another, and the credits follow it up. Julian asked for
                     the title to animate as a project opens. The clip is on
                     the word, not the line, so the words can wrap. */}
-                <h2 className="font-display text-4xl uppercase leading-[0.95] tracking-[0] sm:text-6xl">
-                  {(project.headline ?? project.name).split(" ").map((word, i) => (
-                    <React.Fragment key={i}>
-                      <span className="inline-block overflow-hidden align-top">
-                        <span
-                          className="title-word inline-block"
-                          style={{ "--i": i } as React.CSSProperties}
-                        >
-                          {word}
-                        </span>
-                      </span>{" "}
-                    </React.Fragment>
-                  ))}
-                </h2>
+            <h2 className="font-display text-4xl uppercase leading-[0.95] tracking-[0] sm:text-6xl">
+              {(project.headline ?? project.name).split(" ").map((word, i) => (
+                <React.Fragment key={i}>
+                  <span className="inline-block overflow-hidden align-top">
+                    <span
+                      className="title-word inline-block"
+                      style={{ "--i": i } as React.CSSProperties}
+                    >
+                      {word}
+                    </span>
+                  </span>{" "}
+                </React.Fragment>
+              ))}
+            </h2>
 
-                {/* The writing about the work, when there is any. It used to
+            {/* The writing about the work, when there is any. It used to
                     sit in the page header, where on a page that cannot
                     scroll a paragraph would have squeezed the photographs.
                     Skipped when it is the title again, or a leftover credit
                     line ("styling: @handle") which the credits below say
                     properly. Either can be rewritten in /admin. */}
-                {project.intent &&
-                !project.intent.includes("@") &&
-                project.intent.trim().toLowerCase() !==
-                  project.name.trim().toLowerCase() ? (
-                  <p className="title-rest max-w-prose text-sm leading-relaxed text-muted-foreground">
-                    {project.intent}
-                  </p>
-                ) : null}
+            {project.intent &&
+            !project.intent.includes("@") &&
+            project.intent.trim().toLowerCase() !==
+              project.name.trim().toLowerCase() ? (
+              <p className="title-rest max-w-prose text-sm leading-relaxed text-muted-foreground">
+                {project.intent}
+              </p>
+            ) : null}
 
-                {project.credits.length ? (
-                  <dl
-                    aria-label="Credits"
-                    className="title-rest flex flex-col gap-1 border-t border-border pt-4"
-                  >
-                    {project.credits.map((credit, i) => {
-                      /* Six harvested credits carry the handle as the name
+            {project.credits.length ? (
+              <dl
+                aria-label="Credits"
+                className="title-rest flex flex-col gap-1 border-t border-border pt-4"
+              >
+                {project.credits.map((credit, i) => {
+                  /* Six harvested credits carry the handle as the name
                          ("@apricotsss3") with no instagram field; they link
                          too. */
-                      const handle =
-                        credit.instagram ??
-                        (credit.name.startsWith("@")
-                          ? credit.name.slice(1)
-                          : null);
-                      return (
-                        <div
-                          key={`${credit.role}-${i}`}
-                          className="flex items-baseline gap-3"
-                        >
-                          <dt className="label w-28 shrink-0 text-muted-foreground/70">
-                            {credit.role}
-                          </dt>
-                          <dd className="label min-w-0">
-                            {handle ? (
-                              /* A new tab on purpose: the visitor is on a
+                  const handle =
+                    credit.instagram ??
+                    (credit.name.startsWith("@") ? credit.name.slice(1) : null);
+                  return (
+                    <div
+                      key={`${credit.role}-${i}`}
+                      className="flex items-baseline gap-3"
+                    >
+                      <dt className="label w-28 shrink-0 text-muted-foreground/70">
+                        {credit.role}
+                      </dt>
+                      <dd className="label min-w-0">
+                        {handle ? (
+                          /* A new tab on purpose: the visitor is on a
                                  project, and taking the page out from under
                                  them to show someone else's feed would lose
                                  their place. */
-                              <a
-                                href={`https://www.instagram.com/${handle}/`}
-                                target="_blank"
-                                rel="noreferrer"
-                                className="text-muted-foreground transition-colors duration-200 hoverable:hover:text-foreground"
-                              >
-                                {credit.name}
-                                <span className="sr-only">
-                                  {" "}
-                                  on Instagram (opens in a new tab)
-                                </span>
-                              </a>
-                            ) : (
-                              credit.name
-                            )}
-                          </dd>
-                        </div>
-                      );
-                    })}
-                  </dl>
-                ) : null}
-              </div>
+                          <a
+                            href={`https://www.instagram.com/${handle}/`}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="text-muted-foreground transition-colors duration-200 hoverable:hover:text-foreground"
+                          >
+                            {credit.name}
+                            <span className="sr-only">
+                              {" "}
+                              on Instagram (opens in a new tab)
+                            </span>
+                          </a>
+                        ) : (
+                          credit.name
+                        )}
+                      </dd>
+                    </div>
+                  );
+                })}
+              </dl>
+            ) : null}
+          </div>
         ) : cell.kind === "next" ? (
-              /* The last cell: where the sequence goes next, written and
+          /* The last cell: where the sequence goes next, written and
                  not shown. It carried the next project's cover for a day
                  and Julian said the image from the next page was showing
                  up on this one — which is also how the reference has it:
                  the sequence ends, and past the last photograph there is
                  the name of what follows on empty ground. The pictures on
                  a project page are that project's. */
-              <Link
-                key="next"
-                href={next!.href}
-                data-ring="Next project"
-                className="flex h-full shrink-0 flex-col justify-center gap-2 pl-10 pr-6 sm:pl-24 sm:pr-10 hoverable:cursor-none"
-              >
-                <span className="label text-muted-foreground">
-                  Next project
-                </span>
-                <span className="font-display text-2xl uppercase leading-none tracking-[0] transition-opacity duration-200 hoverable:hover:opacity-70 sm:text-4xl">
-                  {next!.name}
-                </span>
-                {next!.client ? (
-                  <span className="label text-muted-foreground">
-                    {next!.client}
-                  </span>
-                ) : null}
-              </Link>
-            ) : cell.kind === "text" ? (
-              <div
-                key={`text-${cell.block.after}-${cell.block.heading ?? ""}`}
-                data-tick
-                className="flex h-full w-[min(24rem,80vw)] shrink-0 flex-col justify-center"
-              >
-                {cell.block.heading ? (
-                  <h2 className="font-display text-xl uppercase leading-none tracking-[0]">
-                    {cell.block.heading}
-                  </h2>
-                ) : null}
-                <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
-                  {cell.block.body}
-                </p>
-              </div>
-            ) : (
-              /* Full height, and as wide as that height makes it: the
+          <Link
+            key="next"
+            href={next!.href}
+            data-ring="Next project"
+            className="flex h-full shrink-0 flex-col justify-center gap-2 pl-10 pr-6 sm:pl-24 sm:pr-10 hoverable:cursor-none"
+          >
+            <span className="label text-muted-foreground">Next project</span>
+            <span className="font-display text-2xl uppercase leading-none tracking-[0] transition-opacity duration-200 hoverable:hover:opacity-70 sm:text-4xl">
+              {next!.name}
+            </span>
+            {next!.client ? (
+              <span className="label text-muted-foreground">
+                {next!.client}
+              </span>
+            ) : null}
+          </Link>
+        ) : cell.kind === "text" ? (
+          <div
+            key={`text-${cell.block.after}-${cell.block.heading ?? ""}`}
+            data-tick
+            className="flex h-full w-[min(24rem,80vw)] shrink-0 flex-col justify-center"
+          >
+            {cell.block.heading ? (
+              <h2 className="font-display text-xl uppercase leading-none tracking-[0]">
+                {cell.block.heading}
+              </h2>
+            ) : null}
+            <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
+              {cell.block.body}
+            </p>
+          </div>
+        ) : (
+          /* Full height, and as wide as that height makes it: the
                  photograph's own shape is the only thing that decides how
                  much of the strip it takes. */
-              <button
-                key={cell.frame.src}
-                data-tick
-                data-ring="Zoom in"
-                type="button"
-                // Opened by the strip's delegated listener, which is where
-                // the lightbox is reached through a ref.
-                data-n={cell.n}
-                aria-label={`Open frame ${cell.n + 1} of ${frames.length}${
-                  cell.frame.alt ? `: ${cell.frame.alt}` : ""
-                }`}
-                className="group strip-cell relative h-full shrink-0 overflow-hidden press hoverable:cursor-none active:scale-[0.995]"
-                style={
-                  {
-                    backgroundColor: cell.frame.color,
-                    aspectRatio: `${cell.frame.width} / ${cell.frame.height}`,
-                    // Its place in the order, for the stagger of the arrival
-                    // (`strip-cell` in `globals.css`). The pictures are all
-                    // fetched at once as before; only the reveal is in turn.
-                    "--i": cell.n,
-                  } as React.CSSProperties
+          <button
+            key={cell.frame.src}
+            data-tick
+            data-ring="Zoom in"
+            type="button"
+            // Opened by the strip's delegated listener, which is where
+            // the lightbox is reached through a ref.
+            data-n={cell.n}
+            aria-label={`Open frame ${cell.n + 1} of ${frames.length}${
+              cell.frame.alt ? `: ${cell.frame.alt}` : ""
+            }`}
+            className="group strip-cell relative h-full shrink-0 overflow-hidden press hoverable:cursor-none active:scale-[0.995]"
+            style={
+              {
+                backgroundColor: cell.frame.color,
+                aspectRatio: `${cell.frame.width} / ${cell.frame.height}`,
+                // Its place in the order, for the stagger of the arrival
+                // (`strip-cell` in `globals.css`). The pictures are all
+                // fetched at once as before; only the reveal is in turn.
+                "--i": cell.n,
+              } as React.CSSProperties
+            }
+          >
+            <Frame
+              // The first frame is the picture the index was showing:
+              // named, it morphs out of the cover that was clicked
+              // instead of the page cutting. Every other frame is a
+              // plain image, one element per name per page.
+              slug={cell.n === 0 ? project.slug : undefined}
+            >
+              <Image
+                // How the lightbox finds the frame to lift out of the
+                // strip, and to land back in. See `lightbox.tsx`.
+                data-frame={cell.frame.src}
+                src={cell.frame.src}
+                alt={cell.frame.alt || `${project.name}, frame ${cell.n + 1}`}
+                fill
+                sizes="(min-width: 1024px) 60vw, 90vw"
+                // The first two lead the page's loading; every other frame
+                // is fetched at once rather than as the strip reaches it.
+                // Left lazy, Julian's recording showed each frame arriving
+                // as a block of colour and filling in under the wheel,
+                // and the swap from block to picture read as a snap
+                // between every image. The page is the sequence; the
+                // sequence has to be there.
+                priority={cell.n < 2}
+                loading="eager"
+                placeholder={
+                  cell.n === 0 && project.cover.blur ? "blur" : "empty"
                 }
-              >
-                <Image
-                  // How the lightbox finds the frame to lift out of the
-                  // strip, and to land back in. See `lightbox.tsx`.
-                  data-frame={cell.frame.src}
-                  src={cell.frame.src}
-                  alt={cell.frame.alt || `${project.name}, frame ${cell.n + 1}`}
-                  fill
-                  sizes="(min-width: 1024px) 60vw, 90vw"
-                  // The first two lead the page's loading; every other frame
-                  // is fetched at once rather than as the strip reaches it.
-                  // Left lazy, Julian's recording showed each frame arriving
-                  // as a block of colour and filling in under the wheel,
-                  // and the swap from block to picture read as a snap
-                  // between every image. The page is the sequence; the
-                  // sequence has to be there.
-                  priority={cell.n < 2}
-                  loading="eager"
-                  placeholder={
-                    cell.n === 0 && project.cover.blur ? "blur" : "empty"
-                  }
-                  blurDataURL={cell.n === 0 ? project.cover.blur : undefined}
-                  draggable={false}
-                  className="strip-frame h-full w-full object-cover"
-                />
-              </button>
-            ),
+                blurDataURL={cell.n === 0 ? project.cover.blur : undefined}
+                draggable={false}
+                className="strip-frame h-full w-full object-cover"
+              />
+            </Frame>
+          </button>
+        ),
       ),
     [
       cells,
@@ -317,6 +342,7 @@ export function ProjectStrip({
       project.intent,
       project.credits,
       project.cover.blur,
+      project.slug,
       next,
     ],
   );

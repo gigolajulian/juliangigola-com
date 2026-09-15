@@ -1,3 +1,4 @@
+import * as React from "react";
 import { cn } from "@/lib/utils";
 
 /* ── the one-screen page ──────────────────────────────────────────
@@ -44,6 +45,70 @@ export function StripPage({
   );
 }
 
+/** A title whose words rise into place from under a clip, one after
+    another (`title-word` in `globals.css`). The clip is on the word, not
+    the line, so the words can wrap. */
+export function RisingTitle({
+  text,
+  className,
+}: {
+  text: string;
+  className?: string;
+}) {
+  return (
+    <h2
+      className={cn(
+        "font-display text-4xl uppercase leading-[0.95] tracking-[0] sm:text-6xl",
+        className,
+      )}
+    >
+      {text.split(" ").map((word, i) => (
+        <React.Fragment key={i}>
+          <span className="inline-block overflow-hidden align-top">
+            <span
+              className="title-word inline-block"
+              style={{ "--i": i } as React.CSSProperties}
+            >
+              {word}
+            </span>
+          </span>{" "}
+        </React.Fragment>
+      ))}
+    </h2>
+  );
+}
+
+/** The opening cell of a page's strip: the title set large, with a line or
+    two under it that fade up after. The running head in the page's head
+    waits for this cell to go, so the same words are never on screen
+    twice. */
+export function TitleCell({
+  title,
+  hash,
+  children,
+  className,
+}: {
+  title: string;
+  hash?: string;
+  children?: React.ReactNode;
+  className?: string;
+}) {
+  return (
+    <div
+      data-hash={hash}
+      className={cn(
+        "flex w-full shrink-0 flex-col justify-center gap-5 py-10 sm:h-full sm:w-[min(30rem,82vw)] sm:py-0 sm:pr-6",
+        className,
+      )}
+    >
+      <RisingTitle text={title} />
+      {children ? (
+        <div className="title-rest flex flex-col gap-4">{children}</div>
+      ) : null}
+    </div>
+  );
+}
+
 /** Three columns, the outer two the same width, so the title is centred on
     the page and not on whatever is left over. The middle is the running
     head, and it waits its turn: the sequence opens on the title set large,
@@ -82,7 +147,7 @@ export function StripHead({
           {sub ? (
             <p className="label mt-1.5 text-muted-foreground">{sub}</p>
           ) : live ? (
-            <p data-strip-at className="label mt-1.5 min-h-[1em] text-muted-foreground" />
+            <p data-strip-at className="label mt-1.5 min-h-[1lh] text-muted-foreground" />
           ) : null}
         </div>
 

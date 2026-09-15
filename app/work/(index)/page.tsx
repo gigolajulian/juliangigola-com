@@ -1,7 +1,21 @@
 import type { Metadata } from "next";
-import { WorkIndex } from "@/components/work-index";
-import { CallToAction } from "@/components/call-to-action";
-import { COMMISSIONS, indexRow } from "@/lib/work";
+import { Strip } from "@/components/strip";
+import { TitleCell } from "@/components/strip-page";
+import { CoverCell } from "@/components/cover-cell";
+import { GroupCell } from "@/components/work-cells";
+import { EnquiryCell } from "@/components/enquiry-cell";
+import {
+  COMMISSIONS,
+  COVER_ART,
+  WORK_CATEGORY_LINKS,
+  STUDIO,
+  commissionsIn,
+  indexRow,
+  isDisciplineGallery,
+  projectsIn,
+} from "@/lib/work";
+import { COVER_RELEASES } from "@/lib/cover-art-data";
+import { CONTENT } from "@/lib/content";
 
 export const metadata: Metadata = {
   title: "Work",
@@ -10,24 +24,103 @@ export const metadata: Metadata = {
   alternates: { canonical: "/work" },
 };
 
-/** Everything. The head and the chips are the layout's; this is the list. */
+/* ── all the work, as one strip ───────────────────────────────────
+ * Discipline by discipline, in the order of the chip row: each opens on
+ * its name and runs through its covers, so wheeling along the strip reads
+ * the whole archive as chapters, and a chip at the top glides to a
+ * chapter's opening. A discipline that is one gallery rather than a list
+ * (Cover art, Automotive) is one cover cell standing for the whole of it;
+ * the films are a cell of words pointing at their page. It ends on the
+ * ask, and past the ask on the studio.
+ *
+ * The head and the chips are the layout's; this is the sequence.
+ * ─────────────────────────────────────────────────────────────── */
 export default function WorkPage() {
-  return (
-    <>
-      <div className="mx-auto w-full max-w-[100rem] px-6 pb-24 sm:px-10">
-        <WorkIndex projects={COMMISSIONS.map(indexRow)} />
-      </div>
+  const cells: React.ReactNode[] = [
+    <TitleCell key="title" title="Work" hash="work">
+      <p className="max-w-prose text-sm leading-relaxed text-muted-foreground">
+        {COMMISSIONS.length} projects. Editorial, campaigns, portraits, artist
+        imagery, and film.
+      </p>
+    </TitleCell>,
+  ];
+  let i = 0;
 
-      {/* Over the pinned head in the stack, so at the end of the list this
-          slides up over it and the head is gone with the list. */}
-      <div className="relative z-30 bg-background">
-        <CallToAction
-          title="Commission a shoot"
-          body="Tell me what you have in mind and I'll come back with an approach and a quote."
-          type="editorial"
-          secondary={{ href: "/studio", label: "How a commission runs" }}
-        />
-      </div>
-    </>
+  for (const c of WORK_CATEGORY_LINKS) {
+    if (c.slug === "video") {
+      cells.push(
+        <GroupCell
+          key={c.slug}
+          name={c.name}
+          count={`${CONTENT.videos.length + 1} films`}
+          href={c.href}
+          hash={c.slug}
+          i={i++}
+          cta="See the films"
+        />,
+      );
+      continue;
+    }
+
+    const gallery = projectsIn(c.slug).find(isDisciplineGallery);
+    if (gallery) {
+      const isCoverArt = gallery.slug === COVER_ART?.slug;
+      const n = isCoverArt ? COVER_RELEASES.length : gallery.images.length;
+      cells.push(
+        <CoverCell
+          key={c.slug}
+          row={{
+            ...indexRow(gallery),
+            name: c.name,
+            credit: `${n} ${isCoverArt ? "releases" : "frames"}`,
+          }}
+          href={c.href}
+          label={c.name}
+          hash={c.slug}
+          i={i++}
+          eager={i < 4}
+        />,
+      );
+      continue;
+    }
+
+    const run = commissionsIn(c.slug);
+    if (!run.length) continue;
+    cells.push(
+      <GroupCell
+        key={c.slug}
+        name={c.name}
+        count={`${run.length} ${run.length === 1 ? "project" : "projects"}`}
+        href={c.href}
+        hash={c.slug}
+        i={i++}
+      />,
+    );
+    for (const p of run) {
+      cells.push(
+        <CoverCell key={p.slug} row={indexRow(p)} i={i++} eager={i < 4} />,
+      );
+    }
+  }
+
+  cells.push(
+    <EnquiryCell
+      key="enquire"
+      title="Commission a shoot"
+      body="Tell me what you have in mind and I'll come back with an approach and a quote."
+      type="editorial"
+      secondary={{ href: "/studio", label: "How a commission runs" }}
+      next={STUDIO}
+    />,
+  );
+
+  return (
+    <Strip
+      label={`All work: ${COMMISSIONS.length} projects, left and right`}
+      next={STUDIO}
+      className="mt-4 flex-1"
+    >
+      {cells}
+    </Strip>
   );
 }

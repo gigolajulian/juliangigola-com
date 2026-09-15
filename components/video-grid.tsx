@@ -19,16 +19,23 @@ import { cn } from "@/lib/utils";
  * of columns is whatever the width affords rather than a set of breakpoints,
  * and every tile is an `aspect-video` box, so the row heights are known
  * before the still loads and nothing shifts when it does.
+ *
+ * Along a strip (`rows`) the same tiles run two rows deep, each as tall as
+ * half the strip, with the caption on a plate over the still.
  * ─────────────────────────────────────────────────────────────── */
 
 export function VideoGrid({
   videos,
   onOpen,
+  rows = false,
 }: {
   videos: Video[];
   /** When given, a press opens the film here instead of playing it in
       its tile; see `video-viewer.tsx`. */
   onOpen?: (video: Video) => void;
+  /** Two rows running along a strip, the tiles as tall as half of it,
+      with the caption on a plate over the still. On a phone, one column. */
+  rows?: boolean;
 }) {
   /** Which tile has been asked to play. One at a time. */
   const [playing, setPlaying] = React.useState<string | null>(null);
@@ -38,61 +45,88 @@ export function VideoGrid({
   return (
     <ul
       className={cn(
-        "mt-8 grid gap-x-6 gap-y-10",
-        // Siblings that cross the fold together, so they arrive as one
-        // gesture rather than a flash of four simultaneous events. Every
-        // child is revealed here, which is what this utility requires.
-        "stagger",
-        /* No breakpoints: a floor of 22rem gives one column on a phone, two
-           around 44rem and three around 66rem, with the tiles absorbing the
-           slack in between rather than jumping at a width somebody picked.
-           
-           `auto-fill`, not `auto-fit`. They differ only when a row is not
-           full, and that is exactly the case here: `auto-fit` collapses the
-           empty tracks, so the Commercial section with one film in it drew a
-           single 1185px tile beside a Music video section of 580px ones —
-           the same page at two scales. `auto-fill` keeps the empty tracks,
-           so a lone film sits in a column the width of all the others. */
-        "[grid-template-columns:repeat(auto-fill,minmax(min(22rem,100%),1fr))]",
+        "grid",
+        rows
+          ? "h-full grid-flow-col grid-rows-2 gap-3 max-sm:h-auto max-sm:grid-flow-row max-sm:grid-cols-1 max-sm:gap-6"
+          : [
+              "mt-8 gap-x-6 gap-y-10",
+              // Siblings that cross the fold together, so they arrive as one
+              // gesture rather than a flash of four simultaneous events. Every
+              // child is revealed here, which is what this utility requires.
+              "stagger",
+              /* No breakpoints: a floor of 22rem gives one column on a phone, two
+                 around 44rem and three around 66rem, with the tiles absorbing the
+                 slack in between rather than jumping at a width somebody picked.
+
+                 `auto-fill`, not `auto-fit`. They differ only when a row is not
+                 full, and that is exactly the case here: `auto-fill` collapses the
+                 empty tracks, so the Commercial section with one film in it drew a
+                 single 1185px tile beside a Music video section of 580px ones —
+                 the same page at two scales. `auto-fill` keeps the empty tracks,
+                 so a lone film sits in a column the width of all the others. */
+              "[grid-template-columns:repeat(auto-fill,minmax(min(22rem,100%),1fr))]",
+            ],
       )}
     >
-      {videos.map((video) => (
-        <li key={video.id} className="group/cell flex min-w-0 flex-col">
-          <Reveal className="flex min-w-0 flex-col">
-            <Tile
-              video={video}
-              playing={playing === video.id}
-              onPlay={() => (onOpen ? onOpen(video) : setPlaying(video.id))}
-              /* The first still in a section is above the fold and it *is* the
+      {videos.map((video) => {
+        const tile = (
+          <Tile
+            video={video}
+            playing={playing === video.id}
+            onPlay={() => (onOpen ? onOpen(video) : setPlaying(video.id))}
+            /* The first still in a section is above the fold and it *is* the
                content — lazy-loading the thing the page is for costs a beat
                on arrival for nothing. The rest wait until they are scrolled
                to. */
-              eager={videos.indexOf(video) === 0}
-            />
-
-            {/* The caption reacts with the tile: everything in here is muted
-                until the pointer is on the cell, which ties the words to the
-                picture they belong to rather than leaving them as a separate
-                thing below it. `group` is on the `<li>`'s child so the
-                caption is inside the same hover as the frame. */}
-            <div className="mt-3 flex flex-wrap items-baseline gap-x-4 gap-y-1">
-              <h3 className="font-display text-lg uppercase tracking-[0] transition-colors duration-200">
-                {video.title}
-              </h3>
-              {video.client ? (
-                <p className="label text-muted-foreground transition-colors duration-200 group-hover/cell:text-foreground">
-                  {video.client}
-                </p>
-              ) : null}
-              {video.year ? (
-                <p className="label ml-auto shrink-0 tabular-nums text-muted-foreground transition-colors duration-200 group-hover/cell:text-foreground">
-                  {video.year}
-                </p>
-              ) : null}
-            </div>
-          </Reveal>
-        </li>
-      ))}
+            eager={videos.indexOf(video) === 0}
+            box={rows ? "w-full sm:h-full sm:w-auto" : "w-full"}
+          />
+        );
+        /* The caption reacts with the tile: everything in here is muted
+           until the pointer is on the cell, which ties the words to the
+           picture they belong to rather than leaving them as a separate
+           thing below it. `group` is on the `<li>`'s child so the caption
+           is inside the same hover as the frame. Along a strip it sits on
+           a plate over the foot of the still instead, so the tile is the
+           whole of its half of the height. */
+        const caption = (
+          <div
+            className={cn(
+              "flex flex-wrap items-baseline gap-x-4 gap-y-1",
+              rows
+                ? "pointer-events-none absolute inset-x-0 bottom-0 border-t border-border/60 glass-surface bg-background/70 px-4 py-3"
+                : "mt-3",
+            )}
+          >
+            <h3 className="font-display text-lg uppercase tracking-[0] transition-colors duration-200">
+              {video.title}
+            </h3>
+            {video.client ? (
+              <p className="label text-muted-foreground transition-colors duration-200 group-hover/cell:text-foreground">
+                {video.client}
+              </p>
+            ) : null}
+            {video.year ? (
+              <p className="label ml-auto shrink-0 tabular-nums text-muted-foreground transition-colors duration-200 group-hover/cell:text-foreground">
+                {video.year}
+              </p>
+            ) : null}
+          </div>
+        );
+        return rows ? (
+          <li key={video.id} className="group/cell relative min-h-0">
+            {tile}
+            {caption}
+          </li>
+        ) : (
+          <li key={video.id} className="group/cell flex min-w-0 flex-col">
+            <Reveal className="flex min-w-0 flex-col">
+              {tile}
+              {caption}
+            </Reveal>
+          </li>
+        );
+      })}
     </ul>
   );
 }
@@ -102,17 +136,21 @@ function Tile({
   playing,
   onPlay,
   eager,
+  box,
 }: {
   video: Video;
   playing: boolean;
   onPlay: () => void;
   eager?: boolean;
+  /** How the 16:9 box is sized: by its width in a grid, by its height
+      along a strip. */
+  box: string;
 }) {
   const poster = posterFor(video);
 
   if (playing) {
     return (
-      <div className="relative aspect-video w-full overflow-hidden bg-card">
+      <div className={cn("relative aspect-video overflow-hidden bg-card", box)}>
         <iframe
           // `key` on the id, so switching tiles cannot hand the new video the
           // old one's element and leave two players running.
@@ -139,7 +177,10 @@ function Tile({
       // `group` drives two things: the picture's zoom and the play mark
       // arriving. The inset outline that used to draw itself on hover is
       // gone, at Julian's ask.
-      className="group relative aspect-video w-full overflow-hidden bg-card press active:scale-[0.995]"
+      className={cn(
+        "group relative aspect-video overflow-hidden bg-card press active:scale-[0.995]",
+        box,
+      )}
     >
       {poster ? (
         <Image

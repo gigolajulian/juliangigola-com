@@ -506,6 +506,12 @@ export const categoryHref = (categorySlug: string): string => {
   return `/work/category/${categorySlug}`;
 };
 
+/** The pages a strip leads on to once its own sequence has run out: the
+    site's order, in the shape the strip takes (`Lead` in `strip.tsx`). */
+export const WORK_PAGE = { href: "/work", name: "Work" };
+export const STUDIO = { href: "/studio", name: "Studio" };
+export const CONTACT = { href: "/contact", name: "Contact" };
+
 /** A category as the index renders it: name plus where it goes. */
 export type CategoryLink = { slug: string; name: string; href: string };
 
@@ -822,7 +828,7 @@ const disciplineOf = (p: Project): string | undefined =>
  * commissions up rather than overlapping: every project is in exactly one,
  * which is what makes the walk below a walk and not a set of loops.
  */
-const commissionsIn = (categorySlug: string): Project[] =>
+export const commissionsIn = (categorySlug: string): Project[] =>
   COMMISSIONS.filter((p) => disciplineOf(p) === categorySlug);
 
 /**

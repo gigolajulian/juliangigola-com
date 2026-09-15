@@ -134,6 +134,8 @@ export function Strip({
   const scroller = React.useRef<HTMLDivElement>(null);
   React.useImperativeHandle(ref, () => scroller.current!, []);
   const [at, setAt] = React.useState(0);
+  const [ticks, setTicks] = React.useState<{ i: number; word?: string }[]>([]);
+  const tickKey = React.useRef("");
   // For the keyboard, which lives in an effect and must not go stale.
   const atRef = React.useRef(0);
   const wide = useWide();
@@ -202,7 +204,17 @@ export function Strip({
     const land = (i: number) => {
       atRef.current = i;
       setAt(i);
-      const word = (el.children[i] as HTMLElement | undefined)?.dataset.label ?? "";
+      /* The word is the nearest labelled cell at or before this one: the
+         covers under a discipline carry no word of their own, and the head
+         should go on saying the discipline while they go by. */
+      let word = "";
+      for (let k = i; k >= 0; k--) {
+        const w = (el.children[k] as HTMLElement).dataset.label;
+        if (w !== undefined) {
+          word = w;
+          break;
+        }
+      }
       if (word === el.dataset.at) return;
       el.dataset.at = word;
       const out = el.closest("article")?.querySelector("[data-strip-at]");
@@ -231,20 +243,54 @@ export function Strip({
          At the far end the last cell is often narrower than half a window,
          so the middle of the window sits over the one before it and the
          counter could never reach the last cell at all. */
-      if (el.scrollLeft >= room - 2) return land(el.children.length - 1);
-      if (el.scrollLeft <= 2) return land(0);
       const middle = el.scrollLeft + el.clientWidth / 2;
+      const kids = Array.from(el.children) as HTMLElement[];
+      // Every read before any write, or each write would cost a layout.
+      const offs = kids.map((c) => c.offsetLeft + c.offsetWidth / 2 - middle);
       let best = 0;
       let nearest = Infinity;
-      Array.from(el.children).forEach((child, i) => {
-        const cell = child as HTMLElement;
-        const gap = Math.abs(cell.offsetLeft + cell.offsetWidth / 2 - middle);
-        if (gap < nearest) {
-          nearest = gap;
+      offs.forEach((off, i) => {
+        if (Math.abs(off) < nearest) {
+          nearest = Math.abs(off);
           best = i;
         }
+        /* ── the parallax ──
+           Where each cell is against the middle of the window, as a
+           fraction of the window, handed to it as a custom property. The
+           picture inside slides against its frame by a few percent of
+           that (`strip-frame` in `globals.css`), so as the frames cross
+           the screen the pictures cross it a touch slower and sit behind
+           them. Tied to the scroll position and nothing else, so it is as
+           smooth as the scroll is and stops when it stops. Julian asked
+           for a parallax that is smooth and clean. Cells more than a
+           window and a half away are left alone. */
+        const par = off / el.clientWidth;
+        if (Math.abs(par) > 1.5) {
+          if (kids[i].style.getPropertyValue("--par")) {
+            kids[i].style.removeProperty("--par");
+          }
+        } else {
+          kids[i].style.setProperty(
+            "--par",
+            Math.max(-1, Math.min(1, par)).toFixed(3),
+          );
+        }
       });
-      land(best);
+      if (el.scrollLeft >= room - 2) land(kids.length - 1);
+      else if (el.scrollLeft <= 2) land(0);
+      else land(best);
+    };
+    /* The ruler's ticks, read off the cells once they are in the DOM: a
+       cell is often a component of its own, so its attributes are not on
+       the element the strip is handed. Set only when they change. */
+    const readTicks = () => {
+      const t = (Array.from(el.children) as HTMLElement[]).flatMap((c, i) =>
+        c.dataset.tick !== undefined ? [{ i, word: c.dataset.label }] : [],
+      );
+      const key = t.map((x) => `${x.i}:${x.word ?? ""}`).join("|");
+      if (key === tickKey.current) return;
+      tickKey.current = key;
+      setTicks(t);
     };
     const onScroll = () => {
       if (!queued) queued = requestAnimationFrame(read);
@@ -258,7 +304,12 @@ export function Strip({
       const where = i >= 0 ? centreOf(el, i) : null;
       if (where !== null) glide.current(where);
     };
-    read();
+    // A frame later rather than now, so the first render is not followed
+    // by a second one in the same tick.
+    queued = requestAnimationFrame(() => {
+      readTicks();
+      read();
+    });
     el.addEventListener("scroll", onScroll, { passive: true });
     window.addEventListener("resize", read);
     window.addEventListener("hashchange", onHash);
@@ -635,7 +686,9 @@ export function Strip({
                 : null;
       if (i === null) return;
       e.preventDefault();
-      const where = centreOf(el, i);
+      // The ends themselves for Home and End: the last cell is often
+      // narrower than half a window, so its centre is short of the end.
+      const where = i === 0 ? 0 : i === last ? room() : centreOf(el, i);
       if (where !== null) to(where);
     };
 
@@ -678,12 +731,6 @@ export function Strip({
     if (where !== null) glide.current(where);
   };
 
-  /* The ruler reads the cells' own attributes, so a page says what gets a
-     tick by marking the cell and nothing here has to be told. Read from
-     the elements rather than the DOM so the ticks are there on the first
-     paint. */
-  const cells = React.Children.toArray(children);
-
   return (
     <div className={cn("flex min-h-0 flex-col", className)}>
       <div
@@ -725,13 +772,11 @@ export function Strip({
 
         <div
           aria-hidden
-          className="flex min-w-0 flex-1 items-end justify-between gap-px"
+          // `h-4` whether or not the ticks are in yet, so the strip above is
+          // the same height before and after they are read.
+          className="flex h-4 min-w-0 flex-1 items-end justify-between gap-px"
         >
-          {cells.map((cell, i) => {
-            if (!React.isValidElement(cell)) return null;
-            const props = cell.props as Record<string, unknown>;
-            if (props["data-tick"] === undefined) return null;
-            const word = props["data-label"] as string | undefined;
+          {ticks.map(({ i, word }) => {
             return (
               <button
                 key={`tick-${i}`}

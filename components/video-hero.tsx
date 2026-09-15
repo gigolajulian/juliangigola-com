@@ -111,19 +111,6 @@ export function VideoHero({
   /** When it was cut. Printed in the label the screen reader hears. */
   year?: number;
 }) {
-  /* Tells the fixed header it is over the film. Not `data-cover`, which
-     plates the bar the way the homepage does over a pale photograph:
-     Julian wants the reel as the whole background from the top down, and
-     a plate cuts the top of it off. `globals.css` turns the bar's type
-     white over `data-film` instead and leaves it transparent; the wash
-     below is heavy enough at the top for that to read. */
-  React.useEffect(() => {
-    document.documentElement.dataset.film = "true";
-    return () => {
-      delete document.documentElement.dataset.film;
-    };
-  }, []);
-
   const frame = React.useRef<HTMLElement>(null);
   const iframe = React.useRef<HTMLIFrameElement>(null);
   const player = React.useRef<VimeoPlayer | null>(null);
@@ -345,12 +332,12 @@ export function VideoHero({
   }, [withSound, stopRamp]);
 
   return (
-    /* Behind the head of /work/video: `work-shell.tsx` lays this over the
-       full width and puts the title, the count and the chips on top of it.
-       Julian: the reel playing in the background, started muted.
+    /* The opening cell of /work/video (`video-showcase.tsx`): the reel
+       fills the cell and plays muted. Julian: the reel playing in the
+       background, started muted.
 
        `container-type: size` so the film can cover a box whose height is
-       the head's and not the viewport's: an iframe cannot be told to
+       the cell's and not the viewport's: an iframe cannot be told to
        `object-fit: cover`, so it is given the larger of the two dimensions
        it could need in container units and centred on the overflow. */
     <section

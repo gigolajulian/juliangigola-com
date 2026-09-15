@@ -5,6 +5,7 @@ import { Lightbox, useLightbox } from "@/components/lightbox";
 import { CoverFaces, coverLabel } from "@/components/cover-faces";
 import { Reveal } from "@/components/reveal";
 import type { CoverRelease } from "@/lib/cover-art-types";
+import { cn } from "@/lib/utils";
 
 /* ── the cover-art sheet ──────────────────────────────────────────
  * Every release, three across.
@@ -20,7 +21,15 @@ import type { CoverRelease } from "@/lib/cover-art-types";
  * grid that has no gaps anywhere else.
  * ─────────────────────────────────────────────────────────────── */
 
-export function CoverArtGallery({ releases }: { releases: CoverRelease[] }) {
+export function CoverArtGallery({
+  releases,
+  rows = false,
+}: {
+  releases: CoverRelease[];
+  /** Two rows of sleeves running along a strip, each as tall as half of
+      it, instead of three columns down a page. On a phone, two columns. */
+  rows?: boolean;
+}) {
   // The lightbox pages through every side in order, so arrowing off side A
   // lands on side B rather than skipping to the next release.
   const frames = React.useMemo(
@@ -40,7 +49,12 @@ export function CoverArtGallery({ releases }: { releases: CoverRelease[] }) {
     <>
       <ul
         data-ring="Zoom in"
-        className="mt-12 grid grid-cols-2 hoverable:cursor-none sm:mt-16 sm:grid-cols-3"
+        className={cn(
+          "grid hoverable:cursor-none",
+          rows
+            ? "h-full grid-flow-col grid-rows-2 max-sm:h-auto max-sm:grid-flow-row max-sm:grid-cols-2"
+            : "mt-12 grid-cols-2 sm:mt-16 sm:grid-cols-3",
+        )}
       >
         {releases.map((release, i) => {
           const front = release.frames[0];
@@ -61,12 +75,17 @@ export function CoverArtGallery({ releases }: { releases: CoverRelease[] }) {
                 lightbox.show(positions.get(frame.src) ?? 0);
               }}
               aria-label={`Open ${coverLabel(release.title, release.artist, release.frames)}`}
-              className="group relative block aspect-square w-full overflow-hidden press active:scale-[0.995]"
+              className={cn(
+                "group relative block aspect-square w-full overflow-hidden press active:scale-[0.995]",
+                rows && "sm:h-full sm:w-auto",
+              )}
               style={{ backgroundColor: front.color }}
             >
               <CoverFaces
                 frames={release.frames}
-                sizes="(min-width: 640px) 33vw, 50vw"
+                sizes={
+                  rows ? "(min-width: 640px) 18vw, 50vw" : "(min-width: 640px) 33vw, 50vw"
+                }
                 // The top row, eagerly — it is the largest thing above the
                 // fold. The rest of the rack loads as it is reached.
                 priority={i < 3}
@@ -84,12 +103,13 @@ export function CoverArtGallery({ releases }: { releases: CoverRelease[] }) {
           );
 
           return (
-            <li key={release.slug}>
+            <li key={release.slug} className={rows ? "sm:min-h-0" : undefined}>
               {/* The top row carries `priority` and sits above the fold, so
                   it is left unwrapped — revealing it would animate it at load
                   on top of the page's own `rise`. The wrapper goes inside the
-                  `<li>` so the list item stays the grid cell. */}
-              {i < 3 ? cell : <Reveal>{cell}</Reveal>}
+                  `<li>` so the list item stays the grid cell. Along a strip
+                  the strip's own arrival is the reveal. */}
+              {rows || i < 3 ? cell : <Reveal>{cell}</Reveal>}
             </li>
           );
         })}

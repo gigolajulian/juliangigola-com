@@ -1,11 +1,17 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { WorkIndex } from "@/components/work-index";
-import { CallToAction } from "@/components/call-to-action";
+import { Strip } from "@/components/strip";
+import { TitleCell } from "@/components/strip-page";
+import { CoverCell } from "@/components/cover-cell";
+import { EnquiryCell } from "@/components/enquiry-cell";
+import { ProjectStrip } from "@/components/project-strip";
+import { CoverArtGallery } from "@/components/cover-art-gallery";
 import {
   WORK_CATEGORIES,
+  WORK_CATEGORY_LINKS,
   COMMISSIONS,
   COVER_ART,
+  STUDIO,
   projectsIn,
   categoryHref,
   categoryLabel,
@@ -14,8 +20,6 @@ import {
   isDisciplineGallery,
 } from "@/lib/work";
 import { COVER_RELEASES } from "@/lib/cover-art-data";
-import { Gallery } from "@/components/gallery";
-import { CoverArtGallery } from "@/components/cover-art-gallery";
 
 /* ── a discipline ─────────────────────────────────────────────────
  * One page per category, so a discipline is a place rather than a filter
@@ -31,8 +35,10 @@ import { CoverArtGallery } from "@/components/cover-art-gallery";
  * project (COVERART, WEDDINGS), and one route serving both would have to pick
  * a winner and silently shadow the loser.
  *
- * The head and the chip row are the `(index)` layout's, so a click on a
- * chip changes the list and nothing else.
+ * The head and the chip row are the `(index)` layout's; this is the strip
+ * under them, one discipline's chapter of the whole. Past its ask the
+ * wheel leads to the next discipline along the chip row, and past the
+ * last one to the studio.
  * ─────────────────────────────────────────────────────────────── */
 
 /**
@@ -47,6 +53,14 @@ import { CoverArtGallery } from "@/components/cover-art-gallery";
 const LISTED = WORK_CATEGORIES.filter(
   (c) => categoryHref(c.slug) === `/work/category/${c.slug}`,
 );
+
+/** The discipline after this one along the chip row, or the studio after
+    the last: the chain runs once, it does not wrap. */
+const after = (slug: string) => {
+  const at = WORK_CATEGORY_LINKS.findIndex((c) => c.slug === slug);
+  const next = at === -1 ? undefined : WORK_CATEGORY_LINKS[at + 1];
+  return next ? { href: next.href, name: next.name } : STUDIO;
+};
 
 export function generateStaticParams() {
   return LISTED.map((c) => ({ slug: c.slug }));
@@ -92,30 +106,72 @@ export default async function CategoryPage(
   const gallery = projectsIn(slug).find(isDisciplineGallery);
   const isCoverArt = gallery?.slug === COVER_ART?.slug;
   const name = categoryLabel(category);
+  const next = after(slug);
+  const ask = (
+    <EnquiryCell
+      key="enquire"
+      title={`Commission ${name.toLowerCase()}`}
+      body="Tell me what you have in mind and I'll come back with an approach and a quote."
+      type={enquiryTypeFor(projects[0] ?? gallery ?? COMMISSIONS[0])}
+      secondary={{ href: "/work", label: "See all the work" }}
+      next={next}
+    />
+  );
+
+  /* A photographic gallery is a sequence and gets the project strip, which
+     ends on the next discipline as a project ends on the next project. On a
+     phone it keeps its sideways swipe and needs a height to do it in. */
+  if (gallery && !isCoverArt) {
+    return (
+      <div className="flex min-h-0 flex-1 flex-col max-sm:h-[75dvh] max-sm:flex-none">
+        <ProjectStrip project={gallery} next={next} className="mt-4 flex-1" />
+      </div>
+    );
+  }
+
+  /* Cover art is a catalogue and gets its rack, two rows of sleeves along
+     the strip, as one cell. */
+  if (gallery && isCoverArt) {
+    return (
+      <Strip
+        label={`Cover art: ${COVER_RELEASES.length} releases, left and right`}
+        next={next}
+        className="mt-4 flex-1"
+      >
+        <TitleCell title={name} hash={slug}>
+          <p className="label text-muted-foreground">
+            {COVER_RELEASES.length} releases
+          </p>
+        </TitleCell>
+        <div
+          data-tick
+          data-label={name}
+          className="w-full shrink-0 sm:h-full sm:w-auto"
+        >
+          <CoverArtGallery releases={COVER_RELEASES} rows />
+        </div>
+        {ask}
+      </Strip>
+    );
+  }
 
   return (
-    <>
-      <div className="mx-auto w-full max-w-[100rem] px-6 pb-24 sm:px-10">
-        {/* Under the chips, in place of the list. Cover art is a catalogue
-            of 1:1 sleeves and gets its rack; the other galleries are
-            photographic sequences and get the paired-frame spread. */}
-        {gallery ? (
-          isCoverArt ? (
-            <CoverArtGallery releases={COVER_RELEASES} />
-          ) : (
-            <Gallery project={gallery} />
-          )
-        ) : (
-          <WorkIndex projects={projects.map(indexRow)} />
-        )}
-      </div>
-
-      <CallToAction
-        title={`Commission ${name.toLowerCase()}`}
-        body="Tell me what you have in mind and I'll come back with an approach and a quote."
-        type={enquiryTypeFor(projects[0] ?? gallery ?? COMMISSIONS[0])}
-        secondary={{ href: "/work", label: "See all the work" }}
-      />
-    </>
+    <Strip
+      label={`${name}: ${projects.length} projects, left and right`}
+      next={next}
+      className="mt-4 flex-1"
+    >
+      {[
+        <TitleCell key="title" title={name} hash={slug}>
+          <p className="label text-muted-foreground">
+            {projects.length} {projects.length === 1 ? "project" : "projects"}
+          </p>
+        </TitleCell>,
+        ...projects.map((p, i) => (
+          <CoverCell key={p.slug} row={indexRow(p)} i={i} eager={i < 3} />
+        )),
+        ask,
+      ]}
+    </Strip>
   );
 }

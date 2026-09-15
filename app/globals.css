@@ -694,8 +694,13 @@ article:has(.strip-scroll[data-past-first]) .running-head {
    On the picture and not the cell, because the cell's `press` transition
    would smooth every frame of it into lag. */
 .strip-frame {
-  transform: skewX(calc(var(--drift, 0) * -0.16deg))
-    scale(calc(1 + var(--drift, 0) * var(--drift, 0) * 0.00012));
+  /* Three moves in one: the parallax slide against `--par` (set per cell
+     by the strip), the lean against `--drift`, and a standing zoom of 8%
+     so the slide has picture to reveal at the edges: at a full window
+     away the slide is 3% of the picture, which the zoom covers. */
+  transform: translateX(calc(var(--par, 0) * -3%))
+    skewX(calc(var(--drift, 0) * -0.16deg))
+    scale(calc(1.08 + var(--drift, 0) * var(--drift, 0) * 0.00012));
 }
 @media (prefers-reduced-motion: reduce) {
   .title-word,
@@ -1180,21 +1185,6 @@ optgroup {
   box-shadow: inset 0 1px 0 color-mix(in oklab, white 16%, transparent);
 }
 
-/* ── the bar over the reel ─────────────────────────────────────────
- * On /work/video the reel is the background from the top of the page down,
- * and the bar sits on it with no plate: Julian did not want the film cut
- * off under a blurred strip. So the bar keeps its transparent ground and
- * its type goes white, by re-pointing the tokens its classes already use.
- * Only while it has no ground of its own, as above; scrolled, or with the
- * menu open, the bar's own colours come back. */
-:root[data-film] header[data-plain="false"] {
-  --foreground: #fff;
-  --muted-foreground: rgb(255 255 255 / 0.72);
-  /* Set here as well as re-pointed: the wordmark carries no colour of its
-     own and inherits the body's, which was resolved before the token
-     changed. */
-  color: var(--foreground);
-}
 
 /* ── the cover that becomes the page ──────────────────────────────
  * Clicking a cover on the homepage or the index does not swap one page for
@@ -1292,30 +1282,6 @@ optgroup {
   animation-timing-function: var(--ease-out-strong);
 }
 
-/* The work index changing filter: the old list leaves, then the new one
-   arrives. Two boundaries, not one morph — a list of seventy rows has no
-   shape worth interpolating — and the arrival waits for the departure, so
-   there is a beat of empty ground between them rather than two lists
-   crossfading through each other. Short on both sides: this is pressed a
-   dozen times a visit. */
-::view-transition-old(.work-out) {
-  animation: jg-work-out 160ms var(--ease-out-strong) both;
-}
-::view-transition-new(.work-in) {
-  animation: jg-work-in 260ms var(--ease-out-strong) 140ms both;
-}
-@keyframes jg-work-out {
-  to {
-    opacity: 0;
-    transform: translateY(-6px);
-  }
-}
-@keyframes jg-work-in {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-}
 
 /* Reduced motion: no trip. The pages still swap; nothing travels. */
 @media (prefers-reduced-motion: reduce) {
