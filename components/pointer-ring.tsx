@@ -34,7 +34,9 @@ import { createPortal } from "react-dom";
  * arts". Rendered under `<body>` it has no transformed ancestors to inherit.
  * ─────────────────────────────────────────────────────────────── */
 
-const RADIUS = 18;
+// Larger than the hairline ring it replaced: glass needs some area to be
+// seen as glass, and a drop of it is what the pointer is now.
+const RADIUS = 22;
 
 // `document` does not exist on the server, so the portal target is known
 // only on the client. `useSyncExternalStore` with a false server snapshot is
@@ -126,24 +128,31 @@ export function PointerRing() {
     >
       <div
         className={[
-          // Inverted, not coloured: a white ring under `difference` takes
-          // the opposite of whatever is behind it, so it is dark on a bright
-          // sky and light on a black sleeve, with no colour of its own and
-          // nothing to tune per theme. Julian asked for the outline to
-          // invert and for the glow that used to sit under it to go.
-          "relative h-full w-full rounded-full border border-white mix-blend-difference",
+          // A drop of the site's own glass (`glass` in `globals.css`, the
+          // material of the lightbox's buttons and the header's ground),
+          // with its catch light left on at the upper left, where a light
+          // would strike it. It used to be a hairline ring inverting what
+          // it was over; Julian asked for a liquid glass look across the
+          // site, and one material everywhere is what makes it a theme.
+          "glass glass-lit relative h-full w-full rounded-full",
+          // Clearer than the buttons' glass: a pointer is looked through,
+          // a button is read, and at the buttons' fill it was a disc.
+          "[--glass-fill:color-mix(in_oklab,var(--background)_22%,transparent)]",
           // Arrives from slightly small, like everything else pressable here.
           "opacity-0 scale-75 transition-[opacity,scale] duration-200 ease-[var(--ease-out-strong)]",
           "in-data-over:opacity-100 in-data-over:scale-100",
+          // Pressed, the drop squashes a little: glass has weight.
+          "in-data-pressed:scale-[0.88]",
           "motion-reduce:transition-none",
         ].join(" ")}
+        style={{ "--gx": "35%", "--gy": "25%" } as React.CSSProperties}
       >
-        {/* The fill. Grows from the centre on press and lets go on release —
-            a transition, so a quick tap still reads as a fill and not a
-            flash. */}
+        {/* The fill. A brighter drop grows from the centre on press and lets
+            go on release, a transition, so a quick tap still reads as a
+            press and not a flash. */}
         <div
           className={[
-            "h-full w-full rounded-full bg-white",
+            "h-full w-full rounded-full bg-white/45",
             "scale-0 transition-[scale] duration-[260ms] ease-[var(--ease-out-strong)]",
             "in-data-pressed:scale-100",
             "motion-reduce:transition-none",

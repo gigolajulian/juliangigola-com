@@ -78,12 +78,17 @@ const HOLD = 200;
 const RELAX = 120;
 /** The most the band ever shows, in px. Resistance, not travel. */
 const STRETCH = 160;
-/** How far a wheel notch carries the strip, as a multiple of its delta. A
-    notch is 100px in Chrome, and a sequence is four to nine thousand px
-    wide: at one to one a mouse took forty notches to cross it, and Julian
-    asked for it faster on a mouse with a slow wheel. The band's count stays
-    in raw delta, so this does not make leaving any easier. */
-const WHEEL = 1.8;
+/** How far a wheel event carries the strip, as a multiple of its delta.
+    Two gains, because a mouse and a trackpad are not the same instrument:
+    a mouse notch is a hundred px of delta in one event, a trackpad's swipe
+    is dozens of small ones. A sequence is four to nine thousand px wide,
+    and at one to one a mouse took forty notches to cross it; at 1.8 Julian
+    still said the pages took too long to scroll through on a mouse. So a
+    notch carries three times its delta and a trackpad's events under it
+    keep the gentler gain. The band's count stays in raw delta, so neither
+    makes leaving any easier. */
+const WHEEL = 3;
+const PAD = 1.8;
 
 export function ProjectStrip({
   project,
@@ -466,7 +471,7 @@ export function ProjectStrip({
         over = 0;
         release();
       }
-      to(target + dy * WHEEL);
+      to(target + dy * (Math.abs(dy) >= 80 ? WHEEL : PAD));
     };
 
     /* Drag, for a mouse. A touchscreen is left alone: the platform's own

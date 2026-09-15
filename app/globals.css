@@ -731,6 +731,14 @@ article:has(.strip-scroll[data-past-title]) .running-head {
  * 0.98, a photograph the size of half the viewport wants 0.995, and one number
  * cannot serve both.
  */
+/* The `glass` material with its light left on: for a thing that carries
+   no pointer of its own to hover, such as the pointer. */
+@utility glass-lit {
+  &::before {
+    opacity: 1;
+  }
+}
+
 @utility press {
   /* `scale`, `translate` and `rotate`, not just `transform`: Tailwind v4
      compiles `active:scale-[0.98]` to the standalone `scale` property, so a
