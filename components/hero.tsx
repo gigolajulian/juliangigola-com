@@ -99,13 +99,13 @@ function Ways({
     >
       <Link
         href="/work"
-        className="label action rounded-full px-7 py-5 press active:scale-[0.97]"
+        className="label action rounded-full px-7 py-5 press active:scale-[0.97] short:px-6 short:py-3.5"
       >
         See the work
       </Link>
       <Link
         href="/sessions"
-        className="label action-quiet rounded-full bg-background px-7 py-5 press active:scale-[0.97]"
+        className="label action-quiet rounded-full bg-background px-7 py-5 press active:scale-[0.97] short:px-6 short:py-3.5"
       >
         Book a session
       </Link>
@@ -432,6 +432,13 @@ export function Hero({
            masthead, because custom properties inherit and one declaration on
            the section reaches the word wherever it is set. */
         "squat:[--text-display:clamp(2.5rem,4vw,5rem)]",
+        /* And down again on a short window, whatever its shape. A laptop at
+           1280x700 and an iPad held sideways both give the cover about 600px
+           of height, and the name at 8vw of a 1200px window is 95px a line:
+           two lines of it, a discipline word under them and a seven row
+           index do not fit in that, so the index was showing three and a
+           half rows with the fourth cut through the middle. */
+        "short:[--text-display:clamp(2.25rem,4.5vw,4.5rem)]",
       )}
     >
       {/* The photograph is the whole canvas now, with the type on top of it.
@@ -608,7 +615,11 @@ export function Hero({
             whole cell and would put the buttons under whatever the column
             is holding. `pointer-events-auto` on the buttons because
             everything around them passes presses through to the picture. */}
-        <div className="pointer-events-none absolute inset-0 hidden wide:block">
+        {/* Off the picture on a short window: at 1194 by 724 the picture
+            column is 579 wide and the two buttons and the frame's credit
+            pill both want that foot, so the pill ran under the first
+            button. The panel's own copy takes over. */}
+        <div className="pointer-events-none absolute inset-0 hidden wide:block short:wide:hidden">
           <Ways
             style={lands(BUTTONS_MS)}
             className="rise pointer-events-auto absolute bottom-6 right-6 z-20 sm:bottom-8 sm:right-10"
@@ -688,7 +699,12 @@ export function Hero({
               again. */}
             <div
               style={lands(HEAD_MS)}
-              className="rise flex flex-wrap items-baseline gap-x-6 gap-y-1 px-6 pb-4 pt-6 sm:px-10 sm:pt-8 squat:pt-28 wide:pt-28"
+              /* On a short window the two standing lines go and the band
+                 keeps only the height the fixed bar needs. They are in the
+                 footer of every page and the bar is over them; the rows
+                 under the name are what a visitor came to this screen
+                 for. */
+              className="rise flex flex-wrap items-baseline gap-x-6 gap-y-1 px-6 pb-4 pt-6 sm:px-10 sm:pt-8 squat:pt-28 wide:pt-28 short:pb-0 short:[&>*]:hidden"
             >
               {/* Held back while the intro is up, because the intro is already
                 saying these exact words in display type eighty pixels below.
@@ -759,14 +775,14 @@ export function Hero({
                   are never both legible. */}
               <span
                 aria-hidden
-                className="relative mt-2 block min-h-[2em] sm:mt-3"
+                className="relative mt-2 block min-h-[2em] text-3xl sm:mt-3 sm:text-4xl short:min-h-[1em] short:text-2xl short:sm:text-2xl"
               >
                 {slides.map((discipline, i) =>
                   i === active || i === slide.previous ? (
                     <span
                       key={discipline.slug}
                       className={cn(
-                        "font-display absolute inset-0 text-3xl uppercase leading-none tracking-[0] text-muted-foreground sm:text-4xl",
+                        "font-display absolute inset-0 text-3xl uppercase leading-none tracking-[0] text-muted-foreground sm:text-4xl short:text-2xl short:sm:text-2xl",
                         i === active
                           ? // On the intro there is no outgoing word and
                             // nothing to wait for, so the first title is
@@ -804,7 +820,7 @@ export function Hero({
               /* Margins, not padding: the block is ink now, and padding on
                  it would be ink around the rows rather than air around the
                  block. */
-              className="rise mx-6 mb-2 mt-6 sm:mx-10 sm:mb-4 sm:mt-8 tall:mb-0 tall:mt-5 wide:hidden"
+              className="rise mx-6 mb-2 mt-6 sm:mx-10 sm:mb-4 sm:mt-8 tall:mb-0 tall:mt-5 wide:hidden short:wide:flex short:mb-0 short:mt-4"
             />
 
             {/* Three: the index. This is the switcher's control and the site's
@@ -899,7 +915,7 @@ export function Hero({
                       </span>
                       <span
                         className={cn(
-                          "font-display text-2xl uppercase leading-none tracking-[0] transition-colors duration-300 sm:text-3xl",
+                          "font-display text-2xl uppercase leading-none tracking-[0] transition-colors duration-300 sm:text-3xl short:text-xl short:sm:text-2xl",
                           i + 1 === active
                             ? "text-foreground"
                             : "text-muted-foreground",

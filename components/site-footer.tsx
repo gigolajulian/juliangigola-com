@@ -23,7 +23,7 @@ export function SiteFooter() {
     <footer className="border-t border-border">
       {/* A page that sets `data-quiet-footer` (the project strips) gets the
           housekeeping row only; see `globals.css`. */}
-      <div className="site-footer-body mx-auto max-w-[100rem] px-6 py-16 sm:px-10 sm:py-24">
+      <div className="site-footer-body mx-auto max-w-[100rem] px-6 py-12 sm:px-10 sm:py-16">
         <div className="site-footer-ask flex flex-col gap-12 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <p className="label text-muted-foreground">
@@ -63,7 +63,7 @@ export function SiteFooter() {
           </nav>
         </div>
 
-        <div className="site-footer-row mt-16 flex flex-col gap-2 border-t border-border pt-6 sm:flex-row sm:justify-between">
+        <div className="site-footer-row mt-12 flex flex-col gap-2 border-t border-border pt-5 sm:flex-row sm:justify-between">
           <p className="label text-muted-foreground">
             &copy; {new Date().getFullYear()} Julian Gigola. All rights
             reserved.

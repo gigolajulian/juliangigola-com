@@ -544,7 +544,11 @@ body:has([data-quiet-footer]) .site-footer-ask {
   display: none;
 }
 body:has([data-quiet-footer]) .site-footer-body {
-  padding-block: 1.5rem;
+  /* One line and the air it needs. Every strip page has to give this band
+     the bottom of its window, so every pixel here is a pixel off the
+     photographs — 24px of padding around a 14px line made a 62px bar under
+     a cover that was fighting for 20. */
+  padding-block: 0.75rem;
 }
 body:has([data-quiet-footer]) .site-footer-row {
   margin-top: 0;
@@ -652,7 +656,7 @@ body:has(.strip-scroll[data-past-first]) .home-wordmark,
   /* `viewportFit: "cover"` is set and nothing else pads for it, so held
      sideways the last line would sit under the home indicator. */
   body:has([data-quiet-footer]) .site-footer-body {
-    padding-bottom: calc(1.5rem + env(safe-area-inset-bottom));
+    padding-bottom: calc(0.75rem + env(safe-area-inset-bottom));
   }
 }
 
@@ -663,7 +667,7 @@ body:has(.strip-scroll[data-past-first]) .home-wordmark,
    of rows you can see without doing that worth having. */
 @media (max-height: 52rem) {
   .cover-row {
-    padding-block: 0.625rem;
+    padding-block: 0.375rem;
   }
 }
 
