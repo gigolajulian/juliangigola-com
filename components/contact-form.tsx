@@ -138,7 +138,10 @@ export function ContactForm() {
   }
 
   return (
-    <form action={formAction} className="flex flex-col gap-8" noValidate>
+    // `gap-6` and four rows of message: the form is a cell of the contact
+    // strip now, and at 610px of strip on a 1280x700 laptop the eight-gap
+    // version put the send button below the fold of its own box.
+    <form action={formAction} className="flex flex-col gap-6" noValidate>
       {/* The honeypot. Hidden from sight, from the tab order and from
           assistive technology, so anything that fills it is filling every
           input on the page rather than reading the form. `app/contact/actions.ts`
@@ -302,7 +305,7 @@ function Field({
       <Element
         id={id}
         name={name}
-        rows={as === "textarea" ? 6 : undefined}
+        rows={as === "textarea" ? 4 : undefined}
         aria-invalid={error ? true : undefined}
         // Points a screen reader at the message rather than only colouring
         // the border, which says nothing to anyone not looking at it.

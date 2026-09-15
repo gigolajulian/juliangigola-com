@@ -56,16 +56,17 @@ export function StudioReel({
 
   return (
     <div
-      className={className}
+      className={cn("flex min-h-0 flex-col", className)}
       onPointerEnter={() => setHeld(true)}
       onPointerLeave={() => setHeld(false)}
       onFocusCapture={() => setHeld(true)}
       onBlurCapture={() => setHeld(false)}
     >
       {/* One shape for the set. The frames are a mix of portraits and
-          squares, and a box that resized with each one would move four
-          sections of writing every few seconds. */}
-      <div className="relative aspect-[4/5] overflow-hidden">
+          squares, and a box that resized with each one would move the
+          words beside it every few seconds. Along the strip the height is
+          the strip's and 4:5 decides the width. */}
+      <div className="relative aspect-[4/5] min-h-0 flex-1 overflow-hidden">
         {shoots.map((shoot, i) => (
           <Link
             key={shoot.href}
@@ -82,7 +83,7 @@ export function StudioReel({
               src={shoot.src}
               alt={shoot.alt}
               fill
-              sizes="(min-width: 1024px) 40vw, 100vw"
+              sizes="(min-width: 640px) 35vw, 100vw"
               priority={i === 0}
               className="h-full w-full object-cover"
             />

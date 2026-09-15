@@ -530,7 +530,12 @@ export function Strip({
         "textarea, select, [data-scroll]",
       );
       if (inner && el.contains(inner)) {
-        if (inner.tagName !== "DIV") return;
+        // A textarea or a select keeps the wheel whatever it holds. A
+        // marked box gives it back once it has run out, whatever element
+        // it happens to be: the contact page's details are a `dl` and the
+        // studio's services a `ul`, and a tag-name test left both of them
+        // holding the wheel for good.
+        if (!inner.hasAttribute("data-scroll")) return;
         const more =
           e.deltaY < 0
             ? inner.scrollTop > 0

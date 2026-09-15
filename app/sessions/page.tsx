@@ -1,11 +1,13 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
-import { CallToAction } from "@/components/call-to-action";
+import { Strip } from "@/components/strip";
+import { StripPage, StripHead, TitleCell } from "@/components/strip-page";
+import { EnquiryCell } from "@/components/enquiry-cell";
 import { Testimonials } from "@/components/testimonials";
 import { SESSION_TYPES, formatPrice } from "@/lib/sessions";
 import { BOOKING_URL } from "@/lib/site";
-import { projectsIn, coverOf } from "@/lib/work";
+import { CONTACT, projectsIn, coverOf } from "@/lib/work";
 
 /* ── sessions ─────────────────────────────────────────────────────
  * The consumer half of the site, and the half the old one served worst.
@@ -15,6 +17,12 @@ import { projectsIn, coverOf } from "@/lib/work";
  * site made all three unfindable — the rates page was never written. So each
  * session type leads with those three facts, and the sample work is pulled
  * live from the archive so it can never go stale.
+ *
+ * Sideways, like the rest of the site: each session is a photograph and the
+ * card beside it, so the four run past in the order they are priced and the
+ * comparison is a wheel rather than a scroll and a memory. The words scroll
+ * inside their own column when a screen is too short for them — that is the
+ * `data-scroll` box, and the strip yields the wheel to it.
  * ─────────────────────────────────────────────────────────────── */
 
 export const metadata: Metadata = {
@@ -26,63 +34,96 @@ export const metadata: Metadata = {
 
 export default function SessionsPage() {
   return (
-    <>
-      <div className="pb-16 pt-24 sm:pt-28">
-        <header className="mx-auto max-w-[100rem] px-6 sm:px-10">
-          <h1 className="title">Sessions</h1>
-          <p className="mt-4 max-w-prose text-sm leading-relaxed text-muted-foreground">
-            Studio and location sessions across the San Francisco Bay Area.
-            Everything below is booked directly, with no packages to decode.
-          </p>
-        </header>
+    <StripPage
+      head={
+        <StripHead
+          crumb={
+            <Link
+              prefetch={false}
+              href="/contact?type=session"
+              className="label text-muted-foreground transition-colors duration-200 hoverable:hover:text-foreground"
+            >
+              Check a date
+            </Link>
+          }
+          title="Sessions"
+          live
+          aside={`${SESSION_TYPES.length} kinds`}
+        />
+      }
+    >
+      <Strip
+        label={`Sessions: ${SESSION_TYPES.length} kinds, left and right`}
+        next={CONTACT}
+        className="mt-4 flex-1"
+      >
+        {[
+          <TitleCell key="title" title="Sessions" hash="sessions">
+            <p className="text-sm leading-relaxed text-muted-foreground">
+              Studio and location sessions across the San Francisco Bay Area.
+              Everything here is booked directly, with no packages to decode.
+            </p>
+          </TitleCell>,
 
-        {/* The four of them across the page rather than down it: one
-            column each, the photograph on top, the three facts that decide
-            it under, and the enquiry at the foot. Julian asked for the
-            sessions more horizontal, and they are four comparable things —
-            a row is how you compare four of anything, where a stack of
-            full-width bands makes you scroll and remember.
+          ...SESSION_TYPES.flatMap((session, i) => {
+            const sample = projectsIn(session.slug)[0];
+            const cover = sample ? coverOf(sample) : null;
 
-            Four across from `xl`, two from `sm`, one on a phone. */}
-        <div className="mx-auto mt-10 max-w-[100rem] px-6 sm:mt-12 sm:px-10">
-          <ul className="grid gap-8 sm:grid-cols-2 sm:gap-6 xl:grid-cols-4">
-            {SESSION_TYPES.map((session) => {
-              const sample = projectsIn(session.slug)[0];
-              const cover = sample ? coverOf(sample) : null;
+            return [
+              cover && sample ? (
+                <Link
+                  key={`${session.slug}-cover`}
+                  prefetch={false}
+                  href={`/work/${sample.slug}`}
+                  data-tick
+                  data-ring="Open"
+                  aria-label={`${session.name}: see ${sample.name}`}
+                  /* One ratio for all four, not each frame's own: a row of
+                     photographs that each set their own height is not a row.
+                     4:5 upright, which is what most of the archive is shot
+                     at, so the crop is slight. */
+                  className="group strip-cell relative block aspect-[4/5] w-full shrink-0 overflow-hidden hoverable:cursor-none sm:h-full sm:w-auto"
+                  style={
+                    {
+                      backgroundColor: cover.color,
+                      "--i": i,
+                    } as React.CSSProperties
+                  }
+                >
+                  <Image
+                    src={cover.src}
+                    alt={cover.alt || sample.name}
+                    fill
+                    sizes="(min-width: 640px) 35vw, 100vw"
+                    // The first is the one on screen when the page opens.
+                    priority={i === 0}
+                    loading={i === 0 ? undefined : "lazy"}
+                    data-fade={i === 0 ? undefined : ""}
+                    className="strip-frame object-cover object-[50%_25%]"
+                  />
+                </Link>
+              ) : null,
 
-              return (
-                /* `flex flex-col` on the card and `mt-auto` on the button,
-                   so the four buttons line up across the row however much
-                   the lists above them differ. */
-                <li key={session.slug} className="flex flex-col">
-                  {cover && sample ? (
-                    <Link
-                      href={`/work/${sample.slug}`}
-                      /* One ratio for all four, not each frame's own: a row
-                         of four photographs that each set their own height
-                         is not a row. 4:5 upright from `sm`, which is what
-                         most of the archive is shot at, so the crop is
-                         slight. On a phone the four cards are a column and
-                         four upright frames is 1700px of photograph to
-                         scroll, so there it crops to 3:2. */
-                      className="group relative block aspect-[3/2] overflow-hidden sm:aspect-[4/5]"
-                      style={{ backgroundColor: cover.color }}
-                    >
-                      <Image
-                        src={cover.src}
-                        alt={cover.alt || sample.name}
-                        width={cover.width}
-                        height={cover.height}
-                        sizes="(min-width: 1280px) 25vw, (min-width: 640px) 50vw, 100vw"
-                        className="h-full w-full object-cover object-[50%_25%] transition-transform duration-500 ease-[var(--ease-out-strong)] hoverable:group-hover:scale-[1.02] motion-reduce:transition-none"
-                      />
-                    </Link>
-                  ) : null}
-
-                  <h2 className="mt-5 font-display text-2xl leading-tight sm:text-3xl">
+              <div
+                key={session.slug}
+                data-tick
+                data-label={session.name}
+                data-hash={session.slug}
+                className="flex w-full shrink-0 flex-col justify-center gap-4 py-8 sm:h-full sm:w-[min(22rem,60vw)] sm:py-0"
+              >
+                {/* The words take the height they need and scroll inside
+                    themselves when the window is shorter than they are,
+                    rather than pushing the button for booking off the
+                    bottom of a laptop screen. */}
+                <div
+                  data-scroll
+                  className="flex min-h-0 flex-col gap-4 overflow-y-auto overscroll-contain pr-2"
+                >
+                  <h2 className="font-display text-2xl uppercase leading-none tracking-[0] sm:text-3xl">
                     {session.name}
                   </h2>
-                  <dl className="mt-3 flex flex-wrap gap-x-8 gap-y-3 border-t border-border pt-4">
+
+                  <dl className="flex flex-wrap gap-x-8 gap-y-3 border-t border-border pt-4">
                     <div>
                       <dt className="label text-muted-foreground">Rate</dt>
                       <dd className="mt-1.5 text-sm">
@@ -90,60 +131,71 @@ export default function SessionsPage() {
                       </dd>
                     </div>
                     <div>
-                      <dt className="label text-muted-foreground">Turnaround</dt>
+                      <dt className="label text-muted-foreground">
+                        Turnaround
+                      </dt>
                       <dd className="mt-1.5 text-sm">{session.turnaround}</dd>
                     </div>
                   </dl>
 
-                  <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
+                  <p className="text-sm leading-relaxed text-muted-foreground">
                     {session.blurb}
                   </p>
 
-                  <h3 className="label mt-4 text-muted-foreground">Includes</h3>
-                  <ul className="mt-2 flex flex-col gap-1.5">
-                    {session.includes.map((item) => (
-                      <li key={item} className="text-sm text-muted-foreground">
-                        {item}
-                      </li>
-                    ))}
-                  </ul>
-
-                  {/* Once a booking calendar exists, a session client can
-                      take a slot without waiting on a reply — which is the
-                      whole point for this audience. Until then the enquiry
-                      form is the path. */}
-                  <div className="mt-auto flex flex-wrap items-center gap-3 pt-6">
-                    {BOOKING_URL ? (
-                      <a
-                        href={BOOKING_URL}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="label action rounded-full px-5 py-3 press active:scale-[0.97]"
-                      >
-                        Check availability
-                      </a>
-                    ) : null}
-                    <Link
-                      href={`/contact?type=session&session=${session.slug}`}
-                      className="label action-quiet inline-flex items-center gap-2 rounded-full px-5 py-3 press active:scale-[0.97]"
-                    >
-                      Enquire
-                    </Link>
+                  <div>
+                    <h3 className="label text-muted-foreground">Includes</h3>
+                    <ul className="mt-2 flex flex-col gap-1.5">
+                      {session.includes.map((item) => (
+                        <li
+                          key={item}
+                          className="text-sm text-muted-foreground"
+                        >
+                          {item}
+                        </li>
+                      ))}
+                    </ul>
                   </div>
-                </li>
-              );
-            })}
-          </ul>
-        </div>
-      </div>
+                </div>
 
-      <Testimonials />
+                {/* Once a booking calendar exists, a session client can take
+                    a slot without waiting on a reply — which is the whole
+                    point for this audience. Until then the enquiry form is
+                    the path. */}
+                <div className="flex flex-wrap items-center gap-3 border-t border-border pt-4">
+                  {BOOKING_URL ? (
+                    <a
+                      href={BOOKING_URL}
+                      target="_blank"
+                      rel="noreferrer"
+                      data-ring="Book"
+                      className="label action rounded-full px-5 py-3 press active:scale-[0.97] hoverable:cursor-none"
+                    >
+                      Check availability
+                    </a>
+                  ) : null}
+                  <Link
+                    href={`/contact?type=session&session=${session.slug}`}
+                    data-ring="Book"
+                    className="label action-quiet inline-flex items-center gap-2 rounded-full px-5 py-3 press active:scale-[0.97] hoverable:cursor-none"
+                  >
+                    Enquire
+                  </Link>
+                </div>
+              </div>,
+            ];
+          }),
 
-      <CallToAction
-        title="Check a date"
-        body="Tell me roughly when and what for, and I'll confirm availability and the exact rate."
-        type="session"
-      />
-    </>
+          <Testimonials key="testimonials" cells />,
+
+          <EnquiryCell
+            key="enquire"
+            title="Check a date"
+            body="Tell me roughly when and what for, and I'll confirm availability and the exact rate."
+            type="session"
+            next={CONTACT}
+          />,
+        ]}
+      </Strip>
+    </StripPage>
   );
 }
