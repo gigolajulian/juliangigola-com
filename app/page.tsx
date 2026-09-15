@@ -16,105 +16,148 @@ import {
 import { ClientMarks } from "@/components/client-marks";
 
 /* ── the homepage ─────────────────────────────────────────────────
- * The same four moves the page has always made, now as one sequence that
- * runs sideways like the rest of the site:
+ * One screen at a time, sideways. Each screen is a whole section rather
+ * than a slice of one — the cover, the proof, the work three frames at a
+ * time, the rack of sleeves, the two doors, the ask — and a notch, a swipe
+ * or an arrow moves exactly one of them. Julian asked for the page to be
+ * sectioned off, with the movement between sections meaning something:
+ * a gesture is "the next thing", never "a bit further along".
  *
- *   1. The cover — who he is and what he does, cycling through the four
- *      disciplines so the range lands in the first few seconds. See
- *      `hero.tsx`; the discipline index is both its control and the site's
- *      navigation into the work. It is the first cell and it is the whole
- *      screen, so nothing about the first impression changes.
+ * The moves are the ones the page has always made, in the order a first
+ * visitor asks for them:
+ *
+ *   1. The cover — who he is and what he does, cycling through the
+ *      disciplines so the range lands in the first few seconds. It is the
+ *      first screen and it is the whole screen, so nothing about the first
+ *      impression changes. `arrive="none"`: nothing slides the photograph
+ *      in, and nothing moves inside it.
  *   2. Proof — the names that make an art director keep reading.
- *   3. Selected work — the picked projects as tiles the height of the
- *      strip, each scrubbable through its own sequence, then the rack of
- *      sleeves.
- *   4. The two doors, and then the ask. Wheeling past the ask leads to the
- *      work, which is where a visitor who got that far is going.
- *
- * The cover keeps its own arrival and nothing slides it in: `arrive="none"`
- * on the strip. Julian's standing rule is that nothing moves inside the
- * cover photograph.
+ *   3. Selected work — a grid of six a screen, edge to edge, each tile
+ *      scrubbing through its own sequence under the pointer. That answers
+ *      the question a cover cannot: not "does this project exist" but "is
+ *      the whole set good", which is a question about a set and so wants
+ *      the set on one screen.
+ *   4. Cover art, the two doors, and the ask, which leads on to the work.
  * ─────────────────────────────────────────────────────────────── */
 
+/** Tiles to a screen: a grid three across and two down. Six at a time is
+    what the section is for — the question it answers is "is the whole set
+    good", and a set is something you see at once. A screen that does not
+    fill both rows keeps the same cells and centres the row it has, so the
+    tiles are one size across the whole section. */
+const COLUMNS = 3;
+const PER_SCREEN = COLUMNS * 2;
+
+const screensOf = <T,>(all: T[], n: number) =>
+  Array.from({ length: Math.ceil(all.length / n) }, (_, i) =>
+    all.slice(i * n, i * n + n),
+  );
+
 export default function Home() {
+  const screens = screensOf(FEATURED, PER_SCREEN);
+
   return (
     <StripPage>
       <Strip
-        label="Julian Gigola: the cover, selected work, cover art, and how to get in touch. Left and right."
+        label="Julian Gigola: the cover, selected work, cover art, and how to get in touch. One screen at a time, left and right."
         next={WORK_PAGE}
         arrive="none"
+        paged
+        bleed
         className="flex-1"
       >
-        {/* The cover is full bleed: it pulls back over the strip's own
-            gutter, so at rest the photograph is the screen and there is no
-            band of ground down its left. Every cell after it keeps the
-            gutter. */}
         <Hero
           disciplines={DISCIPLINES}
-          className="-ml-6 w-screen shrink-0 max-sm:min-h-[100lvh] sm:-ml-10 sm:h-full"
+          className="w-full shrink-0 max-sm:min-h-[100lvh] sm:h-full"
         />
 
         {PRESS_HOME.length ? (
           <section
             data-tick
             data-label="Clients"
+            data-hash="clients"
             aria-labelledby="press"
-            className="flex w-full shrink-0 flex-col justify-center gap-6 py-10 sm:h-full sm:w-[min(36rem,60vw)] sm:py-0 sm:pl-10"
+            className="flex w-full shrink-0 flex-col justify-center gap-10 border-l border-border px-6 py-16 sm:h-full sm:px-16 sm:pb-0 sm:pt-24"
           >
             <h2 id="press" className="label text-muted-foreground">
               Published &amp; commissioned by
             </h2>
             {/* One component with /studio's wall, so a logo added once shows
-                in both places and neither can be the one still set in type. */}
-            <ClientMarks clients={PRESS_HOME} layout="row" />
+                in both places and neither can be the one still set in type.
+                Held to a column rather than the whole screen: eight marks
+                spread across 1440px is a row of stragglers, and at this
+                width they read as a wall of four. */}
+            <ClientMarks
+              clients={PRESS_HOME}
+              layout="grid"
+              className="max-w-[56rem] gap-x-16 gap-y-16"
+            />
           </section>
         ) : null}
 
-        <div
-          data-tick
-          data-label="Selected work"
-          data-hash="work"
-          className="flex w-full shrink-0 flex-col justify-center gap-3 py-6 sm:h-full sm:w-[min(18rem,40vw)] sm:py-0"
-        >
-          <h2 className="label text-muted-foreground">Selected work</h2>
-          {/* However many are picked in /admin, counted rather than
-              written down: the last copy that said "six" outlived the six. */}
-          <p className="font-display text-3xl uppercase leading-none tracking-[0] sm:text-4xl">
-            {FEATURED.length} projects
-          </p>
-          <Link
-            prefetch={false}
-            href="/work"
-            className="label text-muted-foreground transition-colors duration-200 hoverable:hover:text-foreground"
+        {/* A grid, butting against itself: the section reads as one sheet
+            of imagery rather than as cards in a frame, and the plate over
+            each tile says whose it is. The label in the corner says which
+            screen of the section you are on. */}
+        {screens.map((screen, s) => (
+          <section
+            key={`work-${s}`}
+            data-tick
+            data-label="Selected work"
+            data-hash={s === 0 ? "work" : undefined}
+            aria-label={`Selected work, screen ${s + 1} of ${screens.length}`}
+            className="relative flex w-full shrink-0 flex-col sm:h-full"
           >
-            All projects &rarr;
-          </Link>
-        </div>
+            {/* Which section this is and how far through it, over the
+                photographs and under the fixed bar. The ruler says the
+                section too; this says the count, and carries the way out
+                to all of the work. */}
+            <div className="pointer-events-none absolute inset-x-0 top-0 z-10 flex items-baseline justify-between gap-6 px-6 py-4 sm:px-8 sm:pt-24">
+              <p className="label glass-surface bg-background/70 px-3 py-1.5 text-muted-foreground">
+                Selected work
+                <span className="ml-3 tabular-nums text-foreground">
+                  {String(s + 1).padStart(2, "0")} /{" "}
+                  {String(screens.length).padStart(2, "0")}
+                </span>
+              </p>
+              <Link
+                prefetch={false}
+                href="/work"
+                className="label pointer-events-auto glass-surface bg-background/70 px-3 py-1.5 text-muted-foreground transition-colors duration-200 hoverable:hover:text-foreground"
+              >
+                All {FEATURED.length} &rarr;
+              </Link>
+            </div>
 
-        {/* Each tile is the height of the strip and 4:5 of that across —
-            the ratio the work is shot in — and scrubs through its own
-            sequence under the pointer. That answers the question a cover
-            cannot: not "does this project exist" but "is the whole set
-            good", which is what an art director is actually deciding. */}
-        {FEATURED.map((project, i) => (
-          <WorkBand
-            key={project.slug}
-            project={bandTile(project)}
-            index={i}
-            priority={i < 2}
-          />
+            {/* Rows are half the screen each, whether the screen has one
+                of them or two, so every tile in the section is the same
+                size; a short last screen centres its row rather than
+                leaving a hole under it. */}
+            <div className="grid min-h-0 flex-1 content-center grid-cols-1 sm:grid-cols-3 sm:[grid-auto-rows:50%]">
+              {screen.map((project, i) => (
+                <WorkBand
+                  key={project.slug}
+                  project={bandTile(project)}
+                  index={s * PER_SCREEN + i}
+                  priority={s === 0 && i < PER_SCREEN}
+                />
+              ))}
+            </div>
+          </section>
         ))}
 
         <CoverArt />
 
         {/* The two audiences, split. This is the fix for the old site's
             single thirteen-item dropdown maze: an art director and someone
-            pricing a graduation shoot each get one obvious door. */}
+            pricing a graduation shoot each get one obvious door, and here
+            they get half a screen each. */}
         <section
           data-tick
           data-label="Where next"
+          data-hash="where-next"
           aria-labelledby="paths"
-          className="w-full shrink-0 sm:h-full sm:w-[min(60rem,80vw)]"
+          className="w-full shrink-0 sm:h-full"
         >
           <h2 id="paths" className="sr-only">
             Where to go next
@@ -142,6 +185,7 @@ export default function Home() {
           body="Tell me what you have in mind and I'll come back with an approach and a quote."
           secondary={{ href: "/work", label: "Browse the work" }}
           next={WORK_PAGE}
+          className="border-l border-border px-6 sm:w-full sm:px-16"
         />
       </Strip>
     </StripPage>
@@ -162,7 +206,11 @@ function PathCard({
   return (
     <Link
       href={href}
-      className="group relative flex flex-col justify-between gap-10 px-6 py-10 transition-colors duration-300 hoverable:hover:bg-card sm:px-10 sm:py-16 sm:first:border-r sm:first:border-border"
+      // Centred rather than stretched top to bottom: half a screen each is
+      // more room than two short paragraphs need, and a block pinned to the
+      // top with its way out pinned to the bottom reads as a page that
+      // failed to load the middle.
+      className="group relative flex flex-col justify-center gap-6 border-l border-border px-6 py-12 transition-colors duration-300 hoverable:hover:bg-card sm:px-16 sm:pt-24"
     >
       <div>
         <p className="label text-muted-foreground">{label}</p>

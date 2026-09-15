@@ -109,7 +109,6 @@ export function WorkBand({
 
   return (
     <Link
-      data-tick
       data-ring="Open"
       style={
         {
@@ -124,20 +123,17 @@ export function WorkBand({
       onBlur={reset}
       onKeyDown={onKeyDown}
       aria-label={`${project.name}, ${project.total} frames`}
-      // 4:5, the ratio the work is shot and delivered in.
-      //
-      // This was sized by viewport height — `62vh`, `68vh` above `lg` —
-      // which made the cell's shape an accident of the browser window. At
-      // 1440x900 that is a 720x612 landscape box, so every portrait frame
-      // was centre-cropped by `object-cover` and roughly a third of each
-      // photograph never appeared on the homepage.
-      //
-      // Fixing the ratio to the frame's own means the crop is nil where the
-      // cover is 4:5 and slight where it is taller, instead of severe
-      // everywhere.
-      // Along the strip the height is the strip's and the ratio decides
-      // the width; stacked on a phone it is the width that is given.
-      className="group strip-cell relative block aspect-[4/5] w-full shrink-0 overflow-hidden hoverable:cursor-none sm:h-full sm:w-auto"
+      /* One cell of the homepage's grid: three of these to a screen, so
+         each is about 4:5 on a laptop — the ratio the work is shot and
+         delivered in, which is why three and not four. It fills whatever
+         the grid gives it and the photograph covers that box; stacked on a
+         phone the grid is one column, so there the ratio sets the height.
+
+         It used to be sized by viewport height (`62vh`), which made the
+         shape an accident of the window: at 1440x900 that was a landscape
+         box, and every portrait frame lost a third of itself to the
+         crop. */
+      className="group strip-cell relative block h-full w-full overflow-hidden hoverable:cursor-none max-sm:aspect-[4/5]"
     >
       {/* Base layer: always loaded, never removed. It is what keeps the
             cell from flashing empty the first time a scrub frame is fetched.
@@ -224,7 +220,7 @@ export function WorkBand({
        * site's one established translucent surface, it reads as chrome
        * rather than as something wrong with the image.
        */}
-      <div className="absolute inset-x-0 bottom-0 flex flex-col gap-3 border-t border-border/60 glass-surface bg-background/70 p-5 sm:p-6">
+      <div className="absolute inset-x-0 bottom-0 flex flex-col gap-2 border-t border-border/60 glass-surface bg-background/70 p-4 sm:gap-3 sm:p-5">
         <div className="flex items-baseline gap-4">
           <span className="label shrink-0 tabular-nums text-muted-foreground">
             {String(index + 1).padStart(2, "0")}
@@ -232,7 +228,10 @@ export function WorkBand({
           {/* Moved off the photograph and into the plate. On its own in the
                 top corner it needed either a second plate or a scrim of its
                 own to stay legible over a bright frame. */}
-          <h3 className="font-display min-w-0 truncate text-2xl uppercase leading-none tracking-[0] sm:text-3xl">
+          {/* Sized for a tile in a grid of six rather than for a cell the
+                height of the screen: at `text-3xl` the plate took a third
+                of the picture it was labelling. */}
+          <h3 className="font-display min-w-0 truncate text-xl uppercase leading-none tracking-[0] sm:text-2xl">
             {project.name}
           </h3>
         </div>

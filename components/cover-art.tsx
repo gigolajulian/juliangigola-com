@@ -52,10 +52,11 @@ const homepageReleases = (picked: readonly string[]) => {
   return chosen.length ? chosen : COVER_RELEASES.slice(0, SHOWN);
 };
 
-/* Two cells of the homepage's strip: the heading, then the rack itself as
-   one cell of two rows. Along the strip the sleeves are half its height
-   each and the rack is as wide as that makes it; stacked on a phone they
-   fall back into two columns down the page. */
+/* One screen of the homepage: the rack, with what it is in the corner.
+   Two rows of squares, as many across as the pick has — ten of them at a
+   fifth of the window each, which leaves the squares square on every
+   laptop shape. A cover cannot be cropped: the type and the logo live at
+   its edges. */
 export function CoverArt() {
   const project = COVER_ART;
   if (!project?.images.length) return null;
@@ -63,67 +64,66 @@ export function CoverArt() {
   const releases = homepageReleases(CONTENT.coverArt);
 
   return (
-    <>
-      <div
-        data-tick
-        data-label="Cover art"
-        data-hash="cover-art"
-        className="flex w-full shrink-0 flex-col justify-center gap-3 py-6 sm:h-full sm:w-[min(18rem,40vw)] sm:py-0"
-      >
-        <div className="flex items-baseline gap-4">
+    <section
+      data-tick
+      data-label="Cover art"
+      data-hash="cover-art"
+      aria-labelledby="cover-art"
+      className="relative flex w-full shrink-0 flex-col justify-center border-l border-border py-16 sm:h-full sm:pb-0 sm:pt-24"
+    >
+      <div className="pointer-events-none absolute inset-x-0 top-0 z-10 flex items-baseline justify-between gap-6 px-6 py-4 sm:px-8 sm:pt-24">
+        <p className="label text-muted-foreground">
           {/* Numbered to match the index on the cover, where cover art is 05. */}
-          <span className="label tabular-nums text-muted-foreground">05</span>
-          <h2 id="cover-art" className="label text-muted-foreground">
+          <span className="tabular-nums">05</span>
+          <span id="cover-art" className="ml-3 text-foreground">
             Cover art
-          </h2>
-        </div>
-        <p className="font-display text-3xl uppercase leading-none tracking-[0] sm:text-4xl">
-          Sleeves
+          </span>
         </p>
         <Link
           prefetch={false}
           href={`/work/${project.slug}`}
-          className="label text-muted-foreground transition-colors duration-200 hoverable:hover:text-foreground"
+          className="label pointer-events-auto text-muted-foreground transition-colors duration-200 hoverable:hover:text-foreground"
         >
           All {COVER_RELEASES.length} &rarr;
         </Link>
       </div>
 
-      <div className="w-full shrink-0 sm:h-full sm:w-auto">
-        <ul className="grid h-full grid-cols-2 gap-3 max-sm:grid-cols-2 sm:grid-flow-col sm:grid-cols-none sm:grid-rows-2">
-          {releases.map((release) => (
-            <li key={release.slug}>
-              <Link
-                prefetch={false}
-                href={`/work/${project.slug}`}
-                aria-label={coverLabel(
-                  release.title,
-                  release.artist,
-                  release.frames,
-                )}
-                data-ring="Open"
-                className="group relative block aspect-square overflow-hidden hoverable:cursor-none sm:h-full sm:w-auto"
-                style={{ backgroundColor: release.frames[0]?.color }}
-              >
-                <CoverFaces
-                  frames={release.frames}
-                  sizes="(min-width: 640px) 18vw, 50vw"
-                />
+      <ul
+        className="grid grid-cols-2 sm:grid-cols-5"
+        style={{ gridTemplateRows: "repeat(2, minmax(0, 1fr))" }}
+      >
+        {releases.map((release) => (
+          <li key={release.slug}>
+            <Link
+              prefetch={false}
+              href={`/work/${project.slug}`}
+              aria-label={coverLabel(
+                release.title,
+                release.artist,
+                release.frames,
+              )}
+              data-ring="Open"
+              className="group relative block aspect-square overflow-hidden hoverable:cursor-none"
+              style={{ backgroundColor: release.frames[0]?.color }}
+            >
+              <CoverFaces
+                frames={release.frames}
+                sizes="(min-width: 640px) 20vw, 50vw"
+              />
 
-                {/* The release, named. A music client is scanning for something
-                  they recognise, and a cover on its own does not say what it
-                  is unless you already know it. */}
-                <div className="pointer-events-none absolute inset-x-0 bottom-0 flex flex-col gap-1 border-t border-border/60 glass-surface bg-background/70 p-4 opacity-0 transition-opacity duration-200 ease-out group-hover:opacity-100 group-focus-visible:opacity-100 motion-reduce:transition-none">
-                  <span className="label text-foreground">{release.title}</span>
-                  <span className="label text-muted-foreground">
-                    {release.artist}
-                  </span>
-                </div>
-              </Link>
-            </li>
-          ))}
-        </ul>
-      </div>
-    </>
+              {/* The release, named. A music client is scanning for
+                  something they recognise, and a cover on its own does not
+                  say what it is unless you already know it. */}
+              <div className="pointer-events-none absolute inset-x-0 bottom-0 flex flex-col gap-1 border-t border-border/60 glass-surface bg-background/70 p-4 opacity-0 transition-opacity duration-200 ease-out group-hover:opacity-100 group-focus-visible:opacity-100 motion-reduce:transition-none">
+                <span className="label text-foreground">{release.title}</span>
+                <span className="label text-muted-foreground">
+                  {release.artist}
+                </span>
+              </div>
+            </Link>
+          </li>
+        ))}
+      </ul>
+    </section>
   );
 }

@@ -3,14 +3,19 @@ import { Suspense } from "react";
 import Link from "next/link";
 import { ContactForm } from "@/components/contact-form";
 import { Strip } from "@/components/strip";
-import { StripPage, StripHead, TitleCell } from "@/components/strip-page";
+import { StripPage, StripHead, RisingTitle } from "@/components/strip-page";
 import { RESPONSE_TIME, BOOKING_URL } from "@/lib/site";
 
 /* ── contact ──────────────────────────────────────────────────────
- * The page the whole site is judged on, so it is three cells and the third
- * is the form: the title, the details, and the enquiry. There is no
- * enquiry cell at the end because the form is the enquiry, and nothing
- * leads on from here — a wheel past the end stretches the band and stops.
+ * The page the whole site is judged on, so the form is on the first screen
+ * beside the invitation rather than one swipe behind it. Nothing here is a
+ * step before the ask.
+ *
+ * Two screens. The first is the enquiry: what to say, and the box to say it
+ * in. The second is everything a person might want instead of a form —
+ * the address, where he is, and where else he is. Nothing leads on from
+ * here: a wheel past the end stretches the band and stops, because the
+ * visitor has arrived.
  * ─────────────────────────────────────────────────────────────── */
 
 export const metadata: Metadata = {
@@ -21,8 +26,16 @@ export const metadata: Metadata = {
 };
 
 const ELSEWHERE = [
-  { href: "https://instagram.com/juliangigola", label: "Instagram", at: "@juliangigola" },
-  { href: "https://vimeo.com/filmedbyjulian", label: "Vimeo", at: "filmedbyjulian" },
+  {
+    href: "https://instagram.com/juliangigola",
+    label: "Instagram",
+    at: "@juliangigola",
+  },
+  {
+    href: "https://vimeo.com/filmedbyjulian",
+    label: "Vimeo",
+    at: "filmedbyjulian",
+  },
   {
     href: "https://www.linkedin.com/in/juliangigola",
     label: "LinkedIn",
@@ -51,48 +64,74 @@ export default function ContactPage() {
       }
     >
       <Strip
-        label="Contact: the details and the enquiry form, left and right"
+        label="Contact: the enquiry, and the details. One screen at a time, left and right."
+        paged
+        bleed
         className="mt-4 flex-1"
       >
-        <TitleCell title="Get in touch" hash="contact">
-          <p className="text-sm leading-relaxed text-muted-foreground">
-            Commissions, sessions, or a question about a project. Tell me what
-            kind of shoot it is and I&rsquo;ll come back with an approach and a
-            quote.
-          </p>
-          {/* Answers "will this actually go anywhere?" before they decide
-              whether to fill anything in, which is where most enquiries are
-              abandoned. */}
-          {RESPONSE_TIME ? (
-            <p className="text-sm text-foreground">Replies {RESPONSE_TIME}.</p>
-          ) : null}
-        </TitleCell>
+        {/* One: the ask and the form, side by side. */}
+        <section
+          data-tick
+          data-label="Enquire"
+          data-hash="enquire"
+          className="grid w-full shrink-0 grid-cols-1 gap-10 px-6 py-12 sm:h-full sm:grid-cols-2 sm:items-center sm:gap-16 sm:px-16 sm:py-0"
+        >
+          <div className="flex flex-col gap-6">
+            <RisingTitle text="Get in touch" />
+            <p className="title-rest max-w-prose text-sm leading-relaxed text-muted-foreground">
+              Commissions, sessions, or a question about a project. Tell me what
+              kind of shoot it is and I&rsquo;ll come back with an approach and
+              a quote.
+            </p>
+            {/* Answers "will this actually go anywhere?" before they decide
+                whether to fill anything in, which is where most enquiries
+                are abandoned. */}
+            {RESPONSE_TIME ? (
+              <p className="title-rest text-sm text-foreground">
+                Replies {RESPONSE_TIME}.
+              </p>
+            ) : null}
+            {/* Self-serve booking, once the calendar exists. Beside the form
+                rather than instead of it — a session client wants a slot, a
+                commissioning client wants a conversation. */}
+            {BOOKING_URL ? (
+              <a
+                href={BOOKING_URL}
+                target="_blank"
+                rel="noreferrer"
+                data-ring="Book"
+                className="label inline-block self-start action rounded-full px-6 py-4 press active:scale-[0.97] hoverable:cursor-none"
+              >
+                Check availability
+              </a>
+            ) : null}
+          </div>
 
+          {/* The form keeps its own height and scrolls inside itself on a
+              short window, so the send button is never below the fold of
+              its own box. The strip yields the wheel to it and takes it
+              back once it has run out. `useSearchParams` in the form needs
+              a boundary, so the shell can still be prerendered while the
+              pre-filled type resolves. */}
+          <div
+            data-scroll
+            className="min-h-0 overflow-y-auto overscroll-contain sm:max-h-full sm:pr-3"
+          >
+            <Suspense fallback={null}>
+              <ContactForm />
+            </Suspense>
+          </div>
+        </section>
+
+        {/* Two: everything a person might want instead of a form. */}
         <section
           data-tick
           data-label="Details"
           data-hash="details"
-          className="flex w-full shrink-0 flex-col justify-center gap-6 py-8 sm:h-full sm:w-[min(22rem,60vw)] sm:py-0"
+          className="flex w-full shrink-0 flex-col justify-center gap-8 px-6 py-12 sm:h-full sm:px-16 sm:py-0"
         >
-          {/* Self-serve booking, once the calendar exists. Beside the form
-              rather than instead of it — a session client wants a slot, a
-              commissioning client wants a conversation. */}
-          {BOOKING_URL ? (
-            <a
-              href={BOOKING_URL}
-              target="_blank"
-              rel="noreferrer"
-              data-ring="Book"
-              className="label inline-block self-start action rounded-full px-6 py-4 press active:scale-[0.97] hoverable:cursor-none"
-            >
-              Check availability
-            </a>
-          ) : null}
-
-          <dl
-            data-scroll
-            className="flex min-h-0 flex-col gap-6 overflow-y-auto overscroll-contain border-t border-border pr-2 pt-6"
-          >
+          <h2 className="label text-muted-foreground">Details</h2>
+          <dl className="grid gap-8 sm:grid-cols-3 sm:gap-12">
             <div>
               <dt className="label text-muted-foreground">Email</dt>
               <dd className="mt-2 text-sm">
@@ -113,44 +152,27 @@ export default function ContactPage() {
             {/* The three that used to sit in the footer's ask. The footer is
                 one quiet line under every strip now, so they live where
                 somebody looking for them would go. */}
-            {ELSEWHERE.map((where) => (
-              <div key={where.label}>
-                <dt className="label text-muted-foreground">{where.label}</dt>
-                <dd className="mt-2 text-sm">
+            <div>
+              <dt className="label text-muted-foreground">Elsewhere</dt>
+              <dd className="mt-2 flex flex-col gap-2 text-sm">
+                {ELSEWHERE.map((where) => (
                   <a
+                    key={where.label}
                     href={where.href}
                     target="_blank"
                     rel="noreferrer"
                     className="underline decoration-border underline-offset-4 transition-colors duration-200 hoverable:hover:decoration-current"
                   >
-                    {where.at}
+                    {where.label}
+                    <span className="ml-2 text-muted-foreground">
+                      {where.at}
+                    </span>
                   </a>
-                </dd>
-              </div>
-            ))}
+                ))}
+              </dd>
+            </div>
           </dl>
         </section>
-
-        {/* The last cell is the form itself, and it is this page's ask.
-            The wheel over it scrolls the form to its end and then the
-            strip; a wheel over a field never moves either. `useSearchParams`
-            in the form needs a boundary, so the shell can still be
-            prerendered while the pre-filled type resolves. */}
-        <div
-          data-tick
-          data-label="Enquire"
-          data-hash="form"
-          className="w-full shrink-0 sm:h-full sm:w-[min(36rem,85vw)]"
-        >
-          <div
-            data-scroll
-            className="h-full overflow-y-auto overscroll-contain pr-3"
-          >
-            <Suspense fallback={null}>
-              <ContactForm />
-            </Suspense>
-          </div>
-        </div>
       </Strip>
     </StripPage>
   );

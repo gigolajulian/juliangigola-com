@@ -106,6 +106,8 @@ export function Strip({
   onOpen,
   counter,
   stack = true,
+  paged = false,
+  bleed = false,
   arrive,
   ref,
   className,
@@ -125,6 +127,14 @@ export function Strip({
   /** Under 40rem, run the cells down the page instead and switch the
       machine off. Off for the project strips, which swipe on a phone. */
   stack?: boolean;
+  /** One screen at a time. A notch, a swipe or a flick moves to the next
+      cell and stops there, instead of the sequence running free under the
+      hand. For pages whose cells are whole screens rather than pictures:
+      the movement means "the next thing", not "a bit further along". */
+  paged?: boolean;
+  /** No gutter and no gap, so a cell that is `w-full` is exactly the
+      window. Goes with `paged`. */
+  bleed?: boolean;
   /** No arrival slide. The homepage's cover must not move in. */
   arrive?: "none";
   /** The scroller, for a lightbox that lifts frames out of it. */
@@ -360,6 +370,8 @@ export function Strip({
        it and the sequence leads on to the next page. So the stretch is
        the receipt for the count — you can see how far along you are. */
     let over = 0;
+    /** While a paged move is landing, another gesture is the same gesture. */
+    let locked = 0;
     let pushed = 0;
     let band = 0;
     let leaving = false;
@@ -410,6 +422,14 @@ export function Strip({
        it aimed and 60Hz and 144Hz feel the same. `target` is always where
        the strip will stop. */
     const TAU = 180;
+    /* How long a paged move owns the wheel. A mouse notch is one turn of
+       the hand and another turn a moment later means another screen, so
+       its lock is short. A trackpad sends a stream of small deltas for one
+       swipe and keeps sending them through the momentum afterwards, so
+       every one of those extends the lock: one swipe is one screen, however
+       long the fingers keep gliding. */
+    const NOTCH_LOCK = 260;
+    const SWIPE_LOCK = 380;
 
     const step = (now: number) => {
       const dt = Math.min(32, last ? now - last : 16);
@@ -578,6 +598,27 @@ export function Strip({
         over = 0;
         release();
       }
+      /* Paged: the gesture means the next screen, whatever its size. A
+         trackpad sends a stream of small deltas for one swipe and a mouse
+         one large notch for one turn, so the move is locked for as long as
+         it takes to land — otherwise a single swipe would fly through four
+         sections. */
+      if (paged) {
+        const now = performance.now();
+        const notch = Math.abs(dy) >= 80;
+        if (now < locked) {
+          if (!notch) locked = now + SWIPE_LOCK;
+          return;
+        }
+        locked = now + (notch ? NOTCH_LOCK : SWIPE_LOCK);
+        const last = el.children.length - 1;
+        const where = centreOf(
+          el,
+          Math.max(0, Math.min(last, nearest(target) + (dy > 0 ? 1 : -1))),
+        );
+        if (where !== null) to(where);
+        return;
+      }
       to(target + dy * (Math.abs(dy) >= 80 ? WHEEL : PAD));
     };
 
@@ -653,6 +694,12 @@ export function Strip({
       // you into another page would be a surprise, and the wheel is the
       // gesture that travels.
       if (eased && Math.abs(speed) > 0.05) to(el.scrollLeft + speed * TAU);
+      // Paged, a release lands on a screen rather than wherever the throw
+      // ran out: the page is the unit, so it is what the hand is holding.
+      if (eased && paged) {
+        const where = centreOf(el, nearest(target));
+        if (where !== null) to(where);
+      }
       // After the click that this release is about to fire, not before.
       requestAnimationFrame(() => delete el.dataset.dragged);
     };
@@ -747,7 +794,7 @@ export function Strip({
       el.style.translate = "";
       delete el.dataset.release;
     };
-  }, [router, nextHref, prevHref, live]);
+  }, [router, nextHref, prevHref, live, paged]);
 
   /** Puts a cell in the middle of the window. */
   const goTo = (i: number) => {
@@ -768,14 +815,16 @@ export function Strip({
            the sequence being tugged out of your hand. The momentum stops
            where it is let go instead. */
         className={cn(
-          "flex min-h-0 flex-1 select-none items-center gap-3 overflow-x-auto overflow-y-hidden sm:gap-4",
-          "px-6 sm:px-10",
+          "flex min-h-0 flex-1 select-none items-center overflow-x-auto overflow-y-hidden",
+          bleed ? "gap-0" : "gap-3 px-6 sm:px-10 sm:gap-4",
           "strip-scroll focus-visible:outline-none",
           // Stacked: the cells run down the page, which scrolls as pages
           // do, with nothing hidden, nothing sliding in, and the words
           // selectable again.
           stack &&
             "max-sm:animate-none max-sm:flex-col max-sm:items-stretch max-sm:gap-10 max-sm:overflow-visible max-sm:select-auto",
+          // Stacked, a full-bleed page still wants its words off the edge.
+          bleed && stack && "max-sm:gap-0",
         )}
       >
         {children}
