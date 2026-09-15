@@ -157,7 +157,11 @@ export function useLightbox(
       src ? pictureFor(src) : null,
       stage?.current,
     );
-    opener.current?.focus();
+    /* After the closing transition, not during it: called here the focus
+       landed on an element that was still inside a dialog on its way out,
+       and the return put it on the body instead — so a keyboard visitor
+       lost their place in the sequence. */
+    window.setTimeout(() => opener.current?.focus(), 120);
   };
 
   const step = React.useCallback(

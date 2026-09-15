@@ -104,11 +104,13 @@ export function StudioReel({
               onClick={() => setAt(i)}
               aria-label={shoot.name}
               aria-current={i === at}
-              className="group flex h-4 w-5 items-end"
+              // 24px square, which is the floor for something you have to
+              // hit; the mark inside stays the size it was.
+              className="group flex h-6 w-6 items-end justify-center"
             >
               <span
                 className={cn(
-                  "block w-full rounded-full transition-[height,background-color] duration-200 ease-[var(--ease-out-strong)]",
+                  "block w-5 rounded-full transition-[height,background-color] duration-200 ease-[var(--ease-out-strong)]",
                   i === at
                     ? "h-2.5 bg-foreground"
                     : "h-1 bg-foreground/20 hoverable:group-hover:bg-foreground/50",

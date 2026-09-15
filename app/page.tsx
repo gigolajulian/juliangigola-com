@@ -68,7 +68,11 @@ export default function Home() {
       >
         <Hero
           disciplines={DISCIPLINES}
-          className="w-full shrink-0 max-sm:min-h-[100lvh] sm:h-full"
+          // A height and not a floor: the type column inside takes its own
+          // height from this one, and against a floor it collapsed to its
+          // contents and settled at the top of the screen — the name half
+          // under the bar and the photograph below it.
+          className="w-full shrink-0 max-sm:h-[100lvh] sm:h-full"
         />
 
         {PRESS_HOME.length ? (

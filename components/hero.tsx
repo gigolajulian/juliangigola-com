@@ -726,9 +726,7 @@ export function Hero({
                 once it has gone by. It used to be measured live from the
                 header; the moment is the strip's now, so nothing reads this
                 element but the eye. */}
-              <span className="display block">
-                Julian Gigola
-              </span>
+              <span className="display block">Julian Gigola</span>
 
               {/* The switching half: the job title first, then each discipline.
                 Deliberately not a live region — it would announce a new line
@@ -848,7 +846,7 @@ export function Hero({
             <nav
               data-scroll
               aria-label="Disciplines"
-              className="mt-8 min-h-0 overflow-y-auto overscroll-contain border-t border-border sm:mt-6 tall:hidden"
+              className="mt-8 min-h-0 overflow-y-auto overscroll-contain border-t border-border sm:mt-6 max-sm:tall:hidden"
             >
               <ul onPointerOver={takeFromEvent} onFocus={takeFromEvent}>
                 {disciplines.map((discipline, i) => (
@@ -921,13 +919,16 @@ export function Hero({
             {/* The phases, at a thumb's size. One tick per discipline, the
                 current one lit, each a link to its page and each a target for
                 the same delegated handler the rows use — so tapping a tick
-                switches the cover the way hovering a row does. Only where the
-                rows are hidden. */}
+                switches the cover the way hovering a row does. Only on a
+                phone, where the rows are hidden: on any wider screen the
+                rows are there and a second row of marks would sit just
+                above the strip's ruler saying something different with the
+                same shape. */}
             <ol
               aria-label="Disciplines"
               onPointerOver={takeFromEvent}
               onFocus={takeFromEvent}
-              className="mt-5 hidden gap-1 px-6 tall:flex tall:pb-[max(0.5rem,env(safe-area-inset-bottom))]"
+              className="mt-5 hidden gap-1 px-6 max-sm:tall:flex tall:pb-[max(0.5rem,env(safe-area-inset-bottom))]"
             >
               {disciplines.map((discipline, i) => (
                 <li

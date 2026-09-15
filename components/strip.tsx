@@ -764,6 +764,52 @@ export function Strip({
       if (where !== null) to(where);
     };
 
+    /* A scroll the strip did not start — a sideways trackpad swipe, a
+       touch drag, a scrollbar — settles on a section rather than wherever
+       it ran out. The wheel and the drag are paged by hand above; this is
+       every other way the box can be moved, and without it a page could
+       sit with two sections half on screen and nothing to pull it
+       straight. It waits for the movement to stop, so it never fights the
+       gesture, and it does nothing while the strip is driving itself. */
+    let settle = 0;
+    const onSettle = () => {
+      if (!paged || !eased) return;
+      window.clearTimeout(settle);
+      settle = window.setTimeout(() => {
+        if (down || dragging || frame || leaving) return;
+        const where = centreOf(el, nearest(el.scrollLeft));
+        if (where !== null && Math.abs(where - el.scrollLeft) > 2) to(where);
+      }, 160);
+    };
+
+    /* Tab into a section that is off screen and the browser jumps the box
+       to it: instantly, and to wherever it takes to get the element in
+       view, which on a paged page is usually between two sections. So the
+       jump is put back and the strip travels there itself. Only for the
+       keyboard — a press focuses what it presses, and recentring under a
+       click would be the page moving for no reason. */
+    let beforeTab = -1;
+    const onTab = (e: KeyboardEvent) => {
+      if (e.key !== "Tab") return;
+      beforeTab = el.scrollLeft;
+      window.setTimeout(() => {
+        beforeTab = -1;
+      }, 0);
+    };
+    const onFocusIn = (e: FocusEvent) => {
+      const node = e.target as Node | null;
+      if (beforeTab < 0 || !node || node === el || !el.contains(node)) return;
+      const i = Array.from(el.children).findIndex((c) => c.contains(node));
+      const where = i < 0 ? null : centreOf(el, i);
+      if (where === null) return;
+      el.scrollLeft = beforeTab;
+      beforeTab = -1;
+      if (Math.abs(where - el.scrollLeft) > 2) to(where);
+    };
+
+    el.addEventListener("scroll", onSettle, { passive: true });
+    el.addEventListener("focusin", onFocusIn);
+    document.addEventListener("keydown", onTab, true);
     el.addEventListener("wheel", onWheel, { passive: false });
     el.addEventListener("pointerdown", onDown);
     el.addEventListener("pointermove", onMove);
@@ -780,6 +826,10 @@ export function Strip({
     el.addEventListener("scroll", sync, { passive: true });
 
     return () => {
+      window.clearTimeout(settle);
+      el.removeEventListener("scroll", onSettle);
+      el.removeEventListener("focusin", onFocusIn);
+      document.removeEventListener("keydown", onTab, true);
       el.removeEventListener("wheel", onWheel);
       el.removeEventListener("pointerdown", onDown);
       el.removeEventListener("pointermove", onMove);
@@ -817,7 +867,10 @@ export function Strip({
         className={cn(
           "flex min-h-0 flex-1 select-none items-center overflow-x-auto overflow-y-hidden",
           bleed ? "gap-0" : "gap-3 px-6 sm:px-10 sm:gap-4",
-          "strip-scroll focus-visible:outline-none",
+          /* It takes focus and the arrow keys drive it, so it says so. The
+             ring is inset, because an outline around a box the height of
+             the window would be a frame around the photographs. */
+          "strip-scroll focus-visible:outline-2 focus-visible:-outline-offset-4 focus-visible:outline-foreground/40",
           // Stacked: the cells run down the page, which scrolls as pages
           // do, with nothing hidden, nothing sliding in, and the words
           // selectable again.
@@ -850,7 +903,12 @@ export function Strip({
           // the same height before and after they are read.
           className="flex h-4 min-w-0 flex-1 items-end justify-between gap-px"
         >
-          {ticks.map(({ i, word }) => {
+          {ticks.map(({ i, word }, n) => {
+            /* Words in the back half hang from the right of their tick and
+               grow leftwards. Anchored left like the rest, a long one near
+               the end ran past the edge of the window — and a page that can
+               be scrolled sideways by ten pixels is a page that wobbles. */
+            const end = n * 2 >= ticks.length;
             return (
               <button
                 key={`tick-${i}`}
@@ -863,7 +921,8 @@ export function Strip({
                 {word ? (
                   <span
                     className={cn(
-                      "label pointer-events-none absolute bottom-full left-0 mb-1.5 whitespace-nowrap text-[0.625rem] text-muted-foreground transition-opacity duration-200",
+                      "label pointer-events-none absolute bottom-full mb-1.5 whitespace-nowrap text-[0.625rem] text-muted-foreground transition-opacity duration-200",
+                      end ? "right-0" : "left-0",
                       i === at
                         ? "opacity-100"
                         : "opacity-0 hoverable:group-hover:opacity-100",
