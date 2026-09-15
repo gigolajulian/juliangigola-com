@@ -555,7 +555,7 @@ body:has([data-quiet-footer]) .site-footer-row {
   opacity: 0;
   transition: opacity 240ms var(--ease-out-strong);
 }
-article:has(.strip-scroll[data-past-title]) .running-head {
+article:has(.strip-scroll[data-past-first]) .running-head {
   opacity: 1;
 }
 @media (prefers-reduced-motion: reduce) {
@@ -629,6 +629,10 @@ article:has(.strip-scroll[data-past-title]) .running-head {
   &[data-arrive="back"] {
     animation-name: jg-strip-in-back;
   }
+  /* The homepage: its cover must not move in. */
+  &[data-arrive="none"] {
+    animation: none;
+  }
   @media (prefers-reduced-motion: reduce) {
     animation: none;
     transition: none;
@@ -692,7 +696,6 @@ article:has(.strip-scroll[data-past-title]) .running-head {
 .strip-frame {
   transform: skewX(calc(var(--drift, 0) * -0.16deg))
     scale(calc(1 + var(--drift, 0) * var(--drift, 0) * 0.00012));
-  will-change: transform;
 }
 @media (prefers-reduced-motion: reduce) {
   .title-word,

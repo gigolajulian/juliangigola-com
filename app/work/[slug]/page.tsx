@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ProjectStrip, type NextUp } from "@/components/project-strip";
+import { StripPage, StripHead } from "@/components/strip-page";
 import { CoverArtGallery } from "@/components/cover-art-gallery";
 import { CallToAction } from "@/components/call-to-action";
 import {
@@ -154,63 +155,28 @@ export default async function ProjectPage(props: PageProps<"/work/[slug]">) {
   }
 
   return (
-    /* `data-quiet-footer` does two jobs, both in `globals.css`: the site
-       footer under this page is the one line of housekeeping rather than the
-       ask every other page ends on, and from 40rem up the page is exactly
-       the window with that line on it. Julian asked for a horizontal page
-       that does not scroll vertically at all.
-
-       One screen: the head over the sequence, the sequence across it, a
-       panel under it. The children are sized to fit inside: the head and the
-       panel take what they need and the strip takes the rest, so the
-       photographs are as tall as the window allows on every screen without a
-       single height being written down. `h-dvh` on a phone, which still
-       scrolls its own height to reach the footer; `sm:h-full` above that,
-       filling a `main` already sized to the window less the footer. */
-    <article
-      data-quiet-footer
-      className="flex h-dvh min-h-0 flex-col pt-24 sm:h-full sm:pt-28"
+    /* One screen: the head over the sequence, the sequence across it, a
+       panel under it (`strip-page.tsx`, the chrome every horizontal page
+       shares). `h-dvh` on a phone, which still scrolls its own height to
+       reach the footer; from 40rem up the page is exactly the window. */
+    <StripPage
+      className="h-dvh"
+      head={
+        <StripHead
+          crumb={<Crumb />}
+          title={project.headline ?? project.name}
+          sub={client}
+          aside={[
+            project.categories.length && !isDiscipline
+              ? project.categories.map((c) => c.name).join(", ")
+              : null,
+            `${project.images.length} frames`,
+          ]
+            .filter(Boolean)
+            .join(" · ")}
+        />
+      }
     >
-      <header className="mx-auto w-full max-w-[100rem] shrink-0 px-6 sm:px-10">
-        {/* Three columns, the outer two the same width, so the title is
-            centred on the page and not on whatever is left over. */}
-        <div className="flex items-start justify-between gap-6">
-          <div className="w-28 shrink-0 sm:w-44">
-            <Crumb />
-          </div>
-
-          {/* The running head, and it waits its turn. The sequence opens on
-              the title set large (see `project-strip.tsx`), so this would be
-              the same words twice on the first screen. `running-head` fades
-              it in once that card has been scrolled past — the rule is in
-              `globals.css`, keyed off an attribute the strip sets. Julian
-              asked for the top title to appear when the card goes away. */}
-          <div className="running-head min-w-0 text-center">
-            {/* Set in the display face at a size that reads as a title and
-                not a caption, with whoever the work was for under it, or
-                who is in it. Julian asked for both. */}
-            <h1 className="font-display line-clamp-2 text-xl uppercase leading-none tracking-[0] sm:line-clamp-none sm:text-3xl">
-              {project.headline ?? project.name}
-            </h1>
-            {client ? (
-              <p className="label mt-1.5 text-muted-foreground">{client}</p>
-            ) : null}
-          </div>
-
-          {/* What it is and how much of it there is, opposite the crumb. */}
-          <p className="label w-28 shrink-0 text-right text-muted-foreground sm:w-44">
-            {[
-              project.categories.length && !isDiscipline
-                ? project.categories.map((c) => c.name).join(", ")
-                : null,
-              `${project.images.length} frames`,
-            ]
-              .filter(Boolean)
-              .join(" · ")}
-          </p>
-        </div>
-      </header>
-
       {/* Keyed, because the way from one project to the next is this same
           page with a new slug, and a strip that kept its scroll position and
           its counter across that would arrive at the end of the new sequence
@@ -227,7 +193,7 @@ export default async function ProjectPage(props: PageProps<"/work/[slug]">) {
         prev={prevUp}
         className="mt-6 flex-1"
       />
-    </article>
+    </StripPage>
   );
 }
 

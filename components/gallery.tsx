@@ -4,7 +4,6 @@ import * as React from "react";
 import { ViewTransition } from "react";
 import Image from "next/image";
 import { Reveal } from "@/components/reveal";
-import { PointerRing } from "@/components/pointer-ring";
 import { Lightbox, useLightbox } from "@/components/lightbox";
 import { cn } from "@/lib/utils";
 import type { Project, TextBlock } from "@/lib/work-types";
@@ -161,7 +160,6 @@ export function Gallery({ project }: { project: Project }) {
         })}
       </div>
 
-      <PointerRing />
       <Lightbox frames={frames} name={project.name} {...lightbox} />
     </>
   );

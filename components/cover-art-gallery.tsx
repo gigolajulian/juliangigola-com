@@ -4,7 +4,6 @@ import * as React from "react";
 import { Lightbox, useLightbox } from "@/components/lightbox";
 import { CoverFaces, coverLabel } from "@/components/cover-faces";
 import { Reveal } from "@/components/reveal";
-import { PointerRing } from "@/components/pointer-ring";
 import type { CoverRelease } from "@/lib/cover-art-types";
 
 /* ── the cover-art sheet ──────────────────────────────────────────
@@ -96,7 +95,6 @@ export function CoverArtGallery({ releases }: { releases: CoverRelease[] }) {
         })}
       </ul>
 
-      <PointerRing />
       <Lightbox frames={frames} name="Cover art" {...lightbox} />
     </>
   );

@@ -6,6 +6,7 @@ import { SiteFooter } from "@/components/site-footer";
 import { PhotoNotice } from "@/components/photo-notice";
 import { GlassLight } from "@/components/glass-light";
 import { PhotoFade } from "@/components/photo-fade";
+import { PointerRing } from "@/components/pointer-ring";
 import "./globals.css";
 
 /* Inter for everything that is read rather than announced, at Julian's ask.
@@ -178,6 +179,10 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         </main>
         <SiteFooter />
         <PhotoNotice />
+        {/* The pointer over anything that opens large, site wide. One
+            mount: it follows the pointer and shows only over `[data-ring]`,
+            so every gallery and strip shares it and none carries its own. */}
+        <PointerRing />
       </body>
     </html>
   );
