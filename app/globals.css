@@ -546,6 +546,50 @@ body:has([data-quiet-footer]) .site-footer-row {
   padding-top: 0;
 }
 
+/* The name of the project at the top of a strip page, which waits for the
+   opening plate to go by. The sequence starts on the title set large, so
+   without this the first screen carries the same words twice. Opacity and
+   not `display`, so the header keeps its height and nothing reflows as it
+   comes and goes. The attribute is set by the strip's own scroll reader. */
+.running-head {
+  opacity: 0;
+  transition: opacity 240ms var(--ease-out-strong);
+}
+article:has(.strip-scroll[data-past-title]) .running-head {
+  opacity: 1;
+}
+@media (prefers-reduced-motion: reduce) {
+  .running-head {
+    transition: none;
+  }
+}
+
+/* And the page is exactly the window, with that one line on it. A strip page
+   had a vertical wobble of precisely the footer's height — 62px — because
+   the sequence is `h-dvh` and the footer sits under it, so the one thing
+   below the photographs was the one thing you could not see. Julian asked
+   for a horizontal page that does not scroll vertically at all.
+
+   Only from 40rem up. On a phone the nav takes 93px and the footer 83px out
+   of 844, and squeezing the photographs into what is left to save one short
+   scroll is a poor trade; phones keep the scroll they have. */
+@media (min-width: 40rem) {
+  body:has([data-quiet-footer]) {
+    height: 100dvh;
+    overflow: hidden;
+  }
+  /* A flex child will not shrink below its content without this, and the
+     strip inside is the thing that has to give. */
+  body:has([data-quiet-footer]) > main {
+    min-height: 0;
+  }
+  /* `viewportFit: "cover"` is set and nothing else pads for it, so held
+     sideways the last line would sit under the home indicator. */
+  body:has([data-quiet-footer]) .site-footer-body {
+    padding-bottom: calc(1.5rem + env(safe-area-inset-bottom));
+  }
+}
+
 @utility strip-scroll {
   scrollbar-width: none;
   overscroll-behavior-x: contain;

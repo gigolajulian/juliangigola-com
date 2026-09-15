@@ -6,7 +6,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { PointerRing } from "@/components/pointer-ring";
 import { Lightbox, useLightbox } from "@/components/lightbox";
-import { cn } from "@/lib/utils";
+import { cn, rubberband } from "@/lib/utils";
 import type { Project, TextBlock, Frame } from "@/lib/work-types";
 
 /* ── the sequence, across the screen ──────────────────────────────
@@ -41,9 +41,14 @@ import type { Project, TextBlock, Frame } from "@/lib/work-types";
  * ─────────────────────────────────────────────────────────────── */
 
 type Cell =
+  | { kind: "title" }
   | { kind: "frame"; frame: Frame; n: number }
   | { kind: "text"; block: TextBlock }
   | { kind: "next" };
+
+/** Neither of the two cells that are words rather than photographs: they
+    take no number, no tick, and no place in the count. */
+const isWords = (c: Cell) => c.kind === "title" || c.kind === "next";
 
 export type NextUp = {
   href: string;
@@ -55,9 +60,17 @@ export type NextUp = {
     wheel delta. Three notches on a mouse: an overshoot of one is a
     reader arriving at the end, not asking to leave it. */
 const LEAVE_AFTER = 300;
-/** And how long the strip must have been sitting at its end before any of
-    that counts, so one flick cannot both arrive and leave. */
-const SETTLE = 400;
+/** How long a push is held after the last notch before it starts to drain,
+    so the notches of a steady spin add up rather than leak away between
+    them: a notched wheel fires about ten times a second, and a drain that
+    ran through the gaps levelled a spin off short of LEAVE_AFTER. Then
+    RELAX is the spring: the time in which the held push falls to a third
+    once the hand has stopped. Fast, because a band that takes a second to
+    come back reads as the page being stuck, not as give. */
+const HOLD = 200;
+const RELAX = 120;
+/** The most the band ever shows, in px. Resistance, not travel. */
+const STRETCH = 90;
 
 export function ProjectStrip({
   project,
@@ -92,7 +105,10 @@ export function ProjectStrip({
     for (const b of project.blocks ?? []) {
       byPosition.set(b.after, [...(byPosition.get(b.after) ?? []), b]);
     }
-    const out: Cell[] = [];
+    /* The sequence opens on the title. Julian asked for the title in large
+       bold with the credits right before the first image, which is also
+       where a printed portfolio puts them: the plate before the plates. */
+    const out: Cell[] = [{ kind: "title" }];
     frames.forEach((frame, i) => {
       for (const block of byPosition.get(i) ?? []) out.push({ kind: "text", block });
       out.push({ kind: "frame", frame, n: i });
@@ -104,6 +120,7 @@ export function ProjectStrip({
     return out;
   }, [frames, project.blocks, next]);
 
+
   /* Which cell is nearest the middle of the window. Read off the scroll
      position rather than with an observer, because the counter and the
      ruler want it every frame of a drag and not on a threshold. */
@@ -114,6 +131,16 @@ export function ProjectStrip({
     const read = () => {
       queued = 0;
       const room = el.scrollWidth - el.clientWidth;
+      /* Whether the opening plate has gone. The page header carries the same
+         name in small capitals and it waits for this: two titles on one
+         screen is the same words twice. Half the card's width, so the swap
+         happens as it leaves rather than after it has. The rule that reads
+         this is in `globals.css`. */
+      const card = el.firstElementChild as HTMLElement | null;
+      el.toggleAttribute(
+        "data-past-title",
+        !!card && el.scrollLeft > card.offsetLeft + card.offsetWidth * 0.5,
+      );
       /* Either end is that end's cell, whatever is nearest the middle.
          At the far end the last frame is often narrower than half a window,
          so the middle of the window sits over the one before it and the
@@ -182,6 +209,39 @@ export function ProjectStrip({
     let x = el.scrollLeft;
     let v = 0;
     let last = 0;
+    /* ── the band ──
+       Push past either end and the strip does not stop dead, it gives a
+       little and comes back — the resistance Julian asked for at the ends.
+       `over` is the raw pull past the end, positive at the right and
+       negative at the left; the band shown is that pull through
+       `rubberband`, so the first pixels move it and the later ones barely
+       do. It drains under RELAX whenever the pushing stops. And at the
+       right-hand end it is also the count: keep pushing past LEAVE_AFTER of
+       it and the sequence leads on to the next project. So the stretch is
+       the receipt for the count — you can see how far along you are. */
+    let over = 0;
+    let pushed = 0;
+    let band = 0;
+    let leaving = false;
+
+    /* Drawn with the `translate` property and not `transform`. This is the
+       one trap in here: `strip-scroll` in `globals.css` animates
+       `transform` for both the arrival and the `[data-leaving]` exit, and an
+       inline transform would outrank the exit — the strip would snap back
+       to zero and leave from there. The two properties compose instead, so
+       the exit slide simply starts from wherever the band had got to. */
+    const paint = () => {
+      if (leaving) return;
+      // Softer than the lightbox's swipe: a wheel notch is 100px of delta
+      // where a finger's pull is a few, and at the swipe's firmness two
+      // notches hit the cap before the third could lead on. At this one
+      // the three notches read 25, 48 and 71px, so the band is still
+      // growing at the moment it goes.
+      const pull = eased && over ? rubberband(over, el.clientWidth, 0.25) : 0;
+      el.style.translate = pull
+        ? `${-Math.max(-STRETCH, Math.min(STRETCH, pull))}px`
+        : "";
+    };
 
     /* Momentum and friction, measured off the reference. Julian recorded
        remyshoots.co.za; read frame by frame, its strip's speed climbs while
@@ -236,6 +296,27 @@ export function ProjectStrip({
       frame = requestAnimationFrame(step);
     };
 
+    /** The band's own loop, apart from the strip's: it holds while the
+        pushing goes on and drains once it stops. Its own loop because the
+        strip's writes `scrollLeft` every frame, and a strip loop kept up for
+        the band would overwrite a keyboard or touch scroll for as long as
+        the band took to settle — seen in the test, where a jump to the end
+        was put straight back to the start. */
+    const relax = (now: number) => {
+      if (now - pushed > HOLD) {
+        over *= Math.exp(-16 / RELAX);
+        if (Math.abs(over) < 1) over = 0;
+        paint();
+      }
+      band = over ? requestAnimationFrame(relax) : 0;
+    };
+    const push = (by: number) => {
+      over += by;
+      pushed = performance.now();
+      paint();
+      if (!band) band = requestAnimationFrame(relax);
+    };
+
     /** Aims the strip: sets the speed that runs out exactly at `where`. */
     const to = (where: number) => {
       target = clamp(where);
@@ -269,30 +350,26 @@ export function ProjectStrip({
        `scrollLeft`, or a notch that arrives while the strip is still
        gliding into the last frame would be handed to the page. */
     /* ── the way on ──
-       Past the end, the page gets the wheel and scrolls to its foot. With
-       the page at its foot too, the wheel is asking for what comes next,
-       and enough of it goes there: the strip slides off to the left and the
-       next project's strip arrives from the right (`strip-scroll` in
-       `globals.css`). A notch back cancels the count.
+       Push past the right-hand end and the band shows it; keep pushing and
+       the sequence leads on: the strip slides off to the left and the next
+       project's strip arrives from the right (`strip-scroll` in
+       `globals.css`). Stop pushing and the band relaxes and the count with
+       it, so a wheel that merely arrives at the end and overshoots goes
+       nowhere, and only one that persists does. Julian asked for exactly
+       that: a little resistance, and if the scrolling persists, the next
+       project.
 
-       Two things have to be true before a notch counts, both learned from
-       testing. The strip must have been at its end for a beat — a trackpad
-       flick is one gesture that arrives and overshoots, and without the
-       beat the overshoot alone left the project. And the strip must have
-       been on screen for a moment, or the one a visitor was just carried to
-       accepts the same still-turning wheel and skips on again. */
-    let over = 0;
-    let ended = 0;
-    let leaving = false;
-    /* Arriving does not count as asking to leave again. The strip that a
-       visitor has just been carried to mounts with the wheel still turning,
-       and without this one hard spin skipped a project and then the one
-       after it — seen in the test, which landed two projects along. Half a
-       second of quiet is all it takes to make each step a decision. */
+       Arriving does not count as asking to leave again. The strip a visitor
+       has just been carried to mounts with the wheel still turning, and
+       without this one hard spin skipped a project and then the one after
+       it. Half a second of quiet makes each step a decision. */
     const arrived = performance.now();
     const leave = () => {
       if (!nextHref || leaving || performance.now() - arrived < 500) return;
       leaving = true;
+      // The band holds where it is and the slide starts from it.
+      if (band) cancelAnimationFrame(band);
+      band = 0;
       el.dataset.leaving = "";
       window.setTimeout(() => router.push(nextHref), 260);
     };
@@ -300,27 +377,44 @@ export function ProjectStrip({
     const onWheel = (e: WheelEvent) => {
       // A pinch is a zoom, and a trackpad's sideways swipe already works.
       if (e.ctrlKey || Math.abs(e.deltaX) > Math.abs(e.deltaY)) return;
-      if (e.deltaY < 0) {
-        over = 0;
-        ended = 0;
-      }
-      if (e.deltaY > 0 && target >= room() - 1) {
-        const now = e.timeStamp;
-        if (!ended) ended = now;
-        const foot =
-          window.innerHeight + window.scrollY >=
-          document.documentElement.scrollHeight - 1;
-        if (foot && now - ended > SETTLE && (over += e.deltaY) >= LEAVE_AFTER) {
-          leave();
+      // Firefox can report lines rather than pixels.
+      const dy = e.deltaMode === 1 ? e.deltaY * 40 : e.deltaY;
+
+      /* By where the strip is, not where it is heading: a notch that lands
+         while the strip is still gliding up to the end aims it there and
+         no further, and only once it has got there does the next one pull
+         the band. That tail of the glide is the beat between arriving and
+         asking to leave, and it comes free with the friction. */
+      if (dy > 0 ? el.scrollLeft >= room() - 1 : el.scrollLeft <= 0) {
+        /* Under 40rem the page still has a footer below it, and that goes
+           first, in both directions. From 40rem up the page cannot scroll
+           at all (`globals.css`), so neither of these is ever true there. */
+        if (dy < 0 && window.scrollY > 0) return;
+        if (
+          dy > 0 &&
+          document.documentElement.scrollHeight -
+            window.innerHeight -
+            window.scrollY >
+            1
+        ) {
+          return;
         }
+        e.preventDefault();
+        push(dy);
+        // Only ever at the right-hand end: a negative count cannot reach
+        // it. The left end resists and springs back, and that is all — the
+        // strip starts there, and a visitor who has just opened a project
+        // should not be thrown out of it backwards.
+        if (over >= LEAVE_AFTER) leave();
         return;
       }
-      if (e.deltaY > 0 ? target >= room() - 1 : target <= 0) return;
-      over = 0;
-      ended = 0;
       e.preventDefault();
-      // Firefox can report lines rather than pixels.
-      to(target + (e.deltaMode === 1 ? e.deltaY * 40 : e.deltaY));
+      // A notch the other way lets go of the band, and of the count.
+      if (over) {
+        over = 0;
+        paint();
+      }
+      to(target + dy);
     };
 
     /* Drag, for a mouse. A touchscreen is left alone: the platform's own
@@ -353,8 +447,12 @@ export function ProjectStrip({
       if (dt > 0) speed = (lastX - e.clientX) / dt;
       lastX = e.clientX;
       lastAt = e.timeStamp;
-      target = clamp(fromScroll - (e.clientX - fromX));
+      const want = fromScroll - (e.clientX - fromX);
+      target = clamp(want);
       el.scrollLeft = target;
+      // Whatever the clamp refused is the band: pull past an end and it
+      // gives, and holds where the hand holds it while the loop is stopped.
+      push(want - target - over);
 
       /* Past a few pixels this is a drag rather than a press, and two
          things change. The frame under the pointer must not open when the
@@ -378,7 +476,10 @@ export function ProjectStrip({
       down = false;
       dragging = false;
       // A flick keeps going: let go at a speed, the strip carries on at
-      // that speed and runs out under the same friction as a notch.
+      // that speed and runs out under the same friction as a notch. A drag
+      // past the end springs back and never leads on: a grab that threw
+      // you into another project would be a surprise, and the wheel is the
+      // gesture that travels.
       if (eased && Math.abs(speed) > 0.05) to(el.scrollLeft + speed * TAU);
       // After the click that this release is about to fire, not before.
       requestAnimationFrame(() => delete el.dataset.dragged);
@@ -423,6 +524,8 @@ export function ProjectStrip({
       el.removeEventListener("click", openFrame);
       el.removeEventListener("scroll", sync);
       if (frame) cancelAnimationFrame(frame);
+      if (band) cancelAnimationFrame(band);
+      el.style.translate = "";
     };
   }, [router, nextHref]);
 
@@ -454,7 +557,90 @@ export function ProjectStrip({
   const cellNodes = React.useMemo(
     () =>
       cells.map((cell) =>
-        cell.kind === "next" ? (
+        cell.kind === "title" ? (
+              /* The opening plate: the name of the work, large, with whoever
+                 made it under it. These used to be a row of small capitals
+                 under the sequence; they open it instead, which is what
+                 Julian asked for and which hands the page back most of the
+                 height that showing the footer costs.
+
+                 Four of the seventy-three projects carry credits, so this is
+                 usually a title alone. That is the point of putting it
+                 somewhere worth filling in: they are added in /admin. */
+              <div
+                key="title"
+                className="flex h-full w-[min(30rem,82vw)] shrink-0 flex-col justify-center gap-5 pr-2 sm:pr-6"
+              >
+                <h2 className="font-display text-4xl uppercase leading-[0.95] tracking-[0] sm:text-6xl">
+                  {project.headline ?? project.name}
+                </h2>
+
+                {/* The writing about the work, when there is any. It used to
+                    sit in the page header, where on a page that cannot
+                    scroll a paragraph would have squeezed the photographs.
+                    Skipped when it is the title again, or a leftover credit
+                    line ("styling: @handle") which the credits below say
+                    properly. Either can be rewritten in /admin. */}
+                {project.intent &&
+                !project.intent.includes("@") &&
+                project.intent.trim().toLowerCase() !==
+                  project.name.trim().toLowerCase() ? (
+                  <p className="max-w-prose text-sm leading-relaxed text-muted-foreground">
+                    {project.intent}
+                  </p>
+                ) : null}
+
+                {project.credits.length ? (
+                  <dl
+                    aria-label="Credits"
+                    className="flex flex-col gap-1 border-t border-border pt-4"
+                  >
+                    {project.credits.map((credit, i) => {
+                      /* Six harvested credits carry the handle as the name
+                         ("@apricotsss3") with no instagram field; they link
+                         too. */
+                      const handle =
+                        credit.instagram ??
+                        (credit.name.startsWith("@")
+                          ? credit.name.slice(1)
+                          : null);
+                      return (
+                        <div
+                          key={`${credit.role}-${i}`}
+                          className="flex items-baseline gap-3"
+                        >
+                          <dt className="label w-28 shrink-0 text-muted-foreground/70">
+                            {credit.role}
+                          </dt>
+                          <dd className="label min-w-0">
+                            {handle ? (
+                              /* A new tab on purpose: the visitor is on a
+                                 project, and taking the page out from under
+                                 them to show someone else's feed would lose
+                                 their place. */
+                              <a
+                                href={`https://www.instagram.com/${handle}/`}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="text-muted-foreground transition-colors duration-200 hoverable:hover:text-foreground"
+                              >
+                                {credit.name}
+                                <span className="sr-only">
+                                  {" "}
+                                  on Instagram (opens in a new tab)
+                                </span>
+                              </a>
+                            ) : (
+                              credit.name
+                            )}
+                          </dd>
+                        </div>
+                      );
+                    })}
+                  </dl>
+                ) : null}
+              </div>
+        ) : cell.kind === "next" ? (
               /* The last cell: where the sequence goes next, written and
                  not shown. It carried the next project's cover for a day
                  and Julian said the image from the next page was showing
@@ -541,7 +727,16 @@ export function ProjectStrip({
               </button>
             ),
       ),
-    [cells, frames.length, project.name, project.cover.blur, next],
+    [
+      cells,
+      frames.length,
+      project.name,
+      project.headline,
+      project.intent,
+      project.credits,
+      project.cover.blur,
+      next,
+    ],
   );
 
   return (
@@ -583,7 +778,7 @@ export function ProjectStrip({
             className="flex min-w-0 flex-1 items-end justify-between gap-px"
           >
             {cells.map((cell, i) =>
-              cell.kind === "next" ? null : (
+              isWords(cell) ? null : (
               <button
                 key={`tick-${i}`}
                 type="button"

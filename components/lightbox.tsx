@@ -4,7 +4,7 @@ import * as React from "react";
 import { flushSync } from "react-dom";
 import Image from "next/image";
 import { Dialog, VisuallyHidden } from "radix-ui";
-import { cn } from "@/lib/utils";
+import { cn, rubberband } from "@/lib/utils";
 import type { Frame } from "@/lib/work-types";
 
 /* ── the lightbox ─────────────────────────────────────────────────
@@ -204,9 +204,6 @@ export function useLightbox(
 const FLICK = 0.11;
 /** Before this many px the gesture has no axis; a tap stays a tap. */
 const SLOP = 10;
-
-const rubberband = (over: number, dim: number, c = 0.55) =>
-  (over * dim * c) / (dim + c * Math.abs(over));
 
 type Sample = { t: number; x: number; y: number };
 

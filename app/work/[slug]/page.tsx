@@ -145,147 +145,75 @@ export default async function ProjectPage(props: PageProps<"/work/[slug]">) {
   }
 
   return (
-    /* `data-quiet-footer`: the site footer under this page is the one line
-       of housekeeping. The ask that every other page ends on came off here
-       at Julian's request; the page is the sequence and its panel, and the
-       "next" link in the panel is where it goes on to. */
-    <article data-quiet-footer>
-      {/* One screen: the head over the sequence, the sequence across it, and
-          a panel under it. Julian asked for the project pages to work like
-          remyshoots.co.za, where a project is a filmstrip rather than a page
-          you scroll down.
+    /* `data-quiet-footer` does two jobs, both in `globals.css`: the site
+       footer under this page is the one line of housekeeping rather than the
+       ask every other page ends on, and from 40rem up the page is exactly
+       the window with that line on it. Julian asked for a horizontal page
+       that does not scroll vertically at all.
 
-          `h-dvh` with the three children sized to fit inside it: the head
-          and the panel take what they need, the strip takes the rest. So the
-          photographs are as tall as the window allows on every screen
-          without a single height being written down. */}
-      <div className="flex h-dvh flex-col pt-24 sm:pt-28">
-        <header className="mx-auto w-full max-w-[100rem] shrink-0 px-6 sm:px-10">
-          {/* Three columns, the outer two the same width, so the title is
-              centred on the page and not on whatever is left over. */}
-          <div className="flex items-start justify-between gap-6">
-            <div className="w-28 shrink-0 sm:w-44">
-              <Crumb />
-            </div>
-
-            {/* Set like the reference's masthead: the title in small
-                capitals rather than at display size, the client under it
-                in the muted tone, both centred. Julian asked for the
-                titles to be like the reference. The photographs are the
-                big thing on this page and the title is a caption to them. */}
-            <div className="min-w-0 text-center">
-              <h1 className="label font-semibold text-foreground">
-                {project.headline ?? project.name}
-              </h1>
-              {client ? (
-                <p className="label mt-1 text-muted-foreground">
-                  {client.name}
-                </p>
-              ) : null}
-            </div>
-
-            {/* What it is and how much of it there is, opposite the crumb. */}
-            <p className="label w-28 shrink-0 text-right text-muted-foreground sm:w-44">
-              {[
-                project.categories.length && !isDiscipline
-                  ? project.categories.map((c) => c.name).join(", ")
-                  : null,
-                `${project.images.length} frames`,
-              ]
-                .filter(Boolean)
-                .join(" · ")}
-            </p>
+       One screen: the head over the sequence, the sequence across it, a
+       panel under it. The children are sized to fit inside: the head and the
+       panel take what they need and the strip takes the rest, so the
+       photographs are as tall as the window allows on every screen without a
+       single height being written down. `h-dvh` on a phone, which still
+       scrolls its own height to reach the footer; `sm:h-full` above that,
+       filling a `main` already sized to the window less the footer. */
+    <article
+      data-quiet-footer
+      className="flex h-dvh min-h-0 flex-col pt-24 sm:h-full sm:pt-28"
+    >
+      <header className="mx-auto w-full max-w-[100rem] shrink-0 px-6 sm:px-10">
+        {/* Three columns, the outer two the same width, so the title is
+            centred on the page and not on whatever is left over. */}
+        <div className="flex items-start justify-between gap-6">
+          <div className="w-28 shrink-0 sm:w-44">
+            <Crumb />
           </div>
 
-          {/* The intent, unless it is the title again, or a leftover credit
-              line ("styling: @handle") which five projects carry and the
-              credits below already say. Either can be rewritten in /admin. */}
-          {project.intent &&
-          !project.intent.includes("@") &&
-          project.intent.trim().toLowerCase() !==
-            project.name.trim().toLowerCase() ? (
-            <p className="mx-auto mt-4 max-w-prose text-center text-sm leading-relaxed text-muted-foreground">
-              {project.intent}
-            </p>
-          ) : null}
-        </header>
+          {/* The running head, and it waits its turn. The sequence opens on
+              the title set large (see `project-strip.tsx`), so this would be
+              the same words twice on the first screen. `running-head` fades
+              it in once that card has been scrolled past — the rule is in
+              `globals.css`, keyed off an attribute the strip sets. Julian
+              asked for the top title to appear when the card goes away. */}
+          <div className="running-head min-w-0 text-center">
+            <h1 className="label font-semibold text-foreground">
+              {project.headline ?? project.name}
+            </h1>
+            {client ? (
+              <p className="label mt-1 text-muted-foreground">{client.name}</p>
+            ) : null}
+          </div>
 
-        {/* Keyed, because the way from one project to the next is this same
-            page with a new slug, and a strip that kept its scroll position
-            and its counter across that would arrive at the end of the new
-            sequence rather than the start. */}
-        <ProjectStrip
-          key={project.slug}
-          project={project}
-          next={nextUp}
-          className="mt-6 flex-1"
-        />
+          {/* What it is and how much of it there is, opposite the crumb. */}
+          <p className="label w-28 shrink-0 text-right text-muted-foreground sm:w-44">
+            {[
+              project.categories.length && !isDiscipline
+                ? project.categories.map((c) => c.name).join(", ")
+                : null,
+              `${project.images.length} frames`,
+            ]
+              .filter(Boolean)
+              .join(" · ")}
+          </p>
+        </div>
+      </header>
 
-        {/* The panel under the ruler: the crew on the left, where to go next
-            on the right. One line each rather than the column of rows this
-            page used to carry beside the title, since a column that tall
-            would take the height the photographs are using. Still all
-            capitals and still a link per person, which is what Julian asked
-            for when the credits moved up out of the footer. */}
-        <footer className="mx-auto flex w-full max-w-[100rem] shrink-0 items-end justify-between gap-8 px-6 pb-5 pt-4 sm:px-10">
-          {project.credits.length ? (
-            <dl
-              aria-label="Credits"
-              className="flex min-w-0 flex-wrap gap-x-6 gap-y-1"
-            >
-              {project.credits.map((credit, i) => {
-                /* Six harvested credits carry the handle as the name
-                   ("@apricotsss3") with no instagram field; they link too. */
-                const handle =
-                  credit.instagram ??
-                  (credit.name.startsWith("@") ? credit.name.slice(1) : null);
-                return (
-                  <div
-                    key={`${credit.role}-${i}`}
-                    className="group flex items-baseline gap-2"
-                  >
-                    <dt className="label text-muted-foreground/70">
-                      {credit.role}
-                    </dt>
-                    <dd className="label">
-                      {handle ? (
-                        /* A new tab on purpose: the visitor is on a project
-                           and taking the page out from under them to show
-                           someone else's feed would lose their place. */
-                        <a
-                          href={`https://www.instagram.com/${handle}/`}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="text-muted-foreground transition-colors duration-200 hoverable:hover:text-foreground"
-                        >
-                          {credit.name}
-                          <span className="sr-only">
-                            {" "}
-                            on Instagram (opens in a new tab)
-                          </span>
-                        </a>
-                      ) : (
-                        credit.name
-                      )}
-                    </dd>
-                  </div>
-                );
-              })}
-            </dl>
-          ) : (
-            <span />
-          )}
+      {/* Keyed, because the way from one project to the next is this same
+          page with a new slug, and a strip that kept its scroll position and
+          its counter across that would arrive at the end of the new sequence
+          rather than the start.
 
-          {onwards ? (
-            <Link
-              href={onwards.href}
-              className="label shrink-0 text-muted-foreground transition-colors duration-200 hoverable:hover:text-foreground"
-            >
-              {onwards.name} &rarr;
-            </Link>
-          ) : null}
-        </footer>
-      </div>
+          It carries the credits and the writing now. They used to be a row
+          under the sequence; they open it instead, which is where Julian
+          asked for them and which gives the page back the height that
+          showing the footer costs. */}
+      <ProjectStrip
+        key={project.slug}
+        project={project}
+        next={nextUp}
+        className="mt-6 flex-1"
+      />
     </article>
   );
 }

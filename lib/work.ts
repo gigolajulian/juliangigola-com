@@ -803,18 +803,72 @@ export const nextDiscipline = (
 };
 
 /**
- * The project after this one, for the end of a case study.
+ * The discipline a project belongs to, for the purpose of what follows it.
  *
- * A project page that ends in a footer is a dead end, and a dead end is an
- * exit. Wrapping round at the end means there is always a next thing.
+ * The first of its categories that the index actually shows a chip for, so a
+ * project filed under two is walked once and not twice. Seventy-two of the
+ * seventy-three carry exactly one category, so this is a tie-break rather
+ * than a policy.
+ */
+const disciplineOf = (p: Project): string | undefined =>
+  (p.categories.find((c) => WORK_CATEGORY_LINKS.some((l) => l.slug === c.slug)) ??
+    p.categories[0])?.slug;
+
+/**
+ * The commissions filed under one discipline, in Julian's running order.
+ *
+ * By `disciplineOf` rather than by membership, so the buckets divide the
+ * commissions up rather than overlapping: every project is in exactly one,
+ * which is what makes the walk below a walk and not a set of loops.
+ */
+const commissionsIn = (categorySlug: string): Project[] =>
+  COMMISSIONS.filter((p) => disciplineOf(p) === categorySlug);
+
+/**
+ * The project after this one, for the end of a sequence.
+ *
+ * It stays inside the discipline you are looking at. Someone who opens an
+ * editorial story and keeps going is looking at editorial work, and handing
+ * them a wedding next because it happens to sit there in the running order
+ * answers a question they did not ask. So: the next project in this
+ * discipline, in the order the category page shows them, and when the
+ * discipline runs out the one closest to it. Julian asked for this.
+ *
+ * "Closest" is the order he has already set. `WORK_CATEGORY_LINKS` is hand
+ * ordered — the photographic disciplines first and the reel last — it is the
+ * chip row a visitor has already read on /work, and `nextDiscipline` walks
+ * it as an adjacency too. A second table of what relates to what would say
+ * the same thing twice and drift the first time a discipline is added; if a
+ * pair ever reads wrong, reorder that one list and everything follows.
+ *
+ * It wraps, because a dead end is an exit.
  */
 export const nextAfter = (p: Project): Project | undefined => {
-  const pool = p.categories.some((c) => c.section === "SESSIONS")
-    ? SESSIONS
-    : COMMISSIONS;
-  const i = pool.findIndex((x) => x.slug === p.slug);
-  if (i === -1) return pool[0];
-  return pool[(i + 1) % pool.length];
+  /* Sessions keep their own pool, unchanged. A graduation client and an art
+     director are not looking at the same thing, and a headshot should not
+     lead into a campaign. */
+  if (p.categories.some((c) => c.section === "SESSIONS")) {
+    const i = SESSIONS.findIndex((x) => x.slug === p.slug);
+    return i === -1 ? SESSIONS[0] : SESSIONS[(i + 1) % SESSIONS.length];
+  }
+
+  const here = disciplineOf(p);
+  const siblings = here ? commissionsIn(here) : [];
+  const i = siblings.findIndex((x) => x.slug === p.slug);
+  if (i !== -1 && i + 1 < siblings.length) return siblings[i + 1];
+
+  /* The discipline has run out, so the next one along the row — hopping any
+     that has a chip but no projects behind it, which is how a one-gallery
+     discipline like Cover art is filed. An unfiled project starts the walk
+     at the first discipline, which is where the old running order put it
+     too. */
+  const at = WORK_CATEGORY_LINKS.findIndex((l) => l.slug === here);
+  const n = WORK_CATEGORY_LINKS.length;
+  for (let hop = 1; hop <= n; hop++) {
+    const first = commissionsIn(WORK_CATEGORY_LINKS[(at + hop + n) % n].slug)[0];
+    if (first) return first;
+  }
+  return COMMISSIONS[0];
 };
 
 /**
