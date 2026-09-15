@@ -564,6 +564,54 @@ article:has(.strip-scroll[data-past-first]) .running-head {
   }
 }
 
+/* The same moment for the homepage's wordmark, which is the cover's masthead
+   in miniature: the two are the same name in the same face on the same left
+   edge, so the bar keeps its name off the screen until the cover cell has
+   gone by, then hands it up from under the bar out of a slight oversize.
+
+   It was a scroll-linked measurement against the masthead. The homepage is a
+   strip now and never scrolls, so there was nothing left to measure: the
+   strip says when the opening cell is half gone and this reads it.
+
+   `pointer-events: none` while it is out, because opacity hides a link from
+   the eye and not from the mouse: an invisible anchor over the top left of
+   the cover reloaded the page for anyone who clicked that patch of
+   photograph. Tabbing to it brings it back, so it is never an invisible
+   focus target, and below `lg` the cover stacks under a fixed bar with no
+   masthead beside it, so the name simply stays. */
+.home-wordmark {
+  opacity: 0;
+  pointer-events: none;
+  translate: 0 20px;
+  scale: 1.35;
+  transition:
+    opacity 300ms var(--ease-out-strong),
+    translate 300ms var(--ease-out-strong),
+    scale 300ms var(--ease-out-strong);
+}
+body:has(.strip-scroll[data-past-first]) .home-wordmark,
+.home-wordmark:focus-visible {
+  opacity: 1;
+  pointer-events: auto;
+  translate: none;
+  scale: none;
+}
+@media (max-width: 63.999rem) {
+  .home-wordmark {
+    opacity: 1;
+    pointer-events: auto;
+    translate: none;
+    scale: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .home-wordmark {
+    transition: opacity 300ms var(--ease-out-strong);
+    translate: none;
+    scale: none;
+  }
+}
+
 /* And the page is exactly the window, with that one line on it. A strip page
    had a vertical wobble of precisely the footer's height — 62px — because
    the sequence is `h-dvh` and the footer sits under it, so the one thing
@@ -590,9 +638,28 @@ article:has(.strip-scroll[data-past-first]) .running-head {
   }
 }
 
+/* The cover's index on a short window. The cover is one cell of the
+   homepage's strip, so its panel is the screen less the footer's line, and
+   ten rows at full height do not fit under the masthead on a 700px laptop.
+   The list scrolls inside itself either way; this is what keeps the number
+   of rows you can see without doing that worth having. */
+@media (max-height: 52rem) {
+  .cover-row {
+    padding-block: 0.625rem;
+  }
+}
+
 @utility strip-scroll {
   scrollbar-width: none;
   overscroll-behavior-x: contain;
+  /* A scroll container's contents do not paint outside it — which ought to
+     go without saying, and does everywhere the arrival animation leaves a
+     transform behind. The homepage's cover must not slide in, so its strip
+     has no animation and no transform, and without one the row of cells was
+     reaching the page: `documentElement.scrollWidth` 10650 on a 1440 screen,
+     a homepage that scrolled sideways as a document. Saying it here says it
+     once, for every strip. */
+  contain: paint;
   &::-webkit-scrollbar {
     display: none;
   }

@@ -667,13 +667,33 @@ export function Strip({
       if (b && el.contains(b)) open.current?.(Number(b.dataset.n));
     };
 
+    /** The cell whose centre is nearest a scroll position. */
+    const nearest = (where: number) => {
+      const middle = where + el.clientWidth / 2;
+      let best = 0;
+      let near = Infinity;
+      Array.from(el.children).forEach((c, i) => {
+        const cell = c as HTMLElement;
+        const off = Math.abs(cell.offsetLeft + cell.offsetWidth / 2 - middle);
+        if (off < near) {
+          near = off;
+          best = i;
+        }
+      });
+      return best;
+    };
+
     /* The keyboard, on the scroller itself and nowhere inside it: arrows
        step a cell, Home and End go to the ends. A key pressed in a field
        within a cell is that field's. */
     const onKey = (e: KeyboardEvent) => {
       if (e.target !== el) return;
       const last = el.children.length - 1;
-      const at = atRef.current;
+      /* Where the strip is going, not where it is: three quick presses
+         should step three cells, and each one read the cell in the middle
+         of the window while the glide from the press before it was still
+         on its way there. */
+      const at = nearest(target);
       const i =
         e.key === "ArrowRight"
           ? Math.min(last, at + 1)

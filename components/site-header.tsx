@@ -102,145 +102,16 @@ export function SiteHeader() {
     };
   }, []);
 
-  // Only the homepage sets the name in the cover, so only the homepage has
-  // anything to defer to.
+  /* The handoff, on the homepage only.
+
+     The masthead in the cover and this wordmark are the same name in the
+     same face sharing a left edge, so this one waits until that one has
+     gone by rather than printing it twice on the first screen. It used to
+     be measured against the scroll; the homepage is a strip now and does
+     not scroll at all, so the moment is the same one every strip page
+     uses — the opening cell half gone — and CSS does the whole thing off
+     the attribute the strip sets. See `.home-wordmark` in `globals.css`. */
   const deferWordmark = pathname === "/";
-  const [pastMasthead, setPastMasthead] = React.useState(false);
-  const wordmarkRef = React.useRef<HTMLAnchorElement>(null);
-
-  /**
-   * The handoff.
-   *
-   * The masthead and this wordmark are the same name in the same face, and
-   * they share a left edge — the cover sets it at 112px over two lines, the
-   * bar at 24px over one. So rather than one fading in once the other is
-   * gone, this one arrives from where that one was going: rising the short
-   * distance from below the bar and settling out of a slight oversize, timed
-   * to the masthead's own last line clearing the bar.
-   *
-   * Scroll-linked rather than a transition on a threshold, so it is tied to
-   * the hand doing the scrolling — scroll back up and it goes back, at the
-   * speed it was sent. A one-shot transition fires once at a line in the page
-   * and plays regardless of whether the visitor is still moving.
-   *
-   * Written straight to the node rather than held in state: this runs on
-   * every scroll frame, and a `setState` per frame would re-render the whole
-   * header — nav, burger and panel — to move one word.
-   */
-  React.useEffect(() => {
-    if (!deferWordmark) {
-      // Leaving the homepage: drop anything left on the node, or the wordmark
-      // keeps the cover's last frame on every other route.
-      const el = wordmarkRef.current;
-      if (el) el.style.cssText = "";
-      return;
-    }
-
-    const desktop = window.matchMedia("(min-width: 1024px)");
-    const still = window.matchMedia("(prefers-reduced-motion: reduce)");
-
-    /** Where the name rises from, and how much oversize it sheds. */
-    const RISE_PX = 20;
-    const GROW = 0.35;
-    /** How much scrolling the handoff is spread over. */
-    const TRAVEL_PX = 150;
-
-    let frame = 0;
-    let start = 0;
-    let end = 1;
-
-    /**
-     * Measured off the masthead itself rather than a fraction of the
-     * viewport. Its size is a `clamp()` on the viewport and it sits under a
-     * running head that wraps at some widths, so "half a screen" is only ever
-     * accidentally the right moment.
-     */
-    const measure = () => {
-      const mast = document.querySelector<HTMLElement>("[data-masthead]");
-      const el = wordmarkRef.current;
-      if (!mast || !el) return;
-
-      // Measure the resting place, not the animation: whatever transform is
-      // on the node right now would otherwise be baked into the target.
-      const transform = el.style.transform;
-      el.style.transform = "";
-      const rest = el.getBoundingClientRect();
-      el.style.transform = transform;
-
-      // The scroll at which the masthead's last line clears this one's top —
-      // the first moment the name is not about to be printed twice.
-      end = mast.getBoundingClientRect().bottom + window.scrollY - rest.top;
-      start = Math.max(0, end - TRAVEL_PX);
-    };
-
-    const apply = () => {
-      const el = wordmarkRef.current;
-      if (!el) return;
-
-      // Below `lg` the cover stacks and the masthead sits under a half-screen
-      // photograph, so there is nothing beside the bar to hand off from — the
-      // class keeps the name visible there and inline styles must not fight
-      // it.
-      if (!desktop.matches) {
-        el.style.cssText = "";
-        setPastMasthead(true);
-        return;
-      }
-
-      const raw = Math.min(
-        1,
-        Math.max(0, (window.scrollY - start) / (end - start || 1)),
-      );
-      // Ease out: quick off the mark, settling rather than stopping dead.
-      const p = 1 - Math.pow(1 - raw, 3);
-
-      // No transition while the scroll is driving: a 300ms ease on a value
-      // that changes every frame lags the page by a third of a second, which
-      // reads as the name being dragged rather than moving with the scroll.
-      // It costs the hover fade on this one route, which is a fair trade for
-      // a handoff that tracks the hand.
-      el.style.transition = "none";
-      el.style.opacity = String(p);
-      el.style.transform = still.matches
-        ? ""
-        : `translateY(${(1 - p) * RISE_PX}px) scale(${1 + (1 - p) * GROW})`;
-
-      // Keeps it out of the tab order only while it is genuinely not there.
-      setPastMasthead(raw > 0);
-    };
-
-    const onScroll = () => {
-      if (frame) return;
-      frame = requestAnimationFrame(() => {
-        frame = 0;
-        apply();
-      });
-    };
-
-    const onResize = () => {
-      measure();
-      apply();
-    };
-
-    measure();
-    apply();
-
-    // The display face lands after first paint and the masthead reflows with
-    // it, which moves the moment this is timed against.
-    document.fonts?.ready.then(onResize).catch(() => {});
-
-    window.addEventListener("scroll", onScroll, { passive: true });
-    window.addEventListener("resize", onResize);
-    desktop.addEventListener("change", onResize);
-    return () => {
-      window.removeEventListener("scroll", onScroll);
-      window.removeEventListener("resize", onResize);
-      desktop.removeEventListener("change", onResize);
-      cancelAnimationFrame(frame);
-    };
-  }, [deferWordmark]);
-
-  const wordmarkVisible = !deferWordmark || pastMasthead;
 
   const isCurrent = (href: string) =>
     pathname === href || pathname.startsWith(href + "/");
@@ -276,7 +147,6 @@ export function SiteHeader() {
     >
       <div className="relative mx-auto flex max-w-[100rem] items-center justify-between px-6 py-6 sm:px-10 sm:py-7">
         <Link
-          ref={wordmarkRef}
           href="/"
           // On the homepage the name is a way back to the top, not a reload.
           // Julian asked: a click there used to re-request `/`, which
@@ -327,9 +197,7 @@ export function SiteHeader() {
             // cover. Keyboard access is untouched — pointer-events does not
             // affect the tab order, and `focus-visible:opacity-100` above
             // still brings it back into view when tabbed to.
-            wordmarkVisible
-              ? "opacity-100"
-              : "pointer-events-none opacity-0 max-lg:pointer-events-auto max-lg:opacity-100",
+            deferWordmark && "home-wordmark",
           )}
         >
           Julian Gigola

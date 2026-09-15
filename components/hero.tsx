@@ -223,7 +223,15 @@ type Slide = {
   credit?: { name: string; href: string };
 };
 
-export function Hero({ disciplines }: { disciplines: Discipline[] }) {
+export function Hero({
+  disciplines,
+  className,
+}: {
+  disciplines: Discipline[];
+  /** The cover is the first cell of the homepage's strip, and the cell is
+      given its width and its height by the page. See `app/page.tsx`. */
+  className?: string;
+}) {
   /**
    * What the cover runs through: the title card, then the disciplines.
    *
@@ -400,19 +408,22 @@ export function Hero({ disciplines }: { disciplines: Discipline[] }) {
   return (
     <section
       ref={sectionRef}
+      // The first cell of the homepage's strip: it gets a tick like the
+      // rest, and `/#cover` is a link back to it.
+      data-tick
+      data-label="Cover"
+      data-hash="cover"
       // `held` is set in the same handler as the slide change, so the
       // arriving word mounts with these already in place rather than a
       // render late.
       style={held ? HURRIED : undefined}
       className={cn(
-        "relative flex min-h-dvh flex-col border-b border-border",
-        /* `lvh`, not `dvh`, on an upright phone. Safari's bottom toolbar
-           collapses as the page moves and `dvh` follows it, so a band pinned
-           to the foot of a `dvh` section ends where the toolbar *was* and
-           leaves a strip of picture under it unblurred. The large viewport
-           is the screen with the toolbar out of the way; the band sits under
-           the toolbar until it goes, and covers to the bottom after. */
-        "tall:min-h-[100lvh]",
+        className,
+        /* The height is the cell's, and the cell is the strip's: the cover
+           is exactly the screen less the footer's line on a wide screen,
+           and a screen of its own where the page stacks. One place decides
+           it, in `app/page.tsx`, rather than three viewport units here. */
+        "relative flex h-full flex-col border-b border-border",
         /* The masthead is `clamp(2.75rem, 8vw, 7rem)`, which is right when
            the type has the window - stacked, or in `wide`'s panel, which
            grows with it. The squarish panel does not grow: it is clamped at
@@ -590,20 +601,14 @@ export function Hero({ disciplines }: { disciplines: Discipline[] }) {
           which is how the credit pill in the corner gets clicked at all. It
           used to sit under this column and take nothing. Julian: when the
           pill is clicked, open the project. The plate takes them back. */}
-      <div className="pointer-events-none relative z-10 flex min-h-dvh flex-col justify-end tall:min-h-[100lvh] squat:justify-start wide:justify-start">
-        {/* Bottom right of the screen, over the foot of the photograph.
+      <div className="pointer-events-none relative z-10 flex h-full flex-col justify-end squat:justify-start wide:justify-start">
+        {/* Bottom right of the cover, over the foot of the photograph.
 
-            The box is the first screen and nothing else, because the section
-            is not: it runs `min-h-dvh` and grows past the window whenever
-            the panel's index does, so `bottom` measured against the column
-            is the section's foot rather than the screen's — at 1280x700
-            that put the buttons 148px under the fold and out of reach. A
-            `h-dvh` box pinned to the top of the section is the window, and
-            its corner is the window's corner at any height.
-
-            `pointer-events-auto` on the buttons because everything around
-            them passes presses through to the picture. */}
-        <div className="pointer-events-none absolute inset-x-0 top-0 hidden h-dvh wide:block">
+            Its own box rather than the corner of this column, which is the
+            whole cell and would put the buttons under whatever the column
+            is holding. `pointer-events-auto` on the buttons because
+            everything around them passes presses through to the picture. */}
+        <div className="pointer-events-none absolute inset-0 hidden wide:block">
           <Ways
             style={lands(BUTTONS_MS)}
             className="rise pointer-events-auto absolute bottom-6 right-6 z-20 sm:bottom-8 sm:right-10"
@@ -654,12 +659,12 @@ export function Hero({ disciplines }: { disciplines: Discipline[] }) {
                leaves a hole in the middle of itself. Centred, the head, the
                name, the index and the buttons read as one block with the
                panel around them. */
-            "squat:min-h-dvh squat:w-[clamp(28rem,42%,40rem)] squat:justify-center squat:border-r squat:border-t-0",
+            "squat:h-full squat:w-[clamp(28rem,42%,40rem)] squat:justify-center squat:border-r squat:border-t-0",
             // Beside it: a real panel, opaque and unblurred, filling the
             // width the picture does not take. Nothing is laid over the
             // frame at this ratio, which is the design Julian had and asked
             // to keep — the plate is what the other two fall back to.
-            "wide:min-h-dvh wide:w-[calc(100%-80dvh)] wide:border-r wide:border-t-0",
+            "wide:h-full wide:w-[calc(100%-80dvh)] wide:border-r wide:border-t-0",
             "wide:bg-background wide:backdrop-blur-none",
           )}
         >
@@ -793,7 +798,7 @@ export function Hero({ disciplines }: { disciplines: Discipline[] }) {
             children already filled it, so there was nothing left to centre
             and the block sat against the top with 350px of panel under it.
             `lg` is a width and could not tell those two cases apart. */}
-          <div className="flex min-w-0 flex-col wide:flex-1">
+          <div className="flex min-h-0 min-w-0 flex-col wide:flex-1">
             {/* Two: the ways in, under the name. Where the photograph is
                 the whole canvas this is the only copy; from `wide` the one
                 over the picture's foot takes over and this one goes. */}
@@ -829,11 +834,22 @@ export function Hero({ disciplines }: { disciplines: Discipline[] }) {
                 where the panel is already full. `basis-0 shrink-0` is a
                 box that is either the spare height or zero, never less,
                 so the index keeps its own `sm:mt-6` when there is none. */}
-            <div aria-hidden className="hidden basis-0 shrink-0 wide:block wide:grow" />
+            <div
+              aria-hidden
+              className="hidden basis-0 shrink-0 wide:block wide:grow"
+            />
 
+            {/* The cover is a cell of the strip now and the cell is the
+                screen less the footer's line, so on a short window the ten
+                rows are taller than the panel. The list keeps its size and
+                scrolls inside itself rather than losing rows or shrinking
+                the type Julian asked to be big: `data-scroll` is the
+                strip's own contract — a wheel over this list moves the list
+                until it runs out and then moves the strip. */}
             <nav
+              data-scroll
               aria-label="Disciplines"
-              className="mt-8 border-t border-border sm:mt-6 tall:hidden"
+              className="mt-8 min-h-0 overflow-y-auto overscroll-contain border-t border-border sm:mt-6 tall:hidden"
             >
               <ul onPointerOver={takeFromEvent} onFocus={takeFromEvent}>
                 {disciplines.map((discipline, i) => (
@@ -867,7 +883,9 @@ export function Hero({ disciplines }: { disciplines: Discipline[] }) {
                         // sit 70px under the fold on a 900px screen. Julian
                         // asked for bigger type and then for more air between
                         // the rows, knowing that; the air is his call.
-                        "group flex items-baseline gap-4 px-6 py-4 transition-colors duration-300 sm:px-10",
+                        // `cover-row` tightens the rows on a short window;
+                        // the rule is in `globals.css`.
+                        "cover-row group flex items-baseline gap-4 px-6 py-4 transition-colors duration-300 sm:px-10",
                         // `bg-secondary`, not `bg-card`. Card sits at L* 5.7
                         // against a ground of L* 2.8 — a real step in the token
                         // scale, and almost invisible as a band across a row.
@@ -935,7 +953,6 @@ export function Hero({ disciplines }: { disciplines: Discipline[] }) {
                 </li>
               ))}
             </ol>
-
           </div>
         </div>
       </div>

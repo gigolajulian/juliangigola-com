@@ -108,30 +108,38 @@ export function WorkBand({
   };
 
   return (
-    <article className="bg-background">
-      <Link
-        prefetch={false}
-        href={`/work/${project.slug}`}
-        onPointerMove={onPointerMove}
-        onPointerLeave={reset}
-        onBlur={reset}
-        onKeyDown={onKeyDown}
-        aria-label={`${project.name}, ${project.total} frames`}
-        // 4:5, the ratio the work is shot and delivered in.
-        //
-        // This was sized by viewport height — `62vh`, `68vh` above `lg` —
-        // which made the cell's shape an accident of the browser window. At
-        // 1440x900 that is a 720x612 landscape box, so every portrait frame
-        // was centre-cropped by `object-cover` and roughly a third of each
-        // photograph never appeared on the homepage.
-        //
-        // Fixing the ratio to the frame's own means the crop is nil where the
-        // cover is 4:5 and slight where it is taller, instead of severe
-        // everywhere.
-        className="group relative block aspect-[4/5] w-full overflow-hidden"
-        style={{ backgroundColor: project.cover.color }}
-      >
-        {/* Base layer: always loaded, never removed. It is what keeps the
+    <Link
+      data-tick
+      data-ring="Open"
+      style={
+        {
+          backgroundColor: project.cover.color,
+          "--i": index,
+        } as React.CSSProperties
+      }
+      prefetch={false}
+      href={`/work/${project.slug}`}
+      onPointerMove={onPointerMove}
+      onPointerLeave={reset}
+      onBlur={reset}
+      onKeyDown={onKeyDown}
+      aria-label={`${project.name}, ${project.total} frames`}
+      // 4:5, the ratio the work is shot and delivered in.
+      //
+      // This was sized by viewport height — `62vh`, `68vh` above `lg` —
+      // which made the cell's shape an accident of the browser window. At
+      // 1440x900 that is a 720x612 landscape box, so every portrait frame
+      // was centre-cropped by `object-cover` and roughly a third of each
+      // photograph never appeared on the homepage.
+      //
+      // Fixing the ratio to the frame's own means the crop is nil where the
+      // cover is 4:5 and slight where it is taller, instead of severe
+      // everywhere.
+      // Along the strip the height is the strip's and the ratio decides
+      // the width; stacked on a phone it is the width that is given.
+      className="group strip-cell relative block aspect-[4/5] w-full shrink-0 overflow-hidden hoverable:cursor-none sm:h-full sm:w-auto"
+    >
+      {/* Base layer: always loaded, never removed. It is what keeps the
             cell from flashing empty the first time a scrub frame is fetched.
 
             Named as one stack, so what travels is what is on screen: clicking
@@ -148,28 +156,28 @@ export function WorkBand({
             visible when it is pressed is what lifts out of the cell — and
             dissolves into the project's first frame on the way, which is the
             cover again. */}
-        <ViewTransition
-          name={`cover-${project.slug}`}
-          share="morph"
-          default="none"
-        >
-          <div className="absolute inset-0">
-            <Image
-              src={project.cover.src}
-              alt={project.cover.alt || project.name}
-              fill
-              sizes="(min-width: 1024px) 33vw, (min-width: 768px) 50vw, 100vw"
-              priority={priority}
-              // The blur-up under it while it loads, and — below the fold,
-              // where it is not the largest paint — a fade in when it lands
-              // rather than a pop. See `photo-fade.tsx`.
-              placeholder={project.cover.blur ? "blur" : "empty"}
-              blurDataURL={project.cover.blur}
-              data-fade={priority ? undefined : ""}
-              className="object-cover"
-            />
+      <ViewTransition
+        name={`cover-${project.slug}`}
+        share="morph"
+        default="none"
+      >
+        <div className="absolute inset-0">
+          <Image
+            src={project.cover.src}
+            alt={project.cover.alt || project.name}
+            fill
+            sizes="(min-width: 1024px) 33vw, (min-width: 768px) 50vw, 100vw"
+            priority={priority}
+            // The blur-up under it while it loads, and — below the fold,
+            // where it is not the largest paint — a fade in when it lands
+            // rather than a pop. See `photo-fade.tsx`.
+            placeholder={project.cover.blur ? "blur" : "empty"}
+            blurDataURL={project.cover.blur}
+            data-fade={priority ? undefined : ""}
+            className="object-cover"
+          />
 
-            {/* The scrub frames, stacked over the cover and dissolved between.
+          {/* The scrub frames, stacked over the cover and dissolved between.
 
                 All three are mounted and only their opacity changes, which is
                 what makes the transition a crossfade rather than a swap: the
@@ -177,63 +185,63 @@ export function WorkBand({
                 over it, and the cover is under both. This used to mount one
                 keyed image at a time, which was a hard cut on every step —
                 Julian asked for it to be smoother. */}
-            {touched
-              ? frames.map((f, i) => (
-                  <Image
-                    key={f.src}
-                    src={f.src}
-                    alt=""
-                    fill
-                    loading="lazy"
-                    sizes="(min-width: 1024px) 33vw, (min-width: 768px) 50vw, 100vw"
-                    // Two photographs crossfading show both for a moment; a
-                    // couple of pixels of blur on whichever is mid-fade makes
-                    // them read as one picture resolving — the same trick the
-                    // cover's `dissolve` plays, at a fraction of the size.
-                    className={cn(
-                      "object-cover transition-[opacity,filter] duration-200 ease-[var(--ease-out-strong)] motion-reduce:transition-none",
-                      scrubbing && i === active
-                        ? "opacity-100 blur-none"
-                        : "opacity-0 blur-[2px]",
-                    )}
-                  />
-                ))
-              : null}
-          </div>
-        </ViewTransition>
+          {touched
+            ? frames.map((f, i) => (
+                <Image
+                  key={f.src}
+                  src={f.src}
+                  alt=""
+                  fill
+                  loading="lazy"
+                  sizes="(min-width: 1024px) 33vw, (min-width: 768px) 50vw, 100vw"
+                  // Two photographs crossfading show both for a moment; a
+                  // couple of pixels of blur on whichever is mid-fade makes
+                  // them read as one picture resolving — the same trick the
+                  // cover's `dissolve` plays, at a fraction of the size.
+                  className={cn(
+                    "object-cover transition-[opacity,filter] duration-200 ease-[var(--ease-out-strong)] motion-reduce:transition-none",
+                    scrubbing && i === active
+                      ? "opacity-100 blur-none"
+                      : "opacity-0 blur-[2px]",
+                  )}
+                />
+              ))
+            : null}
+        </div>
+      </ViewTransition>
 
-        {/* A plate under the type, not a wash over the picture.
-         *
-         * This was a gradient two-thirds of the cell tall, fading from the
-         * ground to transparent — so making four lines of type legible cost
-         * most of the photograph, and every frame was shown through a
-         * darkening that got heavier exactly where the subject usually is.
-         *
-         * The same material as the bar at the top of every page: the ground
-         * at 70%, a heavy blur behind it, closed with a hairline. It is the
-         * height of its own contents rather than a fixed fraction of the
-         * cell, so it covers what it needs to and no more — and being the
-         * site's one established translucent surface, it reads as chrome
-         * rather than as something wrong with the image.
-         */}
-        <div className="absolute inset-x-0 bottom-0 flex flex-col gap-3 border-t border-border/60 glass-surface bg-background/70 p-5 sm:p-6">
-          <div className="flex items-baseline gap-4">
-            <span className="label shrink-0 tabular-nums text-muted-foreground">
-              {String(index + 1).padStart(2, "0")}
-            </span>
-            {/* Moved off the photograph and into the plate. On its own in the
+      {/* A plate under the type, not a wash over the picture.
+       *
+       * This was a gradient two-thirds of the cell tall, fading from the
+       * ground to transparent — so making four lines of type legible cost
+       * most of the photograph, and every frame was shown through a
+       * darkening that got heavier exactly where the subject usually is.
+       *
+       * The same material as the bar at the top of every page: the ground
+       * at 70%, a heavy blur behind it, closed with a hairline. It is the
+       * height of its own contents rather than a fixed fraction of the
+       * cell, so it covers what it needs to and no more — and being the
+       * site's one established translucent surface, it reads as chrome
+       * rather than as something wrong with the image.
+       */}
+      <div className="absolute inset-x-0 bottom-0 flex flex-col gap-3 border-t border-border/60 glass-surface bg-background/70 p-5 sm:p-6">
+        <div className="flex items-baseline gap-4">
+          <span className="label shrink-0 tabular-nums text-muted-foreground">
+            {String(index + 1).padStart(2, "0")}
+          </span>
+          {/* Moved off the photograph and into the plate. On its own in the
                 top corner it needed either a second plate or a scrim of its
                 own to stay legible over a bright frame. */}
-            <h3 className="font-display min-w-0 truncate text-2xl uppercase leading-none tracking-[0] sm:text-3xl">
-              {project.name}
-            </h3>
-          </div>
+          <h3 className="font-display min-w-0 truncate text-2xl uppercase leading-none tracking-[0] sm:text-3xl">
+            {project.name}
+          </h3>
+        </div>
 
-          <div className="flex flex-wrap items-baseline gap-x-6 gap-y-2">
-            {project.client ? (
-              <p className="label text-muted-foreground">{project.client}</p>
-            ) : null}
-            {/* The discipline reads from the left, with the client, and the
+        <div className="flex flex-wrap items-baseline gap-x-6 gap-y-2">
+          {project.client ? (
+            <p className="label text-muted-foreground">{project.client}</p>
+          ) : null}
+          {/* The discipline reads from the left, with the client, and the
                 frame count is what gets pushed away.
 
                 It was the other way round: `ml-auto` on the discipline, to
@@ -250,42 +258,41 @@ export function WorkBand({
                 margin in a flex row takes all of the space, so with no client
                 the discipline still starts at the left edge instead of
                 splitting the difference. */}
-            <p className="label text-muted-foreground">{project.discipline}</p>
-            {/* Only while scrubbing: at rest the cover is on screen and it
+          <p className="label text-muted-foreground">{project.discipline}</p>
+          {/* Only while scrubbing: at rest the cover is on screen and it
                 is not one of the three, so a counter would be pointing at
                 nothing. */}
-            <p
-              className={cn(
-                "label ml-auto tabular-nums text-muted-foreground transition-opacity duration-200",
-                scrubbing ? "opacity-100" : "opacity-0",
-              )}
-            >
-              {String(active + 1).padStart(2, "0")} /{" "}
-              {String(frames.length).padStart(2, "0")}
-            </p>
-          </div>
+          <p
+            className={cn(
+              "label ml-auto tabular-nums text-muted-foreground transition-opacity duration-200",
+              scrubbing ? "opacity-100" : "opacity-0",
+            )}
+          >
+            {String(active + 1).padStart(2, "0")} /{" "}
+            {String(frames.length).padStart(2, "0")}
+          </p>
+        </div>
 
-          {/* The scrub position, as a row of ticks. It doubles as the
+        {/* The scrub position, as a row of ticks. It doubles as the
               affordance — it is what tells you the cell is scrubbable before
               you have moved across it. Hidden where there is no pointer to
               scrub with. */}
-          {frames.length > 0 ? (
-            <div aria-hidden className="hidden w-full gap-1 hoverable:flex">
-              {frames.map((f, i) => (
-                <span
-                  key={f.src}
-                  className={cn(
-                    "h-px flex-1 transition-colors duration-150",
-                    i === active && scrubbing
-                      ? "bg-foreground"
-                      : "bg-foreground/25",
-                  )}
-                />
-              ))}
-            </div>
-          ) : null}
-        </div>
-      </Link>
-    </article>
+        {frames.length > 0 ? (
+          <div aria-hidden className="hidden w-full gap-1 hoverable:flex">
+            {frames.map((f, i) => (
+              <span
+                key={f.src}
+                className={cn(
+                  "h-px flex-1 transition-colors duration-150",
+                  i === active && scrubbing
+                    ? "bg-foreground"
+                    : "bg-foreground/25",
+                )}
+              />
+            ))}
+          </div>
+        ) : null}
+      </div>
+    </Link>
   );
 }

@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { Reveal } from "@/components/reveal";
 import { COVER_ART, COVER_RELEASES } from "@/lib/work";
 import { CONTENT } from "@/lib/content";
 import { CoverFaces, coverLabel } from "@/components/cover-faces";
@@ -36,7 +35,9 @@ export const SHOWN = 10;
  * What the panel shows is what the page shows, full stop. Picking none is
  * the state before the rack could be curated and shows the first `SHOWN`.
  *
- * A full last row is the grid's job now, not the list's — see `columnsFor`.
+ * A full last row is the rack's job now, not the list's: it runs two rows
+ * deep along the strip, so an even pick fills both and an odd one leaves a
+ * single gap at its end.
  *
  * A slug matching nothing is dropped rather than throwing: `content/site.json`
  * is edited through a browser form, and `scripts/cover-art.mjs` regenerates
@@ -51,22 +52,10 @@ const homepageReleases = (picked: readonly string[]) => {
   return chosen.length ? chosen : COVER_RELEASES.slice(0, SHOWN);
 };
 
-/**
- * How many across on a wide screen, so the last row is full.
- *
- * Five when five divides the count, else four, else three, else five with a
- * short last row — which only a count like seven or eleven produces. Phones
- * stay at two, which every even pick divides. Written as whole class names
- * rather than built from a number, because Tailwind finds classes by reading
- * the source.
- */
-const columnsFor = (n: number): string => {
-  if (n % 5 === 0) return "lg:grid-cols-5";
-  if (n % 4 === 0) return "lg:grid-cols-4";
-  if (n % 3 === 0) return "lg:grid-cols-3";
-  return "lg:grid-cols-5";
-};
-
+/* Two cells of the homepage's strip: the heading, then the rack itself as
+   one cell of two rows. Along the strip the sleeves are half its height
+   each and the rack is as wide as that makes it; stacked on a phone they
+   fall back into two columns down the page. */
 export function CoverArt() {
   const project = COVER_ART;
   if (!project?.images.length) return null;
@@ -74,33 +63,34 @@ export function CoverArt() {
   const releases = homepageReleases(CONTENT.coverArt);
 
   return (
-    <section aria-labelledby="cover-art" className="border-t border-border">
-      <Reveal variant="calm">
-        <div className="mx-auto flex max-w-[100rem] items-baseline justify-between gap-6 px-6 pb-8 pt-20 sm:px-10 sm:pt-28">
-          <div className="flex items-baseline gap-4">
-            {/* Numbered to match the index on the cover, where cover art is 05. */}
-            <span className="label tabular-nums text-muted-foreground">05</span>
-            <h2 id="cover-art" className="label text-muted-foreground">
-              Cover art
-            </h2>
-          </div>
-          <Link
-            prefetch={false}
-            href={`/work/${project.slug}`}
-            className="label text-muted-foreground transition-colors duration-200 hoverable:hover:text-foreground"
-          >
-            All {COVER_RELEASES.length} &rarr;
-          </Link>
+    <>
+      <div
+        data-tick
+        data-label="Cover art"
+        data-hash="cover-art"
+        className="flex w-full shrink-0 flex-col justify-center gap-3 py-6 sm:h-full sm:w-[min(18rem,40vw)] sm:py-0"
+      >
+        <div className="flex items-baseline gap-4">
+          {/* Numbered to match the index on the cover, where cover art is 05. */}
+          <span className="label tabular-nums text-muted-foreground">05</span>
+          <h2 id="cover-art" className="label text-muted-foreground">
+            Cover art
+          </h2>
         </div>
-      </Reveal>
+        <p className="font-display text-3xl uppercase leading-none tracking-[0] sm:text-4xl">
+          Sleeves
+        </p>
+        <Link
+          prefetch={false}
+          href={`/work/${project.slug}`}
+          className="label text-muted-foreground transition-colors duration-200 hoverable:hover:text-foreground"
+        >
+          All {COVER_RELEASES.length} &rarr;
+        </Link>
+      </div>
 
-      {/* Two columns on a phone, and on a wide screen whatever divides the
-          pick so the last row is full. */}
-      {/* One reveal around the rack rather than one per sleeve. Ten squares
-          arriving individually is confetti; the rack reads as a single shelf
-          of records, so it arrives as one. */}
-      <Reveal>
-        <ul className={`grid grid-cols-2 ${columnsFor(releases.length)}`}>
+      <div className="w-full shrink-0 sm:h-full sm:w-auto">
+        <ul className="grid h-full grid-cols-2 gap-3 max-sm:grid-cols-2 sm:grid-flow-col sm:grid-cols-none sm:grid-rows-2">
           {releases.map((release) => (
             <li key={release.slug}>
               <Link
@@ -111,12 +101,13 @@ export function CoverArt() {
                   release.artist,
                   release.frames,
                 )}
-                className="group relative block aspect-square overflow-hidden"
+                data-ring="Open"
+                className="group relative block aspect-square overflow-hidden hoverable:cursor-none sm:h-full sm:w-auto"
                 style={{ backgroundColor: release.frames[0]?.color }}
               >
                 <CoverFaces
                   frames={release.frames}
-                  sizes="(min-width: 1024px) 20vw, 50vw"
+                  sizes="(min-width: 640px) 18vw, 50vw"
                 />
 
                 {/* The release, named. A music client is scanning for something
@@ -132,7 +123,7 @@ export function CoverArt() {
             </li>
           ))}
         </ul>
-      </Reveal>
-    </section>
+      </div>
+    </>
   );
 }

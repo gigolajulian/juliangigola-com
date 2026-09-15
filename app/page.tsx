@@ -1,160 +1,150 @@
 import Link from "next/link";
 import { Hero } from "@/components/hero";
-import { CallToAction } from "@/components/call-to-action";
+import { Strip } from "@/components/strip";
+import { StripPage } from "@/components/strip-page";
+import { EnquiryCell } from "@/components/enquiry-cell";
 import { Testimonials } from "@/components/testimonials";
 import { WorkBand } from "@/components/work-band";
 import { CoverArt } from "@/components/cover-art";
-import { Reveal } from "@/components/reveal";
-import { FEATURED, PRESS_HOME, DISCIPLINES, bandTile } from "@/lib/work";
+import {
+  FEATURED,
+  PRESS_HOME,
+  DISCIPLINES,
+  WORK_PAGE,
+  bandTile,
+} from "@/lib/work";
 import { ClientMarks } from "@/components/client-marks";
 
 /* ── the homepage ─────────────────────────────────────────────────
- * Four moves, in the order a first-time visitor asks for them.
+ * The same four moves the page has always made, now as one sequence that
+ * runs sideways like the rest of the site:
  *
  *   1. The cover — who he is and what he does, cycling through the four
  *      disciplines so the range lands in the first few seconds. See
  *      `hero.tsx`; the discipline index is both its control and the site's
- *      navigation into the work.
- *   2. Proof — the five names that make an art director keep reading. On the
- *      old site they were four lines of grey text at the foot of /about.
- *   3. Selected work — a full-bleed grid, each cell scrubbable through its own
- *      sequence, so the question answered is "is the whole set good" rather
- *      than "does this project exist".
- *   4. The split, then the ask — an art director and someone pricing a
- *      graduation shoot each get one door, and then a single clear request.
+ *      navigation into the work. It is the first cell and it is the whole
+ *      screen, so nothing about the first impression changes.
+ *   2. Proof — the names that make an art director keep reading.
+ *   3. Selected work — the picked projects as tiles the height of the
+ *      strip, each scrubbable through its own sequence, then the rack of
+ *      sleeves.
+ *   4. The two doors, and then the ask. Wheeling past the ask leads to the
+ *      work, which is where a visitor who got that far is going.
+ *
+ * The cover keeps its own arrival and nothing slides it in: `arrive="none"`
+ * on the strip. Julian's standing rule is that nothing moves inside the
+ * cover photograph.
  * ─────────────────────────────────────────────────────────────── */
 
 export default function Home() {
   return (
-    <>
-      <Hero disciplines={DISCIPLINES} />
+    <StripPage>
+      <Strip
+        label="Julian Gigola: the cover, selected work, cover art, and how to get in touch. Left and right."
+        next={WORK_PAGE}
+        arrive="none"
+        className="flex-1"
+      >
+        {/* The cover is full bleed: it pulls back over the strip's own
+            gutter, so at rest the photograph is the screen and there is no
+            band of ground down its left. Every cell after it keeps the
+            gutter. */}
+        <Hero
+          disciplines={DISCIPLINES}
+          className="-ml-6 w-screen shrink-0 max-sm:min-h-[100lvh] sm:-ml-10 sm:h-full"
+        />
 
-      {/* Proof, in its own band directly under the cover — so it is the first
-          thing past the fold rather than something to be scrolled past. */}
-      <section aria-labelledby="press" className="border-b border-border">
-        <div className="mx-auto flex max-w-[100rem] flex-wrap items-baseline justify-center gap-x-8 gap-y-4 px-6 py-8 sm:px-10 sm:py-10">
-          <h2 id="press" className="label shrink-0 text-muted-foreground">
-            Published &amp; commissioned by
-          </h2>
-          {/* One component with /studio's wall, so a logo added once shows
-              in both places and neither can be the one still set in type. */}
-          <ClientMarks clients={PRESS_HOME} layout="row" />
-        </div>
-      </section>
-
-      {/* Selected work: a full-bleed grid.
-          Two columns running edge to edge, each cell most of the viewport
-          tall. A photograph in a 400px card is a reference to a photograph;
-          at this size it is the thing itself, which is the argument for
-          giving the page over to it. Six cells at this scale means the
-          section is the body of the homepage rather than a strip in it.
-
-          No rules between the cells. The frames butt straight up against
-          each other so the section reads as one sheet of imagery rather than
-          as tiles in a frame — the photographs supply their own edges.
-
-          Each cell scrubs through its own sequence under the pointer — see
-          `work-band.tsx`. That answers the question a cover cannot: not "does
-          this project exist" but "is the whole set good", which is what an
-          art director is actually deciding. */}
-      <section aria-labelledby="featured">
-        <Reveal variant="calm">
-          <div className="mx-auto flex max-w-[100rem] items-baseline justify-between gap-6 px-6 pb-8 pt-20 sm:px-10 sm:pt-28">
-            <h2 id="featured" className="label text-muted-foreground">
-              Selected work
+        {PRESS_HOME.length ? (
+          <section
+            data-tick
+            data-label="Clients"
+            aria-labelledby="press"
+            className="flex w-full shrink-0 flex-col justify-center gap-6 py-10 sm:h-full sm:w-[min(36rem,60vw)] sm:py-0 sm:pl-10"
+          >
+            <h2 id="press" className="label text-muted-foreground">
+              Published &amp; commissioned by
             </h2>
-            <Link
-              href="/work"
-              className="label text-muted-foreground transition-colors duration-200 hoverable:hover:text-foreground"
-            >
-              All projects &rarr;
-            </Link>
-          </div>
-        </Reveal>
+            {/* One component with /studio's wall, so a logo added once shows
+                in both places and neither can be the one still set in type. */}
+            <ClientMarks clients={PRESS_HOME} layout="row" />
+          </section>
+        ) : null}
 
-        {/* Three across, so the six featured projects read as two rows of a
-            set rather than a column of three pairs — the question this
-            section answers is "is the whole body of work good", and that is
-            easier to answer when more of it is on screen at once.
-
-            Ramped rather than jumped: one on a phone, two from `md`, three
-            from `lg`. Going straight to three at `lg` puts a 341px cell on a
-            1024px laptop, which is a thumbnail, not a photograph. */}
-        {/* No `stagger`. It counts every child, and the three unwrapped cells
-            below still count — so cells four to six would all land in its
-            clamp and share one 180ms delay, which is a uniform lag rather
-            than a stagger. A row of photographs arriving together is right
-            anyway; the stepping exists for pairs and short lists. */}
-        <ul className="grid md:grid-cols-2 lg:grid-cols-3">
-          {FEATURED.map((project, i) => {
-            // Three are above the fold now, not two.
-            const band = (
-              <WorkBand
-                project={bandTile(project)}
-                index={i}
-                priority={i < 3}
-              />
-            );
-            return (
-              <li key={project.slug}>
-                {/* The `priority` three are left unwrapped on purpose. They
-                    are at or above the fold, so a reveal would fire on the
-                    first observer callback and animate them at load — on top
-                    of the `rise` the whole page is already doing, which reads
-                    as a flicker rather than as either gesture. Keeping them
-                    plain also leaves the browser's largest-paint candidates
-                    without a compositor layer they have no use for.
-
-                    Everything further down gets the photographic reveal. The
-                    wrapper sits inside the `<li>` so the list item stays the
-                    grid cell. */}
-                {i < 3 ? band : <Reveal>{band}</Reveal>}
-              </li>
-            );
-          })}
-        </ul>
-      </section>
-
-      <CoverArt />
-
-      {/* The two audiences, split. This is the fix for the old site's single
-          thirteen-item dropdown maze: an art director and someone pricing a
-          graduation shoot each get one obvious door. */}
-      <section aria-labelledby="paths" className="border-t border-border">
-        <h2 id="paths" className="sr-only">
-          Where to go next
-        </h2>
-        {/* One reveal around the grid rather than one per card: the `<Link>`
-            inside `PathCard` is the grid item and `sm:odd:border-r` targets
-            it, so a wrapper per card would become the item and take both the
-            divider and the equal heights with it. */}
-        <Reveal
-          variant="calm"
-          className="mx-auto grid max-w-[100rem] sm:grid-cols-2"
+        <div
+          data-tick
+          data-label="Selected work"
+          data-hash="work"
+          className="flex w-full shrink-0 flex-col justify-center gap-3 py-6 sm:h-full sm:w-[min(18rem,40vw)] sm:py-0"
         >
-          <PathCard
+          <h2 className="label text-muted-foreground">Selected work</h2>
+          {/* However many are picked in /admin, counted rather than
+              written down: the last copy that said "six" outlived the six. */}
+          <p className="font-display text-3xl uppercase leading-none tracking-[0] sm:text-4xl">
+            {FEATURED.length} projects
+          </p>
+          <Link
+            prefetch={false}
             href="/work"
-            label="For art directors"
-            title="Commissioned work"
-            body="Editorial, campaigns, portraits, and artist imagery."
-          />
-          <PathCard
-            href="/sessions"
-            label="For individuals"
-            title="Book a session"
-            body="Graduation, headshots, weddings, and studio digitals. What's included and how long it takes."
-          />
-        </Reveal>
-      </section>
+            className="label text-muted-foreground transition-colors duration-200 hoverable:hover:text-foreground"
+          >
+            All projects &rarr;
+          </Link>
+        </div>
 
-      <Testimonials />
+        {/* Each tile is the height of the strip and 4:5 of that across —
+            the ratio the work is shot in — and scrubs through its own
+            sequence under the pointer. That answers the question a cover
+            cannot: not "does this project exist" but "is the whole set
+            good", which is what an art director is actually deciding. */}
+        {FEATURED.map((project, i) => (
+          <WorkBand
+            key={project.slug}
+            project={bandTile(project)}
+            index={i}
+            priority={i < 2}
+          />
+        ))}
 
-      <CallToAction
-        title="Have something in mind?"
-        body="Tell me what you have in mind and I'll come back with an approach and a quote."
-        secondary={{ href: "/work", label: "Browse the work" }}
-      />
-    </>
+        <CoverArt />
+
+        {/* The two audiences, split. This is the fix for the old site's
+            single thirteen-item dropdown maze: an art director and someone
+            pricing a graduation shoot each get one obvious door. */}
+        <section
+          data-tick
+          data-label="Where next"
+          aria-labelledby="paths"
+          className="w-full shrink-0 sm:h-full sm:w-[min(60rem,80vw)]"
+        >
+          <h2 id="paths" className="sr-only">
+            Where to go next
+          </h2>
+          <div className="grid h-full grid-cols-1 sm:grid-cols-2">
+            <PathCard
+              href="/work"
+              label="For art directors"
+              title="Commissioned work"
+              body="Editorial, campaigns, portraits, and artist imagery."
+            />
+            <PathCard
+              href="/sessions"
+              label="For individuals"
+              title="Book a session"
+              body="Graduation, headshots, weddings, and studio digitals. What's included and how long it takes."
+            />
+          </div>
+        </section>
+
+        <Testimonials cells />
+
+        <EnquiryCell
+          title="Have something in mind?"
+          body="Tell me what you have in mind and I'll come back with an approach and a quote."
+          secondary={{ href: "/work", label: "Browse the work" }}
+          next={WORK_PAGE}
+        />
+      </Strip>
+    </StripPage>
   );
 }
 
@@ -172,7 +162,7 @@ function PathCard({
   return (
     <Link
       href={href}
-      className="group relative flex flex-col justify-between gap-16 px-6 py-16 transition-colors duration-300 hoverable:hover:bg-card sm:px-10 sm:py-24 sm:odd:border-r sm:odd:border-border"
+      className="group relative flex flex-col justify-between gap-10 px-6 py-10 transition-colors duration-300 hoverable:hover:bg-card sm:px-10 sm:py-16 sm:first:border-r sm:first:border-border"
     >
       <div>
         <p className="label text-muted-foreground">{label}</p>
