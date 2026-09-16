@@ -1712,7 +1712,8 @@ optgroup {
     0 12px 32px -14px color-mix(in oklab, black 55%, transparent);
   transition:
     background-color 200ms var(--ease-out-strong),
-    border-color 200ms var(--ease-out-strong);
+    border-color 200ms var(--ease-out-strong),
+    color 200ms var(--ease-out-strong);
 
   /* The light. A radial highlight at the pointer, or resting at the top
      edge; painted between the fill and the content. */
@@ -1858,19 +1859,31 @@ optgroup {
     background-color 200ms var(--ease-out-strong),
     border-color 200ms var(--ease-out-strong);
 
+  /* Under the pointer it fills rather than tints. Julian asked for the
+     label to go white on hover, and white type needs a ground to be white
+     against: 7% of ink over the page is not one. So the quiet button
+     takes the ink and hands the page's own colour to its label — white on
+     black in the light, black on white in the dark, which is the second
+     half of the same ask. The filled button beside it keeps its direction,
+     easing off its ink under the pointer, so the pair still reads as two
+     different buttons at every moment. */
   @media (hover: hover) and (pointer: fine) {
     &:hover {
-      background-color: color-mix(in oklab, var(--foreground) 7%, transparent);
-      border-color: color-mix(in oklab, var(--foreground) 30%, transparent);
+      background-color: var(--foreground);
+      border-color: var(--foreground);
+      color: var(--background);
       scale: 1.03;
     }
   }
   &:focus-visible {
-    background-color: color-mix(in oklab, var(--foreground) 7%, transparent);
-    border-color: color-mix(in oklab, var(--foreground) 30%, transparent);
+    background-color: var(--foreground);
+    border-color: var(--foreground);
+    color: var(--background);
   }
   &:active {
-    background-color: color-mix(in oklab, var(--foreground) 12%, transparent);
+    background-color: color-mix(in oklab, var(--foreground) 88%, var(--background));
+    border-color: color-mix(in oklab, var(--foreground) 88%, var(--background));
+    color: var(--background);
   }
 }
 
