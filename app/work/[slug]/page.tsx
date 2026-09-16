@@ -147,7 +147,7 @@ export default async function ProjectPage(props: PageProps<"/work/[slug]">) {
      else is a sequence and gets the strip. */
   if (project.slug === COVER_ART?.slug) {
     return (
-      <article className="pt-24 sm:pt-28">
+      <article className="pt-20 sm:pt-20">
         <header className="mx-auto max-w-[100rem] px-6 sm:px-10">
           <Crumb />
           <h1 className="mt-6 title">{project.headline ?? project.name}</h1>

@@ -707,12 +707,12 @@ export function Hero({
               to clear and the padding would be frosted glass with nothing on
               it.
 
-              `pt-28` and not `pt-24`, which is a bug fixed: the bar measures
-              101px tall at these widths and 96px of clearance put the running
-              head five pixels *under* it. `wide` had 112px through a
-              `lg:wide:` stack and cleared; `squat` had 96 and did not. Both
-              are 112 now, from one class, so they cannot drift apart
-              again. */}
+              `pt-20` on both `squat` and `wide`, from one class so they
+              cannot drift apart: the bar is 60px tall since it was made
+              compact for a page that no longer scrolls down, and 80px
+              clears it with room. (It was 101px and `pt-28`; before that
+              `squat` had 96px and put the running head five pixels under
+              the bar, which is the bug this line fixed.) */}
             <div
               style={lands(HEAD_MS)}
               /* On a short window the two standing lines go and the band
@@ -720,7 +720,7 @@ export function Hero({
                  footer of every page and the bar is over them; the rows
                  under the name are what a visitor came to this screen
                  for. */
-              className="rise flex flex-wrap items-baseline gap-x-6 gap-y-1 px-6 pb-4 pt-6 max-sm:pb-2 max-sm:pt-3 sm:px-10 sm:pt-8 squat:pt-28 wide:pt-28 short:pb-0 short:[&>*]:hidden"
+              className="rise flex flex-wrap items-baseline gap-x-6 gap-y-1 px-6 pb-4 pt-6 max-sm:pb-2 max-sm:pt-3 sm:px-10 sm:pt-8 squat:pt-20 wide:pt-20 short:pb-0 short:[&>*]:hidden"
             >
               {/* Held back while the intro is up, because the intro is already
                 saying these exact words in display type eighty pixels below.

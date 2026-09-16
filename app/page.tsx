@@ -87,7 +87,7 @@ export default function Home() {
           {/* Which section this is, and the way out to all of the work.
               Both sit in the band the bar occupies, which is why the grid
               below starts under it. */}
-          <div className="pointer-events-none absolute inset-x-0 top-0 z-10 flex items-baseline justify-between gap-6 px-6 py-4 sm:px-8 sm:pt-28">
+          <div className="pointer-events-none absolute inset-x-0 top-0 z-10 flex items-baseline justify-between gap-6 px-6 py-4 sm:px-8 sm:pt-20">
             <p className="label glass-surface bg-background/70 px-3 py-1.5 text-muted-foreground">
               Selected work
               <span className="ml-3 tabular-nums text-foreground">
@@ -215,7 +215,7 @@ function PathCard({
       // more room than two short paragraphs need, and a block pinned to the
       // top with its way out pinned to the bottom reads as a page that
       // failed to load the middle.
-      className="group relative flex flex-col justify-center gap-6 border-l border-border px-6 py-12 transition-colors duration-300 hoverable:hover:bg-card sm:px-16 sm:pt-28"
+      className="group relative flex flex-col justify-center gap-6 border-l border-border px-6 py-12 transition-colors duration-300 hoverable:hover:bg-card sm:px-16 sm:pt-20"
     >
       <div>
         <p className="label text-muted-foreground">{label}</p>

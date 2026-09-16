@@ -145,7 +145,7 @@ export function SiteHeader() {
         open && "border-transparent bg-transparent backdrop-blur-none",
       )}
     >
-      <div className="relative mx-auto flex max-w-[100rem] items-center justify-between px-6 py-6 sm:px-10 sm:py-7">
+      <div className="relative mx-auto flex max-w-[100rem] items-center justify-between px-6 py-3 sm:px-10 sm:py-4">
         <Link
           href="/"
           // On the homepage the name is a way back to the top, not a reload.

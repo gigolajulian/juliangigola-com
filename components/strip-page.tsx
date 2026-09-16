@@ -35,7 +35,7 @@ export function StripPage({
       data-quiet-footer
       className={cn(
         "flex min-h-0 flex-col sm:h-full",
-        head && "pt-24 sm:pt-28",
+        head && "pt-20 sm:pt-20",
         className,
       )}
     >

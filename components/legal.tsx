@@ -17,7 +17,7 @@ import type * as React from "react";
 
 export function LegalPage({ children }: { children: React.ReactNode }) {
   return (
-    <div className="pb-24 pt-28 sm:pt-36">
+    <div className="pb-24 pt-24 sm:pt-28">
       <div className="mx-auto max-w-[100rem] px-6 sm:px-10">
         <p className="label text-muted-foreground">The small print</p>
         <h1 className="mt-4 max-w-[20ch] title">Legal</h1>
