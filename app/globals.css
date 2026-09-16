@@ -1095,6 +1095,21 @@ nav[aria-label="Categories"] ul[data-more] {
   }
 }
 
+/* ── a paged strip under a finger ──
+   The browser lands each touch swipe on a section itself, with its own
+   momentum and its own idea of when a gesture is sideways, which an iPad
+   has more consistently than any hand-rolled swipe. Only where the
+   pointer is a finger: a mouse and a wheel are paged by `strip.tsx`, and
+   a snap under a scripted scroll re-aims it as it lands. */
+@media (pointer: coarse) {
+  .strip-paged {
+    scroll-snap-type: x mandatory;
+  }
+  .strip-paged > * {
+    scroll-snap-align: center;
+  }
+}
+
 /* ── a thumb's worth of link ──
    The small capitals links (footer, crumbs, credits, the email in an ask)
    are 13 to 14px tall, and a thumb is not. Padding that the same negative

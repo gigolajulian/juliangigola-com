@@ -745,25 +745,15 @@ export function Strip({
       to(target + dy * (Math.abs(dy) >= 80 ? WHEEL : PAD));
     };
 
-    /* Drag, for a mouse — and for a finger where the strip is paged.
-       A free strip still leaves the touchscreen alone: the platform's own
-       flick and momentum are better than anything reimplemented here. But
-       a paged strip and platform momentum are two different ideas of what
-       a swipe is, and the two of them were fighting: the finger threw the
-       strip wherever its speed took it, the browser kept going, and 160ms
-       after it stopped the settle glided back to whichever section was
-       nearest — so a short swipe returned to the section it started on
-       and a hard one flew through three and crawled back. One swipe, one
-       section, decided at the fingertip. */
+    /* Drag, for a mouse only. A touchscreen is left to the platform: its
+       own flick and momentum, and on a paged strip the browser's scroll
+       snap (`strip-paged` in `globals.css`) lands each swipe on a section.
+       The first version took the finger over on paged pages and moved it
+       one section per swipe by hand; on an iPad that fought the
+       browser's own idea of the gesture and swipes went wrong more often
+       than right. */
     let down = false;
     let dragging = false;
-    /** This gesture is a finger's. */
-    let finger = false;
-    /* What counts as a swipe rather than a press that moved: either a
-       fifth of a section travelled, or let go with speed. Neither decides
-       how far it goes — that is always exactly one. */
-    const SWIPE_PX = 40;
-    const SWIPE_SPEED = 0.25;
     let fromX = 0;
     let fromScroll = 0;
     let lastX = 0;
@@ -771,8 +761,7 @@ export function Strip({
     let speed = 0;
 
     const onDown = (e: PointerEvent) => {
-      const touch = e.pointerType === "touch";
-      if (touch ? !paged : e.pointerType !== "mouse" || e.button !== 0) return;
+      if (e.pointerType !== "mouse" || e.button !== 0) return;
       // A field is for typing and selecting in, not for pulling the page.
       if (
         (e.target as Element | null)?.closest?.(
@@ -783,7 +772,6 @@ export function Strip({
       }
       down = true;
       dragging = false;
-      finger = touch;
       stop();
       fromX = lastX = e.clientX;
       fromScroll = el.scrollLeft;
@@ -827,31 +815,6 @@ export function Strip({
       if (!down) return;
       down = false;
       dragging = false;
-      const was = finger;
-      finger = false;
-
-      /* A finger on a paged strip: one section from the one it started
-         on, whichever way it went. Counting from the start and not from
-         where the drag ended is the whole point — how far the finger
-         travelled decides nothing but whether it was a swipe at all, so
-         the same gesture does the same thing every time. */
-      if (was) {
-        if (eased) {
-          const travel = target - fromScroll;
-          const go =
-            Math.abs(travel) > SWIPE_PX || Math.abs(speed) > SWIPE_SPEED;
-          const dir = (Math.abs(travel) > 4 ? travel : speed) > 0 ? 1 : -1;
-          const last = el.children.length - 1;
-          const from = nearest(fromScroll);
-          const where = centreOf(
-            el,
-            Math.max(0, Math.min(last, go ? from + dir : from)),
-          );
-          if (where !== null) to(where);
-        }
-        requestAnimationFrame(() => delete el.dataset.dragged);
-        return;
-      }
 
       // A flick keeps going: let go at a speed, the strip carries on at
       // that speed and runs out under the same friction as a notch. A drag
@@ -869,19 +832,11 @@ export function Strip({
       requestAnimationFrame(() => delete el.dataset.dragged);
     };
 
-    /* The browser took the gesture — a finger that turned out to be going
-       up or down the page. Nothing moved sideways on purpose, so the strip
-       goes back to the section the hand started on. */
+    // The browser took the pointer away mid-drag.
     const onCancel = () => {
       if (!down) return;
       down = false;
       dragging = false;
-      const was = finger;
-      finger = false;
-      if (eased && was) {
-        const where = centreOf(el, nearest(fromScroll));
-        if (where !== null) to(where);
-      }
       requestAnimationFrame(() => delete el.dataset.dragged);
     };
 
@@ -1083,18 +1038,14 @@ export function Strip({
           // Stacked: the cells run down the page, which scrolls as pages
           // do, with nothing hidden, nothing sliding in, and the words
           // selectable again.
-          /* The finger is the strip's on a paged page, so the browser
-             must not also be panning it sideways under the same gesture:
-             two things moving one scroller was most of what made a swipe
-             on a tablet feel like a guess. Up and down is still the
-             browser's, which is what keeps a scrolling box inside a cell
-             working and lets a page that stacks scroll as a page. */
           // Everything above is the strip's; `strip-grid` in `globals.css`
           // takes the same cells and lays them out as a sheet instead.
           "overflow-x-auto overflow-y-hidden",
           // The same cells, two rows deep: `strip-grid` in `globals.css`.
           grid && "strip-grid",
-          paged && "touch-pan-y",
+          // Snap for a finger, `globals.css`; a mouse and the keyboard
+          // are paged by hand above.
+          paged && "strip-paged",
           stack &&
             "max-sm:animate-none max-sm:flex-col max-sm:items-stretch max-sm:gap-10 max-sm:overflow-visible max-sm:select-auto",
           // Stacked, a full-bleed page still wants its words off the edge.
