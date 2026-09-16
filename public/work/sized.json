@@ -20,9 +20,6 @@
   "/work/analogue-dreams/cover.jpg": [
     1080
   ],
-  "/work/astral-allure/cover.jpg": [
-    1080
-  ],
   "/work/automotive/cover.jpg": [
     1080
   ],
@@ -102,6 +99,18 @@
     1080
   ],
   "/work/liminal/cover.jpg": [
+    1080
+  ],
+  "/work/liminal/02.jpg": [
+    640,
+    1080
+  ],
+  "/work/liminal/03.jpg": [
+    640,
+    1080
+  ],
+  "/work/liminal/04.jpg": [
+    640,
     1080
   ],
   "/work/luna/cover.jpg": [
@@ -188,6 +197,18 @@
   "/work/the-den-talkshow/cover.jpg": [
     1080
   ],
+  "/work/the-den-talkshow/02.jpg": [
+    640,
+    1080
+  ],
+  "/work/the-den-talkshow/03.jpg": [
+    640,
+    1080
+  ],
+  "/work/the-den-talkshow/04.jpg": [
+    640,
+    1080
+  ],
   "/work/torteline/cover.jpg": [
     1080
   ],
@@ -257,7 +278,16 @@
     640,
     1080
   ],
-  "/work/wrapped-up/cover.jpg": [
+  "/work/wrapped-up/04.jpg": [
+    640,
+    1080
+  ],
+  "/work/wrapped-up/01.jpg": [
+    640,
+    1080
+  ],
+  "/work/wrapped-up/05.jpg": [
+    640,
     1080
   ],
   "/work/zoe/cover.jpg": [

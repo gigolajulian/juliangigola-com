@@ -2288,10 +2288,17 @@ export const PROJECTS: Project[] = [
       "src": "/work/graduation/cover.jpg",
       "width": 600,
       "height": 840,
-      "color": "#262640",
+      "color": "#717a86",
       "alt": ""
     },
     "images": [
+      {
+        "src": "/work/graduation/00.jpg",
+        "width": 2500,
+        "height": 3500,
+        "color": "#717a86",
+        "alt": ""
+      },
       {
         "src": "/work/graduation/01.jpg",
         "width": 1600,
