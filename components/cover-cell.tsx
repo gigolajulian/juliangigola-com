@@ -58,7 +58,7 @@ export function CoverCell({
       data-hash={hash}
       data-ring="View project"
       data-mark={mark}
-      className="group strip-cell relative block w-full shrink-0 overflow-hidden press hoverable:cursor-none active:scale-[0.995] sm:h-full sm:w-auto"
+      className="group strip-cell relative block w-full shrink-0 overflow-hidden press active:scale-[0.995] sm:h-full sm:w-auto"
       style={
         {
           backgroundColor: row.cover.color,

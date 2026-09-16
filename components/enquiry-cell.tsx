@@ -89,7 +89,7 @@ export function EnquiryCell({
           prefetch={false}
           href={next.href}
           data-ring="Next"
-          className="label mt-4 w-fit border-t border-border pt-4 text-muted-foreground transition-colors duration-200 hoverable:cursor-none hoverable:hover:text-foreground"
+          className="label mt-4 w-fit border-t border-border pt-4 text-muted-foreground transition-colors duration-200 hoverable:hover:text-foreground"
         >
           Next: {next.name}
         </Link>

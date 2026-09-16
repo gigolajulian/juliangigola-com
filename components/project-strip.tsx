@@ -245,7 +245,7 @@ export function ProjectStrip({
             key="next"
             href={next!.href}
             data-ring="Next project"
-            className="flex h-full shrink-0 flex-col justify-center gap-2 pl-10 pr-6 sm:pl-24 sm:pr-10 hoverable:cursor-none"
+            className="flex h-full shrink-0 flex-col justify-center gap-2 pl-10 pr-6 sm:pl-24 sm:pr-10"
           >
             <span className="label text-muted-foreground">Next project</span>
             <span className="font-display text-2xl uppercase leading-none tracking-[0] transition-opacity duration-200 hoverable:hover:opacity-70 sm:text-4xl">
@@ -287,7 +287,7 @@ export function ProjectStrip({
             aria-label={`Open frame ${cell.n + 1} of ${frames.length}${
               cell.frame.alt ? `: ${cell.frame.alt}` : ""
             }`}
-            className="group strip-cell relative h-full shrink-0 overflow-hidden press hoverable:cursor-none active:scale-[0.995]"
+            className="group strip-cell relative h-full shrink-0 overflow-hidden press active:scale-[0.995]"
             style={
               {
                 backgroundColor: cell.frame.color,

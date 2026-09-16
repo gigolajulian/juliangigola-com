@@ -50,7 +50,7 @@ export function CoverArtGallery({
       <ul
         data-ring="Zoom in"
         className={cn(
-          "grid hoverable:cursor-none",
+          "grid",
           rows
             ? "h-full grid-flow-col grid-rows-2 max-sm:h-auto max-sm:grid-flow-row max-sm:grid-cols-2"
             : "mt-12 grid-cols-2 sm:mt-16 sm:grid-cols-3",

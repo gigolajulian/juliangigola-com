@@ -117,6 +117,40 @@ function travel(
     .catch(() => {});
 }
 
+/* The full-size picture, fetched and decoded before the trip starts.
+ *
+ * The dialog's image asks for `100vw`; the frame in the strip asked for a
+ * third of that, so opening one is a new file off the network and a decode
+ * of several megapixels — and both used to land in the middle of the
+ * animation, which is where the stutter Julian reported came from. The
+ * strip's own `srcset` lists every width of the same photograph, so the one
+ * the dialog is about to choose can be warmed first.
+ *
+ * Capped: a slow connection must not hold the press. After the cap the trip
+ * starts anyway and the picture arrives when it arrives, which is the old
+ * behaviour and no worse.
+ */
+const CAP_MS = 220;
+function warm(from: HTMLElement | null): Promise<void> {
+  const set = from instanceof HTMLImageElement ? from.srcset : "";
+  if (!set) return Promise.resolve();
+  const want = window.innerWidth * (window.devicePixelRatio || 1);
+  const widths = set
+    .split(",")
+    .map((part) => part.trim().split(/\s+/))
+    .map(([url, w]) => ({ url, w: parseInt(w || "0", 10) }))
+    .filter((c) => c.url && c.w > 0)
+    .sort((a, b) => a.w - b.w);
+  const pick = widths.find((c) => c.w >= want) ?? widths[widths.length - 1];
+  if (!pick) return Promise.resolve();
+  const img = new window.Image();
+  img.src = pick.url;
+  return Promise.race([
+    img.decode().catch(() => {}),
+    new Promise<void>((r) => window.setTimeout(r, CAP_MS)),
+  ]).then(() => undefined);
+}
+
 export function useLightbox(
   frames: Frame[],
   /** The layout the frames sit in, if it should spread around the one
@@ -136,14 +170,18 @@ export function useLightbox(
   const show = (i: number) => {
     opener.current = document.activeElement as HTMLElement | null;
     const src = frames[i]?.src;
-    travel(
-      src ? pictureFor(src) : null,
-      () => {
-        setIndex(i);
-        setOpen(true);
-      },
-      null,
-      stage?.current,
+    const from = src ? pictureFor(src) : null;
+    // Warm first, travel second: see `warm` above.
+    void warm(from).then(() =>
+      travel(
+        from,
+        () => {
+          setIndex(i);
+          setOpen(true);
+        },
+        null,
+        stage?.current,
+      ),
     );
   };
 

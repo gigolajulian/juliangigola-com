@@ -103,7 +103,7 @@ export function CoverArt() {
                 release.frames,
               )}
               data-ring="View project"
-              className="group relative block aspect-square overflow-hidden hoverable:cursor-none"
+              className="group relative block aspect-square overflow-hidden"
               style={{ backgroundColor: release.frames[0]?.color }}
             >
               <CoverFaces
