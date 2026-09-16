@@ -1605,6 +1605,20 @@ optgroup {
    the first frame and the snapshot of what it was fades off it, which is
    what the reference does and what a picture coming forward should look
    like. `data-lift` is on the root for the length of the trip. */
+/* And the glass goes flat for the length of the trip.
+ *
+ * The one rough moment in opening a picture is the frame the browser takes
+ * its snapshots in: measured on production at 2560x1440 with a retina
+ * ratio, 133ms of work in a single frame, then a clean sixty for the rest
+ * of the animation. Every blurred surface on screen has to be rasterised
+ * into those snapshots, and turning them off for the trip took that frame
+ * from 133ms to 83 — a third of the freeze, bought for nothing anybody can
+ * see. Nobody reads a blur through a picture growing over it in half a
+ * second. */
+:root[data-lift] :where(.glass, .glass-surface, .glass-prominent) {
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
 :root[data-lift]::view-transition-old(root) {
   animation-duration: 420ms;
 }
