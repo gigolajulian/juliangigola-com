@@ -42,6 +42,7 @@ export function EnquiryCell({
   return (
     <div
       data-tick
+      data-ring=""
       data-label="Enquire"
       data-hash="enquire"
       className={cn(

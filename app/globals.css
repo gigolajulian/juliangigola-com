@@ -821,6 +821,45 @@ nav[aria-label="Categories"] ul[data-more] {
   }
 }
 
+/* ── the pointer's tag ────────────────────────────────────────────
+   The word that hangs off the pointer, set the way a camera sets a
+   focus box: four corner marks around a dark pane with the instruction
+   in mono caps. Julian drew these - VIEW PROJECT, DRAG, ZOOM IN, ZOOM
+   OUT - and asked for the same design on all of them.
+
+   The marks are eight background layers rather than eight elements: two
+   per corner, an arm across and an arm down, each `--mark` long and
+   `--rule` thick, none of them repeating. */
+.ring-tag {
+  --rule: 1.5px;
+  --mark: 9px;
+  --ink: color-mix(in oklab, white 92%, transparent);
+  padding: 0.4rem 0.6rem;
+  color: white;
+  background-color: color-mix(in oklab, black 62%, transparent);
+  background-repeat: no-repeat;
+  background-image: linear-gradient(var(--ink), var(--ink)),
+    linear-gradient(var(--ink), var(--ink)),
+    linear-gradient(var(--ink), var(--ink)),
+    linear-gradient(var(--ink), var(--ink)),
+    linear-gradient(var(--ink), var(--ink)),
+    linear-gradient(var(--ink), var(--ink)),
+    linear-gradient(var(--ink), var(--ink)),
+    linear-gradient(var(--ink), var(--ink));
+  background-size: var(--mark) var(--rule), var(--rule) var(--mark),
+    var(--mark) var(--rule), var(--rule) var(--mark), var(--mark) var(--rule),
+    var(--rule) var(--mark), var(--mark) var(--rule), var(--rule) var(--mark);
+  background-position:
+    0 0,
+    0 0,
+    100% 0,
+    100% 0,
+    0 100%,
+    0 100%,
+    100% 100%,
+    100% 100%;
+}
+
 @utility strip-scroll {
   scrollbar-width: none;
   overscroll-behavior-x: contain;

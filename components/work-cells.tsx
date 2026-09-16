@@ -27,6 +27,7 @@ export function GroupCell({
   return (
     <div
       data-tick
+      data-ring=""
       data-label={name}
       data-hash={hash}
       className="strip-cell flex w-full shrink-0 flex-col justify-center gap-4 py-10 sm:h-full sm:w-[min(22rem,50vw)] sm:py-0 sm:pl-10 sm:pr-4"

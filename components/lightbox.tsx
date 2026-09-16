@@ -395,6 +395,7 @@ export function Lightbox({
                 swipe; the page underneath is a dialog and does not scroll. */}
             <div
               ref={picture}
+              data-ring="Zoom out"
               {...swipe}
               onClick={(e) => {
                 if (e.target === e.currentTarget) onOpenChange(false);

@@ -76,7 +76,7 @@ export default function SessionsPage() {
                   prefetch={false}
                   href={`/work/${sample.slug}`}
                   data-tick
-                  data-ring="Open"
+                  data-ring="View project"
                   aria-label={`${session.name}: see ${sample.name}`}
                   /* One ratio for all four, not each frame's own: a row of
                      photographs that each set their own height is not a row.

@@ -62,14 +62,27 @@ export function PointerRing() {
     const el = ref.current;
     if (!el) return;
 
-    let over = false;
+    /* What the pointer is over, not whether it is over something: moving
+       from a frame straight into the picture it opened kept the first
+       word, because only the boolean had changed and the word was written
+       on that change. */
+    let over: Element | null = null;
 
     const move = (e: PointerEvent) => {
       el.style.transform = `translate3d(${e.clientX - RADIUS}px, ${e.clientY - RADIUS}px, 0)`;
-      const on = (e.target as Element | null)?.closest?.("[data-ring]");
+      /* A word on an ancestor reaches everything inside it, which is how
+         the strip says `Drag` over its whole shelf. Two things cancel it:
+         an empty `data-ring`, written on the cells that are words rather
+         than pictures, and any control of its own that was given no word
+         — a button under a pointer that says DRAG, with no arrow to
+         press it with, is worse than no pointer at all. */
+      const near = (e.target as Element | null)?.closest?.(
+        "[data-ring], a, button, input, textarea, select, label, summary",
+      );
+      const on = near?.getAttribute("data-ring") ? near : null;
+      if (on === over) return;
+      over = on;
       const hit = !!on;
-      if (hit === over) return;
-      over = hit;
       el.toggleAttribute("data-over", hit);
       /* And the system cursor goes, from the root rather than from the
          element under the pointer. `hoverable:cursor-none` on the target
@@ -168,16 +181,20 @@ export function PointerRing() {
           ].join(" ")}
         />
       </div>
-      {/* The word. Set in ink rather than inverted, because a word under
-          `difference` on a mid-grey photograph is unreadable. Below and to
-          the right of the ring, the way a tag hangs off a pointer; a hair
-          later than the ring so the ring leads. Empty when the element gave
-          no word, and `empty:` hides the pill rather than leaving a dot. */}
+      {/* The word, below and to the right of the ring, the way a tag hangs
+          off a pointer; a hair later than the ring so the ring leads. Set
+          as a focus box — four corner marks around a dark pane, mono caps —
+          which is the design Julian drew for VIEW PROJECT, DRAG, ZOOM IN
+          and ZOOM OUT. Its own ground and its own ink rather than the
+          page's: it is read over photographs of every tone, and a word
+          under `difference` on a mid-grey frame is unreadable. Empty when
+          the element gave no word, and `empty:` hides it rather than
+          leaving a mark. */}
       <span
         ref={word}
         className={[
-          "absolute left-full top-full -ml-1 -mt-1 whitespace-nowrap rounded-full bg-foreground px-2 py-1",
-          "text-[0.625rem] font-medium uppercase leading-none tracking-[0.14em] text-background",
+          "ring-tag absolute left-full top-full -ml-1 -mt-1 whitespace-nowrap",
+          "font-mono text-[0.625rem] uppercase leading-none tracking-[0.18em]",
           "opacity-0 translate-y-1 transition-[opacity,translate] duration-200 ease-[var(--ease-out-strong)]",
           "in-data-over:opacity-100 in-data-over:translate-y-0 in-data-over:delay-[40ms]",
           "empty:hidden motion-reduce:transition-none",

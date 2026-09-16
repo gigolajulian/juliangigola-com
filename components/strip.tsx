@@ -1054,6 +1054,9 @@ export function Strip({
            tick — and snap re-aims each one as it settles, which reads as
            the sequence being tugged out of your hand. The momentum stops
            where it is let go instead. */
+        /* The whole shelf is draggable, so the pointer says so; a cover
+           inside it has its own word and a cell of words cancels it. */
+        data-ring="Drag"
         className={cn(
           "flex min-h-0 flex-1 select-none items-center",
           bleed ? "gap-0" : "gap-3 px-6 sm:px-10 sm:gap-4",

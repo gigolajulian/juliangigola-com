@@ -109,7 +109,7 @@ export function WorkBand({
 
   return (
     <Link
-      data-ring="Open"
+      data-ring="View project"
       style={
         {
           backgroundColor: project.cover.color,
