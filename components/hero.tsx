@@ -436,14 +436,17 @@ export function Hero({
            full height and so the frame entire — and exactly half of a
            1440px window spent on a panel whose masthead wraps at 358px and
            whose index rows end 200px short of their own right edge. The
-           picture takes 54% now, the panel keeps the rest, and both read
-           the same declaration so they cannot drift apart. 62% was the
-           first try and Julian asked for less width back: a wider box
-           over a 4:5 frame is a deeper crop through the top and bottom,
-           so width past a point costs picture rather than showing it.
-           `88dvh` is the ceiling on a tall window, where a percentage of
-           the width would outrun the height the frame has. */
-        "wide:[--cover-picture:min(88dvh,54%)]",
+           picture is exactly 4:5 of its own height now, which is the one
+           width at which nothing is cropped: the frames are upright and
+           any share of the window wider than four fifths of the height
+           eats the top and the bottom of them. Every guess before this
+           was a share of the width — 80dvh, then 62%, then 54% — and a
+           share of the width is only ever right at one window shape,
+           worst on the big screens where the height is the thing that
+           grew. The cover cell is its own size container so the picture
+           can read the height it actually has: `dvh` is the window, and
+           the cell is the window less the footer's line. */
+        "wide:[container-type:size] wide:[--cover-picture:calc(100cqh*4/5)]",
         "squat:[--text-display:clamp(2.5rem,4vw,5rem)]",
         /* And down again on a short window, whatever its shape. A laptop at
            1280x700 and an iPad held sideways both give the cover about 600px
