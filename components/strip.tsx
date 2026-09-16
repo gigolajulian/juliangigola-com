@@ -900,6 +900,22 @@ export function Strip({
         ref={scroller}
         tabIndex={0}
         aria-label={label}
+        /* The browser's own drag and drop never gets the gesture.
+           A cover in the index is a link around a photograph, and both of
+           those are things Chrome will happily pick up and carry: a drag
+           that began on one handed the pointer to native drag and drop,
+           which showed a ghost of the link, refused to drop anywhere, and
+           left the strip sitting where it was. Measured on production: of
+           five drags across the category strips, two turned into that -
+           the strip moved 28px of the 280 asked for while 35 `dragover`
+           events ran at 176ms each. `-webkit-user-drag: none` on `img` in
+           `globals.css` and the `dragstart` guard in `photo-notice.tsx`
+           both stop short of it, because the element being dragged is the
+           anchor, not the picture inside it.
+
+           Here and not on the document, so dragging a link out of the
+           footer, the nav or a page of prose still works. */
+        onDragStart={(e) => e.preventDefault()}
         /* No scroll snapping. Every movement here is a scroll the strip
            started itself — a wheel notch, a drag, a flick's momentum, a
            tick — and snap re-aims each one as it settles, which reads as
