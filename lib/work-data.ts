@@ -70,6 +70,66 @@ export const CATEGORIES: Category[] = [
 
 export const PROJECTS: Project[] = [
   {
+    "slug": "abril",
+    "name": "ABRIL",
+    "headline": null,
+    "intent": null,
+    "credits": [
+      {
+        "role": "Photographer",
+        "name": "Julian Gigola"
+      },
+      {
+        "role": "Model",
+        "name": "Abril"
+      }
+    ],
+    "categories": [
+      {
+        "slug": "studio-digitals",
+        "name": "STUDIO DIGITALS",
+        "section": "SESSIONS"
+      }
+    ],
+    "cover": {
+      "src": "/work/abril/cover.jpg",
+      "width": 600,
+      "height": 801,
+      "color": "#CDC9C6",
+      "alt": ""
+    },
+    "images": [
+      {
+        "src": "/work/abril/01.jpg",
+        "width": 2500,
+        "height": 3333,
+        "color": "#CDC9C6",
+        "alt": ""
+      },
+      {
+        "src": "/work/abril/02.jpg",
+        "width": 2500,
+        "height": 3333,
+        "color": "#D2CFCE",
+        "alt": ""
+      },
+      {
+        "src": "/work/abril/03.jpg",
+        "width": 2500,
+        "height": 3334,
+        "color": "#CECBCA",
+        "alt": ""
+      },
+      {
+        "src": "/work/abril/04.jpg",
+        "width": 2500,
+        "height": 3333,
+        "color": "#C7C3C1",
+        "alt": ""
+      }
+    ]
+  },
+  {
     "slug": "iris",
     "name": "IRIS",
     "headline": null,
