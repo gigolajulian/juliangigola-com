@@ -77,7 +77,15 @@ export function CoverArtGallery({
                 // found by source.
                 lightbox.show(
                   positions.get(frame.src) ?? 0,
-                  e.currentTarget.querySelector("img"),
+                  // The side that is actually face up. Both are mounted and
+                  // the hover crossfades between them, so handing over the
+                  // first of the two would hand over an element at zero
+                  // opacity: the picture then flew home to something
+                  // invisible, and on the way out there was nothing on
+                  // screen at all.
+                  e.currentTarget.querySelector<HTMLElement>(
+                    `img[data-frame="${CSS.escape(frame.src)}"]`,
+                  ),
                 );
               }}
               aria-label={`Open ${coverLabel(release.title, release.artist, release.frames)}`}

@@ -190,9 +190,14 @@ function warm(from: HTMLElement | null): Promise<void> {
   ]).then(() => undefined);
 }
 
-/** Is enough of this frame in the window to be worth flying home to? */
+/** Is enough of this frame in the window, and visible, to travel to? */
 const onScreen = (el: HTMLElement | null) => {
   if (!el) return false;
+  // Faded out counts as absent. A sleeve mounts both its sides and
+  // crossfades them under the pointer, so half the frames on a cover art
+  // page are sitting there at zero opacity: a snapshot of one of those is
+  // a picture nobody can see, travelling.
+  if (Number(getComputedStyle(el).opacity) < 0.05) return false;
   const r = el.getBoundingClientRect();
   const w = Math.min(r.right, window.innerWidth) - Math.max(r.left, 0);
   const h = Math.min(r.bottom, window.innerHeight) - Math.max(r.top, 0);
@@ -221,7 +226,8 @@ export function useLightbox(frames: Frame[]) {
   const show = (i: number, el?: HTMLElement | null) => {
     opener.current = document.activeElement as HTMLElement | null;
     const src = frames[i]?.src;
-    const from = el ?? (src ? pictureFor(src) : null);
+    const found = el ?? (src ? pictureFor(src) : null);
+    const from = onScreen(found) ? found : null;
     origin.current = from;
     originAt.current = i;
     // Warm first, travel second: see `warm` above.
