@@ -925,7 +925,12 @@ nav[aria-label="Categories"] ul[data-more] {
      reloading. Short, because the only thing it has to cover is one set
      of covers being replaced by another. */
   &[data-arrive="fade"] {
-    animation: jg-fade-in 200ms var(--ease-out-strong) backwards;
+    /* A short slide along with the fade, from whichever side of the row the
+       chip was pressed on: `--fade-from` is written by the strip and is
+       nought when the press was on the chip already lit. Still short —
+       chips are pressed often, and an arrival that takes its time is one
+       that is in the way by the third press. */
+    animation: jg-fade-slide 260ms var(--ease-out-strong) backwards;
   }
   /* And nothing inside it arrives separately. Each cell carries a rise of
      its own, staggered up to six deep, which is right for a page opening
@@ -951,6 +956,12 @@ nav[aria-label="Categories"] ul[data-more] {
 @keyframes jg-fade-in {
   from {
     opacity: 0;
+  }
+}
+@keyframes jg-fade-slide {
+  from {
+    opacity: 0;
+    transform: translateX(var(--fade-from, 0px));
   }
 }
 @keyframes jg-strip-in-back {

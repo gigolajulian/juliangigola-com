@@ -393,7 +393,18 @@ function Chip({
       /* So the strip that is about to mount knows it is a filter change
          and fades in where it stands, instead of sliding in from a
          quarter of the window away as an arriving page does. */
-      onClick={markFilter}
+      onClick={(e) => {
+        /* Where this chip is against the one that is lit, as a share of
+           the row's width. Measured at the press rather than counted,
+           which keeps it right when the row has scrolled and needs no
+           index threaded through two components. */
+        const me = e.currentTarget.getBoundingClientRect();
+        const row = e.currentTarget.closest("ul");
+        const lit = row?.querySelector('[aria-current="page"]');
+        const from = lit?.getBoundingClientRect().left ?? me.left;
+        const width = row?.clientWidth || 1;
+        markFilter((me.left - from) / width);
+      }}
       className={className}
     >
       {children}

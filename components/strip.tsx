@@ -53,13 +53,23 @@ let cameBack = false;
  * one client navigation and nothing more.
  */
 
-/** When a filter chip was last pressed. A strip mounting just after one
-    fades in where it stands rather than sliding in from a quarter of the
-    window: the filter row is above it and did not move, so the sequence
-    under it changing is not a page arriving. */
+/** When a filter chip was last pressed, and which way along the row it
+    was from the chip that was lit. A strip mounting just after one fades
+    in where it stands rather than sliding in from a quarter of the window:
+    the filter row is above it and did not move, so the sequence under it
+    changing is not a page arriving.
+
+    The direction is the whole of what Julian asked for: press a chip to the
+    right of the one that is lit and the new sequence comes in from the
+    right, as though the row and the work under it were one thing you were
+    moving along. `shift` is how far along the row the press was, as a share
+    of the row's width, so a neighbour slides a little and a chip at the far
+    end slides the most. */
 let filteredAt = 0;
-export const markFilter = () => {
+let filterShift = 0;
+export const markFilter = (shift = 0) => {
   filteredAt = Date.now();
+  filterShift = Math.max(-1, Math.min(1, shift));
 };
 const FILTER_MS = 1200;
 
@@ -238,7 +248,13 @@ export function Strip({
     const el = scroller.current;
     if (!el || !live) return;
     // The filter changed under a row that stayed: a fade, not an arrival.
-    if (filtered) el.dataset.arrive = "fade";
+    if (filtered) {
+      el.dataset.arrive = "fade";
+      /* Half a screen at the very ends of the row, nothing at all for a
+         press on the chip already lit. The CSS reads it; a shift of zero
+         leaves the old still fade exactly as it was. */
+      el.style.setProperty("--fade-from", `${(filterShift * 5).toFixed(2)}vw`);
+    }
     const hash = decodeURIComponent(window.location.hash.slice(1));
     if (hash) {
       const i = Array.from(el.children).findIndex(
