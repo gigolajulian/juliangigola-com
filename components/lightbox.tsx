@@ -99,16 +99,52 @@ function travel(
   // Says which trip this is, so the root's crossfade can be a plain fade
   // off a page that never moved. See `[data-lift]` in `globals.css`.
   document.documentElement.setAttribute("data-lift", "");
+
+  /* And every blurred surface goes flat for the length of the trip.
+   *
+   * The one rough moment in opening a photograph is the frame the browser
+   * takes its snapshots in: measured on production at 2560x1440 with a
+   * retina ratio, 133ms of work in a single frame and a clean sixty for
+   * the rest of the animation, which is what reads as a lurch at the
+   * start. With every backdrop filter off it measured 67 to 83. The
+   * surfaces that cost it are the lightbox's own buttons, which mount
+   * inside the update below — hence the second pass in there, before the
+   * new snapshot is taken.
+   *
+   * Written as inline styles and not as a rule, and that is a bug fixed:
+   * `:root[data-lift] .glass { backdrop-filter: none !important }` shipped
+   * as an empty rule. The build drops a declaration that sets a property
+   * to its own initial value, `!important` and all — read back off the
+   * live stylesheet as `:root[data-lift] :where(.glass, ...) { }`. */
+  const flattened: HTMLElement[] = [];
+  const flatten = () => {
+    for (const el of document.querySelectorAll<HTMLElement>(
+      ".glass, .glass-surface, .glass-prominent",
+    )) {
+      if (flattened.includes(el)) continue;
+      flattened.push(el);
+      el.style.backdropFilter = "none";
+      el.style.setProperty("-webkit-backdrop-filter", "none");
+    }
+  };
+  flatten();
   const transition = document.startViewTransition(() => {
     // Synchronous, so the new snapshot is of the updated page.
     flushSync(update);
     if (from) from.style.viewTransitionName = "";
     if (to) to.style.viewTransitionName = NAME;
     if (stage) stage.style.viewTransitionName = to ? STAGE : "";
+    // The lightbox's chrome exists as of this line and is about to be
+    // photographed with the rest of the new page.
+    flatten();
   });
   transition.finished
     .finally(() => {
       document.documentElement.removeAttribute("data-lift");
+      for (const el of flattened) {
+        el.style.removeProperty("backdrop-filter");
+        el.style.removeProperty("-webkit-backdrop-filter");
+      }
       if (to) to.style.viewTransitionName = "";
       if (stage) stage.style.viewTransitionName = "";
     })
