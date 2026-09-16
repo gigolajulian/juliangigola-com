@@ -71,7 +71,24 @@ function travel(
     update();
     return;
   }
-  if (from) from.style.viewTransitionName = NAME;
+  /* The name goes on both ends of the trip or on neither.
+   *
+   * The dialog's picture used to carry it always, and a name with only one
+   * side is not a morph: the browser has no rectangle to come from, so it
+   * grew the picture out of a speck in the middle of the window. Julian saw
+   * it on the cover art, where it happens every time — the grid shows one
+   * side of a sleeve and the lightbox opens whichever side was face up, so
+   * more often than not there is no element on the page holding the picture
+   * that is about to open. Unpaired, the lightbox simply fades. */
+  const picture = () =>
+    document.querySelector<HTMLElement>("[data-lightbox-picture]");
+  if (from) {
+    from.style.viewTransitionName = NAME;
+  } else if (to) {
+    // Going home: the picture is the old side and it exists right now.
+    const p = picture();
+    if (p) p.style.viewTransitionName = NAME;
+  }
   // Says which trip this is, so the root's crossfade can be a plain fade
   // off a page that never moved. See `[data-lift]` in `globals.css`.
   // Which way the picture is going: `in` from the strip, `out` back to it.
@@ -109,8 +126,16 @@ function travel(
   const transition = document.startViewTransition(() => {
     // Synchronous, so the new snapshot is of the updated page.
     flushSync(update);
-    if (from) from.style.viewTransitionName = "";
-    if (to) to.style.viewTransitionName = NAME;
+    if (from) {
+      from.style.viewTransitionName = "";
+      const p = picture();
+      if (p) p.style.viewTransitionName = NAME;
+    }
+    if (to) {
+      const p = picture();
+      if (p) p.style.viewTransitionName = "";
+      to.style.viewTransitionName = NAME;
+    }
     // The lightbox's chrome exists as of this line and is about to be
     // photographed with the rest of the new page.
     flatten();
@@ -123,6 +148,8 @@ function travel(
         el.style.removeProperty("-webkit-backdrop-filter");
       }
       if (to) to.style.viewTransitionName = "";
+      const p = picture();
+      if (p) p.style.viewTransitionName = "";
     })
     // A skipped transition — hidden tab, a second one starting — rejects
     // `finished`; the update still ran, and nothing here needs the promise.
@@ -184,10 +211,19 @@ export function useLightbox(frames: Frame[]) {
   // tab from the top of the page again to get back to where they were.
   const opener = React.useRef<HTMLElement | null>(null);
 
-  const show = (i: number) => {
+  /* The element the picture came out of, and which index it was. A cover
+     art cell knows this and the DOM does not: the grid holds one side of a
+     sleeve, the lightbox opens whichever side was face up, so looking the
+     picture up by its own source finds nothing half the time. */
+  const origin = React.useRef<HTMLElement | null>(null);
+  const originAt = React.useRef(-1);
+
+  const show = (i: number, el?: HTMLElement | null) => {
     opener.current = document.activeElement as HTMLElement | null;
     const src = frames[i]?.src;
-    const from = src ? pictureFor(src) : null;
+    const from = el ?? (src ? pictureFor(src) : null);
+    origin.current = from;
+    originAt.current = i;
     // Warm first, travel second: see `warm` above.
     void warm(from).then(() =>
       travel(
@@ -213,7 +249,12 @@ export function useLightbox(frames: Frame[]) {
        the window or half out of it, so when the slot is not really on
        screen the lightbox simply fades instead. */
     const src = frames[index]?.src;
-    const home = src ? pictureFor(src) : null;
+    const home =
+      index === originAt.current && origin.current
+        ? origin.current
+        : src
+          ? pictureFor(src)
+          : null;
     travel(null, () => setOpen(false), onScreen(home) ? home : null);
     /* After the closing transition, not during it: called here the focus
        landed on an element that was still inside a dialog on its way out,
@@ -463,9 +504,10 @@ export function Lightbox({
               {current ? (
                 <Image
                   key={current.src}
-                  // The destination on the way in and the origin on the way out —
-                  // see `travel`. Only one of these is ever mounted.
-                  style={{ viewTransitionName: NAME }}
+                  // The destination on the way in and the origin on the way
+                  // out — `travel` puts the name on it for the length of a
+                  // trip that has something at the other end.
+                  data-lightbox-picture
                   src={current.src}
                   alt={current.alt || `${name}, frame ${index + 1}`}
                   width={current.width}

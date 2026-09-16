@@ -72,7 +72,13 @@ export function CoverArtGallery({
                   release.frames.length > 1 &&
                   e.currentTarget.matches(":hover");
                 const frame = release.frames[turned ? 1 : 0];
-                lightbox.show(positions.get(frame.src) ?? 0);
+                // The sleeve itself is the picture's origin: the side that
+                // opens may not be the side on the page, so it cannot be
+                // found by source.
+                lightbox.show(
+                  positions.get(frame.src) ?? 0,
+                  e.currentTarget.querySelector("img"),
+                );
               }}
               aria-label={`Open ${coverLabel(release.title, release.artist, release.frames)}`}
               className={cn(
