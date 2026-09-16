@@ -70,14 +70,114 @@ export const CATEGORIES: Category[] = [
 
 export const PROJECTS: Project[] = [
   {
+    "slug": "lost-relic",
+    "name": "LOST RELIC",
+    "headline": null,
+    "intent": null,
+    "credits": [
+      {
+        "role": "In frame",
+        "name": "@0414lei"
+      },
+      {
+        "role": "Photo",
+        "name": "@juliangigola"
+      }
+    ],
+    "categories": [
+      {
+        "slug": "editorial",
+        "name": "EDITORIAL",
+        "section": "WORK"
+      }
+    ],
+    "cover": {
+      "src": "/work/lost-relic/cover.jpg",
+      "width": 600,
+      "height": 800,
+      "color": "#B8B1B1",
+      "alt": ""
+    },
+    "images": [
+      {
+        "src": "/work/lost-relic/01.jpg",
+        "width": 2500,
+        "height": 3333,
+        "color": "#B8B1B1",
+        "alt": ""
+      },
+      {
+        "src": "/work/lost-relic/02.jpg",
+        "width": 2500,
+        "height": 3333,
+        "color": "#A8A19E",
+        "alt": ""
+      },
+      {
+        "src": "/work/lost-relic/03.jpg",
+        "width": 2500,
+        "height": 3334,
+        "color": "#8C8178",
+        "alt": ""
+      },
+      {
+        "src": "/work/lost-relic/04.jpg",
+        "width": 2500,
+        "height": 3333,
+        "color": "#887D78",
+        "alt": ""
+      },
+      {
+        "src": "/work/lost-relic/05.jpg",
+        "width": 2500,
+        "height": 3333,
+        "color": "#8F8585",
+        "alt": ""
+      },
+      {
+        "src": "/work/lost-relic/06.jpg",
+        "width": 2500,
+        "height": 3333,
+        "color": "#7E6F66",
+        "alt": ""
+      },
+      {
+        "src": "/work/lost-relic/07.jpg",
+        "width": 2500,
+        "height": 3334,
+        "color": "#A29B99",
+        "alt": ""
+      },
+      {
+        "src": "/work/lost-relic/08.jpg",
+        "width": 2500,
+        "height": 3334,
+        "color": "#A19A9A",
+        "alt": ""
+      }
+    ]
+  },
+  {
     "slug": "hua",
     "name": "HUA",
     "headline": null,
     "intent": null,
     "credits": [
       {
-        "role": "Photographer",
-        "name": "Julian Gigola"
+        "role": "In frame",
+        "name": "@0414lei"
+      },
+      {
+        "role": "Styling",
+        "name": "@leena_kema"
+      },
+      {
+        "role": "Photo",
+        "name": "@juliangigola"
+      },
+      {
+        "role": "Wardrobe",
+        "name": "@starcasevintage"
       }
     ],
     "categories": [
