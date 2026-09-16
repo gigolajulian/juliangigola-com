@@ -102,7 +102,7 @@ export function CoverArt() {
                 release.artist,
                 release.frames,
               )}
-              data-ring="View project"
+              data-ring="View covers"
               className="group relative block aspect-square overflow-hidden"
               style={{ backgroundColor: release.frames[0]?.color }}
             >

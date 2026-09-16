@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { createPortal } from "react-dom";
+import { usePathname } from "next/navigation";
 
 /* ── the pointer's label ──────────────────────────────────────────
  * The cursor over something that opens: the system arrow, with a word
@@ -49,8 +50,14 @@ export function PointerRing() {
   const ref = React.useRef<HTMLDivElement>(null);
   const word = React.useRef<HTMLSpanElement>(null);
   const mounted = useMounted();
+  /* Not on the homepage. It is a cover photograph with a name on it and
+     two ways in: nothing there needs a word explaining what a press does,
+     and a tag following the pointer across the one screen that is meant to
+     be looked at rather than used is noise. Julian's call. */
+  const quiet = usePathname() === "/";
 
   React.useEffect(() => {
+    if (quiet) return;
     if (!window.matchMedia("(hover: hover) and (pointer: fine)").matches) {
       return;
     }
@@ -112,9 +119,9 @@ export function PointerRing() {
     // null, so `ref.current` is empty when this first runs and the listeners
     // were never attached — the ring sat at (0,0) with nothing driving it.
     // Re-running once the element exists is the whole point of the dep.
-  }, [mounted]);
+  }, [mounted, quiet]);
 
-  if (!mounted) return null;
+  if (!mounted || quiet) return null;
 
   return createPortal(
     /* The outer element only moves; everything that fades or shifts is

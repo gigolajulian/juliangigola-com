@@ -174,6 +174,7 @@ function Tile({
       type="button"
       onClick={onPlay}
       aria-label={`Play ${video.title}`}
+      data-ring="Play"
       // `group` drives two things: the picture's zoom and the play mark
       // arriving. The inset outline that used to draw itself on hover is
       // gone, at Julian's ask.

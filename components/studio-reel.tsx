@@ -83,6 +83,7 @@ export function StudioReel({
             href={shoot.href}
             aria-hidden={i !== at}
             tabIndex={i === at ? undefined : -1}
+            data-ring="View project"
             style={{ backgroundColor: shoot.color }}
             className={cn(
               "absolute inset-0 block transition-opacity duration-700 ease-[var(--ease-out-strong)] motion-reduce:transition-none",

@@ -546,6 +546,7 @@ export function Lightbox({
               <Dialog.Close asChild>
                 <button
                   type="button"
+                  data-ring="Close"
                   className="label glass ml-4 rounded-full px-4 py-2.5 text-muted-foreground press hoverable:hover:text-foreground active:scale-[0.97]"
                 >
                   Close
@@ -573,6 +574,10 @@ function LightboxButton({
       type="button"
       onClick={onClick}
       aria-label={label}
+      // The word under the pointer is the short one: the label says
+      // "Previous frame" for a screen reader, which has no picture in
+      // front of it; a tag over the picture does.
+      data-ring={label.replace(" frame", "")}
       // 44px minimum target — this is the control someone taps repeatedly on
       // a phone, so it gets a real hit area rather than an icon's worth.
       className="glass flex h-11 w-11 items-center justify-center rounded-full text-base press active:scale-[0.97]"

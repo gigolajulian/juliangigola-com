@@ -1050,6 +1050,15 @@ nav[aria-label="Categories"] ul[data-more] {
   }
 }
 
+/* The same movement for the round glass controls, which carry `press` and
+   `glass` rather than `action`: the lightbox's arrows and its close. A
+   little more than the pills, because they are small. */
+@media (hover: hover) and (pointer: fine) {
+  .glass.press:hover {
+    scale: 1.06;
+  }
+}
+
 @utility press {
   /* `scale`, `translate` and `rotate`, not just `transform`: Tailwind v4
      compiles `active:scale-[0.98]` to the standalone `scale` property, so a
@@ -1822,10 +1831,16 @@ optgroup {
 
   /* Off the full ink under a pointer and back to it on the press: hover is
      the button noticing you, press is the button answering. The same pair
-     the chips use, and the same direction. */
+     the chips use, and the same direction.
+
+     And it comes forward a little. Julian asked for the scale on hover; it
+     rides the same spring `press` already declares for the way down, so a
+     button that grows 3% under the pointer and drops to 97% under the
+     finger is one movement with two ends rather than two effects. */
   @media (hover: hover) and (pointer: fine) {
     &:hover {
       background-color: color-mix(in oklab, var(--foreground) 84%, var(--background));
+      scale: 1.03;
     }
   }
   &:focus-visible {
@@ -1847,6 +1862,7 @@ optgroup {
     &:hover {
       background-color: color-mix(in oklab, var(--foreground) 7%, transparent);
       border-color: color-mix(in oklab, var(--foreground) 30%, transparent);
+      scale: 1.03;
     }
   }
   &:focus-visible {

@@ -89,6 +89,7 @@ export function CoverArtGallery({
                 );
               }}
               aria-label={`Open ${coverLabel(release.title, release.artist, release.frames)}`}
+              data-ring="Zoom in"
               className={cn(
                 "group relative block aspect-square w-full overflow-hidden press active:scale-[0.995]",
                 rows && "sm:h-full sm:w-auto",
