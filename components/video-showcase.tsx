@@ -5,7 +5,6 @@ import Link from "next/link";
 import { Strip, type Lead } from "@/components/strip";
 import { VideoGrid } from "@/components/video-grid";
 import { VideoViewer } from "@/components/video-viewer";
-import { VideoHero } from "@/components/video-hero";
 import { REEL, filmCount, type Video } from "@/lib/videos";
 
 /* ── the films, along the strip, with one viewer over them ────────
@@ -33,20 +32,11 @@ export function VideoShowcase({
   const [open, setOpen] = React.useState<Video | null>(null);
   const all = sections.flatMap((s) => s.films);
 
-  const cells: React.ReactNode[] = [
-    /* The reel first, filling the strip's height and most of a screen
-       across, playing muted with its own sound and fullscreen controls.
-       Julian asked for the reel to open the page. */
-    <div
-      key="reel"
-      data-tick
-      data-label="Reel"
-      data-hash="reel"
-      className="relative w-full shrink-0 overflow-hidden max-sm:aspect-video sm:h-full sm:w-[calc(100vw-5rem)]"
-    >
-      <VideoHero videoId={REEL.videoId} title={REEL.title} />
-    </div>,
-  ];
+  /* The reel is the page's ground, not its first cell: it plays full bleed
+     behind everything (`ReelBackdrop` below), and the strip opens straight
+     on the films. Julian asked for the reel as the background with the
+     projects over it. */
+  const cells: React.ReactNode[] = [];
 
   if (!all.length) {
     cells.push(
@@ -104,9 +94,15 @@ export function VideoShowcase({
 
   cells.push(ask);
 
+  /* The strip's scroller, read for how far along it is: the veil over the
+     reel thickens with it (see `ReelBackdrop`). */
+  const scroller = React.useRef<HTMLDivElement | null>(null);
+
   return (
     <>
+      <ReelBackdrop scroller={scroller} />
       <Strip
+        ref={scroller}
         label={`Motion: ${filmCount(all)} films, left and right`}
         next={next}
         className="mt-4 flex-1"
@@ -116,5 +112,66 @@ export function VideoShowcase({
 
       <VideoViewer videos={all} current={open} onChange={setOpen} />
     </>
+  );
+}
+
+/* ── the reel, behind the page ────────────────────────────────────
+ * Vimeo's background mode: muted, looping, no chrome, and it starts on its
+ * own because it is silent. The frame is cut to cover the window whatever
+ * the window's shape, and over it sits a veil in the page's own ground
+ * colour, so the type keeps its contrast in either theme: paper over the
+ * reel in the light, black over it in the dark.
+ *
+ * The veil is thin at the start, where the reel is most of what there is
+ * to see, and thickens as the strip moves into the film sections, where
+ * the reel has become a backdrop to a row of other films. Julian chose
+ * dimmed and darkening as you scroll. `--reel-dim` is written by hand
+ * from the scroller's position rather than through state: it changes
+ * every frame of a drag.
+ *
+ * Fixed inside `<main>`, which carries a transform, so "fixed" means the
+ * box of main; on a strip page main is the window, which is what is
+ * wanted. Behind main's content through a negative z-index: main's own
+ * ground is transparent and the body's shows through the veil.
+ * ─────────────────────────────────────────────────────────────── */
+function ReelBackdrop({
+  scroller,
+}: {
+  scroller: React.RefObject<HTMLDivElement | null>;
+}) {
+  const veil = React.useRef<HTMLDivElement>(null);
+  React.useEffect(() => {
+    const el = scroller.current;
+    const v = veil.current;
+    if (!el || !v) return;
+    const read = () => {
+      const room = el.scrollWidth - el.clientWidth;
+      const at = room > 0 ? Math.min(1, Math.max(0, el.scrollLeft / room)) : 0;
+      v.style.setProperty("--reel-dim", at.toFixed(3));
+    };
+    read();
+    el.addEventListener("scroll", read, { passive: true });
+    window.addEventListener("resize", read);
+    return () => {
+      el.removeEventListener("scroll", read);
+      window.removeEventListener("resize", read);
+    };
+  }, [scroller]);
+
+  return (
+    <div
+      ref={veil}
+      aria-hidden
+      className="reel-backdrop pointer-events-none fixed inset-0 -z-10 overflow-hidden"
+    >
+      <iframe
+        src={`https://player.vimeo.com/video/${REEL.videoId}?background=1&autoplay=1&loop=1&muted=1&dnt=1`}
+        title={REEL.title}
+        allow="autoplay; encrypted-media"
+        tabIndex={-1}
+        className="reel-backdrop-frame absolute left-1/2 top-1/2"
+      />
+      <div className="reel-veil absolute inset-0" />
+    </div>
   );
 }

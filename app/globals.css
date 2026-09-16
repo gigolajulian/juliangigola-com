@@ -1064,6 +1064,37 @@ nav[aria-label="Categories"] ul[data-more] {
   }
 }
 
+/* ── the reel behind the motion page ──
+   A 16:9 frame cut to cover whatever shape the window is: as wide as the
+   window or as wide as its height needs, whichever is more, centred. The
+   veil is the page's ground at an opacity that runs from a little over a
+   third at the start of the strip to nearly all of it by the end, on
+   `--reel-dim` written by `video-showcase.tsx`. */
+.reel-backdrop-frame {
+  width: max(100vw, calc(100vh * 16 / 9));
+  height: max(100vh, calc(100vw * 9 / 16));
+  translate: -50% -50%;
+  border: 0;
+}
+.reel-veil {
+  background-color: var(--background);
+  opacity: calc(0.38 + var(--reel-dim, 0) * 0.5);
+  transition: opacity 120ms linear;
+}
+/* Paper over a film is a different sum from black over one: at 38% the
+   light ground came out as dark grey with dark ink on it, and every muted
+   word in the chrome vanished. The light veil starts at four fifths, where
+   the reel reads as a watermark under paper and the ink keeps its
+   contrast, and closes to nearly all of it by the end. */
+:root[data-theme="light"] .reel-veil {
+  opacity: calc(0.8 + var(--reel-dim, 0) * 0.16);
+}
+@media (prefers-reduced-motion: reduce) {
+  .reel-backdrop {
+    display: none;
+  }
+}
+
 /* ── a thumb's worth of link ──
    The small capitals links (footer, crumbs, credits, the email in an ask)
    are 13 to 14px tall, and a thumb is not. Padding that the same negative
