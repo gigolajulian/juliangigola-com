@@ -1284,50 +1284,50 @@ export const PROJECTS: Project[] = [
     "images": [
       {
         "src": "/work/aera-wraith/01.jpg",
-        "width": 1600,
-        "height": 2133,
+        "width": 2499,
+        "height": 3331,
         "color": "#131B20",
         "alt": ""
       },
       {
         "src": "/work/aera-wraith/02.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#110A12",
         "alt": ""
       },
       {
         "src": "/work/aera-wraith/03.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#080D12",
         "alt": ""
       },
       {
         "src": "/work/aera-wraith/04.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#000005",
         "alt": ""
       },
       {
         "src": "/work/aera-wraith/05.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#223E57",
         "alt": ""
       },
       {
         "src": "/work/aera-wraith/06.jpg",
-        "width": 1600,
-        "height": 1994,
+        "width": 2499,
+        "height": 3114,
         "color": "#121518",
         "alt": ""
       },
       {
         "src": "/work/aera-wraith/07.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#0D080F",
         "alt": ""
       }
@@ -1356,92 +1356,92 @@ export const PROJECTS: Project[] = [
     "images": [
       {
         "src": "/work/aether/01.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#8C8CA6",
         "alt": ""
       },
       {
         "src": "/work/aether/02.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#404059",
         "alt": ""
       },
       {
         "src": "/work/aether/03.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#C0C0D9",
         "alt": ""
       },
       {
         "src": "/work/aether/04.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#A6A6C0",
         "alt": ""
       },
       {
         "src": "/work/aether/05.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#262626",
         "alt": ""
       },
       {
         "src": "/work/aether/06.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#595973",
         "alt": ""
       },
       {
         "src": "/work/aether/07.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#C0C0D9",
         "alt": ""
       },
       {
         "src": "/work/aether/08.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#404040",
         "alt": ""
       },
       {
         "src": "/work/aether/09.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#262626",
         "alt": ""
       },
       {
         "src": "/work/aether/10.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#262626",
         "alt": ""
       },
       {
         "src": "/work/aether/11.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#262626",
         "alt": ""
       },
       {
         "src": "/work/aether/12.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#262626",
         "alt": ""
       },
       {
         "src": "/work/aether/13.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#262640",
         "alt": ""
       }
@@ -1470,71 +1470,71 @@ export const PROJECTS: Project[] = [
     "images": [
       {
         "src": "/work/analogue-dreams/01.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 1837,
+        "height": 2296,
         "color": "#260C0C",
         "alt": ""
       },
       {
         "src": "/work/analogue-dreams/02.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2074,
+        "height": 2593,
         "color": "#F3F3F3",
         "alt": ""
       },
       {
         "src": "/work/analogue-dreams/03.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#260C0C",
         "alt": ""
       },
       {
         "src": "/work/analogue-dreams/04.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#0C260C",
         "alt": ""
       },
       {
         "src": "/work/analogue-dreams/05.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2311,
+        "height": 2889,
         "color": "#260C0C",
         "alt": ""
       },
       {
         "src": "/work/analogue-dreams/06.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#0C260C",
         "alt": ""
       },
       {
         "src": "/work/analogue-dreams/07.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#0C260C",
         "alt": ""
       },
       {
         "src": "/work/analogue-dreams/08.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#0C260C",
         "alt": ""
       },
       {
         "src": "/work/analogue-dreams/09.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#0C260C",
         "alt": ""
       },
       {
         "src": "/work/analogue-dreams/10.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#0C260C",
         "alt": ""
       }
@@ -1563,92 +1563,92 @@ export const PROJECTS: Project[] = [
     "images": [
       {
         "src": "/work/astral-allure/01.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#262626",
         "alt": ""
       },
       {
         "src": "/work/astral-allure/02.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#262626",
         "alt": ""
       },
       {
         "src": "/work/astral-allure/03.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#262626",
         "alt": ""
       },
       {
         "src": "/work/astral-allure/04.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#262626",
         "alt": ""
       },
       {
         "src": "/work/astral-allure/05.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#262626",
         "alt": ""
       },
       {
         "src": "/work/astral-allure/06.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#262626",
         "alt": ""
       },
       {
         "src": "/work/astral-allure/07.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#262626",
         "alt": ""
       },
       {
         "src": "/work/astral-allure/08.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#262626",
         "alt": ""
       },
       {
         "src": "/work/astral-allure/09.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#262626",
         "alt": ""
       },
       {
         "src": "/work/astral-allure/10.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#595973",
         "alt": ""
       },
       {
         "src": "/work/astral-allure/11.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#595973",
         "alt": ""
       },
       {
         "src": "/work/astral-allure/12.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#73738C",
         "alt": ""
       },
       {
         "src": "/work/astral-allure/13.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#262626",
         "alt": ""
       }
@@ -1671,134 +1671,134 @@ export const PROJECTS: Project[] = [
     "images": [
       {
         "src": "/work/automotive/01.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3123,
         "color": "#E5F8FD",
         "alt": ""
       },
       {
         "src": "/work/automotive/02.jpg",
-        "width": 1600,
-        "height": 2001,
+        "width": 2499,
+        "height": 3125,
         "color": "#FEFEFE",
         "alt": ""
       },
       {
         "src": "/work/automotive/03.jpg",
-        "width": 1600,
-        "height": 2398,
+        "width": 2429,
+        "height": 3641,
         "color": "#C4DCE3",
         "alt": ""
       },
       {
         "src": "/work/automotive/04.jpg",
-        "width": 1600,
-        "height": 2001,
+        "width": 2499,
+        "height": 3125,
         "color": "#B2C5C6",
         "alt": ""
       },
       {
         "src": "/work/automotive/05.jpg",
-        "width": 1600,
-        "height": 2001,
+        "width": 2499,
+        "height": 3125,
         "color": "#1B1B1D",
         "alt": ""
       },
       {
         "src": "/work/automotive/06.jpg",
-        "width": 1600,
-        "height": 2001,
+        "width": 2499,
+        "height": 3125,
         "color": "#02191B",
         "alt": ""
       },
       {
         "src": "/work/automotive/07.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#232828",
         "alt": ""
       },
       {
         "src": "/work/automotive/08.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3123,
         "color": "#1D2122",
         "alt": ""
       },
       {
         "src": "/work/automotive/09.jpg",
-        "width": 1600,
-        "height": 2001,
+        "width": 2499,
+        "height": 3125,
         "color": "#1D2122",
         "alt": ""
       },
       {
         "src": "/work/automotive/10.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#1D2223",
         "alt": ""
       },
       {
         "src": "/work/automotive/11.jpg",
-        "width": 1600,
-        "height": 2001,
+        "width": 2499,
+        "height": 3125,
         "color": "#192C33",
         "alt": ""
       },
       {
         "src": "/work/automotive/12.jpg",
-        "width": 1600,
-        "height": 2001,
+        "width": 2499,
+        "height": 3125,
         "color": "#273C41",
         "alt": ""
       },
       {
         "src": "/work/automotive/13.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#172125",
         "alt": ""
       },
       {
         "src": "/work/automotive/14.jpg",
-        "width": 1600,
-        "height": 2001,
+        "width": 2499,
+        "height": 3125,
         "color": "#323A36",
         "alt": ""
       },
       {
         "src": "/work/automotive/15.jpg",
-        "width": 1600,
-        "height": 2001,
+        "width": 2499,
+        "height": 3125,
         "color": "#070606",
         "alt": ""
       },
       {
         "src": "/work/automotive/16.jpg",
-        "width": 1600,
-        "height": 900,
+        "width": 2499,
+        "height": 1406,
         "color": "#84B3CA",
         "alt": ""
       },
       {
         "src": "/work/automotive/17.jpg",
-        "width": 1600,
-        "height": 900,
+        "width": 2499,
+        "height": 1406,
         "color": "#787061",
         "alt": ""
       },
       {
         "src": "/work/automotive/18.jpg",
-        "width": 1600,
-        "height": 2133,
+        "width": 2499,
+        "height": 3332,
         "color": "#20263E",
         "alt": ""
       },
       {
         "src": "/work/automotive/19.jpg",
-        "width": 1600,
-        "height": 1047,
+        "width": 2499,
+        "height": 1636,
         "color": "#0C0401",
         "alt": ""
       }
@@ -1821,120 +1821,120 @@ export const PROJECTS: Project[] = [
     "images": [
       {
         "src": "/work/byte-me/01.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#A6A6A6",
         "alt": ""
       },
       {
         "src": "/work/byte-me/02.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#A6A6A6",
         "alt": ""
       },
       {
         "src": "/work/byte-me/03.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#A6A6A6",
         "alt": ""
       },
       {
         "src": "/work/byte-me/04.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#8C8C8C",
         "alt": ""
       },
       {
         "src": "/work/byte-me/05.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#8C8C8C",
         "alt": ""
       },
       {
         "src": "/work/byte-me/06.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#8C8C8C",
         "alt": ""
       },
       {
         "src": "/work/byte-me/07.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#737373",
         "alt": ""
       },
       {
         "src": "/work/byte-me/08.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#8C8C8C",
         "alt": ""
       },
       {
         "src": "/work/byte-me/09.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#8C8C8C",
         "alt": ""
       },
       {
         "src": "/work/byte-me/10.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#737373",
         "alt": ""
       },
       {
         "src": "/work/byte-me/11.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#737373",
         "alt": ""
       },
       {
         "src": "/work/byte-me/12.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#737373",
         "alt": ""
       },
       {
         "src": "/work/byte-me/13.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#8C8C8C",
         "alt": ""
       },
       {
         "src": "/work/byte-me/14.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#8C8C8C",
         "alt": ""
       },
       {
         "src": "/work/byte-me/15.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#A6A6A6",
         "alt": ""
       },
       {
         "src": "/work/byte-me/16.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#A6A6A6",
         "alt": ""
       },
       {
         "src": "/work/byte-me/17.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#8C8C8C",
         "alt": ""
       }
@@ -1963,43 +1963,43 @@ export const PROJECTS: Project[] = [
     "images": [
       {
         "src": "/work/coral-synthmorph/01.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#260C26",
         "alt": ""
       },
       {
         "src": "/work/coral-synthmorph/02.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#F38CC0",
         "alt": ""
       },
       {
         "src": "/work/coral-synthmorph/03.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#D9738C",
         "alt": ""
       },
       {
         "src": "/work/coral-synthmorph/04.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#734040",
         "alt": ""
       },
       {
         "src": "/work/coral-synthmorph/05.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#594040",
         "alt": ""
       },
       {
         "src": "/work/coral-synthmorph/06.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#C08C8C",
         "alt": ""
       }
@@ -2226,43 +2226,43 @@ export const PROJECTS: Project[] = [
     "images": [
       {
         "src": "/work/crave/01.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#D9D9D9",
         "alt": ""
       },
       {
         "src": "/work/crave/02.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#262626",
         "alt": ""
       },
       {
         "src": "/work/crave/03.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#D9D9D9",
         "alt": ""
       },
       {
         "src": "/work/crave/04.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#C0C0C0",
         "alt": ""
       },
       {
         "src": "/work/crave/05.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#C0C0C0",
         "alt": ""
       },
       {
         "src": "/work/crave/06.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#F3F3F3",
         "alt": ""
       }
@@ -2291,99 +2291,99 @@ export const PROJECTS: Project[] = [
     "images": [
       {
         "src": "/work/cyber1a/01.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#0C260C",
         "alt": ""
       },
       {
         "src": "/work/cyber1a/02.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#0C260C",
         "alt": ""
       },
       {
         "src": "/work/cyber1a/03.jpg",
-        "width": 1600,
-        "height": 1829,
+        "width": 2499,
+        "height": 2856,
         "color": "#D9D9D9",
         "alt": ""
       },
       {
         "src": "/work/cyber1a/04.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#D9D9F3",
         "alt": ""
       },
       {
         "src": "/work/cyber1a/05.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#0C260C",
         "alt": ""
       },
       {
         "src": "/work/cyber1a/06.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#0C260C",
         "alt": ""
       },
       {
         "src": "/work/cyber1a/07.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#0C260C",
         "alt": ""
       },
       {
         "src": "/work/cyber1a/08.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#0C260C",
         "alt": ""
       },
       {
         "src": "/work/cyber1a/09.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#0C260C",
         "alt": ""
       },
       {
         "src": "/work/cyber1a/10.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#0C260C",
         "alt": ""
       },
       {
         "src": "/work/cyber1a/11.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#0C260C",
         "alt": ""
       },
       {
         "src": "/work/cyber1a/12.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#C02659",
         "alt": ""
       },
       {
         "src": "/work/cyber1a/13.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#260C26",
         "alt": ""
       },
       {
         "src": "/work/cyber1a/14.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#400C26",
         "alt": ""
       }
@@ -2412,92 +2412,92 @@ export const PROJECTS: Project[] = [
     "images": [
       {
         "src": "/work/cyberscape/01.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#0C260C",
         "alt": ""
       },
       {
         "src": "/work/cyberscape/02.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#0C260C",
         "alt": ""
       },
       {
         "src": "/work/cyberscape/03.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#0C260C",
         "alt": ""
       },
       {
         "src": "/work/cyberscape/04.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#0C260C",
         "alt": ""
       },
       {
         "src": "/work/cyberscape/05.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#0C260C",
         "alt": ""
       },
       {
         "src": "/work/cyberscape/06.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#0C260C",
         "alt": ""
       },
       {
         "src": "/work/cyberscape/07.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#0C260C",
         "alt": ""
       },
       {
         "src": "/work/cyberscape/08.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#0C260C",
         "alt": ""
       },
       {
         "src": "/work/cyberscape/09.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#0C400C",
         "alt": ""
       },
       {
         "src": "/work/cyberscape/10.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#D90C0C",
         "alt": ""
       },
       {
         "src": "/work/cyberscape/11.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#0C260C",
         "alt": ""
       },
       {
         "src": "/work/cyberscape/12.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#0C260C",
         "alt": ""
       },
       {
         "src": "/work/cyberscape/13.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#0C260C",
         "alt": ""
       }
@@ -2520,106 +2520,106 @@ export const PROJECTS: Project[] = [
     "images": [
       {
         "src": "/work/dark-matter/01.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#737373",
         "alt": ""
       },
       {
         "src": "/work/dark-matter/02.jpg",
-        "width": 1600,
-        "height": 1999,
+        "width": 1707,
+        "height": 2133,
         "color": "#0C260C",
         "alt": ""
       },
       {
         "src": "/work/dark-matter/03.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#595959",
         "alt": ""
       },
       {
         "src": "/work/dark-matter/04.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#404040",
         "alt": ""
       },
       {
         "src": "/work/dark-matter/05.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#262626",
         "alt": ""
       },
       {
         "src": "/work/dark-matter/06.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#A6A6A6",
         "alt": ""
       },
       {
         "src": "/work/dark-matter/07.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#404040",
         "alt": ""
       },
       {
         "src": "/work/dark-matter/08.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#737359",
         "alt": ""
       },
       {
         "src": "/work/dark-matter/09.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#404040",
         "alt": ""
       },
       {
         "src": "/work/dark-matter/10.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#404040",
         "alt": ""
       },
       {
         "src": "/work/dark-matter/11.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#C0C0C0",
         "alt": ""
       },
       {
         "src": "/work/dark-matter/12.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#C0C0C0",
         "alt": ""
       },
       {
         "src": "/work/dark-matter/13.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#404040",
         "alt": ""
       },
       {
         "src": "/work/dark-matter/14.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#404040",
         "alt": ""
       },
       {
         "src": "/work/dark-matter/15.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#C0C0C0",
         "alt": ""
       }
@@ -2642,64 +2642,64 @@ export const PROJECTS: Project[] = [
     "images": [
       {
         "src": "/work/dystopia/01.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#0C260C",
         "alt": ""
       },
       {
         "src": "/work/dystopia/02.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#59C0D9",
         "alt": ""
       },
       {
         "src": "/work/dystopia/03.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#73C0D9",
         "alt": ""
       },
       {
         "src": "/work/dystopia/04.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#73C0D9",
         "alt": ""
       },
       {
         "src": "/work/dystopia/05.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#0C260C",
         "alt": ""
       },
       {
         "src": "/work/dystopia/06.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#73C0D9",
         "alt": ""
       },
       {
         "src": "/work/dystopia/07.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#262626",
         "alt": ""
       },
       {
         "src": "/work/dystopia/08.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#0C260C",
         "alt": ""
       },
       {
         "src": "/work/dystopia/09.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#0C260C",
         "alt": ""
       }
@@ -2722,99 +2722,99 @@ export const PROJECTS: Project[] = [
     "images": [
       {
         "src": "/work/entangled/01.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#A60C0C",
         "alt": ""
       },
       {
         "src": "/work/entangled/02.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#A60C0C",
         "alt": ""
       },
       {
         "src": "/work/entangled/03.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#8C0C0C",
         "alt": ""
       },
       {
         "src": "/work/entangled/04.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#A60C0C",
         "alt": ""
       },
       {
         "src": "/work/entangled/05.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#D9D9D9",
         "alt": ""
       },
       {
         "src": "/work/entangled/06.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#D9D9D9",
         "alt": ""
       },
       {
         "src": "/work/entangled/07.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#D9D9D9",
         "alt": ""
       },
       {
         "src": "/work/entangled/08.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#D9D9D9",
         "alt": ""
       },
       {
         "src": "/work/entangled/09.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#D9D9D9",
         "alt": ""
       },
       {
         "src": "/work/entangled/10.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#C0C0C0",
         "alt": ""
       },
       {
         "src": "/work/entangled/11.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#F3F3F3",
         "alt": ""
       },
       {
         "src": "/work/entangled/12.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#D9D9D9",
         "alt": ""
       },
       {
         "src": "/work/entangled/13.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#D9D9D9",
         "alt": ""
       },
       {
         "src": "/work/entangled/14.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#F3F3F3",
         "alt": ""
       }
@@ -2843,64 +2843,64 @@ export const PROJECTS: Project[] = [
     "images": [
       {
         "src": "/work/events/01.jpg",
-        "width": 1600,
-        "height": 1829,
+        "width": 2499,
+        "height": 2856,
         "color": "#26260C",
         "alt": ""
       },
       {
         "src": "/work/events/02.jpg",
-        "width": 1600,
-        "height": 1829,
+        "width": 2499,
+        "height": 2856,
         "color": "#262626",
         "alt": ""
       },
       {
         "src": "/work/events/03.jpg",
-        "width": 1600,
-        "height": 1829,
+        "width": 2499,
+        "height": 2856,
         "color": "#264040",
         "alt": ""
       },
       {
         "src": "/work/events/04.jpg",
-        "width": 1600,
-        "height": 2240,
+        "width": 1707,
+        "height": 2390,
         "color": "#262626",
         "alt": ""
       },
       {
         "src": "/work/events/05.jpg",
-        "width": 1600,
-        "height": 2241,
+        "width": 1693,
+        "height": 2371,
         "color": "#0C260C",
         "alt": ""
       },
       {
         "src": "/work/events/06.jpg",
-        "width": 1600,
-        "height": 1143,
+        "width": 2499,
+        "height": 1785,
         "color": "#0C260C",
         "alt": ""
       },
       {
         "src": "/work/events/07.jpg",
-        "width": 1600,
-        "height": 2240,
+        "width": 2499,
+        "height": 3499,
         "color": "#262626",
         "alt": ""
       },
       {
         "src": "/work/events/08.jpg",
-        "width": 1600,
-        "height": 1143,
+        "width": 2390,
+        "height": 1707,
         "color": "#262626",
         "alt": ""
       },
       {
         "src": "/work/events/09.jpg",
-        "width": 1600,
-        "height": 1829,
+        "width": 2499,
+        "height": 2856,
         "color": "#262626",
         "alt": ""
       },
@@ -2913,85 +2913,85 @@ export const PROJECTS: Project[] = [
       },
       {
         "src": "/work/events/11.jpg",
-        "width": 1600,
-        "height": 1829,
+        "width": 2499,
+        "height": 2856,
         "color": "#262626",
         "alt": ""
       },
       {
         "src": "/work/events/12.jpg",
-        "width": 1600,
-        "height": 1829,
+        "width": 2499,
+        "height": 2856,
         "color": "#262626",
         "alt": ""
       },
       {
         "src": "/work/events/13.jpg",
-        "width": 1600,
-        "height": 1829,
+        "width": 2499,
+        "height": 2856,
         "color": "#262626",
         "alt": ""
       },
       {
         "src": "/work/events/14.jpg",
-        "width": 1600,
-        "height": 1067,
+        "width": 2499,
+        "height": 1667,
         "color": "#262626",
         "alt": ""
       },
       {
         "src": "/work/events/15.jpg",
-        "width": 1600,
-        "height": 900,
+        "width": 2499,
+        "height": 1405,
         "color": "#262626",
         "alt": ""
       },
       {
         "src": "/work/events/16.jpg",
-        "width": 1600,
-        "height": 1067,
+        "width": 2499,
+        "height": 1667,
         "color": "#260C0C",
         "alt": ""
       },
       {
         "src": "/work/events/17.jpg",
-        "width": 1600,
-        "height": 900,
+        "width": 2499,
+        "height": 1405,
         "color": "#0C260C",
         "alt": ""
       },
       {
         "src": "/work/events/18.jpg",
-        "width": 1600,
-        "height": 900,
+        "width": 2499,
+        "height": 1405,
         "color": "#0C260C",
         "alt": ""
       },
       {
         "src": "/work/events/19.jpg",
-        "width": 1600,
-        "height": 900,
+        "width": 2499,
+        "height": 1406,
         "color": "#260C0C",
         "alt": ""
       },
       {
         "src": "/work/events/20.jpg",
-        "width": 1600,
-        "height": 900,
+        "width": 2499,
+        "height": 1405,
         "color": "#0C260C",
         "alt": ""
       },
       {
         "src": "/work/events/21.jpg",
-        "width": 1600,
-        "height": 900,
+        "width": 2499,
+        "height": 1406,
         "color": "#0C260C",
         "alt": ""
       },
       {
         "src": "/work/events/22.jpg",
-        "width": 1600,
-        "height": 900,
+        "width": 2499,
+        "height": 1406,
         "color": "#260C26",
         "alt": ""
       }
@@ -3014,92 +3014,92 @@ export const PROJECTS: Project[] = [
     "images": [
       {
         "src": "/work/frostbite/01.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2074,
+        "height": 2593,
         "color": "#264059",
         "alt": ""
       },
       {
         "src": "/work/frostbite/02.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#262640",
         "alt": ""
       },
       {
         "src": "/work/frostbite/03.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#264059",
         "alt": ""
       },
       {
         "src": "/work/frostbite/04.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2256,
+        "height": 2820,
         "color": "#D9D9D9",
         "alt": ""
       },
       {
         "src": "/work/frostbite/05.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#40A6D9",
         "alt": ""
       },
       {
         "src": "/work/frostbite/06.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#26A6C0",
         "alt": ""
       },
       {
         "src": "/work/frostbite/07.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#D9C0A6",
         "alt": ""
       },
       {
         "src": "/work/frostbite/08.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#265973",
         "alt": ""
       },
       {
         "src": "/work/frostbite/09.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#F3F3F3",
         "alt": ""
       },
       {
         "src": "/work/frostbite/10.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#265973",
         "alt": ""
       },
       {
         "src": "/work/frostbite/11.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#0C260C",
         "alt": ""
       },
       {
         "src": "/work/frostbite/12.jpg",
-        "width": 1600,
-        "height": 2414,
+        "width": 2074,
+        "height": 3129,
         "color": "#D9C0C0",
         "alt": ""
       },
       {
         "src": "/work/frostbite/13.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#264040",
         "alt": ""
       }
@@ -3122,78 +3122,78 @@ export const PROJECTS: Project[] = [
     "images": [
       {
         "src": "/work/fun-xyz/01.jpg",
-        "width": 1600,
-        "height": 2400,
+        "width": 2428,
+        "height": 3642,
         "color": "#262626",
         "alt": ""
       },
       {
         "src": "/work/fun-xyz/02.jpg",
-        "width": 1600,
-        "height": 2400,
+        "width": 2428,
+        "height": 3642,
         "color": "#262626",
         "alt": ""
       },
       {
         "src": "/work/fun-xyz/03.jpg",
-        "width": 1600,
-        "height": 2399,
+        "width": 2428,
+        "height": 3641,
         "color": "#26260C",
         "alt": ""
       },
       {
         "src": "/work/fun-xyz/04.jpg",
-        "width": 1600,
-        "height": 2400,
+        "width": 2428,
+        "height": 3642,
         "color": "#262626",
         "alt": ""
       },
       {
         "src": "/work/fun-xyz/05.jpg",
-        "width": 1600,
-        "height": 2400,
+        "width": 2428,
+        "height": 3642,
         "color": "#260C0C",
         "alt": ""
       },
       {
         "src": "/work/fun-xyz/06.jpg",
-        "width": 1600,
-        "height": 2400,
+        "width": 2428,
+        "height": 3642,
         "color": "#C08C73",
         "alt": ""
       },
       {
         "src": "/work/fun-xyz/07.jpg",
-        "width": 1600,
-        "height": 2401,
+        "width": 2427,
+        "height": 3642,
         "color": "#260C0C",
         "alt": ""
       },
       {
         "src": "/work/fun-xyz/08.jpg",
-        "width": 1600,
-        "height": 2400,
+        "width": 2428,
+        "height": 3642,
         "color": "#262626",
         "alt": ""
       },
       {
         "src": "/work/fun-xyz/09.jpg",
-        "width": 1600,
-        "height": 2400,
+        "width": 2428,
+        "height": 3642,
         "color": "#262626",
         "alt": ""
       },
       {
         "src": "/work/fun-xyz/10.jpg",
-        "width": 1600,
-        "height": 2400,
+        "width": 2428,
+        "height": 3642,
         "color": "#C08C73",
         "alt": ""
       },
       {
         "src": "/work/fun-xyz/11.jpg",
-        "width": 1600,
-        "height": 2400,
+        "width": 2428,
+        "height": 3642,
         "color": "#D9A673",
         "alt": ""
       }
@@ -3222,106 +3222,106 @@ export const PROJECTS: Project[] = [
     "images": [
       {
         "src": "/work/giselle-studio-digitals/01.jpg",
-        "width": 1600,
-        "height": 2240,
+        "width": 2499,
+        "height": 3498,
         "color": "#F3F3F3",
         "alt": ""
       },
       {
         "src": "/work/giselle-studio-digitals/02.jpg",
-        "width": 1600,
-        "height": 2240,
+        "width": 2499,
+        "height": 3499,
         "color": "#F3F3F3",
         "alt": ""
       },
       {
         "src": "/work/giselle-studio-digitals/03.jpg",
-        "width": 1600,
-        "height": 2240,
+        "width": 2499,
+        "height": 3499,
         "color": "#F3F3F3",
         "alt": ""
       },
       {
         "src": "/work/giselle-studio-digitals/04.jpg",
-        "width": 1600,
-        "height": 2240,
+        "width": 2499,
+        "height": 3499,
         "color": "#F3F3F3",
         "alt": ""
       },
       {
         "src": "/work/giselle-studio-digitals/05.jpg",
-        "width": 1600,
-        "height": 2240,
+        "width": 2499,
+        "height": 3499,
         "color": "#F3F3F3",
         "alt": ""
       },
       {
         "src": "/work/giselle-studio-digitals/06.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#F3F3F3",
         "alt": ""
       },
       {
         "src": "/work/giselle-studio-digitals/07.jpg",
-        "width": 1600,
-        "height": 2240,
+        "width": 2499,
+        "height": 3499,
         "color": "#F3F3F3",
         "alt": ""
       },
       {
         "src": "/work/giselle-studio-digitals/08.jpg",
-        "width": 1600,
-        "height": 2240,
+        "width": 2499,
+        "height": 3499,
         "color": "#D9D9D9",
         "alt": ""
       },
       {
         "src": "/work/giselle-studio-digitals/09.jpg",
-        "width": 1600,
-        "height": 2240,
+        "width": 2499,
+        "height": 3499,
         "color": "#F3F3F3",
         "alt": ""
       },
       {
         "src": "/work/giselle-studio-digitals/10.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#F3F3F3",
         "alt": ""
       },
       {
         "src": "/work/giselle-studio-digitals/11.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#F3F3F3",
         "alt": ""
       },
       {
         "src": "/work/giselle-studio-digitals/12.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#F3F3F3",
         "alt": ""
       },
       {
         "src": "/work/giselle-studio-digitals/13.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#F3F3F3",
         "alt": ""
       },
       {
         "src": "/work/giselle-studio-digitals/14.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#F3F3F3",
         "alt": ""
       },
       {
         "src": "/work/giselle-studio-digitals/15.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#F3F3F3",
         "alt": ""
       }
@@ -3344,71 +3344,71 @@ export const PROJECTS: Project[] = [
     "images": [
       {
         "src": "/work/goodcult/01.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#375358",
         "alt": ""
       },
       {
         "src": "/work/goodcult/02.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#000001",
         "alt": ""
       },
       {
         "src": "/work/goodcult/03.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#5C828D",
         "alt": ""
       },
       {
         "src": "/work/goodcult/04.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#4C7279",
         "alt": ""
       },
       {
         "src": "/work/goodcult/05.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#436770",
         "alt": ""
       },
       {
         "src": "/work/goodcult/06.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#3A5E67",
         "alt": ""
       },
       {
         "src": "/work/goodcult/07.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#3F626B",
         "alt": ""
       },
       {
         "src": "/work/goodcult/08.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#205F5C",
         "alt": ""
       },
       {
         "src": "/work/goodcult/09.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#20706C",
         "alt": ""
       },
       {
         "src": "/work/goodcult/10.jpg",
-        "width": 1600,
-        "height": 1281,
+        "width": 2499,
+        "height": 2000,
         "color": "#1B504E",
         "alt": ""
       },
@@ -3421,43 +3421,43 @@ export const PROJECTS: Project[] = [
       },
       {
         "src": "/work/goodcult/12.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#25746F",
         "alt": ""
       },
       {
         "src": "/work/goodcult/13.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#277773",
         "alt": ""
       },
       {
         "src": "/work/goodcult/14.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#2B706C",
         "alt": ""
       },
       {
         "src": "/work/goodcult/15.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#A6671C",
         "alt": ""
       },
       {
         "src": "/work/goodcult/16.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#965917",
         "alt": ""
       },
       {
         "src": "/work/goodcult/17.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#C08025",
         "alt": ""
       }
@@ -3493,64 +3493,64 @@ export const PROJECTS: Project[] = [
       },
       {
         "src": "/work/graduation/01.jpg",
-        "width": 1600,
-        "height": 2240,
+        "width": 2499,
+        "height": 3499,
         "color": "#262640",
         "alt": ""
       },
       {
         "src": "/work/graduation/02.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#262626",
         "alt": ""
       },
       {
         "src": "/work/graduation/03.jpg",
-        "width": 1600,
-        "height": 2398,
+        "width": 2429,
+        "height": 3641,
         "color": "#A6C0D9",
         "alt": ""
       },
       {
         "src": "/work/graduation/04.jpg",
-        "width": 1600,
-        "height": 2240,
+        "width": 2499,
+        "height": 3499,
         "color": "#0C260C",
         "alt": ""
       },
       {
         "src": "/work/graduation/05.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#C0A6A6",
         "alt": ""
       },
       {
         "src": "/work/graduation/06.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#C0A6A6",
         "alt": ""
       },
       {
         "src": "/work/graduation/07.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#F3F3F3",
         "alt": ""
       },
       {
         "src": "/work/graduation/08.jpg",
-        "width": 1600,
-        "height": 2240,
+        "width": 2499,
+        "height": 3499,
         "color": "#262626",
         "alt": ""
       },
       {
         "src": "/work/graduation/09.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#A68C40",
         "alt": ""
       },
@@ -3577,22 +3577,22 @@ export const PROJECTS: Project[] = [
       },
       {
         "src": "/work/graduation/13.jpg",
-        "width": 1600,
-        "height": 2400,
+        "width": 2428,
+        "height": 3642,
         "color": "#A6C0C0",
         "alt": ""
       },
       {
         "src": "/work/graduation/14.jpg",
-        "width": 1600,
-        "height": 2400,
+        "width": 2428,
+        "height": 3642,
         "color": "#F3F3F3",
         "alt": ""
       },
       {
         "src": "/work/graduation/15.jpg",
-        "width": 1600,
-        "height": 2400,
+        "width": 2428,
+        "height": 3642,
         "color": "#C0C0C0",
         "alt": ""
       }
@@ -3621,99 +3621,99 @@ export const PROJECTS: Project[] = [
     "images": [
       {
         "src": "/work/headshots/01.jpg",
-        "width": 1600,
-        "height": 1574,
+        "width": 2499,
+        "height": 2459,
         "color": "#F3F3F3",
         "alt": ""
       },
       {
         "src": "/work/headshots/02.jpg",
-        "width": 1600,
-        "height": 1600,
+        "width": 2499,
+        "height": 2499,
         "color": "#F3F3F3",
         "alt": ""
       },
       {
         "src": "/work/headshots/03.jpg",
-        "width": 1600,
-        "height": 1600,
+        "width": 2499,
+        "height": 2499,
         "color": "#F3F3F3",
         "alt": ""
       },
       {
         "src": "/work/headshots/04.jpg",
-        "width": 1600,
-        "height": 2400,
+        "width": 2428,
+        "height": 3642,
         "color": "#262626",
         "alt": ""
       },
       {
         "src": "/work/headshots/05.jpg",
-        "width": 1600,
-        "height": 2400,
+        "width": 2428,
+        "height": 3642,
         "color": "#262626",
         "alt": ""
       },
       {
         "src": "/work/headshots/06.jpg",
-        "width": 1600,
-        "height": 2400,
+        "width": 2428,
+        "height": 3642,
         "color": "#C08C73",
         "alt": ""
       },
       {
         "src": "/work/headshots/07.jpg",
-        "width": 1600,
-        "height": 2399,
+        "width": 2428,
+        "height": 3641,
         "color": "#26260C",
         "alt": ""
       },
       {
         "src": "/work/headshots/08.jpg",
-        "width": 1600,
-        "height": 2400,
+        "width": 2428,
+        "height": 3642,
         "color": "#260C0C",
         "alt": ""
       },
       {
         "src": "/work/headshots/09.jpg",
-        "width": 1600,
-        "height": 2400,
+        "width": 2428,
+        "height": 3642,
         "color": "#262626",
         "alt": ""
       },
       {
         "src": "/work/headshots/10.jpg",
-        "width": 1600,
-        "height": 2400,
+        "width": 2428,
+        "height": 3642,
         "color": "#C08C73",
         "alt": ""
       },
       {
         "src": "/work/headshots/11.jpg",
-        "width": 1600,
-        "height": 2400,
+        "width": 2428,
+        "height": 3642,
         "color": "#262626",
         "alt": ""
       },
       {
         "src": "/work/headshots/12.jpg",
-        "width": 1600,
-        "height": 2401,
+        "width": 2427,
+        "height": 3642,
         "color": "#260C0C",
         "alt": ""
       },
       {
         "src": "/work/headshots/13.jpg",
-        "width": 1600,
-        "height": 2400,
+        "width": 2428,
+        "height": 3642,
         "color": "#262626",
         "alt": ""
       },
       {
         "src": "/work/headshots/14.jpg",
-        "width": 1600,
-        "height": 2400,
+        "width": 2428,
+        "height": 3642,
         "color": "#D9A673",
         "alt": ""
       }
@@ -3736,36 +3736,36 @@ export const PROJECTS: Project[] = [
     "images": [
       {
         "src": "/work/hellamack/01.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#F3D9D9",
         "alt": ""
       },
       {
         "src": "/work/hellamack/02.jpg",
-        "width": 1600,
-        "height": 2398,
+        "width": 2429,
+        "height": 3641,
         "color": "#A68C73",
         "alt": ""
       },
       {
         "src": "/work/hellamack/03.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#D9D9D9",
         "alt": ""
       },
       {
         "src": "/work/hellamack/04.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#A68C73",
         "alt": ""
       },
       {
         "src": "/work/hellamack/05.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#F3D9D9",
         "alt": ""
       }
@@ -3799,155 +3799,155 @@ export const PROJECTS: Project[] = [
     "images": [
       {
         "src": "/work/i-wanna-be-a-human/01.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#A6A6A6",
         "alt": "i wanna be a human vol. 1"
       },
       {
         "src": "/work/i-wanna-be-a-human/02.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#8C8C8C",
         "alt": "i wanna be a human vol. 1"
       },
       {
         "src": "/work/i-wanna-be-a-human/03.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#8C8C8C",
         "alt": "i wanna be a human vol. 1"
       },
       {
         "src": "/work/i-wanna-be-a-human/04.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#737373",
         "alt": "i wanna be a human vol. 2"
       },
       {
         "src": "/work/i-wanna-be-a-human/05.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#A6A6A6",
         "alt": "i wanna be a human vol. 2"
       },
       {
         "src": "/work/i-wanna-be-a-human/06.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#404040",
         "alt": "i wanna be a human vol. 3"
       },
       {
         "src": "/work/i-wanna-be-a-human/07.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#595959",
         "alt": "i wanna be a human vol. 3"
       },
       {
         "src": "/work/i-wanna-be-a-human/08.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#8C8C8C",
         "alt": "i wanna be a human vol. 3"
       },
       {
         "src": "/work/i-wanna-be-a-human/09.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#F3F3F3",
         "alt": "i wanna be a human vol. 3"
       },
       {
         "src": "/work/i-wanna-be-a-human/10.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#F3F3F3",
         "alt": "i wanna be a human vol. 3"
       },
       {
         "src": "/work/i-wanna-be-a-human/11.jpg",
-        "width": 1600,
-        "height": 2133,
+        "width": 2499,
+        "height": 3331,
         "color": "#C0C0C0",
         "alt": "i wanna be a human vol. 4"
       },
       {
         "src": "/work/i-wanna-be-a-human/12.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#8C8C8C",
         "alt": "i wanna be a human vol. 4"
       },
       {
         "src": "/work/i-wanna-be-a-human/13.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#A6A6A6",
         "alt": "i wanna be a human vol. 4"
       },
       {
         "src": "/work/i-wanna-be-a-human/14.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#A6A6A6",
         "alt": "i wanna be a human vol. 4"
       },
       {
         "src": "/work/i-wanna-be-a-human/15.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#C0C0C0",
         "alt": "i wanna be a human vol. 4"
       },
       {
         "src": "/work/i-wanna-be-a-human/16.jpg",
-        "width": 1600,
-        "height": 1200,
+        "width": 2499,
+        "height": 1874,
         "color": "#737373",
         "alt": "i wanna be a human vol. 5"
       },
       {
         "src": "/work/i-wanna-be-a-human/17.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#8C8C8C",
         "alt": "i wanna be a human vol. 5"
       },
       {
         "src": "/work/i-wanna-be-a-human/18.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#F3F3F3",
         "alt": "i wanna be a human vol. 5"
       },
       {
         "src": "/work/i-wanna-be-a-human/19.jpg",
-        "width": 1600,
-        "height": 2134,
+        "width": 2499,
+        "height": 3333,
         "color": "#A6A6A6",
         "alt": "i wanna be a human vol. 3"
       },
       {
         "src": "/work/i-wanna-be-a-human/20.jpg",
-        "width": 1600,
-        "height": 2133,
+        "width": 2499,
+        "height": 3331,
         "color": "#8C8C8C",
         "alt": "i wanna be a human vol. 3"
       },
       {
         "src": "/work/i-wanna-be-a-human/21.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#A6A6A6",
         "alt": "i wanna be a human vol. 3"
       },
       {
         "src": "/work/i-wanna-be-a-human/22.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#8C8C8C",
         "alt": "i wanna be a human vol. 3"
       }
@@ -3976,120 +3976,120 @@ export const PROJECTS: Project[] = [
     "images": [
       {
         "src": "/work/info-overload/01.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#260C0C",
         "alt": ""
       },
       {
         "src": "/work/info-overload/02.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#260C0C",
         "alt": ""
       },
       {
         "src": "/work/info-overload/03.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#260C0C",
         "alt": ""
       },
       {
         "src": "/work/info-overload/04.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#260C0C",
         "alt": ""
       },
       {
         "src": "/work/info-overload/05.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#260C0C",
         "alt": ""
       },
       {
         "src": "/work/info-overload/06.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#260C0C",
         "alt": ""
       },
       {
         "src": "/work/info-overload/07.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#260C0C",
         "alt": ""
       },
       {
         "src": "/work/info-overload/08.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#262626",
         "alt": ""
       },
       {
         "src": "/work/info-overload/09.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#260C26",
         "alt": ""
       },
       {
         "src": "/work/info-overload/10.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#260C0C",
         "alt": ""
       },
       {
         "src": "/work/info-overload/11.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#260C0C",
         "alt": ""
       },
       {
         "src": "/work/info-overload/12.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#260C0C",
         "alt": ""
       },
       {
         "src": "/work/info-overload/13.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#0C260C",
         "alt": ""
       },
       {
         "src": "/work/info-overload/14.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#262626",
         "alt": ""
       },
       {
         "src": "/work/info-overload/15.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#0C260C",
         "alt": ""
       },
       {
         "src": "/work/info-overload/16.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#0C260C",
         "alt": ""
       },
       {
         "src": "/work/info-overload/17.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#0C260C",
         "alt": ""
       }
@@ -4112,29 +4112,29 @@ export const PROJECTS: Project[] = [
     "images": [
       {
         "src": "/work/isabela/01.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#26260C",
         "alt": ""
       },
       {
         "src": "/work/isabela/02.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#26260C",
         "alt": ""
       },
       {
         "src": "/work/isabela/03.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#26260C",
         "alt": ""
       },
       {
         "src": "/work/isabela/04.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#594026",
         "alt": ""
       },
@@ -4184,29 +4184,29 @@ export const PROJECTS: Project[] = [
     "images": [
       {
         "src": "/work/jubo/01.jpg",
-        "width": 1600,
-        "height": 2240,
+        "width": 2499,
+        "height": 3499,
         "color": "#262626",
         "alt": ""
       },
       {
         "src": "/work/jubo/02.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#262626",
         "alt": ""
       },
       {
         "src": "/work/jubo/03.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#C0D9D9",
         "alt": ""
       },
       {
         "src": "/work/jubo/04.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#F3F3F3",
         "alt": ""
       }
@@ -4235,176 +4235,176 @@ export const PROJECTS: Project[] = [
     "images": [
       {
         "src": "/work/l3na/01.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#C0D9F3",
         "alt": ""
       },
       {
         "src": "/work/l3na/02.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#C0D9F3",
         "alt": ""
       },
       {
         "src": "/work/l3na/03.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#73A6F3",
         "alt": ""
       },
       {
         "src": "/work/l3na/04.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#0C260C",
         "alt": ""
       },
       {
         "src": "/work/l3na/05.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#0C260C",
         "alt": ""
       },
       {
         "src": "/work/l3na/06.jpg",
-        "width": 1600,
-        "height": 2240,
+        "width": 2499,
+        "height": 3499,
         "color": "#C0C0C0",
         "alt": ""
       },
       {
         "src": "/work/l3na/07.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#0C260C",
         "alt": ""
       },
       {
         "src": "/work/l3na/08.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#260C26",
         "alt": ""
       },
       {
         "src": "/work/l3na/09.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#260C26",
         "alt": ""
       },
       {
         "src": "/work/l3na/10.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#73598C",
         "alt": ""
       },
       {
         "src": "/work/l3na/11.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#592673",
         "alt": ""
       },
       {
         "src": "/work/l3na/12.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#0C260C",
         "alt": ""
       },
       {
         "src": "/work/l3na/13.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#0C260C",
         "alt": ""
       },
       {
         "src": "/work/l3na/14.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#0C260C",
         "alt": ""
       },
       {
         "src": "/work/l3na/15.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#0C260C",
         "alt": ""
       },
       {
         "src": "/work/l3na/16.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#265973",
         "alt": ""
       },
       {
         "src": "/work/l3na/17.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#0C260C",
         "alt": ""
       },
       {
         "src": "/work/l3na/18.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#0C260C",
         "alt": ""
       },
       {
         "src": "/work/l3na/19.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#590C0C",
         "alt": ""
       },
       {
         "src": "/work/l3na/20.jpg",
-        "width": 1600,
-        "height": 2240,
+        "width": 2499,
+        "height": 3499,
         "color": "#260C0C",
         "alt": ""
       },
       {
         "src": "/work/l3na/21.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#260C0C",
         "alt": ""
       },
       {
         "src": "/work/l3na/22.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#260C0C",
         "alt": ""
       },
       {
         "src": "/work/l3na/23.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#260C0C",
         "alt": ""
       },
       {
         "src": "/work/l3na/24.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#260C0C",
         "alt": ""
       },
       {
         "src": "/work/l3na/25.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#260C0C",
         "alt": ""
       }
@@ -4427,36 +4427,36 @@ export const PROJECTS: Project[] = [
     "images": [
       {
         "src": "/work/light-play/01.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#A67359",
         "alt": ""
       },
       {
         "src": "/work/light-play/02.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#262626",
         "alt": ""
       },
       {
         "src": "/work/light-play/03.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#A68C73",
         "alt": ""
       },
       {
         "src": "/work/light-play/04.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#735940",
         "alt": ""
       },
       {
         "src": "/work/light-play/05.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#595959",
         "alt": ""
       }
@@ -4485,57 +4485,57 @@ export const PROJECTS: Project[] = [
     "images": [
       {
         "src": "/work/lightbeam/01.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#262626",
         "alt": ""
       },
       {
         "src": "/work/lightbeam/02.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#0C260C",
         "alt": ""
       },
       {
         "src": "/work/lightbeam/03.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#264040",
         "alt": ""
       },
       {
         "src": "/work/lightbeam/04.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#264040",
         "alt": ""
       },
       {
         "src": "/work/lightbeam/05.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#264040",
         "alt": ""
       },
       {
         "src": "/work/lightbeam/06.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#0C260C",
         "alt": ""
       },
       {
         "src": "/work/lightbeam/07.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#264040",
         "alt": ""
       },
       {
         "src": "/work/lightbeam/08.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#264040",
         "alt": ""
       }
@@ -4558,50 +4558,50 @@ export const PROJECTS: Project[] = [
     "images": [
       {
         "src": "/work/liminal/01.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#734026",
         "alt": ""
       },
       {
         "src": "/work/liminal/02.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#592626",
         "alt": ""
       },
       {
         "src": "/work/liminal/03.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#8C4026",
         "alt": ""
       },
       {
         "src": "/work/liminal/04.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#8C4026",
         "alt": ""
       },
       {
         "src": "/work/liminal/05.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#A64026",
         "alt": ""
       },
       {
         "src": "/work/liminal/06.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#262626",
         "alt": ""
       },
       {
         "src": "/work/liminal/07.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#262626",
         "alt": ""
       }
@@ -4630,99 +4630,99 @@ export const PROJECTS: Project[] = [
     "images": [
       {
         "src": "/work/liquid-metal-dreams/01.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#C08C73",
         "alt": ""
       },
       {
         "src": "/work/liquid-metal-dreams/02.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#404040",
         "alt": ""
       },
       {
         "src": "/work/liquid-metal-dreams/03.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#267373",
         "alt": ""
       },
       {
         "src": "/work/liquid-metal-dreams/04.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#598C8C",
         "alt": ""
       },
       {
         "src": "/work/liquid-metal-dreams/05.jpg",
-        "width": 1600,
-        "height": 2001,
+        "width": 2499,
+        "height": 3126,
         "color": "#408C8C",
         "alt": ""
       },
       {
         "src": "/work/liquid-metal-dreams/06.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#C0F3F3",
         "alt": ""
       },
       {
         "src": "/work/liquid-metal-dreams/07.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#73A6A6",
         "alt": ""
       },
       {
         "src": "/work/liquid-metal-dreams/08.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#262626",
         "alt": ""
       },
       {
         "src": "/work/liquid-metal-dreams/09.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#D9D9D9",
         "alt": ""
       },
       {
         "src": "/work/liquid-metal-dreams/10.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#A6A6A6",
         "alt": ""
       },
       {
         "src": "/work/liquid-metal-dreams/11.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#D9D9F3",
         "alt": ""
       },
       {
         "src": "/work/liquid-metal-dreams/12.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#262626",
         "alt": ""
       },
       {
         "src": "/work/liquid-metal-dreams/13.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#405959",
         "alt": ""
       },
       {
         "src": "/work/liquid-metal-dreams/14.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#262626",
         "alt": ""
       }
@@ -4751,43 +4751,43 @@ export const PROJECTS: Project[] = [
     "images": [
       {
         "src": "/work/luna/01.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#262626",
         "alt": ""
       },
       {
         "src": "/work/luna/02.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#262626",
         "alt": ""
       },
       {
         "src": "/work/luna/03.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#262626",
         "alt": ""
       },
       {
         "src": "/work/luna/04.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#0C260C",
         "alt": ""
       },
       {
         "src": "/work/luna/05.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#0C260C",
         "alt": ""
       },
       {
         "src": "/work/luna/06.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#C0C0C0",
         "alt": ""
       }
@@ -4816,71 +4816,71 @@ export const PROJECTS: Project[] = [
     "images": [
       {
         "src": "/work/lustro/01.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#0C260C",
         "alt": ""
       },
       {
         "src": "/work/lustro/02.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#0C260C",
         "alt": ""
       },
       {
         "src": "/work/lustro/03.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#0C260C",
         "alt": ""
       },
       {
         "src": "/work/lustro/04.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#0C260C",
         "alt": ""
       },
       {
         "src": "/work/lustro/05.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#260C0C",
         "alt": ""
       },
       {
         "src": "/work/lustro/06.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#0C260C",
         "alt": ""
       },
       {
         "src": "/work/lustro/07.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#0C260C",
         "alt": ""
       },
       {
         "src": "/work/lustro/08.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#0C260C",
         "alt": ""
       },
       {
         "src": "/work/lustro/09.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#0C260C",
         "alt": ""
       },
       {
         "src": "/work/lustro/10.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#0C260C",
         "alt": ""
       }
@@ -4930,155 +4930,155 @@ export const PROJECTS: Project[] = [
     "images": [
       {
         "src": "/work/luxe-meets-future/01.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#A6A6A6",
         "alt": ""
       },
       {
         "src": "/work/luxe-meets-future/02.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#8CA6A6",
         "alt": ""
       },
       {
         "src": "/work/luxe-meets-future/03.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#262626",
         "alt": ""
       },
       {
         "src": "/work/luxe-meets-future/04.jpg",
-        "width": 1600,
-        "height": 2240,
+        "width": 2499,
+        "height": 3499,
         "color": "#8CA6A6",
         "alt": ""
       },
       {
         "src": "/work/luxe-meets-future/05.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#8CC0C0",
         "alt": ""
       },
       {
         "src": "/work/luxe-meets-future/06.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#598C8C",
         "alt": ""
       },
       {
         "src": "/work/luxe-meets-future/07.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#A6A6A6",
         "alt": ""
       },
       {
         "src": "/work/luxe-meets-future/08.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#260C0C",
         "alt": ""
       },
       {
         "src": "/work/luxe-meets-future/09.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#738C8C",
         "alt": ""
       },
       {
         "src": "/work/luxe-meets-future/10.jpg",
-        "width": 1600,
-        "height": 2240,
+        "width": 2499,
+        "height": 3499,
         "color": "#8CA6F3",
         "alt": ""
       },
       {
         "src": "/work/luxe-meets-future/11.jpg",
-        "width": 1600,
-        "height": 2240,
+        "width": 2499,
+        "height": 3499,
         "color": "#598CD9",
         "alt": ""
       },
       {
         "src": "/work/luxe-meets-future/12.jpg",
-        "width": 1600,
-        "height": 2240,
+        "width": 2499,
+        "height": 3499,
         "color": "#0C260C",
         "alt": ""
       },
       {
         "src": "/work/luxe-meets-future/13.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#262626",
         "alt": ""
       },
       {
         "src": "/work/luxe-meets-future/14.jpg",
-        "width": 1600,
-        "height": 2240,
+        "width": 2499,
+        "height": 3499,
         "color": "#0C260C",
         "alt": ""
       },
       {
         "src": "/work/luxe-meets-future/15.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#0C260C",
         "alt": ""
       },
       {
         "src": "/work/luxe-meets-future/16.jpg",
-        "width": 1600,
-        "height": 2240,
+        "width": 2499,
+        "height": 3499,
         "color": "#8C5940",
         "alt": ""
       },
       {
         "src": "/work/luxe-meets-future/17.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#0C590C",
         "alt": ""
       },
       {
         "src": "/work/luxe-meets-future/18.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#595973",
         "alt": ""
       },
       {
         "src": "/work/luxe-meets-future/19.jpg",
-        "width": 1600,
-        "height": 2240,
+        "width": 2499,
+        "height": 3499,
         "color": "#0C260C",
         "alt": ""
       },
       {
         "src": "/work/luxe-meets-future/20.jpg",
-        "width": 1600,
-        "height": 2240,
+        "width": 2499,
+        "height": 3499,
         "color": "#0C260C",
         "alt": ""
       },
       {
         "src": "/work/luxe-meets-future/21.jpg",
-        "width": 1600,
-        "height": 2240,
+        "width": 2499,
+        "height": 3499,
         "color": "#73A6D9",
         "alt": ""
       },
       {
         "src": "/work/luxe-meets-future/22.jpg",
-        "width": 1600,
-        "height": 2240,
+        "width": 2499,
+        "height": 3499,
         "color": "#402640",
         "alt": ""
       }
@@ -5112,92 +5112,92 @@ export const PROJECTS: Project[] = [
     "images": [
       {
         "src": "/work/metamorphosis/01.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#264059",
         "alt": ""
       },
       {
         "src": "/work/metamorphosis/02.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#264040",
         "alt": ""
       },
       {
         "src": "/work/metamorphosis/03.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#0C260C",
         "alt": ""
       },
       {
         "src": "/work/metamorphosis/04.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#264059",
         "alt": ""
       },
       {
         "src": "/work/metamorphosis/05.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#264040",
         "alt": ""
       },
       {
         "src": "/work/metamorphosis/06.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#405973",
         "alt": ""
       },
       {
         "src": "/work/metamorphosis/07.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#264059",
         "alt": ""
       },
       {
         "src": "/work/metamorphosis/08.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#264059",
         "alt": ""
       },
       {
         "src": "/work/metamorphosis/09.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#262626",
         "alt": ""
       },
       {
         "src": "/work/metamorphosis/10.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#264059",
         "alt": ""
       },
       {
         "src": "/work/metamorphosis/11.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#264059",
         "alt": ""
       },
       {
         "src": "/work/metamorphosis/12.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#264040",
         "alt": ""
       },
       {
         "src": "/work/metamorphosis/13.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#262640",
         "alt": ""
       }
@@ -5226,113 +5226,113 @@ export const PROJECTS: Project[] = [
     "images": [
       {
         "src": "/work/mirage/01.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#A60C0C",
         "alt": ""
       },
       {
         "src": "/work/mirage/02.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#400C0C",
         "alt": ""
       },
       {
         "src": "/work/mirage/03.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#400C0C",
         "alt": ""
       },
       {
         "src": "/work/mirage/04.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#260C0C",
         "alt": ""
       },
       {
         "src": "/work/mirage/05.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#590C0C",
         "alt": ""
       },
       {
         "src": "/work/mirage/06.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#400C0C",
         "alt": ""
       },
       {
         "src": "/work/mirage/07.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#A60C0C",
         "alt": ""
       },
       {
         "src": "/work/mirage/08.jpg",
-        "width": 1600,
-        "height": 2398,
+        "width": 2429,
+        "height": 3641,
         "color": "#A60C0C",
         "alt": ""
       },
       {
         "src": "/work/mirage/09.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#8C0C0C",
         "alt": ""
       },
       {
         "src": "/work/mirage/10.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#8C0C0C",
         "alt": ""
       },
       {
         "src": "/work/mirage/11.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#A60C0C",
         "alt": ""
       },
       {
         "src": "/work/mirage/12.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#A60C0C",
         "alt": ""
       },
       {
         "src": "/work/mirage/13.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#730C0C",
         "alt": ""
       },
       {
         "src": "/work/mirage/14.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#730C0C",
         "alt": ""
       },
       {
         "src": "/work/mirage/15.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#730C0C",
         "alt": ""
       },
       {
         "src": "/work/mirage/16.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#400C0C",
         "alt": ""
       }
@@ -5361,92 +5361,92 @@ export const PROJECTS: Project[] = [
     "images": [
       {
         "src": "/work/mya/01.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#F3F3F3",
         "alt": ""
       },
       {
         "src": "/work/mya/02.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#F3F3F3",
         "alt": ""
       },
       {
         "src": "/work/mya/03.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#F3F3F3",
         "alt": ""
       },
       {
         "src": "/work/mya/04.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#F3F3F3",
         "alt": ""
       },
       {
         "src": "/work/mya/05.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#F3F3F3",
         "alt": ""
       },
       {
         "src": "/work/mya/06.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#F3F3F3",
         "alt": ""
       },
       {
         "src": "/work/mya/07.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#F3F3F3",
         "alt": ""
       },
       {
         "src": "/work/mya/08.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#F3F3F3",
         "alt": ""
       },
       {
         "src": "/work/mya/09.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#F3F3F3",
         "alt": ""
       },
       {
         "src": "/work/mya/10.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#26A6C0",
         "alt": ""
       },
       {
         "src": "/work/mya/11.jpg",
-        "width": 1600,
-        "height": 2202,
+        "width": 2499,
+        "height": 3439,
         "color": "#40A6C0",
         "alt": ""
       },
       {
         "src": "/work/mya/12.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#260C0C",
         "alt": ""
       },
       {
         "src": "/work/mya/13.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#59A6C0",
         "alt": ""
       }
@@ -5469,687 +5469,687 @@ export const PROJECTS: Project[] = [
     "images": [
       {
         "src": "/work/nabu/01.jpg",
-        "width": 1600,
-        "height": 2134,
+        "width": 2499,
+        "height": 3333,
         "color": "#18191D",
         "alt": ""
       },
       {
         "src": "/work/nabu/02.jpg",
-        "width": 1600,
-        "height": 2133,
+        "width": 2499,
+        "height": 3331,
         "color": "#0B0D10",
         "alt": ""
       },
       {
         "src": "/work/nabu/03.jpg",
-        "width": 1600,
-        "height": 2134,
+        "width": 2499,
+        "height": 3333,
         "color": "#070A0F",
         "alt": ""
       },
       {
         "src": "/work/nabu/04.jpg",
-        "width": 1600,
-        "height": 1000,
+        "width": 2499,
+        "height": 1562,
         "color": "#01050A",
         "alt": ""
       },
       {
         "src": "/work/nabu/05.jpg",
-        "width": 1600,
-        "height": 2133,
+        "width": 2499,
+        "height": 3331,
         "color": "#1F1E20",
         "alt": ""
       },
       {
         "src": "/work/nabu/06.jpg",
-        "width": 1600,
-        "height": 2134,
+        "width": 2499,
+        "height": 3333,
         "color": "#1A1A1D",
         "alt": ""
       },
       {
         "src": "/work/nabu/07.jpg",
-        "width": 1600,
-        "height": 2134,
+        "width": 2499,
+        "height": 3333,
         "color": "#111216",
         "alt": ""
       },
       {
         "src": "/work/nabu/08.jpg",
-        "width": 1600,
-        "height": 2134,
+        "width": 2499,
+        "height": 3333,
         "color": "#15161A",
         "alt": ""
       },
       {
         "src": "/work/nabu/09.jpg",
-        "width": 1600,
-        "height": 2134,
+        "width": 2499,
+        "height": 3333,
         "color": "#0A0D13",
         "alt": ""
       },
       {
         "src": "/work/nabu/10.jpg",
-        "width": 1600,
-        "height": 2133,
+        "width": 2499,
+        "height": 3331,
         "color": "#3D3735",
         "alt": ""
       },
       {
         "src": "/work/nabu/11.jpg",
-        "width": 1600,
-        "height": 1000,
+        "width": 2499,
+        "height": 1562,
         "color": "#11151F",
         "alt": ""
       },
       {
         "src": "/work/nabu/12.jpg",
-        "width": 1600,
-        "height": 2133,
+        "width": 2499,
+        "height": 3331,
         "color": "#2D2E37",
         "alt": ""
       },
       {
         "src": "/work/nabu/13.jpg",
-        "width": 1600,
-        "height": 2133,
+        "width": 2499,
+        "height": 3331,
         "color": "#2D323F",
         "alt": ""
       },
       {
         "src": "/work/nabu/14.jpg",
-        "width": 1600,
-        "height": 2134,
+        "width": 2499,
+        "height": 3333,
         "color": "#546D93",
         "alt": ""
       },
       {
         "src": "/work/nabu/15.jpg",
-        "width": 1600,
-        "height": 2134,
+        "width": 2499,
+        "height": 3333,
         "color": "#8692B2",
         "alt": ""
       },
       {
         "src": "/work/nabu/16.jpg",
-        "width": 1600,
-        "height": 2134,
+        "width": 2499,
+        "height": 3333,
         "color": "#7A87A2",
         "alt": ""
       },
       {
         "src": "/work/nabu/17.jpg",
-        "width": 1600,
-        "height": 2133,
+        "width": 2499,
+        "height": 3331,
         "color": "#A0ADCC",
         "alt": ""
       },
       {
         "src": "/work/nabu/18.jpg",
-        "width": 1600,
-        "height": 2134,
+        "width": 2499,
+        "height": 3333,
         "color": "#ACB6D1",
         "alt": ""
       },
       {
         "src": "/work/nabu/19.jpg",
-        "width": 1600,
-        "height": 2134,
+        "width": 2499,
+        "height": 3333,
         "color": "#ECEBF5",
         "alt": ""
       },
       {
         "src": "/work/nabu/20.jpg",
-        "width": 1600,
-        "height": 2134,
+        "width": 2499,
+        "height": 3333,
         "color": "#988270",
         "alt": ""
       },
       {
         "src": "/work/nabu/21.jpg",
-        "width": 1600,
-        "height": 2133,
+        "width": 2499,
+        "height": 3331,
         "color": "#3D4020",
         "alt": ""
       },
       {
         "src": "/work/nabu/22.jpg",
-        "width": 1600,
-        "height": 2133,
+        "width": 2499,
+        "height": 3331,
         "color": "#0E0F12",
         "alt": ""
       },
       {
         "src": "/work/nabu/23.jpg",
-        "width": 1600,
-        "height": 2134,
+        "width": 2499,
+        "height": 3333,
         "color": "#B2ACA6",
         "alt": ""
       },
       {
         "src": "/work/nabu/24.jpg",
-        "width": 1600,
-        "height": 2134,
+        "width": 2499,
+        "height": 3333,
         "color": "#A4A2A3",
         "alt": ""
       },
       {
         "src": "/work/nabu/25.jpg",
-        "width": 1600,
-        "height": 2134,
+        "width": 2499,
+        "height": 3333,
         "color": "#E5E2EC",
         "alt": ""
       },
       {
         "src": "/work/nabu/26.jpg",
-        "width": 1600,
-        "height": 2133,
+        "width": 2499,
+        "height": 3331,
         "color": "#C0C4DB",
         "alt": ""
       },
       {
         "src": "/work/nabu/27.jpg",
-        "width": 1600,
-        "height": 2133,
+        "width": 2499,
+        "height": 3331,
         "color": "#D4CDCF",
         "alt": ""
       },
       {
         "src": "/work/nabu/28.jpg",
-        "width": 1600,
-        "height": 2133,
+        "width": 2499,
+        "height": 3331,
         "color": "#171614",
         "alt": ""
       },
       {
         "src": "/work/nabu/29.jpg",
-        "width": 1600,
-        "height": 2134,
+        "width": 2499,
+        "height": 3333,
         "color": "#0F1310",
         "alt": ""
       },
       {
         "src": "/work/nabu/30.jpg",
-        "width": 1600,
-        "height": 2134,
+        "width": 2499,
+        "height": 3333,
         "color": "#23241A",
         "alt": ""
       },
       {
         "src": "/work/nabu/31.jpg",
-        "width": 1600,
-        "height": 2134,
+        "width": 2499,
+        "height": 3333,
         "color": "#393324",
         "alt": ""
       },
       {
         "src": "/work/nabu/32.jpg",
-        "width": 1600,
-        "height": 2133,
+        "width": 2499,
+        "height": 3331,
         "color": "#59493B",
         "alt": ""
       },
       {
         "src": "/work/nabu/33.jpg",
-        "width": 1600,
-        "height": 2134,
+        "width": 2499,
+        "height": 3333,
         "color": "#DBDAD7",
         "alt": ""
       },
       {
         "src": "/work/nabu/34.jpg",
-        "width": 1600,
-        "height": 2133,
+        "width": 2499,
+        "height": 3331,
         "color": "#F1F0F2",
         "alt": ""
       },
       {
         "src": "/work/nabu/35.jpg",
-        "width": 1600,
-        "height": 2134,
+        "width": 2499,
+        "height": 3333,
         "color": "#41362E",
         "alt": ""
       },
       {
         "src": "/work/nabu/36.jpg",
-        "width": 1600,
-        "height": 2133,
+        "width": 2499,
+        "height": 3331,
         "color": "#8F8B84",
         "alt": ""
       },
       {
         "src": "/work/nabu/37.jpg",
-        "width": 1600,
-        "height": 2134,
+        "width": 2499,
+        "height": 3333,
         "color": "#312C2B",
         "alt": ""
       },
       {
         "src": "/work/nabu/38.jpg",
-        "width": 1600,
-        "height": 2134,
+        "width": 2499,
+        "height": 3333,
         "color": "#3B3433",
         "alt": ""
       },
       {
         "src": "/work/nabu/39.jpg",
-        "width": 1600,
-        "height": 2134,
+        "width": 2499,
+        "height": 3333,
         "color": "#1F1C1C",
         "alt": ""
       },
       {
         "src": "/work/nabu/40.jpg",
-        "width": 1600,
-        "height": 2134,
+        "width": 2499,
+        "height": 3333,
         "color": "#262626",
         "alt": ""
       },
       {
         "src": "/work/nabu/41.jpg",
-        "width": 1600,
-        "height": 2134,
+        "width": 2499,
+        "height": 3333,
         "color": "#262626",
         "alt": ""
       },
       {
         "src": "/work/nabu/42.jpg",
-        "width": 1600,
-        "height": 2398,
+        "width": 2429,
+        "height": 3641,
         "color": "#262626",
         "alt": ""
       },
       {
         "src": "/work/nabu/43.jpg",
-        "width": 1600,
-        "height": 1000,
+        "width": 2499,
+        "height": 1562,
         "color": "#262626",
         "alt": ""
       },
       {
         "src": "/work/nabu/44.jpg",
-        "width": 1600,
-        "height": 2134,
+        "width": 2499,
+        "height": 3333,
         "color": "#262626",
         "alt": ""
       },
       {
         "src": "/work/nabu/45.jpg",
-        "width": 1600,
-        "height": 2134,
+        "width": 2499,
+        "height": 3333,
         "color": "#262626",
         "alt": ""
       },
       {
         "src": "/work/nabu/46.jpg",
-        "width": 1600,
-        "height": 2134,
+        "width": 2499,
+        "height": 3333,
         "color": "#262626",
         "alt": ""
       },
       {
         "src": "/work/nabu/47.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#262626",
         "alt": ""
       },
       {
         "src": "/work/nabu/48.jpg",
-        "width": 1600,
-        "height": 2134,
+        "width": 2499,
+        "height": 3333,
         "color": "#262626",
         "alt": ""
       },
       {
         "src": "/work/nabu/49.jpg",
-        "width": 1600,
-        "height": 2134,
+        "width": 2499,
+        "height": 3333,
         "color": "#262626",
         "alt": ""
       },
       {
         "src": "/work/nabu/50.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#262626",
         "alt": ""
       },
       {
         "src": "/work/nabu/51.jpg",
-        "width": 1600,
-        "height": 2134,
+        "width": 2499,
+        "height": 3333,
         "color": "#262626",
         "alt": ""
       },
       {
         "src": "/work/nabu/52.jpg",
-        "width": 1600,
-        "height": 2133,
+        "width": 2499,
+        "height": 3331,
         "color": "#262626",
         "alt": ""
       },
       {
         "src": "/work/nabu/53.jpg",
-        "width": 1600,
-        "height": 1000,
+        "width": 2499,
+        "height": 1562,
         "color": "#0C260C",
         "alt": ""
       },
       {
         "src": "/work/nabu/54.jpg",
-        "width": 1600,
-        "height": 1067,
+        "width": 2499,
+        "height": 1667,
         "color": "#0C260C",
         "alt": ""
       },
       {
         "src": "/work/nabu/55.jpg",
-        "width": 1600,
-        "height": 2398,
+        "width": 2429,
+        "height": 3641,
         "color": "#262626",
         "alt": ""
       },
       {
         "src": "/work/nabu/56.jpg",
-        "width": 1600,
-        "height": 2398,
+        "width": 2429,
+        "height": 3641,
         "color": "#262626",
         "alt": ""
       },
       {
         "src": "/work/nabu/57.jpg",
-        "width": 1600,
-        "height": 2134,
+        "width": 2499,
+        "height": 3333,
         "color": "#0C260C",
         "alt": ""
       },
       {
         "src": "/work/nabu/58.jpg",
-        "width": 1600,
-        "height": 2398,
+        "width": 2429,
+        "height": 3641,
         "color": "#C0C0D9",
         "alt": ""
       },
       {
         "src": "/work/nabu/59.jpg",
-        "width": 1600,
-        "height": 2398,
+        "width": 2429,
+        "height": 3641,
         "color": "#A6A6C0",
         "alt": ""
       },
       {
         "src": "/work/nabu/60.jpg",
-        "width": 1600,
-        "height": 2398,
+        "width": 2429,
+        "height": 3641,
         "color": "#A6A6C0",
         "alt": ""
       },
       {
         "src": "/work/nabu/61.jpg",
-        "width": 1600,
-        "height": 2134,
+        "width": 2499,
+        "height": 3333,
         "color": "#262640",
         "alt": ""
       },
       {
         "src": "/work/nabu/62.jpg",
-        "width": 1600,
-        "height": 2134,
+        "width": 2499,
+        "height": 3333,
         "color": "#F3F3F3",
         "alt": ""
       },
       {
         "src": "/work/nabu/63.jpg",
-        "width": 1600,
-        "height": 2134,
+        "width": 2499,
+        "height": 3333,
         "color": "#262626",
         "alt": ""
       },
       {
         "src": "/work/nabu/64.jpg",
-        "width": 1600,
-        "height": 2134,
+        "width": 2499,
+        "height": 3333,
         "color": "#F3F3F3",
         "alt": ""
       },
       {
         "src": "/work/nabu/65.jpg",
-        "width": 1600,
-        "height": 2134,
+        "width": 2499,
+        "height": 3333,
         "color": "#F3F3F3",
         "alt": ""
       },
       {
         "src": "/work/nabu/66.jpg",
-        "width": 1600,
-        "height": 2398,
+        "width": 2429,
+        "height": 3641,
         "color": "#40598C",
         "alt": ""
       },
       {
         "src": "/work/nabu/67.jpg",
-        "width": 1600,
-        "height": 2398,
+        "width": 2429,
+        "height": 3641,
         "color": "#262626",
         "alt": ""
       },
       {
         "src": "/work/nabu/68.jpg",
-        "width": 1600,
-        "height": 2398,
+        "width": 2429,
+        "height": 3641,
         "color": "#262626",
         "alt": ""
       },
       {
         "src": "/work/nabu/69.jpg",
-        "width": 1600,
-        "height": 2398,
+        "width": 2429,
+        "height": 3641,
         "color": "#262626",
         "alt": ""
       },
       {
         "src": "/work/nabu/70.jpg",
-        "width": 1600,
-        "height": 2398,
+        "width": 2429,
+        "height": 3641,
         "color": "#262626",
         "alt": ""
       },
       {
         "src": "/work/nabu/71.jpg",
-        "width": 1600,
-        "height": 2398,
+        "width": 2429,
+        "height": 3641,
         "color": "#262626",
         "alt": ""
       },
       {
         "src": "/work/nabu/72.jpg",
-        "width": 1600,
-        "height": 2398,
+        "width": 2429,
+        "height": 3641,
         "color": "#262626",
         "alt": ""
       },
       {
         "src": "/work/nabu/73.jpg",
-        "width": 1600,
-        "height": 2398,
+        "width": 2429,
+        "height": 3641,
         "color": "#262626",
         "alt": ""
       },
       {
         "src": "/work/nabu/74.jpg",
-        "width": 1600,
-        "height": 2398,
+        "width": 2429,
+        "height": 3641,
         "color": "#262626",
         "alt": ""
       },
       {
         "src": "/work/nabu/75.jpg",
-        "width": 1600,
-        "height": 2398,
+        "width": 2429,
+        "height": 3641,
         "color": "#262626",
         "alt": ""
       },
       {
         "src": "/work/nabu/76.jpg",
-        "width": 1600,
-        "height": 2398,
+        "width": 2429,
+        "height": 3641,
         "color": "#262626",
         "alt": ""
       },
       {
         "src": "/work/nabu/77.jpg",
-        "width": 1600,
-        "height": 2398,
+        "width": 2429,
+        "height": 3641,
         "color": "#262626",
         "alt": ""
       },
       {
         "src": "/work/nabu/78.jpg",
-        "width": 1600,
-        "height": 2398,
+        "width": 2429,
+        "height": 3641,
         "color": "#262626",
         "alt": ""
       },
       {
         "src": "/work/nabu/79.jpg",
-        "width": 1600,
-        "height": 2133,
+        "width": 2499,
+        "height": 3331,
         "color": "#262626",
         "alt": ""
       },
       {
         "src": "/work/nabu/80.jpg",
-        "width": 1600,
-        "height": 2134,
+        "width": 2499,
+        "height": 3333,
         "color": "#262626",
         "alt": ""
       },
       {
         "src": "/work/nabu/81.jpg",
-        "width": 1600,
-        "height": 2398,
+        "width": 2429,
+        "height": 3641,
         "color": "#F3D9C0",
         "alt": ""
       },
       {
         "src": "/work/nabu/82.jpg",
-        "width": 1600,
-        "height": 2398,
+        "width": 2429,
+        "height": 3641,
         "color": "#D9C0A6",
         "alt": ""
       },
       {
         "src": "/work/nabu/83.jpg",
-        "width": 1600,
-        "height": 2398,
+        "width": 2429,
+        "height": 3641,
         "color": "#D9C0A6",
         "alt": ""
       },
       {
         "src": "/work/nabu/84.jpg",
-        "width": 1600,
-        "height": 2398,
+        "width": 2429,
+        "height": 3641,
         "color": "#262626",
         "alt": ""
       },
       {
         "src": "/work/nabu/85.jpg",
-        "width": 1600,
-        "height": 2398,
+        "width": 2429,
+        "height": 3641,
         "color": "#262626",
         "alt": ""
       },
       {
         "src": "/work/nabu/86.jpg",
-        "width": 1600,
-        "height": 2398,
+        "width": 2429,
+        "height": 3641,
         "color": "#C0A68C",
         "alt": ""
       },
       {
         "src": "/work/nabu/87.jpg",
-        "width": 1600,
-        "height": 2398,
+        "width": 2429,
+        "height": 3641,
         "color": "#262626",
         "alt": ""
       },
       {
         "src": "/work/nabu/88.jpg",
-        "width": 1600,
-        "height": 2398,
+        "width": 2429,
+        "height": 3641,
         "color": "#262626",
         "alt": ""
       },
       {
         "src": "/work/nabu/89.jpg",
-        "width": 1600,
-        "height": 2398,
+        "width": 2429,
+        "height": 3641,
         "color": "#262626",
         "alt": ""
       },
       {
         "src": "/work/nabu/90.jpg",
-        "width": 1600,
-        "height": 2398,
+        "width": 2429,
+        "height": 3641,
         "color": "#262626",
         "alt": ""
       },
       {
         "src": "/work/nabu/91.jpg",
-        "width": 1600,
-        "height": 2398,
+        "width": 2429,
+        "height": 3641,
         "color": "#262626",
         "alt": ""
       },
       {
         "src": "/work/nabu/92.jpg",
-        "width": 1600,
-        "height": 2398,
+        "width": 2429,
+        "height": 3641,
         "color": "#262626",
         "alt": ""
       },
       {
         "src": "/work/nabu/93.jpg",
-        "width": 1600,
-        "height": 2398,
+        "width": 2429,
+        "height": 3641,
         "color": "#262626",
         "alt": ""
       },
       {
         "src": "/work/nabu/94.jpg",
-        "width": 1600,
-        "height": 2398,
+        "width": 2429,
+        "height": 3641,
         "color": "#262626",
         "alt": ""
       },
       {
         "src": "/work/nabu/95.jpg",
-        "width": 1600,
-        "height": 2398,
+        "width": 2429,
+        "height": 3641,
         "color": "#262626",
         "alt": ""
       },
       {
         "src": "/work/nabu/96.jpg",
-        "width": 1600,
-        "height": 2398,
+        "width": 2429,
+        "height": 3641,
         "color": "#262626",
         "alt": ""
       },
       {
         "src": "/work/nabu/97.jpg",
-        "width": 1600,
-        "height": 2398,
+        "width": 2429,
+        "height": 3641,
         "color": "#262626",
         "alt": ""
       },
       {
         "src": "/work/nabu/98.jpg",
-        "width": 1600,
-        "height": 2398,
+        "width": 2429,
+        "height": 3641,
         "color": "#262626",
         "alt": ""
       }
@@ -6178,43 +6178,43 @@ export const PROJECTS: Project[] = [
     "images": [
       {
         "src": "/work/oakley-x-nike/01.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#262626",
         "alt": ""
       },
       {
         "src": "/work/oakley-x-nike/02.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#0C260C",
         "alt": ""
       },
       {
         "src": "/work/oakley-x-nike/03.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#0C260C",
         "alt": ""
       },
       {
         "src": "/work/oakley-x-nike/04.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#0C260C",
         "alt": ""
       },
       {
         "src": "/work/oakley-x-nike/05.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#26D9F3",
         "alt": ""
       },
       {
         "src": "/work/oakley-x-nike/06.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#26A6D9",
         "alt": ""
       }
@@ -6243,29 +6243,29 @@ export const PROJECTS: Project[] = [
     "images": [
       {
         "src": "/work/obscura/01.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#0C260C",
         "alt": ""
       },
       {
         "src": "/work/obscura/02.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#260C0C",
         "alt": ""
       },
       {
         "src": "/work/obscura/03.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#260C0C",
         "alt": ""
       },
       {
         "src": "/work/obscura/04.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#260C0C",
         "alt": ""
       }
@@ -6288,141 +6288,141 @@ export const PROJECTS: Project[] = [
     "images": [
       {
         "src": "/work/places/01.jpg",
-        "width": 1600,
-        "height": 1067,
+        "width": 2493,
+        "height": 1662,
         "color": "#264059",
         "alt": ""
       },
       {
         "src": "/work/places/02.jpg",
-        "width": 1600,
-        "height": 899,
+        "width": 2499,
+        "height": 1404,
         "color": "#262626",
         "alt": ""
       },
       {
         "src": "/work/places/03.jpg",
-        "width": 1600,
-        "height": 898,
+        "width": 2499,
+        "height": 1403,
         "color": "#172917",
         "alt": ""
       },
       {
         "src": "/work/places/04.jpg",
-        "width": 1600,
-        "height": 900,
+        "width": 2499,
+        "height": 1406,
         "color": "#B5C7D1",
         "alt": ""
       },
       {
         "src": "/work/places/05.jpg",
-        "width": 1600,
-        "height": 1200,
+        "width": 2047,
+        "height": 1535,
         "color": "#8C7552",
         "alt": ""
       },
       {
         "src": "/work/places/06.jpg",
-        "width": 1600,
-        "height": 898,
+        "width": 2499,
+        "height": 1403,
         "color": "#79C5E1",
         "alt": ""
       },
       {
         "src": "/work/places/07.jpg",
-        "width": 1600,
-        "height": 839,
+        "width": 2499,
+        "height": 1311,
         "color": "#C6D9E1",
         "alt": ""
       },
       {
         "src": "/work/places/08.jpg",
-        "width": 1600,
-        "height": 898,
+        "width": 2499,
+        "height": 1403,
         "color": "#02242F",
         "alt": ""
       },
       {
         "src": "/work/places/09.jpg",
-        "width": 1600,
-        "height": 900,
+        "width": 2046,
+        "height": 1151,
         "color": "#1F3237",
         "alt": ""
       },
       {
         "src": "/work/places/10.jpg",
-        "width": 1600,
-        "height": 900,
+        "width": 1848,
+        "height": 1040,
         "color": "#01242E",
         "alt": ""
       },
       {
         "src": "/work/places/11.jpg",
-        "width": 1600,
-        "height": 2398,
+        "width": 2429,
+        "height": 3641,
         "color": "#D9F3F3",
         "alt": ""
       },
       {
         "src": "/work/places/12.jpg",
-        "width": 1600,
-        "height": 2398,
+        "width": 2429,
+        "height": 3641,
         "color": "#1D353D",
         "alt": ""
       },
       {
         "src": "/work/places/13.jpg",
-        "width": 1600,
-        "height": 2001,
+        "width": 2499,
+        "height": 3125,
         "color": "#93959D",
         "alt": ""
       },
       {
         "src": "/work/places/14.jpg",
-        "width": 1600,
-        "height": 900,
+        "width": 2499,
+        "height": 1405,
         "color": "#0C260C",
         "alt": ""
       },
       {
         "src": "/work/places/15.jpg",
-        "width": 1600,
-        "height": 1067,
+        "width": 2499,
+        "height": 1666,
         "color": "#152631",
         "alt": ""
       },
       {
         "src": "/work/places/16.jpg",
-        "width": 1600,
-        "height": 2001,
+        "width": 2499,
+        "height": 3125,
         "color": "#021A1C",
         "alt": ""
       },
       {
         "src": "/work/places/17.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3123,
         "color": "#272623",
         "alt": ""
       },
       {
         "src": "/work/places/18.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3123,
         "color": "#23221F",
         "alt": ""
       },
       {
         "src": "/work/places/19.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#F3F3F3",
         "alt": ""
       },
       {
         "src": "/work/places/20.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#260C0C",
         "alt": ""
       }
@@ -6451,120 +6451,120 @@ export const PROJECTS: Project[] = [
     "images": [
       {
         "src": "/work/poise/01.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 1659,
+        "height": 2074,
         "color": "#8C8C73",
         "alt": ""
       },
       {
         "src": "/work/poise/02.jpg",
-        "width": 1600,
-        "height": 2001,
+        "width": 2385,
+        "height": 2982,
         "color": "#404026",
         "alt": ""
       },
       {
         "src": "/work/poise/03.jpg",
-        "width": 1600,
-        "height": 2001,
+        "width": 2369,
+        "height": 2962,
         "color": "#F3F3F3",
         "alt": ""
       },
       {
         "src": "/work/poise/04.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2074,
+        "height": 2593,
         "color": "#F3F3F3",
         "alt": ""
       },
       {
         "src": "/work/poise/05.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#8C7359",
         "alt": ""
       },
       {
         "src": "/work/poise/06.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#8C7359",
         "alt": ""
       },
       {
         "src": "/work/poise/07.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#8C7359",
         "alt": ""
       },
       {
         "src": "/work/poise/08.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#8C7373",
         "alt": ""
       },
       {
         "src": "/work/poise/09.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#C0A68C",
         "alt": ""
       },
       {
         "src": "/work/poise/10.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#C0A68C",
         "alt": ""
       },
       {
         "src": "/work/poise/11.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#C0A68C",
         "alt": ""
       },
       {
         "src": "/work/poise/12.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#C0A68C",
         "alt": ""
       },
       {
         "src": "/work/poise/13.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#262626",
         "alt": ""
       },
       {
         "src": "/work/poise/14.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#262626",
         "alt": ""
       },
       {
         "src": "/work/poise/15.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#A68C73",
         "alt": ""
       },
       {
         "src": "/work/poise/16.jpg",
-        "width": 1600,
-        "height": 2064,
+        "width": 1983,
+        "height": 2558,
         "color": "#A68C73",
         "alt": ""
       },
       {
         "src": "/work/poise/17.jpg",
-        "width": 1600,
-        "height": 2027,
+        "width": 2019,
+        "height": 2558,
         "color": "#A68C73",
         "alt": ""
       }
@@ -6587,106 +6587,106 @@ export const PROJECTS: Project[] = [
     "images": [
       {
         "src": "/work/purgatory/01.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#595940",
         "alt": ""
       },
       {
         "src": "/work/purgatory/02.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#8C8C73",
         "alt": ""
       },
       {
         "src": "/work/purgatory/03.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#40260C",
         "alt": ""
       },
       {
         "src": "/work/purgatory/04.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#737359",
         "alt": ""
       },
       {
         "src": "/work/purgatory/05.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#260C0C",
         "alt": ""
       },
       {
         "src": "/work/purgatory/06.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#260C0C",
         "alt": ""
       },
       {
         "src": "/work/purgatory/07.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#C0A68C",
         "alt": ""
       },
       {
         "src": "/work/purgatory/08.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#262626",
         "alt": ""
       },
       {
         "src": "/work/purgatory/09.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#0C260C",
         "alt": ""
       },
       {
         "src": "/work/purgatory/10.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#26260C",
         "alt": ""
       },
       {
         "src": "/work/purgatory/11.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#260C0C",
         "alt": ""
       },
       {
         "src": "/work/purgatory/12.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#8C7359",
         "alt": ""
       },
       {
         "src": "/work/purgatory/13.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#735940",
         "alt": ""
       },
       {
         "src": "/work/purgatory/14.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#595940",
         "alt": ""
       },
       {
         "src": "/work/purgatory/15.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#40260C",
         "alt": ""
       }
@@ -6709,71 +6709,71 @@ export const PROJECTS: Project[] = [
     "images": [
       {
         "src": "/work/realestate/01.jpg",
-        "width": 1600,
-        "height": 915,
+        "width": 2142,
+        "height": 1225,
         "color": "#BAC4CA",
         "alt": ""
       },
       {
         "src": "/work/realestate/02.jpg",
-        "width": 1600,
-        "height": 887,
+        "width": 2499,
+        "height": 1386,
         "color": "#BACBCB",
         "alt": ""
       },
       {
         "src": "/work/realestate/03.jpg",
-        "width": 1600,
-        "height": 1067,
+        "width": 2499,
+        "height": 1666,
         "color": "#C5D3E8",
         "alt": ""
       },
       {
         "src": "/work/realestate/04.jpg",
-        "width": 1600,
-        "height": 1067,
+        "width": 2499,
+        "height": 1666,
         "color": "#BACDE8",
         "alt": ""
       },
       {
         "src": "/work/realestate/05.jpg",
-        "width": 1600,
-        "height": 1067,
+        "width": 2499,
+        "height": 1666,
         "color": "#836F52",
         "alt": ""
       },
       {
         "src": "/work/realestate/06.jpg",
-        "width": 1600,
-        "height": 1096,
+        "width": 2499,
+        "height": 1712,
         "color": "#E3DBD3",
         "alt": ""
       },
       {
         "src": "/work/realestate/07.jpg",
-        "width": 1600,
-        "height": 1067,
+        "width": 2499,
+        "height": 1666,
         "color": "#ECEBEB",
         "alt": ""
       },
       {
         "src": "/work/realestate/08.jpg",
-        "width": 1600,
-        "height": 1127,
+        "width": 2499,
+        "height": 1761,
         "color": "#312E2C",
         "alt": ""
       },
       {
         "src": "/work/realestate/09.jpg",
-        "width": 1600,
-        "height": 2526,
+        "width": 2367,
+        "height": 3737,
         "color": "#D4D2D0",
         "alt": ""
       },
       {
         "src": "/work/realestate/10.jpg",
-        "width": 1600,
-        "height": 2400,
+        "width": 2428,
+        "height": 3642,
         "color": "#2A2928",
         "alt": ""
       }
@@ -6796,57 +6796,57 @@ export const PROJECTS: Project[] = [
     "images": [
       {
         "src": "/work/retro-reverie-vol-01/01.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#8C5926",
         "alt": ""
       },
       {
         "src": "/work/retro-reverie-vol-01/02.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#260C0C",
         "alt": ""
       },
       {
         "src": "/work/retro-reverie-vol-01/03.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#C0A68C",
         "alt": ""
       },
       {
         "src": "/work/retro-reverie-vol-01/04.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#F3F3F3",
         "alt": ""
       },
       {
         "src": "/work/retro-reverie-vol-01/05.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#F3F3F3",
         "alt": ""
       },
       {
         "src": "/work/retro-reverie-vol-01/06.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#F3D9C0",
         "alt": ""
       },
       {
         "src": "/work/retro-reverie-vol-01/07.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#F3D9D9",
         "alt": ""
       },
       {
         "src": "/work/retro-reverie-vol-01/08.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#F3F3F3",
         "alt": ""
       }
@@ -6869,106 +6869,106 @@ export const PROJECTS: Project[] = [
     "images": [
       {
         "src": "/work/retro-reverie-vol-02/01.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#D9D9F3",
         "alt": ""
       },
       {
         "src": "/work/retro-reverie-vol-02/02.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#A65926",
         "alt": ""
       },
       {
         "src": "/work/retro-reverie-vol-02/03.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#732626",
         "alt": ""
       },
       {
         "src": "/work/retro-reverie-vol-02/04.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#734026",
         "alt": ""
       },
       {
         "src": "/work/retro-reverie-vol-02/05.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#734026",
         "alt": ""
       },
       {
         "src": "/work/retro-reverie-vol-02/06.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#260C0C",
         "alt": ""
       },
       {
         "src": "/work/retro-reverie-vol-02/07.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#260C0C",
         "alt": ""
       },
       {
         "src": "/work/retro-reverie-vol-02/08.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#F3C0A6",
         "alt": ""
       },
       {
         "src": "/work/retro-reverie-vol-02/09.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#F3F3F3",
         "alt": ""
       },
       {
         "src": "/work/retro-reverie-vol-02/10.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#F3F3F3",
         "alt": ""
       },
       {
         "src": "/work/retro-reverie-vol-02/11.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#260C0C",
         "alt": ""
       },
       {
         "src": "/work/retro-reverie-vol-02/12.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#D9D9F3",
         "alt": ""
       },
       {
         "src": "/work/retro-reverie-vol-02/13.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#734026",
         "alt": ""
       },
       {
         "src": "/work/retro-reverie-vol-02/14.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#A65926",
         "alt": ""
       },
       {
         "src": "/work/retro-reverie-vol-02/15.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#592626",
         "alt": ""
       }
@@ -6997,71 +6997,71 @@ export const PROJECTS: Project[] = [
     "images": [
       {
         "src": "/work/revelo/01.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#262626",
         "alt": ""
       },
       {
         "src": "/work/revelo/02.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#264040",
         "alt": ""
       },
       {
         "src": "/work/revelo/03.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#D9D9F3",
         "alt": ""
       },
       {
         "src": "/work/revelo/04.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#F3F3F3",
         "alt": ""
       },
       {
         "src": "/work/revelo/05.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#0C260C",
         "alt": ""
       },
       {
         "src": "/work/revelo/06.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#0C260C",
         "alt": ""
       },
       {
         "src": "/work/revelo/07.jpg",
-        "width": 1600,
-        "height": 1829,
+        "width": 2499,
+        "height": 2856,
         "color": "#F3F3F3",
         "alt": ""
       },
       {
         "src": "/work/revelo/08.jpg",
-        "width": 1600,
-        "height": 1829,
+        "width": 2499,
+        "height": 2856,
         "color": "#F3F3F3",
         "alt": ""
       },
       {
         "src": "/work/revelo/09.jpg",
-        "width": 1600,
-        "height": 1829,
+        "width": 2499,
+        "height": 2856,
         "color": "#F3F3F3",
         "alt": ""
       },
       {
         "src": "/work/revelo/10.jpg",
-        "width": 1600,
-        "height": 1829,
+        "width": 2499,
+        "height": 2856,
         "color": "#F3F3F3",
         "alt": ""
       }
@@ -7090,78 +7090,78 @@ export const PROJECTS: Project[] = [
     "images": [
       {
         "src": "/work/rouge/01.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#730C0C",
         "alt": ""
       },
       {
         "src": "/work/rouge/02.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#730C0C",
         "alt": ""
       },
       {
         "src": "/work/rouge/03.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#8C0C0C",
         "alt": ""
       },
       {
         "src": "/work/rouge/04.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#730C0C",
         "alt": ""
       },
       {
         "src": "/work/rouge/05.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#730C0C",
         "alt": ""
       },
       {
         "src": "/work/rouge/06.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#730C0C",
         "alt": ""
       },
       {
         "src": "/work/rouge/07.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#730C0C",
         "alt": ""
       },
       {
         "src": "/work/rouge/08.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#8C0C0C",
         "alt": ""
       },
       {
         "src": "/work/rouge/09.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#730C0C",
         "alt": ""
       },
       {
         "src": "/work/rouge/10.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#730C0C",
         "alt": ""
       },
       {
         "src": "/work/rouge/11.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#8C2626",
         "alt": ""
       }
@@ -7190,99 +7190,99 @@ export const PROJECTS: Project[] = [
     "images": [
       {
         "src": "/work/sage/01.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#260C0C",
         "alt": ""
       },
       {
         "src": "/work/sage/02.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#F30CC0",
         "alt": ""
       },
       {
         "src": "/work/sage/03.jpg",
-        "width": 1600,
-        "height": 2240,
+        "width": 2499,
+        "height": 3499,
         "color": "#260C0C",
         "alt": ""
       },
       {
         "src": "/work/sage/04.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#260C0C",
         "alt": ""
       },
       {
         "src": "/work/sage/05.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#260C0C",
         "alt": ""
       },
       {
         "src": "/work/sage/06.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#404040",
         "alt": ""
       },
       {
         "src": "/work/sage/07.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#595959",
         "alt": ""
       },
       {
         "src": "/work/sage/08.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#404040",
         "alt": ""
       },
       {
         "src": "/work/sage/09.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#404040",
         "alt": ""
       },
       {
         "src": "/work/sage/10.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#8CA6A6",
         "alt": ""
       },
       {
         "src": "/work/sage/11.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#8CA6A6",
         "alt": ""
       },
       {
         "src": "/work/sage/12.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#A67373",
         "alt": ""
       },
       {
         "src": "/work/sage/13.jpg",
-        "width": 1600,
-        "height": 2240,
+        "width": 2499,
+        "height": 3499,
         "color": "#C08C8C",
         "alt": ""
       },
       {
         "src": "/work/sage/14.jpg",
-        "width": 1600,
-        "height": 2240,
+        "width": 2499,
+        "height": 3499,
         "color": "#C08C8C",
         "alt": ""
       }
@@ -7311,92 +7311,92 @@ export const PROJECTS: Project[] = [
     "images": [
       {
         "src": "/work/sago/01.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#F3F3F3",
         "alt": ""
       },
       {
         "src": "/work/sago/02.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#F3F3F3",
         "alt": ""
       },
       {
         "src": "/work/sago/03.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#F3F3D9",
         "alt": ""
       },
       {
         "src": "/work/sago/04.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#0C260C",
         "alt": ""
       },
       {
         "src": "/work/sago/05.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#F3F3F3",
         "alt": ""
       },
       {
         "src": "/work/sago/06.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#C0C0C0",
         "alt": ""
       },
       {
         "src": "/work/sago/07.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#C0C0C0",
         "alt": ""
       },
       {
         "src": "/work/sago/08.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#D9D9D9",
         "alt": ""
       },
       {
         "src": "/work/sago/09.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#D9D9D9",
         "alt": ""
       },
       {
         "src": "/work/sago/10.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#D9D9D9",
         "alt": ""
       },
       {
         "src": "/work/sago/11.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#D9D9D9",
         "alt": ""
       },
       {
         "src": "/work/sago/12.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#F3F3F3",
         "alt": ""
       },
       {
         "src": "/work/sago/13.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#F3F3F3",
         "alt": ""
       }
@@ -7425,190 +7425,190 @@ export const PROJECTS: Project[] = [
     "images": [
       {
         "src": "/work/sara/01.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#0C260C",
         "alt": ""
       },
       {
         "src": "/work/sara/02.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#73F3F3",
         "alt": ""
       },
       {
         "src": "/work/sara/03.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#262626",
         "alt": ""
       },
       {
         "src": "/work/sara/04.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#D9F3F3",
         "alt": ""
       },
       {
         "src": "/work/sara/05.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#A6F3F3",
         "alt": ""
       },
       {
         "src": "/work/sara/06.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#A6F3F3",
         "alt": ""
       },
       {
         "src": "/work/sara/07.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#0C260C",
         "alt": ""
       },
       {
         "src": "/work/sara/08.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#A673D9",
         "alt": ""
       },
       {
         "src": "/work/sara/09.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#260C40",
         "alt": ""
       },
       {
         "src": "/work/sara/10.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#260C26",
         "alt": ""
       },
       {
         "src": "/work/sara/11.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#A68CD9",
         "alt": ""
       },
       {
         "src": "/work/sara/12.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#8C73C0",
         "alt": ""
       },
       {
         "src": "/work/sara/13.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#D98CC0",
         "alt": ""
       },
       {
         "src": "/work/sara/14.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#404040",
         "alt": ""
       },
       {
         "src": "/work/sara/15.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#404059",
         "alt": ""
       },
       {
         "src": "/work/sara/16.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#735959",
         "alt": ""
       },
       {
         "src": "/work/sara/17.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#405973",
         "alt": ""
       },
       {
         "src": "/work/sara/18.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#265973",
         "alt": ""
       },
       {
         "src": "/work/sara/19.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#260C0C",
         "alt": ""
       },
       {
         "src": "/work/sara/20.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#260C0C",
         "alt": ""
       },
       {
         "src": "/work/sara/21.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#0C260C",
         "alt": ""
       },
       {
         "src": "/work/sara/22.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#F30C26",
         "alt": ""
       },
       {
         "src": "/work/sara/23.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#0C260C",
         "alt": ""
       },
       {
         "src": "/work/sara/24.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#F3C073",
         "alt": ""
       },
       {
         "src": "/work/sara/25.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#260C26",
         "alt": ""
       },
       {
         "src": "/work/sara/26.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#400C26",
         "alt": ""
       },
       {
         "src": "/work/sara/27.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#F30C59",
         "alt": ""
       }
@@ -7631,29 +7631,29 @@ export const PROJECTS: Project[] = [
     "images": [
       {
         "src": "/work/solace/01.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#260C0C",
         "alt": ""
       },
       {
         "src": "/work/solace/02.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#260C0C",
         "alt": ""
       },
       {
         "src": "/work/solace/03.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#590C0C",
         "alt": ""
       },
       {
         "src": "/work/solace/04.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#260C0C",
         "alt": ""
       }
@@ -7682,29 +7682,29 @@ export const PROJECTS: Project[] = [
     "images": [
       {
         "src": "/work/solitude/01.jpg",
-        "width": 1600,
-        "height": 2001,
+        "width": 2499,
+        "height": 3125,
         "color": "#C0C0C0",
         "alt": ""
       },
       {
         "src": "/work/solitude/02.jpg",
-        "width": 1600,
-        "height": 2001,
+        "width": 2499,
+        "height": 3125,
         "color": "#C0C0C0",
         "alt": ""
       },
       {
         "src": "/work/solitude/03.jpg",
-        "width": 1600,
-        "height": 2001,
+        "width": 2499,
+        "height": 3125,
         "color": "#C0C0C0",
         "alt": ""
       },
       {
         "src": "/work/solitude/04.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#C0C0C0",
         "alt": ""
       }
@@ -7733,50 +7733,50 @@ export const PROJECTS: Project[] = [
     "images": [
       {
         "src": "/work/sols/01.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#D9D9D9",
         "alt": ""
       },
       {
         "src": "/work/sols/02.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#F3F3F3",
         "alt": ""
       },
       {
         "src": "/work/sols/03.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#8C8C8C",
         "alt": ""
       },
       {
         "src": "/work/sols/04.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#F3F3F3",
         "alt": ""
       },
       {
         "src": "/work/sols/05.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#F3F3F3",
         "alt": ""
       },
       {
         "src": "/work/sols/06.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#F3F3F3",
         "alt": ""
       },
       {
         "src": "/work/sols/07.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#F3F3F3",
         "alt": ""
       }
@@ -7805,36 +7805,36 @@ export const PROJECTS: Project[] = [
     "images": [
       {
         "src": "/work/sonder/01.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#262626",
         "alt": ""
       },
       {
         "src": "/work/sonder/02.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#262626",
         "alt": ""
       },
       {
         "src": "/work/sonder/03.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#262626",
         "alt": ""
       },
       {
         "src": "/work/sonder/04.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#262626",
         "alt": ""
       },
       {
         "src": "/work/sonder/05.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#262626",
         "alt": ""
       }
@@ -7863,218 +7863,218 @@ export const PROJECTS: Project[] = [
     "images": [
       {
         "src": "/work/steampunk-files-001/01.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#262626",
         "alt": ""
       },
       {
         "src": "/work/steampunk-files-001/02.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#262626",
         "alt": ""
       },
       {
         "src": "/work/steampunk-files-001/03.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#262626",
         "alt": ""
       },
       {
         "src": "/work/steampunk-files-001/04.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#262626",
         "alt": ""
       },
       {
         "src": "/work/steampunk-files-001/05.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#262626",
         "alt": ""
       },
       {
         "src": "/work/steampunk-files-001/06.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#262626",
         "alt": ""
       },
       {
         "src": "/work/steampunk-files-001/07.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#262626",
         "alt": ""
       },
       {
         "src": "/work/steampunk-files-001/08.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#262626",
         "alt": ""
       },
       {
         "src": "/work/steampunk-files-001/09.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#262626",
         "alt": ""
       },
       {
         "src": "/work/steampunk-files-001/10.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#262626",
         "alt": ""
       },
       {
         "src": "/work/steampunk-files-001/11.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#262626",
         "alt": ""
       },
       {
         "src": "/work/steampunk-files-001/12.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#262626",
         "alt": ""
       },
       {
         "src": "/work/steampunk-files-001/13.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#D9D9D9",
         "alt": ""
       },
       {
         "src": "/work/steampunk-files-001/14.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#262626",
         "alt": ""
       },
       {
         "src": "/work/steampunk-files-001/15.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#262626",
         "alt": ""
       },
       {
         "src": "/work/steampunk-files-001/16.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#F3F3F3",
         "alt": ""
       },
       {
         "src": "/work/steampunk-files-001/17.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#262626",
         "alt": ""
       },
       {
         "src": "/work/steampunk-files-001/18.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#262626",
         "alt": ""
       },
       {
         "src": "/work/steampunk-files-001/19.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#262626",
         "alt": ""
       },
       {
         "src": "/work/steampunk-files-001/20.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#F3F3F3",
         "alt": ""
       },
       {
         "src": "/work/steampunk-files-001/21.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#262626",
         "alt": ""
       },
       {
         "src": "/work/steampunk-files-001/22.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#262626",
         "alt": ""
       },
       {
         "src": "/work/steampunk-files-001/23.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#262626",
         "alt": ""
       },
       {
         "src": "/work/steampunk-files-001/24.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#262626",
         "alt": ""
       },
       {
         "src": "/work/steampunk-files-001/25.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#262626",
         "alt": ""
       },
       {
         "src": "/work/steampunk-files-001/26.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#262626",
         "alt": ""
       },
       {
         "src": "/work/steampunk-files-001/27.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#262626",
         "alt": ""
       },
       {
         "src": "/work/steampunk-files-001/28.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#262626",
         "alt": ""
       },
       {
         "src": "/work/steampunk-files-001/29.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#262626",
         "alt": ""
       },
       {
         "src": "/work/steampunk-files-001/30.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#262626",
         "alt": ""
       },
       {
         "src": "/work/steampunk-files-001/31.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#262626",
         "alt": ""
       }
@@ -8108,85 +8108,85 @@ export const PROJECTS: Project[] = [
     "images": [
       {
         "src": "/work/stratus-lookbook-vol-1/01.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#26260C",
         "alt": ""
       },
       {
         "src": "/work/stratus-lookbook-vol-1/02.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#0C260C",
         "alt": ""
       },
       {
         "src": "/work/stratus-lookbook-vol-1/03.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#408C8C",
         "alt": ""
       },
       {
         "src": "/work/stratus-lookbook-vol-1/04.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#262626",
         "alt": ""
       },
       {
         "src": "/work/stratus-lookbook-vol-1/05.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#8C7340",
         "alt": ""
       },
       {
         "src": "/work/stratus-lookbook-vol-1/06.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#594026",
         "alt": ""
       },
       {
         "src": "/work/stratus-lookbook-vol-1/07.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#40738C",
         "alt": ""
       },
       {
         "src": "/work/stratus-lookbook-vol-1/08.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#262626",
         "alt": ""
       },
       {
         "src": "/work/stratus-lookbook-vol-1/09.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#F3F3F3",
         "alt": ""
       },
       {
         "src": "/work/stratus-lookbook-vol-1/10.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#262626",
         "alt": ""
       },
       {
         "src": "/work/stratus-lookbook-vol-1/11.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#C0D9D9",
         "alt": ""
       },
       {
         "src": "/work/stratus-lookbook-vol-1/12.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#8CC0D9",
         "alt": ""
       }
@@ -8215,120 +8215,120 @@ export const PROJECTS: Project[] = [
     "images": [
       {
         "src": "/work/taneka/01.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#F3F3F3",
         "alt": ""
       },
       {
         "src": "/work/taneka/02.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#F3F3F3",
         "alt": ""
       },
       {
         "src": "/work/taneka/03.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#F3F3F3",
         "alt": ""
       },
       {
         "src": "/work/taneka/04.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#F3F3F3",
         "alt": ""
       },
       {
         "src": "/work/taneka/05.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#F3F3F3",
         "alt": ""
       },
       {
         "src": "/work/taneka/06.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#F3F3F3",
         "alt": ""
       },
       {
         "src": "/work/taneka/07.jpg",
-        "width": 1600,
-        "height": 1829,
+        "width": 2499,
+        "height": 2856,
         "color": "#8C8C8C",
         "alt": ""
       },
       {
         "src": "/work/taneka/08.jpg",
-        "width": 1600,
-        "height": 1829,
+        "width": 2499,
+        "height": 2856,
         "color": "#737373",
         "alt": ""
       },
       {
         "src": "/work/taneka/09.jpg",
-        "width": 1600,
-        "height": 1829,
+        "width": 2499,
+        "height": 2856,
         "color": "#737373",
         "alt": ""
       },
       {
         "src": "/work/taneka/10.jpg",
-        "width": 1600,
-        "height": 1829,
+        "width": 2499,
+        "height": 2856,
         "color": "#8C8C8C",
         "alt": ""
       },
       {
         "src": "/work/taneka/11.jpg",
-        "width": 1600,
-        "height": 1829,
+        "width": 2499,
+        "height": 2856,
         "color": "#737373",
         "alt": ""
       },
       {
         "src": "/work/taneka/12.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#F3D9D9",
         "alt": ""
       },
       {
         "src": "/work/taneka/13.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#F3F3F3",
         "alt": ""
       },
       {
         "src": "/work/taneka/14.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#F3F3F3",
         "alt": ""
       },
       {
         "src": "/work/taneka/15.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#F3F3F3",
         "alt": ""
       },
       {
         "src": "/work/taneka/16.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#F3F3F3",
         "alt": ""
       },
       {
         "src": "/work/taneka/17.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#D9D9D9",
         "alt": ""
       }
@@ -8357,50 +8357,50 @@ export const PROJECTS: Project[] = [
     "images": [
       {
         "src": "/work/the-den-talkshow/01.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#262626",
         "alt": ""
       },
       {
         "src": "/work/the-den-talkshow/02.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#F3F3F3",
         "alt": ""
       },
       {
         "src": "/work/the-den-talkshow/03.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#F3F3F3",
         "alt": ""
       },
       {
         "src": "/work/the-den-talkshow/04.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#F3F3F3",
         "alt": ""
       },
       {
         "src": "/work/the-den-talkshow/05.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#262626",
         "alt": ""
       },
       {
         "src": "/work/the-den-talkshow/06.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#262626",
         "alt": ""
       },
       {
         "src": "/work/the-den-talkshow/07.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#260C0C",
         "alt": ""
       }
@@ -8429,120 +8429,120 @@ export const PROJECTS: Project[] = [
     "images": [
       {
         "src": "/work/torteline/01.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#0C260C",
         "alt": ""
       },
       {
         "src": "/work/torteline/02.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#0C260C",
         "alt": ""
       },
       {
         "src": "/work/torteline/03.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#0C260C",
         "alt": ""
       },
       {
         "src": "/work/torteline/04.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#408CA6",
         "alt": ""
       },
       {
         "src": "/work/torteline/05.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#0C260C",
         "alt": ""
       },
       {
         "src": "/work/torteline/06.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#8CD9D9",
         "alt": ""
       },
       {
         "src": "/work/torteline/07.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#8C0C0C",
         "alt": ""
       },
       {
         "src": "/work/torteline/08.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#260C0C",
         "alt": ""
       },
       {
         "src": "/work/torteline/09.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#730C0C",
         "alt": ""
       },
       {
         "src": "/work/torteline/10.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#730C0C",
         "alt": ""
       },
       {
         "src": "/work/torteline/11.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#A60C0C",
         "alt": ""
       },
       {
         "src": "/work/torteline/12.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#40260C",
         "alt": ""
       },
       {
         "src": "/work/torteline/13.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#735940",
         "alt": ""
       },
       {
         "src": "/work/torteline/14.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#594026",
         "alt": ""
       },
       {
         "src": "/work/torteline/15.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#735940",
         "alt": ""
       },
       {
         "src": "/work/torteline/16.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#C07326",
         "alt": ""
       },
       {
         "src": "/work/torteline/17.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#8C8C8C",
         "alt": ""
       }
@@ -8571,50 +8571,50 @@ export const PROJECTS: Project[] = [
     "images": [
       {
         "src": "/work/totem/01.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#260C0C",
         "alt": ""
       },
       {
         "src": "/work/totem/02.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#262626",
         "alt": ""
       },
       {
         "src": "/work/totem/03.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#262626",
         "alt": ""
       },
       {
         "src": "/work/totem/04.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#262626",
         "alt": ""
       },
       {
         "src": "/work/totem/05.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#262626",
         "alt": ""
       },
       {
         "src": "/work/totem/06.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#262626",
         "alt": ""
       },
       {
         "src": "/work/totem/07.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#A67359",
         "alt": ""
       }
@@ -8643,50 +8643,50 @@ export const PROJECTS: Project[] = [
     "images": [
       {
         "src": "/work/transmutate/01.jpg",
-        "width": 1600,
-        "height": 1829,
+        "width": 2499,
+        "height": 2856,
         "color": "#40738C",
         "alt": ""
       },
       {
         "src": "/work/transmutate/02.jpg",
-        "width": 1600,
-        "height": 1829,
+        "width": 2499,
+        "height": 2856,
         "color": "#4073A6",
         "alt": ""
       },
       {
         "src": "/work/transmutate/03.jpg",
-        "width": 1600,
-        "height": 1829,
+        "width": 2499,
+        "height": 2856,
         "color": "#73C0F3",
         "alt": ""
       },
       {
         "src": "/work/transmutate/04.jpg",
-        "width": 1600,
-        "height": 1829,
+        "width": 2499,
+        "height": 2856,
         "color": "#4073A6",
         "alt": ""
       },
       {
         "src": "/work/transmutate/05.jpg",
-        "width": 1600,
-        "height": 1829,
+        "width": 2499,
+        "height": 2856,
         "color": "#264059",
         "alt": ""
       },
       {
         "src": "/work/transmutate/06.jpg",
-        "width": 1600,
-        "height": 1829,
+        "width": 2499,
+        "height": 2856,
         "color": "#4073A6",
         "alt": ""
       },
       {
         "src": "/work/transmutate/07.jpg",
-        "width": 1600,
-        "height": 1829,
+        "width": 2499,
+        "height": 2856,
         "color": "#5973A6",
         "alt": ""
       }
@@ -8715,71 +8715,71 @@ export const PROJECTS: Project[] = [
     "images": [
       {
         "src": "/work/true-grit/01.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#26260C",
         "alt": ""
       },
       {
         "src": "/work/true-grit/02.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#26C0C0",
         "alt": ""
       },
       {
         "src": "/work/true-grit/03.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#260C0C",
         "alt": ""
       },
       {
         "src": "/work/true-grit/04.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#26260C",
         "alt": ""
       },
       {
         "src": "/work/true-grit/05.jpg",
-        "width": 1600,
-        "height": 2399,
+        "width": 2428,
+        "height": 3641,
         "color": "#26C0C0",
         "alt": ""
       },
       {
         "src": "/work/true-grit/06.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#260C0C",
         "alt": ""
       },
       {
         "src": "/work/true-grit/07.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#26C0C0",
         "alt": ""
       },
       {
         "src": "/work/true-grit/08.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#40C0C0",
         "alt": ""
       },
       {
         "src": "/work/true-grit/09.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#260C0C",
         "alt": ""
       },
       {
         "src": "/work/true-grit/10.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#73D9D9",
         "alt": ""
       }
@@ -8808,169 +8808,169 @@ export const PROJECTS: Project[] = [
     "images": [
       {
         "src": "/work/ukiyosunknown/01.jpg",
-        "width": 1600,
-        "height": 2133,
+        "width": 2499,
+        "height": 3331,
         "color": "#F2EDEA",
         "alt": ""
       },
       {
         "src": "/work/ukiyosunknown/02.jpg",
-        "width": 1600,
-        "height": 2134,
+        "width": 2499,
+        "height": 3333,
         "color": "#939388",
         "alt": ""
       },
       {
         "src": "/work/ukiyosunknown/03.jpg",
-        "width": 1600,
-        "height": 2134,
+        "width": 1628,
+        "height": 2171,
         "color": "#3B4A4F",
         "alt": ""
       },
       {
         "src": "/work/ukiyosunknown/04.jpg",
-        "width": 1600,
-        "height": 2134,
+        "width": 2499,
+        "height": 3333,
         "color": "#6D7167",
         "alt": ""
       },
       {
         "src": "/work/ukiyosunknown/05.jpg",
-        "width": 1600,
-        "height": 2135,
+        "width": 2499,
+        "height": 3334,
         "color": "#797C72",
         "alt": ""
       },
       {
         "src": "/work/ukiyosunknown/06.jpg",
-        "width": 1600,
-        "height": 2133,
+        "width": 2499,
+        "height": 3331,
         "color": "#A4A19A",
         "alt": ""
       },
       {
         "src": "/work/ukiyosunknown/07.jpg",
-        "width": 1600,
-        "height": 2134,
+        "width": 2499,
+        "height": 3333,
         "color": "#95968E",
         "alt": ""
       },
       {
         "src": "/work/ukiyosunknown/08.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2047,
+        "height": 2559,
         "color": "#C0C0C0",
         "alt": ""
       },
       {
         "src": "/work/ukiyosunknown/09.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#D9C0C0",
         "alt": ""
       },
       {
         "src": "/work/ukiyosunknown/10.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#D9C0C0",
         "alt": ""
       },
       {
         "src": "/work/ukiyosunknown/11.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#A6A6A6",
         "alt": ""
       },
       {
         "src": "/work/ukiyosunknown/12.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#A6A68C",
         "alt": ""
       },
       {
         "src": "/work/ukiyosunknown/13.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#D9C0C0",
         "alt": ""
       },
       {
         "src": "/work/ukiyosunknown/14.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#D9C0C0",
         "alt": ""
       },
       {
         "src": "/work/ukiyosunknown/15.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#C0C0C0",
         "alt": ""
       },
       {
         "src": "/work/ukiyosunknown/16.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#D9D9D9",
         "alt": ""
       },
       {
         "src": "/work/ukiyosunknown/17.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#D9C0C0",
         "alt": ""
       },
       {
         "src": "/work/ukiyosunknown/18.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#D9C0C0",
         "alt": ""
       },
       {
         "src": "/work/ukiyosunknown/19.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#D9C0C0",
         "alt": ""
       },
       {
         "src": "/work/ukiyosunknown/20.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#262626",
         "alt": ""
       },
       {
         "src": "/work/ukiyosunknown/21.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#262626",
         "alt": ""
       },
       {
         "src": "/work/ukiyosunknown/22.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#262626",
         "alt": ""
       },
       {
         "src": "/work/ukiyosunknown/23.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#C0A6A6",
         "alt": ""
       },
       {
         "src": "/work/ukiyosunknown/24.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#D9C0C0",
         "alt": ""
       }
@@ -8993,50 +8993,50 @@ export const PROJECTS: Project[] = [
     "images": [
       {
         "src": "/work/urban-reverie/01.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#F3F3F3",
         "alt": ""
       },
       {
         "src": "/work/urban-reverie/02.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#262626",
         "alt": ""
       },
       {
         "src": "/work/urban-reverie/03.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#262626",
         "alt": ""
       },
       {
         "src": "/work/urban-reverie/04.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#262626",
         "alt": ""
       },
       {
         "src": "/work/urban-reverie/05.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#262626",
         "alt": ""
       },
       {
         "src": "/work/urban-reverie/06.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#262626",
         "alt": ""
       },
       {
         "src": "/work/urban-reverie/07.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#262626",
         "alt": ""
       }
@@ -9065,15 +9065,15 @@ export const PROJECTS: Project[] = [
     "images": [
       {
         "src": "/work/valgur/01.jpg",
-        "width": 1600,
-        "height": 2133,
+        "width": 2499,
+        "height": 3331,
         "color": "#050605",
         "alt": ""
       },
       {
         "src": "/work/valgur/02.jpg",
-        "width": 1600,
-        "height": 2133,
+        "width": 2499,
+        "height": 3331,
         "color": "#050505",
         "alt": ""
       },
@@ -9086,92 +9086,92 @@ export const PROJECTS: Project[] = [
       },
       {
         "src": "/work/valgur/04.jpg",
-        "width": 1600,
-        "height": 2134,
+        "width": 2499,
+        "height": 3333,
         "color": "#020303",
         "alt": ""
       },
       {
         "src": "/work/valgur/05.jpg",
-        "width": 1600,
-        "height": 2134,
+        "width": 2499,
+        "height": 3333,
         "color": "#06090A",
         "alt": ""
       },
       {
         "src": "/work/valgur/06.jpg",
-        "width": 1600,
-        "height": 1067,
+        "width": 2499,
+        "height": 1667,
         "color": "#050505",
         "alt": ""
       },
       {
         "src": "/work/valgur/07.jpg",
-        "width": 1600,
-        "height": 2133,
+        "width": 2499,
+        "height": 3331,
         "color": "#18303D",
         "alt": ""
       },
       {
         "src": "/work/valgur/08.jpg",
-        "width": 1600,
-        "height": 2134,
+        "width": 2499,
+        "height": 3333,
         "color": "#080C0D",
         "alt": ""
       },
       {
         "src": "/work/valgur/09.jpg",
-        "width": 1600,
-        "height": 2134,
+        "width": 2499,
+        "height": 3333,
         "color": "#040505",
         "alt": ""
       },
       {
         "src": "/work/valgur/10.jpg",
-        "width": 1600,
-        "height": 2133,
+        "width": 2499,
+        "height": 3331,
         "color": "#090D0E",
         "alt": ""
       },
       {
         "src": "/work/valgur/11.jpg",
-        "width": 1600,
-        "height": 2094,
+        "width": 2499,
+        "height": 3270,
         "color": "#1B3C47",
         "alt": ""
       },
       {
         "src": "/work/valgur/12.jpg",
-        "width": 1600,
-        "height": 1067,
+        "width": 2499,
+        "height": 1667,
         "color": "#16323E",
         "alt": ""
       },
       {
         "src": "/work/valgur/13.jpg",
-        "width": 1600,
-        "height": 2133,
+        "width": 2499,
+        "height": 3331,
         "color": "#030405",
         "alt": ""
       },
       {
         "src": "/work/valgur/14.jpg",
-        "width": 1600,
-        "height": 2133,
+        "width": 2499,
+        "height": 3331,
         "color": "#030303",
         "alt": ""
       },
       {
         "src": "/work/valgur/15.jpg",
-        "width": 1600,
-        "height": 2133,
+        "width": 2499,
+        "height": 3331,
         "color": "#040505",
         "alt": ""
       },
       {
         "src": "/work/valgur/16.jpg",
-        "width": 1600,
-        "height": 2134,
+        "width": 2499,
+        "height": 3333,
         "color": "#FFFFFF",
         "alt": ""
       }
@@ -9200,85 +9200,85 @@ export const PROJECTS: Project[] = [
     "images": [
       {
         "src": "/work/vendetta/01.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#260C0C",
         "alt": ""
       },
       {
         "src": "/work/vendetta/02.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#400C0C",
         "alt": ""
       },
       {
         "src": "/work/vendetta/03.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#730C0C",
         "alt": ""
       },
       {
         "src": "/work/vendetta/04.jpg",
-        "width": 1600,
-        "height": 2398,
+        "width": 2429,
+        "height": 3641,
         "color": "#8C0C0C",
         "alt": ""
       },
       {
         "src": "/work/vendetta/05.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#400C0C",
         "alt": ""
       },
       {
         "src": "/work/vendetta/06.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#400C0C",
         "alt": ""
       },
       {
         "src": "/work/vendetta/07.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#260C0C",
         "alt": ""
       },
       {
         "src": "/work/vendetta/08.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#590C0C",
         "alt": ""
       },
       {
         "src": "/work/vendetta/09.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#260C0C",
         "alt": ""
       },
       {
         "src": "/work/vendetta/10.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#730C0C",
         "alt": ""
       },
       {
         "src": "/work/vendetta/11.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#730C0C",
         "alt": ""
       },
       {
         "src": "/work/vendetta/12.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#F30C0C",
         "alt": ""
       }
@@ -9307,92 +9307,92 @@ export const PROJECTS: Project[] = [
     "images": [
       {
         "src": "/work/vines-roses/01.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#262626",
         "alt": ""
       },
       {
         "src": "/work/vines-roses/02.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#262626",
         "alt": ""
       },
       {
         "src": "/work/vines-roses/03.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#262626",
         "alt": ""
       },
       {
         "src": "/work/vines-roses/04.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#260C0C",
         "alt": ""
       },
       {
         "src": "/work/vines-roses/05.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#737373",
         "alt": ""
       },
       {
         "src": "/work/vines-roses/06.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#262626",
         "alt": ""
       },
       {
         "src": "/work/vines-roses/07.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#595959",
         "alt": ""
       },
       {
         "src": "/work/vines-roses/08.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#262626",
         "alt": ""
       },
       {
         "src": "/work/vines-roses/09.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#262626",
         "alt": ""
       },
       {
         "src": "/work/vines-roses/10.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#262626",
         "alt": ""
       },
       {
         "src": "/work/vines-roses/11.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#262626",
         "alt": ""
       },
       {
         "src": "/work/vines-roses/12.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#262626",
         "alt": ""
       },
       {
         "src": "/work/vines-roses/13.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#262626",
         "alt": ""
       }
@@ -9415,232 +9415,232 @@ export const PROJECTS: Project[] = [
     "images": [
       {
         "src": "/work/bridal/01.jpg",
-        "width": 1600,
-        "height": 2399,
+        "width": 2428,
+        "height": 3641,
         "color": "#F3F3F3",
         "alt": ""
       },
       {
         "src": "/work/bridal/02.jpg",
-        "width": 1600,
-        "height": 1067,
+        "width": 2499,
+        "height": 1667,
         "color": "#C0C0C0",
         "alt": ""
       },
       {
         "src": "/work/bridal/03.jpg",
-        "width": 1600,
-        "height": 2398,
+        "width": 2429,
+        "height": 3641,
         "color": "#D9D9D9",
         "alt": ""
       },
       {
         "src": "/work/bridal/04.jpg",
-        "width": 1600,
-        "height": 2398,
+        "width": 2429,
+        "height": 3641,
         "color": "#C0C0C0",
         "alt": ""
       },
       {
         "src": "/work/bridal/05.jpg",
-        "width": 1600,
-        "height": 2399,
+        "width": 2428,
+        "height": 3641,
         "color": "#F3F3F3",
         "alt": ""
       },
       {
         "src": "/work/bridal/06.jpg",
-        "width": 1600,
-        "height": 2398,
+        "width": 2429,
+        "height": 3641,
         "color": "#F3F3F3",
         "alt": ""
       },
       {
         "src": "/work/bridal/07.jpg",
-        "width": 1600,
-        "height": 2398,
+        "width": 2429,
+        "height": 3641,
         "color": "#262626",
         "alt": ""
       },
       {
         "src": "/work/bridal/08.jpg",
-        "width": 1600,
-        "height": 1067,
+        "width": 2499,
+        "height": 1667,
         "color": "#C0C0C0",
         "alt": ""
       },
       {
         "src": "/work/bridal/09.jpg",
-        "width": 1600,
-        "height": 2399,
+        "width": 2428,
+        "height": 3641,
         "color": "#F3F3F3",
         "alt": ""
       },
       {
         "src": "/work/bridal/10.jpg",
-        "width": 1600,
-        "height": 2399,
+        "width": 2428,
+        "height": 3641,
         "color": "#C0C0A6",
         "alt": ""
       },
       {
         "src": "/work/bridal/11.jpg",
-        "width": 1600,
-        "height": 1067,
+        "width": 2499,
+        "height": 1667,
         "color": "#737373",
         "alt": ""
       },
       {
         "src": "/work/bridal/12.jpg",
-        "width": 1600,
-        "height": 2398,
+        "width": 2429,
+        "height": 3641,
         "color": "#F3F3F3",
         "alt": ""
       },
       {
         "src": "/work/bridal/13.jpg",
-        "width": 1600,
-        "height": 2399,
+        "width": 2428,
+        "height": 3641,
         "color": "#F3F3F3",
         "alt": ""
       },
       {
         "src": "/work/bridal/14.jpg",
-        "width": 1600,
-        "height": 2398,
+        "width": 2429,
+        "height": 3641,
         "color": "#F3F3F3",
         "alt": ""
       },
       {
         "src": "/work/bridal/15.jpg",
-        "width": 1600,
-        "height": 1067,
+        "width": 2499,
+        "height": 1667,
         "color": "#D9C0A6",
         "alt": ""
       },
       {
         "src": "/work/bridal/16.jpg",
-        "width": 1600,
-        "height": 1067,
+        "width": 2499,
+        "height": 1667,
         "color": "#F3F3F3",
         "alt": ""
       },
       {
         "src": "/work/bridal/17.jpg",
-        "width": 1600,
-        "height": 1067,
+        "width": 2499,
+        "height": 1667,
         "color": "#F3F3F3",
         "alt": ""
       },
       {
         "src": "/work/bridal/18.jpg",
-        "width": 1600,
-        "height": 2399,
+        "width": 2428,
+        "height": 3641,
         "color": "#D9D9D9",
         "alt": ""
       },
       {
         "src": "/work/bridal/19.jpg",
-        "width": 1600,
-        "height": 2398,
+        "width": 2429,
+        "height": 3641,
         "color": "#C0C0C0",
         "alt": ""
       },
       {
         "src": "/work/bridal/20.jpg",
-        "width": 1600,
-        "height": 2399,
+        "width": 2428,
+        "height": 3641,
         "color": "#C0A68C",
         "alt": ""
       },
       {
         "src": "/work/bridal/21.jpg",
-        "width": 1600,
-        "height": 2398,
+        "width": 2429,
+        "height": 3641,
         "color": "#735940",
         "alt": ""
       },
       {
         "src": "/work/bridal/22.jpg",
-        "width": 1600,
-        "height": 1067,
+        "width": 2499,
+        "height": 1667,
         "color": "#737373",
         "alt": ""
       },
       {
         "src": "/work/bridal/23.jpg",
-        "width": 1600,
-        "height": 1067,
+        "width": 2499,
+        "height": 1667,
         "color": "#8C8C73",
         "alt": ""
       },
       {
         "src": "/work/bridal/24.jpg",
-        "width": 1600,
-        "height": 1067,
+        "width": 2499,
+        "height": 1667,
         "color": "#8C7373",
         "alt": ""
       },
       {
         "src": "/work/bridal/25.jpg",
-        "width": 1600,
-        "height": 1067,
+        "width": 2499,
+        "height": 1667,
         "color": "#262626",
         "alt": ""
       },
       {
         "src": "/work/bridal/26.jpg",
-        "width": 1600,
-        "height": 1067,
+        "width": 2499,
+        "height": 1667,
         "color": "#262626",
         "alt": ""
       },
       {
         "src": "/work/bridal/27.jpg",
-        "width": 1600,
-        "height": 2398,
+        "width": 2429,
+        "height": 3641,
         "color": "#262626",
         "alt": ""
       },
       {
         "src": "/work/bridal/28.jpg",
-        "width": 1600,
-        "height": 2399,
+        "width": 2428,
+        "height": 3641,
         "color": "#262626",
         "alt": ""
       },
       {
         "src": "/work/bridal/29.jpg",
-        "width": 1600,
-        "height": 2398,
+        "width": 2429,
+        "height": 3641,
         "color": "#C0C0C0",
         "alt": ""
       },
       {
         "src": "/work/bridal/30.jpg",
-        "width": 1600,
-        "height": 2398,
+        "width": 2429,
+        "height": 3641,
         "color": "#262626",
         "alt": ""
       },
       {
         "src": "/work/bridal/31.jpg",
-        "width": 1600,
-        "height": 2399,
+        "width": 2428,
+        "height": 3641,
         "color": "#26260C",
         "alt": ""
       },
       {
         "src": "/work/bridal/32.jpg",
-        "width": 1600,
-        "height": 2399,
+        "width": 2428,
+        "height": 3641,
         "color": "#262626",
         "alt": ""
       },
       {
         "src": "/work/bridal/33.jpg",
-        "width": 1600,
-        "height": 1067,
+        "width": 2499,
+        "height": 1667,
         "color": "#8C7359",
         "alt": ""
       }
@@ -9669,281 +9669,281 @@ export const PROJECTS: Project[] = [
     "images": [
       {
         "src": "/work/weddings/01.jpg",
-        "width": 1600,
-        "height": 1067,
+        "width": 2499,
+        "height": 1667,
         "color": "#AFAAAD",
         "alt": ""
       },
       {
         "src": "/work/weddings/02.jpg",
-        "width": 1600,
-        "height": 2134,
+        "width": 2499,
+        "height": 3333,
         "color": "#BCB2B2",
         "alt": ""
       },
       {
         "src": "/work/weddings/03.jpg",
-        "width": 1600,
-        "height": 2134,
+        "width": 2499,
+        "height": 3333,
         "color": "#C9C7C9",
         "alt": ""
       },
       {
         "src": "/work/weddings/04.jpg",
-        "width": 1600,
-        "height": 2134,
+        "width": 2499,
+        "height": 3333,
         "color": "#746757",
         "alt": ""
       },
       {
         "src": "/work/weddings/05.jpg",
-        "width": 1600,
-        "height": 2134,
+        "width": 2499,
+        "height": 3333,
         "color": "#766D68",
         "alt": ""
       },
       {
         "src": "/work/weddings/06.jpg",
-        "width": 1600,
-        "height": 1067,
+        "width": 2499,
+        "height": 1667,
         "color": "#9E9998",
         "alt": ""
       },
       {
         "src": "/work/weddings/07.jpg",
-        "width": 1600,
-        "height": 2134,
+        "width": 2499,
+        "height": 3333,
         "color": "#8B837E",
         "alt": ""
       },
       {
         "src": "/work/weddings/08.jpg",
-        "width": 1600,
-        "height": 2134,
+        "width": 2499,
+        "height": 3333,
         "color": "#9F9A98",
         "alt": ""
       },
       {
         "src": "/work/weddings/09.jpg",
-        "width": 1600,
-        "height": 1067,
+        "width": 2499,
+        "height": 1667,
         "color": "#635E59",
         "alt": ""
       },
       {
         "src": "/work/weddings/10.jpg",
-        "width": 1600,
-        "height": 2134,
+        "width": 2499,
+        "height": 3333,
         "color": "#806E67",
         "alt": ""
       },
       {
         "src": "/work/weddings/11.jpg",
-        "width": 1600,
-        "height": 2133,
+        "width": 2499,
+        "height": 3331,
         "color": "#9D816F",
         "alt": ""
       },
       {
         "src": "/work/weddings/12.jpg",
-        "width": 1600,
-        "height": 2134,
+        "width": 2499,
+        "height": 3333,
         "color": "#846958",
         "alt": ""
       },
       {
         "src": "/work/weddings/13.jpg",
-        "width": 1600,
-        "height": 2399,
+        "width": 2428,
+        "height": 3641,
         "color": "#8E8380",
         "alt": ""
       },
       {
         "src": "/work/weddings/14.jpg",
-        "width": 1600,
-        "height": 2134,
+        "width": 2499,
+        "height": 3333,
         "color": "#B0ACAD",
         "alt": ""
       },
       {
         "src": "/work/weddings/15.jpg",
-        "width": 1600,
-        "height": 1067,
+        "width": 2499,
+        "height": 1667,
         "color": "#ABA4A4",
         "alt": ""
       },
       {
         "src": "/work/weddings/16.jpg",
-        "width": 1600,
-        "height": 1067,
+        "width": 2499,
+        "height": 1667,
         "color": "#82786E",
         "alt": ""
       },
       {
         "src": "/work/weddings/17.jpg",
-        "width": 1600,
-        "height": 2134,
+        "width": 2499,
+        "height": 3333,
         "color": "#413C36",
         "alt": ""
       },
       {
         "src": "/work/weddings/18.jpg",
-        "width": 1600,
-        "height": 2133,
+        "width": 2499,
+        "height": 3331,
         "color": "#76665D",
         "alt": ""
       },
       {
         "src": "/work/weddings/19.jpg",
-        "width": 1600,
-        "height": 1067,
+        "width": 2499,
+        "height": 1667,
         "color": "#9F9A98",
         "alt": ""
       },
       {
         "src": "/work/weddings/20.jpg",
-        "width": 1600,
-        "height": 1067,
+        "width": 2499,
+        "height": 1667,
         "color": "#574439",
         "alt": ""
       },
       {
         "src": "/work/weddings/21.jpg",
-        "width": 1600,
-        "height": 1067,
+        "width": 2499,
+        "height": 1667,
         "color": "#7E7266",
         "alt": ""
       },
       {
         "src": "/work/weddings/22.jpg",
-        "width": 1600,
-        "height": 2134,
+        "width": 2499,
+        "height": 3333,
         "color": "#B3B2B6",
         "alt": ""
       },
       {
         "src": "/work/weddings/23.jpg",
-        "width": 1600,
-        "height": 1067,
+        "width": 2499,
+        "height": 1667,
         "color": "#918478",
         "alt": ""
       },
       {
         "src": "/work/weddings/24.jpg",
-        "width": 1600,
-        "height": 1067,
+        "width": 2499,
+        "height": 1667,
         "color": "#C9C2C2",
         "alt": ""
       },
       {
         "src": "/work/weddings/25.jpg",
-        "width": 1600,
-        "height": 2398,
+        "width": 2429,
+        "height": 3641,
         "color": "#544A46",
         "alt": ""
       },
       {
         "src": "/work/weddings/26.jpg",
-        "width": 1600,
-        "height": 1067,
+        "width": 2499,
+        "height": 1667,
         "color": "#85796D",
         "alt": ""
       },
       {
         "src": "/work/weddings/27.jpg",
-        "width": 1600,
-        "height": 2133,
+        "width": 2499,
+        "height": 3331,
         "color": "#464340",
         "alt": ""
       },
       {
         "src": "/work/weddings/28.jpg",
-        "width": 1600,
-        "height": 1067,
+        "width": 2499,
+        "height": 1667,
         "color": "#605A52",
         "alt": ""
       },
       {
         "src": "/work/weddings/29.jpg",
-        "width": 1600,
-        "height": 2134,
+        "width": 2499,
+        "height": 3333,
         "color": "#B78A5D",
         "alt": ""
       },
       {
         "src": "/work/weddings/30.jpg",
-        "width": 1600,
-        "height": 2398,
+        "width": 2429,
+        "height": 3641,
         "color": "#B5A9AB",
         "alt": ""
       },
       {
         "src": "/work/weddings/31.jpg",
-        "width": 1600,
-        "height": 2134,
+        "width": 2499,
+        "height": 3333,
         "color": "#463C35",
         "alt": ""
       },
       {
         "src": "/work/weddings/32.jpg",
-        "width": 1600,
-        "height": 2134,
+        "width": 2499,
+        "height": 3333,
         "color": "#EFE5E8",
         "alt": ""
       },
       {
         "src": "/work/weddings/33.jpg",
-        "width": 1600,
-        "height": 1067,
+        "width": 2499,
+        "height": 1667,
         "color": "#724041",
         "alt": ""
       },
       {
         "src": "/work/weddings/34.jpg",
-        "width": 1600,
-        "height": 1067,
+        "width": 2499,
+        "height": 1667,
         "color": "#837464",
         "alt": ""
       },
       {
         "src": "/work/weddings/35.jpg",
-        "width": 1600,
-        "height": 1067,
+        "width": 2499,
+        "height": 1667,
         "color": "#3A2A25",
         "alt": ""
       },
       {
         "src": "/work/weddings/36.jpg",
-        "width": 1600,
-        "height": 1067,
+        "width": 2499,
+        "height": 1667,
         "color": "#B74459",
         "alt": ""
       },
       {
         "src": "/work/weddings/37.jpg",
-        "width": 1600,
-        "height": 1067,
+        "width": 2499,
+        "height": 1667,
         "color": "#665253",
         "alt": ""
       },
       {
         "src": "/work/weddings/38.jpg",
-        "width": 1600,
-        "height": 2134,
+        "width": 2499,
+        "height": 3333,
         "color": "#D9BDA3",
         "alt": ""
       },
       {
         "src": "/work/weddings/39.jpg",
-        "width": 1600,
-        "height": 1067,
+        "width": 2499,
+        "height": 1667,
         "color": "#C8C8C7",
         "alt": ""
       },
       {
         "src": "/work/weddings/40.jpg",
-        "width": 1600,
-        "height": 1067,
+        "width": 2499,
+        "height": 1667,
         "color": "#998062",
         "alt": ""
       }
@@ -9985,127 +9985,127 @@ export const PROJECTS: Project[] = [
     "images": [
       {
         "src": "/work/wired-magazine/01.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#262626",
         "alt": ""
       },
       {
         "src": "/work/wired-magazine/02.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#D9D9C0",
         "alt": ""
       },
       {
         "src": "/work/wired-magazine/03.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#D9D9F3",
         "alt": ""
       },
       {
         "src": "/work/wired-magazine/04.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#C0C0A6",
         "alt": ""
       },
       {
         "src": "/work/wired-magazine/05.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#C0D9F3",
         "alt": ""
       },
       {
         "src": "/work/wired-magazine/06.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#262626",
         "alt": ""
       },
       {
         "src": "/work/wired-magazine/07.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#262626",
         "alt": ""
       },
       {
         "src": "/work/wired-magazine/08.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#262626",
         "alt": ""
       },
       {
         "src": "/work/wired-magazine/09.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#26598C",
         "alt": ""
       },
       {
         "src": "/work/wired-magazine/10.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#40598C",
         "alt": ""
       },
       {
         "src": "/work/wired-magazine/11.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#C0C0C0",
         "alt": ""
       },
       {
         "src": "/work/wired-magazine/12.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#264073",
         "alt": ""
       },
       {
         "src": "/work/wired-magazine/13.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#404040",
         "alt": ""
       },
       {
         "src": "/work/wired-magazine/14.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#C0A6A6",
         "alt": ""
       },
       {
         "src": "/work/wired-magazine/15.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#5973A6",
         "alt": ""
       },
       {
         "src": "/work/wired-magazine/16.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#262626",
         "alt": ""
       },
       {
         "src": "/work/wired-magazine/17.jpg",
-        "width": 1600,
-        "height": 2240,
+        "width": 2499,
+        "height": 3499,
         "color": "#40598C",
         "alt": ""
       },
       {
         "src": "/work/wired-magazine/18.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#262626",
         "alt": ""
       }
@@ -10134,22 +10134,22 @@ export const PROJECTS: Project[] = [
     "images": [
       {
         "src": "/work/wrapped-up/01.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#262626",
         "alt": ""
       },
       {
         "src": "/work/wrapped-up/02.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#D9D9D9",
         "alt": ""
       },
       {
         "src": "/work/wrapped-up/03.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#262626",
         "alt": ""
       },
@@ -10162,29 +10162,29 @@ export const PROJECTS: Project[] = [
       },
       {
         "src": "/work/wrapped-up/05.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#262626",
         "alt": ""
       },
       {
         "src": "/work/wrapped-up/06.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#262626",
         "alt": ""
       },
       {
         "src": "/work/wrapped-up/07.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#D9C0C0",
         "alt": ""
       },
       {
         "src": "/work/wrapped-up/08.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#C0C0C0",
         "alt": ""
       }
@@ -10213,211 +10213,211 @@ export const PROJECTS: Project[] = [
     "images": [
       {
         "src": "/work/zoe/01.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#F3F3F3",
         "alt": ""
       },
       {
         "src": "/work/zoe/02.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#C0C0C0",
         "alt": ""
       },
       {
         "src": "/work/zoe/03.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#F3F3F3",
         "alt": ""
       },
       {
         "src": "/work/zoe/04.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#F3F3F3",
         "alt": ""
       },
       {
         "src": "/work/zoe/05.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#C0C0C0",
         "alt": ""
       },
       {
         "src": "/work/zoe/06.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#F3F3F3",
         "alt": ""
       },
       {
         "src": "/work/zoe/07.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#F3F3F3",
         "alt": ""
       },
       {
         "src": "/work/zoe/08.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#F3F3F3",
         "alt": ""
       },
       {
         "src": "/work/zoe/09.jpg",
-        "width": 1600,
-        "height": 2398,
+        "width": 2429,
+        "height": 3641,
         "color": "#F3F3F3",
         "alt": ""
       },
       {
         "src": "/work/zoe/10.jpg",
-        "width": 1600,
-        "height": 2398,
+        "width": 2429,
+        "height": 3641,
         "color": "#F3F3F3",
         "alt": ""
       },
       {
         "src": "/work/zoe/11.jpg",
-        "width": 1600,
-        "height": 2398,
+        "width": 2429,
+        "height": 3641,
         "color": "#F3F3F3",
         "alt": ""
       },
       {
         "src": "/work/zoe/12.jpg",
-        "width": 1600,
-        "height": 2398,
+        "width": 2429,
+        "height": 3641,
         "color": "#D9D9D9",
         "alt": ""
       },
       {
         "src": "/work/zoe/13.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#F3F3F3",
         "alt": ""
       },
       {
         "src": "/work/zoe/14.jpg",
-        "width": 1600,
-        "height": 2398,
+        "width": 2429,
+        "height": 3641,
         "color": "#F3F3F3",
         "alt": ""
       },
       {
         "src": "/work/zoe/15.jpg",
-        "width": 1600,
-        "height": 2398,
+        "width": 2429,
+        "height": 3641,
         "color": "#F3F3F3",
         "alt": ""
       },
       {
         "src": "/work/zoe/16.jpg",
-        "width": 1600,
-        "height": 2398,
+        "width": 2429,
+        "height": 3641,
         "color": "#C0C0C0",
         "alt": ""
       },
       {
         "src": "/work/zoe/17.jpg",
-        "width": 1600,
-        "height": 2398,
+        "width": 2429,
+        "height": 3641,
         "color": "#C0C0C0",
         "alt": ""
       },
       {
         "src": "/work/zoe/18.jpg",
-        "width": 1600,
-        "height": 2398,
+        "width": 2429,
+        "height": 3641,
         "color": "#F3F3F3",
         "alt": ""
       },
       {
         "src": "/work/zoe/19.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#F3F3F3",
         "alt": ""
       },
       {
         "src": "/work/zoe/20.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#D9D9D9",
         "alt": ""
       },
       {
         "src": "/work/zoe/21.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#F3F3F3",
         "alt": ""
       },
       {
         "src": "/work/zoe/22.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#F3F3F3",
         "alt": ""
       },
       {
         "src": "/work/zoe/23.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#F3F3F3",
         "alt": ""
       },
       {
         "src": "/work/zoe/24.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#F3F3F3",
         "alt": ""
       },
       {
         "src": "/work/zoe/25.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#F3F3F3",
         "alt": ""
       },
       {
         "src": "/work/zoe/26.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#F3F3F3",
         "alt": ""
       },
       {
         "src": "/work/zoe/27.jpg",
-        "width": 1600,
-        "height": 2398,
+        "width": 2429,
+        "height": 3641,
         "color": "#F3F3F3",
         "alt": ""
       },
       {
         "src": "/work/zoe/28.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#F3F3F3",
         "alt": ""
       },
       {
         "src": "/work/zoe/29.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#F3F3F3",
         "alt": ""
       },
       {
         "src": "/work/zoe/30.jpg",
-        "width": 1600,
-        "height": 2000,
+        "width": 2499,
+        "height": 3124,
         "color": "#F3F3F3",
         "alt": ""
       }
