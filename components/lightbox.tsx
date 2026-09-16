@@ -49,30 +49,20 @@ const NAME = "lightbox-frame";
 const pictureFor = (src: string): HTMLElement | null =>
   document.querySelector<HTMLElement>(`img[data-frame="${CSS.escape(src)}"]`);
 
-/** The layout the frame lifts out of, when it spreads; see `travel`. */
-const STAGE = "lightbox-stage";
-
 /**
  * Runs `update` as a view transition with the name travelling from `from`
  * to `to`. Either end may be absent; the lightbox's own picture carries the
  * name in its style, so it is never passed here. Without the API, or with
  * reduced motion, the update simply runs.
  *
- * `stage`, when given, is the layout the frame is lifted out of — the
- * filmstrip. It is named on the side of the trip where the lightbox is
- * closed and only there, so the browser sees it leave on the way in and
- * arrive on the way out, and `globals.css` scales it about the pressed
- * frame: the neighbours spread away from the one that is growing, and
- * gather back round it on the way home. Julian's reference for this is
- * remyshoots.co.za, studied frame by frame. The origin is handed over as a
- * custom property on the root, which the transition pseudo-elements
- * inherit.
+ * The strip the frame is lifted out of used to travel too, spreading away
+ * from the picture and gathering back round it. See `globals.css` for why
+ * it does not any more.
  */
 function travel(
   from: HTMLElement | null,
   update: () => void,
   to: HTMLElement | null,
-  stage?: HTMLElement | null,
 ) {
   if (
     typeof document.startViewTransition !== "function" ||
@@ -82,23 +72,11 @@ function travel(
     return;
   }
   if (from) from.style.viewTransitionName = NAME;
-  const anchor = from ?? to;
-  if (stage && anchor) {
-    const r = anchor.getBoundingClientRect();
-    const s = stage.getBoundingClientRect();
-    document.documentElement.style.setProperty(
-      "--lift-x",
-      `${r.left + r.width / 2 - s.left}px`,
-    );
-  }
-  // Named while closed (the old side going in, the new side coming out),
-  // never while open: a named element is drawn above the root snapshot, so
-  // named on the open side it would show through the lightbox's overlay for
-  // the length of the trip.
-  if (stage && from) stage.style.viewTransitionName = STAGE;
   // Says which trip this is, so the root's crossfade can be a plain fade
   // off a page that never moved. See `[data-lift]` in `globals.css`.
-  document.documentElement.setAttribute("data-lift", "");
+  // Which way the picture is going: `in` from the strip, `out` back to it.
+  // The two are not mirror images — see `[data-lift]` in `globals.css`.
+  document.documentElement.setAttribute("data-lift", from ? "in" : "out");
 
   /* And every blurred surface goes flat for the length of the trip.
    *
@@ -133,7 +111,6 @@ function travel(
     flushSync(update);
     if (from) from.style.viewTransitionName = "";
     if (to) to.style.viewTransitionName = NAME;
-    if (stage) stage.style.viewTransitionName = to ? STAGE : "";
     // The lightbox's chrome exists as of this line and is about to be
     // photographed with the rest of the new page.
     flatten();
@@ -146,7 +123,6 @@ function travel(
         el.style.removeProperty("-webkit-backdrop-filter");
       }
       if (to) to.style.viewTransitionName = "";
-      if (stage) stage.style.viewTransitionName = "";
     })
     // A skipped transition — hidden tab, a second one starting — rejects
     // `finished`; the update still ran, and nothing here needs the promise.
@@ -187,12 +163,17 @@ function warm(from: HTMLElement | null): Promise<void> {
   ]).then(() => undefined);
 }
 
-export function useLightbox(
-  frames: Frame[],
-  /** The layout the frames sit in, if it should spread around the one
-      that opens. */
-  stage?: React.RefObject<HTMLElement | null>,
-) {
+/** Is enough of this frame in the window to be worth flying home to? */
+const onScreen = (el: HTMLElement | null) => {
+  if (!el) return false;
+  const r = el.getBoundingClientRect();
+  const w = Math.min(r.right, window.innerWidth) - Math.max(r.left, 0);
+  const h = Math.min(r.bottom, window.innerHeight) - Math.max(r.top, 0);
+  if (w <= 0 || h <= 0) return false;
+  return (w * h) / (r.width * r.height) > 0.6;
+};
+
+export function useLightbox(frames: Frame[]) {
   const count = frames.length;
   const [open, setOpen] = React.useState(false);
   const [index, setIndex] = React.useState(0);
@@ -216,7 +197,6 @@ export function useLightbox(
           setOpen(true);
         },
         null,
-        stage?.current,
       ),
     );
   };
@@ -226,15 +206,15 @@ export function useLightbox(
       setOpen(true);
       return;
     }
-    // Back to whichever frame is showing now, which after a few arrow keys
-    // is not the one that was pressed.
+    /* Back to whichever frame is showing now, which after a few arrow keys
+       is not the one that was pressed — and after a few of them that frame
+       is off the side of the window, because the strip behind stayed where
+       it was. A picture flying home to a slot nobody can see lands beside
+       the window or half out of it, so when the slot is not really on
+       screen the lightbox simply fades instead. */
     const src = frames[index]?.src;
-    travel(
-      null,
-      () => setOpen(false),
-      src ? pictureFor(src) : null,
-      stage?.current,
-    );
+    const home = src ? pictureFor(src) : null;
+    travel(null, () => setOpen(false), onScreen(home) ? home : null);
     /* After the closing transition, not during it: called here the focus
        landed on an element that was still inside a dialog on its way out,
        and the return put it on the body instead — so a keyboard visitor

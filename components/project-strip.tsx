@@ -75,7 +75,7 @@ export function ProjectStrip({
 }) {
   const frames = project.images;
   const scroller = React.useRef<HTMLDivElement>(null);
-  const lightbox = useLightbox(frames, scroller);
+  const lightbox = useLightbox(frames);
 
   /* The photographs with the writing back in its place. `lib/work.ts` pulls
      the two apart — the lightbox and the counts have no use for a paragraph
