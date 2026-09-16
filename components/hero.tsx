@@ -431,6 +431,17 @@ export function Hero({
            Condensed in a 640px column. Re-declared here rather than at the
            masthead, because custom properties inherit and one declaration on
            the section reaches the word wherever it is set. */
+        /* How much of a wide screen the photograph takes. Julian asked to
+           see more of the picture: it was `80dvh` across, which is 4:5 at
+           full height and so the frame entire — and exactly half of a
+           1440px window spent on a panel whose masthead wraps at 358px and
+           whose index rows end 200px short of their own right edge. The
+           picture takes 62% now, the panel keeps the rest, and both read
+           the same declaration so they cannot drift apart. `96dvh` is the
+           ceiling: past that the frame is cropped sideways rather than
+           top and bottom, which is the one crop a 4:5 photograph cannot
+           take. */
+        "wide:[--cover-picture:min(96dvh,62%)]",
         "squat:[--text-display:clamp(2.5rem,4vw,5rem)]",
         /* And down again on a short window, whatever its shape. A laptop at
            1280x700 and an iPad held sideways both give the cover about 600px
@@ -466,7 +477,7 @@ export function Hero({
           // right-hand column again: `80dvh` across is 4:5 at full height, so
           // the frame is shown entire rather than cropped to the window. The
           // type has the rest.
-          "wide:left-auto wide:right-0 wide:w-[80dvh]",
+          "wide:left-auto wide:right-0 wide:w-[var(--cover-picture)]",
         )}
         style={{ backgroundColor: current.frame.color }}
       >
@@ -675,7 +686,7 @@ export function Hero({
             // width the picture does not take. Nothing is laid over the
             // frame at this ratio, which is the design Julian had and asked
             // to keep — the plate is what the other two fall back to.
-            "wide:h-full wide:w-[calc(100%-80dvh)] wide:border-r wide:border-t-0",
+            "wide:h-full wide:w-[calc(100%-var(--cover-picture))] wide:border-r wide:border-t-0",
             "wide:bg-background wide:backdrop-blur-none",
           )}
         >
@@ -704,7 +715,7 @@ export function Hero({
                  footer of every page and the bar is over them; the rows
                  under the name are what a visitor came to this screen
                  for. */
-              className="rise flex flex-wrap items-baseline gap-x-6 gap-y-1 px-6 pb-4 pt-6 sm:px-10 sm:pt-8 squat:pt-28 wide:pt-28 short:pb-0 short:[&>*]:hidden"
+              className="rise flex flex-wrap items-baseline gap-x-6 gap-y-1 px-6 pb-4 pt-6 max-sm:pb-2 max-sm:pt-3 sm:px-10 sm:pt-8 squat:pt-28 wide:pt-28 short:pb-0 short:[&>*]:hidden"
             >
               {/* Held back while the intro is up, because the intro is already
                 saying these exact words in display type eighty pixels below.
@@ -744,7 +755,7 @@ export function Hero({
               this page look amateur. */}
             <h1
               style={lands(NAME_MS)}
-              className="emerge px-6 pt-6 sm:px-10 squat:pt-10 wide:pt-10"
+              className="emerge px-6 pt-6 max-sm:pt-3 sm:px-10 squat:pt-10 wide:pt-10"
             >
               {/* The header's own wordmark waits on this one and takes over
                 once it has gone by. It used to be measured live from the
@@ -952,7 +963,7 @@ export function Hero({
               aria-label="Disciplines"
               onPointerOver={takeFromEvent}
               onFocus={takeFromEvent}
-              className="mt-5 hidden gap-1 px-6 max-sm:tall:flex tall:pb-[max(0.5rem,env(safe-area-inset-bottom))]"
+              className="mt-4 hidden gap-1 px-6 max-sm:tall:flex tall:pb-[max(0.5rem,env(safe-area-inset-bottom))]"
             >
               {disciplines.map((discipline, i) => (
                 <li
