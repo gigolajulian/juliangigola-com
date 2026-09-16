@@ -325,7 +325,7 @@ export function WorkShell({
                 icon of four squares is a guess, and these are two words. */}
             <div
               className={cn(
-                "flex shrink-0 items-center gap-1 pr-6 sm:pr-10",
+                "flex shrink-0 items-center gap-1 pr-6 sm:pr-10 max-sm:hidden",
                 !sheet && "hidden",
               )}
             >
@@ -342,7 +342,7 @@ export function WorkShell({
                       : "text-muted-foreground/60 hoverable:hover:text-foreground",
                   )}
                 >
-                  {mode}
+                  <span className="uppercase">{mode}</span>
                 </button>
               ))}
             </div>

@@ -328,6 +328,22 @@ export const categoryLabel = (category: Category): string =>
  * After `refile`, so a project moved to another discipline in /admin is
  * labelled by where it now is and not where it was.
  */
+/**
+ * A name for every picture. The harvest left `alt` empty on all but a
+ * handful of frames, and an empty alt tells a screen reader the photograph
+ * is decoration. On a photographer's site it is the content, so a frame
+ * with no description of its own is named for the work it belongs to and
+ * its place in it. Real descriptions written in /admin still win.
+ */
+const withAlt = (project: Project): Project => ({
+  ...project,
+  cover: { ...project.cover, alt: project.cover.alt || project.name },
+  images: project.images.map((f, i) => ({
+    ...f,
+    alt: f.alt || `${project.name}, frame ${i + 1} of ${project.images.length}`,
+  })),
+});
+
 const relabel = (project: Project): Project => ({
   ...project,
   categories: project.categories.map((c) => ({ ...c, name: categoryLabel(c) })),
@@ -357,7 +373,7 @@ export const ALL_PROJECTS: Project[] = [
     p.slug === "coverart" ? withCoverArt(p) : withLeadFrame(p),
   ),
 ]
-  .map((p) => relabel(reframe(recopy(recredit(refile(p))))))
+  .map((p) => withAlt(relabel(reframe(recopy(recredit(refile(p)))))))
   .sort(byRunningOrder);
 
 /**

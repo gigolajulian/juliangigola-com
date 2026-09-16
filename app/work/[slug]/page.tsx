@@ -41,15 +41,26 @@ export async function generateMetadata(
   if (!project) return {};
 
   const client = project.credits.find((c) => /client/i.test(c.role));
-  const description =
-    project.intent ??
-    [
-      project.headline ?? project.name,
-      client ? `for ${client.name}` : null,
-      "by Julian Gigola",
-    ]
-      .filter(Boolean)
-      .join(" ");
+  const model = project.credits.find((c) => /model|in frame/i.test(c.role));
+  const discipline = project.categories[0]?.name.toLowerCase();
+  const n = project.images.length;
+  /* What a pasted link shows under the title. The intent copy when there
+     is one, cut to a sentence's worth; otherwise built from what the
+     manifest knows: "HUA: brand campaigns by Julian Gigola, 17 frames, with
+     @0414lei. San Francisco Bay Area." Twenty characters was what a shared
+     project used to get. */
+  const description = project.intent
+    ? project.intent.length > 155
+      ? project.intent.slice(0, 152).replace(/\s+\S*$/, "") + "…"
+      : project.intent
+    : [
+        `${project.headline ?? project.name}: ${discipline ?? "photography"} by Julian Gigola`,
+        client ? `for ${client.name}` : null,
+        `${n} ${n === 1 ? "frame" : "frames"}`,
+        model ? `with ${model.name}` : null,
+      ]
+        .filter(Boolean)
+        .join(", ") + ". San Francisco Bay Area.";
 
   return {
     title: project.name,
@@ -65,9 +76,14 @@ export async function generateMetadata(
           url: coverOf(project).src,
           width: coverOf(project).width,
           height: coverOf(project).height,
+          alt: project.name,
         },
       ],
     },
+    /* The root names the eye mark for every card, and a named field is
+       inherited whole: a project pasted into X or Slack showed the logo
+       while the Open Graph card next to it showed the work. */
+    twitter: { card: "summary_large_image", images: [coverOf(project).src] },
   };
 }
 
@@ -143,7 +159,7 @@ export default async function ProjectPage(props: PageProps<"/work/[slug]">) {
         <CallToAction
           className="mt-24"
           title="Want something like this?"
-          body="Tell me what you have in mind and I will come back with an approach and a quote."
+          body="Tell me what you have in mind and I'll come back with a treatment and a rate."
           type={enquiryTypeFor(project)}
           detail={project.name}
           secondary={

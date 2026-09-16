@@ -1064,6 +1064,20 @@ nav[aria-label="Categories"] ul[data-more] {
   }
 }
 
+/* ── a thumb's worth of link ──
+   The small capitals links (footer, crumbs, credits, the email in an ask)
+   are 13 to 14px tall, and a thumb is not. Padding that the same negative
+   margin takes back: the hit area is 30px, the type does not move, and
+   nothing around it shifts. Phones only, where there is a thumb. */
+@media (max-width: 40rem) {
+  a.label,
+  .label a,
+  nav[aria-label="Legal"] a {
+    padding-block: 0.5rem;
+    margin-block: -0.5rem;
+  }
+}
+
 @utility label {
   /* Inter's figures, set to one width. Every number on the site that is in a
      column or changes under a pointer wears this face — the counts down the

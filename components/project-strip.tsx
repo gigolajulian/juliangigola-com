@@ -149,13 +149,16 @@ export function ProjectStrip({
                  somewhere worth filling in: they are added in /admin. */
           <div
             key="title"
-            className="flex h-full w-[min(30rem,82vw)] shrink-0 flex-col justify-center gap-5 pr-2 sm:pr-6"
+            className="flex h-full w-[min(30rem,82vw)] shrink-0 flex-col justify-center gap-5 pr-2 max-sm:w-[68vw] sm:pr-6"
           >
             {/* Each word rises into place from under a clip, one after
                     another, and the credits follow it up. Julian asked for
                     the title to animate as a project opens. The clip is on
                     the word, not the line, so the words can wrap. */}
-            <h2 className="font-display text-4xl uppercase leading-[0.95] tracking-[0] sm:text-6xl">
+            <h2
+              aria-hidden
+              className="font-display text-4xl uppercase leading-[0.95] tracking-[0] sm:text-6xl"
+            >
               {(project.headline ?? project.name).split(" ").map((word, i) => (
                 <React.Fragment key={i}>
                   <span className="inline-block overflow-hidden align-top">

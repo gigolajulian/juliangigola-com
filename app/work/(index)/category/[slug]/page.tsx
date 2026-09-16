@@ -92,9 +92,7 @@ export async function generateMetadata(
     title: name,
     description: gallery
       ? `${count} ${name.toLowerCase()} frames by Julian Gigola.`
-      : `${count} commissioned ${name.toLowerCase()} ${
-          count === 1 ? "project" : "projects"
-        } by Julian Gigola, with clients and credits.`,
+      : `${name}: ${count} ${count === 1 ? "project" : "projects"} by Julian Gigola, with clients and credits.`,
     alternates: { canonical: `/work/category/${slug}` },
   };
 }
@@ -121,10 +119,10 @@ export default async function CategoryPage(
   const ask = (
     <EnquiryCell
       key="enquire"
-      title={`Commission ${name.toLowerCase()}`}
-      body="Tell me what you have in mind and I'll come back with an approach and a quote."
+      title={`Something in ${name.toLowerCase()}?`}
+      body="Tell me what it is for and when, and I'll come back with an approach and a quote."
       type={enquiryTypeFor(projects[0] ?? gallery ?? COMMISSIONS[0])}
-      secondary={{ href: "/work", label: "See all the work" }}
+      secondary={{ href: "/work", label: "See the work" }}
       next={next}
     />
   );

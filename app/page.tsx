@@ -99,7 +99,8 @@ export default function Home() {
               href="/work"
               className="label pointer-events-auto glass-surface bg-background/70 px-3 py-1.5 text-muted-foreground transition-colors duration-200 hoverable:hover:text-foreground"
             >
-              All {COMMISSIONS.length} &rarr;
+              <span aria-hidden>All {COMMISSIONS.length} &rarr;</span>
+              <span className="sr-only">All {COMMISSIONS.length} projects</span>
             </Link>
           </div>
 
@@ -138,7 +139,7 @@ export default function Home() {
               photographs; a line under the work is read in the second it
               takes to pass it, which is all a logo needs. */}
           {PRESS_HOME.length ? (
-            <div
+            <section
               aria-labelledby="press"
               className="flex shrink-0 flex-col items-center gap-4 border-t border-border px-6 py-5 sm:flex-row sm:justify-center sm:gap-10 sm:px-8"
             >
@@ -146,7 +147,7 @@ export default function Home() {
                 Published &amp; commissioned by
               </h2>
               <ClientMarks clients={PRESS_HOME} layout="row" />
-            </div>
+            </section>
           ) : null}
         </section>
 
@@ -170,7 +171,7 @@ export default function Home() {
             <PathCard
               href="/work"
               label="For art directors"
-              title="Commissioned work"
+              title="See the work"
               body="Editorial, campaigns, portraits, and artist imagery."
             />
             <PathCard
@@ -187,7 +188,7 @@ export default function Home() {
         <EnquiryCell
           title="Have something in mind?"
           body="Tell me what you have in mind and I'll come back with an approach and a quote."
-          secondary={{ href: "/work", label: "Browse the work" }}
+          secondary={{ href: "/work", label: "See the work" }}
           next={WORK_PAGE}
           className="border-l border-border px-6 sm:w-full sm:px-16"
         />

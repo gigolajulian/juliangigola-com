@@ -64,7 +64,7 @@ export function EnquiryCell({
           href={href}
           className="label action rounded-full px-6 py-4 press active:scale-[0.97]"
         >
-          Start an enquiry
+          Enquire
         </Link>
         {secondary ? (
           <Link

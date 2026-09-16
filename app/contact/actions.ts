@@ -98,7 +98,7 @@ export async function submitEnquiry(
   if (read("company") !== "") {
     return {
       status: "sent",
-      message: "Thank you, we will get back to you shortly! :)",
+      message: "Thanks. I'll reply within 24 hours.",
     };
   }
 
@@ -149,7 +149,7 @@ export async function submitEnquiry(
         status: "unconfigured",
         values,
         message:
-          "This build has no inbox attached, so nothing was stored. Your message is ready below. Open it and it will reach Julian directly.",
+          "This build has no inbox attached, so nothing was stored. Your message is ready below. Open it and it will reach me directly.",
         mailto,
       };
     }
@@ -185,7 +185,7 @@ export async function submitEnquiry(
         status: "unconfigured",
         values,
         message:
-          "The form has taken an unusual number of messages today and has stopped accepting more. Nothing is lost. Use the email link below and it will reach him directly.",
+          "The form has taken an unusual number of messages today and has stopped accepting more. Nothing is lost. Use the email link below and it will reach me directly.",
         mailto,
       };
     }
@@ -234,7 +234,7 @@ export async function submitEnquiry(
 
     return {
       status: "sent",
-      message: "Thank you, we will get back to you shortly! :)",
+      message: "Thanks. I'll reply within 24 hours.",
     };
   } catch (err) {
     // Never swallow this: hand back a route that definitely works.
@@ -243,7 +243,7 @@ export async function submitEnquiry(
       status: "unconfigured",
       values,
       message:
-        "Something went wrong storing that. Nothing was lost. Use the email link below and it will reach him directly.",
+        "Something went wrong storing that. Nothing was lost. Use the email link below and it will reach me directly.",
       mailto,
     };
   }

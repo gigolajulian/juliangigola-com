@@ -750,7 +750,7 @@ export function Hero({
                 breakpoint — this drops to its own line and stays flush right
                 instead of the left label wrapping under a stranded item. */}
               <p className="label ml-auto shrink-0 text-muted-foreground">
-                SF Bay Area
+                San Francisco Bay Area
               </p>
             </div>
 
@@ -965,7 +965,7 @@ export function Hero({
                 above the strip's ruler saying something different with the
                 same shape. */}
             <ol
-              aria-label="Disciplines"
+              aria-label="Disciplines, on the picture"
               onPointerOver={takeFromEvent}
               onFocus={takeFromEvent}
               className="mt-4 hidden gap-1 px-6 max-sm:tall:flex tall:pb-[max(0.5rem,env(safe-area-inset-bottom))]"

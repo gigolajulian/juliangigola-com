@@ -62,7 +62,7 @@ const display = localFont({
   adjustFontFallback: false,
 });
 
-const SITE = "https://www.juliangigola.com";
+const SITE = "https://juliangigola.com";
 
 /**
  * `viewport-fit=cover`, which Next does not set by default. Without it an
@@ -77,6 +77,14 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",
+  /* The browser's own bar takes the page's ground, so a phone does not
+     wear a white strip over a dark site or the reverse. The two values are
+     the `--background` tokens in `globals.css`, written out because a meta
+     tag cannot read a custom property. */
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#efece7" },
+    { media: "(prefers-color-scheme: dark)", color: "#0b0a09" },
+  ],
 };
 
 export const metadata: Metadata = {
@@ -92,7 +100,9 @@ export const metadata: Metadata = {
     type: "website",
     siteName: "Julian Gigola",
     locale: "en_US",
-    url: SITE,
+    /* No `url` here: set once at the root it was inherited by every page,
+       so a shared /sessions link unfurled pointing at the homepage. The
+       canonical on each page is the address. */
     /* The eye mark on black, at 1200x630. Julian's pick for the thumbnail.
      *
      * It used to be the cover photograph, cropped from whatever `coverSlug`

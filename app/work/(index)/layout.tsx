@@ -1,3 +1,4 @@
+import { filmCount } from "@/lib/videos";
 import type * as React from "react";
 import { WorkShell, type Head } from "@/components/work-shell";
 import {
@@ -27,8 +28,8 @@ const HEADS: Record<string, Head> = {
   },
   video: {
     title: "Motion",
-    aside: `${CONTENT.videos.length + 1} films`,
-    count: CONTENT.videos.length + 1,
+    aside: `${filmCount(CONTENT.videos)} films`,
+    count: filmCount(CONTENT.videos),
     // A reel, a hero and two racks of embeds: a strip, and only a strip.
     sheet: false,
   },

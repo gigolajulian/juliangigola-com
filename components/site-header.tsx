@@ -310,7 +310,7 @@ export function SiteHeader() {
           "motion-reduce:transition-none",
         )}
       >
-        <nav aria-label="Main">
+        <nav aria-label="Menu">
           <ul className="flex flex-col gap-1 pl-4">
             {LINKS.map((link, i) => (
               <li key={link.href} className="relative">

@@ -155,13 +155,13 @@ export function problems(values: {
 
   if (!values.name) errors.name = "Please add your name.";
   else if (values.name.length > MAX.name)
-    errors.name = "That is longer than we can send.";
+    errors.name = "That is longer than the form can send.";
 
-  if (!values.email) errors.email = "Please add an email so Julian can reply.";
+  if (!values.email) errors.email = "Please add an email so I can reply.";
   else if (!looksLikeEmail(values.email))
     errors.email = "That does not look like an email address.";
   else if (values.email.length > MAX.email)
-    errors.email = "That is longer than we can send.";
+    errors.email = "That is longer than the form can send.";
 
   if (!values.message)
     errors.message = "Please say a little about the project.";
@@ -256,7 +256,7 @@ export const emailCopy = (e: Enquiry): { subject: string; text: string } => ({
     e.message,
     "",
     "",
-    "Stored in the site's inbox: https://www.juliangigola.com/admin (Inbox tab).",
+    "Stored in the site's inbox: https://juliangigola.com/admin (Inbox tab).",
     "Reply to this email to answer them directly.",
   ]
     .filter((line) => line !== null)

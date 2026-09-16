@@ -13,7 +13,7 @@ export function GroupCell({
   href,
   hash,
   i,
-  cta = `See all ${name.toLowerCase()}`,
+  cta = `All ${name.toLowerCase()}`,
 }: {
   name: string;
   /** Already worded: "18 projects", "8 films". */

@@ -86,11 +86,8 @@ export default function ContactPage() {
             {/* Answers "will this actually go anywhere?" before they decide
                 whether to fill anything in, which is where most enquiries
                 are abandoned. */}
-            {RESPONSE_TIME ? (
-              <p className="title-rest text-sm text-foreground">
-                Replies {RESPONSE_TIME}.
-              </p>
-            ) : null}
+            {/* The promise sits in the head aside; twice on one screen read
+                as a tic on a phone. */}
             {/* Self-serve booking, once the calendar exists. Beside the form
                 rather than instead of it — a session client wants a slot, a
                 commissioning client wants a conversation. */}

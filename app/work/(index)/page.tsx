@@ -1,3 +1,4 @@
+import { filmCount } from "@/lib/videos";
 import type { Metadata } from "next";
 import { Strip } from "@/components/strip";
 import { CoverCell } from "@/components/cover-cell";
@@ -59,7 +60,7 @@ export default function WorkPage() {
         <GroupCell
           key={c.slug}
           name={c.name}
-          count={`${CONTENT.videos.length + 1} films`}
+          count={`${filmCount(CONTENT.videos)} films`}
           href={c.href}
           hash={c.slug}
           i={i++}
@@ -126,8 +127,8 @@ export default function WorkPage() {
   cells.push(
     <EnquiryCell
       key="enquire"
-      title="Commission a shoot"
-      body="Tell me what you have in mind and I'll come back with an approach and a quote."
+      title="Have a shoot in mind?"
+      body="Tell me what it is for and when, and I'll come back with an approach and a quote."
       type="editorial"
       secondary={{ href: "/studio", label: "How a commission runs" }}
       next={STUDIO}

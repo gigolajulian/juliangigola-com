@@ -51,12 +51,18 @@ export function StripPage({
 export function RisingTitle({
   text,
   className,
+  decorative = false,
 }: {
   text: string;
   className?: string;
+  /** The same words the running head already carries as the page's `h1`:
+      set large here for the eye, hidden from a screen reader so the page
+      is not announced twice. */
+  decorative?: boolean;
 }) {
   return (
     <h2
+      aria-hidden={decorative || undefined}
       className={cn(
         "font-display text-4xl uppercase leading-[0.95] tracking-[0] sm:text-6xl",
         className,
@@ -101,7 +107,7 @@ export function TitleCell({
         className,
       )}
     >
-      <RisingTitle text={title} />
+      <RisingTitle text={title} decorative />
       {children ? (
         <div className="title-rest flex flex-col gap-4">{children}</div>
       ) : null}

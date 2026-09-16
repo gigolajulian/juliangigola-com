@@ -6,7 +6,7 @@ import { Strip, type Lead } from "@/components/strip";
 import { VideoGrid } from "@/components/video-grid";
 import { VideoViewer } from "@/components/video-viewer";
 import { VideoHero } from "@/components/video-hero";
-import { REEL, type Video } from "@/lib/videos";
+import { REEL, filmCount, type Video } from "@/lib/videos";
 
 /* ── the films, along the strip, with one viewer over them ────────
  * The page is a server component; the viewer is state. This is the client
@@ -44,7 +44,7 @@ export function VideoShowcase({
       data-hash="reel"
       className="relative w-full shrink-0 overflow-hidden max-sm:aspect-video sm:h-full sm:w-[calc(100vw-5rem)]"
     >
-      <VideoHero videoId={REEL.videoId} title={REEL.title} year={REEL.year} />
+      <VideoHero videoId={REEL.videoId} title={REEL.title} />
     </div>,
   ];
 
@@ -65,7 +65,7 @@ export function VideoShowcase({
           >
             Ask for more
           </Link>{" "}
-          and it comes back the same day.
+          and I&rsquo;ll reply within 24 hours.
         </p>
       </div>,
     );
@@ -107,7 +107,7 @@ export function VideoShowcase({
   return (
     <>
       <Strip
-        label={`Motion: ${all.length + 1} films, left and right`}
+        label={`Motion: ${filmCount(all)} films, left and right`}
         next={next}
         className="mt-4 flex-1"
       >

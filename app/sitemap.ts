@@ -1,7 +1,7 @@
 import type { MetadataRoute } from "next";
 import { PROJECTS, WORK_CATEGORY_LINKS } from "@/lib/work";
 
-const SITE = "https://www.juliangigola.com";
+const SITE = "https://juliangigola.com";
 
 // Required by `output: "export"`, which will not infer that a metadata route
 // is static. This route has no request-time input, so it always was.

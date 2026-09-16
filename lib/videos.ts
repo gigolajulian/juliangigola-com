@@ -61,7 +61,6 @@ export const REEL = {
   /* The title without the year in it, because the year is its own field now
      and printing 2023 twice on one line is how a caption looks careless. */
   title: "Director's Reel",
-  year: 2023,
   /* Vimeo's stills are behind its API, so the URL is written down the way
      /admin writes it down for every other Vimeo film: looked up once, from
      vimeo.com/api/oembed.json, at 1280x720. */
@@ -213,3 +212,7 @@ export const watchUrl = (v: Video): string =>
 /** Everything in one section, in the order the content file holds them. */
 export const inSection = (videos: Video[], section: VideoSection): Video[] =>
   videos.filter((v) => v.section === section);
+
+/** How many films the motion page shows: the sections plus the reel. Every
+    count on the site reads this, so adding a reel or a section is one edit. */
+export const filmCount = (videos: readonly unknown[]): number => videos.length + 1;

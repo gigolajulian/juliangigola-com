@@ -7,6 +7,7 @@ export const metadata: Metadata = {
   title: "Legal",
   description:
     "The terms on which juliangigola.com and the photographs on it may be used, none of it as AI training data, and what the site knows about you.",
+  alternates: { canonical: "/legal" },
 };
 
 /* Julian asked for the terms and the privacy policy on one page, in two

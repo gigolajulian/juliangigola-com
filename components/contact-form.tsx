@@ -103,7 +103,7 @@ export function ContactForm() {
           style={{ "--reveal-delay": "260ms" } as React.CSSProperties}
           className="rise font-display mt-6 text-3xl uppercase tracking-[0]"
         >
-          Sent!
+          Sent.
         </h2>
 
         <p
@@ -262,7 +262,7 @@ export function ContactForm() {
           disabled={pending}
           className="label action rounded-full px-6 py-4 press active:scale-[0.97] disabled:opacity-50"
         >
-          {pending ? "Sending…" : "Send enquiry"}
+          {pending ? "Sending…" : "Enquire"}
         </button>
         <p className="text-xs text-muted-foreground">
           Or email{" "}

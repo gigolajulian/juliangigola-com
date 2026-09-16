@@ -84,7 +84,8 @@ export function CoverArt() {
           href={`/work/${project.slug}`}
           className="label pointer-events-auto text-muted-foreground transition-colors duration-200 hoverable:hover:text-foreground"
         >
-          All {COVER_RELEASES.length} &rarr;
+          <span aria-hidden>All {COVER_RELEASES.length} &rarr;</span>
+          <span className="sr-only">All {COVER_RELEASES.length} covers</span>
         </Link>
       </div>
 

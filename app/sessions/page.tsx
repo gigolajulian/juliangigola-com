@@ -19,7 +19,7 @@ import { CONTACT, projectsIn, coverOf } from "@/lib/work";
  * live from the archive so it can never go stale.
  *
  * Sideways, like the rest of the site: each session is a photograph and the
- * card beside it, so the four run past in the order they are priced and the
+ * card beside it, so the four run past in one row and the
  * comparison is a wheel rather than a scroll and a memory. The words scroll
  * inside their own column when a screen is too short for them — that is the
  * `data-scroll` box, and the strip yields the wheel to it.
@@ -40,20 +40,20 @@ export default function SessionsPage() {
           crumb={
             <Link
               prefetch={false}
-              href="/contact?type=session"
+              href="/work"
               className="label text-muted-foreground transition-colors duration-200 hoverable:hover:text-foreground"
             >
-              Check a date
+              &larr; The work
             </Link>
           }
           title="Sessions"
           live
-          aside={`${SESSION_TYPES.length} kinds`}
+          aside={`${SESSION_TYPES.length} session types`}
         />
       }
     >
       <Strip
-        label={`Sessions: ${SESSION_TYPES.length} kinds, left and right`}
+        label={`Sessions: ${SESSION_TYPES.length} session types, left and right`}
         next={CONTACT}
         className="mt-4 flex-1"
       >
@@ -189,8 +189,8 @@ export default function SessionsPage() {
 
           <EnquiryCell
             key="enquire"
-            title="Check a date"
-            body="Tell me roughly when and what for, and I'll confirm availability and the exact rate."
+            title="Book a session"
+            body="Tell me roughly when and what for, and I'll confirm the date and the exact rate."
             type="session"
             next={CONTACT}
           />,

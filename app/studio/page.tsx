@@ -36,7 +36,7 @@ const SERVICES = [
   "Camera operating",
   "Photography",
   "Producing",
-  "Post production",
+  "Post-production",
   "Art direction",
   "Creative direction",
 ];
@@ -171,8 +171,8 @@ export default function StudioPage() {
               <div className="flex flex-col gap-3 short:gap-2">
                 <h2 className="label text-muted-foreground">Biography</h2>
                 <p className="text-sm leading-relaxed lg:text-base short:text-[0.8125rem] short:leading-snug">
-                  Bay Area based creative director and photographer,
-                  specializing in editorial, commercial, and artist imagery. My
+                  Bay Area-based creative director and photographer,
+                  specialising in editorial, commercial, and artist imagery. My
                   work blends creativity with a keen eye for detail, focusing on
                   everything from studio portraits to location shoots.
                   Photography allows me to explore the world through a unique
@@ -243,7 +243,7 @@ export default function StudioPage() {
                   href="/contact?type=editorial"
                   className="label action rounded-full px-6 py-4 press active:scale-[0.97] short:py-3"
                 >
-                  Commission a shoot
+                  Enquire
                 </Link>
                 <Link
                   prefetch={false}
@@ -263,15 +263,15 @@ export default function StudioPage() {
           </div>
 
           {PRESS_STUDIO.length ? (
-            <div
+            <section
               aria-labelledby="clients"
               className="flex shrink-0 flex-col items-center gap-4 border-t border-border py-5 sm:flex-row sm:justify-center sm:gap-10 short:py-3"
             >
               <h2 id="clients" className="label shrink-0 text-muted-foreground">
-                Trusted with the work by
+                Published &amp; commissioned by
               </h2>
               <ClientMarks clients={PRESS_STUDIO} layout="row" />
-            </div>
+            </section>
           ) : null}
         </section>
       </Strip>

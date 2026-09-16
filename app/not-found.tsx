@@ -39,7 +39,14 @@ function Mark({ className }: { className?: string }) {
   );
 }
 
-export const metadata: Metadata = { title: "Frame not found" };
+export const metadata: Metadata = {
+  title: "Frame not found",
+  description: "That page is not on the site. The work, the sessions and the studio are.",
+  /* A 404 inherits the root canonical, which is the homepage: without this
+     a search engine could index a missing page as the front door. */
+  robots: { index: false, follow: true },
+  alternates: { canonical: null },
+};
 
 const MONO = "font-mono text-[11px] uppercase tracking-[0.2em]";
 
@@ -108,7 +115,7 @@ export default function NotFound() {
           }}
         />
 
-        <main className="relative mx-auto flex min-h-dvh w-full max-w-[100rem] flex-col justify-center gap-6 px-6 pb-16 pt-32 sm:gap-8 sm:px-10 sm:pt-40">
+        <section className="relative mx-auto flex min-h-dvh w-full max-w-[100rem] flex-col justify-center gap-6 px-6 pb-16 pt-32 sm:gap-8 sm:px-10 sm:pt-40">
           {/* The slate. */}
           <div className="rise flex flex-wrap items-center gap-3.5">
             <Mark className="size-6 shrink-0 text-foreground" />
@@ -130,7 +137,7 @@ export default function NotFound() {
               data-requested-path
               className={`${MONO} text-muted-foreground`}
             >
-              /lost
+              this address
             </span>
           </div>
 
@@ -227,11 +234,11 @@ export default function NotFound() {
                 aria-hidden
                 className="size-1.5 rounded-full bg-[var(--tan)] animate-[jg-blink_1.8s_steps(1)_infinite] motion-reduce:animate-none"
               />
-              <span data-focus-readout>Focus 000%</span>
+              <span data-focus-readout>Focus</span>
             </span>
             <span>San Francisco Bay Area</span>
           </div>
-        </main>
+        </section>
       </div>
     </NotFoundScene>
   );

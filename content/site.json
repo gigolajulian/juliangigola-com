@@ -30,10 +30,10 @@
     {
       "slug": "graduation",
       "name": "Graduation",
-      "blurb": "Cap and gown, on campus or in studio. Enough coverage for the family frame and the announcement. (SJSU & SCU campus/ travel fee charged if out of range)",
+      "blurb": "Cap and gown, on campus or in studio. Enough coverage for the family frame and the announcement. On campus at SJSU or SCU; a travel fee applies further out.",
       "from": 400,
       "includes": [
-        "1 hour on location",
+        "One hour on location",
         "Two outfit changes",
         "Edited gallery",
         "Print release"
@@ -63,7 +63,7 @@
         "Front and profile",
         "Unretouched, as agencies require"
       ],
-      "turnaround": "48 hours"
+      "turnaround": "2 days"
     },
     {
       "slug": "weddings",
