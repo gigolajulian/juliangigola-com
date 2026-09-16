@@ -61,8 +61,17 @@
 /* A short window. A 13in laptop at 1280x700 leaves a strip 421px tall where
    a 1440x900 leaves 621, and a screen composed for the taller one runs over
    its own foot on the shorter. Things that can be set smaller say so with
-   this rather than being sized for the worst case everywhere. */
-@custom-variant short (@media (max-height: 52rem));
+   this rather than being sized for the worst case everywhere.
+
+   `min-width: 40rem` is the half of this that was missing, and it cost a
+   phone its layout. An iPhone in Safari reports a layout height between 745
+   and 812 - the bars take the rest - so every rule written for a laptop at
+   1280x700 was also firing on a phone held upright, where the window is not
+   short at all: it is narrow and tall, and the shape that needs less type is
+   the other one. The subtitle reserving a single line is what that looked
+   like, since `Photographer & creative director` is one line in a laptop's
+   panel and two in a 342px column: the second printed under the buttons. */
+@custom-variant short (@media (max-height: 52rem) and (min-width: 40rem));
 
 @custom-variant squat (
   @media (min-width: 64rem) and (min-aspect-ratio: 9 / 10) and
@@ -665,7 +674,8 @@ body:has(.strip-scroll[data-past-first]) .home-wordmark,
    ten rows at full height do not fit under the masthead on a 700px laptop.
    The list scrolls inside itself either way; this is what keeps the number
    of rows you can see without doing that worth having. */
-@media (max-height: 52rem) {
+/* Same shape as the `short` variant above, and for the same reason. */
+@media (max-height: 52rem) and (min-width: 40rem) {
   .cover-row {
     padding-block: 0.375rem;
   }

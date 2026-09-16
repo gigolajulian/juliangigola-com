@@ -716,6 +716,14 @@ export function Hero({
               <p
                 className={cn(
                   "label text-muted-foreground transition-opacity duration-500 ease-[var(--ease-out-strong)] motion-reduce:transition-none",
+                  /* Not on a phone. The band at the foot is 332 of a 745px
+                     screen and this line takes 30 of them to say, in 14px
+                     caps, what the display type says 100px below it - and it
+                     cannot share a line with `SF Bay Area` in a 345px column,
+                     so it costs the row double. The two lines printing the
+                     same sentence at two sizes is the crammed feeling
+                     itself. */
+                  "max-sm:hidden",
                   active === 0 ? "opacity-0" : "opacity-100",
                 )}
               >
