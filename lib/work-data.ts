@@ -70,6 +70,153 @@ export const CATEGORIES: Category[] = [
 
 export const PROJECTS: Project[] = [
   {
+    "slug": "hua",
+    "name": "HUA",
+    "headline": null,
+    "intent": null,
+    "credits": [
+      {
+        "role": "Photographer",
+        "name": "Julian Gigola"
+      }
+    ],
+    "categories": [
+      {
+        "slug": "campaigns",
+        "name": "CAMPAIGNS",
+        "section": "WORK"
+      }
+    ],
+    "cover": {
+      "src": "/work/hua/cover.jpg",
+      "width": 600,
+      "height": 375,
+      "color": "#33342D",
+      "alt": ""
+    },
+    "images": [
+      {
+        "src": "/work/hua/01.jpg",
+        "width": 2500,
+        "height": 1563,
+        "color": "#33342D",
+        "alt": ""
+      },
+      {
+        "src": "/work/hua/02.jpg",
+        "width": 2500,
+        "height": 1563,
+        "color": "#20211E",
+        "alt": ""
+      },
+      {
+        "src": "/work/hua/03.jpg",
+        "width": 2500,
+        "height": 1562,
+        "color": "#232423",
+        "alt": ""
+      },
+      {
+        "src": "/work/hua/04.jpg",
+        "width": 2500,
+        "height": 3333,
+        "color": "#1B1A1B",
+        "alt": ""
+      },
+      {
+        "src": "/work/hua/05.jpg",
+        "width": 2500,
+        "height": 3333,
+        "color": "#2D2C26",
+        "alt": ""
+      },
+      {
+        "src": "/work/hua/06.jpg",
+        "width": 2500,
+        "height": 3334,
+        "color": "#31342F",
+        "alt": ""
+      },
+      {
+        "src": "/work/hua/07.jpg",
+        "width": 2500,
+        "height": 1562,
+        "color": "#474A41",
+        "alt": ""
+      },
+      {
+        "src": "/work/hua/08.jpg",
+        "width": 2500,
+        "height": 3333,
+        "color": "#272927",
+        "alt": ""
+      },
+      {
+        "src": "/work/hua/09.jpg",
+        "width": 2500,
+        "height": 1563,
+        "color": "#5C090C",
+        "alt": ""
+      },
+      {
+        "src": "/work/hua/10.jpg",
+        "width": 2500,
+        "height": 1563,
+        "color": "#2F0509",
+        "alt": ""
+      },
+      {
+        "src": "/work/hua/11.jpg",
+        "width": 2500,
+        "height": 1562,
+        "color": "#2E050A",
+        "alt": ""
+      },
+      {
+        "src": "/work/hua/12.jpg",
+        "width": 2500,
+        "height": 1563,
+        "color": "#3E070C",
+        "alt": ""
+      },
+      {
+        "src": "/work/hua/13.jpg",
+        "width": 2500,
+        "height": 3333,
+        "color": "#38070B",
+        "alt": ""
+      },
+      {
+        "src": "/work/hua/14.jpg",
+        "width": 2500,
+        "height": 3333,
+        "color": "#400507",
+        "alt": ""
+      },
+      {
+        "src": "/work/hua/15.jpg",
+        "width": 2500,
+        "height": 3333,
+        "color": "#34080B",
+        "alt": ""
+      },
+      {
+        "src": "/work/hua/16.jpg",
+        "width": 2500,
+        "height": 3333,
+        "color": "#2D060D",
+        "alt": ""
+      },
+      {
+        "src": "/work/hua/17.jpg",
+        "width": 2500,
+        "height": 3333,
+        "color": "#1B1B1A",
+        "alt": ""
+      }
+    ]
+  },
+  {
     "slug": "abril",
     "name": "ABRIL",
     "headline": null,
