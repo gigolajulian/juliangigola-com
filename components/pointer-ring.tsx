@@ -91,11 +91,19 @@ export function PointerRing() {
     const up = () => el.removeAttribute("data-pressed");
 
     document.addEventListener("pointermove", move, { passive: true });
+    /* And when what is under the pointer changes without the pointer
+       moving — a click that navigates, a strip that glides past under a
+       still hand. Measured in Julian's own Chrome: after opening a project
+       from the work page the label still read VIEW PROJECT over a frame
+       that zooms, until the mouse was nudged. `pointerover` carries
+       coordinates like any pointer event, so the same handler does. */
+    document.addEventListener("pointerover", move, { passive: true });
     document.addEventListener("pointerdown", down, { passive: true });
     document.addEventListener("pointerup", up, { passive: true });
     document.addEventListener("pointercancel", up, { passive: true });
     return () => {
       document.removeEventListener("pointermove", move);
+      document.removeEventListener("pointerover", move);
       document.removeEventListener("pointerdown", down);
       document.removeEventListener("pointerup", up);
       document.removeEventListener("pointercancel", up);
