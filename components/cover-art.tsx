@@ -69,9 +69,9 @@ export function CoverArt() {
       data-label="Cover art"
       data-hash="cover-art"
       aria-labelledby="cover-art"
-      className="relative flex w-full shrink-0 flex-col justify-center border-l border-border py-16 sm:h-full sm:pb-0 sm:pt-24"
+      className="relative flex w-full shrink-0 flex-col justify-center border-l border-border py-16 sm:h-full sm:pb-0 sm:pt-28"
     >
-      <div className="pointer-events-none absolute inset-x-0 top-0 z-10 flex items-baseline justify-between gap-6 px-6 py-4 sm:px-8 sm:pt-24">
+      <div className="pointer-events-none absolute inset-x-0 top-0 z-10 flex items-baseline justify-between gap-6 px-6 py-4 sm:px-8 sm:pt-28">
         <p className="label text-muted-foreground">
           {/* Numbered to match the index on the cover, where cover art is 05. */}
           <span className="tabular-nums">05</span>
