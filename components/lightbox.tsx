@@ -96,6 +96,9 @@ function travel(
   // named on the open side it would show through the lightbox's overlay for
   // the length of the trip.
   if (stage && from) stage.style.viewTransitionName = STAGE;
+  // Says which trip this is, so the root's crossfade can be a plain fade
+  // off a page that never moved. See `[data-lift]` in `globals.css`.
+  document.documentElement.setAttribute("data-lift", "");
   const transition = document.startViewTransition(() => {
     // Synchronous, so the new snapshot is of the updated page.
     flushSync(update);
@@ -105,6 +108,7 @@ function travel(
   });
   transition.finished
     .finally(() => {
+      document.documentElement.removeAttribute("data-lift");
       if (to) to.style.viewTransitionName = "";
       if (stage) stage.style.viewTransitionName = "";
     })
