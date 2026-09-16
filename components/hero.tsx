@@ -436,12 +436,14 @@ export function Hero({
            full height and so the frame entire — and exactly half of a
            1440px window spent on a panel whose masthead wraps at 358px and
            whose index rows end 200px short of their own right edge. The
-           picture takes 62% now, the panel keeps the rest, and both read
-           the same declaration so they cannot drift apart. `96dvh` is the
-           ceiling: past that the frame is cropped sideways rather than
-           top and bottom, which is the one crop a 4:5 photograph cannot
-           take. */
-        "wide:[--cover-picture:min(96dvh,62%)]",
+           picture takes 54% now, the panel keeps the rest, and both read
+           the same declaration so they cannot drift apart. 62% was the
+           first try and Julian asked for less width back: a wider box
+           over a 4:5 frame is a deeper crop through the top and bottom,
+           so width past a point costs picture rather than showing it.
+           `88dvh` is the ceiling on a tall window, where a percentage of
+           the width would outrun the height the frame has. */
+        "wide:[--cover-picture:min(88dvh,54%)]",
         "squat:[--text-display:clamp(2.5rem,4vw,5rem)]",
         /* And down again on a short window, whatever its shape. A laptop at
            1280x700 and an iPad held sideways both give the cover about 600px
