@@ -47,7 +47,7 @@ export const CLIENT_MARKS: Record<string, ClientMarkData> = {
     src: "/clients/jubo.png",
     width: 183,
     height: 85,
-    scale: 0.9,
+    scale: 1,
   },
   "ladera-granola": {
     kind: "mask",
@@ -55,6 +55,13 @@ export const CLIENT_MARKS: Record<string, ClientMarkData> = {
     width: 1129,
     height: 190,
     scale: 0.7,
+  },
+  "paradox": {
+    kind: "mask",
+    src: "/clients/paradox.png",
+    width: 1468,
+    height: 320,
+    scale: 0.99,
   },
   "pear-vc": {
     kind: "mask",
@@ -82,7 +89,7 @@ export const CLIENT_MARKS: Record<string, ClientMarkData> = {
     src: "/clients/ukiyosunknown.png",
     width: 617,
     height: 320,
-    scale: 1.14,
+    scale: 1.26,
   },
   "wired-magazine": {
     kind: "svg",
