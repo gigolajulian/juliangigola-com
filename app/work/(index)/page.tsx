@@ -110,7 +110,11 @@ export default function WorkPage() {
       cells.push(
         <CoverCell
           key={p.slug}
-          row={indexRow(p)}
+          /* No frame count on the All view. Julian: it reads on a
+             discipline, where you are looking at one kind of work and the
+             size of each project is the thing that distinguishes them, and
+             it is noise across fifty-eight covers of everything. */
+          row={{ ...indexRow(p), frames: undefined }}
           i={i++}
           mark={markFor(p.slug)?.slug}
           eager={i < 4}
