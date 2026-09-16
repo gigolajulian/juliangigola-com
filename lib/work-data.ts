@@ -70,6 +70,1198 @@ export const CATEGORIES: Category[] = [
 
 export const PROJECTS: Project[] = [
   {
+    "slug": "iris",
+    "name": "IRIS",
+    "headline": null,
+    "intent": null,
+    "credits": [
+      {
+        "role": "Photographer",
+        "name": "Julian Gigola"
+      },
+      {
+        "role": "Model",
+        "name": "@justjustiris"
+      }
+    ],
+    "categories": [
+      {
+        "slug": "artist-presskit",
+        "name": "ARTIST PRESSKIT",
+        "section": "MUSIC"
+      }
+    ],
+    "cover": {
+      "src": "/work/iris/cover.jpg",
+      "width": 600,
+      "height": 800,
+      "color": "#999E9D",
+      "alt": ""
+    },
+    "images": [
+      {
+        "src": "/work/iris/01.jpg",
+        "width": 2500,
+        "height": 3333,
+        "color": "#999E9D",
+        "alt": ""
+      },
+      {
+        "src": "/work/iris/02.jpg",
+        "width": 2500,
+        "height": 3333,
+        "color": "#A7ABA9",
+        "alt": ""
+      },
+      {
+        "src": "/work/iris/03.jpg",
+        "width": 2500,
+        "height": 3333,
+        "color": "#AAADAB",
+        "alt": ""
+      },
+      {
+        "src": "/work/iris/04.jpg",
+        "width": 2500,
+        "height": 3333,
+        "color": "#656A6A",
+        "alt": ""
+      },
+      {
+        "src": "/work/iris/05.jpg",
+        "width": 2500,
+        "height": 3333,
+        "color": "#3C3D3C",
+        "alt": ""
+      },
+      {
+        "src": "/work/iris/06.jpg",
+        "width": 2500,
+        "height": 3333,
+        "color": "#6C6D6B",
+        "alt": ""
+      },
+      {
+        "src": "/work/iris/07.jpg",
+        "width": 2500,
+        "height": 3333,
+        "color": "#717574",
+        "alt": ""
+      },
+      {
+        "src": "/work/iris/08.jpg",
+        "width": 2500,
+        "height": 3334,
+        "color": "#474848",
+        "alt": ""
+      },
+      {
+        "src": "/work/iris/09.jpg",
+        "width": 2500,
+        "height": 3334,
+        "color": "#747A79",
+        "alt": ""
+      },
+      {
+        "src": "/work/iris/10.jpg",
+        "width": 2500,
+        "height": 3333,
+        "color": "#AAA9A5",
+        "alt": ""
+      },
+      {
+        "src": "/work/iris/11.jpg",
+        "width": 2500,
+        "height": 3333,
+        "color": "#6A635C",
+        "alt": ""
+      }
+    ]
+  },
+  {
+    "slug": "novocaine",
+    "name": "NOVOCAINE",
+    "headline": null,
+    "intent": null,
+    "credits": [
+      {
+        "role": "Photographer",
+        "name": "Julian Gigola"
+      },
+      {
+        "role": "Model",
+        "name": "@phoebe2phly"
+      }
+    ],
+    "categories": [
+      {
+        "slug": "editorial",
+        "name": "EDITORIAL",
+        "section": "WORK"
+      }
+    ],
+    "cover": {
+      "src": "/work/novocaine/cover.jpg",
+      "width": 600,
+      "height": 400,
+      "color": "#47423E",
+      "alt": ""
+    },
+    "images": [
+      {
+        "src": "/work/novocaine/01.jpg",
+        "width": 2500,
+        "height": 1668,
+        "color": "#47423E",
+        "alt": ""
+      },
+      {
+        "src": "/work/novocaine/02.jpg",
+        "width": 2500,
+        "height": 3333,
+        "color": "#191C1B",
+        "alt": ""
+      },
+      {
+        "src": "/work/novocaine/03.jpg",
+        "width": 2500,
+        "height": 3333,
+        "color": "#99968E",
+        "alt": ""
+      },
+      {
+        "src": "/work/novocaine/04.jpg",
+        "width": 2500,
+        "height": 3334,
+        "color": "#7D7974",
+        "alt": ""
+      },
+      {
+        "src": "/work/novocaine/05.jpg",
+        "width": 2500,
+        "height": 3334,
+        "color": "#7A7773",
+        "alt": ""
+      },
+      {
+        "src": "/work/novocaine/06.jpg",
+        "width": 2500,
+        "height": 3333,
+        "color": "#908B84",
+        "alt": ""
+      },
+      {
+        "src": "/work/novocaine/07.jpg",
+        "width": 2500,
+        "height": 1667,
+        "color": "#BDBBB6",
+        "alt": ""
+      },
+      {
+        "src": "/work/novocaine/08.jpg",
+        "width": 2500,
+        "height": 1668,
+        "color": "#817E79",
+        "alt": ""
+      },
+      {
+        "src": "/work/novocaine/09.jpg",
+        "width": 2500,
+        "height": 1667,
+        "color": "#9D9A95",
+        "alt": ""
+      },
+      {
+        "src": "/work/novocaine/10.jpg",
+        "width": 2500,
+        "height": 3333,
+        "color": "#373029",
+        "alt": ""
+      },
+      {
+        "src": "/work/novocaine/11.jpg",
+        "width": 2500,
+        "height": 3333,
+        "color": "#22221F",
+        "alt": ""
+      },
+      {
+        "src": "/work/novocaine/12.jpg",
+        "width": 2500,
+        "height": 3333,
+        "color": "#383836",
+        "alt": ""
+      },
+      {
+        "src": "/work/novocaine/13.jpg",
+        "width": 2500,
+        "height": 3333,
+        "color": "#343532",
+        "alt": ""
+      },
+      {
+        "src": "/work/novocaine/14.jpg",
+        "width": 2500,
+        "height": 1668,
+        "color": "#676764",
+        "alt": ""
+      },
+      {
+        "src": "/work/novocaine/15.jpg",
+        "width": 2500,
+        "height": 1667,
+        "color": "#646562",
+        "alt": ""
+      },
+      {
+        "src": "/work/novocaine/16.jpg",
+        "width": 2500,
+        "height": 1667,
+        "color": "#61615E",
+        "alt": ""
+      },
+      {
+        "src": "/work/novocaine/17.jpg",
+        "width": 2500,
+        "height": 3333,
+        "color": "#5D5F5D",
+        "alt": ""
+      }
+    ]
+  },
+  {
+    "slug": "paradox",
+    "name": "PARADOX",
+    "headline": null,
+    "intent": null,
+    "credits": [
+      {
+        "role": "Photographer",
+        "name": "Julian Gigola"
+      }
+    ],
+    "categories": [
+      {
+        "slug": "campaigns",
+        "name": "CAMPAIGNS",
+        "section": "WORK"
+      }
+    ],
+    "cover": {
+      "src": "/work/paradox/cover.jpg",
+      "width": 600,
+      "height": 800,
+      "color": "#716D6D",
+      "alt": ""
+    },
+    "images": [
+      {
+        "src": "/work/paradox/01.jpg",
+        "width": 2500,
+        "height": 3333,
+        "color": "#716D6D",
+        "alt": ""
+      },
+      {
+        "src": "/work/paradox/02.jpg",
+        "width": 2500,
+        "height": 3334,
+        "color": "#B2ADAC",
+        "alt": ""
+      },
+      {
+        "src": "/work/paradox/03.jpg",
+        "width": 2500,
+        "height": 3333,
+        "color": "#B4AEAA",
+        "alt": ""
+      },
+      {
+        "src": "/work/paradox/04.jpg",
+        "width": 2500,
+        "height": 3333,
+        "color": "#675F5E",
+        "alt": ""
+      },
+      {
+        "src": "/work/paradox/05.jpg",
+        "width": 2500,
+        "height": 3334,
+        "color": "#787E8A",
+        "alt": ""
+      },
+      {
+        "src": "/work/paradox/06.jpg",
+        "width": 2500,
+        "height": 3334,
+        "color": "#7B7979",
+        "alt": ""
+      },
+      {
+        "src": "/work/paradox/07.jpg",
+        "width": 2500,
+        "height": 3333,
+        "color": "#756F70",
+        "alt": ""
+      },
+      {
+        "src": "/work/paradox/08.jpg",
+        "width": 2500,
+        "height": 3334,
+        "color": "#8E8C8C",
+        "alt": ""
+      },
+      {
+        "src": "/work/paradox/09.jpg",
+        "width": 2500,
+        "height": 3334,
+        "color": "#96939A",
+        "alt": ""
+      },
+      {
+        "src": "/work/paradox/10.jpg",
+        "width": 2500,
+        "height": 3333,
+        "color": "#8D8D90",
+        "alt": ""
+      },
+      {
+        "src": "/work/paradox/11.jpg",
+        "width": 2500,
+        "height": 3334,
+        "color": "#786F6F",
+        "alt": ""
+      },
+      {
+        "src": "/work/paradox/12.jpg",
+        "width": 2500,
+        "height": 3333,
+        "color": "#827F8B",
+        "alt": ""
+      }
+    ]
+  },
+  {
+    "slug": "relay",
+    "name": "RELAY",
+    "headline": null,
+    "intent": null,
+    "credits": [
+      {
+        "role": "Photographer",
+        "name": "Julian Gigola"
+      },
+      {
+        "role": "Model",
+        "name": "@anisajade"
+      }
+    ],
+    "categories": [
+      {
+        "slug": "editorial",
+        "name": "EDITORIAL",
+        "section": "WORK"
+      }
+    ],
+    "cover": {
+      "src": "/work/relay/cover.jpg",
+      "width": 600,
+      "height": 801,
+      "color": "#CCC6C3",
+      "alt": ""
+    },
+    "images": [
+      {
+        "src": "/work/relay/01.jpg",
+        "width": 2500,
+        "height": 3333,
+        "color": "#CCC6C3",
+        "alt": ""
+      },
+      {
+        "src": "/work/relay/02.jpg",
+        "width": 2500,
+        "height": 3333,
+        "color": "#C2BBB7",
+        "alt": ""
+      },
+      {
+        "src": "/work/relay/03.jpg",
+        "width": 2500,
+        "height": 3333,
+        "color": "#D1CCC8",
+        "alt": ""
+      },
+      {
+        "src": "/work/relay/04.jpg",
+        "width": 2500,
+        "height": 3334,
+        "color": "#CEC8C5",
+        "alt": ""
+      },
+      {
+        "src": "/work/relay/05.jpg",
+        "width": 2500,
+        "height": 3334,
+        "color": "#BDB8B4",
+        "alt": ""
+      },
+      {
+        "src": "/work/relay/06.jpg",
+        "width": 2500,
+        "height": 3333,
+        "color": "#BEB9B4",
+        "alt": ""
+      },
+      {
+        "src": "/work/relay/07.jpg",
+        "width": 2500,
+        "height": 3333,
+        "color": "#616263",
+        "alt": ""
+      },
+      {
+        "src": "/work/relay/08.jpg",
+        "width": 2500,
+        "height": 3333,
+        "color": "#53514F",
+        "alt": ""
+      },
+      {
+        "src": "/work/relay/09.jpg",
+        "width": 2500,
+        "height": 3333,
+        "color": "#B7B5B3",
+        "alt": ""
+      },
+      {
+        "src": "/work/relay/10.jpg",
+        "width": 2400,
+        "height": 3200,
+        "color": "#6F7377",
+        "alt": ""
+      }
+    ]
+  },
+  {
+    "slug": "diesel",
+    "name": "DIESEL: FOR SUCCESSFUL LIVING",
+    "headline": null,
+    "intent": null,
+    "credits": [
+      {
+        "role": "Photographer",
+        "name": "Julian Gigola"
+      }
+    ],
+    "categories": [
+      {
+        "slug": "campaigns",
+        "name": "CAMPAIGNS",
+        "section": "WORK"
+      }
+    ],
+    "cover": {
+      "src": "/work/diesel/cover.jpg",
+      "width": 600,
+      "height": 400,
+      "color": "#747375",
+      "alt": ""
+    },
+    "images": [
+      {
+        "src": "/work/diesel/01.jpg",
+        "width": 2500,
+        "height": 1667,
+        "color": "#747375",
+        "alt": ""
+      },
+      {
+        "src": "/work/diesel/02.jpg",
+        "width": 2500,
+        "height": 1667,
+        "color": "#6A5E5A",
+        "alt": ""
+      },
+      {
+        "src": "/work/diesel/03.jpg",
+        "width": 2500,
+        "height": 1667,
+        "color": "#767577",
+        "alt": ""
+      },
+      {
+        "src": "/work/diesel/04.jpg",
+        "width": 2500,
+        "height": 1668,
+        "color": "#6E6B6A",
+        "alt": ""
+      },
+      {
+        "src": "/work/diesel/05.jpg",
+        "width": 2500,
+        "height": 1667,
+        "color": "#74706F",
+        "alt": ""
+      },
+      {
+        "src": "/work/diesel/06.jpg",
+        "width": 2500,
+        "height": 1667,
+        "color": "#65696C",
+        "alt": ""
+      },
+      {
+        "src": "/work/diesel/07.jpg",
+        "width": 2500,
+        "height": 1667,
+        "color": "#6A6D70",
+        "alt": ""
+      }
+    ]
+  },
+  {
+    "slug": "undisputed",
+    "name": "UNDISPUTED",
+    "headline": null,
+    "intent": null,
+    "credits": [
+      {
+        "role": "Photographer",
+        "name": "Julian Gigola"
+      },
+      {
+        "role": "Model",
+        "name": "@iaiupo"
+      },
+      {
+        "role": "MUA & Styling",
+        "name": "@amana_mana11"
+      }
+    ],
+    "categories": [
+      {
+        "slug": "editorial",
+        "name": "EDITORIAL",
+        "section": "WORK"
+      }
+    ],
+    "cover": {
+      "src": "/work/undisputed/cover.jpg",
+      "width": 600,
+      "height": 800,
+      "color": "#7E7069",
+      "alt": ""
+    },
+    "images": [
+      {
+        "src": "/work/undisputed/01.jpg",
+        "width": 2500,
+        "height": 3333,
+        "color": "#7E7069",
+        "alt": ""
+      },
+      {
+        "src": "/work/undisputed/02.jpg",
+        "width": 2500,
+        "height": 3334,
+        "color": "#8B8782",
+        "alt": ""
+      },
+      {
+        "src": "/work/undisputed/03.jpg",
+        "width": 2500,
+        "height": 3333,
+        "color": "#787472",
+        "alt": ""
+      },
+      {
+        "src": "/work/undisputed/04.jpg",
+        "width": 2500,
+        "height": 3333,
+        "color": "#7D7A77",
+        "alt": ""
+      },
+      {
+        "src": "/work/undisputed/05.jpg",
+        "width": 2500,
+        "height": 3333,
+        "color": "#83817F",
+        "alt": ""
+      },
+      {
+        "src": "/work/undisputed/06.jpg",
+        "width": 2500,
+        "height": 3333,
+        "color": "#988F8B",
+        "alt": ""
+      },
+      {
+        "src": "/work/undisputed/07.jpg",
+        "width": 2500,
+        "height": 3333,
+        "color": "#857F7D",
+        "alt": ""
+      },
+      {
+        "src": "/work/undisputed/08.jpg",
+        "width": 2500,
+        "height": 3334,
+        "color": "#827E7C",
+        "alt": ""
+      },
+      {
+        "src": "/work/undisputed/09.jpg",
+        "width": 2500,
+        "height": 3333,
+        "color": "#877F7B",
+        "alt": ""
+      },
+      {
+        "src": "/work/undisputed/10.jpg",
+        "width": 2500,
+        "height": 3333,
+        "color": "#B0A9A6",
+        "alt": ""
+      },
+      {
+        "src": "/work/undisputed/11.jpg",
+        "width": 2500,
+        "height": 3333,
+        "color": "#968B84",
+        "alt": ""
+      }
+    ]
+  },
+  {
+    "slug": "decoy",
+    "name": "DECOY",
+    "headline": null,
+    "intent": null,
+    "credits": [
+      {
+        "role": "Photographer",
+        "name": "Julian Gigola"
+      },
+      {
+        "role": "Model",
+        "name": "@symphonypascal"
+      }
+    ],
+    "categories": [
+      {
+        "slug": "editorial",
+        "name": "EDITORIAL",
+        "section": "WORK"
+      }
+    ],
+    "cover": {
+      "src": "/work/decoy/cover.jpg",
+      "width": 600,
+      "height": 800,
+      "color": "#C9BCB3",
+      "alt": ""
+    },
+    "images": [
+      {
+        "src": "/work/decoy/01.jpg",
+        "width": 2500,
+        "height": 3333,
+        "color": "#C9BCB3",
+        "alt": ""
+      },
+      {
+        "src": "/work/decoy/02.jpg",
+        "width": 2500,
+        "height": 3334,
+        "color": "#DBD4D0",
+        "alt": ""
+      },
+      {
+        "src": "/work/decoy/03.jpg",
+        "width": 2500,
+        "height": 3333,
+        "color": "#E5DEDB",
+        "alt": ""
+      },
+      {
+        "src": "/work/decoy/04.jpg",
+        "width": 2500,
+        "height": 3333,
+        "color": "#E7DFDB",
+        "alt": ""
+      },
+      {
+        "src": "/work/decoy/05.jpg",
+        "width": 2500,
+        "height": 3333,
+        "color": "#DACDC6",
+        "alt": ""
+      },
+      {
+        "src": "/work/decoy/06.jpg",
+        "width": 2500,
+        "height": 3333,
+        "color": "#C4B8B1",
+        "alt": ""
+      }
+    ]
+  },
+  {
+    "slug": "nyx",
+    "name": "NYX",
+    "headline": null,
+    "intent": null,
+    "credits": [
+      {
+        "role": "Photographer",
+        "name": "Julian Gigola"
+      },
+      {
+        "role": "Model",
+        "name": "@anisajade"
+      }
+    ],
+    "categories": [
+      {
+        "slug": "editorial",
+        "name": "EDITORIAL",
+        "section": "WORK"
+      }
+    ],
+    "cover": {
+      "src": "/work/nyx/cover.jpg",
+      "width": 600,
+      "height": 800,
+      "color": "#939494",
+      "alt": ""
+    },
+    "images": [
+      {
+        "src": "/work/nyx/01.jpg",
+        "width": 2500,
+        "height": 3333,
+        "color": "#939494",
+        "alt": ""
+      },
+      {
+        "src": "/work/nyx/02.jpg",
+        "width": 2500,
+        "height": 3333,
+        "color": "#6E6B68",
+        "alt": ""
+      },
+      {
+        "src": "/work/nyx/03.jpg",
+        "width": 2500,
+        "height": 3334,
+        "color": "#828586",
+        "alt": ""
+      },
+      {
+        "src": "/work/nyx/04.jpg",
+        "width": 2500,
+        "height": 3334,
+        "color": "#696A6C",
+        "alt": ""
+      },
+      {
+        "src": "/work/nyx/05.jpg",
+        "width": 2500,
+        "height": 3334,
+        "color": "#898987",
+        "alt": ""
+      },
+      {
+        "src": "/work/nyx/06.jpg",
+        "width": 2500,
+        "height": 3333,
+        "color": "#3B3635",
+        "alt": ""
+      },
+      {
+        "src": "/work/nyx/07.jpg",
+        "width": 2500,
+        "height": 3333,
+        "color": "#7C7D7A",
+        "alt": ""
+      },
+      {
+        "src": "/work/nyx/08.jpg",
+        "width": 2294,
+        "height": 3059,
+        "color": "#332925",
+        "alt": ""
+      },
+      {
+        "src": "/work/nyx/09.jpg",
+        "width": 2500,
+        "height": 3334,
+        "color": "#575A5A",
+        "alt": ""
+      },
+      {
+        "src": "/work/nyx/10.jpg",
+        "width": 2500,
+        "height": 3333,
+        "color": "#565959",
+        "alt": ""
+      },
+      {
+        "src": "/work/nyx/11.jpg",
+        "width": 2500,
+        "height": 3333,
+        "color": "#3B3E3F",
+        "alt": ""
+      },
+      {
+        "src": "/work/nyx/12.jpg",
+        "width": 2500,
+        "height": 3333,
+        "color": "#808181",
+        "alt": ""
+      }
+    ]
+  },
+  {
+    "slug": "serif",
+    "name": "SERIF",
+    "headline": null,
+    "intent": null,
+    "credits": [
+      {
+        "role": "Photographer",
+        "name": "Julian Gigola"
+      },
+      {
+        "role": "Model",
+        "name": "@tamakgo"
+      }
+    ],
+    "categories": [
+      {
+        "slug": "portraits",
+        "name": "PORTRAITS",
+        "section": "WORK"
+      }
+    ],
+    "cover": {
+      "src": "/work/serif/cover.jpg",
+      "width": 600,
+      "height": 800,
+      "color": "#B7B6B6",
+      "alt": ""
+    },
+    "images": [
+      {
+        "src": "/work/serif/01.jpg",
+        "width": 2500,
+        "height": 3333,
+        "color": "#B7B6B6",
+        "alt": ""
+      },
+      {
+        "src": "/work/serif/02.jpg",
+        "width": 2500,
+        "height": 3333,
+        "color": "#B7B1AE",
+        "alt": ""
+      },
+      {
+        "src": "/work/serif/03.jpg",
+        "width": 2500,
+        "height": 3333,
+        "color": "#C2BCB9",
+        "alt": ""
+      },
+      {
+        "src": "/work/serif/04.jpg",
+        "width": 2500,
+        "height": 3333,
+        "color": "#A69C96",
+        "alt": ""
+      },
+      {
+        "src": "/work/serif/05.jpg",
+        "width": 2500,
+        "height": 3334,
+        "color": "#85807E",
+        "alt": ""
+      },
+      {
+        "src": "/work/serif/06.jpg",
+        "width": 2500,
+        "height": 3333,
+        "color": "#BBB8B7",
+        "alt": ""
+      },
+      {
+        "src": "/work/serif/07.jpg",
+        "width": 2500,
+        "height": 3333,
+        "color": "#B5B2B0",
+        "alt": ""
+      }
+    ]
+  },
+  {
+    "slug": "void",
+    "name": "VOID",
+    "headline": null,
+    "intent": null,
+    "credits": [
+      {
+        "role": "Photographer",
+        "name": "Julian Gigola"
+      },
+      {
+        "role": "Model",
+        "name": "@kniiivess"
+      }
+    ],
+    "categories": [
+      {
+        "slug": "editorial",
+        "name": "EDITORIAL",
+        "section": "WORK"
+      }
+    ],
+    "cover": {
+      "src": "/work/void/cover.jpg",
+      "width": 600,
+      "height": 800,
+      "color": "#8B9193",
+      "alt": ""
+    },
+    "images": [
+      {
+        "src": "/work/void/01.jpg",
+        "width": 2500,
+        "height": 3333,
+        "color": "#8B9193",
+        "alt": ""
+      },
+      {
+        "src": "/work/void/02.jpg",
+        "width": 2500,
+        "height": 3333,
+        "color": "#8C9295",
+        "alt": ""
+      },
+      {
+        "src": "/work/void/03.jpg",
+        "width": 2500,
+        "height": 3334,
+        "color": "#969A9B",
+        "alt": ""
+      },
+      {
+        "src": "/work/void/04.jpg",
+        "width": 2500,
+        "height": 3333,
+        "color": "#8D9192",
+        "alt": ""
+      },
+      {
+        "src": "/work/void/05.jpg",
+        "width": 2500,
+        "height": 3333,
+        "color": "#A7ACAD",
+        "alt": ""
+      },
+      {
+        "src": "/work/void/06.jpg",
+        "width": 2500,
+        "height": 3333,
+        "color": "#AAAEB0",
+        "alt": ""
+      },
+      {
+        "src": "/work/void/07.jpg",
+        "width": 2500,
+        "height": 3333,
+        "color": "#ACAFB0",
+        "alt": ""
+      },
+      {
+        "src": "/work/void/08.jpg",
+        "width": 2500,
+        "height": 3333,
+        "color": "#ADB0B0",
+        "alt": ""
+      },
+      {
+        "src": "/work/void/09.jpg",
+        "width": 2500,
+        "height": 3333,
+        "color": "#303237",
+        "alt": ""
+      }
+    ]
+  },
+  {
+    "slug": "aegis",
+    "name": "ÆGIS",
+    "headline": null,
+    "intent": null,
+    "credits": [
+      {
+        "role": "Photographer",
+        "name": "Julian Gigola"
+      },
+      {
+        "role": "Model",
+        "name": "@phoebe2phly"
+      }
+    ],
+    "categories": [
+      {
+        "slug": "editorial",
+        "name": "EDITORIAL",
+        "section": "WORK"
+      }
+    ],
+    "cover": {
+      "src": "/work/aegis/cover.jpg",
+      "width": 600,
+      "height": 800,
+      "color": "#534E48",
+      "alt": ""
+    },
+    "images": [
+      {
+        "src": "/work/aegis/01.jpg",
+        "width": 2500,
+        "height": 3333,
+        "color": "#534E48",
+        "alt": ""
+      },
+      {
+        "src": "/work/aegis/02.jpg",
+        "width": 2500,
+        "height": 3333,
+        "color": "#606364",
+        "alt": ""
+      },
+      {
+        "src": "/work/aegis/03.jpg",
+        "width": 2500,
+        "height": 3333,
+        "color": "#616567",
+        "alt": ""
+      },
+      {
+        "src": "/work/aegis/04.jpg",
+        "width": 2500,
+        "height": 3333,
+        "color": "#878C8E",
+        "alt": ""
+      },
+      {
+        "src": "/work/aegis/05.jpg",
+        "width": 2500,
+        "height": 3334,
+        "color": "#646361",
+        "alt": ""
+      },
+      {
+        "src": "/work/aegis/06.jpg",
+        "width": 2500,
+        "height": 3334,
+        "color": "#696A6A",
+        "alt": ""
+      }
+    ]
+  },
+  {
+    "slug": "vigil",
+    "name": "VIGIL",
+    "headline": null,
+    "intent": null,
+    "credits": [
+      {
+        "role": "Photographer",
+        "name": "Julian Gigola"
+      },
+      {
+        "role": "Model",
+        "name": "@kissedbyconstance"
+      }
+    ],
+    "categories": [
+      {
+        "slug": "editorial",
+        "name": "EDITORIAL",
+        "section": "WORK"
+      }
+    ],
+    "cover": {
+      "src": "/work/vigil/cover.jpg",
+      "width": 600,
+      "height": 801,
+      "color": "#15130E",
+      "alt": ""
+    },
+    "images": [
+      {
+        "src": "/work/vigil/01.jpg",
+        "width": 2500,
+        "height": 3338,
+        "color": "#15130E",
+        "alt": ""
+      },
+      {
+        "src": "/work/vigil/02.jpg",
+        "width": 2500,
+        "height": 3333,
+        "color": "#26211B",
+        "alt": ""
+      },
+      {
+        "src": "/work/vigil/03.jpg",
+        "width": 2500,
+        "height": 3333,
+        "color": "#1C1712",
+        "alt": ""
+      },
+      {
+        "src": "/work/vigil/04.jpg",
+        "width": 2500,
+        "height": 3333,
+        "color": "#171717",
+        "alt": ""
+      },
+      {
+        "src": "/work/vigil/05.jpg",
+        "width": 2500,
+        "height": 3333,
+        "color": "#2E2923",
+        "alt": ""
+      },
+      {
+        "src": "/work/vigil/06.jpg",
+        "width": 2500,
+        "height": 3333,
+        "color": "#24201B",
+        "alt": ""
+      },
+      {
+        "src": "/work/vigil/07.jpg",
+        "width": 2500,
+        "height": 3334,
+        "color": "#41342B",
+        "alt": ""
+      },
+      {
+        "src": "/work/vigil/08.jpg",
+        "width": 2500,
+        "height": 3333,
+        "color": "#18130F",
+        "alt": ""
+      }
+    ]
+  },
+  {
     "slug": "aera-wraith",
     "name": "ÆRA:WRAITH",
     "headline": null,
