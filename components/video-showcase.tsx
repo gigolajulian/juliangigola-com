@@ -81,7 +81,12 @@ export function VideoShowcase({
         data-tick
         data-label={section.name}
         data-hash={section.id}
-        className="flex w-full shrink-0 flex-col justify-center gap-2 py-10 sm:h-full sm:w-[min(18rem,40vw)] sm:py-0 sm:pl-10"
+        /* The column is at least 18rem and as much more as the word needs.
+           A fixed 18rem is 248px of room once the gutter is taken, and
+           COMMERCIAL set in the display face at 48px is 285px: the word ran
+           out of its own cell and printed itself over the films standing
+           next to it. Nothing here is long enough to want a cap. */
+        className="flex w-full shrink-0 flex-col justify-center gap-2 py-10 sm:h-full sm:w-max sm:min-w-[min(18rem,40vw)] sm:py-0 sm:pl-10 sm:pr-10"
       >
         <h2 className="font-display text-3xl uppercase leading-[0.95] tracking-[0] sm:text-5xl">
           {section.name}
