@@ -6,7 +6,7 @@ import { useSelectedLayoutSegments } from "next/navigation";
 import { cn } from "@/lib/utils";
 import type { CategoryLink } from "@/lib/work";
 import { StripPage, StripHead } from "@/components/strip-page";
-import { markFilter } from "@/components/strip";
+import { markFilter, StripView, type StripViewMode } from "@/components/strip";
 
 /* ── the frame around the work ────────────────────────────────────
  * The head and the chip row, mounted once for the whole of /work, its
@@ -39,11 +39,65 @@ import { markFilter } from "@/components/strip";
  * any more.
  * ─────────────────────────────────────────────────────────────── */
 
+/* ── strip or sheet, remembered ───────────────────────────────────
+ * The way somebody wants to look at a body of work is a preference, not a
+ * step to repeat on every visit, so the choice is kept.
+ *
+ * A store read through `useSyncExternalStore` rather than state set in an
+ * effect: the server has no `localStorage` and must draw the strip, the
+ * browser knows better a moment later, and this is the one hook that says
+ * exactly that - `getServerSnapshot` for the render that has to match the
+ * HTML, `getSnapshot` from then on. `useWide` in `strip.tsx` reads the
+ * media query the same way.
+ */
+const VIEW_KEY = "work-view";
+
+let watching: (() => void)[] = [];
+
+const readView = (): StripViewMode => {
+  try {
+    return window.localStorage.getItem(VIEW_KEY) === "grid" ? "grid" : "strip";
+  } catch {
+    // Private browsing: it works, it is simply not remembered.
+    return "strip";
+  }
+};
+
+const subscribeView = (onChange: () => void) => {
+  watching.push(onChange);
+  // The same person in another tab of the same site.
+  window.addEventListener("storage", onChange);
+  return () => {
+    watching = watching.filter((w) => w !== onChange);
+    window.removeEventListener("storage", onChange);
+  };
+};
+
+const chooseView = (next: StripViewMode) => {
+  try {
+    window.localStorage.setItem(VIEW_KEY, next);
+  } catch {
+    // As above.
+  }
+  for (const w of watching) w();
+};
+
 export type Head = {
   title: string;
   aside: string;
   /** How many things are behind this filter, for the chip. */
   count: number;
+  /**
+   * Whether this filter can be shown as a sheet.
+   *
+   * A list of projects can: every cell is a cover, and a grid of covers is
+   * the same information laid out differently. A discipline that is one
+   * gallery cannot, and neither can the films or the cover art rack - those
+   * cells are a photo essay, a reel and a two-row catalogue, each built for
+   * a strip, and squared off into a grid they collapse to a line. The
+   * toggle is not offered where it has nothing to offer.
+   */
+  sheet: boolean;
 };
 
 export function WorkShell({
@@ -69,14 +123,37 @@ export function WorkShell({
      put in the middle of it whenever the filter changes: arriving on
      Places with the row showing Editorial through Portraits would be the
      same lie the old active state told. */
+  /* It is the layout that holds the view, and the layout survives a filter
+     change: choose Grid, then choose Portraits, and you are in the grid
+     looking at portraits. */
+  const chosen = React.useSyncExternalStore(
+    subscribeView,
+    readView,
+    () => "strip" as StripViewMode,
+  );
+  /* A filter that cannot be a sheet is a strip whatever was chosen, and the
+     choice is kept: walk from Editorial's grid through Places and back, and
+     Editorial is still a grid. */
+  const sheet = head.sheet;
+  const view: StripViewMode = sheet ? chosen : "strip";
+
   const row = React.useRef<HTMLUListElement>(null);
   const lit = React.useRef<HTMLLIElement>(null);
   React.useEffect(() => {
     const r = row.current;
+    if (!r) return;
+    /* Whether there is a row beyond the edge of the window, so the edge can
+       say so: a chip cut in half by the window looks like a mistake, a chip
+       fading out looks like a row that continues. */
+    const measure = () => r.toggleAttribute("data-more", r.scrollWidth > r.clientWidth + 1);
+    measure();
     const c = lit.current;
-    if (!r || !c || r.scrollWidth <= r.clientWidth) return;
-    const to = c.offsetLeft - r.clientWidth / 2 + c.offsetWidth / 2;
-    r.scrollLeft = Math.max(0, Math.min(r.scrollWidth - r.clientWidth, to));
+    if (c && r.scrollWidth > r.clientWidth) {
+      const to = c.offsetLeft - r.clientWidth / 2 + c.offsetWidth / 2;
+      r.scrollLeft = Math.max(0, Math.min(r.scrollWidth - r.clientWidth, to));
+    }
+    window.addEventListener("resize", measure);
+    return () => window.removeEventListener("resize", measure);
   }, [key]);
 
   return (
@@ -109,7 +186,8 @@ export function WorkShell({
           {/* The old site's three dropdowns become one row that can be
               ignored: the default is everything, so nobody has to make a
               choice before they can look at anything. */}
-          <nav aria-label="Categories" className="mt-3 w-full shrink-0">
+          <div className="mt-3 flex w-full shrink-0 items-center gap-2">
+            <nav aria-label="Categories" className="min-w-0 flex-1">
             {/* The padding is the list's, not the bar's: at the bar's edge
                 the chips would stop dead against 24px of nothing, and a
                 row that scrolls should run to the edge of the window and
@@ -138,12 +216,39 @@ export function WorkShell({
                   </Chip>
                 </li>
               ))}
-            </ul>
-          </nav>
+              </ul>
+            </nav>
+
+            {/* Two ways through the same work, named rather than drawn: an
+                icon of four squares is a guess, and these are two words. */}
+            <div
+              className={cn(
+                "flex shrink-0 items-center gap-1 pr-6 sm:pr-10",
+                !sheet && "hidden",
+              )}
+            >
+              {(["strip", "grid"] as const).map((mode) => (
+                <button
+                  key={mode}
+                  type="button"
+                  aria-pressed={view === mode}
+                  onClick={() => chooseView(mode)}
+                  className={cn(
+                    "label rounded-full px-2.5 py-1.5 transition-colors duration-200 max-sm:py-3",
+                    view === mode
+                      ? "text-foreground"
+                      : "text-muted-foreground/60 hoverable:hover:text-foreground",
+                  )}
+                >
+                  {mode}
+                </button>
+              ))}
+            </div>
+          </div>
         </>
       }
     >
-      {children}
+      <StripView value={view}>{children}</StripView>
     </StripPage>
   );
 }

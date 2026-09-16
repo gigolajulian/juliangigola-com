@@ -107,6 +107,41 @@ export function ClientMarks({
   );
 }
 
+/**
+ * One mark on its own, at the size of a line of type: the strip's panel
+ * shows the client of the cover in the middle. `row`'s box, because that is
+ * the small one, and the panel is a 16px band.
+ */
+export function SoleMark({
+  client,
+  className,
+}: {
+  client: Client;
+  className?: string;
+}) {
+  /* No mark on file, nothing shown. The wall falls back to the name set in
+     the display face, which is right in a row of logos and wrong in a 16px
+     band beside the ruler, where it would be the loudest thing on the
+     page. */
+  if (!CLIENT_MARKS[client.slug]) return null;
+  return (
+    <span
+      className={cn(
+        /* A fixed box, and a small one. The marks are evened by ink area,
+           so the roundest of them stands 1.5x its nominal height: at the
+           wall's size that put a 26px logo in a row built on a 16px ruler,
+           the panel grew to fit it, and the strip above lost those pixels
+           every time a client's cover came to the middle. The box does not
+           move now, and nothing inside it can push. */
+        "flex h-5 shrink-0 items-center overflow-hidden text-muted-foreground [--mark-box:0.75rem] [--mark-cap:4.5rem]",
+        className,
+      )}
+    >
+      <ClientMark client={client} layout="row" />
+    </span>
+  );
+}
+
 function ClientMark({
   client,
   layout,

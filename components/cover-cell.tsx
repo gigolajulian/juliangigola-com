@@ -29,6 +29,7 @@ export function CoverCell({
   label,
   hash,
   i,
+  mark,
   eager,
 }: {
   row: IndexRow;
@@ -41,6 +42,9 @@ export function CoverCell({
   hash?: string;
   /** Its place in the strip, for the stagger of the arrival. */
   i: number;
+  /** The slug of the client's mark, shown in the panel while this cell is
+      the one in the middle. */
+  mark?: string;
   /** The first screen's covers load with the page; the rest as the strip
       reaches them. */
   eager?: boolean;
@@ -53,6 +57,7 @@ export function CoverCell({
       data-label={label}
       data-hash={hash}
       data-ring="Open"
+      data-mark={mark}
       className="group strip-cell relative block w-full shrink-0 overflow-hidden press hoverable:cursor-none active:scale-[0.995] sm:h-full sm:w-auto"
       style={
         {
@@ -82,12 +87,22 @@ export function CoverCell({
           the height of its own two lines and no more, so it covers what it
           needs to of the photograph and nothing else. Always on, because a
           strip of covers is scanned for a name you recognise. */}
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 flex items-baseline justify-between gap-4 border-t border-border/60 glass-surface bg-background/70 px-4 py-3">
+      <div className="cover-plate pointer-events-none absolute inset-x-0 bottom-0 flex items-baseline justify-between gap-4 border-t border-border/60 glass-surface bg-background/70 px-4 py-3">
         <span className="font-display min-w-0 truncate text-lg uppercase leading-none tracking-[0]">
           {row.name}
         </span>
         <span className="label shrink-0 text-muted-foreground">
           {row.credit}
+          {/* And how much of it there is. A cover is one photograph; the
+              number is what says it opens onto a body of work. Off on a
+              phone, where the plate is 390px wide and the name is what has
+              to survive. */}
+          {row.frames ? (
+            <span className="max-sm:hidden">
+              <span className="px-1.5 text-muted-foreground/50">/</span>
+              {row.frames} frames
+            </span>
+          ) : null}
         </span>
       </div>
     </Link>

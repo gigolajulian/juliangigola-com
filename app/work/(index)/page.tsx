@@ -11,8 +11,11 @@ import {
   commissionsIn,
   indexRow,
   isDisciplineGallery,
+  markFor,
+  PRESS,
   projectsIn,
 } from "@/lib/work";
+import { SoleMark } from "@/components/client-marks";
 import { COVER_RELEASES } from "@/lib/cover-art-data";
 import { CONTENT } from "@/lib/content";
 
@@ -34,6 +37,14 @@ export const metadata: Metadata = {
  *
  * The head and the chips are the layout's; this is the sequence.
  * ─────────────────────────────────────────────────────────────── */
+/* The eight clients with a mark on file, rendered once and handed to the
+   strip as nodes: the panel shows the one the cover in the middle names.
+   A map and not a lookup function, because this is a server component and
+   a function cannot cross into the client one. */
+const MARKS = Object.fromEntries(
+  PRESS.map((c) => [c.slug, <SoleMark key={c.slug} client={c} />]),
+);
+
 export default function WorkPage() {
   /* No title cell. "Work" set large next to "Editorial" set large was two
      titles on one screen arguing about which page you were on; the word is
@@ -69,6 +80,9 @@ export default function WorkPage() {
             ...indexRow(gallery),
             name: c.name,
             credit: `${n} ${isCoverArt ? "releases" : "frames"}`,
+            // The credit is already the count here; saying it twice on one
+            // plate is how "40 frames / 40 frames" happens.
+            frames: undefined,
           }}
           href={c.href}
           label={c.name}
@@ -94,7 +108,13 @@ export default function WorkPage() {
     );
     for (const p of run) {
       cells.push(
-        <CoverCell key={p.slug} row={indexRow(p)} i={i++} eager={i < 4} />,
+        <CoverCell
+          key={p.slug}
+          row={indexRow(p)}
+          i={i++}
+          mark={markFor(p.slug)?.slug}
+          eager={i < 4}
+        />,
       );
     }
   }
@@ -114,6 +134,7 @@ export default function WorkPage() {
     <Strip
       label={`All work: ${COMMISSIONS.length} projects, left and right`}
       next={STUDIO}
+      marks={MARKS}
       className="mt-4 flex-1"
     >
       {cells}

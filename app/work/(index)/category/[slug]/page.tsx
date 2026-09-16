@@ -18,7 +18,10 @@ import {
   enquiryTypeFor,
   indexRow,
   isDisciplineGallery,
+  markFor,
+  PRESS,
 } from "@/lib/work";
+import { SoleMark } from "@/components/client-marks";
 import { COVER_RELEASES } from "@/lib/cover-art-data";
 
 /* ── a discipline ─────────────────────────────────────────────────
@@ -40,6 +43,14 @@ import { COVER_RELEASES } from "@/lib/cover-art-data";
  * wheel leads to the next discipline along the chip row, and past the
  * last one to the studio.
  * ─────────────────────────────────────────────────────────────── */
+
+/* The eight clients with a mark on file, rendered once and handed to the
+   strip as nodes: the panel shows the one the cover in the middle names.
+   A map and not a lookup function, because this is a server component and
+   a function cannot cross into the client one. */
+const MARKS = Object.fromEntries(
+  PRESS.map((c) => [c.slug, <SoleMark key={c.slug} client={c} />]),
+);
 
 /**
  * Only categories that have something to show.
@@ -159,6 +170,7 @@ export default async function CategoryPage(
     <Strip
       label={`${name}: ${projects.length} projects, left and right`}
       next={next}
+      marks={MARKS}
       className="mt-4 flex-1"
     >
       {[
@@ -168,7 +180,13 @@ export default async function CategoryPage(
           </p>
         </TitleCell>,
         ...projects.map((p, i) => (
-          <CoverCell key={p.slug} row={indexRow(p)} i={i} eager={i < 3} />
+          <CoverCell
+            key={p.slug}
+            row={indexRow(p)}
+            i={i}
+            mark={markFor(p.slug)?.slug}
+            eager={i < 3}
+          />
         )),
         ask,
       ]}

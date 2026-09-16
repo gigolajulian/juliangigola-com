@@ -588,6 +588,15 @@ export type IndexRow = {
   cover: Frame;
   /** The credit shown against the name; the discipline when there is none. */
   credit: string;
+  /**
+   * How many frames are behind the cover.
+   *
+   * A cover is one photograph and a project is a body of work, and nothing
+   * on the index said which of the two you were about to open. Left off
+   * where the credit is already a count: the disciplines that are one
+   * gallery say "24 releases" there and would otherwise say it twice.
+   */
+  frames?: number;
 };
 
 export const indexRow = (p: Project): IndexRow => ({
@@ -595,6 +604,7 @@ export const indexRow = (p: Project): IndexRow => ({
   name: p.name,
   cover: withBlur(p.cover),
   credit: billing(p) ?? p.categories[0]?.name ?? "",
+  frames: p.images.length || undefined,
 });
 
 /**
@@ -720,6 +730,17 @@ export const PRESS: Client[] = [
   const project = /^\/work\/([a-z0-9-]+)$/.exec(c.href)?.[1];
   return !project || project === "video" || bySlug.has(project);
 });
+
+/**
+ * The mark of the client a project was shot for, if that client has one.
+ *
+ * Eight do. The strip shows it in the panel as the cover it belongs to comes
+ * to the middle: a credential stated where it was earned, rather than a wall
+ * of logos somewhere else. Julian: the client logos need to be more
+ * integrated.
+ */
+export const markFor = (slug: string): Client | undefined =>
+  PRESS.find((c) => c.href === `/work/${slug}`);
 
 /**
  * A wall in the editor's order. An order that names nothing is the state

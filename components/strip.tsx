@@ -122,6 +122,20 @@ const useWide = () =>
     () => true,
   );
 
+/* ── the other way of looking at it ───────────────────────────────
+ * A strip is a sequence and a grid is an inventory, and the two answer
+ * different questions about the same set: "walk me through it" against
+ * "show me everything". /work is 34,512px of ribbon - twenty-four screens
+ * at 1440 - and until now there was no way to see it at once.
+ *
+ * Context rather than a prop, because the control is in the layout
+ * (`work-shell.tsx`, which survives a filter change) and the strip is in
+ * the page under it. A strip nobody wraps reads the default and is exactly
+ * what it was.
+ */
+export type StripViewMode = "strip" | "grid";
+export const StripView = React.createContext<StripViewMode>("strip");
+
 /** The scroll position that puts cell `i` in the middle of the window. */
 const centreOf = (el: HTMLElement, i: number) => {
   const cell = el.children[i] as HTMLElement | undefined;
@@ -136,6 +150,7 @@ export function Strip({
   prev,
   onOpen,
   counter,
+  marks,
   stack = true,
   paged = false,
   bleed = false,
@@ -155,6 +170,15 @@ export function Strip({
   onOpen?: (n: number) => void;
   /** Drawn left of the ruler, given the index of the cell in the middle. */
   counter?: (at: number) => React.ReactNode;
+  /**
+   * Marks by key, drawn in the panel when the cell in the middle names one
+   * in `data-mark`.
+   *
+   * A map of nodes and not a function of the index, because the pages that
+   * want this are server components and a function cannot cross that
+   * boundary - rendered nodes can.
+   */
+  marks?: Record<string, React.ReactNode>;
   /** Under 40rem, run the cells down the page instead and switch the
       machine off. Off for the project strips, which swipe on a phone. */
   stack?: boolean;
@@ -175,12 +199,19 @@ export function Strip({
   const scroller = React.useRef<HTMLDivElement>(null);
   React.useImperativeHandle(ref, () => scroller.current!, []);
   const [at, setAt] = React.useState(0);
+  /** The key of the mark the cell in the middle names, if it names one. */
+  const [mark, setMark] = React.useState("");
   const [ticks, setTicks] = React.useState<{ i: number; word?: string }[]>([]);
   const tickKey = React.useRef("");
   // For the keyboard, which lives in an effect and must not go stale.
   const atRef = React.useRef(0);
   const wide = useWide();
-  const live = stack ? wide : true;
+  const view = React.useContext(StripView);
+  const grid = view === "grid";
+  /* Laid out as a grid, the machine is off for the same reasons it is off
+     on a phone: there is no sequence to ease along, no cell in the middle
+     to be on, and the page's own scrolling is the right one. */
+  const live = (stack ? wide : true) && !grid;
   const router = useRouter();
   // Stable for the life of the strip: pages key it by what it shows.
   const nextHref = next?.href;
@@ -294,6 +325,9 @@ export function Strip({
           break;
         }
       }
+      /* The mark belongs to the cell itself and not to the chapter it is
+         in: a client is the client of one project. */
+      setMark((el.children[i] as HTMLElement).dataset.mark ?? "");
       if (word === el.dataset.at) return;
       el.dataset.at = word;
       const out = el.closest("article")?.querySelector("[data-strip-at]");
@@ -1004,7 +1038,7 @@ export function Strip({
            the sequence being tugged out of your hand. The momentum stops
            where it is let go instead. */
         className={cn(
-          "flex min-h-0 flex-1 select-none items-center overflow-x-auto overflow-y-hidden",
+          "flex min-h-0 flex-1 select-none items-center",
           bleed ? "gap-0" : "gap-3 px-6 sm:px-10 sm:gap-4",
           /* It takes focus and the arrow keys drive it, so it says so. The
              ring is inset, because an outline around a box the height of
@@ -1019,7 +1053,11 @@ export function Strip({
              on a tablet feel like a guess. Up and down is still the
              browser's, which is what keeps a scrolling box inside a cell
              working and lets a page that stacks scroll as a page. */
-          paged && "touch-pan-y",
+          // Everything above is the strip's; `strip-grid` in `globals.css`
+          // takes the same cells and lays them out as a sheet instead.
+          grid && "strip-grid",
+          !grid && "overflow-x-auto overflow-y-hidden",
+          paged && !grid && "touch-pan-y",
           stack &&
             "max-sm:animate-none max-sm:flex-col max-sm:items-stretch max-sm:gap-10 max-sm:overflow-visible max-sm:select-auto",
           // Stacked, a full-bleed page still wants its words off the edge.
@@ -1040,11 +1078,20 @@ export function Strip({
           // The gap has to hold a tick word: 16px did not, and the word's
           // top two pixels sat inside the strip, over the bottom edge of
           // whatever cell was there.
-          "mt-6 flex items-end gap-6 px-6 sm:px-10",
+          /* `min-h-5`, so the row is the same height with a client's mark
+             in it and without one: the strip above is `flex-1` and would
+             otherwise give up four pixels every time a mark appeared. */
+          "mt-6 flex min-h-5 items-end gap-6 px-6 sm:px-10",
           stack && "max-sm:hidden",
+          // Nothing to scrub, and no cell to be on.
+          grid && "hidden",
         )}
       >
         {counter?.(at)}
+        {/* Who the cover in the middle was shot for. It sits at the end of
+            the ruler's own line, so it reads as part of the instrument
+            rather than as a badge dropped on the page. */}
+        {marks?.[mark] ?? null}
 
         <div
           aria-hidden
