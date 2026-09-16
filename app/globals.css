@@ -740,9 +740,36 @@ nav[aria-label="Categories"] ul[data-more] {
    ask at the end - stand full height and take two columns: they are written
    for a column the width of a masthead, and 240px of one wraps `Brand
    campaigns` into three lines. */
-.strip-grid > :where(div, section, article) {
-  grid-row: 1 / -1;
-  grid-column: span 2;
+@media (min-width: 40rem) {
+  .strip-grid > :where(div, section, article) {
+    /* A discipline opens the strip on its name, a title page before its run
+       of covers. In the rack that title page was a blank column: 484px of
+       paper with one word on it, and the pictures starting a fifth of the
+       way across the window. Here the name is a label in the top slot of
+       its own column with a cover under it, so the work runs to both edges
+       of the window and the word still says where a chapter begins.
+
+       Full height and one column, not half a column: a cell pinned to the
+       top row makes the auto-placement skip the slot under it, and the rack
+       printed holes a screen wide between disciplines. */
+    grid-row: 1 / -1;
+    grid-column: span 1;
+    justify-content: center;
+    gap: 0.25rem;
+    padding: 0 0.75rem;
+  }
+  .strip-grid > :where(div, section, article):not([data-hash="enquire"]) h2 {
+    font-size: 1.5rem;
+    line-height: 1;
+  }
+  /* The ask is the exception: a sentence, two buttons and the way on to the
+     studio is not a label and does not fit in a slot. */
+  .strip-grid > [data-hash="enquire"] {
+    grid-row: 1 / -1;
+    grid-column: span 2;
+    justify-content: center;
+    padding: 0 1.5rem;
+  }
 }
 /* At 240px the plate has no room for a name beside a credit: the name goes
    on its own line and the credit under it, so `Metamorphosis` is not
