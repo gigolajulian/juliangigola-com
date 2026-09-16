@@ -1826,6 +1826,12 @@ optgroup {
      when they sit side by side: the quiet one has a real hairline, and
      without this the pair differed by the two pixels it adds. */
   border: 1px solid transparent;
+  position: relative;
+  isolation: isolate;
+  box-shadow:
+    inset 0 1px 0 color-mix(in oklab, white 22%, transparent),
+    inset 0 -1px 0 color-mix(in oklab, black 22%, transparent),
+    0 10px 24px -16px color-mix(in oklab, black 55%, transparent);
   background-color: var(--foreground);
   color: var(--background);
   transition: background-color 200ms var(--ease-out-strong);
@@ -1854,6 +1860,12 @@ optgroup {
 
 @utility action-quiet {
   border: 1px solid var(--border);
+  position: relative;
+  isolation: isolate;
+  box-shadow:
+    inset 0 1px 0 color-mix(in oklab, white 18%, transparent),
+    inset 0 -1px 0 color-mix(in oklab, black 14%, transparent),
+    0 10px 24px -16px color-mix(in oklab, black 45%, transparent);
   color: var(--foreground);
   transition:
     background-color 200ms var(--ease-out-strong),
@@ -1885,6 +1897,40 @@ optgroup {
     border-color: color-mix(in oklab, var(--foreground) 88%, var(--background));
     color: var(--background);
   }
+}
+
+/* The light on the two buttons. The same material the floating controls
+   wear, on the thing a visitor actually presses: a soft highlight where the
+   pointer catches the surface, sliding with the hand through `--gx`/`--gy`
+   (written by `glass-light.tsx`) and resting at the top edge before there
+   is a hand at all. The fill underneath is opaque ink, so there is no blur
+   to see through here — what makes it glass is the shine along the top
+   edge, the shadow under it, and the light that follows you. */
+.action::before,
+.action-quiet::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  pointer-events: none;
+  background: radial-gradient(
+    120px circle at var(--gx, 50%) var(--gy, 0%),
+    color-mix(in oklab, white 24%, transparent),
+    transparent 70%
+  );
+  opacity: 0;
+  transition: opacity 260ms var(--ease-out-strong);
+}
+@media (hover: hover) and (pointer: fine) {
+  .action:hover::before,
+  .action-quiet:hover::before {
+    opacity: 1;
+  }
+}
+.action:focus-visible::before,
+.action-quiet:focus-visible::before {
+  opacity: 1;
 }
 
 @utility glass-surface {
