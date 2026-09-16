@@ -208,10 +208,13 @@ export function Strip({
   const wide = useWide();
   const view = React.useContext(StripView);
   const grid = view === "grid";
-  /* Laid out as a grid, the machine is off for the same reasons it is off
-     on a phone: there is no sequence to ease along, no cell in the middle
-     to be on, and the page's own scrolling is the right one. */
-  const live = (stack ? wide : true) && !grid;
+  /* The machine runs in both views. The sheet is a rack - two rows deep,
+     running sideways - and not a page of its own that scrolls downwards:
+     Julian asked for the grid to be horizontal too, and the version that
+     scrolled down had to switch the wheel, the drag, the ruler and the
+     lead-on off to do it, which is most of what made changing a filter
+     feel like changing pages. Same gestures, twice the work on screen. */
+  const live = stack ? wide : true;
   const router = useRouter();
   // Stable for the life of the strip: pages key it by what it shows.
   const nextHref = next?.href;
@@ -317,8 +320,13 @@ export function Strip({
       /* The word is the nearest labelled cell at or before this one: the
          covers under a discipline carry no word of their own, and the head
          should go on saying the discipline while they go by. */
+      /* At the very start there is nowhere to have got to, and the head
+         already says what the page is. "Work" with "Editorial" under it,
+         before anything has been clicked, reads as a filter that has been
+         applied - Julian: all work has editorial under it before clicking
+         the filter. It fills in as soon as the sequence moves. */
       let word = "";
-      for (let k = i; k >= 0; k--) {
+      for (let k = el.scrollLeft <= 2 ? -1 : i; k >= 0; k--) {
         const w = (el.children[k] as HTMLElement).dataset.label;
         if (w !== undefined) {
           word = w;
@@ -1055,9 +1063,10 @@ export function Strip({
              working and lets a page that stacks scroll as a page. */
           // Everything above is the strip's; `strip-grid` in `globals.css`
           // takes the same cells and lays them out as a sheet instead.
+          "overflow-x-auto overflow-y-hidden",
+          // The same cells, two rows deep: `strip-grid` in `globals.css`.
           grid && "strip-grid",
-          !grid && "overflow-x-auto overflow-y-hidden",
-          paged && !grid && "touch-pan-y",
+          paged && "touch-pan-y",
           stack &&
             "max-sm:animate-none max-sm:flex-col max-sm:items-stretch max-sm:gap-10 max-sm:overflow-visible max-sm:select-auto",
           // Stacked, a full-bleed page still wants its words off the edge.
@@ -1083,8 +1092,6 @@ export function Strip({
              otherwise give up four pixels every time a mark appeared. */
           "mt-6 flex min-h-5 items-end gap-6 px-6 sm:px-10",
           stack && "max-sm:hidden",
-          // Nothing to scrub, and no cell to be on.
-          grid && "hidden",
         )}
       >
         {counter?.(at)}

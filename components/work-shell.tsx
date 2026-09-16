@@ -139,6 +139,98 @@ export function WorkShell({
 
   const row = React.useRef<HTMLUListElement>(null);
   const lit = React.useRef<HTMLLIElement>(null);
+  /* The row is a thing you can take hold of.
+     Eleven chips do not fit a laptop, so the row scrolls; a row that
+     scrolls and cannot be dragged is a row most people never reach the end
+     of, because a mouse has no sideways wheel. Held, it goes with the hand;
+     let go with speed, it carries on and runs out under the same friction
+     the strip uses. A press that moved is not a press: the click that
+     follows a drag is swallowed, or letting go over Portraits would filter
+     to portraits. */
+  React.useEffect(() => {
+    const r = row.current;
+    if (!r) return;
+    let down = false;
+    let from = 0;
+    let at = 0;
+    let last = 0;
+    let when = 0;
+    let speed = 0;
+    let glide = 0;
+    const onDown = (e: PointerEvent) => {
+      if (e.pointerType !== "mouse" || e.button !== 0) return;
+      if (r.scrollWidth <= r.clientWidth) return;
+      down = true;
+      from = e.clientX;
+      at = r.scrollLeft;
+      last = e.clientX;
+      when = performance.now();
+      speed = 0;
+      cancelAnimationFrame(glide);
+    };
+    const onMove = (e: PointerEvent) => {
+      if (!down) return;
+      const travel = e.clientX - from;
+      /* Three pixels of slop, so a press with a shaking hand is still a
+         press - and the pointer is captured only once it is a drag, never
+         on the way down. A captured pointer sends the click that follows to
+         whatever is holding the capture, so capturing a press would mean
+         every chip's click arriving at the row instead of the chip, and no
+         filter ever changing. */
+      if (Math.abs(travel) > 3 && !r.hasAttribute("data-dragged")) {
+        r.toggleAttribute("data-dragged", true);
+        r.setPointerCapture(e.pointerId);
+      }
+      r.scrollLeft = at - travel;
+      const now = performance.now();
+      const gap = now - when;
+      if (gap > 0) speed = (e.clientX - last) / gap;
+      last = e.clientX;
+      when = now;
+    };
+    const onUp = () => {
+      if (!down) return;
+      down = false;
+      // A flick keeps going and runs out: `TAU` is the strip's own figure.
+      let v = -speed;
+      const TAU = 180;
+      let then = performance.now();
+      const run = () => {
+        const now = performance.now();
+        const dt = now - then;
+        then = now;
+        r.scrollLeft += v * dt;
+        v *= Math.exp(-dt / TAU);
+        if (Math.abs(v) > 0.02) glide = requestAnimationFrame(run);
+      };
+      if (Math.abs(v) > 0.05) glide = requestAnimationFrame(run);
+      // After the click this release is about to fire, not before.
+      requestAnimationFrame(() => r.removeAttribute("data-dragged"));
+    };
+    const swallow = (e: MouseEvent) => {
+      if (!r.hasAttribute("data-dragged")) return;
+      e.preventDefault();
+      e.stopPropagation();
+    };
+    r.addEventListener("pointerdown", onDown);
+    r.addEventListener("pointermove", onMove);
+    r.addEventListener("pointerup", onUp);
+    r.addEventListener("pointercancel", onUp);
+    r.addEventListener("click", swallow, true);
+    // The browser must not pick the chips up and carry them instead.
+    const noDrag = (e: DragEvent) => e.preventDefault();
+    r.addEventListener("dragstart", noDrag);
+    return () => {
+      cancelAnimationFrame(glide);
+      r.removeEventListener("pointerdown", onDown);
+      r.removeEventListener("pointermove", onMove);
+      r.removeEventListener("pointerup", onUp);
+      r.removeEventListener("pointercancel", onUp);
+      r.removeEventListener("click", swallow, true);
+      r.removeEventListener("dragstart", noDrag);
+    };
+  }, []);
+
   React.useEffect(() => {
     const r = row.current;
     if (!r) return;
@@ -149,8 +241,18 @@ export function WorkShell({
     measure();
     const c = lit.current;
     if (c && r.scrollWidth > r.clientWidth) {
-      const to = c.offsetLeft - r.clientWidth / 2 + c.offsetWidth / 2;
-      r.scrollLeft = Math.max(0, Math.min(r.scrollWidth - r.clientWidth, to));
+      /* Only when the chosen chip is not already in view. Re-centring a
+         chip that is on screen moves the row under the hand for no reason,
+         which is half of what made a filter click feel unsettled. */
+      const left = c.offsetLeft - r.scrollLeft;
+      const hidden = left < 8 || left + c.offsetWidth > r.clientWidth - 8;
+      if (hidden) {
+        const to = c.offsetLeft - r.clientWidth / 2 + c.offsetWidth / 2;
+        r.scrollTo({
+          left: Math.max(0, Math.min(r.scrollWidth - r.clientWidth, to)),
+          behavior: "smooth",
+        });
+      }
     }
     window.addEventListener("resize", measure);
     return () => window.removeEventListener("resize", measure);
@@ -194,7 +296,7 @@ export function WorkShell({
                 out of it. */}
             <ul
               ref={row}
-              className="flex flex-nowrap gap-x-0.5 overflow-x-auto px-3 [scrollbar-width:none] sm:px-7 [&::-webkit-scrollbar]:hidden"
+              className="flex flex-nowrap gap-x-0.5 overflow-x-auto px-3 select-none [scrollbar-width:none] sm:px-7 [&::-webkit-scrollbar]:hidden"
             >
               <li ref={all ? lit : undefined}>
                 <Chip href="/work" active={all} count={heads.all?.count}>

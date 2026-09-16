@@ -689,16 +689,24 @@ nav[aria-label="Categories"] ul[data-more] {
   mask-image: linear-gradient(to right, #000 calc(100% - 2.5rem), transparent);
 }
 
-/* ── the same cells, as a sheet ───────────────────────────────────
- * A strip is a sequence and a grid is an inventory. /work is 34,512px of
- * ribbon at 1440, twenty-four screens of it, and somebody who wants to see
- * what is there rather than be walked through it had no way to.
+/* ── the same cells, as a rack ────────────────────────────────────
+ * A strip shows you one thing at a time and a rack shows you the shelf.
+ * /work is 34,512px of ribbon at 1440 - twenty-four screens - and somebody
+ * who wants to know what is there rather than be walked through it had no
+ * way to see it.
+ *
+ * Two rows deep, running sideways, which is the point: it is the same
+ * gesture as everything else on the site. The first version of this
+ * scrolled downwards like a document, and to do that it had to switch off
+ * the wheel, the drag, the ruler, the lead-on and the panel - so changing a
+ * filter changed the furniture, which is exactly what Julian said it felt
+ * like. This one changes the shelf and nothing else.
  *
  * The cells are untouched: the same server-rendered covers, in the same
  * order, under the same filter. Only the box they sit in changes, which is
  * why this is CSS and not a second component - two renderings of one
- * archive is two things to keep in step, and the first one to drift is the
- * one nobody is looking at.
+ * archive is two things to keep in step, and the first to drift is the one
+ * nobody is looking at.
  *
  * Unlayered on purpose: it has to beat the `sm:h-full sm:w-auto` a cell
  * carries for the strip, and a utility in `@layer utilities` loses to any
@@ -706,77 +714,57 @@ nav[aria-label="Categories"] ul[data-more] {
  */
 .strip-grid {
   display: grid;
-  /* The count comes from the width rather than from breakpoints: two on a
-     phone, four or five on a desktop, and nothing to keep in step with a
-     media query. */
-  grid-template-columns: repeat(auto-fill, minmax(min(15rem, 45%), 1fr));
+  grid-template-rows: repeat(2, minmax(0, 1fr));
+  grid-auto-flow: column;
+  /* A column narrow enough that a cover half the strip's height is still
+     upright: 603px of strip is two rows of 297, and 15rem across that is
+     about 4:5. */
+  grid-auto-columns: min(15rem, 26vw);
   gap: 0.5rem;
-  align-content: start;
-  /* The scroller carries `items-center` for the strip, where a cell is
-     centred in the window's height. In a grid that stops the items being
-     stretched, and a cover has no in-flow content at all - a filled image
-     and an absolute plate - so the row it is in was sized from nothing and
-     every cell overflowed it. Stretched, the row and the cell are the same
-     box again. */
+  /* The scroller carries `items-center` for the strip, where one cell is
+     centred in the window's height. Here every cell fills its row. */
   align-items: stretch;
-  overflow-x: hidden;
-  padding-bottom: 1.5rem;
-}
-.strip-grid > * {
-  height: auto !important;
-  width: 100% !important;
-  /* The parallax is an inline style the strip leaves on each cell, and a
-     sheet that slid its pictures about would be a sheet nobody could read.
-     `!important` because it is competing with an element's own style. */
-  --par: 0 !important;
-}
-/* A contact sheet shows the frame, not a crop of it: the 1.1 blow-up the
-   parallax needs to have something to slide inside is off here. */
-.strip-grid .strip-frame {
-  transform: none;
-}
-/* One height for every cover, and one ratio with it. In the strip each cell
-   is cut to its own frame, which is right when they pass one at a time and
-   wrong in a sheet: eleven ratios across five columns is a scattered board,
-   and the eye reads a grid by its rhythm.
-
-   A height in `min()` rather than an `aspect-ratio`, deliberately. A cover
-   holds a filled image and an absolute plate and so has no in-flow content
-   at all; a row sized from that is a row sized from nothing, and the cells
-   either overflowed it or were squeezed into 112px of it. A definite height
-   gives the row something to be, and leaves the cells of words - a
-   discipline's title, the ask at the end - to size themselves. */
-.strip-grid > a {
-  height: min(22rem, 56vw) !important;
-  aspect-ratio: auto !important;
+  justify-items: stretch;
 }
 /* The cells that are words rather than pictures - a discipline's title, the
-   ask at the end - take the whole row. They are written for a column the
-   height of the window, and squeezed into a fifth of one they print over
-   their neighbours. */
+   ask at the end - stand full height and take two columns: they are written
+   for a column the width of a masthead, and 240px of one wraps `Brand
+   campaigns` into three lines. */
 .strip-grid > :where(div, section, article) {
-  grid-column: 1 / -1;
+  grid-row: 1 / -1;
+  grid-column: span 2;
 }
-/* At a fifth of the window the plate has 260px, and a name is what has to
-   survive it: the credit and the count go under rather than beside. */
+/* At 240px the plate has no room for a name beside a credit: the name goes
+   on its own line and the credit under it, so `Metamorphosis` is not
+   `Metamorph...`. */
 .strip-grid .cover-plate {
   flex-direction: column;
   align-items: flex-start;
   gap: 0.125rem;
 }
-@media (min-width: 40rem) {
-  /* The page is locked from here up, so the sheet scrolls inside the same
-     frame the strip had: head, filter row and footer all stay put, which is
-     what a filter wants - you change one and the results move, not the
-     furniture. Below this the document scrolls as a page and the grid is
-     simply two columns of it. */
+.strip-grid > * {
+  height: auto !important;
+  width: auto !important;
+  aspect-ratio: auto !important;
+}
+/* On a phone the page is not locked and the strip is already a column, so
+   the sheet is the same idea the other way up: two across, running down,
+   scrolled as a page. A rack held sideways on a 390px screen gives columns
+   101px wide and 1,704px of shelf nothing can reach. */
+@media (max-width: 39.999rem) {
   .strip-grid {
-    overflow-y: auto;
-    scrollbar-width: none;
-    gap: 0.75rem;
+    grid-template-rows: none;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-auto-flow: row;
+    grid-auto-rows: auto;
+    align-items: start;
   }
-  .strip-grid::-webkit-scrollbar {
-    display: none;
+  .strip-grid > a {
+    height: min(14rem, 56vw) !important;
+  }
+  .strip-grid > :where(div, section, article) {
+    grid-row: auto;
+    grid-column: 1 / -1;
   }
 }
 
@@ -839,6 +827,13 @@ nav[aria-label="Categories"] ul[data-more] {
      of covers being replaced by another. */
   &[data-arrive="fade"] {
     animation: jg-fade-in 200ms var(--ease-out-strong) backwards;
+  }
+  /* And nothing inside it arrives separately. Each cell carries a rise of
+     its own, staggered up to six deep, which is right for a page opening
+     and wrong for a filter: twelve covers popping in one after another is
+     what made changing one feel choppy. One fade, all of it at once. */
+  &[data-arrive="fade"] .strip-cell {
+    animation: none;
   }
   @media (prefers-reduced-motion: reduce) {
     animation: none;
