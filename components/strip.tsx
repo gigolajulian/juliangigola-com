@@ -47,6 +47,37 @@ export type Lead = {
     storage: it only has to survive one client navigation. */
 let cameBack = false;
 
+/* ── a filter change, and a way back to your seat ─────────────────
+ * Two more things a strip wants to know about how it got here, both
+ * module state for the same reason `cameBack` is: they have to survive
+ * one client navigation and nothing more.
+ */
+
+/** When a filter chip was last pressed. A strip mounting just after one
+    fades in where it stands rather than sliding in from a quarter of the
+    window: the filter row is above it and did not move, so the sequence
+    under it changing is not a page arriving. */
+let filteredAt = 0;
+export const markFilter = () => {
+  filteredAt = Date.now();
+};
+const FILTER_MS = 1200;
+
+/** When the browser last went back or forward. A strip mounting just
+    after one puts the visitor back where they were on this path instead
+    of at the beginning: leaving Portraits five covers in to look at one
+    project and returning to the first cover is losing somebody's place in
+    a sequence they were reading. */
+let poppedAt = 0;
+const POP_MS = 1500;
+if (typeof window !== "undefined") {
+  window.addEventListener("popstate", () => {
+    poppedAt = Date.now();
+  });
+}
+/** Where a path's strip was when it was last left. */
+const seat = (path: string) => `strip-at:${path}`;
+
 /** How far past the end a wheel has to push before it leads on, in px of
     wheel delta. Three notches on a mouse: an overshoot of one is a
     reader arriving at the end, not asking to leave it. */
@@ -167,8 +198,13 @@ export function Strip({
   React.useLayoutEffect(() => {
     const back = cameBack;
     cameBack = false;
+    const filtered = Date.now() - filteredAt < FILTER_MS;
+    filteredAt = 0;
+    const popped = Date.now() - poppedAt < POP_MS;
     const el = scroller.current;
     if (!el || !live) return;
+    // The filter changed under a row that stayed: a fade, not an arrival.
+    if (filtered) el.dataset.arrive = "fade";
     const hash = decodeURIComponent(window.location.hash.slice(1));
     if (hash) {
       const i = Array.from(el.children).findIndex(
@@ -180,6 +216,26 @@ export function Strip({
         return;
       }
     }
+    /* Back, to a path this strip has been on before: the seat it was left
+       in. No animation with it — coming back to where you were is not an
+       arrival, and a sequence that slid in from the right while sitting at
+       its sixth cover would read as a new page that is already scrolled. */
+    if (popped) {
+      const seated = Number(
+        (() => {
+          try {
+            return window.sessionStorage.getItem(seat(window.location.pathname));
+          } catch {
+            return null;
+          }
+        })(),
+      );
+      if (seated > 0) {
+        el.dataset.arrive = "none";
+        el.scrollLeft = seated;
+        return;
+      }
+    }
     if (back) {
       el.dataset.arrive = "back";
       el.scrollLeft = el.scrollWidth;
@@ -187,6 +243,30 @@ export function Strip({
       el.dataset.arrive = "none";
     }
   }, [live, arrive]);
+
+  /** The scroll position, kept live: a cleanup cannot read it off the
+      element, which is detached by then. */
+  const seatX = React.useRef(0);
+
+  /* Where this strip was when the page left, kept under the path it was
+     on. The path is read when the effect is set up, not in the cleanup:
+     by the time React tears a page down the address bar is already
+     showing the next one. */
+  React.useEffect(() => {
+    if (!scroller.current || !live) return;
+    const path = window.location.pathname;
+    return () => {
+      /* From the ref and not from the element: by the time a cleanup runs,
+         React has taken the scroller out of the document, and a detached
+         box reads `scrollLeft` 0 — which is how the first version of this
+         faithfully remembered the beginning of every sequence. */
+      try {
+        window.sessionStorage.setItem(seat(path), String(seatX.current));
+      } catch {
+        // Private browsing. The seat is a courtesy, not a feature.
+      }
+    };
+  }, [live]);
 
   /* Which cell is nearest the middle of the window. Read off the scroll
      position rather than with an observer, because the counter and the
@@ -221,6 +301,8 @@ export function Strip({
     };
     const read = () => {
       queued = 0;
+      // Where to sit somebody down if they come back to this path.
+      seatX.current = Math.round(el.scrollLeft);
       const room = el.scrollWidth - el.clientWidth;
       /* Whether the opening cell has gone. A page's running head waits for
          this: the sequence opens on its title set large, and two titles on

@@ -6,6 +6,7 @@ import { useSelectedLayoutSegments } from "next/navigation";
 import { cn } from "@/lib/utils";
 import type { CategoryLink } from "@/lib/work";
 import { StripPage, StripHead } from "@/components/strip-page";
+import { markFilter } from "@/components/strip";
 
 /* ── the frame around the work ────────────────────────────────────
  * The head and the chip row, mounted once for the whole of /work, its
@@ -23,14 +24,27 @@ import { StripPage, StripHead } from "@/components/strip-page";
  * it can read the selected segments, and `heads` carries the title and
  * the count for every filter the layout could be showing.
  *
- * On /work itself the chips do not navigate at all: the whole of the work
- * is one strip, discipline by discipline, and a chip glides to its
- * discipline's opening cell. A plain anchor, not a `Link`: a same-path
- * hash through the router never fires `hashchange`, and the strip listens
- * for exactly that. On a category page the chips are routes again.
+ * A chip is a route, from every page, always. It used to be two controls
+ * wearing one shape: on /work it was an anchor to a hash and scrolled the
+ * strip, on a category page it was a link and swapped the page. Measured
+ * on the live site, the same click was a 24,527px glide lasting 2.3s in
+ * one place and a 62ms swap in the other, the row went on filling `All`
+ * however deep into Portraits you had travelled, and `All` itself did
+ * nothing at all on /work - it pointed at `#work`, and the cell carrying
+ * that hash left with the title cell. One behaviour, and the route is
+ * what says which chip is lit.
+ *
+ * `/work#places` still opens on Places: the cells keep their hashes and
+ * the strip still listens for `hashchange`. Nothing in the row writes one
+ * any more.
  * ─────────────────────────────────────────────────────────────── */
 
-export type Head = { title: string; aside: string };
+export type Head = {
+  title: string;
+  aside: string;
+  /** How many things are behind this filter, for the chip. */
+  count: number;
+};
 
 export function WorkShell({
   heads,
@@ -47,6 +61,23 @@ export function WorkShell({
   const key = segments[1] ?? segments[0] ?? "all";
   const head = heads[key] ?? heads.all;
   const all = key === "all";
+
+  /* The row is one line that scrolls, so eleven chips cost 25px at any
+     width instead of wrapping to four rows and 113px on a phone - which
+     was 15% of the screen spent on the filter, above the work it filters.
+     A line that scrolls hides what is off the end, so the chosen chip is
+     put in the middle of it whenever the filter changes: arriving on
+     Places with the row showing Editorial through Portraits would be the
+     same lie the old active state told. */
+  const row = React.useRef<HTMLUListElement>(null);
+  const lit = React.useRef<HTMLLIElement>(null);
+  React.useEffect(() => {
+    const r = row.current;
+    const c = lit.current;
+    if (!r || !c || r.scrollWidth <= r.clientWidth) return;
+    const to = c.offsetLeft - r.clientWidth / 2 + c.offsetWidth / 2;
+    r.scrollLeft = Math.max(0, Math.min(r.scrollWidth - r.clientWidth, to));
+  }, [key]);
 
   return (
     <StripPage
@@ -78,22 +109,30 @@ export function WorkShell({
           {/* The old site's three dropdowns become one row that can be
               ignored: the default is everything, so nobody has to make a
               choice before they can look at anything. */}
-          <nav
-            aria-label="Categories"
-            className="mx-auto mt-3 w-full max-w-[100rem] shrink-0 px-6 sm:px-10"
-          >
-            <ul className="-mx-3 flex flex-wrap gap-x-1 gap-y-1">
-              <li>
-                <Chip href={all ? "#work" : "/work"} jump={all} active={all}>
+          <nav aria-label="Categories" className="mt-3 w-full shrink-0">
+            {/* The padding is the list's, not the bar's: at the bar's edge
+                the chips would stop dead against 24px of nothing, and a
+                row that scrolls should run to the edge of the window and
+                out of it. */}
+            <ul
+              ref={row}
+              className="flex flex-nowrap gap-x-0.5 overflow-x-auto px-3 [scrollbar-width:none] sm:px-7 [&::-webkit-scrollbar]:hidden"
+            >
+              <li ref={all ? lit : undefined}>
+                <Chip href="/work" active={all} count={heads.all?.count}>
                   All
                 </Chip>
               </li>
               {categories.map((c) => (
-                <li key={c.slug}>
+                <li
+                  key={c.slug}
+                  ref={key === c.slug ? lit : undefined}
+                  className="shrink-0"
+                >
                   <Chip
-                    href={all ? `#${c.slug}` : c.href}
-                    jump={all}
+                    href={c.href}
                     active={key === c.slug}
+                    count={heads[c.slug]?.count}
                   >
                     {c.name}
                   </Chip>
@@ -111,33 +150,32 @@ export function WorkShell({
 
 function Chip({
   href,
-  jump,
   active,
+  count,
   children,
 }: {
   href: string;
-  /** A jump within the strip rather than a route. */
-  jump: boolean;
   active: boolean;
+  /** Shown after the name: the row reads as a map of the archive rather
+      than eleven words, and the size of a discipline is the thing an art
+      director is weighing when they pick one. */
+  count?: number;
   children: React.ReactNode;
 }) {
   /* Chips. The chosen filter is filled, ink on ground, which is the one
      mark that can be found at a glance in a row of eleven; the rest
      light up as a soft pill under a pointer. */
   const className = cn(
-    "label block rounded-full px-3 py-1.5",
+    /* A thumb's worth of chip on a phone, where the row scrolls and a
+       mis-tap is a filter nobody asked for; the desktop keeps the line
+       thin, because the pointer is exact and the band is height the
+       photographs would rather have. */
+    "label block whitespace-nowrap rounded-full px-3 py-1.5 max-sm:py-3",
     "transition-colors duration-200 ease-[var(--ease-out-strong)]",
     active
       ? "bg-foreground text-background"
       : "text-muted-foreground hoverable:hover:bg-foreground/[0.07] hoverable:hover:text-foreground focus-visible:bg-foreground/[0.07] focus-visible:text-foreground",
   );
-  if (jump) {
-    return (
-      <a href={href} className={className}>
-        {children}
-      </a>
-    );
-  }
   return (
     <Link
       prefetch={false}
@@ -145,9 +183,23 @@ function Chip({
       // `page`, not `true`: this is a link to the page being viewed, which
       // is what a screen reader should be told about the current filter.
       aria-current={active ? "page" : undefined}
+      /* So the strip that is about to mount knows it is a filter change
+         and fades in where it stands, instead of sliding in from a
+         quarter of the window away as an arriving page does. */
+      onClick={markFilter}
       className={className}
     >
       {children}
+      {count === undefined ? null : (
+        <span
+          className={cn(
+            "ml-1 tabular-nums",
+            active ? "text-background/60" : "text-muted-foreground/60",
+          )}
+        >
+          {count}
+        </span>
+      )}
     </Link>
   );
 }

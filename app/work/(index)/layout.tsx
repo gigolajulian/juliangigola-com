@@ -19,8 +19,16 @@ import { CONTENT } from "@/lib/content";
  * handed down: the shell reads the route to pick one.
  */
 const HEADS: Record<string, Head> = {
-  all: { title: "Work", aside: `${COMMISSIONS.length} projects` },
-  video: { title: "Motion", aside: `${CONTENT.videos.length + 1} films` },
+  all: {
+    title: "Work",
+    aside: `${COMMISSIONS.length} projects`,
+    count: COMMISSIONS.length,
+  },
+  video: {
+    title: "Motion",
+    aside: `${CONTENT.videos.length + 1} films`,
+    count: CONTENT.videos.length + 1,
+  },
 };
 
 for (const c of WORK_CATEGORY_LINKS) {
@@ -37,6 +45,9 @@ for (const c of WORK_CATEGORY_LINKS) {
     aside: gallery
       ? `${count} ${isCoverArt ? "releases" : "frames"}`
       : `${count} ${count === 1 ? "project" : "projects"}`,
+    // The same number the head says, so the chip and the title it opens
+    // can never disagree.
+    count,
   };
 }
 

@@ -732,6 +732,15 @@ body:has(.strip-scroll[data-past-first]) .home-wordmark,
   &[data-arrive="none"] {
     animation: none;
   }
+  /* A filter changed, and the head and the chip row above it did not: the
+     sequence is what changed, so it comes up where it stands. Sliding it
+     in from 24vw announced a new page every time a chip was pressed, and
+     eleven chips at 640ms is most of what made the filtering feel like
+     reloading. Short, because the only thing it has to cover is one set
+     of covers being replaced by another. */
+  &[data-arrive="fade"] {
+    animation: jg-fade-in 200ms var(--ease-out-strong) backwards;
+  }
   @media (prefers-reduced-motion: reduce) {
     animation: none;
     transition: none;
@@ -743,6 +752,11 @@ body:has(.strip-scroll[data-past-first]) .home-wordmark,
 @keyframes jg-strip-in {
   from {
     transform: translateX(24vw);
+    opacity: 0;
+  }
+}
+@keyframes jg-fade-in {
+  from {
     opacity: 0;
   }
 }
