@@ -972,6 +972,14 @@ export function Strip({
       if (Math.abs(where - el.scrollLeft) > 2) to(where);
     };
 
+    /* The way back to the top of a page that has no top. The wordmark in
+       the header is that way on every other page; here it dispatches this
+       at the scroller instead of scrolling a document that never moves,
+       and the strip travels home under the same friction as a wheel
+       notch rather than cutting there. */
+    const onHome = () => to(0);
+
+    el.addEventListener("jg:home", onHome);
     el.addEventListener("scroll", onSettle, { passive: true });
     el.addEventListener("focusin", onFocusIn);
     document.addEventListener("keydown", onTab, true);
@@ -992,6 +1000,7 @@ export function Strip({
 
     return () => {
       window.clearTimeout(settle);
+      el.removeEventListener("jg:home", onHome);
       el.removeEventListener("scroll", onSettle);
       el.removeEventListener("focusin", onFocusIn);
       document.removeEventListener("keydown", onTab, true);

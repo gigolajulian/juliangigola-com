@@ -158,6 +158,15 @@ export function SiteHeader() {
             if (pathname !== "/") return;
             if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
             e.preventDefault();
+            /* The homepage is a strip: its top is the left edge of a box
+               that never scrolls the document, so the name asks the strip
+               to travel there and it glides under its own friction. The
+               scroll below is for the phone, where the same cells are
+               stacked and the page is the scroll. Whichever of the two is
+               not the case does nothing. */
+            document
+              .querySelector(".strip-scroll")
+              ?.dispatchEvent(new Event("jg:home"));
             window.scrollTo({
               top: 0,
               behavior: window.matchMedia("(prefers-reduced-motion: reduce)")
