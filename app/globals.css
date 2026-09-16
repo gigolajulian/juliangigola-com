@@ -716,10 +716,20 @@ nav[aria-label="Categories"] ul[data-more] {
   display: grid;
   grid-template-rows: repeat(2, minmax(0, 1fr));
   grid-auto-flow: column;
-  /* A column narrow enough that a cover half the strip's height is still
-     upright: 603px of strip is two rows of 297, and 15rem across that is
-     about 4:5. */
-  grid-auto-columns: min(15rem, 26vw);
+  /* A column exactly 4:5 of a row, so a cover in the rack is the same
+     upright frame it is everywhere else on the site rather than whatever
+     shape the window happens to leave. `15rem` was that at 900px of
+     window and nowhere else: a 1080 screen gives rows of 370 and a 240px
+     cover in one is 2:3.
+
+     The shelf is a size container, so a cell can read the shelf's own
+     height and work out what four fifths of a row comes to; the column is
+     then as wide as the cover standing in it. A cell cannot do this from
+     the track list itself — `cqh` in `grid-auto-columns` would measure
+     some ancestor, not the shelf — which is why the width is set on the
+     cover below and the track simply follows it. */
+  container-type: size;
+  grid-auto-columns: min-content;
   gap: 0.5rem;
   /* The scroller carries `items-center` for the strip, where one cell is
      centred in the window's height. Here every cell fills its row. */
@@ -742,10 +752,18 @@ nav[aria-label="Categories"] ul[data-more] {
   align-items: flex-start;
   gap: 0.125rem;
 }
+/* Cells arrive from the strip with a height, a width or an aspect of their
+   own; in the rack the grid decides all three. */
 .strip-grid > * {
   height: auto !important;
   width: auto !important;
   aspect-ratio: auto !important;
+}
+/* Except the covers, which are 4:5 wherever they are printed. A row of the
+   rack gives the height and the frame gives the width. */
+.strip-grid > a {
+  height: 100% !important;
+  width: calc((100cqh - 0.5rem) / 2 * 4 / 5) !important;
 }
 /* On a phone the page is not locked and the strip is already a column, so
    the sheet is the same idea the other way up: two across, running down,
@@ -753,6 +771,10 @@ nav[aria-label="Categories"] ul[data-more] {
    101px wide and 1,704px of shelf nothing can reach. */
 @media (max-width: 39.999rem) {
   .strip-grid {
+    /* Not a size container down here: this sheet's height is its content,
+       and an element that may not read its own content has no height at
+       all. Measured before the rule was scoped: every cell 0 by 0. */
+    container-type: normal;
     grid-template-rows: none;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     grid-auto-flow: row;
@@ -760,7 +782,11 @@ nav[aria-label="Categories"] ul[data-more] {
     align-items: start;
   }
   .strip-grid > a {
-    height: min(14rem, 56vw) !important;
+    /* Down the page there is no row to take a height from: the two columns
+       set the width and the frame sets the rest. */
+    width: auto !important;
+    height: auto !important;
+    aspect-ratio: 4 / 5 !important;
   }
   .strip-grid > :where(div, section, article) {
     grid-row: auto;
