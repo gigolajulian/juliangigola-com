@@ -64,12 +64,12 @@ export default function ContactPage() {
       }
     >
       <Strip
-        label="Contact: the enquiry, and the details. One screen at a time, left and right."
+        label="Contact: the ask, the details, and the form."
         paged
         bleed
         className="mt-4 flex-1"
       >
-        {/* One: the ask and the form, side by side. */}
+        {/* The ask and the details on one side, the form on the other. */}
         <section
           data-tick
           data-label="Enquire"
@@ -102,6 +102,53 @@ export default function ContactPage() {
                 Check availability
               </a>
             ) : null}
+            {/* Everything a person might want instead of the form. It had
+                a screen of its own, which was a screen to swipe past on
+                the way to nothing: the address and the handles are two
+                lines and belong beside the ask. */}
+            <div className="border-t border-border pt-8">
+              <dl className="grid gap-6 sm:grid-cols-2">
+                <div>
+                  <dt className="label text-muted-foreground">Email</dt>
+                  <dd className="mt-2 text-sm">
+                    <a
+                      href="mailto:hello@juliangigola.com"
+                      className="underline decoration-border underline-offset-4 transition-colors duration-200 hoverable:hover:decoration-current"
+                    >
+                      hello@juliangigola.com
+                    </a>
+                  </dd>
+                </div>
+                <div>
+                  <dt className="label text-muted-foreground">Based in</dt>
+                  <dd className="mt-2 text-sm">
+                    San Francisco Bay Area &middot; available to travel
+                  </dd>
+                </div>
+                {/* The three that used to sit in the footer's ask. The footer is
+                one quiet line under every strip now, so they live where
+                somebody looking for them would go. */}
+                <div>
+                  <dt className="label text-muted-foreground">Elsewhere</dt>
+                  <dd className="mt-2 flex flex-col gap-2 text-sm">
+                    {ELSEWHERE.map((where) => (
+                      <a
+                        key={where.label}
+                        href={where.href}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="underline decoration-border underline-offset-4 transition-colors duration-200 hoverable:hover:decoration-current"
+                      >
+                        {where.label}
+                        <span className="ml-2 text-muted-foreground">
+                          {where.at}
+                        </span>
+                      </a>
+                    ))}
+                  </dd>
+                </div>
+              </dl>
+            </div>
           </div>
 
           {/* The form keeps its own height and scrolls inside itself on a
@@ -118,57 +165,6 @@ export default function ContactPage() {
               <ContactForm />
             </Suspense>
           </div>
-        </section>
-
-        {/* Two: everything a person might want instead of a form. */}
-        <section
-          data-tick
-          data-label="Details"
-          data-hash="details"
-          className="flex w-full shrink-0 flex-col justify-center gap-8 px-6 py-12 sm:h-full sm:px-16 sm:py-0"
-        >
-          <h2 className="label text-muted-foreground">Details</h2>
-          <dl className="grid gap-8 sm:grid-cols-3 sm:gap-12">
-            <div>
-              <dt className="label text-muted-foreground">Email</dt>
-              <dd className="mt-2 text-sm">
-                <a
-                  href="mailto:hello@juliangigola.com"
-                  className="underline decoration-border underline-offset-4 transition-colors duration-200 hoverable:hover:decoration-current"
-                >
-                  hello@juliangigola.com
-                </a>
-              </dd>
-            </div>
-            <div>
-              <dt className="label text-muted-foreground">Based in</dt>
-              <dd className="mt-2 text-sm">
-                San Francisco Bay Area &middot; available to travel
-              </dd>
-            </div>
-            {/* The three that used to sit in the footer's ask. The footer is
-                one quiet line under every strip now, so they live where
-                somebody looking for them would go. */}
-            <div>
-              <dt className="label text-muted-foreground">Elsewhere</dt>
-              <dd className="mt-2 flex flex-col gap-2 text-sm">
-                {ELSEWHERE.map((where) => (
-                  <a
-                    key={where.label}
-                    href={where.href}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="underline decoration-border underline-offset-4 transition-colors duration-200 hoverable:hover:decoration-current"
-                  >
-                    {where.label}
-                    <span className="ml-2 text-muted-foreground">
-                      {where.at}
-                    </span>
-                  </a>
-                ))}
-              </dd>
-            </div>
-          </dl>
         </section>
       </Strip>
     </StripPage>
