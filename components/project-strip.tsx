@@ -279,35 +279,36 @@ export function ProjectStrip({
           /* Full height, and as wide as that height makes it: the
                  photograph's own shape is the only thing that decides how
                  much of the strip it takes. */
-          <button
+          <Frame
             key={cell.frame.src}
-            data-tick
-            data-ring="Zoom in"
-            type="button"
-            // Opened by the strip's delegated listener, which is where
-            // the lightbox is reached through a ref.
-            data-n={cell.n}
-            aria-label={`Open frame ${cell.n + 1} of ${frames.length}${
-              cell.frame.alt ? `: ${cell.frame.alt}` : ""
-            }`}
-            className="group strip-cell relative h-full shrink-0 overflow-hidden press active:scale-[0.995]"
-            style={
-              {
-                backgroundColor: cell.frame.color,
-                aspectRatio: `${cell.frame.width} / ${cell.frame.height}`,
-                // Its place in the order, for the stagger of the arrival
-                // (`strip-cell` in `globals.css`). The pictures are all
-                // fetched at once as before; only the reveal is in turn.
-                "--i": cell.n,
-              } as React.CSSProperties
-            }
+            // The first frame is the picture the index was showing:
+            // named, it morphs out of the cover that was clicked instead
+            // of the page cutting. Every other frame is a plain image,
+            // one element per name per page. On the cell, not the picture,
+            // for the reason `cover-cell.tsx` gives.
+            slug={cell.n === 0 ? project.slug : undefined}
           >
-            <Frame
-              // The first frame is the picture the index was showing:
-              // named, it morphs out of the cover that was clicked
-              // instead of the page cutting. Every other frame is a
-              // plain image, one element per name per page.
-              slug={cell.n === 0 ? project.slug : undefined}
+            <button
+              data-tick
+              data-ring="Zoom in"
+              type="button"
+              // Opened by the strip's delegated listener, which is where
+              // the lightbox is reached through a ref.
+              data-n={cell.n}
+              aria-label={`Open frame ${cell.n + 1} of ${frames.length}${
+                cell.frame.alt ? `: ${cell.frame.alt}` : ""
+              }`}
+              className="group strip-cell relative h-full shrink-0 overflow-hidden press active:scale-[0.995]"
+              style={
+                {
+                  backgroundColor: cell.frame.color,
+                  aspectRatio: `${cell.frame.width} / ${cell.frame.height}`,
+                  // Its place in the order, for the stagger of the arrival
+                  // (`strip-cell` in `globals.css`). The pictures are all
+                  // fetched at once as before; only the reveal is in turn.
+                  "--i": cell.n,
+                } as React.CSSProperties
+              }
             >
               <Image
                 // How the lightbox finds the frame to lift out of the
@@ -341,8 +342,8 @@ export function ProjectStrip({
                 draggable={false}
                 className="strip-frame h-full w-full object-cover"
               />
-            </Frame>
-          </button>
+            </button>
+          </Frame>
         ),
       ),
     [
