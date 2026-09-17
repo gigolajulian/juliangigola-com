@@ -12,7 +12,8 @@ import {
   CATEGORIES as HARVESTED_CATEGORIES,
 } from "./work-data";
 import type { Project, Category, Frame, TextBlock } from "./work-types";
-import { COVER_RELEASES } from "./cover-art-data";
+import { COVER_RELEASES as RELEASES } from "./cover-art-data";
+import type { CoverRelease } from "./cover-art-types";
 import { CONTENT } from "./content";
 import {
   ADDED,
@@ -48,7 +49,24 @@ export const CATEGORIES: Category[] = [
   ),
 ];
 
-export { COVER_RELEASES };
+/**
+ * The cover-art gallery in Julian's order.
+ *
+ * `lib/cover-art-data.ts` is generated and its order is the script's; which
+ * release the gallery opens on is an editorial decision and belongs in
+ * /admin. Partial and stable, exactly like the work's own running order: a
+ * named release takes its place, an unnamed one keeps the place the script
+ * gave it, and an empty list is the gallery as generated.
+ */
+const releaseRank = new Map(
+  CONTENT.coverArtOrder.map((slug, i) => [slug, i] as const),
+);
+
+export const COVER_RELEASES: CoverRelease[] = [...RELEASES].sort(
+  (a, b) =>
+    (releaseRank.get(a.slug) ?? Infinity) -
+    (releaseRank.get(b.slug) ?? Infinity),
+);
 
 /**
  * The cover-art gallery, with the harvest's pictures replaced by Julian's own

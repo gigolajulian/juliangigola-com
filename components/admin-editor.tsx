@@ -110,6 +110,9 @@ const TABS = [
     // With the work rather than with the pages: it is a discipline whose
     // contents change, not a page whose copy does.
     { id: "video", label: "Motion" },
+    // Same reason as Motion: a discipline whose contents are arranged, not
+    // a page whose copy is written.
+    { id: "coverart", label: "Cover art" },
   ],
   /* Its own group, because it is not the same kind of visit at all.
    *
@@ -135,6 +138,7 @@ const FIELD_TAB: Record<string, View> = {
   coverSlug: "home",
   featured: "home",
   coverArt: "home",
+  coverArtOrder: "coverart",
   clientsHome: "clients",
   clientsStudio: "clients",
   sessions: "sessions",
@@ -1206,6 +1210,8 @@ export function AdminEditor({
           : null}
         {!page && view === "inbox" ? <AdminInbox /> : null}
 
+        {!page && view === "coverart" ? CoverArtFields() : null}
+
         {!page && view === "video" ? (
           <AdminVideos
             videos={draft.videos}
@@ -1411,6 +1417,39 @@ export function AdminEditor({
             addLabel="Add a client"
             searchLabel="Search clients"
             emptyNote="Nothing chosen, so the wall shows every client, in the order they are filed."
+          />
+        </Field>
+      </Area>
+    );
+  }
+
+  /* The gallery's own running order.
+   *
+   * `lib/cover-art-data.ts` is generated and its order is the script's, so
+   * until now the only way to move a release was to edit that script and
+   * re-run it. It is an editorial decision — which sleeve the gallery opens
+   * on — and it belongs here, on the same picker the homepage rack uses,
+   * because it is the same decision in the same shape.
+   *
+   * Partial: the list names only what has been moved and everything else
+   * keeps the place the script gave it, so leading with one release costs
+   * one entry rather than a snapshot of all twenty-six. */
+  function CoverArtFields() {
+    return (
+      <Area title="Cover art">
+        <Field
+          anchor="coverArtOrder"
+          label="The order of the gallery"
+          hint={`What /work/coverart shows, from first to last. Drag, or use the arrows. ${releases.length} releases in all; anything you do not place stays where it is, after the ones you do.`}
+        >
+          <AdminPicker
+            chosen={draft.coverArtOrder}
+            items={releases}
+            onChange={(next) => set("coverArtOrder", next)}
+            addLabel="Place a release"
+            searchLabel="Search releases"
+            emptyNote="Nothing placed, so the gallery runs in the order it was generated in."
+            shortfallNote="The rest follow in their own order, after these."
           />
         </Field>
       </Area>

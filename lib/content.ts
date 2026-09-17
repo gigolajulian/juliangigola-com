@@ -58,6 +58,18 @@ export type SiteContent = {
    */
   coverArt: string[];
   /**
+   * The running order of the cover-art gallery, as dragged in /admin.
+   *
+   * Partial, like the work's own order: it names only what has been moved,
+   * and anything absent keeps the place `lib/cover-art-data.ts` gave it. An
+   * empty list is the gallery as generated, so this costs nothing until
+   * somebody decides a release should lead.
+   *
+   * Separate from `coverArt` above, which is the handful the homepage rack
+   * shows. This is every release, in the order `/work/coverart` prints them.
+   */
+  coverArtOrder: string[];
+  /**
    * Which disciplines the cover cycles through, in order.
    *
    * Separate from which disciplines exist, because the two questions are
@@ -294,6 +306,7 @@ function parse(v: unknown): SiteContent {
     // Absent in files written before the rack could be curated, which is not
     // an error — it simply means nothing has been picked.
     coverArt: strList(v.coverArt ?? [], "coverArt"),
+    coverArtOrder: strList(v.coverArtOrder ?? [], "coverArtOrder"),
     heroDisciplines: strList(v.heroDisciplines ?? [], "heroDisciplines"),
     clientsHome: strList(v.clientsHome ?? [], "clientsHome"),
     clientsStudio: strList(v.clientsStudio ?? [], "clientsStudio"),
