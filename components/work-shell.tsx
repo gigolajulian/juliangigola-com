@@ -553,7 +553,7 @@ export function WorkShell({
                 out of it. */}
             <ul
               ref={row}
-              className="relative flex flex-wrap gap-x-0.5 px-3 select-none max-sm:gap-y-1 sm:flex-nowrap sm:overflow-x-auto sm:px-7 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+              className="relative gap-x-0.5 px-3 select-none max-sm:grid max-sm:grid-cols-2 max-sm:justify-items-start max-sm:gap-y-0.5 sm:flex sm:flex-nowrap sm:overflow-x-auto sm:px-7 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
             >
               {/* The lit pill is one element that slides to whichever chip
                   is chosen, rather than a fill each chip draws for itself:
