@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { ViewTransition } from "react";
 import Link from "next/link";
 import { useSelectedLayoutSegments } from "next/navigation";
 import { cn } from "@/lib/utils";
@@ -139,6 +140,7 @@ export function WorkShell({
 
   const row = React.useRef<HTMLUListElement>(null);
   const lit = React.useRef<HTMLLIElement>(null);
+  const pill = React.useRef<HTMLSpanElement>(null);
   /* The row is a thing you can take hold of.
      Eleven chips do not fit a laptop, so the row scrolls; a row that
      scrolls and cannot be dragged is a row most people never reach the end
@@ -237,8 +239,22 @@ export function WorkShell({
     /* Whether there is a row beyond the edge of the window, so the edge can
        say so: a chip cut in half by the window looks like a mistake, a chip
        fading out looks like a row that continues. */
-    const measure = () => r.toggleAttribute("data-more", r.scrollWidth > r.clientWidth + 1);
+    const measure = () => {
+      r.toggleAttribute("data-more", r.scrollWidth > r.clientWidth + 1);
+      const c = lit.current;
+      const s = pill.current;
+      if (!c || !s) return;
+      s.style.width = `${c.offsetWidth}px`;
+      s.style.height = `${c.offsetHeight}px`;
+      s.style.transform = `translateX(${c.offsetLeft}px)`;
+      s.style.opacity = "1";
+      // Placed, it may move from here on; the first placement just is.
+      requestAnimationFrame(() => s.toggleAttribute("data-placed", true));
+    };
+    if (!pill.current?.hasAttribute("data-placed"))
+      pill.current?.style.setProperty("transition", "none");
     measure();
+    requestAnimationFrame(() => pill.current?.style.removeProperty("transition"));
     const c = lit.current;
     if (c && r.scrollWidth > r.clientWidth) {
       /* Only when the chosen chip is not already in view. Re-centring a
@@ -296,10 +312,24 @@ export function WorkShell({
                 out of it. */}
             <ul
               ref={row}
-              className="flex flex-nowrap gap-x-0.5 overflow-x-auto px-3 select-none [scrollbar-width:none] sm:px-7 [&::-webkit-scrollbar]:hidden"
+              className="relative flex flex-nowrap gap-x-0.5 overflow-x-auto px-3 select-none [scrollbar-width:none] sm:px-7 [&::-webkit-scrollbar]:hidden"
             >
-              <li ref={all ? lit : undefined}>
-                <Chip href="/work" active={all} count={heads.all?.count}>
+              {/* The lit pill is one element that slides to whichever chip
+                  is chosen, rather than a fill each chip draws for itself:
+                  the choice is seen moving along the row. Measured in the
+                  effect above; the first placement is not animated. */}
+              <span
+                ref={pill}
+                aria-hidden
+                className="pointer-events-none absolute left-0 top-0 rounded-full bg-foreground opacity-0 transition-[transform,width,height] duration-300 ease-[var(--ease-out-strong)] motion-reduce:transition-none"
+              />
+              <li ref={all ? lit : undefined} className="relative z-10">
+                <Chip
+                  href="/work"
+                  active={all}
+                  count={heads.all?.count}
+                  ring="All work"
+                >
                   All
                 </Chip>
               </li>
@@ -307,12 +337,13 @@ export function WorkShell({
                 <li
                   key={c.slug}
                   ref={key === c.slug ? lit : undefined}
-                  className="shrink-0"
+                  className="relative z-10 shrink-0"
                 >
                   <Chip
                     href={c.href}
                     active={key === c.slug}
                     count={heads[c.slug]?.count}
+                    ring={c.name}
                   >
                     {c.name}
                   </Chip>
@@ -350,7 +381,16 @@ export function WorkShell({
         </>
       }
     >
-      <StripView value={view}>{children}</StripView>
+      {/* The row passes: on a filter the old row slides out and the new
+          one in, the way the pressed chip lies from the lit one and as far
+          as the number of chips between them, so the page reads as
+          travelling past the sections in between rather than swapping.
+          `Chip` writes the distance; `.pass` in `globals.css` moves it.
+          Everything outside this boundary, the head and the chips, holds
+          still. Julian asked for exactly this. */}
+      <ViewTransition update="pass" default="none">
+        <StripView value={view}>{children}</StripView>
+      </ViewTransition>
     </StripPage>
   );
 }
@@ -359,10 +399,13 @@ function Chip({
   href,
   active,
   count,
+  ring,
   children,
 }: {
   href: string;
   active: boolean;
+  /** What the pointer ring says over it. */
+  ring: string;
   /** Shown after the name: the row reads as a map of the archive rather
       than eleven words, and the size of a discipline is the thing an art
       director is weighing when they pick one. */
@@ -378,9 +421,12 @@ function Chip({
        thin, because the pointer is exact and the band is height the
        photographs would rather have. */
     "label block whitespace-nowrap rounded-full px-3 py-1.5 max-sm:py-3",
-    "transition-colors duration-200 ease-[var(--ease-out-strong)]",
+    "transition-[color,background-color,transform] duration-200 ease-[var(--ease-out-strong)]",
+    // A chip lifts a touch under the pointer and gives under the press;
+    // the lit one is drawn by the pill sliding beneath the row.
+    "hoverable:hover:scale-[1.05] active:scale-[0.96] motion-reduce:hover:scale-100",
     active
-      ? "bg-foreground text-background"
+      ? "text-background"
       : "text-muted-foreground hoverable:hover:bg-foreground/[0.07] hoverable:hover:text-foreground focus-visible:bg-foreground/[0.07] focus-visible:text-foreground",
   );
   return (
@@ -390,20 +436,31 @@ function Chip({
       // `page`, not `true`: this is a link to the page being viewed, which
       // is what a screen reader should be told about the current filter.
       aria-current={active ? "page" : undefined}
+      // The pointer ring says which filter it is over. Julian asked.
+      data-ring={ring}
       /* So the strip that is about to mount knows it is a filter change
          and fades in where it stands, instead of sliding in from a
          quarter of the window away as an arriving page does. */
       onClick={(e) => {
-        /* Where this chip is against the one that is lit, as a share of
-           the row's width. Measured at the press rather than counted,
-           which keeps it right when the row has scrolled and needs no
-           index threaded through two components. */
+        /* Which side of the lit chip this one lies, measured at the press;
+           the strip's own fade keeps no slide of its own now that the row
+           passes (below). */
         const me = e.currentTarget.getBoundingClientRect();
         const row = e.currentTarget.closest("ul");
         const lit = row?.querySelector('[aria-current="page"]');
         const from = lit?.getBoundingClientRect().left ?? me.left;
-        const width = row?.clientWidth || 1;
-        markFilter((me.left - from) / width);
+        markFilter(0);
+        /* How far the row passes, and how long it takes: a chip's worth of
+           distance for every chip between the lit one and this, in the
+           direction this one lies. `.pass` in `globals.css` reads both. */
+        const chips = row ? Array.from(row.querySelectorAll("li")) : [];
+        const at = chips.findIndex((li) => li.contains(e.currentTarget));
+        const was = chips.findIndex((li) => lit ? li.contains(lit) : false);
+        const steps = at < 0 || was < 0 ? 1 : Math.abs(at - was);
+        const way = me.left - from < 0 ? -1 : 1;
+        const root = document.documentElement.style;
+        root.setProperty("--pass", `${way * Math.min(10 + steps * 6, 40)}vw`);
+        root.setProperty("--pass-ms", `${Math.min(280 + steps * 45, 600)}ms`);
       }}
       className={className}
     >

@@ -1816,6 +1816,43 @@ optgroup {
     transform: scale(1.06);
   }
 }
+/* ── the row passes the sections between ──
+   On the work index the row of work is its own boundary (`work-shell.tsx`,
+   `update="pass"`): the old row leaves the way the pressed chip lies from
+   the lit one and the new row follows it in, over `--pass` of distance in
+   `--pass-ms`, both written by the chip at the press: further and longer
+   for every chip between the two. A little blur mid-flight, since the two
+   rows are different pictures crossing. The head and the chips are outside
+   the boundary and hold still. */
+::view-transition-group(.pass) {
+  animation-duration: var(--pass-ms, 320ms);
+  animation-timing-function: cubic-bezier(0.32, 0.72, 0, 1);
+}
+::view-transition-old(.pass) {
+  animation: jg-pass-out var(--pass-ms, 320ms) cubic-bezier(0.32, 0.72, 0, 1)
+    both;
+  mix-blend-mode: normal;
+}
+::view-transition-new(.pass) {
+  animation: jg-pass-in var(--pass-ms, 320ms) cubic-bezier(0.32, 0.72, 0, 1)
+    both;
+  mix-blend-mode: normal;
+}
+@keyframes jg-pass-out {
+  to {
+    opacity: 0;
+    transform: translateX(calc(var(--pass, 0vw) * -1));
+    filter: blur(2px);
+  }
+}
+@keyframes jg-pass-in {
+  from {
+    opacity: 0;
+    transform: translateX(var(--pass, 0vw));
+    filter: blur(2px);
+  }
+}
+
 /* A filter on the work index: no zoom, the row fades on its own. */
 :root[data-nav="filter"]::view-transition-group(.page),
 :root[data-nav="filter"]::view-transition-old(.page),
