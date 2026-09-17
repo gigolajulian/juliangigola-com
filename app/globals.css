@@ -731,7 +731,17 @@ nav[aria-label="Categories"] ul[data-more] {
      cover below and the track simply follows it. */
   container-type: size;
   grid-auto-columns: min-content;
-  gap: 0.5rem;
+  /* Julian: more air in the rack. 0.5rem set the covers almost touching,
+     which is a contact sheet; 1rem is a hung wall. The cover's own width
+     below is worked out from the row's height minus this gap, so the two
+     are one number and have to move together. */
+  gap: 1rem;
+  /* And air above and below the rack, so the covers hang off the chip
+     row rather than starting against it and finishing against the
+     ruler. The shelf is the size container, so `cqh` below is measured
+     inside this padding and the cover's width follows it down.
+     */
+  padding-block: 1.75rem;
   /* The scroller carries `items-center` for the strip, where one cell is
      centred in the window's height. Here every cell fills its row. */
   align-items: stretch;
@@ -757,7 +767,18 @@ nav[aria-label="Categories"] ul[data-more] {
     grid-column: span 1;
     justify-content: center;
     gap: 0.25rem;
-    padding: 0 0.75rem;
+    /* Julian: a line between the disciplines. The rule is the chapter
+       break the strip gets for free from a whole screen of paper and the
+       rack has to state, and it hangs off the name that starts the
+       chapter rather than being a cell of its own. Not on the first one,
+       which would be a rule down the left edge of the window with
+       nothing before it. */
+    padding: 0 2rem;
+    border-left: 1px solid var(--color-border);
+  }
+  .strip-grid > :where(div, section, article):first-child {
+    border-left: 0;
+    padding-left: 0.75rem;
   }
   .strip-grid > :where(div, section, article):not([data-hash="enquire"]) h2 {
     font-size: 1.5rem;
@@ -791,7 +812,7 @@ nav[aria-label="Categories"] ul[data-more] {
    rack gives the height and the frame gives the width. */
 .strip-grid > a {
   height: 100% !important;
-  width: calc((100cqh - 0.5rem) / 2 * 4 / 5) !important;
+  width: calc((100cqh - 1rem) / 2 * 4 / 5) !important;
 }
 /* On a phone the page is not locked and the strip is already a column, so
    the sheet is the same idea the other way up: two across, running down,
@@ -819,6 +840,15 @@ nav[aria-label="Categories"] ul[data-more] {
   .strip-grid > :where(div, section, article) {
     grid-row: auto;
     grid-column: 1 / -1;
+    /* Running down the page the break is a line across it, not beside
+       it, and the name needs room over it. */
+    border-left: 0;
+    border-top: 1px solid var(--color-border);
+    padding: 1.5rem 0 0.25rem;
+  }
+  .strip-grid > :where(div, section, article):first-child {
+    border-top: 0;
+    padding-top: 0;
   }
 }
 
