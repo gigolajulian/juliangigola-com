@@ -962,12 +962,10 @@ nav[aria-label="Categories"] ul[data-more] {
        that is in the way by the third press. */
     animation: jg-fade-slide 260ms var(--ease-out-strong) backwards;
   }
-  /* Carried in by the work index's lane (`work-shell.tsx`), or under a
-     page zoom (`data-nav` on the root, see `strip.tsx`): the strip itself
-     does nothing. What is inside it is stilled below, next to the cell's
-     own rise, because this block is a utility and a utility loses to any
-     unlayered rule whatever its specificity. */
-  &[data-arrive="lane"],
+  /* Under a page zoom (`data-nav` on the root, see `strip.tsx`) the strip
+     itself does nothing. What is inside it is stilled below, next to the
+     cell's own rise, because this block is a utility and a utility loses
+     to any unlayered rule whatever its specificity. */
   &[data-arrive="zoom"] {
     animation: none;
   }
@@ -1037,9 +1035,6 @@ nav[aria-label="Categories"] ul[data-more] {
    pictures came up after it. Here and not in the strip's utility block
    above, where these lived and lost to this rule for being layered. */
 .strip-scroll[data-arrive="fade"] .strip-cell,
-.strip-scroll[data-arrive="lane"] .strip-cell,
-.strip-scroll[data-arrive="lane"] .title-word,
-.strip-scroll[data-arrive="lane"] .title-rest,
 .strip-scroll[data-arrive="zoom"] .strip-cell,
 .strip-scroll[data-arrive="zoom"] .title-word,
 .strip-scroll[data-arrive="zoom"] .title-rest {
@@ -1783,39 +1778,6 @@ optgroup {
     transform: translateY(-2.5vh);
   }
 }
-/* ── the lane that passes the sections between ──
-   Built and moved by `runLane` in `work-shell.tsx`; this is only how it
-   is drawn. Over the row, clipped to it, and nothing in it may animate
-   on its own: the cells are clones of the strip's, whose arrival and
-   press animations would otherwise play again in the clone. */
-.pass-lane {
-  position: absolute;
-  inset: 0;
-  z-index: 20;
-  overflow: hidden;
-  pointer-events: none;
-}
-.pass-lane-inner {
-  display: flex;
-  height: 100%;
-  align-items: center;
-  will-change: transform;
-}
-.pass-lane-cell {
-  height: 100%;
-  flex: 0 0 auto;
-  overflow: hidden;
-}
-.pass-lane-cell img {
-  height: 100%;
-  width: 100%;
-  object-fit: cover;
-}
-.pass-lane * {
-  animation: none !important;
-  transition: none !important;
-}
-
 /* A filter on the work index: no zoom, the row fades on its own. */
 :root[data-nav="filter"]::view-transition-group(.page),
 :root[data-nav="filter"]::view-transition-old(.page),

@@ -66,12 +66,6 @@ let cameBack = false;
     of the row's width, so a neighbour slides a little and a chip at the far
     end slides the most. */
 let filteredAt = 0;
-/** The work index's lane is carrying the row in (`work-shell.tsx`), so
-    the strip must not also fade or slide it: the lane moves it. */
-let laneAt = 0;
-export const markLane = () => {
-  laneAt = Date.now();
-};
 let filterShift = 0;
 export const markFilter = (shift = 0) => {
   filteredAt = Date.now();
@@ -272,16 +266,10 @@ export function Strip({
     cameBack = false;
     const filtered = Date.now() - filteredAt < FILTER_MS;
     filteredAt = 0;
-    const laned = Date.now() - laneAt < FILTER_MS;
-    laneAt = 0;
     const popped = Date.now() - poppedAt < POP_MS;
     const el = scroller.current;
     if (!el || !live) return;
     // The filter changed under a row that stayed: a fade, not an arrival.
-    if (filtered && laned) {
-      el.dataset.arrive = "lane";
-      return;
-    }
     if (filtered) {
       el.dataset.arrive = "fade";
       /* Half a screen at the very ends of the row, nothing at all for a
