@@ -569,6 +569,22 @@ function Stage({
 }) {
   const area = React.useRef<HTMLDivElement>(null);
   const size = useFit(area, frame.width, frame.height);
+  /* Under the picture while it arrives.
+     The viewer asks for a wider copy than the strip did, so on a slow
+     connection the file is still in flight when the trip starts — the
+     press waits `DECODE_CAP_MS` and no longer. Measured on production:
+     the box was empty for the first 400ms and the file landed at 641ms,
+     which is the blank Julian saw. The copy the page already decoded is
+     the same photograph and costs nothing, so it holds the box until the
+     full one paints; the frame's own colour covers a frame that is not
+     on the page, after a few arrow keys. */
+  const under = React.useMemo(
+    () => {
+      const el = pictureFor(frame.src);
+      return el instanceof HTMLImageElement ? el.currentSrc : "";
+    },
+    [frame.src],
+  );
   return (
     <div
       ref={area}
@@ -591,8 +607,12 @@ function Stage({
         {/* The box the trip transforms: exactly the picture, clipped. */}
         <div
           data-zoom-box
-          className="relative shrink-0 overflow-hidden"
-          style={size ? { width: size.w, height: size.h } : { width: 0, height: 0 }}
+          className="relative shrink-0 overflow-hidden bg-cover bg-center"
+          style={{
+            ...(size ? { width: size.w, height: size.h } : { width: 0, height: 0 }),
+            backgroundColor: frame.color,
+            ...(under ? { backgroundImage: `url("${under}")` } : null),
+          }}
         >
           <Image
             key={frame.src}
