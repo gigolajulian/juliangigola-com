@@ -18,7 +18,6 @@
     "purgatory": "editorial",
     "retro-reverie-vol-01": "editorial",
     "retro-reverie-vol-02": "editorial",
-    "bridal": "weddings",
     "hellamack": "campaigns",
     "solace": "editorial",
     "urban-reverie": "editorial"
@@ -459,9 +458,7 @@
       "/work/abril/04.jpg"
     ]
   },
-  "hidden": [
-    "bridal"
-  ],
+  "hidden": [],
   "credits": {
     "crave": [
       {
@@ -582,7 +579,6 @@
     "valgur",
     "vendetta",
     "vines-roses",
-    "bridal",
     "weddings",
     "wired-magazine",
     "wrapped-up",
