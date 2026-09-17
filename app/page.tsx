@@ -168,9 +168,12 @@ export default function Home() {
           title="Have something in mind?"
           body="Tell me what you have in mind and I'll come back with an approach and a quote."
           next={WORK_PAGE}
-          className="border-l border-border px-6"
+          className="border-l border-border"
           aside={
-            <div id="where-next" className="grid gap-px bg-border">
+            <div
+              id="where-next"
+              className="grid h-full grid-rows-2 gap-px bg-border"
+            >
               <PathCard
                 href="/work"
                 label="For art directors"

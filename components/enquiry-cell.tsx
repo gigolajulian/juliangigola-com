@@ -54,14 +54,25 @@ export function EnquiryCell({
       data-hash="enquire"
       className={cn(
         "flex w-full shrink-0 flex-col justify-center gap-6 py-10 sm:h-full sm:w-[min(40rem,85vw)] sm:py-0 sm:pl-24 sm:pr-6",
+        /* With an aside the cell is the whole window, split: the ask
+           centred in the left half with room around it, and the aside
+           given the right half floor to ceiling. Stretched and not
+           centred, or at 2000px the aside floats in the middle of the
+           screen as a box with the ask marooned beside it. The cell's own
+           padding goes, so each half sets its own. */
         aside &&
-          "gap-10 sm:grid sm:w-[100vw] sm:grid-cols-2 sm:items-center sm:gap-16 sm:pl-16 sm:pr-16",
+          "gap-0 sm:grid sm:w-[100vw] sm:grid-cols-2 sm:items-stretch sm:p-0",
         className,
       )}
     >
       {/* The ask itself, as one column. Its own flex box rather than the
           cell's, so an aside can sit beside the whole of it. */}
-      <div className="flex flex-col gap-6">
+      <div
+        className={cn(
+          "flex flex-col gap-6",
+          aside && "justify-center px-6 py-12 sm:px-16 sm:py-0",
+        )}
+      >
         <div>
           <h2 className="title max-w-[22ch]">{title}</h2>
           {body ? (
