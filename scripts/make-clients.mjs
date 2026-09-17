@@ -231,17 +231,18 @@ async function maskPng(file, slug, name) {
   /* Capped at 320px tall. A mark is drawn at 24px and at most twice that on a
      dense screen, so a 1629px source is three orders of magnitude of bytes
      nobody sees — and a mask is fetched by every visitor. */
-  const out = join(served, `${slug}.png`);
+  const out = join(served, `${slug}.webp`);
   await sharp(source)
     .extract({ left, top, width, height })
     .resize({ height: Math.min(height, 320), withoutEnlargement: true })
-    .png({ compressionLevel: 9 })
+    // Lossless keeps the alpha edge exact; a mask is nothing but its alpha.
+    .webp({ lossless: true })
     .toFile(out);
 
   const final = await sharp(out).metadata();
   return {
     kind: "mask",
-    src: `/clients/${slug}.png`,
+    src: `/clients/${slug}.webp`,
     width: final.width,
     height: final.height,
     trimmedFrom: `${info.width}x${info.height}`,

@@ -187,7 +187,9 @@ const nextConfig: NextConfig = {
        laptop and a phone at 2x, 1920 everything else; the loader rounds a
        request up to the next one. `imageSizes` is kept for the small slots
        — the index panel, a picker thumbnail. */
-    deviceSizes: [640, 1080, 1920],
+    /* 1280 for a phone at 2.6x to 3x: a 100vw tile there needs 1050 to
+       1170px and was rounding up to 1920, on every tile of / and /work. */
+    deviceSizes: [640, 1080, 1280, 1920],
     imageSizes: [128, 256],
   },
 

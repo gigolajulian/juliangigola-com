@@ -37,14 +37,15 @@ const subscribeHoverable = (onChange: () => void) => {
 export function WorkBand({
   project,
   index,
-  /** The cells above the fold on most screens. */
-  priority = false,
+  /** The cells above the fold on most screens: fetched at once, but not
+      preloaded ahead of the hero. */
+  eager = false,
 }: {
   /** Trimmed on the server to the cover, three frames and the plate's words
       — which three, and why, is with `bandTile` in `lib/work.ts`. */
   project: BandTile;
   index: number;
-  priority?: boolean;
+  eager?: boolean;
 }) {
   const frames = project.frames;
 
@@ -163,13 +164,13 @@ export function WorkBand({
             alt={project.cover.alt || project.name}
             fill
             sizes="(min-width: 1024px) 33vw, (min-width: 768px) 50vw, 100vw"
-            priority={priority}
+            loading={eager ? "eager" : "lazy"}
             // The blur-up under it while it loads, and — below the fold,
             // where it is not the largest paint — a fade in when it lands
             // rather than a pop. See `photo-fade.tsx`.
             placeholder={project.cover.blur ? "blur" : "empty"}
             blurDataURL={project.cover.blur}
-            data-fade={priority ? undefined : ""}
+            data-fade={eager ? undefined : ""}
             className="object-cover"
           />
 

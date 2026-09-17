@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { AdminEditor } from "@/components/admin-editor";
+import { CLIENT_MARKS, type ClientMarkData } from "@/lib/clients-data";
 import { CONTENT, CONTENT_PATH } from "@/lib/content";
 import { SHOWN as HOMEPAGE_RELEASES } from "@/components/cover-art";
 import {
@@ -42,6 +43,15 @@ export const metadata: Metadata = {
   // does nothing without a token is still not one to show a stranger.
   robots: { index: false, follow: false },
 };
+
+const markSrc = (m: ClientMarkData | undefined): string =>
+  !m
+    ? ""
+    : m.kind === "mask"
+      ? m.src
+      : `data:image/svg+xml,${encodeURIComponent(
+          `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${m.viewBox}" fill="#fff">${m.body}</svg>`,
+        )}`;
 
 export default function AdminPage() {
   const addedSlugs = new Set(ADDED.map((p) => p.slug));
@@ -92,8 +102,9 @@ export default function AdminPage() {
           slug: c.slug,
           name: c.name,
           detail: c.href,
-          // The mark, white on transparent, over the editor's dark ground.
-          cover: { src: `/clients/${c.slug}.png`, color: "#111111" },
+          // The mark, white on transparent, over the editor's dark ground:
+          // the mask file for a raster mark, the SVG inlined for a vector.
+          cover: { src: markSrc(CLIENT_MARKS[c.slug]), color: "#111111" },
         }))}
         slugs={PROJECTS.map((p) => p.slug)}
         /* Every category a shoot can be, sessions included. `WORK` and

@@ -316,7 +316,12 @@ export function ProjectStrip({
                 src={cell.frame.src}
                 alt={cell.frame.alt || `${project.name}, frame ${cell.n + 1}`}
                 fill
-                sizes="(min-width: 1024px) 60vw, 90vw"
+                // A frame is as tall as the strip and as wide as its ratio
+                // says, not as wide as the window. Measured: a portrait
+                // frame on a phone is 524css wide and was fetched at 1080
+                // for 1376 needed; on a laptop it is 490 wide and fetched
+                // 1080 for 490. 8rem is the bar and the ruler.
+                sizes={`calc((100vh - 8rem) * ${(cell.frame.width / cell.frame.height).toFixed(3)})`}
                 // The first two lead the page's loading; every other frame
                 // is fetched at once rather than as the strip reaches it.
                 // Left lazy, Julian's recording showed each frame arriving

@@ -517,6 +517,7 @@ export function Hero({
               fill
               sizes="(min-width: 1024px) 45vw, 100vw"
               priority={i === 0}
+              fetchPriority={i === 0 ? "high" : undefined}
               // A 16px copy of the frame, inlined, under the picture while it
               // loads — so the cover is never a flat block of the frame's
               // colour. Only the hand-made frames in `/hero/` have one
