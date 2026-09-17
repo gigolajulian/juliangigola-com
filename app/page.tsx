@@ -52,7 +52,14 @@ import { ClientMarks } from "@/components/client-marks";
    a screen has left is a tile 155 wide: small enough that UKIYOSUNKNOWN came
    out UKIYOS... Two rows of a taller tile is the same nine pictures at half
    again the size, and the short row centres itself under the long one. */
-const ROWS = [5, 4];
+/* Split from however many are picked, longer row on top: ten shows as
+   five and five, nine as five and four. Fixed at [5, 4] it dropped the
+   tenth without a word — the count in the corner said ten and nine were
+   on the screen. */
+const ROWS = [
+  Math.ceil(FEATURED.length / 2),
+  Math.floor(FEATURED.length / 2),
+].filter((n) => n > 0);
 
 export default function Home() {
   return (
