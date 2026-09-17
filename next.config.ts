@@ -193,11 +193,16 @@ const nextConfig: NextConfig = {
        at 150% shows a landscape frame 1907css wide and needs 2861px, and
        at 1920 it was drawn at two thirds density, which Julian saw as
        pixelated. */
-    deviceSizes: [640, 1080, 1280, 1920, 2500],
+    /* Five rungs, not eight. Every unique source-and-width is a
+       transformation Cloudflare counts for the month, so the ladder is
+       the multiplier on the whole archive: 1080 went because 1280 is
+       18% more pixels and nobody can see the difference, and 128 went
+       because nothing on the site is drawn that small. */
+    deviceSizes: [640, 1280, 1920, 2500],
     /* 384 for the homepage's band: five tiles to a row makes each one
        about 254px on a laptop, and with `sizes` saying a third of the
        window every one of them was fetching the 640. */
-    imageSizes: [128, 256, 384],
+    imageSizes: [384],
   },
 
   // Stops naming the framework and its version to every request. Free, and
