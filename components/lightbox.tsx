@@ -428,14 +428,28 @@ function useFit(
   React.useLayoutEffect(() => {
     const el = area.current;
     if (!el) return;
-    const fit = () => {
-      const w = el.clientWidth;
-      const h = el.clientHeight;
+    /* The content box, not the padding box. `clientWidth` and
+       `clientHeight` count the padding as room, so the stage's own
+       margin was being spent on the picture: a tall frame came out 80px
+       taller than the space inside the padding, ran to the top of the
+       window and sat hard against the controls with nothing between
+       them. Julian saw that as the controls overlaying the picture. The
+       observer hands the content box straight over; the first
+       measurement, before there is an entry, takes the padding off by
+       hand. */
+    const fit = (content?: DOMRectReadOnly) => {
+      let w = content?.width;
+      let h = content?.height;
+      if (w === undefined || h === undefined) {
+        const pad = window.getComputedStyle(el);
+        w = el.clientWidth - parseFloat(pad.paddingLeft) - parseFloat(pad.paddingRight);
+        h = el.clientHeight - parseFloat(pad.paddingTop) - parseFloat(pad.paddingBottom);
+      }
       const s = Math.min(w / width, h / height);
       setSize({ w: Math.round(width * s), h: Math.round(height * s) });
     };
     fit();
-    const ro = new ResizeObserver(fit);
+    const ro = new ResizeObserver(([entry]) => fit(entry.contentRect));
     ro.observe(el);
     return () => ro.disconnect();
   }, [area, width, height]);
@@ -496,7 +510,10 @@ export function Lightbox({
             onClick={(e) => {
               if (e.target === e.currentTarget) onOpenChange(false);
             }}
-            className="flex shrink-0 items-center justify-between gap-6 px-6 pb-6 sm:px-10 sm:pb-8"
+            /* Its own space above the picture as well as below it, so the
+               row reads as the viewer's floor rather than as something
+               resting on the photograph. */
+            className="flex shrink-0 items-center justify-between gap-6 px-6 pb-6 pt-4 sm:px-10 sm:pb-8 sm:pt-6"
           >
             {/* Read out as it changes: the counter is the one thing that
                 says where in the sequence a keyboard visitor is. */}
