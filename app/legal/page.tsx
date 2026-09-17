@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { LegalPage } from "@/components/legal";
 import { TermsColumn } from "@/components/terms";
 import { PrivacyColumn } from "@/components/privacy";
+import { OpenOnHash } from "@/components/open-on-hash";
 
 export const metadata: Metadata = {
   title: "Legal",
@@ -16,6 +17,7 @@ export const metadata: Metadata = {
 export default function LegalPage_() {
   return (
     <LegalPage>
+      <OpenOnHash />
       <TermsColumn />
       <PrivacyColumn />
     </LegalPage>

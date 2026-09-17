@@ -74,7 +74,7 @@ export function LegalColumn({
 
       <div className="mt-10 max-w-prose text-base leading-relaxed">{intro}</div>
 
-      <ol className="mt-14 max-w-prose list-none space-y-12 p-0 [counter-reset:clause]">
+      <ol className="mt-14 max-w-prose list-none border-t border-border p-0 [counter-reset:clause]">
         {/* Each clause takes an anchor of its own, named for the column it
             is in: "Changes" and "Contact" are the title of a clause in both
             columns, and `/legal#terms-changes` and `/legal#privacy-changes`
@@ -109,16 +109,39 @@ export function Clause({
   children: React.ReactNode;
 }) {
   return (
-    <li
-      id={column ? `${column}-${anchor(title)}` : undefined}
-      className="scroll-mt-28 [counter-increment:clause]"
-    >
-      <h3 className="label flex gap-4 text-muted-foreground before:content-[counter(clause,decimal-leading-zero)]">
-        {title}
-      </h3>
-      <div className="mt-5 space-y-4 text-base leading-relaxed [&_li]:mt-2 [&_strong]:font-medium [&_strong]:text-foreground [&_ul]:list-disc [&_ul]:pl-5">
-        {children}
-      </div>
+    <li className="border-b border-border [counter-increment:clause]">
+      {/* Julian: too text heavy. Thirty-one clauses set out in full is a
+          wall nobody reads, and a policy nobody reads is a policy nobody
+          has agreed to. Shut, the page is its table of contents and you
+          open the one you came for.
+
+          `<details>`, so it works with no JavaScript, is in the tab order
+          and announced as expandable without a line of ARIA, and — the
+          reason it has to be this element and not a state hook — a browser
+          opens one by itself when the address names something inside it,
+          which is what keeps `/legal#terms-ownership` landing on the
+          clause rather than on a closed lid. */}
+      <details
+        id={column ? `${column}-${anchor(title)}` : undefined}
+        className="group scroll-mt-28"
+      >
+        <summary className="label flex cursor-pointer list-none items-center gap-4 py-5 text-muted-foreground transition-colors duration-200 before:content-[counter(clause,decimal-leading-zero)] hoverable:hover:text-foreground [&::-webkit-details-marker]:hidden">
+          <h3 className="min-w-0 flex-1">{title}</h3>
+          {/* A cross that turns into a line: the shape says shut and open
+              without a word, and turning is cheaper than swapping two
+              glyphs. */}
+          <span
+            aria-hidden
+            className="relative size-3 shrink-0 transition-transform duration-300 ease-[var(--ease-out-strong)] group-open:rotate-45 motion-reduce:transition-none"
+          >
+            <span className="absolute left-0 top-1/2 h-px w-full -translate-y-1/2 bg-current" />
+            <span className="absolute left-1/2 top-0 h-full w-px -translate-x-1/2 bg-current transition-opacity duration-200 group-open:opacity-0" />
+          </span>
+        </summary>
+        <div className="space-y-4 pb-7 text-base leading-relaxed [&_li]:mt-2 [&_strong]:font-medium [&_strong]:text-foreground [&_ul]:list-disc [&_ul]:pl-5">
+          {children}
+        </div>
+      </details>
     </li>
   );
 }
