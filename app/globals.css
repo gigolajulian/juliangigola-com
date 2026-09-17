@@ -932,32 +932,13 @@ nav[aria-label="Categories"] ul[data-more] {
        that is in the way by the third press. */
     animation: jg-fade-slide 260ms var(--ease-out-strong) backwards;
   }
-  /* And nothing inside it arrives separately. Each cell carries a rise of
-     its own, staggered up to six deep, which is right for a page opening
-     and wrong for a filter: twelve covers popping in one after another is
-     what made changing one feel choppy. One fade, all of it at once. */
-  &[data-arrive="fade"] .strip-cell {
-    animation: none;
-  }
-  /* Carried in by the work index's lane (`work-shell.tsx`): the strip
-     itself does nothing, and nothing inside it does either. */
-  &[data-arrive="lane"] {
-    animation: none;
-  }
-  &[data-arrive="lane"] .strip-cell,
-  &[data-arrive="lane"] .title-word,
-  &[data-arrive="lane"] .title-rest {
-    animation: none;
-  }
-  /* Under a page zoom (`data-nav` in or out on the root, see `strip.tsx`)
-     the zoom is the arrival, and the page must be whole for the snapshot
-     the zoom is made of: with the cells still waiting on their own rise
-     the new page's snapshot was empty for the first 180ms, so the zoom
-     went to dark and the pictures came up after it. */
-  &[data-arrive="zoom"],
-  &[data-arrive="zoom"] .strip-cell,
-  &[data-arrive="zoom"] .title-word,
-  &[data-arrive="zoom"] .title-rest {
+  /* Carried in by the work index's lane (`work-shell.tsx`), or under a
+     page zoom (`data-nav` on the root, see `strip.tsx`): the strip itself
+     does nothing. What is inside it is stilled below, next to the cell's
+     own rise, because this block is a utility and a utility loses to any
+     unlayered rule whatever its specificity. */
+  &[data-arrive="lane"],
+  &[data-arrive="zoom"] {
     animation: none;
   }
   @media (prefers-reduced-motion: reduce) {
@@ -1014,6 +995,25 @@ nav[aria-label="Categories"] ul[data-more] {
 .strip-cell {
   animation: jg-fade-up 760ms var(--ease-out-strong) both;
   animation-delay: calc(180ms + min(var(--i, 0), 6) * 90ms);
+}
+/* And when nothing inside the strip arrives separately. A filter: each
+   cell's rise, staggered up to six deep, is right for a page opening and
+   wrong for a filter, where twelve covers popping in one after another
+   is what made changing one feel choppy. The lane: it moves the row. A
+   page zoom: the zoom is the arrival, and the page must be whole for the
+   snapshot the zoom is made of; frozen mid flight on production, the new
+   page's snapshot was empty for the first 180ms because its cells were
+   still waiting on their own rise, so the zoom went to dark and the
+   pictures came up after it. Here and not in the strip's utility block
+   above, where these lived and lost to this rule for being layered. */
+.strip-scroll[data-arrive="fade"] .strip-cell,
+.strip-scroll[data-arrive="lane"] .strip-cell,
+.strip-scroll[data-arrive="lane"] .title-word,
+.strip-scroll[data-arrive="lane"] .title-rest,
+.strip-scroll[data-arrive="zoom"] .strip-cell,
+.strip-scroll[data-arrive="zoom"] .title-word,
+.strip-scroll[data-arrive="zoom"] .title-rest {
+  animation: none;
 }
 @keyframes jg-rise {
   from {
