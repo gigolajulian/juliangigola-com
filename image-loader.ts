@@ -1,5 +1,6 @@
 import type { ImageLoaderProps } from "next/image";
 import SIZED from "./public/work/sized.json";
+import SOURCES from "./public/work/sources.json";
 
 /**
  * Every photograph on the site goes through here.
@@ -74,9 +75,16 @@ function sizedHero(src: string, width: number): string | null {
   const m = /^\/hero\/([a-z0-9-]+)\.jpg$/i.exec(src);
   const widths = m ? HERO_WIDTHS : (SIZED as Record<string, number[]>)[src];
   if (!widths) return null;
-  const w =
-    widths.find((candidate) => candidate >= width) ?? widths[widths.length - 1];
-  return src.replace(/\.jpg$/i, `-w${w}.jpg`);
+  const w = widths.find((candidate) => candidate >= width);
+  if (w !== undefined) return src.replace(/\.jpg$/i, `-w${w}.jpg`);
+  /* Wider than the widest copy. A hero has nothing bigger and takes its
+     widest; a cover is the same picture as a full-size frame
+     (`sources.json`, written by `make-cards`), so it takes that frame at
+     its 2500px; a scrub frame is its own master. Serving the 1080 copy
+     for a 2700px slot was a browser upscale, which Julian saw as
+     pixelated covers on a 4K monitor. */
+  if (m) return src.replace(/\.jpg$/i, `-w${widths[widths.length - 1]}.jpg`);
+  return (SOURCES as Record<string, string>)[src] ?? src;
 }
 
 export default function cloudflareImageLoader({

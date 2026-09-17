@@ -94,7 +94,8 @@ export default function SessionsPage() {
                     src={cover.src}
                     alt={cover.alt || sample.name}
                     fill
-                    sizes="(min-width: 640px) 35vw, 100vw"
+                    // 4:5 and as tall as the strip: see `cover-cell.tsx`.
+                    sizes="(min-width: 640px) and (min-resolution: 2.5dppx) calc((100vh - 10rem) * 0.534), (min-width: 640px) calc((100vh - 10rem) * 0.8), 100vw"
                     // The first is the one on screen when the page opens.
                     priority={i === 0}
                     loading={i === 0 ? undefined : "lazy"}

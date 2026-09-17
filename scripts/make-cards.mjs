@@ -32,6 +32,9 @@ import { join } from "node:path";
 
 const OUT_SIZED = "public/work/sized.json";
 const OUT_BLUR = "public/work/blur.json";
+/** Which full-size frame each cover is the same picture as, for the loader:
+    above the widest sized copy it serves that frame instead of upscaling. */
+const OUT_SOURCES = "public/work/sources.json";
 const COVER_WIDTHS = [1080];
 const FRAME_WIDTHS = [640, 1080];
 const SCRUB_FROM = 1;
@@ -63,6 +66,7 @@ try {
 
   const sized = {};
   const blur = {};
+  const sources = {};
   let made = 0;
 
   const cut = async (source, src, w) => {
@@ -91,6 +95,7 @@ try {
       const [a, b] = await Promise.all([thumb(onDisk(cover)), thumb(onDisk(first))]);
       if (distance(a, b) < SAME_PICTURE) {
         for (const w of COVER_WIDTHS) await cut(onDisk(first), cover, w);
+        sources[cover] = first;
       }
     }
 
@@ -110,6 +115,7 @@ try {
   for (const [file, data] of [
     [OUT_SIZED, sized],
     [OUT_BLUR, blur],
+    [OUT_SOURCES, sources],
   ]) {
     const json = JSON.stringify(data, null, 2) + "\n";
     let changed = true;

@@ -73,7 +73,11 @@ export function CoverCell({
           src={row.cover.src}
           alt={row.cover.alt || row.name}
           fill
-          sizes="(min-width: 640px) 35vw, 100vw"
+          // Height-bound above a phone: the cell is the strip's height and
+          // the cover's ratio wide, so the width is told from the height.
+          // 10rem is the bar, the chip row and the ruler. On a 3x screen,
+          // two thirds, for the 2x rung (see `project-strip.tsx`).
+          sizes={`(min-width: 640px) and (min-resolution: 2.5dppx) calc((100vh - 10rem) * ${((row.cover.width / row.cover.height) * 0.667).toFixed(3)}), (min-width: 640px) calc((100vh - 10rem) * ${(row.cover.width / row.cover.height).toFixed(3)}), 100vw`}
           priority={eager}
           loading={eager ? undefined : "lazy"}
           placeholder={row.cover.blur ? "blur" : "empty"}
