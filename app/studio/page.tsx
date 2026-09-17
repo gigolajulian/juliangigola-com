@@ -109,9 +109,16 @@ export default function StudioPage() {
           data-tick
           data-label="Studio"
           data-hash="studio"
-          className="grid w-full shrink-0 grid-cols-1 sm:h-full sm:grid-cols-[1fr_minmax(0,38vw)]"
+          /* Julian: the picture and the words the other way round. The
+             picture takes the left-hand column from sm up and the writing
+             the rest of the window. Ordered rather than reordered: the
+             title still comes first in the markup, which is the order it
+             is read in and the order its words rise in, and on a phone
+             where there is one column it is still the first thing on the
+             screen. */
+          className="grid w-full shrink-0 grid-cols-1 sm:h-full sm:grid-cols-[minmax(0,38vw)_1fr]"
         >
-          <div className="flex flex-col justify-center gap-8 px-6 py-12 sm:px-16 sm:py-0">
+          <div className="flex flex-col justify-center gap-8 px-6 py-12 sm:order-2 sm:px-16 sm:py-0">
             <div className="flex flex-col gap-6">
               <RisingTitle text="Bay Area creative director and photographer" />
               <p className="title-rest max-w-prose text-sm leading-relaxed text-muted-foreground">
@@ -149,7 +156,7 @@ export default function StudioPage() {
             <StudioReel
               shoots={shoots}
               fill
-              className="min-h-0 max-sm:aspect-[4/5] sm:h-full"
+              className="min-h-0 max-sm:aspect-[4/5] sm:order-1 sm:h-full"
             />
           ) : null}
         </section>

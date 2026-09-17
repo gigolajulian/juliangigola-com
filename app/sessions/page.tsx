@@ -162,7 +162,11 @@ export default function SessionsPage() {
                     a slot without waiting on a reply — which is the whole
                     point for this audience. Until then the enquiry form is
                     the path. */}
-                <div className="flex flex-wrap items-center gap-3 border-t border-border pt-4">
+                {/* Julian: to the right. The cell is a narrow column of
+                    label and value read down the left; the one thing to
+                    press is put at the other end of the rule under it, so
+                    it is not a seventh line of the list. */}
+                <div className="flex flex-wrap items-center justify-end gap-3 border-t border-border pt-4">
                   {BOOKING_URL ? (
                     <a
                       href={BOOKING_URL}
