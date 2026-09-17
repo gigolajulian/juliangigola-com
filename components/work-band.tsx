@@ -47,6 +47,15 @@ export function WorkBand({
 
   const [active, setActive] = React.useState(0);
   const [scrubbing, setScrubbing] = React.useState(false);
+  /* Julian: the homepage loads the covers and nothing else. The frames a
+     tile scrubs through are asked for when the pointer arrives on that
+     tile, so a visit that never touches one costs a cover apiece and the
+     three frames of six tiles are never fetched at all. They were mounted
+     at rest before, which bought a crossfade that never cut on the first
+     pass; the first step across a cold tile may cut now, and the rest of
+     the pass is a dissolve as before. Per tile, so hovering one does not
+     fetch the other five. */
+  const [near, setNear] = React.useState(false);
 
   /* The three frames are mounted from the start wherever there is a pointer
      to scrub with, not on the first move. Mounted on first move, the fade
@@ -71,6 +80,7 @@ export function WorkBand({
     // with a finger would fight the page scroll, and a "hover" on touch is
     // just a tap that has not decided what it is yet.
     if (e.pointerType === "touch" || frames.length === 0) return;
+    setNear(true);
 
     const box = e.currentTarget.getBoundingClientRect();
     const ratio = (e.clientX - box.left) / box.width;
@@ -97,6 +107,7 @@ export function WorkBand({
     const delta = e.key === "ArrowRight" ? 1 : e.key === "ArrowLeft" ? -1 : 0;
     if (!delta) return;
     e.preventDefault();
+    setNear(true);
     // The first press lands on the first frame rather than skipping it.
     setActive(
       (i) => (scrubbing ? i + delta + frames.length : 0) % frames.length,
@@ -183,14 +194,16 @@ export function WorkBand({
                 over it, and the cover is under both. This used to mount one
                 keyed image at a time, which was a hard cut on every step —
                 Julian asked for it to be smoother. */}
-          {touched
+          {touched && near
             ? frames.map((f, i) => (
                 <Image
                   key={f.src}
                   src={f.src}
                   alt=""
                   fill
-                  loading="lazy"
+                  // The pointer is on the tile: they are wanted now, not
+                  // when something else decides they are near.
+                  loading="eager"
                   sizes="(min-width: 1024px) 33vw, (min-width: 768px) 50vw, 100vw"
                   // Two photographs crossfading show both for a moment; a
                   // couple of pixels of blur on whichever is mid-fade makes

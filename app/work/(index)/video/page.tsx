@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { VideoShowcase } from "@/components/video-showcase";
 import { EnquiryCell } from "@/components/enquiry-cell";
 import { CONTENT } from "@/lib/content";
-import { STUDIO } from "@/lib/work";
 import { SECTIONS, inSection } from "@/lib/videos";
 
 /* ── /work/video ──────────────────────────────────────────────────

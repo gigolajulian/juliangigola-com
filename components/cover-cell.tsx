@@ -1,9 +1,8 @@
 "use client";
 
+import * as React from "react";
 import { ViewTransition } from "react";
 import { useRouter } from "next/navigation";
-import loader from "../image-loader";
-import SOURCES from "../public/work/sources.json";
 import Link from "next/link";
 import Image from "next/image";
 import type { IndexRow } from "@/lib/work";
@@ -60,17 +59,28 @@ export function CoverCell({
      been fetched: `prefetch={false}` here means never, by Julian's rule
      against the viewport prefetch flood, and a hover is one link at a
      time. `sources.json` says which full-size frame the cover is. */
+  /* Julian: an index page loads its covers and nothing else, and the
+     rest of a set only once the project is opened. So this warms the
+     route and no longer fetches the project's first frame at up to
+     2500px — which, with the pointer parked while the strip moved
+     underneath it, was one full-size photograph per cover that slid
+     past, and is what made scrolling with a pointer over the pictures
+     stutter.
+
+     Held for a beat first, for the same reason: covers travelling under
+     a still pointer each fire this, and a prefetch per cover crossed is
+     the viewport flood arriving sideways. A pointer that rests on one
+     cover is somebody choosing it. */
+  const hold = React.useRef(0);
   const warm = () => {
-    router.prefetch(href ?? `/work/${row.slug}`);
-    const first = (SOURCES as Record<string, string>)[row.cover.src];
-    if (!first) return;
-    const dpr = window.devicePixelRatio || 1;
-    const ratio = row.cover.width / row.cover.height;
-    const css = (window.innerHeight - 128) * ratio * (dpr >= 2.5 ? 0.667 : 1);
-    const rungs = [128, 256, 640, 1080, 1280, 1920, 2500];
-    const rung = rungs.find((r) => r >= css * dpr) ?? 2500;
-    new window.Image().src = loader({ src: first, width: rung });
+    window.clearTimeout(hold.current);
+    hold.current = window.setTimeout(
+      () => router.prefetch(href ?? `/work/${row.slug}`),
+      140,
+    );
   };
+  const cool = () => window.clearTimeout(hold.current);
+  React.useEffect(() => () => window.clearTimeout(hold.current), []);
   /* The name is on the cell and not on the picture: the picture stands
      at scale(1.1) inside the cell's clip (`strip-frame`), and a snapshot
      of it is the picture unclipped, a tenth too big, which held for the
@@ -88,7 +98,9 @@ export function CoverCell({
         data-ring="View project"
         data-mark={mark}
         onPointerEnter={warm}
+        onPointerLeave={cool}
         onFocus={warm}
+        onBlur={cool}
         className="group strip-cell relative block w-full shrink-0 overflow-hidden press active:scale-[0.995] sm:h-full sm:w-auto"
         style={
           {
