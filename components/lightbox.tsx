@@ -195,11 +195,16 @@ function warm(from: HTMLElement | null): Promise<void> {
   const set = from instanceof HTMLImageElement ? from.srcset : "";
   if (!set) return Promise.resolve();
   const want = window.innerWidth * (window.devicePixelRatio || 1);
-  const widths = set
-    .split(",")
-    .map((part) => part.trim().split(/\s+/))
-    .map(([url, w]) => ({ url, w: parseInt(w || "0", 10) }))
-    .filter((c) => c.url && c.w > 0)
+  /* Each candidate is a URL, a space and a width; not split on commas,
+     because the CDN's URLs carry commas of their own
+     (`/cdn-cgi/image/width=1920,quality=82,format=auto/...`). Split on
+     them, this warmed `/work/format=auto/...`, a file that does not
+     exist, and the real picture was fetched and decoded on the press,
+     in the middle of the trip: measured as a 108ms stall in which the
+     frame jumped from 15% to 76% of the way. */
+  const widths = Array.from(set.matchAll(/(\S+)\s+(\d+)w/g))
+    .map((m) => ({ url: m[1], w: parseInt(m[2], 10) }))
+    .filter((c) => c.w > 0)
     .sort((a, b) => a.w - b.w);
   const pick = widths.find((c) => c.w >= want) ?? widths[widths.length - 1];
   if (!pick) return Promise.resolve();
