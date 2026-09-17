@@ -413,8 +413,12 @@ export function WorkShell({
               </ul>
             </nav>
 
-            {/* Two ways through the same work, named rather than drawn: an
-                icon of four squares is a guess, and these are two words. */}
+            {/* Two ways through the same work. Drawn rather than named,
+                which Julian asked for: the marks are the layouts
+                themselves — upright frames in a row, or a field of
+                squares — and the one in use is the bright one. The word
+                stays as the button's label for anyone not looking at
+                the screen. */}
             <div
               className={cn(
                 "flex shrink-0 items-center gap-1 pr-6 sm:pr-10 max-sm:hidden",
@@ -426,15 +430,36 @@ export function WorkShell({
                   key={mode}
                   type="button"
                   aria-pressed={view === mode}
+                  aria-label={mode === "strip" ? "Strip view" : "Grid view"}
                   onClick={() => chooseView(mode)}
                   className={cn(
-                    "label rounded-full px-2.5 py-1.5 transition-colors duration-200 max-sm:py-3",
+                    "rounded-full px-2 py-2 transition-opacity duration-200 max-sm:py-3",
                     view === mode
-                      ? "text-foreground"
-                      : "text-muted-foreground/60 hoverable:hover:text-foreground",
+                      ? "text-foreground opacity-100"
+                      : "text-foreground opacity-35 hoverable:hover:opacity-70",
                   )}
                 >
-                  <span className="uppercase">{mode}</span>
+                  <svg
+                    aria-hidden
+                    viewBox="0 0 16 16"
+                    className="h-4 w-4"
+                    fill="currentColor"
+                  >
+                    {mode === "strip" ? (
+                      <>
+                        <rect x="0" y="2" width="4" height="12" rx="0.5" />
+                        <rect x="6" y="2" width="4" height="12" rx="0.5" />
+                        <rect x="12" y="2" width="4" height="12" rx="0.5" />
+                      </>
+                    ) : (
+                      <>
+                        <rect x="1" y="1" width="6" height="6" rx="0.5" />
+                        <rect x="9" y="1" width="6" height="6" rx="0.5" />
+                        <rect x="1" y="9" width="6" height="6" rx="0.5" />
+                        <rect x="9" y="9" width="6" height="6" rx="0.5" />
+                      </>
+                    )}
+                  </svg>
                 </button>
               ))}
             </div>
