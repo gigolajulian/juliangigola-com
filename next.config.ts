@@ -188,8 +188,12 @@ const nextConfig: NextConfig = {
        request up to the next one. `imageSizes` is kept for the small slots
        — the index panel, a picker thumbnail. */
     /* 1280 for a phone at 2.6x to 3x: a 100vw tile there needs 1050 to
-       1170px and was rounding up to 1920, on every tile of / and /work. */
-    deviceSizes: [640, 1080, 1280, 1920],
+       1170px and was rounding up to 1920, on every tile of / and /work.
+       2500, the masters' own width, for a big dense screen: a 4K monitor
+       at 150% shows a landscape frame 1907css wide and needs 2861px, and
+       at 1920 it was drawn at two thirds density, which Julian saw as
+       pixelated. */
+    deviceSizes: [640, 1080, 1280, 1920, 2500],
     imageSizes: [128, 256],
   },
 
