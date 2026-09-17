@@ -75,11 +75,22 @@ export function WorkBand({
     () => false,
   );
 
+  /* Where the pointer was, to tell a move from a tile moving under it.
+     A swipe carries the cells past a cursor that is sitting still, and
+     the browser re-aims its hover at whatever arrives: the tile under the
+     cursor was scrubbing to a new frame on every animation frame of the
+     swipe, which is React work in the middle of the one gesture that has
+     to stay smooth. A pointer that has not moved is not scrubbing. */
+  const was = React.useRef<{ x: number; y: number } | null>(null);
+
   const onPointerMove = (e: React.PointerEvent<HTMLElement>) => {
     // Touch gets the cover and a plain tap through to the project. Scrubbing
     // with a finger would fight the page scroll, and a "hover" on touch is
     // just a tap that has not decided what it is yet.
     if (e.pointerType === "touch" || frames.length === 0) return;
+    const still = was.current?.x === e.clientX && was.current?.y === e.clientY;
+    was.current = { x: e.clientX, y: e.clientY };
+    if (still) return;
     setNear(true);
 
     const box = e.currentTarget.getBoundingClientRect();
@@ -96,6 +107,7 @@ export function WorkBand({
   // Back to the cover. The frames stay mounted and fade out under it — see
   // `touched` — so leaving is the same dissolve as arriving, not a cut.
   const reset = () => {
+    was.current = null;
     setScrubbing(false);
     setActive(0);
   };

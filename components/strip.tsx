@@ -94,6 +94,10 @@ const seat = (path: string) => `strip-at:${path}`;
     wheel delta. Three notches on a mouse: an overshoot of one is a
     reader arriving at the end, not asking to leave it. */
 const LEAVE_AFTER = 300;
+/** The quiet that ends a swipe. A trackpad fires every frame or so while
+    the fingers are down and keeps firing as the fling decays, so anything
+    under about a tenth of a second is still the same push. */
+const GESTURE_GAP_MS = 120;
 /** How long a push is held after the last notch before it starts to drain,
     so the notches of a steady spin add up rather than leak away between
     them: a notched wheel fires about ten times a second, and a drain that
@@ -729,9 +733,24 @@ export function Strip({
        the strip back to a target measured from where it used to be. One
        path, one idea of where the strip is going, and up, down, left and
        right all reach it. */
+    /* One swipe is one gesture, and who owns it is decided once.
+       A trackpad sends a stream of events for a single push of two
+       fingers, and each one is aimed at whatever happens to be under a
+       cursor that never moved: as the strip carries cells along, that is
+       a different element every few frames. Deciding per event let the
+       middle of a swipe land on something that wanted the wheel for
+       itself — an inner box, a tile, a list — and the rest of the push
+       did nothing. Whoever the first event of a gesture goes to keeps it
+       until the fingers lift, which is a gap of `GESTURE_GAP_MS`. */
+    let gestureAt = 0;
+    let owned = false;
+
     const onWheel = (e: WheelEvent) => {
       // A pinch is a zoom.
       if (e.ctrlKey) return;
+      const now = e.timeStamp || performance.now();
+      const fresh = now - gestureAt > GESTURE_GAP_MS;
+      gestureAt = now;
       const sideways = Math.abs(e.deltaX) > Math.abs(e.deltaY);
       const raw = sideways ? e.deltaX : e.deltaY;
       if (!raw) return;
@@ -739,12 +758,14 @@ export function Strip({
          first: a form's box until it has run out, a textarea and a select
          always. A strip that took the wheel over a form would move the
          page out from under the words being typed. */
-      const inner = sideways
-        ? null
-        : (e.target as Element | null)?.closest?.<HTMLElement>(
-            "textarea, select, [data-scroll]",
-          );
+      const inner =
+        sideways || (!fresh && owned)
+          ? null
+          : (e.target as Element | null)?.closest?.<HTMLElement>(
+              "textarea, select, [data-scroll]",
+            );
       if (inner && el.contains(inner)) {
+        owned = false;
         // A textarea or a select keeps the wheel whatever it holds. A
         // marked box gives it back once it has run out, whatever element
         // it happens to be: the contact page's details are a `dl` and the
@@ -757,6 +778,7 @@ export function Strip({
             : inner.scrollTop + inner.clientHeight < inner.scrollHeight - 1;
         if (more) return;
       }
+      owned = true;
       // Firefox can report lines rather than pixels.
       const dy = e.deltaMode === 1 ? raw * 40 : raw;
 
@@ -770,7 +792,10 @@ export function Strip({
            directions: a project strip on a phone has its footer below it.
            From 40rem up a strip page cannot scroll at all (`globals.css`),
            so neither of these is ever true there. */
-        if (!sideways && dy < 0 && window.scrollY > 0) return;
+        if (!sideways && dy < 0 && window.scrollY > 0) {
+          owned = false;
+          return;
+        }
         if (
           !sideways &&
           dy > 0 &&
@@ -779,8 +804,10 @@ export function Strip({
             window.scrollY >
             1
         ) {
+          owned = false;
           return;
         }
+        owned = true;
         e.preventDefault();
         push(dy);
         // Past the end, on; past the start, back. Julian asked for both.
