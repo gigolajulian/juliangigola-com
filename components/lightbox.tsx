@@ -132,6 +132,10 @@ export function useLightbox(frames: Frame[]) {
   const originAt = React.useRef(-1);
   const trip = React.useRef<ZoomTrip | null>(null);
   const closing = React.useRef(false);
+  /* A press whose picture is still decoding. A close in that window,
+     Escape or the back button pressed quickly, abandons the open rather
+     than letting the viewer come up after it. */
+  const pending = React.useRef(false);
   /** The scroll lock, undone as the close starts. */
   const unlock = React.useRef<(() => void) | null>(null);
   /** The history entry, taken off once the close has landed. */
@@ -139,6 +143,11 @@ export function useLightbox(frames: Frame[]) {
 
   const close = React.useCallback(
     (to: HTMLElement | null) => {
+      if (pending.current) {
+        pending.current = false;
+        markViewer(false);
+        return;
+      }
       if (closing.current) return;
       closing.current = true;
       unlock.current?.();
@@ -179,7 +188,10 @@ export function useLightbox(frames: Frame[]) {
     origin.current = found ?? null;
     originAt.current = i;
     markViewer(true);
+    pending.current = true;
     void warm(found ?? null).then(() => {
+      if (!pending.current) return;
+      pending.current = false;
       unlock.current = lockScroll();
       trip.current = zoomOpen({
         from,
@@ -230,10 +242,11 @@ export function useLightbox(frames: Frame[]) {
   );
 
   // Arrow keys page through the sequence. Radix handles Escape and the focus
-  // trap; focus restoration is `close` above.
+  // trap once the viewer is up; before that, Escape abandons the press.
   React.useEffect(() => {
-    if (!open) return;
     const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && pending.current) closeRef.current();
+      if (!open) return;
       if (e.key === "ArrowRight") step(1);
       else if (e.key === "ArrowLeft") step(-1);
       else return;

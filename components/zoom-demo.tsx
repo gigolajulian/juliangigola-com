@@ -46,6 +46,7 @@ export function ZoomDemo() {
   const [open, setOpen] = React.useState<number | null>(null);
   const trip = React.useRef<ZoomTrip | null>(null);
   const closing = React.useRef(false);
+  const pending = React.useRef(false);
   const unlock = React.useRef<(() => void) | null>(null);
   const unpush = React.useRef<(() => void) | null>(null);
   const opener = React.useRef<HTMLElement | null>(null);
@@ -79,6 +80,10 @@ export function ZoomDemo() {
   }, [open, fit]);
 
   const close = React.useCallback(() => {
+    if (pending.current) {
+      pending.current = false;
+      return;
+    }
     if (open === null || closing.current) return;
     closing.current = true;
     unlock.current?.();
@@ -113,6 +118,7 @@ export function ZoomDemo() {
   const show = (i: number, from: HTMLElement) => {
     if (open !== null || trip.current) return;
     opener.current = from;
+    pending.current = true;
     // The full picture, decoded first, capped.
     const warm = new window.Image();
     warm.src = full(GRID[i]);
@@ -120,6 +126,8 @@ export function ZoomDemo() {
       warm.decode().catch(() => {}),
       new Promise<void>((r) => window.setTimeout(r, DECODE_CAP_MS)),
     ]).then(() => {
+      if (!pending.current) return;
+      pending.current = false;
       unlock.current = lockScroll();
       trip.current = zoomOpen({
         from,
@@ -141,9 +149,9 @@ export function ZoomDemo() {
     setOpen((i) => (i === null ? i : (i + d + GRID.length) % GRID.length));
 
   React.useEffect(() => {
-    if (open === null) return;
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") closeRef.current();
+      if (open === null) return;
       else if (e.key === "ArrowRight") step(1);
       else if (e.key === "ArrowLeft") step(-1);
       else return;

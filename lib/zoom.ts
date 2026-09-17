@@ -388,9 +388,26 @@ export function zoomOpen(o: OpenOptions): ZoomTrip {
     [{ transform: at.picture }, { transform: ID }],
     opts,
   );
-  fade(o.backdrop?.(), 1, BACKDROP_IN_MS);
-  for (const c of o.chrome?.() ?? [])
-    fade(c, 1, CHROME_MS, OPEN_MS + CHROME_DELAY_MS);
+  /* Held at the thumbnail until the first frame of the viewer has been
+     painted. The viewer's first frame is the dear one, the picture's
+     texture going up to the GPU, and measured on production it took
+     about 140ms; an animation started before it has already run a third
+     of its course by the time anything is drawn, which showed as the
+     picture jumping most of the way in one frame. Two frames on, the
+     clock starts from nought. */
+  a.pause();
+  b?.pause();
+  c?.pause();
+  requestAnimationFrame(() =>
+    requestAnimationFrame(() => {
+      a.play();
+      b?.play();
+      c?.play();
+      fade(o.backdrop?.(), 1, BACKDROP_IN_MS);
+      for (const el of o.chrome?.() ?? [])
+        fade(el, 1, CHROME_MS, OPEN_MS + CHROME_DELAY_MS);
+    }),
+  );
   const settle = async () => {
     await decoded(pic);
     removeStandIn();
