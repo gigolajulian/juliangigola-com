@@ -8,6 +8,7 @@ import { GlassLight } from "@/components/glass-light";
 import { PhotoFade } from "@/components/photo-fade";
 import { PointerRing } from "@/components/pointer-ring";
 import "./globals.css";
+import { ImageFallback } from "@/components/image-fallback";
 import { PageTransition } from "@/components/page-transition";
 
 /* Inter for everything that is read rather than announced, at Julian's ask.
@@ -188,6 +189,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <main id="main" className="rise flex flex-1 flex-col">
           {/* Every page zooms in and out of the next: `page-transition.tsx`
               and `.page` in `globals.css`. */}
+          <ImageFallback />
           <PageTransition>{children}</PageTransition>
         </main>
         <SiteFooter />
