@@ -1052,36 +1052,13 @@ nav[aria-label="Categories"] ul[data-more] {
   }
 }
 /* ── the words come and go with the cell ──
-   The pictures already move with where they are: the strip writes `--par`
-   on every cell, minus one at the left edge of the window through nought in
-   the middle to one at the right, and the frames lean on it. The writing
-   did not, so a heading held full strength until the cell it was in was cut
-   off by the edge of the screen. Now it reads at full while its cell is
-   near the middle and is gone by the time the cell is a screen away, which
-   is the same thing the eye is already doing.
-
-   On the cell's own columns rather than on the cell: a cell is often a
-   picture and a column of words side by side, and the picture must not
-   fade — `:has()` leaves any column carrying an image alone. And on the
-   column rather than on the paragraphs inside it, because the arrival
-   animations already own `opacity` on those and a filled animation would
-   freeze whatever value it landed on. */
-.strip-scroll > * > *:not(:has(img, video, picture, .strip-frame)) {
-  /* No `abs()` yet in enough of the field: the sign is taken off by hand. */
-  --away: max(var(--par, 0), calc(var(--par, 0) * -1));
-  /* The strip clamps `--par` at one, so one is as far away as anything
-     ever reads: full strength out to a little past half a window, then
-     down to nothing by the time the cell's middle is a window from the
-     middle of the screen, which is the moment it leaves. A gentler curve
-     took a cover's name to half while it was plainly there to read. */
-  opacity: clamp(0, calc((1 - var(--away)) / 0.45), 1);
-}
-@media (prefers-reduced-motion: reduce) {
-  .strip-scroll > * > *:not(:has(img, video, picture, .strip-frame)) {
-    opacity: 1;
-  }
-}
-
+   Full strength while a cell is near the middle of the window, gone by
+   the time it is a screen away, which is the same thing the eye is
+   already doing. `strip.tsx` writes the value straight onto the columns
+   that fade: it used to hand the cell a `--par` for a rule here to read,
+   and an inherited custom property invalidated the style of the whole
+   subtree under every cell, on every frame of a swipe. The columns
+   carrying a picture are left alone — a photograph must not fade. */
 /* The parallax: where the cell is against the middle of the window, set on
    the cell by the strip. The picture slides against its frame by a share of
    that, so the pictures cross the screen a touch slower than the frames

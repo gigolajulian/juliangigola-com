@@ -418,6 +418,25 @@ export function Strip({
       const out = el.closest("article")?.querySelector("[data-strip-at]");
       if (out) out.textContent = word;
     };
+    /* The columns of a cell that fade with it: the ones carrying no
+       picture. A cell is often a photograph and a column of words side by
+       side, and the photograph must not fade. Held per cell and rebuilt
+       only when the cell's children change, because this is read on every
+       frame of a swipe. */
+    const soften = new WeakMap<HTMLElement, { n: number; list: HTMLElement[] }>();
+    const fades = (cell: HTMLElement) => {
+      const had = soften.get(cell);
+      if (had && had.n === cell.childElementCount) return had.list;
+      const list = (Array.from(cell.children) as HTMLElement[]).filter(
+        (c) => !c.querySelector("img, video, picture, .strip-frame"),
+      );
+      soften.set(cell, { n: cell.childElementCount, list });
+      return list;
+    };
+    /* Reduced motion keeps the words at full strength, which is what the
+       stylesheet used to say. */
+    const still = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
     const read = () => {
       queued = 0;
       // Where to sit somebody down if they come back to this path.
@@ -448,26 +467,29 @@ export function Strip({
           nearest = Math.abs(off);
           best = i;
         }
-        /* ── the parallax ──
+        /* ── the words come and go with the cell ──
            Where each cell is against the middle of the window, as a
-           fraction of the window, handed to it as a custom property. The
-           picture inside slides against its frame by a few percent of
-           that (`strip-frame` in `globals.css`), so as the frames cross
-           the screen the pictures cross it a touch slower and sit behind
-           them. Tied to the scroll position and nothing else, so it is as
-           smooth as the scroll is and stops when it stops. Julian asked
-           for a parallax that is smooth and clean. Cells more than a
-           window and a half away are left alone. */
+           fraction of the window: full strength near the middle, gone by
+           the time the cell is a window away, which is the moment it
+           leaves. Tied to the scroll position and nothing else, so it is
+           as smooth as the scroll is and stops when it stops. Cells more
+           than a window and a half away are left alone.
+
+           Written straight onto the columns that fade rather than handed
+           to the cell as `--par` for the stylesheet to read. A custom
+           property inherits, so setting one on a cell invalidated the
+           style of everything under it, every frame, for every cell on
+           screen: measured on the homepage, 403ms of style recalculation
+           inside a swipe of a second and a half, against 18ms with the
+           writes taken out. That was the lag Julian could feel. */
         const par = off / el.clientWidth;
+        const away = Math.min(1, Math.abs(par));
+        const soft = fades(kids[i]);
         if (Math.abs(par) > 1.5) {
-          if (kids[i].style.getPropertyValue("--par")) {
-            kids[i].style.removeProperty("--par");
-          }
-        } else {
-          kids[i].style.setProperty(
-            "--par",
-            Math.max(-1, Math.min(1, par)).toFixed(3),
-          );
+          for (const c of soft) if (c.style.opacity) c.style.opacity = "";
+        } else if (!still) {
+          const o = Math.max(0, Math.min(1, (1 - away) / 0.45)).toFixed(2);
+          for (const c of soft) if (c.style.opacity !== o) c.style.opacity = o;
         }
       });
       if (el.scrollLeft >= room - 2) land(kids.length - 1);
