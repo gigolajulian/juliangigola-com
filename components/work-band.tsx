@@ -182,7 +182,7 @@ export function WorkBand({
             src={project.cover.src}
             alt={project.cover.alt || project.name}
             fill
-            sizes="(min-width: 1024px) 33vw, (min-width: 768px) 50vw, 100vw"
+            sizes="(min-width: 1024px) 20vw, (min-width: 768px) 50vw, 100vw"
             /* Lazy even above the fold: React's server renderer preloads
                every non-lazy image, and three tiles preloaded beside the
                hero were competing with it on a phone, where they are
@@ -216,7 +216,7 @@ export function WorkBand({
                   // The pointer is on the tile: they are wanted now, not
                   // when something else decides they are near.
                   loading="eager"
-                  sizes="(min-width: 1024px) 33vw, (min-width: 768px) 50vw, 100vw"
+                  sizes="(min-width: 1024px) 20vw, (min-width: 768px) 50vw, 100vw"
                   // Two photographs crossfading show both for a moment; a
                   // couple of pixels of blur on whichever is mid-fade makes
                   // them read as one picture resolving — the same trick the

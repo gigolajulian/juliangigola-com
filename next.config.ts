@@ -194,7 +194,10 @@ const nextConfig: NextConfig = {
        at 1920 it was drawn at two thirds density, which Julian saw as
        pixelated. */
     deviceSizes: [640, 1080, 1280, 1920, 2500],
-    imageSizes: [128, 256],
+    /* 384 for the homepage's band: five tiles to a row makes each one
+       about 254px on a laptop, and with `sizes` saying a third of the
+       window every one of them was fetching the 640. */
+    imageSizes: [128, 256, 384],
   },
 
   // Stops naming the framework and its version to every request. Free, and
