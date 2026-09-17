@@ -308,7 +308,9 @@ export function Strip({
     if (back) {
       el.dataset.arrive = "back";
       el.scrollLeft = el.scrollWidth;
-    } else if (arrive === "none" || zooming) {
+    } else if (zooming) {
+      el.dataset.arrive = "zoom";
+    } else if (arrive === "none") {
       el.dataset.arrive = "none";
     }
   }, [live, arrive]);

@@ -949,6 +949,17 @@ nav[aria-label="Categories"] ul[data-more] {
   &[data-arrive="lane"] .title-rest {
     animation: none;
   }
+  /* Under a page zoom (`data-nav` in or out on the root, see `strip.tsx`)
+     the zoom is the arrival, and the page must be whole for the snapshot
+     the zoom is made of: with the cells still waiting on their own rise
+     the new page's snapshot was empty for the first 180ms, so the zoom
+     went to dark and the pictures came up after it. */
+  &[data-arrive="zoom"],
+  &[data-arrive="zoom"] .strip-cell,
+  &[data-arrive="zoom"] .title-word,
+  &[data-arrive="zoom"] .title-rest {
+    animation: none;
+  }
   @media (prefers-reduced-motion: reduce) {
     animation: none;
     transition: none;
