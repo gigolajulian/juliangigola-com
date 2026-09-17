@@ -7,7 +7,12 @@ import { useSelectedLayoutSegments } from "next/navigation";
 import { cn } from "@/lib/utils";
 import type { CategoryLink } from "@/lib/work";
 import { StripPage, StripHead } from "@/components/strip-page";
-import { markFilter, StripView, type StripViewMode } from "@/components/strip";
+import {
+  markFilter,
+  markLane,
+  StripView,
+  type StripViewMode,
+} from "@/components/strip";
 
 /* ── the frame around the work ────────────────────────────────────
  * The head and the chip row, mounted once for the whole of /work, its
@@ -110,11 +115,13 @@ export type PassPic = {
 };
 
 /* ── the lane ─────────────────────────────────────────────────────
- * A chip is pressed and the row travels: the cells on screen slide off
- * the way the pressed chip lies from the lit one, the pictures of every
- * filter between the two pass by after them, and the lane fades to show
- * the pressed filter's row already in place beneath. Julian asked for the
- * projects to seem loaded and the photographs between to pass quickly.
+ * A chip is pressed and the row travels as one strip: the cells on screen
+ * slide off the way the pressed chip lies from the lit one, the pictures
+ * of every filter between the two pass by after them, and the pressed
+ * filter's own row follows them in and lands, all at one speed, with no
+ * fade anywhere. Julian asked for the projects to seem loaded and the
+ * photographs between to pass quickly, and then for no fade: the row is
+ * one thing moving.
  *
  * The cells that slide off are clones of the ones on screen, so they are
  * the same pictures, already decoded; the cells off screen are not cloned,
@@ -122,8 +129,20 @@ export type PassPic = {
  * the 640px rung, one that already exists for every cover (it is what a
  * phone gets), so nothing here asks the resizer for a new size. Web
  * Animations rather than a view transition: a snapshot cannot show
- * pictures that were never on the page.
+ * pictures that were never on the page. The new row is real: when it
+ * mounts (`WorkShell` watches for it) it is put on the same animation at
+ * the lane's current time, at the far end of the lane's content, so it
+ * follows the last picture in with the same motion and stops at nought.
  * ─────────────────────────────────────────────────────────────── */
+type Lane = {
+  slide: Animation;
+  /** Where the new row starts, relative to the row's box. */
+  rowFrom: number;
+  duration: number;
+  ease: string;
+  done: () => void;
+};
+
 const LANE_RUNG = 640;
 const laneSrc = (p: PassPic) => loader({ src: p.src, width: LANE_RUNG });
 
@@ -131,9 +150,9 @@ function runLane(
   box: HTMLElement,
   between: PassPic[],
   way: 1 | -1,
-) {
+): Lane | null {
   const scroller = box.querySelector<HTMLElement>(".strip-scroll");
-  if (!scroller) return;
+  if (!scroller) return null;
   const laneRect = box.getBoundingClientRect();
   const gap = parseFloat(getComputedStyle(scroller).columnGap) || 12;
 
@@ -187,24 +206,44 @@ function runLane(
     way > 0
       ? firstLeft - laneRect.left
       : firstLeft - laneRect.left - passWidth - (passWidth ? gap : 0);
-  const end = way > 0 ? -total : laneWidth;
-  const duration = Math.min(420 + between.length * 60, 1100);
+  /* Forward, the content leaves to the left by its whole width and a gap,
+     and the new row, which starts a gap past its end, lands at nought.
+     Back, the content leaves to the right, and the new row starts a
+     window's width to the left of it and lands at nought the same. */
+  const end = way > 0 ? -(total + gap) : laneWidth;
+  const rowFrom = way > 0 ? start + total + gap : start - laneWidth;
+  const duration = Math.min(520 + between.length * 70, 1300);
   // Fast through the middle, easing out at the end: the pictures between
-  // are glimpsed, the pressed filter's settle.
+  // are glimpsed, the row that follows them settles.
   const ease = "cubic-bezier(0.45, 0, 0.15, 1)";
   const slide = inner.animate(
     [{ transform: `translateX(${start}px)` }, { transform: `translateX(${end}px)` }],
     { duration, easing: ease, fill: "forwards" },
   );
-  lane.animate(
+  /* The real row is hidden under its clones for the trip, or it showed
+     through them standing still until its page swapped; back if it is
+     still there when the lane ends, which is a navigation that failed. */
+  scroller.style.visibility = "hidden";
+  const done = () => {
+    lane.remove();
+    if (scroller.isConnected) scroller.style.removeProperty("visibility");
+  };
+  slide.finished.then(done).catch(() => {});
+  return { slide, rowFrom, duration, ease, done };
+}
+
+/** The new row, put on the lane's motion at the lane's current time. */
+function followLane(scroller: HTMLElement, lane: Lane) {
+  const at = Number(lane.slide.currentTime ?? 0);
+  if (at >= lane.duration) return;
+  const ride = scroller.animate(
     [
-      { opacity: 1, offset: 0 },
-      { opacity: 1, offset: 0.7 },
-      { opacity: 0, offset: 1 },
+      { transform: `translateX(${lane.rowFrom}px)` },
+      { transform: "translateX(0px)" },
     ],
-    { duration, easing: "linear", fill: "forwards" },
+    { duration: lane.duration, easing: lane.ease, fill: "backwards" },
   );
-  slide.finished.finally(() => lane.remove()).catch(() => {});
+  ride.currentTime = at;
 }
 
 /* What the row would fetch for a cover at this window, so the warm-up asks
@@ -234,6 +273,25 @@ export function WorkShell({
   children: React.ReactNode;
 }) {
   const rowBox = React.useRef<HTMLDivElement>(null);
+  const laneRef = React.useRef<Lane | null>(null);
+
+  /* The new row mounts some time after the press, when its page arrives;
+     the moment it does, it joins the lane. */
+  React.useEffect(() => {
+    const box = rowBox.current;
+    if (!box) return;
+    const watch = new MutationObserver(() => {
+      const lane = laneRef.current;
+      if (!lane) return;
+      const scroller = box.querySelector<HTMLElement>(".strip-scroll");
+      if (!scroller || scroller.dataset.arrive !== "lane") return;
+      if (scroller.dataset.riding !== undefined) return;
+      scroller.dataset.riding = "";
+      followLane(scroller, lane);
+    });
+    watch.observe(box, { childList: true, subtree: true });
+    return () => watch.disconnect();
+  }, []);
 
   /* The warm-up: on a desktop with a pointer and no request to save data,
      once the page is idle, every filter's lane pictures and the two covers
@@ -280,16 +338,23 @@ export function WorkShell({
     if (a < 0 || b < 0 || a === b) return;
     const slugs = order.slice(Math.min(a, b) + 1, Math.max(a, b));
     if (way < 0) slugs.reverse();
-    /* Two pictures from each filter passed and three from the one
-       pressed, twelve at most: the first cut took four of each, thirty six
-       cells and twenty five thousand pixels in a second, which is a smear.
-       The pressed filter's own pictures end the lane, so it settles on the
-       filter that was pressed while its row lands underneath. */
-    const between = [
-      ...slugs.flatMap((s) => (passes[s] ?? []).slice(0, 2)),
-      ...(passes[to] ?? []).slice(0, 3),
-    ].slice(-12);
-    runLane(box, between, way);
+    /* Two pictures from each filter passed, ten at most: the first cut
+       took four of each, thirty six cells and twenty five thousand pixels
+       in a second, which is a smear. The pressed filter's real row follows
+       the last of them in. */
+    const between = slugs
+      .flatMap((s) => (passes[s] ?? []).slice(0, 2))
+      .slice(-10);
+    laneRef.current?.done();
+    const lane = runLane(box, between, way);
+    if (!lane) return;
+    markLane();
+    laneRef.current = lane;
+    lane.slide.finished
+      .then(() => {
+        if (laneRef.current === lane) laneRef.current = null;
+      })
+      .catch(() => {});
   };
 
   /* The row is one line that scrolls, so eleven chips cost 25px at any

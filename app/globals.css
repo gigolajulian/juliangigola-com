@@ -939,6 +939,16 @@ nav[aria-label="Categories"] ul[data-more] {
   &[data-arrive="fade"] .strip-cell {
     animation: none;
   }
+  /* Carried in by the work index's lane (`work-shell.tsx`): the strip
+     itself does nothing, and nothing inside it does either. */
+  &[data-arrive="lane"] {
+    animation: none;
+  }
+  &[data-arrive="lane"] .strip-cell,
+  &[data-arrive="lane"] .title-word,
+  &[data-arrive="lane"] .title-rest {
+    animation: none;
+  }
   @media (prefers-reduced-motion: reduce) {
     animation: none;
     transition: none;
@@ -1827,7 +1837,6 @@ optgroup {
   z-index: 20;
   overflow: hidden;
   pointer-events: none;
-  background-color: var(--background);
 }
 .pass-lane-inner {
   display: flex;
