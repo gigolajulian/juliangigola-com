@@ -1,6 +1,6 @@
 import { filmCount } from "@/lib/videos";
 import type * as React from "react";
-import { WorkShell, type Head } from "@/components/work-shell";
+import { WorkShell, type Head, type PassPic } from "@/components/work-shell";
 import {
   COMMISSIONS,
   COVER_ART,
@@ -58,13 +58,40 @@ for (const c of WORK_CATEGORY_LINKS) {
   };
 }
 
+/* Four pictures per filter, for the lane that passes them by when a chip
+   is pressed (`work-shell.tsx`): the covers of a discipline's first
+   projects, the first frames of a discipline that is one gallery, the
+   posters of the first films. Never a whole project object. */
+const PASS_COUNT = 4;
+const pic = (f: { src: string; width: number; height: number; color?: string }): PassPic => ({
+  src: f.src,
+  width: f.width,
+  height: f.height,
+  color: f.color ?? "transparent",
+});
+const PASSES: Record<string, PassPic[]> = {
+  all: COMMISSIONS.slice(0, PASS_COUNT).map((p) => pic(p.cover)),
+  video: CONTENT.videos
+    .slice(0, PASS_COUNT)
+    .flatMap((v) => (v.poster ? [{ src: v.poster, width: 16, height: 9, color: "#111" }] : [])),
+};
+for (const c of WORK_CATEGORY_LINKS) {
+  if (c.slug === "video") continue;
+  const gallery = projectsIn(c.slug).find(isDisciplineGallery);
+  PASSES[c.slug] = gallery
+    ? gallery.images.slice(0, PASS_COUNT).map(pic)
+    : projectsIn(c.slug)
+        .slice(0, PASS_COUNT)
+        .map((p) => pic(p.cover));
+}
+
 export default function WorkIndexLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
   return (
-    <WorkShell heads={HEADS} categories={WORK_CATEGORY_LINKS}>
+    <WorkShell heads={HEADS} categories={WORK_CATEGORY_LINKS} passes={PASSES}>
       {children}
     </WorkShell>
   );

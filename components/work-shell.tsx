@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { ViewTransition } from "react";
+import loader from "../image-loader";
 import Link from "next/link";
 import { useSelectedLayoutSegments } from "next/navigation";
 import { cn } from "@/lib/utils";
@@ -101,21 +101,196 @@ export type Head = {
   sheet: boolean;
 };
 
+/** One picture the lane can pass by: a cover, a frame or a poster. */
+export type PassPic = {
+  src: string;
+  width: number;
+  height: number;
+  color: string;
+};
+
+/* ── the lane ─────────────────────────────────────────────────────
+ * A chip is pressed and the row travels: the cells on screen slide off
+ * the way the pressed chip lies from the lit one, the pictures of every
+ * filter between the two pass by after them, and the lane fades to show
+ * the pressed filter's row already in place beneath. Julian asked for the
+ * projects to seem loaded and the photographs between to pass quickly.
+ *
+ * The cells that slide off are clones of the ones on screen, so they are
+ * the same pictures, already decoded; the cells off screen are not cloned,
+ * because a clone of a lazy picture is a fetch. The pictures between are
+ * the 640px rung, one that already exists for every cover (it is what a
+ * phone gets), so nothing here asks the resizer for a new size. Web
+ * Animations rather than a view transition: a snapshot cannot show
+ * pictures that were never on the page.
+ * ─────────────────────────────────────────────────────────────── */
+const LANE_RUNG = 640;
+const laneSrc = (p: PassPic) => loader({ src: p.src, width: LANE_RUNG });
+
+function runLane(
+  box: HTMLElement,
+  between: PassPic[],
+  way: 1 | -1,
+) {
+  const scroller = box.querySelector<HTMLElement>(".strip-scroll");
+  if (!scroller) return;
+  const laneRect = box.getBoundingClientRect();
+  const gap = parseFloat(getComputedStyle(scroller).columnGap) || 12;
+
+  const lane = document.createElement("div");
+  lane.className = "pass-lane";
+  const inner = document.createElement("div");
+  inner.className = "pass-lane-inner";
+  inner.style.gap = `${gap}px`;
+
+  // The cells on screen, as they stand.
+  const kept: HTMLElement[] = [];
+  let firstLeft = 0;
+  for (const cell of Array.from(scroller.children) as HTMLElement[]) {
+    const r = cell.getBoundingClientRect();
+    if (r.right <= 0 || r.left >= window.innerWidth || r.width === 0) continue;
+    if (!kept.length) firstLeft = r.left;
+    const clone = cell.cloneNode(true) as HTMLElement;
+    clone.style.width = `${r.width}px`;
+    clone.style.flex = "0 0 auto";
+    kept.push(clone);
+  }
+  const old = document.createElement("div");
+  old.className = "pass-lane-inner";
+  old.style.gap = `${gap}px`;
+  old.append(...kept);
+
+  const pass = document.createElement("div");
+  pass.className = "pass-lane-inner";
+  pass.style.gap = `${gap}px`;
+  for (const p of between) {
+    const cell = document.createElement("div");
+    cell.className = "pass-lane-cell";
+    cell.style.aspectRatio = `${p.width} / ${p.height}`;
+    cell.style.backgroundColor = p.color;
+    const img = document.createElement("img");
+    img.src = laneSrc(p);
+    img.alt = "";
+    img.decoding = "sync";
+    cell.append(img);
+    pass.append(cell);
+  }
+
+  inner.append(...(way > 0 ? [old, pass] : [pass, old]));
+  lane.append(inner);
+  box.append(lane);
+
+  const passWidth = pass.offsetWidth;
+  const total = inner.scrollWidth;
+  const laneWidth = laneRect.width;
+  const start =
+    way > 0
+      ? firstLeft - laneRect.left
+      : firstLeft - laneRect.left - passWidth - (passWidth ? gap : 0);
+  const end = way > 0 ? -total : laneWidth;
+  const duration = Math.min(420 + between.length * 60, 1100);
+  // Fast through the middle, easing out at the end: the pictures between
+  // are glimpsed, the pressed filter's settle.
+  const ease = "cubic-bezier(0.45, 0, 0.15, 1)";
+  const slide = inner.animate(
+    [{ transform: `translateX(${start}px)` }, { transform: `translateX(${end}px)` }],
+    { duration, easing: ease, fill: "forwards" },
+  );
+  lane.animate(
+    [
+      { opacity: 1, offset: 0 },
+      { opacity: 1, offset: 0.7 },
+      { opacity: 0, offset: 1 },
+    ],
+    { duration, easing: "linear", fill: "forwards" },
+  );
+  slide.finished.finally(() => lane.remove()).catch(() => {});
+}
+
+/* What the row would fetch for a cover at this window, so the warm-up asks
+   for the same file the row does and not one more size. Mirrors the
+   `sizes` in `cover-cell.tsx`: the strip's height by the cover's ratio,
+   two thirds of it on a 3x screen. */
+const RUNGS = [128, 256, 640, 1080, 1280, 1920, 2500];
+const rowSrc = (p: PassPic) => {
+  const dpr = window.devicePixelRatio || 1;
+  const css = (window.innerHeight - 160) * (p.width / p.height) * (dpr >= 2.5 ? 0.667 : 1);
+  const need = css * dpr;
+  const rung = RUNGS.find((r) => r >= need) ?? RUNGS[RUNGS.length - 1];
+  return loader({ src: p.src, width: rung });
+};
+
 export function WorkShell({
   heads,
   categories,
+  passes,
   children,
 }: {
   /** By filter key: "all", a category slug, or "video". */
   heads: Record<string, Head>;
   categories: CategoryLink[];
+  /** By the same key: the pictures the lane passes by. */
+  passes: Record<string, PassPic[]>;
   children: React.ReactNode;
 }) {
+  const rowBox = React.useRef<HTMLDivElement>(null);
+
+  /* The warm-up: on a desktop with a pointer and no request to save data,
+     once the page is idle, every filter's lane pictures and the two covers
+     its row opens on are fetched and decoded, so a filter pressed later
+     is there at once. A phone is left alone. */
+  React.useEffect(() => {
+    if (!window.matchMedia("(hover: hover) and (pointer: fine)").matches) return;
+    const conn = (navigator as { connection?: { saveData?: boolean } }).connection;
+    if (conn?.saveData) return;
+    const warm = () => {
+      for (const pics of Object.values(passes)) {
+        for (const p of pics) new Image().src = laneSrc(p);
+        for (const p of pics.slice(0, 2)) new Image().src = rowSrc(p);
+      }
+    };
+    const idle = (window as { requestIdleCallback?: (cb: () => void, o?: { timeout: number }) => number }).requestIdleCallback;
+    const handle = idle ? idle(warm, { timeout: 4000 }) : window.setTimeout(warm, 1500);
+    return () => {
+      const cancel = (window as { cancelIdleCallback?: (h: number) => void }).cancelIdleCallback;
+      if (idle && cancel) cancel(handle);
+      else window.clearTimeout(handle);
+    };
+  }, [passes]);
+
   const segments = useSelectedLayoutSegments();
   // [] on /work, ["category", slug] on a discipline, ["video"] on the films.
   const key = segments[1] ?? segments[0] ?? "all";
   const head = heads[key] ?? heads.all;
   const all = key === "all";
+
+  /* The filters in the order of the row, so the lane knows which lie
+     between the lit chip and the pressed one; nearest first, whichever
+     way it goes. */
+  const order = React.useMemo(
+    () => ["all", ...categories.map((c) => c.slug)],
+    [categories],
+  );
+  const lane = (to: string, way: 1 | -1) => {
+    const box = rowBox.current;
+    if (!box) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const a = order.indexOf(key);
+    const b = order.indexOf(to);
+    if (a < 0 || b < 0 || a === b) return;
+    const slugs = order.slice(Math.min(a, b) + 1, Math.max(a, b));
+    if (way < 0) slugs.reverse();
+    /* Two pictures from each filter passed and three from the one
+       pressed, twelve at most: the first cut took four of each, thirty six
+       cells and twenty five thousand pixels in a second, which is a smear.
+       The pressed filter's own pictures end the lane, so it settles on the
+       filter that was pressed while its row lands underneath. */
+    const between = [
+      ...slugs.flatMap((s) => (passes[s] ?? []).slice(0, 2)),
+      ...(passes[to] ?? []).slice(0, 3),
+    ].slice(-12);
+    runLane(box, between, way);
+  };
 
   /* The row is one line that scrolls, so eleven chips cost 25px at any
      width instead of wrapping to four rows and 113px on a phone - which
@@ -329,6 +504,7 @@ export function WorkShell({
                   active={all}
                   count={heads.all?.count}
                   ring="All work"
+                  onPress={(way) => lane("all", way)}
                 >
                   All
                 </Chip>
@@ -344,6 +520,7 @@ export function WorkShell({
                     active={key === c.slug}
                     count={heads[c.slug]?.count}
                     ring={c.name}
+                    onPress={(way) => lane(c.slug, way)}
                   >
                     {c.name}
                   </Chip>
@@ -381,16 +558,11 @@ export function WorkShell({
         </>
       }
     >
-      {/* The row passes: on a filter the old row slides out and the new
-          one in, the way the pressed chip lies from the lit one and as far
-          as the number of chips between them, so the page reads as
-          travelling past the sections in between rather than swapping.
-          `Chip` writes the distance; `.pass` in `globals.css` moves it.
-          Everything outside this boundary, the head and the chips, holds
-          still. Julian asked for exactly this. */}
-      <ViewTransition update="pass" default="none">
+      {/* The row, and the lane that passes over it on a filter: `runLane`
+          above. The head and the chips are outside it and hold still. */}
+      <div ref={rowBox} className="relative flex min-h-0 flex-1 flex-col">
         <StripView value={view}>{children}</StripView>
-      </ViewTransition>
+      </div>
     </StripPage>
   );
 }
@@ -400,12 +572,15 @@ function Chip({
   active,
   count,
   ring,
+  onPress,
   children,
 }: {
   href: string;
   active: boolean;
   /** What the pointer ring says over it. */
   ring: string;
+  /** Pressed, with which side of the lit chip it lies on. */
+  onPress: (way: 1 | -1) => void;
   /** Shown after the name: the row reads as a map of the archive rather
       than eleven words, and the size of a discipline is the thing an art
       director is weighing when they pick one. */
@@ -450,17 +625,7 @@ function Chip({
         const lit = row?.querySelector('[aria-current="page"]');
         const from = lit?.getBoundingClientRect().left ?? me.left;
         markFilter(0);
-        /* How far the row passes, and how long it takes: a chip's worth of
-           distance for every chip between the lit one and this, in the
-           direction this one lies. `.pass` in `globals.css` reads both. */
-        const chips = row ? Array.from(row.querySelectorAll("li")) : [];
-        const at = chips.findIndex((li) => li.contains(e.currentTarget));
-        const was = chips.findIndex((li) => lit ? li.contains(lit) : false);
-        const steps = at < 0 || was < 0 ? 1 : Math.abs(at - was);
-        const way = me.left - from < 0 ? -1 : 1;
-        const root = document.documentElement.style;
-        root.setProperty("--pass", `${way * Math.min(10 + steps * 6, 40)}vw`);
-        root.setProperty("--pass-ms", `${Math.min(280 + steps * 45, 600)}ms`);
+        if (!active) onPress(me.left - from < 0 ? -1 : 1);
       }}
       className={className}
     >
