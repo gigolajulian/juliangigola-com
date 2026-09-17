@@ -357,9 +357,10 @@ export function WorkShell({
       .catch(() => {});
   };
 
-  /* The row is one line that scrolls, so eleven chips cost 25px at any
-     width instead of wrapping to four rows and 113px on a phone - which
-     was 15% of the screen spent on the filter, above the work it filters.
+  /* From sm up the row is one line that scrolls, so eleven chips cost
+     25px at any width. On a phone it wraps instead: a line that scrolls
+     is a line a thumb swipes the filters out of, and the filters are the
+     one thing on the page that has to stay put.
      A line that scrolls hides what is off the end, so the chosen chip is
      put in the middle of it whenever the filter changes: arriving on
      Places with the row showing Editorial through Portraits would be the
@@ -486,7 +487,7 @@ export function WorkShell({
       if (!c || !s) return;
       s.style.width = `${c.offsetWidth}px`;
       s.style.height = `${c.offsetHeight}px`;
-      s.style.transform = `translateX(${c.offsetLeft}px)`;
+      s.style.transform = `translate(${c.offsetLeft}px, ${c.offsetTop}px)`;
       s.style.opacity = "1";
       // Placed, it may move from here on; the first placement just is.
       requestAnimationFrame(() => s.toggleAttribute("data-placed", true));
@@ -552,7 +553,7 @@ export function WorkShell({
                 out of it. */}
             <ul
               ref={row}
-              className="relative flex flex-nowrap gap-x-0.5 overflow-x-auto px-3 select-none [scrollbar-width:none] sm:px-7 [&::-webkit-scrollbar]:hidden"
+              className="relative flex flex-wrap gap-x-0.5 px-3 select-none max-sm:gap-y-1 sm:flex-nowrap sm:overflow-x-auto sm:px-7 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
             >
               {/* The lit pill is one element that slides to whichever chip
                   is chosen, rather than a fill each chip draws for itself:
