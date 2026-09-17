@@ -53,7 +53,11 @@ export function PageTransition({ children }: { children: React.ReactNode }) {
         a.pathname === "/";
       set(out ? "out" : "in");
     };
-    const onPop = () => set("out");
+    // The photo viewer keeps an entry in the history so the back button
+    // closes it (`lib/zoom.ts`); that pop is not a page leaving.
+    const onPop = () => {
+      if (root.dataset.viewer === undefined) set("out");
+    };
     document.addEventListener("click", onClick, true);
     window.addEventListener("popstate", onPop);
     return () => {

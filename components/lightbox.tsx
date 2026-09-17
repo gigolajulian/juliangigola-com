@@ -4,215 +4,85 @@ import * as React from "react";
 import { flushSync } from "react-dom";
 import Image from "next/image";
 import { Dialog, VisuallyHidden } from "radix-ui";
-import { cn, rubberband } from "@/lib/utils";
+import { rubberband } from "@/lib/utils";
 import type { Frame } from "@/lib/work-types";
+import {
+  zoomOpen,
+  zoomClose,
+  lockScroll,
+  pushHistory,
+  DECODE_CAP_MS,
+  type ZoomTrip,
+} from "@/lib/zoom";
 
 /* ── the lightbox ─────────────────────────────────────────────────
  * A frame at the size of the screen, paged with the arrow keys.
  *
- * Shared by the project galleries and the cover-art sheet: those two lay
- * their frames out very differently, but what happens when you click one is
- * the same, and it is the part with the keyboard handling and the focus
- * behaviour in it.
+ * Shared by the project strips, the galleries and the cover-art sheet:
+ * those lay their frames out very differently, but what happens when you
+ * click one is the same, and it is the part with the keyboard handling
+ * and the focus behaviour in it.
+ *
+ * The trip is `lib/zoom.ts`: the frame pressed grows into the viewer and
+ * the viewer's picture shrinks back into whichever frame it now is. One
+ * picture moving, on the browser's View Transitions where it has them and
+ * on a FLIP transform elsewhere.
  * ─────────────────────────────────────────────────────────────── */
-
-/**
- * Which frame is open, and how it got there.
- *
- * A hook rather than state inside `Lightbox`, because the thing that opens it
- * is whatever the surrounding layout happens to be — a row of paired frames,
- * a grid of covers — and that has to stay the caller's business.
- */
-/* ── the trip ─────────────────────────────────────────────────────
- * Pressing a frame does not open a dialog over it. The frame lifts off the
- * page and grows to the middle of the screen; closing sends it back.
- *
- * The browser's View Transitions API directly, not React's `<ViewTransition>`
- * — and the difference is the point. React's component pairs a name that is
- * *unmounting* with one that is *mounting*, which is what a route change is.
- * Here the frame in the gallery stays on the page under the lightbox, so
- * both ends exist at once and React refuses the pair as a duplicate. The
- * browser has no such rule: it captures a snapshot, runs the update, and
- * captures another, and a name is allowed to be on one element before and a
- * different element after. So the name is put on the pressed picture, moved
- * to the lightbox's picture inside the update, and taken off afterwards.
- *
- * Every frame that can open carries `data-frame` with its path, which is how
- * the one to lift — or land in — is found. The route morph on the project's
- * first frame (`cover-<slug>`, see `gallery.tsx`) is React's and untouched:
- * that one crosses pages, and this one never does.
- * ─────────────────────────────────────────────────────────────── */
-
-/** The one name the trip uses. On one element at a time, by construction. */
-const NAME = "lightbox-frame";
 
 const pictureFor = (src: string): HTMLElement | null =>
   document.querySelector<HTMLElement>(`img[data-frame="${CSS.escape(src)}"]`);
 
-/* The box the name goes on: the frame's clipping cell where it has one,
-   the picture itself elsewhere. A strip frame stands at `scale(1.1)`
-   inside a cell that clips it (`strip-frame` in `globals.css`), and a
-   snapshot is of the element's own box, transform and all, not of what
-   the cell lets through. Named on the picture, the trip home ended on a
-   box a tenth too large and the page then cut to the clipped frame: a
-   snap at the end of every close, measured at 1204px against 1094 on a
-   1440 window. The cell is exactly what is seen. */
+/** The box the trip starts from and lands in: the frame's clipping cell
+    where it has one, the picture itself elsewhere. */
 const boxOf = (el: HTMLElement): HTMLElement =>
-  el.closest<HTMLElement>(".strip-cell") ?? el;
+  el.closest<HTMLElement>(".strip-cell, button, a") ?? el;
 
-/**
- * Runs `update` as a view transition with the name travelling from `from`
- * to `to`. Either end may be absent; the lightbox's own picture carries the
- * name in its style, so it is never passed here. Without the API, or with
- * reduced motion, the update simply runs.
- *
- * The strip the frame is lifted out of used to travel too, spreading away
- * from the picture and gathering back round it. See `globals.css` for why
- * it does not any more.
- */
-function travel(
-  from: HTMLElement | null,
-  update: () => void,
-  to: HTMLElement | null,
-) {
-  if (
-    typeof document.startViewTransition !== "function" ||
-    window.matchMedia("(prefers-reduced-motion: reduce)").matches
-  ) {
-    update();
-    return;
-  }
-  /* The name goes on both ends of the trip or on neither.
-   *
-   * The dialog's picture used to carry it always, and a name with only one
-   * side is not a morph: the browser has no rectangle to come from, so it
-   * grew the picture out of a speck in the middle of the window. Julian saw
-   * it on the cover art, where it happens every time — the grid shows one
-   * side of a sleeve and the lightbox opens whichever side was face up, so
-   * more often than not there is no element on the page holding the picture
-   * that is about to open. Unpaired, the lightbox simply fades. */
-  const picture = () =>
-    document.querySelector<HTMLElement>("[data-lightbox-picture]");
-  if (from) {
-    boxOf(from).style.viewTransitionName = NAME;
-  } else if (to) {
-    // Going home: the picture is the old side and it exists right now.
-    const p = picture();
-    if (p) p.style.viewTransitionName = NAME;
-  }
-  // Says which trip this is, so the root's crossfade can be a plain fade
-  // off a page that never moved. See `[data-lift]` in `globals.css`.
-  // Which way the picture is going: `in` from the strip, `out` back to it.
-  // The two are not mirror images — see `[data-lift]` in `globals.css`.
-  document.documentElement.setAttribute("data-lift", from ? "in" : "out");
-  /* And whether the far end is a strip cell, whose picture stands at a
-     tenth over its box: the travelling picture then zooms to meet it
-     (`data-lift-zoom` in `globals.css`), so nothing changes size the
-     moment the trip ends. */
-  const end = from ?? to;
-  document.documentElement.toggleAttribute(
-    "data-lift-zoom",
-    !!end && boxOf(end) !== end,
-  );
+const rectOf = (el: Element) => {
+  const r = el.getBoundingClientRect();
+  return { left: r.left, top: r.top, width: r.width, height: r.height };
+};
 
-  /* And every blurred surface goes flat for the length of the trip.
-   *
-   * The one rough moment in opening a photograph is the frame the browser
-   * takes its snapshots in: measured on production at 2560x1440 with a
-   * retina ratio, 133ms of work in a single frame and a clean sixty for
-   * the rest of the animation, which is what reads as a lurch at the
-   * start. With every backdrop filter off it measured 67 to 83. The
-   * surfaces that cost it are the lightbox's own buttons, which mount
-   * inside the update below — hence the second pass in there, before the
-   * new snapshot is taken.
-   *
-   * Written as inline styles and not as a rule, and that is a bug fixed:
-   * `:root[data-lift] .glass { backdrop-filter: none !important }` shipped
-   * as an empty rule. The build drops a declaration that sets a property
-   * to its own initial value, `!important` and all — read back off the
-   * live stylesheet as `:root[data-lift] :where(.glass, ...) { }`. */
-  const flattened: HTMLElement[] = [];
-  const flatten = () => {
-    for (const el of document.querySelectorAll<HTMLElement>(
-      ".glass, .glass-surface, .glass-prominent",
-    )) {
-      if (flattened.includes(el)) continue;
-      flattened.push(el);
-      el.style.backdropFilter = "none";
-      el.style.setProperty("-webkit-backdrop-filter", "none");
-    }
-  };
-  flatten();
-  const transition = document.startViewTransition(() => {
-    // Synchronous, so the new snapshot is of the updated page.
-    flushSync(update);
-    if (from) {
-      boxOf(from).style.viewTransitionName = "";
-      const p = picture();
-      if (p) p.style.viewTransitionName = NAME;
-    }
-    if (to) {
-      const p = picture();
-      if (p) p.style.viewTransitionName = "";
-      boxOf(to).style.viewTransitionName = NAME;
-    }
-    // The lightbox's chrome exists as of this line and is about to be
-    // photographed with the rest of the new page.
-    flatten();
-  });
-  transition.finished
-    .finally(() => {
-      document.documentElement.removeAttribute("data-lift");
-      document.documentElement.removeAttribute("data-lift-zoom");
-      for (const el of flattened) {
-        el.style.removeProperty("backdrop-filter");
-        el.style.removeProperty("-webkit-backdrop-filter");
-      }
-      if (to) boxOf(to).style.viewTransitionName = "";
-      const p = picture();
-      if (p) p.style.viewTransitionName = "";
-    })
-    // A skipped transition — hidden tab, a second one starting — rejects
-    // `finished`; the update still ran, and nothing here needs the promise.
-    .catch(() => {});
-}
+/** Says a viewer is up, for the page's own popstate listeners. */
+const markViewer = (on: boolean) => {
+  if (on) document.documentElement.setAttribute("data-viewer", "");
+  else document.documentElement.removeAttribute("data-viewer");
+};
+
+const viewerBox = () =>
+  document.querySelector<HTMLElement>("[data-zoom-box]");
+const viewerPicture = () =>
+  document.querySelector<HTMLImageElement>("[data-zoom-box] img[data-lightbox-picture]");
+const viewerBackdrop = () =>
+  document.querySelector<HTMLElement>("[data-zoom-backdrop]");
+const viewerChrome = () =>
+  Array.from(document.querySelectorAll<HTMLElement>("[data-zoom-chrome]"));
 
 /* The full-size picture, fetched and decoded before the trip starts.
- *
- * The dialog's image asks for `100vw`; the frame in the strip asked for a
- * third of that, so opening one is a new file off the network and a decode
- * of several megapixels — and both used to land in the middle of the
- * animation, which is where the stutter Julian reported came from. The
- * strip's own `srcset` lists every width of the same photograph, so the one
- * the dialog is about to choose can be warmed first.
- *
- * Capped: a slow connection must not hold the press. After the cap the trip
- * starts anyway and the picture arrives when it arrives, which is the old
- * behaviour and no worse.
- */
-const CAP_MS = 220;
+   The viewer asks for `100vw`; the frame in the strip asked for a third
+   of that, so opening one is a new file and a decode of several
+   megapixels, and both used to land in the middle of the animation. The
+   frame's own `srcset` lists every width of the same photograph, so the
+   one the viewer is about to choose is warmed first. Each candidate is
+   read as URL and width, not split on commas: the CDN's URLs carry
+   commas of their own. Capped, so a slow connection never holds the
+   press. */
 function warm(from: HTMLElement | null): Promise<void> {
-  const set = from instanceof HTMLImageElement ? from.srcset : "";
+  const img =
+    from instanceof HTMLImageElement ? from : from?.querySelector("img");
+  const set = img?.srcset ?? "";
   if (!set) return Promise.resolve();
   const want = window.innerWidth * (window.devicePixelRatio || 1);
-  /* Each candidate is a URL, a space and a width; not split on commas,
-     because the CDN's URLs carry commas of their own
-     (`/cdn-cgi/image/width=1920,quality=82,format=auto/...`). Split on
-     them, this warmed `/work/format=auto/...`, a file that does not
-     exist, and the real picture was fetched and decoded on the press,
-     in the middle of the trip: measured as a 108ms stall in which the
-     frame jumped from 15% to 76% of the way. */
   const widths = Array.from(set.matchAll(/(\S+)\s+(\d+)w/g))
     .map((m) => ({ url: m[1], w: parseInt(m[2], 10) }))
     .filter((c) => c.w > 0)
     .sort((a, b) => a.w - b.w);
   const pick = widths.find((c) => c.w >= want) ?? widths[widths.length - 1];
   if (!pick) return Promise.resolve();
-  const img = new window.Image();
-  img.src = pick.url;
+  const copy = new window.Image();
+  copy.src = pick.url;
   return Promise.race([
-    img.decode().catch(() => {}),
-    new Promise<void>((r) => window.setTimeout(r, CAP_MS)),
+    copy.decode().catch(() => {}),
+    new Promise<void>((r) => window.setTimeout(r, DECODE_CAP_MS)),
   ]).then(() => undefined);
 }
 
@@ -231,55 +101,110 @@ const onScreen = (el: HTMLElement | null) => {
   return (w * h) / (r.width * r.height) > 0.6;
 };
 
+/** Where the frame lives now, whether or not it is on screen: the close
+    scrolls it into view itself. Absent means shrink to the middle. */
+const homeOf = (el: HTMLElement | null) =>
+  el && el.isConnected && Number(getComputedStyle(el).opacity) >= 0.05
+    ? boxOf(el)
+    : null;
+
+/**
+ * Which frame is open, and how it got there.
+ *
+ * A hook rather than state inside `Lightbox`, because the thing that opens
+ * it is whatever the surrounding layout happens to be, and that has to stay
+ * the caller's business.
+ */
 export function useLightbox(frames: Frame[]) {
   const count = frames.length;
   const [open, setOpen] = React.useState(false);
   const [index, setIndex] = React.useState(0);
 
-  // Radix returns focus to its own `Dialog.Trigger`, and there isn't one here
-  // — the lightbox is opened from whichever of twenty-odd frames was clicked.
-  // Without this, closing drops focus on <body> and a keyboard visitor has to
-  // tab from the top of the page again to get back to where they were.
+  // Focus goes back to the frame that was pressed. Radix would return it to
+  // its own trigger, and there isn't one: the lightbox is opened from
+  // whichever of twenty-odd frames was clicked.
   const opener = React.useRef<HTMLElement | null>(null);
-
   /* The element the picture came out of, and which index it was. A cover
      art cell knows this and the DOM does not: the grid holds one side of a
-     sleeve, the lightbox opens whichever side was face up, so looking the
-     picture up by its own source finds nothing half the time. */
+     sleeve, so looking the picture up by its source finds nothing half the
+     time. */
   const origin = React.useRef<HTMLElement | null>(null);
   const originAt = React.useRef(-1);
+  const trip = React.useRef<ZoomTrip | null>(null);
+  const closing = React.useRef(false);
+  /** The scroll lock, undone as the close starts. */
+  const unlock = React.useRef<(() => void) | null>(null);
+  /** The history entry, taken off once the close has landed. */
+  const unpush = React.useRef<(() => void) | null>(null);
+
+  const close = React.useCallback(
+    (to: HTMLElement | null) => {
+      if (closing.current) return;
+      closing.current = true;
+      unlock.current?.();
+      unlock.current = null;
+      // An open still in flight is stopped where it is, and the way home
+      // starts from there.
+      const box = viewerBox();
+      const dragged = box?.parentElement?.style.transform;
+      const startRect =
+        trip.current?.interrupt() ?? (dragged && box ? rectOf(box) : null);
+      trip.current = zoomClose({
+        box,
+        picture: viewerPicture(),
+        to,
+        startRect,
+        backdrop: viewerBackdrop,
+        chrome: viewerChrome,
+        unmount: () => flushSync(() => setOpen(false)),
+      });
+      trip.current.finished.finally(() => {
+        unpush.current?.();
+        unpush.current = null;
+        trip.current = null;
+        closing.current = false;
+        markViewer(false);
+        opener.current?.focus({ preventScroll: true });
+      });
+    },
+    [],
+  );
 
   const show = (i: number, el?: HTMLElement | null) => {
+    if (open || trip.current) return;
     opener.current = document.activeElement as HTMLElement | null;
     const src = frames[i]?.src;
     const found = el ?? (src ? pictureFor(src) : null);
-    const from = onScreen(found) ? found : null;
-    origin.current = from;
+    const from = onScreen(found) ? boxOf(found as HTMLElement) : null;
+    origin.current = found ?? null;
     originAt.current = i;
-    // Warm first, travel second: see `warm` above.
-    void warm(from).then(() =>
-      travel(
+    markViewer(true);
+    void warm(found ?? null).then(() => {
+      unlock.current = lockScroll();
+      trip.current = zoomOpen({
         from,
-        () => {
-          setIndex(i);
-          setOpen(true);
-        },
-        null,
-      ),
-    );
+        mount: () =>
+          flushSync(() => {
+            setIndex(i);
+            setOpen(true);
+          }),
+        box: viewerBox,
+        picture: viewerPicture,
+        backdrop: viewerBackdrop,
+        chrome: viewerChrome,
+      });
+      trip.current.finished.finally(() => {
+        if (!closing.current) trip.current = null;
+      });
+      // The back button closes it the way the close button does.
+      unpush.current = pushHistory(() => closeRef.current());
+    });
   };
 
-  const onOpenChange = (next: boolean) => {
-    if (next) {
-      setOpen(true);
-      return;
-    }
-    /* Back to whichever frame is showing now, which after a few arrow keys
-       is not the one that was pressed — and after a few of them that frame
-       is off the side of the window, because the strip behind stayed where
-       it was. A picture flying home to a slot nobody can see lands beside
-       the window or half out of it, so when the slot is not really on
-       screen the lightbox simply fades instead. */
+  /* Back to whichever frame is showing now, which after a few arrow keys
+     is not the one that was pressed. Off screen it is scrolled to, behind
+     the backdrop, before the picture goes there. */
+  const closeTo = () => {
     const src = frames[index]?.src;
     const home =
       index === originAt.current && origin.current
@@ -287,12 +212,16 @@ export function useLightbox(frames: Frame[]) {
         : src
           ? pictureFor(src)
           : null;
-    travel(null, () => setOpen(false), onScreen(home) ? home : null);
-    /* After the closing transition, not during it: called here the focus
-       landed on an element that was still inside a dialog on its way out,
-       and the return put it on the body instead — so a keyboard visitor
-       lost their place in the sequence. */
-    window.setTimeout(() => opener.current?.focus(), 120);
+    close(homeOf(home));
+  };
+  const closeRef = React.useRef(closeTo);
+  React.useEffect(() => {
+    closeRef.current = closeTo;
+  });
+
+  const onOpenChange = (next: boolean) => {
+    if (next) return;
+    closeRef.current();
   };
 
   const step = React.useCallback(
@@ -301,7 +230,7 @@ export function useLightbox(frames: Frame[]) {
   );
 
   // Arrow keys page through the sequence. Radix handles Escape and the focus
-  // trap; focus restoration is `onOpenChange` above.
+  // trap; focus restoration is `close` above.
   React.useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => {
@@ -319,20 +248,13 @@ export function useLightbox(frames: Frame[]) {
 
 /* ── the swipe ────────────────────────────────────────────────────
  * On a phone the frame follows the finger. Sideways pages the sequence,
- * down lets go of it; either commits on a flick regardless of distance,
- * because a flick is a decision and making it travel a third of the screen
- * as well is asking twice. Under that, the picture stays glued to the
- * finger — 1:1, from where it was grabbed — and springs back from wherever
- * it is if the gesture is abandoned.
+ * down lets go of it: the picture shrinks and fades with the distance,
+ * and a release past a quarter of the height, or a flick, hands it to the
+ * close from wherever it is. Under that it springs back to the middle.
  *
  * Pointer Events with capture, so a swipe that leaves the picture's box
- * keeps tracking. Mice are left out: with a pointer the arrows, the keys and
- * a click outside are all quicker than a drag, and a mouse-down that pans a
- * photograph is not what anyone expects.
- *
- * The pull past the ends of a one-frame sequence, and upward, rubber-bands
- * rather than stopping — a hard stop reads as frozen, resistance reads as
- * "nothing further this way".
+ * keeps tracking. Mice are left out: with a pointer the arrows, the keys
+ * and a click outside are all quicker than a drag.
  * ─────────────────────────────────────────────────────────────── */
 
 /** Above this, in px per ms, a release commits whatever it was doing. */
@@ -361,7 +283,13 @@ function useSwipe({
   // not also close the lightbox.
   const moved = React.useRef(false);
 
-  const place = (x: number, y: number, opacity: number, settle: boolean) => {
+  const place = (
+    x: number,
+    y: number,
+    scale: number,
+    opacity: number,
+    settle: boolean,
+  ) => {
     const el = ref.current;
     if (!el) return;
     const still = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -369,15 +297,15 @@ function useSwipe({
       settle && !still
         ? "transform 360ms var(--ease-spring), opacity 200ms var(--ease-out-strong)"
         : "none";
-    el.style.transform = x || y ? `translate(${x}px, ${y}px)` : "";
+    el.style.transform =
+      x || y || scale !== 1
+        ? `translate(${x}px, ${y}px) scale(${scale})`
+        : "";
     el.style.opacity = opacity === 1 ? "" : String(opacity);
   };
 
   const onPointerDown: React.PointerEventHandler<HTMLDivElement> = (e) => {
     if (e.pointerType === "mouse" || !e.isPrimary) return;
-    // Capture keeps the swipe tracking past the picture's edge. It throws
-    // when the pointer is already gone, and a swipe without capture still
-    // works — it just lets go at the edge.
     try {
       e.currentTarget.setPointerCapture(e.pointerId);
     } catch {}
@@ -389,8 +317,7 @@ function useSwipe({
       samples: [{ t: e.timeStamp, x: e.clientX, y: e.clientY }],
     };
     moved.current = false;
-    // Grabbing a picture mid-spring stops it where it is.
-    place(0, 0, 1, false);
+    place(0, 0, 1, 1, false);
   };
 
   const onPointerMove: React.PointerEventHandler<HTMLDivElement> = (e) => {
@@ -408,11 +335,12 @@ function useSwipe({
     }
     const el = e.currentTarget;
     if (d.axis === "x") {
-      place(dx, 0, 1, false);
+      place(dx, 0, 1, 1, false);
     } else {
       // Down is the gesture; up is resisted.
       const y = dy > 0 ? dy : rubberband(dy, el.clientHeight);
-      place(0, y, Math.max(0.3, 1 - Math.max(0, dy) / el.clientHeight), false);
+      const share = Math.max(0, dy) / el.clientHeight;
+      place(0, y, 1 - 0.4 * Math.min(1, share), Math.max(0.3, 1 - share), false);
     }
   };
 
@@ -437,22 +365,20 @@ function useSwipe({
       if (commit) {
         onStep(dir);
         // The next frame starts a little in from the side it is coming from
-        // and settles — one strip moving, not one picture replaced by another.
-        place(dir * -el.clientWidth * 0.2, 0, 0, false);
-        requestAnimationFrame(() => place(0, 0, 1, true));
+        // and settles: one strip moving, not one picture replaced by another.
+        place(dir * -el.clientWidth * 0.2, 0, 1, 0, false);
+        requestAnimationFrame(() => place(0, 0, 1, 1, true));
         return;
       }
     } else if (d.axis === "y") {
       const commit = dy > el.clientHeight * 0.25 || vy > FLICK;
       if (commit) {
-        // Clean before the trip home, so the snapshot is of the frame and
-        // not of the frame half off the screen.
-        place(0, 0, 1, false);
+        // The close measures the picture where the finger left it.
         onDismiss();
         return;
       }
     }
-    place(0, 0, 1, true);
+    place(0, 0, 1, 1, true);
   };
 
   const onClickCapture: React.MouseEventHandler<HTMLDivElement> = (e) => {
@@ -472,6 +398,35 @@ function useSwipe({
       onClickCapture,
     },
   };
+}
+
+/* The picture's box, in pixels: as large as the area allows at the
+   picture's own shape. Measured rather than left to CSS, because the trip
+   is a transform of this box and it has to be exactly the picture, no
+   letterbox inside it. */
+function useFit(
+  area: React.RefObject<HTMLDivElement | null>,
+  width: number,
+  height: number,
+) {
+  const [size, setSize] = React.useState<{ w: number; h: number } | null>(
+    null,
+  );
+  React.useLayoutEffect(() => {
+    const el = area.current;
+    if (!el) return;
+    const fit = () => {
+      const w = el.clientWidth;
+      const h = el.clientHeight;
+      const s = Math.min(w / width, h / height);
+      setSize({ w: Math.round(width * s), h: Math.round(height * s) });
+    };
+    fit();
+    const ro = new ResizeObserver(fit);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [area, width, height]);
+  return size;
 }
 
 export function Lightbox({
@@ -495,62 +450,34 @@ export function Lightbox({
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
       <Dialog.Portal>
-        <Dialog.Overlay className="fixed inset-0 z-50 bg-background/95 animate-in fade-in duration-200 ease-out motion-reduce:animate-none" />
+        {/* The backdrop and the chrome start unseen and are faded by the
+            trip on their own curves (`lib/zoom.ts`). */}
+        <Dialog.Overlay
+          data-zoom-backdrop
+          className="fixed inset-0 z-50 bg-background/95"
+          style={{ opacity: 0 }}
+        />
 
         <Dialog.Content
-          className={cn(
-            "fixed inset-0 z-50 flex flex-col outline-none",
-            // Modals keep a centred origin — they are not anchored to a
-            // trigger, so scaling from one would look arbitrary.
-            // A fade only. The scale it used to carry is the frame's own
-            // job now: it arrives from where it was pressed.
-            "animate-in fade-in duration-200 ease-out motion-reduce:animate-none",
-          )}
+          aria-modal="true"
+          className="fixed inset-0 z-50 flex flex-col outline-none"
         >
           <VisuallyHidden.Root>
             <Dialog.Title>{`${name}, frame ${index + 1} of ${frames.length}`}</Dialog.Title>
           </VisuallyHidden.Root>
 
-          {/* Anywhere that is not the picture closes it — Julian asked. The
-              check is against the element itself, so a click on the frame
-              stays put and the controls below keep their own jobs. */}
-          <div
-            onClick={(e) => {
-              if (e.target === e.currentTarget) onOpenChange(false);
-            }}
-            className="flex min-h-0 flex-1 items-center justify-center p-4 sm:p-10"
-          >
-            {/* What the finger moves. The wrapper stays mounted across a
-                step, so the offset it was released at is where the next
-                frame starts from. `touch-none` hands every touch to the
-                swipe; the page underneath is a dialog and does not scroll. */}
-            <div
-              ref={picture}
-              data-ring="Zoom out"
-              {...swipe}
-              onClick={(e) => {
-                if (e.target === e.currentTarget) onOpenChange(false);
-              }}
-              className="flex h-full w-full touch-none select-none items-center justify-center will-change-transform"
-            >
-              {current ? (
-                <Image
-                  key={current.src}
-                  // The destination on the way in and the origin on the way
-                  // out — `travel` puts the name on it for the length of a
-                  // trip that has something at the other end.
-                  data-lightbox-picture
-                  src={current.src}
-                  alt={current.alt || `${name}, frame ${index + 1}`}
-                  width={current.width}
-                  height={current.height}
-                  sizes="100vw"
-                  priority
-                  className="max-h-full w-auto max-w-full object-contain"
-                />
-              ) : null}
-            </div>
-          </div>
+          {/* Anywhere that is not the picture closes it. The check is against
+              the element itself, so a click on the frame stays put and the
+              controls below keep their own jobs. */}
+          {current ? (
+            <Stage
+              frame={current}
+              alt={current.alt || `${name}, frame ${index + 1}`}
+              pictureRef={picture}
+              swipe={swipe}
+              onClose={() => onOpenChange(false)}
+            />
+          ) : null}
 
           <div
             onClick={(e) => {
@@ -558,11 +485,22 @@ export function Lightbox({
             }}
             className="flex shrink-0 items-center justify-between gap-6 px-6 pb-6 sm:px-10 sm:pb-8"
           >
-            <p className="label text-muted-foreground">
+            {/* Read out as it changes: the counter is the one thing that
+                says where in the sequence a keyboard visitor is. */}
+            <p
+              data-zoom-chrome
+              aria-live="polite"
+              className="label text-muted-foreground"
+              style={{ opacity: 0 }}
+            >
               {index + 1} / {frames.length}
             </p>
 
-            <div className="flex items-center gap-2">
+            <div
+              data-zoom-chrome
+              className="flex items-center gap-2"
+              style={{ opacity: 0 }}
+            >
               <LightboxButton onClick={() => step(-1)} label="Previous frame">
                 &larr;
               </LightboxButton>
@@ -586,6 +524,64 @@ export function Lightbox({
   );
 }
 
+function Stage({
+  frame,
+  alt,
+  pictureRef,
+  swipe,
+  onClose,
+}: {
+  frame: Frame;
+  alt: string;
+  pictureRef: React.RefObject<HTMLDivElement | null>;
+  swipe: ReturnType<typeof useSwipe>["handlers"];
+  onClose: () => void;
+}) {
+  const area = React.useRef<HTMLDivElement>(null);
+  const size = useFit(area, frame.width, frame.height);
+  return (
+    <div
+      ref={area}
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
+      className="flex min-h-0 flex-1 items-center justify-center p-4 sm:p-10"
+    >
+      {/* What the finger moves. Stays mounted across a step, so the offset
+          it was released at is where the next frame starts from. */}
+      <div
+        ref={pictureRef}
+        data-ring="Zoom out"
+        {...swipe}
+        onClick={(e) => {
+          if (e.target === e.currentTarget) onClose();
+        }}
+        className="flex h-full w-full touch-none select-none items-center justify-center"
+      >
+        {/* The box the trip transforms: exactly the picture, clipped. */}
+        <div
+          data-zoom-box
+          className="relative shrink-0 overflow-hidden"
+          style={size ? { width: size.w, height: size.h } : { width: 0, height: 0 }}
+        >
+          <Image
+            key={frame.src}
+            data-lightbox-picture
+            src={frame.src}
+            alt={alt}
+            width={frame.width}
+            height={frame.height}
+            sizes="100vw"
+            priority
+            draggable={false}
+            className="block h-full w-full object-contain"
+          />
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function LightboxButton({
   onClick,
   label,
@@ -604,8 +600,8 @@ function LightboxButton({
       // "Previous frame" for a screen reader, which has no picture in
       // front of it; a tag over the picture does.
       data-ring={label.replace(" frame", "")}
-      // 44px minimum target — this is the control someone taps repeatedly on
-      // a phone, so it gets a real hit area rather than an icon's worth.
+      // 44px minimum target: the control someone taps repeatedly on a
+      // phone gets a real hit area rather than an icon's worth.
       className="glass flex h-11 w-11 items-center justify-center rounded-full text-base press active:scale-[0.97]"
     >
       <span aria-hidden>{children}</span>

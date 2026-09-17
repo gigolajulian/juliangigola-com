@@ -88,7 +88,9 @@ let poppedAt = 0;
 const POP_MS = 1500;
 if (typeof window !== "undefined") {
   window.addEventListener("popstate", () => {
-    poppedAt = Date.now();
+    // Not the photo viewer closing on the back button (`lib/zoom.ts`).
+    if (document.documentElement.dataset.viewer === undefined)
+      poppedAt = Date.now();
   });
 }
 /** Where a path's strip was when it was last left. */

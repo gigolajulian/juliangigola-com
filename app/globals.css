@@ -1068,11 +1068,12 @@ nav[aria-label="Categories"] ul[data-more] {
    move made by how fast you scrolled rather than by where you were, so a
    picture arrived bent and straightened itself once it had stopped, which
    is the one thing a photograph should never do. Position only now. */
+/* Julian: the thumbnail is not cropped. The frame used to stand at a
+   tenth over its cell and slide against it with the scroll; now the cell
+   is the whole photograph, which is also what lets it grow into the viewer
+   as one picture (`lib/zoom.ts`) with nothing to crop or uncrop. */
 .strip-frame {
-  /* The slide, and a standing zoom of 10% so it has picture to reveal at
-     the edges: a window away the slide is 4% of the picture and the zoom
-     covers 5% on each side. */
-  transform: translateX(calc(var(--par, 0) * -4%)) scale(1.1);
+  transform: none;
 }
 @media (prefers-reduced-motion: reduce) {
   .title-word,
@@ -1673,44 +1674,6 @@ optgroup {
   object-fit: cover;
 }
 
-/* The frame that lifts into the lightbox, and back. The same trip as the
-   cover's, addressed by name rather than class because this one is run by
-   the browser's API directly — see `lightbox.tsx` for why. */
-::view-transition-group(lightbox-frame) {
-  /* Julian sent a recording of the reference opening a picture and asked
-     for that: the frame takes about half a second to grow into place and
-     the page simply goes to ground behind it. 420ms read as a snap.
-
-     No blur on this pair, unlike the cover's trip below. The blur is there
-     to hide two snapshots of different crops interpolating; a frame and
-     the picture it opens are the same photograph at the same shape, so
-     there is nothing to hide and the softening was the whole reason this
-     one looked mushy. */
-  animation-duration: 560ms;
-  /* And a gentler curve than the rest of the site uses. `--ease-out-strong`
-     spends 85% of the trip in the first third of the time, which on a
-     picture crossing half a screen reads as a jump followed by a wait:
-     measured at 110ms it was already at its final size with 450ms of
-     background left to fade. This one keeps moving through the middle,
-     which is what makes the reference look smooth. */
-  animation-timing-function: cubic-bezier(0.32, 0.72, 0, 1);
-}
-::view-transition-image-pair(lightbox-frame) {
-  animation-duration: 560ms;
-  animation-timing-function: cubic-bezier(0.32, 0.72, 0, 1);
-}
-
-/* The strip used to spread around the frame that was growing and gather
-   back round it on the way home — a second named snapshot, scaled 1.18
-   about the pressed frame. It is gone, and this is the ghost Julian
-   screenshotted: on a dark page that snapshot printed as a pale slab a
-   fifth too large, sitting beside the real frames rather than on them,
-   and at speed it never rasterised into anything better than flat grey.
-   Killing it in a test left exactly what the reference does — one solid
-   picture flying home over a clean page — so it is killed here. The
-   spread was the one part of the zoom a plain lift does not give; it is
-   not worth a slab of grey across the middle of the window. */
-
 /* The rest of the page, on the same trip. Quicker than the cover on purpose:
    the words are in place before the picture arrives, which is the order a
    reader wants them in. The fixed bar is inside the root snapshot and
@@ -1719,64 +1682,6 @@ optgroup {
 ::view-transition-new(root) {
   animation-duration: 240ms;
   animation-timing-function: var(--ease-out-strong);
-}
-
-/* Opening a picture is not a page changing: nothing behind it moves, so
-   the two roots crossfading printed every word twice for a quarter of a
-   second — the title doubled and offset, the neighbouring frame ghosted
-   through its own replacement. The page underneath is simply there from
-   the first frame and the snapshot of what it was fades off it, which is
-   what the reference does and what a picture coming forward should look
-   like. `data-lift` is on the root for the length of the trip. */
-/* A plain fade, and the blend mode is the whole point of writing it out.
- *
- * The browser's own root crossfade runs the two snapshots in
- * `mix-blend-mode: plus-lighter` — it adds them together, which is the
- * right way to crossfade two versions of the same page and the wrong way
- * to crossfade a photograph the size of the window with the page behind
- * it. On a dark page it printed a pale wash the shape of the picture,
- * which is what Julian screenshotted on the way out. Declaring an
- * animation of one's own replaces the browser's pair, blend mode and all.
- *
- * Going in, the page under the picture is simply there from the first
- * frame and the snapshot of what it was fades off it. Coming out it must
- * not be: the frame the picture is flying home to sits in that page, so
- * the page comes up as the picture lands. */
-:root[data-lift]::view-transition-old(root) {
-  animation: jg-fade-out 420ms var(--ease-out-strong) both;
-  mix-blend-mode: normal;
-}
-:root[data-lift="in"]::view-transition-new(root) {
-  animation: none;
-  mix-blend-mode: normal;
-}
-:root[data-lift="out"]::view-transition-new(root) {
-  animation: jg-fade-in 420ms 140ms var(--ease-out-strong) backwards;
-  mix-blend-mode: normal;
-}
-@keyframes jg-fade-out {
-  to {
-    opacity: 0;
-  }
-}
-
-/* And the picture itself does not dissolve into itself.
- *
- * A pair crossfades by default, which is right when the two ends are
- * different crops and wrong here: they are the same photograph, so both
- * ends at half opacity over a dark page is not a picture moving, it is a
- * pale wash where a picture should be. The old snapshot carries the whole
- * trip at full strength and the new one takes over at the end, where they
- * are identical and nobody can see the join. */
-::view-transition-old(lightbox-frame) {
-  animation: none;
-  opacity: 1;
-  object-fit: cover;
-}
-::view-transition-new(lightbox-frame) {
-  animation: none;
-  opacity: 0;
-  object-fit: cover;
 }
 
 
@@ -1886,45 +1791,6 @@ optgroup {
 /* Clicks during a trip reach the page underneath. */
 ::view-transition {
   pointer-events: none;
-}
-/* The strip's frame stands at scale(1.1) inside its cell (`strip-frame`),
-   and the trip ends on the cell. So the travelling picture, which is the
-   whole photograph, zooms in by that tenth as it lands, clipped to the
-   cell like the frame is; and on the way out it starts at the tenth and
-   eases back to the whole. Without this the last frame of every close
-   cut from the whole picture to the zoomed one, measured as a jump of 6.6
-   against 0.3 in the frames before. `data-lift-zoom` is set by
-   `lightbox.tsx` only when the far end is a strip cell; a gallery frame
-   has no standing zoom and keeps the plain trip above. */
-:root[data-lift-zoom]::view-transition-image-pair(lightbox-frame) {
-  overflow: hidden;
-}
-:root[data-lift-zoom][data-lift="out"]::view-transition-old(lightbox-frame) {
-  animation: jg-frame-settle 560ms cubic-bezier(0.32, 0.72, 0, 1) both;
-}
-/* On the way in the two snapshots start as the same pixels: the cell's
-   clipped view, and the whole photograph at the same tenth over, clipped
-   the same. So the cell's snapshot sits on top for the first beat and
-   fades off, by which time the dialog's own fade-in is done and the
-   photograph underneath is solid. Simply hiding the old one showed the
-   picture arriving pale. */
-:root[data-lift-zoom][data-lift="in"]::view-transition-old(lightbox-frame) {
-  z-index: 1;
-  animation: jg-fade-out 200ms linear 160ms both;
-}
-:root[data-lift-zoom][data-lift="in"]::view-transition-new(lightbox-frame) {
-  opacity: 1;
-  animation: jg-frame-lift 560ms cubic-bezier(0.32, 0.72, 0, 1) both;
-}
-@keyframes jg-frame-settle {
-  to {
-    transform: scale(1.1);
-  }
-}
-@keyframes jg-frame-lift {
-  from {
-    transform: scale(1.1);
-  }
 }
 
 /* Reduced motion: no trip. The pages still swap; nothing travels. */
