@@ -20,7 +20,7 @@ export function PageTransition({ children }: { children: React.ReactNode }) {
   React.useEffect(() => {
     const root = document.documentElement;
     let clear = 0;
-    const set = (way: "in" | "out") => {
+    const set = (way: "in" | "out" | "filter") => {
       root.dataset.nav = way;
       window.clearTimeout(clear);
       clear = window.setTimeout(() => delete root.dataset.nav, 1200);
@@ -33,6 +33,18 @@ export function PageTransition({ children }: { children: React.ReactNode }) {
       );
       if (!a || a.target === "_blank" || a.origin !== location.origin) return;
       if (a.pathname === location.pathname) return;
+      /* A chip on the work index is a filter, not a page: /work, a
+         category and the motion page are one page with one row swapped,
+         and the strip already fades the row (`data-arrive="fade"`). The
+         zoom on top of it read as the whole site reloading. */
+      const index = (path: string) =>
+        path === "/work" ||
+        path === "/work/video" ||
+        path.startsWith("/work/category/");
+      if (index(a.pathname) && index(location.pathname)) {
+        set("filter");
+        return;
+      }
       /* A crumb ("← All work") and any link marked so are the way out; the
          wordmark too, since home is where every trip started. */
       const out =

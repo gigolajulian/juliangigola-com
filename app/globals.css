@@ -1816,6 +1816,15 @@ optgroup {
     transform: scale(1.06);
   }
 }
+/* A filter on the work index: no zoom, the row fades on its own. */
+:root[data-nav="filter"]::view-transition-group(.page),
+:root[data-nav="filter"]::view-transition-old(.page),
+:root[data-nav="filter"]::view-transition-new(.page) {
+  animation: none;
+}
+:root[data-nav="filter"]::view-transition-old(.page) {
+  display: none;
+}
 /* Clicks during a trip reach the page underneath. */
 ::view-transition {
   pointer-events: none;
