@@ -21,6 +21,7 @@ const TYPES = [
   { value: "editorial", label: "Editorial" },
   { value: "campaign", label: "Campaign" },
   { value: "music", label: "Music" },
+  { value: "portrait", label: "Portrait" },
   { value: "session", label: "Session" },
   { value: "other", label: "Other" },
 ] as const;
@@ -38,6 +39,10 @@ const FOLLOW_UP: Record<string, { label: string; placeholder: string }> = {
   music: {
     label: "Artist and release date",
     placeholder: "e.g. cover art, single out 3 May",
+  },
+  portrait: {
+    label: "Who it is for, and roughly when",
+    placeholder: "e.g. an actor's headshots, some time in June",
   },
   session: {
     label: "Preferred date and how many people",
@@ -158,38 +163,6 @@ export function ContactForm() {
         aria-hidden="true"
         hidden
       />
-      <fieldset>
-        <legend className="label text-muted-foreground">
-          What kind of shoot?
-        </legend>
-        <div className="mt-4 flex flex-wrap gap-2">
-          {TYPES.map((t) => (
-            <label
-              key={t.value}
-              className={cn(
-                "label cursor-pointer border px-4 py-3 transition-colors duration-200",
-                "focus-within:outline focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-[var(--ring)]",
-                type === t.value
-                  ? "border-foreground text-foreground"
-                  : "border-border text-muted-foreground hoverable:hover:border-foreground/40 hoverable:hover:text-foreground",
-              )}
-            >
-              <input
-                type="radio"
-                name="type"
-                value={t.value}
-                checked={type === t.value}
-                onChange={() => setType(t.value)}
-                // Visually hidden rather than `hidden`, so it stays in the
-                // tab order and arrow keys still walk the radio group.
-                className="sr-only"
-              />
-              {t.label}
-            </label>
-          ))}
-        </div>
-      </fieldset>
-
       <Field
         name="name"
         label="Name"
@@ -208,6 +181,42 @@ export function ContactForm() {
         autoComplete="email"
         required
       />
+
+      {/* Julian: not the first thing the form asks. A row of five, now
+          six, chips at the top of the page put a decision in front of
+          somebody who has arrived meaning to write a sentence, and it is
+          the site's question rather than theirs. Name, email, and then
+          the kind of shoot as one line they answer on the way past.
+
+          A `select` and not the chips: six of them wrapped to two rows
+          and took more of the form than the message did, and a dropdown
+          is one row whatever is in it. Native, so a phone gives it the
+          platform's own wheel. */}
+      <label className="flex flex-col gap-2">
+        <span className="label text-muted-foreground">What kind of shoot?</span>
+        <select
+          name="type"
+          value={type}
+          onChange={(e) => setType(e.target.value)}
+          className="label w-full appearance-none border-b border-border bg-transparent py-3 pr-8 text-foreground outline-none transition-colors duration-200 focus:border-foreground"
+          style={{
+            /* The site's own mark rather than the platform's blue
+               triangle: a chevron drawn in the text colour, which follows
+               the theme because `currentColor` does. */
+            backgroundImage:
+              "url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 6' fill='none' stroke='gray' stroke-width='1.2'><path d='M1 1l4 4 4-4'/></svg>\")",
+            backgroundRepeat: "no-repeat",
+            backgroundPosition: "right 0.25rem center",
+            backgroundSize: "0.625rem",
+          }}
+        >
+          {TYPES.map((t) => (
+            <option key={t.value} value={t.value}>
+              {t.label}
+            </option>
+          ))}
+        </select>
+      </label>
 
       <Field
         name="detail"

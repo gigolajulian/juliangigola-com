@@ -29,6 +29,7 @@ const SHOOT_TYPES = [
   "editorial",
   "campaign",
   "music",
+  "portrait",
   "session",
   "other",
 ] as const;
