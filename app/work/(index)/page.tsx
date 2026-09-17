@@ -8,7 +8,6 @@ import {
   COMMISSIONS,
   COVER_ART,
   WORK_CATEGORY_LINKS,
-  STUDIO,
   commissionsIn,
   indexRow,
   isDisciplineGallery,
@@ -131,14 +130,19 @@ export default function WorkPage() {
       body="Tell me what it is for and when, and I'll come back with an approach and a quote."
       type="editorial"
       secondary={{ href: "/studio", label: "How a commission runs" }}
-      next={STUDIO}
+      /* Julian: the ask is a page of its own here, not a 40rem cell with
+         the last cover still beside it, and the archive does not lead on
+         to the studio. A sequence of projects ends where the projects
+         end; being carried onto another page for scrolling one notch too
+         far is a surprise, and the way to the studio is the button under
+         the ask and the word in the header. */
+      className="sm:w-[100vw] sm:px-[10vw]"
     />,
   );
 
   return (
     <Strip
       label={`All work: ${COMMISSIONS.length} projects, left and right`}
-      next={STUDIO}
       marks={MARKS}
       className="mt-4 flex-1"
     >

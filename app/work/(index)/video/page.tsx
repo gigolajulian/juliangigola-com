@@ -36,7 +36,8 @@ export default function VideoPage() {
         name: s.name,
         films: inSection(videos, s.id),
       }))}
-      next={STUDIO}
+      /* No lead-on, for the reason `(index)/page.tsx` gives: the end of
+         the films is the end of the films. */
       ask={
         <EnquiryCell
           key="enquire"
@@ -44,7 +45,7 @@ export default function VideoPage() {
           body="Tell me what you have in mind and I'll come back with an approach and a quote."
           type="editorial"
           secondary={{ href: "/work", label: "See the work" }}
-          next={STUDIO}
+          className="sm:w-[100vw] sm:px-[10vw]"
         />
       }
     />
