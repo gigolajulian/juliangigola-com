@@ -65,8 +65,10 @@ export function SiteFooter() {
 
         <div className="site-footer-row mt-12 flex flex-col gap-2 border-t border-border pt-5 sm:flex-row sm:justify-between">
           <p className="label text-muted-foreground">
-            &copy; {new Date().getFullYear()} Julian Gigola. All rights
-            reserved.
+            <strong className="font-semibold text-foreground">
+              &copy; {new Date().getFullYear()} Julian Gigola.
+            </strong>{" "}
+            All rights reserved.
           </p>
           <nav aria-label="Legal" className="label text-muted-foreground">
             <ul className="flex flex-wrap gap-x-6 gap-y-2">
