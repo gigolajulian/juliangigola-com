@@ -3792,13 +3792,6 @@ export const PROJECTS: Project[] = [
     },
     "images": [
       {
-        "src": "/work/graduation/00.jpg",
-        "width": 2500,
-        "height": 3500,
-        "color": "#717a86",
-        "alt": ""
-      },
-      {
         "src": "/work/graduation/01.jpg",
         "width": 2499,
         "height": 3499,
