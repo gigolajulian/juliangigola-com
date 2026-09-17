@@ -1749,10 +1749,21 @@ optgroup {
 /* From the bar, a beat first. Julian asked for it: a press in the header
    is a jump across the site rather than a step through it, so the page
    being left has the trip to itself before the next one comes up. The
-   delay is the old page's whole fade, so nothing waits on screen that a
-   reader can see waiting. */
+   delay is the old page's whole fade and a beat past it.
+
+   A delay on `jg-page-up` alone was no wait at all, which is what Julian
+   saw: that keyframe moves the page and nothing else, so the new one sat
+   there in full view, 2.5vh low, for the whole of it. The incoming page
+   comes up from nothing instead, and the screen is the site's own ground
+   in between. */
 :root[data-nav-bar]::view-transition-new(.page) {
-  animation-delay: 200ms;
+  animation: jg-page-in 420ms cubic-bezier(0.32, 0.72, 0, 1) 300ms both;
+}
+@keyframes jg-page-in {
+  from {
+    opacity: 0;
+    transform: translateY(2.5vh);
+  }
 }
 :root[data-nav="out"]::view-transition-old(.page) {
   animation-name: jg-page-down;
