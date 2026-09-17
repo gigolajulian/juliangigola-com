@@ -3,6 +3,7 @@ import { VideoShowcase } from "@/components/video-showcase";
 import { EnquiryCell } from "@/components/enquiry-cell";
 import { CONTENT } from "@/lib/content";
 import { SECTIONS, inSection } from "@/lib/videos";
+import { WORK_CATEGORY_LINKS } from "@/lib/work";
 
 /* ── /work/video ──────────────────────────────────────────────────
  * The moving work, as one more filter on the work index: the `(index)`
@@ -25,11 +26,22 @@ export const metadata: Metadata = {
   alternates: { canonical: "/work/video" },
 };
 
+/* The filter before the films in the chip row, so pushing back off the
+   start lands on it the way it does on every other filter. */
+const BEFORE = (() => {
+  const at = WORK_CATEGORY_LINKS.findIndex((c) => c.slug === "video");
+  const prev = at > 0 ? WORK_CATEGORY_LINKS[at - 1] : undefined;
+  return prev
+    ? { href: prev.href, name: prev.name }
+    : { href: "/work", name: "All work" };
+})();
+
 export default function VideoPage() {
   const videos = CONTENT.videos;
 
   return (
     <VideoShowcase
+      prev={BEFORE}
       sections={SECTIONS.map((s) => ({
         id: s.id,
         name: s.name,

@@ -732,6 +732,13 @@ export function Strip({
        without this one hard spin skipped a project and then the one after
        it. Half a second of quiet makes each step a decision. */
     const arrived = performance.now();
+    /* Two filters of the work index are one page with the row swapped, not
+       two pages. */
+    const filterPath = (path: string) =>
+      path === "/work" ||
+      path === "/work/video" ||
+      path.startsWith("/work/category/");
+
     const leave = (dir: 1 | -1) => {
       const href = dir > 0 ? nextHref : prevHref;
       if (!href || leaving || performance.now() - arrived < 500) return;
@@ -739,6 +746,19 @@ export function Strip({
       // The band holds where it is and the slide starts from it.
       if (band) cancelAnimationFrame(band);
       band = 0;
+      /* Places to Motion was a page leaving and a page arriving: the strip
+         slid off, and for the 260ms it took the screen was bare paper —
+         measured on production, mean brightness at 235.8 with nothing on
+         it from 457ms to 718ms. Between two filters the head and the chip
+         row do not change, so there is nothing to leave: the row is
+         swapped where it stands, the way a chip press does it, and the
+         push goes out at once. */
+      if (filterPath(window.location.pathname) && filterPath(href)) {
+        markFilter(dir);
+        cameBack = dir < 0;
+        router.push(href);
+        return;
+      }
       el.dataset.leaving = dir > 0 ? "on" : "back";
       cameBack = dir < 0;
       window.setTimeout(() => router.push(href), 260);

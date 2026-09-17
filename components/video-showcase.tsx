@@ -21,11 +21,16 @@ import { REEL, filmCount, type Video } from "@/lib/videos";
 export function VideoShowcase({
   sections,
   next,
+  prev,
   ask,
 }: {
   sections: { id: string; name: string; films: Video[] }[];
   /** Where the wheel goes past the ask. */
   next?: Lead;
+  /** Where pushing back off the start goes: the filter before this one.
+      Julian: the chip row reads in both directions, and the films were
+      the one filter you could not walk back out of. */
+  prev?: Lead;
   /** The last cell, an `EnquiryCell`. */
   ask: React.ReactNode;
 }) {
@@ -113,6 +118,7 @@ export function VideoShowcase({
         ref={scroller}
         label={`Motion: ${filmCount(all)} films, left and right`}
         next={next}
+        prev={prev}
         className="mt-4 flex-1"
       >
         {cells}
