@@ -788,9 +788,14 @@ nav[aria-label="Categories"] ul[data-more] {
      studio is not a label and does not fit in a slot. */
   .strip-grid > [data-hash="enquire"] {
     grid-row: 1 / -1;
+    /* Julian: a third of the window. The ask was one column of the rack
+       wide — 239px on a 2000px screen, a strip of type in the corner.
+       A share of the window instead; `width` carries `!important`
+       because the rule that sizes every other cell does. */
     grid-column: span 2;
+    width: 33vw !important;
     justify-content: center;
-    padding: 0 1.5rem;
+    padding: 0 3rem;
   }
 }
 /* At 240px the plate has no room for a name beside a credit: the name goes
