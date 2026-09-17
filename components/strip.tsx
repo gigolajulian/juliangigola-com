@@ -298,10 +298,17 @@ export function Strip({
         return;
       }
     }
+    /* A page zooming in or out (`page-transition.tsx` writes `data-nav`
+       on the root for the trip) is the arrival; the strip sliding in from
+       the side as well was three motions at once, the zoom, the cover's
+       morph and the slide, measured on a recording of a cover opening. */
+    const zooming =
+      document.documentElement.dataset.nav === "in" ||
+      document.documentElement.dataset.nav === "out";
     if (back) {
       el.dataset.arrive = "back";
       el.scrollLeft = el.scrollWidth;
-    } else if (arrive === "none") {
+    } else if (arrive === "none" || zooming) {
       el.dataset.arrive = "none";
     }
   }, [live, arrive]);

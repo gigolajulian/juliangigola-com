@@ -1786,13 +1786,19 @@ optgroup {
 ::view-transition-image-pair(.page) {
   isolation: auto;
 }
+/* The page underneath is whole from the first frame and the page leaving
+   sits on top of it and fades off: two pages each at half strength met
+   in the middle as a dip to dark, measured on a recording as a frame
+   where neither page could be read. Now one page is always solid. */
 ::view-transition-old(.page) {
+  z-index: 1;
   animation: jg-zoom-past 420ms cubic-bezier(0.32, 0.72, 0, 1) both;
   mix-blend-mode: normal;
 }
 ::view-transition-new(.page) {
   animation: jg-zoom-up 420ms cubic-bezier(0.32, 0.72, 0, 1) both;
   mix-blend-mode: normal;
+  opacity: 1;
 }
 :root[data-nav="out"]::view-transition-old(.page) {
   animation-name: jg-zoom-down;
@@ -1809,7 +1815,6 @@ optgroup {
 }
 @keyframes jg-zoom-up {
   from {
-    opacity: 0;
     transform: scale(0.94);
   }
 }
@@ -1822,7 +1827,6 @@ optgroup {
 }
 @keyframes jg-zoom-settle {
   from {
-    opacity: 0;
     transform: scale(1.06);
   }
 }

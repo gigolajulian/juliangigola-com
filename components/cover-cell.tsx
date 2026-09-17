@@ -1,6 +1,9 @@
 "use client";
 
 import { ViewTransition } from "react";
+import { useRouter } from "next/navigation";
+import loader from "../image-loader";
+import SOURCES from "../public/work/sources.json";
 import Link from "next/link";
 import Image from "next/image";
 import type { IndexRow } from "@/lib/work";
@@ -49,6 +52,25 @@ export function CoverCell({
       reaches them. */
   eager?: boolean;
 }) {
+  const router = useRouter();
+  /* Under the pointer, before the press: the project's page, and the
+     frame its first cell opens on, at the size that cell would ask for.
+     Measured on a recording, a cover pressed cold sat still for half a
+     second before anything moved, because nothing about the project had
+     been fetched: `prefetch={false}` here means never, by Julian's rule
+     against the viewport prefetch flood, and a hover is one link at a
+     time. `sources.json` says which full-size frame the cover is. */
+  const warm = () => {
+    router.prefetch(href ?? `/work/${row.slug}`);
+    const first = (SOURCES as Record<string, string>)[row.cover.src];
+    if (!first) return;
+    const dpr = window.devicePixelRatio || 1;
+    const ratio = row.cover.width / row.cover.height;
+    const css = (window.innerHeight - 128) * ratio * (dpr >= 2.5 ? 0.667 : 1);
+    const rungs = [128, 256, 640, 1080, 1280, 1920, 2500];
+    const rung = rungs.find((r) => r >= css * dpr) ?? 2500;
+    new window.Image().src = loader({ src: first, width: rung });
+  };
   return (
     <Link
       prefetch={false}
@@ -58,6 +80,8 @@ export function CoverCell({
       data-hash={hash}
       data-ring="View project"
       data-mark={mark}
+      onPointerEnter={warm}
+      onFocus={warm}
       className="group strip-cell relative block w-full shrink-0 overflow-hidden press active:scale-[0.995] sm:h-full sm:w-auto"
       style={
         {
