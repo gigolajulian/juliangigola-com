@@ -726,19 +726,36 @@ export function Strip({
       window.setTimeout(() => router.push(href), 260);
     };
 
-    /* A vertical wheel moves the strip sideways. `passive: false` because
-       it has to be able to take the event; left passive, the browser would
-       scroll the page at the same time and both would move. */
+    /* A wheel moves the strip sideways, whichever way it is turned.
+       `passive: false` because it has to be able to take the event; left
+       passive, the browser would scroll the page at the same time and both
+       would move.
+
+       Both axes through here, and that is the fix for what Julian saw as
+       a glitchy trackpad. A sideways swipe used to be handed to the
+       browser to scroll the overflow natively, so the strip had two ways
+       of moving at once: the browser writing `scrollLeft` with its own
+       momentum, and the loop below easing towards a target it had worked
+       out before any of that happened. A diagonal swipe — which every
+       trackpad swipe is, a little — ran both, and the next notch yanked
+       the strip back to a target measured from where it used to be. One
+       path, one idea of where the strip is going, and up, down, left and
+       right all reach it. */
     const onWheel = (e: WheelEvent) => {
-      // A pinch is a zoom, and a trackpad's sideways swipe already works.
-      if (e.ctrlKey || Math.abs(e.deltaX) > Math.abs(e.deltaY)) return;
+      // A pinch is a zoom.
+      if (e.ctrlKey) return;
+      const sideways = Math.abs(e.deltaX) > Math.abs(e.deltaY);
+      const raw = sideways ? e.deltaX : e.deltaY;
+      if (!raw) return;
       /* Something inside a cell that scrolls on its own gets the wheel
          first: a form's box until it has run out, a textarea and a select
          always. A strip that took the wheel over a form would move the
          page out from under the words being typed. */
-      const inner = (e.target as Element | null)?.closest?.<HTMLElement>(
-        "textarea, select, [data-scroll]",
-      );
+      const inner = sideways
+        ? null
+        : (e.target as Element | null)?.closest?.<HTMLElement>(
+            "textarea, select, [data-scroll]",
+          );
       if (inner && el.contains(inner)) {
         // A textarea or a select keeps the wheel whatever it holds. A
         // marked box gives it back once it has run out, whatever element
@@ -753,7 +770,7 @@ export function Strip({
         if (more) return;
       }
       // Firefox can report lines rather than pixels.
-      const dy = e.deltaMode === 1 ? e.deltaY * 40 : e.deltaY;
+      const dy = e.deltaMode === 1 ? raw * 40 : raw;
 
       /* By where the strip is, not where it is heading: a notch that lands
          while the strip is still gliding up to the end aims it there and
@@ -765,8 +782,9 @@ export function Strip({
            directions: a project strip on a phone has its footer below it.
            From 40rem up a strip page cannot scroll at all (`globals.css`),
            so neither of these is ever true there. */
-        if (dy < 0 && window.scrollY > 0) return;
+        if (!sideways && dy < 0 && window.scrollY > 0) return;
         if (
+          !sideways &&
           dy > 0 &&
           document.documentElement.scrollHeight -
             window.innerHeight -
