@@ -7,11 +7,7 @@ import { useSelectedLayoutSegments } from "next/navigation";
 import { cn } from "@/lib/utils";
 import type { CategoryLink } from "@/lib/work";
 import { StripPage, StripHead } from "@/components/strip-page";
-import {
-  markFilter,
-  StripView,
-  type StripViewMode,
-} from "@/components/strip";
+import { markFilter, StripView, type StripViewMode } from "@/components/strip";
 
 /* ── the frame around the work ────────────────────────────────────
  * The head and the chip row, mounted once for the whole of /work, its
@@ -117,7 +113,10 @@ export type PassPic = {
 const RUNGS = [128, 256, 640, 1080, 1280, 1920, 2500];
 const rowSrc = (p: PassPic) => {
   const dpr = window.devicePixelRatio || 1;
-  const css = (window.innerHeight - 160) * (p.width / p.height) * (dpr >= 2.5 ? 0.667 : 1);
+  const css =
+    (window.innerHeight - 160) *
+    (p.width / p.height) *
+    (dpr >= 2.5 ? 0.667 : 1);
   const need = css * dpr;
   const rung = RUNGS.find((r) => r >= need) ?? RUNGS[RUNGS.length - 1];
   return loader({ src: p.src, width: rung });
@@ -143,18 +142,30 @@ export function WorkShell({
      already. Covers only, and only the two that will be seen. A phone is
      left alone. */
   React.useEffect(() => {
-    if (!window.matchMedia("(hover: hover) and (pointer: fine)").matches) return;
-    const conn = (navigator as { connection?: { saveData?: boolean } }).connection;
+    if (!window.matchMedia("(hover: hover) and (pointer: fine)").matches)
+      return;
+    const conn = (navigator as { connection?: { saveData?: boolean } })
+      .connection;
     if (conn?.saveData) return;
     const warm = () => {
       for (const pics of Object.values(passes)) {
         for (const p of pics.slice(0, 2)) new Image().src = rowSrc(p);
       }
     };
-    const idle = (window as { requestIdleCallback?: (cb: () => void, o?: { timeout: number }) => number }).requestIdleCallback;
-    const handle = idle ? idle(warm, { timeout: 4000 }) : window.setTimeout(warm, 1500);
+    const idle = (
+      window as {
+        requestIdleCallback?: (
+          cb: () => void,
+          o?: { timeout: number },
+        ) => number;
+      }
+    ).requestIdleCallback;
+    const handle = idle
+      ? idle(warm, { timeout: 4000 })
+      : window.setTimeout(warm, 1500);
     return () => {
-      const cancel = (window as { cancelIdleCallback?: (h: number) => void }).cancelIdleCallback;
+      const cancel = (window as { cancelIdleCallback?: (h: number) => void })
+        .cancelIdleCallback;
       if (idle && cancel) cancel(handle);
       else window.clearTimeout(handle);
     };
@@ -303,7 +314,9 @@ export function WorkShell({
     if (!pill.current?.hasAttribute("data-placed"))
       pill.current?.style.setProperty("transition", "none");
     measure();
-    requestAnimationFrame(() => pill.current?.style.removeProperty("transition"));
+    requestAnimationFrame(() =>
+      pill.current?.style.removeProperty("transition"),
+    );
     const c = lit.current;
     if (c && r.scrollWidth > r.clientWidth) {
       /* Only when the chosen chip is not already in view. Re-centring a
@@ -322,6 +335,53 @@ export function WorkShell({
     window.addEventListener("resize", measure);
     return () => window.removeEventListener("resize", measure);
   }, [key]);
+
+  /* Two ways through the same work. Drawn rather than named, and under
+     the count rather than out at the edge of the window: the head is the
+     page saying what it is and how much of it there is, and how it is
+     laid out belongs in the same breath. The word stays as the button's
+     label for anyone not looking at the screen. */
+  const toggle = (
+    <span className="mt-2 flex items-center justify-end gap-1 max-sm:hidden">
+      {(["strip", "grid"] as const).map((mode) => (
+        <button
+          key={mode}
+          type="button"
+          aria-pressed={view === mode}
+          aria-label={mode === "strip" ? "Strip view" : "Grid view"}
+          onClick={() => chooseView(mode)}
+          className={cn(
+            "-my-1 rounded-full p-1.5 transition-opacity duration-200",
+            view === mode
+              ? "text-foreground opacity-100"
+              : "text-foreground opacity-35 hoverable:hover:opacity-70",
+          )}
+        >
+          <svg
+            aria-hidden
+            viewBox="0 0 16 16"
+            className="h-3.5 w-3.5"
+            fill="currentColor"
+          >
+            {mode === "strip" ? (
+              <>
+                <rect x="0" y="2" width="4" height="12" rx="0.5" />
+                <rect x="6" y="2" width="4" height="12" rx="0.5" />
+                <rect x="12" y="2" width="4" height="12" rx="0.5" />
+              </>
+            ) : (
+              <>
+                <rect x="1" y="1" width="6" height="6" rx="0.5" />
+                <rect x="9" y="1" width="6" height="6" rx="0.5" />
+                <rect x="1" y="9" width="6" height="6" rx="0.5" />
+                <rect x="9" y="9" width="6" height="6" rx="0.5" />
+              </>
+            )}
+          </svg>
+        </button>
+      ))}
+    </span>
+  );
 
   return (
     <StripPage
@@ -342,7 +402,12 @@ export function WorkShell({
             }
             title={head.title}
             live
-            aside={head.aside}
+            aside={
+              <>
+                {head.aside}
+                {toggle}
+              </>
+            }
             /* On /work the strip opens on a discipline, so the page's own
                title lives here, in the middle of the head, from the first
                frame. A category page still opens on its name set large and
@@ -355,101 +420,51 @@ export function WorkShell({
               choice before they can look at anything. */}
           <div className="mt-3 flex w-full shrink-0 items-center gap-2">
             <nav aria-label="Categories" className="min-w-0 flex-1">
-            {/* The padding is the list's, not the bar's: at the bar's edge
+              {/* The padding is the list's, not the bar's: at the bar's edge
                 the chips would stop dead against 24px of nothing, and a
                 row that scrolls should run to the edge of the window and
                 out of it. */}
-            <ul
-              ref={row}
-              className="relative gap-x-0.5 px-3 select-none max-sm:grid max-sm:grid-cols-2 max-sm:justify-items-start max-sm:gap-y-0.5 sm:flex sm:flex-nowrap sm:overflow-x-auto sm:px-7 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-            >
-              {/* The lit pill is one element that slides to whichever chip
+              <ul
+                ref={row}
+                className="relative gap-x-0.5 px-3 select-none max-sm:grid max-sm:grid-cols-2 max-sm:justify-items-start max-sm:gap-y-0.5 sm:flex sm:flex-nowrap sm:overflow-x-auto sm:px-7 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+              >
+                {/* The lit pill is one element that slides to whichever chip
                   is chosen, rather than a fill each chip draws for itself:
                   the choice is seen moving along the row. Measured in the
                   effect above; the first placement is not animated. */}
-              <span
-                ref={pill}
-                aria-hidden
-                className="pointer-events-none absolute left-0 top-0 rounded-full bg-foreground opacity-0 transition-[transform,width,height] duration-300 ease-[var(--ease-out-strong)] motion-reduce:transition-none"
-              />
-              <li ref={all ? lit : undefined} className="relative z-10">
-                <Chip
-                  href="/work"
-                  active={all}
-                  count={heads.all?.count}
-                  ring="All work"
-                                  >
-                  All
-                </Chip>
-              </li>
-              {categories.map((c) => (
-                <li
-                  key={c.slug}
-                  ref={key === c.slug ? lit : undefined}
-                  className="relative z-10 shrink-0"
-                >
+                <span
+                  ref={pill}
+                  aria-hidden
+                  className="pointer-events-none absolute left-0 top-0 rounded-full bg-foreground opacity-0 transition-[transform,width,height] duration-300 ease-[var(--ease-out-strong)] motion-reduce:transition-none"
+                />
+                <li ref={all ? lit : undefined} className="relative z-10">
                   <Chip
-                    href={c.href}
-                    active={key === c.slug}
-                    count={heads[c.slug]?.count}
-                    ring={c.name}
-                                      >
-                    {c.name}
+                    href="/work"
+                    active={all}
+                    count={heads.all?.count}
+                    ring="All work"
+                  >
+                    All
                   </Chip>
                 </li>
-              ))}
+                {categories.map((c) => (
+                  <li
+                    key={c.slug}
+                    ref={key === c.slug ? lit : undefined}
+                    className="relative z-10 shrink-0"
+                  >
+                    <Chip
+                      href={c.href}
+                      active={key === c.slug}
+                      count={heads[c.slug]?.count}
+                      ring={c.name}
+                    >
+                      {c.name}
+                    </Chip>
+                  </li>
+                ))}
               </ul>
             </nav>
-
-            {/* Two ways through the same work. Drawn rather than named,
-                which Julian asked for: the marks are the layouts
-                themselves — upright frames in a row, or a field of
-                squares — and the one in use is the bright one. The word
-                stays as the button's label for anyone not looking at
-                the screen. */}
-            <div
-              className={cn(
-                "flex shrink-0 items-center gap-1 pr-6 sm:pr-10 max-sm:hidden",
-              )}
-            >
-              {(["strip", "grid"] as const).map((mode) => (
-                <button
-                  key={mode}
-                  type="button"
-                  aria-pressed={view === mode}
-                  aria-label={mode === "strip" ? "Strip view" : "Grid view"}
-                  onClick={() => chooseView(mode)}
-                  className={cn(
-                    "rounded-full px-2 py-2 transition-opacity duration-200 max-sm:py-3",
-                    view === mode
-                      ? "text-foreground opacity-100"
-                      : "text-foreground opacity-35 hoverable:hover:opacity-70",
-                  )}
-                >
-                  <svg
-                    aria-hidden
-                    viewBox="0 0 16 16"
-                    className="h-4 w-4"
-                    fill="currentColor"
-                  >
-                    {mode === "strip" ? (
-                      <>
-                        <rect x="0" y="2" width="4" height="12" rx="0.5" />
-                        <rect x="6" y="2" width="4" height="12" rx="0.5" />
-                        <rect x="12" y="2" width="4" height="12" rx="0.5" />
-                      </>
-                    ) : (
-                      <>
-                        <rect x="1" y="1" width="6" height="6" rx="0.5" />
-                        <rect x="9" y="1" width="6" height="6" rx="0.5" />
-                        <rect x="1" y="9" width="6" height="6" rx="0.5" />
-                        <rect x="9" y="9" width="6" height="6" rx="0.5" />
-                      </>
-                    )}
-                  </svg>
-                </button>
-              ))}
-            </div>
           </div>
         </>
       }
