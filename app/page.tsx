@@ -212,7 +212,7 @@ function PathCard({
       // more room than two short paragraphs need, and a block pinned to the
       // top with its way out pinned to the bottom reads as a page that
       // failed to load the middle.
-      className="group relative flex flex-col justify-center gap-6 border-l border-border px-6 py-12 transition-colors duration-300 hoverable:hover:bg-card sm:px-16 sm:pt-20"
+      className="group relative flex flex-col justify-center gap-6 border-l border-border bg-background px-6 py-12 transition-colors duration-300 hoverable:hover:bg-card sm:px-16 sm:pt-20"
     >
       <div>
         <p className="label text-muted-foreground">{label}</p>
