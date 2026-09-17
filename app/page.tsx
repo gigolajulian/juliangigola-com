@@ -152,44 +152,39 @@ export default function Home() {
 
         <CoverArt />
 
-        {/* The two audiences, split. This is the fix for the old site's
-            single thirteen-item dropdown maze: an art director and someone
-            pricing a graduation shoot each get one obvious door, and here
-            they get half a screen each. */}
-        <section
-          data-tick
-          data-label="Where next"
-          data-hash="where-next"
-          aria-labelledby="paths"
-          className="w-full shrink-0 sm:h-full"
-        >
-          <h2 id="paths" className="sr-only">
-            Where to go next
-          </h2>
-          <div className="grid h-full grid-cols-1 sm:grid-cols-2">
-            <PathCard
-              href="/work"
-              label="For art directors"
-              title="See the work"
-              body="Editorial, campaigns, portraits, and artist imagery."
-            />
-            <PathCard
-              href="/sessions"
-              label="For individuals"
-              title="Book a session"
-              body="Graduation, headshots, weddings, and studio digitals. What's included and how long it takes."
-            />
-          </div>
-        </section>
-
         <Testimonials cells />
 
+        {/* Julian: merge these, there is too much white space. The ask and
+            the two doors were two screens of mostly paper asking the same
+            thing, with the second repeating the first's "See the work".
+            One screen: the question on the left, and on the right the two
+            audiences split — an art director and somebody pricing a
+            graduation shoot each get one obvious door, which is the fix
+            for the old site's thirteen-item dropdown maze.
+
+            `#where-next` still resolves: the strip finds the cell holding
+            whatever the address names, and that id is on the doors. */}
         <EnquiryCell
           title="Have something in mind?"
           body="Tell me what you have in mind and I'll come back with an approach and a quote."
-          secondary={{ href: "/work", label: "See the work" }}
           next={WORK_PAGE}
-          className="border-l border-border px-6 sm:w-full sm:px-16"
+          className="border-l border-border px-6"
+          aside={
+            <div id="where-next" className="grid gap-px bg-border">
+              <PathCard
+                href="/work"
+                label="For art directors"
+                title="See the work"
+                body="Editorial, campaigns, portraits, and artist imagery."
+              />
+              <PathCard
+                href="/sessions"
+                label="For individuals"
+                title="Book a session"
+                body="Graduation, headshots, weddings, and studio digitals. What's included and how long it takes."
+              />
+            </div>
+          }
         />
       </Strip>
     </StripPage>

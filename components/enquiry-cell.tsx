@@ -1,3 +1,4 @@
+import type * as React from "react";
 import Link from "next/link";
 import type { Lead } from "@/components/strip";
 import { cn } from "@/lib/utils";
@@ -20,6 +21,7 @@ export function EnquiryCell({
   type = "other",
   detail,
   secondary,
+  aside,
   next,
   className,
 }: {
@@ -30,6 +32,11 @@ export function EnquiryCell({
   /** Extra context for the follow-up field, e.g. the project just viewed. */
   detail?: string;
   secondary?: { href: string; label: string };
+  /** Anything that belongs beside the ask rather than after it: the
+      homepage puts its two doors here, because the ask and "where next"
+      were two screens asking the same thing with a window of paper
+      between them. Given half the cell from sm up. */
+  aside?: React.ReactNode;
   /** The page a wheel past this cell leads to; named here so it is no
       surprise when it arrives. */
   next?: Lead;
@@ -47,53 +54,60 @@ export function EnquiryCell({
       data-hash="enquire"
       className={cn(
         "flex w-full shrink-0 flex-col justify-center gap-6 py-10 sm:h-full sm:w-[min(40rem,85vw)] sm:py-0 sm:pl-24 sm:pr-6",
+        aside &&
+          "gap-10 sm:grid sm:w-[100vw] sm:grid-cols-2 sm:items-center sm:gap-16 sm:pl-16 sm:pr-16",
         className,
       )}
     >
-      <div>
-        <h2 className="title max-w-[22ch]">{title}</h2>
-        {body ? (
-          <p className="mt-4 max-w-prose text-sm leading-relaxed text-muted-foreground">
-            {body}
-          </p>
-        ) : null}
-      </div>
+      {/* The ask itself, as one column. Its own flex box rather than the
+          cell's, so an aside can sit beside the whole of it. */}
+      <div className="flex flex-col gap-6">
+        <div>
+          <h2 className="title max-w-[22ch]">{title}</h2>
+          {body ? (
+            <p className="mt-4 max-w-prose text-sm leading-relaxed text-muted-foreground">
+              {body}
+            </p>
+          ) : null}
+        </div>
 
-      <div className="flex flex-wrap items-center gap-3">
-        <Link
-          href={href}
-          className="label action rounded-full px-6 py-4 press active:scale-[0.97]"
+        <div className="flex flex-wrap items-center gap-3">
+          <Link
+            href={href}
+            className="label action rounded-full px-6 py-4 press active:scale-[0.97]"
+          >
+            Enquire
+          </Link>
+          {secondary ? (
+            <Link
+              prefetch={false}
+              href={secondary.href}
+              className="label action-quiet rounded-full px-6 py-4 press active:scale-[0.97]"
+            >
+              {secondary.label}
+            </Link>
+          ) : null}
+        </div>
+
+        <a
+          href="mailto:hello@juliangigola.com"
+          className="label w-fit text-muted-foreground transition-colors duration-200 hoverable:hover:text-foreground"
         >
-          Enquire
-        </Link>
-        {secondary ? (
+          hello@juliangigola.com
+        </a>
+        {next ? (
           <Link
             prefetch={false}
-            href={secondary.href}
-            className="label action-quiet rounded-full px-6 py-4 press active:scale-[0.97]"
+            href={next.href}
+            data-ring="Next"
+            className="label mt-4 w-fit border-t border-border pt-4 text-muted-foreground transition-colors duration-200 hoverable:hover:text-foreground"
           >
-            {secondary.label}
+            Next: {next.name}
           </Link>
         ) : null}
       </div>
 
-      <a
-        href="mailto:hello@juliangigola.com"
-        className="label w-fit text-muted-foreground transition-colors duration-200 hoverable:hover:text-foreground"
-      >
-        hello@juliangigola.com
-      </a>
-
-      {next ? (
-        <Link
-          prefetch={false}
-          href={next.href}
-          data-ring="Next"
-          className="label mt-4 w-fit border-t border-border pt-4 text-muted-foreground transition-colors duration-200 hoverable:hover:text-foreground"
-        >
-          Next: {next.name}
-        </Link>
-      ) : null}
+      {aside}
     </div>
   );
 }
