@@ -320,8 +320,11 @@ export function ProjectStrip({
                 // says, not as wide as the window. Measured: a portrait
                 // frame on a phone is 524css wide and was fetched at 1080
                 // for 1376 needed; on a laptop it is 490 wide and fetched
-                // 1080 for 490. 8rem is the bar and the ruler.
-                sizes={`calc((100vh - 8rem) * ${(cell.frame.width / cell.frame.height).toFixed(3)})`}
+                // 1080 for 490. 8rem is the bar and the ruler. A 3x phone
+                // is told two thirds of the truth, so it fetches about 2x:
+                // full density there was 6.5MB of frames on one page, and
+                // the difference past 2x is not one a phone shows.
+                sizes={`(min-resolution: 2.5dppx) calc((100vh - 8rem) * ${((cell.frame.width / cell.frame.height) * 0.667).toFixed(3)}), calc((100vh - 8rem) * ${(cell.frame.width / cell.frame.height).toFixed(3)})`}
                 // The first two lead the page's loading; every other frame
                 // is fetched at once rather than as the strip reaches it.
                 // Left lazy, Julian's recording showed each frame arriving
