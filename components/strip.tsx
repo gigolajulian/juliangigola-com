@@ -383,12 +383,40 @@ export function Strip({
          applied - Julian: all work has editorial under it before clicking
          the filter. It fills in as soon as the sequence moves. */
       let word = "";
+      let section: HTMLElement | null = null;
       for (let k = el.scrollLeft <= 2 ? -1 : i; k >= 0; k--) {
-        const w = (el.children[k] as HTMLElement).dataset.label;
+        const c = el.children[k] as HTMLElement;
+        const w = c.dataset.label;
         if (w !== undefined) {
           word = w;
+          section = c;
           break;
         }
+      }
+      /* And the address follows the same cell. Julian: a page with
+         sections should say which one you are on, so the homepage reads
+         `/#work` over Selected work and `/#cover-art` over the covers, and
+         that address can be copied out of the bar and sent.
+
+         `replaceState`, not a push: a page is one page however far along
+         it you are, and pushing a section would turn the back button into
+         a rewind through every section you passed. The router's own state
+         is handed back with it, or Next loses its place. Only cells with a
+         word are sections — a photograph on a project page has a hash so
+         it can be linked to, and is not somewhere you have arrived. Never
+         while the viewer is open: it keeps an entry of its own for the
+         back button (`lib/zoom.ts`), and writing over it would leave the
+         picture with no way out. */
+      const want = section?.dataset.hash ? `#${section.dataset.hash}` : "";
+      if (
+        want !== window.location.hash &&
+        document.documentElement.dataset.viewer === undefined
+      ) {
+        window.history.replaceState(
+          window.history.state,
+          "",
+          `${window.location.pathname}${window.location.search}${want}`,
+        );
       }
       /* The mark belongs to the cell itself and not to the chapter it is
          in: a client is the client of one project. */
