@@ -92,17 +92,6 @@ export type Head = {
   aside: string;
   /** How many things are behind this filter, for the chip. */
   count: number;
-  /**
-   * Whether this filter can be shown as a sheet.
-   *
-   * A list of projects can: every cell is a cover, and a grid of covers is
-   * the same information laid out differently. A discipline that is one
-   * gallery cannot, and neither can the films or the cover art rack - those
-   * cells are a photo essay, a reel and a two-row catalogue, each built for
-   * a strip, and squared off into a grid they collapse to a line. The
-   * toggle is not offered where it has nothing to offer.
-   */
-  sheet: boolean;
 };
 
 /** One picture a filter's row opens on: a cover, a frame or a poster. */
@@ -193,11 +182,10 @@ export function WorkShell({
     readView,
     () => "strip" as StripViewMode,
   );
-  /* A filter that cannot be a sheet is a strip whatever was chosen, and the
-     choice is kept: walk from Editorial's grid through Places and back, and
-     Editorial is still a grid. */
-  const sheet = head.sheet;
-  const view: StripViewMode = sheet ? chosen : "strip";
+  /* Julian: the choice is offered on every filter, the films and the
+     galleries included. It is kept as you walk: from Editorial's grid
+     through Places and back, Editorial is still a grid. */
+  const view: StripViewMode = chosen;
 
   const row = React.useRef<HTMLUListElement>(null);
   const lit = React.useRef<HTMLLIElement>(null);
@@ -422,7 +410,6 @@ export function WorkShell({
             <div
               className={cn(
                 "flex shrink-0 items-center gap-1 pr-6 sm:pr-10 max-sm:hidden",
-                !sheet && "hidden",
               )}
             >
               {(["strip", "grid"] as const).map((mode) => (

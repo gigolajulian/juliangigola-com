@@ -24,14 +24,11 @@ const HEADS: Record<string, Head> = {
     title: "Work",
     aside: `${COMMISSIONS.length} projects`,
     count: COMMISSIONS.length,
-    sheet: true,
   },
   video: {
     title: "Motion",
     aside: `${filmCount(CONTENT.videos)} films`,
     count: filmCount(CONTENT.videos),
-    // A reel, a hero and two racks of embeds: a strip, and only a strip.
-    sheet: false,
   },
 };
 
@@ -52,9 +49,6 @@ for (const c of WORK_CATEGORY_LINKS) {
     // The same number the head says, so the chip and the title it opens
     // can never disagree.
     count,
-    // A list of projects can be a sheet; one gallery standing as a
-    // discipline is a sequence and stays one.
-    sheet: !gallery,
   };
 }
 

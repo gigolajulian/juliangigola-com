@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { Strip, type Lead } from "@/components/strip";
+import { Strip, StripView, type Lead } from "@/components/strip";
 import { VideoGrid } from "@/components/video-grid";
 import { VideoViewer } from "@/components/video-viewer";
 import { REEL, filmCount, type Video } from "@/lib/videos";
@@ -165,6 +165,12 @@ function ReelBackdrop({
       window.removeEventListener("resize", read);
     };
   }, [scroller]);
+
+  /* In the rack there is no scroll along the reel to dim it, so the film
+     playing behind stayed bright under a grid of stills and its titles
+     read through the page as a ghost. The rack is a catalogue; the reel
+     belongs to the strip. */
+  if (React.useContext(StripView) === "grid") return null;
 
   return (
     <div
