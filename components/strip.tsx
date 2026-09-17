@@ -161,6 +161,26 @@ const centreOf = (el: HTMLElement, i: number) => {
   return cell.offsetLeft - (el.clientWidth - cell.offsetWidth) / 2;
 };
 
+/**
+ * Which cell a hash names.
+ *
+ * A cell's own `data-hash` first, and failing that any `data-hash` or `id`
+ * inside one: a page's sections are not always cells — the studio's ask and
+ * its client list live inside the screen they belong to, and `/legal` is a
+ * column of headings — and a hash that names one of those should still bring
+ * the cell holding it into view rather than doing nothing at all.
+ */
+const cellFor = (el: HTMLElement, hash: string): number => {
+  if (!hash) return -1;
+  const cells = Array.from(el.children) as HTMLElement[];
+  const own = cells.findIndex((c) => c.dataset.hash === hash);
+  if (own >= 0) return own;
+  const safe = CSS.escape(hash);
+  return cells.findIndex(
+    (c) => c.querySelector(`[data-hash="${safe}"], #${safe}`) !== null,
+  );
+};
+
 export function Strip({
   children,
   label,
@@ -271,9 +291,7 @@ export function Strip({
     }
     const hash = decodeURIComponent(window.location.hash.slice(1));
     if (hash) {
-      const i = Array.from(el.children).findIndex(
-        (c) => (c as HTMLElement).dataset.hash === hash,
-      );
+      const i = cellFor(el, hash);
       const where = i >= 0 ? centreOf(el, i) : null;
       if (where !== null) {
         el.scrollLeft = where;
@@ -454,9 +472,7 @@ export function Strip({
     // A hash changed underfoot (a chip on /work is a plain anchor): glide.
     const onHash = () => {
       const hash = decodeURIComponent(window.location.hash.slice(1));
-      const i = Array.from(el.children).findIndex(
-        (c) => (c as HTMLElement).dataset.hash === hash,
-      );
+      const i = cellFor(el, hash);
       const where = i >= 0 ? centreOf(el, i) : null;
       if (where !== null) glide.current(where);
     };

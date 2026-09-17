@@ -1,4 +1,4 @@
-import type * as React from "react";
+import * as React from "react";
 
 /* ── the legal page ───────────────────────────────────────────────
  * Terms and Privacy on one page, side by side: two columns from `xl` up,
@@ -75,21 +75,44 @@ export function LegalColumn({
       <div className="mt-10 max-w-prose text-base leading-relaxed">{intro}</div>
 
       <ol className="mt-14 max-w-prose list-none space-y-12 p-0 [counter-reset:clause]">
-        {children}
+        {/* Each clause takes an anchor of its own, named for the column it
+            is in: "Changes" and "Contact" are the title of a clause in both
+            columns, and `/legal#terms-changes` and `/legal#privacy-changes`
+            are different clauses. Passed down rather than typed at each of
+            the thirty-one call sites, which is thirty-one chances to repeat
+            one. */}
+        {React.Children.map(children, (child) =>
+          React.isValidElement<{ column?: string }>(child)
+            ? React.cloneElement(child, { column: id })
+            : child,
+        )}
       </ol>
     </section>
   );
 }
 
+/** A clause title as an anchor: "What you may do" becomes `what-you-may-do`. */
+const anchor = (title: string) =>
+  title
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "");
+
 export function Clause({
   title,
+  column,
   children,
 }: {
   title: string;
+  /** Written by `LegalColumn`; the half of the page this clause is in. */
+  column?: string;
   children: React.ReactNode;
 }) {
   return (
-    <li className="[counter-increment:clause]">
+    <li
+      id={column ? `${column}-${anchor(title)}` : undefined}
+      className="scroll-mt-28 [counter-increment:clause]"
+    >
       <h3 className="label flex gap-4 text-muted-foreground before:content-[counter(clause,decimal-leading-zero)]">
         {title}
       </h3>
