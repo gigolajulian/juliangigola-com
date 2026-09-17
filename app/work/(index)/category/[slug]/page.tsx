@@ -11,7 +11,6 @@ import {
   WORK_CATEGORY_LINKS,
   COMMISSIONS,
   COVER_ART,
-  STUDIO,
   projectsIn,
   categoryHref,
   categoryLabel,
@@ -65,12 +64,25 @@ const LISTED = WORK_CATEGORIES.filter(
   (c) => categoryHref(c.slug) === `/work/category/${c.slug}`,
 );
 
-/** The discipline after this one along the chip row, or the studio after
-    the last: the chain runs once, it does not wrap. */
+/** The discipline after this one along the chip row. The chain runs once
+    and does not wrap, and past the last one there is nothing: the archive
+    ending is not a request to be taken to the studio. */
 const after = (slug: string) => {
   const at = WORK_CATEGORY_LINKS.findIndex((c) => c.slug === slug);
   const next = at === -1 ? undefined : WORK_CATEGORY_LINKS[at + 1];
-  return next ? { href: next.href, name: next.name } : STUDIO;
+  return next ? { href: next.href, name: next.name } : undefined;
+};
+
+/** And the one before it, with All work before the first. Julian: pushing
+    back off the start of a filter should lead to the filter before it, the
+    way pushing off the end leads to the one after. The chip row read in
+    both directions, so a sequence you walked into can be walked back out
+    of without going to the row and picking. */
+const before = (slug: string) => {
+  const at = WORK_CATEGORY_LINKS.findIndex((c) => c.slug === slug);
+  if (at < 0) return undefined;
+  const prev = WORK_CATEGORY_LINKS[at - 1];
+  return prev ? { href: prev.href, name: prev.name } : { href: "/work", name: "All work" };
 };
 
 export function generateStaticParams() {
@@ -116,6 +128,7 @@ export default async function CategoryPage(
   const isCoverArt = gallery?.slug === COVER_ART?.slug;
   const name = categoryLabel(category);
   const next = after(slug);
+  const prev = before(slug);
   const ask = (
     <EnquiryCell
       key="enquire"
@@ -133,7 +146,12 @@ export default async function CategoryPage(
   if (gallery && !isCoverArt) {
     return (
       <div className="flex min-h-0 flex-1 flex-col max-sm:h-[75dvh] max-sm:flex-none">
-        <ProjectStrip project={gallery} next={next} className="mt-4 flex-1" />
+        <ProjectStrip
+          project={gallery}
+          next={next}
+          prev={prev}
+          className="mt-4 flex-1"
+        />
       </div>
     );
   }
@@ -145,6 +163,7 @@ export default async function CategoryPage(
       <Strip
         label={`Cover art: ${COVER_RELEASES.length} releases, left and right`}
         next={next}
+        prev={prev}
         className="mt-4 flex-1"
       >
         <TitleCell title={name} hash={slug}>
@@ -168,6 +187,7 @@ export default async function CategoryPage(
     <Strip
       label={`${name}: ${projects.length} projects, left and right`}
       next={next}
+      prev={prev}
       marks={MARKS}
       className="mt-4 flex-1"
     >
