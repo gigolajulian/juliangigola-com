@@ -158,24 +158,24 @@
   ],
   "clientsHome": [
     "wired-magazine",
-    "pear-vc",
-    "ladera-granola",
-    "sols",
+    "paradox",
     "ukiyosunknown",
+    "goodcult",
     "jubo",
     "sago",
-    "goodcult",
-    "paradox"
+    "sols",
+    "pear-vc",
+    "ladera-granola"
   ],
   "clientsStudio": [
     "wired-magazine",
-    "pear-vc",
-    "ladera-granola",
-    "sols",
     "ukiyosunknown",
     "jubo",
     "sago",
+    "paradox",
     "goodcult",
-    "paradox"
+    "sols",
+    "pear-vc",
+    "ladera-granola"
   ]
 }
