@@ -3,7 +3,6 @@ import { notFound } from "next/navigation";
 import { Strip } from "@/components/strip";
 import { TitleCell } from "@/components/strip-page";
 import { CoverCell } from "@/components/cover-cell";
-import { EnquiryCell } from "@/components/enquiry-cell";
 import { ProjectStrip } from "@/components/project-strip";
 import { CoverArtGallery } from "@/components/cover-art-gallery";
 import {
@@ -14,7 +13,6 @@ import {
   projectsIn,
   categoryHref,
   categoryLabel,
-  enquiryTypeFor,
   indexRow,
   isDisciplineGallery,
   markFor,
@@ -38,9 +36,9 @@ import { COVER_RELEASES } from "@/lib/cover-art-data";
  * a winner and silently shadow the loser.
  *
  * The head and the chip row are the `(index)` layout's; this is the strip
- * under them, one discipline's chapter of the whole. Past its ask the
- * wheel leads to the next discipline along the chip row, and past the
- * last one to the studio.
+ * under them, one discipline's chapter of the whole. Past its last cover
+ * the wheel leads to the next discipline along the chip row, and back off
+ * its first to the one before.
  * ─────────────────────────────────────────────────────────────── */
 
 /* The eight clients with a mark on file, rendered once and handed to the
@@ -129,16 +127,13 @@ export default async function CategoryPage(
   const name = categoryLabel(category);
   const next = after(slug);
   const prev = before(slug);
-  const ask = (
-    <EnquiryCell
-      key="enquire"
-      title={`Something in ${name.toLowerCase()}?`}
-      body="Tell me what it is for and when, and I'll come back with an approach and a quote."
-      type={enquiryTypeFor(projects[0] ?? gallery ?? COMMISSIONS[0])}
-      secondary={{ href: "/work", label: "See the work" }}
-      next={next}
-    />
-  );
+  /* Julian: no ask at the end of a discipline. Eleven filters meant
+     eleven copies of the same question, each one standing between the
+     last cover of one discipline and the first of the next, which is
+     exactly where somebody walking the row does not want to be stopped.
+     It is asked once, at the end of the whole archive, and the header
+     carries Contact from every screen.
+   */
 
   /* A photographic gallery is a sequence and gets the project strip, which
      ends on the next discipline as a project ends on the next project. On a
@@ -178,7 +173,6 @@ export default async function CategoryPage(
         >
           <CoverArtGallery releases={COVER_RELEASES} rows />
         </div>
-        {ask}
       </Strip>
     );
   }
@@ -206,7 +200,6 @@ export default async function CategoryPage(
             eager={i < 3}
           />
         )),
-        ask,
       ]}
     </Strip>
   );

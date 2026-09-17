@@ -40,7 +40,7 @@ export default function VideoPage() {
       ask={
         <EnquiryCell
           key="enquire"
-          title="Have a film in mind?"
+          title="Have a project in mind?"
           body="Tell me what you have in mind and I'll come back with an approach and a quote."
           type="editorial"
           secondary={{ href: "/work", label: "See the work" }}
