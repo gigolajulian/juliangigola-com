@@ -625,7 +625,13 @@ export function Strip({
        8px of the hand. Integrated exactly per frame, so a tick lands where
        it aimed and 60Hz and 144Hz feel the same. `target` is always where
        the strip will stop. */
-    const TAU = 180;
+    /* Julian: smoother. 180 carried a tail a reader could watch — the
+       landing test is the remaining distance, so at seven time constants
+       the strip was still creeping a third of a pixel a frame more than a
+       second after the hand stopped, and a sequence that is still moving
+       when you have finished the gesture reads as lag rather than glide.
+       150 catches up sooner and the landing below is called earlier. */
+    const TAU = 150;
     /* How long a paged move owns the wheel. A mouse notch is one turn of
        the hand and another turn a moment later means another screen, so
        its lock is short. A trackpad sends a stream of small deltas for one
@@ -646,7 +652,11 @@ export function Strip({
         x = Math.min(end, Math.max(0, x));
         v = 0;
       }
-      if (Math.abs(target - x) < 0.5 && Math.abs(v) * TAU < 0.5) {
+      /* Landed. A pixel and a half rather than half a pixel: `scrollLeft`
+         is whole pixels, so everything under one is a frame of work
+         nobody can see — measured on /work, sixty frames of it at the end
+         of every swipe. */
+      if (Math.abs(target - x) < 1.5 && Math.abs(v) * TAU < 1.5) {
         x = target;
         v = 0;
         el.scrollLeft = x;
@@ -1264,7 +1274,7 @@ export function Strip({
                     "block w-full rounded-full transition-[height,background-color] duration-200 ease-[var(--ease-out-strong)]",
                     i === at
                       ? "h-4 bg-foreground"
-                      : "h-1.5 bg-foreground/20 hoverable:group-hover:bg-foreground/50",
+                      : "h-1 bg-foreground/20 hoverable:group-hover:h-1.5 hoverable:group-hover:bg-foreground/40",
                   )}
                 />
               </button>

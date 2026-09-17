@@ -83,6 +83,30 @@ export function WorkBand({
      to stay smooth. A pointer that has not moved is not scrubbing. */
   const was = React.useRef<{ x: number; y: number } | null>(null);
 
+  /* Near means on screen, not under the pointer.
+     Asking for the frames when the pointer arrived meant the first pass
+     across a tile had nothing to dissolve to: the cover held for the
+     length of the fade and the frame appeared at the end of it, a cut on
+     exactly the pass a visitor judges. The tile asks as it comes into the
+     window instead, a window's margin ahead, so the crossfade always has
+     a decoded picture on both sides. Still nothing on a phone, where
+     `touched` is false and no finger ever scrubs. */
+  const tile = React.useRef<HTMLAnchorElement>(null);
+  React.useEffect(() => {
+    const el = tile.current;
+    if (!el || !touched) return;
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry.isIntersecting) return;
+        setNear(true);
+        io.disconnect();
+      },
+      { rootMargin: "0px" },
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, [touched]);
+
   const onPointerMove = (e: React.PointerEvent<HTMLElement>) => {
     // Touch gets the cover and a plain tap through to the project. Scrubbing
     // with a finger would fight the page scroll, and a "hover" on touch is
@@ -129,6 +153,7 @@ export function WorkBand({
 
   return (
     <Link
+      ref={tile}
       data-ring="View project"
       style={
         {
