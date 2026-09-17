@@ -1746,6 +1746,14 @@ optgroup {
   mix-blend-mode: normal;
   opacity: 1;
 }
+/* From the bar, a beat first. Julian asked for it: a press in the header
+   is a jump across the site rather than a step through it, so the page
+   being left has the trip to itself before the next one comes up. The
+   delay is the old page's whole fade, so nothing waits on screen that a
+   reader can see waiting. */
+:root[data-nav-bar]::view-transition-new(.page) {
+  animation-delay: 200ms;
+}
 :root[data-nav="out"]::view-transition-old(.page) {
   animation-name: jg-page-down;
 }

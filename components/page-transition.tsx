@@ -20,10 +20,20 @@ export function PageTransition({ children }: { children: React.ReactNode }) {
   React.useEffect(() => {
     const root = document.documentElement;
     let clear = 0;
-    const set = (way: "in" | "out" | "filter") => {
+    const set = (way: "in" | "out" | "filter", bar = false) => {
       root.dataset.nav = way;
+      /* Julian asked for a beat before the page arrives when the press
+         came from the bar. A link inside the page is a step through the
+         work and wants no waiting; the bar is a jump across the site, and
+         the old page is given the room to leave before the new one comes
+         up. `globals.css` reads it as a delay on the incoming page. */
+      if (bar) root.dataset.navBar = "";
+      else delete root.dataset.navBar;
       window.clearTimeout(clear);
-      clear = window.setTimeout(() => delete root.dataset.nav, 1200);
+      clear = window.setTimeout(() => {
+        delete root.dataset.nav;
+        delete root.dataset.navBar;
+      }, 1200);
     };
     const onClick = (e: MouseEvent) => {
       if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey)
@@ -51,7 +61,7 @@ export function PageTransition({ children }: { children: React.ReactNode }) {
         a.dataset.back !== undefined ||
         a.textContent?.trimStart().startsWith("←") ||
         a.pathname === "/";
-      set(out ? "out" : "in");
+      set(out ? "out" : "in", a.closest("header") !== null);
     };
     // The photo viewer keeps an entry in the history so the back button
     // closes it (`lib/zoom.ts`); that pop is not a page leaving.
