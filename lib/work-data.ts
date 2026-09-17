@@ -760,7 +760,7 @@ export const PROJECTS: Project[] = [
       },
       {
         "role": "Model",
-        "name": "@anisajade"
+        "name": "@anisajadee"
       }
     ],
     "categories": [
