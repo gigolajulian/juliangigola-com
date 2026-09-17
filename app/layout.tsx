@@ -8,6 +8,7 @@ import { GlassLight } from "@/components/glass-light";
 import { PhotoFade } from "@/components/photo-fade";
 import { PointerRing } from "@/components/pointer-ring";
 import "./globals.css";
+import { PageTransition } from "@/components/page-transition";
 
 /* Inter for everything that is read rather than announced, at Julian's ask.
    It pairs with the masthead the way the Swiss posters did: one condensed
@@ -185,7 +186,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             than pop — see `photo-fade.tsx`. Renders nothing. */}
         <PhotoFade />
         <main id="main" className="rise flex flex-1 flex-col">
-          {children}
+          {/* Every page zooms in and out of the next: `page-transition.tsx`
+              and `.page` in `globals.css`. */}
+          <PageTransition>{children}</PageTransition>
         </main>
         <SiteFooter />
         <PhotoNotice />

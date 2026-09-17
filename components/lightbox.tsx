@@ -49,6 +49,17 @@ const NAME = "lightbox-frame";
 const pictureFor = (src: string): HTMLElement | null =>
   document.querySelector<HTMLElement>(`img[data-frame="${CSS.escape(src)}"]`);
 
+/* The box the name goes on: the frame's clipping cell where it has one,
+   the picture itself elsewhere. A strip frame stands at `scale(1.1)`
+   inside a cell that clips it (`strip-frame` in `globals.css`), and a
+   snapshot is of the element's own box, transform and all, not of what
+   the cell lets through. Named on the picture, the trip home ended on a
+   box a tenth too large and the page then cut to the clipped frame: a
+   snap at the end of every close, measured at 1204px against 1094 on a
+   1440 window. The cell is exactly what is seen. */
+const boxOf = (el: HTMLElement): HTMLElement =>
+  el.closest<HTMLElement>(".strip-cell") ?? el;
+
 /**
  * Runs `update` as a view transition with the name travelling from `from`
  * to `to`. Either end may be absent; the lightbox's own picture carries the
@@ -83,7 +94,7 @@ function travel(
   const picture = () =>
     document.querySelector<HTMLElement>("[data-lightbox-picture]");
   if (from) {
-    from.style.viewTransitionName = NAME;
+    boxOf(from).style.viewTransitionName = NAME;
   } else if (to) {
     // Going home: the picture is the old side and it exists right now.
     const p = picture();
@@ -94,6 +105,15 @@ function travel(
   // Which way the picture is going: `in` from the strip, `out` back to it.
   // The two are not mirror images — see `[data-lift]` in `globals.css`.
   document.documentElement.setAttribute("data-lift", from ? "in" : "out");
+  /* And whether the far end is a strip cell, whose picture stands at a
+     tenth over its box: the travelling picture then zooms to meet it
+     (`data-lift-zoom` in `globals.css`), so nothing changes size the
+     moment the trip ends. */
+  const end = from ?? to;
+  document.documentElement.toggleAttribute(
+    "data-lift-zoom",
+    !!end && boxOf(end) !== end,
+  );
 
   /* And every blurred surface goes flat for the length of the trip.
    *
@@ -127,14 +147,14 @@ function travel(
     // Synchronous, so the new snapshot is of the updated page.
     flushSync(update);
     if (from) {
-      from.style.viewTransitionName = "";
+      boxOf(from).style.viewTransitionName = "";
       const p = picture();
       if (p) p.style.viewTransitionName = NAME;
     }
     if (to) {
       const p = picture();
       if (p) p.style.viewTransitionName = "";
-      to.style.viewTransitionName = NAME;
+      boxOf(to).style.viewTransitionName = NAME;
     }
     // The lightbox's chrome exists as of this line and is about to be
     // photographed with the rest of the new page.
@@ -143,11 +163,12 @@ function travel(
   transition.finished
     .finally(() => {
       document.documentElement.removeAttribute("data-lift");
+      document.documentElement.removeAttribute("data-lift-zoom");
       for (const el of flattened) {
         el.style.removeProperty("backdrop-filter");
         el.style.removeProperty("-webkit-backdrop-filter");
       }
-      if (to) to.style.viewTransitionName = "";
+      if (to) boxOf(to).style.viewTransitionName = "";
       const p = picture();
       if (p) p.style.viewTransitionName = "";
     })

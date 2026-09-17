@@ -1759,6 +1759,107 @@ optgroup {
 }
 
 
+/* ── one page zooms into the next ──────────────────────────────────
+   `page-transition.tsx` wraps every page in a boundary that gets the
+   `page` class when its content changes on a navigation. Going in, the
+   page you pressed on grows a little and fades as the new one comes up
+   from slightly smaller than itself; coming out (a crumb, the back
+   button: `data-nav="out"`) the reverse, so the page you leave shrinks
+   away and the one you return to settles down from above. The header
+   and footer are outside the boundary and do not move. A cover that is
+   morphing into a project's first frame flies over both, on its own
+   group. Blend mode normal, for the reason the lift's rules give. */
+::view-transition-group(.page) {
+  animation-duration: 420ms;
+  animation-timing-function: cubic-bezier(0.32, 0.72, 0, 1);
+}
+::view-transition-image-pair(.page) {
+  isolation: auto;
+}
+::view-transition-old(.page) {
+  animation: jg-zoom-past 420ms cubic-bezier(0.32, 0.72, 0, 1) both;
+  mix-blend-mode: normal;
+}
+::view-transition-new(.page) {
+  animation: jg-zoom-up 420ms cubic-bezier(0.32, 0.72, 0, 1) both;
+  mix-blend-mode: normal;
+}
+:root[data-nav="out"]::view-transition-old(.page) {
+  animation-name: jg-zoom-down;
+}
+:root[data-nav="out"]::view-transition-new(.page) {
+  animation-name: jg-zoom-settle;
+}
+/* In: the old page comes at you and goes; the new one grows into place. */
+@keyframes jg-zoom-past {
+  to {
+    opacity: 0;
+    transform: scale(1.06);
+  }
+}
+@keyframes jg-zoom-up {
+  from {
+    opacity: 0;
+    transform: scale(0.94);
+  }
+}
+/* Out: the old page falls away; the one you came from settles down. */
+@keyframes jg-zoom-down {
+  to {
+    opacity: 0;
+    transform: scale(0.94);
+  }
+}
+@keyframes jg-zoom-settle {
+  from {
+    opacity: 0;
+    transform: scale(1.06);
+  }
+}
+/* Clicks during a trip reach the page underneath. */
+::view-transition {
+  pointer-events: none;
+}
+/* The strip's frame stands at scale(1.1) inside its cell (`strip-frame`),
+   and the trip ends on the cell. So the travelling picture, which is the
+   whole photograph, zooms in by that tenth as it lands, clipped to the
+   cell like the frame is; and on the way out it starts at the tenth and
+   eases back to the whole. Without this the last frame of every close
+   cut from the whole picture to the zoomed one, measured as a jump of 6.6
+   against 0.3 in the frames before. `data-lift-zoom` is set by
+   `lightbox.tsx` only when the far end is a strip cell; a gallery frame
+   has no standing zoom and keeps the plain trip above. */
+:root[data-lift-zoom]::view-transition-image-pair(lightbox-frame) {
+  overflow: hidden;
+}
+:root[data-lift-zoom][data-lift="out"]::view-transition-old(lightbox-frame) {
+  animation: jg-frame-settle 560ms cubic-bezier(0.32, 0.72, 0, 1) both;
+}
+/* On the way in the two snapshots start as the same pixels: the cell's
+   clipped view, and the whole photograph at the same tenth over, clipped
+   the same. So the cell's snapshot sits on top for the first beat and
+   fades off, by which time the dialog's own fade-in is done and the
+   photograph underneath is solid. Simply hiding the old one showed the
+   picture arriving pale. */
+:root[data-lift-zoom][data-lift="in"]::view-transition-old(lightbox-frame) {
+  z-index: 1;
+  animation: jg-fade-out 200ms linear 160ms both;
+}
+:root[data-lift-zoom][data-lift="in"]::view-transition-new(lightbox-frame) {
+  opacity: 1;
+  animation: jg-frame-lift 560ms cubic-bezier(0.32, 0.72, 0, 1) both;
+}
+@keyframes jg-frame-settle {
+  to {
+    transform: scale(1.1);
+  }
+}
+@keyframes jg-frame-lift {
+  from {
+    transform: scale(1.1);
+  }
+}
+
 /* Reduced motion: no trip. The pages still swap; nothing travels. */
 @media (prefers-reduced-motion: reduce) {
   ::view-transition-group(*),

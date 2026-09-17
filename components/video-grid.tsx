@@ -3,7 +3,7 @@
 import * as React from "react";
 import Image from "next/image";
 import { Reveal } from "@/components/reveal";
-import { embedUrl, posterFor, type Video } from "@/lib/videos";
+import { embedUrl, posterFor, previewUrl, type Video } from "@/lib/videos";
 import { cn } from "@/lib/utils";
 
 /* ── the tiles ────────────────────────────────────────────────────
@@ -148,6 +148,28 @@ function Tile({
 }) {
   const poster = posterFor(video);
 
+  /* The film plays under the pointer, muted, from its best passage
+     (`previewAt`), until the tile is pressed and it opens properly. Only
+     where there is a pointer to hover with, and only after it has rested
+     on the tile for a moment, so a pass across the row does not start
+     four players. The player sits over the still with pointer events
+     off, so the tile keeps its hover and its click. Julian asked. */
+  const [previewing, setPreviewing] = React.useState(false);
+  const rest = React.useRef(0);
+  const hoverable = () =>
+    window.matchMedia("(hover: hover) and (pointer: fine)").matches &&
+    !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const enter = () => {
+    if (!hoverable()) return;
+    window.clearTimeout(rest.current);
+    rest.current = window.setTimeout(() => setPreviewing(true), 350);
+  };
+  const leave = () => {
+    window.clearTimeout(rest.current);
+    setPreviewing(false);
+  };
+  React.useEffect(() => () => window.clearTimeout(rest.current), []);
+
   if (playing) {
     return (
       <div className={cn("relative aspect-video overflow-hidden bg-card", box)}>
@@ -173,6 +195,10 @@ function Tile({
     <button
       type="button"
       onClick={onPlay}
+      onPointerEnter={enter}
+      onPointerLeave={leave}
+      onFocus={enter}
+      onBlur={leave}
       aria-label={`Play ${video.title}`}
       data-ring="Play"
       // `group` drives two things: the picture's zoom and the play mark
@@ -203,6 +229,17 @@ function Tile({
           // archive, so the loader that rewrites archive paths must not touch
           // them — `unoptimized` hands the URL through as it is.
           unoptimized
+        />
+      ) : null}
+
+      {previewing ? (
+        <iframe
+          src={previewUrl(video)}
+          title=""
+          aria-hidden
+          tabIndex={-1}
+          allow="autoplay; encrypted-media"
+          className="pointer-events-none absolute inset-0 h-full w-full border-0 animate-in fade-in duration-500"
         />
       ) : null}
 

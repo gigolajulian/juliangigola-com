@@ -86,8 +86,16 @@ export function VideoShowcase({
           {section.films.length === 1 ? "film" : "films"}
         </p>
       </div>,
-      <div key={section.id} className="w-full shrink-0 sm:h-full sm:w-auto">
-        <VideoGrid videos={section.films} onOpen={setOpen} rows />
+      /* Two thirds of the height, centred, so the reel shows above and
+         below the films as well as between them. Julian asked for the
+         tiles smaller so the background is seen. */
+      <div
+        key={section.id}
+        className="w-full shrink-0 sm:flex sm:h-full sm:w-auto sm:items-center"
+      >
+        <div className="sm:h-[62%]">
+          <VideoGrid videos={section.films} onOpen={setOpen} rows />
+        </div>
       </div>,
     );
   }
@@ -165,7 +173,8 @@ function ReelBackdrop({
       className="reel-backdrop pointer-events-none fixed inset-0 -z-10 overflow-hidden"
     >
       <iframe
-        src={`https://player.vimeo.com/video/${REEL.videoId}?background=1&autoplay=1&loop=1&muted=1&dnt=1`}
+        // From two seconds in, past the slate. Julian asked.
+        src={`https://player.vimeo.com/video/${REEL.videoId}?background=1&autoplay=1&loop=1&muted=1&dnt=1#t=2s`}
         title={REEL.title}
         allow="autoplay; encrypted-media"
         tabIndex={-1}

@@ -46,6 +46,13 @@ export type Video = {
    * admin panel looked up when the link was pasted.
    */
   poster?: string;
+  /**
+   * Where a hover preview starts, in seconds: a few seconds of the film's
+   * best passage, muted, under the pointer on the motion page. Set per film
+   * in `content/site.json`; a film without one starts a little way in,
+   * past the slate.
+   */
+  previewAt?: number;
 };
 
 /**
@@ -202,6 +209,17 @@ export const embedUrl = (v: Video): string =>
   v.provider === "youtube"
     ? `https://www.youtube-nocookie.com/embed/${v.videoId}?autoplay=1&rel=0&modestbranding=1&playsinline=1`
     : `https://player.vimeo.com/video/${v.videoId}?autoplay=1&dnt=1&title=0&byline=0&portrait=0`;
+
+/** A film under the pointer: muted, no chrome, looping from its best
+    passage. Both players take a start time; Vimeo's background mode has no
+    controls to hide, YouTube's are switched off and its loop needs the
+    film named as its own playlist. */
+export const previewUrl = (v: Video): string => {
+  const at = Math.max(0, Math.round(v.previewAt ?? 8));
+  return v.provider === "youtube"
+    ? `https://www.youtube-nocookie.com/embed/${v.videoId}?autoplay=1&mute=1&controls=0&start=${at}&loop=1&playlist=${v.videoId}&rel=0&modestbranding=1&playsinline=1&disablekb=1`
+    : `https://player.vimeo.com/video/${v.videoId}?background=1&autoplay=1&loop=1&muted=1&dnt=1#t=${at}s`;
+};
 
 /** Where the video lives, for the visitor who would rather watch it there. */
 export const watchUrl = (v: Video): string =>

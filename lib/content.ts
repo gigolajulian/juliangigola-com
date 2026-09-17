@@ -274,6 +274,12 @@ function video(v: unknown, path: string): Video {
     client: optional(v.client, `${path}.client`),
     year: year(v.year, `${path}.year`),
     poster: posterOrUndefined(v.poster, `${path}.poster`),
+    previewAt:
+      v.previewAt === undefined
+        ? undefined
+        : typeof v.previewAt === "number" && v.previewAt >= 0
+          ? v.previewAt
+          : fail(`${path}.previewAt`, "seconds, 0 or more", v.previewAt),
   };
 }
 
