@@ -37,15 +37,11 @@ const subscribeHoverable = (onChange: () => void) => {
 export function WorkBand({
   project,
   index,
-  /** The cells above the fold on most screens: fetched at once, but not
-      preloaded ahead of the hero. */
-  eager = false,
 }: {
   /** Trimmed on the server to the cover, three frames and the plate's words
       — which three, and why, is with `bandTile` in `lib/work.ts`. */
   project: BandTile;
   index: number;
-  eager?: boolean;
 }) {
   const frames = project.frames;
 
@@ -164,13 +160,18 @@ export function WorkBand({
             alt={project.cover.alt || project.name}
             fill
             sizes="(min-width: 1024px) 33vw, (min-width: 768px) 50vw, 100vw"
-            loading={eager ? "eager" : "lazy"}
+            /* Lazy even above the fold: React's server renderer preloads
+               every non-lazy image, and three tiles preloaded beside the
+               hero were competing with it on a phone, where they are
+               below it. A lazy image in view is still fetched as soon as
+               the page is laid out. */
+            loading="lazy"
             // The blur-up under it while it loads, and — below the fold,
             // where it is not the largest paint — a fade in when it lands
             // rather than a pop. See `photo-fade.tsx`.
             placeholder={project.cover.blur ? "blur" : "empty"}
             blurDataURL={project.cover.blur}
-            data-fade={eager ? undefined : ""}
+            data-fade=""
             className="object-cover"
           />
 

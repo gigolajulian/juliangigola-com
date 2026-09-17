@@ -125,9 +125,6 @@ export default function Home() {
                       <WorkBand
                         project={bandTile(project)}
                         index={from + i}
-                        // Eager, not preloaded: on a phone the band is
-                        // below the hero and was competing with it.
-                        eager={r === 0 && i < 3}
                       />
                     </div>
                   ))}
