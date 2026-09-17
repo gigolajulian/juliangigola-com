@@ -681,6 +681,10 @@ export function Strip({
       band = over ? requestAnimationFrame(relax) : 0;
     };
     const push = (by: number) => {
+      /* A strip with one screen in it and nowhere to lead on has nothing
+         to stretch against: the band was give with nothing behind it,
+         which reads as the page wobbling. Julian asked for it gone. */
+      if (room() < 1 && !(by > 0 ? nextHref : prevHref)) return;
       over += by;
       pushed = performance.now();
       delete el.dataset.release;
