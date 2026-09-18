@@ -609,6 +609,18 @@
       "/work/poise/13.jpg",
       "/work/poise/15.jpg",
       "/work/poise/16.jpg"
+    ],
+    "rouge": [
+      "/work/rouge/01.jpg",
+      "/work/rouge/02.jpg",
+      "/work/rouge/03.jpg",
+      "/work/rouge/04.jpg",
+      "/work/rouge/05.jpg",
+      "/work/rouge/06.jpg",
+      "/work/rouge/07.jpg",
+      "/work/rouge/08.jpg",
+      "/work/rouge/09.jpg",
+      "/work/rouge/10.jpg"
     ]
   },
   "hidden": [],
