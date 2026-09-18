@@ -585,13 +585,13 @@
     ],
     "iris": [
       "/work/iris/01.jpg",
+      "/work/iris/08.jpg",
       "/work/iris/07.jpg",
       "/work/iris/02.jpg",
-      "/work/iris/03.jpg",
       "/work/iris/04.jpg",
       "/work/iris/05.jpg",
       "/work/iris/06.jpg",
-      "/work/iris/08.jpg",
+      "/work/iris/03.jpg",
       "/work/iris/09.jpg",
       "/work/iris/10.jpg",
       "/work/iris/11.jpg"
@@ -621,6 +621,25 @@
       "/work/rouge/08.jpg",
       "/work/rouge/09.jpg",
       "/work/rouge/10.jpg"
+    ],
+    "torteline": [
+      "/work/torteline/05.jpg",
+      "/work/torteline/01.jpg",
+      "/work/torteline/02.jpg",
+      "/work/torteline/03.jpg",
+      "/work/torteline/04.jpg",
+      "/work/torteline/06.jpg",
+      "/work/torteline/07.jpg",
+      "/work/torteline/08.jpg",
+      "/work/torteline/09.jpg",
+      "/work/torteline/10.jpg",
+      "/work/torteline/11.jpg",
+      "/work/torteline/12.jpg",
+      "/work/torteline/13.jpg",
+      "/work/torteline/14.jpg",
+      "/work/torteline/15.jpg",
+      "/work/torteline/17.jpg",
+      "/work/torteline/16.jpg"
     ]
   },
   "hidden": [],
