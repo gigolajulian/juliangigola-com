@@ -92,6 +92,26 @@ export function PointerRing() {
         word.current.textContent = on?.getAttribute("data-ring") ?? "";
       }
     };
+    /* The pointer left the window. Julian: the word should not be left
+       hanging over the page with no pointer under it — which is what
+       happened on the way to a bookmark or another window, because the
+       last `pointermove` inside the page was over something with a word
+       and nothing since said otherwise. `relatedTarget` is null exactly
+       when the pointer has gone out of the document rather than into
+       another element, and `blur` covers the window losing focus without
+       the pointer crossing an edge: alt-tab, a screenshot tool, the
+       browser's own chrome. The word fades on its own transition, and
+       moving back in writes it again. */
+    const away = () => {
+      if (!over) return;
+      over = null;
+      el.removeAttribute("data-over");
+      el.removeAttribute("data-pressed");
+    };
+    const left = (e: PointerEvent) => {
+      if (e.relatedTarget === null) away();
+    };
+
     const down = () => {
       if (over) el.setAttribute("data-pressed", "");
     };
@@ -108,12 +128,16 @@ export function PointerRing() {
     document.addEventListener("pointerdown", down, { passive: true });
     document.addEventListener("pointerup", up, { passive: true });
     document.addEventListener("pointercancel", up, { passive: true });
+    document.addEventListener("pointerout", left, { passive: true });
+    window.addEventListener("blur", away);
     return () => {
       document.removeEventListener("pointermove", move);
       document.removeEventListener("pointerover", move);
       document.removeEventListener("pointerdown", down);
       document.removeEventListener("pointerup", up);
       document.removeEventListener("pointercancel", up);
+      document.removeEventListener("pointerout", left);
+      window.removeEventListener("blur", away);
     };
     // On `mounted`, not `[]`: the first render on a hydrated page returns
     // null, so `ref.current` is empty when this first runs and the listeners

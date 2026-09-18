@@ -934,7 +934,6 @@ export function AdminEditor({
     () => ({
       people,
       faces,
-      token,
       onFace: (
         handle: string,
         picture: { base64: string; preview: string; bytes: number } | null,
@@ -965,7 +964,7 @@ export function AdminEditor({
         setAvatars((a) => ({ ...a, [handle]: path }));
       },
     }),
-    [people, faces, token],
+    [people, faces],
   );
 
   /* Three columns from `xl`: the site on the left, the work in the middle,

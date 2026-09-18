@@ -54,8 +54,6 @@ export type CreditDeskValue = {
   people: CreditBook;
   /** Handle to a path under `public/`, or a staged data URL. */
   faces: Record<string, string>;
-  /** The GitHub token, which is also what the avatar route accepts. */
-  token: string;
   /** A picture for a handle: base64 JPEG bytes, or null to forget it. */
   onFace: (
     handle: string,
@@ -266,54 +264,25 @@ export const tidyCredits = (credits: Credit[]): Credit[] =>
     }));
 
 /* ── a collaborator's face ────────────────────────────────────────
- * The circle beside a handle. Empty, it is a button: press it and the site
- * asks Instagram for that profile's picture the way a chat app does when
- * you paste a profile into it, and keeps a copy. Instagram answers a
- * logged-out browser with nothing, so this goes through `/api/avatar` on
- * the server, and it happens once — the copy is committed with the site and
- * the live pages never ask Instagram anything.
+ * The circle beside a handle: the profile photograph the hover card on a
+ * project page draws, saved with the site as `public/people/<handle>.jpg`.
  *
- * When it will not answer, the same circle takes a file. A photograph saved
- * by hand is a perfectly good answer and the panel should not be a dead end
- * because somebody else's servers had an opinion.
+ * Fetching it is not a button here, and that is measured rather than
+ * chosen: Instagram answers a request from a home connection and refuses
+ * one from a datacentre. From a Worker on Cloudflare's edge every user
+ * agent came back 429, and two public proxies came back 429 and 403. So
+ * the collecting is `scripts/faces.mjs`, run on Julian's own machine,
+ * which fetches every credited handle at once and commits the results.
+ *
+ * This is the other half: one face, chosen by hand, for somebody the
+ * script could not reach — a private account, or a picture Julian would
+ * rather choose himself.
  * ─────────────────────────────────────────────────────────────── */
 function Face({ desk, handle }: { desk: CreditDeskValue; handle: string }) {
   const [busy, setBusy] = React.useState(false);
   const [said, setSaid] = React.useState("");
   const file = React.useRef<HTMLInputElement>(null);
   const has = handle ? desk.faces[handle] : "";
-
-  const fetchIt = async () => {
-    if (!handle || busy) return;
-    setBusy(true);
-    setSaid("");
-    try {
-      const res = await fetch("/api/avatar", {
-        method: "POST",
-        headers: {
-          "content-type": "application/json",
-          authorization: `Bearer ${desk.token}`,
-        },
-        body: JSON.stringify({ handle }),
-      });
-      const body = (await res.json()) as {
-        src?: string;
-        bytes?: number;
-        error?: string;
-      };
-      if (!body.src) throw new Error(body.error ?? "No picture.");
-      desk.onFace(handle, {
-        base64: body.src.split(",")[1] ?? "",
-        preview: body.src,
-        bytes: body.bytes ?? 0,
-      });
-    } catch (e) {
-      // Said once, beside the circle, and the file picker is right there.
-      setSaid(e instanceof Error ? e.message : "Could not fetch it.");
-    } finally {
-      setBusy(false);
-    }
-  };
 
   const chosen = async (f: File | undefined) => {
     if (!f || !handle) return;
@@ -339,13 +308,13 @@ function Face({ desk, handle }: { desk: CreditDeskValue; handle: string }) {
       <button
         type="button"
         disabled={!handle || busy}
-        onClick={() => void fetchIt()}
+        onClick={() => file.current?.click()}
         title={
           handle
-            ? "Fetch this profile's picture from Instagram"
+            ? "Choose this person's picture. `scripts/faces.mjs` fetches them all."
             : "Add the handle first"
         }
-        aria-label={`Profile picture for ${handle || "this credit"}`}
+        aria-label={`Picture for ${handle || "this credit"}`}
         className="size-10 shrink-0 overflow-hidden rounded-full border border-border bg-card press disabled:opacity-30"
       >
         {has ? (
@@ -357,25 +326,15 @@ function Face({ desk, handle }: { desk: CreditDeskValue; handle: string }) {
           </span>
         )}
       </button>
-      <span className="flex flex-col">
+      {has ? (
         <button
           type="button"
-          disabled={!handle || busy}
-          onClick={() => file.current?.click()}
-          className="label text-left text-muted-foreground underline-offset-4 press hoverable:hover:underline disabled:opacity-30"
+          onClick={() => desk.onFace(handle, null)}
+          className="label text-muted-foreground underline-offset-4 press hoverable:hover:underline"
         >
-          {has ? "Replace" : "Or choose"}
+          Remove
         </button>
-        {has ? (
-          <button
-            type="button"
-            onClick={() => desk.onFace(handle, null)}
-            className="label text-left text-muted-foreground underline-offset-4 press hoverable:hover:underline"
-          >
-            Remove
-          </button>
-        ) : null}
-      </span>
+      ) : null}
       {said ? (
         <span className="label max-w-40 text-muted-foreground">{said}</span>
       ) : null}
