@@ -786,8 +786,10 @@ nav[aria-label="Categories"] ul[data-more] {
     border-left: 0;
     padding-left: 0.75rem;
   }
+  /* Julian: the name of the discipline you are looking at, half again as
+     big. It is the one word on the page that says which filter is on. */
   .strip-grid > :where(div, section, article):not([data-hash="enquire"]) h2 {
-    font-size: 1.5rem;
+    font-size: 2.25rem;
     line-height: 1;
   }
   /* The ask is the exception: a sentence, two buttons and the way on to the
