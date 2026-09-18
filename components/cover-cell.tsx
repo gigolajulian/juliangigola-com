@@ -125,7 +125,16 @@ export function CoverCell({
           placeholder={row.cover.blur ? "blur" : "empty"}
           blurDataURL={row.cover.blur}
           draggable={false}
-          className="strip-frame object-cover"
+          /* Under a pointer the photograph leans in. 1.04 and 500ms: a
+             cover is a large surface and a fast scale on one reads as a
+             jolt, where a slow one reads as the frame taking a step
+             towards you. Transform only, so it stays on the compositor.
+             The easing is on `img[data-fade]` in globals.css, which is an
+             element-and-attribute selector and beats a class: a
+             `transition-[scale]` written here lost to it and the picture
+             jumped to size.
+             Julian asked. */
+          className="strip-frame object-cover hoverable:group-hover:scale-[1.04] motion-reduce:group-hover:scale-100"
         />
 
         {/* The plate: the same material as the bar at the top of every page,
@@ -135,7 +144,7 @@ export function CoverCell({
           so the rack and a phone held sideways get the same plate as a
           full window rather than a stacked variant of their own. Always
           on, because a strip of covers is scanned for a name. */}
-        <div className="cover-plate pointer-events-none absolute -inset-x-px -bottom-px flex h-1/5 min-h-[2.75rem] flex-col justify-center gap-[1.2cqw] border-t border-border/60 glass-surface bg-background/70 px-[4cqw]">
+        <div className="cover-plate pointer-events-none absolute -inset-x-px -bottom-px flex h-1/5 min-h-[2.75rem] flex-col justify-center gap-[1.2cqw] border-t border-border/60 glass-surface bg-background/70 px-[4cqw] transition-[background-color,border-color] duration-500 ease-[var(--ease-out-strong)] hoverable:group-hover:border-border/30 hoverable:group-hover:bg-background/40 motion-reduce:transition-none">
           <span
             style={{ "--n": row.name.length } as React.CSSProperties}
             className="cover-name font-display min-w-0 truncate uppercase leading-[0.9] tracking-[0]"

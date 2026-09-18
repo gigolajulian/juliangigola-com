@@ -222,9 +222,9 @@ function Tile({
           /* A slow zoom, and only the picture moves. 500ms rather than the
              200 a control would take: this is a large surface and a fast
              scale on a photograph reads as a jolt, where a slow one reads as
-             the frame leaning in. Transform and opacity only, so it stays on
-             the compositor. */
-          className="object-cover transition-transform duration-500 ease-[var(--ease-out-strong)] hoverable:group-hover:scale-[1.04] motion-reduce:transition-none motion-reduce:group-hover:scale-100"
+             the frame leaning in. The easing lives on `img[data-fade]` in
+             globals.css, which outranks any transition written here. */
+          className="object-cover hoverable:group-hover:scale-[1.04] motion-reduce:group-hover:scale-100"
           // These are 16:9 thumbnails from a CDN, not frames from the
           // archive, so the loader that rewrites archive paths must not touch
           // them — `unoptimized` hands the URL through as it is.

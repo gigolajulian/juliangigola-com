@@ -2273,9 +2273,16 @@ optgroup {
  * `data-loaded`; without scripting there is nothing to wait for and the
  * picture is simply shown. Not used above the fold — see the component.
  * ─────────────────────────────────────────────────────────────── */
+/* `scale` rides along with the fade, and is declared here rather than on
+   the elements: this selector is an element and an attribute, so it beats
+   any `transition-[scale]` a component writes as a class and the hover
+   zoom jumped to size instead of easing. Measured: transition-property
+   read `opacity` on a cover carrying the class. */
 img[data-fade] {
   opacity: 0;
-  transition: opacity 480ms var(--ease-out-strong);
+  transition:
+    opacity 480ms var(--ease-out-strong),
+    scale 500ms var(--ease-out-strong);
 }
 img[data-fade][data-loaded] {
   opacity: 1;
