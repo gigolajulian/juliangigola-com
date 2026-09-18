@@ -168,7 +168,7 @@ export default function WorkPage() {
       label={`All work: ${COMMISSIONS.length} projects, left and right`}
       marks={MARKS}
       frames={viewer}
-      className="mt-4 max-sm:mt-2 flex-1"
+      className="mt-4 max-sm:mt-2 short:mt-2 flex-1"
     >
       {cells}
     </WorkStrip>
