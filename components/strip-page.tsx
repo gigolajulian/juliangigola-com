@@ -35,7 +35,7 @@ export function StripPage({
       data-quiet-footer
       className={cn(
         "flex min-h-0 flex-col sm:h-full",
-        head && "pt-20 sm:pt-20",
+        head && "pt-20 sm:pt-20 lying:pt-12",
         className,
       )}
     >
@@ -147,7 +147,7 @@ export function StripHead({
   open?: boolean;
 }) {
   return (
-    <header className="mx-auto w-full max-w-[100rem] shrink-0 px-6 sm:px-10">
+    <header className="mx-auto w-full max-w-[100rem] shrink-0 px-6 sm:px-10 lying:px-6">
       <div className="flex items-start justify-between gap-6">
         <div className="w-28 shrink-0 sm:w-44">{crumb}</div>
 
@@ -164,7 +164,7 @@ export function StripHead({
               than swapping the word in place. */}
           <h1
             key={open ? title : undefined}
-            className="font-display line-clamp-2 text-xl uppercase leading-none tracking-[0] sm:line-clamp-none sm:text-3xl"
+            className="font-display line-clamp-2 text-xl uppercase leading-none tracking-[0] sm:line-clamp-none sm:text-3xl lying:text-xl"
           >
             {open
               ? title.split(" ").map((word, i) => (

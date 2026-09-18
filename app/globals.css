@@ -73,6 +73,12 @@
    panel and two in a 342px column: the second printed under the buttons. */
 @custom-variant short (@media (max-height: 52rem) and (min-width: 40rem));
 
+/* A phone held sideways: 852 by 393 is a wide screen by every width test
+   on the site, so the bar, the head and the ruler all took their desktop
+   sizes and left the photographs 172px tall out of 393. Anything this
+   short is a phone, and the chrome gets out of the way. */
+@custom-variant lying (@media (max-height: 30rem) and (min-width: 40rem));
+
 @custom-variant squat (
   @media (min-width: 64rem) and (min-aspect-ratio: 9 / 10) and
     (max-aspect-ratio: 5 / 4)
@@ -805,6 +811,23 @@ nav[aria-label="Categories"] ul[data-more] {
   flex-direction: column;
   align-items: flex-start;
   gap: 0.125rem;
+}
+/* The same wherever a cover comes out narrow, which the rack is not the
+   only way of reaching: a phone held sideways gives the strip 200px of
+   height and the covers follow it down to 150 wide, where `Lost Relic`
+   printed as `L...`. The cell measures itself and the plate reads it. */
+.strip-cell {
+  container-type: inline-size;
+}
+@container (max-width: 15rem) {
+  .cover-plate {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.125rem;
+  }
+  .cover-plate > :first-child {
+    font-size: 1rem;
+  }
 }
 /* Cells arrive from the strip with a height, a width or an aspect of their
    own; in the rack the grid decides all three. */

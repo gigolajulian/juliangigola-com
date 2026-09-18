@@ -145,7 +145,7 @@ export function SiteHeader() {
         open && "border-transparent bg-transparent backdrop-blur-none",
       )}
     >
-      <div className="relative mx-auto flex max-w-[100rem] items-center justify-between px-6 py-3 sm:px-10 sm:py-4">
+      <div className="relative mx-auto flex max-w-[100rem] items-center justify-between px-6 py-3 sm:px-10 sm:py-4 lying:py-1.5">
         <Link
           href="/"
           // On the homepage the name is a way back to the top, not a reload.
@@ -185,7 +185,7 @@ export function SiteHeader() {
           // it brings it back into view, so it is never an invisible focus
           // target.
           className={cn(
-            "font-display text-lg uppercase leading-none tracking-[0] sm:text-2xl",
+            "font-display text-lg uppercase leading-none tracking-[0] sm:text-2xl lying:text-lg",
             // Scaling from the left edge, because that edge is shared with
             // the masthead — growing from the centre would slide the name
             // sideways out of the alignment the handoff depends on.
