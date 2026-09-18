@@ -660,7 +660,9 @@
       "/work/hua/08.jpg"
     ]
   },
-  "hidden": [],
+  "hidden": [
+    "fun-xyz"
+  ],
   "credits": {
     "crave": [
       {
