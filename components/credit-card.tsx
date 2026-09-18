@@ -128,9 +128,20 @@ export function CreditCard({
                 {named && role ? " · " : ""}
                 {role}
               </p>
-              <p className="label mt-3 text-muted-foreground">
+              {/* A line of words saying "Open on Instagram" that could not
+                  be opened. The name that raises the card is a link, but a
+                  pointer that has travelled into the card is already past
+                  it, and this is what it arrives at. Julian found it.
+                  Its own anchor, so pressing the words does what they say. */}
+              <a
+                href={`https://www.instagram.com/${handle}/`}
+                target="_blank"
+                rel="noreferrer"
+                data-ring="Open"
+                className="label mt-3 inline-block text-muted-foreground transition-colors duration-200 hoverable:hover:text-foreground focus-visible:text-foreground"
+              >
                 Open on Instagram &#8599;
-              </p>
+              </a>
             </div>
           </div>
         </HoverCard.Content>
