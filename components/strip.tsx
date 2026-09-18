@@ -319,7 +319,35 @@ export function Strip({
       document.documentElement.dataset.nav === "out";
     if (back) {
       el.dataset.arrive = "back";
+      /* The end of the sequence, not the end of the scroller. Walking
+         back into a filter used to land on whatever the strip finishes
+         with — which since the ask came off the discipline pages is the
+         card naming the *next* project, a screen with no photograph on
+         it. Julian saw that as Event coverage opening blank.
+
+         The end first, because at this point the cells may not have been
+         laid out and `offsetLeft` would read zero for all of them; then a
+         frame later, when they have, back to the last cell the ruler
+         counts. Both are the end of the strip, so there is nothing to
+         see between them. */
       el.scrollLeft = el.scrollWidth;
+      requestAnimationFrame(() => {
+        const cells = Array.from(el.children) as HTMLElement[];
+        const last = cells.reduce(
+          (found, cell, i) => (cell.dataset.tick !== undefined ? i : found),
+          -1,
+        );
+        const where = last >= 0 ? centreOf(el, last) : null;
+        if (where === null) return;
+        const at = Math.max(0, Math.min(el.scrollWidth - el.clientWidth, where));
+        /* A nudge off the end, never a journey: if the cells still have
+           no layout the sum comes out near zero, and moving there would
+           be the strip opening at the start of a sequence somebody is
+           walking backwards into. */
+        if (at < el.scrollLeft && at > el.scrollLeft - el.clientWidth * 1.5) {
+          el.scrollLeft = at;
+        }
+      });
     } else if (zooming) {
       el.dataset.arrive = "zoom";
     } else if (arrive === "none") {

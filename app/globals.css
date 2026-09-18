@@ -844,9 +844,15 @@ a.strip-cell {
   width: auto !important;
   aspect-ratio: auto !important;
 }
-/* Except the covers, which are 4:5 wherever they are printed. A row of the
-   rack gives the height and the frame gives the width. */
-.strip-grid > a {
+/* Except the pictures, which are 4:5 wherever they are printed. A row of
+   the rack gives the height and the frame gives the width.
+
+   A cover is a link and a gallery's frame is a button that opens the
+   viewer — the rule named links only, so a discipline that is one gallery
+   (event coverage, places, automotive) laid every frame out at `auto` and
+   the rack showed one picture or none. Julian asked for it fixed. */
+.strip-grid > a,
+.strip-grid > button {
   height: 100% !important;
   width: calc((100cqh - 1rem) / 2 * 4 / 5) !important;
 }
@@ -866,7 +872,8 @@ a.strip-cell {
     grid-auto-rows: auto;
     align-items: start;
   }
-  .strip-grid > a {
+  .strip-grid > a,
+  .strip-grid > button {
     /* Down the page there is no row to take a height from: the two columns
        set the width and the frame sets the rest. */
     width: auto !important;
