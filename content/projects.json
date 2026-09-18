@@ -687,6 +687,15 @@
       "/work/relay/05.jpg",
       "/work/relay/06.jpg",
       "/work/relay/08.jpg"
+    ],
+    "aera-wraith": [
+      "/work/aera-wraith/01.jpg",
+      "/work/aera-wraith/02.jpg",
+      "/work/aera-wraith/05.jpg",
+      "/work/aera-wraith/04.jpg",
+      "/work/aera-wraith/06.jpg",
+      "/work/aera-wraith/07.jpg",
+      "/work/aera-wraith/03.jpg"
     ]
   },
   "hidden": [
@@ -718,6 +727,23 @@
       },
       {
         "role": "Photographer",
+        "name": "Julian Gigola",
+        "instagram": "juliangigola"
+      }
+    ],
+    "aera-wraith": [
+      {
+        "role": "3D Artist",
+        "name": "Nikoo Sheybani",
+        "instagram": "nikxdesigns"
+      },
+      {
+        "role": "Model",
+        "name": "Anya Fam",
+        "instagram": "rice666s"
+      },
+      {
+        "role": "Direction",
         "name": "Julian Gigola",
         "instagram": "juliangigola"
       }
