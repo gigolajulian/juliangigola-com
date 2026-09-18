@@ -839,6 +839,15 @@ nav[aria-label="Categories"] ul[data-more] {
     padding: 0 3rem;
   }
 }
+/* The name on a plate, sized to the name. A fixed size either set a short
+   title small on a wide cover or cut a long one: `I Wanna Be A Human` came
+   out as `I Wanna Be A Hu...` at the size `Hua` wanted. The count of
+   characters comes in as `--n` and the type takes whichever is smaller, a
+   twelfth of the cover or the width one line of that many condensed caps
+   can have. Nothing measures anything; it is one division. */
+.cover-name {
+  font-size: clamp(0.85rem, min(8.5cqw, calc(118cqw / var(--n, 12))), 3rem);
+}
 /* One plate for every cover, at every size. The rack used to stack the
    credit under the name and a narrow cover used to drop it; the type is
    measured off the cell now, so neither is needed and a cover is the

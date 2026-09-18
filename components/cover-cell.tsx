@@ -135,21 +135,23 @@ export function CoverCell({
           so the rack and a phone held sideways get the same plate as a
           full window rather than a stacked variant of their own. Always
           on, because a strip of covers is scanned for a name. */}
-        <div className="cover-plate pointer-events-none absolute inset-x-0 bottom-0 flex h-1/5 min-h-[2.75rem] items-end justify-between gap-[4cqw] border-t border-border/60 glass-surface bg-background/70 px-[4cqw] py-[3cqw]">
-          <span className="font-display min-w-0 truncate text-[clamp(0.8rem,6.5cqw,2.5rem)] uppercase leading-none tracking-[0]">
+        <div className="cover-plate pointer-events-none absolute inset-x-0 bottom-0 flex h-1/5 min-h-[2.75rem] items-center justify-between gap-[5cqw] border-t border-border/60 glass-surface bg-background/70 px-[4cqw]">
+          <span
+            style={{ "--n": row.name.length } as React.CSSProperties}
+            className="cover-name font-display min-w-0 truncate uppercase leading-[0.9] tracking-[0]"
+          >
             {row.name}
           </span>
-          <span className="label shrink-0 text-[clamp(0.5rem,2.2cqw,0.8125rem)] text-muted-foreground">
-            {row.credit}
-            {/* And how much of it there is. A cover is one photograph; the
-              number is what says it opens onto a body of work. Off on a
-              phone, where the plate is 390px wide and the name is what has
-              to survive. */}
+          {/* The right of the band, set as two right-ranged lines rather
+            than one long one: who it was for, and how much of it there is.
+            Stacked, the column fills the same height the name does and the
+            band has no dead air in it; on one line the two ran together
+            past a slash and left the top half of the plate empty. The
+            count is what says a cover opens onto a body of work. */}
+          <span className="label flex shrink-0 flex-col items-end gap-[0.4em] text-[clamp(0.5rem,2.2cqw,0.8125rem)] leading-none text-muted-foreground">
+            <span className="max-w-[40cqw] truncate">{row.credit}</span>
             {row.frames ? (
-              <span className="max-sm:hidden">
-                <span className="px-1.5 text-muted-foreground/50">/</span>
-                {row.frames} frames
-              </span>
+              <span className="text-muted-foreground/60">{row.frames} frames</span>
             ) : null}
           </span>
         </div>
