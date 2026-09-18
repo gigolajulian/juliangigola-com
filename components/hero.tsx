@@ -804,14 +804,14 @@ export function Hero({
                   are never both legible. */}
               <span
                 aria-hidden
-                className="relative mt-2 block min-h-[2em] text-3xl max-sm:min-h-[1em] max-sm:text-[min(1.875rem,calc((100vw-3rem)*0.058))] sm:mt-3 sm:text-4xl short:min-h-[1em] short:text-2xl short:sm:text-2xl"
+                className="relative mt-2 block min-h-[2em] text-3xl [container-type:inline-size] max-sm:min-h-[1em] max-sm:text-[min(1.875rem,5.8cqw)] sm:mt-3 sm:text-4xl short:min-h-[1em] short:text-2xl short:sm:text-2xl lying:text-[min(1.5rem,5.8cqw)]"
               >
                 {slides.map((discipline, i) =>
                   i === active || i === slide.previous ? (
                     <span
                       key={discipline.slug}
                       className={cn(
-                        "font-display absolute inset-0 text-3xl uppercase leading-none tracking-[0] text-muted-foreground max-sm:whitespace-nowrap max-sm:text-[min(1.875rem,calc((100vw-3rem)*0.058))] sm:text-4xl short:text-2xl short:sm:text-2xl",
+                        "font-display absolute inset-0 text-3xl uppercase leading-none tracking-[0] text-muted-foreground max-sm:whitespace-nowrap max-sm:text-[min(1.875rem,5.8cqw)] sm:text-4xl short:text-2xl short:sm:text-2xl lying:whitespace-nowrap lying:text-[min(1.5rem,5.8cqw)]",
                         i === active
                           ? // On the intro there is no outgoing word and
                             // nothing to wait for, so the first title is
