@@ -68,6 +68,11 @@ export function ContactForm() {
   // can carry, and the visitor never had to type it.
   const presetRef = params.get("ref");
 
+  /* The send button is dead until there is something to send. Julian
+     asked: an enquiry that goes nowhere because a field was missed is
+     an enquiry lost, and the button saying so before it is pressed is
+     cheaper than an error after. */
+  const [ready, setReady] = React.useState(false);
   const [type, setType] = React.useState<string>(
     TYPES.some((t) => t.value === preset) ? (preset as string) : "editorial",
   );
@@ -146,7 +151,21 @@ export function ContactForm() {
     // `gap-6` and four rows of message: the form is a cell of the contact
     // strip now, and at 610px of strip on a 1280x700 laptop the eight-gap
     // version put the send button below the fold of its own box.
-    <form action={formAction} className="flex flex-col gap-6" noValidate>
+    <form
+      action={formAction}
+      /* Whether the form has what it needs, read off the form itself
+         rather than tracked field by field: the inputs already say what
+         they require, and `checkValidity` is the browser answering the
+         same question. `noValidate` turns off the browser's own bubbles,
+         not its validity model, so this keeps working.
+
+         `input` and `change` both, because typing fires one and a radio
+         or an autofill fires the other. */
+      onInput={(e) => setReady(e.currentTarget.checkValidity())}
+      onChange={(e) => setReady(e.currentTarget.checkValidity())}
+      className="flex flex-col gap-6"
+      noValidate
+    >
       {/* The honeypot. Hidden from sight, from the tab order and from
           assistive technology, so anything that fills it is filling every
           input on the page rather than reading the form. `app/contact/actions.ts`
@@ -278,11 +297,18 @@ export function ContactForm() {
       <div className="flex items-center gap-6">
         <button
           type="submit"
-          disabled={pending}
-          className="label action px-6 py-4 press active:scale-[0.97] disabled:opacity-50"
+          disabled={pending || !ready}
+          className="label action px-6 py-4 press active:scale-[0.97]"
         >
           {pending ? "Sending…" : "Enquire"}
         </button>
+        {/* What is still missing, where the button is, and only once
+            there is any reason to say it. */}
+        {!ready && !pending ? (
+          <p className="label text-muted-foreground">
+            Your name, your email and a line about the shoot
+          </p>
+        ) : null}
         <p className="text-xs text-muted-foreground">
           Or email{" "}
           <a

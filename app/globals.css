@@ -2338,6 +2338,22 @@ optgroup {
 .action-quiet:active::before {
   inset: 7px;
 }
+
+/* Off. A button that cannot be pressed yet says so by going quiet: the
+   fill drops back, the label goes with it, and nothing under the pointer
+   answers. It keeps its size, so the row does not move when the form
+   fills up and the button comes alive. */
+.action:disabled,
+.action-quiet:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+@media (hover: hover) and (pointer: fine) {
+  .action:disabled:hover,
+  .action-quiet:disabled:hover {
+    border-color: color-mix(in oklab, var(--foreground) 30%, transparent);
+  }
+}
 @media (prefers-reduced-motion: reduce) {
   .action::before,
   .action-quiet::before {
