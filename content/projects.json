@@ -709,6 +709,28 @@
       "/work/undisputed/09.jpg",
       "/work/undisputed/10.jpg",
       "/work/undisputed/11.jpg"
+    ],
+    "vigil": [
+      "/work/vigil/05.jpg",
+      "/work/vigil/01.jpg",
+      "/work/vigil/02.jpg",
+      "/work/vigil/03.jpg",
+      "/work/vigil/04.jpg",
+      "/work/vigil/06.jpg",
+      "/work/vigil/07.jpg",
+      "/work/vigil/08.jpg"
+    ],
+    "analogue-dreams": [
+      "/work/analogue-dreams/07.jpg",
+      "/work/analogue-dreams/09.jpg",
+      "/work/analogue-dreams/08.jpg",
+      "/work/analogue-dreams/03.jpg",
+      "/work/analogue-dreams/04.jpg",
+      "/work/analogue-dreams/05.jpg",
+      "/work/analogue-dreams/06.jpg",
+      "/work/analogue-dreams/10.jpg",
+      "/work/analogue-dreams/02.jpg",
+      "/work/analogue-dreams/01.jpg"
     ]
   },
   "hidden": [
@@ -757,35 +779,6 @@
       },
       {
         "role": "Direction",
-        "name": "Julian Gigola",
-        "instagram": "juliangigola"
-      }
-    ],
-    "decoy": [
-      {
-        "role": "Photographer",
-        "name": "Julian Gigola",
-        "instagram": "juliangigola"
-      },
-      {
-        "role": "Model",
-        "name": "@symphonypaschal",
-        "instagram": "symphonypaschal"
-      }
-    ],
-    "i-wanna-be-a-human": [
-      {
-        "role": "Model",
-        "name": "Lola Morgan",
-        "instagram": "lolamorganmorgan"
-      },
-      {
-        "role": "Styling and art direction",
-        "name": "Henny Oh",
-        "instagram": "henny__oh"
-      },
-      {
-        "role": "Photographer",
         "name": "Julian Gigola",
         "instagram": "juliangigola"
       }
