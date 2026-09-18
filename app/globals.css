@@ -786,11 +786,12 @@ nav[aria-label="Categories"] ul[data-more] {
     border-left: 0;
     padding-left: 0.75rem;
   }
-  /* Julian: the name of the discipline you are looking at, half again as
-     big. It is the one word on the page that says which filter is on. */
+  /* Julian: the name of the discipline you are looking at, set large. It
+     is the one word on the page that says which filter is on, and at a
+     label's size it read as a caption beside the pictures. */
   .strip-grid > :where(div, section, article):not([data-hash="enquire"]) h2 {
-    font-size: 2.25rem;
-    line-height: 1;
+    font-size: 3rem;
+    line-height: 0.95;
   }
   /* The ask is the exception: a sentence, two buttons and the way on to the
      studio is not a label and does not fit in a slot. */
