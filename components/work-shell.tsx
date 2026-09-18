@@ -438,7 +438,7 @@ export function WorkShell({
           {/* The old site's three dropdowns become one row that can be
               ignored: the default is everything, so nobody has to make a
               choice before they can look at anything. */}
-          <div className="mt-3 flex w-full shrink-0 items-center gap-2 max-sm:mt-1.5 short:mt-1.5 lying:mt-1.5">
+          <div className="mt-3 flex w-full shrink-0 items-center gap-2 tablet:mt-1.5 max-sm:mt-1.5 short:mt-1.5 lying:mt-1.5">
             <nav aria-label="Categories" className="min-w-0 flex-1">
               {/* The padding is the list's, not the bar's: at the bar's edge
                 the chips would stop dead against 24px of nothing, and a

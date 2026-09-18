@@ -1183,7 +1183,10 @@ export function Strip({
   };
 
   return (
-    <div className={cn("flex min-h-0 flex-col", className)}>
+    /* `strip-band` carries the tablet and phone squeeze: the pages set
+       `mt-4` on this and a coarse window cannot spare it. In CSS rather
+       than a variant here, because the margin arrives from the page. */
+    <div className={cn("strip-band flex min-h-0 flex-col", className)}>
       <div
         ref={scroller}
         tabIndex={0}
@@ -1253,7 +1256,7 @@ export function Strip({
           /* `min-h-5`, so the row is the same height with a client's mark
              in it and without one: the strip above is `flex-1` and would
              otherwise give up four pixels every time a mark appeared. */
-          "mt-6 flex min-h-3 items-end gap-6 px-6 sm:px-10 lying:mt-2",
+          "mt-6 flex min-h-3 items-end gap-6 px-6 max-sm:mt-3 sm:px-10 tablet:mt-3 lying:mt-2",
           stack && "max-sm:hidden",
         )}
       >

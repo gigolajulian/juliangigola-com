@@ -582,6 +582,19 @@ body:has([data-quiet-footer]) .site-footer-body {
      a cover that was fighting for 20. */
   padding-block: 0.75rem;
 }
+/* And less again where the window is a tablet or a phone, which is where
+   the photographs have least to spare. Julian asked. */
+@media (pointer: coarse) and (min-width: 40rem), (max-width: 40rem) {
+  body:has([data-quiet-footer]) .site-footer-body {
+    padding-block: 0.4rem;
+  }
+  .strip-band {
+    /* The gap the pages leave between the chip row and the first
+       photograph. A desktop can afford 16px of it; a tablet held in two
+       hands cannot. */
+    margin-top: 0.5rem;
+  }
+}
 body:has([data-quiet-footer]) .site-footer-row {
   margin-top: 0;
   border-top: 0;
