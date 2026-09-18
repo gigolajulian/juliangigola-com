@@ -76,47 +76,45 @@ export default function WorkPage() {
 
     const gallery = projectsIn(c.slug).find(isDisciplineGallery);
     if (gallery) {
+      /* A discipline Julian shoots straight onto the page opens the way
+         every other discipline opens: on its name. It used to open on one
+         of its own photographs with the name of the discipline written
+         across the plate, which read as a project called Event Coverage
+         sitting in a row of projects. The words are the divider and the
+         frames run out behind them. Julian asked.
+
+         Cover art is in this now too. It stood as a single sleeve for
+         twenty four releases; it shows them. Front faces here, which is
+         what a rack shows — the backs are on its own page, where a sleeve
+         turns over under the pointer. */
       const isCoverArt = gallery.slug === COVER_ART?.slug;
-      const n = isCoverArt ? COVER_RELEASES.length : gallery.images.length;
+      const frames = isCoverArt
+        ? COVER_RELEASES.map((r) => r.frames[0])
+        : gallery.images;
       cells.push(
-        <CoverCell
+        <GroupCell
           key={c.slug}
-          row={{
-            ...indexRow(gallery),
-            name: c.name,
-            credit: `${n} ${isCoverArt ? "releases" : "frames"}`,
-            // The credit is already the count here; saying it twice on one
-            // plate is how "40 frames / 40 frames" happens.
-            frames: undefined,
-          }}
+          name={c.name}
+          count={`${frames.length} ${isCoverArt ? "releases" : "frames"}`}
           href={c.href}
-          label={c.name}
           hash={c.slug}
           i={i++}
-          eager={i < 4}
+          cta={isCoverArt ? "See the covers" : "See them all"}
         />,
       );
-      /* And the rest of the set behind that first one. Julian: a
-         discipline he shoots straight onto the page should show all of
-         its frames here, not one picture standing for twenty. Cover art
-         is the exception and stays a single cell: it is a catalogue with
-         its own rack on its own page. */
-      if (!isCoverArt) {
-        for (const frame of gallery.images.slice(1)) {
-          cells.push(
-            <FrameCell
-              key={frame.src}
-              frame={frame}
-              n={viewer.push(frame) - 1}
-              name={c.name}
-              i={i++}
-            />,
-          );
-        }
+      for (const frame of frames) {
+        cells.push(
+          <FrameCell
+            key={frame.src}
+            frame={frame}
+            n={viewer.push(frame) - 1}
+            name={c.name}
+            i={i++}
+          />,
+        );
       }
       continue;
     }
-
     const run = commissionsIn(c.slug);
     if (!run.length) continue;
     cells.push(
