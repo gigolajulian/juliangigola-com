@@ -878,6 +878,49 @@ nav[aria-label="Categories"] ul[data-more] {
     font-size: 1.875rem;
   }
 }
+/* ── the turn of a chapter ──
+   The three lines of an "Up next" cell, driven by the scroller rather than
+   by a timer: `view()` is the cell's own position in the strip, so the
+   words lie back while the cell is out at the edge, arrive as it reaches
+   the middle, and go back the way they came if the wheel does. The eyebrow
+   leads, the name follows it, the count follows that.
+
+   The resting state here is the arrived state, so a browser with no
+   scroll-driven animations shows three lines of words and nothing is
+   missing. Same for a reader who has asked for less movement. */
+.up-next-eyebrow,
+.up-next-name,
+.up-next-count {
+  opacity: 1;
+  translate: 0 0;
+}
+@supports (animation-timeline: view()) {
+  @media not (prefers-reduced-motion: reduce) {
+    .up-next-eyebrow,
+    .up-next-name,
+    .up-next-count {
+      animation: up-next linear both;
+      animation-timeline: view(inline);
+      animation-range: entry 10% contain 40%;
+    }
+    .up-next-name {
+      animation-range: entry 20% contain 55%;
+    }
+    .up-next-count {
+      animation-range: entry 30% contain 70%;
+    }
+  }
+}
+@keyframes up-next {
+  from {
+    opacity: 0;
+    translate: 2.5rem 0;
+  }
+  to {
+    opacity: 1;
+    translate: 0 0;
+  }
+}
 /* The name on a plate, sized to the name. A fixed size either set a short
    title small on a wide cover or cut a long one: `I Wanna Be A Human` came
    out as `I Wanna Be A Hu...` at the size `Hua` wanted. The count of
