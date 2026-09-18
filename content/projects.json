@@ -595,6 +595,20 @@
       "/work/iris/09.jpg",
       "/work/iris/10.jpg",
       "/work/iris/11.jpg"
+    ],
+    "poise": [
+      "/work/poise/09.jpg",
+      "/work/poise/01.jpg",
+      "/work/poise/02.jpg",
+      "/work/poise/05.jpg",
+      "/work/poise/06.jpg",
+      "/work/poise/07.jpg",
+      "/work/poise/08.jpg",
+      "/work/poise/10.jpg",
+      "/work/poise/12.jpg",
+      "/work/poise/13.jpg",
+      "/work/poise/15.jpg",
+      "/work/poise/16.jpg"
     ]
   },
   "hidden": [],
@@ -612,6 +626,18 @@
       },
       {
         "role": "Direction",
+        "name": "Julian Gigola",
+        "instagram": "juliangigola"
+      }
+    ],
+    "poise": [
+      {
+        "role": "Model",
+        "name": "Anya Fam",
+        "instagram": "rice666s"
+      },
+      {
+        "role": "Photographer",
         "name": "Julian Gigola",
         "instagram": "juliangigola"
       }
