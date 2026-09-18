@@ -657,7 +657,11 @@ export function Hero({
                plate 555px tall is off here (see the nav below) — the ticks
                are the same control at a thumb's size. Denser ground than the
                stacked default so the type holds on a bright frame. */
-            "tall:bg-background/[0.72]",
+            /* Julian: thirty per cent less of it on a phone. 72 down to
+               50, so more of the photograph comes through the band under
+               it — the name and the phase are display weight over a deep
+               blur and hold at that. */
+            "tall:bg-background/[0.5]",
             /* Less thin and less blurred where the panel is a full column.
 
                At 45% over a 40px blur the panel became a smear rather than a
@@ -800,14 +804,14 @@ export function Hero({
                   are never both legible. */}
               <span
                 aria-hidden
-                className="relative mt-2 block min-h-[2em] text-3xl max-sm:min-h-[1em] max-sm:text-[min(1.875rem,calc((100vw-3rem)*0.072))] sm:mt-3 sm:text-4xl short:min-h-[1em] short:text-2xl short:sm:text-2xl"
+                className="relative mt-2 block min-h-[2em] text-3xl max-sm:min-h-[1em] max-sm:text-[min(1.875rem,calc((100vw-3rem)*0.058))] sm:mt-3 sm:text-4xl short:min-h-[1em] short:text-2xl short:sm:text-2xl"
               >
                 {slides.map((discipline, i) =>
                   i === active || i === slide.previous ? (
                     <span
                       key={discipline.slug}
                       className={cn(
-                        "font-display absolute inset-0 text-3xl uppercase leading-none tracking-[0] text-muted-foreground max-sm:whitespace-nowrap max-sm:text-[min(1.875rem,calc((100vw-3rem)*0.072))] sm:text-4xl short:text-2xl short:sm:text-2xl",
+                        "font-display absolute inset-0 text-3xl uppercase leading-none tracking-[0] text-muted-foreground max-sm:whitespace-nowrap max-sm:text-[min(1.875rem,calc((100vw-3rem)*0.058))] sm:text-4xl short:text-2xl short:sm:text-2xl",
                         i === active
                           ? // On the intro there is no outgoing word and
                             // nothing to wait for, so the first title is

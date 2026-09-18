@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { Strip, StripView, type Lead } from "@/components/strip";
+import { Strip, StripView, useWide, type Lead } from "@/components/strip";
 import { VideoGrid } from "@/components/video-grid";
 import { VideoViewer } from "@/components/video-viewer";
 import { REEL, filmCount, type Video } from "@/lib/videos";
@@ -172,11 +172,18 @@ function ReelBackdrop({
     };
   }, [scroller]);
 
+  const wide = useWide();
+
   /* In the rack there is no scroll along the reel to dim it, so the film
      playing behind stayed bright under a grid of stills and its titles
      read through the page as a ghost. The rack is a catalogue; the reel
      belongs to the strip. */
   if (React.useContext(StripView) === "grid") return null;
+  /* And not on a phone at all. Julian asked for it gone there: it is a
+     Vimeo player streaming a film behind a page nobody came to watch a
+     film on, over whatever connection a phone has, and the veil over it
+     is thickest exactly where the screen is smallest. */
+  if (!wide) return null;
 
   return (
     <div

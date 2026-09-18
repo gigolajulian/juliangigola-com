@@ -130,7 +130,7 @@ const subscribeWide = (onChange: () => void) => {
   mq.addEventListener("change", onChange);
   return () => mq.removeEventListener("change", onChange);
 };
-const useWide = () =>
+export const useWide = () =>
   React.useSyncExternalStore(
     subscribeWide,
     () => window.matchMedia(WIDE).matches,
