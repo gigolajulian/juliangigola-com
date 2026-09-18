@@ -475,7 +475,7 @@ export function WorkShell({
                 <span
                   ref={pill}
                   aria-hidden
-                  className="pointer-events-none absolute left-0 top-0 rounded-full bg-foreground opacity-0 transition-[transform,width,height] duration-300 ease-[var(--ease-out-strong)] motion-reduce:transition-none"
+                  className="pointer-events-none absolute left-0 top-0 bg-foreground opacity-0 transition-[transform,width,height] duration-300 ease-[var(--ease-out-strong)] motion-reduce:transition-none"
                 />
                 <li
                   ref={all && shown === null ? lit : undefined}
@@ -548,21 +548,22 @@ function Chip({
   children: React.ReactNode;
 }) {
   /* Chips. The chosen filter is filled, ink on ground, which is the one
-     mark that can be found at a glance in a row of eleven; the rest
-     light up as a soft pill under a pointer. */
+     mark that can be found at a glance in a row of eleven; the rest take a
+     hairline under the pointer rather than a wash, so the row is the same
+     square family as the buttons. */
   const className = cn(
     /* A thumb's worth of chip on a phone, where the row scrolls and a
        mis-tap is a filter nobody asked for; the desktop keeps the line
        thin, because the pointer is exact and the band is height the
        photographs would rather have. */
-    "label block whitespace-nowrap rounded-full px-3 py-1.5 max-sm:py-3",
-    "transition-[color,background-color,transform] duration-200 ease-[var(--ease-out-strong)]",
+    "label block whitespace-nowrap border border-transparent px-3 py-1.5 max-sm:py-3",
+    "transition-[color,background-color,border-color,transform] duration-200 ease-[var(--ease-out-strong)]",
     // A chip lifts a touch under the pointer and gives under the press;
     // the lit one is drawn by the pill sliding beneath the row.
     "hoverable:hover:scale-[1.05] active:scale-[0.96] motion-reduce:hover:scale-100",
     active
       ? "text-background"
-      : "text-muted-foreground hoverable:hover:bg-foreground/[0.07] hoverable:hover:text-foreground focus-visible:bg-foreground/[0.07] focus-visible:text-foreground",
+      : "text-muted-foreground hoverable:hover:border-foreground/40 hoverable:hover:text-foreground focus-visible:border-foreground/40 focus-visible:text-foreground",
   );
   return (
     <Link

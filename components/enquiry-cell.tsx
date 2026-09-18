@@ -85,7 +85,7 @@ export function EnquiryCell({
         <div className="flex flex-wrap items-center gap-3">
           <Link
             href={href}
-            className="label action rounded-full px-6 py-4 press active:scale-[0.97]"
+            className="label action px-6 py-4 press active:scale-[0.97]"
           >
             Enquire
           </Link>
@@ -93,7 +93,7 @@ export function EnquiryCell({
             <Link
               prefetch={false}
               href={secondary.href}
-              className="label action-quiet rounded-full px-6 py-4 press active:scale-[0.97]"
+              className="label action-quiet px-6 py-4 press active:scale-[0.97]"
             >
               {secondary.label}
             </Link>
