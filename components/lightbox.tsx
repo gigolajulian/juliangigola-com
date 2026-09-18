@@ -4,7 +4,7 @@ import * as React from "react";
 import { flushSync } from "react-dom";
 import Image from "next/image";
 import { Dialog, VisuallyHidden } from "radix-ui";
-import { rubberband } from "@/lib/utils";
+import { cn, rubberband } from "@/lib/utils";
 import type { Frame } from "@/lib/work-types";
 import {
   zoomOpen,
@@ -556,12 +556,12 @@ export function Lightbox({
 
 
 /* ── scroll to zoom, drag to look around ──────────────────────────
- * A wheel over the picture zooms it, from six tenths out to three times
- * in, and the point under the pointer stays where it is: zoom towards a
- * face and the face is what grows, not the middle of the frame. Past
- * actual size the picture is bigger than its box, so the hand moves it
- * and the box clips. The offset is clamped to the overhang, so a photo
- * can never be dragged off its own frame and left as a strip of black.
+ * A wheel over the picture zooms it, up to three times in and never
+ * smaller than it arrived: fitted to the window is the photograph, and
+ * anything under that is a picture sitting in a hole. The point under
+ * the pointer stays where it is, so zooming towards a face grows the
+ * face and not the middle of the frame, and past fit the hand moves it
+ * with the offset held to the overhang, so it cannot be dragged away.
  *
  * The transform goes on a wrapper of its own, between the box and the
  * picture. `lib/zoom.ts` flies the box and animates the picture inside it,
@@ -569,7 +569,7 @@ export function Lightbox({
  * zoom written to either of them is set and then ignored. Measured before
  * the wrapper: scale 1.9 in state, matrix(1, 0, 0, 1, 0, 0) on screen.
  * ─────────────────────────────────────────────────────────────── */
-const ZOOM_MIN = 0.6;
+const ZOOM_MIN = 1;
 const ZOOM_MAX = 3;
 
 function useZoom(box: React.RefObject<HTMLDivElement | null>, key: string) {
@@ -720,7 +720,7 @@ function Stage({
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
-      className="flex min-h-0 flex-1 items-center justify-center p-4 sm:p-10"
+      className="flex min-h-0 flex-1 items-center justify-center overflow-hidden p-4 sm:p-10"
     >
       {/* What the finger moves. Stays mounted across a step, so the offset
           it was released at is where the next frame starts from. */}
@@ -737,11 +737,21 @@ function Stage({
         {/* The box the trip transforms: exactly the picture, clipped. */}
         <div
           data-zoom-box
-          className="relative shrink-0 overflow-hidden bg-cover bg-center"
+          className={cn(
+            "relative shrink-0 bg-cover bg-center",
+            /* Clipped at its own edge while it is the size it was fitted
+               to, and not once a wheel has been over it: a zoom is
+               allowed the whole viewer, which on an upright photograph
+               is most of the window either side of the frame. The stage
+               clips instead. Julian asked. */
+            zoom.scale === 1 && "overflow-hidden",
+          )}
           style={{
             ...(size ? { width: size.w, height: size.h } : { width: 0, height: 0 }),
-            backgroundColor: frame.color,
-            ...(under ? { backgroundImage: `url("${under}")` } : null),
+            backgroundColor: zoom.scale === 1 ? frame.color : "transparent",
+            ...(under && zoom.scale === 1
+              ? { backgroundImage: `url("${under}")` }
+              : null),
           }}
         >
           <div style={zoom.style} className="h-full w-full">

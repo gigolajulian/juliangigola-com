@@ -462,7 +462,6 @@ export function WorkShell({
                     active={all && shown === null}
                     current={all}
                     count={heads.all?.count}
-                    ring="All work"
                   >
                     All
                   </Chip>
@@ -478,7 +477,6 @@ export function WorkShell({
                       active={shown === c.slug}
                       current={key === c.slug}
                       count={heads[c.slug]?.count}
-                      ring={c.name}
                     >
                       {c.name}
                     </Chip>
@@ -503,7 +501,6 @@ function Chip({
   active,
   current = active,
   count,
-  ring,
   children,
 }: {
   href: string;
@@ -515,8 +512,6 @@ function Chip({
       it defaults to `active` for every row that has no second idea of
       where it is. */
   current?: boolean;
-  /** What the pointer ring says over it. */
-  ring: string;
   /** Shown after the name: the row reads as a map of the archive rather
       than eleven words, and the size of a discipline is the thing an art
       director is weighing when they pick one. */
@@ -550,8 +545,10 @@ function Chip({
       // `page`, not `true`: this is a link to the page being viewed, which
       // is what a screen reader should be told about the current filter.
       aria-current={current ? "page" : undefined}
-      // The pointer ring says which filter it is over. Julian asked.
-      data-ring={ring}
+      /* No word at the pointer. The chip it is over is already a word,
+         and the pointer was repeating it back a few pixels lower down.
+         Julian asked. */
+      data-ring=""
       /* So the strip that is about to mount knows it is a filter change
          and fades in where it stands, instead of sliding in from a
          quarter of the window away as an arriving page does. */
