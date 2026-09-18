@@ -816,14 +816,22 @@ nav[aria-label="Categories"] ul[data-more] {
    only way of reaching: a phone held sideways gives the strip 200px of
    height and the covers follow it down to 150 wide, where `Lost Relic`
    printed as `L...`. The cell measures itself and the plate reads it. */
-.strip-cell {
+/* On the covers only. `container-type: inline-size` contains the element's
+   own width, so a cell sized by its content stops being: put on every
+   `.strip-cell`, it squeezed the rack's chapter columns to their floor and
+   `Editorial` printed as `Edit...`. A cover is sized by the grid either
+   way and can safely measure itself. */
+a.strip-cell {
   container-type: inline-size;
 }
 @container (max-width: 15rem) {
-  .cover-plate {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.125rem;
+  /* Julian: the type under the photographs read as a slab. Stacking the
+     credit under the name doubled the plate on exactly the covers with
+     least room — 56px of it over a 277px picture. A narrow cover keeps
+     the name, which is what a strip of covers is scanned for, and gives
+     up the credit. */
+  .cover-plate > :last-child {
+    display: none;
   }
   .cover-plate > :first-child {
     font-size: 1rem;
