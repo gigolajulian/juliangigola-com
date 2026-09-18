@@ -15,7 +15,7 @@ export function GroupCell({
   href,
   hash,
   i,
-  cta = `All ${name.toLowerCase()}`,
+  cta = "All projects",
 }: {
   name: string;
   /** Already worded: "18 projects", "8 films". */
@@ -24,6 +24,10 @@ export function GroupCell({
   hash: string;
   /** Its place in the strip, for the stagger of the arrival. */
   i: number;
+  /* Julian: "All editorial" under a chapter of the all work page read as
+     a link that does nothing, because all the editorial covers are
+     already there. The press narrows the page to the discipline, and the
+     name of the discipline is set large directly above. */
   cta?: string;
 }) {
   return (
