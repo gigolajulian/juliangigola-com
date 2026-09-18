@@ -1203,7 +1203,7 @@ export function Strip({
           // are paged by hand above.
           paged && "strip-paged",
           stack &&
-            "max-sm:animate-none max-sm:flex-col max-sm:items-stretch max-sm:gap-10 max-sm:overflow-visible max-sm:select-auto",
+            "max-sm:animate-none max-sm:flex-col max-sm:items-stretch max-sm:gap-6 max-sm:overflow-visible max-sm:select-auto",
           // Stacked, a full-bleed page still wants its words off the edge.
           bleed && stack && "max-sm:gap-0",
         )}

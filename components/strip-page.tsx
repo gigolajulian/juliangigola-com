@@ -103,7 +103,7 @@ export function TitleCell({
     <div
       data-hash={hash}
       className={cn(
-        "flex w-full shrink-0 flex-col justify-center gap-5 py-10 sm:h-full sm:w-[min(30rem,82vw)] sm:py-0 sm:pr-6",
+        "flex w-full shrink-0 flex-col justify-center gap-4 py-6 sm:gap-5 sm:h-full sm:w-[min(30rem,82vw)] sm:py-0 sm:pr-6",
         className,
       )}
     >
@@ -191,8 +191,12 @@ export function StripHead({
           ) : null}
         </div>
 
+        {/* On a phone the head is the way back and the name of the page,
+            and nothing else: 112px of column broke `4 session types` over
+            two lines against the right edge, and every count here is said
+            again by the cell the sequence opens on. */}
         <p className="label w-28 shrink-0 text-right text-muted-foreground sm:w-44">
-          {aside}
+          <span className="max-sm:hidden">{aside}</span>
         </p>
       </div>
     </header>
