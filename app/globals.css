@@ -2109,7 +2109,7 @@ optgroup {
   position: relative;
   isolation: isolate;
   color: var(--foreground);
-  background-color: color-mix(in oklab, var(--background) 30%, transparent);
+  background-color: color-mix(in oklab, var(--background) 46%, transparent);
   -webkit-backdrop-filter: blur(24px) saturate(1.9) brightness(1.06);
   backdrop-filter: blur(24px) saturate(1.9) brightness(1.06);
   box-shadow: 0 12px 32px -18px color-mix(in oklab, black 45%, transparent);
