@@ -887,7 +887,7 @@ export function Hero({
             <nav
               data-scroll
               aria-label="Disciplines"
-              className="mt-8 min-h-0 overflow-y-auto overscroll-contain border-t border-border sm:mt-6 max-sm:tall:hidden"
+              className="mt-8 min-h-0 overflow-y-auto overscroll-contain border-t border-border sm:mt-6 max-sm:tall:hidden lying:hidden"
             >
               <ul onPointerOver={takeFromEvent} onFocus={takeFromEvent}>
                 {disciplines.map((discipline, i) => (
