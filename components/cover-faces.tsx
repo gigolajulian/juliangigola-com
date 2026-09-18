@@ -44,7 +44,7 @@ export function CoverFaces({
         data-fade={priority ? undefined : ""}
         data-frame={front.src}
         src={front.thumb}
-        alt=""
+        alt={front.alt}
         fill
         sizes={sizes}
         priority={priority}
@@ -63,7 +63,7 @@ export function CoverFaces({
           <Image
             data-frame={back.src}
             src={back.thumb}
-            alt=""
+            alt={back.alt}
             fill
             sizes={sizes}
             // Never the priority image: it is invisible until someone asks
