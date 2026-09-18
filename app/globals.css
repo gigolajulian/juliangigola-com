@@ -839,6 +839,28 @@ nav[aria-label="Categories"] ul[data-more] {
     padding: 0 3rem;
   }
 }
+/* A chapter heading, sized to the heading. The column is a fixed width and
+   the name was set at one size in it, so `Editorial` took a line and `Brand
+   campaigns` took two: the count and the link under it sat 45px lower on
+   half the chapters and the strip had no baseline running through it. The
+   count of characters comes in as `--n` and the type takes whichever is
+   smaller, the full size or the width one line of that many condensed caps
+   can have in the 296px the column leaves. The constant is measured, not
+   guessed: the widest of the names runs at 0.58em a character, so a name
+   of n fits inside 296px at 29rem / n with room to spare. `nowrap` is the
+   guarantee behind the arithmetic. Julian asked: a long name goes smaller
+   rather than taller. */
+.chapter-name {
+  font-size: clamp(1.25rem, min(3rem, calc(29rem / var(--n, 12))), 3rem);
+  white-space: nowrap;
+}
+@media (max-width: 40rem) {
+  /* Stacked, the column is the width of the page and a name fits at the
+     phone size whatever it is. */
+  .chapter-name {
+    font-size: 1.875rem;
+  }
+}
 /* The name on a plate, sized to the name. A fixed size either set a short
    title small on a wide cover or cut a long one: `I Wanna Be A Human` came
    out as `I Wanna Be A Hu...` at the size `Hua` wanted. The count of
