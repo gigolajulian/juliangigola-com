@@ -731,6 +731,23 @@
       "/work/analogue-dreams/10.jpg",
       "/work/analogue-dreams/02.jpg",
       "/work/analogue-dreams/01.jpg"
+    ],
+    "novocaine": [
+      "/work/novocaine/01.jpg",
+      "/work/novocaine/02.jpg",
+      "/work/novocaine/03.jpg",
+      "/work/novocaine/04.jpg",
+      "/work/novocaine/05.jpg",
+      "/work/novocaine/06.jpg",
+      "/work/novocaine/07.jpg",
+      "/work/novocaine/08.jpg",
+      "/work/novocaine/09.jpg",
+      "/work/novocaine/10.jpg",
+      "/work/novocaine/11.jpg",
+      "/work/novocaine/12.jpg",
+      "/work/novocaine/14.jpg",
+      "/work/novocaine/15.jpg",
+      "/work/novocaine/17.jpg"
     ]
   },
   "hidden": [
@@ -781,6 +798,17 @@
         "role": "Direction",
         "name": "Julian Gigola",
         "instagram": "juliangigola"
+      }
+    ],
+    "novocaine": [
+      {
+        "role": "Photographer",
+        "name": "Julian Gigola"
+      },
+      {
+        "role": "Model",
+        "name": "Phoebe",
+        "instagram": "phoebe2phly"
       }
     ]
   },
