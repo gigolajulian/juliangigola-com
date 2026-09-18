@@ -135,23 +135,25 @@ export function CoverCell({
           so the rack and a phone held sideways get the same plate as a
           full window rather than a stacked variant of their own. Always
           on, because a strip of covers is scanned for a name. */}
-        <div className="cover-plate pointer-events-none absolute inset-x-0 bottom-0 flex h-1/5 min-h-[2.75rem] items-center justify-between gap-[5cqw] border-t border-border/60 glass-surface bg-background/70 px-[4cqw]">
+        <div className="cover-plate pointer-events-none absolute inset-x-0 bottom-0 flex h-1/5 min-h-[2.75rem] flex-col justify-center gap-[1.2cqw] border-t border-border/60 glass-surface bg-background/70 px-[4cqw]">
           <span
             style={{ "--n": row.name.length } as React.CSSProperties}
             className="cover-name font-display min-w-0 truncate uppercase leading-[0.9] tracking-[0]"
           >
             {row.name}
           </span>
-          {/* The right of the band, set as two right-ranged lines rather
-            than one long one: who it was for, and how much of it there is.
-            Stacked, the column fills the same height the name does and the
-            band has no dead air in it; on one line the two ran together
-            past a slash and left the top half of the plate empty. The
-            count is what says a cover opens onto a body of work. */}
-          <span className="label flex shrink-0 flex-col items-end gap-[0.4em] text-[clamp(0.5rem,2.2cqw,0.8125rem)] leading-none text-muted-foreground">
-            <span className="max-w-[40cqw] truncate">{row.credit}</span>
+          {/* Under the name, not beside it. Julian asked: who it was for
+            reads as a subtitle to the title and not as a second column
+            competing with it, and the whole plate ranges left off one
+            edge. The count is what says a cover opens onto a body of
+            work rather than being one photograph. */}
+          <span className="label min-w-0 truncate text-[clamp(0.5rem,2.2cqw,0.8125rem)] leading-none text-muted-foreground">
+            {row.credit}
             {row.frames ? (
-              <span className="text-muted-foreground/60">{row.frames} frames</span>
+              <>
+                <span className="px-1.5 text-muted-foreground/50">/</span>
+                {row.frames} frames
+              </>
             ) : null}
           </span>
         </div>
