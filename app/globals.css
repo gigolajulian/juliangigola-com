@@ -423,6 +423,13 @@
     @apply font-sans;
     /* The nav is fixed; without this, an in-page jump lands under it. */
     scroll-padding-top: 6rem;
+    /* Every strip page is exactly one window and never scrolls; the terms
+       and the privacy notice are prose and do. So the scrollbar appeared
+       and disappeared as you moved between them, and a classic scrollbar
+       takes its width out of the window: the whole page stepped sideways
+       on the way in and back on the way out. The gutter is held open
+       whether or not there is a bar in it, so nothing moves. */
+    scrollbar-gutter: stable;
   }
 
   /* The half of the copyright notice that JavaScript cannot do.
@@ -742,6 +749,27 @@ nav[aria-label="Categories"] ul[data-more] {
   .strip-scroll {
     touch-action: pan-x pinch-zoom;
   }
+}
+
+/* ── the chosen discipline ──
+   The marker that slides along the filter row. Blur alone did nothing for
+   it: it sits on the page ground, and there is no photograph behind a row
+   of words to see through. What makes it glass on a flat ground is the
+   light on the surface, so it carries a sheen falling from the top edge
+   over the fill and a soft cast under it. The blur stays for the frames
+   that do run under the row on a short window. */
+.filter-lit {
+  background-image: linear-gradient(
+    to bottom,
+    color-mix(in oklab, white 22%, transparent),
+    color-mix(in oklab, white 6%, transparent) 46%,
+    transparent 62%
+  );
+  background-color: color-mix(in oklab, var(--foreground) 72%, transparent);
+  border: 1px solid color-mix(in oklab, var(--foreground) 55%, transparent);
+  -webkit-backdrop-filter: blur(24px) saturate(1.9) brightness(1.06);
+  backdrop-filter: blur(24px) saturate(1.9) brightness(1.06);
+  box-shadow: 0 10px 26px -14px color-mix(in oklab, black 60%, transparent);
 }
 
 .strip-grid {
@@ -1192,10 +1220,18 @@ a.strip-cell {
   --background: oklch(0.145 0.003 70);
   --foreground: oklch(0.955 0.004 80);
   --card: oklch(0.185 0.003 70);
-  --muted-foreground: oklch(0.655 0.005 80);
   --border: oklch(1 0 0 / 11%);
   --input: oklch(1 0 0 / 14%);
 }
+/* And every quiet word goes nearly white over the film. A muted grey is
+   readable on a still ground and not on a reel that is bright in one
+   frame and black in the next: the chips, the counts and the crumb all
+   came and went with the cut. Both themes, so it sits after the block
+   above. Julian asked for the text white on the motion page. */
+:root[data-reel] {
+  --muted-foreground: oklch(0.88 0.004 80);
+}
+
 :root[data-theme="light"][data-reel] .reel-veil {
   opacity: calc(0.38 + var(--reel-dim, 0) * 0.5);
 }

@@ -475,7 +475,7 @@ export function WorkShell({
                 <span
                   ref={pill}
                   aria-hidden
-                  className="pointer-events-none absolute left-0 top-0 border border-foreground/60 bg-foreground/[0.72] opacity-0 backdrop-blur-[24px] backdrop-saturate-[1.9] transition-[transform,width,height] duration-300 ease-[var(--ease-out-strong)] motion-reduce:transition-none"
+                  className="filter-lit pointer-events-none absolute left-0 top-0 opacity-0 transition-[transform,width,height] duration-300 ease-[var(--ease-out-strong)] motion-reduce:transition-none"
                 />
                 <li
                   ref={all && shown === null ? lit : undefined}
