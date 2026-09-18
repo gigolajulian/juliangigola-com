@@ -105,7 +105,7 @@ function Ways({
       </Link>
       <Link
         href="/sessions"
-        className="label action-quiet bg-background px-7 py-5 press active:scale-[0.97] short:px-6 short:py-3.5"
+        className="label action-quiet px-7 py-5 press active:scale-[0.97] short:px-6 short:py-3.5"
       >
         Book a session
       </Link>
