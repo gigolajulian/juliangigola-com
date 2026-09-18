@@ -177,6 +177,41 @@ export function WorkShell({
   const head = heads[key] ?? heads.all;
   const all = key === "all";
 
+  /* Julian: on All, light the discipline you have scrolled to. The strip
+     already works out which chapter the middle of the window is in — it
+     writes the word on the scroller as `data-at` for the running head and
+     the address bar — so the row only has to watch that attribute and
+     move its pill. The route does not change and neither does
+     `aria-current`: this is where you are in the page, not which page you
+     are on. */
+  const [here, setHere] = React.useState<string | null>(null);
+  React.useEffect(() => {
+    // Off All the row follows the route and this is not read at all.
+    if (!all) return;
+    const el = document.querySelector(".strip-scroll");
+    if (!el) return;
+    const read = () => {
+      const word = (el as HTMLElement).dataset.at ?? "";
+      const found = categories.find(
+        (c) => c.name.toLowerCase() === word.toLowerCase(),
+      );
+      setHere(found?.slug ?? null);
+    };
+    /* A frame late, not in the effect's body: the strip writes `data-at`
+       from its own first read, and a state change inside an effect is a
+       second render of the row before the browser has painted the first. */
+    const first = requestAnimationFrame(read);
+    const watch = new MutationObserver(read);
+    watch.observe(el, { attributes: true, attributeFilter: ["data-at"] });
+    return () => {
+      cancelAnimationFrame(first);
+      watch.disconnect();
+    };
+  }, [all, categories, key]);
+  /** Which chip is filled: where the strip is, when it says, else the
+      route. */
+  const shown = all ? here : key;
+
   /* From sm up the row is one line that scrolls, so eleven chips cost
      25px at any width. On a phone it wraps instead: a line that scrolls
      is a line a thumb swipes the filters out of, and the filters are the
@@ -334,7 +369,7 @@ export function WorkShell({
     }
     window.addEventListener("resize", measure);
     return () => window.removeEventListener("resize", measure);
-  }, [key]);
+  }, [key, shown]);
 
   /* Two ways through the same work. Drawn rather than named, and under
      the count rather than out at the edge of the window: the head is the
@@ -442,10 +477,14 @@ export function WorkShell({
                   aria-hidden
                   className="pointer-events-none absolute left-0 top-0 rounded-full bg-foreground opacity-0 transition-[transform,width,height] duration-300 ease-[var(--ease-out-strong)] motion-reduce:transition-none"
                 />
-                <li ref={all ? lit : undefined} className="relative z-10">
+                <li
+                  ref={all && shown === null ? lit : undefined}
+                  className="relative z-10"
+                >
                   <Chip
                     href="/work"
-                    active={all}
+                    active={all && shown === null}
+                    current={all}
                     count={heads.all?.count}
                     ring="All work"
                   >
@@ -455,12 +494,13 @@ export function WorkShell({
                 {categories.map((c) => (
                   <li
                     key={c.slug}
-                    ref={key === c.slug ? lit : undefined}
+                    ref={shown === c.slug ? lit : undefined}
                     className="relative z-10 shrink-0"
                   >
                     <Chip
                       href={c.href}
-                      active={key === c.slug}
+                      active={shown === c.slug}
+                      current={key === c.slug}
                       count={heads[c.slug]?.count}
                       ring={c.name}
                     >
@@ -485,12 +525,20 @@ export function WorkShell({
 function Chip({
   href,
   active,
+  current = active,
   count,
   ring,
   children,
 }: {
   href: string;
+  /** Filled: the filter showing, or on All the chapter being scrolled
+      through. A look, not an address. */
   active: boolean;
+  /** The page this chip leads to is the page being shown. The address,
+      which a screen reader is told about and the row's own presses read;
+      it defaults to `active` for every row that has no second idea of
+      where it is. */
+  current?: boolean;
   /** What the pointer ring says over it. */
   ring: string;
   /** Shown after the name: the row reads as a map of the archive rather
@@ -522,7 +570,7 @@ function Chip({
       href={href}
       // `page`, not `true`: this is a link to the page being viewed, which
       // is what a screen reader should be told about the current filter.
-      aria-current={active ? "page" : undefined}
+      aria-current={current ? "page" : undefined}
       // The pointer ring says which filter it is over. Julian asked.
       data-ring={ring}
       /* So the strip that is about to mount knows it is a filter change
@@ -538,13 +586,13 @@ function Chip({
         const row = e.currentTarget.closest("ul");
         const lit = row?.querySelector('[aria-current="page"]');
         const from = lit?.getBoundingClientRect().left ?? me.left;
-        markFilter(active ? 0 : me.left - from < 0 ? -1 : 1);
+        markFilter(current ? 0 : me.left - from < 0 ? -1 : 1);
         /* Julian: pressing All while the work is already showing all of
            it goes back to the beginning. A link to the page you are on
            changes no route and moves nothing otherwise; `jg:home` is the
            same event the wordmark sends on the homepage, so the strip
            travels there under its own friction rather than cutting. */
-        if (active)
+        if (current)
           document
             .querySelector(".strip-scroll")
             ?.dispatchEvent(new Event("jg:home"));

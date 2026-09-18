@@ -65,25 +65,33 @@ export function GroupCell({
  * Its own shape, like a cover: what varies along the strip is the ratio of
  * the photograph. The rack squares them all to 4:5, which is the rule
  * every other cell in it follows.
+ *
+ * A button, not a link: Julian asked that a single photograph dumped on a
+ * discipline open in the viewer here, the way a project's frames do on its
+ * own page. The discipline's own page is still one press away, on the
+ * cover that opens the run and on the chip above.
  * ─────────────────────────────────────────────────────────────── */
 export function FrameCell({
   frame,
-  href,
+  n,
   name,
   i,
 }: {
   frame: Frame;
-  href: string;
+  /** Its place in the page's own list of gallery frames: the strip reads
+      it off the press and hands it to the viewer. */
+  n: number;
   /** The discipline, for the label a screen reader reads. */
   name: string;
   /** Its place in the strip, for the stagger of the arrival. */
   i: number;
 }) {
   return (
-    <Link
-      prefetch={false}
-      href={href}
-      data-ring="View discipline"
+    <button
+      type="button"
+      data-n={n}
+      data-ring="Zoom in"
+      aria-label={frame.alt || `${name}, frame ${n + 1}`}
       className="group strip-cell relative block w-full shrink-0 overflow-hidden press active:scale-[0.995] sm:h-full sm:w-auto"
       style={
         {
@@ -95,6 +103,7 @@ export function FrameCell({
     >
       <Image
         data-fade=""
+        data-frame={frame.src}
         src={frame.src}
         alt={frame.alt || name}
         fill
@@ -103,6 +112,6 @@ export function FrameCell({
         draggable={false}
         className="strip-frame object-cover"
       />
-    </Link>
+    </button>
   );
 }

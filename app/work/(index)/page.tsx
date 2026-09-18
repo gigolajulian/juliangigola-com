@@ -1,6 +1,6 @@
 import { filmCount } from "@/lib/videos";
 import type { Metadata } from "next";
-import { Strip } from "@/components/strip";
+import { WorkStrip } from "@/components/work-strip";
 import { CoverCell } from "@/components/cover-cell";
 import { FrameCell, GroupCell } from "@/components/work-cells";
 import { EnquiryCell } from "@/components/enquiry-cell";
@@ -18,6 +18,7 @@ import {
 import { SoleMark } from "@/components/client-marks";
 import { COVER_RELEASES } from "@/lib/cover-art-data";
 import { CONTENT } from "@/lib/content";
+import type { Frame } from "@/lib/work-types";
 
 export const metadata: Metadata = {
   title: "Work",
@@ -51,6 +52,10 @@ export default function WorkPage() {
      in the middle of the head now, where it rises into place as the page
      arrives, and the strip opens on the first discipline. */
   const cells: React.ReactNode[] = [];
+  /* Every gallery frame on the page, in the order they are laid out. A
+     press on one opens the viewer at its place in here (`work-strip.tsx`);
+     the covers are links to their discipline and are not in it. */
+  const viewer: Frame[] = [];
   let i = 0;
 
   for (const c of WORK_CATEGORY_LINKS) {
@@ -102,7 +107,7 @@ export default function WorkPage() {
             <FrameCell
               key={frame.src}
               frame={frame}
-              href={c.href}
+              n={viewer.push(frame) - 1}
               name={c.name}
               i={i++}
             />,
@@ -159,12 +164,13 @@ export default function WorkPage() {
   );
 
   return (
-    <Strip
+    <WorkStrip
       label={`All work: ${COMMISSIONS.length} projects, left and right`}
       marks={MARKS}
+      frames={viewer}
       className="mt-4 flex-1"
     >
       {cells}
-    </Strip>
+    </WorkStrip>
   );
 }
