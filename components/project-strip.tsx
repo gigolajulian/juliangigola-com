@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { ViewTransition } from "react";
 import { Lightbox, useLightbox } from "@/components/lightbox";
+import { CreditCard } from "@/components/credit-card";
 import { Strip, type Lead } from "@/components/strip";
 import type { Project, TextBlock, Frame } from "@/lib/work-types";
 
@@ -200,12 +201,11 @@ export function ProjectStrip({
                 className="title-rest flex flex-col gap-1 border-t border-border pt-4"
               >
                 {project.credits.map((credit, i) => {
-                  /* Six harvested credits carry the handle as the name
-                         ("@apricotsss3") with no instagram field; they link
-                         too. */
-                  const handle =
-                    credit.instagram ??
-                    (credit.name.startsWith("@") ? credit.name.slice(1) : null);
+                  /* Worked out in `lib/work.ts` (`withFaces`), along with
+                         the face that goes with it: six harvested credits
+                         carry the handle as the name ("@apricotsss3") with
+                         no instagram field, and they link too. */
+                  const handle = credit.handle ?? null;
                   return (
                     <div
                       key={`${credit.role}-${i}`}
@@ -220,18 +220,28 @@ export function ProjectStrip({
                                  project, and taking the page out from under
                                  them to show someone else's feed would lose
                                  their place. */
-                          <a
-                            href={`https://www.instagram.com/${handle}/`}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="text-muted-foreground transition-colors duration-200 hoverable:hover:text-foreground"
+                          /* Held for a beat, the name says who that is
+                                 before it hands the visitor over: the face
+                                 and the handle, out of the word itself. */
+                          <CreditCard
+                            handle={handle}
+                            name={credit.name}
+                            role={credit.role}
+                            avatar={credit.avatar ?? undefined}
                           >
-                            {credit.name}
-                            <span className="sr-only">
-                              {" "}
-                              on Instagram (opens in a new tab)
-                            </span>
-                          </a>
+                            <a
+                              href={`https://www.instagram.com/${handle}/`}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="text-muted-foreground transition-colors duration-200 hoverable:hover:text-foreground"
+                            >
+                              {credit.name}
+                              <span className="sr-only">
+                                {" "}
+                                on Instagram (opens in a new tab)
+                              </span>
+                            </a>
+                          </CreditCard>
                         ) : (
                           credit.name
                         )}

@@ -19,6 +19,7 @@ import { AdminVideos } from "@/components/admin-videos";
 import { isTextRef, type FrameRef, type TrashedProject } from "@/lib/added";
 import { ADDED_PATH } from "@/lib/added";
 import { type PendingUpload } from "@/components/admin-frames";
+import { CreditDesk, creditBook } from "@/components/admin-credits";
 import {
   adoptable,
   projectsFile,
@@ -189,6 +190,7 @@ export function AdminEditor({
   initialRecopied,
   initialOrder,
   initialCovers,
+  initialAvatars,
   releases,
   releaseLimit,
   heroChoices,
@@ -232,6 +234,8 @@ export function AdminEditor({
   initialOrder: string[];
   /** Discipline covers the last build applied, category slug to frame path. */
   initialCovers: Record<string, string>;
+  /** Collaborators' faces the last build applied, handle to picture path. */
+  initialAvatars: Record<string, string>;
   /** Every cover-art release, for the homepage rack picker. */
   releases: PickerItem[];
   /**
@@ -276,6 +280,10 @@ export function AdminEditor({
   /** The photograph standing for each discipline, by category slug. */
   const [covers, setCovers] =
     React.useState<Record<string, string>>(initialCovers);
+  /** A collaborator's profile photograph, by Instagram handle. One person,
+      one picture, however many shoots they are credited on. */
+  const [avatars, setAvatars] =
+    React.useState<Record<string, string>>(initialAvatars);
   /**
    * The project whose row is expanded, if any.
    *
@@ -334,8 +342,18 @@ export function AdminEditor({
       copy: recopied,
       order,
       covers,
+      avatars,
     }),
-    [hidden, recategorised, reframed, recredited, recopied, order, covers],
+    [
+      hidden,
+      recategorised,
+      reframed,
+      recredited,
+      recopied,
+      order,
+      covers,
+      avatars,
+    ],
   );
 
   /**
@@ -372,6 +390,7 @@ export function AdminEditor({
       copy: initialRecopied,
       order: initialOrder,
       covers: initialCovers,
+      avatars: initialAvatars,
     },
   }));
 
@@ -714,6 +733,7 @@ export function AdminEditor({
         setRecopied(repo.copy);
         setOrder(repo.order);
         setCovers(repo.covers);
+        setAvatars(repo.avatars);
         setBaseline({ content, manifest: repo });
       } else {
         // The edits stay, and so does the baseline they are measured against
@@ -888,57 +908,118 @@ export function AdminEditor({
     (s) => s.trim() !== "" && !known.has(s),
   );
 
+  /* ── the credit desk ────────────────────────────────────────────
+     Everyone ever credited, and the faces on file, handed to the credit
+     rows wherever they are drawn — the project list, the page editor, the
+     new project form. A context, because none of the three panels in
+     between has any business carrying it. */
+  const people = React.useMemo(
+    () =>
+      creditBook([
+        ...projects.map((p) => recredited[p.slug] ?? p.credits),
+        ...Object.values(recredited),
+      ]),
+    [projects, recredited],
+  );
+  /* What a circle draws: the picture staged in this session if there is
+     one, and otherwise the copy the last build published. */
+  const faces = React.useMemo(() => {
+    const out: Record<string, string> = {};
+    for (const [handle, path] of Object.entries(avatars)) {
+      out[handle] = uploads[`public${path}`]?.preview ?? path;
+    }
+    return out;
+  }, [avatars, uploads]);
+  const desk = React.useMemo(
+    () => ({
+      people,
+      faces,
+      token,
+      onFace: (
+        handle: string,
+        picture: { base64: string; preview: string; bytes: number } | null,
+      ) => {
+        const path = `/people/${handle}.jpg`;
+        if (!picture) {
+          setAvatars((a) => {
+            const next = { ...a };
+            delete next[handle];
+            return next;
+          });
+          setUploads((u) => {
+            const next = { ...u };
+            delete next[`public${path}`];
+            return next;
+          });
+          return;
+        }
+        setUploads((u) => ({
+          ...u,
+          [`public${path}`]: {
+            path: `public${path}`,
+            base64: picture.base64,
+            preview: picture.preview,
+            bytes: picture.bytes,
+          },
+        }));
+        setAvatars((a) => ({ ...a, [handle]: path }));
+      },
+    }),
+    [people, faces, token],
+  );
+
+  /* Three columns from `xl`: the site on the left, the work in the middle,
+  the result on the right. Below that they stack in the same order. At `2xl`
+  the sitemap shares the slack instead of the middle taking all of it. A
+  fixed rail beside a `1fr` centre means every pixel past the breakpoint
+  goes to the form — measured at 2000px that was a 1041px column of fields
+  next to a sitemap still four thumbnails wide, which is the opposite of
+  what the extra width is for. Two flex tracks in a 1:1.6 ratio grow
+  together, so the map gets wider as the display does; the 34rem floor is
+  what the fields need before the ratio takes over, and the preview stays
+  fixed because it is a picture of a page at a plausible width rather than a
+  panel to fill. */
   return (
-    /* Three columns from `xl`: the site on the left, the work in the middle,
-       the result on the right. Below that they stack in the same order.
-       At `2xl` the sitemap shares the slack instead of the middle taking all
-       of it. A fixed rail beside a `1fr` centre means every pixel past the
-       breakpoint goes to the form — measured at 2000px that was a 1041px
-       column of fields next to a sitemap still four thumbnails wide, which is
-       the opposite of what the extra width is for. Two flex tracks in a 1:1.6
-       ratio grow together, so the map gets wider as the display does; the
-       34rem floor is what the fields need before the ratio takes over, and
-       the preview stays fixed because it is a picture of a page at a
-       plausible width rather than a panel to fill. */
-    <div
-      className={cn(
-        "mt-10 grid gap-10 xl:min-h-0 xl:flex-1 2xl:gap-12",
-        // The page editor takes the preview's column as well: it is the
-        // preview, of one page, and it wants the width.
-        page
-          ? "xl:grid-cols-[17rem_1fr] 2xl:grid-cols-[1fr_5fr]"
-          : "xl:grid-cols-[17rem_1fr_23rem] 2xl:grid-cols-[1fr_minmax(34rem,1.6fr)_26rem]",
-      )}
-    >
-      {/* Not a tab any more. The sitemap is what the site currently is, which
+    <CreditDesk value={desk}>
+      <div
+        className={cn(
+          "mt-10 grid gap-10 xl:min-h-0 xl:flex-1 2xl:gap-12",
+          // The page editor takes the preview's column as well: it is the
+          // preview, of one page, and it wants the width.
+          page
+            ? "xl:grid-cols-[17rem_1fr] 2xl:grid-cols-[1fr_5fr]"
+            : "xl:grid-cols-[17rem_1fr_23rem] 2xl:grid-cols-[1fr_minmax(34rem,1.6fr)_26rem]",
+        )}
+      >
+        {/* Not a tab any more. The sitemap is what the site currently is, which
           is context for every edit rather than a place to go — and it redraws
           as the draft changes, so it doubles as a readout of what hiding
           something will actually do. */}
-      {/* Each column its own scroller. Sticky positioning did this job while
+        {/* Each column its own scroller. Sticky positioning did this job while
           the page scrolled as one document; now the grid is exactly one
           screen tall, so `min-h-0` is what lets a track shrink below its
           content and `overflow-y-auto` is what gives that content somewhere
           to go. Without `min-h-0` a grid track floors at its content height
           and the whole page grows again. */}
-      <aside className="min-w-0 xl:min-h-0 xl:overflow-y-auto xl:pb-10">
-        <AdminSitemap
-          projects={orderedProjects.map((p) => ({
-            slug: p.slug,
-            name: p.name,
-            category: p.category,
-            cover: p.cover,
-          }))}
-          hidden={hidden}
-          categories={categoryLinks}
-          origin={origin}
-          onGo={go}
-          onReorder={reorderSlugs}
-          compact
-        />
-      </aside>
+        <aside className="min-w-0 xl:min-h-0 xl:overflow-y-auto xl:pb-10">
+          <AdminSitemap
+            projects={orderedProjects.map((p) => ({
+              slug: p.slug,
+              name: p.name,
+              category: p.category,
+              cover: p.cover,
+            }))}
+            hidden={hidden}
+            categories={categoryLinks}
+            origin={origin}
+            onGo={go}
+            onReorder={reorderSlugs}
+            compact
+          />
+        </aside>
 
-      <div className="min-w-0 xl:min-h-0 xl:overflow-y-auto xl:pb-10">
-        {/* Not a gate any more. The editor used to be hidden entirely until a
+        <div className="min-w-0 xl:min-h-0 xl:overflow-y-auto xl:pb-10">
+          {/* Not a gate any more. The editor used to be hidden entirely until a
             token proved itself, which meant arriving at /admin — or clicking
             a project in the sitemap — showed a read-only index and a password
             box. Everything on this page can be worked out from what the last
@@ -946,372 +1027,380 @@ export function AdminEditor({
             asked for at the point it is actually needed: the commit. The
             usual visit does not see this at all, because a stored token
             reconnects on mount. */}
-        {!sha ? (
-          <Connect
-            token={token}
-            setToken={setToken}
-            onConnect={() => load(token.trim())}
-            status={status}
-          />
-        ) : null}
+          {!sha ? (
+            <Connect
+              token={token}
+              setToken={setToken}
+              onConnect={() => load(token.trim())}
+              status={status}
+            />
+          ) : null}
 
-        {/* Three views over one draft, rather than three pages. Everything the
+          {/* Three views over one draft, rather than three pages. Everything the
             tabs switch between edits the same object, and the preview beside
             them reflects all of it — so moving between them never loses work
             and never needs saving first. */}
-        {/* Sticky to the top of its own column.
-         *
-         * The column is a scroller now and the form inside it is long — four
-         * sections, a picker, seventy projects — so a tab row that scrolls
-         * away takes the only way between views with it, and Publish along
-         * with it. Pinned, the two things you always want are always there.
-         * `bg-background` is not decoration: without it the form scrolls
-         * through the row. */}
-        {/* One sticky block, not two stacked ones. Pinning the tabs and the
+          {/* Sticky to the top of its own column.
+           *
+           * The column is a scroller now and the form inside it is long — four
+           * sections, a picker, seventy projects — so a tab row that scrolls
+           * away takes the only way between views with it, and Publish along
+           * with it. Pinned, the two things you always want are always there.
+           * `bg-background` is not decoration: without it the form scrolls
+           * through the row. */}
+          {/* One sticky block, not two stacked ones. Pinning the tabs and the
             index separately means the second has to be offset by the height
             of the first, and that number is a guess about a font — it was 13px
             short, which is 13px of form scrolling through the gap between
             them. Nested inside one pinned container they simply sit together
             and nothing has to be measured. */}
-        <div className="sticky top-0 z-20 bg-background">
-          {/* The bar, on the edge of the chrome rather than in the flow.
-           *
-           * Absolutely positioned on the header's own bottom border, the way
-           * a browser puts its loading bar on the edge of the toolbar: it
-           * appears and disappears without moving a single thing on the page,
-           * which a bar occupying a row cannot do — and a form that jumps two
-           * pixels every time you publish is worse than no bar at all.
-           *
-           * Proportional while committing, because that is countable. A sweep
-           * while the deploy runs, because it is not: Cloudflare cannot be
-           * asked how far along it is, and a bar creeping to 80% of nothing
-           * is a lie in the shape of the truth. */}
-          {status.kind === "working" || awaitingDeploy ? (
-            <div
-              role="progressbar"
-              aria-label={
-                awaitingDeploy ? "Waiting for the deploy" : "Publishing"
-              }
-              aria-valuenow={
-                status.kind === "working" && status.total
-                  ? status.done
-                  : undefined
-              }
-              aria-valuemax={
-                status.kind === "working" && status.total
-                  ? status.total
-                  : undefined
-              }
-              className="pointer-events-none absolute inset-x-0 -bottom-px z-30 h-px overflow-hidden bg-border"
+          <div className="sticky top-0 z-20 bg-background">
+            {/* The bar, on the edge of the chrome rather than in the flow.
+             *
+             * Absolutely positioned on the header's own bottom border, the way
+             * a browser puts its loading bar on the edge of the toolbar: it
+             * appears and disappears without moving a single thing on the page,
+             * which a bar occupying a row cannot do — and a form that jumps two
+             * pixels every time you publish is worse than no bar at all.
+             *
+             * Proportional while committing, because that is countable. A sweep
+             * while the deploy runs, because it is not: Cloudflare cannot be
+             * asked how far along it is, and a bar creeping to 80% of nothing
+             * is a lie in the shape of the truth. */}
+            {status.kind === "working" || awaitingDeploy ? (
+              <div
+                role="progressbar"
+                aria-label={
+                  awaitingDeploy ? "Waiting for the deploy" : "Publishing"
+                }
+                aria-valuenow={
+                  status.kind === "working" && status.total
+                    ? status.done
+                    : undefined
+                }
+                aria-valuemax={
+                  status.kind === "working" && status.total
+                    ? status.total
+                    : undefined
+                }
+                className="pointer-events-none absolute inset-x-0 -bottom-px z-30 h-px overflow-hidden bg-border"
+              >
+                {status.kind === "working" && status.total ? (
+                  <span
+                    // `scaleX` from the left rather than `width`: a width
+                    // change lays the row out again on every tick, a scale is
+                    // a compositor-only move. Linear, because progress is a
+                    // constant rate and an ease on it reads as stalling.
+                    className="block h-full w-full origin-left bg-foreground transition-transform duration-300 ease-linear"
+                    style={{
+                      transform: `scaleX(${(status.done ?? 0) / status.total})`,
+                    }}
+                  />
+                ) : (
+                  <span className="sweep block h-full w-1/4 bg-foreground" />
+                )}
+              </div>
+            ) : null}
+            {/* Wraps, and the publish group never shrinks.
+             *
+             * This row was one unwrapping line of six shrink-0 tab groups
+             * followed by Publish, and Publish is the thing that gave. In the
+             * three-column workbench the middle column is 609px at 1440x900
+             * and this row wants 691, so the button sat from x=953 to x=1043
+             * against a column ending at 961: eighty-two pixels of it outside
+             * its own box, clipped, with no scrollbar to reach it. "I make a
+             * change and Publish doesn't show up" was exactly that, and the
+             * flag beside it was fine all along.
+             *
+             * Wrapping rather than scrolling the tabs. A scroller hides tabs
+             * behind a gesture nobody knows is available; a second line costs
+             * 36px on a tool that has the room, and everything stays visible
+             * and in the same place. */}
+            <nav
+              className="flex flex-wrap items-center gap-x-3 gap-y-2 border-b border-border py-2"
+              aria-label="Editor sections"
             >
-              {status.kind === "working" && status.total ? (
+              {/* A segmented control rather than three underlined words.
+               *
+               * These are the three halves of the tool and the one thing you
+               * press most, so they get a surface: an underline on a lowercase
+               * word reads as a link among links, and at this size the selected
+               * one was legible only by a 2px rule. Filled, the current view is
+               * obvious from across the desk — which is the same argument the
+               * hero index makes for `bg-secondary` on its current row. */}
+              {TABS.map((group, g) => (
                 <span
-                  // `scaleX` from the left rather than `width`: a width
-                  // change lays the row out again on every tick, a scale is
-                  // a compositor-only move. Linear, because progress is a
-                  // constant rate and an ease on it reads as stalling.
-                  className="block h-full w-full origin-left bg-foreground transition-transform duration-300 ease-linear"
-                  style={{
-                    transform: `scaleX(${(status.done ?? 0) / status.total})`,
-                  }}
-                />
-              ) : (
-                <span className="sweep block h-full w-1/4 bg-foreground" />
-              )}
-            </div>
-          ) : null}
-          {/* Wraps, and the publish group never shrinks.
-           *
-           * This row was one unwrapping line of six shrink-0 tab groups
-           * followed by Publish, and Publish is the thing that gave. In the
-           * three-column workbench the middle column is 609px at 1440x900
-           * and this row wants 691, so the button sat from x=953 to x=1043
-           * against a column ending at 961: eighty-two pixels of it outside
-           * its own box, clipped, with no scrollbar to reach it. "I make a
-           * change and Publish doesn't show up" was exactly that, and the
-           * flag beside it was fine all along.
-           *
-           * Wrapping rather than scrolling the tabs. A scroller hides tabs
-           * behind a gesture nobody knows is available; a second line costs
-           * 36px on a tool that has the room, and everything stays visible
-           * and in the same place. */}
-          <nav
-            className="flex flex-wrap items-center gap-x-3 gap-y-2 border-b border-border py-2"
-            aria-label="Editor sections"
-          >
-            {/* A segmented control rather than three underlined words.
-             *
-             * These are the three halves of the tool and the one thing you
-             * press most, so they get a surface: an underline on a lowercase
-             * word reads as a link among links, and at this size the selected
-             * one was legible only by a 2px rule. Filled, the current view is
-             * obvious from across the desk — which is the same argument the
-             * hero index makes for `bg-secondary` on its current row. */}
-            {TABS.map((group, g) => (
-              <span
-                key={g}
-                className="flex shrink-0 border border-border p-0.5"
-              >
-                {group.map((t) => (
-                  <button
-                    key={t.id}
-                    type="button"
-                    onClick={() => setView(t.id)}
-                    aria-current={view === t.id ? "true" : undefined}
-                    className={cn(
-                      "label px-3 py-1.5 transition-colors duration-200",
-                      view === t.id
-                        ? "bg-foreground text-background"
-                        : "text-muted-foreground hoverable:hover:bg-card hoverable:hover:text-foreground",
-                    )}
-                  >
-                    {t.label}
-                  </button>
-                ))}
-              </span>
-            ))}
-            {/* Publish, where the work is.
-             *
-             * There is a second one at the foot of the column, and that is the
-             * point: the middle column is its own scroller now, so the bottom
-             * bar is only sticky to the bottom of a panel you may be nowhere
-             * near. An edit made near the top — dragging a frame, refiling a
-             * shoot — had no way to be committed without scrolling back down
-             * to look for the button.
-             *
-             * Always present and disabled rather than appearing when it has
-             * something to do: a control that materialises shifts the row it is
-             * in and has to be noticed before it can be used, whereas a greyed
-             * one is a permanent answer to "where do I publish this". The
-             * `title` says which of the two reasons it is grey. */}
-            {/* `shrink-0`, so if anything in this row has to give it is not
+                  key={g}
+                  className="flex shrink-0 border border-border p-0.5"
+                >
+                  {group.map((t) => (
+                    <button
+                      key={t.id}
+                      type="button"
+                      onClick={() => setView(t.id)}
+                      aria-current={view === t.id ? "true" : undefined}
+                      className={cn(
+                        "label px-3 py-1.5 transition-colors duration-200",
+                        view === t.id
+                          ? "bg-foreground text-background"
+                          : "text-muted-foreground hoverable:hover:bg-card hoverable:hover:text-foreground",
+                      )}
+                    >
+                      {t.label}
+                    </button>
+                  ))}
+                </span>
+              ))}
+              {/* Publish, where the work is.
+               *
+               * There is a second one at the foot of the column, and that is the
+               * point: the middle column is its own scroller now, so the bottom
+               * bar is only sticky to the bottom of a panel you may be nowhere
+               * near. An edit made near the top — dragging a frame, refiling a
+               * shoot — had no way to be committed without scrolling back down
+               * to look for the button.
+               *
+               * Always present and disabled rather than appearing when it has
+               * something to do: a control that materialises shifts the row it is
+               * in and has to be noticed before it can be used, whereas a greyed
+               * one is a permanent answer to "where do I publish this". The
+               * `title` says which of the two reasons it is grey. */}
+              {/* `shrink-0`, so if anything in this row has to give it is not
               the one control the row exists for. */}
-            <span className="ml-auto flex shrink-0 items-center gap-3 self-center">
-              {/* Three states, because there are three.
-               *
-               * "Unpublished" and "live" are not opposites with nothing in
-               * between: committing to GitHub and the change reaching the
-               * public site are a couple of minutes apart, and that gap is
-               * the one the editor used to say nothing about. So the middle
-               * state is its own — published, not yet live — and it is the
-               * one carrying the sweep.
-               *
-               * A dot as well as the words. The state that decides whether
-               * Publish does anything should be readable without reading, and
-               * at `label` size six words of grey text beside a grey button
-               * is not. Green only for live, never for committed: "your work
-               * is safe" and "the world can see it" are different promises
-               * and only one of them is what green means here.
-               *
-               * `aria-live` so the change is announced rather than only
-               * coloured — the whole point of this label is a state change you
-               * are not necessarily watching for. */}
-              <span
-                aria-live="polite"
-                className="label flex items-center gap-2"
-              >
+              <span className="ml-auto flex shrink-0 items-center gap-3 self-center">
+                {/* Three states, because there are three.
+                 *
+                 * "Unpublished" and "live" are not opposites with nothing in
+                 * between: committing to GitHub and the change reaching the
+                 * public site are a couple of minutes apart, and that gap is
+                 * the one the editor used to say nothing about. So the middle
+                 * state is its own — published, not yet live — and it is the
+                 * one carrying the sweep.
+                 *
+                 * A dot as well as the words. The state that decides whether
+                 * Publish does anything should be readable without reading, and
+                 * at `label` size six words of grey text beside a grey button
+                 * is not. Green only for live, never for committed: "your work
+                 * is safe" and "the world can see it" are different promises
+                 * and only one of them is what green means here.
+                 *
+                 * `aria-live` so the change is announced rather than only
+                 * coloured — the whole point of this label is a state change you
+                 * are not necessarily watching for. */}
                 <span
-                  aria-hidden
-                  className={cn(
-                    "block size-1.5 rounded-full",
-                    dirty || awaitingDeploy || committed
-                      ? "bg-foreground"
-                      : "bg-live",
-                  )}
-                />
-                {/* Each word is a new node when the state changes, so
+                  aria-live="polite"
+                  className="label flex items-center gap-2"
+                >
+                  <span
+                    aria-hidden
+                    className={cn(
+                      "block size-1.5 rounded-full",
+                      dirty || awaitingDeploy || committed
+                        ? "bg-foreground"
+                        : "bg-live",
+                    )}
+                  />
+                  {/* Each word is a new node when the state changes, so
                     `emerge` fades it in — "published" is the one completion
                     moment the workbench has, and it used to swap in as text. */}
-                {dirty ? (
-                  <span className="emerge text-foreground">unpublished</span>
-                ) : awaitingDeploy ? (
-                  <span className="emerge text-muted-foreground">
-                    published &middot; going live
-                  </span>
-                ) : committed ? (
-                  // The watch gave up, or there was no `/BUILD_ID` to watch.
-                  // The commit happened; whether it landed is unknown, and
-                  // green would claim otherwise.
-                  <span className="emerge text-muted-foreground">
-                    published
-                  </span>
-                ) : (
-                  // Nothing pending. Either a deploy was seen landing, or this
-                  // page has published nothing — and it was itself served by
-                  // the current build, so what is on screen is what the public
-                  // site has.
-                  <span className="emerge text-live">live</span>
-                )}
+                  {dirty ? (
+                    <span className="emerge text-foreground">unpublished</span>
+                  ) : awaitingDeploy ? (
+                    <span className="emerge text-muted-foreground">
+                      published &middot; going live
+                    </span>
+                  ) : committed ? (
+                    // The watch gave up, or there was no `/BUILD_ID` to watch.
+                    // The commit happened; whether it landed is unknown, and
+                    // green would claim otherwise.
+                    <span className="emerge text-muted-foreground">
+                      published
+                    </span>
+                  ) : (
+                    // Nothing pending. Either a deploy was seen landing, or this
+                    // page has published nothing — and it was itself served by
+                    // the current build, so what is on screen is what the public
+                    // site has.
+                    <span className="emerge text-live">live</span>
+                  )}
+                </span>
+                <button
+                  type="button"
+                  onClick={publish}
+                  disabled={!sha || !dirty || status.kind === "working"}
+                  title={
+                    !sha
+                      ? "Connect the GitHub token at the foot of this column first"
+                      : !dirty
+                        ? "Nothing to publish: the draft matches the live site"
+                        : undefined
+                  }
+                  className="label border border-foreground bg-foreground px-4 py-2 text-background press hoverable:hover:opacity-90 active:scale-[0.98] disabled:cursor-not-allowed disabled:border-border disabled:bg-transparent disabled:text-muted-foreground disabled:opacity-50"
+                >
+                  {status.kind === "working" ? "Publishing…" : "Publish"}
+                </button>
               </span>
-              <button
-                type="button"
-                onClick={publish}
-                disabled={!sha || !dirty || status.kind === "working"}
-                title={
-                  !sha
-                    ? "Connect the GitHub token at the foot of this column first"
-                    : !dirty
-                      ? "Nothing to publish: the draft matches the live site"
-                      : undefined
-                }
-                className="label border border-foreground bg-foreground px-4 py-2 text-background press hoverable:hover:opacity-90 active:scale-[0.98] disabled:cursor-not-allowed disabled:border-border disabled:bg-transparent disabled:text-muted-foreground disabled:opacity-50"
-              >
-                {status.kind === "working" ? "Publishing…" : "Publish"}
-              </button>
-            </span>
-          </nav>
-        </div>
+            </nav>
+          </div>
 
-        {page
-          ? (() => {
-              const p = orderedProjects.find((x) => x.slug === page);
-              if (!p) return null;
-              return (
-                <AdminPage
-                  project={p}
-                  disciplines={categories}
-                  filedAs={recategorised[p.slug] ?? p.categorySlug}
-                  onRecategorise={(categorySlug) =>
-                    setRecategorised((r) => ({ ...r, [p.slug]: categorySlug }))
-                  }
-                  frames={reframed[p.slug] ?? null}
-                  uploads={uploads}
-                  onReframe={(next) =>
-                    setReframed((r) =>
-                      withOverride(r, p.slug, next, baseline.manifest.frames),
-                    )
-                  }
-                  onUpload={(added) =>
-                    setUploads((u) => ({
-                      ...u,
-                      ...Object.fromEntries(added.map((a) => [a.path, a])),
-                    }))
-                  }
-                  credits={recredited[p.slug] ?? p.credits}
-                  onCredits={(next) =>
-                    setRecredited((c) =>
-                      withOverride(c, p.slug, next, baseline.manifest.credits),
-                    )
-                  }
-                  copy={recopied[p.slug] ?? null}
-                  onCopy={(next) =>
-                    setRecopied((c) =>
-                      withOverride(c, p.slug, next, baseline.manifest.copy),
-                    )
-                  }
-                  onClose={() => {
-                    setPage(null);
-                    setView("projects");
-                    setOpened(p.slug);
-                  }}
-                />
-              );
-            })()
-          : null}
-        {!page && view === "inbox" ? <AdminInbox /> : null}
+          {page
+            ? (() => {
+                const p = orderedProjects.find((x) => x.slug === page);
+                if (!p) return null;
+                return (
+                  <AdminPage
+                    project={p}
+                    disciplines={categories}
+                    filedAs={recategorised[p.slug] ?? p.categorySlug}
+                    onRecategorise={(categorySlug) =>
+                      setRecategorised((r) => ({
+                        ...r,
+                        [p.slug]: categorySlug,
+                      }))
+                    }
+                    frames={reframed[p.slug] ?? null}
+                    uploads={uploads}
+                    onReframe={(next) =>
+                      setReframed((r) =>
+                        withOverride(r, p.slug, next, baseline.manifest.frames),
+                      )
+                    }
+                    onUpload={(added) =>
+                      setUploads((u) => ({
+                        ...u,
+                        ...Object.fromEntries(added.map((a) => [a.path, a])),
+                      }))
+                    }
+                    credits={recredited[p.slug] ?? p.credits}
+                    onCredits={(next) =>
+                      setRecredited((c) =>
+                        withOverride(
+                          c,
+                          p.slug,
+                          next,
+                          baseline.manifest.credits,
+                        ),
+                      )
+                    }
+                    copy={recopied[p.slug] ?? null}
+                    onCopy={(next) =>
+                      setRecopied((c) =>
+                        withOverride(c, p.slug, next, baseline.manifest.copy),
+                      )
+                    }
+                    onClose={() => {
+                      setPage(null);
+                      setView("projects");
+                      setOpened(p.slug);
+                    }}
+                  />
+                );
+              })()
+            : null}
+          {!page && view === "inbox" ? <AdminInbox /> : null}
 
-        {!page && view === "coverart" ? CoverArtFields() : null}
+          {!page && view === "coverart" ? CoverArtFields() : null}
 
-        {!page && view === "video" ? (
-          <AdminVideos
-            videos={draft.videos}
-            onChange={(next) => set("videos", next)}
-          />
-        ) : null}
+          {!page && view === "video" ? (
+            <AdminVideos
+              videos={draft.videos}
+              onChange={(next) => set("videos", next)}
+            />
+          ) : null}
 
-        {!page && view === "disciplines" ? (
-          <AdminDisciplines
-            disciplines={categories}
-            /* In the draft's running order, so the list this view drags is
+          {!page && view === "disciplines" ? (
+            <AdminDisciplines
+              disciplines={categories}
+              /* In the draft's running order, so the list this view drags is
                the list the site will publish — including the projects added
                in this session, which the manifest has never seen. */
-            projects={orderedProjects}
-            hidden={hidden}
-            onOrder={setOrder}
-            covers={covers}
-            onCover={(category, src) =>
-              setCovers((c) => {
-                const next = { ...c };
-                // Removed rather than stored as null, so going back to the
-                // derived cover leaves no entry behind to publish.
-                if (src) next[category] = src;
-                else delete next[category];
-                return next;
-              })
-            }
-            opened={openDiscipline}
-            onOpened={setOpenDiscipline}
-          />
-        ) : null}
+              projects={orderedProjects}
+              hidden={hidden}
+              onOrder={setOrder}
+              covers={covers}
+              onCover={(category, src) =>
+                setCovers((c) => {
+                  const next = { ...c };
+                  // Removed rather than stored as null, so going back to the
+                  // derived cover leaves no entry behind to publish.
+                  if (src) next[category] = src;
+                  else delete next[category];
+                  return next;
+                })
+              }
+              opened={openDiscipline}
+              onOpened={setOpenDiscipline}
+            />
+          ) : null}
 
-        {!page && view === "projects" ? (
-          <>
-            <AdminProjects
-              token={token}
-              /* The draft's running order, not the build's. The list here
+          {!page && view === "projects" ? (
+            <>
+              <AdminProjects
+                token={token}
+                /* The draft's running order, not the build's. The list here
                  and the list in Disciplines are the same list, and showing
                  one in an order the other has already changed is how you
                  stop trusting either. */
-              projects={orderedProjects}
-              hidden={hidden}
-              onHiddenChange={setHidden}
-              onRemoved={setTrash}
-              disciplines={categories}
-              recategorised={recategorised}
-              onRecategorise={(slug, categorySlug) =>
-                setRecategorised((r) => ({ ...r, [slug]: categorySlug }))
-              }
-              reframed={reframed}
-              /* `null` is the sequence editor saying the frames are back in
+                projects={orderedProjects}
+                hidden={hidden}
+                onHiddenChange={setHidden}
+                onRemoved={setTrash}
+                disciplines={categories}
+                recategorised={recategorised}
+                onRecategorise={(slug, categorySlug) =>
+                  setRecategorised((r) => ({ ...r, [slug]: categorySlug }))
+                }
+                reframed={reframed}
+                /* `null` is the sequence editor saying the frames are back in
                  the order it found them — which is the published order, and
                  that may itself be an override. `withOverride` puts that
                  back rather than dropping it; see the note there. */
-              onReframe={(slug, frames) =>
-                setReframed((r) =>
-                  withOverride(r, slug, frames, baseline.manifest.frames),
-                )
-              }
-              uploads={uploads}
-              onUpload={(added) =>
-                setUploads((u) => ({
-                  ...u,
-                  ...Object.fromEntries(added.map((a) => [a.path, a])),
-                }))
-              }
-              credits={recredited}
-              /* Same as the sequences: "Undo changes" means back to what is
+                onReframe={(slug, frames) =>
+                  setReframed((r) =>
+                    withOverride(r, slug, frames, baseline.manifest.frames),
+                  )
+                }
+                uploads={uploads}
+                onUpload={(added) =>
+                  setUploads((u) => ({
+                    ...u,
+                    ...Object.fromEntries(added.map((a) => [a.path, a])),
+                  }))
+                }
+                credits={recredited}
+                /* Same as the sequences: "Undo changes" means back to what is
                  published, and an intentionally empty list is a different
                  thing which `withOverride` keeps. */
-              onCredits={(slug, next) =>
-                setRecredited((c) =>
-                  withOverride(c, slug, next, baseline.manifest.credits),
-                )
-              }
-              opened={opened}
-              onOpened={setOpened}
-              onOpenPage={(slug) => {
-                setOpened(slug);
-                setPage(slug);
-              }}
-              query={filter}
-              onQuery={setFilter}
-            />
-            <AdminTrash token={token} trash={trash} onChanged={setTrash} />
+                onCredits={(slug, next) =>
+                  setRecredited((c) =>
+                    withOverride(c, slug, next, baseline.manifest.credits),
+                  )
+                }
+                opened={opened}
+                onOpened={setOpened}
+                onOpenPage={(slug) => {
+                  setOpened(slug);
+                  setPage(slug);
+                }}
+                query={filter}
+                onQuery={setFilter}
+              />
+              <AdminTrash token={token} trash={trash} onChanged={setTrash} />
 
-            {/* Adding a project belongs with the projects, not on every tab.
+              {/* Adding a project belongs with the projects, not on every tab.
                 Reached only once the token has proved itself against the repo:
                 the form commits several files at once, and a rejected token
                 halfway through would leave photographs in the branch with no
                 manifest pointing at them. */}
-            <AdminNewProject
-              token={token}
-              categories={categories}
-              existingSlugs={known}
-            />
-          </>
-        ) : null}
+              <AdminNewProject
+                token={token}
+                categories={categories}
+                existingSlugs={known}
+              />
+            </>
+          ) : null}
 
-        {/* One area at a time, so switching tabs is not a scroll and the
+          {/* One area at a time, so switching tabs is not a scroll and the
             widest column holds only the fields you came for.
          
             Called, not rendered as `<HomeFields />`. These are closures over
@@ -1327,64 +1416,65 @@ export function AdminEditor({
             directly in this component's tree, where React reconciles them by
             position and the real components inside — `AdminPicker` and the
             rest — keep their identity and their state. */}
-        {!page && view === "home" ? HomeFields() : null}
-        {!page && view === "clients" ? ClientFields() : null}
-        {!page && view === "sessions" ? SessionFields() : null}
-        {!page && view === "testimonials" ? QuoteFields() : null}
-        {!page && view === "contact" ? ContactFields() : null}
+          {!page && view === "home" ? HomeFields() : null}
+          {!page && view === "clients" ? ClientFields() : null}
+          {!page && view === "sessions" ? SessionFields() : null}
+          {!page && view === "testimonials" ? QuoteFields() : null}
+          {!page && view === "contact" ? ContactFields() : null}
 
-        {/* The slug list, shared by every field that takes one, so it has to
+          {/* The slug list, shared by every field that takes one, so it has to
             outlive the tab that uses it. */}
-        <datalist id="project-slugs">
-          {slugs.map((s) => (
-            <option key={s} value={s} />
-          ))}
-        </datalist>
+          <datalist id="project-slugs">
+            {slugs.map((s) => (
+              <option key={s} value={s} />
+            ))}
+          </datalist>
 
-        {/* The token and the status line, under every tab. Publish itself is
+          {/* The token and the status line, under every tab. Publish itself is
             up in the app bar; what stays down here is the thing you set once
             and the thing you read after pressing it. */}
-        <div className="sticky bottom-0 mt-12 flex flex-wrap items-center gap-4 border-t border-border bg-background py-6">
-          {sha ? (
-            <>
-              <StatusLine status={status} />
-              <button
-                type="button"
-                onClick={() => {
-                  window.localStorage.removeItem(TOKEN_KEY);
-                  setToken("");
-                  setSha(null);
-                  setStatus({ kind: "idle" });
-                }}
-                className="label ml-auto border border-border px-4 py-2 press hoverable:hover:bg-card active:scale-[0.98]"
-              >
-                Forget token
-              </button>
-            </>
-          ) : (
-            <p className="label max-w-prose text-muted-foreground">
-              Arrange anything you like. Publishing needs the GitHub token at
-              the top of this column, and nothing is committed until then.
-            </p>
-          )}
+          <div className="sticky bottom-0 mt-12 flex flex-wrap items-center gap-4 border-t border-border bg-background py-6">
+            {sha ? (
+              <>
+                <StatusLine status={status} />
+                <button
+                  type="button"
+                  onClick={() => {
+                    window.localStorage.removeItem(TOKEN_KEY);
+                    setToken("");
+                    setSha(null);
+                    setStatus({ kind: "idle" });
+                  }}
+                  className="label ml-auto border border-border px-4 py-2 press hoverable:hover:bg-card active:scale-[0.98]"
+                >
+                  Forget token
+                </button>
+              </>
+            ) : (
+              <p className="label max-w-prose text-muted-foreground">
+                Arrange anything you like. Publishing needs the GitHub token at
+                the top of this column, and nothing is committed until then.
+              </p>
+            )}
+          </div>
         </div>
-      </div>
 
-      {/* Sticky, so it stays beside the field being edited on a long form.
+        {/* Sticky, so it stays beside the field being edited on a long form.
           Below `xl` it drops under the form rather than squeezing both. */}
-      {page ? null : (
-        <aside className="min-w-0 xl:min-h-0 xl:overflow-y-auto xl:pb-10">
-          {/* Ordered too: the preview's whole job is to be what publishing
+        {page ? null : (
+          <aside className="min-w-0 xl:min-h-0 xl:overflow-y-auto xl:pb-10">
+            {/* Ordered too: the preview's whole job is to be what publishing
             would produce, and the homepage band it draws is in running
             order. */}
-          <AdminPreview
-            draft={draft}
-            projects={orderedProjects}
-            hidden={hidden}
-          />
-        </aside>
-      )}
-    </div>
+            <AdminPreview
+              draft={draft}
+              projects={orderedProjects}
+              hidden={hidden}
+            />
+          </aside>
+        )}
+      </div>
+    </CreditDesk>
   );
 
   function ClientFields() {

@@ -33,6 +33,7 @@ const edit = {
   copy: {},
   order: [],
   covers: {},
+  avatars: {},
 };
 
 // What is already in the repo is carried through, not clobbered.
@@ -59,6 +60,40 @@ const edit = {
   const out = projectsFile(null, edit);
   assert.ok(!("order" in out), "an empty order is not written at all");
   assert.ok(!("covers" in out), "nor an empty cover map");
+  assert.ok(!("avatars" in out), "nor an empty set of faces");
+}
+
+// A face is written, and by handle: one person, one picture, however many
+// shoots they are credited on.
+{
+  const out = projectsFile(null, {
+    ...edit,
+    avatars: { anisajadee: "/people/anisajadee.jpg" },
+  });
+  assert.deepEqual(
+    out.avatars,
+    { anisajadee: "/people/anisajadee.jpg" },
+    "a collaborator's face is committed",
+  );
+}
+
+// And adopted back off the repository, like every other map.
+{
+  const back = adoptable(
+    { projects: [], avatars: { anisajadee: "/people/anisajadee.jpg" } },
+    edit,
+  );
+  assert.deepEqual(
+    back.avatars,
+    { anisajadee: "/people/anisajadee.jpg" },
+    "faces come back off the file",
+  );
+  assert.deepEqual(
+    adoptable({ projects: [] }, { ...edit, avatars: { x: "/people/x.jpg" } })
+      .avatars,
+    {},
+    "a file with no faces means none, not the ones the build had",
+  );
 }
 
 // And a previously-written one is removed when it is emptied, rather than
@@ -197,6 +232,7 @@ const edit = {
     copy: { a: { title: "A", intent: null } },
     order: ["a", "b"],
     covers: { editorial: "/work/a/01.jpg" },
+    avatars: {},
   };
 
   // The round trip: what `projectsFile` writes is what `adoptable` reads.
@@ -213,6 +249,7 @@ const edit = {
     ...build,
     order: [],
     covers: {},
+    avatars: {},
   });
   assert.ok(!("order" in emptied), "an empty order is not written");
   const read = adoptable(emptied, build);
@@ -251,6 +288,7 @@ const edit = {
       copy: {},
       order: [],
       covers: {},
+    avatars: {},
     }),
     "a bare file reads as a bare manifest",
   );

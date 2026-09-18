@@ -22,6 +22,7 @@ import {
   RECREDITED,
   RECOPIED,
   ORDER,
+  AVATARS,
   DISCIPLINE_COVERS,
 } from "@/lib/added";
 
@@ -179,6 +180,7 @@ export default function AdminPage() {
            them as ordinary state it can edit. */
         initialOrder={[...ORDER]}
         initialCovers={{ ...DISCIPLINE_COVERS }}
+        initialAvatars={{ ...AVATARS }}
         /* Imported from the section itself rather than restated, so the
            picker's limit cannot drift away from the number the grid is
            actually built around. */

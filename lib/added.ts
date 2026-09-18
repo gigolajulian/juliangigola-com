@@ -309,6 +309,18 @@ export type AddedFile = {
    */
   covers: Record<string, string>;
   /**
+   * A collaborator's profile photograph, by Instagram handle.
+   *
+   * By handle and not by project, because a model credited on three shoots
+   * is one person with one face: the picture is saved once and every credit
+   * that names the handle finds it.
+   *
+   * A path under `public/`, never an Instagram address. Instagram's own
+   * picture URLs are signed and expire within days, so the bytes are
+   * downloaded when the person is added and kept with the site.
+   */
+  avatars: Record<string, string>;
+  /**
    * Disciplines added here rather than harvested from the old site.
    *
    * `lib/work-data.ts` holds the thirteen the old nav had, and
@@ -491,6 +503,20 @@ function parse(v: unknown): AddedFile {
     return { slug, name: str(d.name, `${at}.name`), section };
   });
 
+  const rawAvatars = v.avatars === undefined ? {} : v.avatars;
+  if (!isRecord(rawAvatars)) return fail("avatars", "an object", rawAvatars);
+  const avatars: Record<string, string> = {};
+  for (const [who, src] of Object.entries(rawAvatars)) {
+    /* Both sides are held to what they are: a handle Instagram would
+       accept, and a path inside the site's own pictures. A value that is
+       not one is dropped rather than failing a build — a missing face is a
+       card without a circle, and the path goes into a `src`. */
+    const handle = instagramHandle(who);
+    const path = typeof src === "string" ? src : "";
+    if (handle && /^\/people\/[a-z0-9._-]+\.(jpe?g|png|webp)$/i.test(path))
+      avatars[handle] = path;
+  }
+
   const rawCovers = v.covers === undefined ? {} : v.covers;
   if (!isRecord(rawCovers)) return fail("covers", "an object", rawCovers);
   const covers: Record<string, string> = {};
@@ -507,6 +533,7 @@ function parse(v: unknown): AddedFile {
     copy,
     order,
     covers,
+    avatars,
     disciplines,
     hidden: hidden.map((s, i) => str(s, `hidden[${i}]`)),
   };
@@ -530,6 +557,9 @@ export const ADDED_DISCIPLINES: readonly {
   name: string;
   section: Section;
 }[] = FILE.disciplines;
+
+/** A collaborator's face, by Instagram handle. Paths under `public/`. */
+export const AVATARS: Readonly<Record<string, string>> = FILE.avatars;
 
 /** Hand-picked discipline covers, by category slug. Frame paths. */
 export const DISCIPLINE_COVERS: Readonly<Record<string, string>> = FILE.covers;

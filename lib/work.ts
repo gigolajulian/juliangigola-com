@@ -25,6 +25,7 @@ import {
   ORDER,
   DISCIPLINE_COVERS,
   ADDED_DISCIPLINES,
+  AVATARS,
   isTextRef,
   type AddedProject,
 } from "./added";
@@ -353,6 +354,37 @@ export const categoryLabel = (category: Category): string =>
  * with no description of its own is named for the work it belongs to and
  * its place in it. Real descriptions written in /admin still win.
  */
+/**
+ * A collaborator's face, by Instagram handle, or nothing.
+ *
+ * Saved with the site rather than fetched: Instagram's own picture URLs are
+ * signed and expire, so what is kept is a copy, downloaded once in /admin
+ * when the person was added. A handle with no picture on file is not a
+ * failure — the card it feeds prints the handle on its own.
+ */
+export const avatarFor = (
+  handle: string | null | undefined,
+): string | undefined => (handle ? AVATARS[handle.toLowerCase()] : undefined);
+
+/**
+ * The face and the handle on every credit, worked out here.
+ *
+ * Here and not in the card that draws it, because the card is a client
+ * component: reaching for the archive from there would carry the whole
+ * manifest into the browser to look up one path. This runs where the
+ * archive is free to read, and a credit arrives knowing who it is.
+ */
+const withFaces = (project: Project): Project => ({
+  ...project,
+  credits: project.credits.map((c) => {
+    // Six harvested credits carry the handle as the name ("@apricotsss3")
+    // with no instagram field of their own; they link too.
+    const handle =
+      c.instagram ?? (c.name.startsWith("@") ? c.name.slice(1) : null);
+    return { ...c, handle, avatar: avatarFor(handle) ?? null };
+  }),
+});
+
 const withAlt = (project: Project): Project => ({
   ...project,
   cover: { ...project.cover, alt: project.cover.alt || project.name },
@@ -391,7 +423,7 @@ export const ALL_PROJECTS: Project[] = [
     p.slug === "coverart" ? withCoverArt(p) : withLeadFrame(p),
   ),
 ]
-  .map((p) => withAlt(relabel(reframe(recopy(recredit(refile(p)))))))
+  .map((p) => withFaces(withAlt(relabel(reframe(recopy(recredit(refile(p))))))))
   .sort(byRunningOrder);
 
 /**
@@ -895,8 +927,11 @@ export const nextDiscipline = (
  * than a policy.
  */
 const disciplineOf = (p: Project): string | undefined =>
-  (p.categories.find((c) => WORK_CATEGORY_LINKS.some((l) => l.slug === c.slug)) ??
-    p.categories[0])?.slug;
+  (
+    p.categories.find((c) =>
+      WORK_CATEGORY_LINKS.some((l) => l.slug === c.slug),
+    ) ?? p.categories[0]
+  )?.slug;
 
 /**
  * The commissions filed under one discipline, in Julian's running order.
@@ -951,7 +986,9 @@ const neighbour = (p: Project, dir: 1 | -1): Project | undefined => {
   const at = WORK_CATEGORY_LINKS.findIndex((l) => l.slug === here);
   const n = WORK_CATEGORY_LINKS.length;
   for (let hop = 1; hop <= n; hop++) {
-    const run = commissionsIn(WORK_CATEGORY_LINKS[(at + dir * hop + 2 * n) % n].slug);
+    const run = commissionsIn(
+      WORK_CATEGORY_LINKS[(at + dir * hop + 2 * n) % n].slug,
+    );
     const found = run[dir > 0 ? 0 : run.length - 1];
     if (found) return found;
   }

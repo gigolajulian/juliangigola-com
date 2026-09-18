@@ -1,5 +1,5 @@
 import { getCloudflareContext } from "@opennextjs/cloudflare";
-import { REPO } from "@/lib/admin-github";
+import { bearer, canPush } from "@/lib/vouch";
 import { summary, type Enquiry, type Summary } from "@/lib/inbox";
 
 /* ── reading the inbox ────────────────────────────────────────────
@@ -91,82 +91,6 @@ async function wired() {
   return env.INBOX ? { inbox: env.INBOX, key: env.INBOX_KEY } : null;
 }
 
-/* ── the other key: the one the editor already has ────────────────
- * The inbox used to open only with `INBOX_KEY`, a secret set with wrangler
- * and pasted into the panel — two copies of one string that had to match,
- * and on a second device a second paste. Julian got "Not authorised" three
- * times in a row from the two copies drifting apart.
- *
- * The panel already holds a GitHub token, and that token is the site's
- * real credential: whoever can push to the repository publishes the site.
- * So a request carrying it as a bearer token is checked against GitHub —
- * does this token see the repository, with push? — and opens the inbox if
- * so. The token is forwarded to api.github.com and nowhere else, never
- * stored, and the answer is remembered for five minutes by a hash of it so
- * the panel's every click is not a round trip to GitHub.
- *
- * `INBOX_KEY` still works, for anyone who prefers a key that is not a
- * repository credential.
- * ─────────────────────────────────────────────────────────────── */
-const VOUCHED_MS = 5 * 60 * 1000;
-const vouched = new Map<string, number>();
-
-const digest = async (s: string) =>
-  [
-    ...new Uint8Array(
-      await crypto.subtle.digest("SHA-256", new TextEncoder().encode(s)),
-    ),
-  ]
-    .map((b) => b.toString(16).padStart(2, "0"))
-    .join("");
-
-/** True when GitHub says this token can push to the site's repository. */
-async function canPush(token: string): Promise<boolean> {
-  try {
-    return await vouch(token);
-  } catch {
-    return false;
-  }
-}
-
-/**
- * The shapes GitHub tokens come in. Anything else is refused before the
- * fetch: otherwise every request with a made-up bearer string costs a call
- * to GitHub, and enough of those from one origin gets the Worker's egress
- * rate-limited there — which closes the inbox to the real token too.
- */
-const GITHUB_TOKEN =
-  /^(gh[pousr]_[A-Za-z0-9]{20,255}|github_pat_[A-Za-z0-9_]{20,255})$/;
-
-async function vouch(token: string): Promise<boolean> {
-  if (!GITHUB_TOKEN.test(token)) return false;
-  const id = await digest(token);
-  const until = vouched.get(id);
-  if (until && until > Date.now()) return true;
-
-  // Bounded, and closed on failure: a slow GitHub must not hang the inbox
-  // open, and an unreachable one must not open it.
-  const res = await fetch(
-    `https://api.github.com/repos/${REPO.owner}/${REPO.repo}`,
-    {
-      signal: AbortSignal.timeout(8000),
-      headers: {
-        authorization: `Bearer ${token}`,
-        accept: "application/vnd.github+json",
-        "user-agent": "juliangigola-inbox",
-      },
-    },
-  );
-  if (!res.ok) {
-    await res.body?.cancel();
-    return false;
-  }
-  const repo = (await res.json()) as { permissions?: { push?: boolean } };
-  const ok = repo.permissions?.push === true;
-  if (ok) vouched.set(id, Date.now() + VOUCHED_MS);
-  return ok;
-}
-
 async function guard(request: Request) {
   const rig = await wired();
   if (!rig) {
@@ -186,11 +110,9 @@ async function guard(request: Request) {
   if (rig.key && (await authorised(request, rig.key)))
     return { inbox: rig.inbox };
 
-  const bearer = /^Bearer\s+(\S+)$/i.exec(
-    request.headers.get("authorization") ?? "",
-  )?.[1];
-  if (bearer) {
-    if (await canPush(bearer)) return { inbox: rig.inbox };
+  const token = bearer(request);
+  if (token) {
+    if (await canPush(token)) return { inbox: rig.inbox };
     return {
       error: json(
         { error: "GitHub did not accept that token for this repository." },

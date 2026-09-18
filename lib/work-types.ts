@@ -58,6 +58,17 @@ export type Credit = {
    * `content/projects.json` as an override the harvest cannot touch.
    */
   instagram?: string | null;
+  /**
+   * The handle this credit actually links to, worked out once in
+   * `lib/work.ts`: `instagram` when there is one, and otherwise the name
+   * itself where the old site wrote the credit as "@apricotsss3".
+   */
+  handle?: string | null;
+  /**
+   * Their profile photograph, a path under `public/`, when one has been
+   * saved. Derived from `handle`; see `avatarFor` in `lib/work.ts`.
+   */
+  avatar?: string | null;
 };
 
 /**
