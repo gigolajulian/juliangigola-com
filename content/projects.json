@@ -760,6 +760,25 @@
         "name": "Julian Gigola",
         "instagram": "juliangigola"
       }
+    ],
+    "decoy": [
+      {
+        "role": "Photographer",
+        "name": "Julian Gigola",
+        "instagram": "juliangigola"
+      },
+      {
+        "role": "Model",
+        "name": "@symphonypaschal",
+        "instagram": "symphonypaschal"
+      }
+    ],
+    "i-wanna-be-a-human": [
+      {
+        "role": "Model",
+        "name": "Lola Morgan",
+        "instagram": "lolamorganmorgan"
+      }
     ]
   },
   "disciplines": [
@@ -884,11 +903,13 @@
     "kniiivess": "/people/kniiivess.jpg",
     "leena_kema": "/people/leena_kema.jpg",
     "lightbender_mark": "/people/lightbender_mark.jpg",
+    "lolamorganmorgan": "/people/lolamorganmorgan.jpg",
     "nikxdesigns": "/people/nikxdesigns.jpg",
     "phoebe2phly": "/people/phoebe2phly.jpg",
     "rice666s": "/people/rice666s.jpg",
     "starcasevintage": "/people/starcasevintage.jpg",
     "stylingbylydia": "/people/stylingbylydia.jpg",
+    "symphonypaschal": "/people/symphonypaschal.jpg",
     "tamakgo": "/people/tamakgo.jpg",
     "thisguysdope_disguise": "/people/thisguysdope_disguise.jpg"
   }
