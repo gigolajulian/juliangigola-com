@@ -345,7 +345,50 @@ const edit = {
   );
 }
 
-console.log("admin payload: 41 cases pass");
+/* The guard in `components/admin-editor.tsx` that refuses a publish which
+   would undo somebody else's commit. It is this comparison and nothing else,
+   so this is where it is worth proving.
+
+   The case is the one that actually happened: `f807362`, an /admin save from
+   a page older than the commits that added the credits, which wrote its empty
+   credit map over them and deleted two projects' worth. */
+{
+  const baseline = { ...edit };
+
+  // The repo grew a credit block this page has never seen. Refuse.
+  const ahead = adoptable(
+    { projects: [], trash: [], credits: { "i-wanna-be-a-human": [{ role: "Model" }] } },
+    baseline,
+  );
+  assert.equal(
+    same(ahead, baseline),
+    false,
+    "a credit block added since this page loaded is not the baseline",
+  );
+
+  // The repo is exactly where this page left it. Publish.
+  const level = adoptable({ projects: [], trash: [] }, baseline);
+  assert.equal(same(level, baseline), true, "an unchanged repo publishes");
+
+  // And the same for every other map the manifest writes wholesale, because
+  // each one is overwritten by `projectsFile` the same way credits are.
+  for (const [key, value] of [
+    ["categories", { mirage: "chroma" }],
+    ["frames", { sago: ["/work/sago/02.jpg"] }],
+    ["avatars", { hennyoh: "/people/hennyoh.jpg" }],
+    ["covers", { video: "/work/sago/01.jpg" }],
+    ["order", ["sago"]],
+    ["hidden", ["sago"]],
+  ]) {
+    assert.equal(
+      same(adoptable({ projects: [], trash: [], [key]: value }, baseline), baseline),
+      false,
+      `${key} moving in the repo is caught`,
+    );
+  }
+}
+
+console.log("admin payload: 50 cases pass");
 
 // A rewritten title that was cleared is dropped rather than published.
 {

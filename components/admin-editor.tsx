@@ -808,6 +808,33 @@ export function AdminEditor({
         // Read fresh: a project may have been added or deleted since this page
         // loaded, and writing back a stale list would undo it.
         const current = await readFile(token, ADDED_PATH);
+
+        /* And the same refusal `site.json` gets above, for the half of the
+           draft that lives here.
+         *
+         * Reading fresh is not enough on its own: `projectsFile` writes this
+         * page's whole manifest over whatever it read, so a key this page has
+         * never heard of is a key it deletes. That is not hypothetical —
+         * `f807362` erased the credits on I WANNA BE A HUMAN and DECOY,
+         * committed by hand two commits before, because this page had been
+         * open since before them.
+         *
+         * `connect` already adopts the repo when the page is clean; a page
+         * with edits on it cannot, because adopting would throw them away.
+         * So it refuses instead. One reload costs a minute. The other way
+         * costs work, silently, and nobody finds out until they look at a
+         * page that used to name three people. */
+        const live = current
+          ? adoptable(JSON.parse(current) as ProjectsFile, baseline.manifest)
+          : baseline.manifest;
+        if (!same(live, baseline.manifest)) {
+          setStatus({
+            kind: "error",
+            message:
+              "The project list changed in the repo since this page loaded, so publishing now would undo it. Reload /admin and make the edit again.",
+          });
+          return;
+        }
         // Built by `lib/admin-payload.ts`, covered by
         // `scripts/check-payload.mjs`. That is the one part of publishing
         // testable without a token, and the part where a dropped field
