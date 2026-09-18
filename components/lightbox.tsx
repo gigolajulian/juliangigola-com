@@ -572,11 +572,29 @@ export function Lightbox({
 const ZOOM_MIN = 1;
 const ZOOM_MAX = 3;
 
-function useZoom(box: React.RefObject<HTMLDivElement | null>, key: string) {
+function useZoom(
+  box: React.RefObject<HTMLDivElement | null>,
+  key: string,
+  swipe: ReturnType<typeof useSwipe>["handlers"],
+) {
   const [scale, setScale] = React.useState(1);
   const [at, setAt] = React.useState({ x: 0, y: 0 });
   const [held, setHeld] = React.useState(false);
   const drag = React.useRef<{ id: number; x: number; y: number } | null>(null);
+  /* Every finger on the picture, and the pinch the pair of them began.
+     A tablet has no wheel, so this is the only way in: two fingers set
+     the scale by how far apart they are against how far apart they
+     started, anchored on the point between them, which is the same
+     arithmetic the wheel does around the pointer. */
+  const pts = React.useRef(new Map<number, { x: number; y: number }>());
+  const pinch = React.useRef<{
+    gap: number;
+    scale: number;
+    x: number;
+    y: number;
+    ox: number;
+    oy: number;
+  } | null>(null);
   // Set by a pan, read by the click that follows it: a drag across the
   // picture ends in a click on the wrapper, and the wrapper closes the
   // viewer. Measured: every look around shut the photograph.
@@ -635,38 +653,110 @@ function useZoom(box: React.RefObject<HTMLDivElement | null>, key: string) {
     return () => el.removeEventListener("wheel", onWheel);
   }, [box, clamp]);
 
-  /* The hand, once there is more picture than box. Below that the frame
-     fits and there is nothing to look around, so the swipe keeps the
-     gesture and a drag still steps and dismisses as it always did. */
-  const pan = scale > 1
-    ? {
-        onPointerDown: (e: React.PointerEvent) => {
-          e.currentTarget.setPointerCapture(e.pointerId);
-          drag.current = { id: e.pointerId, x: e.clientX, y: e.clientY };
-          moved.current = false;
-          setHeld(true);
-        },
-        onPointerMove: (e: React.PointerEvent) => {
-          const d = drag.current;
-          if (!d || d.id !== e.pointerId) return;
-          const dx = e.clientX - d.x;
-          const dy = e.clientY - d.y;
-          if (dx || dy) moved.current = true;
-          d.x = e.clientX;
-          d.y = e.clientY;
-          setAt((o) => clamp(scale, o.x + dx, o.y + dy));
-        },
-        onPointerUp: () => {
-          drag.current = null;
-          setHeld(false);
-        },
-        onPointerCancel: () => {
-          drag.current = null;
-          setHeld(false);
-        },
-      }
-    : null;
+  /* One set of handlers for every gesture on the picture. What a press
+     turns into depends on how many fingers arrive and how far in the
+     photograph already is:
 
+       two fingers        pinch, at any zoom
+       one, zoomed in     the hand, moving the picture inside its box
+       one, at fit        the swipe, which steps and dismisses as before
+
+     The swipe is handed the press only in that last case, and is told to
+     let go the moment a second finger lands, or it would still be tracking
+     a drag underneath the pinch. */
+  const mid = (a: { x: number; y: number }, b: { x: number; y: number }) => ({
+    x: (a.x + b.x) / 2,
+    y: (a.y + b.y) / 2,
+  });
+  const gapOf = (a: { x: number; y: number }, b: { x: number; y: number }) =>
+    Math.hypot(a.x - b.x, a.y - b.y);
+
+  const onPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
+    pts.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    if (pts.current.size === 2) {
+      const [a, b] = [...pts.current.values()];
+      const el = box.current;
+      const r = el?.getBoundingClientRect();
+      const m = mid(a, b);
+      pinch.current = {
+        gap: gapOf(a, b) || 1,
+        scale,
+        x: r ? m.x - (r.left + r.width / 2) : 0,
+        y: r ? m.y - (r.top + r.height / 2) : 0,
+        ox: at.x,
+        oy: at.y,
+      };
+      drag.current = null;
+      moved.current = true;
+      setHeld(true);
+      swipe.onPointerCancel?.(e);
+      return;
+    }
+    if (scale > 1) {
+      e.currentTarget.setPointerCapture(e.pointerId);
+      drag.current = { id: e.pointerId, x: e.clientX, y: e.clientY };
+      moved.current = false;
+      setHeld(true);
+      return;
+    }
+    swipe.onPointerDown?.(e);
+  };
+
+  const onPointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (pts.current.has(e.pointerId)) {
+      pts.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    }
+    const p = pinch.current;
+    if (p && pts.current.size >= 2) {
+      const [a, b] = [...pts.current.values()];
+      const next = Math.min(
+        ZOOM_MAX,
+        Math.max(ZOOM_MIN, (p.scale * gapOf(a, b)) / p.gap),
+      );
+      setScale(next);
+      setAt(
+        clamp(
+          next,
+          p.x - ((p.x - p.ox) * next) / p.scale,
+          p.y - ((p.y - p.oy) * next) / p.scale,
+        ),
+      );
+      return;
+    }
+    const d = drag.current;
+    if (d && d.id === e.pointerId) {
+      const dx = e.clientX - d.x;
+      const dy = e.clientY - d.y;
+      if (dx || dy) moved.current = true;
+      d.x = e.clientX;
+      d.y = e.clientY;
+      setAt((o) => clamp(scale, o.x + dx, o.y + dy));
+      return;
+    }
+    if (scale === 1) swipe.onPointerMove?.(e);
+  };
+
+  const release = (
+    e: React.PointerEvent<HTMLDivElement>,
+    cancelled: boolean,
+  ) => {
+    const wasPinching = pts.current.size >= 2;
+    pts.current.delete(e.pointerId);
+    if (pts.current.size < 2) pinch.current = null;
+    if (drag.current?.id === e.pointerId) drag.current = null;
+    if (!drag.current && !pinch.current) setHeld(false);
+    if (!wasPinching && scale === 1) {
+      if (cancelled) swipe.onPointerCancel?.(e);
+      else swipe.onPointerUp?.(e);
+    }
+  };
+
+  const pan = {
+    onPointerDown,
+    onPointerMove,
+    onPointerUp: (e: React.PointerEvent<HTMLDivElement>) => release(e, false),
+    onPointerCancel: (e: React.PointerEvent<HTMLDivElement>) => release(e, true),
+  };
   return {
     scale,
     pan,
@@ -697,7 +787,7 @@ function Stage({
 }) {
   const area = React.useRef<HTMLDivElement>(null);
   const size = useFit(area, frame.width, frame.height);
-  const zoom = useZoom(pictureRef, frame.src);
+  const zoom = useZoom(pictureRef, frame.src, swipe);
   /* Under the picture while it arrives.
      The viewer asks for a wider copy than the strip did, so on a slow
      connection the file is still in flight when the trip starts — the
@@ -727,7 +817,7 @@ function Stage({
       <div
         ref={pictureRef}
         data-ring={zoom.ring}
-        {...(zoom.pan ?? swipe)}
+        {...zoom.pan}
         onClick={(e) => {
           if (zoom.dragged()) return;
           if (e.target === e.currentTarget) onClose();

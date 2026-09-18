@@ -2134,7 +2134,7 @@ optgroup {
    Translucent ink reads on paper and over a photograph alike, and it keeps
    the pair apart, because the quiet one beside it is the pale glass. */
 @utility action {
-  --glass-light: color-mix(in oklab, white 22%, transparent);
+  font-weight: 700;
   border: 1px solid color-mix(in oklab, var(--foreground) 60%, transparent);
   border-radius: 0;
   position: relative;
@@ -2148,16 +2148,14 @@ optgroup {
     background-color 200ms var(--ease-out-strong),
     border-color 200ms var(--ease-out-strong),
     --gx 340ms var(--ease-out-strong),
-    --gy 340ms var(--ease-out-strong),
-    scale 200ms var(--ease-out-strong);
+    --gy 340ms var(--ease-out-strong);
 
   /* Off the full ink under a pointer and back to it on the press: hover is
      the button noticing you, press is the button answering. */
   @media (hover: hover) and (pointer: fine) {
     &:hover {
       background-color: color-mix(in oklab, var(--foreground) 74%, transparent);
-      border-color: color-mix(in oklab, var(--foreground) 80%, transparent);
-      scale: 1.03;
+      border-color: var(--foreground);
     }
   }
   &:focus-visible {
@@ -2170,7 +2168,7 @@ optgroup {
 }
 
 @utility action-quiet {
-  --glass-light: color-mix(in oklab, white 26%, transparent);
+  font-weight: 700;
   border: 1px solid color-mix(in oklab, var(--foreground) 22%, transparent);
   border-radius: 0;
   position: relative;
@@ -2185,8 +2183,7 @@ optgroup {
     border-color 200ms var(--ease-out-strong),
     color 200ms var(--ease-out-strong),
     --gx 340ms var(--ease-out-strong),
-    --gy 340ms var(--ease-out-strong),
-    scale 200ms var(--ease-out-strong);
+    --gy 340ms var(--ease-out-strong);
 
   /* Under the pointer it fills rather than tints: white type needs a ground
      to be white against, and 7% of ink over the page is not one. The loud
@@ -2197,7 +2194,6 @@ optgroup {
       background-color: var(--foreground);
       border-color: var(--foreground);
       color: var(--background);
-      scale: 1.03;
     }
   }
   &:focus-visible {
@@ -2212,39 +2208,12 @@ optgroup {
   }
 }
 
-/* The light on the two buttons. The same material the floating controls
-   wear, on the thing a visitor actually presses: a soft highlight where the
-   pointer catches the surface, sliding with the hand through `--gx`/`--gy`
-   (written by `glass-light.tsx`) and resting at the top edge before there
-   is a hand at all. The fill underneath is opaque ink, so there is no blur
-   to see through here — what makes it glass is the shine along the top
-   edge, the shadow under it, and the light that follows you. */
-.action::before,
-.action-quiet::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  border-radius: inherit;
-  pointer-events: none;
-  background: radial-gradient(
-    150px circle at var(--gx) var(--gy),
-    color-mix(in oklab, white 30%, transparent),
-    transparent 72%
-  );
-  opacity: 0.5;
-  transition: opacity 260ms var(--ease-out-strong);
-}
-@media (hover: hover) and (pointer: fine) {
-  .action:hover::before,
-  .action-quiet:hover::before {
-    opacity: 1;
-  }
-}
-.action:focus-visible::before,
-.action-quiet:focus-visible::before {
-  opacity: 1;
-}
+/* No light pool and no lean. A white radial under the pointer on a
+   button that is itself pale read as a smear across it, and a button
+   that grows when you point at it moves the thing you were aiming for.
+   What answers the pointer instead is the edge: the hairline comes up
+   to full ink over 200ms and nothing else on the button moves at all.
+   Julian asked. */
 
 @utility glass-surface {
   background-color: color-mix(in oklab, var(--background) 62%, transparent);

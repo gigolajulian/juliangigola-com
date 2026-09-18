@@ -199,7 +199,14 @@ export function ContactForm() {
               key={t.value}
               className={cn(
                 "label cursor-pointer border px-4 py-3 transition-colors duration-200",
-                "focus-within:outline focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-[var(--ring)]",
+                /* Keyboard focus only. `focus-within` put the accent ring
+                   around whichever kind of shoot had been pressed and left
+                   it there, so a chosen type wore two outlines: its own
+                   border and a teal one outside it. A clicked radio does
+                   not match `:focus-visible` (measured), so this is the
+                   ring for somebody arriving by Tab and nobody else.
+                   Julian asked. */
+                "has-[:focus-visible]:outline has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-[var(--ring)]",
                 type === t.value
                   ? "border-foreground text-foreground"
                   : "border-border text-muted-foreground hoverable:hover:border-foreground/40 hoverable:hover:text-foreground",
