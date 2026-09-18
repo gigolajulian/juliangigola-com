@@ -402,6 +402,18 @@ export function Hero({
     if (Number.isInteger(i)) take(i);
   };
 
+  /* A mouse only. `pointerover` fires for a finger too, and on a tablet
+     the home page is a strip you swipe: a finger crossing the discipline
+     rows on its way through fired this at every row it passed and the
+     cover changed two or three times under the hand mid-swipe, which is
+     the glitch Julian was looking at. A deliberate press still chooses a
+     row, through the click below, and a keyboard still chooses one
+     through focus. */
+  const takeFromHover = (e: React.PointerEvent) => {
+    if (e.pointerType !== "mouse") return;
+    takeFromEvent(e);
+  };
+
   const current = slides[active];
   if (!current) return null;
 
@@ -893,7 +905,11 @@ export function Hero({
               aria-label="Disciplines"
               className="mt-8 min-h-0 overflow-y-auto overscroll-contain border-t border-border sm:mt-6 max-sm:tall:hidden lying:hidden"
             >
-              <ul onPointerOver={takeFromEvent} onFocus={takeFromEvent}>
+              <ul
+                onPointerOver={takeFromHover}
+                onClick={takeFromEvent}
+                onFocus={takeFromEvent}
+              >
                 {disciplines.map((discipline, i) => (
                   // Offset by one: this list is the disciplines, the cycle is
                   // the intro plus the disciplines. Row `i` is slide `i + 1`,
@@ -971,7 +987,8 @@ export function Hero({
                 same shape. */}
             <ol
               aria-label="Disciplines, on the picture"
-              onPointerOver={takeFromEvent}
+              onPointerOver={takeFromHover}
+              onClick={takeFromEvent}
               onFocus={takeFromEvent}
               className="mt-4 hidden gap-1 px-6 max-sm:tall:flex tall:pb-[max(0.5rem,env(safe-area-inset-bottom))]"
             >
