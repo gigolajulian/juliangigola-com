@@ -19,8 +19,14 @@
     "retro-reverie-vol-01": "editorial",
     "retro-reverie-vol-02": "editorial",
     "hellamack": "campaigns",
-    "solace": "editorial",
-    "urban-reverie": "editorial"
+    "solace": "chroma",
+    "urban-reverie": "editorial",
+    "mirage": "chroma",
+    "cyberscape": "chroma",
+    "true-grit": "chroma",
+    "lustro": "chroma",
+    "vendetta": "chroma",
+    "obscura": "chroma"
   },
   "frames": {
     "wrapped-up": [
@@ -596,6 +602,11 @@
       "slug": "realestate",
       "name": "Real estate",
       "section": "SESSIONS"
+    },
+    {
+      "slug": "chroma",
+      "name": "Chroma",
+      "section": "WORK"
     }
   ],
   "order": [
