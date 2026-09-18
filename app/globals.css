@@ -2255,8 +2255,101 @@ optgroup {
    button that is itself pale read as a smear across it, and a button
    that grows when you point at it moves the thing you were aiming for.
    What answers the pointer instead is the edge: the hairline comes up
-   to full ink over 200ms and nothing else on the button moves at all.
-   Julian asked. */
+   to full ink over 200ms, and the four corner marks outside it step
+   further out. Nothing on the button itself moves. */
+
+/* ── the marks inside a button ──
+   Four corner brackets, the way a camera puts a frame around what it
+   has picked. One element, not four: a box inset from the button on
+   every side with eight gradients painting two arms at each of its
+   corners. That is what makes the movement free — all four step out
+   together because the box they are drawn on grows, so there is one
+   transition and no chance of them coming apart.
+
+   `inset` and not `scale`: scaling would stretch the arms with the box
+   and the marks would fatten as they travelled.
+
+   Inside the button rather than around it. Drawn outside, they were cut
+   off wherever a button sits at the edge of something that scrolls,
+   which on this site is most places: measured on /contact, three of the
+   four were clipped by the form's own scroller and only the top right
+   survived. `currentColor` so each variant marks itself in its own
+   label's colour without being told. */
+.action::before,
+.action-quiet::before {
+  --arm: 9px;
+  --thick: 1.5px;
+  --mark: color-mix(in oklab, currentColor 40%, transparent);
+  content: "";
+  position: absolute;
+  inset: 5px;
+  pointer-events: none;
+  background-image:
+    /* top left */
+    linear-gradient(var(--mark), var(--mark)),
+    linear-gradient(var(--mark), var(--mark)),
+    /* top right */
+    linear-gradient(var(--mark), var(--mark)),
+    linear-gradient(var(--mark), var(--mark)),
+    /* bottom left */
+    linear-gradient(var(--mark), var(--mark)),
+    linear-gradient(var(--mark), var(--mark)),
+    /* bottom right */
+    linear-gradient(var(--mark), var(--mark)),
+    linear-gradient(var(--mark), var(--mark));
+  background-size:
+    var(--arm) var(--thick),
+    var(--thick) var(--arm),
+    var(--arm) var(--thick),
+    var(--thick) var(--arm),
+    var(--arm) var(--thick),
+    var(--thick) var(--arm),
+    var(--arm) var(--thick),
+    var(--thick) var(--arm);
+  background-position:
+    left top,
+    left top,
+    right top,
+    right top,
+    left bottom,
+    left bottom,
+    right bottom,
+    right bottom;
+  background-repeat: no-repeat;
+  transition:
+    inset 300ms var(--ease-out-strong),
+    --mark 300ms var(--ease-out-strong);
+}
+@media (hover: hover) and (pointer: fine) {
+  .action:hover::before,
+  .action-quiet:hover::before {
+    inset: 2px;
+    --mark: currentColor;
+  }
+}
+.action:focus-visible::before,
+.action-quiet:focus-visible::before {
+  inset: 2px;
+  --mark: currentColor;
+}
+/* A press pulls them back in, so the marks answer a finger as well as a
+   pointer: on a touch screen this is the only state they have. */
+.action:active::before,
+.action-quiet:active::before {
+  inset: 7px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .action::before,
+  .action-quiet::before {
+    transition: none;
+  }
+}
+/* Registered, or the colour of the marks jumps rather than coming up. */
+@property --mark {
+  syntax: "<color>";
+  inherits: false;
+  initial-value: transparent;
+}
 
 @utility glass-surface {
   background-color: color-mix(in oklab, var(--background) 62%, transparent);
