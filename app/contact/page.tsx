@@ -97,7 +97,7 @@ export default function ContactPage() {
                 target="_blank"
                 rel="noreferrer"
                 data-ring="Book"
-                className="label inline-block self-start action px-6 py-4 press active:scale-[0.97]"
+                className="label inline-block self-start action rounded-full px-6 py-4 press active:scale-[0.97]"
               >
                 Check availability
               </a>

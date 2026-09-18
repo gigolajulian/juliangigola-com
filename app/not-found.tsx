@@ -176,14 +176,14 @@ export default function NotFound() {
               <div className="mt-6 flex flex-wrap gap-3 sm:mt-7">
                 <Link
                   href="/work"
-                  className={`${MONO} inline-flex items-center gap-3 bg-[var(--tan)] px-6 py-4 font-bold text-[#1A1D21] press active:scale-[0.97] hoverable:hover:bg-[var(--leather)]`}
+                  className={`${MONO} inline-flex items-center gap-3 rounded-full bg-[var(--tan)] px-6 py-4 font-bold text-[#1A1D21] press active:scale-[0.97] hoverable:hover:bg-[var(--leather)]`}
                 >
                   <span className="opacity-60">01</span>
                   See the work
                 </Link>
                 <Link
                   href="/"
-                  className={`${MONO} action-quiet inline-flex items-center gap-3 px-6 py-4 font-bold press active:scale-[0.97]`}
+                  className={`${MONO} action-quiet inline-flex items-center gap-3 rounded-full px-6 py-4 font-bold press active:scale-[0.97]`}
                 >
                   <span className="opacity-60">02</span>
                   Back to home

@@ -2023,98 +2023,81 @@ optgroup {
  * the colour and what it does under a pointer, so the eight buttons on the
  * site cannot drift apart again.
  * ─────────────────────────────────────────────────────────────── */
-/* ── the two buttons ──
-   Square. A hairline holds the shape and the fill is the page behind it,
-   blurred: the same material `glass` above wears on the lightbox controls,
-   which is the one place on the site that already had it. The pill it
-   replaces was full-radius opaque ink, and Julian's note on it was that the
-   shape is the one every framework ships.
-
-   Both buttons take the glass. What separates them is the edge and how much
-   ground they hold, not one being ink and the other an outline: the pair has
-   to read as two different buttons at every moment, which was true of the
-   pill pair and has to stay true here.
-
-   The fill is `--background`, not `--foreground`. These sit over photographs
-   on the hero, and a button that darkens what is behind it in the dark theme
-   (and lightens it in the light one) is a button whose label stays legible
-   over any frame that happens to be showing. A foreground wash would go
-   milky over a bright photograph and lose the type.
-
-   The radial highlight that follows the pointer is already declared for both
-   of these below, and needs nothing here. */
 @utility action {
-  border: 1px solid color-mix(in oklab, var(--foreground) 55%, transparent);
-  border-radius: 0;
+  /* A transparent border, so this and `action-quiet` are the same height
+     when they sit side by side: the quiet one has a real hairline, and
+     without this the pair differed by the two pixels it adds. */
+  border: 1px solid transparent;
   position: relative;
   isolation: isolate;
-  color: var(--foreground);
-  background-color: color-mix(in oklab, var(--background) 42%, transparent);
-  -webkit-backdrop-filter: blur(16px) saturate(1.7);
-  backdrop-filter: blur(16px) saturate(1.7);
   box-shadow:
-    inset 0 1px 0 color-mix(in oklab, white 20%, transparent),
-    inset 0 -1px 0 color-mix(in oklab, black 26%, transparent),
-    0 12px 30px -18px color-mix(in oklab, black 65%, transparent);
-  transition:
-    background-color 200ms var(--ease-out-strong),
-    border-color 200ms var(--ease-out-strong),
-    scale 200ms var(--ease-out-strong);
+    inset 0 1px 0 color-mix(in oklab, white 22%, transparent),
+    inset 0 -1px 0 color-mix(in oklab, black 22%, transparent),
+    0 10px 24px -16px color-mix(in oklab, black 55%, transparent);
+  background-color: var(--foreground);
+  color: var(--background);
+  transition: background-color 200ms var(--ease-out-strong);
 
-  /* The edge takes the light and the glass firms up. It comes forward a
-     little too, the way it did as a pill: Julian asked for the scale on
-     hover, and it rides the same spring `press` declares for the way down,
-     so growing 3% under the pointer and dropping to 97% under the finger is
-     one movement with two ends. */
+  /* Off the full ink under a pointer and back to it on the press: hover is
+     the button noticing you, press is the button answering. The same pair
+     the chips use, and the same direction.
+
+     And it comes forward a little. Julian asked for the scale on hover; it
+     rides the same spring `press` already declares for the way down, so a
+     button that grows 3% under the pointer and drops to 97% under the
+     finger is one movement with two ends rather than two effects. */
   @media (hover: hover) and (pointer: fine) {
     &:hover {
-      border-color: color-mix(in oklab, var(--foreground) 88%, transparent);
-      background-color: color-mix(in oklab, var(--background) 58%, transparent);
+      background-color: color-mix(in oklab, var(--foreground) 84%, var(--background));
       scale: 1.03;
     }
   }
   &:focus-visible {
-    border-color: color-mix(in oklab, var(--foreground) 88%, transparent);
-    background-color: color-mix(in oklab, var(--background) 58%, transparent);
+    background-color: color-mix(in oklab, var(--foreground) 84%, var(--background));
   }
   &:active {
-    background-color: color-mix(in oklab, var(--background) 68%, transparent);
+    background-color: var(--foreground);
   }
 }
 
 @utility action-quiet {
-  border: 1px solid color-mix(in oklab, var(--foreground) 20%, transparent);
-  border-radius: 0;
+  border: 1px solid var(--border);
   position: relative;
   isolation: isolate;
-  color: var(--foreground);
-  background-color: color-mix(in oklab, var(--background) 24%, transparent);
-  -webkit-backdrop-filter: blur(16px) saturate(1.7);
-  backdrop-filter: blur(16px) saturate(1.7);
   box-shadow:
-    inset 0 1px 0 color-mix(in oklab, white 14%, transparent),
-    inset 0 -1px 0 color-mix(in oklab, black 20%, transparent),
-    0 12px 30px -20px color-mix(in oklab, black 55%, transparent);
+    inset 0 1px 0 color-mix(in oklab, white 18%, transparent),
+    inset 0 -1px 0 color-mix(in oklab, black 14%, transparent),
+    0 10px 24px -16px color-mix(in oklab, black 45%, transparent);
+  color: var(--foreground);
   transition:
     background-color 200ms var(--ease-out-strong),
-    border-color 200ms var(--ease-out-strong),
-    scale 200ms var(--ease-out-strong);
+    border-color 200ms var(--ease-out-strong);
 
-  /* It comes up to where the loud one rests rather than past it, so the two
-     never trade places under a pointer travelling across them. */
+  /* Under the pointer it fills rather than tints. Julian asked for the
+     label to go white on hover, and white type needs a ground to be white
+     against: 7% of ink over the page is not one. So the quiet button
+     takes the ink and hands the page's own colour to its label — white on
+     black in the light, black on white in the dark, which is the second
+     half of the same ask. The filled button beside it keeps its direction,
+     easing off its ink under the pointer, so the pair still reads as two
+     different buttons at every moment. */
   @media (hover: hover) and (pointer: fine) {
     &:hover {
-      border-color: color-mix(in oklab, var(--foreground) 42%, transparent);
-      background-color: color-mix(in oklab, var(--background) 40%, transparent);
+      background-color: var(--foreground);
+      border-color: var(--foreground);
+      color: var(--background);
       scale: 1.03;
     }
   }
   &:focus-visible {
-    border-color: color-mix(in oklab, var(--foreground) 42%, transparent);
-    background-color: color-mix(in oklab, var(--background) 40%, transparent);
+    background-color: var(--foreground);
+    border-color: var(--foreground);
+    color: var(--background);
   }
   &:active {
-    background-color: color-mix(in oklab, var(--background) 54%, transparent);
+    background-color: color-mix(in oklab, var(--foreground) 88%, var(--background));
+    border-color: color-mix(in oklab, var(--foreground) 88%, var(--background));
+    color: var(--background);
   }
 }
 

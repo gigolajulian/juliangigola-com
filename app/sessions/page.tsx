@@ -173,7 +173,7 @@ export default function SessionsPage() {
                       target="_blank"
                       rel="noreferrer"
                       data-ring="Book"
-                      className="label action px-5 py-3 press active:scale-[0.97]"
+                      className="label action rounded-full px-5 py-3 press active:scale-[0.97]"
                     >
                       Check availability
                     </a>
@@ -181,7 +181,7 @@ export default function SessionsPage() {
                   <Link
                     href={`/contact?type=session&session=${session.slug}`}
                     data-ring="Book"
-                    className="label action-quiet inline-flex items-center gap-2 px-5 py-3 press active:scale-[0.97]"
+                    className="label action-quiet inline-flex items-center gap-2 rounded-full px-5 py-3 press active:scale-[0.97]"
                   >
                     Enquire
                   </Link>

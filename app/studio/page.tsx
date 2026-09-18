@@ -248,14 +248,14 @@ export default function StudioPage() {
               >
                 <Link
                   href="/contact?type=editorial"
-                  className="label action px-6 py-4 press active:scale-[0.97] short:py-3"
+                  className="label action rounded-full px-6 py-4 press active:scale-[0.97] short:py-3"
                 >
                   Enquire
                 </Link>
                 <Link
                   prefetch={false}
                   href="/work"
-                  className="label action-quiet px-6 py-4 press active:scale-[0.97] short:py-3"
+                  className="label action-quiet rounded-full px-6 py-4 press active:scale-[0.97] short:py-3"
                 >
                   See the work
                 </Link>
