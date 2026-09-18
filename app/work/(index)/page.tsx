@@ -2,7 +2,7 @@ import { filmCount } from "@/lib/videos";
 import type { Metadata } from "next";
 import { Strip } from "@/components/strip";
 import { CoverCell } from "@/components/cover-cell";
-import { GroupCell } from "@/components/work-cells";
+import { FrameCell, GroupCell } from "@/components/work-cells";
 import { EnquiryCell } from "@/components/enquiry-cell";
 import {
   COMMISSIONS,
@@ -91,6 +91,24 @@ export default function WorkPage() {
           eager={i < 4}
         />,
       );
+      /* And the rest of the set behind that first one. Julian: a
+         discipline he shoots straight onto the page should show all of
+         its frames here, not one picture standing for twenty. Cover art
+         is the exception and stays a single cell: it is a catalogue with
+         its own rack on its own page. */
+      if (!isCoverArt) {
+        for (const frame of gallery.images.slice(1)) {
+          cells.push(
+            <FrameCell
+              key={frame.src}
+              frame={frame}
+              href={c.href}
+              name={c.name}
+              i={i++}
+            />,
+          );
+        }
+      }
       continue;
     }
 
