@@ -15,6 +15,7 @@ import type { Project, Category, Frame, TextBlock } from "./work-types";
 import { COVER_RELEASES as RELEASES } from "./cover-art-data";
 import type { CoverRelease } from "./cover-art-types";
 import { CONTENT } from "./content";
+import { REEL } from "./videos";
 import {
   ADDED,
   HIDDEN,
@@ -1097,6 +1098,19 @@ const COVER_OVERRIDES: Record<string, Frame> = {
     "/work/ukiyosunknown/01.jpg",
     "Model crouched on a studio floor beside a CRT television, looking away from camera",
   ),
+  /* The one frame on the cover that is not a photograph at all: a still from
+     the Director's Reel, which is what MOTION is actually an index of.
+     Without it the row fell back to the first film's YouTube thumbnail, which
+     is 216x162 and was being drawn at 797x997, a four and a half times
+     upscale of a postage stamp, and it looked it. Cropped to 4:5 from the
+     3840x2160 master and sized the way `coverart` below is. */
+  video: {
+    src: "/hero/motion.jpg",
+    width: 2500,
+    height: 3125,
+    color: "#80888B",
+    alt: "Two lowriders on the waterfront at golden hour, the Bay Bridge and the downtown skyline behind them",
+  },
   coverart: {
     // The one discipline whose work is not a photograph but a released object,
     // so it is shown as one: sleeves laid out as prints, the lead release
@@ -1303,8 +1317,12 @@ export const DISCIPLINES: Discipline[] = DISCIPLINE_SLUGS.map((slug) =>
        poster credits the film, and goes to the page it plays on. */
     const credit = project
       ? { name: project.name, href: `/work/${project.slug}` }
-      : isVideo && CONTENT.videos[0]
-        ? { name: CONTENT.videos[0].title, href: "/work/video" }
+      : isVideo
+        ? // The reel, not `videos[0]`. The frame above is a still from it,
+          // and the rule for this corner is that it credits what is on
+          // screen: CLEAN printed under a frame from the reel is the kind of
+          // caption nobody notices until they do.
+          { name: REEL.title, href: "/work/video" }
         : undefined;
 
     return {
