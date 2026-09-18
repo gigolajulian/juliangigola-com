@@ -48,13 +48,28 @@ const categoryRedirects = CATEGORIES.map((c) => ({
  *
  * The `has` host condition is what keeps this from being a loop: it fires only
  * on the `www` name and the destination is absolute, so the apex never matches
- * itself. Checked with a `Host:` header before it shipped.
+ * itself.
+ *
+ * Two rules rather than one `/:path*`, because the homepage is the one URL a
+ * single rule gets wrong. On the Worker, `/:path*` matching `/` leaves the
+ * token unsubstituted and the browser is sent to the literal
+ * `https://juliangigola.com/:path*`. `next dev` substitutes it correctly, so
+ * this only shows up once it is deployed — it was caught on production and is
+ * why the root has a rule of its own and the rest uses `+`, which needs at
+ * least one segment.
  */
+const WWW = [{ type: "host" as const, value: "www.juliangigola.com" }];
 const wwwRedirect = [
   {
-    source: "/:path*",
-    has: [{ type: "host" as const, value: "www.juliangigola.com" }],
-    destination: "https://juliangigola.com/:path*",
+    source: "/",
+    has: WWW,
+    destination: "https://juliangigola.com/",
+    permanent: true,
+  },
+  {
+    source: "/:path+",
+    has: WWW,
+    destination: "https://juliangigola.com/:path+",
     permanent: true,
   },
 ];
