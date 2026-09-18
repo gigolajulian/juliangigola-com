@@ -72,6 +72,10 @@ export function ClientMarks({
             aria-label={client.name}
             className={cn(
               "group relative flex items-center justify-center text-muted-foreground transition-colors duration-200 hoverable:hover:text-foreground",
+              // In the row, a thumb's worth of link: a wordmark is 16px of
+              // ink and a thumb is not. The negative margin takes the
+              // padding back, so the row is the height it always was.
+              "max-sm:-my-2 max-sm:py-2",
               // A whole cell to aim at in the wall, so the target is the
               // logo's space rather than its ink — a wordmark's letterforms
               // are mostly holes.

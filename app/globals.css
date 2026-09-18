@@ -1189,6 +1189,7 @@ a.strip-cell {
   a.label,
   .label a,
   dd a,
+  a[href^="mailto:"],
   header a[href="/"],
   nav[aria-label="Legal"] a {
     padding-block: 0.5rem;
