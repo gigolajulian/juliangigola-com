@@ -1253,7 +1253,7 @@ export function Strip({
           /* `min-h-5`, so the row is the same height with a client's mark
              in it and without one: the strip above is `flex-1` and would
              otherwise give up four pixels every time a mark appeared. */
-          "mt-6 flex min-h-5 items-end gap-6 px-6 sm:px-10 lying:mt-2",
+          "mt-6 flex min-h-3 items-end gap-6 px-6 sm:px-10 lying:mt-2",
           stack && "max-sm:hidden",
         )}
       >
@@ -1265,9 +1265,9 @@ export function Strip({
 
         <div
           aria-hidden
-          // `h-4` whether or not the ticks are in yet, so the strip above is
+          // `h-2` whether or not the ticks are in yet, so the strip above is
           // the same height before and after they are read.
-          className="flex h-4 min-w-0 flex-1 items-end justify-between gap-px"
+          className="flex h-2 min-w-0 flex-1 items-end justify-between gap-px"
         >
           {ticks.map(({ i, word }, n) => {
             /* Words in the back half hang from the right of their tick and
@@ -1282,7 +1282,7 @@ export function Strip({
                 tabIndex={-1}
                 title={word}
                 onClick={() => goTo(i)}
-                className="group relative flex h-4 flex-1 items-end"
+                className="group relative flex h-2 flex-1 items-end"
               >
                 {word ? (
                   <span
@@ -1301,7 +1301,7 @@ export function Strip({
                   className={cn(
                     "block w-full rounded-full transition-[height,background-color] duration-200 ease-[var(--ease-out-strong)]",
                     i === at
-                      ? "h-4 bg-foreground"
+                      ? "h-2 bg-foreground"
                       : "h-1 bg-foreground/20 hoverable:group-hover:h-1.5 hoverable:group-hover:bg-foreground/40",
                   )}
                 />

@@ -250,9 +250,9 @@ export function ZoomDemo() {
               {(open ?? 0) + 1} / {GRID.length} · {p.label}
             </p>
             <div data-demo-chrome className="flex gap-2" style={{ opacity: 0 }}>
-              <button type="button" onClick={() => step(-1)} className="label glass rounded-full px-4 py-2.5" aria-label="Previous">←</button>
-              <button type="button" onClick={() => step(1)} className="label glass rounded-full px-4 py-2.5" aria-label="Next">→</button>
-              <button ref={closeBtn} type="button" onClick={close} className="label glass ml-4 rounded-full px-4 py-2.5">Close</button>
+              <button type="button" onClick={() => step(-1)} className="label glass px-4 py-2.5" aria-label="Previous">←</button>
+              <button type="button" onClick={() => step(1)} className="label glass px-4 py-2.5" aria-label="Next">→</button>
+              <button ref={closeBtn} type="button" onClick={close} className="label glass ml-4 px-4 py-2.5">Close</button>
             </div>
           </div>
         </div>,

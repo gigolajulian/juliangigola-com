@@ -541,7 +541,7 @@ export function Lightbox({
                 <button
                   type="button"
                   data-ring="Close"
-                  className="label glass ml-4 rounded-full px-4 py-2.5 text-muted-foreground press hoverable:hover:text-foreground active:scale-[0.97]"
+                  className="label glass ml-4 px-4 py-2.5 text-muted-foreground press hoverable:hover:text-foreground active:scale-[0.97]"
                 >
                   Close
                 </button>
@@ -652,7 +652,7 @@ function LightboxButton({
       data-ring={label.replace(" frame", "")}
       // 44px minimum target: the control someone taps repeatedly on a
       // phone gets a real hit area rather than an icon's worth.
-      className="glass flex h-11 w-11 items-center justify-center rounded-full text-base press active:scale-[0.97]"
+      className="glass flex h-11 w-11 items-center justify-center text-base press active:scale-[0.97]"
     >
       <span aria-hidden>{children}</span>
     </button>

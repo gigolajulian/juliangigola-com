@@ -555,7 +555,7 @@ function Ctl({
       aria-label={label}
       title={label}
       className={cn(
-        "label flex h-9 w-9 items-center justify-center glass rounded-full text-foreground press hoverable:hover:bg-card disabled:opacity-30",
+        "label flex h-9 w-9 items-center justify-center glass text-foreground press hoverable:hover:bg-card disabled:opacity-30",
         className,
       )}
     >

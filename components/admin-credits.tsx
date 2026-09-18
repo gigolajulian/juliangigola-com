@@ -315,7 +315,7 @@ function Face({ desk, handle }: { desk: CreditDeskValue; handle: string }) {
             : "Add the handle first"
         }
         aria-label={`Picture for ${handle || "this credit"}`}
-        className="size-10 shrink-0 overflow-hidden rounded-full border border-border bg-card press disabled:opacity-30"
+        className="size-10 shrink-0 overflow-hidden border border-border bg-card press disabled:opacity-30"
       >
         {has ? (
           // eslint-disable-next-line @next/next/no-img-element

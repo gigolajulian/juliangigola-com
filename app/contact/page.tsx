@@ -4,7 +4,7 @@ import Link from "next/link";
 import { ContactForm } from "@/components/contact-form";
 import { Strip } from "@/components/strip";
 import { StripPage, StripHead, RisingTitle } from "@/components/strip-page";
-import { RESPONSE_TIME, BOOKING_URL } from "@/lib/site";
+import { BOOKING_URL } from "@/lib/site";
 
 /* ── contact ──────────────────────────────────────────────────────
  * The page the whole site is judged on, so the form is on the first screen
@@ -32,11 +32,6 @@ const ELSEWHERE = [
     at: "@juliangigola",
   },
   {
-    href: "https://vimeo.com/filmedbyjulian",
-    label: "Vimeo",
-    at: "filmedbyjulian",
-  },
-  {
     href: "https://www.linkedin.com/in/juliangigola",
     label: "LinkedIn",
     at: "Julian Gigola",
@@ -59,7 +54,6 @@ export default function ContactPage() {
           }
           title="Contact"
           live
-          aside={RESPONSE_TIME ? `Replies ${RESPONSE_TIME}` : undefined}
         />
       }
     >
@@ -97,7 +91,7 @@ export default function ContactPage() {
                 target="_blank"
                 rel="noreferrer"
                 data-ring="Book"
-                className="label inline-block self-start action rounded-full px-6 py-4 press active:scale-[0.97]"
+                className="label inline-block self-start action px-6 py-4 press active:scale-[0.97]"
               >
                 Check availability
               </a>

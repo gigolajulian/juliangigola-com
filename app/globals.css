@@ -1159,6 +1159,21 @@ a.strip-cell {
 :root[data-theme="light"] .reel-veil {
   opacity: calc(0.8 + var(--reel-dim, 0) * 0.16);
 }
+/* Over the reel the page is a cinema, not a sheet of paper: the light
+   theme keeps a dark ground so the film reads through it and the type
+   stays white. Set by `video-showcase.tsx` while the backdrop is up. */
+:root[data-theme="light"][data-reel] {
+  color-scheme: dark;
+  --background: oklch(0.145 0.003 70);
+  --foreground: oklch(0.955 0.004 80);
+  --card: oklch(0.185 0.003 70);
+  --muted-foreground: oklch(0.655 0.005 80);
+  --border: oklch(1 0 0 / 11%);
+  --input: oklch(1 0 0 / 14%);
+}
+:root[data-theme="light"][data-reel] .reel-veil {
+  opacity: calc(0.38 + var(--reel-dim, 0) * 0.5);
+}
 @media (prefers-reduced-motion: reduce) {
   .reel-backdrop {
     display: none;
@@ -1908,10 +1923,8 @@ optgroup {
   -webkit-backdrop-filter: blur(15px) saturate(1.6);
   backdrop-filter: blur(15px) saturate(1.6);
   border: 1px solid var(--glass-edge);
-  box-shadow:
-    inset 0 1px 0 var(--glass-shine),
-    inset 0 -1px 0 var(--glass-shade),
-    0 12px 32px -14px color-mix(in oklab, black 55%, transparent);
+  border-radius: 0;
+  box-shadow: 0 12px 32px -14px color-mix(in oklab, black 55%, transparent);
   transition:
     background-color 200ms var(--ease-out-strong),
     border-color 200ms var(--ease-out-strong),
@@ -1962,10 +1975,8 @@ optgroup {
   -webkit-backdrop-filter: blur(15px) saturate(1.6);
   backdrop-filter: blur(15px) saturate(1.6);
   border: 1px solid var(--glass-edge);
-  box-shadow:
-    inset 0 1px 0 var(--glass-shine),
-    inset 0 -1px 0 var(--glass-shade),
-    0 12px 32px -14px color-mix(in oklab, black 55%, transparent);
+  border-radius: 0;
+  box-shadow: 0 12px 32px -14px color-mix(in oklab, black 55%, transparent);
   transition: background-color 200ms var(--ease-out-strong);
 
   &::before {
@@ -2023,37 +2034,49 @@ optgroup {
  * the colour and what it does under a pointer, so the eight buttons on the
  * site cannot drift apart again.
  * ─────────────────────────────────────────────────────────────── */
+/* ── the two buttons ──
+   Glass, square, no bevel.
+
+   Square because every other edge on the site is: the strip, the ruler, the
+   grid. A lit top edge over a dark bottom one is the other thing that went:
+   it imitates moulded plastic, and under a condensed grotesque on paper it
+   reads as a control borrowed from somebody else's software.
+
+   `action` takes the prominent fill, which is ink at 86% rather than page at
+   52%. That matters and is worth writing down: the pale glass is invisible
+   on the paper ground, near white over near white, with a white pointer
+   highlight that cannot be seen and a blur with nothing behind it. Measured
+   on production it made the primary call to action on /contact a hollow box.
+   Translucent ink reads on paper and over a photograph alike, and it keeps
+   the pair apart, because the quiet one beside it is the pale glass. */
 @utility action {
-  /* A transparent border, so this and `action-quiet` are the same height
-     when they sit side by side: the quiet one has a real hairline, and
-     without this the pair differed by the two pixels it adds. */
-  border: 1px solid transparent;
+  --glass-light: color-mix(in oklab, white 22%, transparent);
+  border: 1px solid color-mix(in oklab, var(--foreground) 60%, transparent);
+  border-radius: 0;
   position: relative;
   isolation: isolate;
-  box-shadow:
-    inset 0 1px 0 color-mix(in oklab, white 22%, transparent),
-    inset 0 -1px 0 color-mix(in oklab, black 22%, transparent),
-    0 10px 24px -16px color-mix(in oklab, black 55%, transparent);
-  background-color: var(--foreground);
   color: var(--background);
-  transition: background-color 200ms var(--ease-out-strong);
+  background-color: color-mix(in oklab, var(--foreground) 86%, transparent);
+  -webkit-backdrop-filter: blur(15px) saturate(1.6);
+  backdrop-filter: blur(15px) saturate(1.6);
+  box-shadow: 0 12px 32px -16px color-mix(in oklab, black 55%, transparent);
+  transition:
+    background-color 200ms var(--ease-out-strong),
+    border-color 200ms var(--ease-out-strong),
+    scale 200ms var(--ease-out-strong);
 
   /* Off the full ink under a pointer and back to it on the press: hover is
-     the button noticing you, press is the button answering. The same pair
-     the chips use, and the same direction.
-
-     And it comes forward a little. Julian asked for the scale on hover; it
-     rides the same spring `press` already declares for the way down, so a
-     button that grows 3% under the pointer and drops to 97% under the
-     finger is one movement with two ends rather than two effects. */
+     the button noticing you, press is the button answering. */
   @media (hover: hover) and (pointer: fine) {
     &:hover {
-      background-color: color-mix(in oklab, var(--foreground) 84%, var(--background));
+      background-color: color-mix(in oklab, var(--foreground) 74%, transparent);
+      border-color: color-mix(in oklab, var(--foreground) 80%, transparent);
       scale: 1.03;
     }
   }
   &:focus-visible {
-    background-color: color-mix(in oklab, var(--foreground) 84%, var(--background));
+    background-color: color-mix(in oklab, var(--foreground) 74%, transparent);
+    border-color: color-mix(in oklab, var(--foreground) 80%, transparent);
   }
   &:active {
     background-color: var(--foreground);
@@ -2061,26 +2084,26 @@ optgroup {
 }
 
 @utility action-quiet {
-  border: 1px solid var(--border);
+  --glass-light: color-mix(in oklab, white 26%, transparent);
+  border: 1px solid color-mix(in oklab, var(--foreground) 22%, transparent);
+  border-radius: 0;
   position: relative;
   isolation: isolate;
-  box-shadow:
-    inset 0 1px 0 color-mix(in oklab, white 18%, transparent),
-    inset 0 -1px 0 color-mix(in oklab, black 14%, transparent),
-    0 10px 24px -16px color-mix(in oklab, black 45%, transparent);
   color: var(--foreground);
+  background-color: color-mix(in oklab, var(--background) 30%, transparent);
+  -webkit-backdrop-filter: blur(15px) saturate(1.6);
+  backdrop-filter: blur(15px) saturate(1.6);
+  box-shadow: 0 12px 32px -18px color-mix(in oklab, black 45%, transparent);
   transition:
     background-color 200ms var(--ease-out-strong),
-    border-color 200ms var(--ease-out-strong);
+    border-color 200ms var(--ease-out-strong),
+    color 200ms var(--ease-out-strong),
+    scale 200ms var(--ease-out-strong);
 
-  /* Under the pointer it fills rather than tints. Julian asked for the
-     label to go white on hover, and white type needs a ground to be white
-     against: 7% of ink over the page is not one. So the quiet button
-     takes the ink and hands the page's own colour to its label — white on
-     black in the light, black on white in the dark, which is the second
-     half of the same ask. The filled button beside it keeps its direction,
-     easing off its ink under the pointer, so the pair still reads as two
-     different buttons at every moment. */
+  /* Under the pointer it fills rather than tints: white type needs a ground
+     to be white against, and 7% of ink over the page is not one. The loud
+     one beside it eases off its ink at the same moment, so the pair reads as
+     two different buttons at every point in the movement. */
   @media (hover: hover) and (pointer: fine) {
     &:hover {
       background-color: var(--foreground);

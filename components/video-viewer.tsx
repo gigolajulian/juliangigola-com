@@ -163,7 +163,7 @@ export function VideoViewer({
               <Dialog.Close asChild>
                 <button
                   type="button"
-                  className="label glass ml-4 rounded-full px-4 py-2.5 text-muted-foreground press hoverable:hover:text-foreground active:scale-[0.97]"
+                  className="label glass ml-4 px-4 py-2.5 text-muted-foreground press hoverable:hover:text-foreground active:scale-[0.97]"
                 >
                   Close
                 </button>
@@ -190,7 +190,7 @@ function ViewerButton({
       type="button"
       onClick={onClick}
       aria-label={label}
-      className="glass flex size-11 items-center justify-center rounded-full text-muted-foreground press hoverable:hover:text-foreground active:scale-[0.95]"
+      className="glass flex size-11 items-center justify-center text-muted-foreground press hoverable:hover:text-foreground active:scale-[0.95]"
     >
       {children}
     </button>

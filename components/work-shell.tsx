@@ -386,7 +386,7 @@ export function WorkShell({
           aria-label={mode === "strip" ? "Strip view" : "Grid view"}
           onClick={() => chooseView(mode)}
           className={cn(
-            "-my-1 rounded-full p-1.5 transition-opacity duration-200",
+            "-my-1 p-1.5 transition-opacity duration-200",
             view === mode
               ? "text-foreground opacity-100"
               : "text-foreground opacity-35 hoverable:hover:opacity-70",
@@ -475,7 +475,7 @@ export function WorkShell({
                 <span
                   ref={pill}
                   aria-hidden
-                  className="pointer-events-none absolute left-0 top-0 rounded-full bg-foreground opacity-0 transition-[transform,width,height] duration-300 ease-[var(--ease-out-strong)] motion-reduce:transition-none"
+                  className="pointer-events-none absolute left-0 top-0 bg-foreground opacity-0 transition-[transform,width,height] duration-300 ease-[var(--ease-out-strong)] motion-reduce:transition-none"
                 />
                 <li
                   ref={all && shown === null ? lit : undefined}
@@ -555,7 +555,7 @@ function Chip({
        mis-tap is a filter nobody asked for; the desktop keeps the line
        thin, because the pointer is exact and the band is height the
        photographs would rather have. */
-    "label block whitespace-nowrap rounded-full px-3 py-1.5 max-sm:py-3",
+    "label block whitespace-nowrap px-3 py-1.5 max-sm:py-3",
     "transition-[color,background-color,transform] duration-200 ease-[var(--ease-out-strong)]",
     // A chip lifts a touch under the pointer and gives under the press;
     // the lit one is drawn by the pill sliding beneath the row.

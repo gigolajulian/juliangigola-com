@@ -192,14 +192,28 @@ function ReelBackdrop({
       className="reel-backdrop pointer-events-none fixed inset-0 -z-10 overflow-hidden"
     >
       <iframe
-        // From two seconds in, past the slate. Julian asked.
-        src={`https://player.vimeo.com/video/${REEL.videoId}?background=1&autoplay=1&loop=1&muted=1&dnt=1#t=2s`}
+        // From three seconds in, past the slate. Julian asked.
+        src={`https://player.vimeo.com/video/${REEL.videoId}?background=1&autoplay=1&loop=1&muted=1&dnt=1#t=3s`}
         title={REEL.title}
         allow="autoplay; encrypted-media"
         tabIndex={-1}
         className="reel-backdrop-frame absolute left-1/2 top-1/2"
       />
       <div className="reel-veil absolute inset-0" />
+      <ReelTheme />
     </div>
   );
+}
+
+/* While the film is behind the page the light theme is not paper. The
+   attribute on the root turns it to the dark palette (globals.css), so
+   the type over the reel is white in either theme. Julian asked. */
+function ReelTheme() {
+  React.useEffect(() => {
+    document.documentElement.dataset.reel = "1";
+    return () => {
+      delete document.documentElement.dataset.reel;
+    };
+  }, []);
+  return null;
 }

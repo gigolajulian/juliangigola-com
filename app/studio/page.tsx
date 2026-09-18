@@ -172,8 +172,7 @@ export default function StudioPage() {
             data-scroll
             className="grid min-h-0 flex-1 content-center gap-10 overflow-y-auto sm:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)] sm:gap-16 short:sm:gap-10"
           >
-            {/* His words. The biography reads as a column; the vision is a
-                statement and is set as one. */}
+            {/* His words. The biography reads as a column. */}
             <div className="flex flex-col gap-8 short:gap-5">
               <div className="flex flex-col gap-3 short:gap-2">
                 <h2 className="label text-muted-foreground">Biography</h2>
@@ -187,16 +186,6 @@ export default function StudioPage() {
                   every subject I work with. Whether it&rsquo;s a personal
                   project or a collaboration, I strive to create images that
                   resonate and leave a lasting impression.
-                </p>
-              </div>
-              <div className="flex flex-col gap-3 short:gap-2">
-                <h2 className="label text-muted-foreground">Vision</h2>
-                <p className="font-display text-xl uppercase leading-[1.1] tracking-[0] lg:text-2xl short:text-base">
-                  My vision is to create captivating visual stories that go
-                  beyond the surface. As one person behind the lens, I am
-                  dedicated to capturing the unique essence of each subject with
-                  authenticity, creativity, and a commitment to integrity,
-                  crafting images that resonate and inspire.
                 </p>
               </div>
             </div>
@@ -248,14 +237,14 @@ export default function StudioPage() {
               >
                 <Link
                   href="/contact?type=editorial"
-                  className="label action rounded-full px-6 py-4 press active:scale-[0.97] short:py-3"
+                  className="label action px-6 py-4 press active:scale-[0.97] short:py-3"
                 >
                   Enquire
                 </Link>
                 <Link
                   prefetch={false}
                   href="/work"
-                  className="label action-quiet rounded-full px-6 py-4 press active:scale-[0.97] short:py-3"
+                  className="label action-quiet px-6 py-4 press active:scale-[0.97] short:py-3"
                 >
                   See the work
                 </Link>

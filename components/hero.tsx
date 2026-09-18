@@ -99,13 +99,13 @@ function Ways({
     >
       <Link
         href="/work"
-        className="label action rounded-full px-7 py-5 press active:scale-[0.97] short:px-6 short:py-3.5"
+        className="label action px-7 py-5 press active:scale-[0.97] short:px-6 short:py-3.5"
       >
         See the work
       </Link>
       <Link
         href="/sessions"
-        className="label action-quiet rounded-full bg-background px-7 py-5 press active:scale-[0.97] short:px-6 short:py-3.5"
+        className="label action-quiet bg-background px-7 py-5 press active:scale-[0.97] short:px-6 short:py-3.5"
       >
         Book a session
       </Link>
@@ -586,7 +586,7 @@ export function Hero({
                    one. The picture is its own column at that width, so its
                    left edge is the panel's border and the pill sits on the
                    frame either way. */
-                "label glass absolute bottom-4 right-4 z-10 rounded-full px-4 py-2.5 text-muted-foreground hoverable:hover:text-foreground sm:bottom-6 sm:right-6 wide:left-10 wide:right-auto",
+                "label glass absolute bottom-4 right-4 z-10 px-4 py-2.5 text-muted-foreground hoverable:hover:text-foreground sm:bottom-6 sm:right-6 wide:left-10 wide:right-auto",
                 leaving
                   ? "title-out pointer-events-none"
                   : // Same guard as the photograph: on the intro there is no
