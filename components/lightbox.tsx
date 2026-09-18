@@ -554,6 +554,134 @@ export function Lightbox({
   );
 }
 
+
+/* ── scroll to zoom, drag to look around ──────────────────────────
+ * A wheel over the picture zooms it, from six tenths out to three times
+ * in, and the point under the pointer stays where it is: zoom towards a
+ * face and the face is what grows, not the middle of the frame. Past
+ * actual size the picture is bigger than its box, so the hand moves it
+ * and the box clips. The offset is clamped to the overhang, so a photo
+ * can never be dragged off its own frame and left as a strip of black.
+ *
+ * The transform goes on a wrapper of its own, between the box and the
+ * picture. `lib/zoom.ts` flies the box and animates the picture inside it,
+ * and a finished Web Animation holds whatever transform it ended on, so a
+ * zoom written to either of them is set and then ignored. Measured before
+ * the wrapper: scale 1.9 in state, matrix(1, 0, 0, 1, 0, 0) on screen.
+ * ─────────────────────────────────────────────────────────────── */
+const ZOOM_MIN = 0.6;
+const ZOOM_MAX = 3;
+
+function useZoom(box: React.RefObject<HTMLDivElement | null>, key: string) {
+  const [scale, setScale] = React.useState(1);
+  const [at, setAt] = React.useState({ x: 0, y: 0 });
+  const [held, setHeld] = React.useState(false);
+  const drag = React.useRef<{ id: number; x: number; y: number } | null>(null);
+  // Set by a pan, read by the click that follows it: a drag across the
+  // picture ends in a click on the wrapper, and the wrapper closes the
+  // viewer. Measured: every look around shut the photograph.
+  const moved = React.useRef(false);
+
+  /* A new frame is a new photograph, not the last one at the last zoom.
+     Adjusted while rendering rather than in an effect: React re-runs this
+     component before anything paints, so the new picture never appears
+     for a frame at the old zoom on its way back to one. */
+  const [was, setWas] = React.useState(key);
+  if (was !== key) {
+    setWas(key);
+    setScale(1);
+    setAt({ x: 0, y: 0 });
+  }
+
+  // How far the picture may move before its own edge comes past the box.
+  const clamp = React.useCallback(
+    (s: number, x: number, y: number) => {
+      const el = box.current;
+      if (!el || s <= 1) return { x: 0, y: 0 };
+      const mx = (el.clientWidth * (s - 1)) / 2;
+      const my = (el.clientHeight * (s - 1)) / 2;
+      return {
+        x: Math.max(-mx, Math.min(mx, x)),
+        y: Math.max(-my, Math.min(my, y)),
+      };
+    },
+    [box],
+  );
+
+  /* Non-passive, and on the element rather than through React: React
+     attaches wheel listeners at the root as passive, so a handler in JSX
+     cannot stop the page behind from scrolling with it. */
+  React.useEffect(() => {
+    const el = box.current;
+    if (!el) return;
+    const onWheel = (e: WheelEvent) => {
+      e.preventDefault();
+      const r = el.getBoundingClientRect();
+      // Where the pointer is, measured from the middle of the box.
+      const px = e.clientX - (r.left + r.width / 2);
+      const py = e.clientY - (r.top + r.height / 2);
+      setScale((was) => {
+        const next = Math.min(
+          ZOOM_MAX,
+          Math.max(ZOOM_MIN, was * Math.exp(-e.deltaY / 420)),
+        );
+        setAt((o) =>
+          clamp(next, px - ((px - o.x) * next) / was, py - ((py - o.y) * next) / was),
+        );
+        return next;
+      });
+    };
+    el.addEventListener("wheel", onWheel, { passive: false });
+    return () => el.removeEventListener("wheel", onWheel);
+  }, [box, clamp]);
+
+  /* The hand, once there is more picture than box. Below that the frame
+     fits and there is nothing to look around, so the swipe keeps the
+     gesture and a drag still steps and dismisses as it always did. */
+  const pan = scale > 1
+    ? {
+        onPointerDown: (e: React.PointerEvent) => {
+          e.currentTarget.setPointerCapture(e.pointerId);
+          drag.current = { id: e.pointerId, x: e.clientX, y: e.clientY };
+          moved.current = false;
+          setHeld(true);
+        },
+        onPointerMove: (e: React.PointerEvent) => {
+          const d = drag.current;
+          if (!d || d.id !== e.pointerId) return;
+          const dx = e.clientX - d.x;
+          const dy = e.clientY - d.y;
+          if (dx || dy) moved.current = true;
+          d.x = e.clientX;
+          d.y = e.clientY;
+          setAt((o) => clamp(scale, o.x + dx, o.y + dy));
+        },
+        onPointerUp: () => {
+          drag.current = null;
+          setHeld(false);
+        },
+        onPointerCancel: () => {
+          drag.current = null;
+          setHeld(false);
+        },
+      }
+    : null;
+
+  return {
+    scale,
+    pan,
+    /** True while the click that follows a pan is still to come. */
+    dragged: () => moved.current,
+    /* The word at the pointer says what the wheel will do next, and the
+       cursor says whether there is anything to drag. Julian asked. */
+    ring: scale > 1 ? "Scroll to zoom out" : "Scroll to zoom in",
+    style: {
+      transform: `translate(${at.x}px, ${at.y}px) scale(${scale})`,
+      transition: held ? "none" : "transform 180ms var(--ease-out-strong)",
+      cursor: scale > 1 ? (held ? "grabbing" : "grab") : undefined,
+    } as React.CSSProperties,
+  };
+}
 function Stage({
   frame,
   alt,
@@ -569,6 +697,7 @@ function Stage({
 }) {
   const area = React.useRef<HTMLDivElement>(null);
   const size = useFit(area, frame.width, frame.height);
+  const zoom = useZoom(pictureRef, frame.src);
   /* Under the picture while it arrives.
      The viewer asks for a wider copy than the strip did, so on a slow
      connection the file is still in flight when the trip starts — the
@@ -597,9 +726,10 @@ function Stage({
           it was released at is where the next frame starts from. */}
       <div
         ref={pictureRef}
-        data-ring="Zoom out"
-        {...swipe}
+        data-ring={zoom.ring}
+        {...(zoom.pan ?? swipe)}
         onClick={(e) => {
+          if (zoom.dragged()) return;
           if (e.target === e.currentTarget) onClose();
         }}
         className="flex h-full w-full touch-none select-none items-center justify-center"
@@ -614,6 +744,7 @@ function Stage({
             ...(under ? { backgroundImage: `url("${under}")` } : null),
           }}
         >
+          <div style={zoom.style} className="h-full w-full">
           <Image
             key={frame.src}
             data-lightbox-picture
@@ -626,6 +757,7 @@ function Stage({
             draggable={false}
             className="block h-full w-full object-contain"
           />
+          </div>
         </div>
       </div>
     </div>
