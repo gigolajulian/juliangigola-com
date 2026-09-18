@@ -426,7 +426,12 @@ export function WorkShell({
                 out of it. */}
               <ul
                 ref={row}
-                className="relative gap-x-0.5 px-3 select-none max-sm:grid max-sm:grid-cols-2 max-sm:justify-items-start max-sm:gap-y-0.5 sm:flex sm:flex-nowrap sm:overflow-x-auto sm:px-7 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+                /* Centred in the window, by auto margins on the first and
+                   last chip rather than `justify-center`: centring a flex
+                   row that scrolls puts its start out of reach, and these
+                   collapse to nothing the moment the row is wider than the
+                   bar. */
+                className="relative gap-x-0.5 px-3 select-none max-sm:grid max-sm:grid-cols-2 max-sm:justify-items-start max-sm:gap-y-0.5 sm:flex sm:flex-nowrap sm:overflow-x-auto sm:px-7 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:[&>li:first-of-type]:ml-auto sm:[&>li:last-of-type]:mr-auto"
               >
                 {/* The lit pill is one element that slides to whichever chip
                   is chosen, rather than a fill each chip draws for itself:
@@ -534,6 +539,15 @@ function Chip({
         const lit = row?.querySelector('[aria-current="page"]');
         const from = lit?.getBoundingClientRect().left ?? me.left;
         markFilter(active ? 0 : me.left - from < 0 ? -1 : 1);
+        /* Julian: pressing All while the work is already showing all of
+           it goes back to the beginning. A link to the page you are on
+           changes no route and moves nothing otherwise; `jg:home` is the
+           same event the wordmark sends on the homepage, so the strip
+           travels there under its own friction rather than cutting. */
+        if (active)
+          document
+            .querySelector(".strip-scroll")
+            ?.dispatchEvent(new Event("jg:home"));
       }}
       className={className}
     >
