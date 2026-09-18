@@ -557,6 +557,15 @@ export type CategoryLink = { slug: string; name: string; href: string };
  * across that boundary — the href each category needs is data, so it travels
  * as data.
  */
+/** The front of the chip row, in the order Julian wants it read. */
+const ROW_ORDER = [
+  "editorial",
+  "campaigns",
+  "artist-presskit",
+  "portraits",
+  "chroma",
+];
+
 export const WORK_CATEGORY_LINKS: CategoryLink[] = WORK_CATEGORIES.filter(
   /* A row that navigates nowhere is worse than one that is absent, so a
      discipline waits until there is something to open.
@@ -579,11 +588,23 @@ export const WORK_CATEGORY_LINKS: CategoryLink[] = WORK_CATEGORIES.filter(
     name: categoryLabel(c),
     href: categoryHref(c.slug),
   }))
-  // Video at the end of the row, where Julian wants it: the photographic
-  // disciplines first and the one that is not photographs last. Stable, so
-  // nothing else moves. `nextDiscipline` follows this order too, which puts
-  // the reel after Places and wraps to Editorial from there.
-  .sort((a, b) => Number(a.slug === "video") - Number(b.slug === "video"));
+  /* The row in Julian's order. The manifest's order is the old site's nav
+     and a discipline added since lands at the end of it, which is no order
+     at all: Chroma came out after Places and the presskits sat away from
+     the portraits they read with. Named here, front of the row; anything
+     not named keeps the place the manifest gave it, and Video stays last,
+     the photographic disciplines first and the one that is not photographs
+     after them. `nextDiscipline` follows this order too. */
+  .map((c, i) => {
+    const at = ROW_ORDER.indexOf(c.slug);
+    return { c, rank: at < 0 ? ROW_ORDER.length + i : at };
+  })
+  .sort(
+    (a, b) =>
+      Number(a.c.slug === "video") - Number(b.c.slug === "video") ||
+      a.rank - b.rank,
+  )
+  .map(({ c }) => c);
 
 /* ── what a list is handed ────────────────────────────────────────
  * The index on /work and the band on the homepage are client components,
