@@ -1911,6 +1911,23 @@ optgroup {
  * the fill opaque, and every colour is mixed from the theme's own tokens so
  * the material is the same material in light and dark.
  * ─────────────────────────────────────────────────────────────── */
+/* ── the light, as a thing that can move ──
+   `--gx` / `--gy` are written by `glass-light.tsx` the instant the pointer
+   moves. Registered as lengths they can be transitioned, so the highlight
+   arrives a beat behind the hand and smears across the surface on the way:
+   the glass has weight. Unregistered they snapped, which reads as a decal.
+   Initial values put the light at the top edge, where it rests. */
+@property --gx {
+  syntax: "<length-percentage>";
+  inherits: true;
+  initial-value: 50%;
+}
+@property --gy {
+  syntax: "<length-percentage>";
+  inherits: true;
+  initial-value: 0%;
+}
+
 @utility glass {
   --glass-fill: color-mix(in oklab, var(--background) 52%, transparent);
   --glass-edge: color-mix(in oklab, var(--foreground) 18%, transparent);
@@ -1920,8 +1937,8 @@ optgroup {
   position: relative;
   isolation: isolate;
   background-color: var(--glass-fill);
-  -webkit-backdrop-filter: blur(15px) saturate(1.6);
-  backdrop-filter: blur(15px) saturate(1.6);
+  -webkit-backdrop-filter: blur(24px) saturate(1.9) brightness(1.06);
+  backdrop-filter: blur(24px) saturate(1.9) brightness(1.06);
   border: 1px solid var(--glass-edge);
   border-radius: 0;
   box-shadow: 0 12px 32px -14px color-mix(in oklab, black 55%, transparent);
@@ -1940,7 +1957,7 @@ optgroup {
     border-radius: inherit;
     pointer-events: none;
     background: radial-gradient(
-      140px circle at var(--gx, 50%) var(--gy, 0%),
+      160px circle at var(--gx) var(--gy),
       var(--glass-light),
       transparent 70%
     );
@@ -1972,8 +1989,8 @@ optgroup {
   isolation: isolate;
   color: var(--background);
   background-color: var(--glass-fill);
-  -webkit-backdrop-filter: blur(15px) saturate(1.6);
-  backdrop-filter: blur(15px) saturate(1.6);
+  -webkit-backdrop-filter: blur(24px) saturate(1.9) brightness(1.06);
+  backdrop-filter: blur(24px) saturate(1.9) brightness(1.06);
   border: 1px solid var(--glass-edge);
   border-radius: 0;
   box-shadow: 0 12px 32px -14px color-mix(in oklab, black 55%, transparent);
@@ -1987,7 +2004,7 @@ optgroup {
     border-radius: inherit;
     pointer-events: none;
     background: radial-gradient(
-      140px circle at var(--gx, 50%) var(--gy, 0%),
+      160px circle at var(--gx) var(--gy),
       var(--glass-light),
       transparent 70%
     );
@@ -2056,13 +2073,15 @@ optgroup {
   position: relative;
   isolation: isolate;
   color: var(--background);
-  background-color: color-mix(in oklab, var(--foreground) 86%, transparent);
-  -webkit-backdrop-filter: blur(15px) saturate(1.6);
-  backdrop-filter: blur(15px) saturate(1.6);
+  background-color: color-mix(in oklab, var(--foreground) 72%, transparent);
+  -webkit-backdrop-filter: blur(24px) saturate(1.9) brightness(1.06);
+  backdrop-filter: blur(24px) saturate(1.9) brightness(1.06);
   box-shadow: 0 12px 32px -16px color-mix(in oklab, black 55%, transparent);
   transition:
     background-color 200ms var(--ease-out-strong),
     border-color 200ms var(--ease-out-strong),
+    --gx 340ms var(--ease-out-strong),
+    --gy 340ms var(--ease-out-strong),
     scale 200ms var(--ease-out-strong);
 
   /* Off the full ink under a pointer and back to it on the press: hover is
@@ -2091,13 +2110,15 @@ optgroup {
   isolation: isolate;
   color: var(--foreground);
   background-color: color-mix(in oklab, var(--background) 30%, transparent);
-  -webkit-backdrop-filter: blur(15px) saturate(1.6);
-  backdrop-filter: blur(15px) saturate(1.6);
+  -webkit-backdrop-filter: blur(24px) saturate(1.9) brightness(1.06);
+  backdrop-filter: blur(24px) saturate(1.9) brightness(1.06);
   box-shadow: 0 12px 32px -18px color-mix(in oklab, black 45%, transparent);
   transition:
     background-color 200ms var(--ease-out-strong),
     border-color 200ms var(--ease-out-strong),
     color 200ms var(--ease-out-strong),
+    --gx 340ms var(--ease-out-strong),
+    --gy 340ms var(--ease-out-strong),
     scale 200ms var(--ease-out-strong);
 
   /* Under the pointer it fills rather than tints: white type needs a ground
@@ -2140,11 +2161,11 @@ optgroup {
   border-radius: inherit;
   pointer-events: none;
   background: radial-gradient(
-    120px circle at var(--gx, 50%) var(--gy, 0%),
-    color-mix(in oklab, white 24%, transparent),
-    transparent 70%
+    150px circle at var(--gx) var(--gy),
+    color-mix(in oklab, white 30%, transparent),
+    transparent 72%
   );
-  opacity: 0;
+  opacity: 0.5;
   transition: opacity 260ms var(--ease-out-strong);
 }
 @media (hover: hover) and (pointer: fine) {
