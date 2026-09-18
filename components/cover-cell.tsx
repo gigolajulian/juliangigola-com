@@ -129,14 +129,17 @@ export function CoverCell({
         />
 
         {/* The plate: the same material as the bar at the top of every page,
-          the height of its own two lines and no more, so it covers what it
-          needs to of the photograph and nothing else. Always on, because a
-          strip of covers is scanned for a name you recognise. */}
-        <div className="cover-plate pointer-events-none absolute inset-x-0 bottom-0 flex items-baseline justify-between gap-4 border-t border-border/60 glass-surface bg-background/70 px-4 py-3">
-          <span className="font-display min-w-0 truncate text-lg uppercase leading-none tracking-[0]">
+          and a fifth of the cover, which is the band Julian asked for. One
+          layout at every size — name along the bottom left, credit along
+          the bottom right — with the type measured in `cqw` off the cell,
+          so the rack and a phone held sideways get the same plate as a
+          full window rather than a stacked variant of their own. Always
+          on, because a strip of covers is scanned for a name. */}
+        <div className="cover-plate pointer-events-none absolute inset-x-0 bottom-0 flex h-1/5 min-h-[2.75rem] items-end justify-between gap-[4cqw] border-t border-border/60 glass-surface bg-background/70 px-[4cqw] py-[3cqw]">
+          <span className="font-display min-w-0 truncate text-[clamp(0.8rem,6.5cqw,2.5rem)] uppercase leading-none tracking-[0]">
             {row.name}
           </span>
-          <span className="label shrink-0 text-muted-foreground">
+          <span className="label shrink-0 text-[clamp(0.5rem,2.2cqw,0.8125rem)] text-muted-foreground">
             {row.credit}
             {/* And how much of it there is. A cover is one photograph; the
               number is what says it opens onto a body of work. Off on a

@@ -839,18 +839,10 @@ nav[aria-label="Categories"] ul[data-more] {
     padding: 0 3rem;
   }
 }
-/* At 240px the plate has no room for a name beside a credit: the name goes
-   on its own line and the credit under it, so `Metamorphosis` is not
-   `Metamorph...`. */
-.strip-grid .cover-plate {
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 0.125rem;
-}
-/* The same wherever a cover comes out narrow, which the rack is not the
-   only way of reaching: a phone held sideways gives the strip 200px of
-   height and the covers follow it down to 150 wide, where `Lost Relic`
-   printed as `L...`. The cell measures itself and the plate reads it. */
+/* One plate for every cover, at every size. The rack used to stack the
+   credit under the name and a narrow cover used to drop it; the type is
+   measured off the cell now, so neither is needed and a cover is the
+   same object wherever it is printed. Julian asked. */
 /* On the covers only. `container-type: inline-size` contains the element's
    own width, so a cell sized by its content stops being: put on every
    `.strip-cell`, it squeezed the rack's chapter columns to their floor and
@@ -858,19 +850,6 @@ nav[aria-label="Categories"] ul[data-more] {
    way and can safely measure itself. */
 a.strip-cell {
   container-type: inline-size;
-}
-@container (max-width: 15rem) {
-  /* Julian: the type under the photographs read as a slab. Stacking the
-     credit under the name doubled the plate on exactly the covers with
-     least room — 56px of it over a 277px picture. A narrow cover keeps
-     the name, which is what a strip of covers is scanned for, and gives
-     up the credit. */
-  .cover-plate > :last-child {
-    display: none;
-  }
-  .cover-plate > :first-child {
-    font-size: 1rem;
-  }
 }
 /* Cells arrive from the strip with a height, a width or an aspect of their
    own; in the rack the grid decides all three. */
