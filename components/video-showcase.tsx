@@ -98,7 +98,11 @@ export function VideoShowcase({
         key={section.id}
         className="w-full shrink-0 sm:flex sm:h-full sm:w-auto sm:items-center"
       >
-        <div className="sm:h-[62%]">
+        {/* Two thirds on a desktop, where the reel behind is the point of
+          the page. On a tablet there is no reel worth seeing behind a grid
+          of stills and the tiles were simply small, so they take most of
+          the height instead. Julian asked. */}
+        <div className="sm:h-[62%] tablet:h-[88%]">
           <VideoGrid videos={section.films} onOpen={setOpen} rows />
         </div>
       </div>,

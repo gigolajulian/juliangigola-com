@@ -11,6 +11,10 @@
  * guard is one definition rather than a condition repeated at each call site.
  */
 @custom-variant hoverable (@media (hover: hover) and (pointer: fine));
+/* A tablet: a finger on a screen wide enough to lay the work out as a
+   desktop does. Hover never happens there, so anything that hides itself
+   until the pointer arrives is parked on screen for good. */
+@custom-variant tablet (@media (pointer: coarse) and (min-width: 40rem));
 
 /**
  * Wide enough for the cover to be two columns.

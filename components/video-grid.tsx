@@ -256,6 +256,11 @@ function Tile({
           It also comes back for a keyboard: a tile you can reach with Tab has
           to show what pressing it does.
 
+          And it is off altogether on a tablet, where hover never happens
+          and the disc would sit on every still for good. A phone keeps it:
+          one tile fills the screen there and the mark is what says the
+          picture is a film. Julian asked.
+
           The disc exists for the mark and not for the picture: a white
           triangle on a pale still is invisible, and a mark with its own dark
           disc under it is legible on anything. */}
@@ -263,7 +268,7 @@ function Tile({
         aria-hidden
         className="absolute inset-0 flex items-center justify-center"
       >
-        <span className="flex size-16 items-center justify-center glass transition-[opacity,scale] duration-300 ease-[var(--ease-out-strong)] hoverable:scale-90 hoverable:opacity-0 hoverable:group-hover:scale-100 hoverable:group-hover:opacity-100 group-focus-visible:scale-100 group-focus-visible:opacity-100 motion-reduce:transition-none">
+        <span className="flex size-16 items-center justify-center glass tablet:hidden transition-[opacity,scale] duration-300 ease-[var(--ease-out-strong)] hoverable:scale-90 hoverable:opacity-0 hoverable:group-hover:scale-100 hoverable:group-hover:opacity-100 group-focus-visible:scale-100 group-focus-visible:opacity-100 motion-reduce:transition-none">
           {/* Drawn, not imported — the same rule the rest of the icons here
               follow. A triangle, optically centred: a shape with a flat left
               edge and a point on the right reads as off-centre when its
