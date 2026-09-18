@@ -818,6 +818,35 @@
         "name": "Phoebe",
         "instagram": "phoebe2phly"
       }
+    ],
+    "decoy": [
+      {
+        "role": "Photographer",
+        "name": "Julian Gigola",
+        "instagram": "juliangigola"
+      },
+      {
+        "role": "Model",
+        "name": "@symphonypaschal",
+        "instagram": "symphonypaschal"
+      }
+    ],
+    "i-wanna-be-a-human": [
+      {
+        "role": "Model",
+        "name": "Lola Morgan",
+        "instagram": "lolamorganmorgan"
+      },
+      {
+        "role": "Styling and art direction",
+        "name": "Henny Oh",
+        "instagram": "henny__oh"
+      },
+      {
+        "role": "Photographer",
+        "name": "Julian Gigola",
+        "instagram": "juliangigola"
+      }
     ]
   },
   "disciplines": [
