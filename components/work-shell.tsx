@@ -235,7 +235,6 @@ export function WorkShell({
 
   const row = React.useRef<HTMLUListElement>(null);
   const lit = React.useRef<HTMLLIElement>(null);
-  const pill = React.useRef<HTMLSpanElement>(null);
   /* The row is a thing you can take hold of.
      Eleven chips do not fit a laptop, so the row scrolls; a row that
      scrolls and cannot be dragged is a row most people never reach the end
@@ -336,22 +335,8 @@ export function WorkShell({
        fading out looks like a row that continues. */
     const measure = () => {
       r.toggleAttribute("data-more", r.scrollWidth > r.clientWidth + 1);
-      const c = lit.current;
-      const s = pill.current;
-      if (!c || !s) return;
-      s.style.width = `${c.offsetWidth}px`;
-      s.style.height = `${c.offsetHeight}px`;
-      s.style.transform = `translate(${c.offsetLeft}px, ${c.offsetTop}px)`;
-      s.style.opacity = "1";
-      // Placed, it may move from here on; the first placement just is.
-      requestAnimationFrame(() => s.toggleAttribute("data-placed", true));
     };
-    if (!pill.current?.hasAttribute("data-placed"))
-      pill.current?.style.setProperty("transition", "none");
     measure();
-    requestAnimationFrame(() =>
-      pill.current?.style.removeProperty("transition"),
-    );
     const c = lit.current;
     if (c && r.scrollWidth > r.clientWidth) {
       /* Only when the chosen chip is not already in view. Re-centring a
@@ -468,15 +453,6 @@ export function WorkShell({
                    bar. */
                 className="relative gap-x-0.5 px-3 select-none max-sm:grid max-sm:grid-cols-2 max-sm:justify-items-start max-sm:gap-y-0.5 sm:flex sm:flex-nowrap sm:overflow-x-auto sm:px-7 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:[&>li:first-of-type]:ml-auto sm:[&>li:last-of-type]:mr-auto"
               >
-                {/* The lit pill is one element that slides to whichever chip
-                  is chosen, rather than a fill each chip draws for itself:
-                  the choice is seen moving along the row. Measured in the
-                  effect above; the first placement is not animated. */}
-                <span
-                  ref={pill}
-                  aria-hidden
-                  className="filter-lit pointer-events-none absolute left-0 top-0 opacity-0 transition-[transform,width,height] duration-300 ease-[var(--ease-out-strong)] motion-reduce:transition-none"
-                />
                 <li
                   ref={all && shown === null ? lit : undefined}
                   className="relative z-10"
@@ -547,9 +523,13 @@ function Chip({
   count?: number;
   children: React.ReactNode;
 }) {
-  /* Chips. The chosen filter is filled, ink on ground, which is the one
+  /* Chips. The chosen filter is set bold and in full ink, and that is the
      mark that can be found at a glance in a row of eleven; the rest
-     light up as a soft pill under a pointer. */
+     only brighten under a pointer. The soft pill that used to draw
+     itself under the hand is gone: the lit marker already says which
+     one is chosen, and a second fill saying nothing was redundant.
+     Julian asked. The keyboard keeps its fill, because a focus ring
+     that is only a colour change is not a focus ring. */
   const className = cn(
     /* A thumb's worth of chip on a phone, where the row scrolls and a
        mis-tap is a filter nobody asked for; the desktop keeps the line
@@ -557,12 +537,11 @@ function Chip({
        photographs would rather have. */
     "label block whitespace-nowrap px-3 py-1.5 max-sm:py-3",
     "transition-[color,background-color,transform] duration-200 ease-[var(--ease-out-strong)]",
-    // A chip lifts a touch under the pointer and gives under the press;
-    // the lit one is drawn by the pill sliding beneath the row.
+    // A chip lifts a touch under the pointer and gives under the press.
     "hoverable:hover:scale-[1.05] active:scale-[0.96] motion-reduce:hover:scale-100",
     active
-      ? "text-background"
-      : "text-muted-foreground hoverable:hover:bg-foreground/[0.07] hoverable:hover:text-foreground focus-visible:bg-foreground/[0.07] focus-visible:text-foreground",
+      ? "font-bold text-foreground"
+      : "text-muted-foreground hoverable:hover:text-foreground focus-visible:bg-foreground/[0.07] focus-visible:text-foreground",
   );
   return (
     <Link

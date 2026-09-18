@@ -751,27 +751,6 @@ nav[aria-label="Categories"] ul[data-more] {
   }
 }
 
-/* ── the chosen discipline ──
-   The marker that slides along the filter row. Blur alone did nothing for
-   it: it sits on the page ground, and there is no photograph behind a row
-   of words to see through. What makes it glass on a flat ground is the
-   light on the surface, so it carries a sheen falling from the top edge
-   over the fill and a soft cast under it. The blur stays for the frames
-   that do run under the row on a short window. */
-.filter-lit {
-  background-image: linear-gradient(
-    to bottom,
-    color-mix(in oklab, white 22%, transparent),
-    color-mix(in oklab, white 6%, transparent) 46%,
-    transparent 62%
-  );
-  background-color: color-mix(in oklab, var(--foreground) 72%, transparent);
-  border: 1px solid color-mix(in oklab, var(--foreground) 55%, transparent);
-  -webkit-backdrop-filter: blur(24px) saturate(1.9) brightness(1.06);
-  backdrop-filter: blur(24px) saturate(1.9) brightness(1.06);
-  box-shadow: 0 10px 26px -14px color-mix(in oklab, black 60%, transparent);
-}
-
 .strip-grid {
   display: grid;
   grid-template-rows: repeat(2, minmax(0, 1fr));
