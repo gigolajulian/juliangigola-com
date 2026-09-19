@@ -1291,49 +1291,29 @@ a.strip-cell {
   }
 }
 
-/* ── twelve disciplines on an upright tablet ──
+/* ── twelve disciplines, on a window that cannot hold them ──
    The row scrolls sideways, which is an invitation on a desktop where it
-   is 1470 wide against 1425 and one chip hangs off the end. At 768 it was
-   the same 1470 with no sign there was more of it, and six of the twelve
-   were off the screen.
+   is 1470 wide against 1425 and one chip hangs off the end. Below that it
+   was never a row at all. At 768 the same 1470 had six of the twelve off
+   the screen with no sign there was more of it; wrapped to two lines it
+   fitted, four pixels apart, which is not a gap but a word space, and
+   BRAND CAMPAIGNS 15 ARTIST PRESSKIT 7 read as one line of type. In four
+   aligned columns it was tidy and still a block of twelve names where the
+   photographs should be. On a phone it was a hundred and thirty seven
+   pixels of small caps, a sixth of the screen, before a visitor saw any
+   work at all.
 
-   Two wrapped lines fixed that and made a different mess. The twelve names
-   run from 71 to 176 wide, so wrapping fits six to a line only at four
-   pixels apart, and four pixels between two runs of small caps is not a
-   gap — it is a space. BRAND CAMPAIGNS 15 ARTIST PRESSKIT 7 reads as one
-   line of type, nothing lines up with the row underneath it, and Julian
-   said the filters were all over the place. They were.
+   So below `lg` the twelve stop being a bar and become a drawer, the
+   mirror of the menu — `work-filter.tsx`, and the rules above. What is
+   left in the bar is one capsule saying where you are. The row itself
+   stays in the page, hidden, because it is twelve links to twelve
+   galleries and a crawler should still find them.
 
-   So they are a table now: four columns, three rows, and the columns are
-   as wide as the widest name in each. Two things come of that. The names
-   line up down the screen, which is what turns twelve scattered words
-   into a list you can scan. And four to a line leaves 170 pixels that six
-   to a line did not have, which pays for two full spaces between the
-   columns rather than four pixels.
-
-   Content-sized columns rather than equal ones, because equal columns at
-   this width are 839 and the long names print over their neighbours —
-   that was the first attempt. `overflow-x: auto` stays as the floor: if
-   the disciplines ever outgrow the window the bar scrolls again instead
-   of bleeding over the photographs.
-
-   A phone has its own layout, two columns of six, so this is
-   `min-width: 40rem` and the tablet only. */
-@media (max-aspect-ratio: 4 / 5) and (min-width: 40rem) {
+   Julian asked for the filters to do exactly what the menu does, from the
+   other side. */
+@media (max-width: 63.999rem) {
   .chip-row {
-    display: grid;
-    grid-template-columns: repeat(4, auto);
-    justify-content: center;
-    justify-items: start;
-    column-gap: 2rem;
-    row-gap: 0.125rem;
-    padding-inline: 0;
-  }
-  .chip-row > li:first-of-type {
-    margin-left: 0;
-  }
-  .chip-row > li:last-of-type {
-    margin-right: 0;
+    display: none;
   }
 }
 
@@ -1762,45 +1742,61 @@ a.strip-cell {
   }
 }
 
-/* ── the menu is a drawer and the page is its lid ──
+/* ── two drawers, and the page is the lid of both ──
    Julian: the burger should push the screen left and the menu should come
-   out from behind it on the right.
+   out from behind it on the right. Then: the filters should do the exact
+   same thing from the other side.
 
-   It was a panel that faded up over the whole window, which is the usual
-   answer and says nothing: the page is simply gone for as long as the menu
-   is up, and a visitor who opened it by accident has lost their place. A
-   drawer keeps the page on the screen, off to one side, plainly still
-   there and plainly waiting — and pressing it is how you go back to it.
+   So there is one drawer here and two of them on the screen. The menu
+   comes in from the right and pushes the page left; the filters come in
+   from the left and push it right. Everything else about them — the
+   material, the timing, the held breath, the glass over the page, the way
+   the names drop in a step apart — is one set of rules that both wear.
+
+   Why a drawer at all: a panel that fades up over the whole window is the
+   usual answer and it says nothing. The page is gone for as long as the
+   panel is up, and somebody who opened it by accident has lost their
+   place. A drawer keeps the page on screen, off to one side, plainly
+   still there and plainly waiting, and pressing it is how you go back.
 
    Four things move and they move as one. The bar, the page and the footer
-   travel left by the drawer’s width; the drawer travels in by the same
-   width. Same distance, same time, same curve, so the drawer’s left edge
-   is against the page’s right edge for every frame: nothing appears from
-   nowhere, and nothing is uncovered that was not already behind it.
+   travel by the drawer’s width; the drawer travels in by the same width.
+   Same distance, same time, same curve, so the drawer’s edge is against
+   the page’s edge for every frame: nothing is uncovered that was not
+   already behind it.
 
    `translate` rather than a transform, and `none` rather than zero at
    rest. An element with any transform on it becomes the frame every fixed
    thing inside it is measured from, which would quietly re-anchor the
    lightbox and the viewer on every page in the site. `none` is not a
-   transform, so the cost is paid only while the drawer is open, and
+   transform, so the cost is paid only while a drawer is open, and
    `translate: none` still interpolates from a length.
 
    420ms, after 80. A drawer is the one control on the site allowed to
    take its time: it is a large object with weight, seen once in a visit,
    and the curve is the same strong ease-out everything else arrives on.
    The 80 is a held breath — Julian asked for it — and it is on the way
-   out only: the delay is read from wherever a transition is going, so
+   out only: a delay is read from wherever a transition is going, so
    closing has none and the page comes straight back under the finger.
 
-   Only below `lg`, where the burger exists. A window wide enough for the
-   four links in the bar never opens this, and a page pushed halfway off a
-   desktop because somebody resized it while it was open is a bug nobody
-   would find twice. */
+   One attribute for both, because two drawers open at once would be a
+   page asked to travel in both directions. `data-drawer` on `<html>` is
+   either "menu" or "filter" or absent, and the stylesheet cannot express
+   the broken state — which is cheaper than two components agreeing to
+   behave.
+
+   Only below `lg`, where the burger and the capsule exist. A window wide
+   enough for the four links in the bar and the twelve filters in a row
+   never opens either, and a page pushed halfway off a desktop because
+   somebody resized it while it was open is a bug nobody would find
+   twice. */
 :root {
-  /* Wide enough for the longest of the four set large, narrow enough that
-     the page keeps most of the window. On a phone that is four fifths of
-     it; from a tablet up it stops growing. */
+  /* Wide enough for the longest name set large, narrow enough that the
+     page keeps most of the window. On a phone both are four fifths of it;
+     on an upright tablet the filters take half the screen, at Julian's
+     ask, and the menu stays at its four words. */
   --menu-w: min(20rem, 82vw);
+  --filter-w: min(24rem, 82vw);
 }
 
 @media (max-width: 63.999rem) {
@@ -1810,11 +1806,33 @@ a.strip-cell {
     transition: translate 420ms var(--ease-out-strong);
   }
 
-  [data-menu="open"] .site-bar,
-  [data-menu="open"] body > main,
-  [data-menu="open"] body > footer {
-    translate: calc(-1 * var(--menu-w)) 0;
+  [data-drawer] .site-bar,
+  [data-drawer] body > main,
+  [data-drawer] body > footer {
     transition-delay: 80ms;
+  }
+  [data-drawer="menu"] .site-bar,
+  [data-drawer="menu"] body > main,
+  [data-drawer="menu"] body > footer {
+    translate: calc(-1 * var(--menu-w)) 0;
+  }
+  [data-drawer="filter"] .site-bar,
+  [data-drawer="filter"] body > main,
+  [data-drawer="filter"] body > footer {
+    translate: var(--filter-w) 0;
+  }
+  /* Going left costs nothing: there is no scrollable region off the left
+     edge of a page. Going right makes one, and it has to be clipped at
+     the root, not at the body.
+     
+     The bar is `position: fixed`, so its overflow belongs to the window
+     rather than to the body that clips everything else — and on a phone
+     that is not a stray scrollbar but a broken page: measured at 390, the
+     document went 710 wide, Chromium widened the layout viewport to match,
+     and the drawer’s own `inset-0` came out 1537 tall on an 844 screen
+     with five of the twelve disciplines below the fold. */
+  :root[data-drawer="filter"] {
+    overflow-x: clip;
   }
 }
 
@@ -1830,8 +1848,8 @@ a.strip-cell {
    lying over exactly that page, so it is the one thing in the stack that
    can blur it: `backdrop-filter` works on whatever is painted underneath,
    and the page is underneath while the bar and the drawer are not. The
-   cross stays sharp, which is the point — the one control left on that
-   side of the screen should not be behind frosted glass.
+   cross and the capsule stay sharp, which is the point — the controls
+   left on that side of the screen should not be behind frosted glass.
 
    Four pixels, not the eighteen `glass-surface` carries on the header and
    the plates, and a lighter tint with it. Julian asked for slight, twice.
@@ -1850,10 +1868,10 @@ a.strip-cell {
    the rule below, which has neither: the blur is gone inside 240ms and
    the page is sharp well before it has finished coming back, so it
    arrives out of the glass rather than through it. */
-.site-menu {
+.drawer {
   visibility: hidden;
-  /* The panel is parked one width to the right of this box. Clipped, so
-     that parked width is never a page somebody can scroll sideways. */
+  /* The panel is parked one width outside this box. Clipped, so that
+     parked width is never a page somebody can scroll sideways. */
   overflow: clip;
   background-color: transparent;
   -webkit-backdrop-filter: blur(0) saturate(1);
@@ -1864,7 +1882,8 @@ a.strip-cell {
     -webkit-backdrop-filter 240ms var(--ease-out-strong),
     backdrop-filter 240ms var(--ease-out-strong);
 }
-[data-menu="open"] .site-menu {
+[data-drawer="menu"] .site-menu,
+[data-drawer="filter"] .work-filter {
   visibility: visible;
   background-color: color-mix(in oklab, var(--background) 16%, transparent);
   -webkit-backdrop-filter: blur(4px) saturate(1.2);
@@ -1879,7 +1898,8 @@ a.strip-cell {
    glass is a way of saying the page is not the thing being looked at;
    dropping to a solid wash instead would say it is not there at all. */
 @media (prefers-reduced-transparency: reduce) {
-  [data-menu="open"] .site-menu {
+  [data-drawer="menu"] .site-menu,
+  [data-drawer="filter"] .work-filter {
     background-color: transparent;
     -webkit-backdrop-filter: none;
     backdrop-filter: none;
@@ -1888,36 +1908,47 @@ a.strip-cell {
 
 /* A ground of its own, or the drawer and the page it came out from under
    are the same colour with a line between them. Five percent of the ink:
-   enough to read as underneath, not enough to read as a different site. */
-.site-menu-panel {
-  translate: 100% 0;
+   enough to read as underneath, not enough to read as a different site.
+   `--park` is the only thing that differs between the two: the menu waits
+   off the right edge, the filters off the left. */
+.drawer-panel {
+  translate: var(--park) 0;
   background-color: color-mix(in oklab, var(--foreground) 5%, var(--background));
   transition: translate 420ms var(--ease-out-strong);
 }
-[data-menu="open"] .site-menu-panel {
+.site-menu-panel {
+  --park: 100%;
+}
+.work-filter-panel {
+  --park: -100%;
+}
+[data-drawer="menu"] .site-menu-panel,
+[data-drawer="filter"] .work-filter-panel {
   translate: none;
   transition-delay: 80ms;
 }
 
-/* The four names, arriving a step apart, behind the same 80ms the drawer
-   waits: they are inside it, so starting before it moves would be four
-   names fading up on a panel that is still off the screen. The delay is
-   on the open state only — `transition-delay` is read from wherever the
+/* The names, arriving a step apart, behind the same 80ms the drawer
+   waits: they are inside it, so starting before it moves would be names
+   fading up on a panel that is still off the screen. The delay is on the
+   open state only — `transition-delay` is read from wherever the
    transition is going — so opening cascades and closing leaves all at
-   once, as one movement. */
-.site-menu-item {
+   once, as one movement.
+
+   Down, not in from the side. Julian asked for them to arrive from the
+   top: each name drops the last few pixels into its place, and with the
+   first one leaving first they read down the page in the order they are
+   in. Sideways, they were travelling the same way the drawer was and the
+   cascade was lost inside it. */
+.drawer-item {
   opacity: 0;
-  /* Down, not in from the side. Julian asked for them to arrive from the
-     top: each name drops the last few pixels into its place, and with the
-     first one leaving first the four of them read down the page in the
-     order they are in. Sideways, they were travelling the same way the
-     drawer was and the cascade was lost inside it. */
   translate: 0 -1.25rem;
   transition:
     opacity 200ms var(--ease-out-strong),
     translate 320ms var(--ease-bounce);
 }
-[data-menu="open"] .site-menu-item {
+[data-drawer="menu"] .site-menu-item,
+[data-drawer="filter"] .work-filter-item {
   opacity: 1;
   translate: none;
   transition-delay: calc(80ms + var(--reveal-delay, 0ms));
@@ -1927,9 +1958,9 @@ a.strip-cell {
   .site-bar,
   body > main,
   body > footer,
-  .site-menu,
-  .site-menu-panel,
-  .site-menu-item {
+  .drawer,
+  .drawer-panel,
+  .drawer-item {
     transition: none;
   }
 }

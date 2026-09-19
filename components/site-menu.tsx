@@ -20,10 +20,11 @@ import { LINKS } from "@/components/site-header";
  * one of the things that moves, and a fixed panel inside a moving element
  * is measured from the element instead of from the window.
  *
- * Open and closed are `data-menu` on `<html>`, written by the header — see
- * `.site-menu` in `globals.css`. There is no state in here at all, which is
- * what lets the drawer render on the server with its links in the page for
- * anything that reads it without running the script.
+ * Open and closed are `data-drawer` on `<html>`, written by the header —
+ * see `.drawer` in `globals.css`, which this shares with the filters on
+ * the other side. There is no state in here at all, which is what lets the
+ * drawer render on the server with its links in the page for anything that
+ * reads it without running the script.
  * ───────────────────────────────────────────── */
 
 export function SiteMenu() {
@@ -43,9 +44,9 @@ export function SiteMenu() {
         if (e.target === e.currentTarget)
           window.dispatchEvent(new Event("jg:menu-close"));
       }}
-      className="site-menu fixed inset-0 z-30 lg:hidden"
+      className="drawer site-menu fixed inset-0 z-30 lg:hidden"
     >
-      <div className="site-menu-panel ml-auto flex h-full w-[var(--menu-w)] flex-col justify-center border-l border-border pl-6 pr-7">
+      <div className="site-menu-panel drawer-panel ml-auto flex h-full w-[var(--menu-w)] flex-col justify-center border-l border-border pl-6 pr-7">
         <nav aria-label="Menu">
           <ul className="flex flex-col items-end gap-1 text-right">
             {LINKS.map((link, i) => (
@@ -60,7 +61,7 @@ export function SiteMenu() {
                 style={
                   { "--reveal-delay": `${i * 60}ms` } as React.CSSProperties
                 }
-                className="site-menu-item"
+                className="site-menu-item drawer-item"
               >
                 <Link
                   href={link.href}

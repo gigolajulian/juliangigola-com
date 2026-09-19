@@ -1,14 +1,12 @@
-import { filmCount } from "@/lib/videos";
 import type * as React from "react";
-import { WorkShell, type Head, type PassPic } from "@/components/work-shell";
+import { WorkShell, type PassPic } from "@/components/work-shell";
 import {
   COMMISSIONS,
-  COVER_ART,
   WORK_CATEGORY_LINKS,
   projectsIn,
   isDisciplineGallery,
 } from "@/lib/work";
-import { COVER_RELEASES } from "@/lib/cover-art-data";
+import { WORK_HEADS } from "@/lib/work-heads";
 import { CONTENT } from "@/lib/content";
 
 /**
@@ -16,42 +14,10 @@ import { CONTENT } from "@/lib/content";
  * the head and the chip row live here and persist across a filter click,
  * so only the strip under them changes. See `components/work-shell.tsx`.
  *
- * The title and the count for every filter are worked out here, once, and
- * handed down: the shell reads the route to pick one.
+ * The titles and the counts come from `lib/work-heads.ts`: below `lg` the
+ * filters are a drawer mounted in the root layout, which needs the same
+ * numbers and is nowhere near this route.
  */
-const HEADS: Record<string, Head> = {
-  all: {
-    title: "Work",
-    aside: `${COMMISSIONS.length} projects`,
-    count: COMMISSIONS.length,
-  },
-  video: {
-    title: "Motion",
-    aside: `${filmCount(CONTENT.videos)} films`,
-    count: filmCount(CONTENT.videos),
-  },
-};
-
-for (const c of WORK_CATEGORY_LINKS) {
-  if (c.slug === "video") continue;
-  const gallery = projectsIn(c.slug).find(isDisciplineGallery);
-  const isCoverArt = gallery?.slug === COVER_ART?.slug;
-  const count = gallery
-    ? isCoverArt
-      ? COVER_RELEASES.length
-      : gallery.images.length
-    : projectsIn(c.slug).length;
-  HEADS[c.slug] = {
-    title: c.name,
-    aside: gallery
-      ? `${count} ${isCoverArt ? "releases" : "frames"}`
-      : `${count} ${count === 1 ? "project" : "projects"}`,
-    // The same number the head says, so the chip and the title it opens
-    // can never disagree.
-    count,
-  };
-}
-
 /* Four pictures per filter, for the lane that passes them by when a chip
    is pressed (`work-shell.tsx`): the covers of a discipline's first
    projects, the first frames of a discipline that is one gallery, the
@@ -85,7 +51,7 @@ export default function WorkIndexLayout({
   children: React.ReactNode;
 }) {
   return (
-    <WorkShell heads={HEADS} categories={WORK_CATEGORY_LINKS} passes={PASSES}>
+    <WorkShell heads={WORK_HEADS} categories={WORK_CATEGORY_LINKS} passes={PASSES}>
       {children}
     </WorkShell>
   );

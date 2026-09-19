@@ -59,22 +59,34 @@ export function SiteHeader() {
    * fact of being open goes on `<html>` and `globals.css` moves everything
    * off it. Nothing here needs to know what moves.
    *
+   * `data-drawer` and not `data-menu`, because /work has one of these too
+   * and it comes in from the other side. One attribute holds one name, so
+   * a page asked to travel both ways at once is a state the stylesheet
+   * cannot express — cheaper than two components agreeing to behave. The
+   * filters still get told, below, so their own state does not drift.
+   *
+   * The cleanup only lets go of what it took: closing this drawer because
+   * the other one opened must not clear the other one's attribute.
+   *
    * The scroll lock rides along: a drawer over a gallery that still scrolls
    * behind it is a page that has not really stopped.
    */
   React.useEffect(() => {
     if (!open) return;
-    document.documentElement.dataset.menu = "open";
+    const root = document.documentElement;
+    root.dataset.drawer = "menu";
+    window.dispatchEvent(new Event("jg:filter-close"));
     const { overflow } = document.body.style;
     document.body.style.overflow = "hidden";
     return () => {
-      delete document.documentElement.dataset.menu;
+      if (root.dataset.drawer === "menu") delete root.dataset.drawer;
       document.body.style.overflow = overflow;
     };
   }, [open]);
 
   // The drawer is a sibling of this component rather than a child, so the
-  // ground beside it closes the menu by saying so rather than by reaching in.
+  // ground beside it closes the menu by saying so rather than by reaching
+  // in. The filters ask for the same thing when they open.
   React.useEffect(() => {
     const close = () => setOpen(false);
     window.addEventListener("jg:menu-close", close);

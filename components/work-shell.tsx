@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useSelectedLayoutSegments } from "next/navigation";
 import { cn } from "@/lib/utils";
 import type { CategoryLink } from "@/lib/work";
+import type { Head } from "@/lib/work-heads";
 import { StripPage, StripHead } from "@/components/strip-page";
 import { markFilter, StripView, type StripViewMode } from "@/components/strip";
 
@@ -83,12 +84,7 @@ const chooseView = (next: StripViewMode) => {
   for (const w of watching) w();
 };
 
-export type Head = {
-  title: string;
-  aside: string;
-  /** How many things are behind this filter, for the chip. */
-  count: number;
-};
+export type { Head };
 
 /** One picture a filter's row opens on: a cover, a frame or a poster. */
 export type PassPic = {
@@ -176,6 +172,52 @@ export function WorkShell({
   const key = segments[1] ?? segments[0] ?? "all";
   const head = heads[key] ?? heads.all;
   const all = key === "all";
+
+  /* ── the capsule, below `lg` ──
+     The twelve disciplines are a drawer there rather than a bar
+     (`work-filter.tsx`), so what is left in the row is one control saying
+     where you are. The drawer itself is mounted in the root layout,
+     because it is `main` that slides out from under it, so being open is
+     `data-drawer` on `<html>` and the stylesheet does the rest — the same
+     attribute, and the same rules, as the menu on the other side.
+
+     Opening this one closes that one: one attribute holds one name, and
+     without the message the menu's own state would drift out of step with
+     what is on the screen. */
+  const [filtering, setFiltering] = React.useState(false);
+
+  React.useEffect(() => {
+    if (!filtering) return;
+    const root = document.documentElement;
+    root.dataset.drawer = "filter";
+    window.dispatchEvent(new Event("jg:menu-close"));
+    const { overflow } = document.body.style;
+    document.body.style.overflow = "hidden";
+    return () => {
+      if (root.dataset.drawer === "filter") delete root.dataset.drawer;
+      document.body.style.overflow = overflow;
+    };
+  }, [filtering]);
+
+  React.useEffect(() => {
+    const close = () => setFiltering(false);
+    const esc = (e: KeyboardEvent) => e.key === "Escape" && setFiltering(false);
+    window.addEventListener("jg:filter-close", close);
+    window.addEventListener("keydown", esc);
+    return () => {
+      window.removeEventListener("jg:filter-close", close);
+      window.removeEventListener("keydown", esc);
+    };
+  }, []);
+
+  // A filter pressed inside the drawer is a navigation, and the shell
+  // survives it, so the drawer would otherwise stay open over the work it
+  // was asked for.
+  const [routeWhenOpened, setRouteWhenOpened] = React.useState(key);
+  if (routeWhenOpened !== key) {
+    setRouteWhenOpened(key);
+    setFiltering(false);
+  }
 
   /* Julian: on All, light the discipline you have scrolled to. The strip
      already works out which chapter the middle of the window is in — it
@@ -439,6 +481,45 @@ export function WorkShell({
               ignored: the default is everything, so nobody has to make a
               choice before they can look at anything. */}
           <div className="mt-3 flex w-full shrink-0 items-center gap-2 tablet:mt-1.5 max-sm:mt-1.5 short:mt-1.5 lying:mt-1.5">
+            {/* Where you are, and the way to the other eleven. Gone from
+                `lg` up, where the row itself is the control and this would
+                be a second one saying the same thing. */}
+            <button
+              type="button"
+              aria-expanded={filtering}
+              aria-controls="work-filter"
+              onClick={() => setFiltering((v) => !v)}
+              className="filter-capsule glass press relative z-10 inline-flex items-center gap-2 rounded-full lg:hidden border border-foreground/20 py-2 pl-3.5 pr-3 label active:scale-[0.97]"
+            >
+              <span className="text-foreground">
+                {all ? "All work" : head.title}
+              </span>
+              <span
+                aria-hidden
+                className="h-3 w-px bg-foreground/25"
+              />
+              <span className="tabular-nums text-muted-foreground">
+                {head.count}
+              </span>
+              <svg
+                aria-hidden
+                width="9"
+                height="6"
+                viewBox="0 0 9 6"
+                className={cn(
+                  "text-muted-foreground transition-transform duration-300 ease-[var(--ease-out-strong)]",
+                  filtering && "rotate-180",
+                )}
+              >
+                <path
+                  d="M1 1l3.5 3.5L8 1"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.2"
+                />
+              </svg>
+            </button>
+
             <nav aria-label="Categories" className="min-w-0 flex-1">
               {/* The padding is the list's, not the bar's: at the bar's edge
                 the chips would stop dead against 24px of nothing, and a

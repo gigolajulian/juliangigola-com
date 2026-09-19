@@ -5,6 +5,9 @@ import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { PhotoNotice } from "@/components/photo-notice";
 import { SiteMenu } from "@/components/site-menu";
+import { WorkFilter } from "@/components/work-filter";
+import { WORK_CATEGORY_LINKS } from "@/lib/work";
+import { WORK_HEADS } from "@/lib/work-heads";
 import { GlassLight } from "@/components/glass-light";
 import { PhotoFade } from "@/components/photo-fade";
 import { PointerRing } from "@/components/pointer-ring";
@@ -185,6 +188,11 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             `main`, because both of those are what it comes out from under
             — see `site-menu.tsx`. */}
         <SiteMenu />
+        {/* And the one /work opens from the other side. Here rather than
+            in the work route's own shell for the same reason: that shell
+            is inside `main`, and `main` is what this slides out from
+            under. It renders nothing off /work. */}
+        <WorkFilter categories={WORK_CATEGORY_LINKS} heads={WORK_HEADS} />
         {/* Writes the pointer's position onto whichever glass control is
             under it — see `glass` in globals.css. Renders nothing. */}
         <GlassLight />
