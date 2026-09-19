@@ -354,6 +354,22 @@ export type AddedFile = {
    * mechanism rather than two with different consequences.
    */
   hidden: string[];
+
+  /**
+   * Off every listing, but still a page.
+   *
+   * `hidden` is unpublished: the route is not built and the URL is a 404,
+   * which is right for work that should not exist any more. Julian asked
+   * for the other thing - ROUGE off the pages, with a link to it that
+   * still opens. So this takes a project out of the work index, the
+   * discipline pages, the homepage band, the running order, the prev/next
+   * chain and the sitemap, and leaves `/work/<slug>` answering for anybody
+   * who has the link.
+   *
+   * The page is `noindex` as well, or "unlisted" would mean unlisted
+   * everywhere except the one listing nobody controls.
+   */
+  unlisted: string[];
 };
 
 function parse(v: unknown): AddedFile {
@@ -379,6 +395,10 @@ function parse(v: unknown): AddedFile {
   // Absent in files written before hiding existed, which is not an error.
   const hidden = v.hidden === undefined ? [] : v.hidden;
   if (!Array.isArray(hidden)) return fail("hidden", "an array", hidden);
+
+  // And the same for unlisting, which is newer still.
+  const unlisted = v.unlisted === undefined ? [] : v.unlisted;
+  if (!Array.isArray(unlisted)) return fail("unlisted", "an array", unlisted);
 
   const rawTrash = v.trash === undefined ? [] : v.trash;
   if (!Array.isArray(rawTrash)) return fail("trash", "an array", rawTrash);
@@ -536,6 +556,7 @@ function parse(v: unknown): AddedFile {
     avatars,
     disciplines,
     hidden: hidden.map((s, i) => str(s, `hidden[${i}]`)),
+    unlisted: unlisted.map((s, i) => str(s, `unlisted[${i}]`)),
   };
 }
 
@@ -564,6 +585,9 @@ export const AVATARS: Readonly<Record<string, string>> = FILE.avatars;
 /** Hand-picked discipline covers, by category slug. Frame paths. */
 export const DISCIPLINE_COVERS: Readonly<Record<string, string>> = FILE.covers;
 export const HIDDEN: ReadonlySet<string> = new Set(FILE.hidden);
+
+/** Off the listings, still a page. See `AddedFile.unlisted`. */
+export const UNLISTED: ReadonlySet<string> = new Set(FILE.unlisted);
 
 /** Where the editor writes. Shown in the editor so it is not a mystery. */
 export const ADDED_PATH = "content/projects.json";

@@ -19,6 +19,7 @@ import { REEL } from "./videos";
 import {
   ADDED,
   HIDDEN,
+  UNLISTED,
   RECATEGORISED,
   REFRAMED,
   RECREDITED,
@@ -434,11 +435,29 @@ export const ALL_PROJECTS: Project[] = [
  * and the old-URL redirects — and a list that has to be remembered in six
  * places is a list that will be forgotten in one.
  */
-export const PROJECTS: Project[] = ALL_PROJECTS.filter(
+/**
+ * Everything that has a page: the archive less what has been unpublished.
+ *
+ * `generateStaticParams`, `getProject` and the bare-slug redirects read this
+ * one, because an unlisted project is reachable by anybody holding the link
+ * and all three are about whether a URL answers.
+ */
+export const LINKABLE: Project[] = ALL_PROJECTS.filter(
   (p) => !HIDDEN.has(p.slug),
 );
 
-export { HIDDEN };
+/**
+ * Everything that appears anywhere: the pages, less what has been unlisted.
+ *
+ * Every index reads this - the work index, the discipline pages, the homepage
+ * band, the running order, the prev/next chain and the sitemap - so unlisting
+ * is one entry in one file rather than a slug to be remembered in six places.
+ */
+export const PROJECTS: Project[] = LINKABLE.filter(
+  (p) => !UNLISTED.has(p.slug),
+);
+
+export { HIDDEN, UNLISTED };
 
 /**
  * The old nav split commissioned work across WORK and MUSIC, which asked a
@@ -528,7 +547,10 @@ export const SESSION_CATEGORIES: Category[] = CATEGORIES.filter(
   (c) => c.section === "SESSIONS",
 );
 
-const bySlug = new Map(PROJECTS.map((p) => [p.slug, p]));
+/* Built from `LINKABLE` and not from `PROJECTS`: an unlisted project is off
+   every index and still has to resolve, or the page it kept would render
+   as a 404 the moment somebody followed the link to it. */
+const bySlug = new Map(LINKABLE.map((p) => [p.slug, p]));
 
 export const getProject = (slug: string): Project | undefined =>
   bySlug.get(slug);

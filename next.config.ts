@@ -5,7 +5,7 @@ import { initOpenNextCloudflareForDev } from "@opennextjs/cloudflare";
 // filtered out. Redirecting from a legacy URL to a page that is no longer
 // built sends a visitor 308 → 404, which is worse than the plain 404 they
 // would have got, because it looks like the site meant to take them there.
-import { PROJECTS, CATEGORIES, categoryHref } from "./lib/work";
+import { LINKABLE, CATEGORIES, categoryHref } from "./lib/work";
 
 /**
  * The old site published every project at the site root — `/wired-magazine`,
@@ -15,7 +15,7 @@ import { PROJECTS, CATEGORIES, categoryHref } from "./lib/work";
  * Generated from the manifest rather than typed out, so a project added or
  * renamed later cannot fall out of the list.
  */
-const projectRedirects = PROJECTS.map((p) => ({
+const projectRedirects = LINKABLE.map((p) => ({
   source: `/${p.slug}`,
   destination: `/work/${p.slug}`,
   permanent: true,

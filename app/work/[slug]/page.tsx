@@ -6,7 +6,8 @@ import { StripPage, StripHead } from "@/components/strip-page";
 import { CoverArtGallery } from "@/components/cover-art-gallery";
 import { CallToAction } from "@/components/call-to-action";
 import {
-  PROJECTS,
+  LINKABLE,
+  UNLISTED,
   COVER_ART,
   COVER_RELEASES,
   getProject,
@@ -30,7 +31,9 @@ import {
  * ─────────────────────────────────────────────────────────────── */
 
 export function generateStaticParams() {
-  return PROJECTS.map((p) => ({ slug: p.slug }));
+  // `LINKABLE`, not `PROJECTS`: an unlisted project is off every index and
+  // still has a page, which is the whole of what unlisted means.
+  return LINKABLE.map((p) => ({ slug: p.slug }));
 }
 
 export async function generateMetadata(
@@ -66,6 +69,14 @@ export async function generateMetadata(
     title: project.name,
     description,
     alternates: { canonical: `/work/${project.slug}` },
+    /* Unlisted means unlisted. The sitemap already leaves it out, but a
+       page off every index that Google still holds is a page Julian took
+       off the site and can be found on it anyway - by the one listing he
+       does not control. `follow`, because the links out of it are to work
+       that is published. */
+    ...(UNLISTED.has(project.slug)
+      ? { robots: { index: false, follow: true } }
+      : {}),
     openGraph: {
       title: project.name,
       description,
