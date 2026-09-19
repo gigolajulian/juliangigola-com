@@ -50,6 +50,7 @@ const categoryRedirects = CATEGORIES.map((c) => ({
   permanent: true,
 }));
 
+/** Pages that moved or were retired. */
 const pageRedirects = [
   { source: "/about", destination: "/studio", permanent: true },
   // /rates never got written — it still served the Format demo's biography.
@@ -182,7 +183,7 @@ const securityHeaders = [
   // ignoring it a breach from the first request, which is the point.
   { key: "X-Robots-Tag", value: "noai, noimageai" },
   { key: "TDM-Reservation", value: "1" },
-  { key: "TDM-Policy", value: "https://www.juliangigola.com/legal#terms" },
+  { key: "TDM-Policy", value: "https://juliangigola.com/legal#terms" },
 ];
 
 const nextConfig: NextConfig = {
