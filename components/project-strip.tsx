@@ -196,9 +196,16 @@ export function ProjectStrip({
             ) : null}
 
             {project.credits.length ? (
+              /* Two columns, the first as wide as the longest role and
+                 no wider. It was a fixed 7rem, and VALGUR's crew list
+                 broke "Hair & Makeup Artist" over two lines; Julian: make
+                 sure the credits are in one line. On a phone the panel is
+                 too narrow for columns at all, so there each credit is
+                 role and name run together on one line, and only a pair
+                 that cannot fit breaks after the role. */
               <dl
                 aria-label="Credits"
-                className="title-rest flex flex-col gap-1 border-t border-border pt-4"
+                className="title-rest flex flex-col gap-1 border-t border-border pt-4 sm:grid sm:grid-cols-[max-content_minmax(0,1fr)] sm:gap-x-3"
               >
                 {project.credits.map((credit, i) => {
                   /* Worked out in `lib/work.ts` (`withFaces`), along with
@@ -209,9 +216,9 @@ export function ProjectStrip({
                   return (
                     <div
                       key={`${credit.role}-${i}`}
-                      className="flex items-baseline gap-3"
+                      className="flex flex-wrap items-baseline gap-x-3 sm:contents"
                     >
-                      <dt className="label w-28 shrink-0 text-muted-foreground/70">
+                      <dt className="label whitespace-nowrap text-muted-foreground/70">
                         {credit.role}
                       </dt>
                       <dd className="label min-w-0">
