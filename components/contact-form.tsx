@@ -307,7 +307,13 @@ export function ContactForm() {
         </div>
       ) : null}
 
-      <div className="flex items-center gap-6">
+      {/* Three things on one line is a desktop’s idea. At 768 it put the
+          sentence about what is missing into a 47px column, one word to a
+          line and 119px tall, and clipped the address by 30; at 390 the
+          column was 54. Wrapping instead, and the sentence takes a line of
+          its own below the button until there is a window wide enough to
+          hold all three. */}
+      <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
         <button
           type="submit"
           disabled={pending}
@@ -320,7 +326,10 @@ export function ContactForm() {
         {/* What is still missing, where the button is, and only once
             there is any reason to say it. */}
         {!ready && !pending ? (
-          <p id="enquire-missing" className="label text-muted-foreground">
+          <p
+            id="enquire-missing"
+            className="label order-last basis-full text-muted-foreground lg:order-none lg:basis-auto"
+          >
             Your name, your email and a line about the shoot
           </p>
         ) : null}
