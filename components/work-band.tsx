@@ -272,7 +272,7 @@ export function WorkBand({
        * site's one established translucent surface, it reads as chrome
        * rather than as something wrong with the image.
        */}
-      <div className="absolute inset-x-0 bottom-0 flex flex-col gap-1.5 border-t border-border/60 glass-surface bg-background/70 p-3 sm:gap-2 sm:p-4">
+      <div className="absolute -inset-x-0.5 -bottom-0.5 flex flex-col gap-1.5 glass-surface bg-background/70 p-3 sm:gap-2 sm:p-4">
         <div className="flex items-baseline gap-3 sm:gap-4">
           <span className="label shrink-0 tabular-nums text-muted-foreground">
             {String(index + 1).padStart(2, "0")}

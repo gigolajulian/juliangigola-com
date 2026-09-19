@@ -94,7 +94,7 @@ export function VideoGrid({
             className={cn(
               "flex flex-wrap items-baseline gap-x-4 gap-y-1",
               rows
-                ? "pointer-events-none absolute inset-x-0 bottom-0 border-t border-border/60 glass-surface bg-background/70 px-4 py-3"
+                ? "pointer-events-none absolute inset-x-0 bottom-0 glass-surface bg-background/70 px-4 py-3"
                 : "mt-3",
             )}
           >

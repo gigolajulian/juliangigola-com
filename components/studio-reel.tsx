@@ -144,7 +144,7 @@ function Caption({
       className={cn(
         "flex items-end justify-between gap-6",
         fill
-          ? "absolute inset-x-0 bottom-0 z-10 glass-surface border-t border-border/60 bg-background/70 px-5 py-4"
+          ? "absolute inset-x-0 bottom-0 z-10 glass-surface bg-background/70 px-5 py-4"
           : "mt-4",
       )}
     >

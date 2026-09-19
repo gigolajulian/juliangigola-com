@@ -495,7 +495,7 @@ export function Strip({
     let markTimer = 0;
     let markWanted = "";
     let hashTimer = 0;
-    let hashWanted = " ";
+    let hashWanted: string | null = null;
     /* Reduced motion keeps the words at full strength, which is what the
        stylesheet used to say. */
     const still = window.matchMedia("(prefers-reduced-motion: reduce)").matches;

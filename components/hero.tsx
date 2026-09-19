@@ -657,7 +657,7 @@ export function Hero({
 
         <div
           className={cn(
-            "pointer-events-auto flex min-w-0 flex-col border-t border-border/60",
+            "pointer-events-auto flex min-w-0 flex-col",
             // Over the photograph: thinned ground, deep blur.
             "glass-surface bg-background/45",
             /* Upright screens — a phone, a tablet held tall — asked for the
