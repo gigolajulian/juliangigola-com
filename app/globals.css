@@ -1291,6 +1291,55 @@ a.strip-cell {
   }
 }
 
+/* ── eight on an upright screen ──
+   Julian: the top eight on an upright iPad and on a phone. Ten of them
+   there is either five to a row at 141px, where the plate starts cutting
+   the names, or a column ten deep that nobody reaches the end of. Four to
+   a row and two rows is eight, and the four that stay share the width the
+   fifth was taking.
+
+   Counted per row rather than across the band, so it is four to a row
+   whatever the archive holds: the rows are `ceil(n/2)` and `floor(n/2)`,
+   so this is eight at ten featured and eight at fourteen. A hidden tile is
+   not fetched either — they are all lazy — so a phone downloads eight
+   covers instead of ten.
+
+   Both orientations of a phone are in here and only one of a tablet: a
+   phone lying down is 844 by 390 and reads as a short desktop, where five
+   to a row is right again. */
+@media (max-aspect-ratio: 4 / 5) {
+  .band-row > *:nth-child(n + 5) {
+    display: none;
+  }
+  .band-count-all {
+    display: none;
+  }
+  /* And the numbers close up behind them. The fifth of each row is the one
+     that goes, so the printed index would read 01 02 03 04 06 07 08 09 with
+     two holes in it. A counter over the tiles that are shown reads 01 to 08,
+     which is what a visitor counting them gets. */
+  .band-grid {
+    counter-reset: tile;
+  }
+  .band-row > *:nth-child(-n + 4) {
+    counter-increment: tile;
+  }
+  .tile-no-lit {
+    display: none;
+  }
+  .tile-no::before {
+    content: counter(tile, decimal-leading-zero);
+  }
+}
+.band-count-few {
+  display: none;
+}
+@media (max-aspect-ratio: 4 / 5) {
+  .band-count-few {
+    display: inline;
+  }
+}
+
 /* ── an upright tablet is not a short desktop ──
    Both of these lay their pictures out from the height they are given,
    which is right on a screen wider than it is tall and wrong on one that

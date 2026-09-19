@@ -97,8 +97,16 @@ export default function Home() {
           <div className="pointer-events-none absolute inset-x-0 top-0 z-10 flex items-baseline justify-between gap-6 px-6 py-4 sm:px-8 sm:pt-20">
             <p className="label glass-surface bg-background/70 px-3 py-1.5 text-muted-foreground">
               Selected work
+              {/* Two, because upright screens show four to a row and stop
+                  at eight (`band-row` in `globals.css`). A visitor who can
+                  count the tiles should not be told a different number. */}
               <span className="ml-3 tabular-nums text-foreground">
-                {String(FEATURED.length).padStart(2, "0")}
+                <span className="band-count-all">
+                  {String(FEATURED.length).padStart(2, "0")}
+                </span>
+                <span className="band-count-few">
+                  {String(Math.min(FEATURED.length, 8)).padStart(2, "0")}
+                </span>
               </span>
             </p>
             <Link
@@ -122,13 +130,13 @@ export default function Home() {
               a page and a half wide, painted straight over the cover art
               on the screen after it. There the width leads instead. The top
               pad is the bar — the first row used to run under it. */}
-          <div className="flex min-h-0 flex-1 flex-col justify-center px-0 pt-0 sm:px-8 sm:pb-6 sm:pt-32">
+          <div className="band-grid flex min-h-0 flex-1 flex-col justify-center px-0 pt-0 sm:px-8 sm:pb-6 sm:pt-32">
             {ROWS.map((count, r) => {
               const from = ROWS.slice(0, r).reduce((n, c) => n + c, 0);
               return (
                 <div
                   key={`row-${r}`}
-                  className="flex min-h-0 flex-1 flex-col justify-center sm:flex-row"
+                  className="band-row flex min-h-0 flex-1 flex-col justify-center sm:flex-row"
                 >
                   {FEATURED.slice(from, from + count).map((project, i) => (
                     <div
