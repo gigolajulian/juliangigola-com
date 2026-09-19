@@ -1528,14 +1528,6 @@ a.strip-cell {
  * 0.98, a photograph the size of half the viewport wants 0.995, and one number
  * cannot serve both.
  */
-/* The `glass` material with its light left on: for a thing that carries
-   no pointer of its own to hover, such as the pointer. */
-@utility glass-lit {
-  &::before {
-    opacity: 1;
-  }
-}
-
 /* The same movement for the round glass controls, which carry `press` and
    `glass` rather than `action`: the lightbox's arrows and its close. A
    little more than the pills, because they are small. */

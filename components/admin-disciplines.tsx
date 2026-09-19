@@ -22,7 +22,7 @@ import { cn } from "@/lib/utils";
  * represents the whole branch sitting above them.
  * ─────────────────────────────────────────────────────────────── */
 
-export type DisciplineGroup = {
+type DisciplineGroup = {
   slug: string;
   name: string;
   /** "Work" or "Sessions" — the two halves of the nav. */

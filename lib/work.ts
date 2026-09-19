@@ -563,9 +563,6 @@ export const UNFILED: Project[] = PROJECTS.filter(
 export const WORK_CATEGORIES: Category[] = CATEGORIES.filter(
   (c) => c.section !== "SESSIONS",
 );
-export const SESSION_CATEGORIES: Category[] = CATEGORIES.filter(
-  (c) => c.section === "SESSIONS",
-);
 
 /* Built from `LINKABLE` and not from `PROJECTS`: an unlisted project is off
    every index and still has to resolve, or the page it kept would render
@@ -794,7 +791,7 @@ export const coverOf = (p: Project): Frame => p.cover;
  * A slug that does not match a project is dropped rather than rendered as a
  * hole, so a typo in the editor costs a card and not the section.
  */
-export const FEATURED_SLUGS: string[] = CONTENT.featured;
+const FEATURED_SLUGS: string[] = CONTENT.featured;
 
 export const FEATURED: Project[] = FEATURED_SLUGS.map((s) =>
   bySlug.get(s),
@@ -890,32 +887,6 @@ const wall = (order: string[]): Client[] =>
 export const PRESS_HOME: Client[] = wall(CONTENT.clientsHome);
 /** The grid on /studio. */
 export const PRESS_STUDIO: Client[] = wall(CONTENT.clientsStudio);
-
-/**
- * The homepage cover.
- *
- * One frame, static. A single photograph is the oldest and least dateable way
- * to open a portfolio, and it is the fastest — one image to decode, which is
- * what a visitor's patience is actually spent on.
- *
- * Named here rather than derived, because this is the most consequential
- * editorial decision on the site: it is the first thing anyone sees. Change
- * the slug to change the cover.
- *
- * The full-size frame, not the small cover derivative — this one runs the
- * full height of the page on a large display.
- */
-export const COVER_SLUG: string = CONTENT.coverSlug;
-
-export const HERO: { project: Project; frame: Frame } | null = (() => {
-  const project = bySlug.get(COVER_SLUG) ?? FEATURED[0] ?? COMMISSIONS[0];
-  // Prefer a portrait frame. The cover sits in a half-width, full-height
-  // column, and `object-cover` on a landscape frame in that shape crops away
-  // both sides — usually most of the subject.
-  const frame =
-    project?.images.find((f) => f.height > f.width) ?? project?.images[0];
-  return project && frame ? { project, frame } : null;
-})();
 
 /**
  * Which contact-form branch a project should pre-select.

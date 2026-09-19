@@ -34,7 +34,7 @@ export type SitemapTarget =
   | { kind: "field"; anchor: string }
   | { kind: "projects"; discipline?: string };
 
-export type SitemapProject = {
+type SitemapProject = {
   slug: string;
   name: string;
   category: string;

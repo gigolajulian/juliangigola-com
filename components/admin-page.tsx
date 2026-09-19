@@ -4,7 +4,6 @@ import * as React from "react";
 import Image from "next/image";
 import { isTextRef, type FrameRef, type TextRef } from "@/lib/added";
 import { useSequence, srcOf, type PendingUpload } from "@/lib/admin-sequence";
-import { pair } from "@/components/gallery";
 import { AdminCredits } from "@/components/admin-credits";
 import type { AdminProject } from "@/components/admin-projects";
 import type { Copy, Credit } from "@/lib/work-types";
@@ -65,7 +64,7 @@ export function AdminPage({
   });
   const { list } = seq;
 
-  /* The public page pairs portrait frames two-up by their dimensions. The
+  /* Portrait frames pair two-up by their dimensions. The
      published frames carry theirs; a photograph added in this session has
      none until it is measured, so its preview reports them on load and the
      row it sits in settles then. Until it does it is treated as a portrait,
@@ -84,7 +83,7 @@ export function AdminPage({
   );
 
   /* Rows as the page lays them: a passage is a row of its own, and the
-     frames between passages pair the way `gallery.tsx` pairs them. Each
+     frames between passages pair by shape (`pair`, below). Each
      row item keeps its index in `list`, which is what every control acts
      on. */
   const rows = React.useMemo(() => {
@@ -562,4 +561,26 @@ function Ctl({
       <span aria-hidden>{children}</span>
     </button>
   );
+}
+
+/**
+ * Rows of one or two, decided by each frame's own shape: a landscape frame
+ * takes a row alone, portraits and squares pair up. Sequence is preserved
+ * exactly; this only decides where the line breaks are, never the order.
+ */
+function pair<T extends { width: number; height: number }>(
+  frames: T[],
+): T[][] {
+  const twoUp = (f: { width: number; height: number }) => f.height >= f.width;
+  const rows: T[][] = [];
+
+  for (const frame of frames) {
+    const last = rows[rows.length - 1];
+    const canJoin = twoUp(frame) && last?.length === 1 && twoUp(last[0]);
+
+    if (canJoin) last.push(frame);
+    else rows.push([frame]);
+  }
+
+  return rows;
 }

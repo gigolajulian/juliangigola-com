@@ -25,7 +25,7 @@ export const COVER_WIDTH = 600;
 
 const QUALITY = 0.82;
 
-export type ProcessedImage = {
+type ProcessedImage = {
   /** JPEG bytes, base64, ready for a git blob. */
   base64: string;
   width: number;

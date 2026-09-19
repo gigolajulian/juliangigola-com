@@ -18,25 +18,25 @@
  * ─────────────────────────────────────────────────────────────── */
 
 /** Opening: how long, and on what curve. */
-export const OPEN_MS = 420;
-export const OPEN_EASE = "cubic-bezier(0.2, 0, 0, 1)";
+const OPEN_MS = 420;
+const OPEN_EASE = "cubic-bezier(0.2, 0, 0, 1)";
 /** Closing. */
-export const CLOSE_MS = 320;
-export const CLOSE_EASE = "cubic-bezier(0.3, 0, 0.2, 1)";
+const CLOSE_MS = 320;
+const CLOSE_EASE = "cubic-bezier(0.3, 0, 0.2, 1)";
 /** The backdrop: quicker in and slower out, so the picture leads it. */
-export const BACKDROP_IN_MS = 200;
-export const BACKDROP_OUT_MS = 280;
+const BACKDROP_IN_MS = 200;
+const BACKDROP_OUT_MS = 280;
 /** The chrome (close, caption, counter) comes up this long after the
     picture lands, and goes at once on close. */
-export const CHROME_DELAY_MS = 80;
-export const CHROME_MS = 160;
+const CHROME_DELAY_MS = 80;
+const CHROME_MS = 160;
 /** With reduced motion: a plain cross fade, no scale. */
-export const REDUCED_MS = 150;
+const REDUCED_MS = 150;
 /** How long a press waits for the full picture to decode before the trip
     starts without it. */
 export const DECODE_CAP_MS = 250;
 
-export const NAME = "zoom-picture";
+const NAME = "zoom-picture";
 /* Which engine draws the trip where the browser offers both.
    Measured on Chrome 140: with the page snapshotted, the browser's engine
    spent about 105ms of GPU time rasterising the page for the first frame
@@ -47,7 +47,7 @@ export const NAME = "zoom-picture";
    blanking the capture. The FLIP engine has neither problem and looks the
    same, so it is the one that runs. "vt" is kept for trying again on a
    later browser. */
-export const ENGINE = "flip" as "flip" | "vt";
+const ENGINE = "flip" as "flip" | "vt";
 
 type Rect = { left: number; top: number; width: number; height: number };
 

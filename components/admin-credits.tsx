@@ -48,9 +48,9 @@ const ROLES = [
  * ─────────────────────────────────────────────────────────────── */
 
 /** Everyone credited before, by name: what they were called and what they did. */
-export type CreditBook = Record<string, { instagram: string; role: string }>;
+type CreditBook = Record<string, { instagram: string; role: string }>;
 
-export type CreditDeskValue = {
+type CreditDeskValue = {
   people: CreditBook;
   /** Handle to a path under `public/`, or a staged data URL. */
   faces: Record<string, string>;
