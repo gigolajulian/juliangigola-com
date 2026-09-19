@@ -87,6 +87,7 @@ export function AdminProjects({
   onUnlistedChange,
   slugs,
   onSlug,
+  changed,
   onRemoved,
   disciplines,
   recategorised,
@@ -115,6 +116,8 @@ export function AdminProjects({
   slugs: Record<string, string>;
   /** A new address for a project, by its original slug. */
   onSlug: (origin: string, next: string) => void;
+  /** Slugs with unpublished edits, as the editor measures them. */
+  changed: Set<string>;
   /** Handed the new bin contents after a removal, so the panel below updates. */
   onRemoved?: (trash: TrashedProject[]) => void;
   /** Disciplines a project can be refiled under. */
@@ -186,14 +189,31 @@ export function AdminProjects({
   /* The expanded row survives the filter. Opening a project from the sitemap
      while the list is narrowed to something else would otherwise open a row
      that is not rendered — and scroll to nothing. */
-  const visible = projects.filter(
+  /* Julian: a state filter. The state was already on every row's meta
+     line, which made finding the hidden ones a read of eighty-five lines.
+     "Unpublished" is what this draft changes on a row and the live site
+     does not have yet, which is the list to read before pressing Publish.
+     The open row stays whatever the filter says, for the same reason it
+     survives the search. */
+  type Show = "all" | "unpublished" | "hidden" | "deleted";
+  const [show, setShow] = React.useState<Show>("all");
+  const shows = (p: AdminProject, s: Show) =>
+    s === "all"
+      ? true
+      : s === "unpublished"
+        ? changed.has(p.slug) || changed.has(p.origin)
+        : s === "hidden"
+          ? unlisted.has(p.slug)
+          : hidden.has(p.slug);
+  const live = projects.filter((p) => !gone.has(p.slug));
+  const visible = live.filter(
     (p) =>
-      !gone.has(p.slug) &&
-      (p.slug === opened ||
-        query.trim() === "" ||
-        `${p.name} ${p.slug} ${p.category}`
-          .toLowerCase()
-          .includes(query.toLowerCase())),
+      p.slug === opened ||
+      (shows(p, show) &&
+        (query.trim() === "" ||
+          `${p.name} ${p.slug} ${p.category}`
+            .toLowerCase()
+            .includes(query.toLowerCase()))),
   );
 
   const toggle = (
@@ -315,11 +335,10 @@ export function AdminProjects({
       </div>
 
       <p className="mt-3 max-w-prose text-sm leading-relaxed text-muted-foreground">
-        Hiding takes a project off the site and can be undone at any time.
-        Removing takes it off and puts it in Recently deleted, where its
-        photographs are kept for a week. Offered only for projects added here,
-        because the migrated archive is regenerated and a removal there would
-        come back.
+        Hide takes a project off every listing and leaves its page open to
+        anybody with the link. Delete takes it off the site: a project added
+        here goes to Recently deleted, where its photographs are kept for a
+        week; a migrated one is unpublished, and Restore brings it back.
       </p>
 
       <input
@@ -328,6 +347,36 @@ export function AdminProjects({
         placeholder="Filter by name, slug or discipline"
         className="mt-6 w-full border border-border bg-transparent px-4 py-3 text-sm outline-none focus-visible:border-foreground"
       />
+
+      <div className="mt-3 flex flex-wrap gap-2" role="group" aria-label="Show">
+        {(
+          [
+            ["all", "All"],
+            ["unpublished", "Unpublished"],
+            ["hidden", "Hidden"],
+            ["deleted", "Deleted"],
+          ] as const
+        ).map(([id, label]) => {
+          const count = live.filter((p) => shows(p, id)).length;
+          return (
+            <button
+              key={id}
+              type="button"
+              onClick={() => setShow(id)}
+              aria-pressed={show === id}
+              className={cn(
+                "label border px-3 py-1.5 transition-colors duration-200",
+                show === id
+                  ? "border-foreground bg-foreground text-background"
+                  : "border-border text-muted-foreground hoverable:hover:bg-card hoverable:hover:text-foreground",
+              )}
+            >
+              {label}
+              <span className="ml-1.5 tabular-nums opacity-60">{count}</span>
+            </button>
+          );
+        })}
+      </div>
 
       {status.kind !== "idle" ? (
         <p
@@ -407,13 +456,6 @@ export function AdminProjects({
                       is an override map rather than a field: their categories
                       come from the generated manifest, where an edit would last
                       until the next harvest and no longer. */}
-                  <button
-                    type="button"
-                    onClick={() => onOpenPage(p.slug)}
-                    className="label border border-border px-3 py-2 press hoverable:hover:bg-card"
-                  >
-                    Edit page
-                  </button>
                   <select
                     value={filedAs}
                     onChange={(e) => onRecategorise(p.slug, e.target.value)}
@@ -579,8 +621,15 @@ export function AdminProjects({
                     onUpload={onUpload}
                   />
                   <div className="border-t border-border bg-card/40 p-5">
-                    <label className="label flex flex-wrap items-baseline gap-1">
-                      <span>Address · /work/</span>
+                    {/* Julian: "Edit page" beside "Edit" on every closed row
+                        read as two names for one thing. It is the page
+                        editor, the title, the intent and the passages
+                        between frames, and it lives here now, inside the
+                        row you have already opened, under the name of what
+                        it edits. */}
+                    <div className="flex flex-wrap items-baseline justify-between gap-3">
+                      <label className="label flex flex-wrap items-baseline gap-1">
+                        <span>Address · /work/</span>
                       <input
                         type="text"
                         key={addressOf(p)}
@@ -611,7 +660,15 @@ export function AdminProjects({
                           · was /{p.origin}, which will still open
                         </span>
                       ) : null}
-                    </label>
+                      </label>
+                      <button
+                        type="button"
+                        onClick={() => onOpenPage(p.slug)}
+                        className="label border border-border px-3 py-1.5 press hoverable:hover:bg-card"
+                      >
+                        Writing and passages
+                      </button>
+                    </div>
                     <div className="mt-5 flex flex-wrap items-baseline justify-between gap-3">
                       <p className="label">Credits</p>
                       {credits[p.slug] ? (

@@ -136,9 +136,10 @@ type View = (typeof TABS)[number][number]["id"];
 const FIELD_TAB: Record<string, View> = {
   responseTime: "contact",
   bookingUrl: "contact",
-  coverSlug: "home",
   featured: "home",
+  heroDisciplines: "home",
   coverArt: "home",
+  videos: "video",
   coverArtOrder: "coverart",
   clientsHome: "clients",
   clientsStudio: "clients",
@@ -466,6 +467,39 @@ export function AdminEditor({
    * field by field, and comparing the two strings called that a change.
    */
   const dirty = manifestMoved || !same(draft, baseline.content);
+
+  /* Julian: which tab holds the change. `dirty` says there is a draft;
+     this says where, one field at a time with the same comparison, so a
+     draft can be reviewed before it is published without a tour of nine
+     tabs. The manifest's fields belong to the two work tabs. */
+  const moved = React.useMemo(() => {
+    const tabs = new Set<View>();
+    for (const key of Object.keys(draft) as (keyof SiteContent)[])
+      if (!same(draft[key], baseline.content[key]))
+        tabs.add(FIELD_TAB[key] ?? "home");
+    for (const key of Object.keys(manifest) as (keyof Draft)[])
+      if (!same(manifest[key], baseline.manifest[key]))
+        tabs.add(key === "order" || key === "covers" ? "disciplines" : "projects");
+    return tabs;
+  }, [draft, manifest, baseline]);
+
+  /** The rows with unpublished edits, for the Projects filter. */
+  const changed = React.useMemo(() => {
+    const out = new Set<string>();
+    const maps = ["categories", "frames", "credits", "copy", "slugs"] as const;
+    for (const key of maps) {
+      const a = manifest[key] as Record<string, unknown>;
+      const b = baseline.manifest[key] as Record<string, unknown>;
+      for (const slug of new Set([...Object.keys(a), ...Object.keys(b)]))
+        if (!same(a[slug], b[slug])) out.add(slug);
+    }
+    for (const key of ["hidden", "unlisted"] as const) {
+      const a = new Set(manifest[key]);
+      const b = new Set(baseline.manifest[key]);
+      for (const slug of [...a, ...b]) if (a.has(slug) !== b.has(slug)) out.add(slug);
+    }
+    return out;
+  }, [manifest, baseline]);
 
   /**
    * Where "Open live" points. Read after mount, because the server has no
@@ -991,7 +1025,7 @@ export function AdminEditor({
   const set = <K extends keyof SiteContent>(key: K, value: SiteContent[K]) =>
     setDraft((d) => ({ ...d, [key]: value }));
 
-  const unknownSlugs = [draft.coverSlug, ...draft.featured].filter(
+  const unknownSlugs = draft.featured.filter(
     (s) => s.trim() !== "" && !known.has(s),
   );
 
@@ -1233,6 +1267,12 @@ export function AdminEditor({
                       )}
                     >
                       {t.label}
+                      {moved.has(t.id) ? (
+                        <span
+                          aria-label=", unpublished edits"
+                          className="ml-1.5 inline-block h-1 w-1 bg-current align-middle"
+                        />
+                      ) : null}
                     </button>
                   ))}
                 </span>
@@ -1433,6 +1473,7 @@ export function AdminEditor({
                 unlisted={unlisted}
                 onUnlistedChange={setUnlisted}
                 slugs={reslugged}
+                changed={changed}
                 onSlug={(origin, next) =>
                   setReslugged((m) => {
                     const out = { ...m };
@@ -1648,20 +1689,6 @@ export function AdminEditor({
   function HomeFields() {
     return (
       <Area title="Homepage">
-        <Field
-          anchor="coverSlug"
-          label="Cover project"
-          hint="The photograph that opens the site."
-        >
-          <input
-            type="text"
-            list="project-slugs"
-            value={draft.coverSlug}
-            onChange={(e) => set("coverSlug", e.target.value)}
-            className={inputClass}
-          />
-        </Field>
-
         <Field
           anchor="featured"
           label="Selected work, in order"

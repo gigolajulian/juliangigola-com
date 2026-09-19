@@ -47,7 +47,6 @@ export type SessionType = {
 export type SiteContent = {
   responseTime: string | null;
   bookingUrl: string | null;
-  coverSlug: string;
   featured: string[];
   /**
    * Cover-art releases to lead the homepage rack, in order.
@@ -301,7 +300,6 @@ function parse(v: unknown): SiteContent {
   return {
     responseTime: strOrNull(v.responseTime, "responseTime"),
     bookingUrl: httpUrlOrNull(v.bookingUrl, "bookingUrl"),
-    coverSlug: str(v.coverSlug, "coverSlug"),
     featured: strList(v.featured, "featured"),
     // Absent in files written before the rack could be curated, which is not
     // an error — it simply means nothing has been picked.

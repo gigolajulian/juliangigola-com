@@ -41,11 +41,9 @@ export function AdminPreview({
     .map((slug) => bySlug.get(slug))
     .filter((p): p is AdminProject => Boolean(p));
 
-  const cover = bySlug.get(draft.coverSlug);
-
   // Named rather than silently dropped: a typo in a slug is invisible in a
   // preview that just renders fewer cards than expected.
-  const missing = [draft.coverSlug, ...draft.featured].filter(
+  const missing = draft.featured.filter(
     (slug) => slug.trim() !== "" && !bySlug.has(slug),
   );
   const withheld = draft.featured.filter((slug) => hidden.has(slug));
@@ -71,22 +69,6 @@ export function AdminPreview({
             so {withheld.length === 1 ? "it" : "they"} will not appear.
           </Warning>
         ) : null}
-
-        <Block label="Cover">
-          {cover ? (
-            <div className="flex items-center gap-4">
-              <Thumb project={cover} className="h-28 w-[5.5rem]" />
-              <div className="min-w-0">
-                <p className="font-display text-2xl uppercase leading-none tracking-[0]">
-                  Julian Gigola
-                </p>
-                <p className="label mt-2 text-muted-foreground">{cover.name}</p>
-              </div>
-            </div>
-          ) : (
-            <Empty>No cover chosen.</Empty>
-          )}
-        </Block>
 
         <Block
           label={`Selected work: ${featured.filter((p) => !hidden.has(p.slug)).length}`}
