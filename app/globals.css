@@ -1455,8 +1455,13 @@ a.strip-cell {
     letter-spacing 220ms var(--ease-out-strong);
 }
 [data-dwell] .rail-word {
-  font-size: 1.25rem;
-  letter-spacing: 0.06em;
+  /* Julian saw twenty and asked for a smaller target. Fifteen is half
+     again as big as the word at rest, which is the difference between
+     glancing at it and reading it, and it stops well clear of the covers
+     instead of landing on them. The weight is never touched: it grows,
+     it does not get louder. */
+  font-size: 0.9375rem;
+  letter-spacing: 0.08em;
   transition:
     font-size 1500ms var(--ease-out-strong) 180ms,
     letter-spacing 1500ms var(--ease-out-strong) 180ms;
