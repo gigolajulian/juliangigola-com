@@ -237,6 +237,8 @@ export function Strip({
   const [at, setAt] = React.useState(0);
   /** The key of the mark the cell in the middle names, if it names one. */
   const [mark, setMark] = React.useState("");
+  /** Which tick the pointer is over, as a place in `ticks`, or null. */
+  const [over, setOver] = React.useState<number | null>(null);
   const [ticks, setTicks] = React.useState<{ i: number; word?: string }[]>([]);
   const tickKey = React.useRef("");
   // For the keyboard, which lives in an effect and must not go stale.
@@ -1260,6 +1262,61 @@ export function Strip({
     };
   }, [router, nextHref, prevHref, live, paged]);
 
+  /* ── running a finger along the ruler ──
+     Every tick is a jump already. What it was not is a thing you could
+     read before you committed to it: a word appeared under a mouse, on
+     ticks that had a word of their own, and a tablet has no hover at all.
+
+     So the pointer says where it is and the release says go. Held down,
+     the name under the pointer follows it along the rail; let go and the
+     strip travels there. Nothing moves until then, because a rail that
+     scrubbed the strip live would be the whole archive flying past under
+     a thumb — and this is a map, not a shuttle.
+
+     The word a tick shows is the word of its section, not its own. On a
+     discipline page twelve of eighty four ticks carry a name; the rest
+     are the covers under one, and the answer to "what is here" is the
+     name of the chapter they belong to. */
+  const rail = React.useRef<HTMLDivElement>(null);
+  const held = React.useRef(false);
+  /** For each tick, the last name at or before it. */
+  const named = React.useMemo(
+    () =>
+      ticks.reduce<(string | undefined)[]>(
+        (out, t, n) => [...out, t.word ?? out[n - 1]],
+        [],
+      ),
+    [ticks],
+  );
+
+  /** Which tick a pointer at `x` is over. The ticks share the rail's width
+      equally, so this is arithmetic rather than a hit test per tick. */
+  const tickAt = (x: number) => {
+    const box = rail.current?.getBoundingClientRect();
+    if (!box || !ticks.length) return null;
+    const n = Math.floor(((x - box.left) / box.width) * ticks.length);
+    return Math.max(0, Math.min(ticks.length - 1, n));
+  };
+
+  const railDown = (e: React.PointerEvent<HTMLDivElement>) => {
+    held.current = true;
+    e.currentTarget.setPointerCapture(e.pointerId);
+    setOver(tickAt(e.clientX));
+  };
+  const railMove = (e: React.PointerEvent<HTMLDivElement>) =>
+    setOver(tickAt(e.clientX));
+  const railUp = (e: React.PointerEvent<HTMLDivElement>) => {
+    const n = tickAt(e.clientX);
+    held.current = false;
+    setOver(null);
+    // A press that never moved is a press on a tick, which is the same
+    // journey: both end here rather than in the button's own `onClick`.
+    if (n !== null) goTo(ticks[n].i);
+  };
+  const railOut = () => {
+    if (!held.current) setOver(null);
+  };
+
   /** Puts a cell in the middle of the window. */
   const goTo = (i: number) => {
     const el = scroller.current;
@@ -1379,11 +1436,21 @@ export function Strip({
 
         <div
           aria-hidden
+          ref={rail}
+          onPointerDown={railDown}
+          onPointerMove={railMove}
+          onPointerUp={railUp}
+          onPointerCancel={railOut}
+          onPointerLeave={railOut}
           // `h-2` whether or not the ticks are in yet, so the strip above is
           // the same height before and after they are read.
-          className="flex h-2 min-w-0 flex-1 items-end justify-between gap-px"
+          /* `touch-action: none`, or the first millimetre of a drag along
+             the rail is the page deciding the gesture was a scroll and
+             taking it away. `py-2` is the thumb: the rail itself is eight
+             pixels tall and the padding is hit area, not height. */
+          className="flex h-2 min-w-0 flex-1 touch-none items-end justify-between gap-px py-2"
         >
-          {ticks.map(({ i, word }, n) => {
+          {ticks.map(({ i }, n) => {
             /* Words in the back half hang from the right of their tick and
                grow leftwards. Anchored left like the rest, a long one near
                the end ran past the edge of the window — and a page that can
@@ -1394,21 +1461,26 @@ export function Strip({
                 key={`tick-${i}`}
                 type="button"
                 tabIndex={-1}
-                title={word}
-                onClick={() => goTo(i)}
-                className="group relative flex h-2 flex-1 items-end"
+                title={named[n]}
+                // The rail above takes the press, so this is a target and
+                // not a handler: two of them would travel twice.
+                className="group pointer-events-none relative flex h-2 flex-1 items-end"
               >
-                {word ? (
+                {named[n] ? (
                   <span
                     className={cn(
-                      "label pointer-events-none absolute bottom-full mb-1 whitespace-nowrap text-[0.625rem] text-muted-foreground transition-opacity duration-200",
+                      "label pointer-events-none absolute bottom-full mb-1 whitespace-nowrap text-[0.625rem] transition-opacity duration-200",
                       end ? "right-0" : "left-0",
-                      i === at
-                        ? "opacity-100"
-                        : "opacity-0 hoverable:group-hover:opacity-100",
+                      over === n
+                        ? "text-foreground opacity-100"
+                        : over !== null
+                          ? "text-muted-foreground opacity-0"
+                          : i === at
+                            ? "text-muted-foreground opacity-100"
+                            : "text-muted-foreground opacity-0",
                     )}
                   >
-                    {word}
+                    {named[n]}
                   </span>
                 ) : null}
                 <span
@@ -1416,7 +1488,9 @@ export function Strip({
                     "block w-full rounded-full transition-[height,background-color] duration-200 ease-[var(--ease-out-strong)]",
                     i === at
                       ? "h-2 bg-foreground"
-                      : "h-1 bg-foreground/20 hoverable:group-hover:h-1.5 hoverable:group-hover:bg-foreground/40",
+                      : over === n
+                        ? "h-1.5 bg-foreground/40"
+                        : "h-1 bg-foreground/20",
                   )}
                 />
               </button>
