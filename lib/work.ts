@@ -20,6 +20,7 @@ import {
   ADDED,
   HIDDEN,
   UNLISTED,
+  SLUGS,
   RECATEGORISED,
   REFRAMED,
   RECREDITED,
@@ -201,6 +202,23 @@ const fromAdded = (p: AddedProject): Project => {
  * keyed by project slug, and a re-harvest can retire a project entirely; a
  * stale key should not be able to fail a build that is otherwise fine.
  */
+/**
+ * Gives a project the address /admin gave it.
+ *
+ * First in the pipeline, before anything looks a project up by slug, so
+ * the new slug is its identity everywhere downstream: the overrides, the
+ * running order, the indexes, the route. The editor writes those maps
+ * under the new slug when it publishes a rename (`remapSlugs` in
+ * `admin-editor.tsx`), so a renamed project is one project and not two
+ * halves of one. The original is kept as `origin` for the redirect.
+ */
+const reslug = (project: Project): Project => {
+  const to = SLUGS[project.slug];
+  return to && to !== project.slug
+    ? { ...project, slug: to, origin: project.slug }
+    : project;
+};
+
 const refile = (project: Project): Project => {
   const wanted = RECATEGORISED[project.slug];
   if (!wanted) return project;
@@ -425,7 +443,9 @@ export const ALL_PROJECTS: Project[] = [
     p.slug === "coverart" ? withCoverArt(p) : withLeadFrame(p),
   ),
 ]
-  .map((p) => withFaces(withAlt(relabel(reframe(recopy(recredit(refile(p))))))))
+  .map((p) =>
+    withFaces(withAlt(relabel(reframe(recopy(recredit(refile(reslug(p)))))))),
+  )
   .sort(byRunningOrder);
 
 /**

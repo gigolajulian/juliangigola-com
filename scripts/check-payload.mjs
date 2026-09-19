@@ -35,6 +35,7 @@ const edit = {
   order: [],
   covers: {},
   avatars: {},
+  slugs: {},
 };
 
 // What is already in the repo is carried through, not clobbered.
@@ -228,6 +229,7 @@ const edit = {
   const build = {
     hidden: ["old"],
     unlisted: [],
+    slugs: {},
     categories: { a: "editorial" },
     frames: { a: ["/work/a/01.jpg"] },
     credits: { a: [{ role: "Model", name: "X" }] },
@@ -285,6 +287,7 @@ const edit = {
     same(adoptable({ projects: [] }, build), {
       hidden: [],
       unlisted: [],
+      slugs: {},
       categories: {},
       frames: {},
       credits: {},
@@ -383,6 +386,7 @@ const edit = {
     ["order", ["sago"]],
     ["hidden", ["sago"]],
     ["unlisted", ["rouge"]],
+    ["slugs", { sago: "sago-two" }],
   ]) {
     assert.equal(
       same(adoptable({ projects: [], trash: [], [key]: value }, baseline), baseline),
@@ -408,6 +412,7 @@ const edit = {
     order: ["p", "q"],
     covers: { editorial: "/work/p/01.jpg" },
     avatars: { x: "/people/x.jpg" },
+    slugs: { p: "pp" },
   };
   const back = adoptable(projectsFile({ projects: [], trash: [] }, rich), edit);
   assert.equal(

@@ -321,6 +321,17 @@ export type AddedFile = {
    */
   avatars: Record<string, string>;
   /**
+   * A project's address, changed: the slug it was harvested or added
+   * under, to the slug it answers at now.
+   *
+   * Julian asked to change the link to a page from /admin. The frames do
+   * not move - their paths are literal in the manifest and nothing derives
+   * them from the slug - and the old address keeps answering, because
+   * `next.config.ts` reads this map into a redirect. Keyed by the original
+   * so a project renamed twice is still one entry.
+   */
+  slugs: Record<string, string>;
+  /**
    * Disciplines added here rather than harvested from the old site.
    *
    * `lib/work-data.ts` holds the thirteen the old nav had, and
@@ -544,6 +555,18 @@ function parse(v: unknown): AddedFile {
     covers[category] = str(src, `covers["${category}"]`);
   }
 
+  const rawSlugs = v.slugs === undefined ? {} : v.slugs;
+  if (!isRecord(rawSlugs)) return fail("slugs", "an object", rawSlugs);
+  const slugs: Record<string, string> = {};
+  for (const [from, to] of Object.entries(rawSlugs)) {
+    const next = str(to, `slugs["${from}"]`);
+    // A slug goes into a route and a redirect, so it is held to what a
+    // slug is. One that is not fails the build rather than the site.
+    if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(next))
+      return fail(`slugs["${from}"]`, "a lower-case slug", next);
+    if (next !== from) slugs[from] = next;
+  }
+
   return {
     projects,
     trash,
@@ -554,6 +577,7 @@ function parse(v: unknown): AddedFile {
     order,
     covers,
     avatars,
+    slugs,
     disciplines,
     hidden: hidden.map((s, i) => str(s, `hidden[${i}]`)),
     unlisted: unlisted.map((s, i) => str(s, `unlisted[${i}]`)),
@@ -584,6 +608,9 @@ export const AVATARS: Readonly<Record<string, string>> = FILE.avatars;
 
 /** Hand-picked discipline covers, by category slug. Frame paths. */
 export const DISCIPLINE_COVERS: Readonly<Record<string, string>> = FILE.covers;
+
+/** Renamed addresses, original slug to current. See `AddedFile.slugs`. */
+export const SLUGS: Readonly<Record<string, string>> = FILE.slugs;
 export const HIDDEN: ReadonlySet<string> = new Set(FILE.hidden);
 
 /** Off the listings, still a page. See `AddedFile.unlisted`. */

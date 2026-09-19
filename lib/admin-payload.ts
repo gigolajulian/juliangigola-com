@@ -29,6 +29,7 @@ export type ProjectsFile = {
   order?: string[];
   covers?: Record<string, string>;
   avatars?: Record<string, string>;
+  slugs?: Record<string, string>;
 };
 
 /**
@@ -84,6 +85,8 @@ export type Manifest<Frame = unknown, Credit = unknown, Copy = unknown> = {
   covers: Record<string, string>;
   /** A collaborator's face, Instagram handle to a path under `public/`. */
   avatars: Record<string, string>;
+  /** Renamed addresses, original slug to current. */
+  slugs: Record<string, string>;
 };
 
 export function projectsFile(
@@ -135,6 +138,10 @@ export function projectsFile(
   // And the faces, by the same rule: written only once there is one.
   if (Object.keys(edit.avatars).length) next.avatars = edit.avatars;
   else delete next.avatars;
+
+  // And the renames.
+  if (Object.keys(edit.slugs).length) next.slugs = edit.slugs;
+  else delete next.slugs;
 
   return next;
 }
@@ -266,6 +273,8 @@ export function adoptable<F, C, P>(
       file.covers === undefined
         ? {}
         : (stringMap(file.covers) ?? fallback.covers),
+    slugs:
+      file.slugs === undefined ? {} : (stringMap(file.slugs) ?? fallback.slugs),
   };
 }
 

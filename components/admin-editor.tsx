@@ -162,6 +162,44 @@ const fromBase64 = (b64: string): string => {
  */
 type Draft = Manifest<FrameRef, Credit, Copy>;
 
+/* ── a rename, carried through ────────────────────────────────────
+ * Every override this editor holds is keyed by slug, and while the page
+ * is open every row still wears the slug it was built with. So the draft
+ * keeps its keys where the rows can find them, and the *published* draft
+ * is this one: each key a rename applies to, moved under the new slug on
+ * the way out. Idempotent - once the site has deployed the rename the
+ * rows wear the new slug, the old key is absent, and there is nothing to
+ * move - so it runs on every publish rather than remembering whether it
+ * has. `lib/work.ts` renames first in its pipeline for the same reason:
+ * the new slug is the one identity, and a renamed project is never two.
+ * ─────────────────────────────────────────────────────────────── */
+function remapSlugs(draft: Draft, slugs: Record<string, string>): Draft {
+  const renames = Object.entries(slugs).filter(([from, to]) => from !== to);
+  if (!renames.length) return draft;
+  const moveKeys = <T,>(map: Record<string, T>): Record<string, T> => {
+    const next = { ...map };
+    for (const [from, to] of renames) {
+      if (from in next && !(to in next)) {
+        next[to] = next[from];
+        delete next[from];
+      }
+    }
+    return next;
+  };
+  const moveList = (list: string[]): string[] =>
+    list.map((s) => slugs[s] && slugs[s] !== s ? slugs[s] : s);
+  return {
+    ...draft,
+    hidden: moveList(draft.hidden),
+    unlisted: moveList(draft.unlisted),
+    categories: moveKeys(draft.categories),
+    frames: moveKeys(draft.frames),
+    credits: moveKeys(draft.credits),
+    copy: moveKeys(draft.copy),
+    order: moveList(draft.order),
+  };
+}
+
 type Status =
   | { kind: "idle" }
   /**
@@ -189,6 +227,7 @@ export function AdminEditor({
   initialReframed,
   initialRecredited,
   initialRecopied,
+  initialReslugged,
   initialOrder,
   initialCovers,
   initialAvatars,
@@ -232,6 +271,7 @@ export function AdminEditor({
   initialRecredited: Record<string, Credit[]>;
   /** Rewritten titles and intents the last build applied, slug → copy. */
   initialRecopied: Record<string, Copy>;
+  initialReslugged: Record<string, string>;
   /** The running order the last build applied, by slug. */
   initialOrder: string[];
   /** Discipline covers the last build applied, category slug to frame path. */
@@ -280,6 +320,8 @@ export function AdminEditor({
     React.useState<Record<string, Credit[]>>(initialRecredited);
   const [recopied, setRecopied] =
     React.useState<Record<string, Copy>>(initialRecopied);
+  const [reslugged, setReslugged] =
+    React.useState<Record<string, string>>(initialReslugged);
   /** The running order of the work, by slug. Partial - see `lib/added.ts`. */
   const [order, setOrder] = React.useState<string[]>(initialOrder);
   /** The photograph standing for each discipline, by category slug. */
@@ -338,18 +380,23 @@ export function AdminEditor({
    * and `projectsFile` takes exactly this shape.
    */
   const manifest: Draft = React.useMemo(
-    () => ({
-      // Sorted, so a set's iteration order is not mistaken for an edit.
-      hidden: [...hidden].sort(),
-      unlisted: [...unlisted].sort(),
-      categories: recategorised,
-      frames: reframed,
-      credits: recredited,
-      copy: recopied,
-      order,
-      covers,
-      avatars,
-    }),
+    () =>
+      remapSlugs(
+        {
+          // Sorted, so a set's iteration order is not mistaken for an edit.
+          hidden: [...hidden].sort(),
+          unlisted: [...unlisted].sort(),
+          categories: recategorised,
+          frames: reframed,
+          credits: recredited,
+          copy: recopied,
+          order,
+          covers,
+          avatars,
+          slugs: reslugged,
+        },
+        reslugged,
+      ),
     [
       hidden,
       unlisted,
@@ -357,6 +404,7 @@ export function AdminEditor({
       reframed,
       recredited,
       recopied,
+      reslugged,
       order,
       covers,
       avatars,
@@ -396,6 +444,7 @@ export function AdminEditor({
       frames: initialReframed,
       credits: initialRecredited,
       copy: initialRecopied,
+      slugs: initialReslugged,
       order: initialOrder,
       covers: initialCovers,
       avatars: initialAvatars,
@@ -740,6 +789,7 @@ export function AdminEditor({
         setReframed(repo.frames);
         setRecredited(repo.credits);
         setRecopied(repo.copy);
+        setReslugged(repo.slugs);
         setOrder(repo.order);
         setCovers(repo.covers);
         setAvatars(repo.avatars);
@@ -916,6 +966,7 @@ export function AdminEditor({
       setReframed(written.frames);
       setRecredited(written.credits);
       setRecopied(written.copy);
+      setReslugged(written.slugs);
 
       // A fresh publish is not live yet by definition, whatever the last one
       // was — so the green is dropped before the wait begins.
@@ -1381,6 +1432,17 @@ export function AdminEditor({
                 onHiddenChange={setHidden}
                 unlisted={unlisted}
                 onUnlistedChange={setUnlisted}
+                slugs={reslugged}
+                onSlug={(origin, next) =>
+                  setReslugged((m) => {
+                    const out = { ...m };
+                    // Back to the original is no rename at all, and leaves
+                    // no entry behind to publish.
+                    if (next === origin) delete out[origin];
+                    else out[origin] = next;
+                    return out;
+                  })
+                }
                 onRemoved={setTrash}
                 disciplines={categories}
                 recategorised={recategorised}

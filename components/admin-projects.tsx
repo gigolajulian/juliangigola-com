@@ -38,6 +38,8 @@ import { cn } from "@/lib/utils";
 
 export type AdminProject = {
   slug: string;
+  /** What it was harvested or added as: the key of a rename. */
+  origin: string;
   name: string;
   /** Display name of its discipline, for the row and the filter. */
   category: string;
@@ -83,6 +85,8 @@ export function AdminProjects({
   onHiddenChange,
   unlisted,
   onUnlistedChange,
+  slugs,
+  onSlug,
   onRemoved,
   disciplines,
   recategorised,
@@ -107,6 +111,10 @@ export function AdminProjects({
   /** Slugs off the listings but still paged, as the draft has them. */
   unlisted: Set<string>;
   onUnlistedChange: (next: Set<string>) => void;
+  /** Renamed addresses in the draft, original slug to current. */
+  slugs: Record<string, string>;
+  /** A new address for a project, by its original slug. */
+  onSlug: (origin: string, next: string) => void;
   /** Handed the new bin contents after a removal, so the panel below updates. */
   onRemoved?: (trash: TrashedProject[]) => void;
   /** Disciplines a project can be refiled under. */
@@ -200,6 +208,25 @@ export function AdminProjects({
   };
   const toggleUnlisted = (slug: string) =>
     toggle(unlisted, slug, onUnlistedChange);
+
+  /** The address a row answers at, as the draft has it. */
+  const addressOf = (p: AdminProject) => slugs[p.origin] ?? p.slug;
+  /* Julian: allow changing the link to each page. The field holds what a
+     slug is and nothing else - lower case, digits, single hyphens - and
+     refuses an address another project already answers at, because two
+     pages on one URL is one page and a project that quietly vanished.
+     Committed on blur or Enter, not on every keystroke: half a slug is
+     not an address anybody wants published by accident. */
+  const SLUG = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+  const [badSlug, setBadSlug] = React.useState<string | null>(null);
+  const rename = (p: AdminProject, raw: string) => {
+    const next = raw.trim().toLowerCase();
+    if (next === addressOf(p)) return setBadSlug(null);
+    const taken = projects.some((q) => q !== p && addressOf(q) === next);
+    if (!SLUG.test(next) || taken) return setBadSlug(p.origin);
+    setBadSlug(null);
+    onSlug(p.origin, next);
+  };
   /** Delete, for a harvested project: unpublished, reversibly. */
   const toggleHidden = (slug: string) => {
     setConfirming(null);
@@ -367,7 +394,8 @@ export function AdminProjects({
                   </span>
                   <span className="label block truncate text-muted-foreground">
                     {filedName} · {(frames ?? p.images).length} frames · /
-                    {p.slug}
+                    {addressOf(p)}
+                    {slugs[p.origin] ? " · renamed" : ""}
                     {frames ? " · edited" : ""}
                     {isUnlisted ? " · hidden" : ""}
                     {isHidden ? " · deleted" : ""}
@@ -551,7 +579,40 @@ export function AdminProjects({
                     onUpload={onUpload}
                   />
                   <div className="border-t border-border bg-card/40 p-5">
-                    <div className="flex flex-wrap items-baseline justify-between gap-3">
+                    <label className="label flex flex-wrap items-baseline gap-1">
+                      <span>Address · /work/</span>
+                      <input
+                        type="text"
+                        key={addressOf(p)}
+                        defaultValue={addressOf(p)}
+                        spellCheck={false}
+                        autoCapitalize="none"
+                        onBlur={(e) => rename(p, e.currentTarget.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") e.currentTarget.blur();
+                          if (e.key === "Escape") {
+                            e.currentTarget.value = addressOf(p);
+                            e.currentTarget.blur();
+                          }
+                        }}
+                        className={cn(
+                          "label border-b bg-transparent px-0 py-0 lowercase outline-none",
+                          "border-border text-foreground focus:border-foreground",
+                          badSlug === p.origin && "border-destructive text-destructive",
+                        )}
+                        style={{ width: `${Math.max(8, addressOf(p).length + 2)}ch` }}
+                      />
+                      {badSlug === p.origin ? (
+                        <span className="text-destructive">
+                          · not an address, or taken
+                        </span>
+                      ) : slugs[p.origin] ? (
+                        <span className="text-muted-foreground">
+                          · was /{p.origin}, which will still open
+                        </span>
+                      ) : null}
+                    </label>
+                    <div className="mt-5 flex flex-wrap items-baseline justify-between gap-3">
                       <p className="label">Credits</p>
                       {credits[p.slug] ? (
                         <button

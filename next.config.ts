@@ -22,6 +22,23 @@ const projectRedirects = LINKABLE.map((p) => ({
 }));
 
 /**
+ * A project whose address was changed in /admin. Both of the old forms are
+ * in the index and in Julian's own links - the page and the bare slug -
+ * and both land on the page as it is now. Generated from the manifest so
+ * a rename cannot be made without its redirect.
+ */
+const renameRedirects = LINKABLE.filter(
+  (p): p is typeof p & { origin: string } => !!p.origin,
+).flatMap((p) => [
+  {
+    source: `/work/${p.origin}`,
+    destination: `/work/${p.slug}`,
+    permanent: true,
+  },
+  { source: `/${p.origin}`, destination: `/work/${p.slug}`, permanent: true },
+]);
+
+/**
  * Old category pages. Each one lands on that discipline's own page now, so an
  * indexed `/editorial` arrives at the editorial work rather than at seventy
  * projects with a filter still to apply. `categoryHref` handles the two edge
@@ -287,6 +304,7 @@ const nextConfig: NextConfig = {
     return [
       ...wwwRedirect,
       ...pageRedirects,
+      ...renameRedirects,
       ...categoryRedirects,
       ...projectRedirects,
     ].filter(

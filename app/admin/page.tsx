@@ -22,6 +22,7 @@ import {
   REFRAMED,
   RECREDITED,
   RECOPIED,
+  SLUGS,
   ORDER,
   AVATARS,
   DISCIPLINE_COVERS,
@@ -138,6 +139,9 @@ export default function AdminPage() {
            real numbers back out of the archive when a sequence is applied. */
         projects={ALL_PROJECTS.map((p) => ({
           slug: p.slug,
+          // The key of a rename: what it was harvested or added as, which
+          // is the slug itself until somebody changes it.
+          origin: p.origin ?? p.slug,
           name: p.name,
           /* Through `categoryLabel`, the same as `categoryLinks` below.
              The raw manifest name is "EDITORIAL" and the label is
@@ -176,6 +180,7 @@ export default function AdminPage() {
         initialReframed={REFRAMED}
         initialRecredited={RECREDITED}
         initialRecopied={RECOPIED}
+        initialReslugged={SLUGS}
         /* The running order and the picked discipline covers, as the last
            build applied them. Spread rather than passed through, because
            both are frozen reads of the content file and the editor holds

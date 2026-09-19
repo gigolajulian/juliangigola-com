@@ -98,6 +98,13 @@ export type Copy = { title: string; intent: string | null };
 
 export type Project = {
   slug: string;
+  /**
+   * The slug it was harvested or added under, when `slug` is no longer
+   * that. Set by `reslug` in `lib/work.ts` from the `slugs` map in
+   * `content/projects.json`, and read by `next.config.ts` to keep the old
+   * address answering. Absent on a project that has never been renamed.
+   */
+  origin?: string;
   name: string;
   /** The heading from the old title block, where it differs from `name`. */
   headline: string | null;
