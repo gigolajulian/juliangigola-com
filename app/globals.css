@@ -2246,6 +2246,16 @@ optgroup {
 :root[data-nav-bar]::view-transition-new(.page) {
   animation: jg-page-in 420ms cubic-bezier(0.32, 0.72, 0, 1) 300ms both;
 }
+/* And a longer one out of a drawer, which has a door to shut first. The
+   menu and the filters take 420ms to travel back out; at the bar's 300ms
+   the new page was rising into a screen that was still moving, which is
+   two movements in opposite directions and reads as a stumble. 460 is the
+   drawer's own journey and a beat, so what the page comes up into is
+   still. It arrives over 460 as well, because a wait that long wants an
+   arrival to match it. */
+:root[data-nav-drawer]::view-transition-new(.page) {
+  animation: jg-page-in 460ms cubic-bezier(0.32, 0.72, 0, 1) 460ms both;
+}
 /* A credit's card, coming up out of the name it explains: it scales from
    the trigger (`--radix-hover-card-content-transform-origin`), so what
    grows is the word that was hovered. Nothing arrives from nothing —

@@ -79,6 +79,11 @@ export function WorkFilter({
                   <Link
                     href={row.href}
                     prefetch={false}
+                    // The door starts shutting on the press, not when the new
+                    // route commits. Measured: the route landed 300ms after the
+                    // tap, so the drawer was still travelling its last 33px when
+                    // the incoming page began to rise into it.
+                    onClick={() => window.dispatchEvent(new Event("jg:filter-close"))}
                     aria-current={here ? "page" : undefined}
                     className={cn(
                       "flex items-baseline justify-between gap-4 py-1.5",

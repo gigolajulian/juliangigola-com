@@ -65,6 +65,11 @@ export function SiteMenu() {
               >
                 <Link
                   href={link.href}
+                  // The door starts shutting on the press, not when the new
+                  // route commits. Measured: the route landed 300ms after the
+                  // tap, so the drawer was still travelling its last 33px when
+                  // the incoming page began to rise into it.
+                  onClick={() => window.dispatchEvent(new Event("jg:menu-close"))}
                   aria-current={isCurrent(link.href) ? "page" : undefined}
                   className={cn(
                     // Sized to the drawer rather than to the window: the

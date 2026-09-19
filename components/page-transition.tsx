@@ -20,20 +20,38 @@ export function PageTransition({ children }: { children: React.ReactNode }) {
   React.useEffect(() => {
     const root = document.documentElement;
     let clear = 0;
-    const set = (way: "in" | "out" | "filter", bar = false) => {
+    const set = (
+      way: "in" | "out" | "filter",
+      from: "page" | "bar" | "drawer" = "page",
+    ) => {
       root.dataset.nav = way;
       /* Julian asked for a beat before the page arrives when the press
          came from the bar. A link inside the page is a step through the
          work and wants no waiting; the bar is a jump across the site, and
          the old page is given the room to leave before the new one comes
-         up. `globals.css` reads it as a delay on the incoming page. */
-      if (bar) root.dataset.navBar = "";
-      else delete root.dataset.navBar;
+         up. `globals.css` reads it as a delay on the incoming page.
+
+         A drawer is the same jump with a door to shut first. The menu and
+         the filters take 420ms to travel back out, and the four links in
+         the menu used to be inside `<header>` and so counted as the bar;
+         they are their own component now, which quietly took the beat away
+         and let the new page land under a drawer that was still moving.
+         Julian saw it. The longer wait is the drawer's own journey plus
+         one, so the page arrives at a still screen. */
+      if (from === "page") {
+        delete root.dataset.navBar;
+        delete root.dataset.navDrawer;
+      } else {
+        root.dataset.navBar = "";
+        if (from === "drawer") root.dataset.navDrawer = "";
+        else delete root.dataset.navDrawer;
+      }
       window.clearTimeout(clear);
       clear = window.setTimeout(() => {
         delete root.dataset.nav;
         delete root.dataset.navBar;
-      }, 1200);
+        delete root.dataset.navDrawer;
+      }, 1400);
     };
     const onClick = (e: MouseEvent) => {
       if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey)
@@ -61,7 +79,10 @@ export function PageTransition({ children }: { children: React.ReactNode }) {
         a.dataset.back !== undefined ||
         a.textContent?.trimStart().startsWith("←") ||
         a.pathname === "/";
-      set(out ? "out" : "in", a.closest("header") !== null);
+      set(
+        out ? "out" : "in",
+        a.closest(".drawer") ? "drawer" : a.closest("header") ? "bar" : "page",
+      );
     };
     // The photo viewer keeps an entry in the history so the back button
     // closes it (`lib/zoom.ts`); that pop is not a page leaving.
