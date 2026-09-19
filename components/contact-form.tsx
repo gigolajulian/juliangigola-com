@@ -163,6 +163,19 @@ export function ContactForm() {
          or an autofill fires the other. */
       onInput={(e) => setReady(e.currentTarget.checkValidity())}
       onChange={(e) => setReady(e.currentTarget.checkValidity())}
+      /* The gate. It used to be the `disabled` attribute on the button,
+         which also took the button out of the tab order: a keyboard
+         reached every field and then found nothing at the end of the
+         form. The button stays a button now and says it is not ready
+         (`aria-disabled`), and this refuses the submit — a press or Enter
+         in a field alike — and puts the focus on the first field that is
+         still empty, which is the answer to "what is missing". React
+         skips the action when the event is prevented. */
+      onSubmit={(e) => {
+        if (e.currentTarget.checkValidity()) return;
+        e.preventDefault();
+        e.currentTarget.querySelector<HTMLElement>(":invalid")?.focus();
+      }}
       className="flex flex-col gap-6"
       noValidate
     >
@@ -297,15 +310,17 @@ export function ContactForm() {
       <div className="flex items-center gap-6">
         <button
           type="submit"
-          disabled={pending || !ready}
-          className="label action px-6 py-4 press active:scale-[0.97]"
+          disabled={pending}
+          aria-disabled={!ready || undefined}
+          aria-describedby={!ready ? "enquire-missing" : undefined}
+          className="label action px-6 py-4 press active:scale-[0.97] aria-disabled:active:scale-100"
         >
           {pending ? "Sending…" : "Enquire"}
         </button>
         {/* What is still missing, where the button is, and only once
             there is any reason to say it. */}
         {!ready && !pending ? (
-          <p className="label text-muted-foreground">
+          <p id="enquire-missing" className="label text-muted-foreground">
             Your name, your email and a line about the shoot
           </p>
         ) : null}

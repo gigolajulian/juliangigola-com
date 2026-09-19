@@ -78,7 +78,7 @@ export default function Home() {
           // height from this one, and against a floor it collapsed to its
           // contents and settled at the top of the screen — the name half
           // under the bar and the photograph below it.
-          className="w-full shrink-0 max-sm:h-[100lvh] sm:h-full"
+          className="w-full shrink-0 max-sm:h-[100svh] sm:h-full"
         />
 
         {/* A grid, butting against itself: the section reads as one sheet

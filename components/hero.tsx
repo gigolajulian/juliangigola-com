@@ -99,13 +99,13 @@ function Ways({
     >
       <Link
         href="/work"
-        className="label action px-7 py-5 press active:scale-[0.97] short:px-6 short:py-3.5"
+        className="label action px-7 py-5 press active:scale-[0.97] max-sm:px-4 short:px-6 short:py-3.5"
       >
         See the work
       </Link>
       <Link
         href="/sessions"
-        className="label action-quiet px-7 py-5 press active:scale-[0.97] short:px-6 short:py-3.5"
+        className="label action-quiet px-7 py-5 press active:scale-[0.97] max-sm:px-4 short:px-6 short:py-3.5"
       >
         Book a session
       </Link>
@@ -666,8 +666,11 @@ export function Hero({
                and this plate is a band at its foot: the running head, the
                name with the phase under it, a strip of seven ticks for the
                phases, and the two buttons. The seven-row index that made the
-               plate 555px tall is off here (see the nav below) — the ticks
-               are the same control at a thumb's size. Denser ground than the
+               plate 555px tall is off here (see the nav below): on a phone
+               the ticks are the same control at a thumb's size, and a tablet
+               held upright has the buttons only. It had the rows for three
+               days and they cost it the picture — measured at 768 by 1024
+               the plate covered 80% of the cover. Denser ground than the
                stacked default so the type holds on a bright frame. */
             /* Julian: thirty per cent less of it on a phone. 72 down to
                50, so more of the photograph comes through the band under
@@ -861,7 +864,7 @@ export function Hero({
               /* Margins, not padding: the block is ink now, and padding on
                  it would be ink around the rows rather than air around the
                  block. */
-              className="rise mx-6 mb-2 mt-6 sm:mx-10 sm:mb-4 sm:mt-8 tall:mb-0 tall:mt-5 wide:hidden short:wide:flex short:mb-0 short:mt-4"
+              className="rise mx-6 mb-2 mt-6 sm:mx-10 sm:mb-4 sm:mt-8 tall:mb-0 tall:mt-5 sm:tall:mb-6 wide:hidden short:wide:flex short:mb-0 short:mt-4"
             />
 
             {/* Three: the index. This is the switcher's control and the site's
@@ -903,7 +906,7 @@ export function Hero({
             <nav
               data-scroll
               aria-label="Disciplines"
-              className="mt-8 min-h-0 overflow-y-auto overscroll-contain border-t border-border sm:mt-6 max-sm:tall:hidden lying:hidden"
+              className="mt-8 min-h-0 overflow-y-auto overscroll-contain border-t border-border sm:mt-6 tall:hidden lying:hidden"
             >
               <ul
                 onPointerOver={takeFromHover}
@@ -981,10 +984,10 @@ export function Hero({
                 current one lit, each a link to its page and each a target for
                 the same delegated handler the rows use — so tapping a tick
                 switches the cover the way hovering a row does. Only on a
-                phone, where the rows are hidden: on any wider screen the
-                rows are there and a second row of marks would sit just
-                above the strip's ruler saying something different with the
-                same shape. */}
+                phone: on any wider screen a second row of marks would sit
+                just above the strip's ruler saying something different with
+                the same shape, so an upright tablet, which hides the rows
+                too, gets neither and keeps the buttons. */}
             <ol
               aria-label="Disciplines, on the picture"
               onPointerOver={takeFromHover}

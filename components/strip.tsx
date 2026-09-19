@@ -1249,6 +1249,11 @@ export function Strip({
     <div className={cn("strip-band flex min-h-0 flex-col", className)}>
       <div
         ref={scroller}
+        /* A region, so the label below has a role to hang on. Without one
+           this was a `generic` div carrying a name, which ARIA prohibits
+           and some readers drop: a visitor on a screen reader arrived at a
+           focusable thing with no word for what it was. */
+        role="region"
         tabIndex={0}
         aria-label={label}
         /* The browser's own drag and drop never gets the gesture.
@@ -1321,6 +1326,27 @@ export function Strip({
         )}
       >
         {counter?.(at)}
+        {/* Where you are, for a reader who cannot see the inked tick. The
+            ruler beside this is a row of pointer-only jump controls and
+            stays hidden from assistive tech: given a role it became a
+            landmark full of unnamed buttons, measured in Chromium, which
+            does not treat a progressbar's children as presentational. So
+            the position is said once, here, and nothing else changes. */}
+        <span
+          role="progressbar"
+          aria-label="Position"
+          aria-valuemin={1}
+          aria-valuemax={ticks.length || 1}
+          aria-valuenow={Math.max(1, ticks.filter((t) => t.i <= at).length)}
+          aria-valuetext={
+            ticks[Math.max(1, ticks.filter((t) => t.i <= at).length) - 1]
+              ?.word ??
+            `${Math.max(1, ticks.filter((t) => t.i <= at).length)} of ${
+              ticks.length || 1
+            }`
+          }
+          className="sr-only"
+        />
         {/* Who the cover in the middle was shot for. It sits at the end of
             the ruler's own line, so it reads as part of the instrument
             rather than as a badge dropped on the page. */}

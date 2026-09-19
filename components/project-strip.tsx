@@ -353,6 +353,17 @@ export function ProjectStrip({
                 // between every image. The page is the sequence; the
                 // sequence has to be there.
                 priority={cell.n < 2}
+                /* And what the browser does with eighteen of them at once.
+                   Next 16 no longer writes `fetchpriority` from `priority`,
+                   and React preloads in the head every picture that is
+                   neither lazy nor low: all eighteen frames went out as one
+                   equal claim on the connection, so the two that are the
+                   page's first screen had no priority at all. High for
+                   those two, low for the rest — which also takes the rest
+                   out of the head, so they are asked for after the first
+                   frames and the stylesheet rather than alongside them.
+                   They stay eager: the sequence still loads in full. */
+                fetchPriority={cell.n < 2 ? "high" : "low"}
                 loading="eager"
                 placeholder={
                   cell.n === 0 && project.cover.blur ? "blur" : "empty"

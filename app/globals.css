@@ -1295,16 +1295,26 @@ a.strip-cell {
    The small capitals links (footer, crumbs, credits, the email in an ask)
    are 13 to 14px tall, and a thumb is not. Padding that the same negative
    margin takes back: the hit area is 30px, the type does not move, and
-   nothing around it shifts. Phones only, where there is a thumb. */
-@media (max-width: 40rem) {
-  a.label,
-  .label a,
-  dd a,
-  a[href^="mailto:"],
-  header a[href="/"],
-  nav[aria-label="Legal"] a {
-    padding-block: 0.5rem;
-    margin-block: -0.5rem;
+   nothing around it shifts. Wherever there is a thumb: a phone by width,
+   and a tablet by its pointer, which had none of this and put the email
+   and the legal link at 13px.
+
+   In the components layer, so a padding a link sets for itself wins. Out
+   of any layer this beat every utility, and `a.label` is also the two
+   buttons on the cover and the ask's Enquire: their `py-5` and `py-4`
+   came out as 8px on a phone, 31px tall, and the two cover buttons
+   overlapped by 4px where there should have been a gap. */
+@layer components {
+  @media (max-width: 40rem), (pointer: coarse) {
+    a.label,
+    .label a,
+    dd a,
+    a[href^="mailto:"],
+    header a[href="/"],
+    nav[aria-label="Legal"] a {
+      padding-block: 0.5rem;
+      margin-block: -0.5rem;
+    }
   }
 }
 
@@ -2261,14 +2271,19 @@ optgroup {
    answers. It keeps its size, so the row does not move when the form
    fills up and the button comes alive. */
 .action:disabled,
+.action[aria-disabled="true"],
 .action-quiet:disabled {
   opacity: 0.4;
   cursor: not-allowed;
 }
 @media (hover: hover) and (pointer: fine) {
   .action:disabled:hover,
+  .action[aria-disabled="true"]:hover,
+  .action[aria-disabled="true"]:active,
   .action-quiet:disabled:hover {
+    background-color: color-mix(in oklab, var(--foreground) 72%, transparent);
     border-color: color-mix(in oklab, var(--foreground) 30%, transparent);
+    color: var(--background);
   }
 }
 

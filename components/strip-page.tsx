@@ -119,8 +119,13 @@ export function TitleCell({
   );
 }
 
-/** Three columns, the outer two the same width, so the title is centred on
-    the page and not on whatever is left over. The middle is the running
+/** Three columns, the outer two the same width from `sm` up, so the title
+    is centred on the page and not on whatever is left over. On a phone the
+    rails are their content's width: at 112px each, with the gaps and the
+    page padding, a title at 360px wide had 40px and DIESEL: FOR SUCCESSFUL
+    LIVING came out as "DIES / FO…". The title sits a little right of the
+    page's centre there instead, and the longest name still clamps below
+    about 357px. The middle is the running
     head, and it waits its turn: the sequence opens on the title set large,
     so this would be the same words twice on the first screen. `running-head`
     fades it in once that cell has been scrolled past — the rule is in
@@ -153,7 +158,7 @@ export function StripHead({
   return (
     <header className="mx-auto w-full max-w-[100rem] shrink-0 px-6 sm:px-10 lying:px-6">
       <div className="flex items-start justify-between gap-6">
-        <div className="w-28 shrink-0 sm:w-44">{crumb}</div>
+        <div className="shrink-0 sm:w-44">{crumb}</div>
 
         <div className={cn("min-w-0 text-center", !open && "running-head")}>
           {/* Set in the display face at a size that reads as a title and
@@ -199,7 +204,7 @@ export function StripHead({
             and nothing else: 112px of column broke `4 session types` over
             two lines against the right edge, and every count here is said
             again by the cell the sequence opens on. */}
-        <p className="label w-28 shrink-0 text-right text-muted-foreground sm:w-44">
+        <p className="label shrink-0 text-right text-muted-foreground sm:w-44">
           <span className="max-sm:hidden">{aside}</span>
         </p>
       </div>
