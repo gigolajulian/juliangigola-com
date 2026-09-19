@@ -311,7 +311,7 @@ export function SiteHeader() {
         )}
       >
         <nav aria-label="Menu">
-          <ul className="flex flex-col gap-1 pl-4">
+          <ul className="flex flex-col items-end gap-1 pr-4 text-right">
             {LINKS.map((link, i) => (
               <li key={link.href} className="relative">
                 {/* The current page is marked, rather than the others being
@@ -320,7 +320,7 @@ export function SiteHeader() {
                 {isCurrent(link.href) ? (
                   <span
                     aria-hidden
-                    className="absolute -left-4 top-1/2 h-8 w-1 -translate-y-1/2 bg-accent"
+                    className="absolute -right-4 top-1/2 h-8 w-1 -translate-y-1/2 bg-accent"
                   />
                 ) : null}
                 <Link

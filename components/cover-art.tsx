@@ -89,8 +89,12 @@ export function CoverArt() {
         </Link>
       </div>
 
+      {/* Five across and two down, which on an upright tablet printed the
+          sleeves at 153px and left two thirds of the screen empty. `cover-rack`
+          in `globals.css` makes it three by three there: the covers come out
+          at 256, two thirds bigger, and the ninth is the last one shown. */}
       <ul
-        className="grid grid-cols-2 sm:grid-cols-5"
+        className="cover-rack grid grid-cols-2 sm:grid-cols-5"
         style={{ gridTemplateRows: "repeat(2, minmax(0, 1fr))" }}
       >
         {releases.map((release) => (

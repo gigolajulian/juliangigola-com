@@ -1291,6 +1291,40 @@ a.strip-cell {
   }
 }
 
+/* ── an upright tablet is not a short desktop ──
+   Both of these lay their pictures out from the height they are given,
+   which is right on a screen wider than it is tall and wrong on one that
+   is not. On an iPad held upright the cover cell is 768 by 959.
+
+   The band: a row is half of 959, so a tile at 4:5 against it is 262 wide
+   and five of them are 1310 — a page and a half, and because a strip cell
+   does not clip, the overflow painted over the cover art on the screen
+   after it. Julian saw the selected work leaking onto the second page.
+   The width leads here: each tile takes an equal share of its row and the
+   ratio sets the height, so five fit in 768 with the ratio still exact.
+
+   The rack: five across put the sleeves at 153px with two thirds of the
+   screen under them. Three across at three down is 256 a side, two thirds
+   bigger, and the tenth release is the one that goes — a ragged last row
+   of one is worse than nine that fill the screen.
+
+   Not on a phone: `min-width: 40rem`. A phone stacks both of these into a
+   vertical feed and neither is paged, so neither can leak. */
+@media (max-aspect-ratio: 4 / 5) and (min-width: 40rem) {
+  .band-tile {
+    height: auto;
+    flex: 1 1 0;
+    min-width: 0;
+  }
+  .cover-rack {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-rows: repeat(3, minmax(0, 1fr));
+  }
+  .cover-rack > li:nth-child(n + 10) {
+    display: none;
+  }
+}
+
 /* ── a thumb's worth of link ──
    The small capitals links (footer, crumbs, credits, the email in an ask)
    are 13 to 14px tall, and a thumb is not. Padding that the same negative

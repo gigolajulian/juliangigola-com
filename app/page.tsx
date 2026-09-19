@@ -114,8 +114,14 @@ export default function Home() {
           {/* Two rows, each half the height it is given, and every tile
               4:5 against that height. Sizing the tiles from the height is
               what keeps the ratio exact at any window: the width follows,
-              and a row of five is still inside a 1280 screen. The top pad
-              is the bar — the first row used to run under it. */}
+              and a row of five is still inside a 1280 screen.
+
+              Not inside an upright tablet, though, which is what `band-tile`
+              is for (`globals.css`). At 768 by 1024 the cell is 959 tall, so
+              a row is 328 and five tiles at 4:5 against it came to 1310 —
+              a page and a half wide, painted straight over the cover art
+              on the screen after it. There the width leads instead. The top
+              pad is the bar — the first row used to run under it. */}
           <div className="flex min-h-0 flex-1 flex-col justify-center px-0 pt-0 sm:px-8 sm:pb-6 sm:pt-32">
             {ROWS.map((count, r) => {
               const from = ROWS.slice(0, r).reduce((n, c) => n + c, 0);
@@ -127,7 +133,7 @@ export default function Home() {
                   {FEATURED.slice(from, from + count).map((project, i) => (
                     <div
                       key={project.slug}
-                      className="min-h-0 sm:aspect-[4/5] sm:h-full"
+                      className="band-tile min-h-0 sm:aspect-[4/5] sm:h-full"
                     >
                       <WorkBand
                         project={bandTile(project)}

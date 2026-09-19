@@ -774,6 +774,31 @@ export function Strip({
         el.scrollLeft = target;
         return;
       }
+      /* Where the browser is snapping, it scrolls and this does not.
+
+         A paged strip under a finger has `scroll-snap-type: x mandatory`
+         (`strip-paged` in `globals.css`), which is what lands each swipe on
+         a section. Snap and a scripted scroll are the same argument twice:
+         the loop below writes `scrollLeft` a frame at a time and the snap
+         engine pulls each of those writes to the nearest section, so a
+         press on the ruler arrived instantly — measured on an iPad, nought
+         to 768 between one frame and the next, where a swipe to the same
+         place takes half a second of moving picture. Julian asked for the
+         press to look like the swipe.
+
+         So hand it over. `behavior: "smooth"` is the browser's own travel,
+         which is what the finger gets, and it lands on the snap point
+         rather than fighting it. Read off the element rather than from a
+         media query, so this follows the rule wherever it applies. */
+      if (getComputedStyle(el).scrollSnapType !== "none") {
+        if (frame) cancelAnimationFrame(frame);
+        frame = 0;
+        last = 0;
+        v = 0;
+        x = target;
+        el.scrollTo({ left: target, behavior: "smooth" });
+        return;
+      }
       // Pick up from wherever the keyboard, a touch or a drag left it.
       if (!frame) {
         x = el.scrollLeft;
