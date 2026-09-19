@@ -1450,9 +1450,11 @@ a.strip-cell {
   font-size: 0.625rem;
   line-height: 1;
   letter-spacing: 0.14em;
+  font-weight: 400;
   transition:
     font-size 220ms var(--ease-out-strong),
-    letter-spacing 220ms var(--ease-out-strong);
+    letter-spacing 220ms var(--ease-out-strong),
+    font-weight 220ms var(--ease-out-strong);
 }
 [data-dwell] .rail-word {
   /* Julian saw twenty and asked for a smaller target. Fifteen is half
@@ -1462,9 +1464,18 @@ a.strip-cell {
      it does not get louder. */
   font-size: 0.9375rem;
   letter-spacing: 0.08em;
+  /* Julian, twice: it must not look bold. It never was - it is 400, the
+     same regular the rest of the site is set in - but near-white on a
+     near-black page at fifteen pixels reads heavy, and the answer to
+     reading heavy is to weigh less. Inter is loaded here as a variable
+     font with no fixed weight, so 300 is a real cut of it and not a
+     browser thinning one it does not have. Small type needs the weight
+     and large type does not, which is why it comes down as it grows. */
+  font-weight: 300;
   transition:
     font-size 1500ms var(--ease-out-strong) 180ms,
-    letter-spacing 1500ms var(--ease-out-strong) 180ms;
+    letter-spacing 1500ms var(--ease-out-strong) 180ms,
+    font-weight 1500ms var(--ease-out-strong) 180ms;
 }
 @media (prefers-reduced-motion: reduce) {
   .rail-word,
