@@ -426,17 +426,30 @@ export function Strip({
          it can be linked to, and is not somewhere you have arrived. Never
          while the viewer is open: it keeps an entry of its own for the
          back button (`lib/zoom.ts`), and writing over it would leave the
-         picture with no way out. */
+         picture with no way out.
+
+         Also only once the hand has stopped. Written straight from the
+         scroll this ran once per section a swipe crossed, and Safari
+         meters `replaceState` — a burst of them during a gesture is the
+         one thing on this page that touches the history while a finger is
+         moving it. Where you stopped is the address worth copying anyway.
+         */
       const want = section?.dataset.hash ? `#${section.dataset.hash}` : "";
-      if (
-        want !== window.location.hash &&
-        document.documentElement.dataset.viewer === undefined
-      ) {
-        window.history.replaceState(
-          window.history.state,
-          "",
-          `${window.location.pathname}${window.location.search}${want}`,
-        );
+      if (want !== hashWanted) {
+        hashWanted = want;
+        clearTimeout(hashTimer);
+        hashTimer = window.setTimeout(() => {
+          if (
+            want !== window.location.hash &&
+            document.documentElement.dataset.viewer === undefined
+          ) {
+            window.history.replaceState(
+              window.history.state,
+              "",
+              `${window.location.pathname}${window.location.search}${want}`,
+            );
+          }
+        }, 200);
       }
       /* The mark belongs to the cell itself and not to the chapter it is
          in: a client is the client of one project.
@@ -481,6 +494,8 @@ export function Strip({
     };
     let markTimer = 0;
     let markWanted = "";
+    let hashTimer = 0;
+    let hashWanted = " ";
     /* Reduced motion keeps the words at full strength, which is what the
        stylesheet used to say. */
     const still = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -581,6 +596,7 @@ export function Strip({
       window.removeEventListener("hashchange", onHash);
       if (queued) cancelAnimationFrame(queued);
       clearTimeout(markTimer);
+      clearTimeout(hashTimer);
     };
   }, [live, count]);
 
