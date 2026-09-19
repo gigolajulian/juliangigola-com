@@ -143,13 +143,14 @@ export function CoverCell({
         />
 
         {/* The plate: the same material as the bar at the top of every page,
-          and a fifth of the cover, which is the band Julian asked for. One
+          and two fifteenths of the cover: the fifth Julian first asked for,
+          a third smaller when he asked again. One
           layout at every size — name along the bottom left, credit along
           the bottom right — with the type measured in `cqw` off the cell,
           so the rack and a phone held sideways get the same plate as a
           full window rather than a stacked variant of their own. Always
           on, because a strip of covers is scanned for a name. */}
-        <div className="cover-plate pointer-events-none absolute -inset-x-0.5 -bottom-0.5 flex h-1/5 min-h-[2.75rem] flex-col justify-center gap-[1.2cqw] glass-surface bg-background/70 px-[4cqw] transition-[background-color] duration-500 ease-[var(--ease-out-strong)] hoverable:group-hover:bg-background/40 motion-reduce:transition-none">
+        <div className="cover-plate pointer-events-none absolute -inset-x-0.5 -bottom-0.5 flex h-[13.333%] min-h-[1.8333rem] flex-col justify-center gap-[0.8cqw] glass-surface bg-background/70 px-[4cqw] transition-[background-color] duration-500 ease-[var(--ease-out-strong)] hoverable:group-hover:bg-background/40 motion-reduce:transition-none">
           <span
             style={{ "--n": row.name.length } as React.CSSProperties}
             className="cover-name font-display min-w-0 truncate uppercase leading-[0.9] tracking-[0]"
@@ -161,7 +162,7 @@ export function CoverCell({
             competing with it, and the whole plate ranges left off one
             edge. The count is what says a cover opens onto a body of
             work rather than being one photograph. */}
-          <span className="label min-w-0 truncate text-[clamp(0.5rem,2.2cqw,0.8125rem)] leading-none text-muted-foreground">
+          <span className="label min-w-0 truncate text-[clamp(0.5rem,1.5cqw,0.75rem)] leading-none text-muted-foreground">
             {row.credit}
             {row.frames ? (
               <>
