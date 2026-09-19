@@ -875,53 +875,6 @@ nav[aria-label="Categories"] ul[data-more] {
     font-size: 1.875rem;
   }
 }
-/* ── the turn of a chapter ──
-   The three lines of an "Up next" cell, driven by the scroller rather than
-   by a timer: `view()` is the cell's own position in the strip, so the
-   words lie back while the cell is out at the edge, arrive as it reaches
-   the middle, and go back the way they came if the wheel does. The eyebrow
-   leads, the name follows it, the count follows that.
-
-   The resting state here is the arrived state, so a browser with no
-   scroll-driven animations shows three lines of words and nothing is
-   missing. Same for a reader who has asked for less movement. */
-.up-next-eyebrow,
-.up-next-name,
-.up-next-count {
-  opacity: 1;
-  translate: 0 0;
-}
-@supports (animation-timeline: view()) {
-  /* A mouse only. A scroll-driven timeline is evaluated for every element
-     that carries one on every frame the scroller moves, and a swipe on the
-     iPad moves it more than a wheel ever does. It is decoration on a strip
-     of photographs; the tablet gets the work and nothing to compute. */
-  @media (not (prefers-reduced-motion: reduce)) and (pointer: fine) {
-    .up-next-eyebrow,
-    .up-next-name,
-    .up-next-count {
-      animation: up-next linear both;
-      animation-timeline: view(inline);
-      animation-range: entry 10% contain 40%;
-    }
-    .up-next-name {
-      animation-range: entry 20% contain 55%;
-    }
-    .up-next-count {
-      animation-range: entry 30% contain 70%;
-    }
-  }
-}
-@keyframes up-next {
-  from {
-    opacity: 0;
-    translate: 2.5rem 0;
-  }
-  to {
-    opacity: 1;
-    translate: 0 0;
-  }
-}
 /* The name on a plate, sized to the name. A fixed size either set a short
    title small on a wide cover or cut a long one: `I Wanna Be A Human` came
    out as `I Wanna Be A Hu...` at the size `Hua` wanted. The count of
@@ -935,62 +888,6 @@ nav[aria-label="Categories"] ul[data-more] {
    credit under the name and a narrow cover used to drop it; the type is
    measured off the cell now, so neither is needed and a cover is the
    same object wherever it is printed. Julian asked. */
-/* On the covers only. `container-type: inline-size` contains the element's
-   own width, so a cell sized by its content stops being: put on every
-   `.strip-cell`, it squeezed the rack's chapter columns to their floor and
-   `Editorial` printed as `Edit...`. A cover is sized by the grid either
-   way and can safely measure itself. */
-/* ── what comes after the turn ──
-   The first three covers of a new discipline arrive rather than being
-   there: they sit back at a third while the turn cell is still what you
-   are looking at, and come up as you carry on past it. Scroll-driven, so
-   it is the position of the strip doing it and not a timer — wheel back
-   and they go back down. Three, because that is what a window holds
-   beside the turn; past that a discipline is simply open. The chapter
-   head sits between the turn and the first cover, which is why the
-   selectors count four deep to reach three of them.
-
-   Covers only, which is `a.strip-cell`: a gallery discipline runs out in
-   single frames and those are buttons, and Julian asked that the work
-   itself not flicker, only the covers that open a chapter.
-
-   Written off the turn cell with sibling selectors, so nothing has to be
-   counted or marked as the page is built. Behind `@supports`, resting in
-   the arrived state, so a browser without scroll-driven animations and a
-   reader who has asked for less movement both just see the work. */
-@supports (animation-timeline: view()) {
-  /* A mouse only. A scroll-driven timeline is evaluated for every element
-     that carries one on every frame the scroller moves, and a swipe on the
-     iPad moves it more than a wheel ever does. It is decoration on a strip
-     of photographs; the tablet gets the work and nothing to compute. */
-  @media (not (prefers-reduced-motion: reduce)) and (pointer: fine) {
-    .up-next + a.strip-cell,
-    .up-next + * + a.strip-cell,
-    .up-next + * + * + a.strip-cell,
-    .up-next + * + * + * + a.strip-cell {
-      animation: cell-arrive linear both;
-      animation-timeline: view(inline);
-      animation-range: entry 0% contain 30%;
-    }
-    .up-next + * + a.strip-cell {
-      animation-range: entry 0% contain 45%;
-    }
-    .up-next + * + * + a.strip-cell {
-      animation-range: entry 0% contain 60%;
-    }
-    .up-next + * + * + * + a.strip-cell {
-      animation-range: entry 0% contain 75%;
-    }
-  }
-}
-@keyframes cell-arrive {
-  from {
-    opacity: 0.3;
-  }
-  to {
-    opacity: 1;
-  }
-}
 /* ── what a skipped cell is worth ──
    `content-visibility: auto` was here, so the browser could skip the
    layout, paint and decode of every cell away from the window. It went
@@ -1006,6 +903,11 @@ nav[aria-label="Categories"] ul[data-more] {
    this shows. The decode cost it was paying for is real and still there.
 */
 
+/* On the covers only. `container-type: inline-size` contains the element's
+   own width, so a cell sized by its content stops being: put on every
+   `.strip-cell`, it squeezed the rack's chapter columns to their floor and
+   `Editorial` printed as `Edit...`. A cover is sized by the grid either
+   way and can safely measure itself. */
 a.strip-cell {
   container-type: inline-size;
 }

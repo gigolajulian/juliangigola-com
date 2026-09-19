@@ -2,7 +2,7 @@ import { filmCount } from "@/lib/videos";
 import type { Metadata } from "next";
 import { WorkStrip } from "@/components/work-strip";
 import { CoverCell } from "@/components/cover-cell";
-import { FrameCell, GroupCell, UpNextCell } from "@/components/work-cells";
+import { FrameCell, GroupCell } from "@/components/work-cells";
 import { EnquiryCell } from "@/components/enquiry-cell";
 import {
   COMMISSIONS,
@@ -58,16 +58,7 @@ export default function WorkPage() {
   const viewer: Frame[] = [];
   let i = 0;
 
-  for (const [ci, c] of WORK_CATEGORY_LINKS.entries()) {
-    /* The beat between two chapters. Pushed before this discipline
-       opens rather than after the last one closes, so a discipline with
-       nothing in it takes its turn cell with it. */
-    const before = WORK_CATEGORY_LINKS[ci - 1];
-    if (before) {
-      cells.push(
-        <UpNextCell key={`next-${c.slug}`} name={c.name} i={i++} />,
-      );
-    }
+  for (const c of WORK_CATEGORY_LINKS) {
     if (c.slug === "video") {
       cells.push(
         <GroupCell
