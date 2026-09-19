@@ -50,47 +50,6 @@ const categoryRedirects = CATEGORIES.map((c) => ({
   permanent: true,
 }));
 
-/** Pages that moved or were retired. */
-/* One site, one hostname.
- *
- * Both `juliangigola.com` and `www.juliangigola.com` answer from this Worker,
- * with the same bytes, so a search engine sees two copies of everything. Every
- * canonical, every share link and the sitemap say the apex, which is the one
- * nobody was being sent to.
- *
- * A redirect rule in the Cloudflare dashboard would do this too. It lives here
- * instead because this is where the rest of the redirects already live, it is
- * in the diff when somebody asks why, and it cannot be lost by a hand that did
- * not know it was there.
- *
- * The `has` host condition is what keeps this from being a loop: it fires only
- * on the `www` name and the destination is absolute, so the apex never matches
- * itself.
- *
- * Two rules rather than one `/:path*`, because the homepage is the one URL a
- * single rule gets wrong. On the Worker, `/:path*` matching `/` leaves the
- * token unsubstituted and the browser is sent to the literal
- * `https://juliangigola.com/:path*`. `next dev` substitutes it correctly, so
- * this only shows up once it is deployed — it was caught on production and is
- * why the root has a rule of its own and the rest uses `+`, which needs at
- * least one segment.
- */
-const WWW = [{ type: "host" as const, value: "www.juliangigola.com" }];
-const wwwRedirect = [
-  {
-    source: "/",
-    has: WWW,
-    destination: "https://juliangigola.com/",
-    permanent: true,
-  },
-  {
-    source: "/:path+",
-    has: WWW,
-    destination: "https://juliangigola.com/:path+",
-    permanent: true,
-  },
-];
-
 const pageRedirects = [
   { source: "/about", destination: "/studio", permanent: true },
   // /rates never got written — it still served the Format demo's biography.
@@ -302,7 +261,6 @@ const nextConfig: NextConfig = {
     // Project slugs win over category slugs where a name is used for both.
     const seen = new Set<string>();
     return [
-      ...wwwRedirect,
       ...pageRedirects,
       ...renameRedirects,
       ...categoryRedirects,
