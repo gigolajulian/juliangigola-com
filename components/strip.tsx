@@ -1610,12 +1610,34 @@ export function Strip({
              taking it away. `py-2` is the thumb: the rail itself is eight
              pixels tall and the padding is hit area, not height. */
           className={cn(
-            "flex h-2 min-w-0 flex-1 touch-none items-end py-2",
+            "relative flex h-2 min-w-0 flex-1 touch-none items-end py-2",
             // In chapters the gap is drawn inside each one, so the twelve
             // tile the rail and the hit test has nowhere to fall through.
             chaptered ? "gap-0" : "justify-between gap-px",
           )}
         >
+          {/* Hit area, and nothing else. The rail is sixteen pixels of
+              line and Julian said it was hard to stay on one: a mouse
+              running along it sideways drifts off it upwards and the
+              chapter under it shuts. So the band reaches up into the
+              twenty four pixels of empty gap above the rail - the
+              covers end exactly there, and it takes none of them - and
+              eight pixels into the footer's own padding below, which is
+              blank. Sixteen pixels becomes forty eight and not one thing
+              on the page moves.
+
+              A descendant of the rail rather than a sibling, so leaving
+              the rail's own box for it is not leaving the rail:
+              `pointerleave` counts an element and its descendants as one
+              place. Chapters only, where the pointer is a mouse - on a
+              tablet this would be a strip of page that swallows a swipe
+              on its way past. */}
+          {chaptered ? (
+            <span
+              aria-hidden
+              className="absolute -bottom-2 -top-6 left-0 right-0 z-10"
+            />
+          ) : null}
           {chaptered
             ? groups.map((g, gi) => {
                 const count = g.to - g.from + 1;
