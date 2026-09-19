@@ -4,6 +4,7 @@ import localFont from "next/font/local";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { PhotoNotice } from "@/components/photo-notice";
+import { SiteMenu } from "@/components/site-menu";
 import { GlassLight } from "@/components/glass-light";
 import { PhotoFade } from "@/components/photo-fade";
 import { PointerRing } from "@/components/pointer-ring";
@@ -180,6 +181,10 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         </a>
 
         <SiteHeader />
+        {/* The drawer the burger opens. A sibling of the header and of
+            `main`, because both of those are what it comes out from under
+            — see `site-menu.tsx`. */}
+        <SiteMenu />
         {/* Writes the pointer's position onto whichever glass control is
             under it — see `glass` in globals.css. Renders nothing. */}
         <GlassLight />

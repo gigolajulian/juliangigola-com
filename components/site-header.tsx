@@ -29,7 +29,7 @@ import { ThemeToggle } from "@/components/theme-toggle";
  * It waits until the masthead has scrolled away and then takes over.
  * ─────────────────────────────────────────────────────────────── */
 
-const LINKS = [
+export const LINKS = [
   { href: "/work", label: "Work" },
   { href: "/sessions", label: "Sessions" },
   { href: "/studio", label: "Studio" },
@@ -50,15 +50,36 @@ export function SiteHeader() {
     setOpen(false);
   }
 
-  // A fullscreen panel over a scrollable gallery scrolls the page behind it.
+  /* The open state, published to the document.
+   *
+   * The menu is a drawer the page slides off: the bar, the page and the
+   * footer all travel left by the drawer's width, and the drawer is under
+   * them at the right edge waiting to be uncovered. Those three sit in
+   * three different components and only one of them is this one, so the
+   * fact of being open goes on `<html>` and `globals.css` moves everything
+   * off it. Nothing here needs to know what moves.
+   *
+   * The scroll lock rides along: a drawer over a gallery that still scrolls
+   * behind it is a page that has not really stopped.
+   */
   React.useEffect(() => {
     if (!open) return;
+    document.documentElement.dataset.menu = "open";
     const { overflow } = document.body.style;
     document.body.style.overflow = "hidden";
     return () => {
+      delete document.documentElement.dataset.menu;
       document.body.style.overflow = overflow;
     };
   }, [open]);
+
+  // The drawer is a sibling of this component rather than a child, so the
+  // ground beside it closes the menu by saying so rather than by reaching in.
+  React.useEffect(() => {
+    const close = () => setOpen(false);
+    window.addEventListener("jg:menu-close", close);
+    return () => window.removeEventListener("jg:menu-close", close);
+  }, []);
 
   React.useEffect(() => {
     if (!open) return;
@@ -125,13 +146,16 @@ export function SiteHeader() {
        * this together with the cover tone the hero publishes to re-ink the
        * bar over a pale frame.
        *
-       * The menu counts as having a ground even though the bar itself is
-       * transparent then: the panel behind it is a full-screen
-       * `bg-background`, so the type is over the page colour and wants the
-       * page's own ink. */
-      data-plain={scrolled || open ? "true" : "false"}
+       * The menu used to count as a ground of its own, because it used to
+       * be a full-screen panel behind the bar. It is a drawer now and the
+       * bar travels with the page, over the same photograph it was over
+       * before, so being open says nothing about what is underneath. */
+      data-plain={scrolled ? "true" : "false"}
       className={cn(
-        "fixed inset-x-0 top-0 z-40",
+        // `site-bar` is what `globals.css` slides sideways. The whole bar
+        // goes, not its contents: full width and pushed by the drawer's
+        // width, it covers the page exactly and stops at the drawer's edge.
+        "site-bar fixed inset-x-0 top-0 z-40",
         // Border and background rather than a gradient, and both animate from
         // nothing. `border-b` is always present and only its colour changes,
         // so the rule fading in never moves the bar by a pixel.
@@ -140,9 +164,6 @@ export function SiteHeader() {
         scrolled
           ? "glass-surface border-border bg-background/72"
           : "border-transparent bg-transparent",
-        // The panel is its own full-screen surface; a blurred bar on top of
-        // it reads as a seam across the menu.
-        open && "border-transparent bg-transparent backdrop-blur-none",
       )}
     >
       <div className="relative mx-auto flex max-w-[100rem] items-center justify-between px-6 py-3 max-sm:py-2 sm:px-10 sm:py-4 tablet:py-2 lying:py-1.5">
@@ -290,69 +311,6 @@ export function SiteHeader() {
             </span>
           </button>
         </div>
-      </div>
-
-      {/* Rendered always, toggled with `hidden`, so the links are in the DOM
-          for crawlers and the panel does not animate from nothing. */}
-      <div
-        id="mobile-nav"
-        hidden={!open}
-        // The ground fades in, and leaves the way the items came: a fade and
-        // a few pixels down, so closing reads as the menu going back where it
-        // rose from rather than being switched off. `display` is in the
-        // transition with `allow-discrete`, which is what lets the `hidden`
-        // attribute wait for the fade before it takes the panel out of the
-        // page; browsers without it cut, which is what it did before.
-        className={cn(
-          "fixed inset-0 -z-10 flex flex-col justify-center bg-background px-6 pb-20 lg:hidden",
-          "transition-[opacity,transform,display] transition-discrete duration-150 ease-[var(--ease-out-strong)]",
-          "starting:opacity-0 [&[hidden]]:translate-y-2 [&[hidden]]:opacity-0",
-          "motion-reduce:transition-none",
-        )}
-      >
-        <nav aria-label="Menu">
-          <ul className="flex flex-col items-end gap-1 pr-4 text-right">
-            {LINKS.map((link, i) => (
-              <li key={link.href} className="relative">
-                {/* The current page is marked, rather than the others being
-                    dimmed. The accent is the only saturated colour on the
-                    site and already means "you are here". */}
-                {isCurrent(link.href) ? (
-                  <span
-                    aria-hidden
-                    className="absolute -right-4 top-1/2 h-8 w-1 -translate-y-1/2 bg-accent"
-                  />
-                ) : null}
-                <Link
-                  href={link.href}
-                  aria-current={isCurrent(link.href) ? "page" : undefined}
-                  // Staggered so the list cascades in rather than landing all
-                  // at once. Short delays only — 40ms a step reads as one
-                  // gesture, 150ms reads as waiting.
-                  style={
-                    { "--reveal-delay": `${i * 40}ms` } as React.CSSProperties
-                  }
-                  className={cn(
-                    // This is a full-screen menu, so the type is sized to the
-                    // screen rather than to a nav bar — fluid, so it fills a
-                    // phone and an iPad alike without a stack of breakpoints.
-                    "font-display block py-2 uppercase leading-[0.95] tracking-[0]",
-                    "text-[clamp(2.75rem,13vw,5.5rem)]",
-                    // See `menu-in` in globals.css: the bounce, at menu speed.
-                    "menu-in",
-                    // Full strength, always. Dimming everything-but-current
-                    // greys out the entire menu on any page that is not one of
-                    // these four — the homepage included — which reads as
-                    // disabled rather than as emphasis.
-                    "hoverable:hover:opacity-70",
-                  )}
-                >
-                  {link.label}
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </nav>
       </div>
     </header>
   );
