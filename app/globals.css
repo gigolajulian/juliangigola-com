@@ -1433,6 +1433,41 @@ a.strip-cell {
   }
 }
 
+/* ── the ruler's word, growing while somebody stays on the rail ──
+   Julian: enlarge it so it is easier to see what page you are on, and the
+   longer they stay in the menu the larger it gets.
+
+   So it starts at the tick word's own size and ramps up over a second and
+   a half of dwelling, which is long enough that running the pointer past
+   a chapter on the way somewhere else never triggers it and reading one
+   always does. `letter-spacing` comes down as it grows: 0.14em is set for
+   a ten pixel word and at twenty it is a word with gaps in it.
+
+   The ceiling is not taste, it is the twenty four pixels between the
+   bottom of the covers and the top of the rail. Bigger than this and the
+   word sits over a cover's own name plate. */
+.rail-word {
+  font-size: 0.625rem;
+  line-height: 1;
+  letter-spacing: 0.14em;
+  transition:
+    font-size 220ms var(--ease-out-strong),
+    letter-spacing 220ms var(--ease-out-strong);
+}
+[data-dwell] .rail-word {
+  font-size: 1.25rem;
+  letter-spacing: 0.06em;
+  transition:
+    font-size 1500ms var(--ease-out-strong) 180ms,
+    letter-spacing 1500ms var(--ease-out-strong) 180ms;
+}
+@media (prefers-reduced-motion: reduce) {
+  .rail-word,
+  [data-dwell] .rail-word {
+    transition: none;
+  }
+}
+
 @utility label {
   /* Inter's figures, set to one width. Every number on the site that is in a
      column or changes under a pointer wears this face — the counts down the

@@ -1623,6 +1623,12 @@ export function Strip({
           onPointerUp={railUp}
           onPointerCancel={railOut}
           onPointerLeave={railOut}
+          /* Somebody is on the rail. The word above the chapter reads this
+             and grows for as long as it is set - see `.rail-word` in
+             `globals.css`. It outlives the pointer by the same beat the
+             chapter does, so a drift off the line does not shrink the
+             word and start it over. */
+          data-dwell={chaptered && over !== null ? "" : undefined}
           // `h-2` whether or not the ticks are in yet, so the strip above is
           // the same height before and after they are read.
           /* `touch-action: none`, or the first millimetre of a drag along
@@ -1698,7 +1704,7 @@ export function Strip({
                             : undefined
                         }
                         className={cn(
-                          "label pointer-events-none absolute bottom-full mb-1 whitespace-nowrap text-[0.625rem] transition-opacity duration-200",
+                          "rail-word label pointer-events-none absolute bottom-full mb-1 whitespace-nowrap transition-opacity duration-200",
                           named1
                             ? "[translate:-50%_0]"
                             : end
