@@ -18,6 +18,7 @@
 
 /** Structurally what `lib/added.ts` accepts, kept loose on purpose. */
 export type ProjectsFile = {
+  unlisted?: string[];
   projects: unknown[];
   trash?: unknown[];
   hidden?: string[];
@@ -72,6 +73,8 @@ export const tidySequence = <T>(list: T[]): T[] =>
  */
 export type Manifest<Frame = unknown, Credit = unknown, Copy = unknown> = {
   hidden: string[];
+  /** Off every listing, still a page. See `AddedFile.unlisted`. */
+  unlisted: string[];
   categories: Record<string, string>;
   frames: Record<string, Frame[]>;
   credits: Record<string, Credit[]>;
@@ -94,6 +97,7 @@ export function projectsFile(
   // Sorted, so the committed file does not churn on the order a Set happens
   // to iterate in — a diff should show what changed and nothing else.
   next.hidden = [...edit.hidden].sort();
+  next.unlisted = [...edit.unlisted].sort();
   next.categories = edit.categories;
 
   // A sequence that is nothing but dropped passages leaves no entry at all,
@@ -230,6 +234,10 @@ export function adoptable<F, C, P>(
       file.hidden === undefined
         ? []
         : (strings(file.hidden) ?? fallback.hidden),
+    unlisted:
+      file.unlisted === undefined
+        ? []
+        : (strings(file.unlisted) ?? fallback.unlisted),
     categories:
       file.categories === undefined
         ? {}

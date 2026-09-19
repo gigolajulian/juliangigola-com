@@ -182,6 +182,7 @@ export function AdminEditor({
   categories,
   projects,
   initialHidden,
+  initialUnlisted,
   categoryLinks,
   initialTrash,
   initialRecategorised,
@@ -212,6 +213,7 @@ export function AdminEditor({
   projects: AdminProject[];
   /** Which slugs the last build was hiding. */
   initialHidden: string[];
+  initialUnlisted: string[];
   /** Discipline pages, for the sitemap. */
   /** Disciplines for the sitemap, each under the page it hangs off. */
   categoryLinks: {
@@ -265,6 +267,9 @@ export function AdminEditor({
 
   const [hidden, setHidden] = React.useState<Set<string>>(
     () => new Set(initialHidden),
+  );
+  const [unlisted, setUnlisted] = React.useState<Set<string>>(
+    () => new Set(initialUnlisted),
   );
   const [trash, setTrash] = React.useState<TrashedProject[]>(initialTrash);
   const [recategorised, setRecategorised] =
@@ -336,6 +341,7 @@ export function AdminEditor({
     () => ({
       // Sorted, so a set's iteration order is not mistaken for an edit.
       hidden: [...hidden].sort(),
+      unlisted: [...unlisted].sort(),
       categories: recategorised,
       frames: reframed,
       credits: recredited,
@@ -346,6 +352,7 @@ export function AdminEditor({
     }),
     [
       hidden,
+      unlisted,
       recategorised,
       reframed,
       recredited,
@@ -384,6 +391,7 @@ export function AdminEditor({
     content: initial,
     manifest: {
       hidden: [...initialHidden].sort(),
+      unlisted: [...initialUnlisted].sort(),
       categories: initialRecategorised,
       frames: initialReframed,
       credits: initialRecredited,
@@ -727,6 +735,7 @@ export function AdminEditor({
 
       if (!dirty) {
         setHidden(new Set(repo.hidden));
+        setUnlisted(new Set(repo.unlisted));
         setRecategorised(repo.categories);
         setReframed(repo.frames);
         setRecredited(repo.credits);
@@ -1370,6 +1379,8 @@ export function AdminEditor({
                 projects={orderedProjects}
                 hidden={hidden}
                 onHiddenChange={setHidden}
+                unlisted={unlisted}
+                onUnlistedChange={setUnlisted}
                 onRemoved={setTrash}
                 disciplines={categories}
                 recategorised={recategorised}

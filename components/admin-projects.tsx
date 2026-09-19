@@ -17,19 +17,23 @@ import { cn } from "@/lib/utils";
 /* ── the project list ─────────────────────────────────────────────
  * Everything on the site, and what can be done to it.
  *
- * Removal is two different operations wearing one label, and the difference
- * is worth understanding rather than hiding:
+ * Two things can be done to a project, and both are on every row:
  *
- *   - **Hide** takes a project off the site. It works on anything, it is
- *     reversible, and it is the only kind of removal a harvested project can
- *     have — `lib/work-data.ts` is regenerated from the old site, so deleting
- *     an entry there comes back on the next harvest with nothing to show it
- *     ever went.
- *   - **Delete** only applies to projects added here. It removes the entry and
- *     the photographs, in one commit, and does not come back.
+ *   - **Hide** takes it off every listing and leaves its page. Julian: hide
+ *     ROUGE from the pages but let me still keep a link to it. It is the
+ *     `unlisted` list in `lib/added.ts`, published with the rest of the
+ *     draft, and Show puts it back.
+ *   - **Delete** takes it off the site. For a project added here that is
+ *     the bin - the entry and its photographs leave in one commit and sit
+ *     in Recently deleted for a week. For a harvested one it is the
+ *     `hidden` list: `lib/work-data.ts` is regenerated from the old site,
+ *     so deleting an entry there comes back on the next harvest with
+ *     nothing to show it ever went, and unpublishing is the removal that
+ *     survives. Restore puts it back, and it is published with the draft
+ *     like Hide is, so it does not commit on its own.
  *
- * So the button you get depends on where the project came from, and the one
- * that cannot be undone says so.
+ * The two are not one control with two strengths. A hidden project is
+ * somewhere you can send somebody; a deleted one is not.
  * ─────────────────────────────────────────────────────────────── */
 
 export type AdminProject = {
@@ -77,6 +81,8 @@ export function AdminProjects({
   projects,
   hidden,
   onHiddenChange,
+  unlisted,
+  onUnlistedChange,
   onRemoved,
   disciplines,
   recategorised,
@@ -98,6 +104,9 @@ export function AdminProjects({
   /** Slugs currently hidden, as the draft has them. */
   hidden: Set<string>;
   onHiddenChange: (next: Set<string>) => void;
+  /** Slugs off the listings but still paged, as the draft has them. */
+  unlisted: Set<string>;
+  onUnlistedChange: (next: Set<string>) => void;
   /** Handed the new bin contents after a removal, so the panel below updates. */
   onRemoved?: (trash: TrashedProject[]) => void;
   /** Disciplines a project can be refiled under. */
@@ -179,11 +188,22 @@ export function AdminProjects({
           .includes(query.toLowerCase())),
   );
 
-  const toggleHidden = (slug: string) => {
-    const next = new Set(hidden);
+  const toggle = (
+    set: Set<string>,
+    slug: string,
+    emit: (next: Set<string>) => void,
+  ) => {
+    const next = new Set(set);
     if (next.has(slug)) next.delete(slug);
     else next.add(slug);
-    onHiddenChange(next);
+    emit(next);
+  };
+  const toggleUnlisted = (slug: string) =>
+    toggle(unlisted, slug, onUnlistedChange);
+  /** Delete, for a harvested project: unpublished, reversibly. */
+  const toggleHidden = (slug: string) => {
+    setConfirming(null);
+    toggle(hidden, slug, onHiddenChange);
   };
 
   /**
@@ -298,6 +318,7 @@ export function AdminProjects({
       <ul className="mt-6 border-t border-border">
         {visible.map((p) => {
           const isHidden = hidden.has(p.slug);
+          const isUnlisted = unlisted.has(p.slug);
           const isOpen = opened === p.slug;
           /** What the draft has it filed as — an override, or the manifest. */
           const filedAs = recategorised[p.slug] ?? p.categorySlug;
@@ -322,7 +343,7 @@ export function AdminProjects({
               <div
                 className={cn(
                   "flex items-center gap-4 py-3",
-                  isHidden && "opacity-45",
+                  (isHidden || isUnlisted) && "opacity-45",
                 )}
               >
                 <span
@@ -348,7 +369,8 @@ export function AdminProjects({
                     {filedName} · {(frames ?? p.images).length} frames · /
                     {p.slug}
                     {frames ? " · edited" : ""}
-                    {isHidden ? " · hidden" : ""}
+                    {isUnlisted ? " · hidden" : ""}
+                    {isHidden ? " · deleted" : ""}
                   </span>
                 </span>
 
@@ -445,14 +467,48 @@ export function AdminProjects({
 
                   <button
                     type="button"
-                    onClick={() => toggleHidden(p.slug)}
+                    onClick={() => toggleUnlisted(p.slug)}
                     className="label border border-border px-3 py-2 press hoverable:hover:bg-card"
                   >
-                    {isHidden ? "Show" : "Hide"}
+                    {isUnlisted ? "Show" : "Hide"}
                   </button>
 
-                  {p.added ? (
-                    confirming === p.slug ? (
+                  {!p.added ? (
+                    isHidden ? (
+                      <button
+                        type="button"
+                        onClick={() => toggleHidden(p.slug)}
+                        className="label border border-border px-3 py-2 press hoverable:hover:bg-card"
+                      >
+                        Restore
+                      </button>
+                    ) : confirming === p.slug ? (
+                      <>
+                        <button
+                          type="button"
+                          onClick={() => toggleHidden(p.slug)}
+                          className="label border border-destructive px-3 py-2 text-destructive press"
+                        >
+                          Really delete
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setConfirming(null)}
+                          className="label border border-border px-3 py-2 press hoverable:hover:bg-card"
+                        >
+                          Cancel
+                        </button>
+                      </>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => setConfirming(p.slug)}
+                        className="label border border-border px-3 py-2 text-muted-foreground press hoverable:hover:text-destructive"
+                      >
+                        Delete
+                      </button>
+                    )
+                  ) : confirming === p.slug ? (
                       <>
                         <button
                           type="button"
@@ -475,10 +531,9 @@ export function AdminProjects({
                         onClick={() => setConfirming(p.slug)}
                         className="label border border-border px-3 py-2 text-muted-foreground press hoverable:hover:text-destructive"
                       >
-                        Remove
+                        Delete
                       </button>
-                    )
-                  ) : null}
+                    )}
                 </span>
               </div>
 

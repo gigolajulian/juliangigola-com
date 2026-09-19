@@ -27,6 +27,7 @@ import {
 
 const edit = {
   hidden: [],
+  unlisted: [],
   categories: {},
   frames: {},
   credits: {},
@@ -226,6 +227,7 @@ const edit = {
 {
   const build = {
     hidden: ["old"],
+    unlisted: [],
     categories: { a: "editorial" },
     frames: { a: ["/work/a/01.jpg"] },
     credits: { a: [{ role: "Model", name: "X" }] },
@@ -282,6 +284,7 @@ const edit = {
   assert.ok(
     same(adoptable({ projects: [] }, build), {
       hidden: [],
+      unlisted: [],
       categories: {},
       frames: {},
       credits: {},
@@ -379,6 +382,7 @@ const edit = {
     ["covers", { video: "/work/sago/01.jpg" }],
     ["order", ["sago"]],
     ["hidden", ["sago"]],
+    ["unlisted", ["rouge"]],
   ]) {
     assert.equal(
       same(adoptable({ projects: [], trash: [], [key]: value }, baseline), baseline),
@@ -388,7 +392,40 @@ const edit = {
   }
 }
 
-console.log("admin payload: 50 cases pass");
+/* The one way the guard above can rot: a field added to `projectsFile`
+   and not to `adoptable`. The editor would then overwrite that field on
+   every publish and the guard would never see it move, which is the
+   `f807362` failure with a new name. So: everything `projectsFile` writes,
+   `adoptable` reads back, or this fails on the day the field is added. */
+{
+  const rich = {
+    hidden: ["a"],
+    unlisted: ["b"],
+    categories: { p: "editorial" },
+    frames: { p: ["/work/p/01.jpg"] },
+    credits: { p: [{ role: "Model", name: "X" }] },
+    copy: { p: { title: "T", intent: null } },
+    order: ["p", "q"],
+    covers: { editorial: "/work/p/01.jpg" },
+    avatars: { x: "/people/x.jpg" },
+  };
+  const back = adoptable(projectsFile({ projects: [], trash: [] }, rich), edit);
+  assert.equal(
+    same(back, rich),
+    true,
+    "every field projectsFile writes is a field adoptable reads back",
+  );
+  const written = Object.keys(projectsFile({ projects: [], trash: [] }, rich))
+    .filter((k) => k !== "projects" && k !== "trash")
+    .sort();
+  assert.deepEqual(
+    written,
+    Object.keys(rich).sort(),
+    "projectsFile writes exactly the manifest's fields and no others",
+  );
+}
+
+console.log("admin payload: all cases pass");
 
 // A rewritten title that was cleared is dropped rather than published.
 {

@@ -7,6 +7,7 @@ import {
   PROJECTS,
   ALL_PROJECTS,
   HIDDEN,
+  UNLISTED,
   CATEGORIES,
   COVER_RELEASES,
   categoryLabel,
@@ -169,6 +170,7 @@ export default function AdminPage() {
           credits: p.credits,
         }))}
         initialHidden={[...HIDDEN]}
+        initialUnlisted={[...UNLISTED]}
         initialTrash={TRASH}
         initialRecategorised={RECATEGORISED}
         initialReframed={REFRAMED}
