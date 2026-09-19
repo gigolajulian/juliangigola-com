@@ -1480,50 +1480,66 @@ a.strip-cell {
 }
 
 /**
- * A dissolve: this element fades up over whatever is behind it.
+ * An exposure ramp: this element arrives over-exposed and settles.
  *
- * `@starting-style` rather than a mounted-then-toggled class, because the
- * element that fades in here is a brand new node every time — a CSS
- * transition does not run on first render, so a freshly mounted frame set to
- * `opacity-100` simply appears, with no fade at all.
+ * It was a dissolve — a 520ms fade through a 6px blur, two frames resolving
+ * into one the way a lens does. The argument for the blur was sound and the
+ * character was wrong: the work is hard flash and hard shadow, and the cover
+ * was changing frames like a slideshow easing between two soft images. This
+ * is the same swap in the medium's own language. The incoming frame comes up
+ * blown, holds there for the length of a shutter, and settles to itself.
  *
- * Only the incoming layer animates. Fading the outgoing one out at the same
+ * What has not changed, and is not up for changing: it does not slide and it
+ * does not zoom. A cover that moves its own photographs is a slideshow of
+ * pictures rather than an index of work. Only the light moves.
+ *
+ * Two animations, because the two halves answer to different clocks.
+ *
+ *   opacity    `--swap-pic-dur` — 520ms at the cover's own pace, 260ms while
+ *              a visitor has hold of the index (`HURRIED` in `hero.tsx`).
+ *              On `--ease-out-strong` this is front-loaded enough to read as
+ *              a cut: past 80% inside the first fifth of its time, so the
+ *              outgoing frame is covered almost at once and there is no
+ *              window where two photographs are both legible.
+ *   filter     a fixed 250ms, whatever the swap is doing. A shutter does not
+ *              get slower because somebody is browsing slowly. 90ms blown,
+ *              then 160ms back down to the photograph.
+ *
+ * Animations and not transitions, for two reasons. The shape goes two ways —
+ * up to the flash and back out of it — which a transition cannot do. And an
+ * animation runs on a node's first render, which is what the `@starting-style`
+ * here was buying: the frame that fades in is a brand new element every time.
+ *
+ * Only the incoming layer is touched. Fading the outgoing one out at the same
  * time looks like the obvious way to crossfade and is wrong: two layers at
- * ~50% each let the ground show through between them, so every switch dips
- * through a wash of the mat colour before recovering.
+ * ~50% each let the ground show through, so every switch dips through a wash
+ * of the mat colour before recovering.
  */
 @utility dissolve {
-  opacity: 1;
-  filter: blur(0);
-  transition:
-    opacity var(--swap-pic-dur, 520ms) var(--ease-out-strong),
-    /* Shorter than the fade, so the picture is sharp before it is fully
-       opaque rather than arriving and then resolving — the focus should be
-       the first thing finished, not the last. */
-      filter var(--swap-blur-dur, 420ms) var(--ease-out-strong);
+  animation:
+    expose var(--swap-pic-dur, 520ms) var(--ease-out-strong) both,
+    flash var(--swap-flash-dur, 250ms) var(--ease-out-strong) both;
+}
 
-  @starting-style {
+@keyframes expose {
+  from {
     opacity: 0;
-    /* Why blur and not a slide or a zoom.
-     *
-     * A plain crossfade is two photographs on screen at once, and for the
-     * half-second it lasts you see both — a double image, which is the one
-     * thing a picture of a person cannot survive. The usual fixes are motion:
-     * push the incoming frame in, or wipe it across. Both are out here, and
-     * not by accident — this cover has never slid or zoomed, and a cover that
-     * moves its own photographs starts to look like a slideshow of pictures
-     * rather than an index of work.
-     *
-     * Blur solves the same problem without moving anything. The two frames
-     * stop reading as two objects and start reading as one resolving, because
-     * that is what a lens does — and on a photographer's cover, coming into
-     * focus is the one piece of motion that means something about the medium.
-     *
-     * 6px, not more. It is a full-bleed 2500px frame and `filter` puts it on
-     * its own compositor layer; heavy blur is expensive to composite and
-     * expensive in Safari especially. Six is enough to bridge the two images
-     * and cheap enough to hold 60fps. */
-    filter: blur(6px);
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes flash {
+  /* 1.4 and no more. It is the highlights going first, which is what a flash
+     does to a frame; past this the midtones go with them and the picture is
+     gone rather than over-exposed. */
+  from,
+  36% {
+    filter: brightness(1.4);
+  }
+  to {
+    filter: brightness(1);
   }
 }
 
@@ -1536,7 +1552,7 @@ a.strip-cell {
  * into another prints one on top of the other; this reads as one word
  * replacing another, which is what is actually happening.
  *
- *     0ms   the phase ticks — the photograph starts its 520ms dissolve
+ *     0ms   the phase ticks — the photograph starts its 520ms ramp
  *   120ms   the outgoing word begins to leave
  *   320ms   it is gone; the column is briefly empty and the picture carries it
  *   360ms   the incoming word begins to arrive
@@ -1614,11 +1630,15 @@ a.strip-cell {
   .rise,
   .emerge,
   .press,
-  .dissolve,
   .title-out,
   .title-in,
   .menu-in {
     transition: none;
+  }
+  /* The ramp is an animation now, so this is what turns it off. Without a
+     fill there is nothing holding the frame back: it is simply there. */
+  .dissolve {
+    animation: none;
   }
 }
 

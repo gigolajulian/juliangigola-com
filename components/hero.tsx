@@ -164,7 +164,9 @@ const ROW_MS = 55;
  * finished arriving reads as the page thinking about it. So while they have
  * hold of the index the handoff is compressed to about 270ms and the picture
  * with it — the same choreography, out still clearing before in arrives, at
- * the speed of an answer rather than a performance.
+ * the speed of an answer rather than a performance. The frame's flash is not
+ * in here: it is a fixed 250ms either way, because a shutter does not have
+ * two speeds (`dissolve` in `globals.css`).
  *
  * Set on the section, so one declaration reaches the word, the credit in the
  * far corner and the photograph, none of which share a parent below it.
@@ -175,7 +177,6 @@ const HURRIED = {
   "--swap-in-delay": "90ms",
   "--swap-in-dur": "180ms",
   "--swap-pic-dur": "260ms",
-  "--swap-blur-dur": "220ms",
 } as React.CSSProperties;
 
 const lands = (ms: number) =>
