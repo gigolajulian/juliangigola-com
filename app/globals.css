@@ -1292,33 +1292,41 @@ a.strip-cell {
 }
 
 /* ── twelve disciplines on an upright tablet ──
-   The row scrolls sideways, which is right on a desktop where it is 1470
-   wide against 1425 and one chip hangs off the end as an invitation to
-   push it. At 768 it is the same 1470 and six of the twelve were off the
-   screen, on a bar that gives no sign there is more of it: a discipline
-   nobody can see is a discipline nobody presses.
+   The row scrolls sideways, which is an invitation on a desktop where it
+   is 1470 wide against 1425 and one chip hangs off the end. At 768 it was
+   the same 1470 with no sign there was more of it, and six of the twelve
+   were off the screen.
 
-   So it goes onto two lines there and stops scrolling. Wrapped, not put
-   into six equal columns: the twelve are between 71 and 176 wide, so six
-   equal columns are 839 and the long names spill out of theirs and print
-   over their neighbours. Wrapping asks the widths themselves, and the
-   first six come to 733 against the 768 a screen gives once the padding
-   is gone. Four pixels of gap is what is left, and it is enough — these
-   are names in small caps, not buttons.
+   Two wrapped lines fixed that and made a different mess. The twelve names
+   run from 71 to 176 wide, so wrapping fits six to a line only at four
+   pixels apart, and four pixels between two runs of small caps is not a
+   gap — it is a space. BRAND CAMPAIGNS 15 ARTIST PRESSKIT 7 reads as one
+   line of type, nothing lines up with the row underneath it, and Julian
+   said the filters were all over the place. They were.
 
-   The auto margins that centre the scrolling row go with it, being a
-   trick for a single line, and so does the row's own side padding, which
-   is only there to keep a scrolling row off the bar's edge.
+   So they are a table now: four columns, three rows, and the columns are
+   as wide as the widest name in each. Two things come of that. The names
+   line up down the screen, which is what turns twelve scattered words
+   into a list you can scan. And four to a line leaves 170 pixels that six
+   to a line did not have, which pays for two full spaces between the
+   columns rather than four pixels.
 
-   A phone already has its own layout, two columns of six, so this is
+   Content-sized columns rather than equal ones, because equal columns at
+   this width are 839 and the long names print over their neighbours —
+   that was the first attempt. `overflow-x: auto` stays as the floor: if
+   the disciplines ever outgrow the window the bar scrolls again instead
+   of bleeding over the photographs.
+
+   A phone has its own layout, two columns of six, so this is
    `min-width: 40rem` and the tablet only. */
 @media (max-aspect-ratio: 4 / 5) and (min-width: 40rem) {
   .chip-row {
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: repeat(4, auto);
     justify-content: center;
-    column-gap: 0.25rem;
+    justify-items: start;
+    column-gap: 2rem;
     row-gap: 0.125rem;
-    overflow-x: visible;
     padding-inline: 0;
   }
   .chip-row > li:first-of-type {
