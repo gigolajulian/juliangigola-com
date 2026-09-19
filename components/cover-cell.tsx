@@ -144,7 +144,7 @@ export function CoverCell({
           so the rack and a phone held sideways get the same plate as a
           full window rather than a stacked variant of their own. Always
           on, because a strip of covers is scanned for a name. */}
-        <div className="cover-plate pointer-events-none absolute -inset-x-px -bottom-px flex h-1/5 min-h-[2.75rem] flex-col justify-center gap-[1.2cqw] border-t border-border/60 glass-surface bg-background/70 px-[4cqw] transition-[background-color,border-color] duration-500 ease-[var(--ease-out-strong)] hoverable:group-hover:border-border/30 hoverable:group-hover:bg-background/40 motion-reduce:transition-none">
+        <div className="cover-plate pointer-events-none absolute -inset-x-0.5 -bottom-0.5 flex h-1/5 min-h-[2.75rem] flex-col justify-center gap-[1.2cqw] border-t border-border/60 glass-surface bg-background/70 px-[4cqw] transition-[background-color,border-color] duration-500 ease-[var(--ease-out-strong)] hoverable:group-hover:border-border/30 hoverable:group-hover:bg-background/40 motion-reduce:transition-none">
           <span
             style={{ "--n": row.name.length } as React.CSSProperties}
             className="cover-name font-display min-w-0 truncate uppercase leading-[0.9] tracking-[0]"

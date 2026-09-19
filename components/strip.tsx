@@ -439,8 +439,20 @@ export function Strip({
         );
       }
       /* The mark belongs to the cell itself and not to the chapter it is
-         in: a client is the client of one project. */
-      setMark((el.children[i] as HTMLElement).dataset.mark ?? "");
+         in: a client is the client of one project.
+
+         Only once the hand has stopped. Set straight from the scroll, the
+         mark changed at every cell a swipe crossed: on a tablet that is a
+         logo flashing through half a dozen clients in a second, and each
+         change re-rendered the whole strip mid-swipe, which is the lag
+         Julian could feel there. A client's name is a thing to read, and
+         nobody reads anything while the work is still moving. */
+      const badge = (el.children[i] as HTMLElement).dataset.mark ?? "";
+      if (badge !== markWanted) {
+        markWanted = badge;
+        clearTimeout(markTimer);
+        markTimer = window.setTimeout(() => setMark(badge), 160);
+      }
       if (word === el.dataset.at) return;
       el.dataset.at = word;
       const out = el.closest("article")?.querySelector("[data-strip-at]");
@@ -455,12 +467,20 @@ export function Strip({
     const fades = (cell: HTMLElement) => {
       const had = soften.get(cell);
       if (had && had.n === cell.childElementCount) return had.list;
+      const pic = "img, video, picture, .strip-frame";
+      /* `matches` as well as `querySelector`: a cell whose picture is its
+         own direct child — no wrapper around it — passed the old test,
+         because an `img` contains no `img`. The strip then faded the
+         photograph itself and left it at `opacity: 0` when the swipe
+         stopped. RELAY and UNDISPUTED were the two covers built that way. */
       const list = (Array.from(cell.children) as HTMLElement[]).filter(
-        (c) => !c.querySelector("img, video, picture, .strip-frame"),
+        (c) => !c.matches(pic) && !c.querySelector(pic),
       );
       soften.set(cell, { n: cell.childElementCount, list });
       return list;
     };
+    let markTimer = 0;
+    let markWanted = "";
     /* Reduced motion keeps the words at full strength, which is what the
        stylesheet used to say. */
     const still = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -560,6 +580,7 @@ export function Strip({
       window.removeEventListener("resize", read);
       window.removeEventListener("hashchange", onHash);
       if (queued) cancelAnimationFrame(queued);
+      clearTimeout(markTimer);
     };
   }, [live, count]);
 
