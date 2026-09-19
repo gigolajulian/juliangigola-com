@@ -1777,9 +1777,12 @@ a.strip-cell {
    transform, so the cost is paid only while the drawer is open, and
    `translate: none` still interpolates from a length.
 
-   420ms. A drawer is the one control on the site allowed to take its time:
-   it is a large object with weight, seen once in a visit, and the curve is
-   the same strong ease-out everything else arrives on.
+   420ms, after 80. A drawer is the one control on the site allowed to
+   take its time: it is a large object with weight, seen once in a visit,
+   and the curve is the same strong ease-out everything else arrives on.
+   The 80 is a held breath — Julian asked for it — and it is on the way
+   out only: the delay is read from wherever a transition is going, so
+   closing has none and the page comes straight back under the finger.
 
    Only below `lg`, where the burger exists. A window wide enough for the
    four links in the bar never opens this, and a page pushed halfway off a
@@ -1803,6 +1806,7 @@ a.strip-cell {
   [data-menu="open"] body > main,
   [data-menu="open"] body > footer {
     translate: calc(-1 * var(--menu-w)) 0;
+    transition-delay: 80ms;
   }
 }
 
@@ -1821,19 +1825,23 @@ a.strip-cell {
    cross stays sharp, which is the point — the one control left on that
    side of the screen should not be behind frosted glass.
 
-   Eight pixels, not the eighteen `glass-surface` carries on the header
-   and the plates, and a lighter tint with it. Julian asked for slight.
-   Those are chrome you read type off, so they have to put the picture
-   out of the way; this one is the picture, and it should still be the
+   Four pixels, not the eighteen `glass-surface` carries on the header and
+   the plates, and a lighter tint with it. Julian asked for slight, twice.
+   Those are chrome you read type off, so they have to put the picture out
+   of the way; this one is the picture, and it should still be the
    visitor’s own page over there — far enough back to be plainly not the
-   thing being looked at, near enough to be recognised.
+   thing being looked at, near enough to be read.
 
-   It arrives after the movement rather than during it. A full-window blur
-   recomputed against a picture that is travelling is the most expensive
-   frame the site can ask for, on the tablet that is least able to give it;
-   waiting 260ms costs nothing to look at and the page is sharp for the
-   whole of the slide. Going back there is no delay at all: the page comes
-   out from behind the glass as it returns. */
+   It comes up with the movement: the same 80ms wait as the slide, then
+   520ms of it, so the glass is still arriving for a beat after the drawer
+   has stopped. That is what makes it read as settling rather than as a
+   switch — at four pixels a 260ms ramp is over before the eye has found
+   it. Julian asked for it introduced slowly.
+
+   Out is not the same shape. Closing takes the durations and delays from
+   the rule below, which has neither: the blur is gone inside 240ms and
+   the page is sharp well before it has finished coming back, so it
+   arrives out of the glass rather than through it. */
 .site-menu {
   visibility: hidden;
   /* The panel is parked one width to the right of this box. Clipped, so
@@ -1844,16 +1852,19 @@ a.strip-cell {
   backdrop-filter: blur(0) saturate(1);
   transition:
     visibility 420ms,
-    background-color 260ms var(--ease-out-strong),
-    -webkit-backdrop-filter 260ms var(--ease-out-strong),
-    backdrop-filter 260ms var(--ease-out-strong);
+    background-color 240ms var(--ease-out-strong),
+    -webkit-backdrop-filter 240ms var(--ease-out-strong),
+    backdrop-filter 240ms var(--ease-out-strong);
 }
 [data-menu="open"] .site-menu {
   visibility: visible;
   background-color: color-mix(in oklab, var(--background) 16%, transparent);
-  -webkit-backdrop-filter: blur(8px) saturate(1.2);
-  backdrop-filter: blur(8px) saturate(1.2);
-  transition-delay: 0ms, 260ms, 260ms, 260ms;
+  -webkit-backdrop-filter: blur(4px) saturate(1.2);
+  backdrop-filter: blur(4px) saturate(1.2);
+  /* Four values, in the order the shorthand above lists them: the panel
+     has to be visible from the first frame, and the glass takes its time. */
+  transition-duration: 420ms, 520ms, 520ms, 520ms;
+  transition-delay: 0ms, 80ms, 80ms, 80ms;
 }
 
 /* Somebody who has asked for less transparency gets the page plain. The
@@ -1877,11 +1888,15 @@ a.strip-cell {
 }
 [data-menu="open"] .site-menu-panel {
   translate: none;
+  transition-delay: 80ms;
 }
 
-/* The four names, arriving a step apart. The delay is on the open state
-   only: `transition-delay` is read from wherever the transition is going,
-   so opening cascades and closing leaves all at once, as one movement. */
+/* The four names, arriving a step apart, behind the same 80ms the drawer
+   waits: they are inside it, so starting before it moves would be four
+   names fading up on a panel that is still off the screen. The delay is
+   on the open state only — `transition-delay` is read from wherever the
+   transition is going — so opening cascades and closing leaves all at
+   once, as one movement. */
 .site-menu-item {
   opacity: 0;
   translate: 1.5rem 0;
@@ -1892,7 +1907,7 @@ a.strip-cell {
 [data-menu="open"] .site-menu-item {
   opacity: 1;
   translate: none;
-  transition-delay: var(--reveal-delay, 0ms);
+  transition-delay: calc(80ms + var(--reveal-delay, 0ms));
 }
 
 @media (prefers-reduced-motion: reduce) {
