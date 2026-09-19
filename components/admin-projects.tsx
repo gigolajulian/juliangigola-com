@@ -705,8 +705,9 @@ export function AdminProjects({
       ) : null}
 
       <p className="label mt-6 text-muted-foreground">
-        Hiding is part of the draft. It publishes with the rest when you press
-        Publish. Deleting commits on its own, immediately.
+        Hiding, deleting a migrated project and restoring it are part of the
+        draft: they publish with the rest when you press Publish. Deleting a
+        project added here commits on its own, immediately.
       </p>
     </section>
   );
