@@ -138,7 +138,7 @@ export function UpNextCell({ name, i }: { name: string; i: number }) {
     <div
       aria-hidden
       data-ring=""
-      className="strip-cell flex w-full shrink-0 flex-col justify-center gap-1.5 py-8 max-sm:py-4 sm:h-full sm:w-[min(13rem,45vw)] sm:items-end sm:py-0 sm:pl-8 sm:pr-8 sm:text-right"
+      className="up-next strip-cell flex w-full shrink-0 flex-col justify-center gap-1.5 py-8 max-sm:py-4 sm:h-full sm:w-[min(13rem,45vw)] sm:items-end sm:py-0 sm:pl-8 sm:pr-8 sm:text-right"
       style={{ "--i": i } as React.CSSProperties}
     >
       {/* Quiet, and no count. The chapter head it runs into carries both

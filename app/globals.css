@@ -939,6 +939,81 @@ nav[aria-label="Categories"] ul[data-more] {
    `.strip-cell`, it squeezed the rack's chapter columns to their floor and
    `Editorial` printed as `Edit...`. A cover is sized by the grid either
    way and can safely measure itself. */
+/* ── what comes after the turn ──
+   The first three covers of a new discipline arrive rather than being
+   there: they sit back at a third while the turn cell is still what you
+   are looking at, and come up as you carry on past it. Scroll-driven, so
+   it is the position of the strip doing it and not a timer — wheel back
+   and they go back down. Three, because that is what a window holds
+   beside the turn; past that a discipline is simply open. The chapter
+   head sits between the turn and the first cover, which is why the
+   selectors count four deep to reach three of them.
+
+   Covers only, which is `a.strip-cell`: a gallery discipline runs out in
+   single frames and those are buttons, and Julian asked that the work
+   itself not flicker, only the covers that open a chapter.
+
+   Written off the turn cell with sibling selectors, so nothing has to be
+   counted or marked as the page is built. Behind `@supports`, resting in
+   the arrived state, so a browser without scroll-driven animations and a
+   reader who has asked for less movement both just see the work. */
+@supports (animation-timeline: view()) {
+  @media not (prefers-reduced-motion: reduce) {
+    .up-next + a.strip-cell,
+    .up-next + * + a.strip-cell,
+    .up-next + * + * + a.strip-cell,
+    .up-next + * + * + * + a.strip-cell {
+      animation: cell-arrive linear both;
+      animation-timeline: view(inline);
+      animation-range: entry 0% contain 30%;
+    }
+    .up-next + * + a.strip-cell {
+      animation-range: entry 0% contain 45%;
+    }
+    .up-next + * + * + a.strip-cell {
+      animation-range: entry 0% contain 60%;
+    }
+    .up-next + * + * + * + a.strip-cell {
+      animation-range: entry 0% contain 75%;
+    }
+  }
+}
+@keyframes cell-arrive {
+  from {
+    opacity: 0.3;
+  }
+  to {
+    opacity: 1;
+  }
+}
+/* ── only the cells you can see ──
+   A hundred and seventy nine cells and a hundred and fifty seven
+   photographs. Walking the strip end to end used to render and decode all
+   of them: 65MB of image and eight frames over 33ms, the worst 133, which
+   is the lag under a swipe.
+
+   `content-visibility: auto` lets the browser skip the layout, paint and
+   decode of any cell that is not near the window, and pick it up again as
+   it approaches. The cells are safe to skip because none of them is sized
+   by its content: every one sets its own `aspect-ratio` and takes the
+   strip's height, so the width it reserves while skipped is the width it
+   will have when it paints. That is what keeps the scrollbar, the ruler
+   and the snap points where they were.
+
+   `auto` on the intrinsic size as well, so a cell that has been rendered
+   once remembers its own measurements rather than falling back to a guess
+   on the way back past it.
+
+   The strip only. In the rack the columns are sized from the cells by
+   a size container, and a cell that is skipped reports nothing to size
+   from: measured, two covers in the first screen came out as empty
+   boxes. A rack is two rows of small pictures and was never the
+   expensive view. */
+.strip-scroll:not(.strip-grid) > .strip-cell {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 1px auto 1px;
+}
+
 a.strip-cell {
   container-type: inline-size;
 }
