@@ -52,15 +52,6 @@ import { ClientMarks } from "@/components/client-marks";
    a screen has left is a tile 155 wide: small enough that UKIYOSUNKNOWN came
    out UKIYOS... Two rows of a taller tile is the same nine pictures at half
    again the size, and the short row centres itself under the long one. */
-/* Split from however many are picked, longer row on top: ten shows as
-   five and five, nine as five and four. Fixed at [5, 4] it dropped the
-   tenth without a word — the count in the corner said ten and nine were
-   on the screen. */
-const ROWS = [
-  Math.ceil(FEATURED.length / 2),
-  Math.floor(FEATURED.length / 2),
-].filter((n) => n > 0);
-
 export default function Home() {
   return (
     <StripPage>
@@ -97,15 +88,15 @@ export default function Home() {
           <div className="pointer-events-none absolute inset-x-0 top-0 z-10 flex items-baseline justify-between gap-6 px-6 py-4 sm:px-8 sm:pt-20">
             <p className="label glass-surface bg-background/70 px-3 py-1.5 text-muted-foreground">
               Selected work
-              {/* Two, because upright screens show four to a row and stop
-                  at eight (`band-row` in `globals.css`). A visitor who can
-                  count the tiles should not be told a different number. */}
+              {/* Two, because upright screens stop at six (`band-grid` in
+                  `globals.css`). A visitor who can count the tiles should
+                  not be told a different number. */}
               <span className="ml-3 tabular-nums text-foreground">
                 <span className="band-count-all">
                   {String(FEATURED.length).padStart(2, "0")}
                 </span>
                 <span className="band-count-few">
-                  {String(Math.min(FEATURED.length, 8)).padStart(2, "0")}
+                  {String(Math.min(FEATURED.length, 6)).padStart(2, "0")}
                 </span>
               </span>
             </p>
@@ -119,39 +110,33 @@ export default function Home() {
             </Link>
           </div>
 
-          {/* Two rows, each half the height it is given, and every tile
-              4:5 against that height. Sizing the tiles from the height is
-              what keeps the ratio exact at any window: the width follows,
-              and a row of five is still inside a 1280 screen.
+          {/* One grid, two rows, and every tile 4:5 against the height a
+              row is given. Sizing the tiles from the height is what keeps
+              the ratio exact at any window: the width follows, and five of
+              them are still inside a 1280 screen. `max-content` columns, so
+              they sit flush against each other and the row centres in
+              whatever is left rather than being spread across it.
 
-              Not inside an upright tablet, though, which is what `band-tile`
-              is for (`globals.css`). At 768 by 1024 the cell is 959 tall, so
-              a row is 328 and five tiles at 4:5 against it came to 1310 —
-              a page and a half wide, painted straight over the cover art
-              on the screen after it. There the width leads instead. The top
-              pad is the bar — the first row used to run under it. */}
-          <div className="band-grid flex min-h-0 flex-1 flex-col justify-center px-0 pt-0 sm:px-8 sm:pb-6 sm:pt-32">
-            {ROWS.map((count, r) => {
-              const from = ROWS.slice(0, r).reduce((n, c) => n + c, 0);
-              return (
-                <div
-                  key={`row-${r}`}
-                  className="band-row flex min-h-0 flex-1 flex-col justify-center sm:flex-row"
-                >
-                  {FEATURED.slice(from, from + count).map((project, i) => (
-                    <div
-                      key={project.slug}
-                      className="band-tile min-h-0 sm:aspect-[4/5] sm:h-full"
-                    >
-                      <WorkBand
-                        project={bandTile(project)}
-                        index={from + i}
-                      />
-                    </div>
-                  ))}
-                </div>
-              );
-            })}
+              It was two row elements with five tiles in each, and that is
+              what made the first six impossible: taking three from each row
+              gives you the first three and the sixth, seventh and eighth.
+              One container in source order, and the ones that go are the
+              ones after the sixth. `band-grid` in `globals.css` is where an
+              upright screen takes over — three columns there, or one on a
+              phone, and the width leads instead of the height, because a
+              row of five at 4:5 against a 959px cell is 1310 wide and a
+              strip cell does not clip.
+
+              The top pad is the bar — the first row used to run under it. */}
+          <div className="band-grid grid min-h-0 flex-1 content-center justify-center px-0 pt-0 sm:px-8 sm:pb-6 sm:pt-32">
+            {FEATURED.map((project, i) => (
+              <div
+                key={project.slug}
+                className="band-tile min-h-0 sm:aspect-[4/5] sm:h-full"
+              >
+                <WorkBand project={bandTile(project)} index={i} />
+              </div>
+            ))}
           </div>
 
           {/* The proof, where the proof is. It had a screen to itself and a

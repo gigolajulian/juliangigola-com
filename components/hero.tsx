@@ -864,8 +864,14 @@ export function Hero({
               style={lands(BUTTONS_MS)}
               /* Margins, not padding: the block is ink now, and padding on
                  it would be ink around the rows rather than air around the
-                 block. */
-              className="rise mx-6 mb-2 mt-6 sm:mx-10 sm:mb-4 sm:mt-8 tall:mb-0 tall:mt-5 sm:tall:mb-6 wide:hidden short:wide:flex short:mb-0 short:mt-4"
+                 block.
+
+                 Bottom right on an upright tablet. The rows the plate used
+                 to hold are gone from there, so the buttons are the last
+                 thing in it and the only thing on that line: against the
+                 right edge they sit under the thumb that is already there
+                 for the menu, and the name keeps the left. Julian asked. */
+              className="rise mx-6 mb-2 mt-6 sm:mx-10 sm:mb-4 sm:mt-8 tall:mb-0 tall:mt-5 sm:tall:mb-6 sm:tall:justify-end wide:hidden short:wide:flex short:mb-0 short:mt-4"
             />
 
             {/* Three: the index. This is the switcher's control and the site's

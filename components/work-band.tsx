@@ -274,14 +274,8 @@ export function WorkBand({
        */}
       <div className="absolute -inset-x-0.5 -bottom-0.5 flex flex-col gap-1.5 glass-surface bg-background/70 p-3 sm:gap-2 sm:p-4">
         <div className="flex items-baseline gap-3 sm:gap-4">
-          {/* Its place in the selected work. On an upright screen two of
-              the ten are hidden and this would read 01 02 03 04 06, so
-              there the number is a counter over the tiles that are
-              actually shown — `band-row` in `globals.css`. */}
-          <span className="tile-no label shrink-0 tabular-nums text-muted-foreground">
-            <span className="tile-no-lit">
-              {String(index + 1).padStart(2, "0")}
-            </span>
+          <span className="label shrink-0 tabular-nums text-muted-foreground">
+            {String(index + 1).padStart(2, "0")}
           </span>
           {/* Moved off the photograph and into the plate. On its own in the
                 top corner it needed either a second plate or a scrim of its

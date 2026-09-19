@@ -1291,44 +1291,51 @@ a.strip-cell {
   }
 }
 
-/* ── eight on an upright screen ──
-   Julian: the top eight on an upright iPad and on a phone. Ten of them
-   there is either five to a row at 141px, where the plate starts cutting
-   the names, or a column ten deep that nobody reaches the end of. Four to
-   a row and two rows is eight, and the four that stay share the width the
-   fifth was taking.
+/* ── the selected work, at three shapes of screen ──
+   The band is one grid of ten tiles in source order, which is what lets a
+   screen show the first six rather than the first three of each of two
+   rows. Three rules, and only the last is the one the desktop sees.
 
-   Counted per row rather than across the band, so it is four to a row
-   whatever the archive holds: the rows are `ceil(n/2)` and `floor(n/2)`,
-   so this is eight at ten featured and eight at fourteen. A hidden tile is
-   not fetched either — they are all lazy — so a phone downloads eight
-   covers instead of ten.
+   A phone: one column, the tile full width, six of them down the feed.
+   Ten was a column nobody reached the end of.
 
-   Both orientations of a phone are in here and only one of a tablet: a
-   phone lying down is 844 by 390 and reads as a short desktop, where five
-   to a row is right again. */
+   An upright tablet: three columns, and the width leads. The desktop way
+   round — tile height from the row, width from the ratio — puts five tiles
+   at 4:5 against a 959px cell at 1310 wide inside a 768px one, and a strip
+   cell does not clip, so the overflow painted over the cover art on the
+   screen after it. Three across at 235px is two thirds wider than five
+   across was, and the names stop being cut.
+
+   Everything else: five columns of whatever the tile makes itself, two
+   rows, centred. `max-content` rather than `1fr` because the tiles butt
+   against each other and equal columns would put twenty pixels of paper
+   between them.
+
+   Six is the first six, not six of ten: the tiles are in order and the
+   hidden ones are the ones after. A hidden tile is never fetched either,
+   since they are all lazy, so a phone downloads six covers instead of ten. */
+.band-grid {
+  grid-template-columns: repeat(5, max-content);
+  grid-template-rows: repeat(2, minmax(0, 1fr));
+}
+@media (max-width: 40rem) {
+  .band-grid {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: none;
+  }
+}
+@media (max-aspect-ratio: 4 / 5) and (min-width: 40rem) {
+  .band-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    width: 100%;
+  }
+}
 @media (max-aspect-ratio: 4 / 5) {
-  .band-row > *:nth-child(n + 5) {
+  .band-grid > *:nth-child(n + 7) {
     display: none;
   }
   .band-count-all {
     display: none;
-  }
-  /* And the numbers close up behind them. The fifth of each row is the one
-     that goes, so the printed index would read 01 02 03 04 06 07 08 09 with
-     two holes in it. A counter over the tiles that are shown reads 01 to 08,
-     which is what a visitor counting them gets. */
-  .band-grid {
-    counter-reset: tile;
-  }
-  .band-row > *:nth-child(-n + 4) {
-    counter-increment: tile;
-  }
-  .tile-no-lit {
-    display: none;
-  }
-  .tile-no::before {
-    content: counter(tile, decimal-leading-zero);
   }
 }
 .band-count-few {
@@ -1362,7 +1369,6 @@ a.strip-cell {
 @media (max-aspect-ratio: 4 / 5) and (min-width: 40rem) {
   .band-tile {
     height: auto;
-    flex: 1 1 0;
     min-width: 0;
   }
   .cover-rack {
