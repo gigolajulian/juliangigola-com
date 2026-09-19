@@ -1157,6 +1157,24 @@ a.strip-cell {
 .strip-cell {
   animation: jg-fade-up 760ms var(--ease-out-strong) both;
   animation-delay: calc(180ms + min(var(--i, 0), 6) * 90ms);
+  transition: transform 420ms var(--ease-out-strong);
+}
+/* Julian: slightly move the photos up when interacting with the scroll
+   bar. `transform`, and not the `translate` the rest of the site uses:
+   the arrival above animates `translate` with `both`, which pins its
+   final frame to the cell for good and would swallow a lift written to
+   the same property. Six pixels, which is enough to read as the strip
+   noticing and not enough to read as the strip moving. */
+[data-dwell] .strip-cell {
+  transform: translateY(-0.375rem);
+}
+@media (prefers-reduced-motion: reduce) {
+  .strip-cell {
+    transition: none;
+  }
+  [data-dwell] .strip-cell {
+    transform: none;
+  }
 }
 /* And when nothing inside the strip arrives separately. A filter: each
    cell's rise, staggered up to six deep, is right for a page opening and

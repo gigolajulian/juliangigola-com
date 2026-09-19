@@ -23,9 +23,14 @@ export function EnquiryCell({
   secondary,
   aside,
   next,
+  tick = true,
   className,
 }: {
   title: string;
+  /** A stop on the strip's ruler. Off for the work index, where Julian
+      did not want the ask counted as a thirteenth chapter of the work;
+      the cell is still there and still the end of the strip. */
+  tick?: boolean;
   body?: string;
   /** Pre-selects the contact form's branch. */
   type?: string;
@@ -48,9 +53,9 @@ export function EnquiryCell({
 
   return (
     <div
-      data-tick
+      data-tick={tick ? "" : undefined}
       data-ring=""
-      data-label="Enquire"
+      data-label={tick ? "Enquire" : undefined}
       data-hash="enquire"
       className={cn(
         "flex w-full shrink-0 flex-col justify-center gap-6 py-10 sm:h-full sm:w-[min(40rem,85vw)] sm:py-0 sm:pl-24 sm:pr-6",

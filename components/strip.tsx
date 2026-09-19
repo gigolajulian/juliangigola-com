@@ -1509,7 +1509,17 @@ export function Strip({
     /* `strip-band` carries the tablet and phone squeeze: the pages set
        `mt-4` on this and a coarse window cannot spare it. In CSS rather
        than a variant here, because the margin arrives from the page. */
-    <div className={cn("strip-band flex min-h-0 flex-col", className)}>
+    <div
+      className={cn("strip-band flex min-h-0 flex-col", className)}
+      /* Somebody is on the ruler. Two things read this: the word above
+         the open chapter grows for as long as it is set, and the
+         photographs lift a little to say the strip is listening - both
+         in `globals.css`. On the root and not on the rail so the cells
+         are under it; it outlives the pointer by the chapter's own beat,
+         so a drift off the line does not drop the pictures and start
+         the word over. */
+      data-dwell={chaptered && over !== null ? "" : undefined}
+    >
       <div
         ref={scroller}
         /* A region, so the label below has a role to hang on. Without one
@@ -1623,12 +1633,6 @@ export function Strip({
           onPointerUp={railUp}
           onPointerCancel={railOut}
           onPointerLeave={railOut}
-          /* Somebody is on the rail. The word above the chapter reads this
-             and grows for as long as it is set - see `.rail-word` in
-             `globals.css`. It outlives the pointer by the same beat the
-             chapter does, so a drift off the line does not shrink the
-             word and start it over. */
-          data-dwell={chaptered && over !== null ? "" : undefined}
           // `h-2` whether or not the ticks are in yet, so the strip above is
           // the same height before and after they are read.
           /* `touch-action: none`, or the first millimetre of a drag along

@@ -1,3 +1,4 @@
+import * as React from "react";
 import Image from "next/image";
 import Link from "next/link";
 import type { Frame } from "@/lib/work-types";
@@ -75,6 +76,58 @@ export function GroupCell({
  * own page. The discipline's own page is still one press away, on the
  * cover that opens the run and on the chip above.
  * ─────────────────────────────────────────────────────────────── */
+/* ── one film of the motion work ──────────────────────────────────
+ * A poster at the strip's height, 16:9 because that is what a film is,
+ * and a tick of its own so the ruler's Motion chapter opens into the
+ * films the way Editorial opens into its covers. A link to the films
+ * page and not a viewer: the page is where a film plays.
+ * ─────────────────────────────────────────────────────────────── */
+export function FilmCell({
+  title,
+  poster,
+  href,
+  i,
+  eager = false,
+}: {
+  title: string;
+  /** The still, or nothing: a Vimeo film whose still was never looked
+      up draws its own ground rather than a broken picture. */
+  poster: string | null;
+  href: string;
+  /** Its place in the strip, for the stagger of the arrival. */
+  i: number;
+  eager?: boolean;
+}) {
+  return (
+    <Link
+      prefetch={false}
+      href={href}
+      data-tick
+      data-name={title}
+      data-ring="See the films"
+      aria-label={`${title}, film`}
+      className="group strip-cell relative block aspect-video w-full shrink-0 overflow-hidden bg-card press active:scale-[0.995] sm:h-full sm:w-auto"
+      style={{ "--i": i } as React.CSSProperties}
+    >
+      {poster ? (
+        <Image
+          data-fade=""
+          src={poster}
+          alt=""
+          fill
+          sizes="(min-width: 640px) calc((100vh - 10rem) * 1.778), 100vw"
+          loading={eager ? "eager" : "lazy"}
+          draggable={false}
+          className="strip-frame object-cover"
+          // A 16:9 still from a CDN, not a frame from the archive, so the
+          // loader that rewrites archive paths must not touch it.
+          unoptimized
+        />
+      ) : null}
+    </Link>
+  );
+}
+
 export function FrameCell({
   frame,
   n,

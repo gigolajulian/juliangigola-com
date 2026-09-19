@@ -1,8 +1,8 @@
-import { filmCount } from "@/lib/videos";
+import { filmCount, posterFor, REEL, type Video } from "@/lib/videos";
 import type { Metadata } from "next";
 import { WorkStrip } from "@/components/work-strip";
 import { CoverCell } from "@/components/cover-cell";
-import { FrameCell, GroupCell } from "@/components/work-cells";
+import { FilmCell, FrameCell, GroupCell } from "@/components/work-cells";
 import { EnquiryCell } from "@/components/enquiry-cell";
 import {
   COMMISSIONS,
@@ -71,6 +71,26 @@ export default function WorkPage() {
           cta="See the films"
         />,
       );
+      /* Julian: Motion should show up as is. It stood as one cell saying
+         how many films there were, in a row where every other discipline
+         shows its work. So the reel and then the films run out behind
+         the name, each a poster at the strip's height, the way Event
+         coverage runs out its frames. They open the films page rather
+         than a viewer - a film is not a frame, and the page is where it
+         plays. */
+      const films: (Video | typeof REEL)[] = [REEL, ...CONTENT.videos];
+      for (const [k, film] of films.entries()) {
+        cells.push(
+          <FilmCell
+            key={`film-${"id" in film ? film.id : "reel"}`}
+            title={film.title}
+            poster={"id" in film ? posterFor(film) : film.poster}
+            href={c.href}
+            i={i++}
+            eager={k === 0}
+          />,
+        );
+      }
       continue;
     }
 
@@ -150,6 +170,7 @@ export default function WorkPage() {
       title="Have a shoot in mind?"
       body="Tell me what it is for and when, and I'll come back with an approach and a quote."
       type="editorial"
+      tick={false}
       secondary={{ href: "/studio", label: "How a commission runs" }}
       /* Julian: the ask is a page of its own here, not a 40rem cell with
          the last cover still beside it, and the archive does not lead on
