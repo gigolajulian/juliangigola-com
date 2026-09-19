@@ -986,36 +986,40 @@ nav[aria-label="Categories"] ul[data-more] {
     opacity: 1;
   }
 }
-/* ── only the cells you can see ──
-   A hundred and seventy nine cells and a hundred and fifty seven
-   photographs. Walking the strip end to end used to render and decode all
-   of them: 65MB of image and eight frames over 33ms, the worst 133, which
-   is the lag under a swipe.
+/* ── what a skipped cell is worth ──
+   `content-visibility: auto` was here, so the browser could skip the
+   layout, paint and decode of every cell away from the window. It went
+   because of what it reserves for a cell it has not rendered yet: the
+   `auto` in `contain-intrinsic-size` only remembers a cell it has already
+   measured, and every one ahead of the swipe is worth its fallback — a
+   pixel. Safari on the iPad then grew the strip under the hand, a cell at
+   a time, which is the jump in Julian's recording, along with plates drawn
+   twice and cells that came up blank.
 
-   `content-visibility: auto` lets the browser skip the layout, paint and
-   decode of any cell that is not near the window, and pick it up again as
-   it approaches. The cells are safe to skip because none of them is sized
-   by its content: every one sets its own `aspect-ratio` and takes the
-   strip's height, so the width it reserves while skipped is the width it
-   will have when it paints. That is what keeps the scrollbar, the ruler
-   and the snap points where they were.
-
-   `auto` on the intrinsic size as well, so a cell that has been rendered
-   once remembers its own measurements rather than falling back to a guess
-   on the way back past it.
-
-   The strip only. In the rack the columns are sized from the cells by
-   a size container, and a cell that is skipped reports nothing to size
-   from: measured, two covers in the first screen came out as empty
-   boxes. A rack is two rows of small pictures and was never the
-   expensive view. */
-.strip-scroll:not(.strip-grid) > .strip-cell {
-  content-visibility: auto;
-  contain-intrinsic-size: auto 1px auto 1px;
-}
+   If it comes back it needs a real reserved width, not a pixel, and
+   proof on an iPad rather than in a headless Chromium, where none of
+   this shows. The decode cost it was paying for is real and still there.
+*/
 
 a.strip-cell {
   container-type: inline-size;
+}
+
+/* ── glass costs a tablet more than it is worth ──
+   The plate under a cover is blurred glass, and a strip is thirty of them
+   moving at once. A backdrop filter has to re-read the pixels behind it
+   every frame, per plate: on the iPad that came out as plates painted
+   twice, a title over its own ghost, and cells that arrived empty. Where
+   the pointer is a finger the plate is the same plate, filled rather than
+   blurred — at a stride nobody is reading the photograph through it
+   anyway. The header, the buttons and the bar on a project page keep
+   theirs: one of a thing is not thirty. */
+@media (pointer: coarse) {
+  .cover-plate {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    background-color: color-mix(in oklab, var(--background) 88%, transparent);
+  }
 }
 /* Cells arrive from the strip with a height, a width or an aspect of their
    own; in the rack the grid decides all three. */

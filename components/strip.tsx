@@ -958,6 +958,13 @@ export function Strip({
        browser's own idea of the gesture and swipes went wrong more often
        than right. */
     let down = false;
+    /* How many fingers are on the glass. `down` is a mouse's only — the
+       drag above is for a mouse and hands the touchscreen to the platform
+       — so nothing here knew a finger was still on the strip. The settle
+       below is armed by the scroll events a swipe makes and fires 160ms
+       after the last one: hold still mid-swipe without lifting and it
+       re-centred the strip under the hand. That is the jump on the iPad. */
+    let held = 0;
     let dragging = false;
     let fromX = 0;
     let fromScroll = 0;
@@ -1045,6 +1052,16 @@ export function Strip({
       requestAnimationFrame(() => delete el.dataset.dragged);
     };
 
+    const onHold = (e: PointerEvent) => {
+      if (e.pointerType !== "mouse") held++;
+    };
+    const onLet = (e: PointerEvent) => {
+      if (e.pointerType === "mouse") return;
+      held = Math.max(0, held - 1);
+      // The last scroll event may already have gone by; arm it again.
+      if (!held) onSettle();
+    };
+
     const swallowClick = (e: MouseEvent) => {
       if (el.dataset.dragged === undefined) return;
       e.preventDefault();
@@ -1117,7 +1134,7 @@ export function Strip({
       if (!paged || !eased) return;
       window.clearTimeout(settle);
       settle = window.setTimeout(() => {
-        if (down || dragging || frame || leaving) return;
+        if (down || held || dragging || frame || leaving) return;
         const where = centreOf(el, nearest(el.scrollLeft));
         if (where !== null && Math.abs(where - el.scrollLeft) > 2) to(where);
       }, 160);
@@ -1164,6 +1181,9 @@ export function Strip({
     el.addEventListener("pointermove", onMove);
     el.addEventListener("pointerup", onUp);
     el.addEventListener("pointercancel", onCancel);
+    el.addEventListener("pointerdown", onHold, { passive: true });
+    el.addEventListener("pointerup", onLet, { passive: true });
+    el.addEventListener("pointercancel", onLet, { passive: true });
     el.addEventListener("click", swallowClick, true);
     el.addEventListener("click", openCell);
     el.addEventListener("keydown", onKey);
@@ -1185,6 +1205,9 @@ export function Strip({
       el.removeEventListener("pointermove", onMove);
       el.removeEventListener("pointerup", onUp);
       el.removeEventListener("pointercancel", onCancel);
+      el.removeEventListener("pointerdown", onHold);
+      el.removeEventListener("pointerup", onLet);
+      el.removeEventListener("pointercancel", onLet);
       el.removeEventListener("click", swallowClick, true);
       el.removeEventListener("click", openCell);
       el.removeEventListener("keydown", onKey);
