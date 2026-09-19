@@ -87,6 +87,18 @@ const pageRedirects = [
   { source: "/work/bridal", destination: "/work/weddings", permanent: true },
   // The terms and the privacy policy were two pages for a day; they are two
   // columns of one now, and the footer links straight to the anchors.
+  // GISELLE was at its full gallery name and is at its own now. Both of
+  // the old URLs are in the index and in Julian's own links.
+  {
+    source: "/work/giselle-studio-digitals",
+    destination: "/work/giselle",
+    permanent: true,
+  },
+  {
+    source: "/giselle-studio-digitals",
+    destination: "/work/giselle",
+    permanent: true,
+  },
   { source: "/terms", destination: "/legal#terms", permanent: true },
   { source: "/privacy", destination: "/legal#privacy", permanent: true },
 ];

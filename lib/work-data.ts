@@ -3507,7 +3507,7 @@ export const PROJECTS: Project[] = [
     ]
   },
   {
-    "slug": "giselle-studio-digitals",
+    "slug": "giselle",
     "name": "GISELLE",
     "headline": null,
     "intent": null,
