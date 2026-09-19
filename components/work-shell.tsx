@@ -483,13 +483,23 @@ export function WorkShell({
           <div className="mt-3 flex w-full shrink-0 items-center gap-2 tablet:mt-1.5 max-sm:mt-1.5 short:mt-1.5 lying:mt-1.5">
             {/* Where you are, and the way to the other eleven. Gone from
                 `lg` up, where the row itself is the control and this would
-                be a second one saying the same thing. */}
+                be a second one saying the same thing.
+
+                Square, with the plate material the header and the title
+                overlays wear. It was a capsule; Julian: never pill shape.
+                Nothing on this site is round, and a rounded control over
+                square photographs was the one shape that had to explain
+                itself. */}
             <button
               type="button"
               aria-expanded={filtering}
               aria-controls="work-filter"
               onClick={() => setFiltering((v) => !v)}
-              className="filter-capsule glass press relative z-10 inline-flex items-center gap-2 rounded-full lg:hidden border border-foreground/20 py-2 pl-3.5 pr-3 label active:scale-[0.97]"
+              /* The page's own gutter. The row it replaced carried its padding
+                  on the list rather than on the bar, so with the list gone
+                  the capsule sat flush against the window at 0 while every
+                  other line on the page started at 24 or 40. */
+              className="filter-trigger glass-surface press relative z-10 ml-6 inline-flex items-center gap-2 border border-foreground/20 py-2 pl-3.5 pr-3 label active:scale-[0.97] sm:ml-10 lg:hidden"
             >
               <span className="text-foreground">
                 {all ? "All work" : head.title}

@@ -120,7 +120,7 @@ export default function NotFound() {
           <div className="rise flex flex-wrap items-center gap-3.5">
             <Mark className="size-6 shrink-0 text-foreground" />
             <span
-              className={`${MONO} inline-flex items-center gap-2 rounded-full bg-foreground px-3 py-1.5 font-bold text-background`}
+              className={`${MONO} inline-flex items-center gap-2 bg-foreground px-3 py-1.5 font-bold text-background`}
             >
               <span
                 aria-hidden
@@ -129,7 +129,7 @@ export default function NotFound() {
               Frame not found
             </span>
             <span
-              className={`${MONO} inline-flex items-center rounded-full border border-[color-mix(in_oklab,var(--leather)_40%,transparent)] px-3 py-1.5 font-bold text-[var(--leather)]`}
+              className={`${MONO} inline-flex items-center border border-[color-mix(in_oklab,var(--leather)_40%,transparent)] px-3 py-1.5 font-bold text-[var(--leather)]`}
             >
               Error 404
             </span>
