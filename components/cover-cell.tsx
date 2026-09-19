@@ -94,6 +94,11 @@ export function CoverCell({
         href={href ?? `/work/${row.slug}`}
         data-tick
         data-label={label}
+        /* The chapter is `data-label` and only the first cover of a
+           discipline carries one. This is the project, on every cover, so
+           the ruler can name the one under the pointer rather than naming
+           the chapter eight times over. */
+        data-name={row.name}
         data-hash={hash}
         data-ring="View project"
         data-mark={mark}

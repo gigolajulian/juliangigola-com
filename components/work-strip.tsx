@@ -40,6 +40,9 @@ export function WorkStrip({
         label={label}
         marks={marks}
         onOpen={lightbox.show}
+        // Twelve disciplines and eighty four covers: the one ruler on the
+        // site that is a table of contents rather than a row of stops.
+        chapters
         className={className}
       >
         {children}

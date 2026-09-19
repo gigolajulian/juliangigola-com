@@ -35,6 +35,7 @@ export function GroupCell({
       data-tick
       data-ring=""
       data-label={name}
+      data-name={name}
       data-hash={hash}
       className="strip-cell flex w-full shrink-0 flex-col justify-center gap-4 py-10 max-sm:gap-2.5 max-sm:py-5 sm:h-full sm:w-[min(22rem,50vw)] sm:py-0 sm:pl-10 sm:pr-4"
       style={{ "--i": i } as React.CSSProperties}

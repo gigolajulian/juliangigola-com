@@ -138,6 +138,26 @@ export const useWide = () =>
     () => true,
   );
 
+/** A landscape window with a mouse in it: the only place the ruler runs in
+    chapters. A finger has no hover to open one with, and a portrait window
+    has no width to open one into. */
+const DESK =
+  "(hover: hover) and (pointer: fine) and (min-aspect-ratio: 5 / 4)";
+const subscribeDesk = (onChange: () => void) => {
+  const mq = window.matchMedia(DESK);
+  mq.addEventListener("change", onChange);
+  return () => mq.removeEventListener("change", onChange);
+};
+const useDesk = () =>
+  React.useSyncExternalStore(
+    subscribeDesk,
+    () => window.matchMedia(DESK).matches,
+    // The plain ruler on the server, and a desktop swaps to chapters on
+    // hydration. It is `aria-hidden` decoration either way, so nothing a
+    // reader is holding on to moves under it.
+    () => false,
+  );
+
 /* ── the other way of looking at it ───────────────────────────────
  * A strip is a sequence and a grid is an inventory, and the two answer
  * different questions about the same set: "walk me through it" against
@@ -189,6 +209,7 @@ export function Strip({
   marks,
   stack = true,
   paged = false,
+  chapters = false,
   bleed = false,
   arrive,
   ref,
@@ -228,6 +249,12 @@ export function Strip({
   bleed?: boolean;
   /** No arrival slide. The homepage's cover must not move in. */
   arrive?: "none";
+  /** Run the ruler in chapters rather than in ticks: one segment per
+      section, all of them the same width, and the one under the pointer
+      opens into the cells it holds. The work index only, where eighty four
+      covers under twelve disciplines made eighty four four-pixel ticks of
+      a rail that was really a table of contents. */
+  chapters?: boolean;
   /** The scroller, for a lightbox that lifts frames out of it. */
   ref?: React.Ref<HTMLDivElement | null>;
   className?: string;
@@ -239,7 +266,9 @@ export function Strip({
   const [mark, setMark] = React.useState("");
   /** Which tick the pointer is over, as a place in `ticks`, or null. */
   const [over, setOver] = React.useState<number | null>(null);
-  const [ticks, setTicks] = React.useState<{ i: number; word?: string }[]>([]);
+  const [ticks, setTicks] = React.useState<
+    { i: number; word?: string; name?: string }[]
+  >([]);
   const tickKey = React.useRef("");
   // For the keyboard, which lives in an effect and must not go stale.
   const atRef = React.useRef(0);
@@ -566,9 +595,13 @@ export function Strip({
        the element the strip is handed. Set only when they change. */
     const readTicks = () => {
       const t = (Array.from(el.children) as HTMLElement[]).flatMap((c, i) =>
-        c.dataset.tick !== undefined ? [{ i, word: c.dataset.label }] : [],
+        c.dataset.tick !== undefined
+          ? [{ i, word: c.dataset.label, name: c.dataset.name }]
+          : [],
       );
-      const key = t.map((x) => `${x.i}:${x.word ?? ""}`).join("|");
+      const key = t
+        .map((x) => `${x.i}:${x.word ?? ""}:${x.name ?? ""}`)
+        .join("|");
       if (key === tickKey.current) return;
       tickKey.current = key;
       setTicks(t);
@@ -1279,6 +1312,9 @@ export function Strip({
      name of the chapter they belong to. */
   const rail = React.useRef<HTMLDivElement>(null);
   const held = React.useRef(false);
+  /** Where the pointer was last seen along the rail, so a chapter that is
+      still opening can be re-read without one. */
+  const lastX = React.useRef<number | null>(null);
   /** For each tick, the last name at or before it. */
   const named = React.useMemo(
     () =>
@@ -1289,32 +1325,157 @@ export function Strip({
     [ticks],
   );
 
-  /** Which tick a pointer at `x` is over. The ticks share the rail's width
-      equally, so this is arithmetic rather than a hit test per tick. */
+  /* ── the ruler in chapters ──
+     Eighty four covers under twelve disciplines came out as eighty four
+     ticks four pixels wide: a rail that was really a table of contents,
+     drawn as a bar chart of how much work is in each pile. Julian asked
+     for chapters, and then for equal ones - twelve ways of working, not
+     twelve sizes of pile - with the projects appearing inside the one
+     under the pointer.
+
+     So the twelve share the width until one is asked for, and how far
+     that one opens is how much is in it: Editorial's thirty three want
+     room to be pointed at, Cover art's one does not. The bar is scored
+     into its projects rather than beaded with them; a dot per project is
+     a carousel indicator, and at thirty three of them it is a dotted
+     line. */
+  const chapterSegs = React.useRef<(HTMLDivElement | null)[]>([]);
+  /** The runs of `named`: one chapter per section, in order. */
+  const groups = React.useMemo(() => {
+    const out: { name?: string; from: number; to: number }[] = [];
+    named.forEach((word, n) => {
+      const last = out.at(-1);
+      if (last && last.name === word) last.to = n;
+      else out.push({ name: word, from: n, to: n });
+    });
+    return out;
+  }, [named]);
+  /** Which tick the cell in the middle belongs to, and so which chapter
+      is the one being read. */
+  const atTick = Math.max(0, ticks.filter((t) => t.i <= at).length - 1);
+  const desk = useDesk();
+  /* Two chapters are not a table of contents, and one is a rail with a
+     single segment in it. Under three the plain ruler is the better
+     instrument and nothing changes. */
+  const chaptered = chapters && desk && groups.length > 2;
+  /** The chapter the pointer is in, or null. */
+  const openAt =
+    over === null
+      ? null
+      : groups.findIndex((g) => over >= g.from && over <= g.to);
+  /* `open` is taken in here - it is the ref holding `onOpen` - so the
+     chapter under the pointer is named for what it is. */
+  const openChapter = openAt !== null && openAt >= 0 ? openAt : null;
+
+  /** How much room a chapter takes when it opens, as a share against the
+      eleven that stay shut. A floor, or a one-project chapter would open
+      to nothing; a ceiling, or Editorial would take the whole rail. */
+  const opening = (count: number) =>
+    Math.min(Math.max(count / 3.5, 1.4), 7);
+
+  /** Half the gap between two chapters, and so the inset from a chapter's
+      own edge to the bar drawn inside it. */
+  const CHAPTER_PAD = 4;
+
+  /** Which tick a pointer at `x` is over. In plain ticks they share the
+      rail's width equally and this is arithmetic. In chapters they do not
+      - the one under the pointer is wider than the rest, and as often as
+      not the widths are still travelling - so the chapters are asked
+      where they are. Twelve rectangles a move rather than eighty four. */
   const tickAt = (x: number) => {
     const box = rail.current?.getBoundingClientRect();
     if (!box || !ticks.length) return null;
-    const n = Math.floor(((x - box.left) / box.width) * ticks.length);
-    return Math.max(0, Math.min(ticks.length - 1, n));
+    if (!chaptered) {
+      const n = Math.floor(((x - box.left) / box.width) * ticks.length);
+      return Math.max(0, Math.min(ticks.length - 1, n));
+    }
+    /* The chapters tile the rail with no gap between them - the gap is
+       drawn inside each one - so every x on the rail belongs to exactly
+       one of them and there is nowhere to fall through. */
+    let g = chapterSegs.current.findIndex((el) => {
+      const r = el?.getBoundingClientRect();
+      return !!r && x >= r.left && x < r.right;
+    });
+    if (g < 0) g = x < box.left ? 0 : groups.length - 1;
+    const r = chapterSegs.current[g]?.getBoundingClientRect();
+    const here = groups[g];
+    if (!r || !here) return null;
+    const count = here.to - here.from + 1;
+    const w = Math.max(1, r.width - CHAPTER_PAD * 2);
+    const c = Math.floor(((x - r.left - CHAPTER_PAD) / w) * count);
+    return here.from + Math.max(0, Math.min(count - 1, c));
   };
+
+  /* A chapter opening moves the cells out from under a pointer that never
+     moved, so the ruler re-reads itself while the layout is travelling.
+     `setOver` with the answer it already has costs a bail-out and no
+     render, so this is twelve rectangles a frame for as long as a pointer
+     is on the rail and nothing else. */
+  const hit = React.useRef(tickAt);
+  // After the render rather than during it: the loop wants the newest hit
+  // test, and a ref written mid-render is a ref read before it is set.
+  React.useEffect(() => {
+    hit.current = tickAt;
+  });
+  const onRail = over !== null;
+  React.useEffect(() => {
+    if (!chaptered || !onRail) return;
+    let frame = 0;
+    const step = () => {
+      const x = lastX.current;
+      if (x !== null) setOver(hit.current(x));
+      /* A project's name is centred over its own cell, and the first cell
+         of the first chapter is at the edge of the page: I WANNA BE A
+         HUMAN, over Editorial's second cover, measured at -5px and lost
+         its first letter off the side of the window. So the word is
+         pushed back inside the rail here, where its width is known -
+         a percentage in the markup cannot clamp against a word it has
+         not measured. */
+      const railEl = rail.current;
+      const word = railEl?.querySelector<HTMLElement>("[data-word]");
+      if (railEl && word) {
+        const box = railEl.getBoundingClientRect();
+        const seen = word.getBoundingClientRect();
+        const half = seen.width / 2;
+        const mid = seen.left + half;
+        const want = Math.min(
+          Math.max(mid, box.left + half),
+          box.right - half,
+        );
+        if (Math.abs(want - mid) > 0.5)
+          word.style.left = `${
+            parseFloat(getComputedStyle(word).left) + (want - mid)
+          }px`;
+      }
+      frame = requestAnimationFrame(step);
+    };
+    frame = requestAnimationFrame(step);
+    return () => cancelAnimationFrame(frame);
+  }, [chaptered, onRail]);
 
   const railDown = (e: React.PointerEvent<HTMLDivElement>) => {
     held.current = true;
     e.currentTarget.setPointerCapture(e.pointerId);
+    lastX.current = e.clientX;
     setOver(tickAt(e.clientX));
   };
-  const railMove = (e: React.PointerEvent<HTMLDivElement>) =>
+  const railMove = (e: React.PointerEvent<HTMLDivElement>) => {
+    lastX.current = e.clientX;
     setOver(tickAt(e.clientX));
+  };
   const railUp = (e: React.PointerEvent<HTMLDivElement>) => {
     const n = tickAt(e.clientX);
     held.current = false;
+    lastX.current = null;
     setOver(null);
     // A press that never moved is a press on a tick, which is the same
     // journey: both end here rather than in the button's own `onClick`.
     if (n !== null) goTo(ticks[n].i);
   };
   const railOut = () => {
-    if (!held.current) setOver(null);
+    if (held.current) return;
+    lastX.current = null;
+    setOver(null);
   };
 
   /** Puts a cell in the middle of the window. */
@@ -1448,9 +1609,108 @@ export function Strip({
              the rail is the page deciding the gesture was a scroll and
              taking it away. `py-2` is the thumb: the rail itself is eight
              pixels tall and the padding is hit area, not height. */
-          className="flex h-2 min-w-0 flex-1 touch-none items-end justify-between gap-px py-2"
+          className={cn(
+            "flex h-2 min-w-0 flex-1 touch-none items-end py-2",
+            // In chapters the gap is drawn inside each one, so the twelve
+            // tile the rail and the hit test has nowhere to fall through.
+            chaptered ? "gap-0" : "justify-between gap-px",
+          )}
         >
-          {ticks.map(({ i }, n) => {
+          {chaptered
+            ? groups.map((g, gi) => {
+                const count = g.to - g.from + 1;
+                const shown = openChapter === gi;
+                const here = atTick >= g.from && atTick <= g.to;
+                /* Words in the back half hang from the right of their
+                   chapter and grow leftwards, as the ticks' own did: a
+                   long one near the end ran past the edge of the window. */
+                const end = gi * 2 >= groups.length;
+                /* The chapter names itself until one of its projects is
+                   under the pointer, and then the project has the slot.
+                   One word above one chapter, never two competing for the
+                   same inch of line. */
+                const named1 = shown && over !== null;
+                const word = named1 ? (ticks[over].name ?? g.name) : g.name;
+                return (
+                  <div
+                    key={`chapter-${g.from}`}
+                    ref={(el) => {
+                      chapterSegs.current[gi] = el;
+                    }}
+                    style={{ flexGrow: shown ? opening(count) : 1 }}
+                    className="relative flex h-2 min-w-0 shrink basis-0 items-end px-1 transition-[flex-grow] duration-300 ease-[var(--ease-out-strong)]"
+                  >
+                    {word ? (
+                      <span
+                        /* A project's name stands over the project, not
+                           over the left edge of the chapter it is in: the
+                           word is pointing at something and should point
+                           at it. The chapter's own name keeps the ticks'
+                           old anchoring. */
+                        data-word={named1 ? "" : undefined}
+                        style={
+                          named1
+                            ? {
+                                left: `${((over - g.from + 0.5) / count) * 100}%`,
+                              }
+                            : undefined
+                        }
+                        className={cn(
+                          "label pointer-events-none absolute bottom-full mb-1 whitespace-nowrap text-[0.625rem] transition-opacity duration-200",
+                          named1
+                            ? "[translate:-50%_0]"
+                            : end
+                              ? "right-1"
+                              : "left-1",
+                          shown
+                            ? "text-foreground opacity-100"
+                            : over !== null
+                              ? "text-muted-foreground opacity-0"
+                              : here
+                                ? "text-muted-foreground opacity-100"
+                                : "text-muted-foreground opacity-0",
+                        )}
+                      >
+                        {word}
+                      </span>
+                    ) : null}
+                    {/* Open, the chapter drops back to the middle tone -
+                        the one you are standing in included. Once it is
+                        open the ink means the project under the pointer,
+                        and a bar that is already solid has nothing left to
+                        say with it. */}
+                    <div
+                      className={cn(
+                        "flex w-full rounded-full transition-[height,background-color] duration-200 ease-[var(--ease-out-strong)]",
+                        shown
+                          ? "h-2 bg-foreground/25"
+                          : here
+                            ? "h-1 bg-foreground"
+                            : "h-1 bg-foreground/20",
+                      )}
+                    >
+                      {Array.from({ length: count }, (_, k) => (
+                        <span
+                          key={`cell-${g.from + k}`}
+                          className={cn(
+                            "h-full min-w-0 flex-1 transition-[box-shadow,background-color] duration-200 ease-[var(--ease-out-strong)]",
+                            k === 0 && "rounded-l-full",
+                            k === count - 1 && "rounded-r-full",
+                            // A cut the colour of the page, not a gap and
+                            // not a dot: the chapter stays one bar and is
+                            // scored into the work inside it.
+                            shown &&
+                              k < count - 1 &&
+                              "shadow-[inset_-1px_0_0_0_var(--background)]",
+                            shown && over === g.from + k && "bg-foreground",
+                          )}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                );
+              })
+            : ticks.map(({ i }, n) => {
             /* Words in the back half hang from the right of their tick and
                grow leftwards. Anchored left like the rest, a long one near
                the end ran past the edge of the window — and a page that can
