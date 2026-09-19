@@ -795,6 +795,12 @@
       "/work/sara/25.jpg",
       "/work/sara/26.jpg",
       "/work/sara/27.jpg"
+    ],
+    "jubo": [
+      "/work/jubo/03.jpg",
+      "/work/jubo/01.jpg",
+      "/work/jubo/02.jpg",
+      "/work/jubo/04.jpg"
     ]
   },
   "hidden": [
@@ -950,6 +956,7 @@
     "events",
     "frostbite",
     "fun-xyz",
+    "wired-magazine",
     "goodcult",
     "graduation",
     "headshots",
@@ -998,7 +1005,6 @@
     "vendetta",
     "vines-roses",
     "weddings",
-    "wired-magazine",
     "wrapped-up",
     "zoe"
   ],
