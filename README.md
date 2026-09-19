@@ -196,8 +196,8 @@ token lives in `localStorage`, and restricting connections to this origin and
 > | URL | |
 > | --- | --- |
 > | `juliangigola.jg-website-new.workers.dev/admin` | 302 to the Access login |
-> | `www.juliangigola.com/admin` | **200, the whole page** |
 > | `juliangigola.com/admin` | **200, the whole page** |
+> | `www.juliangigola.com/admin` | 301 to the apex (a Redirect Rule on the zone), then the same |
 >
 > Fix: Zero Trust → Access → Applications → this application → add
 > `juliangigola.com` and `www.juliangigola.com`, both path-scoped to `/admin`.
@@ -238,7 +238,7 @@ npx wrangler tail                   # live production logs
 
 Two things only work on the custom domain, never on `*.workers.dev`: image
 transformations, and anything else behind `/cdn-cgi/`. Judge image quality on
-`www.juliangigola.com`.
+`juliangigola.com`.
 
 It was on GitHub Pages before this, as a static export. That had no image optimizer — the
 loader ignored `width` and every device downloaded the same file — and no redirects, and a

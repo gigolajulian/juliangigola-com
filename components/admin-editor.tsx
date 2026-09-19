@@ -50,7 +50,7 @@ import { cn } from "@/lib/utils";
  * store, no session to forge, nothing to get wrong.
  *
  * As of 2026-09-12 that policy covers the `workers.dev` hostname and not the
- * custom domain, so `www.juliangigola.com/admin` serves this page to anyone
+ * custom domain, so `juliangigola.com/admin` serves this page to anyone
  * who asks. See the warning in the README's Hosting section for the fix and
  * for what is actually exposed — which is this UI and published content, not
  * a write path: every commit is authorised by a token that lives in one
