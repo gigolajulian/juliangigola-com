@@ -201,8 +201,9 @@ export function ProjectStrip({
                  broke "Hair & Makeup Artist" over two lines; Julian: make
                  sure the credits are in one line. On a phone the panel is
                  too narrow for columns at all, so there each credit is
-                 role and name run together on one line, and only a pair
-                 that cannot fit breaks after the role. */
+                 role and name run together on one line, set a point
+                 smaller and a little tighter so the longest pair on the
+                 site still fits: Julian, make it fit on phone too. */
               <dl
                 aria-label="Credits"
                 className="title-rest flex flex-col gap-1 border-t border-border pt-4 sm:grid sm:grid-cols-[max-content_minmax(0,1fr)] sm:gap-x-3"
@@ -216,12 +217,12 @@ export function ProjectStrip({
                   return (
                     <div
                       key={`${credit.role}-${i}`}
-                      className="flex flex-wrap items-baseline gap-x-3 sm:contents"
+                      className="flex flex-wrap items-baseline gap-x-2 sm:gap-x-3 sm:contents"
                     >
-                      <dt className="label whitespace-nowrap text-muted-foreground/70">
+                      <dt className="label whitespace-nowrap text-muted-foreground/70 max-sm:text-[0.5625rem] max-sm:tracking-[0.06em]">
                         {credit.role}
                       </dt>
-                      <dd className="label min-w-0">
+                      <dd className="label min-w-0 whitespace-nowrap max-sm:text-[0.5625rem] max-sm:tracking-[0.06em]">
                         {handle ? (
                           /* A new tab on purpose: the visitor is on a
                                  project, and taking the page out from under
