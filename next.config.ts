@@ -52,7 +52,8 @@ const categoryRedirects = CATEGORIES.map((c) => ({
 
 /** Pages that moved or were retired. */
 const pageRedirects = [
-  { source: "/about", destination: "/studio", permanent: true },
+  // Julian: change Studio to About. The page moved; the old name follows.
+  { source: "/studio", destination: "/about", permanent: true },
   // /rates never got written — it still served the Format demo's biography.
   // Sessions is where a rate question actually gets answered now.
   { source: "/rates", destination: "/sessions", permanent: true },

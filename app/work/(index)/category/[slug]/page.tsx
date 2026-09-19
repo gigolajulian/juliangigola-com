@@ -64,7 +64,7 @@ const LISTED = WORK_CATEGORIES.filter(
 
 /** The discipline after this one along the chip row. The chain runs once
     and does not wrap, and past the last one there is nothing: the archive
-    ending is not a request to be taken to the studio. */
+    ending is not a request to be taken to the about page. */
 const after = (slug: string) => {
   const at = WORK_CATEGORY_LINKS.findIndex((c) => c.slug === slug);
   const next = at === -1 ? undefined : WORK_CATEGORY_LINKS[at + 1];

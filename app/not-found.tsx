@@ -41,7 +41,7 @@ function Mark({ className }: { className?: string }) {
 
 export const metadata: Metadata = {
   title: "Frame not found",
-  description: "That page is not on the site. The work, the sessions and the studio are.",
+  description: "That page is not on the site. The work, the sessions and the about page are.",
   /* A 404 inherits the root canonical, which is the homepage: without this
      a search engine could index a missing page as the front door. */
   robots: { index: false, follow: true },

@@ -34,7 +34,7 @@ export const metadata: Metadata = {
  * chapter's opening. A discipline that is one gallery rather than a list
  * (Cover art, Automotive) is one cover cell standing for the whole of it;
  * the films are a cell of words pointing at their page. It ends on the
- * ask, and past the ask on the studio.
+ * ask, and past the ask on the about page.
  *
  * The head and the chips are the layout's; this is the sequence.
  * ─────────────────────────────────────────────────────────────── */
@@ -171,12 +171,12 @@ export default function WorkPage() {
       body="Tell me what it is for and when, and I'll come back with an approach and a quote."
       type="editorial"
       tick={false}
-      secondary={{ href: "/studio", label: "How a commission runs" }}
+      secondary={{ href: "/about", label: "How a commission runs" }}
       /* Julian: the ask is a page of its own here, not a 40rem cell with
          the last cover still beside it, and the archive does not lead on
-         to the studio. A sequence of projects ends where the projects
+         to the about page. A sequence of projects ends where the projects
          end; being carried onto another page for scrolling one notch too
-         far is a surprise, and the way to the studio is the button under
+         far is a surprise, and the way to the about page is the button under
          the ask and the word in the header. */
       className="sm:w-[100vw] sm:px-[10vw]"
     />,

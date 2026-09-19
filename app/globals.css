@@ -2421,7 +2421,7 @@ optgroup {
  * Where it goes, and where it does not: on the controls layer, over
  * pictures — which is the whole reason for a material that lets the picture
  * through. Over a flat page it still reads, through the edge and the
- * highlight, which is why the buttons on /contact and /studio take it too:
+ * highlight, which is why the buttons on /contact and /about take it too:
  * one button style. The admin panel keeps its plain borders.
  *
  * The highlight follows the pointer through `--gx` / `--gy`, written by

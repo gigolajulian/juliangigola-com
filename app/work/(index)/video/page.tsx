@@ -16,7 +16,7 @@ import { WORK_CATEGORY_LINKS } from "@/lib/work";
  *
  * The strip opens on the reel, playing muted, then the music videos and
  * the commercials two rows deep, each film opening in the viewer, and it
- * ends on the ask and leads on to the studio.
+ * ends on the ask and leads on to the about page.
  * ─────────────────────────────────────────────────────────────── */
 
 export const metadata: Metadata = {

@@ -85,7 +85,7 @@ export type SiteContent = {
   heroDisciplines: string[];
   /**
    * The client walls, in order: the strip under the cover and the grid on
-   * /studio, each its own list of slugs from the catalogue in `lib/work.ts`.
+   * /about, each its own list of slugs from the catalogue in `lib/work.ts`.
    * Empty means "the catalogue as written" — the state before the editor
    * could touch them; once either is set, it is authoritative, so a client
    * can be left off one wall and kept on the other.

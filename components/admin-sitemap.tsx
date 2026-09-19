@@ -44,8 +44,8 @@ type SitemapProject = {
 /**
  * The fixed pages, and what editing each one actually means.
  *
- * `target` is absent for Studio on purpose: its copy — the biography, the
- * vision, how a commission runs — lives in `app/studio/page.tsx` and not in
+ * `target` is absent for About on purpose: its copy — the biography, the
+ * vision, how a commission runs — lives in `app/about/page.tsx` and not in
  * `content/site.json`, so there is no field to send anybody to. A row that
  * claimed to be editable and then went nowhere would be worse than one that
  * honestly just opens the published page.
@@ -63,7 +63,7 @@ const PAGES: {
     label: "Sessions",
     target: { kind: "field", anchor: "sessions" },
   },
-  { href: "/studio", label: "Studio", note: "copy lives in the page itself" },
+  { href: "/about", label: "About", note: "copy lives in the page itself" },
   {
     href: "/contact",
     label: "Contact",
@@ -280,7 +280,7 @@ export function AdminSitemap({
 
                 {/* The disciplines that live under this page, and the work
                     under each of them. Only rendered where there is
-                    something: /studio and /contact have no children, and an
+                    something: /about and /contact have no children, and an
                     empty rule hanging below them would suggest otherwise. */}
                 {kids.length || orphans.length ? (
                   <Branch>

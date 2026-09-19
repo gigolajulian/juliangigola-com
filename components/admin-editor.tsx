@@ -1637,8 +1637,8 @@ export function AdminEditor({
 
         <Field
           anchor="clientsStudio"
-          label="On the studio page, in order"
-          hint="The wall of logos on /studio. Its own list, so it can differ from the homepage."
+          label="On the about page, in order"
+          hint="The wall of logos on /about. Its own list, so it can differ from the homepage."
         >
           <AdminPicker
             chosen={draft.clientsStudio}

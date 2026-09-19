@@ -32,7 +32,7 @@ import { ThemeToggle } from "@/components/theme-toggle";
 export const LINKS = [
   { href: "/work", label: "Work" },
   { href: "/sessions", label: "Sessions" },
-  { href: "/studio", label: "Studio" },
+  { href: "/about", label: "About" },
   { href: "/contact", label: "Contact" },
 ] as const;
 

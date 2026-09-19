@@ -6,7 +6,7 @@ import { PRESS_STUDIO, FEATURED, CONTACT, coverOf } from "@/lib/work";
 import { ClientMarks } from "@/components/client-marks";
 import { StudioReel } from "@/components/studio-reel";
 
-/* ── studio ────────────────────────────────────────────────
+/* ── about ────────────────────────────────────────────────
  * The old site split this across /about (real, and decent) and /rates
  * (never written — it still shipped the Format demo's biography, about a
  * New-Zealand-born photographer in New York represented by an agency that is
@@ -26,10 +26,10 @@ import { StudioReel } from "@/components/studio-reel";
  */
 
 export const metadata: Metadata = {
-  title: "Studio",
+  title: "About",
   description:
     "Julian Gigola is a Bay Area creative director and photographer working in editorial, commercial, and artist imagery. Published in WIRED.",
-  alternates: { canonical: "/studio" },
+  alternates: { canonical: "/about" },
 };
 
 const SERVICES = [
@@ -60,7 +60,7 @@ const PHASES = [
   },
 ];
 
-export default function StudioPage() {
+export default function AboutPage() {
   /* Six of the shoots that lead the homepage, in the same order, each one
      linking into itself. A portrait frame where the project has one: the
      reel's column is the taller half of the window, so a landscape opener
@@ -90,14 +90,14 @@ export default function StudioPage() {
               &larr; The work
             </Link>
           }
-          title="Studio"
+          title="About"
           live
           aside="Julian Gigola"
         />
       }
     >
       <Strip
-        label="Studio: who he is, what he is hired for, and how a commission runs. One screen at a time, left and right."
+        label="About: who he is, what he is hired for, and how a commission runs. One screen at a time, left and right."
         next={CONTACT}
         paged
         bleed
@@ -107,8 +107,8 @@ export default function StudioPage() {
             half of the window. */}
         <section
           data-tick
-          data-label="Studio"
-          data-hash="studio"
+          data-label="About"
+          data-hash="about"
           /* Julian: the picture and the words the other way round. The
              picture takes the left-hand column from sm up and the writing
              the rest of the window. Ordered rather than reordered: the
