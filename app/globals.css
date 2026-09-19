@@ -1811,16 +1811,58 @@ a.strip-cell {
    reader, and the drawer stops covering a page it is not on top of.
    Transitioned rather than switched, because `visibility` holds at
    `visible` for the length of a transition that ends hidden — which is
-   what lets the panel finish sliding out before it goes. */
+   what lets the panel finish sliding out before it goes.
+
+   It is also the glass. Julian asked for the page that has been pushed
+   aside to go behind the site’s own material, and this element is already
+   lying over exactly that page, so it is the one thing in the stack that
+   can blur it: `backdrop-filter` works on whatever is painted underneath,
+   and the page is underneath while the bar and the drawer are not. The
+   cross stays sharp, which is the point — the one control left on that
+   side of the screen should not be behind frosted glass.
+
+   The same 18px and 1.5 saturation as `glass-surface` — the header, the
+   cover band, the plates. A lighter tint than those, though: they are
+   chrome you read type off, this is a photograph somebody is meant to
+   still recognise as theirs.
+
+   It arrives after the movement rather than during it. A full-window blur
+   recomputed against a picture that is travelling is the most expensive
+   frame the site can ask for, on the tablet that is least able to give it;
+   waiting 260ms costs nothing to look at and the page is sharp for the
+   whole of the slide. Going back there is no delay at all: the page comes
+   out from behind the glass as it returns. */
 .site-menu {
   visibility: hidden;
   /* The panel is parked one width to the right of this box. Clipped, so
      that parked width is never a page somebody can scroll sideways. */
   overflow: clip;
-  transition: visibility 420ms;
+  background-color: transparent;
+  -webkit-backdrop-filter: blur(0) saturate(1);
+  backdrop-filter: blur(0) saturate(1);
+  transition:
+    visibility 420ms,
+    background-color 260ms var(--ease-out-strong),
+    -webkit-backdrop-filter 260ms var(--ease-out-strong),
+    backdrop-filter 260ms var(--ease-out-strong);
 }
 [data-menu="open"] .site-menu {
   visibility: visible;
+  background-color: color-mix(in oklab, var(--background) 28%, transparent);
+  -webkit-backdrop-filter: blur(18px) saturate(1.5);
+  backdrop-filter: blur(18px) saturate(1.5);
+  transition-delay: 0ms, 260ms, 260ms, 260ms;
+}
+
+/* Somebody who has asked for less transparency gets the page plain. The
+   glass is a way of saying the page is not the thing being looked at;
+   dropping to a solid wash instead would say it is not there at all. */
+@media (prefers-reduced-transparency: reduce) {
+  [data-menu="open"] .site-menu {
+    background-color: transparent;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
 }
 
 /* A ground of its own, or the drawer and the page it came out from under
