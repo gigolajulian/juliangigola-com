@@ -1291,6 +1291,44 @@ a.strip-cell {
   }
 }
 
+/* ── twelve disciplines on an upright tablet ──
+   The row scrolls sideways, which is right on a desktop where it is 1470
+   wide against 1425 and one chip hangs off the end as an invitation to
+   push it. At 768 it is the same 1470 and six of the twelve were off the
+   screen, on a bar that gives no sign there is more of it: a discipline
+   nobody can see is a discipline nobody presses.
+
+   So it goes onto two lines there and stops scrolling. Wrapped, not put
+   into six equal columns: the twelve are between 71 and 176 wide, so six
+   equal columns are 839 and the long names spill out of theirs and print
+   over their neighbours. Wrapping asks the widths themselves, and the
+   first six come to 733 against the 768 a screen gives once the padding
+   is gone. Four pixels of gap is what is left, and it is enough — these
+   are names in small caps, not buttons.
+
+   The auto margins that centre the scrolling row go with it, being a
+   trick for a single line, and so does the row's own side padding, which
+   is only there to keep a scrolling row off the bar's edge.
+
+   A phone already has its own layout, two columns of six, so this is
+   `min-width: 40rem` and the tablet only. */
+@media (max-aspect-ratio: 4 / 5) and (min-width: 40rem) {
+  .chip-row {
+    flex-wrap: wrap;
+    justify-content: center;
+    column-gap: 0.25rem;
+    row-gap: 0.125rem;
+    overflow-x: visible;
+    padding-inline: 0;
+  }
+  .chip-row > li:first-of-type {
+    margin-left: 0;
+  }
+  .chip-row > li:last-of-type {
+    margin-right: 0;
+  }
+}
+
 /* ── the selected work, at three shapes of screen ──
    The band is one grid of ten tiles in source order, which is what lets a
    screen show the first six rather than the first three of each of two

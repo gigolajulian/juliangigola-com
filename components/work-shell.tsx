@@ -450,8 +450,14 @@ export function WorkShell({
                    last chip rather than `justify-center`: centring a flex
                    row that scrolls puts its start out of reach, and these
                    collapse to nothing the moment the row is wider than the
-                   bar. */
-                className="relative gap-x-0.5 px-3 select-none max-sm:grid max-sm:grid-cols-2 max-sm:justify-items-start max-sm:gap-y-0.5 sm:flex sm:flex-nowrap sm:overflow-x-auto sm:px-7 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:[&>li:first-of-type]:ml-auto sm:[&>li:last-of-type]:mr-auto"
+                   bar.
+
+                   Except where it does not scroll. On an upright tablet the
+                   twelve chips are 1470 wide in a 768 window and half of
+                   them were off the end of it; `chip-row` in `globals.css`
+                   wraps them onto two lines there, where the auto margins
+                   are wrong and plain centring is right. */
+                className="chip-row relative gap-x-0.5 px-3 select-none max-sm:grid max-sm:grid-cols-2 max-sm:justify-items-start max-sm:gap-y-0.5 sm:flex sm:flex-nowrap sm:overflow-x-auto sm:px-7 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:[&>li:first-of-type]:ml-auto sm:[&>li:last-of-type]:mr-auto"
               >
                 <li
                   ref={all && shown === null ? lit : undefined}
