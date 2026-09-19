@@ -1899,7 +1899,12 @@ a.strip-cell {
    once, as one movement. */
 .site-menu-item {
   opacity: 0;
-  translate: 1.5rem 0;
+  /* Down, not in from the side. Julian asked for them to arrive from the
+     top: each name drops the last few pixels into its place, and with the
+     first one leaving first the four of them read down the page in the
+     order they are in. Sideways, they were travelling the same way the
+     drawer was and the cascade was lost inside it. */
+  translate: 0 -1.25rem;
   transition:
     opacity 200ms var(--ease-out-strong),
     translate 320ms var(--ease-bounce);

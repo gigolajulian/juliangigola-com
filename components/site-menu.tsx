@@ -52,23 +52,16 @@ export function SiteMenu() {
               <li
                 key={link.href}
                 // Staggered so the list arrives from behind the page rather
-                // than landing with it. Short delays only: 40ms a step reads
-                // as one gesture, 150ms reads as waiting. On the way out
-                // there is no delay, so closing is a single movement.
+                // than landing with it, and top down: 60ms a step, which is
+                // enough to be read as an order while still being one
+                // gesture. It was 40 and the cascade was inside the drawer’s
+                // own movement rather than beside it. On the way out there is
+                // no delay at all, so closing is a single movement.
                 style={
-                  { "--reveal-delay": `${i * 40}ms` } as React.CSSProperties
+                  { "--reveal-delay": `${i * 60}ms` } as React.CSSProperties
                 }
-                className="site-menu-item relative"
+                className="site-menu-item"
               >
-                {/* The current page is marked, rather than the others being
-                    dimmed. The accent is the only saturated colour on the
-                    site and already means “you are here”. */}
-                {isCurrent(link.href) ? (
-                  <span
-                    aria-hidden
-                    className="absolute -right-4 top-1/2 h-8 w-1 -translate-y-1/2 bg-accent"
-                  />
-                ) : null}
                 <Link
                   href={link.href}
                   aria-current={isCurrent(link.href) ? "page" : undefined}
@@ -77,11 +70,20 @@ export function SiteMenu() {
                     // longest of the four has to sit on one line inside it.
                     "font-display block py-2 uppercase leading-[0.95] tracking-[0]",
                     "text-[clamp(2.75rem,12vw,3.5rem)]",
-                    // Full strength, always. Dimming everything-but-current
-                    // greys out the whole menu on any page that is not one of
-                    // these four, the homepage included, which reads as
-                    // disabled rather than as emphasis.
-                    "hoverable:hover:opacity-70",
+                    // Where you are is the one at full strength and the rest
+                    // stand back, at Julian's ask. It was an accent bar in the
+                    // margin beside the current page; the ink says the same
+                    // thing without putting a second mark on the screen, and
+                    // it gives the pointer somewhere to go — half way up on
+                    // hover, which is an answer rather than an arrival.
+                    //
+                    // On a page that is none of these four, the homepage
+                    // included, all four sit back. That is honest: none of
+                    // them is where you are.
+                    "transition-opacity duration-200 ease-[var(--ease-out-strong)]",
+                    isCurrent(link.href)
+                      ? "opacity-100"
+                      : "opacity-45 hoverable:hover:opacity-70",
                   )}
                 >
                   {link.label}
