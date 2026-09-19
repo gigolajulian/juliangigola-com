@@ -1339,9 +1339,79 @@
     ],
     "valgur": [
       {
+        "role": "Artist",
+        "name": "Valgur",
+        "instagram": "soyvalgur"
+      },
+      {
+        "role": "Creative Director",
+        "name": "@frankie4fingers_",
+        "instagram": "frankie4fingers_"
+      },
+      {
         "role": "Photographer",
         "name": "Julian Gigola",
         "instagram": "juliangigola"
+      },
+      {
+        "role": "DIT",
+        "name": "@ozwzrd",
+        "instagram": "ozwzrd"
+      },
+      {
+        "role": "Gaffer",
+        "name": "@phinite",
+        "instagram": "phinite"
+      },
+      {
+        "role": "Key Grip",
+        "name": "@ryen_20",
+        "instagram": "ryen_20"
+      },
+      {
+        "role": "Art Director",
+        "name": "Shane Richard",
+        "instagram": ""
+      },
+      {
+        "role": "Hair & Makeup Artist",
+        "name": "@kalilorenzomuha",
+        "instagram": "kalilorenzomuha"
+      },
+      {
+        "role": "Wardrobe",
+        "name": "@fr4nk.c0m",
+        "instagram": "fr4nk.c0m"
+      },
+      {
+        "role": "CG Artist",
+        "name": "Nikoo Sheybani",
+        "instagram": "nikxdesigns"
+      },
+      {
+        "role": "PA",
+        "name": "@tzuldog",
+        "instagram": "tzuldog"
+      },
+      {
+        "role": "BTS Photographer",
+        "name": "@aramar.mp4",
+        "instagram": "aramar.mp4"
+      },
+      {
+        "role": "Producer",
+        "name": "@steadimacho",
+        "instagram": "steadimacho"
+      },
+      {
+        "role": "Poster Editor",
+        "name": "@resting_swan",
+        "instagram": "resting_swan"
+      },
+      {
+        "role": "Production",
+        "name": "@thecommonbunch",
+        "instagram": "thecommonbunch"
       }
     ],
     "vendetta": [
