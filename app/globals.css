@@ -753,19 +753,16 @@ nav[aria-label="Categories"] ul[data-more] {
    because the thing being lifted is the anchor. This does, and it is the
    same gesture the prevented `dragstart` on the shelf covers for a mouse.
 
-   And the shelf scrolls sideways inside a page that scrolls down, so
-   every swipe begins as a question about which of the two it is. Saying
-   the answer up front is what stops the first few pixels of a drag from
-   going nowhere. Not on a phone, where a stacked strip runs down the
-   page and pan-x would be a lock on it. */
+   `touch-action: pan-x` was here too, to answer up front whether a swipe
+   was the shelf's or the page's. It is gone: anything but `auto` on a
+   scroller takes that region off Safari's fast path, the compositor asks
+   the main thread how to resolve the gesture, and on the iPad the answer
+   arrived as a jump at the moment the finger lifted and momentum took
+   over. The shelf is nearly the whole window on a tablet; Safari can pick
+   the axis itself. */
 .strip-scroll a,
 .strip-scroll a img {
   -webkit-user-drag: none;
-}
-@media (min-width: 40rem) {
-  .strip-scroll {
-    touch-action: pan-x pinch-zoom;
-  }
 }
 
 .strip-grid {
