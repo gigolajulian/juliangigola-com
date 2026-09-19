@@ -899,7 +899,7 @@ nav[aria-label="Categories"] ul[data-more] {
      that carries one on every frame the scroller moves, and a swipe on the
      iPad moves it more than a wheel ever does. It is decoration on a strip
      of photographs; the tablet gets the work and nothing to compute. */
-  @media not (prefers-reduced-motion: reduce) and (pointer: fine) {
+  @media (not (prefers-reduced-motion: reduce)) and (pointer: fine) {
     .up-next-eyebrow,
     .up-next-name,
     .up-next-count {
@@ -966,7 +966,7 @@ nav[aria-label="Categories"] ul[data-more] {
      that carries one on every frame the scroller moves, and a swipe on the
      iPad moves it more than a wheel ever does. It is decoration on a strip
      of photographs; the tablet gets the work and nothing to compute. */
-  @media not (prefers-reduced-motion: reduce) and (pointer: fine) {
+  @media (not (prefers-reduced-motion: reduce)) and (pointer: fine) {
     .up-next + a.strip-cell,
     .up-next + * + a.strip-cell,
     .up-next + * + * + a.strip-cell,
