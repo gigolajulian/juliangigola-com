@@ -1821,10 +1821,12 @@ a.strip-cell {
    cross stays sharp, which is the point — the one control left on that
    side of the screen should not be behind frosted glass.
 
-   The same 18px and 1.5 saturation as `glass-surface` — the header, the
-   cover band, the plates. A lighter tint than those, though: they are
-   chrome you read type off, this is a photograph somebody is meant to
-   still recognise as theirs.
+   Eight pixels, not the eighteen `glass-surface` carries on the header
+   and the plates, and a lighter tint with it. Julian asked for slight.
+   Those are chrome you read type off, so they have to put the picture
+   out of the way; this one is the picture, and it should still be the
+   visitor’s own page over there — far enough back to be plainly not the
+   thing being looked at, near enough to be recognised.
 
    It arrives after the movement rather than during it. A full-window blur
    recomputed against a picture that is travelling is the most expensive
@@ -1848,9 +1850,9 @@ a.strip-cell {
 }
 [data-menu="open"] .site-menu {
   visibility: visible;
-  background-color: color-mix(in oklab, var(--background) 28%, transparent);
-  -webkit-backdrop-filter: blur(18px) saturate(1.5);
-  backdrop-filter: blur(18px) saturate(1.5);
+  background-color: color-mix(in oklab, var(--background) 16%, transparent);
+  -webkit-backdrop-filter: blur(8px) saturate(1.2);
+  backdrop-filter: blur(8px) saturate(1.2);
   transition-delay: 0ms, 260ms, 260ms, 260ms;
 }
 
