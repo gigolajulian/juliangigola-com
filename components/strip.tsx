@@ -121,6 +121,15 @@ const STRETCH = 160;
 const WHEEL = 3;
 const PAD = 1.8;
 
+/** How long an open chapter waits after the pointer has left it, in ms.
+    Julian, having asked for a bigger target first: hold it open for a
+    beat. A mouse running the length of the ruler drifts off it and back
+    on inside a couple of hundred milliseconds, and a chapter that shut on
+    the way past had to be found again. Four hundred forgives the drift
+    without the rail feeling stuck to the pointer; coming back inside it
+    is not a re-entry at all, because nothing shut. */
+const LINGER = 400;
+
 /** Where a strip stops being a strip. Under this the cells of a stacking
     page run down the screen and the machine is off; the value is the
     `sm` breakpoint, the same one `globals.css` unlocks the page at. */
@@ -1315,6 +1324,9 @@ export function Strip({
   /** Where the pointer was last seen along the rail, so a chapter that is
       still opening can be re-read without one. */
   const lastX = React.useRef<number | null>(null);
+  /** The beat an open chapter is held for once the pointer has gone. */
+  const linger = React.useRef(0);
+  React.useEffect(() => () => window.clearTimeout(linger.current), []);
   /** For each tick, the last name at or before it. */
   const named = React.useMemo(
     () =>
@@ -1456,10 +1468,12 @@ export function Strip({
   const railDown = (e: React.PointerEvent<HTMLDivElement>) => {
     held.current = true;
     e.currentTarget.setPointerCapture(e.pointerId);
+    window.clearTimeout(linger.current);
     lastX.current = e.clientX;
     setOver(tickAt(e.clientX));
   };
   const railMove = (e: React.PointerEvent<HTMLDivElement>) => {
+    window.clearTimeout(linger.current);
     lastX.current = e.clientX;
     setOver(tickAt(e.clientX));
   };
@@ -1467,6 +1481,7 @@ export function Strip({
     const n = tickAt(e.clientX);
     held.current = false;
     lastX.current = null;
+    window.clearTimeout(linger.current);
     setOver(null);
     // A press that never moved is a press on a tick, which is the same
     // journey: both end here rather than in the button's own `onClick`.
@@ -1475,7 +1490,12 @@ export function Strip({
   const railOut = () => {
     if (held.current) return;
     lastX.current = null;
-    setOver(null);
+    /* A press shuts the chapter at once - it has been answered, and the
+       strip is already travelling. A pointer merely wandering off is
+       given the beat, and a plain ruler has nothing to hold open. */
+    window.clearTimeout(linger.current);
+    if (!chaptered) return setOver(null);
+    linger.current = window.setTimeout(() => setOver(null), LINGER);
   };
 
   /** Puts a cell in the middle of the window. */
