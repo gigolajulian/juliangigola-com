@@ -38,8 +38,8 @@ export const CLIENT_MARKS: Record<string, ClientMarkData> = {
   "goodcult": {
     kind: "mask",
     src: "/clients/goodcult.webp",
-    width: 971,
-    height: 158,
+    width: 432,
+    height: 70,
     scale: 0.7,
   },
   "jubo": {
@@ -52,15 +52,15 @@ export const CLIENT_MARKS: Record<string, ClientMarkData> = {
   "ladera-granola": {
     kind: "mask",
     src: "/clients/ladera-granola.webp",
-    width: 1129,
-    height: 190,
+    width: 432,
+    height: 73,
     scale: 0.7,
   },
   "paradox": {
     kind: "mask",
     src: "/clients/paradox.webp",
-    width: 1468,
-    height: 320,
+    width: 432,
+    height: 94,
     scale: 0.99,
   },
   "pear-vc": {
@@ -80,15 +80,15 @@ export const CLIENT_MARKS: Record<string, ClientMarkData> = {
   "sols": {
     kind: "mask",
     src: "/clients/sols.webp",
-    width: 400,
-    height: 300,
+    width: 213,
+    height: 160,
     scale: 1.45,
   },
   "ukiyosunknown": {
     kind: "mask",
     src: "/clients/ukiyosunknown.webp",
-    width: 617,
-    height: 320,
+    width: 308,
+    height: 160,
     scale: 1.26,
   },
   "wired-magazine": {

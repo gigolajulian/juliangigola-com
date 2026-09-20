@@ -228,13 +228,23 @@ async function maskPng(file, slug, name) {
   const width = right - left + 1;
   const height = bottom - top + 1;
 
-  /* Capped at 320px tall. A mark is drawn at 24px and at most twice that on a
-     dense screen, so a 1629px source is three orders of magnitude of bytes
-     nobody sees — and a mask is fetched by every visitor. */
+  /* Fitted inside 432x160, because that is four times the biggest box a mark
+     is ever drawn into. Measured rather than assumed: the widest mark on the
+     wall comes out 105x34 CSS pixels, and the cap in `client-marks.tsx` is
+     9rem by 2.75rem, so 144x44 is the ceiling and 432x132 covers a 3x screen.
+
+     The height alone was capped before, at 320, and that missed the wordmarks
+     — a mark 971px wide and 158 tall passed the cap untouched and was still
+     seven times the width anybody sees. Eight marks were 117kB on the cover
+     and on /about; fitted to the box they are 45kB, with no change on screen.
+
+     A mask is fetched by every visitor, and these load from CSS, so no
+     `sizes` and no resizer reaches them. This is the only place it can be
+     spent. */
   const out = join(served, `${slug}.webp`);
   await sharp(source)
     .extract({ left, top, width, height })
-    .resize({ height: Math.min(height, 320), withoutEnlargement: true })
+    .resize({ width: 432, height: 160, fit: "inside", withoutEnlargement: true })
     // Lossless keeps the alpha edge exact; a mask is nothing but its alpha.
     .webp({ lossless: true })
     .toFile(out);
