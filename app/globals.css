@@ -884,6 +884,18 @@ nav[aria-label="Categories"] ul[data-more] {
 .cover-name {
   font-size: clamp(0.85rem, min(5.7cqw, calc(79cqw / var(--n, 12))), 2rem);
 }
+/* In the rack the same formula came out at its floor on every cover —
+   13.6px under a 240px photograph, a caption rather than a title. Julian:
+   larger, and never on two lines. So the rack gets its own pair of
+   numbers: twice the share of the column for the cap, and a per-character
+   divisor measured against the longest name on the page rather than
+   guessed. `DIESEL: FOR SUCCESSFUL LIVING` fits its plate at 15px and no
+   more, which is where 160 comes from; every shorter name rises until the
+   cap stops it. One line always — the division is what keeps it there,
+   and `truncate` is the backstop. */
+.strip-grid .cover-name {
+  font-size: clamp(0.75rem, min(9cqw, calc(160cqw / var(--n, 12))), 1.5rem);
+}
 /* One plate for every cover, at every size. The rack used to stack the
    credit under the name and a narrow cover used to drop it; the type is
    measured off the cell now, so neither is needed and a cover is the

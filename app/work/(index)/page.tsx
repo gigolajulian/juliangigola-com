@@ -18,7 +18,8 @@ import {
 import { SoleMark } from "@/components/client-marks";
 import { COVER_RELEASES } from "@/lib/cover-art-data";
 import { CONTENT } from "@/lib/content";
-import type { Frame } from "@/lib/work-types";
+import type { Frame, Project } from "@/lib/work-types";
+import type { ListRow } from "@/components/work-list";
 
 export const metadata: Metadata = {
   title: "Work",
@@ -46,6 +47,33 @@ const MARKS = Object.fromEntries(
   PRESS.map((c) => [c.slug, <SoleMark key={c.slug} client={c} />]),
 );
 
+/* ── the same work as lines ───────────────────────────────────────
+ * What the list view and the search box read: one lean row per project,
+ * built here because only the server has the projects and a `Project`
+ * itself must never cross into a client component.
+ *
+ * `find` is everything a person might type — the name, the discipline, who
+ * it was for, and every credit's role, name and handle — folded once, on
+ * the server, so the search is a substring test per row and not a walk
+ * through the archive on every keystroke.
+ * ─────────────────────────────────────────────────────────────── */
+const listRow = (p: Project, discipline: string): ListRow => {
+  const row = indexRow(p);
+  return {
+    ...row,
+    href: `/work/${p.slug}`,
+    discipline,
+    find: [
+      p.name,
+      discipline,
+      row.credit,
+      ...p.credits.map((c) => `${c.role} ${c.name} ${c.instagram ?? ""}`),
+    ]
+      .join(" ")
+      .toLowerCase(),
+  };
+};
+
 export default function WorkPage() {
   /* No title cell. "Work" set large next to "Editorial" set large was two
      titles on one screen arguing about which page you were on; the word is
@@ -56,6 +84,8 @@ export default function WorkPage() {
      press on one opens the viewer at its place in here (`work-strip.tsx`);
      the covers are links to their discipline and are not in it. */
   const viewer: Frame[] = [];
+  /** The same sequence as lines, for the list view and the search. */
+  const rows: ListRow[] = [];
   let i = 0;
 
   for (const c of WORK_CATEGORY_LINKS) {
@@ -91,6 +121,22 @@ export default function WorkPage() {
           />,
         );
       }
+      rows.push({
+        slug: "video",
+        name: c.name,
+        href: c.href,
+        discipline: c.name,
+        credit: `${filmCount(CONTENT.videos)} films`,
+        cover: {
+          src: REEL.poster,
+          width: 1280,
+          height: 720,
+          color: "#111111",
+        } as Frame,
+        find: [c.name, REEL.title, ...CONTENT.videos.map((v) => v.title)]
+          .join(" ")
+          .toLowerCase(),
+      });
       continue;
     }
 
@@ -122,6 +168,15 @@ export default function WorkPage() {
           cta={isCoverArt ? "See the covers" : "See them all"}
         />,
       );
+      rows.push({
+        slug: gallery.slug,
+        name: c.name,
+        href: c.href,
+        discipline: c.name,
+        credit: `${frames.length} ${isCoverArt ? "releases" : "frames"}`,
+        cover: indexRow(gallery).cover,
+        find: `${c.name} ${gallery.name}`.toLowerCase(),
+      });
       for (const frame of frames) {
         cells.push(
           <FrameCell
@@ -148,6 +203,7 @@ export default function WorkPage() {
       />,
     );
     for (const p of run) {
+      rows.push(listRow(p, c.name));
       cells.push(
         <CoverCell
           key={p.slug}
@@ -187,6 +243,7 @@ export default function WorkPage() {
       label={`All work: ${COMMISSIONS.length} projects, left and right`}
       marks={MARKS}
       frames={viewer}
+      rows={rows}
       className="mt-4 max-sm:mt-2 short:mt-2 flex-1"
     >
       {cells}

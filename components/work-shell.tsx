@@ -9,6 +9,13 @@ import type { CategoryLink } from "@/lib/work";
 import type { Head } from "@/lib/work-heads";
 import { StripPage, StripHead } from "@/components/strip-page";
 import { markFilter, StripView, type StripViewMode } from "@/components/strip";
+import {
+  chooseView,
+  search,
+  useWorkQuery,
+  useWorkView,
+  type WorkView,
+} from "@/lib/work-view";
 
 /* ── the frame around the work ────────────────────────────────────
  * The head and the chip row, mounted once for the whole of /work, its
@@ -41,48 +48,13 @@ import { markFilter, StripView, type StripViewMode } from "@/components/strip";
  * any more.
  * ─────────────────────────────────────────────────────────────── */
 
-/* ── strip or sheet, remembered ───────────────────────────────────
+/* ── strip, rack or list ──────────────────────────────────────────
  * The way somebody wants to look at a body of work is a preference, not a
- * step to repeat on every visit, so the choice is kept.
- *
- * A store read through `useSyncExternalStore` rather than state set in an
- * effect: the server has no `localStorage` and must draw the strip, the
- * browser knows better a moment later, and this is the one hook that says
- * exactly that - `getServerSnapshot` for the render that has to match the
- * HTML, `getSnapshot` from then on. `useWide` in `strip.tsx` reads the
- * media query the same way.
- */
-const VIEW_KEY = "work-view";
-
-let watching: (() => void)[] = [];
-
-const readView = (): StripViewMode => {
-  try {
-    return window.localStorage.getItem(VIEW_KEY) === "grid" ? "grid" : "strip";
-  } catch {
-    // Private browsing: it works, it is simply not remembered.
-    return "strip";
-  }
-};
-
-const subscribeView = (onChange: () => void) => {
-  watching.push(onChange);
-  // The same person in another tab of the same site.
-  window.addEventListener("storage", onChange);
-  return () => {
-    watching = watching.filter((w) => w !== onChange);
-    window.removeEventListener("storage", onChange);
-  };
-};
-
-const chooseView = (next: StripViewMode) => {
-  try {
-    window.localStorage.setItem(VIEW_KEY, next);
-  } catch {
-    // As above.
-  }
-  for (const w of watching) w();
-};
+ * step to repeat on every visit, so the choice is kept — in
+ * `lib/work-view.ts`, with the search, because the page under this layout
+ * has to read both and a child cannot be handed anything by its parent's
+ * sibling. The note on `useSyncExternalStore` is there.
+ * ─────────────────────────────────────────────────────────────── */
 
 export type { Head };
 
@@ -265,15 +237,17 @@ export function WorkShell({
   /* It is the layout that holds the view, and the layout survives a filter
      change: choose Grid, then choose Portraits, and you are in the grid
      looking at portraits. */
-  const chosen = React.useSyncExternalStore(
-    subscribeView,
-    readView,
-    () => "strip" as StripViewMode,
-  );
+  const chosen = useWorkView();
   /* Julian: the choice is offered on every filter, the films and the
      galleries included. It is kept as you walk: from Editorial's grid
      through Places and back, Editorial is still a grid. */
-  const view: StripViewMode = chosen;
+  /* The list and the search are the whole archive's: a discipline is
+     already a list of one kind of work, and a box that searched eleven
+     projects would be a control with nothing to do. A kept `list` falls
+     back to the strip on a discipline and is waiting again on All. */
+  const view: WorkView = chosen === "list" && !all ? "strip" : chosen;
+  const stripView: StripViewMode = view === "grid" ? "grid" : "strip";
+  const query = useWorkQuery();
 
   const row = React.useRef<HTMLUListElement>(null);
   const lit = React.useRef<HTMLLIElement>(null);
@@ -398,20 +372,35 @@ export function WorkShell({
     return () => window.removeEventListener("resize", measure);
   }, [key, shown]);
 
-  /* Two ways through the same work. Drawn rather than named, and under
+  /* Three ways through the same work. Drawn rather than named, and under
      the count rather than out at the edge of the window: the head is the
      page saying what it is and how much of it there is, and how it is
      laid out belongs in the same breath. The word stays as the button's
-     label for anyone not looking at the screen. */
+     label for anyone not looking at the screen, and hangs off the pointer
+     for anyone who is — `data-ring`, the same tag the covers carry.
+
+     The list only on All: see the note on `view` above. */
+  const modes: WorkView[] = all ? ["strip", "grid", "list"] : ["strip", "grid"];
+  const WORD: Record<WorkView, string> = {
+    strip: "Strip",
+    grid: "Grid",
+    list: "List",
+  };
   const toggle = (
     <span className="mt-2 flex items-center justify-end gap-1 max-sm:hidden">
-      {(["strip", "grid"] as const).map((mode) => (
+      {modes.map((mode) => (
         <button
           key={mode}
           type="button"
           aria-pressed={view === mode}
-          aria-label={mode === "strip" ? "Strip view" : "Grid view"}
-          onClick={() => chooseView(mode)}
+          aria-label={`${WORD[mode]} view`}
+          data-ring={`${WORD[mode]} view`}
+          onClick={() => {
+            /* Leaving the list with something typed would filter a strip
+               nobody can see the ends of. The box empties with it. */
+            if (mode !== "list" && query) search("");
+            chooseView(mode);
+          }}
           className={cn(
             "-my-1 p-1.5 transition-opacity duration-200",
             view === mode
@@ -431,12 +420,23 @@ export function WorkShell({
                 <rect x="6" y="2" width="4" height="12" rx="0.5" />
                 <rect x="12" y="2" width="4" height="12" rx="0.5" />
               </>
-            ) : (
+            ) : mode === "grid" ? (
               <>
                 <rect x="1" y="1" width="6" height="6" rx="0.5" />
                 <rect x="9" y="1" width="6" height="6" rx="0.5" />
                 <rect x="1" y="9" width="6" height="6" rx="0.5" />
                 <rect x="9" y="9" width="6" height="6" rx="0.5" />
+              </>
+            ) : (
+              /* A line of the list: the cover down the left, the name
+                 beside it, three times over. */
+              <>
+                <rect x="0" y="1" width="4" height="4" rx="0.5" />
+                <rect x="6" y="2" width="10" height="2" rx="0.5" />
+                <rect x="0" y="6" width="4" height="4" rx="0.5" />
+                <rect x="6" y="7" width="10" height="2" rx="0.5" />
+                <rect x="0" y="11" width="4" height="4" rx="0.5" />
+                <rect x="6" y="12" width="10" height="2" rx="0.5" />
               </>
             )}
           </svg>
@@ -445,6 +445,47 @@ export function WorkShell({
     </span>
   );
 
+  /* The search. Seventy projects and eleven disciplines, and until now the
+     only way to find the one you were told about was to walk the whole
+     ribbon. It reads the names, the disciplines and every credit on every
+     project, so a model, a client or a crew member finds their own work by
+     their own handle.
+
+     On All, where the whole archive is: a discipline is already a filter,
+     and a box searching eleven covers is a control with nothing to do.
+     In the head's left column, under the way back, opposite the view
+     buttons in the right one: the two controls for how you get at the work
+     stand at the two ends of the same line, and the chip row keeps every
+     pixel it had. From `sm` up — a phone has the dropdown and a thumb, and
+     a field that opens a keyboard over the work is not how that screen is
+     used. */
+  const box = all ? (
+    <div className="relative mt-2 hidden items-center sm:flex">
+      <svg
+        aria-hidden
+        viewBox="0 0 16 16"
+        className="pointer-events-none absolute left-2.5 h-3.5 w-3.5 text-muted-foreground"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.4"
+      >
+        <circle cx="7" cy="7" r="4.6" />
+        <path d="M10.5 10.5L15 15" />
+      </svg>
+      <input
+        type="search"
+        value={query}
+        onChange={(e) => search(e.target.value)}
+        onKeyDown={(e) => {
+          if (e.key === "Escape" && query) search("");
+        }}
+        placeholder="Search"
+        aria-label="Search the work by name, discipline or credit"
+        className="filter-trigger glass-surface label w-full border border-foreground/20 py-1.5 pl-8 pr-2 text-foreground outline-none placeholder:text-muted-foreground focus-visible:border-foreground [&::-webkit-search-cancel-button]:hidden"
+      />
+    </div>
+  ) : null;
+
   return (
     <StripPage
       head={
@@ -452,7 +493,10 @@ export function WorkShell({
           <StripHead
             crumb={
               all ? (
-                <span className="label text-muted-foreground">All work</span>
+                <>
+                  <span className="label text-muted-foreground">All work</span>
+                  {box}
+                </>
               ) : (
                 <Link
                   href="/work"
@@ -581,13 +625,14 @@ export function WorkShell({
                 ))}
               </ul>
             </nav>
+
           </div>
         </>
       }
     >
       {/* The row. The head and the chips are outside it and hold still. */}
       <div ref={rowBox} className="relative flex min-h-0 flex-1 flex-col">
-        <StripView value={view}>{children}</StripView>
+        <StripView value={stripView}>{children}</StripView>
       </div>
     </StripPage>
   );
