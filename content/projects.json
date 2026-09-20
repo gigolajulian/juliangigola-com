@@ -1096,6 +1096,11 @@
         "role": "Photographer",
         "name": "Julian Gigola",
         "instagram": "juliangigola"
+      },
+      {
+        "role": "Client",
+        "name": "GOODCULT",
+        "instagram": "goodcult"
       }
     ],
     "graduation": [
@@ -1117,6 +1122,11 @@
         "role": "Photographer",
         "name": "Julian Gigola",
         "instagram": "juliangigola"
+      },
+      {
+        "role": "Client",
+        "name": "HELLAMACK",
+        "instagram": "hella_mack"
       }
     ],
     "info-overload": [
@@ -1340,6 +1350,10 @@
         "role": "Photographer",
         "name": "Julian Gigola",
         "instagram": "juliangigola"
+      },
+      {
+        "role": "Client",
+        "name": "NABU"
       }
     ],
     "oakley-x-nike": [
@@ -1492,6 +1506,11 @@
         "role": "Photographer",
         "name": "Julian Gigola",
         "instagram": "juliangigola"
+      },
+      {
+        "role": "Client",
+        "name": "SAGO",
+        "instagram": "sagoxstudio"
       }
     ],
     "sara": [
@@ -1525,6 +1544,10 @@
         "role": "Photographer",
         "name": "Julian Gigola",
         "instagram": "juliangigola"
+      },
+      {
+        "role": "Client",
+        "name": "SOLSWEAR"
       }
     ],
     "sonder": [
@@ -1578,6 +1601,11 @@
         "role": "Photographer",
         "name": "Julian Gigola",
         "instagram": "juliangigola"
+      },
+      {
+        "role": "Client",
+        "name": "THE DEN TALKSHOW",
+        "instagram": "thedentalkshow"
       }
     ],
     "torteline": [
@@ -1636,8 +1664,8 @@
       },
       {
         "role": "Styling & Design",
-        "name": "@sbtokio_",
-        "instagram": "sbtokio_"
+        "name": "@tokio.arc",
+        "instagram": "tokio.arc"
       },
       {
         "role": "In frame",
@@ -1955,6 +1983,44 @@
         "role": "Assist",
         "name": "@zertuche.photography",
         "instagram": "zertuche.photography"
+      }
+    ],
+    "hua": [
+      {
+        "role": "In frame",
+        "name": "@0414lei"
+      },
+      {
+        "role": "Styling",
+        "name": "@leena_kema"
+      },
+      {
+        "role": "Photo",
+        "name": "@juliangigola"
+      },
+      {
+        "role": "Wardrobe",
+        "name": "@starcasevintage"
+      },
+      {
+        "role": "Client",
+        "name": "HUA",
+        "instagram": "wearehua"
+      }
+    ],
+    "wired-magazine": [
+      {
+        "role": "Photographer",
+        "name": "Julian Gigola"
+      },
+      {
+        "role": "Light Assist",
+        "name": "Mark Tsui"
+      },
+      {
+        "role": "Client",
+        "name": "WIRED",
+        "instagram": "wired"
       }
     ]
   },
