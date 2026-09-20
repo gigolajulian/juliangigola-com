@@ -1828,7 +1828,15 @@ export function Strip({
              while a wheel was moving it. The ruler was reading a length
              that changed under it, which is why two of its segments lit at
              once near the end. */
-          "mt-6 flex min-h-5 items-end gap-6 px-6 max-sm:mt-3 sm:px-10 tablet:mt-3 lying:mt-2",
+          /* And paper under the rail. Julian: leave some white space on the
+             bottom. The band finished 38px off the foot of a 900px window
+             and the rail read as the last thing on the page rather than as
+             something sitting on it. Padding and not a taller row: the
+             rack reads the shelf's own height to work out a column's
+             width, so anything that changes height mid-gesture moves every
+             cell under the pointer — which is the bug `min-h-5` above was
+             written to stop. A constant 16px moves nothing. */
+          "mt-6 flex min-h-5 items-end gap-6 px-6 pb-4 max-sm:mt-3 sm:px-10 tablet:mt-3 lying:mt-2",
           stack && "max-sm:hidden",
         )}
       >
