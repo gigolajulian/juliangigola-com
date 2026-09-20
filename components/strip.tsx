@@ -934,6 +934,19 @@ export function Strip({
        until the fingers lift, which is a gap of `GESTURE_GAP_MS`. */
     let gestureAt = 0;
     let owned = false;
+    /* A fling decays and a hand does not. `peak` is the biggest delta of
+       the push that is running and `prevMag` the one before this one, so a
+       delta that climbs again once the tail has fallen away is the next
+       swipe arriving before the last one has died. The lock below is
+       pushed another SWIPE_LOCK into the future by every momentum event,
+       and a trackpad's momentum runs for a second or two, so without this
+       a swipe made while the last one was still gliding was thrown away
+       whole. Measured on the homepage before the fix: three swipes, each a
+       full second after the fingers lifted, moved one section between
+       them. That is the hit-and-miss Julian reported on the Mac. */
+    let peak = 0;
+    let trough = Infinity;
+    let again = false;
 
     const onWheel = (e: WheelEvent) => {
       // A pinch is a zoom.
@@ -971,6 +984,30 @@ export function Strip({
       owned = true;
       // Firefox can report lines rather than pixels.
       const dy = e.deltaMode === 1 ? raw * 40 : raw;
+      /* Measured against the quietest the stream has been since its peak,
+         not against the event before it. A new push and the tail it lands
+         on arrive interleaved — macOS keeps the old fling coming for a
+         moment after the fingers are down again — so the event before
+         this one may belong to either, and a rule that reads it compares
+         a push against a fling. The trough belongs to the fling alone,
+         because a fling only ever gets quieter. Twice it, and at least
+         six, is a hand: momentum comes in whole pixels and jitters by
+         one, and a push that is still climbing never sees a trough at all
+         because the trough is only taken once the stream is under half
+         its peak. */
+      const mag = Math.abs(dy);
+      if (fresh) {
+        peak = 0;
+        trough = Infinity;
+      }
+      again = mag >= 6 && mag > trough * 2 && trough < peak / 2;
+      if (again) {
+        peak = mag;
+        trough = Infinity;
+      } else {
+        peak = Math.max(peak, mag);
+        if (mag < peak / 2) trough = Math.min(trough, mag);
+      }
 
       /* By where the strip is, not where it is heading: a notch that lands
          while the strip is still gliding up to the end aims it there and
@@ -1019,7 +1056,7 @@ export function Strip({
       if (paged) {
         const now = performance.now();
         const notch = Math.abs(dy) >= 80;
-        if (now < locked) {
+        if (now < locked && !again) {
           if (!notch) locked = now + SWIPE_LOCK;
           return;
         }
