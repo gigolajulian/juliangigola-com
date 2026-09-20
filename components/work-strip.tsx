@@ -1,11 +1,11 @@
 "use client";
 
 import * as React from "react";
-import { Strip, useWide } from "@/components/strip";
+import { Strip } from "@/components/strip";
 import { Lightbox, useLightbox } from "@/components/lightbox";
 import type { Frame } from "@/lib/work-types";
-import { WorkList, type ListRow } from "@/components/work-list";
-import { useWorkView } from "@/lib/work-view";
+import type { ListRow } from "@/components/work-list";
+import { WorkSheet } from "@/components/work-sheet";
 
 /* ── the work index, with a viewer under it ───────────────────────
  * Four disciplines are photographs put straight on the page rather than
@@ -38,18 +38,9 @@ export function WorkStrip({
   children: React.ReactNode;
 }) {
   const lightbox = useLightbox(frames);
-  /* The list is a different thing on the page rather than the same cells
-     laid out differently, so it replaces the strip instead of restyling
-     it: the machine — the wheel, the drag, the ruler, the viewer — is
-     built for a row and none of it applies to a column of names. */
-  const view = useWorkView();
-  /* Not on a phone, where the buttons that choose a view are hidden: a
-     kept `list` would put up a column with no way back to the strip. */
-  const wide = useWide();
-  if (rows && wide && view === "list") return <WorkList rows={rows} />;
 
   return (
-    <>
+    <WorkSheet rows={rows ?? []}>
       <Strip
         label={label}
         marks={marks}
@@ -63,6 +54,6 @@ export function WorkStrip({
       </Strip>
 
       <Lightbox frames={frames} name="The work" {...lightbox} />
-    </>
+    </WorkSheet>
   );
 }

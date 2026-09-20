@@ -243,11 +243,11 @@ export function WorkShell({
   /* Julian: the choice is offered on every filter, the films and the
      galleries included. It is kept as you walk: from Editorial's grid
      through Places and back, Editorial is still a grid. */
-  /* The list and the search are the whole archive's: a discipline is
-     already a list of one kind of work, and a box that searched eleven
-     projects would be a control with nothing to do. A kept `list` falls
-     back to the strip on a discipline and is waiting again on All. */
-  const view: WorkView = chosen === "list" && !all ? "strip" : chosen;
+  /* Julian: keep the search across the filters. The three views and the
+     viewfinder stand on every one of them now — the list of a discipline
+     is that discipline, and a query is answered from the whole archive
+     whichever chip is lit (`work-sheet.tsx`). */
+  const view: WorkView = chosen;
   const stripView: StripViewMode = view === "grid" ? "grid" : "strip";
   const query = useWorkQuery();
 
@@ -384,13 +384,12 @@ export function WorkShell({
      project, so a model, a client or a crew member finds their own work by
      their own handle.
 
-     On All, where the whole archive is: a discipline is already a filter,
-     and a box searching eleven covers is a control with nothing to do.
-     From `sm` up, with the buttons — a phone has the dropdown and a thumb,
+     On every filter, because a search is kept across them. From `sm` up,
+     with the buttons — a phone has the dropdown and a thumb,
      and a field that opens a keyboard over the work is not how that screen
      is used. */
   const field = React.useRef<HTMLInputElement>(null);
-  const glass = all ? (
+  const glass = (
     <>
       <span aria-hidden className="mx-1 h-3 w-px bg-foreground/15" />
       <button
@@ -401,8 +400,10 @@ export function WorkShell({
         data-ring="Search"
         onClick={() => {
           setFinding(true);
-          // After the field exists, not before.
-          requestAnimationFrame(() => field.current?.focus());
+          /* Now, not a frame later: the field is always mounted, and a
+             frame of waiting is two characters lost by anybody who
+             presses and types in one motion. */
+          field.current?.focus();
         }}
         className={cn(
           "-my-1 p-1.5 transition-opacity duration-200",
@@ -424,7 +425,7 @@ export function WorkShell({
         </svg>
       </button>
     </>
-  ) : null;
+  );
 
   /* Mounted always and opened on a transition rather than mounted on the
      press: an element that appears cannot animate its arrival, and a
@@ -445,7 +446,7 @@ export function WorkShell({
      Spans, not divs: the head's aside is a paragraph, and a block element
      inside one is moved out by the parser before React sees it — which is
      a hydration mismatch, not a styling problem. */
-  const box = all ? (
+  const box = (
     <span
       className={cn(
         "grid transition-[grid-template-columns,opacity] duration-200 ease-[var(--ease-out-strong)] motion-reduce:transition-none",
@@ -477,7 +478,7 @@ export function WorkShell({
         />
       </span>
     </span>
-  ) : null;
+  );
 
   /* Three ways through the same work. Drawn rather than named, and under
      the count rather than out at the edge of the window: the head is the
@@ -490,7 +491,7 @@ export function WorkShell({
   /* Julian: the list first. It reads as the plainest of the three and
      the row runs from plain to pictorial — a column of names, a wall of
      covers, a ribbon. */
-  const modes: WorkView[] = all ? ["list", "grid", "strip"] : ["grid", "strip"];
+  const modes: WorkView[] = ["list", "grid", "strip"];
   const WORD: Record<WorkView, string> = {
     strip: "Strip",
     grid: "Grid",

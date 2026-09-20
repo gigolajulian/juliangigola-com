@@ -19,6 +19,8 @@ import {
   PRESS,
 } from "@/lib/work";
 import { SoleMark } from "@/components/client-marks";
+import { WorkSheet } from "@/components/work-sheet";
+import { WORK_ROWS } from "@/lib/work-rows";
 import { COVER_RELEASES } from "@/lib/cover-art-data";
 
 /* ── a discipline ─────────────────────────────────────────────────
@@ -80,7 +82,9 @@ const before = (slug: string) => {
   const at = WORK_CATEGORY_LINKS.findIndex((c) => c.slug === slug);
   if (at < 0) return undefined;
   const prev = WORK_CATEGORY_LINKS[at - 1];
-  return prev ? { href: prev.href, name: prev.name } : { href: "/work", name: "All work" };
+  return prev
+    ? { href: prev.href, name: prev.name }
+    : { href: "/work", name: "All work" };
 };
 
 export function generateStaticParams() {
@@ -140,14 +144,16 @@ export default async function CategoryPage(
      phone it keeps its sideways swipe and needs a height to do it in. */
   if (gallery && !isCoverArt) {
     return (
-      <div className="flex min-h-0 flex-1 flex-col max-sm:h-[75dvh] max-sm:flex-none">
-        <ProjectStrip
-          project={gallery}
-          next={next}
-          prev={prev}
-          className="mt-4 flex-1"
-        />
-      </div>
+      <WorkSheet rows={WORK_ROWS} within={name}>
+        <div className="flex min-h-0 flex-1 flex-col max-sm:h-[75dvh] max-sm:flex-none">
+          <ProjectStrip
+            project={gallery}
+            next={next}
+            prev={prev}
+            className="mt-4 flex-1"
+          />
+        </div>
+      </WorkSheet>
     );
   }
 
@@ -155,52 +161,56 @@ export default async function CategoryPage(
      the strip, as one cell. */
   if (gallery && isCoverArt) {
     return (
-      <Strip
-        label={`Cover art: ${COVER_RELEASES.length} releases, left and right`}
-        next={next}
-        prev={prev}
-        className="mt-4 flex-1"
-      >
-        <TitleCell title={name} hash={slug}>
-          <p className="label text-muted-foreground">
-            {COVER_RELEASES.length} releases
-          </p>
-        </TitleCell>
-        <div
-          data-tick
-          data-label={name}
-          className="w-full shrink-0 sm:h-full sm:w-auto"
+      <WorkSheet rows={WORK_ROWS} within={name}>
+        <Strip
+          label={`Cover art: ${COVER_RELEASES.length} releases, left and right`}
+          next={next}
+          prev={prev}
+          className="mt-4 flex-1"
         >
-          <CoverArtGallery releases={COVER_RELEASES} rows />
-        </div>
-      </Strip>
+          <TitleCell title={name} hash={slug}>
+            <p className="label text-muted-foreground">
+              {COVER_RELEASES.length} releases
+            </p>
+          </TitleCell>
+          <div
+            data-tick
+            data-label={name}
+            className="w-full shrink-0 sm:h-full sm:w-auto"
+          >
+            <CoverArtGallery releases={COVER_RELEASES} rows />
+          </div>
+        </Strip>
+      </WorkSheet>
     );
   }
 
   return (
-    <Strip
-      label={`${name}: ${projects.length} projects, left and right`}
-      next={next}
-      prev={prev}
-      marks={MARKS}
-      className="mt-4 flex-1"
-    >
-      {[
-        <TitleCell key="title" title={name} hash={slug}>
-          <p className="label text-muted-foreground">
-            {projects.length} {projects.length === 1 ? "project" : "projects"}
-          </p>
-        </TitleCell>,
-        ...projects.map((p, i) => (
-          <CoverCell
-            key={p.slug}
-            row={indexRow(p)}
-            i={i}
-            mark={markFor(p.slug)?.slug}
-            eager={i < 3}
-          />
-        )),
-      ]}
-    </Strip>
+    <WorkSheet rows={WORK_ROWS} within={name}>
+      <Strip
+        label={`${name}: ${projects.length} projects, left and right`}
+        next={next}
+        prev={prev}
+        marks={MARKS}
+        className="mt-4 flex-1"
+      >
+        {[
+          <TitleCell key="title" title={name} hash={slug}>
+            <p className="label text-muted-foreground">
+              {projects.length} {projects.length === 1 ? "project" : "projects"}
+            </p>
+          </TitleCell>,
+          ...projects.map((p, i) => (
+            <CoverCell
+              key={p.slug}
+              row={indexRow(p)}
+              i={i}
+              mark={markFor(p.slug)?.slug}
+              eager={i < 3}
+            />
+          )),
+        ]}
+      </Strip>
+    </WorkSheet>
   );
 }

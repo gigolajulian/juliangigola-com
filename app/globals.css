@@ -839,6 +839,34 @@ nav[aria-label="Categories"] ul[data-more] {
     font-size: 3rem;
     line-height: 0.95;
   }
+  /* Julian: the words must not sit under the photographs, and the pictures
+     should move over to leave room. The cell took its column's min-content,
+     which a `nowrap` credit reports as narrower than the line it prints —
+     `min-w-0` lets it — so `Photographer · Julian Gigola` ran on under the
+     first cover of Places. The column is the width of its own words now,
+     capped so one long credit cannot take a third of the window, and the
+     rack starts after it. `:is()` for the specificity: the rule that sets
+     every cell to `width: auto !important` is a class and a star, and a
+     bare `:where()` cannot beat it.
+
+     The ask is excepted below; it sets its own width. */
+  .strip-grid > :is(div, section, article):not([data-hash="enquire"]):not(
+      [data-tick]
+    ) {
+    width: max-content !important;
+    /* Wide enough for the longest discipline set at 3rem and for a credit
+       under it; `22rem` is the strip's own title column less its padding.
+       Not a share of the window: at 28vw the name itself was cut on a
+       1000px screen, which is the bug the other way round. */
+    max-width: 22rem;
+  }
+  /* And the backstop, in the rack only: past that cap the credit wraps
+     rather than running out of its column. The one-line credits Julian
+     asked for are the project pages', where there is a page's width for
+     them. */
+  .strip-grid > :is(div, section, article):not([data-tick]) :where(dt, dd) {
+    white-space: normal;
+  }
   /* The ask is the exception: a sentence, two buttons and the way on to the
      studio is not a label and does not fit in a slot. */
   .strip-grid > [data-hash="enquire"] {
