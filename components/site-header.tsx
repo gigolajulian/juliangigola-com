@@ -329,9 +329,16 @@ export function SiteHeader() {
 }
 
 /**
- * The underline grows from the left on hover and stays put when the link is
- * the current page. `scaleX` rather than a width or a border, so it animates
- * on the GPU and never nudges the text.
+ * Where you are is the one at full strength and the other three stand back.
+ * No mark under it: Julian picked ink alone out of eight, and it is what the
+ * menu drawer has always done with the same four names — the navbar and the
+ * drawer now say "you are here" the same way, with one less mark on the
+ * screen. The pointer answers in the same language, a name coming up to full
+ * ink rather than a rule drawing itself.
+ *
+ * The underline that used to grow from the left on hover is gone with it.
+ * The keyboard is unaffected: the focus ring is the accent outline every
+ * focusable thing on the site gets, set once in `globals.css`.
  */
 function NavLink({
   href,
@@ -347,24 +354,15 @@ function NavLink({
       href={href}
       aria-current={current ? "page" : undefined}
       className={cn(
-        "group relative block py-3 text-[0.9375rem] uppercase leading-none tracking-[0.08em] transition-colors duration-200",
+        "block py-3 text-[0.9375rem] uppercase leading-none tracking-[0.08em] transition-colors duration-200",
         current
           ? "text-foreground"
-          : "text-muted-foreground hover:text-foreground",
+          // `hoverable:`, not a bare `hover:`: a touch device fires hover on
+          // tap and would leave a name lit that is not the page you are on.
+          : "text-muted-foreground hoverable:hover:text-foreground",
       )}
     >
       {children}
-      <span
-        aria-hidden
-        className={cn(
-          "absolute -bottom-0.5 left-0 h-px w-full origin-left bg-current",
-          "transition-transform duration-200 ease-[var(--ease-out-strong)]",
-          current ? "scale-x-100" : "scale-x-0",
-          // Touch devices fire hover on tap, which would leave an underline
-          // stuck under whatever was last touched.
-          "hoverable:group-hover:scale-x-100",
-        )}
-      />
     </Link>
   );
 }
