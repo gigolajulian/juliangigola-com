@@ -1086,15 +1086,15 @@ a.strip-cell {
 .ring-tag {
   --rule: 1.5px;
   --mark: 9px;
-  --ink: color-mix(in oklab, white 92%, transparent);
+  --ink: white;
   padding: 0.4rem 0.6rem;
   color: white;
-  /* Julian asked for the label to change with what it is over rather than
-     sit on it as a solid chip: the pane is half there, so the photograph
-     reads through it, and the marks and the word carry the legibility.
-     Tint and not blur - a blurred pane that follows the pointer is the
-     stutter this whole pointer was rewritten to be rid of. */
-  background-color: color-mix(in oklab, black 48%, transparent);
+  /* The pane is still see-through, so the photograph reads under it, but
+     it is no longer half there: Julian asked for more of it, and for the
+     marks to be solid rather than nearly so. Tint and not blur - a blurred
+     pane that follows the pointer is the stutter this whole pointer was
+     rewritten to be rid of. */
+  background-color: color-mix(in oklab, black 72%, transparent);
   text-shadow: 0 1px 2px color-mix(in oklab, black 55%, transparent);
   background-repeat: no-repeat;
   background-image: linear-gradient(var(--ink), var(--ink)),
