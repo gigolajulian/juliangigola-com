@@ -88,8 +88,11 @@ export function PointerRing() {
       el.toggleAttribute("data-over", hit);
       if (!hit) el.removeAttribute("data-pressed");
       // The word stays while the label fades out, so it never blanks first.
+      /* Written as an attribute, not as text: the word is cut out of the
+         glass by a pseudo-element, and `content: attr(data-word)` is how a
+         pseudo-element gets a word that changes. See `.ring-tag`. */
       if (hit && word.current) {
-        word.current.textContent = on?.getAttribute("data-ring") ?? "";
+        word.current.dataset.word = on?.getAttribute("data-ring") ?? "";
       }
     };
     /* The pointer left the window. Julian: the word should not be left
@@ -167,7 +170,7 @@ export function PointerRing() {
           "opacity-0 translate-y-1 transition-[opacity,translate] duration-200 ease-[var(--ease-out-strong)]",
           "in-data-over:opacity-100 in-data-over:translate-y-0",
           "in-data-pressed:opacity-70",
-          "empty:hidden motion-reduce:transition-none",
+          "[&:not([data-word])]:hidden motion-reduce:transition-none",
         ].join(" ")}
       />
     </div>,
