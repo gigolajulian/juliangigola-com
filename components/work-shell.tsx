@@ -434,12 +434,13 @@ export function WorkShell({
      animating `width` to a number nobody can name; 200ms on the strong
      ease-out, the curve the rest of the page opens on.
 
-     Inline, at the right-hand end of the row: Julian asked for the box on
-     the line, and for the buttons to move aside for it. The field takes
-     the edge of the window and the four marks slide left by its width —
-     the row is out of the flow and anchored right, so it grows leftwards
-     into the head's own empty middle without moving the count above it or
-     the strip below.
+     Inline, and it opens where the glass is: Julian asked for the box on
+     the line, for the view marks to move aside for it, and for the
+     viewfinder itself to stay where it was. So the field grows in the slot
+     immediately before the glass — the glass holds the right edge, the
+     three marks slide left by the field's width, and because the row is
+     out of the flow and anchored right it grows into the head's own empty
+     middle without moving the count above it or the strip below.
 
      Spans, not divs: the head's aside is a paragraph, and a block element
      inside one is moved out by the parser before React sees it — which is
@@ -472,7 +473,7 @@ export function WorkShell({
           placeholder="Search"
           aria-label="Search the work by name, discipline or credit"
           aria-hidden={!finding}
-          className="filter-trigger glass-surface label ml-1 w-40 border border-foreground/15 px-2 py-1 text-right text-foreground outline-none placeholder:text-muted-foreground focus-visible:border-foreground [&::-webkit-search-cancel-button]:hidden"
+          className="filter-trigger glass-surface label mx-1 w-40 border border-foreground/15 px-2 py-1 text-right text-foreground outline-none placeholder:text-muted-foreground focus-visible:border-foreground [&::-webkit-search-cancel-button]:hidden"
         />
       </span>
     </span>
@@ -552,8 +553,8 @@ export function WorkShell({
             </svg>
           </button>
         ))}
-        {glass}
         {box}
+        {glass}
       </span>
     </span>
   );
