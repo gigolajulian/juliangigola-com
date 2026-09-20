@@ -669,9 +669,34 @@ export function Strip({
           for (const c of soft) if (c.style.opacity !== o) c.style.opacity = o;
         }
       });
-      if (el.scrollLeft >= room - 2) land(kids.length - 1);
-      else if (el.scrollLeft <= 2) land(0);
-      else land(best);
+      /* ── where the rail says you are ──
+         The strip is one cell to a screen, so the cell in the middle of
+         the window is the cell you are on and the rail reaches both ends
+         on its own.
+
+         The rack is not. Five columns are on screen at once, so the middle
+         of the window sits two and a half columns short of the last one,
+         and the lit segment stopped at the tenth of fifteen with the
+         pictures already at the end — 67% of the rail, measured on
+         production on Brand campaigns at 2000. Julian: the scroll bar does
+         not reach the end. So in the rack the rail is driven by how far the
+         shelf has travelled rather than by what is in the middle, which
+         lands the first tick at nought and the last at the end by
+         construction.
+
+         And the end lands on the last cell that carries a tick, not on the
+         last cell. They are not the same: a sequence can finish on a card
+         that leads on or on a page of words, neither of which the rail
+         draws, and `at` pointing at one of them lit nothing at all —
+         measured, the rail went blank on the final frame of the travel. */
+      const ticked = kids.flatMap((k, i) => (k.dataset.tick !== undefined ? [i] : []));
+      const lastTick = ticked.length ? ticked[ticked.length - 1] : kids.length - 1;
+      if (el.scrollLeft >= room - 2) land(lastTick);
+      else if (el.scrollLeft <= 2) land(ticked.length ? ticked[0] : 0);
+      else if (el.classList.contains("strip-grid") && room > 0 && ticked.length > 1) {
+        const gone = Math.max(0, Math.min(1, el.scrollLeft / room));
+        land(ticked[Math.round(gone * (ticked.length - 1))]);
+      } else land(best);
     };
     /* The ruler's ticks, read off the cells once they are in the DOM: a
        cell is often a component of its own, so its attributes are not on
