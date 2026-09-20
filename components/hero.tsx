@@ -812,6 +812,17 @@ export function Hero({
                   the one that was current simply changes class and transitions
                   where it stands.
 
+                  Indented one cap width of its own face. Flush with the
+                  name, the J of Julian and the first letter of the
+                  discipline stack into a single left edge and the word below
+                  reads as a second line of the name rather than as a label
+                  under it. Julian picked this out of seven; half a cap was
+                  too timid to read as meant, and a full word's indent
+                  detached it. `ps` and not `pl` so the absolute children
+                  move with it — an absolutely positioned child is laid out
+                  against the padding box of this element, so the padding
+                  carries them.
+
                   Stacked rather than in flow: the box is already a fixed two
                   lines, so absolute children fill it without either word
                   moving the index and buttons below. See `title-out` and
@@ -827,7 +838,7 @@ export function Hero({
                     <span
                       key={discipline.slug}
                       className={cn(
-                        "font-display absolute inset-0 text-3xl uppercase leading-none tracking-[0] text-muted-foreground max-sm:whitespace-nowrap max-sm:text-[min(1.875rem,5.8cqw)] sm:text-4xl short:text-2xl short:sm:text-2xl lying:whitespace-nowrap lying:text-[min(1.5rem,5.8cqw)]",
+                        "font-display absolute inset-y-0 end-0 start-[0.46em] text-3xl uppercase leading-none tracking-[0] text-muted-foreground max-sm:whitespace-nowrap max-sm:text-[min(1.875rem,5.8cqw)] sm:text-4xl short:text-2xl short:sm:text-2xl lying:whitespace-nowrap lying:text-[min(1.5rem,5.8cqw)]",
                         i === active
                           ? // On the intro there is no outgoing word and
                             // nothing to wait for, so the first title is
