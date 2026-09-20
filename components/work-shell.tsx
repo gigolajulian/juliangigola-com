@@ -466,7 +466,7 @@ export function WorkShell({
         }}
         placeholder="Search"
         aria-label="Search the work by name, discipline or credit"
-        className="label w-full bg-transparent pl-[1.625rem] pr-[1.5rem] text-right text-foreground outline-none placeholder:text-muted-foreground [&::-webkit-search-cancel-button]:hidden"
+        className="label w-full bg-transparent pl-[1.625rem] pr-[1.5rem] text-left text-foreground outline-none placeholder:text-muted-foreground [&::-webkit-search-cancel-button]:hidden"
       />
       {/* The cross empties the box and leaves it open, which is the
           difference between it and the glass: one is "that was not what I
