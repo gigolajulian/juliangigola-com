@@ -328,9 +328,15 @@ export function Strip({
       return;
     }
     /* A cell that is not a picture spans both rows — see `.strip-grid` in
-       `globals.css` — so it is a column on its own and an anchor here. */
+       `globals.css` — so it is a column on its own and an anchor here.
+       `data-tick` and not the tag: the card that leads on to the next
+       discipline is a link like a cover is, and pairing it with a frame
+       moved it out of the end of the sequence and left it stranded in the
+       middle of the rack. The ruler counts what belongs to the sequence
+       and marks it; everything else stays where it was put. */
     const picture = (k: HTMLElement) =>
-      k.tagName === "A" || k.tagName === "BUTTON";
+      (k.tagName === "A" || k.tagName === "BUTTON") &&
+      k.dataset.tick !== undefined;
     const upright = (k: HTMLElement) =>
       (parseFloat(getComputedStyle(k).getPropertyValue("--ar")) || 0.8) < 1;
 

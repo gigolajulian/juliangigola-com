@@ -813,7 +813,13 @@ function Chip({
         <span
           className={cn(
             "ml-1 tabular-nums",
-            active ? "text-background/60" : "text-muted-foreground/60",
+            /* The lit chip's count in the page's own ink, half strength.
+               It used to be `text-background`, which was right while the
+               chosen chip was a filled plate and the count sat on ink; the
+               fill went and the count went with it — near-black at 60% on
+               a near-black page. Julian: keep the count after the filter
+               is selected. Half strength so the name still leads. */
+            active ? "text-foreground/50" : "text-muted-foreground/60",
           )}
         >
           {count}
