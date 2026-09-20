@@ -1769,10 +1769,19 @@ export function Strip({
           // The gap has to hold a tick word: 16px did not, and the word's
           // top two pixels sat inside the strip, over the bottom edge of
           // whatever cell was there.
-          /* `min-h-5`, so the row is the same height with a client's mark
-             in it and without one: the strip above is `flex-1` and would
-             otherwise give up four pixels every time a mark appeared. */
-          "mt-6 flex min-h-3 items-end gap-6 px-6 max-sm:mt-3 sm:px-10 tablet:mt-3 lying:mt-2",
+          /* `min-h-5`, so the row is the same height with a tick's word or
+             a client's mark in it and without one. It had drifted to
+             `min-h-3` and the four pixels this was written to stop were
+             being given up again, with worse consequences in the rack than
+             on a strip: the row sits at 16 empty and 20 with a word, the
+             strip above is `flex-1` and loses the difference, and a rack
+             cell takes its width from the shelf's own height. Measured on
+             Brand campaigns at 2000 — the rack went 919.4 to 915.4, every
+             cell 338.97 to 337.38, the scrollable extent 1287 to 1274, all
+             while a wheel was moving it. The ruler was reading a length
+             that changed under it, which is why two of its segments lit at
+             once near the end. */
+          "mt-6 flex min-h-5 items-end gap-6 px-6 max-sm:mt-3 sm:px-10 tablet:mt-3 lying:mt-2",
           stack && "max-sm:hidden",
         )}
       >
