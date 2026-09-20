@@ -429,16 +429,24 @@ export function WorkShell({
   /* Mounted always and opened on a transition rather than mounted on the
      press: an element that appears cannot animate its arrival, and a
      press that can be taken back halfway is the whole difference between
-     a panel opening and a panel blinking. Rows and opacity, 200ms on the
-     strong ease-out — the same curve the rest of the page opens on. */
-  /* Spans, not divs: the head's aside is a paragraph, and a block element
+     a panel opening and a panel blinking. A column track from `0fr` to
+     `1fr`, which is how a fixed-width thing is grown from nothing without
+     animating `width` to a number nobody can name; 200ms on the strong
+     ease-out, the curve the rest of the page opens on.
+
+     Inline, and it opens leftwards into the head's own empty middle:
+     Julian asked for the box on the line rather than under it. The row is
+     taken out of the flow and anchored to the right edge so it can run
+     past its column without moving the count above it or the strip below.
+
+     Spans, not divs: the head's aside is a paragraph, and a block element
      inside one is moved out by the parser before React sees it — which is
      a hydration mismatch, not a styling problem. */
   const box = all ? (
     <span
       className={cn(
-        "hidden grid-rows-[0fr] transition-[grid-template-rows,opacity] duration-200 ease-[var(--ease-out-strong)] motion-reduce:transition-none sm:grid",
-        finding ? "grid-rows-[1fr] opacity-100" : "opacity-0",
+        "grid transition-[grid-template-columns,opacity] duration-200 ease-[var(--ease-out-strong)] motion-reduce:transition-none",
+        finding ? "grid-cols-[1fr] opacity-50" : "grid-cols-[0fr] opacity-0",
       )}
     >
       <span className="block overflow-hidden">
@@ -459,10 +467,10 @@ export function WorkShell({
             // A field that is about to be hidden must not keep the cursor.
             e.currentTarget.blur();
           }}
-          placeholder="Name, discipline or credit"
+          placeholder="Search"
           aria-label="Search the work by name, discipline or credit"
           aria-hidden={!finding}
-          className="filter-trigger glass-surface label mt-2 w-full border border-foreground/15 px-2 py-1.5 text-right text-foreground outline-none placeholder:text-muted-foreground focus-visible:border-foreground [&::-webkit-search-cancel-button]:hidden"
+          className="filter-trigger glass-surface label mr-1 w-40 border border-foreground/15 px-2 py-1 text-right text-foreground outline-none placeholder:text-muted-foreground focus-visible:border-foreground [&::-webkit-search-cancel-button]:hidden"
         />
       </span>
     </span>
@@ -486,62 +494,65 @@ export function WorkShell({
     list: "List",
   };
   const toggle = (
-    <span className="mt-2 flex items-center justify-end gap-1 max-sm:hidden">
-      {modes.map((mode) => (
-        <button
-          key={mode}
-          type="button"
-          aria-pressed={view === mode}
-          aria-label={`${WORD[mode]} view`}
-          data-ring={`${WORD[mode]} view`}
-          onClick={() => {
-            /* Leaving the list with something typed would filter a strip
+    <span className="relative mt-2 block h-[1.625rem] max-sm:hidden">
+      <span className="absolute right-0 top-0 flex w-max items-center gap-1 whitespace-nowrap">
+        {box}
+        {modes.map((mode) => (
+          <button
+            key={mode}
+            type="button"
+            aria-pressed={view === mode}
+            aria-label={`${WORD[mode]} view`}
+            data-ring={`${WORD[mode]} view`}
+            onClick={() => {
+              /* Leaving the list with something typed would filter a strip
                nobody can see the ends of. The box empties with it. */
-            if (mode !== "list" && query) search("");
-            chooseView(mode);
-          }}
-          className={cn(
-            "-my-1 p-1.5 transition-opacity duration-200",
-            view === mode
-              ? "text-foreground opacity-100"
-              : "text-foreground opacity-35 hoverable:hover:opacity-70",
-          )}
-        >
-          <svg
-            aria-hidden
-            viewBox="0 0 16 16"
-            className="h-3.5 w-3.5"
-            fill="currentColor"
-          >
-            {mode === "strip" ? (
-              <>
-                <rect x="0" y="2" width="4" height="12" rx="0.5" />
-                <rect x="6" y="2" width="4" height="12" rx="0.5" />
-                <rect x="12" y="2" width="4" height="12" rx="0.5" />
-              </>
-            ) : mode === "grid" ? (
-              <>
-                <rect x="1" y="1" width="6" height="6" rx="0.5" />
-                <rect x="9" y="1" width="6" height="6" rx="0.5" />
-                <rect x="1" y="9" width="6" height="6" rx="0.5" />
-                <rect x="9" y="9" width="6" height="6" rx="0.5" />
-              </>
-            ) : (
-              /* A line of the list: the cover down the left, the name
-                 beside it, three times over. */
-              <>
-                <rect x="0" y="1" width="4" height="4" rx="0.5" />
-                <rect x="6" y="2" width="10" height="2" rx="0.5" />
-                <rect x="0" y="6" width="4" height="4" rx="0.5" />
-                <rect x="6" y="7" width="10" height="2" rx="0.5" />
-                <rect x="0" y="11" width="4" height="4" rx="0.5" />
-                <rect x="6" y="12" width="10" height="2" rx="0.5" />
-              </>
+              if (mode !== "list" && query) search("");
+              chooseView(mode);
+            }}
+            className={cn(
+              "-my-1 p-1.5 transition-opacity duration-200",
+              view === mode
+                ? "text-foreground opacity-100"
+                : "text-foreground opacity-35 hoverable:hover:opacity-70",
             )}
-          </svg>
-        </button>
-      ))}
-      {glass}
+          >
+            <svg
+              aria-hidden
+              viewBox="0 0 16 16"
+              className="h-3.5 w-3.5"
+              fill="currentColor"
+            >
+              {mode === "strip" ? (
+                <>
+                  <rect x="0" y="2" width="4" height="12" rx="0.5" />
+                  <rect x="6" y="2" width="4" height="12" rx="0.5" />
+                  <rect x="12" y="2" width="4" height="12" rx="0.5" />
+                </>
+              ) : mode === "grid" ? (
+                <>
+                  <rect x="1" y="1" width="6" height="6" rx="0.5" />
+                  <rect x="9" y="1" width="6" height="6" rx="0.5" />
+                  <rect x="1" y="9" width="6" height="6" rx="0.5" />
+                  <rect x="9" y="9" width="6" height="6" rx="0.5" />
+                </>
+              ) : (
+                /* A line of the list: the cover down the left, the name
+                 beside it, three times over. */
+                <>
+                  <rect x="0" y="1" width="4" height="4" rx="0.5" />
+                  <rect x="6" y="2" width="10" height="2" rx="0.5" />
+                  <rect x="0" y="6" width="4" height="4" rx="0.5" />
+                  <rect x="6" y="7" width="10" height="2" rx="0.5" />
+                  <rect x="0" y="11" width="4" height="4" rx="0.5" />
+                  <rect x="6" y="12" width="10" height="2" rx="0.5" />
+                </>
+              )}
+            </svg>
+          </button>
+        ))}
+        {glass}
+      </span>
     </span>
   );
 
@@ -568,7 +579,6 @@ export function WorkShell({
               <>
                 {head.aside}
                 {toggle}
-                {box}
               </>
             }
             /* On /work the strip opens on a discipline, so the page's own
@@ -605,10 +615,7 @@ export function WorkShell({
               <span className="text-foreground">
                 {all ? "All work" : head.title}
               </span>
-              <span
-                aria-hidden
-                className="h-3 w-px bg-foreground/25"
-              />
+              <span aria-hidden className="h-3 w-px bg-foreground/25" />
               <span className="tabular-nums text-muted-foreground">
                 {head.count}
               </span>
@@ -682,7 +689,6 @@ export function WorkShell({
                 ))}
               </ul>
             </nav>
-
           </div>
         </>
       }
