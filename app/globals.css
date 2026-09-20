@@ -1086,29 +1086,16 @@ a.strip-cell {
 .ring-tag {
   --rule: 1.5px;
   --mark: 9px;
-  --ink: color-mix(in oklab, black 78%, transparent);
+  --ink: color-mix(in oklab, white 92%, transparent);
   padding: 0.4rem 0.6rem;
-  /* Liquid glass, and the word cut out of it. The same material as the
-     header and the buttons — blur, saturate, a lift in brightness — so the
-     label is visibly the one glass this site is made of rather than a chip
-     of its own.
-
-     Light in both themes, which is the one place this pane departs from
-     `glass`. The word is a hole, so its legibility is the difference
-     between the pane and the unfiltered picture inside the letters:
-     measured over a dark frame, a bright frame and flat mid grey, a dark
-     pane gives dark holes on dark and the word disappears. A light pane
-     reads on all three. Julian picked it from that test.
-
-     The earlier note here said tint and never blur, because a blurred pane
-     that follows the pointer repaints the region behind it every frame and
-     that was the stutter this pointer was rewritten to be rid of. Julian
-     asked for the glass anyway; the cost is measured in the commit. */
-  color: transparent;
-  isolation: isolate;
-  background-color: color-mix(in oklab, white 46%, transparent);
-  -webkit-backdrop-filter: blur(14px) saturate(1.8) brightness(1.06);
-  backdrop-filter: blur(14px) saturate(1.8) brightness(1.06);
+  color: white;
+  /* Julian asked for the label to change with what it is over rather than
+     sit on it as a solid chip: the pane is half there, so the photograph
+     reads through it, and the marks and the word carry the legibility.
+     Tint and not blur - a blurred pane that follows the pointer is the
+     stutter this whole pointer was rewritten to be rid of. */
+  background-color: color-mix(in oklab, black 48%, transparent);
+  text-shadow: 0 1px 2px color-mix(in oklab, black 55%, transparent);
   background-repeat: no-repeat;
   background-image: linear-gradient(var(--ink), var(--ink)),
     linear-gradient(var(--ink), var(--ink)),
@@ -1130,38 +1117,6 @@ a.strip-cell {
     0 100%,
     100% 100%,
     100% 100%;
-
-  /* The word, as a hole. `destination-out` erases the pane wherever a
-     glyph is painted, and `isolation` above keeps that erasing inside this
-     label instead of punching through the page. The word lives in the
-     pseudo-element and not in the span, because what is erased has to be a
-     child of what it erases; the span carries it as `data-word`, written
-     by `pointer-ring.tsx`. In flow, not absolute, so the glyphs still give
-     the pane its width. */
-  &::before {
-    content: attr(data-word);
-    display: block;
-    mix-blend-mode: destination-out;
-    color: black;
-  }
-}
-
-/* No blur, no hole. The pane goes solid and the word comes back as ink on
-   it — the label still says what a press will do, which is the only part
-   of it that is not decoration. */
-@media (prefers-reduced-transparency: reduce) {
-  .ring-tag {
-    --ink: color-mix(in oklab, white 92%, transparent);
-    color: white;
-    background-color: color-mix(in oklab, black 66%, transparent);
-    -webkit-backdrop-filter: none;
-    backdrop-filter: none;
-    isolation: auto;
-    &::before {
-      mix-blend-mode: normal;
-      color: white;
-    }
-  }
 }
 
 @utility strip-scroll {
