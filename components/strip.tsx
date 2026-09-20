@@ -1687,7 +1687,20 @@ export function Strip({
   const railMove = (e: React.PointerEvent<HTMLDivElement>) => {
     window.clearTimeout(linger.current);
     lastX.current = e.clientX;
-    setOver(tickAt(e.clientX));
+    const n = tickAt(e.clientX);
+    setOver(n);
+    /* Held, so the shelf comes with the pointer rather than waiting for it
+       to lift. Julian: allow dragging the bold part and going through the
+       filters and the pages. Until now the rail was a preview — a drag
+       along it told you where you would land and never showed you what was
+       there, so the one control built for travelling the whole sequence
+       could only be used one press at a time.
+
+       `glide` retargets rather than restarting: each move sets a new
+       destination and the speed is recomputed from where the travel has
+       actually got to, so a sweep across eleven chapters is one continuous
+       journey and not eleven interrupted ones. */
+    if (held.current && n !== null) goTo(ticks[n].i);
   };
   const railUp = (e: React.PointerEvent<HTMLDivElement>) => {
     const n = tickAt(e.clientX);
