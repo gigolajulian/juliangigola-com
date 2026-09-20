@@ -24,7 +24,7 @@
   Strict-Transport-Security: max-age=31536000; includeSubDomains
   X-Robots-Tag: noai, noimageai
   TDM-Reservation: 1
-  TDM-Policy: https://www.juliangigola.com/legal#terms
+  TDM-Policy: https://juliangigola.com/legal#terms
 
 # Caching, for the same responses.
 #
