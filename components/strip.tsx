@@ -215,7 +215,6 @@ export function Strip({
   prev,
   onOpen,
   counter,
-  marks,
   stack = true,
   paged = false,
   chapters = false,
@@ -236,15 +235,6 @@ export function Strip({
   onOpen?: (n: number) => void;
   /** Drawn left of the ruler, given the index of the cell in the middle. */
   counter?: (at: number) => React.ReactNode;
-  /**
-   * Marks by key, drawn in the panel when the cell in the middle names one
-   * in `data-mark`.
-   *
-   * A map of nodes and not a function of the index, because the pages that
-   * want this are server components and a function cannot cross that
-   * boundary - rendered nodes can.
-   */
-  marks?: Record<string, React.ReactNode>;
   /** Under 40rem, run the cells down the page instead and switch the
       machine off. Off for the project strips, which swipe on a phone. */
   stack?: boolean;
@@ -271,8 +261,6 @@ export function Strip({
   const scroller = React.useRef<HTMLDivElement>(null);
   React.useImperativeHandle(ref, () => scroller.current!, []);
   const [at, setAt] = React.useState(0);
-  /** The key of the mark the cell in the middle names, if it names one. */
-  const [mark, setMark] = React.useState("");
   /** Which tick the pointer is over, as a place in `ticks`, or null. */
   const [over, setOver] = React.useState<number | null>(null);
   const [ticks, setTicks] = React.useState<
@@ -564,21 +552,6 @@ export function Strip({
           }
         }, 200);
       }
-      /* The mark belongs to the cell itself and not to the chapter it is
-         in: a client is the client of one project.
-
-         Only once the hand has stopped. Set straight from the scroll, the
-         mark changed at every cell a swipe crossed: on a tablet that is a
-         logo flashing through half a dozen clients in a second, and each
-         change re-rendered the whole strip mid-swipe, which is the lag
-         Julian could feel there. A client's name is a thing to read, and
-         nobody reads anything while the work is still moving. */
-      const badge = (el.children[i] as HTMLElement).dataset.mark ?? "";
-      if (badge !== markWanted) {
-        markWanted = badge;
-        clearTimeout(markTimer);
-        markTimer = window.setTimeout(() => setMark(badge), 160);
-      }
       if (word === el.dataset.at) return;
       el.dataset.at = word;
       const out = el.closest("article")?.querySelector("[data-strip-at]");
@@ -605,8 +578,6 @@ export function Strip({
       soften.set(cell, { n: cell.childElementCount, list });
       return list;
     };
-    let markTimer = 0;
-    let markWanted = "";
     let hashTimer = 0;
     let hashWanted: string | null = null;
     /* Reduced motion keeps the words at full strength, which is what the
@@ -753,7 +724,6 @@ export function Strip({
       window.removeEventListener("resize", again);
       window.removeEventListener("hashchange", onHash);
       if (queued) cancelAnimationFrame(queued);
-      clearTimeout(markTimer);
       clearTimeout(hashTimer);
     };
   }, [live, count]);
@@ -1807,10 +1777,13 @@ export function Strip({
           }
           className="sr-only"
         />
-        {/* Who the cover in the middle was shot for. It sits at the end of
-            the ruler's own line, so it reads as part of the instrument
-            rather than as a badge dropped on the page. */}
-        {marks?.[mark] ?? null}
+        {/* The client's mark used to sit here, drawn for whichever cover
+            was in the middle. It is gone. In the rack there is no middle —
+            two rows of cells go by at once and the reading picked whatever
+            happened to be centred, so Julian got client logos appearing and
+            swapping at random as he scrolled. A mark that names the wrong
+            project is worse than no mark. The prop and the
+            map that fed it are gone with it. */}
 
         <div
           aria-hidden

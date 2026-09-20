@@ -22,7 +22,6 @@ import { WorkSheet } from "@/components/work-sheet";
 export function WorkStrip({
   frames,
   label,
-  marks,
   rows,
   className,
   children,
@@ -31,7 +30,6 @@ export function WorkStrip({
       cell's `data-n` is its place in here. */
   frames: Frame[];
   label: string;
-  marks?: Record<string, React.ReactNode>;
   /** The same work as lines, for the list view and the search. */
   rows?: ListRow[];
   className?: string;
@@ -43,7 +41,6 @@ export function WorkStrip({
     <WorkSheet rows={rows ?? []}>
       <Strip
         label={label}
-        marks={marks}
         onOpen={lightbox.show}
         // Twelve disciplines and eighty four covers: the one ruler on the
         // site that is a table of contents rather than a row of stops.

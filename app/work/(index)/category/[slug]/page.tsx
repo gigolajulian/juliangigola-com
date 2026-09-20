@@ -16,9 +16,7 @@ import {
   indexRow,
   isDisciplineGallery,
   markFor,
-  PRESS,
 } from "@/lib/work";
-import { SoleMark } from "@/components/client-marks";
 import { WorkSheet } from "@/components/work-sheet";
 import { WORK_ROWS } from "@/lib/work-rows";
 import type { ListRow } from "@/components/work-list";
@@ -45,13 +43,6 @@ import { COVER_RELEASES } from "@/lib/cover-art-data";
  * its first to the one before.
  * ─────────────────────────────────────────────────────────────── */
 
-/* The eight clients with a mark on file, rendered once and handed to the
-   strip as nodes: the panel shows the one the cover in the middle names.
-   A map and not a lookup function, because this is a server component and
-   a function cannot cross into the client one. */
-const MARKS = Object.fromEntries(
-  PRESS.map((c) => [c.slug, <SoleMark key={c.slug} client={c} />]),
-);
 
 /**
  * Only categories that have something to show.
@@ -244,8 +235,7 @@ export default async function CategoryPage(
         label={`${name}: ${projects.length} projects, left and right`}
         next={next}
         prev={prev}
-        marks={MARKS}
-        className="mt-4 flex-1"
+          className="mt-4 flex-1"
       >
         {[
           <TitleCell key="title" title={name} hash={slug}>

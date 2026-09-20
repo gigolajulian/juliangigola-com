@@ -12,10 +12,8 @@ import {
   indexRow,
   isDisciplineGallery,
   markFor,
-  PRESS,
   projectsIn,
 } from "@/lib/work";
-import { SoleMark } from "@/components/client-marks";
 import { COVER_RELEASES } from "@/lib/cover-art-data";
 import { CONTENT } from "@/lib/content";
 import type { Frame } from "@/lib/work-types";
@@ -39,13 +37,6 @@ export const metadata: Metadata = {
  *
  * The head and the chips are the layout's; this is the sequence.
  * ─────────────────────────────────────────────────────────────── */
-/* The eight clients with a mark on file, rendered once and handed to the
-   strip as nodes: the panel shows the one the cover in the middle names.
-   A map and not a lookup function, because this is a server component and
-   a function cannot cross into the client one. */
-const MARKS = Object.fromEntries(
-  PRESS.map((c) => [c.slug, <SoleMark key={c.slug} client={c} />]),
-);
 
 export default function WorkPage() {
   /* No title cell. "Work" set large next to "Editorial" set large was two
@@ -186,7 +177,6 @@ export default function WorkPage() {
   return (
     <WorkStrip
       label={`All work: ${COMMISSIONS.length} projects, left and right`}
-      marks={MARKS}
       frames={viewer}
       rows={WORK_ROWS}
       className="mt-4 max-sm:mt-2 short:mt-2 flex-1"
