@@ -105,9 +105,16 @@ export function FilmCell({
       data-tick
       data-name={title}
       data-ring="See the films"
+      data-film
       aria-label={`${title}, film`}
       className="group strip-cell relative block aspect-video w-full shrink-0 overflow-hidden bg-card press active:scale-[0.995] sm:h-full sm:w-auto"
-      style={{ "--i": i } as React.CSSProperties}
+      /* A film is 16:9 and says so. In the strip the cell is full height and
+         `aspect-video` settles its width, but the rack overrules both with
+         `height: 100%` and a width read off `--ar` — and a cell that names no
+         ratio falls back to the 0.8 a cover has. Every film in the rack was
+         drawn as a 4:5 column with its still cropped to the middle. Julian:
+         in the grid view the videos must be horizontal. */
+      style={{ "--i": i, "--ar": "1.7778" } as React.CSSProperties}
     >
       {poster ? (
         <Image

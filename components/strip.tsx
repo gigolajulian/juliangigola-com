@@ -701,24 +701,40 @@ export function Strip({
       if (room <= 0) land(firstTick);
       else if (el.scrollLeft >= room - 2) land(lastTick);
       else if (el.scrollLeft <= 2) land(firstTick);
-      else if (el.classList.contains("strip-grid") && room > 0 && ticked.length > 1) {
+      else {
+        /* ── the eye slides across the window as the shelf travels ──
+           At the start it reads the left edge, at the middle of the travel
+           the middle of the window, at the end the right edge. One line,
+           and it is what makes the rail both honest and able to reach the
+           last column: the middle of the window alone never gets there,
+           because five columns are on screen and the last one is still two
+           and a half short when the shelf stops.
+
+           This replaces a reading that took how far the shelf had gone and
+           named the tick that far along the *list*. That is only true if
+           every column is the same width, and in the rack they are not: a
+           landscape column is twice an upright one, and All work runs 72
+           projects over eleven chapters of very different lengths. Julian,
+           on Event coverage: it is showing Brand campaigns. It was — the
+           rail was counting projects where it should have been measuring
+           the shelf.
+
+           And it lands on the nearest cell the rail can actually draw.
+           `best` is the nearest cell of any kind, and a sequence carries
+           cells with no tick — a page of words, the ask, the card that
+           leads on — which lit nothing at all. */
         const gone = Math.max(0, Math.min(1, el.scrollLeft / room));
-        land(ticked[Math.round(gone * (ticked.length - 1))]);
-      } else {
-        /* And the nearest cell that the rail can actually draw. `best` is
-           the nearest cell of any kind, and a sequence has cells that
-           carry no tick — a page of words, the ask, the card that leads
-           on. Landing on one of those lit nothing: measured on Motion in
-           the strip, the rail went out at the middle of its own travel,
-           where the cell nearest the middle is a block of words between
-           two films. */
-        land(
-          ticked.length
-            ? ticked.reduce((a, b) =>
-                Math.abs(b - best) < Math.abs(a - best) ? b : a,
-              )
-            : best,
-        );
+        const eye = el.scrollLeft + gone * span;
+        let near = best;
+        let gap = Infinity;
+        for (const i of ticked) {
+          const d = Math.abs(centres[i] - eye);
+          if (d < gap) {
+            gap = d;
+            near = i;
+          }
+        }
+        land(near);
       }
     };
     /* The ruler's ticks, read off the cells once they are in the DOM: a

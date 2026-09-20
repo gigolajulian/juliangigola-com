@@ -1059,6 +1059,12 @@ a.strip-cell {
     height: auto !important;
     aspect-ratio: 4 / 5 !important;
   }
+  /* Except a film, which is 16:9 wherever it is drawn. The sheet sets one
+     ratio so a column of covers reads as a column rather than a stack of
+     different shapes, and a film is the one cell that is not a cover. */
+  .strip-grid > a[data-film] {
+    aspect-ratio: 16 / 9 !important;
+  }
   .strip-grid > :where(div, section, article) {
     grid-row: auto;
     grid-column: 1 / -1;
