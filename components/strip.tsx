@@ -1953,7 +1953,16 @@ export function Strip({
                             : undefined
                         }
                         className={cn(
-                          "rail-word label pointer-events-none absolute bottom-full mb-1 whitespace-nowrap transition-opacity duration-200",
+                          /* `mb-2`, not `mb-1`. Julian: put some space
+                             between the rail and the word that comes up
+                             over it. Four pixels had the word sitting on
+                             the bars, so a long title read as one object
+                             with the graphic under it. Eight separates
+                             them and still clears the covers: the word
+                             rises into the 24px above the rail, and at
+                             twelve pixels plus eight it reaches 20 with
+                             four to spare. */
+                          "rail-word label pointer-events-none absolute bottom-full mb-2 whitespace-nowrap transition-opacity duration-200",
                           named1
                             ? "[translate:-50%_0]"
                             : end

@@ -76,7 +76,12 @@ export default function SessionsPage() {
                   prefetch={false}
                   href={`/work/${sample.slug}`}
                   data-tick
-                  data-ring="View project"
+                  /* Julian: `View more`, not `View project`. The frame is
+                     a sample of the session and not the project it happens
+                     to come from, so the word points at more of this kind
+                     of work rather than naming a project the visitor never
+                     asked about. */
+                  data-ring="View more"
                   aria-label={`${session.name}: see ${sample.name}`}
                   /* One ratio for all four, not each frame's own: a row of
                      photographs that each set their own height is not a row.

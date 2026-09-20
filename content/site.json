@@ -44,7 +44,7 @@
       "slug": "headshots",
       "name": "Headshots",
       "blurb": "Clean, current, and usable everywhere: LinkedIn, press, casting, a company about page.",
-      "from": 200,
+      "from": null,
       "includes": [
         "Studio lighting",
         "Multiple backgrounds",

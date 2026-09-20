@@ -1569,15 +1569,15 @@ a.strip-cell {
     font-weight 220ms var(--ease-out-strong);
 }
 [data-dwell] .rail-word {
-  /* Twenty, then fifteen, now thirteen: Julian has asked for it smaller
-     three times, and a title as long as EDUCO ACADEMY HAIRJAM is the
-     reason — at fifteen it ran most of the way across the band and read
-     as a headline rather than as the label of the thing under the
-     pointer. Thirteen is still a third bigger than the word at rest,
-     which is the whole job: the difference between glancing at it and
-     reading it. The weight is never touched: it grows, it does not get
-     louder. */
-  font-size: 0.8125rem;
+  /* Twenty, fifteen, thirteen, twelve. Julian has asked for it smaller
+     four times and the direction has not changed once, so this is the
+     size it settles at rather than another step down the same road: a
+     fifth bigger than the word at rest, which is still the difference
+     between glancing at it and reading it, and small enough that EDUCO
+     ACADEMY HAIRJAM reads as the label of the thing under the pointer
+     instead of as a headline over the band. The weight is never touched:
+     it grows, it does not get louder. */
+  font-size: 0.75rem;
   letter-spacing: 0.08em;
   /* Julian, twice: it must not look bold. It never was - it is 400, the
      same regular the rest of the site is set in - but near-white on a
