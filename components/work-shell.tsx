@@ -157,6 +157,8 @@ export function WorkShell({
      without the message the menu's own state would drift out of step with
      what is on the screen. */
   const [filtering, setFiltering] = React.useState(false);
+  /** Whether the viewfinder has been opened into a field. */
+  const [finding, setFinding] = React.useState(false);
 
   React.useEffect(() => {
     if (!filtering) return;
@@ -372,6 +374,100 @@ export function WorkShell({
     return () => window.removeEventListener("resize", measure);
   }, [key, shown]);
 
+  /* The search, as a viewfinder. Julian asked for the box gone and the
+     glass on the right with the view buttons: a field sitting open under
+     the crumb was a control demanding to be used on a page nobody arrives
+     at to search. Pressed, it opens into the column under the buttons and
+     takes the cursor; empty and left alone, it closes again.
+
+     It reads the names, the disciplines and every credit on every
+     project, so a model, a client or a crew member finds their own work by
+     their own handle.
+
+     On All, where the whole archive is: a discipline is already a filter,
+     and a box searching eleven covers is a control with nothing to do.
+     From `sm` up, with the buttons — a phone has the dropdown and a thumb,
+     and a field that opens a keyboard over the work is not how that screen
+     is used. */
+  const field = React.useRef<HTMLInputElement>(null);
+  const glass = all ? (
+    <>
+      <span aria-hidden className="mx-1 h-3 w-px bg-foreground/15" />
+      <button
+        type="button"
+        aria-expanded={finding}
+        aria-controls="work-search"
+        aria-label="Search the work"
+        data-ring="Search"
+        onClick={() => {
+          setFinding(true);
+          // After the field exists, not before.
+          requestAnimationFrame(() => field.current?.focus());
+        }}
+        className={cn(
+          "-my-1 p-1.5 transition-opacity duration-200",
+          finding || query
+            ? "text-foreground opacity-100"
+            : "text-foreground opacity-35 hoverable:hover:opacity-70",
+        )}
+      >
+        <svg
+          aria-hidden
+          viewBox="0 0 16 16"
+          className="h-3.5 w-3.5"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.5"
+        >
+          <circle cx="6.8" cy="6.8" r="4.6" />
+          <path d="M10.3 10.3L15 15" />
+        </svg>
+      </button>
+    </>
+  ) : null;
+
+  /* Mounted always and opened on a transition rather than mounted on the
+     press: an element that appears cannot animate its arrival, and a
+     press that can be taken back halfway is the whole difference between
+     a panel opening and a panel blinking. Rows and opacity, 200ms on the
+     strong ease-out — the same curve the rest of the page opens on. */
+  /* Spans, not divs: the head's aside is a paragraph, and a block element
+     inside one is moved out by the parser before React sees it — which is
+     a hydration mismatch, not a styling problem. */
+  const box = all ? (
+    <span
+      className={cn(
+        "hidden grid-rows-[0fr] transition-[grid-template-rows,opacity] duration-200 ease-[var(--ease-out-strong)] motion-reduce:transition-none sm:grid",
+        finding ? "grid-rows-[1fr] opacity-100" : "opacity-0",
+      )}
+    >
+      <span className="block overflow-hidden">
+        <input
+          id="work-search"
+          ref={field}
+          type="search"
+          value={query}
+          tabIndex={finding ? undefined : -1}
+          onChange={(e) => search(e.target.value)}
+          onBlur={() => {
+            if (!query.trim()) setFinding(false);
+          }}
+          onKeyDown={(e) => {
+            if (e.key !== "Escape") return;
+            search("");
+            setFinding(false);
+            // A field that is about to be hidden must not keep the cursor.
+            e.currentTarget.blur();
+          }}
+          placeholder="Name, discipline or credit"
+          aria-label="Search the work by name, discipline or credit"
+          aria-hidden={!finding}
+          className="filter-trigger glass-surface label mt-2 w-full border border-foreground/15 px-2 py-1.5 text-right text-foreground outline-none placeholder:text-muted-foreground focus-visible:border-foreground [&::-webkit-search-cancel-button]:hidden"
+        />
+      </span>
+    </span>
+  ) : null;
+
   /* Three ways through the same work. Drawn rather than named, and under
      the count rather than out at the edge of the window: the head is the
      page saying what it is and how much of it there is, and how it is
@@ -380,7 +476,10 @@ export function WorkShell({
      for anyone who is — `data-ring`, the same tag the covers carry.
 
      The list only on All: see the note on `view` above. */
-  const modes: WorkView[] = all ? ["strip", "grid", "list"] : ["strip", "grid"];
+  /* Julian: the list first. It reads as the plainest of the three and
+     the row runs from plain to pictorial — a column of names, a wall of
+     covers, a ribbon. */
+  const modes: WorkView[] = all ? ["list", "grid", "strip"] : ["grid", "strip"];
   const WORD: Record<WorkView, string> = {
     strip: "Strip",
     grid: "Grid",
@@ -442,49 +541,9 @@ export function WorkShell({
           </svg>
         </button>
       ))}
+      {glass}
     </span>
   );
-
-  /* The search. Seventy projects and eleven disciplines, and until now the
-     only way to find the one you were told about was to walk the whole
-     ribbon. It reads the names, the disciplines and every credit on every
-     project, so a model, a client or a crew member finds their own work by
-     their own handle.
-
-     On All, where the whole archive is: a discipline is already a filter,
-     and a box searching eleven covers is a control with nothing to do.
-     In the head's left column, under the way back, opposite the view
-     buttons in the right one: the two controls for how you get at the work
-     stand at the two ends of the same line, and the chip row keeps every
-     pixel it had. From `sm` up — a phone has the dropdown and a thumb, and
-     a field that opens a keyboard over the work is not how that screen is
-     used. */
-  const box = all ? (
-    <div className="relative mt-2 hidden items-center sm:flex">
-      <svg
-        aria-hidden
-        viewBox="0 0 16 16"
-        className="pointer-events-none absolute left-2.5 h-3.5 w-3.5 text-muted-foreground"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.4"
-      >
-        <circle cx="7" cy="7" r="4.6" />
-        <path d="M10.5 10.5L15 15" />
-      </svg>
-      <input
-        type="search"
-        value={query}
-        onChange={(e) => search(e.target.value)}
-        onKeyDown={(e) => {
-          if (e.key === "Escape" && query) search("");
-        }}
-        placeholder="Search"
-        aria-label="Search the work by name, discipline or credit"
-        className="filter-trigger glass-surface label w-full border border-foreground/20 py-1.5 pl-8 pr-2 text-foreground outline-none placeholder:text-muted-foreground focus-visible:border-foreground [&::-webkit-search-cancel-button]:hidden"
-      />
-    </div>
-  ) : null;
 
   return (
     <StripPage
@@ -493,10 +552,7 @@ export function WorkShell({
           <StripHead
             crumb={
               all ? (
-                <>
-                  <span className="label text-muted-foreground">All work</span>
-                  {box}
-                </>
+                <span className="label text-muted-foreground">All work</span>
               ) : (
                 <Link
                   href="/work"
@@ -512,6 +568,7 @@ export function WorkShell({
               <>
                 {head.aside}
                 {toggle}
+                {box}
               </>
             }
             /* On /work the strip opens on a discipline, so the page's own

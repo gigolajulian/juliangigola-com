@@ -67,7 +67,7 @@ export function WorkList({ rows }: { rows: ListRow[] }) {
                 href={row.href}
                 prefetch={false}
                 data-ring="View project"
-                className="group flex items-center gap-5 border-b border-border py-3 press hoverable:hover:bg-card"
+                className="group flex items-center gap-5 border-b-[0.5px] border-border/40 py-3 press hoverable:hover:border-border hoverable:hover:bg-card"
               >
                 <span
                   className="relative block w-16 shrink-0 overflow-hidden sm:w-20"
