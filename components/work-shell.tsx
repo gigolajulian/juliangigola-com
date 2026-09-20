@@ -466,8 +466,41 @@ export function WorkShell({
         }}
         placeholder="Search"
         aria-label="Search the work by name, discipline or credit"
-        className="label w-full bg-transparent pl-[1.625rem] pr-3 text-right text-foreground outline-none placeholder:text-muted-foreground [&::-webkit-search-cancel-button]:hidden"
+        className="label w-full bg-transparent pl-[1.625rem] pr-[1.5rem] text-right text-foreground outline-none placeholder:text-muted-foreground [&::-webkit-search-cancel-button]:hidden"
       />
+      {/* The cross empties the box and leaves it open, which is the
+          difference between it and the glass: one is "that was not what I
+          meant", the other is "I am done looking". Only with something in
+          the box — a cross beside an empty field is a control that does
+          nothing.
+
+          `onMouseDown` swallowed, or the field blurs before the click
+          lands, the box closes on an empty query and the press arrives at
+          an element that has gone. */}
+      {finding && query ? (
+        <button
+          type="button"
+          aria-label="Clear the search"
+          data-ring="Clear"
+          onMouseDown={(e) => e.preventDefault()}
+          onClick={() => {
+            search("");
+            field.current?.focus();
+          }}
+          className="absolute right-0 top-0 grid h-full w-[1.5rem] place-items-center text-foreground opacity-60 transition-opacity duration-200 hoverable:hover:opacity-100"
+        >
+          <svg
+            aria-hidden
+            viewBox="0 0 16 16"
+            className="h-2.5 w-2.5"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.6"
+          >
+            <path d="M2 2L14 14M14 2L2 14" />
+          </svg>
+        </button>
+      ) : null}
     </span>
   );
 
