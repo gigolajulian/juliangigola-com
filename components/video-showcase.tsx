@@ -96,6 +96,13 @@ export function VideoShowcase({
          tiles smaller so the background is seen. */
       <div
         key={section.id}
+        /* Pictures, not words. In the rack the cells that are words — a
+           discipline's name, the ask — are capped at 22rem of max-content,
+           and this group of films was being read as one of them: Safari
+           laid it out at 77px and the tiles printed themselves over the
+           cells either side. The headings here carry `data-tick` and are
+           excluded already; this says the same thing the other way. */
+        data-pictures
         className="w-full shrink-0 sm:flex sm:h-full sm:w-auto sm:items-center"
       >
         {/* Two thirds on a desktop, where the reel behind is the point of

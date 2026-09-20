@@ -850,8 +850,9 @@ nav[aria-label="Categories"] ul[data-more] {
      bare `:where()` cannot beat it.
 
      The ask is excepted below; it sets its own width. */
-  .strip-grid > :is(div, section, article):not([data-hash="enquire"]):not(
-      [data-tick]
+  .strip-grid
+    > :is(div, section, article):not([data-hash="enquire"]):not([data-tick]):not(
+      [data-pictures]
     ) {
     width: max-content !important;
     /* Wide enough for the longest discipline set at 3rem and for a credit
@@ -866,6 +867,24 @@ nav[aria-label="Categories"] ul[data-more] {
      them. */
   .strip-grid > :is(div, section, article):not([data-tick]) :where(dt, dd) {
     white-space: normal;
+  }
+  /* And the films, which are a block of pictures rather than one picture.
+     Safari laid the block out at 77px and its tiles printed themselves
+     over the cells either side — the whole of what Julian saw as the
+     motion tab looking horrible. The cause is intrinsic sizing: the tiles
+     take their height from the row and their width from 16:9, and WebKit
+     will not carry that back up as the block's own width the way Blink
+     does. So nothing here is left intrinsic. The block is given the
+     height it asks for in `video-showcase.tsx` as a length the rack can
+     resolve, and the tile column is worked out from it: two rows and the
+     gap between them, at 16:9. Measured after, in both engines and at two
+     window sizes: the same block width to the pixel and nothing
+     overflowing its cell. */
+  .strip-grid > [data-pictures] > * {
+    height: 62cqh;
+  }
+  .strip-grid > [data-pictures] ul {
+    grid-auto-columns: calc((62cqh - 0.75rem) / 2 * 16 / 9);
   }
   /* The ask is the exception: a sentence, two buttons and the way on to the
      studio is not a label and does not fit in a slot. */
