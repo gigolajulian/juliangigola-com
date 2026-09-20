@@ -540,29 +540,59 @@ export function Strip({
        stylesheet used to say. */
     const still = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
+    /* ── the cells' geometry, read once ──
+       Where each cell sits and how wide the scroller is. This used to be
+       read inside `read()`, which runs a frame at a time for the length of
+       every scroll: `offsetLeft`, `offsetWidth`, `scrollWidth` and
+       `clientWidth` all make the browser lay the page out before they can
+       answer, and the opacity written at the end of the same pass leaves it
+       dirty again for the next frame. Measured on a rack in grid view, one
+       second of scrolling: 196 layouts and 349 style recalculations, 149ms
+       of style and 110ms of script. That is the jitter Julian could see
+       when a filter changed — the change simply lands on top of it.
+
+       None of it moves while the strip scrolls. A cell's place against its
+       neighbours is fixed by the layout and only changes when the scroller
+       does: a resize, a switch between the strip and the rack, a page with
+       a different number of cells. So it is measured on those and read from
+       here otherwise, and a scroll frame does no layout at all. */
+    let centres: number[] = [];
+    let span = 0;
+    let reach = 0;
+    let firstEnd = 0;
+    const remeasure = () => {
+      const kids = Array.from(el.children) as HTMLElement[];
+      span = el.clientWidth;
+      reach = el.scrollWidth - span;
+      centres = kids.map((c) => c.offsetLeft + c.offsetWidth / 2);
+      const first = kids[0];
+      firstEnd = first ? first.offsetLeft + first.offsetWidth * 0.5 : 0;
+    };
+
     const read = () => {
       queued = 0;
       // Where to sit somebody down if they come back to this path.
       seatX.current = Math.round(el.scrollLeft);
-      const room = el.scrollWidth - el.clientWidth;
+      const kidCount = el.children.length;
+      if (centres.length !== kidCount) remeasure();
+      const room = reach;
       /* Whether the opening cell has gone. A page's running head waits for
          this: the sequence opens on its title set large, and two titles on
          one screen is the same words twice. Half the cell's width, so the
          swap happens as it leaves rather than after it has. The rule that
          reads this is in `globals.css`. */
-      const first = el.firstElementChild as HTMLElement | null;
       el.toggleAttribute(
         "data-past-first",
-        !!first && el.scrollLeft > first.offsetLeft + first.offsetWidth * 0.5,
+        kidCount > 0 && el.scrollLeft > firstEnd,
       );
       /* Either end is that end's cell, whatever is nearest the middle.
          At the far end the last cell is often narrower than half a window,
          so the middle of the window sits over the one before it and the
          counter could never reach the last cell at all. */
-      const middle = el.scrollLeft + el.clientWidth / 2;
+      const middle = el.scrollLeft + span / 2;
       const kids = Array.from(el.children) as HTMLElement[];
-      // Every read before any write, or each write would cost a layout.
-      const offs = kids.map((c) => c.offsetLeft + c.offsetWidth / 2 - middle);
+      // Measured, not read: see `remeasure` above.
+      const offs = centres.map((c) => c - middle);
       let best = 0;
       let nearest = Infinity;
       offs.forEach((off, i) => {
@@ -585,7 +615,7 @@ export function Strip({
            screen: measured on the homepage, 403ms of style recalculation
            inside a swipe of a second and a half, against 18ms with the
            writes taken out. That was the lag Julian could feel. */
-        const par = off / el.clientWidth;
+        const par = off / span;
         const away = Math.min(1, Math.abs(par));
         const soft = fades(kids[i]);
         if (Math.abs(par) > 1.5) {
@@ -629,14 +659,25 @@ export function Strip({
     // by a second one in the same tick.
     queued = requestAnimationFrame(() => {
       readTicks();
+      remeasure();
       read();
     });
+    /* The scroller changing shape is the one thing that moves the cells:
+       a window resized, the rack swapped for the strip, a cell arriving.
+       Measure again then, and never on a scroll frame. */
+    const again = () => {
+      remeasure();
+      read();
+    };
+    const watch = new ResizeObserver(again);
+    watch.observe(el);
     el.addEventListener("scroll", onScroll, { passive: true });
-    window.addEventListener("resize", read);
+    window.addEventListener("resize", again);
     window.addEventListener("hashchange", onHash);
     return () => {
+      watch.disconnect();
       el.removeEventListener("scroll", onScroll);
-      window.removeEventListener("resize", read);
+      window.removeEventListener("resize", again);
       window.removeEventListener("hashchange", onHash);
       if (queued) cancelAnimationFrame(queued);
       clearTimeout(markTimer);
@@ -664,7 +705,25 @@ export function Strip({
     const eased = !window.matchMedia("(prefers-reduced-motion: reduce)")
       .matches;
 
-    const room = () => el.scrollWidth - el.clientWidth;
+    /* ── the scroller's own measurements, taken when it changes ──
+       `scrollWidth` and `clientWidth` both make the browser lay the page
+       out before they can answer, and the loop below writes `scrollLeft`
+       every frame, which leaves the layout dirty for the next read. So
+       reading them inside the loop cost a layout a frame: measured on a
+       rack in grid view, 163 layouts and 342 style recalculations in one
+       second of scrolling, and that is what the jitter is made of.
+
+       Neither changes while the strip is moving. They are taken when the
+       scroller changes shape, and again at the start of a gesture, which
+       is the moment a cell could have arrived without the scroller itself
+       resizing. Never on a frame. */
+    let width = el.clientWidth;
+    let span = el.scrollWidth - width;
+    const size = () => {
+      width = el.clientWidth;
+      span = el.scrollWidth - width;
+    };
+    const room = () => span;
     const clamp = (v: number) => Math.min(room(), Math.max(0, v));
     let target = el.scrollLeft;
     let frame = 0;
@@ -700,7 +759,7 @@ export function Strip({
       // Three notches read 48, 94 and 136px, so the band is still growing
       // at the moment it goes. It was half that and Julian said it did not
       // feel like a rubber band: give that cannot be seen is a stop.
-      const pull = eased && over ? rubberband(over, el.clientWidth, 0.5) : 0;
+      const pull = eased && over ? rubberband(over, width, 0.5) : 0;
       el.style.translate = pull
         ? `${-Math.max(-STRETCH, Math.min(STRETCH, pull))}px`
         : "";
@@ -954,6 +1013,8 @@ export function Strip({
       const now = e.timeStamp || performance.now();
       const fresh = now - gestureAt > GESTURE_GAP_MS;
       gestureAt = now;
+      // A new push: take the measurements again, once, before using them.
+      if (fresh) size();
       const sideways = Math.abs(e.deltaX) > Math.abs(e.deltaY);
       const raw = sideways ? e.deltaX : e.deltaY;
       if (!raw) return;
@@ -1106,6 +1167,7 @@ export function Strip({
       }
       down = true;
       dragging = false;
+      size();
       stop();
       fromX = lastX = e.clientX;
       fromScroll = el.scrollLeft;
@@ -1294,6 +1356,11 @@ export function Strip({
        notch rather than cutting there. */
     const onHome = () => to(0);
 
+    // And whenever the scroller changes shape: a window resized, the rack
+    // swapped for the strip, a cell arriving.
+    const resized = new ResizeObserver(size);
+    resized.observe(el);
+
     el.addEventListener("jg:home", onHome);
     el.addEventListener("scroll", onSettle, { passive: true });
     el.addEventListener("focusin", onFocusIn);
@@ -1318,6 +1385,7 @@ export function Strip({
 
     return () => {
       window.clearTimeout(settle);
+      resized.disconnect();
       el.removeEventListener("jg:home", onHome);
       el.removeEventListener("scroll", onSettle);
       el.removeEventListener("focusin", onFocusIn);
