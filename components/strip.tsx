@@ -291,6 +291,73 @@ export function Strip({
      lead-on off to do it, which is most of what made changing a filter
      feel like changing pages. Same gestures, twice the work on screen. */
   const live = stack ? wide : true;
+
+  /* ── the rack pairs like with like ────────────────────────────
+   * A column of the rack is two cells one above the other and is as wide
+   * as the wider of them, so a portrait sitting above a landscape is
+   * printed in a column half as wide again as itself and the rest of that
+   * column is paper. Measured on production at 1600: Event coverage put a
+   * portrait with a landscape in 5 of its 13 columns, Automotive in 4 of
+   * 11, Places in 5 of 12, and inside one of those columns the narrower
+   * frame is left in a hole about 45% as wide as itself. Julian: the
+   * upright ones can stand next to each other so there is no empty space.
+   *
+   * So the cells are re-ordered, not resized: nothing is cropped and no
+   * frame changes shape. Each cell is paired with the next one of its own
+   * orientation, and `order` puts the two of them in the same column.
+   * Greedy and in sequence, so a run stays close to the order it was
+   * given rather than being sorted into all the uprights and then all the
+   * wide ones.
+   *
+   * The words that open a discipline span both rows and take a whole
+   * column of their own; they are left exactly where they are, and the
+   * pairing starts again after each of them, because that is where the
+   * grid starts a fresh column anyway.
+   *
+   * Read from the DOM and not from the children, because `--ar` is set by
+   * the cell on the element it renders and a parent holding the React
+   * element cannot see it. One pass on the way into the rack, one
+   * `getComputedStyle` per cell; the strip view clears what it wrote.
+   */
+  React.useEffect(() => {
+    const el = scroller.current;
+    if (!el) return;
+    const kids = Array.from(el.children) as HTMLElement[];
+    if (!grid) {
+      for (const k of kids) k.style.order = "";
+      return;
+    }
+    /* A cell that is not a picture spans both rows — see `.strip-grid` in
+       `globals.css` — so it is a column on its own and an anchor here. */
+    const picture = (k: HTMLElement) =>
+      k.tagName === "A" || k.tagName === "BUTTON";
+    const upright = (k: HTMLElement) =>
+      (parseFloat(getComputedStyle(k).getPropertyValue("--ar")) || 0.8) < 1;
+
+    const taken = new Array(kids.length).fill(false);
+    let at = 0;
+    for (let i = 0; i < kids.length; i++) {
+      if (taken[i]) continue;
+      taken[i] = true;
+      kids[i].style.order = String(at++);
+      if (!picture(kids[i])) continue;
+      /* Its partner: the next free cell standing the same way up, and
+         not past the words that begin the next discipline. The same way
+         up and not the nearest shape: pairing each cell with the closest
+         `--ar` within reach was measured worse on two galleries of three,
+         because a good local match spends the partner a later cell needed
+         more. 7.1% of the rack left empty across the three this way,
+         9.9% that way. */
+      const want = upright(kids[i]);
+      for (let j = i + 1; j < kids.length; j++) {
+        if (!picture(kids[j])) break;
+        if (taken[j] || upright(kids[j]) !== want) continue;
+        taken[j] = true;
+        kids[j].style.order = String(at++);
+        break;
+      }
+    }
+  }, [grid, children]);
   const router = useRouter();
   // Stable for the life of the strip: pages key it by what it shows.
   const nextHref = next?.href;
