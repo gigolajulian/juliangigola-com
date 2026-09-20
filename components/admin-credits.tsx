@@ -119,6 +119,22 @@ export function AdminCredits({
     onChange(next);
   };
 
+  /* Dragging: the row goes where it was dropped, the others close up. The
+     grip is the only draggable part, because a draggable row swallows the
+     mouse-selects-text gesture inside its own inputs. Same mechanics as
+     `Ordering` in `admin-disciplines.tsx`: the origin rides in
+     `dataTransfer`, with the state as the fallback. The arrows stay for
+     the keyboard, and for a phone, where there is no drag. */
+  const [dragging, setDragging] = React.useState<number | null>(null);
+  const [over, setOver] = React.useState<number | null>(null);
+  const place = (from: number, to: number) => {
+    if (from === to || !credits[from]) return;
+    const next = [...credits];
+    const [row] = next.splice(from, 1);
+    next.splice(to, 0, row);
+    onChange(next);
+  };
+
   return (
     <div className={className}>
       {title ? (
@@ -132,7 +148,52 @@ export function AdminCredits({
 
       <div className="mt-3 flex flex-col gap-2">
         {credits.map((credit, i) => (
-          <div key={i} className="flex flex-wrap items-center gap-2">
+          <div
+            key={i}
+            onDragOver={(e) => {
+              if (dragging === null) return;
+              e.preventDefault();
+              e.dataTransfer.dropEffect = "move";
+              if (over !== i) setOver(i);
+            }}
+            onDrop={(e) => {
+              if (dragging === null) return;
+              // Cancelling the drop also stops the index landing as text in
+              // whichever input it was released over.
+              e.preventDefault();
+              const from = Number(e.dataTransfer.getData("text/plain"));
+              place(Number.isInteger(from) ? from : dragging, i);
+              setDragging(null);
+              setOver(null);
+            }}
+            className={cn(
+              "flex flex-wrap items-center gap-2 transition-opacity duration-150",
+              dragging === i && "opacity-30",
+              over === i &&
+                dragging !== null &&
+                dragging !== i &&
+                "outline outline-2 outline-offset-2 outline-foreground",
+            )}
+          >
+            <span
+              draggable
+              onDragStart={(e) => {
+                setDragging(i);
+                e.dataTransfer.effectAllowed = "move";
+                e.dataTransfer.setData("text/plain", String(i));
+                const row = e.currentTarget.parentElement;
+                if (row) e.dataTransfer.setDragImage(row, 0, 0);
+              }}
+              onDragEnd={() => {
+                setDragging(null);
+                setOver(null);
+              }}
+              title="Drag to reorder"
+              aria-label={`Drag credit ${i + 1}`}
+              className="label shrink-0 cursor-grab select-none px-1 py-2 text-muted-foreground active:cursor-grabbing"
+            >
+              ≡
+            </span>
             {/* A list, not a closed set. The roles above cover most jobs and
                 save the typing; anything can still be written in, because a
                 shoot invents a role now and then and a dropdown that refuses
