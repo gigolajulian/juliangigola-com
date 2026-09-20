@@ -87,13 +87,37 @@ function sizedHero(src: string, width: number): string | null {
   return (SOURCES as Record<string, string>)[src] ?? src;
 }
 
+/**
+ * The two hosts whose stills the video pages draw.
+ *
+ * A provider thumbnail is somebody else's picture, but it is still a
+ * 1280x720 JPEG painted into a tile 340px wide: 165kB where 44 says the same
+ * thing. The resizer accepts a whole remote URL as its source, so the ladder
+ * that sizes the archive sizes these too, and `format=auto` reaches them as
+ * well. Nothing else absolute is touched.
+ */
+const POSTER_HOSTS = /^https:\/\/i\.(?:ytimg|vimeocdn)\.com\//;
+
 export default function cloudflareImageLoader({
   src,
   width,
   quality,
 }: ImageLoaderProps): string {
-  // An absolute URL is somebody else's and is already complete.
-  if (!src.startsWith("/")) return src;
+  const options = [
+    `width=${width}`,
+    // Matches the quality the harvester writes, so a transform never spends
+    // bytes re-describing compression artefacts it cannot remove.
+    `quality=${quality ?? 82}`,
+    "format=auto",
+  ];
+
+  // An absolute URL is somebody else's. A provider's still is sized anyway;
+  // anything else is already complete.
+  if (!src.startsWith("/")) {
+    return CDN && POSTER_HOSTS.test(src)
+      ? `/cdn-cgi/image/${options.join(",")}/${src}`
+      : src;
+  }
 
   // The sized copy when there is one, with or without the resizer.
   //
@@ -110,14 +134,6 @@ export default function cloudflareImageLoader({
   const source = onR2(picked) ? R2_ORIGIN + picked : picked;
 
   if (!CDN) return source;
-
-  const options = [
-    `width=${width}`,
-    // Matches the quality the harvester writes, so a transform never spends
-    // bytes re-describing compression artefacts it cannot remove.
-    `quality=${quality ?? 82}`,
-    "format=auto",
-  ];
 
   // The source goes in without its leading slash: the format is
   // `/cdn-cgi/image/<options>/<path>`, and a second slash in the path is a

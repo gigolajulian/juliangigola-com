@@ -119,9 +119,8 @@ export function FilmCell({
           loading={eager ? "eager" : "lazy"}
           draggable={false}
           className="strip-frame object-cover"
-          // A 16:9 still from a CDN, not a frame from the archive, so the
-          // loader that rewrites archive paths must not touch it.
-          unoptimized
+          // A 16:9 still from the provider's CDN rather than a frame from
+          // the archive. The loader sizes it to the slot like anything else.
         />
       ) : null}
     </Link>

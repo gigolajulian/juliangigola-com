@@ -130,7 +130,6 @@ export function VideoViewer({
                             fill
                             sizes="12rem"
                             className="object-cover transition-transform duration-500 ease-[var(--ease-out-strong)] hoverable:group-hover:scale-[1.04] motion-reduce:transition-none"
-                            unoptimized
                           />
                         ) : null}
                       </button>

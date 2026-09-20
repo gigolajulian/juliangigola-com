@@ -225,10 +225,10 @@ function Tile({
              the frame leaning in. The easing lives on `img[data-fade]` in
              globals.css, which outranks any transition written here. */
           className="object-cover hoverable:group-hover:scale-[1.04] motion-reduce:group-hover:scale-100"
-          // These are 16:9 thumbnails from a CDN, not frames from the
-          // archive, so the loader that rewrites archive paths must not touch
-          // them — `unoptimized` hands the URL through as it is.
-          unoptimized
+          /* A 16:9 still from the provider's CDN rather than a frame from
+             the archive, and the loader sizes it all the same: a tile is
+             340px wide and the still is 1280, which was four times the
+             pixels needed on every tile of the page. */
         />
       ) : null}
 
