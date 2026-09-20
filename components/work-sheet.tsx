@@ -3,6 +3,7 @@
 import * as React from "react";
 import { useWide } from "@/components/strip";
 import { WorkList, type ListRow } from "@/components/work-list";
+import type { Frame } from "@/lib/work-types";
 import { useWorkQuery, useWorkView } from "@/lib/work-view";
 
 /* ── which of the three is showing ────────────────────────────────
@@ -23,10 +24,18 @@ import { useWorkQuery, useWorkView } from "@/lib/work-view";
  * ─────────────────────────────────────────────────────────────── */
 export function WorkSheet({
   rows,
+  mine,
+  frames,
   within,
   children,
 }: {
   rows: ListRow[];
+  /** This page's own list, where its content is not projects: the frames
+      of a gallery discipline, the sleeves of Cover art, the films. Without
+      it the list is the archive rows filed under `within`. */
+  mine?: ListRow[];
+  /** The photographs `mine` can open in the viewer. */
+  frames?: Frame[];
   /** The discipline this page shows, if it is one. */
   within?: string;
   children: React.ReactNode;
@@ -40,6 +49,7 @@ export function WorkSheet({
   if (!wide) return <>{children}</>;
   if (query.trim()) return <WorkList rows={rows} />;
   if (view === "list") {
+    if (mine) return <WorkList rows={mine} frames={frames} />;
     return (
       <WorkList
         rows={within ? rows.filter((r) => r.discipline === within) : rows}

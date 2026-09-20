@@ -921,6 +921,28 @@ nav[aria-label="Categories"] ul[data-more] {
    more, which is where 160 comes from; every shorter name rises until the
    cap stops it. One line always — the division is what keeps it there,
    and `truncate` is the backstop. */
+/* And the plate they sit on. Julian: more space between the two lines and
+   the second one larger. In the rack the credit was at the floor of its
+   clamp — 8px under a 240px photograph — because the type is measured in
+   `cqw` off a cell that is a quarter of the width it has on the strip, and
+   the gap between the lines came out at 2px, which reads as one block of
+   type rather than a title and a subtitle. Both are set in rem here, where
+   the column is a known size. */
+.strip-grid .cover-plate {
+  gap: 0.3rem;
+  /* Sized to what is on it, not to a share of the cover. Two fifteenths of
+     a 240px column is 32px, and a name set at 20 with a credit under it
+     needs 45: the type was centred in a plate too short for it and the
+     first line came out half on the photograph. On the strip the plate is
+     a fixed band of a tall cover and stays as it was. */
+  height: auto;
+  min-height: 0;
+  padding-block: 0.45rem;
+}
+.strip-grid .cover-plate .label {
+  font-size: 0.6875rem;
+  letter-spacing: 0.08em;
+}
 .strip-grid .cover-name {
   font-size: clamp(0.75rem, min(9cqw, calc(160cqw / var(--n, 12))), 1.5rem);
 }

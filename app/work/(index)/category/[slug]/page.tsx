@@ -21,6 +21,8 @@ import {
 import { SoleMark } from "@/components/client-marks";
 import { WorkSheet } from "@/components/work-sheet";
 import { WORK_ROWS } from "@/lib/work-rows";
+import type { ListRow } from "@/components/work-list";
+import type { Frame } from "@/lib/work-types";
 import { COVER_RELEASES } from "@/lib/cover-art-data";
 
 /* ── a discipline ─────────────────────────────────────────────────
@@ -111,6 +113,35 @@ export async function generateMetadata(
   };
 }
 
+/* ── the disciplines that are not projects ────────────────────────
+ * Event coverage, Automotive and Places are photographs put straight on
+ * the page, and Cover art is a rack of sleeves. In the list they are their
+ * own contents — a line per frame, a line per release — and not the single
+ * line that stands for the whole of them on All. Julian asked.
+ *
+ * A frame has no page to open, so its line opens the viewer instead:
+ * `n` is its place in the frames handed alongside (`work-list.tsx`).
+ * ─────────────────────────────────────────────────────────────── */
+/* The alt text of these frames is written by the harvester and says
+   "Places, frame 3 of 20", which is the number the line already carries.
+   A description that says something else is printed instead. */
+const COUNTED = /frame \d+ of \d+/i;
+
+const framesList = (frames: Frame[], name: string): ListRow[] =>
+  frames.map((f, i) => {
+    const said = f.alt?.trim();
+    return {
+      slug: f.src,
+      n: i,
+      name: `${name} ${String(i + 1).padStart(2, "0")}`,
+      href: "",
+      discipline: name,
+      credit: said && !COUNTED.test(said) ? said : `Frame ${i + 1}`,
+      cover: f,
+      find: `${name} ${said ?? ""}`.toLowerCase(),
+    };
+  });
+
 export default async function CategoryPage(
   props: PageProps<"/work/category/[slug]">,
 ) {
@@ -144,7 +175,12 @@ export default async function CategoryPage(
      phone it keeps its sideways swipe and needs a height to do it in. */
   if (gallery && !isCoverArt) {
     return (
-      <WorkSheet rows={WORK_ROWS} within={name}>
+      <WorkSheet
+        rows={WORK_ROWS}
+        mine={framesList(gallery.images, name)}
+        frames={gallery.images}
+        within={name}
+      >
         <div className="flex min-h-0 flex-1 flex-col max-sm:h-[75dvh] max-sm:flex-none">
           <ProjectStrip
             project={gallery}
@@ -161,7 +197,24 @@ export default async function CategoryPage(
      the strip, as one cell. */
   if (gallery && isCoverArt) {
     return (
-      <WorkSheet rows={WORK_ROWS} within={name}>
+      <WorkSheet
+        rows={WORK_ROWS}
+        /* A release is a record sleeve with a name and an artist on it,
+           and both faces are on the rack behind this list, so a line
+           opens the front of it in the viewer. */
+        mine={COVER_RELEASES.map((r, i) => ({
+          slug: r.frames[0].src,
+          n: i,
+          name: r.title,
+          href: "",
+          discipline: name,
+          credit: r.artist,
+          cover: r.frames[0],
+          find: `${r.title} ${r.artist}`.toLowerCase(),
+        }))}
+        frames={COVER_RELEASES.map((r) => r.frames[0])}
+        within={name}
+      >
         <Strip
           label={`Cover art: ${COVER_RELEASES.length} releases, left and right`}
           next={next}

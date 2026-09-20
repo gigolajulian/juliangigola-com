@@ -374,24 +374,40 @@ export function WorkShell({
     return () => window.removeEventListener("resize", measure);
   }, [key, shown]);
 
-  /* The search, as a viewfinder. Julian asked for the box gone and the
-     glass on the right with the view buttons: a field sitting open under
-     the crumb was a control demanding to be used on a page nobody arrives
-     at to search. Pressed, it opens into the column under the buttons and
-     takes the cursor; empty and left alone, it closes again.
-
-     It reads the names, the disciplines and every credit on every
-     project, so a model, a client or a crew member finds their own work by
-     their own handle.
-
-     On every filter, because a search is kept across them. From `sm` up,
-     with the buttons — a phone has the dropdown and a thumb,
-     and a field that opens a keyboard over the work is not how that screen
-     is used. */
+  /* The search, as a viewfinder that opens into a box.
+   *
+   * One element, not two: the glass is the left end of a pill that is
+   * 1.75rem wide with nothing in it and 12rem wide with a field in it, and
+   * because the row is anchored to the right edge the growing happens
+   * leftwards — the glass slides left and the box appears behind it, which
+   * is what Julian asked for and is one width transition rather than a
+   * dance between two elements. Rounded, against the rule about pills, on
+   * his say-so.
+   *
+   * It reads the names, the disciplines and every credit on every project,
+   * so a model, a client or a crew member finds their own work by their own
+   * handle, and the answer comes from the whole archive whichever filter is
+   * lit (`work-sheet.tsx`).
+   *
+   * Mounted always and opened on a transition rather than mounted on the
+   * press: an element that appears cannot animate its arrival, and a press
+   * that can be taken back halfway is the difference between a thing
+   * opening and a thing blinking. 260ms on the strong ease-out, the curve
+   * the rest of the page opens on.
+   *
+   * From `sm` up, with the buttons — a phone has the dropdown and a thumb,
+   * and a field that opens a keyboard over the work is not how that screen
+   * is used. */
   const field = React.useRef<HTMLInputElement>(null);
-  const glass = (
-    <>
-      <span aria-hidden className="mx-1 h-3 w-px bg-foreground/15" />
+  const finder = (
+    <span
+      className={cn(
+        "relative flex h-[1.625rem] shrink-0 items-center overflow-hidden border transition-[width,border-radius,border-color,opacity] duration-[260ms] ease-[var(--ease-out-strong)] motion-reduce:transition-none",
+        finding
+          ? "glass-surface w-48 rounded-full border-foreground/15 opacity-50"
+          : "w-[1.625rem] rounded-none border-transparent opacity-100",
+      )}
+    >
       <button
         type="button"
         aria-expanded={finding}
@@ -399,6 +415,12 @@ export function WorkShell({
         aria-label="Search the work"
         data-ring="Search"
         onClick={() => {
+          if (finding) {
+            search("");
+            setFinding(false);
+            field.current?.blur();
+            return;
+          }
           setFinding(true);
           /* Now, not a frame later: the field is always mounted, and a
              frame of waiting is two characters lost by anybody who
@@ -406,8 +428,8 @@ export function WorkShell({
           field.current?.focus();
         }}
         className={cn(
-          "-my-1 p-1.5 transition-opacity duration-200",
-          finding || query
+          "absolute left-0 top-0 grid h-full w-[1.625rem] place-items-center transition-opacity duration-200",
+          finding
             ? "text-foreground opacity-100"
             : "text-foreground opacity-35 hoverable:hover:opacity-70",
         )}
@@ -424,59 +446,28 @@ export function WorkShell({
           <path d="M10.3 10.3L15 15" />
         </svg>
       </button>
-    </>
-  );
-
-  /* Mounted always and opened on a transition rather than mounted on the
-     press: an element that appears cannot animate its arrival, and a
-     press that can be taken back halfway is the whole difference between
-     a panel opening and a panel blinking. A column track from `0fr` to
-     `1fr`, which is how a fixed-width thing is grown from nothing without
-     animating `width` to a number nobody can name; 200ms on the strong
-     ease-out, the curve the rest of the page opens on.
-
-     Inline, and it opens where the glass is: Julian asked for the box on
-     the line, for the view marks to move aside for it, and for the
-     viewfinder itself to stay where it was. So the field grows in the slot
-     immediately before the glass — the glass holds the right edge, the
-     three marks slide left by the field's width, and because the row is
-     out of the flow and anchored right it grows into the head's own empty
-     middle without moving the count above it or the strip below.
-
-     Spans, not divs: the head's aside is a paragraph, and a block element
-     inside one is moved out by the parser before React sees it — which is
-     a hydration mismatch, not a styling problem. */
-  const box = (
-    <span
-      className={cn(
-        "grid transition-[grid-template-columns,opacity] duration-200 ease-[var(--ease-out-strong)] motion-reduce:transition-none",
-        finding ? "grid-cols-[1fr] opacity-50" : "grid-cols-[0fr] opacity-0",
-      )}
-    >
-      <span className="block overflow-hidden">
-        <input
-          id="work-search"
-          ref={field}
-          type="search"
-          value={query}
-          tabIndex={finding ? undefined : -1}
-          onChange={(e) => search(e.target.value)}
-          onBlur={() => {
-            if (!query.trim()) setFinding(false);
-          }}
-          onKeyDown={(e) => {
-            if (e.key !== "Escape") return;
-            search("");
-            setFinding(false);
-            // A field that is about to be hidden must not keep the cursor.
-            e.currentTarget.blur();
-          }}
-          placeholder="Search"
-          aria-label="Search the work by name, discipline or credit"
-          aria-hidden={!finding}
-          className="filter-trigger glass-surface label mx-1 w-40 border border-foreground/15 px-2 py-1 text-right text-foreground outline-none placeholder:text-muted-foreground focus-visible:border-foreground [&::-webkit-search-cancel-button]:hidden"
-        />
-      </span>
+      <input
+        id="work-search"
+        ref={field}
+        type="search"
+        value={query}
+        tabIndex={finding ? undefined : -1}
+        aria-hidden={!finding}
+        onChange={(e) => search(e.target.value)}
+        onBlur={() => {
+          if (!query.trim()) setFinding(false);
+        }}
+        onKeyDown={(e) => {
+          if (e.key !== "Escape") return;
+          search("");
+          setFinding(false);
+          // A field that is about to be hidden must not keep the cursor.
+          e.currentTarget.blur();
+        }}
+        placeholder="Search"
+        aria-label="Search the work by name, discipline or credit"
+        className="label w-full bg-transparent pl-[1.625rem] pr-3 text-right text-foreground outline-none placeholder:text-muted-foreground [&::-webkit-search-cancel-button]:hidden"
+      />
     </span>
   );
 
@@ -498,7 +489,7 @@ export function WorkShell({
     list: "List",
   };
   const toggle = (
-    <span className="relative mt-2 block h-[1.625rem] max-sm:hidden">
+    <span className="relative block h-[1.625rem] max-sm:hidden">
       <span className="absolute right-0 top-0 flex w-max items-center gap-1 whitespace-nowrap">
         {modes.map((mode) => (
           <button
@@ -554,8 +545,8 @@ export function WorkShell({
             </svg>
           </button>
         ))}
-        {box}
-        {glass}
+        <span aria-hidden className="mx-1 h-3 w-px bg-foreground/15" />
+        {finder}
       </span>
     </span>
   );
@@ -579,12 +570,12 @@ export function WorkShell({
             }
             title={head.title}
             live
-            aside={
-              <>
-                {head.aside}
-                {toggle}
-              </>
-            }
+            /* Julian: no count up here. The chip row says how many are
+               behind every filter, including the one that is lit, and the
+               same number twice on one line is the head arguing with
+               itself. What is left in this column is how to look at the
+               work. */
+            aside={toggle}
             /* On /work the strip opens on a discipline, so the page's own
                title lives here, in the middle of the head, from the first
                frame. A category page still opens on its name set large and

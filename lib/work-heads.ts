@@ -12,7 +12,6 @@ import { CONTENT } from "@/lib/content";
 /** What a filter is called and how much is behind it. */
 export type Head = {
   title: string;
-  aside: string;
   /** How many things are behind this filter, for the chip. */
   count: number;
 };
@@ -29,12 +28,10 @@ export type Head = {
 export const WORK_HEADS: Record<string, Head> = {
   all: {
     title: "Work",
-    aside: `${COMMISSIONS.length} projects`,
     count: COMMISSIONS.length,
   },
   video: {
     title: "Motion",
-    aside: `${filmCount(CONTENT.videos)} films`,
     count: filmCount(CONTENT.videos),
   },
 };
@@ -50,9 +47,6 @@ for (const c of WORK_CATEGORY_LINKS) {
     : projectsIn(c.slug).length;
   WORK_HEADS[c.slug] = {
     title: c.name,
-    aside: gallery
-      ? `${count} ${isCoverArt ? "releases" : "frames"}`
-      : `${count} ${count === 1 ? "project" : "projects"}`,
     // The same number the head says, so the chip and the title it opens
     // can never disagree.
     count,

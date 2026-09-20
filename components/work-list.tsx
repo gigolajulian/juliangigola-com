@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import type { Frame } from "@/lib/work-types";
 import { useWorkQuery } from "@/lib/work-view";
+import { Lightbox, useLightbox } from "@/components/lightbox";
 
 /* ── the work as a list ───────────────────────────────────────────
  * The third way through: one line per project, the cover down the left,
@@ -25,6 +26,9 @@ import { useWorkQuery } from "@/lib/work-view";
 
 export type ListRow = {
   slug: string;
+  /** A photograph rather than a project: its place in `frames`, which a
+      press opens in the viewer instead of following `href`. */
+  n?: number;
   name: string;
   href: string;
   /** Which discipline it files under, as the chip row names it. */
@@ -41,8 +45,19 @@ export type ListRow = {
 const matches = (row: ListRow, words: string[]) =>
   words.every((w) => row.find.includes(w));
 
-export function WorkList({ rows }: { rows: ListRow[] }) {
+export function WorkList({
+  rows,
+  frames,
+}: {
+  rows: ListRow[];
+  /** Every photograph a row can open, in the order the rows carry. The
+      disciplines Julian shoots straight onto the page — Event coverage,
+      Automotive, Places — have no project pages behind them, so their
+      lines open the viewer where a project's line opens a page. */
+  frames?: Frame[];
+}) {
   const query = useWorkQuery();
+  const lightbox = useLightbox(frames ?? []);
   const words = query.trim().toLowerCase().split(/\s+/).filter(Boolean);
   const shown = words.length ? rows.filter((r) => matches(r, words)) : rows;
 
@@ -63,12 +78,7 @@ export function WorkList({ rows }: { rows: ListRow[] }) {
         <ul className="flex flex-col">
           {shown.map((row) => (
             <li key={row.slug}>
-              <Link
-                href={row.href}
-                prefetch={false}
-                data-ring="View project"
-                className="group flex items-center gap-5 border-b-[0.5px] border-border/40 py-3 press hoverable:hover:border-border hoverable:hover:bg-card"
-              >
+              <Row row={row} onOpen={lightbox.show}>
                 <span
                   className="relative block w-16 shrink-0 overflow-hidden sm:w-20"
                   style={{
@@ -110,11 +120,53 @@ export function WorkList({ rows }: { rows: ListRow[] }) {
                 <span className="label hidden shrink-0 text-muted-foreground sm:block">
                   {row.discipline}
                 </span>
-              </Link>
+              </Row>
             </li>
           ))}
         </ul>
       </div>
+
+      {frames?.length ? (
+        <Lightbox frames={frames} name="The work" {...lightbox} />
+      ) : null}
     </div>
+  );
+}
+
+/** A line: a page to go to, or a photograph to open. */
+const LINE =
+  "group flex w-full items-center gap-5 border-b-[0.5px] border-border/40 py-3 text-left press hoverable:hover:border-border hoverable:hover:bg-card";
+
+function Row({
+  row,
+  onOpen,
+  children,
+}: {
+  row: ListRow;
+  onOpen: (n: number) => void;
+  children: React.ReactNode;
+}) {
+  if (row.n === undefined) {
+    return (
+      <Link
+        href={row.href}
+        prefetch={false}
+        data-ring="View project"
+        className={LINE}
+      >
+        {children}
+      </Link>
+    );
+  }
+  const n = row.n;
+  return (
+    <button
+      type="button"
+      onClick={() => onOpen(n)}
+      data-ring="Open"
+      className={LINE}
+    >
+      {children}
+    </button>
   );
 }
