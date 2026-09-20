@@ -1922,6 +1922,36 @@ a.strip-cell {
   --filter-w: min(24rem, 82vw);
 }
 
+/* ── the bar under the Dynamic Island ─────────────────────────────
+ * Julian, on an iPhone: the bar should carry on up into the island's
+ * band. The page is laid out under it already — the viewport meta says
+ * `viewport-fit=cover` — but the bar's own surface stopped at the top of
+ * its box, so the band above it was flat page colour rather than the
+ * glass the bar is made of.
+ *
+ * A band painted above the bar in the bar's own material, rather than
+ * padding the bar itself: padding would make the bar 59px taller on that
+ * phone and every page reserves room for it by a written number, so the
+ * top of a dozen pages would go under it. This has no layout at all — it
+ * is zero pixels high on every screen that has no inset, which is every
+ * screen but a notched phone.
+ *
+ * `inherit` on both, so it is the same colour and the same blur as the bar
+ * in whichever of its two states it is in, and it fades with it.
+ * ─────────────────────────────────────────────────────────────── */
+.site-bar::before {
+  content: "";
+  position: absolute;
+  bottom: 100%;
+  left: 0;
+  right: 0;
+  height: env(safe-area-inset-top, 0px);
+  background-color: inherit;
+  backdrop-filter: inherit;
+  -webkit-backdrop-filter: inherit;
+  pointer-events: none;
+}
+
 @media (max-width: 63.999rem) {
   .site-bar,
   body > main,
