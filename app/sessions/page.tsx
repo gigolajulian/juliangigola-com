@@ -110,7 +110,7 @@ export default function SessionsPage() {
                 data-tick
                 data-label={session.name}
                 data-hash={session.slug}
-                className="flex w-full shrink-0 flex-col justify-center gap-4 py-8 sm:h-full sm:w-[min(22rem,60vw)] sm:py-0"
+                className="flex w-full shrink-0 flex-col justify-center gap-6 py-8 sm:h-full sm:w-[min(22rem,60vw)] sm:py-0"
               >
                 {/* The words take the height they need and scroll inside
                     themselves when the window is shorter than they are,
@@ -118,13 +118,13 @@ export default function SessionsPage() {
                     bottom of a laptop screen. */}
                 <div
                   data-scroll
-                  className="flex min-h-0 flex-col gap-4 overflow-y-auto overscroll-contain pr-2"
+                  className="flex min-h-0 flex-col gap-6 overflow-y-auto overscroll-contain pr-2"
                 >
                   <h2 className="font-display text-2xl uppercase leading-none tracking-[0] sm:text-3xl">
                     {session.name}
                   </h2>
 
-                  <dl className="flex flex-wrap gap-x-8 gap-y-3 border-t border-border pt-4">
+                  <dl className="flex flex-wrap gap-x-10 gap-y-4 border-t border-border pt-5">
                     <div>
                       <dt className="label text-muted-foreground">Rate</dt>
                       <dd className="mt-1.5 text-sm">
@@ -145,7 +145,7 @@ export default function SessionsPage() {
 
                   <div>
                     <h3 className="label text-muted-foreground">Includes</h3>
-                    <ul className="mt-2 flex flex-col gap-1.5">
+                    <ul className="mt-3 flex flex-col gap-2.5">
                       {session.includes.map((item) => (
                         <li
                           key={item}
@@ -166,7 +166,7 @@ export default function SessionsPage() {
                     label and value read down the left; the one thing to
                     press is put at the other end of the rule under it, so
                     it is not a seventh line of the list. */}
-                <div className="flex flex-wrap items-center justify-end gap-3 border-t border-border pt-4">
+                <div className="flex flex-wrap items-center justify-end gap-3 border-t border-border pt-5">
                   {BOOKING_URL ? (
                     <a
                       href={BOOKING_URL}
