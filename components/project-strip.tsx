@@ -330,6 +330,13 @@ export function ProjectStrip({
                 {
                   backgroundColor: cell.frame.color,
                   aspectRatio: `${cell.frame.width} / ${cell.frame.height}`,
+                  /* The same shape again as a bare number, for the rack,
+                     where the grid sets the height and works the width out
+                     itself. Julian: a horizontal photograph stays
+                     horizontal in event coverage, automotive and places —
+                     the three disciplines that are one gallery and come
+                     through here rather than as a run of 4:5 covers. */
+                  "--ar": (cell.frame.width / cell.frame.height).toFixed(4),
                   // Its place in the order, for the stagger of the arrival
                   // (`strip-cell` in `globals.css`). The pictures are all
                   // fetched at once as before; only the reveal is in turn.

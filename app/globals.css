@@ -997,17 +997,24 @@ a.strip-cell {
   width: auto !important;
   aspect-ratio: auto !important;
 }
-/* Except the pictures, which are 4:5 wherever they are printed. A row of
-   the rack gives the height and the frame gives the width.
+/* Except the pictures. A row of the rack gives the height and the picture
+   gives the width, from the shape it was shot at: `--ar` comes off the
+   frame in `work-cells.tsx`, and a cover, which is 4:5 wherever it is
+   printed, sets none and takes the 0.8 default.
+
+   Julian: a horizontal photograph stays horizontal in event coverage,
+   automotive and places. Those three disciplines are one gallery rather
+   than a run of covers, so every cell in them was a landscape frame
+   cropped upright to fill a 4:5 column.
 
    A cover is a link and a gallery's frame is a button that opens the
    viewer — the rule named links only, so a discipline that is one gallery
-   (event coverage, places, automotive) laid every frame out at `auto` and
-   the rack showed one picture or none. Julian asked for it fixed. */
+   laid every frame out at `auto` and the rack showed one picture or
+   none. Julian asked for it fixed. */
 .strip-grid > a,
 .strip-grid > button {
   height: 100% !important;
-  width: calc((100cqh - 1rem) / 2 * 4 / 5) !important;
+  width: calc((100cqh - 1rem) / 2 * var(--ar, 0.8)) !important;
 }
 /* On a phone the page is not locked and the strip is already a column, so
    the sheet is the same idea the other way up: two across, running down,

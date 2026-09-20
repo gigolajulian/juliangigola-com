@@ -6,6 +6,8 @@ import Link from "next/link";
 import type { Frame } from "@/lib/work-types";
 import { useWorkQuery } from "@/lib/work-view";
 import { Lightbox, useLightbox } from "@/components/lightbox";
+import { VideoViewer } from "@/components/video-viewer";
+import type { Video } from "@/lib/videos";
 
 /* ── the work as a list ───────────────────────────────────────────
  * The third way through: one line per project, the cover down the left,
@@ -26,6 +28,10 @@ import { Lightbox, useLightbox } from "@/components/lightbox";
 
 export type ListRow = {
   slug: string;
+  /** A film rather than a project: its id in `videos`, which a press
+      plays in the viewer. Julian: clicking a line in the list opens the
+      same thing under the same title as the grid and the strip do. */
+  film?: string;
   /** A photograph rather than a project: its place in `frames`, which a
       press opens in the viewer instead of following `href`. */
   n?: number;
@@ -48,8 +54,13 @@ const matches = (row: ListRow, words: string[]) =>
 export function WorkList({
   rows,
   frames,
+  videos,
 }: {
   rows: ListRow[];
+  /** Every film a row can play, as the page's own strip offers them, so
+      the viewer opens on the film that was clicked and steps through the
+      rest of them from there. */
+  videos?: Video[];
   /** Every photograph a row can open, in the order the rows carry. The
       disciplines Julian shoots straight onto the page — Event coverage,
       Automotive, Places — have no project pages behind them, so their
@@ -58,6 +69,7 @@ export function WorkList({
 }) {
   const query = useWorkQuery();
   const lightbox = useLightbox(frames ?? []);
+  const [film, setFilm] = React.useState<Video | null>(null);
   const words = query.trim().toLowerCase().split(/\s+/).filter(Boolean);
   const shown = words.length ? rows.filter((r) => matches(r, words)) : rows;
 
@@ -78,12 +90,24 @@ export function WorkList({
         <ul className="flex flex-col">
           {shown.map((row) => (
             <li key={row.slug}>
-              <Row row={row} onOpen={lightbox.show}>
+              <Row
+                row={row}
+                onOpen={lightbox.show}
+                onPlay={(id) =>
+                  setFilm(videos?.find((v) => v.id === id) ?? null)
+                }
+              >
                 <span
                   className="relative block w-16 shrink-0 overflow-hidden sm:w-20"
                   style={{
                     backgroundColor: row.cover.color,
-                    aspectRatio: "4 / 5",
+                    /* The shape it was shot at, not an upright crop of it.
+                       Julian, on the films: a horizontal thumbnail stays
+                       horizontal. The column keeps one width so the names
+                       still run down a single edge; it is the height that
+                       gives, which is the way round that leaves the list
+                       scannable. */
+                    aspectRatio: `${row.cover.width} / ${row.cover.height}`,
                   }}
                 >
                   <Image
@@ -129,6 +153,9 @@ export function WorkList({
       {frames?.length ? (
         <Lightbox frames={frames} name="The work" {...lightbox} />
       ) : null}
+      {videos?.length ? (
+        <VideoViewer videos={videos} current={film} onChange={setFilm} />
+      ) : null}
     </div>
   );
 }
@@ -140,12 +167,27 @@ const LINE =
 function Row({
   row,
   onOpen,
+  onPlay,
   children,
 }: {
   row: ListRow;
   onOpen: (n: number) => void;
+  onPlay: (id: string) => void;
   children: React.ReactNode;
 }) {
+  if (row.film) {
+    const id = row.film;
+    return (
+      <button
+        type="button"
+        onClick={() => onPlay(id)}
+        data-ring="Play"
+        className={LINE}
+      >
+        {children}
+      </button>
+    );
+  }
   if (row.n === undefined) {
     return (
       <Link

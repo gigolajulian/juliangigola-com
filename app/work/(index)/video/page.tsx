@@ -67,6 +67,7 @@ export default function VideoPage() {
     },
     ...videos.map((v) => ({
       slug: v.id,
+      film: v.id,
       name: v.title,
       href: "/work/video",
       discipline: "Motion",
@@ -77,7 +78,7 @@ export default function VideoPage() {
   ];
 
   return (
-    <WorkSheet rows={WORK_ROWS} mine={films} within="Motion">
+    <WorkSheet rows={WORK_ROWS} mine={films} videos={videos} within="Motion">
       <VideoShowcase
         prev={BEFORE}
         sections={SECTIONS.map((s) => ({

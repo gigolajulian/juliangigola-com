@@ -154,6 +154,13 @@ export function FrameCell({
         {
           backgroundColor: frame.color,
           aspectRatio: `${frame.width} / ${frame.height}`,
+          /* And the same shape again as a bare number, for the rack. There
+             the grid sets the height and works the width out itself, so it
+             needs the ratio rather than the aspect: a cover is 4:5 and says
+             nothing, a gallery frame is whatever it was shot at. Julian: a
+             horizontal photograph stays horizontal in event coverage,
+             automotive and places. */
+          "--ar": (frame.width / frame.height).toFixed(4),
           "--i": i,
         } as React.CSSProperties
       }

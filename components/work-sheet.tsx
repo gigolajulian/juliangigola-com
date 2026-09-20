@@ -4,6 +4,7 @@ import * as React from "react";
 import { useWide } from "@/components/strip";
 import { WorkList, type ListRow } from "@/components/work-list";
 import type { Frame } from "@/lib/work-types";
+import type { Video } from "@/lib/videos";
 import { useWorkQuery, useWorkView } from "@/lib/work-view";
 
 /* ── which of the three is showing ────────────────────────────────
@@ -26,10 +27,13 @@ export function WorkSheet({
   rows,
   mine,
   frames,
+  videos,
   within,
   children,
 }: {
   rows: ListRow[];
+  /** The films this page can play, for the lines in `mine` that are films. */
+  videos?: Video[];
   /** This page's own list, where its content is not projects: the frames
       of a gallery discipline, the sleeves of Cover art, the films. Without
       it the list is the archive rows filed under `within`. */
@@ -49,7 +53,8 @@ export function WorkSheet({
   if (!wide) return <>{children}</>;
   if (query.trim()) return <WorkList rows={rows} />;
   if (view === "list") {
-    if (mine) return <WorkList rows={mine} frames={frames} />;
+    if (mine)
+      return <WorkList rows={mine} frames={frames} videos={videos} />;
     return (
       <WorkList
         rows={within ? rows.filter((r) => r.discipline === within) : rows}
