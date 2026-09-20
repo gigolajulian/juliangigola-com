@@ -162,13 +162,22 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
          * makes a theme feel broken. `theme-toggle.tsx` keeps following the
          * system after that, until the toggle is pressed.
          *
+         * It also writes the page's colour onto both `theme-color` tags. Julian,
+         * on an iPhone: the band behind the Dynamic Island came up white with
+         * the site in dark. That is Safari tinting the top of the window from
+         * `theme-color`, and the two tags below are keyed to the *system*
+         * scheme — so a phone set to light with the site switched to dark got
+         * the light colour over a black page. The tags stay for the visitor
+         * with no JavaScript, and from here on both carry whichever theme is
+         * actually showing; `theme-toggle.tsx` rewrites them when it changes.
+         *
          * `localStorage` throws outright in some privacy modes rather than
          * returning null, so the whole thing is wrapped; a failure there
          * still leaves the system check to run.
          */}
         <script
           dangerouslySetInnerHTML={{
-            __html: `(function(){var t=null;try{t=localStorage.getItem("theme")}catch(e){}if(t==="light"||(t!=="dark"&&matchMedia("(prefers-color-scheme: light)").matches))document.documentElement.dataset.theme="light"})()`,
+            __html: `(function(){var t=null;try{t=localStorage.getItem("theme")}catch(e){}var l=t==="light"||(t!=="dark"&&matchMedia("(prefers-color-scheme: light)").matches);if(l)document.documentElement.dataset.theme="light";var m=document.querySelectorAll('meta[name="theme-color"]');for(var i=0;i<m.length;i++)m[i].setAttribute("content",l?"#efece7":"#0b0a09")})()`,
           }}
         />
       </head>

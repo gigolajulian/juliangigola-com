@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 
 /* ── the theme switch ─────────────────────────────────────────────
@@ -38,7 +39,20 @@ const read = (): Theme =>
  * one brightness change on the site that is large enough to hurt. Reduced
  * motion, or no API: the switch.
  */
+/* The colour Safari tints the top of the window with, the band behind the
+   Dynamic Island included. Both tags are written, so whichever one the
+   system scheme matches carries the theme that is actually showing: Julian
+   had a white band over a dark page on a phone set to light. The values
+   are the tags' own, in `app/layout.tsx`. */
+const paint = (next: Theme) => {
+  const colour = next === "light" ? "#efece7" : "#0b0a09";
+  for (const m of document.querySelectorAll('meta[name="theme-color"]')) {
+    m.setAttribute("content", colour);
+  }
+};
+
 function apply(next: Theme) {
+  paint(next);
   const flip = () => {
     if (next === "light") document.documentElement.dataset.theme = "light";
     else delete document.documentElement.dataset.theme;
@@ -68,6 +82,13 @@ export function ThemeToggle({ className }: { className?: string }) {
   const [theme, setTheme] = React.useState<Theme | null>(null);
 
   React.useEffect(() => setTheme(read()), []);
+
+  /* And the tint again on every page. Next owns the `theme-color` tags —
+     they come from `metadata` — and it re-renders them on a route change,
+     which would put the system's colour back over a page showing the
+     other theme. */
+  const here = usePathname();
+  React.useEffect(() => paint(read()), [here]);
 
   /* Until the toggle is pressed the site follows the system, live: a
      visitor whose phone goes dark at sunset sees the site go with it, as
