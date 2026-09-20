@@ -691,12 +691,35 @@ export function Strip({
          measured, the rail went blank on the final frame of the travel. */
       const ticked = kids.flatMap((k, i) => (k.dataset.tick !== undefined ? [i] : []));
       const lastTick = ticked.length ? ticked[ticked.length - 1] : kids.length - 1;
-      if (el.scrollLeft >= room - 2) land(lastTick);
-      else if (el.scrollLeft <= 2) land(ticked.length ? ticked[0] : 0);
+      const firstTick = ticked.length ? ticked[0] : 0;
+      /* A sequence short enough to fit the window has nowhere to go, and
+         `scrollLeft` is nought forever. The end test ran first and `0 >=
+         -2` is true, so the rail lit the last of four projects on a
+         filter nobody had scrolled — measured on Artist presskit,
+         Portraits and Mixed media, where the whole run is on screen at
+         once. Nothing has moved, so the rail says the beginning. */
+      if (room <= 0) land(firstTick);
+      else if (el.scrollLeft >= room - 2) land(lastTick);
+      else if (el.scrollLeft <= 2) land(firstTick);
       else if (el.classList.contains("strip-grid") && room > 0 && ticked.length > 1) {
         const gone = Math.max(0, Math.min(1, el.scrollLeft / room));
         land(ticked[Math.round(gone * (ticked.length - 1))]);
-      } else land(best);
+      } else {
+        /* And the nearest cell that the rail can actually draw. `best` is
+           the nearest cell of any kind, and a sequence has cells that
+           carry no tick — a page of words, the ask, the card that leads
+           on. Landing on one of those lit nothing: measured on Motion in
+           the strip, the rail went out at the middle of its own travel,
+           where the cell nearest the middle is a block of words between
+           two films. */
+        land(
+          ticked.length
+            ? ticked.reduce((a, b) =>
+                Math.abs(b - best) < Math.abs(a - best) ? b : a,
+              )
+            : best,
+        );
+      }
     };
     /* The ruler's ticks, read off the cells once they are in the DOM: a
        cell is often a component of its own, so its attributes are not on
