@@ -113,19 +113,21 @@ const CUE_SEEN = "strip-cue";
 const WALL_WANT = 0.46;
 const WALL_CAP = 0.95;
 
-/** The Lenis prototype's switch. `?lenis=1` turns it on for this browser
-    and every page after it, `?lenis=0` turns it off again. Read at the
-    moment an effect runs rather than held in state, so the markup is the
-    same either way and nothing has to hydrate around it. */
+/** Lenis, on for everyone. It carries the wheel on every sequence that
+    runs sideways; `?lenis=0` turns it off for this browser and every page
+    after it, and `?lenis=1` turns it back on. Read at the moment an effect
+    runs rather than held in state, so the markup is the same either way
+    and nothing has to hydrate around it. A browser that refuses storage
+    gets it too: the default is the site, not the fallback. */
 const LENIS_KEY = "strip-lenis";
 function wantsLenis() {
   try {
     const asked = new URLSearchParams(window.location.search).get("lenis");
     if (asked === "1" || asked === "0")
       window.localStorage.setItem(LENIS_KEY, asked);
-    return window.localStorage.getItem(LENIS_KEY) === "1";
+    return window.localStorage.getItem(LENIS_KEY) !== "0";
   } catch {
-    return false;
+    return true;
   }
 }
 /** The quiet that ends a swipe. A trackpad fires every frame or so while
@@ -675,12 +677,11 @@ export function Strip({
     };
   }, [grid, live, count, wallId]);
 
-  /* ── Lenis, on trial ──────────────────────────────────────────
-   * A prototype, off unless asked for: `?lenis=1`. It takes the wheel on
+  /* ── Lenis ────────────────────────────────────────────────────
+   * On by default; `?lenis=0` opts a browser out. It takes the wheel on
    * the strip's own scroller, sideways, and leaves the drag, the rail,
-   * the keys and the lead-on where they are — the wheel is the thing
-   * being judged. Loaded only when it is wanted, so a visitor who never
-   * asks never downloads it.
+   * the keys and the lead-on where they are. Loaded on its own, so it
+   * arrives after the pictures rather than ahead of them.
    *
    * Never on a paged strip. The homepage, the studio and the contact page
    * move a whole screen per gesture, and a screen is not a distance to be
