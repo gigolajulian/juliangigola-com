@@ -955,16 +955,16 @@ export function Hero({
                       href={discipline.href}
                       aria-current={i + 1 === active ? "true" : undefined}
                       className={cn(
-                        // `py-4`, with text-3xl. The type column is what
+                        // `py-3.5`, with text-3xl. The type column is what
                         // sets the height of this section, the 80dvh picture
                         // track loses to it, so every pixel of row height is
-                        // a pixel the buttons drop: at this size both buttons
-                        // sit 70px under the fold on a 900px screen. Julian
-                        // asked for bigger type and then for more air between
-                        // the rows, knowing that; the air is his call.
+                        // a pixel the buttons drop. Julian asked for bigger
+                        // type and then for more air between the rows; at
+                        // `py-4` the sixth row ran under the rail on a
+                        // 1440x900 screen, and two pixels a side clears it.
                         // `cover-row` tightens the rows on a short window;
                         // the rule is in `globals.css`.
-                        "cover-row group flex items-baseline gap-4 px-6 py-4 transition-colors duration-300 sm:px-10",
+                        "cover-row group flex items-baseline gap-4 px-6 py-3.5 transition-colors duration-300 sm:px-10",
                         // `bg-secondary`, not `bg-card`. Card sits at L* 5.7
                         // against a ground of L* 2.8 — a real step in the token
                         // scale, and almost invisible as a band across a row.

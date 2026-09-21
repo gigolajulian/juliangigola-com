@@ -73,6 +73,7 @@ export function ContactForm() {
      an enquiry lost, and the button saying so before it is pressed is
      cheaper than an error after. */
   const [ready, setReady] = React.useState(false);
+  const [emailHint, setEmailHint] = React.useState<string>();
   const [type, setType] = React.useState<string>(
     TYPES.some((t) => t.value === preset) ? (preset as string) : "editorial",
   );
@@ -209,7 +210,18 @@ export function ContactForm() {
         label="Email"
         type="email"
         defaultValue={values.email}
-        error={state.errors?.email}
+        error={state.errors?.email ?? emailHint}
+        /* The one field whose emptiness is not the only way to be wrong.
+           Said on leaving it, not while typing, and cleared on the next
+           keystroke. */
+        onBlur={(e) =>
+          setEmailHint(
+            e.currentTarget.value && !e.currentTarget.validity.valid
+              ? "That does not look like an email address"
+              : undefined,
+          )
+        }
+        onInput={() => setEmailHint(undefined)}
         autoComplete="email"
         required
       />
@@ -389,7 +401,7 @@ function Field({
       />
 
       {error ? (
-        <p id={errorId} className="mt-2 text-xs text-destructive">
+        <p id={errorId} className="mt-2 text-xs text-foreground">
           {error}
         </p>
       ) : null}

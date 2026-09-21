@@ -208,7 +208,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         {/* Marks lazily loaded pictures as they land so they fade in rather
             than pop — see `photo-fade.tsx`. Renders nothing. */}
         <PhotoFade />
-        <main id="main" className="rise flex flex-1 flex-col">
+        {/* `tabIndex={-1}` so the skip link's focus lands here and the next Tab
+            is the first thing in the content, not the header again. */}
+        <main id="main" tabIndex={-1} className="rise flex flex-1 flex-col outline-none">
           {/* Every page zooms in and out of the next: `page-transition.tsx`
               and `.page` in `globals.css`. */}
           <ImageFallback />

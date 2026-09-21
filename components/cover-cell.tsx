@@ -162,7 +162,7 @@ export function CoverCell({
             competing with it, and the whole plate ranges left off one
             edge. The count is what says a cover opens onto a body of
             work rather than being one photograph. */}
-          <span className="label min-w-0 truncate text-[clamp(0.5rem,1.5cqw,0.75rem)] leading-none text-muted-foreground">
+          <span className="label min-w-0 truncate text-[clamp(0.6875rem,1.5cqw,0.75rem)] leading-none text-muted-foreground">
             {row.credit}
             {row.frames ? (
               <>

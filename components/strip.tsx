@@ -1951,9 +1951,13 @@ export function Strip({
           /* `touch-action: none`, or the first millimetre of a drag along
              the rail is the page deciding the gesture was a scroll and
              taking it away. `py-2` is the thumb: the rail itself is eight
-             pixels tall and the padding is hit area, not height. */
+             pixels tall and the padding is hit area, not height. On a
+             touch screen the `::before` takes the hit area to 44px: the 12px
+             gap above the rail and the 16px foot below it, without moving
+             a pixel of the drawing. */
           className={cn(
             "relative flex h-2 min-w-0 flex-1 touch-none items-end py-2",
+            "pointer-coarse:before:absolute pointer-coarse:before:inset-x-0 pointer-coarse:before:-top-3 pointer-coarse:before:-bottom-4 pointer-coarse:before:content-['']",
             // In chapters the gap is drawn inside each one, so the twelve
             // tile the rail and the hit test has nowhere to fall through.
             chaptered ? "gap-0" : "justify-between gap-px",

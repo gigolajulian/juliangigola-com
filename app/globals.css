@@ -717,7 +717,7 @@ body:has(.strip-scroll[data-past-first]) .home-wordmark,
    row that continues and a row that is broken. Set by the shell, which is
    the only thing that can measure it. */
 nav[aria-label="Categories"] ul[data-more] {
-  mask-image: linear-gradient(to right, #000 calc(100% - 2.5rem), transparent);
+  mask-image: linear-gradient(to right, #000 calc(100% - 4rem), transparent);
 }
 
 /* ── the same cells, as a rack ────────────────────────────────────
