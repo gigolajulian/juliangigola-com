@@ -9,6 +9,7 @@ export function TermsColumn() {
     <LegalColumn
       id="terms"
       title="Terms of Service"
+      label="Terms"
       effective="2026-09-13"
       intro={
         <>

@@ -8,6 +8,7 @@ export function PrivacyColumn() {
     <LegalColumn
       id="privacy"
       title="Privacy Policy"
+      label="Privacy"
       effective="2026-09-13"
       intro={
         <>
