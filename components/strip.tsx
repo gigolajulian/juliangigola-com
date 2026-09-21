@@ -2084,8 +2084,15 @@ export function Strip({
     if (held.current && n !== null) goTo(ticks[n].i);
   };
   const railUp = (e: React.PointerEvent<HTMLDivElement>) => {
-    const n = tickAt(e.clientX);
-    const g = awayAt(e.clientX);
+    /* Where the word says, not where a fresh hit test says. The rail can
+       still be settling under a pointer that has only just arrived on it,
+       and read again at the moment of the press it answered for whichever
+       cell had slid under the finger by then: measured on All work, the
+       name over the rail read FROSTBITE and the press landed on
+       LIGHTBEAM. `over` is what the name is drawn from and it is re-read
+       every frame, so pressing takes you to the thing you can see. */
+    const n = over ?? tickAt(e.clientX);
+    const g = overAway ?? awayAt(e.clientX);
     held.current = false;
     lastX.current = null;
     window.clearTimeout(linger.current);
@@ -2319,8 +2326,17 @@ export function Strip({
                    discipline you were in and nothing about where in it:
                    Julian asked for an indicator inside the rail showing
                    the position on the page, and a chapter has to be open
-                   before a position can be marked in it. */
-                const mine = here && !g.href;
+                   before a position can be marked in it.
+
+                   But not while a pointer is on the rail. The open
+                   chapter follows the page, so a rail that kept following
+                   it changed shape between aiming at a project and
+                   pressing it: measured on All work, a press on ÆGIS
+                   while the rail was still settling landed on ASTRAL
+                   ALLURE, four cells away. On the rail, the pointer is
+                   the only thing that opens a chapter, and what you see
+                   is what you press. */
+                const mine = here && !g.href && !onRail;
                 const shown = openChapter === gi || mine;
                 /* Which cell of an open chapter carries the ink: the one
                    under the pointer where the pointer is in this chapter,
@@ -2351,7 +2367,21 @@ export function Strip({
                     style={{
                       flexGrow: shown ? (mine ? OPEN_SHARE : opening(count)) : 1,
                     }}
-                    className="relative flex h-2 min-w-0 shrink basis-0 items-end px-1 transition-[flex-grow] duration-300 ease-[var(--ease-out-strong)]"
+                    className={cn(
+                      "relative flex h-2 min-w-0 shrink basis-0 items-end px-1",
+                      /* Eased while the page is what moves it, instant
+                         while a pointer is on it. Three hundred
+                         milliseconds of growth under a finger is three
+                         hundred milliseconds in which the cell being
+                         aimed at slides away: the name over the rail read
+                         FROSTBITE and the press landed on LIGHTBEAM, and
+                         a press near the left edge of a chapter that was
+                         still opening landed on the first project of it,
+                         which is what Julian saw. Opened at once, the
+                         rail is still before it is aimed at. */
+                      !onRail &&
+                        "transition-[flex-grow] duration-300 ease-[var(--ease-out-strong)]",
+                    )}
                   >
                     {word ? (
                       <span
