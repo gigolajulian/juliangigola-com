@@ -99,6 +99,13 @@ const LEAVE_AFTER = 300;
    is worth the distance it actually moved: 80px is a deliberate pull and
    not the last inch of a flick that happened to land on the end. */
 const LEAVE_TOUCH = 80;
+
+/** How long a visitor is left alone before the rail says the page runs
+    sideways, how long the travel lasts, and where the session remembers
+    that it has already been said. */
+const CUE_WAIT = 2000;
+const CUE_MS = 900;
+const CUE_SEEN = "strip-cue";
 /** The quiet that ends a swipe. A trackpad fires every frame or so while
     the fingers are down and keeps firing as the fling decays, so anything
     under about a tenth of a second is still the same push. */
@@ -268,6 +275,13 @@ export function Strip({
   const [at, setAt] = React.useState(0);
   /** Which tick the pointer is over, as a place in `ticks`, or null. */
   const [over, setOver] = React.useState<number | null>(null);
+  /* ── the sideways cue ──
+     A visitor arriving on a page that runs sideways has nothing telling
+     them so. The rail is the instrument, so the rail is what says it: the
+     lit chapter travels once and settles, two seconds in. The first sign
+     of the page being moved kills it, and it does not come back in the
+     session. Nothing inside the photograph moves for it. */
+  const [cue, setCue] = React.useState(false);
   const [ticks, setTicks] = React.useState<
     { i: number; word?: string; name?: string }[]
   >([]);
@@ -488,6 +502,42 @@ export function Strip({
         // Private browsing. The seat is a courtesy, not a feature.
       }
     };
+  }, [live]);
+
+  React.useEffect(() => {
+    const el = scroller.current;
+    if (!el || !live) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    try {
+      if (window.sessionStorage.getItem(CUE_SEEN)) return;
+    } catch {
+      // Private browsing. Showing it once more than it should is the
+      // harmless way to be wrong about a courtesy.
+    }
+    // Nothing to teach on a page that does not run past its own edge.
+    if (el.scrollWidth - el.clientWidth < 40) return;
+
+    let held: ReturnType<typeof setTimeout>;
+    const watched = ["scroll", "wheel", "pointerdown", "touchstart"];
+    const quit = () => {
+      clearTimeout(wait);
+      clearTimeout(held);
+      setCue(false);
+      for (const t of watched) el.removeEventListener(t, quit);
+      window.removeEventListener("keydown", quit);
+    };
+    const wait = setTimeout(() => {
+      try {
+        window.sessionStorage.setItem(CUE_SEEN, "1");
+      } catch {
+        // As above.
+      }
+      setCue(true);
+      held = setTimeout(quit, CUE_MS);
+    }, CUE_WAIT);
+    for (const t of watched) el.addEventListener(t, quit, { passive: true });
+    window.addEventListener("keydown", quit);
+    return quit;
   }, [live]);
 
   /* Which cell is nearest the middle of the window. Read off the scroll
@@ -1955,6 +2005,7 @@ export function Strip({
              touch screen the `::before` takes the hit area to 44px: the 12px
              gap above the rail and the 16px foot below it, without moving
              a pixel of the drawing. */
+          data-cue={cue ? "" : undefined}
           className={cn(
             "relative flex h-2 min-w-0 flex-1 touch-none items-end py-2",
             "pointer-coarse:before:absolute pointer-coarse:before:inset-x-0 pointer-coarse:before:-top-3 pointer-coarse:before:-bottom-4 pointer-coarse:before:content-['']",
@@ -2063,7 +2114,7 @@ export function Strip({
                         shown
                           ? "h-2 bg-foreground/25"
                           : here
-                            ? "h-1 bg-foreground"
+                            ? "rail-lit h-1 bg-foreground"
                             : "h-1 bg-foreground/20",
                       )}
                     >
@@ -2125,7 +2176,7 @@ export function Strip({
                   className={cn(
                     "block w-full rounded-full transition-[height,background-color] duration-200 ease-[var(--ease-out-strong)]",
                     i === at
-                      ? "h-2 bg-foreground"
+                      ? "rail-lit h-2 bg-foreground"
                       : over === n
                         ? "h-1.5 bg-foreground/40"
                         : "h-1 bg-foreground/20",

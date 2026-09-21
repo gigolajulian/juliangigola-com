@@ -1334,6 +1334,31 @@ a.strip-cell {
   }
 }
 
+/* The sideways cue. The rail is the instrument for moving the page, so
+   the rail is what says the page moves: the lit chapter travels once and
+   settles. `strip.tsx` puts `data-cue` on the rail two seconds in and
+   takes it off at the first sign of a visitor moving the page. `translate`
+   rather than a transform, so the rail's own drawing is untouched. */
+@keyframes rail-cue {
+  0% {
+    translate: 0;
+  }
+  45% {
+    translate: 16px;
+  }
+  100% {
+    translate: 0;
+  }
+}
+[data-cue] .rail-lit {
+  animation: rail-cue 900ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+@media (prefers-reduced-motion: reduce) {
+  [data-cue] .rail-lit {
+    animation: none;
+  }
+}
+
 /* ── the reel behind the motion page ──
    A 16:9 frame cut to cover whatever shape the window is: as wide as the
    window or as wide as its height needs, whichever is more, centred. The
