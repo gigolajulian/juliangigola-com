@@ -183,11 +183,15 @@ export const useWide = () =>
     () => true,
   );
 
-/** A landscape window with a mouse in it: the only place the ruler runs in
-    chapters. A finger has no hover to open one with, and a portrait window
-    has no width to open one into. */
-const DESK =
-  "(hover: hover) and (pointer: fine) and (min-aspect-ratio: 5 / 4)";
+/** A landscape window with room in it: where the ruler runs in chapters.
+    It asked for a mouse as well, because a chapter only opened under a
+    hover and a finger has none. It no longer needs one: the chapter you
+    are standing in is open from the start and the rest are opened by
+    dragging along the rail, which a finger does. Without this an iPad
+    drew All work as a hundred and seventy seven ticks five pixels wide.
+    A portrait window still has no width to open a chapter into, and
+    neither has a phone held sideways. */
+const DESK = "(min-aspect-ratio: 5 / 4) and (min-width: 48rem)";
 const subscribeDesk = (onChange: () => void) => {
   const mq = window.matchMedia(DESK);
   mq.addEventListener("change", onChange);
@@ -1945,6 +1949,16 @@ export function Strip({
   const opening = (count: number) =>
     Math.min(Math.max(count / 3.5, 1.4), 7);
 
+  /** And on the archive's rail, the share the chapter you are in takes,
+      whichever one it is. Julian: every chapter opens to the same width.
+      Its own share would have said how much work is in it, but there is
+      only ever one open here and it is the page you are standing on, so
+      the reading was Portraits at 164px against Editorial at 371 - the
+      rail changing shape between two filters, which is the thing this was
+      built to stop. Four of the fourteen shares, which leaves the other
+      ten disciplines around a hundred pixels each. */
+  const OPEN_SHARE = 4;
+
   /** Half the gap between two chapters, and so the inset from a chapter's
       own edge to the bar drawn inside it. */
   const CHAPTER_PAD = 4;
@@ -2299,17 +2313,25 @@ export function Strip({
           {chaptered
             ? chapterList.map((g, gi) => {
                 const count = g.to - g.from + 1;
-                /* On the archive's rail the chapter that is this page is
-                   open from the start rather than on being pointed at:
-                   the page is already inside it, and its work is what the
-                   rail is being read for. */
-                const mine = !!away && !g.href;
-                const shown = openChapter === gi || mine;
                 const here = atTick >= g.from && atTick <= g.to;
-                /* Which cell in an open chapter carries the ink: the one
-                   under the pointer, or where the page stands when there
-                   is no pointer on the rail. */
-                const mark = over ?? (mine ? atTick : null);
+                /* The chapter you are standing in is open from the start
+                   rather than on being pointed at. Shut, it said which
+                   discipline you were in and nothing about where in it:
+                   Julian asked for an indicator inside the rail showing
+                   the position on the page, and a chapter has to be open
+                   before a position can be marked in it. */
+                const mine = here && !g.href;
+                const shown = openChapter === gi || mine;
+                /* Which cell of an open chapter carries the ink: the one
+                   under the pointer where the pointer is in this chapter,
+                   and otherwise where the page stands. So your own
+                   chapter keeps its place while another is being read. */
+                const mark =
+                  over !== null && over >= g.from && over <= g.to
+                    ? over
+                    : mine
+                      ? atTick
+                      : null;
                 /* Words in the back half hang from the right of their
                    chapter and grow leftwards, as the ticks' own did: a
                    long one near the end ran past the edge of the window. */
@@ -2327,16 +2349,7 @@ export function Strip({
                       chapterSegs.current[gi] = el;
                     }}
                     style={{
-                      /* Open, but not so open that the map it is drawn on
-                         stops being legible: at its own share Editorial's
-                         thirty three would take two fifths of the rail and
-                         squeeze the other ten disciplines into eighty
-                         pixels apiece. */
-                      flexGrow: shown
-                        ? mine
-                          ? Math.min(opening(count), 4)
-                          : opening(count)
-                        : 1,
+                      flexGrow: shown ? (mine ? OPEN_SHARE : opening(count)) : 1,
                     }}
                     className="relative flex h-2 min-w-0 shrink basis-0 items-end px-1 transition-[flex-grow] duration-300 ease-[var(--ease-out-strong)]"
                   >

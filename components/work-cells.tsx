@@ -153,6 +153,14 @@ export function FrameCell({
     <button
       type="button"
       data-n={n}
+      /* A stop on the ruler like any other cell. The galleries run out in
+         full along the index - Julian asked for every frame of Event
+         coverage, Automotive and Places - but only their opening title
+         carried a tick, so the rail drew twenty two photographs as one
+         segment and the discipline looked empty next to Editorial's
+         thirty four. The frames take the name of the chapter they are
+         under, which is what the rail already does with covers. */
+      data-tick
       data-ring="Zoom in"
       aria-label={frame.alt || `${name}, frame ${n + 1}`}
       className="group strip-cell relative block w-full shrink-0 overflow-hidden press active:scale-[0.995] sm:h-full sm:w-auto"
