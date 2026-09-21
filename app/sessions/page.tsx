@@ -75,7 +75,11 @@ export default function SessionsPage() {
                   key={`${session.slug}-cover`}
                   prefetch={false}
                   href={`/work/${sample.slug}`}
-                  data-tick
+                  /* No tick. A session is one section of this page and the
+                     photograph is the front of it, not a stop of its own:
+                     ticked, the ruler drew four sessions as eight, which
+                     is Julian's double reading. The words carry the tick
+                     and the name for the pair. */
                   /* Julian: `View more`, not `View project`. The frame is
                      a sample of the session and not the project it happens
                      to come from, so the word points at more of this kind
