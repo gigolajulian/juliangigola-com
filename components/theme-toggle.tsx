@@ -141,6 +141,11 @@ export function ThemeToggle({ className }: { className?: string }) {
       // Press is the feedback here, and the cursor is the affordance.
       className={cn(
         "group relative flex h-11 w-11 items-center justify-center text-foreground",
+        /* A thumb still gets its forty four pixels; the header does not
+           have to be forty four tall to give them. The margin takes the
+           box back the way the small capitals links do, so the bar comes
+           in and the target does not move. */
+        "tablet:-my-1.5",
         "press active:scale-[0.94]",
         className,
       )}
