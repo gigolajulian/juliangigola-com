@@ -157,6 +157,16 @@ const STRETCH = 160;
 const WHEEL = 3;
 const PAD = 1.8;
 
+/** How long after the strip stops before the rail takes the shape of the
+    chapter you have landed in. The shape follows the page, and reshaping
+    it on the way past a chapter is a pulse rather than a reading: Mixed
+    media is four projects and Portraits five, so on All work each is the
+    chapter you are in for about four hundred milliseconds against the
+    three hundred the growing takes - it had not finished opening before
+    it began to shut. Julian saw it on exactly those two. While the strip
+    runs the rail is eleven equal chapters with the one you are in lit,
+    and it opens once you have arrived. */
+const REST = 200;
 /** How long an open chapter waits after the pointer has left it, in ms.
     Julian, having asked for a bigger target first: hold it open for a
     beat. A mouse running the length of the ruler drifts off it and back
@@ -315,6 +325,8 @@ export function Strip({
   React.useImperativeHandle(ref, () => scroller.current!, []);
   const [at, setAt] = React.useState(0);
   /** Which tick the pointer is over, as a place in `ticks`, or null. */
+  /** Whether the strip has stopped. The rail's shape waits for it. */
+  const [still, setStill] = React.useState(true);
   const [over, setOver] = React.useState<number | null>(null);
   /** Which chapter of the archive the pointer is over, where that chapter
       is another page: it holds no ticks, so `over` cannot say it. */
@@ -1019,8 +1031,12 @@ export function Strip({
       tickKey.current = key;
       setTicks(t);
     };
+    let rest = 0;
     const onScroll = () => {
       if (!queued) queued = requestAnimationFrame(read);
+      setStill(false);
+      window.clearTimeout(rest);
+      rest = window.setTimeout(() => setStill(true), REST);
     };
     // A hash changed underfoot (a chip on /work is a plain anchor): glide.
     const onHash = () => {
@@ -1054,6 +1070,7 @@ export function Strip({
       window.removeEventListener("resize", again);
       window.removeEventListener("hashchange", onHash);
       if (queued) cancelAnimationFrame(queued);
+      window.clearTimeout(rest);
       clearTimeout(hashTimer);
     };
   }, [live, count]);
@@ -2336,7 +2353,11 @@ export function Strip({
                    ALLURE, four cells away. On the rail, the pointer is
                    the only thing that opens a chapter, and what you see
                    is what you press. */
-                const mine = here && !g.href && !onRail;
+                /* A filter's rail is exempt: its one chapter with work
+                   in it never changes as the page runs, so there is
+                   nothing to pulse and the position stays readable while
+                   you scroll. */
+                const mine = here && !g.href && !onRail && (!!away || still);
                 const shown = openChapter === gi || mine;
                 /* Which cell of an open chapter carries the ink: the one
                    under the pointer where the pointer is in this chapter,
