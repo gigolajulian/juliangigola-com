@@ -1479,12 +1479,57 @@ a.strip-cell {
 .band-count-few {
   display: none;
 }
+.band-count-eight {
+  display: none;
+}
 @media (max-aspect-ratio: 4 / 5) {
   .band-count-few {
     display: inline;
   }
 }
 
+/* ── an iPad held sideways ──
+   Between an upright tablet and a laptop there is a third shape: 1024 by
+   768 up to 1366 by 1024, wider than it is tall but not by much. It took
+   the desktop rule, and the desktop rule sizes a tile from the height it
+   is given, so ten tiles came out 163px wide on an iPad mini and the row
+   of marks under them, which is one line on a laptop, broke into two.
+   Julian: the client icons in one row, and only the top eight projects
+   at that size.
+
+   Eight is four across and two down, and the tiles grow to take the room
+   the two dropped ones leave: 186 wide on the mini, 207 on the 11 inch,
+   288 on the 13, measured. The marks stand 18px tall instead of 23 and
+   sit 16px apart, which is what keeps nine of them and their heading on
+   one line at 1024 with 50px over; at 1180 there is 96 to spare.
+
+   The shape and not the pointer: `min-width: 64rem` keeps a phone out,
+   `min-aspect-ratio: 5 / 4` keeps an upright tablet out, and
+   `max-aspect-ratio: 3 / 2` keeps every laptop out, the narrowest of
+   which is 1.54. An iPad sideways is 1.33 to 1.44. */
+@media (min-width: 64rem) and (min-aspect-ratio: 5 / 4) and (max-aspect-ratio: 3 / 2) {
+  .band-grid {
+    grid-template-columns: repeat(4, max-content);
+  }
+  .band-grid > *:nth-child(n + 9) {
+    display: none;
+  }
+  .band-count-all {
+    display: none;
+  }
+  .band-count-eight {
+    display: inline;
+  }
+  section[aria-labelledby="press"] {
+    gap: 2rem;
+  }
+  section[aria-labelledby="press"] ul {
+    flex-wrap: nowrap;
+    column-gap: 1rem;
+    --mark-box: 1.125rem;
+    --mark-cap: 6rem;
+  }
+}
 /* ── an upright tablet is not a short desktop ──
    Both of these lay their pictures out from the height they are given,
    which is right on a screen wider than it is tall and wrong on one that

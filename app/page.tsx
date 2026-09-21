@@ -98,6 +98,11 @@ export default function Home() {
                 <span className="band-count-few">
                   {String(Math.min(FEATURED.length, 6)).padStart(2, "0")}
                 </span>
+                {/* And eight, for an iPad held sideways, which shows four
+                    across and two down (`band-grid` again). */}
+                <span className="band-count-eight">
+                  {String(Math.min(FEATURED.length, 8)).padStart(2, "0")}
+                </span>
               </span>
             </p>
             <Link
