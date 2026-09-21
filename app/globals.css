@@ -1319,19 +1319,34 @@ a.strip-cell {
 /* Julian: the thumbnail is not cropped. The frame used to stand at a
    tenth over its cell and slide against it with the scroll; now the cell
    is the whole photograph, which is also what lets it grow into the viewer
-   as one picture (`lib/zoom.ts`) with nothing to crop or uncrop. */
-.strip-frame {
-  transform: none;
-}
+   as one picture (`lib/zoom.ts`) with nothing to crop or uncrop.
+
+   What used to sit here was `.strip-frame { transform: none }`, left from
+   that parallax. Nothing drives a transform on a frame any more, so it
+   held nothing back and has gone. It was never what stopped the cover
+   answering the pointer either: that hover is the `scale` property, which
+   this never touched. What was missing was a transition, so the picture
+   jumped to its new size in one frame. */
 @media (prefers-reduced-motion: reduce) {
   .title-word,
   .title-rest,
   .strip-cell {
     animation: none;
   }
+  /* And the cover holds still under the pointer. Without a transition the
+     utility that should do this is a jump to the larger size in one
+     frame, which is the motion somebody asked not to be shown. */
   .strip-frame {
-    transform: none;
+    scale: 1 !important;
   }
+}
+/* Not while a cover is growing into the viewer: `lib/zoom.ts` measures
+   the thumbnail it is playing from, and a picture caught mid hover is not
+   the rectangle it measured. The hover is the `scale` property and not a
+   transform - Tailwind writes it that way, and zoom drives `transform`
+   itself, so the two would otherwise compose. */
+:root[data-zoom] .strip-frame {
+  scale: 1 !important;
 }
 
 /* The sideways cue. The rail is the instrument for moving the page, so

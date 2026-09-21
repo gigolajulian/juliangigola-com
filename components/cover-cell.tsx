@@ -139,7 +139,10 @@ export function CoverCell({
              `transition-[scale]` written here lost to it and the picture
              jumped to size.
              Julian asked. */
-          className="strip-frame object-cover hoverable:group-hover:scale-[1.04] motion-reduce:group-hover:scale-100"
+          /* The same half second and the same ease as the plate below it,
+             so the picture and its caption read as one answer to the
+             pointer rather than two. */
+          className="strip-frame object-cover transition-transform duration-500 ease-[var(--ease-out-strong)] hoverable:group-hover:scale-[1.04] motion-reduce:transition-none motion-reduce:group-hover:scale-100"
         />
 
         {/* The plate: the same material as the bar at the top of every page,
