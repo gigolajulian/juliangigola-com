@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { LegalPage } from "@/components/legal";
 import { TermsColumn } from "@/components/terms";
 import { PrivacyColumn } from "@/components/privacy";
-import { OpenOnHash } from "@/components/open-on-hash";
 
 export const metadata: Metadata = {
   title: "Legal",
@@ -11,13 +10,14 @@ export const metadata: Metadata = {
   alternates: { canonical: "/legal" },
 };
 
-/* Julian asked for the terms and the privacy policy on one page, in two
-   columns. The words live in `components/terms.tsx` and
-   `components/privacy.tsx`; this is only the frame. */
+/* The terms and the privacy policy on one page, as one strip of clauses
+   that open sideways when they are pressed. The words live in
+   `components/terms.tsx` and `components/privacy.tsx`; this is only the
+   frame. The page opens whichever clause the address names, which the
+   strip handles now, so the old `OpenOnHash` is not needed here. */
 export default function LegalPage_() {
   return (
     <LegalPage>
-      <OpenOnHash />
       <TermsColumn />
       <PrivacyColumn />
     </LegalPage>
