@@ -112,6 +112,22 @@ const CUE_SEEN = "strip-cue";
     column rather than stand there as a billboard. */
 const WALL_WANT = 0.46;
 const WALL_CAP = 0.95;
+
+/** The Lenis prototype's switch. `?lenis=1` turns it on for this browser
+    and every page after it, `?lenis=0` turns it off again. Read at the
+    moment an effect runs rather than held in state, so the markup is the
+    same either way and nothing has to hydrate around it. */
+const LENIS_KEY = "strip-lenis";
+function wantsLenis() {
+  try {
+    const asked = new URLSearchParams(window.location.search).get("lenis");
+    if (asked === "1" || asked === "0")
+      window.localStorage.setItem(LENIS_KEY, asked);
+    return window.localStorage.getItem(LENIS_KEY) === "1";
+  } catch {
+    return false;
+  }
+}
 /** The quiet that ends a swipe. A trackpad fires every frame or so while
     the fingers are down and keeps firing as the fling decays, so anything
     under about a tenth of a second is still the same push. */
@@ -658,6 +674,49 @@ export function Strip({
       delete el.dataset.wall;
     };
   }, [grid, live, count, wallId]);
+
+  /* ── Lenis, on trial ──────────────────────────────────────────
+   * A prototype, off unless asked for: `?lenis=1`. It takes the wheel on
+   * the strip's own scroller, sideways, and leaves the drag, the rail,
+   * the keys and the lead-on where they are — the wheel is the thing
+   * being judged. Loaded only when it is wanted, so a visitor who never
+   * asks never downloads it. */
+  React.useEffect(() => {
+    const el = scroller.current;
+    if (!el || !live || !wantsLenis()) return;
+    let off = () => {};
+    let gone = false;
+    import("lenis").then(({ default: Lenis }) => {
+      if (gone) return;
+      const lenis = new Lenis({
+        wrapper: el,
+        content: el,
+        orientation: "horizontal",
+        /* A wheel and a trackpad push downwards on a page that runs
+           sideways, so both axes have to count. */
+        gestureOrientation: "both",
+        smoothWheel: true,
+        /* The same gain the strip's own model uses, so what is being
+           judged is the easing and not how far a notch carries: at one to
+           one a notch moved 120px against 360 and Lenis would lose on a
+           difference nobody asked about. */
+        wheelMultiplier: WHEEL,
+        /* Not the finger. An iPad's own momentum is better than anything
+           here, and Lenis says its touch sync is unstable on older iOS. */
+        syncTouch: false,
+        autoRaf: true,
+      });
+      el.dataset.lenis = "1";
+      off = () => {
+        lenis.destroy();
+        delete el.dataset.lenis;
+      };
+    });
+    return () => {
+      gone = true;
+      off();
+    };
+  }, [live]);
 
   /* Which cell is nearest the middle of the window. Read off the scroll
      position rather than with an observer, because the counter and the
@@ -1701,7 +1760,9 @@ export function Strip({
     el.addEventListener("scroll", onSettle, { passive: true });
     el.addEventListener("focusin", onFocusIn);
     document.addEventListener("keydown", onTab, true);
-    el.addEventListener("wheel", onWheel, { passive: false });
+    /* Unless Lenis is driving. Two models pushing the same scroller at
+       once is neither of them. */
+    if (!wantsLenis()) el.addEventListener("wheel", onWheel, { passive: false });
     el.addEventListener("touchstart", onTouchStart, { passive: true });
     el.addEventListener("touchmove", onTouchMove, { passive: true });
     el.addEventListener("touchend", onTouchEnd, { passive: true });
