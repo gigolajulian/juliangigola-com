@@ -427,25 +427,18 @@
     @apply font-sans;
     /* The nav is fixed; without this, an in-page jump lands under it. */
     scroll-padding-top: 6rem;
-    /* Every strip page is exactly one window and never scrolls; the terms
-       and the privacy notice are prose and do. So the scrollbar appeared
-       and disappeared as you moved between them, and a classic scrollbar
-       takes its width out of the window: the whole page stepped sideways
-       on the way in and back on the way out. The gutter is held open
-       whether or not there is a bar in it, so nothing moves. */
-    scrollbar-gutter: stable;
-  }
+    /* No reserved gutter. This held fifteen pixels open on every page so
+       that the window would not step sideways between a strip, which is
+       exactly one window and never scrolls, and the terms and the privacy
+       notice, which are prose and do. The cost was a strip of dead ground
+       down the right of every page, and the cover photograph stopping
+       short of the edge of the screen: Julian asked for the picture to
+       reach it, and a photographer's site is the picture.
 
-  /* Except where a scrollbar has no width to take. A touch device draws
-     its bar over the page and takes nothing, so the gutter held fifteen
-     pixels open for something that can never appear and the cover
-     photograph stopped fifteen pixels short of the right edge of an iPad.
-     Julian asked for the picture to reach the edge. Nothing steps sideways
-     here, because nothing was ever being reserved. */
-  @media (pointer: coarse) {
-    html {
-      scrollbar-gutter: auto;
-    }
+       What comes back is a fifteen pixel step on the way into the two
+       legal pages, and only where a scrollbar takes width at all - not on
+       any touch device, and not on a Mac unless the bars are set to show
+       always. That is the cheaper of the two. */
   }
 
   /* The half of the copyright notice that JavaScript cannot do.
