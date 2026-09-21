@@ -40,15 +40,28 @@ const read = (): Theme =>
  * motion, or no API: the switch.
  */
 /* The colour Safari tints the top of the window with, the band behind the
-   Dynamic Island included. Both tags are written, so whichever one the
-   system scheme matches carries the theme that is actually showing: Julian
-   had a white band over a dark page on a phone set to light. The values
-   are the tags' own, in `app/layout.tsx`. */
+   Dynamic Island included. The values are the tags' own, in
+   `app/layout.tsx`.
+
+   The page ships two tags, one per system scheme, and writing the new
+   colour into both of them is not enough on an iPhone: the band kept the
+   old theme until the page was reloaded. Safari reads the tint from the
+   first tag whose `media` still matches, and a tag whose `content` was
+   edited under it does not always make it read again.
+
+   So the tags are replaced rather than edited. All of them go, and one
+   plain tag with no `media` on it takes their place: nothing left to
+   match against the system scheme, and a node Safari has not seen before,
+   which is what makes it look again. */
 const paint = (next: Theme) => {
   const colour = next === "light" ? "#efece7" : "#0b0a09";
   for (const m of document.querySelectorAll('meta[name="theme-color"]')) {
-    m.setAttribute("content", colour);
+    m.remove();
   }
+  const tag = document.createElement("meta");
+  tag.setAttribute("name", "theme-color");
+  tag.setAttribute("content", colour);
+  document.head.append(tag);
 };
 
 function apply(next: Theme) {
