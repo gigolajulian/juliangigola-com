@@ -387,19 +387,13 @@ export function Strip({
          leaves the old still fade exactly as it was. */
       el.style.setProperty("--fade-from", `${(filterShift * 5).toFixed(2)}vw`);
     }
-    const hash = decodeURIComponent(window.location.hash.slice(1));
-    if (hash) {
-      const i = cellFor(el, hash);
-      const where = i >= 0 ? centreOf(el, i) : null;
-      if (where !== null) {
-        el.scrollLeft = where;
-        return;
-      }
-    }
     /* Back, to a path this strip has been on before: the seat it was left
        in. No animation with it — coming back to where you were is not an
        arrival, and a sequence that slid in from the right while sitting at
-       its sixth cover would read as a new page that is already scrolled. */
+       its sixth cover would read as a new page that is already scrolled.
+       Before the hash: on All work the hash names the discipline under
+       view, written as the row scrolled, so it points at the start of a
+       section the seat is already somewhere inside. */
     if (popped) {
       const seated = Number(
         (() => {
@@ -413,6 +407,17 @@ export function Strip({
       if (seated > 0) {
         el.dataset.arrive = "none";
         el.scrollLeft = seated;
+        // So a cleanup before the first scroll read keeps this seat, not 0.
+        seatX.current = seated;
+        return;
+      }
+    }
+    const hash = decodeURIComponent(window.location.hash.slice(1));
+    if (hash) {
+      const i = cellFor(el, hash);
+      const where = i >= 0 ? centreOf(el, i) : null;
+      if (where !== null) {
+        el.scrollLeft = where;
         return;
       }
     }
