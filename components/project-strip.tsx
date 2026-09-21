@@ -65,9 +65,14 @@ export function ProjectStrip({
   project,
   next,
   prev,
+  map,
   className,
 }: {
   project: Project;
+  /** The archive's chapters, where this sequence is one of them: a
+      discipline that is a gallery rather than a list of projects is shown
+      through here. Straight on to the rail (`strip.tsx`). */
+  map?: { name: string; href: string; here?: boolean }[];
   /** What the strip ends on and where a wheel past the end goes. */
   next?: NextUp;
   /** Where a wheel past the start goes. Julian asked for the way back too. */
@@ -411,6 +416,7 @@ export function ProjectStrip({
         label={`${project.name}: ${frames.length} frames, left and right`}
         next={next}
         prev={prev}
+        map={map}
         // Sideways on a phone too: a sequence swipes.
         stack={false}
         onOpen={lightbox.show}

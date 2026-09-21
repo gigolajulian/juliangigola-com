@@ -254,6 +254,7 @@ export function Strip({
   stack = true,
   paged = false,
   chapters = false,
+  map,
   bleed = false,
   arrive,
   ref,
@@ -290,6 +291,18 @@ export function Strip({
       covers under twelve disciplines made eighty four four-pixel ticks of
       a rail that was really a table of contents. */
   chapters?: boolean;
+  /** The whole archive as chapters, for a page that holds one of them.
+      A filter's strip carries only its own work, so the chaptered rail
+      above saw a single section and fell back to plain ticks: inside
+      Editorial the rail was thirty three identical stops and nothing said
+      which of eleven disciplines you were standing in. Julian asked for
+      the rail to stay the same when a filter is entered.
+
+      So the page hands the rail the row it belongs to. The entry marked
+      `here` is this strip, open and scored into its own work; the rest are
+      shut, name themselves under the pointer and are pressed to go
+      there. */
+  map?: { name: string; href: string; here?: boolean }[];
   /** The scroller, for a lightbox that lifts frames out of it. */
   ref?: React.Ref<HTMLDivElement | null>;
   className?: string;
@@ -299,6 +312,9 @@ export function Strip({
   const [at, setAt] = React.useState(0);
   /** Which tick the pointer is over, as a place in `ticks`, or null. */
   const [over, setOver] = React.useState<number | null>(null);
+  /** Which chapter of the archive the pointer is over, where that chapter
+      is another page: it holds no ticks, so `over` cannot say it. */
+  const [overAway, setOverAway] = React.useState<number | null>(null);
   /* ── the sideways cue ──
      A visitor arriving on a page that runs sideways has nothing telling
      them so. The rail is the instrument, so the rail is what says it: the
@@ -1879,7 +1895,14 @@ export function Strip({
   const chapterSegs = React.useRef<(HTMLDivElement | null)[]>([]);
   /** The runs of `named`: one chapter per section, in order. */
   const groups = React.useMemo(() => {
-    const out: { name?: string; from: number; to: number }[] = [];
+    const out: {
+      name?: string;
+      from: number;
+      to: number;
+      /** A chapter that is elsewhere: it holds no ticks of this page, and
+          a press on it travels to that page instead of along this one. */
+      href?: string;
+    }[] = [];
     named.forEach((word, n) => {
       const last = out.at(-1);
       if (last && last.name === word) last.to = n;
@@ -1890,16 +1913,28 @@ export function Strip({
   /** Which tick the cell in the middle belongs to, and so which chapter
       is the one being read. */
   const atTick = Math.max(0, ticks.filter((t) => t.i <= at).length - 1);
+  /* The archive's own chapters, where a page has been handed them. This
+     strip is one of them and takes all of its ticks; the others hold
+     none and stand for the pages they lead to. */
+  const away = React.useMemo(() => {
+    if (!map?.length || !ticks.length) return null;
+    return map.map((m) =>
+      m.here
+        ? { name: m.name, from: 0, to: ticks.length - 1 }
+        : { name: m.name, from: -1, to: -1, href: m.href },
+    );
+  }, [map, ticks.length]);
+  const chapterList = away ?? groups;
   const desk = useDesk();
   /* Two chapters are not a table of contents, and one is a rail with a
      single segment in it. Under three the plain ruler is the better
      instrument and nothing changes. */
-  const chaptered = chapters && desk && groups.length > 2;
+  const chaptered = (chapters || !!away) && desk && chapterList.length > 2;
   /** The chapter the pointer is in, or null. */
   const openAt =
     over === null
       ? null
-      : groups.findIndex((g) => over >= g.from && over <= g.to);
+      : chapterList.findIndex((g) => over >= g.from && over <= g.to);
   /* `open` is taken in here - it is the ref holding `onOpen` - so the
      chapter under the pointer is named for what it is. */
   const openChapter = openAt !== null && openAt >= 0 ? openAt : null;
@@ -1914,6 +1949,20 @@ export function Strip({
       own edge to the bar drawn inside it. */
   const CHAPTER_PAD = 4;
 
+  /** Which chapter a pointer at `x` is over. The chapters tile the rail
+      with no gap between them - the gap is drawn inside each one - so
+      every x on the rail belongs to exactly one of them and there is
+      nowhere to fall through. */
+  const chapterAt = (x: number) => {
+    const box = rail.current?.getBoundingClientRect();
+    if (!box || !chaptered) return null;
+    const g = chapterSegs.current.findIndex((el) => {
+      const r = el?.getBoundingClientRect();
+      return !!r && x >= r.left && x < r.right;
+    });
+    return g < 0 ? (x < box.left ? 0 : chapterList.length - 1) : g;
+  };
+
   /** Which tick a pointer at `x` is over. In plain ticks they share the
       rail's width equally and this is arithmetic. In chapters they do not
       - the one under the pointer is wider than the rest, and as often as
@@ -1926,17 +1975,12 @@ export function Strip({
       const n = Math.floor(((x - box.left) / box.width) * ticks.length);
       return Math.max(0, Math.min(ticks.length - 1, n));
     }
-    /* The chapters tile the rail with no gap between them - the gap is
-       drawn inside each one - so every x on the rail belongs to exactly
-       one of them and there is nowhere to fall through. */
-    let g = chapterSegs.current.findIndex((el) => {
-      const r = el?.getBoundingClientRect();
-      return !!r && x >= r.left && x < r.right;
-    });
-    if (g < 0) g = x < box.left ? 0 : groups.length - 1;
+    const g = chapterAt(x);
+    if (g === null) return null;
     const r = chapterSegs.current[g]?.getBoundingClientRect();
-    const here = groups[g];
-    if (!r || !here) return null;
+    const here = chapterList[g];
+    // A chapter that lives on another page has no tick of this one in it.
+    if (!r || !here || here.href) return null;
     const count = here.to - here.from + 1;
     const w = Math.max(1, r.width - CHAPTER_PAD * 2);
     const c = Math.floor(((x - r.left - CHAPTER_PAD) / w) * count);
@@ -1990,17 +2034,27 @@ export function Strip({
     return () => cancelAnimationFrame(frame);
   }, [chaptered, onRail]);
 
+  /** The chapter under `x` if it is another page, or null. Read on the way
+      in and on the way out, so a drag that crosses one shows its name and
+      a release on it goes there. */
+  const awayAt = (x: number) => {
+    const g = chapterAt(x);
+    return g !== null && chapterList[g]?.href ? g : null;
+  };
+
   const railDown = (e: React.PointerEvent<HTMLDivElement>) => {
     held.current = true;
     e.currentTarget.setPointerCapture(e.pointerId);
     window.clearTimeout(linger.current);
     lastX.current = e.clientX;
+    setOverAway(awayAt(e.clientX));
     setOver(tickAt(e.clientX));
   };
   const railMove = (e: React.PointerEvent<HTMLDivElement>) => {
     window.clearTimeout(linger.current);
     lastX.current = e.clientX;
     const n = tickAt(e.clientX);
+    setOverAway(awayAt(e.clientX));
     setOver(n);
     /* Held, so the shelf comes with the pointer rather than waiting for it
        to lift. Julian: allow dragging the bold part and going through the
@@ -2017,10 +2071,20 @@ export function Strip({
   };
   const railUp = (e: React.PointerEvent<HTMLDivElement>) => {
     const n = tickAt(e.clientX);
+    const g = awayAt(e.clientX);
     held.current = false;
     lastX.current = null;
     window.clearTimeout(linger.current);
     setOver(null);
+    setOverAway(null);
+    /* A chapter of the archive that is not this page: the rail is a map of
+       all of them, so pressing one is how you get there. Julian asked for
+       exactly that. */
+    const href = g === null ? undefined : chapterList[g]?.href;
+    if (href) {
+      router.push(href);
+      return;
+    }
     // A press that never moved is a press on a tick, which is the same
     // journey: both end here rather than in the button's own `onClick`.
     if (n !== null) goTo(ticks[n].i);
@@ -2032,6 +2096,7 @@ export function Strip({
        strip is already travelling. A pointer merely wandering off is
        given the beat, and a plain ruler has nothing to hold open. */
     window.clearTimeout(linger.current);
+    setOverAway(null);
     if (!chaptered) return setOver(null);
     linger.current = window.setTimeout(() => setOver(null), LINGER);
   };
@@ -2232,14 +2297,23 @@ export function Strip({
             />
           ) : null}
           {chaptered
-            ? groups.map((g, gi) => {
+            ? chapterList.map((g, gi) => {
                 const count = g.to - g.from + 1;
-                const shown = openChapter === gi;
+                /* On the archive's rail the chapter that is this page is
+                   open from the start rather than on being pointed at:
+                   the page is already inside it, and its work is what the
+                   rail is being read for. */
+                const mine = !!away && !g.href;
+                const shown = openChapter === gi || mine;
                 const here = atTick >= g.from && atTick <= g.to;
+                /* Which cell in an open chapter carries the ink: the one
+                   under the pointer, or where the page stands when there
+                   is no pointer on the rail. */
+                const mark = over ?? (mine ? atTick : null);
                 /* Words in the back half hang from the right of their
                    chapter and grow leftwards, as the ticks' own did: a
                    long one near the end ran past the edge of the window. */
-                const end = gi * 2 >= groups.length;
+                const end = gi * 2 >= chapterList.length;
                 /* The chapter names itself until one of its projects is
                    under the pointer, and then the project has the slot.
                    One word above one chapter, never two competing for the
@@ -2252,7 +2326,18 @@ export function Strip({
                     ref={(el) => {
                       chapterSegs.current[gi] = el;
                     }}
-                    style={{ flexGrow: shown ? opening(count) : 1 }}
+                    style={{
+                      /* Open, but not so open that the map it is drawn on
+                         stops being legible: at its own share Editorial's
+                         thirty three would take two fifths of the rail and
+                         squeeze the other ten disciplines into eighty
+                         pixels apiece. */
+                      flexGrow: shown
+                        ? mine
+                          ? Math.min(opening(count), 4)
+                          : opening(count)
+                        : 1,
+                    }}
                     className="relative flex h-2 min-w-0 shrink basis-0 items-end px-1 transition-[flex-grow] duration-300 ease-[var(--ease-out-strong)]"
                   >
                     {word ? (
@@ -2288,11 +2373,18 @@ export function Strip({
                               : "left-1",
                           shown
                             ? "text-foreground opacity-100"
-                            : over !== null
-                              ? "text-muted-foreground opacity-0"
-                              : here
-                                ? "text-muted-foreground opacity-100"
-                                : "text-muted-foreground opacity-0",
+                            : /* A discipline the pointer is running along
+                                 on its way somewhere else says its name,
+                                 because its name is the whole of what it
+                                 offers: it is a door, not a chapter of
+                                 this page. */
+                              overAway === gi
+                              ? "text-foreground opacity-100"
+                              : over !== null || overAway !== null
+                                ? "text-muted-foreground opacity-0"
+                                : here
+                                  ? "text-muted-foreground opacity-100"
+                                  : "text-muted-foreground opacity-0",
                         )}
                       >
                         {word}
@@ -2307,10 +2399,15 @@ export function Strip({
                       className={cn(
                         "flex w-full rounded-full transition-[height,background-color] duration-200 ease-[var(--ease-out-strong)]",
                         shown
-                          ? "h-2 bg-foreground/25"
+                          ? /* The cue nudges the bar that says where you
+                               are, and on the archive's rail that is this
+                               open chapter rather than a lit one. */
+                            cn("h-2 bg-foreground/25", mine && "rail-lit")
                           : here
                             ? "rail-lit h-1 bg-foreground"
-                            : "h-1 bg-foreground/20",
+                            : overAway === gi
+                              ? "h-1.5 bg-foreground/40"
+                              : "h-1 bg-foreground/20",
                       )}
                     >
                       {Array.from({ length: count }, (_, k) => (
@@ -2326,7 +2423,7 @@ export function Strip({
                             shown &&
                               k < count - 1 &&
                               "shadow-[inset_-1px_0_0_0_var(--background)]",
-                            shown && over === g.from + k && "bg-foreground",
+                            shown && mark === g.from + k && "bg-foreground",
                           )}
                         />
                       ))}

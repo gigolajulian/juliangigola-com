@@ -153,6 +153,17 @@ export default async function CategoryPage(
   const name = categoryLabel(category);
   const next = after(slug);
   const prev = before(slug);
+  /* The chip row, handed to the rail as its chapters. A filter's strip
+     holds one discipline, so on its own the rail could only draw that
+     one: inside Editorial it was thirty three identical stops and nothing
+     saying which of eleven you were in. Julian asked for the rail to stay
+     the same when a filter is entered, and for pressing another
+     discipline on it to go there. */
+  const archive = WORK_CATEGORY_LINKS.map((c) => ({
+    name: c.name,
+    href: c.href,
+    here: c.slug === slug,
+  }));
   /* Julian: no ask at the end of a discipline. Eleven filters meant
      eleven copies of the same question, each one standing between the
      last cover of one discipline and the first of the next, which is
@@ -177,6 +188,7 @@ export default async function CategoryPage(
             project={gallery}
             next={next}
             prev={prev}
+            map={archive}
             className="mt-4 flex-1"
           />
         </div>
@@ -210,6 +222,7 @@ export default async function CategoryPage(
           label={`Cover art: ${COVER_RELEASES.length} releases, left and right`}
           next={next}
           prev={prev}
+          map={archive}
           className="mt-4 flex-1"
         >
           <TitleCell title={name} hash={slug}>
@@ -235,6 +248,7 @@ export default async function CategoryPage(
         label={`${name}: ${projects.length} projects, left and right`}
         next={next}
         prev={prev}
+        map={archive}
           className="mt-4 flex-1"
       >
         {[
