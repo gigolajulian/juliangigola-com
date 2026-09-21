@@ -106,6 +106,12 @@ const LEAVE_TOUCH = 80;
 const CUE_WAIT = 2000;
 const CUE_MS = 900;
 const CUE_SEEN = "strip-cue";
+
+/** How wide a column of the wall wants to be, as a share of the shelf's
+    height, and the width past which a single frame has to share its
+    column rather than stand there as a billboard. */
+const WALL_WANT = 0.46;
+const WALL_CAP = 0.95;
 /** The quiet that ends a swipe. A trackpad fires every frame or so while
     the fingers are down and keeps firing as the fling decays, so anything
     under about a tenth of a second is still the same push. */
@@ -282,6 +288,8 @@ export function Strip({
      of the page being moved kills it, and it does not come back in the
      session. Nothing inside the photograph moves for it. */
   const [cue, setCue] = React.useState(false);
+  /* The wall's stylesheet is scoped to this strip and no other. */
+  const wallId = React.useId().replace(/[^a-zA-Z0-9_-]/g, "");
   const [ticks, setTicks] = React.useState<
     { i: number; word?: string; name?: string }[]
   >([]);
@@ -539,6 +547,117 @@ export function Strip({
     window.addEventListener("keydown", quit);
     return quit;
   }, [live]);
+
+  /* ── the wall ─────────────────────────────────────────────────
+   * A discipline that is one gallery is a set of photographs of every
+   * shape. The rack gives every cell the same height and takes its width
+   * from the shape, so a column is as wide as the widest frame in it and
+   * the narrower ones leave a ragged strip of ground beside them — the
+   * gap reads as sixteen pixels in one place and ninety in the next.
+   *
+   * Here the column comes first: its width is chosen so that the frames
+   * stacked in it come out the same width and fill the shelf exactly.
+   *
+   *   W = (shelf - the gaps between them) / sum(1 / ratio)
+   *
+   * Every gap is then the same, every photograph keeps the shape it was
+   * shot at, and nothing is cropped. Only where the shelf is one gallery:
+   * a run of covers is a run of covers and stays exactly as it is, which
+   * is what Julian asked for.
+   *
+   * Written into a stylesheet of its own rather than onto the cells: the
+   * cells belong to React, and a re-render puts back what it knows about.
+   * ─────────────────────────────────────────────────────────────── */
+  React.useLayoutEffect(() => {
+    const el = scroller.current;
+    if (!el || !grid || !live) return;
+    const sheet = document.createElement("style");
+    document.head.append(sheet);
+    el.dataset.wall = wallId;
+
+    const paint = () => {
+      const kids = Array.from(el.children) as HTMLElement[];
+      const frames = kids.filter((k) => k.tagName === "BUTTON");
+      /* A cover is a link. One in the shelf means this is a run of
+         projects, or All work with galleries among them, and the wall
+         has no business rearranging it. */
+      const covers = kids.some((k) => k.tagName === "A" && k.hasAttribute("data-tick"));
+      const cs = getComputedStyle(el);
+      const gap = parseFloat(cs.columnGap) || 16;
+      const room =
+        el.clientHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom);
+      if (!frames.length || covers || room < 80) {
+        sheet.textContent = "";
+        return;
+      }
+
+      const ars = frames.map(
+        (f) => parseFloat(getComputedStyle(f).getPropertyValue("--ar")) || 0.8,
+      );
+      /* Walk the run, taking at each step the number of frames whose
+         shared width lands nearest the one the wall wants. */
+      const cols: { at: number; k: number; w: number }[] = [];
+      for (let i = 0; i < ars.length; ) {
+        let best = { k: 1, w: 0, score: Infinity };
+        for (let k = 1; k <= 3 && i + k <= ars.length; k++) {
+          const inv = ars.slice(i, i + k).reduce((sum, a) => sum + 1 / a, 0);
+          const w = (room - (k - 1) * gap) / inv;
+          const score =
+            Math.abs(w / room - WALL_WANT) + (w / room > WALL_CAP ? 100 : 0);
+          if (score < best.score) best = { k, w, score };
+        }
+        cols.push({ at: i, k: best.k, w: best.w });
+        i += best.k;
+      }
+
+      /* The words that open the shelf stay where they are and keep their
+         own width; the wall starts after them. */
+      const first = kids.indexOf(frames[0]);
+      const head = first > 0 ? kids[first - 1] : null;
+      const left0 = head
+        ? head.offsetLeft + head.offsetWidth + gap
+        : parseFloat(cs.paddingLeft) || 0;
+      const top0 = parseFloat(cs.paddingTop) || 0;
+
+      const at = `[data-wall="${wallId}"]`;
+      const rules = [
+        `${at}{position:relative!important;}`,
+        `${at}>button{position:absolute!important;margin:0!important;aspect-ratio:auto!important;}`,
+      ];
+      let x = left0;
+      for (const col of cols) {
+        let y = top0;
+        for (let n = 0; n < col.k; n++) {
+          const h = col.w / ars[col.at + n];
+          rules.push(
+            `${at}>:nth-child(${kids.indexOf(frames[col.at + n]) + 1}){` +
+              `left:${x.toFixed(2)}px!important;top:${y.toFixed(2)}px!important;` +
+              `width:${col.w.toFixed(2)}px!important;height:${h.toFixed(2)}px!important;}`,
+          );
+          y += h + gap;
+        }
+        x += col.w + gap;
+      }
+      /* Out of the flow, the frames take no room, so the words that open
+         the shelf carry the wall's length on their own margin and
+         whatever follows lands after it. */
+      if (head) {
+        rules.push(
+          `${at}>:nth-child(${first}){margin-right:${(x - left0).toFixed(2)}px!important;}`,
+        );
+      }
+      sheet.textContent = rules.join(String.fromCharCode(10));
+    };
+
+    paint();
+    const watch = new ResizeObserver(paint);
+    watch.observe(el);
+    return () => {
+      watch.disconnect();
+      sheet.remove();
+      delete el.dataset.wall;
+    };
+  }, [grid, live, count, wallId]);
 
   /* Which cell is nearest the middle of the window. Read off the scroll
      position rather than with an observer, because the counter and the
