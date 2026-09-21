@@ -1024,6 +1024,20 @@ a.strip-cell {
     background-color: color-mix(in oklab, var(--background) 88%, transparent);
   }
 }
+/* Julian: lower 60%. Over a pale photograph the blurred backdrop came
+   straight through the plate and the band read as light grey with grey
+   type on it, which is the lightening he was pointing at. The tint is
+   left where it is; what comes through it is taken down to two fifths of
+   its brightness, so the band is dark under any photograph and the name
+   keeps its contrast.
+
+   Dark only. In the light theme the plate is meant to be pale and
+   darkening the backdrop would put a black band across a white page. */
+:root:not([data-theme="light"]) .cover-plate {
+  -webkit-backdrop-filter: blur(18px) saturate(1.5) brightness(0.4);
+  backdrop-filter: blur(18px) saturate(1.5) brightness(0.4);
+}
+
 /* Cells arrive from the strip with a height, a width or an aspect of their
    own; in the rack the grid decides all three. */
 .strip-grid > * {
