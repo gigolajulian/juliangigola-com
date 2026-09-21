@@ -693,6 +693,16 @@ body:has(.strip-scroll[data-past-first]) .home-wordmark,
     height: 100dvh;
     overflow: hidden;
   }
+  /* And the document with it. The body clips, but the scroll belongs to
+     the document, so anything a pixel too tall for one frame while the
+     page settles raised a real scrollbar that then went away again. With
+     no gutter held open any more that flicker is visible, and a bar
+     appearing and vanishing over a photograph is worse than either. A
+     page that is exactly one window cannot scroll, so nothing is put out
+     of reach that was not already clipped. */
+  html:has([data-quiet-footer]) {
+    overflow: hidden;
+  }
   /* A flex child will not shrink below its content without this, and the
      strip inside is the thing that has to give. */
   body:has([data-quiet-footer]) > main {
