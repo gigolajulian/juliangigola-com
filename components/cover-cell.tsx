@@ -145,6 +145,12 @@ export function CoverCell({
           className="strip-frame object-cover transition-transform duration-500 ease-[var(--ease-out-strong)] hoverable:group-hover:scale-[1.04] motion-reduce:transition-none motion-reduce:group-hover:scale-100"
         />
 
+        {/* Julian: do not change the colour of the plate on hover. It used
+          to lighten from 70 to 40 percent of the page over half a second,
+          and with the rail's six pixel lift running at the same time the
+          band read as coming apart rather than as one object moving. A
+          plate that holds still while the picture behind it moves is one
+          thing; a plate that changes its own material mid-move is two. */}
         {/* The plate: the same material as the bar at the top of every page,
           and two fifteenths of the cover: the fifth Julian first asked for,
           a third smaller when he asked again. One
@@ -153,7 +159,7 @@ export function CoverCell({
           so the rack and a phone held sideways get the same plate as a
           full window rather than a stacked variant of their own. Always
           on, because a strip of covers is scanned for a name. */}
-        <div className="cover-plate pointer-events-none absolute -inset-x-0.5 -bottom-0.5 flex h-[13.333%] min-h-[1.8333rem] flex-col justify-center gap-[0.8cqw] glass-surface bg-background/70 px-[4cqw] transition-[background-color] duration-500 ease-[var(--ease-out-strong)] hoverable:group-hover:bg-background/40 motion-reduce:transition-none">
+        <div className="cover-plate pointer-events-none absolute -inset-x-0.5 -bottom-0.5 flex h-[13.333%] min-h-[1.8333rem] flex-col justify-center gap-[0.8cqw] glass-surface bg-background/70 px-[4cqw]">
           <span
             style={{ "--n": row.name.length } as React.CSSProperties}
             className="cover-name font-display min-w-0 truncate uppercase leading-[0.9] tracking-[0]"
