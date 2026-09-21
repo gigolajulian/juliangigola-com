@@ -43,25 +43,26 @@ const read = (): Theme =>
    Dynamic Island included. The values are the tags' own, in
    `app/layout.tsx`.
 
-   The page ships two tags, one per system scheme, and writing the new
-   colour into both of them is not enough on an iPhone: the band kept the
-   old theme until the page was reloaded. Safari reads the tint from the
-   first tag whose `media` still matches, and a tag whose `content` was
-   edited under it does not always make it read again.
+   Nothing here may remove a tag. Next renders the theme colour tags from
+   `metadata`, which makes them React's nodes, and taking them out of the
+   document from the outside left React removing a child that was already
+   gone: `removeChild` threw on the next route change, the render never
+   committed, and the address bar moved to the new page while the old one
+   stayed on screen. Julian had to press a navigation link twice. That was
+   this function, and it is why it only mutates what is already there.
 
-   So the tags are replaced rather than edited. All of them go, and one
-   plain tag with no `media` on it takes their place: nothing left to
-   match against the system scheme, and a node Safari has not seen before,
-   which is what makes it look again. */
+   The page ships two tags, one per system scheme, and writing the colour
+   into both is not enough on an iPhone on its own: Safari tints from the
+   first tag whose `media` still matches. So the media queries come off as
+   well. With nothing left to match against the system scheme, both tags
+   carry the theme that is actually showing and the first of them is the
+   right one. */
 const paint = (next: Theme) => {
   const colour = next === "light" ? "#efece7" : "#0b0a09";
   for (const m of document.querySelectorAll('meta[name="theme-color"]')) {
-    m.remove();
+    m.setAttribute("content", colour);
+    m.removeAttribute("media");
   }
-  const tag = document.createElement("meta");
-  tag.setAttribute("name", "theme-color");
-  tag.setAttribute("content", colour);
-  document.head.append(tag);
 };
 
 function apply(next: Theme) {
