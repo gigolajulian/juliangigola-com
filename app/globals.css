@@ -1543,11 +1543,16 @@ a.strip-cell {
    sit 16px apart, which is what keeps nine of them and their heading on
    one line at 1024 with 50px over; at 1180 there is 96 to spare.
 
-   The shape and not the pointer: `min-width: 64rem` keeps a phone out,
-   `min-aspect-ratio: 5 / 4` keeps an upright tablet out, and
-   `max-aspect-ratio: 3 / 2` keeps every laptop out, the narrowest of
-   which is 1.54. An iPad sideways is 1.33 to 1.44. */
-@media (min-width: 64rem) and (min-aspect-ratio: 5 / 4) and (max-aspect-ratio: 3 / 2) {
+   The pointer and not the shape. This was an aspect window of 1.25 to
+   1.5, read off the devices themselves: an iPad sideways is 1.33 to 1.44
+   and the narrowest laptop is 1.54. But a browser is not a device. Safari
+   takes about ninety pixels of height for its own chrome, which puts an
+   iPad at roughly 1.6 — a laptop's shape — and the rule stopped firing on
+   the machine it was written for. A coarse pointer is the one thing a
+   tablet has and a laptop does not, whatever either of them does with the
+   height; `min-width: 64rem` still keeps a phone out and `landscape`
+   keeps an upright tablet out. */
+@media (pointer: coarse) and (min-width: 64rem) and (orientation: landscape) {
   .band-grid {
     grid-template-columns: repeat(4, max-content);
   }
