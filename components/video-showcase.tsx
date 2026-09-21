@@ -165,10 +165,20 @@ function ReelBackdrop({
   scroller: React.RefObject<HTMLDivElement | null>;
 }) {
   const veil = React.useRef<HTMLDivElement>(null);
+  /* The rack is a catalogue, so the reel is a texture behind it rather
+     than the thing being watched: the veil holds at the dim end instead
+     of following a scroll, and the stills and their titles keep their
+     contrast. Julian asked for the film behind the grid too. */
+  const rack = React.useContext(StripView) === "grid";
   React.useEffect(() => {
     const el = scroller.current;
     const v = veil.current;
-    if (!el || !v) return;
+    if (!v) return;
+    if (rack) {
+      v.style.setProperty("--reel-dim", "1");
+      return;
+    }
+    if (!el) return;
     const read = () => {
       const room = el.scrollWidth - el.clientWidth;
       const at = room > 0 ? Math.min(1, Math.max(0, el.scrollLeft / room)) : 0;
@@ -181,16 +191,11 @@ function ReelBackdrop({
       el.removeEventListener("scroll", read);
       window.removeEventListener("resize", read);
     };
-  }, [scroller]);
+  }, [scroller, rack]);
 
   const wide = useWide();
 
-  /* In the rack there is no scroll along the reel to dim it, so the film
-     playing behind stayed bright under a grid of stills and its titles
-     read through the page as a ghost. The rack is a catalogue; the reel
-     belongs to the strip. */
-  if (React.useContext(StripView) === "grid") return null;
-  /* And not on a phone at all. Julian asked for it gone there: it is a
+  /* Not on a phone at all. Julian asked for it gone there: it is a
      Vimeo player streaming a film behind a page nobody came to watch a
      film on, over whatever connection a phone has, and the veil over it
      is thickest exactly where the screen is smallest. */
