@@ -327,6 +327,13 @@ export function Strip({
   /** Which tick the pointer is over, as a place in `ticks`, or null. */
   /** Whether the strip has stopped. The rail's shape waits for it. */
   const [still, setStill] = React.useState(true);
+  /** Where a press on the rail is taking the strip, as a place in `ticks`.
+      Let go after browsing the rail and the strip has a second of coasting
+      left in it; without this the rail went flat for all of it and then
+      opened, which reads as the instrument losing its place. It knows
+      where the journey ends the moment the finger lifts, so it settles
+      there and waits for the pictures to arrive. */
+  const [aim, setAim] = React.useState<number | null>(null);
   const [over, setOver] = React.useState<number | null>(null);
   /** Which chapter of the archive the pointer is over, where that chapter
       is another page: it holds no ticks, so `over` cannot say it. */
@@ -1036,7 +1043,11 @@ export function Strip({
       if (!queued) queued = requestAnimationFrame(read);
       setStill(false);
       window.clearTimeout(rest);
-      rest = window.setTimeout(() => setStill(true), REST);
+      rest = window.setTimeout(() => {
+        setStill(true);
+        // Arrived: the live reading is the true one again.
+        setAim(null);
+      }, REST);
     };
     // A hash changed underfoot (a chip on /work is a plain anchor): glide.
     const onHash = () => {
@@ -1934,6 +1945,9 @@ export function Strip({
   /** Which tick the cell in the middle belongs to, and so which chapter
       is the one being read. */
   const atTick = Math.max(0, ticks.filter((t) => t.i <= at).length - 1);
+  /** Where the rail draws itself: the live reading, or the end of a
+      journey the rail itself started and the pictures are still making. */
+  const lands = aim ?? atTick;
   /* The archive's own chapters, where a page has been handed them. This
      strip is one of them and takes all of its ticks; the others hold
      none and stand for the pages they lead to. */
@@ -2125,7 +2139,10 @@ export function Strip({
     }
     // A press that never moved is a press on a tick, which is the same
     // journey: both end here rather than in the button's own `onClick`.
-    if (n !== null) goTo(ticks[n].i);
+    if (n !== null) {
+      setAim(n);
+      goTo(ticks[n].i);
+    }
   };
   const railOut = () => {
     if (held.current) return;
@@ -2337,7 +2354,7 @@ export function Strip({
           {chaptered
             ? chapterList.map((g, gi) => {
                 const count = g.to - g.from + 1;
-                const here = atTick >= g.from && atTick <= g.to;
+                const here = lands >= g.from && lands <= g.to;
                 /* The chapter you are standing in is open from the start
                    rather than on being pointed at. Shut, it said which
                    discipline you were in and nothing about where in it:
@@ -2357,7 +2374,8 @@ export function Strip({
                    in it never changes as the page runs, so there is
                    nothing to pulse and the position stays readable while
                    you scroll. */
-                const mine = here && !g.href && !onRail && (!!away || still);
+                const mine =
+                  here && !g.href && !onRail && (!!away || still || aim !== null);
                 const shown = openChapter === gi || mine;
                 /* Which cell of an open chapter carries the ink: the one
                    under the pointer where the pointer is in this chapter,
@@ -2367,7 +2385,7 @@ export function Strip({
                   over !== null && over >= g.from && over <= g.to
                     ? over
                     : mine
-                      ? atTick
+                      ? lands
                       : null;
                 /* Words in the back half hang from the right of their
                    chapter and grow leftwards, as the ticks' own did: a
