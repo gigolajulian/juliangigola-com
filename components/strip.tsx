@@ -94,6 +94,11 @@ const seat = (path: string) => `strip-at:${path}`;
     wheel delta. Three notches on a mouse: an overshoot of one is a
     reader arriving at the end, not asking to leave it. */
 const LEAVE_AFTER = 300;
+/* A finger's pull past the end before the strip leads on. Shorter than
+   the wheel's, because a wheel notch is worth tens of pixels and a finger
+   is worth the distance it actually moved: 80px is a deliberate pull and
+   not the last inch of a flick that happened to land on the end. */
+const LEAVE_TOUCH = 80;
 /** The quiet that ends a swipe. A trackpad fires every frame or so while
     the fingers are down and keeps firing as the fling decays, so anything
     under about a tenth of a second is still the same push. */
@@ -1074,6 +1079,56 @@ export function Strip({
       window.setTimeout(() => router.push(href), 260);
     };
 
+    /* ── a finger past the end ──
+       The wheel stretches the band and leads on at `LEAVE_AFTER`; a finger
+       never reached that path, because a touchscreen scrolls the strip
+       itself and the browser stops it dead on the last cell. Julian, on
+       an iPad held sideways: on a filter, allow swiping back and forth to
+       the previous and next filter. So a swipe that finds the strip
+       already at its end, and carries on the same way, is read as that
+       ask. The band is pushed with the finger so the pull is seen, and at
+       `LEAVE_TOUCH` of it the strip leads on through the same `leave` the
+       wheel uses — between two filters that is the row swapped in place.
+
+       Native scrolling is left alone: the listeners are passive, a swipe
+       with room still to scroll is not read at all, and the edge is
+       decided once at the start of the gesture, so a swipe that arrives
+       at the end mid-travel does not carry straight through into the next
+       page. Two fingers are the platform's, and are ignored. */
+    let touchX: number | null = null;
+    let touchEdge: 1 | -1 | 0 = 0;
+    const onTouchStart = (e: TouchEvent) => {
+      if (e.touches.length !== 1) {
+        touchX = null;
+        return;
+      }
+      touchX = e.touches[0].clientX;
+      const r = room();
+      // A run that fits the window is at both ends at once: 0 here, and
+      // the move reads the direction instead.
+      touchEdge =
+        r < 1 ? 0 : el.scrollLeft >= r - 2 ? 1 : el.scrollLeft <= 2 ? -1 : 0;
+    };
+    const onTouchMove = (e: TouchEvent) => {
+      if (touchX === null || e.touches.length !== 1 || leaving) return;
+      const x = e.touches[0].clientX;
+      const by = touchX - x;
+      touchX = x;
+      // Which way the finger is going, as the band counts it: forward is
+      // positive, the same sign the wheel gives `push`.
+      const dir: 1 | -1 = by > 0 ? 1 : -1;
+      const r = room();
+      const edge = r < 1 ? dir : touchEdge;
+      if (edge !== dir || !(dir > 0 ? nextHref : prevHref)) return;
+      push(by);
+      if (over >= LEAVE_TOUCH) leave(1);
+      if (over <= -LEAVE_TOUCH) leave(-1);
+    };
+    const onTouchEnd = () => {
+      touchX = null;
+      touchEdge = 0;
+    };
+
     /* A wheel moves the strip sideways, whichever way it is turned.
        `passive: false` because it has to be able to take the event; left
        passive, the browser would scroll the page at the same time and both
@@ -1473,6 +1528,10 @@ export function Strip({
     el.addEventListener("focusin", onFocusIn);
     document.addEventListener("keydown", onTab, true);
     el.addEventListener("wheel", onWheel, { passive: false });
+    el.addEventListener("touchstart", onTouchStart, { passive: true });
+    el.addEventListener("touchmove", onTouchMove, { passive: true });
+    el.addEventListener("touchend", onTouchEnd, { passive: true });
+    el.addEventListener("touchcancel", onTouchEnd, { passive: true });
     el.addEventListener("pointerdown", onDown);
     el.addEventListener("pointermove", onMove);
     el.addEventListener("pointerup", onUp);
@@ -1498,6 +1557,10 @@ export function Strip({
       el.removeEventListener("focusin", onFocusIn);
       document.removeEventListener("keydown", onTab, true);
       el.removeEventListener("wheel", onWheel);
+      el.removeEventListener("touchstart", onTouchStart);
+      el.removeEventListener("touchmove", onTouchMove);
+      el.removeEventListener("touchend", onTouchEnd);
+      el.removeEventListener("touchcancel", onTouchEnd);
       el.removeEventListener("pointerdown", onDown);
       el.removeEventListener("pointermove", onMove);
       el.removeEventListener("pointerup", onUp);
