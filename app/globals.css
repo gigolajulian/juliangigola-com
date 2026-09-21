@@ -436,6 +436,18 @@
     scrollbar-gutter: stable;
   }
 
+  /* Except where a scrollbar has no width to take. A touch device draws
+     its bar over the page and takes nothing, so the gutter held fifteen
+     pixels open for something that can never appear and the cover
+     photograph stopped fifteen pixels short of the right edge of an iPad.
+     Julian asked for the picture to reach the edge. Nothing steps sideways
+     here, because nothing was ever being reserved. */
+  @media (pointer: coarse) {
+    html {
+      scrollbar-gutter: auto;
+    }
+  }
+
   /* The half of the copyright notice that JavaScript cannot do.
      `touch-callout` is the long-press "Save Image" sheet on iOS, which never
      raises a contextmenu event; `user-drag` is Safari's own drag-the-file-out,
