@@ -680,10 +680,17 @@ export function Strip({
    * the strip's own scroller, sideways, and leaves the drag, the rail,
    * the keys and the lead-on where they are — the wheel is the thing
    * being judged. Loaded only when it is wanted, so a visitor who never
-   * asks never downloads it. */
+   * asks never downloads it.
+   *
+   * Never on a paged strip. The homepage, the studio and the contact page
+   * move a whole screen per gesture, and a screen is not a distance to be
+   * eased over: Lenis took the wheel and turned each of them into one
+   * continuous scroll that slid the next section into view instead of
+   * landing on it. Julian reported exactly that. Those three keep the
+   * strip's own paging; Lenis is for the sequences that really do run. */
   React.useEffect(() => {
     const el = scroller.current;
-    if (!el || !live || !wantsLenis()) return;
+    if (!el || !live || paged || !wantsLenis()) return;
     let off = () => {};
     let gone = false;
     import("lenis").then(({ default: Lenis }) => {
@@ -716,7 +723,7 @@ export function Strip({
       gone = true;
       off();
     };
-  }, [live]);
+  }, [live, paged]);
 
   /* Which cell is nearest the middle of the window. Read off the scroll
      position rather than with an observer, because the counter and the
@@ -1049,6 +1056,11 @@ export function Strip({
     if (!el || !live) return;
     const eased = !window.matchMedia("(prefers-reduced-motion: reduce)")
       .matches;
+    /* Whether Lenis is carrying the travel on this strip. It never takes a
+       paged one, and even where it does the two ends are still the
+       strip's: the band and the lead-on to the next project are counted
+       here, off wheel events Lenis would otherwise swallow. */
+    const smooth = !paged && wantsLenis();
 
     /* ── the scroller's own measurements, taken when it changes ──
        `scrollWidth` and `clientWidth` both make the browser lay the page
@@ -1498,12 +1510,16 @@ export function Strip({
         if (over <= -LEAVE_AFTER) leave(-1);
         return;
       }
-      e.preventDefault();
       // A notch the other way lets go of the band, and of the count.
       if (over) {
         over = 0;
         release();
       }
+      /* Away from the ends, Lenis has the wheel. Nothing is prevented and
+         nothing is aimed: its own listener moves the scroller, and this
+         handler has already done the only part it keeps. */
+      if (smooth) return;
+      e.preventDefault();
       /* Paged: the gesture means the next screen, whatever its size. A
          trackpad sends a stream of small deltas for one swipe and a mouse
          one large notch for one turn, so the move is locked for as long as
@@ -1760,9 +1776,7 @@ export function Strip({
     el.addEventListener("scroll", onSettle, { passive: true });
     el.addEventListener("focusin", onFocusIn);
     document.addEventListener("keydown", onTab, true);
-    /* Unless Lenis is driving. Two models pushing the same scroller at
-       once is neither of them. */
-    if (!wantsLenis()) el.addEventListener("wheel", onWheel, { passive: false });
+    el.addEventListener("wheel", onWheel, { passive: false });
     el.addEventListener("touchstart", onTouchStart, { passive: true });
     el.addEventListener("touchmove", onTouchMove, { passive: true });
     el.addEventListener("touchend", onTouchEnd, { passive: true });
