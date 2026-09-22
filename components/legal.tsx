@@ -202,9 +202,7 @@ export function LegalPage({ children }: { children: React.ReactNode }) {
                     {d.title}
                   </span>
                   <span className="label mt-2 block text-muted-foreground">
-                    {d.clauses.length} clauses
-                  </span>
-                  <span className="label block text-muted-foreground">
+                    As of{" "}
                     <time dateTime={d.effective}>{dated(d.effective)}</time>
                   </span>
                 </button>
