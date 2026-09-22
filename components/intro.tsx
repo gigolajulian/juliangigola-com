@@ -3,7 +3,7 @@
 import * as React from "react";
 
 /* ── the opening ──────────────────────────────────────────────────
- * The eye mark opens, blinks, and the site arrives through the pupil.
+ * The eye mark opens, blinks, and hands the screen to the site.
  *
  * Every frame is the logo's own geometry recomputed rather than a video
  * or a stack of masks laid over it. A lens is two arcs meeting at the
@@ -36,8 +36,8 @@ const CY = 49.6;
 const A = 42.8;
 const S = 18.0;
 const TAKE = 1000; // the mark: open, hold, blink, settle
-const OPEN = 1600; // the pupil opening into the page
-const CUE = 0.88; // the opening starts before the mark has quite settled
+const FADE = 620; // the ground going, once the mark has settled
+const CUE = 0.94; // the ending starts before the mark has quite settled
 
 const radius = (a: number, s: number) => (a * a + s * s) / (2 * Math.max(s, 0.18));
 
@@ -53,13 +53,6 @@ function lens(a: number, top: number, bot: number) {
 const mix = (from: number, to: number, t: number) => from + (to - from) * t;
 const glide = (t: number) =>
   t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
-/* The curve the pupil opens on. Julian: faster mark, and let the end run
-   on. An exponential was right for a short opening — most of the distance
-   early, then a long tail — but over 1.6 seconds its tail is spent after
-   the hole has already passed the corners, so the extra time would not be
-   seen. This spreads the crossing out instead: 44 per cent of the way at
-   a quarter, 81 at a half, and still moving at the end. */
-const reveal = (t: number) => 1 - Math.pow(1 - t, 2.4);
 
 type Key = [at: number, value: number, ease?: (t: number) => number];
 
@@ -94,7 +87,6 @@ const frame = (t: number) => ({
 
 export function Intro() {
   const box = React.useRef<HTMLDivElement>(null);
-  const art = React.useRef<SVGSVGElement>(null);
   const path = React.useRef<SVGPathElement>(null);
   const clip = React.useRef<SVGPathElement>(null);
   const iris = React.useRef<SVGGElement>(null);
@@ -118,49 +110,17 @@ export function Intro() {
       dot.current?.setAttribute("r", (8.6 * f.pupil).toFixed(3));
     };
 
-    /* Two loops overlap for the last fraction of a second, so they keep
-       their own handles and both are cancelled on the way out. */
     let raf = 0;
-    let out = 0;
-    /* The pupil is the door. A hole opens where the pupil is — not at the
-       centre of the screen, at the pupil — and takes the frame with it.
-       The mark is inside the same mask, so it is eaten from the inside
-       out rather than faded off the top. */
-    const through = () => {
+    /* Julian: the opening through the pupil looked bad, so it is gone.
+       What is here instead is the quietest ending there is — the ground
+       the mark stands on fades and the site is already behind it. It is
+       not the final answer, it is the one that cannot look wrong while
+       the better ones are being chosen. */
+    const leave = () => {
       const el = box.current;
-      const mark = art.current;
-      if (!el || !mark) return;
-      const m = mark.getBoundingClientRect();
-      const x = m.left + m.width / 2;
-      const y = m.top + m.height * 0.409;
-      el.style.setProperty("--hx", `${x}px`);
-      el.style.setProperty("--hy", `${y}px`);
-      const w = window.innerWidth;
-      const h = window.innerHeight;
-      const far = Math.max(
-        Math.hypot(x, y),
-        Math.hypot(w - x, y),
-        Math.hypot(x, h - y),
-        Math.hypot(w - x, h - y),
-      );
-      const t0 = performance.now();
-      const step = (now: number) => {
-        const t = Math.min(1, (now - t0) / OPEN);
-        const k = reveal(t);
-        el.style.setProperty("--hole", `${(k * far * 1.02).toFixed(1)}px`);
-        /* The feather opens with the hole and closes again at the end, so
-           the last frame is a clean page and not a soft ring. */
-        el.style.setProperty(
-          "--feather",
-          `${(Math.sin(Math.PI * t) * 90 + 6).toFixed(1)}px`,
-        );
-        // the mark hangs a moment, then is drawn out through the hole
-        mark.style.transform = `scale(${1 + Math.pow(t, 1.7) * 0.85})`;
-        mark.style.opacity = String(1 - Math.pow(t, 2.6));
-        if (t < 1) out = requestAnimationFrame(step);
-        else root.removeAttribute("data-intro");
-      };
-      out = requestAnimationFrame(step);
+      if (!el) return;
+      el.classList.add("jg-intro-out");
+      window.setTimeout(() => root.removeAttribute("data-intro"), FADE + 40);
     };
 
     const t0 = performance.now();
@@ -170,21 +130,18 @@ export function Intro() {
       draw(frame(t));
       if (!cued && t >= CUE) {
         cued = true;
-        through();
+        leave();
       }
       if (t < 1) raf = requestAnimationFrame(step);
     };
     draw(frame(0));
     raf = requestAnimationFrame(step);
-    return () => {
-      cancelAnimationFrame(raf);
-      cancelAnimationFrame(out);
-    };
+    return () => cancelAnimationFrame(raf);
   }, []);
 
   return (
     <div id="jg-intro" ref={box} aria-hidden="true">
-      <svg ref={art} viewBox="0 0 100 100" focusable="false">
+      <svg viewBox="0 0 100 100" focusable="false">
         <defs>
           <clipPath id="jg-intro-clip">
             <path ref={clip} d={lens(14, 1.2, 1.2)} />

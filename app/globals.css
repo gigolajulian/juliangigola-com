@@ -103,9 +103,7 @@
  *
  * The mark takes the page's own ink and ground, so it arrives in
  * whichever theme is showing and the ground it sits on is the ground the
- * page is already painted in. `--hole` is the pupil opening into the
- * page, and the feather on its edge is what keeps it from reading as a
- * slide wipe. Both are written by `intro.tsx`, frame by frame.
+ * page is already painted in.
  * ───────────────────────────────────────────────────────────────── */
 #jg-intro {
   display: none;
@@ -118,20 +116,20 @@
   place-items: center;
   background: var(--background);
   pointer-events: none;
-  --hole: 0px;
-  --feather: 0px;
-  --hx: 50%;
-  --hy: 50%;
-  -webkit-mask-image: radial-gradient(
-    circle at var(--hx) var(--hy),
-    rgba(0, 0, 0, 0) var(--hole),
-    #000 calc(var(--hole) + var(--feather))
-  );
-  mask-image: radial-gradient(
-    circle at var(--hx) var(--hy),
-    rgba(0, 0, 0, 0) var(--hole),
-    #000 calc(var(--hole) + var(--feather))
-  );
+}
+/* The ending, for now: the ground goes and the site is already behind it.
+   The mark leaves a little ahead of the ground it stands on, so the last
+   thing on screen is the page and not a logo dissolving into it. */
+#jg-intro.jg-intro-out {
+  opacity: 0;
+  transition: opacity 620ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+#jg-intro.jg-intro-out svg {
+  opacity: 0;
+  transform: scale(0.985);
+  transition:
+    opacity 420ms cubic-bezier(0.23, 1, 0.32, 1),
+    transform 620ms cubic-bezier(0.23, 1, 0.32, 1);
 }
 #jg-intro svg {
   width: clamp(7rem, 17vw, 15rem);
