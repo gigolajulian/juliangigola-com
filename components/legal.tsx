@@ -148,9 +148,9 @@ export function LegalColumn({
       data-hash={id}
       /* One document, one screen. Julian: two pages total, so the second
          document is one gesture away rather than eleven. */
-      className="flex w-full shrink-0 flex-col gap-8 py-8 sm:h-full sm:w-full sm:flex-row sm:items-stretch sm:gap-12 sm:py-6 sm:pr-10"
+      className="flex w-full shrink-0 flex-col gap-8 py-8 sm:h-full sm:w-full sm:flex-row sm:items-stretch sm:gap-10 sm:py-2 sm:pr-10"
     >
-      <div className="flex shrink-0 flex-col justify-center gap-5 sm:w-[min(17rem,26%)]">
+      <div className="flex shrink-0 flex-col justify-center gap-5 sm:w-[min(16rem,24%)]">
         <div>
           <h2
             id={`${id}-title`}
@@ -174,11 +174,11 @@ export function LegalColumn({
           itself on a short window rather than pushing the reading column
           off the page. */}
       <ol
-        className="m-0 min-w-0 list-none p-0 sm:h-full sm:w-[min(20rem,30%)] sm:shrink-0 sm:overflow-y-auto sm:overscroll-contain sm:pr-2"
+        className="m-0 min-w-0 list-none p-0 sm:h-full sm:w-[min(26rem,36%)] sm:shrink-0 sm:overflow-y-auto sm:overscroll-contain sm:pr-3"
         onMouseLeave={() => setPeek(null)}
       >
         {clauses.map((c, i) => (
-          <li key={c.id} className="border-b border-border">
+          <li key={c.id} className="border-b border-border last:border-b-0">
             <button
               id={`${c.id}-open`}
               type="button"
@@ -188,7 +188,12 @@ export function LegalColumn({
               onBlur={() => setPeek(null)}
               aria-current={pick === i ? "true" : undefined}
               className={cn(
-                "label flex w-full items-center gap-3 py-1.5 text-left transition-colors duration-200",
+                /* Julian: make the sections bigger. The row is set a step
+                   above the label face and given the height of a line in
+                   a table of contents, which is what it is. Twenty one of
+                   them no longer fit a short window, so the column
+                   scrolls; the reading column beside it does not move. */
+                "label flex w-full items-center gap-4 py-1.5 text-left text-sm leading-tight tracking-[0.06em] transition-colors duration-200",
                 at?.id === c.id ? "text-foreground" : "text-muted-foreground",
                 "hoverable:hover:text-foreground",
               )}

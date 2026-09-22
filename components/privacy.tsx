@@ -29,13 +29,12 @@ export function PrivacyColumn() {
       intro={
         <>
           <p>
-            This Policy states what personal information juliangigola.com
-            collects, why, and what you may require of me. The Site carries no
-            advertising trackers and no third-party cookies.
+            What this Site collects, why, and what you may require of me. No
+            advertising trackers, no third-party cookies.
           </p>
           <p className="mt-3 text-muted-foreground">
-            Controller under European law, business under California law:
-            Julian Gigola, San Francisco Bay Area, California, {EMAIL}.
+            Controller: Julian Gigola, San Francisco Bay Area, California.{" "}
+            {EMAIL}.
           </p>
         </>
       }
