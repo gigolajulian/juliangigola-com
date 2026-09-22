@@ -122,12 +122,17 @@ export function LegalColumn({
     const read = () => {
       const want = decodeURIComponent(window.location.hash.slice(1));
       const i = clauses.findIndex((c) => c.id === want);
-      if (i >= 0) setPick(i);
+      if (i < 0) return;
+      setPick(i);
+      /* The strip travels to a cell whose hash it knows, and a clause is
+         not one of those: `#privacy-your-rights` names a line in the
+         contents, not a page. So the document brings itself into view. */
+      document.getElementById(id)?.scrollIntoView({ inline: "start", block: "nearest" });
     };
     read();
     window.addEventListener("hashchange", read);
     return () => window.removeEventListener("hashchange", read);
-  }, [clauses]);
+  }, [clauses, id]);
 
   const press = (i: number) => {
     setPick(i);
