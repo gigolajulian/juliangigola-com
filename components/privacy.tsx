@@ -26,18 +26,6 @@ export function PrivacyColumn() {
       title="Privacy Policy"
       label="Privacy"
       effective="2026-09-21"
-      intro={
-        <>
-          <p>
-            What this Site collects, why, and what you may require of me. No
-            advertising trackers, no third-party cookies.
-          </p>
-          <p className="mt-3 text-muted-foreground">
-            Controller: Julian Gigola, San Francisco Bay Area, California.{" "}
-            {EMAIL}.
-          </p>
-        </>
-      }
     >
       <Clause title="What is collected, and when">
         <p>

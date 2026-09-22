@@ -29,18 +29,6 @@ export function TermsColumn() {
       title="Terms of Service"
       label="Terms"
       effective="2026-09-21"
-      intro={
-        <>
-          <p>
-            These Terms govern your use of {SITE} and of the work published on
-            it.
-          </p>
-          <p className="mt-3 text-muted-foreground">
-            Read <em>What you may do</em> and <em>What you may not do</em> if
-            nothing else.
-          </p>
-        </>
-      }
     >
       <Clause title="Definitions">
         <p>
