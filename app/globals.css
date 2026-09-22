@@ -1163,6 +1163,18 @@ a.strip-cell {
     100% 100%;
 }
 
+/* A scroller with no bar of its own. The legal page changes what is in
+   its reading column on a hover, and every change moves the scrollable
+   height, so the platform's overlay bar flashed up and faded out again on
+   each one: a bar that appears and vanishes reads as a fault. The panes
+   still scroll, by wheel, by touch and by keyboard. */
+@utility quiet-scroll {
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
 @utility strip-scroll {
   scrollbar-width: none;
   overscroll-behavior-x: contain;
