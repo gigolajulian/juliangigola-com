@@ -90,6 +90,67 @@
    are listed. */
 @custom-variant roomy (@media (min-height: 75rem) and (min-width: 40rem));
 
+/* ── the opening ──────────────────────────────────────────────────
+ * The eye mark over the page, and the page already rendered underneath
+ * it. Hidden unless the script in `layout.tsx` has decided, before the
+ * first paint, that this visit gets one: a first arrival, motion not
+ * turned down, JavaScript running. Without that attribute this is
+ * `display: none`, so nobody is ever shut behind a curtain that has
+ * nothing to lift it.
+ *
+ * `pointer-events: none` is the important line. The intro is a layer,
+ * not a gate: a press during it goes through to the site.
+ *
+ * The mark takes the page's own ink and ground, so it arrives in
+ * whichever theme is showing and the ground it sits on is the ground the
+ * page is already painted in. `--hole` is the pupil opening into the
+ * page, and the feather on its edge is what keeps it from reading as a
+ * slide wipe. Both are written by `intro.tsx`, frame by frame.
+ * ───────────────────────────────────────────────────────────────── */
+#jg-intro {
+  display: none;
+}
+[data-intro="1"] #jg-intro {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: grid;
+  place-items: center;
+  background: var(--background);
+  pointer-events: none;
+  --hole: 0px;
+  --feather: 0px;
+  --hx: 50%;
+  --hy: 50%;
+  -webkit-mask-image: radial-gradient(
+    circle at var(--hx) var(--hy),
+    rgba(0, 0, 0, 0) var(--hole),
+    #000 calc(var(--hole) + var(--feather))
+  );
+  mask-image: radial-gradient(
+    circle at var(--hx) var(--hy),
+    rgba(0, 0, 0, 0) var(--hole),
+    #000 calc(var(--hole) + var(--feather))
+  );
+}
+#jg-intro svg {
+  width: clamp(7rem, 17vw, 15rem);
+  height: auto;
+  transform-origin: 50% 40.9%;
+}
+.jg-intro-lens {
+  fill: var(--foreground);
+}
+.jg-intro-iris {
+  fill: var(--background);
+}
+.jg-intro-pupil {
+  fill: var(--foreground);
+}
+.jg-intro-inner {
+  transform-origin: 50px 40.9px;
+}
+
 @custom-variant squat (
   @media (min-width: 64rem) and (min-aspect-ratio: 9 / 10) and
     (max-aspect-ratio: 5 / 4)

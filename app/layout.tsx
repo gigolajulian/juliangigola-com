@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Inter, Geist_Mono } from "next/font/google";
 import localFont from "next/font/local";
+import { Intro } from "@/components/intro";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { PhotoNotice } from "@/components/photo-notice";
@@ -180,6 +181,20 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             __html: `(function(){var t=null;try{t=localStorage.getItem("theme")}catch(e){}var l=t==="light"||(t!=="dark"&&matchMedia("(prefers-color-scheme: light)").matches);if(l)document.documentElement.dataset.theme="light";var m=document.querySelectorAll('meta[name="theme-color"]');for(var i=0;i<m.length;i++)m[i].setAttribute("content",l?"#ebedef":"#0b0a09")})()`,
           }}
         />
+        {/* Whether this visit gets the opening, decided before the first
+            paint because it cannot be decided after one: a frame of the
+            site showing and then a curtain dropping over it is worse than
+            no curtain at all.
+
+            Three conditions, and `?intro=1` to see it again on demand.
+            `sessionStorage` throws outright in some privacy modes rather
+            than returning null, so the whole thing is wrapped and a
+            failure simply means no opening. */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var q=location.search;if(/[?&]intro=0/.test(q))return;var force=/[?&]intro=1/.test(q);var seen=false;try{seen=!!sessionStorage.getItem("jg-intro")}catch(e){}var calm=matchMedia("(prefers-reduced-motion: reduce)").matches;if(force||(!seen&&!calm))document.documentElement.dataset.intro="1"}catch(e){}})()`,
+          }}
+        />
       </head>
       <body className="min-h-full flex flex-col">
         {/* First stop for a keyboard or screen-reader visitor: the nav is
@@ -191,6 +206,10 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         >
           Skip to content
         </a>
+
+        {/* The eye mark opens over the page on a first arrival, and the
+            page is already underneath it. See `intro.tsx`. */}
+        <Intro />
 
         <SiteHeader />
         {/* The drawer the burger opens. A sibling of the header and of
