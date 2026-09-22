@@ -83,6 +83,13 @@
    short is a phone, and the chrome gets out of the way. */
 @custom-variant lying (@media (max-height: 30rem) and (min-width: 40rem));
 
+/* The other end of the same question: a window with room to spare down
+   the page. The legal page keeps one document's clauses in its contents
+   column and reads the other one on demand, which leaves the bottom of
+   that column empty on a tall display. Past this height both documents
+   are listed. */
+@custom-variant roomy (@media (min-height: 75rem) and (min-width: 40rem));
+
 @custom-variant squat (
   @media (min-width: 64rem) and (min-aspect-ratio: 9 / 10) and
     (max-aspect-ratio: 5 / 4)

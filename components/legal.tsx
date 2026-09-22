@@ -67,12 +67,30 @@ export function LegalPage({ children }: { children: React.ReactNode }) {
   const [peek, setPeek] = React.useState<string | null>(null);
 
   const doc = docs.find((d) => d.id === open) ?? docs[0];
-  const at =
-    doc?.clauses.find((c) => c.id === (peek ?? pick)) ?? doc?.clauses[0];
 
-  const press = (c: Clause) => {
+  /* Whichever clause is being read, and the document it belongs to. Both
+     contents are on the page at a tall window, so the pointer can be over
+     a privacy clause while the terms are the open document, and the
+     reading column has to say so. */
+  const want = peek ?? pick;
+  const found =
+    docs
+      .map((d) => ({ d, c: d.clauses.find((o) => o.id === want) }))
+      .find((x) => x.c) ?? (doc ? { d: doc, c: doc.clauses[0] } : null);
+  const at = found?.c;
+
+  const press = (d: Doc, c: Clause) => {
+    setOpen(d.id);
     setPick(c.id);
     window.history.replaceState(null, "", `#${c.id}`);
+    /* On a phone the three columns are three stacked blocks and the clause
+       is below the whole contents, so a tap would change something the
+       reader cannot see. There is no hover there either, so the tap is
+       the only way in and it has to arrive. */
+    if (window.matchMedia("(max-width: 39.99rem)").matches)
+      document
+        .getElementById("legal-clause")
+        ?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
   /* An address names a clause, and a clause names its document: the
@@ -132,6 +150,12 @@ export function LegalPage({ children }: { children: React.ReactNode }) {
                   setOpen(d.id);
                   setPick(d.clauses[0].id);
                   window.history.replaceState(null, "", `#${d.id}`);
+                  /* On a tall window both contents are on the page, so
+                     choosing a document is a move to its list rather than
+                     a swap. Harmless when it is the only one there. */
+                  document
+                    .getElementById(`${d.id}-contents`)
+                    ?.scrollIntoView({ block: "start" });
                 }}
                 aria-current={here ? "true" : undefined}
                 className={cn(
@@ -159,57 +183,82 @@ export function LegalPage({ children }: { children: React.ReactNode }) {
           })}
         </nav>
 
-        {/* The contents of the document that is open. One at a time, so
-            the longest of them still stands in one length. */}
-        <ol
-          className="m-0 min-h-0 list-none p-0 sm:w-[min(25rem,29%)] sm:shrink-0 sm:overflow-y-auto sm:overscroll-contain"
+        {/* The contents. On a window short enough that one document fills
+            the column, only the open one is here, which is what keeps the
+            terms standing in a single length. Julian: on a tall screen the
+            room under them was empty, so from 75rem of window the second
+            document's clauses run on underneath, each list under its own
+            name. The threshold is height, not width, because that is the
+            thing the space depends on. */}
+        <div
+          className="min-h-0 sm:w-[min(25rem,29%)] sm:shrink-0 sm:overflow-y-auto sm:overscroll-contain"
           onMouseLeave={() => setPeek(null)}
         >
-          {doc?.clauses.map((c) => (
-            <li key={c.id} className="border-b border-border first:border-t">
-              <button
-                id={`${c.id}-open`}
-                type="button"
-                onClick={() => press(c)}
-                onMouseEnter={() => setPeek(c.id)}
-                onFocus={() => setPeek(c.id)}
-                onBlur={() => setPeek(null)}
-                aria-current={at?.id === c.id ? "true" : undefined}
-                className={cn(
-                  "label flex w-full items-center gap-4 py-1.5 text-left text-sm leading-tight tracking-[0.06em] transition-colors duration-200",
-                  at?.id === c.id ? "text-foreground" : "text-muted-foreground",
-                  "hoverable:hover:text-foreground",
-                )}
-              >
-                <span className="tabular-nums">
-                  {String(c.n).padStart(2, "0")}
-                </span>
-                <span className="min-w-0 flex-1">{c.title}</span>
-                {/* A rule that fills when the clause is the one being
-                    read: the contents own marker, in the width a number
-                    takes. */}
-                <span
-                  aria-hidden
-                  className={cn(
-                    "h-px w-4 shrink-0 transition-colors duration-200",
-                    at?.id === c.id ? "bg-foreground" : "bg-transparent",
-                  )}
-                />
-              </button>
-            </li>
+          {docs.map((d) => (
+            <section
+              key={d.id}
+              id={`${d.id}-contents`}
+              aria-label={d.title}
+              className={cn(
+                "mt-6 first:mt-0",
+                d.id === doc?.id ? "block" : "hidden roomy:block",
+              )}
+            >
+              <h2 className="label hidden pb-1.5 text-muted-foreground roomy:block">
+                {d.title}
+              </h2>
+              <ol className="m-0 list-none p-0">
+                {d.clauses.map((c) => (
+                  <li key={c.id} className="border-b border-border first:border-t">
+                    <button
+                      id={`${c.id}-open`}
+                      type="button"
+                      onClick={() => press(d, c)}
+                      onMouseEnter={() => setPeek(c.id)}
+                      onFocus={() => setPeek(c.id)}
+                      onBlur={() => setPeek(null)}
+                      aria-current={at?.id === c.id ? "true" : undefined}
+                      className={cn(
+                        "label flex w-full items-center gap-4 py-1.5 text-left text-sm leading-tight tracking-[0.06em] transition-colors duration-200",
+                        at?.id === c.id
+                          ? "text-foreground"
+                          : "text-muted-foreground",
+                        "hoverable:hover:text-foreground",
+                      )}
+                    >
+                      <span className="tabular-nums">
+                        {String(c.n).padStart(2, "0")}
+                      </span>
+                      <span className="min-w-0 flex-1">{c.title}</span>
+                      {/* A rule that fills when the clause is the one
+                          being read: the contents own marker, in the
+                          width a number takes. */}
+                      <span
+                        aria-hidden
+                        className={cn(
+                          "h-px w-4 shrink-0 transition-colors duration-200",
+                          at?.id === c.id ? "bg-foreground" : "bg-transparent",
+                        )}
+                      />
+                    </button>
+                  </li>
+                ))}
+              </ol>
+            </section>
           ))}
-        </ol>
+        </div>
 
         {/* The clause itself. `aria-live` is deliberately absent: the text
             changes under the pointer, and announcing every clause somebody
             skims past is noise. The buttons name themselves. */}
         {at ? (
           <article
+            id="legal-clause"
             aria-labelledby="legal-reading"
             className="min-w-0 flex-1 border-t border-border pt-5 sm:h-full sm:overflow-y-auto sm:overscroll-contain sm:border-l sm:border-t-0 sm:pl-10 sm:pt-0"
           >
             <h2 id="legal-reading" className="label text-muted-foreground">
-              {doc?.label}
+              {found?.d.label}
               <span className="ml-4 tabular-nums">
                 {String(at.n).padStart(2, "0")}
               </span>
