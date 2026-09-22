@@ -2,25 +2,25 @@
   "/work/lost-relic/cover.jpg": [
     1080
   ],
-  "/work/hua/cover.jpg": [
+  "/work/iris/cover.jpg": [
     1080
   ],
-  "/work/iris/cover.jpg": [
+  "/work/iris/08.jpg": [
+    640,
+    1080
+  ],
+  "/work/iris/07.jpg": [
+    640,
+    1080
+  ],
+  "/work/iris/02.jpg": [
+    640,
     1080
   ],
   "/work/novocaine/cover.jpg": [
     1080
   ],
   "/work/paradox/cover.jpg": [
-    1080
-  ],
-  "/work/relay/cover.jpg": [
-    1080
-  ],
-  "/work/diesel/cover.jpg": [
-    1080
-  ],
-  "/work/undisputed/cover.jpg": [
     1080
   ],
   "/work/decoy/cover.jpg": [
@@ -32,15 +32,6 @@
   "/work/serif/cover.jpg": [
     1080
   ],
-  "/work/void/cover.jpg": [
-    1080
-  ],
-  "/work/aegis/cover.jpg": [
-    1080
-  ],
-  "/work/vigil/cover.jpg": [
-    1080
-  ],
   "/work/aera-wraith/cover.jpg": [
     1080
   ],
@@ -48,7 +39,7 @@
     640,
     1080
   ],
-  "/work/aera-wraith/03.jpg": [
+  "/work/aera-wraith/05.jpg": [
     640,
     1080
   ],
@@ -57,9 +48,6 @@
     1080
   ],
   "/work/aether/cover.jpg": [
-    1080
-  ],
-  "/work/analogue-dreams/cover.jpg": [
     1080
   ],
   "/work/automotive/cover.jpg": [
@@ -89,13 +77,7 @@
   "/work/events/cover.jpg": [
     1080
   ],
-  "/work/frostbite/cover.jpg": [
-    1080
-  ],
   "/work/fun-xyz/cover.jpg": [
-    1080
-  ],
-  "/work/giselle-studio-digitals/cover.jpg": [
     1080
   ],
   "/work/goodcult/cover.jpg": [
@@ -129,9 +111,6 @@
     1080
   ],
   "/work/isabela/cover.jpg": [
-    1080
-  ],
-  "/work/jubo/cover.jpg": [
     1080
   ],
   "/work/l3na/cover.jpg": [
@@ -170,9 +149,6 @@
   "/work/mya/cover.jpg": [
     1080
   ],
-  "/work/nabu/cover.jpg": [
-    1080
-  ],
   "/work/oakley-x-nike/cover.jpg": [
     1080
   ],
@@ -180,9 +156,6 @@
     1080
   ],
   "/work/places/cover.jpg": [
-    1080
-  ],
-  "/work/poise/cover.jpg": [
     1080
   ],
   "/work/retro-reverie-vol-01/cover.jpg": [
@@ -207,9 +180,6 @@
   ],
   "/work/sago/04.jpg": [
     640,
-    1080
-  ],
-  "/work/sara/cover.jpg": [
     1080
   ],
   "/work/solace/cover.jpg": [
@@ -246,9 +216,6 @@
   ],
   "/work/the-den-talkshow/04.jpg": [
     640,
-    1080
-  ],
-  "/work/torteline/cover.jpg": [
     1080
   ],
   "/work/totem/cover.jpg": [
@@ -296,9 +263,6 @@
   "/work/vines-roses/cover.jpg": [
     1080
   ],
-  "/work/bridal/cover.jpg": [
-    1080
-  ],
   "/work/weddings/cover.jpg": [
     1080
   ],
@@ -330,6 +294,45 @@
     1080
   ],
   "/work/zoe/cover.jpg": [
+    1080
+  ],
+  "/work/ghostlight/cover.jpg": [
+    1080
+  ],
+  "/work/kala-x-sharks/cover.jpg": [
+    1080
+  ],
+  "/work/lithe/cover.jpg": [
+    1080
+  ],
+  "/work/threshold/cover.jpg": [
+    1080
+  ],
+  "/work/azure-bloom/cover.jpg": [
+    1080
+  ],
+  "/work/channel-orange/cover.jpg": [
+    1080
+  ],
+  "/work/echo-void/cover.jpg": [
+    1080
+  ],
+  "/work/paranoia/cover.jpg": [
+    1080
+  ],
+  "/work/ravaged/cover.jpg": [
+    1080
+  ],
+  "/work/second-skin/cover.jpg": [
+    1080
+  ],
+  "/work/vesper/cover.jpg": [
+    1080
+  ],
+  "/work/aesc/cover.jpg": [
+    1080
+  ],
+  "/work/celestis/cover.jpg": [
     1080
   ]
 }

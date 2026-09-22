@@ -1,5 +1,1316 @@
 {
-  "projects": [],
+  "projects": [
+    {
+      "slug": "ghostlight",
+      "name": "GHOSTLIGHT",
+      "categorySlug": "editorial",
+      "credits": [
+        {
+          "role": "Photographer",
+          "name": "Julian Gigola",
+          "instagram": "juliangigola"
+        },
+        {
+          "role": "Model",
+          "name": "Zoe",
+          "instagram": "iaiupo"
+        }
+      ],
+      "cover": {
+        "src": "/work/ghostlight/cover.jpg",
+        "width": 600,
+        "height": 800,
+        "color": "#080808",
+        "alt": ""
+      },
+      "images": [
+        {
+          "src": "/work/ghostlight/09.jpg",
+          "width": 2500,
+          "height": 3333,
+          "color": "#080808",
+          "alt": ""
+        },
+        {
+          "src": "/work/ghostlight/01.jpg",
+          "width": 2500,
+          "height": 3333,
+          "color": "#080808",
+          "alt": ""
+        },
+        {
+          "src": "/work/ghostlight/02.jpg",
+          "width": 2500,
+          "height": 3334,
+          "color": "#080808",
+          "alt": ""
+        },
+        {
+          "src": "/work/ghostlight/03.jpg",
+          "width": 2500,
+          "height": 3334,
+          "color": "#080808",
+          "alt": ""
+        },
+        {
+          "src": "/work/ghostlight/04.jpg",
+          "width": 2500,
+          "height": 3333,
+          "color": "#080808",
+          "alt": ""
+        },
+        {
+          "src": "/work/ghostlight/05.jpg",
+          "width": 2500,
+          "height": 3333,
+          "color": "#080808",
+          "alt": ""
+        },
+        {
+          "src": "/work/ghostlight/06.jpg",
+          "width": 2500,
+          "height": 3334,
+          "color": "#080808",
+          "alt": ""
+        },
+        {
+          "src": "/work/ghostlight/07.jpg",
+          "width": 2500,
+          "height": 3333,
+          "color": "#080808",
+          "alt": ""
+        },
+        {
+          "src": "/work/ghostlight/08.jpg",
+          "width": 2500,
+          "height": 3333,
+          "color": "#080808",
+          "alt": ""
+        },
+        {
+          "src": "/work/ghostlight/10.jpg",
+          "width": 2500,
+          "height": 3333,
+          "color": "#080808",
+          "alt": ""
+        },
+        {
+          "src": "/work/ghostlight/11.jpg",
+          "width": 2500,
+          "height": 3334,
+          "color": "#080808",
+          "alt": ""
+        }
+      ]
+    },
+    {
+      "slug": "kala-x-sharks",
+      "name": "KALA X SHARKS",
+      "categorySlug": "campaigns",
+      "credits": [
+        {
+          "role": "Photographer",
+          "name": "Julian Gigola",
+          "instagram": "juliangigola"
+        }
+      ],
+      "cover": {
+        "src": "/work/kala-x-sharks/cover.jpg",
+        "width": 600,
+        "height": 800,
+        "color": "#080808",
+        "alt": ""
+      },
+      "images": [
+        {
+          "src": "/work/kala-x-sharks/06.jpg",
+          "width": 2108,
+          "height": 2811,
+          "color": "#080808",
+          "alt": ""
+        },
+        {
+          "src": "/work/kala-x-sharks/01.jpg",
+          "width": 2500,
+          "height": 3333,
+          "color": "#080808",
+          "alt": ""
+        },
+        {
+          "src": "/work/kala-x-sharks/02.jpg",
+          "width": 2500,
+          "height": 3333,
+          "color": "#080808",
+          "alt": ""
+        },
+        {
+          "src": "/work/kala-x-sharks/03.jpg",
+          "width": 2500,
+          "height": 3333,
+          "color": "#080808",
+          "alt": ""
+        },
+        {
+          "src": "/work/kala-x-sharks/04.jpg",
+          "width": 2500,
+          "height": 3334,
+          "color": "#181818",
+          "alt": ""
+        },
+        {
+          "src": "/work/kala-x-sharks/05.jpg",
+          "width": 2500,
+          "height": 3334,
+          "color": "#080808",
+          "alt": ""
+        },
+        {
+          "src": "/work/kala-x-sharks/07.jpg",
+          "width": 2500,
+          "height": 3333,
+          "color": "#180808",
+          "alt": ""
+        },
+        {
+          "src": "/work/kala-x-sharks/08.jpg",
+          "width": 2500,
+          "height": 1667,
+          "color": "#080808",
+          "alt": ""
+        },
+        {
+          "src": "/work/kala-x-sharks/09.jpg",
+          "width": 2500,
+          "height": 3333,
+          "color": "#080808",
+          "alt": ""
+        }
+      ]
+    },
+    {
+      "slug": "lithe",
+      "name": "LITHE",
+      "categorySlug": "editorial",
+      "credits": [
+        {
+          "role": "Photographer",
+          "name": "Julian Gigola",
+          "instagram": "juliangigola"
+        },
+        {
+          "role": "Model",
+          "name": "@tamakgo",
+          "instagram": "tamakgo"
+        }
+      ],
+      "cover": {
+        "src": "/work/lithe/cover.jpg",
+        "width": 600,
+        "height": 800,
+        "color": "#f8f8f8",
+        "alt": ""
+      },
+      "images": [
+        {
+          "src": "/work/lithe/05.jpg",
+          "width": 2500,
+          "height": 3333,
+          "color": "#f8f8f8",
+          "alt": ""
+        },
+        {
+          "src": "/work/lithe/01.jpg",
+          "width": 2500,
+          "height": 3333,
+          "color": "#c8c8b8",
+          "alt": ""
+        },
+        {
+          "src": "/work/lithe/02.jpg",
+          "width": 2500,
+          "height": 3333,
+          "color": "#c8c8b8",
+          "alt": ""
+        },
+        {
+          "src": "/work/lithe/03.jpg",
+          "width": 2500,
+          "height": 3333,
+          "color": "#c8c8b8",
+          "alt": ""
+        },
+        {
+          "src": "/work/lithe/04.jpg",
+          "width": 2500,
+          "height": 3334,
+          "color": "#c8c8c8",
+          "alt": ""
+        },
+        {
+          "src": "/work/lithe/06.jpg",
+          "width": 2500,
+          "height": 3334,
+          "color": "#f8f8f8",
+          "alt": ""
+        },
+        {
+          "src": "/work/lithe/07.jpg",
+          "width": 2500,
+          "height": 3333,
+          "color": "#f8f8f8",
+          "alt": ""
+        },
+        {
+          "src": "/work/lithe/08.jpg",
+          "width": 2500,
+          "height": 3333,
+          "color": "#d8d8d8",
+          "alt": ""
+        }
+      ]
+    },
+    {
+      "slug": "threshold",
+      "name": "THRESHOLD",
+      "categorySlug": "editorial",
+      "credits": [
+        {
+          "role": "Creative direction and photography",
+          "name": "Julian Gigola",
+          "instagram": "juliangigola"
+        },
+        {
+          "role": "Designer",
+          "name": "@sbtokio_",
+          "instagram": "sbtokio_"
+        },
+        {
+          "role": "In frame",
+          "name": "@xtc_ryan",
+          "instagram": "xtc_ryan"
+        },
+        {
+          "role": "BTS",
+          "name": "@nxcoleramos",
+          "instagram": "nxcoleramos"
+        },
+        {
+          "role": "Archive",
+          "name": "@ukiyosunknown",
+          "instagram": "ukiyosunknown"
+        }
+      ],
+      "cover": {
+        "src": "/work/threshold/cover.jpg",
+        "width": 600,
+        "height": 800,
+        "color": "#382828",
+        "alt": ""
+      },
+      "images": [
+        {
+          "src": "/work/threshold/05.jpg",
+          "width": 2500,
+          "height": 3333,
+          "color": "#382828",
+          "alt": ""
+        },
+        {
+          "src": "/work/threshold/01.jpg",
+          "width": 2500,
+          "height": 3333,
+          "color": "#c8c8c8",
+          "alt": ""
+        },
+        {
+          "src": "/work/threshold/02.jpg",
+          "width": 2500,
+          "height": 3333,
+          "color": "#d8c8c8",
+          "alt": ""
+        },
+        {
+          "src": "/work/threshold/03.jpg",
+          "width": 2500,
+          "height": 3333,
+          "color": "#080818",
+          "alt": ""
+        },
+        {
+          "src": "/work/threshold/04.jpg",
+          "width": 2500,
+          "height": 3333,
+          "color": "#080818",
+          "alt": ""
+        },
+        {
+          "src": "/work/threshold/06.jpg",
+          "width": 2500,
+          "height": 3333,
+          "color": "#080818",
+          "alt": ""
+        },
+        {
+          "src": "/work/threshold/07.jpg",
+          "width": 2500,
+          "height": 3333,
+          "color": "#c8c8c8",
+          "alt": ""
+        },
+        {
+          "src": "/work/threshold/08.jpg",
+          "width": 2500,
+          "height": 3333,
+          "color": "#080818",
+          "alt": ""
+        }
+      ]
+    },
+    {
+      "slug": "azure-bloom",
+      "name": "AZURE BLOOM",
+      "categorySlug": "editorial",
+      "credits": [
+        {
+          "role": "Photographer",
+          "name": "Julian Gigola",
+          "instagram": "juliangigola"
+        },
+        {
+          "role": "Muse and styling",
+          "name": "Zoe",
+          "instagram": "iaiupo"
+        },
+        {
+          "role": "Hair and makeup",
+          "name": "@courtneysagemakeup",
+          "instagram": "courtneysagemakeup"
+        },
+        {
+          "role": "Photo and assist",
+          "name": "Mark Tsui",
+          "instagram": "lightbender_mark"
+        }
+      ],
+      "cover": {
+        "src": "/work/azure-bloom/cover.jpg",
+        "width": 600,
+        "height": 750,
+        "color": "#e8e8e8",
+        "alt": ""
+      },
+      "images": [
+        {
+          "src": "/work/azure-bloom/17.jpg",
+          "width": 2500,
+          "height": 3125,
+          "color": "#e8e8e8",
+          "alt": ""
+        },
+        {
+          "src": "/work/azure-bloom/01.jpg",
+          "width": 2500,
+          "height": 3125,
+          "color": "#d8d8e8",
+          "alt": ""
+        },
+        {
+          "src": "/work/azure-bloom/02.jpg",
+          "width": 2500,
+          "height": 3125,
+          "color": "#e8e8e8",
+          "alt": ""
+        },
+        {
+          "src": "/work/azure-bloom/03.jpg",
+          "width": 2500,
+          "height": 3125,
+          "color": "#e8e8e8",
+          "alt": ""
+        },
+        {
+          "src": "/work/azure-bloom/04.jpg",
+          "width": 2500,
+          "height": 3125,
+          "color": "#e8e8e8",
+          "alt": ""
+        },
+        {
+          "src": "/work/azure-bloom/05.jpg",
+          "width": 2500,
+          "height": 3125,
+          "color": "#e8e8e8",
+          "alt": ""
+        },
+        {
+          "src": "/work/azure-bloom/06.jpg",
+          "width": 2500,
+          "height": 3125,
+          "color": "#e8e8e8",
+          "alt": ""
+        },
+        {
+          "src": "/work/azure-bloom/07.jpg",
+          "width": 2500,
+          "height": 3125,
+          "color": "#181818",
+          "alt": ""
+        },
+        {
+          "src": "/work/azure-bloom/08.jpg",
+          "width": 2500,
+          "height": 3125,
+          "color": "#f8f8f8",
+          "alt": ""
+        },
+        {
+          "src": "/work/azure-bloom/09.jpg",
+          "width": 2500,
+          "height": 3125,
+          "color": "#e8e8e8",
+          "alt": ""
+        },
+        {
+          "src": "/work/azure-bloom/10.jpg",
+          "width": 2500,
+          "height": 3125,
+          "color": "#d8d8d8",
+          "alt": ""
+        },
+        {
+          "src": "/work/azure-bloom/11.jpg",
+          "width": 2500,
+          "height": 3125,
+          "color": "#e8e8e8",
+          "alt": ""
+        },
+        {
+          "src": "/work/azure-bloom/12.jpg",
+          "width": 2500,
+          "height": 3125,
+          "color": "#f8f8f8",
+          "alt": ""
+        },
+        {
+          "src": "/work/azure-bloom/13.jpg",
+          "width": 2500,
+          "height": 3125,
+          "color": "#d8d8d8",
+          "alt": ""
+        },
+        {
+          "src": "/work/azure-bloom/14.jpg",
+          "width": 2500,
+          "height": 3125,
+          "color": "#d8d8e8",
+          "alt": ""
+        },
+        {
+          "src": "/work/azure-bloom/15.jpg",
+          "width": 2500,
+          "height": 3125,
+          "color": "#e8e8e8",
+          "alt": ""
+        },
+        {
+          "src": "/work/azure-bloom/16.jpg",
+          "width": 2500,
+          "height": 3125,
+          "color": "#b88878",
+          "alt": ""
+        },
+        {
+          "src": "/work/azure-bloom/18.jpg",
+          "width": 2500,
+          "height": 3125,
+          "color": "#d8d8d8",
+          "alt": ""
+        }
+      ]
+    },
+    {
+      "slug": "channel-orange",
+      "name": "CHANNEL ORANGE",
+      "categorySlug": "chroma",
+      "credits": [
+        {
+          "role": "Photographer",
+          "name": "Julian Gigola",
+          "instagram": "juliangigola"
+        },
+        {
+          "role": "Model",
+          "name": "@ryleighcyrenee",
+          "instagram": "ryleighcyrenee"
+        }
+      ],
+      "cover": {
+        "src": "/work/channel-orange/cover.jpg",
+        "width": 600,
+        "height": 800,
+        "color": "#080808",
+        "alt": ""
+      },
+      "images": [
+        {
+          "src": "/work/channel-orange/11.jpg",
+          "width": 2500,
+          "height": 3333,
+          "color": "#080808",
+          "alt": ""
+        },
+        {
+          "src": "/work/channel-orange/01.jpg",
+          "width": 2500,
+          "height": 3333,
+          "color": "#080808",
+          "alt": ""
+        },
+        {
+          "src": "/work/channel-orange/02.jpg",
+          "width": 2500,
+          "height": 3333,
+          "color": "#280808",
+          "alt": ""
+        },
+        {
+          "src": "/work/channel-orange/03.jpg",
+          "width": 2500,
+          "height": 3333,
+          "color": "#180808",
+          "alt": ""
+        },
+        {
+          "src": "/work/channel-orange/04.jpg",
+          "width": 2500,
+          "height": 3333,
+          "color": "#080808",
+          "alt": ""
+        },
+        {
+          "src": "/work/channel-orange/05.jpg",
+          "width": 2500,
+          "height": 3333,
+          "color": "#080808",
+          "alt": ""
+        },
+        {
+          "src": "/work/channel-orange/06.jpg",
+          "width": 2500,
+          "height": 3333,
+          "color": "#080808",
+          "alt": ""
+        },
+        {
+          "src": "/work/channel-orange/07.jpg",
+          "width": 2500,
+          "height": 3333,
+          "color": "#080808",
+          "alt": ""
+        },
+        {
+          "src": "/work/channel-orange/08.jpg",
+          "width": 2500,
+          "height": 3333,
+          "color": "#080808",
+          "alt": ""
+        },
+        {
+          "src": "/work/channel-orange/09.jpg",
+          "width": 2500,
+          "height": 3333,
+          "color": "#080808",
+          "alt": ""
+        },
+        {
+          "src": "/work/channel-orange/10.jpg",
+          "width": 2500,
+          "height": 3333,
+          "color": "#080808",
+          "alt": ""
+        }
+      ]
+    },
+    {
+      "slug": "echo-void",
+      "name": "ECHO VOID",
+      "categorySlug": "chroma",
+      "credits": [
+        {
+          "role": "Photographer",
+          "name": "Julian Gigola",
+          "instagram": "juliangigola"
+        },
+        {
+          "role": "Model",
+          "name": "@bbyxshey",
+          "instagram": "bbyxshey"
+        }
+      ],
+      "cover": {
+        "src": "/work/echo-void/cover.jpg",
+        "width": 600,
+        "height": 800,
+        "color": "#080808",
+        "alt": ""
+      },
+      "images": [
+        {
+          "src": "/work/echo-void/05.jpg",
+          "width": 2500,
+          "height": 3333,
+          "color": "#080808",
+          "alt": ""
+        },
+        {
+          "src": "/work/echo-void/01.jpg",
+          "width": 2500,
+          "height": 3333,
+          "color": "#080808",
+          "alt": ""
+        },
+        {
+          "src": "/work/echo-void/02.jpg",
+          "width": 2500,
+          "height": 3334,
+          "color": "#080808",
+          "alt": ""
+        },
+        {
+          "src": "/work/echo-void/03.jpg",
+          "width": 2500,
+          "height": 3333,
+          "color": "#080808",
+          "alt": ""
+        },
+        {
+          "src": "/work/echo-void/04.jpg",
+          "width": 2500,
+          "height": 3333,
+          "color": "#080808",
+          "alt": ""
+        },
+        {
+          "src": "/work/echo-void/06.jpg",
+          "width": 2500,
+          "height": 3333,
+          "color": "#081808",
+          "alt": ""
+        },
+        {
+          "src": "/work/echo-void/07.jpg",
+          "width": 2500,
+          "height": 3333,
+          "color": "#080808",
+          "alt": ""
+        },
+        {
+          "src": "/work/echo-void/08.jpg",
+          "width": 2500,
+          "height": 3333,
+          "color": "#081818",
+          "alt": ""
+        }
+      ]
+    },
+    {
+      "slug": "paranoia",
+      "name": "PARANOIA",
+      "categorySlug": "chroma",
+      "credits": [
+        {
+          "role": "Photographer",
+          "name": "Julian Gigola",
+          "instagram": "juliangigola"
+        },
+        {
+          "role": "Art direction and styling",
+          "name": "@khloefarranstyling",
+          "instagram": "khloefarranstyling"
+        },
+        {
+          "role": "Model",
+          "name": "@xanubis",
+          "instagram": "xanubis"
+        },
+        {
+          "role": "Grip",
+          "name": "@alirezahope",
+          "instagram": "alirezahope"
+        },
+        {
+          "role": "BTS",
+          "name": "Mark Tsui",
+          "instagram": "lightbender_mark"
+        },
+        {
+          "role": "CRT tech",
+          "name": "@327.fm",
+          "instagram": "327.fm"
+        }
+      ],
+      "cover": {
+        "src": "/work/paranoia/cover.jpg",
+        "width": 600,
+        "height": 750,
+        "color": "#080808",
+        "alt": ""
+      },
+      "images": [
+        {
+          "src": "/work/paranoia/01.jpg",
+          "width": 2500,
+          "height": 3125,
+          "color": "#080808",
+          "alt": ""
+        },
+        {
+          "src": "/work/paranoia/02.jpg",
+          "width": 2500,
+          "height": 3125,
+          "color": "#080808",
+          "alt": ""
+        },
+        {
+          "src": "/work/paranoia/03.jpg",
+          "width": 2500,
+          "height": 3125,
+          "color": "#080808",
+          "alt": ""
+        },
+        {
+          "src": "/work/paranoia/04.jpg",
+          "width": 2500,
+          "height": 3125,
+          "color": "#081818",
+          "alt": ""
+        },
+        {
+          "src": "/work/paranoia/05.jpg",
+          "width": 2500,
+          "height": 3125,
+          "color": "#080808",
+          "alt": ""
+        },
+        {
+          "src": "/work/paranoia/06.jpg",
+          "width": 2500,
+          "height": 3125,
+          "color": "#080808",
+          "alt": ""
+        },
+        {
+          "src": "/work/paranoia/07.jpg",
+          "width": 2500,
+          "height": 3125,
+          "color": "#080818",
+          "alt": ""
+        },
+        {
+          "src": "/work/paranoia/08.jpg",
+          "width": 2500,
+          "height": 3125,
+          "color": "#080808",
+          "alt": ""
+        },
+        {
+          "src": "/work/paranoia/09.jpg",
+          "width": 2500,
+          "height": 3125,
+          "color": "#080808",
+          "alt": ""
+        },
+        {
+          "src": "/work/paranoia/10.jpg",
+          "width": 2500,
+          "height": 3125,
+          "color": "#081828",
+          "alt": ""
+        },
+        {
+          "src": "/work/paranoia/11.jpg",
+          "width": 2500,
+          "height": 3125,
+          "color": "#080818",
+          "alt": ""
+        },
+        {
+          "src": "/work/paranoia/12.jpg",
+          "width": 2500,
+          "height": 3125,
+          "color": "#080808",
+          "alt": ""
+        },
+        {
+          "src": "/work/paranoia/13.jpg",
+          "width": 2500,
+          "height": 3125,
+          "color": "#080808",
+          "alt": ""
+        }
+      ]
+    },
+    {
+      "slug": "ravaged",
+      "name": "RAVAGED",
+      "categorySlug": "editorial",
+      "credits": [
+        {
+          "role": "Photographer",
+          "name": "Julian Gigola",
+          "instagram": "juliangigola"
+        },
+        {
+          "role": "Model",
+          "name": "Zoe",
+          "instagram": "iaiupo"
+        }
+      ],
+      "cover": {
+        "src": "/work/ravaged/cover.jpg",
+        "width": 600,
+        "height": 375,
+        "color": "#181818",
+        "alt": ""
+      },
+      "images": [
+        {
+          "src": "/work/ravaged/06.jpg",
+          "width": 2500,
+          "height": 1563,
+          "color": "#181818",
+          "alt": ""
+        },
+        {
+          "src": "/work/ravaged/01.jpg",
+          "width": 2500,
+          "height": 1563,
+          "color": "#181818",
+          "alt": ""
+        },
+        {
+          "src": "/work/ravaged/02.jpg",
+          "width": 2500,
+          "height": 1563,
+          "color": "#181818",
+          "alt": ""
+        },
+        {
+          "src": "/work/ravaged/03.jpg",
+          "width": 2500,
+          "height": 1562,
+          "color": "#282828",
+          "alt": ""
+        },
+        {
+          "src": "/work/ravaged/04.jpg",
+          "width": 2500,
+          "height": 1563,
+          "color": "#e8e8f8",
+          "alt": ""
+        },
+        {
+          "src": "/work/ravaged/05.jpg",
+          "width": 2500,
+          "height": 1563,
+          "color": "#f8f8f8",
+          "alt": ""
+        },
+        {
+          "src": "/work/ravaged/07.jpg",
+          "width": 2500,
+          "height": 1563,
+          "color": "#282828",
+          "alt": ""
+        }
+      ]
+    },
+    {
+      "slug": "second-skin",
+      "name": "SECOND SKIN",
+      "categorySlug": "chroma",
+      "credits": [
+        {
+          "role": "Photographer",
+          "name": "Julian Gigola",
+          "instagram": "juliangigola"
+        },
+        {
+          "role": "Talent and styling",
+          "name": "@draculina97",
+          "instagram": "draculina97"
+        },
+        {
+          "role": "BTS and assist",
+          "name": "Mark Tsui",
+          "instagram": "lightbender_mark"
+        }
+      ],
+      "cover": {
+        "src": "/work/second-skin/cover.jpg",
+        "width": 600,
+        "height": 750,
+        "color": "#080808",
+        "alt": ""
+      },
+      "images": [
+        {
+          "src": "/work/second-skin/09.jpg",
+          "width": 2500,
+          "height": 3125,
+          "color": "#080808",
+          "alt": ""
+        },
+        {
+          "src": "/work/second-skin/01.jpg",
+          "width": 2500,
+          "height": 3125,
+          "color": "#080808",
+          "alt": ""
+        },
+        {
+          "src": "/work/second-skin/02.jpg",
+          "width": 2500,
+          "height": 3125,
+          "color": "#080808",
+          "alt": ""
+        },
+        {
+          "src": "/work/second-skin/03.jpg",
+          "width": 2500,
+          "height": 3125,
+          "color": "#080808",
+          "alt": ""
+        },
+        {
+          "src": "/work/second-skin/04.jpg",
+          "width": 2500,
+          "height": 3125,
+          "color": "#082838",
+          "alt": ""
+        },
+        {
+          "src": "/work/second-skin/05.jpg",
+          "width": 2500,
+          "height": 3125,
+          "color": "#080808",
+          "alt": ""
+        },
+        {
+          "src": "/work/second-skin/06.jpg",
+          "width": 2500,
+          "height": 3125,
+          "color": "#080808",
+          "alt": ""
+        },
+        {
+          "src": "/work/second-skin/07.jpg",
+          "width": 2500,
+          "height": 3125,
+          "color": "#080808",
+          "alt": ""
+        },
+        {
+          "src": "/work/second-skin/08.jpg",
+          "width": 2500,
+          "height": 3125,
+          "color": "#080808",
+          "alt": ""
+        },
+        {
+          "src": "/work/second-skin/10.jpg",
+          "width": 2500,
+          "height": 3125,
+          "color": "#a8b8d8",
+          "alt": ""
+        },
+        {
+          "src": "/work/second-skin/11.jpg",
+          "width": 2500,
+          "height": 3125,
+          "color": "#b8b8e8",
+          "alt": ""
+        },
+        {
+          "src": "/work/second-skin/12.jpg",
+          "width": 2500,
+          "height": 3125,
+          "color": "#082838",
+          "alt": ""
+        },
+        {
+          "src": "/work/second-skin/13.jpg",
+          "width": 2500,
+          "height": 3125,
+          "color": "#e8e8f8",
+          "alt": ""
+        },
+        {
+          "src": "/work/second-skin/14.jpg",
+          "width": 2500,
+          "height": 3125,
+          "color": "#080808",
+          "alt": ""
+        },
+        {
+          "src": "/work/second-skin/15.jpg",
+          "width": 2500,
+          "height": 3125,
+          "color": "#080808",
+          "alt": ""
+        },
+        {
+          "src": "/work/second-skin/16.jpg",
+          "width": 2500,
+          "height": 3125,
+          "color": "#080808",
+          "alt": ""
+        },
+        {
+          "src": "/work/second-skin/17.jpg",
+          "width": 2500,
+          "height": 3125,
+          "color": "#080808",
+          "alt": ""
+        }
+      ]
+    },
+    {
+      "slug": "vesper",
+      "name": "VESPER",
+      "categorySlug": "editorial",
+      "credits": [
+        {
+          "role": "Photographer",
+          "name": "Julian Gigola",
+          "instagram": "juliangigola"
+        },
+        {
+          "role": "Model",
+          "name": "@kissedbyconstance",
+          "instagram": "kissedbyconstance"
+        }
+      ],
+      "cover": {
+        "src": "/work/vesper/cover.jpg",
+        "width": 600,
+        "height": 800,
+        "color": "#080808",
+        "alt": ""
+      },
+      "images": [
+        {
+          "src": "/work/vesper/03.jpg",
+          "width": 2500,
+          "height": 3333,
+          "color": "#080808",
+          "alt": ""
+        },
+        {
+          "src": "/work/vesper/01.jpg",
+          "width": 2500,
+          "height": 3334,
+          "color": "#080808",
+          "alt": ""
+        },
+        {
+          "src": "/work/vesper/02.jpg",
+          "width": 2500,
+          "height": 3333,
+          "color": "#080808",
+          "alt": ""
+        },
+        {
+          "src": "/work/vesper/04.jpg",
+          "width": 2500,
+          "height": 3333,
+          "color": "#080808",
+          "alt": ""
+        },
+        {
+          "src": "/work/vesper/05.jpg",
+          "width": 2500,
+          "height": 3333,
+          "color": "#080808",
+          "alt": ""
+        },
+        {
+          "src": "/work/vesper/06.jpg",
+          "width": 2500,
+          "height": 3333,
+          "color": "#080808",
+          "alt": ""
+        },
+        {
+          "src": "/work/vesper/07.jpg",
+          "width": 2500,
+          "height": 3333,
+          "color": "#080808",
+          "alt": ""
+        },
+        {
+          "src": "/work/vesper/08.jpg",
+          "width": 2500,
+          "height": 1875,
+          "color": "#080808",
+          "alt": ""
+        }
+      ]
+    },
+    {
+      "slug": "aesc",
+      "name": "ÆSC",
+      "categorySlug": "editorial",
+      "credits": [
+        {
+          "role": "Photographer",
+          "name": "Julian Gigola",
+          "instagram": "juliangigola"
+        },
+        {
+          "role": "Styling",
+          "name": "@starcasevintage",
+          "instagram": "starcasevintage"
+        },
+        {
+          "role": "Model and makeup",
+          "name": "Anya Fam",
+          "instagram": "rice666s"
+        },
+        {
+          "role": "Video",
+          "name": "@ptenfilms",
+          "instagram": "ptenfilms"
+        }
+      ],
+      "cover": {
+        "src": "/work/aesc/cover.jpg",
+        "width": 600,
+        "height": 800,
+        "color": "#080808",
+        "alt": ""
+      },
+      "images": [
+        {
+          "src": "/work/aesc/05.jpg",
+          "width": 2500,
+          "height": 3333,
+          "color": "#080808",
+          "alt": ""
+        },
+        {
+          "src": "/work/aesc/01.jpg",
+          "width": 2500,
+          "height": 1875,
+          "color": "#080808",
+          "alt": ""
+        },
+        {
+          "src": "/work/aesc/02.jpg",
+          "width": 2500,
+          "height": 3334,
+          "color": "#181818",
+          "alt": ""
+        },
+        {
+          "src": "/work/aesc/03.jpg",
+          "width": 2500,
+          "height": 3333,
+          "color": "#080808",
+          "alt": ""
+        },
+        {
+          "src": "/work/aesc/04.jpg",
+          "width": 2500,
+          "height": 1875,
+          "color": "#080808",
+          "alt": ""
+        }
+      ]
+    },
+    {
+      "slug": "celestis",
+      "name": "CELESTIS",
+      "categorySlug": "chroma",
+      "credits": [
+        {
+          "role": "Photographer",
+          "name": "Julian Gigola",
+          "instagram": "juliangigola"
+        },
+        {
+          "role": "Model",
+          "name": "Luella Lvnne",
+          "instagram": "luellalvnne"
+        }
+      ],
+      "cover": {
+        "src": "/work/celestis/cover.jpg",
+        "width": 600,
+        "height": 800,
+        "color": "#080808",
+        "alt": ""
+      },
+      "images": [
+        {
+          "src": "/work/celestis/04.jpg",
+          "width": 2500,
+          "height": 3333,
+          "color": "#080808",
+          "alt": ""
+        },
+        {
+          "src": "/work/celestis/01.jpg",
+          "width": 2500,
+          "height": 3333,
+          "color": "#382818",
+          "alt": ""
+        },
+        {
+          "src": "/work/celestis/02.jpg",
+          "width": 2500,
+          "height": 3333,
+          "color": "#e8e8e8",
+          "alt": ""
+        },
+        {
+          "src": "/work/celestis/03.jpg",
+          "width": 2500,
+          "height": 3334,
+          "color": "#e8e8e8",
+          "alt": ""
+        },
+        {
+          "src": "/work/celestis/05.jpg",
+          "width": 2500,
+          "height": 3333,
+          "color": "#080808",
+          "alt": ""
+        },
+        {
+          "src": "/work/celestis/06.jpg",
+          "width": 2500,
+          "height": 3333,
+          "color": "#080808",
+          "alt": ""
+        },
+        {
+          "src": "/work/celestis/07.jpg",
+          "width": 2500,
+          "height": 3333,
+          "color": "#080808",
+          "alt": ""
+        },
+        {
+          "src": "/work/celestis/08.jpg",
+          "width": 2500,
+          "height": 3333,
+          "color": "#080808",
+          "alt": ""
+        }
+      ]
+    }
+  ],
   "trash": [],
   "categories": {
     "light-play": "editorial",
@@ -2082,6 +3393,19 @@
     }
   ],
   "order": [
+    "ghostlight",
+    "kala-x-sharks",
+    "lithe",
+    "threshold",
+    "azure-bloom",
+    "channel-orange",
+    "echo-void",
+    "paranoia",
+    "ravaged",
+    "second-skin",
+    "vesper",
+    "aesc",
+    "celestis",
     "abril",
     "i-wanna-be-a-human",
     "novocaine",

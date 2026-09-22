@@ -81,7 +81,10 @@ try {
     (sized[src] ??= []).push(w);
   };
 
-  for (const project of PROJECTS) {
+  /* The harvest, plus anything added through /admin. Both carry a cover and
+     a sequence of frames, and a project added here wants its blur-up and its
+     retina cover as much as a harvested one does. */
+  for (const project of [...PROJECTS, ...(overrides.projects ?? [])]) {
     const sequence = overrides.frames?.[project.slug];
     const images = sequence
       ? sequence.map((s) => project.images.find((f) => f.src === s)).filter(Boolean)
