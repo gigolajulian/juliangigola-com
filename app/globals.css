@@ -365,27 +365,29 @@
 
   /* Off white rather than white. Paper, not a lightbox: a screen-white ground
      under a full window of photographs is the thing that makes a light theme
-     tiring, so the ground sits a little below white and a little warmer than
-     neutral, and every surface that lifts off it steps down by the same
-     amount it did before. The ink is unchanged, so nothing loses contrast. */
+     tiring, so the ground sits a little below white. Julian: colder, and not
+     bluer. So the hue turns to the cold side of neutral and the chroma comes
+     down with it, which reads as cold paper rather than as a blue cast. Every
+     surface that lifts off the ground steps by the same amount it did before,
+     and the ink is unchanged, so nothing loses contrast. */
 
-  --background: oklch(0.945 0.008 85);
+  --background: oklch(0.945 0.003 250);
   --foreground: oklch(0.185 0.003 70);
 
-  --card: oklch(0.915 0.008 85);
+  --card: oklch(0.915 0.003 250);
   --card-foreground: var(--foreground);
-  --popover: oklch(0.902 0.008 85);
+  --popover: oklch(0.902 0.003 250);
   --popover-foreground: var(--foreground);
 
   --primary: oklch(0.185 0.003 70);
-  --primary-foreground: oklch(0.945 0.008 85);
-  --secondary: oklch(0.872 0.008 85);
+  --primary-foreground: oklch(0.945 0.003 250);
+  --secondary: oklch(0.872 0.003 250);
   --secondary-foreground: var(--foreground);
 
-  --muted: oklch(0.884 0.008 85);
+  --muted: oklch(0.884 0.003 250);
   /* Held to the same ~7:1 the dark ground gives, so credits and captions
      are no less readable for the theme being lighter. */
-  --muted-foreground: oklch(0.44 0.006 80);
+  --muted-foreground: oklch(0.44 0.003 250);
 
   /* Darkened the same way the accent is below, for the same reason: a green
      that reads on a dark ground is too pale to read on a light one. */
@@ -394,7 +396,7 @@
   /* The same teal, taken down far enough to carry contrast against a light
      ground. Still the only chromatic thing on the page. */
   --accent: oklch(0.52 0.1 195);
-  --accent-foreground: oklch(0.968 0.004 80);
+  --accent-foreground: oklch(0.968 0.004 250);
 
   --destructive: oklch(0.51 0.2 25);
 
@@ -404,7 +406,7 @@
   --input: oklch(0 0 0 / 16%);
   --ring: var(--accent);
 
-  --sidebar: oklch(0.938 0.004 80);
+  --sidebar: oklch(0.938 0.004 250);
   --sidebar-foreground: var(--foreground);
   --sidebar-primary: var(--accent);
   --sidebar-primary-foreground: var(--accent-foreground);

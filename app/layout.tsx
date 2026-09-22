@@ -88,7 +88,7 @@ export const viewport: Viewport = {
      the `--background` tokens in `globals.css`, written out because a meta
      tag cannot read a custom property. */
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#efece7" },
+    { media: "(prefers-color-scheme: light)", color: "#ebedef" },
     { media: "(prefers-color-scheme: dark)", color: "#0b0a09" },
   ],
 };
@@ -177,7 +177,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
          */}
         <script
           dangerouslySetInnerHTML={{
-            __html: `(function(){var t=null;try{t=localStorage.getItem("theme")}catch(e){}var l=t==="light"||(t!=="dark"&&matchMedia("(prefers-color-scheme: light)").matches);if(l)document.documentElement.dataset.theme="light";var m=document.querySelectorAll('meta[name="theme-color"]');for(var i=0;i<m.length;i++)m[i].setAttribute("content",l?"#efece7":"#0b0a09")})()`,
+            __html: `(function(){var t=null;try{t=localStorage.getItem("theme")}catch(e){}var l=t==="light"||(t!=="dark"&&matchMedia("(prefers-color-scheme: light)").matches);if(l)document.documentElement.dataset.theme="light";var m=document.querySelectorAll('meta[name="theme-color"]');for(var i=0;i<m.length;i++)m[i].setAttribute("content",l?"#ebedef":"#0b0a09")})()`,
           }}
         />
       </head>

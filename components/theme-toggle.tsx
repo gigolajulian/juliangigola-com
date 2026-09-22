@@ -58,7 +58,7 @@ const read = (): Theme =>
    carry the theme that is actually showing and the first of them is the
    right one. */
 const paint = (next: Theme) => {
-  const colour = next === "light" ? "#efece7" : "#0b0a09";
+  const colour = next === "light" ? "#ebedef" : "#0b0a09";
   for (const m of document.querySelectorAll('meta[name="theme-color"]')) {
     m.setAttribute("content", colour);
     m.removeAttribute("media");
