@@ -180,7 +180,7 @@ export function LegalPage({ children }: { children: React.ReactNode }) {
                   }}
                   aria-current={here ? "true" : undefined}
                   className={cn(
-                    "group border-t border-border pt-3 text-left transition-colors duration-200",
+                    "group border-b border-border pb-3 text-left transition-colors duration-200",
                     /* At the head of the column on a window that shows one
                        document, and at the foot of its own list on one that
                        shows both, which is where Julian wants it: the name
