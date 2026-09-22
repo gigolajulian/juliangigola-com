@@ -229,7 +229,14 @@ export function Clause({
         aria-controls={`${id}-text`}
         onClick={() => show(id)}
         className={cn(
-          "label group flex shrink-0 items-center gap-4 py-5 text-left transition-colors duration-200 sm:h-full sm:w-14 sm:flex-col sm:justify-start sm:py-7",
+          "label group flex shrink-0 items-center gap-4 py-5 text-left transition-colors duration-200",
+          /* Julian: the sideways text is super hard to read. It was ten
+             pixels of letter-spaced capitals turned on its side, which is
+             the worst setting type has, so the titles are the right way
+             up now and the spine is as wide as a title needs. Thirty
+             three of them make a longer strip; a strip is the one thing
+             this page has plenty of. */
+          "sm:h-full sm:w-44 sm:flex-col sm:items-start sm:gap-5 sm:px-5 sm:py-7",
           shown ? "text-foreground" : "text-muted-foreground",
           "hoverable:hover:text-foreground",
         )}
@@ -237,7 +244,9 @@ export function Clause({
         <span className="tabular-nums">
           {String(n).padStart(2, "0")}
         </span>
-        <span className="min-w-0 flex-1 truncate sm:[writing-mode:vertical-rl] sm:rotate-180 sm:overflow-visible sm:whitespace-nowrap">
+        {/* At the foot of the spine, where the eye lands after the
+            number and where a shelf carries a title. */}
+        <span className="min-w-0 flex-1 truncate sm:mt-auto sm:w-full sm:flex-none sm:overflow-visible sm:whitespace-normal sm:text-wrap sm:leading-[1.45]">
           {title}
         </span>
         {/* A cross that turns into a line: the shape says shut and open
