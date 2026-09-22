@@ -35,8 +35,8 @@ import * as React from "react";
 const CY = 49.6;
 const A = 42.8;
 const S = 18.0;
-const TAKE = 900; // the mark: open, hold, and close
-const PART = 1000; // the lids carrying on off the screen
+const TAKE = 1400; // the mark: open, hold, and close
+const PART = 1400; // the lids carrying on off the screen
 const SHUT = 0.78; // where in the take the lens is flat: the cut
 
 const radius = (a: number, s: number) => (a * a + s * s) / (2 * Math.max(s, 0.18));
@@ -126,7 +126,6 @@ export function Intro() {
       dot.current?.setAttribute("r", (8.6 * f.pupil).toFixed(3));
     };
 
-    let raf = 0;
     /* The ending, in two halves that are the same gesture.
      *
      * The cut: the take finishes inside the blink, on the frame where the
@@ -186,10 +185,10 @@ export function Intro() {
         const a = mix(a0, a1, 1 - Math.pow(1 - Math.min(1, t / 0.45), 3));
         const s = mix(s0, s1, glide(t));
         hole.setAttribute("d", wide(cx, cy, a, s));
-        if (t < 1) raf = requestAnimationFrame(step);
+        if (t < 1) requestAnimationFrame(step);
         else root.removeAttribute("data-intro");
       };
-      raf = requestAnimationFrame(step);
+      requestAnimationFrame(step);
     };
 
     const t0 = performance.now();
@@ -197,15 +196,18 @@ export function Intro() {
     const step = (now: number) => {
       const t = Math.min(1, (now - t0) / (TAKE * SHUT));
       draw(frame(t * SHUT));
-      if (t < 1) raf = requestAnimationFrame(step);
+      if (t < 1) requestAnimationFrame(step);
       else if (!cut) {
         cut = true;
         part();
       }
     };
     draw(frame(0));
-    raf = requestAnimationFrame(step);
-    return () => cancelAnimationFrame(raf);
+    requestAnimationFrame(step);
+    /* No cleanup. The take is a one-shot that ends on its own inside two
+       seconds, and cancelling it on unmount would stop it dead in
+       development, where React mounts an effect twice and the guard above
+       keeps the second mount from starting it again. */
   }, []);
 
   return (
