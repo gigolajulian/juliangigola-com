@@ -1,98 +1,69 @@
 "use client";
 
 import * as React from "react";
-import { createPortal } from "react-dom";
 import Link from "next/link";
 import { Strip } from "@/components/strip";
 import { StripPage, StripHead } from "@/components/strip-page";
+import { cn } from "@/lib/utils";
 
 /* ── the legal page ───────────────────────────────────────────────
- * Two pages, and that is the whole of it. One is the terms, one is the
- * privacy policy, each a screen of its own along the strip: the title
- * and the opening on the left, every clause listed on the right. Press
- * a clause and its text comes up over the page.
+ * Two pages, and that is the whole of it. Each is one document laid out
+ * in three columns: the instrument's title and preamble at the left, the
+ * clauses numbered down the middle in a single column, and the clause
+ * itself set in the reading column on the right. The reading column
+ * follows the pointer and holds whatever was last pressed, so a clause
+ * can be skimmed by running down the list and kept by pressing it.
  *
- * Third shape, and the reason for it. The two column grid turned
- * sideways was two documents scrolling inside themselves. The clause per
- * panel strip read its titles sideways, then read them upright and ran
- * to six thousand pixels of spine. A list is what a contract has always
- * carried at the front, and somebody who wants clause nine wants clause
- * nine, not the eight in front of it.
+ * This is the fourth shape, and the reasons the others went: a sideways
+ * two column grid was two documents scrolling inside themselves; a panel
+ * per clause read its titles sideways, then upright, and ran to six
+ * thousand pixels of spine; a modal dialog covered the document it came
+ * out of. A contents list against a reading pane is what a bound
+ * instrument does, and it is the only one of the four where the clause
+ * and its place in the document are visible at the same time.
  *
  * The numbering is real, because it is how a clause gets cited in an
  * email, and every clause keeps its anchor: `/legal#terms-ownership`
- * opens that clause on arrival, and the address follows whatever is
- * open, so a clause can be sent to somebody.
+ * opens that clause on arrival and the address follows what is selected,
+ * so a clause can be sent to somebody.
  * ─────────────────────────────────────────────────────────────── */
 
-const Opened = React.createContext<{
-  open: string | null;
-  show: (id: string) => void;
-  hide: () => void;
-}>({ open: null, show: () => {}, hide: () => {} });
-
 export function LegalPage({ children }: { children: React.ReactNode }) {
-  const [open, setOpen] = React.useState<string | null>(null);
-
-  /* `replaceState`, never `location.hash =`, which would push a history
-     entry for every clause anybody glanced at and bury the back button.
-     And nothing here may sit inside a state updater: an updater runs
-     during render, and React refuses a component that touches anything
-     else from in there. */
-  const show = React.useCallback((id: string) => {
-    setOpen(id);
-    window.history.replaceState(null, "", `#${id}`);
-  }, []);
-
-  const hide = React.useCallback(() => {
-    setOpen(null);
-    window.history.replaceState(null, "", window.location.pathname);
-  }, []);
-
-  /* The address is not ours alone: the strip writes the cell it has
-     arrived at over the top of it, so `#terms-ownership` becomes `#terms`
-     a moment after a press. Only an address that names a clause is
-     allowed to open one; anything else is the strip keeping its score. */
-  React.useEffect(() => {
-    const read = () => {
-      const id = decodeURIComponent(window.location.hash.slice(1));
-      if (id && document.getElementById(`${id}-open`)) setOpen(id);
-    };
-    read();
-    window.addEventListener("hashchange", read);
-    return () => window.removeEventListener("hashchange", read);
-  }, []);
-
   return (
-    <Opened.Provider value={{ open, show, hide }}>
-      <StripPage
-        head={
-          <StripHead
-            crumb={
-              <Link
-                prefetch={false}
-                href="/"
-                className="label text-muted-foreground transition-colors duration-200 hoverable:hover:text-foreground"
-              >
-                &larr; Home
-              </Link>
-            }
-            title="Legal"
-            live
-            aside="Two documents"
-          />
-        }
+    <StripPage
+      head={
+        <StripHead
+          crumb={
+            <Link
+              prefetch={false}
+              href="/"
+              className="label text-muted-foreground transition-colors duration-200 hoverable:hover:text-foreground"
+            >
+              &larr; Home
+            </Link>
+          }
+          title="Legal"
+          live
+          aside="Two documents"
+        />
+      }
+    >
+      <Strip
+        label="Legal: the terms and the privacy policy, left and right"
+        className="mt-4 flex-1"
       >
-        <Strip
-          label="Legal: the terms and the privacy policy, left and right"
-          className="mt-4 flex-1"
-        >
-          {children}
-        </Strip>
-      </StripPage>
-    </Opened.Provider>
+        {children}
+      </Strip>
+    </StripPage>
   );
 }
+
+/** A clause title as an anchor: "What you may do" becomes `what-you-may-do`. */
+const anchor = (title: string) =>
+  title
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "");
 
 export function LegalColumn({
   id,
@@ -118,7 +89,51 @@ export function LegalColumn({
     year: "numeric",
     timeZone: "UTC",
   });
-  const count = React.Children.count(children);
+
+  /* The clauses are read off the children rather than rendered by them.
+     A `Clause` is a declaration, not a component: the list and the
+     reading column are two views of the same clause, and one of them
+     cannot be drawn from inside the other. */
+  const clauses = React.useMemo(
+    () =>
+      React.Children.toArray(children)
+        .filter(
+          (c): c is React.ReactElement<{ title: string; children: React.ReactNode }> =>
+            React.isValidElement(c),
+        )
+        .map((c, i) => ({
+          n: i + 1,
+          title: c.props.title,
+          body: c.props.children,
+          id: `${id}-${anchor(c.props.title)}`,
+        })),
+    [children, id],
+  );
+
+  const [pick, setPick] = React.useState(0);
+  const [peek, setPeek] = React.useState<number | null>(null);
+  const at = clauses[peek ?? pick] ?? clauses[0];
+
+  /* An address that names a clause of this document selects it, on
+     arrival and on every later hashchange. The strip writes its own
+     section hash over the top a moment after a press, which names no
+     clause and is ignored. */
+  React.useEffect(() => {
+    const read = () => {
+      const want = decodeURIComponent(window.location.hash.slice(1));
+      const i = clauses.findIndex((c) => c.id === want);
+      if (i >= 0) setPick(i);
+    };
+    read();
+    window.addEventListener("hashchange", read);
+    return () => window.removeEventListener("hashchange", read);
+  }, [clauses]);
+
+  const press = (i: number) => {
+    setPick(i);
+    window.history.replaceState(null, "", `#${clauses[i].id}`);
+  };
+
   return (
     <section
       id={id}
@@ -128,9 +143,9 @@ export function LegalColumn({
       data-hash={id}
       /* One document, one screen. Julian: two pages total, so the second
          document is one gesture away rather than eleven. */
-      className="flex w-full shrink-0 flex-col gap-8 py-8 sm:h-full sm:w-full sm:flex-row sm:items-stretch sm:gap-16 sm:py-0 sm:pr-10"
+      className="flex w-full shrink-0 flex-col gap-8 py-8 sm:h-full sm:w-full sm:flex-row sm:items-stretch sm:gap-12 sm:py-6 sm:pr-10"
     >
-      <div className="flex shrink-0 flex-col justify-center gap-6 sm:w-[min(22rem,32%)]">
+      <div className="flex shrink-0 flex-col justify-center gap-5 sm:w-[min(17rem,26%)]">
         <div>
           <h2
             id={`${id}-title`}
@@ -138,134 +153,80 @@ export function LegalColumn({
           >
             {title}
           </h2>
-          <p className="label mt-4 text-muted-foreground">
+          <p className="label mt-3 text-muted-foreground">
             Effective <time dateTime={effective}>{shown}</time>
           </p>
         </div>
-        <div className="max-w-prose text-base leading-relaxed">{intro}</div>
+        <div className="max-w-prose text-[0.9375rem] leading-relaxed">
+          {intro}
+        </div>
         <p className="label text-muted-foreground">
-          {count} clauses. Press one to read it.
+          {clauses.length} clauses
         </p>
       </div>
 
-      {/* Two columns from `sm`, because twenty one clauses down one column
-          is taller than any window, and the point of a list is that the
-          whole document is in view at once. */}
-      <ol className="m-0 min-w-0 flex-1 list-none p-0 sm:my-auto sm:columns-2 sm:gap-x-12">
-        {React.Children.map(children, (child, i) =>
-          React.isValidElement<{ column?: string; n?: number }>(child)
-            ? React.cloneElement(child, { column: id, n: i + 1 })
-            : child,
-        )}
+      {/* The contents. One column, as Julian asked, and it scrolls inside
+          itself on a short window rather than pushing the reading column
+          off the page. */}
+      <ol
+        className="m-0 min-w-0 list-none p-0 sm:h-full sm:w-[min(20rem,30%)] sm:shrink-0 sm:overflow-y-auto sm:overscroll-contain sm:pr-2"
+        onMouseLeave={() => setPeek(null)}
+      >
+        {clauses.map((c, i) => (
+          <li key={c.id} className="border-b border-border">
+            <button
+              id={`${c.id}-open`}
+              type="button"
+              onClick={() => press(i)}
+              onMouseEnter={() => setPeek(i)}
+              onFocus={() => setPeek(i)}
+              onBlur={() => setPeek(null)}
+              aria-current={pick === i ? "true" : undefined}
+              className={cn(
+                "label flex w-full items-center gap-3 py-1.5 text-left transition-colors duration-200",
+                at?.id === c.id ? "text-foreground" : "text-muted-foreground",
+                "hoverable:hover:text-foreground",
+              )}
+            >
+              <span className="tabular-nums">{String(c.n).padStart(2, "0")}</span>
+              <span className="min-w-0 flex-1">{c.title}</span>
+              {/* A rule that fills when the clause is the one being read:
+                  the list's own marker, in the width a number would take. */}
+              <span
+                aria-hidden
+                className={cn(
+                  "h-px w-4 shrink-0 transition-colors duration-200",
+                  at?.id === c.id ? "bg-foreground" : "bg-transparent",
+                )}
+              />
+            </button>
+          </li>
+        ))}
       </ol>
+
+      {/* The reading column. `aria-live` is deliberately absent: the text
+          changes under the pointer, and announcing every clause somebody
+          skims past is noise. The buttons name themselves. */}
+      <article
+        aria-labelledby={`${id}-reading`}
+        className="min-w-0 flex-1 border-t border-border pt-5 sm:h-full sm:overflow-y-auto sm:overscroll-contain sm:border-l sm:border-t-0 sm:pl-10 sm:pt-0"
+      >
+        <h3 id={`${id}-reading`} className="label text-muted-foreground">
+          <span className="tabular-nums">{String(at?.n ?? 1).padStart(2, "0")}</span>
+          <span className="ml-4 text-foreground">{at?.title}</span>
+        </h3>
+        <div className="mt-5 max-w-[38rem] text-base leading-relaxed [&_li]:mt-2 [&_p+p]:mt-4 [&_strong]:font-medium [&_strong]:text-foreground [&_ul]:list-disc [&_ul]:pl-5">
+          {at?.body}
+        </div>
+      </article>
     </section>
   );
 }
 
-/** A clause title as an anchor: "What you may do" becomes `what-you-may-do`. */
-const anchor = (title: string) =>
-  title
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-|-$/g, "");
-
-export function Clause({
-  title,
-  column,
-  n = 0,
-  children,
-}: {
-  title: string;
-  /** Written by `LegalColumn`; the document this clause is in. */
-  column?: string;
-  /** Its place in that document, for the number in the list. */
-  n?: number;
-  children: React.ReactNode;
-}) {
-  const id = column ? `${column}-${anchor(title)}` : anchor(title);
-  const { open, show, hide } = React.useContext(Opened);
-
-  return (
-    <li className="break-inside-avoid border-b border-border">
-      <button
-        id={`${id}-open`}
-        type="button"
-        onClick={() => show(id)}
-        className="label flex w-full items-center gap-4 py-3 text-left text-muted-foreground transition-colors duration-200 hoverable:hover:text-foreground"
-      >
-        <span className="tabular-nums">{String(n).padStart(2, "0")}</span>
-        <span className="min-w-0 flex-1">{title}</span>
-        {/* A cross: there is more behind the line, and pressing brings it
-            up. Cheaper than a glyph and it does not need a font. */}
-        <span aria-hidden className="relative size-3 shrink-0">
-          <span className="absolute left-0 top-1/2 h-px w-full -translate-y-1/2 bg-current" />
-          <span className="absolute left-1/2 top-0 h-full w-px -translate-x-1/2 bg-current" />
-        </span>
-      </button>
-      {open === id ? (
-        <ClauseText id={id} title={title} n={n} onClose={hide}>
-          {children}
-        </ClauseText>
-      ) : null}
-    </li>
-  );
-}
-
-/** The clause itself, over the page. A `dialog` opened as a modal, so the
-    platform does the focus trap, the Escape key and the inert background,
-    and a portal to the body so none of it sits among the strip's cells,
-    which the strip counts and rules off. */
-function ClauseText({
-  id,
-  title,
-  n,
-  onClose,
-  children,
-}: {
-  id: string;
-  title: string;
-  n: number;
-  onClose: () => void;
-  children: React.ReactNode;
-}) {
-  const box = React.useRef<HTMLDialogElement>(null);
-
-  React.useEffect(() => {
-    const el = box.current;
-    if (el && !el.open) el.showModal();
-  }, []);
-
-  return createPortal(
-    <dialog
-      ref={box}
-      aria-labelledby={`${id}-heading`}
-      onClose={onClose}
-      /* A press on the backdrop reaches the dialog element itself: the
-         panel inside it takes every press of its own. */
-      onClick={(e) => {
-        if (e.target === box.current) box.current?.close();
-      }}
-      className="clause-box m-auto max-h-[82dvh] w-[min(37rem,92vw)] overflow-hidden border border-border bg-background p-0 text-foreground backdrop:bg-background/70"
-    >
-      <div className="flex max-h-[82dvh] flex-col">
-        <div className="flex items-start justify-between gap-6 border-b border-border px-7 py-5">
-          <h2 id={`${id}-heading`} className="label text-muted-foreground">
-            <span className="tabular-nums">{String(n).padStart(2, "0")}</span>
-            <span className="ml-4 text-foreground">{title}</span>
-          </h2>
-          <button
-            type="button"
-            onClick={() => box.current?.close()}
-            className="label -m-2 shrink-0 p-2 text-muted-foreground transition-colors duration-200 hoverable:hover:text-foreground"
-          >
-            Close
-          </button>
-        </div>
-        <div className="min-h-0 overflow-y-auto overscroll-contain px-7 py-6 text-base leading-relaxed [&_li]:mt-2 [&_p+p]:mt-4 [&_strong]:font-medium [&_strong]:text-foreground [&_ul]:list-disc [&_ul]:pl-5">
-          {children}
-        </div>
-      </div>
-    </dialog>,
-    document.body,
-  );
+/** One clause. It renders nothing of itself: `LegalColumn` reads the title
+    and the body off it and draws both the contents list and the reading
+    column from them. */
+export function Clause(props: { title: string; children: React.ReactNode }) {
+  void props;
+  return null;
 }

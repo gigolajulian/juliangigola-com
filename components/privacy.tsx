@@ -29,17 +29,13 @@ export function PrivacyColumn() {
       intro={
         <>
           <p>
-            This site collects almost nothing. No advertising trackers, no
-            third-party cookies, no consent banner because there is nothing to
-            consent to. The only personal information it asks for is what you
-            type into the enquiry form so that I can answer you.
+            This Policy states what personal information juliangigola.com
+            collects, why, and what you may require of me. The Site carries no
+            advertising trackers and no third-party cookies.
           </p>
-          <p className="mt-4 text-muted-foreground">
-            The Site is juliangigola.com. The person responsible for your
-            information, the controller in the language of European law and the
-            business in the language of California law, is Julian Gigola, a
-            photographer and creative director in the San Francisco Bay Area,
-            California, reachable at {EMAIL}.
+          <p className="mt-3 text-muted-foreground">
+            Controller under European law, business under California law:
+            Julian Gigola, San Francisco Bay Area, California, {EMAIL}.
           </p>
         </>
       }

@@ -32,14 +32,13 @@ export function TermsColumn() {
       intro={
         <>
           <p>
-            This site shows my photography and film work so that people can
-            commission it. Looking is what it is for. Copying is not, and
-            feeding it to a machine is not.
+            These Terms govern your access to {SITE} and to the photography and
+            film work published on it. Your use of the Site is your acceptance
+            of them.
           </p>
-          <p className="mt-4 text-muted-foreground">
-            These terms are a binding agreement between you and me. Read{" "}
-            <em>What you may do</em> and <em>What you may not do</em> if you
-            read nothing else.
+          <p className="mt-3 text-muted-foreground">
+            Read <em>What you may do</em> and <em>What you may not do</em> if
+            you read nothing else.
           </p>
         </>
       }
