@@ -35,9 +35,9 @@ import * as React from "react";
 const CY = 49.6;
 const A = 42.8;
 const S = 18.0;
-const TAKE = 1000; // the mark: open, hold, blink, settle
-const FADE = 620; // the ground going, once the mark has settled
-const CUE = 0.94; // the ending starts before the mark has quite settled
+const TAKE = 900; // the mark: open, hold, and close
+const PART = 1000; // the lids carrying on off the screen
+const SHUT = 0.78; // where in the take the lens is flat: the cut
 
 const radius = (a: number, s: number) => (a * a + s * s) / (2 * Math.max(s, 0.18));
 
@@ -48,6 +48,15 @@ function lens(a: number, top: number, bot: number) {
   const rt = radius(a, top).toFixed(3);
   const rb = radius(a, bot).toFixed(3);
   return `M${x0} ${CY} A${rt} ${rt} 0 0 1 ${x1} ${CY} A${rb} ${rb} 0 0 1 ${x0} ${CY} Z`;
+}
+
+/** The same lens, anywhere and at any size: the intro draws it in the
+    mark's own hundred units while it is a logo, and in screen pixels once
+    it is a hole in the page. One formula, so the swap between the two is
+    the same shape at the same place. */
+function wide(cx: number, cy: number, a: number, s: number) {
+  const r = radius(a, s).toFixed(2);
+  return `M${(cx - a).toFixed(2)} ${cy.toFixed(2)} A${r} ${r} 0 0 1 ${(cx + a).toFixed(2)} ${cy.toFixed(2)} A${r} ${r} 0 0 1 ${(cx - a).toFixed(2)} ${cy.toFixed(2)} Z`;
 }
 
 const mix = (from: number, to: number, t: number) => from + (to - from) * t;
@@ -76,14 +85,18 @@ function track(t: number, keys: Key[]) {
 /* The lens grows outward along its own axis from a short line, so the
    shape arrives rather than being uncovered, and the iris opens from
    just under its drawn size: far enough to read as movement, not so far
-   that it reads as a zoom. Then one slow blink, and it rests on the
-   artwork. */
+   that it reads as a zoom. It rests on the artwork, and then it closes.
+   The take ends shut, on a hairline, because that hairline is the cut. */
 const frame = (t: number) => ({
-  a: track(t, [[0, 14], [0.44, A]]),
-  s: track(t, [[0, 1.2], [0.46, S], [0.58, S], [0.76, 0.4], [0.98, S]]),
-  iris: track(t, [[0, 0.82], [0.5, 1]]),
-  pupil: track(t, [[0, 0.78], [0.56, 1]]),
+  a: track(t, [[0, 14], [0.42, A]]),
+  s: track(t, [[0, 1.2], [0.44, S], [0.58, S], [SHUT, 0.3]]),
+  iris: track(t, [[0, 0.82], [0.48, 1]]),
+  pupil: track(t, [[0, 0.78], [0.54, 1]]),
 });
+
+/* Once per page load. React remounts effects in development, and a second
+   take would measure a mark the first one had already hidden. */
+let played = false;
 
 export function Intro() {
   const box = React.useRef<HTMLDivElement>(null);
@@ -92,10 +105,13 @@ export function Intro() {
   const iris = React.useRef<SVGGElement>(null);
   const eye = React.useRef<SVGGElement>(null);
   const dot = React.useRef<SVGCircleElement>(null);
+  const veilRef = React.useRef<SVGSVGElement>(null);
+  const holeRef = React.useRef<SVGPathElement>(null);
 
   React.useEffect(() => {
     const root = document.documentElement;
-    if (root.dataset.intro !== "1") return;
+    if (root.dataset.intro !== "1" || played) return;
+    played = true;
     try {
       sessionStorage.setItem("jg-intro", "1");
     } catch {}
@@ -111,28 +127,81 @@ export function Intro() {
     };
 
     let raf = 0;
-    /* Julian: the opening through the pupil looked bad, so it is gone.
-       What is here instead is the quietest ending there is — the ground
-       the mark stands on fades and the site is already behind it. It is
-       not the final answer, it is the one that cannot look wrong while
-       the better ones are being chosen. */
-    const leave = () => {
+    /* The ending, in two halves that are the same gesture.
+     *
+     * The cut: the take finishes inside the blink, on the frame where the
+     * lens is flat and the screen holds one hairline of ink and nothing
+     * else. A film cuts on motion because there is nothing to hide
+     * behind; here there is nothing on screen to dissolve, so the mark
+     * can stop being ink and start being a hole without anybody seeing
+     * the swap. That is the whole trick, and it costs nothing.
+     *
+     * The parting: from that hairline the same two arcs carry on opening,
+     * in screen units now, until the top one has left the top of the
+     * window and the bottom one the bottom. The ground splits along the
+     * logo's own curves and the site is what is between them. Nothing is
+     * masked over the page, nothing scales, nothing fades: the shape
+     * doing the transition is the mark itself.
+     */
+    const part = () => {
       const el = box.current;
-      if (!el) return;
-      el.classList.add("jg-intro-out");
-      window.setTimeout(() => root.removeAttribute("data-intro"), FADE + 40);
+      const art = el?.querySelector("svg");
+      const veil = veilRef.current;
+      const hole = holeRef.current;
+      if (!el || !art || !veil || !hole) return;
+
+      const m = art.getBoundingClientRect();
+      const w = window.innerWidth;
+      const h = window.innerHeight;
+      // where the hairline is on screen, in screen units
+      const cx = m.left + m.width / 2;
+      const cy = m.top + (m.height * CY) / 100;
+      const a0 = (m.width * A) / 100;
+      const s0 = (m.height * 0.3) / 100;
+      /* Wide enough that the lens's points sit off the sides, so what
+         crosses the screen is two arcs and never a closing shape, and no
+         wider: past about this the arcs flatten into straight edges and
+         the reveal stops being the logo's curve and becomes a blind. */
+      const a1 = w * 1.15;
+      /* Just far enough that the arcs leave the window as the curve lands,
+         rather than early with the rest of the take spent on an empty
+         screen: the rise each one has to travel is its own distance to the
+         edge, and the margin is for the flattest part of the curve near
+         the corners. */
+      const s1 = Math.max(cy, h - cy) * 1.08;
+
+      veil.setAttribute("viewBox", `0 0 ${w} ${h}`);
+      hole.setAttribute("d", wide(cx, cy, a0, s0));
+      el.classList.add("jg-intro-parting");
+
+      const t0 = performance.now();
+      const step = (now: number) => {
+        const t = Math.min(1, (now - t0) / PART);
+        /* The line runs out to the sides first, so what is left travelling
+           is two arcs and not a closing shape. The arcs themselves part on
+           the same eased curve the blink used, from a standstill, because
+           the blink arrived at this hairline decelerating: any faster off
+           the mark and the ground is gone before the eye has read it as
+           lids. */
+        const a = mix(a0, a1, 1 - Math.pow(1 - Math.min(1, t / 0.45), 3));
+        const s = mix(s0, s1, glide(t));
+        hole.setAttribute("d", wide(cx, cy, a, s));
+        if (t < 1) raf = requestAnimationFrame(step);
+        else root.removeAttribute("data-intro");
+      };
+      raf = requestAnimationFrame(step);
     };
 
     const t0 = performance.now();
-    let cued = false;
+    let cut = false;
     const step = (now: number) => {
-      const t = Math.min(1, (now - t0) / TAKE);
-      draw(frame(t));
-      if (!cued && t >= CUE) {
-        cued = true;
-        leave();
-      }
+      const t = Math.min(1, (now - t0) / (TAKE * SHUT));
+      draw(frame(t * SHUT));
       if (t < 1) raf = requestAnimationFrame(step);
+      else if (!cut) {
+        cut = true;
+        part();
+      }
     };
     draw(frame(0));
     raf = requestAnimationFrame(step);
@@ -168,6 +237,33 @@ export function Intro() {
             />
           </g>
         </g>
+      </svg>
+
+      {/* The ground again, with the lens cut out of it. It is the same
+          colour as the layer it sits on and its hole starts as the
+          hairline the mark ended on, so switching to it is invisible;
+          from there the hole is the only thing that moves. */}
+      <svg
+        ref={veilRef}
+        className="jg-intro-veil"
+        viewBox="0 0 100 100"
+        preserveAspectRatio="none"
+        focusable="false"
+      >
+        <defs>
+          <mask id="jg-intro-mask">
+            <rect x="0" y="0" width="100%" height="100%" fill="#fff" />
+            <path ref={holeRef} fill="#000" />
+          </mask>
+        </defs>
+        <rect
+          x="0"
+          y="0"
+          width="100%"
+          height="100%"
+          fill="var(--background)"
+          mask="url(#jg-intro-mask)"
+        />
       </svg>
     </div>
   );
