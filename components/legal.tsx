@@ -257,15 +257,25 @@ export function LegalPage({ children }: { children: React.ReactNode }) {
             aria-labelledby="legal-reading"
             className="min-w-0 flex-1 border-t border-border pt-5 sm:h-full sm:overflow-y-auto sm:overscroll-contain sm:border-l sm:border-t-0 sm:pl-10 sm:pt-0"
           >
-            <h2 id="legal-reading" className="label text-muted-foreground">
-              {found?.d.label}
-              <span className="ml-4 tabular-nums">
-                {String(at.n).padStart(2, "0")}
-              </span>
-              <span className="ml-4 text-foreground">{at.title}</span>
-            </h2>
-            <div className="mt-5 max-w-[40rem] text-base leading-relaxed [&_li]:mt-2 [&_p+p]:mt-4 [&_strong]:font-medium [&_strong]:text-foreground [&_ul]:list-disc [&_ul]:pl-5">
-              {at.body}
+            {/* Keyed on the clause, so the fade runs again on every change
+                rather than only on the first one: a new key is a new
+                element, and a new element plays its animation. Short and
+                in from the contents side, which is where the press came
+                from. */}
+            <div
+              key={at.id}
+              className="animate-[jg-fade-slide_240ms_var(--ease-out-strong)] [--fade-from:0.75rem] motion-reduce:animate-none"
+            >
+              <h2 id="legal-reading" className="label text-muted-foreground">
+                {found?.d.label}
+                <span className="ml-4 tabular-nums">
+                  {String(at.n).padStart(2, "0")}
+                </span>
+                <span className="ml-4 text-foreground">{at.title}</span>
+              </h2>
+              <div className="mt-5 max-w-[40rem] text-base leading-relaxed [&_li]:mt-2 [&_p+p]:mt-4 [&_strong]:font-medium [&_strong]:text-foreground [&_ul]:list-disc [&_ul]:pl-5">
+                {at.body}
+              </div>
             </div>
           </article>
         ) : null}
