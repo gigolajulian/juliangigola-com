@@ -1,78 +1,62 @@
 "use client";
 
 import * as React from "react";
+import { createPortal } from "react-dom";
 import Link from "next/link";
 import { Strip } from "@/components/strip";
-import { StripPage, StripHead, TitleCell } from "@/components/strip-page";
-import { cn } from "@/lib/utils";
+import { StripPage, StripHead } from "@/components/strip-page";
 
 /* ── the legal page ───────────────────────────────────────────────
- * Julian did not like the first horizontal version, which was the old
- * two column grid turned on its side: two tall documents that scrolled
- * inside themselves, which is a scroll bar inside a scroll bar. He asked
- * for an expanding horizontal strip, opened by pressing it.
+ * Two pages, and that is the whole of it. One is the terms, one is the
+ * privacy policy, each a screen of its own along the strip: the title
+ * and the opening on the left, every clause listed on the right. Press
+ * a clause and its text comes up over the page.
  *
- * So every clause is a panel of its own, standing closed with its number
- * and its title set vertically down the spine. Press one and it opens
- * sideways into a column of text; press it again and it shuts. The page
- * is its own table of contents at rest, which is what these two
- * documents want: nobody reads a privacy policy, they look one thing up.
- *
- * Two documents, and the ruler underneath knows it. Each opens with a
- * panel carrying its title and the date it took effect, and that panel
- * carries the label, so the rail runs in two chapters and the clauses
- * are the cells inside them.
+ * Third shape, and the reason for it. The two column grid turned
+ * sideways was two documents scrolling inside themselves. The clause per
+ * panel strip read its titles sideways, then read them upright and ran
+ * to six thousand pixels of spine. A list is what a contract has always
+ * carried at the front, and somebody who wants clause nine wants clause
+ * nine, not the eight in front of it.
  *
  * The numbering is real, because it is how a clause gets cited in an
- * email, and each panel keeps the anchor it had: `/legal#terms-ownership`
- * still opens that clause and travels to it.
+ * email, and every clause keeps its anchor: `/legal#terms-ownership`
+ * opens that clause on arrival, and the address follows whatever is
+ * open, so a clause can be sent to somebody.
  * ─────────────────────────────────────────────────────────────── */
 
-/** The clause that is open, and the way to open another. One at a time:
-    two open panels put the text the reader is holding out of the window,
-    and the strip is already the way to move between them. */
 const Opened = React.createContext<{
   open: string | null;
   show: (id: string) => void;
-}>({ open: null, show: () => {} });
+  hide: () => void;
+}>({ open: null, show: () => {}, hide: () => {} });
 
 export function LegalPage({ children }: { children: React.ReactNode }) {
   const [open, setOpen] = React.useState<string | null>(null);
 
-  /* Pressing a panel opens it and sends the strip to it. The strip
-     travels to whichever cell the address names, so naming it is the
-     whole of the journey; the event has to be dispatched by hand because
-     `replaceState` changes the address and tells nobody. Never
-     `location.hash =`, which would push a history entry for every clause
-     anybody opened.
+  /* `replaceState`, never `location.hash =`, which would push a history
+     entry for every clause anybody glanced at and bury the back button.
+     And nothing here may sit inside a state updater: an updater runs
+     during render, and React refuses a component that touches anything
+     else from in there. */
+  const show = React.useCallback((id: string) => {
+    setOpen(id);
+    window.history.replaceState(null, "", `#${id}`);
+  }, []);
 
-     Nothing here may happen inside the state updater. An updater runs
-     during React's render, and dispatching from in there made the strip
-     set its own state while this component was rendering, which React
-     refuses. */
-  const show = React.useCallback(
-    (id: string) => {
-      const next = open === id ? null : id;
-      setOpen(next);
-      const url = next ? `#${next}` : window.location.pathname;
-      window.history.replaceState(null, "", url);
-      if (next) window.dispatchEvent(new HashChangeEvent("hashchange"));
-    },
-    [open],
-  );
+  const hide = React.useCallback(() => {
+    setOpen(null);
+    window.history.replaceState(null, "", window.location.pathname);
+  }, []);
 
-  /* The address is not ours alone: having travelled, the strip writes the
-     section it has arrived at over the top of it, so the address goes
-     from `#terms-ownership` to `#terms` a moment after a press. Read
-     back naively that shut the panel that had just been opened. Only an
-     address that names a clause is allowed to change which one is open;
-     anything else is the strip keeping its own score. */
+  /* The address is not ours alone: the strip writes the cell it has
+     arrived at over the top of it, so `#terms-ownership` becomes `#terms`
+     a moment after a press. Only an address that names a clause is
+     allowed to open one; anything else is the strip keeping its score. */
   React.useEffect(() => {
     const read = () => {
       const id = decodeURIComponent(window.location.hash.slice(1));
-      if (!id) return;
-      const panel = document.getElementById(id);
-      if (panel?.querySelector("button[aria-controls]")) setOpen(id);
+      if (id && document.getElementById(`${id}-open`)) setOpen(id);
     };
     read();
     window.addEventListener("hashchange", read);
@@ -80,7 +64,7 @@ export function LegalPage({ children }: { children: React.ReactNode }) {
   }, []);
 
   return (
-    <Opened.Provider value={{ open, show }}>
+    <Opened.Provider value={{ open, show, hide }}>
       <StripPage
         head={
           <StripHead
@@ -101,16 +85,8 @@ export function LegalPage({ children }: { children: React.ReactNode }) {
       >
         <Strip
           label="Legal: the terms and the privacy policy, left and right"
-          chapters
           className="mt-4 flex-1"
         >
-          {/* No opener. Julian: remove it. Two titles and two dates say
-              what the page is, and a paragraph explaining that a legal
-              page is a legal page is the kind of writing these documents
-              are trying not to be. */}
-          <TitleCell title="Legal" hash="legal">
-            <p className="label text-muted-foreground">The small print</p>
-          </TitleCell>
           {children}
         </Strip>
       </StripPage>
@@ -126,11 +102,10 @@ export function LegalColumn({
   intro,
   children,
 }: {
-  /** Anchor, so `/legal#terms` and `/legal#privacy` land on the column. */
+  /** Anchor, so `/legal#terms` and `/legal#privacy` land on the page. */
   id: string;
   title: string;
-  /** The short name, for the ruler under the strip and the running head:
-      "Terms of Service" over an eight pixel tick is not a label. */
+  /** The short name, for the ruler under the strip. */
   label: string;
   /** ISO date, so the machine and the reader see the same day. */
   effective: string;
@@ -143,20 +118,19 @@ export function LegalColumn({
     year: "numeric",
     timeZone: "UTC",
   });
-  /* A fragment, not a box. The strip reads its own children in a dozen
-     places and a wrapper here would hide every panel from the ruler, the
-     counter and the seat, so the document's head and its clauses are
-     handed up as siblings. */
+  const count = React.Children.count(children);
   return (
-    <>
-      <section
-        id={id}
-        aria-labelledby={`${id}-title`}
-        data-tick
-        data-label={label}
-        data-hash={id}
-        className="flex w-full shrink-0 flex-col justify-center gap-6 py-8 sm:h-full sm:w-[min(28rem,82vw)] sm:py-0 sm:pr-8"
-      >
+    <section
+      id={id}
+      aria-labelledby={`${id}-title`}
+      data-tick
+      data-label={label}
+      data-hash={id}
+      /* One document, one screen. Julian: two pages total, so the second
+         document is one gesture away rather than eleven. */
+      className="flex w-full shrink-0 flex-col gap-8 py-8 sm:h-full sm:w-full sm:flex-row sm:items-stretch sm:gap-16 sm:py-0 sm:pr-10"
+    >
+      <div className="flex shrink-0 flex-col justify-center gap-6 sm:w-[min(22rem,32%)]">
         <div>
           <h2
             id={`${id}-title`}
@@ -170,21 +144,21 @@ export function LegalColumn({
         </div>
         <div className="max-w-prose text-base leading-relaxed">{intro}</div>
         <p className="label text-muted-foreground">
-          {React.Children.count(children)} clauses. Press one to read it.
+          {count} clauses. Press one to read it.
         </p>
-      </section>
+      </div>
 
-      {/* Each clause takes an anchor of its own, named for the document it
-          is in: "Changes" and "Contact" are the title of a clause in both,
-          and `/legal#terms-changes` and `/legal#privacy-changes` are
-          different clauses. Passed down rather than typed at each of the
-          call sites, which is a chance apiece to repeat one. */}
-      {React.Children.map(children, (child, i) =>
-        React.isValidElement<{ column?: string; n?: number }>(child)
-          ? React.cloneElement(child, { column: id, n: i + 1 })
-          : child,
-      )}
-    </>
+      {/* Two columns from `sm`, because twenty one clauses down one column
+          is taller than any window, and the point of a list is that the
+          whole document is in view at once. */}
+      <ol className="m-0 min-w-0 flex-1 list-none p-0 sm:my-auto sm:columns-2 sm:gap-x-12">
+        {React.Children.map(children, (child, i) =>
+          React.isValidElement<{ column?: string; n?: number }>(child)
+            ? React.cloneElement(child, { column: id, n: i + 1 })
+            : child,
+        )}
+      </ol>
+    </section>
   );
 }
 
@@ -204,96 +178,94 @@ export function Clause({
   title: string;
   /** Written by `LegalColumn`; the document this clause is in. */
   column?: string;
-  /** Its place in that document, for the number down the spine. */
+  /** Its place in that document, for the number in the list. */
   n?: number;
   children: React.ReactNode;
 }) {
   const id = column ? `${column}-${anchor(title)}` : anchor(title);
-  const { open, show } = React.useContext(Opened);
-  const shown = open === id;
+  const { open, show, hide } = React.useContext(Opened);
 
   return (
-    <div
-      id={id}
-      data-tick
-      data-name={title}
-      data-hash={id}
-      className="flex w-full shrink-0 flex-col border-t border-border sm:h-full sm:w-auto sm:flex-row sm:border-l sm:border-t-0"
-    >
-      {/* The spine. Shut, this is the whole panel: a number at the top and
-          the title read from the bottom up, which is the way a spine is
-          read off a shelf. */}
+    <li className="break-inside-avoid border-b border-border">
       <button
+        id={`${id}-open`}
         type="button"
-        aria-expanded={shown}
-        aria-controls={`${id}-text`}
         onClick={() => show(id)}
-        className={cn(
-          "label group flex shrink-0 items-center gap-4 py-5 text-left transition-colors duration-200",
-          /* Julian: the sideways text is super hard to read. It was ten
-             pixels of letter-spaced capitals turned on its side, which is
-             the worst setting type has, so the titles are the right way
-             up now and the spine is as wide as a title needs. Thirty
-             three of them make a longer strip; a strip is the one thing
-             this page has plenty of. */
-          "sm:h-full sm:w-44 sm:flex-col sm:items-start sm:gap-5 sm:px-5 sm:py-7",
-          shown ? "text-foreground" : "text-muted-foreground",
-          "hoverable:hover:text-foreground",
-        )}
+        className="label flex w-full items-center gap-4 py-3 text-left text-muted-foreground transition-colors duration-200 hoverable:hover:text-foreground"
       >
-        <span className="tabular-nums">
-          {String(n).padStart(2, "0")}
-        </span>
-        {/* At the foot of the spine, where the eye lands after the
-            number and where a shelf carries a title. */}
-        <span className="min-w-0 flex-1 truncate sm:mt-auto sm:w-full sm:flex-none sm:overflow-visible sm:whitespace-normal sm:text-wrap sm:leading-[1.45]">
-          {title}
-        </span>
-        {/* A cross that turns into a line: the shape says shut and open
-            without a word, and turning is cheaper than swapping two
-            glyphs. */}
-        <span
-          aria-hidden
-          className={cn(
-            "relative size-3 shrink-0 transition-transform duration-300 ease-[var(--ease-out-strong)] motion-reduce:transition-none",
-            shown && "rotate-45",
-          )}
-        >
+        <span className="tabular-nums">{String(n).padStart(2, "0")}</span>
+        <span className="min-w-0 flex-1">{title}</span>
+        {/* A cross: there is more behind the line, and pressing brings it
+            up. Cheaper than a glyph and it does not need a font. */}
+        <span aria-hidden className="relative size-3 shrink-0">
           <span className="absolute left-0 top-1/2 h-px w-full -translate-y-1/2 bg-current" />
-          <span
-            className={cn(
-              "absolute left-1/2 top-0 h-full w-px -translate-x-1/2 bg-current transition-opacity duration-200",
-              shown && "opacity-0",
-            )}
-          />
+          <span className="absolute left-1/2 top-0 h-full w-px -translate-x-1/2 bg-current" />
         </span>
       </button>
+      {open === id ? (
+        <ClauseText id={id} title={title} n={n} onClose={hide}>
+          {children}
+        </ClauseText>
+      ) : null}
+    </li>
+  );
+}
 
-      {/* The text, opening sideways. A grid track from nothing to one
-          fraction is the one way a width can be animated without naming
-          the width, so a long clause and a short one both open at the
-          same speed and neither is measured in advance. */}
-      <div
-        id={`${id}-text`}
-        role="region"
-        aria-label={title}
-        className={cn(
-          "grid transition-[grid-template-rows,grid-template-columns] duration-[420ms] ease-[var(--ease-out-strong)] motion-reduce:transition-none",
-          "sm:h-full",
-          shown
-            ? "grid-rows-[1fr] sm:grid-cols-[1fr] sm:grid-rows-none"
-            : "grid-rows-[0fr] sm:grid-cols-[0fr] sm:grid-rows-none",
-        )}
-      >
-        <div className="min-h-0 min-w-0 overflow-hidden">
-          <div
-            data-scroll
-            className="h-full w-full overflow-y-auto overscroll-contain pb-8 pr-2 text-base leading-relaxed sm:w-[min(32rem,76vw)] sm:py-7 sm:pl-6 sm:pr-8 [&_li]:mt-2 [&_p+p]:mt-4 [&_strong]:font-medium [&_strong]:text-foreground [&_ul]:list-disc [&_ul]:pl-5"
+/** The clause itself, over the page. A `dialog` opened as a modal, so the
+    platform does the focus trap, the Escape key and the inert background,
+    and a portal to the body so none of it sits among the strip's cells,
+    which the strip counts and rules off. */
+function ClauseText({
+  id,
+  title,
+  n,
+  onClose,
+  children,
+}: {
+  id: string;
+  title: string;
+  n: number;
+  onClose: () => void;
+  children: React.ReactNode;
+}) {
+  const box = React.useRef<HTMLDialogElement>(null);
+
+  React.useEffect(() => {
+    const el = box.current;
+    if (el && !el.open) el.showModal();
+  }, []);
+
+  return createPortal(
+    <dialog
+      ref={box}
+      aria-labelledby={`${id}-heading`}
+      onClose={onClose}
+      /* A press on the backdrop reaches the dialog element itself: the
+         panel inside it takes every press of its own. */
+      onClick={(e) => {
+        if (e.target === box.current) box.current?.close();
+      }}
+      className="clause-box m-auto max-h-[82dvh] w-[min(37rem,92vw)] overflow-hidden border border-border bg-background p-0 text-foreground backdrop:bg-background/70"
+    >
+      <div className="flex max-h-[82dvh] flex-col">
+        <div className="flex items-start justify-between gap-6 border-b border-border px-7 py-5">
+          <h2 id={`${id}-heading`} className="label text-muted-foreground">
+            <span className="tabular-nums">{String(n).padStart(2, "0")}</span>
+            <span className="ml-4 text-foreground">{title}</span>
+          </h2>
+          <button
+            type="button"
+            onClick={() => box.current?.close()}
+            className="label -m-2 shrink-0 p-2 text-muted-foreground transition-colors duration-200 hoverable:hover:text-foreground"
           >
-            {children}
-          </div>
+            Close
+          </button>
+        </div>
+        <div className="min-h-0 overflow-y-auto overscroll-contain px-7 py-6 text-base leading-relaxed [&_li]:mt-2 [&_p+p]:mt-4 [&_strong]:font-medium [&_strong]:text-foreground [&_ul]:list-disc [&_ul]:pl-5">
+          {children}
         </div>
       </div>
-    </div>
+    </dialog>,
+    document.body,
   );
 }
