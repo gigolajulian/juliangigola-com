@@ -35,8 +35,8 @@ import * as React from "react";
 const CY = 49.6;
 const A = 42.8;
 const S = 18.0;
-const TAKE = 1500; // the mark: open, hold, blink, settle
-const OPEN = 1000; // the pupil opening into the page
+const TAKE = 1000; // the mark: open, hold, blink, settle
+const OPEN = 1600; // the pupil opening into the page
 const CUE = 0.88; // the opening starts before the mark has quite settled
 
 const radius = (a: number, s: number) => (a * a + s * s) / (2 * Math.max(s, 0.18));
@@ -53,10 +53,13 @@ function lens(a: number, top: number, bot: number) {
 const mix = (from: number, to: number, t: number) => from + (to - from) * t;
 const glide = (t: number) =>
   t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
-/* A long tail: most of the distance early, then a deceleration that runs
-   out of road slowly. It is what makes the opening read as expensive
-   rather than as a wipe. */
-const expo = (t: number) => (t >= 1 ? 1 : 1 - Math.pow(2, -10 * t));
+/* The curve the pupil opens on. Julian: faster mark, and let the end run
+   on. An exponential was right for a short opening — most of the distance
+   early, then a long tail — but over 1.6 seconds its tail is spent after
+   the hole has already passed the corners, so the extra time would not be
+   seen. This spreads the crossing out instead: 44 per cent of the way at
+   a quarter, 81 at a half, and still moving at the end. */
+const reveal = (t: number) => 1 - Math.pow(1 - t, 2.4);
 
 type Key = [at: number, value: number, ease?: (t: number) => number];
 
@@ -143,7 +146,7 @@ export function Intro() {
       const t0 = performance.now();
       const step = (now: number) => {
         const t = Math.min(1, (now - t0) / OPEN);
-        const k = expo(t);
+        const k = reveal(t);
         el.style.setProperty("--hole", `${(k * far * 1.02).toFixed(1)}px`);
         /* The feather opens with the hole and closes again at the end, so
            the last frame is a clean page and not a soft ring. */
