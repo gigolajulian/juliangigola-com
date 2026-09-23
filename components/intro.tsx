@@ -42,7 +42,8 @@ const BLUR = 0.72; // how soft the mark starts, as a share of its own thickness
 const FEATHER = 0.018; // how soft the lid edge is, as a share of the window
 const PAGE = 0.026; // how soft the page starts, as a share of the window
 
-const radius = (a: number, s: number) => (a * a + s * s) / (2 * Math.max(s, 0.18));
+const radius = (a: number, s: number) =>
+  (a * a + s * s) / (2 * Math.max(s, 0.18));
 
 /** The lens, from a half width and the rise of each arc. */
 function lens(a: number, top: number, bot: number) {
@@ -99,11 +100,28 @@ const focus = (t: number) => 1 - Math.pow(1 - t, 3);
    that it reads as a zoom. It rests on the artwork, and then it closes.
    The take ends shut, on a hairline, because that hairline is the cut. */
 const frame = (t: number) => ({
-  a: track(t, [[0, 14], [0.42, A]]),
-  s: track(t, [[0, 1.2], [0.44, S], [0.58, S], [SHUT, 0.3]]),
-  iris: track(t, [[0, 0.82], [0.48, 1]]),
-  pupil: track(t, [[0, 0.78], [0.54, 1]]),
-  blur: track(t, [[0, 1], [0.55, 0, focus]]),
+  a: track(t, [
+    [0, 14],
+    [0.42, A],
+  ]),
+  s: track(t, [
+    [0, 1.2],
+    [0.44, S],
+    [0.58, S],
+    [SHUT, 0.3],
+  ]),
+  iris: track(t, [
+    [0, 0.82],
+    [0.48, 1],
+  ]),
+  pupil: track(t, [
+    [0, 0.78],
+    [0.54, 1],
+  ]),
+  blur: track(t, [
+    [0, 1],
+    [0.55, 0, focus],
+  ]),
 });
 
 /* Once per page load. React remounts effects in development, and a second
@@ -268,78 +286,94 @@ export function Intro() {
   }, []);
 
   return (
-    <div id="jg-intro" ref={box} aria-hidden="true">
-      <svg viewBox="0 0 100 100" focusable="false">
-        <defs>
-          <clipPath id="jg-intro-clip">
-            <path ref={clip} d={lens(14, 1.2, 1.2)} />
-          </clipPath>
-        </defs>
-        {/* The lens is the ink, the iris is the ground punched back
+    <>
+      {/* The one rule that cannot wait for the stylesheet. The mark is in
+          the server's HTML and the styles are in separate files, so there
+          is a window between the document arriving and the CSS applying
+          in which this layer has no rules at all: an unstyled `<svg>`
+          lays itself out in the flow and prints the opening hairline
+          across the top of the page. Carried inline it is there from the
+          first byte, and `[data-intro="1"] #jg-intro` in the stylesheet
+          still wins on specificity when it comes, so nothing downstream
+          needs `!important` to undo it.
+
+          The attribute `hidden` would be shorter and is wrong: the user
+          agent writes that rule with `!important`, which no author rule
+          can beat, and the opening never plays at all. */}
+      <style>{"#jg-intro{display:none}"}</style>
+      <div id="jg-intro" ref={box} aria-hidden="true">
+        <svg viewBox="0 0 100 100" focusable="false">
+          <defs>
+            <clipPath id="jg-intro-clip">
+              <path ref={clip} d={lens(14, 1.2, 1.2)} />
+            </clipPath>
+          </defs>
+          {/* The lens is the ink, the iris is the ground punched back
             through it, the pupil is the ink again: the same three fills
             the file has, in the same order. The iris is not clipped,
             because the ground colour on the ground is already invisible
             and a clip leaves the lens's own anti-aliased edge showing as
             a thread along the top arc. */}
-        <path ref={path} className="jg-intro-lens" d={lens(14, 1.2, 1.2)} />
-        <g ref={iris} className="jg-intro-inner">
-          <circle className="jg-intro-iris" cx="50" cy="40.9" r="20.7" />
-        </g>
-        <g clipPath="url(#jg-intro-clip)">
-          <g ref={eye} className="jg-intro-inner">
-            <circle
-              ref={dot}
-              className="jg-intro-pupil"
-              cx="50"
-              cy="40.9"
-              r="6.7"
-            />
+          <path ref={path} className="jg-intro-lens" d={lens(14, 1.2, 1.2)} />
+          <g ref={iris} className="jg-intro-inner">
+            <circle className="jg-intro-iris" cx="50" cy="40.9" r="20.7" />
           </g>
-        </g>
-      </svg>
+          <g clipPath="url(#jg-intro-clip)">
+            <g ref={eye} className="jg-intro-inner">
+              <circle
+                ref={dot}
+                className="jg-intro-pupil"
+                cx="50"
+                cy="40.9"
+                r="6.7"
+              />
+            </g>
+          </g>
+        </svg>
 
-      {/* The ground again, with the lens cut out of it. It is the same
+        {/* The ground again, with the lens cut out of it. It is the same
           colour as the layer it sits on and its hole starts as the
           hairline the mark ended on, so switching to it is invisible;
           from there the hole is the only thing that moves. */}
-      <svg
-        ref={veilRef}
-        className="jg-intro-veil"
-        viewBox="0 0 100 100"
-        preserveAspectRatio="none"
-        focusable="false"
-      >
-        <defs>
-          {/* The lid edge. Blurring the hole rather than the veil keeps
+        <svg
+          ref={veilRef}
+          className="jg-intro-veil"
+          viewBox="0 0 100 100"
+          preserveAspectRatio="none"
+          focusable="false"
+        >
+          <defs>
+            {/* The lid edge. Blurring the hole rather than the veil keeps
               the softness on the one edge that moves: blurring the veil
               would soften the window's own borders too and let the page
               through at the corners. `sRGB` because a mask blurred in
               linear light lifts its midtones and the edge reads as a
               grey band rather than a fade. */}
-          <filter
-            id="jg-intro-feather"
-            x="-25%"
-            y="-25%"
-            width="150%"
-            height="150%"
-            colorInterpolationFilters="sRGB"
-          >
-            <feGaussianBlur ref={edgeRef} stdDeviation="0" />
-          </filter>
-          <mask id="jg-intro-mask">
-            <rect x="0" y="0" width="100%" height="100%" fill="#fff" />
-            <path ref={holeRef} fill="#000" filter="url(#jg-intro-feather)" />
-          </mask>
-        </defs>
-        <rect
-          x="0"
-          y="0"
-          width="100%"
-          height="100%"
-          fill="var(--background)"
-          mask="url(#jg-intro-mask)"
-        />
-      </svg>
-    </div>
+            <filter
+              id="jg-intro-feather"
+              x="-25%"
+              y="-25%"
+              width="150%"
+              height="150%"
+              colorInterpolationFilters="sRGB"
+            >
+              <feGaussianBlur ref={edgeRef} stdDeviation="0" />
+            </filter>
+            <mask id="jg-intro-mask">
+              <rect x="0" y="0" width="100%" height="100%" fill="#fff" />
+              <path ref={holeRef} fill="#000" filter="url(#jg-intro-feather)" />
+            </mask>
+          </defs>
+          <rect
+            x="0"
+            y="0"
+            width="100%"
+            height="100%"
+            fill="var(--background)"
+            mask="url(#jg-intro-mask)"
+          />
+        </svg>
+      </div>
+    </>
   );
 }
