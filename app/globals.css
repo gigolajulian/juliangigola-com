@@ -759,6 +759,24 @@ body:has(.strip-scroll[data-past-first]) .home-wordmark,
     scale: none;
   }
 }
+
+/* The mark, which is the wordmark's opposite number: it is on screen for
+   exactly the moments the name is not, and leaves on the same curve the
+   name arrives on, so the corner is never empty and never doubled.
+
+   It does not exist below `lg`, where the wordmark never defers and the
+   name is in the corner from the first frame. */
+.home-eye {
+  transition: opacity 300ms var(--ease-out-strong);
+}
+body:has(.strip-scroll[data-past-first]) .home-eye {
+  opacity: 0;
+}
+@media (max-width: 63.999rem) {
+  .home-eye {
+    display: none;
+  }
+}
 @media (prefers-reduced-motion: reduce) {
   .home-wordmark {
     transition: opacity 300ms var(--ease-out-strong);
