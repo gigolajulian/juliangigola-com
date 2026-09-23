@@ -1393,8 +1393,8 @@
       ]
     },
     {
-      "slug": "nalayah",
-      "name": "NALAYAH",
+      "slug": "opal",
+      "name": "OPAL",
       "categorySlug": "portraits",
       "credits": [
         {
@@ -1404,11 +1404,12 @@
         },
         {
           "role": "Model",
-          "name": "Nalayah"
+          "name": "Nalayah Lashaee",
+          "instagram": "nalayahlashaee"
         }
       ],
       "cover": {
-        "src": "/work/nalayah/cover.jpg",
+        "src": "/work/opal/cover.jpg",
         "width": 600,
         "height": 800,
         "color": "#ada5a0",
@@ -1416,49 +1417,49 @@
       },
       "images": [
         {
-          "src": "/work/nalayah/01.jpg",
+          "src": "/work/opal/01.jpg",
           "width": 2500,
           "height": 3333,
           "color": "#ada5a0",
           "alt": ""
         },
         {
-          "src": "/work/nalayah/02.jpg",
+          "src": "/work/opal/02.jpg",
           "width": 2500,
           "height": 3333,
           "color": "#b8b2ad",
           "alt": ""
         },
         {
-          "src": "/work/nalayah/03.jpg",
+          "src": "/work/opal/03.jpg",
           "width": 2500,
           "height": 3333,
           "color": "#b6afa9",
           "alt": ""
         },
         {
-          "src": "/work/nalayah/04.jpg",
+          "src": "/work/opal/04.jpg",
           "width": 2500,
           "height": 3333,
           "color": "#b4aea8",
           "alt": ""
         },
         {
-          "src": "/work/nalayah/05.jpg",
+          "src": "/work/opal/05.jpg",
           "width": 2500,
           "height": 3333,
           "color": "#bfb9b5",
           "alt": ""
         },
         {
-          "src": "/work/nalayah/06.jpg",
+          "src": "/work/opal/06.jpg",
           "width": 2500,
           "height": 3333,
           "color": "#97938d",
           "alt": ""
         },
         {
-          "src": "/work/nalayah/07.jpg",
+          "src": "/work/opal/07.jpg",
           "width": 2500,
           "height": 3333,
           "color": "#a9a49f",
@@ -3559,7 +3560,7 @@
     }
   ],
   "order": [
-    "nalayah",
+    "opal",
     "fauxtopia",
     "ghostlight",
     "kala-x-sharks",
