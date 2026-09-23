@@ -211,36 +211,48 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             page is already underneath it. See `intro.tsx`. */}
         <Intro />
 
-        <SiteHeader />
-        {/* The drawer the burger opens. A sibling of the header and of
+        {/* One element around the whole site, so the opening can put a
+            lens over it. A filter is applied per element and each one
+            warps around its own centre, so header, main and footer
+            filtered separately would be three lenses rather than one.
+            It carries the column that `body` used to, and it is a plain
+            wrapper with no styling of its own the rest of the time. */}
+        <div id="jg-page" className="flex flex-1 flex-col">
+          <SiteHeader />
+          {/* The drawer the burger opens. A sibling of the header and of
             `main`, because both of those are what it comes out from under
             — see `site-menu.tsx`. */}
-        <SiteMenu />
-        {/* And the one /work opens from the other side. Here rather than
+          <SiteMenu />
+          {/* And the one /work opens from the other side. Here rather than
             in the work route's own shell for the same reason: that shell
             is inside `main`, and `main` is what this slides out from
             under. It renders nothing off /work. */}
-        <WorkFilter categories={WORK_CATEGORY_LINKS} heads={WORK_HEADS} />
-        {/* Writes the pointer's position onto whichever glass control is
+          <WorkFilter categories={WORK_CATEGORY_LINKS} heads={WORK_HEADS} />
+          {/* Writes the pointer's position onto whichever glass control is
             under it — see `glass` in globals.css. Renders nothing. */}
-        <GlassLight />
-        {/* Marks lazily loaded pictures as they land so they fade in rather
+          <GlassLight />
+          {/* Marks lazily loaded pictures as they land so they fade in rather
             than pop — see `photo-fade.tsx`. Renders nothing. */}
-        <PhotoFade />
-        {/* `tabIndex={-1}` so the skip link's focus lands here and the next Tab
+          <PhotoFade />
+          {/* `tabIndex={-1}` so the skip link's focus lands here and the next Tab
             is the first thing in the content, not the header again. */}
-        <main id="main" tabIndex={-1} className="rise flex flex-1 flex-col outline-none">
-          {/* Every page zooms in and out of the next: `page-transition.tsx`
+          <main
+            id="main"
+            tabIndex={-1}
+            className="rise flex flex-1 flex-col outline-none"
+          >
+            {/* Every page zooms in and out of the next: `page-transition.tsx`
               and `.page` in `globals.css`. */}
-          <ImageFallback />
-          <PageTransition>{children}</PageTransition>
-        </main>
-        <SiteFooter />
-        <PhotoNotice />
-        {/* The pointer over anything that opens large, site wide. One
+            <ImageFallback />
+            <PageTransition>{children}</PageTransition>
+          </main>
+          <SiteFooter />
+          <PhotoNotice />
+          {/* The pointer over anything that opens large, site wide. One
             mount: it follows the pointer and shows only over `[data-ring]`,
             so every gallery and strip shares it and none carries its own. */}
-        <PointerRing />
+          <PointerRing />
+        </div>
       </body>
     </html>
   );

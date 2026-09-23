@@ -41,6 +41,7 @@ const SHUT = 0.78; // where in the take the lens is flat: the cut
 const BLUR = 0.72; // how soft the mark starts, as a share of its own thickness
 const FEATHER = 0.018; // how soft the lid edge is, as a share of the window
 const PAGE = 0.026; // how soft the page starts, as a share of the window
+const LENS = 0.16; // how far the lens pushes, as a share of the window
 
 const radius = (a: number, s: number) => (a * a + s * s) / (2 * Math.max(s, 0.18));
 
@@ -106,6 +107,55 @@ const frame = (t: number) => ({
   blur: track(t, [[0, 1], [0.55, 0, focus]]),
 });
 
+/* The lens the page is seen through as the lids open, written into a
+   displacement map: a small picture whose red and green say how far to
+   reach sideways and down for each pixel's colour. The map is built once
+   at the cut, at the size of the window, and then only its strength
+   changes.
+
+   The profile is a barrel: nothing at the centre, which is the one point
+   a lens leaves alone, growing outward so the middle of the page swells
+   against the edges. It tapers over the last fifth, because a lens that
+   still pushes at the rim reaches past the edge of the page for colour
+   that is not there and leaves a torn transparent border.
+
+   The radius is measured in screen pixels rather than in the map's own
+   square, or the circle would come out an ellipse on any window that is
+   not square. */
+function bend(w: number, h: number) {
+  const N = 128;
+  const c = document.createElement("canvas");
+  c.width = N;
+  c.height = N;
+  const ctx = c.getContext("2d");
+  if (!ctx) return null;
+  const px = ctx.createImageData(N, N);
+  const short = Math.min(w, h);
+  const far = Math.hypot(w, h) / short;
+  for (let y = 0; y < N; y++) {
+    for (let x = 0; x < N; x++) {
+      const u = ((x + 0.5) / N) * 2 - 1;
+      const v = ((y + 0.5) / N) * 2 - 1;
+      const sx = (u * w) / short;
+      const sy = (v * h) / short;
+      const r = Math.hypot(sx, sy);
+      const k = Math.min(1, r / far);
+      const hem = Math.min(1, Math.max(0, (k - 0.8) / 0.2));
+      const m = Math.pow(k, 1.6) * (1 - hem * hem * (3 - 2 * hem));
+      const i = (y * N + x) * 4;
+      /* Toward the centre, so the middle of the page is magnified rather
+         than pinched. Half a channel is the whole of the reach; the
+         filter's own scale supplies the pixels. */
+      px.data[i] = Math.round(255 * (0.5 - (r ? (sx / r) * m : 0) * 0.5));
+      px.data[i + 1] = Math.round(255 * (0.5 - (r ? (sy / r) * m : 0) * 0.5));
+      px.data[i + 2] = 0;
+      px.data[i + 3] = 255;
+    }
+  }
+  ctx.putImageData(px, 0, 0);
+  return c.toDataURL();
+}
+
 /* Once per page load. React remounts effects in development, and a second
    take would measure a mark the first one had already hidden. */
 let played = false;
@@ -120,6 +170,9 @@ export function Intro() {
   const veilRef = React.useRef<SVGSVGElement>(null);
   const holeRef = React.useRef<SVGPathElement>(null);
   const edgeRef = React.useRef<SVGFEGaussianBlurElement>(null);
+  const lensRef = React.useRef<SVGFilterElement>(null);
+  const mapRef = React.useRef<SVGFEImageElement>(null);
+  const pushRef = React.useRef<SVGFEDisplacementMapElement>(null);
 
   React.useEffect(() => {
     const root = document.documentElement;
@@ -211,6 +264,29 @@ export function Intro() {
       root.classList.add("jg-intro-focusing");
       root.style.setProperty("--jg-focus", `${haze.toFixed(2)}px`);
 
+      /* The filter region is pinned to the window rather than left to the
+         page's own box. A filter region takes the size of what it is
+         applied to, and the wrapper is as tall as the document, so the
+         lens would be centred somewhere down the page with the window
+         showing a slice of it. The opening only ever runs at the top of
+         a page, so the top window of the wrapper is the window. */
+      const push = pushRef.current;
+      const map = mapRef.current;
+      const lens = lensRef.current;
+      const bent = bend(w, h);
+      if (push && map && lens && bent) {
+        for (const [k, v] of [
+          ["x", "0"],
+          ["y", "0"],
+          ["width", `${w}`],
+          ["height", `${h}`],
+        ] as const) {
+          lens.setAttribute(k, v);
+          map.setAttribute(k, v);
+        }
+        map.setAttribute("href", bent);
+      }
+
       const t0 = performance.now();
       const step = (now: number) => {
         const t = Math.min(1, (now - t0) / PART);
@@ -237,6 +313,20 @@ export function Intro() {
         root.style.setProperty(
           "--jg-focus",
           `${(haze * (1 - glide(t))).toFixed(2)}px`,
+        );
+        /* The lens holds while the lids are still nearly shut and lets
+           go once there is page to see. Relaxed on the focus's own curve
+           it is at its weakest exactly when the window opens, which is
+           the same as not bending anything: the strongest part of the
+           warp would happen behind a closed ground. */
+        push?.setAttribute(
+          "scale",
+          (
+            Math.min(w, h) *
+            LENS *
+            2 *
+            track(t, [[0, 1], [0.45, 1], [1, 0, focus]])
+          ).toFixed(2),
         );
         if (t < 1) requestAnimationFrame(step);
         else {
@@ -296,6 +386,28 @@ export function Intro() {
             />
           </g>
         </g>
+      </svg>
+
+      {/* The lens the page is seen through while the lids open. It is
+          only a filter, so nothing here is ever drawn; the stylesheet
+          points `#jg-page` at it for as long as the opening lasts. */}
+      <svg className="jg-intro-defs" aria-hidden="true" focusable="false">
+        <filter
+          ref={lensRef}
+          id="jg-lens"
+          filterUnits="userSpaceOnUse"
+          colorInterpolationFilters="sRGB"
+        >
+          <feImage ref={mapRef} preserveAspectRatio="none" result="jg-bend" />
+          <feDisplacementMap
+            ref={pushRef}
+            in="SourceGraphic"
+            in2="jg-bend"
+            scale="0"
+            xChannelSelector="R"
+            yChannelSelector="G"
+          />
+        </filter>
       </svg>
 
       {/* The ground again, with the lens cut out of it. It is the same
