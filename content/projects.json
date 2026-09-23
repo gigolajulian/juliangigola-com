@@ -1391,6 +1391,80 @@
           "alt": ""
         }
       ]
+    },
+    {
+      "slug": "nalayah",
+      "name": "NALAYAH",
+      "categorySlug": "portraits",
+      "credits": [
+        {
+          "role": "Photographer",
+          "name": "Julian Gigola",
+          "instagram": "juliangigola"
+        },
+        {
+          "role": "Model",
+          "name": "Nalayah"
+        }
+      ],
+      "cover": {
+        "src": "/work/nalayah/cover.jpg",
+        "width": 600,
+        "height": 800,
+        "color": "#ada5a0",
+        "alt": ""
+      },
+      "images": [
+        {
+          "src": "/work/nalayah/01.jpg",
+          "width": 2500,
+          "height": 3333,
+          "color": "#ada5a0",
+          "alt": ""
+        },
+        {
+          "src": "/work/nalayah/02.jpg",
+          "width": 2500,
+          "height": 3333,
+          "color": "#b8b2ad",
+          "alt": ""
+        },
+        {
+          "src": "/work/nalayah/03.jpg",
+          "width": 2500,
+          "height": 3333,
+          "color": "#b6afa9",
+          "alt": ""
+        },
+        {
+          "src": "/work/nalayah/04.jpg",
+          "width": 2500,
+          "height": 3333,
+          "color": "#b4aea8",
+          "alt": ""
+        },
+        {
+          "src": "/work/nalayah/05.jpg",
+          "width": 2500,
+          "height": 3333,
+          "color": "#bfb9b5",
+          "alt": ""
+        },
+        {
+          "src": "/work/nalayah/06.jpg",
+          "width": 2500,
+          "height": 3333,
+          "color": "#97938d",
+          "alt": ""
+        },
+        {
+          "src": "/work/nalayah/07.jpg",
+          "width": 2500,
+          "height": 3333,
+          "color": "#a9a49f",
+          "alt": ""
+        }
+      ]
     }
   ],
   "trash": [],
@@ -3485,6 +3559,7 @@
     }
   ],
   "order": [
+    "nalayah",
     "fauxtopia",
     "ghostlight",
     "kala-x-sharks",
