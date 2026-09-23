@@ -1295,6 +1295,102 @@
           "alt": ""
         }
       ]
+    },
+    {
+      "slug": "fauxtopia",
+      "name": "FAUXTOPIA",
+      "categorySlug": "editorial",
+      "credits": [
+        {
+          "role": "Photographer",
+          "name": "Julian Gigola",
+          "instagram": "juliangigola"
+        },
+        {
+          "role": "Model",
+          "name": "Zoe Monet",
+          "instagram": "iaiupo"
+        }
+      ],
+      "cover": {
+        "src": "/work/fauxtopia/cover.jpg",
+        "width": 600,
+        "height": 800,
+        "color": "#887a73",
+        "alt": ""
+      },
+      "images": [
+        {
+          "src": "/work/fauxtopia/01.jpg",
+          "width": 2500,
+          "height": 3333,
+          "color": "#897a73",
+          "alt": ""
+        },
+        {
+          "src": "/work/fauxtopia/02.jpg",
+          "width": 2500,
+          "height": 3333,
+          "color": "#918682",
+          "alt": ""
+        },
+        {
+          "src": "/work/fauxtopia/03.jpg",
+          "width": 2500,
+          "height": 3334,
+          "color": "#81756f",
+          "alt": ""
+        },
+        {
+          "src": "/work/fauxtopia/04.jpg",
+          "width": 2500,
+          "height": 3333,
+          "color": "#86766d",
+          "alt": ""
+        },
+        {
+          "src": "/work/fauxtopia/05.jpg",
+          "width": 2500,
+          "height": 3333,
+          "color": "#8a7b72",
+          "alt": ""
+        },
+        {
+          "src": "/work/fauxtopia/06.jpg",
+          "width": 2500,
+          "height": 1668,
+          "color": "#928683",
+          "alt": ""
+        },
+        {
+          "src": "/work/fauxtopia/07.jpg",
+          "width": 2500,
+          "height": 3334,
+          "color": "#6d6362",
+          "alt": ""
+        },
+        {
+          "src": "/work/fauxtopia/08.jpg",
+          "width": 2500,
+          "height": 3334,
+          "color": "#817570",
+          "alt": ""
+        },
+        {
+          "src": "/work/fauxtopia/09.jpg",
+          "width": 2500,
+          "height": 3334,
+          "color": "#82716e",
+          "alt": ""
+        },
+        {
+          "src": "/work/fauxtopia/10.jpg",
+          "width": 2500,
+          "height": 3335,
+          "color": "#807069",
+          "alt": ""
+        }
+      ]
     }
   ],
   "trash": [],
@@ -3389,6 +3485,7 @@
     }
   ],
   "order": [
+    "fauxtopia",
     "ghostlight",
     "kala-x-sharks",
     "lithe",
