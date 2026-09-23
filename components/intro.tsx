@@ -39,6 +39,9 @@ const TAKE = 1400; // the mark: open, hold, and close
 const PART = 1400; // the lids carrying on off the screen
 const SHUT = 0.78; // where in the take the lens is flat: the cut
 const BLUR = 0.72; // how soft the mark starts, as a share of its own thickness
+const FEATHER = 0.018; // how soft the lid edge is, as a share of the window
+const PAGE = 0.026; // how soft the page starts, as a share of the window
+const SETTLE = 700; // the page finding focus after the lids have gone
 
 const radius = (a: number, s: number) => (a * a + s * s) / (2 * Math.max(s, 0.18));
 
@@ -117,6 +120,7 @@ export function Intro() {
   const dot = React.useRef<SVGCircleElement>(null);
   const veilRef = React.useRef<SVGSVGElement>(null);
   const holeRef = React.useRef<SVGPathElement>(null);
+  const edgeRef = React.useRef<SVGFEGaussianBlurElement>(null);
 
   React.useEffect(() => {
     const root = document.documentElement;
@@ -172,7 +176,8 @@ export function Intro() {
       const art = el?.querySelector("svg");
       const veil = veilRef.current;
       const hole = holeRef.current;
-      if (!el || !art || !veil || !hole) return;
+      const edge = edgeRef.current;
+      if (!el || !art || !veil || !hole || !edge) return;
 
       const m = art.getBoundingClientRect();
       const w = window.innerWidth;
@@ -193,10 +198,19 @@ export function Intro() {
          edge, and the margin is for the flattest part of the curve near
          the corners. */
       const s1 = Math.max(cy, h - cy) * 1.08;
+      /* Both softnesses are measured off the window, so the gesture reads
+         the same on a phone as on a desktop. */
+      const fur = Math.min(w, h) * FEATHER;
+      const haze = Math.min(w, h) * PAGE;
 
       veil.setAttribute("viewBox", `0 0 ${w} ${h}`);
       hole.setAttribute("d", wide(cx, cy, a0, s0));
       el.classList.add("jg-intro-parting");
+      /* The page is only worth blurring from here. Until the cut it is
+         behind a solid ground, and a filter over the whole site costs a
+         layer the size of the window for nothing. */
+      root.classList.add("jg-intro-focusing");
+      root.style.setProperty("--jg-focus", `${haze.toFixed(2)}px`);
 
       const t0 = performance.now();
       const step = (now: number) => {
@@ -210,8 +224,28 @@ export function Intro() {
         const a = mix(a0, a1, 1 - Math.pow(1 - Math.min(1, t / 0.45), 3));
         const s = mix(s0, s1, glide(t));
         hole.setAttribute("d", wide(cx, cy, a, s));
-        if (t < 1) requestAnimationFrame(step);
-        else root.removeAttribute("data-intro");
+        /* Held to the gap's own rise for the same reason the mark's blur
+           was: a feather wider than the opening erases the opening. Once
+           the lids are a window apart it settles at its full width and
+           the edge stays soft all the way off the screen. */
+        edge.setAttribute("stdDeviation", Math.min(fur, s * 0.5).toFixed(2));
+        /* The page keeps its own time. It holds soft while the lids are
+           crossing, when a sliver of site is showing and there is nothing
+           to be sharp about, and finds focus in the seconds after they
+           have gone. Tied to the lids instead it is already sharp by the
+           time enough of it is visible to notice, which is the same as
+           not blurring it at all. */
+        const tp = (now - t0) / (PART + SETTLE);
+        root.style.setProperty(
+          "--jg-focus",
+          `${(haze * track(tp, [[0, 1], [0.45, 1], [1, 0, focus]])).toFixed(2)}px`,
+        );
+        if (t >= 1 && root.dataset.intro) root.removeAttribute("data-intro");
+        if (tp < 1) requestAnimationFrame(step);
+        else {
+          root.classList.remove("jg-intro-focusing");
+          root.style.removeProperty("--jg-focus");
+        }
       };
       requestAnimationFrame(step);
     };
@@ -278,9 +312,25 @@ export function Intro() {
         focusable="false"
       >
         <defs>
+          {/* The lid edge. Blurring the hole rather than the veil keeps
+              the softness on the one edge that moves: blurring the veil
+              would soften the window's own borders too and let the page
+              through at the corners. `sRGB` because a mask blurred in
+              linear light lifts its midtones and the edge reads as a
+              grey band rather than a fade. */}
+          <filter
+            id="jg-intro-feather"
+            x="-25%"
+            y="-25%"
+            width="150%"
+            height="150%"
+            colorInterpolationFilters="sRGB"
+          >
+            <feGaussianBlur ref={edgeRef} stdDeviation="0" />
+          </filter>
           <mask id="jg-intro-mask">
             <rect x="0" y="0" width="100%" height="100%" fill="#fff" />
-            <path ref={holeRef} fill="#000" />
+            <path ref={holeRef} fill="#000" filter="url(#jg-intro-feather)" />
           </mask>
         </defs>
         <rect
