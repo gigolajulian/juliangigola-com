@@ -178,7 +178,7 @@ export function WorkBand({
          shape an accident of the window: at 1440x900 that was a landscape
          box, and every portrait frame lost a third of itself to the
          crop. */
-      className="group strip-cell relative block h-full w-full overflow-hidden max-sm:aspect-[4/5]"
+      className="group strip-cell press relative block h-full w-full overflow-hidden max-sm:aspect-[4/5] active:scale-[0.995]"
     >
       {/* Base layer: always loaded, never removed. It is what keeps the
             cell from flashing empty the first time a scrub frame is fetched.

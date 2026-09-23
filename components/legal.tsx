@@ -97,7 +97,13 @@ export function LegalPage({ children }: { children: React.ReactNode }) {
     if (window.matchMedia("(max-width: 39.99rem)").matches)
       document
         .getElementById("legal-clause")
-        ?.scrollIntoView({ behavior: "smooth", block: "start" });
+        ?.scrollIntoView({
+          behavior: window.matchMedia("(prefers-reduced-motion: reduce)")
+            .matches
+            ? "auto"
+            : "smooth",
+          block: "start",
+        });
   };
 
   /* An address names a clause, and a clause names its document: the

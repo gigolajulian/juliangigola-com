@@ -125,6 +125,8 @@ function wantsLenis() {
     const asked = new URLSearchParams(window.location.search).get("lenis");
     if (asked === "1" || asked === "0")
       window.localStorage.setItem(LENIS_KEY, asked);
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches)
+      return false;
     return window.localStorage.getItem(LENIS_KEY) !== "0";
   } catch {
     return true;

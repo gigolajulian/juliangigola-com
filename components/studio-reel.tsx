@@ -86,7 +86,7 @@ export function StudioReel({
             data-ring="View project"
             style={{ backgroundColor: shoot.color }}
             className={cn(
-              "absolute inset-0 block transition-opacity duration-700 ease-[var(--ease-out-strong)] motion-reduce:transition-none",
+              "press absolute inset-0 block transition-opacity duration-700 ease-[var(--ease-out-strong)] active:scale-[0.995] motion-reduce:transition-none",
               i === at ? "opacity-100" : "pointer-events-none opacity-0",
             )}
           >

@@ -91,7 +91,7 @@ export default function SessionsPage() {
                      photographs that each set their own height is not a row.
                      4:5 upright, which is what most of the archive is shot
                      at, so the crop is slight. */
-                  className="group strip-cell relative block aspect-[4/5] w-full shrink-0 overflow-hidden sm:h-full sm:w-auto"
+                  className="group strip-cell press relative block aspect-[4/5] w-full shrink-0 overflow-hidden active:scale-[0.995] sm:h-full sm:w-auto"
                   style={
                     {
                       backgroundColor: cover.color,

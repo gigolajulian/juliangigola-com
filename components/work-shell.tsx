@@ -366,7 +366,10 @@ export function WorkShell({
         const to = c.offsetLeft - r.clientWidth / 2 + c.offsetWidth / 2;
         r.scrollTo({
           left: Math.max(0, Math.min(r.scrollWidth - r.clientWidth, to)),
-          behavior: "smooth",
+          behavior: window.matchMedia("(prefers-reduced-motion: reduce)")
+            .matches
+            ? "auto"
+            : "smooth",
         });
       }
     }
@@ -466,7 +469,7 @@ export function WorkShell({
         }}
         placeholder="Search"
         aria-label="Search the work by name, discipline or credit"
-        className="label w-full bg-transparent pl-[1.625rem] pr-[1.5rem] text-left text-foreground outline-none placeholder:text-muted-foreground [&::-webkit-search-cancel-button]:hidden"
+        className="label w-full bg-transparent pl-[1.625rem] pr-[1.5rem] text-left text-foreground outline-none focus-visible:outline-1 focus-visible:outline-offset-[3px] focus-visible:outline-ring placeholder:text-muted-foreground [&::-webkit-search-cancel-button]:hidden"
       />
       {/* The cross empties the box and leaves it open, which is the
           difference between it and the glass: one is "that was not what I
@@ -764,7 +767,7 @@ function Chip({
        thin, because the pointer is exact and the band is height the
        photographs would rather have. */
     "label block whitespace-nowrap px-3 py-1.5 max-sm:py-3",
-    "transition-[color,background-color,transform] duration-200 ease-[var(--ease-out-strong)]",
+    "transition-[color,background-color,scale] duration-200 ease-[var(--ease-out-strong)]",
     // A chip lifts a touch under the pointer and gives under the press.
     "hoverable:hover:scale-[1.05] active:scale-[0.96] motion-reduce:hover:scale-100",
     active

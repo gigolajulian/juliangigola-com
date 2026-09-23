@@ -102,12 +102,12 @@ export function VideoGrid({
               {video.title}
             </h3>
             {video.client ? (
-              <p className="label text-muted-foreground transition-colors duration-200 group-hover/cell:text-foreground">
+              <p className="label text-muted-foreground transition-colors duration-200 hoverable:group-hover/cell:text-foreground">
                 {video.client}
               </p>
             ) : null}
             {video.year ? (
-              <p className="label ml-auto shrink-0 tabular-nums text-muted-foreground transition-colors duration-200 group-hover/cell:text-foreground">
+              <p className="label ml-auto shrink-0 tabular-nums text-muted-foreground transition-colors duration-200 hoverable:group-hover/cell:text-foreground">
                 {video.year}
               </p>
             ) : null}
