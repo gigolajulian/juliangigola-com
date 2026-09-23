@@ -38,6 +38,7 @@ const S = 18.0;
 const TAKE = 1400; // the mark: open, hold, and close
 const PART = 1400; // the lids carrying on off the screen
 const SHUT = 0.78; // where in the take the lens is flat: the cut
+const BLUR = 0.72; // how soft the mark starts, as a share of its own thickness
 
 const radius = (a: number, s: number) => (a * a + s * s) / (2 * Math.max(s, 0.18));
 
@@ -82,6 +83,14 @@ function track(t: number, keys: Key[]) {
   return keys[keys.length - 1][1];
 }
 
+/* The focus lands as the iris finishes opening, on an ease-out, so most
+   of the softness goes in the first third and the last of it settles
+   rather than creeps. It has to reach zero well before the cut: blur
+   still on the mark at the hairline would show at the swap, and the veil
+   cannot be blurred with it, since a soft hole lets the page through
+   early. */
+const focus = (t: number) => 1 - Math.pow(1 - t, 3);
+
 /* The lens grows outward along its own axis from a short line, so the
    shape arrives rather than being uncovered, and the iris opens from
    just under its drawn size: far enough to read as movement, not so far
@@ -92,6 +101,7 @@ const frame = (t: number) => ({
   s: track(t, [[0, 1.2], [0.44, S], [0.58, S], [SHUT, 0.3]]),
   iris: track(t, [[0, 0.82], [0.48, 1]]),
   pupil: track(t, [[0, 0.78], [0.54, 1]]),
+  blur: track(t, [[0, 1], [0.55, 0, focus]]),
 });
 
 /* Once per page load. React remounts effects in development, and a second
@@ -116,7 +126,22 @@ export function Intro() {
       sessionStorage.setItem("jg-intro", "1");
     } catch {}
 
+    const art = box.current?.querySelector("svg");
+    const span = art?.getBoundingClientRect().width ?? 0;
+
     const draw = (f: ReturnType<typeof frame>) => {
+      if (art) {
+        /* Sized against the lens's own thickness, never a fixed number
+           of pixels. The mark is set in `vw` between two clamps, so a
+           blur that reads as a lens finding focus on a desktop is a
+           smeared blob on a phone; and the take opens from a line three
+           pixels tall, which a blur measured off the whole mark erases
+           rather than softens. Held to the thickness, the softness
+           arrives with the shape and leaves with it. */
+        const px = f.blur * BLUR * f.s * 2 * (span / 100);
+        (art as SVGSVGElement).style.filter =
+          px > 0.2 ? `blur(${px.toFixed(2)}px)` : "";
+      }
       const d = lens(f.a, f.s, f.s);
       path.current?.setAttribute("d", d);
       clip.current?.setAttribute("d", d);
