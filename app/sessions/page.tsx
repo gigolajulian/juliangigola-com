@@ -119,7 +119,7 @@ export default function SessionsPage() {
                 data-tick
                 data-label={session.name}
                 data-hash={session.slug}
-                className="flex w-full shrink-0 flex-col justify-center gap-8 py-8 sm:h-full sm:w-[min(22rem,60vw)] sm:py-0"
+                className="flex w-full shrink-0 flex-col justify-center gap-8 py-8 short:gap-5 sm:h-full sm:w-[min(22rem,60vw)] sm:py-0"
               >
                 {/* The words take the height they need and scroll inside
                     themselves when the window is shorter than they are,
@@ -127,13 +127,13 @@ export default function SessionsPage() {
                     bottom of a laptop screen. */}
                 <div
                   data-scroll
-                  className="flex min-h-0 flex-col gap-8 overflow-y-auto overscroll-contain pr-2"
+                  className="flex min-h-0 flex-col gap-8 overflow-y-auto overscroll-contain pr-2 short:gap-5"
                 >
-                  <h2 className="font-display text-2xl uppercase leading-none tracking-[0] sm:text-3xl">
+                  <h2 className="font-display text-2xl uppercase leading-none tracking-[0] short:sm:text-2xl sm:text-3xl">
                     {session.name}
                   </h2>
 
-                  <dl className="flex flex-wrap gap-x-10 gap-y-4 border-t border-border pt-6">
+                  <dl className="flex flex-wrap gap-x-10 gap-y-4 border-t border-border pt-6 short:pt-4">
                     <div>
                       <dt className="label text-muted-foreground">Rate</dt>
                       <dd className="mt-1.5 text-sm">
@@ -154,7 +154,7 @@ export default function SessionsPage() {
 
                   <div>
                     <h3 className="label text-muted-foreground">Includes</h3>
-                    <ul className="mt-4 flex flex-col gap-3">
+                    <ul className="mt-4 flex flex-col gap-3 short:gap-2">
                       {session.includes.map((item) => (
                         <li
                           key={item}

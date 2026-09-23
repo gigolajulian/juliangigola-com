@@ -101,7 +101,7 @@ export default function ContactPage() {
                 the way to nothing: the address and the handles are two
                 lines and belong beside the ask. */}
             <div className="border-t border-border pt-8">
-              <dl className="grid gap-6 sm:grid-cols-2">
+              <dl className="grid gap-6 min-[56rem]:grid-cols-2">
                 <div>
                   <dt className="label text-muted-foreground">Email</dt>
                   <dd className="mt-2 text-sm">

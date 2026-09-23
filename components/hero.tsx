@@ -781,13 +781,21 @@ export function Hero({
               this page look amateur. */}
             <h1
               style={lands(NAME_MS)}
-              className="emerge px-6 pt-6 max-sm:pt-3 sm:px-10 squat:pt-10 wide:pt-10"
+              className="emerge px-6 pt-6 [container-type:inline-size] max-sm:pt-3 sm:px-10 squat:pt-10 wide:pt-10"
             >
               {/* The header's own wordmark waits on this one and takes over
                 once it has gone by. It used to be measured live from the
                 header; the moment is the strip's now, so nothing reads this
                 element but the eye. */}
-              <span className="display block">Julian Gigola</span>
+              {/* Capped against the panel as well as the viewport: at 1440x900 the
+                left panel is narrower than at 1366, and the name broke onto
+                two lines and pushed the index down. */}
+              <span
+                className="display block"
+                style={{ fontSize: "min(var(--text-display), 13.2cqw)" }}
+              >
+                Julian Gigola
+              </span>
 
               {/* The switching half: the job title first, then each discipline.
                 Deliberately not a live region — it would announce a new line

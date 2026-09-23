@@ -161,7 +161,7 @@ export function ProjectStrip({
                `#next`. A link into the middle of a sequence is the one
                thing a horizontal page cannot otherwise be given. */
             data-hash="title"
-            className="flex h-full w-[min(30rem,82vw)] shrink-0 flex-col justify-center gap-5 pr-2 max-sm:w-[68vw] sm:pr-6"
+            className="flex h-full w-[min(30rem,82vw)] shrink-0 flex-col justify-center gap-5 pr-2 max-sm:w-[56vw] sm:pr-6"
           >
             {/* Each word rises into place from under a clip, one after
                     another, and the credits follow it up. Julian asked for
