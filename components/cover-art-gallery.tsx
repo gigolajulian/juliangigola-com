@@ -3,7 +3,6 @@
 import * as React from "react";
 import { Lightbox, useLightbox } from "@/components/lightbox";
 import { CoverFaces, coverLabel } from "@/components/cover-faces";
-import { Reveal } from "@/components/reveal";
 import type { CoverRelease } from "@/lib/cover-art-types";
 import { cn } from "@/lib/utils";
 
@@ -119,12 +118,7 @@ export function CoverArtGallery({
 
           return (
             <li key={release.slug} className={rows ? "sm:min-h-0" : undefined}>
-              {/* The top row carries `priority` and sits above the fold, so
-                  it is left unwrapped — revealing it would animate it at load
-                  on top of the page's own `rise`. The wrapper goes inside the
-                  `<li>` so the list item stays the grid cell. Along a strip
-                  the strip's own arrival is the reveal. */}
-              {rows || i < 3 ? cell : <Reveal>{cell}</Reveal>}
+              {cell}
             </li>
           );
         })}

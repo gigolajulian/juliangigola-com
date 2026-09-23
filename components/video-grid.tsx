@@ -2,7 +2,6 @@
 
 import * as React from "react";
 import Image from "next/image";
-import { Reveal } from "@/components/reveal";
 import { embedUrl, posterFor, previewUrl, type Video } from "@/lib/videos";
 import { cn } from "@/lib/utils";
 
@@ -50,10 +49,6 @@ export function VideoGrid({
           ? "h-full grid-flow-col grid-rows-2 gap-3 max-sm:h-auto max-sm:grid-flow-row max-sm:grid-cols-1 max-sm:gap-6"
           : [
               "mt-8 gap-x-6 gap-y-10",
-              // Siblings that cross the fold together, so they arrive as one
-              // gesture rather than a flash of four simultaneous events. Every
-              // child is revealed here, which is what this utility requires.
-              "stagger",
               /* No breakpoints: a floor of 22rem gives one column on a phone, two
                  around 44rem and three around 66rem, with the tiles absorbing the
                  slack in between rather than jumping at a width somebody picked.
@@ -120,10 +115,8 @@ export function VideoGrid({
           </li>
         ) : (
           <li key={video.id} className="group/cell flex min-w-0 flex-col">
-            <Reveal className="flex min-w-0 flex-col">
-              {tile}
-              {caption}
-            </Reveal>
+            {tile}
+            {caption}
           </li>
         );
       })}

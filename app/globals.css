@@ -249,21 +249,6 @@
   --ease-out-strong: cubic-bezier(0.23, 1, 0.32, 1);
   --ease-in-out-strong: cubic-bezier(0.77, 0, 0.175, 1);
 
-  /* ── the calm pair ───────────────────────────────────────────
-   * How long type takes to arrive. Two values rather than a scale, because
-   * their whole purpose is that the scroll reveal and the cover's phase
-   * change agree with each other — a token with one call site is a literal
-   * with extra steps.
-   *
-   * The fade is shorter than the move on purpose: the text is fully legible
-   * while it is still travelling the last few pixels, so it reads as settling
-   * rather than as arriving late. No easing token to go with them — the curve
-   * wanted here is the plain `ease-in-out` keyword, and aliasing a keyword
-   * buys nothing.
-   * ─────────────────────────────────────────────────────────── */
-  --dur-fade: 300ms;
-  --dur-move: 400ms;
-
   /* ── springs ──────────────────────────────────────────────────
    * A bezier cannot overshoot and come back — it is bounded by its own end
    * point — so a bounce is impossible to express as one. These are real
@@ -602,11 +587,10 @@
 
 /* Reduced motion means fewer and gentler animations, not none.
  *
- * Deliberately NOT a blanket `animation: none !important` reset. Two things
- * on this site handle the preference better than a global override could —
- * the corridor freezes itself mid-flight as a finished still (a zeroed
- * duration would instead stack every card at the exit), and `Reveal` shows
- * its frame immediately rather than wiping it in. Colour and opacity
+ * Deliberately NOT a blanket `animation: none !important` reset. The
+ * corridor handles the preference better than a global override could: it
+ * freezes itself mid-flight as a finished still, where a zeroed duration
+ * would instead stack every card at the exit. Colour and opacity
  * transitions stay, because they carry meaning rather than movement.
  *
  * Anything that moves and does not handle this itself opts in at the call
@@ -1530,14 +1514,6 @@ a.strip-cell {
   opacity: calc(0.38 + var(--reel-dim, 0) * 0.5);
   transition: opacity 120ms linear;
 }
-/* Paper over a film is a different sum from black over one: at 38% the
-   light ground came out as dark grey with dark ink on it, and every muted
-   word in the chrome vanished. The light veil starts at four fifths, where
-   the reel reads as a watermark under paper and the ink keeps its
-   contrast, and closes to nearly all of it by the end. */
-:root[data-theme="light"] .reel-veil {
-  opacity: calc(0.8 + var(--reel-dim, 0) * 0.16);
-}
 /* Over the reel the page is a cinema, not a sheet of paper: the light
    theme keeps a dark ground so the film reads through it and the type
    stays white. Set by `video-showcase.tsx` while the backdrop is up. */
@@ -1556,10 +1532,6 @@ a.strip-cell {
    above. Julian asked for the text white on the motion page. */
 :root[data-reel] {
   --muted-foreground: oklch(0.88 0.004 80);
-}
-
-:root[data-theme="light"][data-reel] .reel-veil {
-  opacity: calc(0.38 + var(--reel-dim, 0) * 0.5);
 }
 @media (prefers-reduced-motion: reduce) {
   .reel-backdrop {
@@ -1792,10 +1764,20 @@ a.strip-cell {
   line-height: 1;
   letter-spacing: 0.14em;
   font-weight: 400;
+  /* The growth is a `scale`, not a font-size. Measured on production: a
+     font-size, tracking and weight tween on this one span cost a layout
+     on every frame of the second and a half, about 170ms of layout and as
+     much again of style over a single dwell, for a word twelve pixels
+     tall. Scaling it from its own edge draws the same picture on the
+     compositor. The tracking and the weight cannot scale, so they switch
+     instead, once, at the small size where the switch is smallest: on the
+     way in they change at the moment the growth starts, on the way out
+     the moment the shrink has ended. The settled state under the pointer
+     is exactly the one Julian signed off. */
   transition:
-    font-size 220ms var(--ease-out-strong),
-    letter-spacing 220ms var(--ease-out-strong),
-    font-weight 220ms var(--ease-out-strong);
+    scale 220ms var(--ease-out-strong),
+    letter-spacing 0ms linear 220ms,
+    font-weight 0ms linear 220ms;
 }
 [data-dwell] .rail-word {
   /* Twenty, fifteen, thirteen, twelve. Julian has asked for it smaller
@@ -1805,9 +1787,12 @@ a.strip-cell {
      between glancing at it and reading it, and small enough that EDUCO
      ACADEMY HAIRJAM reads as the label of the thing under the pointer
      instead of as a headline over the band. The weight is never touched:
-     it grows, it does not get louder. */
-  font-size: 0.75rem;
-  letter-spacing: 0.08em;
+     it grows, it does not get louder.
+
+     Twelve pixels is ten scaled by 1.2, below, and the tracking is written
+     for the settled size: 0.08em of twelve, divided back out so that it
+     comes to that once the scale has run. */
+  letter-spacing: calc(0.08em / 1.2);
   /* Julian, twice: it must not look bold. It never was - it is 400, the
      same regular the rest of the site is set in - but near-white on a
      near-black page at fifteen pixels reads heavy, and the answer to
@@ -1816,10 +1801,11 @@ a.strip-cell {
      browser thinning one it does not have. Small type needs the weight
      and large type does not, which is why it comes down as it grows. */
   font-weight: 300;
+  scale: 1.2;
   transition:
-    font-size 1500ms var(--ease-out-strong) 180ms,
-    letter-spacing 1500ms var(--ease-out-strong) 180ms,
-    font-weight 1500ms var(--ease-out-strong) 180ms;
+    scale 1500ms var(--ease-out-strong) 180ms,
+    letter-spacing 0ms linear 180ms,
+    font-weight 0ms linear 180ms;
 }
 @media (prefers-reduced-motion: reduce) {
   .rail-word,
@@ -1868,20 +1854,28 @@ a.strip-cell {
      compiles `active:scale-[0.98]` to the standalone `scale` property, so a
      transition on `transform` alone would animate nothing at all.
 
-     The colours ride along on a plain ease at their own speed. They were part
-     of the one transition each of these buttons declared by hand, and folding
-     them in here is what stops a `transition-colors` alongside this utility
-     from clobbering the spring — a shorthand and a longhand fighting over the
-     same declaration is not a fight worth having at ten call sites. */
+     The colours ride along at their own speed. They were part of the one
+     transition each of these buttons declared by hand, and folding them in
+     here is what stops a `transition-colors` alongside this utility from
+     clobbering the spring — a shorthand and a longhand fighting over the
+     same declaration is not a fight worth having at ten call sites.
+
+     This list wins over the ones `action`, `action-quiet` and `glass`
+     declare when both are on the same element (measured: every button on
+     the site), so it has to carry everything theirs do: the strong curve
+     on the colours, which used to fall back to a plain ease-out here, and
+     the pointer light's `--gx`/`--gy`, which used to snap. */
   transition:
     transform 440ms var(--ease-bounce),
     scale 440ms var(--ease-bounce),
     translate 440ms var(--ease-bounce),
     rotate 440ms var(--ease-bounce),
-    background-color 200ms ease-out,
-    border-color 200ms ease-out,
-    color 200ms ease-out,
-    opacity 200ms ease-out;
+    background-color 200ms var(--ease-out-strong),
+    border-color 200ms var(--ease-out-strong),
+    color 200ms var(--ease-out-strong),
+    opacity 200ms var(--ease-out-strong),
+    --gx 340ms var(--ease-out-strong),
+    --gy 340ms var(--ease-out-strong);
 
   &:active {
     /* Down is not the expressive part. It is the interface acknowledging the
@@ -1892,10 +1886,12 @@ a.strip-cell {
       scale 90ms cubic-bezier(0.4, 0, 1, 1),
       translate 90ms cubic-bezier(0.4, 0, 1, 1),
       rotate 90ms cubic-bezier(0.4, 0, 1, 1),
-      background-color 200ms ease-out,
-      border-color 200ms ease-out,
-      color 200ms ease-out,
-      opacity 200ms ease-out;
+      background-color 200ms var(--ease-out-strong),
+      border-color 200ms var(--ease-out-strong),
+      color 200ms var(--ease-out-strong),
+      opacity 200ms var(--ease-out-strong),
+      --gx 340ms var(--ease-out-strong),
+      --gy 340ms var(--ease-out-strong);
   }
 }
 
@@ -2200,8 +2196,9 @@ a.strip-cell {
  * is zero pixels high on every screen that has no inset, which is every
  * screen but a notched phone.
  *
- * `inherit` on both, so it is the same colour and the same blur as the bar
- * in whichever of its two states it is in, and it fades with it.
+ * `inherit`, so it is the same colour as the bar in whichever of its two
+ * states it is in, and it fades with it. The blur comes from the layer
+ * below, which reaches up over this strip.
  * ─────────────────────────────────────────────────────────────── */
 .site-bar::before {
   content: "";
@@ -2211,9 +2208,46 @@ a.strip-cell {
   right: 0;
   height: env(safe-area-inset-top, 0px);
   background-color: inherit;
-  backdrop-filter: inherit;
-  -webkit-backdrop-filter: inherit;
   pointer-events: none;
+}
+
+/* The bar's glass. It used to be `glass-surface` switched on with the
+   scroll, with `backdrop-filter` in the bar's transition list, which
+   means the browser re-filtered everything behind the bar on every frame
+   of the 300ms, ten or twenty times a visit. The blur is now on all the
+   time, on a layer of its own under the bar's contents, and only its
+   opacity moves: the same picture, and the compositor does the work.
+   Under the contents rather than over them, so the wordmark and the menu
+   stay sharp. It reaches up over the notch strip so the safe area is the
+   same material. */
+.site-bar::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  top: calc(-1 * env(safe-area-inset-top, 0px));
+  z-index: -1;
+  -webkit-backdrop-filter: blur(18px) saturate(1.5);
+  backdrop-filter: blur(18px) saturate(1.5);
+  opacity: 0;
+  transition: opacity 300ms var(--ease-out-strong);
+  pointer-events: none;
+}
+.site-bar[data-plain="true"]::after {
+  opacity: 1;
+}
+@media (prefers-reduced-motion: reduce) {
+  .site-bar::after {
+    transition: none;
+  }
+}
+@media (prefers-reduced-transparency: reduce) {
+  .site-bar::after {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+  .site-bar[data-plain="true"] {
+    background-color: var(--background);
+  }
 }
 
 @media (max-width: 63.999rem) {
@@ -2550,11 +2584,10 @@ optgroup {
 :root[data-cover] header[data-plain="false"] {
   border-color: var(--border);
   background-color: color-mix(in oklab, var(--background) 72%, transparent);
-  /* The same glass as `glass-surface`, which this rule out-ranks by
-     specificity: saturation and the shine along the top edge, so the bar
-     over a pale cover is the same material as the bar everywhere else. */
-  -webkit-backdrop-filter: blur(18px) saturate(1.5);
-  backdrop-filter: blur(18px) saturate(1.5);
+}
+/* The same glass as the scrolled bar: its own blurred layer, faded up. */
+:root[data-cover] header[data-plain="false"]::after {
+  opacity: 1;
 }
 
 
@@ -2683,9 +2716,27 @@ optgroup {
     transform: scale(0.96) translateY(4px);
   }
 }
+@keyframes jg-credit-out {
+  to {
+    opacity: 0;
+    transform: scale(0.96) translateY(4px);
+  }
+}
+/* Out of the trigger it was opened from, rather than out of its own
+   middle: the card belongs to the name it explains. It leaves the way it
+   came, at the same speed; Radix keeps it mounted until the animation
+   ends. (The old reduced-motion rule keyed on an attribute Radix never
+   sets, so it did nothing. This one is on the class.) */
+.credit-card {
+  transform-origin: var(--radix-hover-card-content-transform-origin);
+  animation: jg-credit-in 200ms cubic-bezier(0.23, 1, 0.32, 1) both;
+}
+.credit-card[data-state="closed"] {
+  animation: jg-credit-out 200ms cubic-bezier(0.23, 1, 0.32, 1) both;
+}
 @media (prefers-reduced-motion: reduce) {
-  [data-radix-hover-card-content] {
-    animation: none !important;
+  .credit-card {
+    animation: none;
   }
 }
 

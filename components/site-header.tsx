@@ -170,11 +170,15 @@ export function SiteHeader() {
         "site-bar fixed inset-x-0 top-0 z-40",
         // Border and background rather than a gradient, and both animate from
         // nothing. `border-b` is always present and only its colour changes,
-        // so the rule fading in never moves the bar by a pixel.
-        "border-b transition-[background-color,border-color,backdrop-filter] duration-300",
+        // so the rule fading in never moves the bar by a pixel. The glass is
+        // not in this list: it lives on `.site-bar::after` in `globals.css`,
+        // blurred all the time and faded by opacity, because interpolating a
+        // blur re-filters the whole bar every frame and fading a layer that
+        // is already blurred does not.
+        "border-b transition-[background-color,border-color] duration-300",
         "ease-[var(--ease-out-strong)] motion-reduce:transition-none",
         scrolled
-          ? "glass-surface border-border bg-background/72"
+          ? "border-border bg-background/72"
           : "border-transparent bg-transparent",
       )}
     >

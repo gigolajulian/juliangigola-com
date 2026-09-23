@@ -54,9 +54,12 @@ export function VideoViewer({
   return (
     <Dialog.Root open={current !== null} onOpenChange={(o) => !o && close()}>
       <Dialog.Portal>
-        <Dialog.Overlay className="fixed inset-0 z-50 bg-background/95 animate-in fade-in duration-200 ease-out motion-reduce:animate-none" />
+        {/* In and out at the same speed. Radix holds the viewer mounted
+            until the closing animation ends, so the close is a fade rather
+            than a cut. */}
+        <Dialog.Overlay className="fixed inset-0 z-50 bg-background/95 animate-in fade-in duration-200 ease-out data-[state=closed]:animate-out data-[state=closed]:fade-out motion-reduce:animate-none" />
         <Dialog.Content
-          className="fixed inset-0 z-50 flex flex-col outline-none animate-in fade-in duration-200 ease-out motion-reduce:animate-none"
+          className="fixed inset-0 z-50 flex flex-col outline-none animate-in fade-in duration-200 ease-out data-[state=closed]:animate-out data-[state=closed]:fade-out motion-reduce:animate-none"
           onClick={(e) => {
             if (e.target === e.currentTarget) close();
           }}

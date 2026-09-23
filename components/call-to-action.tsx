@@ -1,6 +1,5 @@
 import * as React from "react";
 import Link from "next/link";
-import { Reveal } from "@/components/reveal";
 import { cn } from "@/lib/utils";
 
 /* ── the ask ──────────────────────────────────────────────────────
@@ -42,14 +41,7 @@ export function CallToAction({
       className={cn("border-t border-border", className)}
       aria-labelledby={titleId}
     >
-      {/* One reveal for the whole ask. It is the last thing before the
-          footer on four different routes, and it earns its arrival — but the
-          title, the body and the two buttons are one sentence, not four
-          things, so they come in together. */}
-      <Reveal
-        variant="calm"
-        className="mx-auto flex max-w-[100rem] flex-col gap-8 px-6 py-16 sm:flex-row sm:items-end sm:justify-between sm:px-10 sm:py-20"
-      >
+      <div className="mx-auto flex max-w-[100rem] flex-col gap-8 px-6 py-16 sm:flex-row sm:items-end sm:justify-between sm:px-10 sm:py-20">
         <div>
           <h2 id={titleId} className="title max-w-[22ch]">
             {title}
@@ -77,7 +69,7 @@ export function CallToAction({
             </Link>
           ) : null}
         </div>
-      </Reveal>
+      </div>
     </section>
   );
 }

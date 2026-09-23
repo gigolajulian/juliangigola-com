@@ -94,13 +94,8 @@ export function CreditCard({
           /* The pointer's own word is the link's; the card is not a
              control and asks for none. */
           data-ring=""
-          className="z-50 w-[17rem] rounded-xl border border-border glass-surface bg-popover/90 p-4 text-popover-foreground shadow-xl"
-          /* Out of the trigger it was opened from, rather than out of its
-             own middle: the card belongs to the name it explains. */
-          style={{
-            transformOrigin: "var(--radix-hover-card-content-transform-origin)",
-            animation: "jg-credit-in 200ms cubic-bezier(0.23, 1, 0.32, 1) both",
-          }}
+          /* `credit-card` is the arrival and the leaving, in `globals.css`. */
+          className="credit-card z-50 w-[17rem] rounded-xl border border-border glass-surface bg-popover/90 p-4 text-popover-foreground shadow-xl"
         >
           <div className="flex items-start gap-3">
             {avatar ? (

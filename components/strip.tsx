@@ -2450,11 +2450,13 @@ export function Strip({
                              twelve pixels plus eight it reaches 20 with
                              four to spare. */
                           "rail-word label pointer-events-none absolute bottom-full mb-2 whitespace-nowrap transition-opacity duration-200",
+                          /* The word grows by a scale (globals.css), so
+                             it grows from the edge it is pinned to. */
                           named1
-                            ? "[translate:-50%_0]"
+                            ? "origin-bottom [translate:-50%_0]"
                             : end
-                              ? "right-1"
-                              : "left-1",
+                              ? "origin-bottom-right right-1"
+                              : "origin-bottom-left left-1",
                           shown
                             ? "text-foreground opacity-100"
                             : /* A discipline the pointer is running along
@@ -2481,17 +2483,22 @@ export function Strip({
                         say with it. */}
                     <div
                       className={cn(
-                        "flex w-full rounded-full transition-[height,background-color] duration-200 ease-[var(--ease-out-strong)]",
+                        /* Always the full eight pixels tall and scaled
+                           down from the bottom, rather than a height that
+                           moves: a height tween lays the whole rail out
+                           again on every frame, a scale is drawn by the
+                           compositor. */
+                        "flex h-2 w-full origin-bottom rounded-full transition-[scale,background-color] duration-200 ease-[var(--ease-out-strong)]",
                         shown
                           ? /* The cue nudges the bar that says where you
                                are, and on the archive's rail that is this
                                open chapter rather than a lit one. */
-                            cn("h-2 bg-foreground/25", mine && "rail-lit")
+                            cn("scale-y-100 bg-foreground/25", mine && "rail-lit")
                           : here
-                            ? "rail-lit h-1 bg-foreground"
+                            ? "rail-lit scale-y-50 bg-foreground"
                             : overAway === gi
-                              ? "h-1.5 bg-foreground/40"
-                              : "h-1 bg-foreground/20",
+                              ? "scale-y-75 bg-foreground/40"
+                              : "scale-y-50 bg-foreground/20",
                       )}
                     >
                       {Array.from({ length: count }, (_, k) => (
@@ -2550,12 +2557,12 @@ export function Strip({
                 ) : null}
                 <span
                   className={cn(
-                    "block w-full rounded-full transition-[height,background-color] duration-200 ease-[var(--ease-out-strong)]",
+                    "block h-2 w-full origin-bottom rounded-full transition-[scale,background-color] duration-200 ease-[var(--ease-out-strong)]",
                     i === at
-                      ? "rail-lit h-2 bg-foreground"
+                      ? "rail-lit scale-y-100 bg-foreground"
                       : over === n
-                        ? "h-1.5 bg-foreground/40"
-                        : "h-1 bg-foreground/20",
+                        ? "scale-y-75 bg-foreground/40"
+                        : "scale-y-50 bg-foreground/20",
                   )}
                 />
               </button>
