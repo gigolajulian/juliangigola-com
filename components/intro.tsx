@@ -36,12 +36,11 @@ const CY = 49.6;
 const A = 42.8;
 const S = 18.0;
 const TAKE = 1400; // the mark: open, hold, and close
-const PART = 1400; // the lids carrying on off the screen
+const PART = 1100; // the lids carrying on off the screen
 const SHUT = 0.78; // where in the take the lens is flat: the cut
 const BLUR = 0.72; // how soft the mark starts, as a share of its own thickness
 const FEATHER = 0.018; // how soft the lid edge is, as a share of the window
 const PAGE = 0.026; // how soft the page starts, as a share of the window
-const SETTLE = 700; // the page finding focus after the lids have gone
 
 const radius = (a: number, s: number) => (a * a + s * s) / (2 * Math.max(s, 0.18));
 
@@ -229,20 +228,19 @@ export function Intro() {
            the lids are a window apart it settles at its full width and
            the edge stays soft all the way off the screen. */
         edge.setAttribute("stdDeviation", Math.min(fur, s * 0.5).toFixed(2));
-        /* The page keeps its own time. It holds soft while the lids are
-           crossing, when a sliver of site is showing and there is nothing
-           to be sharp about, and finds focus in the seconds after they
-           have gone. Tied to the lids instead it is already sharp by the
-           time enough of it is visible to notice, which is the same as
-           not blurring it at all. */
-        const tp = (now - t0) / (PART + SETTLE);
+        /* The page comes into focus on the lids' own curve, so the
+           softness leaves at the rate they open rather than waiting for
+           them and sharpening afterwards, which reads as a second
+           animation after the first has finished. It lands on zero at
+           the same moment they clear the window, and the curve is
+           decelerating there, so nothing snaps. */
         root.style.setProperty(
           "--jg-focus",
-          `${(haze * track(tp, [[0, 1], [0.45, 1], [1, 0, focus]])).toFixed(2)}px`,
+          `${(haze * (1 - glide(t))).toFixed(2)}px`,
         );
-        if (t >= 1 && root.dataset.intro) root.removeAttribute("data-intro");
-        if (tp < 1) requestAnimationFrame(step);
+        if (t < 1) requestAnimationFrame(step);
         else {
+          root.removeAttribute("data-intro");
           root.classList.remove("jg-intro-focusing");
           root.style.removeProperty("--jg-focus");
         }
