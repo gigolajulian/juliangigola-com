@@ -574,13 +574,6 @@
           "alt": ""
         },
         {
-          "src": "/work/channel-orange/03.jpg",
-          "width": 2500,
-          "height": 3333,
-          "color": "#180808",
-          "alt": ""
-        },
-        {
           "src": "/work/channel-orange/04.jpg",
           "width": 2500,
           "height": 3333,
@@ -2073,7 +2066,6 @@
       "/work/sara/09.jpg",
       "/work/sara/10.jpg",
       "/work/sara/11.jpg",
-      "/work/sara/12.jpg",
       "/work/sara/13.jpg",
       "/work/sara/14.jpg",
       "/work/sara/15.jpg",
@@ -2094,6 +2086,27 @@
       "/work/jubo/01.jpg",
       "/work/jubo/02.jpg",
       "/work/jubo/04.jpg"
+    ],
+    "places": [
+      "/work/places/01.jpg",
+      "/work/places/02.jpg",
+      "/work/places/03.jpg",
+      "/work/places/04.jpg",
+      "/work/places/05.jpg",
+      "/work/places/06.jpg",
+      "/work/places/07.jpg",
+      "/work/places/08.jpg",
+      "/work/places/09.jpg",
+      "/work/places/10.jpg",
+      "/work/places/11.jpg",
+      "/work/places/12.jpg",
+      "/work/places/13.jpg",
+      "/work/places/14.jpg",
+      "/work/places/16.jpg",
+      "/work/places/17.jpg",
+      "/work/places/18.jpg",
+      "/work/places/19.jpg",
+      "/work/places/20.jpg"
     ]
   },
   "hidden": [
