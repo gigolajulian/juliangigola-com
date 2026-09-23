@@ -179,36 +179,6 @@ export function SiteHeader() {
       )}
     >
       <div className="relative mx-auto flex max-w-[100rem] items-center justify-between px-6 py-3 max-sm:py-2 sm:px-10 sm:py-4 tablet:py-1.5 lying:py-1.5">
-        {/* The mark holds the left edge while the wordmark is away. On the
-            homepage the name does not print in the header until the strip
-            has gone past its opening cell, and until then this corner is
-            empty; the eye stands there and hands over as the name arrives.
-            The two are never both on screen.
-
-            Outside the link rather than inside it, because the wordmark is
-            faded by scaling and sliding its whole box and a child would be
-            carried along with that. Its left inset is the bar's own
-            padding, so the two share the edge the masthead depends on.
-
-            Decorative and never a target: the route home is the wordmark
-            and, on this page, the cover itself. An invisible anchor over
-            the top-left of the photograph is the exact bug the wordmark's
-            `pointer-events-none` was added to fix. */}
-        {deferWordmark && (
-          <span
-            aria-hidden
-            className="home-eye pointer-events-none absolute left-6 top-1/2 size-7 -translate-y-1/2 sm:left-10"
-          >
-            <svg viewBox="0 0 100 100" className="size-full" focusable="false">
-              <path
-                d="M7.2 49.6 A59.9 59.9 0 0 1 92.8 49.6 A59.9 59.9 0 0 1 7.2 49.6 Z"
-                fill="currentColor"
-              />
-              <circle cx="50" cy="40.9" r="20.7" fill="var(--background)" />
-              <circle cx="50" cy="40.9" r="8.6" fill="currentColor" />
-            </svg>
-          </span>
-        )}
         <Link
           href="/"
           // On the homepage the name is a way back to the top, not a reload.
