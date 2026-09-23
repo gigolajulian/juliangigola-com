@@ -394,7 +394,7 @@ function Field({
         className={cn(
           "mt-3 block w-full border-0 border-b bg-transparent py-3 text-base",
           "transition-colors duration-200 placeholder:text-muted-foreground/60",
-          "focus:outline-none focus:border-foreground focus-visible:outline-1 focus-visible:outline-offset-[3px] focus-visible:outline-ring",
+          "focus:outline-none focus:border-foreground focus-visible:outline-solid focus-visible:outline-1 focus-visible:outline-offset-[3px] focus-visible:outline-ring",
           error ? "border-destructive" : "border-border",
         )}
         {...props}
