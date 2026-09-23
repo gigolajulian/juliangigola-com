@@ -928,7 +928,7 @@
     {
       "slug": "second-skin",
       "name": "SECOND SKIN",
-      "categorySlug": "chroma",
+      "categorySlug": "editorial",
       "credits": [
         {
           "role": "Photographer",
@@ -1078,7 +1078,7 @@
     {
       "slug": "vesper",
       "name": "VESPER",
-      "categorySlug": "editorial",
+      "categorySlug": "chroma",
       "credits": [
         {
           "role": "Photographer",
