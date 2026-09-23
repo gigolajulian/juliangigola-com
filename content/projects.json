@@ -199,7 +199,7 @@
         },
         {
           "role": "Model",
-          "name": "@tamakgo",
+          "name": "Carmen",
           "instagram": "tamakgo"
         }
       ],
@@ -3534,6 +3534,17 @@
         "role": "Client",
         "name": "WIRED",
         "instagram": "wired"
+      }
+    ],
+    "serif": [
+      {
+        "role": "Photographer",
+        "name": "Julian Gigola"
+      },
+      {
+        "role": "Model",
+        "name": "Carmen",
+        "instagram": "tamakgo"
       }
     ]
   },
