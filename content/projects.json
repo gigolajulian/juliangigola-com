@@ -25,6 +25,13 @@
       },
       "images": [
         {
+          "src": "/work/ghostlight/05.jpg",
+          "width": 2500,
+          "height": 3333,
+          "color": "#080808",
+          "alt": ""
+        },
+        {
           "src": "/work/ghostlight/09.jpg",
           "width": 2500,
           "height": 3333,
@@ -54,13 +61,6 @@
         },
         {
           "src": "/work/ghostlight/04.jpg",
-          "width": 2500,
-          "height": 3333,
-          "color": "#080808",
-          "alt": ""
-        },
-        {
-          "src": "/work/ghostlight/05.jpg",
           "width": 2500,
           "height": 3333,
           "color": "#080808",
