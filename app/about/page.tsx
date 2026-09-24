@@ -187,11 +187,15 @@ export default function AboutPage() {
               <div className="flex flex-col gap-3 short:gap-2">
                 <h2 className="label text-muted-foreground">Biography</h2>
                 <p className="text-sm leading-relaxed lg:text-base short:text-[0.8125rem] short:leading-snug">
-                  I&rsquo;m a photographer and creative director in the San
-                  Francisco Bay Area. I shoot editorial, campaigns and artists,
-                  in the studio and on location, and I direct the shoots I
-                  photograph. My work has run in WIRED and for brands from Sago
-                  to Pear VC. If you have a job in mind, write to me.
+                  As a photographer and creative director based in the San
+                  Francisco Bay Area, my work sits between the worlds of
+                  editorial fashion, commercial campaigns, and artist
+                  development. On the commercial side my work includes
+                  commissions for tech and consumer brands and features from
+                  WIRED. I&rsquo;ve been instrumental in shaping the visual
+                  identities of musicians and independent artists locally.
+                  While rooted in the Bay Area, I collaborate with clients
+                  worldwide.
                 </p>
               </div>
             </div>
