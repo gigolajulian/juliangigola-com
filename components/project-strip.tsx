@@ -1,7 +1,6 @@
 "use client";
 
 import * as React from "react";
-import { TitleGlyphs } from "@/components/title-glyphs";
 import Image from "next/image";
 import Link from "next/link";
 import { ViewTransition } from "react";
@@ -179,7 +178,7 @@ export function ProjectStrip({
                       className="title-word inline-block"
                       style={{ "--i": i } as React.CSSProperties}
                     >
-                      <TitleGlyphs text={word} />
+                      {word}
                     </span>
                   </span>{" "}
                 </React.Fragment>

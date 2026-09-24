@@ -1,5 +1,4 @@
 import * as React from "react";
-import { TitleGlyphs } from "@/components/title-glyphs";
 import { cn } from "@/lib/utils";
 
 /* ── the one-screen page ──────────────────────────────────────────
@@ -184,12 +183,12 @@ export function StripHead({
                         className="title-word inline-block"
                         style={{ "--i": i } as React.CSSProperties}
                       >
-                        <TitleGlyphs text={word} />
+                        {word}
                       </span>
                     </span>{" "}
                   </React.Fragment>
                 ))
-              : <TitleGlyphs text={title} />}
+              : title}
           </h1>
           {sub ? (
             <p className="label mt-1.5 text-muted-foreground">{sub}</p>

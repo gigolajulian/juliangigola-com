@@ -28,8 +28,8 @@ export type AddedProject = {
   name: string;
   /** One category slug, matching `CATEGORIES` in the manifest. */
   categorySlug: string;
-  /** The title on the project's own page, where it differs from `name`:
-      NOVA is NOVA in every index and "NOVA ⟡" on its page. */
+  /** The title on the project's own page, where it differs from `name`
+      in the indexes. Optional; most projects have none. */
   headline?: string;
   credits: Credit[];
   /** A 600px derivative of the opening frame, for indexes and previews. */
