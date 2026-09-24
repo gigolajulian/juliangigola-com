@@ -312,7 +312,10 @@ for (const file of files) {
     ? Buffer.from(
         `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${mark.viewBox}">${mark.body.replace(/currentColor/g, "#000")}</svg>`,
       )
-    : readFileSync(join(served, `${slug}.png`));
+    : // The file `maskPng` just wrote. It was a `.png` until the masks went
+      // to lossless WebP, and this line was left reading a file that no
+      // longer exists, so any PNG source crashed the run.
+      readFileSync(join(served, `${slug}.webp`));
 
   mark.ink = await inkCoverage(rendered);
 

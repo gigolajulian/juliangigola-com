@@ -35,6 +35,13 @@ export type ClientMarkData = VectorMark | RasterMark;
 
 /** By the client's key. Absent means that client keeps its wordmark. */
 export const CLIENT_MARKS: Record<string, ClientMarkData> = {
+  "empire": {
+    kind: "mask",
+    src: "/clients/empire.webp",
+    width: 130,
+    height: 160,
+    scale: 1.45,
+  },
   "goodcult": {
     kind: "mask",
     src: "/clients/goodcult.webp",
@@ -47,7 +54,7 @@ export const CLIENT_MARKS: Record<string, ClientMarkData> = {
     src: "/clients/jubo.webp",
     width: 183,
     height: 85,
-    scale: 1,
+    scale: 0.9,
   },
   "ladera-granola": {
     kind: "mask",
@@ -61,7 +68,7 @@ export const CLIENT_MARKS: Record<string, ClientMarkData> = {
     src: "/clients/paradox.webp",
     width: 432,
     height: 94,
-    scale: 0.99,
+    scale: 0.89,
   },
   "pear-vc": {
     kind: "mask",
@@ -89,7 +96,7 @@ export const CLIENT_MARKS: Record<string, ClientMarkData> = {
     src: "/clients/ukiyosunknown.webp",
     width: 308,
     height: 160,
-    scale: 1.26,
+    scale: 1.14,
   },
   "wired-magazine": {
     kind: "svg",
