@@ -407,7 +407,10 @@ export function WorkShell({
       className={cn(
         "relative flex h-[1.625rem] shrink-0 items-center overflow-hidden border transition-[width,border-radius,border-color,opacity] duration-[260ms] ease-[var(--ease-out-strong)] motion-reduce:transition-none",
         finding
-          ? "glass-surface w-48 rounded-full border-foreground/15 opacity-50"
+          ? /* Focus shows as the pill's own edge coming up, not a ring
+               drawn inside it: the ring was clipped by the pill into two
+               accent lines, and Julian did not want it. */
+            "glass-surface w-48 rounded-full border-foreground/15 opacity-50 has-[:focus]:border-foreground/50"
           : "w-[1.625rem] rounded-none border-transparent opacity-100",
       )}
     >
@@ -469,7 +472,7 @@ export function WorkShell({
         }}
         placeholder="Search"
         aria-label="Search the work by name, discipline or credit"
-        className="label w-full bg-transparent pl-[1.625rem] pr-[1.5rem] text-left text-foreground outline-none focus-visible:outline-solid focus-visible:outline-1 focus-visible:outline-offset-[3px] focus-visible:outline-ring placeholder:text-muted-foreground [&::-webkit-search-cancel-button]:hidden"
+        className="label w-full bg-transparent pl-[1.625rem] pr-[1.5rem] text-left text-foreground outline-none focus-visible:outline-none placeholder:text-muted-foreground [&::-webkit-search-cancel-button]:hidden"
       />
       {/* The cross empties the box and leaves it open, which is the
           difference between it and the glass: one is "that was not what I

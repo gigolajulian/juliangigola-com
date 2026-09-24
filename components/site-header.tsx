@@ -84,6 +84,48 @@ export function SiteHeader() {
     };
   }, [open]);
 
+  /* Coming back to the window put the accent ring on whatever was last
+     pressed. Chrome counts the Alt+Tab (or the Cmd+Tab) that brings the
+     window back as keyboard use, so a button focused by a click comes back
+     :focus-visible, ring and all. Julian saw it on every return. So when
+     the window loses focus and the last thing that happened was a pointer,
+     the focus is let go. A keyboard user is left alone, and a text field is
+     too, so a half-typed search keeps its caret. The browser keeps its
+     place in the tab order either way, so Tab still carries on from there. */
+  React.useEffect(() => {
+    let pointer = false;
+    const onPointer = () => {
+      pointer = true;
+    };
+    /* The switch away is itself a key: Alt or Cmd goes down on this
+       page before the window goes. A modifier on its own, or a key held
+       with Alt or Cmd, is the way out and not a visitor using the
+       keyboard here. */
+    const onKey = (e: KeyboardEvent) => {
+      if (
+        e.altKey ||
+        e.metaKey ||
+        ["Alt", "Meta", "Control", "Shift"].includes(e.key)
+      )
+        return;
+      pointer = false;
+    };
+    const onLeave = () => {
+      const el = document.activeElement as HTMLElement | null;
+      if (!pointer || !el || el === document.body) return;
+      if (el.matches("input, textarea, select, [contenteditable]")) return;
+      el.blur();
+    };
+    window.addEventListener("pointerdown", onPointer, true);
+    window.addEventListener("keydown", onKey, true);
+    window.addEventListener("blur", onLeave);
+    return () => {
+      window.removeEventListener("pointerdown", onPointer, true);
+      window.removeEventListener("keydown", onKey, true);
+      window.removeEventListener("blur", onLeave);
+    };
+  }, []);
+
   // The drawer is a sibling of this component rather than a child, so the
   // ground beside it closes the menu by saying so rather than by reaching
   // in. The filters ask for the same thing when they open.
