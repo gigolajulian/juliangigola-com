@@ -215,19 +215,10 @@ export default function AboutPage() {
                         <span className="label shrink-0 tabular-nums text-muted-foreground">
                           {String(i + 1).padStart(2, "0")}
                         </span>
-                        {/* The rule carries on from each number to the next
-                            step, so the four read as one line of work rather
-                            than four cards. The last one has none: the job is
-                            done. */}
-                        <span
-                          aria-hidden
-                          className={
-                            // Two to a row: the rule runs from a number to
-                            // the step beside it, and stops at the end of
-                            // the row rather than pointing off the edge.
-                            i % 2 === 1 ? "hidden" : "h-px flex-1 bg-border"
-                          }
-                        />
+                        {/* A rule runs from every number to the edge of its
+                            column, so each step carries the same line.
+                            Julian asked for it on 02 and 04 too. */}
+                        <span aria-hidden className="h-px flex-1 bg-border" />
                       </div>
                       <h3 className="font-display text-2xl uppercase leading-none tracking-[0] lg:text-3xl short:text-xl">
                         {phase.step}

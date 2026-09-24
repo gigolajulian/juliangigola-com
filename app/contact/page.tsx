@@ -82,9 +82,11 @@ export default function ContactPage() {
           <div className="flex flex-col gap-6">
             <RisingTitle text="Get in touch" />
             <p className="title-rest max-w-prose text-sm leading-relaxed text-muted-foreground">
-              Commissions, sessions, or a question about a project. Tell me what
-              kind of shoot it is and I&rsquo;ll come back with an approach and
-              a quote.
+              {/* A sentence to a line, where there is room: Julian asked
+                  for two lines rather than a wrap mid sentence. */}
+              Commissions, sessions, or a question about a project.
+              <br className="max-sm:hidden" /> Tell me what kind of shoot it
+              is and I&rsquo;ll come back with an approach and a quote.
             </p>
             {/* Answers "will this actually go anywhere?" before they decide
                 whether to fill anything in, which is where most enquiries
