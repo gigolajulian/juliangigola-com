@@ -26,33 +26,20 @@ export const metadata: Metadata = {
   alternates: { canonical: "/contact" },
 };
 
-/* Drawn in the same line as the rest of the site's icons: a 24px box,
-   a 1.5 stroke in currentColor, so they sit muted and come up on hover. */
+/* Julian's own logo files, used as masks over currentColor like the
+   client marks, so they sit muted and come up on hover in either theme. */
 const ELSEWHERE = [
   {
     href: "https://instagram.com/juliangigola",
     label: "Instagram",
     at: "@juliangigola",
-    icon: (
-      <>
-        <rect x="3" y="3" width="18" height="18" rx="5" />
-        <circle cx="12" cy="12" r="4" />
-        <circle cx="17.25" cy="6.75" r="0.9" fill="currentColor" stroke="none" />
-      </>
-    ),
+    mark: "/social/instagram.webp",
   },
   {
     href: "https://www.linkedin.com/in/juliangigola",
     label: "LinkedIn",
     at: "Julian Gigola",
-    icon: (
-      <>
-        <rect x="3" y="3" width="18" height="18" rx="3" />
-        <path d="M8 10.5V17" />
-        <circle cx="8" cy="7.5" r="1" fill="currentColor" stroke="none" />
-        <path d="M11.5 17v-6.5M11.5 13.5c0-1.7 1.1-3 2.75-3S17 11.8 17 13.5V17" />
-      </>
-    ),
+    mark: "/social/linkedin.webp",
   },
 ];
 
@@ -156,18 +143,16 @@ export default function ContactPage() {
                     aria-label={`${where.label}, ${where.at}`}
                     className="flex items-center gap-2.5 p-2 text-sm text-muted-foreground transition-colors duration-200 hoverable:hover:text-foreground"
                   >
-                    <svg
-                      viewBox="0 0 24 24"
+                    <span
                       aria-hidden
-                      className="size-6"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth={1.5}
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
-                      {where.icon}
-                    </svg>
+                      className="block size-6 shrink-0 bg-current"
+                      style={{
+                        maskImage: `url(${where.mark})`,
+                        WebkitMaskImage: `url(${where.mark})`,
+                        maskSize: "contain",
+                        WebkitMaskSize: "contain",
+                      }}
+                    />
                     {where.at}
                   </a>
                 ))}
