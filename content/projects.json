@@ -1466,6 +1466,102 @@
           "alt": ""
         }
       ]
+    },
+    {
+      "slug": "nova",
+      "name": "NOVA",
+      "categorySlug": "editorial",
+      "credits": [
+        {
+          "role": "Photographer",
+          "name": "Julian Gigola",
+          "instagram": "juliangigola"
+        },
+        {
+          "role": "Model",
+          "name": "@koinovastar",
+          "instagram": "koinovastar"
+        }
+      ],
+      "cover": {
+        "src": "/work/nova/cover.jpg",
+        "width": 600,
+        "height": 800,
+        "color": "#30313b",
+        "alt": ""
+      },
+      "images": [
+        {
+          "src": "/work/nova/01.jpg",
+          "width": 2500,
+          "height": 3333,
+          "color": "#30313b",
+          "alt": ""
+        },
+        {
+          "src": "/work/nova/02.jpg",
+          "width": 2500,
+          "height": 1668,
+          "color": "#34323a",
+          "alt": ""
+        },
+        {
+          "src": "/work/nova/03.jpg",
+          "width": 2500,
+          "height": 3334,
+          "color": "#373137",
+          "alt": ""
+        },
+        {
+          "src": "/work/nova/04.jpg",
+          "width": 2500,
+          "height": 3333,
+          "color": "#343030",
+          "alt": ""
+        },
+        {
+          "src": "/work/nova/05.jpg",
+          "width": 2500,
+          "height": 3334,
+          "color": "#222023",
+          "alt": ""
+        },
+        {
+          "src": "/work/nova/06.jpg",
+          "width": 2500,
+          "height": 3333,
+          "color": "#353232",
+          "alt": ""
+        },
+        {
+          "src": "/work/nova/07.jpg",
+          "width": 2500,
+          "height": 3333,
+          "color": "#302e2d",
+          "alt": ""
+        },
+        {
+          "src": "/work/nova/08.jpg",
+          "width": 2500,
+          "height": 3333,
+          "color": "#2a2828",
+          "alt": ""
+        },
+        {
+          "src": "/work/nova/09.jpg",
+          "width": 2500,
+          "height": 3333,
+          "color": "#503c39",
+          "alt": ""
+        },
+        {
+          "src": "/work/nova/10.jpg",
+          "width": 2500,
+          "height": 3333,
+          "color": "#483b38",
+          "alt": ""
+        }
+      ]
     }
   ],
   "trash": [],
@@ -3575,6 +3671,7 @@
     }
   ],
   "order": [
+    "nova",
     "opal",
     "fauxtopia",
     "ghostlight",
