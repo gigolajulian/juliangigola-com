@@ -132,9 +132,11 @@ export default function AboutPage() {
             <div className="flex flex-col gap-6">
               <RisingTitle text="Bay Area creative director and photographer" />
               <p className="title-rest max-w-prose text-sm leading-relaxed text-muted-foreground">
-                Editorial, commercial, and artist imagery, shot in the studio
-                and on location. One person behind the lens, from the treatment
-                to the final files.
+                Photographer and Creative Director based in the San Francisco
+                Bay Area. Operating at the intersection of editorial fashion,
+                commercial campaigns, and artist development. Trusted by
+                emerging musicians, tech brands, and WIRED. Available
+                worldwide.
               </p>
             </div>
 
@@ -150,7 +152,7 @@ export default function AboutPage() {
                 {SERVICES.map((service) => (
                   <li
                     key={service}
-                    className="label border-b border-border py-3"
+                    className="label border-b border-border py-3 text-sm"
                   >
                     {service}
                   </li>
