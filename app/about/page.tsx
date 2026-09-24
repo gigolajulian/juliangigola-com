@@ -182,7 +182,7 @@ export default function AboutPage() {
         >
           <div
             data-scroll
-            className="grid min-h-0 flex-1 content-center gap-10 overflow-y-auto sm:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)] sm:gap-16 short:sm:gap-10"
+            className="grid min-h-0 flex-1 content-center gap-10 overflow-y-auto sm:grid-cols-[minmax(0,1fr)_minmax(0,2fr)] sm:gap-16 short:sm:gap-10"
           >
             {/* His words. The biography reads as a column. */}
             <div className="flex flex-col gap-8 short:gap-5">
