@@ -3796,6 +3796,10 @@
     "paradox": {
       "title": "EDUCO ACADEMY HAIRJAM",
       "intent": null
+    },
+    "metamorphosis": {
+      "title": "METAMORPHOSIS",
+      "intent": null
     }
   }
 }
