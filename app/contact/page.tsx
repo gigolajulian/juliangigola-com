@@ -31,7 +31,8 @@ export const metadata: Metadata = {
 const ELSEWHERE = [
   {
     href: "https://instagram.com/juliangigola",
-    label: "Instagram, @juliangigola",
+    label: "Instagram",
+    at: "@juliangigola",
     icon: (
       <>
         <rect x="3" y="3" width="18" height="18" rx="5" />
@@ -42,7 +43,8 @@ const ELSEWHERE = [
   },
   {
     href: "https://www.linkedin.com/in/juliangigola",
-    label: "LinkedIn, Julian Gigola",
+    label: "LinkedIn",
+    at: "Julian Gigola",
     icon: (
       <>
         <rect x="3" y="3" width="18" height="18" rx="3" />
@@ -140,19 +142,19 @@ export default function ContactPage() {
                   </dd>
                 </div>
               </dl>
-              {/* Instagram and LinkedIn as their marks, no heading: Julian
-                  asked for the logos in place of the names. The link is the
-                  padded box, so a thumb has more than the glyph to aim at. */}
-              <div className="-ml-2 mt-5 flex gap-2">
+              {/* Instagram and LinkedIn as their marks with the handle
+                  beside each, no heading: Julian asked for the logos in
+                  place of the names. The link is the padded box, so a thumb
+                  has more than the glyph to aim at. */}
+              <div className="-ml-2 mt-5 flex flex-wrap gap-x-6 gap-y-2">
                 {ELSEWHERE.map((where) => (
                   <a
                     key={where.href}
                     href={where.href}
                     target="_blank"
                     rel="noreferrer"
-                    aria-label={where.label}
-                    title={where.label}
-                    className="p-2 text-muted-foreground transition-colors duration-200 hoverable:hover:text-foreground"
+                    aria-label={`${where.label}, ${where.at}`}
+                    className="flex items-center gap-2.5 p-2 text-sm text-muted-foreground transition-colors duration-200 hoverable:hover:text-foreground"
                   >
                     <svg
                       viewBox="0 0 24 24"
@@ -166,6 +168,7 @@ export default function ContactPage() {
                     >
                       {where.icon}
                     </svg>
+                    {where.at}
                   </a>
                 ))}
               </div>
