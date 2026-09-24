@@ -28,7 +28,7 @@ import { StudioReel } from "@/components/studio-reel";
 export const metadata: Metadata = {
   title: "About",
   description:
-    "Julian Gigola is a Bay Area creative director and photographer working in editorial, commercial, and artist imagery. Published in WIRED.",
+    "Julian Gigola, photographer and creative director in the San Francisco Bay Area. Editorial, campaigns and artists, in the studio and on location. Published in WIRED.",
   alternates: { canonical: "/about" },
 };
 
@@ -177,15 +177,11 @@ export default function AboutPage() {
               <div className="flex flex-col gap-3 short:gap-2">
                 <h2 className="label text-muted-foreground">Biography</h2>
                 <p className="text-sm leading-relaxed lg:text-base short:text-[0.8125rem] short:leading-snug">
-                  Bay Area-based creative director and photographer,
-                  specialising in editorial, commercial, and artist imagery. My
-                  work blends creativity with a keen eye for detail, focusing on
-                  everything from studio portraits to location shoots.
-                  Photography allows me to explore the world through a unique
-                  lens and I&rsquo;m dedicated to bringing out the beauty in
-                  every subject I work with. Whether it&rsquo;s a personal
-                  project or a collaboration, I strive to create images that
-                  resonate and leave a lasting impression.
+                  I&rsquo;m a photographer and creative director in the San
+                  Francisco Bay Area. I shoot editorial, campaigns and artists,
+                  in the studio and on location, and I direct the shoots I
+                  photograph. My work has run in WIRED and for brands from Sago
+                  to Pear VC. If you have a job in mind, write to me.
                 </p>
               </div>
             </div>
