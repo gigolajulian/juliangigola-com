@@ -5,6 +5,7 @@ import { ContactForm } from "@/components/contact-form";
 import { Strip } from "@/components/strip";
 import { StripPage, StripHead, RisingTitle } from "@/components/strip-page";
 import { BOOKING_URL } from "@/lib/site";
+import { ABOUT_PAGE } from "@/lib/work";
 
 /* ── contact ──────────────────────────────────────────────────────
  * The page the whole site is judged on, so the form is on the first screen
@@ -59,6 +60,10 @@ export default function ContactPage() {
     >
       <Strip
         label="Contact: the ask, the details, and the form."
+        /* The page About leads to, so a push back past the start goes back
+           there, landing at its end. Julian asked. No `next`: this is
+           where the site's order ends. */
+        prev={ABOUT_PAGE}
         paged
         bleed
         className="mt-4 flex-1"

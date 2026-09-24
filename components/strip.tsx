@@ -46,6 +46,10 @@ export type Lead = {
     end, which is the side the visitor came in by. Module state rather than
     storage: it only has to survive one client navigation. */
 let cameBack = false;
+/** Which way the last strip led on, so the next one can tell the tail of
+    that push from a new one. Never cleared: the window it is read in is
+    the second after the strip mounts, and a cold load has nothing set. */
+let arriveDir: 1 | -1 | 0 = 0;
 
 /* ── a filter change, and a way back to your seat ─────────────────
  * Two more things a strip wants to know about how it got here, both
@@ -1371,11 +1375,13 @@ export function Strip({
       if (filterPath(window.location.pathname) && filterPath(href)) {
         markFilter(dir);
         cameBack = dir < 0;
+        arriveDir = dir;
         router.push(href);
         return;
       }
       el.dataset.leaving = dir > 0 ? "on" : "back";
       cameBack = dir < 0;
+      arriveDir = dir;
       window.setTimeout(() => router.push(href), 260);
     };
 
@@ -1480,6 +1486,24 @@ export function Strip({
       const sideways = Math.abs(e.deltaX) > Math.abs(e.deltaY);
       const raw = sideways ? e.deltaX : e.deltaY;
       if (!raw) return;
+      /* The tail of the push that brought the page here. A trackpad keeps
+         sending momentum after the strip has led on, and those notches
+         land on the strip that has just arrived: measured on Contact
+         pushed back to About, the page landed at its end as it should and
+         then paged itself straight back to the start, on a notch that came
+         560ms after the mount. So for the first second, a push the same
+         way as the one that led here is that push still running out, and
+         is dropped; the other way is a new decision and goes through. Not
+         under Lenis, which has the wheel there. */
+      if (
+        !smooth &&
+        arriveDir !== 0 &&
+        Math.sign(raw) === arriveDir &&
+        performance.now() - arrived < 1000
+      ) {
+        e.preventDefault();
+        return;
+      }
       /* Something inside a cell that scrolls on its own gets the wheel
          first: a form's box until it has run out, a textarea and a select
          always. A strip that took the wheel over a form would move the

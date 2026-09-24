@@ -615,6 +615,8 @@ export const categoryHref = (categorySlug: string): string => {
 /** The pages a strip leads on to once its own sequence has run out: the
     site's order, in the shape the strip takes (`Lead` in `strip.tsx`). */
 export const WORK_PAGE = { href: "/work", name: "Work" };
+export const SESSIONS_PAGE = { href: "/sessions", name: "Sessions" };
+export const ABOUT_PAGE = { href: "/about", name: "About" };
 export const CONTACT = { href: "/contact", name: "Contact" };
 
 /** A category as the index renders it: name plus where it goes. */

@@ -2,7 +2,13 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Strip } from "@/components/strip";
 import { StripPage, StripHead, RisingTitle } from "@/components/strip-page";
-import { PRESS_STUDIO, FEATURED, CONTACT, coverOf } from "@/lib/work";
+import {
+  PRESS_STUDIO,
+  FEATURED,
+  CONTACT,
+  SESSIONS_PAGE,
+  coverOf,
+} from "@/lib/work";
 import { ClientMarks } from "@/components/client-marks";
 import { StudioReel } from "@/components/studio-reel";
 
@@ -99,6 +105,10 @@ export default function AboutPage() {
       <Strip
         label="About: who he is, what he is hired for, and how a commission runs. One screen at a time, left and right."
         next={CONTACT}
+        /* The site's own order, walked both ways: Sessions, About, Contact.
+           Julian asked for the way back from Contact to land here, and for
+           a push back past the start of this page to go on to Sessions. */
+        prev={SESSIONS_PAGE}
         paged
         bleed
         className="mt-4 flex-1"
