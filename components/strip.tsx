@@ -162,6 +162,9 @@ const STRETCH = 160;
     makes leaving any easier. */
 const WHEEL = 3;
 const PAD = 1.8;
+/** Lenis's ease per frame for each: a notch glides, a trackpad follows. */
+const MOUSE_LERP = 0.08;
+const PAD_LERP = 0.2;
 
 /** How long after the strip stops before the rail takes the shape of the
     chapter you have landed in. The shape follows the page, and reshaping
@@ -758,6 +761,31 @@ export function Strip({
            one a notch moved 120px against 360 and Lenis would lose on a
            difference nobody asked about. */
         wheelMultiplier: WHEEL,
+        /* A notch and a trackpad are not the same gesture, and Lenis
+           treated them as one: a trackpad got the mouse's gain of three
+           on top of its own momentum, eased again, which is twitchy under
+           the finger and floaty after it. Measured per event, the way the
+           strip's own model tells them apart: a notch is a delta of 80 or
+           more (or a line or a page), anything finer is a trackpad. The
+           trackpad keeps its gentler gain and a quick ease that follows
+           its own momentum; a notch gets a longer ease so a spin reads as
+           one movement rather than a pulse per notch. */
+        virtualScroll: (data) => {
+          const e = data.event;
+          if (!(e instanceof WheelEvent)) return true;
+          /* In device pixels: at 200% Chrome can report a notch as 50,
+             under the line, and it was eased as a trackpad. */
+          const raw =
+            Math.max(Math.abs(e.deltaX), Math.abs(e.deltaY)) *
+            (window.devicePixelRatio || 1);
+          const notch = e.deltaMode !== 0 || raw >= 80;
+          lenis.options.lerp = notch ? MOUSE_LERP : PAD_LERP;
+          if (!notch) {
+            data.deltaX *= PAD / WHEEL;
+            data.deltaY *= PAD / WHEEL;
+          }
+          return true;
+        },
         /* Not the finger. An iPad's own momentum is better than anything
            here, and Lenis says its touch sync is unstable on older iOS. */
         syncTouch: false,
@@ -2541,7 +2569,12 @@ export function Strip({
                         <span
                           key={`cell-${g.from + k}`}
                           className={cn(
-                            "h-full min-w-0 flex-1 transition-[box-shadow,background-color] duration-200 ease-[var(--ease-out-strong)]",
+                            /* The mark moves without easing its colour.
+                               Eased both ways, a fast scroll left a trail
+                               of half-lit cells behind it: Julian's
+                               recording showed two at once. */
+                            "h-full min-w-0 flex-1 transition-[box-shadow] duration-200 ease-[var(--ease-out-strong)]",
+
                             k === 0 && "rounded-l-full",
                             k === count - 1 && "rounded-r-full",
                             // A cut the colour of the page, not a gap and
@@ -2593,11 +2626,16 @@ export function Strip({
                 ) : null}
                 <span
                   className={cn(
-                    "block h-2 w-full origin-bottom rounded-full transition-[scale,background-color] duration-200 ease-[var(--ease-out-strong)]",
+                    /* The position moves from tick to tick without easing
+                       its colour, and only the lit tick's height eases up.
+                       With the colour easing over 200ms both ways a fast
+                       scroll lit several at a time, the ghosts Julian
+                       recorded on NOVA reading 03 and 09 together. */
+                    "block h-2 w-full origin-bottom rounded-full ease-[var(--ease-out-strong)]",
                     i === at
-                      ? "rail-lit scale-y-100 bg-foreground"
+                      ? "rail-lit scale-y-100 bg-foreground transition-[scale] duration-150"
                       : over === n
-                        ? "scale-y-75 bg-foreground/40"
+                        ? "scale-y-75 bg-foreground/40 transition-[scale,background-color] duration-200"
                         : "scale-y-50 bg-foreground/20",
                   )}
                 />

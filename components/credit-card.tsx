@@ -114,8 +114,25 @@ export function CreditCard({
                 className="size-14 shrink-0 rounded-full object-cover"
               />
             ) : null}
-            <div className="min-w-0">
-              <p className="font-display truncate text-xl uppercase leading-none tracking-[0]">
+            <div className="min-w-0 flex-1">
+              <p
+                /* A long handle is set smaller until it fits, rather than
+                   cut: Julian saw @LIGHTBENDER_... Measured once, as the
+                   card opens, against the column it has. Never below
+                   three quarters of the size, past which the ellipsis
+                   takes over again. */
+                ref={(el) => {
+                  if (!el) return;
+                  el.style.fontSize = "";
+                  /* Two pixels spare: both widths are whole pixels, and a
+                     handle a fraction over still took the ellipsis. */
+                  const fit = el.clientWidth / (el.scrollWidth + 2);
+                  if (el.scrollWidth >= el.clientWidth) {
+                    el.style.fontSize = `${Math.max(0.75, 1.25 * fit)}rem`;
+                  }
+                }}
+                className="font-display truncate text-xl uppercase leading-none tracking-[0]"
+              >
                 @{handle}
               </p>
               <p className="label mt-1.5 truncate text-muted-foreground">
