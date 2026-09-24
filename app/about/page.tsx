@@ -193,13 +193,13 @@ export default function AboutPage() {
                     this and asked for less space. No auto hyphenation, so a
                     justified line never breaks a word with a dash. */}
                 <div className="flex flex-col gap-2.5 text-justify short:gap-1.5">
-                  <p className="text-[clamp(1.05rem,1.3vw,1.3rem)] leading-[1.3] short:text-lg short:leading-tight">
+                  <p className="text-[clamp(1rem,1.15vw,1.125rem)] leading-[1.4] short:text-base short:leading-snug">
                     As a photographer and creative director based in the San
                     Francisco Bay Area, my work sits between the worlds of
                     editorial fashion, commercial campaigns, and artist
                     development.
                   </p>
-                  <p className="text-sm leading-[1.6] text-muted-foreground short:text-[0.8125rem] short:leading-snug">
+                  <p className="text-[0.9375rem] leading-[1.6] text-muted-foreground short:text-sm short:leading-normal">
                     On the commercial side my work includes commissions for
                     tech and consumer brands and features from WIRED.
                     I&rsquo;ve been instrumental in shaping the visual
