@@ -521,11 +521,14 @@ export function WorkShell({
   /* Julian: the list first. It reads as the plainest of the three and
      the row runs from plain to pictorial — a column of names, a wall of
      covers, a ribbon. */
-  const modes: WorkView[] = ["list", "grid", "strip"];
+  /* Colour last: the three that lay the work out, then the one that
+     sorts it by what it looks like (`vectorscope.tsx`). */
+  const modes: WorkView[] = ["list", "grid", "strip", "colour"];
   const WORD: Record<WorkView, string> = {
     strip: "Strip",
     grid: "Grid",
     list: "List",
+    colour: "Colour",
   };
   const toggle = (
     <span className="relative block h-[1.625rem] max-sm:hidden">
@@ -561,6 +564,19 @@ export function WorkShell({
                   <rect x="0" y="2" width="4" height="12" rx="0.5" />
                   <rect x="6" y="2" width="4" height="12" rx="0.5" />
                   <rect x="12" y="2" width="4" height="12" rx="0.5" />
+                </>
+              ) : mode === "colour" ? (
+                /* A scope: the ring, the cross, and a trace across it. */
+                <>
+                  <path
+                    d="M8 1.25a6.75 6.75 0 1 1 0 13.5a6.75 6.75 0 1 1 0-13.5Z"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                  />
+                  <circle cx="5.5" cy="5.5" r="1.25" />
+                  <circle cx="8" cy="8" r="1.25" />
+                  <circle cx="10.5" cy="10.5" r="1.25" />
                 </>
               ) : mode === "grid" ? (
                 <>

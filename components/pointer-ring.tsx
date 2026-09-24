@@ -69,9 +69,21 @@ export function PointerRing() {
        word, because only the boolean had changed and the word was written
        on that change. */
     let over: Element | null = null;
+    /* The word's width, read once per word rather than per move. Past the
+       right edge it hangs on the other side of the pointer: the view
+       buttons and the search sit close enough to the edge to cut it off. */
+    let wide = 0;
+
+    const place = (e: PointerEvent) => {
+      const x =
+        e.clientX + OFF_X + wide > window.innerWidth - 8
+          ? e.clientX - OFF_X - wide
+          : e.clientX + OFF_X;
+      el.style.transform = `translate3d(${x}px, ${e.clientY + OFF_Y}px, 0)`;
+    };
 
     const move = (e: PointerEvent) => {
-      el.style.transform = `translate3d(${e.clientX + OFF_X}px, ${e.clientY + OFF_Y}px, 0)`;
+      place(e);
       /* A word on an ancestor reaches everything inside it, which is how
          the strip says `Drag` over its whole shelf. Two things cancel it:
          an empty `data-ring`, written on the cells that are words rather
@@ -90,6 +102,8 @@ export function PointerRing() {
       // The word stays while the label fades out, so it never blanks first.
       if (hit && word.current) {
         word.current.textContent = on?.getAttribute("data-ring") ?? "";
+        wide = word.current.offsetWidth;
+        place(e);
       }
     };
     /* The pointer left the window. Julian: the word should not be left

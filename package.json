@@ -7,6 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
+    "scope": "npx tsx scripts/make-scope.mts",
     "prebuild": "node scripts/make-hero.mjs && node --no-warnings scripts/make-cards.mjs"
   },
   "dependencies": {
