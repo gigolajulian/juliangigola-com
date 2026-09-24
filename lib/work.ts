@@ -855,6 +855,7 @@ export const PRESS: Client[] = [
   { name: "SAGO", slug: "sago", href: "/work/sago" },
   { name: "GOOD CULT", slug: "goodcult", href: "/work/goodcult" },
   { name: "PARADOX", slug: "paradox", href: "/work/paradox" },
+  { name: "HUA", slug: "hua", href: "/work/hua" },
   /* No project of its own on the site, so the mark leads to EMPIRE itself.
      Julian asked. */
   { name: "EMPIRE", slug: "empire", href: "https://www.empi.re/" },

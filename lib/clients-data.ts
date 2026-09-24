@@ -49,6 +49,13 @@ export const CLIENT_MARKS: Record<string, ClientMarkData> = {
     height: 70,
     scale: 0.7,
   },
+  "hua": {
+    kind: "mask",
+    src: "/clients/hua.webp",
+    width: 161,
+    height: 160,
+    scale: 1.36,
+  },
   "jubo": {
     kind: "mask",
     src: "/clients/jubo.webp",
