@@ -26,16 +26,31 @@ export const metadata: Metadata = {
   alternates: { canonical: "/contact" },
 };
 
+/* Drawn in the same line as the rest of the site's icons: a 24px box,
+   a 1.5 stroke in currentColor, so they sit muted and come up on hover. */
 const ELSEWHERE = [
   {
     href: "https://instagram.com/juliangigola",
-    label: "Instagram",
-    at: "@juliangigola",
+    label: "Instagram, @juliangigola",
+    icon: (
+      <>
+        <rect x="3" y="3" width="18" height="18" rx="5" />
+        <circle cx="12" cy="12" r="4" />
+        <circle cx="17.25" cy="6.75" r="0.9" fill="currentColor" stroke="none" />
+      </>
+    ),
   },
   {
     href: "https://www.linkedin.com/in/juliangigola",
-    label: "LinkedIn",
-    at: "Julian Gigola",
+    label: "LinkedIn, Julian Gigola",
+    icon: (
+      <>
+        <rect x="3" y="3" width="18" height="18" rx="3" />
+        <path d="M8 10.5V17" />
+        <circle cx="8" cy="7.5" r="1" fill="currentColor" stroke="none" />
+        <path d="M11.5 17v-6.5M11.5 13.5c0-1.7 1.1-3 2.75-3S17 11.8 17 13.5V17" />
+      </>
+    ),
   },
 ];
 
@@ -121,32 +136,39 @@ export default function ContactPage() {
                 <div>
                   <dt className="label text-muted-foreground">Based in</dt>
                   <dd className="mt-2 text-sm">
-                    San Francisco Bay Area &middot; available to travel
-                  </dd>
-                </div>
-                {/* The three that used to sit in the footer's ask. The footer is
-                one quiet line under every strip now, so they live where
-                somebody looking for them would go. */}
-                <div>
-                  <dt className="label text-muted-foreground">Elsewhere</dt>
-                  <dd className="mt-2 flex flex-col gap-2 text-sm">
-                    {ELSEWHERE.map((where) => (
-                      <a
-                        key={where.label}
-                        href={where.href}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="underline decoration-border underline-offset-4 transition-colors duration-200 hoverable:hover:decoration-current"
-                      >
-                        {where.label}
-                        <span className="ml-2 text-muted-foreground">
-                          {where.at}
-                        </span>
-                      </a>
-                    ))}
+                    San Francisco Bay Area &middot; Available to travel
                   </dd>
                 </div>
               </dl>
+              {/* Instagram and LinkedIn as their marks, no heading: Julian
+                  asked for the logos in place of the names. The link is the
+                  padded box, so a thumb has more than the glyph to aim at. */}
+              <div className="-ml-2 mt-5 flex gap-2">
+                {ELSEWHERE.map((where) => (
+                  <a
+                    key={where.href}
+                    href={where.href}
+                    target="_blank"
+                    rel="noreferrer"
+                    aria-label={where.label}
+                    title={where.label}
+                    className="p-2 text-muted-foreground transition-colors duration-200 hoverable:hover:text-foreground"
+                  >
+                    <svg
+                      viewBox="0 0 24 24"
+                      aria-hidden
+                      className="size-6"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth={1.5}
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      {where.icon}
+                    </svg>
+                  </a>
+                ))}
+              </div>
             </div>
           </div>
 

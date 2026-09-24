@@ -1094,13 +1094,14 @@ const archiveFrame = (src: string, alt: string): Frame => {
 };
 
 const COVER_OVERRIDES: Record<string, Frame> = {
-  portraits: {
-    src: "/hero/cover.jpg",
-    width: 2500,
-    height: 3333,
-    color: "#897A74",
-    alt: "Model in a fur-trimmed hooded coat on the shoreline at sunset",
-  },
+  /* FAUXTOPIA's opening frame. It was a copy in `/hero/`, which has no
+     project in its path, so the credit fell back to the first portrait
+     project and the cover linked to OPAL. Pointing at the archive frame lets
+     `frameProject` name the shoot the photograph is from. */
+  portraits: archiveFrame(
+    "/work/fauxtopia/01.jpg",
+    "Model in a fur-trimmed hooded coat on the shoreline at sunset",
+  ),
   // Exactly 4:5, so it fills the cover column with nothing cropped at all —
   // the only frame in the archive that does.
   editorial: archiveFrame(
