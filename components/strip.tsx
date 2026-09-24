@@ -486,7 +486,11 @@ export function Strip({
         })(),
       );
       if (seated > 0) {
-        el.dataset.arrive = "none";
+        /* Its own word rather than "none", which is the homepage's cold
+           load and keeps the cells' rise: here the cells were on screen
+           a moment ago, and coming back to them is not an arrival for
+           them either. `globals.css` stills both on "seat". */
+        el.dataset.arrive = "seat";
         el.scrollLeft = seated;
         // So a cleanup before the first scroll read keeps this seat, not 0.
         seatX.current = seated;

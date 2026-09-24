@@ -183,6 +183,25 @@ const lands = (ms: number) =>
   ({ "--reveal-delay": `${ms}ms` }) as React.CSSProperties;
 
 /**
+ * Whether the cover is being come back to.
+ *
+ * The cascade above is a first impression: the photograph, then the name,
+ * then the buttons and seven rows one beat apart, most of two seconds. On
+ * the fifth trip home it read as the site loading, and Julian asked for a
+ * better arrival. So the cascade runs once, on a cold load, and a return
+ * lands as one: every delay is zero and the parts fade up together with
+ * the page's own settle, half a second from the press.
+ *
+ * `page-transition.tsx` writes `data-nav` on the root for the length of a
+ * client-side trip, which is the only way this component ever mounts
+ * without a cold load. Read once, at mount: on the server and on a
+ * hydration the attribute is absent, so the two renders agree.
+ */
+const returning = () =>
+  typeof document !== "undefined" &&
+  document.documentElement.dataset.nav !== undefined;
+
+/**
  * The opening frame. A title card, not a sixth discipline.
  *
  * It states the job once, over the city the work is made in, and then never
@@ -258,6 +277,9 @@ export function Hero({
    * the one crossfading out behind it.
    */
   const [slide, setSlide] = React.useState({ active: 0, previous: -1 });
+  const [back] = React.useState(returning);
+  /** Where each part of the cover lands: the cascade, or all at once. */
+  const at = (ms: number) => lands(back ? 0 : ms);
   const { active } = slide;
 
   /**
@@ -651,7 +673,7 @@ export function Hero({
             button. The panel's own copy takes over. */}
         <div className="pointer-events-none absolute inset-0 hidden wide:block short:wide:hidden">
           <Ways
-            style={lands(BUTTONS_MS)}
+            style={at(BUTTONS_MS)}
             className="rise pointer-events-auto absolute bottom-6 right-6 z-20 sm:bottom-8 sm:right-10"
           />
         </div>
@@ -735,7 +757,7 @@ export function Hero({
               `squat` had 96px and put the running head five pixels under
               the bar, which is the bug this line fixed.) */}
             <div
-              style={lands(HEAD_MS)}
+              style={at(HEAD_MS)}
               /* On a short window the two standing lines go and the band
                  keeps only the height the fixed bar needs. They are in the
                  footer of every page and the bar is over them; the rows
@@ -780,7 +802,7 @@ export function Hero({
               twice, forty pixels apart, is what made an earlier version of
               this page look amateur. */}
             <h1
-              style={lands(NAME_MS)}
+              style={at(NAME_MS)}
               className="emerge px-6 pt-6 [container-type:inline-size] max-sm:pt-3 sm:px-10 squat:pt-10 wide:pt-10"
             >
               {/* The header's own wordmark waits on this one and takes over
@@ -880,7 +902,7 @@ export function Hero({
                 the whole canvas this is the only copy; from `wide` the one
                 over the picture's foot takes over and this one goes. */}
             <Ways
-              style={lands(BUTTONS_MS)}
+              style={at(BUTTONS_MS)}
               /* Margins, not padding: the block is ink now, and padding on
                  it would be ink around the rows rather than air around the
                  block.
@@ -954,7 +976,7 @@ export function Hero({
                     // head had a `border-b` of its own, which stacked a
                     // second line 65px under the fixed bar's own border for
                     // no work — two rules to separate one line of type.
-                    style={lands(INDEX_MS + i * ROW_MS)}
+                    style={at(INDEX_MS + i * ROW_MS)}
                     className="rise border-b border-border"
                     data-discipline={i + 1}
                   >

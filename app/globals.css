@@ -1289,6 +1289,11 @@ a.strip-cell {
   &[data-arrive="none"] {
     animation: none;
   }
+  /* Back to a seat the strip was left in: nothing moves, the strip or
+     what is in it (the cells are stilled below, beside the zoom's). */
+  &[data-arrive="seat"] {
+    animation: none;
+  }
   /* A filter changed, and the head and the chip row above it did not: the
      sequence is what changed, so it comes up where it stands. Sliding it
      in from 24vw announced a new page every time a chip was pressed, and
@@ -1404,6 +1409,7 @@ a.strip-cell {
    pictures came up after it. Here and not in the strip's utility block
    above, where these lived and lost to this rule for being layered. */
 .strip-scroll[data-arrive="fade"] .strip-cell,
+.strip-scroll[data-arrive="seat"] .strip-cell,
 .strip-scroll[data-arrive="zoom"] .strip-cell,
 .strip-scroll[data-arrive="zoom"] .title-word,
 .strip-scroll[data-arrive="zoom"] .title-rest {
@@ -2751,6 +2757,21 @@ optgroup {
 }
 :root[data-nav="out"]::view-transition-new(.page) {
   animation-name: jg-page-settle;
+}
+/* Out by way of the bar or a drawer: the wordmark, which is home. The
+   beat the bar asks for above is a delay on a keyframe that also fades
+   the page up; swapping in `jg-page-settle`, which only moves it, left
+   the new page in full view under the old one for the whole wait, and
+   the work index ghosted over the homepage at 500ms on a recording. The
+   settle with the fade back in, so the wait is a wait. */
+:root[data-nav-bar][data-nav="out"]::view-transition-new(.page) {
+  animation-name: jg-page-settle-in;
+}
+@keyframes jg-page-settle-in {
+  from {
+    opacity: 0;
+    transform: translateY(-2.5vh);
+  }
 }
 /* In: the old page lifts off the top and goes; the new one comes up into
    place from just below. One distance for all four, so a trip out is the
