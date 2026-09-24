@@ -169,7 +169,7 @@ const fromAdded = (p: AddedProject): Project => {
   return {
     slug: p.slug,
     name: p.name,
-    headline: null,
+    headline: p.headline ?? null,
     intent: null,
     credits: p.credits,
     categories: [category],

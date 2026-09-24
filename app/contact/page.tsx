@@ -134,11 +134,12 @@ export default function ContactPage() {
                   </dd>
                 </div>
               </dl>
-              {/* Instagram and LinkedIn as their marks with the handle
-                  beside each, no heading: Julian asked for the logos in
-                  place of the names. The link is the padded box, so a thumb
-                  has more than the glyph to aim at. */}
-              <div className="-ml-2 mt-5 flex flex-wrap gap-x-6 gap-y-2">
+              {/* Instagram and LinkedIn as their marks alone: Julian asked
+                  for the logos in place of the names, then for the handles
+                  to go too. The name is still read out, and shown on hover.
+                  The link is the padded box, so a thumb has more than the
+                  glyph to aim at. */}
+              <div className="-ml-2 mt-5 flex gap-2">
                 {ELSEWHERE.map((where) => (
                   <a
                     key={where.href}
@@ -146,7 +147,8 @@ export default function ContactPage() {
                     target="_blank"
                     rel="noreferrer"
                     aria-label={`${where.label}, ${where.at}`}
-                    className="flex items-center gap-2.5 p-2 text-sm text-muted-foreground transition-colors duration-200 hoverable:hover:text-foreground"
+                    title={`${where.label}, ${where.at}`}
+                    className="p-2 text-muted-foreground transition-colors duration-200 hoverable:hover:text-foreground"
                   >
                     <span
                       aria-hidden
@@ -158,7 +160,6 @@ export default function ContactPage() {
                         WebkitMaskSize: "contain",
                       }}
                     />
-                    {where.at}
                   </a>
                 ))}
               </div>
