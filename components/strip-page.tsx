@@ -204,7 +204,9 @@ export function StripHead({
             and nothing else: 112px of column broke `4 session types` over
             two lines against the right edge, and every count here is said
             again by the cell the sequence opens on. */}
-        <p className="label shrink-0 text-right text-muted-foreground sm:w-44">
+        {/* A client's logo, where a campaign has one, sits level with the
+            middle of the title block rather than on the crumb's line. */}
+        <p className="label shrink-0 text-right text-muted-foreground has-[[data-aside-mark]]:self-center sm:w-44">
           <span className="max-sm:hidden">{aside}</span>
         </p>
       </div>

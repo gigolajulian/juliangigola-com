@@ -206,7 +206,12 @@ export default async function ProjectPage(props: PageProps<"/work/[slug]">) {
           sub={client}
           aside={
             mark && CLIENT_MARKS[mark.slug] ? (
-              <span role="img" aria-label={mark.name} title={mark.name}>
+              <span
+                role="img"
+                aria-label={mark.name}
+                title={mark.name}
+                data-aside-mark
+              >
                 <SoleMark
                   client={mark}
                   className="h-auto justify-end overflow-visible text-foreground opacity-80 transition-opacity duration-200 hoverable:hover:opacity-100 [--mark-box:1.45rem] [--mark-cap:9rem]"
