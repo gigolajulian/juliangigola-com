@@ -118,7 +118,10 @@ export default function ContactPage() {
                   <dd className="mt-2 text-sm">
                     <a
                       href="mailto:hello@juliangigola.com"
-                      className="underline decoration-border underline-offset-4 transition-colors duration-200 hoverable:hover:decoration-current"
+                      /* In capitals, sitting on its rule: Julian asked for
+                         both. A border rather than an underline, which
+                         vanishes when it is brought this close. */
+                      className="inline-block border-b border-border pb-0 uppercase leading-none tracking-[0.04em] transition-colors duration-200 hoverable:hover:border-current"
                     >
                       hello@juliangigola.com
                     </a>
