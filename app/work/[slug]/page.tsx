@@ -5,6 +5,8 @@ import { ProjectStrip, type NextUp } from "@/components/project-strip";
 import { StripPage, StripHead } from "@/components/strip-page";
 import { CoverArtGallery } from "@/components/cover-art-gallery";
 import { CallToAction } from "@/components/call-to-action";
+import { SoleMark } from "@/components/client-marks";
+import { CLIENT_MARKS } from "@/lib/clients-data";
 import {
   LINKABLE,
   UNLISTED,
@@ -18,6 +20,7 @@ import {
   prevBefore,
   billing,
   nextDiscipline,
+  markFor,
 } from "@/lib/work";
 
 /* ── the case study ───────────────────────────────────────────────
@@ -119,6 +122,14 @@ export default async function ProjectPage(props: PageProps<"/work/[slug]">) {
      subject for an unrelated mixed-media shoot. Both are fixed below. */
   const isDiscipline = isDisciplineGallery(project);
 
+  /* A brand campaign whose client has a logo on file shows the logo top
+     right, in place of the discipline and the frame count. Julian asked
+     for it at 80% and full on hover. A campaign with no logo keeps the
+     text. */
+  const mark = project.categories.some((c) => c.slug === "campaigns")
+    ? markFor(project.slug)
+    : undefined;
+
   /* Where the foot of the page goes. A discipline has no sibling project, so
      it follows the chips on /work to the next discipline instead of being
      handed whatever sits next in the running order. */
@@ -193,14 +204,25 @@ export default async function ProjectPage(props: PageProps<"/work/[slug]">) {
           crumb={<Crumb />}
           title={project.headline ?? project.name}
           sub={client}
-          aside={[
-            project.categories.length && !isDiscipline
-              ? project.categories.map((c) => c.name).join(", ")
-              : null,
-            `${project.images.length} frames`,
-          ]
-            .filter(Boolean)
-            .join(" · ")}
+          aside={
+            mark && CLIENT_MARKS[mark.slug] ? (
+              <span role="img" aria-label={mark.name} title={mark.name}>
+                <SoleMark
+                  client={mark}
+                  className="h-auto justify-end overflow-visible text-foreground opacity-80 transition-opacity duration-200 hoverable:hover:opacity-100 [--mark-box:1.45rem] [--mark-cap:9rem]"
+                />
+              </span>
+            ) : (
+              [
+                project.categories.length && !isDiscipline
+                  ? project.categories.map((c) => c.name).join(", ")
+                  : null,
+                `${project.images.length} frames`,
+              ]
+                .filter(Boolean)
+                .join(" · ")
+            )
+          }
         />
       }
     >
