@@ -1481,7 +1481,7 @@
     "frostbite": "editorial",
     "fun-xyz": "headshots",
     "goodcult": "campaigns",
-    "liminal": "editorial",
+    "liminal": "chroma",
     "nabu": "campaigns",
     "purgatory": "editorial",
     "retro-reverie-vol-01": "editorial",
@@ -1498,7 +1498,9 @@
     "revelo": "chroma",
     "luna": "chroma",
     "isabela": "editorial",
-    "analogue-dreams": "chroma"
+    "analogue-dreams": "chroma",
+    "transmutate": "chroma",
+    "info-overload": "chroma"
   },
   "frames": {
     "wrapped-up": [
