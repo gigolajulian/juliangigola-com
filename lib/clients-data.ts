@@ -38,9 +38,9 @@ export const CLIENT_MARKS: Record<string, ClientMarkData> = {
   "empire": {
     kind: "mask",
     src: "/clients/empire.webp",
-    width: 130,
+    width: 159,
     height: 160,
-    scale: 1.45,
+    scale: 1.36,
   },
   "goodcult": {
     kind: "mask",
