@@ -1648,10 +1648,18 @@ export function Strip({
     const onDown = (e: PointerEvent) => {
       if (e.pointerType !== "mouse" || e.button !== 0) return;
       // A field is for typing and selecting in, not for pulling the page.
+      const at = e.target as Element | null;
+      if (at?.closest?.("input, textarea, select, label")) return;
+      /* A `[data-scroll]` box is not excluded as a whole. It used to be, and
+         the Biography panel on /about is one box from edge to edge, so a
+         drag back to the first panel only took from its margins: Julian
+         found it buggy. The wheel is what the box scrolls with; a mouse
+         pulling sideways means the strip. Only a press on the box's own
+         scrollbar is left to the box. */
       if (
-        (e.target as Element | null)?.closest?.(
-          "input, textarea, select, label, [data-scroll]",
-        )
+        at instanceof HTMLElement &&
+        at.hasAttribute("data-scroll") &&
+        e.offsetX >= at.clientWidth
       ) {
         return;
       }
