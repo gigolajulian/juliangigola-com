@@ -51,9 +51,15 @@ const asked = args.filter((a) => !a.startsWith("--")).map((a) => a.toLowerCase()
  */
 const IG = /^[a-z0-9_][a-z0-9._]{0,29}$/;
 const collected = new Set();
-for (const list of Object.values(
-  JSON.parse(readFileSync(MANIFEST, "utf8")).credits ?? {},
-)) {
+const manifest = JSON.parse(readFileSync(MANIFEST, "utf8"));
+/* The credit overrides, and the credits on projects added in /admin: a
+   project added there carries its own list, which the first version of
+   this missed, so NOVA's model had no face. */
+for (const list of [
+  ...Object.values(manifest.credits ?? {}),
+  ...(manifest.projects ?? []).map((p) => p.credits ?? []),
+]) {
+  if (!Array.isArray(list)) continue;
   for (const c of list) {
     const h = (c.instagram || (c.name ?? "").replace(/^@/, "")).toLowerCase();
     if (c.instagram ? IG.test(h) : (c.name ?? "").startsWith("@") && IG.test(h))
