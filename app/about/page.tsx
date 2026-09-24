@@ -188,17 +188,26 @@ export default function AboutPage() {
             <div className="flex flex-col gap-8 short:gap-5">
               <div className="flex flex-col gap-3 short:gap-2">
                 <h2 className="label text-muted-foreground">Biography</h2>
-                <p className="text-sm leading-relaxed lg:text-base short:text-[0.8125rem] short:leading-snug">
-                  As a photographer and creative director based in the San
-                  Francisco Bay Area, my work sits between the worlds of
-                  editorial fashion, commercial campaigns, and artist
-                  development. On the commercial side my work includes
-                  commissions for tech and consumer brands and features from
-                  WIRED. I&rsquo;ve been instrumental in shaping the visual
-                  identities of musicians and independent artists locally.
-                  While rooted in the Bay Area, I collaborate with clients
-                  worldwide.
-                </p>
+                {/* The first sentence as a lead, the rest under it in the
+                    muted body size. Justified, and set close: Julian picked
+                    this and asked for less space. No auto hyphenation, so a
+                    justified line never breaks a word with a dash. */}
+                <div className="flex flex-col gap-2.5 text-justify short:gap-1.5">
+                  <p className="text-[clamp(1.05rem,1.3vw,1.3rem)] leading-[1.3] short:text-lg short:leading-tight">
+                    As a photographer and creative director based in the San
+                    Francisco Bay Area, my work sits between the worlds of
+                    editorial fashion, commercial campaigns, and artist
+                    development.
+                  </p>
+                  <p className="text-sm leading-[1.6] text-muted-foreground short:text-[0.8125rem] short:leading-snug">
+                    On the commercial side my work includes commissions for
+                    tech and consumer brands and features from WIRED.
+                    I&rsquo;ve been instrumental in shaping the visual
+                    identities of musicians and independent artists locally.
+                    While rooted in the Bay Area, I collaborate with clients
+                    worldwide.
+                  </p>
+                </div>
               </div>
             </div>
 
