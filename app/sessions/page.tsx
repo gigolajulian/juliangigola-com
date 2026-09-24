@@ -7,7 +7,7 @@ import { EnquiryCell } from "@/components/enquiry-cell";
 import { Testimonials } from "@/components/testimonials";
 import { SESSION_TYPES, formatPrice } from "@/lib/sessions";
 import { BOOKING_URL } from "@/lib/site";
-import { CONTACT, projectsIn, coverOf } from "@/lib/work";
+import { CONTACT, PROJECTS, projectsIn, coverOf } from "@/lib/work";
 
 /* ── sessions ─────────────────────────────────────────────────────
  * The consumer half of the site, and the half the old one served worst.
@@ -66,7 +66,10 @@ export default function SessionsPage() {
           </TitleCell>,
 
           ...SESSION_TYPES.flatMap((session, i) => {
-            const sample = projectsIn(session.slug)[0];
+            const sample =
+              (session.sample &&
+                PROJECTS.find((p) => p.slug === session.sample)) ||
+              projectsIn(session.slug)[0];
             const cover = sample ? coverOf(sample) : null;
 
             return [

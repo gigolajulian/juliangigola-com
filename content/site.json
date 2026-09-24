@@ -28,6 +28,20 @@
   "testimonials": [],
   "sessions": [
     {
+      "slug": "portraits",
+      "name": "Portraits",
+      "blurb": "One person and an hour, in the studio or somewhere that says something about them. A portrait to keep, rather than a headshot to use.",
+      "from": null,
+      "includes": [
+        "One hour, studio or location",
+        "Two looks",
+        "Retouched selects",
+        "Crops for web and print"
+      ],
+      "turnaround": "1 week",
+      "sample": "fauxtopia"
+    },
+    {
       "slug": "graduation",
       "name": "Graduation",
       "blurb": "Cap and gown, on campus or in studio. Enough coverage for the family frame and the announcement. On campus at SJSU or SCU; a travel fee applies further out.",

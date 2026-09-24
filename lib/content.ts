@@ -42,6 +42,10 @@ export type SessionType = {
   /** What the client actually walks away with. */
   includes: string[];
   turnaround: string;
+  /** The project whose cover stands for this session, by slug, when it
+      is not the first project filed under `slug`. Julian: Portraits is
+      shown with FAUXTOPIA's cover. */
+  sample?: string;
 };
 
 export type SiteContent = {
@@ -171,6 +175,7 @@ const session = (v: unknown, path: string): SessionType => {
     from: money(v.from, `${path}.from`),
     includes: strList(v.includes, `${path}.includes`),
     turnaround: str(v.turnaround, `${path}.turnaround`),
+    sample: optional(v.sample, `${path}.sample`),
   };
 };
 
