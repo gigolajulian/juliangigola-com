@@ -855,9 +855,9 @@ export const PRESS: Client[] = [
   { name: "SAGO", slug: "sago", href: "/work/sago" },
   { name: "GOOD CULT", slug: "goodcult", href: "/work/goodcult" },
   { name: "PARADOX", slug: "paradox", href: "/work/paradox" },
-  /* No project of its own on the site yet, so the mark leads to the work.
-     Point it at the project once there is one. */
-  { name: "EMPIRE", slug: "empire", href: "/work" },
+  /* No project of its own on the site, so the mark leads to EMPIRE itself.
+     Julian asked. */
+  { name: "EMPIRE", slug: "empire", href: "https://www.empi.re/" },
 ].filter((c) => {
   const project = /^\/work\/([a-z0-9-]+)$/.exec(c.href)?.[1];
   return !project || project === "video" || bySlug.has(project);

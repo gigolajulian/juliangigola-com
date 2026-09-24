@@ -69,6 +69,11 @@ export function ClientMarks({
         >
           <Link
             href={client.href}
+            /* A client whose work is not on the site leads to the client
+               instead, in a new tab, the way the Instagram links do. */
+            {...(/^https?:\/\//.test(client.href)
+              ? { target: "_blank", rel: "noreferrer" }
+              : {})}
             aria-label={client.name}
             className={cn(
               "group relative flex items-center justify-center text-muted-foreground transition-colors duration-200 hoverable:hover:text-foreground",
