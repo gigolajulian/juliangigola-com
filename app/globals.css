@@ -1106,8 +1106,22 @@ a.strip-cell {
    Dark only. In the light theme the plate is meant to be pale and
    darkening the backdrop would put a black band across a white page. */
 :root:not([data-theme="light"]) .cover-plate {
-  -webkit-backdrop-filter: blur(18px) saturate(1.5) brightness(0.4);
-  backdrop-filter: blur(18px) saturate(1.5) brightness(0.4);
+  /* Julian, again, the other way: lower the tint and the blur. Measured on
+     DECOY, the palest cover, against the two-fifths above: the band went
+     from near black (grey 36) to a smoked glass (grey 93) that lets the
+     photograph read through it. Twelve pixels of blur, not eighteen, so
+     the picture under the plate is still a picture. The tint comes down
+     from 70% to 45% of the ground, which is the `bg-background/70` on
+     the plate overridden here, in the dark theme only. */
+  -webkit-backdrop-filter: blur(12px) saturate(1.3) brightness(0.65);
+  backdrop-filter: blur(12px) saturate(1.3) brightness(0.65);
+  background-color: color-mix(in oklab, var(--background) 45%, transparent);
+}
+/* What the lighter band costs is the handle under the name: the muted grey
+   measured 2.0:1 against it on DECOY. Lifted to nearly the ink, it is
+   4.8:1, better than the 4.6:1 it had on the dark band. */
+:root:not([data-theme="light"]) .cover-plate .text-muted-foreground {
+  color: color-mix(in oklab, var(--foreground) 88%, transparent);
 }
 
 /* Cells arrive from the strip with a height, a width or an aspect of their
