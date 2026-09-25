@@ -130,6 +130,23 @@ type Item = {
   colours: string[];
 };
 
+/** A project's points on the scope, in their own colours. */
+const dotsOf = (
+  ctx: CanvasRenderingContext2D,
+  p: Placed,
+  c: number,
+  k: number,
+  size: number,
+) => {
+  for (const s of p.shots) {
+    for (let i = 0, j = 0; i < s.xy.length; i += 2, j += 3) {
+      const [x, y] = rim([s.xy[i], s.xy[i + 1]]);
+      ctx.fillStyle = `rgb(${s.pts[j]},${s.pts[j + 1]},${s.pts[j + 2]})`;
+      ctx.fillRect(c + x * k - size / 2, c - y * k - size / 2, size, size);
+    }
+  }
+};
+
 /** The share of a photograph's points in reach of a hue. */
 const inHue = (xy: number[], point: [number, number]) => {
   const aim = Math.atan2(point[1], point[0]);
@@ -440,15 +457,8 @@ export function ScopePanel({
       const dot1 = Math.max(1.2, size / 260);
       const quiet = dark ? 0.3 : 0.45;
       for (const p of placed) {
-        const on = focus ? p.slug === focus : !litSlugs || litSlugs.has(p.slug);
-        ctx.globalAlpha = focus ? (on ? 0.95 : 0.04) : on ? quiet : 0.05;
-        for (const s of p.shots) {
-          for (let i = 0, j = 0; i < s.xy.length; i += 2, j += 3) {
-            const [x, y] = rim([s.xy[i], s.xy[i + 1]]);
-            ctx.fillStyle = `rgb(${s.pts[j]},${s.pts[j + 1]},${s.pts[j + 2]})`;
-            ctx.fillRect(c + x * k - dot1 / 2, c - y * k - dot1 / 2, dot1, dot1);
-          }
-        }
+        ctx.globalAlpha = !litSlugs || litSlugs.has(p.slug) ? quiet : 0.05;
+        dotsOf(ctx, p, c, k, dot1);
       }
       ctx.restore();
     };
@@ -464,7 +474,39 @@ export function ScopePanel({
       ro.disconnect();
       mo.disconnect();
     };
-  }, [placed, point, focus, litSlugs]);
+  }, [placed, point, litSlugs]);
+
+  /* The hovered set, on a layer of its own over the scope: a veil that
+     puts everything else back, and that set's dots alone. Repainting all
+     of them for each tile the pointer crossed was 40 to 90ms a time, just
+     as the fan began to move. */
+  const litLayer = React.useRef<HTMLCanvasElement>(null);
+  React.useEffect(() => {
+    const el = litLayer.current;
+    const size = el?.clientWidth;
+    const ctx = el?.getContext("2d");
+    if (!el || !size || !ctx) return;
+    const dpr = window.devicePixelRatio || 1;
+    if (el.width !== Math.round(size * dpr)) {
+      el.width = el.height = Math.round(size * dpr);
+    }
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, size, size);
+    const p = focus ? placed.find((q) => q.slug === focus) : null;
+    if (!p) return;
+    const css = getComputedStyle(el);
+    const dark = !document.documentElement.matches('[data-theme="light"]');
+    const c = size / 2;
+    const r = c - 1;
+    ctx.fillStyle = css.getPropertyValue("--background").trim() || "#000";
+    ctx.globalAlpha = 0.9;
+    ctx.beginPath();
+    ctx.arc(c, c, r + 1, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.globalCompositeOperation = dark ? "lighter" : "source-over";
+    ctx.globalAlpha = 0.95;
+    dotsOf(ctx, p, c, r / RIM, Math.max(1.2, size / 260));
+  }, [focus, placed]);
 
   /* The pointer, in chroma units and held to the disc. */
   const at = (e: React.MouseEvent<HTMLDivElement>): [number, number] => {
@@ -559,6 +601,11 @@ export function ScopePanel({
           }}
         >
           <canvas ref={canvas} className="size-full" />
+          <canvas
+            ref={litLayer}
+            aria-hidden
+            className="pointer-events-none absolute inset-0 size-full"
+          />
           {held ? (
             /* The held point: a ring in the colour it stands on. */
             <span
