@@ -3,10 +3,9 @@
 import * as React from "react";
 
 /* ── the opening ──────────────────────────────────────────────────
- * The eye mark as a solid, pinned to the middle of the window: it
- * turns in from edge on and then faces the pointer, while a loader under
- * it fills with the page getting ready. At 100 the layer fades
- * to the site.
+ * The eye mark in the middle of the window: it fades in while a loader
+ * under it fills with the page getting ready. It blinks at 65, and at
+ * 100 the layer fades to the site.
  *
  * Three rules it lives by, because an intro sits between a visitor and
  * the work:
@@ -29,17 +28,14 @@ import * as React from "react";
  * ─────────────────────────────────────────────────────────────── */
 
 const CAP = 5000; // the longest anybody waits, whatever is still loading
-const IN = 1100; // turning in from edge on
-const FILL = 1400; // the loader's steady fill, when the page is quicker
+const SHOW = 500; // the eye fading in
+const FILL = 1000; // the loader's steady fill, when the page is quicker
+const BLINK = 360; // the blink at 100: shut, then open again
 const LIFT = 600; // the fade
-const DEPTH = 8; // how thick the solid is, in the logo's hundred units
-const SLICES = 40; // the most layers the depth is drawn in
-const REST = -16; // degrees: where it turns in to, then drifts from
-const DRIFT = 6; // degrees it drifts while the loader fills
-const LOOK_Y = 18; // degrees it turns after a pointer at the window's side
-const LOOK_X = 12; // and tips after one at the top or bottom
 
-const ease = (t: number) => 1 - Math.pow(1 - t, 3);
+const easeOut = (t: number) => 1 - Math.pow(1 - t, 3);
+const easeInOut = (t: number) =>
+  t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
 
 /* The logo from `app/icon.svg`: the lens with the iris taken out of it,
    and the pupil. The iris is bigger than the lens is tall, so the cut
@@ -58,60 +54,33 @@ function paths() {
   return (shape = { lens, open, pupil });
 }
 
-/* The solid at an angle, in the page's own colours: the face in its ink,
-   the sides between ink and ground, fading toward the ground the further
-   back they are, so the depth reads in either theme. Drawn back to
-   front, so each slice covers the one behind. A turn narrows each slice
-   by its cosine and slides it by the sine of its depth; a tip does the
-   same up and down. */
+/* The eye, flat, in the page's own colours. `open` is how far the lid
+   is up: one is the logo as drawn, nought a line through the lens's
+   middle. */
 type RGB = [number, number, number];
 function draw(
   c: CanvasRenderingContext2D,
   ground: RGB,
   ink: RGB,
-  deg: number,
-  tip: number,
   eye: number,
+  open: number,
   // Where its middle is, in the canvas's own pixels.
   cx: number,
   cy: number,
 ) {
   const { width: w, height: h } = c.canvas;
-  const { lens, open, pupil } = paths();
-  const tone = (t: number) =>
-    `rgb(${ground.map((g, i) => Math.round(g + (ink[i] - g) * t)).join(",")})`;
+  const { lens, open: cut, pupil } = paths();
   c.setTransform(1, 0, 0, 1, 0, 0);
-  c.fillStyle = tone(0);
+  c.fillStyle = `rgb(${ground.join(",")})`;
   c.fillRect(0, 0, w, h);
-  const a = (deg * Math.PI) / 180;
   const k = eye / 85.6; // pixels per logo unit: the lens is 85.6 wide
-  const cos = Math.cos(a);
-  const sin = Math.sin(a);
-  const p = (tip * Math.PI) / 180;
-  const cosP = Math.cos(p);
-  const sinP = Math.sin(p);
-  /* One layer per pixel of side that shows, and no more: square on, no
-     side shows and the face is the only fill. */
-  const side = DEPTH * k * Math.max(Math.abs(sin), Math.abs(sinP));
-  const n = Math.min(SLICES, Math.ceil(side));
-  for (let i = 0; i <= n; i++) {
-    const front = i === n;
-    const z = n ? -DEPTH * (1 - i / n) : 0;
-    c.setTransform(
-      k * cos,
-      0,
-      0,
-      k * cosP,
-      cx + k * (z * sin - 50 * cos),
-      cy + k * (z * sinP - 49.6 * cosP),
-    );
-    c.fillStyle = front ? tone(1) : tone(0.3 + 0.3 * (i / n));
-    c.save();
-    c.clip(lens);
-    c.fill(open, "evenodd");
-    c.restore();
-    c.fill(pupil);
-  }
+  c.setTransform(k, 0, 0, k * open, cx - 50 * k, cy - 49.6 * k * open);
+  c.fillStyle = `rgb(${ink.join(",")})`;
+  c.save();
+  c.clip(lens);
+  c.fill(cut, "evenodd");
+  c.restore();
+  c.fill(pupil);
 }
 
 /* A colour as red, green and blue, from whatever the theme declares it
@@ -172,21 +141,6 @@ export function Intro() {
     mark.current?.append(canvas);
     const pen = canvas.getContext("2d");
 
-    /* The pointer, as a place the eye turns to face: nought in the middle
-       of the window, one at an edge. Eased every frame, so a flick of the
-       mouse is a glance rather than a snap. Nothing on a touch screen,
-       where there is no pointer to follow. */
-    let mx = 0;
-    let my = 0;
-    let lx = 0;
-    let ly = 0;
-    const look = (e: PointerEvent) => {
-      if (e.pointerType !== "mouse") return;
-      mx = Math.max(-1, Math.min(1, (e.clientX / w) * 2 - 1));
-      my = Math.max(-1, Math.min(1, (e.clientY / h) * 2 - 1));
-    };
-    window.addEventListener("pointermove", look, { passive: true });
-
     /* What "ready" means: the type, every photograph already on screen
        that is not lazy, and the window's own load. The line fills on a
        steady curve over `FILL` and never runs ahead of those: a quick page
@@ -212,6 +166,7 @@ export function Intro() {
 
     const t0 = performance.now();
     let shown = 0;
+    let blinkAt = 0;
     const step = (now: number) => {
       // A frame's time can be a touch before `t0`: never below nought.
       const since = Math.max(0, now - t0);
@@ -221,28 +176,26 @@ export function Intro() {
       shown += (target - shown) * 0.2;
       if (target - shown < 0.001) shown = target;
 
-      /* The turn: in from edge on, then a slow drift while the loader
-         fills. */
-      const deg =
-        since < IN
-          ? 90 + (REST - 90) * ease(since / IN)
-          : REST + DRIFT * ease(Math.min(1, (since - IN) / 2400));
-      lx += (mx - lx) * 0.08;
-      ly += (my - ly) * 0.08;
+      /* At 65 it blinks: the lid comes down quicker than it goes back
+         up, as a real one does. */
+      if (shown >= 0.65 && blinkAt === 0) blinkAt = now;
+      const b = blinkAt ? Math.min(1, (now - blinkAt) / BLINK) : 0;
+      const shut =
+        b < 0.4 ? easeInOut(b / 0.4) : 1 - easeInOut((b - 0.4) / 0.6);
 
+      canvas.style.opacity = String(easeOut(Math.min(1, since / SHOW)));
       if (pen)
         draw(
           pen,
           ground,
           ink,
-          deg + lx * LOOK_Y,
-          ly * LOOK_X,
           full * dpr,
+          1 - 0.97 * shut,
           (w / 2) * dpr,
           (h / 2) * dpr,
         );
 
-      const gone = shown === 1;
+      const gone = shown === 1 && b === 1;
       if (bar.current) bar.current.style.transform = `scaleX(${shown})`;
       if (count.current) {
         count.current.textContent = String(Math.round(shown * 100)).padStart(
@@ -254,7 +207,6 @@ export function Intro() {
         requestAnimationFrame(step);
         return;
       }
-      window.removeEventListener("pointermove", look);
       box.current?.classList.add("jg-intro-leaving");
       setTimeout(() => {
         lift();
