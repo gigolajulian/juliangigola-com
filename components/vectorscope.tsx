@@ -813,7 +813,7 @@ function ColourTile({ item }: { item: Item }) {
         {colours.length ? (
           <span
             aria-hidden
-            className="absolute left-0 top-0 z-10 flex gap-1 bg-white p-1.5"
+            className="absolute left-0 top-0 z-10 flex gap-1 bg-white p-[3px]"
           >
             {colours.map((c, i) => (
               <span key={i} className="size-3" style={{ backgroundColor: c }} />
