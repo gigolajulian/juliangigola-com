@@ -146,16 +146,6 @@
 #jg-intro.jg-intro-parting > .jg-intro-veil {
   display: block;
 }
-/* The site coming into focus behind the lids. The filter goes on each
-   top-level child rather than on `body`, because a filtered ancestor
-   becomes the containing block for everything fixed inside it and the
-   header would scroll away with the page for as long as it lasted. The
-   intro itself is excluded: it is the thing doing the focusing. The
-   class is only on the root between the cut and the end of the parting,
-   so a full window filter never outlives the gesture. */
-.jg-intro-focusing body > *:not(#jg-intro) {
-  filter: blur(var(--jg-focus, 0px));
-}
 .jg-intro-lens {
   fill: var(--foreground);
 }

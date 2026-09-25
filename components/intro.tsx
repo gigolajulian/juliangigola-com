@@ -226,8 +226,21 @@ export function Intro() {
       /* The page is only worth blurring from here. Until the cut it is
          behind a solid ground, and a filter over the whole site costs a
          layer the size of the window for nothing. */
-      root.classList.add("jg-intro-focusing");
-      root.style.setProperty("--jg-focus", `${haze.toFixed(2)}px`);
+      /* Written on each top-level child, not as a variable on the root: an
+         inherited custom property restyles every element in the document
+         each frame, measured at ~1s of style work across the parting on a
+         phone at 4x slowdown. These few boxes are all the filter touches.
+         Each top-level child and not `body`, because a filtered ancestor
+         becomes the containing block for everything fixed inside it and
+         the header would scroll away with the page while it lasted. */
+      const focusing = [...document.body.children].filter(
+        (n): n is HTMLElement => n instanceof HTMLElement && n.id !== "jg-intro",
+      );
+      const focus = (px: number) => {
+        const f = `blur(${px.toFixed(2)}px)`;
+        for (const n of focusing) n.style.filter = f;
+      };
+      focus(haze);
 
       const t0 = performance.now();
       const step = (now: number) => {
@@ -252,15 +265,11 @@ export function Intro() {
            animation after the first has finished. It lands on zero at
            the same moment they clear the window, and the curve is
            decelerating there, so nothing snaps. */
-        root.style.setProperty(
-          "--jg-focus",
-          `${(haze * (1 - glide(t))).toFixed(2)}px`,
-        );
+        focus(haze * (1 - glide(t)));
         if (t < 1) requestAnimationFrame(step);
         else {
           root.removeAttribute("data-intro");
-          root.classList.remove("jg-intro-focusing");
-          root.style.removeProperty("--jg-focus");
+          for (const n of focusing) n.style.removeProperty("filter");
         }
       };
       requestAnimationFrame(step);
