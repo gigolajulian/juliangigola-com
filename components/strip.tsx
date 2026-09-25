@@ -255,6 +255,11 @@ const centreOf = (el: HTMLElement, i: number) => {
  * its client list live inside the screen they belong to, and `/legal` is a
  * column of headings — and a hash that names one of those should still bring
  * the cell holding it into view rather than doing nothing at all.
+ *
+ * Last, a photograph by its file: `/work/nyx#photo-06` opens on
+ * `/work/nyx/06.jpg` wherever it sits in the sequence. The colour panel
+ * links that way, because a position would move whenever a project's
+ * opener changes and a file name does not.
  */
 const cellFor = (el: HTMLElement, hash: string): number => {
   if (!hash) return -1;
@@ -262,8 +267,13 @@ const cellFor = (el: HTMLElement, hash: string): number => {
   const own = cells.findIndex((c) => c.dataset.hash === hash);
   if (own >= 0) return own;
   const safe = CSS.escape(hash);
-  return cells.findIndex(
+  const held = cells.findIndex(
     (c) => c.querySelector(`[data-hash="${safe}"], #${safe}`) !== null,
+  );
+  if (held >= 0 || !hash.startsWith("photo-")) return held;
+  const file = CSS.escape(`/${hash.slice(6)}.jpg`);
+  return cells.findIndex(
+    (c) => c.querySelector(`[data-frame$="${file}"]`) !== null,
   );
 };
 

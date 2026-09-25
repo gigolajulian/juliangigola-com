@@ -779,7 +779,8 @@ function ColourTile({ item }: { item: Item }) {
 
   return (
     <Link
-      href={p.href}
+      // Straight to this photograph in the project (`cellFor` in strip.tsx).
+      href={`${p.href}#photo-${shot.src.split("/").pop()?.replace(/\.jpg$/i, "")}`}
       prefetch={false}
       data-ring="View project"
       className="group block"
