@@ -10,6 +10,7 @@ import type { Head } from "@/lib/work-heads";
 import { StripPage, StripHead } from "@/components/strip-page";
 import { ScopePanel, type ScopeRow } from "@/components/vectorscope";
 import { markFilter, StripView, type StripViewMode } from "@/components/strip";
+import { animate } from "motion";
 import {
   chooseView,
   search,
@@ -17,6 +18,16 @@ import {
   useWorkView,
   type WorkView,
 } from "@/lib/work-view";
+
+/* JellyRadio's figures, as Julian's example set them. */
+const JELLY = {
+  swell: 0.2,
+  shrink: 0.03,
+  jelly: 1,
+  bounce: 0.4,
+  stagger: 36,
+  stiffness: 580,
+};
 
 /* ── the frame around the work ────────────────────────────────────
  * The head and the chip row, mounted once for the whole of /work, its
@@ -454,6 +465,79 @@ export function WorkShell({
     return () => window.removeEventListener("resize", measure);
   }, [key, shown]);
 
+  /* The jelly, from React Bits' JellyRadio: the chosen chip swells, wide
+     a beat before tall, and the others give way on springs that soften
+     with distance and start a step later the further out they are. Its
+     motion rather than its markup: that component is a group of radio
+     buttons, and these are links, one per route, in a row that drags.
+     Only where the row is a row (`lg` up); in the drawer below it they
+     are a grid, and a push along a line means nothing there. */
+  const litAt =
+    shown === null
+      ? all
+        ? 0
+        : -1
+      : categories.findIndex((c) => c.slug === shown) + 1 || -1;
+  const settled = React.useRef(false);
+  React.useEffect(() => {
+    const r = row.current;
+    if (!r) return;
+    const chips = Array.from(r.children) as HTMLElement[];
+    const wide = window.matchMedia("(min-width: 64rem)");
+    const calm = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    /* Seated without motion on arrival, and again whenever the window
+       crosses `lg`: cleared going down to the drawer's grid, put back going
+       up to the row. */
+    const seat = (still: boolean) => {
+      if (!wide.matches) {
+        for (const c of chips) c.style.removeProperty("transform");
+        return;
+      }
+      const push = litAt < 0 ? 0 : (chips[litAt].offsetWidth * JELLY.swell) / 2;
+      const spring = (k: number, m: number, bounce: number, delay: number) =>
+        still || calm
+          ? { duration: 0 }
+          : {
+              type: "spring" as const,
+              stiffness: k,
+              damping: 2 * Math.sqrt(k * m) * (1 - bounce),
+              mass: m,
+              delay,
+            };
+      chips.forEach((c, i) => {
+        const far = litAt < 0 ? 0 : Math.abs(i - litAt);
+        const x = litAt < 0 ? 0 : Math.sign(i - litAt) * push;
+        const s =
+          litAt < 0 ? 1 : i === litAt ? 1 + JELLY.swell : 1 - JELLY.shrink;
+        const k = JELLY.stiffness * (1 - 0.12 * Math.min(far, 3));
+        const j = JELLY.jelly;
+        const b = JELLY.bounce;
+        const delay = (far * JELLY.stagger) / 1000;
+        animate(c, { x }, spring(k, 0.9, b, delay));
+        animate(
+          c,
+          { scaleX: s },
+          spring(
+            k * (1 + 0.24 * j),
+            0.9 - 0.1 * j,
+            Math.min(0.85, b + 0.3 * j),
+            delay,
+          ),
+        );
+        animate(
+          c,
+          { scaleY: s },
+          spring(k * (1 - 0.14 * j), 0.9 + 0.05 * j, b, delay + 0.05 * j),
+        );
+      });
+    };
+    seat(settled.current === false);
+    settled.current = true;
+    const onWide = () => seat(true);
+    wide.addEventListener("change", onWide);
+    return () => wide.removeEventListener("change", onWide);
+  }, [litAt]);
+
   /* The search, as a viewfinder that opens into a box.
    *
    * One element, not two: the glass is the left end of a pill that is
@@ -627,7 +711,12 @@ export function WorkShell({
               on ? "opacity-100" : "opacity-35",
             )}
           >
-            <svg aria-hidden viewBox="0 0 16 16" className="h-4 w-4" fill="currentColor">
+            <svg
+              aria-hidden
+              viewBox="0 0 16 16"
+              className="h-4 w-4"
+              fill="currentColor"
+            >
               {mode === "grid" ? (
                 <>
                   <rect x="1" y="1" width="6" height="6" rx="0.5" />
@@ -723,7 +812,12 @@ export function WorkShell({
           )}
         >
           {/* A scope: the ring and a trace across it. */}
-          <svg aria-hidden viewBox="0 0 16 16" className="h-3.5 w-3.5" fill="currentColor">
+          <svg
+            aria-hidden
+            viewBox="0 0 16 16"
+            className="h-3.5 w-3.5"
+            fill="currentColor"
+          >
             <path
               d="M8 1.25a6.75 6.75 0 1 1 0 13.5a6.75 6.75 0 1 1 0-13.5Z"
               fill="none"
