@@ -3232,3 +3232,13 @@ img[data-fade][data-loaded] {
     opacity: 0.18;
   }
 }
+
+/* ── the colour panel ─────────────────────────────────────────────
+ * Work outside the hue the scope is reading steps back
+ * (`components/vectorscope.tsx`). No transition: it follows the pointer
+ * across the scope many times a second, and easing each change would
+ * trail behind the hand.
+ * ─────────────────────────────────────────────────────────────── */
+[data-scope="dim"] {
+  opacity: 0.15;
+}

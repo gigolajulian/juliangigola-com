@@ -7,6 +7,7 @@ import {
   isDisciplineGallery,
 } from "@/lib/work";
 import { WORK_HEADS } from "@/lib/work-heads";
+import { WORK_ROWS } from "@/lib/work-rows";
 import { CONTENT } from "@/lib/content";
 
 /**
@@ -45,13 +46,22 @@ for (const c of WORK_CATEGORY_LINKS) {
         .map((p) => pic(p.cover));
 }
 
+/* What the colour panel needs of each line of the index: which samples
+   are its, which link on the page is it, and what to call it. */
+const SCOPE = WORK_ROWS.map(({ slug, href, name }) => ({ slug, href, name }));
+
 export default function WorkIndexLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
   return (
-    <WorkShell heads={WORK_HEADS} categories={WORK_CATEGORY_LINKS} passes={PASSES}>
+    <WorkShell
+      heads={WORK_HEADS}
+      categories={WORK_CATEGORY_LINKS}
+      passes={PASSES}
+      scope={SCOPE}
+    >
       {children}
     </WorkShell>
   );

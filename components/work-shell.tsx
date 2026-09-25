@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils";
 import type { CategoryLink } from "@/lib/work";
 import type { Head } from "@/lib/work-heads";
 import { StripPage, StripHead } from "@/components/strip-page";
+import { ScopePanel, type ScopeRow } from "@/components/vectorscope";
 import { markFilter, StripView, type StripViewMode } from "@/components/strip";
 import {
   chooseView,
@@ -98,6 +99,7 @@ export function WorkShell({
   heads,
   categories,
   passes,
+  scope,
   children,
 }: {
   /** By filter key: "all", a category slug, or "video". */
@@ -105,6 +107,8 @@ export function WorkShell({
   categories: CategoryLink[];
   /** By the same key: the pictures each filter's row opens on. */
   passes: Record<string, PassPic[]>;
+  /** The work the colour panel can place (`vectorscope.tsx`). */
+  scope: ScopeRow[];
   children: React.ReactNode;
 }) {
   const rowBox = React.useRef<HTMLDivElement>(null);
@@ -164,6 +168,9 @@ export function WorkShell({
      without the message the menu's own state would drift out of step with
      what is on the screen. */
   const [filtering, setFiltering] = React.useState(false);
+  /** Whether the colour panel is out. */
+  const [scoping, setScoping] = React.useState(false);
+  const closeScope = React.useCallback(() => setScoping(false), []);
   /** Whether the viewfinder has been opened into a field. */
   const [finding, setFinding] = React.useState(false);
 
@@ -528,14 +535,11 @@ export function WorkShell({
   /* Julian: the list first. It reads as the plainest of the three and
      the row runs from plain to pictorial — a column of names, a wall of
      covers, a ribbon. */
-  /* Colour last: the three that lay the work out, then the one that
-     sorts it by what it looks like (`vectorscope.tsx`). */
-  const modes: WorkView[] = ["list", "grid", "strip", "colour"];
+  const modes: WorkView[] = ["list", "grid", "strip"];
   const WORD: Record<WorkView, string> = {
     strip: "Strip",
     grid: "Grid",
     list: "List",
-    colour: "Colour",
   };
   const toggle = (
     <span className="relative block h-[1.625rem] max-sm:hidden">
@@ -572,19 +576,6 @@ export function WorkShell({
                   <rect x="6" y="2" width="4" height="12" rx="0.5" />
                   <rect x="12" y="2" width="4" height="12" rx="0.5" />
                 </>
-              ) : mode === "colour" ? (
-                /* A scope: the ring, the cross, and a trace across it. */
-                <>
-                  <path
-                    d="M8 1.25a6.75 6.75 0 1 1 0 13.5a6.75 6.75 0 1 1 0-13.5Z"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="1.5"
-                  />
-                  <circle cx="5.5" cy="5.5" r="1.25" />
-                  <circle cx="8" cy="8" r="1.25" />
-                  <circle cx="10.5" cy="10.5" r="1.25" />
-                </>
               ) : mode === "grid" ? (
                 <>
                   <rect x="1" y="1" width="6" height="6" rx="0.5" />
@@ -608,6 +599,36 @@ export function WorkShell({
           </button>
         ))}
         <span aria-hidden className="mx-1 h-3 w-px bg-foreground/15" />
+        {/* Julian: not a view, a button beside the search that brings the
+            scope in over the page (`vectorscope.tsx`). */}
+        <button
+          type="button"
+          aria-expanded={scoping}
+          aria-controls="work-scope"
+          aria-label="Colour"
+          data-ring="Colour"
+          onClick={() => setScoping((v) => !v)}
+          className={cn(
+            "-my-1 p-1.5 transition-opacity duration-200",
+            scoping
+              ? "text-foreground opacity-100"
+              : "text-foreground opacity-35 hoverable:hover:opacity-70",
+          )}
+        >
+          {/* A scope: the ring and a trace across it. */}
+          <svg aria-hidden viewBox="0 0 16 16" className="h-3.5 w-3.5" fill="currentColor">
+            <path
+              d="M8 1.25a6.75 6.75 0 1 1 0 13.5a6.75 6.75 0 1 1 0-13.5Z"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.5"
+            />
+            <circle cx="5.5" cy="5.5" r="1.25" />
+            <circle cx="8" cy="8" r="1.25" />
+            <circle cx="10.5" cy="10.5" r="1.25" />
+          </svg>
+        </button>
+        <ScopePanel open={scoping} onClose={closeScope} rows={scope} />
         {finder}
       </span>
     </span>

@@ -20,7 +20,7 @@ import * as React from "react";
  * last week is not.
  * ─────────────────────────────────────────────────────────────── */
 
-export type WorkView = "strip" | "grid" | "list" | "colour";
+export type WorkView = "strip" | "grid" | "list";
 
 const KEY = "work-view";
 
@@ -42,9 +42,7 @@ const subscribe = (onChange: () => void) => {
 const readView = (): WorkView => {
   try {
     const kept = window.localStorage.getItem(KEY);
-    return kept === "grid" || kept === "list" || kept === "colour"
-      ? kept
-      : "strip";
+    return kept === "grid" || kept === "list" ? kept : "strip";
   } catch {
     // Private browsing: it works, it is simply not remembered.
     return "strip";
