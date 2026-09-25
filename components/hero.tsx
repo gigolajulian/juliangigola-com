@@ -380,6 +380,22 @@ export function Hero({
    */
   const [held, setHeld] = React.useState(false);
 
+  /**
+   * Whether any of the cover is on screen. Scrolled past, the cycle kept
+   * swapping slides nobody could see, and on a phone each swap's render and
+   * restyle cost a frame or two of the scroll every 3.5 seconds (measured
+   * with DevTools at 4x CPU slowdown). It waits off screen and picks up on
+   * the usual beat when the cover comes back.
+   */
+  const [seen, setSeen] = React.useState(true);
+  React.useEffect(() => {
+    const el = sectionRef.current;
+    if (!el) return;
+    const io = new IntersectionObserver(([e]) => setSeen(e.isIntersecting));
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
+
   /** Pure — no side effects in the updater, which React may call twice. */
   const go = React.useCallback(
     (i: number) =>
@@ -388,7 +404,7 @@ export function Hero({
   );
 
   React.useEffect(() => {
-    if (held || slides.length < 2) return;
+    if (held || !seen || slides.length < 2) return;
 
     // Nothing will advance, so the intro would be the whole cover: a picture
     // with no discipline named, no row current, and the running head below
@@ -430,7 +446,7 @@ export function Hero({
     };
     // `slides` is rebuilt every render from props that never change.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [held, slides.length]);
+  }, [held, seen, slides.length]);
 
   /**
    * Hands the cover back once the mouse has been still for `IDLE_MS`.
