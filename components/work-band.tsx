@@ -34,6 +34,15 @@ const subscribeHoverable = (onChange: () => void) => {
   return () => mq.removeEventListener("change", onChange);
 };
 
+/* The width a tile is drawn at, which is what picks the file (`band-grid` in
+   `globals.css`). Measured against production: a tile is 4:5 against half
+   of the height left after 20rem of bar and marks, three to a row on an
+   upright screen, one on a phone. It said 20vw, which on a 2x laptop asked
+   for 680px and got the 1280 file for a 574px tile, four times the pixels
+   to decode as the band slid past, and every decode held a frame back. */
+const BAND_SIZES =
+  "(max-width: 40rem) 100vw, (max-aspect-ratio: 4/5) calc((100vw - 4rem) / 3), max(10rem, calc((100vh - 20rem) * 0.4))";
+
 export function WorkBand({
   project,
   index,
@@ -207,7 +216,7 @@ export function WorkBand({
             src={project.cover.src}
             alt={project.cover.alt || project.name}
             fill
-            sizes="(min-width: 1024px) 20vw, (min-width: 768px) 50vw, 100vw"
+            sizes={BAND_SIZES}
             /* Lazy even above the fold: React's server renderer preloads
                every non-lazy image, and three tiles preloaded beside the
                hero were competing with it on a phone, where they are
@@ -241,7 +250,7 @@ export function WorkBand({
                   // The pointer is on the tile: they are wanted now, not
                   // when something else decides they are near.
                   loading="eager"
-                  sizes="(min-width: 1024px) 20vw, (min-width: 768px) 50vw, 100vw"
+                  sizes={BAND_SIZES}
                   // Two photographs crossfading show both for a moment; a
                   // couple of pixels of blur on whichever is mid-fade makes
                   // them read as one picture resolving — the same trick the
