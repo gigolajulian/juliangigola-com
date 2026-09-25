@@ -812,10 +812,31 @@ export function Strip({
         /* Not the finger. An iPad's own momentum is better than anything
            here, and Lenis says its touch sync is unstable on older iOS. */
         syncTouch: false,
-        autoRaf: true,
+        /* Driven here rather than by `autoRaf`, which asks for a frame
+           every frame for the life of the page, so a strip nobody touches
+           never lets the main thread sleep. The loop runs while an ease is
+           travelling and stops when it lands; a wheel wakes it. */
+        autoRaf: false,
       });
+      let frame = 0;
+      const loop = (t: number) => {
+        lenis.raf(t);
+        frame = lenis.isScrolling === "smooth" ? requestAnimationFrame(loop) : 0;
+      };
+      const wake = () => {
+        if (frame) return;
+        /* Lenis times a frame from the last one it saw. After a rest
+           that is seconds ago, and one frame that long lands the whole
+           ease at once. Zero reads as "no previous frame". */
+        lenis.time = 0;
+        frame = requestAnimationFrame(loop);
+      };
+      // Capture, so the wake is booked before Lenis handles the event.
+      el.addEventListener("wheel", wake, { capture: true, passive: true });
       el.dataset.lenis = "1";
       off = () => {
+        cancelAnimationFrame(frame);
+        el.removeEventListener("wheel", wake, { capture: true });
         lenis.destroy();
         delete el.dataset.lenis;
       };
