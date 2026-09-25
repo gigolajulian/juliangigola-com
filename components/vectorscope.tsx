@@ -15,15 +15,15 @@ import type { Frame } from "@/lib/work-types";
  * Julian: a button that brings it in from the left, and with it the page
  * turns to colour. The discipline rack steps away (`data-scope-open` in
  * globals.css) and in its place a grid of the projects in the hue the
- * scope is reading, the strongest first, each shown by the photograph of
- * it that is most in that colour, with the set's dominant colours on a
- * white plate at its top left. The page follows the pointer over the
- * scope as it moves; a click holds the hue. A tile opens its project.
+ * scope is reading, the strongest first, each shown by its cover with the
+ * set's dominant colours on a white plate at its top left, and the rest
+ * of its photographs in that colour stacked under it, to fan out on hover
+ * (`ColourTile`). The page follows the pointer over the scope as it
+ * moves; a click holds the hue. A tile opens its project.
  *
  * Smooth rather than redrawn: the tiles are keyed by project, so one that
- * stays glides to its new place (`ColourGrid`), one that arrives rises
- * in, and one whose best photograph changes crossfades to it
- * (`ColourTile`).
+ * stays glides to its new place (`ColourGrid`) and one that arrives rises
+ * in.
  *
  * Which projects are in play is read from the page, not handed down: the
  * rack is still there under the panel, so the chip that is lit still
@@ -123,7 +123,14 @@ const TARGETS: [string, number[]][] = [
 type Shot = Frame & { dominant: string; pts: number[]; xy: number[] };
 type Placed = { slug: string; name: string; href: string; shots: Shot[] };
 type ColourSet = { p: Placed; shots: Shot[]; score: number };
-type Item = { p: Placed; shot: Shot; count: number; colours: string[] };
+/** A tile: the project's cover, and its other photographs in the colour. */
+type Item = {
+  p: Placed;
+  shot: Shot;
+  stack: Shot[];
+  count: number;
+  colours: string[];
+};
 
 /** The share of a photograph's points in reach of a hue. */
 const inHue = (xy: number[], point: [number, number]) => {
@@ -283,20 +290,23 @@ export function ScopePanel({
       .sort((a, b) => b.shots.length - a.shots.length || b.score - a.score);
   }, [placed, settled, neutral]);
 
-  /* One tile a project: the photograph most in the colour, or with no
-     colour chosen the one the project opens on. */
+  /* One tile a project, shown by its cover (the photograph it opens
+     on), with the rest of its photographs in the colour stacked under it,
+     the strongest first; with no colour chosen, the rest of the set. */
   const items = React.useMemo<Item[]>(
     () =>
       neutral
         ? placed.map((p) => ({
             p,
             shot: p.shots[0],
+            stack: p.shots.slice(1),
             count: 0,
             colours: swatches(p.shots.slice(0, 8)),
           }))
         : sets.map((s) => ({
             p: s.p,
-            shot: s.shots[0],
+            shot: s.p.shots[0],
+            stack: s.shots.filter((f) => f.src !== s.p.shots[0].src),
             count: s.shots.length,
             colours: swatches(s.shots),
           })),
@@ -766,71 +776,230 @@ function ColourGrid({
   );
 }
 
-/* A project, shown by one photograph. When the best photograph changes the
-   new one is laid over the old and fades up once it has loaded
-   (`img[data-fade]` in globals.css), and the old one goes after, so the
-   tile never shows its bare colour in between. */
+/** Between the photographs in the fan, and inside its panel. */
+const FAN_GAP = 8;
+
+const photoHref = (href: string, s: Shot) =>
+  `${href}#photo-${s.src.split("/").pop()?.replace(/\.jpg$/i, "")}`;
+
+/* A project, shown by its cover. The rest of its photographs in this
+   colour sit under it as a stack, two edges peeking out; the pointer
+   resting on the cover fans them out beside it, over the grid, each one a
+   way straight to that photograph (`cellFor` in strip.tsx). Julian asked
+   for the cover and a quick look at the rest rather than every photograph
+   in the set at once. Laid out when it opens, in two rows as tall as the
+   cover, towards whichever side has the room, with what does not fit
+   counted on a last card that opens the project. Touch has no hover and
+   simply opens the project. */
 function ColourTile({ item }: { item: Item }) {
-  const { p, shot, count, colours } = item;
-  const [layers, setLayers] = React.useState<Shot[]>([shot]);
-  if (layers[layers.length - 1].src !== shot.src)
-    setLayers((l) => [l[l.length - 1], shot]);
-  const top = layers[layers.length - 1];
+  const { p, shot, stack, count, colours } = item;
+  const box = React.useRef<HTMLSpanElement>(null);
+  const wait = React.useRef(0);
+  const [open, setOpen] = React.useState(false);
+  const [fan, setFan] = React.useState<{
+    left: boolean;
+    h: number;
+    rows: number[][];
+    more: number;
+  } | null>(null);
+
+  const enter = () => {
+    if (!stack.length || !window.matchMedia("(hover: hover)").matches) return;
+    window.clearTimeout(wait.current);
+    // A beat, so a pointer crossing the grid does not open every stack.
+    wait.current = window.setTimeout(() => {
+      const el = box.current;
+      const section = el?.closest("section");
+      if (!el || !section) return;
+      const r = el.getBoundingClientRect();
+      const s = section.getBoundingClientRect();
+      const cs = getComputedStyle(section);
+      // Two rows and the panel's padding come to the cover's height.
+      const h = (r.height - FAN_GAP * 3) / 2;
+      const right = s.right - parseFloat(cs.paddingRight) - r.right;
+      const leftRoom = r.left - s.left - parseFloat(cs.paddingLeft);
+      const left = leftRoom > right;
+      const room = Math.max(right, leftRoom) - 16 - FAN_GAP * 2;
+      const all = stack.map((f) => (h * f.width) / f.height);
+      const card = h * 0.45;
+      // In order, row by row; the last row keeps room for the count.
+      const rows: number[][] = [[], []];
+      let i = 0;
+      for (const [n, row] of rows.entries()) {
+        let used = 0;
+        while (i < all.length) {
+          const reserve = n === 1 && i < all.length - 1 ? FAN_GAP + card : 0;
+          if (used + all[i] + reserve > room) break;
+          row.push(all[i]);
+          used += all[i] + FAN_GAP;
+          i++;
+        }
+      }
+      setFan({ left, h, rows, more: all.length - i });
+      setOpen(true);
+    }, 90);
+  };
+  const leave = () => {
+    window.clearTimeout(wait.current);
+    setOpen(false);
+  };
+  React.useEffect(() => () => window.clearTimeout(wait.current), []);
+
+  const still =
+    typeof window !== "undefined" &&
+    window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
   return (
-    <Link
-      // Straight to this photograph in the project (`cellFor` in strip.tsx).
-      href={`${p.href}#photo-${shot.src.split("/").pop()?.replace(/\.jpg$/i, "")}`}
-      prefetch={false}
-      data-ring="View project"
-      className="group block"
+    <div
+      className="relative"
+      style={{ zIndex: open ? 30 : undefined }}
+      onPointerEnter={enter}
+      onPointerLeave={leave}
     >
-      <span
-        className="relative block aspect-[4/5] overflow-hidden"
-        style={{ backgroundColor: top.color }}
+      <Link
+        href={p.href}
+        prefetch={false}
+        data-ring="View project"
+        className="group block"
       >
-        {layers.map((l) => (
-          <Image
-            key={l.src}
-            src={l.src}
-            alt={l === top ? l.alt : ""}
-            fill
-            sizes="(min-width: 96rem) 24vw, (min-width: 64rem) 30vw, 60vw"
-            data-fade=""
-            onLoad={
-              l === top && layers.length > 1
-                ? () =>
-                    window.setTimeout(
-                      () => setLayers((x) => x.slice(-1)),
-                      520,
-                    )
-                : undefined
-            }
-            className="object-cover transition-[scale] duration-500 ease-[var(--ease-out-strong)] hoverable:group-hover:scale-[1.028]"
-          />
-        ))}
-        {/* The set's dominant colours, on a white plate at the top left. */}
-        {colours.length ? (
+        <span className="relative isolate block">
+          {/* The stack under the cover: two edges, in the set's own colours. */}
+          {stack.slice(0, 2).map((f, i) => (
+            <span
+              key={f.src}
+              aria-hidden
+              className="absolute inset-0 transition-[opacity,translate] duration-300 ease-[var(--ease-out-strong)]"
+              style={{
+                backgroundColor: f.color,
+                translate: open ? "0 0" : `${(i + 1) * 6}px 0`,
+                scale: `1 ${1 - (i + 1) * 0.04}`,
+                opacity: open ? 0 : 1 - i * 0.35,
+                zIndex: -1 - i,
+              }}
+            />
+          ))}
           <span
-            aria-hidden
-            className="absolute left-0 top-0 z-10 flex gap-1 bg-white p-[3px]"
+            ref={box}
+            className="relative block aspect-[4/5] overflow-hidden"
+            style={{ backgroundColor: shot.color }}
           >
-            {colours.map((c, i) => (
-              <span key={i} className="size-3" style={{ backgroundColor: c }} />
-            ))}
+            <Image
+              src={shot.src}
+              alt={shot.alt}
+              fill
+              sizes="(min-width: 96rem) 24vw, (min-width: 64rem) 30vw, 60vw"
+              data-fade=""
+              className="object-cover transition-[scale] duration-500 ease-[var(--ease-out-strong)] hoverable:group-hover:scale-[1.028]"
+            />
+            {/* The set's dominant colours, on a white plate at the top left. */}
+            {colours.length ? (
+              <span
+                aria-hidden
+                className="absolute left-0 top-0 z-10 flex gap-1 bg-white p-[3px]"
+              >
+                {colours.map((c, i) => (
+                  <span key={i} className="size-3" style={{ backgroundColor: c }} />
+                ))}
+              </span>
+            ) : null}
           </span>
-        ) : null}
-      </span>
-      <span className="mt-2 flex items-baseline justify-between gap-3">
-        <span className="label truncate transition-colors group-hover:text-muted-foreground">
-          {p.name}
         </span>
-        {count ? (
-          <span className="label shrink-0 tabular-nums text-muted-foreground">
-            {count}
+        <span className="mt-2 flex items-baseline justify-between gap-3">
+          <span className="label truncate transition-colors group-hover:text-muted-foreground">
+            {p.name}
           </span>
-        ) : null}
-      </span>
-    </Link>
+          {count ? (
+            <span className="label shrink-0 tabular-nums text-muted-foreground">
+              {count}
+            </span>
+          ) : null}
+        </span>
+      </Link>
+
+      {fan ? (
+        /* The padding on the cover's side bridges the gap between the
+           tiles, so the pointer can cross to the fan without leaving. */
+        <div
+          data-fan
+          className="absolute"
+          style={{
+            top: 0,
+            [fan.left ? "right" : "left"]: "100%",
+            [fan.left ? "paddingRight" : "paddingLeft"]: 16,
+            pointerEvents: open ? "auto" : "none",
+          }}
+        >
+          <div
+            className={cn(
+              "flex flex-col gap-2 bg-background p-2 shadow-[0_12px_32px_rgb(0_0_0/0.22)]",
+              fan.left ? "items-end" : "items-start",
+              !still && "transition-[clip-path,opacity] ease-[var(--ease-out-strong)]",
+            )}
+            style={{
+              clipPath: open
+                ? "inset(0 0 0 0)"
+                : fan.left
+                  ? "inset(0 0 0 100%)"
+                  : "inset(0 100% 0 0)",
+              opacity: open ? 1 : 0,
+              transitionDuration: open ? "420ms" : "200ms",
+            }}
+          >
+            {fan.rows.map((row, r) =>
+              row.length || (r === 1 && fan.more) ? (
+                <div key={r} className={cn("flex gap-2", fan.left && "flex-row-reverse")}>
+                  {row.map((w, n) => {
+                    // Its place in the stack, for the photograph and the stagger.
+                    const i = r === 0 ? n : fan.rows[0].length + n;
+                    const f = stack[i];
+                    return (
+                      <Link
+                        key={f.src}
+                        href={photoHref(p.href, f)}
+                        prefetch={false}
+                        tabIndex={open ? undefined : -1}
+                        data-ring="View photo"
+                        className="relative block shrink-0 overflow-hidden"
+                        style={{
+                          width: w,
+                          height: fan.h,
+                          backgroundColor: f.color,
+                          translate: open ? "0 0" : `${fan.left ? 24 : -24}px 0`,
+                          opacity: open ? 1 : 0,
+                          transition: still
+                            ? undefined
+                            : `translate 420ms ${SETTLE} ${open ? i * 25 : 0}ms, opacity 300ms ${SETTLE} ${open ? i * 25 : 0}ms`,
+                        }}
+                      >
+                        <Image
+                          src={f.src}
+                          alt={f.alt}
+                          fill
+                          sizes={`${Math.ceil(w)}px`}
+                          data-fade=""
+                          className="object-cover"
+                        />
+                      </Link>
+                    );
+                  })}
+                  {r === 1 && fan.more ? (
+                    <Link
+                      href={p.href}
+                      prefetch={false}
+                      tabIndex={open ? undefined : -1}
+                      data-ring="View project"
+                      className="label flex shrink-0 items-center justify-center bg-foreground/[0.06] text-muted-foreground"
+                      style={{ width: fan.h * 0.45, height: fan.h }}
+                    >
+                      +{fan.more}
+                    </Link>
+                  ) : null}
+                </div>
+              ) : null,
+            )}
+          </div>
+        </div>
+      ) : null}
+    </div>
   );
 }
