@@ -139,16 +139,24 @@ const inHue = (xy: number[], point: [number, number]) => {
   return near / (xy.length / 2 || 1);
 };
 
-/** Up to three dominant colours of a set, the near-duplicates folded. */
+/** Three colours of a set, the near-duplicates folded: the frames'
+    dominant colours first, then, where those run out, colours sampled
+    from the photographs themselves. Julian: always three. */
 const swatches = (shots: Shot[]) => {
-  const out: number[][] = [];
-  for (const s of shots) {
+  const pool: number[][] = shots.map((s) => {
     const n = parseInt(s.dominant.slice(1), 16);
-    const c = [(n >> 16) & 255, (n >> 8) & 255, n & 255];
-    if (out.every((o) => Math.hypot(o[0] - c[0], o[1] - c[1], o[2] - c[2]) > 40))
-      out.push(c);
-    if (out.length === 3) break;
-  }
+    return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+  });
+  for (const s of shots)
+    for (let i = 0; i + 2 < s.pts.length; i += 3) pool.push(s.pts.slice(i, i + 3));
+  const out: number[][] = [];
+  for (const apart of [40, 12, 0])
+    for (const c of pool) {
+      if (out.length === 3) break;
+      if (out.every((o) => Math.hypot(o[0] - c[0], o[1] - c[1], o[2] - c[2]) > apart))
+        out.push(c);
+    }
+  while (out.length < 3) out.push(out[0] ?? [17, 17, 17]);
   return out.map(hex);
 };
 
@@ -804,10 +812,10 @@ function ColourTile({ item }: { item: Item }) {
         {colours.length ? (
           <span
             aria-hidden
-            className="absolute left-2 top-2 z-10 flex gap-1 bg-white p-1.5"
+            className="absolute left-0 top-0 z-10 flex gap-1 bg-white p-1.5"
           >
-            {colours.map((c) => (
-              <span key={c} className="size-3" style={{ backgroundColor: c }} />
+            {colours.map((c, i) => (
+              <span key={i} className="size-3" style={{ backgroundColor: c }} />
             ))}
           </span>
         ) : null}
