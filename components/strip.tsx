@@ -657,74 +657,86 @@ export function Strip({
 
     const paint = () => {
       const kids = Array.from(el.children) as HTMLElement[];
-      const frames = kids.filter((k) => k.tagName === "BUTTON");
-      /* A cover is a link. One in the shelf means this is a run of
-         projects, or All work with galleries among them, and the wall
-         has no business rearranging it. */
-      const covers = kids.some((k) => k.tagName === "A" && k.hasAttribute("data-tick"));
       const cs = getComputedStyle(el);
       const gap = parseFloat(cs.columnGap) || 16;
       const room =
         el.clientHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom);
-      if (!frames.length || covers || room < 80) {
+      /* Each run of a gallery's frames is a wall of its own. A cover is a
+         link and never part of one, so a run of covers stays exactly as
+         it is; on All work the galleries among them are walled one by one.
+         Julian saw the ragged holes in Event coverage there, where the
+         wall used to stand down for the whole shelf. */
+      const runs: HTMLElement[][] = [];
+      for (let i = 0; i < kids.length; i++) {
+        if (kids[i].tagName !== "BUTTON") continue;
+        if (i > 0 && kids[i - 1].tagName === "BUTTON") runs[runs.length - 1].push(kids[i]);
+        else runs.push([kids[i]]);
+      }
+      if (!runs.length || room < 80) {
         sheet.textContent = "";
         return;
       }
-
-      const ars = frames.map(
-        (f) => parseFloat(getComputedStyle(f).getPropertyValue("--ar")) || 0.8,
-      );
-      /* Walk the run, taking at each step the number of frames whose
-         shared width lands nearest the one the wall wants. */
-      const cols: { at: number; k: number; w: number }[] = [];
-      for (let i = 0; i < ars.length; ) {
-        let best = { k: 1, w: 0, score: Infinity };
-        for (let k = 1; k <= 3 && i + k <= ars.length; k++) {
-          const inv = ars.slice(i, i + k).reduce((sum, a) => sum + 1 / a, 0);
-          const w = (room - (k - 1) * gap) / inv;
-          const score =
-            Math.abs(w / room - WALL_WANT) + (w / room > WALL_CAP ? 100 : 0);
-          if (score < best.score) best = { k, w, score };
-        }
-        cols.push({ at: i, k: best.k, w: best.w });
-        i += best.k;
-      }
-
-      /* The words that open the shelf stay where they are and keep their
-         own width; the wall starts after them. */
-      const first = kids.indexOf(frames[0]);
-      const head = first > 0 ? kids[first - 1] : null;
-      const left0 = head
-        ? head.offsetLeft + head.offsetWidth + gap
-        : parseFloat(cs.paddingLeft) || 0;
-      const top0 = parseFloat(cs.paddingTop) || 0;
 
       const at = `[data-wall="${wallId}"]`;
       const rules = [
         `${at}{position:relative!important;}`,
         `${at}>button{position:absolute!important;margin:0!important;aspect-ratio:auto!important;}`,
       ];
-      let x = left0;
-      for (const col of cols) {
-        let y = top0;
-        for (let n = 0; n < col.k; n++) {
-          const h = col.w / ars[col.at + n];
-          rules.push(
-            `${at}>:nth-child(${kids.indexOf(frames[col.at + n]) + 1}){` +
-              `left:${x.toFixed(2)}px!important;top:${y.toFixed(2)}px!important;` +
-              `width:${col.w.toFixed(2)}px!important;height:${h.toFixed(2)}px!important;}`,
-          );
-          y += h + gap;
-        }
-        x += col.w + gap;
-      }
-      /* Out of the flow, the frames take no room, so the words that open
-         the shelf carry the wall's length on their own margin and
-         whatever follows lands after it. */
-      if (head) {
-        rules.push(
-          `${at}>:nth-child(${first}){margin-right:${(x - left0).toFixed(2)}px!important;}`,
+      const top0 = parseFloat(cs.paddingTop) || 0;
+      for (const frames of runs) {
+        const ars = frames.map(
+          (f) => parseFloat(getComputedStyle(f).getPropertyValue("--ar")) || 0.8,
         );
+        /* Walk the run, taking at each step the number of frames whose
+           shared width lands nearest the one the wall wants. */
+        const cols: { at: number; k: number; w: number }[] = [];
+        for (let i = 0; i < ars.length; ) {
+          let best = { k: 1, w: 0, score: Infinity };
+          for (let k = 1; k <= 3 && i + k <= ars.length; k++) {
+            const inv = ars.slice(i, i + k).reduce((sum, a) => sum + 1 / a, 0);
+            const w = (room - (k - 1) * gap) / inv;
+            const score =
+              Math.abs(w / room - WALL_WANT) + (w / room > WALL_CAP ? 100 : 0);
+            if (score < best.score) best = { k, w, score };
+          }
+          cols.push({ at: i, k: best.k, w: best.w });
+          i += best.k;
+        }
+
+        /* The words that open the run stay where they are and keep their
+           own width; the wall starts after them. Where they stand depends
+           on the walls before this one, so what is written so far goes in
+           first and is measured: one layout a gallery, and only when the
+           shelf changes size. */
+        const first = kids.indexOf(frames[0]);
+        const head = first > 0 ? kids[first - 1] : null;
+        sheet.textContent = rules.join(String.fromCharCode(10));
+        const left0 = head
+          ? head.offsetLeft + head.offsetWidth + gap
+          : parseFloat(cs.paddingLeft) || 0;
+
+        let x = left0;
+        for (const col of cols) {
+          let y = top0;
+          for (let n = 0; n < col.k; n++) {
+            const h = col.w / ars[col.at + n];
+            rules.push(
+              `${at}>:nth-child(${kids.indexOf(frames[col.at + n]) + 1}){` +
+                `left:${x.toFixed(2)}px!important;top:${y.toFixed(2)}px!important;` +
+                `width:${col.w.toFixed(2)}px!important;height:${h.toFixed(2)}px!important;}`,
+            );
+            y += h + gap;
+          }
+          x += col.w + gap;
+        }
+        /* Out of the flow, the frames take no room, so the words that open
+           the run carry the wall's length on their own margin and whatever
+           follows lands after it. */
+        if (head) {
+          rules.push(
+            `${at}>:nth-child(${first}){margin-right:${(x - left0).toFixed(2)}px!important;}`,
+          );
+        }
       }
       sheet.textContent = rules.join(String.fromCharCode(10));
     };
