@@ -124,6 +124,8 @@ const COVER_WIDTH = 600;
 const LEAD_FRAMES: Record<string, string> = {
   // Julian's pick: the second frame, not the first.
   "luxe-meets-future": "/work/luxe-meets-future/02.jpg",
+  // Julian's pick: the glass sculpture, frame twelve.
+  metamorphosis: "/work/metamorphosis/12.jpg",
 };
 
 const withLeadFrame = (project: Project): Project => {
