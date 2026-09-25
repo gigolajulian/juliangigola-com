@@ -75,7 +75,7 @@ export default function ContactPage() {
         {/* The ask and the details on one side, the form on the other. */}
         <section
           data-tick
-          data-label="Enquire"
+          data-label="Inquire"
           data-hash="enquire"
           className="grid w-full shrink-0 grid-cols-1 gap-10 px-6 py-12 sm:h-full sm:grid-cols-2 sm:items-center sm:gap-16 sm:px-16 sm:py-0"
         >

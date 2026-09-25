@@ -620,8 +620,8 @@ export function WorkShell({
           type="button"
           aria-expanded={scoping}
           aria-controls="work-scope"
-          aria-label="Colour"
-          data-ring="Colour"
+          aria-label="Color"
+          data-ring="Color"
           onClick={() => (scoping ? closeScope() : openScope())}
           className={cn(
             "-my-1 p-1.5 transition-opacity duration-200",

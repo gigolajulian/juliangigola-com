@@ -62,7 +62,7 @@ const PHASES = [
   },
   {
     step: "Delivery",
-    body: "Selects for approval, then final retouched files in the crops and colour spaces you need.",
+    body: "Selects for approval, then final retouched files in the crops and color spaces you need.",
   },
 ];
 
@@ -251,7 +251,7 @@ export default function AboutPage() {
                   href="/contact?type=editorial"
                   className="label action px-6 py-4 press active:scale-[0.97] short:py-3"
                 >
-                  Enquire
+                  Inquire
                 </Link>
                 <Link
                   prefetch={false}

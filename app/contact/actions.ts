@@ -125,7 +125,7 @@ export async function submitEnquiry(
     : "other";
 
   /** The hand-written route, for every path that cannot store the enquiry. */
-  const subject = `${type} enquiry from ${values.name}`;
+  const subject = `${type} inquiry from ${values.name}`;
   const body = [
     `Type: ${type}`,
     values.detail ? `Details: ${values.detail.slice(0, MAX.detail)}` : null,

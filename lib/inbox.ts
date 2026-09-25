@@ -247,7 +247,7 @@ export type Summary = {
  * grapher's inbox on a phone reads fastest.
  */
 export const emailCopy = (e: Enquiry): { subject: string; text: string } => ({
-  subject: `${e.type} enquiry from ${e.name}`,
+  subject: `${e.type} inquiry from ${e.name}`,
   text: [
     `Type: ${e.type}`,
     e.detail ? `Details: ${e.detail}` : null,
@@ -281,7 +281,7 @@ export const summary = (e: Enquiry): Summary => ({
  * mail, where his signature and his sent folder are.
  */
 export function replyLink(e: Enquiry): string {
-  const subject = `Re: your ${e.type} enquiry`;
+  const subject = `Re: your ${e.type} inquiry`;
   const quoted = e.message
     .split("\n")
     .map((line) => `> ${line}`)

@@ -55,7 +55,7 @@ export function EnquiryCell({
     <div
       data-tick={tick ? "" : undefined}
       data-ring=""
-      data-label={tick ? "Enquire" : undefined}
+      data-label={tick ? "Inquire" : undefined}
       data-hash="enquire"
       className={cn(
         "flex w-full shrink-0 flex-col justify-center gap-6 py-10 sm:h-full sm:w-[min(40rem,85vw)] sm:py-0 sm:pl-24 sm:pr-6",
@@ -92,7 +92,7 @@ export function EnquiryCell({
             href={href}
             className="label action px-6 py-4 press active:scale-[0.97]"
           >
-            Enquire
+            Inquire
           </Link>
           {secondary ? (
             <Link

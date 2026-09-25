@@ -195,7 +195,7 @@ export default function SessionsPage() {
                     data-ring="Book"
                     className="label action-quiet inline-flex items-center gap-2 px-5 py-3 press active:scale-[0.97]"
                   >
-                    Enquire
+                    Inquire
                   </Link>
                 </div>
               </div>,

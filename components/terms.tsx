@@ -127,7 +127,7 @@ export function TermsColumn() {
             anyone else, on any platform, in any form;
           </li>
           <li>
-            modify, crop, recolour, retouch, composite, translate, or make any
+            modify, crop, recolor, retouch, composite, translate, or make any
             derivative work from any Content;
           </li>
           <li>
@@ -300,9 +300,9 @@ export function TermsColumn() {
         </p>
       </Clause>
 
-      <Clause title="Enquiries and material you send">
+      <Clause title="Inquiries and material you send">
         <p>
-          When you send an enquiry you confirm that what you have written is
+          When you send an inquiry you confirm that what you have written is
           accurate and that you are entitled to send it. You give me the right
           to use it to answer you, to evaluate and carry out the work discussed,
           and to keep a record of it. Where it goes and how long it is kept is
@@ -314,7 +314,7 @@ export function TermsColumn() {
         </p>
         <p>
           Do not send anything confidential, anything you have no right to send,
-          or anything unlawful. An enquiry is not a confidential communication
+          or anything unlawful. An inquiry is not a confidential communication
           and no non-disclosure obligation arises from sending one. If you send
           an idea, a brief, or a reference, I am free to work on similar
           projects for other people; I take no obligation from having read it.
@@ -322,7 +322,7 @@ export function TermsColumn() {
         <p>
           The form is protected against automated submission. Using it to send
           spam, to probe the Site, or to send anything other than a genuine
-          enquiry is a breach of these terms.
+          inquiry is a breach of these terms.
         </p>
       </Clause>
 
@@ -456,7 +456,7 @@ export function TermsColumn() {
       <Clause title="Age">
         <p>
           The Site is not directed at children. If you are under 13, do not use
-          it and do not send an enquiry. If you are between 13 and 18, use it
+          it and do not send an inquiry. If you are between 13 and 18, use it
           only with the involvement of a parent or guardian, who accepts these
           terms on your behalf. If I learn that somebody under 13 has sent me
           personal information, I delete it.

@@ -58,7 +58,7 @@ export function CallToAction({
             href={href}
             className="label action px-6 py-4 press active:scale-[0.97]"
           >
-            Enquire
+            Inquire
           </Link>
           {secondary ? (
             <Link

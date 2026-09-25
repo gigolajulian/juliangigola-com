@@ -153,7 +153,7 @@ export function AdminInbox() {
   async function remove(row: Row) {
     if (
       !window.confirm(
-        `Delete the enquiry from ${row.name}? This cannot be undone.`,
+        `Delete the inquiry from ${row.name}? This cannot be undone.`,
       )
     )
       return;
@@ -172,7 +172,7 @@ export function AdminInbox() {
     <div className="mt-10 flex flex-col gap-6">
       <div className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-2">
         <h2 className="font-display text-xl uppercase tracking-[0]">
-          Enquiries
+          Inquiries
           {rows ? (
             <span className="label ml-3 text-muted-foreground">
               {rows.length} total
@@ -351,7 +351,7 @@ function Unlock({
       className="flex max-w-prose flex-col gap-3 border border-border bg-card p-5"
     >
       <p className="text-sm text-muted-foreground">
-        Enquiries are kept on this site rather than emailed. The inbox opens
+        Inquiries are kept on this site rather than emailed. The inbox opens
         with the GitHub token you signed in with, so normally there is nothing
         to do here. If you would rather it use a key of its own, set one with{" "}
         <code className="text-foreground">wrangler secret put INBOX_KEY</code>{" "}

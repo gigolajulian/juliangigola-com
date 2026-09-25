@@ -539,7 +539,7 @@ export function ScopePanel({
       <aside
         id="work-scope"
         data-scope-panel
-        aria-label="Colour"
+        aria-label="Color"
         inert={!open}
         style={{
           width: PANEL,
@@ -557,7 +557,7 @@ export function ScopePanel({
         )}
       >
         <div className="flex items-center justify-between">
-          <p className="label">Colour</p>
+          <p className="label">Color</p>
           <button
             type="button"
             onClick={onClose}
@@ -578,14 +578,14 @@ export function ScopePanel({
           }}
           role="slider"
           tabIndex={0}
-          aria-label="Colour"
+          aria-label="Color"
           aria-valuemin={0}
           aria-valuemax={360}
           aria-valuenow={Math.round(h)}
           aria-valuetext={
             point
               ? `Hue ${Math.round(h)} degrees, saturation ${Math.round(s * 100)} percent`
-              : "No colour chosen"
+              : "No color chosen"
           }
           onKeyDown={(e) => {
             const step = e.shiftKey ? 8 : 2;
@@ -622,11 +622,11 @@ export function ScopePanel({
 
         <p className="label min-h-[1lh] truncate tabular-nums" aria-live="polite">
           {data === null ? (
-            <span className="text-muted-foreground">Reading the colours</span>
+            <span className="text-muted-foreground">Reading the colors</span>
           ) : neutral ? (
             <span className="text-muted-foreground">All the work</span>
           ) : (
-            `${count} ${count === 1 ? "project" : "projects"} in this colour`
+            `${count} ${count === 1 ? "project" : "projects"} in this color`
           )}
         </p>
         <p
@@ -659,7 +659,7 @@ export function ScopePanel({
           }}
         >
           <label htmlFor="scope-brand" className="label text-muted-foreground">
-            Brand colour
+            Brand color
           </label>
           <span
             aria-hidden
@@ -689,7 +689,7 @@ export function ScopePanel({
         </form>
 
         <p className="text-xs leading-relaxed text-muted-foreground">
-          Click the scope to find a colour in the work. Click the point again to let it go.
+          Click the scope to find a color in the work. Click the point again to let it go.
         </p>
       </aside>
 
@@ -698,7 +698,7 @@ export function ScopePanel({
         <section
           data-scope-panel
           data-scroll
-          aria-label="The work in this colour"
+          aria-label="The work in this color"
           style={{
             left: PANEL,
             ...(room ? { top: room.top, bottom: room.bottom } : null),
@@ -708,7 +708,7 @@ export function ScopePanel({
           {data === null ? null : items.length ? (
             <ColourGrid items={items} onOver={setOver} />
           ) : (
-            <p className="label text-muted-foreground">Nothing in this colour yet</p>
+            <p className="label text-muted-foreground">Nothing in this color yet</p>
           )}
         </section>
       ) : null}

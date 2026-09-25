@@ -1775,7 +1775,7 @@ export function AdminEditor({
         <p className="max-w-prose text-sm text-muted-foreground">
           A price left empty reads as &ldquo;On request&rdquo;, which is honest,
           but a visible number is the single biggest thing that stops a session
-          client leaving without enquiring.
+          client leaving without inquiring.
         </p>
 
         {draft.sessions.map((session, i) => (

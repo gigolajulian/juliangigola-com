@@ -333,7 +333,7 @@ export function ContactForm() {
           aria-describedby={!ready ? "enquire-missing" : undefined}
           className="label action px-6 py-4 press active:scale-[0.97] aria-disabled:active:scale-100"
         >
-          {pending ? "Sending…" : "Enquire"}
+          {pending ? "Sending…" : "Inquire"}
         </button>
         {/* What is still missing, where the button is, and only once
             there is any reason to say it. */}

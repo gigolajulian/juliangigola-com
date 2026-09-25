@@ -29,13 +29,13 @@ export function PrivacyColumn() {
     >
       <Clause title="What is collected, and when">
         <p>
-          <strong>If you send an enquiry.</strong> The form collects your name,
+          <strong>If you send an inquiry.</strong> The form collects your name,
           your email address, the kind of shoot you are asking about, the
           optional detail line such as a publication, a release date or a
           location, and your message. On submission the Site also records the
           date and time and the two-letter country code Cloudflare derives from
           your connection. That is the complete list. Your IP address is not
-          stored with your enquiry.
+          stored with your inquiry.
         </p>
         <p>
           <strong>If you email me directly.</strong> Your address and whatever
@@ -46,7 +46,7 @@ export function PrivacyColumn() {
           that deliver the Site see your IP address, your browser type, the
           pages you request and the page you came from. Cloudflare processes
           that to deliver pages and to protect the Site from abuse. The Site
-          itself keeps one derived value: for five minutes after an enquiry is
+          itself keeps one derived value: for five minutes after an inquiry is
           sent it stores a salted one-way hash of the sender&rsquo;s IP address,
           so the form cannot be fired again from the same connection inside that
           window. The hash cannot be turned back into an address, the salt
@@ -77,7 +77,7 @@ export function PrivacyColumn() {
           <li>
             <strong>To keep the Site up, secure and free of abuse</strong>,
             which is what the five-minute cooldown and the daily ceiling on
-            enquiries are for. Basis: my legitimate interest in running a
+            inquiries are for. Basis: my legitimate interest in running a
             working site (Article 6(1)(f)). The intrusion is minimal and the
             data is hashed or aggregate.
           </li>
@@ -151,14 +151,14 @@ export function PrivacyColumn() {
         <ul>
           <li>
             <strong>Cloudflare, Inc.</strong> (San Francisco, USA): hosts and
-            delivers the Site, stores enquiries in its key-value storage,
-            derives the country code, and sends the email copy of each enquiry
+            delivers the Site, stores inquiries in its key-value storage,
+            derives the country code, and sends the email copy of each inquiry
             to my mailbox. Cloudflare runs a global network and your request is
             handled at the location nearest you.
           </li>
           <li>
             <strong>Google LLC</strong> (Google Workspace): my email service. A
-            copy of each enquiry is delivered to my mailbox there, and any email
+            copy of each inquiry is delivered to my mailbox there, and any email
             you send me is stored there.
           </li>
           <li>
@@ -210,7 +210,7 @@ export function PrivacyColumn() {
       <Clause title="How long it is kept">
         <ul>
           <li>
-            <strong>Enquiries</strong> stay in the Site&rsquo;s inbox until I
+            <strong>Inquiries</strong> stay in the Site&rsquo;s inbox until I
             have read and answered them, and are then deleted. The email copy in
             my mailbox is kept as long as ordinary business correspondence, and
             longer where it forms part of the record of commissioned work that
@@ -218,7 +218,7 @@ export function PrivacyColumn() {
           </li>
           <li>
             <strong>The cooldown hash</strong> deletes itself five minutes after
-            the enquiry. <strong>The daily enquiry counter</strong>, which holds
+            the inquiry. <strong>The daily inquiry counter</strong>, which holds
             a number and nothing else, deletes itself after two days.
           </li>
           <li>
@@ -235,7 +235,7 @@ export function PrivacyColumn() {
       <Clause title="Security">
         <p>
           The Site is served only over HTTPS, with strict transport security and
-          a content security policy. Enquiries are held in encrypted storage
+          a content security policy. Inquiries are held in encrypted storage
           that only the Site&rsquo;s own code and I can read, behind a
           credential that is not shared. The form has a hidden field that
           catches automated submissions, a per-sender cooldown, and a daily
@@ -255,7 +255,7 @@ export function PrivacyColumn() {
           copy in a portable form. Write to {EMAIL}. I answer within thirty
           days, or within the shorter period your local law sets, and I will
           need enough to be sure the request comes from you: ordinarily, that it
-          comes from the address the enquiry came from.
+          comes from the address the inquiry came from.
         </p>
         <p>
           <strong>If you are in the EEA, the UK or Switzerland</strong>, you
@@ -295,7 +295,7 @@ export function PrivacyColumn() {
           The Site is not directed to children and I do not knowingly collect
           personal information from anybody under sixteen, which covers the
           thirteen-year threshold that United States law sets as well. If you
-          believe a child has sent an enquiry, write to {EMAIL} and it will be
+          believe a child has sent an inquiry, write to {EMAIL} and it will be
           deleted.
         </p>
       </Clause>
@@ -316,7 +316,7 @@ export function PrivacyColumn() {
           When this policy changes, the new version is published here with a new
           effective date. If a change would materially reduce your rights or
           widen what is collected, I will say so on this page in advance and,
-          where I have your address from an open enquiry, tell you directly.
+          where I have your address from an open inquiry, tell you directly.
         </p>
       </Clause>
 
