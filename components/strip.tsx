@@ -2465,7 +2465,9 @@ export function Strip({
                 const word = named1 ? (ticks[over].name ?? g.name) : g.name;
                 return (
                   <div
-                    key={`chapter-${g.from}`}
+                    /* Every chapter away from this page starts at -1, so
+                       those are told apart by where they lead. */
+                    key={`chapter-${g.href ?? g.from}`}
                     ref={(el) => {
                       chapterSegs.current[gi] = el;
                     }}
