@@ -142,7 +142,7 @@ export function CoverCell({
           /* The same half second and the same ease as the plate below it,
              so the picture and its caption read as one answer to the
              pointer rather than two. */
-          className="strip-frame object-cover transition-transform duration-500 ease-[var(--ease-out-strong)] hoverable:group-hover:scale-[1.04] motion-reduce:transition-none motion-reduce:group-hover:scale-100"
+          className="strip-frame object-cover transition-transform duration-500 ease-[var(--ease-out-strong)] hoverable:group-hover:scale-[1.028] motion-reduce:transition-none motion-reduce:group-hover:scale-100"
         />
 
         {/* Julian: do not change the colour of the plate on hover. It used
