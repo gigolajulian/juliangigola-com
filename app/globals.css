@@ -3234,19 +3234,31 @@ img[data-fade][data-loaded] {
 }
 
 /* ── the colour panel ─────────────────────────────────────────────
- * Work outside the hue the scope is reading steps back
- * (`components/vectorscope.tsx`). No transition: it follows the pointer
- * across the scope many times a second, and easing each change would
- * trail behind the hand.
+ * While it is out the page is the work in its colour
+ * (`components/vectorscope.tsx`), and the rack under it, discipline
+ * titles and all, steps away. Hidden rather than removed: which projects
+ * the lit chip puts on the page is read from it.
  * ─────────────────────────────────────────────────────────────── */
-[data-scope="dim"] {
-  opacity: 0.15;
-}
-/* The panel sits on the left and the work steps over for it, the
-   panel's own width, rather than sliding under it. */
 @media (min-width: 40rem) {
   [data-scope-open] main .strip-band,
   [data-scope-open] main .work-list {
-    margin-inline-start: 22rem;
+    visibility: hidden;
+  }
+}
+/* A set and its photographs arrive: up from a few pixels under, out of
+   nothing, one after another on the delays the component writes. */
+@keyframes scope-in {
+  from {
+    opacity: 0;
+    translate: 0 8px;
+    scale: 0.98;
+  }
+}
+.scope-in {
+  animation: scope-in 380ms var(--ease-out-strong) both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .scope-in {
+    animation: none;
   }
 }

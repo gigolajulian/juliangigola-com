@@ -1,57 +1,69 @@
 "use client";
 
 import * as React from "react";
+import Image from "next/image";
+import Link from "next/link";
 import { createPortal } from "react-dom";
 import { cn } from "@/lib/utils";
+import { Lightbox, useLightbox } from "@/components/lightbox";
+import type { Frame } from "@/lib/work-types";
 
 /* ── the work by colour ───────────────────────────────────────────
  * A vectorscope of the palettes of the work on the page: each dot is a
- * patch of a frame, placed where a colourist's scope would put it (Cb
- * across, Cr up), drawn in its own colour.
+ * patch of a photograph, placed where a colourist's scope would put it
+ * (Cb across, Cr up), drawn in its own colour.
  *
- * Julian: not a view but a button that brings it in, on the left, and it
- * answers to the hover. So it is a panel beside whatever the page is
- * showing, and the work steps over to make room (`data-scope-open` in
- * globals.css); the head opens it on the grid (`work-shell.tsx`) — the
- * strip, the grid or the list — and the page answers it: the pointer over
- * the scope picks a hue and the work outside that hue dims, a dot under
- * the pointer names its project and lights that project's dots, a cell
- * under the pointer does the same. A click holds the hue.
+ * Julian: a button that brings it in from the left, and with it the page
+ * turns to colour. The discipline rack steps away (`data-scope-open` in
+ * globals.css) and in its place every photograph in the hue the scope is
+ * reading, in sets by project, the strongest first, each with its
+ * dominant colours at the top left. The pointer over the scope picks the
+ * hue, and the page follows once it rests; a click holds it. A photograph
+ * opens in the viewer.
  *
- * The page is read, not handed down: the panel finds the cells by the
- * links in them, so the strip, the rack and the list need to know
- * nothing about it. `[data-scope="dim"]` in globals.css does the dimming.
+ * Which projects are in play is read from the page, not handed down: the
+ * rack is still there under the panel, so the chip that is lit still
+ * decides, and the strip needs to know nothing about any of this.
  *
  * The samples are `public/scope.json`, written by `npm run scope`
- * (`scripts/make-scope.mts`), and fetched the first time the panel
- * opens. Only RGB is stored; position is derived here. A project added
- * since the file was written is simply absent until it is run again.
+ * (`scripts/make-scope.mts`), one entry per photograph, and fetched the
+ * first time the panel opens. Only RGB is stored; position is derived
+ * here. A project added since the file was written is simply absent until
+ * it is run again.
  * ─────────────────────────────────────────────────────────────── */
 
 export type ScopeRow = { slug: string; href: string; name: string };
 
+/** [src, width, height, colour, dominant, r, g, b, ...] */
+type Entry = [string, number, number, string, string, ...number[]];
+
 /** Fetched once per visit. */
-let samples: Promise<Record<string, number[]>> | null = null;
+let samples: Promise<Record<string, Entry[]>> | null = null;
 const loadSamples = () =>
   (samples ??= fetch("/scope.json")
     .then((r) => (r.ok ? r.json() : {}))
-    .catch(() => ({}))) as Promise<Record<string, number[]>>;
+    .catch(() => ({}))) as Promise<Record<string, Entry[]>>;
 
 /** Chroma units from the middle to the rim. Footage rarely goes past half
     of the full ±128, so the scope is drawn at the gain a colourist would
     use to read it. */
 const RIM = 70;
-/** How far round the scope a dot may be from the point and still count. */
+/** How far round the scope a point may be from the hue and still count. */
 const REACH = (16 * Math.PI) / 180;
-/** And how far out it must reach, as a share of the point's own chroma: a
-    dot near the middle is close to every hue and says nothing of this one. */
+/** And how far out it must reach, as a share of the hue's own chroma: a
+    point near the middle is close to every hue and says nothing of this. */
 const DEPTH = 0.35;
-/** The share of a project's dots that must be in reach for it to stay. */
-const KEEP = 0.05;
-/** Inside this, the point is on neutral and everything shows. */
+/** The share of a photograph's points that must be in reach for it to be
+    in the colour. */
+const KEEP = 0.25;
+/** Inside this, the point is on neutral and the page shows everything. */
 const NEUTRAL = 5;
 /** How near a dot the pointer must be to name it, in CSS px. */
 const NEAR_PX = 7;
+/** How long the pointer rests on a hue before the page follows it. */
+const REST_MS = 220;
+/** The panel's width; the results start where it ends. */
+const PANEL = "22rem";
 
 const cbcr = (r: number, g: number, b: number) => [
   -0.1687 * r - 0.3313 * g + 0.5 * b,
@@ -101,13 +113,48 @@ const TARGETS: [string, number[]][] = [
   ["YL", [191, 191, 0]],
 ];
 
-/** The links that are the work, not the chrome around it. */
-const cellsOnPage = () => {
+type Shot = Frame & { dominant: string; pts: number[]; xy: number[] };
+type Placed = { slug: string; name: string; href: string; shots: Shot[] };
+type ColourSet = { p: Placed; shots: Shot[]; score: number };
+
+/** The share of a photograph's points in reach of a hue. */
+const inHue = (xy: number[], point: [number, number]) => {
+  const aim = Math.atan2(point[1], point[0]);
+  const floor = Math.hypot(point[0], point[1]) * DEPTH;
+  let near = 0;
+  for (let i = 0; i < xy.length; i += 2) {
+    if (Math.hypot(xy[i], xy[i + 1]) < floor) continue;
+    let d = Math.abs(Math.atan2(xy[i + 1], xy[i]) - aim);
+    if (d > Math.PI) d = 2 * Math.PI - d;
+    if (d < REACH) near++;
+  }
+  return near / (xy.length / 2 || 1);
+};
+
+/** Up to three dominant colours of a set, the near-duplicates folded. */
+const swatches = (shots: Shot[]) => {
+  const out: number[][] = [];
+  for (const s of shots) {
+    const n = parseInt(s.dominant.slice(1), 16);
+    const c = [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+    if (out.every((o) => Math.hypot(o[0] - c[0], o[1] - c[1], o[2] - c[2]) > 40))
+      out.push(c);
+    if (out.length === 3) break;
+  }
+  return out.map(hex);
+};
+
+/** The slugs of the work the page is showing: the rack under the panel. */
+const onPage = (byHref: Map<string, ScopeRow>) => {
   const main = document.querySelector("main");
-  if (!main) return [];
-  return Array.from(main.querySelectorAll<HTMLAnchorElement>("a[href]")).filter(
-    (a) => !a.closest("nav, header, footer, #work-filter, [data-scope-panel]"),
-  );
+  const seen = new Set<string>();
+  if (!main) return "";
+  for (const a of main.querySelectorAll<HTMLAnchorElement>("a[href]")) {
+    if (a.closest("nav, header, footer, #work-filter, [data-scope-panel]")) continue;
+    const row = byHref.get(a.getAttribute("href") ?? "");
+    if (row) seen.add(row.slug);
+  }
+  return [...seen].sort().join(" ");
 };
 
 export function ScopePanel({
@@ -123,7 +170,7 @@ export function ScopePanel({
   const [ever, setEver] = React.useState(false);
   if (open && !ever) setEver(true);
 
-  const [data, setData] = React.useState<Record<string, number[]> | null>(null);
+  const [data, setData] = React.useState<Record<string, Entry[]> | null>(null);
   React.useEffect(() => {
     if (!ever) return;
     let live = true;
@@ -137,139 +184,109 @@ export function ScopePanel({
     () => new Map(rows.map((r) => [r.href, r])),
     [rows],
   );
-  const bySlug = React.useMemo(
-    () => new Map(rows.map((r) => [r.slug, r])),
-    [rows],
-  );
 
-  /** Which projects the page is showing now, as one comparable string. */
+  /** Which projects the page is showing, as one comparable string. */
   const [present, setPresent] = React.useState("");
-  /** Where the pointer is on the scope, and where a click left the point. */
-  const [aim, setAim] = React.useState<[number, number] | null>(null);
-  const [held, setHeld] = React.useState<[number, number] | null>(null);
-  /** The project of the dot under the pointer, and of the cell under it. */
-  const [dot, setDot] = React.useState<string | null>(null);
-  const [cell, setCell] = React.useState<string | null>(null);
-  const [brand, setBrand] = React.useState("");
-
-  /* Each project on the page as scope positions. */
-  const placed = React.useMemo(() => {
-    const on = new Set(present.split(" "));
-    return rows.flatMap((row) => {
-      const pts = data?.[row.slug];
-      if (!pts?.length || !on.has(row.slug)) return [];
-      const xy: number[] = [];
-      for (let i = 0; i < pts.length; i += 3) {
-        const [cb, cr] = cbcr(pts[i], pts[i + 1], pts[i + 2]);
-        xy.push(cb, cr);
-      }
-      return [{ slug: row.slug, pts, xy }];
-    });
-  }, [rows, data, present]);
-
-  const point = aim ?? held;
-  const hueHits = React.useMemo(() => {
-    if (!point || Math.hypot(point[0], point[1]) < NEUTRAL) return null;
-    /* By hue rather than by distance: a brand colour is usually more
-       saturated than anything in a photograph, and a distance test found
-       nothing out there. */
-    const aimAt = Math.atan2(point[1], point[0]);
-    const floor = Math.hypot(point[0], point[1]) * DEPTH;
-    const hits = new Set<string>();
-    for (const p of placed) {
-      let near = 0;
-      for (let i = 0; i < p.xy.length; i += 2) {
-        if (Math.hypot(p.xy[i], p.xy[i + 1]) < floor) continue;
-        let d = Math.abs(Math.atan2(p.xy[i + 1], p.xy[i]) - aimAt);
-        if (d > Math.PI) d = 2 * Math.PI - d;
-        if (d < REACH) near++;
-      }
-      if (near / (p.xy.length / 2 || 1) >= KEEP) hits.add(p.slug);
-    }
-    return hits;
-  }, [placed, point]);
-
-  /* The page follows the hue, never the dot: the dots are dense enough
-     that the pointer is nearly always beside one, and the page narrowing
-     to a single project under every move hid the hue altogether. */
-  const lit = hueHits;
-  /** Whose dots the scope shows lit. */
-  const focus = cell ?? dot;
-
-  /* ── the page answers ── */
-  const litRef = React.useRef(lit);
-  React.useEffect(() => {
-    litRef.current = lit;
-  });
-  const mark = React.useCallback(() => {
-    const on = litRef.current;
-    const seen = new Set<string>();
-    for (const a of cellsOnPage()) {
-      const row = byHref.get(a.getAttribute("href") ?? "");
-      if (!row) continue;
-      seen.add(row.slug);
-      const box = a.closest<HTMLElement>("[data-tick]") ?? a;
-      box.dataset.scope = on && !on.has(row.slug) ? "dim" : "on";
-      box.dataset.scopeSlug = row.slug;
-    }
-    const key = [...seen].sort().join(" ");
-    setPresent((k) => (k === key ? k : key));
-  }, [byHref]);
-
-  const litKey = lit ? [...lit].sort().join(" ") : "";
-  React.useEffect(() => {
-    if (!open) return;
-    // A frame on, like every other pass: the cells are the page's own.
-    const frame = requestAnimationFrame(mark);
-    return () => cancelAnimationFrame(frame);
-  }, [open, mark, litKey]);
-
-  /* A filter, a view or a search puts different cells on the page. */
   React.useEffect(() => {
     if (!open) return;
     const main = document.querySelector("main");
-    if (!main) return;
-    let frame = 0;
+    let frame = requestAnimationFrame(() => setPresent(onPage(byHref)));
+    if (!main) return () => cancelAnimationFrame(frame);
+    /* A chip puts different work on the page. */
     const mo = new MutationObserver(() => {
       cancelAnimationFrame(frame);
-      frame = requestAnimationFrame(mark);
+      frame = requestAnimationFrame(() => setPresent(onPage(byHref)));
     });
     mo.observe(main, { childList: true, subtree: true });
     return () => {
       mo.disconnect();
       cancelAnimationFrame(frame);
-      for (const el of document.querySelectorAll<HTMLElement>("[data-scope]")) {
-        delete el.dataset.scope;
-        delete el.dataset.scopeSlug;
-      }
     };
-  }, [open, mark]);
+  }, [open, byHref]);
 
-  /* A cell under the pointer lights its own dots; Escape puts it away. */
+  /** Where the pointer is on the scope, and where a click left the point. */
+  const [aim, setAim] = React.useState<[number, number] | null>(null);
+  const [held, setHeld] = React.useState<[number, number] | null>(null);
+  /** The hue the page is showing: the pointer's once it rests, else held. */
+  const [settled, setSettled] = React.useState<[number, number] | null>(null);
+  React.useEffect(() => {
+    const id = window.setTimeout(() => setSettled(aim ?? held), aim ? REST_MS : 0);
+    return () => window.clearTimeout(id);
+  }, [aim, held]);
+  /** The project of the dot under the pointer, and of the set under it. */
+  const [dot, setDot] = React.useState<string | null>(null);
+  const [over, setOver] = React.useState<string | null>(null);
+  const [brand, setBrand] = React.useState("");
+
+  /* Each project on the page, its photographs as scope positions. */
+  const placed = React.useMemo<Placed[]>(() => {
+    const on = new Set(present.split(" "));
+    return rows.flatMap((row) => {
+      const entries = data?.[row.slug];
+      if (!entries?.length || !on.has(row.slug)) return [];
+      const shots = entries.map(([src, width, height, color, dominant, ...pts], i) => {
+        const xy: number[] = [];
+        for (let k = 0; k < pts.length; k += 3) {
+          const [cb, cr] = cbcr(pts[k], pts[k + 1], pts[k + 2]);
+          xy.push(cb, cr);
+        }
+        return {
+          src,
+          width,
+          height,
+          color,
+          dominant,
+          alt: `${row.name}, frame ${i + 1}`,
+          pts,
+          xy,
+        };
+      });
+      return [{ slug: row.slug, name: row.name, href: row.href, shots }];
+    });
+  }, [rows, data, present]);
+
+  const neutral = !settled || Math.hypot(settled[0], settled[1]) < NEUTRAL;
+  const sets = React.useMemo<ColourSet[]>(() => {
+    if (neutral || !settled) return [];
+    return placed
+      .map((p) => {
+        const scored = p.shots
+          .map((s) => ({ s, k: inHue(s.xy, settled) }))
+          .filter((x) => x.k >= KEEP)
+          .sort((a, b) => b.k - a.k);
+        return {
+          p,
+          shots: scored.map((x) => x.s),
+          score: scored.reduce((n, x) => n + x.k, 0),
+        };
+      })
+      .filter((s) => s.shots.length)
+      .sort((a, b) => b.shots.length - a.shots.length || b.score - a.score);
+  }, [placed, settled, neutral]);
+
+  /* What the viewer pages through: the photographs as they are laid out. */
+  const shown = React.useMemo<Shot[]>(
+    () => (neutral ? placed.map((p) => p.shots[0]) : sets.flatMap((s) => s.shots)),
+    [neutral, placed, sets],
+  );
+  const lightbox = useLightbox(shown);
+  const indexOf = React.useMemo(
+    () => new Map(shown.map((s, i) => [s.src, i])),
+    [shown],
+  );
+
+  /* Escape puts it away; the viewer takes its own. */
   React.useEffect(() => {
     if (!open) return;
-    const over = (e: PointerEvent) => {
-      const el = (e.target as Element | null)?.closest?.<HTMLElement>(
-        "[data-scope-slug]",
-      );
-      const slug = el?.dataset.scopeSlug ?? null;
-      setCell((c) => (c === slug ? c : slug));
-    };
     const key = (e: KeyboardEvent) => {
-      // The viewer takes its own Escape.
       if (e.key === "Escape" && !document.querySelector("[data-zoom-box]"))
         onClose();
     };
-    document.addEventListener("pointerover", over, { passive: true });
     window.addEventListener("keydown", key);
-    return () => {
-      document.removeEventListener("pointerover", over);
-      window.removeEventListener("keydown", key);
-      setCell(null);
-    };
+    return () => window.removeEventListener("keydown", key);
   }, [open, onClose]);
 
-  /* The work makes room for it rather than sliding under it. */
+  /* The rack steps away while the colour is up. */
   React.useEffect(() => {
     if (!open) return;
     const root = document.documentElement;
@@ -293,10 +310,21 @@ export function ScopePanel({
       const end = foot ? foot.getBoundingClientRect().top : window.innerHeight;
       setRoom({ top, bottom: Math.max(0, window.innerHeight - end) });
     };
-    fit();
+    const frame = requestAnimationFrame(fit);
     window.addEventListener("resize", fit);
-    return () => window.removeEventListener("resize", fit);
+    return () => {
+      cancelAnimationFrame(frame);
+      window.removeEventListener("resize", fit);
+    };
   }, [open]);
+
+  const point = aim ?? held;
+  /** Whose dots are lit on the scope: a named dot's or a hovered set's. */
+  const focus = over ?? dot;
+  const litSlugs = React.useMemo(
+    () => (neutral ? null : new Set(sets.map((s) => s.p.slug))),
+    [neutral, sets],
+  );
 
   /* ── the scope ── */
   const canvas = React.useRef<HTMLCanvasElement>(null);
@@ -376,15 +404,17 @@ export function ScopePanel({
          scope trace does; plain alpha on a light one. */
       ctx.save();
       ctx.globalCompositeOperation = dark ? "lighter" : "source-over";
-      const size1 = Math.max(1.2, size / 260);
+      const dot1 = Math.max(1.2, size / 260);
       const quiet = dark ? 0.3 : 0.45;
       for (const p of placed) {
-        const on = focus ? p.slug === focus : !lit || lit.has(p.slug);
+        const on = focus ? p.slug === focus : !litSlugs || litSlugs.has(p.slug);
         ctx.globalAlpha = focus ? (on ? 0.95 : 0.04) : on ? quiet : 0.05;
-        for (let i = 0, j = 0; i < p.xy.length; i += 2, j += 3) {
-          const [x, y] = rim([p.xy[i], p.xy[i + 1]]);
-          ctx.fillStyle = `rgb(${p.pts[j]},${p.pts[j + 1]},${p.pts[j + 2]})`;
-          ctx.fillRect(c + x * k - size1 / 2, c - y * k - size1 / 2, size1, size1);
+        for (const s of p.shots) {
+          for (let i = 0, j = 0; i < s.xy.length; i += 2, j += 3) {
+            const [x, y] = rim([s.xy[i], s.xy[i + 1]]);
+            ctx.fillStyle = `rgb(${s.pts[j]},${s.pts[j + 1]},${s.pts[j + 2]})`;
+            ctx.fillRect(c + x * k - dot1 / 2, c - y * k - dot1 / 2, dot1, dot1);
+          }
         }
       }
       ctx.restore();
@@ -401,7 +431,7 @@ export function ScopePanel({
       ro.disconnect();
       mo.disconnect();
     };
-  }, [placed, point, focus, lit]);
+  }, [placed, point, focus, litSlugs]);
 
   /* The pointer, in chroma units and held to the disc. */
   const at = (e: React.MouseEvent<HTMLDivElement>): [number, number] => {
@@ -417,12 +447,14 @@ export function ScopePanel({
     let best: string | null = null;
     let bd = reach;
     for (const q of placed) {
-      for (let i = 0; i < q.xy.length; i += 2) {
-        const [x, y] = rim([q.xy[i], q.xy[i + 1]]);
-        const d = Math.hypot(x - p[0], y - p[1]);
-        if (d < bd) {
-          bd = d;
-          best = q.slug;
+      for (const s of q.shots) {
+        for (let i = 0; i < s.xy.length; i += 2) {
+          const [x, y] = rim([s.xy[i], s.xy[i + 1]]);
+          const d = Math.hypot(x - p[0], y - p[1]);
+          if (d < bd) {
+            bd = d;
+            best = q.slug;
+          }
         }
       }
     }
@@ -441,167 +473,282 @@ export function ScopePanel({
   const swatch = point ? colourAt(point[0], point[1]) : null;
   const { h, s } = hsl(swatch ?? [128, 128, 128]);
   const pct = (v: number) => `${50 + (v / RIM) * 50}%`;
-  const count = lit ? [...lit].length : 0;
-  const named = focus ? bySlug.get(focus)?.name : null;
+  const count = shown.length;
+  const named = focus ? rows.find((r) => r.slug === focus)?.name : null;
+  /** Changes whenever the page's answer does, so it arrives afresh. */
+  const answer = neutral || !settled ? "all" : settled.map((v) => v.toFixed(1)).join();
 
   if (!ever) return null;
 
-  return createPortal(
-    <aside
-      id="work-scope"
-      data-scope-panel
-      aria-label="Colour"
-      inert={!open}
-      style={room ? { top: room.top, bottom: room.bottom } : undefined}
-      className={cn(
-        "fixed left-0 z-40 flex w-[22rem] flex-col gap-4 overflow-y-auto border-r border-border bg-background px-6 py-5 max-sm:hidden sm:pl-10",
-        "transition-[translate] duration-300 ease-[var(--ease-out-strong)] motion-reduce:transition-none",
-        open ? "translate-x-0" : "-translate-x-full",
-      )}
+  const tile = (shot: Shot, delay: number) => (
+    <button
+      key={shot.src}
+      type="button"
+      data-ring="Zoom in"
+      onClick={(e) =>
+        lightbox.show(
+          indexOf.get(shot.src) ?? 0,
+          e.currentTarget.querySelector("img"),
+        )
+      }
+      className="scope-in relative block aspect-[4/5] w-full overflow-hidden"
+      style={{ backgroundColor: shot.color, animationDelay: `${delay}ms` }}
     >
-      <div className="flex items-center justify-between">
-        <p className="label">Colour</p>
-        <button
-          type="button"
-          onClick={onClose}
-          data-ring="Close"
-          className="label text-muted-foreground transition-colors hoverable:hover:text-foreground"
-        >
-          Close
-        </button>
-      </div>
+      <Image
+        src={shot.src}
+        alt={shot.alt}
+        fill
+        sizes="(min-width: 96rem) 12vw, (min-width: 64rem) 16vw, 24vw"
+        data-fade=""
+        data-frame={shot.src}
+        className="object-cover transition-[scale] duration-500 ease-[var(--ease-out-strong)] hoverable:hover:scale-[1.028]"
+      />
+    </button>
+  );
 
-      <div
-        className="relative aspect-square w-full shrink-0 cursor-crosshair touch-none select-none"
-        onPointerMove={(e) => {
-          const p = at(e);
-          setAim(p);
-          const d = nearest(p, e.currentTarget.getBoundingClientRect().width);
-          setDot((x) => (x === d ? x : d));
-        }}
-        onPointerLeave={() => {
-          setAim(null);
-          setDot(null);
-        }}
-        onClick={(e) => {
-          const p = at(e);
-          // A click on the held point lets it go; anywhere else moves it.
-          setHeld((h) =>
-            h && Math.hypot(h[0] - p[0], h[1] - p[1]) < 4 ? null : p,
-          );
-        }}
-        role="slider"
-        tabIndex={0}
+  return createPortal(
+    <>
+      <aside
+        id="work-scope"
+        data-scope-panel
         aria-label="Colour"
-        aria-valuemin={0}
-        aria-valuemax={360}
-        aria-valuenow={Math.round(h)}
-        aria-valuetext={
-          point
-            ? `Hue ${Math.round(h)} degrees, saturation ${Math.round(s * 100)} percent`
-            : "No colour chosen"
-        }
-        onKeyDown={(e) => {
-          const step = e.shiftKey ? 8 : 2;
-          const d: Record<string, [number, number]> = {
-            ArrowLeft: [-step, 0],
-            ArrowRight: [step, 0],
-            ArrowUp: [0, step],
-            ArrowDown: [0, -step],
-          };
-          if (!d[e.key]) return;
-          e.preventDefault();
-          setHeld((h) => rim([(h?.[0] ?? 0) + d[e.key][0], (h?.[1] ?? 0) + d[e.key][1]]));
+        inert={!open}
+        style={{
+          width: PANEL,
+          ...(room ? { top: room.top, bottom: room.bottom } : null),
         }}
+        className={cn(
+          "fixed left-0 z-40 flex flex-col gap-4 overflow-y-auto border-r border-border bg-background px-6 py-5 max-sm:hidden sm:pl-10",
+          /* In from the left. `starting:` is the first frame after it is
+             put on the page, which the open used to skip: it mounted
+             already in place and simply appeared. The drawer curve and
+             half a second, so the travel is seen: on the site's strong
+             ease-out it was home within 120ms and read as a pop. */
+          "transition-[translate] duration-[520ms] ease-[cubic-bezier(0.32,0.72,0,1)] motion-reduce:transition-none",
+          open ? "translate-x-0 starting:-translate-x-full" : "-translate-x-full",
+        )}
       >
-        <canvas ref={canvas} className="size-full" />
-        {held ? (
-          /* The held point: a ring in the colour it stands on. */
+        <div className="flex items-center justify-between">
+          <p className="label">Colour</p>
+          <button
+            type="button"
+            onClick={onClose}
+            data-ring="Close"
+            className="label text-muted-foreground transition-colors hoverable:hover:text-foreground"
+          >
+            Close
+          </button>
+        </div>
+
+        <div
+          className="relative aspect-square w-full shrink-0 cursor-crosshair touch-none select-none"
+          onPointerMove={(e) => {
+            const p = at(e);
+            setAim(p);
+            const d = nearest(p, e.currentTarget.getBoundingClientRect().width);
+            setDot((x) => (x === d ? x : d));
+          }}
+          onPointerLeave={() => {
+            setAim(null);
+            setDot(null);
+          }}
+          onClick={(e) => {
+            const p = at(e);
+            // A click on the held point lets it go; anywhere else moves it.
+            const release = held && Math.hypot(held[0] - p[0], held[1] - p[1]) < 4;
+            setHeld(release ? null : p);
+            setSettled(release ? null : p);
+          }}
+          role="slider"
+          tabIndex={0}
+          aria-label="Colour"
+          aria-valuemin={0}
+          aria-valuemax={360}
+          aria-valuenow={Math.round(h)}
+          aria-valuetext={
+            point
+              ? `Hue ${Math.round(h)} degrees, saturation ${Math.round(s * 100)} percent`
+              : "No colour chosen"
+          }
+          onKeyDown={(e) => {
+            const step = e.shiftKey ? 8 : 2;
+            const d: Record<string, [number, number]> = {
+              ArrowLeft: [-step, 0],
+              ArrowRight: [step, 0],
+              ArrowUp: [0, step],
+              ArrowDown: [0, -step],
+            };
+            if (!d[e.key]) return;
+            e.preventDefault();
+            setHeld((h) => rim([(h?.[0] ?? 0) + d[e.key][0], (h?.[1] ?? 0) + d[e.key][1]]));
+          }}
+        >
+          <canvas ref={canvas} className="size-full" />
+          {held ? (
+            /* The held point: a ring in the colour it stands on. */
+            <span
+              aria-hidden
+              className="pointer-events-none absolute size-4 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-foreground shadow-[0_0_0_1px_var(--background)]"
+              style={{
+                left: pct(held[0]),
+                top: pct(-held[1]),
+                backgroundColor: hex(colourAt(held[0], held[1])),
+              }}
+            />
+          ) : null}
+        </div>
+
+        <p className="label min-h-[1lh] truncate tabular-nums" aria-live="polite">
+          {data === null ? (
+            <span className="text-muted-foreground">Reading the colours</span>
+          ) : neutral ? (
+            <span className="text-muted-foreground">All the work</span>
+          ) : (
+            `${count} ${count === 1 ? "frame" : "frames"} in ${sets.length} ${sets.length === 1 ? "project" : "projects"}`
+          )}
+        </p>
+        <p
+          className={cn(
+            "label -mt-3 flex gap-5 tabular-nums text-muted-foreground",
+            !point && "invisible",
+          )}
+        >
+          <span>
+            Hue{" "}
+            <span className="text-foreground">
+              {String(Math.round(h)).padStart(3, "0")}°
+            </span>
+          </span>
+          <span>
+            Sat{" "}
+            <span className="text-foreground">
+              {String(Math.round(s * 100)).padStart(2, "0")}%
+            </span>
+          </span>
+        </p>
+        {/* Whose dots are lit: the dot under the pointer, or the set. */}
+        <p className="label -mt-2 min-h-[1lh] truncate">{named}</p>
+
+        <form
+          className="flex items-center gap-3"
+          onSubmit={(e) => {
+            e.preventDefault();
+            match();
+          }}
+        >
+          <label htmlFor="scope-brand" className="label text-muted-foreground">
+            Brand colour
+          </label>
           <span
             aria-hidden
-            className="pointer-events-none absolute size-4 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-foreground shadow-[0_0_0_1px_var(--background)]"
+            className="size-3 shrink-0 rounded-full border border-border"
             style={{
-              left: pct(held[0]),
-              top: pct(-held[1]),
-              backgroundColor: hex(colourAt(held[0], held[1])),
+              backgroundColor: /^#?[0-9a-f]{6}$/i.test(brand.trim())
+                ? `#${brand.trim().replace("#", "")}`
+                : swatch
+                  ? hex(swatch)
+                  : "transparent",
             }}
           />
-        ) : null}
-      </div>
+          <input
+            id="scope-brand"
+            value={brand}
+            onChange={(e) => setBrand(e.target.value)}
+            placeholder="#a77262"
+            spellCheck={false}
+            className="w-20 border-b border-border bg-transparent py-1 font-mono text-xs text-foreground outline-none placeholder:text-muted-foreground focus:border-foreground"
+          />
+          <button
+            type="submit"
+            className="label text-muted-foreground transition-colors hoverable:hover:text-foreground"
+          >
+            Match
+          </button>
+        </form>
 
-      <p className="label min-h-[1lh] truncate tabular-nums" aria-live="polite">
-        {data === null ? (
-          <span className="text-muted-foreground">Reading the colours</span>
-        ) : lit ? (
-          `${count} ${count === 1 ? "match" : "matches"}`
-        ) : (
-          <span className="text-muted-foreground">All the work</span>
-        )}
-      </p>
-      <p
-        className={cn(
-          "label -mt-3 flex gap-5 tabular-nums text-muted-foreground",
-          !point && "invisible",
-        )}
-      >
-        <span>
-          Hue{" "}
-          <span className="text-foreground">
-            {String(Math.round(h)).padStart(3, "0")}°
-          </span>
-        </span>
-        <span>
-          Sat{" "}
-          <span className="text-foreground">
-            {String(Math.round(s * 100)).padStart(2, "0")}%
-          </span>
-        </span>
-      </p>
+        <p className="text-xs leading-relaxed text-muted-foreground">
+          Hover the scope to find a colour in the work. Click to hold it.
+        </p>
+      </aside>
 
-      {/* Whose dots are lit: the dot under the pointer, or the cell. */}
-      <p className="label -mt-2 min-h-[1lh] truncate">{named}</p>
-
-      <form
-        className="flex items-center gap-3"
-        onSubmit={(e) => {
-          e.preventDefault();
-          match();
-        }}
-      >
-        <label htmlFor="scope-brand" className="label text-muted-foreground">
-          Brand colour
-        </label>
-        <span
-          aria-hidden
-          className="size-3 shrink-0 rounded-full border border-border"
+      {/* The page, in colour: where the rack was, beside the panel. */}
+      {open ? (
+        <section
+          data-scope-panel
+          data-scroll
+          aria-label="The work in this colour"
           style={{
-            backgroundColor: /^#?[0-9a-f]{6}$/i.test(brand.trim())
-              ? `#${brand.trim().replace("#", "")}`
-              : swatch
-                ? hex(swatch)
-                : "transparent",
+            left: PANEL,
+            ...(room ? { top: room.top, bottom: room.bottom } : null),
           }}
-        />
-        <input
-          id="scope-brand"
-          value={brand}
-          onChange={(e) => setBrand(e.target.value)}
-          placeholder="#a77262"
-          spellCheck={false}
-          className="w-20 border-b border-border bg-transparent py-1 font-mono text-xs text-foreground outline-none placeholder:text-muted-foreground focus:border-foreground"
-        />
-        <button
-          type="submit"
-          className="label text-muted-foreground transition-colors hoverable:hover:text-foreground"
+          className="fixed right-0 z-30 overflow-y-auto overscroll-contain bg-background px-6 pb-10 pt-1 max-sm:hidden sm:px-10 transition-opacity duration-300 starting:opacity-0"
         >
-          Match
-        </button>
-      </form>
+          <div key={answer}>
+            {data === null ? null : neutral ? (
+              <ul className="grid grid-cols-[repeat(auto-fill,minmax(10rem,1fr))] gap-3">
+                {placed.map((p, i) => (
+                  <li
+                    key={p.slug}
+                    onPointerEnter={() => setOver(p.slug)}
+                    onPointerLeave={() => setOver(null)}
+                  >
+                    {tile(p.shots[0], Math.min(i, 12) * 20)}
+                    <Link
+                      href={p.href}
+                      prefetch={false}
+                      className="label mt-2 block truncate transition-colors hoverable:hover:text-muted-foreground"
+                    >
+                      {p.name}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            ) : sets.length ? (
+              <div className="flex flex-col gap-10">
+                {sets.map((set, i) => (
+                  <section
+                    key={set.p.slug}
+                    onPointerEnter={() => setOver(set.p.slug)}
+                    onPointerLeave={() => setOver(null)}
+                    className="scope-in"
+                    style={{ animationDelay: `${Math.min(i, 8) * 40}ms` }}
+                  >
+                    {/* The set's dominant colours at its top left, then
+                        whose it is and how much of it is in the colour. */}
+                    <div className="mb-3 flex items-center gap-3">
+                      <span className="flex gap-1" aria-hidden>
+                        {swatches(set.shots).map((c) => (
+                          <span key={c} className="size-3" style={{ backgroundColor: c }} />
+                        ))}
+                      </span>
+                      <Link
+                        href={set.p.href}
+                        prefetch={false}
+                        className="label transition-colors hoverable:hover:text-muted-foreground"
+                      >
+                        {set.p.name}
+                      </Link>
+                      <span className="label tabular-nums text-muted-foreground">
+                        {set.shots.length}
+                      </span>
+                    </div>
+                    <div className="grid grid-cols-[repeat(auto-fill,minmax(9rem,1fr))] gap-3">
+                      {set.shots.map((shot, j) =>
+                        tile(shot, Math.min(i, 8) * 40 + Math.min(j, 10) * 25),
+                      )}
+                    </div>
+                  </section>
+                ))}
+              </div>
+            ) : (
+              <p className="label text-muted-foreground">Nothing in this colour yet</p>
+            )}
+          </div>
+        </section>
+      ) : null}
 
-      <p className="text-xs leading-relaxed text-muted-foreground">
-        Hover the scope to find a colour in the work. Click to hold it.
-      </p>
-    </aside>,
+      <Lightbox frames={shown} name="Colour" {...lightbox} />
+    </>,
     document.body,
   );
 }

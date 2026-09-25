@@ -12,7 +12,6 @@ import { ScopePanel, type ScopeRow } from "@/components/vectorscope";
 import { markFilter, StripView, type StripViewMode } from "@/components/strip";
 import {
   chooseView,
-  currentView,
   search,
   useWorkQuery,
   useWorkView,
@@ -171,14 +170,11 @@ export function WorkShell({
   const [filtering, setFiltering] = React.useState(false);
   /** Whether the colour panel is out. */
   const [scoping, setScoping] = React.useState(false);
-  /* Julian: colour opens on the grid and on All, so the photographs show
-     across the disciplines at once, and closing it puts back the view that
-     was showing — unless another was chosen while it was open. */
+  /* Julian: colour opens on All, so the photographs show across the
+     disciplines at once; the panel then puts the work in its colour where
+     the rack was (`vectorscope.tsx`). */
   const router = useRouter();
-  const beforeScope = React.useRef<WorkView | null>(null);
   const openScope = () => {
-    beforeScope.current = currentView();
-    if (beforeScope.current !== "grid") chooseView("grid");
     if (!all) {
       // A filter change like a chip's: the rack fades in where it stands.
       markFilter(0);
@@ -186,12 +182,7 @@ export function WorkShell({
     }
     setScoping(true);
   };
-  const closeScope = React.useCallback(() => {
-    setScoping(false);
-    const was = beforeScope.current;
-    beforeScope.current = null;
-    if (was && was !== "grid" && currentView() === "grid") chooseView(was);
-  }, []);
+  const closeScope = React.useCallback(() => setScoping(false), []);
   /** Whether the viewfinder has been opened into a field. */
   const [finding, setFinding] = React.useState(false);
 

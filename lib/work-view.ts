@@ -49,9 +49,6 @@ const readView = (): WorkView => {
   }
 };
 
-/** The view as kept, read outside a render. */
-export const currentView = (): WorkView => readView();
-
 /** The strip, for everybody who has not said otherwise. */
 const server = (): WorkView => "strip";
 
