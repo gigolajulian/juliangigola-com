@@ -128,6 +128,8 @@ const LEAD_FRAMES: Record<string, string> = {
   metamorphosis: "/work/metamorphosis/12.jpg",
   // Julian's pick: on the floor by the television, frame eleven.
   sage: "/work/sage/11.jpg",
+  // Julian's pick: the hair in the air, frame six.
+  nyx: "/work/nyx/06.jpg",
 };
 
 const withLeadFrame = (project: Project): Project => {
@@ -144,7 +146,10 @@ const withLeadFrame = (project: Project): Project => {
     images: [lead, ...project.images.filter((f) => f.src !== lead.src)],
     cover: {
       ...lead,
-      src: `/hero/${project.slug}.jpg`,
+      /* Named for the frame, so a new pick is a new address: the files
+         are cached for a day and served stale for a week, and a cover
+         changed under the same name kept showing the old one. */
+      src: `/hero/${project.slug}-${lead.src.split("/").pop()}`,
       width: COVER_WIDTH,
       height: Math.round((COVER_WIDTH / lead.width) * lead.height),
     },
