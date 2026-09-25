@@ -9,8 +9,10 @@ import { cn } from "@/lib/utils";
  * patch of a frame, placed where a colourist's scope would put it (Cb
  * across, Cr up), drawn in its own colour.
  *
- * Julian: not a view but a button that brings it in, and it answers to
- * the hover. So it is a panel beside whatever the page is showing — the
+ * Julian: not a view but a button that brings it in, on the left, and it
+ * answers to the hover. So it is a panel beside whatever the page is
+ * showing, and the work steps over to make room (`data-scope-open` in
+ * globals.css); the head opens it on the grid (`work-shell.tsx`) — the
  * strip, the grid or the list — and the page answers it: the pointer over
  * the scope picks a hue and the work outside that hue dims, a dot under
  * the pointer names its project and lights that project's dots, a cell
@@ -267,6 +269,16 @@ export function ScopePanel({
     };
   }, [open, onClose]);
 
+  /* The work makes room for it rather than sliding under it. */
+  React.useEffect(() => {
+    if (!open) return;
+    const root = document.documentElement;
+    root.dataset.scopeOpen = "";
+    return () => {
+      delete root.dataset.scopeOpen;
+    };
+  }, [open]);
+
   /* Between the chip row and the footer, so the head and the chips stay
      in reach while it is out. */
   const [room, setRoom] = React.useState<{ top: number; bottom: number } | null>(
@@ -442,9 +454,9 @@ export function ScopePanel({
       inert={!open}
       style={room ? { top: room.top, bottom: room.bottom } : undefined}
       className={cn(
-        "fixed right-0 z-40 flex w-[22rem] flex-col gap-4 overflow-y-auto border-l border-border bg-background px-6 py-5 max-sm:hidden",
+        "fixed left-0 z-40 flex w-[22rem] flex-col gap-4 overflow-y-auto border-r border-border bg-background px-6 py-5 max-sm:hidden sm:pl-10",
         "transition-[translate] duration-300 ease-[var(--ease-out-strong)] motion-reduce:transition-none",
-        open ? "translate-x-0" : "translate-x-full",
+        open ? "translate-x-0" : "-translate-x-full",
       )}
     >
       <div className="flex items-center justify-between">

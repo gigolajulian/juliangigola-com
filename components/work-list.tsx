@@ -74,7 +74,7 @@ export function WorkList({
   const shown = words.length ? rows.filter((r) => matches(r, words)) : rows;
 
   return (
-    <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
+    <div className="work-list min-h-0 flex-1 overflow-y-auto overscroll-contain">
       <div className="mx-auto w-full max-w-[100rem] px-6 pb-16 pt-4 sm:px-10">
         {/* What the search found, said once, above the answer. Silent with
             an empty box: a list of everything does not need a count at the

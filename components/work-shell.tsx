@@ -3,7 +3,7 @@
 import * as React from "react";
 import loader from "../image-loader";
 import Link from "next/link";
-import { useSelectedLayoutSegments } from "next/navigation";
+import { useRouter, useSelectedLayoutSegments } from "next/navigation";
 import { cn } from "@/lib/utils";
 import type { CategoryLink } from "@/lib/work";
 import type { Head } from "@/lib/work-heads";
@@ -12,6 +12,7 @@ import { ScopePanel, type ScopeRow } from "@/components/vectorscope";
 import { markFilter, StripView, type StripViewMode } from "@/components/strip";
 import {
   chooseView,
+  currentView,
   search,
   useWorkQuery,
   useWorkView,
@@ -170,7 +171,27 @@ export function WorkShell({
   const [filtering, setFiltering] = React.useState(false);
   /** Whether the colour panel is out. */
   const [scoping, setScoping] = React.useState(false);
-  const closeScope = React.useCallback(() => setScoping(false), []);
+  /* Julian: colour opens on the grid and on All, so the photographs show
+     across the disciplines at once, and closing it puts back the view that
+     was showing — unless another was chosen while it was open. */
+  const router = useRouter();
+  const beforeScope = React.useRef<WorkView | null>(null);
+  const openScope = () => {
+    beforeScope.current = currentView();
+    if (beforeScope.current !== "grid") chooseView("grid");
+    if (!all) {
+      // A filter change like a chip's: the rack fades in where it stands.
+      markFilter(0);
+      router.push("/work", { scroll: false });
+    }
+    setScoping(true);
+  };
+  const closeScope = React.useCallback(() => {
+    setScoping(false);
+    const was = beforeScope.current;
+    beforeScope.current = null;
+    if (was && was !== "grid" && currentView() === "grid") chooseView(was);
+  }, []);
   /** Whether the viewfinder has been opened into a field. */
   const [finding, setFinding] = React.useState(false);
 
@@ -607,7 +628,7 @@ export function WorkShell({
           aria-controls="work-scope"
           aria-label="Colour"
           data-ring="Colour"
-          onClick={() => setScoping((v) => !v)}
+          onClick={() => (scoping ? closeScope() : openScope())}
           className={cn(
             "-my-1 p-1.5 transition-opacity duration-200",
             scoping
