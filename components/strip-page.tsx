@@ -140,6 +140,7 @@ export function StripHead({
   sub,
   live,
   aside,
+  phone,
   open = false,
 }: {
   crumb: React.ReactNode;
@@ -151,13 +152,21 @@ export function StripHead({
   live?: boolean;
   /** What it is and how much of it there is, opposite the crumb. */
   aside?: React.ReactNode;
+  /** What stands in for `aside` on a phone, where it is hidden. */
+  phone?: React.ReactNode;
   /** The title is the page's own, shown from the first frame rather than
       after the opening cell has gone. */
   open?: boolean;
 }) {
   return (
     <header className="mx-auto w-full max-w-[100rem] shrink-0 px-6 sm:px-10 lying:px-6">
-      <div className="flex items-start justify-between gap-6">
+      {/* Julian: centre the title on a phone. Its right column is empty
+          there, so between a crumb and nothing the title sat centred in
+          what was left, right of the page's middle. Two equal outer tracks
+          put it on the middle; a crumb or a title too long for that still
+          gets the room it needs, because a track never goes below its
+          words. */}
+      <div className="flex items-start justify-between gap-6 max-sm:grid max-sm:grid-cols-[1fr_auto_1fr]">
         <div className="shrink-0 sm:w-44">{crumb}</div>
 
         <div className={cn("min-w-0 text-center", !open && "running-head")}>
@@ -208,6 +217,7 @@ export function StripHead({
             middle of the title block rather than on the crumb's line. */}
         <p className="label shrink-0 text-right text-muted-foreground has-[[data-aside-mark]]:self-center sm:w-44">
           <span className="max-sm:hidden">{aside}</span>
+          {phone ? <span className="sm:hidden">{phone}</span> : null}
         </p>
       </div>
     </header>

@@ -553,6 +553,47 @@ export function WorkShell({
     grid: "Grid",
     list: "List",
   };
+  /* A phone's two ways of looking: one project to the width of the screen,
+     or two to a row. The list and the strip both stack one up there, so
+     they are one choice here, and it is lit for either. */
+  const phoneToggle = (
+    <span className="flex items-center justify-end gap-1">
+      {(["strip", "grid"] as const).map((mode) => {
+        const on = !scoping && (mode === "grid") === (view === "grid");
+        return (
+          <button
+            key={mode}
+            type="button"
+            aria-pressed={on}
+            aria-label={mode === "grid" ? "Grid view" : "One up view"}
+            onClick={() => {
+              if (query) search("");
+              chooseView(mode);
+              closeScope();
+            }}
+            className={cn(
+              "-my-1 p-2 transition-opacity duration-200",
+              on ? "opacity-100" : "opacity-35",
+            )}
+          >
+            <svg aria-hidden viewBox="0 0 16 16" className="h-4 w-4" fill="currentColor">
+              {mode === "grid" ? (
+                <>
+                  <rect x="1" y="1" width="6" height="6" rx="0.5" />
+                  <rect x="9" y="1" width="6" height="6" rx="0.5" />
+                  <rect x="1" y="9" width="6" height="6" rx="0.5" />
+                  <rect x="9" y="9" width="6" height="6" rx="0.5" />
+                </>
+              ) : (
+                <rect x="3" y="1" width="10" height="14" rx="0.5" />
+              )}
+            </svg>
+          </button>
+        );
+      })}
+    </span>
+  );
+
   const toggle = (
     <span className="relative block h-[1.625rem] max-sm:hidden">
       <span className="absolute right-0 top-0 flex w-max items-center gap-1 whitespace-nowrap">
@@ -652,7 +693,12 @@ export function WorkShell({
   return (
     <StripPage
       head={
-        <>
+        /* Julian: keep the head pinned on a phone. The page scrolls there,
+           and with the head gone the only way to the other disciplines or
+           the other view was all the way back up. It stops under the bar,
+           61px on a phone (measured), on the ground colour so the work
+           passes under it rather than through it. */
+        <div className="shrink-0 max-sm:sticky max-sm:top-[61px] max-sm:z-20 max-sm:bg-background max-sm:pb-3">
           <StripHead
             crumb={
               all ? (
@@ -674,6 +720,7 @@ export function WorkShell({
                itself. What is left in this column is how to look at the
                work. */
             aside={toggle}
+            phone={phoneToggle}
             /* On /work the strip opens on a discipline, so the page's own
                title lives here, in the middle of the head, from the first
                frame. A category page still opens on its name set large and
@@ -787,7 +834,7 @@ export function WorkShell({
               </ul>
             </nav>
           </div>
-        </>
+        </div>
       }
     >
       {/* The row. The head and the chips are outside it and hold still. */}
