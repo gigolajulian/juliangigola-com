@@ -560,7 +560,8 @@ export function WorkShell({
           <button
             key={mode}
             type="button"
-            aria-pressed={view === mode}
+            // Julian: in colour the page is the colour, so no view is lit.
+            aria-pressed={view === mode && !scoping}
             aria-label={`${WORD[mode]} view`}
             data-ring={`${WORD[mode]} view`}
             onClick={() => {
@@ -568,10 +569,12 @@ export function WorkShell({
                nobody can see the ends of. The box empties with it. */
               if (mode !== "list" && query) search("");
               chooseView(mode);
+              // A view chosen is a way out of colour, as a discipline is.
+              closeScope();
             }}
             className={cn(
               "-my-1 p-1.5 transition-opacity duration-200",
-              view === mode
+              view === mode && !scoping
                 ? "text-foreground opacity-100"
                 : "text-foreground opacity-35 hoverable:hover:opacity-70",
             )}
