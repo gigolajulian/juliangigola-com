@@ -735,6 +735,10 @@ export function WorkShell({
                 out of it. */}
               <ul
                 ref={row}
+                // Julian: a discipline pressed puts the colour panel away.
+                onClickCapture={(e) => {
+                  if ((e.target as Element).closest("a")) closeScope();
+                }}
                 /* Centred in the window, by auto margins on the first and
                    last chip rather than `justify-center`: centring a flex
                    row that scrolls puts its start out of reach, and these

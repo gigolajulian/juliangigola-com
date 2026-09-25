@@ -5,7 +5,6 @@ import Image from "next/image";
 import Link from "next/link";
 import { createPortal } from "react-dom";
 import { cn } from "@/lib/utils";
-import { Lightbox, useLightbox } from "@/components/lightbox";
 import type { Frame } from "@/lib/work-types";
 
 /* ── the work by colour ───────────────────────────────────────────
@@ -15,11 +14,16 @@ import type { Frame } from "@/lib/work-types";
  *
  * Julian: a button that brings it in from the left, and with it the page
  * turns to colour. The discipline rack steps away (`data-scope-open` in
- * globals.css) and in its place every photograph in the hue the scope is
- * reading, in sets by project, the strongest first, each with its
- * dominant colours at the top left. The pointer over the scope picks the
- * hue, and the page follows once it rests; a click holds it. A photograph
- * opens in the viewer.
+ * globals.css) and in its place a grid of the projects in the hue the
+ * scope is reading, the strongest first, each shown by the photograph of
+ * it that is most in that colour, with the set's dominant colours on a
+ * white plate at its top left. The page follows the pointer over the
+ * scope as it moves; a click holds the hue. A tile opens its project.
+ *
+ * Smooth rather than redrawn: the tiles are keyed by project, so one that
+ * stays glides to its new place (`ColourGrid`), one that arrives rises
+ * in, and one whose best photograph changes crossfades to it
+ * (`ColourTile`).
  *
  * Which projects are in play is read from the page, not handed down: the
  * rack is still there under the panel, so the chip that is lit still
@@ -60,8 +64,11 @@ const KEEP = 0.25;
 const NEUTRAL = 5;
 /** How near a dot the pointer must be to name it, in CSS px. */
 const NEAR_PX = 7;
-/** How long the pointer rests on a hue before the page follows it. */
-const REST_MS = 220;
+/** The page follows the pointer in steps of this many chroma units, so it
+    moves when the hue does and not on every pixel of the hand. */
+const STEP = 2;
+/** The strong ease-out the site uses for things settling into place. */
+const SETTLE = "cubic-bezier(0.23, 1, 0.32, 1)";
 /** The panel's width; the results start where it ends. */
 const PANEL = "22rem";
 
@@ -116,6 +123,7 @@ const TARGETS: [string, number[]][] = [
 type Shot = Frame & { dominant: string; pts: number[]; xy: number[] };
 type Placed = { slug: string; name: string; href: string; shots: Shot[] };
 type ColourSet = { p: Placed; shots: Shot[]; score: number };
+type Item = { p: Placed; shot: Shot; count: number; colours: string[] };
 
 /** The share of a photograph's points in reach of a hue. */
 const inHue = (xy: number[], point: [number, number]) => {
@@ -207,12 +215,15 @@ export function ScopePanel({
   /** Where the pointer is on the scope, and where a click left the point. */
   const [aim, setAim] = React.useState<[number, number] | null>(null);
   const [held, setHeld] = React.useState<[number, number] | null>(null);
-  /** The hue the page is showing: the pointer's once it rests, else held. */
-  const [settled, setSettled] = React.useState<[number, number] | null>(null);
-  React.useEffect(() => {
-    const id = window.setTimeout(() => setSettled(aim ?? held), aim ? REST_MS : 0);
-    return () => window.clearTimeout(id);
-  }, [aim, held]);
+  /** The hue the page is showing: the pointer's, else the held one, in
+      steps. Julian: no pause; the page follows the hand. */
+  const at0 = aim ?? held;
+  const qx = at0 ? Math.round(at0[0] / STEP) : null;
+  const qy = at0 ? Math.round(at0[1] / STEP) : null;
+  const settled = React.useMemo<[number, number] | null>(
+    () => (qx === null || qy === null ? null : [qx * STEP, qy * STEP]),
+    [qx, qy],
+  );
   /** The project of the dot under the pointer, and of the set under it. */
   const [dot, setDot] = React.useState<string | null>(null);
   const [over, setOver] = React.useState<string | null>(null);
@@ -264,23 +275,31 @@ export function ScopePanel({
       .sort((a, b) => b.shots.length - a.shots.length || b.score - a.score);
   }, [placed, settled, neutral]);
 
-  /* What the viewer pages through: the photographs as they are laid out. */
-  const shown = React.useMemo<Shot[]>(
-    () => (neutral ? placed.map((p) => p.shots[0]) : sets.flatMap((s) => s.shots)),
+  /* One tile a project: the photograph most in the colour, or with no
+     colour chosen the one the project opens on. */
+  const items = React.useMemo<Item[]>(
+    () =>
+      neutral
+        ? placed.map((p) => ({
+            p,
+            shot: p.shots[0],
+            count: 0,
+            colours: swatches(p.shots.slice(0, 8)),
+          }))
+        : sets.map((s) => ({
+            p: s.p,
+            shot: s.shots[0],
+            count: s.shots.length,
+            colours: swatches(s.shots),
+          })),
     [neutral, placed, sets],
   );
-  const lightbox = useLightbox(shown);
-  const indexOf = React.useMemo(
-    () => new Map(shown.map((s, i) => [s.src, i])),
-    [shown],
-  );
 
-  /* Escape puts it away; the viewer takes its own. */
+  /* Escape puts it away. */
   React.useEffect(() => {
     if (!open) return;
     const key = (e: KeyboardEvent) => {
-      if (e.key === "Escape" && !document.querySelector("[data-zoom-box]"))
-        onClose();
+      if (e.key === "Escape") onClose();
     };
     window.addEventListener("keydown", key);
     return () => window.removeEventListener("keydown", key);
@@ -473,38 +492,10 @@ export function ScopePanel({
   const swatch = point ? colourAt(point[0], point[1]) : null;
   const { h, s } = hsl(swatch ?? [128, 128, 128]);
   const pct = (v: number) => `${50 + (v / RIM) * 50}%`;
-  const count = shown.length;
+  const count = items.length;
   const named = focus ? rows.find((r) => r.slug === focus)?.name : null;
-  /** Changes whenever the page's answer does, so it arrives afresh. */
-  const answer = neutral || !settled ? "all" : settled.map((v) => v.toFixed(1)).join();
 
   if (!ever) return null;
-
-  const tile = (shot: Shot, delay: number) => (
-    <button
-      key={shot.src}
-      type="button"
-      data-ring="Zoom in"
-      onClick={(e) =>
-        lightbox.show(
-          indexOf.get(shot.src) ?? 0,
-          e.currentTarget.querySelector("img"),
-        )
-      }
-      className="scope-in relative block aspect-[4/5] w-full overflow-hidden"
-      style={{ backgroundColor: shot.color, animationDelay: `${delay}ms` }}
-    >
-      <Image
-        src={shot.src}
-        alt={shot.alt}
-        fill
-        sizes="(min-width: 96rem) 12vw, (min-width: 64rem) 16vw, 24vw"
-        data-fade=""
-        data-frame={shot.src}
-        className="object-cover transition-[scale] duration-500 ease-[var(--ease-out-strong)] hoverable:hover:scale-[1.028]"
-      />
-    </button>
-  );
 
   return createPortal(
     <>
@@ -557,7 +548,6 @@ export function ScopePanel({
             // A click on the held point lets it go; anywhere else moves it.
             const release = held && Math.hypot(held[0] - p[0], held[1] - p[1]) < 4;
             setHeld(release ? null : p);
-            setSettled(release ? null : p);
           }}
           role="slider"
           tabIndex={0}
@@ -604,7 +594,7 @@ export function ScopePanel({
           ) : neutral ? (
             <span className="text-muted-foreground">All the work</span>
           ) : (
-            `${count} ${count === 1 ? "frame" : "frames"} in ${sets.length} ${sets.length === 1 ? "project" : "projects"}`
+            `${count} ${count === 1 ? "project" : "projects"} in this colour`
           )}
         </p>
         <p
@@ -683,72 +673,155 @@ export function ScopePanel({
           }}
           className="fixed right-0 z-30 overflow-y-auto overscroll-contain bg-background px-6 pb-10 pt-1 max-sm:hidden sm:px-10 transition-opacity duration-300 starting:opacity-0"
         >
-          <div key={answer}>
-            {data === null ? null : neutral ? (
-              <ul className="grid grid-cols-[repeat(auto-fill,minmax(10rem,1fr))] gap-3">
-                {placed.map((p, i) => (
-                  <li
-                    key={p.slug}
-                    onPointerEnter={() => setOver(p.slug)}
-                    onPointerLeave={() => setOver(null)}
-                  >
-                    {tile(p.shots[0], Math.min(i, 12) * 20)}
-                    <Link
-                      href={p.href}
-                      prefetch={false}
-                      className="label mt-2 block truncate transition-colors hoverable:hover:text-muted-foreground"
-                    >
-                      {p.name}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            ) : sets.length ? (
-              <div className="flex flex-col gap-10">
-                {sets.map((set, i) => (
-                  <section
-                    key={set.p.slug}
-                    onPointerEnter={() => setOver(set.p.slug)}
-                    onPointerLeave={() => setOver(null)}
-                    className="scope-in"
-                    style={{ animationDelay: `${Math.min(i, 8) * 40}ms` }}
-                  >
-                    {/* The set's dominant colours at its top left, then
-                        whose it is and how much of it is in the colour. */}
-                    <div className="mb-3 flex items-center gap-3">
-                      <span className="flex gap-1" aria-hidden>
-                        {swatches(set.shots).map((c) => (
-                          <span key={c} className="size-3" style={{ backgroundColor: c }} />
-                        ))}
-                      </span>
-                      <Link
-                        href={set.p.href}
-                        prefetch={false}
-                        className="label transition-colors hoverable:hover:text-muted-foreground"
-                      >
-                        {set.p.name}
-                      </Link>
-                      <span className="label tabular-nums text-muted-foreground">
-                        {set.shots.length}
-                      </span>
-                    </div>
-                    <div className="grid grid-cols-[repeat(auto-fill,minmax(9rem,1fr))] gap-3">
-                      {set.shots.map((shot, j) =>
-                        tile(shot, Math.min(i, 8) * 40 + Math.min(j, 10) * 25),
-                      )}
-                    </div>
-                  </section>
-                ))}
-              </div>
-            ) : (
-              <p className="label text-muted-foreground">Nothing in this colour yet</p>
-            )}
-          </div>
+          {data === null ? null : items.length ? (
+            <ColourGrid items={items} onOver={setOver} />
+          ) : (
+            <p className="label text-muted-foreground">Nothing in this colour yet</p>
+          )}
         </section>
       ) : null}
-
-      <Lightbox frames={shown} name="Colour" {...lightbox} />
     </>,
     document.body,
+  );
+}
+
+/* ── the grid ─────────────────────────────────────────────────────
+ * Laid out by CSS, moved by FLIP: after each change every tile that was
+ * already on the page is put back where it was and let go, so it glides to
+ * its new place instead of jumping, and a new one rises in. Offsets, not
+ * rects, so a scrolled grid measures the same.
+ * ─────────────────────────────────────────────────────────────── */
+function ColourGrid({
+  items,
+  onOver,
+}: {
+  items: Item[];
+  onOver: (slug: string | null) => void;
+}) {
+  const grid = React.useRef<HTMLUListElement>(null);
+  const was = React.useRef(new Map<string, { x: number; y: number }>());
+  const order = items.map((i) => i.p.slug).join(" ");
+  React.useLayoutEffect(() => {
+    const el = grid.current;
+    if (!el) return;
+    const still = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const now = new Map<string, { x: number; y: number }>();
+    let fresh = 0;
+    for (const li of Array.from(el.children) as HTMLElement[]) {
+      const slug = li.dataset.slug ?? "";
+      const at = { x: li.offsetLeft, y: li.offsetTop };
+      now.set(slug, at);
+      if (still) continue;
+      const from = was.current.get(slug);
+      if (from) {
+        const dx = from.x - at.x;
+        const dy = from.y - at.y;
+        if (dx || dy)
+          li.animate(
+            [{ translate: `${dx}px ${dy}px` }, { translate: "0 0" }],
+            { duration: 520, easing: SETTLE },
+          );
+      } else {
+        li.animate(
+          [
+            { opacity: 0, translate: "0 10px", scale: "0.97" },
+            { opacity: 1, translate: "0 0", scale: "1" },
+          ],
+          {
+            duration: 420,
+            easing: SETTLE,
+            delay: Math.min(fresh++, 14) * 22,
+            fill: "backwards",
+          },
+        );
+      }
+    }
+    was.current = now;
+  }, [order]);
+
+  return (
+    <ul
+      ref={grid}
+      className="relative grid grid-cols-[repeat(auto-fill,minmax(12rem,1fr))] gap-x-4 gap-y-6"
+    >
+      {items.map((item) => (
+        <li
+          key={item.p.slug}
+          data-slug={item.p.slug}
+          onPointerEnter={() => onOver(item.p.slug)}
+          onPointerLeave={() => onOver(null)}
+        >
+          <ColourTile item={item} />
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+/* A project, shown by one photograph. When the best photograph changes the
+   new one is laid over the old and fades up once it has loaded
+   (`img[data-fade]` in globals.css), and the old one goes after, so the
+   tile never shows its bare colour in between. */
+function ColourTile({ item }: { item: Item }) {
+  const { p, shot, count, colours } = item;
+  const [layers, setLayers] = React.useState<Shot[]>([shot]);
+  if (layers[layers.length - 1].src !== shot.src)
+    setLayers((l) => [l[l.length - 1], shot]);
+  const top = layers[layers.length - 1];
+
+  return (
+    <Link
+      href={p.href}
+      prefetch={false}
+      data-ring="View project"
+      className="group block"
+    >
+      <span
+        className="relative block aspect-[4/5] overflow-hidden"
+        style={{ backgroundColor: top.color }}
+      >
+        {layers.map((l) => (
+          <Image
+            key={l.src}
+            src={l.src}
+            alt={l === top ? l.alt : ""}
+            fill
+            sizes="(min-width: 96rem) 16vw, (min-width: 64rem) 22vw, 30vw"
+            data-fade=""
+            onLoad={
+              l === top && layers.length > 1
+                ? () =>
+                    window.setTimeout(
+                      () => setLayers((x) => x.slice(-1)),
+                      520,
+                    )
+                : undefined
+            }
+            className="object-cover transition-[scale] duration-500 ease-[var(--ease-out-strong)] hoverable:group-hover:scale-[1.028]"
+          />
+        ))}
+        {/* The set's dominant colours, on a white plate at the top left. */}
+        {colours.length ? (
+          <span
+            aria-hidden
+            className="absolute left-2 top-2 z-10 flex gap-1 bg-white p-1.5"
+          >
+            {colours.map((c) => (
+              <span key={c} className="size-3" style={{ backgroundColor: c }} />
+            ))}
+          </span>
+        ) : null}
+      </span>
+      <span className="mt-2 flex items-baseline justify-between gap-3">
+        <span className="label truncate transition-colors group-hover:text-muted-foreground">
+          {p.name}
+        </span>
+        {count ? (
+          <span className="label shrink-0 tabular-nums text-muted-foreground">
+            {count}
+          </span>
+        ) : null}
+      </span>
+    </Link>
   );
 }

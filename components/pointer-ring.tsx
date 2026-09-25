@@ -179,8 +179,8 @@ export function PointerRing() {
           "ring-tag block whitespace-nowrap",
           "font-mono text-[0.625rem] uppercase leading-none tracking-[0.18em]",
           "opacity-0 translate-y-1 transition-[opacity,translate] duration-200 ease-[var(--ease-out-strong)]",
-          "in-data-over:opacity-100 in-data-over:translate-y-0",
-          "in-data-pressed:opacity-70",
+          "in-data-over:opacity-80 in-data-over:translate-y-0",
+          "in-data-pressed:opacity-[0.56]",
           "empty:hidden motion-reduce:transition-none",
         ].join(" ")}
       />
