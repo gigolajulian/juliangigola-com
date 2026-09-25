@@ -233,6 +233,11 @@ const nextConfig: NextConfig = {
        about 254px on a laptop, and with `sizes` saying a third of the
        window every one of them was fetching the 640. */
     imageSizes: [384],
+    /* 78 everywhere a photograph is shown: about 15% lighter than the
+       harvester's 82 and not a difference Julian could see at 1:1. 82
+       only for the full-size copy the viewer swaps in to be zoomed.
+       Next 16 coerces any quality not listed here to the nearest one. */
+    qualities: [78, 82],
   },
 
   // Stops naming the framework and its version to every request. Free, and

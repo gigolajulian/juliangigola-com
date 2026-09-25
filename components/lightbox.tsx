@@ -119,6 +119,10 @@ export function useLightbox(frames: Frame[]) {
   const count = frames.length;
   const [open, setOpen] = React.useState(false);
   const [index, setIndex] = React.useState(0);
+  /* The open has landed and no close has begun: the only time the
+     full-size copy is on the stage (`Stage`), so it never rides a trip
+     that animates the picture under it. */
+  const [settled, setSettled] = React.useState(false);
 
   // Focus goes back to the frame that was pressed. Radix would return it to
   // its own trigger, and there isn't one: the lightbox is opened from
@@ -150,6 +154,8 @@ export function useLightbox(frames: Frame[]) {
       }
       if (closing.current) return;
       closing.current = true;
+      // Before the rects are read: the trip flies the fitted picture home.
+      flushSync(() => setSettled(false));
       unlock.current?.();
       unlock.current = null;
       // An open still in flight is stopped where it is, and the way home
@@ -206,7 +212,9 @@ export function useLightbox(frames: Frame[]) {
         chrome: viewerChrome,
       });
       trip.current.finished.finally(() => {
-        if (!closing.current) trip.current = null;
+        if (closing.current) return;
+        trip.current = null;
+        setSettled(true);
       });
       // The back button closes it the way the close button does.
       unpush.current = pushHistory(() => closeRef.current());
@@ -256,7 +264,7 @@ export function useLightbox(frames: Frame[]) {
     return () => window.removeEventListener("keydown", onKey);
   }, [open, step]);
 
-  return { open, index, show, onOpenChange, step };
+  return { open, index, show, onOpenChange, step, settled };
 }
 
 /* ── the swipe ────────────────────────────────────────────────────
@@ -463,6 +471,7 @@ export function Lightbox({
   index,
   onOpenChange,
   step,
+  settled,
 }: {
   frames: Frame[];
   /** What the sequence is, for the dialog's accessible title. */
@@ -502,6 +511,7 @@ export function Lightbox({
               alt={current.alt || `${name}, frame ${index + 1}`}
               pictureRef={picture}
               swipe={swipe}
+              sharp={settled}
               onClose={() => onOpenChange(false)}
             />
           ) : null}
@@ -777,14 +787,20 @@ function Stage({
   alt,
   pictureRef,
   swipe,
+  sharp,
   onClose,
 }: {
   frame: Frame;
   alt: string;
   pictureRef: React.RefObject<HTMLDivElement | null>;
   swipe: ReturnType<typeof useSwipe>["handlers"];
+  /** Whether the full-size copy may be put on the stage. */
+  sharp: boolean;
   onClose: () => void;
 }) {
+  /* Which full-size copy has painted. By source, so a step to the next
+     frame starts from the fitted picture again until its own arrives. */
+  const [sharpDone, setSharpDone] = React.useState<string | null>(null);
   const area = React.useRef<HTMLDivElement>(null);
   const size = useFit(area, frame.width, frame.height);
   const zoom = useZoom(pictureRef, frame.src, swipe);
@@ -844,7 +860,7 @@ function Stage({
               : null),
           }}
         >
-          <div style={zoom.style} className="h-full w-full">
+          <div style={zoom.style} className="relative h-full w-full">
           <Image
             key={frame.src}
             data-lightbox-picture
@@ -857,6 +873,28 @@ function Stage({
             draggable={false}
             className="block h-full w-full object-contain"
           />
+          {/* The zoomable copy: the master's full width at 82, laid exactly
+              over the fitted picture once it has decoded, so the swap is
+              invisible until a wheel goes in on it. The fitted picture is
+              screen sized, and at three times it was soft. */}
+          {sharp ? (
+            <Image
+              key={`sharp-${frame.src}`}
+              src={frame.src}
+              alt=""
+              aria-hidden
+              width={frame.width}
+              height={frame.height}
+              sizes="2500px"
+              quality={82}
+              draggable={false}
+              onLoad={() => setSharpDone(frame.src)}
+              className={cn(
+                "absolute inset-0 block h-full w-full object-contain",
+                sharpDone === frame.src ? "opacity-100" : "opacity-0",
+              )}
+            />
+          ) : null}
           </div>
         </div>
       </div>

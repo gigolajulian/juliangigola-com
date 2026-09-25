@@ -365,25 +365,26 @@ export function ProjectStrip({
                 // full density there was 6.5MB of frames on one page, and
                 // the difference past 2x is not one a phone shows.
                 sizes={`(min-resolution: 2.5dppx) calc((100vh - 8rem) * ${((cell.frame.width / cell.frame.height) * 0.667).toFixed(3)}), calc((100vh - 8rem) * ${(cell.frame.width / cell.frame.height).toFixed(3)})`}
-                // The first two lead the page's loading; every other frame
+                // The first three lead the page's loading; every other frame
                 // is fetched at once rather than as the strip reaches it.
                 // Left lazy, Julian's recording showed each frame arriving
                 // as a block of colour and filling in under the wheel,
                 // and the swap from block to picture read as a snap
                 // between every image. The page is the sequence; the
                 // sequence has to be there.
-                priority={cell.n < 2}
+                priority={cell.n < 3}
                 /* And what the browser does with eighteen of them at once.
                    Next 16 no longer writes `fetchpriority` from `priority`,
                    and React preloads in the head every picture that is
                    neither lazy nor low: all eighteen frames went out as one
                    equal claim on the connection, so the two that are the
                    page's first screen had no priority at all. High for
-                   those two, low for the rest — which also takes the rest
+                   the first three (Julian: they are the page load), low
+                   for the rest — which also takes the rest
                    out of the head, so they are asked for after the first
                    frames and the stylesheet rather than alongside them.
                    They stay eager: the sequence still loads in full. */
-                fetchPriority={cell.n < 2 ? "high" : "low"}
+                fetchPriority={cell.n < 3 ? "high" : "low"}
                 loading="eager"
                 placeholder={
                   cell.n === 0 && project.cover.blur ? "blur" : "empty"

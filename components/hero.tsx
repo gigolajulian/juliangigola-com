@@ -3,7 +3,7 @@
 import * as React from "react";
 import BLUR from "@/public/hero/blur.json";
 import Link from "next/link";
-import Image from "next/image";
+import Image, { getImageProps } from "next/image";
 import { cn } from "@/lib/utils";
 import type { Discipline, Frame } from "@/lib/work";
 
@@ -58,6 +58,34 @@ const IDLE_MS = 3000;
  * cover beginning to speak.
  */
 const INTRO_MS = 5200;
+
+/** The cover's slot, shared by the pictures and the warm-up below. */
+const COVER_SIZES = "(min-width: 1024px) 45vw, 100vw";
+
+/**
+ * A frame fetched and decoded ahead of its turn, once per visit.
+ *
+ * Only two frames are mounted (see `slide`), so the next one used to be
+ * asked for at the moment it was due: measured on production, the first
+ * switch dissolved in over a block of colour and the photograph landed
+ * 5.8s after load. Built from `getImageProps` with the same `sizes`, so
+ * the browser picks the same candidate the mounted picture will and the
+ * switch finds it in the cache, already decoded.
+ */
+const warmed = new Map<string, Promise<void>>();
+const warmFrame = (src: string) => {
+  let done = warmed.get(src);
+  if (!done) {
+    const { props } = getImageProps({ src, alt: "", fill: true, sizes: COVER_SIZES });
+    const img = new window.Image();
+    if (props.sizes) img.sizes = props.sizes;
+    if (props.srcSet) img.srcset = props.srcSet;
+    img.src = props.src;
+    done = img.decode().catch(() => {});
+    warmed.set(src, done);
+  }
+  return done;
+};
 
 /**
  * The two ways in.
@@ -281,6 +309,31 @@ export function Hero({
   /** Where each part of the cover lands: the cascade, or all at once. */
   const at = (ms: number) => lands(back ? 0 : ms);
   const { active } = slide;
+  /** For the timer, which reads it without restarting on every switch. */
+  const activeRef = React.useRef(active);
+  React.useEffect(() => {
+    activeRef.current = active;
+  }, [active]);
+
+  /* The rest of the frames, one at a time and in the order they play,
+     once the page has loaded: never competing with the first picture,
+     and there before a hover asks for one. */
+  React.useEffect(() => {
+    let live = true;
+    const run = async () => {
+      for (const s of slides.slice(1)) {
+        if (!live) return;
+        await warmFrame(s.frame.src);
+      }
+    };
+    if (document.readyState === "complete") void run();
+    else window.addEventListener("load", () => void run(), { once: true });
+    return () => {
+      live = false;
+    };
+    // The slides are fixed for the life of the page.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   /**
    * Tells the header there is a photograph behind it.
@@ -354,14 +407,19 @@ export function Hero({
     // reading `active` to decide would put it in this effect's dependencies
     // and restart the timer on every switch.
     let id = 0;
+    let live = true;
     const advance = () => {
-      setSlide((s) => ({
-        // Wraps to 1, not 0. The intro plays once and is then out of the
-        // rotation for the life of the page.
-        active: s.active + 1 >= slides.length ? 1 : s.active + 1,
-        previous: s.active,
-      }));
-      id = window.setTimeout(advance, DWELL_MS);
+      // Wraps to 1, not 0. The intro plays once and is then out of the
+      // rotation for the life of the page.
+      const now = activeRef.current;
+      const next = now + 1 >= slides.length ? 1 : now + 1;
+      // Not before the next frame is in hand: a dissolve over a picture
+      // still in flight is a block of colour and then a pop.
+      void warmFrame(slides[next].frame.src).then(() => {
+        if (!live) return;
+        setSlide((s) => ({ active: next, previous: s.active }));
+        id = window.setTimeout(advance, DWELL_MS);
+      });
     };
 
     // Only the very first run waits out the load; picking the cover back up
@@ -369,7 +427,12 @@ export function Hero({
     id = window.setTimeout(advance, opening.current ? INTRO_MS : DWELL_MS);
     opening.current = false;
 
-    return () => window.clearTimeout(id);
+    return () => {
+      live = false;
+      window.clearTimeout(id);
+    };
+    // `slides` is rebuilt every render from props that never change.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [held, slides.length]);
 
   /**
@@ -550,7 +613,7 @@ export function Hero({
                   : ""
               }
               fill
-              sizes="(min-width: 1024px) 45vw, 100vw"
+              sizes={COVER_SIZES}
               priority={i === 0}
               fetchPriority={i === 0 ? "high" : undefined}
               // A 16px copy of the frame, inlined, under the picture while it

@@ -105,9 +105,10 @@ export default function cloudflareImageLoader({
 }: ImageLoaderProps): string {
   const options = [
     `width=${width}`,
-    // Matches the quality the harvester writes, so a transform never spends
-    // bytes re-describing compression artefacts it cannot remove.
-    `quality=${quality ?? 82}`,
+    // 78 for every picture that is looked at rather than inspected: a
+    // step under the harvester's 82 that Julian could not see at 1:1. The
+    // viewer's zoomable copy asks for 82 (next.config.ts, `qualities`).
+    `quality=${quality ?? 78}`,
     "format=auto",
   ];
 

@@ -87,6 +87,10 @@ const rowSrc = (p: PassPic) => {
     (dpr >= 2.5 ? 0.667 : 1);
   const need = css * dpr;
   const rung = RUNGS.find((r) => r >= need) ?? RUNGS[RUNGS.length - 1];
+  /* Not the masters: a cover that would need the 2500px copy is left for
+     the filter to fetch when it is pressed. Measured on a 2x laptop: 3.1MB
+     fetched on /work with three pictures in view. */
+  if (rung === RUNGS[RUNGS.length - 1]) return null;
   return loader({ src: p.src, width: rung });
 };
 
@@ -117,7 +121,10 @@ export function WorkShell({
     if (conn?.saveData) return;
     const warm = () => {
       for (const pics of Object.values(passes)) {
-        for (const p of pics.slice(0, 2)) new Image().src = rowSrc(p);
+        for (const p of pics.slice(0, 2)) {
+          const src = rowSrc(p);
+          if (src) new Image().src = src;
+        }
       }
     };
     const idle = (
