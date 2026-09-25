@@ -118,11 +118,35 @@
   place-items: center;
   background: var(--background);
 }
-/* The eye is drawn on a canvas the window's size. Under it,
-   the loader: a short hairline that fills, and a count. */
+/* The CRT fills the window, and the eye's canvas sits in the middle of
+   it, over the leader's dial. Under the eye, the loader: a short hairline
+   that fills, and a count, in the leader's white whichever theme is on,
+   since the screen is dark in both. The rules for the CRT's host are the
+   package's own: its stylesheet is 73kB for the whole library, and this
+   is all of it the CRT uses. */
 .jg-intro-mark {
   position: absolute;
   inset: 0;
+  opacity: 0;
+}
+.jg-intro-mark > .threeui-background {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  isolation: isolate;
+}
+.jg-intro-mark > .threeui-background > canvas {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.jg-intro-eye {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  translate: -50% -50%;
 }
 .jg-intro-load {
   position: absolute;
@@ -134,7 +158,7 @@
   display: grid;
   justify-items: center;
   gap: 0.625rem;
-  color: var(--foreground);
+  color: #ececf0;
 }
 .jg-intro-load > span {
   order: 1;
@@ -142,11 +166,11 @@
 .jg-intro-track {
   width: 100%;
   height: 1px;
-  background: color-mix(in oklab, var(--foreground) 16%, transparent);
+  background: color-mix(in oklab, currentColor 16%, transparent);
 }
 .jg-intro-track > div {
   height: 100%;
-  background: var(--foreground);
+  background: currentColor;
   transform: scaleX(0);
   transform-origin: left;
 }
