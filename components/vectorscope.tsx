@@ -62,8 +62,6 @@ const DEPTH = 0.35;
 const KEEP = 0.25;
 /** Inside this, the point is on neutral and the page shows everything. */
 const NEUTRAL = 5;
-/** How near a dot the pointer must be to name it, in CSS px. */
-const NEAR_PX = 7;
 /** The page follows the pointer in steps of this many chroma units, so it
     moves when the hue does and not on every pixel of the hand. */
 const STEP = 2;
@@ -227,20 +225,18 @@ export function ScopePanel({
     };
   }, [open, byHref]);
 
-  /** Where the pointer is on the scope, and where a click left the point. */
-  const [aim, setAim] = React.useState<[number, number] | null>(null);
+  /** Where a click left the point. Julian: the page follows a click, not
+      the hand; following the pointer redrew the grid on every move. */
   const [held, setHeld] = React.useState<[number, number] | null>(null);
-  /** The hue the page is showing: the pointer's, else the held one, in
-      steps. Julian: no pause; the page follows the hand. */
-  const at0 = aim ?? held;
+  /** The hue the page is showing, in steps. */
+  const at0 = held;
   const qx = at0 ? Math.round(at0[0] / STEP) : null;
   const qy = at0 ? Math.round(at0[1] / STEP) : null;
   const settled = React.useMemo<[number, number] | null>(
     () => (qx === null || qy === null ? null : [qx * STEP, qy * STEP]),
     [qx, qy],
   );
-  /** The project of the dot under the pointer, and of the set under it. */
-  const [dot, setDot] = React.useState<string | null>(null);
+  /** The project of the set under the pointer. */
   const [over, setOver] = React.useState<string | null>(null);
   const [brand, setBrand] = React.useState("");
 
@@ -290,9 +286,9 @@ export function ScopePanel({
       .sort((a, b) => b.shots.length - a.shots.length || b.score - a.score);
   }, [placed, settled, neutral]);
 
-  /* One tile a project, shown by its cover (the photograph it opens
-     on), with the rest of its photographs in the colour stacked under it,
-     the strongest first; with no colour chosen, the rest of the set. */
+  /* One tile a project, shown by its photograph nearest the colour, the
+     rest of its photographs in the colour stacked under it, strongest
+     first; with no colour chosen, its cover and the rest of the set. */
   const items = React.useMemo<Item[]>(
     () =>
       neutral
@@ -305,8 +301,8 @@ export function ScopePanel({
           }))
         : sets.map((s) => ({
             p: s.p,
-            shot: s.p.shots[0],
-            stack: s.shots.filter((f) => f.src !== s.p.shots[0].src),
+            shot: s.shots[0],
+            stack: s.shots.slice(1),
             count: s.shots.length,
             colours: swatches(s.shots),
           })),
@@ -355,9 +351,9 @@ export function ScopePanel({
     };
   }, [open]);
 
-  const point = aim ?? held;
-  /** Whose dots are lit on the scope: a named dot's or a hovered set's. */
-  const focus = over ?? dot;
+  const point = held;
+  /** Whose dots are lit on the scope: the hovered set's. */
+  const focus = over;
   const litSlugs = React.useMemo(
     () => (neutral ? null : new Set(sets.map((s) => s.p.slug))),
     [neutral, sets],
@@ -479,25 +475,6 @@ export function ScopePanel({
       -((e.clientY - box.top - half) / half) * RIM,
     ]);
   };
-  const nearest = (p: [number, number], width: number) => {
-    const reach = (NEAR_PX / (width / 2)) * RIM;
-    let best: string | null = null;
-    let bd = reach;
-    for (const q of placed) {
-      for (const s of q.shots) {
-        for (let i = 0; i < s.xy.length; i += 2) {
-          const [x, y] = rim([s.xy[i], s.xy[i + 1]]);
-          const d = Math.hypot(x - p[0], y - p[1]);
-          if (d < bd) {
-            bd = d;
-            best = q.slug;
-          }
-        }
-      }
-    }
-    return best;
-  };
-
   const match = () => {
     const m = /^#?([0-9a-f]{6})$/i.exec(brand.trim());
     if (!m) return;
@@ -551,16 +528,6 @@ export function ScopePanel({
 
         <div
           className="relative aspect-square w-full shrink-0 cursor-crosshair touch-none select-none"
-          onPointerMove={(e) => {
-            const p = at(e);
-            setAim(p);
-            const d = nearest(p, e.currentTarget.getBoundingClientRect().width);
-            setDot((x) => (x === d ? x : d));
-          }}
-          onPointerLeave={() => {
-            setAim(null);
-            setDot(null);
-          }}
           onClick={(e) => {
             const p = at(e);
             // A click on the held point lets it go; anywhere else moves it.
@@ -634,7 +601,7 @@ export function ScopePanel({
             </span>
           </span>
         </p>
-        {/* Whose dots are lit: the dot under the pointer, or the set. */}
+        {/* Whose dots are lit: the set under the pointer. */}
         <p className="label -mt-2 min-h-[1lh] truncate">{named}</p>
 
         <form
@@ -675,7 +642,7 @@ export function ScopePanel({
         </form>
 
         <p className="text-xs leading-relaxed text-muted-foreground">
-          Hover the scope to find a colour in the work. Click to hold it.
+          Click the scope to find a colour in the work. Click the point again to let it go.
         </p>
       </aside>
 
@@ -709,7 +676,7 @@ export function ScopePanel({
  * its new place instead of jumping, and a new one rises in. Offsets, not
  * rects, so a scrolled grid measures the same.
  * ─────────────────────────────────────────────────────────────── */
-function ColourGrid({
+const ColourGrid = React.memo(function ColourGrid({
   items,
   onOver,
 }: {
@@ -717,6 +684,9 @@ function ColourGrid({
   onOver: (slug: string | null) => void;
 }) {
   const grid = React.useRef<HTMLUListElement>(null);
+  /** The set whose fan is open. Julian: the rest step back so it is the
+      one in focus. */
+  const [focus, setFocus] = React.useState<string | null>(null);
   const was = React.useRef(new Map<string, { x: number; y: number }>());
   const order = items.map((i) => i.p.slug).join(" ");
   React.useLayoutEffect(() => {
@@ -768,13 +738,15 @@ function ColourGrid({
           data-slug={item.p.slug}
           onPointerEnter={() => onOver(item.p.slug)}
           onPointerLeave={() => onOver(null)}
+          className="transition-opacity duration-300 ease-[var(--ease-out-strong)]"
+          style={{ opacity: focus && focus !== item.p.slug ? 0.2 : 1 }}
         >
-          <ColourTile item={item} />
+          <ColourTile item={item} onFocus={setFocus} />
         </li>
       ))}
     </ul>
   );
-}
+});
 
 /** Between the photographs in the fan, and inside its panel. */
 const FAN_GAP = 8;
@@ -782,32 +754,42 @@ const FAN_GAP = 8;
 const photoHref = (href: string, s: Shot) =>
   `${href}#photo-${s.src.split("/").pop()?.replace(/\.jpg$/i, "")}`;
 
-/* A project, shown by its cover. The rest of its photographs in this
-   colour sit under it as a stack, two edges peeking out; the pointer
-   resting on the cover fans them out beside it, over the grid, each one a
-   way straight to that photograph (`cellFor` in strip.tsx). Julian asked
-   for the cover and a quick look at the rest rather than every photograph
-   in the set at once. Laid out when it opens, in two rows as tall as the
-   cover, towards whichever side has the room, with what does not fit
+/* A project, shown by its photograph nearest the colour. The rest of its
+   photographs in the colour sit under it as a stack, two edges peeking
+   out; the pointer resting on it fans them out beside it, over the grid,
+   and the other sets step back (`ColourGrid`), each photograph a way
+   straight to itself in the project (`cellFor` in strip.tsx). Julian asked
+   for a quick look at the rest rather than every photograph in the set at
+   once. Laid out the moment the pointer arrives, so the photographs are
+   already loading during the beat before it opens; in two rows as tall as
+   the tile, towards whichever side has the room, with what does not fit
    counted on a last card that opens the project. Touch has no hover and
    simply opens the project. */
-function ColourTile({ item }: { item: Item }) {
+const ColourTile = React.memo(function ColourTile({
+  item,
+  onFocus,
+}: {
+  item: Item;
+  onFocus: (slug: string | null) => void;
+}) {
   const { p, shot, stack, count, colours } = item;
   const box = React.useRef<HTMLSpanElement>(null);
   const wait = React.useRef(0);
   const [open, setOpen] = React.useState(false);
-  const [fan, setFan] = React.useState<{
+  const [laid, setFan] = React.useState<{
+    stack: Shot[];
     left: boolean;
     h: number;
     rows: number[][];
     more: number;
   } | null>(null);
+  // Laid out for another colour's stack is not laid out for this one.
+  const fan = laid?.stack === stack ? laid : null;
 
   const enter = () => {
     if (!stack.length || !window.matchMedia("(hover: hover)").matches) return;
     window.clearTimeout(wait.current);
-    // A beat, so a pointer crossing the grid does not open every stack.
-    wait.current = window.setTimeout(() => {
+    {
       const el = box.current;
       const section = el?.closest("section");
       if (!el || !section) return;
@@ -835,13 +817,18 @@ function ColourTile({ item }: { item: Item }) {
           i++;
         }
       }
-      setFan({ left, h, rows, more: all.length - i });
+      setFan({ stack, left, h, rows, more: all.length - i });
+    }
+    // A beat, so a pointer crossing the grid does not open every stack.
+    wait.current = window.setTimeout(() => {
       setOpen(true);
+      onFocus(p.slug);
     }, 90);
   };
   const leave = () => {
     window.clearTimeout(wait.current);
     setOpen(false);
+    onFocus(null);
   };
   React.useEffect(() => () => window.clearTimeout(wait.current), []);
 
@@ -933,16 +920,17 @@ function ColourTile({ item }: { item: Item }) {
             className={cn(
               "flex flex-col gap-2 bg-background p-2 shadow-[0_12px_32px_rgb(0_0_0/0.22)]",
               fan.left ? "items-end" : "items-start",
-              !still && "transition-[clip-path,opacity] ease-[var(--ease-out-strong)]",
+              !still && "transition-[opacity,scale,translate] ease-[var(--ease-out-strong)]",
             )}
+            /* Opacity and transform only, from the tile's side, so the
+               compositor carries it: the clip that used to wipe it open
+               was repainted on every frame. */
             style={{
-              clipPath: open
-                ? "inset(0 0 0 0)"
-                : fan.left
-                  ? "inset(0 0 0 100%)"
-                  : "inset(0 100% 0 0)",
+              transformOrigin: fan.left ? "right center" : "left center",
+              scale: open ? "1" : "0.96",
+              translate: open ? "0 0" : `${fan.left ? 12 : -12}px 0`,
               opacity: open ? 1 : 0,
-              transitionDuration: open ? "420ms" : "200ms",
+              transitionDuration: open ? "320ms" : "160ms",
             }}
           >
             {fan.rows.map((row, r) =>
@@ -964,11 +952,11 @@ function ColourTile({ item }: { item: Item }) {
                           width: w,
                           height: fan.h,
                           backgroundColor: f.color,
-                          translate: open ? "0 0" : `${fan.left ? 24 : -24}px 0`,
+                          translate: open ? "0 0" : `${fan.left ? 12 : -12}px 0`,
                           opacity: open ? 1 : 0,
                           transition: still
                             ? undefined
-                            : `translate 420ms ${SETTLE} ${open ? i * 25 : 0}ms, opacity 300ms ${SETTLE} ${open ? i * 25 : 0}ms`,
+                            : `translate 340ms ${SETTLE} ${open ? i * 18 : 0}ms, opacity 240ms ${SETTLE} ${open ? i * 18 : 0}ms`,
                         }}
                       >
                         <Image
@@ -1002,4 +990,4 @@ function ColourTile({ item }: { item: Item }) {
       ) : null}
     </div>
   );
-}
+});
