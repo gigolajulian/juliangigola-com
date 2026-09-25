@@ -1160,29 +1160,33 @@ a.strip-cell {
        and an element that may not read its own content has no height at
        all. Measured before the rule was scoped: every cell 0 by 0. */
     container-type: normal;
-    grid-template-rows: none;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    grid-auto-flow: row;
-    grid-auto-rows: auto;
-    align-items: start;
+    /* Justified rows, the phone's wall. Every picture's width is its
+       shape times a row height of 11rem, and a line shares out what it
+       has left over in the same proportion; with the shape held by
+       `aspect-ratio`, everything on a line comes out the same height and
+       the line fills the width exactly. So nothing is cropped and there
+       are no holes: a horizontal frame in Event coverage is horizontal
+       here too, where the sheet used to cut every frame to 4:5. Covers
+       have no `--ar`, stand at 4:5 and so still go two to a line. */
+    display: flex;
+    /* A row, over the column the strip is on a phone. */
+    flex-direction: row !important;
+    flex-wrap: wrap;
+    align-items: flex-start;
   }
   .strip-grid > a,
   .strip-grid > button {
-    /* Down the page there is no row to take a height from: the two columns
-       set the width and the frame sets the rest. */
     width: auto !important;
     height: auto !important;
-    aspect-ratio: 4 / 5 !important;
-  }
-  /* Except a film, which is 16:9 wherever it is drawn. The sheet sets one
-     ratio so a column of covers reads as a column rather than a stack of
-     different shapes, and a film is the one cell that is not a cover. */
-  .strip-grid > a[data-film] {
-    aspect-ratio: 16 / 9 !important;
+    /* Grow in proportion to the shape, times a hundred: a line whose
+       grow factors add up to less than one is only given that share of
+       its room, so a portrait on a line of its own stopped short. */
+    flex: calc(var(--ar, 0.8) * 100) 1 calc(var(--ar, 0.8) * 11rem);
+    aspect-ratio: var(--ar, 0.8) !important;
+    min-width: 0;
   }
   .strip-grid > :where(div, section, article) {
-    grid-row: auto;
-    grid-column: 1 / -1;
+    flex: 1 0 100%;
     /* Running down the page the break is a line across it, not beside
        it, and the name needs room over it. */
     border-left: 0;

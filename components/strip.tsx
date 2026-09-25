@@ -650,7 +650,8 @@ export function Strip({
    * ─────────────────────────────────────────────────────────────── */
   React.useLayoutEffect(() => {
     const el = scroller.current;
-    if (!el || !grid || !live) return;
+    // Not on a phone: the sheet there runs down the page (`globals.css`).
+    if (!el || !grid || !live || !wide) return;
     const sheet = document.createElement("style");
     document.head.append(sheet);
     el.dataset.wall = wallId;
@@ -749,7 +750,7 @@ export function Strip({
       sheet.remove();
       delete el.dataset.wall;
     };
-  }, [grid, live, count, wallId]);
+  }, [grid, live, wide, count, wallId]);
 
   /* ── Lenis ────────────────────────────────────────────────────
    * On by default; `?lenis=0` opts a browser out. It takes the wheel on
