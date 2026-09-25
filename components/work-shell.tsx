@@ -274,6 +274,57 @@ export function WorkShell({
      is that discipline, and a query is answered from the whole archive
      whichever chip is lit (`work-sheet.tsx`). */
   const view: WorkView = chosen;
+
+  /* Julian: on an iPad the rack keeps running sideways but shows whole
+     columns. Two rows sized from the height left a cover cut in half at
+     the window's edge whatever the model, so here the count of columns is
+     rounded up to what the width holds and every cover takes an equal
+     share of it, never taller than a row allows. A snap brings a swipe to
+     rest on a column. Worked out here because it needs a width divided by
+     a length, which CSS cannot yet do everywhere; `--rack-w` in
+     `globals.css` is where it lands. */
+  React.useEffect(() => {
+    if (view !== "grid") return;
+    const shelf = rowBox.current?.querySelector<HTMLElement>(".strip-grid");
+    if (!shelf) return;
+    const mq = window.matchMedia("(pointer: coarse) and (min-width: 40rem)");
+    const fit = () => {
+      if (!mq.matches) {
+        shelf.style.removeProperty("--rack-w");
+        shelf.style.removeProperty("--rack-pad");
+        return;
+      }
+      const cs = getComputedStyle(shelf);
+      const gap = parseFloat(cs.columnGap) || 0;
+      // The padding the stylesheet gives the rack, 1.75rem, not whatever
+      // this last set: the fit must not read its own answer back.
+      const pad = 28;
+      const most = ((shelf.clientHeight - 2 * pad - gap) / 2) * 0.8;
+      const room =
+        shelf.clientWidth -
+        parseFloat(cs.paddingLeft) -
+        parseFloat(cs.paddingRight);
+      const n = Math.max(1, Math.ceil((room + gap) / (most + gap) - 0.001));
+      const w = Math.floor((room - (n - 1) * gap) / n);
+      shelf.style.setProperty("--rack-w", `${w}px`);
+      /* The rows are as tall as the covers now, not as the shelf: the room
+         a narrower cover leaves goes above and below the rack rather than
+         between its two rows. */
+      shelf.style.setProperty(
+        "--rack-pad",
+        `${Math.max(pad, (shelf.clientHeight - gap - (2 * w) / 0.8) / 2)}px`,
+      );
+    };
+    fit();
+    const ro = new ResizeObserver(fit);
+    ro.observe(shelf);
+    mq.addEventListener("change", fit);
+    return () => {
+      ro.disconnect();
+      mq.removeEventListener("change", fit);
+      shelf.style.removeProperty("--rack-w");
+    };
+  }, [view]);
   const stripView: StripViewMode = view === "grid" ? "grid" : "strip";
   const query = useWorkQuery();
 

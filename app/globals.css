@@ -1140,6 +1140,26 @@ a.strip-cell {
   height: 100% !important;
   width: calc((100cqh - 1rem) / 2 * var(--ar, 0.8)) !important;
 }
+/* Julian: on an iPad, whole columns. `--rack-w` is only ever set there
+   (`work-shell.tsx`): the width of a cover once the window is shared out
+   between a whole number of columns, and `--rack-pad` the room that
+   leaves above and below, so each row is exactly a cover tall. A title
+   column takes the same width, so the columns stay on one beat, and a
+   snap brings a swipe to rest on one. A gallery's frames keep their own
+   shape from the row height, as everywhere else. */
+.strip-grid[style*="--rack-w"] {
+  padding-block: var(--rack-pad);
+  scroll-snap-type: x proximity;
+  scroll-padding-inline: 2.5rem;
+}
+.strip-grid[style*="--rack-w"] > * {
+  scroll-snap-align: start;
+}
+.strip-grid[style*="--rack-w"] > a:not([style*="--ar"]),
+.strip-grid[style*="--rack-w"]
+  > :where(div, section, article):not([data-hash="enquire"]) {
+  width: var(--rack-w) !important;
+}
 /* On a phone the page is not locked and the strip is already a column, so
    the sheet is the same idea the other way up: two across, running down,
    scrolled as a page. A rack held sideways on a 390px screen gives columns
