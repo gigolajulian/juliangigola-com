@@ -126,6 +126,8 @@ const LEAD_FRAMES: Record<string, string> = {
   "luxe-meets-future": "/work/luxe-meets-future/02.jpg",
   // Julian's pick: the glass sculpture, frame twelve.
   metamorphosis: "/work/metamorphosis/12.jpg",
+  // Julian's pick: on the floor by the television, frame eleven.
+  sage: "/work/sage/11.jpg",
 };
 
 const withLeadFrame = (project: Project): Project => {
