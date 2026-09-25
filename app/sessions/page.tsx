@@ -207,7 +207,7 @@ export default function SessionsPage() {
           <EnquiryCell
             key="enquire"
             title="Book a session"
-            body="Tell me roughly when and what for, and I'll confirm the date and the exact rate."
+            body="Contact me with questions about commissions."
             type="session"
             next={CONTACT}
           />,
