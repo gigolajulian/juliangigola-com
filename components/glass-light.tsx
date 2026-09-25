@@ -14,7 +14,7 @@ import * as React from "react";
  * position at the top edge for that case.
  * ─────────────────────────────────────────────────────────────── */
 
-const GLASS = ".glass, .glass-prominent, .action, .action-quiet";
+const GLASS = ".glass, .glass-prominent";
 
 export function GlassLight() {
   React.useEffect(() => {

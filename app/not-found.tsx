@@ -67,9 +67,9 @@ export default function NotFound() {
       >
         {/* The room: two drifting glows, a faint grid, a dusting of grain.
             All decorative, all behind everything, and all still under
-            reduced motion. The glows are a quarter less blurred than the
-            design drew them, at Julian's ask — enough edge that they read
-            as light in a room rather than a wash. */}
+            reduced motion. The glows are soft by their own gradient, not
+            a blur filter: a filter on a layer that drifts is redrawn every
+            frame, and the gradient already fades to nothing at its edge. */}
         <div
           aria-hidden
           className="pointer-events-none absolute animate-[jg-drift-a_24s_ease-in-out_infinite] motion-reduce:animate-none"
@@ -78,7 +78,6 @@ export default function NotFound() {
             height: "68vw",
             left: "-14vw",
             top: "-16vw",
-            filter: "blur(34px)",
             background:
               "radial-gradient(closest-side, rgba(181,153,112,0.38), rgba(181,153,112,0))",
           }}
@@ -91,7 +90,6 @@ export default function NotFound() {
             height: "60vw",
             right: "-16vw",
             bottom: "-22vw",
-            filter: "blur(38px)",
             background:
               "radial-gradient(closest-side, rgba(92,142,158,0.28), rgba(92,142,158,0))",
           }}

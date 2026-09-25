@@ -1113,6 +1113,26 @@ a.strip-cell {
 :root:not([data-theme="light"]) .cover-plate .text-muted-foreground {
   color: color-mix(in oklab, var(--foreground) 88%, transparent);
 }
+/* The tablet rule above, again, after the dark plate: that rule's
+   `:root:not(...)` outranked the bare `.cover-plate` in the media query, so
+   in the dark theme a finger got every plate blurred anyway, 87 of them on
+   /work (measured). Same selector weight, later, so it wins in both
+   themes. And two more that a finger never needed as glass: the plates on
+   the homepage's work tiles, and the plates that only show on hover, which
+   a touch screen never shows and still paid a backdrop layer for each. */
+@media (pointer: coarse) {
+  :root .cover-plate,
+  :root:not([data-theme="light"]) .cover-plate,
+  :root .band-tile .glass-surface {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    background-color: color-mix(in oklab, var(--background) 88%, transparent);
+  }
+  :root .glass-surface.opacity-0 {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+}
 
 /* Cells arrive from the strip with a height, a width or an aspect of their
    own; in the rack the grid decides all three. */
@@ -3055,9 +3075,7 @@ optgroup {
   transition:
     background-color 200ms var(--ease-out-strong),
     border-color 200ms var(--ease-out-strong),
-    color 200ms var(--ease-out-strong),
-    --gx 340ms var(--ease-out-strong),
-    --gy 340ms var(--ease-out-strong);
+    color 200ms var(--ease-out-strong);
 
   /* Inverts under a pointer: the ground with the ink on it, where at rest
      it is the ink with the ground on it. It used to go from 72% ink to 74%
@@ -3102,9 +3120,7 @@ optgroup {
   transition:
     background-color 200ms var(--ease-out-strong),
     border-color 200ms var(--ease-out-strong),
-    color 200ms var(--ease-out-strong),
-    --gx 340ms var(--ease-out-strong),
-    --gy 340ms var(--ease-out-strong);
+    color 200ms var(--ease-out-strong);
 
   /* Under the pointer it fills rather than tints: white type needs a ground
      to be white against, and 7% of ink over the page is not one. The loud

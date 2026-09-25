@@ -996,8 +996,9 @@ export function Strip({
 
     const read = () => {
       queued = 0;
+      const x = el.scrollLeft;
       // Where to sit somebody down if they come back to this path.
-      seatX.current = Math.round(el.scrollLeft);
+      seatX.current = Math.round(x);
       const kidCount = el.children.length;
       if (centres.length !== kidCount) remeasure();
       const room = reach;
@@ -1008,13 +1009,13 @@ export function Strip({
          reads this is in `globals.css`. */
       el.toggleAttribute(
         "data-past-first",
-        kidCount > 0 && el.scrollLeft > firstEnd,
+        kidCount > 0 && x > firstEnd,
       );
       /* Either end is that end's cell, whatever is nearest the middle.
          At the far end the last cell is often narrower than half a window,
          so the middle of the window sits over the one before it and the
          counter could never reach the last cell at all. */
-      const middle = el.scrollLeft + span / 2;
+      const middle = x + span / 2;
       const kids = Array.from(el.children) as HTMLElement[];
       // Measured, not read: see `remeasure` above.
       const offs = centres.map((c) => c - middle);
@@ -1080,8 +1081,8 @@ export function Strip({
          Portraits and Mixed media, where the whole run is on screen at
          once. Nothing has moved, so the rail says the beginning. */
       if (room <= 0) land(firstTick);
-      else if (el.scrollLeft >= room - 2) land(lastTick);
-      else if (el.scrollLeft <= 2) land(firstTick);
+      else if (x >= room - 2) land(lastTick);
+      else if (x <= 2) land(firstTick);
       else {
         /* ── the eye slides across the window as the shelf travels ──
            At the start it reads the left edge, at the middle of the travel
@@ -1104,8 +1105,8 @@ export function Strip({
            `best` is the nearest cell of any kind, and a sequence carries
            cells with no tick — a page of words, the ask, the card that
            leads on — which lit nothing at all. */
-        const gone = Math.max(0, Math.min(1, el.scrollLeft / room));
-        const eye = el.scrollLeft + gone * span;
+        const gone = Math.max(0, Math.min(1, x / room));
+        const eye = x + gone * span;
         let near = best;
         let gap = Infinity;
         for (const i of ticked) {
