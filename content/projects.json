@@ -853,13 +853,20 @@
         }
       ],
       "cover": {
-        "src": "/work/ravaged/cover.jpg",
+        "src": "/work/ravaged/cover-05.jpg",
         "width": 600,
         "height": 375,
-        "color": "#181818",
+        "color": "#f8f8f8",
         "alt": ""
       },
       "images": [
+        {
+          "src": "/work/ravaged/05.jpg",
+          "width": 2500,
+          "height": 1563,
+          "color": "#f8f8f8",
+          "alt": ""
+        },
         {
           "src": "/work/ravaged/06.jpg",
           "width": 2500,
@@ -896,13 +903,6 @@
           "alt": ""
         },
         {
-          "src": "/work/ravaged/05.jpg",
-          "width": 2500,
-          "height": 1563,
-          "color": "#f8f8f8",
-          "alt": ""
-        },
-        {
           "src": "/work/ravaged/07.jpg",
           "width": 2500,
           "height": 1563,
@@ -933,13 +933,20 @@
         }
       ],
       "cover": {
-        "src": "/work/second-skin/cover.jpg",
+        "src": "/work/second-skin/cover-13.jpg",
         "width": 600,
         "height": 750,
-        "color": "#080808",
+        "color": "#e8e8f8",
         "alt": ""
       },
       "images": [
+        {
+          "src": "/work/second-skin/13.jpg",
+          "width": 2500,
+          "height": 3125,
+          "color": "#e8e8f8",
+          "alt": ""
+        },
         {
           "src": "/work/second-skin/09.jpg",
           "width": 2500,
@@ -1022,13 +1029,6 @@
           "width": 2500,
           "height": 3125,
           "color": "#082838",
-          "alt": ""
-        },
-        {
-          "src": "/work/second-skin/13.jpg",
-          "width": 2500,
-          "height": 3125,
-          "color": "#e8e8f8",
           "alt": ""
         },
         {
@@ -1170,13 +1170,20 @@
         }
       ],
       "cover": {
-        "src": "/work/aesc/cover.jpg",
+        "src": "/work/aesc/cover-03.jpg",
         "width": 600,
         "height": 800,
         "color": "#080808",
         "alt": ""
       },
       "images": [
+        {
+          "src": "/work/aesc/03.jpg",
+          "width": 2500,
+          "height": 3333,
+          "color": "#080808",
+          "alt": ""
+        },
         {
           "src": "/work/aesc/05.jpg",
           "width": 2500,
@@ -1196,13 +1203,6 @@
           "width": 2500,
           "height": 3334,
           "color": "#181818",
-          "alt": ""
-        },
-        {
-          "src": "/work/aesc/03.jpg",
-          "width": 2500,
-          "height": 3333,
-          "color": "#080808",
           "alt": ""
         },
         {
