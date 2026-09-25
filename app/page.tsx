@@ -86,7 +86,7 @@ export default function Home() {
               Both sit in the band the bar occupies, which is why the grid
               below starts under it. */}
           <div className="pointer-events-none absolute inset-x-0 top-0 z-10 flex items-baseline justify-between gap-6 px-6 py-4 sm:px-8 sm:pt-20">
-            <p className="label glass-surface bg-background/70 px-3 py-1.5 text-muted-foreground">
+            <h2 className="label glass-surface bg-background/70 px-3 py-1.5 text-muted-foreground">
               Selected work
               {/* Two, because upright screens stop at six (`band-grid` in
                   `globals.css`). A visitor who can count the tiles should
@@ -104,7 +104,7 @@ export default function Home() {
                   {String(Math.min(FEATURED.length, 8)).padStart(2, "0")}
                 </span>
               </span>
-            </p>
+            </h2>
             <Link
               prefetch={false}
               href="/work"
