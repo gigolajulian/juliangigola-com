@@ -70,7 +70,7 @@ const STEP = 2;
 /** The strong ease-out the site uses for things settling into place. */
 const SETTLE = "cubic-bezier(0.23, 1, 0.32, 1)";
 /** The panel's width; the results start where it ends. */
-const PANEL = "22rem";
+const PANEL = "clamp(22rem, 31vw, 28rem)";
 
 const cbcr = (r: number, g: number, b: number) => [
   -0.1687 * r - 0.3313 * g + 0.5 * b,
@@ -750,7 +750,7 @@ function ColourGrid({
   return (
     <ul
       ref={grid}
-      className="relative grid grid-cols-[repeat(auto-fill,minmax(12rem,1fr))] gap-x-4 gap-y-6"
+      className="relative grid grid-cols-[repeat(auto-fill,minmax(18rem,1fr))] gap-x-4 gap-y-6"
     >
       {items.map((item) => (
         <li
@@ -794,7 +794,7 @@ function ColourTile({ item }: { item: Item }) {
             src={l.src}
             alt={l === top ? l.alt : ""}
             fill
-            sizes="(min-width: 96rem) 16vw, (min-width: 64rem) 22vw, 30vw"
+            sizes="(min-width: 96rem) 24vw, (min-width: 64rem) 30vw, 60vw"
             data-fade=""
             onLoad={
               l === top && layers.length > 1
