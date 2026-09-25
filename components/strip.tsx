@@ -463,6 +463,20 @@ export function Strip({
   React.useEffect(() => {
     open.current = onOpen;
   });
+  /* A press on a numbered button opens it. Delegated, so a page can build
+     its cells once and the opener is reached through a ref. Its own
+     effect, not the machine's: a strip stacked down a phone has the
+     machine off and its frames still open. */
+  React.useEffect(() => {
+    const el = scroller.current;
+    if (!el) return;
+    const openCell = (e: MouseEvent) => {
+      const b = (e.target as Element | null)?.closest?.<HTMLElement>("[data-n]");
+      if (b && el.contains(b)) open.current?.(Number(b.dataset.n));
+    };
+    el.addEventListener("click", openCell);
+    return () => el.removeEventListener("click", openCell);
+  }, []);
   const count = React.Children.count(children);
 
   /* Before the first paint: a deep link opens on its cell, and arriving
@@ -1822,15 +1836,6 @@ export function Strip({
       e.stopPropagation();
     };
 
-    // A press on a numbered button opens it. Delegated, so a page can build
-    // its cells once and the opener is reached through a ref.
-    const openCell = (e: MouseEvent) => {
-      const b = (e.target as Element | null)?.closest?.<HTMLElement>(
-        "[data-n]",
-      );
-      if (b && el.contains(b)) open.current?.(Number(b.dataset.n));
-    };
-
     /** The cell whose centre is nearest a scroll position. */
     const nearest = (where: number) => {
       const middle = where + el.clientWidth / 2;
@@ -1948,7 +1953,6 @@ export function Strip({
     el.addEventListener("pointerup", onLet, { passive: true });
     el.addEventListener("pointercancel", onLet, { passive: true });
     el.addEventListener("click", swallowClick, true);
-    el.addEventListener("click", openCell);
     el.addEventListener("keydown", onKey);
     // A touchscreen writes `scrollLeft` itself; the target has to follow,
     // or the next wheel notch would spring back.
@@ -1977,7 +1981,6 @@ export function Strip({
       el.removeEventListener("pointerup", onLet);
       el.removeEventListener("pointercancel", onLet);
       el.removeEventListener("click", swallowClick, true);
-      el.removeEventListener("click", openCell);
       el.removeEventListener("keydown", onKey);
       el.removeEventListener("scroll", sync);
       if (frame) cancelAnimationFrame(frame);

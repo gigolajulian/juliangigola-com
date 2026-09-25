@@ -183,7 +183,7 @@ export default async function CategoryPage(
         frames={gallery.images}
         within={name}
       >
-        <div className="flex min-h-0 flex-1 flex-col max-sm:h-[75dvh] max-sm:flex-none">
+        <div className="flex min-h-0 flex-1 flex-col">
           <ProjectStrip
             project={gallery}
             next={next}

@@ -195,10 +195,9 @@ export default async function ProjectPage(props: PageProps<"/work/[slug]">) {
   return (
     /* One screen: the head over the sequence, the sequence across it, a
        panel under it (`strip-page.tsx`, the chrome every horizontal page
-       shares). `h-dvh` on a phone, which still scrolls its own height to
-       reach the footer; from 40rem up the page is exactly the window. */
+       shares). On a phone it stacks down the page like the rest of the
+       work; from 40rem up the page is exactly the window. */
     <StripPage
-      className="h-dvh"
       head={
         <StripHead
           crumb={<Crumb />}

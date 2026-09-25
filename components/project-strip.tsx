@@ -161,7 +161,7 @@ export function ProjectStrip({
                `#next`. A link into the middle of a sequence is the one
                thing a horizontal page cannot otherwise be given. */
             data-hash="title"
-            className="flex h-full w-[min(30rem,82vw)] shrink-0 flex-col justify-center gap-5 pr-2 max-sm:w-[56vw] sm:pr-6"
+            className="flex w-[min(30rem,82vw)] shrink-0 flex-col justify-center gap-5 pr-2 max-sm:w-full sm:h-full sm:pr-6"
           >
             {/* Each word rises into place from under a clip, one after
                     another, and the credits follow it up. Julian asked for
@@ -295,7 +295,7 @@ export function ProjectStrip({
             key={`text-${cell.block.after}-${cell.block.heading ?? ""}`}
             data-hash={`${cell.block.after}-note`}
             data-tick
-            className="flex h-full w-[min(24rem,80vw)] shrink-0 flex-col justify-center"
+            className="flex w-[min(24rem,80vw)] shrink-0 flex-col justify-center max-sm:w-full sm:h-full"
           >
             {cell.block.heading ? (
               <h2 className="font-display text-xl uppercase leading-none tracking-[0]">
@@ -330,7 +330,7 @@ export function ProjectStrip({
               aria-label={`Open frame ${cell.n + 1} of ${frames.length}${
                 cell.frame.alt ? `: ${cell.frame.alt}` : ""
               }`}
-              className="group strip-cell relative h-full shrink-0 overflow-hidden press active:scale-[0.995]"
+              className="group strip-cell relative w-full shrink-0 overflow-hidden press active:scale-[0.995] sm:h-full sm:w-auto"
               style={
                 {
                   backgroundColor: cell.frame.color,
@@ -418,8 +418,8 @@ export function ProjectStrip({
         next={next}
         prev={prev}
         map={map}
-        // Sideways on a phone too: a sequence swipes.
-        stack={false}
+        // Julian: vertical on a phone, like the rest of the work. The
+        // default stacks it down the page under 40rem.
         onOpen={lightbox.show}
         counter={counter}
         className={className}
