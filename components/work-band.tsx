@@ -176,7 +176,6 @@ export function WorkBand({
       onPointerLeave={reset}
       onBlur={reset}
       onKeyDown={onKeyDown}
-      aria-label={`${project.name}, ${project.total} frames`}
       /* One cell of the homepage's grid: three of these to a screen, so
          each is about 4:5 on a laptop — the ratio the work is shot and
          delivered in, which is why three and not four. It fills whatever
@@ -294,8 +293,11 @@ export function WorkBand({
                 tile is about 260 by 195 on a laptop: at `text-2xl` with a
                 20px surround the plate was taking half of the photograph
                 it was labelling. */}
+          {/* The link's name is the plate's own words, so voice control
+              can say what is printed; the frame count is for ears only. */}
           <h3 className="font-display min-w-0 truncate text-lg uppercase leading-none tracking-[0] sm:text-xl">
             {project.name}
+            <span className="sr-only">, {project.total} frames</span>
           </h3>
           {/* There was a frame counter here, reading 03 / 12 while the
               pointer scrubbed. Invisible at rest it still held its width,
