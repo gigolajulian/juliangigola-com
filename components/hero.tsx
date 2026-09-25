@@ -315,25 +315,22 @@ export function Hero({
     activeRef.current = active;
   }, [active]);
 
-  /* The rest of the frames, one at a time and in the order they play,
-     once the page has loaded: never competing with the first picture,
-     and there before a hover asks for one. */
+  /* The frame after this one, while this one is on screen: a whole
+     dwell of lead, and nothing fetched for a lap nobody stays for. All of
+     them at once took the homepage from 674kB to 2.1MB on a 2x laptop,
+     most of it for laps a visitor may never stay for. The first waits for the page's own
+     load, so it never competes with the picture already showing. */
   React.useEffect(() => {
-    let live = true;
-    const run = async () => {
-      for (const s of slides.slice(1)) {
-        if (!live) return;
-        await warmFrame(s.frame.src);
-      }
-    };
-    if (document.readyState === "complete") void run();
-    else window.addEventListener("load", () => void run(), { once: true });
-    return () => {
-      live = false;
-    };
-    // The slides are fixed for the life of the page.
+    const next = active + 1 >= slides.length ? 1 : active + 1;
+    const src = slides[next]?.frame.src;
+    if (!src) return;
+    const go = () => void warmFrame(src);
+    if (document.readyState === "complete") return go();
+    window.addEventListener("load", go, { once: true });
+    return () => window.removeEventListener("load", go);
+    // `slides` is rebuilt every render from props that never change.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [active]);
 
   /**
    * Tells the header there is a photograph behind it.
