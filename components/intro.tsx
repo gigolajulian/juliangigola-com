@@ -31,7 +31,8 @@ const CAP = 5000; // the longest anybody waits, whatever is still loading
 const SHOW = 500; // the eye fading in
 const FILL = 1000; // the loader's steady fill, when the page is quicker
 const BLINK = 360; // the blink at 100: shut, then open again
-const LIFT = 600; // the fade
+const HIDE = 300; // the eye fading out, before the page starts
+const LIFT = 400; // the ground fading while the page arrives
 
 const easeOut = (t: number) => 1 - Math.pow(1 - t, 3);
 const easeInOut = (t: number) =>
@@ -209,9 +210,12 @@ export function Intro() {
       }
       box.current?.classList.add("jg-intro-leaving");
       setTimeout(() => {
-        lift();
-        canvas.remove();
-      }, LIFT);
+        root.dataset.intro = "lift";
+        setTimeout(() => {
+          lift();
+          canvas.remove();
+        }, LIFT);
+      }, HIDE);
     };
     requestAnimationFrame(step);
     /* No cleanup. The loader is a one-shot that ends on its own inside
@@ -227,7 +231,7 @@ export function Intro() {
           is a window between the document arriving and the CSS applying
           in which it has no rules at all and would lay itself out in the
           flow. Carried inline it is there from the first byte, and
-          `[data-intro="1"] #jg-intro` in the stylesheet still wins on
+          `[data-intro] #jg-intro` in the stylesheet still wins on
           specificity when it comes.
 
           The attribute `hidden` would be shorter and is wrong: the user

@@ -110,7 +110,7 @@
 #jg-intro {
   display: none;
 }
-[data-intro="1"] #jg-intro {
+[data-intro] #jg-intro {
   position: fixed;
   inset: 0;
   z-index: 60;
@@ -150,15 +150,33 @@
   transform: scaleX(0);
   transform-origin: left;
 }
-/* Leaving: after the blink, the whole layer fades. */
+/* Leaving, in two steps. After the blink the eye and the loader fade,
+   and the bare ground stays. Then (`data-intro="lift"`) the ground
+   fades while the page makes its own entrance underneath, so the page
+   arrives rather than being uncovered already arrived. */
 #jg-intro.jg-intro-leaving {
-  opacity: 0;
   pointer-events: none;
-  transition: opacity 600ms var(--ease-out-strong);
 }
-#jg-intro.jg-intro-leaving > .jg-intro-load {
+#jg-intro.jg-intro-leaving > * {
   opacity: 0;
   transition: opacity 300ms var(--ease-out-strong);
+}
+[data-intro="lift"] #jg-intro {
+  opacity: 0;
+  transition: opacity 400ms var(--ease-out-strong);
+}
+/* The page's entrance, held at its first frame while the intro is up:
+   the keyframed ones paused (they fill backwards, so paused is their
+   start), the `@starting-style` ones pinned at their start, which they
+   transition out of the moment the hold comes off. */
+[data-intro="1"] :is(.strip-cell, .title-word, .title-rest, .dissolve) {
+  animation-play-state: paused;
+}
+[data-intro="1"] :is(.rise, .emerge) {
+  opacity: 0;
+}
+[data-intro="1"] .rise {
+  transform: translateY(0.75rem);
 }
 
 @custom-variant squat (

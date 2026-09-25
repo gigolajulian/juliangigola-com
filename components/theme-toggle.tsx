@@ -32,7 +32,7 @@ const read = (): Theme =>
   document.documentElement.dataset.theme === "light" ? "light" : "dark";
 
 /**
- * Sets the attribute the CSS keys off — the source of truth; `localStorage`
+ * Sets the attribute the CSS keys off — the source of truth; `sessionStorage`
  * is only how a choice survives a reload. As a view transition, so the
  * whole page crossfades over the root's 240ms (see `globals.css`) instead
  * of every surface jumping from black to white between two frames — the
@@ -87,7 +87,7 @@ export function ThemeToggle({ className }: { className?: string }) {
   /**
    * Starts as `null`, not as `"dark"`.
    *
-   * The server cannot know the choice — it lives in `localStorage`, which the
+   * The server cannot know the choice — it lives in `sessionStorage`, which the
    * inline script reads before first paint. `null` is also what suppresses
    * the turn on arrival: a visitor who chose light would otherwise watch the
    * mark spin half a circle on every page load, animating a state it was
@@ -108,11 +108,13 @@ export function ThemeToggle({ className }: { className?: string }) {
      visitor whose phone goes dark at sunset sees the site go with it, as
      every native app does. The inline script in `app/layout.tsx` made the
      same decision for the first paint; this keeps making it. A stored
-     choice is a choice, and ends the following. */
+     choice is a choice, and ends the following for the rest of the visit:
+     it lives in `sessionStorage`, so the next visit starts from the system
+     again. Julian: check the system default before loading. */
   React.useEffect(() => {
     const chosen = (() => {
       try {
-        return window.localStorage.getItem(STORAGE_KEY);
+        return window.sessionStorage.getItem(STORAGE_KEY);
       } catch {
         return null;
       }
@@ -132,7 +134,7 @@ export function ThemeToggle({ className }: { className?: string }) {
     apply(next);
 
     try {
-      window.localStorage.setItem(STORAGE_KEY, next);
+      window.sessionStorage.setItem(STORAGE_KEY, next);
     } catch {
       // Private browsing, or storage disabled. The theme still changes for
       // this page; it simply will not be remembered.

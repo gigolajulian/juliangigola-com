@@ -172,13 +172,13 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
          * with no JavaScript, and from here on both carry whichever theme is
          * actually showing; `theme-toggle.tsx` rewrites them when it changes.
          *
-         * `localStorage` throws outright in some privacy modes rather than
+         * Storage throws outright in some privacy modes rather than
          * returning null, so the whole thing is wrapped; a failure there
          * still leaves the system check to run.
          */}
         <script
           dangerouslySetInnerHTML={{
-            __html: `(function(){var t=null;try{t=localStorage.getItem("theme")}catch(e){}var l=t==="light"||(t!=="dark"&&matchMedia("(prefers-color-scheme: light)").matches);if(l)document.documentElement.dataset.theme="light";var m=document.querySelectorAll('meta[name="theme-color"]');for(var i=0;i<m.length;i++)m[i].setAttribute("content",l?"#ebedef":"#0b0a09")})()`,
+            __html: `(function(){var t=null;try{localStorage.removeItem("theme");t=sessionStorage.getItem("theme")}catch(e){}var l=t==="light"||(t!=="dark"&&matchMedia("(prefers-color-scheme: light)").matches);if(l)document.documentElement.dataset.theme="light";var m=document.querySelectorAll('meta[name="theme-color"]');for(var i=0;i<m.length;i++)m[i].setAttribute("content",l?"#ebedef":"#0b0a09")})()`,
           }}
         />
         {/* Whether this visit gets the opening, decided before the first
