@@ -1484,13 +1484,20 @@
         }
       ],
       "cover": {
-        "src": "/work/nova/cover.jpg",
+        "src": "/work/nova/cover-06.jpg",
         "width": 600,
         "height": 800,
-        "color": "#30313b",
+        "color": "#353232",
         "alt": ""
       },
       "images": [
+        {
+          "src": "/work/nova/06.jpg",
+          "width": 2500,
+          "height": 3333,
+          "color": "#353232",
+          "alt": ""
+        },
         {
           "src": "/work/nova/01.jpg",
           "width": 2500,
@@ -1524,13 +1531,6 @@
           "width": 2500,
           "height": 3334,
           "color": "#222023",
-          "alt": ""
-        },
-        {
-          "src": "/work/nova/06.jpg",
-          "width": 2500,
-          "height": 3333,
-          "color": "#353232",
           "alt": ""
         },
         {
