@@ -14,9 +14,9 @@ import { DISCIPLINES } from "@/lib/work";
  * contact sheet — FRAME NOT FOUND, ERROR 404, the path that was asked for —
  * and offers the disciplines as somewhere to go instead, with live counts.
  *
- * Colour comes from the design rather than the site's tokens: a warm tan and
- * a leather for the accents, on the site's own ground. They are scoped to
- * this page as custom properties; nothing else on the site uses them.
+ * Colour is the site's own: its ground and ink, its muted grey, and its one
+ * accent where the design had a tan and a leather. Julian: use the same
+ * colours as the website. So it follows the theme like every other page.
  * ─────────────────────────────────────────────────────────────── */
 
 /** The site's mark — the eye from `app/icon.svg`, drawn in the page's ink. */
@@ -62,7 +62,7 @@ export default function NotFound() {
   return (
     <NotFoundScene>
       <div
-        className="relative overflow-hidden bg-background [--leather:#C9B89A] [--tan:#B59970]"
+        className="relative overflow-hidden bg-background"
         style={{ minHeight: "100dvh" }}
       >
         {/* The room: two drifting glows, a faint grid, a dusting of grain.
@@ -79,7 +79,7 @@ export default function NotFound() {
             left: "-14vw",
             top: "-16vw",
             background:
-              "radial-gradient(closest-side, rgba(181,153,112,0.38), rgba(181,153,112,0))",
+              "radial-gradient(closest-side, color-mix(in oklab, var(--accent) 24%, transparent), transparent)",
           }}
         />
         <div
@@ -91,7 +91,7 @@ export default function NotFound() {
             right: "-16vw",
             bottom: "-22vw",
             background:
-              "radial-gradient(closest-side, rgba(92,142,158,0.28), rgba(92,142,158,0))",
+              "radial-gradient(closest-side, color-mix(in oklab, var(--foreground) 10%, transparent), transparent)",
           }}
         />
         <div
@@ -99,7 +99,7 @@ export default function NotFound() {
           className="pointer-events-none absolute inset-0 opacity-55"
           style={{
             backgroundImage:
-              "linear-gradient(rgba(236,237,232,0.045) 1px, transparent 1px), linear-gradient(90deg, rgba(236,237,232,0.045) 1px, transparent 1px)",
+              "linear-gradient(color-mix(in oklab, var(--foreground) 4.5%, transparent) 1px, transparent 1px), linear-gradient(90deg, color-mix(in oklab, var(--foreground) 4.5%, transparent) 1px, transparent 1px)",
             backgroundSize: "72px 72px",
           }}
         />
@@ -108,7 +108,7 @@ export default function NotFound() {
           className="pointer-events-none absolute inset-0 opacity-20 mix-blend-overlay"
           style={{
             backgroundImage:
-              "radial-gradient(rgba(236,237,232,0.5) 0.5px, transparent 0.5px)",
+              "radial-gradient(color-mix(in oklab, var(--foreground) 50%, transparent) 0.5px, transparent 0.5px)",
             backgroundSize: "3px 3px",
           }}
         />
@@ -122,12 +122,12 @@ export default function NotFound() {
             >
               <span
                 aria-hidden
-                className="size-1.5 rounded-full bg-[var(--tan)] animate-[jg-blink_1.8s_steps(1)_infinite] motion-reduce:animate-none"
+                className="size-1.5 rounded-full bg-accent animate-[jg-blink_1.8s_steps(1)_infinite] motion-reduce:animate-none"
               />
               Frame not found
             </span>
             <span
-              className={`${MONO} inline-flex items-center border border-[color-mix(in_oklab,var(--leather)_40%,transparent)] px-3 py-1.5 font-bold text-[var(--leather)]`}
+              className={`${MONO} inline-flex items-center border border-[color-mix(in_oklab,var(--accent)_40%,transparent)] px-3 py-1.5 font-bold text-accent`}
             >
               Error 404
             </span>
@@ -174,7 +174,7 @@ export default function NotFound() {
               <div className="mt-6 flex flex-wrap gap-3 sm:mt-7">
                 <Link
                   href="/work"
-                  className={`${MONO} inline-flex items-center gap-3 bg-[var(--tan)] px-6 py-4 font-bold text-[#1A1D21] press active:scale-[0.97] hoverable:hover:bg-[var(--leather)]`}
+                  className={`${MONO} action inline-flex items-center gap-3 px-6 py-4 font-bold press active:scale-[0.97]`}
                 >
                   <span className="opacity-60">01</span>
                   See the work
@@ -199,10 +199,10 @@ export default function NotFound() {
                     <Link
                       prefetch={false}
                       href={p.href}
-                      className="group flex items-baseline gap-3.5 border-t border-border px-0.5 py-3 text-foreground transition-colors duration-200 hoverable:hover:text-[var(--leather)]"
+                      className="group flex items-baseline gap-3.5 border-t border-border px-0.5 py-3 text-foreground transition-colors duration-200 hoverable:hover:text-accent"
                     >
                       <span
-                        className={`${MONO} min-w-[22px] tracking-[0.16em] text-[var(--tan)]`}
+                        className={`${MONO} min-w-[22px] tracking-[0.16em] text-accent`}
                       >
                         {String(i + 1).padStart(2, "0")}
                       </span>
@@ -230,7 +230,7 @@ export default function NotFound() {
             <span className="inline-flex items-center gap-2">
               <span
                 aria-hidden
-                className="size-1.5 rounded-full bg-[var(--tan)] animate-[jg-blink_1.8s_steps(1)_infinite] motion-reduce:animate-none"
+                className="size-1.5 rounded-full bg-accent animate-[jg-blink_1.8s_steps(1)_infinite] motion-reduce:animate-none"
               />
               <span data-focus-readout>Focus</span>
             </span>

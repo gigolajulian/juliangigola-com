@@ -6,8 +6,8 @@ import { CrtBackground } from "@designcodeio/threeui";
 /* ── the opening ──────────────────────────────────────────────────
  * The eye mark in the middle of a CRT playing a film leader (ThreeUI's
  * `CrtBackground`, cinematic), where the countdown's number would be: it
- * fades in while a loader under it fills with the page getting ready. It
- * blinks at 65, and at 100 the layer fades to the site.
+ * scales in from small while a loader under it fills with the page
+ * getting ready, and at 100 the layer fades to the site.
  *
  * Three rules it lives by, because an intro sits between a visitor and
  * the work:
@@ -32,7 +32,8 @@ import { CrtBackground } from "@designcodeio/threeui";
 const CAP = 5000; // the longest anybody waits, whatever is still loading
 const SHOW = 500; // the eye fading in
 const FILL = 1000; // the loader's steady fill, when the page is quicker
-const BLINK = 360; // the blink at 65: shut, then open again
+const GROW = 900; // the eye scaling in from small
+const SMALL = 0.35; // its size at the start, against its full size
 const HIDE = 300; // the eye fading out, before the page starts
 const LIFT = 400; // the ground fading while the page arrives
 
@@ -46,8 +47,6 @@ const EYE = 1.35; // the eye's width, in dial radii
 const LINE = 2.5; // the CRT's scanline pitch, CSS pixels: 0.4 a pixel of height
 
 const easeOut = (t: number) => 1 - Math.pow(1 - t, 3);
-const easeInOut = (t: number) =>
-  t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
 
 /* The logo from `app/icon.svg`: the lens with the iris taken out of it,
    and the pupil. The iris is bigger than the lens is tall, so the cut
@@ -74,13 +73,11 @@ function paths() {
    every frame, and now and then the eye knocked sideways or a row of it
    torn.
 
-   `open` is how far the lid is up: one is the logo as drawn, nought a
-   line through the lens's middle. `px` is canvas pixels to a CSS pixel. */
+   `px` is canvas pixels to a CSS pixel. */
 function draw(
   c: CanvasRenderingContext2D,
   grain: HTMLCanvasElement,
   eye: number,
-  open: number,
   px: number,
 ) {
   const { width: w, height: h } = c.canvas;
@@ -100,7 +97,7 @@ function draw(
 
   const k = eye / 85.6; // pixels per logo unit: the lens is 85.6 wide
   const nudge = Math.random() < 0.08 ? (Math.random() - 0.5) * 4 * px : 0;
-  c.setTransform(k, 0, 0, k * open, cx - 50 * k + nudge, cy - 49.6 * k * open);
+  c.setTransform(k, 0, 0, k, cx - 50 * k + nudge, cy - 49.6 * k);
   c.fillStyle = "#f6f6fa";
   c.shadowColor = "rgba(255,255,255,0.55)";
   c.shadowBlur = eye * 0.09;
@@ -222,7 +219,6 @@ export function Intro() {
 
     const t0 = performance.now();
     let shown = 0;
-    let blinkAt = 0;
     let crtOn = false;
     const step = (now: number) => {
       if (withCrt && !crtOn) {
@@ -237,20 +233,15 @@ export function Intro() {
       shown += (target - shown) * 0.2;
       if (target - shown < 0.001) shown = target;
 
-      /* At 65 it blinks: the lid comes down quicker than it goes back
-         up, as a real one does. */
-      if (shown >= 0.65 && blinkAt === 0) blinkAt = now;
-      const b = blinkAt ? Math.min(1, (now - blinkAt) / BLINK) : 0;
-      const shut =
-        b < 0.4 ? easeInOut(b / 0.4) : 1 - easeInOut((b - 0.4) / 0.6);
-
+      // The eye scales in from small; the patch under it stays put.
+      const grown = easeOut(Math.min(1, since / GROW));
       if (mark.current)
         mark.current.style.opacity = String(
           easeOut(Math.min(1, since / SHOW)),
         );
-      if (pen) draw(pen, grain, full * dpr, 1 - 0.97 * shut, dpr);
+      if (pen) draw(pen, grain, full * dpr * (SMALL + (1 - SMALL) * grown), dpr);
 
-      const gone = shown === 1 && b === 1;
+      const gone = shown === 1 && since >= GROW;
       if (bar.current) bar.current.style.transform = `scaleX(${shown})`;
       if (count.current) {
         count.current.textContent = String(Math.round(shown * 100)).padStart(
