@@ -3,21 +3,18 @@
 import * as React from "react";
 
 /* ── the opening ──────────────────────────────────────────────────
- * The eye mark opens, blinks, and hands the screen to the site.
- *
- * Every frame is the logo's own geometry recomputed rather than a video
- * or a stack of masks laid over it. A lens is two arcs meeting at the
- * corners, so a half width and a rise give the radius back:
- * r = (a² + s²) / 2s. The logo's 42.8 and 18.0 return 59.88, which is the
- * 59.9 in `app/icon.svg`, so the resting frame of this animation is the
- * artwork itself and not a copy of it.
+ * The eye mark as a solid, pinned to the middle of the window: it
+ * turns in from edge on and then faces the pointer, while a loader under
+ * it fills with the page getting ready. At 100 the layer fades
+ * to the site.
  *
  * Three rules it lives by, because an intro sits between a visitor and
  * the work:
  *
- *   It never holds the page. The site is rendered underneath from the
- *   first byte and this is a layer over the top with `pointer-events:
- *   none`, so a press during it lands on whatever is beneath.
+ *   It never holds the page for long. The site is rendered underneath
+ *   from the first byte, and the layer gives up at `CAP` whatever is
+ *   still loading: a slow phone is not kept at the door for the last
+ *   photograph.
  *
  *   It runs once a visit, not once a page. `sessionStorage` remembers,
  *   so moving between Work and Sessions never replays it.
@@ -26,118 +23,119 @@ import * as React from "react";
  *
  * All three decisions are made by the inline script in `layout.tsx`
  * before the first paint, which is the only place they can be made
- * without a frame of the site showing first. This component draws the
- * mark on the server either way and the stylesheet keeps it hidden
- * unless that script has set `data-intro`, so a visitor with no
- * JavaScript is never shut behind a curtain that cannot lift.
+ * without a frame of the site showing first. The stylesheet keeps this
+ * layer hidden unless that script has set `data-intro`, so a visitor
+ * with no JavaScript is never shut behind a curtain that cannot lift.
  * ─────────────────────────────────────────────────────────────── */
 
-const CY = 49.6;
-const A = 42.8;
-const S = 18.0;
-const TAKE = 1400; // the mark: open, hold, and close
-const PART = 1100; // the lids carrying on off the screen
-const SHUT = 0.78; // where in the take the lens is flat: the cut
-const BLUR = 0.72; // how soft the mark starts, as a share of its own thickness
-const FEATHER = 0.018; // how soft the lid edge is, as a share of the window
-const PAGE = 0.026; // how soft the page starts, as a share of the window
+const CAP = 5000; // the longest anybody waits, whatever is still loading
+const IN = 1100; // turning in from edge on
+const FILL = 1400; // the loader's steady fill, when the page is quicker
+const LIFT = 600; // the fade
+const DEPTH = 8; // how thick the solid is, in the logo's hundred units
+const SLICES = 40; // the most layers the depth is drawn in
+const REST = -16; // degrees: where it turns in to, then drifts from
+const DRIFT = 6; // degrees it drifts while the loader fills
+const LOOK_Y = 18; // degrees it turns after a pointer at the window's side
+const LOOK_X = 12; // and tips after one at the top or bottom
 
-const radius = (a: number, s: number) =>
-  (a * a + s * s) / (2 * Math.max(s, 0.18));
+const ease = (t: number) => 1 - Math.pow(1 - t, 3);
 
-/** The lens, from a half width and the rise of each arc. */
-function lens(a: number, top: number, bot: number) {
-  const x0 = (50 - a).toFixed(3);
-  const x1 = (50 + a).toFixed(3);
-  const rt = radius(a, top).toFixed(3);
-  const rb = radius(a, bot).toFixed(3);
-  return `M${x0} ${CY} A${rt} ${rt} 0 0 1 ${x1} ${CY} A${rb} ${rb} 0 0 1 ${x0} ${CY} Z`;
+/* The logo from `app/icon.svg`: the lens with the iris taken out of it,
+   and the pupil. The iris is bigger than the lens is tall, so the cut
+   runs off the top and the lens reads as a cup. */
+// Made on first use: there is no `Path2D` on the server.
+let shape: { lens: Path2D; open: Path2D; pupil: Path2D } | null = null;
+function paths() {
+  if (shape) return shape;
+  const lens = new Path2D(
+    "M7.2 49.6 A59.9 59.9 0 0 1 92.8 49.6 A59.9 59.9 0 0 1 7.2 49.6 Z",
+  );
+  const open = new Path2D("M-1e3 -1e3 H1e3 V1e3 H-1e3 Z");
+  open.arc(50, 40.9, 20.7, 0, Math.PI * 2);
+  const pupil = new Path2D();
+  pupil.arc(50, 40.9, 8.6, 0, Math.PI * 2);
+  return (shape = { lens, open, pupil });
 }
 
-/** The same lens, anywhere and at any size: the intro draws it in the
-    mark's own hundred units while it is a logo, and in screen pixels once
-    it is a hole in the page. One formula, so the swap between the two is
-    the same shape at the same place. */
-function wide(cx: number, cy: number, a: number, s: number) {
-  const r = radius(a, s).toFixed(2);
-  return `M${(cx - a).toFixed(2)} ${cy.toFixed(2)} A${r} ${r} 0 0 1 ${(cx + a).toFixed(2)} ${cy.toFixed(2)} A${r} ${r} 0 0 1 ${(cx - a).toFixed(2)} ${cy.toFixed(2)} Z`;
-}
-
-const mix = (from: number, to: number, t: number) => from + (to - from) * t;
-const glide = (t: number) =>
-  t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
-
-type Key = [at: number, value: number, ease?: (t: number) => number];
-
-/** Keyframes, interpolated. Written this way the value is continuous by
-    construction; crossfading two eased ramps leaves a jump in the
-    velocity where they meet, which is what a blink that snaps looks
-    like. */
-function track(t: number, keys: Key[]) {
-  if (t <= keys[0][0]) return keys[0][1];
-  for (let i = 1; i < keys.length; i++) {
-    const [t1, v1, ease] = keys[i];
-    const [t0, v0] = keys[i - 1];
-    if (t <= t1) {
-      const k = t1 === t0 ? 1 : (t - t0) / (t1 - t0);
-      return mix(v0, v1, (ease ?? glide)(k));
-    }
+/* The solid at an angle, in the page's own colours: the face in its ink,
+   the sides between ink and ground, fading toward the ground the further
+   back they are, so the depth reads in either theme. Drawn back to
+   front, so each slice covers the one behind. A turn narrows each slice
+   by its cosine and slides it by the sine of its depth; a tip does the
+   same up and down. */
+type RGB = [number, number, number];
+function draw(
+  c: CanvasRenderingContext2D,
+  ground: RGB,
+  ink: RGB,
+  deg: number,
+  tip: number,
+  eye: number,
+  // Where its middle is, in the canvas's own pixels.
+  cx: number,
+  cy: number,
+) {
+  const { width: w, height: h } = c.canvas;
+  const { lens, open, pupil } = paths();
+  const tone = (t: number) =>
+    `rgb(${ground.map((g, i) => Math.round(g + (ink[i] - g) * t)).join(",")})`;
+  c.setTransform(1, 0, 0, 1, 0, 0);
+  c.fillStyle = tone(0);
+  c.fillRect(0, 0, w, h);
+  const a = (deg * Math.PI) / 180;
+  const k = eye / 85.6; // pixels per logo unit: the lens is 85.6 wide
+  const cos = Math.cos(a);
+  const sin = Math.sin(a);
+  const p = (tip * Math.PI) / 180;
+  const cosP = Math.cos(p);
+  const sinP = Math.sin(p);
+  /* One layer per pixel of side that shows, and no more: square on, no
+     side shows and the face is the only fill. */
+  const side = DEPTH * k * Math.max(Math.abs(sin), Math.abs(sinP));
+  const n = Math.min(SLICES, Math.ceil(side));
+  for (let i = 0; i <= n; i++) {
+    const front = i === n;
+    const z = n ? -DEPTH * (1 - i / n) : 0;
+    c.setTransform(
+      k * cos,
+      0,
+      0,
+      k * cosP,
+      cx + k * (z * sin - 50 * cos),
+      cy + k * (z * sinP - 49.6 * cosP),
+    );
+    c.fillStyle = front ? tone(1) : tone(0.3 + 0.3 * (i / n));
+    c.save();
+    c.clip(lens);
+    c.fill(open, "evenodd");
+    c.restore();
+    c.fill(pupil);
   }
-  return keys[keys.length - 1][1];
 }
 
-/* The focus lands as the iris finishes opening, on an ease-out, so most
-   of the softness goes in the first third and the last of it settles
-   rather than creeps. It has to reach zero well before the cut: blur
-   still on the mark at the hairline would show at the swap, and the veil
-   cannot be blurred with it, since a soft hole lets the page through
-   early. */
-const focus = (t: number) => 1 - Math.pow(1 - t, 3);
+/* A colour as red, green and blue, from whatever the theme declares it
+   in: the canvas resolves `oklch()` and the rest for us. */
+function resolve(css: string): RGB {
+  const c = document.createElement("canvas").getContext("2d");
+  if (!c) return [0, 0, 0];
+  c.fillStyle = css;
+  c.fillRect(0, 0, 1, 1);
+  const [r, g, b] = c.getImageData(0, 0, 1, 1).data;
+  return [r, g, b];
+}
 
-/* The lens grows outward along its own axis from a short line, so the
-   shape arrives rather than being uncovered, and the iris opens from
-   just under its drawn size: far enough to read as movement, not so far
-   that it reads as a zoom. It rests on the artwork, and then it closes.
-   The take ends shut, on a hairline, because that hairline is the cut. */
-const frame = (t: number) => ({
-  a: track(t, [
-    [0, 14],
-    [0.42, A],
-  ]),
-  s: track(t, [
-    [0, 1.2],
-    [0.44, S],
-    [0.58, S],
-    [SHUT, 0.3],
-  ]),
-  iris: track(t, [
-    [0, 0.82],
-    [0.48, 1],
-  ]),
-  pupil: track(t, [
-    [0, 0.78],
-    [0.54, 1],
-  ]),
-  blur: track(t, [
-    [0, 1],
-    [0.55, 0, focus],
-  ]),
-});
+const lift = () => document.documentElement.removeAttribute("data-intro");
 
 /* Once per page load. React remounts effects in development, and a second
-   take would measure a mark the first one had already hidden. */
+   take would start a loader the first had already finished. */
 let played = false;
 
 export function Intro() {
   const box = React.useRef<HTMLDivElement>(null);
-  const path = React.useRef<SVGPathElement>(null);
-  const clip = React.useRef<SVGPathElement>(null);
-  const iris = React.useRef<SVGGElement>(null);
-  const eye = React.useRef<SVGGElement>(null);
-  const dot = React.useRef<SVGCircleElement>(null);
-  const veilRef = React.useRef<SVGSVGElement>(null);
-  const holeRef = React.useRef<SVGPathElement>(null);
-  const edgeRef = React.useRef<SVGFEGaussianBlurElement>(null);
+  const mark = React.useRef<HTMLDivElement>(null);
+  const bar = React.useRef<HTMLDivElement>(null);
+  const count = React.useRef<HTMLSpanElement>(null);
 
   React.useEffect(() => {
     const root = document.documentElement;
@@ -147,241 +145,153 @@ export function Intro() {
       sessionStorage.setItem("jg-intro", "1");
     } catch {}
 
-    const art = box.current?.querySelector("svg");
-    const span = art?.getBoundingClientRect().width ?? 0;
+    const cs = getComputedStyle(root);
+    const ground = resolve(cs.getPropertyValue("--background").trim());
+    const ink = resolve(cs.getPropertyValue("--foreground").trim());
 
-    const draw = (f: ReturnType<typeof frame>) => {
-      if (art) {
-        /* Sized against the lens's own thickness, never a fixed number
-           of pixels. The mark is set in `vw` between two clamps, so a
-           blur that reads as a lens finding focus on a desktop is a
-           smeared blob on a phone; and the take opens from a line three
-           pixels tall, which a blur measured off the whole mark erases
-           rather than softens. Held to the thickness, the softness
-           arrives with the shape and leaves with it. */
-        const px = f.blur * BLUR * f.s * 2 * (span / 100);
-        (art as SVGSVGElement).style.filter =
-          px > 0.2 ? `blur(${px.toFixed(2)}px)` : "";
-      }
-      const d = lens(f.a, f.s, f.s);
-      path.current?.setAttribute("d", d);
-      clip.current?.setAttribute("d", d);
-      const scale = `scale(${f.iris})`;
-      if (iris.current) iris.current.style.transform = scale;
-      if (eye.current) eye.current.style.transform = scale;
-      dot.current?.setAttribute("r", (8.6 * f.pupil).toFixed(3));
+    /* The eye is about 1.6 times the still logo on a desktop and half the
+       width of a phone, and never more than half the window's height. */
+    const rem = parseFloat(cs.fontSize) || 16;
+    const w = window.innerWidth;
+    const h = window.innerHeight;
+    const full = Math.min(
+      Math.max(0.28 * w, Math.min(0.55 * w, 16 * rem)),
+      24 * rem,
+      0.5 * h,
+    );
+    // For the loader, which sits under the eye.
+    box.current?.style.setProperty("--eye", `${full}px`);
+
+    /* Drawn at the screen's own pixels, up to two to a CSS pixel, so the
+       eye's edges are sharp on a retina screen. */
+    const dpr = Math.min(2, window.devicePixelRatio || 1);
+    const canvas = document.createElement("canvas");
+    canvas.width = Math.round(w * dpr);
+    canvas.height = Math.round(h * dpr);
+    canvas.style.cssText = "display:block;width:100%;height:100%";
+    mark.current?.append(canvas);
+    const pen = canvas.getContext("2d");
+
+    /* The pointer, as a place the eye turns to face: nought in the middle
+       of the window, one at an edge. Eased every frame, so a flick of the
+       mouse is a glance rather than a snap. Nothing on a touch screen,
+       where there is no pointer to follow. */
+    let mx = 0;
+    let my = 0;
+    let lx = 0;
+    let ly = 0;
+    const look = (e: PointerEvent) => {
+      if (e.pointerType !== "mouse") return;
+      mx = Math.max(-1, Math.min(1, (e.clientX / w) * 2 - 1));
+      my = Math.max(-1, Math.min(1, (e.clientY / h) * 2 - 1));
     };
+    window.addEventListener("pointermove", look, { passive: true });
 
-    /* The ending, in two halves that are the same gesture.
-     *
-     * The cut: the take finishes inside the blink, on the frame where the
-     * lens is flat and the screen holds one hairline of ink and nothing
-     * else. A film cuts on motion because there is nothing to hide
-     * behind; here there is nothing on screen to dissolve, so the mark
-     * can stop being ink and start being a hole without anybody seeing
-     * the swap. That is the whole trick, and it costs nothing.
-     *
-     * The parting: from that hairline the same two arcs carry on opening,
-     * in screen units now, until the top one has left the top of the
-     * window and the bottom one the bottom. The ground splits along the
-     * logo's own curves and the site is what is between them. Nothing is
-     * masked over the page, nothing scales, nothing fades: the shape
-     * doing the transition is the mark itself.
-     */
-    const part = () => {
-      const el = box.current;
-      const art = el?.querySelector("svg");
-      const veil = veilRef.current;
-      const hole = holeRef.current;
-      const edge = edgeRef.current;
-      if (!el || !art || !veil || !hole || !edge) return;
-
-      const m = art.getBoundingClientRect();
-      const w = window.innerWidth;
-      const h = window.innerHeight;
-      // where the hairline is on screen, in screen units
-      const cx = m.left + m.width / 2;
-      const cy = m.top + (m.height * CY) / 100;
-      const a0 = (m.width * A) / 100;
-      const s0 = (m.height * 0.3) / 100;
-      /* Wide enough that the lens's points sit off the sides, so what
-         crosses the screen is two arcs and never a closing shape, and no
-         wider: past about this the arcs flatten into straight edges and
-         the reveal stops being the logo's curve and becomes a blind. */
-      const a1 = w * 1.15;
-      /* Just far enough that the arcs leave the window as the curve lands,
-         rather than early with the rest of the take spent on an empty
-         screen: the rise each one has to travel is its own distance to the
-         edge, and the margin is for the flattest part of the curve near
-         the corners. */
-      const s1 = Math.max(cy, h - cy) * 1.08;
-      /* Both softnesses are measured off the window, so the gesture reads
-         the same on a phone as on a desktop. */
-      const fur = Math.min(w, h) * FEATHER;
-      const haze = Math.min(w, h) * PAGE;
-
-      veil.setAttribute("viewBox", `0 0 ${w} ${h}`);
-      hole.setAttribute("d", wide(cx, cy, a0, s0));
-      el.classList.add("jg-intro-parting");
-      /* The page is only worth blurring from here. Until the cut it is
-         behind a solid ground, and a filter over the whole site costs a
-         layer the size of the window for nothing. */
-      /* Written on each top-level child, not as a variable on the root: an
-         inherited custom property restyles every element in the document
-         each frame, measured at ~1s of style work across the parting on a
-         phone at 4x slowdown. These few boxes are all the filter touches.
-         Each top-level child and not `body`, because a filtered ancestor
-         becomes the containing block for everything fixed inside it and
-         the header would scroll away with the page while it lasted. */
-      const focusing = [...document.body.children].filter(
-        (n): n is HTMLElement => n instanceof HTMLElement && n.id !== "jg-intro",
+    /* What "ready" means: the type, every photograph already on screen
+       that is not lazy, and the window's own load. The line fills on a
+       steady curve over `FILL` and never runs ahead of those: a quick page
+       gets the smooth fill, a slow one waits at what has really come. */
+    const tasks: Promise<unknown>[] = [document.fonts.ready];
+    if (document.readyState !== "complete") {
+      tasks.push(
+        new Promise((r) => window.addEventListener("load", r, { once: true })),
       );
-      const focus = (px: number) => {
-        const f = `blur(${px.toFixed(2)}px)`;
-        for (const n of focusing) n.style.filter = f;
-      };
-      focus(haze);
-
-      const t0 = performance.now();
-      const step = (now: number) => {
-        const t = Math.min(1, (now - t0) / PART);
-        /* The line runs out to the sides first, so what is left travelling
-           is two arcs and not a closing shape. The arcs themselves part on
-           the same eased curve the blink used, from a standstill, because
-           the blink arrived at this hairline decelerating: any faster off
-           the mark and the ground is gone before the eye has read it as
-           lids. */
-        const a = mix(a0, a1, 1 - Math.pow(1 - Math.min(1, t / 0.45), 3));
-        const s = mix(s0, s1, glide(t));
-        hole.setAttribute("d", wide(cx, cy, a, s));
-        /* Held to the gap's own rise for the same reason the mark's blur
-           was: a feather wider than the opening erases the opening. Once
-           the lids are a window apart it settles at its full width and
-           the edge stays soft all the way off the screen. */
-        edge.setAttribute("stdDeviation", Math.min(fur, s * 0.5).toFixed(2));
-        /* The page comes into focus on the lids' own curve, so the
-           softness leaves at the rate they open rather than waiting for
-           them and sharpening afterwards, which reads as a second
-           animation after the first has finished. It lands on zero at
-           the same moment they clear the window, and the curve is
-           decelerating there, so nothing snaps. */
-        focus(haze * (1 - glide(t)));
-        if (t < 1) requestAnimationFrame(step);
-        else {
-          root.removeAttribute("data-intro");
-          for (const n of focusing) n.style.removeProperty("filter");
-        }
-      };
-      requestAnimationFrame(step);
-    };
+    }
+    for (const img of Array.from(document.images)) {
+      if (img.complete || img.loading === "lazy") continue;
+      if (img.getBoundingClientRect().top > window.innerHeight) continue;
+      tasks.push(
+        new Promise((r) => {
+          img.addEventListener("load", r, { once: true });
+          img.addEventListener("error", r, { once: true });
+        }),
+      );
+    }
+    let done = 0;
+    for (const t of tasks) t.then(() => done++);
 
     const t0 = performance.now();
-    let cut = false;
+    let shown = 0;
     const step = (now: number) => {
-      const t = Math.min(1, (now - t0) / (TAKE * SHUT));
-      draw(frame(t * SHUT));
-      if (t < 1) requestAnimationFrame(step);
-      else if (!cut) {
-        cut = true;
-        part();
+      // A frame's time can be a touch before `t0`: never below nought.
+      const since = Math.max(0, now - t0);
+      const real = done / tasks.length;
+      const target =
+        since >= CAP ? 1 : Math.min(real, Math.min(1, since / FILL));
+      shown += (target - shown) * 0.2;
+      if (target - shown < 0.001) shown = target;
+
+      /* The turn: in from edge on, then a slow drift while the loader
+         fills. */
+      const deg =
+        since < IN
+          ? 90 + (REST - 90) * ease(since / IN)
+          : REST + DRIFT * ease(Math.min(1, (since - IN) / 2400));
+      lx += (mx - lx) * 0.08;
+      ly += (my - ly) * 0.08;
+
+      if (pen)
+        draw(
+          pen,
+          ground,
+          ink,
+          deg + lx * LOOK_Y,
+          ly * LOOK_X,
+          full * dpr,
+          (w / 2) * dpr,
+          (h / 2) * dpr,
+        );
+
+      const gone = shown === 1;
+      if (bar.current) bar.current.style.transform = `scaleX(${shown})`;
+      if (count.current) {
+        count.current.textContent = String(Math.round(shown * 100)).padStart(
+          3,
+          "0",
+        );
       }
+      if (!gone) {
+        requestAnimationFrame(step);
+        return;
+      }
+      window.removeEventListener("pointermove", look);
+      box.current?.classList.add("jg-intro-leaving");
+      setTimeout(() => {
+        lift();
+        canvas.remove();
+      }, LIFT);
     };
-    draw(frame(0));
     requestAnimationFrame(step);
-    /* No cleanup. The take is a one-shot that ends on its own inside two
-       seconds, and cancelling it on unmount would stop it dead in
+    /* No cleanup. The loader is a one-shot that ends on its own inside
+       `CAP`, and cancelling it on unmount would stop it dead in
        development, where React mounts an effect twice and the guard above
        keeps the second mount from starting it again. */
   }, []);
 
   return (
     <>
-      {/* The one rule that cannot wait for the stylesheet. The mark is in
+      {/* The one rule that cannot wait for the stylesheet. The layer is in
           the server's HTML and the styles are in separate files, so there
           is a window between the document arriving and the CSS applying
-          in which this layer has no rules at all: an unstyled `<svg>`
-          lays itself out in the flow and prints the opening hairline
-          across the top of the page. Carried inline it is there from the
-          first byte, and `[data-intro="1"] #jg-intro` in the stylesheet
-          still wins on specificity when it comes, so nothing downstream
-          needs `!important` to undo it.
+          in which it has no rules at all and would lay itself out in the
+          flow. Carried inline it is there from the first byte, and
+          `[data-intro="1"] #jg-intro` in the stylesheet still wins on
+          specificity when it comes.
 
           The attribute `hidden` would be shorter and is wrong: the user
           agent writes that rule with `!important`, which no author rule
           can beat, and the opening never plays at all. */}
       <style>{"#jg-intro{display:none}"}</style>
       <div id="jg-intro" ref={box} aria-hidden="true">
-        <svg viewBox="0 0 100 100" focusable="false">
-          <defs>
-            <clipPath id="jg-intro-clip">
-              <path ref={clip} d={lens(14, 1.2, 1.2)} />
-            </clipPath>
-          </defs>
-          {/* The lens is the ink, the iris is the ground punched back
-            through it, the pupil is the ink again: the same three fills
-            the file has, in the same order. The iris is not clipped,
-            because the ground colour on the ground is already invisible
-            and a clip leaves the lens's own anti-aliased edge showing as
-            a thread along the top arc. */}
-          <path ref={path} className="jg-intro-lens" d={lens(14, 1.2, 1.2)} />
-          <g ref={iris} className="jg-intro-inner">
-            <circle className="jg-intro-iris" cx="50" cy="40.9" r="20.7" />
-          </g>
-          <g clipPath="url(#jg-intro-clip)">
-            <g ref={eye} className="jg-intro-inner">
-              <circle
-                ref={dot}
-                className="jg-intro-pupil"
-                cx="50"
-                cy="40.9"
-                r="6.7"
-              />
-            </g>
-          </g>
-        </svg>
-
-        {/* The ground again, with the lens cut out of it. It is the same
-          colour as the layer it sits on and its hole starts as the
-          hairline the mark ended on, so switching to it is invisible;
-          from there the hole is the only thing that moves. */}
-        <svg
-          ref={veilRef}
-          className="jg-intro-veil"
-          viewBox="0 0 100 100"
-          preserveAspectRatio="none"
-          focusable="false"
-        >
-          <defs>
-            {/* The lid edge. Blurring the hole rather than the veil keeps
-              the softness on the one edge that moves: blurring the veil
-              would soften the window's own borders too and let the page
-              through at the corners. `sRGB` because a mask blurred in
-              linear light lifts its midtones and the edge reads as a
-              grey band rather than a fade. */}
-            <filter
-              id="jg-intro-feather"
-              x="-25%"
-              y="-25%"
-              width="150%"
-              height="150%"
-              colorInterpolationFilters="sRGB"
-            >
-              <feGaussianBlur ref={edgeRef} stdDeviation="0" />
-            </filter>
-            <mask id="jg-intro-mask">
-              <rect x="0" y="0" width="100%" height="100%" fill="#fff" />
-              <path ref={holeRef} fill="#000" filter="url(#jg-intro-feather)" />
-            </mask>
-          </defs>
-          <rect
-            x="0"
-            y="0"
-            width="100%"
-            height="100%"
-            fill="var(--background)"
-            mask="url(#jg-intro-mask)"
-          />
-        </svg>
+        <div ref={mark} className="jg-intro-mark" />
+        <div className="jg-intro-load">
+          <span ref={count} className="label tabular-nums">
+            000
+          </span>
+          <div className="jg-intro-track">
+            <div ref={bar} />
+          </div>
+        </div>
       </div>
     </>
   );

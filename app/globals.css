@@ -98,12 +98,14 @@
  * `display: none`, so nobody is ever shut behind a curtain that has
  * nothing to lift it.
  *
- * `pointer-events: none` is the important line. The intro is a layer,
- * not a gate: a press during it goes through to the site.
+ * It takes presses while it is up: a press let through to the page
+ * underneath started a page change whose view transition drew over the
+ * intro. It lets them go the moment it starts to fade, so the site is
+ * live under the fade and not after it.
  *
- * The mark takes the page's own ink and ground, so it arrives in
- * whichever theme is showing and the ground it sits on is the ground the
- * page is already painted in.
+ * The mark sits on the page's own ground, so it arrives in whichever
+ * theme is showing and the ground it sits on is the ground the page is
+ * already painted in.
  * ───────────────────────────────────────────────────────────────── */
 #jg-intro {
   display: none;
@@ -115,48 +117,49 @@
   display: grid;
   place-items: center;
   background: var(--background);
-  pointer-events: none;
 }
-/* The ending. The take finishes inside the blink, on the frame where the
-   lens is a hairline, and the layer swaps there: the mark stops being ink
-   and the veil takes over, which is the same ground with the same lens
-   cut out of it. Nothing is visible at the moment of the swap, so there
-   is nothing to cover. From there the arcs carry on opening until they
-   are past the edges of the window, and the ground goes with them. */
-#jg-intro > svg:first-of-type {
-  width: clamp(7rem, 17vw, 15rem);
-  height: auto;
-  transform-origin: 50% 40.9%;
-}
-#jg-intro > .jg-intro-veil {
+/* The eye is drawn on a canvas the window's size. On the bottom edge,
+   the loader: a count, and a hairline the width of the window that
+   fills. */
+.jg-intro-mark {
   position: absolute;
   inset: 0;
+}
+.jg-intro-load {
+  position: absolute;
+  /* The lens's bottom edge is 0.21 of its width below its middle. */
+  left: 50%;
+  top: calc(50% + var(--eye, 16rem) * 0.21 + 3rem);
+  translate: -50% 0;
+  width: min(10rem, 40vw);
+  display: grid;
+  justify-items: center;
+  gap: 0.625rem;
+  color: var(--foreground);
+}
+.jg-intro-load > span {
+  order: 1;
+}
+.jg-intro-track {
   width: 100%;
+  height: 1px;
+  background: color-mix(in oklab, var(--foreground) 16%, transparent);
+}
+.jg-intro-track > div {
   height: 100%;
-  display: none;
+  background: var(--foreground);
+  transform: scaleX(0);
+  transform-origin: left;
 }
-#jg-intro.jg-intro-parting {
-  background: transparent;
+/* Leaving: the eye turns away edge on while the whole layer fades. */
+#jg-intro.jg-intro-leaving {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 600ms var(--ease-out-strong);
 }
-/* Hidden, not removed: the veil's hole is placed from the mark's measured
-   box, and a mark taken out of the layout has no box to measure. */
-#jg-intro.jg-intro-parting > svg:first-of-type {
-  visibility: hidden;
-}
-#jg-intro.jg-intro-parting > .jg-intro-veil {
-  display: block;
-}
-.jg-intro-lens {
-  fill: var(--foreground);
-}
-.jg-intro-iris {
-  fill: var(--background);
-}
-.jg-intro-pupil {
-  fill: var(--foreground);
-}
-.jg-intro-inner {
-  transform-origin: 50px 40.9px;
+#jg-intro.jg-intro-leaving > .jg-intro-load {
+  opacity: 0;
+  transition: opacity 300ms var(--ease-out-strong);
 }
 
 @custom-variant squat (
