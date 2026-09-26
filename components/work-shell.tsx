@@ -20,9 +20,10 @@ import {
 } from "@/lib/work-view";
 
 /* JellyRadio's figures, as Julian's example set them, with the bounce
-   taken down by a third (from 0.4) at his asking. */
+   taken down by a third (from 0.4) and the swell of the lit chip halved
+   (from 0.2), both at Julian's asking. */
 const JELLY = {
-  swell: 0.2,
+  swell: 0.1,
   shrink: 0.03,
   jelly: 1,
   bounce: 0.27,
