@@ -77,6 +77,11 @@ const DriftWall = ({
      Julian: make sure all the photos are loaded before showing it. Capped,
      so a slow connection still gets the wall rather than nothing. */
   const [shown, setShown] = useState(false);
+  /* Seen at least once. Lazy loading judges distance from the viewport by
+     boxes the wall's tilt throws off, so tiles in plain view sat empty
+     (measured: 31 of 96 loaded on the homepage's last screen). Once the
+     wall is seen every tile loads. Julian: no empty slots. */
+  const [seen, setSeen] = useState(false);
   const onShownRef = useRef(onShown);
   useEffect(() => {
     onShownRef.current = onShown;
@@ -240,10 +245,29 @@ const DriftWall = ({
       rafRef.current = requestAnimationFrame(animate);
     };
 
-    rafRef.current = requestAnimationFrame(animate);
-    return () => {
+    // The site's addition: only while it can be seen. A wall at the end of
+    // a strip (the homepage's last screen) is mounted from the start and
+    // would otherwise run the whole time somebody reads the screens before
+    // it. Stopped, it picks up from where it stood.
+    const start = () => {
+      if (rafRef.current) return;
+      lastTsRef.current = null;
+      rafRef.current = requestAnimationFrame(animate);
+    };
+    const stop = () => {
       if (rafRef.current) cancelAnimationFrame(rafRef.current);
       rafRef.current = null;
+    };
+    const io = new IntersectionObserver(([entry]) => {
+      if (!entry.isIntersecting) return stop();
+      setSeen(true);
+      start();
+    });
+    if (containerRef.current) io.observe(containerRef.current);
+    else start();
+    return () => {
+      io.disconnect();
+      stop();
       lastTsRef.current = null;
     };
   }, [baseVelocities, columnMeta, pauseOnHover, parallax, reduced, applyPlaneTransform]);
@@ -308,7 +332,7 @@ const DriftWall = ({
     const inner = (
       <span className="drift-wall__inner">
         {/* eslint-disable-next-line @next/next/no-img-element -- the site passes loader-sized URLs */}
-        <img src={item.image} alt={item.title ?? ''} loading={eager ? 'eager' : 'lazy'} decoding="async" draggable={false} onLoad={e => e.currentTarget.classList.add('is-loaded')} />
+        <img src={item.image} alt={item.title ?? ''} loading={eager || seen ? 'eager' : 'lazy'} decoding="async" draggable={false} onLoad={e => e.currentTarget.classList.add('is-loaded')} />
         <span className="drift-wall__overlay" aria-hidden="true" />
       </span>
     );

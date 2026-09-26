@@ -22,6 +22,7 @@ export function EnquiryCell({
   detail,
   secondary,
   aside,
+  backdrop,
   next,
   tick = true,
   className,
@@ -42,6 +43,9 @@ export function EnquiryCell({
       were two screens asking the same thing with a window of paper
       between them. Given half the cell from sm up. */
   aside?: React.ReactNode;
+  /** Something behind the whole cell, under the ask and the aside: the
+      homepage's wall of the work. */
+  backdrop?: React.ReactNode;
   /** The page a wheel past this cell leads to; named here so it is no
       surprise when it arrives. */
   next?: Lead;
@@ -58,7 +62,7 @@ export function EnquiryCell({
       data-label={tick ? "Inquire" : undefined}
       data-hash="enquire"
       className={cn(
-        "flex w-full shrink-0 flex-col justify-center gap-6 py-10 sm:h-full sm:w-[min(40rem,85vw)] sm:py-0 sm:pl-24 sm:pr-6",
+        "relative flex w-full shrink-0 flex-col justify-center gap-6 py-10 sm:h-full sm:w-[min(40rem,85vw)] sm:py-0 sm:pl-24 sm:pr-6",
         /* With an aside the cell is the whole window, split: the ask
            centred in the left half with room around it, and the aside
            given the right half floor to ceiling. Stretched and not
@@ -70,11 +74,16 @@ export function EnquiryCell({
         className,
       )}
     >
+      {backdrop ? (
+        <div className="absolute inset-0 overflow-hidden">
+          {backdrop}
+        </div>
+      ) : null}
       {/* The ask itself, as one column. Its own flex box rather than the
           cell's, so an aside can sit beside the whole of it. */}
       <div
         className={cn(
-          "flex flex-col gap-6",
+          "relative flex flex-col gap-6",
           aside && "justify-center px-6 py-12 sm:px-16 sm:py-0",
         )}
       >
@@ -123,7 +132,7 @@ export function EnquiryCell({
         ) : null}
       </div>
 
-      {aside}
+      {backdrop && aside ? <div className="relative h-full">{aside}</div> : aside}
     </div>
   );
 }

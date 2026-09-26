@@ -6,10 +6,12 @@ import { EnquiryCell } from "@/components/enquiry-cell";
 import { Testimonials } from "@/components/testimonials";
 import { WorkBand } from "@/components/work-band";
 import { CoverArt } from "@/components/cover-art";
+import DriftWall from "@/components/DriftWall";
 import {
   FEATURED,
   COMMISSIONS,
   PRESS_HOME,
+  WALL,
   DISCIPLINES,
   WORK_PAGE,
   bandTile,
@@ -183,10 +185,37 @@ export default function Home() {
           body="Tell me what you have in mind and I'll come back with an approach and a quote."
           next={WORK_PAGE}
           className="border-l border-border"
+          /* Julian: the photo wall on the last page, as on the intro and
+             the 404. Behind the ask and the two doors, dimmed so both
+             still read; the doors are frosted glass over it. Each tile a way into
+             its project, as on the 404. Four dozen, which covers the widest
+             screen (`intro.tsx` has the arithmetic). */
+          backdrop={
+            <DriftWall
+              items={WALL.slice(0, 48)}
+              columns="fill"
+              tileWidth={300}
+              tileHeight={400}
+              gap={28}
+              radius={4}
+              tilt={16}
+              turn={-14}
+              perspective={1200}
+              depth={120}
+              speed={24}
+              direction="up"
+              variance={0.45}
+              parallax={0.6}
+              lift={16}
+              fade={0.6}
+              dim={0.4}
+              overlayColor="var(--background)"
+            />
+          }
           aside={
             <div
               id="where-next"
-              className="grid h-full grid-rows-2 gap-px bg-border"
+              className="grid h-full grid-rows-2 divide-y divide-border"
             >
               <PathCard
                 href="/work"
@@ -226,7 +255,7 @@ function PathCard({
       // more room than two short paragraphs need, and a block pinned to the
       // top with its way out pinned to the bottom reads as a page that
       // failed to load the middle.
-      className="group relative flex flex-col justify-center gap-6 border-l border-border bg-background px-6 py-12 transition-colors duration-300 hoverable:hover:bg-card sm:px-16 sm:pt-20"
+      className="group relative flex flex-col justify-center gap-6 border-l border-border glass-surface bg-background/15 px-6 py-12 transition-colors duration-300 hoverable:hover:bg-card/35 sm:px-16 sm:pt-20"
     >
       <div>
         <p className="label text-muted-foreground">{label}</p>

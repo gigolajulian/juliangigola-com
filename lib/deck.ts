@@ -65,7 +65,7 @@
 export type Deck = "pile" | "screens" | "chapters" | "leads";
 
 const PEEK = 20; // px of each card left showing on the pile
-const SINK = 0.06; // how far a covered card on the pile scales back
+const STEP = 0.03; // how far a card on the pile scales back for each card over it
 const RECEDE = 0.1; // how far a covered screen scales back into the space behind
 
 /** A card's recede, `p` of the way to `by`. */
@@ -129,14 +129,18 @@ export function runDeck(el: HTMLElement, mode: Deck): () => void {
      so the depth keeps up with the pin. */
   const depth = () => {
     const x = el.scrollLeft;
-    for (let i = 0; i < cards.length; i++) {
-      const s = spots[i];
-      // How much of this card, pinned, the one after it now covers.
-      const p = Math.min(
-        1,
-        Math.max(0, (s.pin + s.width - (s.next - x)) / s.width),
-      );
-      scrub(live, cards[i], p, mode === "screens" ? RECEDE : SINK);
+    // How much of each card, pinned, the one after it now covers.
+    const cover = spots.map((s) =>
+      Math.min(1, Math.max(0, (s.pin + s.width - (s.next - x)) / s.width)),
+    );
+    // On the pile a card sinks a step for every card over it, so the pile
+    // tapers evenly, the way ScrollStack's does. Julian: the stack looked
+    // uneven when every covered card sank the same way.
+    let over = 0;
+    for (let i = cards.length - 1; i >= 0; i--) {
+      over += cover[i];
+      if (mode === "screens") scrub(live, cards[i], cover[i], RECEDE);
+      else scrub(live, cards[i], over / cards.length, STEP * cards.length);
     }
   };
 
