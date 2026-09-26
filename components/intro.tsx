@@ -137,10 +137,11 @@ export function Intro({ tiles }: { tiles: WallTile[] }) {
       if (target - shown < 0.001) shown = target;
 
       if (mark.current)
-        mark.current.style.opacity = String(
-          easeOut(Math.min(1, since / SHOW)),
-        );
-      if (bar.current) bar.current.style.transform = `scaleX(${shown})`;
+        mark.current.style.opacity = String(easeOut(Math.min(1, since / SHOW)));
+      if (bar.current)
+        bar.current.style.clipPath = `inset(0 ${(1 - shown) * 100}% 0 0 round 9999px)`;
+      // Julian: the eye comes up with the line, from nothing to full.
+      if (eye.current) eye.current.style.opacity = String(shown);
       const l = lids();
       if (l && blinks === 0 && since >= 1400) {
         blinks = 1;
@@ -226,7 +227,7 @@ export function Intro({ tiles }: { tiles: WallTile[] }) {
         </div>
         {/* Julian: the count in the middle, the eye at the foot, and the
             line along the bottom edge. */}
-        <div ref={eye} className="jg-intro-eye">
+        <div ref={eye} className="jg-intro-eye" style={{ opacity: 0 }}>
           <BlinkingMark still />
         </div>
         <div className="jg-intro-load">
@@ -255,7 +256,5 @@ function LoaderCount({
     feedRef.current = setTo;
   }, [feedRef]);
   // Critically damped: rolls between numbers and lands without creeping.
-  return (
-    <CountUp to={to} stiffness={300} damping={35} />
-  );
+  return <CountUp to={to} stiffness={300} damping={35} />;
 }

@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Inter, Geist_Mono, Big_Shoulders } from "next/font/google";
+import { Inter, Geist_Mono } from "next/font/google";
 import localFont from "next/font/local";
 import { Intro } from "@/components/intro";
 import { SiteHeader } from "@/components/site-header";
@@ -47,16 +47,16 @@ const geistMono = Geist_Mono({
   preload: false,
 });
 
-// The splash's count. Julian chose it: a thin condensed grotesque, the
-// same tall, narrow build as Univers Bold Condensed, so the number reads as
-// kin to the titles. Variable for the optical size axis: at 72 it is the
-// Display cut he picked, finer than the text cut at the default 14.
-// Preloaded, because the splash is the first thing a new visitor sees.
-const counter = Big_Shoulders({
+// Univers 57 Condensed, the regular weight of the titles' face, for the
+// splash's count: Julian wanted it one step lighter than the 67. Preloaded,
+// because the splash is the first thing a new visitor sees.
+const counter = localFont({
+  src: "./fonts/Univers57Condensed.otf",
   variable: "--font-counter",
-  subsets: ["latin"],
-  axes: ["opsz"],
   display: "block",
+  weight: "400",
+  style: "normal",
+  adjustFontFallback: false,
 });
 
 // Univers Bold Condensed for the masthead and project titles.
