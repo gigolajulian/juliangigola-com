@@ -2960,6 +2960,13 @@ optgroup {
 :root[data-nav-side][data-nav-drawer]::view-transition-new(.page) {
   animation-delay: 460ms;
 }
+/* Out of the drawer the page starts pushed aside and slides home, and the
+   card waiting at its right edge slid with it: a strip of Contact showed
+   down the side of the screen before the deal. Clipped to the page, it
+   waits out of sight. */
+:root[data-nav-side]::view-transition-group(.page) {
+  overflow: clip;
+}
 :root[data-nav-side]::view-transition-old(.page) {
   z-index: 0;
   animation-name: jg-bar-recede;
