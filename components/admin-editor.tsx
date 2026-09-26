@@ -301,6 +301,33 @@ export function AdminEditor({
   const [sha, setSha] = React.useState<string | null>(null);
   const [status, setStatus] = React.useState<Status>({ kind: "idle" });
   const [view, setView] = React.useState<View>("home");
+  /* One column over the whole workbench, the other two out of the way:
+     Julian wanted each one full screen, to see it from above. Escape
+     brings the three back. */
+  const [full, setFull] = React.useState<"map" | "work" | "preview" | null>(
+    null,
+  );
+  React.useEffect(() => {
+    if (!full) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setFull(null);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [full]);
+  /** The switch at the head of a column. Only where there are columns. */
+  const whole = (which: "map" | "work" | "preview") => (
+    <div className="sticky top-0 z-10 flex justify-end bg-background pb-2 max-xl:hidden">
+      <button
+        type="button"
+        onClick={() => setFull(full === which ? null : which)}
+        aria-pressed={full === which}
+        className="label text-muted-foreground transition-colors duration-200 hoverable:hover:text-foreground"
+      >
+        {full === which ? "Close full screen" : "Full screen"}
+      </button>
+    </div>
+  );
   /** Which discipline is expanded in the Disciplines view. */
   const [openDiscipline, setOpenDiscipline] = React.useState<string | null>(
     null,
@@ -1106,9 +1133,13 @@ export function AdminEditor({
           "mt-10 grid gap-10 xl:min-h-0 xl:flex-1 2xl:gap-12",
           // The page editor takes the preview's column as well: it is the
           // preview, of one page, and it wants the width.
-          page
-            ? "xl:grid-cols-[17rem_1fr] 2xl:grid-cols-[1fr_5fr]"
-            : "xl:grid-cols-[17rem_1fr_23rem] 2xl:grid-cols-[1fr_minmax(34rem,1.6fr)_26rem]",
+          full
+            ? // Seen from above: the sitemap and the preview as many covers
+              // across as fit.
+              "xl:grid-cols-1 2xl:grid-cols-1 [&_[data-map-grid]]:grid-cols-[repeat(auto-fill,minmax(7rem,1fr))] [&_[data-preview-grid]]:grid-cols-[repeat(auto-fill,minmax(9rem,1fr))]"
+            : page
+              ? "xl:grid-cols-[17rem_1fr] 2xl:grid-cols-[1fr_5fr]"
+              : "xl:grid-cols-[17rem_1fr_23rem] 2xl:grid-cols-[1fr_minmax(34rem,1.6fr)_26rem]",
         )}
       >
         {/* Not a tab any more. The sitemap is what the site currently is, which
@@ -1121,7 +1152,13 @@ export function AdminEditor({
           content and `overflow-y-auto` is what gives that content somewhere
           to go. Without `min-h-0` a grid track floors at its content height
           and the whole page grows again. */}
-        <aside className="min-w-0 xl:min-h-0 xl:overflow-y-auto xl:pb-10">
+        <aside
+          className={cn(
+            "min-w-0 xl:min-h-0 xl:overflow-y-auto xl:pb-10",
+            full && full !== "map" && "xl:hidden",
+          )}
+        >
+          {whole("map")}
           <AdminSitemap
             projects={orderedProjects.map((p) => ({
               slug: p.slug,
@@ -1138,7 +1175,13 @@ export function AdminEditor({
           />
         </aside>
 
-        <div className="min-w-0 xl:min-h-0 xl:overflow-y-auto xl:pb-10">
+        <div
+          className={cn(
+            "min-w-0 xl:min-h-0 xl:overflow-y-auto xl:pb-10",
+            full && full !== "work" && "xl:hidden",
+          )}
+        >
+          {whole("work")}
           {/* Not a gate any more. The editor used to be hidden entirely until a
             token proved itself, which meant arriving at /admin — or clicking
             a project in the sitemap — showed a read-only index and a password
@@ -1602,7 +1645,13 @@ export function AdminEditor({
         {/* Sticky, so it stays beside the field being edited on a long form.
           Below `xl` it drops under the form rather than squeezing both. */}
         {page ? null : (
-          <aside className="min-w-0 xl:min-h-0 xl:overflow-y-auto xl:pb-10">
+          <aside
+            className={cn(
+              "min-w-0 xl:min-h-0 xl:overflow-y-auto xl:pb-10",
+              full && full !== "preview" && "xl:hidden",
+            )}
+          >
+            {whole("preview")}
             {/* Ordered too: the preview's whole job is to be what publishing
             would produce, and the homepage band it draws is in running
             order. */}

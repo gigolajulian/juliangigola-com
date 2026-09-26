@@ -463,6 +463,7 @@ function Tiles({
   const [over, setOver] = React.useState<string | null>(null);
   return (
     <ul
+      data-map-grid
       className={cn(
         "grid gap-1",
         // Wider rails on a big display mean more of the site visible without

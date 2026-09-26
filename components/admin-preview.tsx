@@ -75,7 +75,7 @@ export function AdminPreview({
         >
           {featured.length ? (
             // Three across, as the homepage lays it out.
-            <ul className="grid grid-cols-3 gap-1">
+            <ul data-preview-grid className="grid grid-cols-3 gap-1">
               {featured
                 .filter((p) => !hidden.has(p.slug))
                 .map((p, i) => (
