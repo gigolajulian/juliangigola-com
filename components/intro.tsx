@@ -1,13 +1,14 @@
 "use client";
 
 import * as React from "react";
-import { CrtBackground } from "@designcodeio/threeui";
+import DriftWall from "@/components/DriftWall";
+import type { WallTile } from "@/lib/work";
 
 /* ── the opening ──────────────────────────────────────────────────
- * The eye mark in the middle of a CRT playing a film leader (ThreeUI's
- * `CrtBackground`, cinematic), where the countdown's number would be: it
- * scales in from small while a loader under it fills with the page
- * getting ready, and at 100 the layer fades to the site.
+ * A wall of the work drifting in perspective (React Bits' `DriftWall`),
+ * the featured projects first, with a loader in the middle that fills
+ * with the page getting ready. At 100 the wall fades and the page makes
+ * its own entrance.
  *
  * Three rules it lives by, because an intro sits between a visitor and
  * the work:
@@ -29,125 +30,13 @@ import { CrtBackground } from "@designcodeio/threeui";
  * with no JavaScript is never shut behind a curtain that cannot lift.
  * ─────────────────────────────────────────────────────────────── */
 
-const CAP = 5000; // the longest anybody waits, whatever is still loading
-const SHOW = 500; // the eye fading in
-const FILL = 1000; // the loader's steady fill, when the page is quicker
-const GROW = 900; // the eye scaling in from small
-const SMALL = 0.35; // its size at the start, against its full size
-const HIDE = 300; // the eye fading out, before the page starts
+const CAP = 6000; // the longest anybody waits, whatever is still loading
+const SHOW = 600; // the wall fading in
+const FILL = 3500; // the loader's steady fill, when the page is quicker
+const HIDE = 300; // the wall fading out, before the page starts
 const LIFT = 400; // the ground fading while the page arrives
 
-/* The leader's dial, as the package draws it: the screen letterboxed by
-   0.112 of its height top and bottom, and the dial a radius of 0.325 of
-   what is left. The screen fills the window, so in CSS pixels the dial's
-   radius is this share of the window's height. */
-const DIAL = 0.325 * (1 - 2 * 0.112);
-const DISC = 0.8; // the patch over the countdown's number, in dial radii
-const EYE = 1.35; // the eye's width, in dial radii
-const LINE = 2.5; // the CRT's scanline pitch, CSS pixels: 0.4 a pixel of height
-
 const easeOut = (t: number) => 1 - Math.pow(1 - t, 3);
-
-/* The logo from `app/icon.svg`: the lens with the iris taken out of it,
-   and the pupil. The iris is bigger than the lens is tall, so the cut
-   runs off the top and the lens reads as a cup. */
-// Made on first use: there is no `Path2D` on the server.
-let shape: { lens: Path2D; open: Path2D; pupil: Path2D } | null = null;
-function paths() {
-  if (shape) return shape;
-  const lens = new Path2D(
-    "M7.2 49.6 A59.9 59.9 0 0 1 92.8 49.6 A59.9 59.9 0 0 1 7.2 49.6 Z",
-  );
-  const open = new Path2D("M-1e3 -1e3 H1e3 V1e3 H-1e3 Z");
-  open.arc(50, 40.9, 20.7, 0, Math.PI * 2);
-  const pupil = new Path2D();
-  pupil.arc(50, 40.9, 8.6, 0, Math.PI * 2);
-  return (shape = { lens, open, pupil });
-}
-
-/* The eye on the leader, where the countdown's number is. A patch of the
-   screen's own dark covers the number, feathered so its edge is lost in
-   the glass, and the eye goes on it in the leader's white with the
-   number's glow. Then the picture's faults, over what is drawn and
-   nowhere else: the scanlines at the CRT's pitch, a grain that changes
-   every frame, and now and then the eye knocked sideways or a row of it
-   torn.
-
-   `px` is canvas pixels to a CSS pixel. */
-function draw(
-  c: CanvasRenderingContext2D,
-  grain: HTMLCanvasElement,
-  eye: number,
-  px: number,
-) {
-  const { width: w, height: h } = c.canvas;
-  const cx = w / 2;
-  const cy = h / 2;
-  const { lens, open: cut, pupil } = paths();
-  c.setTransform(1, 0, 0, 1, 0, 0);
-  c.globalCompositeOperation = "source-over";
-  c.globalAlpha = 1;
-  c.clearRect(0, 0, w, h);
-
-  const disc = c.createRadialGradient(cx, cy, 0, cx, cy, w / 2);
-  disc.addColorStop(0.86, "rgb(10,10,12)");
-  disc.addColorStop(1, "rgba(10,10,12,0)");
-  c.fillStyle = disc;
-  c.fillRect(0, 0, w, h);
-
-  const k = eye / 85.6; // pixels per logo unit: the lens is 85.6 wide
-  const nudge = Math.random() < 0.08 ? (Math.random() - 0.5) * 4 * px : 0;
-  c.setTransform(k, 0, 0, k, cx - 50 * k + nudge, cy - 49.6 * k);
-  c.fillStyle = "#f6f6fa";
-  c.shadowColor = "rgba(255,255,255,0.55)";
-  c.shadowBlur = eye * 0.09;
-  c.save();
-  c.clip(lens);
-  c.fill(cut, "evenodd");
-  c.restore();
-  c.fill(pupil);
-  c.shadowBlur = 0;
-
-  c.setTransform(1, 0, 0, 1, 0, 0);
-  c.globalCompositeOperation = "source-atop";
-  c.globalAlpha = 0.16;
-  c.fillStyle = "#000";
-  const pitch = LINE * px;
-  for (let y = cy % pitch; y < h; y += pitch) {
-    c.fillRect(0, y, w, pitch * 0.45);
-  }
-  const g = grain.getContext("2d");
-  if (g) {
-    const img = g.createImageData(grain.width, grain.height);
-    for (let i = 0; i < img.data.length; i += 4) {
-      const v = Math.random() * 255;
-      img.data[i] = img.data[i + 1] = img.data[i + 2] = v;
-      img.data[i + 3] = 255;
-    }
-    g.putImageData(img, 0, 0);
-    c.globalAlpha = 0.11;
-    c.imageSmoothingEnabled = false;
-    c.drawImage(grain, 0, 0, w, h);
-  }
-  c.globalCompositeOperation = "source-over";
-  c.globalAlpha = 1;
-  if (Math.random() < 0.12) {
-    const y = Math.random() * h;
-    const band = (2 + Math.random() * 6) * px;
-    const dx = (Math.random() - 0.5) * 10 * px;
-    c.drawImage(c.canvas, 0, y, w, band, dx, y, w, band);
-  }
-}
-
-/* Whether this browser can draw the CRT at all: without WebGL the
-   package throws while mounting, and the eye plays on the plain ground. */
-function webgl() {
-  try {
-    return !!document.createElement("canvas").getContext("webgl");
-  } catch {
-    return false;
-  }
-}
 
 const lift = () => document.documentElement.removeAttribute("data-intro");
 
@@ -155,15 +44,20 @@ const lift = () => document.documentElement.removeAttribute("data-intro");
    take would start a loader the first had already finished. */
 let played = false;
 
-export function Intro() {
+export function Intro({ tiles }: { tiles: WallTile[] }) {
   const box = React.useRef<HTMLDivElement>(null);
   const mark = React.useRef<HTMLDivElement>(null);
-  const eyeBox = React.useRef<HTMLDivElement>(null);
   const bar = React.useRef<HTMLDivElement>(null);
   const count = React.useRef<HTMLSpanElement>(null);
-  /* The CRT, mounted only while the intro plays: WebGL on every page load
-     for a layer that is not showing would be waste. */
-  const [crt, setCrt] = React.useState(false);
+  /* The wall, mounted only while the intro plays: two dozen pictures on
+     every page load for a layer that is not showing would be waste. Its
+     tiles here are not links (no `href`): the layer is a curtain, and a
+     press on it must not start a page change under it. */
+  const [wall, setWall] = React.useState(false);
+  const still = React.useMemo(
+    () => tiles.map(({ image, title }) => ({ image, title })),
+    [tiles],
+  );
 
   React.useEffect(() => {
     const root = document.documentElement;
@@ -172,27 +66,6 @@ export function Intro() {
     try {
       sessionStorage.setItem("jg-intro", "1");
     } catch {}
-
-    /* The eye sits in the dial, and the dial is sized by the window's
-       height. The patch it sits on is its canvas. */
-    const dial = DIAL * window.innerHeight;
-    const full = EYE * dial;
-    const side = 2 * DISC * dial;
-    // For the loader, which sits under the eye.
-    box.current?.style.setProperty("--eye", `${full}px`);
-
-    /* Drawn at the screen's own pixels, up to two to a CSS pixel, so the
-       eye's edges are sharp on a retina screen. */
-    const dpr = Math.min(2, window.devicePixelRatio || 1);
-    const canvas = document.createElement("canvas");
-    canvas.width = canvas.height = Math.round(side * dpr);
-    canvas.style.cssText = `display:block;width:${side}px;height:${side}px`;
-    eyeBox.current?.append(canvas);
-    const pen = canvas.getContext("2d");
-    // The grain: a small tile of noise, stretched over the eye.
-    const grain = document.createElement("canvas");
-    grain.width = grain.height = Math.max(32, Math.round(side / 2));
-    const withCrt = webgl();
 
     /* What "ready" means: the type, every photograph already on screen
        that is not lazy, and the window's own load. The line fills on a
@@ -219,11 +92,11 @@ export function Intro() {
 
     const t0 = performance.now();
     let shown = 0;
-    let crtOn = false;
+    let wallOn = false;
     const step = (now: number) => {
-      if (withCrt && !crtOn) {
-        crtOn = true;
-        setCrt(true);
+      if (!wallOn) {
+        wallOn = true;
+        setWall(true);
       }
       // A frame's time can be a touch before `t0`: never below nought.
       const since = Math.max(0, now - t0);
@@ -233,15 +106,10 @@ export function Intro() {
       shown += (target - shown) * 0.2;
       if (target - shown < 0.001) shown = target;
 
-      // The eye scales in from small; the patch under it stays put.
-      const grown = easeOut(Math.min(1, since / GROW));
       if (mark.current)
         mark.current.style.opacity = String(
           easeOut(Math.min(1, since / SHOW)),
         );
-      if (pen) draw(pen, grain, full * dpr * (SMALL + (1 - SMALL) * grown), dpr);
-
-      const gone = shown === 1 && since >= GROW;
       if (bar.current) bar.current.style.transform = `scaleX(${shown})`;
       if (count.current) {
         count.current.textContent = String(Math.round(shown * 100)).padStart(
@@ -249,7 +117,7 @@ export function Intro() {
           "0",
         );
       }
-      if (!gone) {
+      if (shown !== 1) {
         requestAnimationFrame(step);
         return;
       }
@@ -258,8 +126,7 @@ export function Intro() {
         root.dataset.intro = "lift";
         setTimeout(() => {
           lift();
-          canvas.remove();
-          setCrt(false);
+          setWall(false);
         }, LIFT);
       }, HIDE);
     };
@@ -286,18 +153,28 @@ export function Intro() {
       <style>{"#jg-intro{display:none}"}</style>
       <div id="jg-intro" ref={box} aria-hidden="true">
         <div ref={mark} className="jg-intro-mark">
-          {crt && (
-            <CrtBackground
-              variant="cinematic"
-              speed={1.31}
-              motion={0.15}
-              hue={7}
-              saturation={1}
-              brightness={1}
-              opacity={1}
+          {wall && (
+            <DriftWall
+              items={still}
+              columns="fill"
+              tileWidth={300}
+              tileHeight={400}
+              gap={28}
+              radius={4}
+              tilt={16}
+              turn={-14}
+              perspective={1200}
+              depth={120}
+              speed={42}
+              direction="up"
+              variance={0.45}
+              parallax={0.6}
+              lift={64}
+              fade={0.6}
+              dim={0.55}
+              overlayColor="#0b0a09"
             />
           )}
-          <div ref={eyeBox} className="jg-intro-eye" />
         </div>
         <div className="jg-intro-load">
           <span ref={count} className="label tabular-nums">

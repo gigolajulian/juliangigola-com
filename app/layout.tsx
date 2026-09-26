@@ -7,7 +7,7 @@ import { SiteFooter } from "@/components/site-footer";
 import { PhotoNotice } from "@/components/photo-notice";
 import { SiteMenu } from "@/components/site-menu";
 import { WorkFilter } from "@/components/work-filter";
-import { WORK_CATEGORY_LINKS } from "@/lib/work";
+import { WALL, WORK_CATEGORY_LINKS } from "@/lib/work";
 import { WORK_HEADS } from "@/lib/work-heads";
 import { GlassLight } from "@/components/glass-light";
 import { PhotoFade } from "@/components/photo-fade";
@@ -207,9 +207,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           Skip to content
         </a>
 
-        {/* The eye mark opens over the page on a first arrival, and the
+        {/* The wall of work opens over the page on a first arrival, and the
             page is already underneath it. See `intro.tsx`. */}
-        <Intro />
+        <Intro tiles={WALL} />
 
         <SiteHeader />
         {/* The drawer the burger opens. A sibling of the header and of

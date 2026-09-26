@@ -15,6 +15,7 @@ import type { Project, Category, Frame, TextBlock } from "./work-types";
 import { COVER_RELEASES as RELEASES } from "./cover-art-data";
 import type { CoverRelease } from "./cover-art-types";
 import { CONTENT } from "./content";
+import imageLoader from "../image-loader";
 import { REEL } from "./videos";
 import {
   ADDED,
@@ -806,6 +807,25 @@ const FEATURED_SLUGS: string[] = CONTENT.featured;
 export const FEATURED: Project[] = FEATURED_SLUGS.map((s) =>
   bySlug.get(s),
 ).filter((p): p is Project => Boolean(p));
+
+/**
+ * The drifting wall on the intro and the 404: the featured work first, then
+ * every other project in the site's order. Julian: fill the page with work,
+ * each card a different project. With every project on it, each column
+ * holds several and no card on screen repeats another. Built here, on the
+ * server, so a client component is handed three strings a tile and never
+ * the projects. Small copies (640px, a 300px tile on a retina screen)
+ * because the intro's are fetched alongside the page's own pictures.
+ */
+export type WallTile = { image: string; title: string; href: string };
+export const WALL: WallTile[] = [
+  ...FEATURED,
+  ...PROJECTS.filter((p) => !FEATURED.includes(p)),
+].map((p) => ({
+  image: imageLoader({ src: p.cover.src, width: 640, quality: 70 }),
+  title: p.name,
+  href: `/work/${p.slug}`,
+}));
 
 /**
  * The press strip on the homepage. The old site buried these as plain text at

@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { NotFoundScene } from "@/components/not-found-scene";
-import { DISCIPLINES } from "@/lib/work";
+import DriftWall from "@/components/DriftWall";
+import { DISCIPLINES, WALL } from "@/lib/work";
 
 /* ── 404 ──────────────────────────────────────────────────────────
  * From a design Julian made in Claude Design and asked to have on the site,
@@ -62,38 +63,36 @@ export default function NotFound() {
   return (
     <NotFoundScene>
       <div
+        data-fit-page
         className="relative overflow-hidden bg-background"
         style={{ minHeight: "100dvh" }}
       >
-        {/* The room: two drifting glows, a faint grid, a dusting of grain.
-            All decorative, all behind everything, and all still under
-            reduced motion. The glows are soft by their own gradient, not
-            a blur filter: a filter on a layer that drifts is redrawn every
-            frame, and the gradient already fades to nothing at its edge. */}
-        <div
-          aria-hidden
-          className="pointer-events-none absolute animate-[jg-drift-a_24s_ease-in-out_infinite] motion-reduce:animate-none"
-          style={{
-            width: "68vw",
-            height: "68vw",
-            left: "-14vw",
-            top: "-16vw",
-            background:
-              "radial-gradient(closest-side, color-mix(in oklab, var(--accent) 24%, transparent), transparent)",
-          }}
-        />
-        <div
-          aria-hidden
-          className="pointer-events-none absolute animate-[jg-drift-b_30s_ease-in-out_infinite] motion-reduce:animate-none"
-          style={{
-            width: "60vw",
-            height: "60vw",
-            right: "-16vw",
-            bottom: "-22vw",
-            background:
-              "radial-gradient(closest-side, color-mix(in oklab, var(--foreground) 10%, transparent), transparent)",
-          }}
-        />
+        {/* The room: the work itself, drifting on a wall behind the page
+            (`DriftWall`), each tile a way into its project. Dimmed toward
+            the ground so the words over it still read; a faint grid and a
+            dusting of grain over that. Julian: the 404 gets the drift wall. */}
+        <div className="absolute inset-0">
+          <DriftWall
+            items={WALL}
+            columns="fill"
+            tileWidth={300}
+            tileHeight={400}
+            gap={28}
+            radius={4}
+            tilt={16}
+            turn={-14}
+            perspective={1200}
+            depth={120}
+            speed={30}
+            direction="up"
+            variance={0.45}
+            parallax={0.6}
+            lift={64}
+            fade={0.6}
+            dim={0.4}
+            overlayColor="var(--background)"
+          />
+        </div>
         <div
           aria-hidden
           className="pointer-events-none absolute inset-0 opacity-55"
@@ -113,7 +112,7 @@ export default function NotFound() {
           }}
         />
 
-        <section className="relative mx-auto flex min-h-dvh w-full max-w-[100rem] flex-col justify-center gap-6 px-6 pb-16 pt-32 sm:gap-8 sm:px-10 sm:pt-40">
+        <section className="pointer-events-none relative mx-auto flex [&_a]:pointer-events-auto h-dvh w-full max-w-[100rem] flex-col justify-center gap-4 px-6 pb-6 pt-20 sm:gap-6 sm:px-10 sm:pt-24">
           {/* The slate. */}
           <div className="rise flex flex-wrap items-center gap-3.5">
             <Mark className="size-6 shrink-0 text-foreground" />
@@ -146,7 +145,9 @@ export default function NotFound() {
             data-numerals
             className="rise select-none font-display font-bold leading-[0.82] tracking-[-0.05em] text-foreground"
             style={{
-              fontSize: "clamp(104px, 26vw, 340px)",
+              // By the window's height as well as its width: the page never
+              // scrolls, so the numerals give way on a short window.
+              fontSize: "clamp(64px, min(26vw, 26dvh), 340px)",
               transition: "filter 0.1s linear, opacity 0.1s linear",
               ["--reveal-delay" as string]: "80ms",
             }}
@@ -166,7 +167,8 @@ export default function NotFound() {
               <h1 className="font-display text-2xl uppercase leading-[1.02] tracking-[0] text-foreground sm:text-4xl">
                 This frame never made the edit.
               </h1>
-              <p className="mt-4 text-sm leading-[1.7] text-muted-foreground [text-wrap:pretty]">
+              {/* For a mouse, so not on a phone, where the page has no room. */}
+              <p className="mt-4 text-sm leading-[1.7] text-muted-foreground [text-wrap:pretty] max-sm:hidden">
                 The page you were looking for has been moved, renamed, or cut
                 from the selects. Drag your cursor across the numerals to pull
                 them into focus, or head back to the work.
@@ -189,7 +191,9 @@ export default function NotFound() {
               </div>
             </div>
 
-            <div className="flex flex-col gap-3.5">
+            {/* Not on a phone: the page never scrolls, and the wall's tiles
+                behind are ways into the work already. */}
+            <div className="flex flex-col gap-3.5 max-sm:hidden">
               <div className={`${MONO} text-muted-foreground`}>
                 Try one of these
               </div>
