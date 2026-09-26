@@ -1395,7 +1395,8 @@ a.strip-cell {
      itself does nothing. What is inside it is stilled below, next to the
      cell's own rise, because this block is a utility and a utility loses
      to any unlayered rule whatever its specificity. */
-  &[data-arrive="zoom"] {
+  &[data-arrive="zoom"],
+  &[data-arrive="fly"] {
     animation: none;
   }
   @media (prefers-reduced-motion: reduce) {
@@ -1515,6 +1516,7 @@ a.strip-cell {
   box-shadow: 0 0 0 0.5rem var(--background);
 }
 .strip-scroll[data-arrive="fade"] .strip-cell,
+.strip-scroll[data-arrive="fly"] .strip-cell,
 .strip-scroll[data-arrive="seat"] .strip-cell,
 .strip-scroll[data-arrive="zoom"] .strip-cell,
 .strip-scroll[data-arrive="zoom"] .title-word,
@@ -2924,6 +2926,54 @@ optgroup {
     transform: translateY(-2.5vh);
   }
 }
+/* ── along the bar ──
+   Julian chose it from three: a press in the bar deals the next page in
+   as a card over the one you are on, which recedes into the dark behind
+   it, the way the deck does between projects. Which way it comes is
+   where the page sits in the bar (`data-nav-side`, `page-transition.tsx`):
+   to the right of this one, it comes in from the right. It replaces the
+   bar's fade and beat; out of a drawer it still waits for the drawer. */
+:root[data-nav-side]::view-transition-old(.page),
+:root[data-nav-side]::view-transition-new(.page) {
+  animation-duration: 760ms;
+  animation-delay: 0ms;
+  animation-timing-function: cubic-bezier(0.77, 0, 0.175, 1);
+  animation-fill-mode: both;
+}
+:root[data-nav-side][data-nav-drawer]::view-transition-old(.page),
+:root[data-nav-side][data-nav-drawer]::view-transition-new(.page) {
+  animation-delay: 460ms;
+}
+:root[data-nav-side]::view-transition-old(.page) {
+  z-index: 0;
+  animation-name: jg-bar-recede;
+}
+:root[data-nav-side]::view-transition-new(.page) {
+  z-index: 2;
+}
+:root[data-nav-side="right"]::view-transition-new(.page) {
+  animation-name: jg-bar-in-right;
+}
+:root[data-nav-side="left"]::view-transition-new(.page) {
+  animation-name: jg-bar-in-left;
+}
+@keyframes jg-bar-recede {
+  to {
+    transform: scale(0.9);
+    opacity: 0.25;
+  }
+}
+@keyframes jg-bar-in-right {
+  from {
+    transform: translateX(100%);
+  }
+}
+@keyframes jg-bar-in-left {
+  from {
+    transform: translateX(-100%);
+  }
+}
+
 /* A filter on the work index: no zoom, the row fades on its own. */
 :root[data-nav="filter"]::view-transition-group(.page),
 :root[data-nav="filter"]::view-transition-old(.page),
@@ -3414,9 +3464,33 @@ img[data-fade][data-loaded] {
  * the lit chip puts on the page is read from it.
  * ─────────────────────────────────────────────────────────────── */
 @media (min-width: 40rem) {
+  /* Julian: a transition when colour is clicked. The rack goes back into
+     the dark as the panel comes in, rather than cutting to an empty page
+     for the moment before the sets are dealt out of the scope
+     (`ColourGrid`); and comes back up when it closes. */
+  main .strip-band,
+  main .work-list {
+    transition:
+      opacity 280ms var(--ease-out-strong),
+      scale 280ms var(--ease-out-strong);
+  }
   [data-scope-open] main .strip-band,
   [data-scope-open] main .work-list {
     visibility: hidden;
+    opacity: 0;
+    scale: 0.97;
+    transition:
+      opacity 280ms var(--ease-out-strong),
+      scale 280ms var(--ease-out-strong),
+      visibility 0s 280ms;
+  }
+}
+@media (min-width: 40rem) and (prefers-reduced-motion: reduce) {
+  main .strip-band,
+  main .work-list,
+  [data-scope-open] main .strip-band,
+  [data-scope-open] main .work-list {
+    transition: none;
   }
 }
 /* A set and its photographs arrive: up from a few pixels under, out of
@@ -3447,4 +3521,27 @@ body:has([data-fit-page]) {
 }
 body:has([data-fit-page]) footer {
   display: none;
+}
+
+/* ── changing view on /work ─────────────────────────────────────────
+ * Julian: something dope. `morphView` in `lib/work-view.ts` names every
+ * cover in sight, and each flies from its place in one view to its place
+ * in the next, a beat behind the one to its left. The strong in-out curve
+ * the site keeps for things moving on screen, long enough to follow, and
+ * the blur mid-flight the covers use when they open a project.
+ * ─────────────────────────────────────────────────────────────── */
+:root[data-nav="view"]::view-transition-group(.view) {
+  animation-duration: 720ms;
+  animation-timing-function: cubic-bezier(0.77, 0, 0.175, 1);
+}
+:root[data-nav="view"]::view-transition-image-pair(.view) {
+  animation-name: jg-via-blur;
+  animation-duration: 720ms;
+  animation-timing-function: cubic-bezier(0.77, 0, 0.175, 1);
+}
+:root[data-nav="view"]::view-transition-old(.view),
+:root[data-nav="view"]::view-transition-new(.view) {
+  block-size: 100%;
+  object-fit: cover;
+  animation-duration: 720ms;
 }

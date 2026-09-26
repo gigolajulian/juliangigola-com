@@ -98,6 +98,9 @@ export function WorkList({
                 }
               >
                 <span
+                  data-vt={
+                    (row.n !== undefined && frames?.[row.n]?.src) || row.slug
+                  }
                   className="relative block w-16 shrink-0 overflow-hidden sm:w-20"
                   style={{
                     backgroundColor: row.cover.color,

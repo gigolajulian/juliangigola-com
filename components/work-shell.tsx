@@ -13,6 +13,8 @@ import { markFilter, StripView, type StripViewMode } from "@/components/strip";
 import { animate } from "motion";
 import {
   chooseView,
+  morphView,
+  noteCovers,
   search,
   useWorkQuery,
   useWorkView,
@@ -703,11 +705,13 @@ export function WorkShell({
             type="button"
             aria-pressed={on}
             aria-label={mode === "grid" ? "Grid view" : "One up view"}
-            onClick={() => {
-              if (query) search("");
-              chooseView(mode);
-              closeScope();
-            }}
+            onClick={() =>
+              morphView(() => {
+                if (query) search("");
+                chooseView(mode);
+                closeScope();
+              })
+            }
             className={cn(
               "-my-1 p-2 transition-opacity duration-200",
               on ? "opacity-100" : "opacity-35",
@@ -747,14 +751,17 @@ export function WorkShell({
             aria-pressed={view === mode && !scoping}
             aria-label={`${WORD[mode]} view`}
             data-ring={`${WORD[mode]} view`}
-            onClick={() => {
-              /* Leaving the list with something typed would filter a strip
-               nobody can see the ends of. The box empties with it. */
-              if (mode !== "list" && query) search("");
-              chooseView(mode);
-              // A view chosen is a way out of colour, as a discipline is.
-              closeScope();
-            }}
+            onClick={() =>
+              morphView(() => {
+                /* Leaving the list with something typed would filter a
+                   strip nobody can see the ends of. The box empties with
+                   it. */
+                if (mode !== "list" && query) search("");
+                chooseView(mode);
+                // A view chosen is a way out of colour, as a discipline is.
+                closeScope();
+              })
+            }
             className={cn(
               "-my-1 p-1.5 transition-opacity duration-200",
               view === mode && !scoping
@@ -1059,6 +1066,8 @@ function Chip({
         const lit = row?.querySelector('[aria-current="page"]');
         const from = lit?.getBoundingClientRect().left ?? me.left;
         markFilter(current ? 0 : me.left - from < 0 ? -1 : 1);
+        // Where the covers stand, for the next strip to fly them from.
+        if (!current) noteCovers();
         /* Julian: pressing All while the work is already showing all of
            it goes back to the beginning. A link to the page you are on
            changes no route and moves nothing otherwise; `jg:home` is the

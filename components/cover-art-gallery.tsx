@@ -88,6 +88,8 @@ export function CoverArtGallery({
                 );
               }}
               aria-label={`Open ${coverLabel(release.title, release.artist, release.frames)}`}
+              // Flies between the views as the covers do (`morphView`).
+              data-vt={front.src}
               data-ring="Zoom in"
               className={cn(
                 "group relative block aspect-square w-full overflow-hidden press active:scale-[0.995]",

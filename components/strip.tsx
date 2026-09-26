@@ -4,6 +4,7 @@ import { runDeck, type Deck } from "@/lib/deck";
 import * as React from "react";
 import { useRouter } from "next/navigation";
 import { cn, rubberband } from "@/lib/utils";
+import { flyCovers } from "@/lib/work-view";
 
 /* ── the strip ────────────────────────────────────────────────────
  * One screen, and the page runs across it. This is the machine behind
@@ -548,7 +549,12 @@ export function Strip({
       else window.setTimeout(done, 1000);
     }
     // The filter changed under a row that stayed: a fade, not an arrival.
-    if (filtered) {
+    /* Julian: the covers fly across the filters as they do between the
+       views (`flyCovers` in `lib/work-view.ts`), from where they stood
+       when the chip was pressed. */
+    if (filtered && flyCovers(el)) {
+      el.dataset.arrive = "fly";
+    } else if (filtered) {
       el.dataset.arrive = "fade";
       /* Half a screen at the very ends of the row, nothing at all for a
          press on the chip already lit. The CSS reads it; a shift of zero

@@ -155,6 +155,12 @@ export function FrameCell({
     <button
       type="button"
       data-n={n}
+      /* Flies between the views and across the filters as a cover does
+         (`morphView`), paired by the photograph itself: its place in the
+         page's frames differs from one filter to the next. The list's
+         line for it carries the same. Julian: Event coverage, Automotive
+         and Places did not animate. */
+      data-vt={frame.src}
       /* A stop on the ruler like any other cell. The galleries run out in
          full along the index - Julian asked for every frame of Event
          coverage, Automotive and Places - but only their opening title

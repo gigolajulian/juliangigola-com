@@ -327,6 +327,11 @@ export function ProjectStrip({
               // Opened by the strip's delegated listener, which is where
               // the lightbox is reached through a ref.
               data-n={cell.n}
+              /* Flies between the views and across the filters
+                 (`morphView` in `lib/work-view.ts`), paired by the
+                 photograph. Julian: Event coverage, Automotive and Places
+                 did not animate; they come through here. */
+              data-vt={cell.frame.src}
               aria-label={`Open frame ${cell.n + 1} of ${frames.length}${
                 cell.frame.alt ? `: ${cell.frame.alt}` : ""
               }`}

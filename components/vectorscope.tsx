@@ -17,8 +17,8 @@ import type { Frame } from "@/lib/work-types";
  * globals.css) and in its place a grid of the projects in the hue the
  * scope is reading, the strongest first, each shown by its cover with the
  * set's dominant colours on a white plate at its top left, and the rest
- * of its photographs in that colour stacked under it, to fan out on hover
- * (`ColourTile`). The page follows the pointer over the scope as it
+ * of its photographs in that colour stacked under it (`ColourTile`); no
+ * hover, Julian asked. The page follows the pointer over the scope as it
  * moves; a click holds the hue. A tile opens its project.
  *
  * Smooth rather than redrawn: the tiles are keyed by project, so one that
@@ -254,7 +254,6 @@ export function ScopePanel({
     [qx, qy],
   );
   /** The project of the set under the pointer. */
-  const [over, setOver] = React.useState<string | null>(null);
   const [brand, setBrand] = React.useState("");
 
   /* Each project on the page, its photographs as scope positions. */
@@ -369,8 +368,6 @@ export function ScopePanel({
   }, [open]);
 
   const point = held;
-  /** Whose dots are lit on the scope: the hovered set's. */
-  const focus = over;
   const litSlugs = React.useMemo(
     () => (neutral ? null : new Set(sets.map((s) => s.p.slug))),
     [neutral, sets],
@@ -476,38 +473,6 @@ export function ScopePanel({
     };
   }, [placed, point, litSlugs]);
 
-  /* The hovered set, on a layer of its own over the scope: a veil that
-     puts everything else back, and that set's dots alone. Repainting all
-     of them for each tile the pointer crossed was 40 to 90ms a time, just
-     as the fan began to move. */
-  const litLayer = React.useRef<HTMLCanvasElement>(null);
-  React.useEffect(() => {
-    const el = litLayer.current;
-    const size = el?.clientWidth;
-    const ctx = el?.getContext("2d");
-    if (!el || !size || !ctx) return;
-    const dpr = window.devicePixelRatio || 1;
-    if (el.width !== Math.round(size * dpr)) {
-      el.width = el.height = Math.round(size * dpr);
-    }
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    ctx.clearRect(0, 0, size, size);
-    const p = focus ? placed.find((q) => q.slug === focus) : null;
-    if (!p) return;
-    const css = getComputedStyle(el);
-    const dark = !document.documentElement.matches('[data-theme="light"]');
-    const c = size / 2;
-    const r = c - 1;
-    ctx.fillStyle = css.getPropertyValue("--background").trim() || "#000";
-    ctx.globalAlpha = 0.9;
-    ctx.beginPath();
-    ctx.arc(c, c, r + 1, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.globalCompositeOperation = dark ? "lighter" : "source-over";
-    ctx.globalAlpha = 0.95;
-    dotsOf(ctx, p, c, r / RIM, Math.max(1.2, size / 260));
-  }, [focus, placed]);
-
   /* The pointer, in chroma units and held to the disc. */
   const at = (e: React.MouseEvent<HTMLDivElement>): [number, number] => {
     const box = e.currentTarget.getBoundingClientRect();
@@ -530,7 +495,6 @@ export function ScopePanel({
   const { h, s } = hsl(swatch ?? [128, 128, 128]);
   const pct = (v: number) => `${50 + (v / RIM) * 50}%`;
   const count = items.length;
-  const named = focus ? rows.find((r) => r.slug === focus)?.name : null;
 
   if (!ever) return null;
 
@@ -601,11 +565,6 @@ export function ScopePanel({
           }}
         >
           <canvas ref={canvas} className="size-full" />
-          <canvas
-            ref={litLayer}
-            aria-hidden
-            className="pointer-events-none absolute inset-0 size-full"
-          />
           {held ? (
             /* The held point: a ring in the colour it stands on. */
             <span
@@ -648,8 +607,6 @@ export function ScopePanel({
             </span>
           </span>
         </p>
-        {/* Whose dots are lit: the set under the pointer. */}
-        <p className="label -mt-2 min-h-[1lh] truncate">{named}</p>
 
         <form
           className="flex items-center gap-3"
@@ -706,7 +663,7 @@ export function ScopePanel({
           className="fixed right-0 z-30 overflow-y-auto overscroll-contain bg-background px-6 pb-10 pt-1 max-sm:hidden sm:px-10 transition-opacity duration-300 starting:opacity-0"
         >
           {data === null ? null : items.length ? (
-            <ColourGrid items={items} onOver={setOver} />
+            <ColourGrid items={items} />
           ) : (
             <p className="label text-muted-foreground">Nothing in this color yet</p>
           )}
@@ -725,15 +682,10 @@ export function ScopePanel({
  * ─────────────────────────────────────────────────────────────── */
 const ColourGrid = React.memo(function ColourGrid({
   items,
-  onOver,
 }: {
   items: Item[];
-  onOver: (slug: string | null) => void;
 }) {
   const grid = React.useRef<HTMLUListElement>(null);
-  /** The set whose fan is open. Julian: the rest step back so it is the
-      one in focus. */
-  const [focus, setFocus] = React.useState<string | null>(null);
   const was = React.useRef(new Map<string, { x: number; y: number }>());
   const order = items.map((i) => i.p.slug).join(" ");
   React.useLayoutEffect(() => {
@@ -742,6 +694,13 @@ const ColourGrid = React.memo(function ColourGrid({
     const still = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const now = new Map<string, { x: number; y: number }>();
     let fresh = 0;
+    /* Opening: the grid's first draw. Julian: a transition when colour is
+       clicked, and a graceful one. Each set waits for its photograph, so
+       nothing arrives as a bare plate of colour, then comes up out of a
+       soft blur, a beat after the one before; a set arriving for a new
+       hue afterwards rises in where it lands, as before. */
+    const opening = was.current.size === 0;
+    const t0 = performance.now();
     for (const li of Array.from(el.children) as HTMLElement[]) {
       const slug = li.dataset.slug ?? "";
       const at = { x: li.offsetLeft, y: li.offsetTop };
@@ -756,6 +715,30 @@ const ColourGrid = React.memo(function ColourGrid({
             [{ translate: `${dx}px ${dy}px` }, { translate: "0 0" }],
             { duration: 520, easing: SETTLE },
           );
+      } else if (opening) {
+        const beat = Math.min(fresh++, 14) * 70;
+        const img = li.querySelector("img");
+        li.style.opacity = "0";
+        const up = () => {
+          li.animate(
+            [
+              { opacity: 0, translate: "0 14px", filter: "blur(8px)" },
+              { opacity: 1, translate: "0 0", filter: "blur(0px)" },
+            ],
+            {
+              duration: 900,
+              easing: SETTLE,
+              delay: Math.max(0, beat - (performance.now() - t0)),
+              fill: "backwards",
+            },
+          );
+          li.style.removeProperty("opacity");
+        };
+        // A slow photograph still comes up, a second and a half on.
+        Promise.race([
+          img?.decode().catch(() => {}),
+          new Promise((r) => setTimeout(r, 1500)),
+        ]).then(up);
       } else {
         li.animate(
           [
@@ -780,261 +763,77 @@ const ColourGrid = React.memo(function ColourGrid({
       className="relative grid grid-cols-[repeat(auto-fill,minmax(18rem,1fr))] gap-x-4 gap-y-6"
     >
       {items.map((item) => (
-        <li
-          key={item.p.slug}
-          data-slug={item.p.slug}
-          onPointerEnter={() => onOver(item.p.slug)}
-          onPointerLeave={() => onOver(null)}
-          className="transition-opacity duration-300 ease-[var(--ease-out-strong)]"
-          style={{ opacity: focus && focus !== item.p.slug ? 0.2 : 1 }}
-        >
-          <ColourTile item={item} onFocus={setFocus} />
+        <li key={item.p.slug} data-slug={item.p.slug}>
+          <ColourTile item={item} />
         </li>
       ))}
     </ul>
   );
 });
 
-/** Between the photographs in the fan, and inside its panel. */
-const FAN_GAP = 8;
-
-const photoHref = (href: string, s: Shot) =>
-  `${href}#photo-${s.src.split("/").pop()?.replace(/\.jpg$/i, "")}`;
-
-/* A project, shown by its photograph nearest the colour. The rest of its
-   photographs in the colour sit under it as a stack, two edges peeking
-   out; the pointer resting on it fans them out beside it, over the grid,
-   and the other sets step back (`ColourGrid`), each photograph a way
-   straight to itself in the project (`cellFor` in strip.tsx). Julian asked
-   for a quick look at the rest rather than every photograph in the set at
-   once. Laid out the moment the pointer arrives, so the photographs are
-   already loading during the beat before it opens; in two rows as tall as
-   the tile, towards whichever side has the room, with what does not fit
-   counted on a last card that opens the project. Touch has no hover and
-   simply opens the project. */
-const ColourTile = React.memo(function ColourTile({
-  item,
-  onFocus,
-}: {
-  item: Item;
-  onFocus: (slug: string | null) => void;
-}) {
+/* A project, shown by its photograph nearest the colour, the rest of its
+   photographs in the colour under it as a stack, two edges peeking out. */
+const ColourTile = React.memo(function ColourTile({ item }: { item: Item }) {
   const { p, shot, stack, count, colours } = item;
-  const box = React.useRef<HTMLSpanElement>(null);
-  const wait = React.useRef(0);
-  const [open, setOpen] = React.useState(false);
-  const [laid, setFan] = React.useState<{
-    stack: Shot[];
-    left: boolean;
-    h: number;
-    rows: number[][];
-    more: number;
-  } | null>(null);
-  // Laid out for another colour's stack is not laid out for this one.
-  const fan = laid?.stack === stack ? laid : null;
-
-  const enter = () => {
-    if (!stack.length || !window.matchMedia("(hover: hover)").matches) return;
-    window.clearTimeout(wait.current);
-    {
-      const el = box.current;
-      const section = el?.closest("section");
-      if (!el || !section) return;
-      const r = el.getBoundingClientRect();
-      const s = section.getBoundingClientRect();
-      const cs = getComputedStyle(section);
-      // Two rows and the panel's padding come to the cover's height.
-      const h = (r.height - FAN_GAP * 3) / 2;
-      const right = s.right - parseFloat(cs.paddingRight) - r.right;
-      const leftRoom = r.left - s.left - parseFloat(cs.paddingLeft);
-      const left = leftRoom > right;
-      const room = Math.max(right, leftRoom) - 16 - FAN_GAP * 2;
-      const all = stack.map((f) => (h * f.width) / f.height);
-      const card = h * 0.45;
-      // In order, row by row; the last row keeps room for the count.
-      const rows: number[][] = [[], []];
-      let i = 0;
-      for (const [n, row] of rows.entries()) {
-        let used = 0;
-        while (i < all.length) {
-          const reserve = n === 1 && i < all.length - 1 ? FAN_GAP + card : 0;
-          if (used + all[i] + reserve > room) break;
-          row.push(all[i]);
-          used += all[i] + FAN_GAP;
-          i++;
-        }
-      }
-      setFan({ stack, left, h, rows, more: all.length - i });
-    }
-    // A beat, so a pointer crossing the grid does not open every stack.
-    wait.current = window.setTimeout(() => {
-      setOpen(true);
-      onFocus(p.slug);
-    }, 90);
-  };
-  const leave = () => {
-    window.clearTimeout(wait.current);
-    setOpen(false);
-    onFocus(null);
-  };
-  React.useEffect(() => () => window.clearTimeout(wait.current), []);
-
-  const still =
-    typeof window !== "undefined" &&
-    window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-
+  /* Julian: no hover on the colour page. The fan of the set's other
+     photographs, the rest of the grid stepping back and the cover's zoom
+     all came with the pointer; the tile is now the cover and its name. */
   return (
-    <div
-      className="relative"
-      style={{ zIndex: open ? 30 : undefined }}
-      onPointerEnter={enter}
-      onPointerLeave={leave}
+    <Link
+      href={p.href}
+      prefetch={false}
+      data-ring="View project"
+      className="block"
     >
-      <Link
-        href={p.href}
-        prefetch={false}
-        data-ring="View project"
-        className="group block"
-      >
-        <span className="relative isolate block">
-          {/* The stack under the cover: two edges, in the set's own colours. */}
-          {stack.slice(0, 2).map((f, i) => (
-            <span
-              key={f.src}
-              aria-hidden
-              className="absolute inset-0 transition-[opacity,translate] duration-300 ease-[var(--ease-out-strong)]"
-              style={{
-                backgroundColor: f.color,
-                translate: open ? "0 0" : `${(i + 1) * 6}px 0`,
-                scale: `1 ${1 - (i + 1) * 0.04}`,
-                opacity: open ? 0 : 1 - i * 0.35,
-                zIndex: -1 - i,
-              }}
-            />
-          ))}
+      <span className="relative isolate block">
+        {/* The stack under the cover: two edges, in the set's own colours. */}
+        {stack.slice(0, 2).map((f, i) => (
           <span
-            ref={box}
-            className="relative block aspect-[4/5] overflow-hidden"
-            style={{ backgroundColor: shot.color }}
-          >
-            <Image
-              src={shot.src}
-              alt={shot.alt}
-              fill
-              sizes="(min-width: 96rem) 24vw, (min-width: 64rem) 30vw, 60vw"
-              data-fade=""
-              className="object-cover transition-[scale] duration-500 ease-[var(--ease-out-strong)] hoverable:group-hover:scale-[1.028]"
-            />
-            {/* The set's dominant colours, on a white plate at the top left. */}
-            {colours.length ? (
-              <span
-                aria-hidden
-                className="absolute left-0 top-0 z-10 flex gap-1 bg-white p-[3px]"
-              >
-                {colours.map((c, i) => (
-                  <span key={i} className="size-3" style={{ backgroundColor: c }} />
-                ))}
-              </span>
-            ) : null}
-          </span>
-        </span>
-        <span className="mt-2 flex items-baseline justify-between gap-3">
-          <span className="label truncate transition-colors group-hover:text-muted-foreground">
-            {p.name}
-          </span>
-          {count ? (
-            <span className="label shrink-0 tabular-nums text-muted-foreground">
-              {count}
+            key={f.src}
+            aria-hidden
+            className="absolute inset-0"
+            style={{
+              backgroundColor: f.color,
+              translate: `${(i + 1) * 6}px 0`,
+              scale: `1 ${1 - (i + 1) * 0.04}`,
+              opacity: 1 - i * 0.35,
+              zIndex: -1 - i,
+            }}
+          />
+        ))}
+        <span
+          className="relative block aspect-[4/5] overflow-hidden"
+          style={{ backgroundColor: shot.color }}
+        >
+          <Image
+            src={shot.src}
+            alt={shot.alt}
+            fill
+            sizes="(min-width: 96rem) 24vw, (min-width: 64rem) 30vw, 60vw"
+            data-fade=""
+            className="object-cover"
+          />
+          {/* The set's dominant colours, on a white plate at the top left. */}
+          {colours.length ? (
+            <span
+              aria-hidden
+              className="absolute left-0 top-0 z-10 flex gap-1 bg-white p-[3px]"
+            >
+              {colours.map((c, i) => (
+                <span key={i} className="size-3" style={{ backgroundColor: c }} />
+              ))}
             </span>
           ) : null}
         </span>
-      </Link>
-
-      {fan ? (
-        /* The padding on the cover's side bridges the gap between the
-           tiles, so the pointer can cross to the fan without leaving. */
-        <div
-          data-fan
-          className="absolute"
-          style={{
-            top: 0,
-            [fan.left ? "right" : "left"]: "100%",
-            [fan.left ? "paddingRight" : "paddingLeft"]: 16,
-            pointerEvents: open ? "auto" : "none",
-          }}
-        >
-          <div
-            className={cn(
-              "flex flex-col gap-2 bg-background p-2 shadow-[0_12px_32px_rgb(0_0_0/0.22)]",
-              fan.left ? "items-end" : "items-start",
-              !still && "transition-[opacity,scale,translate] ease-[var(--ease-out-strong)]",
-            )}
-            /* Opacity and transform only, from the tile's side, so the
-               compositor carries it: the clip that used to wipe it open
-               was repainted on every frame. */
-            style={{
-              transformOrigin: fan.left ? "right center" : "left center",
-              scale: open ? "1" : "0.96",
-              translate: open ? "0 0" : `${fan.left ? 12 : -12}px 0`,
-              opacity: open ? 1 : 0,
-              transitionDuration: open ? "320ms" : "160ms",
-            }}
-          >
-            {fan.rows.map((row, r) =>
-              row.length || (r === 1 && fan.more) ? (
-                <div key={r} className={cn("flex gap-2", fan.left && "flex-row-reverse")}>
-                  {row.map((w, n) => {
-                    // Its place in the stack, for the photograph and the stagger.
-                    const i = r === 0 ? n : fan.rows[0].length + n;
-                    const f = stack[i];
-                    return (
-                      <Link
-                        key={f.src}
-                        href={photoHref(p.href, f)}
-                        prefetch={false}
-                        tabIndex={open ? undefined : -1}
-                        data-ring="View photo"
-                        className="relative block shrink-0 overflow-hidden"
-                        style={{
-                          width: w,
-                          height: fan.h,
-                          backgroundColor: f.color,
-                          translate: open ? "0 0" : `${fan.left ? 12 : -12}px 0`,
-                          opacity: open ? 1 : 0,
-                          transition: still
-                            ? undefined
-                            : `translate 340ms ${SETTLE} ${open ? i * 18 : 0}ms, opacity 240ms ${SETTLE} ${open ? i * 18 : 0}ms`,
-                        }}
-                      >
-                        <Image
-                          src={f.src}
-                          alt={f.alt}
-                          fill
-                          sizes={`${Math.ceil(w)}px`}
-                          data-fade=""
-                          className="object-cover"
-                        />
-                      </Link>
-                    );
-                  })}
-                  {r === 1 && fan.more ? (
-                    <Link
-                      href={p.href}
-                      prefetch={false}
-                      tabIndex={open ? undefined : -1}
-                      data-ring="View project"
-                      className="label flex shrink-0 items-center justify-center bg-foreground/[0.06] text-muted-foreground"
-                      style={{ width: fan.h * 0.45, height: fan.h }}
-                    >
-                      +{fan.more}
-                    </Link>
-                  ) : null}
-                </div>
-              ) : null,
-            )}
-          </div>
-        </div>
-      ) : null}
-    </div>
+      </span>
+      <span className="mt-2 flex items-baseline justify-between gap-3">
+        <span className="label truncate">{p.name}</span>
+        {count ? (
+          <span className="label shrink-0 tabular-nums text-muted-foreground">
+            {count}
+          </span>
+        ) : null}
+      </span>
+    </Link>
   );
 });

@@ -24,7 +24,19 @@ const clearNav = () => {
   delete root.dataset.nav;
   delete root.dataset.navBar;
   delete root.dataset.navDrawer;
+  delete root.dataset.navSide;
 };
+
+/* The bar's order, left to right, the wordmark first. A press in the bar
+   travels along it: to the right of the page you are on, the pages move
+   right to left, and back the other way. Julian: a transition for each
+   page from the navbar. A project or a filter counts as its section. */
+const SECTIONS = ["/", "/work", "/sessions", "/about", "/contact"];
+const sectionOf = (path: string) =>
+  SECTIONS.reduce(
+    (found, s, i) => (path === s || (s !== "/" && path.startsWith(`${s}/`)) ? i : found),
+    -1,
+  );
 
 export function PageTransition({ children }: { children: React.ReactNode }) {
   /* Over when the trip lands, not on a clock from the press. The page's
@@ -106,10 +118,17 @@ export function PageTransition({ children }: { children: React.ReactNode }) {
         a.dataset.back !== undefined ||
         a.textContent?.trimStart().startsWith("←") ||
         a.pathname === "/";
-      set(
-        out ? "out" : "in",
-        a.closest(".drawer") ? "drawer" : a.closest("header") ? "bar" : "page",
-      );
+      const from = a.closest(".drawer")
+        ? "drawer"
+        : a.closest("header")
+          ? "bar"
+          : "page";
+      set(out ? "out" : "in", from);
+      const here = sectionOf(location.pathname);
+      const there = sectionOf(a.pathname);
+      if (from !== "page" && here >= 0 && there >= 0 && here !== there)
+        root.dataset.navSide = there > here ? "right" : "left";
+      else delete root.dataset.navSide;
     };
     // The photo viewer keeps an entry in the history so the back button
     // closes it (`lib/zoom.ts`); that pop is not a page leaving.

@@ -99,6 +99,7 @@ export function CoverCell({
            the ruler can name the one under the pointer rather than naming
            the chapter eight times over. */
         data-name={row.name}
+        data-vt={row.slug}
         data-hash={hash}
         data-ring="View project"
         data-mark={mark}
