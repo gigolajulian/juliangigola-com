@@ -48,6 +48,11 @@ const DriftWall = ({
   dim = 0.55,
   grayscale = false,
   overlayColor = '#060010',
+  // The site's additions: load the photographs at once rather than as they
+  // near the screen (the intro, where they are the whole point), and say
+  // when the wall has come up.
+  eager = false,
+  onShown = /** @type {(() => void) | undefined} */ (undefined),
   className = '',
   style = undefined
 }) => {
@@ -72,12 +77,17 @@ const DriftWall = ({
      Julian: make sure all the photos are loaded before showing it. Capped,
      so a slow connection still gets the wall rather than nothing. */
   const [shown, setShown] = useState(false);
+  const onShownRef = useRef(onShown);
+  useEffect(() => {
+    onShownRef.current = onShown;
+  });
   useEffect(() => {
     let done = false;
     const show = () => {
       if (!done) {
         done = true;
         setShown(true);
+        onShownRef.current?.();
       }
     };
     const cap = setTimeout(show, 5000);
@@ -298,7 +308,7 @@ const DriftWall = ({
     const inner = (
       <span className="drift-wall__inner">
         {/* eslint-disable-next-line @next/next/no-img-element -- the site passes loader-sized URLs */}
-        <img src={item.image} alt={item.title ?? ''} loading="lazy" decoding="async" draggable={false} onLoad={e => e.currentTarget.classList.add('is-loaded')} />
+        <img src={item.image} alt={item.title ?? ''} loading={eager ? 'eager' : 'lazy'} decoding="async" draggable={false} onLoad={e => e.currentTarget.classList.add('is-loaded')} />
         <span className="drift-wall__overlay" aria-hidden="true" />
       </span>
     );

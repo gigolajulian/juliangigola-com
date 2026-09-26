@@ -53,11 +53,22 @@ export function Intro({ tiles }: { tiles: WallTile[] }) {
      every page load for a layer that is not showing would be waste. Its
      tiles here are not links (no `href`): the layer is a curtain, and a
      press on it must not start a page change under it. */
-  const [wall, setWall] = React.useState(false);
+  /* How many photographs the wall is given: as many as the screen shows,
+     not the whole archive. `DriftWall` fills the width with a column per
+     tile width and a half again for the swing of the plane, and splits
+     the pictures across its columns when each gets four or more; four a
+     column is the least that keeps every column its own. An iPad is five
+     columns, twenty pictures; a wide desktop eleven. Julian: it does not
+     need to load as many photos as a large screen. Nought is no wall. */
+  const [wall, setWall] = React.useState(0);
   const still = React.useMemo(
-    () => tiles.map(({ image, title }) => ({ image, title })),
-    [tiles],
+    () => tiles.slice(0, wall).map(({ image, title }) => ({ image, title })),
+    [tiles, wall],
   );
+  /* The wall says when its photographs in view are up, and the loader
+     counts that among what "ready" means, so a slow connection gets the
+     wall and not a bare counter. */
+  const wallUp = React.useRef<() => void>(() => {});
 
   React.useEffect(() => {
     const root = document.documentElement;
@@ -71,7 +82,10 @@ export function Intro({ tiles }: { tiles: WallTile[] }) {
        that is not lazy, and the window's own load. The line fills on a
        steady curve over `FILL` and never runs ahead of those: a quick page
        gets the smooth fill, a slow one waits at what has really come. */
-    const tasks: Promise<unknown>[] = [document.fonts.ready];
+    const tasks: Promise<unknown>[] = [
+      document.fonts.ready,
+      new Promise<void>((r) => (wallUp.current = r)),
+    ];
     if (document.readyState !== "complete") {
       tasks.push(
         new Promise((r) => window.addEventListener("load", r, { once: true })),
@@ -96,7 +110,8 @@ export function Intro({ tiles }: { tiles: WallTile[] }) {
     const step = (now: number) => {
       if (!wallOn) {
         wallOn = true;
-        setWall(true);
+        const columns = Math.max(5, Math.ceil((innerWidth * 1.5) / (300 + 28)));
+        setWall(columns * 4);
       }
       // A frame's time can be a touch before `t0`: never below nought.
       const since = Math.max(0, now - t0);
@@ -126,7 +141,7 @@ export function Intro({ tiles }: { tiles: WallTile[] }) {
         root.dataset.intro = "lift";
         setTimeout(() => {
           lift();
-          setWall(false);
+          setWall(0);
         }, LIFT);
       }, HIDE);
     };
@@ -153,9 +168,11 @@ export function Intro({ tiles }: { tiles: WallTile[] }) {
       <style>{"#jg-intro{display:none}"}</style>
       <div id="jg-intro" ref={box} aria-hidden="true">
         <div ref={mark} className="jg-intro-mark">
-          {wall && (
+          {wall > 0 && (
             <DriftWall
               items={still}
+              eager
+              onShown={() => wallUp.current()}
               columns="fill"
               tileWidth={300}
               tileHeight={400}
