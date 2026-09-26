@@ -66,11 +66,11 @@ export default function NotFound() {
             turn={-14}
             perspective={1200}
             depth={120}
-            speed={30}
+            speed={24}
             direction="up"
             variance={0.45}
             parallax={0.6}
-            lift={64}
+            lift={16}
             fade={0.6}
             dim={0.4}
             overlayColor="var(--background)"

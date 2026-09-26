@@ -182,11 +182,11 @@ export function Intro({ tiles }: { tiles: WallTile[] }) {
               turn={-14}
               perspective={1200}
               depth={120}
-              speed={42}
+              speed={34}
               direction="up"
               variance={0.45}
               parallax={0.6}
-              lift={64}
+              lift={16}
               fade={0.6}
               dim={0.55}
               overlayColor="#0b0a09"
