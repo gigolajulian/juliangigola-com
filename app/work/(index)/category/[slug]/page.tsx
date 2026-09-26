@@ -43,7 +43,6 @@ import { COVER_RELEASES } from "@/lib/cover-art-data";
  * its first to the one before.
  * ─────────────────────────────────────────────────────────────── */
 
-
 /**
  * Only categories that have something to show.
  *
@@ -223,6 +222,9 @@ export default async function CategoryPage(
           next={next}
           prev={prev}
           map={archive}
+          // Dealt at the ends: the next discipline comes in as a card over
+          // this one, and the one before comes back from behind.
+          deck="leads"
           className="mt-4 flex-1"
         >
           <TitleCell title={name} hash={slug}>
@@ -249,7 +251,10 @@ export default async function CategoryPage(
         next={next}
         prev={prev}
         map={archive}
-          className="mt-4 flex-1"
+        // Dealt at the ends: the next discipline comes in as a card over
+        // this one, and the one before comes back from behind.
+        deck="leads"
+        className="mt-4 flex-1"
       >
         {[
           <TitleCell key="title" title={name} hash={slug}>

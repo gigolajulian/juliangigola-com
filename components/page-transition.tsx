@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { ViewTransition } from "react";
+import { usePathname } from "next/navigation";
 
 /* ── one page becomes the next by zooming ─────────────────────────
  * Julian asked for it: opening a page should read as zooming into it, and
@@ -16,7 +17,36 @@ import { ViewTransition } from "react";
  * back button a step out. `globals.css` reads `data-nav`. Removed once the
  * trip is over, so a theme flip or a filter change never inherits it.
  * ─────────────────────────────────────────────────────────────── */
+const clearNav = () => {
+  const root = document.documentElement;
+  // A strip dealt across pages clears its own (`leave` in `strip.tsx`).
+  if (root.dataset.nav === "deal") return;
+  delete root.dataset.nav;
+  delete root.dataset.navBar;
+  delete root.dataset.navDrawer;
+};
+
 export function PageTransition({ children }: { children: React.ReactNode }) {
+  /* Over when the trip lands, not on a clock from the press. The page's
+     animations are read off the root while they run, and a page slower
+     than the clock (a cold Worker, a route compiling on dev) lost its
+     way halfway and fell back to the browser's own crossfade. */
+  const path = usePathname();
+  React.useLayoutEffect(() => {
+    if (document.documentElement.dataset.nav === undefined) return;
+    const trip = (
+      document as Document & {
+        activeViewTransition?: { finished: Promise<void> } | null;
+      }
+    ).activeViewTransition;
+    if (trip) {
+      trip.finished.finally(clearNav);
+      return;
+    }
+    const t = window.setTimeout(clearNav, 1400);
+    return () => window.clearTimeout(t);
+  }, [path]);
+
   React.useEffect(() => {
     const root = document.documentElement;
     let clear = 0;
@@ -46,12 +76,9 @@ export function PageTransition({ children }: { children: React.ReactNode }) {
         if (from === "drawer") root.dataset.navDrawer = "";
         else delete root.dataset.navDrawer;
       }
+      // Only for a press that never lands; the arrival clears it above.
       window.clearTimeout(clear);
-      clear = window.setTimeout(() => {
-        delete root.dataset.nav;
-        delete root.dataset.navBar;
-        delete root.dataset.navDrawer;
-      }, 1400);
+      clear = window.setTimeout(clearNav, 10000);
     };
     const onClick = (e: MouseEvent) => {
       if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey)

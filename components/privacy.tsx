@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { LegalColumn, Clause } from "@/components/legal";
 
 const EMAIL = "hello@juliangigola.com";
@@ -94,9 +93,9 @@ export function PrivacyColumn() {
           <li>
             <strong>To establish, exercise or defend legal claims</strong>,
             including enforcing the{" "}
-            <Link href="#terms" className="underline underline-offset-4">
+            <a href="#terms" className="underline underline-offset-4">
               Terms of Service
-            </Link>
+            </a>
             . Basis: legitimate interest.
           </li>
         </ul>

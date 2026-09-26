@@ -45,6 +45,9 @@ export function WorkStrip({
         // Twelve disciplines and eighty four covers: the one ruler on the
         // site that is a table of contents rather than a row of stops.
         chapters
+        // Each discipline comes in as a card over the last screen of the
+        // one before (`lib/deck.ts`).
+        deck="chapters"
         className={className}
       >
         {children}

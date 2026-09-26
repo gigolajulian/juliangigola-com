@@ -55,6 +55,10 @@ export default function SessionsPage() {
       <Strip
         label={`Sessions: ${SESSION_TYPES.length} session types, left and right`}
         next={CONTACT}
+        // Julian: the ScrollStack, made to make sense sideways. Each
+        // session is a card pinning at the left while the next one is
+        // dealt over it (`lib/deck.ts`).
+        deck="pile"
         className="mt-4 flex-1"
       >
         {[
@@ -65,141 +69,148 @@ export default function SessionsPage() {
             </p>
           </TitleCell>,
 
-          ...SESSION_TYPES.flatMap((session, i) => {
+          ...SESSION_TYPES.map((session, i) => {
             const sample =
               (session.sample &&
                 PROJECTS.find((p) => p.slug === session.sample)) ||
               projectsIn(session.slug)[0];
             const cover = sample ? coverOf(sample) : null;
 
-            return [
-              cover && sample ? (
-                <Link
-                  key={`${session.slug}-cover`}
-                  prefetch={false}
-                  href={`/work/${sample.slug}`}
-                  /* No tick. A session is one section of this page and the
+            /* One card for the pair, photograph and words, so the deck
+               deals a session and not half of one. It carries the tick
+               and the name for the pair, and the page's ground so the
+               card under it is covered and not seen through. */
+            return (
+              <div
+                key={session.slug}
+                data-deck
+                data-tick
+                data-label={session.name}
+                data-hash={session.slug}
+                className="flex w-full shrink-0 flex-col gap-3 bg-background sm:h-full sm:w-auto sm:flex-row sm:gap-4"
+              >
+                {cover && sample ? (
+                  <Link
+                    key={`${session.slug}-cover`}
+                    prefetch={false}
+                    href={`/work/${sample.slug}`}
+                    /* No tick. A session is one section of this page and the
                      photograph is the front of it, not a stop of its own:
                      ticked, the ruler drew four sessions as eight, which
                      is Julian's double reading. The words carry the tick
                      and the name for the pair. */
-                  /* Julian: `View more`, not `View project`. The frame is
+                    /* Julian: `View more`, not `View project`. The frame is
                      a sample of the session and not the project it happens
                      to come from, so the word points at more of this kind
                      of work rather than naming a project the visitor never
                      asked about. */
-                  data-ring="View more"
-                  aria-label={`${session.name}: see ${sample.name}`}
-                  /* One ratio for all four, not each frame's own: a row of
+                    data-ring="View more"
+                    aria-label={`${session.name}: see ${sample.name}`}
+                    /* One ratio for all four, not each frame's own: a row of
                      photographs that each set their own height is not a row.
                      4:5 upright, which is what most of the archive is shot
                      at, so the crop is slight. */
-                  className="group strip-cell press relative block aspect-[4/5] w-full shrink-0 overflow-hidden active:scale-[0.995] sm:h-full sm:w-auto"
-                  style={
-                    {
-                      backgroundColor: cover.color,
-                      "--i": i,
-                    } as React.CSSProperties
-                  }
-                >
-                  <Image
-                    src={cover.src}
-                    alt={cover.alt || sample.name}
-                    fill
-                    // 4:5 and as tall as the strip: see `cover-cell.tsx`.
-                    sizes="(min-width: 640px) and (min-resolution: 2.5dppx) calc((100vh - 10rem) * 0.534), (min-width: 640px) calc((100vh - 10rem) * 0.8), 100vw"
-                    // The first is the one on screen when the page opens.
-                    priority={i === 0}
-                    loading={i === 0 ? undefined : "lazy"}
-                    data-fade={i === 0 ? undefined : ""}
-                    className="strip-frame object-cover object-[50%_25%]"
-                  />
-                </Link>
-              ) : null,
+                    className="group strip-cell press relative block aspect-[4/5] w-full shrink-0 overflow-hidden active:scale-[0.995] sm:h-full sm:w-auto"
+                    style={
+                      {
+                        backgroundColor: cover.color,
+                        "--i": i,
+                      } as React.CSSProperties
+                    }
+                  >
+                    <Image
+                      src={cover.src}
+                      alt={cover.alt || sample.name}
+                      fill
+                      // 4:5 and as tall as the strip: see `cover-cell.tsx`.
+                      sizes="(min-width: 640px) and (min-resolution: 2.5dppx) calc((100vh - 10rem) * 0.534), (min-width: 640px) calc((100vh - 10rem) * 0.8), 100vw"
+                      // The first is the one on screen when the page opens.
+                      priority={i === 0}
+                      loading={i === 0 ? undefined : "lazy"}
+                      data-fade={i === 0 ? undefined : ""}
+                      className="strip-frame object-cover object-[50%_25%]"
+                    />
+                  </Link>
+                ) : null}
 
-              <div
-                key={session.slug}
-                data-tick
-                data-label={session.name}
-                data-hash={session.slug}
-                className="flex w-full shrink-0 flex-col justify-center gap-8 py-8 short:gap-5 sm:h-full sm:w-[min(22rem,60vw)] sm:py-0"
-              >
-                {/* The words take the height they need and scroll inside
+                <div className="flex w-full shrink-0 flex-col justify-center gap-8 py-8 short:gap-5 sm:h-full sm:w-[min(22rem,60vw)] sm:py-0">
+                  {/* The words take the height they need and scroll inside
                     themselves when the window is shorter than they are,
                     rather than pushing the button for booking off the
                     bottom of a laptop screen. */}
-                <div
-                  data-scroll
-                  className="flex min-h-0 flex-col gap-8 overflow-y-auto overscroll-contain pr-2 short:gap-5"
-                >
-                  <h2 className="font-display text-2xl uppercase leading-none tracking-[0] short:sm:text-2xl sm:text-3xl">
-                    {session.name}
-                  </h2>
+                  <div
+                    data-scroll
+                    className="flex min-h-0 flex-col gap-8 overflow-y-auto overscroll-contain pr-2 short:gap-5"
+                  >
+                    <h2 className="font-display text-2xl uppercase leading-none tracking-[0] short:sm:text-2xl sm:text-3xl">
+                      {session.name}
+                    </h2>
 
-                  <dl className="flex flex-wrap gap-x-10 gap-y-4 border-t border-border pt-6 short:pt-4">
+                    <dl className="flex flex-wrap gap-x-10 gap-y-4 border-t border-border pt-6 short:pt-4">
+                      <div>
+                        <dt className="label text-muted-foreground">Rate</dt>
+                        <dd className="mt-1.5 text-sm">
+                          {formatPrice(session.from)}
+                        </dd>
+                      </div>
+                      <div>
+                        <dt className="label text-muted-foreground">
+                          Turnaround
+                        </dt>
+                        <dd className="mt-1.5 text-sm">{session.turnaround}</dd>
+                      </div>
+                    </dl>
+
+                    <p className="text-sm leading-relaxed text-muted-foreground">
+                      {session.blurb}
+                    </p>
+
                     <div>
-                      <dt className="label text-muted-foreground">Rate</dt>
-                      <dd className="mt-1.5 text-sm">
-                        {formatPrice(session.from)}
-                      </dd>
+                      <h3 className="label text-muted-foreground">Includes</h3>
+                      <ul className="mt-4 flex flex-col gap-3 short:gap-2">
+                        {session.includes.map((item) => (
+                          <li
+                            key={item}
+                            className="text-sm text-muted-foreground"
+                          >
+                            {item}
+                          </li>
+                        ))}
+                      </ul>
                     </div>
-                    <div>
-                      <dt className="label text-muted-foreground">
-                        Turnaround
-                      </dt>
-                      <dd className="mt-1.5 text-sm">{session.turnaround}</dd>
-                    </div>
-                  </dl>
-
-                  <p className="text-sm leading-relaxed text-muted-foreground">
-                    {session.blurb}
-                  </p>
-
-                  <div>
-                    <h3 className="label text-muted-foreground">Includes</h3>
-                    <ul className="mt-4 flex flex-col gap-3 short:gap-2">
-                      {session.includes.map((item) => (
-                        <li
-                          key={item}
-                          className="text-sm text-muted-foreground"
-                        >
-                          {item}
-                        </li>
-                      ))}
-                    </ul>
                   </div>
-                </div>
 
-                {/* Once a booking calendar exists, a session client can take
+                  {/* Once a booking calendar exists, a session client can take
                     a slot without waiting on a reply — which is the whole
                     point for this audience. Until then the enquiry form is
                     the path. */}
-                {/* Julian: to the right. The cell is a narrow column of
+                  {/* Julian: to the right. The cell is a narrow column of
                     label and value read down the left; the one thing to
                     press is put at the other end of the rule under it, so
                     it is not a seventh line of the list. */}
-                <div className="flex flex-wrap items-center justify-end gap-3 border-t border-border pt-6">
-                  {BOOKING_URL ? (
-                    <a
-                      href={BOOKING_URL}
-                      target="_blank"
-                      rel="noreferrer"
+                  <div className="flex flex-wrap items-center justify-end gap-3 border-t border-border pt-6">
+                    {BOOKING_URL ? (
+                      <a
+                        href={BOOKING_URL}
+                        target="_blank"
+                        rel="noreferrer"
+                        data-ring="Book"
+                        className="label action px-5 py-3 press active:scale-[0.97]"
+                      >
+                        Check availability
+                      </a>
+                    ) : null}
+                    <Link
+                      href={`/contact?type=session&session=${session.slug}`}
                       data-ring="Book"
-                      className="label action px-5 py-3 press active:scale-[0.97]"
+                      className="label action-quiet inline-flex items-center gap-2 px-5 py-3 press active:scale-[0.97]"
                     >
-                      Check availability
-                    </a>
-                  ) : null}
-                  <Link
-                    href={`/contact?type=session&session=${session.slug}`}
-                    data-ring="Book"
-                    className="label action-quiet inline-flex items-center gap-2 px-5 py-3 press active:scale-[0.97]"
-                  >
-                    Inquire
-                  </Link>
+                      Inquire
+                    </Link>
+                  </div>
                 </div>
-              </div>,
-            ];
+              </div>
+            );
           }),
 
           <Testimonials key="testimonials" cells />,

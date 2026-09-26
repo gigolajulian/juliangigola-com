@@ -34,6 +34,8 @@ export function GroupCell({
   return (
     <div
       data-tick
+      // Opens a chapter of the deck (`lib/deck.ts`).
+      data-deck
       data-ring=""
       data-label={name}
       data-name={name}

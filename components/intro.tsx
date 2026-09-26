@@ -33,8 +33,8 @@ import type { WallTile } from "@/lib/work";
 const CAP = 6000; // the longest anybody waits, whatever is still loading
 const SHOW = 600; // the wall fading in
 const FILL = 3500; // the loader's steady fill, when the page is quicker
-const HIDE = 300; // the wall fading out, before the page starts
-const LIFT = 400; // the ground fading while the page arrives
+const HIDE = 150; // the loader going, a beat before the wall does
+const LIFT = 900; // the wall dissolving into the page as it arrives
 
 const easeOut = (t: number) => 1 - Math.pow(1 - t, 3);
 

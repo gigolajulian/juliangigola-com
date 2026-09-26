@@ -422,6 +422,9 @@ export function ProjectStrip({
         // default stacks it down the page under 40rem.
         onOpen={lightbox.show}
         counter={counter}
+        // Dealt at the ends: the next project comes in as a card over
+        // this one, and the one before comes back from behind.
+        deck="leads"
         className={className}
       >
         {cellNodes}

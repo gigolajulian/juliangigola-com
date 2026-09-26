@@ -1,5 +1,6 @@
 "use client";
 
+import { runDeck, type Deck } from "@/lib/deck";
 import * as React from "react";
 import { useRouter } from "next/navigation";
 import { cn, rubberband } from "@/lib/utils";
@@ -75,7 +76,16 @@ export const markFilter = (shift = 0) => {
   filteredAt = Date.now();
   filterShift = Math.max(-1, Math.min(1, shift));
 };
-const FILTER_MS = 1200;
+// Read once by the strip that mounts next, so it can wait out a slow page.
+const FILTER_MS = 10000;
+/** When a strip last led on as a card (`deck="leads"`): the strip that
+    mounts next is the card, and names itself for the trip. Generous,
+    because the next page can take seconds to come in (a cold Worker, a
+    route compiling on dev) and the deal has to survive the wait. It used
+    to be a second and a half, and a slow page lost the deal: the strip
+    froze and the next one popped in. Julian saw it often. */
+let dealtAt = 0;
+const DEAL_MS = 10000;
 
 /** When the browser last went back or forward. A strip mounting just
     after one puts the visitor back where they were on this path instead
@@ -240,11 +250,19 @@ const useDesk = () =>
 export type StripViewMode = "strip" | "grid";
 export const StripView = React.createContext<StripViewMode>("strip");
 
+/** Where a cell sits in layout. A cell dealt as a deck (`lib/deck.ts`) is
+    `position: sticky`, and Chrome folds the sticky offset into a stuck
+    cell's `offsetLeft`, so a pinned cover read as sitting exactly where
+    the screen over it did and the paging never moved on. The deck stamps
+    the layout position on the cell; the rest read `offsetLeft`. */
+const leftOf = (cell: HTMLElement) =>
+  cell.dataset.at !== undefined ? Number(cell.dataset.at) : cell.offsetLeft;
+
 /** The scroll position that puts cell `i` in the middle of the window. */
 const centreOf = (el: HTMLElement, i: number) => {
   const cell = el.children[i] as HTMLElement | undefined;
   if (!cell) return null;
-  return cell.offsetLeft - (el.clientWidth - cell.offsetWidth) / 2;
+  return leftOf(cell) - (el.clientWidth - cell.offsetWidth) / 2;
 };
 
 /**
@@ -290,6 +308,7 @@ export function Strip({
   map,
   bleed = false,
   arrive,
+  deck,
   ref,
   className,
 }: {
@@ -318,6 +337,10 @@ export function Strip({
   bleed?: boolean;
   /** No arrival slide. The homepage's cover must not move in. */
   arrive?: "none";
+  /** Deal the cells as a deck, each pinning at the left while the next
+      slides over it (`lib/deck.ts`). "pile" for the cells marked
+      `data-deck`, "screens" for every cell. Wide screens only. */
+  deck?: Deck;
   /** Run the ruler in chapters rather than in ticks: one segment per
       section, all of them the same width, and the one under the pointer
       opens into the cells it holds. The work index only, where eighty four
@@ -341,6 +364,11 @@ export function Strip({
   className?: string;
 }) {
   const scroller = React.useRef<HTMLDivElement>(null);
+  React.useEffect(() => {
+    const el = scroller.current;
+    if (!deck || !el) return;
+    return runDeck(el, deck);
+  }, [deck]);
   React.useImperativeHandle(ref, () => scroller.current!, []);
   const [at, setAt] = React.useState(0);
   /** Which tick the pointer is over, as a place in `ticks`, or null. */
@@ -471,7 +499,9 @@ export function Strip({
     const el = scroller.current;
     if (!el) return;
     const openCell = (e: MouseEvent) => {
-      const b = (e.target as Element | null)?.closest?.<HTMLElement>("[data-n]");
+      const b = (e.target as Element | null)?.closest?.<HTMLElement>(
+        "[data-n]",
+      );
       if (b && el.contains(b)) open.current?.(Number(b.dataset.n));
     };
     el.addEventListener("click", openCell);
@@ -488,9 +518,35 @@ export function Strip({
     cameBack = false;
     const filtered = Date.now() - filteredAt < FILTER_MS;
     filteredAt = 0;
+    const dealt = Date.now() - dealtAt < DEAL_MS;
+    dealtAt = 0;
     const popped = Date.now() - poppedAt < POP_MS;
     const el = scroller.current;
     if (!el || !live) return;
+    /* Dealt in as a card over the strip before (`deal` in `globals.css`):
+       the trip is the arrival, so nothing in here moves on its own. The
+       name pairs this strip with the one leaving, for the trip only. */
+    if (dealt) {
+      el.dataset.arrive = "dealt";
+      el.style.setProperty("view-transition-name", "strip");
+      /* Undone when the trip lands, not on a clock: the deal's animations
+         are read off the root while they run, so taking the way off early
+         stops them where they stand. */
+      const root = document.documentElement;
+      const done = () => {
+        el.style.removeProperty("view-transition-name");
+        if (root.dataset.nav !== "deal") return;
+        delete root.dataset.nav;
+        delete root.dataset.navWay;
+      };
+      const trip = (
+        document as Document & {
+          activeViewTransition?: ViewTransition | null;
+        }
+      ).activeViewTransition;
+      if (trip) trip.finished.finally(done);
+      else window.setTimeout(done, 1000);
+    }
     // The filter changed under a row that stayed: a fade, not an arrival.
     if (filtered) {
       el.dataset.arrive = "fade";
@@ -510,7 +566,9 @@ export function Strip({
       const seated = Number(
         (() => {
           try {
-            return window.sessionStorage.getItem(seat(window.location.pathname));
+            return window.sessionStorage.getItem(
+              seat(window.location.pathname),
+            );
           } catch {
             return null;
           }
@@ -545,7 +603,7 @@ export function Strip({
       document.documentElement.dataset.nav === "in" ||
       document.documentElement.dataset.nav === "out";
     if (back) {
-      el.dataset.arrive = "back";
+      el.dataset.arrive = dealt ? "dealt" : "back";
       /* The end of the sequence, not the end of the scroller. Walking
          back into a filter used to land on whatever the strip finishes
          with — which since the ask came off the discipline pages is the
@@ -566,7 +624,10 @@ export function Strip({
         );
         const where = last >= 0 ? centreOf(el, last) : null;
         if (where === null) return;
-        const at = Math.max(0, Math.min(el.scrollWidth - el.clientWidth, where));
+        const at = Math.max(
+          0,
+          Math.min(el.scrollWidth - el.clientWidth, where),
+        );
         /* A nudge off the end, never a journey: if the cells still have
            no layout the sum comes out near zero, and moving there would
            be the strip opening at the start of a sequence somebody is
@@ -675,7 +736,9 @@ export function Strip({
       const cs = getComputedStyle(el);
       const gap = parseFloat(cs.columnGap) || 16;
       const room =
-        el.clientHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom);
+        el.clientHeight -
+        parseFloat(cs.paddingTop) -
+        parseFloat(cs.paddingBottom);
       /* Each run of a gallery's frames is a wall of its own. A cover is a
          link and never part of one, so a run of covers stays exactly as
          it is; on All work the galleries among them are walled one by one.
@@ -684,7 +747,8 @@ export function Strip({
       const runs: HTMLElement[][] = [];
       for (let i = 0; i < kids.length; i++) {
         if (kids[i].tagName !== "BUTTON") continue;
-        if (i > 0 && kids[i - 1].tagName === "BUTTON") runs[runs.length - 1].push(kids[i]);
+        if (i > 0 && kids[i - 1].tagName === "BUTTON")
+          runs[runs.length - 1].push(kids[i]);
         else runs.push([kids[i]]);
       }
       if (!runs.length || room < 80) {
@@ -700,12 +764,13 @@ export function Strip({
       const top0 = parseFloat(cs.paddingTop) || 0;
       for (const frames of runs) {
         const ars = frames.map(
-          (f) => parseFloat(getComputedStyle(f).getPropertyValue("--ar")) || 0.8,
+          (f) =>
+            parseFloat(getComputedStyle(f).getPropertyValue("--ar")) || 0.8,
         );
         /* Walk the run, taking at each step the number of frames whose
            shared width lands nearest the one the wall wants. */
         const cols: { at: number; k: number; w: number }[] = [];
-        for (let i = 0; i < ars.length; ) {
+        for (let i = 0; i < ars.length;) {
           let best = { k: 1, w: 0, score: Infinity };
           for (let k = 1; k <= 3 && i + k <= ars.length; k++) {
             const inv = ars.slice(i, i + k).reduce((sum, a) => sum + 1 / a, 0);
@@ -727,7 +792,7 @@ export function Strip({
         const head = first > 0 ? kids[first - 1] : null;
         sheet.textContent = rules.join(String.fromCharCode(10));
         const left0 = head
-          ? head.offsetLeft + head.offsetWidth + gap
+          ? leftOf(head) + head.offsetWidth + gap
           : parseFloat(cs.paddingLeft) || 0;
 
         let x = left0;
@@ -835,7 +900,8 @@ export function Strip({
       let frame = 0;
       const loop = (t: number) => {
         lenis.raf(t);
-        frame = lenis.isScrolling === "smooth" ? requestAnimationFrame(loop) : 0;
+        frame =
+          lenis.isScrolling === "smooth" ? requestAnimationFrame(loop) : 0;
       };
       const wake = () => {
         if (frame) return;
@@ -943,7 +1009,10 @@ export function Strip({
        side, and the photograph must not fade. Held per cell and rebuilt
        only when the cell's children change, because this is read on every
        frame of a swipe. */
-    const soften = new WeakMap<HTMLElement, { n: number; list: HTMLElement[] }>();
+    const soften = new WeakMap<
+      HTMLElement,
+      { n: number; list: HTMLElement[] }
+    >();
     const fades = (cell: HTMLElement) => {
       const had = soften.get(cell);
       if (had && had.n === cell.childElementCount) return had.list;
@@ -989,9 +1058,9 @@ export function Strip({
       const kids = Array.from(el.children) as HTMLElement[];
       span = el.clientWidth;
       reach = el.scrollWidth - span;
-      centres = kids.map((c) => c.offsetLeft + c.offsetWidth / 2);
+      centres = kids.map((c) => leftOf(c) + c.offsetWidth / 2);
       const first = kids[0];
-      firstEnd = first ? first.offsetLeft + first.offsetWidth * 0.5 : 0;
+      firstEnd = first ? leftOf(first) + first.offsetWidth * 0.5 : 0;
     };
 
     const read = () => {
@@ -1007,10 +1076,7 @@ export function Strip({
          one screen is the same words twice. Half the cell's width, so the
          swap happens as it leaves rather than after it has. The rule that
          reads this is in `globals.css`. */
-      el.toggleAttribute(
-        "data-past-first",
-        kidCount > 0 && x > firstEnd,
-      );
+      el.toggleAttribute("data-past-first", kidCount > 0 && x > firstEnd);
       /* Either end is that end's cell, whatever is nearest the middle.
          At the far end the last cell is often narrower than half a window,
          so the middle of the window sits over the one before it and the
@@ -1071,8 +1137,12 @@ export function Strip({
          that leads on or on a page of words, neither of which the rail
          draws, and `at` pointing at one of them lit nothing at all —
          measured, the rail went blank on the final frame of the travel. */
-      const ticked = kids.flatMap((k, i) => (k.dataset.tick !== undefined ? [i] : []));
-      const lastTick = ticked.length ? ticked[ticked.length - 1] : kids.length - 1;
+      const ticked = kids.flatMap((k, i) =>
+        k.dataset.tick !== undefined ? [i] : [],
+      );
+      const lastTick = ticked.length
+        ? ticked[ticked.length - 1]
+        : kids.length - 1;
       const firstTick = ticked.length ? ticked[0] : 0;
       /* A sequence short enough to fit the window has nowhere to go, and
          `scrollLeft` is nought forever. The end test ran first and `0 >=
@@ -1452,6 +1522,30 @@ export function Strip({
       // The band holds where it is and the slide starts from it.
       if (band) cancelAnimationFrame(band);
       band = 0;
+      /* Dealt at the ends (`deck="leads"`, `lib/deck.ts`): the next page's
+         strip comes in as a card over this one while this one recedes,
+         and backwards this one goes off the way it came and the one
+         before comes up from behind. The trip is the page transition's
+         (`deal` in `globals.css`); this strip names itself so it is
+         snapshotted apart from the page, and the root says which way. */
+      if (deck === "leads") {
+        dealtAt = Date.now();
+        cameBack = dir < 0;
+        arriveDir = dir;
+        el.style.setProperty("view-transition-name", "strip");
+        const root = document.documentElement;
+        root.dataset.nav = "deal";
+        root.dataset.navWay = dir > 0 ? "on" : "back";
+        /* The strip that arrives takes this off when its trip lands. This
+           is only for a push that never lands. */
+        window.setTimeout(() => {
+          if (root.dataset.nav !== "deal") return;
+          delete root.dataset.nav;
+          delete root.dataset.navWay;
+        }, DEAL_MS);
+        router.push(href);
+        return;
+      }
       /* Places to Motion was a page leaving and a page arriving: the strip
          slid off, and for the 260ms it took the screen was bare paper —
          measured on production, mean brightness at 235.8 with nothing on
@@ -1844,7 +1938,7 @@ export function Strip({
       let near = Infinity;
       Array.from(el.children).forEach((c, i) => {
         const cell = c as HTMLElement;
-        const off = Math.abs(cell.offsetLeft + cell.offsetWidth / 2 - middle);
+        const off = Math.abs(leftOf(cell) + cell.offsetWidth / 2 - middle);
         if (off < near) {
           near = off;
           best = i;
@@ -1989,7 +2083,7 @@ export function Strip({
       el.style.translate = "";
       delete el.dataset.release;
     };
-  }, [router, nextHref, prevHref, live, paged]);
+  }, [router, nextHref, prevHref, live, paged, deck]);
 
   /* ── running a finger along the ruler ──
      Every tick is a jump already. What it was not is a thing you could
@@ -2091,8 +2185,7 @@ export function Strip({
   /** How much room a chapter takes when it opens, as a share against the
       eleven that stay shut. A floor, or a one-project chapter would open
       to nothing; a ceiling, or Editorial would take the whole rail. */
-  const opening = (count: number) =>
-    Math.min(Math.max(count / 3.5, 1.4), 7);
+  const opening = (count: number) => Math.min(Math.max(count / 3.5, 1.4), 7);
 
   /** And on the archive's rail, the share the chapter you are in takes,
       whichever one it is. Julian: every chapter opens to the same width.
@@ -2178,10 +2271,7 @@ export function Strip({
         const seen = word.getBoundingClientRect();
         const half = seen.width / 2;
         const mid = seen.left + half;
-        const want = Math.min(
-          Math.max(mid, box.left + half),
-          box.right - half,
-        );
+        const want = Math.min(Math.max(mid, box.left + half), box.right - half);
         if (Math.abs(want - mid) > 0.5)
           word.style.left = `${
             parseFloat(getComputedStyle(word).left) + (want - mid)
@@ -2301,6 +2391,8 @@ export function Strip({
         role="region"
         tabIndex={0}
         aria-label={label}
+        /* Dealt as a deck: `globals.css` makes every cell opaque. */
+        data-dealt={deck}
         /* The browser's own drag and drop never gets the gesture.
            A cover in the index is a link around a photograph, and both of
            those are things Chrome will happily pick up and carry: a drag
@@ -2489,7 +2581,10 @@ export function Strip({
                    nothing to pulse and the position stays readable while
                    you scroll. */
                 const mine =
-                  here && !g.href && !onRail && (!!away || still || aim !== null);
+                  here &&
+                  !g.href &&
+                  !onRail &&
+                  (!!away || still || aim !== null);
                 const shown = openChapter === gi || mine;
                 /* Which cell of an open chapter carries the ink: the one
                    under the pointer where the pointer is in this chapter,
@@ -2520,7 +2615,11 @@ export function Strip({
                       chapterSegs.current[gi] = el;
                     }}
                     style={{
-                      flexGrow: shown ? (mine ? OPEN_SHARE : opening(count)) : 1,
+                      flexGrow: shown
+                        ? mine
+                          ? OPEN_SHARE
+                          : opening(count)
+                        : 1,
                     }}
                     className={cn(
                       "relative flex h-2 min-w-0 shrink basis-0 items-end px-1",
@@ -2607,7 +2706,10 @@ export function Strip({
                           ? /* The cue nudges the bar that says where you
                                are, and on the archive's rail that is this
                                open chapter rather than a lit one. */
-                            cn("scale-y-100 bg-foreground/25", mine && "rail-lit")
+                            cn(
+                              "scale-y-100 bg-foreground/25",
+                              mine && "rail-lit",
+                            )
                           : here
                             ? "rail-lit scale-y-50 bg-foreground"
                             : overAway === gi
@@ -2642,56 +2744,56 @@ export function Strip({
                 );
               })
             : ticks.map(({ i }, n) => {
-            /* Words in the back half hang from the right of their tick and
+                /* Words in the back half hang from the right of their tick and
                grow leftwards. Anchored left like the rest, a long one near
                the end ran past the edge of the window — and a page that can
                be scrolled sideways by ten pixels is a page that wobbles. */
-            const end = n * 2 >= ticks.length;
-            return (
-              <button
-                key={`tick-${i}`}
-                type="button"
-                tabIndex={-1}
-                title={named[n]}
-                // The rail above takes the press, so this is a target and
-                // not a handler: two of them would travel twice.
-                className="group pointer-events-none relative flex h-2 flex-1 items-end"
-              >
-                {named[n] ? (
-                  <span
-                    className={cn(
-                      "label pointer-events-none absolute bottom-full mb-1 whitespace-nowrap text-[0.625rem] transition-opacity duration-200",
-                      end ? "right-0" : "left-0",
-                      over === n
-                        ? "text-foreground opacity-100"
-                        : over !== null
-                          ? "text-muted-foreground opacity-0"
-                          : i === at
-                            ? "text-muted-foreground opacity-100"
-                            : "text-muted-foreground opacity-0",
-                    )}
+                const end = n * 2 >= ticks.length;
+                return (
+                  <button
+                    key={`tick-${i}`}
+                    type="button"
+                    tabIndex={-1}
+                    title={named[n]}
+                    // The rail above takes the press, so this is a target and
+                    // not a handler: two of them would travel twice.
+                    className="group pointer-events-none relative flex h-2 flex-1 items-end"
                   >
-                    {named[n]}
-                  </span>
-                ) : null}
-                <span
-                  className={cn(
-                    /* The position moves from tick to tick without easing
+                    {named[n] ? (
+                      <span
+                        className={cn(
+                          "label pointer-events-none absolute bottom-full mb-1 whitespace-nowrap text-[0.625rem] transition-opacity duration-200",
+                          end ? "right-0" : "left-0",
+                          over === n
+                            ? "text-foreground opacity-100"
+                            : over !== null
+                              ? "text-muted-foreground opacity-0"
+                              : i === at
+                                ? "text-muted-foreground opacity-100"
+                                : "text-muted-foreground opacity-0",
+                        )}
+                      >
+                        {named[n]}
+                      </span>
+                    ) : null}
+                    <span
+                      className={cn(
+                        /* The position moves from tick to tick without easing
                        its colour, and only the lit tick's height eases up.
                        With the colour easing over 200ms both ways a fast
                        scroll lit several at a time, the ghosts Julian
                        recorded on NOVA reading 03 and 09 together. */
-                    "block h-2 w-full origin-bottom rounded-full ease-[var(--ease-out-strong)]",
-                    i === at
-                      ? "rail-lit scale-y-100 bg-foreground transition-[scale] duration-150"
-                      : over === n
-                        ? "scale-y-75 bg-foreground/40 transition-[scale,background-color] duration-200"
-                        : "scale-y-50 bg-foreground/20",
-                  )}
-                />
-              </button>
-            );
-          })}
+                        "block h-2 w-full origin-bottom rounded-full ease-[var(--ease-out-strong)]",
+                        i === at
+                          ? "rail-lit scale-y-100 bg-foreground transition-[scale] duration-150"
+                          : over === n
+                            ? "scale-y-75 bg-foreground/40 transition-[scale,background-color] duration-200"
+                            : "scale-y-50 bg-foreground/20",
+                      )}
+                    />
+                  </button>
+                );
+              })}
         </div>
       </div>
     </div>

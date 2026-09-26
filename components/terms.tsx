@@ -32,7 +32,9 @@ export function TermsColumn() {
     >
       <Clause title="Definitions">
         <p>
-          <strong>&ldquo;I&rdquo;, &ldquo;me&rdquo; and &ldquo;my&rdquo;</strong>{" "}
+          <strong>
+            &ldquo;I&rdquo;, &ldquo;me&rdquo; and &ldquo;my&rdquo;
+          </strong>{" "}
           mean Julian Gigola, a sole proprietor in the San Francisco Bay Area,
           California, who owns and operates {SITE}.
         </p>
@@ -55,9 +57,9 @@ export function TermsColumn() {
         </p>
         <p>
           The{" "}
-          <Link href="#privacy" className="underline underline-offset-4">
+          <a href="#privacy" className="underline underline-offset-4">
             Privacy Policy
-          </Link>{" "}
+          </a>{" "}
           is part of these terms.
         </p>
       </Clause>
@@ -107,7 +109,9 @@ export function TermsColumn() {
           cache what it needs to show a page. You may link to any page, and you
           may share that link.
         </p>
-        <p>That is the whole of the licence, and it is revocable at any time.</p>
+        <p>
+          That is the whole of the licence, and it is revocable at any time.
+        </p>
       </Clause>
 
       <Clause title="What you may not do">
@@ -307,9 +311,9 @@ export function TermsColumn() {
           to use it to answer you, to evaluate and carry out the work discussed,
           and to keep a record of it. Where it goes and how long it is kept is
           in the{" "}
-          <Link href="#privacy" className="underline underline-offset-4">
+          <a href="#privacy" className="underline underline-offset-4">
             Privacy Policy
-          </Link>
+          </a>
           .
         </p>
         <p>
@@ -496,9 +500,8 @@ export function TermsColumn() {
           other. There is no third-party beneficiary of these terms.
         </p>
         <p>
-          <em>Definitions</em>, <em>Ownership</em>,{" "}
-          <em>What you may not do</em>,{" "}
-          <em>No use for AI or machine learning</em>,{" "}
+          <em>Definitions</em>, <em>Ownership</em>, <em>What you may not do</em>
+          , <em>No use for AI or machine learning</em>,{" "}
           <em>Unauthorised use, and what it costs</em>, <em>No warranty</em>,{" "}
           <em>Limitation of liability</em>, <em>Indemnity</em>,{" "}
           <em>Enforcement</em>, <em>Governing law and disputes</em> and this

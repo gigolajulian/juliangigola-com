@@ -111,6 +111,8 @@ export default function AboutPage() {
         prev={SESSIONS_PAGE}
         paged
         bleed
+        // The two screens dealt as a deck, as on the homepage (`lib/deck.ts`).
+        deck="screens"
         className="mt-4 flex-1"
       >
         {/* One: the line, what he is hired for, and the work down the other

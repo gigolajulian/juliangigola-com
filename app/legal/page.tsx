@@ -10,8 +10,8 @@ export const metadata: Metadata = {
   alternates: { canonical: "/legal" },
 };
 
-/* The terms and the privacy policy on one page, as one strip of clauses
-   that open sideways when they are pressed. The words live in
+/* The terms and the privacy policy on one page, a screen each, dealt as
+   a deck (`components/legal.tsx`). The words live in
    `components/terms.tsx` and `components/privacy.tsx`; this is only the
    frame. The page opens whichever clause the address names, which the
    strip handles now, so the old `OpenOnHash` is not needed here. */

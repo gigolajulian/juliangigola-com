@@ -60,6 +60,9 @@ export default function Home() {
         next={WORK_PAGE}
         arrive="none"
         paged
+        // Julian: the ScrollStack, sideways. Each screen slides over the one
+        // before, which sinks back under it (`lib/deck.ts`).
+        deck="screens"
         bleed
         className="flex-1"
       >
