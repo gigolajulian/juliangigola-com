@@ -246,8 +246,21 @@ export type Summary = {
  * it is a notification, not a newsletter, and plain text is what a photo-
  * grapher's inbox on a phone reads fastest.
  */
+/* The subject says what the job is, not only who asked: the type, the name,
+   and the details field, or the message's opening words when that is
+   empty, cut at a word near sixty characters so it fits a phone's inbox
+   row. Julian chose it. Every enquiry reads differently, so Gmail does not
+   thread two people together. */
+const subjectOf = (e: Enquiry) => {
+  const type = e.type.charAt(0).toUpperCase() + e.type.slice(1);
+  let job = (e.detail || e.message).replace(/\s+/g, " ").trim();
+  if (job.length > 60) job = `${job.slice(0, 60).replace(/\s+\S*$/, "")}…`;
+  job = job.charAt(0).toUpperCase() + job.slice(1);
+  return [`${type} inquiry`, e.name, job].filter(Boolean).join(" · ");
+};
+
 export const emailCopy = (e: Enquiry): { subject: string; text: string } => ({
-  subject: `${e.type} inquiry from ${e.name}`,
+  subject: subjectOf(e),
   text: [
     `Type: ${e.type}`,
     e.detail ? `Details: ${e.detail}` : null,

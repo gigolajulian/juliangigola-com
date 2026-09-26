@@ -36,6 +36,24 @@ const credentials = (key: string): Record<string, string> => {
 
 type Row = Summary & { key: string };
 
+/**
+ * How many are unread, for the badge on the Inbox tab, which has to know
+ * before the tab is ever opened. Null when there is nothing to ask with or
+ * the answer did not come: no badge is the right failure, not a wrong one.
+ */
+export async function unreadCount(): Promise<number | null> {
+  const headers = credentials(window.localStorage.getItem(KEY_STORE) ?? "");
+  if (!Object.keys(headers).length) return null;
+  try {
+    const res = await fetch("/api/inbox", { headers, cache: "no-store" });
+    if (!res.ok) return null;
+    const { rows } = (await res.json()) as { rows: Row[] };
+    return rows.filter((r) => !r.read).length;
+  } catch {
+    return null;
+  }
+}
+
 const when = (at: string) => {
   const d = new Date(at);
   const mins = Math.round((Date.now() - d.getTime()) / 60000);
@@ -45,7 +63,12 @@ const when = (at: string) => {
   return d.toLocaleDateString(undefined, { month: "short", day: "numeric" });
 };
 
-export function AdminInbox() {
+export function AdminInbox({
+  onUnread,
+}: {
+  /** Told whenever the count changes here, so the tab's badge keeps up. */
+  onUnread?: (n: number) => void;
+} = {}) {
   const [key, setKey] = React.useState("");
   const [rows, setRows] = React.useState<Row[] | null>(null);
   const [open, setOpen] = React.useState<string | null>(null);
@@ -167,6 +190,9 @@ export function AdminInbox() {
   }
 
   const unread = rows?.filter((r) => !r.read).length ?? 0;
+  React.useEffect(() => {
+    if (rows) onUnread?.(unread);
+  }, [rows, unread, onUnread]);
 
   return (
     <div className="mt-10 flex flex-col gap-6">

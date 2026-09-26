@@ -14,7 +14,7 @@ import { AdminPreview } from "@/components/admin-preview";
 import { AdminPage } from "@/components/admin-page";
 import { AdminPicker, type PickerItem } from "@/components/admin-picker";
 import { AdminTrash } from "@/components/admin-trash";
-import { AdminInbox } from "@/components/admin-inbox";
+import { AdminInbox, unreadCount } from "@/components/admin-inbox";
 import { AdminVideos } from "@/components/admin-videos";
 import { isTextRef, type FrameRef, type TrashedProject } from "@/lib/added";
 import { ADDED_PATH } from "@/lib/added";
@@ -301,6 +301,20 @@ export function AdminEditor({
   const [sha, setSha] = React.useState<string | null>(null);
   const [status, setStatus] = React.useState<Status>({ kind: "idle" });
   const [view, setView] = React.useState<View>("home");
+  /* Unread enquiries, on the Inbox tab, so a new one is seen from whatever
+     tab is open. Asked when the page opens and again whenever the window
+     comes back into focus; the Inbox itself keeps it current while open.
+     Julian asked. */
+  const [unread, setUnread] = React.useState(0);
+  React.useEffect(() => {
+    const ask = () =>
+      void unreadCount().then((n) => {
+        if (n !== null) setUnread(n);
+      });
+    ask();
+    window.addEventListener("focus", ask);
+    return () => window.removeEventListener("focus", ask);
+  }, []);
   /* One column over the whole workbench, the other two out of the way:
      Julian wanted each one full screen, to see it from above. Escape
      brings the three back. */
@@ -1310,6 +1324,12 @@ export function AdminEditor({
                       )}
                     >
                       {t.label}
+                      {t.id === "inbox" && unread > 0 ? (
+                        <span className="ml-1.5 inline-block bg-live px-1 tabular-nums text-background">
+                          {unread}
+                          <span className="sr-only"> unread</span>
+                        </span>
+                      ) : null}
                       {moved.has(t.id) ? (
                         <span
                           aria-label=", unpublished edits"
@@ -1466,7 +1486,7 @@ export function AdminEditor({
                 );
               })()
             : null}
-          {!page && view === "inbox" ? <AdminInbox /> : null}
+          {!page && view === "inbox" ? <AdminInbox onUnread={setUnread} /> : null}
 
           {!page && view === "coverart" ? CoverArtFields() : null}
 
