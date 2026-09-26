@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { NotFoundScene } from "@/components/not-found-scene";
+import { NotFoundScene, BlinkingMark } from "@/components/not-found-scene";
 import DriftWall from "@/components/DriftWall";
 import { DISCIPLINES, WALL } from "@/lib/work";
 
@@ -20,26 +20,6 @@ import { DISCIPLINES, WALL } from "@/lib/work";
  * colours as the website. So it follows the theme like every other page.
  * ─────────────────────────────────────────────────────────────── */
 
-/** The site's mark — the eye from `app/icon.svg`, drawn in the page's ink. */
-function Mark({ className }: { className?: string }) {
-  return (
-    <svg
-      viewBox="0 0 100 100"
-      aria-hidden
-      className={className}
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="6.8"
-      strokeLinejoin="round"
-      strokeLinecap="round"
-    >
-      <path d="M8.4 50C23.07 22.32 76.93 22.32 91.6 50 76.93 77.68 23.07 77.68 8.4 50Z" />
-      <circle cx="50" cy="50" r="25" />
-      <circle cx="50" cy="50" r="11.5" fill="currentColor" stroke="none" />
-    </svg>
-  );
-}
-
 export const metadata: Metadata = {
   title: "Frame not found",
   description: "That page is not on the site. The work, the sessions and the about page are.",
@@ -50,6 +30,8 @@ export const metadata: Metadata = {
 };
 
 const MONO = "font-mono text-[11px] uppercase tracking-[0.2em]";
+const LIST_MONO =
+  "font-mono text-[clamp(11px,1.35dvh,13px)] uppercase tracking-[0.16em]";
 
 export default function NotFound() {
   const places = [
@@ -69,8 +51,9 @@ export default function NotFound() {
       >
         {/* The room: the work itself, drifting on a wall behind the page
             (`DriftWall`), each tile a way into its project. Dimmed toward
-            the ground so the words over it still read; a faint grid and a
-            dusting of grain over that. Julian: the 404 gets the drift wall. */}
+            the ground so the words over it still read, and a
+            dusting of grain over that. Julian: the 404 gets the drift wall,
+            and no grid. */}
         <div className="absolute inset-0">
           <DriftWall
             items={WALL}
@@ -95,15 +78,6 @@ export default function NotFound() {
         </div>
         <div
           aria-hidden
-          className="pointer-events-none absolute inset-0 opacity-55"
-          style={{
-            backgroundImage:
-              "linear-gradient(color-mix(in oklab, var(--foreground) 4.5%, transparent) 1px, transparent 1px), linear-gradient(90deg, color-mix(in oklab, var(--foreground) 4.5%, transparent) 1px, transparent 1px)",
-            backgroundSize: "72px 72px",
-          }}
-        />
-        <div
-          aria-hidden
           className="pointer-events-none absolute inset-0 opacity-20 mix-blend-overlay"
           style={{
             backgroundImage:
@@ -115,7 +89,7 @@ export default function NotFound() {
         <section className="pointer-events-none relative mx-auto flex [&_a]:pointer-events-auto h-dvh w-full max-w-[100rem] flex-col justify-center gap-4 px-6 pb-6 pt-20 sm:gap-6 sm:px-10 sm:pt-24">
           {/* The slate. */}
           <div className="rise flex flex-wrap items-center gap-3.5">
-            <Mark className="size-6 shrink-0 text-foreground" />
+            <BlinkingMark className="size-6 shrink-0 text-foreground" />
             <span
               className={`${MONO} inline-flex items-center gap-2 bg-foreground px-3 py-1.5 font-bold text-background`}
             >
@@ -155,20 +129,22 @@ export default function NotFound() {
             404
           </div>
 
+          {/* The list is the wider column: Julian wanted the ways out to
+              take up more of the page. */}
           <div
-            className="rise grid items-end gap-6 sm:gap-11"
-            style={{
-              gridTemplateColumns:
-                "repeat(auto-fit, minmax(min(100%, 300px), 1fr))",
-              ["--reveal-delay" as string]: "160ms",
-            }}
+            className="rise grid items-end gap-6 sm:grid-cols-[minmax(0,1fr)_minmax(0,1.35fr)] sm:gap-11"
+            style={{ ["--reveal-delay" as string]: "160ms" }}
           >
-            <div className="max-w-[48ch]">
-              <h1 className="font-display text-2xl uppercase leading-[1.02] tracking-[0] text-foreground sm:text-4xl">
+            <div className="@container max-w-[40rem]">
+              <h1 className="font-display text-2xl uppercase leading-[1.02] tracking-[0] text-foreground sm:text-[clamp(2.25rem,5.2dvh,3.5rem)]">
                 This frame never made the edit.
               </h1>
-              {/* For a mouse, so not on a phone, where the page has no room. */}
-              <p className="mt-4 text-sm leading-[1.7] text-muted-foreground [text-wrap:pretty] max-sm:hidden">
+              {/* For a mouse, so not on a phone, where the page has no room.
+                  Two lines, justified edge to edge, Julian's call: the
+                  sentence runs about 80 times its size, so a size of the
+                  column's width over 42 sets it on two lines with a little
+                  room, and the last line is justified as well. */}
+              <p className="mt-4 text-justify text-[clamp(11.5px,2.39cqi,17px)] leading-[1.7] text-muted-foreground [text-align-last:justify] max-sm:hidden">
                 The page you were looking for has been moved, renamed, or cut
                 from the selects. Drag your cursor across the numerals to pull
                 them into focus, or head back to the work.
@@ -203,19 +179,18 @@ export default function NotFound() {
                     <Link
                       prefetch={false}
                       href={p.href}
-                      className="group flex items-baseline gap-3.5 border-t border-border px-0.5 py-3 text-foreground transition-colors duration-200 hoverable:hover:text-accent"
+                      className="group flex items-baseline gap-5 border-t border-border px-0.5 py-[clamp(0.4rem,1.3dvh,1rem)] text-foreground transition-colors duration-200 hoverable:hover:text-accent"
                     >
-                      <span
-                        className={`${MONO} min-w-[22px] tracking-[0.16em] text-accent`}
-                      >
+                      {/* Sized by the window's height as well, like the
+                          numerals: six rows this size and the page never
+                          scrolls. */}
+                      <span className={`${LIST_MONO} min-w-[2.5ch] text-accent`}>
                         {String(i + 1).padStart(2, "0")}
                       </span>
-                      <span className="flex-1 font-display text-base uppercase leading-none tracking-[0]">
+                      <span className="flex-1 font-display text-[clamp(1.125rem,2.8dvh,2rem)] uppercase leading-none tracking-[0]">
                         {p.label}
                       </span>
-                      <span
-                        className={`${MONO} tracking-[0.16em] text-muted-foreground`}
-                      >
+                      <span className={`${LIST_MONO} text-muted-foreground`}>
                         {p.count}
                       </span>
                     </Link>

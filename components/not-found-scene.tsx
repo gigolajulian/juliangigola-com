@@ -82,3 +82,67 @@ export function NotFoundScene({ children }: { children: React.ReactNode }) {
 
   return <div ref={ref}>{children}</div>;
 }
+
+/* ── the eye on the slate ─────────────────────────────────────────
+ * Julian's mark, drawn as `app/icon.svg` draws it: a lens of two arcs
+ * meeting in sharp corners, the iris raised so it breaks the top lid,
+ * a small pupil. The iris is a hole rather than a black disc, so the page
+ * shows through it on either theme, as the tab's black shows through it.
+ *
+ * It blinks once the page has come up, and then every five to eight
+ * seconds, a different wait each time so it reads as a glance rather than
+ * a metronome. Not while the intro is still over the page, and not at all
+ * for anybody who asks for less motion.
+ * ─────────────────────────────────────────────────────────────── */
+export function BlinkingMark({ className }: { className?: string }) {
+  const lids = React.useRef<SVGGElement>(null);
+  const id = React.useId();
+
+  React.useEffect(() => {
+    const g = lids.current;
+    if (!g || window.matchMedia("(prefers-reduced-motion: reduce)").matches)
+      return;
+    let t = 0;
+    const blink = () => {
+      // Still behind the intro: look again shortly.
+      if (document.documentElement.dataset.intro !== undefined) {
+        t = window.setTimeout(blink, 500);
+        return;
+      }
+      g.animate(
+        [
+          { transform: "scaleY(1)" },
+          { transform: "scaleY(0.06)", offset: 0.45 },
+          { transform: "scaleY(1)" },
+        ],
+        { duration: 240, easing: "cubic-bezier(0.45, 0, 0.55, 1)" },
+      );
+      t = window.setTimeout(blink, 5000 + Math.random() * 3000);
+    };
+    // Once the elements are up: the window's load, and the reveal after it.
+    const start = () => (t = window.setTimeout(blink, 700));
+    if (document.readyState === "complete") start();
+    else window.addEventListener("load", start, { once: true });
+    return () => {
+      window.removeEventListener("load", start);
+      window.clearTimeout(t);
+    };
+  }, []);
+
+  return (
+    <svg viewBox="0 0 100 100" aria-hidden className={className}>
+      <mask id={id}>
+        <rect width="100" height="100" fill="#fff" />
+        <circle cx="50" cy="40.9" r="20.7" fill="#000" />
+      </mask>
+      {/* Shut about the middle of the lens, where lids meet. */}
+      <g ref={lids} style={{ transformOrigin: "50px 49.6px" }} fill="currentColor">
+        <path
+          d="M7.2 49.6 A59.9 59.9 0 0 1 92.8 49.6 A59.9 59.9 0 0 1 7.2 49.6 Z"
+          mask={`url(#${id})`}
+        />
+        <circle cx="50" cy="40.9" r="8.6" />
+      </g>
+    </svg>
+  );
+}

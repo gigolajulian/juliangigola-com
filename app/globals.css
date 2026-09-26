@@ -2556,6 +2556,20 @@ a.strip-cell {
 body:has([data-workbench]) > footer {
   display: none;
 }
+/* Where it is one screen, the page itself does not scroll: the columns do.
+   Anything poking past the screen (the intro's 0.75rem lift on `.rise`,
+   held while the intro plays) otherwise scrolled the whole editor by that
+   much. Julian: it scrolls past the content. */
+@media (min-width: 80rem) {
+  html:has([data-workbench]) {
+    overflow: hidden;
+  }
+  /* And no lift to poke past it: a jump to a field scrolls into view, and
+     would take the page along by the lift too. */
+  html:has([data-workbench]) #main {
+    transform: none;
+  }
+}
 
 /* ── the field you asked for ──────────────────────────────────────
  * A jump from the sitemap or the section index scrolls the editor, and a
