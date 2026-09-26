@@ -219,7 +219,11 @@ export async function submitEnquiry(
        chain covers it. */
     try {
       const { subject, text } = emailCopy(stored);
+      /* `to` although the binding already fixes the destination: the docs
+         call it optional there, and the runtime threw "Email must have at
+         least one recipient" on every enquiry until it was set. */
       await env.EMAIL?.send({
+        to: TO,
         from: { name: "Julian Gigola website", email: FROM },
         subject,
         text,
