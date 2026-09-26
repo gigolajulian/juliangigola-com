@@ -129,10 +129,15 @@ export function runDeck(el: HTMLElement, mode: Deck): () => void {
      so the depth keeps up with the pin. */
   const depth = () => {
     const x = el.scrollLeft;
-    // How much of each card, pinned, the one after it now covers.
-    const cover = spots.map((s) =>
-      Math.min(1, Math.max(0, (s.pin + s.width - (s.next - x)) / s.width)),
-    );
+    // How much of each card, pinned, the one after it now covers. Under
+    // two pixels is nothing: `offsetLeft` rounds, a screen is 1761.333 wide,
+    // and a screen at rest read as a third of a pixel covered. It sat at
+    // scale 0.99998, resampled, and every seam in it shimmered. Julian saw
+    // it on Selected work and Cover art.
+    const cover = spots.map((s) => {
+      const over = s.pin + s.width - (s.next - x);
+      return over < 2 ? 0 : Math.min(1, over / s.width);
+    });
     // On the pile a card sinks a step for every card over it, so the pile
     // tapers evenly, the way ScrollStack's does. Julian: the stack looked
     // uneven when every covered card sank the same way.

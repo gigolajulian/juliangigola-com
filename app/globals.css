@@ -1724,6 +1724,19 @@ a.strip-cell {
   grid-template-columns: repeat(5, max-content);
   grid-template-rows: repeat(2, minmax(0, 1fr));
 }
+/* Whole pixels. Half the height was 361.094, so a tile at 4:5 was 288.875
+   wide and every join between two tiles fell partway through a pixel,
+   which drew a hairline down it. Julian saw the seams glitch. Rounded
+   down to five, the width is four fifths of it and whole too. Height-led
+   screens only: an upright one leads with the width. */
+@media (min-width: 40rem) and (not (max-aspect-ratio: 4 / 5)) {
+  .band-grid {
+    grid-template-rows: repeat(2, round(down, 50%, 5px));
+    /* From the top, not centred: centring split what the rounding left
+       over, under ten pixels, into two fractional halves. */
+    align-content: start;
+  }
+}
 @media (max-width: 40rem) {
   .band-grid {
     grid-template-columns: minmax(0, 1fr);
@@ -2933,11 +2946,14 @@ optgroup {
    where the page sits in the bar (`data-nav-side`, `page-transition.tsx`):
    to the right of this one, it comes in from the right. It replaces the
    bar's fade and beat; out of a drawer it still waits for the drawer. */
+/* One movement, landed and done. The in-and-out curve it had first, at
+   760ms, crept the last 30px into place over 400ms, and the creep read
+   as a second move after the card had landed. */
 :root[data-nav-side]::view-transition-old(.page),
 :root[data-nav-side]::view-transition-new(.page) {
-  animation-duration: 760ms;
+  animation-duration: 480ms;
   animation-delay: 0ms;
-  animation-timing-function: cubic-bezier(0.77, 0, 0.175, 1);
+  animation-timing-function: cubic-bezier(0.25, 1, 0.5, 1);
   animation-fill-mode: both;
 }
 :root[data-nav-side][data-nav-drawer]::view-transition-old(.page),
@@ -2950,6 +2966,26 @@ optgroup {
 }
 :root[data-nav-side]::view-transition-new(.page) {
   z-index: 2;
+  /* A card is solid. The snapshot is the page's own element, and a page
+     that leaves its ground to the body (Contact) came in as glass, with
+     the page it covered showing through it. Julian saw it. */
+  background-color: var(--background);
+}
+/* Which put the card over the bar, which is on the root and not in any
+   group: the wordmark was eaten from the right as the card came in. The
+   bar is its own group on a deal, above the card, and holds still. */
+:root[data-nav-side] .site-bar {
+  view-transition-name: site-bar;
+}
+::view-transition-group(site-bar) {
+  z-index: 3;
+  animation: none;
+}
+::view-transition-old(site-bar) {
+  display: none;
+}
+::view-transition-new(site-bar) {
+  animation: none;
 }
 :root[data-nav-side="right"]::view-transition-new(.page) {
   animation-name: jg-bar-in-right;

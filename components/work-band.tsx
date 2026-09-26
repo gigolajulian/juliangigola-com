@@ -186,7 +186,7 @@ export function WorkBand({
          shape an accident of the window: at 1440x900 that was a landscape
          box, and every portrait frame lost a third of itself to the
          crop. */
-      className="group strip-cell press relative block h-full w-full overflow-hidden max-sm:aspect-[4/5] active:scale-[0.995]"
+      className="group strip-cell press relative block h-full w-full max-sm:aspect-[4/5] active:scale-[0.995]"
     >
       {/* Base layer: always loaded, never removed. It is what keeps the
             cell from flashing empty the first time a scrub frame is fetched.
@@ -210,7 +210,11 @@ export function WorkBand({
         share="morph"
         default="none"
       >
-        <div className="absolute inset-0">
+        {/* The clip is here, on the pictures, and not on the tile: clipped
+            at the tile, the plate's glass was cut at a fractional pixel and
+            its blur leaked a light hairline up every join. Julian saw the
+            seams glitch. */}
+        <div className="absolute inset-0 overflow-hidden">
           <Image
             src={project.cover.src}
             alt={project.cover.alt || project.name}
@@ -280,7 +284,7 @@ export function WorkBand({
        * site's one established translucent surface, it reads as chrome
        * rather than as something wrong with the image.
        */}
-      <div className="absolute -inset-x-0.5 -bottom-0.5 flex flex-col gap-1.5 glass-surface bg-background/70 p-3 sm:gap-2 sm:p-4">
+      <div className="absolute inset-x-0 bottom-0 flex flex-col gap-1.5 glass-surface bg-background/70 p-3 sm:gap-2 sm:p-4">
         <div className="flex items-baseline gap-3 sm:gap-4">
           <span className="label shrink-0 tabular-nums text-muted-foreground">
             {String(index + 1).padStart(2, "0")}
