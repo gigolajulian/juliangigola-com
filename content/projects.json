@@ -1597,7 +1597,8 @@
     "analogue-dreams": "chroma",
     "transmutate": "chroma",
     "info-overload": "chroma",
-    "steampunk-files-001": "editorial"
+    "steampunk-files-001": "editorial",
+    "stratus-lookbook-vol-1": "editorial"
   },
   "frames": {
     "wrapped-up": [
@@ -2378,11 +2379,22 @@
       "/work/places/18.jpg",
       "/work/places/19.jpg",
       "/work/places/20.jpg"
+    ],
+    "lustro": [
+      "/work/lustro/08.jpg",
+      "/work/lustro/10.jpg",
+      "/work/lustro/05.jpg",
+      "/work/lustro/09.jpg",
+      "/work/lustro/06.jpg",
+      "/work/lustro/03.jpg",
+      "/work/lustro/04.jpg",
+      "/work/lustro/07.jpg",
+      "/work/lustro/01.jpg",
+      "/work/lustro/02.jpg"
     ]
   },
   "hidden": [
-    "fun-xyz",
-    "lustro"
+    "fun-xyz"
   ],
   "unlisted": [
     "rouge"
@@ -3675,7 +3687,6 @@
     "opal",
     "fauxtopia",
     "ghostlight",
-    "kala-x-sharks",
     "lithe",
     "threshold",
     "azure-bloom",
@@ -3725,10 +3736,10 @@
     "fun-xyz",
     "wired-magazine",
     "goodcult",
+    "jubo",
     "graduation",
     "headshots",
     "isabela",
-    "jubo",
     "torteline",
     "l3na",
     "light-play",
@@ -3757,13 +3768,14 @@
     "sara",
     "solace",
     "solitude",
+    "kala-x-sharks",
     "sols",
+    "the-den-talkshow",
     "hellamack",
     "sonder",
     "steampunk-files-001",
     "stratus-lookbook-vol-1",
     "taneka",
-    "the-den-talkshow",
     "totem",
     "transmutate",
     "true-grit",
@@ -3772,7 +3784,8 @@
     "vines-roses",
     "weddings",
     "wrapped-up",
-    "zoe"
+    "zoe",
+    "lustro"
   ],
   "avatars": {
     "0414lei": "/people/0414lei.jpg",
