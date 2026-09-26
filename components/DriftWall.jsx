@@ -163,7 +163,12 @@ const DriftWall = ({
     const unit = tileHeight + gap;
     return columnItems.map(col => {
       const copyHeight = Math.max(unit, col.length * unit);
-      const copies = Math.max(2, Math.ceil((containerHeight * 1.6) / copyHeight) + 1);
+      /* The site's fix: a column drifts up to a whole copy out of place,
+         so it carries a copy's height beyond the view at either end, or
+         its foot rose into the screen and left a hole. Julian: no empty
+         spaces. Measured before: holes along the bottom of the homepage's
+         wall at 2000 by 1181. */
+      const copies = Math.ceil((containerHeight * 1.6) / copyHeight) + 2;
       return { copyHeight, copies };
     });
   }, [columnItems, tileHeight, gap, containerHeight]);

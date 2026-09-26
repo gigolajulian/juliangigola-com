@@ -45,6 +45,9 @@
 
 .drift-wall__col {
   position: relative;
+  /* Each about the middle of the wall, however many copies it carries:
+     hung from the top, a shorter column's foot ran out short. */
+  align-self: center;
   width: calc(var(--dw-tile-w) + var(--dw-gap));
   transform-style: preserve-3d;
 }

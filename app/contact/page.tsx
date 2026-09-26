@@ -76,7 +76,7 @@ export default function ContactPage() {
         <section
           data-tick
           data-label="Inquire"
-          data-hash="enquire"
+          data-hash="inquire"
           className="grid w-full shrink-0 grid-cols-1 gap-10 px-6 py-12 sm:h-full sm:grid-cols-2 sm:items-center sm:gap-16 sm:px-16 sm:py-0"
         >
           <div className="flex flex-col gap-6">

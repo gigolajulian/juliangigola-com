@@ -935,7 +935,7 @@ nav[aria-label="Categories"] ul[data-more] {
   /* Julian: the name of the discipline you are looking at, set large. It
      is the one word on the page that says which filter is on, and at a
      label's size it read as a caption beside the pictures. */
-  .strip-grid > :where(div, section, article):not([data-hash="enquire"]) h2 {
+  .strip-grid > :where(div, section, article):not([data-hash="inquire"]) h2 {
     font-size: 3rem;
     line-height: 0.95;
   }
@@ -951,7 +951,7 @@ nav[aria-label="Categories"] ul[data-more] {
 
      The ask is excepted below; it sets its own width. */
   .strip-grid
-    > :is(div, section, article):not([data-hash="enquire"]):not(
+    > :is(div, section, article):not([data-hash="inquire"]):not(
       [data-tick]
     ):not([data-pictures]) {
     width: max-content !important;
@@ -988,7 +988,7 @@ nav[aria-label="Categories"] ul[data-more] {
   }
   /* The ask is the exception: a sentence, two buttons and the way on to the
      studio is not a label and does not fit in a slot. */
-  .strip-grid > [data-hash="enquire"] {
+  .strip-grid > [data-hash="inquire"] {
     grid-row: 1 / -1;
     /* Julian: a third of the window. The ask was one column of the rack
        wide — 239px on a 2000px screen, a strip of type in the corner.
@@ -1200,7 +1200,7 @@ a.strip-cell {
 }
 .strip-grid[style*="--rack-w"] > a:not([style*="--ar"]),
 .strip-grid[style*="--rack-w"]
-  > :where(div, section, article):not([data-hash="enquire"]) {
+  > :where(div, section, article):not([data-hash="inquire"]) {
   width: var(--rack-w) !important;
 }
 /* On a phone the page is not locked and the strip is already a column, so

@@ -246,7 +246,7 @@ export default function AboutPage() {
                   finished deciding, rather than one swipe further on where
                   it was its own page. */}
               <div
-                data-hash="enquire"
+                data-hash="inquire"
                 className="flex flex-wrap items-center gap-3 border-t border-border pt-6 short:pt-4"
               >
                 <Link

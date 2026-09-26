@@ -207,7 +207,7 @@ export default function Home() {
               variance={0.45}
               parallax={0.6}
               lift={16}
-              fade={0.6}
+              fade={0}
               dim={0.4}
               overlayColor="var(--background)"
             />

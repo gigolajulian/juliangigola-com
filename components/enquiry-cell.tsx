@@ -60,7 +60,7 @@ export function EnquiryCell({
       data-tick={tick ? "" : undefined}
       data-ring=""
       data-label={tick ? "Inquire" : undefined}
-      data-hash="enquire"
+      data-hash="inquire"
       className={cn(
         "relative flex w-full shrink-0 flex-col justify-center gap-6 py-10 sm:h-full sm:w-[min(40rem,85vw)] sm:py-0 sm:pl-24 sm:pr-6",
         /* With an aside the cell is the whole window, split: the ask
