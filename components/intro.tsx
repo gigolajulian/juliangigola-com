@@ -2,6 +2,8 @@
 
 import * as React from "react";
 import DriftWall from "@/components/DriftWall";
+import CountUp from "@/components/CountUp";
+import { BlinkingMark, blink } from "@/components/not-found-scene";
 import type { WallTile } from "@/lib/work";
 
 /* ── the opening ──────────────────────────────────────────────────
@@ -30,9 +32,9 @@ import type { WallTile } from "@/lib/work";
  * with no JavaScript is never shut behind a curtain that cannot lift.
  * ─────────────────────────────────────────────────────────────── */
 
-const CAP = 6000; // the longest anybody waits, whatever is still loading
+const CAP = 6200; // the longest anybody waits, whatever is still loading
 const SHOW = 600; // the wall fading in
-const FILL = 3500; // the loader's steady fill, when the page is quicker
+const FILL = 3700; // the loader's steady fill, when the page is quicker; Julian: 0.2s longer
 const HIDE = 150; // the loader going, a beat before the wall does
 const LIFT = 900; // the wall dissolving into the page as it arrives
 
@@ -49,6 +51,8 @@ export function Intro({ tiles }: { tiles: WallTile[] }) {
   const mark = React.useRef<HTMLDivElement>(null);
   const bar = React.useRef<HTMLDivElement>(null);
   const count = React.useRef<HTMLSpanElement>(null);
+  const feed = React.useRef<(n: number) => void>(() => {});
+  const eye = React.useRef<HTMLDivElement>(null);
   /* The wall, mounted only while the intro plays: two dozen pictures on
      every page load for a layer that is not showing would be waste. Its
      tiles here are not links (no `href`): the layer is a curtain, and a
@@ -61,6 +65,10 @@ export function Intro({ tiles }: { tiles: WallTile[] }) {
      columns, twenty pictures; a wide desktop eleven. Julian: it does not
      need to load as many photos as a large screen. Nought is no wall. */
   const [wall, setWall] = React.useState(0);
+  /* The wall takes the theme the head script chose before the first paint:
+     a visitor whose system is light no longer gets a dark curtain over a
+     light site. Read once, when the wall mounts. */
+  const [light, setLight] = React.useState(false);
   const still = React.useMemo(
     () => tiles.slice(0, wall).map(({ image, title }) => ({ image, title })),
     [tiles, wall],
@@ -104,13 +112,20 @@ export function Intro({ tiles }: { tiles: WallTile[] }) {
     let done = 0;
     for (const t of tasks) t.then(() => done++);
 
+    /* The eye blinks twice: once as the wall settles in, and once as the
+       count closes on 100, so its lids come down as the wall lets go. */
+    const lids = () => eye.current?.querySelector("[data-lids]");
+    let blinks = 0;
+
     const t0 = performance.now();
     let shown = 0;
+    let fed = 0;
     let wallOn = false;
     const step = (now: number) => {
       if (!wallOn) {
         wallOn = true;
         const columns = Math.max(5, Math.ceil((innerWidth * 1.5) / (300 + 28)));
+        setLight(root.dataset.theme === "light");
         setWall(columns * 4);
       }
       // A frame's time can be a touch before `t0`: never below nought.
@@ -126,13 +141,29 @@ export function Intro({ tiles }: { tiles: WallTile[] }) {
           easeOut(Math.min(1, since / SHOW)),
         );
       if (bar.current) bar.current.style.transform = `scaleX(${shown})`;
-      if (count.current) {
-        count.current.textContent = String(Math.round(shown * 100)).padStart(
-          3,
-          "0",
-        );
+      const l = lids();
+      if (l && blinks === 0 && since >= 1400) {
+        blinks = 1;
+        blink(l);
       }
-      if (shown !== 1) {
+      if (l && blinks === 1 && shown >= 0.96) {
+        blinks = 2;
+        blink(l);
+      }
+      /* The count is React Bits' CountUp, rolling on a spring that trails
+         its target by a tenth of a second or so. It is given the line's
+         target that far ahead, never past what has really loaded, and the
+         wall waits for it to read 100 so it never leaves on 097. */
+      const ahead =
+        since >= CAP ? 1 : Math.min(real, Math.min(1, (since + 120) / FILL));
+      const pct = Math.round(ahead * 100);
+      if (pct !== fed) {
+        fed = pct;
+        feed.current(pct);
+      }
+      const counted =
+        count.current?.textContent === "100" || since >= CAP + 1000;
+      if (shown !== 1 || !counted) {
         requestAnimationFrame(step);
         return;
       }
@@ -188,20 +219,43 @@ export function Intro({ tiles }: { tiles: WallTile[] }) {
               parallax={0.6}
               lift={16}
               fade={0.6}
-              dim={0.55}
-              overlayColor="#0b0a09"
+              dim={light ? 0.7 : 0.55}
+              overlayColor={light ? "#ebedef" : "#0b0a09"}
             />
           )}
         </div>
+        {/* Julian: the count in the middle, the eye at the foot, and the
+            line along the bottom edge. */}
+        <div ref={eye} className="jg-intro-eye">
+          <BlinkingMark still />
+        </div>
         <div className="jg-intro-load">
-          <span ref={count} className="label tabular-nums">
-            000
+          <span ref={count} className="jg-intro-count tabular-nums">
+            <LoaderCount feedRef={feed} />
           </span>
-          <div className="jg-intro-track">
-            <div ref={bar} />
-          </div>
+        </div>
+        {/* The line along the foot of the screen, edge to edge. */}
+        <div className="jg-intro-track">
+          <div ref={bar} />
         </div>
       </div>
     </>
+  );
+}
+
+/* The count on its own, so a new target re-renders a number and not the
+   wall of photographs around it. */
+function LoaderCount({
+  feedRef,
+}: {
+  feedRef: React.RefObject<(n: number) => void>;
+}) {
+  const [to, setTo] = React.useState(0);
+  React.useEffect(() => {
+    feedRef.current = setTo;
+  }, [feedRef]);
+  // Critically damped: rolls between numbers and lands without creeping.
+  return (
+    <CountUp to={to} stiffness={300} damping={35} />
   );
 }

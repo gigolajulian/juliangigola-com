@@ -6,6 +6,7 @@ import { useSearchParams } from "next/navigation";
 import { submitEnquiry, type ContactState } from "@/app/contact/actions";
 import { RESPONSE_TIME } from "@/lib/site";
 import { cn } from "@/lib/utils";
+import StatusMark from "@/components/StatusMark";
 
 /* ── the enquiry ──────────────────────────────────────────────────
  * The old form was three fields: name, email, message. Which means every
@@ -108,7 +109,7 @@ export function ContactForm() {
         role="status"
         className="flex flex-col items-center self-start border border-border px-8 py-12 text-center sm:px-12"
       >
-        <SentMark />
+        <SentStatus />
 
         <h2
           style={{ "--reveal-delay": "260ms" } as React.CSSProperties}
@@ -333,7 +334,25 @@ export function ContactForm() {
           aria-describedby={!ready ? "enquire-missing" : undefined}
           className="label action px-6 py-4 press active:scale-[0.97] aria-disabled:active:scale-100"
         >
-          {pending ? "Sending…" : "Inquire"}
+          {/* React Bits' StatusMark, Julian's pick: a dashed ring at rest,
+              an arc turning while it sends, a cross if it could not.
+              Hidden from screen readers; the button's words say it. */}
+          <span className="inline-flex items-center gap-2.5">
+            <span aria-hidden className="inline-flex">
+              <StatusMark
+                status={
+                  pending
+                    ? "running"
+                    : state.status === "error"
+                      ? "failed"
+                      : "pending"
+                }
+                size={14}
+                errorColor="var(--destructive)"
+              />
+            </span>
+            {pending ? "Sending…" : "Inquire"}
+          </span>
         </button>
         {/* What is still missing, where the button is, and only once
             there is any reason to say it. */}
@@ -413,60 +432,23 @@ function Field({
   );
 }
 
-/**
- * The mark that draws itself when an enquiry lands.
- *
- * A ring and a check, in the green this site reserves for state — `--live`
- * rather than the teal accent, on the same reasoning the token carries: the
- * accent is identity and belongs on things you can press, while this is a
- * report on something that just happened.
- *
- * The ring closes first and the check follows into it. That order reads as
- * *completing* something; both at once reads as two lines appearing. Each is
- * the one `jg-draw` keyframe taking that path's own `stroke-dashoffset` to
- * zero, and the lengths are written inline because they are facts about the
- * geometry rather than about the animation: 2*pi*r at r=15 is 94.25, and the
- * check's two segments measure about 22. Both are rounded *up* where they are
- * uncertain — a length a shade too long finishes a hair early, where one too
- * short leaves the line permanently unfinished.
- */
-function SentMark() {
+/* The sent card's mark: it arrives still turning, as the button left it,
+   and closes on the check. React Bits' StatusMark, in the site's green. */
+function SentStatus() {
+  const [done, setDone] = React.useState(false);
+  React.useEffect(() => {
+    const t = window.setTimeout(() => setDone(true), 420);
+    return () => window.clearTimeout(t);
+  }, []);
   return (
-    <svg
-      viewBox="0 0 36 36"
-      aria-hidden
-      className="size-14 text-live"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <circle
-        cx="18"
-        cy="18"
-        r="15"
-        className="draw"
-        style={
-          {
-            strokeDasharray: 94.25,
-            strokeDashoffset: 94.25,
-            "--draw-dur": "560ms",
-          } as React.CSSProperties
-        }
+    <span aria-hidden className="inline-flex">
+      <StatusMark
+        status={done ? "done" : "running"}
+        size={56}
+        strokeWidth={1}
+        doneColor="var(--live)"
+        drawDuration={320}
       />
-      <path
-        d="M11.5 18.5 L16 23 L24.5 13.5"
-        className="draw"
-        style={
-          {
-            strokeDasharray: 22,
-            strokeDashoffset: 22,
-            "--draw-dur": "300ms",
-            "--draw-delay": "340ms",
-          } as React.CSSProperties
-        }
-      />
-    </svg>
+    </span>
   );
 }

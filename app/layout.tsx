@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Inter, Geist_Mono } from "next/font/google";
+import { Inter, Geist_Mono, Big_Shoulders } from "next/font/google";
 import localFont from "next/font/local";
 import { Intro } from "@/components/intro";
 import { SiteHeader } from "@/components/site-header";
@@ -45,6 +45,18 @@ const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
   preload: false,
+});
+
+// The splash's count. Julian chose it: a thin condensed grotesque, the
+// same tall, narrow build as Univers Bold Condensed, so the number reads as
+// kin to the titles. Variable for the optical size axis: at 72 it is the
+// Display cut he picked, finer than the text cut at the default 14.
+// Preloaded, because the splash is the first thing a new visitor sees.
+const counter = Big_Shoulders({
+  variable: "--font-counter",
+  subsets: ["latin"],
+  axes: ["opsz"],
+  display: "block",
 });
 
 // Univers Bold Condensed for the masthead and project titles.
@@ -145,7 +157,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="en"
-      className={`${sans.variable} ${geistMono.variable} ${display.variable} h-full antialiased`}
+      className={`${sans.variable} ${geistMono.variable} ${display.variable} ${counter.variable} h-full antialiased`}
       // Dark is the default and is what the CSS already declares, so the
       // server renders the correct theme for everyone except the visitor who
       // has chosen light. That one case is what the script below fixes.

@@ -103,8 +103,8 @@
  * intro. It lets them go the moment it starts to fade, so the site is
  * live under the fade and not after it.
  *
- * The layer is the wall's dark in either theme, so the frame before the
- * wall mounts already matches it.
+ * The layer is the wall's ground in the visitor's theme, so the frame
+ * before the wall mounts already matches it.
  * ───────────────────────────────────────────────────────────────── */
 #jg-intro {
   display: none;
@@ -118,31 +118,83 @@
   /* The site's dark, the wall's overlay, so the frame before the wall
      mounts matches it. */
   background: #0b0a09;
+  color: #ececf0;
+  --jg-intro-inset: clamp(1.25rem, 3vw, 2.5rem);
 }
 /* The wall fills the window, and the loader sits at the bottom of it: a
-   count, and under it a short hairline that fills, in white whichever theme is on,
-   since the wall is dark in both. */
+   count, and under it a short hairline that fills, in the ink of the
+   theme the wall is in. */
 .jg-intro-mark {
   position: absolute;
   inset: 0;
   opacity: 0;
 }
+/* The count in the middle of the screen. */
 .jg-intro-load {
-  position: absolute;
-  left: 50%;
-  bottom: calc(2.5rem + env(safe-area-inset-bottom, 0px));
-  translate: -50% 0;
-  width: min(10rem, 40vw);
+  position: relative;
+  width: min(16rem, 60vw);
   display: grid;
   justify-items: center;
-  gap: 0.625rem;
-  color: #ececf0;
+  gap: 1rem;
   /* Presses go through to the wall's tiles, which lift under the pointer. */
   pointer-events: none;
 }
-.jg-intro-track {
+/* Light: the page's ground, and the loader in its ink. Julian asked for a
+   light mode for the wall; the wall's own overlay follows in `intro.tsx`. */
+:root[data-theme="light"][data-intro] #jg-intro {
+  background: #ebedef;
+}
+:root[data-theme="light"][data-intro] #jg-intro {
+  color: #0b0a09;
+}
+:root[data-theme="light"] #jg-intro .drift-wall__inner {
+  background: #d8dadd;
+}
+/* The eye at the foot, in the middle. */
+.jg-intro-eye {
+  position: absolute;
+  left: 50%;
+  bottom: calc(var(--jg-intro-inset) + env(safe-area-inset-bottom, 0px));
+  translate: -50% 0;
+  width: clamp(2.5rem, 4vw, 3.25rem);
+  aspect-ratio: 1;
+  pointer-events: none;
+}
+/* A soft pool of the ground under the count and the eye keeps both clear
+   of whatever photograph drifts behind. */
+.jg-intro-load::before,
+.jg-intro-eye::before {
+  content: "";
+  position: absolute;
+  inset: -90%;
+  z-index: -1;
+  background: radial-gradient(closest-side, #0b0a09 0%, transparent 100%);
+  opacity: 0.55;
+}
+:root[data-theme="light"] .jg-intro-load::before,
+:root[data-theme="light"] .jg-intro-eye::before {
+  background: radial-gradient(closest-side, #ebedef 0%, transparent 100%);
+  opacity: 0.8;
+}
+.jg-intro-eye svg {
   width: 100%;
-  height: 1px;
+  height: 100%;
+}
+/* The count in Big Shoulders, thin, at its display optical size: tall and
+   narrow like the Univers titles (`--font-counter`, `layout.tsx`). */
+.jg-intro-count {
+  font-family: var(--font-counter), var(--font-sans), sans-serif;
+  font-weight: 300;
+  font-variation-settings: "opsz" 72;
+  font-size: clamp(3.25rem, 7.5vw, 5.25rem);
+  line-height: 0.9;
+  letter-spacing: 0;
+}
+.jg-intro-track {
+  position: absolute;
+  inset-inline: 0;
+  bottom: env(safe-area-inset-bottom, 0px);
+  height: 2px;
   background: color-mix(in oklab, currentColor 16%, transparent);
 }
 .jg-intro-track > div {
@@ -160,7 +212,7 @@
 #jg-intro.jg-intro-leaving {
   pointer-events: none;
 }
-#jg-intro.jg-intro-leaving > .jg-intro-load {
+#jg-intro.jg-intro-leaving > :is(.jg-intro-load, .jg-intro-track) {
   opacity: 0;
   transition: opacity 250ms var(--ease-out-strong);
 }
@@ -2903,8 +2955,13 @@ optgroup {
    the page up; swapping in `jg-page-settle`, which only moves it, left
    the new page in full view under the old one for the whole wait, and
    the work index ghosted over the homepage at 500ms on a recording. The
-   settle with the fade back in, so the wait is a wait. */
-:root[data-nav-bar][data-nav="out"]::view-transition-new(.page) {
+   settle with the fade back in, so the wait is a wait.
+
+   Not on a deal. This selector outweighed `[data-nav-side="left"]`, so
+   the wordmark, the one bar link that is a way out, faded the homepage
+   up through the page it left instead of dealing it in from the left.
+   Julian saw the two pages ghost over each other. */
+:root[data-nav-bar][data-nav="out"]:not([data-nav-side])::view-transition-new(.page) {
   animation-name: jg-page-settle-in;
 }
 @keyframes jg-page-settle-in {
