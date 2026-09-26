@@ -19,12 +19,13 @@ import {
   type WorkView,
 } from "@/lib/work-view";
 
-/* JellyRadio's figures, as Julian's example set them. */
+/* JellyRadio's figures, as Julian's example set them, with the bounce
+   taken down by a third (from 0.4) at his asking. */
 const JELLY = {
   swell: 0.2,
   shrink: 0.03,
   jelly: 1,
-  bounce: 0.4,
+  bounce: 0.27,
   stagger: 36,
   stiffness: 580,
 };
