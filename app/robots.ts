@@ -14,11 +14,16 @@ export default function robots(): MetadataRoute.Robots {
       // and Google-Extended / Applebot-Extended are the switches those two
       // companies publish for training use specifically. The legal version
       // of this list is clause 5 of /legal#terms; the headers carry it too.
+      //
+      // AI search is let in, at Julian's ask (2026-09-26): OAI-SearchBot,
+      // ChatGPT-User, PerplexityBot, Perplexity-User, DuckAssistBot,
+      // MistralAI-User and Meta-ExternalFetcher fetch a page to answer a
+      // question and cite it, and are off this list. Each company's training
+      // crawler (GPTBot, Meta-ExternalAgent...) stays on it. Claude-SearchBot
+      // and Claude-User were never listed; ClaudeBot is Anthropic's trainer.
       {
         userAgent: [
           "GPTBot",
-          "ChatGPT-User",
-          "OAI-SearchBot",
           "Google-Extended",
           "Applebot-Extended",
           "ClaudeBot",
@@ -29,9 +34,6 @@ export default function robots(): MetadataRoute.Robots {
           "Amazonbot",
           "FacebookBot",
           "Meta-ExternalAgent",
-          "Meta-ExternalFetcher",
-          "PerplexityBot",
-          "Perplexity-User",
           "cohere-ai",
           "cohere-training-data-crawler",
           "Diffbot",
@@ -46,8 +48,6 @@ export default function robots(): MetadataRoute.Robots {
           "Ai2Bot-Dolma",
           "PanguBot",
           "Kangaroo Bot",
-          "DuckAssistBot",
-          "MistralAI-User",
           "iaskspider/2.0",
           "ICC-Crawler",
           "Scrapy",

@@ -151,6 +151,8 @@ export const metadata: Metadata = {
     images: ["/og.jpg"],
   },
   alternates: { canonical: "/" },
+  // Bing Webmaster Tools ownership. Removing it unverifies the site there.
+  verification: { other: { "msvalidate.01": "DEF796C06E3ACDCBF969BF1FF3E4EA6A" } },
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

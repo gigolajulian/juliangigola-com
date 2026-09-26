@@ -28,7 +28,7 @@ export function TermsColumn() {
       id="terms"
       title="Terms of Service"
       label="Terms"
-      effective="2026-09-21"
+      effective="2026-09-26"
     >
       <Clause title="Definitions">
         <p>
@@ -152,9 +152,9 @@ export function TermsColumn() {
           <li>
             access the Site by automated means, including crawlers, spiders,
             scrapers, bots, headless browsers, download managers and scripts,
-            except a search engine indexing the Site in accordance with my
-            robots.txt for the sole purpose of returning links to it in search
-            results;
+            except a search engine or AI search service indexing the Site in
+            accordance with my robots.txt for the sole purpose of returning
+            links to it, or citing it with a link, in its results;
           </li>
           <li>
             circumvent, disable, or interfere with any technical measure on the
@@ -199,7 +199,10 @@ export function TermsColumn() {
           reference image, or generating output that imitates, reproduces, or is
           derived from the Content or my style.
         </p>
-        <p>Without limiting that, you may not:</p>
+        <p>
+          Without limiting that, and subject only to <em>AI search</em> below,
+          you may not:
+        </p>
         <ul>
           <li>
             include any Content, any file derived from it, or any description or
@@ -221,6 +224,15 @@ export function TermsColumn() {
             the above as a consequence of accessing it.
           </li>
         </ul>
+        <p>
+          <strong>AI search.</strong> The one exception to this clause: a
+          search or answer service that my robots.txt admits may index the Site
+          and read a page of it to answer a question a person has asked, and may
+          name, briefly quote, and link to that page in its answer. It may not
+          use anything from the Site to train, fine-tune, or evaluate a model,
+          or generate images from the photographs or in their manner.
+          Everything else in this clause still applies to it.
+        </p>
         <p>
           <strong>Reservation of rights.</strong> To the fullest extent
           permitted by law, I expressly reserve all rights in the Content for
