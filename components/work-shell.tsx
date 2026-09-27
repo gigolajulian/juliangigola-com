@@ -683,10 +683,9 @@ export function WorkShell({
      for anyone who is — `data-ring`, the same tag the covers carry.
 
      The list only on All: see the note on `view` above. */
-  /* Julian: the list first. It reads as the plainest of the three and
-     the row runs from plain to pictorial — a column of names, a wall of
-     covers, a ribbon. */
-  const modes: WorkView[] = ["list", "grid", "strip"];
+  /* Julian: no list button; the list is what a search shows. The row
+     runs from a wall of covers to a ribbon. */
+  const modes: WorkView[] = ["grid", "strip"];
   const WORD: Record<WorkView, string> = {
     strip: "Strip",
     grid: "Grid",
@@ -756,7 +755,7 @@ export function WorkShell({
                 /* Leaving the list with something typed would filter a
                    strip nobody can see the ends of. The box empties with
                    it. */
-                if (mode !== "list" && query) search("");
+                if (query) search("");
                 chooseView(mode);
                 // A view chosen is a way out of colour, as a discipline is.
                 closeScope();

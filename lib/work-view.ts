@@ -40,10 +40,14 @@ const subscribe = (onChange: () => void) => {
   };
 };
 
+/* Julian: the list only while searching. It has no button of its own;
+   a search shows it and emptying the box puts back the view that was
+   chosen, which is all that is kept. */
 const readView = (): WorkView => {
+  if (query.trim()) return "list";
   try {
     const kept = window.localStorage.getItem(KEY);
-    return kept === "grid" || kept === "list" ? kept : "strip";
+    return kept === "grid" ? kept : "strip";
   } catch {
     // Private browsing: it works, it is simply not remembered.
     return "strip";
@@ -268,7 +272,6 @@ export const morphView = (change: () => void) => {
    would have the answer somewhere off the side of the window — so typing
    switches to it and clearing puts back whatever was showing before. */
 let query = "";
-let before: WorkView | null = null;
 
 const readQuery = () => query;
 const noQuery = () => "";
@@ -277,19 +280,6 @@ export const useWorkQuery = (): string =>
   React.useSyncExternalStore(subscribe, readQuery, noQuery);
 
 export const search = (next: string) => {
-  const had = query.trim() !== "";
-  const has = next.trim() !== "";
   query = next;
-  if (has && !had) {
-    before = readView();
-    chooseView("list");
-    return;
-  }
-  if (!has && had && before) {
-    const back = before;
-    before = null;
-    chooseView(back);
-    return;
-  }
   tell();
 };
