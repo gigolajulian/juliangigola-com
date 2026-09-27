@@ -185,7 +185,7 @@
  * each frame, the depth itself on the card, the camera on the section.
  * ───────────────────────────────────────────────────────────────── */
 .cover-float {
-  perspective: var(--h-perspective, 2490px);
+  perspective: var(--h-perspective, 3280px);
 }
 .cover-float-ring,
 .cover-float-frame {
@@ -326,7 +326,7 @@
    new size instead of stretched; and moved from the middle of the cover. */
 .cover-float-middle {
   zoom: var(--h-mid-size, 1.02);
-  translate: 0 calc(var(--h-mid-down, -20px) / var(--h-mid-size, 1.02));
+  translate: 0 calc(var(--h-mid-down, 21px) / var(--h-mid-size, 1.02));
 }
 .cover-float-name {
   color: var(--hero-ink);
@@ -342,7 +342,7 @@
 }
 .cover-float-where {
   font-family: var(--font-mono);
-  font-size: var(--h-where-size, 14.5px);
+  font-size: var(--h-where-size, 13px);
   color: var(--hero-where);
 }
 .cover-cta {
@@ -412,9 +412,9 @@
      after `--blur-wait`, once the pointer has stayed long enough to mean
      it, so passing over a frame on the way somewhere blurs nothing. */
   .cover-float {
-    --focus-wait: 80ms;
-    --blur-wait: 600ms;
-    --release-wait: 140ms;
+    --focus-wait: 30ms;
+    --blur-wait: 310ms;
+    --release-wait: 60ms;
   }
   /* Julian: an ease on it. The one pointed at glides forward and back
      on a soft ease in and out rather than snapping to its place. */
@@ -434,7 +434,7 @@
   .cover-float-ring:has(.cover-float-frame:hover) .cover-float-card {
     /* Julian: less blur round the one in focus, and glass over the rest
        instead (the pane below). No darkening. */
-    filter: blur(var(--h-others-blur, 0.3px));
+    filter: blur(var(--h-others-blur, 0.5px));
     transition-delay: var(--blur-wait);
   }
   /* The glass: a clear pane over each of the others, the site's own

@@ -35,20 +35,20 @@ export const CARDS = {
   grow: [1.045, 1, 1.2, 0.005],
   forward: [64, 0, 200, 1],
   towardMiddle: [0.12, 0, 1, 0.01],
-  shadow: { blur: [5, 0, 80, 1], opacity: [0.41, 0, 1, 0.01] },
-  otherPhotos: { blur: [0.3, 0, 8, 0.1], glassSheen: [0.75, 0, 1, 0.05] },
+  shadow: { blur: [4, 0, 80, 1], opacity: [0.3, 0, 1, 0.01] },
+  otherPhotos: { blur: [0.5, 0, 8, 0.1], glassSheen: [0.75, 0, 1, 0.05] },
   delays: {
-    comeForward: [80, 0, 1000, 10],
-    blurOthers: [600, 0, 2000, 10],
-    letGo: [140, 0, 1000, 10],
+    comeForward: [30, 0, 1000, 10],
+    blurOthers: [310, 0, 2000, 10],
+    letGo: [60, 0, 1000, 10],
   },
 } satisfies DialConfig;
 
 export const SPACE = {
   tiltUpDown: [8, 0, 20, 0.5],
   tiltSideways: [16.5, 0, 30, 0.5],
-  followSpeed: [16, 1, 50, 1],
-  perspective: [2490, 300, 4000, 10],
+  followSpeed: [21, 1, 50, 1],
+  perspective: [3280, 300, 4000, 10],
 } satisfies DialConfig;
 
 const ENTRANCE = {
@@ -106,7 +106,7 @@ const LAYOUT = {
 
 const TYPE = {
   roleLine: { size: [15, 9, 24, 0.5], letterSpacing: [0.17, 0, 0.5, 0.01] },
-  location: { size: [14.5, 9, 20, 0.5] },
+  location: { size: [13, 9, 20, 0.5] },
   buttons: { size: [10.5, 8, 16, 0.5] },
   /* Julian: how close the name, the role, the location and the buttons
      sit, in px of space between each and the next. */
@@ -115,12 +115,12 @@ const TYPE = {
      the cover, negative up. */
   middle: {
     size: [1.02, 0.5, 1.6, 0.01],
-    moveDown: [-20, -300, 300, 1],
+    moveDown: [21, -300, 300, 1],
   },
   spacing: {
-    nameToRole: [7, 0, 80, 1],
+    nameToRole: [8, 0, 80, 1],
     roleToLocation: [10, 0, 80, 1],
-    locationToButtons: [18, 0, 80, 1],
+    locationToButtons: [13, 0, 80, 1],
   },
 } satisfies DialConfig;
 

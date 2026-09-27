@@ -116,7 +116,7 @@ export function CoverFloat({
               />
             </span>
           </span>
-          <span className="mt-[var(--h-gap-role,7px)] block">
+          <span className="mt-[var(--h-gap-role,8px)] block">
             <span
               className="lift block cover-float-title"
               style={{ "--reveal-delay": "1420ms" } as React.CSSProperties}
@@ -131,7 +131,7 @@ export function CoverFloat({
           </span>
         </h1>
         <p
-          className="lift cover-float-where mt-[var(--h-gap-where,10px)] mb-[var(--h-gap-cta,18px)] max-w-[34rem]"
+          className="lift cover-float-where mt-[var(--h-gap-where,10px)] mb-[var(--h-gap-cta,13px)] max-w-[34rem]"
           style={{ "--reveal-delay": "1600ms" } as React.CSSProperties}
         >
           {"Based in San Francisco, CA. Available Worldwide"}

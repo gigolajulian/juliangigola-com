@@ -320,6 +320,11 @@ export function WarpText({
        a visitor's own pointer on the name takes over from it at once. */
     const PASS_MS = 1300;
     let pass = 0;
+    /* After the pass, the lens fades out where it finished, off the end
+       of the name, and only then goes back to its idle drift: gliding back
+       across it read as a second swipe, right to left (Julian: one swipe,
+       left to right). */
+    let fading = false;
     let waiting = sweepRef.current && !reduceMotion;
     const rise = container.closest(".lift")?.getAnimations()[0];
     const riseTiming = rise?.effect?.getComputedTiming();
@@ -333,6 +338,8 @@ export function WarpText({
       if (pointer.activeTarget > 0) return;
       pointer.x = pointer.tx = -0.08;
       pointer.y = pointer.ty = 0.5;
+      // From nothing at the left edge, not the idle shimmer jumping there.
+      pointer.active = 0;
       pass = now;
     };
 
@@ -460,19 +467,29 @@ export function WarpText({
       maybePass(now);
       if (pass) {
         const t = (now - pass) / PASS_MS;
-        if (t >= 1 || pointer.activeTarget > 0) pass = 0;
-        else {
+        if (t >= 1 || pointer.activeTarget > 0) {
+          pass = 0;
+          fading = pointer.activeTarget === 0;
+        } else {
           // Unhurried at either end, like a hand starting and stopping.
           const e = 0.5 - Math.cos(Math.PI * t) / 2;
           pointer.tx = -0.08 + 1.16 * e;
           pointer.ty = 0.5;
         }
       }
+      if (fading && (pointer.activeTarget > 0 || pointer.active < 0.02)) {
+        fading = false;
+        // Faded out: back to the drift unseen, to come up there again.
+        if (pointer.activeTarget === 0) {
+          pointer.x = idleX;
+          pointer.y = idleY;
+        }
+      }
       const on = pointer.activeTarget > 0 || pass > 0;
       const damping = on ? 0.12 : 0.035;
-      pointer.x += ((on ? pointer.tx : idleX) - pointer.x) * damping;
-      pointer.y += ((on ? pointer.ty : idleY) - pointer.y) * damping;
-      pointer.active += ((on ? 1 : 0.18) - pointer.active) * 0.06;
+      pointer.x += ((on || fading ? pointer.tx : idleX) - pointer.x) * damping;
+      pointer.y += ((on || fading ? pointer.ty : idleY) - pointer.y) * damping;
+      pointer.active += ((on ? 1 : fading ? 0 : 0.18) - pointer.active) * 0.06;
       program.uniforms.uPointer.value[0] = pointer.x;
       program.uniforms.uPointer.value[1] = pointer.y;
       program.uniforms.uPointerActive.value = reduceMotion ? pointer.active * 0.35 : pointer.active;
