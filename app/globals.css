@@ -474,8 +474,8 @@
        to the cover's centre, measured as the pointer lands (`CoverCard`);
        the panel's Toward Middle is the share of it taken. The frame stays
        put, so the pointer never loses it as the picture moves. */
-    translate: calc(var(--mid-x, 0px) * var(--h-mid, 0.12))
-      calc(var(--mid-y, 0px) * var(--h-mid, 0.12));
+    translate: calc(var(--mid-x, 0px) * var(--h-mid, 0.08))
+      calc(var(--mid-y, 0px) * var(--h-mid, 0.08));
     filter: blur(0px);
     transition-delay: var(--focus-wait);
   }
@@ -2733,8 +2733,8 @@ a.strip-cell {
   inset: 0;
   top: calc(-1 * env(safe-area-inset-top, 0px));
   z-index: -1;
-  -webkit-backdrop-filter: blur(18px) saturate(1.5);
-  backdrop-filter: blur(18px) saturate(1.5);
+  -webkit-backdrop-filter: blur(12px) saturate(1.5);
+  backdrop-filter: blur(12px) saturate(1.5);
   opacity: 0;
   transition: opacity 300ms var(--ease-out-strong);
   pointer-events: none;
@@ -2815,8 +2815,8 @@ a.strip-cell {
     position: absolute;
     inset: 0;
     z-index: -1;
-    -webkit-backdrop-filter: blur(18px) saturate(1.5);
-    backdrop-filter: blur(18px) saturate(1.5);
+    -webkit-backdrop-filter: blur(12px) saturate(1.5);
+    backdrop-filter: blur(12px) saturate(1.5);
     pointer-events: none;
   }
   @media (prefers-reduced-transparency: reduce) {
