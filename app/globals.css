@@ -2742,6 +2742,18 @@ a.strip-cell {
 .site-bar[data-plain="true"]::after {
   opacity: 1;
 }
+/* Julian: glass on the homepage. The bar sits on the cover's photographs
+   and the homepage never scrolls the page, so it never got a ground of its
+   own. It gets the site's glass instead: the frosted layer above at full,
+   a thin tint of the page, a hairline, and light along its top edge. */
+.site-bar[data-home]:not([data-plain="true"]) {
+  border-color: color-mix(in oklab, var(--foreground) 12%, transparent);
+  background-color: color-mix(in oklab, var(--background) 34%, transparent);
+  box-shadow: inset 0 1px 0 color-mix(in oklab, white 12%, transparent);
+}
+.site-bar[data-home]::after {
+  opacity: 1;
+}
 @media (prefers-reduced-motion: reduce) {
   .site-bar::after {
     transition: none;
@@ -2752,7 +2764,8 @@ a.strip-cell {
     -webkit-backdrop-filter: none;
     backdrop-filter: none;
   }
-  .site-bar[data-plain="true"] {
+  .site-bar[data-plain="true"],
+  .site-bar[data-home] {
     background-color: var(--background);
   }
 }

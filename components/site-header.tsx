@@ -207,6 +207,8 @@ export function SiteHeader() {
        * bar travels with the page, over the same photograph it was over
        * before, so being open says nothing about what is underneath. */
       data-plain={scrolled ? "true" : "false"}
+      // Glass over the homepage's photographs (`.site-bar[data-home]`).
+      data-home={pathname === "/" ? "" : undefined}
       className={cn(
         // `site-bar` is what `globals.css` slides sideways. The whole bar
         // goes, not its contents: full width and pushed by the drawer's
