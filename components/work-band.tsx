@@ -186,7 +186,7 @@ export function WorkBand({
          shape an accident of the window: at 1440x900 that was a landscape
          box, and every portrait frame lost a third of itself to the
          crop. */
-      className="group strip-cell press relative block h-full w-full max-sm:aspect-[4/5] active:scale-[0.995]"
+      className="group strip-cell press relative block h-full w-full overflow-hidden max-sm:aspect-[4/5] active:scale-[0.995]"
     >
       {/* Base layer: always loaded, never removed. It is what keeps the
             cell from flashing empty the first time a scrub frame is fetched.
@@ -210,11 +210,13 @@ export function WorkBand({
         share="morph"
         default="none"
       >
-        {/* The clip is here, on the pictures, and not on the tile: clipped
-            at the tile, the plate's glass was cut at a fractional pixel and
-            its blur leaked a light hairline up every join. Julian saw the
-            seams glitch. */}
-        <div className="absolute inset-0 overflow-hidden">
+        {/* Clipped here, for the morph, and again at the tile with the
+            plate inside it: Julian saw the plate slip against the picture
+            as the screens slid and settled, the two clipped and drawn
+            apart. One clip round both and they move as one. The hairline
+            the tile's clip once cut into the plate's blur was a fractional
+            join, and the rows are whole pixels now (`band-grid`). */}
+        <div className="photo-corner absolute inset-0 overflow-hidden">
           <Image
             src={project.cover.src}
             alt={project.cover.alt || project.name}

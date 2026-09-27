@@ -198,7 +198,7 @@ function Tile({
       // arriving. The inset outline that used to draw itself on hover is
       // gone, at Julian's ask.
       className={cn(
-        "group relative aspect-video overflow-hidden bg-card press active:scale-[0.995]",
+        "photo-corner group relative aspect-video overflow-hidden bg-card press active:scale-[0.995]",
         box,
       )}
     >

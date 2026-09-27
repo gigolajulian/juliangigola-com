@@ -66,7 +66,7 @@ export function CoverArt() {
   return (
     <section
       data-tick
-      data-label="Cover art"
+      data-label="Cover Art"
       data-hash="cover-art"
       aria-labelledby="cover-art"
       className="relative flex w-full shrink-0 flex-col justify-center border-l border-border py-16 sm:h-full sm:pb-0 sm:pt-20"

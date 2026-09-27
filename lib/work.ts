@@ -95,7 +95,7 @@ const withCoverArt = (project: Project): Project => {
     ...project,
     // "COVERART" was one word on the old site and reads as a typo set large —
     // on the project page it is printed as the category too, so both go.
-    name: "Cover art",
+    name: "Cover Art",
     // The category used to be renamed here too. `relabel` does it now, for
     // this category and every other one, from `CATEGORY_LABELS`.
     cover: { ...images[0], src: "/covers/cover.jpg", width: 600, height: 600 },
@@ -335,11 +335,11 @@ const reframe = (project: Project): Project => {
 /** Display names, where the old site's nav label does not read well. */
 const CATEGORY_LABELS: Record<string, string> = {
   // One word on the old site, and it looks like a typo set large.
-  coverart: "Cover art",
+  coverart: "Cover Art",
   // "Campaigns" alone is ambiguous next to EDITORIAL — it could as easily mean
   // a political or fundraising one. The client is a brand, and saying so is
   // what an art director is scanning the index for.
-  campaigns: "Brand campaigns",
+  campaigns: "Brand Campaigns",
   /* Julian: rename Video to Motion. "Video" names a file format; the row
      next to EDITORIAL and PORTRAITS should name a kind of work, and the
      moving work here is direction, not footage. The slug stays `video`, so
@@ -357,7 +357,8 @@ const CATEGORY_LABELS: Record<string, string> = {
  */
 export const categoryLabel = (category: Category): string =>
   CATEGORY_LABELS[category.slug] ??
-  category.name.charAt(0) + category.name.slice(1).toLowerCase();
+  // Julian: every word capitalized, "Event Coverage", "Mixed Media".
+  category.name.toLowerCase().replace(/(^|\s)\S/g, (c) => c.toUpperCase());
 
 /**
  * Prints every category under its display name, once, for good.
@@ -737,11 +738,57 @@ export type IndexRow = {
   frames?: number;
 };
 
+/** A credited name without the zero-width marks pasted in with some. */
+const clean = (name: string) => name.replace(/\p{Cf}/gu, "").trim();
+/** Julian himself, under either spelling he is credited by. */
+const isJulian = (name: string) => /julian gigola|@juliangigola/i.test(name);
+
+/**
+ * The line under a cover's name. Julian: the model, for unity, and the
+ * creative director after a slash when there is one; for brand campaigns,
+ * the client or brand instead.
+ *
+ * The model is whoever is credited in front of the lens, under whatever
+ * the credit calls them: Model, Muse, In frame, Talent, or Artist on a
+ * presskit (never a 3D or CG artist, whose role names a craft). The first
+ * one, where there are several. A creative director who is Julian is not
+ * named: it is his site. Nothing credited, and it falls back to what was
+ * there before, the billing and then the discipline.
+ */
+/** Julian's line for the campaigns whose credits name no client or brand:
+    two were spec work, not commissioned. */
+const CAMPAIGN_CLIENT: Record<string, string> = {
+  ukiyosunknown: "@ukiyosunknown",
+  diesel: "Diesel spec",
+  "oakley-x-nike": "Oakley x Nike spec",
+  "kala-x-sharks": "Kala Therapy x SJ Sharks",
+};
+
+const coverCredit = (p: Project): string => {
+  const credits = p.credits.map((c) => ({ ...c, name: clean(c.name) }));
+  if (p.categories.some((c) => c.slug === "campaigns")) {
+    const client = credits.find((c) => /client|brand/i.test(c.role));
+    return (
+      client?.name ?? CAMPAIGN_CLIENT[p.slug] ?? p.categories[0]?.name ?? ""
+    );
+  }
+  const model = credits.find(
+    (c) =>
+      /\b(model|muse|in frame|talent)\b/i.test(c.role) ||
+      /^artist$/i.test(c.role),
+  )?.name;
+  const director = credits.find(
+    (c) => /creative direct/i.test(c.role) && !isJulian(c.name),
+  )?.name;
+  const lead = model ?? billing(p) ?? p.categories[0]?.name ?? "";
+  return director && director !== lead ? `${lead} / ${director}` : lead;
+};
+
 export const indexRow = (p: Project): IndexRow => ({
   slug: p.slug,
   name: p.name,
   cover: withBlur(p.cover),
-  credit: billing(p) ?? p.categories[0]?.name ?? "",
+  credit: coverCredit(p),
   frames: p.images.length || undefined,
 });
 
@@ -769,7 +816,10 @@ export type BandTile = {
 };
 
 export const bandTile = (p: Project): BandTile => {
-  const client = billing(p);
+  /* The same line as the cover's on /work, bar the discipline fallback:
+     the tile prints the discipline beside it already. */
+  const credit = coverCredit(p);
+  const client = credit === p.categories[0]?.name ? undefined : credit;
   return {
     slug: p.slug,
     name: p.name,

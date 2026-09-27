@@ -122,7 +122,7 @@ export function VideoViewer({
                         onClick={() => onChange(v)}
                         aria-label={`Play ${v.title}`}
                         className={cn(
-                          "group relative aspect-video w-full overflow-hidden bg-card press active:scale-[0.98]",
+                          "photo-corner group relative aspect-video w-full overflow-hidden bg-card press active:scale-[0.98]",
                           "opacity-70 transition-opacity duration-200 hoverable:hover:opacity-100 focus-visible:opacity-100",
                         )}
                       >

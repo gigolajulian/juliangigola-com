@@ -182,9 +182,13 @@ export default async function CategoryPage(
         frames={gallery.images}
         within={name}
       >
-        <div className="flex min-h-0 flex-1 flex-col">
+        <div data-discipline-page className="flex min-h-0 flex-1 flex-col">
           <ProjectStrip
-            project={gallery}
+            /* Titled with the discipline's own label, as the index names
+               it ("Event Coverage"), not the gallery's stored name, which
+               is in capitals. Julian: each word capitalized, across the
+               disciplines. */
+            project={{ ...gallery, name, headline: null }}
             next={next}
             prev={prev}
             map={archive}
@@ -227,11 +231,7 @@ export default async function CategoryPage(
           deck="leads"
           className="mt-4 flex-1"
         >
-          <TitleCell title={name} hash={slug}>
-            <p className="label text-muted-foreground">
-              {COVER_RELEASES.length} releases
-            </p>
-          </TitleCell>
+          <TitleCell title={name} hash={slug} className="discipline-title" />
           <div
             data-tick
             data-label={name}
@@ -257,11 +257,7 @@ export default async function CategoryPage(
         className="mt-4 flex-1"
       >
         {[
-          <TitleCell key="title" title={name} hash={slug}>
-            <p className="label text-muted-foreground">
-              {projects.length} {projects.length === 1 ? "project" : "projects"}
-            </p>
-          </TitleCell>,
+          <TitleCell key="title" title={name} hash={slug} className="discipline-title" />,
           ...projects.map((p, i) => (
             <CoverCell
               key={p.slug}

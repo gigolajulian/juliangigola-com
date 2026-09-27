@@ -91,20 +91,14 @@
 @custom-variant roomy (@media (min-height: 75rem) and (min-width: 40rem));
 
 /* ── the opening ──────────────────────────────────────────────────
- * The eye mark over the page, and the page already rendered underneath
- * it. Hidden unless the script in `layout.tsx` has decided, before the
- * first paint, that this visit gets one: a first arrival, motion not
- * turned down, JavaScript running. Without that attribute this is
+ * The screen as the loading bar (`intro.tsx`): the ground, a panel in the
+ * theme's ink sweeping over it from the left, and the eye in the middle,
+ * set in `difference` so it turns over where the panel passes under it.
+ *
+ * Hidden unless the script in `layout.tsx` has decided, before the first
+ * paint, that this visit gets one. Without that attribute this is
  * `display: none`, so nobody is ever shut behind a curtain that has
  * nothing to lift it.
- *
- * It takes presses while it is up: a press let through to the page
- * underneath started a page change whose view transition drew over the
- * intro. It lets them go the moment it starts to fade, so the site is
- * live under the fade and not after it.
- *
- * The layer is the wall's ground in the visitor's theme, so the frame
- * before the wall mounts already matches it.
  * ───────────────────────────────────────────────────────────────── */
 #jg-intro {
   display: none;
@@ -113,126 +107,44 @@
   position: fixed;
   inset: 0;
   z-index: 60;
-  display: grid;
-  place-items: center;
-  /* The site's dark, the wall's overlay, so the frame before the wall
-     mounts matches it. */
+  display: block;
   background: #0b0a09;
   color: #ececf0;
-  --jg-intro-inset: clamp(1.25rem, 3vw, 2.5rem);
 }
-/* The wall fills the window, and the loader sits at the bottom of it: a
-   count, and under it a short hairline that fills, in the ink of the
-   theme the wall is in. */
-.jg-intro-mark {
-  position: absolute;
-  inset: 0;
-  opacity: 0;
-}
-/* The count in the middle of the screen. */
-.jg-intro-load {
-  position: relative;
-  width: min(16rem, 60vw);
-  display: grid;
-  justify-items: center;
-  gap: 1rem;
-  /* Presses go through to the wall's tiles, which lift under the pointer. */
-  pointer-events: none;
-}
-/* Light: the page's ground, and the loader in its ink. Julian asked for a
-   light mode for the wall; the wall's own overlay follows in `intro.tsx`. */
 :root[data-theme="light"][data-intro] #jg-intro {
   background: #ebedef;
-}
-:root[data-theme="light"][data-intro] #jg-intro {
   color: #0b0a09;
 }
-:root[data-theme="light"] #jg-intro .drift-wall__inner {
-  background: #d8dadd;
+.jg-intro-panel {
+  position: absolute;
+  inset: 0;
+  background: currentColor;
+  clip-path: inset(0 100% 0 0);
 }
-/* The eye at the foot, in the middle, above the line. */
 .jg-intro-eye {
   position: absolute;
   left: 50%;
-  bottom: calc(1.75rem + env(safe-area-inset-bottom, 0px));
-  translate: -50% 0;
-  width: clamp(2.5rem, 4vw, 3.25rem);
+  top: 50%;
+  translate: -50% -50%;
+  width: clamp(4.5rem, 8vw, 7rem);
   aspect-ratio: 1;
-  pointer-events: none;
-}
-/* A soft pool of the ground under the count and the eye keeps both clear
-   of whatever photograph drifts behind. */
-.jg-intro-load::before,
-.jg-intro-eye::before {
-  content: "";
-  position: absolute;
-  inset: -90%;
-  z-index: -1;
-  background: radial-gradient(closest-side, #0b0a09 0%, transparent 100%);
-  opacity: 0.55;
-}
-:root[data-theme="light"] .jg-intro-load::before,
-:root[data-theme="light"] .jg-intro-eye::before {
-  background: radial-gradient(closest-side, #ebedef 0%, transparent 100%);
-  opacity: 0.8;
+  color: #fff;
+  mix-blend-mode: difference;
 }
 .jg-intro-eye svg {
   width: 100%;
   height: 100%;
 }
-/* The count in Univers 57 Condensed, one step lighter than the titles'
-   67 (`--font-counter`, `layout.tsx`). Julian's pick. */
-.jg-intro-count {
-  font-family: var(--font-counter), var(--font-display), sans-serif;
-  font-weight: 400;
-  font-size: clamp(3rem, 7vw, 5rem);
-  line-height: 0.9;
-  letter-spacing: 0;
-}
-/* The line matches the strip's rail, eight pixels and fully rounded, and
-   runs edge to edge along the foot of the screen. Julian asked. It fills by
-   a rounded clip rather than a scale, which would squash its round end
-   (`intro.tsx`). */
-.jg-intro-track {
-  position: absolute;
-  inset-inline: 0;
-  bottom: env(safe-area-inset-bottom, 0px);
-  height: 0.5rem;
-  border-radius: 9999px;
-  background: color-mix(in oklab, currentColor 16%, transparent);
-}
-.jg-intro-track > div {
-  height: 100%;
-  border-radius: inherit;
-  background: currentColor;
-  clip-path: inset(0 100% 0 0 round 9999px);
-}
-/* Leaving, in one move. Julian: seamless and natural into the page. The
-   loader goes first and quickly; the wall then dissolves straight into
-   the page while drifting a little toward the viewer, as if walked
-   through, and the page makes its own entrance under it at the same
-   moment (`data-intro="lift"` releases the hold below). No bare ground
-   in between, which in light mode was a flash of dark. */
-#jg-intro.jg-intro-leaving {
+/* Full: the whole layer, panel and eye together, lifts off the top of
+   the screen (`intro.tsx`), and lets the pointer through as it goes. */
+#jg-intro.jg-intro-open {
   pointer-events: none;
 }
-#jg-intro.jg-intro-leaving > :is(.jg-intro-load, .jg-intro-track) {
-  opacity: 0;
-  transition: opacity 250ms var(--ease-out-strong);
-}
-[data-intro="lift"] #jg-intro {
-  opacity: 0;
-  transition: opacity 900ms cubic-bezier(0.4, 0, 0.2, 1);
-}
-[data-intro="lift"] .jg-intro-mark {
-  scale: 1.06;
-  transition: scale 900ms cubic-bezier(0.4, 0, 0.2, 1);
-}
-/* The page's entrance, held at its first frame while the intro is up:
+/* The page's entrance, held at its first frame while the panel fills:
    the keyframed ones paused (they fill backwards, so paused is their
-   start), the `@starting-style` ones pinned at their start, which they
-   transition out of the moment the hold comes off. */
-[data-intro="1"] :is(.strip-cell, .title-word, .title-rest, .dissolve) {
+   start), the `@starting-style` ones pinned at their start. */
+[data-intro="1"]
+  :is(.strip-cell, .title-word, .title-rest, .dissolve, .lift, .cover-float-frame, .cover-float-card) {
   animation-play-state: paused;
 }
 [data-intro="1"] :is(.rise, .emerge) {
@@ -240,6 +152,304 @@
 }
 [data-intro="1"] .rise {
   transform: translateY(0.75rem);
+}
+
+/* ── the lift ─────────────────────────────────────────────────────
+ * Type rising out of its own line. The element carries its own mask: it
+ * is clipped at its resting foot while it travels up to it, and nothing
+ * stays clipped once it has landed. `backwards`, so it holds below its
+ * line through its delay and lets go of the element at the end.
+ * ───────────────────────────────────────────────────────────────── */
+.lift {
+  animation: jg-lift var(--h-lift-ms, 900ms) cubic-bezier(0.16, 1, 0.3, 1) backwards;
+  animation-delay: var(--reveal-delay, 0ms);
+}
+@keyframes jg-lift {
+  from {
+    transform: translateY(100%);
+    clip-path: inset(0 0 100% 0);
+  }
+  to {
+    transform: translateY(0);
+    clip-path: inset(0);
+  }
+}
+
+/* ── the cover ────────────────────────────────────────────────────
+ * The featured work in a loose field round the name (`cover-float.tsx`),
+ * upright, each at its own small depth (`--z`); the space turns a few
+ * degrees after the pointer (`cover-space.tsx`), so near and far frames
+ * move apart.
+ *
+ * The depth is kept all the way down: `preserve-3d` on the ring and on
+ * each frame, the depth itself on the card, the camera on the section.
+ * ───────────────────────────────────────────────────────────────── */
+.cover-float {
+  perspective: var(--h-perspective, 1780px);
+}
+.cover-float-ring,
+.cover-float-frame {
+  transform-style: preserve-3d;
+}
+.cover-float-frame {
+  position: absolute;
+  left: var(--x);
+  top: var(--y);
+  width: var(--w);
+  /* Out of order: each frame's place in `ORDER` (`cover-float.tsx`),
+     spread out from the start. */
+  --delay: calc(var(--h-start, 1180ms) + var(--order, 0) * var(--h-spread, 1.2ms));
+  animation: jg-fly var(--h-fly-ms, 1800ms) cubic-bezier(0.16, 1, 0.3, 1)
+    var(--delay) backwards;
+}
+@media (max-width: 39.99rem) {
+  .cover-float-frame {
+    left: var(--px);
+    top: var(--py);
+    width: 28vw;
+  }
+}
+.cover-float-card {
+  position: absolute;
+  inset: 0;
+  display: block;
+  overflow: hidden;
+  border-radius: var(--radius-photo);
+  transform: translateZ(var(--z, 0px));
+}
+/* ── one corner for every photograph ──────────────────────────────
+ * Julian: every picture on the site on one corner, 8px, the drifting
+ * wall included (`radius` on `DriftWall`): the cover, the strips, the
+ * grids, the cover art, the lists, the films, the reel.
+ * Controls stay square. `isolation` so Safari clips a picture that zooms
+ * inside its rounded frame instead of drawing square corners over it.
+ * ───────────────────────────────────────────────────────────────── */
+:root {
+  --radius-photo: 8px;
+}
+.strip-cell,
+.photo-corner {
+  border-radius: var(--radius-photo);
+  isolation: isolate;
+}
+/* Julian: cover art always square, wherever it is shown: a sleeve is a
+   square. Known by its folder, `/covers/`, which the image loader keeps
+   in every URL it writes. */
+:is(.strip-cell, .photo-corner, .drift-wall__inner):has(img[src*="/covers/"]) {
+  border-radius: 0;
+}
+/* Julian: the project tiles square at the foot, so the plate with the
+   name sits flush along the bottom edge: the homepage's, and the covers
+   across /work (`cover-cell.tsx`, the ones carrying a plate). */
+/* Julian: the names on the homepage's tiles a touch more open than the
+   -0.04em every black heading carries (`.font-display`). */
+.band-tile h3 {
+  letter-spacing: -0.02em;
+}
+.band-tile :is(.strip-cell, .photo-corner),
+.strip-cell:has(.cover-plate) {
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+/* The name through glass (`warp-text.tsx`): the canvas fills its box. */
+.warp-text {
+  position: relative;
+  display: block;
+  overflow: hidden;
+  isolation: isolate;
+}
+.warp-text canvas {
+  position: absolute;
+  inset: 0;
+  /* Over the pixel size ogl writes on the element, so the canvas always
+     fills its box and can never overhang it and be cut off. */
+  width: 100% !important;
+  height: 100% !important;
+  display: block;
+}
+/* The type on the cover, to Julian's spec: the name in Inter Tight Black,
+   everything under it in JetBrains Mono. The colours are the spec's, for
+   the dark ground; the light ground, opt-in by the toggle, takes the
+   site's own ink and greys so it keeps its contrast there. */
+.cover-float {
+  --hero-ink: #f2f1ee;
+  --hero-sub: #bdbbb5;
+  --hero-where: #77756f;
+  --hero-line: #3a3936;
+  --hero-on-ink: #0b0b0b;
+}
+:root[data-theme="light"] .cover-float {
+  --hero-ink: var(--foreground);
+  --hero-sub: var(--foreground);
+  --hero-where: var(--muted-foreground);
+  --hero-line: var(--border);
+  --hero-on-ink: var(--background);
+}
+.cover-float-name {
+  color: var(--hero-ink);
+  line-height: 1;
+}
+.cover-float-title {
+  font-family: var(--font-mono);
+  font-weight: 400;
+  font-size: var(--h-title-size, 14px);
+  letter-spacing: var(--h-title-track, 0.2em);
+  text-transform: uppercase;
+  color: var(--hero-sub);
+}
+.cover-float-where {
+  font-family: var(--font-mono);
+  font-size: var(--h-where-size, 13px);
+  color: var(--hero-where);
+}
+.cover-cta {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-weight: 500;
+  font-size: var(--h-cta-size, 11px);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  padding: 13px 22px;
+  border-radius: 0;
+  box-shadow: none;
+  background: var(--hero-ink);
+  color: var(--hero-on-ink);
+  border: 0;
+}
+.cover-cta-quiet {
+  background: transparent;
+  color: var(--hero-ink);
+  border: 1px solid var(--hero-line);
+}
+/* Pointing at a frame: it swells a little, over the ones round it, and
+   the line under the name trades the job title for that frame's
+   discipline (`cover-role.tsx`). The words share one grid cell, so the
+   line keeps its height whichever is showing; the old word drops out of
+   the slot as the new one rises into it. */
+@media (hover: hover) and (pointer: fine) {
+  /* Julian: a beat before it answers, and the one pointed at comes into
+     focus. It waits `--focus-wait` going in, so a pointer crossing the
+     ring on its way somewhere does not set off every frame it passes,
+     and lets go at once coming out. In focus: forward toward the viewer,
+     a little larger, sharp; the rest soften behind it,
+     the way a lens racks focus. */
+  /* Letting go waits `--release-wait`, so a pointer crossing the gap
+     from one frame to the next keeps the room racked instead of the
+     others sharpening for a moment and blurring again. */
+  /* Julian: not everything blurring the moment the pointer lands. The
+     one pointed at comes forward after `--focus-wait`; the rest soften only
+     after `--blur-wait`, once the pointer has stayed long enough to mean
+     it, so passing over a frame on the way somewhere blurs nothing. */
+  .cover-float {
+    --focus-wait: 250ms;
+    --blur-wait: 600ms;
+    --release-wait: 280ms;
+  }
+  /* Julian: an ease on it. The one pointed at glides forward and back
+     on a soft ease in and out rather than snapping to its place. */
+  /* The swell is a spring now (`cover-card.tsx`), through
+     `--hover-scale`; the move forward stays here. */
+  .cover-float-card {
+    scale: var(--hover-scale, 1);
+    transition:
+      transform 700ms cubic-bezier(0.65, 0, 0.35, 1),
+      filter 500ms ease;
+    transition-delay: var(--release-wait);
+  }
+  .cover-float-frame:hover {
+    z-index: 1;
+  }
+  .cover-float-ring:has(.cover-float-frame:hover) .cover-float-card {
+    /* Julian: less blur round the one in focus, and glass over the rest
+       instead (the pane below). No darkening. */
+    filter: blur(var(--h-others-blur, 0.6px));
+    transition-delay: var(--blur-wait);
+  }
+  /* The glass: a clear pane over each of the others, the site's own
+     material (`@utility glass`) cut to the frame. A light raking across it
+     from the top left and a lit rim, nothing that darkens the photograph.
+     It comes up with the blur, once the pointer has stayed. */
+  .cover-float-card::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    background: linear-gradient(
+      150deg,
+      color-mix(in oklab, white 22%, transparent),
+      color-mix(in oklab, white 6%, transparent) 38%,
+      transparent 60%
+    );
+    box-shadow:
+      inset 0 0 0 1px color-mix(in oklab, white 20%, transparent),
+      inset 0 1px 0 color-mix(in oklab, white 42%, transparent);
+    opacity: 0;
+    transition: opacity 600ms ease;
+    transition-delay: var(--release-wait);
+  }
+  .cover-float-ring:has(.cover-float-frame:hover) .cover-float-card::after {
+    opacity: var(--h-glass, 0.85);
+    transition-delay: var(--blur-wait);
+  }
+  .cover-float-ring .cover-float-frame:hover .cover-float-card::after {
+    opacity: 0;
+    transition-delay: 0ms;
+  }
+  .cover-float-ring .cover-float-frame:hover .cover-float-card {
+    transform: translateZ(calc(var(--z, 0px) + var(--h-lift, 40px)));
+    filter: blur(0px);
+    transition-delay: var(--focus-wait);
+  }
+}
+.cover-role > * {
+  grid-area: 1 / 1;
+}
+.cover-role-word {
+  opacity: 0;
+  translate: 0 0.35em;
+  transition:
+    opacity 220ms var(--ease-out-strong),
+    translate 320ms var(--ease-out-strong);
+}
+.cover-role-word[data-on] {
+  opacity: 1;
+  translate: 0 0;
+}
+@media (prefers-reduced-motion: reduce) {
+  .cover-float-card,
+  .cover-role-word {
+    transition: none;
+  }
+}
+/* The fade is on the card, not the frame: opacity below 1 flattens a
+   `preserve-3d` element, so a frame fading as it flew would travel flat
+   and snap to its depth the moment it landed, 5 to 15% in one frame. */
+.cover-float-card {
+  animation: jg-fade var(--h-fade-ms, 1500ms) cubic-bezier(0.33, 1, 0.68, 1)
+    var(--delay) backwards;
+}
+/* Julian: the photographs arrive the way basis's do, measured off his
+   recording: out of order, each fading up out of nothing and a blur, and
+   rising the last of the way into place on a long, soft finish. */
+@keyframes jg-fly {
+  from {
+    transform: translateY(var(--h-fly, 90px));
+  }
+}
+@keyframes jg-fade {
+  from {
+    opacity: 0;
+    filter: blur(var(--h-fade-blur, 14px));
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .lift,
+  .cover-float-frame,
+  .cover-float-card {
+    animation: none;
+  }
 }
 
 @custom-variant squat (
@@ -269,9 +479,12 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-sans);
-  --font-mono: var(--font-geist-mono);
+  /* Body text is the mono (`layout.tsx`); the section titles are the
+     serif. */
+  --font-sans: var(--font-mono);
+  --font-mono: var(--font-mono);
   --font-display: var(--font-display);
+  --font-serif: var(--font-serif);
   --font-heading: var(--font-display);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
@@ -680,34 +893,44 @@
  */
 @utility display {
   font-family: var(--font-display);
+  font-weight: 900;
   font-size: var(--text-display);
   line-height: 0.92;
-  /* Zero, and everything else in this face matches it.
-   *
-   * The display type had drifted across four different trackings — 0.01,
-   * 0.02, 0.04 and 0.05em — set inline at sixteen call sites, against the 0
-   * declared here. The worst of it was the header wordmark at 0.05em, which
-   * takes over from the masthead at 0 as you scroll: the same name, in the
-   * same face, handing off between two different letter-spacings.
-   *
-   * Univers Bold Condensed is drawn tight on purpose. Opening it up reads as
-   * a different typeface set badly rather than as the same one breathing. */
-  letter-spacing: 0;
+  /* Julian's spec: Inter Tight Black, set tight, -0.04em on every heading. */
+  letter-spacing: -0.04em;
   text-transform: uppercase;
 }
 
 /** Page and project titles. Same face, one step down. */
 @utility title {
   font-family: var(--font-display);
+  font-weight: 900;
   font-size: var(--text-title);
   line-height: 1;
-  /* Zero, like `display` above. Univers Bold Condensed was drawn tight and
-     the counters are already narrow; adding tracking to it does not make it
-     more legible, it makes it look like a different face set badly. The
-     half-percent that used to be here was the kind of number that survives
-     because nobody measures it. */
-  letter-spacing: 0;
+  letter-spacing: -0.04em;
   text-transform: uppercase;
+}
+
+/* Every heading in the display face, Black, -0.04em (Julian's spec). In
+   the base layer for bare headings, so a heading that is styled as a label
+   on purpose can still say so; and unlayered for anything that asks for the
+   display face by class, so the zero tracking set at thirty-odd call sites
+   for the old condensed face gives way to this. */
+@layer base {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: var(--font-display);
+    font-weight: 900;
+    letter-spacing: -0.04em;
+  }
+}
+.font-display {
+  font-weight: 900;
+  letter-spacing: -0.04em;
 }
 
 /* ── the project strip's scroller ─────────────────────────────────
@@ -807,14 +1030,6 @@ body:has(.strip-scroll[data-past-first]) .home-wordmark,
   pointer-events: auto;
   translate: none;
   scale: none;
-}
-@media (max-width: 63.999rem) {
-  .home-wordmark {
-    opacity: 1;
-    pointer-events: auto;
-    translate: none;
-    scale: none;
-  }
 }
 @media (prefers-reduced-motion: reduce) {
   .home-wordmark {
@@ -988,13 +1203,8 @@ nav[aria-label="Categories"] ul[data-more] {
   .strip-grid > :where(div, section, article):first-child {
     padding-left: 0.75rem;
   }
-  /* Julian: the name of the discipline you are looking at, set large. It
-     is the one word on the page that says which filter is on, and at a
-     label's size it read as a caption beside the pictures. */
-  .strip-grid > :where(div, section, article):not([data-hash="inquire"]) h2 {
-    font-size: 3rem;
-    line-height: 0.95;
-  }
+  /* The discipline's name is the size it is in the strip. It was forced
+     to 3rem here; Julian: the same size in both views. */
   /* Julian: the words must not sit under the photographs, and the pictures
      should move over to leave room. The cell took its column's min-content,
      which a `nowrap` credit reports as narrower than the line it prints —
@@ -1011,11 +1221,11 @@ nav[aria-label="Categories"] ul[data-more] {
       [data-tick]
     ):not([data-pictures]) {
     width: max-content !important;
-    /* Wide enough for the longest discipline set at 3rem and for a credit
-       under it; `22rem` is the strip's own title column less its padding.
-       Not a share of the window: at 28vw the name itself was cut on a
-       1000px screen, which is the bug the other way round. */
-    max-width: 22rem;
+    /* Wide enough for the longest single word of a discipline at its
+       strip size (Automotive, 363px at 4.5rem) and for a credit under
+       it. Not a share of the window: at 28vw the name itself was cut on
+       a 1000px screen, which is the bug the other way round. */
+    max-width: 28rem;
   }
   /* And the backstop, in the rack only: past that cap the credit wraps
      rather than running out of its column. The one-line credits Julian
@@ -1036,6 +1246,12 @@ nav[aria-label="Categories"] ul[data-more] {
      gap between them, at 16:9. Measured after, in both engines and at two
      window sizes: the same block width to the pixel and nothing
      overflowing its cell. */
+  /* Cover Art's rack is one cell of the grid holding every sleeve. In the
+     strip it runs one row, the strip's full height; Julian: in grid view
+     it should be a grid, two rows like every other discipline's. */
+  .strip-grid ul[data-rack] {
+    grid-template-rows: repeat(2, minmax(0, 1fr));
+  }
   .strip-grid > [data-pictures] > * {
     height: 62cqh;
   }
@@ -1112,7 +1328,8 @@ nav[aria-label="Categories"] ul[data-more] {
      a fixed band of a tall cover and stays as it was. */
   height: auto;
   min-height: 0;
-  padding-block: 0.45rem;
+  /* Julian: the plate slightly larger (was 0.45rem). */
+  padding-block: 0.7rem;
 }
 .strip-grid .cover-plate .label {
   font-size: 0.6875rem;
@@ -1582,9 +1799,30 @@ a.strip-cell {
 .strip-scroll[data-arrive="dealt"] .title-rest {
   animation: none;
 }
+/* Julian: a discipline's name a fifth bigger than a project's title,
+   which shares the component (`text-4xl`, `sm:text-6xl` there). Both of
+   the discipline page's openings: the galleries' strip and the others'
+   title cell. */
+:is([data-discipline-page], .discipline-title) h2:has(.title-word) {
+  font-size: 2.7rem;
+}
+@media (min-width: 40rem) {
+  :is([data-discipline-page], .discipline-title) h2:has(.title-word) {
+    font-size: 4.5rem;
+  }
+}
+/* The clip each rising word sits in (`project-strip.tsx`,
+   `strip-page.tsx`) was its line box, which cut the descenders off the
+   serif titles: Julian saw the g of Event Coverage lose its tail. The
+   clip reaches below the line now and gives the room back, so nothing
+   moves; the rise starts lower to stay hidden in the deeper clip. */
+:has(> .title-word) {
+  padding-bottom: 0.35em;
+  margin-bottom: -0.35em;
+}
 @keyframes jg-rise {
   from {
-    translate: 0 110%;
+    translate: 0 150%;
   }
 }
 @keyframes jg-fade-up {
@@ -1776,7 +2014,10 @@ a.strip-cell {
    Six is the first six, not six of ten: the tiles are in order and the
    hidden ones are the ones after. A hidden tile is never fetched either,
    since they are all lazy, so a phone downloads six covers instead of ten. */
+/* Julian: room between the tiles now they have round corners, on the
+   8-point grid, a little wider than the 8px corner. */
 .band-grid {
+  gap: 12px;
   grid-template-columns: repeat(5, max-content);
   grid-template-rows: repeat(2, minmax(0, 1fr));
 }
@@ -1787,7 +2028,7 @@ a.strip-cell {
    screens only: an upright one leads with the width. */
 @media (min-width: 40rem) and (not (max-aspect-ratio: 4 / 5)) {
   .band-grid {
-    grid-template-rows: repeat(2, round(down, 50%, 5px));
+    grid-template-rows: repeat(2, round(down, calc((100% - 12px) / 2), 5px));
     /* From the top, not centred: centring split what the rounding left
        over, under ten pixels, into two fractional halves. */
     align-content: start;
@@ -1802,6 +2043,9 @@ a.strip-cell {
 @media (max-aspect-ratio: 4 / 5) and (min-width: 40rem) {
   .band-grid {
     grid-template-columns: repeat(3, minmax(0, 1fr));
+    /* Rows as tall as the tiles, so the gap between the rows is the
+       12px between the columns and not the slack of a half-height row. */
+    grid-template-rows: none;
     width: 100%;
   }
 }
@@ -3648,4 +3892,81 @@ body:has([data-fit-page]) footer {
   block-size: 100%;
   object-fit: cover;
   animation-duration: 720ms;
+}
+
+/* The `?tune` sliders for the cover's name (`warp-tuner.tsx`), dev only. */
+.warp-tuner {
+  position: fixed;
+  left: 16px;
+  bottom: 16px;
+  z-index: 100;
+  display: grid;
+  gap: 10px;
+  width: 280px;
+  padding: 14px 16px;
+  border: 1px solid var(--border);
+  font: 400 11px/1.3 var(--font-mono);
+  color: var(--foreground);
+}
+.warp-tuner label {
+  display: grid;
+  gap: 4px;
+}
+.warp-tuner span {
+  display: flex;
+  justify-content: space-between;
+  color: var(--muted-foreground);
+}
+.warp-tuner b {
+  font-weight: 500;
+  color: var(--foreground);
+  font-variant-numeric: tabular-nums;
+}
+.warp-tuner input {
+  width: 100%;
+  accent-color: var(--foreground);
+}
+.warp-tuner[data-corner="right"] {
+  left: auto;
+  right: 16px;
+}
+.warp-tuner p {
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+}
+.warp-tuner-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.warp-tuner button {
+  padding: 8px;
+  border: 1px solid var(--border);
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+}
+
+/* ── the section titles ──────────────────────────────────────────────
+ * Julian: the logo and the page titles (h1) in Inter Tight Black, the
+ * section titles (h2) in Instrument Serif, as the words are written
+ * rather than in capitals. The h2s set as small mono labels keep that,
+ * and so does one marked `data-display` (the session names), which
+ * keeps the black capitals.
+ * Unlayered, so it outranks the `font-display`, `uppercase` and
+ * `tracking` utilities those titles carry. The two faces share a cap
+ * height, so the adjustment sizes the serif up by a third, which is
+ * what a title-case word needs to hold the room a word in black
+ * capitals did.
+ * ─────────────────────────────────────────────────────────────── */
+h2:not(.label, [data-display]) {
+  font-family: var(--font-serif);
+  font-weight: 400;
+  font-size-adjust: cap-height 0.95;
+  /* The line is measured off the size as set, not as adjusted: 1.2 of
+     it is about 0.9 of the enlarged letters, so a title on two lines
+     keeps its descenders off the line below. */
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+  text-transform: none;
 }

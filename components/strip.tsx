@@ -904,17 +904,28 @@ export function Strip({
         autoRaf: false,
       });
       let frame = 0;
+      /* Lenis is fed its own clock, which never moves more than two
+         frames at once. It eases by the time since the frame before, and
+         the first frame after a rest can carry a stale stamp: measured on
+         /work, a notch's first frame arrived 3ms after the one before it
+         stamped 67ms later, and Lenis spent the whole of that at once:
+         82px of a 300px notch in one frame, then 17. The jump at the
+         start of every scroll. */
+      let clock = 0;
+      let seen = 0;
       const loop = (t: number) => {
-        lenis.raf(t);
+        clock += seen ? Math.min(t - seen, 34) : 0;
+        seen = t;
+        lenis.raf(clock);
         frame =
           lenis.isScrolling === "smooth" ? requestAnimationFrame(loop) : 0;
       };
       const wake = () => {
         if (frame) return;
-        /* Lenis times a frame from the last one it saw. After a rest
-           that is seconds ago, and one frame that long lands the whole
-           ease at once. Zero reads as "no previous frame". */
-        lenis.time = 0;
+        /* A new run: its first frame is a start, not a step, so nothing
+           is carried over from the rest. */
+        seen = 0;
+        lenis.time = clock;
         frame = requestAnimationFrame(loop);
       };
       // Capture, so the wake is booked before Lenis handles the event.
@@ -1449,6 +1460,47 @@ export function Strip({
       if (!band) band = requestAnimationFrame(relax);
     };
 
+    /* ── a paged move is a slide, not a throw ──
+       Julian: the scroll smooth, the homepage above all. A paged move went
+       through the momentum above, which aims a speed that runs out at the
+       next screen: measured on the homepage at 1440, 281px of the 1440 in
+       the first frame and then a tail, the last 100px taking 600ms. A lurch
+       and a crawl. A screen to screen move is a slide, so it is timed and
+       eased in and out like the opening's lift. A move that starts while
+       another is running is already travelling, so it carries on with the
+       ease out only, timed so it sets off at the speed it already had: a
+       quick second notch runs on into the next screen without a stall or a
+       kick. */
+    const PAGE_MS = 800;
+    const inOut = (t: number) =>
+      t < 0.5 ? 2 * t * t : 1 - (-2 * t + 2) ** 2 / 2;
+    const out = (t: number) => 1 - (1 - t) ** 2;
+    let from = 0;
+    let began = 0;
+    let curve = inOut;
+    let length = PAGE_MS;
+    // The slide's speed on its last frame, px per ms, for a handover.
+    let pace = 0;
+    let paced = 0;
+    const slide = (now: number) => {
+      if (!began) began = now;
+      const t = Math.min(1, (now - began) / length);
+      const was = x;
+      x = from + (target - from) * curve(t);
+      if (paced) pace = (x - was) / Math.max(1, now - paced);
+      paced = now;
+      el.scrollLeft = x;
+      if (t < 1) {
+        frame = requestAnimationFrame(slide);
+        return;
+      }
+      frame = 0;
+      last = 0;
+      v = 0;
+      pace = 0;
+      paced = 0;
+    };
+
     /** Aims the strip: sets the speed that runs out exactly at `where`. */
     const to = (where: number) => {
       target = clamp(where);
@@ -1479,6 +1531,30 @@ export function Strip({
         v = 0;
         x = target;
         el.scrollTo({ left: target, behavior: "smooth" });
+        return;
+      }
+      if (paged) {
+        from = el.scrollLeft;
+        const still =
+          !frame || !pace || Math.sign(pace) !== Math.sign(target - from);
+        curve = still ? inOut : out;
+        /* The ease out sets off at twice the average speed, so a length of
+           twice the distance over the speed it had matches the two. */
+        length = still
+          ? PAGE_MS
+          : Math.min(
+              PAGE_MS * 1.5,
+              Math.max(
+                PAGE_MS / 2,
+                (2 * Math.abs(target - from)) / Math.abs(pace),
+              ),
+            );
+        if (frame) cancelAnimationFrame(frame);
+        // From now, so the first frame already moves.
+        began = performance.now();
+        paced = 0;
+        x = from;
+        frame = requestAnimationFrame(slide);
         return;
       }
       // Pick up from wherever the keyboard, a touch or a drag left it.

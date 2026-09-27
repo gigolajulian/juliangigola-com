@@ -1,13 +1,12 @@
 import type { Metadata, Viewport } from "next";
-import { Inter, Geist_Mono } from "next/font/google";
-import localFont from "next/font/local";
+import { Instrument_Serif, Inter_Tight, JetBrains_Mono } from "next/font/google";
 import { Intro } from "@/components/intro";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { PhotoNotice } from "@/components/photo-notice";
 import { SiteMenu } from "@/components/site-menu";
 import { WorkFilter } from "@/components/work-filter";
-import { WALL, WORK_CATEGORY_LINKS } from "@/lib/work";
+import { WORK_CATEGORY_LINKS } from "@/lib/work";
 import { WORK_HEADS } from "@/lib/work-heads";
 import { GlassLight } from "@/components/glass-light";
 import { PhotoFade } from "@/components/photo-fade";
@@ -16,69 +15,32 @@ import "./globals.css";
 import { ImageFallback } from "@/components/image-fallback";
 import { PageTransition } from "@/components/page-transition";
 
-/* Inter for everything that is read rather than announced, at Julian's ask.
-   It pairs with the masthead the way the Swiss posters did: one condensed
-   and heavy face for the name and the titles, one neutral face at text
-   sizes underneath, and no third voice competing with either.
-
-   Inter rather than the Geist it replaces for two things it does that the
-   site actually uses. Its figures can be set to one width, so the counts
-   down the cover's index and the frame counters no longer shuffle sideways
-   as they change. And it carries an optical size axis, so the same family
-   is drawn for a 11px label and a 16px paragraph instead of one drawing
-   being scaled to both.
-
-   `globals.css` resolves `font-sans` from `--font-sans` (shadcn's theme
-   block names it that), so the variable has to match. */
-const sans = Inter({
-  variable: "--font-sans",
-  subsets: ["latin"],
-});
-
-// Declared but not preloaded. `font-mono` is set in three places and all
-// three are in /admin — a token field, a key field, a log — yet the 29kB
-// woff2 was in a `<link rel="preload">` on every page of the site, fetched
-// before first paint for text nobody outside /admin ever sees. Without the
-// preload the browser fetches it when a page first uses it, which is what a
-// font that one route needs should do.
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-  preload: false,
-});
-
-// Univers 57 Condensed, the regular weight of the titles' face, for the
-// splash's count: Julian wanted it one step lighter than the 67. Preloaded,
-// because the splash is the first thing a new visitor sees.
-const counter = localFont({
-  src: "./fonts/Univers57Condensed.otf",
-  variable: "--font-counter",
-  display: "block",
-  weight: "400",
-  style: "normal",
-  adjustFontFallback: false,
-});
-
-// Univers Bold Condensed for the masthead and project titles.
-//
-// Frutiger, 1957 — the same grotesque that set Swiss poster design and has
-// not looked dated since. Condensed and heavy, so a name or a project title
-// holds its own against a photograph without needing to be enormous.
-//
-// Self-hosted rather than pulled from a CDN: `next/font/local` inlines the
-// @font-face, hashes the filename, and preloads it, so there is no
-// third-party request and no flash of fallback text.
-const display = localFont({
-  src: "./fonts/OPTIUniversSixtySeven.otf",
+/* Two families and no more, at Julian's ask: Inter Tight Black for the
+   name and every heading, JetBrains Mono for everything else, text, menu,
+   captions, labels, figures. Loaded through `next/font`, which fetches them
+   from Google Fonts at build time and serves them from this site, so a
+   visitor makes no request to Google and the text never flashes a fallback
+   face. The variables are the ones the spec names; `globals.css` points
+   `font-sans` at the mono so body text needs no class. */
+const display = Inter_Tight({
   variable: "--font-display",
-  display: "swap",
-  // The one weight this file contains. Declaring it means `font-display` text
-  // is never synthetically emboldened on top of an already-bold face.
-  weight: "700",
-  style: "normal",
-  // No tracking adjustment. The face is drawn tight and is set tight
-  // everywhere — see `display` in `globals.css`.
-  adjustFontFallback: false,
+  subsets: ["latin"],
+  weight: "900",
+  fallback: ["Helvetica Neue", "Arial", "sans-serif"],
+});
+/* Julian: the section titles (every h2 that is not a label) in a serif,
+   so the logo and the page titles are not the only voice. */
+const serif = Instrument_Serif({
+  variable: "--font-serif",
+  subsets: ["latin"],
+  weight: "400",
+  fallback: ["Georgia", "serif"],
+});
+const mono = JetBrains_Mono({
+  variable: "--font-mono",
+  subsets: ["latin"],
+  weight: ["400", "500"],
+  fallback: ["ui-monospace", "monospace"],
 });
 
 const SITE = "https://juliangigola.com";
@@ -159,7 +121,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="en"
-      className={`${sans.variable} ${geistMono.variable} ${display.variable} ${counter.variable} h-full antialiased`}
+      className={`${display.variable} ${serif.variable} ${mono.variable} h-full antialiased`}
       // Dark is the default and is what the CSS already declares, so the
       // server renders the correct theme for everyone except the visitor who
       // has chosen light. That one case is what the script below fixes.
@@ -206,7 +168,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             failure simply means no opening. */}
         <script
           dangerouslySetInnerHTML={{
-            __html: `(function(){try{var q=location.search;if(/[?&]intro=0/.test(q))return;var force=/[?&]intro=1/.test(q);var seen=false;try{seen=!!sessionStorage.getItem("jg-intro")}catch(e){}var calm=matchMedia("(prefers-reduced-motion: reduce)").matches;if(force||(!seen&&!calm))document.documentElement.dataset.intro="1"}catch(e){}})()`,
+            __html: `(function(){try{var q=location.search;if(/[?&]intro=0/.test(q))return;var force=/[?&]intro=1/.test(q);var seen=false;try{seen=!!sessionStorage.getItem("jg-intro")}catch(e){}var calm=matchMedia("(prefers-reduced-motion: reduce)").matches;var home=location.pathname==="/";if(force||(home&&!seen&&!calm))document.documentElement.dataset.intro="1"}catch(e){}})()`,
           }}
         />
       </head>
@@ -223,7 +185,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
 
         {/* The wall of work opens over the page on a first arrival, and the
             page is already underneath it. See `intro.tsx`. */}
-        <Intro tiles={WALL} />
+        <Intro />
 
         <SiteHeader />
         {/* The drawer the burger opens. A sibling of the header and of

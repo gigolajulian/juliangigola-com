@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Hero } from "@/components/hero";
+import { CoverFloat } from "@/components/cover-float";
 import { Strip } from "@/components/strip";
 import { StripPage } from "@/components/strip-page";
 import { EnquiryCell } from "@/components/enquiry-cell";
@@ -12,7 +12,6 @@ import {
   COMMISSIONS,
   PRESS_HOME,
   WALL,
-  DISCIPLINES,
   WORK_PAGE,
   bandTile,
 } from "@/lib/work";
@@ -68,12 +67,9 @@ export default function Home() {
         bleed
         className="flex-1"
       >
-        <Hero
-          disciplines={DISCIPLINES}
-          // A height and not a floor: the type column inside takes its own
-          // height from this one, and against a floor it collapsed to its
-          // contents and settled at the top of the screen — the name half
-          // under the bar and the photograph below it.
+        {/* Julian: the cover as skvarenina.com opens, with his work. */}
+        <CoverFloat
+          work={FEATURED}
           className="w-full shrink-0 max-sm:h-[100svh] sm:h-full"
         />
 
@@ -197,7 +193,7 @@ export default function Home() {
               tileWidth={300}
               tileHeight={400}
               gap={28}
-              radius={4}
+              radius={8}
               tilt={16}
               turn={-14}
               perspective={1200}

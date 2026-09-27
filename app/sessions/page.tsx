@@ -142,7 +142,12 @@ export default function SessionsPage() {
                     data-scroll
                     className="flex min-h-0 flex-col gap-8 overflow-y-auto overscroll-contain pr-2 short:gap-5"
                   >
-                    <h2 className="font-display text-2xl uppercase leading-none tracking-[0] short:sm:text-2xl sm:text-3xl">
+                    {/* Julian: in the black caps of the page's title above
+                        it, not the serif of the other section titles. */}
+                    <h2
+                      data-display
+                      className="font-display text-2xl uppercase leading-none tracking-[0] short:sm:text-2xl sm:text-3xl"
+                    >
                       {session.name}
                     </h2>
 

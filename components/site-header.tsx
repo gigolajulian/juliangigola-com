@@ -5,6 +5,8 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { WarpTuner } from "@/components/warp-tuner";
+import { NAME_WARP } from "@/lib/name-warp";
 
 /* ── the chrome ───────────────────────────────────────────────────
  * Four destinations, no dropdowns.
@@ -254,9 +256,9 @@ export function SiteHeader() {
                 : "smooth",
             });
           }}
-          // Caps, because that is what a bold condensed grotesque is for —
-          // and it is how the wordmark has always been set. A little tracking
-          // stops the condensed forms from fusing at small sizes.
+          // Julian: the name as the cover sets it, Inter Tight Black in
+          // upper and lower case at -0.045em, so the wordmark and the
+          // masthead are one mark.
           //
           // Faded rather than unmounted, so it stays in the accessibility
           // tree and the tab order throughout — the route home must not
@@ -264,12 +266,14 @@ export function SiteHeader() {
           // it brings it back into view, so it is never an invisible focus
           // target.
           className={cn(
-            "font-display text-lg uppercase leading-none tracking-[0] sm:text-2xl lying:text-lg",
+            "font-display text-lg leading-none sm:text-2xl lying:text-lg",
             // Scaling from the left edge, because that edge is shared with
             // the masthead — growing from the centre would slide the name
             // sideways out of the alignment the handoff depends on.
             "origin-left will-change-[transform,opacity]",
-            "transition-opacity duration-300 ease-[var(--ease-out-strong)] hoverable:hover:opacity-70",
+            // Julian: a very slight fade on hover. It was to 70%, which
+            // greyed the colour split of the warp under the pointer.
+            "transition-opacity duration-300 ease-[var(--ease-out-strong)] hoverable:hover:opacity-90",
             "focus-visible:opacity-100",
             // Deferring only makes sense where the masthead is actually
             // beside it. Below `lg` the cover stacks, so the masthead sits
@@ -288,7 +292,24 @@ export function SiteHeader() {
             deferWordmark && "home-wordmark",
           )}
         >
-          Julian Gigola
+          {/* Julian: the same glass as the name on the cover. The canvas is
+              a picture of the words; the words are here for everyone who
+              reads them as text. Pulled left by the room the effect keeps
+              round the words, so the name still starts on the margin. */}
+          <span className="sr-only">Julian Gigola</span>
+          {/* Sliders with `?tune` on the dev server (`warp-tuner.tsx`). */}
+          <WarpTuner
+            title="Navbar logo"
+            corner="right"
+            text="Julian Gigola"
+            fontFamily="var(--font-display)"
+            fontWeight={900}
+            fontSize="1em"
+            letterSpacing="-0.045em"
+            // Julian: the cover's hover on the logo too, the same values.
+            {...NAME_WARP}
+            style={{ width: "5.9em", height: "1.1em", marginLeft: "-0.18em" }}
+          />
         </Link>
 
         {/* The right-hand group. Grouping these rather than leaving them as

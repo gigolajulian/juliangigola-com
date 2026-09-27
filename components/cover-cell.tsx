@@ -153,14 +153,15 @@ export function CoverCell({
           plate that holds still while the picture behind it moves is one
           thing; a plate that changes its own material mid-move is two. */}
         {/* The plate: the same material as the bar at the top of every page,
-          and two fifteenths of the cover: the fifth Julian first asked for,
-          a third smaller when he asked again. One
+          and three twentieths of the cover: the fifth Julian first asked
+          for, a third smaller when he asked again, then a little larger
+          again (13.3% to 15%). One
           layout at every size — name along the bottom left, credit along
           the bottom right — with the type measured in `cqw` off the cell,
           so the rack and a phone held sideways get the same plate as a
           full window rather than a stacked variant of their own. Always
           on, because a strip of covers is scanned for a name. */}
-        <div className="cover-plate pointer-events-none absolute -inset-x-0.5 -bottom-0.5 flex h-[13.333%] min-h-[1.8333rem] flex-col justify-center gap-[0.8cqw] glass-surface bg-background/70 px-[4cqw]">
+        <div className="cover-plate pointer-events-none absolute -inset-x-0.5 -bottom-0.5 flex h-[15%] min-h-[1.8333rem] flex-col justify-center gap-[0.8cqw] glass-surface bg-background/70 px-[4cqw]">
           <span
             style={{ "--n": row.name.length } as React.CSSProperties}
             className="cover-name font-display min-w-0 truncate uppercase leading-[0.9] tracking-[0]"

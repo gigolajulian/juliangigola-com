@@ -1,4 +1,4 @@
-import { filmCount, posterFor, REEL, type Video } from "@/lib/videos";
+import { posterFor, REEL, type Video } from "@/lib/videos";
 import type { Metadata } from "next";
 import { WorkStrip } from "@/components/work-strip";
 import { CoverCell } from "@/components/cover-cell";
@@ -56,7 +56,6 @@ export default function WorkPage() {
         <GroupCell
           key={c.slug}
           name={c.name}
-          count={`${filmCount(CONTENT.videos)} films`}
           href={c.href}
           hash={c.slug}
           i={i++}
@@ -107,7 +106,6 @@ export default function WorkPage() {
         <GroupCell
           key={c.slug}
           name={c.name}
-          count={`${frames.length} ${isCoverArt ? "releases" : "frames"}`}
           href={c.href}
           hash={c.slug}
           i={i++}
@@ -133,7 +131,6 @@ export default function WorkPage() {
       <GroupCell
         key={c.slug}
         name={c.name}
-        count={`${run.length} ${run.length === 1 ? "project" : "projects"}`}
         href={c.href}
         hash={c.slug}
         i={i++}

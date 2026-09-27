@@ -25,8 +25,10 @@ export function CoverArtGallery({
   rows = false,
 }: {
   releases: CoverRelease[];
-  /** Two rows of sleeves running along a strip, each as tall as half of
-      it, instead of three columns down a page. On a phone, two columns. */
+  /** One row of sleeves running along a strip, each the strip's full
+      height, instead of three columns down a page. On a phone, two
+      columns. Julian: the whole height, with a gap between the sleeves
+      smaller than the strip's own. */
   rows?: boolean;
 }) {
   // The lightbox pages through every side in order, so arrowing off side A
@@ -48,10 +50,12 @@ export function CoverArtGallery({
     <>
       <ul
         data-ring="Zoom in"
+        // Two rows deep in the rack (grid view), one in the strip.
+        data-rack={rows || undefined}
         className={cn(
           "grid",
           rows
-            ? "h-full grid-flow-col grid-rows-2 max-sm:h-auto max-sm:grid-flow-row max-sm:grid-cols-2"
+            ? "h-full grid-flow-col grid-rows-1 gap-2 max-sm:h-auto max-sm:grid-flow-row max-sm:grid-cols-2"
             : "mt-12 grid-cols-2 sm:mt-16 sm:grid-cols-3",
         )}
       >
@@ -100,7 +104,7 @@ export function CoverArtGallery({
               <CoverFaces
                 frames={release.frames}
                 sizes={
-                  rows ? "(min-width: 640px) 18vw, 50vw" : "(min-width: 640px) 33vw, 50vw"
+                  rows ? "(min-width: 640px) calc(100vh - 10rem), 50vw" : "(min-width: 640px) 33vw, 50vw"
                 }
                 // The top row, eagerly — it is the largest thing above the
                 // fold. The rest of the rack loads as it is reached.
@@ -126,7 +130,7 @@ export function CoverArtGallery({
         })}
       </ul>
 
-      <Lightbox frames={frames} name="Cover art" {...lightbox} />
+      <Lightbox frames={frames} name="Cover Art" {...lightbox} />
     </>
   );
 }

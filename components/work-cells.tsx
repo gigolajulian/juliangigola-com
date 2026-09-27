@@ -6,21 +6,18 @@ import type { Frame } from "@/lib/work-types";
 /* ── the words between the covers ─────────────────────────────────
  * The work strip runs discipline by discipline, and each discipline opens
  * on its name: a cell of words before its run of covers, the way a chapter
- * opens on a title page. It carries the count and the way to that
- * discipline's own page, and it is what the chips at the top jump to.
+ * opens on a title page. It carries the way to that discipline's own
+ * page (the count under the name is gone, Julian asked), and it is what the chips at the top jump to.
  * ─────────────────────────────────────────────────────────────── */
 
 export function GroupCell({
   name,
-  count,
   href,
   hash,
   i,
   cta = "All projects",
 }: {
   name: string;
-  /** Already worded: "18 projects", "8 films". */
-  count: string;
   href: string;
   hash: string;
   /** Its place in the strip, for the stagger of the arrival. */
@@ -49,7 +46,6 @@ export function GroupCell({
       >
         {name}
       </h2>
-      <p className="label text-muted-foreground">{count}</p>
       <Link
         prefetch={false}
         href={href}

@@ -61,7 +61,7 @@ export default function NotFound() {
             tileWidth={300}
             tileHeight={400}
             gap={28}
-            radius={4}
+            radius={8}
             tilt={16}
             turn={-14}
             perspective={1200}

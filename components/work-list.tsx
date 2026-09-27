@@ -101,7 +101,7 @@ export function WorkList({
                   data-vt={
                     (row.n !== undefined && frames?.[row.n]?.src) || row.slug
                   }
-                  className="relative block w-16 shrink-0 overflow-hidden sm:w-20"
+                  className="photo-corner relative block w-16 shrink-0 overflow-hidden sm:w-20"
                   style={{
                     backgroundColor: row.cover.color,
                     /* The shape it was shot at, not an upright crop of it.
