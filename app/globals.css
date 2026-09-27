@@ -211,6 +211,35 @@
     width: 28vw;
   }
 }
+/* Arranging on the "Hero layout" panel: the space holds still, the focus
+   effects stand down, and each card wears the number of its folder. */
+.cover-float[data-arrange] .cover-float-ring {
+  transform: none !important;
+}
+.cover-float[data-arrange] .cover-float-frame {
+  cursor: grab;
+}
+.cover-float[data-arrange] .cover-float-frame:active {
+  cursor: grabbing;
+}
+.cover-float[data-arrange] .cover-float-card {
+  filter: none !important;
+  outline: 1px dashed rgb(255 255 255 / 0.7);
+}
+.cover-float[data-arrange] .cover-float-frame::after {
+  content: attr(data-card);
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  padding: 2px 5px;
+  background: rgb(0 0 0 / 0.75);
+  color: #fff;
+  font: 500 10px/1.2 var(--font-mono, monospace);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  pointer-events: none;
+  transform: translateZ(calc(var(--z, 0px) + 1px));
+}
 .cover-float-card {
   position: absolute;
   inset: 0;

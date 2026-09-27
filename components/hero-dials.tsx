@@ -5,13 +5,14 @@ import { motion } from "motion/react";
 import {
   DialRoot,
   useDialKit,
+  useDialKitController,
   type DialConfig,
   type DialPadConfig,
 } from "dialkit";
 import "dialkit/styles.css";
 import { WarpText } from "@/components/warp-text";
 import { NAME_WARP } from "@/lib/name-warp";
-import { SLOTS } from "@/lib/cover-slots";
+import { DEAL, SLOTS } from "@/lib/cover-slots";
 
 /* ── the hero on DialKit ──────────────────────────────────────────
  * Julian: tune almost everything about the cover live, on DialKit's
@@ -77,6 +78,11 @@ type Slot = {
   depth: [number, number, number, number];
 };
 const LAYOUT = {
+  /* Julian: move the cards by hand. On, a card drags where it should go,
+     the wheel over it sizes it, shift and the wheel sets its depth, and
+     the panel's numbers follow. Links and the space's turn wait. */
+  arrange: false,
+  shuffle: { type: "action", label: "Shuffle photos" },
   pull: { width: [1, 0.3, 1.5, 0.01], height: [1, 0.3, 1.5, 0.01] },
   cards: Object.fromEntries(
     SLOTS.map((s, i) => [
@@ -105,6 +111,16 @@ export const useCards = () =>
   useDialKit("Hero cards", CARDS, { id: "hero-cards" });
 export const useSpace = () =>
   useDialKit("Hero space", SPACE, { id: "hero-space" });
+
+/** The photographs dealt into the places again, at random. */
+const shuffled = (deal: number[]) => {
+  const next = [...deal];
+  for (let i = next.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [next[i], next[j]] = [next[j], next[i]];
+  }
+  return next;
+};
 
 /** A value as a ref, for effects that run once and read it each frame. */
 export function useLatest<T>(value: T) {
@@ -148,9 +164,26 @@ export function HeroDials() {
     id: "hero-entrance",
   });
   const name = useDialKit("Hero name", NAME, { id: "hero-name" });
-  const layout = useDialKit("Hero layout", LAYOUT, { id: "hero-layout" });
+  /* Which place each photograph takes (`DEAL`); Shuffle deals again. */
+  const [deal, setDeal] = React.useState(DEAL);
+  const kit = useDialKitController("Hero layout", LAYOUT, {
+    id: "hero-layout",
+    onAction: (action) => {
+      if (action.endsWith("shuffle")) setDeal(shuffled);
+    },
+  });
+  const layout = kit.values;
+  /* The controller is new each render; the arrange listeners outlive that. */
+  const kitRef = useLatest(kit);
   React.useEffect(() => {
-    all.current = { cards, space, name, entrance, type, layout };
+    all.current = {
+      cards,
+      space,
+      name,
+      entrance,
+      type,
+      layout: { ...layout, deal: deal.map((d) => d + 1) },
+    };
   });
 
   /* Run the entrance again, forced: drop every animation on the cover for
@@ -206,14 +239,104 @@ export function HeroDials() {
     el.style.setProperty("--h-pull-y", `${layout.pull.height}`);
     /* Each card's place, over the one the server gave it. */
     el.querySelectorAll<HTMLElement>(".cover-float-frame").forEach((f, i) => {
-      const c = layout.cards[`card ${i + 1}`];
+      const card = `card ${(deal[i] ?? i) + 1}`;
+      const c = layout.cards[card];
       if (!c) return;
+      f.dataset.card = card;
       f.style.setProperty("--x", `${c.place.x}%`);
       f.style.setProperty("--y", `${-c.place.y}%`);
       f.style.setProperty("--w", `${c.width}vw`);
       f.style.setProperty("--z", `${c.depth}px`);
     });
   });
+
+  /* Arrange: the cards moved on the page itself. The listeners sit on the
+     cover, below the strip, so a drag or a wheel over a card stops there
+     and never pages the strip. */
+  const arrange = layout.arrange;
+  React.useEffect(() => {
+    const el = ref.current?.closest<HTMLElement>(".cover-float");
+    if (!el || !arrange) return;
+    el.dataset.arrange = "";
+    const at = (e: Event) =>
+      (e.target as Element).closest<HTMLElement>(".cover-float-frame");
+    const step = (v: number, s: number) => Math.round(v / s) * s;
+    const clamp = (v: number, lo: number, hi: number) =>
+      Math.min(hi, Math.max(lo, v));
+    const set = (card: string, slot: Partial<Slot>) =>
+      kitRef.current.setValues({ cards: { [card]: slot } } as never);
+    let drag: {
+      card: string;
+      px: number;
+      py: number;
+      x: number;
+      y: number;
+    } | null = null;
+    const down = (e: PointerEvent) => {
+      const f = at(e);
+      if (!f?.dataset.card) return;
+      e.preventDefault();
+      e.stopPropagation();
+      const c = kitRef.current.getValues().cards[f.dataset.card];
+      drag = {
+        card: f.dataset.card,
+        px: e.clientX,
+        py: e.clientY,
+        x: c.place.x,
+        y: -c.place.y,
+      };
+      f.setPointerCapture(e.pointerId);
+    };
+    const move = (e: PointerEvent) => {
+      if (!drag) return;
+      e.stopPropagation();
+      const r = el.getBoundingClientRect();
+      const { pull } = kitRef.current.getValues();
+      const x = drag.x + ((e.clientX - drag.px) / r.width) * 100 / pull.width;
+      const y = drag.y + ((e.clientY - drag.py) / r.height) * 100 / pull.height;
+      set(drag.card, {
+        place: { x: step(clamp(x, -15, 105), 0.5), y: -step(clamp(y, -15, 100), 0.5) },
+      } as never);
+    };
+    const up = (e: PointerEvent) => {
+      if (drag) e.stopPropagation();
+      drag = null;
+    };
+    const wheel = (e: WheelEvent) => {
+      const f = at(e);
+      if (!f?.dataset.card) return;
+      e.preventDefault();
+      e.stopPropagation();
+      const c = kitRef.current.getValues().cards[f.dataset.card];
+      const d = -Math.sign(e.deltaY || e.deltaX);
+      if (e.shiftKey) {
+        set(f.dataset.card, { depth: clamp(c.depth + d * 5, -200, 200) } as never);
+      } else {
+        set(f.dataset.card, { width: clamp(c.width + d * 0.5, 4, 30) } as never);
+      }
+    };
+    /* A card is a link: not while arranging. */
+    const stop = (e: Event) => {
+      if (!at(e)) return;
+      e.preventDefault();
+      e.stopPropagation();
+    };
+    el.addEventListener("pointerdown", down);
+    el.addEventListener("pointermove", move);
+    el.addEventListener("pointerup", up);
+    el.addEventListener("wheel", wheel, { passive: false });
+    el.addEventListener("click", stop);
+    el.addEventListener("dragstart", stop);
+    return () => {
+      delete el.dataset.arrange;
+      el.removeEventListener("pointerdown", down);
+      el.removeEventListener("pointermove", move);
+      el.removeEventListener("pointerup", up);
+      el.removeEventListener("wheel", wheel);
+      el.removeEventListener("click", stop);
+      el.removeEventListener("dragstart", stop);
+    };
+  }, [arrange, kitRef]);
 
   return (
     <>

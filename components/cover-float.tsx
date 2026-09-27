@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils";
 import { CoverSpace } from "@/components/cover-space";
 import { CoverRole } from "@/components/cover-role";
 import { CoverCard, HeroDials, HeroName } from "@/components/hero-dials";
-import { SLOTS } from "@/lib/cover-slots";
+import { DEAL, SLOTS } from "@/lib/cover-slots";
 
 /* ── the cover ────────────────────────────────────────────────────
  * The name in the middle of the screen and the featured work round it,
@@ -55,7 +55,7 @@ export function CoverFloat({
       <HeroDials />
       <CoverSpace className="cover-float-ring absolute inset-0 -z-10">
         {frames.map((p, i) => {
-          const s = SLOTS[i];
+          const s = SLOTS[DEAL[i] ?? i];
           return (
             <Link
               key={p.slug}
@@ -132,7 +132,7 @@ export function CoverFloat({
           className="lift cover-float-where mt-5 mb-[26px] max-w-[34rem]"
           style={{ "--reveal-delay": "1600ms" } as React.CSSProperties}
         >
-          Based in San Francisco, CA. Available worldwide
+          Based in San Francisco, CA. Available Worldwide
         </p>
         <div
           className="lift flex flex-wrap justify-center gap-3"

@@ -28,3 +28,8 @@ export const SLOTS: {
   { x: 2.5, y: 38.5, w: 13.5, z: 40 },
   { x: 55, y: 70, w: 13.5, z: -25 },
 ];
+
+/** Which place each photograph takes, in the order the cover lists them:
+    the first photograph at `SLOTS[DEAL[0]]`, and so on. The "Hero layout"
+    panel's Shuffle deals them again. */
+export const DEAL: number[] = SLOTS.map((_, i) => i);
