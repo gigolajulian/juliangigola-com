@@ -286,7 +286,7 @@ export function WorkBand({
        * site's one established translucent surface, it reads as chrome
        * rather than as something wrong with the image.
        */}
-      <div className="absolute inset-x-0 bottom-0 flex flex-col gap-1.5 glass-surface bg-background/70 p-3 sm:gap-2 sm:p-4">
+      <div className="absolute inset-x-0 bottom-0 flex flex-col gap-1.5 glass-surface bg-background/70 p-3 [container-type:inline-size] sm:gap-2 sm:p-4">
         <div className="flex items-baseline gap-3 sm:gap-4">
           <span className="label shrink-0 tabular-nums text-muted-foreground">
             {String(index + 1).padStart(2, "0")}
@@ -301,7 +301,13 @@ export function WorkBand({
                 it was labelling. */}
           {/* The link's name is the plate's own words, so voice control
               can say what is printed; the frame count is for ears only. */}
-          <h3 className="font-display min-w-0 truncate text-lg uppercase leading-none tracking-[0] sm:text-xl">
+          {/* An iPad's tiles are 116 to 184 wide, and one line cut every
+              long name to WIRED MA... The words wrap to two balanced lines
+              instead, and the type comes down only as far as its longest
+              word (UKIYOSUNKNOWN is thirteen letters) needs to fit. */}
+          <h3 className="font-display min-w-0 text-balance break-words text-lg uppercase leading-[0.95] tracking-[0] sm:text-[min(1.25rem,calc((100cqw-2rem)/(var(--longest)*0.7)))]"
+            style={{ "--longest": Math.max(...project.name.split(/\s+/).map((w) => w.length)) } as React.CSSProperties}
+          >
             {project.name}
             <span className="sr-only">, {project.total} frames</span>
           </h3>

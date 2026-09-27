@@ -4,11 +4,11 @@
     plain module, not the client component's, so the cover (a server
     component) gets the values rather than a client reference. */
 export const NAME_WARP = {
-  warpStrength: 0.31,
-  warpScale: 0.5,
+  warpStrength: 0.28,
+  warpScale: 0.6,
   speed: 0.8,
-  pointerInfluence: 1,
-  pointerStrength: 0.75,
+  pointerInfluence: 1.25,
+  pointerStrength: 0.87,
   refraction: 0.03,
-  ripple: 2.05,
+  ripple: 1.65,
 } as const;

@@ -161,7 +161,7 @@
  * line through its delay and lets go of the element at the end.
  * ───────────────────────────────────────────────────────────────── */
 .lift {
-  animation: jg-lift var(--h-lift-ms, 900ms) cubic-bezier(0.16, 1, 0.3, 1) backwards;
+  animation: jg-lift var(--h-lift-ms, 1030ms) cubic-bezier(0.16, 1, 0.3, 1) backwards;
   animation-delay: var(--reveal-delay, 0ms);
 }
 @keyframes jg-lift {
@@ -185,7 +185,7 @@
  * each frame, the depth itself on the card, the camera on the section.
  * ───────────────────────────────────────────────────────────────── */
 .cover-float {
-  perspective: var(--h-perspective, 2010px);
+  perspective: var(--h-perspective, 2490px);
 }
 .cover-float-ring,
 .cover-float-frame {
@@ -195,23 +195,26 @@
   position: absolute;
   /* Drawn toward the middle by the "Hero layout" panel's pull (1: as laid
      out). A phone places them itself, below. */
-  left: calc(50% + (var(--x) - 50%) * var(--h-pull-x, 1));
-  top: calc(50% + (var(--y) - 50%) * var(--h-pull-y, 1));
+  left: calc(50% + (var(--x) - 50%) * var(--h-pull-x, 1.05));
+  top: calc(50% + (var(--y) - 50%) * var(--h-pull-y, 0.94));
   width: var(--w);
   /* Out of order: each frame's place in `ORDER` (`cover-float.tsx`),
      spread out from the start. */
-  --delay: calc(var(--h-start, 1180ms) + var(--order, 0) * var(--h-spread, 0.95ms));
-  animation: jg-fly var(--h-fly-ms, 1200ms) cubic-bezier(0.16, 1, 0.3, 1)
+  --delay: calc(var(--h-start, 420ms) + var(--order, 0) * var(--h-spread, 0.95ms));
+  animation: jg-fly var(--h-fly-ms, 1020ms) cubic-bezier(0.16, 1, 0.3, 1)
     var(--delay) backwards;
 }
 @media (max-width: 39.99rem) {
   .cover-float-frame {
     left: var(--px);
     top: var(--py);
-    width: 28vw;
+    /* And no taller than a short phone's window allows: Safari with its
+       bars up leaves an iPhone 659px, where 28vw ran the top row into the
+       name and the bottom row into the buttons. */
+    width: min(28vw, 13svh);
   }
 }
-/* Arranging on the "Hero layout" panel: the space holds still, the focus
+/* Arranging on the "Photo layout" panel: the space holds still, the focus
    effects stand down, and each card wears the number of its folder. */
 .cover-float[data-arrange] .cover-float-ring {
   transform: none !important;
@@ -224,6 +227,7 @@
 }
 .cover-float[data-arrange] .cover-float-card {
   filter: none !important;
+  translate: none !important;
   outline: 1px dashed rgb(255 255 255 / 0.7);
 }
 .cover-float[data-arrange] .cover-float-frame::after {
@@ -324,8 +328,8 @@
 .cover-float-title {
   font-family: var(--font-mono);
   font-weight: 400;
-  font-size: var(--h-title-size, 15.5px);
-  letter-spacing: var(--h-title-track, 0.2em);
+  font-size: var(--h-title-size, 15px);
+  letter-spacing: var(--h-title-track, 0.17em);
   text-transform: uppercase;
   color: var(--hero-sub);
 }
@@ -373,9 +377,9 @@
      after `--blur-wait`, once the pointer has stayed long enough to mean
      it, so passing over a frame on the way somewhere blurs nothing. */
   .cover-float {
-    --focus-wait: 250ms;
+    --focus-wait: 80ms;
     --blur-wait: 600ms;
-    --release-wait: 280ms;
+    --release-wait: 140ms;
   }
   /* Julian: an ease on it. The one pointed at glides forward and back
      on a soft ease in and out rather than snapping to its place. */
@@ -385,6 +389,7 @@
     scale: var(--hover-scale, 1);
     transition:
       transform 700ms cubic-bezier(0.65, 0, 0.35, 1),
+      translate 700ms cubic-bezier(0.65, 0, 0.35, 1),
       filter 500ms ease;
     transition-delay: var(--release-wait);
   }
@@ -430,6 +435,12 @@
   }
   .cover-float-ring .cover-float-frame:hover .cover-float-card {
     transform: translateZ(calc(var(--z, 0px) + var(--h-lift, 64px)));
+    /* Julian: and toward the middle. `--mid-x` and `--mid-y` are the way
+       to the cover's centre, measured as the pointer lands (`CoverCard`);
+       the panel's Toward Middle is the share of it taken. The frame stays
+       put, so the pointer never loses it as the picture moves. */
+    translate: calc(var(--mid-x, 0px) * var(--h-mid, 0.12))
+      calc(var(--mid-y, 0px) * var(--h-mid, 0.12));
     filter: blur(0px);
     transition-delay: var(--focus-wait);
   }
@@ -458,7 +469,7 @@
    `preserve-3d` element, so a frame fading as it flew would travel flat
    and snap to its depth the moment it landed, 5 to 15% in one frame. */
 .cover-float-card {
-  animation: jg-fade var(--h-fade-ms, 1500ms) cubic-bezier(0.33, 1, 0.68, 1)
+  animation: jg-fade var(--h-fade-ms, 1110ms) cubic-bezier(0.33, 1, 0.68, 1)
     var(--delay) backwards;
 }
 /* Julian: the photographs arrive the way basis's do, measured off his
@@ -466,13 +477,13 @@
    rising the last of the way into place on a long, soft finish. */
 @keyframes jg-fly {
   from {
-    transform: translateY(var(--h-fly, 95px));
+    transform: translateY(var(--h-fly, 150px));
   }
 }
 @keyframes jg-fade {
   from {
     opacity: 0;
-    filter: blur(var(--h-fade-blur, 14px));
+    filter: blur(var(--h-fade-blur, 7px));
   }
 }
 @media (prefers-reduced-motion: reduce) {
@@ -4109,11 +4120,26 @@ h2:not(.label, [data-display]) {
 /* A short window: the name and the line come down so the two never
    meet (at 1280 by 720 they touched). */
 @media (min-width: 40rem) and (max-height: 820px) {
+  /* The strip here is 420 to 480px tall, so a 34rem floor pushed the
+     name and the facts under the ruler. The screen is the panel. */
+  .about-hero {
+    min-height: 0;
+  }
   .about-hero-name {
     font-size: clamp(40px, 4vw, 88px);
   }
   .about-hero .about-hero-title {
-    font-size: clamp(1.75rem, 2.4vw, 2.7rem);
+    font-size: clamp(1.5rem, min(2.4vw, 4.4vh), 2.7rem);
+    line-height: 1.1;
+  }
+  /* The six services in two ruled columns, three rows instead of six. */
+  .about-hero-services {
+    max-width: 28rem;
+  }
+  .about-hero-services ul {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: 1.5rem;
   }
   .about-hero-bio {
     gap: 0.75rem;
@@ -4129,6 +4155,13 @@ h2:not(.label, [data-display]) {
   }
   .about-hero-content {
     padding-block: 1.4rem;
+  }
+}
+/* A laptop's browser window (1366 by 768 leaves about 657): with the intro
+   the name came down to 36px. The biography, one screen on, says it. */
+@media (min-width: 40rem) and (max-height: 700px) {
+  .about-hero-intro {
+    display: none;
   }
 }
 .about-hero-copy {

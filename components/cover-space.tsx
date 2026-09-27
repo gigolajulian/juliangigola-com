@@ -10,8 +10,12 @@ import { useLatest, useSpace } from "@/components/hero-dials";
  * different depths (`--z` on each, `cover-float.tsx`), and the space turns
  * a few degrees after the pointer, easing rather than jumping, so near and
  * far frames move apart. Once they have landed they stay where they are,
- * as on basis, his reference; the orbit he tried after them is gone. A
- * mouse only; a finger has nothing to follow.
+ * as on basis, his reference; the orbit he tried after them is gone.
+ *
+ * On a phone or an iPad there is no pointer, so the space follows the
+ * device's tilt instead (Julian's pick over a finger drag or a drift).
+ * iOS only hands out the orientation after asking, and only asks from a
+ * tap, so there it starts at the visitor's first touch of the page.
  */
 export function CoverSpace({
   children,
@@ -22,16 +26,11 @@ export function CoverSpace({
 }) {
   const ref = React.useRef<HTMLDivElement>(null);
   /* How far the space turns at the screen's edge, in degrees, and how
-     fast it follows: the "Hero space" panel. */
+     fast it follows: the "3D tilt" panel. */
   const space = useLatest(useSpace());
   React.useEffect(() => {
     const el = ref.current;
-    if (
-      !el ||
-      !matchMedia("(hover: hover) and (pointer: fine)").matches ||
-      matchMedia("(prefers-reduced-motion: reduce)").matches
-    )
-      return;
+    if (!el || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     let tx = 0;
     let ty = 0;
     let x = 0;
@@ -43,7 +42,7 @@ export function CoverSpace({
          (Julian: 23) per 60th of a second, however many frames that is. */
       const k =
         1 -
-        (1 - space.current.follow / 100) **
+        (1 - space.current.followSpeed / 100) **
           (Math.min(now - (last || now - 16.7), 100) / 16.7);
       last = now;
       x += (tx - x) * k;
@@ -54,14 +53,67 @@ export function CoverSpace({
           ? requestAnimationFrame(tick)
           : (last = 0);
     };
-    const move = (e: PointerEvent) => {
-      tx = (e.clientX / innerWidth - 0.5) * 2 * space.current.turnY;
-      ty = (0.5 - e.clientY / innerHeight) * 2 * space.current.turnX;
+    /* Where the space turns to, from -1 to 1 on each axis. */
+    const aim = (x: number, y: number) => {
+      const c = (v: number) => Math.max(-1, Math.min(1, v));
+      tx = c(x) * space.current.tiltSideways;
+      ty = c(y) * space.current.tiltUpDown;
       if (!raf) raf = requestAnimationFrame(tick);
     };
-    addEventListener("pointermove", move, { passive: true });
+
+    if (matchMedia("(hover: hover) and (pointer: fine)").matches) {
+      const move = (e: PointerEvent) => {
+        /* Julian: the space holds still while he works the DialKit panel. */
+        if ((e.target as Element | null)?.closest?.('[class*="dialkit"]')) return;
+        aim(
+          (e.clientX / innerWidth - 0.5) * 2,
+          (0.5 - e.clientY / innerHeight) * 2,
+        );
+      };
+      addEventListener("pointermove", move, { passive: true });
+      return () => {
+        removeEventListener("pointermove", move);
+        cancelAnimationFrame(raf);
+      };
+    }
+
+    /* The tilt. 25 degrees either way is the full turn. Forward and back
+       is measured from however the device is being held, and that rest
+       point follows slowly, so lying on a sofa is as level as sitting up. */
+    if (typeof DeviceOrientationEvent === "undefined") return;
+    const TILT = 25;
+    let rest: number | null = null;
+    const orient = (e: DeviceOrientationEvent) => {
+      if (e.beta === null || e.gamma === null) return;
+      const angle = screen.orientation?.angle ?? 0;
+      const [side, fore] =
+        angle === 90
+          ? [e.beta, -e.gamma]
+          : angle === 270 || angle === -90
+            ? [-e.beta, e.gamma]
+            : angle === 180
+              ? [-e.gamma, -e.beta]
+              : [e.gamma, e.beta];
+      rest = rest === null ? fore : rest + (fore - rest) * 0.01;
+      aim(side / TILT, (fore - rest) / TILT);
+    };
+    const listen = () =>
+      addEventListener("deviceorientation", orient, { passive: true });
+    const ios = DeviceOrientationEvent as unknown as {
+      requestPermission?: () => Promise<string>;
+    };
+    const ask = () =>
+      ios.requestPermission?.()
+        .then((state) => state === "granted" && listen())
+        .catch(() => {});
+    if (typeof ios.requestPermission === "function") {
+      addEventListener("click", ask, { once: true });
+    } else {
+      listen();
+    }
     return () => {
-      removeEventListener("pointermove", move);
+      removeEventListener("click", ask);
+      removeEventListener("deviceorientation", orient);
       cancelAnimationFrame(raf);
     };
   }, [space]);

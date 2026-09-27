@@ -28,36 +28,39 @@ import { DEAL, SLOTS } from "@/lib/cover-slots";
  * the clipboard to paste back.
  * ─────────────────────────────────────────────────────────────── */
 
+/* Julian: the names were confusing. Each key is the label DialKit shows
+   (it splits camelCase into words), so every one says what it moves. */
 export const CARDS = {
-  spring: { type: "spring", visualDuration: 0.6, bounce: 0 },
-  scale: [1.045, 1, 1.2, 0.005],
-  lift: [64, 0, 200, 1],
+  motion: { type: "spring", visualDuration: 0.6, bounce: 0 },
+  grow: [1.045, 1, 1.2, 0.005],
+  forward: [64, 0, 200, 1],
+  towardMiddle: [0.12, 0, 1, 0.01],
   shadow: { blur: [5, 0, 80, 1], opacity: [0.41, 0, 1, 0.01] },
-  others: { blur: [0.6, 0, 8, 0.1], glass: [0.75, 0, 1, 0.05] },
-  waits: {
-    focus: [250, 0, 1000, 10],
-    blur: [600, 0, 2000, 10],
-    release: [280, 0, 1000, 10],
+  otherPhotos: { blur: [0.6, 0, 8, 0.1], glassSheen: [0.75, 0, 1, 0.05] },
+  delays: {
+    comeForward: [80, 0, 1000, 10],
+    blurOthers: [600, 0, 2000, 10],
+    letGo: [140, 0, 1000, 10],
   },
 } satisfies DialConfig;
 
 export const SPACE = {
-  turnX: [4, 0, 20, 0.5],
-  turnY: [9.5, 0, 30, 0.5],
-  follow: [16, 1, 50, 1],
-  perspective: [2010, 300, 4000, 10],
+  tiltUpDown: [8, 0, 20, 0.5],
+  tiltSideways: [16.5, 0, 30, 0.5],
+  followSpeed: [16, 1, 50, 1],
+  perspective: [2490, 300, 4000, 10],
 } satisfies DialConfig;
 
 const ENTRANCE = {
-  start: [1180, 0, 3000, 10],
-  spread: [0.95, 0, 4, 0.05],
-  fly: { distance: [95, 0, 300, 1], duration: [1200, 200, 4000, 10] },
-  fade: { duration: [1500, 100, 4000, 10], blur: [14, 0, 40, 1] },
-  text: { duration: [900, 100, 3000, 10] },
+  firstPhotoAt: [420, 0, 3000, 10],
+  stagger: [0.95, 0, 4, 0.05],
+  photosFlyIn: { distance: [150, 0, 300, 1], duration: [1020, 200, 4000, 10] },
+  photosFadeIn: { duration: [1110, 100, 4000, 10], blur: [7, 0, 40, 1] },
+  textRise: { duration: [1030, 100, 3000, 10] },
 } satisfies DialConfig;
 
 const NAME = {
-  size: [104, 40, 200, 1],
+  size: [97, 40, 200, 1],
   warpStrength: [NAME_WARP.warpStrength, 0, 0.6, 0.01],
   warpScale: [NAME_WARP.warpScale, 0.2, 5, 0.05],
   speed: [NAME_WARP.speed, 0, 2, 0.01],
@@ -81,9 +84,9 @@ const LAYOUT = {
   /* Julian: move the cards by hand. On, a card drags where it should go,
      the wheel over it sizes it, shift and the wheel sets its depth, and
      the panel's numbers follow. Links and the space's turn wait. */
-  arrange: false,
+  dragToArrange: false,
   shuffle: { type: "action", label: "Shuffle photos" },
-  pull: { width: [1, 0.3, 1.5, 0.01], height: [1, 0.3, 1.5, 0.01] },
+  spread: { width: [1.05, 0.3, 1.5, 0.01], height: [0.94, 0.3, 1.5, 0.01] },
   cards: Object.fromEntries(
     SLOTS.map((s, i) => [
       `card ${i + 1}`,
@@ -102,15 +105,32 @@ const LAYOUT = {
 } satisfies DialConfig;
 
 const TYPE = {
-  title: { size: [15.5, 9, 24, 0.5], tracking: [0.2, 0, 0.5, 0.01] },
-  where: { size: [14.5, 9, 20, 0.5] },
+  roleLine: { size: [15, 9, 24, 0.5], letterSpacing: [0.17, 0, 0.5, 0.01] },
+  location: { size: [14.5, 9, 20, 0.5] },
   buttons: { size: [11, 8, 16, 0.5] },
 } satisfies DialConfig;
 
+/** What each panel section changes on the cover, by its title as the
+    panel prints it (lowercased). The Card folders are matched apart. */
+const DIAL_TARGETS: Record<string, string> = {
+  "photo hover": ".cover-float-frame",
+  "3d tilt": ".cover-float-frame",
+  "text sizes": ".cover-float-title, .cover-float-where, .cover-cta",
+  "role line": ".cover-float-title",
+  location: ".cover-float-where",
+  buttons: ".cover-cta",
+  "load animation": ".cover-float-frame, .cover-float-name, .cover-float-title, .cover-float-where, .cover-cta",
+  "photos fly in": ".cover-float-frame",
+  "photos fade in": ".cover-float-frame",
+  "text rise": ".cover-float-name, .cover-float-title, .cover-float-where, .cover-cta",
+  "name effect": ".cover-float-name",
+  "photo layout": ".cover-float-frame",
+};
+
 export const useCards = () =>
-  useDialKit("Hero cards", CARDS, { id: "hero-cards" });
+  useDialKit("Photo hover", CARDS, { id: "hero-cards" });
 export const useSpace = () =>
-  useDialKit("Hero space", SPACE, { id: "hero-space" });
+  useDialKit("3D tilt", SPACE, { id: "hero-space" });
 
 /** The photographs dealt into the places again, at random. */
 const shuffled = (deal: number[]) => {
@@ -141,7 +161,7 @@ export function HeroDials() {
      of every panel's values to paste back in one go. */
   const all = React.useRef({});
   useDialKit(
-    "Hero",
+    "Hero tools",
     {
       replay: { type: "action", label: "Replay entrance" },
       copy: { type: "action", label: "Copy all values" },
@@ -159,14 +179,14 @@ export function HeroDials() {
 
   const cards = useCards();
   const space = useSpace();
-  const type = useDialKit("Hero type", TYPE, { id: "hero-type" });
-  const entrance = useDialKit("Hero entrance", ENTRANCE, {
+  const type = useDialKit("Text sizes", TYPE, { id: "hero-type" });
+  const entrance = useDialKit("Load animation", ENTRANCE, {
     id: "hero-entrance",
   });
-  const name = useDialKit("Hero name", NAME, { id: "hero-name" });
+  const name = useDialKit("Name effect", NAME, { id: "hero-name" });
   /* Which place each photograph takes (`DEAL`); Shuffle deals again. */
   const [deal, setDeal] = React.useState(DEAL);
-  const kit = useDialKitController("Hero layout", LAYOUT, {
+  const kit = useDialKitController("Photo layout", LAYOUT, {
     id: "hero-layout",
     onAction: (action) => {
       if (action.endsWith("shuffle")) setDeal(shuffled);
@@ -215,28 +235,29 @@ export function HeroDials() {
     const el = cover();
     if (!el) return;
     const vars: Record<string, string> = {
-      "--focus-wait": `${cards.waits.focus}ms`,
-      "--blur-wait": `${cards.waits.blur}ms`,
-      "--release-wait": `${cards.waits.release}ms`,
-      "--h-lift": `${cards.lift}px`,
-      "--h-others-blur": `${cards.others.blur}px`,
-      "--h-glass": `${cards.others.glass}`,
+      "--focus-wait": `${cards.delays.comeForward}ms`,
+      "--blur-wait": `${cards.delays.blurOthers}ms`,
+      "--release-wait": `${cards.delays.letGo}ms`,
+      "--h-lift": `${cards.forward}px`,
+      "--h-mid": `${cards.towardMiddle}`,
+      "--h-others-blur": `${cards.otherPhotos.blur}px`,
+      "--h-glass": `${cards.otherPhotos.glassSheen}`,
       "--h-perspective": `${space.perspective}px`,
-      "--h-start": `${entrance.start}ms`,
-      "--h-spread": `${entrance.spread}ms`,
-      "--h-fly": `${entrance.fly.distance}px`,
-      "--h-fly-ms": `${entrance.fly.duration}ms`,
-      "--h-fade-ms": `${entrance.fade.duration}ms`,
-      "--h-fade-blur": `${entrance.fade.blur}px`,
-      "--h-lift-ms": `${entrance.text.duration}ms`,
-      "--h-title-size": `${type.title.size}px`,
-      "--h-title-track": `${type.title.tracking}em`,
-      "--h-where-size": `${type.where.size}px`,
+      "--h-start": `${entrance.firstPhotoAt}ms`,
+      "--h-spread": `${entrance.stagger}ms`,
+      "--h-fly": `${entrance.photosFlyIn.distance}px`,
+      "--h-fly-ms": `${entrance.photosFlyIn.duration}ms`,
+      "--h-fade-ms": `${entrance.photosFadeIn.duration}ms`,
+      "--h-fade-blur": `${entrance.photosFadeIn.blur}px`,
+      "--h-lift-ms": `${entrance.textRise.duration}ms`,
+      "--h-title-size": `${type.roleLine.size}px`,
+      "--h-title-track": `${type.roleLine.letterSpacing}em`,
+      "--h-where-size": `${type.location.size}px`,
       "--h-cta-size": `${type.buttons.size}px`,
     };
     for (const [k, v] of Object.entries(vars)) el.style.setProperty(k, v);
-    el.style.setProperty("--h-pull-x", `${layout.pull.width}`);
-    el.style.setProperty("--h-pull-y", `${layout.pull.height}`);
+    el.style.setProperty("--h-pull-x", `${layout.spread.width}`);
+    el.style.setProperty("--h-pull-y", `${layout.spread.height}`);
     /* Each card's place, over the one the server gave it. */
     el.querySelectorAll<HTMLElement>(".cover-float-frame").forEach((f, i) => {
       const card = `card ${(deal[i] ?? i) + 1}`;
@@ -253,7 +274,7 @@ export function HeroDials() {
   /* Arrange: the cards moved on the page itself. The listeners sit on the
      cover, below the strip, so a drag or a wheel over a card stops there
      and never pages the strip. */
-  const arrange = layout.arrange;
+  const arrange = layout.dragToArrange;
   React.useEffect(() => {
     const el = ref.current?.closest<HTMLElement>(".cover-float");
     if (!el || !arrange) return;
@@ -291,7 +312,7 @@ export function HeroDials() {
       if (!drag) return;
       e.stopPropagation();
       const r = el.getBoundingClientRect();
-      const { pull } = kitRef.current.getValues();
+      const { spread: pull } = kitRef.current.getValues();
       const x = drag.x + ((e.clientX - drag.px) / r.width) * 100 / pull.width;
       const y = drag.y + ((e.clientY - drag.py) / r.height) * 100 / pull.height;
       set(drag.card, {
@@ -338,6 +359,58 @@ export function HeroDials() {
     };
   }, [arrange, kitRef]);
 
+  /* Julian: hovering a section of the panel draws a yellow box round what
+     it changes on the page. The innermost section that names something
+     wins; one that does not (Shadow, Delays) falls back to its panel. */
+  React.useEffect(() => {
+    if (process.env.NODE_ENV === "production") return;
+    const el = ref.current?.closest<HTMLElement>(".cover-float");
+    if (!el) return;
+    const layer = document.createElement("div");
+    layer.style.cssText = "position:fixed;inset:0;z-index:9998;pointer-events:none";
+    document.body.append(layer);
+    let on: string | null = null;
+    let raf = 0;
+    const draw = () => {
+      const boxes = on ? [...el.querySelectorAll<HTMLElement>(on)] : [];
+      while (layer.children.length > boxes.length) layer.lastChild!.remove();
+      boxes.forEach((b, i) => {
+        const r = b.getBoundingClientRect();
+        const box = (layer.children[i] as HTMLElement | undefined) ?? layer.appendChild(document.createElement("div"));
+        box.style.cssText = `position:absolute;left:${r.left - 3}px;top:${r.top - 3}px;width:${r.width + 6}px;height:${r.height + 6}px;outline:2px solid #ffd400;background:rgb(255 212 0 / 0.08)`;
+      });
+      /* The cards drift and turn under it, so the boxes follow each frame. */
+      raf = on ? requestAnimationFrame(draw) : 0;
+    };
+    const over = (e: PointerEvent) => {
+      let next: string | null = null;
+      for (
+        let f: Element | null | undefined = (e.target as Element).closest?.(".dialkit-folder");
+        f && !next;
+        f = f.parentElement?.closest(".dialkit-folder")
+      ) {
+        const title = f
+          .querySelector(":scope > .dialkit-folder-header .dialkit-folder-title")
+          ?.textContent?.trim()
+          .toLowerCase();
+        if (!title) continue;
+        next = /^card \d+$/.test(title)
+          ? `.cover-float-frame[data-card="${title}"]`
+          : (DIAL_TARGETS[title] ?? null);
+      }
+      if (next === on) return;
+      on = next;
+      if (on && !raf) raf = requestAnimationFrame(draw);
+      if (!on) draw();
+    };
+    document.addEventListener("pointerover", over);
+    return () => {
+      document.removeEventListener("pointerover", over);
+      cancelAnimationFrame(raf);
+      layer.remove();
+    };
+  }, []);
+
   return (
     <>
       <span ref={ref} hidden />
@@ -346,7 +419,7 @@ export function HeroDials() {
   );
 }
 
-/** The name, through WarpText, on the "Hero name" panel. */
+/** The name, through WarpText, on the "Name effect" panel. */
 export function HeroName({
   className,
   style,
@@ -355,7 +428,7 @@ export function HeroName({
   style?: React.CSSProperties;
 }) {
   /* The same panel as `HeroDials` reads for its copy. */
-  const n = useDialKit("Hero name", NAME, { id: "hero-name" });
+  const n = useDialKit("Name effect", NAME, { id: "hero-name" });
   return (
     <WarpText
       text="Julian Gigola"
@@ -378,7 +451,7 @@ export function HeroName({
 
 /**
  * A photograph on the cover, with its hover swell and shadow on a spring
- * from the "Hero cards" panel.
+ * from the "Photo hover" panel.
  *
  * It follows the frame's hover, as the stylesheet does, not its own: the
  * card sits forward of the frame in 3D, and the pointer lands on the frame
@@ -394,7 +467,20 @@ export function CoverCard({ children }: { children: React.ReactNode }) {
   React.useEffect(() => {
     const frame = ref.current?.parentElement;
     if (!frame) return;
-    const on = (e: PointerEvent) => e.pointerType === "mouse" && setHover(true);
+    const on = (e: PointerEvent) => {
+      if (e.pointerType !== "mouse") return;
+      /* The way from this card to the cover's centre, for the stylesheet
+         to take a share of (Toward Middle). Measured off the frame, which
+         does not move on hover. */
+      const card = ref.current;
+      const cover = frame.closest(".cover-float")?.getBoundingClientRect();
+      if (card && cover) {
+        const f = frame.getBoundingClientRect();
+        card.style.setProperty("--mid-x", `${cover.left + cover.width / 2 - (f.left + f.width / 2)}px`);
+        card.style.setProperty("--mid-y", `${cover.top + cover.height / 2 - (f.top + f.height / 2)}px`);
+      }
+      setHover(true);
+    };
     const off = () => setHover(false);
     frame.addEventListener("pointerenter", on);
     frame.addEventListener("pointerleave", off);
@@ -404,14 +490,14 @@ export function CoverCard({ children }: { children: React.ReactNode }) {
     };
   }, []);
 
-  const s = cards.spring;
+  const s = cards.motion;
   return (
     <motion.span
       ref={ref}
       className="cover-float-card"
       initial={{ "--hover-scale": 1 }}
       animate={{
-        "--hover-scale": hover ? cards.scale : 1,
+        "--hover-scale": hover ? cards.grow : 1,
         boxShadow: `0 0 ${hover ? cards.shadow.blur : 0}px rgb(0 0 0 / ${cards.shadow.opacity})`,
       }}
       transition={{
@@ -419,7 +505,7 @@ export function CoverCard({ children }: { children: React.ReactNode }) {
            without the type. */
         ...(s.type === "easing" ? { duration: s.duration, ease: s.ease } : s),
         /* The waits the stylesheet keeps for the rest of the focus. */
-        delay: (hover ? cards.waits.focus : cards.waits.release) / 1000,
+        delay: (hover ? cards.delays.comeForward : cards.delays.letGo) / 1000,
       }}
     >
       {children}

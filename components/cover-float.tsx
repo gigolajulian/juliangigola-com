@@ -122,7 +122,9 @@ export function CoverFloat({
               style={{ "--reveal-delay": "1420ms" } as React.CSSProperties}
             >
               <CoverRole
-                role="Photographer ♱ Creative Director"
+                /* Bound so a phone breaks it after the cross, never
+                   leaving "Director" alone on the second line. */
+                role={"Photographer ♱ Creative Director"}
                 disciplines={[...new Set(labels)]}
               />
             </span>
@@ -132,7 +134,7 @@ export function CoverFloat({
           className="lift cover-float-where mt-5 mb-[26px] max-w-[34rem]"
           style={{ "--reveal-delay": "1600ms" } as React.CSSProperties}
         >
-          Based in San Francisco, CA. Available Worldwide
+          {"Based in San Francisco, CA. Available Worldwide"}
         </p>
         <div
           className="lift flex flex-wrap justify-center gap-3"

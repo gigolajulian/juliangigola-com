@@ -130,14 +130,14 @@ void main() {
   vec2 pc = (c + 0.5) * uCell;
   float t = bayer(ivec2(c));
 
-  // The pointer pushes the grain out, like a lens, and shakes it: barely
-  // on his face, which holds still enough to read (Julian: minimum
-  // warping on the face only).
+  // The pointer pushes the grain out, like a lens, and shakes it: never
+  // on his face (Julian: no warp on the face). Nothing inside the oval,
+  // easing in over a band just outside it so the edge does not show.
   float R = uRes.x / 13.0 * 0.75;  // Julian: a quarter smaller
   vec2 d = pc - uPointer;
   float dist = length(d) + 1e-4;
   vec2 q = ((pc - uRect.xy) / uRect.zw - FACE) / FACE_R;
-  float k = uOn * exp(-(dist * dist) / (R * R)) * mix(1.0, 0.1, exp(-dot(q, q)));
+  float k = uOn * exp(-(dist * dist) / (R * R)) * smoothstep(1.05, 1.5, length(q));
   float jit = k * 4.0 * uCell * sin(c.x * 12.9 + c.y * 78.2 + uTime * 9.0);
   vec2 sp = pc - d / dist * k * R * 0.5 + vec2(jit, -jit);
 

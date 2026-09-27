@@ -22,8 +22,8 @@ export function CoverRole({
 }) {
   const ref = React.useRef<HTMLSpanElement>(null);
   const [on, setOn] = React.useState<string | null>(null);
-  /* The frames' waits, from the "Hero cards" panel. */
-  const waits = useLatest(useCards().waits);
+  /* The frames' waits, from the "Photo hover" panel. */
+  const waits = useLatest(useCards().delays);
 
   React.useEffect(() => {
     const cover = ref.current?.closest(".cover-float");
@@ -37,7 +37,7 @@ export function CoverRole({
       clearTimeout(wait);
       wait = window.setTimeout(
         () => setOn(frame?.dataset.discipline ?? null),
-        frame ? waits.current.focus : waits.current.release,
+        frame ? waits.current.comeForward : waits.current.letGo,
       );
     };
     const over = (e: Event) =>
