@@ -31,7 +31,7 @@ const clearNav = () => {
    travels along it: to the right of the page you are on, the pages move
    right to left, and back the other way. Julian: a transition for each
    page from the navbar. A project or a filter counts as its section. */
-const SECTIONS = ["/", "/work", "/sessions", "/about", "/contact"];
+const SECTIONS = ["/", "/work", "/sessions", "/contact", "/about"];
 const sectionOf = (path: string) =>
   SECTIONS.reduce(
     (found, s, i) => (path === s || (s !== "/" && path.startsWith(`${s}/`)) ? i : found),

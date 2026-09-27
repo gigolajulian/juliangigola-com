@@ -4014,15 +4014,23 @@ h2:not(.label, [data-display]) {
 }
 
 /* ── the about page's first screen (`about-hero.tsx`) ─────────────
- * Dark in both themes, like a photograph. */
+ * Dark on the dark theme; on the light one the words turn over onto the
+ * page's ground and the portrait keeps its dark, fading in toward him. */
 .about-hero {
+  --ah-ground: #0b0b0b;
+  --ah-shade: 11 11 11;
+  --ah-ink: #f2f1ee;
+  --ah-soft: #9a9892;
+  --ah-dim: #77756f;
+  --ah-fact: #bdbbb5;
+  --ah-rule: #2a2927;
   position: relative;
   isolation: isolate;
   overflow: hidden;
   height: 100%;
   min-height: 34rem;
-  background: #0b0b0b;
-  color: #f2f1ee;
+  background: var(--ah-ground);
+  color: var(--ah-ink);
   font-family: var(--font-mono);
   font-size: 11px;
   letter-spacing: 0.18em;
@@ -4053,6 +4061,9 @@ h2:not(.label, [data-display]) {
   z-index: 2;
   display: flex;
   flex-direction: column;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
   padding: 2.5rem clamp(1rem, 6vw, 6rem);
 }
 /* Julian: the line, the intro and the services under it, fitted beside
@@ -4071,7 +4082,7 @@ h2:not(.label, [data-display]) {
   letter-spacing: 0;
 }
 .about-hero-intro {
-  max-width: 36rem;
+  max-width: var(--title-w, 36rem);
 }
 .about-hero-copy {
   max-width: var(--hero-room, 46vw);
@@ -4086,25 +4097,27 @@ h2:not(.label, [data-display]) {
   line-height: 1.2;
 }
 .about-hero-intro {
-  font-size: 0.8125rem;
-  line-height: 1.6;
-  color: #9a9892;
+  /* Julian: bigger (it was 13px; twice was too big). */
+  font-size: 1rem;
+  line-height: 1.55;
+  color: var(--ah-soft);
 }
 .about-hero-services .label {
-  color: #77756f;
+  color: var(--ah-dim);
 }
 /* Julian: one column, a ruled list, a little bigger than the labels. */
 .about-hero-services {
-  max-width: 20rem;
+  max-width: 22rem;
 }
 .about-hero-services ul {
   margin-top: 0.2rem;
 }
 .about-hero-services li.label {
   padding-block: 0.24rem;
-  border-bottom: 1px solid #2a2927;
-  color: #f2f1ee;
-  font-size: 12px;
+  border-bottom: 1px solid var(--ah-rule);
+  color: var(--ah-ink);
+  /* Julian: bigger (it was 12px; twice was too big). */
+  font-size: 15px;
   letter-spacing: 0.1em;
 }
 /* A wash of the ground down the left, under the words: the lights keep
@@ -4115,7 +4128,7 @@ h2:not(.label, [data-display]) {
   inset: 0;
   z-index: -1;
   pointer-events: none;
-  background: linear-gradient(90deg, rgb(11 11 11 / 0.8) 0%, rgb(11 11 11 / 0.6) 38%, transparent 56%);
+  background: linear-gradient(90deg, rgb(var(--ah-shade) / 0.8) 0%, rgb(var(--ah-shade) / 0.6) 38%, transparent 56%);
 }
 /* A short window: the name and the line come down so the two never
    meet (at 1280 by 720 they touched). */
@@ -4131,15 +4144,6 @@ h2:not(.label, [data-display]) {
   .about-hero .about-hero-title {
     font-size: clamp(1.5rem, min(2.4vw, 4.4vh), 2.7rem);
     line-height: 1.1;
-  }
-  /* The six services in two ruled columns, three rows instead of six. */
-  .about-hero-services {
-    max-width: 28rem;
-  }
-  .about-hero-services ul {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    column-gap: 1.5rem;
   }
   .about-hero-bio {
     gap: 0.75rem;
@@ -4157,15 +4161,46 @@ h2:not(.label, [data-display]) {
     padding-block: 1.4rem;
   }
 }
-/* A laptop's browser window (1366 by 768 leaves about 657): with the intro
-   the name came down to 36px. The biography, one screen on, says it. */
-@media (min-width: 40rem) and (max-height: 700px) {
+/* The six services in two ruled columns, three rows instead of six:
+   room for the biography above them (Julian merged it into the intro). */
+@media (min-width: 40rem) {
+  .about-hero-services {
+    max-width: 34rem;
+  }
+  .about-hero-services ul {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: 1.5rem;
+  }
+}
+/* A laptop's browser window (1366 by 768 leaves about 657; 1280 by 800,
+   1440 by 790 and 1024 by 768 too): the intro gives way so the name and the client
+   marks fit (Julian's pick). */
+@media (min-width: 40rem) and (max-height: 820px) {
   .about-hero-intro {
     display: none;
   }
 }
+/* Julian: the title 25% larger where the screen is tall enough to hold it
+   with everything else; on a laptop it keeps its old size and the blocks
+   sit closer, so the name and the marks still fit. */
+@media (min-width: 40rem) and (min-height: 1000px) {
+  .about-hero .about-hero-title {
+    font-size: clamp(2.75rem, 3.875vw, 4.75rem);
+  }
+}
+@media (min-width: 40rem) and (max-height: 999px) {
+  .about-hero-bio {
+    gap: 0.9rem;
+  }
+  .about-hero-name {
+    margin-bottom: 0.9rem;
+  }
+  .about-hero-copy {
+    padding-top: 1rem;
+  }
+}
 .about-hero-copy {
-  margin-top: auto;
   padding-top: 1.5rem;
 }
 .about-hero-name {
@@ -4173,41 +4208,35 @@ h2:not(.label, [data-display]) {
   font-size: clamp(48px, 5vw, 104px);
   line-height: 0.86;
   letter-spacing: -0.045em;
+  /* Julian: the wordmark, the header's face and weight, in its own case. */
+  font-family: var(--font-display);
+  font-weight: 900;
+  text-transform: none;
 }
-/* Julian: the first name spread across the surname. The name is as wide
-   as its longer line, and the letters of the first spread across it, so the
-   spacing gives way as a letter under the pointer thickens. */
-.about-hero-name {
-  width: fit-content;
-}
-.about-hero-first {
-  display: flex;
-  justify-content: space-between;
-  /* Julian: taller than the surname, and as wide as it (the name and the
-     facts end on one edge, `about-hero.tsx`). Tracked close so it still
-     fits at that size, the letters spread to the edge. */
-  font-size: 1.12em;
-  letter-spacing: -0.145em;
-  width: 100%;
-  font-weight: 200;
-}
-.about-hero-last {
+/* The line is there for its size only; the warp draws over it, a little
+   larger than the line so the fit inside it (94% across) lands on the
+   same edge and the warp has room above and below. */
+.about-hero-line {
+  position: relative;
   display: block;
-  /* Julian: regular. */
-  font-weight: 400;
-  color: var(--accent);
+  width: fit-content;
+  white-space: nowrap;
+}
+.about-hero-ghost {
+  color: transparent;
+}
+.about-hero-warp {
+  position: absolute;
+  inset: -0.14em -3.2%;
 }
 .about-hero-facts {
   display: flex;
-  flex-wrap: wrap;
+  /* Julian: the two on one line. */
+  flex-wrap: nowrap;
+  white-space: nowrap;
   gap: 0.75rem 1.6rem;
-  color: #bdbbb5;
+  color: var(--ah-fact);
   font-size: 10px;
-}
-.about-hero-facts[data-stack] {
-  flex-direction: column;
-  align-items: flex-start;
-  row-gap: 0.3rem;
 }
 .about-hero-facts li::before {
   content: "";
@@ -4218,9 +4247,113 @@ h2:not(.label, [data-display]) {
   vertical-align: 1px;
   background: currentColor;
 }
-/* The dark accent is set for a light ground; this one is always dark. */
+/* The light theme's hero: the words' greys turned over, on the page's own
+   ground. The shader fades that ground into his dark (`uDusk`). */
 :root[data-theme="light"] .about-hero {
-  --accent: oklch(0.72 0.095 195);
+  --ah-ground: var(--background);
+  --ah-shade: 235 237 239;
+  --ah-ink: #141312;
+  --ah-soft: #5f5d58;
+  --ah-dim: #7d7b75;
+  --ah-fact: #45433f;
+  --ah-rule: #d2d2d0;
+}
+/* And the client marks stop where the dark begins (`--dusk-room`). */
+@media (min-width: 40rem) {
+  :root[data-theme="light"] .about-hero .about-hero-clients {
+    max-width: var(--dusk-room, 40vw);
+  }
+}
+/* The ask under the services, in the case it is set in everywhere else. */
+.about-hero-ask {
+  text-transform: none;
+}
+/* The foot: the name and the facts, and under them the client marks
+   along the bottom left (Julian liked them there), one tight line: the
+   label, then the marks looping inside the room the words have, so they
+   stop short of him. */
+.about-hero-base {
+  margin-top: auto;
+}
+.about-hero-clients {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  max-width: var(--hero-room, 46vw);
+  margin-top: 0.6rem;
+  padding-top: 0.6rem;
+  /* Julian: the rule over them fades out by halfway across. */
+  background: linear-gradient(90deg, var(--border), transparent 50%) top left / 100% 1px no-repeat;
+}
+/* The marks on one line, looping right to left, faded in and out at the
+   ends; held while the pointer is on them, still for reduced motion. */
+.about-marquee {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+}
+.about-marquee-track {
+  display: flex;
+  width: max-content;
+  animation: about-marquee 40s linear infinite;
+}
+.about-marquee:hover .about-marquee-track {
+  animation-play-state: paused;
+}
+.about-marquee-list {
+  flex-wrap: nowrap;
+  padding-right: 2rem;
+}
+@keyframes about-marquee {
+  to {
+    transform: translateX(-50%);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .about-marquee-track {
+    animation: none;
+  }
+}
+/* Julian: the loop only where the room is short. A tall screen keeps the
+   marks still, in their own row under the name at the bottom left. On
+   the light theme they stop short of his dark, so they keep looping
+   there, on one line (Julian). */
+@media (min-width: 40rem) and (min-height: 1000px) {
+  .about-hero-clients {
+    gap: 2rem;
+    max-width: none;
+    margin-top: 1rem;
+    padding-top: 0.9rem;
+  }
+  :root:not([data-theme="light"]) .about-marquee {
+    overflow: visible;
+    mask-image: none;
+  }
+  :root:not([data-theme="light"]) .about-marquee-track {
+    width: auto;
+    animation: none;
+  }
+  :root:not([data-theme="light"]) .about-marquee-track > [inert] {
+    display: none;
+  }
+  :root:not([data-theme="light"]) .about-marquee-list {
+    flex-wrap: wrap;
+    justify-content: flex-start;
+  }
+}
+@media (max-width: 39.99rem) {
+  .about-hero-base {
+    display: contents;
+  }
+  .about-hero-clients {
+    order: 4;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.9rem;
+    max-width: none;
+    margin: 2rem 0 0;
+  }
 }
 @media (max-width: 39.99rem) {
   .about-hero-facts {

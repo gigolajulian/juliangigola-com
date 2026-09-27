@@ -5,7 +5,7 @@ import { ContactForm } from "@/components/contact-form";
 import { Strip } from "@/components/strip";
 import { StripPage, StripHead, RisingTitle } from "@/components/strip-page";
 import { BOOKING_URL } from "@/lib/site";
-import { ABOUT_PAGE } from "@/lib/work";
+import { ABOUT_PAGE, SESSIONS_PAGE } from "@/lib/work";
 
 /* ── contact ──────────────────────────────────────────────────────
  * The page the whole site is judged on, so the form is on the first screen
@@ -14,9 +14,8 @@ import { ABOUT_PAGE } from "@/lib/work";
  *
  * Two screens. The first is the enquiry: what to say, and the box to say it
  * in. The second is everything a person might want instead of a form —
- * the address, where he is, and where else he is. Nothing leads on from
- * here: a wheel past the end stretches the band and stops, because the
- * visitor has arrived.
+ * the address, where he is, and where else he is. A wheel past the end
+ * goes on to About, the last page in the nav's order.
  * ─────────────────────────────────────────────────────────────── */
 
 export const metadata: Metadata = {
@@ -43,6 +42,27 @@ const ELSEWHERE = [
   },
 ];
 
+/* How a commission runs, beside the form it starts: Julian moved it here
+   from About. */
+const PHASES = [
+  {
+    step: "Brief",
+    body: "References, usage, deliverables, and dates. A deck is welcome but not required.",
+  },
+  {
+    step: "Treatment",
+    body: "A lighting and location approach, a shot list, and a quote covering crew and licensing.",
+  },
+  {
+    step: "Shoot",
+    body: "Studio or location, Bay Area or travelling. Art direction on request.",
+  },
+  {
+    step: "Delivery",
+    body: "Selects for approval, then final retouched files in the crops and color spaces you need.",
+  },
+];
+
 export default function ContactPage() {
   return (
     <StripPage
@@ -51,10 +71,10 @@ export default function ContactPage() {
           crumb={
             <Link
               prefetch={false}
-              href="/work"
+              href={SESSIONS_PAGE.href}
               className="label text-muted-foreground transition-colors duration-200 hoverable:hover:text-foreground"
             >
-              &larr; Portfolio
+              &larr; {SESSIONS_PAGE.name}
             </Link>
           }
           title="Contact"
@@ -64,10 +84,11 @@ export default function ContactPage() {
     >
       <Strip
         label="Contact: the ask, the details, and the form."
-        /* The page About leads to, so a push back past the start goes back
-           there, landing at its end. Julian asked. No `next`: this is
-           where the site's order ends. */
-        prev={ABOUT_PAGE}
+        /* The site's order, as the nav has it: Sessions, Contact, About.
+           Back past the start goes to Sessions, on past the end to About
+           (Julian). */
+        prev={SESSIONS_PAGE}
+        next={ABOUT_PAGE}
         paged
         bleed
         className="mt-4 flex-1"
@@ -79,7 +100,12 @@ export default function ContactPage() {
           data-hash="inquire"
           className="grid w-full shrink-0 grid-cols-1 gap-10 px-6 py-12 sm:h-full sm:grid-cols-2 sm:items-center sm:gap-16 sm:px-16 sm:py-0"
         >
-          <div className="flex flex-col gap-6">
+          {/* Scrolls inside itself if a short window still cannot hold
+              it, as the form beside it does. */}
+          <div
+            data-scroll
+            className="flex min-h-0 flex-col gap-6 overflow-y-auto overscroll-contain sm:max-h-full short:gap-4"
+          >
             <RisingTitle text="Get in touch" />
             <p className="title-rest max-w-prose text-sm leading-relaxed text-muted-foreground">
               {/* A sentence to a line, where there is room: Julian asked
@@ -111,7 +137,7 @@ export default function ContactPage() {
                 a screen of its own, which was a screen to swipe past on
                 the way to nothing: the address and the handles are two
                 lines and belong beside the ask. */}
-            <div className="border-t border-border pt-8">
+            <div className="border-t border-border pt-8 short:pt-5">
               <dl className="grid gap-6 min-[56rem]:grid-cols-2">
                 <div>
                   <dt className="label text-muted-foreground">Email</dt>
@@ -139,7 +165,7 @@ export default function ContactPage() {
                   to go too. The name is still read out, and shown on hover.
                   The link is the padded box, so a thumb has more than the
                   glyph to aim at. */}
-              <div className="-ml-2 mt-5 flex gap-2">
+              <div className="-ml-2 mt-5 flex gap-2 short:mt-3">
                 {ELSEWHERE.map((where) => (
                   <a
                     key={where.href}
@@ -163,6 +189,28 @@ export default function ContactPage() {
                   </a>
                 ))}
               </div>
+            </div>
+            {/* The four steps, compact: a name and a line each, the lines
+                giving way on a short window so the column still fits. */}
+            <div className="border-t border-border pt-6 short:pt-4">
+              <h2 className="label text-muted-foreground">
+                How a commission runs
+              </h2>
+              <ol className="mt-4 grid grid-cols-2 gap-x-8 gap-y-4 short:mt-3 short:grid-cols-4 short:gap-x-4">
+                {PHASES.map((phase, i) => (
+                  <li key={phase.step} className="flex flex-col gap-1">
+                    <span className="label tabular-nums text-muted-foreground">
+                      {String(i + 1).padStart(2, "0")}
+                    </span>
+                    <h3 className="font-display text-lg uppercase leading-none tracking-[0] short:text-base">
+                      {phase.step}
+                    </h3>
+                    <p className="text-xs leading-relaxed text-muted-foreground short:hidden">
+                      {phase.body}
+                    </p>
+                  </li>
+                ))}
+              </ol>
             </div>
           </div>
 

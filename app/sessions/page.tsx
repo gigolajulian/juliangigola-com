@@ -48,7 +48,6 @@ export default function SessionsPage() {
           }
           title="Sessions"
           live
-          aside={`${SESSION_TYPES.length} session types`}
         />
       }
     >
