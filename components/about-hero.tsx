@@ -126,22 +126,16 @@ void main() {
   vec2 pc = (c + 0.5) * uCell;
   float t = bayer(ivec2(c));
 
-  // The pointer pushes the grain out, like a lens, and shakes it.
-  float R = uRes.x / 13.0 * 0.75;  // Julian: a quarter smaller
-  vec2 d = pc - uPointer;
-  float dist = length(d) + 1e-4;
-  float k = uOn * exp(-(dist * dist) / (R * R));
-  float jit = k * 4.0 * uCell * sin(c.x * 12.9 + c.y * 78.2 + uTime * 9.0);
-  vec2 sp = pc - d / dist * k * R * 0.5 + vec2(jit, -jit);
-
-  // Sharpened, so the features hold at this size.
-  float l = lum(sp);
-  float avg = (lum(sp + vec2(uCell, 0.0)) + lum(sp - vec2(uCell, 0.0)) +
-               lum(sp + vec2(0.0, uCell)) + lum(sp - vec2(0.0, uCell))) * 0.25;
-  l = clamp(l + 0.5 * (l - avg), 0.0, 1.0) * (1.0 - k * 0.35);
+  // Him, held still: the pointer warps only the lights behind (Julian:
+  // warp the background, not the subject). Sharpened, so the features
+  // hold at this size.
+  float l = lum(pc);
+  float avg = (lum(pc + vec2(uCell, 0.0)) + lum(pc - vec2(uCell, 0.0)) +
+               lum(pc + vec2(0.0, uCell)) + lum(pc - vec2(0.0, uCell))) * 0.25;
+  l = clamp(l + 0.5 * (l - avg), 0.0, 1.0);
   // Only him: the backdrop's grey, a touch lighter round him, left a
   // halo of dots (Julian: remove the dots around me).
-  l *= smoothstep(0.35, 0.75, body(sp));
+  l *= smoothstep(0.35, 0.75, body(pc));
   float photo = quant(l, t);
 
   // The lights behind, matched to Julian's reference: soft streaks running
@@ -456,7 +450,6 @@ export function AboutHero({ children }: { children?: React.ReactNode }) {
           <ul className="about-hero-facts">
             <li>Based in San Francisco, CA</li>
             <li>Available worldwide</li>
-            <li>Published in WIRED</li>
           </ul>
         </div>
       </div>
