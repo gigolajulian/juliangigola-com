@@ -75,7 +75,7 @@ export function EnquiryCell({
       )}
     >
       {backdrop ? (
-        <div className="absolute inset-0 overflow-hidden">
+        <div className="enquiry-backdrop absolute inset-0 overflow-hidden">
           {backdrop}
         </div>
       ) : null}

@@ -461,7 +461,7 @@
     transition-delay: var(--release-wait);
   }
   .cover-float-ring:has(.cover-float-frame:hover) .cover-float-card::after {
-    opacity: var(--h-glass, 0.75);
+    opacity: var(--h-glass, 0.5);
     transition-delay: var(--blur-wait);
   }
   .cover-float-ring .cover-float-frame:hover .cover-float-card::after {
@@ -2753,6 +2753,80 @@ a.strip-cell {
 }
 .site-bar[data-home]::after {
   opacity: 1;
+}
+/* And its floor: the rail and the footer float over the foot of the strip
+   as one pane of the same glass, and the strip runs on under them
+   (`site-header.tsx` sets `data-under` and measures `--under`). Each
+   screen keeps its old height, so nothing on it moves; the hero's
+   photographs and the last page's wall carry on below it, under the
+   glass. From 40rem, where the strip runs sideways. */
+@media (min-width: 40rem) {
+  :root[data-under] .strip-band {
+    position: relative;
+  }
+  :root[data-under] .strip-scroll > * {
+    align-self: flex-start;
+    height: calc(100% - var(--under, 94px));
+  }
+  :root[data-under] .strip-scroll > .cover-float {
+    overflow: clip visible;
+  }
+  :root[data-under] .enquiry-backdrop {
+    bottom: calc(-1 * var(--under, 94px));
+  }
+  :root[data-under] .strip-rail,
+  :root[data-under] body > footer {
+    left: 0;
+    right: 0;
+    background-color: color-mix(in oklab, var(--background) 34%, transparent);
+  }
+  :root[data-under] .strip-rail {
+    position: absolute;
+    bottom: var(--foot, 38px);
+    z-index: 20;
+    /* Its old margin as padding, so the pane is as tall as the rail was
+       with the space above it and every screen keeps its height. */
+    margin-top: 0;
+    padding-top: 1.5rem;
+    /* The hairline and the light along it as shadows, not a border,
+       which would add a pixel to the pane. */
+    box-shadow:
+      inset 0 1px 0 color-mix(in oklab, var(--foreground) 12%, transparent),
+      inset 0 2px 0 color-mix(in oklab, white 8%, transparent);
+  }
+  @media (pointer: coarse) {
+    :root[data-under] .strip-rail {
+      padding-top: 0.75rem;
+    }
+  }
+  @media (max-height: 30rem) {
+    :root[data-under] .strip-rail {
+      padding-top: 0.5rem;
+    }
+  }
+  :root[data-under] body > footer {
+    position: fixed;
+    bottom: 0;
+    z-index: 30;
+    border-top-color: transparent;
+  }
+  :root[data-under] :is(.strip-rail, body > footer)::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    -webkit-backdrop-filter: blur(18px) saturate(1.5);
+    backdrop-filter: blur(18px) saturate(1.5);
+    pointer-events: none;
+  }
+  @media (prefers-reduced-transparency: reduce) {
+    :root[data-under] :is(.strip-rail, body > footer) {
+      background-color: var(--background);
+    }
+    :root[data-under] :is(.strip-rail, body > footer)::after {
+      display: none;
+    }
+  }
 }
 @media (prefers-reduced-motion: reduce) {
   .site-bar::after {

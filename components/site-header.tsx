@@ -52,6 +52,39 @@ export function SiteHeader() {
     setOpen(false);
   }
 
+  /* The homepage's floor, glass like the bar (Julian: the footer glass
+   * too). The strip runs to the foot of the screen and the rail and the
+   * footer float over it, so the photographs carry on under them the way
+   * they do under the bar; each screen keeps the height it had, so the
+   * hero stands where it was set. How much floats is measured, since the
+   * rail and the footer change height with the screen, and handed to
+   * `globals.css` as `--under` (`:root[data-under]`). */
+  React.useEffect(() => {
+    if (pathname !== "/") return;
+    const root = document.documentElement;
+    let sizes: ResizeObserver | null = null;
+    const frame = requestAnimationFrame(() => {
+      const foot = document.querySelector<HTMLElement>("body > footer");
+      const rail = document.querySelector<HTMLElement>(".strip-rail");
+      if (!foot || !rail) return;
+      root.dataset.under = "";
+      const measure = () => {
+        root.style.setProperty("--foot", `${foot.offsetHeight}px`);
+        root.style.setProperty("--under", `${foot.offsetHeight + rail.offsetHeight}px`);
+      };
+      sizes = new ResizeObserver(measure);
+      sizes.observe(foot);
+      sizes.observe(rail);
+    });
+    return () => {
+      cancelAnimationFrame(frame);
+      sizes?.disconnect();
+      delete root.dataset.under;
+      root.style.removeProperty("--foot");
+      root.style.removeProperty("--under");
+    };
+  }, [pathname]);
+
   /* The open state, published to the document.
    *
    * The menu is a drawer the page slides off: the bar, the page and the

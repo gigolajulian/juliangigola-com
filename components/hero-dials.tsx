@@ -31,12 +31,12 @@ import { DEAL, SLOTS } from "@/lib/cover-slots";
 /* Julian: the names were confusing. Each key is the label DialKit shows
    (it splits camelCase into words), so every one says what it moves. */
 export const CARDS = {
-  motion: { type: "spring", visualDuration: 0.6, bounce: 0 },
+  motion: { type: "easing", duration: 0.25, ease: [1, -0.4, 0.5, 1] },
   grow: [1.045, 1, 1.2, 0.005],
   forward: [64, 0, 200, 1],
   towardMiddle: [0.12, 0, 1, 0.01],
   shadow: { blur: [4, 0, 80, 1], opacity: [0.3, 0, 1, 0.01] },
-  otherPhotos: { blur: [0.5, 0, 8, 0.1], glassSheen: [0.75, 0, 1, 0.05] },
+  otherPhotos: { blur: [0.5, 0, 8, 0.1], glassSheen: [0.5, 0, 1, 0.05] },
   delays: {
     comeForward: [30, 0, 1000, 10],
     blurOthers: [310, 0, 2000, 10],
