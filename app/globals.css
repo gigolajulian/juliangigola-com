@@ -185,7 +185,7 @@
  * each frame, the depth itself on the card, the camera on the section.
  * ───────────────────────────────────────────────────────────────── */
 .cover-float {
-  perspective: var(--h-perspective, 1780px);
+  perspective: var(--h-perspective, 2010px);
 }
 .cover-float-ring,
 .cover-float-frame {
@@ -199,7 +199,7 @@
   /* Out of order: each frame's place in `ORDER` (`cover-float.tsx`),
      spread out from the start. */
   --delay: calc(var(--h-start, 1180ms) + var(--order, 0) * var(--h-spread, 1.2ms));
-  animation: jg-fly var(--h-fly-ms, 1800ms) cubic-bezier(0.16, 1, 0.3, 1)
+  animation: jg-fly var(--h-fly-ms, 1200ms) cubic-bezier(0.16, 1, 0.3, 1)
     var(--delay) backwards;
 }
 @media (max-width: 39.99rem) {
@@ -293,14 +293,14 @@
 .cover-float-title {
   font-family: var(--font-mono);
   font-weight: 400;
-  font-size: var(--h-title-size, 14px);
+  font-size: var(--h-title-size, 15.5px);
   letter-spacing: var(--h-title-track, 0.2em);
   text-transform: uppercase;
   color: var(--hero-sub);
 }
 .cover-float-where {
   font-family: var(--font-mono);
-  font-size: var(--h-where-size, 13px);
+  font-size: var(--h-where-size, 14.5px);
   color: var(--hero-where);
 }
 .cover-cta {
@@ -390,7 +390,7 @@
     transition-delay: var(--release-wait);
   }
   .cover-float-ring:has(.cover-float-frame:hover) .cover-float-card::after {
-    opacity: var(--h-glass, 0.85);
+    opacity: var(--h-glass, 0.75);
     transition-delay: var(--blur-wait);
   }
   .cover-float-ring .cover-float-frame:hover .cover-float-card::after {
@@ -398,7 +398,7 @@
     transition-delay: 0ms;
   }
   .cover-float-ring .cover-float-frame:hover .cover-float-card {
-    transform: translateZ(calc(var(--z, 0px) + var(--h-lift, 40px)));
+    transform: translateZ(calc(var(--z, 0px) + var(--h-lift, 64px)));
     filter: blur(0px);
     transition-delay: var(--focus-wait);
   }
@@ -435,7 +435,7 @@
    rising the last of the way into place on a long, soft finish. */
 @keyframes jg-fly {
   from {
-    transform: translateY(var(--h-fly, 90px));
+    transform: translateY(var(--h-fly, 95px));
   }
 }
 @keyframes jg-fade {
@@ -3969,4 +3969,221 @@ h2:not(.label, [data-display]) {
   line-height: 1.2;
   letter-spacing: -0.01em;
   text-transform: none;
+}
+
+/* ── the about page's first screen (`about-hero.tsx`) ─────────────
+ * Dark in both themes, like a photograph. */
+.about-hero {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  height: 100%;
+  min-height: 34rem;
+  background: #0b0b0b;
+  color: #f2f1ee;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+.about-hero-stage,
+.about-hero-stage canvas {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.about-hero-stage canvas {
+  image-rendering: pixelated;
+}
+/* No WebGL: the photograph as it is, in grey, held where the grain holds
+   him. */
+.about-hero[data-flat] .about-hero-stage {
+  background: url("/about/julian.jpg") 78% center / cover no-repeat;
+  filter: grayscale(1) brightness(0.85);
+}
+/* The words over the grain: role and biography at the top, the name at
+   the foot. */
+.about-hero-content {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  padding: 2.5rem clamp(1rem, 6vw, 6rem);
+}
+/* Julian: the line, the intro and the services under it, fitted beside
+   him and never over him: every block of words stops at `--hero-room`,
+   40px short of where he starts at this width (`about-hero.tsx` measures
+   it). Sized so the name still has the foot of the screen. */
+.about-hero-bio {
+  display: flex;
+  flex-direction: column;
+  /* Julian: each block its own space. As much as the height allows: 27px
+     at 900 tall, the most the name leaves there, up to 64px on a tall
+     screen. */
+  gap: clamp(1.6rem, calc(7vh - 36px), 4rem);
+  max-width: var(--hero-room, 46vw);
+  text-transform: none;
+  letter-spacing: 0;
+}
+.about-hero-intro {
+  max-width: 36rem;
+}
+.about-hero-copy {
+  max-width: var(--hero-room, 46vw);
+}
+/* Julian: two lines, "and photographer" under "Bay Area creative
+   director" at any width. */
+.about-hero .about-hero-title {
+  max-width: 13em;
+  /* Julian: bigger, and the lines apart: at 1.05 the y of Bay met the
+     line under it. */
+  font-size: clamp(2.2rem, 3.1vw, 3.8rem);
+  line-height: 1.2;
+}
+.about-hero-intro {
+  font-size: 0.8125rem;
+  line-height: 1.6;
+  color: #9a9892;
+}
+.about-hero-services .label {
+  color: #77756f;
+}
+/* Julian: one column, a ruled list, a little bigger than the labels. */
+.about-hero-services {
+  max-width: 20rem;
+}
+.about-hero-services ul {
+  margin-top: 0.2rem;
+}
+.about-hero-services li.label {
+  padding-block: 0.24rem;
+  border-bottom: 1px solid #2a2927;
+  color: #f2f1ee;
+  font-size: 12px;
+  letter-spacing: 0.1em;
+}
+/* A wash of the ground down the left, under the words: the lights keep
+   drifting behind them but never brighten the text's ground. */
+.about-hero-content::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: linear-gradient(90deg, rgb(11 11 11 / 0.8) 0%, rgb(11 11 11 / 0.6) 38%, transparent 56%);
+}
+/* A short window: the name and the line come down so the two never
+   meet (at 1280 by 720 they touched). */
+@media (min-width: 40rem) and (max-height: 820px) {
+  .about-hero-name {
+    font-size: clamp(40px, 4vw, 88px);
+  }
+  .about-hero .about-hero-title {
+    font-size: clamp(1.75rem, 2.4vw, 2.7rem);
+  }
+  .about-hero-bio {
+    gap: 0.75rem;
+  }
+  .about-hero-copy {
+    padding-top: 1rem;
+  }
+  .about-hero-name {
+    margin-bottom: 1rem;
+  }
+  .about-hero-services li.label {
+    padding-block: 0.2rem;
+  }
+  .about-hero-content {
+    padding-block: 1.4rem;
+  }
+}
+.about-hero-copy {
+  margin-top: auto;
+  padding-top: 1.5rem;
+}
+.about-hero-name {
+  margin-bottom: 1.4rem;
+  font-size: clamp(48px, 5vw, 104px);
+  line-height: 0.86;
+  letter-spacing: -0.045em;
+}
+/* Julian: the first name spread across the surname. The name is as wide
+   as its longer line, and the letters of the first spread across it, so the
+   spacing gives way as a letter under the pointer thickens. */
+.about-hero-name {
+  width: fit-content;
+}
+.about-hero-first {
+  display: flex;
+  justify-content: space-between;
+  /* Julian: taller than the surname, and still inside the box that ends
+     at the apex. The height comes from the size, the fit from closing the
+     tracking up: at the surname's tracking 1.25em ran the N past it. */
+  font-size: 1.25em;
+  letter-spacing: -0.145em;
+  /* Julian: the N ends over the top of the last A. Measured: the A's
+     apex is 0.34em of the surname in from its end, 0.272em of this
+     line's size. */
+  width: calc(100% - 0.272em);
+  font-weight: 200;
+}
+.about-hero-last {
+  display: block;
+  font-weight: 900;
+  color: var(--accent);
+}
+.about-hero-facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1.6rem;
+  color: #bdbbb5;
+  font-size: 10px;
+}
+.about-hero-facts li::before {
+  content: "";
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  margin-right: 8px;
+  vertical-align: 1px;
+  background: currentColor;
+}
+/* The dark accent is set for a light ground; this one is always dark. */
+:root[data-theme="light"] .about-hero {
+  --accent: oklch(0.72 0.095 195);
+}
+@media (max-width: 39.99rem) {
+  .about-hero-facts {
+    flex-direction: column;
+  }
+  /* On a phone the words run under him: the role, room for the portrait,
+     the name, the facts, then the biography, and the screen grows to
+     hold them. */
+  .about-hero {
+    height: auto;
+  }
+  .about-hero-content {
+    position: relative;
+    padding: 1.5rem 1rem 2rem;
+  }
+  /* The name starts where the portrait has faded out (its height is
+     `--portrait-h`, set with the picture), so nothing sits over him. */
+  .about-hero-copy {
+    order: 2;
+    max-width: none;
+    margin-top: calc(var(--portrait-h, 60svh) - 1.5rem);
+  }
+  .about-hero-bio {
+    order: 3;
+    display: flex;
+    flex-direction: column;
+    max-width: none;
+    margin-top: 1.75rem;
+  }
+  .about-hero-content::before {
+    display: none;
+  }
 }

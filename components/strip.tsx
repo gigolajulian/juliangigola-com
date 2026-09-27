@@ -1470,8 +1470,8 @@ export function Strip({
        another is running is already travelling, so it carries on with the
        ease out only, timed so it sets off at the speed it already had: a
        quick second notch runs on into the next screen without a stall or a
-       kick. */
-    const PAGE_MS = 800;
+       kick. Julian, after 800ms shipped: slow. 550. */
+    const PAGE_MS = 550;
     const inOut = (t: number) =>
       t < 0.5 ? 2 * t * t : 1 - (-2 * t + 2) ** 2 / 2;
     const out = (t: number) => 1 - (1 - t) ** 2;

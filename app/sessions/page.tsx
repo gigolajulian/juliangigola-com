@@ -43,7 +43,7 @@ export default function SessionsPage() {
               href="/work"
               className="label text-muted-foreground transition-colors duration-200 hoverable:hover:text-foreground"
             >
-              &larr; The work
+              &larr; Portfolio
             </Link>
           }
           title="Sessions"

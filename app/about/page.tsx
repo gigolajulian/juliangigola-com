@@ -2,15 +2,9 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Strip } from "@/components/strip";
 import { StripPage, StripHead, RisingTitle } from "@/components/strip-page";
-import {
-  PRESS_STUDIO,
-  FEATURED,
-  CONTACT,
-  SESSIONS_PAGE,
-  coverOf,
-} from "@/lib/work";
+import { PRESS_STUDIO, CONTACT, SESSIONS_PAGE } from "@/lib/work";
 import { ClientMarks } from "@/components/client-marks";
-import { StudioReel } from "@/components/studio-reel";
+import { AboutHero } from "@/components/about-hero";
 
 /* ── about ────────────────────────────────────────────────
  * The old site split this across /about (real, and decent) and /rates
@@ -18,15 +12,12 @@ import { StudioReel } from "@/components/studio-reel";
  * New-Zealand-born photographer in New York represented by an agency that is
  * not his). One page, his own words only.
  *
- * Two screens. It was five, then four, and each pass found the same thing:
- * a page about one person does not have five things to say, and a screen
- * holding one of five reads as a page that failed to load.
+ * Two screens. It was five, then four, then three; Julian: two.
  *
- *   1. Who he is, said in one line, what he is hired for under it, and the
- *      work running down the other half of the window edge to edge. A page
- *      about a photographer opens on photographs.
- *   2. Everything else at once: the biography, the vision, the four phases
- *      of a commission, the names that have been through them, and the ask.
+ *   1. Who he is: his portrait as pixels and his name, the pointer playing
+ *      over both (`about-hero.tsx`), with the line and the services beside.
+ *   2. Everything else at once: the biography, the four phases of a
+ *      commission, the names that have been through them, and the ask.
  *      A visitor who has read the first screen is deciding, not browsing,
  *      so the second screen is the whole answer and the way to start.
  */
@@ -67,22 +58,6 @@ const PHASES = [
 ];
 
 export default function AboutPage() {
-  /* Six of the shoots that lead the homepage, in the same order, each one
-     linking into itself. A portrait frame where the project has one: the
-     reel's column is the taller half of the window, so a landscape opener
-     would be cropped to a band of its own middle. */
-  const shoots = FEATURED.slice(0, 6).map((project) => {
-    const frame =
-      project.images.find((f) => f.height > f.width) ?? coverOf(project);
-    return {
-      href: `/work/${project.slug}`,
-      name: project.name,
-      src: frame.src,
-      alt: frame.alt || `Frame from ${project.name}`,
-      color: frame.color,
-    };
-  });
-
   return (
     <StripPage
       head={
@@ -93,7 +68,7 @@ export default function AboutPage() {
               href="/work"
               className="label text-muted-foreground transition-colors duration-200 hoverable:hover:text-foreground"
             >
-              &larr; The work
+              &larr; Portfolio
             </Link>
           }
           title="About"
@@ -115,67 +90,45 @@ export default function AboutPage() {
         deck="screens"
         className="mt-4 flex-1"
       >
-        {/* One: the line, what he is hired for, and the work down the other
-            half of the window. */}
+        {/* One: the portrait, the name, the line, and the services. */}
         <section
           data-tick
           data-label="About"
           data-hash="about"
-          /* Julian: the picture and the words the other way round. The
-             picture takes the left-hand column from sm up and the writing
-             the rest of the window. Ordered rather than reordered: the
-             title still comes first in the markup, which is the order it
-             is read in and the order its words rise in, and on a phone
-             where there is one column it is still the first thing on the
-             screen. */
-          className="grid w-full shrink-0 grid-cols-1 sm:h-full sm:grid-cols-[minmax(0,38vw)_1fr]"
+          className="w-full shrink-0 sm:h-full"
         >
-          <div className="flex flex-col justify-center gap-8 px-6 py-12 sm:order-2 sm:px-16 sm:py-0">
-            <div className="flex flex-col gap-6">
-              <RisingTitle text="Bay Area creative director and photographer" />
-              <p className="title-rest max-w-prose text-sm leading-relaxed text-muted-foreground">
-                Photographer and Creative Director based in the San Francisco
-                Bay Area. Operating at the intersection of editorial fashion,
-                commercial campaigns, and artist development. Trusted by
-                emerging musicians, tech brands, and WIRED. Available
-                worldwide.
-              </p>
-            </div>
-
+          <AboutHero>
+            {/* Julian: the line, what he is hired for under it, fitted
+                beside the portrait. */}
+            <RisingTitle
+              /* The ampersand kept with Photographer, so it opens the
+                 second line rather than hanging off the first. */
+              text={"Bay Area Creative Director & Photographer"}
+              className="about-hero-title"
+            />
+            <p className="title-rest about-hero-intro">
+              Photographer and Creative Director based in the San Francisco Bay
+              Area. Operating at the intersection of editorial fashion,
+              commercial campaigns, and artist development. Trusted by emerging
+              musicians, tech brands, and WIRED. Available worldwide.
+            </p>
             {/* A ruled list rather than prose: somebody deciding whether to
                 brief him is scanning for one word, and six of them in a
-                paragraph is six words to find. On the opening screen because
-                it is the other half of the answer to who he is — the line
-                says what he does, this says what he is hired for. Two
-                columns, so six rows are three deep. */}
-            <div className="title-rest flex flex-col gap-3">
-              <h2 className="label text-muted-foreground">Services</h2>
-              <ul className="grid max-w-xl grid-cols-2 gap-x-10">
+                paragraph is six words to find. */}
+            <div className="title-rest about-hero-services">
+              <h2 className="label">Services</h2>
+              <ul>
                 {SERVICES.map((service) => (
-                  <li
-                    key={service}
-                    className="label border-b border-border py-3 text-sm"
-                  >
+                  <li key={service} className="label">
                     {service}
                   </li>
                 ))}
               </ul>
             </div>
-          </div>
-
-          {shoots.length ? (
-            /* Edge to edge: the picture takes the column it is given and the
-               name and ticks ride on the foot of it. Held to 4:5 only where
-               the strip has stacked and there is no height to take. */
-            <StudioReel
-              shoots={shoots}
-              fill
-              className="min-h-0 max-sm:aspect-[4/5] sm:order-1 sm:h-full"
-            />
-          ) : null}
+          </AboutHero>
         </section>
 
-        {/* Two: the writing, the sequence, the names, and the ask. */}
+        {/* Two: the biography, the sequence, the names, and the ask. */}
         <section
           data-tick
           data-label="Biography"
@@ -187,29 +140,26 @@ export default function AboutPage() {
             className="grid min-h-0 flex-1 content-center gap-10 overflow-y-auto sm:grid-cols-[minmax(0,1fr)_minmax(0,2fr)] sm:gap-16 short:sm:gap-10"
           >
             {/* His words. The biography reads as a column. */}
-            <div className="flex flex-col gap-8 short:gap-5">
-              <div className="flex flex-col gap-3 short:gap-2">
-                <h2 className="label text-muted-foreground">Biography</h2>
-                {/* The first sentence as a lead, the rest under it in the
-                    muted body size. Justified, and set close: Julian picked
-                    this and asked for less space. No auto hyphenation, so a
-                    justified line never breaks a word with a dash. */}
-                <div className="flex flex-col gap-2.5 text-justify short:gap-1.5">
-                  <p className="text-[clamp(1rem,1.15vw,1.125rem)] leading-[1.4] short:text-base short:leading-snug">
-                    As a photographer and creative director based in the San
-                    Francisco Bay Area, my work sits between the worlds of
-                    editorial fashion, commercial campaigns, and artist
-                    development.
-                  </p>
-                  <p className="text-[0.9375rem] leading-[1.6] text-muted-foreground short:text-sm short:leading-normal">
-                    On the commercial side my work includes commissions for
-                    tech and consumer brands and features from WIRED.
-                    I&rsquo;ve been instrumental in shaping the visual
-                    identities of musicians and independent artists locally.
-                    While rooted in the Bay Area, I collaborate with clients
-                    worldwide.
-                  </p>
-                </div>
+            <div className="flex flex-col gap-3 short:gap-2">
+              <h2 className="label text-muted-foreground">Biography</h2>
+              {/* The first sentence as a lead, the rest under it in the
+                  muted body size. Justified, and set close: Julian picked
+                  this and asked for less space. No auto hyphenation, so a
+                  justified line never breaks a word with a dash. */}
+              <div className="flex flex-col gap-2.5 text-justify short:gap-1.5">
+                <p className="text-[clamp(1rem,1.15vw,1.125rem)] leading-[1.4] short:text-base short:leading-snug">
+                  As a photographer and creative director based in the San
+                  Francisco Bay Area, my work sits between the worlds of
+                  editorial fashion, commercial campaigns, and artist
+                  development.
+                </p>
+                <p className="text-[0.9375rem] leading-[1.6] text-muted-foreground short:text-sm short:leading-normal">
+                  On the commercial side my work includes commissions for tech
+                  and consumer brands and features from WIRED. I&rsquo;ve been
+                  instrumental in shaping the visual identities of musicians and
+                  independent artists locally. While rooted in the Bay Area, I
+                  collaborate with clients worldwide.
+                </p>
               </div>
             </div>
 

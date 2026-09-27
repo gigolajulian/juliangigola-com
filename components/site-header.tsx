@@ -32,7 +32,7 @@ import { NAME_WARP } from "@/lib/name-warp";
  * ─────────────────────────────────────────────────────────────── */
 
 export const LINKS = [
-  { href: "/work", label: "Work" },
+  { href: "/work", label: "Portfolio" },
   { href: "/sessions", label: "Sessions" },
   { href: "/about", label: "About" },
   { href: "/contact", label: "Contact" },

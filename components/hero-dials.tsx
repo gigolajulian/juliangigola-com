@@ -23,10 +23,10 @@ import { NAME_WARP } from "@/lib/name-warp";
 
 export const CARDS = {
   spring: { type: "spring", visualDuration: 0.6, bounce: 0 },
-  scale: [1.02, 1, 1.2, 0.005],
-  lift: [40, 0, 200, 1],
-  shadow: { blur: [0, 0, 80, 1], opacity: [0.45, 0, 1, 0.01] },
-  others: { blur: [0.6, 0, 8, 0.1], glass: [0.85, 0, 1, 0.05] },
+  scale: [1.045, 1, 1.2, 0.005],
+  lift: [64, 0, 200, 1],
+  shadow: { blur: [5, 0, 80, 1], opacity: [0.41, 0, 1, 0.01] },
+  others: { blur: [0.6, 0, 8, 0.1], glass: [0.75, 0, 1, 0.05] },
   waits: {
     focus: [250, 0, 1000, 10],
     blur: [600, 0, 2000, 10],
@@ -36,15 +36,15 @@ export const CARDS = {
 
 export const SPACE = {
   turnX: [4, 0, 20, 0.5],
-  turnY: [17.5, 0, 30, 0.5],
-  follow: [23, 1, 50, 1],
-  perspective: [1780, 300, 4000, 10],
+  turnY: [9.5, 0, 30, 0.5],
+  follow: [16, 1, 50, 1],
+  perspective: [2010, 300, 4000, 10],
 } satisfies DialConfig;
 
 const ENTRANCE = {
   start: [1180, 0, 3000, 10],
   spread: [1.2, 0, 4, 0.05],
-  fly: { distance: [90, 0, 300, 1], duration: [1800, 200, 4000, 10] },
+  fly: { distance: [95, 0, 300, 1], duration: [1200, 200, 4000, 10] },
   fade: { duration: [1500, 100, 4000, 10], blur: [14, 0, 40, 1] },
   text: { duration: [900, 100, 3000, 10] },
 } satisfies DialConfig;
@@ -61,8 +61,8 @@ const NAME = {
 } satisfies DialConfig;
 
 const TYPE = {
-  title: { size: [14, 9, 24, 0.5], tracking: [0.2, 0, 0.5, 0.01] },
-  where: { size: [13, 9, 20, 0.5] },
+  title: { size: [15.5, 9, 24, 0.5], tracking: [0.2, 0, 0.5, 0.01] },
+  where: { size: [14.5, 9, 20, 0.5] },
   buttons: { size: [11, 8, 16, 0.5] },
 } satisfies DialConfig;
 
