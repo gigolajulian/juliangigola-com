@@ -238,14 +238,18 @@ export function WarpText({
   pointerStrength = 0.38,
   refraction = 0.018,
   ripple = true,
+  sweep = false,
   className,
   style,
 }: Partial<Look> & {
   text: string;
+  /** Once, as the page loads, the lens passes along the words. */
+  sweep?: boolean;
   className?: string;
   style?: React.CSSProperties;
 }) {
   const ref = React.useRef<HTMLDivElement>(null);
+  const sweepRef = React.useRef(sweep);
   const look: Look = {
     text,
     fontSize,
@@ -269,6 +273,14 @@ export function WarpText({
     const container = ref.current;
     if (!container) return;
 
+    /* Pixels per CSS pixel: the screen's, and a CSS `zoom` on the way up
+       (the hero's Middle size on DialKit). A zoomed box keeps its size in
+       CSS pixels, so without it the canvas was drawn at the unzoomed size
+       and stretched, soft at anything over 1. */
+    const density = () =>
+      Math.min(devicePixelRatio || 1, 2) *
+      ((container as HTMLElement & { currentCSSZoom?: number }).currentCSSZoom ?? 1);
+
     let renderer: Renderer;
     try {
       renderer = new Renderer({
@@ -276,7 +288,7 @@ export function WarpText({
         alpha: true,
         premultipliedAlpha: false,
         antialias: true,
-        dpr: Math.min(devicePixelRatio || 1, 2),
+        dpr: density(),
       });
     } catch (error) {
       console.warn("WarpText: WebGL could not be initialized.", error);
@@ -298,6 +310,31 @@ export function WarpText({
     let version = 0;
     const pointer = { x: 0.5, y: 0.5, tx: 0.5, ty: 0.5, active: 0, activeTarget: 0 };
     const startTime = performance.now();
+
+    /* ── the pass ──
+       Julian's recording: the pointer drawn along the name, left to right,
+       the letters warping and splitting into colour where it goes. On
+       load that pass plays by itself, starting while the name is still
+       rising into its line (a quarter of the way through `.lift`, which
+       waits under the opening, `intro.tsx`; Julian: start it earlier), and
+       a visitor's own pointer on the name takes over from it at once. */
+    const PASS_MS = 1300;
+    let pass = 0;
+    let waiting = sweepRef.current && !reduceMotion;
+    const rise = container.closest(".lift")?.getAnimations()[0];
+    const riseTiming = rise?.effect?.getComputedTiming();
+    const passFrom =
+      Number(riseTiming?.delay ?? 0) + Number(riseTiming?.duration ?? 0) * 0.25;
+    const maybePass = (now: number) => {
+      if (!waiting) return;
+      const at = rise ? Number(rise.currentTime ?? 0) : Infinity;
+      if (rise && rise.playState !== "finished" && at < passFrom) return;
+      waiting = false;
+      if (pointer.activeTarget > 0) return;
+      pointer.x = pointer.tx = -0.08;
+      pointer.y = pointer.ty = 0.5;
+      pass = now;
+    };
 
     const texture = new Texture(gl, {
       generateMipmaps: false,
@@ -346,7 +383,7 @@ export function WarpText({
       // resize, so the canvas stayed too big and the name was cut off.
       const rect = { width: container.clientWidth, height: container.clientHeight };
       if (rect.width <= 0 || rect.height <= 0) return;
-      const dpr = Math.min(devicePixelRatio || 1, 2);
+      const dpr = density();
       const image = await buildTextCanvas(container, rect.width, rect.height, dpr, lookRef.current);
       if (disposed || contextLost || mine !== version) return;
       texture.image = image;
@@ -362,7 +399,7 @@ export function WarpText({
       // resize, so the canvas stayed too big and the name was cut off.
       const rect = { width: container.clientWidth, height: container.clientHeight };
       if (rect.width <= 0 || rect.height <= 0) return;
-      renderer.dpr = Math.min(devicePixelRatio || 1, 2);
+      renderer.dpr = density();
       renderer.setSize(rect.width, rect.height);
       program.uniforms.uResolution.value[0] = gl.drawingBufferWidth;
       program.uniforms.uResolution.value[1] = gl.drawingBufferHeight;
@@ -400,12 +437,38 @@ export function WarpText({
       renderOnce();
     };
 
+    /* Under another screen of the homepage's deck (`lib/deck.ts`), the
+       name is out of sight but still in the viewport, so the observer
+       below keeps it running. It stops there, and starts again as the
+       screen over it moves off. */
+    const unburied = new MutationObserver(() => {
+      unburied.disconnect();
+      if (visible && pageVisible && !raf && !disposed) raf = requestAnimationFrame(loop);
+    });
+
     const loop = (now: number) => {
       if (disposed || contextLost) return;
+      const buried = container.closest("[data-buried]");
+      if (buried) {
+        raf = 0;
+        unburied.observe(buried, { attributes: true, attributeFilter: ["data-buried"] });
+        return;
+      }
       const elapsed = (now - startTime) * 0.001;
       const idleX = 0.5 + Math.sin(elapsed * 0.33) * 0.12;
       const idleY = 0.5 + Math.cos(elapsed * 0.27) * 0.1;
-      const on = pointer.activeTarget > 0;
+      maybePass(now);
+      if (pass) {
+        const t = (now - pass) / PASS_MS;
+        if (t >= 1 || pointer.activeTarget > 0) pass = 0;
+        else {
+          // Unhurried at either end, like a hand starting and stopping.
+          const e = 0.5 - Math.cos(Math.PI * t) / 2;
+          pointer.tx = -0.08 + 1.16 * e;
+          pointer.ty = 0.5;
+        }
+      }
+      const on = pointer.activeTarget > 0 || pass > 0;
       const damping = on ? 0.12 : 0.035;
       pointer.x += ((on ? pointer.tx : idleX) - pointer.x) * damping;
       pointer.y += ((on ? pointer.ty : idleY) - pointer.y) * damping;
@@ -429,7 +492,13 @@ export function WarpText({
     };
 
     const sizes = new ResizeObserver(resize);
-    sizes.observe(container);
+    /* In device pixels where the browser can, which changes with a zoom
+       as well as a resize; the plain box where it cannot (Safari). */
+    try {
+      sizes.observe(container, { box: "device-pixel-content-box" });
+    } catch {
+      sizes.observe(container);
+    }
     const view = new IntersectionObserver(([entry]) => {
       visible = entry.isIntersecting;
       if (visible && pageVisible && !raf) raf = requestAnimationFrame(loop);
@@ -459,6 +528,7 @@ export function WarpText({
       cancelAnimationFrame(raf);
       sizes.disconnect();
       view.disconnect();
+      unburied.disconnect();
       theme.disconnect();
       dark.removeEventListener("change", rasterize);
       canvas.removeEventListener("pointermove", onPointerMove);

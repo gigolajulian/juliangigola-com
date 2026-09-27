@@ -54,20 +54,17 @@ const DriftWall = ({
   eager = false,
   onShown = /** @type {(() => void) | undefined} */ (undefined),
   className = '',
-  style = undefined
+  style = /** @type {Record<string, string | number> | undefined} */ (undefined)
 }) => {
   const containerRef = useRef(null);
   const planeRef = useRef(null);
   const trackRefs = useRef([]);
-  const rafRef = useRef(null);
 
   const offsetsRef = useRef([]);
-  const velocitiesRef = useRef([]);
   const hoveredColRef = useRef(-1);
   const wallHoveredRef = useRef(false);
   const pointerRef = useRef({ x: 0, y: 0 });
   const pointerDampedRef = useRef({ x: 0, y: 0 });
-  const lastTsRef = useRef(null);
 
   const [containerHeight, setContainerHeight] = useState(600);
   const [containerWidth, setContainerWidth] = useState(0);
@@ -193,7 +190,6 @@ const DriftWall = ({
 
   useEffect(() => {
     offsetsRef.current = columnMeta.map((meta, c) => meta.copyHeight * ((c * 0.37) % 1));
-    velocitiesRef.current = columnItems.map(() => 0);
   }, [columnMeta, columnItems]);
 
   const applyPlaneTransform = useCallback(
@@ -208,83 +204,129 @@ const DriftWall = ({
     [tilt, turn, roll, depth]
   );
 
+  /* The site's rewrite of the drift: each column is one looping animation
+     the browser runs on the compositor, not a transform written from script
+     every frame. Written per frame, the tracks cost a style pass of about
+     5ms a frame for as long as the wall was on screen, measured on the
+     homepage's last page: a third of the main thread with nobody touching
+     anything. Script now runs only while something is easing: the plane
+     following the pointer, or a column slowing under it and picking up
+     again, and stops once both have settled. */
+  const wakeRef = useRef(() => {});
   useEffect(() => {
-    const animate = ts => {
-      if (lastTsRef.current === null) lastTsRef.current = ts;
-      const dt = Math.min(0.05, Math.max(0, ts - lastTsRef.current) / 1000);
-      lastTsRef.current = ts;
+    const tracks = trackRefs.current;
+    const anims = [];
+    const rates = [];
+    columnMeta.forEach((meta, c) => {
+      const el = tracks[c];
+      const v = baseVelocities[c];
+      if (!el || !meta) return;
+      const at = offsetsRef.current[c] ?? 0;
+      if (reduced || !v) {
+        el.style.transform = `translate3d(0, ${-at}px, 0)`;
+        return;
+      }
+      el.style.transform = '';
+      const duration = (meta.copyHeight / Math.abs(v)) * 1000;
+      const a = el.animate(
+        [{ transform: 'translate3d(0, 0, 0)' }, { transform: `translate3d(0, ${-meta.copyHeight}px, 0)` }],
+        { duration, iterations: Infinity, direction: v > 0 ? 'normal' : 'reverse' }
+      );
+      const p = at / meta.copyHeight;
+      a.currentTime = duration * (v > 0 ? p : 1 - p);
+      a.pause();
+      anims[c] = a;
+      rates[c] = 1;
+    });
+
+    let frame = 0;
+    let last = null;
+    let visible = !containerRef.current;
+    const tick = ts => {
+      const dt = last === null ? 1 / 60 : Math.min(0.05, Math.max(0, ts - last) / 1000);
+      last = ts;
+      let busy = false;
 
       const maxTilt = parallax * 8;
-      const targetX = pointerRef.current.x * maxTilt;
-      const targetY = -pointerRef.current.y * maxTilt;
-      const damp = 1 - Math.exp(-dt / 0.12);
-      pointerDampedRef.current.x += (targetX - pointerDampedRef.current.x) * damp;
-      pointerDampedRef.current.y += (targetY - pointerDampedRef.current.y) * damp;
-      applyPlaneTransform(pointerDampedRef.current.x, pointerDampedRef.current.y);
-
-      if (!reduced) {
-        for (let c = 0; c < trackRefs.current.length; c++) {
-          const meta = columnMeta[c];
-          if (!meta) continue;
-          const paused = wallHoveredRef.current && pauseOnHover;
-          const factor = paused || hoveredColRef.current === c ? 0 : 1;
-          const target = baseVelocities[c] * factor;
-
-          const ease = 1 - Math.exp(-dt / (target === 0 ? 0.16 : 0.28));
-          velocitiesRef.current[c] += (target - velocitiesRef.current[c]) * ease;
-          let next = (offsetsRef.current[c] ?? 0) + velocitiesRef.current[c] * dt;
-          next = ((next % meta.copyHeight) + meta.copyHeight) % meta.copyHeight;
-          offsetsRef.current[c] = next;
-
-          const el = trackRefs.current[c];
-          if (el) el.style.transform = `translate3d(0, ${-next}px, 0)`;
-        }
-      } else {
-        for (let c = 0; c < trackRefs.current.length; c++) {
-          const el = trackRefs.current[c];
-          const meta = columnMeta[c];
-          if (el && meta) el.style.transform = `translate3d(0, ${-(offsetsRef.current[c] ?? 0)}px, 0)`;
-        }
+      const d = pointerDampedRef.current;
+      const tx = pointerRef.current.x * maxTilt - d.x;
+      const ty = -pointerRef.current.y * maxTilt - d.y;
+      if (Math.abs(tx) > 0.005 || Math.abs(ty) > 0.005) {
+        const damp = 1 - Math.exp(-dt / 0.12);
+        d.x += tx * damp;
+        d.y += ty * damp;
+        applyPlaneTransform(d.x, d.y);
+        busy = true;
       }
 
-      rafRef.current = requestAnimationFrame(animate);
+      const paused = wallHoveredRef.current && pauseOnHover;
+      anims.forEach((a, c) => {
+        if (!a) return;
+        const target = paused || hoveredColRef.current === c ? 0 : 1;
+        if (rates[c] === target) return;
+        const ease = 1 - Math.exp(-dt / (target === 0 ? 0.16 : 0.28));
+        rates[c] += (target - rates[c]) * ease;
+        if (Math.abs(target - rates[c]) < 0.005) rates[c] = target;
+        else busy = true;
+        a.playbackRate = rates[c];
+      });
+
+      frame = busy ? requestAnimationFrame(tick) : 0;
+      if (!busy) last = null;
     };
+    const wake = () => {
+      if (visible && !frame) frame = requestAnimationFrame(tick);
+    };
+    wakeRef.current = wake;
+    applyPlaneTransform(pointerDampedRef.current.x, pointerDampedRef.current.y);
 
     // The site's addition: only while it can be seen. A wall at the end of
     // a strip (the homepage's last screen) is mounted from the start and
     // would otherwise run the whole time somebody reads the screens before
     // it. Stopped, it picks up from where it stood.
-    const start = () => {
-      if (rafRef.current) return;
-      lastTsRef.current = null;
-      rafRef.current = requestAnimationFrame(animate);
-    };
-    const stop = () => {
-      if (rafRef.current) cancelAnimationFrame(rafRef.current);
-      rafRef.current = null;
+    const show = on => {
+      visible = on;
+      for (const a of anims) {
+        if (!a) continue;
+        if (on) a.play();
+        else a.pause();
+      }
+      if (on) wake();
+      else if (frame) {
+        cancelAnimationFrame(frame);
+        frame = 0;
+        last = null;
+      }
     };
     const io = new IntersectionObserver(([entry]) => {
-      if (!entry.isIntersecting) return stop();
-      setSeen(true);
-      start();
+      if (entry.isIntersecting) setSeen(true);
+      show(entry.isIntersecting);
     });
     if (containerRef.current) io.observe(containerRef.current);
-    else start();
+    else show(true);
     return () => {
       io.disconnect();
-      stop();
-      lastTsRef.current = null;
+      if (frame) cancelAnimationFrame(frame);
+      wakeRef.current = () => {};
+      // Kept where each column stood, for the next run to start from.
+      anims.forEach((a, c) => {
+        if (!a) return;
+        offsetsRef.current[c] = (a.effect.getComputedTiming().progress ?? 0) * columnMeta[c].copyHeight;
+        a.cancel();
+      });
     };
   }, [baseVelocities, columnMeta, pauseOnHover, parallax, reduced, applyPlaneTransform]);
 
   const activate = useCallback((id, index) => {
     activeIdRef.current = id;
     hoveredColRef.current = index;
+    wakeRef.current();
     setActiveId(id);
   }, []);
   const release = useCallback(() => {
     activeIdRef.current = null;
     hoveredColRef.current = -1;
+    wakeRef.current();
     setActiveId(null);
   }, []);
 
@@ -297,6 +339,7 @@ const DriftWall = ({
           x: (e.clientX - rect.left) / rect.width - 0.5,
           y: (e.clientY - rect.top) / rect.height - 0.5
         };
+        wakeRef.current();
       }
       const hit = document.elementFromPoint(e.clientX, e.clientY);
       const tile = hit && hit.closest ? hit.closest('[data-tile-id]') : null;
@@ -305,6 +348,7 @@ const DriftWall = ({
       if (id === activeIdRef.current) return;
       activeIdRef.current = id;
       hoveredColRef.current = Number(tile.dataset.col);
+      wakeRef.current();
       setActiveId(id);
     },
     [parallax, reduced]
@@ -314,6 +358,7 @@ const DriftWall = ({
     wallHoveredRef.current = false;
     pointerRef.current = { x: 0, y: 0 };
     release();
+    wakeRef.current();
   }, [release]);
 
   const cssVars = useMemo(
@@ -380,6 +425,7 @@ const DriftWall = ({
       onPointerMove={handlePointerMove}
       onPointerEnter={() => {
         wallHoveredRef.current = true;
+        wakeRef.current();
       }}
       onPointerLeave={handlePointerLeaveWall}
       role="group"

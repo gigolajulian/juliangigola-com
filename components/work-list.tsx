@@ -3,6 +3,7 @@
 import * as React from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { AnimatePresence, MotionConfig, motion } from "motion/react";
 import type { Frame } from "@/lib/work-types";
 import { useWorkQuery } from "@/lib/work-view";
 import { Lightbox, useLightbox } from "@/components/lightbox";
@@ -87,70 +88,92 @@ export function WorkList({
           </p>
         ) : null}
 
-        <ul className="flex flex-col">
-          {shown.map((row) => (
-            <li key={row.slug}>
-              <Row
-                row={row}
-                onOpen={lightbox.show}
-                onPlay={(id) =>
-                  setFilm(videos?.find((v) => v.id === id) ?? null)
-                }
-              >
-                <span
-                  data-vt={
-                    (row.n !== undefined && frames?.[row.n]?.src) || row.slug
-                  }
-                  className="photo-corner relative block w-16 shrink-0 overflow-hidden sm:w-20"
-                  style={{
-                    backgroundColor: row.cover.color,
-                    /* The shape it was shot at, not an upright crop of it.
+        {/* As the search narrows, a line that no longer matches fades out
+            of the column and the ones under it slide up into its place;
+            one that matches again fades back in. Each key takes over from
+            the last mid-move, which a page transition cannot. Not on the
+            list's own arrival, which is the view's morph (`work-view.ts`). */}
+        <MotionConfig reducedMotion="user">
+          <ul className="relative flex flex-col">
+            <AnimatePresence initial={false} mode="popLayout">
+              {shown.map((row) => (
+                <motion.li
+                  key={row.slug}
+                  layout="position"
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, transition: { duration: 0.08 } }}
+                  transition={{
+                    type: "spring",
+                    stiffness: 520,
+                    damping: 44,
+                    mass: 0.9,
+                  }}
+                >
+                  <Row
+                    row={row}
+                    onOpen={lightbox.show}
+                    onPlay={(id) =>
+                      setFilm(videos?.find((v) => v.id === id) ?? null)
+                    }
+                  >
+                    <span
+                      data-vt={
+                        (row.n !== undefined && frames?.[row.n]?.src) ||
+                        row.slug
+                      }
+                      className="photo-corner relative block w-16 shrink-0 overflow-hidden sm:w-20"
+                      style={{
+                        backgroundColor: row.cover.color,
+                        /* The shape it was shot at, not an upright crop of it.
                        Julian, on the films: a horizontal thumbnail stays
                        horizontal. The column keeps one width so the names
                        still run down a single edge; it is the height that
                        gives, which is the way round that leaves the list
                        scannable. */
-                    aspectRatio: `${row.cover.width} / ${row.cover.height}`,
-                  }}
-                >
-                  <Image
-                    src={row.cover.src}
-                    alt=""
-                    fill
-                    sizes="80px"
-                    loading="lazy"
-                    placeholder={row.cover.blur ? "blur" : "empty"}
-                    blurDataURL={row.cover.blur}
-                    draggable={false}
-                    className="object-cover"
-                  />
-                </span>
+                        aspectRatio: `${row.cover.width} / ${row.cover.height}`,
+                      }}
+                    >
+                      <Image
+                        src={row.cover.src}
+                        alt=""
+                        fill
+                        sizes="80px"
+                        loading="lazy"
+                        placeholder={row.cover.blur ? "blur" : "empty"}
+                        blurDataURL={row.cover.blur}
+                        draggable={false}
+                        className="object-cover"
+                      />
+                    </span>
 
-                {/* The name at the size a title is set on this site, and
+                    {/* The name at the size a title is set on this site, and
                     one line of it: a column of names is scanned down the
                     left edge, and a name that wraps breaks that edge. */}
-                <span className="min-w-0 flex-1">
-                  <span className="font-display block truncate text-lg uppercase leading-none tracking-[0] sm:text-2xl">
-                    {row.name}
-                  </span>
-                  <span className="label mt-1.5 block truncate text-muted-foreground">
-                    {row.credit}
-                    {row.frames ? (
-                      <>
-                        <span aria-hidden> · </span>
-                        {row.frames} frames
-                      </>
-                    ) : null}
-                  </span>
-                </span>
+                    <span className="min-w-0 flex-1">
+                      <span className="font-display block truncate text-lg uppercase leading-none tracking-[0] sm:text-2xl">
+                        {row.name}
+                      </span>
+                      <span className="label mt-1.5 block truncate text-muted-foreground">
+                        {row.credit}
+                        {row.frames ? (
+                          <>
+                            <span aria-hidden> · </span>
+                            {row.frames} frames
+                          </>
+                        ) : null}
+                      </span>
+                    </span>
 
-                <span className="label hidden shrink-0 text-muted-foreground sm:block">
-                  {row.discipline}
-                </span>
-              </Row>
-            </li>
-          ))}
-        </ul>
+                    <span className="label hidden shrink-0 text-muted-foreground sm:block">
+                      {row.discipline}
+                    </span>
+                  </Row>
+                </motion.li>
+              ))}
+            </AnimatePresence>
+          </ul>
+        </MotionConfig>
       </div>
 
       {frames?.length ? (

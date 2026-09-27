@@ -111,6 +111,8 @@ const seat = (path: string) => `strip-at:${path}`;
 /** How far past the end a wheel has to push before it leads on, in px of
     wheel delta. Three notches on a mouse: an overshoot of one is a
     reader arriving at the end, not asking to leave it. */
+/** Fired on the scroller when the rack has laid its frames out again. */
+const RELAID = "strip-relaid";
 const LEAVE_AFTER = 300;
 /* A finger's pull past the end before the strip leads on. Shorter than
    the wheel's, because a wheel notch is worth tens of pixels and a finger
@@ -154,6 +156,8 @@ function wantsLenis() {
     the fingers are down and keeps firing as the fling decays, so anything
     under about a tenth of a second is still the same push. */
 const GESTURE_GAP_MS = 120;
+/** A wheel and a pointer, where a paged strip rides Lenis (`strip.tsx`). */
+const WHEELED = "(hover: hover) and (pointer: fine)";
 /** How long a push is held after the last notch before it starts to drain,
     so the notches of a steady spin add up rather than leak away between
     them: a notched wheel fires about ten times a second, and a drain that
@@ -536,9 +540,14 @@ export function Strip({
       if (warmed.size === Number(!!nextHref) + Number(!!prevHref))
         el.removeEventListener("scroll", warm);
     };
-    warm();
+    // A frame on, not while the page is still being put together: read
+    // then, the scroller's size forced a layout inside the arrival.
+    const first = requestAnimationFrame(warm);
     el.addEventListener("scroll", warm, { passive: true });
-    return () => el.removeEventListener("scroll", warm);
+    return () => {
+      cancelAnimationFrame(first);
+      el.removeEventListener("scroll", warm);
+    };
   }, [router, nextHref, prevHref, live]);
 
   /* Before the first paint: a deep link opens on its cell, and arriving
@@ -791,6 +800,7 @@ export function Strip({
       }
       if (!runs.length || room < 80) {
         sheet.textContent = "";
+        el.dispatchEvent(new Event(RELAID));
         return;
       }
 
@@ -857,6 +867,7 @@ export function Strip({
         }
       }
       sheet.textContent = rules.join(String.fromCharCode(10));
+      el.dispatchEvent(new Event(RELAID));
     };
 
     paint();
@@ -875,18 +886,25 @@ export function Strip({
    * the keys and the lead-on where they are. Loaded on its own, so it
    * arrives after the pictures rather than ahead of them.
    *
-   * Never on a paged strip. The homepage, the studio and the contact page
-   * move a whole screen per gesture, and a screen is not a distance to be
-   * eased over: Lenis took the wheel and turned each of them into one
-   * continuous scroll that slid the next section into view instead of
-   * landing on it. Julian reported exactly that. Those three keep the
-   * strip's own paging; Lenis is for the sequences that really do run. */
+   * A paged strip (the homepage, the studio, the contact page) once kept
+   * off it: Lenis made each one continuous scroll that slid the next
+   * section into view instead of landing on it, and Julian reported
+   * exactly that. They paged instead, a timed slide set off by the
+   * gesture, which meant the stack moved after the wheel rather than with
+   * it (Julian: make it happen with the scroll). So under a wheel they
+   * have Lenis too, and land by `settle` below: the screens follow the
+   * wheel, and once it rests the strip carries on to the next screen or
+   * goes back to the one it left. A finger keeps the browser's snap. */
   React.useEffect(() => {
     const el = scroller.current;
-    if (!el || !live || paged || !wantsLenis()) return;
+    if (!el || !live || !wantsLenis()) return;
+    if (paged && !matchMedia(WHEELED).matches) return;
     let off = () => {};
     let gone = false;
-    import("lenis").then(({ default: Lenis }) => {
+    /* A frame on: Lenis measures the wrapper as it is made, and made while
+       the page arrives that was 18ms of layout inside the trip's freeze. */
+    const ready = new Promise((go) => requestAnimationFrame(go));
+    Promise.all([import("lenis"), ready]).then(([{ default: Lenis }]) => {
       if (gone) return;
       const lenis = new Lenis({
         wrapper: el,
@@ -960,11 +978,54 @@ export function Strip({
         lenis.time = clock;
         frame = requestAnimationFrame(loop);
       };
+      /* ── landing, on a paged strip ──
+         Once the wheel has been still for a moment, the strip goes on to
+         the next screen if it has come a fifth of the way towards it, and
+         back to the one it left if not: a single notch turns the page, and
+         a nudge the other way is taken back. Screens are measured end to
+         end off their widths, since the deck pins them where they are. */
+      let rest = 0;
+      /* Judged by where Lenis is heading, not where it has got to: the
+         ease after a notch runs on for a second, and waiting it out put
+         the landing back after the wheel. */
+      const settle = () => {
+        const cs = getComputedStyle(el);
+        const gap = parseFloat(cs.columnGap) || 0;
+        const end = el.scrollWidth - el.clientWidth;
+        const stops: number[] = [];
+        let at = parseFloat(cs.paddingLeft) || 0;
+        for (const k of Array.from(el.children) as HTMLElement[]) {
+          stops.push(Math.min(end, at));
+          at += k.offsetWidth + gap;
+        }
+        if (!stops.length) return;
+        const x = lenis.targetScroll;
+        let i = 0;
+        while (i < stops.length - 1 && stops[i + 1] <= x) i++;
+        const from = stops[i];
+        const to = stops[Math.min(i + 1, stops.length - 1)];
+        const gone = to > from ? (x - from) / (to - from) : 0;
+        const onward = lenis.direction >= 0 ? gone > 0.2 : gone > 0.8;
+        const target = onward ? to : from;
+        if (Math.abs(target - x) < 1 && Math.abs(target - el.scrollLeft) < 1) return;
+        lenis.scrollTo(target, {
+          duration: 0.6,
+          easing: (t) => 1 - (1 - t) ** 3,
+        });
+        wake();
+      };
+      const onRest = () => {
+        window.clearTimeout(rest);
+        rest = window.setTimeout(settle, GESTURE_GAP_MS + 20);
+      };
+      if (paged) el.addEventListener("wheel", onRest, { passive: true });
       // Capture, so the wake is booked before Lenis handles the event.
       el.addEventListener("wheel", wake, { capture: true, passive: true });
       el.dataset.lenis = "1";
       off = () => {
         cancelAnimationFrame(frame);
+        window.clearTimeout(rest);
+        el.removeEventListener("wheel", onRest);
         el.removeEventListener("wheel", wake, { capture: true });
         lenis.destroy();
         delete el.dataset.lenis;
@@ -1288,11 +1349,18 @@ export function Strip({
     };
     const watch = new ResizeObserver(again);
     watch.observe(el);
+    /* And when the rack has placed its frames. Moved, not resized, they
+       change the shelf's length without the scroller changing size, so
+       the end measured in the strip stood in the rack and the rail never
+       reached its end there (Julian: at the end of the screen the scroll
+       bar is not). */
+    el.addEventListener(RELAID, again);
     el.addEventListener("scroll", onScroll, { passive: true });
     window.addEventListener("resize", again);
     window.addEventListener("hashchange", onHash);
     return () => {
       watch.disconnect();
+      el.removeEventListener(RELAID, again);
       el.removeEventListener("scroll", onScroll);
       window.removeEventListener("resize", again);
       window.removeEventListener("hashchange", onHash);
@@ -1325,7 +1393,7 @@ export function Strip({
        paged one, and even where it does the two ends are still the
        strip's: the band and the lead-on to the next project are counted
        here, off wheel events Lenis would otherwise swallow. */
-    const smooth = !paged && wantsLenis();
+    const smooth = wantsLenis() && (!paged || matchMedia(WHEELED).matches);
 
     /* ── the scroller's own measurements, taken when it changes ──
        `scrollWidth` and `clientWidth` both make the browser lay the page
@@ -1338,19 +1406,29 @@ export function Strip({
        Neither changes while the strip is moving. They are taken when the
        scroller changes shape, and again at the start of a gesture, which
        is the moment a cell could have arrived without the scroller itself
-       resizing. Never on a frame. */
-    let width = el.clientWidth;
-    let span = el.scrollWidth - width;
+       resizing. Never on a frame.
+
+       Nor while the page is arriving: read as the strip is set up, just
+       after the deck has pinned its cells, they laid the page out again
+       inside the trip in (measured on the way into the work). A frame on,
+       the layout is the one the browser made anyway, and a gesture
+       measures again at its start. */
+    let width = 0;
+    let span = 0;
     const size = () => {
       width = el.clientWidth;
       span = el.scrollWidth - width;
     };
     const room = () => span;
     const clamp = (v: number) => Math.min(room(), Math.max(0, v));
-    let target = el.scrollLeft;
+    let target = 0;
     let frame = 0;
     // Where the strip is and how fast it is going, in px and px per ms.
-    let x = el.scrollLeft;
+    let x = 0;
+    const firstSize = requestAnimationFrame(() => {
+      size();
+      x = target = el.scrollLeft;
+    });
     let v = 0;
     let last = 0;
     /* ── the band ──
@@ -1464,6 +1542,36 @@ export function Strip({
         the band would overwrite a keyboard or touch scroll for as long as
         the band took to settle — seen in the test, where a jump to the end
         was put straight back to the start. */
+    /* ── the wall ──
+       An end with nowhere to lead on is a wall, and a push into it is one
+       bounce: the strip gives a little and springs back past rest, the
+       way a thrown thing meets a spring, and that is the whole answer
+       that nothing is there. It was the band, and a trackpad keeps
+       sending its swipe for a second as the fling runs out, so the band
+       climbed a step a notch to its 160px stop and sat there until the
+       fingers' momentum ended (Julian: scrolling left on the homepage is
+       stuttery). The bounce is the browser's own animation, run off the
+       main thread, and a swipe gets one however long it keeps sending.
+
+       The curve is a damped spring's response to a knock (damping 0.5,
+       out at 120ms, back past rest by a sixth, still by 800ms), sampled. */
+    const WALL = [0, 0.403, 0.694, 0.881, 0.979, 1.0, 0.961, 0.878, 0.764, 0.633, 0.496, 0.362, 0.238, 0.128, 0.035, -0.039, -0.094, -0.132, -0.154, -0.163, -0.161, -0.15, -0.133, -0.113, -0.091, -0.069, -0.048, -0.028, -0.012, 0.001, 0.012, 0.019, 0];
+    const WALL_MS = 800;
+    let wall: Animation | null = null;
+    const bounce = (dir: 1 | -1, speed: number) => {
+      if (!eased || wall || room() < 1) return;
+      const reach = -dir * Math.min(72, 24 + speed * 0.5);
+      const a = el.animate(
+        WALL.map((k) => ({ translate: `${(k * reach).toFixed(1)}px` })),
+        { duration: WALL_MS },
+      );
+      wall = a;
+      const done = () => {
+        if (wall === a) wall = null;
+      };
+      a.finished.then(done, done);
+    };
+
     /** Lets the band go: CSS springs it back (`[data-release]` in
         `globals.css`), so nothing here paints the return frame by frame. */
     const release = () => {
@@ -1892,6 +2000,12 @@ export function Strip({
         }
         owned = true;
         e.preventDefault();
+        // Nowhere to go that way: the wall. A swipe knocks once; a
+        // mouse's notch is a knock of its own.
+        if (!(dy > 0 ? nextHref : prevHref)) {
+          if (fresh || again || Math.abs(dy) >= 80) bounce(dy > 0 ? 1 : -1, Math.abs(dy));
+          return;
+        }
         push(dy);
         // Past the end, on; past the start, back. Julian asked for both.
         if (over >= LEAVE_AFTER) leave(1);
@@ -2185,8 +2299,10 @@ export function Strip({
     el.addEventListener("scroll", sync, { passive: true });
 
     return () => {
+      cancelAnimationFrame(firstSize);
       window.clearTimeout(settle);
       resized.disconnect();
+      wall?.cancel();
       el.removeEventListener("jg:home", onHome);
       el.removeEventListener("scroll", onSettle);
       el.removeEventListener("focusin", onFocusIn);

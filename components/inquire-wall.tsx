@@ -11,9 +11,13 @@ import type { WallTile } from "@/lib/work";
    the same motion at any size. The panel mounts with the hero's, on the
    dev server only; production gets the default. */
 export function InquireWall({ items }: { items: WallTile[] }) {
-  const { scale } = useDialKit(
+  /* And its tint (Julian: lower it). One dial for the two layers that
+     darken it: the tiles' own opacity and the veil of the page colour
+     over each. 0.6 is how it first shipped, tiles at 0.4 under a 0.42
+     veil; 0 is the photographs at full strength. */
+  const { scale, tint } = useDialKit(
     "Background wall",
-    { scale: [1.15, 0.2, 2, 0.05] },
+    { scale: [1.15, 0.2, 2, 0.05], tint: [0.45, 0, 1, 0.01] },
     { id: "inquire-wall" },
   );
   /* Julian: a dial for the blur on the two doors to the right of the
@@ -46,7 +50,8 @@ export function InquireWall({ items }: { items: WallTile[] }) {
       parallax={0.6}
       lift={16}
       fade={0}
-      dim={0.4}
+      dim={1 - tint}
+      style={{ "--dw-veil": tint * 0.7 }}
       overlayColor="var(--background)"
     />
   );

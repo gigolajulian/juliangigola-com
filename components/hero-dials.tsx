@@ -36,7 +36,7 @@ export const CARDS = {
   forward: [64, 0, 200, 1],
   towardMiddle: [0.12, 0, 1, 0.01],
   shadow: { blur: [5, 0, 80, 1], opacity: [0.41, 0, 1, 0.01] },
-  otherPhotos: { blur: [0.6, 0, 8, 0.1], glassSheen: [0.75, 0, 1, 0.05] },
+  otherPhotos: { blur: [0.3, 0, 8, 0.1], glassSheen: [0.75, 0, 1, 0.05] },
   delays: {
     comeForward: [80, 0, 1000, 10],
     blurOthers: [600, 0, 2000, 10],
@@ -107,7 +107,21 @@ const LAYOUT = {
 const TYPE = {
   roleLine: { size: [15, 9, 24, 0.5], letterSpacing: [0.17, 0, 0.5, 0.01] },
   location: { size: [14.5, 9, 20, 0.5] },
-  buttons: { size: [11, 8, 16, 0.5] },
+  buttons: { size: [10.5, 8, 16, 0.5] },
+  /* Julian: how close the name, the role, the location and the buttons
+     sit, in px of space between each and the next. */
+  /* Julian: the size of the whole middle (name, role, location and
+     buttons together) and where it starts: px down from the middle of
+     the cover, negative up. */
+  middle: {
+    size: [1.02, 0.5, 1.6, 0.01],
+    moveDown: [-20, -300, 300, 1],
+  },
+  spacing: {
+    nameToRole: [7, 0, 80, 1],
+    roleToLocation: [10, 0, 80, 1],
+    locationToButtons: [18, 0, 80, 1],
+  },
 } satisfies DialConfig;
 
 /** What each panel section changes on the cover, by its title as the
@@ -119,6 +133,8 @@ const DIAL_TARGETS: Record<string, string> = {
   "role line": ".cover-float-title",
   location: ".cover-float-where",
   buttons: ".cover-cta",
+  spacing: ".cover-float-name, .cover-float-title, .cover-float-where, .cover-cta",
+  middle: ".cover-float-middle",
   "load animation": ".cover-float-frame, .cover-float-name, .cover-float-title, .cover-float-where, .cover-cta",
   "photos fly in": ".cover-float-frame",
   "photos fade in": ".cover-float-frame",
@@ -256,6 +272,11 @@ export function HeroDials() {
       "--h-title-track": `${type.roleLine.letterSpacing}em`,
       "--h-where-size": `${type.location.size}px`,
       "--h-cta-size": `${type.buttons.size}px`,
+      "--h-mid-size": `${type.middle.size}`,
+      "--h-mid-down": `${type.middle.moveDown}px`,
+      "--h-gap-role": `${type.spacing.nameToRole}px`,
+      "--h-gap-where": `${type.spacing.roleToLocation}px`,
+      "--h-gap-cta": `${type.spacing.locationToButtons}px`,
     };
     for (const [k, v] of Object.entries(vars)) el.style.setProperty(k, v);
     el.style.setProperty("--h-pull-x", `${layout.spread.width}`);
@@ -446,6 +467,7 @@ export function HeroName({
       pointerStrength={n.lensStrength}
       refraction={n.colorSplit}
       ripple={n.ripple}
+      sweep
       className={className}
       style={{ ...style, fontSize: `clamp(44px, 10vw, ${n.size}px)` }}
     />

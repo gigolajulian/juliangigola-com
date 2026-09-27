@@ -446,27 +446,34 @@ export function WorkShell({
     const measure = () => {
       r.toggleAttribute("data-more", r.scrollWidth > r.clientWidth + 1);
     };
-    measure();
-    const c = lit.current;
-    if (c && r.scrollWidth > r.clientWidth) {
-      /* Only when the chosen chip is not already in view. Re-centring a
+    /* A frame on: measured as the page arrives, the row laid the whole
+       page out again inside the trip in (43ms on the way into the work). */
+    const first = requestAnimationFrame(() => {
+      measure();
+      const c = lit.current;
+      if (c && r.scrollWidth > r.clientWidth) {
+        /* Only when the chosen chip is not already in view. Re-centring a
          chip that is on screen moves the row under the hand for no reason,
          which is half of what made a filter click feel unsettled. */
-      const left = c.offsetLeft - r.scrollLeft;
-      const hidden = left < 8 || left + c.offsetWidth > r.clientWidth - 8;
-      if (hidden) {
-        const to = c.offsetLeft - r.clientWidth / 2 + c.offsetWidth / 2;
-        r.scrollTo({
-          left: Math.max(0, Math.min(r.scrollWidth - r.clientWidth, to)),
-          behavior: window.matchMedia("(prefers-reduced-motion: reduce)")
-            .matches
-            ? "auto"
-            : "smooth",
-        });
+        const left = c.offsetLeft - r.scrollLeft;
+        const hidden = left < 8 || left + c.offsetWidth > r.clientWidth - 8;
+        if (hidden) {
+          const to = c.offsetLeft - r.clientWidth / 2 + c.offsetWidth / 2;
+          r.scrollTo({
+            left: Math.max(0, Math.min(r.scrollWidth - r.clientWidth, to)),
+            behavior: window.matchMedia("(prefers-reduced-motion: reduce)")
+              .matches
+              ? "auto"
+              : "smooth",
+          });
+        }
       }
-    }
+    });
     window.addEventListener("resize", measure);
-    return () => window.removeEventListener("resize", measure);
+    return () => {
+      cancelAnimationFrame(first);
+      window.removeEventListener("resize", measure);
+    };
   }, [key, shown]);
 
   /* The jelly, from React Bits' JellyRadio: the chosen chip swells, wide
@@ -517,6 +524,14 @@ export function WorkShell({
         const j = JELLY.jelly;
         const b = JELLY.bounce;
         const delay = (far * JELLY.stagger) / 1000;
+        /* Seated still, the transform is written, not animated: motion's
+           zero-length animate read each chip's computed transform first,
+           32ms of style on the frame the page arrives. */
+        if (still || calm) {
+          c.style.transform =
+            x === 0 && s === 1 ? "" : `translateX(${x}px) scale(${s})`;
+          return;
+        }
         animate(c, { x }, spring(k, 0.9, b, delay));
         animate(
           c,
@@ -535,11 +550,18 @@ export function WorkShell({
         );
       });
     };
-    seat(settled.current === false);
-    settled.current = true;
+    /* A frame on, like the row's measure above: the lit chip's width,
+       read as the page arrives, laid the page out again inside the trip. */
+    const first = requestAnimationFrame(() => {
+      seat(settled.current === false);
+      settled.current = true;
+    });
     const onWide = () => seat(true);
     wide.addEventListener("change", onWide);
-    return () => wide.removeEventListener("change", onWide);
+    return () => {
+      cancelAnimationFrame(first);
+      wide.removeEventListener("change", onWide);
+    };
   }, [litAt]);
 
   /* The search, as a viewfinder that opens into a box.

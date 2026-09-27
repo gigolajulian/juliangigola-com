@@ -135,6 +135,7 @@ export function runDeck(el: HTMLElement, mode: Deck): () => void {
       c.style.removeProperty("transform-origin");
       c.style.removeProperty("will-change");
       delete c.dataset.at;
+      delete c.dataset.buried;
     }
     cards = [];
     rest = [];
@@ -144,8 +145,9 @@ export function runDeck(el: HTMLElement, mode: Deck): () => void {
   /* Written in the scroll handler itself, not a frame later: the scroll
      event runs in the same rendering step as the paint that follows it,
      so the depth keeps up with the pin. */
-  const depth = () => {
-    const x = el.scrollLeft;
+  /* Handed the scroll by `deal`, which reads it before it writes: read
+     after, it laid the page out again inside the arrival. */
+  const depth = (x = el.scrollLeft) => {
     // How much of each card, pinned, the one after it now covers. Under
     // two pixels is nothing: `offsetLeft` rounds, a screen is 1761.333 wide,
     // and a screen at rest read as a third of a pixel covered. It sat at
@@ -161,6 +163,15 @@ export function runDeck(el: HTMLElement, mode: Deck): () => void {
     let over = 0;
     for (let i = cards.length - 1; i >= 0; i--) {
       over += cover[i];
+      /* A screen wholly under the next one says so, and what runs a loop
+         of its own stops while it is there: the hero's name kept drawing
+         at 120 frames a second under the last page, where an observer
+         still counts it on screen (`warp-text.tsx`, `cover-space.tsx`). */
+      if (mode === "screens") {
+        const buried = cover[i] >= 1;
+        if (buried !== "buried" in cards[i].dataset)
+          cards[i].toggleAttribute("data-buried", buried);
+      }
       if (mode === "screens") scrub(live, cards[i], cover[i], RECEDE);
       else scrub(live, cards[i], over / cards.length, STEP * cards.length);
     }
@@ -170,6 +181,7 @@ export function runDeck(el: HTMLElement, mode: Deck): () => void {
     clear();
     if (!wide.matches || calm.matches) return;
     const kids = Array.from(el.children) as HTMLElement[];
+    const x0 = el.scrollLeft;
     // Layout positions, read with nothing pinned.
     for (const k of kids) k.dataset.at = String(k.offsetLeft);
     cards =
@@ -202,17 +214,28 @@ export function runDeck(el: HTMLElement, mode: Deck): () => void {
       c.style.position = "relative";
       c.style.zIndex = String(cards.length + 1);
     });
-    depth();
+    depth(x0);
   };
 
-  deal();
-  el.addEventListener("scroll", depth, { passive: true });
+  const onScroll = () => depth();
+  /* Dealt once the page is on screen, not while it is arriving. A page
+     change holds the screen on the page it left until the new one has
+     been laid out, and the deal's readings and writes lay it out twice
+     more: the pause before the work index came in (Julian: the delay and
+     the glitch into the portfolio). Two frames on, the trip's snapshot is
+     taken and moving on the compositor, and nothing here shows yet, since
+     a strip arrives at an end where no card is covered. */
+  let first = requestAnimationFrame(() => {
+    first = requestAnimationFrame(deal);
+  });
+  el.addEventListener("scroll", onScroll, { passive: true });
   wide.addEventListener("change", deal);
   calm.addEventListener("change", deal);
   window.addEventListener("resize", deal);
   const relaid = onRelaid(el, deal);
   return () => {
-    el.removeEventListener("scroll", depth);
+    cancelAnimationFrame(first);
+    el.removeEventListener("scroll", onScroll);
     wide.removeEventListener("change", deal);
     calm.removeEventListener("change", deal);
     window.removeEventListener("resize", deal);
@@ -286,9 +309,9 @@ function runChapters(el: HTMLElement): () => void {
     }
   };
 
-  const depth = () => {
-    const x = el.scrollLeft;
-    const vw = el.clientWidth;
+  /* The scroll and the window handed over by `deal`, read before it
+     writes, for the same reason as above. */
+  const depth = (x = el.scrollLeft, vw = el.clientWidth) => {
     for (const ch of chapters) {
       const p = Math.min(1, Math.max(0, (x - ch.pinX) / vw));
       if (p === ch.p) continue;
@@ -303,48 +326,73 @@ function runChapters(el: HTMLElement): () => void {
     clear();
     if (!wide.matches || calm.matches) return;
     kids = Array.from(el.children) as HTMLElement[];
-    // Layout positions, read with nothing pinned.
-    for (const k of kids) k.dataset.at = String(k.offsetLeft);
+    /* Every reading first, then every write. Written a cell at a time
+       between readings, each `transform-origin` made the next reading lay
+       the whole page out again: a hundred layouts of the work index while
+       it arrived, 114ms with the screen held on the page it left (Julian:
+       the delay and the glitch going into the portfolio). Nothing written
+       here moves a cell, so what is read first is still true after. */
+    const at = kids.map((k) => k.offsetLeft);
+    const widths = kids.map((k) => k.offsetWidth);
     const heads = kids.filter((k) => k.hasAttribute("data-deck"));
     const pad = parseFloat(getComputedStyle(el).paddingLeft) || 0;
     const vw = el.clientWidth;
+    const x0 = el.scrollLeft;
     const mid = el.clientHeight / 2;
     const top = topOf(el);
-    // Every cell positioned, in order: what comes later lies over what
-    // came before, and a plain cell would lie under a held one whatever
-    // its order.
-    kids.forEach((k, i) => {
-      k.style.position = "relative";
-      k.style.zIndex = String(i + 1);
-    });
     // The last chapter has nothing coming over it, so it never holds.
+    const origins: [HTMLElement, string][] = [];
     chapters = heads.slice(0, -1).map((head, h) => {
       const next = heads[h + 1];
+      const from = kids.indexOf(head);
+      const to = kids.indexOf(next);
       // A chapter shorter than the window holds from its start instead.
-      const pinX = Math.max(head.offsetLeft - pad, next.offsetLeft - vw);
+      const pinX = Math.max(at[from] - pad, at[to] - vw);
       const cards: Card[] = [];
-      for (const cell of kids.slice(kids.indexOf(head), kids.indexOf(next))) {
-        const left = cell.offsetLeft - pinX;
-        if (left + cell.offsetWidth <= 0) continue; // never on that screen
+      for (let i = from; i < to; i++) {
+        const cell = kids[i];
+        const left = at[i] - pinX;
+        if (left + widths[i] <= 0) continue; // never on that screen
         // About the screen's middle, from the cell's own corner.
-        cell.style.transformOrigin = `${vw / 2 - left}px ${mid - (topOf(cell) - top)}px`;
+        origins.push([cell, `${vw / 2 - left}px ${mid - (topOf(cell) - top)}px`]);
         // The sticky offset counts from the content edge (measured:
         // `left: 0` held at the padding), so it is short by the padding.
         cards.push({ cell, left: left - pad });
       }
       return { pinX, cards, held: false, p: -1 };
     });
-    depth();
+    // Layout positions, read with nothing pinned.
+    kids.forEach((k, i) => {
+      k.dataset.at = String(at[i]);
+      // Every cell positioned, in order: what comes later lies over what
+      // came before, and a plain cell would lie under a held one whatever
+      // its order.
+      k.style.position = "relative";
+      k.style.zIndex = String(i + 1);
+    });
+    for (const [cell, origin] of origins) cell.style.transformOrigin = origin;
+    depth(x0, vw);
   };
 
-  deal();
-  el.addEventListener("scroll", depth, { passive: true });
+  const onScroll = () => depth();
+  /* Dealt once the page is on screen, not while it is arriving. A page
+     change holds the screen on the page it left until the new one has
+     been laid out, and the deal's readings and writes lay it out twice
+     more: the pause before the work index came in (Julian: the delay and
+     the glitch into the portfolio). Two frames on, the trip's snapshot is
+     taken and moving on the compositor, and nothing here shows yet, since
+     a strip arrives at an end where no card is covered. */
+  let first = requestAnimationFrame(() => {
+    first = requestAnimationFrame(deal);
+  });
+  el.addEventListener("scroll", onScroll, { passive: true });
   wide.addEventListener("change", deal);
   calm.addEventListener("change", deal);
   window.addEventListener("resize", deal);
   const relaid = onRelaid(el, deal);
   return () => {
-    el.removeEventListener("scroll", depth);
+    cancelAnimationFrame(first);
+    el.removeEventListener("scroll", onScroll);
     wide.removeEventListener("change", deal);
     calm.removeEventListener("change", deal);
     window.removeEventListener("resize", deal);

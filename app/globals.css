@@ -119,7 +119,7 @@
   position: absolute;
   inset: 0;
   background: currentColor;
-  clip-path: inset(0 100% 0 0);
+  transform: translateX(-100%);
 }
 .jg-intro-eye {
   position: absolute;
@@ -321,6 +321,13 @@
   --hero-line: var(--border);
   --hero-on-ink: var(--background);
 }
+/* The whole middle at once, on the "Text sizes" panel's Middle: zoom
+   rather than a scale, so the name's canvas and the type are drawn at the
+   new size instead of stretched; and moved from the middle of the cover. */
+.cover-float-middle {
+  zoom: var(--h-mid-size, 1.02);
+  translate: 0 calc(var(--h-mid-down, -20px) / var(--h-mid-size, 1.02));
+}
 .cover-float-name {
   color: var(--hero-ink);
   line-height: 1;
@@ -342,7 +349,7 @@
   display: inline-block;
   font-family: var(--font-mono);
   font-weight: 500;
-  font-size: var(--h-cta-size, 11px);
+  font-size: var(--h-cta-size, 10.5px);
   letter-spacing: 0.18em;
   text-transform: uppercase;
   padding: 13px 22px;
@@ -356,6 +363,34 @@
   background: transparent;
   color: var(--hero-ink);
   border: 1px solid var(--hero-line);
+}
+/* Julian: a hover on the homepage's buttons. The pair invert, as the
+   site's other buttons do (`action`, `action-quiet`): the solid one
+   goes to the ground with its edge drawn in ink, the outlined one fills
+   with ink, so they still read as two buttons mid-way. The edge is an
+   inset shadow so nothing moves. */
+.cover-cta {
+  transition:
+    background-color 200ms var(--ease-out-strong),
+    border-color 200ms var(--ease-out-strong),
+    box-shadow 200ms var(--ease-out-strong),
+    color 200ms var(--ease-out-strong);
+}
+@media (hover: hover) and (pointer: fine) {
+  .cover-cta:hover {
+    background: var(--background);
+    color: var(--hero-ink);
+    box-shadow: inset 0 0 0 1px var(--hero-ink);
+  }
+  .cover-cta-quiet:hover {
+    background: var(--hero-ink);
+    color: var(--hero-on-ink);
+    border-color: var(--hero-ink);
+    box-shadow: none;
+  }
+}
+.cover-cta:focus-visible {
+  box-shadow: inset 0 0 0 1px var(--hero-ink);
 }
 /* Pointing at a frame: it swells a little, over the ones round it, and
    the line under the name trades the job title for that frame's
@@ -399,7 +434,7 @@
   .cover-float-ring:has(.cover-float-frame:hover) .cover-float-card {
     /* Julian: less blur round the one in focus, and glass over the rest
        instead (the pane below). No darkening. */
-    filter: blur(var(--h-others-blur, 0.6px));
+    filter: blur(var(--h-others-blur, 0.3px));
     transition-delay: var(--blur-wait);
   }
   /* The glass: a clear pane over each of the others, the site's own

@@ -358,6 +358,11 @@ export function ProjectStrip({
                 // How the lightbox finds the frame to lift out of the
                 // strip, and to land back in. See `lightbox.tsx`.
                 data-frame={cell.frame.src}
+                /* Faded up as it lands (`photo-fade.tsx`), over the block
+                   of its own colour, rather than swapped in. Not the first:
+                   it is the page's largest paint and the cover the work
+                   index morphs into, and has its blur to stand in. */
+                data-fade={cell.n > 0 ? "" : undefined}
                 src={cell.frame.src}
                 alt={cell.frame.alt || `${project.name}, frame ${cell.n + 1}`}
                 fill

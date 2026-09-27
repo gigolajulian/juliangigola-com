@@ -33,7 +33,6 @@ import { BlinkingMark, blink } from "@/components/not-found-scene";
    and 98% at a second and a half; it holds full a beat; then the whole
    panel, eye and all, lifts off the top of the screen, gathering speed. */
 const CAP = 5000; // the longest anybody waits, whatever is still loading
-const FILL = 1900; // the panel's sweep, when the page is quicker
 const HOLD = 450; // full, before it lifts
 const OUT = 1000; // the lift
 
@@ -58,7 +57,7 @@ export function Intro() {
 
     /* What "ready" means: the type, every photograph already on screen
        that is not lazy, and the window's own load. The panel sweeps on a
-       steady curve over `FILL` and never runs ahead of those. */
+       steady curve over `SWEEP` and never runs ahead of those. */
     const tasks: Promise<unknown>[] = [document.fonts.ready];
     if (document.readyState !== "complete") {
       tasks.push(
@@ -78,41 +77,70 @@ export function Intro() {
     let done = 0;
     for (const t of tasks) t.then(() => done++);
 
+    /* The sweep runs as an animation the browser moves on its own, off the
+       main thread. Drawn from script a frame at a time, it stood still for
+       the fifth of a second React takes to bring the page to life
+       underneath, halfway across the screen. The curve is the one that
+       script drew, sampled: quick to start, slowing into full. It never
+       runs ahead of what has loaded, which a check every 50ms holds it to;
+       at `CAP` it runs on regardless. */
+    const SWEEP = 2100;
+    const CURVE = [
+      0, 0.0265, 0.0923, 0.1593, 0.2301, 0.3009, 0.3835, 0.4493, 0.5117,
+      0.5705, 0.6362, 0.6867, 0.7335, 0.7765, 0.8229, 0.8574, 0.8881,
+      0.9149, 0.9419, 0.9603, 0.9748, 0.9854, 0.9922, 0.9964, 1,
+    ];
+    // When the sweep reaches `p` of the way across, in ms.
+    const reaches = (p: number) => {
+      const i = CURVE.findIndex((c) => c >= p);
+      if (i <= 0) return 0;
+      const f = (p - CURVE[i - 1]) / (CURVE[i] - CURVE[i - 1]);
+      return ((i - 1 + f) / (CURVE.length - 1)) * SWEEP;
+    };
+    const frames = [{ transform: "translateX(-100%)" }, { transform: "none" }];
+    const timing = { duration: SWEEP, fill: "forwards" as const };
+    let sweep: Animation | undefined;
+    try {
+      sweep = panel.current?.animate(frames, { ...timing, easing: `linear(${CURVE.join(",")})` });
+    } catch {
+      // No `linear()` easing (an older browser): the nearest curve.
+      sweep = panel.current?.animate(frames, { ...timing, easing: "cubic-bezier(0.3, 0.7, 0.4, 1)" });
+    }
+
     const lids = () => eye.current?.querySelector("[data-lids]");
     let blinked = false;
     const t0 = performance.now();
-    let shown = 0;
-    const step = (now: number) => {
-      const since = Math.max(0, now - t0);
-      const real = done / tasks.length;
-      const t = Math.min(1, since / FILL);
-      const target = since >= CAP ? 1 : Math.min(real, 1 - (1 - t) * (1 - t));
-      shown += (target - shown) * 0.12;
-      if (target - shown < 0.002) shown = target;
-      if (panel.current)
-        panel.current.style.clipPath = `inset(0 ${(1 - shown) * 100}% 0 0)`;
+    const hold = window.setInterval(() => {
+      const real = performance.now() - t0 >= CAP ? 1 : done / tasks.length;
+      const at = Number(sweep?.currentTime ?? SWEEP);
+      if (real < 1 && at >= reaches(real)) sweep?.pause();
+      else if (sweep?.playState === "paused") sweep.play();
       const l = lids();
-      if (l && !blinked && shown >= 0.5) {
+      if (l && !blinked && at >= reaches(0.5)) {
         blinked = true;
         blink(l);
       }
-      if (shown < 1) {
-        requestAnimationFrame(step);
-        return;
-      }
-      /* Full. A beat, then the layer lifts off the top of the screen, and
-         the page starts its own entrance under it at the same moment. */
-      setTimeout(() => {
-        box.current?.classList.add("jg-intro-open");
-        root.dataset.intro = "lift";
-        box.current?.animate(
-          [{ transform: "translateY(0)" }, { transform: "translateY(-100%)" }],
-          { duration: OUT, easing: "cubic-bezier(0.76, 0, 0.24, 1)", fill: "forwards" },
-        );
-        setTimeout(lift, OUT);
-      }, HOLD);
-    };
-    requestAnimationFrame(step);
+    }, 50);
+
+    /* Full. A beat, then the layer lifts off the top of the screen, and
+       the page starts its own entrance under it at the same moment. */
+    const full = sweep ? sweep.finished : Promise.resolve();
+    full
+      .catch(() => {})
+      .then(() => {
+        window.clearInterval(hold);
+        const l = lids();
+        if (l && !blinked) blink(l);
+        setTimeout(() => {
+          box.current?.classList.add("jg-intro-open");
+          root.dataset.intro = "lift";
+          box.current?.animate(
+            [{ transform: "translateY(0)" }, { transform: "translateY(-100%)" }],
+            { duration: OUT, easing: "cubic-bezier(0.76, 0, 0.24, 1)", fill: "forwards" },
+          );
+          setTimeout(lift, OUT);
+        }, HOLD);
+      });
   }, []);
 
   return (

@@ -55,6 +55,8 @@ export function CoverSpace({
     };
     /* Where the space turns to, from -1 to 1 on each axis. */
     const aim = (x: number, y: number) => {
+      // Not while another screen of the deck lies over it (`lib/deck.ts`).
+      if (el.closest("[data-buried]")) return;
       const c = (v: number) => Math.max(-1, Math.min(1, v));
       tx = c(x) * space.current.tiltSideways;
       ty = c(y) * space.current.tiltUpDown;

@@ -18,7 +18,7 @@ export const SLOTS: {
   z: number;
   phone?: [number, number];
 }[] = [
-  { x: 14.5, y: 10, w: 12, z: 13, phone: [4, 3] },
+  { x: 16.5, y: 9, w: 12, z: 13, phone: [4, 3] },
   { x: 70, y: 12, w: 13, z: 30, phone: [68, 6] },
   { x: 31.5, y: 0.5, w: 12, z: -2, phone: [37, 0] },
   { x: 70, y: 58.5, w: 12, z: 50, phone: [68, 78] },
