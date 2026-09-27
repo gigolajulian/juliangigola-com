@@ -125,6 +125,7 @@ const DIAL_TARGETS: Record<string, string> = {
   "text rise": ".cover-float-name, .cover-float-title, .cover-float-where, .cover-cta",
   "name effect": ".cover-float-name",
   "photo layout": ".cover-float-frame",
+  "background wall": ".inquire-wall",
 };
 
 export const useCards = () =>
@@ -372,7 +373,8 @@ export function HeroDials() {
     let on: string | null = null;
     let raf = 0;
     const draw = () => {
-      const boxes = on ? [...el.querySelectorAll<HTMLElement>(on)] : [];
+      // The page, not the cover: the wall is on the last page.
+      const boxes = on ? [...document.querySelectorAll<HTMLElement>(on)] : [];
       while (layer.children.length > boxes.length) layer.lastChild!.remove();
       boxes.forEach((b, i) => {
         const r = b.getBoundingClientRect();

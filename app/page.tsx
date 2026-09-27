@@ -6,7 +6,7 @@ import { EnquiryCell } from "@/components/enquiry-cell";
 import { Testimonials } from "@/components/testimonials";
 import { WorkBand } from "@/components/work-band";
 import { CoverArt } from "@/components/cover-art";
-import DriftWall from "@/components/DriftWall";
+import { InquireWall } from "@/components/inquire-wall";
 import {
   FEATURED,
   COMMISSIONS,
@@ -187,28 +187,7 @@ export default function Home() {
              its project, as on the 404. Four dozen, which covers the widest
              screen (`intro.tsx` has the arithmetic). */
           backdrop={
-            <DriftWall
-              items={WALL.slice(0, 48)}
-              columns="fill"
-              /* Julian: the wall at half its size (after trying a third
-                 and the full size); the drift slowed with it. */
-              tileWidth={150}
-              tileHeight={200}
-              gap={14}
-              radius={8}
-              tilt={16}
-              turn={-14}
-              perspective={1200}
-              depth={120}
-              speed={12}
-              direction="up"
-              variance={0.45}
-              parallax={0.6}
-              lift={16}
-              fade={0}
-              dim={0.4}
-              overlayColor="var(--background)"
-            />
+            <InquireWall items={WALL.slice(0, 48)} />
           }
           aside={
             <div
