@@ -190,17 +190,17 @@ export default function Home() {
             <DriftWall
               items={WALL.slice(0, 48)}
               columns="fill"
-              /* Julian: the wall at a third of its size, the drift
-                 slowed with it so it reads as the same motion. */
-              tileWidth={100}
-              tileHeight={133}
-              gap={9}
+              /* Julian: the wall at half its size (after trying a third
+                 and the full size); the drift slowed with it. */
+              tileWidth={150}
+              tileHeight={200}
+              gap={14}
               radius={8}
               tilt={16}
               turn={-14}
               perspective={1200}
               depth={120}
-              speed={8}
+              speed={12}
               direction="up"
               variance={0.45}
               parallax={0.6}
@@ -256,7 +256,7 @@ function PathCard({
       /* Julian: the wall runs on behind the doors, seen rather than
          frosted over: a 30% tint for the type and 6px of blur, not the
          site's glass. */
-      className="group relative flex flex-col justify-center gap-6 border-l border-border bg-background/30 px-6 py-12 backdrop-blur-[6px] transition-colors duration-300 hoverable:hover:bg-background/45 sm:px-16 sm:pt-20"
+      className="group relative flex flex-col justify-center gap-6 border-l border-border bg-background/30 px-6 py-12 backdrop-blur-[3px] transition-colors duration-300 hoverable:hover:bg-background/45 sm:px-16 sm:pt-20"
     >
       <div>
         <p className="label text-muted-foreground">{label}</p>
