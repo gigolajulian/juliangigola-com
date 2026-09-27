@@ -41,6 +41,9 @@ export type Lead = {
   href: string;
   name: string;
   client?: string;
+  /** Walking back into it opens at its start, not its end (Julian: back
+      from Sessions lands on the first page of the work). */
+  start?: boolean;
 };
 
 /** Set by a strip on its way out backwards and read by the next one on its
@@ -488,6 +491,7 @@ export function Strip({
   // Stable for the life of the strip: pages key it by what it shows.
   const nextHref = next?.href;
   const prevHref = prev?.href;
+  const prevStart = prev?.start === true;
   const open = React.useRef(onOpen);
   React.useEffect(() => {
     open.current = onOpen;
@@ -509,6 +513,33 @@ export function Strip({
     return () => el.removeEventListener("click", openCell);
   }, []);
   const count = React.Children.count(children);
+
+  /* Julian: a delay between the scroll and the page switching. The page
+     led on to was fetched only once the strip left, so the deal waited on
+     the network. Each end's page is fetched once the strip is within a
+     screen and a half of it, one request a way, well before the push. */
+  React.useEffect(() => {
+    const el = scroller.current;
+    if (!el || !live || (!nextHref && !prevHref)) return;
+    const warmed = new Set<string>();
+    const warm = () => {
+      const near = el.clientWidth * 1.5;
+      const room = el.scrollWidth - el.clientWidth;
+      if (nextHref && room - el.scrollLeft < near && !warmed.has(nextHref)) {
+        warmed.add(nextHref);
+        router.prefetch(nextHref);
+      }
+      if (prevHref && el.scrollLeft < near && !warmed.has(prevHref)) {
+        warmed.add(prevHref);
+        router.prefetch(prevHref);
+      }
+      if (warmed.size === Number(!!nextHref) + Number(!!prevHref))
+        el.removeEventListener("scroll", warm);
+    };
+    warm();
+    el.addEventListener("scroll", warm, { passive: true });
+    return () => el.removeEventListener("scroll", warm);
+  }, [router, nextHref, prevHref, live]);
 
   /* Before the first paint: a deep link opens on its cell, and arriving
      backwards opens at the end with the slide coming from the left. Both
@@ -609,7 +640,8 @@ export function Strip({
       document.documentElement.dataset.nav === "in" ||
       document.documentElement.dataset.nav === "out";
     if (back) {
-      el.dataset.arrive = dealt ? "dealt" : "back";
+      // Dealt whole as a page (`nav-side`), the page's trip is the arrival.
+      el.dataset.arrive = dealt ? "dealt" : zooming ? "zoom" : "back";
       /* The end of the sequence, not the end of the scroller. Walking
          back into a filter used to land on whatever the strip finishes
          with — which since the ask came off the discipline pages is the
@@ -1612,7 +1644,7 @@ export function Strip({
          snapshotted apart from the page, and the root says which way. */
       if (deck === "leads") {
         dealtAt = Date.now();
-        cameBack = dir < 0;
+        cameBack = dir < 0 && !prevStart;
         arriveDir = dir;
         el.style.setProperty("view-transition-name", "strip");
         const root = document.documentElement;
@@ -1637,15 +1669,29 @@ export function Strip({
          push goes out at once. */
       if (filterPath(window.location.pathname) && filterPath(href)) {
         markFilter(dir);
-        cameBack = dir < 0;
+        cameBack = dir < 0 && !prevStart;
         arriveDir = dir;
         router.push(href);
         return;
       }
-      el.dataset.leaving = dir > 0 ? "on" : "back";
-      cameBack = dir < 0;
+      /* Julian: keep the stack when scrolling past a page into the next
+         one. Any other page is dealt whole, as the bar deals it (`nav-side`
+         in `globals.css`): the next page in as a card from the right over
+         this one, which recedes, and back the one before from the left.
+         Only the strip, as on the work's pages, left the next page's head
+         popping in over this one (home into the work index, Julian: very
+         glitchy). The arrival clears it (`page-transition.tsx`). */
+      cameBack = dir < 0 && !prevStart;
       arriveDir = dir;
-      window.setTimeout(() => router.push(href), 260);
+      const root = document.documentElement;
+      root.dataset.nav = "in";
+      root.dataset.navSide = dir > 0 ? "right" : "left";
+      window.setTimeout(() => {
+        if (root.dataset.navSide === undefined) return;
+        delete root.dataset.nav;
+        delete root.dataset.navSide;
+      }, DEAL_MS);
+      router.push(href);
     };
 
     /* ── a finger past the end ──
@@ -2165,7 +2211,7 @@ export function Strip({
       el.style.translate = "";
       delete el.dataset.release;
     };
-  }, [router, nextHref, prevHref, live, paged, deck]);
+  }, [router, nextHref, prevHref, prevStart, live, paged, deck]);
 
   /* ── running a finger along the ruler ──
      Every tick is a jump already. What it was not is a thing you could

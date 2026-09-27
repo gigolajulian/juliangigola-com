@@ -1,5 +1,6 @@
 "use client";
 
+import * as React from "react";
 import { useDialKit } from "dialkit";
 import DriftWall from "@/components/DriftWall";
 import type { WallTile } from "@/lib/work";
@@ -15,6 +16,17 @@ export function InquireWall({ items }: { items: WallTile[] }) {
     { scale: [1.15, 0.2, 2, 0.05] },
     { id: "inquire-wall" },
   );
+  /* Julian: a dial for the blur on the two doors to the right of the
+     ask, frosted over this wall. It reaches them as `--door-blur`, which
+     their class reads with the same 2px as its fallback. */
+  const { blur } = useDialKit(
+    "Right cards",
+    { blur: [2, 0, 24, 0.5] },
+    { id: "inquire-doors" },
+  );
+  React.useEffect(() => {
+    document.getElementById("where-next")?.style.setProperty("--door-blur", `${blur}px`);
+  }, [blur]);
   return (
     <DriftWall
       items={items}

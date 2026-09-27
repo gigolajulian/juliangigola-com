@@ -3331,6 +3331,15 @@ optgroup {
 :root[data-nav-side] .site-bar {
   view-transition-name: site-bar;
 }
+/* No cover flies on a deal. The homepage's selected work and the work
+   index share the covers' names (`cover-${slug}`, the morph into a
+   project), so dealing one into the other flew the band's covers, pinned
+   under the later screens, out over both pages. Julian saw it as a grid
+   flashing up. The morph is for a press on a cover, not a page dealt. */
+:root[data-nav-side] [style*="view-transition-name: cover-"],
+:root[data-nav="deal"] [style*="view-transition-name: cover-"] {
+  view-transition-name: none !important;
+}
 ::view-transition-group(site-bar) {
   z-index: 3;
   animation: none;

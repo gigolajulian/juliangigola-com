@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Strip } from "@/components/strip";
+import { Strip, type Lead } from "@/components/strip";
 import { Lightbox, useLightbox } from "@/components/lightbox";
 import type { Frame } from "@/lib/work-types";
 import type { ListRow } from "@/components/work-list";
@@ -23,6 +23,7 @@ export function WorkStrip({
   frames,
   label,
   rows,
+  prev,
   className,
   children,
 }: {
@@ -32,6 +33,8 @@ export function WorkStrip({
   label: string;
   /** The same work as lines, for the list view and the search. */
   rows?: ListRow[];
+  /** Where scrolling back past the start goes. */
+  prev?: Lead;
   className?: string;
   children: React.ReactNode;
 }) {
@@ -41,6 +44,7 @@ export function WorkStrip({
     <WorkSheet rows={rows ?? []}>
       <Strip
         label={label}
+        prev={prev}
         onOpen={lightbox.show}
         // Twelve disciplines and eighty four covers: the one ruler on the
         // site that is a table of contents rather than a row of stops.

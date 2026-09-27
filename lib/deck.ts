@@ -92,6 +92,23 @@ const scrub = (
   a.currentTime = p * 1000;
 };
 
+/** Deal again when the rack (`strip-grid`) lays the same cells out
+    again, and only then. Any class change used to: Lenis marks the
+    scroller `lenis-scrolling` as a gesture starts and stops, so every
+    swipe on the work index re-dealt all eighty covers twice, 70ms of
+    forced layout each (Julian: the portfolio feels laggy). */
+const onRelaid = (el: HTMLElement, deal: () => void) => {
+  let grid = el.classList.contains("strip-grid");
+  const watch = new MutationObserver(() => {
+    const now = el.classList.contains("strip-grid");
+    if (now === grid) return;
+    grid = now;
+    deal();
+  });
+  watch.observe(el, { attributes: true, attributeFilter: ["class"] });
+  return watch;
+};
+
 const drop = (live: Map<HTMLElement, Animation>) => {
   for (const a of live.values()) a.cancel();
   live.clear();
@@ -193,9 +210,7 @@ export function runDeck(el: HTMLElement, mode: Deck): () => void {
   wide.addEventListener("change", deal);
   calm.addEventListener("change", deal);
   window.addEventListener("resize", deal);
-  // The rack (`strip-grid`) lays the same cells out again: deal again.
-  const relaid = new MutationObserver(deal);
-  relaid.observe(el, { attributes: true, attributeFilter: ["class"] });
+  const relaid = onRelaid(el, deal);
   return () => {
     el.removeEventListener("scroll", depth);
     wide.removeEventListener("change", deal);
@@ -327,9 +342,7 @@ function runChapters(el: HTMLElement): () => void {
   wide.addEventListener("change", deal);
   calm.addEventListener("change", deal);
   window.addEventListener("resize", deal);
-  // The rack (`strip-grid`) lays the same cells out again: deal again.
-  const relaid = new MutationObserver(deal);
-  relaid.observe(el, { attributes: true, attributeFilter: ["class"] });
+  const relaid = onRelaid(el, deal);
   return () => {
     el.removeEventListener("scroll", depth);
     wide.removeEventListener("change", deal);

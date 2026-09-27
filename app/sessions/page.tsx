@@ -53,6 +53,8 @@ export default function SessionsPage() {
     >
       <Strip
         label={`Sessions: ${SESSION_TYPES.length} session types, left and right`}
+        // Julian: scrolling back goes to the work, on its first page.
+        prev={{ href: "/work", name: "Portfolio", start: true }}
         next={CONTACT}
         // Julian: the ScrollStack, made to make sense sideways. Each
         // session is a card pinning at the left while the next one is

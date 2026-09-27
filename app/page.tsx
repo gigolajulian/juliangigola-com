@@ -235,7 +235,7 @@ function PathCard({
       /* Julian: the wall runs on behind the doors, seen rather than
          frosted over: a 30% tint for the type and 6px of blur, not the
          site's glass. */
-      className="group relative flex flex-col justify-center gap-6 border-l border-border bg-background/30 px-6 py-12 backdrop-blur-[3px] transition-colors duration-300 hoverable:hover:bg-background/45 sm:px-16 sm:pt-20"
+      className="group relative flex flex-col justify-center gap-6 border-l border-border bg-background/30 px-6 py-12 backdrop-blur-[var(--door-blur,2px)] transition-colors duration-300 hoverable:hover:bg-background/45 sm:px-16 sm:pt-20"
     >
       <div>
         <p className="label text-muted-foreground">{label}</p>

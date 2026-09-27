@@ -126,6 +126,7 @@ const DIAL_TARGETS: Record<string, string> = {
   "name effect": ".cover-float-name",
   "photo layout": ".cover-float-frame",
   "background wall": ".inquire-wall",
+  "right cards": "#where-next",
 };
 
 export const useCards = () =>

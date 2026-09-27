@@ -176,6 +176,8 @@ export default function WorkPage() {
       label={`All work: ${COMMISSIONS.length} projects, left and right`}
       frames={viewer}
       rows={WORK_ROWS}
+      // Julian: scrolling back past the start goes home.
+      prev={{ href: "/", name: "Home" }}
       className="mt-4 max-sm:mt-2 short:mt-2 flex-1"
     >
       {cells}
