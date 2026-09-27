@@ -193,12 +193,14 @@
 }
 .cover-float-frame {
   position: absolute;
-  left: var(--x);
-  top: var(--y);
+  /* Drawn toward the middle by the "Hero layout" panel's pull (1: as laid
+     out). A phone places them itself, below. */
+  left: calc(50% + (var(--x) - 50%) * var(--h-pull-x, 1));
+  top: calc(50% + (var(--y) - 50%) * var(--h-pull-y, 1));
   width: var(--w);
   /* Out of order: each frame's place in `ORDER` (`cover-float.tsx`),
      spread out from the start. */
-  --delay: calc(var(--h-start, 1180ms) + var(--order, 0) * var(--h-spread, 1.2ms));
+  --delay: calc(var(--h-start, 1180ms) + var(--order, 0) * var(--h-spread, 0.95ms));
   animation: jg-fly var(--h-fly-ms, 1200ms) cubic-bezier(0.16, 1, 0.3, 1)
     var(--delay) backwards;
 }
@@ -4119,20 +4121,18 @@ h2:not(.label, [data-display]) {
 .about-hero-first {
   display: flex;
   justify-content: space-between;
-  /* Julian: taller than the surname, and still inside the box that ends
-     at the apex. The height comes from the size, the fit from closing the
-     tracking up: at the surname's tracking 1.25em ran the N past it. */
-  font-size: 1.25em;
+  /* Julian: taller than the surname, and as wide as it (the name and the
+     facts end on one edge, `about-hero.tsx`). Tracked close so it still
+     fits at that size, the letters spread to the edge. */
+  font-size: 1.12em;
   letter-spacing: -0.145em;
-  /* Julian: the N ends over the top of the last A. Measured: the A's
-     apex is 0.34em of the surname in from its end, 0.272em of this
-     line's size. */
-  width: calc(100% - 0.272em);
+  width: 100%;
   font-weight: 200;
 }
 .about-hero-last {
   display: block;
-  font-weight: 900;
+  /* Julian: regular. */
+  font-weight: 400;
   color: var(--accent);
 }
 .about-hero-facts {
@@ -4141,6 +4141,11 @@ h2:not(.label, [data-display]) {
   gap: 0.75rem 1.6rem;
   color: #bdbbb5;
   font-size: 10px;
+}
+.about-hero-facts[data-stack] {
+  flex-direction: column;
+  align-items: flex-start;
+  row-gap: 0.3rem;
 }
 .about-hero-facts li::before {
   content: "";

@@ -5,10 +5,11 @@ import { cn } from "@/lib/utils";
 import { CoverSpace } from "@/components/cover-space";
 import { CoverRole } from "@/components/cover-role";
 import { CoverCard, HeroDials, HeroName } from "@/components/hero-dials";
+import { SLOTS } from "@/lib/cover-slots";
 
 /* ── the cover ────────────────────────────────────────────────────
  * The name in the middle of the screen and the featured work round it,
- * laid out like basis's cover (`SLOTS`).
+ * laid out like basis's cover (`lib/cover-slots.ts`).
  *
  * The entrance is basis's, measured off Julian's recording: a second
  * after the opening lifts, the frames fade up out of nothing and a blur
@@ -21,32 +22,6 @@ import { CoverCard, HeroDials, HeroName } from "@/components/hero-dials";
  * Every frame is a link to its project, so the field is an index as well
  * as a picture.
  * ─────────────────────────────────────────────────────────────── */
-
-/** Where each frame sits: left and top as a share of the cover, width in
-    vw; each keeps its own photograph's proportions. Julian: laid out like
-    basis's cover, his reference: upright cards in a loose, staggered field
-    with room between them, some running off the edges, the middle left
-    clear for the name. A little depth each (`z`, pixels toward the
-    viewer) so the pointer moves them apart. The six with a `phone` place
-    are the ones a phone shows, above and below the name. */
-const SLOTS: {
-  x: number;
-  y: number;
-  w: number;
-  z: number;
-  phone?: [number, number];
-}[] = [
-  { x: 8, y: 14, w: 13, z: 40, phone: [4, 8] },
-  { x: 77, y: 12, w: 13, z: 30, phone: [68, 9] },
-  { x: 30, y: -2.4, w: 12, z: -30, phone: [37, 3] },
-  { x: 72, y: 60, w: 12, z: 50, phone: [68, 73] },
-  { x: 17, y: 62, w: 11.5, z: -20, phone: [6, 74] },
-  { x: 52, y: 2, w: 10, z: -50, phone: [37, 80] },
-  { x: 93, y: 46, w: 12, z: -10 },
-  { x: 40, y: 74, w: 10.5, z: 20 },
-  { x: -3, y: 57, w: 11, z: -40 },
-  { x: 57, y: 79, w: 11, z: -25 },
-];
 
 /** When each frame sets off, in the order of `SLOTS`: out of order, as
     measured, across about a second and a half. */
@@ -157,7 +132,7 @@ export function CoverFloat({
           className="lift cover-float-where mt-5 mb-[26px] max-w-[34rem]"
           style={{ "--reveal-delay": "1600ms" } as React.CSSProperties}
         >
-          Based in San Francisco, CA. Available worldwide.
+          Based in San Francisco, CA. Available worldwide
         </p>
         <div
           className="lift flex flex-wrap justify-center gap-3"

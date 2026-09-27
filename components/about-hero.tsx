@@ -59,6 +59,10 @@ out vec4 fragColor;
 const vec3 GROUND = vec3(0.043);
 const vec3 INK = vec3(0.91, 0.90, 0.875);
 const float LEVELS = 4.0;
+// His face in the photograph, hair to chin, as a share of its width and
+// height (measured on /about/julian.jpg).
+const vec2 FACE = vec2(0.785, 0.32);
+const vec2 FACE_R = vec2(0.06, 0.13);
 
 // 8x8 ordered dither threshold, 0..1.
 float bayer(ivec2 p) {
@@ -126,16 +130,25 @@ void main() {
   vec2 pc = (c + 0.5) * uCell;
   float t = bayer(ivec2(c));
 
-  // Him, held still: the pointer warps only the lights behind (Julian:
-  // warp the background, not the subject). Sharpened, so the features
-  // hold at this size.
-  float l = lum(pc);
-  float avg = (lum(pc + vec2(uCell, 0.0)) + lum(pc - vec2(uCell, 0.0)) +
-               lum(pc + vec2(0.0, uCell)) + lum(pc - vec2(0.0, uCell))) * 0.25;
-  l = clamp(l + 0.5 * (l - avg), 0.0, 1.0);
+  // The pointer pushes the grain out, like a lens, and shakes it: barely
+  // on his face, which holds still enough to read (Julian: minimum
+  // warping on the face only).
+  float R = uRes.x / 13.0 * 0.75;  // Julian: a quarter smaller
+  vec2 d = pc - uPointer;
+  float dist = length(d) + 1e-4;
+  vec2 q = ((pc - uRect.xy) / uRect.zw - FACE) / FACE_R;
+  float k = uOn * exp(-(dist * dist) / (R * R)) * mix(1.0, 0.1, exp(-dot(q, q)));
+  float jit = k * 4.0 * uCell * sin(c.x * 12.9 + c.y * 78.2 + uTime * 9.0);
+  vec2 sp = pc - d / dist * k * R * 0.5 + vec2(jit, -jit);
+
+  // Sharpened, so the features hold at this size.
+  float l = lum(sp);
+  float avg = (lum(sp + vec2(uCell, 0.0)) + lum(sp - vec2(uCell, 0.0)) +
+               lum(sp + vec2(0.0, uCell)) + lum(sp - vec2(0.0, uCell))) * 0.25;
+  l = clamp(l + 0.5 * (l - avg), 0.0, 1.0) * (1.0 - k * 0.35);
   // Only him: the backdrop's grey, a touch lighter round him, left a
   // halo of dots (Julian: remove the dots around me).
-  l *= smoothstep(0.35, 0.75, body(pc));
+  l *= smoothstep(0.35, 0.75, body(sp));
   float photo = quant(l, t);
 
   // The lights behind, matched to Julian's reference: soft streaks running
@@ -422,6 +435,66 @@ export function AboutHero({ children }: { children?: React.ReactNode }) {
       gl.getExtension("WEBGL_lose_context")?.loseContext();
       canvas.remove();
     };
+  }, []);
+
+  /* Julian: the first name, the surname and the facts under them end on
+     one edge. The facts line sets the width and the name is sized to it;
+     where a short screen has no room above for that, the facts stack and
+     the name fits the longer of them, as far as the room lets it. */
+  React.useEffect(() => {
+    const box = ref.current;
+    const name = box?.querySelector<HTMLElement>(".about-hero-name");
+    const last = box?.querySelector<HTMLElement>(".about-hero-last");
+    const facts = box?.querySelector<HTMLElement>(".about-hero-facts");
+    if (!box || !name || !last || !facts) return;
+    const surname = document.createRange();
+    surname.selectNodeContents(last);
+    /* The name's size at which the surname is as wide as the facts. */
+    const sized = (current: number) => {
+      const items = [...facts.children].map((li) => li.getBoundingClientRect());
+      const width =
+        Math.max(...items.map((r) => r.right)) -
+        Math.min(...items.map((r) => r.left));
+      return current * (width / surname.getBoundingClientRect().width);
+    };
+    const copy = name.parentElement!;
+    /* The slack above the name: the copy sits at the foot on an auto
+       margin, so what that margin comes to is what the name can grow,
+       plus the foot's padding down to 16px. */
+    const content = copy.parentElement!;
+    const slack = () =>
+      (parseFloat(getComputedStyle(copy).marginTop) || 0) +
+      Math.max(0, parseFloat(getComputedStyle(content).paddingBottom) - 16) -
+      Math.max(0, copy.getBoundingClientRect().bottom - content.getBoundingClientRect().bottom + parseFloat(getComputedStyle(content).paddingBottom));
+    const fit = () => {
+      name.style.fontSize = "";
+      delete facts.dataset.stack;
+      const current = parseFloat(getComputedStyle(name).fontSize);
+      const grows = name.offsetHeight / current;
+      let size = sized(current);
+      /* A phone's screen grows to hold the words; a wide one does not. */
+      if (box.clientWidth >= 640 && size > current + slack() / grows) {
+        const row = slack();
+        /* No room for the name at the width of the row: the facts one
+           above the other, which is narrower, if that fits. */
+        facts.dataset.stack = "";
+        const stacked = sized(current);
+        if (stacked <= current + slack() / grows) {
+          size = stacked;
+        } else if (slack() > row) {
+          size = current + slack() / grows;
+        } else {
+          delete facts.dataset.stack;
+          size = current + row / grows;
+        }
+      }
+      name.style.fontSize = `${size}px`;
+    };
+    fit();
+    void document.fonts.ready.then(fit);
+    const sizes = new ResizeObserver(fit);
+    sizes.observe(box);
+    return () => sizes.disconnect();
   }, []);
 
   return (

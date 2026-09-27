@@ -34,8 +34,8 @@ import { NAME_WARP } from "@/lib/name-warp";
 export const LINKS = [
   { href: "/work", label: "Portfolio" },
   { href: "/sessions", label: "Sessions" },
-  { href: "/about", label: "About" },
   { href: "/contact", label: "Contact" },
+  { href: "/about", label: "About" },
 ] as const;
 
 export function SiteHeader() {

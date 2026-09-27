@@ -2,10 +2,16 @@
 
 import * as React from "react";
 import { motion } from "motion/react";
-import { DialRoot, useDialKit, type DialConfig } from "dialkit";
+import {
+  DialRoot,
+  useDialKit,
+  type DialConfig,
+  type DialPadConfig,
+} from "dialkit";
 import "dialkit/styles.css";
 import { WarpText } from "@/components/warp-text";
 import { NAME_WARP } from "@/lib/name-warp";
+import { SLOTS } from "@/lib/cover-slots";
 
 /* ── the hero on DialKit ──────────────────────────────────────────
  * Julian: tune almost everything about the cover live, on DialKit's
@@ -43,7 +49,7 @@ export const SPACE = {
 
 const ENTRANCE = {
   start: [1180, 0, 3000, 10],
-  spread: [1.2, 0, 4, 0.05],
+  spread: [0.95, 0, 4, 0.05],
   fly: { distance: [95, 0, 300, 1], duration: [1200, 200, 4000, 10] },
   fade: { duration: [1500, 100, 4000, 10], blur: [14, 0, 40, 1] },
   text: { duration: [900, 100, 3000, 10] },
@@ -58,6 +64,35 @@ const NAME = {
   lensStrength: [NAME_WARP.pointerStrength, 0, 1.5, 0.01],
   colorSplit: [NAME_WARP.refraction, 0, 0.1, 0.001],
   ripple: [NAME_WARP.ripple, 0, 4, 0.05],
+} satisfies DialConfig;
+
+/* Julian: move each card, and pull the field in. Each card has a pad for
+   where it sits (left and top as a share of the cover; the pad's y runs
+   upward, so it holds the top negated), its width in vw and its depth.
+   `pull` draws every card toward the middle across and down: 1 is the
+   layout as it stands. */
+type Slot = {
+  place: DialPadConfig;
+  width: [number, number, number, number];
+  depth: [number, number, number, number];
+};
+const LAYOUT = {
+  pull: { width: [1, 0.3, 1.5, 0.01], height: [1, 0.3, 1.5, 0.01] },
+  cards: Object.fromEntries(
+    SLOTS.map((s, i) => [
+      `card ${i + 1}`,
+      {
+        place: {
+          type: "pad",
+          x: [s.x, -15, 105, 0.5],
+          y: [-s.y, -100, 15, 0.5],
+          labels: { x: "left", y: "top" },
+        },
+        width: [s.w, 4, 30, 0.5],
+        depth: [s.z, -200, 200, 1],
+      },
+    ]),
+  ) as Record<string, Slot>,
 } satisfies DialConfig;
 
 const TYPE = {
@@ -113,8 +148,9 @@ export function HeroDials() {
     id: "hero-entrance",
   });
   const name = useDialKit("Hero name", NAME, { id: "hero-name" });
+  const layout = useDialKit("Hero layout", LAYOUT, { id: "hero-layout" });
   React.useEffect(() => {
-    all.current = { cards, space, name, entrance, type };
+    all.current = { cards, space, name, entrance, type, layout };
   });
 
   /* Run the entrance again, forced: drop every animation on the cover for
@@ -166,6 +202,17 @@ export function HeroDials() {
       "--h-cta-size": `${type.buttons.size}px`,
     };
     for (const [k, v] of Object.entries(vars)) el.style.setProperty(k, v);
+    el.style.setProperty("--h-pull-x", `${layout.pull.width}`);
+    el.style.setProperty("--h-pull-y", `${layout.pull.height}`);
+    /* Each card's place, over the one the server gave it. */
+    el.querySelectorAll<HTMLElement>(".cover-float-frame").forEach((f, i) => {
+      const c = layout.cards[`card ${i + 1}`];
+      if (!c) return;
+      f.style.setProperty("--x", `${c.place.x}%`);
+      f.style.setProperty("--y", `${-c.place.y}%`);
+      f.style.setProperty("--w", `${c.width}vw`);
+      f.style.setProperty("--z", `${c.depth}px`);
+    });
   });
 
   return (
