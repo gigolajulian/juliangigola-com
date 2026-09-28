@@ -52,8 +52,8 @@ export function TermsColumn() {
         <p>
           <strong>&ldquo;You&rdquo;</strong> means whoever accesses the Site,
           whether a person, a company, or software acting for either. If you
-          access it for an organisation, you confirm you have authority to bind
-          it, and &ldquo;you&rdquo; means that organisation as well.
+          access it for an organization, you confirm you have authority to bind
+          it, and &ldquo;you&rdquo; means that organization as well.
         </p>
         <p>
           The{" "}
@@ -73,7 +73,7 @@ export function TermsColumn() {
         </p>
         <p>
           A program that requests a page has accepted these terms on behalf of
-          whoever runs it, and that person or organisation is bound by them. No
+          whoever runs it, and that person or organization is bound by them. No
           human needs to have read this page for the agreement to bind.
         </p>
       </Clause>

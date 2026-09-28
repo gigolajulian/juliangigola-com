@@ -160,7 +160,7 @@ export default function WorkPage() {
       body="Tell me what it is for and when, and I'll come back with an approach and a quote."
       type="editorial"
       tick={false}
-      secondary={{ href: "/about", label: "How a commission runs" }}
+      secondary={{ href: "/contact", label: "How a commission runs" }}
       /* Julian: the ask is a page of its own here, not a 40rem cell with
          the last cover still beside it, and the archive does not lead on
          to the about page. A sequence of projects ends where the projects

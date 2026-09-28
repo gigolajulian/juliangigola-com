@@ -914,6 +914,11 @@ export function Strip({
            sideways, so both axes have to count. */
         gestureOrientation: "both",
         smoothWheel: true,
+        /* A box that scrolls on its own (the contact form on a laptop) keeps
+           the wheel until it has run out, as the strip's own wheel lets it.
+           Without this Lenis took the wheel over the form and moved nothing,
+           and the send button under the fold could not be reached. */
+        allowNestedScroll: true,
         /* The same gain the strip's own model uses, so what is being
            judged is the easing and not how far a notch carries: at one to
            one a notch moved 120px against 360 and Lenis would lose on a
@@ -1740,7 +1745,8 @@ export function Strip({
        has just been carried to mounts with the wheel still turning, and
        without this one hard spin skipped a project and then the one after
        it. Half a second of quiet makes each step a decision. */
-    const arrived = performance.now();
+    let arrived = performance.now();
+    let paused = false;
     /* Two filters of the work index are one page with the row swapped, not
        two pages. */
     const filterPath = (path: string) =>
@@ -1751,6 +1757,16 @@ export function Strip({
     const leave = (dir: 1 | -1) => {
       const href = dir > 0 ? nextHref : prevHref;
       if (!href || leaving || performance.now() - arrived < 500) return;
+      /* Never off a page with words typed into its form: the contact form
+         keeps no state, and a drag across its intro or a spin over its
+         steps took a half written inquiry to About and back empty. The
+         band still gives; the bar still goes. */
+      if (
+        [...el.querySelectorAll<HTMLInputElement | HTMLTextAreaElement>(
+          "input:not([hidden], [type=hidden], [type=radio], [type=checkbox]), textarea",
+        )].some((f) => f.value.trim())
+      )
+        return;
       leaving = true;
       // The band holds where it is and the slide starts from it.
       if (band) cancelAnimationFrame(band);
@@ -1907,13 +1923,27 @@ export function Strip({
       // A pinch is a zoom.
       if (e.ctrlKey) return;
       const now = e.timeStamp || performance.now();
-      const fresh = now - gestureAt > GESTURE_GAP_MS;
+      // Since the last notch here, or since the page came if none has yet.
+      const before = gestureAt;
+      const gap = now - Math.max(before, arrived);
+      const fresh = now - before > GESTURE_GAP_MS;
       gestureAt = now;
       // A new push: take the measurements again, once, before using them.
       if (fresh) size();
       const sideways = Math.abs(e.deltaX) > Math.abs(e.deltaY);
       const raw = sideways ? e.deltaX : e.deltaY;
       if (!raw) return;
+      /* Half a second of quiet, not half a second since the mount: the
+         spin that led here is still that spin until it pauses, so the
+         arrival moves with it. A long spin went Sessions to Contact to
+         About with Contact on screen for under a second. A pause is
+         300ms, and a second for the first notch here: the page mounting
+         under the spin stalls it. Only for a page a spin or a drag led
+         to; one reached from the bar owes nothing to a wheel. */
+      if (!paused) {
+        if (!arriveDir || gap > (before > arrived ? 300 : 1000)) paused = true;
+        else arrived = performance.now();
+      }
       /* The tail of the push that brought the page here. A trackpad keeps
          sending momentum after the strip has led on, and those notches
          land on the strip that has just arrived: measured on Contact
@@ -2143,12 +2173,15 @@ export function Strip({
       if (!down) return;
       down = false;
       dragging = false;
+      // After the click that this release is about to fire, not before.
+      requestAnimationFrame(() => delete el.dataset.dragged);
 
       // A flick keeps going: let go at a speed, the strip carries on at
-      // that speed and runs out under the same friction as a notch. A drag
-      // past the end springs back and never leads on: a grab that threw
-      // you into another page would be a surprise, and the wheel is the
-      // gesture that travels.
+      // that speed and runs out under the same friction as a notch.
+      // Julian: drag to the next and the page before. Let go pulled past
+      // an end as far as a finger has to, and it leads on as a swipe does.
+      if (over >= LEAVE_TOUCH) return leave(1);
+      if (over <= -LEAVE_TOUCH) return leave(-1);
       if (eased && Math.abs(speed) > 0.05) to(el.scrollLeft + speed * TAU);
       // Paged, a release lands on a screen rather than wherever the throw
       // ran out: the page is the unit, so it is what the hand is holding.
@@ -2156,8 +2189,6 @@ export function Strip({
         const where = centreOf(el, nearest(target));
         if (where !== null) to(where);
       }
-      // After the click that this release is about to fire, not before.
-      requestAnimationFrame(() => delete el.dataset.dragged);
     };
 
     // The browser took the pointer away mid-drag.

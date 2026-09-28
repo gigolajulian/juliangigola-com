@@ -1223,6 +1223,12 @@
     font-weight: 900;
     letter-spacing: -0.04em;
   }
+  /* Julian: a heading set as a label ("Selected work", "Services") in the
+     same face as the labels beside it ("All 88"), not the display Black. */
+  :is(h1, h2, h3, h4, h5, h6).label {
+    font-family: var(--font-mono);
+    font-weight: 400;
+  }
 }
 .font-display {
   font-weight: 900;
@@ -2535,6 +2541,12 @@ a.strip-cell {
     nav[aria-label="Legal"] a {
       padding-block: 0.5rem;
       margin-block: -0.5rem;
+    }
+    /* Not the filter chips: their row scrolls sideways, which clips it
+       top and bottom, and the margin shrank the row to 9px of a 28px chip.
+       On an iPad sideways only a 9px band of each chip took a tap. */
+    .chip-row a {
+      margin-block: 0;
     }
   }
 }
@@ -4582,14 +4594,35 @@ h2:not(.label) {
 .about-hero-copy {
   max-width: var(--hero-room, 44rem);
 }
-/* Julian: two lines, "and photographer" under "Bay Area creative
-   director" at any width. */
+/* Julian: the name and the facts at the bottom right. Not on a phone,
+   where they come first under the heading. */
+@media (min-width: 40rem) {
+  .about-hero .about-hero-copy {
+    width: fit-content;
+    margin-left: auto;
+  }
+}
+/* Julian: three lines, "SF Bay Area / Creative Director / & Photographer",
+   at any width: each line is one piece of the title (`app/about/page.tsx`),
+   set on a line of its own. */
+.about-hero .about-hero-title > span {
+  display: block;
+  width: fit-content;
+}
 .about-hero .about-hero-title {
   max-width: 13em;
   /* Julian: bigger, and the lines apart: at 1.05 the y of Bay met the
      line under it. */
-  font-size: clamp(2.2rem, 3.1vw, 3.8rem);
-  line-height: 1.2;
+  /* Julian: bigger, again, now it is three short lines; then too big,
+     a quarter back. */
+  font-size: clamp(2.2rem, min(3vw, 4.6vh), 3.6rem);
+  /* A phone: "Creative Director" is the long line, and at 2.2rem it ran
+     off a 390px screen. Sized to the width there. */
+  @media (max-width: 39.99rem) {
+    font-size: min(2.2rem, 8vw);
+  }
+  /* 1.1 now it is in capitals: no descender to meet the line under. */
+  line-height: 1.1;
 }
 .about-hero-intro {
   /* Julian: bigger (it was 13px; twice was too big). */
@@ -4600,9 +4633,9 @@ h2:not(.label) {
 .about-hero-services .label {
   color: var(--ah-dim);
 }
-/* Julian: one column, a ruled list, a little bigger than the labels. */
+/* Julian: one column, a ruled list, bigger than the labels. */
 .about-hero-services {
-  max-width: 22rem;
+  max-width: 26rem;
 }
 .about-hero-services ul {
   margin-top: 0.2rem;
@@ -4611,9 +4644,40 @@ h2:not(.label) {
   padding-block: 0.24rem;
   border-bottom: 1px solid var(--ah-rule);
   color: var(--ah-ink);
-  /* Julian: bigger (it was 12px; twice was too big). */
-  font-size: 15px;
+  /* Julian: bigger, again (15px, 12px before that). */
+  font-size: clamp(1.05rem, min(1.35vw, 2.2vh), 1.5rem);
   letter-spacing: 0.1em;
+  position: relative;
+  transition:
+    padding-left 380ms var(--ease-out-strong),
+    color 380ms var(--ease-out-strong);
+}
+/* Julian: a hover on the services. The rule under the one pointed at
+   draws across in ink from the left while its words step in, and the
+   others dim so it is the one being read. */
+.about-hero-services li.label::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1px;
+  height: 1px;
+  background: var(--ah-ink);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 520ms var(--ease-out-strong);
+}
+@media (hover: hover) and (pointer: fine) {
+  .about-hero-services ul:hover li.label {
+    color: var(--ah-soft);
+  }
+  .about-hero-services ul li.label:hover {
+    padding-left: 0.9rem;
+    color: var(--ah-ink);
+  }
+  .about-hero-services li.label:hover::after {
+    transform: scaleX(1);
+  }
 }
 /* A wash of the ground down the left, under the words: the lights keep
    drifting behind them but never brighten the text's ground. */
@@ -4637,7 +4701,7 @@ h2:not(.label) {
     font-size: clamp(40px, 4vw, 88px);
   }
   .about-hero .about-hero-title {
-    font-size: clamp(1.5rem, min(2.4vw, 4.4vh), 2.7rem);
+    font-size: clamp(1.6rem, min(2.4vw, 3.8vh), 2.7rem);
     line-height: 1.1;
   }
   .about-hero-bio {
@@ -4650,22 +4714,12 @@ h2:not(.label) {
     margin-bottom: 1rem;
   }
   .about-hero-services li.label {
-    padding-block: 0.2rem;
+    padding-block: 0.08rem;
+    font-size: clamp(0.9rem, 2vh, 1.2rem);
+    line-height: 1.25;
   }
   .about-hero-content {
     padding-block: 1.4rem;
-  }
-}
-/* The six services in two ruled columns, three rows instead of six:
-   room for the biography above them (Julian merged it into the intro). */
-@media (min-width: 40rem) {
-  .about-hero-services {
-    max-width: 34rem;
-  }
-  .about-hero-services ul {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    column-gap: 1.5rem;
   }
 }
 /* Julian: improve the placements. With the portrait gone the right of
@@ -4676,7 +4730,7 @@ h2:not(.label) {
 @media (min-width: 64rem) {
   .about-hero-bio {
     display: grid;
-    grid-template-columns: minmax(0, 36rem) minmax(0, 30rem);
+    grid-template-columns: minmax(0, 1fr) minmax(0, 24rem);
     align-items: start;
     max-width: none;
   }
@@ -4688,23 +4742,69 @@ h2:not(.label) {
     grid-column: 1;
   }
   .about-hero .about-hero-title {
-    grid-column: 1 / -1;
     max-width: 18em;
   }
+  /* Julian: the services a better spot: top right, level with the
+     title, the name under them at the bottom right. */
   .about-hero-services {
     grid-column: 2;
-    grid-row: 2 / span 2;
+    grid-row: 1 / span 3;
+    width: 100%;
   }
   .about-hero .about-hero-clients {
     max-width: none;
+  }
+  /* Julian's DialKit paste (2026-09-28): the line, the intro and the ask
+     low on the left, just over the name, and the services centred beside
+     them. The bio takes the height and sets its rows at the foot. */
+  .about-hero .about-hero-bio {
+    flex: 1;
+    align-content: end;
+    /* The paste closed the line, the intro and the ask up to each other;
+       set, so a shorter screen's smaller gap does not overlap them. */
+    row-gap: 0;
+  }
+  .about-hero .about-hero-services {
+    align-self: center;
+  }
+  .about-hero .about-hero-services > h2 {
+    zoom: 1.25;
+    /* -20 at 1.25 is the list's -25: the two on one edge. */
+    translate: -20px 0;
+  }
+  .about-hero .about-hero-services > ul {
+    margin-top: 1.1rem;
+    translate: -25px 0;
+  }
+  .about-hero .about-hero-intro {
+    letter-spacing: -0.055em;
+    line-height: 1.75;
+    text-align: left;
+  }
+  /* Julian: the buttons smaller, and fitting at every size. */
+  .about-hero .about-hero-ask {
+    margin-top: 0.9rem;
+  }
+  .about-hero .about-marquee {
+    zoom: 1.27;
+  }
+  /* Julian: sizes that make sense together. The intro and the services
+     are the same body size, scaled with the screen (and its height, so a
+     laptop still fits). */
+  .about-hero {
+    --ah-body: clamp(0.9rem, min(1vw, 1.8vh), 1.2rem);
+  }
+  .about-hero .about-hero-intro,
+  .about-hero .about-hero-services li.label {
+    font-size: var(--ah-body);
   }
 }
 /* A laptop's browser window (1366 by 768 leaves about 657; 1280 by 800,
    1440 by 790 and 1024 by 768 too): the intro gives way so the name and the client
    marks fit (Julian's pick). From 1024 wide the services sit beside it
-   (the two columns above), which leaves it room down to 740 tall. */
+   (the two columns above), which leaves it room down to 800 tall. */
 @media (min-width: 40rem) and (max-width: 63.99rem) and (max-height: 820px),
-  (min-width: 64rem) and (max-height: 740px) {
+  (min-width: 64rem) and (max-height: 800px) {
   .about-hero-intro {
     display: none;
   }
@@ -4714,7 +4814,7 @@ h2:not(.label) {
    sit closer, so the name and the marks still fit. */
 @media (min-width: 40rem) and (min-height: 1000px) {
   .about-hero .about-hero-title {
-    font-size: clamp(2.75rem, 3.875vw, 4.75rem);
+    font-size: clamp(2.6rem, min(3.6vw, 5.2vh), 4.5rem);
   }
 }
 @media (min-width: 40rem) and (max-height: 999px) {
@@ -4816,8 +4916,12 @@ h2:not(.label) {
   width: max-content;
   animation: about-marquee var(--marquee-s, 40s) linear infinite;
 }
-.about-marquee:hover .about-marquee-track {
-  animation-play-state: paused;
+/* A pointer only: a tap left :hover stuck on a phone and the marks
+   stopped for good. */
+@media (hover: hover) and (pointer: fine) {
+  .about-marquee:hover .about-marquee-track {
+    animation-play-state: paused;
+  }
 }
 .about-marquee-list {
   flex-wrap: nowrap;

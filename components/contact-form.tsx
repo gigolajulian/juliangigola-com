@@ -32,7 +32,7 @@ const TYPES = [
 const FOLLOW_UP: Record<string, { label: string; placeholder: string }> = {
   editorial: {
     label: "Publication and issue date",
-    placeholder: "e.g. print, March issue, closing 14 Feb",
+    placeholder: "e.g. print, March issue, due Feb 14",
   },
   campaign: {
     label: "Usage and territory",

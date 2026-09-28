@@ -150,8 +150,13 @@ export default function NotFound() {
                 {/* For a mouse, so not on a phone, where the page has no room. */}
                 <p className="mt-4 w-0 min-w-full text-justify text-[clamp(11.5px,2.39cqi,17px)] leading-[1.7] text-muted-foreground max-sm:hidden">
                   The page you were looking for has been moved, renamed, or cut
-                  from the selects. Drag your cursor across the numerals to pull
-                  them into focus, or head back to the work.
+                  from the selects.{" "}
+                  {/* A finger has no cursor to drag (an iPad shows this). */}
+                  <span className="hoverable:hidden">Head back to the work.</span>
+                  <span className="hidden hoverable:inline">
+                    Drag your cursor across the numerals to pull them into
+                    focus, or head back to the work.
+                  </span>
                 </p>
               </div>
               <div className="mt-6 flex flex-wrap gap-3 sm:mt-7">

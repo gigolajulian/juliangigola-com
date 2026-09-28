@@ -44,7 +44,9 @@ export function PageTransition({ children }: { children: React.ReactNode }) {
      than the clock (a cold Worker, a route compiling on dev) lost its
      way halfway and fell back to the browser's own crossfade. */
   const path = usePathname();
+  const shown = React.useRef(path);
   React.useLayoutEffect(() => {
+    shown.current = path;
     if (document.documentElement.dataset.nav === undefined) return;
     const trip = (
       document as Document & {
@@ -131,9 +133,12 @@ export function PageTransition({ children }: { children: React.ReactNode }) {
       else delete root.dataset.navSide;
     };
     // The photo viewer keeps an entry in the history so the back button
-    // closes it (`lib/zoom.ts`); that pop is not a page leaving.
+    // closes it (`lib/zoom.ts`); that pop is not a page leaving. Read by
+    // the path, not by the viewer's flag: closing it with Esc or Close
+    // takes the flag down before its own `history.back()` pops, and the
+    // root was left saying "out" for ten seconds.
     const onPop = () => {
-      if (root.dataset.viewer === undefined) set("out");
+      if (location.pathname !== shown.current) set("out");
     };
     document.addEventListener("click", onClick, true);
     window.addEventListener("popstate", onPop);

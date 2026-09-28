@@ -119,9 +119,11 @@ export default function AboutPage() {
           >
             {/* Julian: the line, what he is hired for under it. */}
             <RisingTitle
-              /* The ampersand kept with Photographer, so it opens the
-                 second line rather than hanging off the first. */
-              text={"Bay Area Creative Director & Photographer"}
+              /* Julian: three lines, "SF Bay Area / Creative Director /
+                 & Photographer". Each line's words held together by
+                 no-break spaces, so each line rises as one piece and the
+                 stylesheet sets one to a line (`.about-hero-title`). */
+              text={"SF Bay Area Creative Director & Photographer"}
               className="about-hero-title"
             />
             {/* Julian's words, as he wrote them. */}
@@ -152,14 +154,14 @@ export default function AboutPage() {
             >
               <Link
                 href="/contact?type=editorial"
-                className="label action px-6 py-4 press active:scale-[0.97] short:py-3"
+                className="label action px-5 py-3 press active:scale-[0.97] short:py-2.5"
               >
                 Inquire
               </Link>
               <Link
                 prefetch={false}
                 href="/portfolio"
-                className="label action-quiet px-6 py-4 press active:scale-[0.97] short:py-3"
+                className="label action-quiet px-5 py-3 press active:scale-[0.97] short:py-2.5"
               >
                 See the work
               </Link>

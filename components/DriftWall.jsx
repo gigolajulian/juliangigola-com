@@ -393,6 +393,11 @@ const DriftWall = ({
       className: `drift-wall__tile${activeId === id ? ' is-active' : ''}`,
       'data-tile-id': id,
       'data-col': colIndex,
+      /* Out of the tab order: every copy of every column was a stop, about
+         300 on the 404, most of them off screen with no ring, before the
+         page's own buttons. The wall is for the pointer; the keys have
+         the buttons. */
+      tabIndex: -1,
       onFocus: () => activate(id, colIndex),
       onBlur: release
     };

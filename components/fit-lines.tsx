@@ -41,7 +41,13 @@ export function FitLines() {
         `position:absolute;visibility:hidden;white-space:nowrap;font-family:var(--font-display);font-weight:900;` +
         `letter-spacing:-0.045em;font-size:${getComputedStyle(name).fontSize}`;
       middle.appendChild(probe);
-      const target = probe.getBoundingClientRect().width;
+      /* No wider than the name as drawn: its canvas fits itself to the
+         screen, and the words set at full size ran 421px on a 390px
+         phone, both lines off both edges. */
+      const target = Math.min(
+        probe.getBoundingClientRect().width,
+        name.getBoundingClientRect().width,
+      );
       probe.remove();
       for (const l of lines()) {
         l.style.letterSpacing = "0";

@@ -57,7 +57,7 @@ const PHASES = [
   },
   {
     step: "Shoot",
-    body: "Studio or location, Bay Area or travelling. Art direction on request.",
+    body: "Studio or location, Bay Area or traveling. Art direction on request.",
   },
   {
     step: "Delivery",
@@ -112,14 +112,15 @@ export default function ContactPage() {
       >
         {/* Julian: three columns. The ask, where the Sessions title sits
             on its page (the same 40px in, the same width, centred in the
-            height); the details and the steps; the form. Two columns
+            height); the form in the middle (Julian); the details and the
+            steps. Two columns
             under 1280px, the ask over the details beside the form, and
             one on a phone. */}
         <section
           data-tick
           data-label="Inquire"
           data-hash="inquire"
-          className="grid w-full shrink-0 grid-cols-1 gap-10 px-6 py-12 sm:h-full sm:grid-cols-2 sm:grid-rows-[auto_minmax(0,auto)] sm:content-center sm:items-center sm:gap-x-16 sm:gap-y-8 sm:pl-10 sm:pr-16 sm:py-0 xl:grid-cols-[30rem_minmax(0,1fr)_minmax(0,1.15fr)] xl:grid-rows-1 xl:content-stretch xl:gap-x-10 2xl:gap-x-14"
+          className="grid w-full shrink-0 grid-cols-1 gap-10 px-6 py-12 sm:h-full sm:grid-cols-2 sm:grid-rows-[auto_minmax(0,auto)] sm:content-center sm:items-center sm:gap-x-16 sm:gap-y-8 sm:pl-10 sm:pr-16 sm:py-0 xl:grid-cols-[30rem_minmax(0,1.15fr)_minmax(0,1fr)] xl:grid-rows-1 xl:content-stretch xl:gap-x-10 2xl:gap-x-14"
         >
           <div className="flex flex-col gap-5 sm:col-start-1 sm:row-start-1 sm:pr-6 xl:self-center">
             <RisingTitle text="Get in Touch" className="contact-title" />
@@ -157,7 +158,7 @@ export default function ContactPage() {
               it, as the form beside it does. */}
           <div
             data-scroll
-            className="flex min-h-0 flex-col gap-6 overflow-y-auto overscroll-contain sm:col-start-1 sm:row-start-2 sm:max-h-full sm:self-start short:gap-4 xl:col-start-2 xl:row-start-1 xl:self-center"
+            className="flex min-h-0 flex-col gap-6 overflow-y-auto overscroll-contain sm:col-start-1 sm:row-start-2 sm:max-h-full sm:self-start short:gap-4 xl:col-start-3 xl:row-start-1 xl:self-center"
           >
             {/* Everything a person might want instead of the form. It had
                 a screen of its own, which was a screen to swipe past on
@@ -253,7 +254,7 @@ export default function ContactPage() {
           <div
             data-scroll
             data-dial="form"
-            className="min-h-0 overflow-y-auto overscroll-contain sm:col-start-2 sm:row-span-2 sm:row-start-1 sm:max-h-full sm:pr-3 xl:col-start-3 xl:row-span-1"
+            className="min-h-0 overflow-y-auto overscroll-contain sm:col-start-2 sm:row-span-2 sm:row-start-1 sm:max-h-full sm:pr-3 xl:col-start-2 xl:row-span-1"
           >
             <Suspense fallback={null}>
               <ContactForm />

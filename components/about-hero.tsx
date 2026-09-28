@@ -25,23 +25,26 @@ import { NAME_WARP } from "@/lib/name-warp";
               640px wide; Julian: a little less detail than 2.5 and 2),
               and how many greys
      Lights   the streaks behind: how bright, where they start and how
-              soft, their size, drift and angle (degrees, up to the right)
+              soft, their size, how fast they change, how fast they slide
+              along themselves (Julian: make the background loop live) and
+              their angle (degrees, up to the right)
      Hover    how far the pointer pushes the lights
      Ripple   a click's ring: speed in px a second, push, and how long
      Logos    one pass of the client marks, in seconds */
 const BG = {
   grain: {
-    cell: [3.2, 1, 10, 0.1],
-    phone: [2.6, 1, 10, 0.1],
+    cell: [2, 1, 10, 0.1],
+    phone: [4.2, 1, 10, 0.1],
     levels: [4, 2, 8, 1],
   },
   lights: {
     _collapsed: true,
-    amount: [0.32, 0, 1, 0.01],
-    start: [0.64, 0, 1, 0.01],
-    softness: [0.28, 0.01, 1, 0.01],
-    size: [1, 0.2, 4, 0.05],
+    amount: [0.36, 0, 1, 0.01],
+    start: [0.66, 0, 1, 0.01],
+    softness: [0.26, 0.01, 1, 0.01],
+    size: [1.05, 0.2, 4, 0.05],
     speed: [0.2, 0, 2, 0.01],
+    slide: [0.1, 0, 1, 0.01],
     angle: [35, -90, 90, 1],
   },
   hover: {
@@ -85,6 +88,7 @@ uniform float uLevels;
 uniform vec4 uLights;
 uniform vec2 uLightDir;
 uniform float uLightT;
+uniform float uSlide;   // how far the streaks slide along themselves per unit of uLightT
 uniform float uLens;
 uniform vec2 uWave;
 out vec4 fragColor;
@@ -146,8 +150,9 @@ void main() {
   vec2 wave = rd / rl * ring * uWave.y;
 
   // The lights, matched to Julian's reference: soft streaks running up to
-  // the right that swell and dissolve where they are, never travelling.
-  // A noise field stretched along the diagonal, changing with time.
+  // the right that swell and dissolve, and (Julian: make the background
+  // loop live) slide slowly along themselves. A noise field stretched
+  // along the diagonal, changing with time and moving along it (uSlide).
   vec2 u = (pc - wave) / uRes.y;
   // The pointer pushes the lights aside where it passes (Julian: the
   // hover moves the lights).
@@ -156,7 +161,7 @@ void main() {
   u += toP / pd * uOn * uLens * exp(-(pd * pd) / 0.03);
   vec2 dir = uLightDir;                     // up and to the right
   vec2 a = vec2(dot(u, dir), dot(u, vec2(-dir.y, dir.x))) / uLights.w;
-  float n = noise(vec3(a.x * 3.6, a.y * 8.5, uLightT));
+  float n = noise(vec3((a.x - uLightT * uSlide) * 3.6, a.y * 8.5, uLightT));
   float f = smoothstep(uLights.y, uLights.y + uLights.z, n);
   // The ripple's ring lights the grain it passes through.
   float field = quant(clamp(f * uLights.x + ring * 0.45, 0.0, 1.0), t);
@@ -215,9 +220,10 @@ export function AboutHero({
       uRipple: { value: [0, 0, -1] },
       uLight: { value: 0 },
       uLevels: { value: 4 },
-      uLights: { value: [0.32, 0.64, 0.28, 1] },
+      uLights: { value: [0.36, 0.66, 0.26, 1.05] },
       uLightDir: { value: [0.819, -0.574] },
       uLightT: { value: 0 },
+      uSlide: { value: 0.1 },
       uLens: { value: 0.09 },
       uWave: { value: [700, 22] },
     };
@@ -285,6 +291,7 @@ export function AboutHero({
       if (!still && last) lightT += (Math.min(now - last, 50) / 1000) * l.lights.speed;
       last = now;
       u.uLightT.value = lightT;
+      u.uSlide.value = l.lights.slide;
       u.uLevels.value = l.grain.levels;
       u.uLights.value = [l.lights.amount, l.lights.start, l.lights.softness, l.lights.size];
       const a = (l.lights.angle * Math.PI) / 180;
@@ -303,7 +310,12 @@ export function AboutHero({
 
       /* The drift keeps it running while it is on screen; held still, it
          runs only while something is still settling. */
-      if (visible && !document.hidden && (!still || moving)) wake();
+      /* The next frame straight on, not through `wake`: `wake` starts the
+         clock afresh (`last = 0`), so going through it every frame held
+         the lights' clock at a standstill (Julian: make the background
+         loop live). */
+      if (visible && !document.hidden && (!still || moving) && !gone)
+        raf = requestAnimationFrame(frame);
     };
     const wake = () => {
       if (!raf && !gone) {
@@ -385,12 +397,17 @@ export function AboutHero({
     };
     /* The slack above the name: the row it shares with the client marks
        sits at the foot on an auto margin, so what that margin comes to is
-       what the name can grow, plus the foot's padding down to 16px. */
+       what the name can grow. Not into the foot's padding: grown into it,
+       the screen scrolled by what it took. */
     const base = name.closest<HTMLElement>(".about-hero-base")!;
     const content = base.parentElement!;
+    /* On a wide screen the bio takes that room instead and sets its words
+       at its foot (`globals.css`), so what it leaves over them counts too. */
+    const bio = content.querySelector<HTMLElement>(".about-hero-bio")!;
     const slack = () =>
       (parseFloat(getComputedStyle(base).marginTop) || 0) +
-      Math.max(0, parseFloat(getComputedStyle(content).paddingBottom) - 16) -
+      bio.offsetTop + bio.offsetHeight -
+      Math.max(...[...bio.children].map((c) => (c as HTMLElement).offsetTop + (c as HTMLElement).offsetHeight)) -
       Math.max(0, base.getBoundingClientRect().bottom - content.getBoundingClientRect().bottom + parseFloat(getComputedStyle(content).paddingBottom));
     const fit = () => {
       /* Julian: the intro as long as the title's line. The title wraps at
