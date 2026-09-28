@@ -24,15 +24,15 @@ import { buildProgram } from "@/lib/gl-warm";
 
 const WAVES = {
   strength: [0.3, 0, 1, 0.01],
-  speed: [1, 0, 4, 0.05],
-  height: [0.3, 0, 1, 0.01],
+  speed: [0.5, 0, 4, 0.05],
+  height: [0.31, 0, 1, 0.01],
   spread: [0.045, 0, 0.2, 0.005],
-  bend: [0.32, 0, 1, 0.01],
-  swing: [0.11, 0, 0.4, 0.005],
-  waveSize: [1, 0.2, 3, 0.05],
+  bend: [0.5, 0, 1, 0.01],
+  swing: [0.115, 0, 0.4, 0.005],
+  waveSize: [1.3, 0.2, 3, 0.05],
   thickness: [0.0028, 0.0005, 0.01, 0.0001],
-  colorSplit: [0.055, 0, 0.3, 0.005],
-  fadeTop: [0.85, 0.2, 1, 0.01],
+  colorSplit: [0.065, 0, 0.3, 0.005],
+  fadeTop: [0.71, 0.2, 1, 0.01],
 } satisfies DialConfig;
 
 const vertex = `#version 300 es

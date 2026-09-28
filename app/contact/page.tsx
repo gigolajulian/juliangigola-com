@@ -123,8 +123,10 @@ export default function ContactPage() {
             data-scroll
             className="flex min-h-0 flex-col gap-6 overflow-y-auto overscroll-contain sm:max-h-full short:gap-4"
           >
-            <RisingTitle text="Get in touch" className="contact-title" />
-            <p data-dial="intro" className="title-rest max-w-prose text-sm leading-relaxed text-muted-foreground">
+            <RisingTitle text="Get in Touch" className="contact-title" />
+            {/* 1.02 as a zoom: Julian's DialKit size for the intro, the same
+                `zoom` the panel's Size writes (`page-dials.tsx`). */}
+            <p data-dial="intro" className="title-rest max-w-prose text-sm leading-relaxed text-muted-foreground [zoom:1.02]">
               {/* A sentence to a line, where there is room: Julian asked
                   for two lines rather than a wrap mid sentence. */}
               Commissions, sessions, or a question about a project.
