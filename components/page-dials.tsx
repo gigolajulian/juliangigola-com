@@ -188,7 +188,7 @@ export function PageDials({
 
   return (
     <>
-      <DialRoot position="top-right" />
+      <DialRoot position="top-right" defaultOpen={false} />
       <DialCopyAll />
     </>
   );

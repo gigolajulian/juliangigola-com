@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { Mesh, Renderer, Texture, Triangle } from "ogl";
+import { useDialKit, type DialConfig } from "dialkit";
 import { buildProgram } from "@/lib/gl-warm";
 import { WarpText } from "@/components/warp-text";
 import { NAME_WARP } from "@/lib/name-warp";
@@ -19,15 +20,65 @@ import { NAME_WARP } from "@/lib/name-warp";
  * the dark fades in toward him.
  * ─────────────────────────────────────────────────────────────── */
 
-/** The grain: one dithered cell every this many CSS pixels. */
-/* Julian: a little less detail than 2.5 and 2. */
-const CELL_WIDE = 3.2;
-const CELL_PHONE = 2.6;
-/** Where Julian stands across the photograph, and where that is held on
-    screen: further in on a phone so the crop never cuts him. */
+/** Where Julian stands across the photograph. */
 const FOCUS = 0.78;
-const HOLD_WIDE = 0.74;
-const HOLD_PHONE = 0.62;
+
+/* Julian: the background on DialKit, "About background" (the dev server
+   only; production gets these defaults).
+     Grain    one dithered cell every `cell` CSS pixels (`phone` under
+              640px wide; Julian: a little less detail than 2.5 and 2),
+              how many greys, and the sharpening that holds his features
+     Photo    his tones: what goes black, the range over it, the curve;
+              and where he is held across the screen, further in on a
+              phone so the crop never cuts him
+     Lights   the streaks behind: how bright, where they start and how
+              soft, their size, drift and angle (degrees, up to the right)
+     Hover    the lens round the pointer: its size, push and shake, and
+              how far it pushes the lights
+     Ripple   a click's ring: speed in px a second, push, and how long
+     Logos    one pass of the client marks, in seconds */
+const BG = {
+  grain: {
+    cell: [3.2, 1, 10, 0.1],
+    phone: [2.6, 1, 10, 0.1],
+    levels: [4, 2, 8, 1],
+    sharpen: [0.5, 0, 2, 0.05],
+  },
+  photo: {
+    _collapsed: true,
+    black: [0.14, 0, 0.6, 0.01],
+    range: [0.62, 0.1, 1.5, 0.01],
+    curve: [0.9, 0.3, 2, 0.05],
+    across: [0.74, 0, 1, 0.01],
+    acrossPhone: [0.62, 0, 1, 0.01],
+  },
+  lights: {
+    _collapsed: true,
+    amount: [0.32, 0, 1, 0.01],
+    start: [0.64, 0, 1, 0.01],
+    softness: [0.28, 0.01, 1, 0.01],
+    size: [1, 0.2, 4, 0.05],
+    speed: [0.2, 0, 2, 0.01],
+    angle: [35, -90, 90, 1],
+  },
+  hover: {
+    _collapsed: true,
+    size: [0.75, 0, 3, 0.05],
+    push: [0.5, 0, 2, 0.05],
+    shake: [4, 0, 12, 0.1],
+    lights: [0.09, 0, 0.5, 0.01],
+  },
+  ripple: {
+    _collapsed: true,
+    speed: [700, 100, 2000, 10],
+    push: [22, 0, 80, 1],
+    seconds: [1.2, 0.2, 4, 0.1],
+  },
+  logos: {
+    _collapsed: true,
+    seconds: [40, 5, 120, 1],
+  },
+} satisfies DialConfig;
 
 const vertex = `#version 300 es
 in vec2 position;
@@ -53,6 +104,18 @@ uniform vec2 uFade;     // the photograph fades out between these heights
 uniform vec3 uRipple;   // a click: x, y in CSS pixels, and its age in seconds
 uniform float uLight;   // 1 on the light theme
 uniform vec4 uDusk;     // light theme: the page's ground at xy, his dark ground by zw
+// The panel's (BG, above): the greys and sharpening; black, range and curve;
+// the lights' amount, start, softness and size, their direction and clock;
+// the lens's size, push, shake and push on the lights; the ring's speed
+// and push.
+uniform float uLevels;
+uniform float uSharpen;
+uniform vec3 uTone;
+uniform vec4 uLights;
+uniform vec2 uLightDir;
+uniform float uLightT;
+uniform vec4 uLens;
+uniform vec2 uWave;
 out vec4 fragColor;
 
 const vec3 GROUND = vec3(0.043);
@@ -60,7 +123,6 @@ const vec3 INK = vec3(0.91, 0.90, 0.875);
 // The light theme's ground and ink (--background, --foreground).
 const vec3 PAPER = vec3(0.922, 0.929, 0.936);
 const vec3 PRINT = vec3(0.077, 0.072, 0.068);
-const float LEVELS = 4.0;
 // His face in the photograph, hair to chin, as a share of its width and
 // height (measured on /about/julian.jpg).
 const vec2 FACE = vec2(0.785, 0.32);
@@ -94,11 +156,11 @@ float noise(vec3 x) {
     f.z);
 }
 
-// A tone, dithered to one of LEVELS greys.
+// A tone, dithered to one of uLevels greys.
 float quant(float v, float t) {
-  float s = clamp(v, 0.0, 1.0) * (LEVELS - 1.0);
+  float s = clamp(v, 0.0, 1.0) * (uLevels - 1.0);
   float b = floor(s);
-  return (b + step(t, s - b)) / (LEVELS - 1.0);
+  return (b + step(t, s - b)) / (uLevels - 1.0);
 }
 
 // How much of the photograph shows at a height: all of it, bar the foot
@@ -116,7 +178,7 @@ float lum(vec2 p) {
   vec2 uv = (p - uRect.xy) / uRect.zw;
   if (outside(uv)) return 0.0;
   float l = dot(texture(uPhoto, uv).rgb, vec3(0.2126, 0.7152, 0.0722));
-  return pow(clamp((l - 0.14) / 0.62, 0.0, 1.0), 0.9) * fade(p);
+  return pow(clamp((l - uTone.x) / uTone.y, 0.0, 1.0), uTone.z) * fade(p);
 }
 
 // Him: 1 where he stands, 0 on the backdrop.
@@ -136,31 +198,31 @@ void main() {
   // on his face (Julian: no warp on the face, the mask feathered).
   // Nothing on the middle of the face, easing in across its edge and well
   // past it, so there is no line where the warp stops.
-  float R = uRes.x / 13.0 * 0.75;  // Julian: a quarter smaller
+  float R = uRes.x / 13.0 * uLens.x;  // Julian: a quarter smaller (0.75)
   vec2 d = pc - uPointer;
   float dist = length(d) + 1e-4;
   vec2 q = ((pc - uRect.xy) / uRect.zw - FACE) / FACE_R;
   float face = smoothstep(0.7, 1.9, length(q));
   float k = uOn * exp(-(dist * dist) / (R * R)) * face;
-  float jit = k * 4.0 * uCell * sin(c.x * 12.9 + c.y * 78.2 + uTime * 9.0);
-  vec2 sp = pc - d / dist * k * R * 0.5 + vec2(jit, -jit);
+  float jit = k * uLens.z * uCell * sin(c.x * 12.9 + c.y * 78.2 + uTime * 9.0);
+  vec2 sp = pc - d / dist * k * R * uLens.y + vec2(jit, -jit);
 
   // Julian: a click sends a ripple out from where it lands, a ring that
   // pushes the grain and the lights outward as it passes and fades as it
   // goes. His face still holds.
   vec2 rd = pc - uRipple.xy;
   float rl = length(rd) + 1e-4;
-  float front = uRipple.z * 700.0;
+  float front = uRipple.z * uWave.x;
   float ring = step(0.0, uRipple.z) * exp(-uRipple.z * 3.2) *
                exp(-pow((rl - front) / 50.0, 2.0));
-  vec2 wave = rd / rl * ring * 22.0;
+  vec2 wave = rd / rl * ring * uWave.y;
   sp -= wave * face;
 
   // Sharpened, so the features hold at this size.
   float l = lum(sp);
   float avg = (lum(sp + vec2(uCell, 0.0)) + lum(sp - vec2(uCell, 0.0)) +
                lum(sp + vec2(0.0, uCell)) + lum(sp - vec2(0.0, uCell))) * 0.25;
-  l = clamp(l + 0.5 * (l - avg), 0.0, 1.0) * (1.0 - k * 0.35);
+  l = clamp(l + uSharpen * (l - avg), 0.0, 1.0) * (1.0 - k * 0.35);
   // Only him: the backdrop's grey, a touch lighter round him, left a
   // halo of dots (Julian: remove the dots around me).
   l *= smoothstep(0.35, 0.75, body(sp));
@@ -175,17 +237,17 @@ void main() {
   // hover moves the lights).
   vec2 toP = u - uPointer / uRes.y;
   float pd = length(toP) + 1e-4;
-  u += toP / pd * uOn * 0.09 * exp(-(pd * pd) / 0.03);
-  vec2 dir = vec2(0.819, -0.574);           // up and to the right, 35 degrees
-  vec2 a = vec2(dot(u, dir), dot(u, vec2(-dir.y, dir.x)));
-  float n = noise(vec3(a.x * 3.6, a.y * 8.5, uTime * 0.2));
-  float f = smoothstep(0.64, 0.92, n);
+  u += toP / pd * uOn * uLens.w * exp(-(pd * pd) / 0.03);
+  vec2 dir = uLightDir;                     // up and to the right
+  vec2 a = vec2(dot(u, dir), dot(u, vec2(-dir.y, dir.x))) / uLights.w;
+  float n = noise(vec3(a.x * 3.6, a.y * 8.5, uLightT));
+  float f = smoothstep(uLights.y, uLights.y + uLights.z, n);
   // Behind him, never over him: his dark shirt and glasses stay dark.
   float behind = 1.0 - smoothstep(0.15, 0.55, body(pc));
   f *= behind;
   // The ripple's ring lights the grain it passes through on the ground,
   // never on him (Julian: no added dots on the subject).
-  float field = quant(clamp(f * 0.32 + ring * 0.45 * behind, 0.0, 1.0), t);
+  float field = quant(clamp(f * uLights.x + ring * 0.45 * behind, 0.0, 1.0), t);
 
   // On the light theme the words sit on the page's ground and he keeps
   // his dark one, the one fading into the other between them (Julian: he
@@ -207,6 +269,13 @@ export function AboutHero({
 }) {
   const ref = React.useRef<HTMLDivElement>(null);
   const stageRef = React.useRef<HTMLDivElement>(null);
+  const dials = useDialKit("About background", BG, { id: "about-bg" });
+  const look = React.useRef(dials);
+  const refresh = React.useRef(() => {});
+  React.useEffect(() => {
+    look.current = dials;
+    refresh.current();
+  });
 
   React.useEffect(() => {
     const box = ref.current;
@@ -252,7 +321,7 @@ export function AboutHero({
       uPhoto: { value: photo },
       uRes: { value: [1, 1] },
       uDpr: { value: renderer.dpr },
-      uCell: { value: CELL_WIDE },
+      uCell: { value: BG.grain.cell[0] },
       uTime: { value: 0 },
       uPointer: { value: [-1e4, -1e4] },
       uOn: { value: 0 },
@@ -262,6 +331,14 @@ export function AboutHero({
       uRipple: { value: [0, 0, -1] },
       uLight: { value: 0 },
       uDusk: { value: [0, 0, 1, 0] },
+      uLevels: { value: 4 },
+      uSharpen: { value: 0.5 },
+      uTone: { value: [0.14, 0.62, 0.9] },
+      uLights: { value: [0.32, 0.64, 0.28, 1] },
+      uLightDir: { value: [0.819, -0.574] },
+      uLightT: { value: 0 },
+      uLens: { value: [0.75, 0.5, 4, 0.09] },
+      uWave: { value: [700, 22] },
     };
     /* The program once its shaders are compiled, in the GPU's own time
        (`lib/gl-warm.ts`); until then the stage is the page's own ground. */
@@ -281,7 +358,6 @@ export function AboutHero({
     /* Julian: clicking makes it ripple. One ring at a time; a new click
        starts a new one. */
     const ripple = { x: 0, y: 0, at: -1e9 };
-    const RIPPLE_S = 1.2;
     const click = (e: PointerEvent) => {
       if (still) return;
       ripple.x = e.clientX;
@@ -302,7 +378,9 @@ export function AboutHero({
       const h = box.clientHeight;
       if (!w || !h) return;
       const phone = w < 640;
-      const cell = phone ? CELL_PHONE : CELL_WIDE;
+      const { grain, photo: p, logos } = look.current;
+      const cell = phone ? grain.phone : grain.cell;
+      box.style.setProperty("--marquee-s", `${logos.seconds}s`);
       /* One fragment per grain cell, scaled up square by the stylesheet:
          the same picture for a sixth to a twenty-fifth of the work. */
       renderer.dpr = 1 / cell;
@@ -320,7 +398,7 @@ export function AboutHero({
         const dh = img.naturalHeight * s;
         const x = Math.min(
           0,
-          Math.max(w - dw, w * (phone ? HOLD_PHONE : HOLD_WIDE) - dw * FOCUS),
+          Math.max(w - dw, w * (phone ? p.acrossPhone : p.across) - dw * FOCUS),
         );
         u.uRect.value = [x, (ph - dh) / 2, dw, dh];
         u.uFade.value = phone ? [ph * 0.7, ph] : [1e5, 1e5 + 1];
@@ -356,11 +434,28 @@ export function AboutHero({
        and a loop woken then would run on for good. */
     let gone = false;
     const t0 = performance.now();
+    /* The lights' clock is added up, so a change of their speed on the
+       panel carries on from where they are instead of jumping. */
+    let lightT = 0;
+    let last = 0;
     const frame = (now: number) => {
       raf = 0;
+      const l = look.current;
       pointer.on += (pointer.target - pointer.on) * 0.08;
       const r = box.getBoundingClientRect();
       u.uTime.value = still ? 0 : (now - t0) / 1000;
+      if (!still && last) lightT += (Math.min(now - last, 50) / 1000) * l.lights.speed;
+      last = now;
+      u.uLightT.value = lightT;
+      u.uLevels.value = l.grain.levels;
+      u.uSharpen.value = l.grain.sharpen;
+      u.uTone.value = [l.photo.black, l.photo.range, l.photo.curve];
+      u.uLights.value = [l.lights.amount, l.lights.start, l.lights.softness, l.lights.size];
+      const a = (l.lights.angle * Math.PI) / 180;
+      u.uLightDir.value = [Math.cos(a), -Math.sin(a)];
+      u.uLens.value = [l.hover.size, l.hover.push, l.hover.shake, l.hover.lights];
+      u.uWave.value = [l.ripple.speed, l.ripple.push];
+      const RIPPLE_S = l.ripple.seconds;
       u.uPointer.value = [pointer.x - r.left, pointer.y - r.top];
       u.uOn.value = pointer.on;
       const age = (now - ripple.at) / 1000;
@@ -375,7 +470,14 @@ export function AboutHero({
       if (visible && !document.hidden && (!still || moving)) wake();
     };
     const wake = () => {
-      if (!raf && !gone) raf = requestAnimationFrame(frame);
+      if (!raf && !gone) {
+        last = 0;
+        raf = requestAnimationFrame(frame);
+      }
+    };
+    refresh.current = () => {
+      size();
+      wake();
     };
 
     buildProgram(gl, { vertex, fragment, depthTest: false, depthWrite: false, uniforms: u }).then((program) => {
@@ -481,6 +583,7 @@ export function AboutHero({
     return () => {
       gone = true;
       cancelAnimationFrame(raf);
+      refresh.current = () => {};
       sizes.disconnect();
       view.disconnect();
       theme.disconnect();

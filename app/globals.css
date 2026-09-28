@@ -91,8 +91,8 @@
 @custom-variant roomy (@media (min-height: 75rem) and (min-width: 40rem));
 
 /* ── the opening ──────────────────────────────────────────────────
- * The screen as the loading bar (`intro.tsx`): the ground, a panel in the
- * theme's ink sweeping over it from the left, and the eye in the middle,
+ * The screen as the loading bar (`intro.tsx`): the ground in the theme's
+ * ink, a panel in the page's colour sweeping over it from the left, and the eye in the middle,
  * set in `difference` so it turns over where the panel passes under it.
  *
  * Hidden unless the script in `layout.tsx` has decided, before the first
@@ -108,12 +108,17 @@
   inset: 0;
   z-index: 60;
   display: block;
-  background: #0b0a09;
-  color: #ececf0;
+  /* Julian: invert the splash screen. The ground is the theme's ink and
+     the panel sweeps across it in the page's own colour, so at full it is
+     the page already, and the lift uncovers more of the same. The white
+     a warm off white, paper rather than screen (Julian: more off white,
+     towards warm). */
+  background: #eee9e0;
+  color: #0b0a09;
 }
 :root[data-theme="light"][data-intro] #jg-intro {
-  background: #ebedef;
-  color: #0b0a09;
+  background: #0b0a09;
+  color: #ebedef;
 }
 .jg-intro-panel {
   position: absolute;
@@ -2741,8 +2746,9 @@ a.strip-cell {
   inset: 0;
   top: calc(-1 * env(safe-area-inset-top, 0px));
   z-index: -1;
-  -webkit-backdrop-filter: blur(12px) saturate(1.5);
-  backdrop-filter: blur(12px) saturate(1.5);
+  /* 9px: Julian, lower the blur slightly on the navbar and the footer. */
+  -webkit-backdrop-filter: blur(9px) saturate(1.5);
+  backdrop-filter: blur(9px) saturate(1.5);
   opacity: 0;
   transition: opacity 300ms var(--ease-out-strong);
   pointer-events: none;
@@ -2818,20 +2824,26 @@ a.strip-cell {
     z-index: 30;
     border-top-color: transparent;
   }
-  :root[data-under] :is(.strip-rail, body > footer)::after {
+  /* One pane, not two. Julian: make the scroll bar and the footer one
+     panel. Each had a blur of its own, and two blurs meeting draw a seam
+     where each one's edge samples differently. One layer now, the rail's,
+     running on down under the footer, which keeps only its tint. 9px, a
+     little under the 12 it was (Julian: lower the blur slightly). */
+  :root[data-under] .strip-rail::after {
     content: "";
     position: absolute;
     inset: 0;
+    bottom: calc(-1 * var(--foot, 38px));
     z-index: -1;
-    -webkit-backdrop-filter: blur(12px) saturate(1.5);
-    backdrop-filter: blur(12px) saturate(1.5);
+    -webkit-backdrop-filter: blur(9px) saturate(1.5);
+    backdrop-filter: blur(9px) saturate(1.5);
     pointer-events: none;
   }
   @media (prefers-reduced-transparency: reduce) {
     :root[data-under] :is(.strip-rail, body > footer) {
       background-color: var(--background);
     }
-    :root[data-under] :is(.strip-rail, body > footer)::after {
+    :root[data-under] .strip-rail::after {
       display: none;
     }
   }
@@ -4435,7 +4447,7 @@ h2:not(.label, [data-display]) {
 .about-marquee-track {
   display: flex;
   width: max-content;
-  animation: about-marquee 40s linear infinite;
+  animation: about-marquee var(--marquee-s, 40s) linear infinite;
 }
 .about-marquee:hover .about-marquee-track {
   animation-play-state: paused;
@@ -4542,10 +4554,9 @@ h2:not(.label, [data-display]) {
   }
 }
 /* "Copy all" (components/dial-copy-all.tsx), in the panel's header,
-   left of the close button; hidden while the panel is folded. */
-.dialkit-panel-header {
-  position: relative;
-}
+   left of the close button; hidden while the panel is folded. The open
+   header is DialKit's sticky one, which it sits against; making the header
+   relative instead pulled the folded button's icon off centre. */
 .dial-copy-all {
   position: absolute;
   top: 10px;

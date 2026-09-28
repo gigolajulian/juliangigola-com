@@ -401,7 +401,7 @@ export function HeroDials() {
   return (
     <>
       <span ref={ref} hidden />
-      <DialRoot position="top-right" />
+      <DialRoot position="top-right" defaultOpen={false} />
       <DialCopyAll />
     </>
   );

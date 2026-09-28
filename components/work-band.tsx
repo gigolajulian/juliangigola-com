@@ -43,6 +43,10 @@ const subscribeHoverable = (onChange: () => void) => {
 const BAND_SIZES =
   "(max-width: 40rem) 100vw, (max-aspect-ratio: 4/5) calc((100vw - 4rem) / 3), max(10rem, calc((100vh - 20rem) * 0.4))";
 
+/** A name's width in ems, set in the display face on one line. */
+const nameEm = (name: string) =>
+  [...name].reduce((w, c) => w + (c === " " ? 0.3 : 0.72), 0);
+
 export function WorkBand({
   project,
   index,
@@ -300,12 +304,23 @@ export function WorkBand({
                 it was labelling. */}
           {/* The link's name is the plate's own words, so voice control
               can say what is printed; the frame count is for ears only. */}
-          {/* An iPad's tiles are 116 to 184 wide, and one line cut every
-              long name to WIRED MA... The words wrap to two balanced lines
-              instead, and the type comes down only as far as its longest
-              word (UKIYOSUNKNOWN is thirteen letters) needs to fit. */}
-          <h3 className="font-display min-w-0 text-balance break-words text-lg uppercase leading-[0.95] tracking-[0] sm:text-[min(1.25rem,calc((100cqw-2rem)/(var(--longest)*0.7)))]"
-            style={{ "--longest": Math.max(...project.name.split(/\s+/).map((w) => w.length)) } as React.CSSProperties}
+          {/* One line, whatever the tile (Julian: I WANNA BE A HUMAN on two
+              lines should not happen on smaller screens). The type comes
+              down as far as the whole name needs to fit beside its number
+              (2rem, with its gap; `cqw` is the plate inside its padding),
+              and no smaller than 10px: under that, on the tiles of a
+              1024 by 768 screen, it wraps to two balanced lines as before,
+              the floor lowered to what the longest word needs so a word is
+              never broken. `--name-em` and `--word-em` are widths in ems,
+              measured off Inter Tight 900: a letter is at most 0.72, a
+              space 0.3. */}
+          <h3 className="font-display min-w-0 text-balance break-words text-lg uppercase leading-[0.95] tracking-[0] sm:text-[clamp(min(10px,calc((100cqw-2rem)/var(--word-em))),calc((100cqw-2rem)/var(--name-em)),1.25rem)]"
+            style={
+              {
+                "--name-em": nameEm(project.name),
+                "--word-em": Math.max(...project.name.split(/\s+/).map(nameEm)),
+              } as React.CSSProperties
+            }
           >
             {project.name}
             <span className="sr-only">, {project.total} frames</span>

@@ -36,7 +36,8 @@ import { BlinkingMark, blink } from "@/components/not-found-scene";
    and 98% at a second and a half; it holds full a beat; then the whole
    panel, eye and all, lifts off the top of the screen, gathering speed. */
 const CAP = 5000; // the longest anybody waits, whatever is still loading
-const HOLD = 450; // full, before it lifts
+const BEAT = 150; // full, before the blink
+const AFTER = 60; // the blink done, before it lifts
 const OUT = 1000; // the lift
 
 const lift = () => document.documentElement.removeAttribute("data-intro");
@@ -143,14 +144,19 @@ export function Intro() {
     }
 
     const lids = () => eye.current?.querySelector("[data-lids]");
-    let blinked = false;
-    /* Julian: the blink earlier, and sometimes two. A fifth of the way
-       across rather than half, and a coin toss for a second blink a beat
-       after the first, the way an eye does it. */
-    const blinks = (l: Element) => {
-      blink(l).finished.then(() => {
-        if (Math.random() < 0.5) setTimeout(() => blink(l), 110);
-      }, () => {});
+    const wait = (ms: number) => new Promise((r) => setTimeout(r, ms));
+    /* Julian: the eye blinks right before the lift, sometimes once and
+       sometimes twice (a coin toss for a second blink a beat after the
+       first, the way an eye does it). Resolves when it has finished, so
+       the lift goes the moment the eye opens again. */
+    const blinks = async () => {
+      const l = lids();
+      if (!l) return;
+      await blink(l).finished.catch(() => {});
+      if (Math.random() < 0.5) {
+        await wait(110);
+        await blink(l).finished.catch(() => {});
+      }
     };
     const t0 = performance.now();
     const hold = window.setInterval(() => {
@@ -158,31 +164,26 @@ export function Intro() {
       const at = Number(sweep?.currentTime ?? SWEEP);
       if (real < 1 && at >= reaches(real)) sweep?.pause();
       else if (sweep?.playState === "paused") sweep.play();
-      const l = lids();
-      if (l && !blinked && at >= reaches(0.2)) {
-        blinked = true;
-        blinks(l);
-      }
     }, 50);
 
-    /* Full. A beat, then the layer lifts off the top of the screen, and
-       the page starts its own entrance under it at the same moment. */
+    /* Full. A beat, the blink, and then the layer lifts off the top of the
+       screen, and the page starts its own entrance under it at the same
+       moment. */
     const full = sweep ? sweep.finished : Promise.resolve();
     full
       .catch(() => {})
-      .then(() => {
+      .then(async () => {
         window.clearInterval(hold);
-        const l = lids();
-        if (l && !blinked) blinks(l);
-        setTimeout(() => {
-          box.current?.classList.add("jg-intro-open");
-          root.dataset.intro = "lift";
-          box.current?.animate(
-            [{ transform: "translateY(0)" }, { transform: "translateY(-100%)" }],
-            { duration: OUT, easing: "cubic-bezier(0.76, 0, 0.24, 1)", fill: "forwards" },
-          );
-          setTimeout(lift, OUT);
-        }, HOLD);
+        await wait(BEAT);
+        await blinks();
+        await wait(AFTER);
+        box.current?.classList.add("jg-intro-open");
+        root.dataset.intro = "lift";
+        box.current?.animate(
+          [{ transform: "translateY(0)" }, { transform: "translateY(-100%)" }],
+          { duration: OUT, easing: "cubic-bezier(0.76, 0, 0.24, 1)", fill: "forwards" },
+        );
+        setTimeout(lift, OUT);
       });
   }, []);
 

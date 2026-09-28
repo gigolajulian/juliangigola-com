@@ -43,10 +43,16 @@ const DIALS = {
   title: { sel: ".about-hero-title", text: true },
   intro: { sel: ".about-hero-intro", text: true },
   services: ".about-hero-services",
+  servicesHeading: { sel: ".about-hero-services > h2", text: true },
+  servicesList: ".about-hero-services > ul",
   buttons: ".about-hero-ask",
+  inquireButton: { sel: ".about-hero-ask > a:first-child", text: true },
+  workButton: { sel: ".about-hero-ask > a:last-child", text: true },
   name: ".about-hero-name",
   facts: ".about-hero-facts",
   clients: ".about-hero-clients",
+  clientsHeading: { sel: "#clients", text: true },
+  logos: ".about-marquee",
 };
 
 export default function AboutPage() {

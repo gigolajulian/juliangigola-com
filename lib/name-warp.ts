@@ -8,7 +8,8 @@ export const NAME_WARP = {
   warpScale: 0.6,
   speed: 0.8,
   pointerInfluence: 1.25,
-  pointerStrength: 0.87,
+  // Julian: lower the hover on the name, and the swipe with it (0.87).
+  pointerStrength: 0.6,
   refraction: 0.03,
   ripple: 1.65,
 } as const;
