@@ -69,8 +69,10 @@ export function EnquiryCell({
            centred, or at 2000px the aside floats in the middle of the
            screen as a box with the ask marooned beside it. The cell's own
            padding goes, so each half sets its own. */
+        /* On a phone the doors run to the cell's foot, so the wall never
+           shows under the last one without its tint. */
         aside &&
-          "gap-0 sm:grid sm:w-[100vw] sm:grid-cols-2 sm:items-stretch sm:p-0",
+          "gap-0 max-sm:pb-0 sm:grid sm:w-[100vw] sm:grid-cols-2 sm:items-stretch sm:p-0",
         className,
       )}
     >
@@ -84,13 +86,13 @@ export function EnquiryCell({
       <div
         className={cn(
           "relative flex flex-col gap-6",
-          aside && "justify-center px-6 py-12 sm:px-16 sm:py-0",
+          aside && "justify-center px-6 py-12 sm:px-16 sm:py-0 lying:gap-4 lying:px-10 lying:pt-12",
         )}
       >
         <div>
-          <h2 className="title max-w-[22ch]">{title}</h2>
+          <h2 className="title max-w-[22ch] lying:[--text-title:2.25rem]">{title}</h2>
           {body ? (
-            <p className="mt-4 max-w-prose text-sm leading-relaxed text-muted-foreground">
+            <p className="mt-4 max-w-prose text-sm leading-relaxed text-muted-foreground lying:mt-2">
               {body}
             </p>
           ) : null}
@@ -125,7 +127,7 @@ export function EnquiryCell({
             prefetch={false}
             href={next.href}
             data-ring="Next"
-            className="label mt-4 w-fit border-t border-border pt-4 text-muted-foreground transition-colors duration-200 hoverable:hover:text-foreground"
+            className="label mt-4 w-fit border-t border-border pt-4 text-muted-foreground transition-colors duration-200 hoverable:hover:text-foreground lying:hidden"
           >
             Next: {next.name}
           </Link>

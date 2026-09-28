@@ -212,14 +212,48 @@
   --fy: var(--y);
   --fw: var(--w);
   --fz: var(--z, 0px);
-  left: calc(50% + (var(--fx) - 50%) * var(--h-pull-x, 1.05));
+  left: calc(50% + (var(--fx) - 50%) * var(--h-pull-x, 1.05) * var(--wide, 1));
   top: calc(50% + (var(--fy) - 50%) * var(--h-pull-y, 0.94));
-  width: var(--fw);
+  width: calc(var(--fw) * var(--wide, 1));
   /* Out of order: each frame's place in `ORDER` (`cover-float.tsx`),
      spread out from the start. */
   --delay: calc(var(--h-start, 420ms) + var(--order, 0) * var(--h-spread, 0.95ms));
   animation: jg-fly var(--h-fly-ms, 1020ms) cubic-bezier(0.16, 1, 0.3, 1)
     var(--delay) backwards;
+}
+/* Julian: refined for 2560 by 1080. The large layout is in vw, so on a
+   screen wider than 16:9 the photographs grew with the width and not the
+   height, a third bigger at 21:9 and into the bar and the rail. `--wide`
+   takes them and their spread across back toward the 16:9 composition, in
+   steps (a ratio of lengths cannot be computed in CSS): about 1.85 times
+   the height wide. Large screens only; a phone on its side is as wide and
+   has its own layout. */
+@media (min-width: 80rem) and (min-height: 32rem) and (min-aspect-ratio: 2 / 1) {
+  .cover-float {
+    --wide: 0.9;
+  }
+  /* Five sleeves across at full width were two rows taller than the
+     window, over the heading and the rail; two rows sized from the height
+     instead, centred. */
+  .cover-rack {
+    width: min(100%, calc((100svh - 16rem) * 2.5));
+    margin-inline: auto;
+  }
+}
+@media (min-width: 80rem) and (min-height: 32rem) and (min-aspect-ratio: 11 / 5) {
+  .cover-float {
+    --wide: 0.8;
+  }
+}
+@media (min-width: 80rem) and (min-height: 32rem) and (min-aspect-ratio: 14 / 5) {
+  .cover-float {
+    --wide: 0.66;
+  }
+}
+@media (min-width: 80rem) and (min-height: 32rem) and (min-aspect-ratio: 16 / 5) {
+  .cover-float {
+    --wide: 0.55;
+  }
 }
 /* Julian: a layout of their own for the smaller screens (the cards
    looked too small there, the arrangement not the best), one for a
@@ -1192,6 +1226,17 @@ body:has([data-quiet-footer]) .site-footer-row {
   margin-top: 0;
   border-top: 0;
   padding-top: 0;
+}
+/* Julian: room to breathe on a phone, which scrolls, so the line takes
+   nothing from the photographs; and clear of the home indicator. */
+@media (max-width: 39.99rem) {
+  body:has([data-quiet-footer]) .site-footer-body {
+    padding-top: 1.75rem;
+    padding-bottom: calc(2rem + env(safe-area-inset-bottom));
+  }
+  body:has([data-quiet-footer]) .site-footer-row {
+    gap: 0.75rem;
+  }
 }
 
 /* The name of the project at the top of a strip page, which waits for the
@@ -2344,6 +2389,48 @@ a.strip-cell {
     --mark-cap: 6rem;
   }
 }
+/* ── a phone on its side ──
+   Julian: an iPhone 16 Pro or Pro Max held sideways (874 by 402, 956 by
+   440) should fit better. The strip's cells are about 320 to 360 tall
+   there, under a 56px bar. Selected work took the desktop's two rows of
+   five, which with the marks' two lines left the tiles as thumbnails, and
+   the rack's two rows of five ran under its heading. One row of six each,
+   the width leading so six always fit across, and the marks on one small
+   line. `lying` is the same query as the variant. */
+@media (max-height: 30rem) and (min-width: 40rem) {
+  .band-grid {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    grid-template-rows: none;
+    align-content: center;
+    width: 100%;
+  }
+  .band-tile {
+    height: auto;
+    min-width: 0;
+  }
+  .band-grid > *:nth-child(n + 7) {
+    display: none;
+  }
+  .band-count-all {
+    display: none;
+  }
+  .band-count-few {
+    display: inline;
+  }
+  section[aria-labelledby="press"] ul {
+    flex-wrap: nowrap;
+    column-gap: 0.75rem;
+    --mark-box: 0.9rem;
+    --mark-cap: 5rem;
+  }
+  .cover-rack {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    grid-template-rows: none !important;
+  }
+  .cover-rack > li:nth-child(n + 7) {
+    display: none;
+  }
+}
 /* ── an upright tablet is not a short desktop ──
    Both of these lay their pictures out from the height they are given,
    which is right on a screen wider than it is tall and wrong on one that
@@ -2373,6 +2460,12 @@ a.strip-cell {
     grid-template-rows: repeat(3, minmax(0, 1fr));
   }
   .cover-rack > li:nth-child(n + 10) {
+    display: none;
+  }
+}
+/* Julian: a phone shows the first six sleeves, three rows of two. */
+@media (max-width: 39.99rem) {
+  .cover-rack > li:nth-child(n + 7) {
     display: none;
   }
 }

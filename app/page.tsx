@@ -86,7 +86,7 @@ export default function Home() {
           {/* Which section this is, and the way out to all of the work.
               Both sit in the band the bar occupies, which is why the grid
               below starts under it. */}
-          <div className="pointer-events-none absolute inset-x-0 top-0 z-10 flex items-baseline justify-between gap-6 px-6 py-4 sm:px-8 sm:pt-20">
+          <div className="pointer-events-none absolute inset-x-0 top-0 z-10 flex items-baseline justify-between gap-6 px-6 py-4 sm:px-8 sm:pt-20 lying:pt-16">
             <h2 className="label glass-surface bg-background/70 px-3 py-1.5 text-muted-foreground">
               Selected work
               {/* Two, because upright screens stop at six (`band-grid` in
@@ -134,7 +134,7 @@ export default function Home() {
               strip cell does not clip.
 
               The top pad is the bar — the first row used to run under it. */}
-          <div className="band-grid grid min-h-0 flex-1 content-center justify-center px-0 pt-0 sm:px-8 sm:pb-6 sm:pt-32">
+          <div className="band-grid grid min-h-0 flex-1 content-center justify-center px-0 pt-0 sm:px-8 sm:pb-6 sm:pt-32 lying:pb-2 lying:pt-28">
             {FEATURED.map((project, i) => (
               <div
                 key={project.slug}
@@ -152,12 +152,24 @@ export default function Home() {
           {PRESS_HOME.length ? (
             <section
               aria-labelledby="press"
-              className="flex shrink-0 flex-col items-center gap-4 border-t border-border px-6 py-5 sm:flex-row sm:justify-center sm:gap-10 sm:px-8"
+              className="flex shrink-0 flex-col items-center gap-4 border-t border-border px-6 py-5 sm:flex-row sm:justify-center sm:gap-10 sm:px-8 lying:gap-5 lying:py-2.5"
             >
               <h2 id="press" className="label shrink-0 text-muted-foreground">
                 Published &amp; commissioned by
               </h2>
-              <ClientMarks clients={PRESS_HOME} layout="row" />
+              <ClientMarks clients={PRESS_HOME} layout="row" className="max-sm:hidden" />
+              {/* Julian: on a phone, two rows of five, each sized to fit the
+                  width (the wider row is 339px at 23px tall, plus its gaps). */}
+              <div className="flex flex-col items-center gap-4 sm:hidden">
+                {[PRESS_HOME.slice(0, 5), PRESS_HOME.slice(5)].map((row) => (
+                  <ClientMarks
+                    key={row[0]?.slug}
+                    clients={row}
+                    layout="row"
+                    className="flex-nowrap gap-x-3 [--mark-box:min(1.45rem,calc((100vw-6rem)*0.068))]"
+                  />
+                ))}
+              </div>
             </section>
           ) : null}
         </section>
@@ -235,12 +247,14 @@ function PathCard({
       /* Julian: the wall runs on behind the doors, seen rather than
          frosted over: a 30% tint for the type and 6px of blur, not the
          site's glass. */
-      className="group relative flex flex-col justify-center gap-6 border-l border-border bg-background/30 px-6 py-12 backdrop-blur-[var(--door-blur,2px)] transition-colors duration-300 hoverable:hover:bg-background/45 sm:px-16 sm:pt-20"
+      className="group relative flex flex-col justify-center gap-6 border-l border-border bg-background/30 px-6 py-12 backdrop-blur-[var(--door-blur,2px)] transition-colors duration-300 hoverable:hover:bg-background/45 sm:px-16 sm:pt-20 lying:gap-3 lying:px-10 lying:py-3 lying:first:pt-16"
     >
       <div>
         <p className="label text-muted-foreground">{label}</p>
-        <h3 className="mt-5 title">{title}</h3>
-        <p className="mt-4 max-w-sm text-sm leading-relaxed text-muted-foreground">
+        <h3 className="mt-5 title lying:mt-2 lying:[--text-title:1.75rem]">{title}</h3>
+        {/* A phone on its side has the height for the door, not its
+            description. */}
+        <p className="mt-4 max-w-sm text-sm leading-relaxed text-muted-foreground lying:hidden">
           {body}
         </p>
       </div>
