@@ -17,7 +17,7 @@ export function InquireWall({ items }: { items: WallTile[] }) {
      veil; 0 is the photographs at full strength. */
   const { scale, tint } = useDialKit(
     "Background wall",
-    { scale: [1.15, 0.2, 2, 0.05], tint: [0.45, 0, 1, 0.01] },
+    { scale: [1.25, 0.2, 2, 0.05], tint: [0.37, 0, 1, 0.01] },
     { id: "inquire-wall" },
   );
   /* Julian: a dial for the blur on the two doors to the right of the
@@ -25,7 +25,7 @@ export function InquireWall({ items }: { items: WallTile[] }) {
      their class reads with the same 2px as its fallback. */
   const { blur } = useDialKit(
     "Right cards",
-    { blur: [2, 0, 24, 0.5] },
+    { blur: [1, 0, 24, 0.5] },
     { id: "inquire-doors" },
   );
   React.useEffect(() => {

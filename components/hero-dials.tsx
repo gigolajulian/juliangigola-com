@@ -45,23 +45,23 @@ import {
 /* Julian: the names were confusing. Each key is the label DialKit shows
    (it splits camelCase into words), so every one says what it moves. */
 export const CARDS = {
-  motion: { type: "easing", duration: 0.25, ease: [1, -0.14, 0.5, 1] },
+  motion: { type: "spring", visualDuration: 0.3, bounce: 0.2 },
   grow: [1.03, 1, 1.2, 0.005],
   forward: [44, 0, 200, 1],
   towardMiddle: [0.1, 0, 1, 0.01],
   shadow: { blur: [4, 0, 80, 1], opacity: [0.3, 0, 1, 0.01] },
-  otherPhotos: { blur: [0.5, 0, 8, 0.1], glassSheen: [0.4, 0, 1, 0.05] },
+  otherPhotos: { blur: [0.3, 0, 8, 0.1], glassSheen: [0.4, 0, 1, 0.05] },
   delays: {
-    comeForward: [30, 0, 1000, 10],
+    comeForward: [10, 0, 1000, 10],
     blurOthers: [310, 0, 2000, 10],
-    letGo: [60, 0, 1000, 10],
+    letGo: [20, 0, 1000, 10],
   },
 } satisfies DialConfig;
 
 export const SPACE = {
-  tiltUpDown: [8, 0, 20, 0.5],
+  tiltUpDown: [9.5, 0, 20, 0.5],
   tiltSideways: [16.5, 0, 30, 0.5],
-  followSpeed: [21, 1, 50, 1],
+  followSpeed: [16, 1, 50, 1],
   perspective: [3280, 300, 4000, 10],
 } satisfies DialConfig;
 
@@ -74,9 +74,10 @@ const ENTRANCE = {
 } satisfies DialConfig;
 
 const NAME = {
-  size: [97, 40, 200, 1],
-  warpStrength: [NAME_WARP.warpStrength, 0, 0.6, 0.01],
-  warpScale: [NAME_WARP.warpScale, 0.2, 5, 0.05],
+  size: [96, 40, 200, 1],
+  // Julian's pasted values, the cover's own; About keeps NAME_WARP.
+  warpStrength: [0.21, 0, 0.6, 0.01],
+  warpScale: [0.8, 0.2, 5, 0.05],
   speed: [NAME_WARP.speed, 0, 2, 0.01],
   lensRadius: [NAME_WARP.pointerInfluence, 0.1, 3, 0.05],
   lensStrength: [NAME_WARP.pointerStrength, 0, 1.5, 0.01],
@@ -193,22 +194,22 @@ const MIDDLE_DIALS = Object.fromEntries(
 ) as Record<Shape, Record<keyof Middle, [number, number, number, number]> & { _collapsed: boolean }>;
 
 const TYPE = {
-  roleLine: { size: [13, 9, 24, 0.5], letterSpacing: [0.15, 0, 0.5, 0.01] },
-  location: { size: [10.5, 9, 20, 0.5] },
-  buttons: { size: [9.5, 8, 16, 0.5] },
+  roleLine: { size: [16, 9, 24, 0.5], letterSpacing: [0.15, 0, 0.5, 0.01] },
+  location: { size: [14, 9, 20, 0.5] },
+  buttons: { size: [10, 8, 16, 0.5] },
   /* Julian: how close the name, the role, the location and the buttons
      sit, in px of space between each and the next. */
   /* Julian: the size of the whole middle (name, role, location and
      buttons together) and where it starts: px down from the middle of
      the cover, negative up. */
   middle: {
-    size: [0.9, 0.5, 1.6, 0.01],
+    size: [0.99, 0.5, 1.6, 0.01],
     moveDown: [22, -300, 300, 1],
   },
   spacing: {
     nameToRole: [5, 0, 80, 1],
     roleToLocation: [8, 0, 80, 1],
-    locationToButtons: [11, 0, 80, 1],
+    locationToButtons: [19, 0, 80, 1],
   },
 } satisfies DialConfig;
 

@@ -159,7 +159,7 @@ export function CoverFloat({
           </span>
         </h1>
         <p
-          className="lift cover-float-where mt-[var(--h-gap-where,8px)] mb-[var(--h-gap-cta,11px)] max-w-[34rem]"
+          className="lift cover-float-where mt-[var(--h-gap-where,8px)] mb-[var(--h-gap-cta,19px)] max-w-[34rem]"
           style={{ "--reveal-delay": "1600ms" } as React.CSSProperties}
         >
           <span className="fit-line">{"Based in San Francisco, CA. Available Worldwide"}</span>

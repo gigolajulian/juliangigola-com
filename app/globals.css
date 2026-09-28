@@ -471,9 +471,9 @@
    rather than a scale, so the name's canvas and the type are drawn at the
    new size instead of stretched; and moved from the middle of the cover. */
 .cover-float-middle {
-  zoom: var(--h-mid-size, 0.9);
-  translate: calc(var(--m-x) * 1vw / var(--h-mid-size, 0.9))
-    calc((var(--h-mid-down, 22px) + var(--m-y) * 1svh) / var(--h-mid-size, 0.9));
+  zoom: var(--h-mid-size, 0.99);
+  translate: calc(var(--m-x) * 1vw / var(--h-mid-size, 0.99))
+    calc((var(--h-mid-down, 22px) + var(--m-y) * 1svh) / var(--h-mid-size, 0.99));
 }
 .cover-float-name {
   color: var(--hero-ink);
@@ -482,7 +482,7 @@
 .cover-float-title {
   font-family: var(--font-mono);
   font-weight: 400;
-  font-size: calc(var(--h-title-size, 13px) * var(--m-role));
+  font-size: calc(var(--h-title-size, 16px) * var(--m-role));
   letter-spacing: var(--h-title-track, 0.15em);
   /* Julian: the lines centred on each other. The spacing after the last
      letter, matched before the first. */
@@ -492,7 +492,7 @@
 }
 .cover-float-where {
   font-family: var(--font-mono);
-  font-size: calc(var(--h-where-size, 10.5px) * var(--m-where));
+  font-size: calc(var(--h-where-size, 14px) * var(--m-where));
   color: var(--hero-where);
 }
 /* Julian: on a phone the role and the location one line each, as wide as
@@ -518,7 +518,7 @@
   display: inline-block;
   font-family: var(--font-mono);
   font-weight: 500;
-  font-size: var(--h-cta-size, 9.5px);
+  font-size: var(--h-cta-size, 10px);
   letter-spacing: 0.18em;
   text-transform: uppercase;
   padding: 13px 22px;
@@ -581,9 +581,9 @@
      after `--blur-wait`, once the pointer has stayed long enough to mean
      it, so passing over a frame on the way somewhere blurs nothing. */
   .cover-float {
-    --focus-wait: 30ms;
+    --focus-wait: 10ms;
     --blur-wait: 310ms;
-    --release-wait: 60ms;
+    --release-wait: 20ms;
   }
   /* Julian: an ease on it. The one pointed at glides forward and back
      on a soft ease in and out rather than snapping to its place. */
@@ -611,7 +611,7 @@
   .cover-float-ring:has(.cover-float-frame:hover) .cover-float-card {
     /* Julian: less blur round the one in focus, and glass over the rest
        instead (the pane below). No darkening. */
-    filter: blur(var(--h-others-blur, 0.5px));
+    filter: blur(var(--h-others-blur, 0.3px));
     transition-delay: var(--blur-wait);
   }
   /* The glass: a clear pane over each of the others, the site's own
