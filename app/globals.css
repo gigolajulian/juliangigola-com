@@ -436,6 +436,12 @@
   .cover-float-frame:hover {
     z-index: 1;
   }
+  /* Julian: on a photograph's hover, the navbar and the floor a little
+     clearer: their tint comes down from 34% to 22%, easing on each
+     one's own background transition. */
+  :root:has(.cover-float-frame:hover) {
+    --glass-tint: 22%;
+  }
   .cover-float-ring:has(.cover-float-frame:hover) .cover-float-card {
     /* Julian: less blur round the one in focus, and glass over the rest
        instead (the pane below). No darkening. */
@@ -2762,7 +2768,7 @@ a.strip-cell {
    a thin tint of the page, a hairline, and light along its top edge. */
 .site-bar[data-home]:not([data-plain="true"]) {
   border-color: color-mix(in oklab, var(--foreground) 12%, transparent);
-  background-color: color-mix(in oklab, var(--background) 34%, transparent);
+  background-color: color-mix(in oklab, var(--background) var(--glass-tint, 34%), transparent);
   box-shadow: inset 0 1px 0 color-mix(in oklab, white 12%, transparent);
 }
 .site-bar[data-home]::after {
@@ -2792,7 +2798,8 @@ a.strip-cell {
   :root[data-under] body > footer {
     left: 0;
     right: 0;
-    background-color: color-mix(in oklab, var(--background) 34%, transparent);
+    background-color: color-mix(in oklab, var(--background) var(--glass-tint, 34%), transparent);
+    transition: background-color 300ms var(--ease-out-strong);
   }
   :root[data-under] .strip-rail {
     position: absolute;
