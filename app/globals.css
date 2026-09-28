@@ -1235,7 +1235,7 @@ body:has([data-quiet-footer]) .site-footer-row {
     padding-bottom: calc(2rem + env(safe-area-inset-bottom));
   }
   body:has([data-quiet-footer]) .site-footer-row {
-    gap: 1.25rem;
+    gap: 2rem;
   }
 }
 

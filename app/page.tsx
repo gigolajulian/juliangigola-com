@@ -158,17 +158,16 @@ export default function Home() {
                 Published &amp; commissioned by
               </h2>
               <ClientMarks clients={PRESS_HOME} layout="row" className="max-sm:hidden" />
-              {/* Julian: on a phone, two rows of five, each sized to fit the
-                  width (the wider row is 339px at 23px tall, plus its gaps). */}
-              <div className="flex flex-col items-center gap-4 sm:hidden">
-                {[PRESS_HOME.slice(0, 5), PRESS_HOME.slice(5)].map((row) => (
-                  <ClientMarks
-                    key={row[0]?.slug}
-                    clients={row}
-                    layout="row"
-                    className="flex-nowrap gap-x-3 [--mark-box:min(1.45rem,calc((100vw-6rem)*0.068))]"
-                  />
-                ))}
+              {/* Julian: on a phone, one line that scrolls, as on the About
+                  page (`about-marquee` in `globals.css`): the list twice,
+                  the second out of reach of keys and readers. */}
+              <div className="about-marquee w-full sm:hidden">
+                <div className="about-marquee-track">
+                  <ClientMarks clients={PRESS_HOME} layout="row" className="about-marquee-list" />
+                  <div inert aria-hidden>
+                    <ClientMarks clients={PRESS_HOME} layout="row" className="about-marquee-list" />
+                  </div>
+                </div>
               </div>
             </section>
           ) : null}
