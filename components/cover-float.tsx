@@ -60,7 +60,7 @@ export function CoverFloat({
             <Link
               key={p.slug}
               prefetch={false}
-              href={`/work/${p.slug}`}
+              href={`/portfolio/${p.slug}`}
               tabIndex={-1}
               data-discipline={labels[i]}
               className={cn("cover-float-frame", !s.phone && "max-sm:hidden")}
@@ -140,7 +140,7 @@ export function CoverFloat({
           className="lift flex flex-wrap justify-center gap-3"
           style={{ "--reveal-delay": "1760ms" } as React.CSSProperties}
         >
-          <Link href="/work" className="cover-cta press active:scale-[0.97]">
+          <Link href="/portfolio" className="cover-cta press active:scale-[0.97]">
             See the work
           </Link>
           <Link

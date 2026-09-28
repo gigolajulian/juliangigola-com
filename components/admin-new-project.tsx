@@ -234,7 +234,7 @@ export function AdminNewProject({
           hint={
             slugTaken
               ? "Already used by another project."
-              : `/work/${slug || "…"}`
+              : `/portfolio/${slug || "…"}`
           }
         >
           <input

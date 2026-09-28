@@ -81,7 +81,7 @@ export function CoverArt() {
         </p>
         <Link
           prefetch={false}
-          href={`/work/${project.slug}`}
+          href={`/portfolio/${project.slug}`}
           className="label pointer-events-auto text-muted-foreground transition-colors duration-200 hoverable:hover:text-foreground"
         >
           <span aria-hidden>All {COVER_RELEASES.length} &rarr;</span>
@@ -101,7 +101,7 @@ export function CoverArt() {
           <li key={release.slug}>
             <Link
               prefetch={false}
-              href={`/work/${project.slug}`}
+              href={`/portfolio/${project.slug}`}
               aria-label={coverLabel(
                 release.title,
                 release.artist,

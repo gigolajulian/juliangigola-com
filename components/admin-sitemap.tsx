@@ -57,7 +57,7 @@ const PAGES: {
   note?: string;
 }[] = [
   { href: "/", label: "Home", target: { kind: "field", anchor: "featured" } },
-  { href: "/work", label: "Work", target: { kind: "projects" } },
+  { href: "/portfolio", label: "Work", target: { kind: "projects" } },
   {
     href: "/sessions",
     label: "Sessions",
@@ -158,7 +158,7 @@ export function AdminSitemap({
        the work is worse than no sitemap. So they get a branch, named for what
        is wrong with them. */
     const orphans =
-      page.href === "/work"
+      page.href === "/portfolio"
         ? live.filter(
             (p) => !named.has(p.category) && (pageHit || hit(p.name, p.slug)),
           )
@@ -561,7 +561,7 @@ function Tiles({
               </button>
             ) : (
               <Open
-                href={`/work/${p.slug}`}
+                href={`/portfolio/${p.slug}`}
                 origin={origin}
                 className={cn("group block", dim && "opacity-40")}
               >

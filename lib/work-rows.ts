@@ -32,7 +32,7 @@ const lineFor = (p: Project, discipline: string): ListRow => {
   const row = indexRow(p);
   return {
     ...row,
-    href: `/work/${p.slug}`,
+    href: `/portfolio/${p.slug}`,
     discipline,
     find: [
       p.name,

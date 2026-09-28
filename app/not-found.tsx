@@ -35,7 +35,7 @@ const LIST_MONO =
 
 export default function NotFound() {
   const places = [
-    ...DISCIPLINES.filter((d) => d.href.startsWith("/work"))
+    ...DISCIPLINES.filter((d) => d.href.startsWith("/portfolio"))
       .slice(0, 4)
       .map((d) => ({ label: d.name, count: String(d.count), href: d.href })),
     { label: "Book a session", count: "→", href: "/sessions" },
@@ -151,7 +151,7 @@ export default function NotFound() {
               </p>
               <div className="mt-6 flex flex-wrap gap-3 sm:mt-7">
                 <Link
-                  href="/work"
+                  href="/portfolio"
                   className={`${MONO} action inline-flex items-center gap-3 px-6 py-4 font-bold press active:scale-[0.97]`}
                 >
                   <span className="opacity-60">01</span>

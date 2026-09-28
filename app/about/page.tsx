@@ -5,6 +5,7 @@ import { StripPage, StripHead, RisingTitle } from "@/components/strip-page";
 import { PRESS_STUDIO, CONTACT } from "@/lib/work";
 import { ClientMarks } from "@/components/client-marks";
 import { AboutHero } from "@/components/about-hero";
+import { PageDials } from "@/components/page-dials";
 
 /* ── about ────────────────────────────────────────────────
  * The old site split this across /about (real, and decent) and /rates
@@ -35,6 +36,19 @@ const SERVICES = [
   "Creative direction",
 ];
 
+/* What DialKit's "About layout" panel moves (`page-dials.tsx`). */
+const DIALS = {
+  crumb: { sel: '[data-dial="crumb"]', text: true },
+  pageTitle: { sel: '[data-dial="page-title"]', text: true },
+  title: { sel: ".about-hero-title", text: true },
+  intro: { sel: ".about-hero-intro", text: true },
+  services: ".about-hero-services",
+  buttons: ".about-hero-ask",
+  name: ".about-hero-name",
+  facts: ".about-hero-facts",
+  clients: ".about-hero-clients",
+};
+
 export default function AboutPage() {
   return (
     <StripPage
@@ -55,6 +69,7 @@ export default function AboutPage() {
         />
       }
     >
+      <PageDials title="About layout" id="about-layout" parts={DIALS} />
       <Strip
         label="About: who he is, what he is hired for, and who has hired him."
         /* The site's own order, as the nav has it: Sessions, Contact,
@@ -138,7 +153,7 @@ export default function AboutPage() {
               </Link>
               <Link
                 prefetch={false}
-                href="/work"
+                href="/portfolio"
                 className="label action-quiet px-6 py-4 press active:scale-[0.97] short:py-3"
               >
                 See the work

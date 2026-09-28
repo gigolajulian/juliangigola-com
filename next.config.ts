@@ -17,7 +17,7 @@ import { LINKABLE, CATEGORIES, categoryHref } from "./lib/work";
  */
 const projectRedirects = LINKABLE.map((p) => ({
   source: `/${p.slug}`,
-  destination: `/work/${p.slug}`,
+  destination: `/portfolio/${p.slug}`,
   permanent: true,
 }));
 
@@ -32,10 +32,15 @@ const renameRedirects = LINKABLE.filter(
 ).flatMap((p) => [
   {
     source: `/work/${p.origin}`,
-    destination: `/work/${p.slug}`,
+    destination: `/portfolio/${p.slug}`,
     permanent: true,
   },
-  { source: `/${p.origin}`, destination: `/work/${p.slug}`, permanent: true },
+  {
+    source: `/portfolio/${p.origin}`,
+    destination: `/portfolio/${p.slug}`,
+    permanent: true,
+  },
+  { source: `/${p.origin}`, destination: `/portfolio/${p.slug}`, permanent: true },
 ]);
 
 /**
@@ -50,6 +55,30 @@ const categoryRedirects = CATEGORIES.map((c) => ({
   permanent: true,
 }));
 
+/**
+ * Julian: Portfolio at /portfolio. The work lived at /work, and every
+ * address under it is in the index, in his Instagram and in inboxes, so
+ * each one answers with a permanent redirect to the same place under
+ * /portfolio. Last, so a rename above sends an old slug straight to its new
+ * one. Pages only: the photographs are still filed under `/work/`
+ * (`image-loader.ts`), so nothing here matches a path with a dot in it or
+ * one folder deeper than a project.
+ */
+const workRedirects = [
+  { source: "/work", destination: "/portfolio", permanent: true },
+  { source: "/work/video", destination: "/portfolio/video", permanent: true },
+  {
+    source: "/work/category/:slug([a-z0-9-]+)",
+    destination: "/portfolio/category/:slug",
+    permanent: true,
+  },
+  {
+    source: "/work/:slug([a-z0-9-]+)",
+    destination: "/portfolio/:slug",
+    permanent: true,
+  },
+];
+
 /** Pages that moved or were retired. */
 const pageRedirects = [
   // Julian: change Studio to About. The page moved; the old name follows.
@@ -62,19 +91,25 @@ const pageRedirects = [
   { source: "/store", destination: "/", permanent: true },
   // "Wedding" (33 frames) was folded into the Weddings gallery; the project
   // is hidden now and its frames live in the gallery's sequence.
-  { source: "/work/bridal", destination: "/work/weddings", permanent: true },
+  { source: "/work/bridal", destination: "/portfolio/weddings", permanent: true },
+  { source: "/portfolio/bridal", destination: "/portfolio/weddings", permanent: true },
   // The terms and the privacy policy were two pages for a day; they are two
   // columns of one now, and the footer links straight to the anchors.
   // GISELLE was at its full gallery name and is at its own now. Both of
   // the old URLs are in the index and in Julian's own links.
   {
     source: "/work/giselle-studio-digitals",
-    destination: "/work/giselle",
+    destination: "/portfolio/giselle",
+    permanent: true,
+  },
+  {
+    source: "/portfolio/giselle-studio-digitals",
+    destination: "/portfolio/giselle",
     permanent: true,
   },
   {
     source: "/giselle-studio-digitals",
-    destination: "/work/giselle",
+    destination: "/portfolio/giselle",
     permanent: true,
   },
   { source: "/terms", destination: "/legal#terms", permanent: true },
@@ -272,6 +307,7 @@ const nextConfig: NextConfig = {
       ...renameRedirects,
       ...categoryRedirects,
       ...projectRedirects,
+      ...workRedirects,
     ].filter(
       (r) => {
         if (seen.has(r.source)) return false;

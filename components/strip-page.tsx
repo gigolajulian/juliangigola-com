@@ -167,9 +167,9 @@ export function StripHead({
           gets the room it needs, because a track never goes below its
           words. */}
       <div className="flex items-start justify-between gap-6 max-sm:grid max-sm:grid-cols-[1fr_auto_1fr]">
-        <div className="shrink-0 sm:w-44">{crumb}</div>
+        <div data-dial="crumb" className="shrink-0 sm:w-44">{crumb}</div>
 
-        <div className={cn("min-w-0 text-center", !open && "running-head")}>
+        <div data-dial="page-title" className={cn("min-w-0 text-center", !open && "running-head")}>
           {/* Set in the display face at a size that reads as a title and
               not a caption. Julian asked for the top title bigger and in
               the display face, with the client or model under it.

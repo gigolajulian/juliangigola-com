@@ -69,7 +69,7 @@ export type SiteContent = {
    * somebody decides a release should lead.
    *
    * Separate from `coverArt` above, which is the handful the homepage rack
-   * shows. This is every release, in the order `/work/coverart` prints them.
+   * shows. This is every release, in the order `/portfolio/coverart` prints them.
    */
   coverArtOrder: string[];
   /**

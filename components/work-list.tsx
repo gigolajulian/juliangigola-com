@@ -140,8 +140,9 @@ export function WorkList({
                         fill
                         sizes="80px"
                         loading="lazy"
-                        placeholder={row.cover.blur ? "blur" : "empty"}
-                        blurDataURL={row.cover.blur}
+                        // The block of its colour under it while it loads,
+                        // not a blur: at 80px the blur was not worth an SVG
+                        // document with a filter in it for every row.
                         draggable={false}
                         className="object-cover"
                       />

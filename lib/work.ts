@@ -366,7 +366,7 @@ export const categoryLabel = (category: Category): string =>
  * The labels above were only being applied where somebody remembered to call
  * `categoryLabel` — the cover index, the nav, a page heading. Everywhere that
  * printed `project.categories[0].name` got the raw manifest name instead, so
- * `/work` listed "CAMPAIGNS" while the nav above it said "Brand campaigns",
+ * `/portfolio` listed "CAMPAIGNS" while the nav above it said "Brand campaigns",
  * and the homepage tiles did the same. That was true before this function
  * existed and would have been true of every future rename.
  *
@@ -607,25 +607,25 @@ const HAS_VIDEOS = CONTENT.videos.length > 0;
  * falls back to the full index instead of a route that does not exist.
  */
 export const categoryHref = (categorySlug: string): string => {
-  // Video's page is the work rather than a listing of it, like `/work/coverart`
+  // Video's page is the work rather than a listing of it, like `/portfolio/coverart`
   // — and unlike every other discipline, what fills it is not in the archive.
-  if (categorySlug === "video") return "/work/video";
+  if (categorySlug === "video") return "/portfolio/video";
 
   const inCategory = projectsIn(categorySlug);
-  if (inCategory.length === 0) return "/work";
+  if (inCategory.length === 0) return "/portfolio";
   /* A one-gallery discipline used to go to its project page instead —
-     `/work/coverart` — which took a visitor who had just clicked a chip on
+     `/portfolio/coverart` — which took a visitor who had just clicked a chip on
      the index off to a different page with a different shape. Julian asked
      for the gallery to open under the filters instead, so it goes through
      the category route like every other chip; that page renders the frames
-     where the listing would be. `/work/coverart` still resolves for
+     where the listing would be. `/portfolio/coverart` still resolves for
      anything already linked to it. */
-  return `/work/category/${categorySlug}`;
+  return `/portfolio/category/${categorySlug}`;
 };
 
 /** The pages a strip leads on to once its own sequence has run out: the
     site's order, in the shape the strip takes (`Lead` in `strip.tsx`). */
-export const WORK_PAGE = { href: "/work", name: "Work" };
+export const WORK_PAGE = { href: "/portfolio", name: "Work" };
 export const SESSIONS_PAGE = { href: "/sessions", name: "Sessions" };
 export const ABOUT_PAGE = { href: "/about", name: "About" };
 export const CONTACT = { href: "/contact", name: "Contact" };
@@ -874,7 +874,7 @@ export const WALL: WallTile[] = [
 ].map((p) => ({
   image: imageLoader({ src: p.cover.src, width: 640, quality: 70 }),
   title: p.name,
-  href: `/work/${p.slug}`,
+  href: `/portfolio/${p.slug}`,
 }));
 
 /**
@@ -925,16 +925,16 @@ export type Client = {
  * `content/site.json` — see `PRESS_HOME` and `PRESS_STUDIO`.
  */
 export const PRESS: Client[] = [
-  { name: "WIRED", slug: "wired-magazine", href: "/work/wired-magazine" },
-  { name: "Pear VC", slug: "pear-vc", href: "/work/video" },
-  { name: "Ladera Granola", slug: "ladera-granola", href: "/work/video" },
-  { name: "SOLSWEAR", slug: "sols", href: "/work/sols" },
-  { name: "UKIYOSUNKNOWN", slug: "ukiyosunknown", href: "/work/ukiyosunknown" },
-  { name: "JUBO", slug: "jubo", href: "/work/jubo" },
-  { name: "SAGO", slug: "sago", href: "/work/sago" },
-  { name: "GOOD CULT", slug: "goodcult", href: "/work/goodcult" },
-  { name: "PARADOX", slug: "paradox", href: "/work/paradox" },
-  { name: "HUA", slug: "hua", href: "/work/hua" },
+  { name: "WIRED", slug: "wired-magazine", href: "/portfolio/wired-magazine" },
+  { name: "Pear VC", slug: "pear-vc", href: "/portfolio/video" },
+  { name: "Ladera Granola", slug: "ladera-granola", href: "/portfolio/video" },
+  { name: "SOLSWEAR", slug: "sols", href: "/portfolio/sols" },
+  { name: "UKIYOSUNKNOWN", slug: "ukiyosunknown", href: "/portfolio/ukiyosunknown" },
+  { name: "JUBO", slug: "jubo", href: "/portfolio/jubo" },
+  { name: "SAGO", slug: "sago", href: "/portfolio/sago" },
+  { name: "GOOD CULT", slug: "goodcult", href: "/portfolio/goodcult" },
+  { name: "PARADOX", slug: "paradox", href: "/portfolio/paradox" },
+  { name: "HUA", slug: "hua", href: "/portfolio/hua" },
   /* No project of its own on the site, so the mark leads to EMPIRE itself.
      Julian asked. */
   { name: "EMPIRE", slug: "empire", href: "https://www.empi.re/" },
@@ -952,7 +952,7 @@ export const PRESS: Client[] = [
  * integrated.
  */
 export const markFor = (slug: string): Client | undefined =>
-  PRESS.find((c) => c.href === `/work/${slug}`);
+  PRESS.find((c) => c.href === `/portfolio/${slug}`);
 
 /**
  * A wall in the editor's order. An order that names nothing is the state
@@ -1414,13 +1414,13 @@ export const DISCIPLINES: Discipline[] = DISCIPLINE_SLUGS.map((slug) =>
     /* Credit the thing on screen. A photograph credits its project; a film's
        poster credits the film, and goes to the page it plays on. */
     const credit = project
-      ? { name: project.name, href: `/work/${project.slug}` }
+      ? { name: project.name, href: `/portfolio/${project.slug}` }
       : isVideo
         ? // The reel, not `videos[0]`. The frame above is a still from it,
           // and the rule for this corner is that it credits what is on
           // screen: CLEAN printed under a frame from the reel is the kind of
           // caption nobody notices until they do.
-          { name: REEL.title, href: "/work/video" }
+          { name: REEL.title, href: "/portfolio/video" }
         : undefined;
 
     return {

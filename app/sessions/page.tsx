@@ -4,6 +4,7 @@ import Image from "next/image";
 import { Strip } from "@/components/strip";
 import { StripPage, StripHead, TitleCell } from "@/components/strip-page";
 import { EnquiryCell } from "@/components/enquiry-cell";
+import { PageDials } from "@/components/page-dials";
 import { Testimonials } from "@/components/testimonials";
 import { SESSION_TYPES, formatPrice } from "@/lib/sessions";
 import { BOOKING_URL } from "@/lib/site";
@@ -32,6 +33,22 @@ export const metadata: Metadata = {
   alternates: { canonical: "/sessions" },
 };
 
+/* What DialKit's "Sessions layout" panel moves (`page-dials.tsx`). The
+   session parts move every session's together. */
+const DIALS = {
+  crumb: { sel: '[data-dial="crumb"]', text: true },
+  pageTitle: { sel: '[data-dial="page-title"]', text: true },
+  title: { sel: '[data-hash="sessions"] > :first-child', text: true },
+  intro: { sel: '[data-hash="sessions"] > .title-rest', text: true },
+  photos: '[data-ring="View more"]',
+  names: "h2[data-display]",
+  rates: '[data-dial="session-rates"]',
+  text: '[data-dial="session-text"]',
+  includes: '[data-dial="session-includes"]',
+  buttons: '[data-dial="session-buttons"]',
+  ask: ".sessions-ask",
+};
+
 export default function SessionsPage() {
   return (
     <StripPage
@@ -40,7 +57,7 @@ export default function SessionsPage() {
           crumb={
             <Link
               prefetch={false}
-              href="/work"
+              href="/portfolio"
               className="label text-muted-foreground transition-colors duration-200 hoverable:hover:text-foreground"
             >
               &larr; Portfolio
@@ -51,10 +68,11 @@ export default function SessionsPage() {
         />
       }
     >
+      <PageDials title="Sessions layout" id="sessions-layout" parts={DIALS} />
       <Strip
         label={`Sessions: ${SESSION_TYPES.length} session types, left and right`}
         // Julian: scrolling back goes to the work, on its first page.
-        prev={{ href: "/work", name: "Portfolio", start: true }}
+        prev={{ href: "/portfolio", name: "Portfolio", start: true }}
         next={CONTACT}
         // Julian: the ScrollStack, made to make sense sideways. Each
         // session is a card pinning at the left while the next one is
@@ -94,7 +112,7 @@ export default function SessionsPage() {
                   <Link
                     key={`${session.slug}-cover`}
                     prefetch={false}
-                    href={`/work/${sample.slug}`}
+                    href={`/portfolio/${sample.slug}`}
                     /* No tick. A session is one section of this page and the
                      photograph is the front of it, not a stop of its own:
                      ticked, the ruler drew four sessions as eight, which
@@ -153,7 +171,7 @@ export default function SessionsPage() {
                       {session.name}
                     </h2>
 
-                    <dl className="flex flex-wrap gap-x-10 gap-y-4 border-t border-border pt-6 short:pt-4">
+                    <dl data-dial="session-rates" className="flex flex-wrap gap-x-10 gap-y-4 border-t border-border pt-6 short:pt-4">
                       <div>
                         <dt className="label text-muted-foreground">Rate</dt>
                         <dd className="mt-1.5 text-sm">
@@ -168,11 +186,11 @@ export default function SessionsPage() {
                       </div>
                     </dl>
 
-                    <p className="text-sm leading-relaxed text-muted-foreground">
+                    <p data-dial="session-text" className="text-sm leading-relaxed text-muted-foreground">
                       {session.blurb}
                     </p>
 
-                    <div>
+                    <div data-dial="session-includes">
                       <h3 className="label text-muted-foreground">Includes</h3>
                       <ul className="mt-4 flex flex-col gap-3 short:gap-2">
                         {session.includes.map((item) => (
@@ -195,7 +213,7 @@ export default function SessionsPage() {
                     label and value read down the left; the one thing to
                     press is put at the other end of the rule under it, so
                     it is not a seventh line of the list. */}
-                  <div className="flex flex-wrap items-center justify-end gap-3 border-t border-border pt-6">
+                  <div data-dial="session-buttons" className="flex flex-wrap items-center justify-end gap-3 border-t border-border pt-6">
                     {BOOKING_URL ? (
                       <a
                         href={BOOKING_URL}
@@ -228,6 +246,7 @@ export default function SessionsPage() {
             body="Contact me with questions about commissions."
             type="session"
             next={CONTACT}
+            className="sessions-ask"
           />,
         ]}
       </Strip>

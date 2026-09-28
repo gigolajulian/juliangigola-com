@@ -31,6 +31,51 @@ export function InquireWall({ items }: { items: WallTile[] }) {
   React.useEffect(() => {
     document.getElementById("where-next")?.style.setProperty("--door-blur", `${blur}px`);
   }, [blur]);
+
+  /* Built on the screen before it, not with the page. Julian:
+     a first visit lagged until everything had loaded. The wall is 144
+     tiles in 3D, each a layer of its own, and on the homepage it is the
+     last of five screens: built with the page it was a good part of the
+     first layout and the hydration, and its layers were carried through
+     every frame of the four screens before it. Along the strip, or down
+     the page on a phone; a link straight to #inquire builds it at once.
+     Once the scrolling has stopped: built during a page turn, it dropped
+     half a dozen frames of it. Not in a transition, which here runs the
+     whole page through a view transition (`page-transition.tsx`). */
+  const box = React.useRef<HTMLDivElement>(null);
+  const [near, setNear] = React.useState(false);
+  React.useEffect(() => {
+    const el = box.current;
+    if (!el || near) return;
+    const strip = el.closest<HTMLElement>(".strip-scroll");
+    const root = strip && getComputedStyle(strip).overflowX !== "visible" ? strip : null;
+    const scroller: EventTarget = root ?? window;
+    let still = 0;
+    const build = () => setNear(true);
+    const moved = () => {
+      clearTimeout(still);
+      still = window.setTimeout(build, 200);
+    };
+    const io = new IntersectionObserver(
+      ([e]) => {
+        if (!e.isIntersecting) return;
+        io.disconnect();
+        scroller.addEventListener("scroll", moved, { passive: true });
+        moved();
+      },
+      // Half a screen: an edge that only touches the margin counts, so a
+      // whole one built it two screens early.
+      { root, rootMargin: "50% 50%" },
+    );
+    io.observe(el);
+    return () => {
+      io.disconnect();
+      clearTimeout(still);
+      scroller.removeEventListener("scroll", moved);
+    };
+  }, [near]);
+  if (!near) return <div ref={box} className="h-full w-full" />;
+
   return (
     <DriftWall
       items={items}

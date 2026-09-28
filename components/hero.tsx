@@ -126,7 +126,7 @@ function Ways({
       className={cn("flex flex-wrap items-center gap-3", className)}
     >
       <Link
-        href="/work"
+        href="/portfolio"
         className="label action px-7 py-5 press active:scale-[0.97] max-sm:px-4 short:px-6 short:py-3.5"
       >
         See the work

@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { Mesh, Program, Renderer, Texture, Triangle } from "ogl";
+import { buildProgram } from "@/lib/gl-warm";
 
 /* ── the name, through glass ──────────────────────────────────────
  * React Bits' WarpText (reactbits.dev), which Julian asked for on the name
@@ -292,6 +293,8 @@ export function WarpText({
       });
     } catch (error) {
       console.warn("WarpText: WebGL could not be initialized.", error);
+      // Nothing to wait for: the opening lifts without it (`intro.tsx`).
+      container.dataset.drawn = "";
       return;
     }
     const gl = renderer.gl;
@@ -352,32 +355,29 @@ export function WarpText({
     });
     const l = lookRef.current;
     const geometry = new Triangle(gl);
-    const program = new Program(gl, {
-      vertex,
-      fragment,
-      transparent: true,
-      depthTest: false,
-      depthWrite: false,
-      uniforms: {
-        uTextTexture: { value: texture },
-        uResolution: { value: new Float32Array([1, 1]) },
-        uPointer: { value: new Float32Array([0.5, 0.5]) },
-        uPointerActive: { value: 0 },
-        uTime: { value: 0 },
-        uWarpStrength: { value: l.warpStrength },
-        uWarpScale: { value: l.warpScale },
-        uSpeed: { value: l.speed },
-        uPointerInfluence: { value: l.pointerInfluence },
-        uPointerStrength: { value: l.pointerStrength },
-        uRefraction: { value: l.refraction },
-        uRipple: { value: Number(l.ripple) },
-        uMotion: { value: reduceMotion ? 0 : 1 },
-      },
-    });
-    const mesh = new Mesh(gl, { geometry, program });
+    const uniforms = {
+      uTextTexture: { value: texture },
+      uResolution: { value: new Float32Array([1, 1]) },
+      uPointer: { value: new Float32Array([0.5, 0.5]) },
+      uPointerActive: { value: 0 },
+      uTime: { value: 0 },
+      uWarpStrength: { value: l.warpStrength },
+      uWarpScale: { value: l.warpScale },
+      uSpeed: { value: l.speed },
+      uPointerInfluence: { value: l.pointerInfluence },
+      uPointerStrength: { value: l.pointerStrength },
+      uRefraction: { value: l.refraction },
+      uRipple: { value: Number(l.ripple) },
+      uMotion: { value: reduceMotion ? 0 : 1 },
+    };
+    /* The program once its shaders are compiled, which the GPU does in
+       its own time (`lib/gl-warm.ts`); nothing draws until then, and the
+       name is still rising under the opening by the time it is. */
+    let program: Program | undefined;
+    let mesh: Mesh | undefined;
 
     const renderOnce = () => {
-      if (!disposed && !contextLost) renderer.render({ scene: mesh });
+      if (!disposed && !contextLost && mesh) renderer.render({ scene: mesh });
     };
 
     const rasterize = async () => {
@@ -396,10 +396,13 @@ export function WarpText({
       texture.image = image;
       texture.needsUpdate = true;
       renderOnce();
+      // The words are on the canvas: the opening waits for this before it
+      // lifts, so the name is never missing behind it (`intro.tsx`).
+      if (mesh) container.dataset.drawn = "";
     };
 
     const resize = () => {
-      if (disposed || contextLost) return;
+      if (disposed || contextLost || !mesh) return;
       // The box as laid out, not as drawn: a transform on an ancestor (the
       // header's wordmark is scaled on the homepage) would otherwise be
       // baked into the canvas, and a transform changing back fires no
@@ -408,8 +411,8 @@ export function WarpText({
       if (rect.width <= 0 || rect.height <= 0) return;
       renderer.dpr = density();
       renderer.setSize(rect.width, rect.height);
-      program.uniforms.uResolution.value[0] = gl.drawingBufferWidth;
-      program.uniforms.uResolution.value[1] = gl.drawingBufferHeight;
+      uniforms.uResolution.value[0] = gl.drawingBufferWidth;
+      uniforms.uResolution.value[1] = gl.drawingBufferHeight;
       rasterize();
     };
 
@@ -440,7 +443,7 @@ export function WarpText({
     };
     const onReducedMotion = (e: MediaQueryListEvent) => {
       reduceMotion = e.matches;
-      program.uniforms.uMotion.value = reduceMotion ? 0 : 1;
+      uniforms.uMotion.value = reduceMotion ? 0 : 1;
       renderOnce();
     };
 
@@ -455,6 +458,10 @@ export function WarpText({
 
     const loop = (now: number) => {
       if (disposed || contextLost) return;
+      if (!mesh) {
+        raf = 0;
+        return;
+      }
       const buried = container.closest("[data-buried]");
       if (buried) {
         raf = 0;
@@ -490,20 +497,20 @@ export function WarpText({
       pointer.x += ((on || fading ? pointer.tx : idleX) - pointer.x) * damping;
       pointer.y += ((on || fading ? pointer.ty : idleY) - pointer.y) * damping;
       pointer.active += ((on ? 1 : fading ? 0 : 0.18) - pointer.active) * 0.06;
-      program.uniforms.uPointer.value[0] = pointer.x;
-      program.uniforms.uPointer.value[1] = pointer.y;
-      program.uniforms.uPointerActive.value = reduceMotion ? pointer.active * 0.35 : pointer.active;
-      program.uniforms.uTime.value = reduceMotion ? 0 : elapsed;
+      uniforms.uPointer.value[0] = pointer.x;
+      uniforms.uPointer.value[1] = pointer.y;
+      uniforms.uPointerActive.value = reduceMotion ? pointer.active * 0.35 : pointer.active;
+      uniforms.uTime.value = reduceMotion ? 0 : elapsed;
       // Read every frame, so a change of props (the `?tune` sliders in
       // `warp-tuner.tsx`) shows without rebuilding the canvas.
       const l = lookRef.current;
-      program.uniforms.uWarpStrength.value = l.warpStrength;
-      program.uniforms.uWarpScale.value = l.warpScale;
-      program.uniforms.uSpeed.value = l.speed;
-      program.uniforms.uPointerInfluence.value = l.pointerInfluence;
-      program.uniforms.uPointerStrength.value = l.pointerStrength;
-      program.uniforms.uRefraction.value = l.refraction;
-      program.uniforms.uRipple.value = Number(l.ripple);
+      uniforms.uWarpStrength.value = l.warpStrength;
+      uniforms.uWarpScale.value = l.warpScale;
+      uniforms.uSpeed.value = l.speed;
+      uniforms.uPointerInfluence.value = l.pointerInfluence;
+      uniforms.uPointerStrength.value = l.pointerStrength;
+      uniforms.uRefraction.value = l.refraction;
+      uniforms.uRipple.value = Number(l.ripple);
       renderOnce();
       raf = requestAnimationFrame(loop);
     };
@@ -537,8 +544,20 @@ export function WarpText({
     document.addEventListener("visibilitychange", onVisibility);
     reduced.addEventListener("change", onReducedMotion);
 
-    resize();
-    raf = requestAnimationFrame(loop);
+    buildProgram(gl, {
+      vertex,
+      fragment,
+      transparent: true,
+      depthTest: false,
+      depthWrite: false,
+      uniforms,
+    }).then((built) => {
+      program = built;
+      if (disposed || contextLost) return;
+      mesh = new Mesh(gl, { geometry, program });
+      resize();
+      if (visible && pageVisible && !raf) raf = requestAnimationFrame(loop);
+    });
 
     return () => {
       disposed = true;
@@ -557,7 +576,7 @@ export function WarpText({
         try {
           if (texture.texture) gl.deleteTexture(texture.texture);
           geometry.remove();
-          program.remove();
+          program?.remove();
           gl.getExtension("WEBGL_lose_context")?.loseContext();
         } catch {}
       }

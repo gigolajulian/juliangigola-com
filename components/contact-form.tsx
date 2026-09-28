@@ -139,7 +139,7 @@ export function ContactForm() {
             person who has just written in is the likeliest visitor on the
             site to want another look at the work. */}
         <Link
-          href="/work"
+          href="/portfolio"
           style={{ "--reveal-delay": "560ms" } as React.CSSProperties}
           className="rise label mt-8 text-muted-foreground transition-colors duration-200 hoverable:hover:text-foreground"
         >
@@ -329,6 +329,7 @@ export function ContactForm() {
       <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
         <button
           type="submit"
+          data-dial="send"
           disabled={pending}
           aria-disabled={!ready || undefined}
           aria-describedby={!ready ? "enquire-missing" : undefined}

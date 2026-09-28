@@ -40,7 +40,7 @@ export function generateStaticParams() {
 }
 
 export async function generateMetadata(
-  props: PageProps<"/work/[slug]">,
+  props: PageProps<"/portfolio/[slug]">,
 ): Promise<Metadata> {
   const { slug } = await props.params;
   const project = getProject(slug);
@@ -71,7 +71,7 @@ export async function generateMetadata(
   return {
     title: project.name,
     description,
-    alternates: { canonical: `/work/${project.slug}` },
+    alternates: { canonical: `/portfolio/${project.slug}` },
     /* Unlisted means unlisted. The sitemap already leaves it out, but a
        page off every index that Google still holds is a page Julian took
        off the site and can be found on it anyway - by the one listing he
@@ -101,7 +101,7 @@ export async function generateMetadata(
   };
 }
 
-export default async function ProjectPage(props: PageProps<"/work/[slug]">) {
+export default async function ProjectPage(props: PageProps<"/portfolio/[slug]">) {
   const { slug } = await props.params;
   const project = getProject(slug);
   if (!project) notFound();
@@ -138,7 +138,7 @@ export default async function ProjectPage(props: PageProps<"/work/[slug]">) {
     : (() => {
         const next = nextAfter(project);
         return next
-          ? { href: `/work/${next.slug}`, name: `Next: ${next.name}` }
+          ? { href: `/portfolio/${next.slug}`, name: `Next: ${next.name}` }
           : undefined;
       })();
 
@@ -161,7 +161,7 @@ export default async function ProjectPage(props: PageProps<"/work/[slug]">) {
      the same walk. A discipline gallery has no project before it. */
   const prevProject = isDiscipline ? undefined : prevBefore(project);
   const prevUp: NextUp | undefined = prevProject
-    ? { href: `/work/${prevProject.slug}`, name: prevProject.name }
+    ? { href: `/portfolio/${prevProject.slug}`, name: prevProject.name }
     : undefined;
 
   /* Cover art keeps the rack it was given: twenty-four sleeves at 1:1, two
@@ -255,7 +255,7 @@ function Crumb() {
   return (
     <nav aria-label="Breadcrumb">
       <Link
-        href="/work"
+        href="/portfolio"
         className="label text-muted-foreground transition-colors duration-200 hoverable:hover:text-foreground"
       >
         &larr; All work

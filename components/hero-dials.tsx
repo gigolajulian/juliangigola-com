@@ -9,7 +9,9 @@ import {
   type DialConfig,
   type DialPadConfig,
 } from "dialkit";
-import "dialkit/styles.css";
+import { useDialKitStyles } from "@/lib/dialkit-styles";
+import { highlightDials } from "@/lib/dial-highlight";
+import { DialCopyAll } from "@/components/dial-copy-all";
 import { WarpText } from "@/components/warp-text";
 import { NAME_WARP } from "@/lib/name-warp";
 import { DEAL, SLOTS } from "@/lib/cover-slots";
@@ -31,12 +33,12 @@ import { DEAL, SLOTS } from "@/lib/cover-slots";
 /* Julian: the names were confusing. Each key is the label DialKit shows
    (it splits camelCase into words), so every one says what it moves. */
 export const CARDS = {
-  motion: { type: "easing", duration: 0.25, ease: [1, -0.4, 0.5, 1] },
-  grow: [1.045, 1, 1.2, 0.005],
-  forward: [64, 0, 200, 1],
-  towardMiddle: [0.08, 0, 1, 0.01],
+  motion: { type: "easing", duration: 0.25, ease: [1, -0.14, 0.5, 1] },
+  grow: [1.03, 1, 1.2, 0.005],
+  forward: [44, 0, 200, 1],
+  towardMiddle: [0.1, 0, 1, 0.01],
   shadow: { blur: [4, 0, 80, 1], opacity: [0.3, 0, 1, 0.01] },
-  otherPhotos: { blur: [0.5, 0, 8, 0.1], glassSheen: [0.5, 0, 1, 0.05] },
+  otherPhotos: { blur: [0.5, 0, 8, 0.1], glassSheen: [0.4, 0, 1, 0.05] },
   delays: {
     comeForward: [30, 0, 1000, 10],
     blurOthers: [310, 0, 2000, 10],
@@ -174,6 +176,7 @@ export function useLatest<T>(value: T) {
     tree to that frame's link and went to the project. */
 export function HeroDials() {
   const ref = React.useRef<HTMLSpanElement>(null);
+  useDialKitStyles();
   const cover = () => ref.current?.closest<HTMLElement>(".cover-float");
   /* Julian: one panel on top (registered first, so listed first) with the two buttons: replay, and one copy
      of every panel's values to paste back in one go. */
@@ -382,63 +385,24 @@ export function HeroDials() {
     };
   }, [arrange, kitRef]);
 
-  /* Julian: hovering a section of the panel draws a yellow box round what
-     it changes on the page. The innermost section that names something
-     wins; one that does not (Shadow, Delays) falls back to its panel. */
+  /* Julian: hovering a section of the panel draws a box round what it
+     changes on the page (`lib/dial-highlight.ts`). A section that names
+     nothing (Shadow, Delays) falls back to its panel. */
   React.useEffect(() => {
     if (process.env.NODE_ENV === "production") return;
-    const el = ref.current?.closest<HTMLElement>(".cover-float");
-    if (!el) return;
-    const layer = document.createElement("div");
-    layer.style.cssText = "position:fixed;inset:0;z-index:9998;pointer-events:none";
-    document.body.append(layer);
-    let on: string | null = null;
-    let raf = 0;
-    const draw = () => {
-      // The page, not the cover: the wall is on the last page.
-      const boxes = on ? [...document.querySelectorAll<HTMLElement>(on)] : [];
-      while (layer.children.length > boxes.length) layer.lastChild!.remove();
-      boxes.forEach((b, i) => {
-        const r = b.getBoundingClientRect();
-        const box = (layer.children[i] as HTMLElement | undefined) ?? layer.appendChild(document.createElement("div"));
-        box.style.cssText = `position:absolute;left:${r.left - 3}px;top:${r.top - 3}px;width:${r.width + 6}px;height:${r.height + 6}px;outline:2px solid #ffd400;background:rgb(255 212 0 / 0.08)`;
-      });
-      /* The cards drift and turn under it, so the boxes follow each frame. */
-      raf = on ? requestAnimationFrame(draw) : 0;
-    };
-    const over = (e: PointerEvent) => {
-      let next: string | null = null;
-      for (
-        let f: Element | null | undefined = (e.target as Element).closest?.(".dialkit-folder");
-        f && !next;
-        f = f.parentElement?.closest(".dialkit-folder")
-      ) {
-        const title = f
-          .querySelector(":scope > .dialkit-folder-header .dialkit-folder-title")
-          ?.textContent?.trim()
-          .toLowerCase();
-        if (!title) continue;
-        next = /^card \d+$/.test(title)
-          ? `.cover-float-frame[data-card="${title}"]`
-          : (DIAL_TARGETS[title] ?? null);
-      }
-      if (next === on) return;
-      on = next;
-      if (on && !raf) raf = requestAnimationFrame(draw);
-      if (!on) draw();
-    };
-    document.addEventListener("pointerover", over);
-    return () => {
-      document.removeEventListener("pointerover", over);
-      cancelAnimationFrame(raf);
-      layer.remove();
-    };
+    if (!ref.current?.closest(".cover-float")) return;
+    return highlightDials((title) =>
+      /^card \d+$/.test(title)
+        ? `.cover-float-frame[data-card="${title}"]`
+        : (DIAL_TARGETS[title] ?? null),
+    );
   }, []);
 
   return (
     <>
       <span ref={ref} hidden />
       <DialRoot position="top-right" />
+      <DialCopyAll />
     </>
   );
 }

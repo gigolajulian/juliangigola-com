@@ -108,7 +108,7 @@ export default function Home() {
             </h2>
             <Link
               prefetch={false}
-              href="/work"
+              href="/portfolio"
               className="label pointer-events-auto glass-surface bg-background/70 px-3 py-1.5 text-muted-foreground transition-colors duration-200 hoverable:hover:text-foreground"
             >
               <span aria-hidden>All {COMMISSIONS.length} &rarr;</span>
@@ -195,7 +195,7 @@ export default function Home() {
               className="grid h-full grid-rows-2 divide-y divide-border"
             >
               <PathCard
-                href="/work"
+                href="/portfolio"
                 label="For art directors"
                 title="See the work"
                 body="Editorial, campaigns, portraits, and artist imagery."

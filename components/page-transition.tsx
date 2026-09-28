@@ -31,7 +31,7 @@ const clearNav = () => {
    travels along it: to the right of the page you are on, the pages move
    right to left, and back the other way. Julian: a transition for each
    page from the navbar. A project or a filter counts as its section. */
-const SECTIONS = ["/", "/work", "/sessions", "/contact", "/about"];
+const SECTIONS = ["/", "/portfolio", "/sessions", "/contact", "/about"];
 const sectionOf = (path: string) =>
   SECTIONS.reduce(
     (found, s, i) => (path === s || (s !== "/" && path.startsWith(`${s}/`)) ? i : found),
@@ -105,9 +105,9 @@ export function PageTransition({ children }: { children: React.ReactNode }) {
          and the strip already fades the row (`data-arrive="fade"`). The
          zoom on top of it read as the whole site reloading. */
       const index = (path: string) =>
-        path === "/work" ||
-        path === "/work/video" ||
-        path.startsWith("/work/category/");
+        path === "/portfolio" ||
+        path === "/portfolio/video" ||
+        path.startsWith("/portfolio/category/");
       if (index(a.pathname) && index(location.pathname)) {
         set("filter");
         return;

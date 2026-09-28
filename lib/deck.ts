@@ -109,6 +109,25 @@ const onRelaid = (el: HTMLElement, deal: () => void) => {
   return watch;
 };
 
+/** Runs `fn` once the page is idle, and returns what cancels it.
+    Julian: a first visit lagged while the pictures came in. The deal's
+    forced layout (70ms on the work index) ran two frames after the strip
+    mounted, back to back with the hydration and the pictures landing;
+    nothing it does shows until the strip is scrolled, so it waits for a
+    gap. Safari has no idle callback, so it waits a beat there. */
+const idle = (fn: () => void): (() => void) => {
+  const w = window as Window & {
+    requestIdleCallback?: (cb: () => void, o?: { timeout: number }) => number;
+    cancelIdleCallback?: (h: number) => void;
+  };
+  if (w.requestIdleCallback && w.cancelIdleCallback) {
+    const h = w.requestIdleCallback(fn, { timeout: 800 });
+    return () => w.cancelIdleCallback!(h);
+  }
+  const t = window.setTimeout(fn, 250);
+  return () => window.clearTimeout(t);
+};
+
 const drop = (live: Map<HTMLElement, Animation>) => {
   for (const a of live.values()) a.cancel();
   live.clear();
@@ -224,17 +243,16 @@ export function runDeck(el: HTMLElement, mode: Deck): () => void {
      more: the pause before the work index came in (Julian: the delay and
      the glitch into the portfolio). Two frames on, the trip's snapshot is
      taken and moving on the compositor, and nothing here shows yet, since
-     a strip arrives at an end where no card is covered. */
-  let first = requestAnimationFrame(() => {
-    first = requestAnimationFrame(deal);
-  });
+     a strip arrives at an end where no card is covered. And once the page
+     is idle rather than two frames on (`idle`). */
+  const first = idle(deal);
   el.addEventListener("scroll", onScroll, { passive: true });
   wide.addEventListener("change", deal);
   calm.addEventListener("change", deal);
   window.addEventListener("resize", deal);
   const relaid = onRelaid(el, deal);
   return () => {
-    cancelAnimationFrame(first);
+    first();
     el.removeEventListener("scroll", onScroll);
     wide.removeEventListener("change", deal);
     calm.removeEventListener("change", deal);
@@ -381,17 +399,16 @@ function runChapters(el: HTMLElement): () => void {
      more: the pause before the work index came in (Julian: the delay and
      the glitch into the portfolio). Two frames on, the trip's snapshot is
      taken and moving on the compositor, and nothing here shows yet, since
-     a strip arrives at an end where no card is covered. */
-  let first = requestAnimationFrame(() => {
-    first = requestAnimationFrame(deal);
-  });
+     a strip arrives at an end where no card is covered. And once the page
+     is idle rather than two frames on (`idle`). */
+  const first = idle(deal);
   el.addEventListener("scroll", onScroll, { passive: true });
   wide.addEventListener("change", deal);
   calm.addEventListener("change", deal);
   window.addEventListener("resize", deal);
   const relaid = onRelaid(el, deal);
   return () => {
-    cancelAnimationFrame(first);
+    first();
     el.removeEventListener("scroll", onScroll);
     wide.removeEventListener("change", deal);
     calm.removeEventListener("change", deal);

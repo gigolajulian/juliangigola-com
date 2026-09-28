@@ -59,7 +59,7 @@ const JELLY = {
  * that hash left with the title cell. One behaviour, and the route is
  * what says which chip is lit.
  *
- * `/work#places` still opens on Places: the cells keep their hashes and
+ * `/portfolio#places` still opens on Places: the cells keep their hashes and
  * the strip still listens for `hashchange`. Nothing in the row writes one
  * any more.
  * ─────────────────────────────────────────────────────────────── */
@@ -193,7 +193,7 @@ export function WorkShell({
     if (!all) {
       // A filter change like a chip's: the rack fades in where it stands.
       markFilter(0);
-      router.push("/work", { scroll: false });
+      router.push("/portfolio", { scroll: false });
     }
     setScoping(true);
   };
@@ -880,7 +880,7 @@ export function WorkShell({
                 <span className="label text-muted-foreground">All work</span>
               ) : (
                 <Link
-                  href="/work"
+                  href="/portfolio"
                   className="label text-muted-foreground transition-colors duration-200 hoverable:hover:text-foreground"
                 >
                   &larr; All work
@@ -982,7 +982,7 @@ export function WorkShell({
                   className="relative z-10"
                 >
                   <Chip
-                    href="/work"
+                    href="/portfolio"
                     active={all && shown === null}
                     current={all}
                     count={heads.all?.count}

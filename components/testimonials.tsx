@@ -32,7 +32,7 @@ export function Testimonials({ cells = false }: { cells?: boolean }) {
               {t.project ? (
                 <Link
                   prefetch={false}
-                  href={`/work/${t.project}`}
+                  href={`/portfolio/${t.project}`}
                   className="transition-colors duration-200 hoverable:hover:text-foreground"
                 >
                   {t.name}
@@ -67,7 +67,7 @@ export function Testimonials({ cells = false }: { cells?: boolean }) {
                 <p className="label mt-5 text-muted-foreground">
                   {t.project ? (
                     <Link
-                      href={`/work/${t.project}`}
+                      href={`/portfolio/${t.project}`}
                       className="transition-colors duration-200 hoverable:hover:text-foreground"
                     >
                       {t.name}

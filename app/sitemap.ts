@@ -15,7 +15,7 @@ export const dynamic = "force-static";
 export default function sitemap(): MetadataRoute.Sitemap {
   // Listed explicitly, so /admin cannot drift into the sitemap by being a
   // route — it is unlisted on purpose.
-  const pages = ["", "/work", "/sessions", "/about", "/contact", "/legal"].map(
+  const pages = ["", "/portfolio", "/sessions", "/about", "/contact", "/legal"].map(
     (path) => ({
       url: `${SITE}${path}`,
       changeFrequency: "monthly" as const,
@@ -32,7 +32,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     // ("bay area music video director" is the search it answers). The other
     // one-gallery disciplines arrive below as projects, because that is what
     // they are.
-    (c) => c.href.startsWith("/work/category/") || c.href === "/work/video",
+    (c) => c.href.startsWith("/portfolio/category/") || c.href === "/portfolio/video",
   ).map((c) => ({
     url: `${SITE}${c.href}`,
     changeFrequency: "monthly" as const,

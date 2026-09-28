@@ -8,7 +8,7 @@ import type { Video } from "@/lib/videos";
 import { useWorkQuery, useWorkView } from "@/lib/work-view";
 
 /* ── which of the three is showing ────────────────────────────────
- * The switch every page under `/work` stands behind: the strip or the
+ * The switch every page under `/portfolio` stands behind: the strip or the
  * rack it was handed, or the list, or the answer to what is typed in the
  * head's viewfinder.
  *

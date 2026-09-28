@@ -282,7 +282,7 @@ const centreOf = (el: HTMLElement, i: number) => {
  * column of headings — and a hash that names one of those should still bring
  * the cell holding it into view rather than doing nothing at all.
  *
- * Last, a photograph by its file: `/work/nyx#photo-06` opens on
+ * Last, a photograph by its file: `/portfolio/nyx#photo-06` opens on
  * `/work/nyx/06.jpg` wherever it sits in the sequence. The colour panel
  * links that way, because a position would move whenever a project's
  * opener changes and a file name does not.
@@ -1733,9 +1733,9 @@ export function Strip({
     /* Two filters of the work index are one page with the row swapped, not
        two pages. */
     const filterPath = (path: string) =>
-      path === "/work" ||
-      path === "/work/video" ||
-      path.startsWith("/work/category/");
+      path === "/portfolio" ||
+      path === "/portfolio/video" ||
+      path.startsWith("/portfolio/category/");
 
     const leave = (dir: 1 | -1) => {
       const href = dir > 0 ? nextHref : prevHref;

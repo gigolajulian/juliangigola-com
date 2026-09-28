@@ -32,7 +32,7 @@ import { COVER_RELEASES } from "@/lib/cover-art-data";
  * director can be sent directly: "here is the editorial work" is a link,
  * not an instruction.
  *
- * A static segment, `/work/category/…`, rather than sharing `/work/[slug]`
+ * A static segment, `/portfolio/category/…`, rather than sharing `/portfolio/[slug]`
  * with the projects: five categories are published under the same slug as a
  * project (COVERART, WEDDINGS), and one route serving both would have to pick
  * a winner and silently shadow the loser.
@@ -47,13 +47,13 @@ import { COVER_RELEASES } from "@/lib/cover-art-data";
  * Only categories that have something to show.
  *
  * An empty one has nothing to put on a page: `categoryHref` sends it back to
- * `/work`, so it is never linked here. A category that is itself a single
+ * `/portfolio`, so it is never linked here. A category that is itself a single
  * gallery *is* listed: it renders its frames under the filter row where the
  * project list would be, which is what Julian asked for. Click Automotive
  * and the cars load right there.
  */
 const LISTED = WORK_CATEGORIES.filter(
-  (c) => categoryHref(c.slug) === `/work/category/${c.slug}`,
+  (c) => categoryHref(c.slug) === `/portfolio/category/${c.slug}`,
 );
 
 /** The discipline after this one along the chip row. The chain runs once
@@ -76,7 +76,7 @@ const before = (slug: string) => {
   const prev = WORK_CATEGORY_LINKS[at - 1];
   return prev
     ? { href: prev.href, name: prev.name }
-    : { href: "/work", name: "All work" };
+    : { href: "/portfolio", name: "All work" };
 };
 
 export function generateStaticParams() {
@@ -84,7 +84,7 @@ export function generateStaticParams() {
 }
 
 export async function generateMetadata(
-  props: PageProps<"/work/category/[slug]">,
+  props: PageProps<"/portfolio/category/[slug]">,
 ): Promise<Metadata> {
   const { slug } = await props.params;
   const category = LISTED.find((c) => c.slug === slug);
@@ -99,7 +99,7 @@ export async function generateMetadata(
     description: gallery
       ? `${count} ${name.toLowerCase()} frames by Julian Gigola.`
       : `${name}: ${count} ${count === 1 ? "project" : "projects"} by Julian Gigola, with clients and credits.`,
-    alternates: { canonical: `/work/category/${slug}` },
+    alternates: { canonical: `/portfolio/category/${slug}` },
   };
 }
 
@@ -133,7 +133,7 @@ const framesList = (frames: Frame[], name: string): ListRow[] =>
   });
 
 export default async function CategoryPage(
-  props: PageProps<"/work/category/[slug]">,
+  props: PageProps<"/portfolio/category/[slug]">,
 ) {
   const { slug } = await props.params;
   const category = LISTED.find((c) => c.slug === slug);

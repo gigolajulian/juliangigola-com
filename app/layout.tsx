@@ -162,13 +162,15 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             site showing and then a curtain dropping over it is worse than
             no curtain at all.
 
-            Three conditions, and `?intro=1` to see it again on demand.
+            Three conditions (the first page of a visit, whichever it is,
+            but not /admin; not seen yet; motion not turned down), and
+            `?intro=1` to see it again on demand.
             `sessionStorage` throws outright in some privacy modes rather
             than returning null, so the whole thing is wrapped and a
             failure simply means no opening. */}
         <script
           dangerouslySetInnerHTML={{
-            __html: `(function(){try{var q=location.search;if(/[?&]intro=0/.test(q))return;var force=/[?&]intro=1/.test(q);var seen=false;try{seen=!!sessionStorage.getItem("jg-intro")}catch(e){}var calm=matchMedia("(prefers-reduced-motion: reduce)").matches;var home=location.pathname==="/";if(force||(home&&!seen&&!calm))document.documentElement.dataset.intro="1"}catch(e){}})()`,
+            __html: `(function(){try{var q=location.search;if(/[?&]intro=0/.test(q))return;var force=/[?&]intro=1/.test(q);var seen=false;try{seen=!!sessionStorage.getItem("jg-intro")}catch(e){}var calm=matchMedia("(prefers-reduced-motion: reduce)").matches;var admin=location.pathname.indexOf("/admin")===0;if(force||(!admin&&!seen&&!calm))document.documentElement.dataset.intro="1"}catch(e){}})()`,
           }}
         />
       </head>

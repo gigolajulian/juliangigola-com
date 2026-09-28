@@ -14,9 +14,9 @@ import { WORK_CATEGORY_LINKS } from "@/lib/work";
  * layout draws the head and the chip row with Motion lit, and the films
  * run across the strip under the chips where a discipline's covers would.
  *
- * Still a real route, at `/work/video` and not `/work/category/video`,
+ * Still a real route, at `/portfolio/video` and not `/portfolio/category/video`,
  * because it is not a listing of projects: there are no project pages
- * behind it, so the page is the work, the way `/work/coverart` is.
+ * behind it, so the page is the work, the way `/portfolio/coverart` is.
  *
  * The strip opens on the reel, playing muted, then the music videos and
  * the commercials two rows deep, each film opening in the viewer, and it
@@ -27,7 +27,7 @@ export const metadata: Metadata = {
   title: "Motion",
   description:
     "Music videos and commercials, directed and shot in the San Francisco Bay Area. Selected moving work with clients and credits.",
-  alternates: { canonical: "/work/video" },
+  alternates: { canonical: "/portfolio/video" },
 };
 
 /* The filter before the films in the chip row, so pushing back off the
@@ -37,7 +37,7 @@ const BEFORE = (() => {
   const prev = at > 0 ? WORK_CATEGORY_LINKS[at - 1] : undefined;
   return prev
     ? { href: prev.href, name: prev.name }
-    : { href: "/work", name: "All work" };
+    : { href: "/portfolio", name: "All work" };
 })();
 
 /* The poster of a film as a frame, for its line in the list: a still with
@@ -59,7 +59,7 @@ export default function VideoPage() {
     {
       slug: "reel",
       name: REEL.title,
-      href: "/work/video",
+      href: "/portfolio/video",
       discipline: "Motion",
       credit: "The reel",
       cover: still(REEL.poster),
@@ -69,7 +69,7 @@ export default function VideoPage() {
       slug: v.id,
       film: v.id,
       name: v.title,
-      href: "/work/video",
+      href: "/portfolio/video",
       discipline: "Motion",
       credit: [v.client, v.year].filter(Boolean).join(" · ") || "Film",
       cover: still(posterFor(v)),
@@ -94,7 +94,7 @@ export default function VideoPage() {
             title="Have a project in mind?"
             body="Tell me what you have in mind and I'll come back with an approach and a quote."
             type="editorial"
-            secondary={{ href: "/work", label: "See the work" }}
+            secondary={{ href: "/portfolio", label: "See the work" }}
             className="sm:w-[100vw] sm:px-[10vw]"
           />
         }

@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import Link from "next/link";
+import { ChromaWaves } from "@/components/chroma-waves";
 import { ContactForm } from "@/components/contact-form";
+import { PageDials } from "@/components/page-dials";
 import { Strip } from "@/components/strip";
 import { StripPage, StripHead, RisingTitle } from "@/components/strip-page";
 import { BOOKING_URL } from "@/lib/site";
@@ -63,6 +65,18 @@ const PHASES = [
   },
 ];
 
+/* What DialKit's "Contact layout" panel moves (`page-dials.tsx`). */
+const DIALS = {
+  crumb: { sel: '[data-dial="crumb"]', text: true },
+  pageTitle: { sel: '[data-dial="page-title"]', text: true },
+  title: { sel: ".contact-title", text: true },
+  intro: { sel: '[data-dial="intro"]', text: true },
+  details: '[data-dial="details"]',
+  steps: '[data-dial="steps"]',
+  form: '[data-dial="form"]',
+  sendButton: '[data-dial="send"]',
+};
+
 export default function ContactPage() {
   return (
     <StripPage
@@ -82,6 +96,9 @@ export default function ContactPage() {
         />
       }
     >
+      {/* Julian: waves behind the page, the site's own shader. */}
+      <ChromaWaves className="pointer-events-none fixed inset-0 -z-10" />
+      <PageDials title="Contact layout" id="contact-layout" parts={DIALS} />
       <Strip
         label="Contact: the ask, the details, and the form."
         /* The site's order, as the nav has it: Sessions, Contact, About.
@@ -106,8 +123,8 @@ export default function ContactPage() {
             data-scroll
             className="flex min-h-0 flex-col gap-6 overflow-y-auto overscroll-contain sm:max-h-full short:gap-4"
           >
-            <RisingTitle text="Get in touch" />
-            <p className="title-rest max-w-prose text-sm leading-relaxed text-muted-foreground">
+            <RisingTitle text="Get in touch" className="contact-title" />
+            <p data-dial="intro" className="title-rest max-w-prose text-sm leading-relaxed text-muted-foreground">
               {/* A sentence to a line, where there is room: Julian asked
                   for two lines rather than a wrap mid sentence. */}
               Commissions, sessions, or a question about a project.
@@ -137,7 +154,7 @@ export default function ContactPage() {
                 a screen of its own, which was a screen to swipe past on
                 the way to nothing: the address and the handles are two
                 lines and belong beside the ask. */}
-            <div className="border-t border-border pt-8 short:pt-5">
+            <div data-dial="details" className="border-t border-border pt-8 short:pt-5">
               <dl className="grid gap-6 min-[56rem]:grid-cols-2">
                 <div>
                   <dt className="label text-muted-foreground">Email</dt>
@@ -192,7 +209,7 @@ export default function ContactPage() {
             </div>
             {/* The four steps, compact: a name and a line each, the lines
                 giving way on a short window so the column still fits. */}
-            <div className="border-t border-border pt-6 short:pt-4">
+            <div data-dial="steps" className="border-t border-border pt-6 short:pt-4">
               <h2 className="label text-muted-foreground">
                 How a commission runs
               </h2>
@@ -222,6 +239,7 @@ export default function ContactPage() {
               pre-filled type resolves. */}
           <div
             data-scroll
+            data-dial="form"
             className="min-h-0 overflow-y-auto overscroll-contain sm:max-h-full sm:pr-3"
           >
             <Suspense fallback={null}>

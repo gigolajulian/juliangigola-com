@@ -461,7 +461,7 @@
     transition-delay: var(--release-wait);
   }
   .cover-float-ring:has(.cover-float-frame:hover) .cover-float-card::after {
-    opacity: var(--h-glass, 0.5);
+    opacity: var(--h-glass, 0.4);
     transition-delay: var(--blur-wait);
   }
   .cover-float-ring .cover-float-frame:hover .cover-float-card::after {
@@ -469,13 +469,13 @@
     transition-delay: 0ms;
   }
   .cover-float-ring .cover-float-frame:hover .cover-float-card {
-    transform: translateZ(calc(var(--z, 0px) + var(--h-lift, 64px)));
+    transform: translateZ(calc(var(--z, 0px) + var(--h-lift, 44px)));
     /* Julian: and toward the middle. `--mid-x` and `--mid-y` are the way
        to the cover's centre, measured as the pointer lands (`CoverCard`);
        the panel's Toward Middle is the share of it taken. The frame stays
        put, so the pointer never loses it as the picture moves. */
-    translate: calc(var(--mid-x, 0px) * var(--h-mid, 0.08))
-      calc(var(--mid-y, 0px) * var(--h-mid, 0.08));
+    translate: calc(var(--mid-x, 0px) * var(--h-mid, 0.1))
+      calc(var(--mid-y, 0px) * var(--h-mid, 0.1));
     filter: blur(0px);
     transition-delay: var(--focus-wait);
   }
@@ -1814,6 +1814,14 @@ a.strip-cell {
       transform 420ms var(--ease-out-strong),
       scale 90ms cubic-bezier(0.4, 0, 1, 1);
   }
+}
+/* Only the first dozen arrive. Julian: a first visit lagged until the
+   pictures were in. /work rose all 88 of its covers at once, a layer each
+   and a style pass each a frame for a second and a half, while the
+   pictures were landing in them; the ones past the first screen finished
+   long before anybody got there. */
+.strip-cell:nth-child(n + 13) {
+  animation: none;
 }
 /* Julian: slightly move the photos up when interacting with the scroll
    bar. `transform`, and not the `translate` the rest of the site uses:
@@ -4517,4 +4525,44 @@ h2:not(.label, [data-display]) {
   .about-hero-content::before {
     display: none;
   }
+}
+
+/* DialKit (the dev server only). Julian: its background at 85%, so the
+   page reads through the panel. Its own themes set the colour; these
+   match their specificity and win on order. */
+:root .dialkit-root {
+  --dial-glass-bg: rgb(33 33 33 / 0.85);
+}
+:root .dialkit-root[data-theme="light"] {
+  --dial-glass-bg: rgb(250 250 250 / 0.85);
+}
+@media (prefers-color-scheme: light) {
+  :root .dialkit-root[data-theme="system"] {
+    --dial-glass-bg: rgb(250 250 250 / 0.85);
+  }
+}
+/* "Copy all" (components/dial-copy-all.tsx), in the panel's header,
+   left of the close button; hidden while the panel is folded. */
+.dialkit-panel-header {
+  position: relative;
+}
+.dial-copy-all {
+  position: absolute;
+  top: 10px;
+  right: 32px;
+  height: 24px;
+  padding: 0 8px;
+  border: 0;
+  border-radius: 6px;
+  background: var(--dial-surface);
+  color: var(--dial-text-label);
+  font: 500 11px/24px system-ui, sans-serif;
+  cursor: pointer;
+}
+.dial-copy-all:hover {
+  background: var(--dial-surface-hover);
+  color: var(--dial-text-primary);
+}
+.dialkit-folder-root[data-open="false"] .dial-copy-all {
+  display: none;
 }

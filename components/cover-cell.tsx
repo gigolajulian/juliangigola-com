@@ -75,7 +75,7 @@ export function CoverCell({
   const warm = () => {
     window.clearTimeout(hold.current);
     hold.current = window.setTimeout(
-      () => router.prefetch(href ?? `/work/${row.slug}`),
+      () => router.prefetch(href ?? `/portfolio/${row.slug}`),
       140,
     );
   };
@@ -91,7 +91,7 @@ export function CoverCell({
     <ViewTransition name={`cover-${row.slug}`} share="morph" default="none">
       <Link
         prefetch={false}
-        href={href ?? `/work/${row.slug}`}
+        href={href ?? `/portfolio/${row.slug}`}
         data-tick
         data-label={label}
         /* The chapter is `data-label` and only the first cover of a
@@ -128,8 +128,12 @@ export function CoverCell({
           sizes={`(min-width: 640px) and (min-resolution: 2.5dppx) calc((100vh - 10rem) * ${((row.cover.width / row.cover.height) * 0.667).toFixed(3)}), (min-width: 640px) calc((100vh - 10rem) * ${(row.cover.width / row.cover.height).toFixed(3)}), 100vw`}
           priority={eager}
           loading={eager ? undefined : "lazy"}
-          placeholder={row.cover.blur ? "blur" : "empty"}
-          blurDataURL={row.cover.blur}
+          /* No blur placeholder: Next paints it as the picture's own
+             background, and the picture is transparent until it lands
+             (`data-fade`), so it was never seen. It still cost a small SVG
+             document with a 20px blur for every cover, parsed and laid out
+             as the page came in (116 on /work). The cell's own colour
+             stands in. */
           draggable={false}
           /* Under a pointer the photograph leans in. 1.04 and 500ms: a
              cover is a large surface and a fast scale on one reads as a

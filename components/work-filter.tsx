@@ -37,14 +37,14 @@ export function WorkFilter({
   // Every page in the site mounts the root layout, and eleven of them have
   // nothing to filter. The work index, its disciplines and the video page
   // are the three shapes of route that do.
-  if (!pathname.startsWith("/work")) return null;
+  if (!pathname.startsWith("/portfolio")) return null;
 
   const rows = [
-    { slug: "all", name: "All work", href: "/work" },
+    { slug: "all", name: "All work", href: "/portfolio" },
     ...categories,
   ];
   const isCurrent = (href: string) =>
-    href === "/work" ? pathname === "/work" : pathname.startsWith(href);
+    href === "/portfolio" ? pathname === "/portfolio" : pathname.startsWith(href);
 
   return (
     <div

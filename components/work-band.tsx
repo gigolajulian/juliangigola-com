@@ -171,7 +171,7 @@ export function WorkBand({
         } as React.CSSProperties
       }
       prefetch={false}
-      href={`/work/${project.slug}`}
+      href={`/portfolio/${project.slug}`}
       onPointerMove={onPointerMove}
       onPointerLeave={reset}
       onBlur={reset}
@@ -228,11 +228,10 @@ export function WorkBand({
                below it. A lazy image in view is still fetched as soon as
                the page is laid out. */
             loading="lazy"
-            // The blur-up under it while it loads, and — below the fold,
-            // where it is not the largest paint — a fade in when it lands
-            // rather than a pop. See `photo-fade.tsx`.
-            placeholder={project.cover.blur ? "blur" : "empty"}
-            blurDataURL={project.cover.blur}
+            // A fade in when it lands rather than a pop, over the tile's
+            // colour (`photo-fade.tsx`). No blur-up: it was the picture's
+            // own background, so it faded with it and was never seen, and
+            // it cost an SVG document with a 20px blur a tile.
             data-fade=""
             className="object-cover"
           />

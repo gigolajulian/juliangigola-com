@@ -1,7 +1,8 @@
 "use client";
 
 import * as React from "react";
-import { Mesh, Program, Renderer, Texture, Triangle } from "ogl";
+import { Mesh, Renderer, Texture, Triangle } from "ogl";
+import { buildProgram } from "@/lib/gl-warm";
 import { WarpText } from "@/components/warp-text";
 import { NAME_WARP } from "@/lib/name-warp";
 
@@ -247,29 +248,24 @@ export function AboutHero({
       wrapS: gl.CLAMP_TO_EDGE,
       wrapT: gl.CLAMP_TO_EDGE,
     });
-    const program = new Program(gl, {
-      vertex,
-      fragment,
-      depthTest: false,
-      depthWrite: false,
-      uniforms: {
-        uPhoto: { value: photo },
-        uRes: { value: [1, 1] },
-        uDpr: { value: renderer.dpr },
-        uCell: { value: CELL_WIDE },
-        uTime: { value: 0 },
-        uPointer: { value: [-1e4, -1e4] },
-        uOn: { value: 0 },
-        uRect: { value: [0, 0, 0, 0] },
-        uMask: { value: mask },
-        uFade: { value: [1e5, 1e5 + 1] },
-        uRipple: { value: [0, 0, -1] },
-        uLight: { value: 0 },
-        uDusk: { value: [0, 0, 1, 0] },
-      },
-    });
-    const mesh = new Mesh(gl, { geometry: new Triangle(gl), program });
-    const u = program.uniforms;
+    const u = {
+      uPhoto: { value: photo },
+      uRes: { value: [1, 1] },
+      uDpr: { value: renderer.dpr },
+      uCell: { value: CELL_WIDE },
+      uTime: { value: 0 },
+      uPointer: { value: [-1e4, -1e4] },
+      uOn: { value: 0 },
+      uRect: { value: [0, 0, 0, 0] },
+      uMask: { value: mask },
+      uFade: { value: [1e5, 1e5 + 1] },
+      uRipple: { value: [0, 0, -1] },
+      uLight: { value: 0 },
+      uDusk: { value: [0, 0, 1, 0] },
+    };
+    /* The program once its shaders are compiled, in the GPU's own time
+       (`lib/gl-warm.ts`); until then the stage is the page's own ground. */
+    let mesh: Mesh | undefined;
 
     const pointer = { x: -1e4, y: -1e4, on: 0, target: 0 };
     const move = (e: PointerEvent) => {
@@ -369,7 +365,7 @@ export function AboutHero({
       u.uOn.value = pointer.on;
       const age = (now - ripple.at) / 1000;
       u.uRipple.value = [ripple.x - r.left, ripple.y - r.top, age < RIPPLE_S ? age : -1];
-      renderer.render({ scene: mesh });
+      if (mesh) renderer.render({ scene: mesh });
 
       const moving =
         Math.abs(pointer.target - pointer.on) > 0.01 || age < RIPPLE_S;
@@ -381,6 +377,12 @@ export function AboutHero({
     const wake = () => {
       if (!raf && !gone) raf = requestAnimationFrame(frame);
     };
+
+    buildProgram(gl, { vertex, fragment, depthTest: false, depthWrite: false, uniforms: u }).then((program) => {
+      if (gone) return;
+      mesh = new Mesh(gl, { geometry: new Triangle(gl), program });
+      wake();
+    });
 
     const sizes = new ResizeObserver(() => {
       size();
@@ -406,7 +408,11 @@ export function AboutHero({
       attributeFilter: ["data-theme"],
     });
     document.addEventListener("visibilitychange", shown);
-    img.onload = () => {
+    /* Decoded off the main thread first, then read on a canvas kept on
+       the CPU: drawn straight from `onload`, the decode and the read back
+       from the GPU were one 130ms stall as the page came in. */
+    img.decode().then(() => {
+      if (gone) return;
       photo.image = img;
       /* Where he is: the photograph against its plain grey backdrop, read
          low. Anything far enough from the backdrop's grey is him (his
@@ -417,7 +423,7 @@ export function AboutHero({
       const mc = document.createElement("canvas");
       mc.width = MW;
       mc.height = MH;
-      const mx = mc.getContext("2d");
+      const mx = mc.getContext("2d", { willReadFrequently: true });
       if (mx) {
         mx.drawImage(img, 0, 0, MW, MH);
         const px = mx.getImageData(0, 0, MW, MH);
@@ -470,11 +476,10 @@ export function AboutHero({
       }
       size();
       wake();
-    };
+    }, () => {});
 
     return () => {
       gone = true;
-      img.onload = null;
       cancelAnimationFrame(raf);
       sizes.disconnect();
       view.disconnect();

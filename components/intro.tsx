@@ -18,7 +18,10 @@ import { BlinkingMark, blink } from "@/components/not-found-scene";
  *   from the first byte, and the panel fills at `CAP` whatever is still
  *   loading.
  *
- *   It runs once a visit, on the homepage. `sessionStorage` remembers.
+ *   It runs once a visit, on whichever page the visit starts on.
+ *   `sessionStorage` remembers. Julian: use the splash screen as a loader,
+ *   so the lag of a first load is never seen. It was the homepage only,
+ *   and a first visit straight to /work got the lag with nothing over it.
  *
  *   It is skipped for anybody who asks their system for less motion.
  *
@@ -55,9 +58,18 @@ export function Intro() {
       sessionStorage.setItem("jg-intro", "1");
     } catch {}
 
-    /* What "ready" means: the type, every photograph already on screen
-       that is not lazy, and the window's own load. The panel sweeps on a
-       steady curve over `SWEEP` and never runs ahead of those. */
+    /* What "ready" means: the type, the window's own load, every
+       photograph on screen decoded, and then the page gone quiet. The
+       panel sweeps on a steady curve over `SWEEP` and never runs ahead of
+       those.
+
+       Julian: the lag of a first load should never be seen. Loaded was
+       not enough: the page still had its pictures to decode, the name's
+       shader to compile and the hydration to finish, and the lift uncovered
+       all of that. So the photographs are waited for decoded, lazy ones
+       included when they are on screen (in view, a lazy one loads at
+       once), across the screen as well as down it, for the sideways
+       strips. */
     const tasks: Promise<unknown>[] = [document.fonts.ready];
     if (document.readyState !== "complete") {
       tasks.push(
@@ -65,15 +77,38 @@ export function Intro() {
       );
     }
     for (const img of Array.from(document.images)) {
-      if (img.complete || img.loading === "lazy") continue;
-      if (img.getBoundingClientRect().top > window.innerHeight) continue;
-      tasks.push(
-        new Promise((r) => {
-          img.addEventListener("load", r, { once: true });
-          img.addEventListener("error", r, { once: true });
-        }),
-      );
+      const r = img.getBoundingClientRect();
+      const seen =
+        r.width > 0 &&
+        r.height > 0 &&
+        r.bottom > 0 &&
+        r.right > 0 &&
+        r.top < window.innerHeight &&
+        r.left < window.innerWidth;
+      if (seen) tasks.push(img.decode().catch(() => {}));
     }
+    /* Then quiet: the name drawn (`data-drawn`, `warp-text.tsx`), and a
+       run of 300ms in which no frame took longer than two, so whatever
+       was still working under the panel (the hydration, a decode, the
+       deck's first layout) has finished before anybody sees the page. */
+    tasks.push(
+      new Promise<void>((resolve) => {
+        let calm = 0;
+        let last = performance.now();
+        const drawn = () =>
+          Array.from(document.querySelectorAll<HTMLElement>(".warp-text")).every(
+            (el) => "drawn" in el.dataset || !el.getBoundingClientRect().width,
+          );
+        const tick = (now: number) => {
+          const gap = now - last;
+          last = now;
+          calm = gap < 34 ? calm + gap : 0;
+          if (calm >= 300 && drawn()) resolve();
+          else requestAnimationFrame(tick);
+        };
+        requestAnimationFrame(tick);
+      }),
+    );
     let done = 0;
     for (const t of tasks) t.then(() => done++);
 
@@ -109,6 +144,14 @@ export function Intro() {
 
     const lids = () => eye.current?.querySelector("[data-lids]");
     let blinked = false;
+    /* Julian: the blink earlier, and sometimes two. A fifth of the way
+       across rather than half, and a coin toss for a second blink a beat
+       after the first, the way an eye does it. */
+    const blinks = (l: Element) => {
+      blink(l).finished.then(() => {
+        if (Math.random() < 0.5) setTimeout(() => blink(l), 110);
+      }, () => {});
+    };
     const t0 = performance.now();
     const hold = window.setInterval(() => {
       const real = performance.now() - t0 >= CAP ? 1 : done / tasks.length;
@@ -116,9 +159,9 @@ export function Intro() {
       if (real < 1 && at >= reaches(real)) sweep?.pause();
       else if (sweep?.playState === "paused") sweep.play();
       const l = lids();
-      if (l && !blinked && at >= reaches(0.5)) {
+      if (l && !blinked && at >= reaches(0.2)) {
         blinked = true;
-        blink(l);
+        blinks(l);
       }
     }, 50);
 
@@ -130,7 +173,7 @@ export function Intro() {
       .then(() => {
         window.clearInterval(hold);
         const l = lids();
-        if (l && !blinked) blink(l);
+        if (l && !blinked) blinks(l);
         setTimeout(() => {
           box.current?.classList.add("jg-intro-open");
           root.dataset.intro = "lift";

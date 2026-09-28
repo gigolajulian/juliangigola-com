@@ -292,7 +292,7 @@ export type AddedFile = {
    * The running order of the work, by slug.
    *
    * One order for the whole site rather than one per discipline. A project
-   * filed under two disciplines has one position, `/work` and every discipline
+   * filed under two disciplines has one position, `/portfolio` and every discipline
    * page agree, and there is a single list to reason about instead of nine
    * that can disagree with each other.
    *
@@ -380,7 +380,7 @@ export type AddedFile = {
    * for the other thing - ROUGE off the pages, with a link to it that
    * still opens. So this takes a project out of the work index, the
    * discipline pages, the homepage band, the running order, the prev/next
-   * chain and the sitemap, and leaves `/work/<slug>` answering for anybody
+   * chain and the sitemap, and leaves `/portfolio/<slug>` answering for anybody
    * who has the link.
    *
    * The page is `noindex` as well, or "unlisted" would mean unlisted
