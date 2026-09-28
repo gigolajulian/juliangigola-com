@@ -63,15 +63,16 @@ export function SiteFooter() {
           </nav>
         </div>
 
-        <div className="site-footer-row mt-12 flex flex-col gap-2 border-t border-border pt-5 sm:flex-row sm:justify-between lying:mt-0 lying:border-t-0 lying:pt-0">
+        <div className="site-footer-row mt-12 flex flex-col gap-2 max-sm:flex-col-reverse max-sm:gap-5 border-t border-border pt-5 sm:flex-row sm:justify-between lying:mt-0 lying:border-t-0 lying:pt-0">
           <p className="label text-muted-foreground">
             <strong className="font-semibold text-foreground">
               &copy; {new Date().getFullYear()} Julian Gigola.
             </strong>{" "}
             All rights reserved.
           </p>
-          <nav aria-label="Legal" className="label text-muted-foreground">
-            <ul className="flex flex-wrap gap-x-6 gap-y-2">
+          {/* Julian: on a phone, the second line to the right. */}
+          <nav aria-label="Legal" className="label text-muted-foreground max-sm:self-end">
+            <ul className="flex flex-wrap gap-x-6 gap-y-2 max-sm:justify-end">
               {LEGAL.map((l) => (
                 <li key={l.href}>
                   <Link

@@ -208,13 +208,11 @@ export default function Home() {
             >
               <PathCard
                 href="/portfolio"
-                label="For art directors"
                 title="See the work"
                 body="Editorial, campaigns, portraits, and artist imagery."
               />
               <PathCard
                 href="/sessions"
-                label="For individuals"
                 title="Book a session"
                 body="Graduation, headshots, weddings, and studio digitals. What's included and how long it takes."
               />
@@ -228,12 +226,10 @@ export default function Home() {
 
 function PathCard({
   href,
-  label,
   title,
   body,
 }: {
   href: string;
-  label: string;
   title: string;
   body: string;
 }) {
@@ -250,8 +246,8 @@ function PathCard({
       className="group relative flex flex-col justify-center gap-6 border-l border-border bg-background/30 px-6 py-12 backdrop-blur-[var(--door-blur,2px)] transition-colors duration-300 hoverable:hover:bg-background/45 sm:px-16 sm:pt-20 lying:gap-3 lying:px-10 lying:py-3 lying:first:pt-16"
     >
       <div>
-        <p className="label text-muted-foreground">{label}</p>
-        <h3 className="mt-5 title lying:mt-2 lying:[--text-title:1.75rem]">{title}</h3>
+        {/* Julian: no audience line over the title, on any screen. */}
+        <h3 className="title lying:[--text-title:1.75rem]">{title}</h3>
         {/* A phone on its side has the height for the door, not its
             description. */}
         <p className="mt-4 max-w-sm text-sm leading-relaxed text-muted-foreground lying:hidden">
