@@ -12,9 +12,21 @@ import {
 import { useDialKitStyles } from "@/lib/dialkit-styles";
 import { highlightDials } from "@/lib/dial-highlight";
 import { DialCopyAll } from "@/components/dial-copy-all";
+import { ArrangeInspector, type ArrangeCard } from "@/components/hero-arrange";
+import { Hero3D } from "@/components/hero-3d";
 import { WarpText } from "@/components/warp-text";
 import { NAME_WARP } from "@/lib/name-warp";
-import { DEAL, SLOTS } from "@/lib/cover-slots";
+import {
+  DEAL,
+  LANDSCAPE,
+  MIDDLE,
+  PHONE,
+  SIDEWAYS,
+  SLOTS,
+  UPRIGHT,
+  middleVars,
+  type Middle,
+} from "@/lib/cover-slots";
 
 /* ── the hero on DialKit ──────────────────────────────────────────
  * Julian: tune almost everything about the cover live, on DialKit's
@@ -84,45 +96,119 @@ type Slot = {
 };
 const LAYOUT = {
   /* Julian: move the cards by hand. On, a card drags where it should go,
-     the wheel over it sizes it, shift and the wheel sets its depth, and
+     the wheel over it moves it forward or back, shift and the wheel sizes it, and
      the panel's numbers follow. Links and the space's turn wait. */
   dragToArrange: false,
   shuffle: { type: "action", label: "Shuffle photos" },
   spread: { width: [1.05, 0.3, 1.5, 0.01], height: [0.94, 0.3, 1.5, 0.01] },
-  cards: Object.fromEntries(
-    SLOTS.map((s, i) => [
+  cards: cardsOf(SLOTS) as Record<string, Slot>,
+} satisfies DialConfig;
+
+/* Julian: the smaller screens arranged on their own. A tablet held
+   upright and a short landscape screen (640 to 1279px wide) each have a
+   panel of the same cards, with a switch for whether each shows; the
+   spread and Drag to Arrange are the main panel's, and a drag moves the
+   cards of whichever layout the window is showing. */
+type SmallSlot = Slot & { show: boolean };
+const UPRIGHT_LAYOUT = {
+  cards: cardsOf(UPRIGHT) as Record<string, SmallSlot>,
+} satisfies DialConfig;
+const LANDSCAPE_LAYOUT = {
+  cards: cardsOf(LANDSCAPE) as Record<string, SmallSlot>,
+} satisfies DialConfig;
+const PHONE_LAYOUT = {
+  cards: cardsOf(PHONE) as Record<string, SmallSlot>,
+} satisfies DialConfig;
+const SIDEWAYS_LAYOUT = {
+  cards: cardsOf(SIDEWAYS) as Record<string, SmallSlot>,
+} satisfies DialConfig;
+/* The same queries as `globals.css`; sideways wins over landscape. */
+const UPRIGHT_MQ =
+  "(min-width: 40rem) and (max-width: 79.99rem) and (orientation: portrait)";
+const LANDSCAPE_MQ =
+  "(min-width: 40rem) and (max-width: 79.99rem) and (orientation: landscape)";
+const SIDEWAYS_MQ = "(orientation: landscape) and (max-height: 31.99rem)";
+const PHONE_MQ = "(max-width: 39.99rem) and (orientation: portrait)";
+
+/** Which layout the window is showing. */
+type Shape = "large" | "landscape" | "upright" | "phone" | "sideways";
+const shapeNow = (): Shape =>
+  matchMedia(PHONE_MQ).matches
+    ? "phone"
+    : matchMedia(SIDEWAYS_MQ).matches
+      ? "sideways"
+      : matchMedia(UPRIGHT_MQ).matches
+        ? "upright"
+        : matchMedia(LANDSCAPE_MQ).matches
+          ? "landscape"
+          : "large";
+
+/* Julian arranges across many screen sizes in one tab, and a reload (or
+   the dev server's own, on a code change) threw the layouts away. Kept
+   for the tab's life, so they survive that and never outlive it to hide a
+   new default. */
+const keep = (id: string) => ({
+  persist: { key: `jg-arrange:${id}`, storage: "sessionStorage" as const },
+});
+
+/** A card folder for each place; with a `show` switch where the places
+    have one. */
+function cardsOf(
+  places: { x: number; y: number; w: number; z: number; show?: boolean }[],
+) {
+  return Object.fromEntries(
+    places.map((s, i) => [
       `card ${i + 1}`,
       {
+        ...(s.show === undefined ? {} : { _collapsed: true, show: s.show }),
         place: {
           type: "pad",
           x: [s.x, -15, 105, 0.5],
           y: [-s.y, -100, 15, 0.5],
           labels: { x: "left", y: "top" },
         },
-        width: [s.w, 4, 30, 0.5],
+        width: [s.w, 4, 40, 0.5],
         depth: [s.z, -200, 200, 1],
       },
     ]),
-  ) as Record<string, Slot>,
-} satisfies DialConfig;
+  );
+}
+
+/* Julian: the name, the role, the location and the buttons sized, and the
+   middle moved, on each screen shape (`MIDDLE`). The arrange inspector
+   edits the set the window is showing. */
+const MIDDLE_DIALS = Object.fromEntries(
+  Object.entries(MIDDLE).map(([shape, m]) => [
+    shape,
+    {
+      _collapsed: true,
+      name: [m.name, 0.4, 2, 0.01],
+      role: [m.role, 0.4, 2, 0.01],
+      where: [m.where, 0.4, 2, 0.01],
+      buttons: [m.buttons, 0.4, 2, 0.01],
+      x: [m.x, -50, 50, 0.5],
+      y: [m.y, -50, 50, 0.5],
+    },
+  ]),
+) as Record<Shape, Record<keyof Middle, [number, number, number, number]> & { _collapsed: boolean }>;
 
 const TYPE = {
-  roleLine: { size: [15, 9, 24, 0.5], letterSpacing: [0.17, 0, 0.5, 0.01] },
-  location: { size: [13, 9, 20, 0.5] },
-  buttons: { size: [10.5, 8, 16, 0.5] },
+  roleLine: { size: [13, 9, 24, 0.5], letterSpacing: [0.15, 0, 0.5, 0.01] },
+  location: { size: [10.5, 9, 20, 0.5] },
+  buttons: { size: [9.5, 8, 16, 0.5] },
   /* Julian: how close the name, the role, the location and the buttons
      sit, in px of space between each and the next. */
   /* Julian: the size of the whole middle (name, role, location and
      buttons together) and where it starts: px down from the middle of
      the cover, negative up. */
   middle: {
-    size: [1.02, 0.5, 1.6, 0.01],
-    moveDown: [21, -300, 300, 1],
+    size: [0.9, 0.5, 1.6, 0.01],
+    moveDown: [22, -300, 300, 1],
   },
   spacing: {
-    nameToRole: [8, 0, 80, 1],
-    roleToLocation: [10, 0, 80, 1],
-    locationToButtons: [13, 0, 80, 1],
+    nameToRole: [5, 0, 80, 1],
+    roleToLocation: [8, 0, 80, 1],
+    locationToButtons: [11, 0, 80, 1],
   },
 } satisfies DialConfig;
 
@@ -135,12 +221,15 @@ const DIAL_TARGETS: Record<string, string> = {
   "role line": ".cover-float-title",
   location: ".cover-float-where",
   buttons: ".cover-cta",
-  spacing: ".cover-float-name, .cover-float-title, .cover-float-where, .cover-cta",
+  spacing:
+    ".cover-float-name, .cover-float-title, .cover-float-where, .cover-cta",
   middle: ".cover-float-middle",
-  "load animation": ".cover-float-frame, .cover-float-name, .cover-float-title, .cover-float-where, .cover-cta",
+  "load animation":
+    ".cover-float-frame, .cover-float-name, .cover-float-title, .cover-float-where, .cover-cta",
   "photos fly in": ".cover-float-frame",
   "photos fade in": ".cover-float-frame",
-  "text rise": ".cover-float-name, .cover-float-title, .cover-float-where, .cover-cta",
+  "text rise":
+    ".cover-float-name, .cover-float-title, .cover-float-where, .cover-cta",
   "name effect": ".cover-float-name",
   "photo layout": ".cover-float-frame",
   "background wall": ".inquire-wall",
@@ -209,13 +298,69 @@ export function HeroDials() {
   const [deal, setDeal] = React.useState(DEAL);
   const kit = useDialKitController("Photo layout", LAYOUT, {
     id: "hero-layout",
+    ...keep("hero-layout"),
     onAction: (action) => {
       if (action.endsWith("shuffle")) setDeal(shuffled);
     },
   });
   const layout = kit.values;
-  /* The controller is new each render; the arrange listeners outlive that. */
+  const upright = useDialKitController(
+    "Photo layout, upright",
+    UPRIGHT_LAYOUT,
+    {
+      id: "hero-layout-upright",
+      ...keep("hero-layout-upright"),
+    },
+  );
+  const landscape = useDialKitController(
+    "Photo layout, landscape",
+    LANDSCAPE_LAYOUT,
+    {
+      id: "hero-layout-landscape",
+      ...keep("hero-layout-landscape"),
+    },
+  );
+  const phone = useDialKitController("Photo layout, phone", PHONE_LAYOUT, {
+    id: "hero-layout-phone",
+    ...keep("hero-layout-phone"),
+  });
+  const sideways = useDialKitController(
+    "Photo layout, sideways",
+    SIDEWAYS_LAYOUT,
+    {
+      id: "hero-layout-sideways",
+      ...keep("hero-layout-sideways"),
+    },
+  );
+  const middle = useDialKitController("Middle by screen", MIDDLE_DIALS, {
+    id: "hero-middle",
+    ...keep("hero-middle"),
+  });
+  const mids = middle.values as unknown as Record<Shape, Middle>;
+  const layouts = { large: kit, upright, landscape, phone, sideways };
+  /* The arrange inspector (`hero-arrange.tsx`): the layout showing, the
+     card picked, and the field tilted to see its depth. */
+  const [shape, setShape] = React.useState<Shape>("large");
+  React.useEffect(() => {
+    const on = () => setShape(shapeNow());
+    on();
+    const lists = [PHONE_MQ, SIDEWAYS_MQ, UPRIGHT_MQ, LANDSCAPE_MQ].map((q) =>
+      matchMedia(q),
+    );
+    lists.forEach((l) => l.addEventListener("change", on));
+    return () => lists.forEach((l) => l.removeEventListener("change", on));
+  }, []);
+  const [picked, setPicked] = React.useState<string | null>(null);
+  const [tilt, setTilt] = React.useState(false);
+  const [view3d, setView3d] = React.useState(false);
+  /* The controllers are new each render; the arrange listeners outlive
+     that. */
   const kitRef = useLatest(kit);
+  const uprightRef = useLatest(upright);
+  const landscapeRef = useLatest(landscape);
+  const phoneRef = useLatest(phone);
+  const sidewaysRef = useLatest(sideways);
+  const middleRef = useLatest(middle);
   React.useEffect(() => {
     all.current = {
       cards,
@@ -224,6 +369,11 @@ export function HeroDials() {
       entrance,
       type,
       layout: { ...layout, deal: deal.map((d) => d + 1) },
+      upright: upright.values,
+      landscape: landscape.values,
+      phone: phone.values,
+      sideways: sideways.values,
+      middle: middle.values,
     };
   });
 
@@ -281,7 +431,10 @@ export function HeroDials() {
       "--h-gap-where": `${type.spacing.roleToLocation}px`,
       "--h-gap-cta": `${type.spacing.locationToButtons}px`,
     };
-    for (const [k, v] of Object.entries(vars)) el.style.setProperty(k, v);
+    for (const [k, v] of Object.entries({ ...vars, ...middleVars(mids) }))
+      el.style.setProperty(k, v);
+    // The phone's lines fitted again to the name at its new size.
+    window.dispatchEvent(new Event("jg-fit"));
     el.style.setProperty("--h-pull-x", `${layout.spread.width}`);
     el.style.setProperty("--h-pull-y", `${layout.spread.height}`);
     /* Each card's place, over the one the server gave it. */
@@ -294,6 +447,28 @@ export function HeroDials() {
       f.style.setProperty("--y", `${-c.place.y}%`);
       f.style.setProperty("--w", `${c.width}vw`);
       f.style.setProperty("--z", `${c.depth}px`);
+      for (const [k, set, off] of [
+        ["u", upright.values, "cover-float-off-upright"],
+        ["l", landscape.values, "cover-float-off-landscape"],
+        ["s", sideways.values, "cover-float-off-sideways"],
+      ] as const) {
+        const p = set.cards[card];
+        if (!p) continue;
+        f.style.setProperty(`--${k}x`, `${p.place.x}%`);
+        f.style.setProperty(`--${k}y`, `${-p.place.y}%`);
+        f.style.setProperty(`--${k}w`, `${p.width}vw`);
+        f.style.setProperty(`--${k}z`, `${p.depth}px`);
+        f.classList.toggle(off, !p.show);
+      }
+      const p = phone.values.cards[card];
+      if (p) {
+        f.style.setProperty("--px", `${p.place.x}%`);
+        f.style.setProperty("--py", `${-p.place.y}%`);
+        f.style.setProperty("--pw", `${p.width}vw`);
+        f.style.setProperty("--pwh", `${(p.width * 13) / 28}svh`);
+        f.style.setProperty("--pz", `${p.depth}px`);
+        f.classList.toggle("cover-float-off-phone", !p.show);
+      }
     });
   });
 
@@ -310,8 +485,35 @@ export function HeroDials() {
     const step = (v: number, s: number) => Math.round(v / s) * s;
     const clamp = (v: number, lo: number, hi: number) =>
       Math.min(hi, Math.max(lo, v));
+    /* The layout the window is showing: a smaller screen's own, or the
+       large one. */
+    const active = () =>
+      ({
+        phone: phoneRef,
+        sideways: sidewaysRef,
+        upright: uprightRef,
+        landscape: landscapeRef,
+        large: kitRef,
+      })[shapeNow()].current;
+    type Card = {
+      place: { x: number; y: number };
+      width: number;
+      depth: number;
+    };
+    const cardOf = (card: string) =>
+      (active().getValues() as unknown as { cards: Record<string, Card> })
+        .cards[card];
     const set = (card: string, slot: Partial<Slot>) =>
-      kitRef.current.setValues({ cards: { [card]: slot } } as never);
+      active().setValues({ cards: { [card]: slot } } as never);
+    const mid = (e: Event) =>
+      (e.target as Element).closest<HTMLElement>(".cover-float-middle");
+    const setMid = (patch: Partial<Middle>) =>
+      middleRef.current.setValues({ [shapeNow()]: patch } as never);
+    const midNow = () =>
+      (middleRef.current.getValues() as unknown as Record<Shape, Middle>)[
+        shapeNow()
+      ];
+    let moving: { px: number; py: number; x: number; y: number } | null = null;
     let drag: {
       card: string;
       px: number;
@@ -320,11 +522,21 @@ export function HeroDials() {
       y: number;
     } | null = null;
     const down = (e: PointerEvent) => {
+      if (mid(e)) {
+        e.preventDefault();
+        e.stopPropagation();
+        setPicked("middle");
+        const m = midNow();
+        moving = { px: e.clientX, py: e.clientY, x: m.x, y: m.y };
+        mid(e)!.setPointerCapture(e.pointerId);
+        return;
+      }
       const f = at(e);
       if (!f?.dataset.card) return;
       e.preventDefault();
       e.stopPropagation();
-      const c = kitRef.current.getValues().cards[f.dataset.card];
+      setPicked(f.dataset.card);
+      const c = cardOf(f.dataset.card);
       drag = {
         card: f.dataset.card,
         px: e.clientX,
@@ -335,36 +547,98 @@ export function HeroDials() {
       f.setPointerCapture(e.pointerId);
     };
     const move = (e: PointerEvent) => {
+      if (moving) {
+        e.stopPropagation();
+        setMid({
+          x: step(
+            clamp(
+              moving.x + ((e.clientX - moving.px) / innerWidth) * 100,
+              -50,
+              50,
+            ),
+            0.5,
+          ),
+          y: step(
+            clamp(
+              moving.y + ((e.clientY - moving.py) / innerHeight) * 100,
+              -50,
+              50,
+            ),
+            0.5,
+          ),
+        });
+        return;
+      }
       if (!drag) return;
       e.stopPropagation();
       const r = el.getBoundingClientRect();
-      const { spread: pull } = kitRef.current.getValues();
-      const x = drag.x + ((e.clientX - drag.px) / r.width) * 100 / pull.width;
-      const y = drag.y + ((e.clientY - drag.py) / r.height) * 100 / pull.height;
+      // A phone places its cards as they are, with no spread.
+      const pull = matchMedia(PHONE_MQ).matches
+        ? { width: 1, height: 1 }
+        : kitRef.current.getValues().spread;
+      const x = drag.x + (((e.clientX - drag.px) / r.width) * 100) / pull.width;
+      const y =
+        drag.y + (((e.clientY - drag.py) / r.height) * 100) / pull.height;
       set(drag.card, {
-        place: { x: step(clamp(x, -15, 105), 0.5), y: -step(clamp(y, -15, 100), 0.5) },
+        place: {
+          x: step(clamp(x, -15, 105), 0.5),
+          y: -step(clamp(y, -15, 100), 0.5),
+        },
       } as never);
     };
     const up = (e: PointerEvent) => {
-      if (drag) e.stopPropagation();
+      if (drag || moving) e.stopPropagation();
       drag = null;
+      moving = null;
     };
     const wheel = (e: WheelEvent) => {
+      /* Julian: over the middle, the wheel sizes the part under the
+         pointer: the name, the role, the location or the buttons. */
+      const part =
+        mid(e) &&
+        (e.target as Element).closest(
+          ".cover-float-name, .cover-float-title, .cover-float-where, .cover-float-ctas",
+        );
+      if (mid(e)) {
+        e.preventDefault();
+        e.stopPropagation();
+        setPicked("middle");
+        if (!part) return;
+        const k: keyof Middle = part.matches(".cover-float-name")
+          ? "name"
+          : part.matches(".cover-float-title")
+            ? "role"
+            : part.matches(".cover-float-where")
+              ? "where"
+              : "buttons";
+        const d = -Math.sign(e.deltaY || e.deltaX);
+        setMid({
+          [k]: Math.round(clamp(midNow()[k] + d * 0.02, 0.4, 2) * 100) / 100,
+        });
+        return;
+      }
       const f = at(e);
       if (!f?.dataset.card) return;
       e.preventDefault();
       e.stopPropagation();
-      const c = kitRef.current.getValues().cards[f.dataset.card];
+      setPicked(f.dataset.card);
+      const c = cardOf(f.dataset.card);
       const d = -Math.sign(e.deltaY || e.deltaX);
+      /* Julian: scrolling over a card moves it in the 3D space, forward
+         (up) or back; with shift it sizes the card instead. */
       if (e.shiftKey) {
-        set(f.dataset.card, { depth: clamp(c.depth + d * 5, -200, 200) } as never);
+        set(f.dataset.card, {
+          width: clamp(c.width + d * 0.5, 4, 40),
+        } as never);
       } else {
-        set(f.dataset.card, { width: clamp(c.width + d * 0.5, 4, 30) } as never);
+        set(f.dataset.card, {
+          depth: clamp(c.depth + d * 10, -200, 200),
+        } as never);
       }
     };
     /* A card is a link: not while arranging. */
     const stop = (e: Event) => {
-      if (!at(e)) return;
+      if (!at(e) && !mid(e)) return;
       e.preventDefault();
       e.stopPropagation();
     };
@@ -376,6 +650,10 @@ export function HeroDials() {
     el.addEventListener("dragstart", stop);
     return () => {
       delete el.dataset.arrange;
+      delete el.dataset.tilt;
+      el.querySelectorAll("[data-picked]").forEach((f) =>
+        f.removeAttribute("data-picked"),
+      );
       el.removeEventListener("pointerdown", down);
       el.removeEventListener("pointermove", move);
       el.removeEventListener("pointerup", up);
@@ -383,7 +661,29 @@ export function HeroDials() {
       el.removeEventListener("click", stop);
       el.removeEventListener("dragstart", stop);
     };
-  }, [arrange, kitRef]);
+  }, [
+    arrange,
+    kitRef,
+    uprightRef,
+    landscapeRef,
+    phoneRef,
+    sidewaysRef,
+    middleRef,
+  ]);
+
+  /* The picked card ringed on the page, and the field tilted. */
+  React.useEffect(() => {
+    const el = cover();
+    if (!el || !arrange) return;
+    el.querySelectorAll<HTMLElement>(".cover-float-frame").forEach((f) =>
+      f.toggleAttribute("data-picked", f.dataset.card === picked),
+    );
+    el.querySelector(".cover-float-middle")?.toggleAttribute(
+      "data-picked",
+      picked === "middle",
+    );
+    el.toggleAttribute("data-tilt", tilt);
+  });
 
   /* Julian: hovering a section of the panel draws a box round what it
      changes on the page (`lib/dial-highlight.ts`). A section that names
@@ -403,6 +703,52 @@ export function HeroDials() {
       <span ref={ref} hidden />
       <DialRoot position="top-right" defaultOpen={false} />
       <DialCopyAll />
+      {arrange ? (
+        <ArrangeInspector
+          shape={shape}
+          cards={
+            layouts[shape].values.cards as unknown as Record<
+              string,
+              ArrangeCard
+            >
+          }
+          picked={picked}
+          onPick={setPicked}
+          set={(card, patch) =>
+            layouts[shape].setValues({ cards: { [card]: patch } } as never)
+          }
+          photoOf={(card) =>
+            cover()?.querySelector<HTMLElement>(
+              `.cover-float-frame[data-card="${card}"]`,
+            )?.dataset.photo ?? ""
+          }
+          middle={mids[shape]}
+          setMiddle={(patch) => middle.setValues({ [shape]: patch } as never)}
+          tilt={tilt}
+          onTilt={setTilt}
+          view3d={view3d}
+          onView3d={setView3d}
+        />
+      ) : null}
+      {arrange && view3d ? (
+        <Hero3D
+          cover={cover}
+          shape={shape}
+          cards={
+            layouts[shape].values.cards as unknown as Record<
+              string,
+              ArrangeCard
+            >
+          }
+          pull={shape === "phone" ? { width: 1, height: 1 } : layout.spread}
+          picked={picked}
+          onPick={setPicked}
+          set={(card, patch) =>
+            layouts[shape].setValues({ cards: { [card]: patch } } as never)
+          }
+          onClose={() => setView3d(false)}
+        />
+      ) : null}
     </>
   );
 }
@@ -433,7 +779,10 @@ export function HeroName({
       ripple={n.ripple}
       sweep
       className={className}
-      style={{ ...style, fontSize: `clamp(44px, 10vw, ${n.size}px)` }}
+      style={{
+        ...style,
+        fontSize: `calc(clamp(44px, 10vw, ${n.size}px) * var(--m-name, 1))`,
+      }}
     />
   );
 }
@@ -465,8 +814,14 @@ export function CoverCard({ children }: { children: React.ReactNode }) {
       const cover = frame.closest(".cover-float")?.getBoundingClientRect();
       if (card && cover) {
         const f = frame.getBoundingClientRect();
-        card.style.setProperty("--mid-x", `${cover.left + cover.width / 2 - (f.left + f.width / 2)}px`);
-        card.style.setProperty("--mid-y", `${cover.top + cover.height / 2 - (f.top + f.height / 2)}px`);
+        card.style.setProperty(
+          "--mid-x",
+          `${cover.left + cover.width / 2 - (f.left + f.width / 2)}px`,
+        );
+        card.style.setProperty(
+          "--mid-y",
+          `${cover.top + cover.height / 2 - (f.top + f.height / 2)}px`,
+        );
       }
       setHover(true);
     };

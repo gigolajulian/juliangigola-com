@@ -4,8 +4,9 @@ import { categoryLabel, type Project } from "@/lib/work";
 import { cn } from "@/lib/utils";
 import { CoverSpace } from "@/components/cover-space";
 import { CoverRole } from "@/components/cover-role";
+import { FitLines } from "@/components/fit-lines";
 import { CoverCard, HeroDials, HeroName } from "@/components/hero-dials";
-import { DEAL, SLOTS } from "@/lib/cover-slots";
+import { DEAL, LANDSCAPE, MIDDLE, PHONE, SIDEWAYS, SLOTS, UPRIGHT, middleVars } from "@/lib/cover-slots";
 
 /* ── the cover ────────────────────────────────────────────────────
  * The name in the middle of the screen and the featured work round it,
@@ -46,6 +47,7 @@ export function CoverFloat({
       data-tick
       data-label="Cover"
       aria-label="Julian Gigola, photographer and creative director"
+      style={middleVars(MIDDLE) as React.CSSProperties}
       className={cn(
         "cover-float relative isolate grid place-items-center overflow-hidden",
         className,
@@ -55,7 +57,12 @@ export function CoverFloat({
       <HeroDials />
       <CoverSpace className="cover-float-ring absolute inset-0 -z-10">
         {frames.map((p, i) => {
-          const s = SLOTS[DEAL[i] ?? i];
+          const at = DEAL[i] ?? i;
+          const s = SLOTS[at];
+          const u = UPRIGHT[at];
+          const l = LANDSCAPE[at];
+          const ph = PHONE[at];
+          const sw = SIDEWAYS[at];
           return (
             <Link
               key={p.slug}
@@ -63,14 +70,37 @@ export function CoverFloat({
               href={`/portfolio/${p.slug}`}
               tabIndex={-1}
               data-discipline={labels[i]}
-              className={cn("cover-float-frame", !s.phone && "max-sm:hidden")}
+              data-photo={p.name}
+              className={cn(
+                "cover-float-frame",
+                !ph.show && "cover-float-off-phone",
+                !sw.show && "cover-float-off-sideways",
+                // The smaller screens' own layouts (globals.css).
+                !u.show && "cover-float-off-upright",
+                !l.show && "cover-float-off-landscape",
+              )}
               style={
                 {
                   "--x": `${s.x}%`,
                   "--y": `${s.y}%`,
                   "--w": `${s.w}vw`,
-                  "--px": `${s.phone?.[0] ?? 0}%`,
-                  "--py": `${s.phone?.[1] ?? 0}%`,
+                  "--ux": `${u.x}%`,
+                  "--uy": `${u.y}%`,
+                  "--uw": `${u.w}vw`,
+                  "--uz": `${u.z}px`,
+                  "--lx": `${l.x}%`,
+                  "--ly": `${l.y}%`,
+                  "--lw": `${l.w}vw`,
+                  "--lz": `${l.z}px`,
+                  "--sx": `${sw.x}%`,
+                  "--sy": `${sw.y}%`,
+                  "--sw": `${sw.w}vw`,
+                  "--sz": `${sw.z}px`,
+                  "--px": `${ph.x}%`,
+                  "--py": `${ph.y}%`,
+                  "--pw": `${ph.w}vw`,
+                  "--pwh": `${(ph.w * 13) / 28}svh`,
+                  "--pz": `${ph.z}px`,
                   "--z": `${s.z}px`,
                   /* When it sets off: `--delay` in `globals.css`. */
                   "--order": ORDER[i] ?? 0,
@@ -84,7 +114,7 @@ export function CoverFloat({
                   src={p.cover.src}
                   alt=""
                   fill
-                  sizes="(max-width: 640px) 30vw, 14vw"
+                  sizes="(max-width: 640px) 30vw, (max-width: 1280px) 22vw, 14vw"
                   priority={i < 4}
                   className="object-cover"
                   style={{ backgroundColor: p.cover.color }}
@@ -116,14 +146,12 @@ export function CoverFloat({
               />
             </span>
           </span>
-          <span className="mt-[var(--h-gap-role,8px)] block">
+          <span className="mt-[var(--h-gap-role,5px)] block">
             <span
               className="lift block cover-float-title"
               style={{ "--reveal-delay": "1420ms" } as React.CSSProperties}
             >
               <CoverRole
-                /* Bound so a phone breaks it after the cross, never
-                   leaving "Director" alone on the second line. */
                 role={"Photographer ♱ Creative Director"}
                 disciplines={[...new Set(labels)]}
               />
@@ -131,13 +159,14 @@ export function CoverFloat({
           </span>
         </h1>
         <p
-          className="lift cover-float-where mt-[var(--h-gap-where,10px)] mb-[var(--h-gap-cta,13px)] max-w-[34rem]"
+          className="lift cover-float-where mt-[var(--h-gap-where,8px)] mb-[var(--h-gap-cta,11px)] max-w-[34rem]"
           style={{ "--reveal-delay": "1600ms" } as React.CSSProperties}
         >
-          {"Based in San Francisco, CA. Available Worldwide"}
+          <span className="fit-line">{"Based in San Francisco, CA. Available Worldwide"}</span>
+          <FitLines />
         </p>
         <div
-          className="lift flex flex-wrap justify-center gap-3"
+          className="lift cover-float-ctas flex flex-wrap justify-center gap-3"
           style={{ "--reveal-delay": "1760ms" } as React.CSSProperties}
         >
           <Link href="/portfolio" className="cover-cta press active:scale-[0.97]">

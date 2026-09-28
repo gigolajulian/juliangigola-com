@@ -55,7 +55,8 @@ export function CoverRole({
   return (
     <span ref={ref} className="cover-role grid">
       <span className="cover-role-word" data-on={on === null || undefined}>
-        {role}
+        {/* Fitted to the wordmark on a phone (`fit-lines.tsx`). */}
+        <span className="fit-line">{role}</span>
       </span>
       {disciplines.map((d) => (
         <span

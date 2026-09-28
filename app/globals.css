@@ -191,6 +191,13 @@
  * ───────────────────────────────────────────────────────────────── */
 .cover-float {
   perspective: var(--h-perspective, 3280px);
+  /* The middle's set for the screen's shape (`MIDDLE`, below by query). */
+  --m-name: var(--m-large-name, 1);
+  --m-role: var(--m-large-role, 1);
+  --m-where: var(--m-large-where, 1);
+  --m-buttons: var(--m-large-buttons, 1);
+  --m-x: var(--m-large-x, 0);
+  --m-y: var(--m-large-y, 0);
 }
 .cover-float-ring,
 .cover-float-frame {
@@ -198,25 +205,114 @@
 }
 .cover-float-frame {
   position: absolute;
-  /* Drawn toward the middle by the "Hero layout" panel's pull (1: as laid
-     out). A phone places them itself, below. */
-  left: calc(50% + (var(--x) - 50%) * var(--h-pull-x, 1.05));
-  top: calc(50% + (var(--y) - 50%) * var(--h-pull-y, 0.94));
-  width: var(--w);
+  /* Where it sits, from the set for the screen's shape (below). Drawn
+     toward the middle by the "Photo layout" panel's spread (1: as laid
+     out). A phone places them itself, further down. */
+  --fx: var(--x);
+  --fy: var(--y);
+  --fw: var(--w);
+  --fz: var(--z, 0px);
+  left: calc(50% + (var(--fx) - 50%) * var(--h-pull-x, 1.05));
+  top: calc(50% + (var(--fy) - 50%) * var(--h-pull-y, 0.94));
+  width: var(--fw);
   /* Out of order: each frame's place in `ORDER` (`cover-float.tsx`),
      spread out from the start. */
   --delay: calc(var(--h-start, 420ms) + var(--order, 0) * var(--h-spread, 0.95ms));
   animation: jg-fly var(--h-fly-ms, 1020ms) cubic-bezier(0.16, 1, 0.3, 1)
     var(--delay) backwards;
 }
-@media (max-width: 39.99rem) {
+/* Julian: a layout of their own for the smaller screens (the cards
+   looked too small there, the arrangement not the best), one for a
+   tablet held upright and one for a short landscape screen, each with
+   its places, widths, depths and which cards show (`UPRIGHT` and
+   `LANDSCAPE` in `lib/cover-slots.ts`, each on its own "Photo layout"
+   panel). 1280px wide and up keeps the large screen's. */
+@media (min-width: 40rem) and (max-width: 79.99rem) and (orientation: portrait) {
+  .cover-float {
+    --m-name: var(--m-upright-name, 1);
+    --m-role: var(--m-upright-role, 1);
+    --m-where: var(--m-upright-where, 1);
+    --m-buttons: var(--m-upright-buttons, 1);
+    --m-x: var(--m-upright-x, 0);
+    --m-y: var(--m-upright-y, 0);
+  }
+  .cover-float-frame {
+    --fx: var(--ux);
+    --fy: var(--uy);
+    --fw: var(--uw);
+    --fz: var(--uz, 0px);
+  }
+  .cover-float-off-upright {
+    display: none;
+  }
+}
+@media (min-width: 40rem) and (max-width: 79.99rem) and (orientation: landscape) {
+  .cover-float {
+    --m-name: var(--m-landscape-name, 1);
+    --m-role: var(--m-landscape-role, 1);
+    --m-where: var(--m-landscape-where, 1);
+    --m-buttons: var(--m-landscape-buttons, 1);
+    --m-x: var(--m-landscape-x, 0);
+    --m-y: var(--m-landscape-y, 0);
+  }
+  .cover-float-frame {
+    --fx: var(--lx);
+    --fy: var(--ly);
+    --fw: var(--lw);
+    --fz: var(--lz, 0px);
+  }
+  .cover-float-off-landscape {
+    display: none;
+  }
+}
+/* A phone on its side, or any landscape window under 512px tall (an
+   iPhone at 844 by 390, the iPhone Duo folded and turned, 678 by 466):
+   its own layout, `SIDEWAYS`. After the landscape one, which it
+   overrides where both match. */
+@media (orientation: landscape) and (max-height: 31.99rem) {
+  .cover-float {
+    --m-name: var(--m-sideways-name, 1);
+    --m-role: var(--m-sideways-role, 1);
+    --m-where: var(--m-sideways-where, 1);
+    --m-buttons: var(--m-sideways-buttons, 1);
+    --m-x: var(--m-sideways-x, 0);
+    --m-y: var(--m-sideways-y, 0);
+  }
+  .cover-float-frame {
+    --fx: var(--sx);
+    --fy: var(--sy);
+    --fw: var(--sw);
+    --fz: var(--sz, 0px);
+  }
+  .cover-float-off-landscape {
+    display: block;
+  }
+  .cover-float-off-sideways {
+    display: none;
+  }
+}
+@media (max-width: 39.99rem) and (orientation: portrait) {
+  .cover-float {
+    --m-name: var(--m-phone-name, 1);
+    --m-role: var(--m-phone-role, 1);
+    --m-where: var(--m-phone-where, 1);
+    --m-buttons: var(--m-phone-buttons, 1);
+    --m-x: var(--m-phone-x, 0);
+    --m-y: var(--m-phone-y, 0);
+  }
   .cover-float-frame {
     left: var(--px);
     top: var(--py);
     /* And no taller than a short phone's window allows: Safari with its
        bars up leaves an iPhone 659px, where 28vw ran the top row into the
-       name and the bottom row into the buttons. */
-    width: min(28vw, 13svh);
+       name and the bottom row into the buttons. `--pwh` is the width's
+       share of the height at that ratio, 28vw to 13svh (`PHONE`,
+       `lib/cover-slots.ts`). */
+    width: min(var(--pw, 28vw), var(--pwh, 13svh));
+    --fz: var(--pz, 0px);
+  }
+  .cover-float-off-phone {
+    display: none;
   }
 }
 /* Arranging on the "Photo layout" panel: the space holds still, the focus
@@ -226,6 +322,17 @@
 }
 .cover-float[data-arrange] .cover-float-frame {
   cursor: grab;
+}
+/* The card picked in the arrange inspector (`hero-arrange.tsx`), and Tilt:
+   the field turned so how far forward each card stands can be seen. */
+.cover-float[data-arrange] .cover-float-middle[data-picked],
+.cover-float[data-arrange] .cover-float-frame[data-picked] .cover-float-card {
+  outline: 2px solid #4da3ff;
+  outline-offset: 2px;
+}
+.cover-float[data-arrange][data-tilt] .cover-float-ring {
+  transform: rotateX(14deg) rotateY(-28deg) !important;
+  transition: transform 400ms ease;
 }
 .cover-float[data-arrange] .cover-float-frame:active {
   cursor: grabbing;
@@ -247,7 +354,7 @@
   text-transform: uppercase;
   letter-spacing: 0.1em;
   pointer-events: none;
-  transform: translateZ(calc(var(--z, 0px) + 1px));
+  transform: translateZ(calc(var(--fz, 0px) + 1px));
 }
 .cover-float-card {
   position: absolute;
@@ -255,7 +362,7 @@
   display: block;
   overflow: hidden;
   border-radius: var(--radius-photo);
-  transform: translateZ(var(--z, 0px));
+  transform: translateZ(var(--fz, 0px));
 }
 /* ── one corner for every photograph ──────────────────────────────
  * Julian: every picture on the site on one corner, 8px, the drifting
@@ -330,8 +437,9 @@
    rather than a scale, so the name's canvas and the type are drawn at the
    new size instead of stretched; and moved from the middle of the cover. */
 .cover-float-middle {
-  zoom: var(--h-mid-size, 1.02);
-  translate: 0 calc(var(--h-mid-down, 21px) / var(--h-mid-size, 1.02));
+  zoom: var(--h-mid-size, 0.9);
+  translate: calc(var(--m-x) * 1vw / var(--h-mid-size, 0.9))
+    calc((var(--h-mid-down, 22px) + var(--m-y) * 1svh) / var(--h-mid-size, 0.9));
 }
 .cover-float-name {
   color: var(--hero-ink);
@@ -340,21 +448,43 @@
 .cover-float-title {
   font-family: var(--font-mono);
   font-weight: 400;
-  font-size: var(--h-title-size, 15px);
-  letter-spacing: var(--h-title-track, 0.17em);
+  font-size: calc(var(--h-title-size, 13px) * var(--m-role));
+  letter-spacing: var(--h-title-track, 0.15em);
+  /* Julian: the lines centred on each other. The spacing after the last
+     letter, matched before the first. */
+  text-indent: var(--h-title-track, 0.15em);
   text-transform: uppercase;
   color: var(--hero-sub);
 }
 .cover-float-where {
   font-family: var(--font-mono);
-  font-size: var(--h-where-size, 13px);
+  font-size: calc(var(--h-where-size, 10.5px) * var(--m-where));
   color: var(--hero-where);
+}
+/* Julian: on a phone the role and the location one line each, as wide as
+   the wordmark (`fit-lines.tsx` spreads them, or scales one down), set
+   close. */
+@media (max-width: 39.99rem) and (orientation: portrait) {
+  .cover-float-middle .fit-line {
+    text-indent: 0;
+    display: block;
+    width: max-content;
+    margin-inline: auto;
+    white-space: nowrap;
+  }
+  .cover-float-title,
+  .cover-float-where {
+    line-height: 1.3;
+  }
+}
+.cover-float-ctas {
+  zoom: var(--m-buttons);
 }
 .cover-cta {
   display: inline-block;
   font-family: var(--font-mono);
   font-weight: 500;
-  font-size: var(--h-cta-size, 10.5px);
+  font-size: var(--h-cta-size, 9.5px);
   letter-spacing: 0.18em;
   text-transform: uppercase;
   padding: 13px 22px;
@@ -437,10 +567,12 @@
     z-index: 1;
   }
   /* Julian: on a photograph's hover, the navbar and the floor a little
-     clearer: their tint comes down from 34% to 22%, easing on each
-     one's own background transition. */
+     clearer: their tint comes down from 34% to 22%, and (Julian: lower
+     blur when a photo is in hover) their blur from 9px to 4px, easing on
+     each one's own transitions. */
   :root:has(.cover-float-frame:hover) {
     --glass-tint: 22%;
+    --glass-blur: 4px;
   }
   .cover-float-ring:has(.cover-float-frame:hover) .cover-float-card {
     /* Julian: less blur round the one in focus, and glass over the rest
@@ -480,7 +612,7 @@
     transition-delay: 0ms;
   }
   .cover-float-ring .cover-float-frame:hover .cover-float-card {
-    transform: translateZ(calc(var(--z, 0px) + var(--h-lift, 44px)));
+    transform: translateZ(calc(var(--fz, 0px) + var(--h-lift, 44px)));
     /* Julian: and toward the middle. `--mid-x` and `--mid-y` are the way
        to the cover's centre, measured as the pointer lands (`CoverCard`);
        the panel's Toward Middle is the share of it taken. The frame stays
@@ -2752,11 +2884,15 @@ a.strip-cell {
   inset: 0;
   top: calc(-1 * env(safe-area-inset-top, 0px));
   z-index: -1;
-  /* 9px: Julian, lower the blur slightly on the navbar and the footer. */
-  -webkit-backdrop-filter: blur(9px) saturate(1.5);
-  backdrop-filter: blur(9px) saturate(1.5);
+  /* 9px: Julian, lower the blur slightly on the navbar and the footer.
+     Less again while a photograph is hovered (`--glass-blur`, below). */
+  -webkit-backdrop-filter: blur(var(--glass-blur, 9px)) saturate(1.5);
+  backdrop-filter: blur(var(--glass-blur, 9px)) saturate(1.5);
   opacity: 0;
-  transition: opacity 300ms var(--ease-out-strong);
+  transition:
+    opacity 300ms var(--ease-out-strong),
+    backdrop-filter 300ms var(--ease-out-strong),
+    -webkit-backdrop-filter 300ms var(--ease-out-strong);
   pointer-events: none;
 }
 .site-bar[data-plain="true"]::after {
@@ -2842,8 +2978,11 @@ a.strip-cell {
     inset: 0;
     bottom: calc(-1 * var(--foot, 38px));
     z-index: -1;
-    -webkit-backdrop-filter: blur(9px) saturate(1.5);
-    backdrop-filter: blur(9px) saturate(1.5);
+    -webkit-backdrop-filter: blur(var(--glass-blur, 9px)) saturate(1.5);
+    backdrop-filter: blur(var(--glass-blur, 9px)) saturate(1.5);
+    transition:
+      backdrop-filter 300ms var(--ease-out-strong),
+      -webkit-backdrop-filter 300ms var(--ease-out-strong);
     pointer-events: none;
   }
   @media (prefers-reduced-transparency: reduce) {
