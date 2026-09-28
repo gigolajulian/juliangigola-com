@@ -11,7 +11,7 @@ import { notesText } from "@/lib/arrange-notes";
    paste back here makes them all defaults in one go. The dev server only,
    as the panels are. */
 /** Every panel on the page, in the paste DialKit's own copy gives. */
-function copyText() {
+export function copyText() {
   const blocks = DialStore.getPanels("panel").map((p) => {
     const values = Object.fromEntries(
       Object.entries(DialStore.getValues(p.id)).filter(([k]) => !k.endsWith(".__mode")),

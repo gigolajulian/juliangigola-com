@@ -142,8 +142,20 @@
 }
 /* Full: the whole layer, panel and eye together, lifts off the top of
    the screen (`intro.tsx`), and lets the pointer through as it goes. */
+/* An orb that only shows if the wait is long enough to need one
+   (`lightbox.tsx`). */
+.orb-late {
+  animation: jg-fade-in 200ms ease-out 330ms both;
+}
 #jg-intro.jg-intro-open {
   pointer-events: none;
+  /* Julian: bring back the swipe up. Inverted, the panel at full is the
+     page's own colour, so it lifted with no edge to see and only the eye
+     seemed to move. A shadow cast down onto the page and a hairline along
+     its foot, in either theme, so it reads as a sheet leaving. */
+  box-shadow:
+    0 1px 0 rgb(128 128 128 / 0.35),
+    0 28px 60px -12px rgb(0 0 0 / 0.28);
 }
 /* The page's entrance, held at its first frame while the panel fills:
    the keyframed ones paused (they fill backwards, so paused is their
@@ -192,6 +204,7 @@
 .cover-float {
   perspective: var(--h-perspective, 3280px);
   /* The middle's set for the screen's shape (`MIDDLE`, below by query). */
+  --zmax: var(--zmax-large, 0px);
   --m-name: var(--m-large-name, 1);
   --m-role: var(--m-large-role, 1);
   --m-where: var(--m-large-where, 1);
@@ -263,6 +276,7 @@
    panel). 1280px wide and up keeps the large screen's. */
 @media (min-width: 40rem) and (max-width: 79.99rem) and (orientation: portrait) {
   .cover-float {
+    --zmax: var(--zmax-upright, 0px);
     --m-name: var(--m-upright-name, 1);
     --m-role: var(--m-upright-role, 1);
     --m-where: var(--m-upright-where, 1);
@@ -282,6 +296,7 @@
 }
 @media (min-width: 40rem) and (max-width: 79.99rem) and (orientation: landscape) {
   .cover-float {
+    --zmax: var(--zmax-landscape, 0px);
     --m-name: var(--m-landscape-name, 1);
     --m-role: var(--m-landscape-role, 1);
     --m-where: var(--m-landscape-where, 1);
@@ -305,6 +320,7 @@
    overrides where both match. */
 @media (orientation: landscape) and (max-height: 31.99rem) {
   .cover-float {
+    --zmax: var(--zmax-sideways, 0px);
     --m-name: var(--m-sideways-name, 1);
     --m-role: var(--m-sideways-role, 1);
     --m-where: var(--m-sideways-where, 1);
@@ -327,6 +343,7 @@
 }
 @media (max-width: 39.99rem) and (orientation: portrait) {
   .cover-float {
+    --zmax: var(--zmax-phone, 0px);
     --m-name: var(--m-phone-name, 1);
     --m-role: var(--m-phone-role, 1);
     --m-where: var(--m-phone-where, 1);
@@ -450,7 +467,7 @@
   display: block;
 }
 /* The type on the cover, to Julian's spec: the name in Inter Tight Black,
-   everything under it in JetBrains Mono. The colours are the spec's, for
+   everything under it in IBM Plex Mono. The colours are the spec's, for
    the dark ground; the light ground, opt-in by the toggle, takes the
    site's own ink and greys so it keeps its contrast there. */
 .cover-float {
@@ -517,8 +534,9 @@
 .cover-cta {
   display: inline-block;
   font-family: var(--font-mono);
-  font-weight: 500;
-  font-size: var(--h-cta-size, 10px);
+  /* Julian: increase weight. The buttons' 700, as `action`. */
+  font-weight: 700;
+  font-size: var(--h-cta-size, 12px);
   letter-spacing: 0.18em;
   text-transform: uppercase;
   padding: 13px 22px;
@@ -646,7 +664,15 @@
     transition-delay: 0ms;
   }
   .cover-float-ring .cover-float-frame:hover .cover-float-card {
-    transform: translateZ(calc(var(--fz, 0px) + var(--h-lift, 44px)));
+    /* Julian: some cards did not cover on hover. The lift was from the
+       card's own depth, so one set far back stayed behind a neighbour
+       further forward; in 3D, depth and not z-index decides. Now it comes
+       out in front of the frontmost photograph as well (`--zmax`, by
+       layout), less however far the orbit has carried the frame
+       (`--oz`, `cover-orbit.tsx`). */
+    transform: translateZ(
+      calc(max(var(--fz, 0px), var(--zmax, 0px) - var(--oz, 0px)) + var(--h-lift, 44px))
+    );
     /* Julian: and toward the middle. `--mid-x` and `--mid-y` are the way
        to the cover's centre, measured as the pointer lands (`CoverCard`);
        the panel's Toward Middle is the share of it taken. The frame stays
@@ -738,7 +764,7 @@
   --font-sans: var(--font-mono);
   --font-mono: var(--font-mono);
   --font-display: var(--font-display);
-  --font-serif: var(--font-serif);
+  --font-archivo: var(--font-archivo);
   --font-heading: var(--font-display);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
@@ -1032,8 +1058,24 @@
     @apply border-border;
   }
 
+  /* Julian: capitalize small text everywhere. Inputs keep what is typed
+     (the browser's own `text-transform: none`); their placeholders and
+     every button follow the page. The wordmarks keep their own case. */
   body {
     @apply bg-background text-foreground;
+    text-transform: uppercase;
+  }
+  button,
+  ::placeholder {
+    text-transform: uppercase;
+  }
+  /* Julian: justify body. Base layer, so a `text-center` or `text-right`
+     on the paragraph itself still wins. */
+  p {
+    text-align: justify;
+    /* Split long words at the line's end, so a narrow column is not
+       opened up into wide gaps between the words. */
+    hyphens: auto;
   }
 
   html {
@@ -1544,12 +1586,12 @@ nav[aria-label="Categories"] ul[data-more] {
    count of characters comes in as `--n` and the type takes whichever is
    smaller, the full size or the width one line of that many condensed caps
    can have in the 296px the column leaves. The constant is measured, not
-   guessed: the widest of the names runs at 0.58em a character, so a name
-   of n fits inside 296px at 29rem / n with room to spare. `nowrap` is the
+   guessed: in Archivo 900 the widest of the names runs at 0.83em a
+   character, so a name of n fits inside 296px at 22rem / n. `nowrap` is the
    guarantee behind the arithmetic. Julian asked: a long name goes smaller
    rather than taller. */
 .chapter-name {
-  font-size: clamp(1.25rem, min(3rem, calc(29rem / var(--n, 12))), 3rem);
+  font-size: clamp(1.25rem, min(3rem, calc(22rem / var(--n, 12))), 3rem);
   white-space: nowrap;
 }
 @media (max-width: 40rem) {
@@ -4126,6 +4168,87 @@ optgroup {
    to full ink over 200ms and nothing else on the button moves at all.
    Julian asked. */
 
+/* Julian: the buttons like his recording. Under a pointer the fill
+   floods in as a circle from where it came in and drains back out toward
+   where it left (`glass-light.tsx` writes the point, --fx and --fy, and
+   the circle's size, --fd). The circle is the hover's fill, so the
+   button's own ground stays as it is at rest; the type and the edge
+   still turn over as before. Julian: match the radius, so round ended,
+   as in the recording (his exception to "never a pill shape"). */
+:is(.action, .action-quiet, .cover-cta) {
+  border-radius: 9999px;
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  /* The type turns over as the fill reaches it: a beat after the circle
+     starts going in, and going out, once it has drained off the words. */
+  transition:
+    background-color 200ms var(--ease-out-strong),
+    border-color 200ms var(--ease-out-strong),
+    box-shadow 200ms var(--ease-out-strong),
+    color 220ms ease 170ms;
+}
+:is(.action, .action-quiet, .cover-cta)::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  left: var(--fx, 50%);
+  top: var(--fy, 100%);
+  width: var(--fd, 250%);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  translate: -50% -50%;
+  scale: 0;
+  background: var(--flood);
+  pointer-events: none;
+  transition: scale 560ms cubic-bezier(0.33, 0, 0.2, 1);
+}
+.action {
+  --flood: var(--background);
+}
+.action-quiet {
+  --flood: var(--foreground);
+}
+.cover-cta {
+  --flood: var(--background);
+}
+.cover-cta-quiet {
+  --flood: var(--hero-ink);
+}
+/* Julian: the edge shows on hover. The fill stops inside the border, so
+   the edge is a real border here too (the solid homepage one had it as an
+   inset shadow, which the fill covered), and the ones that fill with ink
+   keep a grey edge rather than one the colour of the fill. */
+.cover-cta:not(.cover-cta-quiet) {
+  border: 1px solid transparent;
+}
+@media (hover: hover) and (pointer: fine) {
+  :is(.action, .action-quiet, .cover-cta):not(:disabled, [aria-disabled="true"]):hover::before {
+    scale: 1;
+  }
+  :is(.action, .action-quiet, .cover-cta):hover {
+    transition-delay: 0s, 0s, 0s, 90ms;
+  }
+  .action:hover {
+    background-color: color-mix(in oklab, var(--foreground) 72%, transparent);
+  }
+  .action-quiet:hover {
+    background-color: color-mix(in oklab, var(--background) 46%, transparent);
+    border-color: color-mix(in oklab, var(--foreground) 45%, transparent);
+  }
+  .cover-cta:hover {
+    background: var(--hero-ink);
+  }
+  .cover-cta-quiet:hover {
+    background: transparent;
+    border-color: color-mix(in oklab, var(--hero-ink) 45%, transparent);
+  }
+  .cover-cta:not(.cover-cta-quiet):hover {
+    border-color: var(--hero-ink);
+    box-shadow: none;
+  }
+}
+
 /* Off. A button that cannot be pressed yet says so by going quiet: the
    fill drops back, the label goes with it, and nothing under the pointer
    answers. It keeps its size, so the row does not move when the form
@@ -4381,31 +4504,20 @@ body:has([data-fit-page]) footer {
 
 /* ── the section titles ──────────────────────────────────────────────
  * Julian: the logo and the page titles (h1) in Inter Tight Black, the
- * section titles (h2) in Instrument Serif, as the words are written
- * rather than in capitals. The h2s set as small mono labels keep that,
- * and so does one marked `data-display` (the session names), which
- * keeps the black capitals.
- * Unlayered, so it outranks the `font-display`, `uppercase` and
- * `tracking` utilities those titles carry. The two faces share a cap
- * height, so the adjustment sizes the serif up by a third, which is
- * what a title-case word needs to hold the room a word in black
- * capitals did.
+ * section titles (h2) in Archivo 900 capitals (capitalize them all; they
+ * were Instrument Serif in title case). The h2s set as small mono labels
+ * keep that. Unlayered, so it outranks the `font-display` utility those
+ * titles carry.
  * ─────────────────────────────────────────────────────────────── */
-h2:not(.label, [data-display]) {
-  font-family: var(--font-serif);
-  font-weight: 400;
-  font-size-adjust: cap-height 0.95;
-  /* The line is measured off the size as set, not as adjusted: 1.2 of
-     it is about 0.9 of the enlarged letters, so a title on two lines
-     keeps its descenders off the line below. */
-  line-height: 1.2;
-  letter-spacing: -0.01em;
-  text-transform: none;
+h2:not(.label) {
+  font-family: var(--font-archivo);
+  font-weight: 900;
+  text-transform: uppercase;
 }
 
 /* ── the about page's first screen (`about-hero.tsx`) ─────────────
- * Dark on the dark theme; on the light one the words turn over onto the
- * page's ground and the portrait keeps its dark, fading in toward him. */
+ * Dark on the dark theme; on the light one the words and the grain turn
+ * over onto the page's ground. */
 .about-hero {
   --ah-ground: #0b0b0b;
   --ah-shade: 11 11 11;
@@ -4437,12 +4549,6 @@ h2:not(.label, [data-display]) {
 .about-hero-stage canvas {
   image-rendering: pixelated;
 }
-/* No WebGL: the photograph as it is, in grey, held where the grain holds
-   him. */
-.about-hero[data-flat] .about-hero-stage {
-  background: url("/about/julian.jpg") 78% center / cover no-repeat;
-  filter: grayscale(1) brightness(0.85);
-}
 /* The words over the grain: role and biography at the top, the name at
    the foot. */
 .about-hero-content {
@@ -4456,10 +4562,10 @@ h2:not(.label, [data-display]) {
   scrollbar-width: thin;
   padding: 2.5rem clamp(1rem, 6vw, 6rem);
 }
-/* Julian: the line, the intro and the services under it, fitted beside
-   him and never over him: every block of words stops at `--hero-room`,
-   40px short of where he starts at this width (`about-hero.tsx` measures
-   it). Sized so the name still has the foot of the screen. */
+/* Julian: the line, the intro and the services under it, every block of
+   words stopping at `--hero-room` (44rem: the portrait is gone, so the
+   words no longer stop short of him). Sized so the name still has the
+   foot of the screen. */
 .about-hero-bio {
   display: flex;
   flex-direction: column;
@@ -4467,15 +4573,14 @@ h2:not(.label, [data-display]) {
      at 900 tall, the most the name leaves there, up to 64px on a tall
      screen. */
   gap: clamp(1.6rem, calc(7vh - 36px), 4rem);
-  max-width: var(--hero-room, 46vw);
-  text-transform: none;
+  max-width: var(--hero-room, 44rem);
   letter-spacing: 0;
 }
 .about-hero-intro {
   max-width: var(--title-w, 36rem);
 }
 .about-hero-copy {
-  max-width: var(--hero-room, 46vw);
+  max-width: var(--hero-room, 44rem);
 }
 /* Julian: two lines, "and photographer" under "Bay Area creative
    director" at any width. */
@@ -4563,10 +4668,43 @@ h2:not(.label, [data-display]) {
     column-gap: 1.5rem;
   }
 }
+/* Julian: improve the placements. With the portrait gone the right of
+   the screen was empty and the words queued down the left. On a wide
+   screen the line runs across on two lines, as he asked for it, the
+   intro and the ask under it on the left and the services beside them
+   on the right; the client marks run the width of the foot. */
+@media (min-width: 64rem) {
+  .about-hero-bio {
+    display: grid;
+    grid-template-columns: minmax(0, 36rem) minmax(0, 30rem);
+    align-items: start;
+    max-width: none;
+  }
+  /* Past the laptop blocks below, which reset the whole `gap`. */
+  .about-hero .about-hero-bio {
+    column-gap: clamp(3rem, 8vw, 10rem);
+  }
+  .about-hero-bio > * {
+    grid-column: 1;
+  }
+  .about-hero .about-hero-title {
+    grid-column: 1 / -1;
+    max-width: 18em;
+  }
+  .about-hero-services {
+    grid-column: 2;
+    grid-row: 2 / span 2;
+  }
+  .about-hero .about-hero-clients {
+    max-width: none;
+  }
+}
 /* A laptop's browser window (1366 by 768 leaves about 657; 1280 by 800,
    1440 by 790 and 1024 by 768 too): the intro gives way so the name and the client
-   marks fit (Julian's pick). */
-@media (min-width: 40rem) and (max-height: 820px) {
+   marks fit (Julian's pick). From 1024 wide the services sit beside it
+   (the two columns above), which leaves it room down to 740 tall. */
+@media (min-width: 40rem) and (max-width: 63.99rem) and (max-height: 820px),
+  (min-width: 64rem) and (max-height: 740px) {
   .about-hero-intro {
     display: none;
   }
@@ -4638,7 +4776,7 @@ h2:not(.label, [data-display]) {
   background: currentColor;
 }
 /* The light theme's hero: the words' greys turned over, on the page's own
-   ground. The shader fades that ground into his dark (`uDusk`). */
+   ground. */
 :root[data-theme="light"] .about-hero {
   --ah-ground: var(--background);
   --ah-shade: 235 237 239;
@@ -4647,16 +4785,6 @@ h2:not(.label, [data-display]) {
   --ah-dim: #7d7b75;
   --ah-fact: #45433f;
   --ah-rule: #d2d2d0;
-}
-/* And the client marks stop where the dark begins (`--dusk-room`). */
-@media (min-width: 40rem) {
-  :root[data-theme="light"] .about-hero .about-hero-clients {
-    max-width: var(--dusk-room, 40vw);
-  }
-}
-/* The ask under the services, in the case it is set in everywhere else. */
-.about-hero-ask {
-  text-transform: none;
 }
 /* The foot: the name and the facts, and under them the client marks
    along the bottom left (Julian liked them there), one tight line: the
@@ -4669,7 +4797,7 @@ h2:not(.label, [data-display]) {
   display: flex;
   align-items: center;
   gap: 1.5rem;
-  max-width: var(--hero-room, 46vw);
+  max-width: var(--hero-room, 44rem);
   margin-top: 0.6rem;
   padding-top: 0.6rem;
   /* Julian: the rule over them fades out by halfway across. */
@@ -4749,9 +4877,8 @@ h2:not(.label, [data-display]) {
   .about-hero-facts {
     flex-direction: column;
   }
-  /* On a phone the words run under him: the role, room for the portrait,
-     the name, the facts, then the biography, and the screen grows to
-     hold them. */
+  /* On a phone: the name, the facts, then the biography, and the screen
+     grows to hold them. */
   .about-hero {
     height: auto;
   }
@@ -4759,12 +4886,9 @@ h2:not(.label, [data-display]) {
     position: relative;
     padding: 1.5rem 1rem 2rem;
   }
-  /* The name starts where the portrait has faded out (its height is
-     `--portrait-h`, set with the picture), so nothing sits over him. */
   .about-hero-copy {
     order: 2;
     max-width: none;
-    margin-top: calc(var(--portrait-h, 60svh) - 1.5rem);
   }
   .about-hero-bio {
     order: 3;

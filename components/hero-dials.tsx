@@ -11,7 +11,7 @@ import {
 } from "dialkit";
 import { useDialKitStyles } from "@/lib/dialkit-styles";
 import { highlightDials } from "@/lib/dial-highlight";
-import { DialCopyAll } from "@/components/dial-copy-all";
+import { DialCopyAll, copyText } from "@/components/dial-copy-all";
 import { ArrangeInspector, type ArrangeCard } from "@/components/hero-arrange";
 import { Hero3D } from "@/components/hero-3d";
 import { WarpText } from "@/components/warp-text";
@@ -133,7 +133,7 @@ const PHONE_MQ = "(max-width: 39.99rem) and (orientation: portrait)";
 
 /** Which layout the window is showing. */
 type Shape = "large" | "landscape" | "upright" | "phone" | "sideways";
-const shapeNow = (): Shape =>
+export const shapeNow = (): Shape =>
   matchMedia(PHONE_MQ).matches
     ? "phone"
     : matchMedia(SIDEWAYS_MQ).matches
@@ -196,7 +196,7 @@ const MIDDLE_DIALS = Object.fromEntries(
 const TYPE = {
   roleLine: { size: [16, 9, 24, 0.5], letterSpacing: [0.15, 0, 0.5, 0.01] },
   location: { size: [14, 9, 20, 0.5] },
-  buttons: { size: [10, 8, 16, 0.5] },
+  buttons: { size: [12, 8, 16, 0.5] },
   /* Julian: how close the name, the role, the location and the buttons
      sit, in px of space between each and the next. */
   /* Julian: the size of the whole middle (name, role, location and
@@ -270,7 +270,9 @@ export function HeroDials() {
   const cover = () => ref.current?.closest<HTMLElement>(".cover-float");
   /* Julian: one panel on top (registered first, so listed first) with the two buttons: replay, and one copy
      of every panel's values to paste back in one go. */
-  const all = React.useRef({});
+  /* Which place each photograph takes, for the copy: Shuffle's deal
+     lives here and not on a panel. */
+  const all = React.useRef({ deal: DEAL });
   useDialKit(
     "Hero tools",
     {
@@ -280,9 +282,17 @@ export function HeroDials() {
     {
       id: "hero",
       onAction: (action) => {
-        if (action === "replay") return replay();
+        if (action.endsWith("replay")) return replay();
+        /* Julian kept pasting this panel's own copy, which holds only its
+           two buttons. The button copies what "Copy all" does: every
+           panel and the notes, in the paste that bakes them in. */
+        const { deal } = all.current;
+        const shuffled = deal.some((d, i) => d !== i);
         void navigator.clipboard.writeText(
-          JSON.stringify(all.current, null, 2),
+          copyText() +
+            (shuffled ? `
+
+"Photo layout" deal (1-based): ${JSON.stringify(deal.map((d) => d + 1))}` : ""),
         );
       },
     },
@@ -294,7 +304,8 @@ export function HeroDials() {
   const entrance = useDialKit("Load animation", ENTRANCE, {
     id: "hero-entrance",
   });
-  const name = useDialKit("Name effect", NAME, { id: "hero-name" });
+  // Registered here too, so the panel is listed in its place.
+  useDialKit("Name effect", NAME, { id: "hero-name" });
   /* Which place each photograph takes (`DEAL`); Shuffle deals again. */
   const [deal, setDeal] = React.useState(DEAL);
   const kit = useDialKitController("Photo layout", LAYOUT, {
@@ -363,19 +374,7 @@ export function HeroDials() {
   const sidewaysRef = useLatest(sideways);
   const middleRef = useLatest(middle);
   React.useEffect(() => {
-    all.current = {
-      cards,
-      space,
-      name,
-      entrance,
-      type,
-      layout: { ...layout, deal: deal.map((d) => d + 1) },
-      upright: upright.values,
-      landscape: landscape.values,
-      phone: phone.values,
-      sideways: sideways.values,
-      middle: middle.values,
-    };
+    all.current = { deal };
   });
 
   /* Run the entrance again, forced: drop every animation on the cover for

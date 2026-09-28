@@ -180,7 +180,9 @@ export function Intro() {
         box.current?.classList.add("jg-intro-open");
         root.dataset.intro = "lift";
         box.current?.animate(
-          [{ transform: "translateY(0)" }, { transform: "translateY(-100%)" }],
+          /* Past the top by the shadow its foot casts (`globals.css`), so the
+             shadow leaves with it and does not vanish when the layer goes. */
+          [{ transform: "translateY(0)" }, { transform: "translateY(calc(-100% - 6rem))" }],
           { duration: OUT, easing: "cubic-bezier(0.76, 0, 0.24, 1)", fill: "forwards" },
         );
         setTimeout(lift, OUT);

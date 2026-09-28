@@ -22,7 +22,8 @@ import { DISCIPLINES, WALL } from "@/lib/work";
 
 export const metadata: Metadata = {
   title: "Frame not found",
-  description: "That page is not on the site. The work, the sessions and the about page are.",
+  description:
+    "That page is not on the site. The work, the sessions and the about page are.",
   /* A 404 inherits the root canonical, which is the homepage: without this
      a search engine could index a missing page as the front door. */
   robots: { index: false, follow: true },
@@ -136,19 +137,23 @@ export default function NotFound() {
             style={{ ["--reveal-delay" as string]: "160ms" }}
           >
             <div className="@container max-w-[40rem]">
-              <h1 className="font-display text-2xl uppercase leading-[1.02] tracking-[0] text-foreground sm:text-[clamp(2.25rem,5.2dvh,3.5rem)]">
-                This frame never made the edit.
-              </h1>
-              {/* For a mouse, so not on a phone, where the page has no room.
-                  Two lines, justified edge to edge, Julian's call: the
-                  sentence runs about 80 times its size, so a size of the
-                  column's width over 42 sets it on two lines with a little
-                  room, and the last line is justified as well. */}
-              <p className="mt-4 text-justify text-[clamp(11.5px,2.39cqi,17px)] leading-[1.7] text-muted-foreground [text-align-last:justify] max-sm:hidden">
-                The page you were looking for has been moved, renamed, or cut
-                from the selects. Drag your cursor across the numerals to pull
-                them into focus, or head back to the work.
-              </p>
+              {/* Julian: the body as long as the title. The title breaks
+                  where it always did, and the block takes the width of its
+                  longer line; the paragraph fills that width and no more
+                  (`w-0 min-w-full`), justified, its last line left as set
+                  so it does not open into gaps. */}
+              <div className="w-fit max-w-full">
+                <h1 className="font-display text-2xl uppercase leading-[1.02] tracking-[0] text-foreground sm:text-[clamp(2.25rem,5.2dvh,3.5rem)]">
+                  This frame never
+                  <br /> made the edit.
+                </h1>
+                {/* For a mouse, so not on a phone, where the page has no room. */}
+                <p className="mt-4 w-0 min-w-full text-justify text-[clamp(11.5px,2.39cqi,17px)] leading-[1.7] text-muted-foreground max-sm:hidden">
+                  The page you were looking for has been moved, renamed, or cut
+                  from the selects. Drag your cursor across the numerals to pull
+                  them into focus, or head back to the work.
+                </p>
+              </div>
               <div className="mt-6 flex flex-wrap gap-3 sm:mt-7">
                 <Link
                   href="/portfolio"
@@ -184,7 +189,9 @@ export default function NotFound() {
                       {/* Sized by the window's height as well, like the
                           numerals: six rows this size and the page never
                           scrolls. */}
-                      <span className={`${LIST_MONO} min-w-[2.5ch] text-accent`}>
+                      <span
+                        className={`${LIST_MONO} min-w-[2.5ch] text-accent`}
+                      >
                         {String(i + 1).padStart(2, "0")}
                       </span>
                       <span className="flex-1 font-display text-[clamp(1.125rem,2.8dvh,2rem)] uppercase leading-none tracking-[0]">

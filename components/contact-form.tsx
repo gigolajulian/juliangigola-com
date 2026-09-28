@@ -7,6 +7,7 @@ import { submitEnquiry, type ContactState } from "@/app/contact/actions";
 import { RESPONSE_TIME } from "@/lib/site";
 import { cn } from "@/lib/utils";
 import StatusMark from "@/components/StatusMark";
+import { Orb } from "@/components/orb";
 
 /* ── the enquiry ──────────────────────────────────────────────────
  * The old form was three fields: name, email, message. Which means every
@@ -335,23 +336,19 @@ export function ContactForm() {
           aria-describedby={!ready ? "enquire-missing" : undefined}
           className="label action px-6 py-4 press active:scale-[0.97] aria-disabled:active:scale-100"
         >
-          {/* React Bits' StatusMark, Julian's pick: a dashed ring at rest,
-              an arc turning while it sends, a cross if it could not.
-              Hidden from screen readers; the button's words say it. */}
+          {/* Julian: a thinking orb, still at rest and composing while it
+              sends, in the button's own ink; StatusMark's cross if it could
+              not. Hidden from screen readers; the button's words say it. */}
           <span className="inline-flex items-center gap-2.5">
-            <span aria-hidden className="inline-flex">
-              <StatusMark
-                status={
-                  pending
-                    ? "running"
-                    : state.status === "error"
-                      ? "failed"
-                      : "pending"
-                }
-                size={14}
-                errorColor="var(--destructive)"
-              />
-            </span>
+            {state.status === "error" && !pending ? (
+              <span aria-hidden className="inline-flex">
+                <StatusMark status="failed" size={14} errorColor="var(--destructive)" />
+              </span>
+            ) : (
+              <span className="-my-[3px] inline-flex">
+                <Orb state="composing" size={20} paused={!pending} />
+              </span>
+            )}
             {pending ? "Sending…" : "Inquire"}
           </span>
         </button>
@@ -433,8 +430,8 @@ function Field({
   );
 }
 
-/* The sent card's mark: it arrives still turning, as the button left it,
-   and closes on the check. React Bits' StatusMark, in the site's green. */
+/* The sent card's mark: it arrives as the orb the button left, still
+   composing, and closes on StatusMark's check in the site's green. */
 function SentStatus() {
   const [done, setDone] = React.useState(false);
   React.useEffect(() => {
@@ -442,14 +439,18 @@ function SentStatus() {
     return () => window.clearTimeout(t);
   }, []);
   return (
-    <span aria-hidden className="inline-flex">
-      <StatusMark
-        status={done ? "done" : "running"}
-        size={56}
-        strokeWidth={1}
-        doneColor="var(--live)"
-        drawDuration={320}
-      />
+    <span aria-hidden className="inline-flex size-16 items-center justify-center">
+      {done ? (
+        <StatusMark
+          status="done"
+          size={56}
+          strokeWidth={1}
+          doneColor="var(--live)"
+          drawDuration={320}
+        />
+      ) : (
+        <Orb state="composing" size={64} />
+      )}
     </span>
   );
 }

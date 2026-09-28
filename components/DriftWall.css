@@ -59,7 +59,19 @@
   transform-style: preserve-3d;
 }
 
+/* Julian: the hover on the 404's wall was stuck. The plane, columns
+   and tracks lie in the tiles' own tilted plane, and the hit test kept
+   landing on them instead of the tile under the pointer, so the lifted
+   tile stayed the first one touched. Only the tiles take the pointer;
+   the wall itself still hears every move (`onPointerMove`). */
+.drift-wall__plane,
+.drift-wall__col,
+.drift-wall__track {
+  pointer-events: none;
+}
+
 .drift-wall__tile {
+  pointer-events: auto;
   position: relative;
   display: block;
   width: 100%;

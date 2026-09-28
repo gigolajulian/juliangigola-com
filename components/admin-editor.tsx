@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { Orb } from "@/components/orb";
 import {
   CONTENT_PATH,
   type SiteContent,
@@ -1380,15 +1381,22 @@ export function AdminEditor({
                   aria-live="polite"
                   className="label flex items-center gap-2"
                 >
-                  <span
-                    aria-hidden
-                    className={cn(
-                      "block size-1.5 rounded-full",
-                      dirty || awaitingDeploy || committed
-                        ? "bg-foreground"
-                        : "bg-live",
-                    )}
-                  />
+                  {/* Julian: a thinking orb while it works, and while
+                      the deploy is watched for; the dot otherwise. */}
+                  {status.kind === "working" || awaitingDeploy ? (
+                    <Orb
+                      state={awaitingDeploy ? "searching" : "working"}
+                      size={20}
+                    />
+                  ) : (
+                    <span
+                      aria-hidden
+                      className={cn(
+                        "block size-1.5 rounded-full",
+                        dirty || committed ? "bg-foreground" : "bg-live",
+                      )}
+                    />
+                  )}
                   {/* Each word is a new node when the state changes, so
                     `emerge` fades it in — "published" is the one completion
                     moment the workbench has, and it used to swap in as text. */}
@@ -2143,10 +2151,11 @@ function StatusLine({ status }: { status: Status }) {
       // happens away from where the pointer is.
       role="status"
       className={cn(
-        "text-sm",
+        "flex items-center gap-2 text-sm",
         status.kind === "error" ? "text-accent" : "text-muted-foreground",
       )}
     >
+      {status.kind === "working" ? <Orb state="connecting" size={20} /> : null}
       {status.message}
       {status.kind === "saved" ? (
         <>

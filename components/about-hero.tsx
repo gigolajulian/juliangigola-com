@@ -1,40 +1,32 @@
 "use client";
 
 import * as React from "react";
-import { Mesh, Renderer, Texture, Triangle } from "ogl";
+import { Mesh, Renderer, Triangle } from "ogl";
 import { useDialKit, type DialConfig } from "dialkit";
 import { buildProgram } from "@/lib/gl-warm";
 import { WarpText } from "@/components/warp-text";
 import { NAME_WARP } from "@/lib/name-warp";
 
 /* ── the about page's first screen ────────────────────────────────
- * Julian: his portrait in a fine grain of greys on the dark, with soft
- * lights swelling and fading behind in the same grain; the pointer pushes the grain
- * aside round it and pushes the lights aside. The name is the site's
- * wordmark on one line, warping as the homepage's hero does (Julian:
+ * Julian: soft lights swelling and fading in a fine grain of greys on
+ * the dark; the pointer pushes the lights aside and a click ripples
+ * them. His portrait was here (Julian: remove my image). The name is
+ * the site's wordmark on one line, warping as the homepage's hero does (Julian:
  * match the hero).
  *
  * Drawn on the GPU (ogl, as `warp-text.tsx`): at a grain this fine the
  * whole screen is redrawn every frame, which a canvas loop could not keep
- * up with. On the light theme the words are on the page's ground and
- * the dark fades in toward him.
+ * up with. On the light theme the grain is dark on the page's ground.
  * ─────────────────────────────────────────────────────────────── */
-
-/** Where Julian stands across the photograph. */
-const FOCUS = 0.78;
 
 /* Julian: the background on DialKit, "About background" (the dev server
    only; production gets these defaults).
      Grain    one dithered cell every `cell` CSS pixels (`phone` under
               640px wide; Julian: a little less detail than 2.5 and 2),
-              how many greys, and the sharpening that holds his features
-     Photo    his tones: what goes black, the range over it, the curve;
-              and where he is held across the screen, further in on a
-              phone so the crop never cuts him
+              and how many greys
      Lights   the streaks behind: how bright, where they start and how
               soft, their size, drift and angle (degrees, up to the right)
-     Hover    the lens round the pointer: its size, push and shake, and
-              how far it pushes the lights
+     Hover    how far the pointer pushes the lights
      Ripple   a click's ring: speed in px a second, push, and how long
      Logos    one pass of the client marks, in seconds */
 const BG = {
@@ -42,15 +34,6 @@ const BG = {
     cell: [3.2, 1, 10, 0.1],
     phone: [2.6, 1, 10, 0.1],
     levels: [4, 2, 8, 1],
-    sharpen: [0.5, 0, 2, 0.05],
-  },
-  photo: {
-    _collapsed: true,
-    black: [0.14, 0, 0.6, 0.01],
-    range: [0.62, 0.1, 1.5, 0.01],
-    curve: [0.9, 0.3, 2, 0.05],
-    across: [0.74, 0, 1, 0.01],
-    acrossPhone: [0.62, 0, 1, 0.01],
   },
   lights: {
     _collapsed: true,
@@ -63,9 +46,6 @@ const BG = {
   },
   hover: {
     _collapsed: true,
-    size: [0.75, 0, 3, 0.05],
-    push: [0.5, 0, 2, 0.05],
-    shake: [4, 0, 12, 0.1],
     lights: [0.09, 0, 0.5, 0.01],
   },
   ripple: {
@@ -91,30 +71,21 @@ void main() {
 const fragment = `#version 300 es
 precision highp float;
 precision highp int;
-uniform sampler2D uPhoto;
 uniform vec2 uRes;      // CSS pixels
 uniform float uDpr;
 uniform float uCell;
-uniform float uTime;
 uniform vec2 uPointer;  // CSS pixels, from the top left
 uniform float uOn;
-uniform vec4 uRect;     // the photograph: x, y, width, height in CSS pixels
-uniform sampler2D uMask; // where he is in the photograph, soft edged
-uniform vec2 uFade;     // the photograph fades out between these heights
 uniform vec3 uRipple;   // a click: x, y in CSS pixels, and its age in seconds
 uniform float uLight;   // 1 on the light theme
-uniform vec4 uDusk;     // light theme: the page's ground at xy, his dark ground by zw
-// The panel's (BG, above): the greys and sharpening; black, range and curve;
-// the lights' amount, start, softness and size, their direction and clock;
-// the lens's size, push, shake and push on the lights; the ring's speed
-// and push.
+// The panel's (BG, above): the greys; the lights' amount, start, softness
+// and size, their direction and clock; the pointer's push on the lights;
+// the ring's speed and push.
 uniform float uLevels;
-uniform float uSharpen;
-uniform vec3 uTone;
 uniform vec4 uLights;
 uniform vec2 uLightDir;
 uniform float uLightT;
-uniform vec4 uLens;
+uniform float uLens;
 uniform vec2 uWave;
 out vec4 fragColor;
 
@@ -123,10 +94,6 @@ const vec3 INK = vec3(0.91, 0.90, 0.875);
 // The light theme's ground and ink (--background, --foreground).
 const vec3 PAPER = vec3(0.922, 0.929, 0.936);
 const vec3 PRINT = vec3(0.077, 0.072, 0.068);
-// His face in the photograph, hair to chin, as a share of its width and
-// height (measured on /about/julian.jpg).
-const vec2 FACE = vec2(0.785, 0.32);
-const vec2 FACE_R = vec2(0.06, 0.13);
 
 // 8x8 ordered dither threshold, 0..1.
 float bayer(ivec2 p) {
@@ -163,103 +130,42 @@ float quant(float v, float t) {
   return (b + step(t, s - b)) / (uLevels - 1.0);
 }
 
-// How much of the photograph shows at a height: all of it, bar the foot
-// of a phone's portrait, which fades out above the name.
-float fade(vec2 p) {
-  return 1.0 - smoothstep(uFade.x, uFade.y, p.y);
-}
-
-bool outside(vec2 uv) {
-  return any(lessThan(uv, vec2(0.0))) || any(greaterThan(uv, vec2(1.0)));
-}
-
-// The photograph's brightness at a point, the grey backdrop taken to black.
-float lum(vec2 p) {
-  vec2 uv = (p - uRect.xy) / uRect.zw;
-  if (outside(uv)) return 0.0;
-  float l = dot(texture(uPhoto, uv).rgb, vec3(0.2126, 0.7152, 0.0722));
-  return pow(clamp((l - uTone.x) / uTone.y, 0.0, 1.0), uTone.z) * fade(p);
-}
-
-// Him: 1 where he stands, 0 on the backdrop.
-float body(vec2 p) {
-  vec2 uv = (p - uRect.xy) / uRect.zw;
-  if (outside(uv)) return 0.0;
-  return texture(uMask, uv).r * fade(p);
-}
-
 void main() {
   vec2 px = vec2(gl_FragCoord.x, uRes.y * uDpr - gl_FragCoord.y) / uDpr;
   vec2 c = floor(px / uCell);
   vec2 pc = (c + 0.5) * uCell;
   float t = bayer(ivec2(c));
 
-  // The pointer pushes the grain out, like a lens, and shakes it: never
-  // on his face (Julian: no warp on the face, the mask feathered).
-  // Nothing on the middle of the face, easing in across its edge and well
-  // past it, so there is no line where the warp stops.
-  float R = uRes.x / 13.0 * uLens.x;  // Julian: a quarter smaller (0.75)
-  vec2 d = pc - uPointer;
-  float dist = length(d) + 1e-4;
-  vec2 q = ((pc - uRect.xy) / uRect.zw - FACE) / FACE_R;
-  float face = smoothstep(0.7, 1.9, length(q));
-  float k = uOn * exp(-(dist * dist) / (R * R)) * face;
-  float jit = k * uLens.z * uCell * sin(c.x * 12.9 + c.y * 78.2 + uTime * 9.0);
-  vec2 sp = pc - d / dist * k * R * uLens.y + vec2(jit, -jit);
-
   // Julian: a click sends a ripple out from where it lands, a ring that
-  // pushes the grain and the lights outward as it passes and fades as it
-  // goes. His face still holds.
+  // pushes the lights outward as it passes and fades as it goes.
   vec2 rd = pc - uRipple.xy;
   float rl = length(rd) + 1e-4;
   float front = uRipple.z * uWave.x;
   float ring = step(0.0, uRipple.z) * exp(-uRipple.z * 3.2) *
                exp(-pow((rl - front) / 50.0, 2.0));
   vec2 wave = rd / rl * ring * uWave.y;
-  sp -= wave * face;
 
-  // Sharpened, so the features hold at this size.
-  float l = lum(sp);
-  float avg = (lum(sp + vec2(uCell, 0.0)) + lum(sp - vec2(uCell, 0.0)) +
-               lum(sp + vec2(0.0, uCell)) + lum(sp - vec2(0.0, uCell))) * 0.25;
-  l = clamp(l + uSharpen * (l - avg), 0.0, 1.0) * (1.0 - k * 0.35);
-  // Only him: the backdrop's grey, a touch lighter round him, left a
-  // halo of dots (Julian: remove the dots around me).
-  l *= smoothstep(0.35, 0.75, body(sp));
-  float photo = quant(l, t);
-
-  // The lights behind, matched to Julian's reference: soft streaks running
-  // up to the right that swell and dissolve where they are, never
-  // travelling. A noise field stretched along the diagonal, changing with
-  // time.
+  // The lights, matched to Julian's reference: soft streaks running up to
+  // the right that swell and dissolve where they are, never travelling.
+  // A noise field stretched along the diagonal, changing with time.
   vec2 u = (pc - wave) / uRes.y;
   // The pointer pushes the lights aside where it passes (Julian: the
   // hover moves the lights).
   vec2 toP = u - uPointer / uRes.y;
   float pd = length(toP) + 1e-4;
-  u += toP / pd * uOn * uLens.w * exp(-(pd * pd) / 0.03);
+  u += toP / pd * uOn * uLens * exp(-(pd * pd) / 0.03);
   vec2 dir = uLightDir;                     // up and to the right
   vec2 a = vec2(dot(u, dir), dot(u, vec2(-dir.y, dir.x))) / uLights.w;
   float n = noise(vec3(a.x * 3.6, a.y * 8.5, uLightT));
   float f = smoothstep(uLights.y, uLights.y + uLights.z, n);
-  // Behind him, never over him: his dark shirt and glasses stay dark.
-  float behind = 1.0 - smoothstep(0.15, 0.55, body(pc));
-  f *= behind;
-  // The ripple's ring lights the grain it passes through on the ground,
-  // never on him (Julian: no added dots on the subject).
-  float field = quant(clamp(f * uLights.x + ring * 0.45 * behind, 0.0, 1.0), t);
+  // The ripple's ring lights the grain it passes through.
+  float field = quant(clamp(f * uLights.x + ring * 0.45, 0.0, 1.0), t);
 
-  // On the light theme the words sit on the page's ground and he keeps
-  // his dark one, the one fading into the other between them (Julian: he
-  // looked wrong turned over).
-  vec2 dd = uDusk.zw - uDusk.xy;
-  float lit = uLight * (1.0 - smoothstep(0.0, 1.0, dot(pc - uDusk.xy, dd) / dot(dd, dd)));
-  fragColor = vec4(mix(mix(GROUND, PAPER, lit), mix(INK, PRINT, lit), max(photo, field)), 1.0);
+  fragColor = vec4(mix(mix(GROUND, PAPER, uLight), mix(INK, PRINT, uLight), field), 1.0);
 }
 `;
 
-/** `children`: the line, the services and the ask, set beside the
-    portrait. `foot`: the client marks, along the bottom of the screen. */
+/** `children`: the line, the services and the ask. `foot`: the client marks, along the bottom of the screen. */
 export function AboutHero({
   children,
   foot,
@@ -292,8 +198,7 @@ export function AboutHero({
         dpr: Math.min(devicePixelRatio || 1, 2),
       });
     } catch {
-      /* No WebGL: the photograph as it is, in grey (`[data-flat]`). */
-      box.dataset.flat = "";
+      /* No WebGL: the page's own ground. */
       return;
     }
     const gl = renderer.gl;
@@ -301,43 +206,19 @@ export function AboutHero({
     canvas.setAttribute("aria-hidden", "true");
     stage.appendChild(canvas);
 
-    const photo = new Texture(gl, {
-      generateMipmaps: false,
-      flipY: false,
-      minFilter: gl.LINEAR,
-      magFilter: gl.LINEAR,
-      wrapS: gl.CLAMP_TO_EDGE,
-      wrapT: gl.CLAMP_TO_EDGE,
-    });
-    const mask = new Texture(gl, {
-      generateMipmaps: false,
-      flipY: false,
-      minFilter: gl.LINEAR,
-      magFilter: gl.LINEAR,
-      wrapS: gl.CLAMP_TO_EDGE,
-      wrapT: gl.CLAMP_TO_EDGE,
-    });
     const u = {
-      uPhoto: { value: photo },
       uRes: { value: [1, 1] },
       uDpr: { value: renderer.dpr },
       uCell: { value: BG.grain.cell[0] },
-      uTime: { value: 0 },
       uPointer: { value: [-1e4, -1e4] },
       uOn: { value: 0 },
-      uRect: { value: [0, 0, 0, 0] },
-      uMask: { value: mask },
-      uFade: { value: [1e5, 1e5 + 1] },
       uRipple: { value: [0, 0, -1] },
       uLight: { value: 0 },
-      uDusk: { value: [0, 0, 1, 0] },
       uLevels: { value: 4 },
-      uSharpen: { value: 0.5 },
-      uTone: { value: [0.14, 0.62, 0.9] },
       uLights: { value: [0.32, 0.64, 0.28, 1] },
       uLightDir: { value: [0.819, -0.574] },
       uLightT: { value: 0 },
-      uLens: { value: [0.75, 0.5, 4, 0.09] },
+      uLens: { value: 0.09 },
       uWave: { value: [700, 22] },
     };
     /* The program once its shaders are compiled, in the GPU's own time
@@ -369,16 +250,12 @@ export function AboutHero({
     box.addEventListener("pointerleave", leave);
     box.addEventListener("pointerdown", click, { passive: true });
 
-    const img = new Image();
-    img.src = "/about/julian.jpg";
-    /* Where his left edge falls across the photograph, from the mask. */
-    let subjectLeft = FOCUS - 0.15;
     const size = () => {
       const w = box.clientWidth;
       const h = box.clientHeight;
       if (!w || !h) return;
       const phone = w < 640;
-      const { grain, photo: p, logos } = look.current;
+      const { grain, logos } = look.current;
       const cell = phone ? grain.phone : grain.cell;
       box.style.setProperty("--marquee-s", `${logos.seconds}s`);
       /* One fragment per grain cell, scaled up square by the stylesheet:
@@ -388,52 +265,14 @@ export function AboutHero({
       u.uDpr.value = renderer.dpr;
       u.uRes.value = [w, h];
       u.uCell.value = cell;
-      if (img.naturalWidth) {
-        /* A phone gives the portrait the top of the screen to itself,
-           fading out at its foot, and the words start under it; a wide
-           screen has him the full height, beside the words. */
-        const ph = phone ? Math.round(Math.min(h, innerHeight * 0.6)) : h;
-        const s = Math.max(w / img.naturalWidth, ph / img.naturalHeight);
-        const dw = img.naturalWidth * s;
-        const dh = img.naturalHeight * s;
-        const x = Math.min(
-          0,
-          Math.max(w - dw, w * (phone ? p.acrossPhone : p.across) - dw * FOCUS),
-        );
-        u.uRect.value = [x, (ph - dh) / 2, dw, dh];
-        u.uFade.value = phone ? [ph * 0.7, ph] : [1e5, 1e5 + 1];
-        /* On a phone he is above the words, so the dark runs down; wide,
-           he is beside them, so it runs across, ending where he starts. */
-        const edge = x + dw * subjectLeft;
-        u.uDusk.value = phone
-          ? [0, ph, 0, ph * 0.55]
-          : [edge - w * 0.3, 0, edge, 0];
-        box.style.setProperty("--portrait-h", `${ph}px`);
-        /* The words stop 40px short of where he starts, at any width. */
-        const content = box.querySelector<HTMLElement>(".about-hero-content");
-        const inset = content
-          ? parseFloat(getComputedStyle(content).paddingLeft)
-          : 0;
-        box.style.setProperty(
-          "--hero-room",
-          `${Math.max(0, Math.round(x + dw * subjectLeft - inset - 40))}px`,
-        );
-        /* Julian's mockup: a long, soft fade, a third of the screen. The
-           client marks on the light theme stop a third of the way in. */
-        box.style.setProperty(
-          "--dusk-room",
-          `${Math.max(0, Math.round(edge - w * 0.2 - inset))}px`,
-        );
-      }
     };
 
     let raf = 0;
     let visible = true;
-    /* Once cleaned up it never starts again: the photo can finish loading
-       after the component has gone (React mounts twice in development),
-       and a loop woken then would run on for good. */
+    /* Once cleaned up it never starts again: the program can finish
+       compiling after the component has gone (React mounts twice in
+       development), and a loop woken then would run on for good. */
     let gone = false;
-    const t0 = performance.now();
     /* The lights' clock is added up, so a change of their speed on the
        panel carries on from where they are instead of jumping. */
     let lightT = 0;
@@ -443,17 +282,14 @@ export function AboutHero({
       const l = look.current;
       pointer.on += (pointer.target - pointer.on) * 0.08;
       const r = box.getBoundingClientRect();
-      u.uTime.value = still ? 0 : (now - t0) / 1000;
       if (!still && last) lightT += (Math.min(now - last, 50) / 1000) * l.lights.speed;
       last = now;
       u.uLightT.value = lightT;
       u.uLevels.value = l.grain.levels;
-      u.uSharpen.value = l.grain.sharpen;
-      u.uTone.value = [l.photo.black, l.photo.range, l.photo.curve];
       u.uLights.value = [l.lights.amount, l.lights.start, l.lights.softness, l.lights.size];
       const a = (l.lights.angle * Math.PI) / 180;
       u.uLightDir.value = [Math.cos(a), -Math.sin(a)];
-      u.uLens.value = [l.hover.size, l.hover.push, l.hover.shake, l.hover.lights];
+      u.uLens.value = l.hover.lights;
       u.uWave.value = [l.ripple.speed, l.ripple.push];
       const RIPPLE_S = l.ripple.seconds;
       u.uPointer.value = [pointer.x - r.left, pointer.y - r.top];
@@ -510,75 +346,7 @@ export function AboutHero({
       attributeFilter: ["data-theme"],
     });
     document.addEventListener("visibilitychange", shown);
-    /* Decoded off the main thread first, then read on a canvas kept on
-       the CPU: drawn straight from `onload`, the decode and the read back
-       from the GPU were one 130ms stall as the page came in. */
-    img.decode().then(() => {
-      if (gone) return;
-      photo.image = img;
-      /* Where he is: the photograph against its plain grey backdrop, read
-         low. Anything far enough from the backdrop's grey is him (his
-         black shirt is darker than it, the jacket lighter); spread a
-         little and softened, so the lights keep clear of his edges. */
-      const MW = 192;
-      const MH = Math.round((MW * img.naturalHeight) / img.naturalWidth);
-      const mc = document.createElement("canvas");
-      mc.width = MW;
-      mc.height = MH;
-      const mx = mc.getContext("2d", { willReadFrequently: true });
-      if (mx) {
-        mx.drawImage(img, 0, 0, MW, MH);
-        const px = mx.getImageData(0, 0, MW, MH);
-        const d = px.data;
-        const L = (i: number) =>
-          (0.2126 * d[i * 4] + 0.7152 * d[i * 4 + 1] + 0.0722 * d[i * 4 + 2]) /
-          255;
-        /* The backdrop's grey, off the empty left fifth of the frame. */
-        let bg = 0;
-        let n = 0;
-        for (let y = 0; y < MH; y++)
-          for (let x = 0; x < MW / 5; x++, n++) bg += L(y * MW + x);
-        bg /= n;
-        let m = new Float32Array(MW * MH);
-        for (let i = 0; i < MW * MH; i++)
-          m[i] = Math.abs(L(i) - bg) > 0.045 ? 1 : 0;
-        /* His left edge: the first column with him in it. */
-        subjectLeft = 1;
-        for (let x = 0; x < MW && subjectLeft === 1; x++) {
-          let c = 0;
-          for (let y = 0; y < MH; y++) c += m[y * MW + x];
-          if (c >= 4) subjectLeft = x / MW;
-        }
-        for (let pass = 0; pass < 3; pass++) {
-          const next = new Float32Array(MW * MH);
-          for (let y = 0; y < MH; y++)
-            for (let x = 0; x < MW; x++) {
-              let sum = 0;
-              let hit = 0;
-              for (let dy = -1; dy <= 1; dy++)
-                for (let dx = -1; dx <= 1; dx++) {
-                  const yy = Math.min(MH - 1, Math.max(0, y + dy));
-                  const xx = Math.min(MW - 1, Math.max(0, x + dx));
-                  const v = m[yy * MW + xx];
-                  sum += v;
-                  hit = Math.max(hit, v);
-                }
-              /* The first pass spreads him a cell, the others soften. */
-              next[y * MW + x] = pass === 0 ? hit : sum / 9;
-            }
-          m = next;
-        }
-        for (let i = 0; i < MW * MH; i++) {
-          const v = Math.round(m[i] * 255);
-          d[i * 4] = d[i * 4 + 1] = d[i * 4 + 2] = v;
-          d[i * 4 + 3] = 255;
-        }
-        mx.putImageData(px, 0, 0);
-        mask.image = mc;
-      }
-      size();
-      wake();
-    }, () => {});
+    size();
 
     return () => {
       gone = true;
@@ -656,9 +424,8 @@ export function AboutHero({
     <div ref={ref} className="about-hero">
       <div ref={stageRef} className="about-hero-stage" />
 
-      {/* The line and the services at the top left, the name at the foot:
-          beside him on a wide screen, under him on a phone. The role line
-          is gone: the title says it. */}
+      {/* The line and the services at the top left, the name at the foot.
+          The role line is gone: the title says it. */}
       {/* Scrolls inside itself where a short window cannot hold it all,
           the strip yielding the wheel to it (as the contact form does). */}
       <div className="about-hero-content" data-scroll>

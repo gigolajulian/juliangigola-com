@@ -1052,6 +1052,17 @@ export function Strip({
     const land = (i: number) => {
       atRef.current = i;
       setAt(i);
+      /* Julian: the screens either side loaded before they are asked for,
+         so a page never arrives with its pictures still coming. A lazy
+         image told to be eager starts loading at once. Paged strips only
+         (home, About, Contact, Legal): their cells are whole screens. */
+      if (paged) {
+        for (const k of [i - 1, i + 1]) {
+          el.children[k]
+            ?.querySelectorAll<HTMLImageElement>('img[loading="lazy"]')
+            .forEach((img) => (img.loading = "eager"));
+        }
+      }
       /* The word is the nearest labelled cell at or before this one: the
          covers under a discipline carry no word of their own, and the head
          should go on saying the discipline while they go by. */
@@ -1368,7 +1379,7 @@ export function Strip({
       window.clearTimeout(rest);
       clearTimeout(hashTimer);
     };
-  }, [live, count]);
+  }, [live, count, paged]);
 
   /* ── how it moves ───────────────────────────────────────────────
      Every way of moving the strip writes to one target and a single rAF

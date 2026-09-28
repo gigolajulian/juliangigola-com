@@ -268,7 +268,10 @@ const DriftWall = ({
         rates[c] += (target - rates[c]) * ease;
         if (Math.abs(target - rates[c]) < 0.005) rates[c] = target;
         else busy = true;
-        a.playbackRate = rates[c];
+        // Julian: a column jumped under a still pointer on the 404. Setting
+        // `playbackRate` on a running compositor animation can move it
+        // (MDN); `updatePlaybackRate` syncs the position first.
+        a.updatePlaybackRate(rates[c]);
       });
 
       frame = busy ? requestAnimationFrame(tick) : 0;

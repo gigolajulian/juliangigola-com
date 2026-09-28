@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
-import { Instrument_Serif, Inter_Tight, JetBrains_Mono } from "next/font/google";
+import { IBM_Plex_Mono, Inter_Tight } from "next/font/google";
+import localFont from "next/font/local";
 import { Intro } from "@/components/intro";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
@@ -16,7 +17,7 @@ import { ImageFallback } from "@/components/image-fallback";
 import { PageTransition } from "@/components/page-transition";
 
 /* Two families and no more, at Julian's ask: Inter Tight Black for the
-   name and every heading, JetBrains Mono for everything else, text, menu,
+   name and every heading, IBM Plex Mono for everything else, text, menu,
    captions, labels, figures. Loaded through `next/font`, which fetches them
    from Google Fonts at build time and serves them from this site, so a
    visitor makes no request to Google and the text never flashes a fallback
@@ -28,18 +29,20 @@ const display = Inter_Tight({
   weight: "900",
   fallback: ["Helvetica Neue", "Arial", "sans-serif"],
 });
-/* Julian: the section titles (every h2 that is not a label) in a serif,
-   so the logo and the page titles are not the only voice. */
-const serif = Instrument_Serif({
-  variable: "--font-serif",
-  subsets: ["latin"],
-  weight: "400",
-  fallback: ["Georgia", "serif"],
+/* Julian: the section titles (every h2 that is not a label) in Archivo
+   900 capitals, from his own font file: the variable font cut to that one
+   weight and to Latin (10.7 KB from 658). */
+const archivo = localFont({
+  src: "./fonts/Archivo-Black.woff2",
+  variable: "--font-archivo",
+  weight: "900",
+  fallback: ["Helvetica Neue", "Arial", "sans-serif"],
 });
-const mono = JetBrains_Mono({
+const mono = IBM_Plex_Mono({
   variable: "--font-mono",
   subsets: ["latin"],
-  weight: ["400", "500"],
+  /* 700 for the buttons (`action`, `cover-cta`), drawn rather than faked. */
+  weight: ["400", "500", "700"],
   fallback: ["ui-monospace", "monospace"],
 });
 
@@ -121,7 +124,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="en"
-      className={`${display.variable} ${serif.variable} ${mono.variable} h-full antialiased`}
+      className={`${display.variable} ${archivo.variable} ${mono.variable} h-full antialiased`}
       // Dark is the default and is what the CSS already declares, so the
       // server renders the correct theme for everyone except the visitor who
       // has chosen light. That one case is what the script below fixes.

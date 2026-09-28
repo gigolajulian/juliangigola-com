@@ -110,19 +110,18 @@ export default function ContactPage() {
         bleed
         className="mt-4 flex-1"
       >
-        {/* The ask and the details on one side, the form on the other. */}
+        {/* Julian: three columns. The ask, where the Sessions title sits
+            on its page (the same 40px in, the same width, centred in the
+            height); the details and the steps; the form. Two columns
+            under 1280px, the ask over the details beside the form, and
+            one on a phone. */}
         <section
           data-tick
           data-label="Inquire"
           data-hash="inquire"
-          className="grid w-full shrink-0 grid-cols-1 gap-10 px-6 py-12 sm:h-full sm:grid-cols-2 sm:items-center sm:gap-16 sm:px-16 sm:py-0"
+          className="grid w-full shrink-0 grid-cols-1 gap-10 px-6 py-12 sm:h-full sm:grid-cols-2 sm:grid-rows-[auto_minmax(0,auto)] sm:content-center sm:items-center sm:gap-x-16 sm:gap-y-8 sm:pl-10 sm:pr-16 sm:py-0 xl:grid-cols-[30rem_minmax(0,1fr)_minmax(0,1.15fr)] xl:grid-rows-1 xl:content-stretch xl:gap-x-10 2xl:gap-x-14"
         >
-          {/* Scrolls inside itself if a short window still cannot hold
-              it, as the form beside it does. */}
-          <div
-            data-scroll
-            className="flex min-h-0 flex-col gap-6 overflow-y-auto overscroll-contain sm:max-h-full short:gap-4"
-          >
+          <div className="flex flex-col gap-5 sm:col-start-1 sm:row-start-1 sm:pr-6 xl:self-center">
             <RisingTitle text="Get in Touch" className="contact-title" />
             {/* 1.02 as a zoom: Julian's DialKit size for the intro, the same
                 `zoom` the panel's Size writes (`page-dials.tsx`). */}
@@ -152,12 +151,22 @@ export default function ContactPage() {
                 Check availability
               </a>
             ) : null}
+          </div>
+
+          {/* Scrolls inside itself if a short window still cannot hold
+              it, as the form beside it does. */}
+          <div
+            data-scroll
+            className="flex min-h-0 flex-col gap-6 overflow-y-auto overscroll-contain sm:col-start-1 sm:row-start-2 sm:max-h-full sm:self-start short:gap-4 xl:col-start-2 xl:row-start-1 xl:self-center"
+          >
             {/* Everything a person might want instead of the form. It had
                 a screen of its own, which was a screen to swipe past on
                 the way to nothing: the address and the handles are two
                 lines and belong beside the ask. */}
-            <div data-dial="details" className="border-t border-border pt-8 short:pt-5">
-              <dl className="grid gap-6 min-[56rem]:grid-cols-2">
+            <div data-dial="details" className="border-t border-border pt-8 short:pt-5 xl:border-t-0 xl:pt-0">
+              {/* Side by side where the column has the room for both, by its
+                  own width rather than the window's. */}
+              <dl className="grid grid-cols-[repeat(auto-fit,minmax(15rem,1fr))] gap-6">
                 <div>
                   <dt className="label text-muted-foreground">Email</dt>
                   <dd className="mt-2 text-sm">
@@ -215,7 +224,9 @@ export default function ContactPage() {
               <h2 className="label text-muted-foreground">
                 How a commission runs
               </h2>
-              <ol className="mt-4 grid grid-cols-2 gap-x-8 gap-y-4 short:mt-3 short:grid-cols-4 short:gap-x-4">
+              {/* One down the middle column of three, where two would set the
+                  lines too short to justify; two again on a wide screen. */}
+              <ol className="mt-4 grid grid-cols-2 gap-x-8 gap-y-4 short:mt-3 short:grid-cols-4 short:gap-x-4 xl:grid-cols-1 short:xl:grid-cols-2 2xl:grid-cols-2">
                 {PHASES.map((phase, i) => (
                   <li key={phase.step} className="flex flex-col gap-1">
                     <span className="label tabular-nums text-muted-foreground">
@@ -242,7 +253,7 @@ export default function ContactPage() {
           <div
             data-scroll
             data-dial="form"
-            className="min-h-0 overflow-y-auto overscroll-contain sm:max-h-full sm:pr-3"
+            className="min-h-0 overflow-y-auto overscroll-contain sm:col-start-2 sm:row-span-2 sm:row-start-1 sm:max-h-full sm:pr-3 xl:col-start-3 xl:row-span-1"
           >
             <Suspense fallback={null}>
               <ContactForm />

@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { Orb } from "@/components/orb";
 import { flushSync } from "react-dom";
 import Image from "next/image";
 import { Dialog, VisuallyHidden } from "radix-ui";
@@ -801,6 +802,8 @@ function Stage({
   /* Which full-size copy has painted. By source, so a step to the next
      frame starts from the fitted picture again until its own arrives. */
   const [sharpDone, setSharpDone] = React.useState<string | null>(null);
+  /* Which picture has painted, for the orb: by source, as above. */
+  const [shown, setShown] = React.useState<string | null>(null);
   const area = React.useRef<HTMLDivElement>(null);
   const size = useFit(area, frame.width, frame.height);
   const zoom = useZoom(pictureRef, frame.src, swipe);
@@ -826,8 +829,16 @@ function Stage({
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
-      className="flex min-h-0 flex-1 items-center justify-center overflow-hidden p-4 sm:p-10"
+      className="relative flex min-h-0 flex-1 items-center justify-center overflow-hidden p-4 sm:p-10"
     >
+      {/* Julian: a thinking orb while the picture is still on its way.
+          It waits a third of a second before it shows, so a picture that
+          is already here never flashes one. */}
+      {shown !== frame.src ? (
+        <span className="orb-late pointer-events-none absolute bottom-4 right-4 z-10 text-foreground sm:bottom-6 sm:right-6">
+          <Orb state="searching" size={20} />
+        </span>
+      ) : null}
       {/* What the finger moves. Stays mounted across a step, so the offset
           it was released at is where the next frame starts from. */}
       <div
@@ -871,6 +882,7 @@ function Stage({
             sizes="100vw"
             priority
             draggable={false}
+            onLoad={() => setShown(frame.src)}
             className="block h-full w-full object-contain"
           />
           {/* The zoomable copy: the master's full width at 82, laid exactly

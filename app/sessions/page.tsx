@@ -106,7 +106,7 @@ export default function SessionsPage() {
                 data-tick
                 data-label={session.name}
                 data-hash={session.slug}
-                className="flex w-full shrink-0 flex-col gap-3 bg-background sm:h-full sm:w-auto sm:flex-row sm:gap-4"
+                className="flex w-full shrink-0 flex-col gap-3 bg-background sm:h-full sm:w-auto sm:flex-row sm:gap-8 xl:gap-12"
               >
                 {cover && sample ? (
                   <Link
@@ -152,21 +152,23 @@ export default function SessionsPage() {
                   </Link>
                 ) : null}
 
-                <div className="flex w-full shrink-0 flex-col justify-center gap-8 py-8 short:gap-5 sm:h-full sm:w-[min(22rem,60vw)] sm:py-0">
+                {/* Julian: larger, the title too. The column grows with
+                    the screen, 22rem on a laptop to 30rem on a wide one,
+                    and keeps a margin before the next photograph. */}
+                <div className="flex w-full shrink-0 flex-col justify-center gap-8 py-8 short:gap-5 sm:h-full sm:w-[clamp(22rem,23vw,30rem)] sm:py-0 sm:pr-10 xl:pr-14">
                   {/* The words take the height they need and scroll inside
                     themselves when the window is shorter than they are,
                     rather than pushing the button for booking off the
                     bottom of a laptop screen. */}
                   <div
                     data-scroll
-                    className="flex min-h-0 flex-col gap-8 overflow-y-auto overscroll-contain pr-2 short:gap-5"
+                    className="flex min-h-0 flex-col gap-8 overflow-y-auto overscroll-contain pr-2 short:gap-4"
                   >
-                    {/* Julian: in the black of the page's title above it,
-                        not the serif of the other section titles, and in
-                        title case: "Portraits", not caps. */}
+                    {/* Julian: in Archivo 900 capitals, as every section
+                        title (`globals.css`). */}
                     <h2
                       data-display
-                      className="font-display text-2xl leading-none tracking-[0] short:sm:text-2xl sm:text-3xl"
+                      className="font-display text-3xl leading-[0.95] tracking-[0] sm:text-[clamp(2rem,2.6vw,3.25rem)] short:sm:text-3xl"
                     >
                       {session.name}
                     </h2>
@@ -174,7 +176,7 @@ export default function SessionsPage() {
                     <dl data-dial="session-rates" className="flex flex-wrap gap-x-10 gap-y-4 border-t border-border pt-6 short:pt-4">
                       <div>
                         <dt className="label text-muted-foreground">Rate</dt>
-                        <dd className="mt-1.5 text-sm">
+                        <dd className="mt-1.5 text-sm sm:text-base short:sm:text-sm">
                           {formatPrice(session.from)}
                         </dd>
                       </div>
@@ -182,21 +184,21 @@ export default function SessionsPage() {
                         <dt className="label text-muted-foreground">
                           Turnaround
                         </dt>
-                        <dd className="mt-1.5 text-sm">{session.turnaround}</dd>
+                        <dd className="mt-1.5 text-sm sm:text-base short:sm:text-sm">{session.turnaround}</dd>
                       </div>
                     </dl>
 
-                    <p data-dial="session-text" className="text-sm leading-relaxed text-muted-foreground">
+                    <p data-dial="session-text" className="text-sm leading-relaxed text-muted-foreground sm:text-base short:sm:text-sm">
                       {session.blurb}
                     </p>
 
                     <div data-dial="session-includes">
                       <h3 className="label text-muted-foreground">Includes</h3>
-                      <ul className="mt-4 flex flex-col gap-3 short:gap-2">
+                      <ul className="mt-3 flex flex-col short:mt-1.5">
                         {session.includes.map((item) => (
                           <li
                             key={item}
-                            className="text-sm text-muted-foreground"
+                            className="border-b border-border py-2.5 text-sm short:py-1 sm:text-base short:sm:text-sm"
                           >
                             {item}
                           </li>

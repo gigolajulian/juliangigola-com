@@ -14,7 +14,7 @@ import { PageDials } from "@/components/page-dials";
  * not his). One page, his own words only.
  *
  * One screen. It was five, then four, then three, then two; Julian: one.
- * His portrait as pixels and his name, the pointer playing over both
+ * Lights in a grain of pixels and his name, the pointer playing over both
  * (`about-hero.tsx`), with the line, the biography, the services and the
  * ask beside, and the client marks along the foot. How a commission runs
  * is on Contact, beside the form it leads to.
@@ -88,7 +88,7 @@ export default function AboutPage() {
         deck="screens"
         className="mt-4 flex-1"
       >
-        {/* One: the portrait, the name, the line, and the services. */}
+        {/* One: the name, the line, and the services. */}
         <section
           data-tick
           data-label="About"
@@ -117,8 +117,7 @@ export default function AboutPage() {
               ) : null
             }
           >
-            {/* Julian: the line, what he is hired for under it, fitted
-                beside the portrait. */}
+            {/* Julian: the line, what he is hired for under it. */}
             <RisingTitle
               /* The ampersand kept with Photographer, so it opens the
                  second line rather than hanging off the first. */

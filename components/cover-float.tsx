@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils";
 import { CoverSpace } from "@/components/cover-space";
 import { CoverRole } from "@/components/cover-role";
 import { FitLines } from "@/components/fit-lines";
+import { CoverOrbit } from "@/components/cover-orbit";
 import { CoverCard, HeroDials, HeroName } from "@/components/hero-dials";
 import { DEAL, LANDSCAPE, MIDDLE, PHONE, SIDEWAYS, SLOTS, UPRIGHT, middleVars } from "@/lib/cover-slots";
 
@@ -47,7 +48,19 @@ export function CoverFloat({
       data-tick
       data-label="Cover"
       aria-label="Julian Gigola, photographer and creative director"
-      style={middleVars(MIDDLE) as React.CSSProperties}
+      style={
+        {
+          ...middleVars(MIDDLE),
+          /* The frontmost photograph in each layout, which the one pointed
+             at comes out in front of (`globals.css`). */
+          "--zmax-large": `${Math.max(...SLOTS.map((s) => s.z))}px`,
+          ...Object.fromEntries(
+            Object.entries({ upright: UPRIGHT, landscape: LANDSCAPE, sideways: SIDEWAYS, phone: PHONE }).map(
+              ([shape, set]) => [`--zmax-${shape}`, `${Math.max(...set.filter((p) => p.show).map((p) => p.z))}px`],
+            ),
+          ),
+        } as React.CSSProperties
+      }
       className={cn(
         "cover-float relative isolate grid place-items-center overflow-hidden",
         className,
@@ -55,6 +68,8 @@ export function CoverFloat({
     >
       {/* First, so its panels are listed before the cards' own. */}
       <HeroDials />
+      {/* Julian: once settled, the photos go round through the places. */}
+      <CoverOrbit />
       <CoverSpace className="cover-float-ring absolute inset-0 -z-10">
         {frames.map((p, i) => {
           const at = DEAL[i] ?? i;
@@ -125,12 +140,15 @@ export function CoverFloat({
         })}
       </CoverSpace>
 
+      {/* Julian: the words come in as the photographs do, from the first
+          photograph's start (`--h-start`, "Load animation"), each part a
+          beat after the one above, rather than once they have landed. */}
       <div className="cover-float-middle flex max-w-[min(62rem,92vw)] flex-col items-center px-6 text-center">
         <h1 className="uppercase">
           <span className="block">
             <span
               className="lift block"
-              style={{ "--reveal-delay": "1300ms" } as React.CSSProperties}
+              style={{ "--reveal-delay": "var(--h-start, 420ms)" } as React.CSSProperties}
             >
               {/* Julian: the name through React Bits' WarpText, in Inter
                   Tight Black. The canvas is a picture of the words; the words
@@ -149,7 +167,7 @@ export function CoverFloat({
           <span className="mt-[var(--h-gap-role,5px)] block">
             <span
               className="lift block cover-float-title"
-              style={{ "--reveal-delay": "1420ms" } as React.CSSProperties}
+              style={{ "--reveal-delay": "calc(var(--h-start, 420ms) + 120ms)" } as React.CSSProperties}
             >
               <CoverRole
                 role={"Photographer ♱ Creative Director"}
@@ -160,14 +178,14 @@ export function CoverFloat({
         </h1>
         <p
           className="lift cover-float-where mt-[var(--h-gap-where,8px)] mb-[var(--h-gap-cta,19px)] max-w-[34rem]"
-          style={{ "--reveal-delay": "1600ms" } as React.CSSProperties}
+          style={{ "--reveal-delay": "calc(var(--h-start, 420ms) + 300ms)" } as React.CSSProperties}
         >
           <span className="fit-line">{"Based in San Francisco, CA. Available Worldwide"}</span>
           <FitLines />
         </p>
         <div
           className="lift cover-float-ctas flex flex-wrap justify-center gap-3"
-          style={{ "--reveal-delay": "1760ms" } as React.CSSProperties}
+          style={{ "--reveal-delay": "calc(var(--h-start, 420ms) + 460ms)" } as React.CSSProperties}
         >
           <Link href="/portfolio" className="cover-cta press active:scale-[0.97]">
             See the work
