@@ -5,9 +5,9 @@ import { cn } from "@/lib/utils";
 import { CoverSpace } from "@/components/cover-space";
 import { CoverRole } from "@/components/cover-role";
 import { FitLines } from "@/components/fit-lines";
-import { CoverOrbit } from "@/components/cover-orbit";
 import { CoverCard, HeroDials, HeroName } from "@/components/hero-dials";
 import { DEAL, LANDSCAPE, MIDDLE, PHONE, SIDEWAYS, SLOTS, UPRIGHT, middleVars } from "@/lib/cover-slots";
+import { LiquidPair } from "@/components/liquid-pair";
 
 /* ── the cover ────────────────────────────────────────────────────
  * The name in the middle of the screen and the featured work round it,
@@ -68,8 +68,6 @@ export function CoverFloat({
     >
       {/* First, so its panels are listed before the cards' own. */}
       <HeroDials />
-      {/* Julian: once settled, the photos go round through the places. */}
-      <CoverOrbit />
       <CoverSpace className="cover-float-ring absolute inset-0 -z-10">
         {frames.map((p, i) => {
           const at = DEAL[i] ?? i;
@@ -183,7 +181,8 @@ export function CoverFloat({
           <span className="fit-line">{"Based in San Francisco, CA. Available Worldwide"}</span>
           <FitLines />
         </p>
-        <div
+        <LiquidPair
+          fill="var(--hero-ink)"
           className="lift cover-float-ctas flex flex-wrap justify-center gap-3"
           style={{ "--reveal-delay": "calc(var(--h-start, 420ms) + 460ms)" } as React.CSSProperties}
         >
@@ -196,7 +195,7 @@ export function CoverFloat({
           >
             Book a session
           </Link>
-        </div>
+        </LiquidPair>
       </div>
     </section>
   );

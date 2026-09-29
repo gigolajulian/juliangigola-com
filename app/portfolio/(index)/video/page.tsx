@@ -37,7 +37,7 @@ const BEFORE = (() => {
   const prev = at > 0 ? WORK_CATEGORY_LINKS[at - 1] : undefined;
   return prev
     ? { href: prev.href, name: prev.name }
-    : { href: "/portfolio", name: "All work" };
+    : { href: "/portfolio", name: "Portfolio" };
 })();
 
 /* The poster of a film as a frame, for its line in the list: a still with

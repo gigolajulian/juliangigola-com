@@ -200,11 +200,16 @@ export function StripHead({
               : title}
           </h1>
           {sub ? (
-            <p className="label mt-1.5 text-muted-foreground">{sub}</p>
-          ) : live ? (
+            /* Julian: always centred. The head's `text-center` lost to
+               the justified paragraphs (`globals.css`), which set a line
+               this short flush left on a laptop. */
+            <p className="label mt-1.5 text-center text-muted-foreground">{sub}</p>
+          ) : live !== undefined ? (
+            /* `live={false}` keeps the line's room and leaves it empty, so
+               a head that switches it off does not move the strip. */
             <p
-              data-strip-at
-              className="label mt-1.5 min-h-[1lh] text-muted-foreground"
+              data-strip-at={live ? "" : undefined}
+              className="label mt-1.5 min-h-[1lh] text-center text-muted-foreground"
             />
           ) : null}
         </div>
@@ -215,10 +220,10 @@ export function StripHead({
             again by the cell the sequence opens on. */}
         {/* A client's logo, where a campaign has one, sits level with the
             middle of the title block rather than on the crumb's line. */}
-        <p className="label shrink-0 text-right text-muted-foreground has-[[data-aside-mark]]:self-center sm:w-44">
+        <div className="label shrink-0 text-right text-muted-foreground has-[[data-aside-mark]]:self-center sm:w-44">
           <span className="max-sm:hidden">{aside}</span>
           {phone ? <span className="sm:hidden">{phone}</span> : null}
-        </p>
+        </div>
       </div>
     </header>
   );

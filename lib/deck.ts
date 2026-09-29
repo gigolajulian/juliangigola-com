@@ -245,7 +245,10 @@ export function runDeck(el: HTMLElement, mode: Deck): () => void {
      taken and moving on the compositor, and nothing here shows yet, since
      a strip arrives at an end where no card is covered. And once the page
      is idle rather than two frames on (`idle`). */
-  const first = idle(deal);
+  /* Except a strip walked back into, which opens at its end with cards
+     covered: dealt late, the pile jumped under the visitor a second after
+     landing (Julian, Contact back to Sessions). */
+  const first = el.scrollLeft > 0 ? (deal(), () => {}) : idle(deal);
   el.addEventListener("scroll", onScroll, { passive: true });
   wide.addEventListener("change", deal);
   calm.addEventListener("change", deal);

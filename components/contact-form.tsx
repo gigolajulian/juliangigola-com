@@ -32,7 +32,7 @@ const TYPES = [
 const FOLLOW_UP: Record<string, { label: string; placeholder: string }> = {
   editorial: {
     label: "Publication and issue date",
-    placeholder: "e.g. print, March issue, due Feb 14",
+    placeholder: "e.g. print, due Feb 14",
   },
   campaign: {
     label: "Usage and territory",
@@ -179,7 +179,7 @@ export function ContactForm() {
         e.preventDefault();
         e.currentTarget.querySelector<HTMLElement>(":invalid")?.focus();
       }}
-      className="flex flex-col gap-6"
+      className="flex flex-col gap-5"
       noValidate
     >
       {/* The honeypot. Hidden from sight, from the tab order and from
@@ -244,7 +244,7 @@ export function ContactForm() {
             <label
               key={t.value}
               className={cn(
-                "label cursor-pointer border px-4 py-3 transition-colors duration-200",
+                "label cursor-pointer border px-4 py-2.5 transition-colors duration-200 [@media(pointer:coarse)]:py-4",
                 /* Keyboard focus only. `focus-within` put the accent ring
                    around whichever kind of shoot had been pressed and left
                    it there, so a chosen type wore two outlines: its own
@@ -357,12 +357,12 @@ export function ContactForm() {
         {!ready && !pending ? (
           <p
             id="enquire-missing"
-            className="label order-last basis-full text-muted-foreground lg:order-none lg:basis-auto"
+            className="label order-last basis-full text-left text-muted-foreground lg:order-none lg:basis-auto"
           >
             Your name, your email and a line about the shoot
           </p>
         ) : null}
-        <p className="text-xs text-muted-foreground">
+        <p className="text-left text-xs text-muted-foreground">
           Or email{" "}
           <a
             href="mailto:hello@juliangigola.com"
@@ -403,13 +403,13 @@ function Field({
       <Element
         id={id}
         name={name}
-        rows={as === "textarea" ? 4 : undefined}
+        rows={as === "textarea" ? 3 : undefined}
         aria-invalid={error ? true : undefined}
         // Points a screen reader at the message rather than only colouring
         // the border, which says nothing to anyone not looking at it.
         aria-describedby={error ? errorId : undefined}
         className={cn(
-          "mt-3 block w-full border-0 border-b bg-transparent py-3 text-base",
+          "mt-2 block w-full border-0 border-b bg-transparent py-2.5 text-base",
           "transition-colors duration-200 placeholder:text-muted-foreground/60",
           // Focus is the rule under the field coming up to full ink. No
           // accent ring as well: a text field shows focus whether the

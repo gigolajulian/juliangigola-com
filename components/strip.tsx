@@ -5,6 +5,7 @@ import * as React from "react";
 import { useRouter } from "next/navigation";
 import { cn, rubberband } from "@/lib/utils";
 import { flyCovers } from "@/lib/work-view";
+import { Liquid } from "liquid-gooey";
 
 /* ── the strip ────────────────────────────────────────────────────
  * One screen, and the page runs across it. This is the machine behind
@@ -1820,7 +1821,11 @@ export function Strip({
       arriveDir = dir;
       const root = document.documentElement;
       root.dataset.nav = "in";
-      root.dataset.navSide = dir > 0 ? "right" : "left";
+      /* Julian: back is the stack scrolled backwards, so this page, the
+         card on top, goes off to the right and the one before comes up
+         from behind (`back` in `globals.css`), not in over it from the
+         left as the bar deals it. */
+      root.dataset.navSide = dir > 0 ? "right" : "back";
       window.setTimeout(() => {
         if (root.dataset.navSide === undefined) return;
         delete root.dataset.nav;
@@ -2268,15 +2273,33 @@ export function Strip({
        straight. It waits for the movement to stop, so it never fights the
        gesture, and it does nothing while the strip is driving itself. */
     let settle = 0;
+    /* The screen a paged strip last came to rest on. */
+    let seat = paged ? nearest(el.scrollLeft) : 0;
     const onSettle = () => {
       if (!paged || !eased) return;
       window.clearTimeout(settle);
       settle = window.setTimeout(() => {
         if (down || held || dragging || frame || leaving) return;
-        const where = centreOf(el, nearest(el.scrollLeft));
+        seat = nearest(el.scrollLeft);
+        const where = centreOf(el, seat);
         if (where !== null && Math.abs(where - el.scrollLeft) > 2) to(where);
       }, 160);
     };
+    /* Turned on its side, or the window resized, a paged strip stays on
+       the screen it was on: the scroll kept its pixels, which at the new
+       width stood two thirds of the way between two screens (an iPad on
+       the homepage). A frame on, once the deck has laid its screens out
+       again at the new width. */
+    let across = el.clientWidth;
+    const reseat = () => {
+      if (!paged || el.clientWidth === across) return;
+      across = el.clientWidth;
+      requestAnimationFrame(() => {
+        const where = centreOf(el, seat);
+        if (where !== null) el.scrollLeft = where;
+      });
+    };
+
 
     /* Tab into a section that is off screen and the browser jumps the box
        to it: instantly, and to wherever it takes to get the element in
@@ -2312,7 +2335,10 @@ export function Strip({
 
     // And whenever the scroller changes shape: a window resized, the rack
     // swapped for the strip, a cell arriving.
-    const resized = new ResizeObserver(size);
+    const resized = new ResizeObserver(() => {
+      size();
+      reseat();
+    });
     resized.observe(el);
 
     el.addEventListener("jg:home", onHome);
@@ -2537,6 +2563,36 @@ export function Strip({
     hit.current = tickAt;
   });
   const onRail = over !== null;
+  /** The chapter the page is in, for the rail at rest (`rail-sum`). */
+  const nowIn = chaptered
+    ? chapterList.find((g) => !g.href && lands >= g.from && lands <= g.to)
+    : undefined;
+  /* Its fill follows the scroll exactly (Julian): from the chapter's first
+     cell in the middle of the window to its last, written by hand so a
+     scroll frame costs no render. */
+  const sumFill = React.useRef<HTMLSpanElement>(null);
+  const sumFrom = nowIn ? ticks[nowIn.from]?.i : undefined;
+  const sumTo = nowIn ? (ticks[nowIn.to + 1]?.i ?? Infinity) - 1 : undefined;
+  React.useEffect(() => {
+    const el = scroller.current;
+    const fill = sumFill.current;
+    if (!el || !fill || sumFrom === undefined || sumTo === undefined) return;
+    const read = () => {
+      const max = el.scrollWidth - el.clientWidth;
+      const a = Math.max(0, centreOf(el, sumFrom) ?? 0);
+      const b = Math.min(
+        max,
+        centreOf(el, Math.min(sumTo, el.children.length - 1)) ?? max,
+      );
+      const p = b > a ? (el.scrollLeft - a) / (b - a) : 1;
+      // A clip and not a width: a width lays the rail out on every
+      // scroll frame, a clip is only painted.
+      fill.style.clipPath = `inset(0 ${100 - Math.min(1, Math.max(0, p)) * 100}% 0 0 round 9999px)`;
+    };
+    read();
+    el.addEventListener("scroll", read, { passive: true });
+    return () => el.removeEventListener("scroll", read);
+  }, [sumFrom, sumTo]);
   React.useEffect(() => {
     if (!chaptered || !onRail) return;
     let frame = 0;
@@ -2764,6 +2820,9 @@ export function Strip({
           "strip-rail mt-6 flex min-h-5 items-end gap-6 px-6 pb-4 max-sm:mt-3 sm:px-10 tablet:mt-3 lying:mt-2",
           stack && "max-sm:hidden",
         )}
+        /* Julian: one big bar, sectioned off, each discipline named in
+           its own section (`rail-names` in `globals.css`). */
+        data-rail-names={chaptered ? "always" : undefined}
       >
         {counter?.(at)}
         {/* Where you are, for a reader who cannot see the inked tick. The
@@ -2814,7 +2873,7 @@ export function Strip({
              a pixel of the drawing. */
           data-cue={cue ? "" : undefined}
           className={cn(
-            "relative flex h-2 min-w-0 flex-1 touch-none items-end py-2",
+            "rail-line relative flex h-2 min-w-0 flex-1 touch-none items-end py-2",
             "pointer-coarse:before:absolute pointer-coarse:before:inset-x-0 pointer-coarse:before:-top-3 pointer-coarse:before:-bottom-4 pointer-coarse:before:content-['']",
             // In chapters the gap is drawn inside each one, so the twelve
             // tile the rail and the hit test has nowhere to fall through.
@@ -2842,6 +2901,28 @@ export function Strip({
               aria-hidden
               className="absolute -bottom-2 -top-6 left-0 right-0 z-10"
             />
+          ) : null}
+          {/* The drop, on every rail but the archive's (Julian put that
+              one back as it was). */}
+          {chaptered ? null : <RailInk rail={rail} />}
+          {/* Julian: unhovered, the archive's rail is About's one line,
+              filled as far as the page has got through the discipline it
+              is in. The line is the sections themselves, shrunk; this is
+              only the fill and the name over them (`rail-sum` in
+              `globals.css`). */}
+          {nowIn ? (
+            <span
+              aria-hidden
+              className="rail-sum pointer-events-none absolute inset-x-0 top-0 z-[1] h-2 rounded-full"
+            >
+              <span
+                ref={sumFill}
+                className="block h-full w-full rounded-full bg-foreground [clip-path:inset(0_100%_0_0)]"
+              />
+              <span className="rail-word label absolute bottom-full left-0 mb-2 whitespace-nowrap text-muted-foreground">
+                {nowIn.name}
+              </span>
+            </span>
           ) : null}
           {chaptered
             ? chapterList.map((g, gi) => {
@@ -2908,7 +2989,7 @@ export function Strip({
                         : 1,
                     }}
                     className={cn(
-                      "relative flex h-2 min-w-0 shrink basis-0 items-end px-1",
+                      "rail-chapter relative flex h-2 min-w-0 shrink basis-0 items-end px-1",
                       /* Eased while the page is what moves it, instant
                          while a pointer is on it. Three hundred
                          milliseconds of growth under a finger is three
@@ -2987,7 +3068,7 @@ export function Strip({
                            moves: a height tween lays the whole rail out
                            again on every frame, a scale is drawn by the
                            compositor. */
-                        "flex h-2 w-full origin-bottom rounded-full transition-[scale,background-color] duration-200 ease-[var(--ease-out-strong)]",
+                        "rail-bar flex h-2 w-full origin-bottom rounded-full transition-[scale,background-color] duration-200 ease-[var(--ease-out-strong)]",
                         shown
                           ? /* The cue nudges the bar that says where you
                                are, and on the archive's rail that is this
@@ -3026,6 +3107,24 @@ export function Strip({
                         />
                       ))}
                     </div>
+                    {/* Julian: the discipline inside its own bar
+                        (`rail-name`, `globals.css`). */}
+                    <span
+                      aria-hidden
+                      data-tone={
+                        shown
+                          ? "open"
+                          : here
+                            ? "lit"
+                            : overAway === gi
+                              ? "near"
+                              : undefined
+                      }
+                      className="rail-name label"
+                    >
+                      {/* The project under the pointer, once one is. */}
+                      {word}
+                    </span>
                   </div>
                 );
               })
@@ -3063,6 +3162,7 @@ export function Strip({
                       </span>
                     ) : null}
                     <span
+                      data-ink={i === at ? "" : undefined}
                       className={cn(
                         /* The position moves from tick to tick without easing
                        its colour, and only the lit tick's height eases up.
@@ -3083,5 +3183,99 @@ export function Strip({
         </div>
       </div>
     </div>
+  );
+}
+
+/* ── the ink in liquid ──
+   Julian: the gooey UI in the scrollbar, sitewide. Where you are on the
+   rail is a drop of the ink (`liquid-gooey`, Move): it sits over the lit
+   tick (`data-ink`), and when that moves the drop runs after
+   it, stretching and trailing a droplet. The lit mark gives up its own
+   ink while the drop is there (`data-goo`, `globals.css`), so there is
+   one mark and not two. Read after every render of the strip and for a
+   beat after, since a chapter opening and the cue move the mark without
+   one. Not for anybody who asked for less motion: the plain ink stays. */
+function RailInk({ rail }: { rail: React.RefObject<HTMLDivElement | null> }) {
+  const box = React.useRef<HTMLSpanElement>(null);
+  const [ink, setInk] = React.useState<{
+    x: number;
+    y: number;
+    w: number;
+    h: number;
+  } | null>(null);
+  React.useEffect(() => {
+    const r = rail.current;
+    const b = box.current;
+    if (!r || !b) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    let raf = 0;
+    const until = performance.now() + 950;
+    const read = () => {
+      const el = r.querySelector<HTMLElement>("[data-ink]");
+      if (!el) {
+        delete r.dataset.goo;
+        setInk(null);
+        return;
+      }
+      const a = el.getBoundingClientRect();
+      const o = b.getBoundingClientRect();
+      const next = {
+        x: a.left - o.left,
+        y: a.top - o.top,
+        w: a.width,
+        h: a.height,
+      };
+      setInk((p) =>
+        p &&
+        Math.abs(p.x - next.x) +
+          Math.abs(p.y - next.y) +
+          Math.abs(p.w - next.w) +
+          Math.abs(p.h - next.h) <
+          0.5
+          ? p
+          : next,
+      );
+      r.dataset.goo = "";
+      if (performance.now() < until) raf = requestAnimationFrame(read);
+    };
+    /* A frame on, not here: read inside the effect, a drop that moved on
+       every render set state on every render, and a fling on All work
+       ran React out of nested updates. */
+    raf = requestAnimationFrame(read);
+    return () => cancelAnimationFrame(raf);
+  });
+  React.useEffect(() => () => void delete rail.current?.dataset.goo, [rail]);
+  return (
+    <span
+      ref={box}
+      aria-hidden
+      className="pointer-events-none absolute inset-0 z-[5]"
+    >
+      {ink ? (
+        /* A blur of two: the lit chapter is four pixels tall, and any
+           more ate it down to a wobbling thread. */
+        <Liquid
+          blur={2}
+          contrast={18}
+          fill="var(--foreground)"
+          className="h-full w-full"
+        >
+          {/* Julian: less bounce, as the filter bar's. */}
+          <Liquid.Item effect="move" move={{ wobble: 0.25 }}>
+            <div
+              /* The drop springs to where the mark is and only then
+                 changes size: a chapter shutting took the width at once
+                 and smeared a bar across the rail. */
+              className="absolute left-0 top-0 rounded-full transition-[width,height] duration-300 ease-[var(--ease-out-strong)]"
+              style={{
+                width: ink.w,
+                height: ink.h,
+                transform: `translate(${ink.x}px, ${ink.y}px)`,
+              }}
+            />
+          </Liquid.Item>
+        </Liquid>
+      ) : null}
+    </span>
   );
 }

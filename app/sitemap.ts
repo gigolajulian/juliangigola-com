@@ -40,7 +40,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   }));
 
   const projects = PROJECTS.map((p) => ({
-    url: `${SITE}/work/${p.slug}`,
+    url: `${SITE}/portfolio/${p.slug}`,
     changeFrequency: "yearly" as const,
     priority: 0.6,
   }));

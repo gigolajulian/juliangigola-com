@@ -9,6 +9,7 @@ import { Testimonials } from "@/components/testimonials";
 import { SESSION_TYPES, formatPrice } from "@/lib/sessions";
 import { BOOKING_URL } from "@/lib/site";
 import { CONTACT, PROJECTS, projectsIn, coverOf } from "@/lib/work";
+import { LiquidPair } from "@/components/liquid-pair";
 
 /* ── sessions ─────────────────────────────────────────────────────
  * The consumer half of the site, and the half the old one served worst.
@@ -188,7 +189,7 @@ export default function SessionsPage() {
                       </div>
                     </dl>
 
-                    <p data-dial="session-text" className="text-sm leading-relaxed text-muted-foreground sm:text-base short:sm:text-sm">
+                    <p data-dial="session-text" className="text-left text-sm leading-relaxed text-muted-foreground sm:text-base short:sm:text-sm">
                       {session.blurb}
                     </p>
 
@@ -215,7 +216,7 @@ export default function SessionsPage() {
                     label and value read down the left; the one thing to
                     press is put at the other end of the rule under it, so
                     it is not a seventh line of the list. */}
-                  <div data-dial="session-buttons" className="flex flex-wrap items-center justify-end gap-3 border-t border-border pt-6">
+                  <LiquidPair data-dial="session-buttons" className="flex flex-wrap items-center justify-end gap-3 border-t border-border pt-6">
                     {BOOKING_URL ? (
                       <a
                         href={BOOKING_URL}
@@ -234,7 +235,7 @@ export default function SessionsPage() {
                     >
                       Inquire
                     </Link>
-                  </div>
+                  </LiquidPair>
                 </div>
               </div>
             );

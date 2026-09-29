@@ -422,16 +422,29 @@ export function AboutHero({
         );
       }
       name.style.fontSize = "";
+      delete facts.dataset.stack;
       const current = parseFloat(getComputedStyle(name).fontSize);
       const grows = name.offsetHeight / current;
-      let size = sized(current);
+      const want = sized(current);
+      let size = want;
       /* A phone's screen grows to hold the words; a wide one does not. */
       if (box.clientWidth >= 640)
         size = Math.max(40, Math.min(size, current + slack() / grows));
       name.style.fontSize = `${size}px`;
+      /* Held short of the facts' width by the height, the name no longer
+         reached their end (an iPad on its side: 287 against 411). Julian:
+         the two right aligned, the facts to the name's length. They stack
+         under it, each on its own line, rather than run past it; a few
+         pixels short is only set right, on the facts' edge. */
+      if (size < want * 0.97) facts.dataset.stack = "";
     };
     fit();
-    void document.fonts.ready.then(fit);
+    /* Shown once it is sized in its own face: fitted first in the
+       fallback's, it drew at 577px and jumped to 439 half a second in. */
+    void document.fonts.ready.then(() => {
+      fit();
+      name.dataset.fit = "";
+    });
     const sizes = new ResizeObserver(fit);
     sizes.observe(box);
     return () => sizes.disconnect();

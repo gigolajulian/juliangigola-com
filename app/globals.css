@@ -126,6 +126,20 @@
   background: currentColor;
   transform: translateX(-100%);
 }
+/* The sweep starts with the first paint, not when the script arrives, so
+   the wait for the script is under it rather than before it. `intro.tsx`
+   holds it back to what has loaded; `SWEEP` and `CURVE` there must match
+   these. No `linear()` (an older browser) drops the second line and keeps
+   the nearest curve. */
+[data-intro] .jg-intro-panel {
+  animation: jg-intro-sweep 1600ms cubic-bezier(0.3, 0.7, 0.4, 1) forwards;
+  animation: jg-intro-sweep 1600ms linear(0, 0.0265, 0.0923, 0.1593, 0.2301, 0.3009, 0.3835, 0.4493, 0.5117, 0.5705, 0.6362, 0.6867, 0.7335, 0.7765, 0.8229, 0.8574, 0.8881, 0.9149, 0.9419, 0.9603, 0.9748, 0.9854, 0.9922, 0.9964, 1) forwards;
+}
+@keyframes jg-intro-sweep {
+  to {
+    transform: none;
+  }
+}
 .jg-intro-eye {
   position: absolute;
   left: 50%;
@@ -181,14 +195,27 @@
   animation: jg-lift var(--h-lift-ms, 1030ms) cubic-bezier(0.16, 1, 0.3, 1) backwards;
   animation-delay: var(--reveal-delay, 0ms);
 }
+/* The mask moves by a number, not by the clip itself. Chromium runs an
+   animated `clip-path` on the compositor and until it ends hit-tests the
+   element as fully clipped: "See the work" could not be clicked for the
+   whole of its rise, the last half second of it already in place. A clip that
+   holds still and reads `--lift-clip` is drawn and hit-tested as it
+   stands. */
+@property --lift-clip {
+  syntax: "<number>";
+  inherits: false;
+  initial-value: 0;
+}
 @keyframes jg-lift {
   from {
     transform: translateY(100%);
-    clip-path: inset(0 0 100% 0);
+    --lift-clip: 100;
+    clip-path: inset(0 0 calc(var(--lift-clip) * 1%) 0);
   }
   to {
     transform: translateY(0);
-    clip-path: inset(0);
+    --lift-clip: 0;
+    clip-path: inset(0 0 calc(var(--lift-clip) * 1%) 0);
   }
 }
 
@@ -668,10 +695,9 @@
        card's own depth, so one set far back stayed behind a neighbour
        further forward; in 3D, depth and not z-index decides. Now it comes
        out in front of the frontmost photograph as well (`--zmax`, by
-       layout), less however far the orbit has carried the frame
-       (`--oz`, `cover-orbit.tsx`). */
+       layout). */
     transform: translateZ(
-      calc(max(var(--fz, 0px), var(--zmax, 0px) - var(--oz, 0px)) + var(--h-lift, 44px))
+      calc(max(var(--fz, 0px), var(--zmax, 0px)) + var(--h-lift, 44px))
     );
     /* Julian: and toward the middle. `--mid-x` and `--mid-y` are the way
        to the cover's centre, measured as the pointer lands (`CoverCard`);
@@ -1070,12 +1096,22 @@
     text-transform: uppercase;
   }
   /* Julian: justify body. Base layer, so a `text-center` or `text-right`
-     on the paragraph itself still wins. */
+     on the paragraph itself still wins. Then: I just want it to look
+     good. Justified mono needs about 45 characters a line or the gaps
+     open up between the words, and measured on every page, under 1024px
+     wide nearly every paragraph had 19 to 42. So justified from there up,
+     set left below it, and set left too where a desktop column is narrow
+     (the sessions' lines, the contact steps and notes carry `text-left`). */
   p {
-    text-align: justify;
+    text-align: left;
     /* Split long words at the line's end, so a narrow column is not
        opened up into wide gaps between the words. */
     hyphens: auto;
+  }
+  @media (min-width: 64rem) {
+    p {
+      text-align: justify;
+    }
   }
 
   html {
@@ -2229,6 +2265,182 @@ a.strip-cell {
   }
 }
 
+/* The archive's rail (`data-rail-names="always"`, `strip.tsx`). At rest
+   it is the one line About has (`rail-sum`), filled as far as the page has
+   got through the discipline it is in. Under the pointer the disciplines
+   come up out of it as an Apple segmented control (Julian): one soft
+   capsule, faint short dividers, and a raised thumb on the discipline you
+   are in. An open discipline names the project under the pointer and
+   lights it. At rest the sections are the line, shrunk to its height and
+   in its tone, so hovering grows one object rather than swapping two
+   (Julian: seamless). The bar scales rather than growing, so nothing is
+   laid out again. */
+.rail-name {
+  display: none;
+}
+.strip-rail[data-rail-names="always"] {
+  /* Solid, not see-through: two see-through sections meeting on a
+     fraction of a pixel draw a seam where their edges overlap. */
+  --rail-line: color-mix(in oklab, var(--foreground) 20%, var(--background));
+  --rail-track: color-mix(in oklab, var(--foreground) 11%, var(--background));
+  --rail-thumb: color-mix(in oklab, var(--foreground) 24%, var(--background));
+  --rail-shadow: 0 1px 3px rgb(0 0 0 / 0.4), inset 0 0.5px 0 rgb(255 255 255 / 0.08);
+}
+:root[data-theme="light"] .strip-rail[data-rail-names="always"] {
+  --rail-track: color-mix(in oklab, var(--foreground) 8%, var(--background));
+  --rail-thumb: #fff;
+  --rail-shadow: 0 2px 6px rgb(0 0 0 / 0.1), 0 1px 1px rgb(0 0 0 / 0.06), 0 0 0 0.5px rgb(0 0 0 / 0.04);
+}
+.strip-rail[data-rail-names="always"] .rail-chapter {
+  padding-inline: 0;
+  height: 22px;
+}
+.strip-rail[data-rail-names="always"] .rail-bar {
+  position: relative;
+  height: 100%;
+  border-radius: 0;
+  background-color: var(--rail-line);
+  scale: 1 0.36;
+  animation: none;
+  transition:
+    scale 320ms var(--ease-out-strong),
+    background-color 320ms var(--ease-out-strong);
+}
+/* What only the control has: gone while it is the line. */
+.strip-rail[data-rail-names="always"] .rail-bar::before,
+.strip-rail[data-rail-names="always"] .rail-bar::after,
+.strip-rail[data-rail-names="always"] .rail-bar > span {
+  opacity: 0;
+  transition: opacity 120ms var(--ease-out-strong);
+}
+.strip-rail[data-rail-names="always"] .rail-chapter:first-of-type .rail-bar {
+  border-radius: 9999px 0 0 9999px;
+}
+.strip-rail[data-rail-names="always"] .rail-chapter:last-of-type .rail-bar {
+  border-radius: 0 9999px 9999px 0;
+}
+/* Short dividers, gone either side of the thumb. */
+.strip-rail[data-rail-names="always"] .rail-chapter + .rail-chapter .rail-bar::after {
+  content: "";
+  position: absolute;
+  left: -0.5px;
+  top: 6px;
+  bottom: 6px;
+  width: 1px;
+  background: color-mix(in oklab, var(--foreground) 16%, transparent);
+}
+.strip-rail[data-rail-names="always"] .rail-chapter:has(> [data-tone="lit"]) .rail-bar::after,
+.strip-rail[data-rail-names="always"] .rail-chapter:has(> [data-tone="lit"]) + .rail-chapter .rail-bar::after,
+.strip-rail[data-rail-names="always"] .rail-chapter:has(> [data-tone="near"]) .rail-bar::after,
+.strip-rail[data-rail-names="always"] .rail-chapter:has(> [data-tone="near"]) + .rail-chapter .rail-bar::after {
+  opacity: 0;
+}
+/* The thumb on the discipline you are in, and a quieter one on a
+   discipline elsewhere that the pointer is on. */
+.strip-rail[data-rail-names="always"] .rail-chapter:has(> [data-tone="lit"]) .rail-bar::before,
+.strip-rail[data-rail-names="always"] .rail-chapter:has(> [data-tone="near"]) .rail-bar::before {
+  content: "";
+  position: absolute;
+  inset: 2px;
+  border-radius: 9999px;
+  background: var(--rail-thumb);
+  box-shadow: var(--rail-shadow);
+}
+.strip-rail[data-rail-names="always"] .rail-chapter:has(> [data-tone="near"]) .rail-bar::before {
+  background: color-mix(in oklab, var(--foreground) 8%, transparent);
+  box-shadow: none;
+}
+/* In an open discipline each project is a stretch of the capsule, and the
+   one under the pointer (or where the page is) is lit quietly, as a hover
+   is, so it never competes with the thumb. */
+.strip-rail[data-rail-names="always"] .rail-bar > span {
+  position: relative;
+  background: none;
+  box-shadow: none;
+}
+.strip-rail[data-rail-names="always"] .rail-bar > span.bg-foreground::before {
+  content: "";
+  position: absolute;
+  inset: 2px 1px;
+  min-width: 8px;
+  border-radius: 9999px;
+  background: color-mix(in oklab, var(--foreground) 12%, transparent);
+}
+.strip-rail[data-rail-names="always"] .rail-name {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: block;
+  padding-inline: 8px;
+  line-height: 22px;
+  text-align: center;
+  /* A discipline too narrow for its name ends it on an ellipsis. */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.5625rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  color: color-mix(in oklab, var(--foreground) 60%, transparent);
+  opacity: 0;
+  pointer-events: none;
+  transition:
+    opacity 120ms var(--ease-out-strong),
+    color 200ms var(--ease-out-strong);
+}
+.strip-rail[data-rail-names="always"] .rail-name[data-tone] {
+  color: var(--foreground);
+}
+/* The name is in the capsule, so no word stands over it. */
+.strip-rail[data-rail-names="always"] .rail-chapter .rail-word {
+  display: none;
+}
+.rail-sum {
+  transition: opacity 240ms var(--ease-out-strong) 80ms;
+}
+/* The line grows into the control as one piece, and what the control
+   adds comes up once it is most of the way there. */
+.rail-line:hover .rail-bar,
+[data-dwell] .rail-line .rail-bar {
+  scale: none;
+  background-color: var(--rail-track);
+}
+.rail-line:hover .rail-bar::before,
+.rail-line:hover .rail-bar::after,
+.rail-line:hover .rail-bar > span,
+[data-dwell] .rail-line .rail-bar::before,
+[data-dwell] .rail-line .rail-bar::after,
+[data-dwell] .rail-line .rail-bar > span {
+  opacity: 1;
+  transition: opacity 200ms var(--ease-out-strong) 120ms;
+}
+.rail-line:hover .rail-name,
+[data-dwell] .rail-line .rail-name {
+  opacity: 1;
+  transition-delay: 140ms, 0ms;
+}
+.rail-line:hover .rail-sum,
+[data-dwell] .rail-line .rail-sum {
+  opacity: 0;
+  transition: opacity 140ms var(--ease-out-strong);
+}
+@media (prefers-reduced-motion: reduce) {
+  .strip-rail[data-rail-names="always"] .rail-bar,
+  .strip-rail[data-rail-names="always"] .rail-bar::before,
+  .strip-rail[data-rail-names="always"] .rail-bar::after,
+  .strip-rail[data-rail-names="always"] .rail-bar > span,
+  .strip-rail[data-rail-names="always"] .rail-name,
+  .rail-line .rail-sum {
+    transition: none !important;
+  }
+}
+
+/* The rail's ink in liquid (`RailInk`, `strip.tsx`): the drop is the
+   mark, so the mark under it gives up its own ink. */
+[data-goo] [data-ink] {
+  background-color: transparent;
+}
+
 /* ── the reel behind the motion page ──
    A 16:9 frame cut to cover whatever shape the window is: as wide as the
    window or as wide as its height needs, whichever is more, centred. The
@@ -2283,6 +2495,17 @@ a.strip-cell {
   }
   .strip-paged > * {
     scroll-snap-align: center;
+  }
+}
+/* But not a strip dealt as a deck (the homepage). Every screen of it is
+   pinned (`position: sticky`, `lib/deck.ts`), and a pinned screen's snap
+   point is wherever it is pinned, which is wherever the strip stands: a
+   slow swipe came to rest half way between two screens, and turning an
+   iPad sideways snapped back to the cover. The strip's own settle lands
+   the swipe instead, on the screens' true places (`data-at`). */
+@media (pointer: coarse) {
+  .strip-scroll[data-dealt="screens"] {
+    scroll-snap-type: none;
   }
 }
 
@@ -3316,6 +3539,19 @@ a.strip-cell {
   transition-delay: calc(80ms + var(--reveal-delay, 0ms));
 }
 
+/* The footer held with the page while the splash is up, and let in with
+   it. The sheet lifts off the top, so the foot of the screen is uncovered
+   first, and the footer stood there alone for 450ms before the bar and
+   the page (an iPad). The translate is the drawer's (above). */
+[data-intro="1"] body > footer {
+  opacity: 0;
+}
+body > footer {
+  transition:
+    opacity 420ms var(--ease-out-strong),
+    translate 420ms var(--ease-out-strong);
+}
+
 @media (prefers-reduced-motion: reduce) {
   .site-bar,
   body > main,
@@ -3791,6 +4027,29 @@ optgroup {
 :root[data-nav-side="left"]::view-transition-new(.page) {
   animation-name: jg-bar-in-left;
 }
+/* Scrolled back past the start of a strip (`leave` in `strip.tsx`): the
+   deal run backwards. The page you are on is the card on top and goes off
+   to the right; the one before comes up from where it had receded to. */
+:root[data-nav-side="back"]::view-transition-old(.page) {
+  z-index: 2;
+  animation-name: jg-bar-off-right;
+  background-color: var(--background);
+}
+:root[data-nav-side="back"]::view-transition-new(.page) {
+  z-index: 0;
+  animation-name: jg-bar-rise;
+}
+@keyframes jg-bar-off-right {
+  to {
+    transform: translateX(100%);
+  }
+}
+@keyframes jg-bar-rise {
+  from {
+    transform: scale(0.9);
+    opacity: 0.25;
+  }
+}
 @keyframes jg-bar-recede {
   to {
     transform: scale(0.9);
@@ -4233,6 +4492,11 @@ optgroup {
    keep a grey edge rather than one the colour of the fill. */
 .cover-cta:not(.cover-cta-quiet) {
   border: 1px solid transparent;
+  /* Julian: see through, as every other primary on the site (`action`):
+     72% of the ink over a blur of what is behind it, not a solid pill. */
+  background: color-mix(in oklab, var(--hero-ink) 72%, transparent);
+  -webkit-backdrop-filter: blur(24px) saturate(1.9) brightness(1.06);
+  backdrop-filter: blur(24px) saturate(1.9) brightness(1.06);
 }
 @media (hover: hover) and (pointer: fine) {
   :is(.action, .action-quiet, .cover-cta):not(:disabled, [aria-disabled="true"]):hover::before {
@@ -4527,6 +4791,120 @@ h2:not(.label) {
   text-transform: uppercase;
 }
 
+/* ── small things from the scan ──────────────────────────────────
+ * The page's own count showed faintly through the photo viewer, behind
+ * the viewer's (an iPad: "01 / 06" under "1 / 6"). */
+:root[data-viewer] .strip-count {
+  visibility: hidden;
+}
+/* A logo reached by Tab while the marks were sliding sat under the
+   heading, so the ring could not be seen: the row holds still at its
+   start while anything in it has the focus. */
+.about-marquee:focus-within .about-marquee-track {
+  animation: none;
+}
+/* The homepage's ask on the light ground: the muted lines ("hello@",
+   "Next") were faint over a dark tile. Nearer the ink. */
+:root[data-theme="light"] .enquiry-backdrop + * .text-muted-foreground {
+  color: color-mix(in oklab, var(--foreground) 82%, transparent);
+}
+
+/* ── a thumb's worth ──────────────────────────────────────────────
+ * Under a finger, 44px each way at the least (Apple's own floor). The
+ * scan measured the view toggles at 26, the crumbs at 30, Legal at 28,
+ * the "All 88" links at 25, the viewer's Close at 35 and the pills at 39
+ * to 40. The small ones get an unseen square of 44 round their middle,
+ * which moves nothing; one already placed absolutely keeps its place and
+ * holds the square itself. The pills grow to 44. */
+@media (pointer: coarse) {
+  :is(
+    button:has(> svg:only-child),
+    a[aria-label]:has(> [aria-hidden]:only-child),
+    a:has(> .sr-only),
+    [data-dial="crumb"] a,
+    nav[aria-label="Legal"] a,
+    [role="dialog"] button
+  ):not([class*="absolute"], [class*="fixed"]) {
+    position: relative;
+  }
+  :is(
+    button:has(> svg:only-child),
+    a[aria-label]:has(> [aria-hidden]:only-child),
+    a:has(> .sr-only),
+    [data-dial="crumb"] a,
+    nav[aria-label="Legal"] a,
+    [role="dialog"] button
+  )::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: max(100%, 44px);
+    height: max(100%, 44px);
+    translate: -50% -50%;
+  }
+  :is(.action, .action-quiet, .cover-cta) {
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+  /* The homepage's pair sit in a zoom (`--m-buttons`); 44 as seen. */
+  .cover-float-ctas .cover-cta {
+    min-height: calc(44px / var(--m-buttons, 1));
+  }
+}
+
+/* ── words over the drifting wall, on the light ground ──
+ * The wall fades toward the ground, which on the light theme leaves a
+ * dark photograph as dark as it was: the grey type over one measured 2:1
+ * (the homepage's ask, the 404). Julian: a little more blur on the
+ * overlay, not a glow round the letters and not a wash. Set on the
+ * photograph under the overlay rather than as a backdrop filter on it:
+ * the same picture, without a few hundred backdrop passes on a moving
+ * wall. The tile under the pointer comes up sharp. */
+:root[data-theme="light"] .drift-wall__tile:not(.is-active) img {
+  filter: grayscale(var(--dw-gray)) saturate(0.92) blur(2px);
+}
+
+/* ── contact under a finger (`app/contact/page.tsx`) ──────────────
+ * An iPad either way up, and a phone on its side: the three blocks were
+ * squeezed into one screen's height and each scrolled inside itself with
+ * nothing to say so. Sideways on a phone the details came out 0px tall,
+ * the title lost its top, and on the iPad the steps ran under the rail's
+ * word. Under a finger the page is one scroll instead, from the top, its
+ * foot clear of the rail (which sits 12px under the strip here, not 24).
+ * ─────────────────────────────────────────────────────────────── */
+@media (pointer: coarse) and (min-width: 40rem) {
+  .contact-inquire {
+    align-self: flex-start;
+    height: calc(100% - 0.75rem);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    align-content: start;
+    grid-template-rows: auto auto;
+    padding-block: 1.5rem 2.5rem;
+  }
+  .contact-inquire {
+    align-items: start;
+  }
+  .contact-inquire > [data-scroll],
+  .contact-inquire > [data-beam],
+  .contact-inquire > [data-beam] > [data-scroll] {
+    max-height: none;
+    min-height: auto;
+    overflow: visible;
+  }
+  /* With the room to scroll, the steps are two by two with their lines
+     again, not the short window's four names in a row. */
+  .contact-inquire ol {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .contact-inquire ol p {
+    display: block;
+  }
+}
+
 /* ── the about page's first screen (`about-hero.tsx`) ─────────────
  * Dark on the dark theme; on the light one the words and the grain turn
  * over onto the page's ground. */
@@ -4536,7 +4914,6 @@ h2:not(.label) {
   --ah-ink: #f2f1ee;
   --ah-soft: #9a9892;
   --ah-dim: #77756f;
-  --ah-fact: #bdbbb5;
   --ah-rule: #2a2927;
   position: relative;
   isolation: isolate;
@@ -4600,6 +4977,8 @@ h2:not(.label) {
   .about-hero .about-hero-copy {
     width: fit-content;
     margin-left: auto;
+    /* The name ends on the facts' right edge. */
+    text-align: right;
   }
 }
 /* Julian: three lines, "SF Bay Area / Creative Director / & Photographer",
@@ -4799,6 +5178,37 @@ h2:not(.label) {
     font-size: var(--ah-body);
   }
 }
+/* Under a finger the rail sits 12px under the strip, not 24, and its
+   word reached into the words' box: sideways on a phone, where they
+   scroll, POST-PRODUCTION ran under ABOUT. The box ends clear of it; the
+   ground and the lights still run to the foot. */
+@media (pointer: coarse) and (min-width: 40rem) {
+  .about-hero-content {
+    bottom: 0.75rem;
+  }
+}
+/* An upright tablet (768 by 1024): the words ran 141px past the screen
+   and under the rail while the right of it stood empty. The services go
+   to a column of their own beside the intro and the ask. */
+@media (min-width: 40rem) and (max-width: 63.99rem) and (orientation: portrait) {
+  .about-hero-bio {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 15rem);
+    column-gap: 2rem;
+    max-width: none;
+    align-items: start;
+  }
+  .about-hero-bio > * {
+    grid-column: 1;
+  }
+  .about-hero .about-hero-title {
+    grid-column: 1 / -1;
+  }
+  .about-hero .about-hero-services {
+    grid-column: 2;
+    grid-row: 2 / span 2;
+  }
+}
 /* A laptop's browser window (1366 by 768 leaves about 657; 1280 by 800,
    1440 by 790 and 1024 by 768 too): the intro gives way so the name and the client
    marks fit (Julian's pick). From 1024 wide the services sit beside it
@@ -4863,8 +5273,24 @@ h2:not(.label) {
   flex-wrap: nowrap;
   white-space: nowrap;
   gap: 0.75rem 1.6rem;
-  color: var(--ah-fact);
+  /* Julian: white. */
+  color: var(--ah-ink);
   font-size: 10px;
+}
+/* Unseen until it is fitted in its own face (`about-hero.tsx`). */
+.about-hero-name:not([data-fit]) {
+  visibility: hidden;
+}
+/* 11 on a phone, as the labels are there; 10 read small in the hand. */
+@media (max-width: 39.99rem) {
+  .about-hero-facts {
+    font-size: 11px;
+  }
+}
+.about-hero-facts[data-stack] {
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.4rem;
 }
 .about-hero-facts li::before {
   content: "";
@@ -4883,7 +5309,6 @@ h2:not(.label) {
   --ah-ink: #141312;
   --ah-soft: #5f5d58;
   --ah-dim: #7d7b75;
-  --ah-fact: #45433f;
   --ah-rule: #d2d2d0;
 }
 /* The foot: the name and the facts, and under them the client marks
@@ -5043,4 +5468,254 @@ h2:not(.label) {
 }
 .dialkit-folder-root[data-open="false"] .dial-copy-all {
   display: none;
+}
+
+/* ── the drifting wall (`DriftWall.jsx`) ─────────────────────────
+ * Moved here from `DriftWall.css`. The 404 is bundled with every route,
+ * so the component's own sheet was preloaded on every page and went
+ * unused on Sessions, Contact and About, with a console warning each
+ * time. 4 KB in the one sheet instead. Last, as it was loaded last.
+ * ─────────────────────────────────────────────────────────────── */
+.drift-wall {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  perspective: var(--dw-perspective, 1200px);
+  perspective-origin: 50% 50%;
+  --dw-tile-w: 200px;
+  --dw-tile-h: 132px;
+  --dw-gap: 18px;
+  --dw-radius: 14px;
+  --dw-lift: 64px;
+  --dw-dim: 0.55;
+  --dw-gray: 0;
+  --dw-overlay: #060010;
+  --dw-edge: 40%;
+  -webkit-mask-image:
+    radial-gradient(ellipse 78% 82% at 50% 46%, #000 var(--dw-edge), transparent 100%),
+    linear-gradient(to top, #000 var(--dw-edge), transparent 100%);
+  -webkit-mask-composite: source-in;
+  mask-image:
+    radial-gradient(ellipse 78% 82% at 50% 46%, #000 var(--dw-edge), transparent 100%),
+    linear-gradient(to top, #000 var(--dw-edge), transparent 100%);
+  mask-composite: intersect;
+  /* Hidden until its opening photographs have loaded (see the component). */
+  opacity: 0;
+  transition: opacity 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.drift-wall.is-shown {
+  opacity: 1;
+}
+
+.drift-wall__plane {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  display: flex;
+  flex-direction: row;
+  transform-style: preserve-3d;
+  cursor: pointer;
+  transform-origin: 50% 50%;
+  will-change: transform;
+}
+
+.drift-wall__col {
+  position: relative;
+  /* Each about the middle of the wall, however many copies it carries:
+     hung from the top, a shorter column's foot ran out short. */
+  align-self: center;
+  width: calc(var(--dw-tile-w) + var(--dw-gap));
+  transform-style: preserve-3d;
+}
+
+.drift-wall__track {
+  display: flex;
+  flex-direction: column;
+  will-change: transform;
+  transform-style: preserve-3d;
+}
+
+/* Julian: the hover on the 404's wall was stuck. The plane, columns
+   and tracks lie in the tiles' own tilted plane, and the hit test kept
+   landing on them instead of the tile under the pointer, so the lifted
+   tile stayed the first one touched. Only the tiles take the pointer;
+   the wall itself still hears every move (`onPointerMove`). */
+.drift-wall__plane,
+.drift-wall__col,
+.drift-wall__track {
+  pointer-events: none;
+}
+
+.drift-wall__tile {
+  pointer-events: auto;
+  position: relative;
+  display: block;
+  width: 100%;
+  height: calc(var(--dw-tile-h) + var(--dw-gap));
+  flex: 0 0 auto;
+  outline: none;
+  transform-style: preserve-3d;
+}
+
+.drift-wall__inner {
+  position: absolute;
+  inset: calc(var(--dw-gap) / 2);
+  display: block;
+  border-radius: var(--dw-radius);
+  overflow: hidden;
+  background: #0b0b12;
+  opacity: var(--dw-dim);
+  transform: translateZ(0);
+  pointer-events: none;
+  transition:
+    transform 0.42s cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 0.42s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.42s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.drift-wall__tile img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  filter: grayscale(var(--dw-gray)) saturate(0.92);
+  transition: filter 0.42s cubic-bezier(0.22, 1, 0.36, 1);
+  user-select: none;
+  -webkit-user-drag: none;
+  /* A tile that drifts into view later comes up as its photograph arrives,
+     rather than sitting empty and then popping. */
+  opacity: 0;
+}
+
+.drift-wall__tile img.is-loaded {
+  opacity: 1;
+  transition:
+    filter 0.42s cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.drift-wall__overlay {
+  position: absolute;
+  inset: 0;
+  background: var(--dw-overlay);
+  opacity: var(--dw-veil, 0.42);
+  pointer-events: none;
+  transition: opacity 0.42s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.drift-wall__tile.is-active .drift-wall__inner,
+.drift-wall__tile:focus-visible .drift-wall__inner {
+  opacity: 1;
+  transform: translateZ(var(--dw-lift));
+  box-shadow: 0 24px 60px -18px rgba(0, 0, 0, 0.7);
+}
+
+.drift-wall__tile.is-active img,
+.drift-wall__tile:focus-visible img {
+  filter: grayscale(0) saturate(1.05);
+}
+
+.drift-wall__tile.is-active .drift-wall__overlay,
+.drift-wall__tile:focus-visible .drift-wall__overlay {
+  opacity: 0;
+}
+
+.drift-wall__tile:focus-visible .drift-wall__inner {
+  box-shadow:
+    0 24px 60px -18px rgba(0, 0, 0, 0.7),
+    0 0 0 2px rgba(255, 255, 255, 0.9);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .drift-wall__plane,
+  .drift-wall__track {
+    will-change: auto;
+  }
+}
+
+/* The search's liquid ground (`work-shell.tsx`): there while the box is
+   open, gone a beat after it shuts, once the drop has drawn back in. */
+.finder-liquid > [data-gooey-svg] {
+  transition: opacity 150ms ease 200ms;
+}
+.finder-liquid:not([data-open]) > [data-gooey-svg] {
+  opacity: 0;
+}
+.finder-liquid[data-open] > [data-gooey-svg] {
+  transition-delay: 0ms;
+  transition-duration: 0ms;
+}
+
+/* The buttons in liquid (`liquid-pair.tsx`). The first button's ground is
+   the liquid under it, so its own ground and blur step aside at rest; its
+   hover is its own, as before. The quiet ones keep their glass at rest,
+   and when the ink has run into them the glass clears so the ink is what
+   they are filled with, and their circle flood is not drawn. */
+.liquid-pair :is(.action, .cover-cta:not(.cover-cta-quiet)) {
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+.liquid-pair :is(.action, .cover-cta:not(.cover-cta-quiet)):not(:hover, :focus-visible, :active) {
+  background: transparent;
+}
+.liquid-pair :is(.action-quiet, .cover-cta-quiet)::before {
+  display: none;
+}
+.liquid-pair :is([data-on], [data-was]) > :is(.action-quiet, .cover-cta-quiet) {
+  background: transparent;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  border-color: transparent;
+  box-shadow: none;
+}
+.liquid-pair [data-on] > .action-quiet {
+  color: var(--background);
+}
+.liquid-pair [data-on] > .cover-cta-quiet {
+  color: var(--hero-on-ink);
+}
+
+/* The drop that fills a quiet button: out of the first button across the
+   gap (`--lp-gap`, the pair's `gap-3`), the width of this one, and back. */
+.liquid-drop {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 2px;
+  height: 100%;
+  border-radius: 9999px;
+  pointer-events: none;
+}
+.liquid-pair [data-on] .liquid-drop {
+  animation: liquid-run 520ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+.liquid-pair [data-was] .liquid-drop {
+  animation: liquid-drain 380ms cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+@keyframes liquid-run {
+  from {
+    left: calc(-1 * var(--lp-gap, 12px) - 4px);
+    width: calc(var(--lp-gap, 12px) + 8px);
+  }
+  to {
+    left: 0;
+    width: 100%;
+  }
+}
+@keyframes liquid-drain {
+  from {
+    left: 0;
+    width: 100%;
+  }
+  to {
+    left: 0;
+    width: 2px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .liquid-pair :is([data-on], [data-was]) .liquid-drop {
+    animation-duration: 1ms;
+  }
 }

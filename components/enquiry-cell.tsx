@@ -2,6 +2,7 @@ import type * as React from "react";
 import Link from "next/link";
 import type { Lead } from "@/components/strip";
 import { cn } from "@/lib/utils";
+import { LiquidPair } from "@/components/liquid-pair";
 
 /* ── the ask, as the last cell ────────────────────────────────────
  * Every strip ends on this. The site is judged on enquiries, and the old
@@ -98,7 +99,7 @@ export function EnquiryCell({
           ) : null}
         </div>
 
-        <div className="flex flex-wrap items-center gap-3">
+        <LiquidPair className="flex flex-wrap items-center gap-3">
           <Link
             href={href}
             className="label action px-6 py-4 press active:scale-[0.97]"
@@ -114,7 +115,7 @@ export function EnquiryCell({
               {secondary.label}
             </Link>
           ) : null}
-        </div>
+        </LiquidPair>
 
         <a
           href="mailto:hello@juliangigola.com"

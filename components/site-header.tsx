@@ -41,6 +41,7 @@ export const LINKS = [
 export function SiteHeader() {
   const pathname = usePathname();
   const [open, setOpen] = React.useState(false);
+  const burger = React.useRef<HTMLButtonElement>(null);
   const [routeWhenOpened, setRouteWhenOpened] = React.useState(pathname);
 
   // Client-side navigation does not unmount the header, so the panel would
@@ -113,9 +114,26 @@ export function SiteHeader() {
     window.dispatchEvent(new Event("jg:filter-close"));
     const { overflow } = document.body.style;
     document.body.style.overflow = "hidden";
+    /* The page pushed aside is out of reach while the menu is out: Tab
+       went past the four links into it, off the screen at -320px, and a
+       screen reader read it as if it were there. */
+    const behind = [
+      ...document.querySelectorAll<HTMLElement>(
+        // The bar goes aside too; only its burger stays, to shut it.
+        "#main, body > footer, header :is(a, button):not([aria-controls='mobile-nav'])",
+      ),
+    ];
+    behind.forEach((el) => (el.inert = true));
+    const button = burger.current;
     return () => {
       if (root.dataset.drawer === "menu") delete root.dataset.drawer;
       document.body.style.overflow = overflow;
+      behind.forEach((el) => (el.inert = false));
+      // Focus that was in the menu goes back to the button that opened it,
+      // not to wherever the page had it before the menu went away.
+      const at = document.activeElement;
+      if (!at || at === document.body || at.closest("#mobile-nav"))
+        button?.focus({ preventScroll: true });
     };
   }, [open]);
 
@@ -373,6 +391,7 @@ export function SiteHeader() {
           <ThemeToggle className="-mr-2 lg:mr-0" />
 
           <button
+            ref={burger}
             type="button"
             onClick={() => setOpen((v) => !v)}
             aria-expanded={open}

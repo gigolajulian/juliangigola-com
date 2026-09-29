@@ -40,7 +40,7 @@ export function WorkFilter({
   if (!pathname.startsWith("/portfolio")) return null;
 
   const rows = [
-    { slug: "all", name: "All work", href: "/portfolio" },
+    { slug: "all", name: "Portfolio", href: "/portfolio" },
     ...categories,
   ];
   const isCurrent = (href: string) =>
@@ -86,7 +86,7 @@ export function WorkFilter({
                     onClick={() => window.dispatchEvent(new Event("jg:filter-close"))}
                     aria-current={here ? "page" : undefined}
                     className={cn(
-                      "flex items-baseline justify-between gap-4 py-1.5",
+                      "flex items-baseline justify-between gap-4 py-1.5 [@media(pointer:coarse)]:py-3",
                       "transition-opacity duration-200 ease-[var(--ease-out-strong)]",
                       here ? "opacity-100" : "opacity-45 hoverable:hover:opacity-70",
                     )}

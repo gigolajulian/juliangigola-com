@@ -1,7 +1,6 @@
 'use client';
 
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
-import './DriftWall.css';
 
 const DEFAULT_ITEMS = Array.from({ length: 15 }, (_, i) => {
   const ids = [1015, 1025, 1039, 1043, 1044, 1050, 1062, 1069, 1074, 1080, 1084, 106, 110, 133, 164];
@@ -145,16 +144,20 @@ const DriftWall = ({
       : columns;
 
   const columnItems = useMemo(() => {
-    if (items.length >= colCount * 4) {
+    /* A phone sees three or four of a column at a time, and every tile
+       loads once the wall is seen: the 404 fetched all 101 projects there
+       for 14 on the screen. Six a column is still no repeat in view. */
+    const pool = containerWidth && containerWidth < 640 ? items.slice(0, colCount * 6) : items;
+    if (pool.length >= colCount * 4) {
       const cols = Array.from({ length: colCount }, () => []);
-      items.forEach((item, i) => cols[i % colCount].push(item));
+      pool.forEach((item, i) => cols[i % colCount].push(item));
       return cols;
     }
     const run = Math.min(items.length, 6);
     return Array.from({ length: colCount }, (_, c) =>
       Array.from({ length: run }, (_, k) => items[(c * 7 + k * 5) % items.length])
     );
-  }, [items, colCount]);
+  }, [items, colCount, containerWidth]);
 
   const columnMeta = useMemo(() => {
     const unit = tileHeight + gap;
@@ -385,7 +388,7 @@ const DriftWall = ({
     const inner = (
       <span className="drift-wall__inner">
         {/* eslint-disable-next-line @next/next/no-img-element -- the site passes loader-sized URLs */}
-        <img src={item.image} alt={item.title ?? ''} loading={eager || seen ? 'eager' : 'lazy'} decoding="async" draggable={false} onLoad={e => e.currentTarget.classList.add('is-loaded')} />
+        <img src={item.image} srcSet={item.srcSet} sizes={containerWidth && containerWidth < 640 ? '110px' : `${tileWidth}px`} alt={item.title ?? ''} loading={eager || seen ? 'eager' : 'lazy'} decoding="async" draggable={false} onLoad={e => e.currentTarget.classList.add('is-loaded')} />
         <span className="drift-wall__overlay" aria-hidden="true" />
       </span>
     );

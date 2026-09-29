@@ -27,7 +27,8 @@ export type Head = {
  */
 export const WORK_HEADS: Record<string, Head> = {
   all: {
-    title: "Work",
+    // Julian: the menu's word, on the page it opens.
+    title: "Portfolio",
     count: COMMISSIONS.length,
   },
   video: {

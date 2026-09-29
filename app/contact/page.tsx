@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Suspense } from "react";
 import Link from "next/link";
 import { ChromaWaves } from "@/components/chroma-waves";
+import { ContactBeam } from "@/components/contact-beam";
 import { ContactForm } from "@/components/contact-form";
 import { PageDials } from "@/components/page-dials";
 import { Strip } from "@/components/strip";
@@ -120,7 +121,7 @@ export default function ContactPage() {
           data-tick
           data-label="Inquire"
           data-hash="inquire"
-          className="grid w-full shrink-0 grid-cols-1 gap-10 px-6 py-12 sm:h-full sm:grid-cols-2 sm:grid-rows-[auto_minmax(0,auto)] sm:content-center sm:items-center sm:gap-x-16 sm:gap-y-8 sm:pl-10 sm:pr-16 sm:py-0 xl:grid-cols-[30rem_minmax(0,1.15fr)_minmax(0,1fr)] xl:grid-rows-1 xl:content-stretch xl:gap-x-10 2xl:gap-x-14"
+          className="contact-inquire grid w-full shrink-0 grid-cols-1 gap-10 px-6 py-12 sm:h-full sm:grid-cols-2 sm:grid-rows-[auto_minmax(0,auto)] sm:content-center sm:items-center sm:gap-x-16 sm:gap-y-8 sm:pl-10 sm:pr-16 sm:py-0 xl:grid-cols-[30rem_minmax(0,1.15fr)_minmax(0,1fr)] xl:grid-rows-1 xl:content-stretch xl:gap-x-10 2xl:gap-x-14"
         >
           <div className="flex flex-col gap-5 sm:col-start-1 sm:row-start-1 sm:pr-6 xl:self-center">
             <RisingTitle text="Get in Touch" className="contact-title" />
@@ -236,7 +237,7 @@ export default function ContactPage() {
                     <h3 className="font-display text-lg uppercase leading-none tracking-[0] short:text-base">
                       {phase.step}
                     </h3>
-                    <p className="text-xs leading-relaxed text-muted-foreground short:hidden">
+                    <p className="text-left text-xs leading-relaxed text-muted-foreground short:hidden">
                       {phase.body}
                     </p>
                   </li>
@@ -250,16 +251,21 @@ export default function ContactPage() {
               its own box. The strip yields the wheel to it and takes it
               back once it has run out. `useSearchParams` in the form needs
               a boundary, so the shell can still be prerendered while the
-              pre-filled type resolves. */}
-          <div
-            data-scroll
-            data-dial="form"
-            className="min-h-0 overflow-y-auto overscroll-contain sm:col-start-2 sm:row-span-2 sm:row-start-1 sm:max-h-full sm:pr-3 xl:col-start-2 xl:row-span-1"
-          >
-            <Suspense fallback={null}>
-              <ContactForm />
-            </Suspense>
-          </div>
+              pre-filled type resolves.
+
+              Julian: the form as a card with a beam running round its
+              edge (`contact-beam.tsx`), on the header's glass. */}
+          <ContactBeam className="flex min-h-0 sm:col-start-2 sm:row-span-2 sm:row-start-1 sm:max-h-full xl:col-start-2 xl:row-span-1">
+            <div
+              data-scroll
+              data-dial="form"
+              className="glass-surface min-h-0 flex-1 rounded-[16px] overflow-y-auto overscroll-contain border border-border p-6 sm:max-h-full sm:px-8 sm:py-6"
+            >
+              <Suspense fallback={null}>
+                <ContactForm />
+              </Suspense>
+            </div>
+          </ContactBeam>
         </section>
       </Strip>
     </StripPage>

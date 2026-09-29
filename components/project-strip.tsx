@@ -122,7 +122,7 @@ export function ProjectStrip({
         }
       }
       return (
-        <p className="label shrink-0 tabular-nums text-muted-foreground">
+        <p className="strip-count label shrink-0 tabular-nums text-muted-foreground">
           <span className="text-foreground">
             {String(shown).padStart(2, "0")}
           </span>

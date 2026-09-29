@@ -20,7 +20,7 @@ import type { Frame } from "@/lib/work-types";
 import { WORK_ROWS } from "@/lib/work-rows";
 
 export const metadata: Metadata = {
-  title: "Work",
+  title: "Portfolio",
   description:
     "Commissioned photography: editorial, campaigns, portraits, artist imagery, and film. Selected projects with clients and credits.",
   alternates: { canonical: "/portfolio" },
@@ -173,7 +173,7 @@ export default function WorkPage() {
 
   return (
     <WorkStrip
-      label={`All work: ${COMMISSIONS.length} projects, left and right`}
+      label={`Portfolio: ${COMMISSIONS.length} projects, left and right`}
       frames={viewer}
       rows={WORK_ROWS}
       // Julian: scrolling back past the start goes home.

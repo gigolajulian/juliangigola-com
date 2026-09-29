@@ -1,6 +1,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
+import { LiquidPair } from "@/components/liquid-pair";
 
 /* ── the ask ──────────────────────────────────────────────────────
  * One CTA component, used at the end of every page that a visitor can
@@ -53,7 +54,7 @@ export function CallToAction({
           ) : null}
         </div>
 
-        <div className="flex shrink-0 flex-wrap items-center gap-3">
+        <LiquidPair className="flex shrink-0 flex-wrap items-center gap-3">
           <Link
             href={href}
             className="label action px-6 py-4 press active:scale-[0.97]"
@@ -68,7 +69,7 @@ export function CallToAction({
               {secondary.label}
             </Link>
           ) : null}
-        </div>
+        </LiquidPair>
       </div>
     </section>
   );

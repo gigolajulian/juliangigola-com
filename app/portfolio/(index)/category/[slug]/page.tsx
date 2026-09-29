@@ -76,7 +76,7 @@ const before = (slug: string) => {
   const prev = WORK_CATEGORY_LINKS[at - 1];
   return prev
     ? { href: prev.href, name: prev.name }
-    : { href: "/portfolio", name: "All work" };
+    : { href: "/portfolio", name: "Portfolio" };
 };
 
 export function generateStaticParams() {

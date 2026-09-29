@@ -625,7 +625,7 @@ export const categoryHref = (categorySlug: string): string => {
 
 /** The pages a strip leads on to once its own sequence has run out: the
     site's order, in the shape the strip takes (`Lead` in `strip.tsx`). */
-export const WORK_PAGE = { href: "/portfolio", name: "Work" };
+export const WORK_PAGE = { href: "/portfolio", name: "Portfolio" };
 export const SESSIONS_PAGE = { href: "/sessions", name: "Sessions" };
 export const ABOUT_PAGE = { href: "/about", name: "About" };
 export const CONTACT = { href: "/contact", name: "Contact" };
@@ -867,12 +867,16 @@ export const FEATURED: Project[] = FEATURED_SLUGS.map((s) =>
  * the projects. Small copies (640px, a 300px tile on a retina screen)
  * because the intro's are fetched alongside the page's own pictures.
  */
-export type WallTile = { image: string; title: string; href: string };
+export type WallTile = { image: string; srcSet: string; title: string; href: string };
 export const WALL: WallTile[] = [
   ...FEATURED,
   ...PROJECTS.filter((p) => !FEATURED.includes(p)),
 ].map((p) => ({
   image: imageLoader({ src: p.cover.src, width: 640, quality: 70 }),
+  /* And a 320, which a phone's 80px tile takes at three times. */
+  srcSet: [320, 640]
+    .map((w) => `${imageLoader({ src: p.cover.src, width: w, quality: 70 })} ${w}w`)
+    .join(", "),
   title: p.name,
   href: `/portfolio/${p.slug}`,
 }));

@@ -11,6 +11,7 @@ import { StripPage, StripHead } from "@/components/strip-page";
 import { ScopePanel, type ScopeRow } from "@/components/vectorscope";
 import { markFilter, StripView, type StripViewMode } from "@/components/strip";
 import { animate } from "motion";
+import { Liquid } from "liquid-gooey";
 import {
   chooseView,
   morphView,
@@ -493,7 +494,9 @@ export function WorkShell({
   React.useEffect(() => {
     const r = row.current;
     if (!r) return;
-    const chips = Array.from(r.children) as HTMLElement[];
+    const chips = (Array.from(r.children) as HTMLElement[]).filter(
+      (c) => !("liquid" in c.dataset),
+    );
     const wide = window.matchMedia("(min-width: 64rem)");
     const calm = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     /* Seated without motion on arrival, and again whenever the window
@@ -564,6 +567,44 @@ export function WorkShell({
     };
   }, [litAt]);
 
+  /* Julian: the filter bar in liquid. A tint of the ink sits under the lit
+     chip, and when the filter changes it runs to the new one as liquid,
+     trailing a drop (`liquid-gooey`, Move). A tint, not a plate: the lit
+     chip lost its filled plate at Julian's asking, and the words stay as
+     they are. Measured from the layout, grown by the jelly's swell so it
+     sits under the chip as it is drawn. */
+  const [mark, setMark] = React.useState<{
+    x: number;
+    y: number;
+    w: number;
+    h: number;
+    rw: number;
+  } | null>(null);
+  React.useEffect(() => {
+    const r = row.current;
+    if (!r) return;
+    const measure = () => {
+      const c = lit.current;
+      if (!c) return setMark(null);
+      const grow = JELLY.swell / 2;
+      setMark({
+        x: c.offsetLeft - c.offsetWidth * grow,
+        y: c.offsetTop - c.offsetHeight * grow,
+        w: c.offsetWidth * (1 + JELLY.swell),
+        h: c.offsetHeight * (1 + JELLY.swell),
+        rw: r.scrollWidth,
+      });
+    };
+    const first = requestAnimationFrame(measure);
+    const sized = new ResizeObserver(measure);
+    sized.observe(r);
+    if (lit.current) sized.observe(lit.current);
+    return () => {
+      cancelAnimationFrame(first);
+      sized.disconnect();
+    };
+  }, [litAt]);
+
   /* The search, as a viewfinder that opens into a box.
    *
    * One element, not two: the glass is the left end of a pill that is
@@ -589,7 +630,21 @@ export function WorkShell({
    * and a field that opens a keyboard over the work is not how that screen
    * is used. */
   const field = React.useRef<HTMLInputElement>(null);
+  /* Julian: the search in liquid. The box's ground is a drop of the ink
+     that stretches out with the box as it opens and draws back into the
+     glass as it shuts (`liquid-gooey`, Move), in place of the glass
+     plate; shut, it fades (`.finder-liquid`, `globals.css`). */
   const finder = (
+    <Liquid
+      blur={5}
+      contrast={18}
+      fill="color-mix(in oklab, var(--foreground) 10%, var(--background))"
+      className="finder-liquid shrink-0"
+      data-open={finding ? "" : undefined}
+    >
+      <Liquid.Item effect="move">
+        <span aria-hidden className="absolute inset-0 rounded-full" />
+      </Liquid.Item>
     <span
       className={cn(
         "relative flex h-[1.625rem] shrink-0 items-center overflow-hidden border transition-[width,border-radius,border-color,opacity] duration-[260ms] ease-[var(--ease-out-strong)] motion-reduce:transition-none",
@@ -597,7 +652,7 @@ export function WorkShell({
           ? /* Focus shows as the pill's own edge coming up, not a ring
                drawn inside it: the ring was clipped by the pill into two
                accent lines, and Julian did not want it. */
-            "glass-surface w-48 rounded-full border-foreground/15 opacity-50 has-[:focus]:border-foreground/50"
+            "w-48 rounded-full border-foreground/15 opacity-50 has-[:focus]:border-foreground/50"
           : "w-[1.625rem] rounded-none border-transparent opacity-100",
       )}
     >
@@ -695,6 +750,7 @@ export function WorkShell({
         </button>
       ) : null}
     </span>
+    </Liquid>
   );
 
   /* Three ways through the same work. Drawn rather than named, and under
@@ -877,18 +933,21 @@ export function WorkShell({
           <StripHead
             crumb={
               all ? (
-                <span className="label text-muted-foreground">All work</span>
+                <span className="label text-muted-foreground">Portfolio</span>
               ) : (
                 <Link
                   href="/portfolio"
                   className="label text-muted-foreground transition-colors duration-200 hoverable:hover:text-foreground"
                 >
-                  &larr; All work
+                  &larr; Portfolio
                 </Link>
               )
             }
             title={head.title}
-            live
+            /* All work only: on a filter every cell is that one
+               discipline, and the line under the title said it again
+               (Julian: the bottom one is unneeded). */
+            live={all}
             /* Julian: no count up here. The chip row says how many are
                behind every filter, including the one that is lit, and the
                same number twice on one line is the head arguing with
@@ -928,7 +987,7 @@ export function WorkShell({
               className="filter-trigger glass-surface press relative z-10 ml-6 inline-flex items-center gap-2 border border-foreground/20 py-2 pl-3.5 pr-3 label active:scale-[0.97] sm:ml-10 lg:hidden"
             >
               <span className="text-foreground">
-                {all ? "All work" : head.title}
+                {all ? "Portfolio" : head.title}
               </span>
               <span aria-hidden className="h-3 w-px bg-foreground/25" />
               <span className="tabular-nums text-muted-foreground">
@@ -975,7 +1034,7 @@ export function WorkShell({
                    them were off the end of it; `chip-row` in `globals.css`
                    wraps them onto two lines there, where the auto margins
                    are wrong and plain centring is right. */
-                className="chip-row relative gap-x-0.5 px-3 select-none max-sm:grid max-sm:grid-cols-2 max-sm:justify-items-start max-sm:gap-y-0.5 sm:flex sm:flex-nowrap sm:overflow-x-auto sm:px-7 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:[&>li:first-of-type]:ml-auto sm:[&>li:last-of-type]:mr-auto"
+                className="chip-row relative gap-x-0.5 px-3 select-none max-sm:grid max-sm:grid-cols-2 max-sm:justify-items-start max-sm:gap-y-0.5 sm:flex sm:flex-nowrap sm:overflow-x-auto sm:px-7 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:[&>li:first-of-type]:ml-auto sm:[&>li:nth-last-child(2)]:mr-auto"
               >
                 <li
                   ref={all && shown === null ? lit : undefined}
@@ -1006,6 +1065,34 @@ export function WorkShell({
                     </Chip>
                   </li>
                 ))}
+                <li
+                  aria-hidden
+                  data-liquid=""
+                  className="pointer-events-none absolute left-0 top-0 h-full"
+                  style={{ width: mark?.rw }}
+                >
+                  {mark ? (
+                    <Liquid
+                      blur={5}
+                      contrast={18}
+                      fill="color-mix(in oklab, var(--foreground) 12%, var(--background))"
+                      className="h-full w-full"
+                    >
+                      {/* Julian: less bounce. Wobble is the overshoot on
+                          arrival; the library's own is 0.5. */}
+                      <Liquid.Item effect="move" move={{ wobble: 0.25 }}>
+                        <div
+                          className="absolute left-0 top-0"
+                          style={{
+                            width: mark.w,
+                            height: mark.h,
+                            transform: `translate(${mark.x}px, ${mark.y}px)`,
+                          }}
+                        />
+                      </Liquid.Item>
+                    </Liquid>
+                  ) : null}
+                </li>
               </ul>
             </nav>
           </div>

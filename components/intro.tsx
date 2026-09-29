@@ -35,9 +35,12 @@ import { BlinkingMark, blink } from "@/components/not-found-scene";
    The sweep is quick to start and slows into full, 43% at half a second
    and 98% at a second and a half; it holds full a beat; then the whole
    panel, eye and all, lifts off the top of the screen, gathering speed. */
-const CAP = 5000; // the longest anybody waits, whatever is still loading
-const BEAT = 150; // full, before the blink
-const AFTER = 60; // the blink done, before it lifts
+// The longest anybody waits, whatever is still loading, from the moment
+// they asked for the page (not from the script, which a slow phone is
+// late to run): full by 3s, the button to click by 5s.
+const CAP = 3000;
+const BEAT = 100; // full, before the blink
+const AFTER = 40; // the blink done, before it lifts
 const OUT = 1000; // the lift
 
 const lift = () => document.documentElement.removeAttribute("data-intro");
@@ -117,10 +120,14 @@ export function Intro() {
        main thread. Drawn from script a frame at a time, it stood still for
        the fifth of a second React takes to bring the page to life
        underneath, halfway across the screen. The curve is the one that
-       script drew, sampled: quick to start, slowing into full. It never
-       runs ahead of what has loaded, which a check every 50ms holds it to;
-       at `CAP` it runs on regardless. */
-    const SWEEP = 2100;
+       script drew, sampled: quick to start, slowing into full. It is the
+       stylesheet's (`jg-intro-sweep`, `globals.css`), running from the first
+       paint; this only holds it back so it never runs ahead of what has
+       loaded, a check every 50ms; at `CAP` it runs on regardless.
+
+       Julian: load in 5 seconds. It was 2100ms from the script arriving;
+       now 1600ms from the first paint, 98% at 1.4s, basis's own pace. */
+    const SWEEP = 1600;
     const CURVE = [
       0, 0.0265, 0.0923, 0.1593, 0.2301, 0.3009, 0.3835, 0.4493, 0.5117,
       0.5705, 0.6362, 0.6867, 0.7335, 0.7765, 0.8229, 0.8574, 0.8881,
@@ -133,15 +140,7 @@ export function Intro() {
       const f = (p - CURVE[i - 1]) / (CURVE[i] - CURVE[i - 1]);
       return ((i - 1 + f) / (CURVE.length - 1)) * SWEEP;
     };
-    const frames = [{ transform: "translateX(-100%)" }, { transform: "none" }];
-    const timing = { duration: SWEEP, fill: "forwards" as const };
-    let sweep: Animation | undefined;
-    try {
-      sweep = panel.current?.animate(frames, { ...timing, easing: `linear(${CURVE.join(",")})` });
-    } catch {
-      // No `linear()` easing (an older browser): the nearest curve.
-      sweep = panel.current?.animate(frames, { ...timing, easing: "cubic-bezier(0.3, 0.7, 0.4, 1)" });
-    }
+    const sweep: Animation | undefined = panel.current?.getAnimations()[0];
 
     const lids = () => eye.current?.querySelector("[data-lids]");
     const wait = (ms: number) => new Promise((r) => setTimeout(r, ms));
@@ -158,9 +157,8 @@ export function Intro() {
         await blink(l).finished.catch(() => {});
       }
     };
-    const t0 = performance.now();
     const hold = window.setInterval(() => {
-      const real = performance.now() - t0 >= CAP ? 1 : done / tasks.length;
+      const real = performance.now() >= CAP ? 1 : done / tasks.length;
       const at = Number(sweep?.currentTime ?? SWEEP);
       if (real < 1 && at >= reaches(real)) sweep?.pause();
       else if (sweep?.playState === "paused") sweep.play();
@@ -168,8 +166,12 @@ export function Intro() {
 
     /* Full. A beat, the blink, and then the layer lifts off the top of the
        screen, and the page starts its own entrance under it at the same
-       moment. */
-    const full = sweep ? sweep.finished : Promise.resolve();
+       moment. Full and ready both: on a slow phone the sweep can be at full
+       before this script has even arrived. */
+    const full = Promise.all([
+      sweep?.finished,
+      Promise.race([Promise.all(tasks), wait(CAP - performance.now())]),
+    ]);
     full
       .catch(() => {})
       .then(async () => {

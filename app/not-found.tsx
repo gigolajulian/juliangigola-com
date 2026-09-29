@@ -3,6 +3,7 @@ import Link from "next/link";
 import { NotFoundScene, BlinkingMark } from "@/components/not-found-scene";
 import DriftWall from "@/components/DriftWall";
 import { DISCIPLINES, WALL } from "@/lib/work";
+import { LiquidPair } from "@/components/liquid-pair";
 
 /* ── 404 ──────────────────────────────────────────────────────────
  * From a design Julian made in Claude Design and asked to have on the site,
@@ -148,7 +149,7 @@ export default function NotFound() {
                   <br /> made the edit.
                 </h1>
                 {/* For a mouse, so not on a phone, where the page has no room. */}
-                <p className="mt-4 w-0 min-w-full text-justify text-[clamp(11.5px,2.39cqi,17px)] leading-[1.7] text-muted-foreground max-sm:hidden">
+                <p className="mt-4 w-0 min-w-full lg:text-justify text-[clamp(11.5px,2.39cqi,17px)] leading-[1.7] text-muted-foreground max-sm:hidden">
                   The page you were looking for has been moved, renamed, or cut
                   from the selects.{" "}
                   {/* A finger has no cursor to drag (an iPad shows this). */}
@@ -159,7 +160,7 @@ export default function NotFound() {
                   </span>
                 </p>
               </div>
-              <div className="mt-6 flex flex-wrap gap-3 sm:mt-7">
+              <LiquidPair className="mt-6 flex flex-wrap gap-3 sm:mt-7">
                 <Link
                   href="/portfolio"
                   className={`${MONO} action inline-flex items-center gap-3 px-6 py-4 font-bold press active:scale-[0.97]`}
@@ -174,7 +175,7 @@ export default function NotFound() {
                   <span className="opacity-60">02</span>
                   Back to home
                 </Link>
-              </div>
+              </LiquidPair>
             </div>
 
             {/* Not on a phone: the page never scrolls, and the wall's tiles

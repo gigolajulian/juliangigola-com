@@ -258,7 +258,7 @@ function Crumb() {
         href="/portfolio"
         className="label text-muted-foreground transition-colors duration-200 hoverable:hover:text-foreground"
       >
-        &larr; All work
+        &larr; Portfolio
       </Link>
     </nav>
   );

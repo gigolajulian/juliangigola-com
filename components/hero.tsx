@@ -6,6 +6,7 @@ import Link from "next/link";
 import Image, { getImageProps } from "next/image";
 import { cn } from "@/lib/utils";
 import type { Discipline, Frame } from "@/lib/work";
+import { LiquidPair } from "@/components/liquid-pair";
 
 /* ── the cover ────────────────────────────────────────────────────
  * A masthead grid that opens on the job title and then cycles through the
@@ -121,7 +122,7 @@ function Ways({
   style?: React.CSSProperties;
 }) {
   return (
-    <div
+    <LiquidPair
       style={style}
       className={cn("flex flex-wrap items-center gap-3", className)}
     >
@@ -137,7 +138,7 @@ function Ways({
       >
         Book a session
       </Link>
-    </div>
+    </LiquidPair>
   );
 }
 

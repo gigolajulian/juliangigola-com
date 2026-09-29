@@ -5,6 +5,7 @@ import { StripPage, StripHead, RisingTitle } from "@/components/strip-page";
 import { PRESS_STUDIO, CONTACT } from "@/lib/work";
 import { ClientMarks } from "@/components/client-marks";
 import { AboutHero } from "@/components/about-hero";
+import { LiquidPair } from "@/components/liquid-pair";
 import { PageDials } from "@/components/page-dials";
 
 /* ── about ────────────────────────────────────────────────
@@ -139,7 +140,8 @@ export default function AboutPage() {
                 paragraph is six words to find. */}
             <div className="title-rest about-hero-services">
               <h2 className="label">Services</h2>
-              <ul>
+              {/* No word at the pointer: DRAG sat on the row being read. */}
+              <ul data-ring="">
                 {SERVICES.map((service) => (
                   <li key={service} className="label">
                     {service}
@@ -149,9 +151,7 @@ export default function AboutPage() {
             </div>
             {/* The ask, under the services: About is one screen now
                 (Julian). */}
-            <div
-              className="title-rest about-hero-ask flex flex-wrap items-center gap-3"
-            >
+            <LiquidPair className="title-rest about-hero-ask flex flex-wrap items-center gap-3">
               <Link
                 href="/contact?type=editorial"
                 className="label action px-5 py-3 press active:scale-[0.97] short:py-2.5"
@@ -165,7 +165,7 @@ export default function AboutPage() {
               >
                 See the work
               </Link>
-            </div>
+            </LiquidPair>
           </AboutHero>
         </section>
       </Strip>
