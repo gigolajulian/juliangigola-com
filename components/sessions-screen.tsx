@@ -97,14 +97,14 @@ export function SessionsScreen({ sessions }: { sessions: SessionItem[] }) {
               <li
                 key={s.slug}
                 onPointerMove={() => open !== i && setOpen(i)}
-                className="flex flex-col border-b border-border py-4 short:py-3"
+                className="flex flex-col border-b border-border py-2 short:py-1.5"
               >
                 <button
                   type="button"
                   aria-expanded={on}
                   onClick={() => setOpen(i)}
                   onFocus={() => setOpen(i)}
-                  className="grid grid-cols-[auto_minmax(0,1fr)_auto_auto] items-baseline gap-4 text-left"
+                  className="grid grid-cols-[auto_minmax(0,1fr)_auto_auto] items-baseline gap-4 py-2 text-left short:py-1.5"
                 >
                   <span
                     className={`font-display text-[clamp(1.5rem,2.4vw,2.5rem)] leading-none tabular-nums transition-colors duration-300 ${on ? "text-foreground" : "text-muted-foreground/40"}`}
@@ -141,7 +141,7 @@ export function SessionsScreen({ sessions }: { sessions: SessionItem[] }) {
                     </p>
                     <Link
                       href={`/?type=session&session=${encodeURIComponent(s.name)}#contact`}
-                      className="label flex gap-2.5 self-start"
+                      className="label flex gap-2.5 self-start py-2"
                     >
                       Inquire <span aria-hidden>&rarr;</span>
                     </Link>

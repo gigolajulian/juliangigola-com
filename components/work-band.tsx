@@ -308,7 +308,10 @@ export function WorkBand({
        */}
       <div className="absolute inset-x-0 bottom-0 flex flex-col gap-1.5 glass-surface bg-background/70 p-3 [container-type:inline-size] sm:gap-2 sm:p-4">
         <div className="flex items-baseline gap-3 sm:gap-4">
-          <span className="label shrink-0 tabular-nums text-muted-foreground">
+          {/* Not on a phone, where two tiles share a row and the name needs
+              the whole plate to stay readable (BRAND CAMPAIGNS came to 7px on
+              an iPhone SE). */}
+          <span className="label shrink-0 tabular-nums text-muted-foreground max-sm:hidden">
             {String(index + 1).padStart(2, "0")}
           </span>
           {/* Moved off the photograph and into the plate. On its own in the
@@ -330,7 +333,7 @@ export function WorkBand({
               down to about 3px there). `--name-em` is the name's width in
               ems, measured off Inter Tight 900: a letter is at most 0.72, a
               space 0.3. */}
-          <h3 className="font-display min-w-0 whitespace-nowrap text-lg uppercase leading-[0.95] tracking-[0] sm:text-[min(1.25rem,calc((100cqw-2rem)/var(--name-em)))]"
+          <h3 className="font-display min-w-0 whitespace-nowrap text-[min(1.125rem,calc(100cqw/var(--name-em)))] uppercase leading-[0.95] tracking-[0] sm:text-[min(1.25rem,calc((100cqw-2rem)/var(--name-em)))]"
             style={{ "--name-em": nameEm(project.name) } as React.CSSProperties}
           >
             {project.name}
@@ -344,13 +347,17 @@ export function WorkBand({
               letter. */}
         </div>
 
-        {/* Julian: photo / design / video, on each tile, at every size. */}
+        {/* Julian: photo / design / video, on each tile, at every size,
+            and on a phone too, where two tiles share a row now and the
+            client line that used to be here has no room. */}
         {project.medium ? (
-          <p className="label mt-1.5 flex justify-between gap-3 text-muted-foreground max-sm:hidden">
-            <span className="whitespace-nowrap">{project.medium}</span>
+          <p className="label mt-1.5 flex justify-between gap-3 text-muted-foreground">
+            <span className="sm:whitespace-nowrap">{project.medium}</span>
             {/* Where the tile goes, brighter and the arrow on under a
                 pointer. */}
-            <span className="whitespace-nowrap transition-colors duration-200 group-hover:text-foreground">
+            <span
+              className={`whitespace-nowrap transition-colors duration-200 group-hover:text-foreground${project.medium.length > 8 ? " tile-go-long" : ""}`}
+            >
               {/* The words go where the plate is too narrow for them
                   beside its medium, and the arrow stays (`.tile-more` in
                   `globals.css`). */}
@@ -368,39 +375,6 @@ export function WorkBand({
             </span>
           </p>
         ) : null}
-
-        <div className="hidden flex-wrap items-baseline gap-x-4 gap-y-1.5 max-sm:flex">
-          {/* The credits are a phone thing now. Stacked, a tile is the
-              width of the screen and has room for them; in the nine-up
-              grid a tile is about 260 wide and the plate was taking half
-              the photograph to print two lines that are on the project's
-              own page and on the work index anyway. */}
-          {project.client ? (
-            <p className="label hidden text-muted-foreground max-sm:block">
-              {project.client}
-            </p>
-          ) : null}
-          {/* The discipline reads from the left, with the client, and the
-                frame count is what gets pushed away.
-
-                It was the other way round: `ml-auto` on the discipline, to
-                stop it sitting against the client name and reading as one
-                string. That works while there is a client, and a project
-                without one — SAGO, most of the music work — was left with a
-                discipline stranded on the right of an otherwise empty row,
-                under a title starting on the left. Two things aligned to
-                nothing in particular.
-
-                So the words stay together on the left, where the eye already
-                is, and the counter takes the free space. `ml-auto` on it
-                rather than `justify-between` on the row: the first automatic
-                margin in a flex row takes all of the space, so with no client
-                the discipline still starts at the left edge instead of
-                splitting the difference. */}
-          <p className="label hidden text-muted-foreground max-sm:block">
-            {project.discipline}
-          </p>
-        </div>
 
         {/* The scrub position, as a row of ticks. It doubles as the
               affordance — it is what tells you the cell is scrubbable before

@@ -2585,8 +2585,10 @@ a.strip-cell {
   --g: 12px;
 }
 .disc-inner {
-  display: flex;
-  flex-direction: column;
+  /* Julian: a phone takes two to a row (eight full-width photographs
+     were five screens of scrolling before Sessions). */
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: var(--g);
 }
 .disc-tile {
@@ -2598,6 +2600,7 @@ a.strip-cell {
     container-type: size;
   }
   .disc-inner {
+    display: flex;
     height: 100%;
     flex-direction: row;
     flex-wrap: wrap;
@@ -2636,6 +2639,13 @@ a.strip-cell {
 }
 @container (max-width: 13.75rem) {
   .tile-more-long {
+    display: none;
+  }
+}
+/* Beside "Photo / Design" on the smallest phone (an iPhone SE's plate is
+   8.3rem) not even the arrow fits. */
+@container (max-width: 9rem) {
+  .tile-go-long {
     display: none;
   }
 }
@@ -5163,6 +5173,14 @@ h2:not(.label) {
 }
 .liquid-pair [data-on] > .cover-cta-quiet {
   color: var(--hero-on-ink);
+}
+
+/* The hero's pair sits in a zoom on a phone (`--m-buttons`, 0.88). The
+   liquid measures its buttons as seen, already zoomed, and drew them into
+   a layer zoomed again: the ink came out 0.88 of the button, cut short of
+   SEE THE WORK (Julian, on his iPhone). The layer undoes the zoom. */
+.cover-float-ctas.liquid-pair > svg {
+  zoom: calc(1 / var(--m-buttons, 1));
 }
 
 /* The drop that fills a quiet button: out of the first button across the

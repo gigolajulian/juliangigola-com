@@ -95,7 +95,7 @@ export default function Home() {
               project, in two rows, and what each is on its plate: photo,
               design or video (`.disc` in `globals.css`). */}
           <div
-            className="disc min-h-0 flex-1 px-0 pt-0 sm:px-8 sm:pb-4 sm:pt-24 lying:pb-2 lying:pt-20"
+            className="disc min-h-0 flex-1 px-6 pt-6 sm:px-8 sm:pb-4 sm:pt-24 lying:pb-2 lying:pt-20"
             style={{ "--n": DISCIPLINE_TILES.length } as CSSProperties}
           >
             <div className="disc-inner">
