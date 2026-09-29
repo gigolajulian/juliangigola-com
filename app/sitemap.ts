@@ -15,7 +15,7 @@ export const dynamic = "force-static";
 export default function sitemap(): MetadataRoute.Sitemap {
   // Listed explicitly, so /admin cannot drift into the sitemap by being a
   // route — it is unlisted on purpose.
-  const pages = ["", "/portfolio", "/sessions", "/about", "/contact", "/legal"].map(
+  const pages = ["", "/portfolio", "/legal"].map(
     (path) => ({
       url: `${SITE}${path}`,
       changeFrequency: "monthly" as const,

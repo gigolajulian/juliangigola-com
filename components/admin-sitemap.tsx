@@ -59,13 +59,13 @@ const PAGES: {
   { href: "/", label: "Home", target: { kind: "field", anchor: "featured" } },
   { href: "/portfolio", label: "Work", target: { kind: "projects" } },
   {
-    href: "/sessions",
+    href: "/#sessions",
     label: "Sessions",
     target: { kind: "field", anchor: "sessions" },
   },
-  { href: "/about", label: "About", note: "copy lives in the page itself" },
+  { href: "/#about", label: "About", note: "copy lives in the page itself" },
   {
-    href: "/contact",
+    href: "/#contact",
     label: "Contact",
     target: { kind: "field", anchor: "responseTime" },
   },

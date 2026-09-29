@@ -1,3 +1,4 @@
+import type { CSSProperties } from "react";
 import Link from "next/link";
 import { CoverFloat } from "@/components/cover-float";
 import { Strip } from "@/components/strip";
@@ -5,17 +6,22 @@ import { StripPage } from "@/components/strip-page";
 import { EnquiryCell } from "@/components/enquiry-cell";
 import { Testimonials } from "@/components/testimonials";
 import { WorkBand } from "@/components/work-band";
-import { CoverArt } from "@/components/cover-art";
+import TiltedCard from "@/components/TiltedCard";
 import { InquireWall } from "@/components/inquire-wall";
 import {
   FEATURED,
-  COMMISSIONS,
+  DISCIPLINE_TILES,
   PRESS_HOME,
+  PROJECTS,
+  projectsIn,
   WALL,
   WORK_PAGE,
-  bandTile,
 } from "@/lib/work";
 import { ClientMarks } from "@/components/client-marks";
+import { AboutScreen } from "@/components/about-screen";
+import { ContactScreen } from "@/components/contact-screen";
+import { SessionsScreen } from "@/components/sessions-screen";
+import { SESSION_TYPES, formatPrice } from "@/lib/sessions";
 
 /* ── the homepage ─────────────────────────────────────────────────
  * One screen at a time, sideways. Each screen is a whole section rather
@@ -40,7 +46,8 @@ import { ClientMarks } from "@/components/client-marks";
  *      about a set, so the set is on one screen with nothing behind it,
  *      and the client marks run in a line under it: the names that make an
  *      art director keep reading, beside what he made for them.
- *   3. Cover art, the two doors, and the ask, which leads on to the work.
+ *   3. Cover art, About, Contact, and last the two doors and the ask,
+ *      which leads on to the work.
  * ─────────────────────────────────────────────────────────────── */
 
 /* The nine are one screen. The question the section answers is "is the
@@ -57,7 +64,7 @@ export default function Home() {
   return (
     <StripPage>
       <Strip
-        label="Julian Gigola: the cover, selected work, cover art, and how to get in touch. One screen at a time, left and right."
+        label="Julian Gigola: the cover, selected work, cover art, about, contact, and how to get in touch. One screen at a time, left and right."
         next={WORK_PAGE}
         arrive="none"
         paged
@@ -78,71 +85,42 @@ export default function Home() {
             each tile says whose it is. */}
         <section
           data-tick
-          data-label="Selected work"
-          data-hash="work"
-          aria-label={`Selected work, ${FEATURED.length} projects`}
+          /* Julian: Services, at #services (it was Selected work, #work). */
+          data-label="Services"
+          data-hash="services"
+          aria-label={`Services, ${DISCIPLINE_TILES.length} disciplines`}
           className="relative flex w-full shrink-0 flex-col sm:h-full"
         >
-          {/* Which section this is, and the way out to all of the work.
-              Both sit in the band the bar occupies, which is why the grid
-              below starts under it. */}
-          <div className="pointer-events-none absolute inset-x-0 top-0 z-10 flex items-baseline justify-between gap-6 px-6 py-4 sm:px-8 sm:pt-20 lying:pt-16">
-            <h2 className="label glass-surface bg-background/70 px-3 py-1.5 text-muted-foreground">
-              Selected work
-              {/* Two, because upright screens stop at six (`band-grid` in
-                  `globals.css`). A visitor who can count the tiles should
-                  not be told a different number. */}
-              <span className="ml-3 tabular-nums text-foreground">
-                <span className="band-count-all">
-                  {String(FEATURED.length).padStart(2, "0")}
-                </span>
-                <span className="band-count-few">
-                  {String(Math.min(FEATURED.length, 6)).padStart(2, "0")}
-                </span>
-                {/* And eight, for an iPad held sideways, which shows four
-                    across and two down (`band-grid` again). */}
-                <span className="band-count-eight">
-                  {String(Math.min(FEATURED.length, 8)).padStart(2, "0")}
-                </span>
-              </span>
-            </h2>
-            <Link
-              prefetch={false}
-              href="/portfolio"
-              className="label pointer-events-auto glass-surface bg-background/70 px-3 py-1.5 text-muted-foreground transition-colors duration-200 hoverable:hover:text-foreground"
-            >
-              <span aria-hidden>All {COMMISSIONS.length} &rarr;</span>
-              <span className="sr-only">All {COMMISSIONS.length} projects</span>
-            </Link>
-          </div>
-
-          {/* One grid, two rows, and every tile 4:5 against the height a
-              row is given. Sizing the tiles from the height is what keeps
-              the ratio exact at any window: the width follows, and five of
-              them are still inside a 1280 screen. `max-content` columns, so
-              they sit flush against each other and the row centres in
-              whatever is left rather than being spread across it.
-
-              It was two row elements with five tiles in each, and that is
-              what made the first six impossible: taking three from each row
-              gives you the first three and the sixth, seventh and eighth.
-              One container in source order, and the ones that go are the
-              ones after the sixth. `band-grid` in `globals.css` is where an
-              upright screen takes over — three columns there, or one on a
-              phone, and the width leads instead of the height, because a
-              row of five at 4:5 against a 959px cell is 1310 wide and a
-              strip cell does not clip.
-
-              The top pad is the bar — the first row used to run under it. */}
-          <div className="band-grid grid min-h-0 flex-1 content-center justify-center px-0 pt-0 sm:px-8 sm:pb-6 sm:pt-32 lying:pb-2 lying:pt-28">
-            {FEATURED.map((project, i) => (
-              <div
-                key={project.slug}
-                className="band-tile min-h-0 sm:aspect-[4/5] sm:h-full"
-              >
-                <WorkBand project={bandTile(project)} index={i} />
-              </div>
-            ))}
+          {/* Julian: the best photo from each discipline, leading to its
+              project, in two rows, and what each is on its plate: photo,
+              design or video (`.disc` in `globals.css`). */}
+          <div
+            className="disc min-h-0 flex-1 px-0 pt-0 sm:px-8 sm:pb-4 sm:pt-24 lying:pb-2 lying:pt-20"
+            style={{ "--n": DISCIPLINE_TILES.length } as CSSProperties}
+          >
+            <div className="disc-inner">
+              {DISCIPLINE_TILES.map((tile, i) => (
+                <div key={tile.name} className="band-tile disc-tile">
+                  {/* Julian: the cover art's motion here instead (React
+                      Bits' TiltedCard), tilting toward the pointer and
+                      lifting. */}
+                  <TiltedCard
+                    imageSrc={tile.cover.src}
+                    altText={tile.name}
+                    containerHeight="100%"
+                    imageHeight="100%"
+                    imageWidth="100%"
+                    scaleOnHover={1.05}
+                    /* Julian: half the tilt (14deg by default), then less. */
+                    rotateAmplitude={4}
+                    showMobileWarning={false}
+                    showTooltip={false}
+                  >
+                    <WorkBand project={tile} index={i} />
+                  </TiltedCard>
+                </div>
+              ))}
+            </div>
           </div>
 
           {/* The proof, where the proof is. It had a screen to itself and a
@@ -173,9 +151,29 @@ export default function Home() {
           ) : null}
         </section>
 
-        <CoverArt />
-
         <Testimonials cells />
+
+        {/* Julian: Sessions, About and Contact on the homepage, before
+            the ask, which stays last. /about and /contact redirect here.
+            Each session shows the sample /sessions shows. */}
+        <SessionsScreen
+          sessions={SESSION_TYPES.map((s) => {
+            const sample =
+              (s.sample && PROJECTS.find((p) => p.slug === s.sample)) ||
+              projectsIn(s.slug)[0];
+            return {
+              slug: s.slug,
+              name: s.name,
+              rate: formatPrice(s.from),
+              turnaround: s.turnaround,
+              blurb: s.blurb,
+              includes: s.includes,
+              cover: sample ? sample.cover : null,
+            };
+          })}
+        />
+        <AboutScreen />
+        <ContactScreen />
 
         {/* Julian: merge these, there is too much white space. The ask and
             the two doors were two screens of mostly paper asking the same
@@ -211,7 +209,7 @@ export default function Home() {
                 body="Editorial, campaigns, portraits, and artist imagery."
               />
               <PathCard
-                href="/sessions"
+                href="/#sessions"
                 title="Book a session"
                 body="Graduation, headshots, weddings, and studio digitals. What's included and how long it takes."
               />

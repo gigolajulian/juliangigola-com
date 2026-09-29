@@ -82,6 +82,8 @@ export function CoverFloat({
               prefetch={false}
               href={`/portfolio/${p.slug}`}
               tabIndex={-1}
+              // Julian: VIEW on the ring over a photo, as on every other.
+              data-ring="View"
               data-discipline={labels[i]}
               data-photo={p.name}
               className={cn(
@@ -190,7 +192,7 @@ export function CoverFloat({
             See the work
           </Link>
           <Link
-            href="/sessions"
+            href="/#sessions"
             className="cover-cta cover-cta-quiet press active:scale-[0.97]"
           >
             Book a session

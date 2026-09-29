@@ -827,7 +827,7 @@ export function WorkShell({
             // Julian: in colour the page is the colour, so no view is lit.
             aria-pressed={view === mode && !scoping}
             aria-label={`${WORD[mode]} view`}
-            data-ring={`${WORD[mode]} view`}
+            data-ring={WORD[mode]}
             onClick={() =>
               morphView(() => {
                 /* Leaving the list with something typed would filter a
@@ -931,10 +931,10 @@ export function WorkShell({
            passes under it rather than through it. */
         <div className="shrink-0 max-sm:sticky max-sm:top-[61px] max-sm:z-20 max-sm:bg-background max-sm:pb-3">
           <StripHead
+            /* Julian: no "Portfolio" on All work, where it only named the
+               page it is on. A filter keeps the way back. */
             crumb={
-              all ? (
-                <span className="label text-muted-foreground">Portfolio</span>
-              ) : (
+              all ? null : (
                 <Link
                   href="/portfolio"
                   className="label text-muted-foreground transition-colors duration-200 hoverable:hover:text-foreground"
@@ -955,11 +955,12 @@ export function WorkShell({
                work. */
             aside={toggle}
             phone={phoneToggle}
-            /* On /work the strip opens on a discipline, so the page's own
-               title lives here, in the middle of the head, from the first
-               frame. A category page still opens on its name set large and
-               the head waits for that cell to go. */
-            open={all}
+            /* The title in the middle of the head from the first frame,
+               on every Portfolio page. A category page opens on its name
+               set large as well, and the head used to wait for that cell
+               to go; Julian: always show it, and let it swap from one
+               discipline to the next. */
+            open
           />
 
           {/* The old site's three dropdowns become one row that can be
@@ -1160,6 +1161,8 @@ function Chip({
          and the pointer was repeating it back a few pixels lower down.
          Julian asked. */
       data-ring=""
+      // Julian: the ring forms around the chip under the pointer.
+      data-ring-hug=""
       /* So the strip that is about to mount knows it is a filter change
          and fades in where it stands, instead of sliding in from a
          quarter of the window away as an arriving page does. */

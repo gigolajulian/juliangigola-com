@@ -3,7 +3,7 @@
 import { runDeck, type Deck } from "@/lib/deck";
 import * as React from "react";
 import { useRouter } from "next/navigation";
-import { cn, rubberband } from "@/lib/utils";
+import { cn, rubberband, STRIP_SECTION } from "@/lib/utils";
 import { flyCovers } from "@/lib/work-view";
 import { Liquid } from "liquid-gooey";
 
@@ -1123,6 +1123,8 @@ export function Strip({
               "",
               `${window.location.pathname}${window.location.search}${want}`,
             );
+            // A replace fires nothing; the header's links listen for this.
+            window.dispatchEvent(new Event(STRIP_SECTION));
           }
         }, 200);
       }
@@ -1350,6 +1352,21 @@ export function Strip({
       const where = i >= 0 ? centreOf(el, i) : null;
       if (where !== null) glide.current(where);
     };
+    /* A link to a cell on this page, the nav's /#about on the homepage:
+       Next's Link moves the address without a hashchange, so the strip
+       takes the click. `pushState` keeps the router's search params. */
+    const onLink = (e: MouseEvent) => {
+      if (e.defaultPrevented || e.button || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+      const a = (e.target as Element).closest?.<HTMLAnchorElement>("a[href]");
+      if (!a || a.target) return;
+      const url = new URL(a.href);
+      if (url.origin !== location.origin || url.pathname !== location.pathname) return;
+      if (cellFor(el, decodeURIComponent(url.hash.slice(1))) < 0) return;
+      e.preventDefault();
+      history.pushState(null, "", url.href);
+      onHash();
+    };
+    document.addEventListener("click", onLink, true);
     // A frame later rather than now, so the first render is not followed
     // by a second one in the same tick.
     queued = requestAnimationFrame(() => {
@@ -1381,6 +1398,7 @@ export function Strip({
       el.removeEventListener("scroll", onScroll);
       window.removeEventListener("resize", again);
       window.removeEventListener("hashchange", onHash);
+      document.removeEventListener("click", onLink, true);
       if (queued) cancelAnimationFrame(queued);
       window.clearTimeout(rest);
       clearTimeout(hashTimer);
@@ -2756,9 +2774,8 @@ export function Strip({
            tick — and snap re-aims each one as it settles, which reads as
            the sequence being tugged out of your hand. The momentum stops
            where it is let go instead. */
-        /* The whole shelf is draggable, so the pointer says so; a cover
-           inside it has its own word and a cell of words cancels it. */
-        data-ring="Drag"
+        /* The whole shelf is draggable, but the pointer does not say so:
+           Julian, no DRAG. A cover inside it still has its own word. */
         className={cn(
           "flex min-h-0 flex-1 select-none items-center",
           bleed ? "gap-0" : "gap-3 px-6 sm:px-10 sm:gap-4",
@@ -2820,8 +2837,8 @@ export function Strip({
           "strip-rail mt-6 flex min-h-5 items-end gap-6 px-6 pb-4 max-sm:mt-3 sm:px-10 tablet:mt-3 lying:mt-2",
           stack && "max-sm:hidden",
         )}
-        /* Julian: one big bar, sectioned off, each discipline named in
-           its own section (`rail-names` in `globals.css`). */
+        /* Julian: one big bar, sectioned off (`rail-names` in
+           `globals.css`). */
         data-rail-names={chaptered ? "always" : undefined}
       >
         {counter?.(at)}
@@ -2872,6 +2889,10 @@ export function Strip({
              gap above the rail and the 16px foot below it, without moving
              a pixel of the drawing. */
           data-cue={cue ? "" : undefined}
+          /* Julian: one word in the pointer's ring, always, and on a rail
+             that word is VIEW (`pointer-ring.tsx`). The names stay on the
+             rail itself. */
+          data-ring={over !== null || overAway !== null ? "View" : ""}
           className={cn(
             "rail-line relative flex h-2 min-w-0 flex-1 touch-none items-end py-2",
             "pointer-coarse:before:absolute pointer-coarse:before:inset-x-0 pointer-coarse:before:-top-3 pointer-coarse:before:-bottom-4 pointer-coarse:before:content-['']",
@@ -2988,6 +3009,18 @@ export function Strip({
                           : opening(count)
                         : 1,
                     }}
+                    /* Which thumb it carries in the control
+                       (`globals.css`): where you are, or a discipline
+                       elsewhere under the pointer. */
+                    data-tone={
+                      shown
+                        ? "open"
+                        : here
+                          ? "lit"
+                          : overAway === gi
+                            ? "near"
+                            : undefined
+                    }
                     className={cn(
                       "rail-chapter relative flex h-2 min-w-0 shrink basis-0 items-end px-1",
                       /* Eased while the page is what moves it, instant
@@ -3107,22 +3140,10 @@ export function Strip({
                         />
                       ))}
                     </div>
-                    {/* Julian: the discipline inside its own bar
+                    {/* Julian: the discipline inside its own section, or
+                        the project under the pointer in an open one
                         (`rail-name`, `globals.css`). */}
-                    <span
-                      aria-hidden
-                      data-tone={
-                        shown
-                          ? "open"
-                          : here
-                            ? "lit"
-                            : overAway === gi
-                              ? "near"
-                              : undefined
-                      }
-                      className="rail-name label"
-                    >
-                      {/* The project under the pointer, once one is. */}
+                    <span aria-hidden className="rail-name label">
                       {word}
                     </span>
                   </div>

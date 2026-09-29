@@ -202,7 +202,14 @@ export default async function ProjectPage(props: PageProps<"/portfolio/[slug]">)
         <StripHead
           crumb={<Crumb />}
           title={project.headline ?? project.name}
-          sub={client}
+          /* Julian: the discipline under the title, after the client
+             where there is one. Moved here from the top right. A
+             discipline's own gallery is titled with it already. */
+          sub={
+            [client, isDiscipline ? null : project.categories[0]?.name]
+              .filter(Boolean)
+              .join(" · ") || undefined
+          }
           aside={
             mark && CLIENT_MARKS[mark.slug] ? (
               <span
@@ -217,14 +224,7 @@ export default async function ProjectPage(props: PageProps<"/portfolio/[slug]">)
                 />
               </span>
             ) : (
-              [
-                project.categories.length && !isDiscipline
-                  ? project.categories.map((c) => c.name).join(", ")
-                  : null,
-                `${project.images.length} frames`,
-              ]
-                .filter(Boolean)
-                .join(" · ")
+              `${project.images.length} frames`
             )
           }
         />

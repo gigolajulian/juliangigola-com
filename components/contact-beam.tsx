@@ -5,7 +5,8 @@ import { BorderBeam } from "border-beam";
 import { useSiteTheme } from "@/lib/site-theme";
 
 /* Julian: the form in a beam (`border-beam`, Libraries.dev), at his
-   settings: the full border, colorful, 0.7, in the site's own theme. */
+   settings: the full border, 0.7, in the site's own theme. Mono: Julian
+   took the colors off the form (2026-09-29). */
 export function ContactBeam({
   className,
   children,
@@ -17,12 +18,14 @@ export function ContactBeam({
   return (
     <BorderBeam
       size="md"
-      colorVariant="colorful"
+      colorVariant="mono"
       strength={0.7}
       theme={theme}
       /* Julian: rounded, 16px, with the form's box (`rounded-[16px]`,
          `app/contact/page.tsx`). */
       borderRadius={16}
+      /* Julian: slower. A lap in four seconds, against the default 1.96. */
+      duration={4}
       className={className}
     >
       {children}

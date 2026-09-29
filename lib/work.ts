@@ -502,6 +502,12 @@ export { HIDDEN, UNLISTED };
 const inSessions = (p: Project) =>
   p.categories.some((c) => c.section === "SESSIONS");
 
+/* Julian: studio digitals shows in the portfolio too, a chip and a page
+   of its own there, and stays on /sessions. */
+const IN_PORTFOLIO = new Set(["studio-digitals"]);
+const inPortfolio = (p: Project) =>
+  !inSessions(p) || p.categories.some((c) => IN_PORTFOLIO.has(c.slug));
+
 export const projectsIn = (categorySlug: string): Project[] =>
   PROJECTS.filter((p) => p.categories.some((c) => c.slug === categorySlug));
 
@@ -555,7 +561,7 @@ const isDiscipline = isDisciplineGallery;
  * page with a single row on it.
  */
 export const COMMISSIONS: Project[] = PROJECTS.filter(
-  (p) => p.categories.length > 0 && !inSessions(p) && !isDiscipline(p),
+  (p) => p.categories.length > 0 && inPortfolio(p) && !isDiscipline(p),
 );
 
 /** Client-session work: graduation, headshots, weddings, studio digitals. */
@@ -572,7 +578,7 @@ export const UNFILED: Project[] = PROJECTS.filter(
 );
 
 export const WORK_CATEGORIES: Category[] = CATEGORIES.filter(
-  (c) => c.section !== "SESSIONS",
+  (c) => c.section !== "SESSIONS" || IN_PORTFOLIO.has(c.slug),
 );
 
 /* Built from `LINKABLE` and not from `PROJECTS`: an unlisted project is off
@@ -626,9 +632,8 @@ export const categoryHref = (categorySlug: string): string => {
 /** The pages a strip leads on to once its own sequence has run out: the
     site's order, in the shape the strip takes (`Lead` in `strip.tsx`). */
 export const WORK_PAGE = { href: "/portfolio", name: "Portfolio" };
-export const SESSIONS_PAGE = { href: "/sessions", name: "Sessions" };
-export const ABOUT_PAGE = { href: "/about", name: "About" };
-export const CONTACT = { href: "/contact", name: "Contact" };
+export const SESSIONS_PAGE = { href: "/#sessions", name: "Sessions" };
+export const CONTACT = { href: "/#contact", name: "Contact" };
 
 /** A category as the index renders it: name plus where it goes. */
 export type CategoryLink = { slug: string; name: string; href: string };
@@ -813,6 +818,15 @@ export type BandTile = {
   total: number;
   client?: string;
   discipline: string;
+  /** Photo, design or video, printed under the name at every size (the
+      homepage's discipline tiles). */
+  medium?: string;
+  /** A film to play under the pointer in place of the frames: the reel,
+      on the homepage's Motion tile. */
+  reel?: string;
+  /** Where the tile goes, when not its project: a homepage discipline
+      tile opens the portfolio on that discipline (Julian). */
+  href?: string;
 };
 
 export const bandTile = (p: Project): BandTile => {
@@ -1439,6 +1453,119 @@ export const DISCIPLINES: Discipline[] = DISCIPLINE_SLUGS.map((slug) =>
     };
   })
   .filter((d): d is Discipline => d !== null);
+
+/* Julian: photo / design / video. Which of the three each discipline is,
+   printed on its tile; mixed media is both of the first two. */
+const MEDIUM: Record<string, string> = {
+  "mixed-media": "Photo / Design",
+  coverart: "Design",
+  video: "Video",
+};
+const mediumOf = (disciplineSlug: string): string =>
+  MEDIUM[disciplineSlug] ?? "Photo";
+
+/* The homepage's selected work, a tile a discipline (Julian: the best
+   photo from each, leading to its project): the frame picked for it in
+   /admin, the discipline's name on the plate, the project under it, and
+   its medium on the last line. Julian's eight, in this order. Chroma took
+   Studio digitals' place (Julian: a better one): his second largest body
+   of work after Editorial, and one of his featured sets. It is not one
+   of the cover's disciplines, so its tile is made here from the
+   category, the same way.
+
+   Julian: a hover shows my favorite set's best photo from the
+   discipline: the cover of the first of his featured sets (/admin) filed
+   under it, bar the set the tile already shows. With none, the next set
+   filed there (Julian: a different project from Portraits). With none
+   of those, a frame of the tile's own set it is not showing (a cover is
+   its set's first frame again, so the first one past the tile's).
+   Motion has no sets: Julian, the reel, muted, from three seconds in as
+   on the motion page. */
+/* Julian's order, drawn over the page (2026-09-29): four a row. */
+const TILE_SLUGS = [
+  "campaigns",
+  "portraits",
+  "editorial",
+  "mixed-media",
+  "coverart",
+  "artist-presskit",
+  "chroma",
+  "video",
+];
+/* Julian's picks: Cover Art keeps its photograph of the covers laid out
+   and shows The River on hover; Mixed media shows Wrapped Up and
+   Metamorphosis on hover; Artist presskit is Valgur; Chroma is Liminal,
+   with a good blue one on hover (Julian: maybe Analogue Dreams): its
+   frame 06, the bluest of the set with a subject in it. */
+const TILE_PICKS: Record<
+  string,
+  { frame?: Frame; project?: string; hover?: string; hoverFrame?: Frame }
+> = {
+  coverart: { hoverFrame: COVER_RELEASES.find((r) => r.slug === "the-river")?.frames[0] },
+  "mixed-media": { project: "wrapped-up", hover: "metamorphosis" },
+  "artist-presskit": { project: "valgur" },
+  chroma: {
+    project: "liminal",
+    hoverFrame: bySlug
+      .get("analogue-dreams")
+      ?.images.find((f) => f.src.endsWith("/06.jpg")),
+  },
+};
+const tileDiscipline = (slug: string): Discipline | undefined => {
+  const found = DISCIPLINES.find((d) => d.slug === slug);
+  if (found) return found;
+  const category = CATEGORIES.find((c) => c.slug === slug);
+  const frame = categoryFrame(slug);
+  if (!category || !frame) return undefined;
+  const project = frameProject(frame);
+  return {
+    slug,
+    name: categoryLabel(category),
+    count: projectsIn(slug).length,
+    href: categoryHref(slug),
+    ...(project ? { credit: { name: project.name, href: `/portfolio/${project.slug}` } } : {}),
+    frame,
+  };
+};
+export const DISCIPLINE_TILES: (BandTile & { medium: string })[] = TILE_SLUGS.map(
+  tileDiscipline,
+)
+  .filter((d): d is Discipline => Boolean(d))
+  .map((d) => {
+    const pick = TILE_PICKS[d.slug] ?? {};
+    const shown = pick.project ? bySlug.get(pick.project) : undefined;
+    const slug =
+      shown?.slug ?? (d.credit?.href ?? `/portfolio/${d.slug}`).split("/")[2] ?? d.slug;
+    const project = bySlug.get(slug);
+    const frame = pick.frame ?? shown?.cover ?? d.frame;
+    const favorite =
+      (pick.hover ? bySlug.get(pick.hover) : undefined) ??
+      FEATURED.find(
+        (p) => p.slug !== slug && p.categories.some((c) => c.slug === d.slug),
+      ) ??
+      projectsIn(d.slug).find((p) => p.slug !== slug);
+    const best =
+      pick.hoverFrame ??
+      favorite?.cover ??
+      project?.images.find((f) => f.src !== frame.src);
+    const client = shown?.name ?? d.credit?.name;
+    return {
+      slug,
+      href: d.href,
+      name: d.name,
+      cover: withBlur(frame),
+      frames: best ? [best] : [],
+      total: project?.images.length ?? d.count,
+      ...(client ? { client } : {}),
+      discipline: mediumOf(d.slug),
+      medium: mediumOf(d.slug),
+      ...(d.slug === "video"
+        ? {
+            reel: `https://player.vimeo.com/video/${REEL.videoId}?background=1&autoplay=1&loop=1&muted=1&dnt=1#t=3s`,
+          }
+        : {}),
+    };
+  });
 
 /**
  * The cover-art work.

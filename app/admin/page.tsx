@@ -233,7 +233,7 @@ export default function AdminPage() {
           slug: c.slug,
           name: categoryLabel(c),
           href: categoryHref(c.slug),
-          branch: c.section === "SESSIONS" ? "/sessions" : "/portfolio",
+          branch: c.section === "SESSIONS" ? "/#sessions" : "/portfolio",
         }))}
       />
     </div>

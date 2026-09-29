@@ -410,6 +410,8 @@ const DriftWall = ({
         <a
           key={id}
           href={item.href}
+          // The pointer's ring: one word, always (Julian).
+          data-ring={/^https?:/.test(item.href) ? 'Open' : 'View'}
           {...(/^https?:/.test(item.href) ? { target: '_blank', rel: 'noreferrer noopener' } : {})}
           {...commonProps}
         >

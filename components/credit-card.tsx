@@ -149,7 +149,7 @@ export function CreditCard({
                 href={`https://www.instagram.com/${handle}/`}
                 target="_blank"
                 rel="noreferrer"
-                data-ring="Open"
+                data-ring="Instagram"
                 className="label mt-3 inline-block text-muted-foreground transition-colors duration-200 hoverable:hover:text-foreground focus-visible:text-foreground"
               >
                 Open on Instagram &#8599;

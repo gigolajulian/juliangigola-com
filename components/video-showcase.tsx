@@ -55,7 +55,7 @@ export function VideoShowcase({
         <p className="max-w-prose text-sm leading-relaxed text-muted-foreground">
           The rest of the moving work is not up here yet.{" "}
           <Link
-            href="/contact"
+            href="/#contact"
             className="text-foreground underline decoration-border underline-offset-4 hoverable:hover:decoration-foreground"
           >
             Ask for more

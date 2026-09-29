@@ -75,6 +75,8 @@ export function ClientMarks({
               ? { target: "_blank", rel: "noreferrer" }
               : {})}
             aria-label={client.name}
+            // They read like a list of clients; the ring says they open.
+            data-ring={/^https?:\/\//.test(client.href) ? "Open" : "View"}
             className={cn(
               "group relative flex items-center justify-center text-muted-foreground transition-colors duration-200 hoverable:hover:text-foreground",
               // In the row, a thumb's worth of link: a wordmark is 16px of

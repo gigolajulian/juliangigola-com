@@ -6,6 +6,7 @@ import Link from "next/link";
 import { ViewTransition } from "react";
 import { Lightbox, useLightbox } from "@/components/lightbox";
 import { CreditCard } from "@/components/credit-card";
+import { longestWord } from "@/components/strip-page";
 import { Strip, type Lead } from "@/components/strip";
 import type { Project, TextBlock, Frame } from "@/lib/work-types";
 
@@ -170,6 +171,11 @@ export function ProjectStrip({
             <h2
               aria-hidden
               className="font-display text-4xl uppercase leading-[0.95] tracking-[0] sm:text-6xl"
+              style={
+                {
+                  "--word-em": longestWord(project.headline ?? project.name),
+                } as React.CSSProperties
+              }
             >
               {(project.headline ?? project.name).split(" ").map((word, i) => (
                 <React.Fragment key={i}>
@@ -246,6 +252,7 @@ export function ProjectStrip({
                               href={`https://www.instagram.com/${handle}/`}
                               target="_blank"
                               rel="noreferrer"
+                              data-ring="Instagram"
                               className="text-muted-foreground transition-colors duration-200 hoverable:hover:text-foreground"
                             >
                               {credit.name}
@@ -277,7 +284,7 @@ export function ProjectStrip({
             key="next"
             href={next!.href}
             data-hash="next"
-            data-ring="Next project"
+            data-ring="Next"
             className="flex h-full shrink-0 flex-col justify-center gap-2 pl-10 pr-6 sm:pl-24 sm:pr-10"
           >
             <span className="label text-muted-foreground">Next project</span>
@@ -322,7 +329,7 @@ export function ProjectStrip({
             <button
               data-hash={`${cell.n + 1}`}
               data-tick
-              data-ring="Zoom in"
+              data-ring="Zoom"
               type="button"
               // Opened by the strip's delegated listener, which is where
               // the lightbox is reached through a ref.

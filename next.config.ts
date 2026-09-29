@@ -51,7 +51,7 @@ const renameRedirects = LINKABLE.filter(
  */
 const categoryRedirects = CATEGORIES.map((c) => ({
   source: `/${c.slug}`,
-  destination: c.section === "SESSIONS" ? "/sessions" : categoryHref(c.slug),
+  destination: c.section === "SESSIONS" ? "/#sessions" : categoryHref(c.slug),
   permanent: true,
 }));
 
@@ -82,11 +82,17 @@ const workRedirects = [
 /** Pages that moved or were retired. */
 const pageRedirects = [
   // Julian: change Studio to About. The page moved; the old name follows.
-  { source: "/studio", destination: "/about", permanent: true },
+  { source: "/studio", destination: "/#about", permanent: true },
+  // Julian: About and Contact are homepage screens now. The query rides
+  // along, so /contact?type=session still fills the form in.
+  { source: "/about", destination: "/#about", permanent: true },
+  { source: "/contact", destination: "/#contact", permanent: true },
   // /rates never got written — it still served the Format demo's biography.
   // Sessions is where a rate question actually gets answered now.
-  { source: "/rates", destination: "/sessions", permanent: true },
-  { source: "/links", destination: "/contact", permanent: true },
+  { source: "/rates", destination: "/#sessions", permanent: true },
+  // Julian: Sessions is a homepage screen now, and the page is gone.
+  { source: "/sessions", destination: "/#sessions", permanent: true },
+  { source: "/links", destination: "/#contact", permanent: true },
   // There was a cart in the header but nothing behind it.
   { source: "/store", destination: "/", permanent: true },
   // "Wedding" (33 frames) was folded into the Weddings gallery; the project

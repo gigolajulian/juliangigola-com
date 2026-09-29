@@ -53,8 +53,8 @@ export function EnquiryCell({
   className?: string;
 }) {
   const href = detail
-    ? `/contact?type=${encodeURIComponent(type)}&ref=${encodeURIComponent(detail)}`
-    : `/contact?type=${encodeURIComponent(type)}`;
+    ? `/?type=${encodeURIComponent(type)}&ref=${encodeURIComponent(detail)}#contact`
+    : `/?type=${encodeURIComponent(type)}#contact`;
 
   return (
     <div
@@ -87,13 +87,15 @@ export function EnquiryCell({
       <div
         className={cn(
           "relative flex flex-col gap-6",
-          aside && "justify-center px-6 py-12 sm:px-16 sm:py-0 lying:gap-4 lying:px-10 lying:pt-12",
+          aside && "justify-center px-6 py-12 sm:px-10 sm:py-0 lying:gap-4 lying:px-10 lying:pt-12",
         )}
       >
         <div>
-          <h2 className="title max-w-[22ch] lying:[--text-title:2.25rem]">{title}</h2>
+          {/* Julian: matched with Contact's "Get in Touch" (RisingTitle's
+              size: 2.25rem, 3.75rem from sm) and its 40px in. */}
+          <h2 className="title max-w-[22ch] leading-[0.95] [--text-title:2.25rem] sm:[--text-title:3.75rem] lying:[--text-title:2.25rem]">{title}</h2>
           {body ? (
-            <p className="mt-4 max-w-prose text-sm leading-relaxed text-muted-foreground lying:mt-2">
+            <p className="mt-4 max-w-prose text-sm leading-relaxed text-muted-foreground [zoom:1.02] lying:mt-2">
               {body}
             </p>
           ) : null}
@@ -119,6 +121,7 @@ export function EnquiryCell({
 
         <a
           href="mailto:hello@juliangigola.com"
+          data-ring="Email"
           className="label w-fit text-muted-foreground transition-colors duration-200 hoverable:hover:text-foreground"
         >
           hello@juliangigola.com

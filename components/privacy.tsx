@@ -322,7 +322,7 @@ export function PrivacyColumn() {
       <Clause title="Contact">
         <p>
           Julian Gigola, San Francisco Bay Area, California.{" "}
-          <a href={`mailto:${EMAIL}`} className="underline underline-offset-4">
+          <a href={`mailto:${EMAIL}`} data-ring="Email" className="underline underline-offset-4">
             {EMAIL}
           </a>
           . For anything about your information, put Privacy in the subject line

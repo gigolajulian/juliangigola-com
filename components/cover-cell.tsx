@@ -101,7 +101,7 @@ export function CoverCell({
         data-name={row.name}
         data-vt={row.slug}
         data-hash={hash}
-        data-ring="View project"
+        data-ring="View"
         data-mark={mark}
         onPointerEnter={warm}
         onPointerLeave={cool}

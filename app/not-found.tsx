@@ -40,8 +40,8 @@ export default function NotFound() {
     ...DISCIPLINES.filter((d) => d.href.startsWith("/portfolio"))
       .slice(0, 4)
       .map((d) => ({ label: d.name, count: String(d.count), href: d.href })),
-    { label: "Book a session", count: "→", href: "/sessions" },
-    { label: "Contact", count: "→", href: "/contact" },
+    { label: "Book a session", count: "→", href: "/#sessions" },
+    { label: "Contact", count: "→", href: "/#contact" },
   ];
 
   return (

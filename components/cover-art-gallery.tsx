@@ -49,7 +49,7 @@ export function CoverArtGallery({
   return (
     <>
       <ul
-        data-ring="Zoom in"
+        data-ring="Zoom"
         // Two rows deep in the rack (grid view), one in the strip.
         data-rack={rows || undefined}
         className={cn(
@@ -94,7 +94,7 @@ export function CoverArtGallery({
               aria-label={`Open ${coverLabel(release.title, release.artist, release.frames)}`}
               // Flies between the views as the covers do (`morphView`).
               data-vt={front.src}
-              data-ring="Zoom in"
+              data-ring="Zoom"
               className={cn(
                 "group relative block aspect-square w-full overflow-hidden press active:scale-[0.995]",
                 rows && "sm:h-full sm:w-auto",

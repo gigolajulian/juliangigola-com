@@ -102,7 +102,7 @@ export function FilmCell({
       href={href}
       data-tick
       data-name={title}
-      data-ring="See the films"
+      data-ring="Watch"
       data-film
       aria-label={`${title}, film`}
       className="group strip-cell relative block aspect-video w-full shrink-0 overflow-hidden bg-card press active:scale-[0.995] sm:h-full sm:w-auto"
@@ -165,7 +165,7 @@ export function FrameCell({
          thirty four. The frames take the name of the chapter they are
          under, which is what the rail already does with covers. */
       data-tick
-      data-ring="Zoom in"
+      data-ring="Zoom"
       aria-label={frame.alt || `${name}, frame ${n + 1}`}
       className="group strip-cell relative block w-full shrink-0 overflow-hidden press active:scale-[0.995] sm:h-full sm:w-auto"
       style={

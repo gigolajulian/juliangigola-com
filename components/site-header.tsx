@@ -3,10 +3,26 @@
 import * as React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { cn } from "@/lib/utils";
+import { cn, STRIP_SECTION } from "@/lib/utils";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { WarpTuner } from "@/components/warp-tuner";
 import { NAME_WARP } from "@/lib/name-warp";
+
+/* The address's hash, kept current: the strip writes the homepage's
+   section into it as it glides (`STRIP_SECTION`), a link or the back button
+   changes it too. Empty on the server. */
+const subscribeHash = (on: () => void) => {
+  window.addEventListener(STRIP_SECTION, on);
+  window.addEventListener("hashchange", on);
+  window.addEventListener("popstate", on);
+  return () => {
+    window.removeEventListener(STRIP_SECTION, on);
+    window.removeEventListener("hashchange", on);
+    window.removeEventListener("popstate", on);
+  };
+};
+const useHash = () =>
+  React.useSyncExternalStore(subscribeHash, () => window.location.hash, () => "");
 
 /* ── the chrome ───────────────────────────────────────────────────
  * Four destinations, no dropdowns.
@@ -32,10 +48,11 @@ import { NAME_WARP } from "@/lib/name-warp";
  * ─────────────────────────────────────────────────────────────── */
 
 export const LINKS = [
+  // Julian's order (2026-09-29). About and Contact are homepage screens.
+  { href: "/#sessions", label: "Sessions" },
+  { href: "/#about", label: "About" },
+  { href: "/#contact", label: "Contact" },
   { href: "/portfolio", label: "Portfolio" },
-  { href: "/sessions", label: "Sessions" },
-  { href: "/contact", label: "Contact" },
-  { href: "/about", label: "About" },
 ] as const;
 
 export function SiteHeader() {
@@ -241,8 +258,14 @@ export function SiteHeader() {
      the attribute the strip sets. See `.home-wordmark` in `globals.css`. */
   const deferWordmark = pathname === "/";
 
-  const isCurrent = (href: string) =>
-    pathname === href || pathname.startsWith(href + "/");
+  /* Julian: on About and Contact, now screens of the homepage, the bar
+     says so. A link with a hash is current on its page at its section. */
+  const hash = useHash();
+  const isCurrent = (href: string) => {
+    const [path, section] = href.split("#");
+    if (section !== undefined) return pathname === path && hash === `#${section}`;
+    return pathname === href || pathname.startsWith(href + "/");
+  };
 
   return (
     <header
@@ -282,6 +305,7 @@ export function SiteHeader() {
       <div className="relative mx-auto flex max-w-[100rem] items-center justify-between px-6 py-3 max-sm:py-2 sm:px-10 sm:py-4 tablet:py-1.5 lying:py-1.5">
         <Link
           href="/"
+          data-ring="Home"
           // On the homepage the name is a way back to the top, not a reload.
           // Julian asked: a click there used to re-request `/`, which
           // restarted the cover and threw away the scroll. Smooth unless the

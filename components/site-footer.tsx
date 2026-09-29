@@ -31,7 +31,7 @@ export function SiteFooter() {
             </p>
             <h2 className="mt-4 title">
               <Link
-                href="/contact"
+                href="/#contact"
                 className="transition-opacity duration-200 hoverable:hover:opacity-70"
               >
                 Let&rsquo;s make something.
@@ -39,6 +39,7 @@ export function SiteFooter() {
             </h2>
             <a
               href="mailto:hello@juliangigola.com"
+              data-ring="Email"
               className="mt-4 inline-block text-sm text-muted-foreground underline decoration-border underline-offset-4 transition-colors duration-200 hoverable:hover:text-foreground hoverable:hover:decoration-current"
             >
               hello@juliangigola.com
@@ -53,6 +54,7 @@ export function SiteFooter() {
                     href={s.href}
                     target="_blank"
                     rel="me noreferrer"
+                    data-ring={s.label}
                     className="label text-muted-foreground transition-colors duration-200 hoverable:hover:text-foreground"
                   >
                     {s.label}

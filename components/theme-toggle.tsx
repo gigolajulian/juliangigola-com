@@ -147,6 +147,8 @@ export function ThemeToggle({ className }: { className?: string }) {
     <button
       type="button"
       onClick={toggle}
+      // What a press switches to, since the icon alone does not say.
+      data-ring={theme ? (theme === "dark" ? "Light" : "Dark") : ""}
       // A thumb target, like the burger beside it, rather than the 18px of
       // artwork.
       // Constant colour, and no hover brighten. The mark is a ring, so

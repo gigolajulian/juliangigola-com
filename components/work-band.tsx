@@ -124,7 +124,7 @@ export function WorkBand({
     // Touch gets the cover and a plain tap through to the project. Scrubbing
     // with a finger would fight the page scroll, and a "hover" on touch is
     // just a tap that has not decided what it is yet.
-    if (e.pointerType === "touch" || frames.length === 0) return;
+    if (e.pointerType === "touch" || (frames.length === 0 && !project.reel)) return;
     const still = was.current?.x === e.clientX && was.current?.y === e.clientY;
     was.current = { x: e.clientX, y: e.clientY };
     if (still) return;
@@ -132,9 +132,10 @@ export function WorkBand({
 
     const box = e.currentTarget.getBoundingClientRect();
     const ratio = (e.clientX - box.left) / box.width;
-    const next = Math.min(
-      frames.length - 1,
-      Math.max(0, Math.floor(ratio * frames.length)),
+    // The reel's one tick is lit while it plays.
+    const next = Math.max(
+      0,
+      Math.min(frames.length - 1, Math.floor(ratio * frames.length)),
     );
 
     setScrubbing(true);
@@ -167,7 +168,9 @@ export function WorkBand({
   return (
     <Link
       ref={tile}
-      data-ring="View project"
+      /* Julian: rethink the way into the portfolio. The tile is the way:
+         it opens the portfolio on its discipline, and says so. */
+      data-ring="Open"
       style={
         {
           backgroundColor: project.cover.color,
@@ -175,7 +178,7 @@ export function WorkBand({
         } as React.CSSProperties
       }
       prefetch={false}
-      href={`/portfolio/${project.slug}`}
+      href={project.href ?? `/portfolio/${project.slug}`}
       onPointerMove={onPointerMove}
       onPointerLeave={reset}
       onBlur={reset}
@@ -272,6 +275,20 @@ export function WorkBand({
                 />
               ))
             : null}
+
+          {/* The reel under the pointer (Motion), cropped to the tile from
+              the middle of the 16:9 film. Mounted only while hovered, so
+              nothing of Vimeo's loads until then. */}
+          {touched && scrubbing && project.reel ? (
+            <iframe
+              src={project.reel}
+              title=""
+              aria-hidden
+              tabIndex={-1}
+              allow="autoplay; encrypted-media"
+              className="pointer-events-none absolute left-1/2 top-1/2 aspect-video h-full max-w-none -translate-x-1/2 -translate-y-1/2 border-0 animate-in fade-in duration-500"
+            />
+          ) : null}
         </div>
       </ViewTransition>
 
@@ -327,6 +344,31 @@ export function WorkBand({
               letter. */}
         </div>
 
+        {/* Julian: photo / design / video, on each tile, at every size. */}
+        {project.medium ? (
+          <p className="label mt-1.5 flex justify-between gap-3 text-muted-foreground max-sm:hidden">
+            <span className="whitespace-nowrap">{project.medium}</span>
+            {/* Where the tile goes, brighter and the arrow on under a
+                pointer. */}
+            <span className="whitespace-nowrap transition-colors duration-200 group-hover:text-foreground">
+              {/* The words go where the plate is too narrow for them
+                  beside its medium, and the arrow stays (`.tile-more` in
+                  `globals.css`). */}
+              <span
+                className={`tile-more${project.medium.length > 8 ? " tile-more-long" : ""}`}
+              >
+                View more{" "}
+              </span>
+              <span
+                aria-hidden
+                className="inline-block transition-transform duration-300 group-hover:translate-x-1"
+              >
+                &rarr;
+              </span>
+            </span>
+          </p>
+        ) : null}
+
         <div className="hidden flex-wrap items-baseline gap-x-4 gap-y-1.5 max-sm:flex">
           {/* The credits are a phone thing now. Stacked, a tile is the
               width of the screen and has room for them; in the nine-up
@@ -363,12 +405,13 @@ export function WorkBand({
         {/* The scrub position, as a row of ticks. It doubles as the
               affordance — it is what tells you the cell is scrubbable before
               you have moved across it. Hidden where there is no pointer to
-              scrub with. */}
-        {frames.length > 0 ? (
+              scrub with. The reel gets one, lit while it plays (Julian: the
+              same line under Motion as the others). */}
+        {frames.length > 0 || project.reel ? (
           <div aria-hidden className="hidden w-full gap-1 hoverable:flex">
-            {frames.map((f, i) => (
+            {(project.reel ? [project.reel] : frames.map((f) => f.src)).map((key, i) => (
               <span
-                key={f.src}
+                key={key}
                 className={cn(
                   "h-px flex-1 transition-colors duration-150",
                   i === active && scrubbing

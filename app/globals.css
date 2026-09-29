@@ -272,13 +272,6 @@
   .cover-float {
     --wide: 0.9;
   }
-  /* Five sleeves across at full width were two rows taller than the
-     window, over the heading and the rail; two rows sized from the height
-     instead, centred. */
-  .cover-rack {
-    width: min(100%, calc((100svh - 16rem) * 2.5));
-    margin-inline: auto;
-  }
 }
 @media (min-width: 80rem) and (min-height: 32rem) and (min-aspect-ratio: 11 / 5) {
   .cover-float {
@@ -1779,6 +1772,16 @@ a.strip-cell {
   }
 }
 
+/* Julian: the Selected work tiles came apart at the edge on hover. A
+   backdrop blur is not carried through the card's 3D tilt, so the plate
+   stood flat while the photograph turned and the two edges split. On a
+   tilting tile the plate is solid instead. */
+:root .tilted-card-inner .glass-surface {
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  background-color: color-mix(in oklab, var(--background) 88%, transparent);
+}
+
 /* Cells arrive from the strip with a height, a width or an aspect of their
    own; in the rack the grid decides all three. */
 .strip-grid > * {
@@ -1874,56 +1877,90 @@ a.strip-cell {
   }
 }
 
-/* ── the pointer's tag ────────────────────────────────────────────
-   The word that hangs off the pointer, set the way a camera sets a
-   focus box: four corner marks around a dark pane with the instruction
-   in mono caps. Julian drew these - VIEW PROJECT, DRAG, ZOOM IN, ZOOM
-   OUT - and asked for the same design on all of them.
-
-   The marks are eight background layers rather than eight elements: two
-   per corner, an arm across and an arm down, each `--mark` long and
-   `--rule` thick, none of them repeating. */
-.ring-tag {
-  --rule: 1.5px;
-  --mark: 9px;
-  --ink: white;
-  padding: 0.4rem 0.6rem;
-  color: white;
-  /* The pane is still see-through, so the photograph reads under it, but
-     it is no longer half there: Julian asked for more of it, and for the
-     marks to be solid rather than nearly so. Tint and not blur - a blurred
-     pane that follows the pointer is the stutter this whole pointer was
-     rewritten to be rid of. */
-  background-color: color-mix(in oklab, black 72%, transparent);
-  text-shadow: 0 1px 2px color-mix(in oklab, black 55%, transparent);
-  background-repeat: no-repeat;
-  background-image:
-    linear-gradient(var(--ink), var(--ink)),
-    linear-gradient(var(--ink), var(--ink)),
-    linear-gradient(var(--ink), var(--ink)),
-    linear-gradient(var(--ink), var(--ink)),
-    linear-gradient(var(--ink), var(--ink)),
-    linear-gradient(var(--ink), var(--ink)),
-    linear-gradient(var(--ink), var(--ink)),
-    linear-gradient(var(--ink), var(--ink));
-  background-size:
-    var(--mark) var(--rule),
-    var(--rule) var(--mark),
-    var(--mark) var(--rule),
-    var(--rule) var(--mark),
-    var(--mark) var(--rule),
-    var(--rule) var(--mark),
-    var(--mark) var(--rule),
-    var(--rule) var(--mark);
-  background-position:
-    0 0,
-    0 0,
-    100% 0,
-    100% 0,
-    0 100%,
-    0 100%,
-    100% 100%,
-    100% 100%;
+/* ── the pointer's ring ──────────────────────────────────────────
+   Julian, after selectedbase.com: over anything that says what a press
+   does, a circle with that one word in it comes up beside the pointer,
+   on the side toward the middle of the window, and drifts after it
+   (`pointer-ring.tsx` moves it). Nothing at all around the pointer
+   otherwise. Difference blended, so it reads on a photograph and on the
+   ground alike. `cursor-ring` and not `ring`: that is a Tailwind utility,
+   a 1px box shadow, and on a box with no size it drew a dot under the
+   pointer. */
+.cursor-ring {
+  --d: 48px;
+  --out: cubic-bezier(0.215, 0.61, 0.355, 1);
+  position: fixed;
+  left: -0.75vw;
+  top: -0.75vw;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid white;
+  border-radius: 50%;
+  color: rgb(222 222 222);
+  overflow: hidden;
+  mix-blend-mode: difference;
+  opacity: 0;
+  /* Theirs: the transform written each frame is eased again over the
+     same 300ms, which is half of how smooth it reads. */
+  transition-property: transform, width, height, left, top, border-radius, opacity;
+  transition-duration: 300ms;
+  transition-timing-function: var(--out);
+}
+.cursor-ring[data-ready] {
+  /* Julian: a little more (0.1). */
+  opacity: 0.2;
+}
+.cursor-ring[data-ready][data-over] {
+  opacity: 1;
+  width: var(--d);
+  height: var(--d);
+  left: calc(-1.25vw - (var(--d) - 48px) / 2);
+}
+/* Julian: merged with a button, on its edge and faded into its own
+   outline, so there is one line, not two (`pointer-ring.tsx`). The
+   button says what it does, so no word. */
+.cursor-ring[data-ready][data-merge] {
+  opacity: 0;
+  width: var(--mw);
+  height: var(--mh);
+  left: calc(var(--mw) / -2);
+  top: calc(var(--mh) / -2);
+  border-radius: var(--mr);
+}
+/* Julian: around a filter chip it stays in sight, the chip having no
+   outline of its own; faint (Julian: lower opacity). */
+.cursor-ring[data-ready][data-merge="outline"] {
+  opacity: 0.4;
+}
+.ring-word {
+  white-space: nowrap;
+  opacity: 0;
+  translate: 0 100%;
+  rotate: -15deg;
+  transition-property: opacity, translate, rotate;
+  transition-duration: 300ms;
+  transition-timing-function: var(--out);
+}
+.cursor-ring[data-over] .ring-word {
+  opacity: 1;
+  translate: none;
+  rotate: none;
+  transition-delay: 100ms;
+}
+.cursor-ring[data-merge] .ring-word {
+  opacity: 0;
+  translate: 0 100%;
+  rotate: -15deg;
+  transition-delay: 0ms;
+}
+@media (prefers-reduced-motion: reduce) {
+  .cursor-ring,
+  .ring-word {
+    transition: none;
+  }
 }
 
 /* A scroller with no bar of its own. The legal page changes what is in
@@ -2164,8 +2201,16 @@ a.strip-cell {
   font-size: 2.7rem;
 }
 @media (min-width: 40rem) {
+  /* No larger than its longest word fits the cell (30rem less its 1.5rem
+     of padding): AUTOMOTIVE at 4.5rem ran 30px over the first photograph
+     (Julian: overlaying). */
   :is([data-discipline-page], .discipline-title) h2:has(.title-word) {
-    font-size: 4.5rem;
+    font-size: min(4.5rem, calc((min(30rem, 82vw) - 1.5rem) / var(--word-em, 6)));
+  }
+  /* A project's title the same way, at its own 3.75rem: UKIYOSUNKNOWN
+     ran 108px under the first photograph (Julian). */
+  [data-hash="title"] > h2:has(.title-word) {
+    font-size: min(3.75rem, calc((min(30rem, 82vw) - 1.5rem) / var(--word-em, 6)));
   }
 }
 /* The clip each rising word sits in (`project-strip.tsx`,
@@ -2270,14 +2315,11 @@ a.strip-cell {
    got through the discipline it is in. Under the pointer the disciplines
    come up out of it as an Apple segmented control (Julian): one soft
    capsule, faint short dividers, and a raised thumb on the discipline you
-   are in. An open discipline names the project under the pointer and
-   lights it. At rest the sections are the line, shrunk to its height and
+   are in. Each discipline is named inside its section, and an open one
+   names the project under the pointer. At rest the sections are the line, shrunk to its height and
    in its tone, so hovering grows one object rather than swapping two
    (Julian: seamless). The bar scales rather than growing, so nothing is
    laid out again. */
-.rail-name {
-  display: none;
-}
 .strip-rail[data-rail-names="always"] {
   /* Solid, not see-through: two see-through sections meeting on a
      fraction of a pixel draw a seam where their edges overlap. */
@@ -2329,16 +2371,16 @@ a.strip-cell {
   width: 1px;
   background: color-mix(in oklab, var(--foreground) 16%, transparent);
 }
-.strip-rail[data-rail-names="always"] .rail-chapter:has(> [data-tone="lit"]) .rail-bar::after,
-.strip-rail[data-rail-names="always"] .rail-chapter:has(> [data-tone="lit"]) + .rail-chapter .rail-bar::after,
-.strip-rail[data-rail-names="always"] .rail-chapter:has(> [data-tone="near"]) .rail-bar::after,
-.strip-rail[data-rail-names="always"] .rail-chapter:has(> [data-tone="near"]) + .rail-chapter .rail-bar::after {
+.strip-rail[data-rail-names="always"] .rail-chapter[data-tone="lit"] .rail-bar::after,
+.strip-rail[data-rail-names="always"] .rail-chapter[data-tone="lit"] + .rail-chapter .rail-bar::after,
+.strip-rail[data-rail-names="always"] .rail-chapter[data-tone="near"] .rail-bar::after,
+.strip-rail[data-rail-names="always"] .rail-chapter[data-tone="near"] + .rail-chapter .rail-bar::after {
   opacity: 0;
 }
 /* The thumb on the discipline you are in, and a quieter one on a
    discipline elsewhere that the pointer is on. */
-.strip-rail[data-rail-names="always"] .rail-chapter:has(> [data-tone="lit"]) .rail-bar::before,
-.strip-rail[data-rail-names="always"] .rail-chapter:has(> [data-tone="near"]) .rail-bar::before {
+.strip-rail[data-rail-names="always"] .rail-chapter[data-tone="lit"] .rail-bar::before,
+.strip-rail[data-rail-names="always"] .rail-chapter[data-tone="near"] .rail-bar::before {
   content: "";
   position: absolute;
   inset: 2px;
@@ -2346,7 +2388,7 @@ a.strip-cell {
   background: var(--rail-thumb);
   box-shadow: var(--rail-shadow);
 }
-.strip-rail[data-rail-names="always"] .rail-chapter:has(> [data-tone="near"]) .rail-bar::before {
+.strip-rail[data-rail-names="always"] .rail-chapter[data-tone="near"] .rail-bar::before {
   background: color-mix(in oklab, var(--foreground) 8%, transparent);
   box-shadow: none;
 }
@@ -2370,7 +2412,6 @@ a.strip-cell {
   position: absolute;
   inset: 0;
   z-index: 1;
-  display: block;
   padding-inline: 8px;
   line-height: 22px;
   text-align: center;
@@ -2388,7 +2429,7 @@ a.strip-cell {
     opacity 120ms var(--ease-out-strong),
     color 200ms var(--ease-out-strong);
 }
-.strip-rail[data-rail-names="always"] .rail-name[data-tone] {
+.strip-rail[data-rail-names="always"] .rail-chapter[data-tone] .rail-name {
   color: var(--foreground);
 }
 /* The name is in the capsule, so no word stands over it. */
@@ -2535,81 +2576,67 @@ a.strip-cell {
   }
 }
 
-/* ── the selected work, at three shapes of screen ──
-   The band is one grid of ten tiles in source order, which is what lets a
-   screen show the first six rather than the first three of each of two
-   rows. Three rules, and only the last is the one the desktop sees.
-
-   A phone: one column, the tile full width, six of them down the feed.
-   Ten was a column nobody reached the end of.
-
-   An upright tablet: three columns, and the width leads. The desktop way
-   round — tile height from the row, width from the ratio — puts five tiles
-   at 4:5 against a 959px cell at 1310 wide inside a 768px one, and a strip
-   cell does not clip, so the overflow painted over the cover art on the
-   screen after it. Three across at 235px is two thirds wider than five
-   across was, and the names stop being cut.
-
-   Everything else: five columns of whatever the tile makes itself, two
-   rows, centred. `max-content` rather than `1fr` because the tiles butt
-   against each other and equal columns would put twenty pixels of paper
-   between them.
-
-   Six is the first six, not six of ten: the tiles are in order and the
-   hidden ones are the ones after. A hidden tile is never fetched either,
-   since they are all lazy, so a phone downloads six covers instead of ten. */
-/* Julian: room between the tiles now they have round corners, on the
-   8-point grid, a little wider than the 8px corner. */
-.band-grid {
-  gap: 12px;
-  grid-template-columns: repeat(5, max-content);
-  grid-template-rows: repeat(2, minmax(0, 1fr));
+/* ── the selected work: a tile a discipline ──
+   Julian: the best photo from each discipline (`DISCIPLINE_TILES`),
+   side by side, in two rows (Julian, after one). Each tile is 4:5, sized from the room the section leaves (container
+   units: the tile asks its container, the section's tile area), from the
+   height first and then held to the width. A phone stacks them. */
+.disc {
+  --g: 12px;
 }
-/* Whole pixels. Half the height was 361.094, so a tile at 4:5 was 288.875
-   wide and every join between two tiles fell partway through a pixel,
-   which drew a hairline down it. Julian saw the seams glitch. Rounded
-   down to five, the width is four fifths of it and whole too. Height-led
-   screens only: an upright one leads with the width. */
-@media (min-width: 40rem) and (not (max-aspect-ratio: 4 / 5)) {
-  .band-grid {
-    grid-template-rows: repeat(2, round(down, calc((100% - 12px) / 2), 5px));
-    /* From the top, not centred: centring split what the rounding left
-       over, under ten pixels, into two fractional halves. */
-    align-content: start;
+.disc-inner {
+  display: flex;
+  flex-direction: column;
+  gap: var(--g);
+}
+.disc-tile {
+  width: 100%;
+  aspect-ratio: 4 / 5;
+}
+@media (min-width: 40rem) {
+  .disc {
+    container-type: size;
+  }
+  .disc-inner {
+    height: 100%;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-content: center;
+    margin-inline: auto;
+  }
+  .disc-tile {
+    flex: none;
+    /* Not stretched to the line: one row is one line, and a stretched
+       tile loses its 4:5. */
+    align-self: center;
+    width: round(down, var(--tw), 1px);
+    height: auto;
+  }
+  .disc {
+    --per: round(up, calc(var(--n) / 2), 1);
+    --tw: min(
+      calc((100cqh - var(--g)) / 2 * 0.8),
+      calc((100cqw - (var(--per) - 1) * var(--g)) / var(--per))
+    );
+  }
+  /* As wide as a row, so the rest wraps under it, centred. */
+  .disc-inner {
+    max-width: calc(var(--per) * var(--tw) + (var(--per) - 1) * var(--g) + 1px);
   }
 }
-@media (max-width: 40rem) {
-  .band-grid {
-    grid-template-columns: minmax(0, 1fr);
-    grid-template-rows: none;
-  }
-}
-@media (max-aspect-ratio: 4 / 5) and (min-width: 40rem) {
-  .band-grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    /* Rows as tall as the tiles, so the gap between the rows is the
-       12px between the columns and not the slack of a half-height row. */
-    grid-template-rows: none;
-    width: 100%;
-  }
-}
-@media (max-aspect-ratio: 4 / 5) {
-  .band-grid > *:nth-child(n + 7) {
-    display: none;
-  }
-  .band-count-all {
+
+/* A tile's "View more", where its plate has the room: 9.5rem beside a
+   one word medium, 13.75rem beside "Photo / Design" (measured: 142, 150
+   and 215px wanted). Narrower, the arrow alone. */
+@container (max-width: 9.5rem) {
+  .tile-more {
     display: none;
   }
 }
-.band-count-few {
-  display: none;
-}
-.band-count-eight {
-  display: none;
-}
-@media (max-aspect-ratio: 4 / 5) {
-  .band-count-few {
-    display: inline;
+@container (max-width: 13.75rem) {
+  .tile-more-long {
+    display: none;
   }
 }
 
@@ -2619,12 +2646,9 @@ a.strip-cell {
    the desktop rule, and the desktop rule sizes a tile from the height it
    is given, so ten tiles came out 163px wide on an iPad mini and the row
    of marks under them, which is one line on a laptop, broke into two.
-   Julian: the client icons in one row, and only the top eight projects
-   at that size.
+   Julian: the client icons in one row.
 
-   Eight is four across and two down, and the tiles grow to take the room
-   the two dropped ones leave: 186 wide on the mini, 207 on the 11 inch,
-   288 on the 13, measured. The marks stand 18px tall instead of 23 and
+   The marks stand 18px tall instead of 23 and
    sit 16px apart, which is what keeps nine of them and their heading on
    one line at 1024 with 50px over; at 1180 there is 96 to spare.
 
@@ -2638,18 +2662,6 @@ a.strip-cell {
    height; `min-width: 64rem` still keeps a phone out and `landscape`
    keeps an upright tablet out. */
 @media (pointer: coarse) and (min-width: 64rem) and (orientation: landscape) {
-  .band-grid {
-    grid-template-columns: repeat(4, max-content);
-  }
-  .band-grid > *:nth-child(n + 9) {
-    display: none;
-  }
-  .band-count-all {
-    display: none;
-  }
-  .band-count-eight {
-    display: inline;
-  }
   section[aria-labelledby="press"] {
     gap: 2rem;
   }
@@ -2663,84 +2675,15 @@ a.strip-cell {
 /* ── a phone on its side ──
    Julian: an iPhone 16 Pro or Pro Max held sideways (874 by 402, 956 by
    440) should fit better. The strip's cells are about 320 to 360 tall
-   there, under a 56px bar. Selected work took the desktop's two rows of
-   five, which with the marks' two lines left the tiles as thumbnails, and
-   the rack's two rows of five ran under its heading. One row of six each,
-   the width leading so six always fit across, and the marks on one small
-   line. `lying` is the same query as the variant. */
+   there, under a 56px bar. The marks on one small line. `lying` is the same query as the variant. */
 @media (max-height: 30rem) and (min-width: 40rem) {
-  .band-grid {
-    grid-template-columns: repeat(6, minmax(0, 1fr));
-    grid-template-rows: none;
-    align-content: center;
-    width: 100%;
-  }
-  .band-tile {
-    height: auto;
-    min-width: 0;
-  }
-  .band-grid > *:nth-child(n + 7) {
-    display: none;
-  }
-  .band-count-all {
-    display: none;
-  }
-  .band-count-few {
-    display: inline;
-  }
   section[aria-labelledby="press"] ul {
     flex-wrap: nowrap;
     column-gap: 0.75rem;
     --mark-box: 0.9rem;
     --mark-cap: 5rem;
   }
-  .cover-rack {
-    grid-template-columns: repeat(6, minmax(0, 1fr));
-    grid-template-rows: none !important;
-  }
-  .cover-rack > li:nth-child(n + 7) {
-    display: none;
-  }
 }
-/* ── an upright tablet is not a short desktop ──
-   Both of these lay their pictures out from the height they are given,
-   which is right on a screen wider than it is tall and wrong on one that
-   is not. On an iPad held upright the cover cell is 768 by 959.
-
-   The band: a row is half of 959, so a tile at 4:5 against it is 262 wide
-   and five of them are 1310 — a page and a half, and because a strip cell
-   does not clip, the overflow painted over the cover art on the screen
-   after it. Julian saw the selected work leaking onto the second page.
-   The width leads here: each tile takes an equal share of its row and the
-   ratio sets the height, so five fit in 768 with the ratio still exact.
-
-   The rack: five across put the sleeves at 153px with two thirds of the
-   screen under them. Three across at three down is 256 a side, two thirds
-   bigger, and the tenth release is the one that goes — a ragged last row
-   of one is worse than nine that fill the screen.
-
-   Not on a phone: `min-width: 40rem`. A phone stacks both of these into a
-   vertical feed and neither is paged, so neither can leak. */
-@media (max-aspect-ratio: 4 / 5) and (min-width: 40rem) {
-  .band-tile {
-    height: auto;
-    min-width: 0;
-  }
-  .cover-rack {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    grid-template-rows: repeat(3, minmax(0, 1fr));
-  }
-  .cover-rack > li:nth-child(n + 10) {
-    display: none;
-  }
-}
-/* Julian: a phone shows the first six sleeves, three rows of two. */
-@media (max-width: 39.99rem) {
-  .cover-rack > li:nth-child(n + 7) {
-    display: none;
-  }
-}
-
 /* ── a thumb's worth of link ──
    The small capitals links (footer, crumbs, credits, the email in an ask)
    are 13 to 14px tall, and a thumb is not. Padding that the same negative
@@ -4585,8 +4528,9 @@ optgroup {
    read `opacity` on a cover carrying the class. */
 img[data-fade] {
   opacity: 0;
+  /* Julian: seamless. Long enough to read as arriving, not blinking. */
   transition:
-    opacity 480ms var(--ease-out-strong),
+    opacity 700ms cubic-bezier(0.22, 1, 0.36, 1),
     scale 500ms var(--ease-out-strong);
 }
 img[data-fade][data-loaded] {
@@ -4883,7 +4827,9 @@ h2:not(.label) {
     overscroll-behavior: contain;
     align-content: start;
     grid-template-rows: auto auto;
-    padding-block: 1.5rem 2.5rem;
+    /* Clear of the bar: a homepage screen now, under a bar 52px tall
+       here, and 1.5rem put the title's top under it. */
+    padding-block: 5rem 2.5rem;
   }
   .contact-inquire {
     align-items: start;
@@ -4895,441 +4841,13 @@ h2:not(.label) {
     min-height: auto;
     overflow: visible;
   }
-  /* With the room to scroll, the steps are two by two with their lines
-     again, not the short window's four names in a row. */
-  .contact-inquire ol {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-  .contact-inquire ol p {
-    display: block;
-  }
 }
 
-/* ── the about page's first screen (`about-hero.tsx`) ─────────────
- * Dark on the dark theme; on the light one the words and the grain turn
- * over onto the page's ground. */
-.about-hero {
-  --ah-ground: #0b0b0b;
-  --ah-shade: 11 11 11;
-  --ah-ink: #f2f1ee;
-  --ah-soft: #9a9892;
-  --ah-dim: #77756f;
-  --ah-rule: #2a2927;
-  position: relative;
-  isolation: isolate;
-  overflow: hidden;
-  height: 100%;
-  min-height: 34rem;
-  background: var(--ah-ground);
-  color: var(--ah-ink);
-  font-family: var(--font-mono);
-  font-size: 11px;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-}
-.about-hero-stage,
-.about-hero-stage canvas {
-  position: absolute;
-  inset: 0;
-  display: block;
-  width: 100%;
-  height: 100%;
-}
-.about-hero-stage canvas {
-  image-rendering: pixelated;
-}
-/* The words over the grain: role and biography at the top, the name at
-   the foot. */
-.about-hero-content {
-  position: absolute;
-  inset: 0;
-  z-index: 2;
-  display: flex;
-  flex-direction: column;
-  overflow-y: auto;
-  overscroll-behavior: contain;
-  scrollbar-width: thin;
-  padding: 2.5rem clamp(1rem, 6vw, 6rem);
-}
-/* Julian: the line, the intro and the services under it, every block of
-   words stopping at `--hero-room` (44rem: the portrait is gone, so the
-   words no longer stop short of him). Sized so the name still has the
-   foot of the screen. */
-.about-hero-bio {
-  display: flex;
-  flex-direction: column;
-  /* Julian: each block its own space. As much as the height allows: 27px
-     at 900 tall, the most the name leaves there, up to 64px on a tall
-     screen. */
-  gap: clamp(1.6rem, calc(7vh - 36px), 4rem);
-  max-width: var(--hero-room, 44rem);
-  letter-spacing: 0;
-}
-.about-hero-intro {
-  max-width: var(--title-w, 36rem);
-}
-.about-hero-copy {
-  max-width: var(--hero-room, 44rem);
-}
-/* Julian: the name and the facts at the bottom right. Not on a phone,
-   where they come first under the heading. */
-@media (min-width: 40rem) {
-  .about-hero .about-hero-copy {
-    width: fit-content;
-    margin-left: auto;
-    /* The name ends on the facts' right edge. */
-    text-align: right;
-  }
-}
-/* Julian: three lines, "SF Bay Area / Creative Director / & Photographer",
-   at any width: each line is one piece of the title (`app/about/page.tsx`),
-   set on a line of its own. */
-.about-hero .about-hero-title > span {
-  display: block;
-  width: fit-content;
-}
-.about-hero .about-hero-title {
-  max-width: 13em;
-  /* Julian: bigger, and the lines apart: at 1.05 the y of Bay met the
-     line under it. */
-  /* Julian: bigger, again, now it is three short lines; then too big,
-     a quarter back. */
-  font-size: clamp(2.2rem, min(3vw, 4.6vh), 3.6rem);
-  /* A phone: "Creative Director" is the long line, and at 2.2rem it ran
-     off a 390px screen. Sized to the width there. */
-  @media (max-width: 39.99rem) {
-    font-size: min(2.2rem, 8vw);
-  }
-  /* 1.1 now it is in capitals: no descender to meet the line under. */
-  line-height: 1.1;
-}
-.about-hero-intro {
-  /* Julian: bigger (it was 13px; twice was too big). */
-  font-size: 1rem;
-  line-height: 1.55;
-  color: var(--ah-soft);
-}
-.about-hero-services .label {
-  color: var(--ah-dim);
-}
-/* Julian: one column, a ruled list, bigger than the labels. */
-.about-hero-services {
-  max-width: 26rem;
-}
-.about-hero-services ul {
-  margin-top: 0.2rem;
-}
-.about-hero-services li.label {
-  padding-block: 0.24rem;
-  border-bottom: 1px solid var(--ah-rule);
-  color: var(--ah-ink);
-  /* Julian: bigger, again (15px, 12px before that). */
-  font-size: clamp(1.05rem, min(1.35vw, 2.2vh), 1.5rem);
-  letter-spacing: 0.1em;
-  position: relative;
-  transition:
-    padding-left 380ms var(--ease-out-strong),
-    color 380ms var(--ease-out-strong);
-}
-/* Julian: a hover on the services. The rule under the one pointed at
-   draws across in ink from the left while its words step in, and the
-   others dim so it is the one being read. */
-.about-hero-services li.label::after {
-  content: "";
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: -1px;
-  height: 1px;
-  background: var(--ah-ink);
-  transform: scaleX(0);
-  transform-origin: left;
-  transition: transform 520ms var(--ease-out-strong);
-}
-@media (hover: hover) and (pointer: fine) {
-  .about-hero-services ul:hover li.label {
-    color: var(--ah-soft);
-  }
-  .about-hero-services ul li.label:hover {
-    padding-left: 0.9rem;
-    color: var(--ah-ink);
-  }
-  .about-hero-services li.label:hover::after {
-    transform: scaleX(1);
-  }
-}
-/* A wash of the ground down the left, under the words: the lights keep
-   drifting behind them but never brighten the text's ground. */
-.about-hero-content::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  pointer-events: none;
-  background: linear-gradient(90deg, rgb(var(--ah-shade) / 0.8) 0%, rgb(var(--ah-shade) / 0.6) 38%, transparent 56%);
-}
-/* A short window: the name and the line come down so the two never
-   meet (at 1280 by 720 they touched). */
-@media (min-width: 40rem) and (max-height: 820px) {
-  /* The strip here is 420 to 480px tall, so a 34rem floor pushed the
-     name and the facts under the ruler. The screen is the panel. */
-  .about-hero {
-    min-height: 0;
-  }
-  .about-hero-name {
-    font-size: clamp(40px, 4vw, 88px);
-  }
-  .about-hero .about-hero-title {
-    font-size: clamp(1.6rem, min(2.4vw, 3.8vh), 2.7rem);
-    line-height: 1.1;
-  }
-  .about-hero-bio {
-    gap: 0.75rem;
-  }
-  .about-hero-copy {
-    padding-top: 1rem;
-  }
-  .about-hero-name {
-    margin-bottom: 1rem;
-  }
-  .about-hero-services li.label {
-    padding-block: 0.08rem;
-    font-size: clamp(0.9rem, 2vh, 1.2rem);
-    line-height: 1.25;
-  }
-  .about-hero-content {
-    padding-block: 1.4rem;
-  }
-}
-/* Julian: improve the placements. With the portrait gone the right of
-   the screen was empty and the words queued down the left. On a wide
-   screen the line runs across on two lines, as he asked for it, the
-   intro and the ask under it on the left and the services beside them
-   on the right; the client marks run the width of the foot. */
-@media (min-width: 64rem) {
-  .about-hero-bio {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(0, 24rem);
-    align-items: start;
-    max-width: none;
-  }
-  /* Past the laptop blocks below, which reset the whole `gap`. */
-  .about-hero .about-hero-bio {
-    column-gap: clamp(3rem, 8vw, 10rem);
-  }
-  .about-hero-bio > * {
-    grid-column: 1;
-  }
-  .about-hero .about-hero-title {
-    max-width: 18em;
-  }
-  /* Julian: the services a better spot: top right, level with the
-     title, the name under them at the bottom right. */
-  .about-hero-services {
-    grid-column: 2;
-    grid-row: 1 / span 3;
-    width: 100%;
-  }
-  .about-hero .about-hero-clients {
-    max-width: none;
-  }
-  /* Julian's DialKit paste (2026-09-28): the line, the intro and the ask
-     low on the left, just over the name, and the services centred beside
-     them. The bio takes the height and sets its rows at the foot. */
-  .about-hero .about-hero-bio {
-    flex: 1;
-    align-content: end;
-    /* The paste closed the line, the intro and the ask up to each other;
-       set, so a shorter screen's smaller gap does not overlap them. */
-    row-gap: 0;
-  }
-  .about-hero .about-hero-services {
-    align-self: center;
-  }
-  .about-hero .about-hero-services > h2 {
-    zoom: 1.25;
-    /* -20 at 1.25 is the list's -25: the two on one edge. */
-    translate: -20px 0;
-  }
-  .about-hero .about-hero-services > ul {
-    margin-top: 1.1rem;
-    translate: -25px 0;
-  }
-  .about-hero .about-hero-intro {
-    letter-spacing: -0.055em;
-    line-height: 1.75;
-    text-align: left;
-  }
-  /* Julian: the buttons smaller, and fitting at every size. */
-  .about-hero .about-hero-ask {
-    margin-top: 0.9rem;
-  }
-  .about-hero .about-marquee {
-    zoom: 1.27;
-  }
-  /* Julian: sizes that make sense together. The intro and the services
-     are the same body size, scaled with the screen (and its height, so a
-     laptop still fits). */
-  .about-hero {
-    --ah-body: clamp(0.9rem, min(1vw, 1.8vh), 1.2rem);
-  }
-  .about-hero .about-hero-intro,
-  .about-hero .about-hero-services li.label {
-    font-size: var(--ah-body);
-  }
-}
-/* Under a finger the rail sits 12px under the strip, not 24, and its
-   word reached into the words' box: sideways on a phone, where they
-   scroll, POST-PRODUCTION ran under ABOUT. The box ends clear of it; the
-   ground and the lights still run to the foot. */
-@media (pointer: coarse) and (min-width: 40rem) {
-  .about-hero-content {
-    bottom: 0.75rem;
-  }
-}
-/* An upright tablet (768 by 1024): the words ran 141px past the screen
-   and under the rail while the right of it stood empty. The services go
-   to a column of their own beside the intro and the ask. */
-@media (min-width: 40rem) and (max-width: 63.99rem) and (orientation: portrait) {
-  .about-hero-bio {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(0, 15rem);
-    column-gap: 2rem;
-    max-width: none;
-    align-items: start;
-  }
-  .about-hero-bio > * {
-    grid-column: 1;
-  }
-  .about-hero .about-hero-title {
-    grid-column: 1 / -1;
-  }
-  .about-hero .about-hero-services {
-    grid-column: 2;
-    grid-row: 2 / span 2;
-  }
-}
-/* A laptop's browser window (1366 by 768 leaves about 657; 1280 by 800,
-   1440 by 790 and 1024 by 768 too): the intro gives way so the name and the client
-   marks fit (Julian's pick). From 1024 wide the services sit beside it
-   (the two columns above), which leaves it room down to 800 tall. */
-@media (min-width: 40rem) and (max-width: 63.99rem) and (max-height: 820px),
-  (min-width: 64rem) and (max-height: 800px) {
-  .about-hero-intro {
-    display: none;
-  }
-}
-/* Julian: the title 25% larger where the screen is tall enough to hold it
-   with everything else; on a laptop it keeps its old size and the blocks
-   sit closer, so the name and the marks still fit. */
-@media (min-width: 40rem) and (min-height: 1000px) {
-  .about-hero .about-hero-title {
-    font-size: clamp(2.6rem, min(3.6vw, 5.2vh), 4.5rem);
-  }
-}
-@media (min-width: 40rem) and (max-height: 999px) {
-  .about-hero-bio {
-    gap: 0.9rem;
-  }
-  .about-hero-name {
-    margin-bottom: 0.9rem;
-  }
-  .about-hero-copy {
-    padding-top: 1rem;
-  }
-}
-.about-hero-copy {
-  padding-top: 1.5rem;
-}
-.about-hero-name {
-  margin-bottom: 1.4rem;
-  font-size: clamp(48px, 5vw, 104px);
-  line-height: 0.86;
-  letter-spacing: -0.045em;
-  /* Julian: the wordmark, the header's face and weight, in its own case. */
-  font-family: var(--font-display);
-  font-weight: 900;
-  text-transform: none;
-}
-/* The line is there for its size only; the warp draws over it, a little
-   larger than the line so the fit inside it (94% across) lands on the
-   same edge and the warp has room above and below. */
-.about-hero-line {
-  position: relative;
-  display: block;
-  width: fit-content;
-  white-space: nowrap;
-}
-.about-hero-ghost {
-  color: transparent;
-}
-.about-hero-warp {
-  position: absolute;
-  inset: -0.14em -3.2%;
-}
-.about-hero-facts {
-  display: flex;
-  /* Julian: the two on one line. */
-  flex-wrap: nowrap;
-  white-space: nowrap;
-  gap: 0.75rem 1.6rem;
-  /* Julian: white. */
-  color: var(--ah-ink);
-  font-size: 10px;
-}
-/* Unseen until it is fitted in its own face (`about-hero.tsx`). */
-.about-hero-name:not([data-fit]) {
-  visibility: hidden;
-}
-/* 11 on a phone, as the labels are there; 10 read small in the hand. */
-@media (max-width: 39.99rem) {
-  .about-hero-facts {
-    font-size: 11px;
-  }
-}
-.about-hero-facts[data-stack] {
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 0.4rem;
-}
-.about-hero-facts li::before {
-  content: "";
-  display: inline-block;
-  width: 6px;
-  height: 6px;
-  margin-right: 8px;
-  vertical-align: 1px;
-  background: currentColor;
-}
-/* The light theme's hero: the words' greys turned over, on the page's own
-   ground. */
-:root[data-theme="light"] .about-hero {
-  --ah-ground: var(--background);
-  --ah-shade: 235 237 239;
-  --ah-ink: #141312;
-  --ah-soft: #5f5d58;
-  --ah-dim: #7d7b75;
-  --ah-rule: #d2d2d0;
-}
-/* The foot: the name and the facts, and under them the client marks
-   along the bottom left (Julian liked them there), one tight line: the
-   label, then the marks looping inside the room the words have, so they
-   stop short of him. */
-.about-hero-base {
-  margin-top: auto;
-}
-.about-hero-clients {
-  display: flex;
-  align-items: center;
-  gap: 1.5rem;
-  max-width: var(--hero-room, 44rem);
-  margin-top: 0.6rem;
-  padding-top: 0.6rem;
-  /* Julian: the rule over them fades out by halfway across. */
-  background: linear-gradient(90deg, var(--border), transparent 50%) top left / 100% 1px no-repeat;
-}
-/* The marks on one line, looping right to left, faded in and out at the
-   ends; held while the pointer is on them, still for reduced motion. */
+/* ── About, a screen of the homepage (`about-screen.tsx`) ────────
+ * Laid out in the markup from Julian's mockup. Here only the client
+ * marks along its foot: one line, looping right to left, faded in and
+ * out at the ends; held while the pointer is on them, still for reduced
+ * motion. */
 .about-marquee {
   flex: 1;
   min-width: 0;
@@ -5362,72 +4880,42 @@ h2:not(.label) {
     animation: none;
   }
 }
-/* Julian: the loop only where the room is short. A tall screen keeps the
-   marks still, in their own row under the name at the bottom left. On
-   the light theme they stop short of his dark, so they keep looping
-   there, on one line (Julian). */
+/* Julian: the loop only where the room is short. A tall screen holds
+   the marks still, spread across the foot as in his mockup, in either
+   theme. */
 @media (min-width: 40rem) and (min-height: 1000px) {
-  .about-hero-clients {
-    gap: 2rem;
-    max-width: none;
-    margin-top: 1rem;
-    padding-top: 0.9rem;
-  }
-  :root:not([data-theme="light"]) .about-marquee {
+  .about-marquee {
     overflow: visible;
     mask-image: none;
   }
-  :root:not([data-theme="light"]) .about-marquee-track {
+  .about-marquee-track {
     width: auto;
     animation: none;
   }
-  :root:not([data-theme="light"]) .about-marquee-track > [inert] {
+  .about-marquee-track > [inert] {
     display: none;
   }
-  :root:not([data-theme="light"]) .about-marquee-list {
+  .about-marquee-track > .about-marquee-list {
+    flex: 1;
     flex-wrap: wrap;
-    justify-content: flex-start;
+    justify-content: space-between;
+    padding-right: 0;
+    /* Julian: too wide on a large screen. The spread stops growing. */
+    max-width: 64rem;
   }
 }
-@media (max-width: 39.99rem) {
-  .about-hero-base {
-    display: contents;
-  }
-  .about-hero-clients {
-    order: 4;
-    flex-direction: column;
-    align-items: stretch;
-    gap: 0.9rem;
-    max-width: none;
-    margin: 2rem 0 0;
-  }
-}
-@media (max-width: 39.99rem) {
-  .about-hero-facts {
-    flex-direction: column;
-  }
-  /* On a phone: the name, the facts, then the biography, and the screen
-     grows to hold them. */
-  .about-hero {
-    height: auto;
-  }
-  .about-hero-content {
-    position: relative;
-    padding: 1.5rem 1rem 2rem;
-  }
-  .about-hero-copy {
-    order: 2;
-    max-width: none;
-  }
-  .about-hero-bio {
-    order: 3;
-    display: flex;
-    flex-direction: column;
-    max-width: none;
-    margin-top: 1.75rem;
-  }
-  .about-hero-content::before {
-    display: none;
+
+/* Julian: About's block in the middle of its screen (his box,
+   2026-09-29). About is about 37.75rem from its title to its foot (the
+   client marks are gone), so its title sits half the screen less
+   18.875rem down. The
+   screen's own height is read as a size container. Contact's column is
+   centred against its form instead (his box again), so the two titles
+   no longer share a line. */
+@media (min-width: 40rem) {
+  [data-hash="about"] {
+    container-type: size;
+    --screen-title-y: max(6rem, 50cqh - 18.875rem);
   }
 }
 
@@ -5718,4 +5206,68 @@ h2:not(.label) {
   .liquid-pair :is([data-on], [data-was]) .liquid-drop {
     animation-duration: 1ms;
   }
+}
+
+/* Julian: the photographs either side in the image viewer, a little
+   blurred and dim until the pointer is on one (`lightbox.tsx`), turned in
+   3D: the one before faces left, the one after right, each its outer
+   edge back (Julian: the other way). Less turned under the pointer. Turned on its
+   middle and set back, so the outer edge does not swell toward the eye. */
+.lightbox-side {
+  transform: perspective(1400px) translateZ(-160px) rotateY(var(--turn));
+  transition: transform 500ms var(--ease-out-strong);
+}
+/* Julian: natural, smooth. Turned less (28deg, then 20). */
+.lightbox-side[data-side="prev"] {
+  --turn: -20deg;
+}
+.lightbox-side[data-side="next"] {
+  --turn: 20deg;
+}
+@media (hover: hover) and (pointer: fine) {
+  .lightbox-side[data-side="prev"]:hover {
+    --turn: -8deg;
+  }
+  .lightbox-side[data-side="next"]:hover {
+    --turn: 8deg;
+  }
+}
+.lightbox-peek {
+  /* Julian: lower (6px, then 2). */
+  filter: blur(1px);
+  opacity: 0.45;
+  animation: peek-in 500ms var(--ease-out-strong) 120ms backwards;
+  transition:
+    filter 300ms var(--ease-out-strong),
+    opacity 300ms var(--ease-out-strong);
+}
+@media (hover: hover) and (pointer: fine) {
+  button:hover .lightbox-peek {
+    filter: none;
+    opacity: 0.8;
+  }
+}
+@keyframes peek-in {
+  from {
+    opacity: 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .lightbox-peek,
+  .lightbox-side {
+    transition: none;
+    animation: none;
+  }
+}
+
+/* Julian: some tint over the wall behind the ask, so the ask and the
+   doors read over it. The page's own ground, so it is a darkening on the
+   dark theme and a paling on the light one; clicks go through to the
+   tiles, each of which still opens its project. */
+.enquiry-backdrop::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: color-mix(in oklab, var(--background) 45%, transparent);
 }

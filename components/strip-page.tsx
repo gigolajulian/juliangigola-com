@@ -71,6 +71,7 @@ export function RisingTitle({
         "font-display text-4xl uppercase leading-[0.95] tracking-[0] sm:text-6xl",
         className,
       )}
+      style={{ "--word-em": longestWord(text) } as React.CSSProperties}
     >
       {text.split(" ").map((word, i) => (
         <React.Fragment key={i}>
@@ -87,6 +88,13 @@ export function RisingTitle({
     </h2>
   );
 }
+
+/** The longest word's width in ems, in the display face's capitals: about
+    0.72 of an em a letter (AUTOMOTIVE measured 7.08), up to 0.754 in wide
+    letters (UKIYOSUNKNOWN), so 0.76 to be safe. The large discipline and
+    project titles are held to their cell with it (`globals.css`). */
+export const longestWord = (text: string) =>
+  Math.max(...text.split(" ").map((w) => w.length)) * 0.76;
 
 /** The opening cell of a page's strip: the title set large, with a line or
     two under it that fade up after. The running head in the page's head
@@ -206,8 +214,13 @@ export function StripHead({
             <p className="label mt-1.5 text-center text-muted-foreground">{sub}</p>
           ) : live !== undefined ? (
             /* `live={false}` keeps the line's room and leaves it empty, so
-               a head that switches it off does not move the strip. */
+               a head that switches it off does not move the strip. Keyed,
+               because the strip writes this line by hand: the head stays
+               up across a filter click, so without a new element the last
+               word written on All work stayed under the filter's title
+               (COVER ART over EVENT COVERAGE). */
             <p
+              key={live ? "live" : "still"}
               data-strip-at={live ? "" : undefined}
               className="label mt-1.5 min-h-[1lh] text-center text-muted-foreground"
             />

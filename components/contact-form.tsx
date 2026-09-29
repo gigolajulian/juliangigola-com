@@ -336,19 +336,14 @@ export function ContactForm() {
           aria-describedby={!ready ? "enquire-missing" : undefined}
           className="label action px-6 py-4 press active:scale-[0.97] aria-disabled:active:scale-100"
         >
-          {/* Julian: a thinking orb, still at rest and composing while it
-              sends, in the button's own ink; StatusMark's cross if it could
-              not. Hidden from screen readers; the button's words say it. */}
+          {/* Julian: no orb on the button. StatusMark's cross if it could
+              not send. Hidden from screen readers; the words say it. */}
           <span className="inline-flex items-center gap-2.5">
             {state.status === "error" && !pending ? (
               <span aria-hidden className="inline-flex">
                 <StatusMark status="failed" size={14} errorColor="var(--destructive)" />
               </span>
-            ) : (
-              <span className="-my-[3px] inline-flex">
-                <Orb state="composing" size={20} paused={!pending} />
-              </span>
-            )}
+            ) : null}
             {pending ? "Sending…" : "Inquire"}
           </span>
         </button>
@@ -366,6 +361,7 @@ export function ContactForm() {
           Or email{" "}
           <a
             href="mailto:hello@juliangigola.com"
+            data-ring="Email"
             className="underline decoration-border underline-offset-4 transition-colors duration-200 hoverable:hover:text-foreground"
           >
             hello@juliangigola.com

@@ -220,7 +220,7 @@ function Row({
       <Link
         href={row.href}
         prefetch={false}
-        data-ring="View project"
+        data-ring="View"
         className={LINE}
       >
         {children}
@@ -232,7 +232,7 @@ function Row({
     <button
       type="button"
       onClick={() => onOpen(n)}
-      data-ring="Open"
+      data-ring="View"
       className={LINE}
     >
       {children}

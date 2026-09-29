@@ -10,3 +10,8 @@ export { cn } from "cn";
  */
 export const rubberband = (over: number, dim: number, c = 0.55) =>
   (over * dim * c) / (dim + c * Math.abs(over));
+
+/** Sent on the window when the strip writes the section into the address
+    (`strip.tsx`), which a `replaceState` does not announce: the header
+    lights About or Contact from it on the homepage. */
+export const STRIP_SECTION = "strip:section";

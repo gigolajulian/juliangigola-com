@@ -6,6 +6,7 @@ import { flushSync } from "react-dom";
 import Image from "next/image";
 import { Dialog, VisuallyHidden } from "radix-ui";
 import { cn, rubberband } from "@/lib/utils";
+import TiltedCard from "@/components/TiltedCard";
 import type { Frame } from "@/lib/work-types";
 import {
   zoomOpen,
@@ -514,6 +515,12 @@ export function Lightbox({
               swipe={swipe}
               sharp={settled}
               onClose={() => onOpenChange(false)}
+              /* Julian: the photographs either side, at the edges. Not
+                 wrapped: the first has nothing before it. */
+              prev={frames[index - 1]}
+              next={frames[index + 1]}
+              onStep={step}
+              index={index}
             />
           ) : null}
 
@@ -773,9 +780,10 @@ function useZoom(
     pan,
     /** True while the click that follows a pan is still to come. */
     dragged: () => moved.current,
-    /* The word at the pointer says what the wheel will do next, and the
-       cursor says whether there is anything to drag. Julian asked. */
-    ring: scale > 1 ? "Scroll to zoom out" : "Scroll to zoom in",
+    /* The word at the pointer says the wheel does something here, and the
+       cursor says whether there is anything to drag. Julian asked, and
+       then for one word: VIEW, DRAG, ZOOM, SCROLL. */
+    ring: "Scroll",
     style: {
       transform: `translate(${at.x}px, ${at.y}px) scale(${scale})`,
       transition: held ? "none" : "transform 180ms var(--ease-out-strong)",
@@ -790,6 +798,10 @@ function Stage({
   swipe,
   sharp,
   onClose,
+  prev,
+  next,
+  onStep,
+  index,
 }: {
   frame: Frame;
   alt: string;
@@ -798,7 +810,35 @@ function Stage({
   /** Whether the full-size copy may be put on the stage. */
   sharp: boolean;
   onClose: () => void;
+  /** The frames before and after, shown at the edges; absent at the ends. */
+  prev?: Frame;
+  next?: Frame;
+  onStep: (delta: number) => void;
+  /** Where the frame is in the sequence: which way a step went. */
+  index: number;
 }) {
+  /* Julian: a 3D card transition on a step. The new frame swings in from
+     the side it was waiting at, turned as it was there (`.lightbox-side`),
+     and lands flat. Not on the first frame: the trip brings that one. */
+  const swung = React.useRef(index);
+  React.useEffect(() => {
+    const dir = Math.sign(index - swung.current);
+    swung.current = index;
+    const box = area.current?.querySelector<HTMLElement>("[data-zoom-box]");
+    if (!box || !dir || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    box.animate(
+      [
+        {
+          /* Julian: natural and smooth. From about where the side
+             photograph waited, turned as it was, easing out long. */
+          transform: `perspective(1400px) translateX(${dir * 40}%) rotateY(${dir * 20}deg) scale(0.88)`,
+          opacity: 0.5,
+        },
+        { transform: "none", opacity: 1 },
+      ],
+      { duration: 650, easing: "cubic-bezier(0.22, 1, 0.36, 1)" },
+    );
+  }, [index]);
   /* Which full-size copy has painted. By source, so a step to the next
      frame starts from the fitted picture again until its own arrives. */
   const [sharpDone, setSharpDone] = React.useState<string | null>(null);
@@ -910,6 +950,65 @@ function Stage({
           </div>
         </div>
       </div>
+      {/* Julian: the photograph before and the one after, at the picture's
+          height, 24px off its edges and running off the window, blurred
+          until the pointer is on one, which then says PREV or NEXT and
+          steps there on a click. Julian: turned in 3D toward the picture,
+          and tilting to the pointer as the Selected work tiles do. Not while zoomed, and not on a phone,
+          where a swipe does it. Out of the tab order: the arrows below
+          are the controls for that. They fade in on their own
+          (`.lightbox-peek`), since one can arrive after a step. */}
+      {size && zoom.scale === 1
+        ? ([[-1, prev, "Prev"], [1, next, "Next"]] as const).map(([d, f, word]) =>
+            f ? (
+              <button
+                key={word}
+                type="button"
+                tabIndex={-1}
+                aria-label={d < 0 ? "Previous frame" : "Next frame"}
+                data-ring={word}
+                data-side={d < 0 ? "prev" : "next"}
+                onClick={() => onStep(d)}
+                className="lightbox-side absolute top-1/2 z-10 -translate-y-1/2 max-sm:hidden"
+                /* Julian: kept inside the window. At the picture's
+                   height where the room either side allows, narrower
+                   (and so shorter) where it does not, and gone where
+                   there is none. */
+                style={{
+                  width: Math.round((size.h * f.width) / f.height),
+                  maxWidth: `max(0px, calc(50% - ${size.w / 2 + 24}px - 2.5rem))`,
+                  aspectRatio: `${f.width} / ${f.height}`,
+                  [d < 0 ? "right" : "left"]: `calc(50% + ${size.w / 2 + 24}px)`,
+                }}
+              >
+                <TiltedCard
+                  imageSrc={f.src}
+                  altText=""
+                  containerHeight="100%"
+                  imageHeight="100%"
+                  imageWidth="100%"
+                  scaleOnHover={1.04}
+                  showMobileWarning={false}
+                  showTooltip={false}
+                >
+                  {/* Keyed, so a step fades the new neighbour in. */}
+                  <span key={f.src} className="lightbox-peek block h-full w-full overflow-hidden">
+                    <Image
+                      src={f.src}
+                      alt=""
+                      aria-hidden
+                      width={f.width}
+                      height={f.height}
+                      sizes="50vw"
+                      draggable={false}
+                      className="block h-full w-full object-cover"
+                    />
+                  </span>
+                </TiltedCard>
+              </button>
+            ) : null,
+          )
+        : null}
     </div>
   );
 }

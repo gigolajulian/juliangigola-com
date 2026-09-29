@@ -782,7 +782,7 @@ const ColourTile = React.memo(function ColourTile({ item }: { item: Item }) {
     <Link
       href={p.href}
       prefetch={false}
-      data-ring="View project"
+      data-ring="View"
       className="block"
     >
       <span className="relative isolate block">

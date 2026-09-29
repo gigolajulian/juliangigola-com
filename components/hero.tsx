@@ -133,7 +133,7 @@ function Ways({
         See the work
       </Link>
       <Link
-        href="/sessions"
+        href="/#sessions"
         className="label action-quiet px-7 py-5 press active:scale-[0.97] max-sm:px-4 short:px-6 short:py-3.5"
       >
         Book a session
