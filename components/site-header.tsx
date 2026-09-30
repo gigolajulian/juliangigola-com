@@ -86,9 +86,14 @@ export function SiteHeader() {
       const rail = document.querySelector<HTMLElement>(".strip-rail");
       if (!foot || !rail) return;
       root.dataset.under = "";
+      /* Only on a change: a property on the root restyles the whole page,
+         and the observer reports every load's font swap as a resize. */
+      const put = (k: string, v: string) => {
+        if (root.style.getPropertyValue(k) !== v) root.style.setProperty(k, v);
+      };
       const measure = () => {
-        root.style.setProperty("--foot", `${foot.offsetHeight}px`);
-        root.style.setProperty("--under", `${foot.offsetHeight + rail.offsetHeight}px`);
+        put("--foot", `${foot.offsetHeight}px`);
+        put("--under", `${foot.offsetHeight + rail.offsetHeight}px`);
       };
       sizes = new ResizeObserver(measure);
       sizes.observe(foot);

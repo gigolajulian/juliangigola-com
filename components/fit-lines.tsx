@@ -31,16 +31,25 @@ export function FitLines() {
         l.style.paddingLeft = "";
       });
 
+    /* Writes, then one read, then writes: measuring line by line forced a
+       layout of the whole cover per line, several times a load (mount, the
+       fonts, the name's first size), ~190ms on a throttled phone. */
     const fit = () => {
-      clear();
-      if (!phone.matches) return;
+      if (!phone.matches) return clear();
+      const size = getComputedStyle(name).fontSize;
       /* The words of the name, unseen, in its face and size. */
       const probe = document.createElement("span");
       probe.textContent = "Julian Gigola";
       probe.style.cssText =
         `position:absolute;visibility:hidden;white-space:nowrap;font-family:var(--font-display);font-weight:900;` +
-        `letter-spacing:-0.045em;font-size:${getComputedStyle(name).fontSize}`;
+        `letter-spacing:-0.045em;font-size:${size}`;
       middle.appendChild(probe);
+      const all = lines();
+      all.forEach((l) => {
+        l.style.letterSpacing = "0";
+        l.style.fontSize = "";
+        l.style.paddingLeft = "";
+      });
       /* No wider than the name as drawn: its canvas fits itself to the
          screen, and the words set at full size ran 421px on a 390px
          phone, both lines off both edges. */
@@ -48,15 +57,18 @@ export function FitLines() {
         probe.getBoundingClientRect().width,
         name.getBoundingClientRect().width,
       );
+      const read = all.map((l) => ({
+        w: l.getBoundingClientRect().width,
+        n: [...(l.textContent ?? "")].length,
+        size: parseFloat(getComputedStyle(l).fontSize),
+      }));
       probe.remove();
-      for (const l of lines()) {
-        l.style.letterSpacing = "0";
-        const w = l.getBoundingClientRect().width;
-        const n = [...(l.textContent ?? "")].length;
-        if (!w || n < 2) continue;
+      all.forEach((l, i) => {
+        const { w, n, size } = read[i];
+        if (!w || n < 2) return;
         if (w > target) {
           // Too long at its size: smaller, not squeezed.
-          l.style.fontSize = `${parseFloat(getComputedStyle(l).fontSize) * (target / w)}px`;
+          l.style.fontSize = `${size * (target / w)}px`;
         } else {
           const ls = (target - w) / (n - 1);
           l.style.letterSpacing = `${ls}px`;
@@ -64,20 +76,27 @@ export function FitLines() {
           // so the words sit on the name's centre.
           l.style.paddingLeft = `${ls}px`;
         }
-      }
+      });
+    };
+    // Once a frame, however many of the triggers below arrive in it.
+    let frame = 0;
+    const soon = () => {
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(fit);
     };
 
     fit();
-    void document.fonts.ready.then(fit);
-    const sizes = new ResizeObserver(fit);
+    void document.fonts.ready.then(soon);
+    const sizes = new ResizeObserver(soon);
     sizes.observe(name);
-    phone.addEventListener("change", fit);
+    phone.addEventListener("change", soon);
     // The arrange tool sizing the lines (`hero-dials.tsx`).
-    window.addEventListener("jg-fit", fit);
+    window.addEventListener("jg-fit", soon);
     return () => {
+      cancelAnimationFrame(frame);
       sizes.disconnect();
-      phone.removeEventListener("change", fit);
-      window.removeEventListener("jg-fit", fit);
+      phone.removeEventListener("change", soon);
+      window.removeEventListener("jg-fit", soon);
       clear();
     };
   }, []);

@@ -298,7 +298,7 @@ export function WorkShell({
      share of it, never taller than a row allows. A snap brings a swipe to
      rest on a column. Worked out here because it needs a width divided by
      a length, which CSS cannot yet do everywhere; `--rack-w` in
-     `globals.css` is where it lands. */
+     `globals.css` is where it lands, and `data-rack` says it is set. */
   React.useEffect(() => {
     if (view !== "grid") return;
     const shelf = rowBox.current?.querySelector<HTMLElement>(".strip-grid");
@@ -308,6 +308,7 @@ export function WorkShell({
       if (!mq.matches) {
         shelf.style.removeProperty("--rack-w");
         shelf.style.removeProperty("--rack-pad");
+        delete shelf.dataset.rack;
         return;
       }
       const cs = getComputedStyle(shelf);
@@ -323,6 +324,7 @@ export function WorkShell({
       const n = Math.max(1, Math.ceil((room + gap) / (most + gap) - 0.001));
       const w = Math.floor((room - (n - 1) * gap) / n);
       shelf.style.setProperty("--rack-w", `${w}px`);
+      shelf.dataset.rack = "";
       /* The rows are as tall as the covers now, not as the shelf: the room
          a narrower cover leaves goes above and below the rack rather than
          between its two rows. */
@@ -339,6 +341,7 @@ export function WorkShell({
       ro.disconnect();
       mq.removeEventListener("change", fit);
       shelf.style.removeProperty("--rack-w");
+      delete shelf.dataset.rack;
     };
   }, [view]);
   const stripView: StripViewMode = view === "grid" ? "grid" : "strip";

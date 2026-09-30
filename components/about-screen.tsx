@@ -72,7 +72,7 @@ export function AboutScreen() {
           the strip yielding the wheel to it (as the contact form does). */}
       <div
         data-scroll
-        className="grid min-h-0 flex-1 grid-cols-1 gap-12 px-6 pb-10 pt-12 sm:overflow-y-auto sm:overscroll-contain sm:px-10 sm:content-start sm:pb-6 sm:pt-[var(--screen-title-y)] lg:grid-cols-[minmax(0,1.2fr)_minmax(0,0.66fr)_minmax(0,1fr)] lg:gap-x-16"
+        className="grid min-h-0 flex-1 grid-cols-1 gap-12 px-6 pb-10 pt-12 sm:overflow-y-auto sm:overscroll-contain sm:px-10 sm:content-start sm:pb-6 sm:pt-[var(--screen-title-y)] md:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)] md:gap-x-12 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,0.66fr)_minmax(0,1fr)] lg:gap-x-16"
       >
         <div className="flex flex-col">
           <RisingTitle
@@ -156,11 +156,11 @@ export function AboutScreen() {
                 key={phase.step}
                 className="grid flex-1 grid-cols-[3.25rem_minmax(0,1fr)] gap-x-5 border-t border-border py-5 sm:grid-cols-[4rem_minmax(0,1fr)] sm:py-[clamp(0.75rem,2vh,1.25rem)]"
               >
-                <span className="font-display text-3xl leading-none tabular-nums text-muted-foreground/60 sm:text-[clamp(1.75rem,3.6vh,2.6rem)]">
+                <span className="font-display text-3xl leading-none tabular-nums text-muted-foreground/60 sm:text-[clamp(1.75rem,min(3.6vh,3.4vw),2.6rem)]">
                   {String(i + 1).padStart(2, "0")}
                 </span>
                 <div>
-                  <h3 className="font-display text-3xl uppercase leading-none sm:text-[clamp(1.75rem,3.6vh,2.6rem)]">
+                  <h3 className="font-display text-3xl uppercase leading-none sm:text-[clamp(1.75rem,min(3.6vh,3.4vw),2.6rem)]">
                     {phase.step}
                   </h3>
                   <p className="label mt-3 max-w-[48ch] text-left sm:mt-[clamp(0.5rem,1.2vh,0.75rem)] leading-relaxed text-muted-foreground">

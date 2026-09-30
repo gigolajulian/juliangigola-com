@@ -12,10 +12,9 @@ import { useLatest, useSpace } from "@/components/hero-dials";
  * far frames move apart. Once they have landed they stay where they are,
  * as on basis, his reference; the orbit he tried after them is gone.
  *
- * On a phone or an iPad there is no pointer, so the space follows the
- * device's tilt instead (Julian's pick over a finger drag or a drift).
- * iOS only hands out the orientation after asking, and only asks from a
- * tap, so there it starts at the visitor's first touch of the page.
+ * On a phone or an iPad there is no pointer and the space holds still.
+ * It followed the device's tilt there, until Julian took the gyroscope
+ * off the homepage (2026-09-29).
  */
 export function CoverSpace({
   children,
@@ -78,46 +77,6 @@ export function CoverSpace({
         cancelAnimationFrame(raf);
       };
     }
-
-    /* The tilt. 25 degrees either way is the full turn. Forward and back
-       is measured from however the device is being held, and that rest
-       point follows slowly, so lying on a sofa is as level as sitting up. */
-    if (typeof DeviceOrientationEvent === "undefined") return;
-    const TILT = 25;
-    let rest: number | null = null;
-    const orient = (e: DeviceOrientationEvent) => {
-      if (e.beta === null || e.gamma === null) return;
-      const angle = screen.orientation?.angle ?? 0;
-      const [side, fore] =
-        angle === 90
-          ? [e.beta, -e.gamma]
-          : angle === 270 || angle === -90
-            ? [-e.beta, e.gamma]
-            : angle === 180
-              ? [-e.gamma, -e.beta]
-              : [e.gamma, e.beta];
-      rest = rest === null ? fore : rest + (fore - rest) * 0.01;
-      aim(side / TILT, (fore - rest) / TILT);
-    };
-    const listen = () =>
-      addEventListener("deviceorientation", orient, { passive: true });
-    const ios = DeviceOrientationEvent as unknown as {
-      requestPermission?: () => Promise<string>;
-    };
-    const ask = () =>
-      ios.requestPermission?.()
-        .then((state) => state === "granted" && listen())
-        .catch(() => {});
-    if (typeof ios.requestPermission === "function") {
-      addEventListener("click", ask, { once: true });
-    } else {
-      listen();
-    }
-    return () => {
-      removeEventListener("click", ask);
-      removeEventListener("deviceorientation", orient);
-      cancelAnimationFrame(raf);
-    };
   }, [space]);
   return (
     <div ref={ref} aria-hidden className={className}>

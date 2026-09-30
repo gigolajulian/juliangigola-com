@@ -23,6 +23,20 @@ export function LiquidPair({
   /** The ink of the buttons: `--hero-ink` over the homepage's photographs. */
   fill?: string;
 }) {
+  /* Only under a mouse. The ink runs on a pointer's hover, which a finger
+     never makes, and the liquid measured every button every frame to
+     follow it: scrolling a phone, that was a forced layout a frame, about
+     a second of the main thread in a short scroll (Julian: the motion
+     seamless on iPhone and iPad). A finger gets the plain buttons, the
+     same at rest. Plain on the server too, so the markup agrees. */
+  const mouse = React.useSyncExternalStore(subscribeMouse, isMouse, () => false);
+  if (!mouse) {
+    return (
+      <div {...rest} className={className}>
+        {children}
+      </div>
+    );
+  }
   /* Quiet by its class, not its place: on Sessions the first button is
      only there when there is a booking link. */
   const quiet = (child: React.ReactNode) =>
@@ -48,6 +62,14 @@ export function LiquidPair({
     </Liquid>
   );
 }
+
+const MOUSE = "(hover: hover) and (pointer: fine)";
+const isMouse = () => matchMedia(MOUSE).matches;
+const subscribeMouse = (fn: () => void) => {
+  const m = matchMedia(MOUSE);
+  m.addEventListener("change", fn);
+  return () => m.removeEventListener("change", fn);
+};
 
 function Quiet({ children }: { children: React.ReactNode }) {
   const [on, setOn] = React.useState(false);

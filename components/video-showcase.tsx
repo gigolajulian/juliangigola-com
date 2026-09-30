@@ -194,6 +194,15 @@ function ReelBackdrop({
   }, [scroller, rack]);
 
   const wide = useWide();
+  /* The server draws the wide page, so the iframe was in every phone's
+     first HTML and Vimeo's player loaded and ran there (~750ms of script
+     at a 4x throttle) before hydration took it out. Only in the browser,
+     where `wide` is the real answer. */
+  const client = React.useSyncExternalStore(
+    noop,
+    () => true,
+    () => false,
+  );
 
   /* Not on a phone at all. Julian asked for it gone there: it is a
      Vimeo player streaming a film behind a page nobody came to watch a
@@ -207,19 +216,23 @@ function ReelBackdrop({
       aria-hidden
       className="reel-backdrop pointer-events-none fixed inset-0 -z-10 overflow-hidden"
     >
-      <iframe
-        // From three seconds in, past the slate. Julian asked.
-        src={`https://player.vimeo.com/video/${REEL.videoId}?background=1&autoplay=1&loop=1&muted=1&dnt=1#t=3s`}
-        title={REEL.title}
-        allow="autoplay; encrypted-media"
-        tabIndex={-1}
-        className="reel-backdrop-frame absolute left-1/2 top-1/2"
-      />
+      {client ? (
+        <iframe
+          // From three seconds in, past the slate. Julian asked.
+          src={`https://player.vimeo.com/video/${REEL.videoId}?background=1&autoplay=1&loop=1&muted=1&dnt=1#t=3s`}
+          title={REEL.title}
+          allow="autoplay; encrypted-media"
+          tabIndex={-1}
+          className="reel-backdrop-frame absolute left-1/2 top-1/2"
+        />
+      ) : null}
       <div className="reel-veil absolute inset-0" />
       <ReelTheme />
     </div>
   );
 }
+
+const noop = () => () => {};
 
 /* While the film is behind the page the light theme is not paper. The
    attribute on the root turns it to the dark palette (globals.css), so

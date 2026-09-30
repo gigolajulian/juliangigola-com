@@ -1814,17 +1814,33 @@ a.strip-cell {
    leaves above and below, so each row is exactly a cover tall. A title
    column takes the same width, so the columns stay on one beat, and a
    snap brings a swipe to rest on one. A gallery's frames keep their own
-   shape from the row height, as everywhere else. */
-.strip-grid[style*="--rack-w"] {
+   shape from the row height, as everywhere else.
+
+   Keyed off `data-rack`, never `[style*="--rack-w"]`: a style attribute
+   in front of a combinator made Chrome restyle the whole subtree of any
+   element whose inline style changed, anywhere on any page — 22ms on
+   /portfolio per write, and every slide, tilt and view transition writes
+   one. Measured 2026-09-29. */
+.strip-grid[data-rack] {
   padding-block: var(--rack-pad);
   scroll-snap-type: x proximity;
   scroll-padding-inline: 2.5rem;
 }
-.strip-grid[style*="--rack-w"] > * {
+.strip-grid[data-rack] > * {
   scroll-snap-align: start;
 }
-.strip-grid[style*="--rack-w"] > a:not([style*="--ar"]),
-.strip-grid[style*="--rack-w"]
+/* A cover off screen is not styled, laid out or painted until it comes
+   near. The index has about a hundred, and arriving at it did all of them
+   before the zoom could start: the longest freeze on an iPad went from
+   ~360ms to ~230ms (4x throttle, 2026-09-29). A cover is clipped already
+   and sized by the strip, never by its contents, so nothing moves:
+   measured on every page at desktop, iPad both ways and iPhone. */
+.strip-scroll > a.strip-cell {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 300px auto 400px;
+}
+.strip-grid[data-rack] > a:not([style*="--ar"]),
+.strip-grid[data-rack]
   > :where(div, section, article):not([data-hash="inquire"]) {
   width: var(--rack-w) !important;
 }
@@ -2617,11 +2633,20 @@ a.strip-cell {
     height: auto;
   }
   .disc {
-    --per: round(up, calc(var(--n) / 2), 1);
+    --rows: 2;
+    --per: round(up, calc(var(--n) / var(--rows)), 1);
     --tw: min(
-      calc((100cqh - var(--g)) / 2 * 0.8),
+      calc((100cqh - (var(--rows) - 1) * var(--g)) / var(--rows) * 0.8),
       calc((100cqw - (var(--per) - 1) * var(--g)) / var(--per))
     );
+  }
+  /* An upright tablet: three rows of three (the last of two), which
+     fills the tall screen where four across left the tiles small in the
+     middle of it. */
+  @media (orientation: portrait) {
+    .disc {
+      --rows: 3;
+    }
   }
   /* As wide as a row, so the rest wraps under it, centred. */
   .disc-inner {
@@ -4926,6 +4951,13 @@ h2:not(.label) {
   [data-hash="about"] {
     container-type: size;
     --screen-title-y: max(6rem, 50cqh - 18.875rem);
+  }
+}
+/* Under a finger the bar is 52px, not 76: a tablet sideways (1080 by 810)
+   ran About's buttons off its foot with the laptop's 6rem above. */
+@media (min-width: 40rem) and (pointer: coarse) {
+  [data-hash="about"] {
+    --screen-title-y: max(4.5rem, 50cqh - 18.875rem);
   }
 }
 
