@@ -6,12 +6,11 @@ import { CoverCell } from "@/components/cover-cell";
 import { ProjectStrip } from "@/components/project-strip";
 import { CoverArtGallery } from "@/components/cover-art-gallery";
 import {
-  WORK_CATEGORIES,
+  LISTINGS,
   WORK_CATEGORY_LINKS,
   COMMISSIONS,
   COVER_ART,
   projectsIn,
-  categoryHref,
   categoryLabel,
   indexRow,
   isDisciplineGallery,
@@ -32,10 +31,13 @@ import { COVER_RELEASES } from "@/lib/cover-art-data";
  * director can be sent directly: "here is the editorial work" is a link,
  * not an instruction.
  *
- * A static segment, `/portfolio/category/…`, rather than sharing `/portfolio/[slug]`
- * with the projects: five categories are published under the same slug as a
- * project (COVERART, WEDDINGS), and one route serving both would have to pick
- * a winner and silently shadow the loser.
+ * Its own folder rather than a share of `/portfolio/[slug]` with the projects,
+ * but served at `/portfolio/<slug>` all the same (Julian, 2026-09-29: the
+ * disciplines sit beside the projects, not under /portfolio/category/): a
+ * rewrite in `next.config.ts` sends each listing's address here. Where a
+ * discipline shares its slug with its one gallery (Automotive, Events,
+ * Places) the rewrite answers first and this view, the same frames under
+ * the filters, is the page.
  *
  * The head and the chip row are the `(index)` layout's; this is the strip
  * under them, one discipline's chapter of the whole. Past its last cover
@@ -52,9 +54,7 @@ import { COVER_RELEASES } from "@/lib/cover-art-data";
  * project list would be, which is what Julian asked for. Click Automotive
  * and the cars load right there.
  */
-const LISTED = WORK_CATEGORIES.filter(
-  (c) => categoryHref(c.slug) === `/portfolio/category/${c.slug}`,
-);
+const LISTED = LISTINGS;
 
 /** The discipline after this one along the chip row. The chain runs once
     and does not wrap, and past the last one there is nothing: the archive
@@ -84,7 +84,7 @@ export function generateStaticParams() {
 }
 
 export async function generateMetadata(
-  props: PageProps<"/portfolio/category/[slug]">,
+  props: PageProps<"/portfolio/discipline/[slug]">,
 ): Promise<Metadata> {
   const { slug } = await props.params;
   const category = LISTED.find((c) => c.slug === slug);
@@ -99,7 +99,7 @@ export async function generateMetadata(
     description: gallery
       ? `${count} ${name.toLowerCase()} frames by Julian Gigola.`
       : `${name}: ${count} ${count === 1 ? "project" : "projects"} by Julian Gigola, with clients and credits.`,
-    alternates: { canonical: `/portfolio/category/${slug}` },
+    alternates: { canonical: `/portfolio/${slug}` },
   };
 }
 
@@ -133,7 +133,7 @@ const framesList = (frames: Frame[], name: string): ListRow[] =>
   });
 
 export default async function CategoryPage(
-  props: PageProps<"/portfolio/category/[slug]">,
+  props: PageProps<"/portfolio/discipline/[slug]">,
 ) {
   const { slug } = await props.params;
   const category = LISTED.find((c) => c.slug === slug);

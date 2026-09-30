@@ -167,7 +167,7 @@ export function WorkShell({
   }, [passes]);
 
   const segments = useSelectedLayoutSegments();
-  // [] on /work, ["category", slug] on a discipline, ["video"] on the films.
+  // [] on /portfolio, ["discipline", slug] on a discipline, ["video"] on the films.
   const key = segments[1] ?? segments[0] ?? "all";
   const head = heads[key] ?? heads.all;
   const all = key === "all";

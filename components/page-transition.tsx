@@ -3,6 +3,7 @@
 import * as React from "react";
 import { ViewTransition } from "react";
 import { usePathname } from "next/navigation";
+import { filterPaths } from "@/lib/utils";
 
 /* ── one page becomes the next by zooming ─────────────────────────
  * Julian asked for it: opening a page should read as zooming into it, and
@@ -106,11 +107,8 @@ export function PageTransition({ children }: { children: React.ReactNode }) {
          category and the motion page are one page with one row swapped,
          and the strip already fades the row (`data-arrive="fade"`). The
          zoom on top of it read as the whole site reloading. */
-      const index = (path: string) =>
-        path === "/portfolio" ||
-        path === "/portfolio/video" ||
-        path.startsWith("/portfolio/category/");
-      if (index(a.pathname) && index(location.pathname)) {
+      const index = filterPaths();
+      if (index.has(a.pathname) && index.has(location.pathname)) {
         set("filter");
         return;
       }

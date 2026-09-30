@@ -15,3 +15,16 @@ export const rubberband = (over: number, dim: number, c = 0.55) =>
     (`strip.tsx`), which a `replaceState` does not announce: the header
     lights About or Contact from it on the homepage. */
 export const STRIP_SECTION = "strip:section";
+
+/* The addresses that are the work index with its row swapped (All, each
+   discipline, Motion) rather than pages of their own. A discipline and a
+   project are both /portfolio/<slug> (Julian, 2026-09-29), so the address
+   cannot tell them apart; the filter drawer, mounted on every /portfolio
+   page, marks its links that are filters (`work-filter.tsx`). */
+export const filterPaths = (): Set<string> =>
+  new Set(
+    Array.from(
+      document.querySelectorAll<HTMLAnchorElement>("#work-filter a[data-filter]"),
+      (a) => a.pathname,
+    ),
+  );

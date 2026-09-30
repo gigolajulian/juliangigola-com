@@ -5,7 +5,7 @@ import { initOpenNextCloudflareForDev } from "@opennextjs/cloudflare";
 // filtered out. Redirecting from a legacy URL to a page that is no longer
 // built sends a visitor 308 → 404, which is worse than the plain 404 they
 // would have got, because it looks like the site meant to take them there.
-import { LINKABLE, CATEGORIES, categoryHref } from "./lib/work";
+import { LINKABLE, CATEGORIES, LISTINGS, categoryHref } from "./lib/work";
 
 /**
  * The old site published every project at the site root — `/wired-magazine`,
@@ -65,17 +65,19 @@ const categoryRedirects = CATEGORIES.map((c) => ({
  * one folder deeper than a project.
  */
 const workRedirects = [
-  // Cover art opens as its project page now (`categoryHref`).
+  // Julian (2026-09-29): the disciplines moved up beside the projects, so
+  // /portfolio/category/editorial is /portfolio/editorial (and cover art
+  // its project page) from here on.
   {
-    source: "/portfolio/category/coverart",
-    destination: "/portfolio/coverart",
+    source: "/portfolio/category/:slug([a-z0-9-]+)",
+    destination: "/portfolio/:slug",
     permanent: true,
   },
   { source: "/work", destination: "/portfolio", permanent: true },
   { source: "/work/video", destination: "/portfolio/video", permanent: true },
   {
     source: "/work/category/:slug([a-z0-9-]+)",
-    destination: "/portfolio/category/:slug",
+    destination: "/portfolio/:slug",
     permanent: true,
   },
   {
@@ -309,6 +311,18 @@ const nextConfig: NextConfig = {
        neither. */
     if (process.env.NODE_ENV === "development") return [];
     return [{ source: "/:path*", headers: securityHeaders }];
+  },
+
+  /* A discipline's address is /portfolio/<slug>, beside the projects; its
+     page is the `discipline` route under the work index's layout. After
+     the files and before the dynamic routes, so it answers ahead of
+     `/portfolio/[slug]` where a discipline and its one gallery share a
+     slug (Automotive, Events, Places). */
+  async rewrites() {
+    return LISTINGS.map((c) => ({
+      source: `/portfolio/${c.slug}`,
+      destination: `/portfolio/discipline/${c.slug}`,
+    }));
   },
 
   async redirects() {

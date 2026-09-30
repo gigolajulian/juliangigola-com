@@ -3,7 +3,7 @@
 import { runDeck, type Deck } from "@/lib/deck";
 import * as React from "react";
 import { useRouter } from "next/navigation";
-import { cn, rubberband, STRIP_SECTION } from "@/lib/utils";
+import { cn, filterPaths, rubberband, STRIP_SECTION } from "@/lib/utils";
 import { flyCovers } from "@/lib/work-view";
 import { Liquid } from "liquid-gooey";
 
@@ -1768,10 +1768,6 @@ export function Strip({
     let paused = false;
     /* Two filters of the work index are one page with the row swapped, not
        two pages. */
-    const filterPath = (path: string) =>
-      path === "/portfolio" ||
-      path === "/portfolio/video" ||
-      path.startsWith("/portfolio/category/");
 
     const leave = (dir: 1 | -1) => {
       const href = dir > 0 ? nextHref : prevHref;
@@ -1821,7 +1817,8 @@ export function Strip({
          row do not change, so there is nothing to leave: the row is
          swapped where it stands, the way a chip press does it, and the
          push goes out at once. */
-      if (filterPath(window.location.pathname) && filterPath(href)) {
+      const index = filterPaths();
+      if (index.has(window.location.pathname) && index.has(href)) {
         markFilter(dir);
         cameBack = dir < 0 && !prevStart;
         arriveDir = dir;

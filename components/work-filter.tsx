@@ -33,6 +33,14 @@ export function WorkFilter({
   heads: Record<string, Head>;
 }) {
   const pathname = usePathname();
+  /* A discipline is served by a rewrite (`next.config.ts`), and its page
+     is prerendered under the path it is rewritten to, while the browser's
+     `usePathname` already has the address the chips link to; React keeps
+     the server's attributes through that mismatch. So no row is current
+     until mounted, then the address bar decides (the drawer is shut by
+     then, nobody sees it). */
+  const [here, setHere] = React.useState<string | null>(null);
+  React.useEffect(() => setHere(window.location.pathname), [pathname]);
 
   // Every page in the site mounts the root layout, and eleven of them have
   // nothing to filter. The work index, its disciplines and the video page
@@ -40,11 +48,11 @@ export function WorkFilter({
   if (!pathname.startsWith("/portfolio")) return null;
 
   const rows = [
-    { slug: "all", name: "Portfolio", href: "/portfolio" },
+    { slug: "all", name: "Portfolio", href: "/portfolio", filter: true },
     ...categories,
   ];
-  const isCurrent = (href: string) =>
-    href === "/portfolio" ? pathname === "/portfolio" : pathname.startsWith(href);
+  // Exact: a discipline and a project are both /portfolio/<slug> now.
+  const isCurrent = (href: string) => here === href;
 
   return (
     <div
@@ -79,6 +87,9 @@ export function WorkFilter({
                   <Link
                     href={row.href}
                     prefetch={false}
+                    /* Marks the pages that are the work index with its row
+                       swapped (`filterPaths`, `lib/utils.ts`). */
+                    data-filter={row.filter ? "" : undefined}
                     // The door starts shutting on the press, not when the new
                     // route commits. Measured: the route landed 300ms after the
                     // tap, so the drawer was still travelling its last 33px when

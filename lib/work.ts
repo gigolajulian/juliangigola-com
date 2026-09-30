@@ -612,6 +612,11 @@ const HAS_VIDEOS = CONTENT.videos.length > 0;
  * nothing. And a category with no work yet has no page to point at, so it
  * falls back to the full index instead of a route that does not exist.
  */
+/** Whether a discipline gets a listing page: not Video (its page is the
+    films) or Cover art (its project page), and not one with no work yet. */
+const isListing = (slug: string): boolean =>
+  slug !== "video" && slug !== "coverart" && projectsIn(slug).length > 0;
+
 export const categoryHref = (categorySlug: string): string => {
   // Video's page is the work rather than a listing of it, like `/portfolio/coverart`
   // — and unlike every other discipline, what fills it is not in the archive.
@@ -620,17 +625,27 @@ export const categoryHref = (categorySlug: string): string => {
   // Julian (2026-09-29): cover art in the projects, at its own project page.
   if (categorySlug === "coverart") return "/portfolio/coverart";
 
-  const inCategory = projectsIn(categorySlug);
-  if (inCategory.length === 0) return "/portfolio";
+  if (!isListing(categorySlug)) return "/portfolio";
   /* A one-gallery discipline used to go to its project page instead —
      `/portfolio/coverart` — which took a visitor who had just clicked a chip on
      the index off to a different page with a different shape. Julian asked
      for the gallery to open under the filters instead, so it goes through
      the category route like every other chip; that page renders the frames
      where the listing would be. `/portfolio/coverart` still resolves for
-     anything already linked to it. */
-  return `/portfolio/category/${categorySlug}`;
+     anything already linked to it.
+
+     Julian (2026-09-29): straight under /portfolio, like the projects, not
+     under /portfolio/category/. The page is `app/portfolio/(index)/
+     discipline/[slug]`, reached by a rewrite in `next.config.ts`; the old
+     addresses redirect here. Automotive, Events and Places share their
+     slug with their one gallery, and the discipline view (the same frames
+     under the filters) is what answers there. */
+  return `/portfolio/${categorySlug}`;
 };
+
+/** The disciplines with a listing page of their own, at `/portfolio/<slug>`:
+    the category route's pages, its rewrites and its sitemap entries. */
+export const LISTINGS: Category[] = WORK_CATEGORIES.filter((c) => isListing(c.slug));
 
 /** The pages a strip leads on to once its own sequence has run out: the
     site's order, in the shape the strip takes (`Lead` in `strip.tsx`). */
@@ -639,7 +654,15 @@ export const SESSIONS_PAGE = { href: "/#sessions", name: "Sessions" };
 export const CONTACT = { href: "/#contact", name: "Contact" };
 
 /** A category as the index renders it: name plus where it goes. */
-export type CategoryLink = { slug: string; name: string; href: string };
+export type CategoryLink = {
+  slug: string;
+  name: string;
+  href: string;
+  /** Opens on the work index (the filters stay, the strip swaps), rather
+      than on a page of its own; the client tells the two apart by this now
+      that both live at /portfolio/<slug>. */
+  filter: boolean;
+};
 
 /**
  * The category row on the work index, resolved.
@@ -679,6 +702,7 @@ export const WORK_CATEGORY_LINKS: CategoryLink[] = WORK_CATEGORIES.filter(
     // `label` class puts the caps back.
     name: categoryLabel(c),
     href: categoryHref(c.slug),
+    filter: c.slug === "video" || isListing(c.slug),
   }))
   /* The row in Julian's order. The manifest's order is the old site's nav
      and a discipline added since lands at the end of it, which is no order
