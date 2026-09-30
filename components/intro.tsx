@@ -144,18 +144,18 @@ export function Intro() {
 
     const lids = () => eye.current?.querySelector("[data-lids]");
     const wait = (ms: number) => new Promise((r) => setTimeout(r, ms));
-    /* Julian: the eye blinks right before the lift, sometimes once and
-       sometimes twice (a coin toss for a second blink a beat after the
-       first, the way an eye does it). Resolves when it has finished, so
-       the lift goes the moment the eye opens again. */
+    /* Julian: two blinks, spread out, not back to back. The first before
+       the sweep's edge reaches the eye, played by the stylesheet
+       (`jg-intro-blink`, timed in `layout.tsx`); the second here, once it
+       is full and a random beat later, then the lift. Full is 1.6s in at
+       the soonest, so the two are always more than a second apart.
+       Resolves when the eye has opened again. */
     const blinks = async () => {
       const l = lids();
       if (!l) return;
+      await wait(150 + Math.random() * 350);
       await blink(l).finished.catch(() => {});
-      if (Math.random() < 0.5) {
-        await wait(110);
-        await blink(l).finished.catch(() => {});
-      }
+      await wait(200);
     };
     const hold = window.setInterval(() => {
       const real = performance.now() >= CAP ? 1 : done / tasks.length;

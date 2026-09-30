@@ -170,10 +170,14 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             `?intro=1` to see it again on demand.
             `sessionStorage` throws outright in some privacy modes rather
             than returning null, so the whole thing is wrapped and a
-            failure simply means no opening. */}
+            failure simply means no opening.
+
+            Also the moment of the eye's first blink (`intro.tsx`), random,
+            100 to 260ms in, picked here so the stylesheet plays it on the
+            sweep's clock rather than the script's. */}
         <script
           dangerouslySetInnerHTML={{
-            __html: `(function(){try{var q=location.search;if(/[?&]intro=0/.test(q))return;var force=/[?&]intro=1/.test(q);var seen=false;try{seen=!!sessionStorage.getItem("jg-intro")}catch(e){}var calm=matchMedia("(prefers-reduced-motion: reduce)").matches;var admin=location.pathname.indexOf("/admin")===0;if(force||(!admin&&!seen&&!calm))document.documentElement.dataset.intro="1"}catch(e){}})()`,
+            __html: `(function(){try{var q=location.search;if(/[?&]intro=0/.test(q))return;var force=/[?&]intro=1/.test(q);var seen=false;try{seen=!!sessionStorage.getItem("jg-intro")}catch(e){}var calm=matchMedia("(prefers-reduced-motion: reduce)").matches;var admin=location.pathname.indexOf("/admin")===0;if(force||(!admin&&!seen&&!calm)){var r=document.documentElement;r.dataset.intro="1";r.style.setProperty("--jg-blink-at",Math.round(100+Math.random()*160)+"ms")}}catch(e){}})()`,
           }}
         />
       </head>

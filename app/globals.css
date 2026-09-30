@@ -154,6 +154,22 @@
   width: 100%;
   height: 100%;
 }
+/* The first blink, before the sweep is half way.
+   From the stylesheet, so it keeps the sweep's time however late the
+   script arrives; the moment is picked in `layout.tsx`. The same blink as
+   `blink()` in `not-found-scene.tsx`. */
+@keyframes jg-intro-blink {
+  0%,
+  100% {
+    transform: scaleY(1);
+  }
+  45% {
+    transform: scaleY(0.06);
+  }
+}
+[data-intro] .jg-intro-eye [data-lids] {
+  animation: jg-intro-blink 240ms cubic-bezier(0.45, 0, 0.55, 1) var(--jg-blink-at, 300ms);
+}
 /* Full: the whole layer, panel and eye together, lifts off the top of
    the screen (`intro.tsx`), and lets the pointer through as it goes. */
 /* An orb that only shows if the wait is long enough to need one
