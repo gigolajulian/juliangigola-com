@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { BlinkingMark, blink } from "@/components/not-found-scene";
+import { BlinkingMark } from "@/components/not-found-scene";
 
 /* ── the opening ──────────────────────────────────────────────────
  * The screen is the loading bar. A panel in the ink of the theme sweeps in
@@ -39,8 +39,7 @@ import { BlinkingMark, blink } from "@/components/not-found-scene";
 // they asked for the page (not from the script, which a slow phone is
 // late to run): full by 3s, the button to click by 5s.
 const CAP = 3000;
-const BEAT = 100; // full, before the blink
-const AFTER = 40; // the blink done, before it lifts
+const BEAT = 140; // full, before it lifts
 const OUT = 1000; // the lift
 
 const lift = () => document.documentElement.removeAttribute("data-intro");
@@ -142,21 +141,11 @@ export function Intro() {
     };
     const sweep: Animation | undefined = panel.current?.getAnimations()[0];
 
-    const lids = () => eye.current?.querySelector("[data-lids]");
     const wait = (ms: number) => new Promise((r) => setTimeout(r, ms));
-    /* Julian: two blinks, spread out, not back to back. The first before
-       the sweep's edge reaches the eye, played by the stylesheet
-       (`jg-intro-blink`, timed in `layout.tsx`); the second here, once it
-       is full and a random beat later, then the lift. Full is 1.6s in at
-       the soonest, so the two are always more than a second apart.
-       Resolves when the eye has opened again. */
-    const blinks = async () => {
-      const l = lids();
-      if (!l) return;
-      await wait(150 + Math.random() * 350);
-      await blink(l).finished.catch(() => {});
-      await wait(200);
-    };
+    /* Julian: two blinks, spread out, not back to back: one before the
+       sweep's edge reaches the eye, one with it about 87% across. Both
+       played by the stylesheet (`jg-intro-blink`), at random moments
+       picked in `layout.tsx`, so they keep the sweep's time. */
     const hold = window.setInterval(() => {
       const real = performance.now() >= CAP ? 1 : done / tasks.length;
       const at = Number(sweep?.currentTime ?? SWEEP);
@@ -164,7 +153,7 @@ export function Intro() {
       else if (sweep?.playState === "paused") sweep.play();
     }, 50);
 
-    /* Full. A beat, the blink, and then the layer lifts off the top of the
+    /* Full. A beat, and then the layer lifts off the top of the
        screen, and the page starts its own entrance under it at the same
        moment. Full and ready both: on a slow phone the sweep can be at full
        before this script has even arrived. */
@@ -177,8 +166,6 @@ export function Intro() {
       .then(async () => {
         window.clearInterval(hold);
         await wait(BEAT);
-        await blinks();
-        await wait(AFTER);
         box.current?.classList.add("jg-intro-open");
         root.dataset.intro = "lift";
         box.current?.animate(
