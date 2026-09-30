@@ -34,12 +34,13 @@ export function SessionsScreen({ sessions }: { sessions: SessionItem[] }) {
       data-tick
       data-label="Sessions"
       data-hash="sessions"
-      className="relative grid w-full shrink-0 grid-cols-1 items-center gap-10 px-6 py-12 sm:h-full sm:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] sm:gap-x-[clamp(2rem,3.5vw,4rem)] sm:px-10 sm:py-8 short:pb-4 short:pt-20 sm:[container-type:size] xl:grid-cols-[auto_auto_minmax(0,1fr)] xl:gap-x-[max(3.5vw,min(8.25rem,16.5vw-12.5rem))]"
+      className="relative grid w-full shrink-0 grid-cols-1 items-center gap-10 px-6 py-12 sm:h-full sm:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] sm:gap-x-[clamp(2rem,3.5vw,4rem)] sm:px-10 sm:py-8 short:pb-4 short:pt-20 sm:[container-type:size] xl:grid-cols-[auto_auto_minmax(0,1fr)]"
     >
       {/* Julian (2026-09-29, red boxes): with three columns the photograph
-          sits further right and the list starts later. The gaps open from
-          about 1600px wide to twice the old one by 2000; below that a
-          laptop keeps its spacing, or the names run into the rates. On a
+          sits further right (its margin, from about 1600px wide) and larger
+          (to 56rem tall); the list keeps the plain gap after it, half the
+          space it had. Below 1600 a laptop keeps its spacing, or the names
+          run into the rates. On a
           short laptop (1280x800) the content starts below the header
           rather than under it, and the names are set a touch smaller so the
           open session fits. */}
@@ -66,7 +67,7 @@ export function SessionsScreen({ sessions }: { sessions: SessionItem[] }) {
           words keep three lines and the names one. Under 1280 there is no
           room for three columns and it is left out: the words and the
           list. */}
-      <div className="title-rest relative aspect-[3/4] w-full overflow-hidden rounded-[4px] bg-card sm:h-[min(48rem,calc(100cqh-8rem),max(34.5vw,calc(100vw-75rem)))] sm:w-auto sm:justify-self-center sm:max-xl:hidden">
+      <div className="title-rest relative aspect-[3/4] w-full overflow-hidden rounded-[4px] bg-card sm:h-[min(48rem,calc(100cqh-8rem),max(34.5vw,calc(100vw-75rem)))] sm:w-auto sm:justify-self-center sm:max-xl:hidden xl:ml-[max(0rem,min(4.25rem,16.5vw-16.5rem))] xl:h-[min(56rem,calc(100cqh-8rem),max(34.5vw,calc(100vw-75rem)))]">
         {sessions.map((s, i) =>
           s.cover ? (
             <Image
