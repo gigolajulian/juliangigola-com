@@ -50,6 +50,15 @@ export function CreditCard({
   children: React.ReactNode;
 }) {
   const [open, setOpen] = React.useState(false);
+  /* The pointer's ring merges with the card while it is open
+     (`pointer-ring.tsx`), and the card opens after a delay under a pointer
+     that may not move again: tell the ring, once the card is drawn. */
+  React.useEffect(() => {
+    const f = requestAnimationFrame(() =>
+      document.dispatchEvent(new Event("credit-card")),
+    );
+    return () => cancelAnimationFrame(f);
+  }, [open]);
   const hovers = React.useSyncExternalStore(
     subscribeHover,
     () => window.matchMedia(HOVERS).matches,
@@ -84,7 +93,9 @@ export function CreditCard({
       openDelay={200}
       closeDelay={80}
     >
-      <HoverCard.Trigger asChild>{children}</HoverCard.Trigger>
+      <HoverCard.Trigger asChild data-card-trigger="">
+        {children}
+      </HoverCard.Trigger>
       <HoverCard.Portal>
         <HoverCard.Content
           side="top"

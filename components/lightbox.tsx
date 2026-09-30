@@ -791,6 +791,23 @@ function useZoom(
     } as React.CSSProperties,
   };
 }
+/* Every copy of a frame the viewer has painted, by frame. A step moves
+   the middle picture to a side and a side one to the middle, each a new
+   element that paints a frame late; the copy already painted goes under
+   it, so nothing is blank for that frame. */
+const painted = new Map<string, string>();
+const paint = (src: string) => (e: React.SyntheticEvent<HTMLImageElement>) =>
+  painted.set(src, e.currentTarget.currentSrc);
+/** The best copy of a frame already decoded: the viewer's, or the page's. */
+const decodedCopy = (src: string) => {
+  const el = pictureFor(src);
+  return painted.get(src) ?? (el instanceof HTMLImageElement ? el.currentSrc : "");
+};
+const sideUnder = (src: string) => {
+  const url = decodedCopy(src);
+  return url ? `url("${url}")` : undefined;
+};
+
 function Stage({
   frame,
   alt,
@@ -838,6 +855,33 @@ function Stage({
       ],
       { duration: 650, easing: "cubic-bezier(0.22, 1, 0.36, 1)" },
     );
+    /* And the two either side move with it, as one carousel (Julian: the
+       swap was not smooth; they vanished and faded back). The one behind
+       the step is the picture that was in the middle: it leaves the middle
+       flat and turns into its place. The one ahead glides in from past the
+       edge. */
+    const stage = area.current?.getBoundingClientRect();
+    for (const side of area.current?.querySelectorAll<HTMLElement>(".lightbox-side") ?? []) {
+      if (!stage) break;
+      const turn = getComputedStyle(side).getPropertyValue("--turn").trim() || "0deg";
+      const at = (x: string, z: string, r: string) =>
+        `perspective(1400px) translateX(${x}) translateZ(${z}) rotateY(${r})`;
+      const rest = at("0px", "-160px", turn);
+      const behind = (side.dataset.side === "prev") === dir > 0;
+      if (behind) {
+        const b = side.getBoundingClientRect();
+        const dx = stage.left + stage.width / 2 - (b.left + b.width / 2);
+        side.animate([{ transform: at(`${dx}px`, "0px", "0deg") }, { transform: rest }], {
+          duration: 650,
+          easing: "cubic-bezier(0.22, 1, 0.36, 1)",
+        });
+      } else {
+        side.animate(
+          [{ transform: at(`${dir * 60}%`, "-160px", turn), opacity: 0 }, { transform: rest, opacity: 1 }],
+          { duration: 650, easing: "cubic-bezier(0.22, 1, 0.36, 1)" },
+        );
+      }
+    }
   }, [index]);
   /* Which full-size copy has painted. By source, so a step to the next
      frame starts from the fitted picture again until its own arrives. */
@@ -856,13 +900,7 @@ function Stage({
      the same photograph and costs nothing, so it holds the box until the
      full one paints; the frame's own colour covers a frame that is not
      on the page, after a few arrow keys. */
-  const under = React.useMemo(
-    () => {
-      const el = pictureFor(frame.src);
-      return el instanceof HTMLImageElement ? el.currentSrc : "";
-    },
-    [frame.src],
-  );
+  const under = React.useMemo(() => decodedCopy(frame.src), [frame.src]);
   return (
     <div
       ref={area}
@@ -922,7 +960,10 @@ function Stage({
             sizes="100vw"
             priority
             draggable={false}
-            onLoad={() => setShown(frame.src)}
+            onLoad={(e) => {
+              paint(frame.src)(e);
+              setShown(frame.src);
+            }}
             className="block h-full w-full object-contain"
           />
           {/* The zoomable copy: the master's full width at 82, laid exactly
@@ -991,15 +1032,23 @@ function Stage({
                   showMobileWarning={false}
                   showTooltip={false}
                 >
-                  {/* Keyed, so a step fades the new neighbour in. */}
-                  <span key={f.src} className="lightbox-peek block h-full w-full overflow-hidden">
+                  {/* Not keyed: the card stays through a step and moves
+                      (above). The picture is, so a new one is never the old
+                      one for a frame, and the copy the page already has is
+                      under it until it paints, as under the middle one. */}
+                  <span
+                    className="lightbox-peek block h-full w-full overflow-hidden bg-cover bg-center"
+                    style={{ backgroundImage: sideUnder(f.src) }}
+                  >
                     <Image
+                      key={f.src}
                       src={f.src}
                       alt=""
                       aria-hidden
                       width={f.width}
                       height={f.height}
                       sizes="50vw"
+                      onLoad={paint(f.src)}
                       draggable={false}
                       className="block h-full w-full object-cover"
                     />

@@ -2228,6 +2228,19 @@ a.strip-cell {
   [data-hash="title"] > h2:has(.title-word) {
     font-size: min(3.75rem, calc((min(30rem, 82vw) - 1.5rem) / var(--word-em, 6)));
   }
+  /* Julian (2026-09-30): a project's title on one line, and larger. Up to
+     4.5rem (6rem was too large), less where the whole name would not fit
+     50rem (or 82% of the window), and the plate widens to hold it, never
+     narrower than it was. `--title-em` is `titleWidth` in
+     `strip-page.tsx`. */
+  .project-plate {
+    --title-fs: min(4.5rem, calc((min(50rem, 82vw) - 1.5rem) / var(--title-em, 8)));
+    width: max(min(30rem, 82vw), calc(var(--title-fs) * var(--title-em, 8) + 1.5rem));
+  }
+  .project-plate > h2:has(.title-word) {
+    font-size: var(--title-fs);
+    white-space: nowrap;
+  }
 }
 /* The clip each rising word sits in (`project-strip.tsx`,
    `strip-page.tsx`) was its line box, which cut the descenders off the
@@ -3282,8 +3295,6 @@ a.strip-cell {
   :root[data-under] body > footer {
     left: 0;
     right: 0;
-    background-color: color-mix(in oklab, var(--background) var(--glass-tint, 34%), transparent);
-    transition: background-color 300ms var(--ease-out-strong);
   }
   :root[data-under] .strip-rail {
     position: absolute;
@@ -3293,11 +3304,6 @@ a.strip-cell {
        with the space above it and every screen keeps its height. */
     margin-top: 0;
     padding-top: 1.5rem;
-    /* The hairline and the light along it as shadows, not a border,
-       which would add a pixel to the pane. */
-    box-shadow:
-      inset 0 1px 0 color-mix(in oklab, var(--foreground) 12%, transparent),
-      inset 0 2px 0 color-mix(in oklab, white 8%, transparent);
   }
   @media (pointer: coarse) {
     :root[data-under] .strip-rail {
@@ -3315,30 +3321,44 @@ a.strip-cell {
     z-index: 30;
     border-top-color: transparent;
   }
+  /* The footer's line to the rail's edges, not a 100rem column in the
+     middle of a wide screen while the rail runs the width of it. */
+  :root[data-under] .site-footer-body {
+    max-width: none;
+  }
   /* One pane, not two. Julian: make the scroll bar and the footer one
      panel. Each had a blur of its own, and two blurs meeting draw a seam
      where each one's edge samples differently. One layer now, the rail's,
-     running on down under the footer, which keeps only its tint. 9px, a
-     little under the 12 it was (Julian: lower the blur slightly). */
+     running on down under the footer. 9px, a little under the 12 it was
+     (Julian: lower the blur slightly). The tint and the hairline are this
+     layer's too (Julian, 2026-09-30: still two panels): a tint each met
+     where the footer's 38.19px ran into a `--foot` rounded to 38, and the
+     sliver of both read as a line across the glass. */
   :root[data-under] .strip-rail::after {
     content: "";
     position: absolute;
     inset: 0;
     bottom: calc(-1 * var(--foot, 38px));
     z-index: -1;
+    background-color: color-mix(in oklab, var(--background) var(--glass-tint, 34%), transparent);
+    /* The hairline and the light along it as shadows, not a border,
+       which would add a pixel to the pane. */
+    box-shadow:
+      inset 0 1px 0 color-mix(in oklab, var(--foreground) 12%, transparent),
+      inset 0 2px 0 color-mix(in oklab, white 8%, transparent);
     -webkit-backdrop-filter: blur(var(--glass-blur, 9px)) saturate(1.5);
     backdrop-filter: blur(var(--glass-blur, 9px)) saturate(1.5);
     transition:
+      background-color 300ms var(--ease-out-strong),
       backdrop-filter 300ms var(--ease-out-strong),
       -webkit-backdrop-filter 300ms var(--ease-out-strong);
     pointer-events: none;
   }
   @media (prefers-reduced-transparency: reduce) {
-    :root[data-under] :is(.strip-rail, body > footer) {
-      background-color: var(--background);
-    }
     :root[data-under] .strip-rail::after {
-      display: none;
+      background-color: var(--background);
+      -webkit-backdrop-filter: none;
+      backdrop-filter: none;
     }
   }
 }

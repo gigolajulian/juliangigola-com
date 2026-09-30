@@ -96,6 +96,11 @@ export function RisingTitle({
 export const longestWord = (text: string) =>
   Math.max(...text.split(" ").map((w) => w.length)) * 0.76;
 
+/** The whole title's width in ems, on one line: the same 0.76 a letter and
+    about 0.3 a space. A project's title is held to one line with it. */
+export const titleWidth = (text: string) =>
+  text.replace(/ /g, "").length * 0.76 + (text.split(" ").length - 1) * 0.3;
+
 /** The opening cell of a page's strip: the title set large, with a line or
     two under it that fade up after. The running head in the page's head
     waits for this cell to go, so the same words are never on screen

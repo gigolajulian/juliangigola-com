@@ -6,7 +6,7 @@ import Link from "next/link";
 import { ViewTransition } from "react";
 import { Lightbox, useLightbox } from "@/components/lightbox";
 import { CreditCard } from "@/components/credit-card";
-import { longestWord } from "@/components/strip-page";
+import { longestWord, titleWidth } from "@/components/strip-page";
 import { Strip, type Lead } from "@/components/strip";
 import type { Project, TextBlock, Frame } from "@/lib/work-types";
 
@@ -162,7 +162,14 @@ export function ProjectStrip({
                `#next`. A link into the middle of a sequence is the one
                thing a horizontal page cannot otherwise be given. */
             data-hash="title"
-            className="flex w-[min(30rem,82vw)] shrink-0 flex-col justify-center gap-5 pr-2 max-sm:w-full sm:h-full sm:pr-6"
+            /* `project-plate`: from 40rem the title is one line, and the
+               plate as wide as it needs (`globals.css`). */
+            style={
+              {
+                "--title-em": titleWidth(project.headline ?? project.name),
+              } as React.CSSProperties
+            }
+            className="project-plate flex w-[min(30rem,82vw)] shrink-0 flex-col justify-center gap-5 pr-2 max-sm:w-full sm:h-full sm:pr-6"
           >
             {/* Each word rises into place from under a clip, one after
                     another, and the credits follow it up. Julian asked for

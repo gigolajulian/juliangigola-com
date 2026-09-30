@@ -48,11 +48,12 @@ const useHash = () =>
  * ─────────────────────────────────────────────────────────────── */
 
 export const LINKS = [
-  // Julian's order (2026-09-29). About and Contact are homepage screens.
+  // Julian's order (2026-09-30: Portfolio first). About and Contact are
+  // homepage screens.
+  { href: "/portfolio", label: "Portfolio" },
   { href: "/#sessions", label: "Sessions" },
   { href: "/#about", label: "About" },
   { href: "/#contact", label: "Contact" },
-  { href: "/portfolio", label: "Portfolio" },
 ] as const;
 
 export function SiteHeader() {

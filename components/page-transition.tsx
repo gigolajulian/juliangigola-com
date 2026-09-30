@@ -125,8 +125,18 @@ export function PageTransition({ children }: { children: React.ReactNode }) {
           : "page";
       set(out ? "out" : "in", from);
       const here = sectionOf(location.pathname);
-      const there = sectionOf(a.pathname);
-      if (from !== "page" && here >= 0 && there >= 0 && here !== there)
+      /* Portfolio leads the bar (Julian, 2026-09-30), so the homepage's
+         own screens (Sessions, About, Contact) sit to its right; only the
+         wordmark's home is to its left. */
+      const there =
+        a.pathname === "/" && a.hash ? SECTIONS.length : sectionOf(a.pathname);
+      if (
+        from !== "page" &&
+        a.pathname !== location.pathname &&
+        here >= 0 &&
+        there >= 0 &&
+        here !== there
+      )
         root.dataset.navSide = there > here ? "right" : "left";
       else delete root.dataset.navSide;
     };

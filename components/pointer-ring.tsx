@@ -34,7 +34,8 @@ import { createPortal } from "react-dom";
    under it, then 48px at full strength, and the word rises in after
    100ms (`.cursor-ring` in `globals.css`). */
 const ROPE = 1.5625;
-const EASE = 0.12;
+// Julian (2026-09-30): follows a bit closer. Theirs was 0.12.
+const EASE = 0.18;
 // The least it grows to around a word, theirs; a word longer than theirs
 // gets a circle that holds it rather than clipping it.
 const LEAST = 48;
@@ -46,6 +47,10 @@ const READY = 500;
    way toward the pointer. The site's buttons,
    as `glass-light.tsx` lists them. */
 const BUTTON = ".action, .action-quiet, .cover-cta, [data-ring-hug]";
+/* Julian: and into a credit's card. Over the name that raised it, or inside
+   the card, the circle merges with the open card the same way, so the
+   word is not left floating over it (`credit-card.tsx`). */
+const CARD = ".credit-card[data-state='open']";
 const OUTSET = 0;
 const PULL = 0.12;
 // Faster onto a button than after the pointer, so the merge reads as one
@@ -156,9 +161,16 @@ export function PointerRing() {
       if (text) write(text);
     });
 
+    let lastMove: PointerEvent | null = null;
     const move = (e: PointerEvent) => {
+      lastMove = e;
       place(e);
-      const b = (e.target as Element | null)?.closest?.<HTMLElement>(BUTTON);
+      const t = e.target as Element | null;
+      const b =
+        t?.closest?.<HTMLElement>(BUTTON) ??
+        (t?.closest?.(".credit-card, [data-card-trigger]")
+          ? document.querySelector<HTMLElement>(CARD)
+          : null);
       const merge = b && !b.matches(":disabled, [aria-disabled='true']") ? b : null;
       if (merge !== hug) {
         hug = merge;
@@ -221,8 +233,12 @@ export function PointerRing() {
        coordinates like any pointer event, so the same handler does. */
     document.addEventListener("pointerover", move, { passive: true });
     document.addEventListener("pointerout", left, { passive: true });
+    // A card opening or shutting under a still pointer.
+    const recheck = () => lastMove && move(lastMove);
+    document.addEventListener("credit-card", recheck);
     window.addEventListener("blur", away);
     return () => {
+      document.removeEventListener("credit-card", recheck);
       document.removeEventListener("pointermove", move);
       document.removeEventListener("pointerover", move);
       document.removeEventListener("pointerout", left);
