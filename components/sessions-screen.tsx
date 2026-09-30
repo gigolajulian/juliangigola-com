@@ -34,14 +34,22 @@ export function SessionsScreen({ sessions }: { sessions: SessionItem[] }) {
       data-tick
       data-label="Sessions"
       data-hash="sessions"
-      className="relative grid w-full shrink-0 grid-cols-1 items-center gap-10 px-6 py-12 sm:h-full sm:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] sm:gap-x-[clamp(2rem,3.5vw,4rem)] sm:px-10 sm:py-8 sm:[container-type:size] xl:grid-cols-[auto_auto_minmax(0,1fr)]"
+      className="relative grid w-full shrink-0 grid-cols-1 items-center gap-10 px-6 py-12 sm:h-full sm:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] sm:gap-x-[clamp(2rem,3.5vw,4rem)] sm:px-10 sm:py-8 short:pb-4 short:pt-20 sm:[container-type:size] xl:grid-cols-[auto_auto_minmax(0,1fr)] xl:gap-x-[max(3.5vw,min(8.25rem,16.5vw-12.5rem))]"
     >
+      {/* Julian (2026-09-29, red boxes): with three columns the photograph
+          sits further right and the list starts later. The gaps open from
+          about 1600px wide to twice the old one by 2000; below that a
+          laptop keeps its spacing, or the names run into the rates. On a
+          short laptop (1280x800) the content starts below the header
+          rather than under it, and the names are set a touch smaller so the
+          open session fits. */}
       <div className="flex w-fit max-w-full flex-col gap-5 self-center">
+        {/* Julian (2026-09-29): says what the count is, not the title again. */}
         <span className="label text-muted-foreground">
-          Sessions
-          <span className="ml-2 text-foreground">
+          <span className="mr-2 text-foreground">
             {String(sessions.length).padStart(2, "0")}
           </span>
+          Ways to book
         </span>
         {/* Smaller where its column is narrow (a tablet upright). */}
         <RisingTitle text="Sessions" className="sm:max-lg:text-4xl" />
@@ -107,11 +115,11 @@ export function SessionsScreen({ sessions }: { sessions: SessionItem[] }) {
                   className="grid grid-cols-[auto_minmax(0,1fr)_auto_auto] items-baseline gap-4 py-2 text-left short:py-1.5"
                 >
                   <span
-                    className={`font-display text-[clamp(1.5rem,2.4vw,2.5rem)] leading-none tabular-nums transition-colors duration-300 ${on ? "text-foreground" : "text-muted-foreground/40"}`}
+                    className={`font-display text-[clamp(1.5rem,2.4vw,2.5rem)] leading-none short:text-[clamp(1.25rem,2vw,2rem)] tabular-nums transition-colors duration-300 ${on ? "text-foreground" : "text-muted-foreground/40"}`}
                   >
                     {String(i + 1).padStart(2, "0")}
                   </span>
-                  <span className="font-display text-[clamp(1.5rem,2.4vw,2.5rem)] leading-none">
+                  <span className="font-display text-[clamp(1.5rem,2.4vw,2.5rem)] leading-none short:text-[clamp(1.25rem,2vw,2rem)]">
                     {s.name}
                   </span>
                   <span className="label text-muted-foreground max-sm:hidden">
@@ -155,7 +163,7 @@ export function SessionsScreen({ sessions }: { sessions: SessionItem[] }) {
 
         <div className="flex flex-wrap items-center justify-between gap-6 pt-8 short:pt-5">
           <div className="flex flex-col gap-2.5">
-            <span className="font-display text-[2rem] leading-none">
+            <span className="font-display text-[2rem] leading-none short:text-[1.625rem]">
               Book a session
             </span>
             <a

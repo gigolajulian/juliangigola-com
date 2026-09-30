@@ -617,6 +617,9 @@ export const categoryHref = (categorySlug: string): string => {
   // — and unlike every other discipline, what fills it is not in the archive.
   if (categorySlug === "video") return "/portfolio/video";
 
+  // Julian (2026-09-29): cover art in the projects, at its own project page.
+  if (categorySlug === "coverart") return "/portfolio/coverart";
+
   const inCategory = projectsIn(categorySlug);
   if (inCategory.length === 0) return "/portfolio";
   /* A one-gallery discipline used to go to its project page instead —

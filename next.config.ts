@@ -65,6 +65,12 @@ const categoryRedirects = CATEGORIES.map((c) => ({
  * one folder deeper than a project.
  */
 const workRedirects = [
+  // Cover art opens as its project page now (`categoryHref`).
+  {
+    source: "/portfolio/category/coverart",
+    destination: "/portfolio/coverart",
+    permanent: true,
+  },
   { source: "/work", destination: "/portfolio", permanent: true },
   { source: "/work/video", destination: "/portfolio/video", permanent: true },
   {

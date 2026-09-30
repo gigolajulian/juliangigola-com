@@ -81,7 +81,9 @@ export function AboutScreen() {
           />
           {/* Julian's words (2026-09-29). */}
           {/* Set left, as the mockup has it: justified mono opens up. */}
-          <p className="title-rest mt-6 text-left text-[0.95rem] uppercase leading-[1.75] tracking-[0.04em] text-muted-foreground sm:mt-[clamp(1.25rem,3vh,2rem)] sm:text-[clamp(0.8rem,1.6vh,0.95rem)]">
+          {/* Julian: on a phone, smaller and more inviting, in sentence
+              case; the capitals stay from `sm` up. */}
+          <p className="title-rest mt-6 text-left text-[0.875rem] normal-case leading-[1.7] max-sm:hyphens-none text-foreground/80 sm:mt-[clamp(1.25rem,3vh,2rem)] sm:text-[clamp(0.8rem,1.6vh,0.95rem)] sm:uppercase sm:leading-[1.75] sm:tracking-[0.04em] sm:text-muted-foreground">
             Photographer and creative director based in the San Francisco
             Bay Area with 12+ years of experience. As an Assyrian American, I grew up between cultures,
             and that sense of being slightly outside the frame shapes how I
