@@ -155,7 +155,7 @@
   height: 100%;
 }
 /* The two blinks: the first before the sweep is half way, the second
-   with it 84 to 90% across (closed 108ms into the 240).
+   with it 84 to 90% across (closed 189ms into the 420; Julian: 240 was too fast).
    From the stylesheet, so it keeps the sweep's time however late the
    script arrives; the moment is picked in `layout.tsx`. The same blink as
    `blink()` in `not-found-scene.tsx`. */
@@ -170,8 +170,8 @@
 }
 [data-intro] .jg-intro-eye [data-lids] {
   animation:
-    jg-intro-blink 240ms cubic-bezier(0.45, 0, 0.55, 1) var(--jg-blink-at, 180ms),
-    jg-intro-blink 240ms cubic-bezier(0.45, 0, 0.55, 1) var(--jg-blink-2, 920ms);
+    jg-intro-blink 420ms cubic-bezier(0.45, 0, 0.55, 1) var(--jg-blink-at, 180ms),
+    jg-intro-blink 420ms cubic-bezier(0.45, 0, 0.55, 1) var(--jg-blink-2, 920ms);
 }
 /* Full: the whole layer, panel and eye together, lifts off the top of
    the screen (`intro.tsx`), and lets the pointer through as it goes. */

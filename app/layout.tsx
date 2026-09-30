@@ -178,7 +178,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             clock rather than the script's. */}
         <script
           dangerouslySetInnerHTML={{
-            __html: `(function(){try{var q=location.search;if(/[?&]intro=0/.test(q))return;var force=/[?&]intro=1/.test(q);var seen=false;try{seen=!!sessionStorage.getItem("jg-intro")}catch(e){}var calm=matchMedia("(prefers-reduced-motion: reduce)").matches;var admin=location.pathname.indexOf("/admin")===0;if(force||(!admin&&!seen&&!calm)){var r=document.documentElement;r.dataset.intro="1";r.style.setProperty("--jg-blink-at",Math.round(100+Math.random()*160)+"ms");r.style.setProperty("--jg-blink-2",Math.round(860+Math.random()*130)+"ms")}}catch(e){}})()`,
+            __html: `(function(){try{var q=location.search;if(/[?&]intro=0/.test(q))return;var force=/[?&]intro=1/.test(q);var seen=false;try{seen=!!sessionStorage.getItem("jg-intro")}catch(e){}var calm=matchMedia("(prefers-reduced-motion: reduce)").matches;var admin=location.pathname.indexOf("/admin")===0;if(force||(!admin&&!seen&&!calm)){var r=document.documentElement;r.dataset.intro="1";r.style.setProperty("--jg-blink-at",Math.round(100+Math.random()*160)+"ms");r.style.setProperty("--jg-blink-2",Math.round(780+Math.random()*130)+"ms")}}catch(e){}})()`,
           }}
         />
       </head>
