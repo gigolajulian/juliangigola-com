@@ -20,9 +20,9 @@ import type { Frame } from "@/lib/work-types";
 import { WORK_ROWS } from "@/lib/work-rows";
 
 export const metadata: Metadata = {
-  title: "Portfolio",
+  title: "Photography Portfolio, San Francisco Bay Area",
   description:
-    "Commissioned photography: editorial, campaigns, portraits, artist imagery, and film. Selected projects with clients and credits.",
+    "Fashion editorials, brand campaigns, portraits, musician press photos, cover art and music videos by Julian Gigola, photographer in the San Francisco Bay Area.",
   alternates: { canonical: "/portfolio" },
 };
 

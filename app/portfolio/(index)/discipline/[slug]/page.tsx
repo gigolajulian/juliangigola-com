@@ -21,6 +21,7 @@ import { WORK_ROWS } from "@/lib/work-rows";
 import type { ListRow } from "@/components/work-list";
 import type { Frame } from "@/lib/work-types";
 import { COVER_RELEASES } from "@/lib/cover-art-data";
+import { DISCIPLINE_SEO } from "@/lib/seo";
 
 /* ── a discipline ─────────────────────────────────────────────────
  * One page per category, so a discipline is a place rather than a filter
@@ -94,11 +95,16 @@ export async function generateMetadata(
   const gallery = projectsIn(slug).find(isDisciplineGallery);
   const count = gallery ? gallery.images.length : projectsIn(slug).length;
 
+  /* Titled for the search that should land here, from `lib/seo.ts`;
+     a discipline not listed there keeps its plain name. */
+  const seo = DISCIPLINE_SEO[slug];
   return {
-    title: name,
-    description: gallery
-      ? `${count} ${name.toLowerCase()} frames by Julian Gigola.`
-      : `${name}: ${count} ${count === 1 ? "project" : "projects"} by Julian Gigola, with clients and credits.`,
+    title: seo?.title ?? name,
+    description: seo
+      ? seo.description(count)
+      : gallery
+        ? `${count} ${name.toLowerCase()} frames by Julian Gigola.`
+        : `${name}: ${count} ${count === 1 ? "project" : "projects"} by Julian Gigola, with clients and credits.`,
     alternates: { canonical: `/portfolio/${slug}` },
   };
 }
