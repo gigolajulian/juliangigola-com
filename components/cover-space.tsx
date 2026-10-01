@@ -77,6 +77,35 @@ export function CoverSpace({
         cancelAnimationFrame(raf);
       };
     }
+
+    /* Preview (`?tilt=1`), Julian: the hero is too still on a phone and an
+       iPad. The space turns after a finger on the cover the way it turns
+       after a pointer, and eases back when it lifts. Touch events rather
+       than pointer ones: a pointer is cancelled the moment the page starts
+       to scroll, and a touch keeps reporting while it does, so the tilt
+       goes on following the finger through a scroll. Passive, so the
+       scroll itself is never held. */
+    if (!/[?&]tilt=1/.test(location.search)) return;
+    const cover = el.closest("section") ?? el.parentElement;
+    if (!cover) return;
+    const touch = (e: TouchEvent) => {
+      const t = e.touches[0];
+      if (t) aim((t.clientX / innerWidth - 0.5) * 2, (0.5 - t.clientY / innerHeight) * 2);
+    };
+    const lift = (e: TouchEvent) => {
+      if (!e.touches.length) aim(0, 0);
+    };
+    cover.addEventListener("touchstart", touch, { passive: true });
+    cover.addEventListener("touchmove", touch, { passive: true });
+    cover.addEventListener("touchend", lift, { passive: true });
+    cover.addEventListener("touchcancel", lift, { passive: true });
+    return () => {
+      cover.removeEventListener("touchstart", touch);
+      cover.removeEventListener("touchmove", touch);
+      cover.removeEventListener("touchend", lift);
+      cover.removeEventListener("touchcancel", lift);
+      cancelAnimationFrame(raf);
+    };
   }, [space]);
   return (
     <div ref={ref} aria-hidden className={className}>
