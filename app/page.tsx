@@ -16,7 +16,11 @@ import {
   projectsIn,
   WALL,
   WORK_PAGE,
+  WORK_CATEGORY_LINKS,
+  commissionsIn,
+  indexRow,
 } from "@/lib/work";
+import { LeadWindow } from "@/components/lead-window";
 import { ClientMarks } from "@/components/client-marks";
 import { AboutScreen } from "@/components/about-screen";
 import { ContactScreen } from "@/components/contact-screen";
@@ -223,6 +227,12 @@ export default function Home() {
               />
             </div>
           }
+        />
+        {/* The window into the work (`lead-window.tsx`). */}
+        <LeadWindow
+          covers={commissionsIn(WORK_CATEGORY_LINKS[0].slug)
+            .slice(0, 3)
+            .map(indexRow)}
         />
       </Strip>
     </StripPage>

@@ -45,18 +45,25 @@ export function ContactScreen() {
           `sm` only, where the screen has a fixed height. */}
       <div
         data-scroll
-        className="flex min-h-0 flex-col gap-8 sm:max-h-full sm:overflow-y-auto sm:overscroll-contain short:gap-5"
+        className="flex min-h-0 flex-col gap-8 [container-type:inline-size] sm:max-h-full sm:overflow-y-auto sm:overscroll-contain short:gap-5"
       >
         <div className="flex flex-col gap-5">
-          <RisingTitle text="Get in Touch" className="contact-title sm:max-lg:text-5xl" />
+          <RisingTitle text="Get in Touch" className="contact-title" />
           {/* 1.02 as a zoom: Julian's DialKit size for the intro, the same
               `zoom` the panel's Size writes (`page-dials.tsx`). */}
-          <p data-dial="intro" className="title-rest max-w-prose text-sm leading-relaxed text-muted-foreground [zoom:1.02]">
+          <p data-dial="intro" className="title-rest max-w-prose text-left text-sm leading-relaxed text-muted-foreground [zoom:1.02]">
             {/* A sentence to a line, where there is room: Julian asked
-                for two lines rather than a wrap mid sentence. */}
-            Commissions, sessions, or a question about a project.
-            <br className="max-sm:hidden" /> Tell me what kind of shoot it
-            is and I&rsquo;ll come back with an approach and a quote.
+                for two lines rather than a wrap mid sentence. Where there
+                is not, each sentence wraps balanced and set left: it was
+                justified, and "project." stood on a line of its own
+                (Julian, 2026-10-01: one word doesn't need a whole line). */}
+            <span className="sm:block sm:text-balance">
+              Commissions, sessions, or a question about a project.
+            </span>{" "}
+            <span className="sm:block sm:text-balance">
+              Tell me what kind of shoot it is and I&rsquo;ll come back with
+              an approach and a quote.
+            </span>
           </p>
           {/* Answers "will this actually go anywhere?" before they decide
               whether to fill anything in, which is where most enquiries

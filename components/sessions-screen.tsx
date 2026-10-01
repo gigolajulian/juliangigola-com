@@ -145,14 +145,18 @@ export function SessionsScreen({ sessions }: { sessions: SessionItem[] }) {
                       {s.blurb}
                     </p>
                     {/* What the /sessions page used to say about each. */}
+                    {/* The rate first under a finger, where the row has no
+                        room for it: the price is what a private client
+                        came for. */}
                     <p className="label text-left text-muted-foreground">
+                      <span className="text-foreground sm:hidden">{s.rate} · </span>
                       {s.includes.join(" · ")} · Ready in {s.turnaround}
                     </p>
                     <Link
                       href={`/?type=session&session=${encodeURIComponent(s.name)}#contact`}
                       className="label flex gap-2.5 self-start py-2"
                     >
-                      Inquire <span aria-hidden>&rarr;</span>
+                      Book a session <span aria-hidden>&rarr;</span>
                     </Link>
                   </div>
                   </div>
@@ -178,7 +182,9 @@ export function SessionsScreen({ sessions }: { sessions: SessionItem[] }) {
             href="/?type=session#contact"
             className="label action px-7 py-4 press active:scale-[0.97] short:py-2.5"
           >
-            Inquire
+            {/* The private client's verb, not the art director's (Julian,
+                2026-10-01). */}
+            Book a session
           </Link>
         </div>
       </div>

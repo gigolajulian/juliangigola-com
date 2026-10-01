@@ -46,11 +46,11 @@ import {
    (it splits camelCase into words), so every one says what it moves. */
 export const CARDS = {
   motion: { type: "spring", visualDuration: 0.3, bounce: 0.2 },
-  grow: [1.03, 1, 1.2, 0.005],
-  forward: [44, 0, 200, 1],
-  towardMiddle: [0.1, 0, 1, 0.01],
+  grow: [1.02, 1, 1.2, 0.005],
+  forward: [21, 0, 200, 1],
+  towardMiddle: [0.06, 0, 1, 0.01],
   shadow: { blur: [4, 0, 80, 1], opacity: [0.3, 0, 1, 0.01] },
-  otherPhotos: { blur: [0.3, 0, 8, 0.1], glassSheen: [0.4, 0, 1, 0.05] },
+  otherPhotos: { blur: [0.3, 0, 8, 0.1], glassSheen: [0.25, 0, 1, 0.05] },
   delays: {
     comeForward: [10, 0, 1000, 10],
     blurOthers: [310, 0, 2000, 10],

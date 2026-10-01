@@ -39,8 +39,9 @@
  *               each other; the stack when scrolling into the next and
  *               the project before.
  *
- * Nothing fades and nothing casts a shadow: Julian wants cards in space
- * stacking over each other, every one whole. The recede is the depth.
+ * Nothing fades: Julian wants cards in space stacking over each other,
+ * every one whole. The recede is the depth, and since 2026-10-01 a slight
+ * shadow under a screen coming in (`deal-shade` in `globals.css`).
  *
  * Chrome folds the sticky offset into a stuck cell's `offsetLeft`, so a
  * pinned cover reads as sitting exactly where the screen over it does,
@@ -85,6 +86,32 @@ const scrub = (
     a = c.animate([{ scale: 1 }, { scale: 1 - by }], {
       duration: 1000,
       fill: "both",
+    });
+    a.pause();
+    live.set(c, a);
+  }
+  a.currentTime = p * 1000;
+};
+
+/** The shadow under a screen coming in (`globals.css`), `p` of the way
+    in: up by an eighth, then held, the band off the window once it pins. */
+const shade = (
+  live: Map<HTMLElement, Animation>,
+  c: HTMLElement,
+  p: number,
+  pseudoElement = "::before",
+) => {
+  if (p <= 0) {
+    live.get(c)?.cancel();
+    live.delete(c);
+    return;
+  }
+  let a = live.get(c);
+  if (!a) {
+    a = c.animate([{ opacity: 0 }, { opacity: 1, offset: 0.12 }, { opacity: 1 }], {
+      duration: 1000,
+      fill: "both",
+      pseudoElement,
     });
     a.pause();
     live.set(c, a);
@@ -144,12 +171,15 @@ export function runDeck(el: HTMLElement, mode: Deck): () => void {
   // where the next cell starts.
   let spots: { at: number; width: number; pin: number; next: number }[] = [];
   const live = new Map<HTMLElement, Animation>();
+  const shades = new Map<HTMLElement, Animation>();
 
   const clear = () => {
     drop(live);
+    drop(shades);
     for (const c of Array.from(el.children) as HTMLElement[]) {
       c.style.removeProperty("position");
       c.style.removeProperty("left");
+      c.style.removeProperty("right");
       c.style.removeProperty("z-index");
       c.style.removeProperty("transform-origin");
       c.style.removeProperty("will-change");
@@ -166,7 +196,30 @@ export function runDeck(el: HTMLElement, mode: Deck): () => void {
      so the depth keeps up with the pin. */
   /* Handed the scroll by `deal`, which reads it before it writes: read
      after, it laid the page out again inside the arrival. */
+  /* Julian (2026-10-01), a preview at `?flyout=1`: the deck the other way
+     round. The screen you are on is the card on top and flies out to the
+     left as you go; the next one waits under it, pinned against the
+     window's right edge (`right: 0` on a screen as wide as the window is
+     the whole window), and comes up from the space behind as it is
+     uncovered. The shadow is the leaving screen's, off its trailing edge
+     (`::after` in `globals.css`). */
+  let flyout = false;
+  const lift = (x: number) => {
+    const gone = spots.map((s) => {
+      const out = x - s.at;
+      return out < 2 ? 0 : out > s.width - 2 ? 1 : out / s.width;
+    });
+    cards.forEach((c, i) => {
+      if (i > 0) {
+        const buried = gone[i - 1] <= 0;
+        if (buried !== "buried" in c.dataset) c.toggleAttribute("data-buried", buried);
+        scrub(live, c, 1 - gone[i - 1], RECEDE);
+      }
+      shade(shades, c, gone[i] >= 1 ? 0 : gone[i], "::after");
+    });
+  };
   const depth = (x = el.scrollLeft) => {
+    if (flyout) return lift(x);
     // How much of each card, pinned, the one after it now covers. Under
     // two pixels is nothing: `offsetLeft` rounds, a screen is 1761.333 wide,
     // and a screen at rest read as a third of a pixel covered. It sat at
@@ -191,7 +244,10 @@ export function runDeck(el: HTMLElement, mode: Deck): () => void {
         if (buried !== "buried" in cards[i].dataset)
           cards[i].toggleAttribute("data-buried", buried);
       }
-      if (mode === "screens") scrub(live, cards[i], cover[i], RECEDE);
+      if (mode === "screens") {
+        scrub(live, cards[i], cover[i], RECEDE);
+        if (cards[i + 1]) shade(shades, cards[i + 1], cover[i]);
+      }
       else scrub(live, cards[i], over / cards.length, STEP * cards.length);
     }
   };
@@ -217,10 +273,16 @@ export function runDeck(el: HTMLElement, mode: Deck): () => void {
         next: next ? next.offsetLeft : Infinity,
       };
     });
+    flyout = mode === "screens" && "flyout" in document.documentElement.dataset;
     cards.forEach((c, i) => {
       c.style.position = "sticky";
-      c.style.left = `${spots[i].pin}px`;
-      c.style.zIndex = String(i + 1);
+      if (flyout) {
+        c.style.right = "0px";
+        c.style.zIndex = String(cards.length - i);
+      } else {
+        c.style.left = `${spots[i].pin}px`;
+        c.style.zIndex = String(i + 1);
+      }
       // A screen recedes about its middle; a card on the pile keeps its
       // pinned edge, so the pile's edges stay in step.
       c.style.transformOrigin = mode === "screens" ? "50% 50%" : "left center";

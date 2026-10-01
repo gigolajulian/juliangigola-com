@@ -58,6 +58,7 @@ export default function WorkPage() {
           name={c.name}
           href={c.href}
           hash={c.slug}
+          alias={i === 0 ? "Portfolio" : undefined}
           i={i++}
           cta="See the films"
         />,
@@ -108,6 +109,7 @@ export default function WorkPage() {
           name={c.name}
           href={c.href}
           hash={c.slug}
+          alias={i === 0 ? "Portfolio" : undefined}
           i={i++}
           cta={isCoverArt ? "See the covers" : "See them all"}
         />,
@@ -133,6 +135,7 @@ export default function WorkPage() {
         name={c.name}
         href={c.href}
         hash={c.slug}
+        alias={i === 0 ? "Portfolio" : undefined}
         i={i++}
       />,
     );
@@ -176,8 +179,9 @@ export default function WorkPage() {
       label={`Portfolio: ${COMMISSIONS.length} projects, left and right`}
       frames={viewer}
       rows={WORK_ROWS}
-      // Julian: scrolling back past the start goes home.
-      prev={{ href: "/", name: "Home" }}
+      // Julian: scrolling back past the start goes home, to the hero
+      // (2026-10-01), not to the last screen it left by.
+      prev={{ href: "/", name: "Home", start: true }}
       className="mt-4 max-sm:mt-2 short:mt-2 flex-1"
     >
       {cells}

@@ -67,9 +67,12 @@ export function ProjectStrip({
   next,
   prev,
   map,
+  gallery = false,
   className,
 }: {
   project: Project;
+  /** A discipline shown as one set of photographs (`discipline/[slug]`). */
+  gallery?: boolean;
   /** The archive's chapters, where this sequence is one of them: a
       discipline that is a gallery rather than a list of projects is shown
       through here. Straight on to the rail (`strip.tsx`). */
@@ -81,6 +84,15 @@ export function ProjectStrip({
   className?: string;
 }) {
   const frames = project.images;
+  /* Not "Photographer: Julian Gigola" on a discipline that is a gallery
+     (Places, Automotive, Event coverage): one of his own sets, not a job
+     with a crew (Julian, 2026-10-01; the projects keep it). */
+  const credits = gallery
+    ? project.credits.filter(
+        (c) =>
+          !(/photograph/i.test(c.role) && /julian gigola|@juliangigola/i.test(c.name)),
+      )
+    : project.credits;
   const scroller = React.useRef<HTMLDivElement>(null);
   const lightbox = useLightbox(frames);
 
@@ -213,7 +225,7 @@ export function ProjectStrip({
               </p>
             ) : null}
 
-            {project.credits.length ? (
+            {credits.length ? (
               /* Two columns, the first as wide as the longest role and
                  no wider. It was a fixed 7rem, and VALGUR's crew list
                  broke "Hair & Makeup Artist" over two lines; Julian: make
@@ -226,7 +238,7 @@ export function ProjectStrip({
                 aria-label="Credits"
                 className="title-rest flex flex-col gap-1 border-t border-border pt-4 sm:grid sm:grid-cols-[max-content_minmax(0,1fr)] sm:gap-x-3"
               >
-                {project.credits.map((credit, i) => {
+                {credits.map((credit, i) => {
                   /* Worked out in `lib/work.ts` (`withFaces`), along with
                          the face that goes with it: six harvested credits
                          carry the handle as the name ("@apricotsss3") with
@@ -427,7 +439,7 @@ export function ProjectStrip({
       project.name,
       project.headline,
       project.intent,
-      project.credits,
+      credits,
       project.cover.blur,
       project.slug,
       next,

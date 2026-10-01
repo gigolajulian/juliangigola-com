@@ -261,14 +261,14 @@ function Tile({
         aria-hidden
         className="absolute inset-0 flex items-center justify-center"
       >
-        <span className="flex size-16 items-center justify-center glass tablet:hidden transition-[opacity,scale] duration-300 ease-[var(--ease-out-strong)] hoverable:scale-90 hoverable:opacity-0 hoverable:group-hover:scale-100 hoverable:group-hover:opacity-100 group-focus-visible:scale-100 group-focus-visible:opacity-100 motion-reduce:transition-none">
+        <span className="flex size-16 items-center justify-center glass play-glass tablet:hidden transition-[opacity,scale] duration-300 ease-[var(--ease-out-strong)] hoverable:scale-90 hoverable:opacity-0 hoverable:group-hover:scale-100 hoverable:group-hover:opacity-100 group-focus-visible:scale-100 group-focus-visible:opacity-100 motion-reduce:transition-none">
           {/* Drawn, not imported — the same rule the rest of the icons here
               follow. A triangle, optically centred: a shape with a flat left
               edge and a point on the right reads as off-centre when its
               bounding box is centred, so it sits a pixel right. */}
           <svg
             viewBox="0 0 24 24"
-            className="ml-[2px] size-6 text-foreground"
+            className="ml-[2px] size-6 text-white drop-shadow-[0_1px_2px_rgb(0_0_0/0.35)]"
             fill="currentColor"
           >
             <path d="M8 5v14l11-7z" />

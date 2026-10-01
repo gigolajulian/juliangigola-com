@@ -95,7 +95,15 @@ export function ThemeToggle({ className }: { className?: string }) {
    */
   const [theme, setTheme] = React.useState<Theme | null>(null);
 
+  /* And follows the root, not only its own presses: there are two of
+     these (the bar's on a desktop, the menu's under the burger), and an
+     iPad turned from one width to the other shows the one not pressed. */
   React.useEffect(() => setTheme(read()), []);
+  React.useEffect(() => {
+    const watch = new MutationObserver(() => setTheme(read()));
+    watch.observe(document.documentElement, { attributeFilter: ["data-theme"] });
+    return () => watch.disconnect();
+  }, []);
 
   /* And the tint again on every page. Next owns the `theme-color` tags —
      they come from `metadata` — and it re-renders them on a route change,

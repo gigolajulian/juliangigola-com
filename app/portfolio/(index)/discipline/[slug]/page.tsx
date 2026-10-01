@@ -189,6 +189,7 @@ export default async function CategoryPage(
                is in capitals. Julian: each word capitalized, across the
                disciplines. */
             project={{ ...gallery, name, headline: null }}
+            gallery
             next={next}
             prev={prev}
             map={archive}

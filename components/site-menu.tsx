@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { LINKS } from "@/components/site-header";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 /* ── the drawer ─────────────────────────────────────────────
  * Julian: pressing the burger should push the screen left and bring the
@@ -39,14 +40,16 @@ export function SiteMenu() {
          aside puts it back — which is what a page held open at arm’s
          length is asking for. Closed it is `visibility: hidden`, which
          takes the links out of the tab order and out of a screen reader
-         with them, so this covers nothing until it is open. */
+         with them, so this covers nothing until it is open. 31, one over
+         the footer the homepage pins at 30, which stood sharp on the glass
+         (iPad). */
       onClick={(e) => {
         if (e.target === e.currentTarget)
           window.dispatchEvent(new Event("jg:menu-close"));
       }}
-      className="drawer site-menu fixed inset-0 z-30 lg:hidden"
+      className="drawer site-menu fixed inset-0 z-[31] lg:hidden"
     >
-      <div className="site-menu-panel drawer-panel ml-auto flex h-full w-[var(--menu-w)] flex-col justify-center border-l border-border pl-6 pr-7 sm:pl-10 sm:pr-10">
+      <div className="site-menu-panel drawer-panel relative ml-auto flex h-full w-[var(--menu-w)] flex-col justify-center border-l border-border pl-6 pr-7 sm:pl-10 sm:pr-10">
         <nav aria-label="Menu">
           <ul className="flex flex-col items-end gap-1 text-right">
             {LINKS.map((link, i) => (
@@ -98,6 +101,16 @@ export function SiteMenu() {
             ))}
           </ul>
         </nav>
+        {/* The theme, out of the bar on a phone and an iPad and in here
+            (Julian, 2026-10-01): at the foot, on the names' right edge, the
+            last to arrive. `-mr-2` gives the 44px target's padding back so
+            the mark, not the hit area, sits on the margin. */}
+        <div
+          style={{ "--reveal-delay": `${LINKS.length * 60}ms` } as React.CSSProperties}
+          className="site-menu-item drawer-item absolute bottom-[calc(1.5rem+env(safe-area-inset-bottom,0px))] right-7 sm:right-10"
+        >
+          <ThemeToggle className="-mr-2" />
+        </div>
       </div>
     </div>
   );

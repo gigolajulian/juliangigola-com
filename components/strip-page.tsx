@@ -119,6 +119,8 @@ export function TitleCell({
   return (
     <div
       data-hash={hash}
+      // The whole title's width, for the spine (`globals.css`).
+      style={{ "--title-em": titleWidth(title) } as React.CSSProperties}
       className={cn(
         "flex w-full shrink-0 flex-col justify-center gap-4 py-6 sm:gap-5 sm:h-full sm:w-[min(30rem,82vw)] sm:py-0 sm:pr-6",
         className,

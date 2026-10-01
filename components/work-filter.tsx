@@ -65,7 +65,7 @@ export function WorkFilter({
         if (e.target === e.currentTarget)
           window.dispatchEvent(new Event("jg:filter-close"));
       }}
-      className="drawer work-filter fixed inset-0 z-30 lg:hidden"
+      className="drawer work-filter fixed inset-0 z-[31] lg:hidden"
     >
       <div className="work-filter-panel drawer-panel flex h-full w-[var(--filter-w)] flex-col justify-center border-r border-border pl-6 pr-5">
         <nav aria-label="Disciplines">

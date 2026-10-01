@@ -1,5 +1,6 @@
 "use client";
 
+import { openFrom } from "@/components/lead-window";
 import { runDeck, type Deck } from "@/lib/deck";
 import * as React from "react";
 import { useRouter } from "next/navigation";
@@ -127,6 +128,11 @@ const LEAVE_TOUCH = 80;
 const CUE_WAIT = 2000;
 const CUE_MS = 900;
 const CUE_SEEN = "strip-cue";
+/** Julian (2026-10-01): the page itself shows there is more. A paged strip
+    slides this far left as the rail travels, the next screen's edge comes
+    in, and it springs back. Preview only, `?peek=1`, which also shows it
+    on every load so it can be watched again. */
+const PEEK = 64;
 
 /** How wide a column of the wall wants to be, as a share of the shelf's
     height, and the width past which a single frame has to share its
@@ -274,6 +280,11 @@ const leftOf = (cell: HTMLElement) =>
 const centreOf = (el: HTMLElement, i: number) => {
   const cell = el.children[i] as HTMLElement | undefined;
   if (!cell) return null;
+  /* The homepage's last screen, narrowed for the window into the work
+     beside it (`lead-window.tsx`): flush left, so the two fill the
+     screen between them. Centred, the window was half off it. */
+  if (cell.nextElementSibling?.hasAttribute("data-lead-window"))
+    return leftOf(cell);
   return leftOf(cell) - (el.clientWidth - cell.offsetWidth) / 2;
 };
 
@@ -762,8 +773,10 @@ export function Strip({
     const el = scroller.current;
     if (!el || !live) return;
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const peek =
+      paged && new URLSearchParams(window.location.search).get("peek") === "1";
     try {
-      if (window.sessionStorage.getItem(CUE_SEEN)) return;
+      if (!peek && window.sessionStorage.getItem(CUE_SEEN)) return;
     } catch {
       // Private browsing. Showing it once more than it should is the
       // harmless way to be wrong about a courtesy.
@@ -772,27 +785,56 @@ export function Strip({
     if (el.scrollWidth - el.clientWidth < 40) return;
 
     let held: ReturnType<typeof setTimeout>;
+    let wait: ReturnType<typeof setTimeout>;
+    let peeks: Animation[] = [];
     const watched = ["scroll", "wheel", "pointerdown", "touchstart"];
     const quit = () => {
       clearTimeout(wait);
       clearTimeout(held);
+      lifted.disconnect();
+      peeks.forEach((a) => a.cancel());
       setCue(false);
       for (const t of watched) el.removeEventListener(t, quit);
       window.removeEventListener("keydown", quit);
     };
-    const wait = setTimeout(() => {
-      try {
-        window.sessionStorage.setItem(CUE_SEEN, "1");
-      } catch {
-        // As above.
-      }
-      setCue(true);
-      held = setTimeout(quit, CUE_MS);
-    }, CUE_WAIT);
+    const start = () =>
+      (wait = setTimeout(() => {
+        try {
+          window.sessionStorage.setItem(CUE_SEEN, "1");
+        } catch {
+          // As above.
+        }
+        setCue(true);
+        /* Every screen, added to whatever translate it already has, and
+           from script so no screen's own entrance animation is replaced. */
+        if (peek)
+          peeks = Array.from(el.children).map((c) =>
+            c.animate(
+              [
+                { translate: "0px", easing: "cubic-bezier(0.23, 1, 0.32, 1)" },
+                { translate: `${-PEEK}px`, offset: 0.4, easing: "cubic-bezier(0.65, 0, 0.35, 1)" },
+                { translate: "0px" },
+              ],
+              { duration: CUE_MS, composite: "add" },
+            ),
+          );
+        held = setTimeout(quit, CUE_MS);
+      }, CUE_WAIT));
+    /* The two seconds count from the page being seen: on a first visit
+       they ran out under the splash, and the cue played to nobody. */
+    const root = document.documentElement;
+    const lifted = new MutationObserver(() => {
+      if ("intro" in root.dataset) return;
+      lifted.disconnect();
+      start();
+    });
+    if ("intro" in root.dataset)
+      lifted.observe(root, { attributeFilter: ["data-intro"] });
+    else start();
     for (const t of watched) el.addEventListener(t, quit, { passive: true });
     window.addEventListener("keydown", quit);
     return quit;
-  }, [live]);
+  }, [live, paged]);
 
   /* ── the wall ─────────────────────────────────────────────────
    * A discipline that is one gallery is a set of photographs of every
@@ -1546,15 +1588,40 @@ export function Strip({
        inline transform would outrank the exit — the strip would snap back
        to zero and leave from there. The two properties compose instead, so
        the exit slide simply starts from wherever the band had got to. */
+    /* The window into the work, on the homepage: the pull opens it out
+       of the right edge, up to a third of the screen at the count. */
+    const win = el.querySelector<HTMLElement>(":scope > [data-lead-window]");
+    /* Through the window it is one scroll past it, either way (Julian:
+       seamless): the word already said what is next, so there is nothing
+       to make sure of. Everywhere else the band asks for a persistent
+       push (`lead-window.tsx`). */
+    const door = (dir: 1 | -1) =>
+      // A cell of no width, but drawn: none under a finger on a phone.
+      (dir > 0 ? !!win?.getClientRects().length : prevStart && prevHref === "/");
+    const after = (dir: 1 | -1) => (door(dir) ? 90 : LEAVE_AFTER);
     const paint = () => {
       if (leaving) return;
       // Three notches read 48, 94 and 136px, so the band is still growing
       // at the moment it goes. It was half that and Julian said it did not
       // feel like a rubber band: give that cannot be seen is a stop.
       const pull = eased && over ? rubberband(over, width, 0.5) : 0;
-      el.style.translate = pull
-        ? `${-Math.max(-STRETCH, Math.min(STRETCH, pull))}px`
-        : "";
+      /* Into the window, the last screen is the card on top and slides
+         off the portfolio under it by as much as it shows (`lead-pane`),
+         up to three tenths of the screen. Only that screen: the strip
+         moved whole took the pane out of its own clip. A cubic, so it
+         gives easily and then stiffens towards the count, and the
+         crossing is a detent given way (Julian: a tiny bit of
+         resistance). */
+      if (win && over > 0 && door(1)) {
+        const shown = Math.round(
+          innerWidth * 0.3 * (1 - (1 - Math.min(1, over / after(1))) ** 3),
+        );
+        (win.previousElementSibling as HTMLElement).style.translate = `${-shown}px`;
+        win.style.setProperty("--lead-pull", `${shown}px`);
+        return;
+      }
+      const shift = pull ? -Math.max(-STRETCH, Math.min(STRETCH, pull)) : 0;
+      el.style.translate = shift ? `${shift}px` : "";
     };
 
     /* Momentum and friction, measured off the reference. Julian recorded
@@ -1670,6 +1737,10 @@ export function Strip({
       if (leaving || "release" in el.dataset) return;
       el.dataset.release = "";
       el.style.translate = "";
+      if (win) {
+        (win.previousElementSibling as HTMLElement).style.translate = "";
+        win.style.setProperty("--lead-pull", "0px");
+      }
     };
     const relax = (now: number) => {
       if (now - pushed > HOLD) {
@@ -1893,6 +1964,20 @@ export function Strip({
       arriveDir = dir;
       const root = document.documentElement;
       root.dataset.nav = "in";
+      /* The window into the work, opened the rest of the way from where
+         the pull left it, and back from the work the door shutting into
+         the homepage's right edge (`lead-window.tsx`). */
+      if (door(dir)) {
+        if (dir > 0 && win) openFrom(win);
+        root.dataset.navSide = dir > 0 ? "open" : "shut";
+        window.setTimeout(() => {
+          if (root.dataset.navSide === undefined) return;
+          delete root.dataset.nav;
+          delete root.dataset.navSide;
+        }, DEAL_MS);
+        router.push(href);
+        return;
+      }
       /* Julian: back is the stack scrolled backwards, so this page, the
          card on top, goes off to the right and the one before comes up
          from behind (`back` in `globals.css`), not in over it from the
@@ -2126,8 +2211,8 @@ export function Strip({
         }
         push(dy);
         // Past the end, on; past the start, back. Julian asked for both.
-        if (over >= LEAVE_AFTER) leave(1);
-        if (over <= -LEAVE_AFTER) leave(-1);
+        if (over >= after(1)) leave(1);
+        if (over <= -after(-1)) leave(-1);
         return;
       }
       // A notch the other way lets go of the band, and of the count.
@@ -2362,14 +2447,57 @@ export function Strip({
        width stood two thirds of the way between two screens (an iPad on
        the homepage). A frame on, once the deck has laid its screens out
        again at the new width. */
+    /* Julian (2026-10-01): the site should scale smoothly while the window
+       is dragged. It reseated a frame late, so every frame of a drag was
+       painted first at the old pixels, between two screens (154 frames in
+       a sweep, up to 640px off), and then jumped. Here it is put back in
+       the observer, after the new layout and before that frame is
+       painted.
+
+       A strip that is not paged (the portfolio) kept its pixels too, and
+       its grid reflows at a new size, so a drag ended 2300px from the
+       work it was on. It holds the cell at its left edge where it was
+       instead, the way a page keeps its place when it reflows downwards:
+       noted whenever the strip comes to rest, put back on a resize. */
     let across = el.clientWidth;
+    let tall = el.clientHeight;
+    let anchor = { i: 0, off: 0 };
+    const note = () => {
+      const kids = el.children;
+      for (let i = 0; i < kids.length; i++) {
+        const cell = kids[i] as HTMLElement;
+        const left = leftOf(cell);
+        if (left + cell.offsetWidth > el.scrollLeft + 1) {
+          anchor = { i, off: left - el.scrollLeft };
+          return;
+        }
+      }
+    };
+    let noting = 0;
+    const onNote = () => {
+      window.clearTimeout(noting);
+      noting = window.setTimeout(note, 120);
+    };
+    note();
+    /* Moved off the start or not, for what stands at the start
+       (`chapter-alias`, `work-cells.tsx`: the portfolio's first spine
+       reads Portfolio there and its own name once the strip moves). Marked
+       moved rather than at the start, so the page as it first draws, the
+       frame the window's flight lands on, is at the start. */
+    const onStart = () => el.toggleAttribute("data-moved", el.scrollLeft >= 8);
+    onStart();
     const reseat = () => {
-      if (!paged || el.clientWidth === across) return;
+      if (el.clientWidth === across && el.clientHeight === tall) return;
       across = el.clientWidth;
-      requestAnimationFrame(() => {
+      tall = el.clientHeight;
+      if (paged) {
         const where = centreOf(el, seat);
         if (where !== null) el.scrollLeft = where;
-      });
+      } else {
+        const cell = el.children[anchor.i] as HTMLElement | undefined;
+        if (cell) el.scrollLeft = leftOf(cell) - anchor.off;
+      }
+      x = target = el.scrollLeft;
     };
 
 
@@ -2415,6 +2543,8 @@ export function Strip({
 
     el.addEventListener("jg:home", onHome);
     el.addEventListener("scroll", onSettle, { passive: true });
+    el.addEventListener("scroll", onNote, { passive: true });
+    el.addEventListener("scroll", onStart, { passive: true });
     el.addEventListener("focusin", onFocusIn);
     document.addEventListener("keydown", onTab, true);
     el.addEventListener("wheel", onWheel, { passive: false });
@@ -2443,8 +2573,11 @@ export function Strip({
       window.clearTimeout(settle);
       resized.disconnect();
       wall?.cancel();
+      window.clearTimeout(noting);
       el.removeEventListener("jg:home", onHome);
       el.removeEventListener("scroll", onSettle);
+      el.removeEventListener("scroll", onNote);
+      el.removeEventListener("scroll", onStart);
       el.removeEventListener("focusin", onFocusIn);
       document.removeEventListener("keydown", onTab, true);
       el.removeEventListener("wheel", onWheel);

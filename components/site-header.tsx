@@ -48,12 +48,12 @@ const useHash = () =>
  * ─────────────────────────────────────────────────────────────── */
 
 export const LINKS = [
-  // Julian's order (2026-09-30: Portfolio first). About and Contact are
+  // Julian's order (2026-10-01: Portfolio last). About and Contact are
   // homepage screens.
-  { href: "/portfolio", label: "Portfolio" },
   { href: "/#sessions", label: "Sessions" },
   { href: "/#about", label: "About" },
   { href: "/#contact", label: "Contact" },
+  { href: "/portfolio", label: "Portfolio" },
 ] as const;
 
 export function SiteHeader() {
@@ -412,13 +412,12 @@ export function SiteHeader() {
             </ul>
           </nav>
 
-          {/* Outside the nav, at every width. It is not a destination — it
-              changes how the page looks rather than going anywhere — and on
-              a phone it has to be reachable without opening the menu first,
-              which is why it sits beside the burger rather than inside it.
-              `-mr-2` pulls the 44px target's padding back so the artwork
-              lines up with the margin, not the hit area. */}
-          <ThemeToggle className="-mr-2 lg:mr-0" />
+          {/* Outside the nav: it is not a destination, it changes how the
+              page looks rather than going anywhere. Here on a desktop only;
+              under the burger it is in the menu (`site-menu.tsx`), at
+              Julian's ask (2026-10-01), so the bar holds the name and the
+              burger and nothing else. */}
+          <ThemeToggle className="hidden lg:flex" />
 
           <button
             ref={burger}

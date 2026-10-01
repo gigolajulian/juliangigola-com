@@ -16,8 +16,12 @@ export function GroupCell({
   hash,
   i,
   cta = "All projects",
+  alias,
 }: {
   name: string;
+  /** The word the cell stands under at the start of the strip, swapped for
+      its own name once the strip moves (`data-moved`, `strip.tsx`). */
+  alias?: string;
   href: string;
   hash: string;
   /** Its place in the strip, for the stagger of the arrival. */
@@ -41,10 +45,19 @@ export function GroupCell({
       style={{ "--i": i } as React.CSSProperties}
     >
       <h2
-        style={{ "--n": name.length } as React.CSSProperties}
+        style={{ "--n": Math.max(name.length, alias?.length ?? 0) } as React.CSSProperties}
         className="chapter-name font-display uppercase leading-[0.95] tracking-[0]"
       >
-        {name}
+        {alias ? (
+          <>
+            <span className="chapter-alias" aria-hidden>
+              {alias}
+            </span>
+            <span className="chapter-own">{name}</span>
+          </>
+        ) : (
+          name
+        )}
       </h2>
       <Link
         prefetch={false}

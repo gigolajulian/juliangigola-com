@@ -79,6 +79,15 @@ export function ContactForm() {
   const [type, setType] = React.useState<string>(
     TYPES.some((t) => t.value === preset) ? (preset as string) : "editorial",
   );
+  /* And again when the link changes under a form already on the page.
+     The form lives on the homepage, so it is mounted long before a
+     session's Inquire is pressed: Graduation landed here on Editorial,
+     asking for a publication and an issue date (2026-10-01). */
+  const [seen, setSeen] = React.useState(preset);
+  if (preset !== seen) {
+    setSeen(preset);
+    if (TYPES.some((t) => t.value === preset)) setType(preset as string);
+  }
   const [state, formAction, pending] = React.useActionState(
     submitEnquiry,
     INITIAL,
@@ -314,7 +323,7 @@ export function ContactForm() {
         placeholder={followUp.placeholder}
         // Keyed on `type` so switching shoot type actually swaps the field
         // rather than leaving an answer to the previous question in it.
-        key={`detail-${type}`}
+        key={`detail-${type}-${presetSession ?? ""}`}
         defaultValue={
           values.detail ||
           (presetRef ? `Similar to ${presetRef}` : undefined) ||
