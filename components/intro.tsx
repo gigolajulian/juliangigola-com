@@ -41,6 +41,13 @@ import { BlinkingMark } from "@/components/not-found-scene";
 const CAP = 3000;
 const BEAT = 140; // full, before it lifts
 const OUT = 1000; // the lift
+/* Julian (2026-10-01): the lift should reveal the hero. It
+   lifted off a page whose entrance had not started, black under black,
+   so only the eye seemed to move. Here the page starts its entrance
+   under the panel the moment it is ready, usually while the sweep is
+   still slowing into full, and the panel lifts no sooner than this long
+   after, uncovering the name already up and the photographs landing. */
+const UNDER = 450;
 
 const lift = () => document.documentElement.removeAttribute("data-intro");
 
@@ -153,19 +160,23 @@ export function Intro() {
       else if (sweep?.playState === "paused") sweep.play();
     }, 50);
 
-    /* Full. A beat, and then the layer lifts off the top of the
-       screen, and the page starts its own entrance under it at the same
-       moment. Full and ready both: on a slow phone the sweep can be at full
+    /* Ready: the page starts its own entrance under the panel (`UNDER`).
+       Full: a beat, and then the layer lifts off the top of the screen.
+       Full and ready both: on a slow phone the sweep can be at full
        before this script has even arrived. */
-    const full = Promise.all([
-      sweep?.finished,
-      Promise.race([Promise.all(tasks), wait(CAP - performance.now())]),
-    ]);
+    const ready = Promise.race([Promise.all(tasks), wait(CAP - performance.now())]);
+    let under = 0;
+    ready.then(() => {
+      root.dataset.intro = "lift";
+      under = performance.now();
+    });
+    const full = Promise.all([sweep?.finished, ready]);
     full
       .catch(() => {})
       .then(async () => {
         window.clearInterval(hold);
         await wait(BEAT);
+        await wait(under + UNDER - performance.now());
         box.current?.classList.add("jg-intro-open");
         root.dataset.intro = "lift";
         box.current?.animate(

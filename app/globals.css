@@ -454,11 +454,20 @@
    size and drawn at half (`scale`), so that one pixel per CSS pixel is
    two on screen. Everything measured in the card's own pixels is doubled
    to look as it did: the corner, the blurs (`--os`), the glass's rim and
-   the hover shadow (`CoverCard`). `scale` is flat, so `--fz` is not. */
+   the hover shadow (`CoverCard`). `scale` is flat, so `--fz` is not.
+   Not while it fades in (`jg-fade` holds `--os` at 1): a blur on a card
+   twice the size stalled the splash's lift for up to 56ms, so the card
+   blurs in at its own size and doubles once it has landed, which looks
+   the same. */
+@property --os {
+  syntax: "<number>";
+  inherits: true;
+  initial-value: 1;
+}
 .cover-float-card {
   --os: 2;
   position: absolute;
-  inset: -50%;
+  inset: calc(50% - 50% * var(--os));
   display: block;
   overflow: hidden;
   border-radius: calc(var(--radius-photo) * var(--os));
@@ -770,8 +779,11 @@
 @keyframes jg-fade {
   from {
     opacity: 0;
-    /* `--os`: drawn on a card at twice its size (`.cover-float-card`). */
-    filter: blur(calc(var(--h-fade-blur, 7px) * var(--os, 1)));
+    filter: blur(var(--h-fade-blur, 7px));
+    --os: 1;
+  }
+  to {
+    --os: 1;
   }
 }
 @media (prefers-reduced-motion: reduce) {
