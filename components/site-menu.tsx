@@ -46,7 +46,7 @@ export function SiteMenu() {
       }}
       className="drawer site-menu fixed inset-0 z-30 lg:hidden"
     >
-      <div className="site-menu-panel drawer-panel ml-auto flex h-full w-[var(--menu-w)] flex-col justify-center border-l border-border pl-6 pr-7">
+      <div className="site-menu-panel drawer-panel ml-auto flex h-full w-[var(--menu-w)] flex-col justify-center border-l border-border pl-6 pr-7 sm:pl-10 sm:pr-10">
         <nav aria-label="Menu">
           <ul className="flex flex-col items-end gap-1 text-right">
             {LINKS.map((link, i) => (

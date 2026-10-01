@@ -179,7 +179,8 @@ export function ContactForm() {
         e.preventDefault();
         e.currentTarget.querySelector<HTMLElement>(":invalid")?.focus();
       }}
-      className="flex flex-col gap-5"
+      /* Julian: on a phone the whole card fits a screen, so tighter there. */
+      className="flex flex-col gap-3.5 sm:gap-5"
       noValidate
     >
       {/* The honeypot. Hidden from sight, from the tab order and from
@@ -235,7 +236,40 @@ export function ContactForm() {
           moved is the position: name, email, then this, rather than the
           form opening on the site's question before the visitor has
           written a word. */}
-      <fieldset>
+      {/* Julian: a dropdown on a phone, where the six chips took two rows
+          and a third of the screen. It only sets the choice; the chips stay
+          in the form (hidden) and carry the value, so there is one answer. */}
+      <div className="sm:hidden">
+        <label htmlFor="field-type" className="label block text-muted-foreground">
+          What kind of shoot?
+        </label>
+        <div className="relative mt-1">
+          <select
+            id="field-type"
+            value={type}
+            onChange={(e) => setType(e.target.value)}
+            className="block w-full appearance-none rounded-none border-0 border-b border-border bg-transparent py-2 pr-8 text-base uppercase transition-colors duration-200 focus:border-foreground focus:outline-none"
+          >
+            {TYPES.map((t) => (
+              <option key={t.value} value={t.value}>
+                {t.label}
+              </option>
+            ))}
+          </select>
+          <svg
+            aria-hidden
+            viewBox="0 0 12 12"
+            className="pointer-events-none absolute right-1 top-1/2 size-3 -translate-y-1/2 text-muted-foreground"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.5"
+          >
+            <path d="M2 4.5 6 8.5 10 4.5" />
+          </svg>
+        </div>
+      </div>
+
+      <fieldset className="max-sm:hidden">
         <legend className="label text-muted-foreground">
           What kind of shoot?
         </legend>
@@ -334,7 +368,7 @@ export function ContactForm() {
           disabled={pending}
           aria-disabled={!ready || undefined}
           aria-describedby={!ready ? "enquire-missing" : undefined}
-          className="label action px-6 py-4 press active:scale-[0.97] aria-disabled:active:scale-100"
+          className="label action px-6 py-3 press active:scale-[0.97] aria-disabled:active:scale-100 sm:py-4"
         >
           {/* Julian: no orb on the button. StatusMark's cross if it could
               not send. Hidden from screen readers; the words say it. */}
@@ -357,7 +391,8 @@ export function ContactForm() {
             Your name, your email and a line about the shoot
           </p>
         ) : null}
-        <p className="text-left text-xs text-muted-foreground">
+        {/* The address is above the form on a phone already. */}
+        <p className="text-left text-xs text-muted-foreground max-sm:hidden">
           Or email{" "}
           <a
             href="mailto:hello@juliangigola.com"
@@ -405,7 +440,9 @@ function Field({
         // the border, which says nothing to anyone not looking at it.
         aria-describedby={error ? errorId : undefined}
         className={cn(
-          "mt-2 block w-full border-0 border-b bg-transparent py-2.5 text-base",
+          "mt-1 block w-full border-0 border-b bg-transparent py-2 text-base sm:mt-2 sm:py-2.5",
+          // Two lines of message on a phone, where the card has a screen.
+          as === "textarea" && "max-sm:h-[3.75rem] max-sm:resize-none",
           "transition-colors duration-200 placeholder:text-muted-foreground/60",
           // Focus is the rule under the field coming up to full ink. No
           // accent ring as well: a text field shows focus whether the

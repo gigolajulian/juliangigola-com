@@ -40,9 +40,12 @@ export function ContactScreen() {
       data-hash="contact"
       className="contact-inquire relative isolate grid w-full shrink-0 grid-cols-1 gap-10 px-6 py-12 sm:h-full sm:grid-cols-[minmax(0,1fr)_minmax(0,2fr)] sm:grid-rows-[minmax(0,1fr)] sm:items-center sm:gap-x-12 sm:pb-6 sm:pl-10 sm:pr-10 sm:pt-24 lg:gap-x-16"
     >
+      {/* Julian (Pixel): a scroll inside the page on a phone, 2px of it,
+          held the finger and the page would not move. Its own scroll from
+          `sm` only, where the screen has a fixed height. */}
       <div
         data-scroll
-        className="flex min-h-0 flex-col gap-8 overflow-y-auto overscroll-contain sm:max-h-full short:gap-5"
+        className="flex min-h-0 flex-col gap-8 sm:max-h-full sm:overflow-y-auto sm:overscroll-contain short:gap-5"
       >
         <div className="flex flex-col gap-5">
           <RisingTitle text="Get in Touch" className="contact-title sm:max-lg:text-5xl" />
@@ -151,7 +154,7 @@ export function ContactScreen() {
         <div
           data-scroll
           data-dial="form"
-          className="glass-surface min-h-0 flex-1 rounded-[16px] overflow-y-auto overscroll-contain border border-border p-6 sm:max-h-full sm:px-8 sm:py-6"
+          className="glass-surface min-h-0 flex-1 rounded-[16px] border border-border p-5 sm:max-h-full sm:p-6 sm:overflow-y-auto sm:overscroll-contain sm:px-8 sm:py-6"
         >
           <Suspense fallback={null}>
             <ContactForm />

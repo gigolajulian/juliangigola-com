@@ -3219,6 +3219,14 @@ a.strip-cell {
   --menu-w: min(20rem, 82vw);
   --filter-w: min(24rem, 82vw);
 }
+/* Julian (iPad upright): more room from the edge. The panel's sides are
+   the page's 40px gutter from `sm`, and 20rem less those left PORTFOLIO
+   at 3.5rem 15px wider than the panel. */
+@media (min-width: 40rem) {
+  :root {
+    --menu-w: min(24rem, 82vw);
+  }
+}
 
 /* ── the bar under the Dynamic Island ─────────────────────────────
  * Julian, on an iPhone: the bar should carry on up into the island's
@@ -3324,11 +3332,9 @@ a.strip-cell {
     margin-top: 0;
     padding-top: 1.5rem;
   }
-  @media (pointer: coarse) {
-    :root[data-under] .strip-rail {
-      padding-top: 0.75rem;
-    }
-  }
+  /* Under a finger it was 0.75rem, and the screen's name over the bar
+     sat on the pane's hairline (Julian, iPad upright). The same room as a
+     desktop now: one pane, one measure. */
   @media (max-height: 30rem) {
     :root[data-under] .strip-rail {
       padding-top: 0.5rem;
@@ -4899,7 +4905,11 @@ h2:not(.label) {
     height: calc(100% - 0.75rem);
     overflow-y: auto;
     overscroll-behavior: contain;
+    /* Julian (iPad upright): a nudge down. Centred in the screen where it
+       fits, from the top where it does not (`safe`), so a phone on its
+       side still scrolls from the title. */
     align-content: start;
+    align-content: safe center;
     grid-template-rows: auto auto;
     /* Clear of the bar: a homepage screen now, under a bar 52px tall
        here, and 1.5rem put the title's top under it. */
