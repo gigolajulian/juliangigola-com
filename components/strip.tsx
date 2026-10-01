@@ -420,6 +420,46 @@ export function Strip({
      feel like changing pages. Same gestures, twice the work on screen. */
   const live = stack ? wide : true;
 
+  /* Stacked down a phone the strip is not live: none of its scrolling runs,
+     and the cells are no more than sections of a page that scrolls. Its
+     jumps went with it. Cells carry `data-hash`, not an id, so the browser
+     could not find them either, and every link to a screen (the cover's
+     Book a session, the menu's About, /sessions redirecting to
+     /#sessions) changed the address and left a phone at the top. Here the
+     page is scrolled to the cell instead: on arrival, on a hash change, and
+     on a link to this page, which Next moves without a hashchange. */
+  React.useEffect(() => {
+    const el = scroller.current;
+    if (!el || live) return;
+    const go = (smooth: boolean) => {
+      const i = cellFor(el, decodeURIComponent(window.location.hash.slice(1)));
+      const cell = el.children[i] as HTMLElement | undefined;
+      if (!cell) return false;
+      const still = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      cell.scrollIntoView({ block: "start", behavior: smooth && !still ? "smooth" : "auto" });
+      return true;
+    };
+    go(false);
+    const onHash = () => go(true);
+    const onLink = (e: MouseEvent) => {
+      if (e.defaultPrevented || e.button || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+      const a = (e.target as Element).closest?.<HTMLAnchorElement>("a[href]");
+      if (!a || a.target) return;
+      const url = new URL(a.href);
+      if (url.origin !== location.origin || url.pathname !== location.pathname) return;
+      if (cellFor(el, decodeURIComponent(url.hash.slice(1))) < 0) return;
+      e.preventDefault();
+      history.pushState(null, "", url.href);
+      go(true);
+    };
+    window.addEventListener("hashchange", onHash);
+    document.addEventListener("click", onLink, true);
+    return () => {
+      window.removeEventListener("hashchange", onHash);
+      document.removeEventListener("click", onLink, true);
+    };
+  }, [live]);
+
   /* ── the rack pairs like with like ────────────────────────────
    * A column of the rack is two cells one above the other and is as wide
    * as the wider of them, so a portrait sitting above a landscape is
