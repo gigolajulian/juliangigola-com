@@ -613,17 +613,16 @@ const HAS_VIDEOS = CONTENT.videos.length > 0;
  * falls back to the full index instead of a route that does not exist.
  */
 /** Whether a discipline gets a listing page: not Video (its page is the
-    films) or Cover art (its project page), and not one with no work yet. */
+    films), and not one with no work yet. Cover art has one again (Julian,
+    2026-09-30): its rack under the filters, scrolling sideways like every
+    other discipline, rather than a page of its own scrolling down. */
 const isListing = (slug: string): boolean =>
-  slug !== "video" && slug !== "coverart" && projectsIn(slug).length > 0;
+  slug !== "video" && projectsIn(slug).length > 0;
 
 export const categoryHref = (categorySlug: string): string => {
   // Video's page is the work rather than a listing of it, like `/portfolio/coverart`
   // — and unlike every other discipline, what fills it is not in the archive.
   if (categorySlug === "video") return "/portfolio/video";
-
-  // Julian (2026-09-29): cover art in the projects, at its own project page.
-  if (categorySlug === "coverart") return "/portfolio/coverart";
 
   if (!isListing(categorySlug)) return "/portfolio";
   /* A one-gallery discipline used to go to its project page instead —
