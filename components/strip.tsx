@@ -181,8 +181,11 @@ const STRETCH = 160;
     makes leaving any easier. */
 const WHEEL = 3;
 const PAD = 1.8;
-/** Lenis's ease per frame for each: a notch glides, a trackpad follows. */
-const MOUSE_LERP = 0.08;
+/** Lenis's ease per frame for each: a notch glides, a trackpad follows.
+    A notch was 0.08, which took about 460ms to cover nine tenths of its
+    travel and read as lag even at a full frame rate (Julian: the portfolio
+    is laggy on a desktop); 0.13 takes about 270. */
+const MOUSE_LERP = 0.13;
 const PAD_LERP = 0.2;
 
 /** How long after the strip stops before the rail takes the shape of the
@@ -1095,7 +1098,7 @@ export function Strip({
        hand rather than through state: onto the scroller as `data-at`, and
        into whatever `[data-strip-at]` the page put in its head, so the
        running head can say where you are without a render. */
-    const land = (i: number) => {
+    const land = (i: number, x: number) => {
       atRef.current = i;
       setAt(i);
       /* Julian: the screens either side loaded before they are asked for,
@@ -1119,7 +1122,10 @@ export function Strip({
          the filter. It fills in as soon as the sequence moves. */
       let word = "";
       let section: HTMLElement | null = null;
-      for (let k = el.scrollLeft <= 2 ? -1 : i; k >= 0; k--) {
+      /* `x` from `read()`: reading `scrollLeft` again here, after the
+         opacity writes, laid the page out to answer (Julian: the portfolio
+         is laggy). */
+      for (let k = x <= 2 ? -1 : i; k >= 0; k--) {
         const c = el.children[k] as HTMLElement;
         const w = c.dataset.label;
         if (w !== undefined) {
@@ -1223,8 +1229,16 @@ export function Strip({
     let span = 0;
     let reach = 0;
     let firstEnd = 0;
+    // The cells the rail draws, by index: measured with the geometry.
+    let ticked: number[] = [];
+    // The cells whose words are faded now, so a frame leaves the rest alone.
+    const faded = new Set<number>();
     const remeasure = () => {
       const kids = Array.from(el.children) as HTMLElement[];
+      ticked = kids.flatMap((k, i) => (k.dataset.tick !== undefined ? [i] : []));
+      // Every cell looked at once after a change, so none keeps a stale fade.
+      faded.clear();
+      kids.forEach((_, i) => faded.add(i));
       span = el.clientWidth;
       reach = el.scrollWidth - span;
       centres = kids.map((c) => leftOf(c) + c.offsetWidth / 2);
@@ -1278,10 +1292,16 @@ export function Strip({
            writes taken out. That was the lag Julian could feel. */
         const par = off / span;
         const away = Math.min(1, Math.abs(par));
+        /* A cell far off and already clear is skipped outright: the
+           portfolio has two hundred, and every one was looked over on
+           every frame. */
+        if (Math.abs(par) > 1.5 && !faded.has(i)) return;
         const soft = fades(kids[i]);
         if (Math.abs(par) > 1.5) {
+          faded.delete(i);
           for (const c of soft) if (c.style.opacity) c.style.opacity = "";
         } else if (!still) {
+          faded.add(i);
           const o = Math.max(0, Math.min(1, (1 - away) / 0.45)).toFixed(2);
           for (const c of soft) if (c.style.opacity !== o) c.style.opacity = o;
         }
@@ -1306,9 +1326,6 @@ export function Strip({
          that leads on or on a page of words, neither of which the rail
          draws, and `at` pointing at one of them lit nothing at all —
          measured, the rail went blank on the final frame of the travel. */
-      const ticked = kids.flatMap((k, i) =>
-        k.dataset.tick !== undefined ? [i] : [],
-      );
       const lastTick = ticked.length
         ? ticked[ticked.length - 1]
         : kids.length - 1;
@@ -1319,9 +1336,9 @@ export function Strip({
          filter nobody had scrolled — measured on Artist presskit,
          Portraits and Mixed media, where the whole run is on screen at
          once. Nothing has moved, so the rail says the beginning. */
-      if (room <= 0) land(firstTick);
-      else if (x >= room - 2) land(lastTick);
-      else if (x <= 2) land(firstTick);
+      if (room <= 0) land(firstTick, x);
+      else if (x >= room - 2) land(lastTick, x);
+      else if (x <= 2) land(firstTick, x);
       else {
         /* ── the eye slides across the window as the shelf travels ──
            At the start it reads the left edge, at the middle of the travel
@@ -1355,7 +1372,7 @@ export function Strip({
             near = i;
           }
         }
-        land(near);
+        land(near, x);
       }
     };
     /* The ruler's ticks, read off the cells once they are in the DOM: a

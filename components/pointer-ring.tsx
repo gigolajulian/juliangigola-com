@@ -102,6 +102,9 @@ export function PointerRing() {
     // The button it has merged with, and the size it last wrote for it.
     let hug: HTMLElement | null = null;
     let hugSize = "";
+    /* Frames the button it holds has stood still, and where it stood. */
+    let calm = 0;
+    let hugAt = "";
     const sizes = new ResizeObserver(() => (rope = el.offsetWidth * ROPE));
     sizes.observe(el);
 
@@ -117,6 +120,9 @@ export function PointerRing() {
           el.style.setProperty("--mw", `${b.width + OUTSET * 2}px`);
           el.style.setProperty("--mh", `${b.height + OUTSET * 2}px`);
         }
+        const at = `${Math.round(b.left)}|${Math.round(b.top)}`;
+        calm = at === hugAt ? calm + 1 : 0;
+        hugAt = at;
         tx = b.left + b.width / 2 + (mx - b.left - b.width / 2) * PULL;
         ty = b.top + b.height / 2 + (my - b.top - b.height / 2) * PULL;
       }
@@ -125,8 +131,13 @@ export function PointerRing() {
       cx += (tx - cx) * k;
       cy += (ty - cy) * k;
       el.style.transform = `translate3d(${cx.toFixed(4)}px, ${cy.toFixed(4)}px, 0) scale(${hug ? 1 : 1 - Math.min(lag, 0.5)})`;
-      // Held on a button it keeps reading it, which a gliding strip moves.
-      raf = hug || Math.abs(tx - cx) + Math.abs(ty - cy) > 0.05 ? requestAnimationFrame(tick) : 0;
+      /* Held on a button it keeps reading it, which a gliding strip moves,
+         but only until the button has stood still a few frames and the
+         circle has arrived: it read the button every frame for as long as
+         the pointer rested on one, 112 frames in two idle seconds on the
+         portfolio (Julian: laggy). A scroll lets go of it (`hush`). */
+      const moving = Math.abs(tx - cx) + Math.abs(ty - cy) > 0.05;
+      raf = moving || (hug && calm < 8) ? requestAnimationFrame(tick) : 0;
       if (!raf) last = 0;
     };
     const place = (e: PointerEvent) => {
@@ -162,7 +173,16 @@ export function PointerRing() {
     });
 
     let lastMove: PointerEvent | null = null;
+    /* Julian: no ring while scrolling (on Editorial, covers kept raising
+       VIEW as they glided under the hand). Set by a scroll, cleared by the
+       hand moving again: `pointerover` and a still `pointermove` are the
+       page moving under it, not the hand. */
+    let quiet = false;
     const move = (e: PointerEvent) => {
+      if (quiet) {
+        if (e.type !== "pointermove" || (!e.movementX && !e.movementY)) return;
+        quiet = false;
+      }
       lastMove = e;
       place(e);
       const t = e.target as Element | null;
@@ -237,7 +257,14 @@ export function PointerRing() {
     const recheck = () => lastMove && move(lastMove);
     document.addEventListener("credit-card", recheck);
     window.addEventListener("blur", away);
+    const hush = () => {
+      if (quiet) return;
+      quiet = true;
+      away();
+    };
+    window.addEventListener("scroll", hush, { capture: true, passive: true });
     return () => {
+      window.removeEventListener("scroll", hush, { capture: true });
       document.removeEventListener("credit-card", recheck);
       document.removeEventListener("pointermove", move);
       document.removeEventListener("pointerover", move);

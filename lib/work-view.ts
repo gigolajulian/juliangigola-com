@@ -47,15 +47,15 @@ const readView = (): WorkView => {
   if (query.trim()) return "list";
   try {
     const kept = window.localStorage.getItem(KEY);
-    return kept === "grid" ? kept : "strip";
+    return kept === "strip" ? kept : "grid";
   } catch {
     // Private browsing: it works, it is simply not remembered.
-    return "strip";
+    return "grid";
   }
 };
 
-/** The strip, for everybody who has not said otherwise. */
-const server = (): WorkView => "strip";
+/** Julian (2026-10-01): the grid, for everybody who has not said otherwise. */
+const server = (): WorkView => "grid";
 
 export const useWorkView = (): WorkView =>
   React.useSyncExternalStore(subscribe, readView, server);

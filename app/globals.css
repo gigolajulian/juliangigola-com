@@ -446,12 +446,23 @@
   pointer-events: none;
   transform: translateZ(calc(var(--fz, 0px) + 1px));
 }
+/* Julian: the cover's photographs looked low quality, and the files were
+   not it. Chrome rasterises a layer inside the turned, perspective space
+   at one pixel per CSS pixel, not the screen's two, so a 2x screen got a
+   picture stretched to twice its raster (measured 2026-10-01: SSIM 0.77
+   against the same file drawn flat). The card is laid out at twice its
+   size and drawn at half (`scale`), so that one pixel per CSS pixel is
+   two on screen. Everything measured in the card's own pixels is doubled
+   to look as it did: the corner, the blurs (`--os`), the glass's rim and
+   the hover shadow (`CoverCard`). `scale` is flat, so `--fz` is not. */
 .cover-float-card {
+  --os: 2;
   position: absolute;
-  inset: 0;
+  inset: -50%;
   display: block;
   overflow: hidden;
-  border-radius: var(--radius-photo);
+  border-radius: calc(var(--radius-photo) * var(--os));
+  scale: calc(1 / var(--os));
   transform: translateZ(var(--fz, 0px));
 }
 /* ── one corner for every photograph ──────────────────────────────
@@ -647,7 +658,7 @@
   /* The swell is a spring now (`cover-card.tsx`), through
      `--hover-scale`; the move forward stays here. */
   .cover-float-card {
-    scale: var(--hover-scale, 1);
+    scale: calc(var(--hover-scale, 1) / var(--os));
     transition:
       transform 700ms cubic-bezier(0.65, 0, 0.35, 1),
       translate 700ms cubic-bezier(0.65, 0, 0.35, 1),
@@ -668,7 +679,7 @@
   .cover-float-ring:has(.cover-float-frame:hover) .cover-float-card {
     /* Julian: less blur round the one in focus, and glass over the rest
        instead (the pane below). No darkening. */
-    filter: blur(var(--h-others-blur, 0.3px));
+    filter: blur(calc(var(--h-others-blur, 0.3px) * var(--os)));
     transition-delay: var(--blur-wait);
   }
   /* The glass: a clear pane over each of the others, the site's own
@@ -688,8 +699,8 @@
       transparent 60%
     );
     box-shadow:
-      inset 0 0 0 1px color-mix(in oklab, white 20%, transparent),
-      inset 0 1px 0 color-mix(in oklab, white 42%, transparent);
+      inset 0 0 0 calc(1px * var(--os)) color-mix(in oklab, white 20%, transparent),
+      inset 0 calc(1px * var(--os)) 0 color-mix(in oklab, white 42%, transparent);
     opacity: 0;
     transition: opacity 600ms ease;
     transition-delay: var(--release-wait);
@@ -759,7 +770,8 @@
 @keyframes jg-fade {
   from {
     opacity: 0;
-    filter: blur(var(--h-fade-blur, 7px));
+    /* `--os`: drawn on a card at twice its size (`.cover-float-card`). */
+    filter: blur(calc(var(--h-fade-blur, 7px) * var(--os, 1)));
   }
 }
 @media (prefers-reduced-motion: reduce) {

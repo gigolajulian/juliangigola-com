@@ -842,7 +842,8 @@ export function CoverCard({ children }: { children: React.ReactNode }) {
       initial={{ "--hover-scale": 1 }}
       animate={{
         "--hover-scale": hover ? cards.grow : 1,
-        boxShadow: `0 0 ${hover ? cards.shadow.blur : 0}px rgb(0 0 0 / ${cards.shadow.opacity})`,
+        // Doubled: the card is drawn at half its size (`--os`, globals.css).
+        boxShadow: `0 0 ${hover ? cards.shadow.blur * 2 : 0}px rgb(0 0 0 / ${cards.shadow.opacity})`,
       }}
       transition={{
         /* The panel can flip the spring to a curve, which motion spells

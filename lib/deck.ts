@@ -332,6 +332,8 @@ function runChapters(el: HTMLElement): () => void {
 
   /* The scroll and the window handed over by `deal`, read before it
      writes, for the same reason as above. */
+  /* The window's width, as `deal` measured it. */
+  let width = 0;
   const depth = (x = el.scrollLeft, vw = el.clientWidth) => {
     for (const ch of chapters) {
       const p = Math.min(1, Math.max(0, (x - ch.pinX) / vw));
@@ -358,6 +360,7 @@ function runChapters(el: HTMLElement): () => void {
     const heads = kids.filter((k) => k.hasAttribute("data-deck"));
     const pad = parseFloat(getComputedStyle(el).paddingLeft) || 0;
     const vw = el.clientWidth;
+    width = vw;
     const x0 = el.scrollLeft;
     const mid = el.clientHeight / 2;
     const top = topOf(el);
@@ -395,7 +398,21 @@ function runChapters(el: HTMLElement): () => void {
     depth(x0, vw);
   };
 
-  const onScroll = () => depth();
+  /* Once a frame, with the width the deal measured (Julian: the
+     portfolio is laggy on a desktop). It read the window's width on every
+     scroll event, and a reading after the strip's own writes in the same
+     frame laid the page out to answer: 400 style passes over a few
+     seconds of wheeling. The width only changes on a resize, which deals
+     again. A frame callback asked for from a scroll event runs in that
+     same frame, so the pin and the depth still move together. */
+  let queued = 0;
+  const onScroll = () => {
+    if (queued) return;
+    queued = requestAnimationFrame(() => {
+      queued = 0;
+      depth(el.scrollLeft, width || el.clientWidth);
+    });
+  };
   /* Dealt once the page is on screen, not while it is arriving. A page
      change holds the screen on the page it left until the new one has
      been laid out, and the deal's readings and writes lay it out twice
@@ -413,6 +430,7 @@ function runChapters(el: HTMLElement): () => void {
   return () => {
     first();
     el.removeEventListener("scroll", onScroll);
+    cancelAnimationFrame(queued);
     wide.removeEventListener("change", deal);
     calm.removeEventListener("change", deal);
     window.removeEventListener("resize", deal);
