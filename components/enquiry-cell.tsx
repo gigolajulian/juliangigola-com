@@ -87,7 +87,8 @@ export function EnquiryCell({
       <div
         className={cn(
           "relative flex flex-col gap-6",
-          aside && "justify-center px-6 py-12 sm:px-10 sm:py-0 lying:gap-4 lying:px-10 lying:pt-12",
+          /* Centred under the bar (`--bar-h`), as the doors beside it are. */
+          aside && "justify-center px-6 py-12 sm:px-10 sm:pb-0 sm:pt-[var(--bar-h)] lying:gap-4 lying:px-10 lying:pt-12",
         )}
       >
         <div>

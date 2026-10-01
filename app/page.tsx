@@ -2,7 +2,7 @@ import type { CSSProperties } from "react";
 import Link from "next/link";
 import { CoverFloat } from "@/components/cover-float";
 import { Strip } from "@/components/strip";
-import { StripPage } from "@/components/strip-page";
+import { RisingTitle, StripPage } from "@/components/strip-page";
 import { EnquiryCell } from "@/components/enquiry-cell";
 import { Testimonials } from "@/components/testimonials";
 import { WorkBand } from "@/components/work-band";
@@ -91,6 +91,10 @@ export default function Home() {
           aria-label={`Services, ${DISCIPLINE_TILES.length} disciplines`}
           className="relative flex w-full shrink-0 flex-col sm:h-full"
         >
+          {/* On a phone the strip's rail is gone, and with it the only
+              thing naming this screen: it was the one section of the stack
+              with no title, a grid straight after the cover. */}
+          <RisingTitle text="Services" className="px-6 pt-12 sm:hidden" />
           {/* Julian: the best photo from each discipline, leading to its
               project, in two rows, and what each is on its plate: photo,
               design or video (`.disc` in `globals.css`). */}
@@ -199,9 +203,13 @@ export default function Home() {
             <InquireWall items={WALL.slice(0, 48)} />
           }
           aside={
+            /* Julian (2026-10-01, layout): the two doors split the screen
+               under the bar, not behind it. The bar (`--bar-h`) lies over the
+               first, so the first row is half the screen plus half the bar
+               and each door shows the same height. */
             <div
               id="where-next"
-              className="grid h-full grid-rows-2 divide-y divide-border"
+              className="grid h-full grid-rows-2 divide-y divide-border sm:grid-rows-[minmax(0,calc(50%+var(--bar-h)/2))_minmax(0,1fr)]"
             >
               <PathCard
                 href="/portfolio"
@@ -240,7 +248,7 @@ function PathCard({
       /* Julian: the wall runs on behind the doors, seen rather than
          frosted over: a 30% tint for the type and 6px of blur, not the
          site's glass. */
-      className="group relative flex flex-col justify-center gap-6 border-l border-border bg-background/30 px-6 py-12 backdrop-blur-[var(--door-blur,1px)] transition-colors duration-300 hoverable:hover:bg-background/45 sm:px-16 sm:pt-20 lying:gap-3 lying:px-10 lying:py-3 lying:first:pt-16"
+      className="group relative flex flex-col justify-center gap-6 border-l border-border bg-background/30 px-6 py-12 backdrop-blur-[var(--door-blur,1px)] transition-colors duration-300 hoverable:hover:bg-background/45 sm:px-16 sm:first:pt-[calc(3rem+var(--bar-h))] lying:gap-3 lying:px-10 lying:py-3 lying:first:pt-16"
     >
       <div>
         {/* Julian: no audience line over the title, on any screen. */}

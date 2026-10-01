@@ -5026,6 +5026,16 @@ h2:not(.label) {
     --screen-title-y: max(6rem, 50cqh - 18.875rem);
   }
 }
+/* How tall the bar is, for a screen that lies under it and has to centre
+   in what shows (the homepage's last screen): 76px, 52 under a finger. */
+:root {
+  --bar-h: 4.75rem;
+}
+@media (pointer: coarse) {
+  :root {
+    --bar-h: 3.25rem;
+  }
+}
 /* Under a finger the bar is 52px, not 76: a tablet sideways (1080 by 810)
    ran About's buttons off its foot with the laptop's 6rem above. */
 @media (min-width: 40rem) and (pointer: coarse) {
