@@ -181,6 +181,7 @@ export default function Home() {
               includes: s.includes,
               cover: sample ? sample.cover : null,
               page: pageForSession(s.slug) && `/${pageForSession(s.slug)!.slug}`,
+              pageTitle: pageForSession(s.slug)?.h1,
             };
           })}
         />

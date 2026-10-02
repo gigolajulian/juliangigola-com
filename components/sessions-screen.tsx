@@ -25,6 +25,9 @@ export type SessionItem = {
   cover: Frame | null;
   /** The session's booking page (`lib/booking.ts`), where it has one. */
   page?: string;
+  /** That page's heading, the words its link carries (search reads link
+      text as what the page is about). */
+  pageTitle?: string;
 };
 
 export function SessionsScreen({ sessions }: { sessions: SessionItem[] }) {
@@ -206,7 +209,7 @@ export function SessionsScreen({ sessions }: { sessions: SessionItem[] }) {
                           href={s.page}
                           className="label flex gap-2.5 self-start py-2"
                         >
-                          More on {s.name} <span aria-hidden>&rarr;</span>
+                          {s.pageTitle ?? `More on ${s.name}`} <span aria-hidden>&rarr;</span>
                         </Link>
                       ) : null}
                     </div>
