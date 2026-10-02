@@ -271,8 +271,11 @@
   --fy: var(--y);
   --fw: var(--w);
   --fz: var(--z, 0px);
-  left: calc(50% + (var(--fx) - 50%) * var(--h-pull-x, 1.05) * var(--wide, 1));
-  top: calc(50% + (var(--fy) - 50%) * var(--h-pull-y, 0.94));
+  left: calc(
+    50% + (var(--fx) - 50%) * var(--h-pull-x, 1.05) * var(--wide-x, var(--wide, 1))
+  );
+  /* Plus what clears the name (`--clear-y`, `cover-space.tsx`). */
+  top: calc(50% + (var(--fy) - 50%) * var(--h-pull-y, 0.94) + var(--clear-y, 0px));
   width: calc(var(--fw) * var(--wide, 1));
   /* Out of order: each frame's place in `ORDER` (`cover-float.tsx`),
      spread out from the start. */
@@ -290,6 +293,10 @@
 @media (min-width: 80rem) and (min-height: 32rem) and (min-aspect-ratio: 2 / 1) {
   .cover-float {
     --wide: 0.9;
+    /* Julian: on ultrawide, the photographs across the width. Smaller
+       with the shape still, but no longer drawn in with it: the field
+       spreads the whole width as it does at 16:9. */
+    --wide-x: 1;
   }
 }
 @media (min-width: 80rem) and (min-height: 32rem) and (min-aspect-ratio: 11 / 5) {
@@ -300,11 +307,15 @@
 @media (min-width: 80rem) and (min-height: 32rem) and (min-aspect-ratio: 14 / 5) {
   .cover-float {
     --wide: 0.66;
+    /* Julian: in the super wide the photographs closer. Across the whole
+       width they stood too far apart to read as one field. */
+    --wide-x: 0.85;
   }
 }
 @media (min-width: 80rem) and (min-height: 32rem) and (min-aspect-ratio: 16 / 5) {
   .cover-float {
     --wide: 0.55;
+    --wide-x: 0.7;
   }
 }
 /* Julian: a layout of their own for the smaller screens (the cards
@@ -392,7 +403,7 @@
   }
   .cover-float-frame {
     left: var(--px);
-    top: var(--py);
+    top: calc(var(--py) + var(--clear-y, 0px));
     /* And no taller than a short phone's window allows: Safari with its
        bars up leaves an iPhone 659px, where 28vw ran the top row into the
        name and the bottom row into the buttons. `--pwh` is the width's
@@ -547,9 +558,31 @@
    rather than a scale, so the name's canvas and the type are drawn at the
    new size instead of stretched; and moved from the middle of the cover. */
 .cover-float-middle {
-  zoom: var(--h-mid-size, 0.99);
-  translate: calc(var(--m-x) * 1vw / var(--h-mid-size, 0.99))
-    calc((var(--h-mid-down, 22px) + var(--m-y) * 1svh) / var(--h-mid-size, 0.99));
+  --mid: calc(var(--h-mid-size, 0.99) * var(--mid-fit, 1));
+  zoom: var(--mid);
+  translate: calc(var(--m-x) * 1vw / var(--mid))
+    calc((var(--h-mid-down, 22px) + var(--m-y) * 1svh) / var(--mid));
+}
+/* Julian: the name never covered by the photographs. A wide window that
+   is short (a 32:9 screen, or a wide browser window not full height)
+   has the photographs' field as wide as ever and no taller than the
+   window, and the name, set in pixels, filled the gap between the row
+   above it and the row below and ran under both. Smaller as the window
+   is shorter. */
+@media (min-width: 80rem) and (min-aspect-ratio: 2 / 1) and (max-height: 56rem) {
+  .cover-float {
+    --mid-fit: 0.85;
+  }
+}
+@media (min-width: 80rem) and (min-aspect-ratio: 2 / 1) and (max-height: 48rem) {
+  .cover-float {
+    --mid-fit: 0.7;
+  }
+}
+@media (min-width: 80rem) and (min-aspect-ratio: 2 / 1) and (max-height: 40rem) {
+  .cover-float {
+    --mid-fit: 0.6;
+  }
 }
 .cover-float-name {
   color: var(--hero-ink);
@@ -620,7 +653,8 @@
     background-color 200ms var(--ease-out-strong),
     border-color 200ms var(--ease-out-strong),
     box-shadow 200ms var(--ease-out-strong),
-    color 200ms var(--ease-out-strong);
+    color 200ms var(--ease-out-strong),
+    -webkit-text-stroke-width 200ms var(--ease-out-strong);
 }
 @media (hover: hover) and (pointer: fine) {
   .cover-cta:hover {
@@ -990,6 +1024,36 @@
   --background: oklch(0.145 0.003 70);
   --foreground: oklch(0.955 0.004 80);
 
+  /* The ground is not flat: a faint light from above, settling darker into
+     the two bottom corners, all in the ground's own hue so it reads as the
+     room and never as a colour. Drawn by `body::before` and by every
+     surface that stands in for the ground (the dealt screens, the page
+     cards in flight). Sized in vw and vh, not percent, so a box at the
+     window's top left paints exactly the picture behind it, whatever its
+     own size. Each glow eases out over several stops rather than two, so
+     none of them has an edge. The light stays under the cards' 0.185, or
+     a card at the top of the page would stop lifting off it. */
+  --ground: radial-gradient(
+      125vw 75vh at 50vw -12vh,
+      oklch(0.19 0.004 70),
+      oklch(0.178 0.004 70 / 0.6) 30%,
+      oklch(0.165 0.003 70 / 0.25) 55%,
+      transparent 80%
+    ),
+    radial-gradient(
+      70vw 65vh at 0 100vh,
+      oklch(0.11 0.003 70 / 0.85),
+      oklch(0.12 0.003 70 / 0.35) 50%,
+      transparent
+    ),
+    radial-gradient(
+      70vw 65vh at 100vw 100vh,
+      oklch(0.11 0.003 70 / 0.85),
+      oklch(0.12 0.003 70 / 0.35) 50%,
+      transparent
+    ),
+    var(--background);
+
   /* Cards and popovers lift off the ground rather than sitting in a box —
      a hair lighter, never outlined. */
   --card: oklch(0.185 0.003 70);
@@ -1073,6 +1137,31 @@
   --background: oklch(0.945 0.003 250);
   --foreground: oklch(0.185 0.003 70);
 
+  /* The same wash, kept nearer the ground than in the dark: paper under a
+     soft top light, not a lightbox, so the glow stops short of white, and
+     the corners stop short of the cards' 0.915 so a card still steps down
+     off the ground there. */
+  --ground: radial-gradient(
+      125vw 75vh at 50vw -12vh,
+      oklch(0.968 0.003 250),
+      oklch(0.962 0.003 250 / 0.6) 30%,
+      oklch(0.955 0.003 250 / 0.25) 55%,
+      transparent 80%
+    ),
+    radial-gradient(
+      70vw 65vh at 0 100vh,
+      oklch(0.925 0.004 250 / 0.85),
+      oklch(0.932 0.004 250 / 0.35) 50%,
+      transparent
+    ),
+    radial-gradient(
+      70vw 65vh at 100vw 100vh,
+      oklch(0.925 0.004 250 / 0.85),
+      oklch(0.932 0.004 250 / 0.35) 50%,
+      transparent
+    ),
+    var(--background);
+
   --card: oklch(0.915 0.003 250);
   --card-foreground: var(--foreground);
   --popover: oklch(0.902 0.003 250);
@@ -1126,6 +1215,20 @@
   body {
     @apply bg-background text-foreground;
     text-transform: uppercase;
+  }
+  /* The wash (`--ground`), pinned to the window so a long page scrolls over
+     it rather than stretching it. A fixed layer of its own and not
+     `background-attachment: fixed`, which repaints the whole page on every
+     scroll. Under everything: the body makes no stacking context, so -1
+     puts it beneath the page and above the flat ground the body hands the
+     canvas, which stays as the fallback. */
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background: var(--ground);
   }
   button,
   ::placeholder {
@@ -1364,12 +1467,14 @@ body:has([data-quiet-footer]) .site-footer-row {
    without this the first screen carries the same words twice. Opacity and
    not `display`, so the header keeps its height and nothing reflows as it
    comes and goes. The attribute is set by the strip's own scroll reader. */
-/* The system cursor stays. There used to be a glass drop drawn under the
-   pointer and the arrow was hidden for it; Julian asked for the arrow back
-   and the label on its own. A blurred element moving with the pointer is
-   also the most expensive thing that can be on a screen — every pointer
-   move repaints the region behind it — and the trip into the lightbox was
-   stuttering under exactly that. */
+/* The system cursor is replaced by the site's mark (`.pointer-mark`), and
+   the mark is a transform and nothing else. There used to be a glass drop
+   drawn under the pointer and the arrow was hidden for it; Julian asked
+   for the arrow back and the label on its own. A blurred element moving
+   with the pointer is the most expensive thing that can be on a screen —
+   every pointer move repaints the region behind it — and the trip into
+   the lightbox was stuttering under exactly that. So no blur and no filter
+   on anything that follows the pointer. */
 
 .running-head {
   opacity: 0;
@@ -1945,88 +2050,111 @@ a.strip-cell {
   }
 }
 
-/* ── the pointer's ring ──────────────────────────────────────────
-   Julian, after selectedbase.com: over anything that says what a press
-   does, a circle with that one word in it comes up beside the pointer,
-   on the side toward the middle of the window, and drifts after it
-   (`pointer-ring.tsx` moves it). Nothing at all around the pointer
-   otherwise. Difference blended, so it reads on a photograph and on the
-   ground alike. `cursor-ring` and not `ring`: that is a Tailwind utility,
-   a 1px box shadow, and on a box with no size it drew a dot under the
-   pointer. */
-.cursor-ring {
-  --d: 48px;
-  --out: cubic-bezier(0.215, 0.61, 0.355, 1);
+/* ── the pointer's mark ──────────────────────────────────────────
+   The theme switch's circle, solid, in place of the system arrow
+   (`pointer-mark.tsx` moves it). White, difference blended, so it is white
+   over black and black over white wherever it is, a white button on the
+   dark ground included. The outer box only moves, written every frame
+   and never transitioned, so it cannot trail the hand; everything that
+   grows or squeezes is drawn inside it, about the click point.
+
+   Hidden only once the mark is drawn (`data-mark`), and important because
+   the arrange view's grab and the admin's `cursor-grab` would otherwise
+   win the arrow back over the surfaces the mark covers.
+   Text fields keep the native caret, and the mark steps aside there. */
+@media (hover: hover) and (pointer: fine) {
+  :root[data-mark],
+  :root[data-mark] * {
+    cursor: none !important;
+  }
+  :root[data-mark]
+    :is(
+      input:not([type="button"], [type="submit"], [type="reset"], [type="checkbox"], [type="radio"], [type="range"], [type="color"], [type="file"]),
+      textarea,
+      select,
+      [contenteditable]:not([contenteditable="false"])
+    ) {
+    cursor: auto !important;
+  }
+}
+.pointer-mark {
+  /* One curve for every change of size, long enough to be seen as a
+     movement and never overshooting (Julian: smooth). A press goes in
+     quickly and comes back on the same curve. */
+  --grow: 450ms var(--ease-out-strong);
+  --press: 380ms var(--ease-out-strong);
+  /* A point at the pointer; the dot is centred on it. */
   position: fixed;
-  left: -0.75vw;
-  top: -0.75vw;
-  width: 32px;
-  height: 32px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  left: 0;
+  top: 0;
+  z-index: 9999;
+  color: white;
+  mix-blend-mode: difference;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 200ms var(--ease-out-strong);
+  will-change: transform;
+}
+.pointer-mark[data-on] {
+  opacity: 1;
+}
+.pointer-mark[data-state="text"] {
+  opacity: 0;
+}
+/* Drawn large and scaled down, never up, so the edge stays clean at
+   every size and growing it is a compositor-only change. */
+.mark-dot {
+  position: absolute;
+  left: -60px;
+  top: -60px;
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  background: currentColor;
+  scale: calc(18.5 / 120);
+  transition:
+    scale var(--grow),
+    translate var(--grow),
+    transform var(--press);
+}
+/* Over something that does something: larger, and lifted a little off the
+   point, as a thing picked up (Julian). */
+.pointer-mark[data-state="press"] .mark-dot {
+  scale: calc(32 / 120);
+  translate: 0 -4px;
+}
+.pointer-mark[data-down] {
+  --press: 120ms var(--ease-out-strong);
+}
+.pointer-mark[data-down] .mark-dot {
+  transform: scale(0.82);
+}
+/* The ring a click leaves, placed by `translate` so its own `scale`
+   grows it about the click point. */
+.pointer-ripple {
+  position: fixed;
+  left: -10px;
+  top: -10px;
+  z-index: 9999;
+  width: 20px;
+  height: 20px;
   border: 1px solid white;
   border-radius: 50%;
-  color: rgb(222 222 222);
-  overflow: hidden;
   mix-blend-mode: difference;
-  opacity: 0;
-  /* Theirs: the transform written each frame is eased again over the
-     same 300ms, which is half of how smooth it reads. */
-  transition-property: transform, width, height, left, top, border-radius, opacity;
-  transition-duration: 300ms;
-  transition-timing-function: var(--out);
+  pointer-events: none;
+  animation: mark-ripple 450ms var(--ease-out-strong) forwards;
 }
-.cursor-ring[data-ready] {
-  /* Julian: a little more (0.1). */
-  opacity: 0.2;
-}
-.cursor-ring[data-ready][data-over] {
-  opacity: 1;
-  width: var(--d);
-  height: var(--d);
-  left: calc(-1.25vw - (var(--d) - 48px) / 2);
-}
-/* Julian: merged with a button, on its edge and faded into its own
-   outline, so there is one line, not two (`pointer-ring.tsx`). The
-   button says what it does, so no word. */
-.cursor-ring[data-ready][data-merge] {
-  opacity: 0;
-  width: var(--mw);
-  height: var(--mh);
-  left: calc(var(--mw) / -2);
-  top: calc(var(--mh) / -2);
-  border-radius: var(--mr);
-}
-/* Julian: around a filter chip it stays in sight, the chip having no
-   outline of its own; faint (Julian: lower opacity). */
-.cursor-ring[data-ready][data-merge="outline"] {
-  opacity: 0.4;
-}
-.ring-word {
-  white-space: nowrap;
-  opacity: 0;
-  translate: 0 100%;
-  rotate: -15deg;
-  transition-property: opacity, translate, rotate;
-  transition-duration: 300ms;
-  transition-timing-function: var(--out);
-}
-.cursor-ring[data-over] .ring-word {
-  opacity: 1;
-  translate: none;
-  rotate: none;
-  transition-delay: 100ms;
-}
-.cursor-ring[data-merge] .ring-word {
-  opacity: 0;
-  translate: 0 100%;
-  rotate: -15deg;
-  transition-delay: 0ms;
+@keyframes mark-ripple {
+  from {
+    opacity: 0.8;
+  }
+  to {
+    opacity: 0;
+    scale: 3;
+  }
 }
 @media (prefers-reduced-motion: reduce) {
-  .cursor-ring,
-  .ring-word {
+  .mark-dot {
     transition: none;
   }
 }
@@ -2235,6 +2363,20 @@ a.strip-cell {
 .strip-scroll[data-dealt] > * {
   background-color: var(--background);
 }
+/* A screen (the homepage, the legal page) is a whole window, so it carries
+   the wash rather than the flat ground, or the homepage would never show
+   it. Not the other decks: their cells are photographs, and the wash would
+   lie over a frame's own colour while it loads. Under 40rem nothing is
+   dealt and the screens run down the page, so they carry no ground at all
+   and the window's wash shows through, rather than one per screen. */
+.strip-scroll[data-dealt="screens"] > * {
+  background: none;
+}
+@media (min-width: 40rem) {
+  .strip-scroll[data-dealt="screens"] > * {
+    background: var(--ground);
+  }
+}
 /* Julian (2026-10-01): a slight shadow under a screen as it comes in, for
    the depth. A soft band off its leading edge, lying on the screen it is
    covering. Its opacity is scrubbed by the deck (`shade` in `deck.ts`),
@@ -2283,13 +2425,6 @@ a.strip-cell {
     transparent
   );
   opacity: 0;
-}
-/* A strip dealt across pages is the card itself (`deal` below): its
-   snapshot is the whole strip, so the strip is opaque too, or the one it
-   covers shows through the gaps and behind the title. Julian saw it as
-   the background arriving late. */
-.strip-scroll[data-dealt="leads"] {
-  background-color: var(--background);
 }
 /* The work index is dealt in chapters, and its cells stand a gap apart:
    the chapter sliding in showed the one receding behind it through every
@@ -4120,8 +4255,10 @@ optgroup {
   z-index: 2;
   /* A card is solid. The snapshot is the page's own element, and a page
      that leaves its ground to the body (Contact) came in as glass, with
-     the page it covered showing through it. Julian saw it. */
-  background-color: var(--background);
+     the page it covered showing through it. Julian saw it. The wash, not
+     the flat ground, or the card lands flat and the wash pops in under it
+     when the snapshot goes. */
+  background: var(--ground);
 }
 /* Which put the card over the bar, which is on the root and not in any
    group: the wordmark was eaten from the right as the card came in. The
@@ -4160,7 +4297,7 @@ optgroup {
 :root[data-nav-side="back"]::view-transition-old(.page) {
   z-index: 2;
   animation-name: jg-bar-off-right;
-  background-color: var(--background);
+  background: var(--ground);
 }
 :root[data-nav-side="back"]::view-transition-new(.page) {
   z-index: 0;
@@ -4211,7 +4348,8 @@ optgroup {
   right: 0;
   width: 100vw;
   overflow: hidden;
-  background-color: var(--background);
+  /* The wash, as the portfolio it stands in for sits on it. */
+  background: var(--ground);
   clip-path: inset(0 0 0 calc(100% - var(--lead-pull, 0px)));
   transition: clip-path 140ms var(--ease-out-strong);
 }
@@ -4405,7 +4543,7 @@ optgroup {
 }
 :root[data-nav-side="shut"]::view-transition-old(.page) {
   z-index: 2;
-  background-color: var(--background);
+  background: var(--ground);
   animation-name: jg-lead-shut;
   animation-timing-function: cubic-bezier(0.65, 0, 0.35, 1);
 }
@@ -4498,6 +4636,12 @@ optgroup {
 }
 ::view-transition-old(strip),
 ::view-transition-new(strip) {
+  /* A strip dealt across pages is the card itself: opaque, or the one it
+     covers shows through the gaps and behind the title (Julian saw it as
+     the background arriving late). On the snapshot and not on the strip,
+     which starts below the page's head: a ground of its own cut the wash
+     behind it off at its top edge. */
+  background: var(--ground);
   mix-blend-mode: normal;
   animation-duration: 640ms;
   animation-timing-function: var(--ease-out-strong);
@@ -4778,7 +4922,8 @@ optgroup {
   transition:
     background-color 200ms var(--ease-out-strong),
     border-color 200ms var(--ease-out-strong),
-    color 200ms var(--ease-out-strong);
+    color 200ms var(--ease-out-strong),
+    -webkit-text-stroke-width 200ms var(--ease-out-strong);
 
   /* Inverts under a pointer: the ground with the ink on it, where at rest
      it is the ink with the ground on it. It used to go from 72% ink to 74%
@@ -4823,7 +4968,8 @@ optgroup {
   transition:
     background-color 200ms var(--ease-out-strong),
     border-color 200ms var(--ease-out-strong),
-    color 200ms var(--ease-out-strong);
+    color 200ms var(--ease-out-strong),
+    -webkit-text-stroke-width 200ms var(--ease-out-strong);
 
   /* Under the pointer it fills rather than tints: white type needs a ground
      to be white against, and 7% of ink over the page is not one. The loud
@@ -4924,6 +5070,13 @@ optgroup {
   }
   :is(.action, .action-quiet, .cover-cta):hover {
     transition-delay: 0s, 0s, 0s, 90ms;
+  }
+  /* Julian: the type a touch heavier under the pointer. Plex stops at
+     700, which the buttons already are, so it is a hairline of the
+     letters' own colour round them rather than a faked weight; it
+     changes no metrics, so nothing moves. */
+  :is(.action, .action-quiet, .cover-cta):not(:disabled, [aria-disabled="true"]):hover {
+    -webkit-text-stroke: 0.45px currentColor;
   }
   .action:hover {
     background-color: color-mix(in oklab, var(--foreground) 72%, transparent);
@@ -5670,7 +5823,9 @@ h2:not(.label) {
    the liquid under it, so its own ground and blur step aside at rest; its
    hover is its own, as before. The quiet ones keep their glass at rest,
    and when the ink has run into them the glass clears so the ink is what
-   they are filled with, and their circle flood is not drawn. */
+   they are filled with, and their circle flood is not drawn. Come to
+   from anywhere but the first button, the ink does not run and they
+   flood as the first one does (Julian). */
 .liquid-pair :is(.action, .cover-cta:not(.cover-cta-quiet)) {
   -webkit-backdrop-filter: none;
   backdrop-filter: none;
@@ -5678,7 +5833,7 @@ h2:not(.label) {
 .liquid-pair :is(.action, .cover-cta:not(.cover-cta-quiet)):not(:hover, :focus-visible, :active) {
   background: transparent;
 }
-.liquid-pair :is(.action-quiet, .cover-cta-quiet)::before {
+.liquid-pair :is([data-on], [data-was]) > :is(.action-quiet, .cover-cta-quiet)::before {
   display: none;
 }
 .liquid-pair :is([data-on], [data-was]) > :is(.action-quiet, .cover-cta-quiet) {
@@ -5700,7 +5855,9 @@ h2:not(.label) {
    a layer zoomed again: the ink came out 0.88 of the button, cut short of
    SEE THE WORK (Julian, on his iPhone). The layer undoes the zoom. */
 .cover-float-ctas.liquid-pair > svg {
-  zoom: calc(1 / var(--m-buttons, 1));
+  /* And the middle's own (`--mid`), which a short wide window takes to
+     0.6: the ink came out three fifths of SEE THE WORK. */
+  zoom: calc(1 / (var(--m-buttons, 1) * var(--mid, 1)));
 }
 
 /* The drop that fills a quiet button: out of the first button across the
@@ -5809,3 +5966,92 @@ h2:not(.label) {
   pointer-events: none;
   background: color-mix(in oklab, var(--background) 45%, transparent);
 }
+
+/* ── ultrawide ────────────────────────────────────────────────────
+   A 21:9 or 32:9 desktop (twice as wide as tall, and wider than a
+   laptop). The words, the forms and the lists of the homepage's screens
+   stand in one column with the header, the page heads and the footer
+   (2.5rem in), and half of what the window has past 100rem is margin
+   either side (Julian: 100rem was too tight, half that): a session's
+   price was 4000px from its name, the about text one line of 2800px, and
+   the contact form the width of a room away from its heading. What is
+   photographs (the cover, the tiles, the wall behind the ask, the
+   portfolio's strip) keeps the whole width. Julian: on ultrawide, chunkier
+   side margins. */
+@media (min-aspect-ratio: 2 / 1) and (min-width: 110rem) {
+  .screen-measure {
+    padding-inline: calc((100vw - 100rem) / 4 + 2.5rem);
+  }
+  .page-column,
+  :root .site-footer-body,
+  :root[data-under] .site-footer-body {
+    max-width: calc(50vw + 50rem);
+  }
+  /* Sized from the window's width, the photograph took the column and
+     left the list too narrow for a session and its price on one line. */
+  .sessions-photo {
+    height: min(40rem, calc(100cqh - 8rem));
+  }
+  /* The wider column let the about text run to 120 letters a line. */
+  .screen-measure p {
+    max-width: 68ch;
+  }
+}
+
+.contact-pair {
+  display: contents;
+}
+/* A wide window that is short: a 32:9 screen, or a wide browser window
+   not full height. The screens were laid out for the height a 21:9 or
+   16:9 window has, and ran out of it. */
+@media (min-width: 80rem) and (min-aspect-ratio: 2 / 1) and (max-height: 48rem) {
+  /* The open session's words beside its booking line, not over it: under
+     each other they put "Book a session" and its button under the rail. */
+  .session-more {
+    display: grid;
+    max-width: 60rem;
+    grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+    column-gap: 2rem;
+    padding-top: 0.5rem;
+  }
+  .session-more > :first-child {
+    grid-row: span 2;
+  }
+  /* Name and email side by side, so the form's button is on the screen
+     and not under the end of its own box. */
+  .contact-pair {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.5rem;
+  }
+  /* And the rest of it closer, wide enough for the kinds of shoot on one
+     line, and two lines of message: the button inside the box. */
+  .contact-card {
+    max-width: 52rem;
+  }
+  .contact-card > * {
+    padding-block: 1rem;
+  }
+  .contact-card form {
+    gap: 0.75rem;
+  }
+  .contact-card textarea {
+    height: 3.75rem;
+    resize: none;
+  }
+  /* Air between the bar and About me, which sat on it. */
+  .about-grid {
+    padding-top: calc(var(--screen-title-y, 6rem) + 1rem);
+    /* Paid for at the foot, so the buttons stay on the screen. */
+    padding-bottom: 0;
+  }
+}
+/* The tiles a discipline in one row where the window is four times as
+   wide as tall or near it: two rows of eight left them small in the
+   middle of a 32:9 screen. */
+@media (min-width: 40rem) and (min-aspect-ratio: 14 / 5) {
+  .disc {
+    --rows: 1;
+  }
+}
+

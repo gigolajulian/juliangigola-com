@@ -208,6 +208,9 @@ export function ContactForm() {
         aria-hidden="true"
         hidden
       />
+      {/* One box to the page; side by side where the window is short and
+          wide (`contact-pair`, `globals.css`). */}
+      <div className="contact-pair">
       <Field
         name="name"
         label="Name"
@@ -237,6 +240,7 @@ export function ContactForm() {
         autoComplete="email"
         required
       />
+      </div>
 
       {/* Julian: options again, and still after the email. The chips say
           what the six are without being opened, which a dropdown cannot,

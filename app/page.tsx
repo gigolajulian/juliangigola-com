@@ -197,7 +197,7 @@ export default function Home() {
           title="Have something in mind?"
           body="Tell me what you have in mind and I'll come back with an approach and a quote."
           next={WORK_PAGE}
-          className="border-l border-border"
+          className="screen-measure border-l border-border"
           /* Julian: the photo wall on the last page, as on the intro and
              the 404. Behind the ask and the two doors, dimmed so both
              still read; the doors are frosted glass over it. Each tile a way into

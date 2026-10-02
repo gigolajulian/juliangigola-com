@@ -11,7 +11,7 @@ import { WORK_CATEGORY_LINKS } from "@/lib/work";
 import { WORK_HEADS } from "@/lib/work-heads";
 import { GlassLight } from "@/components/glass-light";
 import { PhotoFade } from "@/components/photo-fade";
-import { PointerRing } from "@/components/pointer-ring";
+import { PointerMark } from "@/components/pointer-mark";
 import "./globals.css";
 import { ImageFallback } from "@/components/image-fallback";
 import { PageTransition } from "@/components/page-transition";
@@ -226,7 +226,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         {/* The pointer over anything that opens large, site wide. One
             mount: it follows the pointer and shows only over `[data-ring]`,
             so every gallery and strip shares it and none carries its own. */}
-        <PointerRing />
+        {/* And the pointer itself: the site's mark in place of the arrow.
+            See `pointer-mark.tsx`. */}
+        <PointerMark />
       </body>
     </html>
   );

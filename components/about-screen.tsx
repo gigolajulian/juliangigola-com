@@ -72,7 +72,7 @@ export function AboutScreen() {
           the strip yielding the wheel to it (as the contact form does). */}
       <div
         data-scroll
-        className="grid min-h-0 flex-1 grid-cols-1 gap-12 px-6 pb-10 pt-12 sm:overflow-y-auto sm:overscroll-contain sm:px-10 sm:content-start sm:pb-6 sm:pt-[var(--screen-title-y)] md:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)] md:gap-x-12 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,0.66fr)_minmax(0,1fr)] lg:gap-x-16"
+        className="about-grid screen-measure grid min-h-0 flex-1 grid-cols-1 gap-12 px-6 pb-10 pt-12 sm:overflow-y-auto sm:overscroll-contain sm:px-10 sm:content-start sm:pb-6 sm:pt-[var(--screen-title-y)] md:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)] md:gap-x-12 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,0.66fr)_minmax(0,1fr)] lg:gap-x-16"
       >
         <div className="flex flex-col">
           <RisingTitle
