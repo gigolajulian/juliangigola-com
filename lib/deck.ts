@@ -225,9 +225,13 @@ export function runDeck(el: HTMLElement, mode: Deck): () => void {
     // and a screen at rest read as a third of a pixel covered. It sat at
     // scale 0.99998, resampled, and every seam in it shimmered. Julian saw
     // it on Selected work and Cover art.
+    // The same at the other end: at a fractional width (150% zoom) a
+    // covered screen read 0.9997 covered and was never `data-buried`, and
+    // the hero's photographs showed under the footer's glass as a grey
+    // band (Julian, 2026-10-02).
     const cover = spots.map((s) => {
       const over = s.pin + s.width - (s.next - x);
-      return over < 2 ? 0 : Math.min(1, over / s.width);
+      return over < 2 ? 0 : over > s.width - 2 ? 1 : over / s.width;
     });
     // On the pile a card sinks a step for every card over it, so the pile
     // tapers evenly, the way ScrollStack's does. Julian: the stack looked

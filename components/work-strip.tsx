@@ -52,6 +52,8 @@ export function WorkStrip({
         // Each discipline comes in as a card over the last screen of the
         // one before (`lib/deck.ts`).
         deck="chapters"
+        // Two disciplines first, the rest once it has landed.
+        defer
         className={className}
       >
         {children}

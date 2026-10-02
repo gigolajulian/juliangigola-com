@@ -3553,6 +3553,25 @@ h2.contact-title {
   :root[data-under] .strip-scroll > .cover-float {
     overflow: clip visible;
   }
+  /* Only while it is the screen on top. Once the next one covers it
+     (`data-buried`, `lib/deck.ts`) nothing covered the photos under the
+     glass, which blurred them into a grey band over the footer of every
+     other screen (Julian, 2026-10-01, both themes). */
+  :root[data-under] .strip-scroll > .cover-float[data-buried] {
+    overflow: clip;
+  }
+  /* And the photographs themselves go, not only their overflow: on
+     Julian's machine (Chrome, D3D11, 2321x1334 at 1.5) the frames of a
+     buried hero were still composited where they lie unburied, under the
+     glass, and the clip, the scale and `will-change` each made no
+     difference; the tint over them read as a cool grey band the height of
+     the rail on every other screen (2026-10-02, read off the live tab).
+     A buried screen is wholly under the next one, so nothing of this
+     shows; `visibility` and not `display`, so the frames' places and the
+     observers that count them are kept. */
+  :root[data-under] .strip-scroll > .cover-float[data-buried] .cover-float-frame {
+    visibility: hidden;
+  }
   :root[data-under] .enquiry-backdrop {
     bottom: calc(-1 * var(--under, 94px));
   }
@@ -4354,7 +4373,9 @@ optgroup {
   transition: clip-path 140ms var(--ease-out-strong);
 }
 .strip-scroll > :has(+ .lead-window) {
-  transition: translate 140ms var(--ease-out-strong);
+  transition:
+    translate 140ms var(--ease-out-strong),
+    scale 140ms var(--ease-out-strong);
 }
 .strip-scroll[data-release] :is(> :has(+ .lead-window), .lead-pane) {
   transition-duration: 560ms;
@@ -4391,8 +4412,7 @@ optgroup {
   display: flex;
   align-items: flex-end;
   gap: 1rem;
-  margin-left: -1.5rem;
-  padding: 0 5.5rem 0.25rem 1rem;
+  padding: 0 1.25rem 0.25rem 3rem;
 }
 .lead-all {
   writing-mode: vertical-rl;
@@ -4410,6 +4430,24 @@ optgroup {
   /* The plate's type is measured off the cover, as on the page. */
   container-type: inline-size;
 }
+/* The rack instead, for a visitor who keeps the grid (`lead-window.tsx`):
+   the page's own `strip-grid` rules on the row, so the two rows, the gap,
+   the padding, the column and the plates are the page's and the landing
+   changes nothing. A cover in the rack is 4:5 whatever it was shot at
+   (`--ar` default), and the spine stands both rows as the page's does.
+   Julian (2026-10-02): the card came in as the strip and the page
+   landed as the grid. */
+.lead-row.strip-grid {
+  display: grid;
+}
+.lead-row.strip-grid > .lead-spine {
+  grid-row: 1 / -1;
+}
+.lead-row.strip-grid > .lead-cover {
+  height: 100% !important;
+  width: calc((100cqh - 1rem) / 2 * 0.8) !important;
+  aspect-ratio: auto !important;
+}
 
 /* ── spines ───────────────────────────────────────────────────────
    Julian (2026-10-01), after the window's word: the same on the work.
@@ -4421,6 +4459,9 @@ optgroup {
    default, 2026-10-01), and
    only where the work runs sideways. */
 @media (min-width: 40rem) {
+  /* The way in ("All projects") stands at the foot on the name's right,
+     where the name starts reading (Julian, 2026-10-02, after a spell
+     above it). */
   .strip-cell:has(> .chapter-name) {
     width: auto;
     flex-direction: row;
@@ -4429,14 +4470,15 @@ optgroup {
     gap: 1rem;
     padding-block: 0 0.25rem;
     /* Julian: space between "All projects" and the first cover, which
-       the next screen's shadow also falls across. */
-    padding-right: 5.5rem;
+       the next screen's shadow also falls across. 88px, then closer to
+       the first project twice (2026-10-02). */
+    padding-right: 1.25rem;
     padding-left: 1rem;
   }
-  /* Julian: the first spine closer to the left edge, into the strip's
-     own 40px. */
+  /* The first spine 88px off the left edge: the strip's own 40px and
+     this (Julian: 32px, 64px, then wider again 2026-10-02). */
   .strip-cell:first-child:has(> .chapter-name) {
-    margin-left: -1.5rem;
+    padding-left: 3rem;
   }
   /* "All projects" up beside the name, the same way (Julian: fit it
      better); across, it broke over two lines in the room the spine left. */
@@ -4477,6 +4519,13 @@ optgroup {
     rotate: 180deg;
     line-height: 0.8;
     font-size: min(6.5rem, calc((100dvh - 21rem) / (var(--n, 12) * 0.8)));
+  }
+  /* The first name stands on the page's own wash: it never comes in over
+     anything, so it carries no ground of its own (Julian: remove the
+     extra border under the header). */
+  .strip-scroll[data-dealt] > .strip-cell:first-child:has(> .chapter-name) {
+    background: none;
+    box-shadow: none;
   }
   :is(.discipline-title, [data-discipline-page] .project-plate) {
     width: auto;
@@ -4550,6 +4599,91 @@ optgroup {
 :root[data-nav-side="shut"]::view-transition-new(.page) {
   z-index: 0;
   animation-name: jg-lead-return;
+}
+/* The default since 2026-10-02, `?stack=0` for the door before it
+   (Julian: the portfolio stacks over the home, not under it):
+   the deck the right way round. The pull brings the portfolio in from the
+   right as the card on top, in focus, and the last screen sinks back under
+   it (`strip.tsx` paint); past the count it carries on over the whole
+   window from where the hand left it (`--lead-from`) and the homepage
+   recedes beneath. Back out, the card slides off to the right and the
+   hero comes up from under it. */
+:root[data-stack] .lead-under {
+  scale: 1;
+  filter: none;
+  translate: calc(100% - var(--lead-pull, 0px)) 0;
+  transition: translate 320ms var(--ease-out-strong);
+}
+/* The card runs on down under the glass, as the screens' own pictures
+   do, or the last screen's wall showed through the pane below it; and the
+   homepage's rail gives way as it comes, so the pane never reads Inquire
+   over the portfolio (Julian, 2026-10-02). */
+:root[data-stack][data-under] .lead-pane {
+  bottom: calc(-1 * var(--under, 94px));
+}
+:root[data-stack][data-under] .lead-under {
+  bottom: var(--under, 94px);
+}
+:root[data-stack] .strip-rail > * {
+  opacity: calc(1 - min(1, var(--lead-in, 0) * 2));
+  transition: opacity 320ms var(--ease-out-strong);
+}
+/* The wheel moves the card a screen's worth now, so each notch glides
+   rather than jumps; the edge and the screen under it on the same ease. */
+:root[data-stack] .lead-pane,
+:root[data-stack] .strip-scroll > :has(+ .lead-window) {
+  transition-duration: 320ms;
+}
+:root[data-stack] .strip-scroll[data-release] .lead-under {
+  transition-duration: 560ms;
+  transition-timing-function: cubic-bezier(0.2, 1.7, 0.4, 1);
+}
+:root[data-stack] .strip-scroll[data-dragged] :is(.lead-under, .lead-pane, > :has(+ .lead-window)) {
+  transition-duration: 0s;
+}
+:root[data-stack][data-nav-side="open"]::view-transition-new(.page) {
+  z-index: 2;
+  animation-name: jg-stack-in;
+  animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+  box-shadow: -2rem 0 4rem rgb(0 0 0 / 0.45);
+}
+:root[data-stack][data-nav-side="open"]::view-transition-old(.page) {
+  z-index: 1;
+  clip-path: none;
+  animation-name: jg-stack-sink;
+  animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+}
+:root[data-stack][data-nav-side="shut"]::view-transition-old(.page) {
+  z-index: 2;
+  background: var(--ground);
+  animation-name: jg-stack-out;
+  animation-timing-function: cubic-bezier(0.65, 0, 0.35, 1);
+  box-shadow: -2rem 0 4rem rgb(0 0 0 / 0.45);
+}
+:root[data-stack][data-nav-side="shut"]::view-transition-new(.page) {
+  z-index: 1;
+  animation-name: jg-stack-rise;
+  animation-timing-function: cubic-bezier(0.65, 0, 0.35, 1);
+}
+@keyframes jg-stack-in {
+  from {
+    transform: translateX(var(--lead-from, 100%));
+  }
+}
+@keyframes jg-stack-sink {
+  to {
+    transform: scale(0.9);
+  }
+}
+@keyframes jg-stack-out {
+  to {
+    transform: translateX(100%);
+  }
+}
+@keyframes jg-stack-rise {
+  from {
+    transform: scale(0.9);
+  }
 }
 @keyframes jg-lead-fly {
   to {
