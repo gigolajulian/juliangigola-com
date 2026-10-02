@@ -559,9 +559,12 @@ export function Lightbox({
                 <button
                   type="button"
                   data-ring="Close"
+                  data-stick=""
                   className="label glass ml-4 px-4 py-2.5 text-muted-foreground press hoverable:hover:text-foreground active:scale-[0.97]"
                 >
-                  Close
+                  {/* A box of its own, for the grow when the pointer
+                      sticks (`globals.css`). */}
+                  <span className="block">Close</span>
                 </button>
               </Dialog.Close>
             </div>
@@ -1080,6 +1083,8 @@ function LightboxButton({
       // "Previous frame" for a screen reader, which has no picture in
       // front of it; a tag over the picture does.
       data-ring={label.replace(" frame", "")}
+      // The pointer sticks to it (`pointer-mark.tsx`).
+      data-stick=""
       // 44px minimum target: the control someone taps repeatedly on a
       // phone gets a real hit area rather than an icon's worth.
       className="glass flex h-11 w-11 items-center justify-center text-base press active:scale-[0.97]"

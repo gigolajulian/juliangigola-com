@@ -37,6 +37,54 @@ export function PointerMark() {
     let raf = 0;
     let down = false;
 
+    /* Julian: stuck to the portfolio's view icons and filter chips, the
+       theme switch, the lightbox's controls and the contact marks
+       (`data-stick`). Over
+       one the dot leaves the hand for the icon's centre, leaning a little
+       back toward it, and holds there past the icon's edge until the hand
+       is a good way off; the dot and a drop left at the hand are run
+       together as liquid (`#mark-goo`), so pulling away draws a neck that
+       snaps. The icon grows and leans the other way (`globals.css`). */
+    let stuck: HTMLElement | null = null;
+    // px from the icon's centre. Julian: more resistance, then a touch
+    // less (34 and 0.75 at first, then 46 and 0.85).
+    const RELEASE = 40;
+    const HOLD = 0.8;
+    const unstick = () => {
+      if (!stuck) return;
+      stuck.removeAttribute("data-stuck");
+      stuck.style.removeProperty("--lean-x");
+      stuck.style.removeProperty("--lean-y");
+      stuck = null;
+      el.removeAttribute("data-stuck");
+      el.style.removeProperty("--sx");
+      el.style.removeProperty("--sy");
+      for (const v of ["--neck-l", "--neck-t", "--neck-a"]) el.style.removeProperty(v);
+    };
+    const pull = () => {
+      if (!stuck) return;
+      /* Held to the nearest point of the target's spine: its centre on a
+         square icon, and along its length on a wide one (a filter chip),
+         so the dot slides along a chip with the hand and only the pull
+         off it meets the resistance. */
+      const r = stuck.getBoundingClientRect();
+      const half = Math.min(r.width, r.height) / 2;
+      const dx = x - Math.min(Math.max(x, r.left + half), r.right - half);
+      const dy = y - Math.min(Math.max(y, r.top + half), r.bottom - half);
+      const d = Math.hypot(dx, dy);
+      if (d > RELEASE) return unstick();
+      el.style.setProperty("--sx", `${(-dx * HOLD).toFixed(1)}px`);
+      el.style.setProperty("--sy", `${(-dy * HOLD).toFixed(1)}px`);
+      /* The neck from the hand to the dot, thinning as it is drawn out,
+         so the two stay one liquid however far the resistance lets the
+         hand get (the drop alone came away as a loose dot). */
+      el.style.setProperty("--neck-l", `${(d * HOLD).toFixed(1)}px`);
+      el.style.setProperty("--neck-t", `${Math.max(2.5, 8 - d * 0.12).toFixed(1)}px`);
+      el.style.setProperty("--neck-a", `${Math.atan2(-dy, -dx).toFixed(3)}rad`);
+      stuck.style.setProperty("--lean-x", `${(dx * 0.1).toFixed(1)}px`);
+      stuck.style.setProperty("--lean-y", `${(dy * 0.1).toFixed(1)}px`);
+    };
+
     const draw = () => {
       raf = 0;
       el.style.transform = `translate3d(${x}px, ${y}px, 0)`;
@@ -47,6 +95,7 @@ export function PointerMark() {
       if (e.pointerType === "touch") return;
       x = e.clientX;
       y = e.clientY;
+      pull();
       if (!raf) raf = requestAnimationFrame(draw);
       if (!el.hasAttribute("data-on")) {
         el.setAttribute("data-on", "");
@@ -58,6 +107,14 @@ export function PointerMark() {
     const over = (e: PointerEvent) => {
       move(e);
       const t = e.target as Element | null;
+      const stick = still.matches ? null : t?.closest?.<HTMLElement>("[data-stick]");
+      if (stick && stick !== stuck) {
+        unstick();
+        stuck = stick;
+        stick.setAttribute("data-stuck", "");
+        el.setAttribute("data-stuck", "");
+        pull();
+      }
       const state = t?.closest?.(TEXT)
         ? "text"
         : t?.closest?.(PRESS)
@@ -69,6 +126,7 @@ export function PointerMark() {
     // Out of the window (`relatedTarget` null), or the window losing focus.
     const away = () => {
       el.removeAttribute("data-on");
+      unstick();
       cancel();
     };
     const left = (e: PointerEvent) => {
@@ -116,14 +174,26 @@ export function PointerMark() {
       document.removeEventListener("pointercancel", cancel);
       window.removeEventListener("blur", away);
       cancelAnimationFrame(raf);
+      unstick();
       root.removeAttribute("data-mark");
     };
   }, []);
 
   return (
     <div ref={ref} aria-hidden className="pointer-mark">
-      {/* The switch's circle, solid. */}
-      <div className="mark-dot" />
+      {/* The switch's circle, solid; and the drop it leaves at the hand
+          while it is stuck to an icon, run together as liquid. */}
+      <div className="mark-goo">
+        <div className="mark-dot" />
+        <div className="mark-drop" />
+        <div className="mark-neck" />
+      </div>
+      <svg aria-hidden width="0" height="0" className="absolute">
+        <filter id="mark-goo">
+          <feGaussianBlur stdDeviation="3.5" />
+          <feColorMatrix values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 18 -7" />
+        </filter>
+      </svg>
     </div>
   );
 }

@@ -2129,10 +2129,19 @@ a.strip-cell {
 }
 /* Drawn large and scaled down, never up, so the edge stays clean at
    every size and growing it is a compositor-only change. */
-.mark-dot {
+/* The dot and its drop in one box the size of the dot drawn large, so
+   the liquid filter has the room the neck needs (`pointer-mark.tsx`). */
+.mark-goo {
   position: absolute;
   left: -60px;
   top: -60px;
+  width: 120px;
+  height: 120px;
+}
+.mark-dot {
+  position: absolute;
+  left: 0;
+  top: 0;
   width: 120px;
   height: 120px;
   border-radius: 50%;
@@ -2148,6 +2157,62 @@ a.strip-cell {
 .pointer-mark[data-state="press"] .mark-dot {
   scale: calc(32 / 120);
   translate: 0 -4px;
+}
+/* Stuck to an icon: the dot sits on it, a little larger than over a
+   link, and follows the hand on a short ease so it pours rather than
+   jumps; the drop at the hand shows, and the two are run together. */
+.pointer-mark[data-stuck] .mark-goo {
+  filter: url(#mark-goo);
+}
+.pointer-mark[data-stuck] .mark-dot {
+  scale: calc(30 / 120);
+  translate: var(--sx, 0) var(--sy, 0);
+  transition:
+    scale var(--grow),
+    translate 220ms var(--ease-out-strong),
+    transform var(--press);
+}
+.mark-drop {
+  position: absolute;
+  left: 55px;
+  top: 55px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: 0;
+  transition: opacity 150ms var(--ease-out-strong);
+}
+.pointer-mark[data-stuck] .mark-drop {
+  opacity: 1;
+}
+/* From the hand toward the dot: its length, thickness and angle are
+   written by `pointer-mark.tsx` (`--neck-l`, `--neck-t`, `--neck-a`). */
+.mark-neck {
+  position: absolute;
+  left: 60px;
+  top: calc(60px - var(--neck-t, 0px) / 2);
+  width: var(--neck-l, 0px);
+  height: var(--neck-t, 0px);
+  border-radius: 999px;
+  background: currentColor;
+  transform-origin: 0 50%;
+  rotate: var(--neck-a, 0rad);
+  opacity: 0;
+  transition: opacity 150ms var(--ease-out-strong);
+}
+.pointer-mark[data-stuck] .mark-neck {
+  opacity: 1;
+}
+/* The icon under it: larger, leaning toward the hand. */
+[data-stick] > :is(svg, span) {
+  transition:
+    scale 300ms var(--ease-out-strong),
+    translate 300ms var(--ease-out-strong);
+}
+[data-stick][data-stuck] > :is(svg, span:not(.sr-only)) {
+  scale: 1.2;
+  translate: var(--lean-x, 0) var(--lean-y, 0);
 }
 .pointer-mark[data-down] {
   --press: 120ms var(--ease-out-strong);

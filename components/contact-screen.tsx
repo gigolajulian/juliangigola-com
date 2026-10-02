@@ -147,6 +147,8 @@ export function ContactScreen({
                 target="_blank"
                 rel="noreferrer"
                 data-ring={where.label}
+                // The pointer sticks to the mark (`pointer-mark.tsx`).
+                data-stick=""
                 aria-label={`${where.label}, ${where.at}`}
                 title={`${where.label}, ${where.at}`}
                 className="p-2 text-muted-foreground transition-colors duration-200 hoverable:hover:text-foreground"
