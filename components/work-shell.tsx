@@ -665,6 +665,7 @@ export function WorkShell({
         aria-controls="work-search"
         aria-label="Search the work"
         data-ring="Search"
+        data-stick=""
         onClick={() => {
           if (finding) {
             search("");
@@ -832,6 +833,8 @@ export function WorkShell({
             aria-pressed={view === mode && !scoping}
             aria-label={`${WORD[mode]} view`}
             data-ring={WORD[mode]}
+            /* Julian: the pointer sticks to these four (`pointer-mark.tsx`). */
+            data-stick=""
             onClick={() =>
               morphView(() => {
                 /* Leaving the list with something typed would filter a
@@ -893,6 +896,7 @@ export function WorkShell({
           aria-controls="work-scope"
           aria-label="Color"
           data-ring="Color"
+          data-stick=""
           onClick={() => (scoping ? closeScope() : openScope())}
           className={cn(
             "-my-1 p-1.5 transition-opacity duration-200",
@@ -1165,6 +1169,8 @@ function Chip({
          and the pointer was repeating it back a few pixels lower down.
          Julian asked. */
       data-ring=""
+      // The pointer sticks to the chip (`pointer-mark.tsx`).
+      data-stick=""
       /* So the strip that is about to mount knows it is a filter change
          and fades in where it stands, instead of sliding in from a
          quarter of the window away as an arriving page does. */
