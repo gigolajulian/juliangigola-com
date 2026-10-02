@@ -3,24 +3,20 @@ import { notFound } from "next/navigation";
 import { Strip } from "@/components/strip";
 import { StripPage } from "@/components/strip-page";
 import { ContactScreen } from "@/components/contact-screen";
-import {
-  LdJson,
-  LocalCover,
-  LocalDetails,
-  LocalWhere,
-  LocalWork,
-} from "@/components/local-screens";
+import { LdJson } from "@/components/local-screens";
 import { LocalQuestions } from "@/components/local-questions";
+import { CoverFloat } from "@/components/cover-float";
+import { Testimonials } from "@/components/testimonials";
 import { BOOKING_PAGES, bookingHref, bookingPage } from "@/lib/booking";
+import { getProject } from "@/lib/work";
 import { serviceGraph } from "@/lib/seo";
 
 /* ── a booking page ───────────────────────────────────────────────
- * One service, at the root: /headshots, /graduation-photos. A deck of
- * screens like the homepage (Julian: no vertical pages), read left to
- * right in the order somebody pricing a shoot asks: what is it and what
- * does it cost, what does it look like, what is included, where, the
- * questions, and the form, set to this service. The words are in
- * `lib/booking.ts`; the screens in `components/local-screens.tsx`.
+ * One service, at the root: /headshots, /graduation-photos. Built from
+ * the homepage's own screens (Julian, 2026-10-02): its floating cover
+ * with this service's photographs and title, the testimonials, the
+ * details and questions on one screen, and the form, set to this service.
+ * The words are in `lib/booking.ts`.
  * ─────────────────────────────────────────────────────────────── */
 
 /* Only the pages `lib/booking.ts` lists. Any other address at the root is
@@ -60,8 +56,17 @@ export default async function BookingPage(props: PageProps<"/[service]">) {
   const page = bookingPage(service);
   if (!page) notFound();
 
-  const [cover, ...work] = page.tiles;
   const others = BOOKING_PAGES.filter((p) => p !== page);
+  /* The cover's frames: each tile's photograph, opening what the tile
+     opens (the gallery, or a project). Julian (2026-10-02): headshot 09
+     stays in the gallery, not on the cover. */
+  const work = page.tiles
+    .filter((t) => !t.frame.src.endsWith("/headshots/09.jpg"))
+    .flatMap((t) => {
+      const project = getProject(t.href.split("/").pop() ?? "");
+      return project ? [{ ...project, cover: t.frame }] : [];
+    });
+  const facts = [page.rate, ...(page.turnaround ? [`Ready in ${page.turnaround}`] : [])];
 
   return (
     <StripPage>
@@ -77,37 +82,39 @@ export default async function BookingPage(props: PageProps<"/[service]">) {
         })}
       />
       <Strip
-        label={`${page.h1}: what it is, the work, the details, where, questions, and booking. One screen at a time, left and right.`}
-        next={page.back.href === "/portfolio" ? { href: "/portfolio", name: "Portfolio" } : { href: "/", name: "Home" }}
+        label={`${page.h1}: what people say, the details and questions, and booking. One screen at a time, left and right.`}
+        next={{ href: "/", name: "Home" }}
         paged
         deck="screens"
         bleed
         className="flex-1"
       >
-        <LocalCover
-          label={page.name}
-          crumb={page.back}
-          kicker={page.kicker}
-          title={page.h1}
-          lead={page.lead}
-          facts={[page.rate, ...(page.turnaround ? [`Ready in ${page.turnaround}`] : [])]}
-          actions={[
-            { href: "#book", label: page.book.title },
-            { href: "#work", label: "See the work", quiet: true },
-          ]}
-          frame={cover?.frame}
-          alt={cover?.frame.alt || `${page.h1}, photographed by Julian Gigola`}
+        <CoverFloat
+          work={work}
+          heading={{
+            title: page.h1,
+            where: facts.join(" · "),
+            ctas: [
+              { href: "#book", label: page.book.title },
+              { href: page.gallery.href, label: "See the work" },
+            ],
+          }}
+          className="w-full shrink-0 max-sm:h-[100svh] sm:h-full"
         />
-        <LocalWork tiles={work} gallery={page.gallery} />
-        <LocalDetails
-          blocks={page.blocks}
-          more={{
-            heading: "Also booking",
-            links: others.map((p) => ({ href: bookingHref(p), label: p.h1 })),
+        <Testimonials cells />
+        <LocalQuestions
+          faqs={page.faqs}
+          details={{
+            facts,
+            blocks: [
+              ...page.blocks,
+              {
+                heading: "Also booking",
+                links: others.map((p) => ({ href: bookingHref(p), label: p.h1 })),
+              },
+            ],
           }}
         />
-        <LocalWhere places={page.where} />
-        <LocalQuestions faqs={page.faqs} />
         <ContactScreen
           title={page.book.title}
           label="Book"

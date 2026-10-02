@@ -1,8 +1,9 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { RisingTitle } from "@/components/strip-page";
-import type { Faq } from "@/lib/booking";
+import type { Block, Faq } from "@/lib/booking";
 
 /* ── the questions ────────────────────────────────────────────────
  * A booking page's screen of questions, the ones people search for
@@ -15,8 +16,20 @@ import type { Faq } from "@/lib/booking";
 
 const two = (n: number) => String(n).padStart(2, "0");
 
-export function LocalQuestions({ faqs }: { faqs: Faq[] }) {
+export function LocalQuestions({
+  faqs,
+  details,
+}: {
+  faqs: Faq[];
+  /** The session's price and turnaround, and what was the Details screen,
+      beside the questions, Julian (2026-10-02): one screen for both. */
+  details?: {
+    facts: string[];
+    blocks: (Block & { links?: { href: string; label: string }[] })[];
+  };
+}) {
   const [open, setOpen] = useState(0);
+  const [shown, setShown] = useState(0);
   return (
     <section
       data-tick
@@ -30,11 +43,74 @@ export function LocalQuestions({ faqs }: { faqs: Faq[] }) {
           Asked before booking
         </span>
         <RisingTitle text="Questions" className="sm:max-lg:text-5xl" />
+        {details ? (
+          <div className="title-rest mt-4 flex flex-col gap-4 border-t border-border pt-5">
+            <p className="label text-foreground">{details.facts.join(" · ")}</p>
+            {/* The old Details screen, folded the way the questions are and
+                opened by pointing, Julian (2026-10-02). */}
+            <ul className="flex flex-col">
+              {details.blocks.map((b, i) => {
+                const on = i === shown;
+                return (
+                  <li key={b.heading} className="border-b border-border">
+                    <button
+                      type="button"
+                      aria-expanded={on}
+                      onClick={() => setShown(on ? -1 : i)}
+                      onPointerEnter={(e) => {
+                        if (e.pointerType === "mouse") setShown(i);
+                      }}
+                      className={`label flex w-full items-baseline justify-between gap-4 py-2.5 text-left transition-colors duration-300 ${on ? "text-foreground" : "text-muted-foreground"}`}
+                    >
+                      {b.heading}
+                      <span aria-hidden className={`transition-transform duration-300 ${on ? "rotate-45" : ""}`}>
+                        +
+                      </span>
+                    </button>
+                    <div
+                      inert={!on}
+                      className={`grid transition-[grid-template-rows,opacity] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] ${on ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"}`}
+                    >
+                      <div className="min-h-0 overflow-hidden">
+                        {b.body ? (
+                          <p className="max-w-[48ch] pb-3 text-left text-sm leading-relaxed text-muted-foreground">
+                            {b.body}
+                          </p>
+                        ) : null}
+                        {b.items?.length ? (
+                          <ul className="flex flex-col gap-1.5 pb-3 text-sm text-muted-foreground">
+                            {b.items.map((x) => (
+                              <li key={x}>{x}</li>
+                            ))}
+                          </ul>
+                        ) : null}
+                        {b.links?.length ? (
+                          <ul className="flex flex-col gap-1.5 pb-3 text-sm">
+                            {b.links.map((l) => (
+                              <li key={l.href}>
+                                <Link
+                                  href={l.href}
+                                  className="text-muted-foreground transition-colors duration-200 hoverable:hover:text-foreground"
+                                >
+                                  {l.label} <span aria-hidden>&rarr;</span>
+                                </Link>
+                              </li>
+                            ))}
+                          </ul>
+                        ) : null}
+                      </div>
+                    </div>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+        ) : null}
       </div>
 
       <ul
         data-scroll
-        className="title-rest min-h-0 border-t border-border sm:max-h-full sm:overflow-y-auto sm:overscroll-contain"
+        className="title-rest min-h-0 border-t border-border sm:max-h-full sm:overflow-y-auto sm:overflow-x-hidden sm:overscroll-contain"
       >
         {faqs.map((f, i) => {
           const on = i === open;
@@ -45,6 +121,10 @@ export function LocalQuestions({ faqs }: { faqs: Faq[] }) {
                   type="button"
                   aria-expanded={on}
                   onClick={() => setOpen(on ? -1 : i)}
+                  /* Julian (2026-10-02): a mouse opens it by pointing. */
+                  onPointerEnter={(e) => {
+                    if (e.pointerType === "mouse") setOpen(i);
+                  }}
                   className="grid w-full grid-cols-[auto_minmax(0,1fr)_auto] items-baseline gap-4 py-4 text-left normal-case short:py-2.5"
                 >
                   <span

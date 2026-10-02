@@ -586,6 +586,14 @@
     --mid-fit: 0.6;
   }
 }
+/* A booking page's title runs to three lines where the name is one, and
+   on ultrawide reached up into the top row of photographs: lower there,
+   Julian (2026-10-02). */
+@media (min-width: 80rem) and (min-aspect-ratio: 2 / 1) {
+  .cover-float[data-booking] {
+    --m-y: 11;
+  }
+}
 .cover-float-name {
   color: var(--hero-ink);
   line-height: 1;

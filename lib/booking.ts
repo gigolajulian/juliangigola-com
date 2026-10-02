@@ -386,7 +386,7 @@ export const BOOKING_PAGES: BookingPage[] = [
     ],
     tiles: coversOf("portraits"),
     gallery: { href: "/portfolio/portraits", label: "The portraits" },
-    book: { type: "session", session: portraits.name, title: "Book a portrait" },
+    book: { type: "session", session: portraits.name, title: "Book a portrait session" },
   },
   {
     slug: "music-photography",
