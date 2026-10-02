@@ -292,7 +292,7 @@ export const BOOKING_PAGES: BookingPage[] = [
     ],
     tiles: framesOf("graduation"),
     gallery: { href: "/portfolio/graduation", label: "The graduation gallery" },
-    book: { type: "session", session: grad.name, title: "Book graduation photos" },
+    book: { type: "session", session: grad.name, title: "Book a graduation session" },
   },
   {
     slug: "model-digitals",
