@@ -152,7 +152,14 @@ export function CoverFloat({
       {/* Julian: the words come in as the photographs do, from the first
           photograph's start (`--h-start`, "Load animation"), each part a
           beat after the one above, rather than once they have landed. */}
-      <div className="cover-float-middle flex max-w-[min(62rem,92vw)] flex-col items-center px-6 text-center">
+      {/* A booking page's title is a sentence, not a name: longer lines,
+          Julian (2026-10-02). */}
+      <div
+        className={cn(
+          "cover-float-middle flex flex-col items-center px-6 text-center",
+          heading ? "max-w-[min(96rem,94vw)]" : "max-w-[min(62rem,92vw)]",
+        )}
+      >
         {heading ? (
           <h1
             className="lift font-display text-[clamp(2.5rem,6.5vw,6.5rem)] uppercase leading-[0.92] text-balance"
