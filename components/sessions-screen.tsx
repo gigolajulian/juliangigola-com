@@ -25,6 +25,9 @@ export type SessionItem = {
   cover: Frame | null;
   /** The session's booking page (`lib/booking.ts`), where it has one. */
   page?: string;
+  /** That page's heading, the words its link carries (search reads link
+      text as what the page is about). */
+  pageTitle?: string;
 };
 
 export function SessionsScreen({ sessions }: { sessions: SessionItem[] }) {
@@ -176,18 +179,20 @@ export function SessionsScreen({ sessions }: { sessions: SessionItem[] }) {
                   className={`grid transition-[grid-template-rows,opacity] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] ${on ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"}`}
                 >
                   <div className="min-h-0 overflow-hidden">
-                  <div className="session-more flex max-w-[32.5rem] flex-col gap-3 pl-[clamp(0rem,4vw,4rem)] pt-4">
-                    <p className="text-left text-sm leading-relaxed text-muted-foreground">
+                  <div className="session-more flex flex-col gap-3 pl-[clamp(0rem,4vw,4rem)] pt-4">
+                    <p className="max-w-[32.5rem] text-left text-sm leading-relaxed text-muted-foreground">
                       {s.blurb}
                     </p>
                     {/* What the /sessions page used to say about each. */}
                     {/* The rate first under a finger, where the row has no
                         room for it: the price is what a private client
                         came for. */}
-                    <p className="label text-left text-muted-foreground">
+                    <p className="label max-w-[32.5rem] text-left text-muted-foreground">
                       <span className="text-foreground sm:hidden">{s.rate} · </span>
                       {s.includes.join(" · ")} · Ready in {s.turnaround}
                     </p>
+                    {/* Not held to the words' width: the two links on one line where
+                        the column has room (Julian, 2026-10-02). */}
                     <div className="flex flex-wrap gap-x-6">
                       <Link
                         href={
@@ -206,7 +211,7 @@ export function SessionsScreen({ sessions }: { sessions: SessionItem[] }) {
                           href={s.page}
                           className="label flex gap-2.5 self-start py-2"
                         >
-                          More on {s.name} <span aria-hidden>&rarr;</span>
+                          {s.pageTitle ?? `More on ${s.name}`} <span aria-hidden>&rarr;</span>
                         </Link>
                       ) : null}
                     </div>
