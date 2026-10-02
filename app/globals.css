@@ -543,7 +543,9 @@
 .cover-float {
   --hero-ink: #f2f1ee;
   --hero-sub: #bdbbb5;
-  --hero-where: #77756f;
+  /* Lifted from #77756f (4.3:1) to clear 4.5:1 on the whole ground, the
+     glow in the middle included (UI/UX review, 2026-10-02). */
+  --hero-where: #83817b;
   --hero-line: #3a3936;
   --hero-on-ink: #0b0b0b;
 }

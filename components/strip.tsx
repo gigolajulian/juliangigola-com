@@ -7,7 +7,7 @@ import { flushSync } from "react-dom";
 import { useRouter } from "next/navigation";
 import { cn, filterPaths, rubberband, STRIP_SECTION } from "@/lib/utils";
 import { flyCovers } from "@/lib/work-view";
-import { Liquid } from "liquid-gooey";
+import { Liquid } from "@/components/liquid";
 
 /* ── the strip ────────────────────────────────────────────────────
  * One screen, and the page runs across it. This is the machine behind

@@ -11,7 +11,7 @@ import { StripPage, StripHead } from "@/components/strip-page";
 import { ScopePanel, type ScopeRow } from "@/components/vectorscope";
 import { markFilter, StripView, type StripViewMode } from "@/components/strip";
 import { animate } from "motion";
-import { Liquid } from "liquid-gooey";
+import { Liquid } from "@/components/liquid";
 import {
   chooseView,
   morphView,
