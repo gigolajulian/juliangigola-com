@@ -206,7 +206,7 @@ function Tile({
         <Image
           data-fade=""
           src={poster}
-          alt=""
+          alt={`Still from ${video.title}${video.client ? `, ${video.client}` : ""}`}
           fill
           // A tile is at most a third of a 100rem column, and never more than
           // the viewport on a phone.

@@ -132,7 +132,7 @@ export function FilmCell({
         <Image
           data-fade=""
           src={poster}
-          alt=""
+          alt={`Still from ${title}`}
           fill
           sizes="(min-width: 640px) calc((100vh - 10rem) * 1.778), 100vw"
           loading={eager ? "eager" : "lazy"}
