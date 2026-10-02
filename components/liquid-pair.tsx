@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Liquid } from "liquid-gooey";
+import { Liquid } from "@/components/liquid";
 
 /* Julian: the buttons in liquid (`liquid-gooey`). The first button is a
    body of the ink; the quiet ones beside it stay an outline at rest, and
