@@ -15,6 +15,7 @@ import type { Project, Category, Frame, TextBlock } from "./work-types";
 import { COVER_RELEASES as RELEASES } from "./cover-art-data";
 import type { CoverRelease } from "./cover-art-types";
 import { CONTENT } from "./content";
+import { ALT } from "./alt-text";
 import imageLoader from "../image-loader";
 import { REEL } from "./videos";
 import {
@@ -418,10 +419,10 @@ const withFaces = (project: Project): Project => ({
 
 const withAlt = (project: Project): Project => ({
   ...project,
-  cover: { ...project.cover, alt: project.cover.alt || project.name },
+  cover: { ...project.cover, alt: ALT[project.cover.src] || project.cover.alt || project.name },
   images: project.images.map((f, i) => ({
     ...f,
-    alt: f.alt || `${project.name}, frame ${i + 1} of ${project.images.length}`,
+    alt: ALT[f.src] || f.alt || `${project.name}, frame ${i + 1} of ${project.images.length}`,
   })),
 });
 
