@@ -2114,6 +2114,16 @@ a.strip-cell {
 .pointer-mark[data-on] {
   opacity: 1;
 }
+/* Over the colour scope: the colour under it, no ring (Julian)
+   (`vectorscope.tsx`). */
+:root[data-mark-fill] .pointer-mark {
+  mix-blend-mode: normal;
+}
+:root[data-mark-fill] .mark-dot {
+  /* Just a little bigger than at rest (Julian). */
+  scale: calc(22 / 120);
+  background: var(--mark-fill);
+}
 .pointer-mark[data-state="text"] {
   opacity: 0;
 }
