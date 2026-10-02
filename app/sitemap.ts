@@ -14,6 +14,7 @@ import {
 import type { Frame } from "@/lib/work-types";
 import { COVER_RELEASES } from "@/lib/cover-art-data";
 import DATES from "@/lib/sitemap-dates.json";
+import { CITIES, PAGES, localHref, pagesIn } from "@/lib/locations";
 
 const SITE = "https://juliangigola.com";
 
@@ -138,5 +139,22 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.6,
   }));
 
-  return [...pages, ...categories, ...projects];
+  /* The booking pages, and each city's page over them: above the
+     disciplines, because a search that lands on one of these is somebody
+     pricing a shoot (`lib/locations.ts`). Their pictures are the ones they
+     show; a city's are its pages' covers. */
+  const cities = CITIES.map((c) => ({
+    url: `${SITE}/${c.slug}`,
+    ...showing(pagesIn(c.slug).flatMap((p) => p.tiles.slice(0, 1).map((t) => t.frame))),
+    changeFrequency: "monthly" as const,
+    priority: 0.9,
+  }));
+  const booking = PAGES.map((p) => ({
+    url: `${SITE}${localHref(p)}`,
+    ...showing(p.tiles.slice(0, 7).map((t) => t.frame)),
+    changeFrequency: "monthly" as const,
+    priority: 0.9,
+  }));
+
+  return [...pages, ...cities, ...booking, ...categories, ...projects];
 }

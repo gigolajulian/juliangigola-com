@@ -18,6 +18,14 @@ const SOCIAL = [
     not training data. One link, at Julian's ask. */
 const LEGAL = [{ href: "/legal", label: "Legal" }] as const;
 
+/** The cities the footer names, and the page each has, if it has one. */
+const AREA_LINKS: { name: string; href?: string }[] = [
+  { name: "San Francisco" },
+  { name: "San Jose", href: "/san-jose" },
+  { name: "Oakland" },
+  { name: "Santa Cruz" },
+];
+
 export function SiteFooter() {
   return (
     <footer className="border-t border-border">
@@ -85,9 +93,28 @@ export function SiteFooter() {
                   </Link>
                 </li>
               ))}
+              {/* The region and the cities in it (Julian, 2026-10-02: the
+                  Bay Area is San Francisco, San Jose, Oakland and Santa
+                  Cruz). A city with its own pages is a link to them: the
+                  way in from every page, for a search engine and for
+                  anybody asking whether their city is covered. */}
               <li className="font-bold text-foreground">
                 San Francisco Bay Area
               </li>
+              {AREA_LINKS.map((c) => (
+                <li key={c.name}>
+                  {c.href ? (
+                    <Link
+                      href={c.href}
+                      className="transition-colors duration-200 hoverable:hover:text-foreground"
+                    >
+                      {c.name}
+                    </Link>
+                  ) : (
+                    c.name
+                  )}
+                </li>
+              ))}
             </ul>
           </nav>
         </div>

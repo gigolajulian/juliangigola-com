@@ -75,14 +75,14 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   metadataBase: new URL(SITE),
   title: {
-    /* The two cities over "Bay Area": they are what most searches name,
-       and Julian markets in both (lib/seo.ts). */
-    default: "Julian Gigola | Photographer & Creative Director, SF & San Jose",
+    /* The region, with its cities in the description: San Jose has its own
+       pages now (`lib/locations.ts`), which own that search. */
+    default: "Julian Gigola | Photographer & Creative Director, SF Bay Area",
     // Project and section pages set only their own name; this frames it.
     template: "%s | Julian Gigola",
   },
   description:
-    "Photographer & creative director in San Francisco and San Jose: fashion editorials, brand campaigns, press photos, cover art and music videos. Published in WIRED.",
+    "Photographer & creative director in the SF Bay Area: San Francisco, Oakland, San Jose, Santa Cruz. Editorials, campaigns, press photos, music videos. In WIRED.",
   openGraph: {
     type: "website",
     siteName: "Julian Gigola",

@@ -52,6 +52,8 @@ export const AREA = [
   "Campbell",
   "Los Gatos",
   "Milpitas",
+  // Julian (2026-10-02): the Bay Area as he means it runs to Santa Cruz.
+  "Santa Cruz",
 ];
 
 /** A starting price as a phrase, or nothing while it is "On request". */
@@ -70,38 +72,38 @@ type PageSeo = { title: string; description: (count: number) => string };
     name it had, so a new one added in /admin still gets a title. */
 export const DISCIPLINE_SEO: Record<string, PageSeo> = {
   editorial: {
-    title: "Fashion & Editorial Photographer, SF & San Jose",
+    title: "Fashion & Editorial Photographer, SF Bay Area",
     description: (n) =>
-      `Fashion and editorial photography in San Francisco and San Jose: ${n} editorials and lookbooks with models, stylists and credits. Published in WIRED.`,
+      `Fashion and editorial photography across the SF Bay Area: ${n} editorials and lookbooks with models, stylists and credits. Published in WIRED.`,
   },
   campaigns: {
-    title: "Brand Campaign Photographer, SF & San Jose",
+    title: "Brand Campaign Photographer, SF Bay Area",
     description: (n) =>
-      `Commercial and brand campaign photography for consumer and tech brands in San Francisco, San Jose and Silicon Valley. ${n} campaigns, shot and art-directed.`,
+      `Commercial and brand campaign photography for consumer and tech brands across the Bay Area and Silicon Valley. ${n} campaigns, shot and art-directed.`,
   },
   portraits: {
-    title: "Portrait Photographer, San Francisco & San Jose",
+    title: "Portrait Photographer, San Francisco Bay Area",
     description: (n) =>
       sentence(
-        `Editorial portraits in the studio or on location in San Francisco, San Jose and across the Bay Area. ${n} portrait series by Julian Gigola.`,
+        `Editorial portraits in the studio or on location in San Francisco, Oakland, San Jose and Santa Cruz. ${n} portrait series by Julian Gigola.`,
         from("portraits") ? `Sessions ${from("portraits")!.toLowerCase()}.` : null,
       ),
   },
   "artist-presskit": {
-    title: "Musician Press Photos, San Francisco & San Jose",
+    title: "Musician Press Photos, San Francisco Bay Area",
     description: (n) =>
-      `Press photos for musicians and bands in San Francisco and San Jose: EPK portraits, release imagery and cover art. ${n} artist press kits by Julian Gigola.`,
+      `Press photos for musicians and bands in San Francisco, Oakland and San Jose: EPK portraits, release imagery and cover art. ${n} artist press kits by Julian Gigola.`,
   },
   coverart: {
-    title: "Album & Single Cover Art, SF & San Jose",
+    title: "Album & Single Cover Art, SF Bay Area",
     description: (n) =>
-      `Album and single cover art, photographed and art-directed by Julian Gigola in San Francisco and San Jose. ${n} releases for independent artists and labels.`,
+      `Album and single cover art, photographed and art-directed by Julian Gigola in the San Francisco Bay Area. ${n} releases for independent artists and labels.`,
   },
   "studio-digitals": {
-    title: "Model Digitals & Polaroids, SF & San Jose",
+    title: "Model Digitals & Polaroids, SF Bay Area",
     description: () =>
       sentence(
-        "Agency-standard model digitals (polaroids) in San Francisco and San Jose: full length, three-quarter and close, front and profile, unretouched.",
+        "Agency-standard model digitals (polaroids) in the San Francisco Bay Area: full length, three-quarter and close, front and profile, unretouched.",
         from("studio-digitals") ? `${from("studio-digitals")}.` : null,
       ),
   },
@@ -116,12 +118,12 @@ export const DISCIPLINE_SEO: Record<string, PageSeo> = {
       `Chroma: ${n} editorial and portrait projects lit in saturated color, by Julian Gigola, photographer in the San Francisco Bay Area.`,
   },
   events: {
-    title: "Event Photographer, San Francisco & San Jose",
+    title: "Event Photographer, San Francisco Bay Area",
     description: (n) =>
-      `Event coverage in San Francisco, San Jose and the Bay Area: launches, brand events, concerts and parties. ${n} frames by Julian Gigola.`,
+      `Event coverage in San Francisco, Oakland, San Jose and Santa Cruz: launches, brand events, concerts and parties. ${n} frames by Julian Gigola.`,
   },
   automotive: {
-    title: "Automotive Photographer, SF & San Jose",
+    title: "Automotive Photographer, SF Bay Area",
     description: (n) =>
       `Automotive and car photography in San Francisco, San Jose and the Bay Area. ${n} frames by Julian Gigola.`,
   },
@@ -132,9 +134,9 @@ export const MOTION_SEO = {
   /* "Commercial" gave way to San Jose, where a search for a music video
      director finds only directories (2026-10-02). Brand films stay in the
      description. */
-  title: "Music Video Director, San Francisco & San Jose",
+  title: "Music Video Director, San Francisco Bay Area",
   description:
-    "Music videos and brand films directed and shot by Julian Gigola in San Francisco, San Jose and the Bay Area, for artists, startups and consumer brands.",
+    "Music videos and brand films directed and shot by Julian Gigola across the Bay Area, from San Francisco and Oakland to San Jose.",
 };
 
 /* ── the sessions, at /portfolio/<slug> ───────────────────────────
@@ -145,26 +147,26 @@ export const MOTION_SEO = {
 
 export const SESSION_SEO: Record<string, { title: string; description: string }> = {
   headshots: {
-    title: "Headshot Photographer, San Francisco & San Jose",
+    title: "Headshot Photographer, San Francisco Bay Area",
     description: sentence(
-      "Professional headshots in San Francisco, San Jose and Silicon Valley: LinkedIn, corporate, actor and press. Studio lighting, retouched selects, ready in 3 days.",
+      "Professional headshots in San Francisco, Oakland, San Jose and Santa Cruz: LinkedIn, corporate, actor and press, with studio lighting and retouched selects.",
       from("headshots") ? `${from("headshots")}.` : null,
     ),
   },
   graduation: {
-    title: "Graduation Photographer, San Jose: SJSU & SCU",
+    title: "Graduation Photographer, San Francisco Bay Area",
     // The price before the details, so a results page that cuts the
     // description short cuts the details rather than the price.
     description: sentence(
-      "Graduation photos at SJSU, Santa Clara University and across San Jose and the Bay Area.",
+      "Graduation photos across the SF Bay Area: on campus at SJSU and Santa Clara University, or further out.",
       from("graduation") ? `${from("graduation")}.` : null,
-      "One hour on campus, two outfit changes, edited gallery.",
+      "One hour, two outfit changes.",
     ),
   },
   weddings: {
-    title: "Editorial Wedding Photographer, SF & San Jose",
+    title: "Editorial Wedding Photographer, SF Bay Area",
     description: sentence(
-      "Editorial wedding photography in San Francisco, San Jose and the Bay Area: full-day coverage that reads like a magazine, not an album. Limited dates each year.",
+      "Editorial wedding photography in San Francisco, Oakland, San Jose and Santa Cruz: full-day coverage that reads like a magazine. Limited dates.",
       from("weddings") ? `${from("weddings")}.` : null,
     ),
   },
@@ -259,7 +261,7 @@ export function siteGraph() {
         "@id": business,
         name: "Julian Gigola",
         description:
-          "Photography and creative direction in San Francisco, San Jose and the Bay Area: fashion editorials, brand campaigns, musician press photos, cover art and music videos, plus headshot, portrait, graduation, model digital and wedding sessions.",
+          "Photography and creative direction across the San Francisco Bay Area (San Francisco, Oakland, San Jose, Santa Cruz): fashion editorials, brand campaigns, musician press photos, cover art and music videos, plus headshot, portrait, graduation, model digital and wedding sessions.",
         url: SITE,
         email: EMAIL,
         image: `${SITE}/og.jpg`,
@@ -322,3 +324,87 @@ export function siteGraph() {
     close the script element (the Next.js JSON-LD guide's advice). */
 export const ldJson = (data: unknown) =>
   JSON.stringify(data).replace(/</g, "\\u003c");
+
+/* ── a booking page's own graph ───────────────────────────────────
+ * Beside the site's graph: the service this page sells, where, and from
+ * what price, tied to the business by `@id`; its questions as an FAQPage
+ * (no longer a Google rich result, but the plainest statement of the
+ * answers there is for the engines that read it); and its place under the
+ * city, as a breadcrumb.
+ * ─────────────────────────────────────────────────────────────── */
+
+type LocalLd = {
+  url: string;
+  name: string;
+  service: string;
+  description: string;
+  price: number | null;
+  faqs: { q: string; a: string }[];
+  city: { name: string; slug: string; region: string; towns: string[] };
+};
+
+export function localGraph(p: LocalLd) {
+  const url = `${SITE}${p.url}`;
+  return {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "Service",
+        "@id": `${url}#service`,
+        name: `${p.service} in ${p.city.name}`,
+        serviceType: p.service,
+        description: p.description,
+        url,
+        provider: { "@id": `${SITE}/#business` },
+        areaServed: [
+          { "@type": "City", name: p.city.name },
+          { "@type": "Place", name: p.city.region },
+          ...p.city.towns
+            .filter((t) => t !== p.city.name)
+            .map((name) => ({ "@type": "City", name })),
+        ],
+        ...(p.price !== null
+          ? {
+              offers: {
+                "@type": "Offer",
+                priceSpecification: {
+                  "@type": "PriceSpecification",
+                  minPrice: p.price,
+                  priceCurrency: "USD",
+                },
+                url: `${url}#book`,
+              },
+            }
+          : {}),
+      },
+      ...(p.faqs.length
+        ? [
+            {
+              "@type": "FAQPage",
+              "@id": `${url}#questions`,
+              mainEntity: p.faqs.map((f) => ({
+                "@type": "Question",
+                name: f.q,
+                acceptedAnswer: { "@type": "Answer", text: f.a },
+              })),
+            },
+          ]
+        : []),
+      {
+        "@type": "BreadcrumbList",
+        itemListElement: [
+          { "@type": "ListItem", position: 1, name: "Julian Gigola", item: SITE },
+          {
+            "@type": "ListItem",
+            position: 2,
+            name: p.city.name,
+            item: `${SITE}/${p.city.slug}`,
+          },
+          ...(p.url !== `/${p.city.slug}`
+            ? [{ "@type": "ListItem", position: 3, name: p.name, item: url }]
+            : []),
+        ],
+      },
+    ],
+  };
+}
