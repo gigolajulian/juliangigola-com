@@ -34,15 +34,24 @@ export const PROFILES = [
 ];
 
 /** The places a search names. San Francisco and San Jose carry the most
-    searches; the rest are where a client books from and the least contested
-    to rank in. Campuses are named on the graduation page, not here. */
+    searches, and are the two markets every title names (Julian, 2026-10-02:
+    "also market in San Jose"). The rest are where a client books from and
+    the least contested to rank in: the South Bay towns are where a Silicon
+    Valley company or an SJSU or SCU graduate is. Campuses are named on the
+    graduation page, not here. */
 export const AREA = [
   "San Francisco",
   "San Jose",
   "Oakland",
-  "Santa Clara",
-  "Palo Alto",
   "Berkeley",
+  "Palo Alto",
+  "Mountain View",
+  "Sunnyvale",
+  "Santa Clara",
+  "Cupertino",
+  "Campbell",
+  "Los Gatos",
+  "Milpitas",
 ];
 
 /** A starting price as a phrase, or nothing while it is "On request". */
@@ -61,38 +70,38 @@ type PageSeo = { title: string; description: (count: number) => string };
     name it had, so a new one added in /admin still gets a title. */
 export const DISCIPLINE_SEO: Record<string, PageSeo> = {
   editorial: {
-    title: "Fashion & Editorial Photographer, San Francisco",
+    title: "Fashion & Editorial Photographer, SF & San Jose",
     description: (n) =>
-      `Fashion and editorial photography in the San Francisco Bay Area: ${n} editorials and lookbooks with models, stylists and credits. Published in WIRED.`,
+      `Fashion and editorial photography in San Francisco and San Jose: ${n} editorials and lookbooks with models, stylists and credits. Published in WIRED.`,
   },
   campaigns: {
-    title: "Brand Campaign Photographer, San Francisco",
+    title: "Brand Campaign Photographer, SF & San Jose",
     description: (n) =>
-      `Commercial and brand campaign photography for consumer and tech brands, from the San Francisco Bay Area. ${n} campaigns, shot and art-directed by Julian Gigola.`,
+      `Commercial and brand campaign photography for consumer and tech brands in San Francisco, San Jose and Silicon Valley. ${n} campaigns, shot and art-directed.`,
   },
   portraits: {
-    title: "Portrait Photographer, San Francisco",
+    title: "Portrait Photographer, San Francisco & San Jose",
     description: (n) =>
       sentence(
-        `Editorial portraits in the studio or on location across the San Francisco Bay Area. ${n} portrait series by Julian Gigola.`,
+        `Editorial portraits in the studio or on location in San Francisco, San Jose and across the Bay Area. ${n} portrait series by Julian Gigola.`,
         from("portraits") ? `Sessions ${from("portraits")!.toLowerCase()}.` : null,
       ),
   },
   "artist-presskit": {
-    title: "Musician Press Photos & EPK Shoots, Bay Area",
+    title: "Musician Press Photos, San Francisco & San Jose",
     description: (n) =>
-      `Press photos for musicians and bands in San Francisco and the Bay Area: EPK portraits, release imagery and cover art. ${n} artist press kits by Julian Gigola.`,
+      `Press photos for musicians and bands in San Francisco and San Jose: EPK portraits, release imagery and cover art. ${n} artist press kits by Julian Gigola.`,
   },
   coverart: {
-    title: "Album & Single Cover Art, Bay Area",
+    title: "Album & Single Cover Art, SF & San Jose",
     description: (n) =>
-      `Album and single cover art, photographed and art-directed by Julian Gigola in the San Francisco Bay Area. ${n} releases for independent artists and labels.`,
+      `Album and single cover art, photographed and art-directed by Julian Gigola in San Francisco and San Jose. ${n} releases for independent artists and labels.`,
   },
   "studio-digitals": {
-    title: "Model Digitals & Polaroids, San Francisco",
+    title: "Model Digitals & Polaroids, SF & San Jose",
     description: () =>
       sentence(
-        "Agency-standard model digitals (polaroids) in San Francisco: clean light, full length, three-quarter and close, front and profile, unretouched.",
+        "Agency-standard model digitals (polaroids) in San Francisco and San Jose: full length, three-quarter and close, front and profile, unretouched.",
         from("studio-digitals") ? `${from("studio-digitals")}.` : null,
       ),
   },
@@ -107,22 +116,25 @@ export const DISCIPLINE_SEO: Record<string, PageSeo> = {
       `Chroma: ${n} editorial and portrait projects lit in saturated color, by Julian Gigola, photographer in the San Francisco Bay Area.`,
   },
   events: {
-    title: "Event Photographer, San Francisco Bay Area",
+    title: "Event Photographer, San Francisco & San Jose",
     description: (n) =>
-      `Event coverage across San Francisco and the Bay Area: launches, brand events, concerts and parties. ${n} frames by Julian Gigola.`,
+      `Event coverage in San Francisco, San Jose and the Bay Area: launches, brand events, concerts and parties. ${n} frames by Julian Gigola.`,
   },
   automotive: {
-    title: "Automotive Photographer, Bay Area",
+    title: "Automotive Photographer, SF & San Jose",
     description: (n) =>
-      `Automotive and car photography in the San Francisco Bay Area. ${n} frames by Julian Gigola.`,
+      `Automotive and car photography in San Francisco, San Jose and the Bay Area. ${n} frames by Julian Gigola.`,
   },
 };
 
 /** Motion's page, which is its own route rather than a category listing. */
 export const MOTION_SEO = {
-  title: "Music Video & Commercial Director, San Francisco",
+  /* "Commercial" gave way to San Jose, where a search for a music video
+     director finds only directories (2026-10-02). Brand films stay in the
+     description. */
+  title: "Music Video Director, San Francisco & San Jose",
   description:
-    "Music videos and brand films directed and shot by Julian Gigola in the San Francisco Bay Area, for artists, startups and consumer brands.",
+    "Music videos and brand films directed and shot by Julian Gigola in San Francisco, San Jose and the Bay Area, for artists, startups and consumer brands.",
 };
 
 /* ── the sessions, at /portfolio/<slug> ───────────────────────────
@@ -135,21 +147,24 @@ export const SESSION_SEO: Record<string, { title: string; description: string }>
   headshots: {
     title: "Headshot Photographer, San Francisco & San Jose",
     description: sentence(
-      "Professional headshots in San Francisco and San Jose: LinkedIn, corporate, actor and press. Studio lighting, retouched selects, ready in 3 days.",
+      "Professional headshots in San Francisco, San Jose and Silicon Valley: LinkedIn, corporate, actor and press. Studio lighting, retouched selects, ready in 3 days.",
       from("headshots") ? `${from("headshots")}.` : null,
     ),
   },
   graduation: {
-    title: "Graduation Photographer, SJSU & Santa Clara",
+    title: "Graduation Photographer, San Jose: SJSU & SCU",
+    // The price before the details, so a results page that cuts the
+    // description short cuts the details rather than the price.
     description: sentence(
-      "Graduation photos at SJSU, Santa Clara University and across the Bay Area. One hour on campus, two outfit changes, an edited gallery and print release.",
+      "Graduation photos at SJSU, Santa Clara University and across San Jose and the Bay Area.",
       from("graduation") ? `${from("graduation")}.` : null,
+      "One hour on campus, two outfit changes, edited gallery.",
     ),
   },
   weddings: {
-    title: "Editorial Wedding Photographer, San Francisco",
+    title: "Editorial Wedding Photographer, SF & San Jose",
     description: sentence(
-      "Editorial wedding photography in San Francisco and the Bay Area: full-day coverage that reads like a magazine, not an album. Limited dates each year.",
+      "Editorial wedding photography in San Francisco, San Jose and the Bay Area: full-day coverage that reads like a magazine, not an album. Limited dates each year.",
       from("weddings") ? `${from("weddings")}.` : null,
     ),
   },
@@ -191,6 +206,7 @@ export function siteGraph() {
   const business = `${SITE}/#business`;
   const areaServed = [
     { "@type": "AdministrativeArea", name: "San Francisco Bay Area" },
+    { "@type": "Place", name: "Silicon Valley" },
     ...AREA.map((name) => ({ "@type": "City", name })),
   ];
   /* The area is the business's, said once above rather than per service. */
@@ -243,7 +259,7 @@ export function siteGraph() {
         "@id": business,
         name: "Julian Gigola",
         description:
-          "Photography and creative direction in the San Francisco Bay Area: fashion editorials, brand campaigns, musician press photos, cover art and music videos, plus headshot, portrait, graduation, model digital and wedding sessions.",
+          "Photography and creative direction in San Francisco, San Jose and the Bay Area: fashion editorials, brand campaigns, musician press photos, cover art and music videos, plus headshot, portrait, graduation, model digital and wedding sessions.",
         url: SITE,
         email: EMAIL,
         image: `${SITE}/og.jpg`,
