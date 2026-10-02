@@ -62,7 +62,8 @@ export function GroupCell({
       <Link
         prefetch={false}
         href={href}
-        className="label w-fit border-b border-border pb-1 text-muted-foreground transition-colors duration-200 hoverable:hover:border-foreground hoverable:hover:text-foreground"
+        // 44px tall to a thumb, the line drawn where it was.
+        className="label w-fit border-b border-border pb-1 text-muted-foreground transition-colors duration-200 hoverable:hover:border-foreground hoverable:hover:text-foreground pointer-coarse:relative pointer-coarse:before:absolute pointer-coarse:before:-inset-x-2 pointer-coarse:before:-inset-y-2.5 pointer-coarse:before:content-['']"
       >
         {cta}
       </Link>
