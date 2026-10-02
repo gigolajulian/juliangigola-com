@@ -138,7 +138,15 @@ export function SessionsScreen({ sessions }: { sessions: SessionItem[] }) {
               <li
                 key={s.slug}
                 onPointerMove={() => open !== i && setOpen(i)}
-                className="flex flex-col border-b border-border py-2 short:py-1.5"
+                /* Julian (2026-10-02): anywhere in the row goes to the
+                   booking page, bar its own links: a click on the row is a
+                   click on its name, the link a keyboard and a reader get,
+                   so it goes the way every link on the site goes. */
+                onClick={(e) => {
+                  if (s.page && !(e.target as HTMLElement).closest("a, button"))
+                    e.currentTarget.querySelector("a")?.click();
+                }}
+                className={`flex flex-col border-b border-border py-2 short:py-1.5 ${s.page ? "cursor-pointer" : ""}`}
               >
                 {/* Julian (2026-10-02): a session with a booking page goes
                     there on a click; pointing still opens it here. */}

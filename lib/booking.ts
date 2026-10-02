@@ -174,6 +174,7 @@ const grad = session("graduation");
 const heads = session("headshots");
 const digitals = session("studio-digitals");
 const portraits = session("portraits");
+const weddings = session("weddings");
 
 export const BOOKING_PAGES: BookingPage[] = [
   {
@@ -387,6 +388,56 @@ export const BOOKING_PAGES: BookingPage[] = [
     tiles: coversOf("portraits"),
     gallery: { href: "/portfolio/portraits", label: "The portraits" },
     book: { type: "session", session: portraits.name, title: "Book a portrait session" },
+  },
+  {
+    slug: "weddings",
+    name: "Weddings",
+    title: "Editorial Wedding Photographer, SF & San Jose",
+    description:
+      "Editorial wedding photography in San Francisco, San Jose and across the Bay Area: full-day coverage that reads like a magazine, not an album. Limited dates.",
+    h1: "Editorial weddings in San Francisco & San Jose",
+    kicker: "Full day · Editorial · Limited dates",
+    lead: weddings.blurb,
+    ...sessionFacts(weddings),
+    service: "Wedding photography",
+    back: SESSIONS,
+    blocks: [
+      { heading: "What's included", items: weddings.includes },
+      {
+        heading: "Editorial, not an album",
+        body: "The day photographed the way a magazine would run it: the people, the place and the light, as a story rather than a checklist.",
+      },
+      {
+        heading: "Limited dates",
+        body: "A few weddings a year, so each one gets the time it needs. Send the date in the form as early as you have it.",
+      },
+    ],
+    where: SESSION_WHERE,
+    faqs: [
+      {
+        q: "How much does a wedding photographer cost in San Francisco or San Jose?",
+        a: costAnswer(weddings, "{price} for full-day coverage, an edited gallery and a print release."),
+      },
+      {
+        q: "How far ahead should we book?",
+        a: "As soon as you have a date. There are only a few each year, and spring and fall Saturdays go first.",
+      },
+      {
+        q: "Is a second shooter available?",
+        a: "Yes, for a larger wedding or when two places need covering at once. Say so in the form.",
+      },
+      {
+        q: "When will we get the photos?",
+        a: `The edited gallery is ready in ${weddings.turnaround}, with a print release so you can print anywhere.`,
+      },
+      {
+        q: "Do you travel for weddings?",
+        a: "Anywhere in the Bay Area, and to Los Angeles, New York and further. Travel is quoted with the booking.",
+      },
+    ],
+    tiles: framesOf("weddings"),
+    gallery: { href: "/portfolio/weddings", label: "The weddings gallery" },
+    book: { type: "session", session: weddings.name, title: "Book your wedding" },
   },
   {
     slug: "music-photography",

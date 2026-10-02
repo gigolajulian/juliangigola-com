@@ -151,9 +151,9 @@ export const MOTION_SEO = {
 
 /* ── the sessions, at /portfolio/<slug> ───────────────────────────
  * Headshots, Graduation and Weddings are each one gallery under the
- * session's own slug. Headshots and Graduation are booked at their own
- * pages now (/headshots, /graduation-photos), so their galleries are
- * titled as galleries; Weddings has no booking page and keeps the search.
+ * session's own slug. All three are booked at their own pages now
+ * (/headshots, /graduation-photos, /weddings), so their galleries are
+ * titled as galleries and the booking pages take the search.
  * ─────────────────────────────────────────────────────────────── */
 
 export const SESSION_SEO: Record<string, { title: string; description: string }> = {
@@ -175,7 +175,7 @@ export const SESSION_SEO: Record<string, { title: string; description: string }>
     ),
   },
   weddings: {
-    title: "Editorial Wedding Photographer, SF Bay Area",
+    title: "Wedding Portfolio, SF Bay Area",
     description: sentence(
       "Editorial wedding photography in San Francisco, Oakland, San Jose and Santa Cruz: full-day coverage that reads like a magazine. Limited dates.",
       from("weddings") ? `${from("weddings")}.` : null,

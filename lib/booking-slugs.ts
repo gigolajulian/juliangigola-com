@@ -11,6 +11,7 @@ export const BOOKING_SLUGS = [
   "graduation-photos",
   "model-digitals",
   "portraits",
+  "weddings",
   "music-photography",
   "brand-photography",
 ] as const;

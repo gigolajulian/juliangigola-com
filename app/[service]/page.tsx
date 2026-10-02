@@ -92,7 +92,7 @@ export default async function BookingPage(props: PageProps<"/[service]">) {
         <CoverFloat
           work={work}
           heading={{
-            title: page.h1,
+            title: page.h1.replace(/San (Francisco|Jose)/g, "San\u00a0$1"),
             where: facts.join(" · "),
             ctas: [
               { href: "#book", label: page.book.title },
