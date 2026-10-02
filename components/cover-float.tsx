@@ -136,7 +136,7 @@ export function CoverFloat({
               <CoverCard>
                 <Image
                   src={p.cover.src}
-                  alt=""
+                  alt={p.cover.alt}
                   fill
                   sizes="(max-width: 640px) 30vw, (max-width: 1280px) 22vw, 14vw"
                   priority={i < 4}
