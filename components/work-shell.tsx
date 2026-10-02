@@ -11,7 +11,7 @@ import { StripPage, StripHead } from "@/components/strip-page";
 import { ScopePanel, type ScopeRow } from "@/components/vectorscope";
 import { markFilter, StripView, type StripViewMode } from "@/components/strip";
 import { animate } from "motion";
-import { Liquid } from "liquid-gooey";
+import { Liquid } from "@/components/liquid";
 import {
   chooseView,
   morphView,
@@ -776,7 +776,7 @@ export function WorkShell({
      or two to a row. The list and the strip both stack one up there, so
      they are one choice here, and it is lit for either. */
   const phoneToggle = (
-    <span className="flex items-center justify-end gap-1">
+    <span className="flex items-center justify-end">
       {(["strip", "grid"] as const).map((mode) => {
         const on = !scoping && (mode === "grid") === (view === "grid");
         return (
@@ -793,7 +793,8 @@ export function WorkShell({
               })
             }
             className={cn(
-              "-my-1 p-2 transition-opacity duration-200",
+              // 44px to a thumb, standing no taller in the row.
+              "-my-2.5 p-3.5 transition-opacity duration-200",
               on ? "opacity-100" : "opacity-35",
             )}
           >
@@ -988,7 +989,7 @@ export function WorkShell({
                   on the list rather than on the bar, so with the list gone
                   the capsule sat flush against the window at 0 while every
                   other line on the page started at 24 or 40. */
-              className="filter-trigger glass-surface press relative z-10 ml-6 inline-flex items-center gap-2 border border-foreground/20 py-2 pl-3.5 pr-3 label active:scale-[0.97] sm:ml-10 lg:hidden"
+              className="filter-trigger glass-surface press relative z-10 ml-6 inline-flex pointer-coarse:before:absolute pointer-coarse:before:inset-x-0 pointer-coarse:before:-inset-y-2 pointer-coarse:before:content-[''] items-center gap-2 border border-foreground/20 py-2 pl-3.5 pr-3 label active:scale-[0.97] sm:ml-10 lg:hidden"
             >
               <span className="text-foreground">
                 {all ? "Portfolio" : head.title}
@@ -1164,8 +1165,6 @@ function Chip({
          and the pointer was repeating it back a few pixels lower down.
          Julian asked. */
       data-ring=""
-      // Julian: the ring forms around the chip under the pointer.
-      data-ring-hug=""
       /* So the strip that is about to mount knows it is a filter change
          and fades in where it stands, instead of sliding in from a
          quarter of the window away as an arriving page does. */

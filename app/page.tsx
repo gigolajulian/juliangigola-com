@@ -76,6 +76,8 @@ export default function Home() {
         // Julian: the ScrollStack, sideways. Each screen slides over the one
         // before, which sinks back under it (`lib/deck.ts`).
         deck="screens"
+        // The hero and the next screen first, the rest once it has landed.
+        defer
         bleed
         className="flex-1"
       >
@@ -199,7 +201,7 @@ export default function Home() {
           title="Have something in mind?"
           body="Tell me what you have in mind and I'll come back with an approach and a quote."
           next={WORK_PAGE}
-          className="border-l border-border"
+          className="screen-measure border-l border-border"
           /* Julian: the photo wall on the last page, as on the intro and
              the 404. Behind the ask and the two doors, dimmed so both
              still read; the doors are frosted glass over it. Each tile a way into
@@ -232,8 +234,9 @@ export default function Home() {
         />
         {/* The window into the work (`lead-window.tsx`). */}
         <LeadWindow
+          // Three fill the strip; a screen of the rack takes up to sixteen.
           covers={commissionsIn(WORK_CATEGORY_LINKS[0].slug)
-            .slice(0, 3)
+            .slice(0, 16)
             .map(indexRow)}
         />
       </Strip>

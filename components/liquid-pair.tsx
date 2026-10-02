@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Liquid } from "liquid-gooey";
+import { Liquid } from "@/components/liquid";
 
 /* Julian: the buttons in liquid (`liquid-gooey`). The first button is a
    body of the ink; the quiet ones beside it stay an outline at rest, and
@@ -30,6 +30,8 @@ export function LiquidPair({
      seamless on iPhone and iPad). A finger gets the plain buttons, the
      same at rest. Plain on the server too, so the markup agrees. */
   const mouse = React.useSyncExternalStore(subscribeMouse, isMouse, () => false);
+  // When the pointer last left the first button (`Quiet` reads it).
+  const left = React.useRef(-Infinity);
   if (!mouse) {
     return (
       <div {...rest} className={className}>
@@ -52,11 +54,17 @@ export function LiquidPair({
     >
       {React.Children.toArray(children).map((child, i) =>
         quiet(child) ? (
-          <Quiet key={i}>{child}</Quiet>
-        ) : (
-          <Liquid.Item key={i} observe>
+          <Quiet key={i} from={left}>
             {child}
-          </Liquid.Item>
+          </Quiet>
+        ) : (
+          <span
+            key={i}
+            className="contents"
+            onPointerLeave={() => (left.current = performance.now())}
+          >
+            <Liquid.Item observe>{child}</Liquid.Item>
+          </span>
         ),
       )}
     </Liquid>
@@ -71,7 +79,19 @@ const subscribeMouse = (fn: () => void) => {
   return () => m.removeEventListener("change", fn);
 };
 
-function Quiet({ children }: { children: React.ReactNode }) {
+/* Julian: the ink runs across only when the pointer goes straight from
+   the first button to this one, crossing the gap within this long (ms).
+   Come to it from anywhere else and it floods as the first one does, a
+   circle out of where the pointer came in (`::before`, `globals.css`). */
+const CROSS = 350;
+
+function Quiet({
+  children,
+  from,
+}: {
+  children: React.ReactNode;
+  from: React.RefObject<number>;
+}) {
   const [on, setOn] = React.useState(false);
   /* Been on: drains back on the way out, and the glass waits for it (not
      on the first paint either). */
@@ -83,7 +103,9 @@ function Quiet({ children }: { children: React.ReactNode }) {
   return (
     <span
       className="relative inline-flex"
-      onPointerEnter={(e) => e.pointerType === "mouse" && enter()}
+      onPointerEnter={(e) =>
+        e.pointerType === "mouse" && performance.now() - from.current < CROSS && enter()
+      }
       onPointerLeave={() => setOn(false)}
       onFocus={(e) => e.target.matches(":focus-visible") && enter()}
       onBlur={() => setOn(false)}

@@ -46,7 +46,10 @@ export async function buildProgram(gl: GL, options: ProgramOptions): Promise<Pro
   /* OGL's constructor makes two shaders and a program, fills and links
      them. For the length of that call it gets these ones, already built,
      and filling and linking them again is skipped; what it reads back
-     (the logs, the status, the uniforms) is ready and costs nothing. */
+     (the status, the uniforms) is ready and costs nothing. Except the
+     shaders' own logs: asking for one still waited 53ms in Chrome, mid
+     page crossing (2026-10-01), so OGL is told they are empty. A shader
+     that failed still fails the link, and OGL prints that log. */
   const shaders = [vs, fs];
   const g = gl as unknown as Record<string, unknown>;
   const stand = {
@@ -56,6 +59,7 @@ export async function buildProgram(gl: GL, options: ProgramOptions): Promise<Pro
     shaderSource: () => {},
     compileShader: () => {},
     linkProgram: () => {},
+    getShaderInfoLog: () => "",
   };
   Object.assign(g, stand);
   try {

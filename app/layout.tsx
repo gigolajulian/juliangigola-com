@@ -11,7 +11,7 @@ import { WORK_CATEGORY_LINKS } from "@/lib/work";
 import { WORK_HEADS } from "@/lib/work-heads";
 import { GlassLight } from "@/components/glass-light";
 import { PhotoFade } from "@/components/photo-fade";
-import { PointerRing } from "@/components/pointer-ring";
+import { PointerMark } from "@/components/pointer-mark";
 import "./globals.css";
 import { ImageFallback } from "@/components/image-fallback";
 import { PageTransition } from "@/components/page-transition";
@@ -160,7 +160,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
          */}
         <script
           dangerouslySetInnerHTML={{
-            __html: `(function(){try{var q=location.search,f="deck-flyout";if(/[?&]flyout=1/.test(q))sessionStorage.setItem(f,"1");if(/[?&]flyout=0/.test(q))sessionStorage.removeItem(f);if(sessionStorage.getItem(f)==="1")document.documentElement.dataset.flyout=""}catch(e){}var t=null;try{localStorage.removeItem("theme");t=sessionStorage.getItem("theme")}catch(e){}var l=t==="light"||(t!=="dark"&&matchMedia("(prefers-color-scheme: light)").matches);if(l)document.documentElement.dataset.theme="light";var m=document.querySelectorAll('meta[name="theme-color"]');for(var i=0;i<m.length;i++)m[i].setAttribute("content",l?"#ebedef":"#0b0a09")})()`,
+            __html: `(function(){try{var q=location.search,f="deck-flyout";if(/[?&]flyout=1/.test(q))sessionStorage.setItem(f,"1");if(/[?&]flyout=0/.test(q))sessionStorage.removeItem(f);if(sessionStorage.getItem(f)==="1")document.documentElement.dataset.flyout="";var k="door-stack";if(/[?&]stack=0/.test(q))sessionStorage.setItem(k,"0");if(/[?&]stack=1/.test(q))sessionStorage.removeItem(k);if(sessionStorage.getItem(k)!=="0")document.documentElement.dataset.stack=""}catch(e){}var t=null;try{localStorage.removeItem("theme");t=sessionStorage.getItem("theme")}catch(e){}var l=t==="light"||(t!=="dark"&&matchMedia("(prefers-color-scheme: light)").matches);if(l)document.documentElement.dataset.theme="light";var m=document.querySelectorAll('meta[name="theme-color"]');for(var i=0;i<m.length;i++)m[i].setAttribute("content",l?"#ebedef":"#0b0a09")})()`,
           }}
         />
         {/* Whether this visit gets the opening, decided before the first
@@ -236,7 +236,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         {/* The pointer over anything that opens large, site wide. One
             mount: it follows the pointer and shows only over `[data-ring]`,
             so every gallery and strip shares it and none carries its own. */}
-        <PointerRing />
+        {/* And the pointer itself: the site's mark in place of the arrow.
+            See `pointer-mark.tsx`. */}
+        <PointerMark />
       </body>
     </html>
   );

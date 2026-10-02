@@ -3,10 +3,11 @@
 import { openFrom } from "@/components/lead-window";
 import { runDeck, type Deck } from "@/lib/deck";
 import * as React from "react";
+import { flushSync } from "react-dom";
 import { useRouter } from "next/navigation";
 import { cn, filterPaths, rubberband, STRIP_SECTION } from "@/lib/utils";
 import { flyCovers } from "@/lib/work-view";
-import { Liquid } from "liquid-gooey";
+import { Liquid } from "@/components/liquid";
 
 /* ── the strip ────────────────────────────────────────────────────
  * One screen, and the page runs across it. This is the machine behind
@@ -109,6 +110,27 @@ if (typeof window !== "undefined") {
 }
 /** Where a path's strip was when it was last left. */
 const seat = (path: string) => `strip-at:${path}`;
+
+/** Whether the app has hydrated: a strip mounting before then is the
+    server's markup and must match it whole; one mounting after is a
+    navigation and may hold its far cells back (`defer`). */
+let hydrated = false;
+/** The cells a deferring strip mounts with: up to the third section. */
+const SECTIONS_FIRST = 2;
+/** When a press last went to a place inside a page (`/#about`): the strip
+    that mounts for it is whole, since the address it is read from still
+    holds the page being left while it renders. */
+let aimedAt = 0;
+if (typeof window !== "undefined") {
+  document.addEventListener(
+    "click",
+    (e) => {
+      const a = (e.target as Element | null)?.closest?.<HTMLAnchorElement>("a[href]");
+      if (a && a.origin === location.origin && a.hash) aimedAt = Date.now();
+    },
+    true,
+  );
+}
 
 /** How far past the end a wheel has to push before it leads on, in px of
     wheel delta. Three notches on a mouse: an overshoot of one is a
@@ -332,6 +354,7 @@ export function Strip({
   bleed = false,
   arrive,
   deck,
+  defer = false,
   ref,
   className,
 }: {
@@ -364,6 +387,9 @@ export function Strip({
       slides over it (`lib/deck.ts`). "pile" for the cells marked
       `data-deck`, "screens" for every cell. Wide screens only. */
   deck?: Deck;
+  /** Arriving by navigation, mount the first two sections and the rest
+      once the page has landed and gone quiet. The work index only. */
+  defer?: boolean;
   /** Run the ruler in chapters rather than in ticks: one segment per
       section, all of them the same width, and the one under the pointer
       opens into the cells it holds. The work index only, where eighty four
@@ -387,16 +413,123 @@ export function Strip({
   className?: string;
 }) {
   const scroller = React.useRef<HTMLDivElement>(null);
+  /* Julian (2026-10-01): only the discipline being shown and the next.
+     Arriving at the portfolio built all ninety three projects inside the
+     page transition, 1,100 elements and 130ms of long tasks with the
+     screen held; a discipline page of 300 had none. So a navigation here
+     mounts the first two sections, and the rest follow a section at a
+     time once the arrival is over (`data-nav` gone from the root) and the
+     page is idle: all at once, mid-transition, they cost 87ms and seven
+     dropped frames. Whole at once when the visitor is coming back to a
+     place in it (the back button's seat, a #discipline typed in), and
+     always on the server and the cold load, so the markup and the
+     crawlers have every project. Not the hash at render: the address
+     still holds the page being left (`/#inquire`). */
+  const [sections, setSections] = React.useState(() =>
+    !defer || !hydrated || Date.now() - poppedAt < POP_MS || Date.now() - aimedAt < POP_MS
+      ? Infinity
+      : SECTIONS_FIRST,
+  );
+  /* Whether anything is still held back is this memo's to say, not a count
+     of the two: `Children.count` counts an empty child and `toArray` drops
+     it, so a page with one (the homepage) counted its children at eight
+     and the sections shown at seven for ever. Coming back from the
+     portfolio, that asked for more sections at every idle slot without
+     end, and each one dealt the deck again: the hero lost its `data-buried`
+     and its photographs showed under the glass as a grey band, and the
+     paging lost its places and the wheel stuck (Julian, 2026-10-02). */
+  const [shown, holding] = React.useMemo(() => {
+    if (sections === Infinity) return [children, false] as const;
+    const all = React.Children.toArray(children);
+    let heads = 0;
+    /* A section opens on the cell marked `data-deck`, as the deck reads
+       it: rendered on the server, it reaches here as that element, not as
+       the component that drew it. On the homepage every screen is one. */
+    const opens = (c: React.ReactNode) =>
+      deck === "screens" ||
+      (React.isValidElement<Record<string, unknown>>(c) && "data-deck" in c.props);
+    const cut = all.findIndex((c) => opens(c) && ++heads > sections);
+    if (cut < 0) return [all, false] as const;
+    /* The later sections' openings go in now, only their covers wait:
+       the ruler reads its chapters off them, and with two of thirteen it
+       drew fifty six ticks until the rest arrived. */
+    return [
+      [...all.slice(0, cut), ...(deck === "screens" ? [] : all.slice(cut).filter(opens))],
+      true,
+    ] as const;
+  }, [children, sections, deck]);
+  React.useEffect(() => {
+    hydrated = true;
+  }, []);
   React.useEffect(() => {
     const el = scroller.current;
     if (!deck || !el) return;
     return runDeck(el, deck);
-  }, [deck]);
+    // Dealt again as each held-back section arrives.
+  }, [deck, shown]);
   React.useImperativeHandle(ref, () => scroller.current!, []);
   const [at, setAt] = React.useState(0);
   /** Which tick the pointer is over, as a place in `ticks`, or null. */
   /** Whether the strip has stopped. The rail's shape waits for it. */
   const [still, setStill] = React.useState(true);
+  React.useEffect(() => {
+    // Never under a moving strip: each section deals the deck again.
+    if (!holding || !still) return;
+    const root = document.documentElement;
+    let idle = 0;
+    /* Not in `startTransition`: here that runs the page-wide view
+       transition (`page-transition.tsx`), and every section crossfaded the
+       whole page, a ghost of the hero each second after landing. */
+    const more = () => setSections((n) => n + 1);
+    const later = () => {
+      idle =
+        typeof window.requestIdleCallback === "function"
+          ? window.requestIdleCallback(more, { timeout: 1500 })
+          : window.setTimeout(more, 200);
+    };
+    const landed = new MutationObserver(() => {
+      if (root.dataset.nav !== undefined) return;
+      landed.disconnect();
+      later();
+    });
+    if (root.dataset.nav === undefined) later();
+    else landed.observe(root, { attributes: true, attributeFilter: ["data-nav"] });
+    return () => {
+      landed.disconnect();
+      if (typeof window.cancelIdleCallback === "function") window.cancelIdleCallback(idle);
+      window.clearTimeout(idle);
+    };
+  }, [holding, sections, still]);
+  React.useEffect(() => {
+    const el = scroller.current;
+    if (!holding || !el) return;
+    /* A strip that keeps moving never rests for the idle path above, and
+       ran on past openings with nothing behind them (Julian, 2026-10-02).
+       So the next section also comes in once it is a screen and a half
+       away, moving or not. */
+    let asked = false;
+    const near = () => {
+      if (asked) return;
+      const next =
+        deck === "screens"
+          ? null
+          : el.querySelectorAll<HTMLElement>(":scope > [data-deck]")[sections];
+      const ahead = next
+        ? next.getBoundingClientRect().left - el.getBoundingClientRect().right
+        : el.scrollWidth - el.scrollLeft - el.clientWidth;
+      if (ahead > el.clientWidth * 1.5) return;
+      asked = true;
+      setSections((n) => n + 1);
+    };
+    el.addEventListener("scroll", near, { passive: true });
+    // Before the strip's own listener looks for the cell (`onHash`).
+    const onHash = () => flushSync(() => setSections(Infinity));
+    window.addEventListener("hashchange", onHash);
+    return () => {
+      el.removeEventListener("scroll", near);
+      window.removeEventListener("hashchange", onHash);
+    };
+  }, [holding, sections, deck]);
   /** Where a press on the rail is taking the strip, as a place in `ticks`.
       Let go after browsing the rail and the strip has a second of coasting
       left in it; without this the rail went flat for all of it and then
@@ -545,7 +678,12 @@ export function Strip({
         break;
       }
     }
-  }, [grid, children]);
+    /* On `shown`, not `children`: the held-back sections (`defer`) arrive
+       without the parent rendering again, and a cover written no `order`
+       sorts as nought, to the front of the rack. Coming through the door
+       into the grid, Artist Presskit and Portraits stood where Editorial
+       belonged (Julian, 2026-10-02). */
+  }, [grid, shown]);
   const router = useRouter();
   // Stable for the life of the strip: pages key it by what it shows.
   const nextHref = next?.href;
@@ -571,7 +709,9 @@ export function Strip({
     el.addEventListener("click", openCell);
     return () => el.removeEventListener("click", openCell);
   }, []);
-  const count = React.Children.count(children);
+  // The cells mounted, so the wall and the ruler measure again when the
+  // held-back sections arrive (`defer`).
+  const count = React.Children.count(shown);
 
   /* Julian: a delay between the scroll and the page switching. The page
      led on to was fetched only once the strip left, so the deal waited on
@@ -1112,8 +1252,14 @@ export function Strip({
       if (paged) el.addEventListener("wheel", onRest, { passive: true });
       // Capture, so the wake is booked before Lenis handles the event.
       el.addEventListener("wheel", wake, { capture: true, passive: true });
+      /* Lenis watches the strip's box, not how far it scrolls, so the
+         sections that arrive after a crossing (`defer`) never reached it:
+         the wheel stopped at the second screen (Julian, 2026-10-02). */
+      const grown = new MutationObserver(() => lenis.resize());
+      grown.observe(el, { childList: true });
       el.dataset.lenis = "1";
       off = () => {
+        grown.disconnect();
         cancelAnimationFrame(frame);
         window.clearTimeout(rest);
         el.removeEventListener("wheel", onRest);
@@ -1589,16 +1735,27 @@ export function Strip({
        to zero and leave from there. The two properties compose instead, so
        the exit slide simply starts from wherever the band had got to. */
     /* The window into the work, on the homepage: the pull opens it out
-       of the right edge, up to a third of the screen at the count. */
-    const win = el.querySelector<HTMLElement>(":scope > [data-lead-window]");
+       of the right edge, up to a third of the screen at the count. Looked
+       up when first asked for, since with `defer` it mounts after the strip
+       does. */
+    let win: HTMLElement | null = null;
     /* Through the window it is one scroll past it, either way (Julian:
        seamless): the word already said what is next, so there is nothing
        to make sure of. Everywhere else the band asks for a persistent
        push (`lead-window.tsx`). */
     const door = (dir: 1 | -1) =>
       // A cell of no width, but drawn: none under a finger on a phone.
-      (dir > 0 ? !!win?.getClientRects().length : prevStart && prevHref === "/");
-    const after = (dir: 1 | -1) => (door(dir) ? 90 : LEAVE_AFTER);
+      (dir > 0
+        ? !!(win ??= el.querySelector<HTMLElement>(":scope > [data-lead-window]"))?.getClientRects().length
+        : prevStart && prevHref === "/");
+    /* The portfolio stacking over the home (`data-stack`, the default):
+       past the last screen the wheel carries the portfolio's card in as
+       it carries a screen, the strip's gain a notch, all the way across
+       (Julian: on scroll as well from the last page of home). */
+    const stacked = (dir: 1 | -1) =>
+      dir > 0 && door(1) && "stack" in document.documentElement.dataset;
+    const after = (dir: 1 | -1) =>
+      stacked(dir) ? innerWidth / WHEEL : door(dir) ? 90 : LEAVE_AFTER;
     const paint = () => {
       if (leaving) return;
       // Three notches read 48, 94 and 136px, so the band is still growing
@@ -1612,11 +1769,20 @@ export function Strip({
          gives easily and then stiffens towards the count, and the
          crossing is a detent given way (Julian: a tiny bit of
          resistance). */
-      if (win && over > 0 && door(1)) {
+      if (over > 0 && door(1) && win) {
         const shown = Math.round(
-          innerWidth * 0.3 * (1 - (1 - Math.min(1, over / after(1))) ** 3),
+          stacked(1)
+            ? Math.min(innerWidth, over * WHEEL)
+            : innerWidth * 0.3 * (1 - (1 - Math.min(1, over / after(1))) ** 3),
         );
-        (win.previousElementSibling as HTMLElement).style.translate = `${-shown}px`;
+        const last = win.previousElementSibling as HTMLElement;
+        /* `data-stack` (the default; `?stack=0` opts out): the portfolio comes in over the last screen, which
+           sinks back as the deck's screens do, instead of sliding off. */
+        if ("stack" in document.documentElement.dataset) {
+          last.style.scale = String(1 - (0.1 * shown) / innerWidth);
+          // The homepage's rail gives way as the card comes over it.
+          el.closest<HTMLElement>(".strip-band")?.style.setProperty("--lead-in", (shown / innerWidth).toFixed(3));
+        } else last.style.translate = `${-shown}px`;
         win.style.setProperty("--lead-pull", `${shown}px`);
         return;
       }
@@ -1738,12 +1904,24 @@ export function Strip({
       el.dataset.release = "";
       el.style.translate = "";
       if (win) {
-        (win.previousElementSibling as HTMLElement).style.translate = "";
+        const last = win.previousElementSibling as HTMLElement;
+        last.style.translate = "";
+        last.style.scale = "";
+        el.closest<HTMLElement>(".strip-band")?.style.removeProperty("--lead-in");
         win.style.setProperty("--lead-pull", "0px");
       }
     };
     const relax = (now: number) => {
       if (now - pushed > HOLD) {
+        /* Let go a fifth of the way in or more, and the card carries on
+           over, as a screen does (`settle`); less, and it goes back. */
+        if (over > 0 && stacked(1) && over * WHEEL > innerWidth * 0.2) {
+          leave(1);
+          if (leaving) {
+            band = 0;
+            return;
+          }
+        }
         release();
         // The count drains on its own clock, unseen.
         over *= Math.exp(-16 / RELAX);
@@ -1899,7 +2077,10 @@ export function Strip({
 
     const leave = (dir: 1 | -1) => {
       const href = dir > 0 ? nextHref : prevHref;
-      if (!href || leaving || performance.now() - arrived < 500) return;
+      /* Not for the portfolio's card: it takes a full window of pushing
+         past the last screen, which no spin that led here can be. Kept, it
+         left the card over the whole window until the next notch. */
+      if (!href || leaving || (!stacked(dir) && performance.now() - arrived < 500)) return;
       /* Never off a page with words typed into its form: the contact form
          keeps no state, and a drag across its intro or a spin over its
          steps took a half written inquiry to About and back empty. The
@@ -2987,7 +3168,7 @@ export function Strip({
           bleed && stack && "max-sm:gap-0",
         )}
       >
-        {children}
+        {shown}
       </div>
 
       {/* The panel: a tick for every cell that asked for one, the one you
@@ -3076,8 +3257,8 @@ export function Strip({
              gap above the rail and the 16px foot below it, without moving
              a pixel of the drawing. */
           data-cue={cue ? "" : undefined}
-          /* Julian: one word in the pointer's ring, always, and on a rail
-             that word is VIEW (`pointer-ring.tsx`). The names stay on the
+          /* Julian: one word at the pointer, always, and on a rail
+             that word is VIEW (`pointer-mark.tsx`). The names stay on the
              rail itself. */
           data-ring={over !== null || overAway !== null ? "View" : ""}
           className={cn(
