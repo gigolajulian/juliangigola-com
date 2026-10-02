@@ -417,14 +417,58 @@ const withFaces = (project: Project): Project => ({
   }),
 });
 
-const withAlt = (project: Project): Project => ({
-  ...project,
-  cover: { ...project.cover, alt: ALT[project.cover.src] || project.cover.alt || project.name },
-  images: project.images.map((f, i) => ({
-    ...f,
-    alt: ALT[f.src] || f.alt || `${project.name}, frame ${i + 1} of ${project.images.length}`,
-  })),
-});
+const titleCase = (s: string) =>
+  s.trim().toLowerCase().replace(/(^|[\s(/-])\S/g, (c) => c.toUpperCase());
+
+/**
+ * What the project page says about a photograph, as a sentence for its
+ * alt (Julian, 2026-10-02: the discipline and the credits): the project,
+ * its discipline, who photographed it, who is in it and who it was for.
+ * The crew (gaffer, DIT, styling) stays on the page; the alt says what
+ * the picture is.
+ */
+const altContext = (project: Project): string => {
+  const name = titleCase(project.name);
+  const discipline = project.categories[0]?.name;
+  const credit = (role: RegExp) =>
+    project.credits.find((c) => role.test(c.role))?.name.trim();
+  const same = (a?: string) => !a || a.toLowerCase() === project.name.trim().toLowerCase();
+  const model = credit(/^models?$/i);
+  const artist = credit(/^artists?$/i);
+  const client = credit(/^client$/i);
+  return [
+    discipline && !same(discipline) ? `${name} (${discipline})` : name,
+    `photographed by ${credit(/^photographer$/i) ?? "Julian Gigola"}`,
+    !same(model) && `model ${model}`,
+    !same(artist) && `artist ${artist}`,
+    !same(client) && `for ${client}`,
+  ]
+    .filter(Boolean)
+    .join(", ");
+};
+
+const withAlt = (project: Project): Project => {
+  const context = altContext(project);
+  /* A written description (`lib/alt-text.ts`, or one the harvest kept)
+     first, then the project's own words; without one, the project's words
+     and where in the sequence the frame sits. */
+  const alt = (f: Frame, i: number) => {
+    const said = ALT[f.src] || f.alt;
+    return said
+      ? `${said.replace(/\.$/, "")}. ${context}`
+      : `${context}, photo ${i + 1} of ${project.images.length}`;
+  };
+  const images = project.images.map((f, i) => ({ ...f, alt: alt(f, i) }));
+  // `cover.jpg` is the harvest's copy of the opening frame, so it says what that frame says.
+  const at = project.cover.src.endsWith("/cover.jpg")
+    ? 0
+    : project.images.findIndex((f) => f.src === project.cover.src);
+  return {
+    ...project,
+    cover: { ...project.cover, alt: images[at]?.alt ?? alt(project.cover, 0) },
+    images,
+  };
+};
 
 const relabel = (project: Project): Project => ({
   ...project,
@@ -1208,13 +1252,14 @@ export type Discipline = {
  * does not know: 1,084 frames came across with none.
  */
 const archiveFrame = (src: string, alt: string): Frame => {
-  const found = PROJECTS.flatMap((p) => p.images).find((f) => f.src === src);
+  const project = PROJECTS.find((p) => p.images.some((f) => f.src === src));
+  const found = project?.images.find((f) => f.src === src);
   // Naming a frame that does not exist is an editorial mistake, not a runtime
   // condition to paper over — and a silent fallback here would put the wrong
   // photograph at the top of the homepage.
-  if (!found)
+  if (!project || !found)
     throw new Error(`Cover override names a frame not in the archive: ${src}`);
-  return { ...found, alt };
+  return { ...found, alt: `${alt}. ${altContext(project)}` };
 };
 
 const COVER_OVERRIDES: Record<string, Frame> = {

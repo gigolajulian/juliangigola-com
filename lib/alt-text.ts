@@ -9,6 +9,14 @@
  * who is in it: no client is named unless the project already is.
  */
 export const ALT: Record<string, string> = {
+  // The homepage's cover and sessions
+  "/work/aera-wraith/01.jpg": "Figure in a hood and bodysuit standing on a lit plinth in a smoky ruined chamber",
+  "/work/azure-bloom/08.jpg": "Model with a natural afro in a tiered white tulle dress and a blue ruffled choker, on white",
+  "/work/liminal/01.jpg": "Model with her hair up in an oversized jacket, lit orange from behind with a teal edge light",
+  "/work/wrapped-up/02.jpg": "Model in a black strapless top seen through stretched plastic wrap",
+  "/work/fauxtopia/01.jpg": "Model in a fur-trimmed hooded coat on the shoreline at sunset",
+  "/work/i-wanna-be-a-human/01.jpg": "Model in a sculptural black PVC and tulle look, flanked by motion-blurred figures",
+
   // Headshots
   "/work/headshots/01.jpg": "Studio headshot of a woman with long dark wavy hair in a black top against a white background",
   "/work/headshots/02.jpg": "Studio headshot of a woman with long highlighted hair in a black blazer against a white background",
@@ -70,13 +78,13 @@ export const ALT: Record<string, string> = {
 
   // Brand campaigns
   "/work/paradox/01.jpg": "A barber with tattooed arms combing a model's hair backstage at Educo Academy HairJam",
-  "/work/ukiyosunknown/01.jpg": "Model in black leather crouching beside a television on a white studio floor, for Ukiyosunknown",
+  "/work/ukiyosunknown/01.jpg": "Model in black leather crouching beside a television on a white studio floor",
   "/work/sago/01.jpg": "Man in a SAGO varsity jacket and sunglasses standing in tall golden grass at sunset",
   "/work/goodcult/01.jpg": "Two models in matching Goodcult graphic hoodies against a teal wall, one seated on the floor",
-  "/work/sols/01.jpg": "Model with teal hair and a bandana sitting on a rooftop in a bikini top and denim, for Solswear",
-  "/work/jubo/03.jpg": "Man in an orange beanie and green graphic tee beneath a steel pylon, for Jubo",
-  "/work/hua/16.jpg": "Figure in a hooded coat with rabbit ears standing in a red-lit graffiti tunnel, for Hua",
+  "/work/sols/01.jpg": "Model with teal hair and a bandana sitting on a rooftop in a bikini top and denim",
+  "/work/jubo/03.jpg": "Man in an orange beanie and green graphic tee beneath a steel pylon",
+  "/work/hua/16.jpg": "Figure in a hooded coat with rabbit ears standing in a red-lit graffiti tunnel",
   "/work/diesel/03.jpg": "Close-up of a model's Diesel waistband and low-slung jeans, a group lounging in a warehouse behind",
-  "/work/wired-magazine/01.jpg": "Skateboarder in wide jeans mid-push along a grey wall, shot from the ground, for WIRED",
+  "/work/wired-magazine/01.jpg": "Skateboarder in wide jeans mid-push along a grey wall, shot from the ground",
   "/work/nabu/59.jpg": "Woman with long curly hair in a black NABU shirt on a rooftop under a dusk sky",
 };

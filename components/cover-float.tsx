@@ -136,11 +136,7 @@ export function CoverFloat({
               <CoverCard>
                 <Image
                   src={p.cover.src}
-                  /* A booking page's photographs are its only pictures, and
-                     what a search and a reader learn the service looks like
-                     from (`lib/alt-text.ts`). The homepage's are left as
-                     they were. */
-                  alt={heading ? p.cover.alt : ""}
+                  alt={p.cover.alt}
                   fill
                   sizes="(max-width: 640px) 30vw, (max-width: 1280px) 22vw, 14vw"
                   priority={i < 4}
