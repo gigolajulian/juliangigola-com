@@ -19,10 +19,11 @@ import { serviceGraph } from "@/lib/seo";
  * The words are in `lib/booking.ts`.
  * ─────────────────────────────────────────────────────────────── */
 
-/* Only the pages `lib/booking.ts` lists. Any other address at the root is
-   a 404 rather than an empty page rendered on request. */
-export const dynamicParams = false;
-
+/* Prerendered, and rendered on request where the prerendered copy is not
+   there: a Workers preview upload carries no cache, and `dynamicParams =
+   false` turned every miss into a 404 (2026-10-02). Any address at the
+   root that `lib/booking.ts` does not list is a 404 all the same, from
+   `notFound()` below. */
 export function generateStaticParams() {
   return BOOKING_PAGES.map((p) => ({ service: p.slug }));
 }
