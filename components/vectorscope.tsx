@@ -540,6 +540,15 @@ export function ScopePanel({
             const release = held && Math.hypot(held[0] - p[0], held[1] - p[1]) < 4;
             setHeld(release ? null : p);
           }}
+          /* Julian: over the scope the pointer's mark is the colour it is
+             on, not the inverse (`.pointer-mark` in globals.css). */
+          onPointerMove={(e) => {
+            const p = at(e);
+            const root = document.documentElement;
+            root.style.setProperty("--mark-fill", hex(colourAt(p[0], p[1])));
+            root.setAttribute("data-mark-fill", "");
+          }}
+          onPointerLeave={() => document.documentElement.removeAttribute("data-mark-fill")}
           role="slider"
           tabIndex={0}
           aria-label="Color"
