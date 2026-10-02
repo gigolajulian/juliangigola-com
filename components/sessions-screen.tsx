@@ -84,6 +84,15 @@ export function SessionsScreen({ sessions }: { sessions: SessionItem[] }) {
             />
           ) : null,
         )}
+        {/* The photograph is a way in too, to the open session's page. */}
+        {current.page ? (
+          <Link
+            href={current.page}
+            data-ring="Open"
+            aria-label={`More on ${current.name}`}
+            className="absolute inset-0 z-10"
+          />
+        ) : null}
         <div className="absolute inset-x-0 bottom-0 flex items-baseline justify-between gap-3 bg-background/80 p-4 backdrop-blur-sm">
           <div className="flex items-baseline gap-3">
             <span className="label text-muted-foreground">
@@ -166,9 +175,9 @@ export function SessionsScreen({ sessions }: { sessions: SessionItem[] }) {
                       {s.page ? (
                         <Link
                           href={s.page}
-                          className="label flex gap-2.5 self-start py-2 text-muted-foreground transition-colors duration-200 hoverable:hover:text-foreground"
+                          className="label flex gap-2.5 self-start py-2"
                         >
-                          Details <span aria-hidden>&rarr;</span>
+                          More on {s.name} <span aria-hidden>&rarr;</span>
                         </Link>
                       ) : null}
                     </div>
