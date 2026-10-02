@@ -3537,6 +3537,9 @@ export function Strip({
                     key={`tick-${i}`}
                     type="button"
                     tabIndex={-1}
+                    /* Never pressed nor reached by Tab, so not read out as
+                       a row of nameless buttons either. */
+                    aria-hidden
                     title={named[n]}
                     // The rail above takes the press, so this is a target and
                     // not a handler: two of them would travel twice.

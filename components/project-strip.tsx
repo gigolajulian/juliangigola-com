@@ -249,7 +249,10 @@ export function ProjectStrip({
                       key={`${credit.role}-${i}`}
                       className="flex flex-wrap items-baseline gap-x-2 sm:gap-x-3 sm:contents"
                     >
-                      <dt className="label whitespace-nowrap text-muted-foreground/70 max-sm:text-[0.5625rem] max-sm:tracking-[0.06em]">
+                      {/* The role a shade under the name, and both readable: the role
+                          at the muted grey (4.5:1 and up), the name lifted
+                          above it (Julian, 2026-10-02). */}
+                      <dt className="label whitespace-nowrap text-muted-foreground max-sm:text-[0.5625rem] max-sm:tracking-[0.06em]">
                         {credit.role}
                       </dt>
                       <dd className="label min-w-0 whitespace-nowrap max-sm:text-[0.5625rem] max-sm:tracking-[0.06em]">
@@ -272,7 +275,7 @@ export function ProjectStrip({
                               target="_blank"
                               rel="noreferrer"
                               data-ring="Instagram"
-                              className="text-muted-foreground transition-colors duration-200 hoverable:hover:text-foreground"
+                              className="text-foreground/80 transition-colors duration-200 hoverable:hover:text-foreground"
                             >
                               {credit.name}
                               <span className="sr-only">
