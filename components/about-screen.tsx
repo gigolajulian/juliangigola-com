@@ -90,7 +90,8 @@ export function AboutScreen() {
             see. I work across editorial fashion, commercial campaigns and
             artist development, helping emerging labels, musicians and
             technology brands find the image that feels most like them. I
-            also photograph headshots, portraits, graduations and weddings
+            bring that same approach to people&apos;s own milestones,
+            photographing headshots, portraits, graduations and weddings
             across San Francisco, San Jose and the Bay Area.
           </p>
           <dl className="title-rest mt-8 sm:mt-[clamp(1.25rem,3vh,2rem)] grid grid-cols-3 gap-4 border-t border-border pt-6">
