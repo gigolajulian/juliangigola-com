@@ -639,7 +639,10 @@ export function Strip({
     if (!el) return;
     const kids = Array.from(el.children) as HTMLElement[];
     if (!grid) {
-      for (const k of kids) k.style.order = "";
+      for (const k of kids) {
+        k.style.order = "";
+        delete k.dataset.alone;
+      }
       return;
     }
     /* A cell that is not a picture spans both rows — see `.strip-grid` in
@@ -670,13 +673,19 @@ export function Strip({
          more. 7.1% of the rack left empty across the three this way,
          9.9% that way. */
       const want = upright(kids[i]);
+      let alone = true;
       for (let j = i + 1; j < kids.length; j++) {
         if (!picture(kids[j])) break;
         if (taken[j] || upright(kids[j]) !== want) continue;
         taken[j] = true;
         kids[j].style.order = String(at++);
+        alone = false;
         break;
       }
+      /* No partner: the row under it may be a hole, and the chapter
+         behind showed through it (`[data-alone]` in globals.css). */
+      if (alone) kids[i].dataset.alone = "";
+      else delete kids[i].dataset.alone;
     }
     /* On `shown`, not `children`: the held-back sections (`defer`) arrive
        without the parent rendering again, and a cover written no `order`

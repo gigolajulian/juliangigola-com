@@ -2458,7 +2458,17 @@ a.strip-cell {
    chapter comes in whole. A spread of the page's own colour, not a
    shadow: it is invisible everywhere but over the card behind. */
 .strip-scroll[data-dealt="chapters"] > * {
-  box-shadow: 0 0 0 0.5rem var(--background);
+  box-shadow: 0 0 0 calc(0.5rem + 1px) var(--background);
+}
+/* A cover with no partner in the rack stands over an empty row, and the
+   chapter behind showed through the hole (Julian, 2026-10-02, Artist
+   Presskit's seven). The same ground carried down a row and a gap, by the
+   shelf's height (`.strip-grid` is the size container); a partner, when
+   there is one, is painted after it and covers it. */
+.strip-scroll.strip-grid[data-dealt="chapters"] > [data-alone] {
+  box-shadow:
+    0 0 0 calc(0.5rem + 1px) var(--background),
+    0 calc((100cqh + 1rem) / 2) 0 calc(0.5rem + 1px) var(--background);
 }
 .strip-scroll[data-arrive="fade"] .strip-cell,
 .strip-scroll[data-arrive="fly"] .strip-cell,
