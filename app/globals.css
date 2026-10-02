@@ -1820,6 +1820,12 @@ nav[aria-label="Categories"] ul[data-more] {
    the gap between the lines came out at 2px, which reads as one block of
    type rather than a title and a subtitle. Both are set in rem here, where
    the column is a known size. */
+/* The credit on a light plate over a dark photograph read about 4:1;
+   the ink at 80% clears 4.5:1 over any picture (UI/UX review,
+   2026-10-02). */
+:root[data-theme="light"] .cover-plate .label {
+  color: color-mix(in oklab, var(--foreground) 80%, transparent);
+}
 .strip-grid .cover-plate {
   gap: 0.3rem;
   /* Sized to what is on it, not to a share of the cover. Two fifteenths of
