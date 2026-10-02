@@ -123,8 +123,10 @@ export function LocalWork({
           {gallery.label} <span aria-hidden>&rarr;</span>
         </Link>
       </div>
-      <ul className="title-rest grid min-h-0 flex-1 grid-cols-2 gap-2 sm:grid-cols-3 sm:grid-rows-2">
-        {tiles.slice(0, 6).map((t) => (
+      <ul data-scroll className="title-rest grid min-h-0 flex-1 grid-cols-2 gap-2 sm:grid-cols-3 sm:auto-rows-[calc(50%-0.25rem)] sm:overflow-y-auto">
+        {/* Every frame of the gallery, Julian (2026-10-02): two rows to a
+            screen as before, the rest scrolled to inside it. */}
+        {tiles.map((t) => (
           <li key={t.frame.src} className="relative min-h-0 max-sm:aspect-[3/4]">
             <Link
               href={t.href}

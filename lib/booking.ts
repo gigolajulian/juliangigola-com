@@ -138,7 +138,7 @@ const caption = (name: string) =>
   name.toLowerCase().replace(/(^|\s)\S/g, (c) => c.toUpperCase());
 
 /** A one-gallery session's frames, each opening the gallery. */
-const framesOf = (slug: string, n = 7): Tile[] => {
+const framesOf = (slug: string, n = Infinity): Tile[] => {
   const p = getProject(slug);
   if (!p) return [];
   return p.images.slice(0, n).map((frame, i) => ({
@@ -149,7 +149,7 @@ const framesOf = (slug: string, n = 7): Tile[] => {
 };
 
 /** A discipline's projects, a frame each, each opening its project. */
-const coversOf = (category: string, n = 7, prefer: string[] = []): Tile[] => {
+const coversOf = (category: string, n = Infinity, prefer: string[] = []): Tile[] => {
   const all = projectsIn(category);
   const first = prefer
     .map((s) => all.find((p) => p.slug === s))
@@ -497,7 +497,7 @@ export const BOOKING_PAGES: BookingPage[] = [
         a: "References, usage, deliverables and dates. A deck is welcome but not required.",
       },
     ],
-    tiles: coversOf("campaigns", 7, ["paradox", "ukiyosunknown", "sago", "goodcult", "sols", "jubo", "hua"]),
+    tiles: coversOf("campaigns", Infinity, ["paradox", "ukiyosunknown", "sago", "goodcult", "sols", "jubo", "hua"]),
     gallery: { href: "/portfolio/campaigns", label: "The campaigns" },
     book: { type: "campaign", title: "Brief a campaign" },
   },
