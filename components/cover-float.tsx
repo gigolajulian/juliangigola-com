@@ -180,7 +180,7 @@ export function CoverFloat({
           className="lift cover-float-where mt-[var(--h-gap-where,8px)] mb-[var(--h-gap-cta,19px)] max-w-[34rem]"
           style={{ "--reveal-delay": "calc(var(--h-start, 420ms) + 300ms)" } as React.CSSProperties}
         >
-          <span className="fit-line">{"Based in San Francisco, CA. Available Worldwide"}</span>
+          <span className="fit-line">{"Based in the SF Bay Area. Available to travel worldwide"}</span>
           <FitLines />
         </p>
         <LiquidPair
