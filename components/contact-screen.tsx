@@ -38,7 +38,7 @@ export function ContactScreen() {
       data-tick
       data-label="Contact"
       data-hash="contact"
-      className="contact-inquire relative isolate grid w-full shrink-0 grid-cols-1 gap-10 px-6 py-12 sm:h-full sm:grid-cols-[minmax(0,1fr)_minmax(0,2fr)] sm:grid-rows-[minmax(0,1fr)] sm:items-center sm:gap-x-12 sm:pb-6 sm:pl-10 sm:pr-10 sm:pt-24 lg:gap-x-16"
+      className="screen-measure contact-inquire relative isolate grid w-full shrink-0 grid-cols-1 gap-10 px-6 py-12 sm:h-full sm:grid-cols-[minmax(0,1fr)_minmax(0,2fr)] sm:grid-rows-[minmax(0,1fr)] sm:items-center sm:gap-x-12 sm:pb-6 sm:pl-10 sm:pr-10 sm:pt-24 lg:gap-x-16"
     >
       {/* Julian (Pixel): a scroll inside the page on a phone, 2px of it,
           held the finger and the page would not move. Its own scroll from
@@ -157,7 +157,7 @@ export function ContactScreen() {
 
           Julian: the form as a card with a beam running round its
           edge (`contact-beam.tsx`), on the header's glass. */}
-      <ContactBeam className="flex min-h-0 w-full max-w-[40rem] justify-self-center sm:max-h-full">
+      <ContactBeam className="contact-card flex min-h-0 w-full max-w-[40rem] justify-self-center sm:max-h-full">
         <div
           data-scroll
           data-dial="form"

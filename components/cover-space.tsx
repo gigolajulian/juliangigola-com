@@ -107,6 +107,46 @@ export function CoverSpace({
       cancelAnimationFrame(raf);
     };
   }, [space]);
+  /* Julian: the name never covered by a photograph. The places are set
+     by hand for a few shapes of window and every window between them is
+     a guess, so any frame that reaches into the name and the lines and
+     buttons under it is moved up or down out of it, whichever is nearer,
+     by as much as it reached in and a little air. Measured from the
+     layout (`offset*`, before the entrance and the turn of the space move
+     anything), so the frames land where they stay; again on a resize. */
+  React.useEffect(() => {
+    const ring = ref.current;
+    const mid = ring?.parentElement?.querySelector<HTMLElement>(".cover-float-middle");
+    if (!ring || !mid) return;
+    const AIR = 16;
+    const clear = () => {
+      // Not while Julian drags them into place (the "Photo layout" panel).
+      if (ring.closest("[data-arrange]")) return;
+      const frames = Array.from(ring.querySelectorAll<HTMLElement>(".cover-float-frame"));
+      for (const f of frames) f.style.removeProperty("--clear-y");
+      const o = ring.getBoundingClientRect();
+      const m = mid.getBoundingClientRect();
+      const top = m.top - o.top - AIR;
+      const bottom = m.bottom - o.top + AIR;
+      const left = m.left - o.left - AIR;
+      const right = m.right - o.left + AIR;
+      const moves = frames.map((f) => {
+        const t = f.offsetTop;
+        const b = t + f.offsetHeight;
+        const l = f.offsetLeft;
+        const r = l + f.offsetWidth;
+        if (!f.offsetWidth || r <= left || l >= right || b <= top || t >= bottom) return 0;
+        return t + b < top + bottom ? top - b : bottom - t;
+      });
+      frames.forEach((f, i) => moves[i] && f.style.setProperty("--clear-y", `${Math.round(moves[i])}px`));
+    };
+    clear();
+    const watch = new ResizeObserver(clear);
+    watch.observe(ring);
+    watch.observe(mid);
+    return () => watch.disconnect();
+  }, []);
+
   return (
     <div ref={ref} aria-hidden className={className}>
       {children}

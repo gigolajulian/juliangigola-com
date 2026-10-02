@@ -1164,8 +1164,6 @@ function Chip({
          and the pointer was repeating it back a few pixels lower down.
          Julian asked. */
       data-ring=""
-      // Julian: the ring forms around the chip under the pointer.
-      data-ring-hug=""
       /* So the strip that is about to mount knows it is a filter change
          and fades in where it stands, instead of sliding in from a
          quarter of the window away as an arriving page does. */

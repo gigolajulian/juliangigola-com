@@ -34,7 +34,7 @@ export function SessionsScreen({ sessions }: { sessions: SessionItem[] }) {
       data-tick
       data-label="Sessions"
       data-hash="sessions"
-      className="relative grid w-full shrink-0 grid-cols-1 items-center gap-10 px-6 py-12 sm:h-full sm:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] sm:gap-x-[clamp(2rem,3.5vw,4rem)] sm:px-10 sm:py-8 short:pb-4 short:pt-20 sm:[container-type:size] xl:grid-cols-[auto_auto_minmax(0,1fr)]"
+      className="screen-measure relative grid w-full shrink-0 grid-cols-1 items-center gap-10 px-6 py-12 sm:h-full sm:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] sm:gap-x-[clamp(2rem,3.5vw,4rem)] sm:px-10 sm:py-8 short:pb-4 short:pt-20 sm:[container-type:size] xl:grid-cols-[auto_auto_minmax(0,1fr)]"
     >
       {/* Julian (2026-09-29, red boxes): with three columns the photograph
           sits further right (its margin, from about 1600px wide) and larger
@@ -67,7 +67,7 @@ export function SessionsScreen({ sessions }: { sessions: SessionItem[] }) {
           words keep three lines and the names one. Under 1280 there is no
           room for three columns and it is left out: the words and the
           list. */}
-      <div className="title-rest relative aspect-[3/4] w-full overflow-hidden rounded-[4px] bg-card sm:h-[min(48rem,calc(100cqh-8rem),max(34.5vw,calc(100vw-75rem)))] sm:w-auto sm:justify-self-center sm:max-xl:hidden xl:ml-[max(0rem,min(4.25rem,16.5vw-16.5rem))] xl:h-[min(56rem,calc(100cqh-8rem),max(34.5vw,calc(100vw-75rem)))]">
+      <div className="sessions-photo title-rest relative aspect-[3/4] w-full overflow-hidden rounded-[4px] bg-card sm:h-[min(48rem,calc(100cqh-8rem),max(34.5vw,calc(100vw-75rem)))] sm:w-auto sm:justify-self-center sm:max-xl:hidden xl:ml-[max(0rem,min(4.25rem,16.5vw-16.5rem))] xl:h-[min(56rem,calc(100cqh-8rem),max(34.5vw,calc(100vw-75rem)))]">
         {sessions.map((s, i) =>
           s.cover ? (
             <Image
@@ -140,7 +140,7 @@ export function SessionsScreen({ sessions }: { sessions: SessionItem[] }) {
                   className={`grid transition-[grid-template-rows,opacity] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] ${on ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"}`}
                 >
                   <div className="min-h-0 overflow-hidden">
-                  <div className="flex max-w-[32.5rem] flex-col gap-3 pl-[clamp(0rem,4vw,4rem)] pt-4">
+                  <div className="session-more flex max-w-[32.5rem] flex-col gap-3 pl-[clamp(0rem,4vw,4rem)] pt-4">
                     <p className="text-left text-sm leading-relaxed text-muted-foreground">
                       {s.blurb}
                     </p>

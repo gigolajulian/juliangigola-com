@@ -174,7 +174,7 @@ export function StripHead({
   open?: boolean;
 }) {
   return (
-    <header className="mx-auto w-full max-w-[100rem] shrink-0 px-6 sm:px-10 lying:px-6">
+    <header className="page-column mx-auto w-full max-w-[100rem] shrink-0 px-6 sm:px-10 lying:px-6">
       {/* Julian: centre the title on a phone. Its right column is empty
           there, so between a crumb and nothing the title sat centred in
           what was left, right of the page's middle. Two equal outer tracks

@@ -308,7 +308,7 @@ export function SiteHeader() {
           : "border-transparent bg-transparent",
       )}
     >
-      <div className="relative mx-auto flex max-w-[100rem] items-center justify-between px-6 py-3 max-sm:py-2 sm:px-10 sm:py-4 tablet:py-1.5 lying:py-1.5">
+      <div className="page-column relative mx-auto flex max-w-[100rem] items-center justify-between px-6 py-3 max-sm:py-2 sm:px-10 sm:py-4 tablet:py-1.5 lying:py-1.5">
         <Link
           href="/"
           data-ring="Home"
