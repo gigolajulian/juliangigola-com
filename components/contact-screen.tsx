@@ -1,4 +1,5 @@
 import { Suspense } from "react";
+import type * as React from "react";
 import { ContactBeam } from "@/components/contact-beam";
 import { ContactForm } from "@/components/contact-form";
 import { RisingTitle } from "@/components/strip-page";
@@ -28,7 +29,23 @@ const ELSEWHERE = [
   },
 ];
 
-export function ContactScreen() {
+export function ContactScreen({
+  title = "Get in Touch",
+  intro,
+  label = "Contact",
+  hash = "contact",
+  defaults,
+}: {
+  title?: string;
+  /** In place of the homepage's two sentences: a booking page says what
+      is being booked. */
+  intro?: React.ReactNode;
+  /** The rail's word and the address of the screen. */
+  label?: string;
+  hash?: string;
+  /** The form's type and session where the address names none. */
+  defaults?: { type?: string; session?: string };
+} = {}) {
   /* Julian: two columns. The ask and the details in the left third,
      scrolling inside itself if a short window cannot hold them; the form
      in the middle of the right two, where the eye lands. One column on a
@@ -36,8 +53,8 @@ export function ContactScreen() {
   return (
     <section
       data-tick
-      data-label="Contact"
-      data-hash="contact"
+      data-label={label}
+      data-hash={hash}
       className="screen-measure contact-inquire relative isolate grid w-full shrink-0 grid-cols-1 gap-10 px-6 py-12 sm:h-full sm:grid-cols-[minmax(0,1fr)_minmax(0,2fr)] sm:grid-rows-[minmax(0,1fr)] sm:items-center sm:gap-x-12 sm:pb-6 sm:pl-10 sm:pr-10 sm:pt-24 lg:gap-x-16"
     >
       {/* Julian (Pixel): a scroll inside the page on a phone, 2px of it,
@@ -48,10 +65,11 @@ export function ContactScreen() {
         className="flex min-h-0 flex-col gap-8 [container-type:inline-size] sm:max-h-full sm:overflow-y-auto sm:overscroll-contain short:gap-5"
       >
         <div className="flex flex-col gap-5">
-          <RisingTitle text="Get in Touch" className="contact-title" />
+          <RisingTitle text={title} className="contact-title" />
           {/* 1.02 as a zoom: Julian's DialKit size for the intro, the same
               `zoom` the panel's Size writes (`page-dials.tsx`). */}
           <p data-dial="intro" className="title-rest max-w-prose text-left text-sm leading-relaxed text-muted-foreground [zoom:1.02]">
+            {intro ?? (<>
             {/* A sentence to a line, where there is room: Julian asked
                 for two lines rather than a wrap mid sentence. Where there
                 is not, each sentence wraps balanced and set left: it was
@@ -64,6 +82,7 @@ export function ContactScreen() {
               Tell me what kind of shoot it is and I&rsquo;ll come back with
               an approach and a quote.
             </span>
+            </>)}
           </p>
           {/* Answers "will this actually go anywhere?" before they decide
               whether to fill anything in, which is where most enquiries
@@ -164,7 +183,7 @@ export function ContactScreen() {
           className="glass-surface min-h-0 flex-1 rounded-[16px] border border-border p-5 sm:max-h-full sm:p-6 sm:overflow-y-auto sm:overscroll-contain sm:px-8 sm:py-6"
         >
           <Suspense fallback={null}>
-            <ContactForm />
+            <ContactForm defaults={defaults} />
           </Suspense>
         </div>
       </ContactBeam>

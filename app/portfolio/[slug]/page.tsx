@@ -7,6 +7,7 @@ import { CoverArtGallery } from "@/components/cover-art-gallery";
 import { CallToAction } from "@/components/call-to-action";
 import { SoleMark } from "@/components/client-marks";
 import { CLIENT_MARKS } from "@/lib/clients-data";
+import { SESSION_SEO } from "@/lib/seo";
 import {
   LINKABLE,
   UNLISTED,
@@ -55,7 +56,13 @@ export async function generateMetadata(
      manifest knows: "HUA: brand campaigns by Julian Gigola, 17 frames, with
      @0414lei. San Francisco Bay Area." Twenty characters was what a shared
      project used to get. */
-  const description = project.intent
+  /* A bookable session's gallery (Headshots, Graduation, Weddings) is
+     titled for the search that books it, from `lib/seo.ts`. */
+  const session = SESSION_SEO[project.slug];
+  const title = session?.title ?? project.name;
+  const description = session
+    ? session.description
+    : project.intent
     ? project.intent.length > 155
       ? project.intent.slice(0, 152).replace(/\s+\S*$/, "") + "…"
       : project.intent
@@ -69,7 +76,7 @@ export async function generateMetadata(
         .join(", ") + ". San Francisco Bay Area.";
 
   return {
-    title: project.name,
+    title,
     description,
     alternates: { canonical: `/portfolio/${project.slug}` },
     /* Unlisted means unlisted. The sitemap already leaves it out, but a
@@ -81,7 +88,7 @@ export async function generateMetadata(
       ? { robots: { index: false, follow: true } }
       : {}),
     openGraph: {
-      title: project.name,
+      title,
       description,
       // The opening frame is the project's cover everywhere else on the site;
       // it should be the card in a Slack paste too.

@@ -56,6 +56,7 @@ export function RisingTitle({
   text,
   className,
   decorative = false,
+  as = "h2",
 }: {
   text: string;
   className?: string;
@@ -63,9 +64,13 @@ export function RisingTitle({
       set large here for the eye, hidden from a screen reader so the page
       is not announced twice. */
   decorative?: boolean;
+  /** `h1` where the title is the page's own heading: the booking pages,
+      which have no running head to carry it. */
+  as?: "h1" | "h2";
 }) {
+  const Tag = as;
   return (
-    <h2
+    <Tag
       aria-hidden={decorative || undefined}
       className={cn(
         "font-display text-4xl uppercase leading-[0.95] tracking-[0] sm:text-6xl",
@@ -85,7 +90,7 @@ export function RisingTitle({
           </span>{" "}
         </React.Fragment>
       ))}
-    </h2>
+    </Tag>
   );
 }
 

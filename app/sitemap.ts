@@ -14,6 +14,7 @@ import {
 import type { Frame } from "@/lib/work-types";
 import { COVER_RELEASES } from "@/lib/cover-art-data";
 import DATES from "@/lib/sitemap-dates.json";
+import { BOOKING_PAGES, bookingHref } from "@/lib/booking";
 
 const SITE = "https://juliangigola.com";
 
@@ -138,5 +139,15 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.6,
   }));
 
-  return [...pages, ...categories, ...projects];
+  /* The booking pages: above the disciplines, because a search that
+     lands on one is somebody pricing a shoot (`lib/booking.ts`). Their
+     pictures are the ones they show. */
+  const booking = BOOKING_PAGES.map((p) => ({
+    url: `${SITE}${bookingHref(p)}`,
+    ...showing(p.tiles.slice(0, 7).map((t) => t.frame)),
+    changeFrequency: "monthly" as const,
+    priority: 0.9,
+  }));
+
+  return [...pages, ...booking, ...categories, ...projects];
 }

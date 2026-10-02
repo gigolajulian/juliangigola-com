@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { MOTION_SEO } from "@/lib/seo";
 import { VideoShowcase } from "@/components/video-showcase";
 import { EnquiryCell } from "@/components/enquiry-cell";
 import { CONTENT } from "@/lib/content";
@@ -24,9 +25,9 @@ import { WORK_CATEGORY_LINKS } from "@/lib/work";
  * ─────────────────────────────────────────────────────────────── */
 
 export const metadata: Metadata = {
-  title: "Motion",
-  description:
-    "Music videos and commercials, directed and shot in the San Francisco Bay Area. Selected moving work with clients and credits.",
+  // Titled for the search, from `lib/seo.ts`; the page itself still says Motion.
+  title: MOTION_SEO.title,
+  description: MOTION_SEO.description,
   alternates: { canonical: "/portfolio/video" },
 };
 

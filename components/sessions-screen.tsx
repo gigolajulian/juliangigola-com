@@ -23,6 +23,8 @@ export type SessionItem = {
   blurb: string;
   includes: string[];
   cover: Frame | null;
+  /** The session's booking page (`lib/booking.ts`), where it has one. */
+  page?: string;
 };
 
 export function SessionsScreen({ sessions }: { sessions: SessionItem[] }) {
@@ -82,6 +84,15 @@ export function SessionsScreen({ sessions }: { sessions: SessionItem[] }) {
             />
           ) : null,
         )}
+        {/* The photograph is a way in too, to the open session's page. */}
+        {current.page ? (
+          <Link
+            href={current.page}
+            data-ring="Open"
+            aria-label={`More on ${current.name}`}
+            className="absolute inset-0 z-10"
+          />
+        ) : null}
         <div className="absolute inset-x-0 bottom-0 flex items-baseline justify-between gap-3 bg-background/80 p-4 backdrop-blur-sm">
           <div className="flex items-baseline gap-3">
             <span className="label text-muted-foreground">
@@ -99,6 +110,27 @@ export function SessionsScreen({ sessions }: { sessions: SessionItem[] }) {
         <ul className="border-t border-border">
           {sessions.map((s, i) => {
             const on = i === open;
+            const head = (
+              <>
+                <span
+                  className={`font-display text-[clamp(1.5rem,2.4vw,2.5rem)] leading-none short:text-[clamp(1.25rem,2vw,2rem)] tabular-nums transition-colors duration-300 ${on ? "text-foreground" : "text-muted-foreground/40"}`}
+                >
+                  {String(i + 1).padStart(2, "0")}
+                </span>
+                <span className="font-display text-[clamp(1.5rem,2.4vw,2.5rem)] leading-none short:text-[clamp(1.25rem,2vw,2rem)]">
+                  {s.name}
+                </span>
+                <span className="label text-muted-foreground max-sm:hidden">
+                  {s.rate}
+                </span>
+                <span
+                  aria-hidden
+                  className={`text-lg transition-[opacity,transform] duration-300 ${on ? "translate-x-0 opacity-100" : "-translate-x-2 opacity-0"}`}
+                >
+                  &rarr;
+                </span>
+              </>
+            );
             return (
               /* On a move, not on entering: a row sliding under a still
                  pointer as another closes must not open itself and set
@@ -106,8 +138,27 @@ export function SessionsScreen({ sessions }: { sessions: SessionItem[] }) {
               <li
                 key={s.slug}
                 onPointerMove={() => open !== i && setOpen(i)}
-                className="flex flex-col border-b border-border py-2 short:py-1.5"
+                /* Julian (2026-10-02): anywhere in the row goes to the
+                   booking page, bar its own links: a click on the row is a
+                   click on its name, the link a keyboard and a reader get,
+                   so it goes the way every link on the site goes. */
+                onClick={(e) => {
+                  if (s.page && !(e.target as HTMLElement).closest("a, button"))
+                    e.currentTarget.querySelector("a")?.click();
+                }}
+                className={`flex flex-col border-b border-border py-2 short:py-1.5 ${s.page ? "cursor-pointer" : ""}`}
               >
+                {/* Julian (2026-10-02): a session with a booking page goes
+                    there on a click; pointing still opens it here. */}
+                {s.page ? (
+                  <Link
+                    href={s.page}
+                    onFocus={() => setOpen(i)}
+                    className="grid grid-cols-[auto_minmax(0,1fr)_auto_auto] items-baseline gap-4 py-2 text-left short:py-1.5"
+                  >
+                    {head}
+                  </Link>
+                ) : (
                 <button
                   type="button"
                   aria-expanded={on}
@@ -115,24 +166,9 @@ export function SessionsScreen({ sessions }: { sessions: SessionItem[] }) {
                   onFocus={() => setOpen(i)}
                   className="grid grid-cols-[auto_minmax(0,1fr)_auto_auto] items-baseline gap-4 py-2 text-left short:py-1.5"
                 >
-                  <span
-                    className={`font-display text-[clamp(1.5rem,2.4vw,2.5rem)] leading-none short:text-[clamp(1.25rem,2vw,2rem)] tabular-nums transition-colors duration-300 ${on ? "text-foreground" : "text-muted-foreground/40"}`}
-                  >
-                    {String(i + 1).padStart(2, "0")}
-                  </span>
-                  <span className="font-display text-[clamp(1.5rem,2.4vw,2.5rem)] leading-none short:text-[clamp(1.25rem,2vw,2rem)]">
-                    {s.name}
-                  </span>
-                  <span className="label text-muted-foreground max-sm:hidden">
-                    {s.rate}
-                  </span>
-                  <span
-                    aria-hidden
-                    className={`text-lg transition-[opacity,transform] duration-300 ${on ? "translate-x-0 opacity-100" : "-translate-x-2 opacity-0"}`}
-                  >
-                    &rarr;
-                  </span>
+                  {head}
                 </button>
+                )}
                 {/* Julian: smoother. The open one slides open and the last
                     one slides shut, rather than jumping. */}
                 <div
@@ -152,12 +188,28 @@ export function SessionsScreen({ sessions }: { sessions: SessionItem[] }) {
                       <span className="text-foreground sm:hidden">{s.rate} · </span>
                       {s.includes.join(" · ")} · Ready in {s.turnaround}
                     </p>
-                    <Link
-                      href={`/?type=session&session=${encodeURIComponent(s.name)}#contact`}
-                      className="label flex gap-2.5 self-start py-2"
-                    >
-                      Book a session <span aria-hidden>&rarr;</span>
-                    </Link>
+                    <div className="flex flex-wrap gap-x-6">
+                      <Link
+                        href={
+                          s.page
+                            ? `${s.page}#book`
+                            : `/?type=session&session=${encodeURIComponent(s.name)}#contact`
+                        }
+                        className="label flex gap-2.5 self-start py-2"
+                      >
+                        Book a session <span aria-hidden>&rarr;</span>
+                      </Link>
+                      {/* The whole of it, where it has a page: the work,
+                          where, and the questions asked before booking. */}
+                      {s.page ? (
+                        <Link
+                          href={s.page}
+                          className="label flex gap-2.5 self-start py-2"
+                        >
+                          More on {s.name} <span aria-hidden>&rarr;</span>
+                        </Link>
+                      ) : null}
+                    </div>
                   </div>
                   </div>
                 </div>

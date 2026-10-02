@@ -31,9 +31,17 @@ const ORDER = [0, 700, 1100, 850, 560, 1340, 620, 950, 1220, 780];
 
 export function CoverFloat({
   work,
+  heading,
   className,
 }: {
   work: Project[];
+  /** A booking page's words in place of the name, the role, the location
+      line and the two buttons (`app/[service]/page.tsx`). */
+  heading?: {
+    title: string;
+    where: string;
+    ctas: { href: string; label: string }[];
+  };
   className?: string;
 }) {
   const frames = work.slice(0, SLOTS.length);
@@ -47,7 +55,8 @@ export function CoverFloat({
     <section
       data-tick
       data-label="Cover"
-      aria-label="Julian Gigola, photographer and creative director"
+      aria-label={heading?.title ?? "Julian Gigola, photographer and creative director"}
+      data-booking={heading ? "" : undefined}
       style={
         {
           ...middleVars(MIDDLE),
@@ -78,7 +87,7 @@ export function CoverFloat({
           const sw = SIDEWAYS[at];
           return (
             <Link
-              key={p.slug}
+              key={`${p.slug}-${i}`}
               prefetch={false}
               href={`/portfolio/${p.slug}`}
               tabIndex={-1}
@@ -143,7 +152,22 @@ export function CoverFloat({
       {/* Julian: the words come in as the photographs do, from the first
           photograph's start (`--h-start`, "Load animation"), each part a
           beat after the one above, rather than once they have landed. */}
-      <div className="cover-float-middle flex max-w-[min(62rem,92vw)] flex-col items-center px-6 text-center">
+      {/* A booking page's title is a sentence, not a name: longer lines,
+          Julian (2026-10-02). */}
+      <div
+        className={cn(
+          "cover-float-middle flex flex-col items-center px-6 text-center",
+          heading ? "max-w-[min(96rem,94vw)]" : "max-w-[min(62rem,92vw)]",
+        )}
+      >
+        {heading ? (
+          <h1
+            className="lift font-display text-[clamp(2.5rem,6.5vw,6.5rem)] uppercase leading-[0.92] text-balance"
+            style={{ "--reveal-delay": "var(--h-start, 420ms)" } as React.CSSProperties}
+          >
+            {heading.title}
+          </h1>
+        ) : (
         <h1 className="uppercase">
           <span className="block">
             <span
@@ -176,11 +200,12 @@ export function CoverFloat({
             </span>
           </span>
         </h1>
+        )}
         <p
           className="lift cover-float-where mt-[var(--h-gap-where,8px)] mb-[var(--h-gap-cta,19px)] max-w-[34rem]"
           style={{ "--reveal-delay": "calc(var(--h-start, 420ms) + 300ms)" } as React.CSSProperties}
         >
-          <span className="fit-line">{"Based in San Francisco, CA. Available Worldwide"}</span>
+          <span className="fit-line">{heading?.where ?? "Based in the SF Bay Area. Available to travel worldwide"}</span>
           <FitLines />
         </p>
         <LiquidPair
@@ -188,15 +213,29 @@ export function CoverFloat({
           className="lift cover-float-ctas flex flex-wrap justify-center gap-3"
           style={{ "--reveal-delay": "calc(var(--h-start, 420ms) + 460ms)" } as React.CSSProperties}
         >
-          <Link href="/portfolio" className="cover-cta press active:scale-[0.97]">
-            See the work
-          </Link>
-          <Link
-            href="/#sessions"
-            className="cover-cta cover-cta-quiet press active:scale-[0.97]"
-          >
-            Book a session
-          </Link>
+          {heading ? (
+            heading.ctas.map((c, i) => (
+              <Link
+                key={c.href}
+                href={c.href}
+                className={cn("cover-cta press active:scale-[0.97]", i > 0 && "cover-cta-quiet")}
+              >
+                {c.label}
+              </Link>
+            ))
+          ) : (
+            <>
+              <Link href="/portfolio" className="cover-cta press active:scale-[0.97]">
+                See the work
+              </Link>
+              <Link
+                href="/#sessions"
+                className="cover-cta cover-cta-quiet press active:scale-[0.97]"
+              >
+                Book a session
+              </Link>
+            </>
+          )}
         </LiquidPair>
       </div>
     </section>

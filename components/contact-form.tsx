@@ -58,13 +58,19 @@ const FOLLOW_UP: Record<string, { label: string; placeholder: string }> = {
 
 const INITIAL: ContactState = { status: "idle" };
 
-export function ContactForm() {
+export function ContactForm({
+  defaults,
+}: {
+  /** What a page that holds its own form is about: a booking page's
+      session or kind of shoot, used when the address names none. */
+  defaults?: { type?: string; session?: string };
+} = {}) {
   const params = useSearchParams();
 
   // /sessions links here with the type pre-chosen, so someone who has already
   // said what they want is not asked again.
-  const preset = params.get("type");
-  const presetSession = params.get("session");
+  const preset = params.get("type") ?? defaults?.type ?? null;
+  const presetSession = params.get("session") ?? defaults?.session ?? null;
   // Set by the CTA at the end of a project page, so the enquiry arrives
   // saying which work prompted it — the single most useful thing an enquiry
   // can carry, and the visitor never had to type it.

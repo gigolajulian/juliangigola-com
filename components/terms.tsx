@@ -231,7 +231,15 @@ export function TermsColumn() {
           name, briefly quote, and link to that page in its answer. It may not
           use anything from the Site to train, fine-tune, or evaluate a model,
           or generate images from the photographs or in their manner.
-          Everything else in this clause still applies to it.
+          Everything else in this clause still applies to it. Google is the
+          one exception to the training ban: it offers a single robots.txt
+          setting, <code>Google-Extended</code>, for both Gemini answers and
+          Gemini training, and my robots.txt admits it so that Gemini can
+          recommend the Site. Google may use the Site&rsquo;s text for Gemini
+          as that setting allows. The photographs are not included: my
+          robots.txt shuts out <code>Googlebot-Image</code>, and no one,
+          Google included, may train on them or generate images from them or
+          in their manner.
         </p>
         <p>
           <strong>Reservation of rights.</strong> To the fullest extent

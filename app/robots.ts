@@ -21,10 +21,16 @@ export default function robots(): MetadataRoute.Robots {
       // question and cite it, and are off this list. Each company's training
       // crawler (GPTBot, Meta-ExternalAgent...) stays on it. Claude-SearchBot
       // and Claude-User were never listed; ClaudeBot is Anthropic's trainer.
+      //
+      // Google-Extended is off the list at Julian's ask (2026-10-02) so Gemini
+      // can recommend the site. Google uses that one token for both Gemini
+      // answers and Gemini training, so the terms' AI search clause names
+      // Google as the exception. Googlebot-Image is shut out in exchange, so
+      // the photographs themselves stay out of Google.
+      { userAgent: "Googlebot-Image", disallow: "/" },
       {
         userAgent: [
           "GPTBot",
-          "Google-Extended",
           "Applebot-Extended",
           "ClaudeBot",
           "Claude-Web",

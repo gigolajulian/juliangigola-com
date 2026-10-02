@@ -15,6 +15,7 @@ import { PointerMark } from "@/components/pointer-mark";
 import "./globals.css";
 import { ImageFallback } from "@/components/image-fallback";
 import { PageTransition } from "@/components/page-transition";
+import { ldJson, siteGraph } from "@/lib/seo";
 
 /* Two families and no more, at Julian's ask: Inter Tight Black for the
    name and every heading, IBM Plex Mono for everything else, text, menu,
@@ -74,12 +75,14 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   metadataBase: new URL(SITE),
   title: {
-    default: "Julian Gigola, Photographer & Creative Director, Bay Area",
+    /* The region, with its cities in the description: San Jose has its own
+       pages now (`lib/locations.ts`), which own that search. */
+    default: "Julian Gigola | Photographer & Creative Director, SF Bay Area",
     // Project and section pages set only their own name; this frames it.
     template: "%s | Julian Gigola",
   },
   description:
-    "Editorial, campaign, and artist photography from the San Francisco Bay Area. Published in WIRED. Available for commissions and sessions.",
+    "Photographer & creative director in the SF Bay Area: San Francisco, Oakland, San Jose, Santa Cruz. Editorials, campaigns, press photos, music videos. In WIRED.",
   openGraph: {
     type: "website",
     siteName: "Julian Gigola",
@@ -183,6 +186,13 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         />
       </head>
       <body className="min-h-full flex flex-col">
+        {/* Who Julian is, where he works and what can be booked, for
+            search engines and AI answers to read rather than infer. One
+            graph on every page; see `lib/seo.ts`. */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: ldJson(siteGraph()) }}
+        />
         {/* First stop for a keyboard or screen-reader visitor: the nav is
             fixed and the galleries are long, so skipping past the chrome
             matters more here than on a text site. */}
