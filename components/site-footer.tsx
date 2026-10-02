@@ -18,15 +18,11 @@ const SOCIAL = [
     not training data. One link, at Julian's ask. */
 const LEGAL = [{ href: "/legal", label: "Legal" }] as const;
 
-/** The cities the footer names. A city with a page of its own would be a
-    link; for now every one is a name (Julian: one page per service, not
-    per city). */
-const AREA_LINKS: { name: string; href?: string }[] = [
-  { name: "San Francisco" },
-  { name: "San Jose" },
-  { name: "Oakland" },
-  { name: "Santa Cruz" },
-];
+/** The cities in the region, read out but not shown: Julian (2026-10-02)
+    wanted the footer back to the region alone, with the cities still on
+    the page for a search engine. Every one, and the South Bay towns, are
+    also in the structured data (`areaServed`, `lib/seo.ts`). */
+const AREA_CITIES = ["San Francisco", "San Jose", "Oakland", "Santa Cruz"];
 
 export function SiteFooter() {
   return (
@@ -95,27 +91,15 @@ export function SiteFooter() {
                   </Link>
                 </li>
               ))}
-              {/* The region and the cities in it (Julian, 2026-10-02: the
-                  Bay Area is San Francisco, San Jose, Oakland and Santa
-                  Cruz), named on every page, for a search engine and for
-                  anybody asking whether their city is covered. */}
+              {/* The region, and the cities in it said to a screen reader
+                  and a search engine (the Bay Area as Julian means it runs
+                  to Santa Cruz). */}
               <li className="font-bold text-foreground">
                 San Francisco Bay Area
+                <span className="sr-only">
+                  : {AREA_CITIES.slice(0, -1).join(", ")} and {AREA_CITIES.at(-1)}
+                </span>
               </li>
-              {AREA_LINKS.map((c) => (
-                <li key={c.name}>
-                  {c.href ? (
-                    <Link
-                      href={c.href}
-                      className="transition-colors duration-200 hoverable:hover:text-foreground"
-                    >
-                      {c.name}
-                    </Link>
-                  ) : (
-                    c.name
-                  )}
-                </li>
-              ))}
             </ul>
           </nav>
         </div>
