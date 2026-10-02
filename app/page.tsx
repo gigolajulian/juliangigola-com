@@ -75,6 +75,8 @@ export default function Home() {
         // Julian: the ScrollStack, sideways. Each screen slides over the one
         // before, which sinks back under it (`lib/deck.ts`).
         deck="screens"
+        // The hero and the next screen first, the rest once it has landed.
+        defer
         bleed
         className="flex-1"
       >
@@ -230,8 +232,9 @@ export default function Home() {
         />
         {/* The window into the work (`lead-window.tsx`). */}
         <LeadWindow
+          // Three fill the strip; a screen of the rack takes up to sixteen.
           covers={commissionsIn(WORK_CATEGORY_LINKS[0].slug)
-            .slice(0, 3)
+            .slice(0, 16)
             .map(indexRow)}
         />
       </Strip>

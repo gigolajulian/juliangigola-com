@@ -5,6 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import type { IndexRow } from "@/lib/work";
+import { useWorkView } from "@/lib/work-view";
 
 /* ── the window into the work ─────────────────────────────────────
  * Julian (2026-10-01): past the last screen of the homepage, a peek of the
@@ -35,6 +36,15 @@ export const openFrom = (win: HTMLElement) => {
 
 export function LeadWindow({ covers }: { covers: IndexRow[] }) {
   const router = useRouter();
+  /* As the page will be: the strip for everybody who has not said
+     otherwise, the rack for a visitor who keeps the grid (`work-view`).
+     The card came in as the strip and the page landed as the grid, and
+     the grid's own covers came in white (Julian, 2026-10-02). A screen of
+     the rack is ten or twelve covers, so the rack takes every cover it
+     is handed and the strip its first three; their pictures are the
+     page's own at the page's own sizes, so the landing finds them cached. */
+  const grid = useWorkView() === "grid";
+  const shown = grid ? covers : covers.slice(0, 3);
   const self = React.useRef<HTMLAnchorElement>(null);
   /* The covers load with the prefetch, once the last screen is in sight.
      Not on a phone, where there is no window (the observer never fires). */
@@ -79,7 +89,7 @@ export function LeadWindow({ covers }: { covers: IndexRow[] }) {
           window's edge, it made the strip 165px longer than its screens. */}
       <span className="lead-pane" aria-hidden>
         <span className="lead-under">
-          <span className="lead-row">
+          <span className={grid ? "lead-row strip-grid" : "lead-row"}>
             <span className="lead-spine">
               {/* An h2, as the page's spine is: the face is the heading's. */}
               <h2
@@ -92,12 +102,13 @@ export function LeadWindow({ covers }: { covers: IndexRow[] }) {
                 All projects
               </span>
             </span>
-            {covers.map(({ cover: c, name, credit }) => (
+            {shown.map(({ cover: c, name, credit }) => (
               <span
                 key={c.src}
                 className="lead-cover"
                 style={{
-                  aspectRatio: `${c.width} / ${c.height}`,
+                  // The rack prints every cover 4:5 (`strip-grid`).
+                  aspectRatio: grid ? undefined : `${c.width} / ${c.height}`,
                   backgroundColor: c.color,
                 }}
               >

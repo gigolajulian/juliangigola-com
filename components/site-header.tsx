@@ -78,14 +78,19 @@ export function SiteHeader() {
    * hero stands where it was set. How much floats is measured, since the
    * rail and the footer change height with the screen, and handed to
    * `globals.css` as `--under` (`:root[data-under]`). */
-  React.useEffect(() => {
+  /* Before paint, in the commit that brings the homepage: a frame later,
+     the page came back from the portfolio laid out once without the floor
+     and again with it, in the middle of the door shutting (Julian: back
+     to the hero lags). */
+  React.useLayoutEffect(() => {
     if (pathname !== "/") return;
     const root = document.documentElement;
     let sizes: ResizeObserver | null = null;
-    const frame = requestAnimationFrame(() => {
+    let frame = 0;
+    const start = () => {
       const foot = document.querySelector<HTMLElement>("body > footer");
       const rail = document.querySelector<HTMLElement>(".strip-rail");
-      if (!foot || !rail) return;
+      if (!foot || !rail) return false;
       root.dataset.under = "";
       /* Only on a change: a property on the root restyles the whole page,
          and the observer reports every load's font swap as a resize. */
@@ -99,13 +104,17 @@ export function SiteHeader() {
       sizes = new ResizeObserver(measure);
       sizes.observe(foot);
       sizes.observe(rail);
-    });
+      return true;
+    };
+    // The strip not in yet (a cold load): the next frame, as before.
+    if (!start()) frame = requestAnimationFrame(start);
     return () => {
       cancelAnimationFrame(frame);
       sizes?.disconnect();
       delete root.dataset.under;
-      root.style.removeProperty("--foot");
-      root.style.removeProperty("--under");
+      /* The sizes stay: read only under `data-under`, and taken off and
+         put back they restyled the whole page on the way out to the
+         portfolio and again on the way back. */
     };
   }, [pathname]);
 
