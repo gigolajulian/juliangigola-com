@@ -263,7 +263,10 @@ function Crumb() {
     <nav aria-label="Breadcrumb">
       <Link
         href="/portfolio"
-        className="label text-muted-foreground transition-colors duration-200 hoverable:hover:text-foreground"
+        /* One line: on a phone the head's middle column left it 37px and
+           the arrow stood over the word. Padded to a 26px target and
+           pulled back by as much (UI/UX review, 2026-10-02). */
+        className="label -my-1.5 inline-block whitespace-nowrap py-1.5 text-muted-foreground transition-colors duration-200 hoverable:hover:text-foreground"
       >
         &larr; Portfolio
       </Link>
