@@ -23,6 +23,8 @@ export type SessionItem = {
   blurb: string;
   includes: string[];
   cover: Frame | null;
+  /** The session's booking page (`lib/booking.ts`), where it has one. */
+  page?: string;
 };
 
 export function SessionsScreen({ sessions }: { sessions: SessionItem[] }) {
@@ -152,12 +154,24 @@ export function SessionsScreen({ sessions }: { sessions: SessionItem[] }) {
                       <span className="text-foreground sm:hidden">{s.rate} · </span>
                       {s.includes.join(" · ")} · Ready in {s.turnaround}
                     </p>
-                    <Link
-                      href={`/?type=session&session=${encodeURIComponent(s.name)}#contact`}
-                      className="label flex gap-2.5 self-start py-2"
-                    >
-                      Book a session <span aria-hidden>&rarr;</span>
-                    </Link>
+                    <div className="flex flex-wrap gap-x-6">
+                      <Link
+                        href={`/?type=session&session=${encodeURIComponent(s.name)}#contact`}
+                        className="label flex gap-2.5 self-start py-2"
+                      >
+                        Book a session <span aria-hidden>&rarr;</span>
+                      </Link>
+                      {/* The whole of it, where it has a page: the work,
+                          where, and the questions asked before booking. */}
+                      {s.page ? (
+                        <Link
+                          href={s.page}
+                          className="label flex gap-2.5 self-start py-2 text-muted-foreground transition-colors duration-200 hoverable:hover:text-foreground"
+                        >
+                          Details <span aria-hidden>&rarr;</span>
+                        </Link>
+                      ) : null}
+                    </div>
                   </div>
                   </div>
                 </div>

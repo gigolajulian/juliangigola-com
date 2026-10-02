@@ -21,6 +21,7 @@
  */
 
 import { SESSION_TYPES, formatPrice } from "./sessions";
+import { pageForSession } from "./booking";
 
 export const SITE = "https://juliangigola.com";
 export const EMAIL = "hello@juliangigola.com";
@@ -56,6 +57,9 @@ export const AREA = [
   "Santa Cruz",
 ];
 
+/** Further than a drive: commissions, and sessions on request. */
+export const TRAVEL = ["Los Angeles", "New York"];
+
 /** A starting price as a phrase, or nothing while it is "On request". */
 const from = (slug: string): string | null => {
   const s = SESSION_TYPES.find((t) => t.slug === slug);
@@ -64,7 +68,13 @@ const from = (slug: string): string | null => {
 const sentence = (...parts: (string | null)[]) =>
   parts.filter(Boolean).join(" ");
 
-/* ── the disciplines, at /portfolio/<slug> ─────────────────────── */
+/* ── the disciplines, at /portfolio/<slug> ───────────────────────
+ * Where a booking page sells the same thing (`lib/booking.ts`), the work
+ * here is titled as the portfolio it is, "Headshot Portfolio", and the
+ * booking page takes "Headshot Photographer": two pages of one site
+ * after the same search split it, and the one that should win is the one
+ * that books.
+ * ─────────────────────────────────────────────────────────────── */
 
 type PageSeo = { title: string; description: (count: number) => string };
 
@@ -77,12 +87,12 @@ export const DISCIPLINE_SEO: Record<string, PageSeo> = {
       `Fashion and editorial photography across the SF Bay Area: ${n} editorials and lookbooks with models, stylists and credits. Published in WIRED.`,
   },
   campaigns: {
-    title: "Brand Campaign Photographer, SF Bay Area",
+    title: "Brand Campaign Portfolio, SF Bay Area",
     description: (n) =>
       `Commercial and brand campaign photography for consumer and tech brands across the Bay Area and Silicon Valley. ${n} campaigns, shot and art-directed.`,
   },
   portraits: {
-    title: "Portrait Photographer, San Francisco Bay Area",
+    title: "Portrait Portfolio, San Francisco Bay Area",
     description: (n) =>
       sentence(
         `Editorial portraits in the studio or on location in San Francisco, Oakland, San Jose and Santa Cruz. ${n} portrait series by Julian Gigola.`,
@@ -90,7 +100,7 @@ export const DISCIPLINE_SEO: Record<string, PageSeo> = {
       ),
   },
   "artist-presskit": {
-    title: "Musician Press Photos, San Francisco Bay Area",
+    title: "Artist Press Kit Portfolio, SF Bay Area",
     description: (n) =>
       `Press photos for musicians and bands in San Francisco, Oakland and San Jose: EPK portraits, release imagery and cover art. ${n} artist press kits by Julian Gigola.`,
   },
@@ -100,7 +110,7 @@ export const DISCIPLINE_SEO: Record<string, PageSeo> = {
       `Album and single cover art, photographed and art-directed by Julian Gigola in the San Francisco Bay Area. ${n} releases for independent artists and labels.`,
   },
   "studio-digitals": {
-    title: "Model Digitals & Polaroids, SF Bay Area",
+    title: "Model Digitals Portfolio, SF Bay Area",
     description: () =>
       sentence(
         "Agency-standard model digitals (polaroids) in the San Francisco Bay Area: full length, three-quarter and close, front and profile, unretouched.",
@@ -141,20 +151,21 @@ export const MOTION_SEO = {
 
 /* ── the sessions, at /portfolio/<slug> ───────────────────────────
  * Headshots, Graduation and Weddings are each one gallery under the
- * session's own slug. They are the only pages on the site a search for a
- * bookable session can land on, so they are titled for the search.
+ * session's own slug. Headshots and Graduation are booked at their own
+ * pages now (/headshots, /graduation-photos), so their galleries are
+ * titled as galleries; Weddings has no booking page and keeps the search.
  * ─────────────────────────────────────────────────────────────── */
 
 export const SESSION_SEO: Record<string, { title: string; description: string }> = {
   headshots: {
-    title: "Headshot Photographer, San Francisco Bay Area",
+    title: "Headshot Portfolio, San Francisco Bay Area",
     description: sentence(
       "Professional headshots in San Francisco, Oakland, San Jose and Santa Cruz: LinkedIn, corporate, actor and press, with studio lighting and retouched selects.",
       from("headshots") ? `${from("headshots")}.` : null,
     ),
   },
   graduation: {
-    title: "Graduation Photographer, San Francisco Bay Area",
+    title: "Graduation Photo Gallery, SF Bay Area",
     // The price before the details, so a results page that cuts the
     // description short cuts the details rather than the price.
     description: sentence(
@@ -193,11 +204,12 @@ const SESSION_SERVICE: Record<string, string> = {
   weddings: "Wedding photography",
 };
 
-/** The commissions, which are quoted rather than priced. */
+/** The commissions, which are quoted rather than priced: at their booking
+    page where they have one (`lib/booking.ts`), their work where not. */
 const COMMISSIONS = [
   ["Fashion & editorial photography", "/portfolio/editorial"],
-  ["Brand campaign photography", "/portfolio/campaigns"],
-  ["Musician press photos", "/portfolio/artist-presskit"],
+  ["Brand campaign photography", "/brand-photography"],
+  ["Musician press photos", "/music-photography"],
   ["Album cover art", "/portfolio/coverart"],
   ["Music video direction", "/portfolio/video"],
   ["Creative direction", "/#about"],
@@ -210,6 +222,8 @@ export function siteGraph() {
     { "@type": "AdministrativeArea", name: "San Francisco Bay Area" },
     { "@type": "Place", name: "Silicon Valley" },
     ...AREA.map((name) => ({ "@type": "City", name })),
+    // Julian (2026-10-02): "I can travel to ... LA and NY too".
+    ...TRAVEL.map((name) => ({ "@type": "City", name })),
   ];
   /* The area is the business's, said once above rather than per service. */
   const service = (name: string, url: string) => ({
@@ -283,12 +297,17 @@ export function siteGraph() {
             ...SESSION_TYPES.map((s) => ({
               "@type": "Offer",
               itemOffered: {
-                /* The five sessions each have a gallery at /portfolio/<slug>,
-                   titled for its search (SESSION_SEO, DISCIPLINE_SEO). One
-                   added in /admin since may not, so it points at the list. */
-                ...(SESSION_SERVICE[s.slug]
-                  ? service(SESSION_SERVICE[s.slug], `/portfolio/${s.slug}`)
-                  : service(s.name, "/#sessions")),
+                /* A session's booking page where it has one, its gallery
+                   where not (Weddings), and the list for one added in
+                   /admin since. */
+                ...service(
+                  SESSION_SERVICE[s.slug] ?? s.name,
+                  pageForSession(s.slug)
+                    ? `/${pageForSession(s.slug)!.slug}`
+                    : SESSION_SERVICE[s.slug]
+                      ? `/portfolio/${s.slug}`
+                      : "/#sessions",
+                ),
                 description: s.blurb,
               },
               ...(s.from !== null
@@ -326,24 +345,25 @@ export const ldJson = (data: unknown) =>
   JSON.stringify(data).replace(/</g, "\\u003c");
 
 /* ── a booking page's own graph ───────────────────────────────────
- * Beside the site's graph: the service this page sells, where, and from
- * what price, tied to the business by `@id`; its questions as an FAQPage
- * (no longer a Google rich result, but the plainest statement of the
- * answers there is for the engines that read it); and its place under the
- * city, as a breadcrumb.
+ * Beside the site's graph: the service this page sells, the places it is
+ * sold in (the same list the page's Where screen shows), and from what
+ * price, tied to the business by `@id`; its questions as an FAQPage (no
+ * longer a Google rich result, but the plainest statement of the answers
+ * there is for the engines that read it); and its place under the home
+ * page, as a breadcrumb.
  * ─────────────────────────────────────────────────────────────── */
 
-type LocalLd = {
+type ServiceLd = {
   url: string;
   name: string;
   service: string;
   description: string;
   price: number | null;
   faqs: { q: string; a: string }[];
-  city: { name: string; slug: string; region: string; towns: string[] };
+  places: string[];
 };
 
-export function localGraph(p: LocalLd) {
+export function serviceGraph(p: ServiceLd) {
   const url = `${SITE}${p.url}`;
   return {
     "@context": "https://schema.org",
@@ -351,18 +371,14 @@ export function localGraph(p: LocalLd) {
       {
         "@type": "Service",
         "@id": `${url}#service`,
-        name: `${p.service} in ${p.city.name}`,
+        name: p.service,
         serviceType: p.service,
         description: p.description,
         url,
         provider: { "@id": `${SITE}/#business` },
-        areaServed: [
-          { "@type": "City", name: p.city.name },
-          { "@type": "Place", name: p.city.region },
-          ...p.city.towns
-            .filter((t) => t !== p.city.name)
-            .map((name) => ({ "@type": "City", name })),
-        ],
+        areaServed: p.places
+          .filter((name) => name !== "Anywhere else")
+          .map((name) => ({ "@type": "City", name })),
         ...(p.price !== null
           ? {
               offers: {
@@ -394,15 +410,7 @@ export function localGraph(p: LocalLd) {
         "@type": "BreadcrumbList",
         itemListElement: [
           { "@type": "ListItem", position: 1, name: "Julian Gigola", item: SITE },
-          {
-            "@type": "ListItem",
-            position: 2,
-            name: p.city.name,
-            item: `${SITE}/${p.city.slug}`,
-          },
-          ...(p.url !== `/${p.city.slug}`
-            ? [{ "@type": "ListItem", position: 3, name: p.name, item: url }]
-            : []),
+          { "@type": "ListItem", position: 2, name: p.name, item: url },
         ],
       },
     ],

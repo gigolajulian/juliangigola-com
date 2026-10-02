@@ -1,85 +1,59 @@
 /**
- * The booking pages: one per service and city, at /<city>/<service>.
+ * The booking pages: one per service, at the root (/headshots,
+ * /graduation-photos...), each for San Francisco and San Jose at once.
  *
- * Julian (2026-10-02): "build the booking pages, start with San Jose", and
- * "no vertical pages". So each is a deck of screens like the homepage
- * (`components/local-screens.tsx`), and this file is only what they say.
+ * Julian (2026-10-02): booking pages, "no vertical pages", San Jose and
+ * San Francisco mainly, "I can travel to any of those, LA and NY too",
+ * and "I don't need separate pages for each" city. So a page per service,
+ * a deck of screens like the homepage (`components/local-screens.tsx`),
+ * whose title names the two cities he works in and whose "Where" screen
+ * names every place he shoots, visibly: a search engine ranks a city it
+ * can read on the page, and the structured data says the same thing.
  *
- * Why a page per city and service: a search names both ("headshot
- * photographer san jose", "sjsu grad photos"), and the pages that rank for
- * those in the Bay Area are exactly that, a page per service per city with
- * the price, what is included, and the questions people ask. The research
- * is summarised in `lib/seo.ts`.
- *
- * Every fact here is one the site already states somewhere: the prices,
- * what is included and the turnaround come from the session in
- * `content/site.json` (so /admin changes them here too), the process from
- * About, the reply time from `lib/site.ts`. The answers that are general
- * advice (what to wear, when to book) are written as advice, not as
- * policy. A new city is a new entry in `CITIES` and its pages in `PAGES`;
- * the routes read both.
+ * Every fact is one the site already states: the prices, inclusions and
+ * turnaround come from the session in `content/site.json` (so /admin
+ * changes them here too), the process from About, the reply time from
+ * `lib/site.ts`. Answers that are general advice (what to wear, when to
+ * book) are written as advice, not as policy.
  */
 
 import { SESSION_TYPES, formatPrice, type SessionType } from "./sessions";
 import { RESPONSE_TIME } from "./site";
 import { CONTENT } from "./content";
 import { getProject, projectsIn } from "./work";
+import type { BookingSlug } from "./booking-slugs";
 import type { Frame } from "./work-types";
-
-export type City = {
-  slug: string;
-  name: string;
-  /** What the region is called by the people searching from it. */
-  region: string;
-  /** The towns a client books from, for the structured data. */
-  towns: string[];
-};
-
-export const CITIES: City[] = [
-  {
-    slug: "san-jose",
-    name: "San Jose",
-    region: "Silicon Valley",
-    towns: [
-      "San Jose",
-      "Santa Clara",
-      "Sunnyvale",
-      "Mountain View",
-      "Cupertino",
-      "Campbell",
-      "Los Gatos",
-      "Milpitas",
-      "Palo Alto",
-    ],
-  },
-];
 
 export type Faq = { q: string; a: string };
 export type Block = { heading: string; items?: string[]; body?: string };
-
 export type Tile = { frame: Frame; href: string; caption: string };
+/** A place on the Where screen: its name and what working there means. */
+export type Place = { name: string; note: string };
 
-export type LocalPage = {
-  city: string;
-  slug: string;
-  /** The service in a word, for the rail, the crumb and the hub's list. */
+export type BookingPage = {
+  slug: BookingSlug;
+  /** The service in a word, for the rail, the crumb and the cross links. */
   name: string;
   /** `<title>` before the template's " | Julian Gigola", and the meta
       description. Titled for the search; see `lib/seo.ts`. */
   title: string;
   description: string;
-  /** The page's own heading, and the line of places over it. */
   h1: string;
   kicker: string;
   lead: string;
   /** "From $400" or "On request" for a session, "Quoted per project" for
-      a commission; with what comes back and when. */
+      a commission; and how soon it comes back. */
   rate: string;
   turnaround?: string;
   /** The schema.org service name and starting price. */
   service: string;
   price: number | null;
+  /** The session in `content/site.json` this page books, if it is one. */
+  session?: string;
+  /** Where the crumb goes back to. */
+  back: { href: string; label: string };
   blocks: Block[];
+  where: Place[];
   faqs: Faq[];
   /** The photographs: the first is the cover, the rest the work screen. */
   tiles: Tile[];
@@ -88,11 +62,21 @@ export type LocalPage = {
   book: { type: string; session?: string; title: string };
 };
 
+/** Every city the pages name, for the structured data's service area. */
+export const PLACES = [
+  "San Francisco",
+  "San Jose",
+  "Oakland",
+  "Santa Cruz",
+  "Los Angeles",
+  "New York",
+];
+
 /* ── shared wording ─────────────────────────────────────────────── */
 
 const session = (slug: string): SessionType => {
   const s = SESSION_TYPES.find((t) => t.slug === slug);
-  if (!s) throw new Error(`lib/locations.ts: no session "${slug}" in content/site.json.`);
+  if (!s) throw new Error(`lib/booking.ts: no session "${slug}" in content/site.json.`);
   return s;
 };
 
@@ -105,16 +89,38 @@ const PROCESS: Block = {
   items: [
     "Brief: references, usage, deliverables and dates. A deck is welcome but not required.",
     "Treatment: a lighting and location approach, a shot list, and a quote covering crew and licensing.",
-    "Shoot: studio or location, in San Jose, across the Bay Area or traveling.",
+    "Shoot: studio or location, Bay Area or traveling.",
     "Delivery: selects for approval, then final retouched files in the crops and color spaces you need.",
   ],
 };
 
-/** A session's rate, inclusions and turnaround as the page shows them. */
+/** Where a session is shot. The two cities he works from, the two he
+    drives to, and the two he flies to. */
+const SESSION_WHERE: Place[] = [
+  { name: "San Francisco", note: "Studio or location, anywhere in the city." },
+  { name: "San Jose", note: "Studio or location, and across the South Bay and Silicon Valley." },
+  { name: "Oakland", note: "And the East Bay. Say where in the form." },
+  { name: "Santa Cruz", note: "And the coast. Say where in the form." },
+  { name: "Los Angeles", note: "On request; travel is quoted with the booking." },
+  { name: "New York", note: "On request; travel is quoted with the booking." },
+];
+
+/** Where a commission is shot: anywhere the work is. */
+const COMMISSION_WHERE: Place[] = [
+  { name: "San Francisco", note: "Studio or location." },
+  { name: "San Jose", note: "Studio or location, across Silicon Valley." },
+  { name: "Oakland", note: "And the East Bay." },
+  { name: "Santa Cruz", note: "And the coast." },
+  { name: "Los Angeles", note: "Travel is quoted with the shoot." },
+  { name: "New York", note: "Travel is quoted with the shoot." },
+];
+
+/** A session's rate, turnaround and price as the page shows them. */
 const sessionFacts = (s: SessionType) => ({
   rate: formatPrice(s.from),
   turnaround: s.turnaround,
   price: s.from,
+  session: s.slug,
 });
 
 /** A priced answer, or the on-request one. */
@@ -122,6 +128,9 @@ const costAnswer = (s: SessionType, priced: string) =>
   s.from === null
     ? `Quoted on request, depending on what you need. Send the details through the booking form. ${reply}`.trim()
     : priced.replace("{price}", formatPrice(s.from));
+
+const SESSIONS = { href: "/#sessions", label: "Sessions" };
+const PORTFOLIO = { href: "/portfolio", label: "Portfolio" };
 
 /* ── the photographs ────────────────────────────────────────────── */
 
@@ -139,7 +148,7 @@ const framesOf = (slug: string, n = 7): Tile[] => {
   }));
 };
 
-/** A discipline's projects, a cover each, each opening its project. */
+/** A discipline's projects, a frame each, each opening its project. */
 const coversOf = (category: string, n = 7, prefer: string[] = []): Tile[] => {
   const all = projectsIn(category);
   const first = prefer
@@ -159,80 +168,25 @@ const MUSIC_VIDEOS = CONTENT.videos
   .filter((v) => v.section === "music")
   .map((v) => (v.client ? `${v.title} (${v.client})` : v.title));
 
-/* ── San Jose ───────────────────────────────────────────────────── */
+/* ── the pages ──────────────────────────────────────────────────── */
 
 const grad = session("graduation");
 const heads = session("headshots");
 const digitals = session("studio-digitals");
 const portraits = session("portraits");
 
-export const PAGES: LocalPage[] = [
+export const BOOKING_PAGES: BookingPage[] = [
   {
-    city: "san-jose",
-    slug: "graduation-photos",
-    name: "Graduation",
-    title: "Graduation Photographer San Jose: SJSU & SCU",
-    description: `Graduation photos at SJSU and Santa Clara University in San Jose. ${formatPrice(grad.from)}: one hour on campus, two outfit changes, an edited gallery and print release.`,
-    h1: "Graduation photos in San Jose",
-    kicker: "SJSU · Santa Clara University · South Bay",
-    lead: "Cap and gown at SJSU or Santa Clara University, on campus or in the studio. An hour, two outfit changes, and enough coverage for the family frame and the announcement.",
-    ...sessionFacts(grad),
-    service: "Graduation photography",
-    blocks: [
-      { heading: "What's included", items: grad.includes },
-      {
-        heading: "Where on campus",
-        items: [
-          "SJSU: Tower Hall and Tower Lawn, the Tommie Smith and John Carlos statue, and outside King Library.",
-          "Santa Clara University: the Mission Church and its gardens, and Palm Drive.",
-          "Somewhere else that means something to you works too. On campus at SJSU or SCU; a travel fee applies further out.",
-        ],
-      },
-      {
-        heading: "When to book",
-        body: "Spring commencement dates go first. Book four to six weeks ahead and shoot a week or two before the ceremony, so the gallery is back in time for the announcements.",
-      },
-    ],
-    faqs: [
-      {
-        q: "How much are graduation photos in San Jose?",
-        a: costAnswer(
-          grad,
-          "{price} for an hour on campus at SJSU or Santa Clara University, with two outfit changes, an edited gallery and a print release. A travel fee applies further out.",
-        ),
-      },
-      {
-        q: "When should I take my grad photos?",
-        a: "A week or two before the ceremony, once the cap, gown, stole and cords have arrived. Book four to six weeks ahead: spring dates go first.",
-      },
-      {
-        q: "What should I wear under my gown?",
-        a: "Something you would want to be photographed in without it, because the gown comes off for at least one look. Solid colors photograph best. Bring the stole, the cords and anything else you earned.",
-      },
-      {
-        q: "How long until I get the photos?",
-        a: `The edited gallery is ready in ${grad.turnaround}, with a print release so you can print anywhere.`,
-      },
-      {
-        q: "Do you photograph other campuses?",
-        a: "Yes, anywhere in the Bay Area. SJSU and Santa Clara University are included; a travel fee applies further out.",
-      },
-    ],
-    tiles: framesOf("graduation"),
-    gallery: { href: "/portfolio/graduation", label: "The graduation gallery" },
-    book: { type: "session", session: grad.name, title: "Book graduation photos" },
-  },
-  {
-    city: "san-jose",
     slug: "headshots",
     name: "Headshots",
-    title: "Headshot Photographer San Jose & Silicon Valley",
-    description: `Professional headshots in San Jose and Silicon Valley: LinkedIn, corporate, actor and press. Studio lighting, retouched selects, ready in ${heads.turnaround}.`,
-    h1: "Headshots in San Jose",
+    title: "Headshot Photographer, San Francisco & San Jose",
+    description: `Professional headshots in San Francisco and San Jose: LinkedIn, corporate, actor and press. Studio lighting, retouched selects, ready in ${heads.turnaround}.`,
+    h1: "Headshots in San Francisco & San Jose",
     kicker: "LinkedIn · Corporate · Actors · Press",
     lead: `Clean, current, and usable everywhere: LinkedIn, press, casting, a company about page. Studio lighting, more than one background, and retouched selects back in ${heads.turnaround}.`,
     ...sessionFacts(heads),
     service: "Headshot photography",
+    back: SESSIONS,
     blocks: [
       { heading: "What's included", items: heads.includes },
       {
@@ -242,15 +196,16 @@ export const PAGES: LocalPage[] = [
       {
         heading: "Who it's for",
         items: [
-          "Founders and teams across San Jose and Silicon Valley",
+          "Founders and teams, from SoMa to Silicon Valley",
           "Actors who need current casting shots",
           "Anyone whose LinkedIn photo is older than their job",
         ],
       },
     ],
+    where: SESSION_WHERE,
     faqs: [
       {
-        q: "How much do headshots cost in San Jose?",
+        q: "How much do headshots cost in San Francisco or San Jose?",
         a: costAnswer(heads, "{price}, with retouched selects and crops for web and print."),
       },
       {
@@ -267,7 +222,7 @@ export const PAGES: LocalPage[] = [
       },
       {
         q: "Can you photograph a whole team?",
-        a: `Yes. Say how many people and roughly when in the form, and the quote comes back for the day. ${reply}`.trim(),
+        a: `Yes. Say how many people and roughly when in the booking form, and the quote comes back for the day. ${reply}`.trim(),
       },
     ],
     tiles: framesOf("headshots"),
@@ -275,16 +230,81 @@ export const PAGES: LocalPage[] = [
     book: { type: "session", session: heads.name, title: "Book headshots" },
   },
   {
-    city: "san-jose",
+    slug: "graduation-photos",
+    name: "Graduation",
+    title: "Graduation Photos in San Jose & San Francisco",
+    description: `Graduation photos at SJSU, Santa Clara University, SF State, USF and across the Bay Area. ${formatPrice(grad.from)}: one hour, two outfit changes, edited gallery.`,
+    h1: "Graduation photos in San Jose & San Francisco",
+    kicker: "SJSU · Santa Clara · SF State · USF · Berkeley",
+    lead: "Cap and gown on campus or in the studio, at SJSU and Santa Clara University or anywhere else in the Bay Area. An hour, two outfit changes, and enough coverage for the family frame and the announcement.",
+    ...sessionFacts(grad),
+    service: "Graduation photography",
+    back: SESSIONS,
+    blocks: [
+      { heading: "What's included", items: grad.includes },
+      {
+        heading: "Where on campus",
+        items: [
+          "SJSU: Tower Hall and Tower Lawn, the Tommie Smith and John Carlos statue, and outside King Library.",
+          "Santa Clara University: the Mission Church and its gardens, and Palm Drive.",
+          "SF State: Malcolm X Plaza and the J. Paul Leonard Library.",
+          "USF: St. Ignatius Church and Lone Mountain.",
+          "UC Berkeley: Sather Tower and Sather Gate.",
+        ],
+      },
+      {
+        heading: "When to book",
+        body: "Spring commencement dates go first. Book four to six weeks ahead and shoot a week or two before the ceremony, so the gallery is back in time for the announcements.",
+      },
+    ],
+    where: [
+      { name: "San Jose", note: "SJSU, included." },
+      { name: "Santa Clara", note: "Santa Clara University, included." },
+      { name: "San Francisco", note: "SF State and USF; a travel fee applies." },
+      { name: "Berkeley", note: "UC Berkeley; a travel fee applies." },
+      { name: "Santa Cruz", note: "UC Santa Cruz; a travel fee applies." },
+      { name: "Anywhere else", note: "Any campus or place that means something to you; a travel fee applies." },
+    ],
+    faqs: [
+      {
+        q: "How much are graduation photos?",
+        a: costAnswer(
+          grad,
+          "{price} for an hour on campus at SJSU or Santa Clara University, with two outfit changes, an edited gallery and a print release. At SF State, USF, UC Berkeley and further out, a travel fee applies.",
+        ),
+      },
+      {
+        q: "When should I take my grad photos?",
+        a: "A week or two before the ceremony, once the cap, gown, stole and cords have arrived. Book four to six weeks ahead: spring dates go first.",
+      },
+      {
+        q: "What should I wear under my gown?",
+        a: "Something you would want to be photographed in without it, because the gown comes off for at least one look. Solid colors photograph best. Bring the stole, the cords and anything else you earned.",
+      },
+      {
+        q: "How long until I get the photos?",
+        a: `The edited gallery is ready in ${grad.turnaround}, with a print release so you can print anywhere.`,
+      },
+      {
+        q: "Do you photograph other campuses?",
+        a: "Yes, anywhere in the Bay Area: SF State, USF, UC Berkeley, Stanford, UC Santa Cruz. SJSU and Santa Clara University are included; a travel fee applies further out.",
+      },
+    ],
+    tiles: framesOf("graduation"),
+    gallery: { href: "/portfolio/graduation", label: "The graduation gallery" },
+    book: { type: "session", session: grad.name, title: "Book graduation photos" },
+  },
+  {
     slug: "model-digitals",
     name: "Digitals",
-    title: "Model Digitals & Polaroids in San Jose",
-    description: `Agency-standard model digitals (polaroids) in San Jose: full length, three-quarter and close, front and profile, unretouched. ${formatPrice(digitals.from)}, ready in ${digitals.turnaround}.`,
-    h1: "Model digitals in San Jose",
+    title: "Model Digitals & Polaroids, SF & San Jose",
+    description: `Agency-standard model digitals (polaroids) in San Francisco and San Jose: full length, three-quarter and close, front and profile, unretouched. ${formatPrice(digitals.from)}.`,
+    h1: "Model digitals in San Francisco & San Jose",
     kicker: "Digitals · Polaroids · Agency submissions",
     lead: "Agency-standard digitals: clean light, no retouching, accurate to how you actually look. Everything an agency asks for, in one short session.",
     ...sessionFacts(digitals),
     service: "Model digitals",
+    back: SESSIONS,
     blocks: [
       { heading: "What's included", items: digitals.includes },
       {
@@ -300,6 +320,7 @@ export const PAGES: LocalPage[] = [
         body: "The same thing. Agencies called them polaroids when they were shot on a Polaroid; they are digital now and the name stuck.",
       },
     ],
+    where: SESSION_WHERE,
     faqs: [
       {
         q: "What are model digitals?",
@@ -327,16 +348,16 @@ export const PAGES: LocalPage[] = [
     book: { type: "session", session: digitals.name, title: "Book digitals" },
   },
   {
-    city: "san-jose",
     slug: "portraits",
     name: "Portraits",
-    title: "Portrait Photographer in San Jose",
-    description: `Portrait sessions in San Jose: one person and an hour, in the studio or somewhere that says something about you. Two looks, retouched selects, ready in ${portraits.turnaround}.`,
-    h1: "Portraits in San Jose",
+    title: "Portrait Photographer, San Francisco & San Jose",
+    description: `Portrait sessions in San Francisco and San Jose: one person and an hour, in the studio or somewhere that says something about you. Ready in ${portraits.turnaround}.`,
+    h1: "Portraits in San Francisco & San Jose",
     kicker: "Studio · Location · Editorial",
-    lead: "One person and an hour, in the studio or somewhere in San Jose that says something about them. A portrait to keep, rather than a headshot to use.",
+    lead: "One person and an hour, in the studio or somewhere that says something about them. A portrait to keep, rather than a headshot to use.",
     ...sessionFacts(portraits),
     service: "Portrait photography",
+    back: SESSIONS,
     blocks: [
       { heading: "What's included", items: portraits.includes },
       {
@@ -344,9 +365,10 @@ export const PAGES: LocalPage[] = [
         body: "A headshot is a tool: a face, a clean background, a crop that fits a profile. A portrait is about the person, where they are and what they do, and it is made to be kept.",
       },
     ],
+    where: SESSION_WHERE,
     faqs: [
       {
-        q: "How much is a portrait session in San Jose?",
+        q: "How much is a portrait session?",
         a: costAnswer(portraits, "{price} for an hour, two looks and retouched selects."),
       },
       {
@@ -355,7 +377,7 @@ export const PAGES: LocalPage[] = [
       },
       {
         q: "Studio or location?",
-        a: "Either. A location in San Jose that means something to you, or the studio when the light should be controlled.",
+        a: "Either. A place in San Francisco, San Jose or anywhere in the Bay Area that means something to you, or the studio when the light should be controlled.",
       },
       {
         q: "What do I get, and when?",
@@ -367,18 +389,18 @@ export const PAGES: LocalPage[] = [
     book: { type: "session", session: portraits.name, title: "Book a portrait" },
   },
   {
-    city: "san-jose",
     slug: "music-photography",
     name: "Music",
-    title: "Musician Press Photos & Music Videos, San Jose",
+    title: "Musician Press Photos & Music Videos, Bay Area",
     description:
-      "Press photos, single and album cover art, and music videos for artists and bands in San Jose and the Bay Area, shot and art-directed by Julian Gigola.",
-    h1: "Press photos, cover art & music videos in San Jose",
+      "Press photos, single and album cover art, and music videos for artists and bands in San Francisco, San Jose and Oakland, shot and art-directed by Julian Gigola.",
+    h1: "Press photos, cover art & music videos",
     kicker: "Artists · Bands · Labels",
-    lead: "Press photos, single and album covers, and music videos for artists in San Jose and across the Bay Area, planned together, so a release looks like one thing from the press shot to the video.",
+    lead: "Press photos, single and album covers, and music videos for artists in San Francisco, San Jose and across the Bay Area, planned together, so a release looks like one thing from the press shot to the video.",
     rate: "Quoted per project",
     price: null,
     service: "Music photography and music videos",
+    back: PORTFOLIO,
     blocks: [
       {
         heading: "What you can book",
@@ -393,6 +415,7 @@ export const PAGES: LocalPage[] = [
         ? [{ heading: "Music videos", items: MUSIC_VIDEOS.slice(0, 4) }]
         : []),
     ],
+    where: COMMISSION_WHERE,
     faqs: [
       {
         q: "How much do press photos cost?",
@@ -414,24 +437,28 @@ export const PAGES: LocalPage[] = [
         q: "Do you direct music videos?",
         a: "Yes. The Motion page has the music videos, directed and shot for artists in the Bay Area.",
       },
+      {
+        q: "Do you shoot in Los Angeles or New York?",
+        a: "Yes. Travel is quoted with the shoot; say where and when in the form.",
+      },
     ],
     tiles: coversOf("artist-presskit"),
     gallery: { href: "/portfolio/artist-presskit", label: "Artist press kits" },
     book: { type: "music", title: "Plan a release" },
   },
   {
-    city: "san-jose",
     slug: "brand-photography",
     name: "Brands",
-    title: "Brand & Campaign Photographer, San Jose",
+    title: "Brand & Campaign Photographer, SF & San Jose",
     description:
-      "Campaign photography and art direction for consumer and tech brands in San Jose and Silicon Valley: concept, shoot and retouch. Quoted per project.",
-    h1: "Brand & campaign photography in San Jose",
-    kicker: "Silicon Valley · Consumer · Tech",
-    lead: "Campaign imagery for consumer and technology brands in San Jose and Silicon Valley, from the concept and the art direction to the shoot and the retouch.",
+      "Campaign photography for consumer and tech brands in San Francisco, San Jose and Silicon Valley: concept, art direction, shoot and retouch. Quoted per project.",
+    h1: "Brand & campaign photography",
+    kicker: "Consumer · Tech · Fashion",
+    lead: "Campaign imagery for consumer and technology brands in San Francisco, San Jose and Silicon Valley, from the concept and the art direction to the shoot and the retouch.",
     rate: "Quoted per project",
     price: null,
     service: "Brand campaign photography",
+    back: PORTFOLIO,
     blocks: [
       PROCESS,
       {
@@ -447,10 +474,11 @@ export const PAGES: LocalPage[] = [
         ],
       },
     ],
+    where: COMMISSION_WHERE,
     faqs: [
       {
         q: "What does a campaign shoot cost?",
-        a: `Quoted per project, because where the images run matters as much as the day itself. Send the brief through the form and the quote comes back with a treatment. ${reply}`.trim(),
+        a: `Quoted per project, because where the images run matters as much as the day itself. Send the brief through the booking form and the quote comes back with a treatment. ${reply}`.trim(),
       },
       {
         q: "How is usage licensed?",
@@ -461,8 +489,8 @@ export const PAGES: LocalPage[] = [
         a: "Yes. Stills and motion from one shoot, planned together in the treatment.",
       },
       {
-        q: "Do you shoot on location?",
-        a: "Studio or location, in San Jose, across the Bay Area, or traveling.",
+        q: "Do you travel for shoots?",
+        a: "Yes: across the Bay Area, and to Los Angeles, New York and further. Travel is quoted with the shoot.",
       },
       {
         q: "What should a brief include?",
@@ -475,12 +503,9 @@ export const PAGES: LocalPage[] = [
   },
 ];
 
-export const cityOf = (slug: string) => CITIES.find((c) => c.slug === slug);
-export const pagesIn = (city: string) => PAGES.filter((p) => p.city === city);
-export const pageOf = (city: string, slug: string) =>
-  PAGES.find((p) => p.city === city && p.slug === slug);
-export const localHref = (p: LocalPage) => `/${p.city}/${p.slug}`;
-
-/** Where a page's Book screen sends the form, as the homepage links do. */
-export const bookHref = (p: LocalPage) =>
-  `/?type=${encodeURIComponent(p.book.type)}${p.book.session ? `&session=${encodeURIComponent(p.book.session)}` : ""}#contact`;
+export const bookingPage = (slug: string) =>
+  BOOKING_PAGES.find((p) => p.slug === slug);
+export const bookingHref = (p: BookingPage) => `/${p.slug}`;
+/** The page that books a session in `content/site.json`, if there is one. */
+export const pageForSession = (sessionSlug: string) =>
+  BOOKING_PAGES.find((p) => p.session === sessionSlug);

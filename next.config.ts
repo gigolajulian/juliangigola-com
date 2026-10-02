@@ -6,6 +6,7 @@ import { initOpenNextCloudflareForDev } from "@opennextjs/cloudflare";
 // built sends a visitor 308 → 404, which is worse than the plain 404 they
 // would have got, because it looks like the site meant to take them there.
 import { LINKABLE, CATEGORIES, LISTINGS, categoryHref } from "./lib/work";
+import { BOOKING_SLUGS } from "./lib/booking-slugs";
 
 /**
  * The old site published every project at the site root — `/wired-magazine`,
@@ -327,8 +328,13 @@ const nextConfig: NextConfig = {
 
   async redirects() {
     // Project slugs win over category slugs where a name is used for both.
-    const seen = new Set<string>();
+    // A booking page wins over both: /headshots was the old site's gallery,
+    // and is now the page that books one (`lib/booking-slugs.ts`).
+    const seen = new Set<string>(BOOKING_SLUGS.map((s) => `/${s}`));
     return [
+      // The old site's graduation gallery, in its links and the index:
+      // the page that books one now, not the homepage list.
+      { source: "/graduation", destination: "/graduation-photos", permanent: true },
       ...pageRedirects,
       ...renameRedirects,
       ...categoryRedirects,

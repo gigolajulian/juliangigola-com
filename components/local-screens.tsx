@@ -2,7 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { RisingTitle } from "@/components/strip-page";
 import { LiquidPair } from "@/components/liquid-pair";
-import type { Block, Tile } from "@/lib/locations";
+import type { Block, Place, Tile } from "@/lib/booking";
 import type { Frame } from "@/lib/work-types";
 import { ldJson } from "@/lib/seo";
 
@@ -151,8 +151,8 @@ export function LocalWork({
   );
 }
 
-/** The details: what is included, where, when, and the way on to the
-    other pages in the city. Columns, ruled like the sessions list. */
+/** The details: what is included, how it runs, and the way on to the
+    other booking pages. Columns, ruled like the sessions list. */
 export function LocalDetails({
   blocks,
   more,
@@ -229,57 +229,42 @@ export function LocalDetails({
   );
 }
 
-/** The city's services as a list of doors, for the city's own page: the
-    sessions list's rows, each leading to its booking page. */
-export function LocalServices({
-  city,
-  items,
-}: {
-  city: string;
-  items: { href: string; name: string; rate: string; lead: string }[];
-}) {
+/** Where: every place the service is shot, by name, with what working
+    there means. Visible on purpose: a page ranks for a city it says, and
+    the structured data says the same list (`lib/seo.ts`). */
+export function LocalWhere({ places }: { places: Place[] }) {
   return (
     <section
       data-tick
-      data-label="Services"
-      data-hash="services"
+      data-label="Where"
+      data-hash="where"
       className="relative grid w-full shrink-0 grid-cols-1 gap-10 border-l border-border px-6 pb-12 pt-24 sm:h-full sm:grid-cols-[minmax(0,0.7fr)_minmax(0,1.3fr)] sm:items-center sm:gap-x-[clamp(2rem,4vw,5rem)] sm:px-10 sm:pb-8 short:pt-20"
     >
       <div className="flex flex-col gap-5">
         <span className="label text-muted-foreground">
-          <span className="mr-2 text-foreground">{two(items.length)}</span>
-          Ways to book in {city}
+          <span className="mr-2 text-foreground">{two(places.length)}</span>
+          Places
         </span>
-        <RisingTitle text="Services" className="sm:max-lg:text-5xl" />
+        <RisingTitle text="Where I shoot" className="sm:max-lg:text-5xl" />
       </div>
-      <ul data-scroll className="title-rest min-h-0 border-t border-border sm:max-h-full sm:overflow-y-auto sm:overscroll-contain">
-        {items.map((s, i) => (
-          <li key={s.href} className="border-b border-border">
-            <Link
-              href={s.href}
-              className="group grid grid-cols-[auto_minmax(0,1fr)_auto] items-baseline gap-x-4 gap-y-2 py-4 short:py-2.5"
-            >
-              <span className="font-display text-[clamp(1.5rem,2.4vw,2.5rem)] leading-none tabular-nums text-muted-foreground/40 transition-colors duration-300 hoverable:group-hover:text-foreground">
-                {two(i + 1)}
-              </span>
-              <span className="font-display text-[clamp(1.5rem,2.4vw,2.5rem)] leading-none">
-                {s.name}
-              </span>
-              <span className="label flex items-baseline gap-3 text-muted-foreground">
-                <span className="max-sm:hidden">{s.rate}</span>
-                <span
-                  aria-hidden
-                  className="text-foreground transition-transform duration-300 hoverable:group-hover:translate-x-1"
-                >
-                  &rarr;
-                </span>
-              </span>
-              {/* One line a row from `sm`, where the six have to share a
-                  screen; the whole of it is on the page it leads to. */}
-              <span className="col-start-2 col-end-4 max-w-[60ch] text-left text-sm leading-relaxed text-muted-foreground sm:line-clamp-1 short:hidden">
-                {s.lead}
-              </span>
-            </Link>
+      <ul
+        data-scroll
+        className="title-rest min-h-0 border-t border-border sm:max-h-full sm:overflow-y-auto sm:overscroll-contain"
+      >
+        {places.map((p, i) => (
+          <li
+            key={p.name}
+            className="grid grid-cols-[auto_minmax(0,1fr)] items-baseline gap-x-4 gap-y-1 border-b border-border py-4 short:py-2.5 sm:grid-cols-[auto_minmax(0,0.9fr)_minmax(0,1.1fr)]"
+          >
+            <span className="font-display text-[clamp(1.5rem,2.4vw,2.5rem)] leading-none tabular-nums text-muted-foreground/40">
+              {two(i + 1)}
+            </span>
+            <h2 className="font-display text-[clamp(1.5rem,2.4vw,2.5rem)] uppercase leading-none">
+              {p.name}
+            </h2>
+            <p className="col-start-2 text-left text-sm leading-relaxed text-muted-foreground sm:col-start-3">
+              {p.note}
+            </p>
           </li>
         ))}
       </ul>

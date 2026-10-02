@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { RisingTitle } from "@/components/strip-page";
-import type { Faq } from "@/lib/locations";
+import type { Faq } from "@/lib/booking";
 
 /* ── the questions ────────────────────────────────────────────────
  * A booking page's screen of questions, the ones people search for

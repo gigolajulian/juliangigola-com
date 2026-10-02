@@ -26,6 +26,7 @@ import { AboutScreen } from "@/components/about-screen";
 import { ContactScreen } from "@/components/contact-screen";
 import { SessionsScreen } from "@/components/sessions-screen";
 import { SESSION_TYPES, formatPrice } from "@/lib/sessions";
+import { pageForSession } from "@/lib/booking";
 
 /* ── the homepage ─────────────────────────────────────────────────
  * One screen at a time, sideways. Each screen is a whole section rather
@@ -177,6 +178,7 @@ export default function Home() {
               blurb: s.blurb,
               includes: s.includes,
               cover: sample ? sample.cover : null,
+              page: pageForSession(s.slug) && `/${pageForSession(s.slug)!.slug}`,
             };
           })}
         />
