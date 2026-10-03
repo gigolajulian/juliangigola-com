@@ -92,6 +92,9 @@ export function CoverCell({
       <Link
         prefetch={false}
         href={href ?? `/portfolio/${row.slug}`}
+        /* What carries a cover's name, for `globals.css` to unname on a
+           deal (`[data-morph]`). */
+        data-morph=""
         data-tick
         data-label={label}
         /* The chapter is `data-label` and only the first cover of a

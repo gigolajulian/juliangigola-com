@@ -85,9 +85,18 @@ export function FitLines() {
       frame = requestAnimationFrame(fit);
     };
 
-    fit();
-    void document.fonts.ready.then(soon);
-    const sizes = new ResizeObserver(soon);
+    /* The first fit, and the wait for the fonts, from the size observer's
+       first call: it comes once the page is laid out and before it is
+       painted, where reading it costs nothing. Here, inside the swap back
+       from the portfolio, both brought the new page's styles up to date
+       early (`document.fonts.ready` does too). */
+    let first = true;
+    const sizes = new ResizeObserver(() => {
+      if (!first) return soon();
+      first = false;
+      fit();
+      void document.fonts.ready.then(soon);
+    });
     sizes.observe(name);
     phone.addEventListener("change", soon);
     // The arrange tool sizing the lines (`hero-dials.tsx`).

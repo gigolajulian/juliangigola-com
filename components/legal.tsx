@@ -209,9 +209,14 @@ export function LegalPage({ children }: { children: React.ReactNode }) {
                   somebody skims past is noise. The buttons name themselves.
                   Selectable, on a strip that is not: a clause gets copied
                   into an email. */}
+                {/* Focusable: from `sm` up the clause scrolls in its own
+                    column, and with nothing in it to take the focus a
+                    keyboard could not scroll it (WCAG 2.1.1, the audit
+                    2026-10-02). Tab to it, then the arrows. */}
                 <article
                   id={`${d.id}-clause`}
                   aria-labelledby={`${d.id}-reading`}
+                  tabIndex={0}
                   className="min-w-0 flex-1 select-text border-t border-border pt-6 sm:h-full sm:quiet-scroll sm:overflow-y-auto sm:overscroll-contain sm:border-l sm:border-t-0 sm:pl-12 sm:pt-0"
                 >
                   {/* Keyed on the clause, so the fade runs again on every
