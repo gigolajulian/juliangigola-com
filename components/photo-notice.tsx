@@ -90,8 +90,8 @@ export function PhotoNotice() {
    * The estimate is generous, so the worst case is a notice sitting slightly
    * further inside the edge than it strictly needed to.
    */
-  const BOX_W = 384; // `max-w-sm`
-  const BOX_H = 96; // three lines plus padding, at the narrowest sensible width
+  const BOX_W = 272; // `max-w-[17rem]`
+  const BOX_H = 64; // three short lines plus padding
   const GAP = 12;
   const MARGIN = 16;
 
@@ -135,7 +135,8 @@ export function PhotoNotice() {
         // uses. This is a sentence of plain English making a legal claim, and
         // sixty-odd characters of 11px caps at 0.14em is a thing to decipher
         // rather than read.
-        <p className="max-w-sm bg-foreground px-5 py-4 text-sm leading-snug text-background">
+        // Julian (2026-10-02): smaller.
+        <p className="max-w-[17rem] bg-foreground px-3 py-2 text-left text-xs leading-snug text-background">
           This photo is Copyright &copy; {new Date().getFullYear()} Julian
           Gigola. All rights reserved.
         </p>

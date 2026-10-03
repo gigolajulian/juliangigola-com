@@ -27,7 +27,9 @@ import { ldJson, siteGraph } from "@/lib/seo";
 const display = Inter_Tight({
   variable: "--font-display",
   subsets: ["latin"],
-  weight: "900",
+  /* 800 for the handle on a credit's card, a weight under the rest
+     (Julian, 2026-10-03). */
+  weight: ["800", "900"],
   fallback: ["Helvetica Neue", "Arial", "sans-serif"],
 });
 /* Julian: the section titles (every h2 that is not a label) in Archivo
