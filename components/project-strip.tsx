@@ -54,7 +54,10 @@ function Frame({
   if (!slug) return children;
   return (
     <ViewTransition name={`cover-${slug}`} share="morph" default="none">
-      {children}
+      {/* Marked as what carries a cover's name (`[data-morph]`). */}
+      {React.isValidElement<{ "data-morph"?: string }>(children)
+        ? React.cloneElement(children, { "data-morph": "" })
+        : children}
     </ViewTransition>
   );
 }

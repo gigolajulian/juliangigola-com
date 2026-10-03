@@ -4392,8 +4392,13 @@ optgroup {
    project), so dealing one into the other flew the band's covers, pinned
    under the later screens, out over both pages. Julian saw it as a grid
    flashing up. The morph is for a press on a cover, not a page dealt. */
-:root[data-nav-side] [style*="view-transition-name: cover-"],
-:root[data-nav="deal"] [style*="view-transition-name: cover-"] {
+/* By `data-morph` (each thing that carries a cover's name), never by the
+   style it is named in: a root attribute over `[style*=…]` sent every
+   element with a style attribute through a restyle each time
+   `data-nav-side` came or went, 400 to 600 on the portfolio, twice a
+   crossing. */
+:root[data-nav-side] [data-morph],
+:root[data-nav="deal"] [data-morph] {
   view-transition-name: none !important;
 }
 ::view-transition-group(site-bar) {

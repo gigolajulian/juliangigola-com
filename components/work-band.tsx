@@ -223,7 +223,7 @@ export function WorkBand({
             apart. One clip round both and they move as one. The hairline
             the tile's clip once cut into the plate's blur was a fractional
             join, and the rows are whole pixels now (`band-grid`). */}
-        <div className="photo-corner absolute inset-0 overflow-hidden">
+        <div data-morph="" className="photo-corner absolute inset-0 overflow-hidden">
           <Image
             src={project.cover.src}
             alt={project.cover.alt || project.name}
