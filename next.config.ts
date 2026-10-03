@@ -170,6 +170,10 @@ const pageRedirects = [
  *                    play (see `components/video-grid.tsx`), so the policy is
  *                    the boundary and the click is the consent.
  */
+// Dev-only allowance so impeccable live mode can load. Guarded by NODE_ENV.
+const __impeccableLiveDev =
+  process.env.NODE_ENV === "development" ? " http://localhost:8400" : "";
+
 const csp = [
   "default-src 'self'",
   "base-uri 'self'",
@@ -199,14 +203,14 @@ const csp = [
      reel stays silent, which is the safe direction). The alternative was
      dropping the volume request or shipping sound at whatever level the
      visitor's last Vimeo session left it at. */
-  "script-src 'self' 'unsafe-inline' https://static.cloudflareinsights.com https://player.vimeo.com",
+  `script-src 'self' 'unsafe-inline' https://static.cloudflareinsights.com https://player.vimeo.com${__impeccableLiveDev}`,
   // The two players, and only as an embed — `frame-ancestors 'none'` above
   // is the other direction and still says nobody may frame this site.
   "frame-src https://www.youtube-nocookie.com https://player.vimeo.com",
   // `vimeo.com` and `youtube.com` are oEmbed lookups made by /admin when a
   // link is pasted: the title, and the poster Vimeo does not publish at a
   // guessable URL. No page on the site fetches either.
-  "connect-src 'self' https://api.github.com https://vimeo.com https://www.youtube.com",
+  `connect-src 'self' https://api.github.com https://vimeo.com https://www.youtube.com${__impeccableLiveDev}`,
   "upgrade-insecure-requests",
 ].join("; ");
 

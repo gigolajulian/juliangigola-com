@@ -1,12 +1,11 @@
-import type { CSSProperties } from "react";
+import Image from "next/image";
 import Link from "next/link";
+import type { Frame } from "@/lib/work-types";
 import { CoverFloat } from "@/components/cover-float";
 import { Strip } from "@/components/strip";
-import { RisingTitle, StripPage } from "@/components/strip-page";
+import { StripPage } from "@/components/strip-page";
 import { EnquiryCell } from "@/components/enquiry-cell";
 import { Testimonials } from "@/components/testimonials";
-import { WorkBand } from "@/components/work-band";
-import TiltedCard from "@/components/TiltedCard";
 import { InquireWall } from "@/components/inquire-wall";
 import {
   FEATURED,
@@ -19,12 +18,16 @@ import {
   WORK_CATEGORY_LINKS,
   commissionsIn,
   indexRow,
+  COVER_RELEASES,
 } from "@/lib/work";
+import { CONTENT } from "@/lib/content";
+import { REEL, posterFor } from "@/lib/videos";
 import { LeadWindow } from "@/components/lead-window";
 import { ClientMarks } from "@/components/client-marks";
 import { AboutScreen } from "@/components/about-screen";
 import { ContactScreen } from "@/components/contact-screen";
 import { SessionsScreen } from "@/components/sessions-screen";
+import { ServicesScreen, type Shot } from "@/components/services-screen";
 import { SESSION_TYPES, formatPrice } from "@/lib/sessions";
 import { pageForSession } from "@/lib/booking";
 
@@ -65,6 +68,71 @@ import { pageForSession } from "@/lib/booking";
    a screen has left is a tile 155 wide: small enough that UKIYOSUNKNOWN came
    out UKIYOS... Two rows of a taller tile is the same nine pictures at half
    again the size, and the short row centres itself under the long one. */
+/* Each session's sample, the lead window's covers, and the wall behind
+   Inquire without any frame those, the cover or the services already show. */
+const SAMPLES = SESSION_TYPES.map(
+  (s) => (s.sample && PROJECTS.find((p) => p.slug === s.sample)) || projectsIn(s.slug)[0],
+);
+const LEAD = commissionsIn(WORK_CATEGORY_LINKS[0].slug).slice(0, 16);
+/* Julian's sleeves for the Cover Art table, in his order (2026-10-03). */
+const COVER_PICKS = [
+  "problem-child",
+  "the-river",
+  "the-description",
+  "your-way",
+  "jahannam",
+  "est-modvs-in-rebvs",
+  "took-time",
+  "in-the-hoodie-on-your-sleeve",
+];
+/* What the cover, Sessions and the lead window show, which the services
+   light table leaves out as well. */
+const ELSEWHERE = new Set([...FEATURED, ...SAMPLES, ...LEAD].map((p) => p?.cover.src));
+const SHOWN = new Set([
+  ...ELSEWHERE,
+  // Services: each discipline's cover, and its light table's frames.
+  ...DISCIPLINE_TILES.flatMap((t) => [t.cover.src, ...shotsOf(t).map((s) => s.src)]),
+]);
+const WALL_HERE = WALL.filter((t) => !SHOWN.has(t.src));
+/* A photograph behind each door on the last screen (critique, 2026-10-03:
+   the screen that asks was the only one without work on it). Frames the
+   page shows nowhere else, the wall included. */
+const unseen = (src: string) => !SHOWN.has(src) && !WALL.some((t) => t.src === src);
+// Every cover is on the page already, so a frame from inside a featured set.
+const DOOR_WORK = FEATURED.flatMap((p) => p?.images.slice(1, 4) ?? []).find((f) => unseen(f.src));
+const DOOR_SESSIONS = SAMPLES.flatMap((p) => p?.images.slice(1, 3) ?? []).find((f) => unseen(f.src));
+
+/* A discipline's frames for the Commissions table, up to twelve: its
+   projects' covers (Julian, 2026-10-03), the films for Motion, his picked
+   sleeves for Cover Art. */
+function shotsOf(t: (typeof DISCIPLINE_TILES)[number]): Shot[] {
+  const projects = projectsIn(t.category);
+  const shots: Shot[] = [];
+  // Julian: Mixed media and Brand campaigns show every project, even one
+  // shown elsewhere (campaigns bar Hellamack).
+  const every = t.category === "mixed-media" || t.category === "campaigns";
+  const add = (f: { src: string; color?: string; width: number; height: number }, title: string, href: string) => {
+    if ((every || shots.length < 12) && (every || !ELSEWHERE.has(f.src)) && !shots.some((s) => s.src === f.src)) shots.push({ src: f.src, color: f.color, width: f.width, height: f.height, title, href });
+  };
+  // Cover Art's projects are its sleeves, dealt below; a project cover there
+  // would show one of them twice.
+  if (t.category !== "coverart")
+    for (const p of projects) if (p.slug !== "hellamack") add(p.cover, p.name, `/portfolio/${p.slug}`);
+  // Julian (2026-10-03): covers only. Motion has no projects: every
+  // film, the reel first, by its poster. Cover Art: eight sleeves, not the
+  // photograph of them laid out (Julian: remove).
+  if (t.category === "video")
+    for (const v of [REEL, ...CONTENT.videos]) {
+      const still = "id" in v ? posterFor(v) : v.poster;
+      if (still) add({ src: still, width: 1280, height: 720 }, v.title, "/portfolio/video");
+    }
+  if (t.category === "coverart") {
+    for (const r of COVER_PICKS.map((slug) => COVER_RELEASES.find((c) => c.slug === slug)))
+      if (r) add({ ...r.frames[0], src: r.frames[0].thumb }, `${r.title}, ${r.artist}`, t.href ?? "/portfolio");
+  }
+  return shots;
+}
+
 export default function Home() {
   return (
     <StripPage>
@@ -87,57 +155,22 @@ export default function Home() {
           className="w-full shrink-0 max-sm:h-[100svh] sm:h-full"
         />
 
-        {/* A grid, butting against itself: the section reads as one sheet
-            of imagery rather than as cards in a frame, and the plate over
-            each tile says whose it is. */}
-        <section
-          data-tick
-          /* Julian: Services, at #services (it was Selected work, #work). */
-          data-label="Services"
-          data-hash="services"
-          aria-label={`Services, ${DISCIPLINE_TILES.length} disciplines`}
-          className="relative flex w-full shrink-0 flex-col sm:h-full"
+        {/* Julian (2026-10-03): a preview of the portfolio, not all of
+            it: the disciplines as an index beside one large photograph,
+            and the way on to the portfolio (`services-screen.tsx`). It was
+            a grid of eight tiles, every one a door. */}
+        <ServicesScreen
+          rows={DISCIPLINE_TILES.map((t) => ({
+            slug: t.slug,
+            name: t.name,
+            href: t.href ?? `/portfolio/${t.slug}`,
+            medium: t.medium,
+            count: t.count,
+            cover: t.cover,
+            shots: shotsOf(t),
+          }))}
+          total={PROJECTS.length}
         >
-          {/* On a phone the strip's rail is gone, and with it the only
-              thing naming this screen: it was the one section of the stack
-              with no title, a grid straight after the cover. */}
-          <RisingTitle text="Services" className="px-6 pt-12 sm:hidden" />
-          {/* Julian: the best photo from each discipline, leading to its
-              project, in two rows, and what each is on its plate: photo,
-              design or video (`.disc` in `globals.css`). */}
-          <div
-            className="disc min-h-0 flex-1 px-6 pt-6 sm:px-8 sm:pb-4 sm:pt-24 lying:pb-2 lying:pt-20"
-            style={{ "--n": DISCIPLINE_TILES.length } as CSSProperties}
-          >
-            <div className="disc-inner">
-              {DISCIPLINE_TILES.map((tile, i) => (
-                <div key={tile.name} className="band-tile disc-tile">
-                  {/* Julian: the cover art's motion here instead (React
-                      Bits' TiltedCard), tilting toward the pointer and
-                      lifting. */}
-                  <TiltedCard
-                    imageSrc={tile.cover.src}
-                    altText={tile.name}
-                    containerHeight="100%"
-                    imageHeight="100%"
-                    imageWidth="100%"
-                    scaleOnHover={1.05}
-                    /* Julian: half the tilt (14deg by default), then less. */
-                    rotateAmplitude={4}
-                    showMobileWarning={false}
-                    showTooltip={false}
-                  >
-                    <WorkBand project={tile} index={i} />
-                  </TiltedCard>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* The proof, where the proof is. It had a screen to itself and a
-              screen of logos is a page a visitor swipes past to get back to
-              photographs; a line under the work is read in the second it
-              takes to pass it, which is all a logo needs. */}
           {PRESS_HOME.length ? (
             <section
               aria-labelledby="press"
@@ -160,7 +193,7 @@ export default function Home() {
               </div>
             </section>
           ) : null}
-        </section>
+        </ServicesScreen>
 
         <Testimonials cells />
 
@@ -168,10 +201,8 @@ export default function Home() {
             the ask, which stays last. /about and /contact redirect here.
             Each session shows the sample /sessions shows. */}
         <SessionsScreen
-          sessions={SESSION_TYPES.map((s) => {
-            const sample =
-              (s.sample && PROJECTS.find((p) => p.slug === s.sample)) ||
-              projectsIn(s.slug)[0];
+          sessions={SESSION_TYPES.map((s, i) => {
+            const sample = SAMPLES[i];
             return {
               slug: s.slug,
               name: s.name,
@@ -186,7 +217,10 @@ export default function Home() {
           })}
         />
         <AboutScreen />
-        <ContactScreen />
+        {/* Julian (2026-10-03): the wall behind Inquire, where it was
+            behind the last screen's doors, and none of it a picture the
+            page already shows. */}
+        <ContactScreen backdrop={<InquireWall items={WALL_HERE} />} />
 
         {/* Julian: merge these, there is too much white space. The ask and
             the two doors were two screens of mostly paper asking the same
@@ -208,9 +242,6 @@ export default function Home() {
              still read; the doors are frosted glass over it. Each tile a way into
              its project, as on the 404. Four dozen, which covers the widest
              screen (`intro.tsx` has the arithmetic). */
-          backdrop={
-            <InquireWall items={WALL.slice(0, 48)} />
-          }
           aside={
             /* Julian (2026-10-01, layout): the two doors split the screen
                under the bar, not behind it. The bar (`--bar-h`) lies over the
@@ -221,27 +252,73 @@ export default function Home() {
               className="grid h-full grid-rows-2 divide-y divide-border sm:grid-rows-[minmax(0,calc(50%+var(--bar-h)/2))_minmax(0,1fr)]"
             >
               <PathCard
+                photo={DOOR_WORK}
                 href="/portfolio"
                 title="See the work"
                 body="Editorial, campaigns, portraits, and artist imagery."
               />
-              <PathCard
-                href="/#sessions"
-                title="Book a session"
-                body="Graduation, headshots, weddings, and studio digitals. What's included and how long it takes."
-              />
+              <SessionsDoor photo={DOOR_SESSIONS} />
             </div>
           }
         />
         {/* The window into the work (`lead-window.tsx`). */}
         <LeadWindow
           // Three fill the strip; a screen of the rack takes up to sixteen.
-          covers={commissionsIn(WORK_CATEGORY_LINKS[0].slug)
-            .slice(0, 16)
-            .map(indexRow)}
+          covers={LEAD.map(indexRow)}
         />
       </Strip>
     </StripPage>
+  );
+}
+
+/* The second door, forward rather than back (audit, 2026-10-03): it sent
+   a private client back to Sessions, a screen behind them with Sessions in
+   the bar as well. Each session straight to its own booking page instead. */
+function SessionsDoor({ photo }: { photo?: Frame }) {
+  return (
+    <div className="relative isolate flex flex-col justify-center gap-6 overflow-hidden border-l border-border bg-background/30 px-6 py-12 backdrop-blur-[var(--door-blur,1px)] sm:px-16 lying:gap-3 lying:px-10 lying:py-3">
+      <DoorPhoto photo={photo} />
+      <h3 className="title lying:[--text-title:1.75rem]">Book a session</h3>
+      <ul className="max-w-sm border-t border-border">
+        {SESSION_TYPES.map((s) => {
+          const page = pageForSession(s.slug);
+          return (
+            <li key={s.slug} className="border-b border-border">
+              <Link
+                href={page ? `/${page.slug}` : "/#sessions"}
+                className="group label flex items-center justify-between gap-4 py-3 text-foreground lying:py-1.5"
+              >
+                {s.name}
+                <span
+                  aria-hidden
+                  className="transition-transform duration-300 ease-[var(--ease-out-strong)] hoverable:group-hover:translate-x-1 motion-reduce:transition-none"
+                >
+                  &rarr;
+                </span>
+              </Link>
+            </li>
+          );
+        })}
+      </ul>
+    </div>
+  );
+}
+
+/* The door's photograph, held back so its words read over it. */
+function DoorPhoto({ photo }: { photo?: Frame }) {
+  if (!photo) return null;
+  return (
+    <>
+      <Image
+        src={photo.src}
+        alt=""
+        fill
+        sizes="(min-width: 640px) 50vw, 100vw"
+        className="door-photo -z-20 object-cover"
+        style={{ backgroundColor: photo.color }}
+      />
+      <span aria-hidden className="door-veil absolute inset-0 -z-10" />
+    </>
   );
 }
 
@@ -249,10 +326,12 @@ function PathCard({
   href,
   title,
   body,
+  photo,
 }: {
   href: string;
   title: string;
   body: string;
+  photo?: Frame;
 }) {
   return (
     <Link
@@ -264,14 +343,15 @@ function PathCard({
       /* Julian: the wall runs on behind the doors, seen rather than
          frosted over: a 30% tint for the type and 6px of blur, not the
          site's glass. */
-      className="group relative flex flex-col justify-center gap-6 border-l border-border bg-background/30 px-6 py-12 backdrop-blur-[var(--door-blur,1px)] transition-colors duration-300 hoverable:hover:bg-background/45 sm:px-16 sm:first:pt-[calc(3rem+var(--bar-h))] lying:gap-3 lying:px-10 lying:py-3 lying:first:pt-16"
+      className="group relative isolate flex flex-col justify-center gap-6 overflow-hidden border-l border-border bg-background/30 px-6 py-12 backdrop-blur-[var(--door-blur,1px)] transition-colors duration-300 hoverable:hover:bg-background/45 sm:px-16 sm:first:pt-[calc(3rem+var(--bar-h))] lying:gap-3 lying:px-10 lying:py-3 lying:first:pt-16"
     >
+      <DoorPhoto photo={photo} />
       <div>
         {/* Julian: no audience line over the title, on any screen. */}
         <h3 className="title lying:[--text-title:1.75rem]">{title}</h3>
         {/* A phone on its side has the height for the door, not its
             description. */}
-        <p className="mt-4 max-w-sm text-sm leading-relaxed text-muted-foreground lying:hidden">
+        <p className="mt-4 max-w-sm text-left text-sm normal-case leading-relaxed text-muted-foreground lying:hidden">
           {body}
         </p>
       </div>

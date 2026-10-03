@@ -48,11 +48,13 @@ const useHash = () =>
  * ─────────────────────────────────────────────────────────────── */
 
 export const LINKS = [
-  // Julian's order (2026-10-01: Portfolio last). About and Contact are
+  // Julian's order (2026-10-01: Portfolio last; 2026-10-03: Commissions
+  // first, the two audiences side by side). All but Portfolio are
   // homepage screens.
+  { href: "/#work", label: "Commissions" },
   { href: "/#sessions", label: "Sessions" },
   { href: "/#about", label: "About" },
-  { href: "/#contact", label: "Contact" },
+  { href: "/#contact", label: "Inquire" },
   { href: "/portfolio", label: "Portfolio" },
 ] as const;
 
