@@ -142,15 +142,22 @@ export function ServicesScreen({
               </li>
             ))}
           </ul>
-          {/* The way on, as a button: it is what this screen is for. */}
-          <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
+          {/* The art director's verb first (critique, 2026-10-03: it was
+              nowhere before About), the whole portfolio beside it. */}
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-3">
+            <Link
+              href="/#contact"
+              className="services-book label action px-7 py-4 press active:scale-[0.97] sm:py-[clamp(0.625rem,1.8cqh,1rem)]"
+            >
+              Inquire
+            </Link>
             <Link
               href="/portfolio"
-              className="services-book label action self-start px-7 py-4 press active:scale-[0.97] sm:py-[clamp(0.625rem,1.8cqh,1rem)]"
+              className="label action-quiet px-7 py-4 press active:scale-[0.97] sm:py-[clamp(0.625rem,1.8cqh,1rem)]"
             >
               See the portfolio
             </Link>
-            <span className="label text-muted-foreground">{total} projects</span>
+            <span className="label ml-3 text-muted-foreground">{total} projects</span>
           </div>
         </div>
 

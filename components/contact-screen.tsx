@@ -31,9 +31,10 @@ const ELSEWHERE = [
 ];
 
 export function ContactScreen({
-  title = "Get in Touch",
+  // Julian (2026-10-03): one name for the screen, as the nav says it.
+  title = "Inquire",
   intro,
-  label = "Contact",
+  label = "Inquire",
   hash = "contact",
   defaults,
   backdrop,
@@ -108,9 +109,13 @@ export function ContactScreen({
       {/* Julian (Pixel): a scroll inside the page on a phone, 2px of it,
           held the finger and the page would not move. Its own scroll from
           `sm` only, where the screen has a fixed height. */}
+      {/* On a phone the column dissolves into the screen's own column, so
+          the address and the handles can follow the form rather than stand
+          between the ask and it (critique, 2026-10-03: the name field was
+          530px down). */}
       <div
         data-scroll
-        className="flex min-h-0 flex-col gap-8 [container-type:inline-size] sm:max-h-full sm:overflow-y-auto sm:overscroll-contain short:gap-5"
+        className="flex min-h-0 flex-col gap-8 [container-type:inline-size] max-sm:contents sm:max-h-full sm:overflow-y-auto sm:overscroll-contain short:gap-5"
       >
         <div className="flex flex-col gap-5">
           {/* The homepage's head, unless the visitor came to book a
@@ -144,7 +149,7 @@ export function ContactScreen({
             a screen of its own, which was a screen to swipe past on
             the way to nothing: the address and the handles are two
             lines and belong beside the ask. */}
-        <div data-dial="details" className="border-t border-border pt-8 short:pt-5">
+        <div data-dial="details" className="border-t border-border pt-8 max-sm:order-last short:pt-5">
           {/* Side by side where the column has the room for both, by its
               own width rather than the window's. */}
           <dl className="grid grid-cols-[repeat(auto-fit,minmax(15rem,1fr))] gap-6">

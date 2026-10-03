@@ -1,4 +1,6 @@
+import Image from "next/image";
 import Link from "next/link";
+import type { Frame } from "@/lib/work-types";
 import { CoverFloat } from "@/components/cover-float";
 import { Strip } from "@/components/strip";
 import { StripPage } from "@/components/strip-page";
@@ -92,10 +94,17 @@ const SHOWN = new Set([
   ...DISCIPLINE_TILES.flatMap((t) => [t.cover.src, ...shotsOf(t).map((s) => s.src)]),
 ]);
 const WALL_HERE = WALL.filter((t) => !SHOWN.has(t.src));
+/* A photograph behind each door on the last screen (critique, 2026-10-03:
+   the screen that asks was the only one without work on it). Frames the
+   page shows nowhere else, the wall included. */
+const unseen = (src: string) => !SHOWN.has(src) && !WALL.some((t) => t.src === src);
+// Every cover is on the page already, so a frame from inside a featured set.
+const DOOR_WORK = FEATURED.flatMap((p) => p?.images.slice(1, 4) ?? []).find((f) => unseen(f.src));
+const DOOR_SESSIONS = SAMPLES.flatMap((p) => p?.images.slice(1, 3) ?? []).find((f) => unseen(f.src));
 
-/* Six frames of a discipline for the services light table: each project's
-   cover first, then more frames of those projects until there are six. A
-   discipline with nothing in the archive (video) shows its tile's own. */
+/* A discipline's frames for the Commissions table, up to twelve: its
+   projects' covers (Julian, 2026-10-03), the films for Motion, his picked
+   sleeves for Cover Art. */
 function shotsOf(t: (typeof DISCIPLINE_TILES)[number]): Shot[] {
   const projects = projectsIn(t.category);
   const shots: Shot[] = [];
@@ -243,11 +252,12 @@ export default function Home() {
               className="grid h-full grid-rows-2 divide-y divide-border sm:grid-rows-[minmax(0,calc(50%+var(--bar-h)/2))_minmax(0,1fr)]"
             >
               <PathCard
+                photo={DOOR_WORK}
                 href="/portfolio"
                 title="See the work"
                 body="Editorial, campaigns, portraits, and artist imagery."
               />
-              <SessionsDoor />
+              <SessionsDoor photo={DOOR_SESSIONS} />
             </div>
           }
         />
@@ -264,9 +274,10 @@ export default function Home() {
 /* The second door, forward rather than back (audit, 2026-10-03): it sent
    a private client back to Sessions, a screen behind them with Sessions in
    the bar as well. Each session straight to its own booking page instead. */
-function SessionsDoor() {
+function SessionsDoor({ photo }: { photo?: Frame }) {
   return (
-    <div className="relative flex flex-col justify-center gap-6 border-l border-border bg-background/30 px-6 py-12 backdrop-blur-[var(--door-blur,1px)] sm:px-16 lying:gap-3 lying:px-10 lying:py-3">
+    <div className="relative isolate flex flex-col justify-center gap-6 overflow-hidden border-l border-border bg-background/30 px-6 py-12 backdrop-blur-[var(--door-blur,1px)] sm:px-16 lying:gap-3 lying:px-10 lying:py-3">
+      <DoorPhoto photo={photo} />
       <h3 className="title lying:[--text-title:1.75rem]">Book a session</h3>
       <ul className="max-w-sm border-t border-border">
         {SESSION_TYPES.map((s) => {
@@ -293,14 +304,34 @@ function SessionsDoor() {
   );
 }
 
+/* The door's photograph, held back so its words read over it. */
+function DoorPhoto({ photo }: { photo?: Frame }) {
+  if (!photo) return null;
+  return (
+    <>
+      <Image
+        src={photo.src}
+        alt=""
+        fill
+        sizes="(min-width: 640px) 50vw, 100vw"
+        className="door-photo -z-20 object-cover"
+        style={{ backgroundColor: photo.color }}
+      />
+      <span aria-hidden className="door-veil absolute inset-0 -z-10" />
+    </>
+  );
+}
+
 function PathCard({
   href,
   title,
   body,
+  photo,
 }: {
   href: string;
   title: string;
   body: string;
+  photo?: Frame;
 }) {
   return (
     <Link
@@ -312,8 +343,9 @@ function PathCard({
       /* Julian: the wall runs on behind the doors, seen rather than
          frosted over: a 30% tint for the type and 6px of blur, not the
          site's glass. */
-      className="group relative flex flex-col justify-center gap-6 border-l border-border bg-background/30 px-6 py-12 backdrop-blur-[var(--door-blur,1px)] transition-colors duration-300 hoverable:hover:bg-background/45 sm:px-16 sm:first:pt-[calc(3rem+var(--bar-h))] lying:gap-3 lying:px-10 lying:py-3 lying:first:pt-16"
+      className="group relative isolate flex flex-col justify-center gap-6 overflow-hidden border-l border-border bg-background/30 px-6 py-12 backdrop-blur-[var(--door-blur,1px)] transition-colors duration-300 hoverable:hover:bg-background/45 sm:px-16 sm:first:pt-[calc(3rem+var(--bar-h))] lying:gap-3 lying:px-10 lying:py-3 lying:first:pt-16"
     >
+      <DoorPhoto photo={photo} />
       <div>
         {/* Julian: no audience line over the title, on any screen. */}
         <h3 className="title lying:[--text-title:1.75rem]">{title}</h3>

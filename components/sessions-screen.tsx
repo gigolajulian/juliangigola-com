@@ -140,7 +140,7 @@ export function SessionsScreen({ sessions }: { sessions: SessionItem[] }) {
           words keep three lines and the names one. Under 1280 there is no
           room for three columns and it is left out: the words and the
           list. */}
-      <div className="sessions-photo title-rest relative aspect-[3/4] w-full overflow-hidden rounded-[4px] bg-card sm:h-[min(48rem,calc(100cqh-8rem),max(34.5vw,calc(100vw-75rem)))] sm:w-auto sm:justify-self-center sm:max-xl:hidden xl:ml-[max(0rem,min(4.25rem,16.5vw-16.5rem))] xl:h-[min(56rem,calc(100cqh-8rem),max(34.5vw,calc(100vw-75rem)))]">
+      <div className="sessions-photo title-rest relative aspect-[3/4] max-sm:aspect-[3/2] w-full overflow-hidden rounded-[4px] bg-card sm:h-[min(48rem,calc(100cqh-8rem),max(34.5vw,calc(100vw-75rem)))] sm:w-auto sm:justify-self-center sm:max-xl:hidden xl:ml-[max(0rem,min(4.25rem,16.5vw-16.5rem))] xl:h-[min(56rem,calc(100cqh-8rem),max(34.5vw,calc(100vw-75rem)))]">
         {sessions.map((s, i) =>
           s.cover ? (
             <Image
@@ -376,9 +376,10 @@ export function SessionsScreen({ sessions }: { sessions: SessionItem[] }) {
           <div className="flex flex-col gap-2.5">
             {/* The button says Book a session; said beside it as well, the
                 pair read as a stutter (critique, 2026-10-03). Julian's
-                words in its place. */}
+                words in its place; "Bookings" since Commissions became the
+                art directors' screen in the nav (critique, 2026-10-03). */}
             <span className="font-display text-[2rem] leading-none short:text-[1.625rem]">
-              Commissions open
+              Bookings open
             </span>
             <a
               href="mailto:hello@juliangigola.com"

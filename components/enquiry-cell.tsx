@@ -60,7 +60,7 @@ export function EnquiryCell({
     <div
       data-tick={tick ? "" : undefined}
       data-ring=""
-      data-label={tick ? "Inquire" : undefined}
+      data-label={tick ? "Where next" : undefined}
       data-hash="where-next"
       className={cn(
         "relative flex w-full shrink-0 flex-col justify-center gap-6 py-10 sm:h-full sm:w-[min(40rem,85vw)] sm:py-0 sm:pl-24 sm:pr-6",

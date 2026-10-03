@@ -99,7 +99,11 @@ export function ContactForm({
   const [ready, setReady] = React.useState(false);
   const [emailHint, setEmailHint] = React.useState<string>();
   const [type, setType] = React.useState<string>(
-    TYPES.some((t) => t.value === preset) ? (preset as string) : "editorial",
+    /* Nothing picked until the visitor picks (critique, 2026-10-03): a
+       private client from the nav landed on Editorial. Unpicked, the
+       second question is the general one and the server files it as
+       Other. */
+    TYPES.some((t) => t.value === preset) ? (preset as string) : "",
   );
   /* And again when the link changes under a form already on the page.
      The form lives on the homepage, so it is mounted long before a
@@ -302,7 +306,7 @@ export function ContactForm({
             onChange={(e) => choose(e.target.value)}
             className="block w-full appearance-none rounded-none border-0 border-b border-border bg-transparent py-2 pr-8 text-base uppercase transition-colors duration-200 focus:border-foreground focus:outline-none"
           >
-            {booking && !session ? <option value="">Choose one</option> : null}
+            {!chosen ? <option value="">Choose one</option> : null}
             {choices.map((t) => (
               <option key={t.value} value={t.value}>
                 {t.label}

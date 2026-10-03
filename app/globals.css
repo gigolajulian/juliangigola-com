@@ -6509,3 +6509,32 @@ h2:not(.label) {
     transition: none;
   }
 }
+
+/* Primaries solid under a finger (critique, 2026-10-03). The 72% glass
+   is drawn over by the liquid under a mouse; a phone has no liquid, and
+   the glass over the dark ground read as a grey, disabled button. */
+@media (hover: none), (pointer: coarse) {
+  .cover-cta:not(.cover-cta-quiet) {
+    background: var(--hero-ink);
+  }
+  .action:not(:disabled, [aria-disabled="true"]) {
+    background-color: var(--foreground);
+  }
+}
+
+/* The last screen's doors, each over a photograph (critique, 2026-10-03).
+   The veil is the ground, heavier toward the words, so the type keeps its
+   contrast whatever the frame; a hover lets a little more of it through. */
+.door-veil {
+  background: linear-gradient(
+    to right,
+    color-mix(in oklab, var(--background) 90%, transparent),
+    color-mix(in oklab, var(--background) 68%, transparent)
+  );
+  transition: opacity 400ms var(--ease-out-strong);
+}
+@media (hover: hover) and (pointer: fine) {
+  .group:hover > .door-veil {
+    opacity: 0.85;
+  }
+}
