@@ -1253,9 +1253,10 @@
      (the sessions' lines, the contact steps and notes carry `text-left`). */
   p {
     text-align: left;
-    /* Split long words at the line's end, so a narrow column is not
-       opened up into wide gaps between the words. */
-    hyphens: auto;
+    /* Julian (2026-10-02): never a word broken at the line's end
+       ("accu-rate"). Whole words, the lines evened out instead. */
+    hyphens: manual;
+    text-wrap: pretty;
   }
   @media (min-width: 64rem) {
     p {
@@ -5619,9 +5620,11 @@ h2:not(.label) {
 .about-marquee:focus-within .about-marquee-track {
   animation: none;
 }
-/* The homepage's ask on the light ground: the muted lines ("hello@",
-   "Next") were faint over a dark tile. Nearer the ink. */
-:root[data-theme="light"] .enquiry-backdrop + * .text-muted-foreground {
+/* The homepage's ask over the wall: the muted lines ("hello@", "Next",
+   the line under the question, the doors' lines) were faint over a
+   bright tile, under 4.5:1 on a phone in either theme (scroll-craft's
+   contrast pass, 2026-10-02). Nearer the ink. */
+.enquiry-backdrop ~ * .text-muted-foreground {
   color: color-mix(in oklab, var(--foreground) 82%, transparent);
 }
 
@@ -6199,7 +6202,7 @@ h2:not(.label) {
   position: absolute;
   inset: 0;
   pointer-events: none;
-  background: color-mix(in oklab, var(--background) 45%, transparent);
+  background: color-mix(in oklab, var(--background) 25%, transparent);
 }
 
 /* ── ultrawide ────────────────────────────────────────────────────
@@ -6290,3 +6293,66 @@ h2:not(.label) {
   }
 }
 
+/* ── the ink ──────────────────────────────────────────────────────
+ * Julian: a hover state on the session rows, inverted, animated. The
+ * open row under a mouse (or the keyboard) is inked, the fill wiped in
+ * from the edge the pointer came from and wiped out the same way, so
+ * going down the list the ink is handed down, and going up, handed up
+ * (`data-from`).
+ *
+ * The fill lies over the row and inverts what is under it (white,
+ * `difference`), so each letter turns at the very edge of the wipe,
+ * not all at once: light on dark becomes dark on light, and the other
+ * way round in the light theme. It reaches a little past the column
+ * so nothing in the row moves.
+ * ─────────────────────────────────────────────────────────────── */
+/* What the fill inverts: the page's ground under the inked row, in the
+   row's own group, or in the light theme there is nothing opaque below
+   it to invert and the fill reads white. Wiped with the fill, so the
+   row is the page itself when it is not inked. */
+.session-list > li {
+  isolation: isolate;
+}
+.session-list > li::before {
+  content: "";
+  position: absolute;
+  inset: 0 -1.25rem;
+  z-index: -1;
+  border-radius: 4px;
+  background: var(--background);
+  pointer-events: none;
+  visibility: hidden;
+}
+.session-dev {
+  position: absolute;
+  inset: 0 -1.25rem;
+  z-index: 1;
+  border-radius: 4px;
+  background: #fff;
+  mix-blend-mode: difference;
+  pointer-events: none;
+  visibility: hidden;
+}
+[data-dev] > .session-dev,
+[data-gone] > .session-dev,
+.session-list > [data-dev]::before,
+.session-list > [data-gone]::before {
+  visibility: visible;
+  animation: 340ms var(--ease-out-strong) both;
+}
+[data-from="top"] > [data-dev] > .session-dev,
+[data-from="top"] > [data-dev]::before { animation-name: ink-in-top; }
+[data-from="bottom"] > [data-dev] > .session-dev,
+[data-from="bottom"] > [data-dev]::before { animation-name: ink-in-bottom; }
+[data-from="top"] > [data-gone] > .session-dev,
+[data-from="top"] > [data-gone]::before { animation-name: ink-out-bottom; animation-duration: 260ms; }
+[data-from="bottom"] > [data-gone] > .session-dev,
+[data-from="bottom"] > [data-gone]::before { animation-name: ink-out-top; animation-duration: 260ms; }
+@keyframes ink-in-top { from { clip-path: inset(0 0 100% 0); } to { clip-path: inset(0); } }
+@keyframes ink-in-bottom { from { clip-path: inset(100% 0 0 0); } to { clip-path: inset(0); } }
+@keyframes ink-out-bottom { from { clip-path: inset(0); } to { clip-path: inset(100% 0 0 0); } }
+@keyframes ink-out-top { from { clip-path: inset(0); } to { clip-path: inset(0 0 100% 0); } }
+@media (prefers-reduced-motion: reduce) {
+  [data-dev] > .session-dev, [data-dev]::before { animation: none; }
+  [data-gone] > .session-dev, .session-list > [data-gone]::before { visibility: hidden; }
+}
