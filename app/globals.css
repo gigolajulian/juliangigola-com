@@ -6178,7 +6178,7 @@ h2:not(.label) {
 /* Behind a booking page's questions the same wall carries paragraphs,
    not a line and two doors, so the ground comes further up over it. */
 .questions-wall::after {
-  background: color-mix(in oklab, var(--background) 58%, transparent);
+  background: color-mix(in oklab, var(--background) 40%, transparent);
 }
 /* The rack focus (`local-questions.tsx`): under a mouse the wall is held
    a little out of focus while the words are read, and pulled sharp, with
@@ -6307,64 +6307,28 @@ h2:not(.label) {
 
 /* ── the ink ──────────────────────────────────────────────────────
  * Julian: a hover state on the session rows, inverted, animated. The
- * open row under a mouse (or the keyboard) is inked, the fill wiped in
- * from the edge the pointer came from and wiped out the same way, so
- * going down the list the ink is handed down, and going up, handed up
- * (`data-from`).
+ * open row under a mouse (or the keyboard) is inked, and since
+ * 2026-10-03 the ink is liquid: it runs down or up the list to the
+ * next row and drains to a line when the pointer leaves.
  *
  * The fill lies over the row and inverts what is under it (white,
- * `difference`), so each letter turns at the very edge of the wipe,
+ * `difference`), so each letter turns at the very edge of the ink,
  * not all at once: light on dark becomes dark on light, and the other
  * way round in the light theme. It reaches a little past the column
  * so nothing in the row moves.
  * ─────────────────────────────────────────────────────────────── */
-/* What the fill inverts: the page's ground under the inked row, in the
-   row's own group, or in the light theme there is nothing opaque below
-   it to invert and the fill reads white. Wiped with the fill, so the
-   row is the page itself when it is not inked. */
-.session-list > li {
+/* The fill is the liquid's (`sessions-screen.tsx`), a drop under the
+   open row that runs from row to row. It inverts against a second drop
+   of the page's ground under the words, in the column's own group: in
+   the light theme there is nothing opaque under it otherwise and it
+   reads white. Both reach past the column, so nothing in the row moves. */
+.session-col {
   isolation: isolate;
 }
-.session-list > li::before {
-  content: "";
-  position: absolute;
-  inset: 0 -1.25rem;
+.session-ground {
   z-index: -1;
-  border-radius: 4px;
-  background: var(--background);
-  pointer-events: none;
-  visibility: hidden;
 }
-.session-dev {
-  position: absolute;
-  inset: 0 -1.25rem;
+.session-ink {
   z-index: 1;
-  border-radius: 4px;
-  background: #fff;
   mix-blend-mode: difference;
-  pointer-events: none;
-  visibility: hidden;
-}
-[data-dev] > .session-dev,
-[data-gone] > .session-dev,
-.session-list > [data-dev]::before,
-.session-list > [data-gone]::before {
-  visibility: visible;
-  animation: 340ms var(--ease-out-strong) both;
-}
-[data-from="top"] > [data-dev] > .session-dev,
-[data-from="top"] > [data-dev]::before { animation-name: ink-in-top; }
-[data-from="bottom"] > [data-dev] > .session-dev,
-[data-from="bottom"] > [data-dev]::before { animation-name: ink-in-bottom; }
-[data-from="top"] > [data-gone] > .session-dev,
-[data-from="top"] > [data-gone]::before { animation-name: ink-out-bottom; animation-duration: 260ms; }
-[data-from="bottom"] > [data-gone] > .session-dev,
-[data-from="bottom"] > [data-gone]::before { animation-name: ink-out-top; animation-duration: 260ms; }
-@keyframes ink-in-top { from { clip-path: inset(0 0 100% 0); } to { clip-path: inset(0); } }
-@keyframes ink-in-bottom { from { clip-path: inset(100% 0 0 0); } to { clip-path: inset(0); } }
-@keyframes ink-out-bottom { from { clip-path: inset(0); } to { clip-path: inset(100% 0 0 0); } }
-@keyframes ink-out-top { from { clip-path: inset(0); } to { clip-path: inset(0 0 100% 0); } }
-@media (prefers-reduced-motion: reduce) {
-  [data-dev] > .session-dev, [data-dev]::before { animation: none; }
-  [data-gone] > .session-dev, .session-list > [data-gone]::before { visibility: hidden; }
 }
