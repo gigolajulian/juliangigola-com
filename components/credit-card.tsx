@@ -67,6 +67,7 @@ const IN = "cubic-bezier(0.23, 1, 0.32, 1)";
 const FALL = "cubic-bezier(0.55, 0, 0.75, 0.2)";
 
 type Box = { left: number; top: number; width: number; height: number };
+const inset = (b: Box, n: number): Box => ({ left: b.left + n, top: b.top + n, width: b.width - 2 * n, height: b.height - 2 * n });
 
 export function CreditCard({
   handle,
@@ -243,6 +244,7 @@ function Pour({
 }) {
   const card = React.useRef<HTMLDivElement>(null);
   const drop = React.useRef<HTMLDivElement>(null);
+  const ink = React.useRef<HTMLDivElement>(null);
   const inner = React.useRef<HTMLDivElement>(null);
   const copy = React.useRef<HTMLSpanElement>(null);
   const [height, setHeight] = React.useState(0);
@@ -256,10 +258,10 @@ function Pour({
     width: at.width + 12,
     height: at.height - 6,
   };
-  /* The card: above the word where there is room, under it where not, and
-     kept off the window's edges. */
+  /* The card: under the credit (Julian, 2026-10-02), over it only where
+     the window has no room below, and kept off the window's edges. */
   const h = height || 1;
-  const above = at.top - GAP - h > 16;
+  const above = dropBox.top + dropBox.height + GAP + h > window.innerHeight - 16;
   const cardBox: Box = {
     left: Math.max(16, Math.min(dropBox.left, window.innerWidth - W - 16)),
     top: above ? dropBox.top - GAP - h : dropBox.top + dropBox.height + GAP,
@@ -307,14 +309,15 @@ function Pour({
     window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
   React.useEffect(() => {
-    if (!height || !card.current || !drop.current || !inner.current || !copy.current) return;
-    const c = card.current, d = drop.current, i = inner.current, w = copy.current;
+    if (!height || !card.current || !drop.current || !ink.current || !inner.current || !copy.current) return;
+    const c = card.current, i = inner.current, w = copy.current;
+    const both = (k: Keyframe[], o: KeyframeAnimationOptions) => [drop.current!, ink.current!].map((e) => e.animate(k, o));
     const from = local(dropBox), to = local(cardBox);
     const t = (ms: number) => (reduce ? 0 : ms);
     let anims: Animation[];
     if (open) {
       anims = [
-        d.animate([{ transform: "scale(0.3)" }, { transform: "scale(1)" }], {
+        ...both([{ transform: "scale(0.3)" }, { transform: "scale(1)" }], {
           duration: t(260), easing: IN, fill: "both",
         }),
         w.animate([{ opacity: 0 }, { opacity: 1 }], { duration: t(160), delay: t(90), easing: IN, fill: "both" }),
@@ -328,7 +331,7 @@ function Pour({
         i.animate([{ opacity: 1 }, { opacity: 0 }], { duration: t(110), easing: "ease-out", fill: "both" }),
         c.animate([to, from], { duration: t(320), delay: t(60), easing: FALL, fill: "both" }),
         w.animate([{ opacity: 1 }, { opacity: 0 }], { duration: t(140), delay: t(330), easing: "ease-out", fill: "both" }),
-        d.animate([{ transform: "scale(1)" }, { transform: "scale(0)" }], {
+        ...both([{ transform: "scale(1)" }, { transform: "scale(0)" }], {
           duration: t(220), delay: t(340), easing: FALL, fill: "both",
         }),
       ];
@@ -354,11 +357,15 @@ function Pour({
            filter region is measured from, so it has to be the whole box. */
         className="h-full w-full"
       >
+        {/* The drop's liquid, 3px inside the rectangle drawn over it: the
+            goo's edge sits a little outside a shape this thin, and showed
+            as a wavy rim round the word (Julian, live, 2026-10-02). It is
+            there for the neck to the card. */}
         <Liquid.Item observe>
           <div
             ref={drop}
-            className="absolute rounded-[3px] bg-foreground"
-            style={{ ...local(dropBox), transform: "scale(0)" }}
+            className="absolute"
+            style={{ ...local(inset(dropBox, 3)), transform: "scale(0)" }}
           />
         </Liquid.Item>
         <Liquid.Item observe radius={16}>
@@ -376,6 +383,12 @@ function Pour({
           </div>
         </Liquid.Item>
       </Liquid>
+      {/* The drop itself, crisp, over its liquid. */}
+      <div
+        ref={ink}
+        className="absolute rounded-[3px] bg-foreground"
+        style={{ ...local(dropBox), transform: "scale(0)" }}
+      />
       {/* Over the liquid, where the word is: the word again, in the ground. */}
       <span ref={copy} className="absolute whitespace-nowrap text-background" style={{ opacity: 0 }} />
     </div>
