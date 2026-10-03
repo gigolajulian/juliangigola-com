@@ -106,7 +106,8 @@ export async function submitEnquiry(
     type: read("type"),
     name: read("name"),
     email: read("email"),
-    detail: read("detail"),
+    // A booking's session chip, ahead of its date and place.
+    detail: [read("session"), read("detail")].filter(Boolean).join(" · "),
     message: read("message"),
   };
 

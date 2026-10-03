@@ -424,7 +424,7 @@ export function Strip({
      place in it (the back button's seat, a #discipline typed in), and
      always on the server and the cold load, so the markup and the
      crawlers have every project. Not the hash at render: the address
-     still holds the page being left (`/#inquire`).
+     still holds the page being left (`/#where-next`).
      A deck of screens (the homepage) mounts the one it lands on: coming
      back from the portfolio, the second screen's eight covers and logos
      were built inside the swap, while the screen held for 300ms

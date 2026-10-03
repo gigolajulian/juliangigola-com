@@ -61,7 +61,7 @@ export function EnquiryCell({
       data-tick={tick ? "" : undefined}
       data-ring=""
       data-label={tick ? "Inquire" : undefined}
-      data-hash="inquire"
+      data-hash="where-next"
       className={cn(
         "relative flex w-full shrink-0 flex-col justify-center gap-6 py-10 sm:h-full sm:w-[min(40rem,85vw)] sm:py-0 sm:pl-24 sm:pr-6",
         /* With an aside the cell is the whole window, split: the ask
@@ -96,7 +96,7 @@ export function EnquiryCell({
               size: 2.25rem, 3.75rem from sm) and its 40px in. */}
           <h2 className="title max-w-[22ch] leading-[0.95] [--text-title:2.25rem] sm:[--text-title:min(3.75rem,6vw)] lying:[--text-title:2.25rem]">{title}</h2>
           {body ? (
-            <p className="mt-4 max-w-prose text-sm leading-relaxed text-muted-foreground [zoom:1.02] lying:mt-2">
+            <p className="mt-4 max-w-prose text-sm normal-case leading-relaxed text-muted-foreground [zoom:1.02] lying:mt-2">
               {body}
             </p>
           ) : null}

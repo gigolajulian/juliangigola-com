@@ -952,8 +952,10 @@ export const FEATURED: Project[] = FEATURED_SLUGS.map((s) =>
  * the projects. Small copies (640px, a 300px tile on a retina screen)
  * because the intro's are fetched alongside the page's own pictures.
  */
-export type WallTile = { image: string; srcSet: string; title: string; href: string };
+/** `src` is the frame itself, so a page can leave out what it already shows. */
+export type WallTile = { src: string; image: string; srcSet: string; title: string; href: string };
 const wallTile = (src: string, title: string, href: string): WallTile => ({
+  src,
   image: imageLoader({ src, width: 640, quality: 70 }),
   /* And a 320, which a phone's 80px tile takes at three times. */
   srcSet: [320, 640]
@@ -1612,7 +1614,7 @@ const tileDiscipline = (slug: string): Discipline | undefined => {
     frame,
   };
 };
-export const DISCIPLINE_TILES: (BandTile & { medium: string })[] = TILE_SLUGS.map(
+export const DISCIPLINE_TILES: (BandTile & { medium: string; count: number; category: string })[] = TILE_SLUGS.map(
   tileDiscipline,
 )
   .filter((d): d is Discipline => Boolean(d))
@@ -1644,6 +1646,10 @@ export const DISCIPLINE_TILES: (BandTile & { medium: string })[] = TILE_SLUGS.ma
       ...(client ? { client } : {}),
       discipline: mediumOf(d.slug),
       medium: mediumOf(d.slug),
+      // How many projects the discipline holds (the homepage's index).
+      count: d.count,
+      // The discipline itself, where `slug` is the project on show.
+      category: d.slug,
       ...(d.slug === "video"
         ? {
             reel: `https://player.vimeo.com/video/${REEL.videoId}?background=1&autoplay=1&loop=1&muted=1&dnt=1#t=3s`,

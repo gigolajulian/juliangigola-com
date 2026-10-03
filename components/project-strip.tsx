@@ -223,7 +223,7 @@ export function ProjectStrip({
             !project.intent.includes("@") &&
             project.intent.trim().toLowerCase() !==
               project.name.trim().toLowerCase() ? (
-              <p className="title-rest max-w-prose text-sm leading-relaxed text-muted-foreground">
+              <p className="title-rest max-w-prose text-sm normal-case leading-relaxed text-muted-foreground">
                 {project.intent}
               </p>
             ) : null}

@@ -1,5 +1,6 @@
 "use client";
 
+import type * as React from "react";
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
@@ -104,7 +105,7 @@ export function SessionsScreen({ sessions }: { sessions: SessionItem[] }) {
       data-tick
       data-label="Sessions"
       data-hash="sessions"
-      className="screen-measure relative grid w-full shrink-0 grid-cols-1 items-center gap-10 px-6 py-12 sm:h-full sm:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] sm:gap-x-[clamp(2rem,3.5vw,4rem)] sm:px-10 sm:py-8 short:pb-4 short:pt-20 sm:[container-type:size] xl:grid-cols-[auto_auto_minmax(0,1fr)]"
+      className="screen-measure relative grid w-full shrink-0 grid-cols-1 items-center gap-10 sessions-screen px-6 py-12 sm:h-full sm:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] sm:gap-x-[clamp(2rem,3.5vw,4rem)] sm:px-10 sm:pb-8 sm:pt-20 short:pb-4 sm:[container-type:size] xl:grid-cols-[auto_auto_minmax(0,1fr)]"
     >
       {/* Julian (2026-09-29, red boxes): with three columns the photograph
           sits further right (its margin, from about 1600px wide) and larger
@@ -113,7 +114,9 @@ export function SessionsScreen({ sessions }: { sessions: SessionItem[] }) {
           run into the rates. On a
           short laptop (1280x800) the content starts below the header
           rather than under it, and the names are set a touch smaller so the
-          open session fits. */}
+          open session fits. Critique (2026-10-03): below the header at
+          every height, and centred only while it fits — at 1440x840 the
+          open list ran up under the bar. */}
       <div className="flex w-fit max-w-full flex-col gap-5 self-center">
         {/* Julian (2026-09-29): says what the count is, not the title again. */}
         <span className="label text-muted-foreground">
@@ -126,7 +129,7 @@ export function SessionsScreen({ sessions }: { sessions: SessionItem[] }) {
         <RisingTitle text="Sessions" className="sm:max-lg:text-4xl" />
         {/* Julian: three lines, whatever the size (44ch is the least), where
             the three columns are. */}
-        <p className="title-rest max-w-full text-left xl:w-[46ch] text-sm leading-relaxed text-muted-foreground">
+        <p className="title-rest max-w-full text-left xl:w-[46ch] text-sm normal-case leading-relaxed text-muted-foreground">
           Studio and location sessions across the San Francisco Bay Area.
           Everything here is booked directly, with no packages to decode.
         </p>
@@ -221,6 +224,9 @@ export function SessionsScreen({ sessions }: { sessions: SessionItem[] }) {
                  the next one closing. */
               <li
                 key={s.slug}
+                // Julian (2026-10-03): the rows appear in order as Sessions
+                // arrives, as About's steps do (`.session-step`, globals.css).
+                style={{ "--i": i } as React.CSSProperties}
                 onPointerMove={() => go(i)}
                 /* Julian (2026-10-02): anywhere in the row goes to the
                    booking page, bar its own links: a click on the row is a
@@ -230,7 +236,7 @@ export function SessionsScreen({ sessions }: { sessions: SessionItem[] }) {
                   if (s.page && !(e.target as HTMLElement).closest("a, button"))
                     e.currentTarget.querySelector("a")?.click();
                 }}
-                className={`relative flex flex-col border-b border-border py-1.5 ${s.page ? "cursor-pointer" : ""}`}
+                className={`session-step relative flex flex-col border-b border-border py-1.5 ${s.page ? "cursor-pointer" : ""}`}
               >
                 {/* Julian (2026-10-02): a session with a booking page goes
                     there on a click; pointing still opens it here. */}
@@ -331,15 +337,15 @@ export function SessionsScreen({ sessions }: { sessions: SessionItem[] }) {
             (`.session-col`, `globals.css`). */}
         {/* Mounted at rest, a line of no width, so the first time in
             starts from the pointer like every other. */}
-        {(["session-ground", "session-ink"] as const).map((k) => (
+        {(["session-ground"] as const).map((k) => (
               <div key={k} aria-hidden className={`${k} pointer-events-none absolute inset-y-0 -inset-x-5`}>
                 <Liquid
                   blur={5}
                   contrast={18}
-                  fill={k === "session-ink" ? "#fff" : "var(--background)"}
+                  fill="var(--session-hover)"
                   className="h-full w-full"
                 >
-                  <Liquid.Item effect="move" move={{ springiness: 0.85, wobble: 0, stretch: 0.08, trail: 0 }}>
+                  <Liquid.Item effect="move" move={{ springiness: 0.92, wobble: 0, stretch: 0.04, trail: 0 }}>
                     <div
                       className="absolute left-0 top-0 rounded-[4px]"
                       style={{
@@ -368,8 +374,11 @@ export function SessionsScreen({ sessions }: { sessions: SessionItem[] }) {
             the line, or the button wraps under it and under the rail. */}
         <div className="flex flex-wrap items-center justify-between gap-6 pt-6 short:gap-4 short:pt-5">
           <div className="flex flex-col gap-2.5">
+            {/* The button says Book a session; said beside it as well, the
+                pair read as a stutter (critique, 2026-10-03). Julian's
+                words in its place. */}
             <span className="font-display text-[2rem] leading-none short:text-[1.625rem]">
-              Book a session
+              Commissions open
             </span>
             <a
               href="mailto:hello@juliangigola.com"
@@ -380,7 +389,7 @@ export function SessionsScreen({ sessions }: { sessions: SessionItem[] }) {
           </div>
           <Link
             href="/?type=session#contact"
-            className="label action px-7 py-4 press active:scale-[0.97] short:px-5 short:py-2.5"
+            className="sessions-book label action px-7 py-4 press active:scale-[0.97] short:px-5 short:py-2.5"
           >
             {/* The private client's verb, not the art director's (Julian,
                 2026-10-01). */}

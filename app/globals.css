@@ -648,10 +648,14 @@
   color: var(--hero-on-ink);
   border: 0;
 }
+/* Julian (2026-10-03): the second door read as disabled, a hairline on
+   the dark. Private clients are half the audience, so it is a button in
+   its own right: a lowkey grey fill, the Sessions card's, and an edge
+   that shows. Still second to the solid one beside it. */
 .cover-cta-quiet {
-  background: transparent;
+  background: color-mix(in oklab, var(--hero-ink) 9%, var(--background));
   color: var(--hero-ink);
-  border: 1px solid var(--hero-line);
+  border: 1px solid color-mix(in oklab, var(--hero-ink) 35%, transparent);
 }
 /* Julian: a hover on the homepage's buttons. The pair invert, as the
    site's other buttons do (`action`, `action-quiet`): the solid one
@@ -1250,18 +1254,16 @@
      open up between the words, and measured on every page, under 1024px
      wide nearly every paragraph had 19 to 42. So justified from there up,
      set left below it, and set left too where a desktop column is narrow
-     (the sessions' lines, the contact steps and notes carry `text-left`). */
+     (the sessions' lines, the contact steps and notes carry `text-left`).
+     Julian (2026-10-03, audit): set left everywhere. The prose is in
+     sentence case now and the measure still opens gaps where a column
+     narrows (2.5 spaces wide on the last screen's doors). */
   p {
     text-align: left;
     /* Julian (2026-10-02): never a word broken at the line's end
        ("accu-rate"). Whole words, the lines evened out instead. */
     hyphens: manual;
     text-wrap: pretty;
-  }
-  @media (min-width: 64rem) {
-    p {
-      text-align: justify;
-    }
   }
 
   html {
@@ -1718,7 +1720,7 @@ nav[aria-label="Categories"] ul[data-more] {
 
      The ask is excepted below; it sets its own width. */
   .strip-grid
-    > :is(div, section, article):not([data-hash="inquire"]):not(
+    > :is(div, section, article):not([data-hash="where-next"]):not(
       [data-tick]
     ):not([data-pictures]) {
     width: max-content !important;
@@ -1761,7 +1763,7 @@ nav[aria-label="Categories"] ul[data-more] {
   }
   /* The ask is the exception: a sentence, two buttons and the way on to the
      studio is not a label and does not fit in a slot. */
-  .strip-grid > [data-hash="inquire"] {
+  .strip-grid > [data-hash="where-next"] {
     grid-row: 1 / -1;
     /* Julian: a third of the window. The ask was one column of the rack
        wide — 239px on a 2000px screen, a strip of type in the corner.
@@ -2015,7 +2017,7 @@ a.strip-cell {
 }
 .strip-grid[data-rack] > a:not([style*="--ar"]),
 .strip-grid[data-rack]
-  > :where(div, section, article):not([data-hash="inquire"]) {
+  > :where(div, section, article):not([data-hash="where-next"]) {
   width: var(--rack-w) !important;
 }
 /* On a phone the page is not locked and the strip is already a column, so
@@ -5305,6 +5307,15 @@ optgroup {
   }
 }
 
+/* Sessions' button, alone with no liquid under it: its glass at 72% ink
+   over the dark screen read grey, as if it could not be pressed
+   (critique, 2026-10-03). Solid ink at rest, like the liquid buttons;
+   its hover is its own. */
+:is(.sessions-book, .services-book):not(:hover, :focus-visible, :active) {
+  background-color: var(--foreground);
+  border-color: var(--foreground);
+}
+
 /* Off. A button that cannot be pressed yet says so by going quiet: the
    fill drops back, the label goes with it, and nothing under the pointer
    answers. It keeps its size, so the row does not move when the form
@@ -5796,6 +5807,9 @@ h2:not(.label) {
   }
   [data-hash="about"] > [data-scroll] > div {
     align-self: center;
+    /* Never taller than the screen, so the words scroll inside themselves
+       rather than the column centring up under the bar. */
+    max-height: 100%;
   }
   [data-hash="about"] > [data-scroll] > figure {
     height: min(56rem, calc(100cqh - 8.5rem));
@@ -5808,6 +5822,122 @@ h2:not(.label) {
 @media (min-width: 40rem) and (pointer: coarse) {
   [data-hash="about"] {
     --screen-title-y: max(4.5rem, 50cqh - 18.875rem);
+  }
+}
+/* Sessions centred while it fits, from the top once it does not (the
+   open list ran up under the bar at 1440x840). In CSS, not a utility:
+   `items-[safe_center]` never reached the page. */
+.sessions-screen,
+.services-screen {
+  align-items: safe center;
+}
+/* ── the light table (`services-screen.tsx`) ──
+   The discipline's frames whole, in justified rows (laid out in JS so
+   they fit the table uncropped).
+
+   Julian (2026-10-03, /impeccable animate): the one authored moment is
+   the deal. Arriving on Commissions, or pointing at another discipline,
+   the frames rack into focus one after another the way a lens pulls
+   focus, a little large and soft, then sharp. Visible by default: the
+   deal is a keyframe on mount (fill backwards, so it lets go once done),
+   and the arrival a transition from a hidden state that only applies
+   while the strip says it is somewhere else, as the rows do. Pointing at
+   a frame keeps it and sets the rest back, and its project's name comes
+   up in its corner. Reduced motion: an opacity fade, nothing moves. */
+@keyframes light-rack {
+  from {
+    opacity: 0;
+    filter: blur(10px);
+    scale: 1.035;
+  }
+  45% {
+    opacity: 1;
+  }
+}
+.light-cell {
+  transition:
+    opacity 240ms var(--ease-out-strong),
+    filter 620ms var(--ease-out-strong),
+    scale 620ms var(--ease-out-strong);
+}
+.light-name {
+  position: absolute;
+  bottom: 0.5rem;
+  left: 0.625rem;
+  right: 0.625rem;
+  color: #fff;
+  text-shadow: 0 1px 8px rgb(0 0 0 / 0.65);
+  opacity: 0;
+  translate: 0 0.25rem;
+  transition:
+    opacity 160ms var(--ease-out-strong),
+    translate 220ms var(--ease-out-strong);
+}
+.light-cell:focus-visible .light-name {
+  opacity: 1;
+  translate: 0 0;
+}
+@media (hover: hover) and (pointer: fine) {
+  .light-table:has(.light-cell:hover) .light-cell:not(:hover) {
+    opacity: 0.45;
+  }
+  .light-cell:hover .light-name {
+    opacity: 1;
+    translate: 0 0;
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .light-cell {
+    animation: light-rack 640ms var(--ease-out-strong) backwards;
+    animation-delay: calc(80ms + var(--i, 0) * 38ms);
+    transition-delay: calc(120ms + var(--i, 0) * 38ms);
+  }
+  .light-table:has(.light-cell:hover) .light-cell {
+    transition-delay: 0s;
+  }
+  .strip-scroll[data-at]:not([data-at="Commissions"]) .light-cell {
+    opacity: 0;
+    filter: blur(10px);
+    scale: 1.035;
+    transition-duration: 0s;
+    transition-delay: 0s;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .light-cell {
+    animation: jg-fade-in 240ms ease-out backwards;
+  }
+}
+/* How a commission runs, one step after another as About arrives, and
+   the sessions as Sessions does. Hidden
+   only while the strip says it is somewhere else, so a page without the
+   strip, or before it has said, shows them as they are. Gone at once on
+   the way out, so the next arrival plays it again. */
+@media (prefers-reduced-motion: no-preference) {
+  :is(.about-step, .session-step, .services-step) {
+    transition:
+      opacity 560ms var(--ease-out-strong),
+      translate 640ms var(--ease-out-strong);
+    transition-delay: calc(180ms + var(--i, 0) * 110ms);
+  }
+  /* In from the right, the way the strip travels (`jg-fade-up`). It rose
+     from below once, and the last step rising past the list's foot gave
+     the list a scrollbar for as long as it moved (Julian saw it). The list
+     clips sideways, so this one cannot. */
+  .strip-scroll[data-at]:not([data-at="About"]) .about-step,
+  .strip-scroll[data-at]:not([data-at="Sessions"]) .session-step,
+  .strip-scroll[data-at]:not([data-at="Commissions"]) .services-step {
+    opacity: 0;
+    translate: 2rem 0;
+    transition-duration: 0s;
+    transition-delay: 0s;
+  }
+}
+/* Upright, the screen is tall and its columns narrow: the words need the
+   height the centring gave away (an iPad, 165px above the title). */
+@media (min-width: 40rem) and (orientation: portrait) {
+  [data-hash="about"] {
+    --screen-title-y: 6rem;
   }
 }
 
@@ -6251,6 +6381,22 @@ h2:not(.label) {
 .contact-pair {
   display: contents;
 }
+/* Any short window, not only a wide one: at 1280x720 the send button sat
+   under the end of its own box (critique, 2026-10-03). */
+@media (min-width: 40rem) and (max-height: 56rem) {
+  .contact-pair {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.5rem;
+  }
+}
+/* A phone's bar is one button tall: a jump to a screen stopped 6rem short,
+   and the end of the screen before showed under it. */
+@media (max-width: 39.99rem) {
+  html {
+    scroll-padding-top: 4rem;
+  }
+}
 /* A wide window that is short: a 32:9 screen, or a wide browser window
    not full height. The screens were laid out for the height a 21:9 or
    16:9 window has, and ran out of it. */
@@ -6328,9 +6474,12 @@ h2:not(.label) {
 .session-ground {
   z-index: -1;
 }
-.session-ink {
-  z-index: 1;
-  mix-blend-mode: difference;
+/* The hover. White ink over the row turned it inside out, a bright card
+   on the dark screen; Julian wanted it lower key (2026-10-03). A grey a
+   step off the ground under the words instead, which keep their own
+   colours. Opaque, as the liquid needs. */
+.session-col {
+  --session-hover: color-mix(in oklab, var(--foreground) 6%, var(--background));
 }
 
 /* ── the contact sheet (`contact-sheet.tsx`) ───────────────────

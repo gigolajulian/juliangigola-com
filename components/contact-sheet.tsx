@@ -69,7 +69,7 @@ export function ContactSheet({
           {name}
         </span>
         <RisingTitle text="The work" className="whitespace-nowrap" />
-        <p className="title-rest max-w-[34ch] text-left text-sm leading-relaxed text-muted-foreground">
+        <p className="title-rest max-w-[34ch] text-left text-sm normal-case leading-relaxed text-muted-foreground">
           {total > frames.length
             ? `${frames.length} of ${total} here. Open any frame to see it whole.`
             : "Open any frame to see it whole."}
