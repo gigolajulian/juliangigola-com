@@ -6175,6 +6175,47 @@ h2:not(.label) {
   pointer-events: none;
   background: color-mix(in oklab, var(--background) 25%, transparent);
 }
+/* Behind a booking page's questions the same wall carries paragraphs,
+   not a line and two doors, so the ground comes further up over it. */
+.questions-wall::after {
+  background: color-mix(in oklab, var(--background) 58%, transparent);
+}
+/* The rack focus (`local-questions.tsx`): under a mouse the wall is held
+   a little out of focus while the words are read, and pulled sharp, with
+   the ground lifted off it, when the pointer goes to the photographs; the
+   words go soft the other way. A pull is a lens's, quick to start and slow
+   to settle. Nothing moves; only focus and light. */
+@media (hover: hover) and (pointer: fine) {
+  .questions-wall,
+  .questions-words {
+    transition:
+      filter 700ms var(--ease-out-strong),
+      opacity 700ms var(--ease-out-strong);
+  }
+  .questions-wall {
+    filter: blur(5px);
+  }
+  .questions-wall::after {
+    transition: background-color 700ms var(--ease-out-strong);
+  }
+  [data-look] > .questions-wall {
+    filter: none;
+  }
+  [data-look] > .questions-wall::after {
+    background: color-mix(in oklab, var(--background) 18%, transparent);
+  }
+  [data-look] > .questions-words {
+    opacity: 0.4;
+    filter: blur(2px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .questions-wall,
+  .questions-wall::after,
+  .questions-words {
+    transition: none;
+  }
+}
 
 /* ── ultrawide ────────────────────────────────────────────────────
    A 21:9 or 32:9 desktop (twice as wide as tall, and wider than a

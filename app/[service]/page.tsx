@@ -8,7 +8,8 @@ import { LocalQuestions } from "@/components/local-questions";
 import { CoverFloat } from "@/components/cover-float";
 import { Testimonials } from "@/components/testimonials";
 import { BOOKING_PAGES, bookingHref, bookingPage } from "@/lib/booking";
-import { getProject } from "@/lib/work";
+import { getProject, wallOf } from "@/lib/work";
+import { InquireWall } from "@/components/inquire-wall";
 import { serviceGraph } from "@/lib/seo";
 
 /* ── a booking page ───────────────────────────────────────────────
@@ -105,6 +106,7 @@ export default async function BookingPage(props: PageProps<"/[service]">) {
         <Testimonials cells />
         <LocalQuestions
           faqs={page.faqs}
+          backdrop={<InquireWall items={wallOf(page.gallery.href.split("/").pop() ?? "")} />}
           details={{
             facts,
             blocks: [
