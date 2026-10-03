@@ -58,6 +58,9 @@ export type BookingPage = {
   /** The photographs: the first is the cover, the rest the work screen. */
   tiles: Tile[];
   gallery: { href: string; label: string };
+  /** The frames its work screen shows, where the gallery is too large to
+      show whole: chosen, not sampled (Julian, 2026-10-03). */
+  picks?: string[];
   /** Presets for the form on the Book screen. */
   book: { type: string; session?: string; title: string };
 };
@@ -346,6 +349,20 @@ export const BOOKING_PAGES: BookingPage[] = [
     ],
     tiles: coversOf("studio-digitals"),
     gallery: { href: "/portfolio/studio-digitals", label: "The digitals gallery" },
+    // Only the frames that read as digitals: plain ground, standing or
+    // close, no styling (Julian, 2026-10-03). Taneka's and Zoe's sets are
+    // posed floor work and stay in the gallery.
+    picks: [
+      "/work/abril/04.jpg",
+      "/work/abril/01.jpg",
+      "/work/abril/03.jpg",
+      "/work/abril/02.jpg",
+      "/work/giselle-studio-digitals/14.jpg",
+      "/work/giselle-studio-digitals/15.jpg",
+      "/work/giselle-studio-digitals/01.jpg",
+      "/work/mya/06.jpg",
+      "/work/mya/05.jpg",
+    ],
     book: { type: "session", session: digitals.name, title: "Book digitals" },
   },
   {
@@ -437,6 +454,22 @@ export const BOOKING_PAGES: BookingPage[] = [
     ],
     tiles: framesOf("weddings"),
     gallery: { href: "/portfolio/weddings", label: "The weddings gallery" },
+    picks: [
+      "/work/weddings/02.jpg",
+      "/work/weddings/03.jpg",
+      "/work/weddings/05.jpg",
+      "/work/weddings/10.jpg",
+      "/work/weddings/11.jpg",
+      "/work/weddings/13.jpg",
+      "/work/weddings/17.jpg",
+      "/work/weddings/18.jpg",
+      "/work/weddings/29.jpg",
+      "/work/weddings/30.jpg",
+      "/work/weddings/31.jpg",
+      "/work/weddings/32.jpg",
+      "/work/weddings/38.jpg",
+      "/work/weddings/40.jpg",
+    ],
     book: { type: "session", session: weddings.name, title: "Book your wedding" },
   },
   {

@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { Liquid } from "@/components/liquid";
 import { RisingTitle } from "@/components/strip-page";
 import type { Frame } from "@/lib/work-types";
 
@@ -48,23 +49,54 @@ export function SessionsScreen({ sessions }: { sessions: SessionItem[] }) {
      inked only then (`.session-dev`, `globals.css`). A finger opens a row
      by going to its page, so it never sees it. */
   const [hot, setHot] = useState(false);
-  /* The edge the ink comes in from, and the row it is leaving: going
-     down the list it is handed down, going up, handed up. */
-  const [from, setFrom] = useState<"top" | "bottom">("top");
-  const [gone, setGone] = useState<number | null>(null);
+  /* The edge of the row the pointer came in by, which the ink fills
+     from, and the one it left by, which it drains to (Julian,
+     2026-10-03): over the top it pours down, in from the side it runs
+     across. Between rows it only slides. */
+  const col = useRef<HTMLDivElement>(null);
+  type Edge = "top" | "bottom" | "left" | "right";
+  const [edge, setEdge] = useState<Edge>("top");
+  const [pinch, setPinch] = useState(false);
+  const flick = useRef(0);
+  const nearest = (e: React.PointerEvent, li: Element | null): Edge => {
+    if (!li) return edge;
+    const r = li.getBoundingClientRect();
+    const d = {
+      top: e.clientY - r.top,
+      bottom: r.bottom - e.clientY,
+      left: e.clientX - r.left,
+      right: r.right - e.clientX,
+    };
+    return (Object.keys(d) as Edge[]).reduce((m, k) => (d[k] < d[m] ? k : m));
+  };
   const go = (i: number) => {
     if (i === open) return;
-    setFrom(i > open ? "top" : "bottom");
-    setGone(open);
     setOpen(i);
   };
-  /* Which half of a row the pointer crossed. */
-  const half = (e: React.PointerEvent) => {
-    const li = (e.target as HTMLElement).closest("li");
-    if (!li) return null;
-    const r = li.getBoundingClientRect();
-    return { li, top: e.clientY < r.top + r.height / 2 };
-  };
+  /* Julian (2026-10-03): the ink in liquid, the filter bar's. One drop
+     under the open row that runs to the next one as a liquid would, and
+     drains to a line when the pointer leaves. Read off the row every
+     frame the list is in use, because the rows open and shut under it. */
+  const [drop, setDrop] = useState({ y: 0, h: 0 });
+  useEffect(() => {
+    if (!hot) return;
+    let raf = 0;
+    const read = () => {
+      const li = col.current?.querySelector("ul")?.children[open] as HTMLElement | undefined;
+      const c = col.current?.getBoundingClientRect();
+      if (li && c) {
+        const r = li.getBoundingClientRect();
+        /* Whole pixels: a row opening moves by fractions every frame,
+           and the liquid chased each one. */
+        const y = Math.round(r.top - c.top);
+        const h = Math.round(r.height);
+        setDrop((d) => (d.y === y && d.h === h ? d : { y, h }));
+      }
+      raf = requestAnimationFrame(read);
+    };
+    read();
+    return () => cancelAnimationFrame(raf);
+  }, [hot, open]);
   const current = sessions[open];
 
   return (
@@ -142,30 +174,27 @@ export function SessionsScreen({ sessions }: { sessions: SessionItem[] }) {
         </div>
       </div>
 
-      <div className="title-rest flex min-w-0 flex-col">
+      <div ref={col} className="session-col title-rest relative flex min-w-0 flex-col">
         <ul
           className="session-list border-t border-border"
-          data-from={from}
           onPointerEnter={(e) => {
             if (e.pointerType !== "mouse") return;
-            const h = half(e);
-            if (h) {
-              setFrom(h.top ? "top" : "bottom");
-              setGone(null);
-              setOpen([...e.currentTarget.children].indexOf(h.li));
-            }
+            const li = (e.target as HTMLElement).closest("li");
+            if (li) setOpen([...e.currentTarget.children].indexOf(li));
+            /* Laid shut along that edge at once, then filled from it. */
+            setEdge(nearest(e, li));
+            setPinch(true);
+            window.clearTimeout(flick.current);
+            flick.current = window.setTimeout(() => setPinch(false), 60);
             setHot(true);
           }}
           onPointerLeave={(e) => {
-            const h = half(e);
-            if (h) setFrom(h.top ? "bottom" : "top");
-            setGone(open);
+            setEdge(nearest(e, e.currentTarget.children[open]));
             setHot(false);
           }}
           onFocus={(e) => e.target.matches(":focus-visible") && setHot(true)}
           onBlur={(e) => {
             if (e.currentTarget.contains(e.relatedTarget)) return;
-            setGone(open);
             setHot(false);
           }}
         >
@@ -201,13 +230,8 @@ export function SessionsScreen({ sessions }: { sessions: SessionItem[] }) {
                   if (s.page && !(e.target as HTMLElement).closest("a, button"))
                     e.currentTarget.querySelector("a")?.click();
                 }}
-                data-dev={on && hot ? "" : undefined}
-                data-gone={!(on && hot) && gone === i ? "" : undefined}
                 className={`relative flex flex-col border-b border-border py-1.5 ${s.page ? "cursor-pointer" : ""}`}
               >
-                {/* Julian: the row under the pointer inverted, the ink
-                    wiping in from the edge the pointer came from. */}
-                <span aria-hidden className="session-dev" />
                 {/* Julian (2026-10-02): a session with a booking page goes
                     there on a click; pointing still opens it here. */}
                 {s.page ? (
@@ -301,6 +325,44 @@ export function SessionsScreen({ sessions }: { sessions: SessionItem[] }) {
             );
           })}
         </ul>
+        {/* The ink: white, laid over the list in `difference`, so each
+            letter under it turns as the liquid reaches it, over a drop
+            of the page's ground, the same shape, for it to turn against
+            (`.session-col`, `globals.css`). */}
+        {/* Mounted at rest, a line of no width, so the first time in
+            starts from the pointer like every other. */}
+        {(["session-ground", "session-ink"] as const).map((k) => (
+              <div key={k} aria-hidden className={`${k} pointer-events-none absolute inset-y-0 -inset-x-5`}>
+                <Liquid
+                  blur={5}
+                  contrast={18}
+                  fill={k === "session-ink" ? "#fff" : "var(--background)"}
+                  className="h-full w-full"
+                >
+                  <Liquid.Item effect="move" move={{ springiness: 0.85, wobble: 0, stretch: 0.08, trail: 0 }}>
+                    <div
+                      className="absolute left-0 top-0 rounded-[4px]"
+                      style={{
+                        ...(hot && !pinch
+                          ? { left: 0, width: "100%", height: drop.h, transform: `translateY(${drop.y}px)` }
+                          : {
+                              /* Shut, as a line along the edge. */
+                              left: edge === "right" ? "100%" : 0,
+                              width: edge === "left" || edge === "right" ? 0 : "100%",
+                              height: edge === "top" || edge === "bottom" ? 0 : drop.h,
+                              transform: `translateY(${edge === "bottom" ? drop.y + drop.h : drop.y}px)`,
+                            }),
+                        transition: pinch
+                          ? "none"
+                          : ["left", "width", "height", "transform"]
+                              .map((k) => `${k} ${hot ? 340 : 240}ms var(--ease-out-strong)`)
+                              .join(", "),
+                      }}
+                    />
+                  </Liquid.Item>
+                </Liquid>
+              </div>
+            ))}
 
         {/* On a short laptop (1280x800) the heading and its button share
             the line, or the button wraps under it and under the rail. */}
