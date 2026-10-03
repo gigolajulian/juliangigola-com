@@ -953,18 +953,31 @@ export const FEATURED: Project[] = FEATURED_SLUGS.map((s) =>
  * because the intro's are fetched alongside the page's own pictures.
  */
 export type WallTile = { image: string; srcSet: string; title: string; href: string };
+const wallTile = (src: string, title: string, href: string): WallTile => ({
+  image: imageLoader({ src, width: 640, quality: 70 }),
+  /* And a 320, which a phone's 80px tile takes at three times. */
+  srcSet: [320, 640]
+    .map((w) => `${imageLoader({ src, width: w, quality: 70 })} ${w}w`)
+    .join(", "),
+  title,
+  href,
+});
 export const WALL: WallTile[] = [
   ...FEATURED,
   ...PROJECTS.filter((p) => !FEATURED.includes(p)),
-].map((p) => ({
-  image: imageLoader({ src: p.cover.src, width: 640, quality: 70 }),
-  /* And a 320, which a phone's 80px tile takes at three times. */
-  srcSet: [320, 640]
-    .map((w) => `${imageLoader({ src: p.cover.src, width: w, quality: 70 })} ${w}w`)
-    .join(", "),
-  title: p.name,
-  href: `/portfolio/${p.slug}`,
-}));
+].map((p) => wallTile(p.cover.src, p.name, `/portfolio/${p.slug}`));
+
+/**
+ * The same wall for one kind of session, behind its booking page's
+ * questions (Julian, 2026-10-03): every frame of its gallery, or of every
+ * project in its discipline, each opening the project it is from.
+ */
+export const wallOf = (slug: string): WallTile[] => {
+  const one = getProject(slug);
+  return (one ? [one] : projectsIn(slug)).flatMap((p) =>
+    p.images.map((f) => wallTile(f.src, p.name, `/portfolio/${p.slug}`)),
+  );
+};
 
 /**
  * The press strip on the homepage. The old site buried these as plain text at

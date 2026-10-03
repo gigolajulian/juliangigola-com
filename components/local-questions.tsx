@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import Link from "next/link";
 import { RisingTitle } from "@/components/strip-page";
 import type { Block, Faq } from "@/lib/booking";
@@ -19,6 +19,7 @@ const two = (n: number) => String(n).padStart(2, "0");
 export function LocalQuestions({
   faqs,
   details,
+  backdrop,
 }: {
   faqs: Faq[];
   /** The session's price and turnaround, and what was the Details screen,
@@ -27,17 +28,35 @@ export function LocalQuestions({
     facts: string[];
     blocks: (Block & { links?: { href: string; label: string }[] })[];
   };
+  /** Behind it, the session's own photographs on the drifting wall the
+      homepage's ask has (Julian, 2026-10-03). */
+  backdrop?: ReactNode;
 }) {
   const [open, setOpen] = useState(0);
   const [shown, setShown] = useState(0);
+  /* A rack focus, as a lens pulls it (Julian, delight, 2026-10-03): with
+     the pointer on the words the wall behind them is soft; off the words,
+     over the photographs, the wall comes sharp and up and the words go
+     soft. A mouse only; the words have the focus by default. */
+  const [look, setLook] = useState(false);
   return (
     <section
       data-tick
       data-label="Questions"
       data-hash="questions"
+      data-look={backdrop && look ? "" : undefined}
+      onPointerMove={(e) => {
+        if (!backdrop || e.pointerType !== "mouse") return;
+        const words = !!(e.target as Element).closest("[data-words]");
+        if (words === look) setLook(!words);
+      }}
+      onPointerLeave={() => setLook(false)}
       className="relative grid w-full shrink-0 grid-cols-1 gap-10 border-l border-border px-6 pb-12 pt-24 sm:h-full sm:grid-cols-[minmax(0,0.7fr)_minmax(0,1.3fr)] sm:items-center sm:gap-x-[clamp(2rem,4vw,5rem)] sm:px-10 sm:pb-8 short:pt-20"
     >
-      <div className="flex flex-col gap-5">
+      {backdrop ? (
+        <div className="enquiry-backdrop questions-wall absolute inset-0 overflow-hidden">{backdrop}</div>
+      ) : null}
+      <div data-words className="questions-words relative flex flex-col gap-5">
         <span className="label text-muted-foreground">
           <span className="mr-2 text-foreground">{two(faqs.length)}</span>
           Asked before booking
@@ -110,7 +129,8 @@ export function LocalQuestions({
 
       <ul
         data-scroll
-        className="title-rest min-h-0 border-t border-border sm:max-h-full sm:overflow-y-auto sm:overflow-x-hidden sm:overscroll-contain"
+        data-words
+        className="questions-words title-rest relative min-h-0 border-t border-border sm:max-h-full sm:overflow-y-auto sm:overflow-x-hidden sm:overscroll-contain"
       >
         {faqs.map((f, i) => {
           const on = i === open;
