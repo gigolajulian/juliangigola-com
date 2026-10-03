@@ -9,25 +9,26 @@ import { Liquid } from "@/components/liquid";
  * visitor off the site. Held for a beat it says who they are first: their
  * face, their handle set large, and the way out under it.
  *
- * Julian (2026-10-02, overdrive, "Liquid"): the card is poured out of the
- * name. A drop of ink wells up under the word, which turns to the ground's
- * colour inside it, and the card is drawn up out of that drop, necking and
- * letting go as it rises, the way the filter bar's liquid moves. On the way
- * out it falls back into the word and the drop drains. The ink is the
- * Sessions ink, the foreground itself, opaque (the goo thresholds alpha).
+ * Julian (2026-10-02, overdrive): the card is poured out of the name. A
+ * drop of ink wells up under the word, which turns to the ground's colour
+ * inside it, and the card is drawn out of that drop, necking and letting
+ * go. Then: the card covered the credits under it, so the list opens to
+ * make room for it; and going from one name to the next, the drop slides
+ * across as the portfolio's filter bar does (`effect="move"`, wobble
+ * 0.25), the card going with it, rather than one card draining and
+ * another pouring. The pointer's dot sticks to the name as it does to a
+ * filter chip (`data-stick`, `pointer-mark.tsx`), so the mouse runs into
+ * the tag.
  *
- * The liquid (`liquid-gooey`) exists only while a card is open, in a box
- * just large enough for the word and the card: a group that is not mounted
- * measures nothing, so the credits cost no frames while scrolling, which is
- * what the audit held against the always-on ones (2026-10-02).
+ * One liquid for the whole list (`CreditList`), mounted only while a card
+ * is open: a group that is not there measures nothing, so the credits cost
+ * no frames while scrolling (audit, 2026-10-02).
  *
  * The photograph is ours, kept in `public/people` and written by /admin
  * when the person was added. Instagram is asked nothing at all from here:
- * its own picture addresses are signed and expire within days, so a page
- * that linked one would be printing broken circles a week later, and a
- * page that fetched one would be sending every visitor who happens to
- * hover a name to Instagram's servers. With no picture on file the circle
- * is simply not there and the handle carries the card.
+ * its picture addresses are signed and expire within days, and fetching
+ * one would send every visitor who hovers a name to Instagram's servers.
+ * With no picture on file the circle is simply not there.
  *
  * The card is the pointer's and the keyboard's, never a reader's: the name
  * it comes out of is the same link with the same words, so the card is
@@ -49,7 +50,7 @@ const CLOSE_DELAY = 140;
    liquid's box for the goo to spread into. */
 const W = 272;
 const GAP = 14;
-const SLACK = 40;
+const SLACK = 48;
 
 /* A spring as a `linear()` easing: settles with one small overshoot, the
    wobble 0.25 Julian set on the filter bar's liquid. */
@@ -66,48 +67,96 @@ const SPRING = (() => {
 const IN = "cubic-bezier(0.23, 1, 0.32, 1)";
 const FALL = "cubic-bezier(0.55, 0, 0.75, 0.2)";
 
-type Box = { left: number; top: number; width: number; height: number };
-const inset = (b: Box, n: number): Box => ({ left: b.left + n, top: b.top + n, width: b.width - 2 * n, height: b.height - 2 * n });
+/* The goo, with its edge where the shape's edge is: the library's own
+   threshold sits a little outside, and round a shape as thin as a line of
+   type that showed as a wavy rim (Julian, live). Alpha at one half. */
+const GOO = `<feGaussianBlur in="SourceGraphic" stdDeviation="6" result="blur" /><feColorMatrix in="blur" type="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 24 -12" result="goo" /><feComposite in="SourceGraphic" in2="goo" operator="atop" result="shape" />`;
 
-export function CreditCard({
-  handle,
-  name,
-  role,
-  avatar,
-  children,
-}: {
-  handle: string;
-  name: string;
-  role: string;
-  /** A path under `public/`, or nothing. See `avatarFor` in `lib/work.ts`. */
-  avatar?: string;
-  /** The credit's own link, untouched but for the hover it now carries. */
-  children: React.ReactElement<React.HTMLAttributes<HTMLElement> & { ref?: React.Ref<HTMLElement> }>;
-}) {
+type Person = { handle: string; name: string; role: string; avatar?: string };
+type Held = Person & { el: HTMLElement };
+type Box = { left: number; top: number; width: number; height: number };
+
+const Ctx = React.createContext<{
+  hold: (p: Held) => void;
+  release: () => void;
+  known: WeakMap<HTMLElement, Person>;
+} | null>(null);
+/* How long a switch takes to settle: the names below move to make room,
+   and one can move out from under a still pointer. */
+const SETTLE = 620;
+
+/* How far an element is translated right now (mid-transition included), so
+   a box can be read where it rests rather than where it is passing. */
+const shifted = (el: Element) => {
+  const t = getComputedStyle(el).translate;
+  if (!t || t === "none") return 0;
+  const [, y = "0"] = t.split(" ");
+  return parseFloat(y) || 0;
+};
+
+/* The list's cells: each row's `dt` and `dd` (the row itself is
+   `display: contents` beside the grid), then whatever follows the list in
+   its panel. These are what move to make room. */
+const cellsOf = (dl: Element) => {
+  const cells = [...dl.querySelectorAll<HTMLElement>(":scope > * > dt, :scope > * > dd")];
+  for (let n = dl.nextElementSibling; n; n = n.nextElementSibling) cells.push(n as HTMLElement);
+  return cells;
+};
+
+export function CreditList({ children }: { children: React.ReactNode }) {
   const hovers = React.useSyncExternalStore(
     subscribeHover,
     () => window.matchMedia(HOVERS).matches,
-    // The server draws the plain link; a phone keeps it.
     () => false,
   );
-  const word = React.useRef<HTMLElement | null>(null);
-  // Where the word was when it was held, and whether the card is wanted.
-  const [at, setAt] = React.useState<DOMRect | null>(null);
-  const [open, setOpen] = React.useState(false);
+  const [held, setHeld] = React.useState<Held | null>(null);
+  const [shown, setShown] = React.useState(false);
+  const live = React.useRef(false);
   const timer = React.useRef(0);
+  const settled = React.useRef(0);
+  const at = React.useRef({ x: -1, y: -1 });
+  const [known] = React.useState(() => new WeakMap<HTMLElement, Person>());
 
-  const show = React.useCallback(() => {
+  const hold = React.useCallback((p: Held) => {
     window.clearTimeout(timer.current);
+    /* Already open: straight across, as a chip in the filter bar. */
+    if (live.current) {
+      settled.current = performance.now() + SETTLE;
+      return setHeld(p);
+    }
     timer.current = window.setTimeout(() => {
-      if (!word.current) return;
-      setAt(word.current.getBoundingClientRect());
-      setOpen(true);
+      live.current = true;
+      setHeld(p);
+      setShown(true);
     }, OPEN_DELAY);
   }, []);
-  const hide = React.useCallback(() => {
+  /* Let go, unless the pointer is still on the card or on a name once
+     things have settled: a switch moves the names, and the one just
+     reached can leave the hand without the hand having moved (the list
+     making room for its card), and a leave is all the browser reports. */
+  const release = React.useCallback(() => {
     window.clearTimeout(timer.current);
-    timer.current = window.setTimeout(() => setOpen(false), CLOSE_DELAY);
-  }, []);
+    const wait = Math.max(CLOSE_DELAY, settled.current - performance.now() + 60);
+    timer.current = window.setTimeout(() => {
+      const t = document.elementFromPoint(at.current.x, at.current.y);
+      if (t?.closest(".credit-pour [data-ring='']")) return;
+      const name = t?.closest<HTMLElement>("[data-stick]");
+      const who = name && known.get(name);
+      if (name && who) {
+        settled.current = performance.now() + SETTLE;
+        return setHeld({ ...who, el: name });
+      }
+      live.current = false;
+      setHeld(null);
+    }, wait);
+  }, [known]);
+  // Where the pointer is, for that check.
+  React.useEffect(() => {
+    if (!shown) return;
+    const track = (e: PointerEvent) => (at.current = { x: e.clientX, y: e.clientY });
+    document.addEventListener("pointermove", track, { passive: true });
+    return () => document.removeEventListener("pointermove", track);
+  }, [shown]);
   const stay = React.useCallback(() => window.clearTimeout(timer.current), []);
   React.useEffect(() => () => window.clearTimeout(timer.current), []);
 
@@ -115,10 +164,11 @@ export function CreditCard({
      hanging over a moving sequence has lost its anchor: any scroll, a
      resize or Escape shuts it at once. */
   React.useEffect(() => {
-    if (!open) return;
+    if (!held) return;
     const shut = () => {
       window.clearTimeout(timer.current);
-      setOpen(false);
+      live.current = false;
+      setHeld(null);
     };
     const key = (e: KeyboardEvent) => e.key === "Escape" && shut();
     window.addEventListener("scroll", shut, { capture: true, passive: true });
@@ -129,45 +179,216 @@ export function CreditCard({
       window.removeEventListener("resize", shut);
       window.removeEventListener("keydown", key);
     };
-  }, [open]);
+  }, [held]);
 
-  if (!hovers) return children;
+  const value = React.useMemo(
+    () => (hovers ? { hold, release, known } : null),
+    [hovers, hold, release, known],
+  );
+  return (
+    <Ctx.Provider value={value}>
+      {children}
+      {shown
+        ? createPortal(
+            <Pour held={held} onEnter={stay} onLeave={release} onGone={() => setShown(false)} />,
+            document.body,
+          )
+        : null}
+    </Ctx.Provider>
+  );
+}
 
-  const link = React.cloneElement(children, {
+export function CreditCard({
+  handle,
+  name,
+  role,
+  avatar,
+  children,
+}: Person & {
+  /** The credit's own link, untouched but for the hover it now carries. */
+  children: React.ReactElement<React.HTMLAttributes<HTMLElement> & { ref?: React.Ref<HTMLElement> }>;
+}) {
+  const list = React.useContext(Ctx);
+  const word = React.useRef<HTMLElement | null>(null);
+  if (!list) return children;
+  const hold = () => word.current && list.hold({ handle, name, role, avatar, el: word.current });
+  return React.cloneElement(children, {
     ref: (el: HTMLElement | null) => {
       word.current = el;
+      if (el) list.known.set(el, { handle, name, role, avatar });
     },
-    onPointerEnter: (e: React.PointerEvent<HTMLElement>) => e.pointerType === "mouse" && show(),
-    onPointerLeave: hide,
-    onFocus: (e: React.FocusEvent<HTMLElement>) => e.currentTarget.matches(":focus-visible") && show(),
-    onBlur: hide,
+    // The dot holds to the name as to a filter chip, and runs into the ink.
+    ...({ "data-stick": "" } as object),
+    onPointerEnter: (e: React.PointerEvent<HTMLElement>) => e.pointerType === "mouse" && hold(),
+    onPointerLeave: list.release,
+    onFocus: (e: React.FocusEvent<HTMLElement>) => e.currentTarget.matches(":focus-visible") && hold(),
+    onBlur: list.release,
   });
+}
 
-  /* Six of the harvested credits are the handle and nothing else, so the
-     card would have printed "@anisajadee" twice. The line under the handle
-     is only for a person who has a name of their own on file. */
-  const named = name.replace(/^@/, "").toLowerCase() !== handle.toLowerCase();
+/* The liquid: a drop under the held name that slides from name to name
+   (`move`), and the card, a box the liquid follows (`observe`) that the
+   drop necks into while they are close. Everything moves on CSS
+   transitions, so a new name mid-flight simply sets new places. */
+function Pour({
+  held,
+  onEnter,
+  onLeave,
+  onGone,
+}: {
+  held: Held | null;
+  onEnter: () => void;
+  onLeave: () => void;
+  onGone: () => void;
+}) {
+  const [reduce] = React.useState(() => window.matchMedia("(prefers-reduced-motion: reduce)").matches);
+  const ms = (n: number) => (reduce ? 0 : n);
+  // The last name held, kept through the close so the ink drains into it.
+  const [last, setLast] = React.useState<Held | null>(held);
+  if (held && held !== last) setLast(held);
+  const who = held ?? last;
+  // The list the card belongs to, and the liquid's box, fixed for one opening.
+  const dl = who?.el.closest("dl") ?? null;
+  const [frame] = React.useState(() => {
+    const r = (dl ?? who!.el).getBoundingClientRect();
+    return {
+      left: Math.min(r.left, window.innerWidth - W - 16) - SLACK,
+      top: r.top - 160 - SLACK,
+      width: Math.max(r.width, W + 300) + 2 * SLACK,
+      height: r.height + 360 + 2 * SLACK,
+    };
+  });
+  const inner = React.useRef<HTMLDivElement>(null);
+  const [height, setHeight] = React.useState(0);
+  const [first, setFirst] = React.useState(true);
+
+  // The card's height for the person now held, from their content.
+  React.useLayoutEffect(() => {
+    if (inner.current) setHeight(Math.ceil(inner.current.scrollHeight));
+  }, [who?.handle]);
+  // One frame at the drop before anything travels.
+  React.useEffect(() => {
+    let b = 0;
+    const a = requestAnimationFrame(() => (b = requestAnimationFrame(() => setFirst(false))));
+    return () => {
+      cancelAnimationFrame(a);
+      cancelAnimationFrame(b);
+    };
+  }, []);
+
+  /* Where the held name rests: its box less any room it has been moved
+     by, a little round its own line (inside the link's padded hit area,
+     so the ink never reaches the credit under it). */
+  const geo = React.useMemo(() => {
+    if (!who) return null;
+    const r = who.el.getBoundingClientRect();
+    const cell = who.el.closest("dd");
+    const dy = cell ? shifted(cell) : 0;
+    const drop: Box = { left: r.left - 6, top: r.top - dy + 3, width: r.width + 12, height: r.height - 6 };
+    const h = height || 1;
+    const card: Box = { left: drop.left, top: drop.top + drop.height + GAP, width: W, height: h };
+    card.left = Math.max(16, Math.min(card.left, window.innerWidth - W - 16));
+    return { drop, card, cell };
+    // Read when the name or the card's height changes.
+  }, [who, height]);
+
+  /* Making room: every cell after the held name's moves down to clear the
+     card, the rest come home; on the way out, all of them. */
+  React.useEffect(() => {
+    if (!dl || !geo) return;
+    const cells = cellsOf(dl);
+    const at = geo.cell ? cells.indexOf(geo.cell as HTMLElement) : -1;
+    const next = cells[at + 1];
+    let room = 0;
+    if (held && next) {
+      const base = next.getBoundingClientRect().top - shifted(next);
+      room = Math.max(0, geo.card.top + geo.card.height + GAP - base);
+    }
+    for (const [i, c] of cells.entries()) {
+      c.style.transition = `translate ${ms(held ? 560 : 320)}ms ${held ? SPRING : FALL}`;
+      c.style.translate = i > at && room ? `0 ${room}px` : "";
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [held, geo]);
+  // Gone: the cells are left as they were found.
+  React.useEffect(() => {
+    const list = dl;
+    return () => {
+      if (!list) return;
+      for (const c of cellsOf(list)) {
+        c.style.removeProperty("translate");
+        c.style.removeProperty("transition");
+      }
+    };
+  }, [dl]);
+
+  // Closed: the ink drains, then the liquid goes.
+  React.useEffect(() => {
+    if (held) return;
+    const id = window.setTimeout(onGone, ms(700));
+    return () => window.clearTimeout(id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [held]);
+
+  if (!who || !geo) return null;
+  const local = (b: Box, s = 1) => ({
+    width: b.width,
+    height: b.height,
+    transform: `translate(${b.left - frame.left}px, ${b.top - frame.top}px) scale(${s})`,
+  });
+  const open = !!held && !first;
+  const cardBox = open ? geo.card : geo.drop;
+  const named = who.name.replace(/^@/, "").toLowerCase() !== who.handle.toLowerCase();
+  const font = getComputedStyle(who.el);
+  const run = (ms_: number, ease: string, delay: number) =>
+    ["transform", "width", "height"].map((p) => `${p} ${ms(ms_)}ms ${ease} ${ms(delay)}ms`).join(", ");
 
   return (
-    <>
-      {link}
-      {at
-        ? createPortal(
-            <Pour
-              at={at}
-              open={open}
-              source={word}
-              onEnter={stay}
-              onLeave={hide}
-              onGone={() => setAt(null)}
+    <div
+      aria-hidden
+      className="credit-pour pointer-events-none fixed z-50"
+      style={{ left: frame.left, top: frame.top, width: frame.width, height: frame.height }}
+    >
+      <Liquid
+        fill="var(--foreground)"
+        filter={GOO}
+        shadow="0 14px 34px rgb(0 0 0 / 0.28)"
+        /* Its own style sets `position: relative`; the size is what its
+           filter region is measured from, so it has to be the whole box. */
+        className="h-full w-full"
+      >
+        {/* The drop: the filter bar's travelling liquid. */}
+        <Liquid.Item effect="move" move={{ wobble: 0.25 }}>
+          <div
+            className="absolute left-0 top-0 origin-center rounded-[3px]"
+            style={{
+              ...local(geo.drop, open ? 1 : 0),
+              transition: `transform ${ms(open ? 240 : 220)}ms ${open ? IN : FALL} ${ms(open ? 0 : 300)}ms`,
+            }}
+          />
+        </Liquid.Item>
+        <Liquid.Item observe radius={16}>
+          <div
+            data-ring=""
+            onPointerEnter={onEnter}
+            onPointerLeave={onLeave}
+            className="pointer-events-auto absolute left-0 top-0 origin-top-left overflow-hidden rounded-2xl"
+            style={{ ...local(cardBox), transition: open ? run(560, SPRING, 60) : run(320, FALL, 40) }}
+          >
+            <div
+              ref={inner}
+              key={who.handle}
+              className="w-[272px] p-4 text-background"
+              style={{
+                opacity: open ? 1 : 0,
+                transition: `opacity ${ms(open ? 240 : 100)}ms ease-out ${ms(open ? 300 : 0)}ms`,
+              }}
             >
               <div className="flex items-start gap-3">
-                {avatar ? (
-                  /* A plain `img`: 100px of JPEG already the size it is
-                     drawn at, and the box holds its place either way. */
+                {who.avatar ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
-                    src={avatar}
+                    src={who.avatar}
                     alt=""
                     width={56}
                     height={56}
@@ -176,11 +397,22 @@ export function CreditCard({
                   />
                 ) : null}
                 <div className="min-w-0 flex-1">
+                  {/* Who they are, a weight under bold, the role on a line of
+                      its own ("Julian Gigola · Phot…" was cut), then the
+                      handle, a weight lighter, right over the way out to it
+                      (Julian, 2026-10-03). */}
+                  {named ? (
+                    <p className="label truncate font-semibold text-background">{who.name}</p>
+                  ) : null}
+                  {who.role ? (
+                    <p className={`label text-left text-pretty leading-snug text-background/70 ${named ? "mt-1" : ""}`}>
+                      {who.role}
+                    </p>
+                  ) : null}
                   <p
                     /* A long handle is set smaller until it fits, rather
                        than cut: Julian saw @LIGHTBENDER_... Never below
-                       three quarters of the size, past which the ellipsis
-                       takes over again. */
+                       three quarters of the size. */
                     ref={(el) => {
                       if (!el) return;
                       el.style.fontSize = "";
@@ -189,208 +421,45 @@ export function CreditCard({
                         el.style.fontSize = `${Math.max(0.75, 1.25 * fit)}rem`;
                       }
                     }}
-                    className="font-display truncate text-xl uppercase leading-none tracking-[0]"
+                    className="font-display mt-3 truncate text-xl font-extrabold! uppercase leading-[1.2] tracking-[0]"
                   >
-                    @{handle}
+                    @{who.handle}
                   </p>
-                  <p className="label mt-1.5 truncate text-background/70">
-                    {named ? name : ""}
-                    {named && role ? " · " : ""}
-                    {role}
-                  </p>
-                  {/* Where a pointer that has travelled into the card
-                      arrives: the way out, pressable (Julian found the
-                      words alone could not be). */}
                   <a
-                    href={`https://www.instagram.com/${handle}/`}
+                    href={`https://www.instagram.com/${who.handle}/`}
                     target="_blank"
                     rel="noreferrer"
                     tabIndex={-1}
                     data-ring="Instagram"
-                    className="label mt-3 inline-block text-background/70 transition-colors duration-200 hoverable:hover:text-background"
+                    className="label mt-1.5 inline-block text-background/70 transition-colors duration-200 hoverable:hover:text-background"
                   >
                     Open on Instagram &#8599;
                   </a>
                 </div>
               </div>
-            </Pour>,
-            document.body,
-          )
-        : null}
-    </>
-  );
-}
-
-/* The liquid itself: a drop under the word and the card drawn out of it.
-   Both are boxes the liquid follows (`observe`), moved with the Web
-   Animations API, so the goo necks between them for as long as they are
-   close and lets go when they part. */
-function Pour({
-  at,
-  open,
-  source,
-  onEnter,
-  onLeave,
-  onGone,
-  children,
-}: {
-  at: DOMRect;
-  open: boolean;
-  source: React.RefObject<HTMLElement | null>;
-  onEnter: () => void;
-  onLeave: () => void;
-  onGone: () => void;
-  children: React.ReactNode;
-}) {
-  const card = React.useRef<HTMLDivElement>(null);
-  const drop = React.useRef<HTMLDivElement>(null);
-  const ink = React.useRef<HTMLDivElement>(null);
-  const inner = React.useRef<HTMLDivElement>(null);
-  const copy = React.useRef<HTMLSpanElement>(null);
-  const [height, setHeight] = React.useState(0);
-
-  /* The drop: a rectangle just round the word's own line, inside the
-     link's padded hit area, so it never reaches the credit under it
-     (Julian: more of a rectangle, off the line below). */
-  const dropBox: Box = {
-    left: at.left - 6,
-    top: at.top + 3,
-    width: at.width + 12,
-    height: at.height - 6,
-  };
-  /* The card: under the credit (Julian, 2026-10-02), over it only where
-     the window has no room below, and kept off the window's edges. */
-  const h = height || 1;
-  const above = dropBox.top + dropBox.height + GAP + h > window.innerHeight - 16;
-  const cardBox: Box = {
-    left: Math.max(16, Math.min(dropBox.left, window.innerWidth - W - 16)),
-    top: above ? dropBox.top - GAP - h : dropBox.top + dropBox.height + GAP,
-    width: W,
-    height: h,
-  };
-  // The liquid's own box: both, with room for the goo.
-  const x0 = Math.min(dropBox.left, cardBox.left) - SLACK;
-  const y0 = Math.min(dropBox.top, cardBox.top) - SLACK;
-  const x1 = Math.max(dropBox.left + dropBox.width, cardBox.left + W) + SLACK;
-  const y1 = Math.max(dropBox.top + dropBox.height, cardBox.top + h) + SLACK;
-  const local = (b: Box) => ({
-    left: `${b.left - x0}px`,
-    top: `${b.top - y0}px`,
-    width: `${b.width}px`,
-    height: `${b.height}px`,
-  });
-
-  // The card's height, from its content at its width, before anything moves.
-  React.useLayoutEffect(() => {
-    if (inner.current) setHeight(Math.ceil(inner.current.scrollHeight));
-  }, []);
-
-  /* The word inside the drop is the word itself, in the ground's colour:
-     the same face, size and tracking, read off the link. */
-  React.useLayoutEffect(() => {
-    const src = source.current;
-    if (!src || !copy.current) return;
-    const s = getComputedStyle(src);
-    Object.assign(copy.current.style, {
-      fontFamily: s.fontFamily,
-      fontSize: s.fontSize,
-      fontWeight: s.fontWeight,
-      letterSpacing: s.letterSpacing,
-      textTransform: s.textTransform,
-      left: `${at.left - x0}px`,
-      top: `${at.top - y0}px`,
-      lineHeight: `${at.height}px`,
-    });
-    copy.current.textContent = src.innerText.split("\n")[0];
-  });
-
-  const reduce =
-    typeof window !== "undefined" &&
-    window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-
-  React.useEffect(() => {
-    if (!height || !card.current || !drop.current || !ink.current || !inner.current || !copy.current) return;
-    const c = card.current, i = inner.current, w = copy.current;
-    const both = (k: Keyframe[], o: KeyframeAnimationOptions) => [drop.current!, ink.current!].map((e) => e.animate(k, o));
-    const from = local(dropBox), to = local(cardBox);
-    const t = (ms: number) => (reduce ? 0 : ms);
-    let anims: Animation[];
-    if (open) {
-      anims = [
-        ...both([{ transform: "scale(0.3)" }, { transform: "scale(1)" }], {
-          duration: t(260), easing: IN, fill: "both",
-        }),
-        w.animate([{ opacity: 0 }, { opacity: 1 }], { duration: t(160), delay: t(90), easing: IN, fill: "both" }),
-        c.animate([from, to], { duration: t(560), delay: t(90), easing: SPRING, fill: "both" }),
-        i.animate([{ opacity: 0, transform: "translateY(6px)" }, { opacity: 1, transform: "none" }], {
-          duration: t(240), delay: t(reduce ? 0 : 360), easing: IN, fill: "both",
-        }),
-      ];
-    } else {
-      anims = [
-        i.animate([{ opacity: 1 }, { opacity: 0 }], { duration: t(110), easing: "ease-out", fill: "both" }),
-        c.animate([to, from], { duration: t(320), delay: t(60), easing: FALL, fill: "both" }),
-        w.animate([{ opacity: 1 }, { opacity: 0 }], { duration: t(140), delay: t(330), easing: "ease-out", fill: "both" }),
-        ...both([{ transform: "scale(1)" }, { transform: "scale(0)" }], {
-          duration: t(220), delay: t(340), easing: FALL, fill: "both",
-        }),
-      ];
-      Promise.all(anims.map((a) => a.finished)).then(onGone, () => {});
-    }
-    return () => anims.forEach((a) => a.cancel());
-    // Geometry is fixed for the life of one opening; `open` drives it.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open, height]);
-
-  return (
-    <div
-      aria-hidden
-      className="credit-pour pointer-events-none fixed z-50"
-      style={{ left: x0, top: y0, width: x1 - x0, height: y1 - y0 }}
-    >
-      <Liquid
-        blur={7}
-        contrast={18}
-        fill="var(--foreground)"
-        shadow="0 14px 34px rgb(0 0 0 / 0.28)"
-        /* Its own style sets `position: relative`; the size is what its
-           filter region is measured from, so it has to be the whole box. */
-        className="h-full w-full"
-      >
-        {/* The drop's liquid, 3px inside the rectangle drawn over it: the
-            goo's edge sits a little outside a shape this thin, and showed
-            as a wavy rim round the word (Julian, live, 2026-10-02). It is
-            there for the neck to the card. */}
-        <Liquid.Item observe>
-          <div
-            ref={drop}
-            className="absolute"
-            style={{ ...local(inset(dropBox, 3)), transform: "scale(0)" }}
-          />
-        </Liquid.Item>
-        <Liquid.Item observe radius={16}>
-          <div
-            ref={card}
-            data-ring=""
-            onPointerEnter={onEnter}
-            onPointerLeave={onLeave}
-            className="pointer-events-auto absolute overflow-hidden rounded-2xl"
-            style={local(dropBox)}
-          >
-            <div ref={inner} className="w-[272px] p-4 text-background" style={{ opacity: 0 }}>
-              {children}
             </div>
           </div>
         </Liquid.Item>
       </Liquid>
-      {/* The drop itself, crisp, over its liquid. */}
-      <div
-        ref={ink}
-        className="absolute rounded-[3px] bg-foreground"
-        style={{ ...local(dropBox), transform: "scale(0)" }}
-      />
-      {/* Over the liquid, where the word is: the word again, in the ground. */}
-      <span ref={copy} className="absolute whitespace-nowrap text-background" style={{ opacity: 0 }} />
+      {/* Over the ink, where the name is: the name again, in the ground,
+          once the drop has arrived under it. */}
+      <span
+        key={`w-${who.handle}`}
+        className="absolute left-0 top-0 whitespace-nowrap text-background"
+        style={{
+          fontFamily: font.fontFamily,
+          fontSize: font.fontSize,
+          fontWeight: font.fontWeight,
+          letterSpacing: font.letterSpacing,
+          textTransform: font.textTransform as React.CSSProperties["textTransform"],
+          lineHeight: `${geo.drop.height + 6}px`,
+          transform: `translate(${geo.drop.left + 6 - frame.left}px, ${geo.drop.top - 3 - frame.top}px)`,
+          opacity: open ? 1 : 0,
+          transition: `opacity ${ms(160)}ms ease-out ${ms(open ? 160 : 260)}ms`,
+        }}
+      >
+        {who.el.innerText.split("\n")[0]}
+      </span>
     </div>
   );
 }

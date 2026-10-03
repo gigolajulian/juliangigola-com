@@ -5,7 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { ViewTransition } from "react";
 import { Lightbox, useLightbox } from "@/components/lightbox";
-import { CreditCard } from "@/components/credit-card";
+import { CreditCard, CreditList } from "@/components/credit-card";
 import { longestWord, titleWidth } from "@/components/strip-page";
 import { Strip, type Lead } from "@/components/strip";
 import type { Project, TextBlock, Frame } from "@/lib/work-types";
@@ -237,6 +237,7 @@ export function ProjectStrip({
                  role and name run together on one line, set a point
                  smaller and a little tighter so the longest pair on the
                  site still fits: Julian, make it fit on phone too. */
+              <CreditList>
               <dl
                 aria-label="Credits"
                 className="title-rest flex flex-col gap-1.5 border-t border-border pt-4 sm:grid sm:grid-cols-[max-content_minmax(0,1fr)] sm:gap-x-3 sm:gap-y-1.5"
@@ -295,6 +296,7 @@ export function ProjectStrip({
                   );
                 })}
               </dl>
+              </CreditList>
             ) : null}
           </div>
         ) : cell.kind === "next" ? (
