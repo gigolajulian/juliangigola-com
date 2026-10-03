@@ -202,7 +202,9 @@ const csp = [
   "script-src 'self' 'unsafe-inline' https://static.cloudflareinsights.com https://player.vimeo.com",
   // The two players, and only as an embed — `frame-ancestors 'none'` above
   // is the other direction and still says nobody may frame this site.
-  "frame-src https://www.youtube-nocookie.com https://player.vimeo.com",
+  // And the booking calendars on the session pages (Google Calendar
+  // appointment schedules, `components/contact-screen.tsx`).
+  "frame-src https://www.youtube-nocookie.com https://player.vimeo.com https://calendar.google.com",
   // `vimeo.com` and `youtube.com` are oEmbed lookups made by /admin when a
   // link is pasted: the title, and the poster Vimeo does not publish at a
   // guessable URL. No page on the site fetches either.
