@@ -239,7 +239,7 @@ export function ProjectStrip({
                  site still fits: Julian, make it fit on phone too. */
               <dl
                 aria-label="Credits"
-                className="title-rest flex flex-col gap-1 border-t border-border pt-4 sm:grid sm:grid-cols-[max-content_minmax(0,1fr)] sm:gap-x-3"
+                className="title-rest flex flex-col gap-1.5 border-t border-border pt-4 sm:grid sm:grid-cols-[max-content_minmax(0,1fr)] sm:gap-x-3 sm:gap-y-1.5"
               >
                 {credits.map((credit, i) => {
                   /* Worked out in `lib/work.ts` (`withFaces`), along with
@@ -278,7 +278,7 @@ export function ProjectStrip({
                               target="_blank"
                               rel="noreferrer"
                               data-ring="Instagram"
-                              className="text-foreground/80 transition-colors duration-200 hoverable:hover:text-foreground"
+                              className="-my-1.5 inline-block py-1.5 text-foreground/80 transition-colors duration-200 hoverable:hover:text-foreground"
                             >
                               {credit.name}
                               <span className="sr-only">
