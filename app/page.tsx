@@ -285,6 +285,7 @@ function SessionsDoor({ photo }: { photo?: Frame }) {
           return (
             <li key={s.slug} className="border-b border-border">
               <Link
+                prefetch={false}
                 href={page ? `/${page.slug}` : "/#sessions"}
                 className="group label flex items-center justify-between gap-4 py-3 text-foreground lying:py-1.5"
               >
@@ -335,6 +336,7 @@ function PathCard({
 }) {
   return (
     <Link
+      prefetch={false}
       href={href}
       // Centred rather than stretched top to bottom: half a screen each is
       // more room than two short paragraphs need, and a block pinned to the

@@ -106,6 +106,7 @@ export function ServicesScreen({
                 className="services-step border-b border-border"
               >
                 <Link
+                  prefetch={false}
                   href={r.href}
                   onPointerEnter={(e) => e.pointerType === "mouse" && setOn(i)}
                   onFocus={() => setOn(i)}
@@ -146,12 +147,14 @@ export function ServicesScreen({
               nowhere before About), the whole portfolio beside it. */}
           <div className="flex flex-wrap items-center gap-x-3 gap-y-3">
             <Link
+              prefetch={false}
               href="/#contact"
               className="services-book label action px-7 py-4 press active:scale-[0.97] sm:py-[clamp(0.625rem,1.8cqh,1rem)]"
             >
               Inquire
             </Link>
             <Link
+              prefetch={false}
               href="/portfolio"
               className="label action-quiet px-7 py-4 press active:scale-[0.97] sm:py-[clamp(0.625rem,1.8cqh,1rem)]"
             >
@@ -174,6 +177,7 @@ export function ServicesScreen({
                 const ht = laid.heights[ri];
                 return (
                   <Link
+                    prefetch={false}
                     key={`${rows[on].slug}-${s.src}`}
                     href={s.href}
                     style={{ "--i": si, width: (ht * s.width) / s.height, height: ht } as React.CSSProperties}
