@@ -61,7 +61,7 @@ export function ContactSheet({
       data-tick
       data-label="Work"
       data-hash="work"
-      className="relative grid w-full shrink-0 grid-cols-1 content-center gap-8 border-l border-border px-6 pb-12 pt-24 sm:h-full sm:grid-cols-[minmax(max-content,0.55fr)_auto] sm:items-center sm:gap-x-[clamp(2rem,4vw,5rem)] sm:px-10 sm:pb-8 sm:[container-type:size] short:pt-20"
+      className="relative grid w-full shrink-0 grid-cols-1 content-center gap-8 border-l border-border px-6 pb-12 pt-24 sm:h-full lg:grid-cols-[minmax(max-content,0.55fr)_auto] sm:items-center sm:gap-x-[clamp(2rem,4vw,5rem)] sm:px-10 sm:pb-8 sm:[container-type:size] short:pt-20"
     >
       <div className="flex flex-col gap-5">
         <span className="label text-muted-foreground">
@@ -81,9 +81,12 @@ export function ContactSheet({
         ) : null}
       </div>
 
+      {/* Beside the words from a laptop up; under them on an upright
+          tablet, where side by side left the sheet a postage stamp (the
+          live QA, iPad, 2026-10-03). */}
       <ul
         data-ring="Zoom"
-        className="contact-sheet title-rest grid grid-cols-4 gap-1.5 sm:w-[min(calc(100cqw-30rem),calc((100cqh-8rem)/var(--rows)*var(--cols)))] sm:grid-cols-[repeat(var(--cols),minmax(0,1fr))] sm:gap-2"
+        className="contact-sheet title-rest grid grid-cols-4 gap-1.5 sm:w-[min(100%,calc((100cqh-16rem)/var(--rows)*var(--cols)))] lg:w-[min(calc(100cqw-30rem),calc((100cqh-8rem)/var(--rows)*var(--cols)))] sm:grid-cols-[repeat(var(--cols),minmax(0,1fr))] sm:gap-2"
         style={{ "--rows": rows, "--cols": cols } as CSSProperties}
       >
         {frames.map((f, i) => (
