@@ -17,7 +17,7 @@ export function InquireWall({ items }: { items: WallTile[] }) {
      veil; 0 is the photographs at full strength. */
   const { scale, tint } = useDialKit(
     "Background wall",
-    { scale: [1.25, 0.2, 2, 0.05], tint: [0.37, 0, 1, 0.01] },
+    { scale: [1.25, 0.2, 2, 0.05], tint: [0.2, 0, 1, 0.01] },
     { id: "inquire-wall" },
   );
   /* Julian: a dial for the blur on the two doors to the right of the

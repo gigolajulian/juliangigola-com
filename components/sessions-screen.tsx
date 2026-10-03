@@ -30,8 +30,41 @@ export type SessionItem = {
   pageTitle?: string;
 };
 
+function where(title: string) {
+  const k = title.lastIndexOf(" in ");
+  const arrow = <span aria-hidden>&rarr;</span>;
+  if (k < 0) return <>{title}&nbsp;{arrow}</>;
+  return (
+    <>
+      {title.slice(0, k)}{" "}
+      <span className="whitespace-nowrap">{title.slice(k + 1)}&nbsp;{arrow}</span>
+    </>
+  );
+}
+
 export function SessionsScreen({ sessions }: { sessions: SessionItem[] }) {
   const [open, setOpen] = useState(0);
+  /* Whether a mouse or the keyboard is in the list: the open row is
+     inked only then (`.session-dev`, `globals.css`). A finger opens a row
+     by going to its page, so it never sees it. */
+  const [hot, setHot] = useState(false);
+  /* The edge the ink comes in from, and the row it is leaving: going
+     down the list it is handed down, going up, handed up. */
+  const [from, setFrom] = useState<"top" | "bottom">("top");
+  const [gone, setGone] = useState<number | null>(null);
+  const go = (i: number) => {
+    if (i === open) return;
+    setFrom(i > open ? "top" : "bottom");
+    setGone(open);
+    setOpen(i);
+  };
+  /* Which half of a row the pointer crossed. */
+  const half = (e: React.PointerEvent) => {
+    const li = (e.target as HTMLElement).closest("li");
+    if (!li) return null;
+    const r = li.getBoundingClientRect();
+    return { li, top: e.clientY < r.top + r.height / 2 };
+  };
   const current = sessions[open];
 
   return (
@@ -110,13 +143,38 @@ export function SessionsScreen({ sessions }: { sessions: SessionItem[] }) {
       </div>
 
       <div className="title-rest flex min-w-0 flex-col">
-        <ul className="border-t border-border">
+        <ul
+          className="session-list border-t border-border"
+          data-from={from}
+          onPointerEnter={(e) => {
+            if (e.pointerType !== "mouse") return;
+            const h = half(e);
+            if (h) {
+              setFrom(h.top ? "top" : "bottom");
+              setGone(null);
+              setOpen([...e.currentTarget.children].indexOf(h.li));
+            }
+            setHot(true);
+          }}
+          onPointerLeave={(e) => {
+            const h = half(e);
+            if (h) setFrom(h.top ? "bottom" : "top");
+            setGone(open);
+            setHot(false);
+          }}
+          onFocus={(e) => e.target.matches(":focus-visible") && setHot(true)}
+          onBlur={(e) => {
+            if (e.currentTarget.contains(e.relatedTarget)) return;
+            setGone(open);
+            setHot(false);
+          }}
+        >
           {sessions.map((s, i) => {
             const on = i === open;
             const head = (
               <>
                 <span
-                  className={`font-display text-[clamp(1.5rem,2.4vw,2.5rem)] leading-none short:text-[clamp(1.25rem,2vw,2rem)] tabular-nums transition-colors duration-300 ${on ? "text-foreground" : "text-muted-foreground/40"}`}
+                  className={`font-display text-[clamp(1.5rem,2.4vw,2.5rem)] leading-none short:text-[clamp(1.25rem,2vw,2rem)] tabular-nums transition-colors duration-300 ${on ? "text-foreground" : "text-muted-foreground/75"}`}
                 >
                   {String(i + 1).padStart(2, "0")}
                 </span>
@@ -126,12 +184,6 @@ export function SessionsScreen({ sessions }: { sessions: SessionItem[] }) {
                 <span className="label text-muted-foreground max-sm:hidden">
                   {s.rate}
                 </span>
-                <span
-                  aria-hidden
-                  className={`text-lg transition-[opacity,transform] duration-300 ${on ? "translate-x-0 opacity-100" : "-translate-x-2 opacity-0"}`}
-                >
-                  &rarr;
-                </span>
               </>
             );
             return (
@@ -140,7 +192,7 @@ export function SessionsScreen({ sessions }: { sessions: SessionItem[] }) {
                  the next one closing. */
               <li
                 key={s.slug}
-                onPointerMove={() => open !== i && setOpen(i)}
+                onPointerMove={() => go(i)}
                 /* Julian (2026-10-02): anywhere in the row goes to the
                    booking page, bar its own links: a click on the row is a
                    click on its name, the link a keyboard and a reader get,
@@ -149,15 +201,20 @@ export function SessionsScreen({ sessions }: { sessions: SessionItem[] }) {
                   if (s.page && !(e.target as HTMLElement).closest("a, button"))
                     e.currentTarget.querySelector("a")?.click();
                 }}
-                className={`flex flex-col border-b border-border py-2 short:py-1.5 ${s.page ? "cursor-pointer" : ""}`}
+                data-dev={on && hot ? "" : undefined}
+                data-gone={!(on && hot) && gone === i ? "" : undefined}
+                className={`relative flex flex-col border-b border-border py-1.5 ${s.page ? "cursor-pointer" : ""}`}
               >
+                {/* Julian: the row under the pointer inverted, the ink
+                    wiping in from the edge the pointer came from. */}
+                <span aria-hidden className="session-dev" />
                 {/* Julian (2026-10-02): a session with a booking page goes
                     there on a click; pointing still opens it here. */}
                 {s.page ? (
                   <Link
                     href={s.page}
-                    onFocus={() => setOpen(i)}
-                    className="grid grid-cols-[auto_minmax(0,1fr)_auto_auto] items-baseline gap-4 py-2 text-left short:py-1.5"
+                    onFocus={() => go(i)}
+                    className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-baseline gap-4 py-2 text-left short:py-1.5"
                   >
                     {head}
                   </Link>
@@ -166,8 +223,8 @@ export function SessionsScreen({ sessions }: { sessions: SessionItem[] }) {
                   type="button"
                   aria-expanded={on}
                   onClick={() => setOpen(i)}
-                  onFocus={() => setOpen(i)}
-                  className="grid grid-cols-[auto_minmax(0,1fr)_auto_auto] items-baseline gap-4 py-2 text-left short:py-1.5"
+                  onFocus={() => go(i)}
+                  className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-baseline gap-4 py-2 text-left short:py-1.5"
                 >
                   {head}
                 </button>
@@ -179,41 +236,63 @@ export function SessionsScreen({ sessions }: { sessions: SessionItem[] }) {
                   className={`grid transition-[grid-template-rows,opacity] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] ${on ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"}`}
                 >
                   <div className="min-h-0 overflow-hidden">
-                  <div className="session-more flex flex-col gap-3 pl-[clamp(0rem,4vw,4rem)] pt-4">
-                    <p className="max-w-[32.5rem] text-left text-sm leading-relaxed text-muted-foreground">
+                  <div className="session-more flex flex-col gap-4 pl-[clamp(0rem,4vw,4rem)] pt-5 short:gap-2.5 short:pt-3">
+                    {/* Julian (2026-10-02): friendlier. The words in their
+                        own case, not the page's capitals, and more air
+                        between them; what is a label stays one. */}
+                    <p className="max-w-[32.5rem] text-left text-sm normal-case leading-[1.7] text-muted-foreground text-pretty short:leading-relaxed">
                       {s.blurb}
                     </p>
                     {/* What the /sessions page used to say about each. */}
-                    {/* The rate first under a finger, where the row has no
-                        room for it: the price is what a private client
-                        came for. */}
-                    <p className="label max-w-[32.5rem] text-left text-muted-foreground">
-                      <span className="text-foreground sm:hidden">{s.rate} · </span>
-                      {s.includes.join(" · ")} · Ready in {s.turnaround}
+                    <p className="max-w-[32.5rem] text-left text-[0.8125rem] normal-case leading-relaxed text-muted-foreground text-balance">
+                      {/* Each item whole on its line, and the dot held to the
+                          item before it, so no line starts with one. */}
+                      {s.includes.map((x, k) => (
+                        <span key={x}>
+                          <span className="whitespace-nowrap">{x}</span>
+                          {k < s.includes.length - 1 ? " · " : null}
+                        </span>
+                      ))}
+                      {/* When it is ready, what they ask next: the end of
+                          this line, or under a finger a line of its own
+                          with the rate. */}
+                      <span className="max-sm:hidden">{" · "}</span>
+                      {/* The rate first under a finger, where the row has no
+                          room for it: the price is what a private client
+                          came for. */}
+                      <span className="label whitespace-nowrap text-foreground max-sm:mt-4 max-sm:block">
+                        <span className="sm:hidden">{s.rate} · </span>
+                        <span className="font-medium">Ready in {s.turnaround}</span>
+                      </span>
                     </p>
-                    {/* Not held to the words' width: the two links on one line where
-                        the column has room (Julian, 2026-10-02). */}
-                    <div className="flex flex-wrap gap-x-6">
+                    {/* Julian (2026-10-02): Book a session at the card's
+                        bottom right, the page's link on the left; under it
+                        where the column is too narrow for both, still at
+                        the right. The arrows held to their last word. */}
+                    <div className="flex flex-wrap items-baseline gap-x-8 pointer-coarse:gap-y-4">
+                      {/* The whole of it, where it has a page: the work,
+                          where, and the questions asked before booking. */}
+                      {s.page ? (
+                        <Link
+                          href={s.page}
+                          className="label block py-2 leading-[1.7] text-muted-foreground short:py-1"
+                        >
+                          {/* Where it is ("in San Jose & San Francisco") kept
+                              whole, so a line breaks before it and never
+                              inside a city's name. */}
+                          {where(s.pageTitle ?? `More on ${s.name}`)}
+                        </Link>
+                      ) : null}
                       <Link
                         href={
                           s.page
                             ? `${s.page}#book`
                             : `/?type=session&session=${encodeURIComponent(s.name)}#contact`
                         }
-                        className="label flex gap-2.5 self-start py-2"
+                        className="label ml-auto block whitespace-nowrap py-2 font-bold short:py-1"
                       >
-                        Book a session <span aria-hidden>&rarr;</span>
+                        Book a session&nbsp;<span aria-hidden>&rarr;</span>
                       </Link>
-                      {/* The whole of it, where it has a page: the work,
-                          where, and the questions asked before booking. */}
-                      {s.page ? (
-                        <Link
-                          href={s.page}
-                          className="label flex gap-2.5 self-start py-2"
-                        >
-                          {s.pageTitle ?? `More on ${s.name}`} <span aria-hidden>&rarr;</span>
-                        </Link>
-                      ) : null}
                     </div>
                   </div>
                   </div>
@@ -223,7 +302,9 @@ export function SessionsScreen({ sessions }: { sessions: SessionItem[] }) {
           })}
         </ul>
 
-        <div className="flex flex-wrap items-center justify-between gap-6 pt-8 short:pt-5">
+        {/* On a short laptop (1280x800) the heading and its button share
+            the line, or the button wraps under it and under the rail. */}
+        <div className="flex flex-wrap items-center justify-between gap-6 pt-6 short:gap-4 short:pt-5">
           <div className="flex flex-col gap-2.5">
             <span className="font-display text-[2rem] leading-none short:text-[1.625rem]">
               Book a session
@@ -237,7 +318,7 @@ export function SessionsScreen({ sessions }: { sessions: SessionItem[] }) {
           </div>
           <Link
             href="/?type=session#contact"
-            className="label action px-7 py-4 press active:scale-[0.97] short:py-2.5"
+            className="label action px-7 py-4 press active:scale-[0.97] short:px-5 short:py-2.5"
           >
             {/* The private client's verb, not the art director's (Julian,
                 2026-10-01). */}

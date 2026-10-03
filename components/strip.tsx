@@ -424,11 +424,17 @@ export function Strip({
      place in it (the back button's seat, a #discipline typed in), and
      always on the server and the cold load, so the markup and the
      crawlers have every project. Not the hash at render: the address
-     still holds the page being left (`/#inquire`). */
+     still holds the page being left (`/#inquire`).
+     A deck of screens (the homepage) mounts the one it lands on: coming
+     back from the portfolio, the second screen's eight covers and logos
+     were built inside the swap, while the screen held for 300ms
+     (scroll-craft pass, 2026-10-02). */
   const [sections, setSections] = React.useState(() =>
     !defer || !hydrated || Date.now() - poppedAt < POP_MS || Date.now() - aimedAt < POP_MS
       ? Infinity
-      : SECTIONS_FIRST,
+      : deck === "screens"
+        ? 1
+        : SECTIONS_FIRST,
   );
   /* Whether anything is still held back is this memo's to say, not a count
      of the two: `Children.count` counts an empty child and `toArray` drops
@@ -453,14 +459,44 @@ export function Strip({
     /* The later sections' openings go in now, only their covers wait:
        the ruler reads its chapters off them, and with two of thirteen it
        drew fifty six ticks until the rest arrived. */
+    if (deck !== "screens")
+      return [[...all.slice(0, cut), ...all.slice(cut).filter(opens)], true] as const;
+    /* A screen waits as an empty one in its place, so the rail has all
+       its ticks and the strip its whole length from the first frame, and
+       the screen comes in where it already stood. Coming back from the
+       portfolio the rail grew a tick at a time for a second or more
+       (Julian: the scrollbar takes a minute to load). The window into the
+       work is no screen: zero wide and tickless, it goes in as it is. It
+       is told by the covers it is handed, not by its type: from the
+       server it reaches here wrapped, never as `LeadWindow` itself. */
     return [
-      [...all.slice(0, cut), ...(deck === "screens" ? [] : all.slice(cut).filter(opens))],
+      [
+        ...all.slice(0, cut),
+        ...all.slice(cut).map((c, i) =>
+          React.isValidElement<Record<string, unknown>>(c) && "covers" in c.props ? (
+            c
+          ) : (
+            <div
+              key={`held-${cut + i}`}
+              data-held=""
+              data-tick=""
+              aria-hidden
+              className="w-full shrink-0 sm:h-full"
+            />
+          ),
+        ),
+      ],
       true,
     ] as const;
   }, [children, sections, deck]);
   React.useEffect(() => {
     hydrated = true;
   }, []);
+  /* For the wheel, whose effect must not run again as sections arrive. */
+  const heldBack = React.useRef(false);
+  React.useEffect(() => {
+    heldBack.current = holding;
+  }, [holding]);
   React.useEffect(() => {
     const el = scroller.current;
     if (!deck || !el) return;
@@ -512,11 +548,15 @@ export function Strip({
       if (asked) return;
       const next =
         deck === "screens"
-          ? null
+          ? el.querySelector<HTMLElement>(":scope > [data-held]")
           : el.querySelectorAll<HTMLElement>(":scope > [data-deck]")[sections];
-      const ahead = next
-        ? next.getBoundingClientRect().left - el.getBoundingClientRect().right
-        : el.scrollWidth - el.scrollLeft - el.clientWidth;
+      /* A held screen by where it stands in layout: the deck pins it, and
+         a pinned one reads as wherever the window is. */
+      const ahead = !next
+        ? el.scrollWidth - el.scrollLeft - el.clientWidth
+        : deck === "screens"
+          ? leftOf(next) - el.scrollLeft - el.clientWidth
+          : next.getBoundingClientRect().left - el.getBoundingClientRect().right;
       if (ahead > el.clientWidth * 1.5) return;
       asked = true;
       setSections((n) => n + 1);
@@ -1141,6 +1181,9 @@ export function Strip({
     const ready = new Promise((go) => requestAnimationFrame(go));
     Promise.all([import("lenis"), ready]).then(([{ default: Lenis }]) => {
       if (gone) return;
+      // The notch being judged, for `prevent` below.
+      let dx = 0;
+      let dy = 0;
       const lenis = new Lenis({
         wrapper: el,
         content: el,
@@ -1152,8 +1195,22 @@ export function Strip({
         /* A box that scrolls on its own (the contact form on a laptop) keeps
            the wheel until it has run out, as the strip's own wheel lets it.
            Without this Lenis took the wheel over the form and moved nothing,
-           and the send button under the fold could not be reached. */
-        allowNestedScroll: true,
+           and the send button under the fold could not be reached.
+
+           By the strip's own rule (`onWheel`): a textarea or a select keeps
+           it, a `[data-scroll]` box until it has run out. Not Lenis's
+           `allowNestedScroll`, which read the computed style of everything
+           under the pointer and laid the page out again for it: 20 to 35ms
+           on the first notch of a push on the portfolio, the lag into the
+           way back home (scroll-craft pass, 2026-10-02). */
+        prevent: (node) => {
+          if (Math.abs(dx) > Math.abs(dy)) return false;
+          if (node.matches("textarea, select")) return true;
+          if (!node.hasAttribute("data-scroll")) return false;
+          return dy < 0
+            ? node.scrollTop > 0
+            : node.scrollTop + node.clientHeight < node.scrollHeight - 1;
+        },
         /* The same gain the strip's own model uses, so what is being
            judged is the easing and not how far a notch carries: at one to
            one a notch moved 120px against 360 and Lenis would lose on a
@@ -1170,6 +1227,8 @@ export function Strip({
            one movement rather than a pulse per notch. */
         virtualScroll: (data) => {
           const e = data.event;
+          dx = data.deltaX;
+          dy = data.deltaY;
           if (!(e instanceof WheelEvent)) return true;
           /* In device pixels: at 200% Chrome can report a notch as 50,
              under the line, and it was eased as a trackpad. */
@@ -1707,6 +1766,10 @@ export function Strip({
     const size = () => {
       width = el.clientWidth;
       span = el.scrollWidth - width;
+      // Read with the rest, once a push, not on every notch of it: asked
+      // for after the pull's writes, it laid the homepage out again each
+      // notch (scroll-craft pass, 2026-10-02: 25ms a notch at full speed).
+      drawn = !!(win ??= el.querySelector<HTMLElement>(":scope > [data-lead-window]"))?.getClientRects().length;
     };
     const room = () => span;
     const clamp = (v: number) => Math.min(room(), Math.max(0, v));
@@ -1748,6 +1811,7 @@ export function Strip({
        up when first asked for, since with `defer` it mounts after the strip
        does. */
     let win: HTMLElement | null = null;
+    let drawn = false;
     /* Through the window it is one scroll past it, either way (Julian:
        seamless): the word already said what is next, so there is nothing
        to make sure of. Everywhere else the band asks for a persistent
@@ -1755,7 +1819,10 @@ export function Strip({
     const door = (dir: 1 | -1) =>
       // A cell of no width, but drawn: none under a finger on a phone.
       (dir > 0
-        ? !!(win ??= el.querySelector<HTMLElement>(":scope > [data-lead-window]"))?.getClientRects().length
+        ? win
+          ? drawn
+          : // Not in yet (`defer`): looked for until it is.
+            (drawn = !!(win = el.querySelector<HTMLElement>(":scope > [data-lead-window]"))?.getClientRects().length)
         : prevStart && prevHref === "/");
     /* The portfolio stacking over the home (`data-stack`, the default):
        past the last screen the wheel carries the portfolio's card in as
@@ -1789,8 +1856,10 @@ export function Strip({
            sinks back as the deck's screens do, instead of sliding off. */
         if ("stack" in document.documentElement.dataset) {
           last.style.scale = String(1 - (0.1 * shown) / innerWidth);
-          // The homepage's rail gives way as the card comes over it.
-          el.closest<HTMLElement>(".strip-band")?.style.setProperty("--lead-in", (shown / innerWidth).toFixed(3));
+          /* The homepage's rail gives way as the card comes over it. Set on
+             the rail, the one thing that reads it: on the band it was
+             inherited by the whole homepage, which restyled every notch. */
+          el.closest<HTMLElement>(".strip-band")?.querySelector<HTMLElement>(".strip-rail")?.style.setProperty("--lead-in", (shown / innerWidth).toFixed(3));
         } else last.style.translate = `${-shown}px`;
         win.style.setProperty("--lead-pull", `${shown}px`);
         return;
@@ -1916,7 +1985,7 @@ export function Strip({
         const last = win.previousElementSibling as HTMLElement;
         last.style.translate = "";
         last.style.scale = "";
-        el.closest<HTMLElement>(".strip-band")?.style.removeProperty("--lead-in");
+        el.closest<HTMLElement>(".strip-band")?.querySelector<HTMLElement>(".strip-rail")?.style.removeProperty("--lead-in");
         win.style.setProperty("--lead-pull", "0px");
       }
     };
@@ -2090,6 +2159,9 @@ export function Strip({
          past the last screen, which no spin that led here can be. Kept, it
          left the card over the whole window until the next notch. */
       if (!href || leaving || (!stacked(dir) && performance.now() - arrived < 500)) return;
+      /* The end of a strip whose later screens have not come in yet is not
+         its end: on the homepage's hero alone, a push was the way out. */
+      if (dir > 0 && heldBack.current) return;
       /* Never off a page with words typed into its form: the contact form
          keeps no state, and a drag across its intro or a spin over its
          steps took a half written inquiry to About and back empty. The

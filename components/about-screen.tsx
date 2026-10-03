@@ -83,7 +83,7 @@ export function AboutScreen() {
           {/* Set left, as the mockup has it: justified mono opens up. */}
           {/* Julian: on a phone, smaller and more inviting, in sentence
               case; the capitals stay from `sm` up. */}
-          <p className="title-rest mt-6 text-left text-[0.875rem] normal-case leading-[1.7] max-sm:hyphens-none text-foreground/80 sm:mt-[clamp(1.25rem,3vh,2rem)] sm:text-[clamp(0.8rem,1.6vh,0.95rem)] sm:uppercase sm:leading-[1.75] sm:tracking-[0.04em] sm:text-muted-foreground">
+          <p className="title-rest mt-6 text-left text-[0.875rem] normal-case leading-[1.7] text-foreground/80 sm:mt-[clamp(1.25rem,3vh,2rem)] sm:text-[clamp(0.8rem,1.6vh,0.95rem)] sm:uppercase sm:leading-[1.75] sm:tracking-[0.04em] sm:text-muted-foreground">
             Photographer and creative director based in the San Francisco
             Bay Area with 12+ years of experience. As an Assyrian American, I grew up between cultures,
             and that sense of being slightly outside the frame shapes how I
@@ -161,7 +161,7 @@ export function AboutScreen() {
                 key={phase.step}
                 className="grid flex-1 grid-cols-[3.25rem_minmax(0,1fr)] gap-x-5 border-t border-border py-5 sm:grid-cols-[4rem_minmax(0,1fr)] sm:py-[clamp(0.75rem,2vh,1.25rem)]"
               >
-                <span className="font-display text-3xl leading-none tabular-nums text-muted-foreground/60 sm:text-[clamp(1.75rem,min(3.6vh,3.4vw),2.6rem)]">
+                <span className="font-display text-3xl leading-none tabular-nums text-muted-foreground/80 sm:text-[clamp(1.75rem,min(3.6vh,3.4vw),2.6rem)]">
                   {String(i + 1).padStart(2, "0")}
                 </span>
                 <div>
