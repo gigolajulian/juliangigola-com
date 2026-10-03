@@ -4248,40 +4248,6 @@ optgroup {
 :root[data-nav-drawer]::view-transition-new(.page) {
   animation: jg-page-in 460ms cubic-bezier(0.32, 0.72, 0, 1) 460ms both;
 }
-/* A credit's card, coming up out of the name it explains: it scales from
-   the trigger (`--radix-hover-card-content-transform-origin`), so what
-   grows is the word that was hovered. Nothing arrives from nothing —
-   0.96, not zero. */
-@keyframes jg-credit-in {
-  from {
-    opacity: 0;
-    transform: scale(0.96) translateY(4px);
-  }
-}
-@keyframes jg-credit-out {
-  to {
-    opacity: 0;
-    transform: scale(0.96) translateY(4px);
-  }
-}
-/* Out of the trigger it was opened from, rather than out of its own
-   middle: the card belongs to the name it explains. It leaves the way it
-   came, at the same speed; Radix keeps it mounted until the animation
-   ends. (The old reduced-motion rule keyed on an attribute Radix never
-   sets, so it did nothing. This one is on the class.) */
-.credit-card {
-  transform-origin: var(--radix-hover-card-content-transform-origin);
-  animation: jg-credit-in 200ms cubic-bezier(0.23, 1, 0.32, 1) both;
-}
-.credit-card[data-state="closed"] {
-  animation: jg-credit-out 200ms cubic-bezier(0.23, 1, 0.32, 1) both;
-}
-@media (prefers-reduced-motion: reduce) {
-  .credit-card {
-    animation: none;
-  }
-}
-
 @keyframes jg-page-in {
   from {
     opacity: 0;
@@ -4392,8 +4358,13 @@ optgroup {
    project), so dealing one into the other flew the band's covers, pinned
    under the later screens, out over both pages. Julian saw it as a grid
    flashing up. The morph is for a press on a cover, not a page dealt. */
-:root[data-nav-side] [style*="view-transition-name: cover-"],
-:root[data-nav="deal"] [style*="view-transition-name: cover-"] {
+/* By `data-morph` (each thing that carries a cover's name), never by the
+   style it is named in: a root attribute over `[style*=…]` sent every
+   element with a style attribute through a restyle each time
+   `data-nav-side` came or went, 400 to 600 on the portfolio, twice a
+   crossing. */
+:root[data-nav-side] [data-morph],
+:root[data-nav="deal"] [data-morph] {
   view-transition-name: none !important;
 }
 ::view-transition-group(site-bar) {
@@ -6204,6 +6175,47 @@ h2:not(.label) {
   pointer-events: none;
   background: color-mix(in oklab, var(--background) 25%, transparent);
 }
+/* Behind a booking page's questions the same wall carries paragraphs,
+   not a line and two doors, so the ground comes further up over it. */
+.questions-wall::after {
+  background: color-mix(in oklab, var(--background) 40%, transparent);
+}
+/* The rack focus (`local-questions.tsx`): under a mouse the wall is held
+   a little out of focus while the words are read, and pulled sharp, with
+   the ground lifted off it, when the pointer goes to the photographs; the
+   words go soft the other way. A pull is a lens's, quick to start and slow
+   to settle. Nothing moves; only focus and light. */
+@media (hover: hover) and (pointer: fine) {
+  .questions-wall,
+  .questions-words {
+    transition:
+      filter 700ms var(--ease-out-strong),
+      opacity 700ms var(--ease-out-strong);
+  }
+  .questions-wall {
+    filter: blur(5px);
+  }
+  .questions-wall::after {
+    transition: background-color 700ms var(--ease-out-strong);
+  }
+  [data-look] > .questions-wall {
+    filter: none;
+  }
+  [data-look] > .questions-wall::after {
+    background: color-mix(in oklab, var(--background) 18%, transparent);
+  }
+  [data-look] > .questions-words {
+    opacity: 0.4;
+    filter: blur(2px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .questions-wall,
+  .questions-wall::after,
+  .questions-words {
+    transition: none;
+  }
+}
 
 /* ── ultrawide ────────────────────────────────────────────────────
    A 21:9 or 32:9 desktop (twice as wide as tall, and wider than a
@@ -6295,64 +6307,56 @@ h2:not(.label) {
 
 /* ── the ink ──────────────────────────────────────────────────────
  * Julian: a hover state on the session rows, inverted, animated. The
- * open row under a mouse (or the keyboard) is inked, the fill wiped in
- * from the edge the pointer came from and wiped out the same way, so
- * going down the list the ink is handed down, and going up, handed up
- * (`data-from`).
+ * open row under a mouse (or the keyboard) is inked, and since
+ * 2026-10-03 the ink is liquid: it runs down or up the list to the
+ * next row and drains to a line when the pointer leaves.
  *
  * The fill lies over the row and inverts what is under it (white,
- * `difference`), so each letter turns at the very edge of the wipe,
+ * `difference`), so each letter turns at the very edge of the ink,
  * not all at once: light on dark becomes dark on light, and the other
  * way round in the light theme. It reaches a little past the column
  * so nothing in the row moves.
  * ─────────────────────────────────────────────────────────────── */
-/* What the fill inverts: the page's ground under the inked row, in the
-   row's own group, or in the light theme there is nothing opaque below
-   it to invert and the fill reads white. Wiped with the fill, so the
-   row is the page itself when it is not inked. */
-.session-list > li {
+/* The fill is the liquid's (`sessions-screen.tsx`), a drop under the
+   open row that runs from row to row. It inverts against a second drop
+   of the page's ground under the words, in the column's own group: in
+   the light theme there is nothing opaque under it otherwise and it
+   reads white. Both reach past the column, so nothing in the row moves. */
+.session-col {
   isolation: isolate;
 }
-.session-list > li::before {
-  content: "";
-  position: absolute;
-  inset: 0 -1.25rem;
+.session-ground {
   z-index: -1;
-  border-radius: 4px;
-  background: var(--background);
-  pointer-events: none;
-  visibility: hidden;
 }
-.session-dev {
-  position: absolute;
-  inset: 0 -1.25rem;
+.session-ink {
   z-index: 1;
-  border-radius: 4px;
-  background: #fff;
   mix-blend-mode: difference;
-  pointer-events: none;
-  visibility: hidden;
 }
-[data-dev] > .session-dev,
-[data-gone] > .session-dev,
-.session-list > [data-dev]::before,
-.session-list > [data-gone]::before {
-  visibility: visible;
-  animation: 340ms var(--ease-out-strong) both;
+
+/* ── the contact sheet (`contact-sheet.tsx`) ───────────────────
+ * A rack focus under a mouse: every face sharp until one is pointed
+ * at; that one comes up a little and the rest fall back, soft and low.
+ * Filter and scale only, nothing moves in the layout.
+ * ─────────────────────────────────────────────────────────────── */
+@media (hover: hover) and (pointer: fine) {
+  .contact-sheet img {
+    transition:
+      filter 600ms var(--ease-out-strong),
+      scale 600ms var(--ease-out-strong);
+  }
+  /* Blurred, a frame is drawn a little larger than its cell, or the
+     blur pulls the cell's ground in round the edge as a coloured rim. */
+  .contact-sheet:has(button:hover) img {
+    filter: blur(5px) brightness(0.45) saturate(0.6);
+    scale: 1.1;
+  }
+  .contact-sheet button:is(:hover, :focus-visible) img {
+    filter: none;
+    scale: 1.05;
+  }
 }
-[data-from="top"] > [data-dev] > .session-dev,
-[data-from="top"] > [data-dev]::before { animation-name: ink-in-top; }
-[data-from="bottom"] > [data-dev] > .session-dev,
-[data-from="bottom"] > [data-dev]::before { animation-name: ink-in-bottom; }
-[data-from="top"] > [data-gone] > .session-dev,
-[data-from="top"] > [data-gone]::before { animation-name: ink-out-bottom; animation-duration: 260ms; }
-[data-from="bottom"] > [data-gone] > .session-dev,
-[data-from="bottom"] > [data-gone]::before { animation-name: ink-out-top; animation-duration: 260ms; }
-@keyframes ink-in-top { from { clip-path: inset(0 0 100% 0); } to { clip-path: inset(0); } }
-@keyframes ink-in-bottom { from { clip-path: inset(100% 0 0 0); } to { clip-path: inset(0); } }
-@keyframes ink-out-bottom { from { clip-path: inset(0); } to { clip-path: inset(100% 0 0 0); } }
-@keyframes ink-out-top { from { clip-path: inset(0); } to { clip-path: inset(0 0 100% 0); } }
 @media (prefers-reduced-motion: reduce) {
-  [data-dev] > .session-dev, [data-dev]::before { animation: none; }
-  [data-gone] > .session-dev, .session-list > [data-gone]::before { visibility: hidden; }
+  .contact-sheet img {
+    transition: none;
+  }
 }

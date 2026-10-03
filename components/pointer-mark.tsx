@@ -85,9 +85,73 @@ export function PointerMark() {
       stuck.style.setProperty("--lean-y", `${(dy * 0.1).toFixed(1)}px`);
     };
 
-    const draw = () => {
+    /* Momentum, not lag (Julian, 2026-10-02). The dot rides the hand
+       exactly while it moves; when the hand slows or stops, the dot keeps
+       going a little the way it was headed and springs back onto it. It is
+       a weight on a spring whose only push is the hand braking: the part
+       of its acceleration against its direction of travel. A hand at any
+       steady speed puts nothing into it, so the dot never trails, and
+       speeding up puts nothing in either, so it never falls behind. */
+    const K = (2 * Math.PI * 3.6) ** 2; // spring, about 3.6 Hz
+    const C = 2 * 0.42 * Math.sqrt(K); // damping: one soft overshoot back
+    const GAIN = 0.6; // how much of the braking the dot carries
+    const REACH = 18; // px, the farthest it runs past the hand
+    /* The hand's velocity, from the pointer events and their own clocks,
+       not from frame to frame: a 60 Hz mouse on a 120 Hz screen leaves
+       every other frame without a move, and read per frame each of those
+       looked like a stop and kicked the dot forward. */
+    let ex = 0, ey = 0, et = 0; // the last event
+    let evx = 0, evy = 0; // velocity from events, px/s
+    let vx = 0, vy = 0; // the velocity the spring sees this frame
+    let ox = 0, oy = 0, ux = 0, uy = 0; // the dot's offset and its velocity
+    let last = 0;
+    const sense = (e: PointerEvent) => {
+      const dt = (e.timeStamp - et) / 1000;
+      // `pointerover` brings the same event again; it adds nothing.
+      if (dt === 0) return;
+      if (et && dt < 0.1) {
+        evx += ((e.clientX - ex) / dt - evx) * 0.5;
+        evy += ((e.clientY - ey) / dt - evy) * 0.5;
+      } else {
+        evx = evy = 0;
+      }
+      ex = e.clientX;
+      ey = e.clientY;
+      et = e.timeStamp;
+    };
+    const draw = (now: number) => {
       raf = 0;
-      el.style.transform = `translate3d(${x}px, ${y}px, 0)`;
+      const dt = last ? Math.min(0.032, (now - last) / 1000) : 1 / 60;
+      last = now;
+      const px = vx, py = vy;
+      // No move for a beat is a hand at rest: its speed falls away fast.
+      const fresh = now - et < 45;
+      vx = fresh ? evx : vx * Math.exp(-dt / 0.025);
+      vy = fresh ? evy : vy * Math.exp(-dt / 0.025);
+      let fx = 0, fy = 0;
+      const speed = Math.hypot(px, py);
+      if (!stuck && !still.matches && speed > 1) {
+        const ax = (vx - px) / dt, ay = (vy - py) / dt;
+        const along = (ax * px + ay * py) / speed; // < 0 while braking
+        if (along < 0) {
+          fx = (-along * px) / speed * GAIN;
+          fy = (-along * py) / speed * GAIN;
+        }
+      }
+      ux += (fx - K * ox - C * ux) * dt;
+      uy += (fy - K * oy - C * uy) * dt;
+      ox += ux * dt;
+      oy += uy * dt;
+      // Softly held to its reach rather than stopped dead at it.
+      const d = Math.hypot(ox, oy);
+      const k = d > 0 ? (REACH * Math.tanh(d / REACH)) / d : 0;
+      el.style.transform = `translate3d(${x + ox * k}px, ${y + oy * k}px, 0)`;
+      // Runs while the hand or the dot is moving, and sleeps after.
+      if (Math.hypot(vx, vy) > 2 || d > 0.05 || Math.hypot(ux, uy) > 1) {
+        raf = requestAnimationFrame(draw);
+      } else {
+        last = 0;
+      }
     };
     /* A touchscreen laptop matches a fine pointer too; a finger on it must
        not drag the mark to wherever it landed. */
@@ -95,6 +159,7 @@ export function PointerMark() {
       if (e.pointerType === "touch") return;
       x = e.clientX;
       y = e.clientY;
+      sense(e);
       pull();
       if (!raf) raf = requestAnimationFrame(draw);
       if (!el.hasAttribute("data-on")) {

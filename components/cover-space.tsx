@@ -140,7 +140,9 @@ export function CoverSpace({
       });
       frames.forEach((f, i) => moves[i] && f.style.setProperty("--clear-y", `${Math.round(moves[i])}px`));
     };
-    clear();
+    /* No first call here: the observer's own first call comes before the
+       first paint anyway, and one here as well laid out the whole new
+       homepage twice inside the swap back from the portfolio. */
     const watch = new ResizeObserver(clear);
     watch.observe(ring);
     watch.observe(mid);

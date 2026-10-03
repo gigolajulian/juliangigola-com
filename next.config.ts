@@ -90,6 +90,11 @@ const workRedirects = [
 
 /** Pages that moved or were retired. */
 const pageRedirects = [
+  // Julian (2026-10-03): a session gallery small enough to be all there
+  // is a screen of the page that books it (`contact-sheet.tsx`). Not
+  // permanent while it is new.
+  { source: "/portfolio/headshots", destination: "/headshots#work", permanent: false },
+  { source: "/portfolio/graduation", destination: "/graduation-photos#work", permanent: false },
   // Julian: change Studio to About. The page moved; the old name follows.
   { source: "/studio", destination: "/#about", permanent: true },
   // Julian: About and Contact are homepage screens now. The query rides
@@ -246,6 +251,17 @@ const nextConfig: NextConfig = {
   // Compile and runtime errors are still surfaced — this only removes the
   // idle indicator, not the error overlay.
   devIndicators: false,
+
+  /**
+   * DialKit on the dev server only (Julian). A production build gets
+   * `lib/dialkit-stub.ts` in its place: the configs' defaults and no panel,
+   * so visitors no longer download 72KB gzipped of tuning panels they never
+   * saw (the audit, 2026-10-02).
+   */
+  turbopack: {
+    resolveAlias:
+      process.env.NODE_ENV === "production" ? { dialkit: "./lib/dialkit-stub.ts" } : {},
+  },
 
   /**
    * Photographs are resized and re-encoded by Cloudflare, not by Next.

@@ -8,7 +8,9 @@ import { LocalQuestions } from "@/components/local-questions";
 import { CoverFloat } from "@/components/cover-float";
 import { Testimonials } from "@/components/testimonials";
 import { BOOKING_PAGES, bookingHref, bookingPage } from "@/lib/booking";
-import { getProject } from "@/lib/work";
+import { getProject, projectsIn, wallOf } from "@/lib/work";
+import { InquireWall } from "@/components/inquire-wall";
+import { ContactSheet } from "@/components/contact-sheet";
 import { serviceGraph } from "@/lib/seo";
 
 /* ── a booking page ───────────────────────────────────────────────
@@ -67,6 +69,29 @@ export default async function BookingPage(props: PageProps<"/[service]">) {
       const project = getProject(t.href.split("/").pop() ?? "");
       return project ? [{ ...project, cover: t.frame }] : [];
     });
+  /* A session carries its gallery as a screen of its own (Julian,
+     2026-10-03): the frames chosen for it where the gallery is large
+     (`picks`, `lib/booking.ts`), all of it where it fits in four rows of
+     five, and otherwise fourteen, taken in turn from each of the
+     discipline's projects or spread through the one gallery. */
+  const slug = page.gallery.href.split("/").pop() ?? "";
+  const one = getProject(slug);
+  const sets = (one ? [one] : projectsIn(slug)).map((p) => p.images);
+  const total = sets.reduce((n, s) => n + s.length, 0);
+  const all = sets.flat();
+  const sheet = !page.session
+    ? undefined
+    : page.picks
+      ? page.picks.flatMap((src) => all.filter((f) => f.src === src).slice(0, 1))
+      : total <= 19
+      ? all
+      : sets.length === 1
+        ? Array.from({ length: 14 }, (_, i) => sets[0][Math.floor((i * total) / 14)])
+        : Array.from({ length: Math.max(...sets.map((s) => s.length)) }, (_, k) =>
+            sets.flatMap((s) => (s[k] ? [s[k]] : [])),
+          )
+            .flat()
+            .slice(0, 14);
   const facts = [page.rate, ...(page.turnaround ? [`Ready in ${page.turnaround}`] : [])];
 
   return (
@@ -97,14 +122,25 @@ export default async function BookingPage(props: PageProps<"/[service]">) {
             where: facts.join(" · "),
             ctas: [
               { href: "#book", label: page.book.title },
-              { href: page.gallery.href, label: "See the work" },
+              { href: sheet ? "#work" : page.gallery.href, label: "See the work" },
             ],
           }}
           className="w-full shrink-0 max-sm:h-[100svh] sm:h-full"
         />
+        {sheet ? (
+          <ContactSheet
+            frames={sheet}
+            total={total}
+            name={page.name}
+            book={page.book.title}
+            gallery={page.gallery.href}
+            even={page.slug === "headshots"}
+          />
+        ) : null}
         <Testimonials cells />
         <LocalQuestions
           faqs={page.faqs}
+          backdrop={<InquireWall items={wallOf(slug)} />}
           details={{
             facts,
             blocks: [

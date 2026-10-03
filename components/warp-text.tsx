@@ -226,6 +226,22 @@ const buildTextCanvas = async (
   return canvas;
 };
 
+/* The hero's name kept between visits: leaving the homepage parks its
+   renderer, compiled program and texture here rather than losing the
+   context, and coming back takes them up again. Building them anew cost
+   the way back from the portfolio about 140ms inside the page swap (a
+   new WebGL context, then a 93ms first `setSize` on its drawing buffer). */
+type Kept = {
+  renderer: Renderer;
+  program: Program;
+  geometry: Triangle;
+  texture: Texture;
+  uniforms: Record<string, { value: unknown }>;
+};
+/* One for each WarpText (by its class): the header's logo is one too, and
+   a renderer taken up at another's size would pay for the resize again. */
+const parked = new Map<string, Kept>();
+
 export function WarpText({
   text,
   fontSize = "clamp(3rem, 10vw, 9rem)",
@@ -282,9 +298,13 @@ export function WarpText({
       Math.min(devicePixelRatio || 1, 2) *
       ((container as HTMLElement & { currentCSSZoom?: number }).currentCSSZoom ?? 1);
 
+    const key = className ?? "";
+    let kept = parked.get(key);
+    parked.delete(key);
+    if (kept?.renderer.gl.isContextLost()) kept = undefined;
     let renderer: Renderer;
     try {
-      renderer = new Renderer({
+      renderer = kept?.renderer ?? new Renderer({
         webgl: 2,
         alpha: true,
         premultipliedAlpha: false,
@@ -329,12 +349,20 @@ export function WarpText({
        left to right). */
     let fading = false;
     let waiting = sweepRef.current && !reduceMotion;
-    const rise = container.closest(".lift")?.getAnimations()[0];
-    const riseTiming = rise?.effect?.getComputedTiming();
-    const passFrom =
-      Number(riseTiming?.delay ?? 0) + Number(riseTiming?.duration ?? 0) * 0.25;
+    /* Looked up at the first frame that wants it, not here: `getAnimations`
+       brings the styles of the whole new page up to date, 17ms inside the
+       swap back from the portfolio. */
+    let rise: Animation | undefined;
+    let passFrom = 0;
+    let looked = false;
     const maybePass = (now: number) => {
       if (!waiting) return;
+      if (!looked) {
+        looked = true;
+        rise = container.closest(".lift")?.getAnimations()[0];
+        const riseTiming = rise?.effect?.getComputedTiming();
+        passFrom = Number(riseTiming?.delay ?? 0) + Number(riseTiming?.duration ?? 0) * 0.25;
+      }
       const at = rise ? Number(rise.currentTime ?? 0) : Infinity;
       if (rise && rise.playState !== "finished" && at < passFrom) return;
       waiting = false;
@@ -346,7 +374,7 @@ export function WarpText({
       pass = now;
     };
 
-    const texture = new Texture(gl, {
+    const texture = kept?.texture ?? new Texture(gl, {
       generateMipmaps: false,
       minFilter: gl.LINEAR,
       magFilter: gl.LINEAR,
@@ -354,8 +382,8 @@ export function WarpText({
       wrapT: gl.CLAMP_TO_EDGE,
     });
     const l = lookRef.current;
-    const geometry = new Triangle(gl);
-    const uniforms = {
+    const geometry = kept?.geometry ?? new Triangle(gl);
+    const fresh = {
       uTextTexture: { value: texture },
       uResolution: { value: new Float32Array([1, 1]) },
       uPointer: { value: new Float32Array([0.5, 0.5]) },
@@ -370,10 +398,13 @@ export function WarpText({
       uRipple: { value: Number(l.ripple) },
       uMotion: { value: reduceMotion ? 0 : 1 },
     };
+    // A kept program is bound to its own uniforms: the same object, set anew.
+    const uniforms = kept ? (Object.assign(kept.uniforms, fresh) as typeof fresh) : fresh;
     /* The program once its shaders are compiled, which the GPU does in
        its own time (`lib/gl-warm.ts`); nothing draws until then, and the
        name is still rising under the opening by the time it is. */
-    let program: Program | undefined;
+    // A kept one at once, so a remount straight away can park it again.
+    let program: Program | undefined = kept?.program;
     let mesh: Mesh | undefined;
 
     const renderOnce = () => {
@@ -409,8 +440,13 @@ export function WarpText({
       // resize, so the canvas stayed too big and the name was cut off.
       const rect = { width: container.clientWidth, height: container.clientHeight };
       if (rect.width <= 0 || rect.height <= 0) return;
-      renderer.dpr = density();
-      renderer.setSize(rect.width, rect.height);
+      // Only when it changed: setting a WebGL canvas's size, even to the
+      // same, reallocates its drawing buffer (93ms on the way back home).
+      const dpr = density();
+      if (renderer.dpr !== dpr || renderer.width !== rect.width || renderer.height !== rect.height) {
+        renderer.dpr = dpr;
+        renderer.setSize(rect.width, rect.height);
+      }
       uniforms.uResolution.value[0] = gl.drawingBufferWidth;
       uniforms.uResolution.value[1] = gl.drawingBufferHeight;
       rasterize();
@@ -544,18 +580,20 @@ export function WarpText({
     document.addEventListener("visibilitychange", onVisibility);
     reduced.addEventListener("change", onReducedMotion);
 
-    buildProgram(gl, {
+    (kept ? Promise.resolve(kept.program) : buildProgram(gl, {
       vertex,
       fragment,
       transparent: true,
       depthTest: false,
       depthWrite: false,
       uniforms,
-    }).then((built) => {
+    })).then((built) => {
       program = built;
       if (disposed || contextLost) return;
       mesh = new Mesh(gl, { geometry, program });
-      resize();
+      // A kept renderer waits for the size observer's first call, which
+      // comes once the new page is laid out, rather than laying it out now.
+      if (!kept) resize();
       if (visible && pageVisible && !raf) raf = requestAnimationFrame(loop);
     });
 
@@ -572,7 +610,9 @@ export function WarpText({
       canvas.removeEventListener("webglcontextlost", onContextLost);
       document.removeEventListener("visibilitychange", onVisibility);
       reduced.removeEventListener("change", onReducedMotion);
-      if (!contextLost) {
+      if (!contextLost && program && !parked.has(key)) {
+        parked.set(key, { renderer, program, geometry, texture, uniforms });
+      } else if (!contextLost) {
         try {
           if (texture.texture) gl.deleteTexture(texture.texture);
           geometry.remove();
@@ -582,6 +622,7 @@ export function WarpText({
       }
       canvas.remove();
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- set up once; the class names the instance
   }, []);
 
   return <div ref={ref} aria-hidden className={`warp-text ${className ?? ""}`} style={style} />;
