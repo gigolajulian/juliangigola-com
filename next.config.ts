@@ -90,6 +90,11 @@ const workRedirects = [
 
 /** Pages that moved or were retired. */
 const pageRedirects = [
+  // Julian (2026-10-03): a session gallery small enough to be all there
+  // is a screen of the page that books it (`contact-sheet.tsx`). Not
+  // permanent while it is new.
+  { source: "/portfolio/headshots", destination: "/headshots#work", permanent: false },
+  { source: "/portfolio/graduation", destination: "/graduation-photos#work", permanent: false },
   // Julian: change Studio to About. The page moved; the old name follows.
   { source: "/studio", destination: "/#about", permanent: true },
   // Julian: About and Contact are homepage screens now. The query rides

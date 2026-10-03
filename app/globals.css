@@ -6332,3 +6332,31 @@ h2:not(.label) {
   z-index: 1;
   mix-blend-mode: difference;
 }
+
+/* ── the contact sheet (`contact-sheet.tsx`) ───────────────────
+ * A rack focus under a mouse: every face sharp until one is pointed
+ * at; that one comes up a little and the rest fall back, soft and low.
+ * Filter and scale only, nothing moves in the layout.
+ * ─────────────────────────────────────────────────────────────── */
+@media (hover: hover) and (pointer: fine) {
+  .contact-sheet img {
+    transition:
+      filter 600ms var(--ease-out-strong),
+      scale 600ms var(--ease-out-strong);
+  }
+  /* Blurred, a frame is drawn a little larger than its cell, or the
+     blur pulls the cell's ground in round the edge as a coloured rim. */
+  .contact-sheet:has(button:hover) img {
+    filter: blur(5px) brightness(0.45) saturate(0.6);
+    scale: 1.1;
+  }
+  .contact-sheet button:is(:hover, :focus-visible) img {
+    filter: none;
+    scale: 1.05;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .contact-sheet img {
+    transition: none;
+  }
+}
