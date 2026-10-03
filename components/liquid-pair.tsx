@@ -32,9 +32,32 @@ export function LiquidPair({
   const mouse = React.useSyncExternalStore(subscribeMouse, isMouse, () => false);
   // When the pointer last left the first button (`Quiet` reads it).
   const left = React.useRef(-Infinity);
-  if (!mouse) {
+  /* And only while it is on screen, from the first idle moment after it
+     arrives. Each liquid runs a loop of its own that wakes on any scroll
+     on the page and measures its buttons every frame, and the homepage
+     has five: on the way back from the portfolio they were set up inside
+     the page swap and then measured every frame of the strip's travel,
+     the largest cost of both crossings (scroll-craft pass, 2026-10-02).
+     The plain buttons are the same at rest, so the change is not seen. */
+  const [node, setNode] = React.useState<HTMLDivElement | null>(null);
+  const [live, setLive] = React.useState(false);
+  React.useEffect(() => {
+    if (!mouse || !node) return;
+    let soon = 0;
+    const io = new IntersectionObserver(([e]) => {
+      cancelIdle(soon);
+      if (e.isIntersecting) soon = whenIdle(() => setLive(true));
+      else setLive(false);
+    });
+    io.observe(node);
+    return () => {
+      io.disconnect();
+      cancelIdle(soon);
+    };
+  }, [mouse, node]);
+  if (!mouse || !live) {
     return (
-      <div {...rest} className={className}>
+      <div ref={setNode} {...rest} className={className}>
         {children}
       </div>
     );
@@ -46,6 +69,7 @@ export function LiquidPair({
     /-quiet/.test(child.props.className ?? "");
   return (
     <Liquid
+      ref={setNode}
       blur={7}
       contrast={18}
       fill={fill}
@@ -70,6 +94,21 @@ export function LiquidPair({
     </Liquid>
   );
 }
+
+type IdleWindow = Window & {
+  requestIdleCallback?: (cb: () => void, o?: { timeout: number }) => number;
+  cancelIdleCallback?: (h: number) => void;
+};
+// Safari has no idle callback; a beat stands in for it.
+const whenIdle = (fn: () => void) => {
+  const w = window as IdleWindow;
+  return w.requestIdleCallback ? w.requestIdleCallback(fn, { timeout: 1000 }) : window.setTimeout(fn, 250);
+};
+const cancelIdle = (h: number) => {
+  const w = window as IdleWindow;
+  if (w.cancelIdleCallback) w.cancelIdleCallback(h);
+  else window.clearTimeout(h);
+};
 
 const MOUSE = "(hover: hover) and (pointer: fine)";
 const isMouse = () => matchMedia(MOUSE).matches;

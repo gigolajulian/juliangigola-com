@@ -114,6 +114,19 @@ const DriftWall = ({
           r.top < box.bottom
         );
       });
+      /* Only the ones in view are fetched now, and ahead of everything
+         else. Every tile used to go at once: lazy loading counts anything
+         within a screen or two as near, which is the whole wall, so the
+         dozens out of view competed with the few in it and the wall
+         waited on all of them (Julian: the background on #inquire takes
+         a while; load only what is in the viewport). The rest are handed
+         their addresses once it is shown (`shown` below). */
+      for (const img of inView) {
+        img.loading = 'eager';
+        img.fetchPriority = 'high';
+        if (img.dataset.srcset) img.srcset = img.dataset.srcset;
+        if (img.dataset.src) img.src = img.dataset.src;
+      }
       Promise.all(
         inView.map(img =>
           img.complete
@@ -388,7 +401,7 @@ const DriftWall = ({
     const inner = (
       <span className="drift-wall__inner">
         {/* eslint-disable-next-line @next/next/no-img-element -- the site passes loader-sized URLs */}
-        <img src={item.image} srcSet={item.srcSet} sizes={containerWidth && containerWidth < 640 ? '110px' : `${tileWidth}px`} alt={item.title ?? ''} loading={eager || seen ? 'eager' : 'lazy'} decoding="async" draggable={false} onLoad={e => e.currentTarget.classList.add('is-loaded')} />
+        <img src={eager || shown ? item.image : undefined} srcSet={eager || shown ? item.srcSet : undefined} data-src={item.image} data-srcset={item.srcSet} sizes={containerWidth && containerWidth < 640 ? '110px' : `${tileWidth}px`} alt={item.title ?? ''} loading={eager || seen ? 'eager' : 'lazy'} decoding="async" draggable={false} onLoad={e => e.currentTarget.classList.add('is-loaded')} />
         <span className="drift-wall__overlay" aria-hidden="true" />
       </span>
     );
