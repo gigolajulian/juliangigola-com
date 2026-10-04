@@ -38,9 +38,11 @@ const svg = await readFile(join(root, "app/icon.svg"));
 const SMALL = Buffer.from(
   `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="512" height="512">` +
     `<rect width="100" height="100" fill="#000"/>` +
+    // Scaled out with the big mark (Julian, 2026-10-04).
+    `<g transform="translate(50 50) scale(1.15) translate(-50 -50)">` +
     `<path d="M4 49.6 A58 58 0 0 1 96 49.6 A58 58 0 0 1 4 49.6 Z" fill="#fff"/>` +
     `<circle cx="50" cy="41" r="19" fill="#000"/>` +
-    `</svg>`,
+    `</g></svg>`,
 );
 
 /** The mark at one size, as PNG. Under 24px it is the simplified drawing. */
