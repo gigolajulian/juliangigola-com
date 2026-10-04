@@ -46,7 +46,8 @@ import {
    (it splits camelCase into words), so every one says what it moves. */
 export const CARDS = {
   motion: { type: "spring", visualDuration: 0.3, bounce: 0.2 },
-  grow: [1.02, 1, 1.2, 0.005],
+  // No swell under the pointer (Julian, 2026-10-04: no hover zoom anywhere).
+  grow: [1, 1, 1.2, 0.005],
   forward: [21, 0, 200, 1],
   towardMiddle: [0.06, 0, 1, 0.01],
   shadow: { blur: [4, 0, 80, 1], opacity: [0.3, 0, 1, 0.01] },

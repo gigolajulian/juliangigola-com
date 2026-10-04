@@ -15,6 +15,7 @@ import { PointerMark } from "@/components/pointer-mark";
 import "./globals.css";
 import { ImageFallback } from "@/components/image-fallback";
 import { PageTransition } from "@/components/page-transition";
+import { FocusField } from "@/components/focus-field";
 import { ldJson, siteGraph } from "@/lib/seo";
 
 /* Two families and no more, at Julian's ask: Inter Tight Black for the
@@ -234,6 +235,8 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           <PageTransition>{children}</PageTransition>
         </main>
         <SiteFooter />
+        {/* Focus round the pointer over a gallery: `focus-field.tsx`. */}
+        <FocusField />
         <PhotoNotice />
         {/* The pointer over anything that opens large, site wide. One
             mount: it follows the pointer and shows only over `[data-ring]`,

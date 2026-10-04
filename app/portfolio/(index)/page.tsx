@@ -18,6 +18,7 @@ import { COVER_RELEASES } from "@/lib/cover-art-data";
 import { CONTENT } from "@/lib/content";
 import type { Frame } from "@/lib/work-types";
 import { WORK_ROWS } from "@/lib/work-rows";
+import { frameHash } from "@/lib/frame-hash";
 
 export const metadata: Metadata = {
   title: "Photography Portfolio, San Francisco Bay Area",
@@ -78,6 +79,8 @@ export default function WorkPage() {
             title={film.title}
             poster={"id" in film ? posterFor(film) : film.poster}
             href={c.href}
+            hash={"id" in film ? film.id : "reel"}
+            credit={"id" in film ? film.client : undefined}
             i={i++}
             eager={k === 0}
           />,
@@ -121,6 +124,7 @@ export default function WorkPage() {
             frame={frame}
             n={viewer.push(frame) - 1}
             name={c.name}
+            hash={frameHash(frame.src)}
             i={i++}
           />,
         );
@@ -148,6 +152,9 @@ export default function WorkPage() {
              size of each project is the thing that distinguishes them, and
              it is noise across fifty-eight covers of everything. */
           row={{ ...indexRow(p), frames: undefined }}
+          // A deep link to the project's place here: the homepage's
+          // Commissions table opens on it (/portfolio#<slug>).
+          hash={p.slug}
           i={i++}
           mark={markFor(p.slug)?.slug}
           eager={i < 4}
@@ -182,7 +189,8 @@ export default function WorkPage() {
       // Julian: scrolling back past the start goes home, to the hero
       // (2026-10-01), not to the last screen it left by.
       prev={{ href: "/", name: "Home", start: true }}
-      className="mt-4 max-sm:mt-2 short:mt-2 flex-1"
+      // The pictures come into the page as it is scrolled (globals.css).
+      className="portfolio-arrive mt-4 max-sm:mt-2 short:mt-2 flex-1"
     >
       {cells}
     </WorkStrip>

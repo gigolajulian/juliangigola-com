@@ -123,16 +123,16 @@ export function LeadWindow({ covers }: { covers: IndexRow[] }) {
                     className="object-cover"
                   />
                 )}
-                {/* The page's plate (`cover-cell.tsx`), name and credit. */}
-                <span className="cover-plate absolute -inset-x-0.5 -bottom-0.5 flex h-[15%] min-h-[1.8333rem] flex-col justify-center gap-[0.8cqw] glass-surface bg-background/70 px-[4cqw]">
+                {/* The page's slate (`cover-cell.tsx`), credit and name. */}
+                <span className="cover-slate absolute inset-x-0 bottom-0 flex flex-col items-start gap-[1.2cqw] bg-gradient-to-t from-black/80 via-black/35 to-transparent px-[5cqw] pb-[4.5cqw] pt-[16cqw]">
+                  <span className="label min-w-0 max-w-full truncate text-[clamp(0.625rem,1.6cqw,0.75rem)] leading-none text-white/75">
+                    {credit}
+                  </span>
                   <span
                     style={{ "--n": name.length } as React.CSSProperties}
-                    className="cover-name font-display min-w-0 truncate uppercase leading-[0.9] tracking-[0]"
+                    className="cover-name font-display min-w-0 max-w-full truncate uppercase leading-[0.9] text-white"
                   >
                     {name}
-                  </span>
-                  <span className="label min-w-0 truncate text-[clamp(0.6875rem,1.5cqw,0.75rem)] leading-none text-muted-foreground">
-                    {credit}
                   </span>
                 </span>
               </span>

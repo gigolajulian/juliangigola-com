@@ -1568,15 +1568,16 @@ const mediumOf = (disciplineSlug: string): string =>
    its set's first frame again, so the first one past the tile's).
    Motion has no sets: Julian, the reel, muted, from three seconds in as
    on the motion page. */
-/* Julian's order, drawn over the page (2026-09-29): four a row. */
+/* Julian's order for the homepage's Commissions (2026-10-03): event
+   coverage in, Chroma out. */
 const TILE_SLUGS = [
   "campaigns",
-  "portraits",
-  "editorial",
-  "mixed-media",
-  "coverart",
   "artist-presskit",
-  "chroma",
+  "editorial",
+  "portraits",
+  "mixed-media",
+  "events",
+  "coverart",
   "video",
 ];
 /* Julian's picks: Cover Art keeps its photograph of the covers laid out

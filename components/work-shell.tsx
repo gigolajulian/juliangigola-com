@@ -824,7 +824,7 @@ export function WorkShell({
 
   const toggle = (
     <span className="relative block h-[1.625rem] max-sm:hidden">
-      <span className="absolute right-0 top-0 flex w-max items-center gap-1 whitespace-nowrap">
+      <span className="absolute right-0 top-3 flex w-max items-center gap-1 whitespace-nowrap">
         {modes.map((mode) => (
           <button
             key={mode}

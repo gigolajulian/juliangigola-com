@@ -109,7 +109,7 @@
       "title": "The Description",
       "provider": "youtube",
       "videoId": "E7N7HDnQjfI",
-      "poster": "https://i.ytimg.com/vi/E7N7HDnQjfI/maxresdefault.jpg",
+      "poster": "/films/the-description.jpg",
       "client": "Sammy Shiblaq",
       "section": "music"
     },
@@ -127,7 +127,7 @@
       "title": "Dide O Del",
       "provider": "youtube",
       "videoId": "pwzi7LKu-_I",
-      "poster": "https://i.ytimg.com/vi/pwzi7LKu-_I/maxresdefault.jpg",
+      "poster": "/films/dide-o-del.jpg",
       "client": "Imanemun",
       "section": "music"
     },
@@ -138,14 +138,14 @@
       "videoId": "895734192",
       "section": "commercial",
       "client": "Ladera Granola",
-      "poster": "https://i.vimeocdn.com/video/1770614733-3d69b472e5ab7063c1197e1645f9ceb7d00f19c1db0222854107ab501e3d4d78-d_1280x720"
+      "poster": "/films/ladera-granola-film.jpg"
     },
     {
       "id": "youtube-ym7xEK50OT0",
       "title": "Campaign",
       "provider": "youtube",
       "videoId": "ym7xEK50OT0",
-      "poster": "https://i.ytimg.com/vi/ym7xEK50OT0/maxresdefault.jpg",
+      "poster": "/films/pear-vc-campaign.jpg",
       "client": "Pear VC",
       "section": "commercial"
     },
@@ -163,7 +163,7 @@
       "title": "Purgation",
       "provider": "youtube",
       "videoId": "1e1fYalqTJs",
-      "poster": "https://i.ytimg.com/vi/1e1fYalqTJs/maxresdefault.jpg",
+      "poster": "/films/purgation.jpg",
       "client": "After Dark Fashion",
       "year": 2022,
       "section": "commercial"

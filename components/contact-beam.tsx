@@ -5,7 +5,7 @@ import { BorderBeam } from "border-beam";
 import { useSiteTheme } from "@/lib/site-theme";
 
 /* Julian: the form in a beam (`border-beam`, Libraries.dev), at his
-   settings: the full border, 0.7, in the site's own theme. Mono: Julian
+   settings: the full border, in the site's own theme. Mono: Julian
    took the colors off the form (2026-09-29). */
 export function ContactBeam({
   className,
@@ -19,7 +19,10 @@ export function ContactBeam({
     <BorderBeam
       size="md"
       colorVariant="mono"
-      strength={0.7}
+      /* Julian (2026-10-03): brighter. Full strength (was 0.7) and the
+         glow lifted past the library's 1.3. */
+      strength={1}
+      brightness={2}
       theme={theme}
       /* Julian: rounded, 16px, with the form's box (`rounded-[16px]`,
          `app/contact/page.tsx`). */

@@ -4,6 +4,7 @@ import type * as React from "react";
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Liquid } from "@/components/liquid";
 import { RisingTitle } from "@/components/strip-page";
 import type { Frame } from "@/lib/work-types";
@@ -45,6 +46,7 @@ function where(title: string) {
 }
 
 export function SessionsScreen({ sessions }: { sessions: SessionItem[] }) {
+  const router = useRouter();
   const [open, setOpen] = useState(0);
   /* Whether a mouse or the keyboard is in the list: the open row is
      inked only then (`.session-dev`, `globals.css`). A finger opens a row
@@ -228,6 +230,10 @@ export function SessionsScreen({ sessions }: { sessions: SessionItem[] }) {
                 // arrives, as About's steps do (`.session-step`, globals.css).
                 style={{ "--i": i } as React.CSSProperties}
                 onPointerMove={() => go(i)}
+                /* Julian (2026-10-04): the booking page fetched on the
+                   pointer, so the press has nothing to wait for. Five rows
+                   at most, and the router asks for each once. */
+                onPointerEnter={s.page ? () => router.prefetch(s.page!) : undefined}
                 /* Julian (2026-10-02): anywhere in the row goes to the
                    booking page, bar its own links: a click on the row is a
                    click on its name, the link a keyboard and a reader get,

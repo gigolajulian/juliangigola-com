@@ -4,6 +4,7 @@ import type * as React from "react";
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { Liquid } from "@/components/liquid";
 import { RisingTitle } from "@/components/strip-page";
 import type { Frame } from "@/lib/work-types";
 
@@ -14,8 +15,8 @@ export type ServiceRow = {
   slug: string;
   name: string;
   href: string;
-  medium: string;
-  count: number;
+  /** What the discipline is, one line under its name. */
+  about: string;
   cover: Frame;
   /** Up to twelve frames of the discipline's projects, for the light table. */
   shots: Shot[];
@@ -39,11 +40,14 @@ function justify(shots: Shot[], w: number, h: number) {
   const total = ar.reduce((a, b) => a + b, 0);
   let best = { rows: [] as number[][], heights: [] as number[], area: -1 };
   for (let n = 1; n <= Math.min(6, shots.length); n++) {
-    // Greedy: close a row once it holds its share of the total aspect.
+    // Greedy: close a row once the next frame would sit mostly past its
+    // share of the total aspect. Testing the sum alone left nine films a
+    // hair under three apiece, so they ran 4, 4 and one huge (Julian:
+    // clean on the bottom).
     const rows: number[][] = [[]];
     let sum = 0;
     ar.forEach((a, i) => {
-      if (sum >= total / n && rows.length < n) {
+      if (rows[rows.length - 1].length && sum + a / 2 > total / n && rows.length < n) {
         rows.push([]);
         sum = 0;
       }
@@ -86,6 +90,30 @@ export function ServicesScreen({
 
   const laid = box[0] ? justify(shots, box[0], box[1]) : null;
 
+  /* Julian (2026-10-03): the rows' hover in liquid, as Sessions has it.
+     One drop under the row the pointer is on: it fills from the edge the
+     pointer came in by, runs to the next row, drains to a line on leave. */
+  const col = useRef<HTMLDivElement>(null);
+  type Edge = "top" | "bottom" | "left" | "right";
+  const [hot, setHot] = useState(false);
+  const [edge, setEdge] = useState<Edge>("top");
+  const [pinch, setPinch] = useState(false);
+  const flick = useRef(0);
+  const [drop, setDrop] = useState({ y: 0, h: 0 });
+  const nearest = (e: React.PointerEvent, li: Element | null): Edge => {
+    if (!li) return edge;
+    const r = li.getBoundingClientRect();
+    const d = { top: e.clientY - r.top, bottom: r.bottom - e.clientY, left: e.clientX - r.left, right: r.right - e.clientX };
+    return (Object.keys(d) as Edge[]).reduce((m, k) => (d[k] < d[m] ? k : m));
+  };
+  useEffect(() => {
+    const li = col.current?.querySelector("ul")?.children[on] as HTMLElement | undefined;
+    const c = col.current?.getBoundingClientRect();
+    if (!li || !c) return;
+    const r = li.getBoundingClientRect();
+    setDrop({ y: Math.round(r.top - c.top), h: Math.round(r.height) });
+  }, [on, hot]);
+
 
   return (
     <section
@@ -96,37 +124,91 @@ export function ServicesScreen({
       className="relative flex w-full shrink-0 flex-col sm:h-full"
     >
       <div className="services-screen screen-measure grid min-h-0 flex-1 grid-cols-1 items-center gap-10 px-6 py-12 sm:grid-cols-[minmax(0,1fr)_minmax(0,2fr)] sm:gap-x-[clamp(2rem,4vw,5rem)] sm:px-10 sm:pb-6 sm:pt-20 sm:[container-type:size]">
-        <div className="flex min-w-0 flex-col gap-6">
+        <div className="flex min-w-0 flex-col gap-5">
           <RisingTitle text="Commissions" />
-          <ul className="border-t border-border">
+          {/* A pitch, not a list heading (Julian, 2026-10-03: less of a menu). */}
+          <p className="title-rest -mt-2 whitespace-nowrap text-left text-sm leading-relaxed text-muted-foreground short:hidden">
+            From concept to final frame.
+          </p>
+          <div ref={col} className="services-col relative isolate">
+          <div aria-hidden className="services-ground pointer-events-none absolute inset-y-0 -inset-x-3 -z-10 max-sm:hidden">
+            <Liquid blur={5} contrast={18} fill="var(--services-hover)" className="h-full w-full">
+              <Liquid.Item effect="move" move={{ springiness: 0.92, wobble: 0, stretch: 0.04, trail: 0 }}>
+                <div
+                  className="absolute left-0 top-0 rounded-[4px]"
+                  style={{
+                    ...(hot && !pinch
+                      ? { left: 0, width: "100%", height: drop.h, transform: `translateY(${drop.y}px)` }
+                      : {
+                          /* Shut, as a line along the edge. */
+                          left: edge === "right" ? "100%" : 0,
+                          width: edge === "left" || edge === "right" ? 0 : "100%",
+                          height: edge === "top" || edge === "bottom" ? 0 : drop.h,
+                          transform: `translateY(${edge === "bottom" ? drop.y + drop.h : drop.y}px)`,
+                        }),
+                    transition: pinch
+                      ? "none"
+                      : ["left", "width", "height", "transform"]
+                          .map((k) => `${k} ${hot ? 340 : 240}ms var(--ease-out-strong)`)
+                          .join(", "),
+                  }}
+                />
+              </Liquid.Item>
+            </Liquid>
+          </div>
+          <ul
+            className="border-t border-border/40"
+            onPointerEnter={(e) => {
+              if (e.pointerType !== "mouse") return;
+              /* Laid shut along that edge at once, then filled from it. */
+              setEdge(nearest(e, (e.target as HTMLElement).closest("li")));
+              setPinch(true);
+              window.clearTimeout(flick.current);
+              flick.current = window.setTimeout(() => setPinch(false), 60);
+              setHot(true);
+            }}
+            onPointerLeave={(e) => {
+              setEdge(nearest(e, e.currentTarget.children[on]));
+              setHot(false);
+            }}
+          >
             {rows.map((r, i) => (
               <li
                 key={r.slug}
                 style={{ "--i": i } as React.CSSProperties}
-                className="services-step border-b border-border"
+                className="services-step border-b border-border/40"
               >
+                {/* Julian: the pointer snaps to the rows. Held along the
+                    row's middle (`pointer-mark.tsx`), so it slides with the
+                    hand and steps to the next row on the way down. */}
                 <Link
                   prefetch={false}
                   href={r.href}
+                  data-stick="row"
                   onPointerEnter={(e) => e.pointerType === "mouse" && setOn(i)}
                   onFocus={() => setOn(i)}
-                  className="grid grid-cols-[auto_minmax(0,1fr)] items-baseline gap-x-4 max-sm:items-center py-[clamp(0.375rem,1.1cqh,0.75rem)] max-sm:grid-cols-[auto_minmax(0,1fr)_3.5rem] max-sm:py-2"
+                  className="group grid grid-cols-[auto_minmax(0,1fr)] items-baseline gap-x-4 max-sm:items-center py-[clamp(0.25rem,0.7cqh,0.5rem)] max-sm:grid-cols-[auto_minmax(0,1fr)_3.5rem] max-sm:py-2"
                 >
                   <span
-                    className={`font-display text-[clamp(1.25rem,2.2vw,2.25rem)] leading-none tabular-nums transition-colors duration-300 ${i === on ? "text-foreground" : "text-muted-foreground/60"}`}
+                    className={`label tabular-nums transition-colors duration-300 ${i === on ? "text-foreground" : "text-muted-foreground/60"}`}
                   >
                     {String(i + 1).padStart(2, "0")}
                   </span>
-                  {/* The medium beside the name while it fits, under it when not. */}
-                  <span className="flex min-w-0 flex-wrap items-baseline gap-x-4 gap-y-1">
+                  {/* The name, and under it what it is. */}
+                  {/* The row whose frames are on the table sits a size up. */}
+                  <span
+                    className={`flex min-w-0 origin-left flex-col gap-1 transition-[scale] duration-300 ease-[var(--ease-out-strong)] ${i === on ? "sm:[scale:1.06]" : ""}`}
+                  >
                     <span
-                      className={`font-display text-[clamp(1.25rem,2.2vw,2.25rem)] leading-none transition-[color,translate] duration-300 ease-[var(--ease-out-strong)] ${i === on ? "translate-x-2 text-foreground" : "text-muted-foreground max-sm:text-foreground"}`}
+                      className={`font-display text-[clamp(1.25rem,min(2.2vw,4.2cqh),2.25rem)] leading-none transition-[color,translate] duration-300 ease-[var(--ease-out-strong)] ${i === on ? "translate-x-2 text-foreground" : "text-muted-foreground group-hover:translate-x-2 group-hover:text-foreground max-sm:text-foreground"}`}
                     >
                       {r.name}
                     </span>
-                    <span className="label text-muted-foreground max-sm:hidden short:hidden">
-                      {r.medium} &middot; {r.count}
-                    </span>
+                    {r.about ? (
+                      <span className="label text-muted-foreground short:hidden sm:truncate">
+                        {r.about}
+                      </span>
+                    ) : null}
                   </span>
                   {/* Under a finger: its own picture, in place of the table. */}
                   <span className="relative aspect-square overflow-hidden rounded-[4px] bg-card sm:hidden">
@@ -143,6 +225,7 @@ export function ServicesScreen({
               </li>
             ))}
           </ul>
+          </div>
           {/* The art director's verb first (critique, 2026-10-03: it was
               nowhere before About), the whole portfolio beside it. */}
           <div className="flex flex-wrap items-center gap-x-3 gap-y-3">
@@ -167,7 +250,7 @@ export function ServicesScreen({
         {/* The table: the frames whole, in justified rows. */}
         <div
           ref={field}
-          className="light-table flex w-full flex-col items-center justify-center max-sm:hidden sm:h-[min(44rem,calc(100cqh-6rem))]"
+          className="light-table flex w-full flex-col items-center justify-center max-sm:hidden sm:h-[min(44rem,calc(100cqh-6rem))] 2xl:h-[calc(100cqh-4rem)]"
           style={{ gap: GAP }}
         >
           {laid?.rows.map((r, ri) => (
@@ -181,7 +264,7 @@ export function ServicesScreen({
                     key={`${rows[on].slug}-${s.src}`}
                     href={s.href}
                     style={{ "--i": si, width: (ht * s.width) / s.height, height: ht } as React.CSSProperties}
-                    className="light-cell relative block overflow-hidden rounded-[3px]"
+                    className="light-cell relative block overflow-hidden rounded-[3px] [container-type:inline-size]"
                   >
                     <Image
                       src={s.src}
@@ -190,8 +273,17 @@ export function ServicesScreen({
                       sizes={`${Math.ceil((ht * s.width) / s.height)}px`}
                       style={{ backgroundColor: s.color }}
                     />
-                    <span aria-hidden className="light-name label truncate">
-                      {s.title}
+                    {/* The slate (`cover-cell.tsx`), on hover: a film's
+                        "Title - Artist" splits into credit over title. */}
+                    <span aria-hidden className="light-name flex flex-col items-start gap-1 bg-gradient-to-t from-black/80 via-black/35 to-transparent">
+                      {s.title.includes(" - ") ? (
+                        <span className="label max-w-full truncate text-[0.625rem] leading-none text-white/75">
+                          {s.title.split(" - ").slice(1).join(" - ")}
+                        </span>
+                      ) : null}
+                      <span className="font-display line-clamp-2 max-w-full text-[clamp(0.8125rem,9cqw,1.75rem)] uppercase leading-[0.9] text-white">
+                        {s.title.split(" - ")[0]}
+                      </span>
                     </span>
                   </Link>
                 );

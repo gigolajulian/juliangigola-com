@@ -307,7 +307,13 @@ const centreOf = (el: HTMLElement, i: number) => {
      screen between them. Centred, the window was half off it. */
   if (cell.nextElementSibling?.hasAttribute("data-lead-window"))
     return leftOf(cell);
-  return leftOf(cell) - (el.clientWidth - cell.offsetWidth) / 2;
+  const centre = leftOf(cell) - (el.clientWidth - cell.offsetWidth) / 2;
+  /* No further than where its chapter holds (`lib/deck.ts`): past that
+     the next chapter slides over the screen, and the last cell of one
+     came up half under the next title (Julian: /portfolio#wrapped-up). */
+  let next = cell.nextElementSibling as HTMLElement | null;
+  while (next && !next.hasAttribute("data-deck")) next = next.nextElementSibling as HTMLElement | null;
+  return next ? Math.min(centre, leftOf(next) - el.clientWidth) : centre;
 };
 
 /**
@@ -882,7 +888,6 @@ export function Strip({
       const where = i >= 0 ? centreOf(el, i) : null;
       if (where !== null) {
         el.scrollLeft = where;
-        return;
       }
     }
     /* A page zooming in or out (`page-transition.tsx` writes `data-nav`

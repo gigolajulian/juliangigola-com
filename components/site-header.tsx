@@ -4,6 +4,7 @@ import * as React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn, STRIP_SECTION } from "@/lib/utils";
+import { Liquid } from "@/components/liquid";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { WarpTuner } from "@/components/warp-tuner";
 import { NAME_WARP } from "@/lib/name-warp";
@@ -52,8 +53,8 @@ export const LINKS = [
   // first, the two audiences side by side). All but Portfolio are
   // homepage screens.
   { href: "/#work", label: "Commissions" },
+  { href: "/#about", label: "About me" },
   { href: "/#sessions", label: "Sessions" },
-  { href: "/#about", label: "About" },
   { href: "/#contact", label: "Inquire" },
   { href: "/portfolio", label: "Portfolio" },
 ] as const;
@@ -368,6 +369,8 @@ export function SiteHeader() {
             // Julian: a very slight fade on hover. It was to 70%, which
             // greyed the colour split of the warp under the pointer.
             "transition-opacity duration-300 ease-[var(--ease-out-strong)] hoverable:hover:opacity-90",
+            // Julian (2026-10-04): it grows under the pointer (`.logo-grow`).
+            "logo-grow",
             "focus-visible:opacity-100",
             // Deferring only makes sense where the masthead is actually
             // beside it. Below `lg` the cover stacks, so the masthead sits
@@ -412,15 +415,7 @@ export function SiteHeader() {
             item joins it. */}
         <div className="flex items-center gap-1 lg:gap-8">
           <nav aria-label="Main" className="hidden lg:block">
-            <ul className="flex items-center gap-9">
-              {LINKS.map((link) => (
-                <li key={link.href}>
-                  <NavLink href={link.href} current={isCurrent(link.href)}>
-                    {link.label}
-                  </NavLink>
-                </li>
-              ))}
-            </ul>
+            <NavLinks links={LINKS} isCurrent={isCurrent} />
           </nav>
 
           {/* Outside the nav: it is not a destination, it changes how the
@@ -489,6 +484,122 @@ export function SiteHeader() {
   );
 }
 
+/* Julian (2026-10-03): the select and the hover animated, in the site's
+   own material. The ink drop of the filter bar (`work-shell.tsx`) sits
+   under the page you are on and runs to the name under the pointer as
+   liquid, trailing a droplet, and back again when the pointer leaves. With
+   no page lit (the legal page) it only shows under the pointer.
+   2026-10-04: the drop is the underline itself (Julian liked the run,
+   not the grey box round the word): a line of ink under the page you are
+   on that stretches to the name under the pointer, necks, lands, and
+   runs back. One mark for both, no fill. */
+/** The line's thickness. */
+const LINE_H = 1.5;
+/** The name in the bar, as the pointer sees it (its words, not the link
+    round them). `-1` in `over` below. */
+const LOGO = -1;
+const logoOf = (header: Element | null) =>
+  Array.from(header?.querySelector<HTMLElement>(".logo-grow")?.children ?? []).find(
+    (c) => !c.classList.contains("sr-only"),
+  ) as HTMLElement | undefined;
+
+function NavLinks({
+  links,
+  isCurrent,
+}: {
+  links: readonly { href: string; label: string }[];
+  isCurrent: (href: string) => boolean;
+}) {
+  const list = React.useRef<HTMLUListElement>(null);
+  const [over, setOver] = React.useState<number | null>(null);
+  const lit = links.findIndex((l) => isCurrent(l.href));
+  const at = over ?? (lit >= 0 ? lit : null);
+  /* The layer spans the whole bar, so the line can run out of the list
+     to the name (Julian, 2026-10-04: the gooey line on the logo too).
+     Measured against the bar: `left` and `width` place the layer, `x`,
+     `w` and `y` the line inside it. */
+  const [drop, setDrop] = React.useState<{ x: number; w: number; y: number; left: number; width: number } | null>(null);
+  React.useEffect(() => {
+    const ul = list.current;
+    const header = ul?.closest("header") ?? null;
+    if (!ul || !header) return;
+    const name = header.querySelector<HTMLElement>(".logo-grow");
+    const enter = (e: PointerEvent) => e.pointerType === "mouse" && setOver(LOGO);
+    const leave = () => setOver(null);
+    name?.addEventListener("pointerenter", enter);
+    name?.addEventListener("pointerleave", leave);
+    return () => {
+      name?.removeEventListener("pointerenter", enter);
+      name?.removeEventListener("pointerleave", leave);
+    };
+  }, []);
+  React.useEffect(() => {
+    const ul = list.current;
+    const header = ul?.closest("header") ?? null;
+    const a =
+      at === LOGO
+        ? logoOf(header)
+        : at === null
+          ? null
+          : ul?.children[at + 1]?.firstElementChild;
+    if (!ul || !header || !(a instanceof HTMLElement)) return setDrop(null);
+    const bar = header.getBoundingClientRect();
+    const r = a.getBoundingClientRect();
+    const u = ul.getBoundingClientRect();
+    setDrop({
+      // A slot, less its margins: every one the same length. The name,
+      // the width of its words.
+      x: r.left - bar.left,
+      w: r.width,
+      // On the bar's foot, not under the word (Julian, 2026-10-04).
+      y: bar.bottom - u.top - LINE_H,
+      left: bar.left - u.left,
+      width: bar.width,
+    });
+  }, [at]);
+  return (
+    <ul
+      ref={list}
+      /* Julian (2026-10-04): every slot the same length, the longest
+         name's and a margin, so the line is one length wherever it runs. */
+      className="relative grid auto-cols-fr grid-flow-col items-center"
+      onPointerLeave={() => setOver(null)}
+    >
+      <li
+        aria-hidden
+        className="pointer-events-none absolute top-0"
+        style={drop ? { left: drop.left, width: drop.width, height: drop.y + LINE_H } : { height: 0 }}
+      >
+        {drop ? (
+          <Liquid blur={1.25} contrast={10} fill="var(--foreground)" className="nav-ink h-full w-full opacity-80">
+            <Liquid.Item effect="move" move={{ wobble: 0.25 }}>
+              <div
+                className="absolute left-0 top-0 rounded-full"
+                style={{
+                  width: drop.w,
+                  height: LINE_H,
+                  transform: `translate(${drop.x}px, ${drop.y}px)`,
+                }}
+              />
+            </Liquid.Item>
+          </Liquid>
+        ) : null}
+      </li>
+      {links.map((link, i) => (
+        <li
+          key={link.href}
+          className="relative px-2 text-center xl:px-4"
+          onPointerEnter={(e) => e.pointerType === "mouse" && setOver(i)}
+        >
+          <NavLink href={link.href} current={isCurrent(link.href)} lit={at === i}>
+            {link.label}
+          </NavLink>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
 /**
  * Where you are is the one at full strength and the other three stand back.
  * No mark under it: Julian picked ink alone out of eight, and it is what the
@@ -504,10 +615,13 @@ export function SiteHeader() {
 function NavLink({
   href,
   current,
+  lit = current,
   children,
 }: {
   href: string;
   current: boolean;
+  /** Where the ink drop is: the page, or the name under the pointer. */
+  lit?: boolean;
   children: React.ReactNode;
 }) {
   return (
@@ -515,12 +629,10 @@ function NavLink({
       href={href}
       aria-current={current ? "page" : undefined}
       className={cn(
-        "block py-3 text-[0.9375rem] uppercase leading-none tracking-[0.08em] transition-colors duration-200",
-        current
-          ? "text-foreground"
-          // `hoverable:`, not a bare `hover:`: a touch device fires hover on
-          // tap and would leave a name lit that is not the page you are on.
-          : "text-muted-foreground hoverable:hover:text-foreground",
+        "block py-3 text-[0.9375rem] uppercase leading-none tracking-[0.08em] transition-colors duration-300 ease-[var(--ease-out-strong)]",
+        // The ink follows the drop: the page you are on stands back while
+        // the drop is away at the pointer, and comes up again with it.
+        lit ? "text-foreground" : current ? "text-foreground/70" : "text-muted-foreground",
       )}
     >
       {children}

@@ -1,4 +1,5 @@
 import Image from "next/image";
+import SOURCES from "@/public/work/sources.json";
 import Link from "next/link";
 import type { Frame } from "@/lib/work-types";
 import { CoverFloat } from "@/components/cover-float";
@@ -21,6 +22,7 @@ import {
   COVER_RELEASES,
 } from "@/lib/work";
 import { CONTENT } from "@/lib/content";
+import { frameHash } from "@/lib/frame-hash";
 import { REEL, posterFor } from "@/lib/videos";
 import { LeadWindow } from "@/components/lead-window";
 import { ClientMarks } from "@/components/client-marks";
@@ -85,6 +87,16 @@ const COVER_PICKS = [
   "took-time",
   "in-the-hoodie-on-your-sleeve",
 ];
+/* A project's cover is a copy of one of its frames under another name
+   (`sources.json`, written by `make-cards`). Compared by that frame, a
+   cover and the frame it was cut from count as one picture: Event coverage
+   showed its first photograph twice (Julian, 2026-10-03). */
+/* Frames past a project's cover that its discipline shows as well:
+   Wrapped Up's heels and lipstick, and a second Crave. */
+const MORE = ["/work/wrapped-up/04.jpg", "/work/crave/03.jpg"];
+
+const same = (src: string) => (SOURCES as Record<string, string>)[src] ?? src;
+
 /* What the cover, Sessions and the lead window show, which the services
    light table leaves out as well. */
 const ELSEWHERE = new Set([...FEATURED, ...SAMPLES, ...LEAD].map((p) => p?.cover.src));
@@ -95,43 +107,68 @@ const SHOWN = new Set([
 ]);
 const WALL_HERE = WALL.filter((t) => !SHOWN.has(t.src));
 /* A photograph behind each door on the last screen (critique, 2026-10-03:
-   the screen that asks was the only one without work on it). Frames the
-   page shows nowhere else, the wall included. */
-const unseen = (src: string) => !SHOWN.has(src) && !WALL.some((t) => t.src === src);
-// Every cover is on the page already, so a frame from inside a featured set.
-const DOOR_WORK = FEATURED.flatMap((p) => p?.images.slice(1, 4) ?? []).find((f) => unseen(f.src));
-const DOOR_SESSIONS = SAMPLES.flatMap((p) => p?.images.slice(1, 3) ?? []).find((f) => unseen(f.src));
+   the screen that asks was the only one without work on it). */
+// Julian's pick (2026-10-03): Valgur, the two knights and the lightning.
+const DOOR_WORK = PROJECTS.find((p) => p.slug === "valgur")?.images.find((f) => f.src === "/work/valgur/06.jpg");
+// Julian's pick (2026-10-03): Sago, standing in the tall grass.
+const DOOR_SESSIONS = PROJECTS.find((p) => p.slug === "sago")?.images.find((f) => f.src === "/work/sago/01.jpg");
 
 /* A discipline's frames for the Commissions table, up to twelve: its
    projects' covers (Julian, 2026-10-03), the films for Motion, his picked
    sleeves for Cover Art. */
+
 function shotsOf(t: (typeof DISCIPLINE_TILES)[number]): Shot[] {
   const projects = projectsIn(t.category);
   const shots: Shot[] = [];
-  // Julian: Mixed media and Brand campaigns show every project, even one
-  // shown elsewhere (campaigns bar Hellamack).
-  const every = t.category === "mixed-media" || t.category === "campaigns";
+  // Julian: Mixed media, Brand campaigns and Artist presskit show every
+  // project, even one shown elsewhere (campaigns bar Hellamack; presskit
+  // for Valgur and Iris).
+  const every = ["mixed-media", "campaigns", "artist-presskit"].includes(t.category);
   const add = (f: { src: string; color?: string; width: number; height: number }, title: string, href: string) => {
-    if ((every || shots.length < 12) && (every || !ELSEWHERE.has(f.src)) && !shots.some((s) => s.src === f.src)) shots.push({ src: f.src, color: f.color, width: f.width, height: f.height, title, href });
+    if ((every || shots.length < 12) && (every || !ELSEWHERE.has(f.src)) && !shots.some((s) => same(s.src) === same(f.src))) shots.push({ src: f.src, color: f.color, width: f.width, height: f.height, title, href });
   };
   // Cover Art's projects are its sleeves, dealt below; a project cover there
   // would show one of them twice.
   if (t.category !== "coverart")
-    for (const p of projects) if (p.slug !== "hellamack") add(p.cover, p.name, `/portfolio/${p.slug}`);
+    for (const p of projects) {
+      if (p.slug === "hellamack") continue;
+      add(p.cover, p.name, `/portfolio#${p.slug}`);
+      // Frames Julian asked for beside the cover (2026-10-03).
+      for (const f of p.images) if (MORE.includes(f.src)) add(f, p.name, `/portfolio#${p.slug}`);
+    }
   // Julian (2026-10-03): covers only. Motion has no projects: every
   // film, the reel first, by its poster. Cover Art: eight sleeves, not the
   // photograph of them laid out (Julian: remove).
+  // Event coverage is one long set: its own frames, as /portfolio runs it.
+  if (t.category === "events")
+    for (const p of projects) for (const f of p.images) add(f, p.name, `/portfolio#${frameHash(f.src)}`);
   if (t.category === "video")
     for (const v of [REEL, ...CONTENT.videos]) {
       const still = "id" in v ? posterFor(v) : v.poster;
-      if (still) add({ src: still, width: 1280, height: 720 }, v.title, "/portfolio/video");
+      // Julian: the film and who it was for, "CLEAN - CAMR".
+      const who = "client" in v ? v.client : undefined;
+      const title = who && who !== v.title ? `${v.title} - ${who}` : v.title;
+      if (still) add({ src: still, width: 1280, height: 720 }, title, `/portfolio#${"id" in v ? v.id : "reel"}`);
     }
   if (t.category === "coverart") {
     for (const r of COVER_PICKS.map((slug) => COVER_RELEASES.find((c) => c.slug === slug)))
-      if (r) add({ ...r.frames[0], src: r.frames[0].thumb }, `${r.title}, ${r.artist}`, t.href ?? "/portfolio");
+      if (r) add({ ...r.frames[0], src: r.frames[0].thumb }, `${r.title}, ${r.artist}`, `/portfolio#${frameHash(r.frames[0].src)}`);
   }
   return shots;
 }
+
+/* What each discipline is, one line under its name (Julian, 2026-10-03:
+   a short description of each, in place of the credit names). */
+const ABOUT: Record<string, string> = {
+  campaigns: "Product and lifestyle shoots for brands",
+  "artist-presskit": "Press photos for musicians and artists",
+  editorial: "Styled stories built around a concept",
+  portraits: "Personal portraits, in studio or on location",
+  "mixed-media": "Photography crossed with 3D design",
+  events: "Live shows, from the stage to the crowd",
+  coverart: "Album and single covers for artists",
+  video: "Music videos, campaigns and short films",
+};
 
 export default function Home() {
   return (
@@ -162,12 +199,12 @@ export default function Home() {
         <ServicesScreen
           rows={DISCIPLINE_TILES.map((t) => ({
             slug: t.slug,
-            name: t.name,
+            // Julian: "Fashion editorial" on this list.
+            name: t.category === "editorial" ? "Fashion Editorial" : t.name,
             href: t.href ?? `/portfolio/${t.slug}`,
-            medium: t.medium,
-            count: t.count,
             cover: t.cover,
             shots: shotsOf(t),
+            about: ABOUT[t.category] ?? "",
           }))}
           total={PROJECTS.length}
         >
@@ -197,9 +234,11 @@ export default function Home() {
 
         <Testimonials cells />
 
-        {/* Julian: Sessions, About and Contact on the homepage, before
+        {/* Julian: About, Sessions and Contact on the homepage, before
             the ask, which stays last. /about and /contact redirect here.
+            About before Sessions (Julian, 2026-10-04), as in the bar.
             Each session shows the sample /sessions shows. */}
+        <AboutScreen />
         <SessionsScreen
           sessions={SESSION_TYPES.map((s, i) => {
             const sample = SAMPLES[i];
@@ -216,7 +255,6 @@ export default function Home() {
             };
           })}
         />
-        <AboutScreen />
         {/* Julian (2026-10-03): the wall behind Inquire, where it was
             behind the last screen's doors, and none of it a picture the
             page already shows. */}
@@ -253,6 +291,7 @@ export default function Home() {
             >
               <PathCard
                 photo={DOOR_WORK}
+                photoAt="50% 0%"
                 href="/portfolio"
                 title="See the work"
                 body="Editorial, campaigns, portraits, and artist imagery."
@@ -276,7 +315,7 @@ export default function Home() {
    the bar as well. Each session straight to its own booking page instead. */
 function SessionsDoor({ photo }: { photo?: Frame }) {
   return (
-    <div className="relative isolate flex flex-col justify-center gap-6 overflow-hidden border-l border-border bg-background/30 px-6 py-12 backdrop-blur-[var(--door-blur,1px)] sm:px-16 lying:gap-3 lying:px-10 lying:py-3">
+    <div className="group relative isolate flex flex-col justify-center gap-6 overflow-hidden border-l border-border bg-background/30 px-6 py-12 backdrop-blur-[var(--door-blur,1px)] sm:px-16 lying:gap-3 lying:px-10 lying:py-3">
       <DoorPhoto photo={photo} />
       <h3 className="title lying:[--text-title:1.75rem]">Book a session</h3>
       <ul className="max-w-sm border-t border-border">
@@ -306,7 +345,7 @@ function SessionsDoor({ photo }: { photo?: Frame }) {
 }
 
 /* The door's photograph, held back so its words read over it. */
-function DoorPhoto({ photo }: { photo?: Frame }) {
+function DoorPhoto({ photo, at = "50% 25%" }: { photo?: Frame; at?: string }) {
   if (!photo) return null;
   return (
     <>
@@ -316,7 +355,7 @@ function DoorPhoto({ photo }: { photo?: Frame }) {
         fill
         sizes="(min-width: 640px) 50vw, 100vw"
         className="door-photo -z-20 object-cover"
-        style={{ backgroundColor: photo.color }}
+        style={{ backgroundColor: photo.color, objectPosition: at }}
       />
       <span aria-hidden className="door-veil absolute inset-0 -z-10" />
     </>
@@ -328,11 +367,14 @@ function PathCard({
   title,
   body,
   photo,
+  photoAt,
 }: {
   href: string;
   title: string;
   body: string;
   photo?: Frame;
+  /** Where the crop sits, as object-position. */
+  photoAt?: string;
 }) {
   return (
     <Link
@@ -347,7 +389,7 @@ function PathCard({
          site's glass. */
       className="group relative isolate flex flex-col justify-center gap-6 overflow-hidden border-l border-border bg-background/30 px-6 py-12 backdrop-blur-[var(--door-blur,1px)] transition-colors duration-300 hoverable:hover:bg-background/45 sm:px-16 sm:first:pt-[calc(3rem+var(--bar-h))] lying:gap-3 lying:px-10 lying:py-3 lying:first:pt-16"
     >
-      <DoorPhoto photo={photo} />
+      <DoorPhoto photo={photo} at={photoAt} />
       <div>
         {/* Julian: no audience line over the title, on any screen. */}
         <h3 className="title lying:[--text-title:1.75rem]">{title}</h3>
