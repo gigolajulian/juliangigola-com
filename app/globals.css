@@ -506,19 +506,6 @@
 :is(.strip-cell, .photo-corner, .drift-wall__inner):has(img[src*="/covers/"]) {
   border-radius: 0;
 }
-/* Julian: the project tiles square at the foot, so the plate with the
-   name sits flush along the bottom edge: the homepage's, and the covers
-   across /work (`cover-cell.tsx`, the ones carrying a plate). */
-/* Julian: the names on the homepage's tiles a touch more open than the
-   -0.04em every black heading carries (`.font-display`). */
-.band-tile h3 {
-  letter-spacing: -0.02em;
-}
-.band-tile :is(.strip-cell, .photo-corner) {
-  border-bottom-left-radius: 0;
-  border-bottom-right-radius: 0;
-}
-
 /* The name through glass (`warp-text.tsx`): the canvas fills its box. */
 .warp-text {
   position: relative;
@@ -1860,11 +1847,6 @@ a.strip-cell {
    the homepage's work tiles are filled rather than blurred, and the ones
    that only show on hover, which a touch screen never shows, drop it. */
 @media (pointer: coarse) {
-  :root .band-tile .glass-surface {
-    -webkit-backdrop-filter: none;
-    backdrop-filter: none;
-    background-color: color-mix(in oklab, var(--background) 88%, transparent);
-  }
   :root .glass-surface.opacity-0 {
     -webkit-backdrop-filter: none;
     backdrop-filter: none;
@@ -4095,7 +4077,7 @@ optgroup {
  * Clicking a cover on the homepage or the index does not swap one page for
  * another. The photograph lifts out of its cell, travels, and settles into
  * the first frame of the project — and comes back the same way. React's
- * `<ViewTransition name>` pairs the two elements (see `work-band.tsx`,
+ * `<ViewTransition name>` pairs the two elements (see
  * `work-index.tsx`, `gallery.tsx`); this is how the trip looks.
  *
  * `.morph` is the class the `share` prop assigns, so these rules touch only
