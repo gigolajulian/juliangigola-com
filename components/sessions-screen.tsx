@@ -166,16 +166,14 @@ export function SessionsScreen({ sessions }: { sessions: SessionItem[] }) {
             className="absolute inset-0 z-10"
           />
         ) : null}
-        <div className="absolute inset-x-0 bottom-0 flex items-baseline justify-between gap-3 bg-background/80 p-4 backdrop-blur-sm">
-          <div className="flex items-baseline gap-3">
-            <span className="label text-muted-foreground">
-              {String(open + 1).padStart(2, "0")}
-            </span>
-            <span className="font-display text-xl leading-none">
-              {current.name}
-            </span>
-          </div>
-          <span className="label text-muted-foreground">{current.rate}</span>
+        {/* The slate every photograph on the site carries (`cover-cell.tsx`,
+            the Commissions table): the rate over the name, on a fall of
+            shade (Julian, 2026-10-04: match the rest). */}
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 flex flex-col items-start gap-1.5 bg-gradient-to-t from-black/80 via-black/35 to-transparent px-5 pb-5 pt-20">
+          <span className="label leading-none text-white/75">{current.rate}</span>
+          <span className="font-display text-[clamp(1.25rem,2vw,2rem)] uppercase leading-[0.9] text-white">
+            {current.name}
+          </span>
         </div>
       </div>
 

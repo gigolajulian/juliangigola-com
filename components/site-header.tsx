@@ -571,7 +571,7 @@ function NavLinks({
         style={drop ? { left: drop.left, width: drop.width, height: drop.y + LINE_H } : { height: 0 }}
       >
         {drop ? (
-          <Liquid blur={1.25} contrast={10} fill="var(--foreground)" className="nav-ink h-full w-full opacity-80">
+          <Liquid blur={1.25} contrast={10} fill="var(--foreground)" className={`nav-ink h-full w-full transition-opacity duration-300 ${at === LOGO ? "opacity-40" : "opacity-80"}`}>
             <Liquid.Item effect="move" move={{ wobble: 0.25 }}>
               <div
                 className="absolute left-0 top-0 rounded-full"

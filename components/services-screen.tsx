@@ -64,6 +64,32 @@ function justify(shots: Shot[], w: number, h: number) {
   return best;
 }
 
+/* Julian (2026-10-04): the cards stand a little off the table, and the
+   one under the pointer tips toward it. The tilt is written here, the
+   lift and the easing in `globals.css` (`.light-cell`). */
+const TILT = 5;
+const tilt = (e: React.PointerEvent<HTMLElement>) => {
+  if (e.pointerType !== "mouse") return;
+  const el = e.currentTarget;
+  const r = el.getBoundingClientRect();
+  const x = (e.clientX - r.left) / r.width - 0.5;
+  const y = (e.clientY - r.top) / r.height - 0.5;
+  el.style.setProperty("--ry", `${(x * TILT * 2).toFixed(2)}deg`);
+  el.style.setProperty("--rx", `${(-y * TILT * 2).toFixed(2)}deg`);
+  // And a turn in its own plane (Julian: tilt on every axis), toward
+  // the corner the pointer is in: a degree at most, or it reads as a spin.
+  el.style.setProperty("--rz", `${(x * y * 4).toFixed(2)}deg`);
+  // The shadow falls away from the side that lifts.
+  el.style.setProperty("--sx", `${(-x * 12).toFixed(1)}px`);
+  el.style.setProperty("--sy", `${(-y * 12).toFixed(1)}px`);
+  // Where the light catches it, for the glare (`.light-cell::after`).
+  el.style.setProperty("--gx", `${((x + 0.5) * 100).toFixed(1)}%`);
+  el.style.setProperty("--gy", `${((y + 0.5) * 100).toFixed(1)}%`);
+};
+const untilt = (e: React.PointerEvent<HTMLElement>) => {
+  for (const p of ["--rx", "--ry", "--rz", "--sx", "--sy", "--gx", "--gy"]) e.currentTarget.style.removeProperty(p);
+};
+
 export function ServicesScreen({
   rows,
   total,
@@ -90,6 +116,26 @@ export function ServicesScreen({
 
   const laid = box[0] ? justify(shots, box[0], box[1]) : null;
 
+  /* On the way to the table (Julian, 2026-10-04: a film opened the wrong
+     part of the portfolio). Heading right, across other rows toward the
+     photographs, a row only takes over once the hand has stayed on it a
+     moment; otherwise the table swapped under the hand on the way and the
+     press landed on another discipline's frame. Straight up and down the
+     list it changes at once, as before. */
+  const aim = useRef({ x: 0, t: 0 });
+  const onMove = (e: React.PointerEvent) => {
+    if (e.pointerType === "mouse") aim.current.x = e.movementX;
+  };
+  const enter = (e: React.PointerEvent, i: number) => {
+    if (e.pointerType !== "mouse") return;
+    window.clearTimeout(aim.current.t);
+    if (aim.current.x > 1) aim.current.t = window.setTimeout(() => setOn(i), 160);
+    else setOn(i);
+  };
+
+  /* Julian (2026-10-04): the drop stands proud of its row, the text
+     unchanged: 8px over and under (with the ground's own -inset-y-2). */
+  const PAD = 8;
   /* Julian (2026-10-03): the rows' hover in liquid, as Sessions has it.
      One drop under the row the pointer is on: it fills from the edge the
      pointer came in by, runs to the next row, drains to a line on leave. */
@@ -111,7 +157,7 @@ export function ServicesScreen({
     const c = col.current?.getBoundingClientRect();
     if (!li || !c) return;
     const r = li.getBoundingClientRect();
-    setDrop({ y: Math.round(r.top - c.top), h: Math.round(r.height) });
+    setDrop({ y: Math.round(r.top - c.top), h: Math.round(r.height) + PAD * 2 });
   }, [on, hot]);
 
 
@@ -131,7 +177,7 @@ export function ServicesScreen({
             From concept to final frame.
           </p>
           <div ref={col} className="services-col relative isolate">
-          <div aria-hidden className="services-ground pointer-events-none absolute inset-y-0 -inset-x-3 -z-10 max-sm:hidden">
+          <div aria-hidden className="services-ground pointer-events-none absolute -inset-y-2 -inset-x-6 -z-10 max-sm:hidden">
             <Liquid blur={5} contrast={18} fill="var(--services-hover)" className="h-full w-full">
               <Liquid.Item effect="move" move={{ springiness: 0.92, wobble: 0, stretch: 0.04, trail: 0 }}>
                 <div
@@ -185,7 +231,9 @@ export function ServicesScreen({
                   prefetch={false}
                   href={r.href}
                   data-stick="row"
-                  onPointerEnter={(e) => e.pointerType === "mouse" && setOn(i)}
+                  onPointerEnter={(e) => enter(e, i)}
+                  onPointerMove={onMove}
+                  onPointerLeave={() => window.clearTimeout(aim.current.t)}
                   onFocus={() => setOn(i)}
                   className="group grid grid-cols-[auto_minmax(0,1fr)] items-baseline gap-x-4 max-sm:items-center py-[clamp(0.25rem,0.7cqh,0.5rem)] max-sm:grid-cols-[auto_minmax(0,1fr)_3.5rem] max-sm:py-2"
                 >
@@ -264,13 +312,16 @@ export function ServicesScreen({
                     key={`${rows[on].slug}-${s.src}`}
                     href={s.href}
                     style={{ "--i": si, width: (ht * s.width) / s.height, height: ht } as React.CSSProperties}
+                    onPointerMove={tilt}
+                    onPointerLeave={untilt}
                     className="light-cell relative block overflow-hidden rounded-[3px] [container-type:inline-size]"
                   >
                     <Image
                       src={s.src}
-                      alt={s.title}
+                      alt={/^\d+$/.test(s.title) ? `${rows[on].name}, ${s.title}` : s.title}
                       fill
                       sizes={`${Math.ceil((ht * s.width) / s.height)}px`}
+                      className="object-cover"
                       style={{ backgroundColor: s.color }}
                     />
                     {/* The slate (`cover-cell.tsx`), on hover: a film's

@@ -304,7 +304,7 @@ export function ContactForm({
             id="field-type"
             value={chosen}
             onChange={(e) => choose(e.target.value)}
-            className="block w-full appearance-none rounded-none border-0 border-b border-border bg-transparent py-2 pr-8 text-base uppercase transition-colors duration-200 focus:border-foreground focus:outline-none"
+            className="block w-full appearance-none rounded-none border-0 border-b border-border bg-transparent py-2 pr-8 text-base uppercase transition-colors duration-200 focus:border-foreground/40 focus:outline-none"
           >
             {!chosen ? <option value="">Choose one</option> : null}
             {choices.map((t) => (
@@ -504,11 +504,12 @@ function Field({
           // Two lines of message on a phone, where the card has a screen.
           as === "textarea" && "max-sm:h-[3.75rem] max-sm:resize-none sm:h-[clamp(3.75rem,calc(16vh-3rem),6rem)] sm:resize-none",
           "transition-colors duration-200 placeholder:text-muted-foreground/60",
-          // Focus is the rule under the field coming up to full ink. No
+          // Focus is the rule under the field darkening, to 40% ink (Julian,
+          // 2026-10-04: lower). No
           // accent ring as well: a text field shows focus whether the
           // click or the keyboard put it there, so the ring was on screen
           // every time somebody typed. Julian did not want it.
-          "focus:outline-none focus-visible:outline-none focus:border-foreground",
+          "focus:outline-none focus-visible:outline-none focus:border-foreground/40",
           error ? "border-destructive" : "border-border",
         )}
         {...props}

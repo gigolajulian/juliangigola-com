@@ -1,4 +1,4 @@
-import { posterFor, REEL, type Video } from "@/lib/videos";
+import { creditOf, posterFor, REEL, type Video } from "@/lib/videos";
 import type { Metadata } from "next";
 import { WorkStrip } from "@/components/work-strip";
 import { CoverCell } from "@/components/cover-cell";
@@ -80,7 +80,7 @@ export default function WorkPage() {
             poster={"id" in film ? posterFor(film) : film.poster}
             href={c.href}
             hash={"id" in film ? film.id : "reel"}
-            credit={"id" in film ? film.client : undefined}
+            credit={"id" in film ? creditOf(film) : undefined}
             i={i++}
             eager={k === 0}
           />,

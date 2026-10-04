@@ -1516,28 +1516,25 @@ article:has(.strip-scroll[data-past-first]) .running-head {
    photograph. Tabbing to it brings it back, so it is never an invisible
    focus target, and below `lg` the cover stacks under a fixed bar with no
    masthead beside it, so the name simply stays. */
+/* Julian (2026-10-04): it comes in from the left as the cover goes. */
 .home-wordmark {
   opacity: 0;
   pointer-events: none;
-  translate: 0 20px;
-  scale: 1.35;
+  translate: -48px 0;
   transition:
-    opacity 300ms var(--ease-out-strong),
-    translate 300ms var(--ease-out-strong),
-    scale 300ms var(--ease-out-strong);
+    opacity 360ms var(--ease-out-strong),
+    translate 480ms var(--ease-out-strong);
 }
 body:has(.strip-scroll[data-past-first]) .home-wordmark,
 .home-wordmark:focus-visible {
   opacity: 1;
   pointer-events: auto;
   translate: none;
-  scale: none;
 }
 @media (prefers-reduced-motion: reduce) {
   .home-wordmark {
     transition: opacity 300ms var(--ease-out-strong);
     translate: none;
-    scale: none;
   }
 }
 
@@ -2006,20 +2003,11 @@ a.strip-cell {
    Hidden only once the mark is drawn (`data-mark`), and important because
    the arrange view's grab and the admin's `cursor-grab` would otherwise
    win the arrow back over the surfaces the mark covers.
-   Text fields keep the native caret, and the mark steps aside there. */
+   Over a text field it becomes a caret of its own (below). */
 @media (hover: hover) and (pointer: fine) {
   :root[data-mark],
   :root[data-mark] * {
     cursor: none !important;
-  }
-  :root[data-mark]
-    :is(
-      input:not([type="button"], [type="submit"], [type="reset"], [type="checkbox"], [type="radio"], [type="range"], [type="color"], [type="file"]),
-      textarea,
-      select,
-      [contenteditable]:not([contenteditable="false"])
-    ) {
-    cursor: auto !important;
   }
 }
 .pointer-mark {
@@ -2053,8 +2041,11 @@ a.strip-cell {
   scale: calc(22 / 120);
   background: var(--mark-fill);
 }
-.pointer-mark[data-state="text"] {
-  opacity: 0;
+/* Over a text field (Julian, 2026-10-04: a custom icon for the form): the
+   dot draws itself out into a caret, a thin upright bar, on the same
+   curve as every change of size, and rounds back up on the way out. */
+.pointer-mark[data-state="text"] .mark-dot {
+  scale: calc(2.5 / 120) calc(24 / 120);
 }
 /* Drawn large and scaled down, never up, so the edge stays clean at
    every size and growing it is a compositor-only change. */
@@ -2100,6 +2091,33 @@ a.strip-cell {
     scale var(--grow),
     translate 220ms var(--ease-out-strong),
     transform var(--press);
+}
+/* A row of the Commissions list: the dot grows to hold an arrow pointing
+   on, drawn black so the difference blend cuts it out of the dot (the
+   invert kept, Julian). It slides in from the left as the dot grows, and
+   goes back the same way. */
+.pointer-mark[data-row] .mark-dot {
+  scale: calc(44 / 120);
+}
+.mark-arrow {
+  position: absolute;
+  left: -12px;
+  top: -12px;
+  opacity: 0;
+  scale: 0.5;
+  translate: calc(var(--sx, 0px) - 6px) var(--sy, 0px);
+  transition:
+    opacity 200ms var(--ease-out-strong),
+    scale var(--grow),
+    translate 220ms var(--ease-out-strong);
+}
+.pointer-mark[data-row] .mark-arrow {
+  opacity: 1;
+  scale: 0.8;
+  translate: var(--sx, 0px) var(--sy, 0px);
+}
+.pointer-mark[data-down] .mark-arrow {
+  scale: 0.66;
 }
 .mark-drop {
   position: absolute;
@@ -5822,7 +5840,79 @@ h2:not(.label) {
   transition:
     opacity 240ms var(--ease-out-strong),
     filter 620ms var(--ease-out-strong),
-    scale 620ms var(--ease-out-strong);
+    scale 620ms var(--ease-out-strong),
+    transform 450ms var(--ease-out-strong),
+    box-shadow 450ms var(--ease-out-strong),
+    translate 900ms cubic-bezier(0.25, 1, 0.5, 1);
+}
+/* Julian (2026-10-04): the cards stand a little off the table, a few
+   pixels toward the viewer with a soft shadow under them, and the one
+   under the pointer tips toward it on every axis (`--rx`, `--ry`,
+   `--rz`, written by
+   `services-screen.tsx`). `scale` stays free for the arrival. */
+/* Realism (Julian, 2026-10-04): each card has its own perspective, so it
+   turns about its own centre instead of warping toward the sheet's
+   vanishing point; small angles; it follows the pointer quickly and
+   settles slowly; the shadow falls away from the tilt and a glare sits
+   where the light catches it. */
+.light-cell {
+  transform: perspective(1000px) translateZ(var(--lz, 10px)) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)) rotateZ(var(--rz, 0deg));
+  /* No shadow at rest (Julian, 2026-10-04: only on hover); the same
+     shape, clear, so it fades in rather than snaps. */
+  box-shadow: 0 22px 40px -16px rgb(0 0 0 / 0);
+}
+.light-cell:hover {
+  /* Up off the table toward the viewer (Julian, 2026-10-04: more lift). */
+  --lz: 20px;
+  box-shadow: var(--sx, 0px) calc(22px + var(--sy, 0px)) 40px -16px rgb(0 0 0 / 0.6);
+  transition:
+    opacity 240ms var(--ease-out-strong),
+    filter 620ms var(--ease-out-strong),
+    scale 620ms var(--ease-out-strong),
+    transform 140ms ease-out,
+    box-shadow 140ms ease-out,
+    translate 900ms cubic-bezier(0.25, 1, 0.5, 1);
+}
+/* Room for it (Julian, 2026-10-04): the lifted card grows a few pixels
+   past the 6px gutter, so its neighbours ease aside by half that, the ones
+   before it back, the ones after it on, the rows above up and the rows
+   below down, and settle again when it does. */
+.light-sheet:has(.light-cell:hover) {
+  --push: 3px;
+}
+.light-cell:has(~ .light-cell:hover) {
+  translate: calc(var(--push) * -1) 0;
+}
+.light-cell:hover ~ .light-cell {
+  translate: var(--push) 0;
+}
+.light-sheet:has(~ .light-sheet .light-cell:hover) .light-cell {
+  translate: 0 -3px;
+}
+.light-sheet:has(.light-cell:hover) ~ .light-sheet .light-cell {
+  translate: 0 3px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .light-cell {
+    translate: none !important;
+  }
+}
+.light-cell::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(circle at var(--gx, 50%) var(--gy, 50%), rgb(255 255 255 / 0.14), transparent 60%);
+  opacity: 0;
+  transition: opacity 300ms ease-out;
+}
+.light-cell:hover::after {
+  opacity: 1;
+}
+@media (prefers-reduced-motion: reduce) {
+  .light-cell {
+    transform: none;
+  }
 }
 /* The frame under the pointer (Julian, 2026-10-03: the lift and the push
    were messy across frames of different shapes; 2026-10-04: no zoom on
@@ -6708,14 +6798,20 @@ h2:not(.label) {
   position: fixed;
   z-index: 30;
   pointer-events: none;
-  -webkit-backdrop-filter: blur(3px);
-  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(2.5px);
+  backdrop-filter: blur(2.5px);
   --ff-mask: radial-gradient(
     circle at var(--ff-x, 50%) var(--ff-y, 50%),
     transparent 0,
     transparent var(--ff-sharp, 160px),
-    rgb(0 0 0 / 0.55) calc(var(--ff-sharp, 160px) * 2),
-    #000 calc(var(--ff-sharp, 160px) * 3.4)
+    /* Eased in and out (smoothstep), so neither edge of the falloff shows
+       as a line (Julian, 2026-10-04: shorter, smoother). */
+    rgb(0 0 0 / 0.06) calc(var(--ff-sharp, 160px) * 1.5),
+    rgb(0 0 0 / 0.2) calc(var(--ff-sharp, 160px) * 2),
+    rgb(0 0 0 / 0.5) calc(var(--ff-sharp, 160px) * 2.5),
+    rgb(0 0 0 / 0.8) calc(var(--ff-sharp, 160px) * 3),
+    rgb(0 0 0 / 0.94) calc(var(--ff-sharp, 160px) * 3.5),
+    #000 calc(var(--ff-sharp, 160px) * 4)
   );
   -webkit-mask-image: var(--ff-mask);
   mask-image: var(--ff-mask);
@@ -6746,8 +6842,8 @@ h2:not(.label) {
    white is a filter over it: taken to black, inverted, and four one
    pixel shadows round it for the line. The same list of steps at rest,
    each doing nothing, so the two states blend rather than snap. */
-/* The line only on the light ground: white on the dark one is the name
-   already, and a light line round it only thickened it into a blur. */
+/* No line now, on either ground (Julian, 2026-10-04: no outline); the
+   edge stays transparent, kept so the two states still blend. */
 .logo-grow > :not(.sr-only) {
   --logo-edge: transparent;
   transform-origin: center;
@@ -6756,9 +6852,6 @@ h2:not(.label) {
   transition:
     scale 300ms var(--ease-out-strong),
     filter 300ms var(--ease-out-strong);
-}
-:root[data-theme="light"] .logo-grow > :not(.sr-only) {
-  --logo-edge: var(--foreground);
 }
 @media (hover: hover) and (pointer: fine) {
   .logo-grow:hover > :not(.sr-only) {
@@ -6773,5 +6866,13 @@ h2:not(.label) {
 @media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
   .logo-grow:hover > :not(.sr-only) {
     scale: 1.06;
+  }
+}
+/* White vanished into the light ground (Julian, 2026-10-04): there it
+   turns the grey of the nav's words instead. */
+@media (hover: hover) and (pointer: fine) {
+  :root[data-theme="light"] .logo-grow:hover > :not(.sr-only) {
+    filter: brightness(0) invert(0.4) drop-shadow(0 0 0 transparent) drop-shadow(0 0 0 transparent)
+      drop-shadow(0 0 0 transparent) drop-shadow(0 0 0 transparent);
   }
 }

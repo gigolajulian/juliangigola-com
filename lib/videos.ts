@@ -232,3 +232,8 @@ export const inSection = (videos: Video[], section: VideoSection): Video[] =>
 /** How many films the motion page shows: the sections plus the reel. Every
     count on the site reads this, so adding a reel or a section is one edit. */
 export const filmCount = (videos: readonly unknown[]): number => videos.length + 1;
+
+/** The client as a credit, unless the title already names them ("Pear VC
+    Campaign" under "Pear VC" said it twice; Julian, 2026-10-04). */
+export const creditOf = (v: Pick<Video, "title" | "client">) =>
+  v.client && !v.title.toLowerCase().startsWith(v.client.toLowerCase()) ? v.client : undefined;
