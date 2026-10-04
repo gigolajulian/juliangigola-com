@@ -1098,6 +1098,9 @@ export function WorkShell({
                             width: mark.w,
                             height: mark.h,
                             transform: `translate(${mark.x}px, ${mark.y}px)`,
+                            // The projects' corner (Julian, 2026-10-04);
+                            // `liquid-gooey` reads it off this box.
+                            borderRadius: "var(--radius-photo)",
                           }}
                         />
                       </Liquid.Item>
@@ -1152,7 +1155,7 @@ function Chip({
        mis-tap is a filter nobody asked for; the desktop keeps the line
        thin, because the pointer is exact and the band is height the
        photographs would rather have. */
-    "label block whitespace-nowrap px-3 py-1.5 max-sm:py-3",
+    "label block whitespace-nowrap rounded-[var(--radius-photo)] px-3 py-1.5 max-sm:py-3",
     "transition-[color,background-color,scale] duration-200 ease-[var(--ease-out-strong)]",
     // A chip lifts a touch under the pointer and gives under the press.
     "hoverable:hover:scale-[1.05] active:scale-[0.96] motion-reduce:hover:scale-100",
