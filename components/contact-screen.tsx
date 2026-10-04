@@ -161,8 +161,9 @@ export function ContactScreen({
                   data-ring="Email"
                   /* In capitals, sitting on its rule: Julian asked for
                      both. A border rather than an underline, which
-                     vanishes when it is brought this close. */
-                  className="inline-block border-b border-border pb-0 uppercase leading-none tracking-[0.04em] transition-colors duration-200 hoverable:hover:border-current"
+                     vanishes when it is brought this close. A thumb's
+                     height to a touch screen, the rule drawn where it was. */
+                  className="inline-block border-b border-border pb-0 uppercase pointer-coarse:relative pointer-coarse:before:absolute pointer-coarse:before:-inset-y-2.5 pointer-coarse:before:inset-x-0 pointer-coarse:before:content-[''] leading-none tracking-[0.04em] transition-colors duration-200 hoverable:hover:border-current"
                 >
                   hello@juliangigola.com
                 </a>
