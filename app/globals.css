@@ -6894,3 +6894,26 @@ h2:not(.label) {
       drop-shadow(0 0 0 transparent) drop-shadow(0 0 0 transparent);
   }
 }
+
+/* The Google Calendar booking frame on /book (`book-picker.tsx`). Its page
+   cannot be styled from here, so on the dark theme it is turned over: white
+   to near black, and the hue turned back so Google's blue stays blue. */
+:root:not([data-theme="light"]) .booking-embed {
+  filter: invert(0.9) hue-rotate(180deg);
+}
+/* And the page itself takes the inverted calendar's grey, so the frame
+   sits in it rather than as a lighter slab on near black (Julian,
+   2026-10-04). Exactly what `invert(0.9)` makes of Google's white. */
+/* The wash (`body::before`) as well as the body, or the wash covers it. */
+:root:not([data-theme="light"]) body:has(.book-page),
+:root:not([data-theme="light"]) body:has(.book-page)::before {
+  background: rgb(25 25 25);
+}
+:root[data-theme="light"] body:has(.book-page),
+:root[data-theme="light"] body:has(.book-page)::before {
+  background: rgb(225 227 229);
+}
+/* The calendar fades up each time the session changes. */
+.booking-embed {
+  animation: jg-fade-in 500ms var(--ease-out-strong) both;
+}
