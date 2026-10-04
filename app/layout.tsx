@@ -15,6 +15,7 @@ import { PointerMark } from "@/components/pointer-mark";
 import "./globals.css";
 import { ImageFallback } from "@/components/image-fallback";
 import { PageTransition } from "@/components/page-transition";
+import { CardTilt } from "@/components/card-tilt";
 import { FocusField } from "@/components/focus-field";
 import { ldJson, siteGraph } from "@/lib/seo";
 
@@ -237,6 +238,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <SiteFooter />
         {/* Focus round the pointer over a gallery: `focus-field.tsx`. */}
         <FocusField />
+        <CardTilt />
         <PhotoNotice />
         {/* The pointer over anything that opens large, site wide. One
             mount: it follows the pointer and shows only over `[data-ring]`,

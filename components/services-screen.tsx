@@ -90,6 +90,26 @@ export function ServicesScreen({
 
   const laid = box[0] ? justify(shots, box[0], box[1]) : null;
 
+  /* On the way to the table (Julian, 2026-10-04: a film opened the wrong
+     part of the portfolio). Heading right, across other rows toward the
+     photographs, a row only takes over once the hand has stayed on it a
+     moment; otherwise the table swapped under the hand on the way and the
+     press landed on another discipline's frame. Straight up and down the
+     list it changes at once, as before. */
+  const aim = useRef({ x: 0, t: 0 });
+  const onMove = (e: React.PointerEvent) => {
+    if (e.pointerType === "mouse") aim.current.x = e.movementX;
+  };
+  const enter = (e: React.PointerEvent, i: number) => {
+    if (e.pointerType !== "mouse") return;
+    window.clearTimeout(aim.current.t);
+    if (aim.current.x > 1) aim.current.t = window.setTimeout(() => setOn(i), 160);
+    else setOn(i);
+  };
+
+  /* Julian (2026-10-04): the drop stands proud of its row, the text
+     unchanged: 8px over and under (with the ground's own -inset-y-2). */
+  const PAD = 8;
   /* Julian (2026-10-03): the rows' hover in liquid, as Sessions has it.
      One drop under the row the pointer is on: it fills from the edge the
      pointer came in by, runs to the next row, drains to a line on leave. */
@@ -111,7 +131,7 @@ export function ServicesScreen({
     const c = col.current?.getBoundingClientRect();
     if (!li || !c) return;
     const r = li.getBoundingClientRect();
-    setDrop({ y: Math.round(r.top - c.top), h: Math.round(r.height) });
+    setDrop({ y: Math.round(r.top - c.top), h: Math.round(r.height) + PAD * 2 });
   }, [on, hot]);
 
 
@@ -131,7 +151,7 @@ export function ServicesScreen({
             From concept to final frame.
           </p>
           <div ref={col} className="services-col relative isolate">
-          <div aria-hidden className="services-ground pointer-events-none absolute inset-y-0 -inset-x-3 -z-10 max-sm:hidden">
+          <div aria-hidden className="services-ground pointer-events-none absolute -inset-y-2 -inset-x-6 -z-10 max-sm:hidden">
             <Liquid blur={5} contrast={18} fill="var(--services-hover)" className="h-full w-full">
               <Liquid.Item effect="move" move={{ springiness: 0.92, wobble: 0, stretch: 0.04, trail: 0 }}>
                 <div
@@ -185,7 +205,9 @@ export function ServicesScreen({
                   prefetch={false}
                   href={r.href}
                   data-stick="row"
-                  onPointerEnter={(e) => e.pointerType === "mouse" && setOn(i)}
+                  onPointerEnter={(e) => enter(e, i)}
+                  onPointerMove={onMove}
+                  onPointerLeave={() => window.clearTimeout(aim.current.t)}
                   onFocus={() => setOn(i)}
                   className="group grid grid-cols-[auto_minmax(0,1fr)] items-baseline gap-x-4 max-sm:items-center py-[clamp(0.25rem,0.7cqh,0.5rem)] max-sm:grid-cols-[auto_minmax(0,1fr)_3.5rem] max-sm:py-2"
                 >
@@ -268,9 +290,10 @@ export function ServicesScreen({
                   >
                     <Image
                       src={s.src}
-                      alt={s.title}
+                      alt={/^\d+$/.test(s.title) ? `${rows[on].name}, ${s.title}` : s.title}
                       fill
                       sizes={`${Math.ceil((ht * s.width) / s.height)}px`}
+                      className="object-cover"
                       style={{ backgroundColor: s.color }}
                     />
                     {/* The slate (`cover-cell.tsx`), on hover: a film's

@@ -32,6 +32,16 @@ export function FocusField() {
       el.style.height = `${r.height}px`;
       el.style.setProperty("--ff-x", `${x - r.left}px`);
       el.style.setProperty("--ff-y", `${y - r.top}px`);
+      /* On the portfolio the discipline names between the runs stay sharp
+         (Julian, 2026-10-04): each one in view is cut out of the mask. */
+      const holes = [...on.querySelectorAll<HTMLElement>("[data-deck]")]
+        .map((n) => n.getBoundingClientRect())
+        .filter((h) => h.right > r.left && h.left < r.right);
+      el.style.maskImage = ["var(--ff-mask)", ...holes.map(() => "linear-gradient(#000 0 0)")].join(", ");
+      el.style.maskSize = ["100% 100%", ...holes.map((h) => `${h.width}px ${h.height}px`)].join(", ");
+      el.style.maskPosition = ["0 0", ...holes.map((h) => `${h.left - r.left}px ${h.top - r.top}px`)].join(", ");
+      el.style.maskRepeat = "no-repeat";
+      el.style.maskComposite = ["subtract", ...holes.map(() => "add")].join(", ");
       el.dataset.on = "";
     };
     const soon = () => {
@@ -43,11 +53,15 @@ export function FocusField() {
       y = e.clientY;
       const target = e.target as Element | null;
       const g = target?.closest?.(GALLERIES) ?? null;
-      // The clearing is half the frame under the pointer across, so a
+      // The clearing is a little wider than the frame under the pointer (Julian,
+      // 2026-10-04: wider than the half it was, then wider again), so a
       // wide frame and a small one each come into focus whole.
       const cell = g ? target?.closest<HTMLElement>(CELLS) : null;
       if (cell && g?.contains(cell)) {
-        el.style.setProperty("--ff-sharp", `${Math.round(cell.offsetWidth * 0.5)}px`);
+        // Half that on the portfolio, whose frames run the strip's full
+        // height and are wide enough to clear the whole screen.
+        const k = g.matches(".portfolio-arrive .strip-scroll") ? 0.55 : 1.1;
+        el.style.setProperty("--ff-sharp", `${Math.round(cell.offsetWidth * k)}px`);
       }
       on = g;
       soon();

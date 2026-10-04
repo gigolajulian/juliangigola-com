@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Image from "next/image";
-import { embedUrl, posterFor, previewUrl, type Video } from "@/lib/videos";
+import { creditOf, embedUrl, posterFor, previewUrl, type Video } from "@/lib/videos";
 import { cn } from "@/lib/utils";
 
 /* ── the tiles ────────────────────────────────────────────────────
@@ -91,11 +91,14 @@ export function VideoGrid({
         const caption = rows ? (
           <div className="pointer-events-none absolute inset-x-0 bottom-0 flex flex-col items-start gap-1.5 rounded-b-[var(--radius-photo)] bg-gradient-to-t from-black/80 via-black/35 to-transparent px-6 pb-5 pt-16">
             <h3 className="font-display text-[clamp(1.75rem,2.6vw,3rem)] uppercase leading-[0.9] text-white">
-              {video.title}
+              {/* The last two words held together, so a long title never
+                  leaves one alone on its second line (Julian, 2026-10-04:
+                  "Iranian Americans of / Silicon Valley"). */}
+              {video.title.replace(/ (\S+)$/, "\u00a0$1")}
             </h3>
-            {video.client || video.year ? (
+            {creditOf(video) || video.year ? (
               <p className="label order-first text-white/75">
-                {[video.client, video.year].filter(Boolean).join(" · ")}
+                {[creditOf(video), video.year].filter(Boolean).join(" · ")}
               </p>
             ) : null}
           </div>
@@ -104,9 +107,9 @@ export function VideoGrid({
             <h3 className="font-display text-lg uppercase tracking-[0] transition-colors duration-200">
               {video.title}
             </h3>
-            {video.client ? (
+            {creditOf(video) ? (
               <p className="label text-muted-foreground transition-colors duration-200 hoverable:group-hover/cell:text-foreground">
-                {video.client}
+                {creditOf(video)}
               </p>
             ) : null}
             {video.year ? (

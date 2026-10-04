@@ -160,7 +160,10 @@ export function FilmCell({
           style={{ "--n": title.length } as React.CSSProperties}
           className="cover-name font-display min-w-0 max-w-full truncate uppercase leading-[0.9] text-white"
         >
-          {title}
+          {/* The last two words held together, so a title that wraps never
+              leaves one alone (Julian, 2026-10-04: "Iranian Americans of /
+              Silicon Valley"). */}
+          {title.replace(/ (\S+)$/, "\u00a0$1")}
         </span>
       </div>
     </Link>

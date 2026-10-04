@@ -23,7 +23,7 @@ import {
 } from "@/lib/work";
 import { CONTENT } from "@/lib/content";
 import { frameHash } from "@/lib/frame-hash";
-import { REEL, posterFor } from "@/lib/videos";
+import { REEL, creditOf, posterFor } from "@/lib/videos";
 import { LeadWindow } from "@/components/lead-window";
 import { ClientMarks } from "@/components/client-marks";
 import { AboutScreen } from "@/components/about-screen";
@@ -94,6 +94,7 @@ const COVER_PICKS = [
 /* Frames past a project's cover that its discipline shows as well:
    Wrapped Up's heels and lipstick, and a second Crave. */
 const MORE = ["/work/wrapped-up/04.jpg", "/work/crave/03.jpg"];
+const EDITORIAL_PICKS = ["ghostlight", "threshold", "lithe", "aegis", "vigil", "paranoia", "void", "azure-bloom", "i-wanna-be-a-human"];
 
 const same = (src: string) => (SOURCES as Record<string, string>)[src] ?? src;
 
@@ -125,14 +126,26 @@ function shotsOf(t: (typeof DISCIPLINE_TILES)[number]): Shot[] {
   // for Valgur and Iris).
   const every = ["mixed-media", "campaigns", "artist-presskit"].includes(t.category);
   const add = (f: { src: string; color?: string; width: number; height: number }, title: string, href: string) => {
-    if ((every || shots.length < 12) && (every || !ELSEWHERE.has(f.src)) && !shots.some((s) => same(s.src) === same(f.src))) shots.push({ src: f.src, color: f.color, width: f.width, height: f.height, title, href });
+    // Every upright frame at one 4:5, so a 3:4 among them does not leave a
+    // row of mismatched cards (Julian, 2026-10-04: do the ratios match?).
+    const upright = f.width / f.height > 0.7 && f.width / f.height < 0.85;
+    if ((every || shots.length < 12) && (every || !ELSEWHERE.has(f.src)) && !shots.some((s) => same(s.src) === same(f.src))) shots.push({ src: f.src, color: f.color, width: upright ? 4 : f.width, height: upright ? 5 : f.height, title, href });
   };
+  /* Julian (2026-10-04): Editorial is his own pick of covers, in his
+     order, cut to one 4:5 so the rows are even. */
+  if (t.category === "editorial") {
+    for (const slug of EDITORIAL_PICKS) {
+      const p = projects.find((q) => q.slug === slug);
+      if (p) shots.push({ src: p.cover.src, color: p.cover.color, width: 4, height: 5, title: p.name, href: `/portfolio#${p.slug}` });
+    }
+    return shots;
+  }
   // Cover Art's projects are its sleeves, dealt below; a project cover there
   // would show one of them twice.
   if (t.category !== "coverart")
     for (const p of projects) {
       if (p.slug === "hellamack") continue;
-      add(p.cover, p.name, `/portfolio#${p.slug}`);
+      add(p.cover, t.category === "events" ? "01" : p.name, `/portfolio#${p.slug}`);
       // Frames Julian asked for beside the cover (2026-10-03).
       for (const f of p.images) if (MORE.includes(f.src)) add(f, p.name, `/portfolio#${p.slug}`);
     }
@@ -141,18 +154,20 @@ function shotsOf(t: (typeof DISCIPLINE_TILES)[number]): Shot[] {
   // photograph of them laid out (Julian: remove).
   // Event coverage is one long set: its own frames, as /portfolio runs it.
   if (t.category === "events")
-    for (const p of projects) for (const f of p.images) add(f, p.name, `/portfolio#${frameHash(f.src)}`);
+    // Numbered, not its name on every frame (Julian, 2026-10-04).
+    for (const p of projects) for (const f of p.images) add(f, String(shots.length + 1).padStart(2, "0"), `/portfolio#${frameHash(f.src)}`);
   if (t.category === "video")
     for (const v of [REEL, ...CONTENT.videos]) {
       const still = "id" in v ? posterFor(v) : v.poster;
       // Julian: the film and who it was for, "CLEAN - CAMR".
-      const who = "client" in v ? v.client : undefined;
-      const title = who && who !== v.title ? `${v.title} - ${who}` : v.title;
+      // Not when the title already names them ("Pear VC Campaign").
+      const who = "client" in v ? creditOf(v) : undefined;
+      const title = who ? `${v.title} - ${who}` : v.title;
       if (still) add({ src: still, width: 1280, height: 720 }, title, `/portfolio#${"id" in v ? v.id : "reel"}`);
     }
   if (t.category === "coverart") {
     for (const r of COVER_PICKS.map((slug) => COVER_RELEASES.find((c) => c.slug === slug)))
-      if (r) add({ ...r.frames[0], src: r.frames[0].thumb }, `${r.title}, ${r.artist}`, `/portfolio#${frameHash(r.frames[0].src)}`);
+      if (r) add({ ...r.frames[0], src: r.frames[0].thumb }, `${r.title} - ${r.artist}`, `/portfolio#${frameHash(r.frames[0].src)}`);
   }
   return shots;
 }

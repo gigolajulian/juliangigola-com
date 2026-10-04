@@ -1695,7 +1695,24 @@ export function Strip({
     /* The scroller changing shape is the one thing that moves the cells:
        a window resized, the rack swapped for the strip, a cell arriving.
        Measure again then, and never on a scroll frame. */
+    /* A link straight to a cell, in the rack (Julian, 2026-10-04: every
+       film on the homepage opened Event coverage). The landing is aimed
+       before the rack has placed its frames, at where the cell stands in
+       a strip, and the rack then moves it the better part of a screen
+       further on. Until the visitor moves the row themselves, each
+       re-lay aims again at the cell the address named on arrival. */
+    let aimed = decodeURIComponent(window.location.hash.slice(1));
+    const handed = () => {
+      aimed = "";
+    };
+    for (const t of ["wheel", "pointerdown", "keydown", "touchstart"])
+      el.addEventListener(t, handed, { once: true, passive: true });
     const again = () => {
+      if (aimed) {
+        const i = cellFor(el, aimed);
+        const where = i >= 0 ? centreOf(el, i) : null;
+        if (where !== null) el.scrollLeft = where;
+      }
       remeasure();
       read();
     };
@@ -1713,6 +1730,7 @@ export function Strip({
     return () => {
       watch.disconnect();
       el.removeEventListener(RELAID, again);
+      for (const t of ["wheel", "pointerdown", "keydown", "touchstart"]) el.removeEventListener(t, handed);
       el.removeEventListener("scroll", onScroll);
       window.removeEventListener("resize", again);
       window.removeEventListener("hashchange", onHash);

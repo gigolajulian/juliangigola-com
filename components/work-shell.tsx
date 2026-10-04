@@ -1084,7 +1084,9 @@ export function WorkShell({
                     <Liquid
                       blur={5}
                       contrast={18}
-                      fill="color-mix(in oklab, var(--foreground) 12%, var(--background))"
+                      /* Full ink, the lit chip's words knocked out of it
+                         (Julian, 2026-10-04: a solid pill, not grey). */
+                      fill="var(--foreground)"
                       className="h-full w-full"
                     >
                       {/* Julian: less bounce. Wobble is the overshoot on
@@ -1154,8 +1156,9 @@ function Chip({
     "transition-[color,background-color,scale] duration-200 ease-[var(--ease-out-strong)]",
     // A chip lifts a touch under the pointer and gives under the press.
     "hoverable:hover:scale-[1.05] active:scale-[0.96] motion-reduce:hover:scale-100",
+    // Knocked out of the ink pill drawn under it (Julian, 2026-10-04).
     active
-      ? "font-bold text-foreground"
+      ? "font-bold text-background"
       : "text-muted-foreground hoverable:hover:text-foreground focus-visible:bg-foreground/[0.07] focus-visible:text-foreground",
   );
   return (
@@ -1209,8 +1212,10 @@ function Chip({
                chosen chip was a filled plate and the count sat on ink; the
                fill went and the count went with it — near-black at 60% on
                a near-black page. Julian: keep the count after the filter
-               is selected. Half strength so the name still leads. */
-            active ? "text-foreground/50" : "text-muted-foreground/60",
+               is selected. Half strength so the name still leads. The
+               plate is back (2026-10-04, now in full ink), so it is
+               knocked out of it again. */
+            active ? "text-background/60" : "text-muted-foreground/60",
           )}
         >
           {count}
