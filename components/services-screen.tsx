@@ -64,32 +64,6 @@ function justify(shots: Shot[], w: number, h: number) {
   return best;
 }
 
-/* Julian (2026-10-04): the cards stand a little off the table, and the
-   one under the pointer tips toward it. The tilt is written here, the
-   lift and the easing in `globals.css` (`.light-cell`). */
-const TILT = 5;
-const tilt = (e: React.PointerEvent<HTMLElement>) => {
-  if (e.pointerType !== "mouse") return;
-  const el = e.currentTarget;
-  const r = el.getBoundingClientRect();
-  const x = (e.clientX - r.left) / r.width - 0.5;
-  const y = (e.clientY - r.top) / r.height - 0.5;
-  el.style.setProperty("--ry", `${(x * TILT * 2).toFixed(2)}deg`);
-  el.style.setProperty("--rx", `${(-y * TILT * 2).toFixed(2)}deg`);
-  // And a turn in its own plane (Julian: tilt on every axis), toward
-  // the corner the pointer is in: a degree at most, or it reads as a spin.
-  el.style.setProperty("--rz", `${(x * y * 4).toFixed(2)}deg`);
-  // The shadow falls away from the side that lifts.
-  el.style.setProperty("--sx", `${(-x * 12).toFixed(1)}px`);
-  el.style.setProperty("--sy", `${(-y * 12).toFixed(1)}px`);
-  // Where the light catches it, for the glare (`.light-cell::after`).
-  el.style.setProperty("--gx", `${((x + 0.5) * 100).toFixed(1)}%`);
-  el.style.setProperty("--gy", `${((y + 0.5) * 100).toFixed(1)}%`);
-};
-const untilt = (e: React.PointerEvent<HTMLElement>) => {
-  for (const p of ["--rx", "--ry", "--rz", "--sx", "--sy", "--gx", "--gy"]) e.currentTarget.style.removeProperty(p);
-};
-
 export function ServicesScreen({
   rows,
   total,
@@ -312,8 +286,6 @@ export function ServicesScreen({
                     key={`${rows[on].slug}-${s.src}`}
                     href={s.href}
                     style={{ "--i": si, width: (ht * s.width) / s.height, height: ht } as React.CSSProperties}
-                    onPointerMove={tilt}
-                    onPointerLeave={untilt}
                     className="light-cell relative block overflow-hidden rounded-[3px] [container-type:inline-size]"
                   >
                     <Image
