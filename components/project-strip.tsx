@@ -279,7 +279,7 @@ export function ProjectStrip({
                               target="_blank"
                               rel="noreferrer"
                               data-ring="Instagram"
-                              className="-my-1.5 inline-block py-1.5 text-foreground/80 transition-colors duration-200 hoverable:hover:text-foreground"
+                              className="-my-2 inline-block py-2 text-foreground/80 transition-colors duration-200 hoverable:hover:text-foreground"
                             >
                               {credit.name}
                               <span className="sr-only">
