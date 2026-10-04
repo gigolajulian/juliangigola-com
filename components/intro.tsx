@@ -156,8 +156,13 @@ export function Intro() {
     const hold = window.setInterval(() => {
       const real = performance.now() >= CAP ? 1 : done / tasks.length;
       const at = Number(sweep?.currentTime ?? SWEEP);
-      if (real < 1 && at >= reaches(real)) sweep?.pause();
-      else if (sweep?.playState === "paused") sweep.play();
+      /* Only a running sweep is held. On a slow first load it can finish
+         before this script arrives, and a finished animation paused and
+         then played rewinds to its start: the bar went back and swept a
+         second time (Julian, 2026-10-04). */
+      if (real < 1 && at >= reaches(real)) {
+        if (sweep?.playState === "running") sweep.pause();
+      } else if (sweep?.playState === "paused") sweep.play();
     }, 50);
 
     /* Ready: the page starts its own entrance under the panel (`UNDER`).
