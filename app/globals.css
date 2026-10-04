@@ -4531,9 +4531,12 @@ optgroup {
     padding-block: 0 0.25rem;
     /* Julian: space between "All projects" and the first cover, which
        the next screen's shadow also falls across. 88px, then closer to
-       the first project twice (2026-10-02). */
-    padding-right: 1.25rem;
-    padding-left: 1rem;
+       the first project twice (2026-10-02). Then the margins of the
+       discipline's own page, where "All projects" leads (2026-10-04): the
+       page's 40px before the name, 64px from it to the first cover with
+       the strip's 16px gap. */
+    padding-right: 3rem;
+    padding-left: 2.5rem;
   }
   /* The first spine 88px off the left edge: the strip's own 40px and
      this (Julian: 32px, 64px, then wider again 2026-10-02). */
