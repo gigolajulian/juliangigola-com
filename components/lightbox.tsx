@@ -276,8 +276,8 @@ export function useLightbox(frames: Frame[]) {
  * close from wherever it is. Under that it springs back to the middle.
  *
  * Pointer Events with capture, so a swipe that leaves the picture's box
- * keeps tracking. Mice are left out: with a pointer the arrows, the keys
- * and a click outside are all quicker than a drag.
+ * keeps tracking. A mouse drags it too, by its main button (Julian: drag
+ * to the next and the one before).
  * ─────────────────────────────────────────────────────────────── */
 
 /** Above this, in px per ms, a release commits whatever it was doing. */
@@ -328,7 +328,7 @@ function useSwipe({
   };
 
   const onPointerDown: React.PointerEventHandler<HTMLDivElement> = (e) => {
-    if (e.pointerType === "mouse" || !e.isPrimary) return;
+    if (e.button !== 0 || !e.isPrimary) return;
     try {
       e.currentTarget.setPointerCapture(e.pointerId);
     } catch {}
@@ -432,7 +432,8 @@ function useFit(
   width: number,
   height: number,
 ) {
-  const [size, setSize] = React.useState<{ w: number; h: number } | null>(
+  // `vw`: the area's own width, for the neighbours' room either side.
+  const [size, setSize] = React.useState<{ w: number; h: number; vw: number } | null>(
     null,
   );
   React.useLayoutEffect(() => {
@@ -455,8 +456,12 @@ function useFit(
         w = el.clientWidth - parseFloat(pad.paddingLeft) - parseFloat(pad.paddingRight);
         h = el.clientHeight - parseFloat(pad.paddingTop) - parseFloat(pad.paddingBottom);
       }
+      /* A landscape frame a little short of the width, so the frames
+         either side show past it (Julian: scale down slightly to show the
+         next and before). Not on a phone, which has no sides. */
+      if (width > height && window.matchMedia("(min-width: 640px)").matches) w *= 0.76;
       const s = Math.min(w / width, h / height);
-      setSize({ w: Math.round(width * s), h: Math.round(height * s) });
+      setSize({ w: Math.round(width * s), h: Math.round(height * s), vw: el.clientWidth });
     };
     fit();
     const ro = new ResizeObserver(([entry]) => fit(entry.contentRect));
@@ -811,6 +816,13 @@ const sideUnder = (src: string) => {
   return url ? `url("${url}")` : undefined;
 };
 
+/* A step between frames (Julian: it snapped, smoothen). Was 650ms on an
+   ease that ran seven tenths of the way in the first 150, which read as a
+   jump; the new frame also started half transparent, a grey ghost over
+   the one leaving. Longer, on an even ease-out, and opaque throughout. */
+const STEP_MS = 900;
+const STEP_EASE = "cubic-bezier(0.33, 1, 0.68, 1)";
+
 function Stage({
   frame,
   alt,
@@ -852,11 +864,10 @@ function Stage({
           /* Julian: natural and smooth. From about where the side
              photograph waited, turned as it was, easing out long. */
           transform: `perspective(1400px) translateX(${dir * 40}%) rotateY(${dir * 20}deg) scale(0.88)`,
-          opacity: 0.5,
         },
-        { transform: "none", opacity: 1 },
+        { transform: "none" },
       ],
-      { duration: 650, easing: "cubic-bezier(0.22, 1, 0.36, 1)" },
+      { duration: STEP_MS, easing: STEP_EASE },
     );
     /* And the two either side move with it, as one carousel (Julian: the
        swap was not smooth; they vanished and faded back). The one behind
@@ -875,13 +886,13 @@ function Stage({
         const b = side.getBoundingClientRect();
         const dx = stage.left + stage.width / 2 - (b.left + b.width / 2);
         side.animate([{ transform: at(`${dx}px`, "0px", "0deg") }, { transform: rest }], {
-          duration: 650,
-          easing: "cubic-bezier(0.22, 1, 0.36, 1)",
+          duration: STEP_MS,
+          easing: STEP_EASE,
         });
       } else {
         side.animate(
           [{ transform: at(`${dir * 60}%`, "-160px", turn), opacity: 0 }, { transform: rest, opacity: 1 }],
-          { duration: 650, easing: "cubic-bezier(0.22, 1, 0.36, 1)" },
+          { duration: STEP_MS, easing: STEP_EASE },
         );
       }
     }
@@ -936,7 +947,8 @@ function Stage({
         <div
           data-zoom-box
           className={cn(
-            "relative shrink-0 bg-cover bg-center",
+            // Over the neighbours tucked behind it.
+            "relative z-20 shrink-0 bg-cover bg-center shadow-[0_30px_80px_-20px_rgb(0_0_0/0.45)]",
             /* Clipped at its own edge while it is the size it was fitted
                to, and not once a wheel has been over it: a zoom is
                allowed the whole viewer, which on an upright photograph
@@ -1003,8 +1015,27 @@ function Stage({
           are the controls for that. They fade in on their own
           (`.lightbox-peek`), since one can arrive after a step. */}
       {size && zoom.scale === 1
-        ? ([[-1, prev, "Prev"], [1, next, "Next"]] as const).map(([d, f, word]) =>
-            f ? (
+        ? ([[-1, prev, "Prev"], [1, next, "Next"]] as const).map(([d, f, word]) => {
+            if (!f) return null;
+            /* Julian (2026-10-03): whole, never cropped, the 3D made
+               elite, and not crowding the picture ("too close"). A cover
+               flow: each neighbour smaller and set back, a clear gap from
+               the picture, turned away from it on its inner edge, whole
+               inside the window: shrunk to the room, gone below a
+               sliver. */
+            const GAP = 56;
+            const vw = size.vw;
+            const room = vw / 2 - size.w / 2 - GAP - 24;
+            let h = size.h * 0.78;
+            let w = (h * f.width) / f.height;
+            const proj = () => w * 0.72; // its width on screen, turned
+            if (proj() > room) {
+              const k = room / proj();
+              h *= k;
+              w *= k;
+            }
+            if (room < 64) return null;
+            return (
               <button
                 key={word}
                 type="button"
@@ -1014,16 +1045,11 @@ function Stage({
                 data-side={d < 0 ? "prev" : "next"}
                 onClick={() => onStep(d)}
                 className="lightbox-side absolute top-1/2 z-10 -translate-y-1/2 max-sm:hidden"
-                /* Julian: kept inside the window. At the picture's
-                   height where the room either side allows, narrower
-                   (and so shorter) where it does not, and gone where
-                   there is none. */
                 style={{
-                  width: Math.round((size.h * f.width) / f.height),
-                  maxWidth: `max(0px, calc(50% - ${size.w / 2 + 24}px - 2.5rem))`,
-                  aspectRatio: `${f.width} / ${f.height}`,
-                  [d < 0 ? "right" : "left"]: `calc(50% + ${size.w / 2 + 24}px)`,
-                }}
+                  width: Math.round(w),
+                  height: Math.round(h),
+                  [d < 0 ? "right" : "left"]: `calc(50% + ${Math.round(size.w / 2 + GAP)}px)`,
+                } as React.CSSProperties}
               >
                 <TiltedCard
                   imageSrc={f.src}
@@ -1038,9 +1064,11 @@ function Stage({
                   {/* Not keyed: the card stays through a step and moves
                       (above). The picture is, so a new one is never the old
                       one for a frame, and the copy the page already has is
-                      under it until it paints, as under the middle one. */}
+                      under it until it paints, as under the middle one.
+                      Over it a pane of glass, the picture sharp under it
+                      (`.lightbox-glass`). */}
                   <span
-                    className="lightbox-peek block h-full w-full overflow-hidden bg-cover bg-center"
+                    className="lightbox-peek relative block h-full w-full overflow-hidden bg-cover bg-center"
                     style={{ backgroundImage: sideUnder(f.src) }}
                   >
                     <Image
@@ -1053,13 +1081,14 @@ function Stage({
                       sizes="50vw"
                       onLoad={paint(f.src)}
                       draggable={false}
-                      className="block h-full w-full object-cover"
+                      className="absolute inset-0 block h-full w-full object-cover"
                     />
+                    <span aria-hidden className="lightbox-glass" />
                   </span>
                 </TiltedCard>
               </button>
-            ) : null,
-          )
+            );
+          })
         : null}
     </div>
   );

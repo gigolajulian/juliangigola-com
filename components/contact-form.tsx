@@ -483,7 +483,9 @@ function Field({
   const Element = as;
 
   return (
-    <div>
+    // Lifts toward you under the pointer and while it is being typed in
+    // (`.contact-field`, globals.css).
+    <div className="contact-field">
       <label htmlFor={id} className="label block text-muted-foreground">
         {label}
         {props.required ? <span aria-hidden> *</span> : null}

@@ -84,15 +84,23 @@ export function VideoGrid({
            is inside the same hover as the frame. Along a strip it sits on
            a plate over the foot of the still instead, so the tile is the
            whole of its half of the height. */
-        const caption = (
-          <div
-            className={cn(
-              "flex flex-wrap items-baseline gap-x-4 gap-y-1",
-              rows
-                ? "pointer-events-none absolute inset-x-0 bottom-0 glass-surface bg-background/70 px-4 py-3"
-                : "mt-3",
-            )}
-          >
+        /* Along a strip (Julian, 2026-10-03, "slate"): no plate. The title
+           large in the display face over a fall of shadow at the foot of
+           the still, the credit above it, both on the left; the client's
+           mark is baked into the still's bottom right. */
+        const caption = rows ? (
+          <div className="pointer-events-none absolute inset-x-0 bottom-0 flex flex-col items-start gap-1.5 rounded-b-[var(--radius-photo)] bg-gradient-to-t from-black/80 via-black/35 to-transparent px-6 pb-5 pt-16">
+            <h3 className="font-display text-[clamp(1.75rem,2.6vw,3rem)] uppercase leading-[0.9] text-white">
+              {video.title}
+            </h3>
+            {video.client || video.year ? (
+              <p className="label order-first text-white/75">
+                {[video.client, video.year].filter(Boolean).join(" · ")}
+              </p>
+            ) : null}
+          </div>
+        ) : (
+          <div className="mt-3 flex flex-wrap items-baseline gap-x-4 gap-y-1">
             <h3 className="font-display text-lg uppercase tracking-[0] transition-colors duration-200">
               {video.title}
             </h3>
@@ -212,12 +220,8 @@ function Tile({
           // the viewport on a phone.
           sizes="(min-width: 66rem) 33vw, (min-width: 44rem) 50vw, 100vw"
           loading={eager ? "eager" : "lazy"}
-          /* A slow zoom, and only the picture moves. 500ms rather than the
-             200 a control would take: this is a large surface and a fast
-             scale on a photograph reads as a jolt, where a slow one reads as
-             the frame leaning in. The easing lives on `img[data-fade]` in
-             globals.css, which outranks any transition written here. */
-          className="object-cover hoverable:group-hover:scale-[1.04] motion-reduce:group-hover:scale-100"
+          /* No zoom under the pointer (Julian, 2026-10-04: none anywhere). */
+          className="object-cover"
           /* A 16:9 still from the provider's CDN rather than a frame from
              the archive, and the loader sizes it all the same: a tile is
              340px wide and the still is 1280, which was four times the

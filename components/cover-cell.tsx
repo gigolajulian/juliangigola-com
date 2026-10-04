@@ -138,56 +138,30 @@ export function CoverCell({
              as the page came in (116 on /work). The cell's own colour
              stands in. */
           draggable={false}
-          /* Under a pointer the photograph leans in. 1.04 and 500ms: a
-             cover is a large surface and a fast scale on one reads as a
-             jolt, where a slow one reads as the frame taking a step
-             towards you. Transform only, so it stays on the compositor.
-             The easing is on `img[data-fade]` in globals.css, which is an
-             element-and-attribute selector and beats a class: a
-             `transition-[scale]` written here lost to it and the picture
-             jumped to size.
-             Julian asked. */
-          /* The same half second and the same ease as the plate below it,
-             so the picture and its caption read as one answer to the
-             pointer rather than two. */
-          className="strip-frame object-cover transition-transform duration-500 ease-[var(--ease-out-strong)] hoverable:group-hover:scale-[1.028] motion-reduce:transition-none motion-reduce:group-hover:scale-100"
+          /* No zoom under the pointer (Julian, 2026-10-04: none anywhere). */
+          className="strip-frame object-cover transition-transform duration-500 ease-[var(--ease-out-strong)] motion-reduce:transition-none"
         />
 
-        {/* Julian: do not change the colour of the plate on hover. It used
-          to lighten from 70 to 40 percent of the page over half a second,
-          and with the rail's six pixel lift running at the same time the
-          band read as coming apart rather than as one object moving. A
-          plate that holds still while the picture behind it moves is one
-          thing; a plate that changes its own material mid-move is two. */}
-        {/* The plate: the same material as the bar at the top of every page,
-          and three twentieths of the cover: the fifth Julian first asked
-          for, a third smaller when he asked again, then a little larger
-          again (13.3% to 15%). One
-          layout at every size — name along the bottom left, credit along
-          the bottom right — with the type measured in `cqw` off the cell,
-          so the rack and a phone held sideways get the same plate as a
-          full window rather than a stacked variant of their own. Always
-          on, because a strip of covers is scanned for a name. */}
-        <div className="cover-plate pointer-events-none absolute -inset-x-0.5 -bottom-0.5 flex h-[15%] min-h-[1.8333rem] flex-col justify-center gap-[0.8cqw] glass-surface bg-background/70 px-[4cqw]">
-          <span
-            style={{ "--n": row.name.length } as React.CSSProperties}
-            className="cover-name font-display min-w-0 truncate uppercase leading-[0.9] tracking-[0]"
-          >
-            {row.name}
-          </span>
-          {/* Under the name, not beside it. Julian asked: who it was for
-            reads as a subtitle to the title and not as a second column
-            competing with it, and the whole plate ranges left off one
-            edge. The count is what says a cover opens onto a body of
-            work rather than being one photograph. */}
-          <span className="label min-w-0 truncate text-[clamp(0.6875rem,1.5cqw,0.75rem)] leading-none text-muted-foreground">
+        {/* Julian (2026-10-03): the films' slate on every project. No
+          plate: the name large in the display face over a fall of shadow
+          at the foot of the photograph, who it was for above it, both on
+          the left. The name is sized to its length (`.cover-name`), so a
+          long title stays on one line. */}
+        <div className="cover-slate pointer-events-none absolute inset-x-0 bottom-0 flex flex-col items-start gap-[1.2cqw] bg-gradient-to-t from-black/80 via-black/35 to-transparent px-[5cqw] pb-[4.5cqw] pt-[16cqw]">
+          <span className="label min-w-0 max-w-full truncate text-[clamp(0.625rem,1.6cqw,0.75rem)] leading-none text-white/75">
             {row.credit}
             {row.frames ? (
               <>
-                <span className="px-1.5 text-muted-foreground/50">/</span>
+                <span className="px-1.5 text-white/45">/</span>
                 {row.frames} frames
               </>
             ) : null}
+          </span>
+          <span
+            style={{ "--n": row.name.length } as React.CSSProperties}
+            className="cover-name font-display min-w-0 max-w-full truncate uppercase leading-[0.9] text-white"
+          >
+            {row.name}
           </span>
         </div>
       </Link>
