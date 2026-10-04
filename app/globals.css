@@ -5870,7 +5870,8 @@ h2:not(.label) {
     filter 620ms var(--ease-out-strong),
     scale 620ms var(--ease-out-strong),
     transform 140ms ease-out,
-    box-shadow 140ms ease-out,
+    /* Fades in rather than snapping on (Julian, 2026-10-04: smoothly). */
+    box-shadow 500ms var(--ease-out-strong),
     translate 900ms cubic-bezier(0.25, 1, 0.5, 1);
 }
 /* Room for it (Julian, 2026-10-04): the lifted card grows a few pixels
@@ -6798,7 +6799,7 @@ h2:not(.label) {
     box-shadow: var(--sx, 0px) calc(22px + var(--sy, 0px)) 40px -16px rgb(0 0 0 / 0.6);
     transition:
       transform 140ms ease-out,
-      box-shadow 140ms ease-out,
+      box-shadow 500ms var(--ease-out-strong),
       scale 440ms var(--ease-bounce);
   }
 }
