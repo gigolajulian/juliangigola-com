@@ -6099,8 +6099,10 @@ h2:not(.label) {
   /* In from the right, the way the strip travels (`jg-fade-up`). It rose
      from below once, and the last step rising past the list's foot gave
      the list a scrollbar for as long as it moved (Julian saw it). The list
-     clips sideways, so this one cannot. */
-  .strip-scroll[data-at]:not([data-at="About"]) .about-step,
+     clips sideways, so this one cannot. About's label is "Biography"
+     since the menu names changed; the old "About" here left its steps
+     hidden for good (Julian saw it, 2026-10-05). */
+  .strip-scroll[data-at]:not([data-at="Biography"]) .about-step,
   .strip-scroll[data-at]:not([data-at="Sessions"]) .session-step,
   .strip-scroll[data-at]:not([data-at="Commissions"]) .services-step {
     opacity: 0;

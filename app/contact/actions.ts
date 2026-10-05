@@ -217,9 +217,24 @@ export async function submitEnquiry(
     };
     // The summary rides along as metadata so /admin can draw the whole inbox
     // from one request. See the note in `lib/inbox.ts`.
-    await inbox.put(enquiryKey(now, id.slice(0, 8)), JSON.stringify(stored), {
+    const key = enquiryKey(now, id.slice(0, 8));
+    await inbox.put(key, JSON.stringify(stored), {
       metadata: summary(stored),
     });
+    /* Their images beside it, for /admin's Inbox (`ref:<key>:<n>`, read
+       and deleted with the message by `app/api/inbox/route.ts`). Best
+       effort like the email: the enquiry is already stored. */
+    try {
+      await Promise.all(
+        uploads.map(async (f, n) =>
+          inbox.put(`ref:${key}:${n}`, await f.arrayBuffer(), {
+            metadata: { type: f.type },
+          }),
+        ),
+      );
+    } catch (err) {
+      console.error("contact: stored the enquiry but not its images", err);
+    }
     // The cooldown expires itself, so nothing has to clean it up. The counter
     // is given two days so a message near midnight cannot be double-counted
     // against a bucket that has already gone.
