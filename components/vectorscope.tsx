@@ -16,9 +16,8 @@ import type { Frame } from "@/lib/work-types";
  * turns to colour. The discipline rack steps away (`data-scope-open` in
  * globals.css) and in its place a grid of the projects in the hue the
  * scope is reading, the strongest first, each shown by its cover with the
- * set's dominant colours on a white plate at its top left, and the rest
- * of its photographs in that colour stacked under it (`ColourTile`); no
- * hover, Julian asked. The page follows the pointer over the scope as it
+ * set's dominant colours on a white plate at its top left (`ColourTile`);
+ * no hover, Julian asked. The page follows the pointer over the scope as it
  * moves; a click holds the hue. A tile opens its project.
  *
  * Smooth rather than redrawn: the tiles are keyed by project, so one that
@@ -136,11 +135,10 @@ const TARGETS: [string, number[]][] = [
 type Shot = Frame & { dominant: string; pts: number[]; xy: number[] };
 type Placed = { slug: string; name: string; href: string; shots: Shot[] };
 type ColourSet = { p: Placed; shots: Shot[]; score: number };
-/** A tile: the project's cover, and its other photographs in the colour. */
+/** A tile: the project's photograph nearest the colour. */
 type Item = {
   p: Placed;
   shot: Shot;
-  stack: Shot[];
   count: number;
   colours: string[];
 };
@@ -324,23 +322,20 @@ export function ScopePanel({
       .slice(0, most);
   }, [placed, settled, neutral, most]);
 
-  /* One tile a project, shown by its photograph nearest the colour, the
-     rest of its photographs in the colour stacked under it, strongest
-     first; with no colour chosen, its cover and the rest of the set. */
+  /* One tile a project, shown by its photograph nearest the colour,
+     strongest first; with no colour chosen, its cover. */
   const items = React.useMemo<Item[]>(
     () =>
       neutral
         ? placed.slice(0, most).map((p) => ({
             p,
             shot: p.shots[0],
-            stack: p.shots.slice(1),
             count: 0,
             colours: swatches(p.shots.slice(0, 8)),
           }))
         : sets.map((s) => ({
             p: s.p,
             shot: s.shots[0],
-            stack: s.shots.slice(1),
             count: s.shots.length,
             colours: swatches(s.shots),
           })),
@@ -845,10 +840,9 @@ const ColourGrid = React.memo(function ColourGrid({
   );
 });
 
-/* A project, shown by its photograph nearest the colour, the rest of its
-   photographs in the colour under it as a stack, two edges peeking out. */
+/* A project, shown by its photograph nearest the colour. */
 const ColourTile = React.memo(function ColourTile({ item }: { item: Item }) {
-  const { p, shot, stack, count, colours } = item;
+  const { p, shot, count, colours } = item;
   /* Julian: no hover on the colour page. The fan of the set's other
      photographs, the rest of the grid stepping back and the cover's zoom
      all came with the pointer; the tile is now the cover and its name. */
@@ -860,21 +854,8 @@ const ColourTile = React.memo(function ColourTile({ item }: { item: Item }) {
       className="block"
     >
       <span className="relative isolate block">
-        {/* The stack under the cover: two edges, in the set's own colours. */}
-        {stack.slice(0, 2).map((f, i) => (
-          <span
-            key={f.src}
-            aria-hidden
-            className="absolute inset-0"
-            style={{
-              backgroundColor: f.color,
-              translate: `${(i + 1) * 6}px 0`,
-              scale: `1 ${1 - (i + 1) * 0.04}`,
-              opacity: 1 - i * 0.35,
-              zIndex: -1 - i,
-            }}
-          />
-        ))}
+        {/* No stack under the cover (Julian, 2026-10-05: he did not like how
+            the edges looked). */}
         <span
           className="relative block aspect-[4/5] overflow-hidden"
           style={{ backgroundColor: shot.color }}

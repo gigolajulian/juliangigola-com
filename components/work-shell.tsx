@@ -596,12 +596,18 @@ export function WorkShell({
     const measure = () => {
       const c = lit.current;
       if (!c) return setMark(null);
-      const grow = JELLY.swell / 2;
+      /* A line under the lit chip's words, as the navbar has under its
+         page (Julian, 2026-10-05, once the chips joined the bar's pane):
+         the words' width less the chip's padding, grown with the chip's
+         swell, at the foot of the chip as it is drawn. */
+      const s = 1 + JELLY.swell;
+      const pad = parseFloat(getComputedStyle(c).paddingLeft) || 0;
+      const w = (c.offsetWidth - 2 * pad) * s;
       setMark({
-        x: c.offsetLeft - c.offsetWidth * grow,
-        y: c.offsetTop - c.offsetHeight * grow,
-        w: c.offsetWidth * (1 + JELLY.swell),
-        h: c.offsetHeight * (1 + JELLY.swell),
+        x: c.offsetLeft + c.offsetWidth / 2 - w / 2,
+        y: c.offsetTop + c.offsetHeight / 2 + (c.offsetHeight * s) / 2 - 4,
+        w,
+        h: 1,
         rw: r.scrollWidth,
       });
     };
@@ -1112,10 +1118,9 @@ export function WorkShell({
                 >
                   {mark && quiet ? (
                     <Liquid
-                      blur={5}
-                      contrast={18}
-                      /* Full ink, the lit chip's words knocked out of it
-                         (Julian, 2026-10-04: a solid pill, not grey). */
+                      /* The navbar's goo, so a 1px line survives it. */
+                      blur={0.6}
+                      contrast={10}
                       fill="var(--foreground)"
                       className="h-full w-full"
                     >
@@ -1128,8 +1133,7 @@ export function WorkShell({
                             width: mark.w,
                             height: mark.h,
                             transform: `translate(${mark.x}px, ${mark.y}px)`,
-                            // A pill (Julian, 2026-10-04); `liquid-gooey`
-                            // reads the corner off this box.
+                            // `liquid-gooey` reads the corner off this box.
                             borderRadius: mark.h / 2,
                           }}
                         />
@@ -1189,9 +1193,9 @@ function Chip({
     "transition-[color,background-color,scale] duration-200 ease-[var(--ease-out-strong)]",
     // A chip lifts a touch under the pointer and gives under the press.
     "hoverable:hover:scale-[1.05] active:scale-[0.96] motion-reduce:hover:scale-100",
-    // Knocked out of the ink pill drawn under it (Julian, 2026-10-04).
+    // Full ink over its line (the pill it was knocked out of is gone).
     active
-      ? "font-bold text-background"
+      ? "font-bold text-foreground"
       : "text-muted-foreground hoverable:hover:text-foreground focus-visible:bg-foreground/[0.07] focus-visible:text-foreground",
   );
   return (
@@ -1248,7 +1252,7 @@ function Chip({
                is selected. Half strength so the name still leads. The
                plate is back (2026-10-04, now in full ink), so it is
                knocked out of it again. */
-            active ? "text-background/60" : "text-muted-foreground/60",
+            active ? "text-foreground/60" : "text-muted-foreground/60",
           )}
         >
           {count}

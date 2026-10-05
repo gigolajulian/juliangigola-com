@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import type { IndexRow } from "@/lib/work";
+import ACCENTS from "@/lib/accents.json";
 
 /* ── a cover, as a cell of the work strip ─────────────────────────
  * One project: its opening frame at the strip's full height, its name and
@@ -102,6 +103,8 @@ export function CoverCell({
            the ruler can name the one under the pointer rather than naming
            the chapter eight times over. */
         data-name={row.name}
+        /* The project's colour, for the rail (`scripts/make-accents.mjs`). */
+        data-tint={(ACCENTS as Record<string, string>)[row.slug]}
         data-vt={row.slug}
         data-hash={hash}
         data-ring="View"
