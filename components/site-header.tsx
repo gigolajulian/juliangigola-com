@@ -103,9 +103,14 @@ export function SiteHeader() {
       const put = (k: string, v: string) => {
         if (root.style.getPropertyValue(k) !== v) root.style.setProperty(k, v);
       };
+      /* Both read before either is written: a write to the root's style
+         and then a read restyled the whole page a second time, 140ms on a
+         throttled phone (optimize pass, 2026-10-05). */
       const measure = () => {
-        put("--foot", `${foot.offsetHeight}px`);
-        put("--under", `${foot.offsetHeight + rail.offsetHeight}px`);
+        const f = foot.offsetHeight;
+        const r = rail.offsetHeight;
+        put("--foot", `${f}px`);
+        put("--under", `${f + r}px`);
       };
       sizes = new ResizeObserver(measure);
       sizes.observe(foot);

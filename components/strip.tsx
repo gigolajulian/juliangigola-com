@@ -653,12 +653,31 @@ export function Strip({
   React.useEffect(() => {
     const el = scroller.current;
     if (!el || live) return;
+    let jumped = 0;
     const go = (smooth: boolean) => {
       const i = cellFor(el, decodeURIComponent(window.location.hash.slice(1)));
       const cell = el.children[i] as HTMLElement | undefined;
       if (!cell) return false;
       const still = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      /* The screens off the window are skipped until near it (`globals.css`,
+         `content-visibility`) and hold a guessed height, so a glide past
+         them drew each at its real one on the way and landed hundreds of
+         pixels short. Drawn in full for the journey, skipped again after. */
+      el.setAttribute("data-jump", "");
+      clearTimeout(jumped);
+      /* Two frames on: a screen drawn once keeps its real height when it
+         is skipped again (`auto`), so nothing above the window moves. */
+      const done = () => {
+        clearTimeout(jumped);
+        window.removeEventListener("scrollend", done);
+        requestAnimationFrame(() =>
+          requestAnimationFrame(() => el.removeAttribute("data-jump")),
+        );
+      };
       cell.scrollIntoView({ block: "start", behavior: smooth && !still ? "smooth" : "auto" });
+      window.addEventListener("scrollend", done, { once: true });
+      // Safari without `scrollend`, or a jump with nowhere to go.
+      jumped = window.setTimeout(done, 1500);
       return true;
     };
     go(false);
@@ -679,6 +698,7 @@ export function Strip({
     return () => {
       window.removeEventListener("hashchange", onHash);
       document.removeEventListener("click", onLink, true);
+      clearTimeout(jumped);
     };
   }, [live]);
 
