@@ -53,13 +53,28 @@ const loadSamples = () =>
     use to read it. */
 const RIM = 70;
 /** How far round the scope a point may be from the hue and still count. */
-const REACH = (16 * Math.PI) / 180;
+const REACH = (11 * Math.PI) / 180;
 /** And how far out it must reach, as a share of the hue's own chroma: a
     point near the middle is close to every hue and says nothing of this. */
-const DEPTH = 0.35;
+const DEPTH = 0.5;
 /** The share of a photograph's points that must be in reach for it to be
     in the colour. */
-const KEEP = 0.25;
+const KEEP = 0.1;
+/* Julian (2026-10-05): more accurate, and not so many. The hue is tight
+   (reach 16° to 11°) and the strongest come first, never more than
+   what the room holds: red took in 35 projects, most of them skin leaning red. Then
+   green came up empty, because green is never much of a photograph here,
+   so a tenth of it in the hue is enough (keep 0.25 to 0.1) and the floor
+   stops at `FLOOR` chroma however far out the click is. */
+/** The most a point must be saturated to count, in chroma units. */
+const FLOOR = 8;
+/* How many projects a colour shows is the room's, not a number: as many
+   4:5 covers as fit beside the panel without a scroll, three rows (two on
+   a short screen), and the columns that leaves, from three to eight
+   (Julian, 2026-10-05: 6 by 3 on a big screen, 5 by 3 at 1440). The
+   spacing below is the grid's `gap-4` and the name under each cover. */
+const GAP = 16;
+const NAME = 28;
 /** Inside this, the point is on neutral and the page shows everything. */
 const NEUTRAL = 5;
 /** The page follows the pointer in steps of this many chroma units, so it
@@ -150,7 +165,7 @@ const dotsOf = (
 /** The share of a photograph's points in reach of a hue. */
 const inHue = (xy: number[], point: [number, number]) => {
   const aim = Math.atan2(point[1], point[0]);
-  const floor = Math.hypot(point[0], point[1]) * DEPTH;
+  const floor = Math.min(Math.hypot(point[0], point[1]) * DEPTH, FLOOR);
   let near = 0;
   for (let i = 0; i < xy.length; i += 2) {
     if (Math.hypot(xy[i], xy[i + 1]) < floor) continue;
@@ -284,6 +299,9 @@ export function ScopePanel({
   }, [rows, data, present]);
 
   const neutral = !settled || Math.hypot(settled[0], settled[1]) < NEUTRAL;
+  /** The grid the room holds: columns, rows and a cover's width. */
+  const [fit, setFit] = React.useState({ cols: 5, rows: 3, w: 0 });
+  const most = fit.cols * fit.rows;
   const sets = React.useMemo<ColourSet[]>(() => {
     if (neutral || !settled) return [];
     return placed
@@ -295,12 +313,16 @@ export function ScopePanel({
         return {
           p,
           shots: scored.map((x) => x.s),
-          score: scored.reduce((n, x) => n + x.k, 0),
+          // Its strongest photograph, not how many it has: a big set of
+          // frames that only lean towards the colour ranked over one
+          // that is in it.
+          score: scored[0]?.k ?? 0,
         };
       })
       .filter((s) => s.shots.length)
-      .sort((a, b) => b.shots.length - a.shots.length || b.score - a.score);
-  }, [placed, settled, neutral]);
+      .sort((a, b) => b.score - a.score || b.shots.length - a.shots.length)
+      .slice(0, most);
+  }, [placed, settled, neutral, most]);
 
   /* One tile a project, shown by its photograph nearest the colour, the
      rest of its photographs in the colour stacked under it, strongest
@@ -308,7 +330,7 @@ export function ScopePanel({
   const items = React.useMemo<Item[]>(
     () =>
       neutral
-        ? placed.map((p) => ({
+        ? placed.slice(0, most).map((p) => ({
             p,
             shot: p.shots[0],
             stack: p.shots.slice(1),
@@ -322,7 +344,7 @@ export function ScopePanel({
             count: s.shots.length,
             colours: swatches(s.shots),
           })),
-    [neutral, placed, sets],
+    [neutral, placed, sets, most],
   );
 
   /* Escape puts it away. */
@@ -492,22 +514,40 @@ export function ScopePanel({
   };
 
   const swatch = point ? colourAt(point[0], point[1]) : null;
-  /* Julian (2026-10-04): the work in the colour runs sideways, two rows,
-     and the wheel turns to carry it: down goes right. Kept from the page's
-     own smooth scroll, which would otherwise take a wheel this box cannot
-     use upright and move the hidden rack behind it. */
+  /* The work in the colour fills the screen and does not scroll (Julian,
+     2026-10-05). The wheel is still kept from the page's own smooth
+     scroll, which would move the hidden rack behind it. */
   const results = React.useRef<HTMLElement>(null);
   React.useEffect(() => {
     const el = results.current;
     if (!open || !el) return;
     const wheel = (e: WheelEvent) => {
       e.stopPropagation();
-      if (Math.abs(e.deltaY) <= Math.abs(e.deltaX)) return;
       e.preventDefault();
-      el.scrollLeft += e.deltaMode === 1 ? e.deltaY * 40 : e.deltaY;
     };
     el.addEventListener("wheel", wheel, { passive: false });
     return () => el.removeEventListener("wheel", wheel);
+  }, [open, data]);
+
+  /* The room, measured whenever it changes size. */
+  React.useEffect(() => {
+    const el = results.current;
+    if (!open || !el) return;
+    const measure = () => {
+      const cs = getComputedStyle(el);
+      const W = el.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
+      const H = el.clientHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom);
+      const rows = H < 560 ? 2 : 3;
+      let w = ((H - (rows - 1) * GAP) / rows - NAME) * 0.8;
+      const cols = Math.max(3, Math.min(8, Math.floor((W + GAP) / (w + GAP))));
+      w = Math.floor(Math.min(w, (W - (cols - 1) * GAP) / cols));
+      setFit((f) =>
+        f.cols === cols && f.rows === rows && f.w === w ? f : { cols, rows, w },
+      );
+    };
+    const watch = new ResizeObserver(measure);
+    watch.observe(el);
+    return () => watch.disconnect();
   }, [open, data]);
 
   const { h, s } = hsl(swatch ?? [128, 128, 128]);
@@ -688,10 +728,10 @@ export function ScopePanel({
             left: PANEL,
             ...(room ? { top: room.top, bottom: room.bottom } : null),
           }}
-          className="fixed right-0 z-30 overflow-x-auto overflow-y-hidden overscroll-contain bg-background px-6 pb-6 pt-1 [container-type:size] max-sm:hidden sm:px-10 transition-opacity duration-300 starting:opacity-0"
+          className="fixed right-0 z-30 overflow-hidden bg-background px-6 pb-6 pt-1 [container-type:size] max-sm:hidden sm:px-10 transition-opacity duration-300 starting:opacity-0"
         >
           {data === null ? null : items.length ? (
-            <ColourGrid items={items} />
+            fit.w ? <ColourGrid items={items} cols={fit.cols} w={fit.w} /> : null
           ) : (
             <p className="label text-muted-foreground">Nothing in this color yet</p>
           )}
@@ -710,8 +750,12 @@ export function ScopePanel({
  * ─────────────────────────────────────────────────────────────── */
 const ColourGrid = React.memo(function ColourGrid({
   items,
+  cols,
+  w,
 }: {
   items: Item[];
+  cols: number;
+  w: number;
 }) {
   const grid = React.useRef<HTMLUListElement>(null);
   const was = React.useRef(new Map<string, { x: number; y: number }>());
@@ -788,16 +832,12 @@ const ColourGrid = React.memo(function ColourGrid({
   return (
     <ul
       ref={grid}
-      className="relative grid h-full w-max grid-flow-col grid-rows-2 gap-x-4 gap-y-6"
+      className="relative grid justify-start gap-4"
+      style={{ gridTemplateColumns: `repeat(${cols}, ${w}px)` }}
     >
-      {/* Two rows (Julian, 2026-10-04), each tile as wide as a 4:5 cover
-          half the height, less the gap and its name. */}
+      {/* As many as the room holds (`GAP`, `NAME` and the measure above). */}
       {items.map((item) => (
-        <li
-          key={item.p.slug}
-          data-slug={item.p.slug}
-          className="w-[calc(((100cqh-1.5rem)/2-2rem)*0.8)]"
-        >
+        <li key={item.p.slug} data-slug={item.p.slug}>
           <ColourTile item={item} />
         </li>
       ))}
@@ -843,7 +883,7 @@ const ColourTile = React.memo(function ColourTile({ item }: { item: Item }) {
             src={shot.src}
             alt={shot.alt}
             fill
-            sizes="(min-width: 96rem) 24vw, (min-width: 64rem) 30vw, 60vw"
+            sizes="(min-width: 64rem) 14vw, 20vw"
             data-fade=""
             className="object-cover"
           />

@@ -508,7 +508,8 @@ function Field({
           "mt-1 block w-full border-0 border-b bg-transparent py-2 text-base sm:mt-2 sm:py-2.5",
           // Two lines of message on a phone, where the card has a screen.
           as === "textarea" && "max-sm:h-[3.75rem] max-sm:resize-none sm:h-[clamp(3.75rem,calc(16vh-3rem),6rem)] sm:resize-none",
-          "transition-colors duration-200 placeholder:text-muted-foreground/60",
+          // Placeholders fainter (Julian, 2026-10-05: was 60%).
+          "transition-colors duration-200 placeholder:text-muted-foreground/35",
           // Focus is the rule under the field darkening, to 40% ink (Julian,
           // 2026-10-04: lower). No
           // accent ring as well: a text field shows focus whether the
