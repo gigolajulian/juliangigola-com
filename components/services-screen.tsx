@@ -4,7 +4,7 @@ import type * as React from "react";
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Liquid } from "@/components/liquid";
+import { Liquid, useQuiet } from "@/components/liquid";
 import { RisingTitle } from "@/components/strip-page";
 import type { Frame } from "@/lib/work-types";
 
@@ -76,6 +76,7 @@ export function ServicesScreen({
   children?: React.ReactNode;
 }) {
   const [on, setOn] = useState(0);
+  const quiet = useQuiet();
   const field = useRef<HTMLDivElement>(null);
   const [box, setBox] = useState<[number, number]>([0, 0]);
   const shots = rows[on]?.shots ?? [];
@@ -185,6 +186,7 @@ export function ServicesScreen({
           </ul>
           <div ref={col} className="services-col relative isolate max-sm:hidden">
           <div aria-hidden className="services-ground pointer-events-none absolute -inset-y-2 -inset-x-6 -z-10 max-sm:hidden">
+            {quiet ? (
             <Liquid blur={5} contrast={18} fill="var(--services-hover)" className="h-full w-full">
               <Liquid.Item effect="move" move={{ springiness: 0.92, wobble: 0, stretch: 0.04, trail: 0 }}>
                 <div
@@ -208,6 +210,7 @@ export function ServicesScreen({
                 />
               </Liquid.Item>
             </Liquid>
+            ) : null}
           </div>
           <ul
             className="border-t border-border/40"

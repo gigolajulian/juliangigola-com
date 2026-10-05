@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Liquid } from "@/components/liquid";
+import { Liquid, useQuiet } from "@/components/liquid";
 import { RisingTitle } from "@/components/strip-page";
 import type { Frame } from "@/lib/work-types";
 
@@ -46,6 +46,7 @@ function where(title: string) {
 }
 
 export function SessionsScreen({ sessions }: { sessions: SessionItem[] }) {
+  const quiet = useQuiet();
   const router = useRouter();
   const [open, setOpen] = useState(0);
   /* Whether a mouse or the keyboard is in the list: the open row is
@@ -357,6 +358,7 @@ export function SessionsScreen({ sessions }: { sessions: SessionItem[] }) {
             starts from the pointer like every other. */}
         {(["session-ground"] as const).map((k) => (
               <div key={k} aria-hidden className={`${k} pointer-events-none absolute inset-y-0 -inset-x-5`}>
+                {quiet ? (
                 <Liquid
                   blur={5}
                   contrast={18}
@@ -385,6 +387,7 @@ export function SessionsScreen({ sessions }: { sessions: SessionItem[] }) {
                     />
                   </Liquid.Item>
                 </Liquid>
+                ) : null}
               </div>
             ))}
 

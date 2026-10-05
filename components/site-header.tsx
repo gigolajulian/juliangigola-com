@@ -4,7 +4,7 @@ import * as React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn, STRIP_SECTION } from "@/lib/utils";
-import { Liquid } from "@/components/liquid";
+import { Liquid, useQuiet } from "@/components/liquid";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { WarpTuner } from "@/components/warp-tuner";
 import { NAME_WARP } from "@/lib/name-warp";
@@ -523,6 +523,7 @@ function NavLinks({
   isCurrent: (href: string) => boolean;
 }) {
   const list = React.useRef<HTMLUListElement>(null);
+  const quiet = useQuiet();
   const [over, setOver] = React.useState<number | null>(null);
   const lit = links.findIndex((l) => isCurrent(l.href));
   const at = over ?? (lit >= 0 ? lit : null);
@@ -582,7 +583,7 @@ function NavLinks({
         className="pointer-events-none absolute top-0"
         style={drop ? { left: drop.left, width: drop.width, height: drop.y + LINE_H } : { height: 0 }}
       >
-        {drop ? (
+        {drop && quiet ? (
           <Liquid blur={1.25} contrast={10} fill="var(--foreground)" className={`nav-ink h-full w-full transition-opacity duration-300 ${at === LOGO ? "opacity-40" : "opacity-80"}`}>
             <Liquid.Item effect="move" move={{ wobble: 0.25 }}>
               <div

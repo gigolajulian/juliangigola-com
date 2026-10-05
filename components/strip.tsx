@@ -7,7 +7,7 @@ import { flushSync } from "react-dom";
 import { useRouter } from "next/navigation";
 import { cn, filterPaths, rubberband, STRIP_SECTION } from "@/lib/utils";
 import { flyCovers } from "@/lib/work-view";
-import { Liquid } from "@/components/liquid";
+import { Liquid, useQuiet } from "@/components/liquid";
 
 /* ── the strip ────────────────────────────────────────────────────
  * One screen, and the page runs across it. This is the machine behind
@@ -3746,6 +3746,7 @@ export function Strip({
    one. Not for anybody who asked for less motion: the plain ink stays. */
 function RailInk({ rail }: { rail: React.RefObject<HTMLDivElement | null> }) {
   const box = React.useRef<HTMLSpanElement>(null);
+  const quiet = useQuiet();
   const [ink, setInk] = React.useState<{
     x: number;
     y: number;
@@ -3800,7 +3801,7 @@ function RailInk({ rail }: { rail: React.RefObject<HTMLDivElement | null> }) {
       aria-hidden
       className="pointer-events-none absolute inset-0 z-[5]"
     >
-      {ink ? (
+      {ink && quiet ? (
         /* A blur of two: the lit chapter is four pixels tall, and any
            more ate it down to a wobbling thread. */
         <Liquid

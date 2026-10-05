@@ -228,7 +228,13 @@ export function StripHead({
               than swapping the word in place. */}
           <h1
             key={open ? title : undefined}
-            className="font-display line-clamp-2 text-xl uppercase leading-none tracking-[0] sm:line-clamp-none sm:text-3xl lying:text-xl"
+            className={cn(
+              "font-display line-clamp-2 text-xl uppercase leading-none tracking-[0] sm:line-clamp-none sm:text-3xl lying:text-xl",
+              /* The clamp hides overflow, and with it the button's reach past
+                 its 20px: taps a few pixels off it missed (audit,
+                 2026-10-05). It is one line there anyway. */
+              pick && "max-sm:line-clamp-none",
+            )}
           >
             {pick ? (
               <>
@@ -238,7 +244,7 @@ export function StripHead({
                   aria-expanded={pick.expanded}
                   aria-controls={pick.controls}
                   onClick={pick.onPick}
-                  className="relative inline-flex items-center gap-1.5 whitespace-nowrap press active:scale-[0.97] before:absolute before:-inset-x-3 before:-inset-y-3 before:content-[''] sm:hidden"
+                  className="relative z-10 inline-flex items-center gap-1.5 whitespace-nowrap press active:scale-[0.97] before:absolute before:-inset-x-3 before:-inset-y-3 before:content-[''] sm:hidden"
                 >
                   <span>{words}</span>
                   {pick.count !== undefined ? (
