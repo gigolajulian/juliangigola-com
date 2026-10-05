@@ -35,7 +35,13 @@ export async function GET(request: Request) {
   const gql = async (query: string) => {
     const res = await fetch("https://api.cloudflare.com/client/v4/graphql", {
       method: "POST",
-      headers: { authorization: `Bearer ${env.CF_ANALYTICS_TOKEN}`, "content-type": "application/json" },
+      // Trimmed, since a pasted secret can carry a newline; and a user agent,
+      // because the API answers an anonymous Worker request with an empty 400.
+      headers: {
+        authorization: `Bearer ${env.CF_ANALYTICS_TOKEN.trim()}`,
+        "content-type": "application/json",
+        "user-agent": "juliangigola-admin-traffic",
+      },
       body: JSON.stringify({ query }),
     });
     const text = await res.text();
