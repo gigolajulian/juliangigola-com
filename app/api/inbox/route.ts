@@ -137,6 +137,15 @@ export async function GET(request: Request) {
   const url = new URL(request.url);
   const wanted = url.searchParams.get("key");
 
+  // One of the images an enquiry arrived with (`app/contact/actions.ts`).
+  if (wanted?.startsWith("ref:msg:")) {
+    const got = await gate.inbox.getWithMetadata<{ type?: string }>(wanted, "arrayBuffer");
+    if (got.value === null) return json({ error: "Gone." }, 404);
+    return new Response(got.value, {
+      headers: { ...NO_STORE, "content-type": got.metadata?.type ?? "image/jpeg" },
+    });
+  }
+
   if (wanted) {
     if (!wanted.startsWith("msg:")) return json({ error: "Unknown." }, 400);
     const body = await gate.inbox.get(wanted);
@@ -198,5 +207,8 @@ export async function DELETE(request: Request) {
   if (!key?.startsWith("msg:")) return json({ error: "Unknown." }, 400);
 
   await gate.inbox.delete(key);
+  // And the images it arrived with.
+  const refs = await gate.inbox.list({ prefix: `ref:${key}:` });
+  await Promise.all(refs.keys.map((k: { name: string }) => gate.inbox.delete(k.name)));
   return json({ ok: true });
 }
