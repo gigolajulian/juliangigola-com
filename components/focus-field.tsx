@@ -10,14 +10,19 @@ import * as React from "react";
  * One layer for every gallery, moved with the pointer once a frame, so
  * nothing in the galleries themselves is touched.
  * ─────────────────────────────────────────────────────────────── */
-const GALLERIES = ".light-table, .portfolio-arrive .strip-scroll, .contact-sheet";
-const CELLS = ".light-cell, .strip-cell, .contact-sheet button";
+const GALLERIES = ".light-table, .portfolio-arrive .strip-scroll, .contact-sheet, .site-menu nav";
+const CELLS = ".light-cell, .strip-cell, .contact-sheet button, .site-menu a";
+/* The menu's names too, and on a phone under the finger as well as under
+   a mouse (Julian, 2026-10-04: the press in the menu should soften the
+   others the way the pointer does over Commissions). */
+const MENU = ".site-menu nav";
 
 export function FocusField() {
   const ref = React.useRef<HTMLDivElement>(null);
   React.useEffect(() => {
     const el = ref.current;
-    if (!el || !window.matchMedia("(hover: hover) and (pointer: fine)").matches) return;
+    if (!el) return;
+    const fine = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
     let frame = 0;
     let x = 0;
     let y = 0;
@@ -25,6 +30,8 @@ export function FocusField() {
     const place = () => {
       frame = 0;
       if (!on) return void delete el.dataset.on;
+      // Over the drawer, which stands above everything else on the page.
+      el.style.zIndex = on.matches(MENU) ? "32" : "";
       const r = on.getBoundingClientRect();
       el.style.left = `${r.left}px`;
       el.style.top = `${r.top}px`;
@@ -48,11 +55,13 @@ export function FocusField() {
       if (!frame) frame = requestAnimationFrame(place);
     };
     const move = (e: PointerEvent) => {
-      if (e.pointerType !== "mouse") return;
+      const mouse = e.pointerType === "mouse";
+      if (mouse && !fine) return;
       x = e.clientX;
       y = e.clientY;
       const target = e.target as Element | null;
-      const g = target?.closest?.(GALLERIES) ?? null;
+      let g = target?.closest?.(GALLERIES) ?? null;
+      if (!mouse && !g?.matches(MENU)) g = null;
       // The clearing is a little wider than the frame under the pointer (Julian,
       // 2026-10-04: wider than the half it was, then wider again), so a
       // wide frame and a small one each come into focus whole.
@@ -60,8 +69,12 @@ export function FocusField() {
       if (cell && g?.contains(cell)) {
         // Half that on the portfolio, whose frames run the strip's full
         // height and are wide enough to clear the whole screen.
-        const k = g.matches(".portfolio-arrive .strip-scroll") ? 0.55 : 1.1;
-        el.style.setProperty("--ff-sharp", `${Math.round(cell.offsetWidth * k)}px`);
+        // And in the menu, a name's height: the names are a line apart, so a
+        // clearing as wide as one would leave them all sharp.
+        const sharp = g.matches(MENU)
+          ? cell.offsetHeight * 0.7
+          : cell.offsetWidth * (g.matches(".portfolio-arrive .strip-scroll") ? 0.55 : 1.1);
+        el.style.setProperty("--ff-sharp", `${Math.round(sharp)}px`);
       }
       on = g;
       soon();
@@ -70,13 +83,20 @@ export function FocusField() {
       on = null;
       soon();
     };
+    const lift = (e: PointerEvent) => e.pointerType !== "mouse" && leave();
     const scrolled = () => on && soon();
     document.addEventListener("pointermove", move, { passive: true });
+    document.addEventListener("pointerdown", move, { passive: true });
+    document.addEventListener("pointerup", lift);
+    document.addEventListener("pointercancel", lift);
     document.documentElement.addEventListener("pointerleave", leave);
     window.addEventListener("scroll", scrolled, { capture: true, passive: true });
     return () => {
       cancelAnimationFrame(frame);
       document.removeEventListener("pointermove", move);
+      document.removeEventListener("pointerdown", move);
+      document.removeEventListener("pointerup", lift);
+      document.removeEventListener("pointercancel", lift);
       document.documentElement.removeEventListener("pointerleave", leave);
       window.removeEventListener("scroll", scrolled, { capture: true });
     };

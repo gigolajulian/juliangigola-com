@@ -148,6 +148,10 @@ export function SiteHeader() {
   React.useEffect(() => {
     if (!open) return;
     const root = document.documentElement;
+    /* The 3D preview (`?menu3d=1`): each thing the drawer pushes aside
+       turns about the middle of the window, wherever its own box is. */
+    for (const el of document.querySelectorAll<HTMLElement>(".site-bar, body > main, body > footer"))
+      el.style.setProperty("--oy", `${Math.round(innerHeight / 2 - el.getBoundingClientRect().top)}px`);
     root.dataset.drawer = "menu";
     window.dispatchEvent(new Event("jg:filter-close"));
     const { overflow } = document.body.style;

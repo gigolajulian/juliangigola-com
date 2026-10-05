@@ -91,7 +91,7 @@ export function SiteMenu() {
                     // On a page that is none of these four, the homepage
                     // included, all four sit back. That is honest: none of
                     // them is where you are.
-                    "transition-[opacity,filter] duration-200 ease-[var(--ease-out-strong)]",
+                    "transition-opacity duration-200 ease-[var(--ease-out-strong)]",
                     isCurrent(link.href)
                       ? "opacity-100"
                       : "opacity-45 hoverable:hover:opacity-70",
@@ -104,14 +104,14 @@ export function SiteMenu() {
           </ul>
         </nav>
         {/* The theme, out of the bar on a phone and an iPad and in here
-            (Julian, 2026-10-01): at the foot, on the names' right edge, the
-            last to arrive. `-mr-2` gives the 44px target's padding back so
-            the mark, not the hit area, sits on the margin. */}
+            (Julian, 2026-10-01): at the foot, the last to arrive; on the left
+            margin since 2026-10-04 (Julian). `-ml-2` gives the 44px target's
+            padding back so the mark, not the hit area, sits on the margin. */}
         <div
           style={{ "--reveal-delay": `${LINKS.length * 60}ms` } as React.CSSProperties}
-          className="site-menu-item drawer-item absolute bottom-[calc(1.5rem+env(safe-area-inset-bottom,0px))] right-7 sm:right-10"
+          className="site-menu-item drawer-item absolute bottom-[calc(1.5rem+env(safe-area-inset-bottom,0px))] left-6 sm:left-10"
         >
-          <ThemeToggle className="-mr-2" />
+          <ThemeToggle className="-ml-2" />
         </div>
       </div>
     </div>
