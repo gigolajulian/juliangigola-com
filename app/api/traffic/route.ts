@@ -49,7 +49,11 @@ export async function GET(request: Request) {
     try {
       r = JSON.parse(text);
     } catch {
-      throw new Error(`Cloudflare answered ${res.status}: ${text.slice(0, 160) || "(empty)"}`);
+      // The key's length, never the key: a paste that went wrong shows as a
+      // length far from the 40 characters a Cloudflare token has.
+      throw new Error(
+        `Cloudflare answered ${res.status}: ${text.slice(0, 160) || "(empty)"} (key is ${env.CF_ANALYTICS_TOKEN!.trim().length} characters)`,
+      );
     }
     if (r.errors?.length || !r.data) throw new Error(r.errors?.[0]?.message ?? "Cloudflare said no.");
     return r.data.viewer;
