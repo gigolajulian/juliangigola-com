@@ -207,7 +207,9 @@ export function WorkShell({
     const root = document.documentElement;
     /* On a phone it drops from under the head (`.work-filter`, globals.css):
        where the head ends, so the title stays to press again. */
-    const foot = document.querySelector(".head-glass")?.getBoundingClientRect().bottom;
+    const foot = document
+      .querySelector(".head-glass")
+      ?.getBoundingClientRect().bottom;
     if (foot) root.style.setProperty("--drop-top", `${Math.round(foot)}px`);
     root.dataset.drawer = "filter";
     window.dispatchEvent(new Event("jg:menu-close"));
@@ -652,79 +654,79 @@ export function WorkShell({
       <Liquid.Item effect="move">
         <span aria-hidden className="absolute inset-0 rounded-full" />
       </Liquid.Item>
-    <span
-      className={cn(
-        "relative flex h-[1.625rem] shrink-0 items-center overflow-hidden border transition-[width,border-radius,border-color,opacity] duration-[260ms] ease-[var(--ease-out-strong)] motion-reduce:transition-none",
-        finding
-          ? /* Focus shows as the pill's own edge coming up, not a ring
+      <span
+        className={cn(
+          "relative flex h-[1.625rem] shrink-0 items-center overflow-hidden border transition-[width,border-radius,border-color,opacity] duration-[260ms] ease-[var(--ease-out-strong)] motion-reduce:transition-none",
+          finding
+            ? /* Focus shows as the pill's own edge coming up, not a ring
                drawn inside it: the ring was clipped by the pill into two
                accent lines, and Julian did not want it. */
-            "w-48 rounded-full border-foreground/15 opacity-50 has-[:focus]:border-foreground/50"
-          : "w-[1.625rem] rounded-none border-transparent opacity-100",
-      )}
-    >
-      <button
-        type="button"
-        aria-expanded={finding}
-        aria-controls="work-search"
-        aria-label="Search the work"
-        data-ring="Search"
-        data-stick=""
-        onClick={() => {
-          if (finding) {
-            search("");
-            setFinding(false);
-            field.current?.blur();
-            return;
-          }
-          setFinding(true);
-          /* Now, not a frame later: the field is always mounted, and a
-             frame of waiting is two characters lost by anybody who
-             presses and types in one motion. */
-          field.current?.focus();
-        }}
-        className={cn(
-          "absolute left-0 top-0 grid h-full w-[1.625rem] place-items-center transition-opacity duration-200",
-          finding
-            ? "text-foreground opacity-100"
-            : "text-foreground opacity-35 hoverable:hover:opacity-70",
+              "w-48 rounded-full border-foreground/15 opacity-50 has-[:focus]:border-foreground/50"
+            : "w-[1.625rem] rounded-none border-transparent opacity-100",
         )}
       >
-        <svg
-          aria-hidden
-          viewBox="0 0 16 16"
-          className="h-3.5 w-3.5"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="1.5"
+        <button
+          type="button"
+          aria-expanded={finding}
+          aria-controls="work-search"
+          aria-label="Search the work"
+          data-ring="Search"
+          data-stick=""
+          onClick={() => {
+            if (finding) {
+              search("");
+              setFinding(false);
+              field.current?.blur();
+              return;
+            }
+            setFinding(true);
+            /* Now, not a frame later: the field is always mounted, and a
+             frame of waiting is two characters lost by anybody who
+             presses and types in one motion. */
+            field.current?.focus();
+          }}
+          className={cn(
+            "absolute left-0 top-0 grid h-full w-[1.625rem] place-items-center transition-opacity duration-200",
+            finding
+              ? "text-foreground opacity-100"
+              : "text-foreground opacity-35 hoverable:hover:opacity-70",
+          )}
         >
-          <circle cx="6.8" cy="6.8" r="4.6" />
-          <path d="M10.3 10.3L15 15" />
-        </svg>
-      </button>
-      <input
-        id="work-search"
-        ref={field}
-        type="search"
-        value={query}
-        tabIndex={finding ? undefined : -1}
-        aria-hidden={!finding}
-        onChange={(e) => search(e.target.value)}
-        onBlur={() => {
-          if (!query.trim()) setFinding(false);
-        }}
-        onKeyDown={(e) => {
-          if (e.key !== "Escape") return;
-          search("");
-          setFinding(false);
-          // A field that is about to be hidden must not keep the cursor.
-          e.currentTarget.blur();
-        }}
-        placeholder="Search"
-        aria-label="Search the work by name, discipline or credit"
-        className="label w-full bg-transparent pl-[1.625rem] pr-[1.5rem] text-left text-foreground outline-none focus-visible:outline-none placeholder:text-muted-foreground [&::-webkit-search-cancel-button]:hidden"
-      />
-      {/* The cross empties the box and leaves it open, which is the
+          <svg
+            aria-hidden
+            viewBox="0 0 16 16"
+            className="h-3.5 w-3.5"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.5"
+          >
+            <circle cx="6.8" cy="6.8" r="4.6" />
+            <path d="M10.3 10.3L15 15" />
+          </svg>
+        </button>
+        <input
+          id="work-search"
+          ref={field}
+          type="search"
+          value={query}
+          tabIndex={finding ? undefined : -1}
+          aria-hidden={!finding}
+          onChange={(e) => search(e.target.value)}
+          onBlur={() => {
+            if (!query.trim()) setFinding(false);
+          }}
+          onKeyDown={(e) => {
+            if (e.key !== "Escape") return;
+            search("");
+            setFinding(false);
+            // A field that is about to be hidden must not keep the cursor.
+            e.currentTarget.blur();
+          }}
+          placeholder="Search"
+          aria-label="Search the work by name, discipline or credit"
+          className="label w-full bg-transparent pl-[1.625rem] pr-[1.5rem] text-left text-foreground outline-none focus-visible:outline-none placeholder:text-muted-foreground [&::-webkit-search-cancel-button]:hidden"
+        />
+        {/* The cross empties the box and leaves it open, which is the
           difference between it and the glass: one is "that was not what I
           meant", the other is "I am done looking". Only with something in
           the box — a cross beside an empty field is a control that does
@@ -733,31 +735,31 @@ export function WorkShell({
           `onMouseDown` swallowed, or the field blurs before the click
           lands, the box closes on an empty query and the press arrives at
           an element that has gone. */}
-      {finding && query ? (
-        <button
-          type="button"
-          aria-label="Clear the search"
-          data-ring="Clear"
-          onMouseDown={(e) => e.preventDefault()}
-          onClick={() => {
-            search("");
-            field.current?.focus();
-          }}
-          className="absolute right-0 top-0 grid h-full w-[1.5rem] place-items-center text-foreground opacity-60 transition-opacity duration-200 hoverable:hover:opacity-100"
-        >
-          <svg
-            aria-hidden
-            viewBox="0 0 16 16"
-            className="h-2.5 w-2.5"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.6"
+        {finding && query ? (
+          <button
+            type="button"
+            aria-label="Clear the search"
+            data-ring="Clear"
+            onMouseDown={(e) => e.preventDefault()}
+            onClick={() => {
+              search("");
+              field.current?.focus();
+            }}
+            className="absolute right-0 top-0 grid h-full w-[1.5rem] place-items-center text-foreground opacity-60 transition-opacity duration-200 hoverable:hover:opacity-100"
           >
-            <path d="M2 2L14 14M14 2L2 14" />
-          </svg>
-        </button>
-      ) : null}
-    </span>
+            <svg
+              aria-hidden
+              viewBox="0 0 16 16"
+              className="h-2.5 w-2.5"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.6"
+            >
+              <path d="M2 2L14 14M14 2L2 14" />
+            </svg>
+          </button>
+        ) : null}
+      </span>
     </Liquid>
   );
 
@@ -807,7 +809,12 @@ export function WorkShell({
               on ? "opacity-100" : "opacity-35",
             )}
           >
-            <svg aria-hidden viewBox="0 0 16 16" className="h-3 w-3" fill="currentColor">
+            <svg
+              aria-hidden
+              viewBox="0 0 16 16"
+              className="h-3 w-3"
+              fill="currentColor"
+            >
               {mode === "grid" ? (
                 <>
                   <rect x="1" y="1" width="6" height="6" rx="0.5" />
@@ -890,42 +897,47 @@ export function WorkShell({
             </svg>
           </button>
         ))}
-        <span aria-hidden className="mx-1 h-3 w-px bg-foreground/15" />
         {/* Julian: not a view, a button beside the search that brings the
-            scope in over the page (`vectorscope.tsx`). */}
-        <button
-          type="button"
-          aria-expanded={scoping}
-          aria-controls="work-scope"
-          aria-label="Color"
-          data-ring="Color"
-          data-stick=""
-          onClick={() => (scoping ? closeScope() : openScope())}
-          className={cn(
-            "-my-1 p-1.5 transition-opacity duration-200",
-            scoping
-              ? "text-foreground opacity-100"
-              : "text-foreground opacity-35 hoverable:hover:opacity-70",
-          )}
-        >
-          {/* A scope: the ring and a trace across it. */}
-          <svg
-            aria-hidden
-            viewBox="0 0 16 16"
-            className="h-3.5 w-3.5"
-            fill="currentColor"
-          >
-            <path
-              d="M8 1.25a6.75 6.75 0 1 1 0 13.5a6.75 6.75 0 1 1 0-13.5Z"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.5"
-            />
-            <circle cx="5.5" cy="5.5" r="1.25" />
-            <circle cx="8" cy="8" r="1.25" />
-            <circle cx="10.5" cy="10.5" r="1.25" />
-          </svg>
-        </button>
+            scope in over the page (`vectorscope.tsx`). Grid view only
+            (Julian, 2026-10-04). */}
+        {view === "grid" ? (
+          <>
+            <span aria-hidden className="mx-1 h-3 w-px bg-foreground/15" />
+            <button
+              type="button"
+              aria-expanded={scoping}
+              aria-controls="work-scope"
+              aria-label="Color"
+              data-ring="Color"
+              data-stick=""
+              onClick={() => (scoping ? closeScope() : openScope())}
+              className={cn(
+                "-my-1 p-1.5 transition-opacity duration-200",
+                scoping
+                  ? "text-foreground opacity-100"
+                  : "text-foreground opacity-35 hoverable:hover:opacity-70",
+              )}
+            >
+              {/* A scope: the ring and a trace across it. */}
+              <svg
+                aria-hidden
+                viewBox="0 0 16 16"
+                className="h-3.5 w-3.5"
+                fill="currentColor"
+              >
+                <path
+                  d="M8 1.25a6.75 6.75 0 1 1 0 13.5a6.75 6.75 0 1 1 0-13.5Z"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                />
+                <circle cx="5.5" cy="5.5" r="1.25" />
+                <circle cx="8" cy="8" r="1.25" />
+                <circle cx="10.5" cy="10.5" r="1.25" />
+              </svg>
+            </button>
+          </>
+        ) : null}
         <ScopePanel open={scoping} onClose={closeScope} rows={scope} />
         {finder}
       </span>
@@ -1107,9 +1119,9 @@ export function WorkShell({
                             width: mark.w,
                             height: mark.h,
                             transform: `translate(${mark.x}px, ${mark.y}px)`,
-                            // The projects' corner (Julian, 2026-10-04);
-                            // `liquid-gooey` reads it off this box.
-                            borderRadius: "var(--radius-photo)",
+                            // A pill (Julian, 2026-10-04); `liquid-gooey`
+                            // reads the corner off this box.
+                            borderRadius: mark.h / 2,
                           }}
                         />
                       </Liquid.Item>
@@ -1164,7 +1176,7 @@ function Chip({
        mis-tap is a filter nobody asked for; the desktop keeps the line
        thin, because the pointer is exact and the band is height the
        photographs would rather have. */
-    "label block whitespace-nowrap rounded-[var(--radius-photo)] px-3 py-1.5 max-sm:py-3",
+    "label block whitespace-nowrap rounded-full px-3 py-1.5 max-sm:py-3",
     "transition-[color,background-color,scale] duration-200 ease-[var(--ease-out-strong)]",
     // A chip lifts a touch under the pointer and gives under the press.
     "hoverable:hover:scale-[1.05] active:scale-[0.96] motion-reduce:hover:scale-100",
