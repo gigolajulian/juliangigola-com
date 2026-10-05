@@ -23,21 +23,22 @@ blocked. The terms name Google as the text-only exception.
 - Client logos: the company name as text in each logo link (975e7f4)
 - Video stills: "Still from <title>" alt text (PR #13, 04551d1)
 - Live check 2026-10-02: 119 sitemap URLs all 200; www and http 301 to apex; real 404s; one h1, canonical and description on every checked page; no empty alts on home, booking pages or /portfolio
+- Footer's hidden city text gone; cities live in the description and JSON-LD `areaServed` (checked 2026-10-05)
+- Search numbers in /admin Traffic (Google) and the Agentic OS dashboard (Google and Bing), 2026-10-05
 
 ## Next (code)
 
 1. Campus guides: "Best spots for SJSU grad photos", then SCU and SF State. Live before January for spring commencement. Copy needs Julian's sign-off.
-2. Footer cities are sr-only text (3827ea9). Hidden text kept only for search engines is against Google's spam policies; drop it and rely on `areaServed` plus the booking pages, or show the cities.
-3. After the Google Business Profile is verified: add it (and Yelp) to `sameAs` in the structured data, and a "Leave a review" link.
-4. Written descriptions for the ~1,200 gallery photos that only have generated alt text, starting with the most-viewed projects.
-5. Session links wrap under "Book a session" at 1280px wide (layout, not ranking).
+2. After the Google Business Profile is verified: add it (and Yelp) to `sameAs` in the structured data, and a "Leave a review" link.
+3. Written descriptions for the ~1,200 gallery photos that only have generated alt text, starting with the most-viewed projects.
+4. Session links wrap under "Book a session" at 1280px wide (layout, not ranking).
 
 ## Julian only
 
 - Google Business Profile on hello@juliangigola.com: created 2026-10-02, **not verified yet**. Address, text code, then usually a video in the Google Maps app.
 - Ask 5 to 10 past clients for Google reviews once it is verified.
 - Prices for headshots, portraits and weddings in /admin (still "On request").
-- Submit the sitemap in Google Search Console and Bing Webmaster Tools; turn on IndexNow in Bing.
+- Sitemaps done: Google read it 2026-10-05, 119 URLs, success; Bing has it: 119 URLs, crawled 2026-10-03; IndexNow on via Cloudflare Crawler Hints, 2026-10-05).
 - Bing Places (import from Google), Apple Business Connect, Yelp.
 - Directories: Thumbtack, Expertise.com, Peerspace, Wonderful Machine, ProductionHub, WeddingWire.
 - Decide on photos for the Google profile (they help ranking; conflicts with keeping photos away from Google).
