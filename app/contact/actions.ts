@@ -16,6 +16,7 @@ import {
   problems,
   summary,
   waitPhrase,
+  MAX_REFS,
 } from "@/lib/inbox";
 
 /**
@@ -194,7 +195,26 @@ export async function submitEnquiry(
     const id = crypto.randomUUID();
     const country = typeof cf?.country === "string" ? cf.country : undefined;
 
-    const stored = enquiry(values, now, id, country);
+    /* References (`components/reference-picks.tsx`): Julian's frames by
+       path, and the visitor's own images, already shrunk in their browser.
+       Checked here all the same: paths of the site's shape only, images
+       only, and a ceiling on count and size. */
+    const picks = String(formData.get("picks") ?? "")
+      .split("\n")
+      .filter((src) => /^\/work\/[\w-]+\/[\w.-]+\.(jpe?g|png|webp)$/i.test(src))
+      .slice(0, MAX_REFS);
+    let budget = 20 * 1024 * 1024;
+    const uploads = formData
+      .getAll("refs")
+      .filter((f): f is File => f instanceof File && f.size > 0 && f.type.startsWith("image/"))
+      .slice(0, MAX_REFS - picks.length)
+      .filter((f) => f.size <= 6 * 1024 * 1024 && (budget -= f.size) >= 0);
+
+    const stored = {
+      ...enquiry(values, now, id, country),
+      ...(picks.length ? { picks } : {}),
+      ...(uploads.length ? { files: uploads.map((f) => f.name.slice(0, 80)) } : {}),
+    };
     // The summary rides along as metadata so /admin can draw the whole inbox
     // from one request. See the note in `lib/inbox.ts`.
     await inbox.put(enquiryKey(now, id.slice(0, 8)), JSON.stringify(stored), {
@@ -229,6 +249,14 @@ export async function submitEnquiry(
         subject,
         text,
         replyTo: { name: stored.name, email: stored.email },
+        attachments: await Promise.all(
+          uploads.map(async (f) => ({
+            content: Buffer.from(await f.arrayBuffer()).toString("base64"),
+            filename: f.name.slice(0, 80),
+            type: f.type,
+            disposition: "attachment" as const,
+          })),
+        ),
       });
     } catch (err) {
       console.error(
