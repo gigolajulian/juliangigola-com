@@ -23,6 +23,7 @@ type Data = {
   bots: number;
   topBots: Row[];
   google?: Google;
+  bing?: Google;
 };
 type SearchRow = { key: string; clicks: number; impressions: number; position: number };
 type Google =
@@ -156,17 +157,18 @@ export function AdminTraffic() {
             {list("Bots · 24h", data.topBots)}
           </div>
 
-          <GoogleSearch google={data.google} />
+          <SearchBlock name="Google" source="Search Console" data={data.google} />
+          <SearchBlock name="Bing" source="Bing Webmaster Tools" data={data.bing} />
         </>
       ) : null}
     </div>
   );
 }
 
-/* Google Search over the last 28 days, from Search Console through the
-   same route: how often the site showed, how often it was clicked, where it
-   ranked, and for what. */
-function GoogleSearch({ google }: { google?: Google }) {
+/* A search engine over the last 28 days, through the same route: how often
+   the site showed, how often it was clicked, where it ranked, and for what.
+   Google from Search Console, Bing from Bing Webmaster Tools. */
+function SearchBlock({ name, source, data: google }: { name: string; source: string; data?: Google }) {
   const table = (title: string, rows: SearchRow[]) => (
     <div className="border border-border p-4">
       <h3 className="label mb-3 flex gap-3 text-muted-foreground">
@@ -186,7 +188,7 @@ function GoogleSearch({ google }: { google?: Google }) {
         </ul>
       ) : (
         <p className="text-sm text-muted-foreground">
-          None yet. Google hides searches it has seen only a few times.
+          None yet. {name} hides searches it has seen only a few times.
         </p>
       )}
     </div>
@@ -194,12 +196,12 @@ function GoogleSearch({ google }: { google?: Google }) {
   return (
     <div className="flex flex-col gap-3">
       <h2 className="font-display text-xl uppercase tracking-[0]">
-        Google search
-        <span className="label ml-3 text-muted-foreground">last 28 days · Search Console</span>
+        {name} search
+        <span className="label ml-3 text-muted-foreground">last 28 days · {source}</span>
       </h2>
       {!google || "error" in google ? (
         <p className="label border border-border bg-card px-4 py-3 text-foreground">
-          {google?.error ?? "Search Console not connected yet."}
+          {google?.error ?? `${source} not connected yet.`}
         </p>
       ) : (
         <>

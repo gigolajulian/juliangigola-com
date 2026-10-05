@@ -36,4 +36,7 @@ interface CloudflareEnv {
    * `node scripts/gsc-auth.mjs <client.json>`.
    */
   GSC_OAUTH?: string;
+
+  /** Bing Webmaster Tools API key (Settings > API access), for the same tab. */
+  BING_API_KEY?: string;
 }
