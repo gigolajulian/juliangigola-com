@@ -226,7 +226,9 @@ export default function Home() {
           {PRESS_HOME.length ? (
             <section
               aria-labelledby="press"
-              className="flex shrink-0 flex-col items-center gap-4 border-t border-border px-6 py-5 sm:flex-row sm:justify-center sm:gap-10 sm:px-8 lying:gap-5 lying:py-2.5"
+              /* Above Commissions on a phone (Julian, 2026-10-04): the names
+                 that vouch for the work before the work. */
+              className="flex shrink-0 flex-col items-center gap-4 border-t border-border px-6 py-5 max-sm:order-first max-sm:border-b max-sm:border-t-0 sm:flex-row sm:justify-center sm:gap-10 sm:px-8 lying:gap-5 lying:py-2.5"
             >
               <h2 id="press" className="label shrink-0 text-muted-foreground">
                 Published &amp; commissioned by

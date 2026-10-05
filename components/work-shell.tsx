@@ -205,6 +205,10 @@ export function WorkShell({
   React.useEffect(() => {
     if (!filtering) return;
     const root = document.documentElement;
+    /* On a phone it drops from under the head (`.work-filter`, globals.css):
+       where the head ends, so the title stays to press again. */
+    const foot = document.querySelector(".head-glass")?.getBoundingClientRect().bottom;
+    if (foot) root.style.setProperty("--drop-top", `${Math.round(foot)}px`);
     root.dataset.drawer = "filter";
     window.dispatchEvent(new Event("jg:menu-close"));
     const { overflow } = document.body.style;
@@ -776,8 +780,12 @@ export function WorkShell({
   /* A phone's two ways of looking: one project to the width of the screen,
      or two to a row. The list and the strip both stack one up there, so
      they are one choice here, and it is lit for either. */
+  /* On a phone the two views side by side under the burger, small, grid
+     on the right (Julian, 2026-10-04): the one you are in bright, the other
+     back. */
   const phoneToggle = (
-    <span className="flex items-center justify-end">
+    // On the title's line: 32px targets held to its 20px height.
+    <span className="-mr-1.5 -my-1.5 flex items-center">
       {(["strip", "grid"] as const).map((mode) => {
         const on = !scoping && (mode === "grid") === (view === "grid");
         return (
@@ -794,17 +802,12 @@ export function WorkShell({
               })
             }
             className={cn(
-              // 44px to a thumb, standing no taller in the row.
-              "-my-2.5 p-3.5 transition-opacity duration-200",
+              // 24 by 32: small to the eye, enough to a thumb.
+              "flex h-8 w-6 items-center justify-center text-foreground transition-opacity duration-200",
               on ? "opacity-100" : "opacity-35",
             )}
           >
-            <svg
-              aria-hidden
-              viewBox="0 0 16 16"
-              className="h-4 w-4"
-              fill="currentColor"
-            >
+            <svg aria-hidden viewBox="0 0 16 16" className="h-3 w-3" fill="currentColor">
               {mode === "grid" ? (
                 <>
                   <rect x="1" y="1" width="6" height="6" rx="0.5" />
@@ -935,9 +938,9 @@ export function WorkShell({
         /* Julian: keep the head pinned on a phone. The page scrolls there,
            and with the head gone the only way to the other disciplines or
            the other view was all the way back up. It stops under the bar,
-           61px on a phone (measured), on the ground colour so the work
-           passes under it rather than through it. */
-        <div className="shrink-0 max-sm:sticky max-sm:top-[61px] max-sm:z-20 max-sm:bg-background max-sm:pb-3">
+           61px on a phone (measured). The bar's glass, not the ground
+           (Julian, 2026-10-04), so the work passes under it frosted. */
+        <div className="head-glass shrink-0 max-sm:sticky max-sm:top-[61px] max-sm:z-20 max-sm:pb-3">
           <StripHead
             /* Julian: no "Portfolio" on All work, where it only named the
                page it is on. A filter keeps the way back. */
@@ -969,6 +972,12 @@ export function WorkShell({
                to go; Julian: always show it, and let it swap from one
                discipline to the next. */
             open
+            pick={{
+              // No count beside the title (Julian, 2026-10-04).
+              expanded: filtering,
+              controls: "work-filter",
+              onPick: () => setFiltering((v) => !v),
+            }}
           />
 
           {/* The old site's three dropdowns become one row that can be
@@ -993,7 +1002,7 @@ export function WorkShell({
                   on the list rather than on the bar, so with the list gone
                   the capsule sat flush against the window at 0 while every
                   other line on the page started at 24 or 40. */
-              className="filter-trigger glass-surface press relative z-10 ml-6 inline-flex pointer-coarse:before:absolute pointer-coarse:before:inset-x-0 pointer-coarse:before:-inset-y-2 pointer-coarse:before:content-[''] items-center gap-2 border border-foreground/20 py-2 pl-3.5 pr-3 label active:scale-[0.97] sm:ml-10 lg:hidden"
+              className="filter-trigger glass-surface press relative z-10 ml-6 inline-flex max-sm:hidden pointer-coarse:before:absolute pointer-coarse:before:inset-x-0 pointer-coarse:before:-inset-y-2 pointer-coarse:before:content-[''] items-center gap-2 border border-foreground/20 py-2 pl-3.5 pr-3 label active:scale-[0.97] sm:ml-10 lg:hidden"
             >
               <span className="text-foreground">
                 {all ? "Portfolio" : head.title}

@@ -150,7 +150,40 @@ export function ServicesScreen({
           <p className="title-rest -mt-2 whitespace-nowrap text-left text-sm leading-relaxed text-muted-foreground short:hidden">
             From concept to final frame.
           </p>
-          <div ref={col} className="services-col relative isolate">
+          {/* Under a finger (Julian, 2026-10-04: the names and the pictures
+              too small in a list): the disciplines as frames, two across,
+              the picture leading and the name on its slate, as the
+              portfolio's own cards are. */}
+          <ul className="grid grid-cols-2 gap-x-3 gap-y-5 sm:hidden">
+            {rows.map((r, i) => (
+              <li key={r.slug} style={{ "--i": i } as React.CSSProperties} className="services-step min-w-0">
+                <Link prefetch={false} href={r.href} className="group block press active:scale-[0.98]">
+                  <span className="relative block aspect-[4/5] overflow-hidden rounded-[var(--radius-photo)] bg-card">
+                    <Image
+                      src={r.cover.src}
+                      alt=""
+                      fill
+                      sizes="50vw"
+                      className="object-cover"
+                      style={{ backgroundColor: r.cover.color }}
+                    />
+                    <span className="absolute inset-x-0 bottom-0 flex flex-col gap-1 bg-gradient-to-t from-black/80 via-black/35 to-transparent px-3 pb-3 pt-12">
+                      <span className="label tabular-nums leading-none text-white/75">
+                        {String(i + 1).padStart(2, "0")}
+                      </span>
+                      <span className="font-display line-clamp-2 text-[1.375rem] uppercase leading-[0.9] text-white">
+                        {r.name}
+                      </span>
+                    </span>
+                  </span>
+                  {r.about ? (
+                    <span className="label mt-2 line-clamp-2 block text-muted-foreground">{r.about}</span>
+                  ) : null}
+                </Link>
+              </li>
+            ))}
+          </ul>
+          <div ref={col} className="services-col relative isolate max-sm:hidden">
           <div aria-hidden className="services-ground pointer-events-none absolute -inset-y-2 -inset-x-6 -z-10 max-sm:hidden">
             <Liquid blur={5} contrast={18} fill="var(--services-hover)" className="h-full w-full">
               <Liquid.Item effect="move" move={{ springiness: 0.92, wobble: 0, stretch: 0.04, trail: 0 }}>
@@ -265,7 +298,9 @@ export function ServicesScreen({
             >
               See the portfolio
             </Link>
-            <span className="label ml-3 text-muted-foreground">{total} projects</span>
+            {/* Not under a finger, where it sat against the buttons (Julian,
+                2026-10-04). */}
+            <span className="label ml-3 text-muted-foreground max-sm:hidden">{total} projects</span>
           </div>
         </div>
 

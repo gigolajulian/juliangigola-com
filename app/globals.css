@@ -129,9 +129,17 @@
 [data-intro] #jg-intro::before {
   content: "";
   position: absolute;
-  inset: calc(env(safe-area-inset-top, 0px) + 16px) 0
-    calc(env(safe-area-inset-bottom, 0px) + 16px);
+  inset: 0;
   background: var(--jg-ground);
+}
+/* The bands only where Safari on an iPhone or iPad reads them: everywhere
+   else they were a stripe across the top and foot of the opening (audit,
+   2026-10-04). `-webkit-touch-callout` is iOS Safari's alone. */
+@supports (-webkit-touch-callout: none) {
+  [data-intro] #jg-intro::before {
+    inset: calc(env(safe-area-inset-top, 0px) + 16px) 0
+      calc(env(safe-area-inset-bottom, 0px) + 16px);
+  }
 }
 .jg-intro-panel {
   position: absolute;
@@ -3710,6 +3718,44 @@ h2.contact-title {
     transition: none;
   }
 }
+/* The portfolio's head, pinned under the bar on a phone: the bar's glass
+   carried on down (`work-shell.tsx`). Its own layer, as the bar's is, so
+   the filter's pill inside keeps its own. */
+@media (max-width: 39.999rem) {
+  .head-glass::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background-color: color-mix(in oklab, var(--background) 72%, transparent);
+    -webkit-backdrop-filter: blur(var(--glass-blur, 9px)) saturate(1.5);
+    backdrop-filter: blur(var(--glass-blur, 9px)) saturate(1.5);
+  }
+}
+/* And on a phone held upright, the bar and the head are one pane (Julian,
+   2026-10-04): the bar lets go of its own glass and its rule, and the
+   head's glass reaches up behind it to the top of the screen. */
+@media (max-width: 39.999rem) and (orientation: portrait) {
+  :root:has(.head-glass) .site-bar {
+    background-color: transparent;
+    border-color: transparent;
+    box-shadow: none;
+  }
+  :root:has(.head-glass) .site-bar::after {
+    opacity: 0;
+  }
+  .head-glass::before {
+    top: calc(-61px - env(safe-area-inset-top, 0px));
+  }
+}
+@media (max-width: 39.999rem) and (prefers-reduced-transparency: reduce) {
+  .head-glass::before {
+    background-color: var(--background);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+}
 @media (prefers-reduced-transparency: reduce) {
   .site-bar::after {
     -webkit-backdrop-filter: none;
@@ -3846,10 +3892,6 @@ h2.contact-title {
   :root[data-menu3d][data-drawer="menu"] .site-menu-panel {
     transform: none;
     transition-delay: 80ms;
-  }
-  :root[data-menu3d][data-drawer="menu"] .site-menu {
-    -webkit-backdrop-filter: blur(4px) saturate(1.2);
-    backdrop-filter: blur(4px) saturate(1.2);
   }
   :root[data-menu3d] .site-menu {
     transition-duration: 420ms, 520ms, 520ms, 520ms;
@@ -7002,4 +7044,156 @@ h2:not(.label) {
 /* The calendar fades up each time the session changes. */
 .booking-embed {
   animation: jg-fade-in 500ms var(--ease-out-strong) both;
+}
+
+/* ── turn it upright ──────────────────────────────────────────────
+ * Julian (2026-10-04): on a phone on its side the site is not at its
+ * best, so the screen says so. A phone, not an iPad or a short laptop
+ * window: a touch screen whose short side is a phone's. The outline turns
+ * from lying to standing, once, and then holds. Over everything, the
+ * drawers and the splash included.
+ * ─────────────────────────────────────────────────────────────── */
+.turn-upright {
+  display: none;
+}
+@media (orientation: landscape) and (max-height: 32rem) and (pointer: coarse) {
+  .turn-upright {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1.25rem;
+    background-color: var(--background);
+    color: var(--foreground);
+  }
+  .turn-upright-phone {
+    transform-origin: 32px 32px;
+    animation: jg-turn-upright 1100ms var(--ease-out-strong) 300ms backwards;
+  }
+  .turn-upright-turn {
+    transform-origin: 32px 32px;
+    animation: jg-turn-upright-arrow 2400ms var(--ease-out-strong) infinite;
+  }
+  .turn-upright p {
+    line-height: 1.8;
+  }
+}
+@keyframes jg-turn-upright {
+  from {
+    transform: rotate(-90deg);
+  }
+}
+/* The arrow turns once, rests, and turns again: a hint, not a spinner. */
+@keyframes jg-turn-upright-arrow {
+  from {
+    transform: rotate(-90deg);
+  }
+  50%,
+  to {
+    transform: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .turn-upright-phone,
+  .turn-upright-turn {
+    animation: none;
+  }
+}
+
+/* ── the filter as a drop-down, on a phone ────────────────────────
+ * Julian (2026-10-04): the title is the filter, so the list drops from
+ * under it rather than sliding in from the side and pushing the page
+ * away. It unfolds from the head's foot (`--drop-top`, written on open in
+ * `work-shell.tsx`), the names dropping in a step apart, the page dimmed
+ * under it; it folds back up quicker, all at once, and a pick folds it
+ * while the new title rises in its place.
+ * ─────────────────────────────────────────────────────────────── */
+@media (max-width: 39.999rem) {
+  :root[data-drawer="filter"] :is(.site-bar, body > main, body > footer) {
+    translate: none;
+  }
+  .work-filter {
+    top: var(--drop-top, 7.5rem);
+  }
+  .work-filter-panel {
+    width: 100%;
+    height: auto;
+    max-height: calc(100dvh - var(--drop-top, 7.5rem) - 1rem);
+    overflow-y: auto;
+    justify-content: flex-start;
+    padding: 0.75rem 1.5rem 1.25rem;
+    border-right: 0;
+    border-bottom: 1px solid var(--border);
+    translate: none;
+    clip-path: inset(0 0 100% 0);
+    transition: clip-path 300ms var(--ease-out-strong);
+  }
+  :root[data-drawer="filter"] .work-filter-panel {
+    clip-path: inset(0 0 -1px 0);
+    transition: clip-path 460ms var(--ease-out-strong);
+    transition-delay: 0ms;
+  }
+  .work-filter-item {
+    translate: 0 -0.5rem;
+  }
+  :root[data-drawer="filter"] .work-filter-item {
+    transition-delay: calc(60ms + var(--reveal-delay, 0ms) * 0.7);
+  }
+}
+@media (max-width: 39.999rem) and (prefers-reduced-motion: reduce) {
+  .work-filter-panel {
+    transition: none;
+  }
+}
+
+/* ── the menus as glass, over the page ────────────────────────────
+ * Julian (2026-10-04): the menu and the phone's filter drop-down are the
+ * glass themselves and open over the page, which stays where it is: no
+ * push, no frosting of the page around them. The panels take the head's
+ * own pane (`.head-glass::before`), so the drop-down and the head it falls
+ * from read as one sheet. The window behind stays clear, still there to
+ * be pressed to close.
+ * ─────────────────────────────────────────────────────────────── */
+@media (max-width: 63.999rem) {
+  :root[data-drawer="menu"] :is(.site-bar, body > main, body > footer) {
+    translate: none;
+  }
+  /* Closed too: the drawer's resting `blur(0)` is still a backdrop
+     filter, and one on the window would leave the panel inside it no
+     page to frost while it slides out. */
+  .site-menu,
+  :root[data-drawer="menu"] .site-menu {
+    background-color: transparent;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+  .site-menu-panel {
+    background-color: color-mix(in oklab, var(--background) 72%, transparent);
+    -webkit-backdrop-filter: blur(var(--glass-blur, 9px)) saturate(1.5);
+    backdrop-filter: blur(var(--glass-blur, 9px)) saturate(1.5);
+  }
+}
+@media (max-width: 39.999rem) {
+  .work-filter,
+  :root[data-drawer="filter"] .work-filter {
+    background-color: transparent;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+  .work-filter-panel {
+    background-color: color-mix(in oklab, var(--background) 72%, transparent);
+    -webkit-backdrop-filter: blur(var(--glass-blur, 9px)) saturate(1.5);
+    backdrop-filter: blur(var(--glass-blur, 9px)) saturate(1.5);
+  }
+}
+@media (prefers-reduced-transparency: reduce) {
+  .site-menu-panel,
+  .work-filter-panel {
+    background-color: var(--background);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
 }

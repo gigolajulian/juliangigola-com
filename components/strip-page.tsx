@@ -162,6 +162,7 @@ export function StripHead({
   aside,
   phone,
   open = false,
+  pick,
 }: {
   crumb: React.ReactNode;
   title: string;
@@ -177,7 +178,21 @@ export function StripHead({
   /** The title is the page's own, shown from the first frame rather than
       after the opening cell has gone. */
   open?: boolean;
+  /** On a phone the title is also the way to the other filters (Julian,
+      2026-10-04: the drop-down beside the title, not a box under it). */
+  pick?: { count?: number; expanded: boolean; controls: string; onPick: () => void };
 }) {
+  const words = open
+    ? title.split(" ").map((word, i) => (
+        <React.Fragment key={i}>
+          <span className="inline-block overflow-hidden align-top">
+            <span className="title-word inline-block" style={{ "--i": i } as React.CSSProperties}>
+              {word}
+            </span>
+          </span>{" "}
+        </React.Fragment>
+      ))
+    : title;
   return (
     <header className="page-column mx-auto w-full max-w-[100rem] shrink-0 px-6 sm:px-10 lying:px-6">
       {/* Julian: centre the title on a phone. Its right column is empty
@@ -186,8 +201,19 @@ export function StripHead({
           put it on the middle; a crumb or a title too long for that still
           gets the room it needs, because a track never goes below its
           words. */}
-      <div className="flex items-start justify-between gap-6 max-sm:grid max-sm:grid-cols-[1fr_auto_1fr]">
-        <div data-dial="crumb" className="shrink-0 sm:w-44">{crumb}</div>
+      <div
+        className={cn(
+          "flex items-start justify-between gap-6 max-sm:grid",
+          /* Where the title is the filter: the title centred, the views
+             stacked at the right under the burger (Julian, 2026-10-04). */
+          // Top, not centre: the title's column carries the line under it.
+          pick ? "max-sm:items-start max-sm:gap-x-3" : "",
+          "max-sm:grid-cols-[1fr_auto_1fr]",
+        )}
+      >
+        {/* Where the title is the filter, the way back is in it ("All"), and
+            the crumb beside it only squeezed it onto two lines. */}
+        <div data-dial="crumb" className={cn("shrink-0 sm:w-44", pick && "max-sm:[&>*]:hidden")}>{crumb}</div>
 
         <div data-dial="page-title" className={cn("min-w-0 text-center", !open && "running-head")}>
           {/* Set in the display face at a size that reads as a title and
@@ -204,20 +230,39 @@ export function StripHead({
             key={open ? title : undefined}
             className="font-display line-clamp-2 text-xl uppercase leading-none tracking-[0] sm:line-clamp-none sm:text-3xl lying:text-xl"
           >
-            {open
-              ? title.split(" ").map((word, i) => (
-                  <React.Fragment key={i}>
-                    <span className="inline-block overflow-hidden align-top">
-                      <span
-                        className="title-word inline-block"
-                        style={{ "--i": i } as React.CSSProperties}
-                      >
-                        {word}
-                      </span>
-                    </span>{" "}
-                  </React.Fragment>
-                ))
-              : title}
+            {pick ? (
+              <>
+                <span className="max-sm:hidden">{words}</span>
+                <button
+                  type="button"
+                  aria-expanded={pick.expanded}
+                  aria-controls={pick.controls}
+                  onClick={pick.onPick}
+                  className="relative inline-flex items-center gap-1.5 whitespace-nowrap press active:scale-[0.97] before:absolute before:-inset-x-3 before:-inset-y-3 before:content-[''] sm:hidden"
+                >
+                  <span>{words}</span>
+                  {pick.count !== undefined ? (
+                    <span className="label self-start text-[0.625rem] tabular-nums leading-none text-muted-foreground">
+                      {pick.count}
+                    </span>
+                  ) : null}
+                  <svg
+                    aria-hidden
+                    width="10"
+                    height="7"
+                    viewBox="0 0 9 6"
+                    className={cn(
+                      "text-muted-foreground transition-transform duration-300 ease-[var(--ease-out-strong)]",
+                      pick.expanded && "rotate-180",
+                    )}
+                  >
+                    <path d="M1 1l3.5 3.5L8 1" fill="none" stroke="currentColor" strokeWidth="1.3" />
+                  </svg>
+                </button>
+              </>
+            ) : (
+              words
+            )}
           </h1>
           {sub ? (
             /* Julian: always centred. The head's `text-center` lost to
@@ -245,7 +290,7 @@ export function StripHead({
             again by the cell the sequence opens on. */}
         {/* A client's logo, where a campaign has one, sits level with the
             middle of the title block rather than on the crumb's line. */}
-        <div className="label shrink-0 text-right text-muted-foreground has-[[data-aside-mark]]:self-center sm:w-44">
+        <div className={cn("label shrink-0 text-right text-muted-foreground has-[[data-aside-mark]]:self-center sm:w-44", pick && "max-sm:justify-self-end")}>
           <span className="max-sm:hidden">{aside}</span>
           {phone ? <span className="sm:hidden">{phone}</span> : null}
         </div>
