@@ -7367,24 +7367,25 @@ h2:not(.label) {
  * the project under the pointer in an open one a little more, and the
  * thumb stays neutral so its name reads. The line at rest stays grey.
  * The colours are the projects' accents (`scripts/make-accents.mjs`),
- * held to a lightness and chroma that read on either ground.
+ * held to a lightness and chroma that read on either ground, and that
+ * keep the names on them past 4.5:1.
  * ─────────────────────────────────────────────────────────────── */
 [data-tinted] {
-  --tint-lit: oklch(from var(--tint) clamp(0.58, l, 0.76) clamp(0.07, calc(c * 1.35), 0.17) h);
+  --tint-lit: oklch(from var(--tint) clamp(0.5, l, 0.6) clamp(0.07, calc(c * 1.35), 0.17) h);
 }
 :root[data-theme="light"] [data-tinted] {
-  --tint-lit: oklch(from var(--tint) clamp(0.45, l, 0.62) clamp(0.07, calc(c * 1.35), 0.17) h);
+  --tint-lit: oklch(from var(--tint) clamp(0.54, l, 0.66) clamp(0.07, calc(c * 1.35), 0.17) h);
 }
 /* Each stretch fades into its neighbours' colours at its edges, so the
    bar reads as one blend and not as blocks (Julian: smooth). A neighbour
    with no colour hands over its own, so the blend stops at it. */
 .rail-chapter[data-tinted] {
-  --prev-lit: oklch(from var(--tint-prev) clamp(0.58, l, 0.76) clamp(0.07, calc(c * 1.35), 0.17) h);
-  --next-lit: oklch(from var(--tint-next) clamp(0.58, l, 0.76) clamp(0.07, calc(c * 1.35), 0.17) h);
+  --prev-lit: oklch(from var(--tint-prev) clamp(0.5, l, 0.6) clamp(0.07, calc(c * 1.35), 0.17) h);
+  --next-lit: oklch(from var(--tint-next) clamp(0.5, l, 0.6) clamp(0.07, calc(c * 1.35), 0.17) h);
 }
 :root[data-theme="light"] .rail-chapter[data-tinted] {
-  --prev-lit: oklch(from var(--tint-prev) clamp(0.45, l, 0.62) clamp(0.07, calc(c * 1.35), 0.17) h);
-  --next-lit: oklch(from var(--tint-next) clamp(0.45, l, 0.62) clamp(0.07, calc(c * 1.35), 0.17) h);
+  --prev-lit: oklch(from var(--tint-prev) clamp(0.54, l, 0.66) clamp(0.07, calc(c * 1.35), 0.17) h);
+  --next-lit: oklch(from var(--tint-next) clamp(0.54, l, 0.66) clamp(0.07, calc(c * 1.35), 0.17) h);
 }
 /* The three stops are registered colours, so the blend fades in with
    the capsule growing rather than appearing all at once (Julian: smooth
@@ -7409,6 +7410,18 @@ h2:not(.label) {
   --rail-a: color-mix(in oklab, color-mix(in oklab, var(--prev-lit), var(--tint-lit)) 75%, var(--rail-track));
   --rail-m: color-mix(in oklab, var(--tint-lit) 75%, var(--rail-track));
   --rail-b: color-mix(in oklab, color-mix(in oklab, var(--tint-lit), var(--next-lit)) 75%, var(--rail-track));
+}
+/* The names on the colours at full strength: the grey at 60% read about
+   2.5:1 on them (audit, 2026-10-05). White on the dark ground, where the
+   colours mix down into the track, and dark ink on the light one. The
+   thumb keeps its own (`[data-tone="lit"]`, `"near"`). */
+.rail-line:hover .rail-chapter[data-tinted]:not([data-tone="lit"], [data-tone="near"]) .rail-name,
+[data-dwell] .rail-line .rail-chapter[data-tinted]:not([data-tone="lit"], [data-tone="near"]) .rail-name {
+  color: oklch(0.98 0.003 60);
+}
+:root[data-theme="light"] .rail-line:hover .rail-chapter[data-tinted]:not([data-tone="lit"], [data-tone="near"]) .rail-name,
+:root[data-theme="light"] [data-dwell] .rail-line .rail-chapter[data-tinted]:not([data-tone="lit"], [data-tone="near"]) .rail-name {
+  color: oklch(0.16 0.004 60);
 }
 /* The dividers would cut the blend back into blocks. */
 .rail-line:hover .rail-chapter[data-tinted] .rail-bar::after,

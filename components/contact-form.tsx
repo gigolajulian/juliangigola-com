@@ -493,7 +493,9 @@ function Field({
     <div className="contact-field">
       <label htmlFor={id} className="label block text-muted-foreground">
         {label}
-        {props.required ? <span aria-hidden> *</span> : null}
+        {/* Said, not only shown: the faint "Optional" placeholder is a
+            look (Julian, 2026-10-05), so the label carries the fact. */}
+        {props.required ? <span aria-hidden> *</span> : <span className="sr-only">, optional</span>}
       </label>
 
       <Element
