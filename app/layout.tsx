@@ -236,6 +236,25 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           <PageTransition>{children}</PageTransition>
         </main>
         <SiteFooter />
+        {/* A phone on its side is asked to stand it up (Julian, 2026-10-04):
+            the site is laid out for a phone upright. Only a phone, only on
+            its side (`.turn-upright`, globals.css). */}
+        <div className="turn-upright" aria-hidden>
+          {/* The phone, and on its screen the small arrow of a turn (Julian:
+              a spiral arrow in the phone's screen). */}
+          <svg viewBox="0 0 64 64" width="88" height="88" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+            <g className="turn-upright-phone">
+              <rect x="20" y="8" width="24" height="48" rx="4" />
+              <g className="turn-upright-turn" strokeWidth="1">
+                <path d="M35.5 32a3.5 3.5 0 1 1-1.03-2.47" />
+                <path d="M34.75 28.25v1.6h-1.6" />
+              </g>
+            </g>
+          </svg>
+          <p className="label text-center">Turn your phone upright
+            <span className="block text-muted-foreground">for the best experience</span>
+          </p>
+        </div>
         {/* Focus round the pointer over a gallery: `focus-field.tsx`. */}
         <FocusField />
         <CardTilt />

@@ -69,7 +69,7 @@ export function WorkFilter({
     >
       <div className="work-filter-panel drawer-panel flex h-full w-[var(--filter-w)] flex-col justify-center border-r border-border pl-6 pr-5">
         <nav aria-label="Disciplines">
-          <ul className="flex flex-col">
+          <ul className="flex flex-col max-sm:grid max-sm:grid-cols-2 max-sm:gap-x-5">
             {rows.map((row, i) => {
               const head = heads[row.slug];
               const here = isCurrent(row.href);
@@ -97,12 +97,12 @@ export function WorkFilter({
                     onClick={() => window.dispatchEvent(new Event("jg:filter-close"))}
                     aria-current={here ? "page" : undefined}
                     className={cn(
-                      "flex items-baseline justify-between gap-4 py-1.5 [@media(pointer:coarse)]:py-3",
+                      "flex items-baseline justify-between gap-4 py-1.5 [@media(pointer:coarse)]:py-3 max-sm:gap-2 max-sm:[@media(pointer:coarse)]:py-2.5",
                       "transition-opacity duration-200 ease-[var(--ease-out-strong)]",
                       here ? "opacity-100" : "opacity-45 hoverable:hover:opacity-70",
                     )}
                   >
-                    <span className="font-display uppercase leading-[0.95] tracking-[0] text-[clamp(1.375rem,4.5vw,1.75rem)]">
+                    <span className="font-display uppercase leading-[0.95] tracking-[0] text-[clamp(1.375rem,4.5vw,1.75rem)] max-sm:min-w-0 max-sm:truncate max-sm:text-[1.0625rem]">
                       {row.name}
                     </span>
                     {/* The count in the ink of the name beside it, not in

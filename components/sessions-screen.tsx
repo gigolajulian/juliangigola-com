@@ -72,6 +72,10 @@ export function SessionsScreen({ sessions }: { sessions: SessionItem[] }) {
     };
     return (Object.keys(d) as Edge[]).reduce((m, k) => (d[k] < d[m] ? k : m));
   };
+  /* Whether the row pressed was open when the press began. Julian
+     (2026-10-04): under a finger, the first tap opens a row and the next
+     goes to its page; a mouse has opened it already by pointing. */
+  const wasOpen = useRef(false);
   const go = (i: number) => {
     if (i === open) return;
     setOpen(i);
@@ -228,6 +232,7 @@ export function SessionsScreen({ sessions }: { sessions: SessionItem[] }) {
                 // arrives, as About's steps do (`.session-step`, globals.css).
                 style={{ "--i": i } as React.CSSProperties}
                 onPointerMove={() => go(i)}
+                onPointerDown={() => (wasOpen.current = i === open)}
                 /* Julian (2026-10-04): the booking page fetched on the
                    pointer, so the press has nothing to wait for. Five rows
                    at most, and the router asks for each once. */
@@ -237,8 +242,9 @@ export function SessionsScreen({ sessions }: { sessions: SessionItem[] }) {
                    click on its name, the link a keyboard and a reader get,
                    so it goes the way every link on the site goes. */
                 onClick={(e) => {
-                  if (s.page && !(e.target as HTMLElement).closest("a, button"))
-                    e.currentTarget.querySelector("a")?.click();
+                  if (!s.page || (e.target as HTMLElement).closest("a, button")) return;
+                  if (!wasOpen.current) return go(i);
+                  e.currentTarget.querySelector("a")?.click();
                 }}
                 className={`session-step relative flex flex-col border-b border-border py-1.5 ${s.page ? "cursor-pointer" : ""}`}
               >
@@ -248,6 +254,14 @@ export function SessionsScreen({ sessions }: { sessions: SessionItem[] }) {
                   <Link
                     href={s.page}
                     onFocus={() => go(i)}
+                    onClick={(e) => {
+                      // A press (not a key, not the row passing it on) on a
+                      // row that was shut opens it.
+                      if (e.detail > 0 && !wasOpen.current) {
+                        e.preventDefault();
+                        go(i);
+                      }
+                    }}
                     className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-baseline gap-4 py-2 text-left short:py-1.5"
                   >
                     {head}
