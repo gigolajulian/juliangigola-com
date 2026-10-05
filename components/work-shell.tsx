@@ -899,9 +899,9 @@ export function WorkShell({
           </button>
         ))}
         {/* Julian: not a view, a button beside the search that brings the
-            scope in over the page (`vectorscope.tsx`). Grid view only
-            (Julian, 2026-10-04). */}
-        {view === "grid" ? (
+            scope in over the page (`vectorscope.tsx`). In both views;
+            from strip view it turns the page to grid first (Julian,
+            2026-10-05, which undid grid-only from 10-04). */}
           <>
             <span aria-hidden className="mx-1 h-3 w-px bg-foreground/15" />
             <button
@@ -911,7 +911,16 @@ export function WorkShell({
               aria-label="Color"
               data-ring="Color"
               data-stick=""
-              onClick={() => (scoping ? closeScope() : openScope())}
+              onClick={() =>
+                scoping
+                  ? closeScope()
+                  : view === "grid"
+                    ? openScope()
+                    : morphView(() => {
+                        chooseView("grid");
+                        openScope();
+                      })
+              }
               className={cn(
                 "-my-1 p-1.5 transition-opacity duration-200",
                 scoping
@@ -938,7 +947,6 @@ export function WorkShell({
               </svg>
             </button>
           </>
-        ) : null}
         <ScopePanel open={scoping} onClose={closeScope} rows={scope} />
         {finder}
       </span>
