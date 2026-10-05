@@ -38,7 +38,13 @@ export async function GET(request: Request) {
       headers: { authorization: `Bearer ${env.CF_ANALYTICS_TOKEN}`, "content-type": "application/json" },
       body: JSON.stringify({ query }),
     });
-    const r = (await res.json()) as { data?: { viewer: any }; errors?: { message: string }[] };
+    const text = await res.text();
+    let r: { data?: { viewer: any }; errors?: { message: string }[] };
+    try {
+      r = JSON.parse(text);
+    } catch {
+      throw new Error(`Cloudflare answered ${res.status}: ${text.slice(0, 160) || "(empty)"}`);
+    }
     if (r.errors?.length || !r.data) throw new Error(r.errors?.[0]?.message ?? "Cloudflare said no.");
     return r.data.viewer;
   };
