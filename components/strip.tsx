@@ -1652,7 +1652,11 @@ export function Strip({
            cells with no tick — a page of words, the ask, the card that
            leads on — which lit nothing at all. */
         const gone = Math.max(0, Math.min(1, x / room));
-        const eye = x + gone * span;
+        /* A paged strip is a screen to a section, so the one in the middle
+           of the window is the one you are on. The sliding eye read a third
+           of the way in early on the homepage and lit Biography with
+           Sessions filling the screen (Julian, 2026-10-04). */
+        const eye = paged ? x + span / 2 : x + gone * span;
         let near = best;
         let gap = Infinity;
         for (const i of ticked) {

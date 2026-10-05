@@ -492,6 +492,24 @@ export function ScopePanel({
   };
 
   const swatch = point ? colourAt(point[0], point[1]) : null;
+  /* Julian (2026-10-04): the work in the colour runs sideways, two rows,
+     and the wheel turns to carry it: down goes right. Kept from the page's
+     own smooth scroll, which would otherwise take a wheel this box cannot
+     use upright and move the hidden rack behind it. */
+  const results = React.useRef<HTMLElement>(null);
+  React.useEffect(() => {
+    const el = results.current;
+    if (!open || !el) return;
+    const wheel = (e: WheelEvent) => {
+      e.stopPropagation();
+      if (Math.abs(e.deltaY) <= Math.abs(e.deltaX)) return;
+      e.preventDefault();
+      el.scrollLeft += e.deltaMode === 1 ? e.deltaY * 40 : e.deltaY;
+    };
+    el.addEventListener("wheel", wheel, { passive: false });
+    return () => el.removeEventListener("wheel", wheel);
+  }, [open, data]);
+
   const { h, s } = hsl(swatch ?? [128, 128, 128]);
   const pct = (v: number) => `${50 + (v / RIM) * 50}%`;
   const count = items.length;
@@ -662,6 +680,7 @@ export function ScopePanel({
       {/* The page, in colour: where the rack was, beside the panel. */}
       {open ? (
         <section
+          ref={results}
           data-scope-panel
           data-scroll
           aria-label="The work in this color"
@@ -669,7 +688,7 @@ export function ScopePanel({
             left: PANEL,
             ...(room ? { top: room.top, bottom: room.bottom } : null),
           }}
-          className="fixed right-0 z-30 overflow-y-auto overscroll-contain bg-background px-6 pb-10 pt-1 max-sm:hidden sm:px-10 transition-opacity duration-300 starting:opacity-0"
+          className="fixed right-0 z-30 overflow-x-auto overflow-y-hidden overscroll-contain bg-background px-6 pb-6 pt-1 [container-type:size] max-sm:hidden sm:px-10 transition-opacity duration-300 starting:opacity-0"
         >
           {data === null ? null : items.length ? (
             <ColourGrid items={items} />
@@ -769,10 +788,16 @@ const ColourGrid = React.memo(function ColourGrid({
   return (
     <ul
       ref={grid}
-      className="relative grid grid-cols-[repeat(auto-fill,minmax(18rem,1fr))] gap-x-4 gap-y-6"
+      className="relative grid h-full w-max grid-flow-col grid-rows-2 gap-x-4 gap-y-6"
     >
+      {/* Two rows (Julian, 2026-10-04), each tile as wide as a 4:5 cover
+          half the height, less the gap and its name. */}
       {items.map((item) => (
-        <li key={item.p.slug} data-slug={item.p.slug}>
+        <li
+          key={item.p.slug}
+          data-slug={item.p.slug}
+          className="w-[calc(((100cqh-1.5rem)/2-2rem)*0.8)]"
+        >
           <ColourTile item={item} />
         </li>
       ))}
