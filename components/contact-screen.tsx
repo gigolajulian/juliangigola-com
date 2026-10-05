@@ -32,9 +32,9 @@ const ELSEWHERE = [
 
 export function ContactScreen({
   // Julian (2026-10-03): one name for the screen, as the nav says it.
-  title = "Inquire",
+  title = "Inquiries",
   intro,
-  label = "Inquire",
+  label = "Inquiries",
   hash = "contact",
   defaults,
   backdrop,

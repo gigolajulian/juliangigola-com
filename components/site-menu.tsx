@@ -50,7 +50,7 @@ export function SiteMenu() {
       className="drawer site-menu fixed inset-0 z-[31] lg:hidden"
     >
       <div className="site-menu-panel drawer-panel relative ml-auto flex h-full w-[var(--menu-w)] flex-col justify-center border-l border-border pl-6 pr-7 sm:pl-10 sm:pr-10">
-        <nav aria-label="Menu">
+        <nav aria-label="Menu" className="@container">
           <ul className="flex flex-col items-end gap-1 text-right">
             {LINKS.map((link, i) => (
               <li
@@ -75,10 +75,12 @@ export function SiteMenu() {
                   onClick={() => window.dispatchEvent(new Event("jg:menu-close"))}
                   aria-current={isCurrent(link.href) ? "page" : undefined}
                   className={cn(
-                    // Sized to the drawer rather than to the window: the
-                    // longest of the four has to sit on one line inside it.
-                    "font-display block py-2 uppercase leading-[0.95] tracking-[0]",
-                    "text-[clamp(2.75rem,12vw,3.5rem)]",
+                    // Sized to the drawer, not the window: the longest name,
+                    // "Commissions" at 6.8em, fills at most 97% of its width.
+                    // It was 12vw of the window and ran out past the drawer's
+                    // edge on every phone and iPad (Julian, 2026-10-04).
+                    "font-display block whitespace-nowrap py-2 uppercase leading-[0.95] tracking-[0]",
+                    "text-[min(3.5rem,14.2cqi)]",
                     // Where you are is the one at full strength and the rest
                     // stand back, at Julian's ask. It was an accent bar in the
                     // margin beside the current page; the ink says the same
@@ -89,7 +91,7 @@ export function SiteMenu() {
                     // On a page that is none of these four, the homepage
                     // included, all four sit back. That is honest: none of
                     // them is where you are.
-                    "transition-opacity duration-200 ease-[var(--ease-out-strong)]",
+                    "transition-[opacity,filter] duration-200 ease-[var(--ease-out-strong)]",
                     isCurrent(link.href)
                       ? "opacity-100"
                       : "opacity-45 hoverable:hover:opacity-70",

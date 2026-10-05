@@ -3866,6 +3866,39 @@ h2.contact-title {
   translate: none;
   transition-delay: calc(80ms + var(--reveal-delay, 0ms));
 }
+/* The heading a menu name is flying into (`nav-fly.ts`): out of sight
+   until the word lands on it, and then without its own rise, which the
+   flight has already done. */
+[data-fly-hold] {
+  visibility: hidden;
+}
+[data-flown] .title-word {
+  animation: none;
+  translate: none;
+}
+
+/* Julian (2026-10-04): on a phone, the name under the finger stays sharp
+   and the others go soft, more the farther they are from it, so the press
+   reads before the drawer shuts. */
+@media (pointer: coarse) {
+  .site-menu a:active {
+    opacity: 1;
+  }
+  .site-menu li:has(+ li a:active) > a,
+  .site-menu li:has(a:active) + li > a {
+    filter: blur(2px);
+  }
+  .site-menu li:has(+ li + li a:active) > a,
+  .site-menu li:has(a:active) + li + li > a {
+    filter: blur(4px);
+  }
+  .site-menu li:has(+ li + li + li a:active) > a,
+  .site-menu li:has(+ li + li + li + li a:active) > a,
+  .site-menu li:has(a:active) + li + li + li > a,
+  .site-menu li:has(a:active) + li + li + li + li > a {
+    filter: blur(6px);
+  }
+}
 
 /* The footer held with the page while the splash is up, and let in with
    it. The sheet lifts off the top, so the foot of the screen is uncovered
