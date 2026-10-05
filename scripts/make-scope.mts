@@ -68,3 +68,5 @@ for (const p of PROJECTS) {
 }
 writeFileSync("public/scope.json", JSON.stringify(out));
 console.log(Object.keys(out).length, "projects,", frames, "frames");
+
+await import("./make-accents.mjs");

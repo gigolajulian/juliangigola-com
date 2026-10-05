@@ -2,6 +2,7 @@ import * as React from "react";
 import Image from "next/image";
 import Link from "next/link";
 import type { Frame } from "@/lib/work-types";
+import ACCENTS from "@/lib/accents.json";
 
 /* ── the words between the covers ─────────────────────────────────
  * The work strip runs discipline by discipline, and each discipline opens
@@ -123,6 +124,10 @@ export function FilmCell({
       data-tick
       data-hash={hash}
       data-name={title}
+      /* Films have no samples to take a colour from, so the rail is given
+         one that sits with the rest: a muted violet between Event
+         coverage's indigo and Cover art's red (Julian, 2026-10-05). */
+      data-tint="#7a5a9e"
       data-ring="Watch"
       data-film
       aria-label={`${title}, film`}
@@ -207,6 +212,8 @@ export function FrameCell({
          thirty four. The frames take the name of the chapter they are
          under, which is what the rail already does with covers. */
       data-tick
+      /* Its project's colour, for the rail (`scripts/make-accents.mjs`). */
+      data-tint={(ACCENTS as Record<string, string>)[frame.src.split("/")[2]]}
       data-ring="Zoom"
       aria-label={frame.alt || `${name}, frame ${n + 1}`}
       className="group strip-cell relative block w-full shrink-0 overflow-hidden press active:scale-[0.995] sm:h-full sm:w-auto"

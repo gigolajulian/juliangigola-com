@@ -3737,7 +3737,10 @@ h2.contact-title {
    2026-10-04): the bar lets go of its own glass and its rule, and the
    head's glass reaches up behind it to the top of the screen. */
 @media (max-width: 39.999rem) and (orientation: portrait) {
-  :root:has(.head-glass) .site-bar {
+  /* `[data-home]` too, now the portfolio has the homepage's glass, so
+     this one pane still wins there. */
+  :root:has(.head-glass) .site-bar,
+  :root:has(.head-glass) .site-bar[data-home]:not([data-plain="true"]) {
     background-color: transparent;
     border-color: transparent;
     box-shadow: none;
@@ -3747,6 +3750,40 @@ h2.contact-title {
   }
   .head-glass::before {
     top: calc(-61px - env(safe-area-inset-top, 0px));
+  }
+}
+/* From a tablet up as well (Julian, 2026-10-05: integrate the head into
+   the navbar): the portfolio's title row and the bar are one pane of the
+   homepage's glass, with one hairline under both. The pane reaches up
+   past the top of the screen, so it needs no measure of the bar. */
+@media (min-width: 40rem) {
+  :root:has(.head-glass) .site-bar,
+  :root:has(.head-glass) .site-bar[data-home]:not([data-plain="true"]) {
+    background-color: transparent;
+    border-color: transparent;
+    box-shadow: none;
+  }
+  :root:has(.head-glass) .site-bar::after {
+    opacity: 0;
+  }
+  .head-glass {
+    position: relative;
+    isolation: isolate;
+    /* Room under the chips before the pane's hairline (Julian,
+       2026-10-05: some space under the filter). */
+    padding-bottom: 0.875rem;
+  }
+  .head-glass::before {
+    content: "";
+    position: absolute;
+    inset: -12rem 0 0;
+    margin-inline: calc(50% - 50vw);
+    z-index: -1;
+    pointer-events: none;
+    border-bottom: 1px solid color-mix(in oklab, var(--foreground) 12%, transparent);
+    background-color: color-mix(in oklab, var(--background) var(--glass-tint, 34%), transparent);
+    -webkit-backdrop-filter: blur(var(--glass-blur, 9px)) saturate(1.5);
+    backdrop-filter: blur(var(--glass-blur, 9px)) saturate(1.5);
   }
 }
 @media (max-width: 39.999rem) and (prefers-reduced-transparency: reduce) {
@@ -7321,4 +7358,65 @@ h2:not(.label) {
   .reference-panel {
     transition: none;
   }
+}
+
+/* ── the rail in the photographs' colours ────────────────────────────
+ * Julian (2026-10-05): colour from the photos in the All portfolio bar,
+ * tastefully. Only the control (the bar under the pointer) shows it:
+ * each discipline's stretch of the capsule takes a little of its colour,
+ * the project under the pointer in an open one a little more, and the
+ * thumb stays neutral so its name reads. The line at rest stays grey.
+ * The colours are the projects' accents (`scripts/make-accents.mjs`),
+ * held to a lightness and chroma that read on either ground.
+ * ─────────────────────────────────────────────────────────────── */
+[data-tinted] {
+  --tint-lit: oklch(from var(--tint) clamp(0.58, l, 0.76) clamp(0.07, calc(c * 1.35), 0.17) h);
+}
+:root[data-theme="light"] [data-tinted] {
+  --tint-lit: oklch(from var(--tint) clamp(0.45, l, 0.62) clamp(0.07, calc(c * 1.35), 0.17) h);
+}
+/* Each stretch fades into its neighbours' colours at its edges, so the
+   bar reads as one blend and not as blocks (Julian: smooth). A neighbour
+   with no colour hands over its own, so the blend stops at it. */
+.rail-chapter[data-tinted] {
+  --prev-lit: oklch(from var(--tint-prev) clamp(0.58, l, 0.76) clamp(0.07, calc(c * 1.35), 0.17) h);
+  --next-lit: oklch(from var(--tint-next) clamp(0.58, l, 0.76) clamp(0.07, calc(c * 1.35), 0.17) h);
+}
+:root[data-theme="light"] .rail-chapter[data-tinted] {
+  --prev-lit: oklch(from var(--tint-prev) clamp(0.45, l, 0.62) clamp(0.07, calc(c * 1.35), 0.17) h);
+  --next-lit: oklch(from var(--tint-next) clamp(0.45, l, 0.62) clamp(0.07, calc(c * 1.35), 0.17) h);
+}
+/* The three stops are registered colours, so the blend fades in with
+   the capsule growing rather than appearing all at once (Julian: smooth
+   animation too). At rest they are the line's own grey. */
+@property --rail-a { syntax: "<color>"; inherits: false; initial-value: transparent; }
+@property --rail-m { syntax: "<color>"; inherits: false; initial-value: transparent; }
+@property --rail-b { syntax: "<color>"; inherits: false; initial-value: transparent; }
+.strip-rail[data-rail-names="always"] .rail-chapter[data-tinted] .rail-bar {
+  --rail-a: var(--rail-line);
+  --rail-m: var(--rail-line);
+  --rail-b: var(--rail-line);
+  background-image: linear-gradient(to right in oklab, var(--rail-a), var(--rail-m) 40% 60%, var(--rail-b));
+  transition:
+    scale 320ms var(--ease-out-strong),
+    background-color 320ms var(--ease-out-strong),
+    --rail-a 420ms var(--ease-out-strong),
+    --rail-m 420ms var(--ease-out-strong),
+    --rail-b 420ms var(--ease-out-strong);
+}
+.rail-line:hover .rail-chapter[data-tinted] .rail-bar,
+[data-dwell] .rail-line .rail-chapter[data-tinted] .rail-bar {
+  --rail-a: color-mix(in oklab, color-mix(in oklab, var(--prev-lit), var(--tint-lit)) 75%, var(--rail-track));
+  --rail-m: color-mix(in oklab, var(--tint-lit) 75%, var(--rail-track));
+  --rail-b: color-mix(in oklab, color-mix(in oklab, var(--tint-lit), var(--next-lit)) 75%, var(--rail-track));
+}
+/* The dividers would cut the blend back into blocks. */
+.rail-line:hover .rail-chapter[data-tinted] .rail-bar::after,
+[data-dwell] .rail-line .rail-chapter[data-tinted] .rail-bar::after,
+.rail-line:hover .rail-chapter[data-tinted] + .rail-chapter .rail-bar::after,
+[data-dwell] .rail-line .rail-chapter[data-tinted] + .rail-chapter .rail-bar::after {
+  opacity: 0;
+}
+.strip-rail[data-rail-names="always"] .rail-bar > span.bg-foreground[data-tinted]::before {
+  background: color-mix(in oklab, var(--tint-lit) 70%, transparent);
 }

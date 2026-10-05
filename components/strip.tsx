@@ -597,7 +597,7 @@ export function Strip({
   /* The wall's stylesheet is scoped to this strip and no other. */
   const wallId = React.useId().replace(/[^a-zA-Z0-9_-]/g, "");
   const [ticks, setTicks] = React.useState<
-    { i: number; word?: string; name?: string }[]
+    { i: number; word?: string; name?: string; tint?: string }[]
   >([]);
   const tickKey = React.useRef("");
   // For the keyboard, which lives in an effect and must not go stale.
@@ -1695,11 +1695,11 @@ export function Strip({
     const readTicks = () => {
       const t = (Array.from(el.children) as HTMLElement[]).flatMap((c, i) =>
         c.dataset.tick !== undefined
-          ? [{ i, word: c.dataset.label, name: c.dataset.name }]
+          ? [{ i, word: c.dataset.label, name: c.dataset.name, tint: c.dataset.tint }]
           : [],
       );
       const key = t
-        .map((x) => `${x.i}:${x.word ?? ""}:${x.name ?? ""}`)
+        .map((x) => `${x.i}:${x.word ?? ""}:${x.name ?? ""}:${x.tint ?? ""}`)
         .join("|");
       if (key === tickKey.current) return;
       tickKey.current = key;
@@ -3106,6 +3106,8 @@ export function Strip({
     hit.current = tickAt;
   });
   const onRail = over !== null;
+  /** Each chapter's colour on the rail, and so its neighbours'. */
+  const chapterTints = chapterList.map((g) => tintOf(ticks.slice(g.from, g.to + 1)));
   /** The chapter the page is in, for the rail at rest (`rail-sum`). */
   const nowIn = chaptered
     ? chapterList.find((g) => !g.href && lands >= g.from && lands <= g.to)
@@ -3527,13 +3529,22 @@ export function Strip({
                     ref={(el) => {
                       chapterSegs.current[gi] = el;
                     }}
-                    style={{
-                      flexGrow: shown
-                        ? mine
-                          ? OPEN_SHARE
-                          : opening(count)
-                        : 1,
-                    }}
+                    style={
+                      {
+                        flexGrow: shown
+                          ? mine
+                            ? OPEN_SHARE
+                            : opening(count)
+                          : 1,
+                        /* Each stretch runs into its neighbours' colours
+                           at its edges, so the bar is one blend (Julian:
+                           smooth). */
+                        "--tint": chapterTints[gi],
+                        "--tint-prev": chapterTints[gi - 1] ?? chapterTints[gi],
+                        "--tint-next": chapterTints[gi + 1] ?? chapterTints[gi],
+                      } as React.CSSProperties
+                    }
+                    data-tinted={chapterTints[gi] ? "" : undefined}
                     /* Which thumb it carries in the control
                        (`globals.css`): where you are, or a discipline
                        elsewhere under the pointer. */
@@ -3662,6 +3673,8 @@ export function Strip({
                               "shadow-[inset_-1px_0_0_0_var(--background)]",
                             shown && mark === g.from + k && "bg-foreground",
                           )}
+                          data-tinted={ticks[g.from + k]?.tint ? "" : undefined}
+                          style={{ "--tint": ticks[g.from + k]?.tint } as React.CSSProperties}
                         />
                       ))}
                     </div>
@@ -3734,6 +3747,20 @@ export function Strip({
     </div>
   );
 }
+
+/** A discipline's colour on the rail: the most saturated of its
+    projects' accents (`scripts/make-accents.mjs`). */
+const tintOf = (cells: { tint?: string }[]) => {
+  const sat = (h: string) => {
+    const n = parseInt(h.slice(1), 16);
+    const c = [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+    return Math.max(...c) - Math.min(...c);
+  };
+  let best: string | undefined;
+  for (const { tint } of cells)
+    if (tint && (!best || sat(tint) > sat(best))) best = tint;
+  return best;
+};
 
 /* ── the ink in liquid ──
    Julian: the gooey UI in the scrollbar, sitewide. Where you are on the

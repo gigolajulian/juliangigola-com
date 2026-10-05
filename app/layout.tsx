@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { IBM_Plex_Mono, Inter_Tight } from "next/font/google";
+import { IBM_Plex_Mono, Inter_Tight, Space_Grotesk } from "next/font/google";
 import localFont from "next/font/local";
 import { Intro } from "@/components/intro";
 import { SiteHeader } from "@/components/site-header";
@@ -41,6 +41,13 @@ const archivo = localFont({
   src: "./fonts/Archivo-Black.woff2",
   variable: "--font-archivo",
   weight: "900",
+  fallback: ["Helvetica Neue", "Arial", "sans-serif"],
+});
+/* The service boxes on About, in 500 capitals (Julian, 2026-10-05). */
+const grotesk = Space_Grotesk({
+  variable: "--font-grotesk",
+  subsets: ["latin"],
+  weight: "500",
   fallback: ["Helvetica Neue", "Arial", "sans-serif"],
 });
 const mono = IBM_Plex_Mono({
@@ -131,7 +138,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="en"
-      className={`${display.variable} ${archivo.variable} ${mono.variable} h-full antialiased`}
+      className={`${display.variable} ${archivo.variable} ${grotesk.variable} ${mono.variable} h-full antialiased`}
       // Dark is the default and is what the CSS already declares, so the
       // server renders the correct theme for everyone except the visitor who
       // has chosen light. That one case is what the script below fixes.
