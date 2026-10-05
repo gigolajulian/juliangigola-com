@@ -29,8 +29,10 @@ export async function GET(request: Request) {
   const token = bearer(request);
   if (!token || !(await canPush(token))) return json({ error: "Not authorised." }, 401);
   const { env } = await getCloudflareContext({ async: true });
-  if (!env.CF_ANALYTICS_TOKEN)
-    return json({ error: "No CF_ANALYTICS_TOKEN on this Worker yet." }, 503);
+  // Held in a const: the check above does not narrow `env` inside `gql`,
+  // which failed the production type check (2026-10-05).
+  const key = env.CF_ANALYTICS_TOKEN;
+  if (!key) return json({ error: "No CF_ANALYTICS_TOKEN on this Worker yet." }, 503);
 
   const gql = async (query: string) => {
     const res = await fetch("https://api.cloudflare.com/client/v4/graphql", {
@@ -38,7 +40,7 @@ export async function GET(request: Request) {
       // Trimmed, since a pasted secret can carry a newline; and a user agent,
       // because the API answers an anonymous Worker request with an empty 400.
       headers: {
-        authorization: `Bearer ${env.CF_ANALYTICS_TOKEN.trim()}`,
+        authorization: `Bearer ${key.trim()}`,
         "content-type": "application/json",
         "user-agent": "juliangigola-admin-traffic",
       },
