@@ -7183,8 +7183,10 @@ h2:not(.label) {
     -webkit-backdrop-filter: none;
     backdrop-filter: none;
   }
+  /* Thicker than the head's pane: names are read off this one, and a dark
+     frame under the glass took them below 4.5:1 (audit, 2026-10-05). */
   .work-filter-panel {
-    background-color: color-mix(in oklab, var(--background) 72%, transparent);
+    background-color: color-mix(in oklab, var(--background) 86%, transparent);
     -webkit-backdrop-filter: blur(var(--glass-blur, 9px)) saturate(1.5);
     backdrop-filter: blur(var(--glass-blur, 9px)) saturate(1.5);
   }

@@ -11,7 +11,7 @@ import { StripPage, StripHead } from "@/components/strip-page";
 import { ScopePanel, type ScopeRow } from "@/components/vectorscope";
 import { markFilter, StripView, type StripViewMode } from "@/components/strip";
 import { animate } from "motion";
-import { Liquid } from "@/components/liquid";
+import { Liquid, useQuiet } from "@/components/liquid";
 import {
   chooseView,
   morphView,
@@ -186,6 +186,7 @@ export function WorkShell({
   const [filtering, setFiltering] = React.useState(false);
   /** Whether the colour panel is out. */
   const [scoping, setScoping] = React.useState(false);
+  const quiet = useQuiet();
   /* Julian: colour opens on All, so the photographs show across the
      disciplines at once; the panel then puts the work in its colour where
      the rack was (`vectorscope.tsx`). */
@@ -1101,7 +1102,7 @@ export function WorkShell({
                   className="pointer-events-none absolute left-0 top-0 h-full"
                   style={{ width: mark?.rw }}
                 >
-                  {mark ? (
+                  {mark && quiet ? (
                     <Liquid
                       blur={5}
                       contrast={18}
