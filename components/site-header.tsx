@@ -8,6 +8,7 @@ import { Liquid } from "@/components/liquid";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { WarpTuner } from "@/components/warp-tuner";
 import { NAME_WARP } from "@/lib/name-warp";
+import { installNavFly } from "@/components/nav-fly";
 
 /* The address's hash, kept current: the strip writes the homepage's
    section into it as it glides (`STRIP_SECTION`), a link or the back button
@@ -51,15 +52,17 @@ const useHash = () =>
 export const LINKS = [
   // Julian's order (2026-10-01: Portfolio last; 2026-10-03: Commissions
   // first, the two audiences side by side). All but Portfolio are
-  // homepage screens.
+  // homepage screens. Names in one register, plural nouns like
+  // Commissions (2026-10-04): Biography, Inquiries.
   { href: "/#work", label: "Commissions" },
-  { href: "/#about", label: "About me" },
+  { href: "/#about", label: "Biography" },
   { href: "/#sessions", label: "Sessions" },
-  { href: "/#contact", label: "Inquire" },
+  { href: "/#contact", label: "Inquiries" },
   { href: "/portfolio", label: "Portfolio" },
 ] as const;
 
 export function SiteHeader() {
+  React.useEffect(installNavFly, []);
   const pathname = usePathname();
   const [open, setOpen] = React.useState(false);
   const burger = React.useRef<HTMLButtonElement>(null);

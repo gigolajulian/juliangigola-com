@@ -65,7 +65,7 @@ export function AboutScreen() {
   return (
     <section
       data-tick
-      data-label="About"
+      data-label="Biography"
       data-hash="about"
       className="relative flex w-full shrink-0 flex-col sm:h-full"
     >
@@ -77,8 +77,7 @@ export function AboutScreen() {
       >
         <div className="flex flex-col sm:min-h-0">
           <RisingTitle
-            /* One line: a no-break space, so it rises as one piece. */
-            text={"About me"}
+            text="Biography"
           />
           {/* Julian's words (2026-09-29). */}
           {/* Set left, as the mockup has it: justified mono opens up. */}
