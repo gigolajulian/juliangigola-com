@@ -7197,3 +7197,24 @@ h2:not(.label) {
     backdrop-filter: none;
   }
 }
+
+/* ── the homepage down a phone: off-screen screens skipped ─────────
+ * Stacked (`strip.tsx`, under `WIDE`) the homepage is seven screens, a
+ * thousand elements, and every restyle while it loads went through all of
+ * them. The screens past the first are left out of style, layout and paint
+ * until they come near the window; 1200px holds their place until they
+ * have been drawn once, then their own height (`auto`). Measured on
+ * production, throttled phone, three runs each: LCP 3.5s to 2.7s, style
+ * 1.35s to 0.98s (optimize pass, 2026-10-05). The first screen is never
+ * skipped: it is what is seen, and `data-past-hero` reads it.
+ * ─────────────────────────────────────────────────────────────── */
+@media (max-width: 39.999rem) {
+  .strip-scroll[data-dealt="screens"] > [data-hash]:not(:first-child) {
+    content-visibility: auto;
+    contain-intrinsic-size: auto 1200px;
+  }
+  /* Drawn in full while a link carries the page to a screen (`strip.tsx`). */
+  .strip-scroll[data-dealt="screens"][data-jump] > [data-hash] {
+    content-visibility: visible;
+  }
+}
