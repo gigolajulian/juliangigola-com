@@ -222,6 +222,13 @@ async function bingWebmaster(key?: string) {
       pages: group(pages, "Query"),
     };
   } catch (e) {
-    return { error: (e as Error).message };
+    // Bing refuses Cloudflare's shared servers outright (2026-10-05), so the
+    // Agentic OS dashboard on Julian's PC asks it instead.
+    const message = (e as Error).message;
+    return {
+      error: /ThrottleIP/.test(message)
+        ? "Bing blocks requests from Cloudflare's servers. Bing's numbers are on the Agentic OS dashboard on the PC."
+        : message,
+    };
   }
 }
