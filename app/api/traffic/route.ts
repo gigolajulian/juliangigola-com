@@ -152,7 +152,7 @@ async function searchConsole(secret?: string) {
     const [total, queries, pages] = await Promise.all([query([]), query(["query"]), query(["page"])]);
     const t = total[0];
     const rows = (list: typeof queries) =>
-      list.map((r) => ({ key: r.keys![0].replace(/^https?:\/\/(www\.)?juliangigola\.com/, "") || "/", clicks: r.clicks, impressions: r.impressions, position: Math.round(r.position * 10) / 10 }));
+      list.map((r) => ({ key: r.keys![0].replace(/^https?:\/\//, "").replace(/^juliangigola\.com(?=\/)/, "") || "/", clicks: r.clicks, impressions: r.impressions, position: Math.round(r.position * 10) / 10 }));
     return {
       clicks: t?.clicks ?? 0,
       impressions: t?.impressions ?? 0,
