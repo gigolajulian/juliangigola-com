@@ -29,4 +29,11 @@ interface CloudflareEnv {
    *   wrangler secret put CF_ANALYTICS_TOKEN
    */
   CF_ANALYTICS_TOKEN?: string;
+
+  /**
+   * Google Search Console, read-only, for the same tab: JSON
+   * `{client_id, client_secret, refresh_token}` for hello@. Made and set by
+   * `node scripts/gsc-auth.mjs <client.json>`.
+   */
+  GSC_OAUTH?: string;
 }

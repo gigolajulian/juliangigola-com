@@ -78,7 +78,7 @@ export async function GET(request: Request) {
   };
 
   try {
-    const [days, sources, pages, devices, zone] = await Promise.all([
+    const [days, sources, pages, devices, zone, google] = await Promise.all([
       rum("date", 8),
       rum("refererHost"),
       rum("requestPath", 10),
@@ -86,6 +86,7 @@ export async function GET(request: Request) {
       gql(
         `{viewer{zones(filter:{zoneTag:"${ZONE}"}){httpRequestsAdaptiveGroups(limit:500,filter:{datetime_geq:"${ago(1)}",datetime_lt:"${now.toISOString()}",requestSource:"eyeball",edgeResponseContentTypeName:"html"},orderBy:[count_DESC]){count dimensions{userAgent}}}}}`,
       ),
+      searchConsole(env.GSC_OAUTH),
     ]);
 
     const botLike = /bot|crawl|spider|curl|wget|python|headless|go-http|node|axios|fetch|extended|agent|preview|scan|^$/i;
@@ -107,8 +108,59 @@ export async function GET(request: Request) {
       devices,
       bots,
       topBots: topBots.slice(0, 6),
+      google,
     });
   } catch (e) {
     return json({ error: (e as Error).message }, 502);
+  }
+}
+
+/* Google Search, last 28 days, from Search Console. `GSC_OAUTH` is
+   `{client_id, client_secret, refresh_token}` for hello@, read-only
+   (webmasters.readonly), made once by `scripts/gsc-auth.mjs`. Its own
+   failure is reported in its own block, so Cloudflare's numbers still show. */
+async function searchConsole(secret?: string) {
+  if (!secret) return { error: "Search Console not connected yet." };
+  try {
+    const { client_id, client_secret, refresh_token } = JSON.parse(secret);
+    const tok = (await (
+      await fetch("https://oauth2.googleapis.com/token", {
+        method: "POST",
+        body: new URLSearchParams({ client_id, client_secret, refresh_token, grant_type: "refresh_token" }),
+      })
+    ).json()) as { access_token?: string; error_description?: string; error?: string };
+    if (!tok.access_token) return { error: `Google sign-in failed: ${tok.error_description ?? tok.error}` };
+
+    // Search Console is about three days behind, so the window ends there.
+    const day = (n: number) => new Date(Date.now() - n * 864e5).toISOString().slice(0, 10);
+    const query = async (dimensions: string[], rowLimit = 10) => {
+      const res = await fetch(
+        "https://searchconsole.googleapis.com/webmasters/v3/sites/sc-domain%3Ajuliangigola.com/searchAnalytics/query",
+        {
+          method: "POST",
+          headers: { authorization: `Bearer ${tok.access_token}`, "content-type": "application/json" },
+          body: JSON.stringify({ startDate: day(30), endDate: day(2), dimensions, rowLimit }),
+        },
+      );
+      const r = (await res.json()) as {
+        rows?: { keys?: string[]; clicks: number; impressions: number; ctr: number; position: number }[];
+        error?: { message: string };
+      };
+      if (r.error) throw new Error(r.error.message);
+      return r.rows ?? [];
+    };
+    const [total, queries, pages] = await Promise.all([query([]), query(["query"]), query(["page"])]);
+    const t = total[0];
+    const rows = (list: typeof queries) =>
+      list.map((r) => ({ key: r.keys![0].replace(/^https?:\/\/(www\.)?juliangigola\.com/, "") || "/", clicks: r.clicks, impressions: r.impressions, position: Math.round(r.position * 10) / 10 }));
+    return {
+      clicks: t?.clicks ?? 0,
+      impressions: t?.impressions ?? 0,
+      position: t ? Math.round(t.position * 10) / 10 : null,
+      queries: rows(queries),
+      pages: rows(pages),
+    };
+  } catch (e) {
+    return { error: (e as Error).message };
   }
 }
