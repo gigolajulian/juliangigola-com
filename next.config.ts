@@ -258,6 +258,13 @@ const nextConfig: NextConfig = {
   // idle indicator, not the error overlay.
   devIndicators: false,
 
+  /* The inquiry form carries up to eight reference images, shrunk in the
+     browser to a few hundred KB each (`components/reference-picks.tsx`).
+     Next's 1MB default would refuse the second or third. */
+  experimental: {
+    serverActions: { bodySizeLimit: "24mb" },
+  },
+
   /**
    * DialKit on the dev server only (Julian). A production build gets
    * `lib/dialkit-stub.ts` in its place: the configs' defaults and no panel,

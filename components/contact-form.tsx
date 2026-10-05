@@ -8,6 +8,7 @@ import { RESPONSE_TIME } from "@/lib/site";
 import { cn } from "@/lib/utils";
 import StatusMark from "@/components/StatusMark";
 import { Orb } from "@/components/orb";
+import { ReferencePicks } from "@/components/reference-picks";
 
 /* ── the enquiry ──────────────────────────────────────────────────
  * The old form was three fields: name, email, message. Which means every
@@ -389,6 +390,8 @@ export function ContactForm({
         required
       />
 
+      <ReferencePicks resync={state} />
+
       {state.status === "error" || state.status === "unconfigured" ? (
         <div
           role="alert"
@@ -419,7 +422,9 @@ export function ContactForm({
           column was 54. Wrapping instead, and the sentence takes a line of
           its own below the button until there is a window wide enough to
           hold all three. */}
-      <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
+      {/* Julian (2026-10-05): the address on the left, the button on the right,
+          the sentence off the screen (still read out with the button). */}
+      <div className="flex flex-wrap items-start justify-between gap-x-6 gap-y-3">
         <button
           type="submit"
           data-dial="send"
@@ -444,14 +449,14 @@ export function ContactForm({
         {!ready && !pending ? (
           <p
             id="enquire-missing"
-            className="label order-last basis-full text-left text-muted-foreground lg:order-none lg:basis-auto"
+            className="sr-only"
           >
             Your name, your email and a line about the shoot
           </p>
         ) : null}
         {/* The address is above the form on a phone already. */}
-        <p className="text-left text-xs text-muted-foreground max-sm:hidden">
-          Or email{" "}
+        <p className="order-first text-left text-xs text-muted-foreground opacity-70 max-sm:hidden">
+          Email{" "}
           <a
             href="mailto:hello@juliangigola.com"
             data-ring="Email"

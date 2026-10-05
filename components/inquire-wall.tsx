@@ -89,7 +89,8 @@ export function InquireWall({ items }: { items: WallTile[] }) {
       turn={-14}
       perspective={1200}
       depth={120}
-      speed={24 * scale}
+      /* Julian (2026-10-05): a third slower (was 24). */
+      speed={16 * scale}
       direction="up"
       variance={0.45}
       parallax={0.6}

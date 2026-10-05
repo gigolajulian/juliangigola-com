@@ -34,6 +34,10 @@ export type Enquiry = {
   read: boolean;
   /** Two-letter country from Cloudflare, where it was given. Never the IP. */
   country?: string;
+  /** Julian's frames the visitor picked as references, as `/work/...` paths. */
+  picks?: string[];
+  /** Names of the images they uploaded. The images go with the email. */
+  files?: string[];
 };
 
 /**
@@ -44,6 +48,9 @@ export type Enquiry = {
  * hits a wall immediately rather than getting a few hundred through before a
  * daily cap notices.
  */
+/** References one enquiry may carry, uploads and picks together. */
+export const MAX_REFS = 8;
+
 export const COOLDOWN_MS = 5 * 60 * 1000;
 
 /**
@@ -268,6 +275,10 @@ export const emailCopy = (e: Enquiry): { subject: string; text: string } => ({
     e.country ? `Country: ${e.country}` : null,
     "",
     e.message,
+    ...(e.picks?.length
+      ? ["", "Picked from my work:", ...e.picks.map((src) => `https://juliangigola.com${src}`)]
+      : []),
+    ...(e.files?.length ? ["", `Their references, attached: ${e.files.join(", ")}`] : []),
     "",
     "",
     "Stored in the site's inbox: https://juliangigola.com/admin (Inbox tab).",

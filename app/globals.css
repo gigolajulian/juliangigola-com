@@ -6867,8 +6867,11 @@ h2:not(.label) {
       opacity 700ms var(--ease-out-strong),
       filter 700ms var(--ease-out-strong);
   }
+  /* Julian (2026-10-05): further forward (was 44px, now about 1.05x)
+     and a step toward the middle, as on hover, still clear of the text
+     on the left. */
   .contact-card:focus-within {
-    transform: perspective(1400px) translateZ(44px);
+    transform: perspective(1400px) translateX(-3rem) translateZ(70px);
     box-shadow: 0 50px 90px -40px rgb(0 0 0 / 0.6);
   }
   .contact-inquire:has(.contact-card:focus-within) > :not(.contact-card, style, .enquiry-backdrop) {
@@ -6880,8 +6883,17 @@ h2:not(.label) {
   }
 }
 @media (min-width: 40rem) and (hover: hover) and (pointer: fine) {
+  /* Julian (2026-10-05): the edge's line and glow quieter under the
+     pointer. The beam sets its strength inline, hence !important. */
+  .contact-card:hover {
+    --beam-strength: 0.5 !important;
+  }
+  .contact-card:hover > .contact-edge {
+    opacity: 0.5;
+  }
+  /* Julian (2026-10-05): bigger, and a step toward the middle. */
   .contact-card:hover:not(:focus-within) {
-    transform: perspective(1400px) translateZ(22px);
+    transform: perspective(1400px) translateX(-3rem) translateZ(56px);
     box-shadow: 0 36px 70px -36px rgb(0 0 0 / 0.5);
   }
 }
@@ -7225,5 +7237,86 @@ h2:not(.label) {
   /* Drawn in full while a link carries the page to a screen (`strip.tsx`). */
   .strip-scroll[data-dealt="screens"][data-jump] > [data-hash] {
     content-visibility: visible;
+  }
+}
+
+/* ── the form's edge (Julian, 2026-10-05): a thin white line and its glow
+   that travel round the form on the beam's lap (`contact-beam.tsx`), never
+   sitting still. The beam's own stroke is grey and too faint to read. */
+.contact-edge {
+  transition: opacity 400ms var(--ease-out-strong);
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+  filter: drop-shadow(0 0 2px rgb(255 255 255 / 0.9))
+    drop-shadow(0 0 8px rgb(255 255 255 / 0.5));
+}
+.contact-edge::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 16px;
+  padding: 0.5px;
+  background: conic-gradient(
+    from var(--edge-a),
+    transparent 0% 52%,
+    rgb(255 255 255 / 0.25) 60%,
+    #fff 68%,
+    rgb(255 255 255 / 0.25) 76%,
+    transparent 84% 100%
+  );
+  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  mask-composite: exclude;
+}
+
+/* ── the reference picker (Julian, 2026-10-05) ──
+   Pops out of the inquiry form (`reference-picks.tsx`): a glass panel in
+   the top layer, the page dimmed and blurred behind it. */
+.reference-panel {
+  width: min(60rem, calc(100vw - 2rem));
+  height: min(44rem, calc(100dvh - 4rem));
+  max-width: none;
+  max-height: none;
+  margin: auto;
+  padding: 0;
+  border: 1px solid color-mix(in oklab, var(--foreground) 18%, transparent);
+  border-radius: 16px;
+  color: var(--foreground);
+  background: color-mix(in oklab, var(--background) 86%, transparent);
+  -webkit-backdrop-filter: blur(var(--glass-blur, 9px)) saturate(1.5);
+  backdrop-filter: blur(var(--glass-blur, 9px)) saturate(1.5);
+  box-shadow: 0 40px 90px -30px rgb(0 0 0 / 0.7);
+  opacity: 0;
+  scale: 0.96;
+  transition:
+    opacity 260ms var(--ease-out-strong),
+    scale 260ms var(--ease-out-strong),
+    overlay 260ms allow-discrete,
+    display 260ms allow-discrete;
+}
+.reference-panel[open] {
+  opacity: 1;
+  scale: 1;
+}
+@starting-style {
+  .reference-panel[open] {
+    opacity: 0;
+    scale: 0.96;
+  }
+}
+.reference-panel::backdrop {
+  background: rgb(0 0 0 / 0.45);
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+}
+@media (prefers-reduced-transparency: reduce) {
+  .reference-panel {
+    background: var(--background);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .reference-panel {
+    transition: none;
   }
 }

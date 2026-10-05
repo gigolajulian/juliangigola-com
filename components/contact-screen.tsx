@@ -100,9 +100,10 @@ export function ContactScreen({
     >
       {/* Under the ground the booking pages' questions sit on, 40%, so the
           words read over it (`.questions-wall`). First, so the rule that
-          brings muted words up over a wall finds what follows it. */}
+          brings muted words up over a wall finds what follows it. Inert:
+          Julian (2026-10-05), the wall is not to be clicked here. */}
       {backdrop ? (
-        <div className="enquiry-backdrop questions-wall absolute inset-0 -z-10 overflow-hidden">
+        <div inert className="enquiry-backdrop questions-wall absolute inset-0 -z-10 overflow-hidden">
           {backdrop}
         </div>
       ) : null}
