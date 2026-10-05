@@ -613,6 +613,35 @@ export function Strip({
      feel like changing pages. Same gestures, twice the work on screen. */
   const live = stack ? wide : true;
 
+  /* Past the opening cell, stacked down a phone as well: the page's own
+     scroll, half the cell gone off the top, as `data-past-first` says it
+     sideways (`read` below). Its own name, so only the navbar's wordmark
+     reads it, not the running heads of the stacked pages (Julian,
+     2026-10-04: the name in the bar on an iPhone once the hero is passed). */
+  React.useEffect(() => {
+    const el = scroller.current;
+    if (!el || live) return;
+    let frame = 0;
+    const check = () => {
+      frame = 0;
+      const first = el.firstElementChild as HTMLElement | null;
+      const r = first?.getBoundingClientRect();
+      el.toggleAttribute("data-past-hero", !!r && r.top + r.height / 2 < 0);
+    };
+    const soon = () => {
+      if (!frame) frame = requestAnimationFrame(check);
+    };
+    check();
+    window.addEventListener("scroll", soon, { passive: true });
+    window.addEventListener("resize", soon);
+    return () => {
+      cancelAnimationFrame(frame);
+      window.removeEventListener("scroll", soon);
+      window.removeEventListener("resize", soon);
+      el.removeAttribute("data-past-hero");
+    };
+  }, [live]);
+
   /* Stacked down a phone the strip is not live: none of its scrolling runs,
      and the cells are no more than sections of a page that scrolls. Its
      jumps went with it. Cells carry `data-hash`, not an id, so the browser

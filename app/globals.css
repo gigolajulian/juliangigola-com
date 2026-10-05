@@ -113,12 +113,25 @@
      the page already, and the lift uncovers more of the same. The white
      a warm off white, paper rather than screen (Julian: more off white,
      towards warm). */
-  background: #eee9e0;
   color: #0b0a09;
+  /* The layer's own colour is the panel's, which is the page's, and the
+     ground the panel sweeps across is painted over it short of the top
+     and bottom (below): Safari on an iPhone takes the colour of the bands
+     round the page from what is at the window's edge, and Julian asked
+     for them black in dark and light in light, not the ground (2026-10-04). */
+  background: currentColor;
+  --jg-ground: #eee9e0;
 }
 :root[data-theme="light"][data-intro] #jg-intro {
-  background: #0b0a09;
   color: #ebedef;
+  --jg-ground: #0b0a09;
+}
+[data-intro] #jg-intro::before {
+  content: "";
+  position: absolute;
+  inset: calc(env(safe-area-inset-top, 0px) + 16px) 0
+    calc(env(safe-area-inset-bottom, 0px) + 16px);
+  background: var(--jg-ground);
 }
 .jg-intro-panel {
   position: absolute;
@@ -1519,6 +1532,7 @@ article:has(.strip-scroll[data-past-first]) .running-head {
     translate 480ms var(--ease-out-strong);
 }
 body:has(.strip-scroll[data-past-first]) .home-wordmark,
+body:has(.strip-scroll[data-past-hero]) .home-wordmark,
 .home-wordmark:focus-visible {
   opacity: 1;
   pointer-events: auto;
@@ -3803,6 +3817,48 @@ h2.contact-title {
   transition-delay: 0ms, 80ms, 80ms, 80ms;
 }
 
+/* Preview, `?menu3d=1` (Julian, 2026-10-04): on a phone the page pushed
+   aside swings back in perspective about the edge it shares with the
+   drawer, the drawer turns in on its way, the glass over the page is
+   lighter, and closing is the same movement backwards: the same lengths,
+   the names leaving from the foot up. */
+@media (max-width: 39.999rem) and (prefers-reduced-motion: no-preference) {
+  :root[data-menu3d] :is(.site-bar, body > main, body > footer) {
+    transform-origin: 100% var(--oy, 50vh);
+    /* Inertia (Julian, 2026-10-04): the swing carries a little past and
+       settles back, the slide only just, so the page's edge and the
+       drawer's stay together. */
+    transition:
+      translate 620ms var(--ease-spring),
+      transform 620ms var(--ease-bounce);
+  }
+  :root[data-menu3d][data-drawer="menu"] :is(.site-bar, body > main, body > footer) {
+    transform: perspective(900px) rotateY(16deg) scale(0.94);
+    transition-delay: 80ms;
+  }
+  :root[data-menu3d] .site-menu-panel {
+    transform-origin: 0 50%;
+    transform: perspective(900px) rotateY(-28deg);
+    transition:
+      translate 620ms var(--ease-spring),
+      transform 620ms var(--ease-bounce);
+  }
+  :root[data-menu3d][data-drawer="menu"] .site-menu-panel {
+    transform: none;
+    transition-delay: 80ms;
+  }
+  :root[data-menu3d][data-drawer="menu"] .site-menu {
+    -webkit-backdrop-filter: blur(4px) saturate(1.2);
+    backdrop-filter: blur(4px) saturate(1.2);
+  }
+  :root[data-menu3d] .site-menu {
+    transition-duration: 420ms, 520ms, 520ms, 520ms;
+  }
+  :root[data-menu3d]:not([data-drawer="menu"]) .site-menu-item {
+    transition-delay: max(0ms, calc(240ms - var(--reveal-delay, 0ms)));
+  }
+}
+
 /* Somebody who has asked for less transparency gets the page plain. The
    glass is a way of saying the page is not the thing being looked at;
    dropping to a solid wash instead would say it is not there at all. */
@@ -3877,26 +3933,27 @@ h2.contact-title {
   translate: none;
 }
 
-/* Julian (2026-10-04): on a phone, the name under the finger stays sharp
-   and the others go soft, more the farther they are from it, so the press
-   reads before the drawer shuts. */
+/* In the light the names standing back went pale grey on the pale ground
+   (Julian, 2026-10-04): darker there, the one you are on still the
+   darkest. */
+:root[data-theme="light"] .site-menu a:not([aria-current="page"], :active) {
+  opacity: 0.68;
+}
+@media (hover: hover) {
+  :root[data-theme="light"] .site-menu a:not([aria-current="page"]):hover {
+    opacity: 0.85;
+  }
+}
+/* The name under the finger at full strength; the others go out of focus
+   round it in the focus field (`focus-field.tsx`). */
 @media (pointer: coarse) {
   .site-menu a:active {
     opacity: 1;
   }
-  .site-menu li:has(+ li a:active) > a,
-  .site-menu li:has(a:active) + li > a {
-    filter: blur(2px);
-  }
-  .site-menu li:has(+ li + li a:active) > a,
-  .site-menu li:has(a:active) + li + li > a {
-    filter: blur(4px);
-  }
-  .site-menu li:has(+ li + li + li a:active) > a,
-  .site-menu li:has(+ li + li + li + li a:active) > a,
-  .site-menu li:has(a:active) + li + li + li > a,
-  .site-menu li:has(a:active) + li + li + li + li > a {
-    filter: blur(6px);
+  /* A finger drawn across the names moves the focus with it; left to
+     pan, the drag was taken for a scroll and the focus let go. */
+  .site-menu nav {
+    touch-action: none;
   }
 }
 
