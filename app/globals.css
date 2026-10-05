@@ -6772,6 +6772,13 @@ h2:not(.label) {
       animation-timeline: --arrive;
       animation-range: entry 0% entry 100%;
     }
+    /* The first picture is in the window from the start, half way through
+       its entry on a phone, and Chrome takes nothing still fading in for
+       the page's largest paint: the portfolio reported none at all
+       (audit, 2026-10-05). It keeps the load's own fade (`data-fade`). */
+    .portfolio-arrive .strip-scroll > :nth-child(-n + 2) img[data-fade] {
+      animation: none;
+    }
     @media (max-width: 39.99rem) {
       .portfolio-arrive .strip-scroll > * {
         view-timeline: --arrive y;
