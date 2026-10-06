@@ -6741,6 +6741,14 @@ h2:not(.label) {
   }
 }
 
+/* The Google Calendar booking frame on a session page's Book screen
+   (`contact-screen.tsx`). Its page cannot be styled from here, so on the
+   dark theme it is turned over: white to near black, and the hue turned back
+   so Google's blue stays blue. */
+:root:not([data-theme="light"]) .booking-embed {
+  filter: invert(0.9) hue-rotate(180deg);
+}
+
 /* Primaries solid under a finger (critique, 2026-10-03). The 72% glass
    is drawn over by the liquid under a mouse; a phone has no liquid, and
    the glass over the dark ground read as a grey, disabled button. */

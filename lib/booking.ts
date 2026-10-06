@@ -62,7 +62,9 @@ export type BookingPage = {
       show whole: chosen, not sampled (Julian, 2026-10-03). */
   picks?: string[];
   /** Presets for the form on the Book screen. */
-  book: { type: string; session?: string; title: string };
+  /** `calendar`: the Google Calendar appointment schedule's id, embedded
+      on the Book screen in place of the form (hello@juliangigola.com). */
+  book: { type: string; session?: string; title: string; calendar?: string };
 };
 
 /** Every city the pages name, for the structured data's service area. */
@@ -231,7 +233,7 @@ export const BOOKING_PAGES: BookingPage[] = [
     ],
     tiles: framesOf("headshots"),
     gallery: { href: "/portfolio/headshots", label: "The headshots gallery" },
-    book: { type: "session", session: heads.name, title: "Book headshots" },
+    book: { type: "session", session: heads.name, title: "Book headshots", calendar: "AcZssZ0uTmIdvTQpdNHXZu7EIbFffjn9qFap_BVZQ0aOFL03IsfZ6CRDagD3cWnaAbkvlrTTCM9_l-OY" },
   },
   {
     slug: "graduation-photos",
@@ -296,7 +298,7 @@ export const BOOKING_PAGES: BookingPage[] = [
     ],
     tiles: framesOf("graduation"),
     gallery: { href: "/portfolio/graduation", label: "The graduation gallery" },
-    book: { type: "session", session: grad.name, title: "Book a graduation session" },
+    book: { type: "session", session: grad.name, title: "Book a graduation session", calendar: "AcZssZ1xuDp0FQU0bQESt670XPAJ7R76ql1RdYTRBokN_AybNjkeSrqXLGD8_Qg5bDY9FZBRbDhYiGz7" },
   },
   {
     slug: "model-digitals",
@@ -363,7 +365,7 @@ export const BOOKING_PAGES: BookingPage[] = [
       "/work/mya/06.jpg",
       "/work/mya/05.jpg",
     ],
-    book: { type: "session", session: digitals.name, title: "Book digitals" },
+    book: { type: "session", session: digitals.name, title: "Book digitals", calendar: "AcZssZ3ZCkVh-KA0BaMB1EDaf9nat1xleBQ0tPBHEhqNlau_nzeVjlOsmnAVHo9dqVtURSSFNSHqjazB" },
   },
   {
     slug: "portraits",
@@ -404,7 +406,7 @@ export const BOOKING_PAGES: BookingPage[] = [
     ],
     tiles: coversOf("portraits"),
     gallery: { href: "/portfolio/portraits", label: "The portraits" },
-    book: { type: "session", session: portraits.name, title: "Book a portrait session" },
+    book: { type: "session", session: portraits.name, title: "Book a portrait session", calendar: "AcZssZ14pWKn0PhQZxKSfrSjutq_NM4vtqcRXF4C4PYuzZrXcN54Ec4BO_Rms3HgjKdsDRQYo670AQbD" },
   },
   {
     slug: "weddings",

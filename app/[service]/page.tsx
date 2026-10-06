@@ -157,6 +157,7 @@ export default async function BookingPage(props: PageProps<"/[service]">) {
           label="Book"
           hash="book"
           defaults={{ type: page.book.type, session: page.book.session }}
+          calendar={page.book.calendar}
           intro={
             <>
               <span className="sm:block sm:text-balance">

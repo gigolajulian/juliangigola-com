@@ -37,6 +37,7 @@ export function ContactScreen({
   label = "Inquiries",
   hash = "contact",
   defaults,
+  calendar,
   backdrop,
 }: {
   title?: string;
@@ -48,6 +49,10 @@ export function ContactScreen({
   hash?: string;
   /** The form's type and session where the address names none. */
   defaults?: { type?: string; session?: string };
+  /** A session page's Google Calendar booking schedule (`lib/booking.ts`):
+      the calendar takes the form's place, and the form stays one link away
+      on the homepage for anyone who would rather ask first. */
+  calendar?: string;
   /** A wall of photographs behind the screen (the homepage's). */
   backdrop?: React.ReactNode;
 } = {}) {
@@ -134,7 +139,14 @@ export function ContactScreen({
           {/* Self-serve booking, once the calendar exists. Beside the form
               rather than instead of it — a session client wants a slot, a
               commissioning client wants a conversation. */}
-          {BOOKING_URL ? (
+          {calendar ? (
+            <a
+              href={`/?type=${defaults?.type ?? "session"}${defaults?.session ? `&session=${encodeURIComponent(defaults.session)}` : ""}#contact`}
+              className="label flex gap-2.5 self-start py-2"
+            >
+              Rather ask first? Send a question <span aria-hidden>&rarr;</span>
+            </a>
+          ) : BOOKING_URL ? (
             <a
               href={BOOKING_URL}
               target="_blank"
@@ -221,15 +233,27 @@ export function ContactScreen({
 
           Julian: the form as a card with a beam running round its
           edge (`contact-beam.tsx`), on the header's glass. */}
-      <ContactBeam className="contact-card flex min-h-0 w-full max-w-[40rem] justify-self-center sm:max-h-full">
+      <ContactBeam className={`contact-card flex min-h-0 w-full justify-self-center sm:max-h-full ${calendar ? "max-w-[60rem] sm:h-full" : "max-w-[40rem]"}`}>
         <div
           data-scroll
           data-dial="form"
           className="glass-surface min-h-0 flex-1 rounded-[16px] border border-border p-5 sm:max-h-full sm:p-6 sm:overflow-y-auto sm:overscroll-contain sm:px-8 sm:py-[clamp(1rem,3vh,1.5rem)]"
         >
-          <Suspense fallback={null}>
-            <ContactForm defaults={defaults} sessions={SESSION_TYPES.map((s) => s.name)} />
-          </Suspense>
+          {calendar ? (
+            /* Google's own page, so its colours are Google's: the frame
+               is the site's card, and on the dark theme the page is
+               inverted to sit on it (`.booking-embed`, globals.css). */
+            <iframe
+              src={`https://calendar.google.com/calendar/appointments/schedules/${calendar}?gv=true`}
+              title="Pick a time"
+              loading="lazy"
+              className="booking-embed block h-[75svh] w-full rounded-[8px] border-0 sm:h-full"
+            />
+          ) : (
+            <Suspense fallback={null}>
+              <ContactForm defaults={defaults} sessions={SESSION_TYPES.map((s) => s.name)} />
+            </Suspense>
+          )}
         </div>
       </ContactBeam>
     </section>
