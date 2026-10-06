@@ -7,6 +7,7 @@ import { cn, STRIP_SECTION } from "@/lib/utils";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { WarpTuner } from "@/components/warp-tuner";
 import { NAME_WARP } from "@/lib/name-warp";
+import { installNavFly } from "@/components/nav-fly";
 
 /* The address's hash, kept current: the strip writes the homepage's
    section into it as it glides (`STRIP_SECTION`), a link or the back button
@@ -48,15 +49,19 @@ const useHash = () =>
  * ─────────────────────────────────────────────────────────────── */
 
 export const LINKS = [
-  // Julian's order (2026-10-01: Portfolio last). About and Contact are
-  // homepage screens.
+  // Julian's order (2026-10-01: Portfolio last; 2026-10-03: Commissions
+  // first, the two audiences side by side). All but Portfolio are
+  // homepage screens. Names in one register, plural nouns like
+  // Commissions (2026-10-04): Biography, Inquiries.
+  { href: "/#work", label: "Commissions" },
+  { href: "/#about", label: "Biography" },
   { href: "/#sessions", label: "Sessions" },
-  { href: "/#about", label: "About" },
-  { href: "/#contact", label: "Contact" },
+  { href: "/#contact", label: "Inquiries" },
   { href: "/portfolio", label: "Portfolio" },
 ] as const;
 
 export function SiteHeader() {
+  React.useEffect(installNavFly, []);
   const pathname = usePathname();
   const [open, setOpen] = React.useState(false);
   const burger = React.useRef<HTMLButtonElement>(null);
@@ -97,9 +102,14 @@ export function SiteHeader() {
       const put = (k: string, v: string) => {
         if (root.style.getPropertyValue(k) !== v) root.style.setProperty(k, v);
       };
+      /* Both read before either is written: a write to the root's style
+         and then a read restyled the whole page a second time, 140ms on a
+         throttled phone (optimize pass, 2026-10-05). */
       const measure = () => {
-        put("--foot", `${foot.offsetHeight}px`);
-        put("--under", `${foot.offsetHeight + rail.offsetHeight}px`);
+        const f = foot.offsetHeight;
+        const r = rail.offsetHeight;
+        put("--foot", `${f}px`);
+        put("--under", `${f + r}px`);
       };
       sizes = new ResizeObserver(measure);
       sizes.observe(foot);
@@ -142,6 +152,10 @@ export function SiteHeader() {
   React.useEffect(() => {
     if (!open) return;
     const root = document.documentElement;
+    /* The 3D preview (`?menu3d=1`): each thing the drawer pushes aside
+       turns about the middle of the window, wherever its own box is. */
+    for (const el of document.querySelectorAll<HTMLElement>(".site-bar, body > main, body > footer"))
+      el.style.setProperty("--oy", `${Math.round(innerHeight / 2 - el.getBoundingClientRect().top)}px`);
     root.dataset.drawer = "menu";
     window.dispatchEvent(new Event("jg:filter-close"));
     const { overflow } = document.body.style;
@@ -296,8 +310,9 @@ export function SiteHeader() {
        * bar travels with the page, over the same photograph it was over
        * before, so being open says nothing about what is underneath. */
       data-plain={scrolled ? "true" : "false"}
-      // Glass over the homepage's photographs (`.site-bar[data-home]`).
-      data-home={pathname === "/" ? "" : undefined}
+      // Glass over the homepage's photographs (`.site-bar[data-home]`), and
+      // the same depth on the portfolio (Julian, 2026-10-05: match it).
+      data-home={pathname === "/" || pathname.startsWith("/portfolio") ? "" : undefined}
       className={cn(
         // `site-bar` is what `globals.css` slides sideways. The whole bar
         // goes, not its contents: full width and pushed by the drawer's
@@ -366,6 +381,8 @@ export function SiteHeader() {
             // Julian: a very slight fade on hover. It was to 70%, which
             // greyed the colour split of the warp under the pointer.
             "transition-opacity duration-300 ease-[var(--ease-out-strong)] hoverable:hover:opacity-90",
+            // Julian (2026-10-04): it grows under the pointer (`.logo-grow`).
+            "logo-grow",
             "focus-visible:opacity-100",
             // Deferring only makes sense where the masthead is actually
             // beside it. Below `lg` the cover stacks, so the masthead sits
@@ -410,15 +427,7 @@ export function SiteHeader() {
             item joins it. */}
         <div className="flex items-center gap-1 lg:gap-8">
           <nav aria-label="Main" className="hidden lg:block">
-            <ul className="flex items-center gap-9">
-              {LINKS.map((link) => (
-                <li key={link.href}>
-                  <NavLink href={link.href} current={isCurrent(link.href)}>
-                    {link.label}
-                  </NavLink>
-                </li>
-              ))}
-            </ul>
+            <NavLinks links={LINKS} isCurrent={isCurrent} />
           </nav>
 
           {/* Outside the nav: it is not a destination, it changes how the
@@ -487,6 +496,43 @@ export function SiteHeader() {
   );
 }
 
+/* The select and the hover: the name lit is a touch larger
+   (Julian, 2026-10-05). The ink line that ran under it, between the names
+   and once out to the wordmark (2026-10-03 to 10-05), is gone: the type
+   alone says where you are. With no page lit (the legal page) only the
+   name under the pointer lights. */
+function NavLinks({
+  links,
+  isCurrent,
+}: {
+  links: readonly { href: string; label: string }[];
+  isCurrent: (href: string) => boolean;
+}) {
+  const [over, setOver] = React.useState<number | null>(null);
+  const lit = links.findIndex((l) => isCurrent(l.href));
+  const at = over ?? (lit >= 0 ? lit : null);
+  return (
+    <ul
+      /* Julian (2026-10-04): every slot the same length, the longest
+         name's and a margin. */
+      className="relative grid auto-cols-fr grid-flow-col items-center"
+      onPointerLeave={() => setOver(null)}
+    >
+      {links.map((link, i) => (
+        <li
+          key={link.href}
+          className="relative px-2 text-center xl:px-4"
+          onPointerEnter={(e) => e.pointerType === "mouse" && setOver(i)}
+        >
+          <NavLink href={link.href} current={isCurrent(link.href)} lit={at === i}>
+            {link.label}
+          </NavLink>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
 /**
  * Where you are is the one at full strength and the other three stand back.
  * No mark under it: Julian picked ink alone out of eight, and it is what the
@@ -502,10 +548,13 @@ export function SiteHeader() {
 function NavLink({
   href,
   current,
+  lit = current,
   children,
 }: {
   href: string;
   current: boolean;
+  /** Lit: the page, or the name under the pointer. */
+  lit?: boolean;
   children: React.ReactNode;
 }) {
   return (
@@ -513,12 +562,16 @@ function NavLink({
       href={href}
       aria-current={current ? "page" : undefined}
       className={cn(
-        "block py-3 text-[0.9375rem] uppercase leading-none tracking-[0.08em] transition-colors duration-200",
-        current
-          ? "text-foreground"
-          // `hoverable:`, not a bare `hover:`: a touch device fires hover on
-          // tap and would leave a name lit that is not the page you are on.
-          : "text-muted-foreground hoverable:hover:text-foreground",
+        "block py-3 text-[0.9375rem] uppercase leading-none tracking-[0.08em] transition-[color,scale] duration-300 ease-[var(--ease-out-strong)]",
+        // The page you are on stands back while the pointer lights another
+        // name, and comes up again when it leaves.
+        // Lit, the name is a touch larger (Julian, 2026-10-05).
+        // Bold costs no width in a mono face, so nothing beside it moves.
+        lit
+          ? "text-foreground scale-[1.06]"
+          : current
+            ? "text-foreground/70"
+            : "text-muted-foreground",
       )}
     >
       {children}

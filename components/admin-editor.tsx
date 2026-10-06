@@ -16,6 +16,7 @@ import { AdminPage } from "@/components/admin-page";
 import { AdminPicker, type PickerItem } from "@/components/admin-picker";
 import { AdminTrash } from "@/components/admin-trash";
 import { AdminInbox, unreadCount } from "@/components/admin-inbox";
+import { AdminTraffic } from "@/components/admin-traffic";
 import { AdminVideos } from "@/components/admin-videos";
 import { isTextRef, type FrameRef, type TrashedProject } from "@/lib/added";
 import { ADDED_PATH } from "@/lib/added";
@@ -122,7 +123,11 @@ const TABS = [
    * them things you go in to change. This one is post: you go in to read it,
    * and what you do afterwards happens in your mail. It also has nothing to
    * publish, which is the one thing every other tab has in common. */
-  [{ id: "inbox", label: "Inbox" }],
+  [
+    { id: "inbox", label: "Inbox" },
+    // Read-only too: who came to the site and from where.
+    { id: "traffic", label: "Traffic" },
+  ],
 ] as const;
 
 type View = (typeof TABS)[number][number]["id"];
@@ -1495,6 +1500,7 @@ export function AdminEditor({
               })()
             : null}
           {!page && view === "inbox" ? <AdminInbox onUnread={setUnread} /> : null}
+          {!page && view === "traffic" ? <AdminTraffic /> : null}
 
           {!page && view === "coverart" ? CoverArtFields() : null}
 

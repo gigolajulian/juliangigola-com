@@ -11,7 +11,7 @@ import { StripPage, StripHead } from "@/components/strip-page";
 import { ScopePanel, type ScopeRow } from "@/components/vectorscope";
 import { markFilter, StripView, type StripViewMode } from "@/components/strip";
 import { animate } from "motion";
-import { Liquid } from "@/components/liquid";
+import { Liquid, useQuiet } from "@/components/liquid";
 import {
   chooseView,
   morphView,
@@ -186,6 +186,7 @@ export function WorkShell({
   const [filtering, setFiltering] = React.useState(false);
   /** Whether the colour panel is out. */
   const [scoping, setScoping] = React.useState(false);
+  const quiet = useQuiet();
   /* Julian: colour opens on All, so the photographs show across the
      disciplines at once; the panel then puts the work in its colour where
      the rack was (`vectorscope.tsx`). */
@@ -205,6 +206,12 @@ export function WorkShell({
   React.useEffect(() => {
     if (!filtering) return;
     const root = document.documentElement;
+    /* On a phone it drops from under the head (`.work-filter`, globals.css):
+       where the head ends, so the title stays to press again. */
+    const foot = document
+      .querySelector(".head-glass")
+      ?.getBoundingClientRect().bottom;
+    if (foot) root.style.setProperty("--drop-top", `${Math.round(foot)}px`);
     root.dataset.drawer = "filter";
     window.dispatchEvent(new Event("jg:menu-close"));
     const { overflow } = document.body.style;
@@ -589,12 +596,18 @@ export function WorkShell({
     const measure = () => {
       const c = lit.current;
       if (!c) return setMark(null);
-      const grow = JELLY.swell / 2;
+      /* A line under the lit chip's words, as the navbar has under its
+         page (Julian, 2026-10-05, once the chips joined the bar's pane):
+         the words' width less the chip's padding, grown with the chip's
+         swell, at the foot of the chip as it is drawn. */
+      const s = 1 + JELLY.swell;
+      const pad = parseFloat(getComputedStyle(c).paddingLeft) || 0;
+      const w = (c.offsetWidth - 2 * pad) * s;
       setMark({
-        x: c.offsetLeft - c.offsetWidth * grow,
-        y: c.offsetTop - c.offsetHeight * grow,
-        w: c.offsetWidth * (1 + JELLY.swell),
-        h: c.offsetHeight * (1 + JELLY.swell),
+        x: c.offsetLeft + c.offsetWidth / 2 - w / 2,
+        y: c.offsetTop + c.offsetHeight / 2 + (c.offsetHeight * s) / 2 - 4,
+        w,
+        h: 1,
         rw: r.scrollWidth,
       });
     };
@@ -648,79 +661,79 @@ export function WorkShell({
       <Liquid.Item effect="move">
         <span aria-hidden className="absolute inset-0 rounded-full" />
       </Liquid.Item>
-    <span
-      className={cn(
-        "relative flex h-[1.625rem] shrink-0 items-center overflow-hidden border transition-[width,border-radius,border-color,opacity] duration-[260ms] ease-[var(--ease-out-strong)] motion-reduce:transition-none",
-        finding
-          ? /* Focus shows as the pill's own edge coming up, not a ring
+      <span
+        className={cn(
+          "relative flex h-[1.625rem] shrink-0 items-center overflow-hidden border transition-[width,border-radius,border-color,opacity] duration-[260ms] ease-[var(--ease-out-strong)] motion-reduce:transition-none",
+          finding
+            ? /* Focus shows as the pill's own edge coming up, not a ring
                drawn inside it: the ring was clipped by the pill into two
                accent lines, and Julian did not want it. */
-            "w-48 rounded-full border-foreground/15 opacity-50 has-[:focus]:border-foreground/50"
-          : "w-[1.625rem] rounded-none border-transparent opacity-100",
-      )}
-    >
-      <button
-        type="button"
-        aria-expanded={finding}
-        aria-controls="work-search"
-        aria-label="Search the work"
-        data-ring="Search"
-        data-stick=""
-        onClick={() => {
-          if (finding) {
-            search("");
-            setFinding(false);
-            field.current?.blur();
-            return;
-          }
-          setFinding(true);
-          /* Now, not a frame later: the field is always mounted, and a
-             frame of waiting is two characters lost by anybody who
-             presses and types in one motion. */
-          field.current?.focus();
-        }}
-        className={cn(
-          "absolute left-0 top-0 grid h-full w-[1.625rem] place-items-center transition-opacity duration-200",
-          finding
-            ? "text-foreground opacity-100"
-            : "text-foreground opacity-35 hoverable:hover:opacity-70",
+              "w-48 rounded-full border-foreground/15 opacity-50 has-[:focus]:border-foreground/50"
+            : "w-[1.625rem] rounded-none border-transparent opacity-100",
         )}
       >
-        <svg
-          aria-hidden
-          viewBox="0 0 16 16"
-          className="h-3.5 w-3.5"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="1.5"
+        <button
+          type="button"
+          aria-expanded={finding}
+          aria-controls="work-search"
+          aria-label="Search the work"
+          data-ring="Search"
+          data-stick=""
+          onClick={() => {
+            if (finding) {
+              search("");
+              setFinding(false);
+              field.current?.blur();
+              return;
+            }
+            setFinding(true);
+            /* Now, not a frame later: the field is always mounted, and a
+             frame of waiting is two characters lost by anybody who
+             presses and types in one motion. */
+            field.current?.focus();
+          }}
+          className={cn(
+            "absolute left-0 top-0 grid h-full w-[1.625rem] place-items-center transition-opacity duration-200",
+            finding
+              ? "text-foreground opacity-100"
+              : "text-foreground opacity-35 hoverable:hover:opacity-70",
+          )}
         >
-          <circle cx="6.8" cy="6.8" r="4.6" />
-          <path d="M10.3 10.3L15 15" />
-        </svg>
-      </button>
-      <input
-        id="work-search"
-        ref={field}
-        type="search"
-        value={query}
-        tabIndex={finding ? undefined : -1}
-        aria-hidden={!finding}
-        onChange={(e) => search(e.target.value)}
-        onBlur={() => {
-          if (!query.trim()) setFinding(false);
-        }}
-        onKeyDown={(e) => {
-          if (e.key !== "Escape") return;
-          search("");
-          setFinding(false);
-          // A field that is about to be hidden must not keep the cursor.
-          e.currentTarget.blur();
-        }}
-        placeholder="Search"
-        aria-label="Search the work by name, discipline or credit"
-        className="label w-full bg-transparent pl-[1.625rem] pr-[1.5rem] text-left text-foreground outline-none focus-visible:outline-none placeholder:text-muted-foreground [&::-webkit-search-cancel-button]:hidden"
-      />
-      {/* The cross empties the box and leaves it open, which is the
+          <svg
+            aria-hidden
+            viewBox="0 0 16 16"
+            className="h-3.5 w-3.5"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.5"
+          >
+            <circle cx="6.8" cy="6.8" r="4.6" />
+            <path d="M10.3 10.3L15 15" />
+          </svg>
+        </button>
+        <input
+          id="work-search"
+          ref={field}
+          type="search"
+          value={query}
+          tabIndex={finding ? undefined : -1}
+          aria-hidden={!finding}
+          onChange={(e) => search(e.target.value)}
+          onBlur={() => {
+            if (!query.trim()) setFinding(false);
+          }}
+          onKeyDown={(e) => {
+            if (e.key !== "Escape") return;
+            search("");
+            setFinding(false);
+            // A field that is about to be hidden must not keep the cursor.
+            e.currentTarget.blur();
+          }}
+          placeholder="Search"
+          aria-label="Search the work by name, discipline or credit"
+          className="label w-full bg-transparent pl-[1.625rem] pr-[1.5rem] text-left text-foreground outline-none focus-visible:outline-none placeholder:text-muted-foreground [&::-webkit-search-cancel-button]:hidden"
+        />
+        {/* The cross empties the box and leaves it open, which is the
           difference between it and the glass: one is "that was not what I
           meant", the other is "I am done looking". Only with something in
           the box — a cross beside an empty field is a control that does
@@ -729,31 +742,31 @@ export function WorkShell({
           `onMouseDown` swallowed, or the field blurs before the click
           lands, the box closes on an empty query and the press arrives at
           an element that has gone. */}
-      {finding && query ? (
-        <button
-          type="button"
-          aria-label="Clear the search"
-          data-ring="Clear"
-          onMouseDown={(e) => e.preventDefault()}
-          onClick={() => {
-            search("");
-            field.current?.focus();
-          }}
-          className="absolute right-0 top-0 grid h-full w-[1.5rem] place-items-center text-foreground opacity-60 transition-opacity duration-200 hoverable:hover:opacity-100"
-        >
-          <svg
-            aria-hidden
-            viewBox="0 0 16 16"
-            className="h-2.5 w-2.5"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.6"
+        {finding && query ? (
+          <button
+            type="button"
+            aria-label="Clear the search"
+            data-ring="Clear"
+            onMouseDown={(e) => e.preventDefault()}
+            onClick={() => {
+              search("");
+              field.current?.focus();
+            }}
+            className="absolute right-0 top-0 grid h-full w-[1.5rem] place-items-center text-foreground opacity-60 transition-opacity duration-200 hoverable:hover:opacity-100"
           >
-            <path d="M2 2L14 14M14 2L2 14" />
-          </svg>
-        </button>
-      ) : null}
-    </span>
+            <svg
+              aria-hidden
+              viewBox="0 0 16 16"
+              className="h-2.5 w-2.5"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.6"
+            >
+              <path d="M2 2L14 14M14 2L2 14" />
+            </svg>
+          </button>
+        ) : null}
+      </span>
     </Liquid>
   );
 
@@ -776,8 +789,12 @@ export function WorkShell({
   /* A phone's two ways of looking: one project to the width of the screen,
      or two to a row. The list and the strip both stack one up there, so
      they are one choice here, and it is lit for either. */
+  /* On a phone the two views side by side under the burger, small, grid
+     on the right (Julian, 2026-10-04): the one you are in bright, the other
+     back. */
   const phoneToggle = (
-    <span className="flex items-center justify-end">
+    // On the title's line: 32px targets held to its 20px height.
+    <span className="-mr-1.5 -my-1.5 flex items-center">
       {(["strip", "grid"] as const).map((mode) => {
         const on = !scoping && (mode === "grid") === (view === "grid");
         return (
@@ -794,15 +811,15 @@ export function WorkShell({
               })
             }
             className={cn(
-              // 44px to a thumb, standing no taller in the row.
-              "-my-2.5 p-3.5 transition-opacity duration-200",
+              // 24 by 32: small to the eye, enough to a thumb.
+              "flex h-8 w-6 items-center justify-center text-foreground transition-opacity duration-200",
               on ? "opacity-100" : "opacity-35",
             )}
           >
             <svg
               aria-hidden
               viewBox="0 0 16 16"
-              className="h-4 w-4"
+              className="h-3 w-3"
               fill="currentColor"
             >
               {mode === "grid" ? (
@@ -824,7 +841,7 @@ export function WorkShell({
 
   const toggle = (
     <span className="relative block h-[1.625rem] max-sm:hidden">
-      <span className="absolute right-0 top-0 flex w-max items-center gap-1 whitespace-nowrap">
+      <span className="absolute right-0 top-3 flex w-max items-center gap-1 whitespace-nowrap">
         {modes.map((mode) => (
           <button
             key={mode}
@@ -887,42 +904,55 @@ export function WorkShell({
             </svg>
           </button>
         ))}
-        <span aria-hidden className="mx-1 h-3 w-px bg-foreground/15" />
         {/* Julian: not a view, a button beside the search that brings the
-            scope in over the page (`vectorscope.tsx`). */}
-        <button
-          type="button"
-          aria-expanded={scoping}
-          aria-controls="work-scope"
-          aria-label="Color"
-          data-ring="Color"
-          data-stick=""
-          onClick={() => (scoping ? closeScope() : openScope())}
-          className={cn(
-            "-my-1 p-1.5 transition-opacity duration-200",
-            scoping
-              ? "text-foreground opacity-100"
-              : "text-foreground opacity-35 hoverable:hover:opacity-70",
-          )}
-        >
-          {/* A scope: the ring and a trace across it. */}
-          <svg
-            aria-hidden
-            viewBox="0 0 16 16"
-            className="h-3.5 w-3.5"
-            fill="currentColor"
-          >
-            <path
-              d="M8 1.25a6.75 6.75 0 1 1 0 13.5a6.75 6.75 0 1 1 0-13.5Z"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.5"
-            />
-            <circle cx="5.5" cy="5.5" r="1.25" />
-            <circle cx="8" cy="8" r="1.25" />
-            <circle cx="10.5" cy="10.5" r="1.25" />
-          </svg>
-        </button>
+            scope in over the page (`vectorscope.tsx`). In both views;
+            from strip view it turns the page to grid first (Julian,
+            2026-10-05, which undid grid-only from 10-04). */}
+          <>
+            <span aria-hidden className="mx-1 h-3 w-px bg-foreground/15" />
+            <button
+              type="button"
+              aria-expanded={scoping}
+              aria-controls="work-scope"
+              aria-label="Color"
+              data-ring="Color"
+              data-stick=""
+              onClick={() =>
+                scoping
+                  ? closeScope()
+                  : view === "grid"
+                    ? openScope()
+                    : morphView(() => {
+                        chooseView("grid");
+                        openScope();
+                      })
+              }
+              className={cn(
+                "-my-1 p-1.5 transition-opacity duration-200",
+                scoping
+                  ? "text-foreground opacity-100"
+                  : "text-foreground opacity-35 hoverable:hover:opacity-70",
+              )}
+            >
+              {/* A scope: the ring and a trace across it. */}
+              <svg
+                aria-hidden
+                viewBox="0 0 16 16"
+                className="h-3.5 w-3.5"
+                fill="currentColor"
+              >
+                <path
+                  d="M8 1.25a6.75 6.75 0 1 1 0 13.5a6.75 6.75 0 1 1 0-13.5Z"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                />
+                <circle cx="5.5" cy="5.5" r="1.25" />
+                <circle cx="8" cy="8" r="1.25" />
+                <circle cx="10.5" cy="10.5" r="1.25" />
+              </svg>
+            </button>
+          </>
         <ScopePanel open={scoping} onClose={closeScope} rows={scope} />
         {finder}
       </span>
@@ -935,9 +965,9 @@ export function WorkShell({
         /* Julian: keep the head pinned on a phone. The page scrolls there,
            and with the head gone the only way to the other disciplines or
            the other view was all the way back up. It stops under the bar,
-           61px on a phone (measured), on the ground colour so the work
-           passes under it rather than through it. */
-        <div className="shrink-0 max-sm:sticky max-sm:top-[61px] max-sm:z-20 max-sm:bg-background max-sm:pb-3">
+           61px on a phone (measured). The bar's glass, not the ground
+           (Julian, 2026-10-04), so the work passes under it frosted. */
+        <div className="head-glass shrink-0 max-sm:sticky max-sm:top-[61px] max-sm:z-20 max-sm:pb-3">
           <StripHead
             /* Julian: no "Portfolio" on All work, where it only named the
                page it is on. A filter keeps the way back. */
@@ -969,6 +999,12 @@ export function WorkShell({
                to go; Julian: always show it, and let it swap from one
                discipline to the next. */
             open
+            pick={{
+              // No count beside the title (Julian, 2026-10-04).
+              expanded: filtering,
+              controls: "work-filter",
+              onPick: () => setFiltering((v) => !v),
+            }}
           />
 
           {/* The old site's three dropdowns become one row that can be
@@ -993,7 +1029,7 @@ export function WorkShell({
                   on the list rather than on the bar, so with the list gone
                   the capsule sat flush against the window at 0 while every
                   other line on the page started at 24 or 40. */
-              className="filter-trigger glass-surface press relative z-10 ml-6 inline-flex pointer-coarse:before:absolute pointer-coarse:before:inset-x-0 pointer-coarse:before:-inset-y-2 pointer-coarse:before:content-[''] items-center gap-2 border border-foreground/20 py-2 pl-3.5 pr-3 label active:scale-[0.97] sm:ml-10 lg:hidden"
+              className="filter-trigger glass-surface press relative z-10 ml-6 inline-flex max-sm:hidden pointer-coarse:before:absolute pointer-coarse:before:inset-x-0 pointer-coarse:before:-inset-y-2 pointer-coarse:before:content-[''] items-center gap-2 border border-foreground/20 py-2 pl-3.5 pr-3 label active:scale-[0.97] sm:ml-10 lg:hidden"
             >
               <span className="text-foreground">
                 {all ? "Portfolio" : head.title}
@@ -1080,11 +1116,12 @@ export function WorkShell({
                   className="pointer-events-none absolute left-0 top-0 h-full"
                   style={{ width: mark?.rw }}
                 >
-                  {mark ? (
+                  {mark && quiet ? (
                     <Liquid
-                      blur={5}
-                      contrast={18}
-                      fill="color-mix(in oklab, var(--foreground) 12%, var(--background))"
+                      /* The navbar's goo, so a 1px line survives it. */
+                      blur={0.6}
+                      contrast={10}
+                      fill="var(--foreground)"
                       className="h-full w-full"
                     >
                       {/* Julian: less bounce. Wobble is the overshoot on
@@ -1096,6 +1133,8 @@ export function WorkShell({
                             width: mark.w,
                             height: mark.h,
                             transform: `translate(${mark.x}px, ${mark.y}px)`,
+                            // `liquid-gooey` reads the corner off this box.
+                            borderRadius: mark.h / 2,
                           }}
                         />
                       </Liquid.Item>
@@ -1150,10 +1189,11 @@ function Chip({
        mis-tap is a filter nobody asked for; the desktop keeps the line
        thin, because the pointer is exact and the band is height the
        photographs would rather have. */
-    "label block whitespace-nowrap px-3 py-1.5 max-sm:py-3",
+    "label block whitespace-nowrap rounded-full px-3 py-1.5 max-sm:py-3",
     "transition-[color,background-color,scale] duration-200 ease-[var(--ease-out-strong)]",
     // A chip lifts a touch under the pointer and gives under the press.
     "hoverable:hover:scale-[1.05] active:scale-[0.96] motion-reduce:hover:scale-100",
+    // Full ink over its line (the pill it was knocked out of is gone).
     active
       ? "font-bold text-foreground"
       : "text-muted-foreground hoverable:hover:text-foreground focus-visible:bg-foreground/[0.07] focus-visible:text-foreground",
@@ -1209,8 +1249,10 @@ function Chip({
                chosen chip was a filled plate and the count sat on ink; the
                fill went and the count went with it — near-black at 60% on
                a near-black page. Julian: keep the count after the filter
-               is selected. Half strength so the name still leads. */
-            active ? "text-foreground/50" : "text-muted-foreground/60",
+               is selected. Half strength so the name still leads. The
+               plate is back (2026-10-04, now in full ink), so it is
+               knocked out of it again. */
+            active ? "text-foreground/60" : "text-muted-foreground/60",
           )}
         >
           {count}

@@ -50,7 +50,7 @@ export function SiteMenu() {
       className="drawer site-menu fixed inset-0 z-[31] lg:hidden"
     >
       <div className="site-menu-panel drawer-panel relative ml-auto flex h-full w-[var(--menu-w)] flex-col justify-center border-l border-border pl-6 pr-7 sm:pl-10 sm:pr-10">
-        <nav aria-label="Menu">
+        <nav aria-label="Menu" className="@container">
           <ul className="flex flex-col items-end gap-1 text-right">
             {LINKS.map((link, i) => (
               <li
@@ -75,10 +75,12 @@ export function SiteMenu() {
                   onClick={() => window.dispatchEvent(new Event("jg:menu-close"))}
                   aria-current={isCurrent(link.href) ? "page" : undefined}
                   className={cn(
-                    // Sized to the drawer rather than to the window: the
-                    // longest of the four has to sit on one line inside it.
-                    "font-display block py-2 uppercase leading-[0.95] tracking-[0]",
-                    "text-[clamp(2.75rem,12vw,3.5rem)]",
+                    // Sized to the drawer, not the window: the longest name,
+                    // "Commissions" at 6.8em, fills at most 97% of its width.
+                    // It was 12vw of the window and ran out past the drawer's
+                    // edge on every phone and iPad (Julian, 2026-10-04).
+                    "font-display block whitespace-nowrap py-2 uppercase leading-[0.95] tracking-[0]",
+                    "text-[min(3.5rem,14.2cqi)]",
                     // Where you are is the one at full strength and the rest
                     // stand back, at Julian's ask. It was an accent bar in the
                     // margin beside the current page; the ink says the same
@@ -102,14 +104,14 @@ export function SiteMenu() {
           </ul>
         </nav>
         {/* The theme, out of the bar on a phone and an iPad and in here
-            (Julian, 2026-10-01): at the foot, on the names' right edge, the
-            last to arrive. `-mr-2` gives the 44px target's padding back so
-            the mark, not the hit area, sits on the margin. */}
+            (Julian, 2026-10-01): at the foot, the last to arrive; on the left
+            margin since 2026-10-04 (Julian). `-ml-2` gives the 44px target's
+            padding back so the mark, not the hit area, sits on the margin. */}
         <div
           style={{ "--reveal-delay": `${LINKS.length * 60}ms` } as React.CSSProperties}
-          className="site-menu-item drawer-item absolute bottom-[calc(1.5rem+env(safe-area-inset-bottom,0px))] right-7 sm:right-10"
+          className="site-menu-item drawer-item absolute bottom-[calc(1.5rem+env(safe-area-inset-bottom,0px))] left-6 sm:left-10"
         >
-          <ThemeToggle className="-mr-2" />
+          <ThemeToggle className="-ml-2" />
         </div>
       </div>
     </div>

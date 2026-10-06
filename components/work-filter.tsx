@@ -25,6 +25,9 @@ import type { Head } from "@/lib/work-heads";
  * with its links in the page.
  * ─────────────────────────────────────────────────────────────── */
 
+/** The address is read on render; nothing to subscribe to. */
+const noChange = () => () => {};
+
 export function WorkFilter({
   categories,
   heads,
@@ -39,8 +42,12 @@ export function WorkFilter({
      the server's attributes through that mismatch. So no row is current
      until mounted, then the address bar decides (the drawer is shut by
      then, nobody sees it). */
-  const [here, setHere] = React.useState<string | null>(null);
-  React.useEffect(() => setHere(window.location.pathname), [pathname]);
+  const here = React.useSyncExternalStore(
+    noChange,
+    // Read again on every render, and a new `pathname` is one.
+    () => window.location.pathname,
+    () => null,
+  );
 
   // Every page in the site mounts the root layout, and eleven of them have
   // nothing to filter. The work index, its disciplines and the video page
@@ -69,7 +76,7 @@ export function WorkFilter({
     >
       <div className="work-filter-panel drawer-panel flex h-full w-[var(--filter-w)] flex-col justify-center border-r border-border pl-6 pr-5">
         <nav aria-label="Disciplines">
-          <ul className="flex flex-col">
+          <ul className="flex flex-col max-sm:grid max-sm:grid-cols-2 max-sm:gap-x-5">
             {rows.map((row, i) => {
               const head = heads[row.slug];
               const here = isCurrent(row.href);
@@ -82,7 +89,7 @@ export function WorkFilter({
                   style={
                     { "--reveal-delay": `${i * 30}ms` } as React.CSSProperties
                   }
-                  className="work-filter-item drawer-item"
+                  className="work-filter-item drawer-item max-sm:[container-type:inline-size]"
                 >
                   <Link
                     href={row.href}
@@ -97,18 +104,27 @@ export function WorkFilter({
                     onClick={() => window.dispatchEvent(new Event("jg:filter-close"))}
                     aria-current={here ? "page" : undefined}
                     className={cn(
-                      "flex items-baseline justify-between gap-4 py-1.5 [@media(pointer:coarse)]:py-3",
+                      "flex items-baseline justify-between gap-4 py-1.5 [@media(pointer:coarse)]:py-3 max-sm:gap-2 max-sm:[@media(pointer:coarse)]:py-2.5",
                       "transition-opacity duration-200 ease-[var(--ease-out-strong)]",
-                      here ? "opacity-100" : "opacity-45 hoverable:hover:opacity-70",
+                      // 70, not 45: on the glass the faded names fell under 4.5:1
+                      // (audit, 2026-10-05), the site menu's level in the light.
+                      here ? "opacity-100" : "opacity-70 hoverable:hover:opacity-85",
                     )}
                   >
-                    <span className="font-display uppercase leading-[0.95] tracking-[0] text-[clamp(1.375rem,4.5vw,1.75rem)]">
+                    {/* Two to a row on a phone, set to the column so the
+                        longest, Brand Campaigns, fits whole: one size for
+                        all of them, 17px at most (Julian, 2026-10-05). */}
+                    <span className="font-display uppercase leading-[0.95] tracking-[0] text-[clamp(1.375rem,4.5vw,1.75rem)] max-sm:min-w-0 max-sm:truncate max-sm:text-[min(1.0625rem,calc((100cqi-1.6rem)*0.108))]">
                       {row.name}
                     </span>
                     {/* The count in the ink of the name beside it, not in
                         the muted grey: over a dark frame the grey was the
-                        one thing on the panel that did not survive. */}
-                    <span className="label shrink-0 tabular-nums opacity-60">
+                        one thing on the panel that did not survive. At the
+                        name's own strength: faded again under a faded name
+                        it fell to 2.7:1 (audit, 2026-10-05). */}
+                    {/* Quieter by size, not by fading: smaller and set
+                        to the cap height of the name (Julian, 2026-10-05). */}
+                    <span className="label shrink-0 tabular-nums max-sm:self-start max-sm:text-[0.625rem]">
                       {head?.count}
                     </span>
                   </Link>

@@ -20,4 +20,23 @@ interface CloudflareEnv {
    * `localStorage` beside the GitHub token, and sent as `x-inbox-key`.
    */
   INBOX_KEY?: string;
+
+  /**
+   * Reads the site's own Cloudflare analytics for /admin's Traffic tab
+   * (`app/api/traffic/route.ts`). A Cloudflare API token with Account
+   * Analytics Read and Zone Analytics Read, nothing else. Set with:
+   *
+   *   wrangler secret put CF_ANALYTICS_TOKEN
+   */
+  CF_ANALYTICS_TOKEN?: string;
+
+  /**
+   * Google Search Console, read-only, for the same tab: JSON
+   * `{client_id, client_secret, refresh_token}` for hello@. Made and set by
+   * `node scripts/gsc-auth.mjs <client.json>`.
+   */
+  GSC_OAUTH?: string;
+
+  /** Bing Webmaster Tools API key (Settings > API access), for the same tab. */
+  BING_API_KEY?: string;
 }

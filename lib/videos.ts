@@ -68,11 +68,9 @@ export const REEL = {
   /* The title without the year in it, because the year is its own field now
      and printing 2023 twice on one line is how a caption looks careless. */
   title: "Director's Reel",
-  /* Vimeo's stills are behind its API, so the URL is written down the way
-     /admin writes it down for every other Vimeo film: looked up once, from
-     vimeo.com/api/oembed.json, at 1280x720. */
-  poster:
-    "https://i.vimeocdn.com/video/1770237389-9fb949e4fc9ee6c2136b9caf48c7c7de06dd3aac39042d4b6b642f4d12dac397-d_1280x720",
+  /* Julian's pick (2026-10-03): the opening aerial over the interchange,
+     a 1920 still from his own export of the reel, kept with the app. */
+  poster: "/films/directors-reel.jpg",
 };
 
 export const SECTIONS: { id: VideoSection; name: string }[] = [
@@ -234,3 +232,8 @@ export const inSection = (videos: Video[], section: VideoSection): Video[] =>
 /** How many films the motion page shows: the sections plus the reel. Every
     count on the site reads this, so adding a reel or a section is one edit. */
 export const filmCount = (videos: readonly unknown[]): number => videos.length + 1;
+
+/** The client as a credit, unless the title already names them ("Pear VC
+    Campaign" under "Pear VC" said it twice; Julian, 2026-10-04). */
+export const creditOf = (v: Pick<Video, "title" | "client">) =>
+  v.client && !v.title.toLowerCase().startsWith(v.client.toLowerCase()) ? v.client : undefined;

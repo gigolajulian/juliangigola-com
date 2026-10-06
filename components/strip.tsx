@@ -7,7 +7,7 @@ import { flushSync } from "react-dom";
 import { useRouter } from "next/navigation";
 import { cn, filterPaths, rubberband, STRIP_SECTION } from "@/lib/utils";
 import { flyCovers } from "@/lib/work-view";
-import { Liquid } from "@/components/liquid";
+import { Liquid, useQuiet } from "@/components/liquid";
 
 /* ── the strip ────────────────────────────────────────────────────
  * One screen, and the page runs across it. This is the machine behind
@@ -307,7 +307,13 @@ const centreOf = (el: HTMLElement, i: number) => {
      screen between them. Centred, the window was half off it. */
   if (cell.nextElementSibling?.hasAttribute("data-lead-window"))
     return leftOf(cell);
-  return leftOf(cell) - (el.clientWidth - cell.offsetWidth) / 2;
+  const centre = leftOf(cell) - (el.clientWidth - cell.offsetWidth) / 2;
+  /* No further than where its chapter holds (`lib/deck.ts`): past that
+     the next chapter slides over the screen, and the last cell of one
+     came up half under the next title (Julian: /portfolio#wrapped-up). */
+  let next = cell.nextElementSibling as HTMLElement | null;
+  while (next && !next.hasAttribute("data-deck")) next = next.nextElementSibling as HTMLElement | null;
+  return next ? Math.min(centre, leftOf(next) - el.clientWidth) : centre;
 };
 
 /**
@@ -424,7 +430,7 @@ export function Strip({
      place in it (the back button's seat, a #discipline typed in), and
      always on the server and the cold load, so the markup and the
      crawlers have every project. Not the hash at render: the address
-     still holds the page being left (`/#inquire`).
+     still holds the page being left (`/#where-next`).
      A deck of screens (the homepage) mounts the one it lands on: coming
      back from the portfolio, the second screen's eight covers and logos
      were built inside the swap, while the screen held for 300ms
@@ -591,7 +597,7 @@ export function Strip({
   /* The wall's stylesheet is scoped to this strip and no other. */
   const wallId = React.useId().replace(/[^a-zA-Z0-9_-]/g, "");
   const [ticks, setTicks] = React.useState<
-    { i: number; word?: string; name?: string }[]
+    { i: number; word?: string; name?: string; tint?: string }[]
   >([]);
   const tickKey = React.useRef("");
   // For the keyboard, which lives in an effect and must not go stale.
@@ -607,6 +613,35 @@ export function Strip({
      feel like changing pages. Same gestures, twice the work on screen. */
   const live = stack ? wide : true;
 
+  /* Past the opening cell, stacked down a phone as well: the page's own
+     scroll, half the cell gone off the top, as `data-past-first` says it
+     sideways (`read` below). Its own name, so only the navbar's wordmark
+     reads it, not the running heads of the stacked pages (Julian,
+     2026-10-04: the name in the bar on an iPhone once the hero is passed). */
+  React.useEffect(() => {
+    const el = scroller.current;
+    if (!el || live) return;
+    let frame = 0;
+    const check = () => {
+      frame = 0;
+      const first = el.firstElementChild as HTMLElement | null;
+      const r = first?.getBoundingClientRect();
+      el.toggleAttribute("data-past-hero", !!r && r.top + r.height / 2 < 0);
+    };
+    const soon = () => {
+      if (!frame) frame = requestAnimationFrame(check);
+    };
+    check();
+    window.addEventListener("scroll", soon, { passive: true });
+    window.addEventListener("resize", soon);
+    return () => {
+      cancelAnimationFrame(frame);
+      window.removeEventListener("scroll", soon);
+      window.removeEventListener("resize", soon);
+      el.removeAttribute("data-past-hero");
+    };
+  }, [live]);
+
   /* Stacked down a phone the strip is not live: none of its scrolling runs,
      and the cells are no more than sections of a page that scrolls. Its
      jumps went with it. Cells carry `data-hash`, not an id, so the browser
@@ -618,12 +653,31 @@ export function Strip({
   React.useEffect(() => {
     const el = scroller.current;
     if (!el || live) return;
+    let jumped = 0;
     const go = (smooth: boolean) => {
       const i = cellFor(el, decodeURIComponent(window.location.hash.slice(1)));
       const cell = el.children[i] as HTMLElement | undefined;
       if (!cell) return false;
       const still = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      /* The screens off the window are skipped until near it (`globals.css`,
+         `content-visibility`) and hold a guessed height, so a glide past
+         them drew each at its real one on the way and landed hundreds of
+         pixels short. Drawn in full for the journey, skipped again after. */
+      el.setAttribute("data-jump", "");
+      clearTimeout(jumped);
+      /* Two frames on: a screen drawn once keeps its real height when it
+         is skipped again (`auto`), so nothing above the window moves. */
+      const done = () => {
+        clearTimeout(jumped);
+        window.removeEventListener("scrollend", done);
+        requestAnimationFrame(() =>
+          requestAnimationFrame(() => el.removeAttribute("data-jump")),
+        );
+      };
       cell.scrollIntoView({ block: "start", behavior: smooth && !still ? "smooth" : "auto" });
+      window.addEventListener("scrollend", done, { once: true });
+      // Safari without `scrollend`, or a jump with nowhere to go.
+      jumped = window.setTimeout(done, 1500);
       return true;
     };
     go(false);
@@ -644,6 +698,7 @@ export function Strip({
     return () => {
       window.removeEventListener("hashchange", onHash);
       document.removeEventListener("click", onLink, true);
+      clearTimeout(jumped);
     };
   }, [live]);
 
@@ -882,7 +937,6 @@ export function Strip({
       const where = i >= 0 ? centreOf(el, i) : null;
       if (where !== null) {
         el.scrollLeft = where;
-        return;
       }
     }
     /* A page zooming in or out (`page-transition.tsx` writes `data-nav`
@@ -1618,7 +1672,11 @@ export function Strip({
            cells with no tick — a page of words, the ask, the card that
            leads on — which lit nothing at all. */
         const gone = Math.max(0, Math.min(1, x / room));
-        const eye = x + gone * span;
+        /* A paged strip is a screen to a section, so the one in the middle
+           of the window is the one you are on. The sliding eye read a third
+           of the way in early on the homepage and lit Biography with
+           Sessions filling the screen (Julian, 2026-10-04). */
+        const eye = paged ? x + span / 2 : x + gone * span;
         let near = best;
         let gap = Infinity;
         for (const i of ticked) {
@@ -1637,11 +1695,11 @@ export function Strip({
     const readTicks = () => {
       const t = (Array.from(el.children) as HTMLElement[]).flatMap((c, i) =>
         c.dataset.tick !== undefined
-          ? [{ i, word: c.dataset.label, name: c.dataset.name }]
+          ? [{ i, word: c.dataset.label, name: c.dataset.name, tint: c.dataset.tint }]
           : [],
       );
       const key = t
-        .map((x) => `${x.i}:${x.word ?? ""}:${x.name ?? ""}`)
+        .map((x) => `${x.i}:${x.word ?? ""}:${x.name ?? ""}:${x.tint ?? ""}`)
         .join("|");
       if (key === tickKey.current) return;
       tickKey.current = key;
@@ -1690,7 +1748,24 @@ export function Strip({
     /* The scroller changing shape is the one thing that moves the cells:
        a window resized, the rack swapped for the strip, a cell arriving.
        Measure again then, and never on a scroll frame. */
+    /* A link straight to a cell, in the rack (Julian, 2026-10-04: every
+       film on the homepage opened Event coverage). The landing is aimed
+       before the rack has placed its frames, at where the cell stands in
+       a strip, and the rack then moves it the better part of a screen
+       further on. Until the visitor moves the row themselves, each
+       re-lay aims again at the cell the address named on arrival. */
+    let aimed = decodeURIComponent(window.location.hash.slice(1));
+    const handed = () => {
+      aimed = "";
+    };
+    for (const t of ["wheel", "pointerdown", "keydown", "touchstart"])
+      el.addEventListener(t, handed, { once: true, passive: true });
     const again = () => {
+      if (aimed) {
+        const i = cellFor(el, aimed);
+        const where = i >= 0 ? centreOf(el, i) : null;
+        if (where !== null) el.scrollLeft = where;
+      }
       remeasure();
       read();
     };
@@ -1708,6 +1783,7 @@ export function Strip({
     return () => {
       watch.disconnect();
       el.removeEventListener(RELAID, again);
+      for (const t of ["wheel", "pointerdown", "keydown", "touchstart"]) el.removeEventListener(t, handed);
       el.removeEventListener("scroll", onScroll);
       window.removeEventListener("resize", again);
       window.removeEventListener("hashchange", onHash);
@@ -3030,6 +3106,8 @@ export function Strip({
     hit.current = tickAt;
   });
   const onRail = over !== null;
+  /** Each chapter's colour on the rail, and so its neighbours'. */
+  const chapterTints = chapterList.map((g) => tintOf(ticks.slice(g.from, g.to + 1)));
   /** The chapter the page is in, for the rail at rest (`rail-sum`). */
   const nowIn = chaptered
     ? chapterList.find((g) => !g.href && lands >= g.from && lands <= g.to)
@@ -3451,13 +3529,22 @@ export function Strip({
                     ref={(el) => {
                       chapterSegs.current[gi] = el;
                     }}
-                    style={{
-                      flexGrow: shown
-                        ? mine
-                          ? OPEN_SHARE
-                          : opening(count)
-                        : 1,
-                    }}
+                    style={
+                      {
+                        flexGrow: shown
+                          ? mine
+                            ? OPEN_SHARE
+                            : opening(count)
+                          : 1,
+                        /* Each stretch runs into its neighbours' colours
+                           at its edges, so the bar is one blend (Julian:
+                           smooth). */
+                        "--tint": chapterTints[gi],
+                        "--tint-prev": chapterTints[gi - 1] ?? chapterTints[gi],
+                        "--tint-next": chapterTints[gi + 1] ?? chapterTints[gi],
+                      } as React.CSSProperties
+                    }
+                    data-tinted={chapterTints[gi] ? "" : undefined}
                     /* Which thumb it carries in the control
                        (`globals.css`): where you are, or a discipline
                        elsewhere under the pointer. */
@@ -3586,6 +3673,8 @@ export function Strip({
                               "shadow-[inset_-1px_0_0_0_var(--background)]",
                             shown && mark === g.from + k && "bg-foreground",
                           )}
+                          data-tinted={ticks[g.from + k]?.tint ? "" : undefined}
+                          style={{ "--tint": ticks[g.from + k]?.tint } as React.CSSProperties}
                         />
                       ))}
                     </div>
@@ -3659,6 +3748,20 @@ export function Strip({
   );
 }
 
+/** A discipline's colour on the rail: the most saturated of its
+    projects' accents (`scripts/make-accents.mjs`). */
+const tintOf = (cells: { tint?: string }[]) => {
+  const sat = (h: string) => {
+    const n = parseInt(h.slice(1), 16);
+    const c = [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+    return Math.max(...c) - Math.min(...c);
+  };
+  let best: string | undefined;
+  for (const { tint } of cells)
+    if (tint && (!best || sat(tint) > sat(best))) best = tint;
+  return best;
+};
+
 /* ── the ink in liquid ──
    Julian: the gooey UI in the scrollbar, sitewide. Where you are on the
    rail is a drop of the ink (`liquid-gooey`, Move): it sits over the lit
@@ -3670,6 +3773,7 @@ export function Strip({
    one. Not for anybody who asked for less motion: the plain ink stays. */
 function RailInk({ rail }: { rail: React.RefObject<HTMLDivElement | null> }) {
   const box = React.useRef<HTMLSpanElement>(null);
+  const quiet = useQuiet();
   const [ink, setInk] = React.useState<{
     x: number;
     y: number;
@@ -3724,7 +3828,7 @@ function RailInk({ rail }: { rail: React.RefObject<HTMLDivElement | null> }) {
       aria-hidden
       className="pointer-events-none absolute inset-0 z-[5]"
     >
-      {ink ? (
+      {ink && quiet ? (
         /* A blur of two: the lit chapter is four pixels tall, and any
            more ate it down to a wobbling thread. */
         <Liquid

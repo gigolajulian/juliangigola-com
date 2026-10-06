@@ -223,7 +223,7 @@ export function ProjectStrip({
             !project.intent.includes("@") &&
             project.intent.trim().toLowerCase() !==
               project.name.trim().toLowerCase() ? (
-              <p className="title-rest max-w-prose text-sm leading-relaxed text-muted-foreground">
+              <p className="title-rest max-w-prose text-sm normal-case leading-relaxed text-muted-foreground">
                 {project.intent}
               </p>
             ) : null}
@@ -279,7 +279,7 @@ export function ProjectStrip({
                               target="_blank"
                               rel="noreferrer"
                               data-ring="Instagram"
-                              className="-my-1.5 inline-block py-1.5 text-foreground/80 transition-colors duration-200 hoverable:hover:text-foreground"
+                              className="-my-2 inline-block py-2 text-foreground/80 transition-colors duration-200 hoverable:hover:text-foreground"
                             >
                               {credit.name}
                               <span className="sr-only">

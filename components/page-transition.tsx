@@ -33,6 +33,9 @@ const clearNav = () => {
    right to left, and back the other way. Julian: a transition for each
    page from the navbar. A project or a filter counts as its section. */
 const SECTIONS = ["/", "/portfolio"];
+
+/** Ends a held pop's snapshot once the page it went to has rendered. */
+let landed: (() => void) | null = null;
 const sectionOf = (path: string) =>
   SECTIONS.reduce(
     (found, s, i) => (path === s || (s !== "/" && path.startsWith(`${s}/`)) ? i : found),
@@ -48,6 +51,8 @@ export function PageTransition({ children }: { children: React.ReactNode }) {
   const shown = React.useRef(path);
   React.useLayoutEffect(() => {
     shown.current = path;
+    landed?.();
+    landed = null;
     if (document.documentElement.dataset.nav === undefined) return;
     const trip = (
       document as Document & {
@@ -70,6 +75,9 @@ export function PageTransition({ children }: { children: React.ReactNode }) {
       from: "page" | "bar" | "drawer" = "page",
     ) => {
       root.dataset.nav = way;
+      /* Kept for the visit: a page reached by a press is not a cold load,
+         and the cover's entrance starts at once (`globals.css`). */
+      root.dataset.moved = "";
       /* Julian asked for a beat before the page arrives when the press
          came from the bar. A link inside the page is a step through the
          work and wants no waiting; the bar is a jump across the site, and
@@ -145,14 +153,42 @@ export function PageTransition({ children }: { children: React.ReactNode }) {
     // the path, not by the viewer's flag: closing it with Esc or Close
     // takes the flag down before its own `history.back()` pops, and the
     // root was left saying "out" for ten seconds.
-    const onPop = () => {
-      if (location.pathname !== shown.current) set("out");
+    /* Julian (2026-10-04): going back needs its animation too. React
+       starts no view transition for a pop, so it was a cut. The pop is
+       held here, before the router's own listener, the page snapshotted,
+       and the pop handed back inside the transition; `globals.css` drops
+       the page left and settles the one returned to (`back-page`). */
+    let replaying = false;
+    const onPop = (e: PopStateEvent) => {
+      if (replaying || location.pathname === shown.current) return;
+      set("out");
+      const ua = (e as PopStateEvent & { hasUAVisualTransition?: boolean })
+        .hasUAVisualTransition;
+      if (ua || !document.startViewTransition) return;
+      e.stopImmediatePropagation();
+      const main = document.getElementById("main");
+      main?.style.setProperty("view-transition-name", "back-page");
+      const trip = document.startViewTransition(
+        () =>
+          new Promise<void>((done) => {
+            landed = done;
+            replaying = true;
+            window.dispatchEvent(new PopStateEvent("popstate", { state: history.state }));
+            replaying = false;
+            // A page that takes longer than this lands after the trip.
+            window.setTimeout(done, 1500);
+          }),
+      );
+      trip.finished.finally(() => {
+        main?.style.removeProperty("view-transition-name");
+        clearNav();
+      });
     };
     document.addEventListener("click", onClick, true);
-    window.addEventListener("popstate", onPop);
+    window.addEventListener("popstate", onPop, true);
     return () => {
       document.removeEventListener("click", onClick, true);
-      window.removeEventListener("popstate", onPop);
+      window.removeEventListener("popstate", onPop, true);
       window.clearTimeout(clear);
     };
   }, []);

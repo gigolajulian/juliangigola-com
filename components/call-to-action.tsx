@@ -48,7 +48,7 @@ export function CallToAction({
             {title}
           </h2>
           {body ? (
-            <p className="mt-4 max-w-prose text-sm leading-relaxed text-muted-foreground">
+            <p className="mt-4 max-w-prose text-sm normal-case leading-relaxed text-muted-foreground">
               {body}
             </p>
           ) : null}

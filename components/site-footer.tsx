@@ -32,10 +32,9 @@ export function SiteFooter() {
       <div className="site-footer-body mx-auto max-w-[100rem] px-6 py-12 sm:px-10 sm:py-16 lying:py-2">
         <div className="site-footer-ask flex flex-col gap-12 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <p className="label text-muted-foreground">
-              Commissions and sessions
-            </p>
-            <h2 className="mt-4 title">
+            {/* No label over the heading (critique, 2026-10-03): the
+                heading carries itself. */}
+            <h2 className="title">
               <Link
                 href="/#contact"
                 className="transition-opacity duration-200 hoverable:hover:opacity-70"

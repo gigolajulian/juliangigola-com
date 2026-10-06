@@ -1,9 +1,11 @@
 "use client";
 
+import type * as React from "react";
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Liquid } from "@/components/liquid";
+import { useRouter } from "next/navigation";
+import { Liquid, useQuiet } from "@/components/liquid";
 import { RisingTitle } from "@/components/strip-page";
 import type { Frame } from "@/lib/work-types";
 
@@ -44,6 +46,8 @@ function where(title: string) {
 }
 
 export function SessionsScreen({ sessions }: { sessions: SessionItem[] }) {
+  const quiet = useQuiet();
+  const router = useRouter();
   const [open, setOpen] = useState(0);
   /* Whether a mouse or the keyboard is in the list: the open row is
      inked only then (`.session-dev`, `globals.css`). A finger opens a row
@@ -69,6 +73,10 @@ export function SessionsScreen({ sessions }: { sessions: SessionItem[] }) {
     };
     return (Object.keys(d) as Edge[]).reduce((m, k) => (d[k] < d[m] ? k : m));
   };
+  /* Whether the row pressed was open when the press began. Julian
+     (2026-10-04): under a finger, the first tap opens a row and the next
+     goes to its page; a mouse has opened it already by pointing. */
+  const wasOpen = useRef(false);
   const go = (i: number) => {
     if (i === open) return;
     setOpen(i);
@@ -104,7 +112,7 @@ export function SessionsScreen({ sessions }: { sessions: SessionItem[] }) {
       data-tick
       data-label="Sessions"
       data-hash="sessions"
-      className="screen-measure relative grid w-full shrink-0 grid-cols-1 items-center gap-10 px-6 py-12 sm:h-full sm:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] sm:gap-x-[clamp(2rem,3.5vw,4rem)] sm:px-10 sm:py-8 short:pb-4 short:pt-20 sm:[container-type:size] xl:grid-cols-[auto_auto_minmax(0,1fr)]"
+      className="screen-measure relative grid w-full shrink-0 grid-cols-1 items-center gap-10 sessions-screen px-6 py-12 sm:h-full sm:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] sm:gap-x-[clamp(2rem,3.5vw,4rem)] sm:px-10 sm:pb-8 sm:pt-20 short:pb-4 sm:[container-type:size] xl:grid-cols-[auto_auto_minmax(0,1fr)]"
     >
       {/* Julian (2026-09-29, red boxes): with three columns the photograph
           sits further right (its margin, from about 1600px wide) and larger
@@ -113,7 +121,9 @@ export function SessionsScreen({ sessions }: { sessions: SessionItem[] }) {
           run into the rates. On a
           short laptop (1280x800) the content starts below the header
           rather than under it, and the names are set a touch smaller so the
-          open session fits. */}
+          open session fits. Critique (2026-10-03): below the header at
+          every height, and centred only while it fits — at 1440x840 the
+          open list ran up under the bar. */}
       <div className="flex w-fit max-w-full flex-col gap-5 self-center">
         {/* Julian (2026-09-29): says what the count is, not the title again. */}
         <span className="label text-muted-foreground">
@@ -126,7 +136,7 @@ export function SessionsScreen({ sessions }: { sessions: SessionItem[] }) {
         <RisingTitle text="Sessions" className="sm:max-lg:text-4xl" />
         {/* Julian: three lines, whatever the size (44ch is the least), where
             the three columns are. */}
-        <p className="title-rest max-w-full text-left xl:w-[46ch] text-sm leading-relaxed text-muted-foreground">
+        <p className="title-rest max-w-full text-left xl:w-[46ch] text-sm normal-case leading-relaxed text-muted-foreground">
           Studio and location sessions across the San Francisco Bay Area.
           Everything here is booked directly, with no packages to decode.
         </p>
@@ -137,7 +147,7 @@ export function SessionsScreen({ sessions }: { sessions: SessionItem[] }) {
           words keep three lines and the names one. Under 1280 there is no
           room for three columns and it is left out: the words and the
           list. */}
-      <div className="sessions-photo title-rest relative aspect-[3/4] w-full overflow-hidden rounded-[4px] bg-card sm:h-[min(48rem,calc(100cqh-8rem),max(34.5vw,calc(100vw-75rem)))] sm:w-auto sm:justify-self-center sm:max-xl:hidden xl:ml-[max(0rem,min(4.25rem,16.5vw-16.5rem))] xl:h-[min(56rem,calc(100cqh-8rem),max(34.5vw,calc(100vw-75rem)))]">
+      <div className="sessions-photo title-rest relative aspect-[3/4] max-sm:aspect-[3/2] w-full overflow-hidden rounded-[4px] bg-card sm:h-[min(48rem,calc(100cqh-8rem),max(34.5vw,calc(100vw-75rem)))] sm:w-auto sm:justify-self-center sm:max-xl:hidden xl:ml-[max(0rem,min(4.25rem,16.5vw-16.5rem))] xl:h-[min(56rem,calc(100cqh-8rem),max(34.5vw,calc(100vw-75rem)))]">
         {sessions.map((s, i) =>
           s.cover ? (
             <Image
@@ -161,16 +171,14 @@ export function SessionsScreen({ sessions }: { sessions: SessionItem[] }) {
             className="absolute inset-0 z-10"
           />
         ) : null}
-        <div className="absolute inset-x-0 bottom-0 flex items-baseline justify-between gap-3 bg-background/80 p-4 backdrop-blur-sm">
-          <div className="flex items-baseline gap-3">
-            <span className="label text-muted-foreground">
-              {String(open + 1).padStart(2, "0")}
-            </span>
-            <span className="font-display text-xl leading-none">
-              {current.name}
-            </span>
-          </div>
-          <span className="label text-muted-foreground">{current.rate}</span>
+        {/* The slate every photograph on the site carries (`cover-cell.tsx`,
+            the Commissions table): the rate over the name, on a fall of
+            shade (Julian, 2026-10-04: match the rest). */}
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 flex flex-col items-start gap-1.5 bg-gradient-to-t from-black/80 via-black/35 to-transparent px-5 pb-5 pt-20">
+          <span className="label leading-none text-white/75">{current.rate}</span>
+          <span className="font-display text-[clamp(1.25rem,2vw,2rem)] uppercase leading-[0.9] text-white">
+            {current.name}
+          </span>
         </div>
       </div>
 
@@ -221,16 +229,25 @@ export function SessionsScreen({ sessions }: { sessions: SessionItem[] }) {
                  the next one closing. */
               <li
                 key={s.slug}
+                // Julian (2026-10-03): the rows appear in order as Sessions
+                // arrives, as About's steps do (`.session-step`, globals.css).
+                style={{ "--i": i } as React.CSSProperties}
                 onPointerMove={() => go(i)}
+                onPointerDown={() => (wasOpen.current = i === open)}
+                /* Julian (2026-10-04): the booking page fetched on the
+                   pointer, so the press has nothing to wait for. Five rows
+                   at most, and the router asks for each once. */
+                onPointerEnter={s.page ? () => router.prefetch(s.page!) : undefined}
                 /* Julian (2026-10-02): anywhere in the row goes to the
                    booking page, bar its own links: a click on the row is a
                    click on its name, the link a keyboard and a reader get,
                    so it goes the way every link on the site goes. */
                 onClick={(e) => {
-                  if (s.page && !(e.target as HTMLElement).closest("a, button"))
-                    e.currentTarget.querySelector("a")?.click();
+                  if (!s.page || (e.target as HTMLElement).closest("a, button")) return;
+                  if (!wasOpen.current) return go(i);
+                  e.currentTarget.querySelector("a")?.click();
                 }}
-                className={`relative flex flex-col border-b border-border py-1.5 ${s.page ? "cursor-pointer" : ""}`}
+                className={`session-step relative flex flex-col border-b border-border py-1.5 ${s.page ? "cursor-pointer" : ""}`}
               >
                 {/* Julian (2026-10-02): a session with a booking page goes
                     there on a click; pointing still opens it here. */}
@@ -238,6 +255,14 @@ export function SessionsScreen({ sessions }: { sessions: SessionItem[] }) {
                   <Link
                     href={s.page}
                     onFocus={() => go(i)}
+                    onClick={(e) => {
+                      // A press (not a key, not the row passing it on) on a
+                      // row that was shut opens it.
+                      if (e.detail > 0 && !wasOpen.current) {
+                        e.preventDefault();
+                        go(i);
+                      }
+                    }}
                     className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-baseline gap-4 py-2 text-left short:py-1.5"
                   >
                     {head}
@@ -331,15 +356,16 @@ export function SessionsScreen({ sessions }: { sessions: SessionItem[] }) {
             (`.session-col`, `globals.css`). */}
         {/* Mounted at rest, a line of no width, so the first time in
             starts from the pointer like every other. */}
-        {(["session-ground", "session-ink"] as const).map((k) => (
+        {(["session-ground"] as const).map((k) => (
               <div key={k} aria-hidden className={`${k} pointer-events-none absolute inset-y-0 -inset-x-5`}>
+                {quiet ? (
                 <Liquid
                   blur={5}
                   contrast={18}
-                  fill={k === "session-ink" ? "#fff" : "var(--background)"}
+                  fill="var(--session-hover)"
                   className="h-full w-full"
                 >
-                  <Liquid.Item effect="move" move={{ springiness: 0.85, wobble: 0, stretch: 0.08, trail: 0 }}>
+                  <Liquid.Item effect="move" move={{ springiness: 0.92, wobble: 0, stretch: 0.04, trail: 0 }}>
                     <div
                       className="absolute left-0 top-0 rounded-[4px]"
                       style={{
@@ -361,6 +387,7 @@ export function SessionsScreen({ sessions }: { sessions: SessionItem[] }) {
                     />
                   </Liquid.Item>
                 </Liquid>
+                ) : null}
               </div>
             ))}
 
@@ -368,8 +395,12 @@ export function SessionsScreen({ sessions }: { sessions: SessionItem[] }) {
             the line, or the button wraps under it and under the rail. */}
         <div className="flex flex-wrap items-center justify-between gap-6 pt-6 short:gap-4 short:pt-5">
           <div className="flex flex-col gap-2.5">
+            {/* The button says Book a session; said beside it as well, the
+                pair read as a stutter (critique, 2026-10-03). Julian's
+                words in its place; "Bookings" since Commissions became the
+                art directors' screen in the nav (critique, 2026-10-03). */}
             <span className="font-display text-[2rem] leading-none short:text-[1.625rem]">
-              Book a session
+              Bookings open
             </span>
             <a
               href="mailto:hello@juliangigola.com"
@@ -380,7 +411,7 @@ export function SessionsScreen({ sessions }: { sessions: SessionItem[] }) {
           </div>
           <Link
             href="/?type=session#contact"
-            className="label action px-7 py-4 press active:scale-[0.97] short:px-5 short:py-2.5"
+            className="sessions-book label action px-7 py-4 press active:scale-[0.97] short:px-5 short:py-2.5"
           >
             {/* The private client's verb, not the art director's (Julian,
                 2026-10-01). */}

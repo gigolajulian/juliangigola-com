@@ -8,6 +8,7 @@ import { RESPONSE_TIME } from "@/lib/site";
 import { cn } from "@/lib/utils";
 import StatusMark from "@/components/StatusMark";
 import { Orb } from "@/components/orb";
+import { ReferencePicks } from "@/components/reference-picks";
 
 /* ── the enquiry ──────────────────────────────────────────────────
  * The old form was three fields: name, email, message. Which means every
@@ -58,12 +59,28 @@ const FOLLOW_UP: Record<string, { label: string; placeholder: string }> = {
 
 const INITIAL: ContactState = { status: "idle" };
 
+/** The contact screen's head, or the booking one when the link came
+    from a session (`?type=session`). */
+export function WhenBooking({
+  booking,
+  children,
+}: {
+  booking: React.ReactNode;
+  children: React.ReactNode;
+}) {
+  return useSearchParams().get("type") === "session" ? booking : children;
+}
+
 export function ContactForm({
   defaults,
+  sessions = [],
 }: {
   /** What a page that holds its own form is about: a booking page's
       session or kind of shoot, used when the address names none. */
   defaults?: { type?: string; session?: string };
+  /** The names on the Sessions screen, offered in place of the kinds of
+      shoot once the visitor came to book one. */
+  sessions?: string[];
 } = {}) {
   const params = useSearchParams();
 
@@ -83,7 +100,11 @@ export function ContactForm({
   const [ready, setReady] = React.useState(false);
   const [emailHint, setEmailHint] = React.useState<string>();
   const [type, setType] = React.useState<string>(
-    TYPES.some((t) => t.value === preset) ? (preset as string) : "editorial",
+    /* Nothing picked until the visitor picks (critique, 2026-10-03): a
+       private client from the nav landed on Editorial. Unpicked, the
+       second question is the general one and the server files it as
+       Other. */
+    TYPES.some((t) => t.value === preset) ? (preset as string) : "",
   );
   /* And again when the link changes under a form already on the page.
      The form lives on the homepage, so it is mounted long before a
@@ -94,12 +115,29 @@ export function ContactForm({
     setSeen(preset);
     if (TYPES.some((t) => t.value === preset)) setType(preset as string);
   }
+  /* Julian (critique, 2026-10-03): Book a session landed on the
+     commission desk, the session pushed into the date field. Booking
+     asks which session, then when and where. */
+  const booking = type === "session" && sessions.length > 0;
+  const [session, setSession] = React.useState(presetSession ?? "");
+  const [seenSession, setSeenSession] = React.useState(presetSession);
+  if (presetSession !== seenSession) {
+    setSeenSession(presetSession);
+    setSession(presetSession ?? "");
+  }
+  const choices = booking
+    ? sessions.map((s) => ({ value: s, label: s }))
+    : TYPES;
+  const chosen = booking ? session : type;
+  const choose = booking ? setSession : setType;
   const [state, formAction, pending] = React.useActionState(
     submitEnquiry,
     INITIAL,
   );
 
-  const followUp = FOLLOW_UP[type] ?? FOLLOW_UP.other;
+  const followUp = booking
+    ? { label: "When, where, and how many of you", placeholder: "e.g. May 17, SJSU, two of us" }
+    : FOLLOW_UP[type] ?? FOLLOW_UP.other;
   const values = state.values ?? {};
 
   if (state.status === "sent") {
@@ -195,7 +233,7 @@ export function ContactForm({
         e.currentTarget.querySelector<HTMLElement>(":invalid")?.focus();
       }}
       /* Julian: on a phone the whole card fits a screen, so tighter there. */
-      className="flex flex-col gap-3.5 sm:gap-5"
+      className="flex flex-col gap-3.5 sm:gap-[clamp(0.75rem,2.4vh,1.25rem)]"
       noValidate
     >
       {/* The honeypot. Hidden from sight, from the tab order and from
@@ -260,16 +298,17 @@ export function ContactForm({
           in the form (hidden) and carry the value, so there is one answer. */}
       <div className="sm:hidden">
         <label htmlFor="field-type" className="label block text-muted-foreground">
-          What kind of shoot?
+          {booking ? "Which session?" : "What kind of shoot?"}
         </label>
         <div className="relative mt-1">
           <select
             id="field-type"
-            value={type}
-            onChange={(e) => setType(e.target.value)}
-            className="block w-full appearance-none rounded-none border-0 border-b border-border bg-transparent py-2 pr-8 text-base uppercase transition-colors duration-200 focus:border-foreground focus:outline-none"
+            value={chosen}
+            onChange={(e) => choose(e.target.value)}
+            className="block w-full appearance-none rounded-none border-0 border-b border-border bg-transparent py-2 pr-8 text-base uppercase transition-colors duration-200 focus:border-foreground/40 focus:outline-none"
           >
-            {TYPES.map((t) => (
+            {!chosen ? <option value="">Choose one</option> : null}
+            {choices.map((t) => (
               <option key={t.value} value={t.value}>
                 {t.label}
               </option>
@@ -290,10 +329,10 @@ export function ContactForm({
 
       <fieldset className="max-sm:hidden">
         <legend className="label text-muted-foreground">
-          What kind of shoot?
+          {booking ? "Which session?" : "What kind of shoot?"}
         </legend>
         <div className="mt-4 flex flex-wrap gap-2">
-          {TYPES.map((t) => (
+          {choices.map((t) => (
             <label
               key={t.value}
               className={cn(
@@ -306,17 +345,17 @@ export function ContactForm({
                    ring for somebody arriving by Tab and nobody else.
                    Julian asked. */
                 "has-[:focus-visible]:outline has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-[var(--ring)]",
-                type === t.value
+                chosen === t.value
                   ? "border-foreground text-foreground"
                   : "border-border text-muted-foreground hoverable:hover:border-foreground/40 hoverable:hover:text-foreground",
               )}
             >
               <input
                 type="radio"
-                name="type"
+                name={booking ? "session" : "type"}
                 value={t.value}
-                checked={type === t.value}
-                onChange={() => setType(t.value)}
+                checked={chosen === t.value}
+                onChange={() => choose(t.value)}
                 // Visually hidden rather than `hidden`, so it stays in the
                 // tab order and arrow keys still walk the radio group.
                 className="sr-only"
@@ -326,6 +365,7 @@ export function ContactForm({
           ))}
         </div>
       </fieldset>
+      {booking ? <input type="hidden" name="type" value="session" /> : null}
 
       <Field
         name="detail"
@@ -337,18 +377,20 @@ export function ContactForm({
         defaultValue={
           values.detail ||
           (presetRef ? `Similar to ${presetRef}` : undefined) ||
-          (presetSession && type === "session" ? presetSession : undefined)
+          (presetSession && type === "session" && !booking ? presetSession : undefined)
         }
       />
 
       <Field
         name="message"
-        label="About the project"
+        label={booking ? "Anything I should know" : "About the project"}
         as="textarea"
         defaultValue={values.message}
         error={state.errors?.message}
         required
       />
+
+      <ReferencePicks resync={state} />
 
       {state.status === "error" || state.status === "unconfigured" ? (
         <div
@@ -380,7 +422,9 @@ export function ContactForm({
           column was 54. Wrapping instead, and the sentence takes a line of
           its own below the button until there is a window wide enough to
           hold all three. */}
-      <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
+      {/* Julian (2026-10-05): the address on the left, the button on the right,
+          the sentence off the screen (still read out with the button). */}
+      <div className="flex flex-wrap items-start justify-between gap-x-6 gap-y-3">
         <button
           type="submit"
           data-dial="send"
@@ -397,7 +441,7 @@ export function ContactForm({
                 <StatusMark status="failed" size={14} errorColor="var(--destructive)" />
               </span>
             ) : null}
-            {pending ? "Sending…" : "Inquire"}
+            {pending ? "Sending…" : booking ? "Book a session" : "Inquire"}
           </span>
         </button>
         {/* What is still missing, where the button is, and only once
@@ -405,14 +449,14 @@ export function ContactForm({
         {!ready && !pending ? (
           <p
             id="enquire-missing"
-            className="label order-last basis-full text-left text-muted-foreground lg:order-none lg:basis-auto"
+            className="sr-only"
           >
             Your name, your email and a line about the shoot
           </p>
         ) : null}
         {/* The address is above the form on a phone already. */}
-        <p className="text-left text-xs text-muted-foreground max-sm:hidden">
-          Or email{" "}
+        <p className="order-first text-left text-xs text-muted-foreground opacity-70 max-sm:hidden">
+          Email{" "}
           <a
             href="mailto:hello@juliangigola.com"
             data-ring="Email"
@@ -444,10 +488,14 @@ function Field({
   const Element = as;
 
   return (
-    <div>
+    // Lifts toward you under the pointer and while it is being typed in
+    // (`.contact-field`, globals.css).
+    <div className="contact-field">
       <label htmlFor={id} className="label block text-muted-foreground">
         {label}
-        {props.required ? <span aria-hidden> *</span> : null}
+        {/* Said, not only shown: the faint "Optional" placeholder is a
+            look (Julian, 2026-10-05), so the label carries the fact. */}
+        {props.required ? <span aria-hidden> *</span> : <span className="sr-only">, optional</span>}
       </label>
 
       <Element
@@ -461,13 +509,15 @@ function Field({
         className={cn(
           "mt-1 block w-full border-0 border-b bg-transparent py-2 text-base sm:mt-2 sm:py-2.5",
           // Two lines of message on a phone, where the card has a screen.
-          as === "textarea" && "max-sm:h-[3.75rem] max-sm:resize-none",
-          "transition-colors duration-200 placeholder:text-muted-foreground/60",
-          // Focus is the rule under the field coming up to full ink. No
+          as === "textarea" && "max-sm:h-[3.75rem] max-sm:resize-none sm:h-[clamp(3.75rem,calc(16vh-3rem),6rem)] sm:resize-none",
+          // Placeholders fainter (Julian, 2026-10-05: was 60%).
+          "transition-colors duration-200 placeholder:text-muted-foreground/35",
+          // Focus is the rule under the field darkening, to 40% ink (Julian,
+          // 2026-10-04: lower). No
           // accent ring as well: a text field shows focus whether the
           // click or the keyboard put it there, so the ring was on screen
           // every time somebody typed. Julian did not want it.
-          "focus:outline-none focus-visible:outline-none focus:border-foreground",
+          "focus:outline-none focus-visible:outline-none focus:border-foreground/40",
           error ? "border-destructive" : "border-border",
         )}
         {...props}

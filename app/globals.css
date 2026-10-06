@@ -113,12 +113,33 @@
      the page already, and the lift uncovers more of the same. The white
      a warm off white, paper rather than screen (Julian: more off white,
      towards warm). */
-  background: #eee9e0;
   color: #0b0a09;
+  /* The layer's own colour is the panel's, which is the page's, and the
+     ground the panel sweeps across is painted over it short of the top
+     and bottom (below): Safari on an iPhone takes the colour of the bands
+     round the page from what is at the window's edge, and Julian asked
+     for them black in dark and light in light, not the ground (2026-10-04). */
+  background: currentColor;
+  --jg-ground: #eee9e0;
 }
 :root[data-theme="light"][data-intro] #jg-intro {
-  background: #0b0a09;
   color: #ebedef;
+  --jg-ground: #0b0a09;
+}
+[data-intro] #jg-intro::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--jg-ground);
+}
+/* The bands only where Safari on an iPhone or iPad reads them: everywhere
+   else they were a stripe across the top and foot of the opening (audit,
+   2026-10-04). `-webkit-touch-callout` is iOS Safari's alone. */
+@supports (-webkit-touch-callout: none) {
+  [data-intro] #jg-intro::before {
+    inset: calc(env(safe-area-inset-top, 0px) + 16px) 0
+      calc(env(safe-area-inset-bottom, 0px) + 16px);
+  }
 }
 .jg-intro-panel {
   position: absolute;
@@ -195,6 +216,12 @@
    start), the `@starting-style` ones pinned at their start. */
 [data-intro="1"]
   :is(.strip-cell, .title-word, .title-rest, .dissolve, .lift, .cover-float-frame, .cover-float-card) {
+  animation-play-state: paused;
+}
+/* The photographs wait for the lift as well and arrive once the panel
+   has cleared. Their blur, on nine cards at once, dropped frames from the
+   lift on a cold start (Julian chose this over losing the blur, 2026-10-04). */
+[data-intro="lift"] :is(.cover-float-frame, .cover-float-card) {
   animation-play-state: paused;
 }
 [data-intro="1"] :is(.rise, .emerge) {
@@ -506,20 +533,6 @@
 :is(.strip-cell, .photo-corner, .drift-wall__inner):has(img[src*="/covers/"]) {
   border-radius: 0;
 }
-/* Julian: the project tiles square at the foot, so the plate with the
-   name sits flush along the bottom edge: the homepage's, and the covers
-   across /work (`cover-cell.tsx`, the ones carrying a plate). */
-/* Julian: the names on the homepage's tiles a touch more open than the
-   -0.04em every black heading carries (`.font-display`). */
-.band-tile h3 {
-  letter-spacing: -0.02em;
-}
-.band-tile :is(.strip-cell, .photo-corner),
-.strip-cell:has(.cover-plate) {
-  border-bottom-left-radius: 0;
-  border-bottom-right-radius: 0;
-}
-
 /* The name through glass (`warp-text.tsx`): the canvas fills its box. */
 .warp-text {
   position: relative;
@@ -648,10 +661,14 @@
   color: var(--hero-on-ink);
   border: 0;
 }
+/* Julian (2026-10-03): the second door read as disabled, a hairline on
+   the dark. Private clients are half the audience, so it is a button in
+   its own right: a lowkey grey fill, the Sessions card's, and an edge
+   that shows. Still second to the solid one beside it. */
 .cover-cta-quiet {
-  background: transparent;
+  background: color-mix(in oklab, var(--hero-ink) 9%, var(--background));
   color: var(--hero-ink);
-  border: 1px solid var(--hero-line);
+  border: 1px solid color-mix(in oklab, var(--hero-ink) 35%, transparent);
 }
 /* Julian: a hover on the homepage's buttons. The pair invert, as the
    site's other buttons do (`action`, `action-quiet`): the solid one
@@ -1250,18 +1267,16 @@
      open up between the words, and measured on every page, under 1024px
      wide nearly every paragraph had 19 to 42. So justified from there up,
      set left below it, and set left too where a desktop column is narrow
-     (the sessions' lines, the contact steps and notes carry `text-left`). */
+     (the sessions' lines, the contact steps and notes carry `text-left`).
+     Julian (2026-10-03, audit): set left everywhere. The prose is in
+     sentence case now and the measure still opens gaps where a column
+     narrows (2.5 spaces wide on the last screen's doors). */
   p {
     text-align: left;
     /* Julian (2026-10-02): never a word broken at the line's end
        ("accu-rate"). Whole words, the lines evened out instead. */
     hyphens: manual;
     text-wrap: pretty;
-  }
-  @media (min-width: 64rem) {
-    p {
-      text-align: justify;
-    }
   }
 
   html {
@@ -1515,28 +1530,26 @@ article:has(.strip-scroll[data-past-first]) .running-head {
    photograph. Tabbing to it brings it back, so it is never an invisible
    focus target, and below `lg` the cover stacks under a fixed bar with no
    masthead beside it, so the name simply stays. */
+/* Julian (2026-10-04): it comes in from the left as the cover goes. */
 .home-wordmark {
   opacity: 0;
   pointer-events: none;
-  translate: 0 20px;
-  scale: 1.35;
+  translate: -48px 0;
   transition:
-    opacity 300ms var(--ease-out-strong),
-    translate 300ms var(--ease-out-strong),
-    scale 300ms var(--ease-out-strong);
+    opacity 360ms var(--ease-out-strong),
+    translate 480ms var(--ease-out-strong);
 }
 body:has(.strip-scroll[data-past-first]) .home-wordmark,
+body:has(.strip-scroll[data-past-hero]) .home-wordmark,
 .home-wordmark:focus-visible {
   opacity: 1;
   pointer-events: auto;
   translate: none;
-  scale: none;
 }
 @media (prefers-reduced-motion: reduce) {
   .home-wordmark {
     transition: opacity 300ms var(--ease-out-strong);
     translate: none;
-    scale: none;
   }
 }
 
@@ -1718,7 +1731,7 @@ nav[aria-label="Categories"] ul[data-more] {
 
      The ask is excepted below; it sets its own width. */
   .strip-grid
-    > :is(div, section, article):not([data-hash="inquire"]):not(
+    > :is(div, section, article):not([data-hash="where-next"]):not(
       [data-tick]
     ):not([data-pictures]) {
     width: max-content !important;
@@ -1761,7 +1774,7 @@ nav[aria-label="Categories"] ul[data-more] {
   }
   /* The ask is the exception: a sentence, two buttons and the way on to the
      studio is not a label and does not fit in a slot. */
-  .strip-grid > [data-hash="inquire"] {
+  .strip-grid > [data-hash="where-next"] {
     grid-row: 1 / -1;
     /* Julian: a third of the window. The ask was one column of the rack
        wide — 239px on a 2000px screen, a strip of type in the corner.
@@ -1811,7 +1824,9 @@ nav[aria-label="Categories"] ul[data-more] {
    5.7% of the cover's width or the width one line of that many condensed
    caps can have. Nothing measures anything; it is one division. */
 .cover-name {
-  font-size: clamp(0.85rem, min(5.7cqw, calc(79cqw / var(--n, 12))), 2rem);
+  /* The slate's title (2026-10-03): the films' size, as large as the
+     length lets it be. Was 5.7cqw to 2rem on a plate. */
+  font-size: clamp(1rem, min(9cqw, calc(150cqw / var(--n, 12))), 3rem);
 }
 /* In the rack the same formula came out at its floor on every cover —
    13.6px under a 240px photograph, a caption rather than a title. Julian:
@@ -1822,35 +1837,6 @@ nav[aria-label="Categories"] ul[data-more] {
    more, which is where 160 comes from; every shorter name rises until the
    cap stops it. One line always — the division is what keeps it there,
    and `truncate` is the backstop. */
-/* And the plate they sit on. Julian: more space between the two lines and
-   the second one larger. In the rack the credit was at the floor of its
-   clamp — 8px under a 240px photograph — because the type is measured in
-   `cqw` off a cell that is a quarter of the width it has on the strip, and
-   the gap between the lines came out at 2px, which reads as one block of
-   type rather than a title and a subtitle. Both are set in rem here, where
-   the column is a known size. */
-/* The credit on a light plate over a dark photograph read about 4:1;
-   the ink at 80% clears 4.5:1 over any picture (UI/UX review,
-   2026-10-02). */
-:root[data-theme="light"] .cover-plate .label {
-  color: color-mix(in oklab, var(--foreground) 80%, transparent);
-}
-.strip-grid .cover-plate {
-  gap: 0.3rem;
-  /* Sized to what is on it, not to a share of the cover. Two fifteenths of
-     a 240px column is 32px, and a name set at 20 with a credit under it
-     needs 45: the type was centred in a plate too short for it and the
-     first line came out half on the photograph. On the strip the plate is
-     a fixed band of a tall cover and stays as it was. */
-  height: auto;
-  min-height: 0;
-  /* Julian: the plate slightly larger (was 0.45rem). */
-  padding-block: 0.7rem;
-}
-.strip-grid .cover-plate .label {
-  font-size: 0.6875rem;
-  letter-spacing: 0.08em;
-}
 .strip-grid .cover-name {
   font-size: clamp(0.75rem, min(9cqw, calc(160cqw / var(--n, 12))), 1.5rem);
 }
@@ -1883,63 +1869,12 @@ a.strip-cell {
 }
 
 /* ── glass costs a tablet more than it is worth ──
-   The plate under a cover is blurred glass, and a strip is thirty of them
-   moving at once. A backdrop filter has to re-read the pixels behind it
-   every frame, per plate: on the iPad that came out as plates painted
-   twice, a title over its own ghost, and cells that arrived empty. Where
-   the pointer is a finger the plate is the same plate, filled rather than
-   blurred — at a stride nobody is reading the photograph through it
-   anyway. The header, the buttons and the bar on a project page keep
-   theirs: one of a thing is not thirty. */
+   A backdrop filter re-reads the pixels behind it every frame, and on the
+   iPad thirty of them moving at once came out as plates painted twice and
+   cells that arrived empty. Where the pointer is a finger, the plates on
+   the homepage's work tiles are filled rather than blurred, and the ones
+   that only show on hover, which a touch screen never shows, drop it. */
 @media (pointer: coarse) {
-  .cover-plate {
-    -webkit-backdrop-filter: none;
-    backdrop-filter: none;
-    background-color: color-mix(in oklab, var(--background) 88%, transparent);
-  }
-}
-/* Julian: lower 60%. Over a pale photograph the blurred backdrop came
-   straight through the plate and the band read as light grey with grey
-   type on it, which is the lightening he was pointing at. The tint is
-   left where it is; what comes through it is taken down to two fifths of
-   its brightness, so the band is dark under any photograph and the name
-   keeps its contrast.
-
-   Dark only. In the light theme the plate is meant to be pale and
-   darkening the backdrop would put a black band across a white page. */
-:root:not([data-theme="light"]) .cover-plate {
-  /* Julian, again, the other way: lower the tint and the blur. Measured on
-     DECOY, the palest cover, against the two-fifths above: the band went
-     from near black (grey 36) to a smoked glass (grey 93) that lets the
-     photograph read through it. Twelve pixels of blur, not eighteen, so
-     the picture under the plate is still a picture. The tint comes down
-     from 70% to 45% of the ground, which is the `bg-background/70` on
-     the plate overridden here, in the dark theme only. */
-  -webkit-backdrop-filter: blur(12px) saturate(1.3) brightness(0.65);
-  backdrop-filter: blur(12px) saturate(1.3) brightness(0.65);
-  background-color: color-mix(in oklab, var(--background) 45%, transparent);
-}
-/* What the lighter band costs is the handle under the name: the muted grey
-   measured 2.0:1 against it on DECOY. Lifted to nearly the ink, it is
-   4.8:1, better than the 4.6:1 it had on the dark band. */
-:root:not([data-theme="light"]) .cover-plate .text-muted-foreground {
-  color: color-mix(in oklab, var(--foreground) 88%, transparent);
-}
-/* The tablet rule above, again, after the dark plate: that rule's
-   `:root:not(...)` outranked the bare `.cover-plate` in the media query, so
-   in the dark theme a finger got every plate blurred anyway, 87 of them on
-   /work (measured). Same selector weight, later, so it wins in both
-   themes. And two more that a finger never needed as glass: the plates on
-   the homepage's work tiles, and the plates that only show on hover, which
-   a touch screen never shows and still paid a backdrop layer for each. */
-@media (pointer: coarse) {
-  :root .cover-plate,
-  :root:not([data-theme="light"]) .cover-plate,
-  :root .band-tile .glass-surface {
-    -webkit-backdrop-filter: none;
-    backdrop-filter: none;
-    background-color: color-mix(in oklab, var(--background) 88%, transparent);
-  }
   :root .glass-surface.opacity-0 {
     -webkit-backdrop-filter: none;
     backdrop-filter: none;
@@ -2015,7 +1950,7 @@ a.strip-cell {
 }
 .strip-grid[data-rack] > a:not([style*="--ar"]),
 .strip-grid[data-rack]
-  > :where(div, section, article):not([data-hash="inquire"]) {
+  > :where(div, section, article):not([data-hash="where-next"]) {
   width: var(--rack-w) !important;
 }
 /* On a phone the page is not locked and the strip is already a column, so
@@ -2078,20 +2013,11 @@ a.strip-cell {
    Hidden only once the mark is drawn (`data-mark`), and important because
    the arrange view's grab and the admin's `cursor-grab` would otherwise
    win the arrow back over the surfaces the mark covers.
-   Text fields keep the native caret, and the mark steps aside there. */
+   Over a text field it becomes a caret of its own (below). */
 @media (hover: hover) and (pointer: fine) {
   :root[data-mark],
   :root[data-mark] * {
     cursor: none !important;
-  }
-  :root[data-mark]
-    :is(
-      input:not([type="button"], [type="submit"], [type="reset"], [type="checkbox"], [type="radio"], [type="range"], [type="color"], [type="file"]),
-      textarea,
-      select,
-      [contenteditable]:not([contenteditable="false"])
-    ) {
-    cursor: auto !important;
   }
 }
 .pointer-mark {
@@ -2125,8 +2051,11 @@ a.strip-cell {
   scale: calc(22 / 120);
   background: var(--mark-fill);
 }
-.pointer-mark[data-state="text"] {
-  opacity: 0;
+/* Over a text field (Julian, 2026-10-04: a custom icon for the form): the
+   dot draws itself out into a caret, a thin upright bar, on the same
+   curve as every change of size, and rounds back up on the way out. */
+.pointer-mark[data-state="text"] .mark-dot {
+  scale: calc(2.5 / 120) calc(24 / 120);
 }
 /* Drawn large and scaled down, never up, so the edge stays clean at
    every size and growing it is a compositor-only change. */
@@ -2173,6 +2102,33 @@ a.strip-cell {
     translate 220ms var(--ease-out-strong),
     transform var(--press);
 }
+/* A row of the Commissions list: the dot grows to hold an arrow pointing
+   on, drawn black so the difference blend cuts it out of the dot (the
+   invert kept, Julian). It slides in from the left as the dot grows, and
+   goes back the same way. */
+.pointer-mark[data-row] .mark-dot {
+  scale: calc(44 / 120);
+}
+.mark-arrow {
+  position: absolute;
+  left: -12px;
+  top: -12px;
+  opacity: 0;
+  scale: 0.5;
+  translate: calc(var(--sx, 0px) - 6px) var(--sy, 0px);
+  transition:
+    opacity 200ms var(--ease-out-strong),
+    scale var(--grow),
+    translate 220ms var(--ease-out-strong);
+}
+.pointer-mark[data-row] .mark-arrow {
+  opacity: 1;
+  scale: 0.8;
+  translate: var(--sx, 0px) var(--sy, 0px);
+}
+.pointer-mark[data-down] .mark-arrow {
+  scale: 0.66;
+}
 .mark-drop {
   position: absolute;
   left: 55px;
@@ -2206,12 +2162,14 @@ a.strip-cell {
   opacity: 1;
 }
 /* The icon under it: larger, leaning toward the hand. */
-[data-stick] > :is(svg, span) {
+/* Not a row (`data-stick="row"`, the Commissions list): the dot snaps to
+   it, and a 1.2 scale on a line of display type would be a lurch. */
+[data-stick]:not([data-stick="row"]) > :is(svg, span) {
   transition:
     scale 300ms var(--ease-out-strong),
     translate 300ms var(--ease-out-strong);
 }
-[data-stick][data-stuck] > :is(svg, span:not(.sr-only)) {
+[data-stick]:not([data-stick="row"])[data-stuck] > :is(svg, span:not(.sr-only)) {
   scale: 1.2;
   translate: var(--lean-x, 0) var(--lean-y, 0);
 }
@@ -2524,7 +2482,10 @@ a.strip-cell {
    chapter comes in whole. A spread of the page's own colour, not a
    shadow: it is invisible everywhere but over the card behind. */
 .strip-scroll[data-dealt="chapters"] > * {
-  box-shadow: 0 0 0 calc(0.5rem + 1px) var(--background);
+  /* A variable, so the hover's shadow can carry it too (Julian, 2026-10-04:
+     the hover shadow had replaced it and the chapter behind showed). */
+  --deal-ground: 0 0 0 calc(0.5rem + 1px) var(--background);
+  box-shadow: var(--deal-ground);
 }
 /* A cover with no partner in the rack stands over an empty row, and the
    chapter behind showed through the hole (Julian, 2026-10-02, Artist
@@ -2532,13 +2493,15 @@ a.strip-cell {
    shelf's height (`.strip-grid` is the size container); a partner, when
    there is one, is painted after it and covers it. */
 .strip-scroll.strip-grid[data-dealt="chapters"] > [data-alone] {
-  box-shadow:
+  --deal-ground:
     0 0 0 calc(0.5rem + 1px) var(--background),
     0 calc((100cqh + 1rem) / 2) 0 calc(0.5rem + 1px) var(--background);
 }
 .strip-scroll[data-arrive="fade"] .strip-cell,
 .strip-scroll[data-arrive="fly"] .strip-cell,
 .strip-scroll[data-arrive="seat"] .strip-cell,
+.strip-scroll[data-arrive="seat"] .title-word,
+.strip-scroll[data-arrive="seat"] .title-rest,
 .strip-scroll[data-arrive="zoom"] .strip-cell,
 .strip-scroll[data-arrive="zoom"] .title-word,
 .strip-scroll[data-arrive="zoom"] .title-rest,
@@ -2897,6 +2860,10 @@ h2.contact-title {
   --card: oklch(0.185 0.003 70);
   --border: oklch(1 0 0 / 11%);
   --input: oklch(1 0 0 / 14%);
+  /* And the ground with it: the light theme's glow stayed behind the
+     footer, the one strip the film does not reach, and read as a grey
+     band (Julian, 2026-10-03). */
+  --ground: linear-gradient(var(--background), var(--background));
 }
 /* And every quiet word goes nearly white over the film. A muted grey is
    readable on a still ground and not on a reel that is bright in one
@@ -3751,6 +3718,81 @@ h2.contact-title {
     transition: none;
   }
 }
+/* The portfolio's head, pinned under the bar on a phone: the bar's glass
+   carried on down (`work-shell.tsx`). Its own layer, as the bar's is, so
+   the filter's pill inside keeps its own. */
+@media (max-width: 39.999rem) {
+  .head-glass::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background-color: color-mix(in oklab, var(--background) 72%, transparent);
+    -webkit-backdrop-filter: blur(var(--glass-blur, 9px)) saturate(1.5);
+    backdrop-filter: blur(var(--glass-blur, 9px)) saturate(1.5);
+  }
+}
+/* And on a phone held upright, the bar and the head are one pane (Julian,
+   2026-10-04): the bar lets go of its own glass and its rule, and the
+   head's glass reaches up behind it to the top of the screen. */
+@media (max-width: 39.999rem) and (orientation: portrait) {
+  /* `[data-home]` too, now the portfolio has the homepage's glass, so
+     this one pane still wins there. */
+  :root:has(.head-glass) .site-bar,
+  :root:has(.head-glass) .site-bar[data-home]:not([data-plain="true"]) {
+    background-color: transparent;
+    border-color: transparent;
+    box-shadow: none;
+  }
+  :root:has(.head-glass) .site-bar::after {
+    opacity: 0;
+  }
+  .head-glass::before {
+    top: calc(-61px - env(safe-area-inset-top, 0px));
+  }
+}
+/* From a tablet up as well (Julian, 2026-10-05: integrate the head into
+   the navbar): the portfolio's title row and the bar are one pane of the
+   homepage's glass, with one hairline under both. The pane reaches up
+   past the top of the screen, so it needs no measure of the bar. */
+@media (min-width: 40rem) {
+  :root:has(.head-glass) .site-bar,
+  :root:has(.head-glass) .site-bar[data-home]:not([data-plain="true"]) {
+    background-color: transparent;
+    border-color: transparent;
+    box-shadow: none;
+  }
+  :root:has(.head-glass) .site-bar::after {
+    opacity: 0;
+  }
+  .head-glass {
+    position: relative;
+    isolation: isolate;
+    /* Room under the chips before the pane's hairline (Julian,
+       2026-10-05: some space under the filter). */
+    padding-bottom: 0.875rem;
+  }
+  .head-glass::before {
+    content: "";
+    position: absolute;
+    inset: -12rem 0 0;
+    margin-inline: calc(50% - 50vw);
+    z-index: -1;
+    pointer-events: none;
+    border-bottom: 1px solid color-mix(in oklab, var(--foreground) 12%, transparent);
+    background-color: color-mix(in oklab, var(--background) var(--glass-tint, 34%), transparent);
+    -webkit-backdrop-filter: blur(var(--glass-blur, 9px)) saturate(1.5);
+    backdrop-filter: blur(var(--glass-blur, 9px)) saturate(1.5);
+  }
+}
+@media (max-width: 39.999rem) and (prefers-reduced-transparency: reduce) {
+  .head-glass::before {
+    background-color: var(--background);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+}
 @media (prefers-reduced-transparency: reduce) {
   .site-bar::after {
     -webkit-backdrop-filter: none;
@@ -3858,6 +3900,44 @@ h2.contact-title {
   transition-delay: 0ms, 80ms, 80ms, 80ms;
 }
 
+/* Preview, `?menu3d=1` (Julian, 2026-10-04): on a phone the page pushed
+   aside swings back in perspective about the edge it shares with the
+   drawer, the drawer turns in on its way, the glass over the page is
+   lighter, and closing is the same movement backwards: the same lengths,
+   the names leaving from the foot up. */
+@media (max-width: 39.999rem) and (prefers-reduced-motion: no-preference) {
+  :root[data-menu3d] :is(.site-bar, body > main, body > footer) {
+    transform-origin: 100% var(--oy, 50vh);
+    /* Inertia (Julian, 2026-10-04): the swing carries a little past and
+       settles back, the slide only just, so the page's edge and the
+       drawer's stay together. */
+    transition:
+      translate 620ms var(--ease-spring),
+      transform 620ms var(--ease-bounce);
+  }
+  :root[data-menu3d][data-drawer="menu"] :is(.site-bar, body > main, body > footer) {
+    transform: perspective(900px) rotateY(16deg) scale(0.94);
+    transition-delay: 80ms;
+  }
+  :root[data-menu3d] .site-menu-panel {
+    transform-origin: 0 50%;
+    transform: perspective(900px) rotateY(-28deg);
+    transition:
+      translate 620ms var(--ease-spring),
+      transform 620ms var(--ease-bounce);
+  }
+  :root[data-menu3d][data-drawer="menu"] .site-menu-panel {
+    transform: none;
+    transition-delay: 80ms;
+  }
+  :root[data-menu3d] .site-menu {
+    transition-duration: 420ms, 520ms, 520ms, 520ms;
+  }
+  :root[data-menu3d]:not([data-drawer="menu"]) .site-menu-item {
+    transition-delay: max(0ms, calc(240ms - var(--reveal-delay, 0ms)));
+  }
+}
+
 /* Somebody who has asked for less transparency gets the page plain. The
    glass is a way of saying the page is not the thing being looked at;
    dropping to a solid wash instead would say it is not there at all. */
@@ -3920,6 +4000,40 @@ h2.contact-title {
   opacity: 1;
   translate: none;
   transition-delay: calc(80ms + var(--reveal-delay, 0ms));
+}
+/* The heading a menu name is flying into (`nav-fly.ts`): out of sight
+   until the word lands on it, and then without its own rise, which the
+   flight has already done. */
+[data-fly-hold] {
+  visibility: hidden;
+}
+[data-flown] .title-word {
+  animation: none;
+  translate: none;
+}
+
+/* In the light the names standing back went pale grey on the pale ground
+   (Julian, 2026-10-04): darker there, the one you are on still the
+   darkest. */
+:root[data-theme="light"] .site-menu a:not([aria-current="page"], :active) {
+  opacity: 0.68;
+}
+@media (hover: hover) {
+  :root[data-theme="light"] .site-menu a:not([aria-current="page"]):hover {
+    opacity: 0.85;
+  }
+}
+/* The name under the finger at full strength; the others go out of focus
+   round it in the focus field (`focus-field.tsx`). */
+@media (pointer: coarse) {
+  .site-menu a:active {
+    opacity: 1;
+  }
+  /* A finger drawn across the names moves the focus with it; left to
+     pan, the drag was taken for a scroll and the focus let go. */
+  .site-menu nav {
+    touch-action: none;
+  }
 }
 
 /* The footer held with the page while the splash is up, and let in with
@@ -4138,7 +4252,7 @@ optgroup {
  * Clicking a cover on the homepage or the index does not swap one page for
  * another. The photograph lifts out of its cell, travels, and settles into
  * the first frame of the project — and comes back the same way. React's
- * `<ViewTransition name>` pairs the two elements (see `work-band.tsx`,
+ * `<ViewTransition name>` pairs the two elements (see
  * `work-index.tsx`, `gallery.tsx`); this is how the trip looks.
  *
  * `.morph` is the class the `share` prop assigns, so these rules touch only
@@ -4306,6 +4420,26 @@ optgroup {
     transform: translateY(-2.5vh);
   }
 }
+/* The browser's back button (`onPop`, `page-transition.tsx`): React runs
+   no transition for a pop, so the page is named by hand and given the
+   way out above. The one left drops and goes on top; the one returned to
+   is whole underneath and settles down from above. */
+::view-transition-group(back-page) {
+  animation-duration: 420ms;
+  animation-timing-function: cubic-bezier(0.32, 0.72, 0, 1);
+}
+::view-transition-image-pair(back-page) {
+  isolation: auto;
+}
+::view-transition-old(back-page) {
+  z-index: 1;
+  animation: jg-page-down 200ms cubic-bezier(0.32, 0.72, 0, 1) both;
+  mix-blend-mode: normal;
+}
+::view-transition-new(back-page) {
+  animation: jg-page-settle 420ms cubic-bezier(0.32, 0.72, 0, 1) both;
+  mix-blend-mode: normal;
+}
 /* ── along the bar ──
    Julian chose it from three: a press in the bar deals the next page in
    as a card over the one you are on, which recedes into the dark behind
@@ -4350,8 +4484,18 @@ optgroup {
 /* Which put the card over the bar, which is on the root and not in any
    group: the wordmark was eaten from the right as the card came in. The
    bar is its own group on a deal, above the card, and holds still. */
-:root[data-nav-side] .site-bar {
+:root[data-nav-side] .site-bar,
+:root[data-nav] .site-bar {
   view-transition-name: site-bar;
+}
+/* Arrived by a press, the cover is already on its way (Julian: Sessions
+   into a booking page "needs to be smooth"). Its entrance waits 420ms and
+   spreads over 1.3s for the opening panel on a cold load; behind a page
+   crossing that was an empty page rising, then the frames, the screen
+   blank in between. Here the frames fly in with the page. */
+:root[data-moved] .cover-float {
+  --h-start: 0ms !important;
+  --h-spread: 0.3ms !important;
 }
 /* No cover flies on a deal. The homepage's selected work and the work
    index share the covers' names (`cover-${slug}`, the morph into a
@@ -4544,9 +4688,12 @@ optgroup {
     padding-block: 0 0.25rem;
     /* Julian: space between "All projects" and the first cover, which
        the next screen's shadow also falls across. 88px, then closer to
-       the first project twice (2026-10-02). */
-    padding-right: 1.25rem;
-    padding-left: 1rem;
+       the first project twice (2026-10-02). Then the margins of the
+       discipline's own page, where "All projects" leads (2026-10-04): the
+       page's 40px before the name, 64px from it to the first cover with
+       the strip's 16px gap. */
+    padding-right: 3rem;
+    padding-left: 2.5rem;
   }
   /* The first spine 88px off the left edge: the strip's own 40px and
      this (Julian: 32px, 64px, then wider again 2026-10-02). */
@@ -5305,6 +5452,15 @@ optgroup {
   }
 }
 
+/* Sessions' button, alone with no liquid under it: its glass at 72% ink
+   over the dark screen read grey, as if it could not be pressed
+   (critique, 2026-10-03). Solid ink at rest, like the liquid buttons;
+   its hover is its own. */
+:is(.sessions-book, .services-book):not(:hover, :focus-visible, :active) {
+  background-color: var(--foreground);
+  border-color: var(--foreground);
+}
+
 /* Off. A button that cannot be pressed yet says so by going quiet: the
    fill drops back, the label goes with it, and nothing under the pointer
    answers. It keeps its size, so the row does not move when the form
@@ -5796,6 +5952,9 @@ h2:not(.label) {
   }
   [data-hash="about"] > [data-scroll] > div {
     align-self: center;
+    /* Never taller than the screen, so the words scroll inside themselves
+       rather than the column centring up under the bar. */
+    max-height: 100%;
   }
   [data-hash="about"] > [data-scroll] > figure {
     height: min(56rem, calc(100cqh - 8.5rem));
@@ -5808,6 +5967,192 @@ h2:not(.label) {
 @media (min-width: 40rem) and (pointer: coarse) {
   [data-hash="about"] {
     --screen-title-y: max(4.5rem, 50cqh - 18.875rem);
+  }
+}
+/* Sessions centred while it fits, from the top once it does not (the
+   open list ran up under the bar at 1440x840). In CSS, not a utility:
+   `items-[safe_center]` never reached the page. */
+.sessions-screen,
+.services-screen {
+  align-items: safe center;
+}
+/* ── the light table (`services-screen.tsx`) ──
+   The discipline's frames whole, in justified rows (laid out in JS so
+   they fit the table uncropped).
+
+   Julian (2026-10-03, /impeccable animate): the one authored moment is
+   the deal. Arriving on Commissions, or pointing at another discipline,
+   the frames rack into focus one after another the way a lens pulls
+   focus, a little large and soft, then sharp. Visible by default: the
+   deal is a keyframe on mount (fill backwards, so it lets go once done),
+   and the arrival a transition from a hidden state that only applies
+   while the strip says it is somewhere else, as the rows do. Pointing at
+   a frame keeps it and sets the rest back, and its project's name comes
+   up in its corner. Reduced motion: an opacity fade, nothing moves. */
+@keyframes light-rack {
+  from {
+    opacity: 0;
+    filter: blur(10px);
+    scale: 1.035;
+  }
+  45% {
+    opacity: 1;
+  }
+}
+.light-cell {
+  transition:
+    opacity 240ms var(--ease-out-strong),
+    filter 620ms var(--ease-out-strong),
+    scale 620ms var(--ease-out-strong),
+    transform 450ms var(--ease-out-strong),
+    box-shadow 450ms var(--ease-out-strong),
+    translate 900ms cubic-bezier(0.25, 1, 0.5, 1);
+}
+/* Julian (2026-10-04): the cards stand a little off the table, a few
+   pixels toward the viewer with a soft shadow under them, and the one
+   under the pointer tips toward it on every axis (`--rx`, `--ry`,
+   `--rz`, written by
+   `services-screen.tsx`). `scale` stays free for the arrival. */
+/* Realism (Julian, 2026-10-04): each card has its own perspective, so it
+   turns about its own centre instead of warping toward the sheet's
+   vanishing point; small angles; it follows the pointer quickly and
+   settles slowly; the shadow falls away from the tilt. No glare (Julian,
+   2026-10-04: it read as a glow round the pointer). */
+.light-cell {
+  transform: perspective(1000px) translateZ(var(--lz, 10px)) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)) rotateZ(var(--rz, 0deg));
+  /* No shadow at rest (Julian, 2026-10-04: only on hover); the same
+     shape, clear, so it fades in rather than snaps. */
+  box-shadow: 0 22px 40px -16px rgb(0 0 0 / 0);
+}
+.light-cell:hover {
+  /* Up off the table toward the viewer (Julian, 2026-10-04: more lift). */
+  --lz: 20px;
+  box-shadow: var(--sx, 0px) calc(22px + var(--sy, 0px)) 40px -16px rgb(0 0 0 / 0.6);
+  transition:
+    opacity 240ms var(--ease-out-strong),
+    filter 620ms var(--ease-out-strong),
+    scale 620ms var(--ease-out-strong),
+    transform 140ms ease-out,
+    /* Fades in rather than snapping on (Julian, 2026-10-04: smoothly). */
+    box-shadow 500ms var(--ease-out-strong),
+    translate 900ms cubic-bezier(0.25, 1, 0.5, 1);
+}
+/* Room for it (Julian, 2026-10-04): the lifted card grows a few pixels
+   past the 6px gutter, so its neighbours ease aside by half that, the ones
+   before it back, the ones after it on, the rows above up and the rows
+   below down, and settle again when it does. */
+.light-sheet:has(.light-cell:hover) {
+  --push: 3px;
+}
+.light-cell:has(~ .light-cell:hover) {
+  translate: calc(var(--push) * -1) 0;
+}
+.light-cell:hover ~ .light-cell {
+  translate: var(--push) 0;
+}
+.light-sheet:has(~ .light-sheet .light-cell:hover) .light-cell {
+  translate: 0 -3px;
+}
+.light-sheet:has(.light-cell:hover) ~ .light-sheet .light-cell {
+  translate: 0 3px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .light-cell {
+    translate: none !important;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .light-cell {
+    transform: none;
+  }
+}
+/* The frame under the pointer (Julian, 2026-10-03: the lift and the push
+   were messy across frames of different shapes; 2026-10-04: no zoom on
+   hover anywhere). Nothing moves on the table: the slate rises over the
+   photograph, and the others hold their places, softened (below). */
+.light-cell img {
+  transition:
+    filter 300ms var(--ease-out-strong),
+    scale 300ms var(--ease-out-strong);
+}
+.light-name {
+  /* The slate (2026-10-03, Julian: the same for #work): a fall of shadow
+     across the foot with the name on it, not a line of text on the photo. */
+  position: absolute;
+  inset-inline: 0;
+  bottom: 0;
+  padding: 2.5rem 0.75rem 0.625rem;
+  opacity: 0;
+  translate: 0 0.25rem;
+  transition:
+    opacity 160ms var(--ease-out-strong),
+    translate 220ms var(--ease-out-strong);
+}
+.light-cell:focus-visible .light-name {
+  opacity: 1;
+  translate: 0 0;
+}
+@media (hover: hover) and (pointer: fine) {
+  /* The others' softening is the focus field now (`focus-field.tsx`). */
+  .light-cell:hover .light-name {
+    opacity: 1;
+    translate: 0 0;
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .light-cell {
+    animation: light-rack 640ms var(--ease-out-strong) backwards;
+    animation-delay: calc(80ms + var(--i, 0) * 38ms);
+    transition-delay: calc(120ms + var(--i, 0) * 38ms);
+  }
+  .light-table:has(.light-cell:hover) .light-cell {
+    transition-delay: 0s;
+  }
+  .strip-scroll[data-at]:not([data-at="Commissions"]) .light-cell {
+    opacity: 0;
+    filter: blur(10px);
+    scale: 1.035;
+    transition-duration: 0s;
+    transition-delay: 0s;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .light-cell {
+    animation: jg-fade-in 240ms ease-out backwards;
+  }
+}
+/* How a commission runs, one step after another as About arrives, and
+   the sessions as Sessions does. Hidden
+   only while the strip says it is somewhere else, so a page without the
+   strip, or before it has said, shows them as they are. Gone at once on
+   the way out, so the next arrival plays it again. */
+@media (prefers-reduced-motion: no-preference) {
+  :is(.about-step, .session-step, .services-step) {
+    transition:
+      opacity 560ms var(--ease-out-strong),
+      translate 640ms var(--ease-out-strong);
+    transition-delay: calc(180ms + var(--i, 0) * 110ms);
+  }
+  /* In from the right, the way the strip travels (`jg-fade-up`). It rose
+     from below once, and the last step rising past the list's foot gave
+     the list a scrollbar for as long as it moved (Julian saw it). The list
+     clips sideways, so this one cannot. About's label is "Biography"
+     since the menu names changed; the old "About" here left its steps
+     hidden for good (Julian saw it, 2026-10-05). */
+  .strip-scroll[data-at]:not([data-at="Biography"]) .about-step,
+  .strip-scroll[data-at]:not([data-at="Sessions"]) .session-step,
+  .strip-scroll[data-at]:not([data-at="Commissions"]) .services-step {
+    opacity: 0;
+    translate: 2rem 0;
+    transition-duration: 0s;
+    transition-delay: 0s;
+  }
+}
+/* Upright, the screen is tall and its columns narrow: the words need the
+   height the centring gave away (an iPad, 165px above the title). */
+@media (min-width: 40rem) and (orientation: portrait) {
+  [data-hash="about"] {
+    --screen-title-y: 6rem;
   }
 }
 
@@ -6121,34 +6466,59 @@ h2:not(.label) {
   transform: perspective(1400px) translateZ(-160px) rotateY(var(--turn));
   transition: transform 500ms var(--ease-out-strong);
 }
-/* Julian: natural, smooth. Turned less (28deg, then 20). */
+/* Julian (2026-10-03): a cover flow, turned away on the edge that meets
+   the picture, so the outer edge recedes. */
 .lightbox-side[data-side="prev"] {
-  --turn: -20deg;
+  --turn: -38deg;
+  transform-origin: right center;
 }
 .lightbox-side[data-side="next"] {
-  --turn: 20deg;
+  --turn: 38deg;
+  transform-origin: left center;
 }
 @media (hover: hover) and (pointer: fine) {
   .lightbox-side[data-side="prev"]:hover {
-    --turn: -8deg;
+    --turn: -24deg;
   }
   .lightbox-side[data-side="next"]:hover {
-    --turn: 8deg;
+    --turn: 24deg;
   }
 }
+/* Full opacity (Julian: dont fade the images). */
 .lightbox-peek {
-  /* Julian: lower (6px, then 2). */
-  filter: blur(1px);
-  opacity: 0.45;
   animation: peek-in 500ms var(--ease-out-strong) 120ms backwards;
-  transition:
-    filter 300ms var(--ease-out-strong),
-    opacity 300ms var(--ease-out-strong);
+  box-shadow: 0 24px 60px -24px rgb(0 0 0 / 0.5);
+}
+/* Julian (2026-10-03): glass, not blur. The photograph sharp under a pane:
+   a lit top edge and a darker foot as `.play-glass` draws them, and a
+   broad diagonal sheen that slides across as the card turns to you. */
+.lightbox-glass {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(
+      115deg,
+      color-mix(in oklab, white 26%, transparent) 0%,
+      color-mix(in oklab, white 8%, transparent) 28%,
+      transparent 42%,
+      transparent 62%,
+      color-mix(in oklab, white 10%, transparent) 74%,
+      transparent 86%
+    )
+    0 0 / 200% 100% no-repeat,
+    linear-gradient(to bottom, transparent 60%, color-mix(in oklab, black 22%, transparent));
+  box-shadow:
+    inset 0 1px 0.5px color-mix(in oklab, white 70%, transparent),
+    inset 1px 0 0.5px color-mix(in oklab, white 30%, transparent),
+    inset -1px 0 0.5px color-mix(in oklab, white 30%, transparent),
+    inset 0 -1px 0.5px color-mix(in oklab, white 18%, transparent),
+    inset 0 0 2.5rem color-mix(in oklab, white 10%, transparent);
+  transition: background-position 700ms var(--ease-out-strong);
 }
 @media (hover: hover) and (pointer: fine) {
-  button:hover .lightbox-peek {
-    filter: none;
-    opacity: 0.8;
+  button:hover .lightbox-glass {
+    background-position: 100% 0, 0 0;
   }
 }
 @keyframes peek-in {
@@ -6251,6 +6621,22 @@ h2:not(.label) {
 .contact-pair {
   display: contents;
 }
+/* Any short window, not only a wide one: at 1280x720 the send button sat
+   under the end of its own box (critique, 2026-10-03). */
+@media (min-width: 40rem) and (max-height: 56rem) {
+  .contact-pair {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.5rem;
+  }
+}
+/* A phone's bar is one button tall: a jump to a screen stopped 6rem short,
+   and the end of the screen before showed under it. */
+@media (max-width: 39.99rem) {
+  html {
+    scroll-padding-top: 4rem;
+  }
+}
 /* A wide window that is short: a 32:9 screen, or a wide browser window
    not full height. The screens were laid out for the height a 21:9 or
    16:9 window has, and ran out of it. */
@@ -6328,31 +6714,25 @@ h2:not(.label) {
 .session-ground {
   z-index: -1;
 }
-.session-ink {
-  z-index: 1;
-  mix-blend-mode: difference;
+/* The hover. White ink over the row turned it inside out, a bright card
+   on the dark screen; Julian wanted it lower key (2026-10-03). A grey a
+   step off the ground under the words instead, which keep their own
+   colours. Opaque, as the liquid needs. */
+.session-col {
+  --session-hover: color-mix(in oklab, var(--foreground) 6%, var(--background));
 }
 
 /* ── the contact sheet (`contact-sheet.tsx`) ───────────────────
- * A rack focus under a mouse: every face sharp until one is pointed
- * at; that one comes up a little and the rest fall back, soft and low.
- * Filter and scale only, nothing moves in the layout.
+ * The hover the Commissions table and the portfolio have (Julian,
+ * 2026-10-03: the same on the sessions). The face pointed at leans in
+ * inside its own cell; the rest stay where they are, a touch soft. Was a
+ * rack focus, the others blurred 5px and taken down to 45%.
  * ─────────────────────────────────────────────────────────────── */
 @media (hover: hover) and (pointer: fine) {
   .contact-sheet img {
     transition:
-      filter 600ms var(--ease-out-strong),
-      scale 600ms var(--ease-out-strong);
-  }
-  /* Blurred, a frame is drawn a little larger than its cell, or the
-     blur pulls the cell's ground in round the edge as a coloured rim. */
-  .contact-sheet:has(button:hover) img {
-    filter: blur(5px) brightness(0.45) saturate(0.6);
-    scale: 1.1;
-  }
-  .contact-sheet button:is(:hover, :focus-visible) img {
-    filter: none;
-    scale: 1.05;
+      filter 300ms var(--ease-out-strong),
+      scale 900ms var(--ease-out-strong);
   }
 }
 @media (prefers-reduced-motion: reduce) {
@@ -6367,4 +6747,697 @@ h2:not(.label) {
    so Google's blue stays blue. */
 :root:not([data-theme="light"]) .booking-embed {
   filter: invert(0.9) hue-rotate(180deg);
+}
+
+/* Primaries solid under a finger (critique, 2026-10-03). The 72% glass
+   is drawn over by the liquid under a mouse; a phone has no liquid, and
+   the glass over the dark ground read as a grey, disabled button. */
+@media (hover: none), (pointer: coarse) {
+  .cover-cta:not(.cover-cta-quiet) {
+    background: var(--hero-ink);
+  }
+  .action:not(:disabled, [aria-disabled="true"]) {
+    background-color: var(--foreground);
+  }
+}
+
+/* The last screen's doors, each over a photograph (critique, 2026-10-03).
+   The veil is the ground, heavier toward the words, so the type keeps its
+   contrast whatever the frame; a hover lets a little more of it through. */
+.door-veil {
+  background: linear-gradient(
+    to right,
+    color-mix(in oklab, var(--background) 90%, transparent),
+    color-mix(in oklab, var(--background) 68%, transparent)
+  );
+  transition: opacity 400ms var(--ease-out-strong);
+}
+@media (hover: hover) and (pointer: fine) {
+  .group:hover > .door-veil {
+    opacity: 0.65;
+  }
+}
+/* The bar lies over the first door; its photograph starts under the bar
+   so the top of the frame is not hidden behind it (Julian: go up on the
+   photo). The fill image sets its box inline, hence the weight. */
+@media (min-width: 40rem) {
+  #where-next > :first-child > .door-photo {
+    /* Half under the bar (Julian: somewhere in between). */
+    top: calc(var(--bar-h) / 2) !important;
+    height: calc(100% - var(--bar-h) / 2) !important;
+  }
+}
+
+/* ── the portfolio, coming into the page (Julian, 2026-10-03) ──
+   Each picture comes up out of a fade and settles from a touch large as
+   it crosses into the window, tied to the scroll itself rather than to a
+   timer: it moves with the hand, both ways, and costs no script. Sideways
+   on a screen, downward on a phone. `filter: opacity()` rather than
+   `opacity`, which `data-fade` already owns for the load; no fill, so
+   once in, the picture is itself again and the hover zoom is its own.
+   Where scroll timelines are not supported the pictures simply show. */
+@keyframes jg-arrive {
+  from {
+    filter: opacity(0);
+    scale: 1.08;
+  }
+  to {
+    filter: opacity(1);
+    scale: 1;
+  }
+}
+/* The timeline is the cell's, named, not the picture's own `view()`: the
+   picture sits in a frame that clips, and a clipping box counts as a
+   scroller, so its own view never moved. */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .portfolio-arrive .strip-scroll > * {
+      view-timeline: --arrive x;
+    }
+    .portfolio-arrive img[data-fade] {
+      animation: jg-arrive linear none;
+      animation-timeline: --arrive;
+      animation-range: entry 0% entry 100%;
+    }
+    /* The first picture is in the window from the start, half way through
+       its entry on a phone, and Chrome takes nothing still fading in for
+       the page's largest paint: the portfolio reported none at all
+       (audit, 2026-10-05). It keeps the load's own fade (`data-fade`). */
+    .portfolio-arrive .strip-scroll > :nth-child(-n + 2) img[data-fade] {
+      animation: none;
+    }
+    @media (max-width: 39.99rem) {
+      .portfolio-arrive .strip-scroll > * {
+        view-timeline: --arrive y;
+      }
+    }
+  }
+}
+
+/* The Commissions rows' liquid hover (`services-screen.tsx`), Sessions'
+   drop on the same grey a step off the ground. Opaque, as the liquid
+   needs. */
+.services-col {
+  --services-hover: color-mix(in oklab, var(--foreground) 6%, var(--background));
+}
+
+/* Julian (2026-10-03): a field lifts under the pointer and stays up
+   while it is being typed in. Then: lower key, and one glass plane across
+   the card rather than a plate of its own. So the ground is a band running
+   wall to wall through the card's padding (32px, 20px on a phone), square,
+   with a hairline above and below, and the lift is a few pixels toward
+   the hand, nothing tipped. */
+.contact-field {
+  position: relative;
+  transform: perspective(900px);
+  transition: transform 360ms var(--ease-out-strong);
+}
+.contact-field::before {
+  content: "";
+  position: absolute;
+  inset: -0.5rem -1.25rem;
+  z-index: -1;
+  background-color: color-mix(in oklab, var(--foreground) 5%, transparent);
+  box-shadow:
+    inset 0 1px 0 color-mix(in oklab, var(--foreground) 9%, transparent),
+    inset 0 -1px 0 color-mix(in oklab, var(--foreground) 6%, transparent);
+  opacity: 0;
+  transition: opacity 300ms var(--ease-out-strong);
+  pointer-events: none;
+}
+@media (min-width: 40rem) {
+  .contact-field::before {
+    inset-inline: -2rem;
+  }
+}
+.contact-field:focus-within {
+  transform: perspective(900px) translateZ(8px);
+}
+.contact-field:focus-within::before {
+  opacity: 1;
+}
+@media (hover: hover) and (pointer: fine) {
+  .contact-field:hover::before {
+    opacity: 0.55;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .contact-field,
+  .contact-field:focus-within {
+    transform: none;
+  }
+}
+
+/* ── the inquiry card in depth ──
+   Julian (2026-10-03): the card grows toward you under the pointer, and
+   once somebody starts typing it comes forward into focus while the rest
+   of the screen steps back, so the form is the one thing in front of them
+   until they press Inquire. From a tablet up; on a phone the card is the
+   screen already. */
+@media (min-width: 40rem) {
+  .contact-card {
+    transform: perspective(1400px) translateZ(0);
+    transition:
+      transform 700ms var(--ease-out-strong),
+      box-shadow 700ms var(--ease-out-strong);
+  }
+  /* Never a scroll bar on it (Julian). It still scrolls if a short
+     window needs it; the wheel and the keys reach the fields. */
+  .contact-card [data-scroll] {
+    scrollbar-width: none;
+  }
+  .contact-card [data-scroll]::-webkit-scrollbar {
+    display: none;
+  }
+  .contact-inquire > :not(.contact-card, style) {
+    transition:
+      opacity 700ms var(--ease-out-strong),
+      filter 700ms var(--ease-out-strong);
+  }
+  /* Julian (2026-10-05): further forward (was 44px, now about 1.05x)
+     and a step toward the middle, as on hover, still clear of the text
+     on the left. */
+  .contact-card:focus-within {
+    transform: perspective(1400px) translateX(-3rem) translateZ(70px);
+    box-shadow: 0 50px 90px -40px rgb(0 0 0 / 0.6);
+  }
+  .contact-inquire:has(.contact-card:focus-within) > :not(.contact-card, style, .enquiry-backdrop) {
+    opacity: 0.35;
+    filter: blur(2px);
+  }
+  .contact-inquire:has(.contact-card:focus-within) > .enquiry-backdrop {
+    opacity: 0.5;
+  }
+}
+@media (min-width: 40rem) and (hover: hover) and (pointer: fine) {
+  /* Julian (2026-10-05): the edge's line and glow quieter under the
+     pointer. The beam sets its strength inline, hence !important. */
+  .contact-card:hover {
+    --beam-strength: 0.5 !important;
+  }
+  .contact-card:hover > .contact-edge {
+    opacity: 0.5;
+  }
+  /* Julian (2026-10-05): bigger, and a step toward the middle. */
+  .contact-card:hover:not(:focus-within) {
+    transform: perspective(1400px) translateX(-3rem) translateZ(56px);
+    box-shadow: 0 36px 70px -36px rgb(0 0 0 / 0.5);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .contact-card,
+  .contact-card:hover,
+  .contact-card:focus-within {
+    transform: none !important;
+  }
+  .contact-inquire > * {
+    filter: none !important;
+  }
+}
+
+/* ── the portfolio's hover, as the Commissions table has it ──
+   Julian (2026-10-03): the same on /portfolio, strip and grid. The cell
+   under the pointer holds its frame and its photograph leans in inside
+   it, slowly; every other cell stays where it is, a touch soft, so the one
+   you are on is the sharp one. Nothing moves on the row. */
+.portfolio-arrive .strip-cell img {
+  transition:
+    opacity 700ms cubic-bezier(0.22, 1, 0.36, 1),
+    scale 900ms var(--ease-out-strong),
+    filter 300ms var(--ease-out-strong);
+}
+
+/* And the Commissions table's tilt (Julian, 2026-10-04: the same hover on
+   the portfolio's projects): the card under the pointer lifts, tips toward
+   it (`card-tilt.tsx` writes where the hand is), casts a shadow away from
+   the side that lifts. At rest no transform at all,
+   so two hundred covers are not each a layer of their own. */
+.portfolio-arrive .strip-cell:not([data-deck]) {
+  box-shadow: 0 22px 40px -16px rgb(0 0 0 / 0), var(--deal-ground, 0 0 #0000);
+  transition:
+    transform 450ms var(--ease-out-strong),
+    box-shadow 450ms var(--ease-out-strong),
+    scale 440ms var(--ease-bounce);
+  &:active {
+    transition:
+      transform 450ms var(--ease-out-strong),
+      box-shadow 450ms var(--ease-out-strong),
+      scale 90ms cubic-bezier(0.4, 0, 1, 1);
+  }
+}
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  .portfolio-arrive .strip-cell:not([data-deck]):hover {
+    transform: perspective(1000px) translateZ(20px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)) rotateZ(var(--rz, 0deg));
+    box-shadow:
+      var(--sx, 0px) calc(22px + var(--sy, 0px)) 40px -16px rgb(0 0 0 / 0.6),
+      var(--deal-ground, 0 0 #0000);
+    transition:
+      transform 140ms ease-out,
+      box-shadow 500ms var(--ease-out-strong),
+      scale 440ms var(--ease-bounce);
+  }
+}
+
+/* ── the focus field ──────────────────────────────────────────────
+ * Julian (2026-10-04): focus that follows the pointer across a gallery.
+ * One layer over the gallery blurs what is behind it, and its mask is
+ * clear round the pointer, so the frames near it are sharp and the rest
+ * go out of focus by degrees with their distance, across the whole set
+ * rather than frame by frame (`focus-field.tsx` places it and moves the
+ * clearing).
+ * ─────────────────────────────────────────────────────────────── */
+.focus-field {
+  position: fixed;
+  z-index: 30;
+  pointer-events: none;
+  -webkit-backdrop-filter: blur(2.5px);
+  backdrop-filter: blur(2.5px);
+  --ff-mask: radial-gradient(
+    circle at var(--ff-x, 50%) var(--ff-y, 50%),
+    transparent 0,
+    transparent var(--ff-sharp, 160px),
+    /* Eased in and out (smoothstep), so neither edge of the falloff shows
+       as a line (Julian, 2026-10-04: shorter, smoother). */
+    rgb(0 0 0 / 0.06) calc(var(--ff-sharp, 160px) * 1.5),
+    rgb(0 0 0 / 0.2) calc(var(--ff-sharp, 160px) * 2),
+    rgb(0 0 0 / 0.5) calc(var(--ff-sharp, 160px) * 2.5),
+    rgb(0 0 0 / 0.8) calc(var(--ff-sharp, 160px) * 3),
+    rgb(0 0 0 / 0.94) calc(var(--ff-sharp, 160px) * 3.5),
+    #000 calc(var(--ff-sharp, 160px) * 4)
+  );
+  -webkit-mask-image: var(--ff-mask);
+  mask-image: var(--ff-mask);
+  opacity: 0;
+  transition:
+    opacity 260ms var(--ease-out-strong),
+    --ff-sharp 420ms var(--ease-out-strong);
+}
+/* Typed, so the clearing grows and shrinks between frames of different
+   sizes instead of jumping. */
+@property --ff-sharp {
+  syntax: "<length>";
+  inherits: false;
+  initial-value: 160px;
+}
+.focus-field[data-on] {
+  opacity: 1;
+  transition-duration: 420ms;
+}
+
+/* The navbar's name grows under the pointer (Julian, 2026-10-04), round
+   its own middle so it swells in place: from the link's left edge it
+   slid down and to the right. On the name inside, not the link, whose
+   transform the homepage's handoff from the masthead owns. Lands with a
+   touch of give, lets go quicker. */
+/* And it turns white with a thin outline in the ink (Julian,
+   2026-10-04), faded in. The name is a picture drawn in the ink, so the
+   white is a filter over it: taken to black, inverted, and four one
+   pixel shadows round it for the line. The same list of steps at rest,
+   each doing nothing, so the two states blend rather than snap. */
+/* No line now, on either ground (Julian, 2026-10-04: no outline); the
+   edge stays transparent, kept so the two states still blend. */
+.logo-grow > :not(.sr-only) {
+  --logo-edge: transparent;
+  transform-origin: center;
+  filter: brightness(1) invert(0) drop-shadow(0 0 0 transparent) drop-shadow(0 0 0 transparent)
+    drop-shadow(0 0 0 transparent) drop-shadow(0 0 0 transparent);
+  transition:
+    scale 300ms var(--ease-out-strong),
+    filter 300ms var(--ease-out-strong);
+}
+@media (hover: hover) and (pointer: fine) {
+  .logo-grow:hover > :not(.sr-only) {
+    filter: brightness(0) invert(1) drop-shadow(1px 0 0 var(--logo-edge))
+      drop-shadow(-1px 0 0 var(--logo-edge)) drop-shadow(0 1px 0 var(--logo-edge))
+      drop-shadow(0 -1px 0 var(--logo-edge));
+    transition:
+      scale 500ms cubic-bezier(0.34, 1.56, 0.64, 1),
+      filter 450ms var(--ease-out-strong);
+  }
+}
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  .logo-grow:hover > :not(.sr-only) {
+    scale: 1.06;
+  }
+}
+/* White vanished into the light ground (Julian, 2026-10-04): there it
+   turns the grey of the nav's words instead. */
+@media (hover: hover) and (pointer: fine) {
+  :root[data-theme="light"] .logo-grow:hover > :not(.sr-only) {
+    filter: brightness(0) invert(0.25) drop-shadow(0 0 0 transparent) drop-shadow(0 0 0 transparent)
+      drop-shadow(0 0 0 transparent) drop-shadow(0 0 0 transparent);
+  }
+}
+
+/* The Google Calendar booking frame on /book (`book-picker.tsx`). Its page
+   cannot be styled from here, so on the dark theme it is turned over: white
+   to near black, and the hue turned back so Google's blue stays blue. */
+:root:not([data-theme="light"]) .booking-embed {
+  filter: invert(0.9) hue-rotate(180deg);
+}
+/* And the page itself takes the inverted calendar's grey, so the frame
+   sits in it rather than as a lighter slab on near black (Julian,
+   2026-10-04). Exactly what `invert(0.9)` makes of Google's white. */
+/* The wash (`body::before`) as well as the body, or the wash covers it. */
+:root:not([data-theme="light"]) body:has(.book-page),
+:root:not([data-theme="light"]) body:has(.book-page)::before {
+  background: rgb(25 25 25);
+}
+:root[data-theme="light"] body:has(.book-page),
+:root[data-theme="light"] body:has(.book-page)::before {
+  background: rgb(225 227 229);
+}
+/* The calendar fades up each time the session changes. */
+.booking-embed {
+  animation: jg-fade-in 500ms var(--ease-out-strong) both;
+}
+
+/* ── turn it upright ──────────────────────────────────────────────
+ * Julian (2026-10-04): on a phone on its side the site is not at its
+ * best, so the screen says so. A phone, not an iPad or a short laptop
+ * window: a touch screen whose short side is a phone's. The outline turns
+ * from lying to standing, once, and then holds. Over everything, the
+ * drawers and the splash included.
+ * ─────────────────────────────────────────────────────────────── */
+.turn-upright {
+  display: none;
+}
+@media (orientation: landscape) and (max-height: 32rem) and (pointer: coarse) {
+  .turn-upright {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1.25rem;
+    background-color: var(--background);
+    color: var(--foreground);
+  }
+  .turn-upright-phone {
+    transform-origin: 32px 32px;
+    animation: jg-turn-upright 1100ms var(--ease-out-strong) 300ms backwards;
+  }
+  .turn-upright-turn {
+    transform-origin: 32px 32px;
+    animation: jg-turn-upright-arrow 2400ms var(--ease-out-strong) infinite;
+  }
+  .turn-upright p {
+    line-height: 1.8;
+  }
+}
+@keyframes jg-turn-upright {
+  from {
+    transform: rotate(-90deg);
+  }
+}
+/* The arrow turns once, rests, and turns again: a hint, not a spinner. */
+@keyframes jg-turn-upright-arrow {
+  from {
+    transform: rotate(-90deg);
+  }
+  50%,
+  to {
+    transform: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .turn-upright-phone,
+  .turn-upright-turn {
+    animation: none;
+  }
+}
+
+/* ── the filter as a drop-down, on a phone ────────────────────────
+ * Julian (2026-10-04): the title is the filter, so the list drops from
+ * under it rather than sliding in from the side and pushing the page
+ * away. It unfolds from the head's foot (`--drop-top`, written on open in
+ * `work-shell.tsx`), the names dropping in a step apart, the page dimmed
+ * under it; it folds back up quicker, all at once, and a pick folds it
+ * while the new title rises in its place.
+ * ─────────────────────────────────────────────────────────────── */
+@media (max-width: 39.999rem) {
+  :root[data-drawer="filter"] :is(.site-bar, body > main, body > footer) {
+    translate: none;
+  }
+  .work-filter {
+    top: var(--drop-top, 7.5rem);
+  }
+  .work-filter-panel {
+    width: 100%;
+    height: auto;
+    max-height: calc(100dvh - var(--drop-top, 7.5rem) - 1rem);
+    overflow-y: auto;
+    justify-content: flex-start;
+    padding: 0.75rem 1.5rem 1.25rem;
+    border-right: 0;
+    border-bottom: 1px solid var(--border);
+    translate: none;
+    clip-path: inset(0 0 100% 0);
+    transition: clip-path 300ms var(--ease-out-strong);
+  }
+  :root[data-drawer="filter"] .work-filter-panel {
+    clip-path: inset(0 0 -1px 0);
+    transition: clip-path 460ms var(--ease-out-strong);
+    transition-delay: 0ms;
+  }
+  .work-filter-item {
+    translate: 0 -0.5rem;
+  }
+  :root[data-drawer="filter"] .work-filter-item {
+    transition-delay: calc(60ms + var(--reveal-delay, 0ms) * 0.7);
+  }
+}
+@media (max-width: 39.999rem) and (prefers-reduced-motion: reduce) {
+  .work-filter-panel {
+    transition: none;
+  }
+}
+
+/* ── the menus as glass, over the page ────────────────────────────
+ * Julian (2026-10-04): the menu and the phone's filter drop-down are the
+ * glass themselves and open over the page, which stays where it is: no
+ * push, no frosting of the page around them. The panels take the head's
+ * own pane (`.head-glass::before`), so the drop-down and the head it falls
+ * from read as one sheet. The window behind stays clear, still there to
+ * be pressed to close.
+ * ─────────────────────────────────────────────────────────────── */
+@media (max-width: 63.999rem) {
+  :root[data-drawer="menu"] :is(.site-bar, body > main, body > footer) {
+    translate: none;
+  }
+  /* Closed too: the drawer's resting `blur(0)` is still a backdrop
+     filter, and one on the window would leave the panel inside it no
+     page to frost while it slides out. */
+  .site-menu,
+  :root[data-drawer="menu"] .site-menu {
+    background-color: transparent;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+  .site-menu-panel {
+    background-color: color-mix(in oklab, var(--background) 72%, transparent);
+    -webkit-backdrop-filter: blur(var(--glass-blur, 9px)) saturate(1.5);
+    backdrop-filter: blur(var(--glass-blur, 9px)) saturate(1.5);
+  }
+}
+@media (max-width: 39.999rem) {
+  .work-filter,
+  :root[data-drawer="filter"] .work-filter {
+    background-color: transparent;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+  /* Thicker than the head's pane: names are read off this one, and a dark
+     frame under the glass took them below 4.5:1 (audit, 2026-10-05). */
+  .work-filter-panel {
+    background-color: color-mix(in oklab, var(--background) 86%, transparent);
+    -webkit-backdrop-filter: blur(var(--glass-blur, 9px)) saturate(1.5);
+    backdrop-filter: blur(var(--glass-blur, 9px)) saturate(1.5);
+  }
+}
+@media (prefers-reduced-transparency: reduce) {
+  .site-menu-panel,
+  .work-filter-panel {
+    background-color: var(--background);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+}
+
+/* ── the homepage down a phone: off-screen screens skipped ─────────
+ * Stacked (`strip.tsx`, under `WIDE`) the homepage is seven screens, a
+ * thousand elements, and every restyle while it loads went through all of
+ * them. The screens past the first are left out of style, layout and paint
+ * until they come near the window; 1200px holds their place until they
+ * have been drawn once, then their own height (`auto`). Measured on
+ * production, throttled phone, three runs each: LCP 3.5s to 2.7s, style
+ * 1.35s to 0.98s (optimize pass, 2026-10-05). The first screen is never
+ * skipped: it is what is seen, and `data-past-hero` reads it.
+ * ─────────────────────────────────────────────────────────────── */
+@media (max-width: 39.999rem) {
+  .strip-scroll[data-dealt="screens"] > [data-hash]:not(:first-child) {
+    content-visibility: auto;
+    contain-intrinsic-size: auto 1200px;
+  }
+  /* Drawn in full while a link carries the page to a screen (`strip.tsx`). */
+  .strip-scroll[data-dealt="screens"][data-jump] > [data-hash] {
+    content-visibility: visible;
+  }
+}
+
+/* ── the form's edge (Julian, 2026-10-05): a thin white line and its glow
+   that travel round the form on the beam's lap (`contact-beam.tsx`), never
+   sitting still. The beam's own stroke is grey and too faint to read. */
+.contact-edge {
+  transition: opacity 400ms var(--ease-out-strong);
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+  filter: drop-shadow(0 0 2px rgb(255 255 255 / 0.9))
+    drop-shadow(0 0 8px rgb(255 255 255 / 0.5));
+}
+.contact-edge::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 16px;
+  padding: 0.5px;
+  background: conic-gradient(
+    from var(--edge-a),
+    transparent 0% 52%,
+    rgb(255 255 255 / 0.25) 60%,
+    #fff 68%,
+    rgb(255 255 255 / 0.25) 76%,
+    transparent 84% 100%
+  );
+  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  mask-composite: exclude;
+}
+
+/* ── the reference picker (Julian, 2026-10-05) ──
+   Pops out of the inquiry form (`reference-picks.tsx`): a glass panel in
+   the top layer, the page dimmed and blurred behind it. */
+.reference-panel {
+  width: min(60rem, calc(100vw - 2rem));
+  height: min(44rem, calc(100dvh - 4rem));
+  max-width: none;
+  max-height: none;
+  margin: auto;
+  padding: 0;
+  border: 1px solid color-mix(in oklab, var(--foreground) 18%, transparent);
+  border-radius: 16px;
+  color: var(--foreground);
+  background: color-mix(in oklab, var(--background) 86%, transparent);
+  -webkit-backdrop-filter: blur(var(--glass-blur, 9px)) saturate(1.5);
+  backdrop-filter: blur(var(--glass-blur, 9px)) saturate(1.5);
+  box-shadow: 0 40px 90px -30px rgb(0 0 0 / 0.7);
+  opacity: 0;
+  scale: 0.96;
+  transition:
+    opacity 260ms var(--ease-out-strong),
+    scale 260ms var(--ease-out-strong),
+    overlay 260ms allow-discrete,
+    display 260ms allow-discrete;
+}
+.reference-panel[open] {
+  opacity: 1;
+  scale: 1;
+}
+@starting-style {
+  .reference-panel[open] {
+    opacity: 0;
+    scale: 0.96;
+  }
+}
+.reference-panel::backdrop {
+  background: rgb(0 0 0 / 0.45);
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+}
+@media (prefers-reduced-transparency: reduce) {
+  .reference-panel {
+    background: var(--background);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .reference-panel {
+    transition: none;
+  }
+}
+
+/* ── the rail in the photographs' colours ────────────────────────────
+ * Julian (2026-10-05): colour from the photos in the All portfolio bar,
+ * tastefully. Only the control (the bar under the pointer) shows it:
+ * each discipline's stretch of the capsule takes a little of its colour,
+ * the project under the pointer in an open one a little more, and the
+ * thumb stays neutral so its name reads. The line at rest stays grey.
+ * The colours are the projects' accents (`scripts/make-accents.mjs`),
+ * held to a lightness and chroma that read on either ground, and that
+ * keep the names on them past 4.5:1.
+ * ─────────────────────────────────────────────────────────────── */
+[data-tinted] {
+  --tint-lit: oklch(from var(--tint) clamp(0.5, l, 0.6) clamp(0.07, calc(c * 1.35), 0.17) h);
+}
+:root[data-theme="light"] [data-tinted] {
+  --tint-lit: oklch(from var(--tint) clamp(0.54, l, 0.66) clamp(0.07, calc(c * 1.35), 0.17) h);
+}
+/* Each stretch fades into its neighbours' colours at its edges, so the
+   bar reads as one blend and not as blocks (Julian: smooth). A neighbour
+   with no colour hands over its own, so the blend stops at it. */
+.rail-chapter[data-tinted] {
+  --prev-lit: oklch(from var(--tint-prev) clamp(0.5, l, 0.6) clamp(0.07, calc(c * 1.35), 0.17) h);
+  --next-lit: oklch(from var(--tint-next) clamp(0.5, l, 0.6) clamp(0.07, calc(c * 1.35), 0.17) h);
+}
+:root[data-theme="light"] .rail-chapter[data-tinted] {
+  --prev-lit: oklch(from var(--tint-prev) clamp(0.54, l, 0.66) clamp(0.07, calc(c * 1.35), 0.17) h);
+  --next-lit: oklch(from var(--tint-next) clamp(0.54, l, 0.66) clamp(0.07, calc(c * 1.35), 0.17) h);
+}
+/* The three stops are registered colours, so the blend fades in with
+   the capsule growing rather than appearing all at once (Julian: smooth
+   animation too). At rest they are the line's own grey. */
+@property --rail-a { syntax: "<color>"; inherits: false; initial-value: transparent; }
+@property --rail-m { syntax: "<color>"; inherits: false; initial-value: transparent; }
+@property --rail-b { syntax: "<color>"; inherits: false; initial-value: transparent; }
+.strip-rail[data-rail-names="always"] .rail-chapter[data-tinted] .rail-bar {
+  --rail-a: var(--rail-line);
+  --rail-m: var(--rail-line);
+  --rail-b: var(--rail-line);
+  background-image: linear-gradient(to right in oklab, var(--rail-a), var(--rail-m) 40% 60%, var(--rail-b));
+  transition:
+    scale 320ms var(--ease-out-strong),
+    background-color 320ms var(--ease-out-strong),
+    --rail-a 420ms var(--ease-out-strong),
+    --rail-m 420ms var(--ease-out-strong),
+    --rail-b 420ms var(--ease-out-strong);
+}
+.rail-line:hover .rail-chapter[data-tinted] .rail-bar,
+[data-dwell] .rail-line .rail-chapter[data-tinted] .rail-bar {
+  --rail-a: color-mix(in oklab, color-mix(in oklab, var(--prev-lit), var(--tint-lit)) 75%, var(--rail-track));
+  --rail-m: color-mix(in oklab, var(--tint-lit) 75%, var(--rail-track));
+  --rail-b: color-mix(in oklab, color-mix(in oklab, var(--tint-lit), var(--next-lit)) 75%, var(--rail-track));
+}
+/* The names on the colours at full strength: the grey at 60% read about
+   2.5:1 on them (audit, 2026-10-05). White on the dark ground, where the
+   colours mix down into the track, and dark ink on the light one. The
+   thumb keeps its own (`[data-tone="lit"]`, `"near"`). */
+.rail-line:hover .rail-chapter[data-tinted]:not([data-tone="lit"], [data-tone="near"]) .rail-name,
+[data-dwell] .rail-line .rail-chapter[data-tinted]:not([data-tone="lit"], [data-tone="near"]) .rail-name {
+  color: oklch(0.98 0.003 60);
+}
+:root[data-theme="light"] .rail-line:hover .rail-chapter[data-tinted]:not([data-tone="lit"], [data-tone="near"]) .rail-name,
+:root[data-theme="light"] [data-dwell] .rail-line .rail-chapter[data-tinted]:not([data-tone="lit"], [data-tone="near"]) .rail-name {
+  color: oklch(0.16 0.004 60);
+}
+/* The dividers would cut the blend back into blocks. */
+.rail-line:hover .rail-chapter[data-tinted] .rail-bar::after,
+[data-dwell] .rail-line .rail-chapter[data-tinted] .rail-bar::after,
+.rail-line:hover .rail-chapter[data-tinted] + .rail-chapter .rail-bar::after,
+[data-dwell] .rail-line .rail-chapter[data-tinted] + .rail-chapter .rail-bar::after {
+  opacity: 0;
+}
+.strip-rail[data-rail-names="always"] .rail-bar > span.bg-foreground[data-tinted]::before {
+  background: color-mix(in oklab, var(--tint-lit) 70%, transparent);
 }

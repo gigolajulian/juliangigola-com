@@ -2,6 +2,7 @@ import * as React from "react";
 import Image from "next/image";
 import Link from "next/link";
 import type { Frame } from "@/lib/work-types";
+import ACCENTS from "@/lib/accents.json";
 
 /* ── the words between the covers ─────────────────────────────────
  * The work strip runs discipline by discipline, and each discipline opens
@@ -100,8 +101,12 @@ export function FilmCell({
   href,
   i,
   eager = false,
+  hash,
+  credit,
 }: {
   title: string;
+  /** Who it was for, over the title on the slate. */
+  credit?: string;
   /** The still, or nothing: a Vimeo film whose still was never looked
       up draws its own ground rather than a broken picture. */
   poster: string | null;
@@ -109,13 +114,20 @@ export function FilmCell({
   /** Its place in the strip, for the stagger of the arrival. */
   i: number;
   eager?: boolean;
+  /** Its deep link on the page, for the homepage's Commissions table. */
+  hash?: string;
 }) {
   return (
     <Link
       prefetch={false}
       href={href}
       data-tick
+      data-hash={hash}
       data-name={title}
+      /* Films have no samples to take a colour from, so the rail is given
+         one that sits with the rest: a muted violet between Event
+         coverage's indigo and Cover art's red (Julian, 2026-10-05). */
+      data-tint="#7a5a9e"
       data-ring="Watch"
       data-film
       aria-label={`${title}, film`}
@@ -142,6 +154,23 @@ export function FilmCell({
           // the archive. The loader sizes it to the slot like anything else.
         />
       ) : null}
+      {/* The slate, as on the films page and every cover (`cover-cell.tsx`). */}
+      <div className="cover-slate pointer-events-none absolute inset-x-0 bottom-0 flex flex-col items-start gap-[1.2cqw] bg-gradient-to-t from-black/80 via-black/35 to-transparent px-[5cqw] pb-[4.5cqw] pt-[16cqw]">
+        {credit ? (
+          <span className="label min-w-0 max-w-full truncate text-[clamp(0.625rem,1.6cqw,0.75rem)] leading-none text-white/75">
+            {credit}
+          </span>
+        ) : null}
+        <span
+          style={{ "--n": title.length } as React.CSSProperties}
+          className="cover-name font-display min-w-0 max-w-full truncate uppercase leading-[0.9] text-white"
+        >
+          {/* The last two words held together, so a title that wraps never
+              leaves one alone (Julian, 2026-10-04: "Iranian Americans of /
+              Silicon Valley"). */}
+          {title.replace(/ (\S+)$/, "\u00a0$1")}
+        </span>
+      </div>
     </Link>
   );
 }
@@ -151,6 +180,7 @@ export function FrameCell({
   n,
   name,
   i,
+  hash,
 }: {
   frame: Frame;
   /** Its place in the page's own list of gallery frames: the strip reads
@@ -160,11 +190,14 @@ export function FrameCell({
   name: string;
   /** Its place in the strip, for the stagger of the arrival. */
   i: number;
+  /** Its deep link on the page, for the homepage's Commissions table. */
+  hash?: string;
 }) {
   return (
     <button
       type="button"
       data-n={n}
+      data-hash={hash}
       /* Flies between the views and across the filters as a cover does
          (`morphView`), paired by the photograph itself: its place in the
          page's frames differs from one filter to the next. The list's
@@ -179,6 +212,8 @@ export function FrameCell({
          thirty four. The frames take the name of the chapter they are
          under, which is what the rail already does with covers. */
       data-tick
+      /* Its project's colour, for the rail (`scripts/make-accents.mjs`). */
+      data-tint={(ACCENTS as Record<string, string>)[frame.src.split("/")[2]]}
       data-ring="Zoom"
       aria-label={frame.alt || `${name}, frame ${n + 1}`}
       className="group strip-cell relative block w-full shrink-0 overflow-hidden press active:scale-[0.995] sm:h-full sm:w-auto"

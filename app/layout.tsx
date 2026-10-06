@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { IBM_Plex_Mono, Inter_Tight } from "next/font/google";
+import { IBM_Plex_Mono, Inter_Tight, Space_Grotesk } from "next/font/google";
 import localFont from "next/font/local";
 import { Intro } from "@/components/intro";
 import { SiteHeader } from "@/components/site-header";
@@ -15,6 +15,8 @@ import { PointerMark } from "@/components/pointer-mark";
 import "./globals.css";
 import { ImageFallback } from "@/components/image-fallback";
 import { PageTransition } from "@/components/page-transition";
+import { CardTilt } from "@/components/card-tilt";
+import { FocusField } from "@/components/focus-field";
 import { ldJson, siteGraph } from "@/lib/seo";
 
 /* Two families and no more, at Julian's ask: Inter Tight Black for the
@@ -39,6 +41,13 @@ const archivo = localFont({
   src: "./fonts/Archivo-Black.woff2",
   variable: "--font-archivo",
   weight: "900",
+  fallback: ["Helvetica Neue", "Arial", "sans-serif"],
+});
+/* The service boxes on About, in 500 capitals (Julian, 2026-10-05). */
+const grotesk = Space_Grotesk({
+  variable: "--font-grotesk",
+  subsets: ["latin"],
+  weight: "500",
   fallback: ["Helvetica Neue", "Arial", "sans-serif"],
 });
 const mono = IBM_Plex_Mono({
@@ -125,7 +134,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="en"
-      className={`${display.variable} ${archivo.variable} ${mono.variable} h-full antialiased`}
+      className={`${display.variable} ${archivo.variable} ${grotesk.variable} ${mono.variable} h-full antialiased`}
       // Dark is the default and is what the CSS already declares, so the
       // server renders the correct theme for everyone except the visitor who
       // has chosen light. That one case is what the script below fixes.
@@ -179,7 +188,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             clock rather than the script's. */}
         <script
           dangerouslySetInnerHTML={{
-            __html: `(function(){try{var q=location.search;if(/[?&]intro=0/.test(q))return;var force=/[?&]intro=1/.test(q);var seen=false;try{seen=!!sessionStorage.getItem("jg-intro")}catch(e){}var calm=matchMedia("(prefers-reduced-motion: reduce)").matches;var admin=location.pathname.indexOf("/admin")===0;if(force||(!admin&&!seen&&!calm)){var r=document.documentElement;r.dataset.intro="1";r.style.setProperty("--jg-blink-at",Math.round(100+Math.random()*160)+"ms");r.style.setProperty("--jg-blink-2",Math.round(810+Math.random()*130)+"ms")}}catch(e){}})()`,
+            __html: `(function(){try{var q=location.search;try{if(/[?&]menu3d=1/.test(q))sessionStorage.setItem("jg-menu3d","1");if(/[?&]menu3d=0/.test(q))sessionStorage.removeItem("jg-menu3d");if(sessionStorage.getItem("jg-menu3d"))document.documentElement.dataset.menu3d=""}catch(e){}if(/[?&]intro=0/.test(q))return;var force=/[?&]intro=1/.test(q);var seen=false;try{seen=!!sessionStorage.getItem("jg-intro")}catch(e){}var calm=matchMedia("(prefers-reduced-motion: reduce)").matches;var admin=location.pathname.indexOf("/admin")===0;if(force||(!admin&&!seen&&!calm)){var r=document.documentElement;r.dataset.intro="1";r.style.setProperty("--jg-blink-at",Math.round(100+Math.random()*160)+"ms");r.style.setProperty("--jg-blink-2",Math.round(810+Math.random()*130)+"ms")}}catch(e){}})()`,
           }}
         />
       </head>
@@ -230,6 +239,28 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           <PageTransition>{children}</PageTransition>
         </main>
         <SiteFooter />
+        {/* A phone on its side is asked to stand it up (Julian, 2026-10-04):
+            the site is laid out for a phone upright. Only a phone, only on
+            its side (`.turn-upright`, globals.css). */}
+        <div className="turn-upright" aria-hidden>
+          {/* The phone, and on its screen the small arrow of a turn (Julian:
+              a spiral arrow in the phone's screen). */}
+          <svg viewBox="0 0 64 64" width="88" height="88" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+            <g className="turn-upright-phone">
+              <rect x="20" y="8" width="24" height="48" rx="4" />
+              <g className="turn-upright-turn" strokeWidth="1">
+                <path d="M35.5 32a3.5 3.5 0 1 1-1.03-2.47" />
+                <path d="M34.75 28.25v1.6h-1.6" />
+              </g>
+            </g>
+          </svg>
+          <p className="label text-center">Turn your phone upright
+            <span className="block text-muted-foreground">for the best experience</span>
+          </p>
+        </div>
+        {/* Focus round the pointer over a gallery: `focus-field.tsx`. */}
+        <FocusField />
+        <CardTilt />
         <PhotoNotice />
         {/* The pointer over anything that opens large, site wide. One
             mount: it follows the pointer and shows only over `[data-ring]`,

@@ -2,6 +2,7 @@
 
 import { headers } from "next/headers";
 import { getCloudflareContext } from "@opennextjs/cloudflare";
+import imageLoader from "@/image-loader";
 import {
   COOLDOWN_MS,
   DAILY_CAP,
@@ -16,6 +17,7 @@ import {
   problems,
   summary,
   waitPhrase,
+  MAX_REFS,
 } from "@/lib/inbox";
 
 /**
@@ -106,7 +108,8 @@ export async function submitEnquiry(
     type: read("type"),
     name: read("name"),
     email: read("email"),
-    detail: read("detail"),
+    // A booking's session chip, ahead of its date and place.
+    detail: [read("session"), read("detail")].filter(Boolean).join(" · "),
     message: read("message"),
   };
 
@@ -193,12 +196,46 @@ export async function submitEnquiry(
     const id = crypto.randomUUID();
     const country = typeof cf?.country === "string" ? cf.country : undefined;
 
-    const stored = enquiry(values, now, id, country);
+    /* References (`components/reference-picks.tsx`): Julian's frames by
+       path, and the visitor's own images, already shrunk in their browser.
+       Checked here all the same: paths of the site's shape only, images
+       only, and a ceiling on count and size. */
+    const picks = String(formData.get("picks") ?? "")
+      .split("\n")
+      .filter((src) => /^\/work\/[\w-]+\/[\w.-]+\.(jpe?g|png|webp)$/i.test(src))
+      .slice(0, MAX_REFS);
+    let budget = 20 * 1024 * 1024;
+    const uploads = formData
+      .getAll("refs")
+      .filter((f): f is File => f instanceof File && f.size > 0 && f.type.startsWith("image/"))
+      .slice(0, MAX_REFS - picks.length)
+      .filter((f) => f.size <= 6 * 1024 * 1024 && (budget -= f.size) >= 0);
+
+    const stored = {
+      ...enquiry(values, now, id, country),
+      ...(picks.length ? { picks } : {}),
+      ...(uploads.length ? { files: uploads.map((f) => f.name.slice(0, 80)) } : {}),
+    };
     // The summary rides along as metadata so /admin can draw the whole inbox
     // from one request. See the note in `lib/inbox.ts`.
-    await inbox.put(enquiryKey(now, id.slice(0, 8)), JSON.stringify(stored), {
+    const key = enquiryKey(now, id.slice(0, 8));
+    await inbox.put(key, JSON.stringify(stored), {
       metadata: summary(stored),
     });
+    /* Their images beside it, for /admin's Inbox (`ref:<key>:<n>`, read
+       and deleted with the message by `app/api/inbox/route.ts`). Best
+       effort like the email: the enquiry is already stored. */
+    try {
+      await Promise.all(
+        uploads.map(async (f, n) =>
+          inbox.put(`ref:${key}:${n}`, await f.arrayBuffer(), {
+            metadata: { type: f.type },
+          }),
+        ),
+      );
+    } catch (err) {
+      console.error("contact: stored the enquiry but not its images", err);
+    }
     // The cooldown expires itself, so nothing has to clean it up. The counter
     // is given two days so a message near midnight cannot be double-counted
     // against a bucket that has already gone.
@@ -228,6 +265,17 @@ export async function submitEnquiry(
         subject,
         text,
         replyTo: { name: stored.name, email: stored.email },
+        attachments: [
+          ...(await Promise.all(
+            uploads.map(async (f) => ({
+              content: Buffer.from(await f.arrayBuffer()).toString("base64"),
+              filename: f.name.slice(0, 80),
+              type: f.type,
+              disposition: "attachment" as const,
+            })),
+          )),
+          ...(await pickAttachments(picks)),
+        ],
       });
     } catch (err) {
       console.error(
@@ -251,4 +299,31 @@ export async function submitEnquiry(
       mailto,
     };
   }
+}
+
+/* The frames they picked from the work, attached as well as linked
+   (Julian, 2026-10-05), at 1600px through the same resizer the site uses
+   so the mail stays small. One that will not fetch is left out, not fatal:
+   its link is still in the text. */
+async function pickAttachments(picks: string[]) {
+  const got = await Promise.all(
+    picks.map(async (src) => {
+      try {
+        const sized = imageLoader({ src, width: 1600, quality: 82 });
+        const res = await fetch(new URL(sized, "https://juliangigola.com"), {
+          signal: AbortSignal.timeout(8000),
+        });
+        if (!res.ok) return null;
+        return {
+          content: Buffer.from(await res.arrayBuffer()).toString("base64"),
+          filename: src.split("/").slice(-2).join("-"),
+          type: res.headers.get("content-type") ?? "image/jpeg",
+          disposition: "attachment" as const,
+        };
+      } catch {
+        return null;
+      }
+    }),
+  );
+  return got.filter((a) => a !== null);
 }

@@ -170,6 +170,10 @@ const pageRedirects = [
  *                    play (see `components/video-grid.tsx`), so the policy is
  *                    the boundary and the click is the consent.
  */
+// Dev-only allowance so impeccable live mode can load. Guarded by NODE_ENV.
+const __impeccableLiveDev =
+  process.env.NODE_ENV === "development" ? " http://localhost:8400" : "";
+
 const csp = [
   "default-src 'self'",
   "base-uri 'self'",
@@ -199,16 +203,16 @@ const csp = [
      reel stays silent, which is the safe direction). The alternative was
      dropping the volume request or shipping sound at whatever level the
      visitor's last Vimeo session left it at. */
-  "script-src 'self' 'unsafe-inline' https://static.cloudflareinsights.com https://player.vimeo.com",
+  `script-src 'self' 'unsafe-inline' https://static.cloudflareinsights.com https://player.vimeo.com${__impeccableLiveDev}`,
   // The two players, and only as an embed — `frame-ancestors 'none'` above
   // is the other direction and still says nobody may frame this site.
-  // And the booking calendars on the session pages (Google Calendar
-  // appointment schedules, `components/contact-screen.tsx`).
+  // And the booking calendars on /book and the session pages (Google Calendar
+  // appointment schedules, `components/book-picker.tsx`, `components/contact-screen.tsx`).
   "frame-src https://www.youtube-nocookie.com https://player.vimeo.com https://calendar.google.com",
   // `vimeo.com` and `youtube.com` are oEmbed lookups made by /admin when a
   // link is pasted: the title, and the poster Vimeo does not publish at a
   // guessable URL. No page on the site fetches either.
-  "connect-src 'self' https://api.github.com https://vimeo.com https://www.youtube.com",
+  `connect-src 'self' https://api.github.com https://vimeo.com https://www.youtube.com${__impeccableLiveDev}`,
   "upgrade-insecure-requests",
 ].join("; ");
 
@@ -253,6 +257,13 @@ const nextConfig: NextConfig = {
   // Compile and runtime errors are still surfaced — this only removes the
   // idle indicator, not the error overlay.
   devIndicators: false,
+
+  /* The inquiry form carries up to eight reference images, shrunk in the
+     browser to a few hundred KB each (`components/reference-picks.tsx`).
+     Next's 1MB default would refuse the second or third. */
+  experimental: {
+    serverActions: { bodySizeLimit: "24mb" },
+  },
 
   /**
    * DialKit on the dev server only (Julian). A production build gets

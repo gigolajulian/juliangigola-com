@@ -11,7 +11,7 @@ import * as React from "react";
  * Only on a fine pointer; a phone never mounts the listeners. The system
  * cursor is hidden only once the mark has a position to be drawn at
  * (`data-mark` on the root), so a page whose script never runs keeps its
- * arrow. Over a text field the mark steps aside for the native caret.
+ * arrow. Over a text field the mark draws out into a caret of its own.
  * ─────────────────────────────────────────────────────────────── */
 
 // The caret's places. Button-like inputs stay with the mark.
@@ -57,6 +57,7 @@ export function PointerMark() {
       stuck.style.removeProperty("--lean-y");
       stuck = null;
       el.removeAttribute("data-stuck");
+      el.removeAttribute("data-row");
       el.style.removeProperty("--sx");
       el.style.removeProperty("--sy");
       for (const v of ["--neck-l", "--neck-t", "--neck-a"]) el.style.removeProperty(v);
@@ -160,6 +161,8 @@ export function PointerMark() {
       x = e.clientX;
       y = e.clientY;
       sense(e);
+      // What it was stuck to may be gone with the page it was on.
+      if (stuck && !stuck.isConnected) unstick();
       pull();
       if (!raf) raf = requestAnimationFrame(draw);
       if (!el.hasAttribute("data-on")) {
@@ -178,6 +181,7 @@ export function PointerMark() {
         stuck = stick;
         stick.setAttribute("data-stuck", "");
         el.setAttribute("data-stuck", "");
+        el.toggleAttribute("data-row", stick.dataset.stick === "row");
         pull();
       }
       const state = t?.closest?.(TEXT)
@@ -210,6 +214,15 @@ export function PointerMark() {
     /* Let go: it springs back and a ring runs out from where
        it was pressed. One short-lived element per click, gone when its
        animation ends. */
+    /* A press that leaves the page (Julian, 2026-10-04: a Commissions row
+       or photograph kept its arrow over the page it opened): let go of
+       whatever it is on at once, so the dot eases back to rest as the
+       page changes, and the next page sets it afresh. */
+    const leave = (e: MouseEvent) => {
+      if (!(e.target as Element | null)?.closest?.("a[href]")) return;
+      unstick();
+      el.removeAttribute("data-state");
+    };
     const release = (e: PointerEvent) => {
       if (!down) return;
       down = false;
@@ -230,7 +243,9 @@ export function PointerMark() {
     document.addEventListener("pointerup", release, { passive: true });
     document.addEventListener("pointercancel", cancel, { passive: true });
     window.addEventListener("blur", away);
+    document.addEventListener("click", leave);
     return () => {
+      document.removeEventListener("click", leave);
       document.removeEventListener("pointermove", move);
       document.removeEventListener("pointerover", over);
       document.removeEventListener("pointerout", left);
@@ -253,6 +268,11 @@ export function PointerMark() {
         <div className="mark-drop" />
         <div className="mark-neck" />
       </div>
+      {/* Julian (2026-10-04): over a row of the Commissions list the dot
+          grows and an arrow pointing on is cut out of it. */}
+      <svg className="mark-arrow" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="black" strokeWidth="2.25" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M5 12h14M13 6l6 6-6 6" />
+      </svg>
       <svg aria-hidden width="0" height="0" className="absolute">
         <filter id="mark-goo">
           <feGaussianBlur stdDeviation="3.5" />

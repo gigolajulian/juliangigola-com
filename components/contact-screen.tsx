@@ -1,9 +1,10 @@
 import { Suspense } from "react";
 import type * as React from "react";
 import { ContactBeam } from "@/components/contact-beam";
-import { ContactForm } from "@/components/contact-form";
+import { ContactForm, WhenBooking } from "@/components/contact-form";
 import { RisingTitle } from "@/components/strip-page";
-import { BOOKING_URL } from "@/lib/site";
+import { BOOKING_URL, RESPONSE_TIME } from "@/lib/site";
+import { SESSION_TYPES } from "@/lib/sessions";
 
 /* ── contact ──────────────────────────────────────────────────────
  * A screen of the homepage, before the ask (Julian: About and Contact on
@@ -30,12 +31,14 @@ const ELSEWHERE = [
 ];
 
 export function ContactScreen({
-  title = "Get in Touch",
+  // Julian (2026-10-03): one name for the screen, as the nav says it.
+  title = "Inquiries",
   intro,
-  label = "Contact",
+  label = "Inquiries",
   hash = "contact",
   defaults,
   calendar,
+  backdrop,
 }: {
   title?: string;
   /** In place of the homepage's two sentences: a booking page says what
@@ -50,11 +53,49 @@ export function ContactScreen({
       the calendar takes the form's place, and the form stays one link away
       on the homepage for anyone who would rather ask first. */
   calendar?: string;
+  /** A wall of photographs behind the screen (the homepage's). */
+  backdrop?: React.ReactNode;
 } = {}) {
   /* Julian: two columns. The ask and the details in the left third,
      scrolling inside itself if a short window cannot hold them; the form
      in the middle of the right two, where the eye lands. One column on a
      phone. How a commission runs moved to About. */
+  const head = (
+    <>
+      <RisingTitle text={title} className="contact-title" />
+      {/* 1.02 as a zoom: Julian's DialKit size for the intro, the same
+          `zoom` the panel's Size writes (`page-dials.tsx`). */}
+      <p data-dial="intro" className="title-rest max-w-prose text-left text-sm normal-case leading-relaxed text-muted-foreground [zoom:1.02]">
+        {intro ?? (<>
+        {/* A sentence to a line, where there is room: Julian asked
+            for two lines rather than a wrap mid sentence. Where there
+            is not, each sentence wraps balanced and set left: it was
+            justified, and "project." stood on a line of its own
+            (Julian, 2026-10-01: one word doesn't need a whole line). */}
+        <span className="sm:block sm:text-balance">
+          Commissions, sessions, or a question about a project.
+        </span>{" "}
+        <span className="sm:block sm:text-balance">
+          Tell me what kind of shoot it is and I&rsquo;ll come back with
+          an approach and a quote.
+        </span>
+        </>)}
+      </p>
+    </>
+  );
+  const booking = (
+    <>
+      <RisingTitle text="Book a Session" className="contact-title" />
+      <p className="title-rest max-w-prose text-left text-sm normal-case leading-relaxed text-muted-foreground [zoom:1.02]">
+        <span className="sm:block sm:text-balance">
+          Pick the session and tell me when and where.
+        </span>{" "}
+        <span className="sm:block sm:text-balance">
+          I&rsquo;ll come back with times and a price{RESPONSE_TIME ? ` ${RESPONSE_TIME}` : ""}.
+        </span>
+      </p>
+    </>
+  );
   return (
     <section
       data-tick
@@ -62,33 +103,34 @@ export function ContactScreen({
       data-hash={hash}
       className="screen-measure contact-inquire relative isolate grid w-full shrink-0 grid-cols-1 gap-10 px-6 py-12 sm:h-full sm:grid-cols-[minmax(0,1fr)_minmax(0,2fr)] sm:grid-rows-[minmax(0,1fr)] sm:items-center sm:gap-x-12 sm:pb-6 sm:pl-10 sm:pr-10 sm:pt-24 lg:gap-x-16"
     >
+      {/* Under the ground the booking pages' questions sit on, 40%, so the
+          words read over it (`.questions-wall`). First, so the rule that
+          brings muted words up over a wall finds what follows it. Inert:
+          Julian (2026-10-05), the wall is not to be clicked here. */}
+      {backdrop ? (
+        <div inert className="enquiry-backdrop questions-wall absolute inset-0 -z-10 overflow-hidden">
+          {backdrop}
+        </div>
+      ) : null}
       {/* Julian (Pixel): a scroll inside the page on a phone, 2px of it,
           held the finger and the page would not move. Its own scroll from
           `sm` only, where the screen has a fixed height. */}
+      {/* On a phone the column dissolves into the screen's own column, so
+          the address and the handles can follow the form rather than stand
+          between the ask and it (critique, 2026-10-03: the name field was
+          530px down). */}
       <div
         data-scroll
-        className="flex min-h-0 flex-col gap-8 [container-type:inline-size] sm:max-h-full sm:overflow-y-auto sm:overscroll-contain short:gap-5"
+        className="flex min-h-0 flex-col gap-8 [container-type:inline-size] max-sm:contents sm:max-h-full sm:overflow-y-auto sm:overscroll-contain short:gap-5"
       >
         <div className="flex flex-col gap-5">
-          <RisingTitle text={title} className="contact-title" />
-          {/* 1.02 as a zoom: Julian's DialKit size for the intro, the same
-              `zoom` the panel's Size writes (`page-dials.tsx`). */}
-          <p data-dial="intro" className="title-rest max-w-prose text-left text-sm leading-relaxed text-muted-foreground [zoom:1.02]">
-            {intro ?? (<>
-            {/* A sentence to a line, where there is room: Julian asked
-                for two lines rather than a wrap mid sentence. Where there
-                is not, each sentence wraps balanced and set left: it was
-                justified, and "project." stood on a line of its own
-                (Julian, 2026-10-01: one word doesn't need a whole line). */}
-            <span className="sm:block sm:text-balance">
-              Commissions, sessions, or a question about a project.
-            </span>{" "}
-            <span className="sm:block sm:text-balance">
-              Tell me what kind of shoot it is and I&rsquo;ll come back with
-              an approach and a quote.
-            </span>
-            </>)}
-          </p>
+          {/* The homepage's head, unless the visitor came to book a
+              session (critique, 2026-10-03). A booking page has its own. */}
+          {intro ? head : (
+            <Suspense fallback={head}>
+              <WhenBooking booking={booking}>{head}</WhenBooking>
+            </Suspense>
+          )}
           {/* Answers "will this actually go anywhere?" before they decide
               whether to fill anything in, which is where most enquiries
               are abandoned. */}
@@ -120,7 +162,7 @@ export function ContactScreen({
             a screen of its own, which was a screen to swipe past on
             the way to nothing: the address and the handles are two
             lines and belong beside the ask. */}
-        <div data-dial="details" className="border-t border-border pt-8 short:pt-5">
+        <div data-dial="details" className="border-t border-border pt-8 max-sm:order-last short:pt-5">
           {/* Side by side where the column has the room for both, by its
               own width rather than the window's. */}
           <dl className="grid grid-cols-[repeat(auto-fit,minmax(15rem,1fr))] gap-6">
@@ -132,8 +174,9 @@ export function ContactScreen({
                   data-ring="Email"
                   /* In capitals, sitting on its rule: Julian asked for
                      both. A border rather than an underline, which
-                     vanishes when it is brought this close. */
-                  className="inline-block border-b border-border pb-0 uppercase leading-none tracking-[0.04em] transition-colors duration-200 hoverable:hover:border-current"
+                     vanishes when it is brought this close. A thumb's
+                     height to a touch screen, the rule drawn where it was. */
+                  className="inline-block border-b border-border pb-0 uppercase pointer-coarse:relative pointer-coarse:before:absolute pointer-coarse:before:-inset-y-2.5 pointer-coarse:before:inset-x-0 pointer-coarse:before:content-[''] leading-none tracking-[0.04em] transition-colors duration-200 hoverable:hover:border-current"
                 >
                   hello@juliangigola.com
                 </a>
@@ -194,7 +237,7 @@ export function ContactScreen({
         <div
           data-scroll
           data-dial="form"
-          className="glass-surface min-h-0 flex-1 rounded-[16px] border border-border p-5 sm:max-h-full sm:p-6 sm:overflow-y-auto sm:overscroll-contain sm:px-8 sm:py-6"
+          className="glass-surface min-h-0 flex-1 rounded-[16px] border border-border p-5 sm:max-h-full sm:p-6 sm:overflow-y-auto sm:overscroll-contain sm:px-8 sm:py-[clamp(1rem,3vh,1.5rem)]"
         >
           {calendar ? (
             /* Google's own page, so its colours are Google's: the frame
@@ -208,7 +251,7 @@ export function ContactScreen({
             />
           ) : (
             <Suspense fallback={null}>
-              <ContactForm defaults={defaults} />
+              <ContactForm defaults={defaults} sessions={SESSION_TYPES.map((s) => s.name)} />
             </Suspense>
           )}
         </div>
