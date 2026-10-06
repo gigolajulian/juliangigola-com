@@ -141,12 +141,16 @@ export function Intro() {
           [{ transform: "translateY(0)" }, { transform: "translateY(calc(-100% - 6rem))" }],
           { duration: OUT, easing: "cubic-bezier(0.76, 0, 0.24, 1)", fill: "forwards" },
         );
-        /* Preview (`?deal=new`): the photographs set off halfway up the
-           lift instead of after it (`data-intro="half"`, `globals.css`). */
-        if ("deal" in root.dataset)
-          setTimeout(() => {
-            if (root.dataset.intro === "lift") root.dataset.intro = "half";
-          }, OUT / 2);
+        /* Julian (2026-10-06): the photographs set off with the lift, not
+           after it (they popped in too late). `half` unpauses them
+           (`globals.css`); the panel is still over them for the first
+           beat, so the first ones land as it clears. */
+        root.dataset.intro = "half";
+        /* And no wait on the first one (`--h-start`, `globals.css`): the
+           first photographs land as the panel's foot passes them. Set
+           once and kept, so the delay never changes under a running
+           animation. */
+        root.dataset.splashed = "";
         setTimeout(lift, OUT);
       });
   }, []);

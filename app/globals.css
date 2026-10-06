@@ -224,9 +224,10 @@
 :root[data-deal] .cover-float-frame {
   --delay: calc(var(--h-start, 420ms) + var(--wave-now, var(--wave, 0)) * var(--h-spread, 0.95ms));
 }
-/* The photographs wait for the lift as well and arrive once the panel
-   has cleared. Their blur, on nine cards at once, dropped frames from the
-   lift on a cold start (Julian chose this over losing the blur, 2026-10-04). */
+/* The photographs wait while the panel is full and set off with the
+   lift (`data-intro="half"`, `intro.tsx`; Julian, 2026-10-06: after it
+   was too late). It was after the lift from 2026-10-04, when their blur
+   on nine cards at once dropped frames from it on a cold start. */
 [data-intro="lift"] :is(.cover-float-frame, .cover-float-card) {
   animation-play-state: paused;
 }
@@ -4517,6 +4518,11 @@ optgroup {
 :root[data-moved] .cover-float {
   --h-start: 0ms !important;
   --h-spread: 0.3ms !important;
+}
+/* Behind the opening (Julian, 2026-10-06: the photographs popped in too
+   late), the first one sets off the moment the panel lifts. */
+:root[data-splashed] .cover-float {
+  --h-start: 0ms !important;
 }
 /* No cover flies on a deal. The homepage's selected work and the work
    index share the covers' names (`cover-${slug}`, the morph into a
