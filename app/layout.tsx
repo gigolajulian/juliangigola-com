@@ -92,17 +92,13 @@ export const metadata: Metadata = {
     /* No `url` here: set once at the root it was inherited by every page,
        so a shared /sessions link unfurled pointing at the homepage. The
        canonical on each page is the address. */
-    /* The eye mark on black, at 1200x630. Julian's pick for the thumbnail.
+    /* The wordmark on black, at 1200x630: "Julian Gigola" in Inter Tight 900,
+     * the logo's face. Julian's pick for the thumbnail (2026-10-06); it was
+     * the eye mark before that, and the cover photograph before that.
      *
-     * It used to be the cover photograph, cropped from whatever `coverSlug`
-     * named by a `prebuild` script. The mark does not change with the cover,
-     * so there is nothing left to generate per deploy and the script is gone:
-     * `public/og.jpg` is now a committed file, made from `app/icon.svg`.
-     *
-     * The trade: an unfurl in a feed is 500px wide and a photograph sells the
-     * work harder than a logo does. It is the same mark as the tab, though,
-     * which is the other thing a share card can be worth — a site you
-     * recognise before you have read the title. */
+     * Nothing changes with the cover, so there is nothing to generate per
+     * deploy: `public/og.jpg` is a committed file. book.juliangigola.com
+     * uses the same card for its list page. */
     images: [
       {
         url: "/og.jpg",
