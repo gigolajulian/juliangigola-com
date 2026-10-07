@@ -91,7 +91,7 @@ export function VideoViewer({
                 </div>
                 <div className="mt-3 flex flex-wrap items-baseline gap-x-4 gap-y-1">
                   <h2 className="font-display text-lg uppercase tracking-[0]">
-                    {current.title}
+                    {current.title.replace(/ (\S+)$/, "\u00a0$1")}
                   </h2>
                   {current.client ? (
                     <p className="label text-muted-foreground">

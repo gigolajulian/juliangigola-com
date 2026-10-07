@@ -41,7 +41,7 @@ export function FitLines() {
       const probe = document.createElement("span");
       probe.textContent = "Julian Gigola";
       probe.style.cssText =
-        `position:absolute;visibility:hidden;white-space:nowrap;font-family:var(--font-display);font-weight:900;` +
+        `position:absolute;visibility:hidden;white-space:nowrap;font-family:var(--font-wordmark);font-weight:900;` +
         `letter-spacing:-0.045em;font-size:${size}`;
       middle.appendChild(probe);
       const all = lines();

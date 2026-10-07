@@ -229,7 +229,7 @@ export function StripHead({
           <h1
             key={open ? title : undefined}
             className={cn(
-              "font-display line-clamp-2 text-xl uppercase leading-none tracking-[0] sm:line-clamp-none sm:text-3xl lying:text-xl",
+              "font-[family-name:var(--font-wordmark)] font-black line-clamp-2 text-xl uppercase leading-none tracking-[0] sm:line-clamp-none sm:text-3xl lying:text-xl",
               /* The clamp hides overflow, and with it the button's reach past
                  its 20px: taps a few pixels off it missed (audit,
                  2026-10-05). It is one line there anyway. */
