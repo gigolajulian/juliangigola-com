@@ -189,7 +189,7 @@ export default function Home() {
   return (
     <StripPage>
       <Strip
-        label="Julian Gigola: the cover, selected work, cover art, about, contact, and how to get in touch. One screen at a time, left and right."
+        label="Julian Gigola: the cover, selected work, cover art, about, contact and how to get in touch. One screen at a time, left and right."
         next={WORK_PAGE}
         arrive="none"
         paged
@@ -311,7 +311,7 @@ export default function Home() {
                 photoAt="50% 0%"
                 href="/portfolio"
                 title="See the work"
-                body="Editorial, campaigns, portraits, and artist imagery."
+                body="Editorial, campaigns, portraits and artist imagery."
               />
               <SessionsDoor photo={DOOR_SESSIONS} />
             </div>

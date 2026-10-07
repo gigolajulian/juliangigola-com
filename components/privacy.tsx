@@ -107,7 +107,7 @@ export function PrivacyColumn() {
         </p>
       </Clause>
 
-      <Clause title="Cookies, storage, and analytics">
+      <Clause title="Cookies, storage and analytics">
         <p>
           <strong>The Site sets no cookies of its own.</strong> Cloudflare,
           which delivers it, may set strictly necessary cookies for security and

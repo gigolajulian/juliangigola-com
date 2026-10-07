@@ -93,7 +93,7 @@ const PROCESS: Block = {
   heading: "How it runs",
   items: [
     "Brief: references, usage, deliverables and dates. A deck is welcome but not required.",
-    "Treatment: a lighting and location approach, a shot list, and a quote covering crew and licensing.",
+    "Treatment: a lighting and location approach, a shot list and a quote covering crew and licensing.",
     "Shoot: studio or location, Bay Area or traveling.",
     "Delivery: selects for approval, then final retouched files in the crops and color spaces you need.",
   ],
@@ -189,7 +189,7 @@ export const BOOKING_PAGES: BookingPage[] = [
     description: `Professional headshots in San Francisco and San Jose: LinkedIn, corporate, actor and press. Studio lighting, retouched selects, ready in ${heads.turnaround}.`,
     h1: "Headshots in San Francisco & San Jose",
     kicker: "LinkedIn · Corporate · Actors · Press",
-    lead: `Clean, current, and usable everywhere: LinkedIn, press, casting, a company about page. Studio lighting, more than one background, and retouched selects back in ${heads.turnaround}.`,
+    lead: `Clean, current and usable everywhere: LinkedIn, press, casting, a company about page. Studio lighting, more than one background and retouched selects back in ${heads.turnaround}.`,
     ...sessionFacts(heads),
     service: "Headshot photography",
     back: SESSIONS,
@@ -242,7 +242,7 @@ export const BOOKING_PAGES: BookingPage[] = [
     description: `Graduation photos at SJSU, Santa Clara University, SF State, USF and across the Bay Area. ${formatPrice(grad.from)}: one hour, two outfit changes, edited gallery.`,
     h1: "Graduation photos in San Jose & San Francisco",
     kicker: "SJSU · Santa Clara · SF State · USF · Berkeley",
-    lead: "Cap and gown on campus or in the studio, at SJSU and Santa Clara University or anywhere else in the Bay Area. An hour, two outfit changes, and enough coverage for the family frame and the announcement.",
+    lead: "Cap and gown on campus or in the studio, at SJSU and Santa Clara University or anywhere else in the Bay Area. An hour, two outfit changes and enough coverage for the family frame and the announcement.",
     ...sessionFacts(grad),
     service: "Graduation photography",
     back: SESSIONS,
@@ -251,7 +251,7 @@ export const BOOKING_PAGES: BookingPage[] = [
       {
         heading: "Where on campus",
         items: [
-          "SJSU: Tower Hall and Tower Lawn, the Tommie Smith and John Carlos statue, and outside King Library.",
+          "SJSU: Tower Hall and Tower Lawn, the Tommie Smith and John Carlos statue and outside King Library.",
           "Santa Clara University: the Mission Church and its gardens, and Palm Drive.",
           "SF State: Malcolm X Plaza and the J. Paul Leonard Library.",
           "USF: St. Ignatius Church and Lone Mountain.",
@@ -479,10 +479,10 @@ export const BOOKING_PAGES: BookingPage[] = [
     name: "Music",
     title: "Musician Press Photos & Music Videos, Bay Area",
     description:
-      "Press photos, single and album cover art, and music videos for artists and bands in San Francisco, San Jose and Oakland, shot and art-directed by Julian Gigola.",
+      "Press photos, single and album cover art and music videos for artists and bands in San Francisco, San Jose and Oakland, shot and art-directed by Julian Gigola.",
     h1: "Press photos, cover art & music videos",
     kicker: "Artists · Bands · Labels",
-    lead: "Press photos, single and album covers, and music videos for artists in San Francisco, San Jose and across the Bay Area, planned together, so a release looks like one thing from the press shot to the video.",
+    lead: "Press photos, single and album covers and music videos for artists in San Francisco, San Jose and across the Bay Area, planned together, so a release looks like one thing from the press shot to the video.",
     rate: "Quoted per project",
     price: null,
     service: "Music photography and music videos",
@@ -505,11 +505,11 @@ export const BOOKING_PAGES: BookingPage[] = [
     faqs: [
       {
         q: "How much do press photos cost?",
-        a: `Quoted per project. Say what the release is, when it is out, and what it needs, and the quote comes back with a treatment. ${reply}`.trim(),
+        a: `Quoted per project. Say what the release is, when it is out and what it needs, and the quote comes back with a treatment. ${reply}`.trim(),
       },
       {
         q: "What photos do I need for an EPK?",
-        a: "A few portraits in both landscape and portrait orientation, at least one with room for a headline, and a square crop for streaming profiles. All from one look, so the press reads as one artist.",
+        a: "A few portraits in both landscape and portrait orientation, at least one with room for a headline and a square crop for streaming profiles. All from one look, so the press reads as one artist.",
       },
       {
         q: "Can the press shoot and the cover art be one shoot?",
@@ -568,7 +568,7 @@ export const BOOKING_PAGES: BookingPage[] = [
       },
       {
         q: "How is usage licensed?",
-        a: "Usage is part of the quote: where the images run, for how long, and in which territories. Say what you need in the brief.",
+        a: "Usage is part of the quote: where the images run, for how long and in which territories. Say what you need in the brief.",
       },
       {
         q: "Can you shoot stills and video on the same day?",

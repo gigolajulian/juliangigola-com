@@ -105,7 +105,7 @@ export function VideoGrid({
         ) : (
           <div className="mt-3 flex flex-wrap items-baseline gap-x-4 gap-y-1">
             <h3 className="font-display text-lg uppercase tracking-[0] transition-colors duration-200">
-              {video.title}
+              {video.title.replace(/ (\S+)$/, "\u00a0$1")}
             </h3>
             {creditOf(video) ? (
               <p className="label text-muted-foreground transition-colors duration-200 hoverable:group-hover/cell:text-foreground">

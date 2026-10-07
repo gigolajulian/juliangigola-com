@@ -136,7 +136,7 @@ export function ContactForm({
   );
 
   const followUp = booking
-    ? { label: "When, where, and how many of you", placeholder: "e.g. May 17, SJSU, two of us" }
+    ? { label: "When, where and how many of you", placeholder: "e.g. May 17, SJSU, two of us" }
     : FOLLOW_UP[type] ?? FOLLOW_UP.other;
   const values = state.values ?? {};
 
