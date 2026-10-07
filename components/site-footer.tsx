@@ -77,9 +77,10 @@ export function SiteFooter() {
             </strong>{" "}
             All rights reserved.
           </p>
-          {/* Julian: on a phone, the second line to the right. */}
-          <nav aria-label="Legal" className="label text-muted-foreground max-sm:self-end">
-            <ul className="flex flex-wrap gap-x-6 gap-y-2 max-sm:justify-end">
+          {/* Julian (2026-10-06): on a phone both lines start on the left,
+              the legal one first. It was to the right until today. */}
+          <nav aria-label="Legal" className="label text-muted-foreground">
+            <ul className="flex flex-wrap gap-x-6 gap-y-2">
               {LEGAL.map((l) => (
                 <li key={l.href}>
                   <Link
@@ -93,7 +94,8 @@ export function SiteFooter() {
               {/* The region, and the cities in it said to a screen reader
                   and a search engine (the Bay Area as Julian means it runs
                   to Santa Cruz). */}
-              <li className="font-bold text-foreground">
+              {/* Julian (2026-10-06): on a phone, at the line's right end. */}
+              <li className="font-bold text-foreground max-sm:ml-auto">
                 San Francisco Bay Area
                 <span className="sr-only">
                   : {AREA_CITIES.slice(0, -1).join(", ")} and {AREA_CITIES.at(-1)}

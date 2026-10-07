@@ -1502,11 +1502,32 @@ body:has([data-quiet-footer]) .site-footer-row {
    nothing from the photographs; and clear of the home indicator. */
 @media (max-width: 39.99rem) {
   body:has([data-quiet-footer]) .site-footer-body {
-    padding-top: 1.75rem;
-    padding-bottom: calc(2rem + env(safe-area-inset-bottom));
+    /* Julian (2026-10-06): squashed on an iPhone. More above the rule,
+       more under the line, and clear of Safari's bar. */
+    /* Close under the rule; the rights line near the page's end. */
+    padding-top: 1.25rem;
+    padding-bottom: calc(1.25rem + env(safe-area-inset-bottom));
   }
   body:has([data-quiet-footer]) .site-footer-row {
-    gap: 2rem;
+    gap: 1.25rem;
+  }
+  /* The grid's last row has the same air before the footer. */
+  .strip-grid {
+    padding-bottom: 3rem;
+  }
+  /* And the names on the grid's plates run to two lines rather than
+     being cut (Julian: readable on an iPhone). Sized for the plate, not
+     for the name's length, since the length no longer has to fit one
+     line. */
+  .strip-grid .cover-name {
+    /* The size is at the end of the sheet, past the one-line formula. */
+    white-space: normal;
+    overflow: hidden;
+    text-overflow: clip;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    text-wrap: balance;
   }
 }
 
@@ -7459,4 +7480,12 @@ h2:not(.label) {
 }
 .strip-rail[data-rail-names="always"] .rail-bar > span.bg-foreground[data-tinted]::before {
   background: color-mix(in oklab, var(--tint-lit) 70%, transparent);
+}
+
+/* The grid's names on a phone, two lines (above, with the footer's
+   phone rules): sized for the plate, past the one-line formula. */
+@media (max-width: 39.99rem) {
+  .strip-grid .cover-name {
+    font-size: clamp(0.875rem, 9cqw, 1.25rem);
+  }
 }
