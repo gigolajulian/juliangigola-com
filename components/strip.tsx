@@ -691,6 +691,12 @@ export function Strip({
       if (cellFor(el, decodeURIComponent(url.hash.slice(1))) < 0) return;
       e.preventDefault();
       history.pushState(null, "", url.href);
+      /* `pushState` fires no event, so the bar, which reads the address
+         through `STRIP_SECTION` and `hashchange`, heard nothing and lit
+         the new screen only when something else re-rendered it. The dev
+         build re-renders enough to hide that; production did not
+         (measured 2026-10-07). Said here, the moment the address moves. */
+      window.dispatchEvent(new Event(STRIP_SECTION));
       go(true);
     };
     window.addEventListener("hashchange", onHash);
@@ -1748,6 +1754,8 @@ export function Strip({
       if (cellFor(el, decodeURIComponent(url.hash.slice(1))) < 0) return;
       e.preventDefault();
       history.pushState(null, "", url.href);
+      // As above: the bar reads the address off this event, not the push.
+      window.dispatchEvent(new Event(STRIP_SECTION));
       onHash();
     };
     document.addEventListener("click", onLink, true);
