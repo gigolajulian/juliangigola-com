@@ -43,5 +43,6 @@ blocked. The terms name Google as the text-only exception.
 - Directories: Thumbtack, Expertise.com, Peerspace, Wonderful Machine, ProductionHub, WeddingWire.
 - Decide on photos for the Google profile (they help ranking; conflicts with keeping photos away from Google).
 - Confirm copy Claude wrote: team headshots, campus spots, travel lines, weddings text (`lib/booking.ts`).
+- Block AI scrapers at the edge (2026-10-07 test with `curl -A <bot>`): ClaudeBot, Claude-Web, anthropic-ai, Bytespider, Amazonbot, cohere-ai already get 403. Still 200 on pages and photos: GPTBot, CCBot, FacebookBot, Meta-ExternalAgent, Diffbot, omgili, ImagesiftBot, img2dataset, Timpibot, AI2Bot, PanguBot, ICC-Crawler, Scrapy, python-requests. Fix: Cloudflare dashboard, Security rules, add those user agents to the existing block rule (or Security > Bots > Block AI bots), then re-run the curl test. Code cannot do it: static files are served without the Worker.
 - Cloudflare AI Crawl Control: check OAI-SearchBot, Claude-SearchBot, PerplexityBot aren't blocked at the edge.
 - Monthly: Search Console, Bing AI Performance report, and ask ChatGPT, Gemini and Perplexity "best headshot photographer in San Jose".
