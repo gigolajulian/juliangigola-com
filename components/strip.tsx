@@ -1400,6 +1400,10 @@ export function Strip({
      position rather than with an observer, because the counter and the
      ruler want it every frame of a drag and not on a threshold. */
   const glide = React.useRef<(to: number) => void>(() => {});
+  /** The cell the address named on arrival, re-aimed at on each re-lay
+      until the visitor moves the row themselves (below). A ref, so the
+      ruler and a link can spend it as well as the scroller's own events. */
+  const aimed = React.useRef("");
   React.useEffect(() => {
     const el = scroller.current;
     if (!el || !live) return;
@@ -1718,6 +1722,15 @@ export function Strip({
     };
     // A hash changed underfoot (a chip on /work is a plain anchor): glide.
     const onHash = () => {
+      /* The visitor chose a place, so the arrival's aim (`aimed`) is
+         spent. Left standing, the next re-lay of the row set the strip
+         back on the cell the address named when this effect last ran:
+         Julian (2026-10-07) pressed Inquiries, Sessions, then Biography,
+         and the glide to Biography was thrown back toward Sessions a few
+         frames in, the bar lighting Sessions. Traced in his Chrome: the
+         end's card mounting and leaving re-ran this effect with the
+         address at Sessions, and a re-lay during the next glide re-aimed. */
+      aimed.current = "";
       const hash = decodeURIComponent(window.location.hash.slice(1));
       const i = cellFor(el, hash);
       const where = i >= 0 ? centreOf(el, i) : null;
@@ -1754,15 +1767,15 @@ export function Strip({
        a strip, and the rack then moves it the better part of a screen
        further on. Until the visitor moves the row themselves, each
        re-lay aims again at the cell the address named on arrival. */
-    let aimed = decodeURIComponent(window.location.hash.slice(1));
+    aimed.current = decodeURIComponent(window.location.hash.slice(1));
     const handed = () => {
-      aimed = "";
+      aimed.current = "";
     };
     for (const t of ["wheel", "pointerdown", "keydown", "touchstart"])
       el.addEventListener(t, handed, { once: true, passive: true });
     const again = () => {
-      if (aimed) {
-        const i = cellFor(el, aimed);
+      if (aimed.current) {
+        const i = cellFor(el, aimed.current);
         const where = i >= 0 ? centreOf(el, i) : null;
         if (where !== null) el.scrollLeft = where;
       }
@@ -3250,6 +3263,8 @@ export function Strip({
   /** Puts a cell in the middle of the window. */
   const goTo = (i: number) => {
     const el = scroller.current;
+    // The ruler moving the row is the visitor moving it: the aim is spent.
+    aimed.current = "";
     const where = el ? centreOf(el, i) : null;
     if (where !== null) glide.current(where);
   };

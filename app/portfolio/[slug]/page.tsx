@@ -20,6 +20,7 @@ import {
   nextAfter,
   prevBefore,
   billing,
+  credited,
   nextDiscipline,
   markFor,
 } from "@/lib/work";
@@ -47,7 +48,7 @@ export async function generateMetadata(
   const project = getProject(slug);
   if (!project) return {};
 
-  const client = project.credits.find((c) => /client/i.test(c.role));
+  const client = credited(project, /client/i);
   const model = project.credits.find((c) => /model|in frame/i.test(c.role));
   const discipline = project.categories[0]?.name.toLowerCase();
   const n = project.images.length;
@@ -68,7 +69,7 @@ export async function generateMetadata(
       : project.intent
     : [
         `${project.headline ?? project.name}: ${discipline ?? "photography"} by Julian Gigola`,
-        client ? `for ${client.name}` : null,
+        client ? `for ${client}` : null,
         `${n} ${n === 1 ? "frame" : "frames"}`,
         model ? `with ${model.name}` : null,
       ]
@@ -159,8 +160,11 @@ export default async function ProjectPage(props: PageProps<"/portfolio/[slug]">)
     ? {
         href: onwards.href,
         name: nextProject?.name ?? onwards.name,
-        client: nextProject?.credits.find((c) => /client/i.test(c.role))
-          ?.name,
+        /* Julian (2026-10-06): the discipline where the client would only
+           repeat the name (SAGO, for SAGO), as the grid's caption does. */
+        client:
+          nextProject &&
+          (credited(nextProject, /client/i) ?? nextProject.categories[0]?.name),
       }
     : undefined;
 

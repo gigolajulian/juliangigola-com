@@ -791,10 +791,20 @@ const withBlur = (cover: Frame): Frame => {
   return blur ? { ...cover, blur } : cover;
 };
 
+/** A credit by role, unless it only repeats the project's own name (SAGO,
+    credited to SAGO): under the name, that line said the same thing twice
+    (polish, 2026-10-06). */
+export const credited = (p: Project, role: RegExp): string | undefined => {
+  const name = p.credits.find((c) => role.test(c.role))?.name.trim();
+  return name && name.toLowerCase() !== p.name.trim().toLowerCase()
+    ? name
+    : undefined;
+};
+
 /** The person or company a project is credited to, when there is one: the
     client, or the model or artist in front of the lens. */
 export const billing = (p: Project): string | undefined =>
-  p.credits.find((c) => /client|model|artist/i.test(c.role))?.name;
+  credited(p, /client|model|artist/i);
 
 /** One row of the /work index: a name, a cover for the panel, a credit. */
 export type IndexRow = {
@@ -843,10 +853,8 @@ const CAMPAIGN_CLIENT: Record<string, string> = {
 const coverCredit = (p: Project): string => {
   const credits = p.credits.map((c) => ({ ...c, name: clean(c.name) }));
   if (p.categories.some((c) => c.slug === "campaigns")) {
-    const client = credits.find((c) => /client|brand/i.test(c.role));
-    return (
-      client?.name ?? CAMPAIGN_CLIENT[p.slug] ?? p.categories[0]?.name ?? ""
-    );
+    const client = credited({ ...p, credits }, /client|brand/i);
+    return client ?? CAMPAIGN_CLIENT[p.slug] ?? p.categories[0]?.name ?? "";
   }
   const model = credits.find(
     (c) =>
