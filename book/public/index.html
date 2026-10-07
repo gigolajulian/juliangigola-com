@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Book | Julian Gigola</title>
+<meta name="robots" content="noindex">
+<!-- Link previews (iMessage, Instagram, WhatsApp): crawlers don't run the script below, so these stay the same for every path. -->
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Julian Gigola">
+<meta property="og:title" content="Book a session | Julian Gigola">
+<meta property="og:description" content="Headshots, portraits, graduation and digitals in the Bay Area.">
+<meta property="og:image" content="https://book.juliangigola.com/og-home.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="https://juliangigola.com/favicon.ico">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Inter+Tight:wght@900&display=swap" rel="stylesheet">
+<style>
+  /* book.juliangigola.com: the Cal.com booker in the site's colors. One page; the path picks the event. */
+  :root { --bg: #ebedef; --fg: #141211; --muted: #515354; --line: #d3d5d7; --accent: #007879; --card: #ebedef; --card-line: #d9dbdd; color-scheme: light; }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) { --bg: #0b0a09; --fg: #f1f0ed; --muted: #92908d; --line: #21201f; --accent: #3ee6f0; --card: #141211; --card-line: #1e1c1b; color-scheme: dark; }
+  }
+  :root[data-theme="dark"] { --bg: #0b0a09; --fg: #f1f0ed; --muted: #92908d; --line: #21201f; --accent: #3ee6f0; --card: #141211; --card-line: #1e1c1b; color-scheme: dark; }
+  body { margin: 0; background: var(--bg); color: var(--fg); font: 400 13px/1.5 "IBM Plex Mono", monospace; }
+  main { max-width: 1040px; margin: 0 auto; padding: 24px 16px 48px; }
+  header { margin-bottom: 40px; }
+  header a { font: 900 clamp(24px, 3vw, 32px)/1 "Inter Tight", sans-serif; letter-spacing: -0.02em; color: var(--fg); text-decoration: none; }
+  h1 { font: 900 clamp(56px, 9vw, 96px)/0.92 "Inter Tight", sans-serif; letter-spacing: -0.03em; margin: 0 0 12px; }
+  p { color: var(--muted); margin: 0 0 32px; }
+  #list { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--line); }
+  #list a { display: grid; grid-template-columns: 1fr auto; gap: 4px 16px; padding: 20px 0; border-bottom: 1px solid var(--line); color: var(--fg); text-decoration: none; }
+  #list b { font: 900 clamp(22px, 3vw, 32px)/1 "Inter Tight", sans-serif; letter-spacing: -0.02em; }
+  #list span { color: var(--muted); align-self: center; }
+  #list i { font-style: normal; color: var(--muted); grid-column: 1 / -1; }
+  #list a:hover b { color: var(--accent, inherit); }
+  header a { display: inline-flex; align-items: center; gap: 12px; }
+  #photo, #who img { width: 48px; height: 48px; border-radius: 8px; object-fit: cover; }
+  /* Phone: photo in the header. Tablet and up: photo and name on top of the calendar card. */
+  #who { display: none; }
+  @media (min-width: 768px) {
+    #photo { display: none; }
+    #line { padding-bottom: 32px; border-bottom: 1px solid var(--line); margin-bottom: 24px; }
+    main #cal { border-top: 0; padding-top: 0; }
+    #who { display: flex; align-items: center; gap: 12px; margin: 0 0 12px; font: 900 18px/1 "Inter Tight", sans-serif; letter-spacing: -0.02em; }
+  }
+  #cal { border-top: 1px solid var(--line); padding-top: 24px; }
+  /* Desktop: the row reads as the top of Cal's card (measured: 760px wide, centered, same fill and edge) and laps 10px over the card's top border and corners. Cal widens its card once the frame is 1024px (a 1080px window); below that it stays a plain row */
+  @media (min-width: 1080px) {
+    /* Fit on one laptop screen: the name and photo already sit on the calendar, so the top row goes, and the title runs on one line. */
+    header { display: none; }
+    main { padding-top: 40px; }
+    h1 { font-size: 72px; }
+    h1 br { display: none; }
+    #line { padding-bottom: 20px; margin-bottom: 20px; }
+    #who { box-sizing: border-box; max-width: 760px; margin: 0 auto -10px; padding: 24px 20px 16px; background: var(--card); border: 1px solid var(--card-line); border-bottom: 0; border-radius: 8px 8px 0 0; position: relative; z-index: 1; }
+  }
+</style>
+</head>
+<body>
+<main>
+  <header><a href="https://juliangigola.com"><img id="photo" src="/julian.jpg" alt="" width="48" height="48">Julian Gigola</a></header>
+  <h1 id="title"></h1>
+  <p id="line"></p>
+  <div id="who"><img src="/julian.jpg" alt="" width="48" height="48">Julian Gigola</div>
+  <div id="cal"></div>
+</main>
+<script>
+  (function (C, A, L) { let p = function (a, ar) { a.q.push(ar); }; let d = C.document; C.Cal = C.Cal || function () { let cal = C.Cal; let ar = arguments; if (!cal.loaded) { cal.ns = {}; cal.q = cal.q || []; d.head.appendChild(d.createElement("script")).src = A; cal.loaded = true; } if (ar[0] === L) { const api = function () { p(api, arguments); }; const namespace = ar[1]; api.q = api.q || []; if (typeof namespace === "string") { cal.ns[namespace] = cal.ns[namespace] || api; p(cal.ns[namespace], ar); p(cal, ["initNamespace", namespace]); } else p(cal, ar); return; } p(cal, ar); }; })(window, "https://app.cal.com/embed/embed.js", "init");
+
+  // slug on book.juliangigola.com = slug on cal.com/juliangigola
+  const events = {
+    headshots: ["Headshots", "Book headshots", "30 min Sessions • in Studio or on Location"],
+    portraits: ["Portraits", "Book a portrait session", "60 min Sessions • in Studio, on Campus or at Your Place"],
+    graduation: ["Graduation", "Book a graduation session", "90 min Sessions • on Campus"],
+    digitals: ["Digitals", "Book digitals", "45 min Sessions • in Studio"],
+    editorial: ["Editorial call", "Editorial call", "Fifteen minutes about the idea, the team and the dates. I quote after the call."],
+    campaign: ["Brand call", "Brand & campaign call", "Fifteen minutes about the brief, deliverables, usage and dates. I quote after the call."],
+  };
+  const length = { headshots: "30 min", portraits: "60 min", graduation: "90 min", digitals: "45 min", editorial: "15 min call", campaign: "15 min call" };
+  const slug = location.pathname.split("/")[1];
+  const $ = (id) => document.getElementById(id);
+
+  if (!(slug in events)) {
+    // book.juliangigola.com/ (or any unknown path): pick a booking type.
+    document.title = "Book | Julian Gigola";
+    $("title").textContent = "Book a session";
+    $("line").textContent = "Pick one. The times are live from my calendar.";
+    $("who").remove();
+    $("cal").outerHTML = `<ul id="list">${Object.entries(events)
+      .map(([s, [t, , l]]) => `<li><a href="/${s}"><b>${t}</b><span>${length[s]}</span><i>${l}</i></a></li>`).join("")}</ul>`;
+  } else {
+  const [name, title, line] = events[slug];
+  document.title = title + " | Julian Gigola";
+  $("title").innerHTML = "Book <br>" + name;
+  $("line").textContent = line;
+  // Sessions (not the calls) take a deposit; collected by hand until Stripe is connected in Cal.com.
+  if (!/call$/.test(name)) $("line").insertAdjacentHTML("beforeend", " • Deposit required to confirm booking");
+
+  Cal("init", { origin: "https://app.cal.com" });
+  Cal("inline", { elementOrSelector: "#cal", calLink: "juliangigola/" + slug, config: { theme: "auto", layout: "month_view" } });
+  Cal("ui", {
+    theme: "auto",
+    // Cal's own panel (small round avatar, title, description) moves to the page: photo in the header, title and line above.
+    hideEventTypeDetails: true,
+    layout: "month_view",
+    cssVarsPerTheme: {
+      light: {
+        "cal-brand": "#007879", "cal-brand-emphasis": "#141211", "cal-brand-text": "#ebedef",
+        "cal-bg": "#ebedef", "cal-bg-muted": "#e1e3e5", "cal-bg-subtle": "#e1e3e5", "cal-bg-emphasis": "#d3d5d7",
+        "cal-text": "#141211", "cal-text-emphasis": "#141211", "cal-text-subtle": "#515354", "cal-text-muted": "#515354",
+        "cal-border": "#d3d5d7", "cal-border-subtle": "#d7d9db", "cal-border-emphasis": "#141211", "cal-border-booker": "#d3d5d7",
+      },
+      dark: {
+        "cal-brand": "#3ee6f0", "cal-brand-emphasis": "#f1f0ed", "cal-brand-text": "#0b0a09",
+        "cal-bg": "#0b0a09", "cal-bg-muted": "#141211", "cal-bg-subtle": "#141211", "cal-bg-emphasis": "#21201f",
+        "cal-text": "#f1f0ed", "cal-text-emphasis": "#f1f0ed", "cal-text-subtle": "#92908d", "cal-text-muted": "#92908d",
+        "cal-border": "#21201f", "cal-border-subtle": "#1f1e1d", "cal-border-emphasis": "#f1f0ed", "cal-border-booker": "#21201f",
+      },
+    },
+  });
+  }
+</script>
+</body>
+</html>

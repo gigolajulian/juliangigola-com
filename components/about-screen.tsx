@@ -113,7 +113,7 @@ export function AboutScreen() {
               {SERVICES.map((service) => (
                 <li
                   key={service}
-                  className="label border border-border font-[family-name:var(--font-grotesk)] font-medium px-2 py-3 tracking-[0.05em] text-foreground sm:py-[clamp(0.375rem,1.1cqh,0.75rem)]"
+                  className="label border border-border font-medium px-2 py-3 tracking-[0.05em] text-foreground sm:py-[clamp(0.375rem,1.1cqh,0.75rem)]"
                 >
                   {service}
                 </li>

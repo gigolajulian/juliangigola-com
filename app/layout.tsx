@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { IBM_Plex_Mono, Inter_Tight, Space_Grotesk } from "next/font/google";
+import { IBM_Plex_Mono, Inter_Tight } from "next/font/google";
 import localFont from "next/font/local";
 import { Intro } from "@/components/intro";
 import { SiteHeader } from "@/components/site-header";
@@ -19,35 +19,26 @@ import { CardTilt } from "@/components/card-tilt";
 import { FocusField } from "@/components/focus-field";
 import { ldJson, siteGraph } from "@/lib/seo";
 
-/* Two families and no more, at Julian's ask: Inter Tight Black for the
-   name and every heading, IBM Plex Mono for everything else, text, menu,
-   captions, labels, figures. Loaded through `next/font`, which fetches them
-   from Google Fonts at build time and serves them from this site, so a
-   visitor makes no request to Google and the text never flashes a fallback
-   face. The variables are the ones the spec names; `globals.css` points
-   `font-sans` at the mono so body text needs no class. */
-const display = Inter_Tight({
+/* Endless for the name, every heading and the nav, IBM Plex Mono for
+   everything else, text, captions, labels, figures. Served from this site
+   through `next/font`, so a visitor makes no request to Google and the text
+   never flashes a fallback face. `globals.css` points `font-sans` at the
+   mono so body text needs no class. */
+/* Julian's header face, Endless (2026-10-07): the logo, the titles, the
+   section titles and the nav. One regular cut, declared across every
+   weight so the 900 the titles ask for is not faked bold. */
+const display = localFont({
+  src: "./fonts/Endless.woff2",
   variable: "--font-display",
-  subsets: ["latin"],
-  /* 800 for the handle on a credit's card, a weight under the rest
-     (Julian, 2026-10-03). */
-  weight: ["800", "900"],
+  weight: "100 900",
   fallback: ["Helvetica Neue", "Arial", "sans-serif"],
 });
-/* Julian: the section titles (every h2 that is not a label) in Archivo
-   900 capitals, from his own font file: the variable font cut to that one
-   weight and to Latin (10.7 KB from 658). */
-const archivo = localFont({
-  src: "./fonts/Archivo-Black.woff2",
-  variable: "--font-archivo",
+/* The wordmark stays Inter Tight Black: the logo and the name on the
+   cover (Julian, 2026-10-07). */
+const wordmark = Inter_Tight({
+  variable: "--font-wordmark",
+  subsets: ["latin"],
   weight: "900",
-  fallback: ["Helvetica Neue", "Arial", "sans-serif"],
-});
-/* The service boxes on About, in 500 capitals (Julian, 2026-10-05). */
-const grotesk = Space_Grotesk({
-  variable: "--font-grotesk",
-  subsets: ["latin"],
-  weight: "500",
   fallback: ["Helvetica Neue", "Arial", "sans-serif"],
 });
 const mono = IBM_Plex_Mono({
@@ -101,17 +92,13 @@ export const metadata: Metadata = {
     /* No `url` here: set once at the root it was inherited by every page,
        so a shared /sessions link unfurled pointing at the homepage. The
        canonical on each page is the address. */
-    /* The eye mark on black, at 1200x630. Julian's pick for the thumbnail.
+    /* The wordmark on black, at 1200x630: "Julian Gigola" in Inter Tight 900,
+     * the logo's face. Julian's pick for the thumbnail (2026-10-06); it was
+     * the eye mark before that, and the cover photograph before that.
      *
-     * It used to be the cover photograph, cropped from whatever `coverSlug`
-     * named by a `prebuild` script. The mark does not change with the cover,
-     * so there is nothing left to generate per deploy and the script is gone:
-     * `public/og.jpg` is now a committed file, made from `app/icon.svg`.
-     *
-     * The trade: an unfurl in a feed is 500px wide and a photograph sells the
-     * work harder than a logo does. It is the same mark as the tab, though,
-     * which is the other thing a share card can be worth — a site you
-     * recognise before you have read the title. */
+     * Nothing changes with the cover, so there is nothing to generate per
+     * deploy: `public/og.jpg` is a committed file. book.juliangigola.com
+     * uses the same card for its list page. */
     images: [
       {
         url: "/og.jpg",
@@ -138,7 +125,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="en"
-      className={`${display.variable} ${archivo.variable} ${grotesk.variable} ${mono.variable} h-full antialiased`}
+      className={`${display.variable} ${wordmark.variable} ${mono.variable} h-full antialiased`}
       // Dark is the default and is what the CSS already declares, so the
       // server renders the correct theme for everyone except the visitor who
       // has chosen light. That one case is what the script below fixes.
@@ -271,7 +258,10 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         {/* And the pointer itself: the site's mark in place of the arrow.
             See `pointer-mark.tsx`. */}
         <PointerMark />
-      </body>
+      {/* impeccable-live-start */}
+<script src="http://localhost:8400/live.js?token=bfc9dd22-1259-47cd-ac92-253ac8ff76e6"></script>
+{/* impeccable-live-end */}
+</body>
     </html>
   );
 }

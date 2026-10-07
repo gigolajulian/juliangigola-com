@@ -78,7 +78,7 @@ export async function GET(request: Request) {
   };
 
   try {
-    const [days, sources, pages, devices, zone] = await Promise.all([
+    const [days, sources, pages, devices, zone, google, bing] = await Promise.all([
       rum("date", 8),
       rum("refererHost"),
       rum("requestPath", 10),
@@ -86,6 +86,8 @@ export async function GET(request: Request) {
       gql(
         `{viewer{zones(filter:{zoneTag:"${ZONE}"}){httpRequestsAdaptiveGroups(limit:500,filter:{datetime_geq:"${ago(1)}",datetime_lt:"${now.toISOString()}",requestSource:"eyeball",edgeResponseContentTypeName:"html"},orderBy:[count_DESC]){count dimensions{userAgent}}}}}`,
       ),
+      searchConsole(env.GSC_OAUTH),
+      bingWebmaster(env.BING_API_KEY),
     ]);
 
     const botLike = /bot|crawl|spider|curl|wget|python|headless|go-http|node|axios|fetch|extended|agent|preview|scan|^$/i;
@@ -107,8 +109,126 @@ export async function GET(request: Request) {
       devices,
       bots,
       topBots: topBots.slice(0, 6),
+      google,
+      bing,
     });
   } catch (e) {
     return json({ error: (e as Error).message }, 502);
+  }
+}
+
+/* Google Search, last 28 days, from Search Console. `GSC_OAUTH` is
+   `{client_id, client_secret, refresh_token}` for hello@, read-only
+   (webmasters.readonly), made once by `scripts/gsc-auth.mjs`. Its own
+   failure is reported in its own block, so Cloudflare's numbers still show. */
+async function searchConsole(secret?: string) {
+  if (!secret) return { error: "Search Console not connected yet." };
+  try {
+    const { client_id, client_secret, refresh_token } = JSON.parse(secret);
+    const tok = (await (
+      await fetch("https://oauth2.googleapis.com/token", {
+        method: "POST",
+        body: new URLSearchParams({ client_id, client_secret, refresh_token, grant_type: "refresh_token" }),
+      })
+    ).json()) as { access_token?: string; error_description?: string; error?: string };
+    if (!tok.access_token) return { error: `Google sign-in failed: ${tok.error_description ?? tok.error}` };
+
+    // Search Console is about three days behind, so the window ends there.
+    const day = (n: number) => new Date(Date.now() - n * 864e5).toISOString().slice(0, 10);
+    const query = async (dimensions: string[], rowLimit = 10) => {
+      const res = await fetch(
+        "https://searchconsole.googleapis.com/webmasters/v3/sites/sc-domain%3Ajuliangigola.com/searchAnalytics/query",
+        {
+          method: "POST",
+          headers: { authorization: `Bearer ${tok.access_token}`, "content-type": "application/json" },
+          body: JSON.stringify({ startDate: day(30), endDate: day(2), dimensions, rowLimit }),
+        },
+      );
+      const r = (await res.json()) as {
+        rows?: { keys?: string[]; clicks: number; impressions: number; ctr: number; position: number }[];
+        error?: { message: string };
+      };
+      if (r.error) throw new Error(r.error.message);
+      return r.rows ?? [];
+    };
+    const [total, queries, pages] = await Promise.all([query([]), query(["query"]), query(["page"])]);
+    const t = total[0];
+    const rows = (list: typeof queries) =>
+      list.map((r) => ({ key: r.keys![0].replace(/^https?:\/\//, "").replace(/^juliangigola\.com(?=\/)/, "") || "/", clicks: r.clicks, impressions: r.impressions, position: Math.round(r.position * 10) / 10 }));
+    return {
+      clicks: t?.clicks ?? 0,
+      impressions: t?.impressions ?? 0,
+      position: t ? Math.round(t.position * 10) / 10 : null,
+      queries: rows(queries),
+      pages: rows(pages),
+    };
+  } catch (e) {
+    return { error: (e as Error).message };
+  }
+}
+
+/* Bing, last 28 days, from Bing Webmaster Tools' API with `BING_API_KEY`
+   (Settings > API access there). Bing has no overall rank, so the headline
+   rank is left out; per search and per page it is Bing's average position. */
+async function bingWebmaster(key?: string) {
+  if (!key) return { error: "Bing Webmaster Tools not connected yet." };
+  try {
+    const call = async (method: string) => {
+      const res = await fetch(
+        `https://ssl.bing.com/webmaster/api.svc/json/${method}?siteUrl=${encodeURIComponent("https://juliangigola.com/")}&apikey=${encodeURIComponent(key.trim())}`,
+      );
+      const text = await res.text();
+      let r: { d?: Record<string, unknown>[]; Message?: string };
+      try {
+        r = JSON.parse(text);
+      } catch {
+        throw new Error(`Bing answered ${res.status}: ${text.slice(0, 160) || "(empty)"}`);
+      }
+      if (!r.d) throw new Error(r.Message ?? `Bing answered ${res.status}`);
+      return r.d;
+    };
+    // Bing's dates arrive as "/Date(1759017600000-0700)/".
+    const since = Date.now() - 28 * 864e5;
+    const recent = (rows: Record<string, unknown>[]) =>
+      rows.filter((r) => Number(String(r.Date).match(/\d+/)?.[0] ?? 0) >= since);
+    const [traffic, queries, pages] = await Promise.all([
+      call("GetRankAndTrafficStats"),
+      call("GetQueryStats"),
+      call("GetPageStats"),
+    ]);
+    const sum = (rows: Record<string, unknown>[], field: string) => rows.reduce((s, r) => s + Number(r[field] ?? 0), 0);
+    const group = (rows: Record<string, unknown>[], field: string) => {
+      const by = new Map<string, { clicks: number; impressions: number; pos: number; n: number }>();
+      for (const r of recent(rows)) {
+        const k = String(r[field]).replace(/^https?:\/\//, "").replace(/^juliangigola\.com(?=\/)/, "") || "/";
+        const g = by.get(k) ?? { clicks: 0, impressions: 0, pos: 0, n: 0 };
+        g.clicks += Number(r.Clicks ?? 0);
+        g.impressions += Number(r.Impressions ?? 0);
+        g.pos += Number(r.AvgImpressionPosition ?? 0);
+        g.n += 1;
+        by.set(k, g);
+      }
+      return [...by]
+        .map(([key, g]) => ({ key, clicks: g.clicks, impressions: g.impressions, position: Math.round((g.pos / g.n) * 10) / 10 }))
+        .sort((a, b) => b.impressions - a.impressions)
+        .slice(0, 10);
+    };
+    const t = recent(traffic);
+    return {
+      clicks: sum(t, "Clicks"),
+      impressions: sum(t, "Impressions"),
+      position: null,
+      queries: group(queries, "Query"),
+      pages: group(pages, "Query"),
+    };
+  } catch (e) {
+    // Bing refuses Cloudflare's shared servers outright (2026-10-05), so the
+    // Agentic OS dashboard on Julian's PC asks it instead.
+    const message = (e as Error).message;
+    return {
+      error: /ThrottleIP/.test(message)
+        ? "Bing blocks requests from Cloudflare's servers. Bing's numbers are on the Agentic OS dashboard on the PC."
+        : message,
+    };
   }
 }

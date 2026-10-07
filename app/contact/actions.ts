@@ -2,6 +2,7 @@
 
 import { headers } from "next/headers";
 import { getCloudflareContext } from "@opennextjs/cloudflare";
+import imageLoader from "@/image-loader";
 import {
   COOLDOWN_MS,
   DAILY_CAP,
@@ -264,14 +265,17 @@ export async function submitEnquiry(
         subject,
         text,
         replyTo: { name: stored.name, email: stored.email },
-        attachments: await Promise.all(
-          uploads.map(async (f) => ({
-            content: Buffer.from(await f.arrayBuffer()).toString("base64"),
-            filename: f.name.slice(0, 80),
-            type: f.type,
-            disposition: "attachment" as const,
-          })),
-        ),
+        attachments: [
+          ...(await Promise.all(
+            uploads.map(async (f) => ({
+              content: Buffer.from(await f.arrayBuffer()).toString("base64"),
+              filename: f.name.slice(0, 80),
+              type: f.type,
+              disposition: "attachment" as const,
+            })),
+          )),
+          ...(await pickAttachments(picks)),
+        ],
       });
     } catch (err) {
       console.error(
@@ -295,4 +299,31 @@ export async function submitEnquiry(
       mailto,
     };
   }
+}
+
+/* The frames they picked from the work, attached as well as linked
+   (Julian, 2026-10-05), at 1600px through the same resizer the site uses
+   so the mail stays small. One that will not fetch is left out, not fatal:
+   its link is still in the text. */
+async function pickAttachments(picks: string[]) {
+  const got = await Promise.all(
+    picks.map(async (src) => {
+      try {
+        const sized = imageLoader({ src, width: 1600, quality: 82 });
+        const res = await fetch(new URL(sized, "https://juliangigola.com"), {
+          signal: AbortSignal.timeout(8000),
+        });
+        if (!res.ok) return null;
+        return {
+          content: Buffer.from(await res.arrayBuffer()).toString("base64"),
+          filename: src.split("/").slice(-2).join("-"),
+          type: res.headers.get("content-type") ?? "image/jpeg",
+          disposition: "attachment" as const,
+        };
+      } catch {
+        return null;
+      }
+    }),
+  );
+  return got.filter((a) => a !== null);
 }

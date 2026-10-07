@@ -414,7 +414,8 @@ function Unlock({
 /* The references an enquiry arrived with (Julian, 2026-10-05): their
    uploads, fetched with the inbox's credentials since they are theirs and
    private, and his own frames they picked, which are public. Each opens
-   full size in a new tab. */
+   full size in a new tab. Only what actually loads is shown (Julian,
+   2026-10-05): a broken tile, or a heading over none, says nothing. */
 function References({
   msgKey,
   enquiry,
@@ -425,6 +426,7 @@ function References({
   auth: Record<string, string>;
 }) {
   const [urls, setUrls] = React.useState<(string | null)[]>([]);
+  const [broken, setBroken] = React.useState<string[]>([]);
   const count = enquiry.files?.length ?? 0;
   const header = JSON.stringify(auth);
 
@@ -451,37 +453,36 @@ function References({
 
   const tile =
     "block size-28 overflow-hidden rounded-[6px] border border-border hoverable:hover:border-foreground/40";
+  const uploads = (enquiry.files ?? [])
+    .map((name, n) => ({ name, url: urls[n] }))
+    .filter((u): u is { name: string; url: string } => !!u.url);
+  const picks = (enquiry.picks ?? []).filter((src) => !broken.includes(src));
+  if (!uploads.length && !picks.length) return null;
   return (
     <div className="flex flex-col gap-3">
-      {count ? (
+      {uploads.length ? (
         <>
           <p className="label text-muted-foreground">Their references</p>
           <ul className="flex flex-wrap gap-2">
-            {enquiry.files!.map((name, n) => (
-              <li key={n}>
-                {urls[n] ? (
-                  <a href={urls[n]!} target="_blank" rel="noreferrer" title={name} className={tile}>
-                    {/* eslint-disable-next-line @next/next/no-img-element -- a private blob */}
-                    <img src={urls[n]!} alt={name} className="size-full object-cover" />
-                  </a>
-                ) : (
-                  <span className={cn(tile, "label grid place-items-center p-2 text-center text-muted-foreground")}>
-                    {urls.length ? "Not stored" : "Loading"}
-                  </span>
-                )}
+            {uploads.map(({ name, url }) => (
+              <li key={url}>
+                <a href={url} target="_blank" rel="noreferrer" title={name} className={tile}>
+                  {/* eslint-disable-next-line @next/next/no-img-element -- a private blob */}
+                  <img src={url} alt={name} className="size-full object-cover" />
+                </a>
               </li>
             ))}
           </ul>
         </>
       ) : null}
-      {enquiry.picks?.length ? (
+      {picks.length ? (
         <>
           <p className="label text-muted-foreground">Picked from my work</p>
           <ul className="flex flex-wrap gap-2">
-            {enquiry.picks.map((src) => (
+            {picks.map((src) => (
               <li key={src}>
                 <a href={src} target="_blank" rel="noreferrer" className={tile}>
-                  <Image src={src} alt="" width={224} height={224} sizes="112px" className="size-full object-cover" />
+                  <Image src={src} alt="" width={224} height={224} sizes="112px" className="size-full object-cover" onError={() => setBroken((b) => [...b, src])} />
                 </a>
               </li>
             ))}

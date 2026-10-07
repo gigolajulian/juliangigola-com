@@ -411,7 +411,7 @@ export function SiteHeader() {
             title="Navbar logo"
             corner="right"
             text="Julian Gigola"
-            fontFamily="var(--font-display)"
+            fontFamily="var(--font-wordmark)"
             fontWeight={900}
             fontSize="1em"
             letterSpacing="-0.045em"
