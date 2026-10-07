@@ -35,7 +35,17 @@ export function FitLines() {
        layout of the whole cover per line, several times a load (mount, the
        fonts, the name's first size), ~190ms on a throttled phone. */
     const fit = () => {
-      if (!phone.matches) return clear();
+      if (!phone.matches) {
+        /* Everywhere else the location is set to the role's width, one
+           block under the name (Julian, 2026-10-07). */
+        clear();
+        const [role, where] = lines();
+        const rw = role?.getBoundingClientRect().width;
+        const ww = where?.getBoundingClientRect().width;
+        if (rw && ww)
+          where.style.fontSize = `${parseFloat(getComputedStyle(where).fontSize) * (rw / ww)}px`;
+        return;
+      }
       const size = getComputedStyle(name).fontSize;
       /* The words of the name, unseen, in its face and size. */
       const probe = document.createElement("span");

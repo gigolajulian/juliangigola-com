@@ -1005,6 +1005,26 @@ export function Strip({
     }
   }, [live, arrive]);
 
+  /* The photographs arrive from the middle of the window out, the nearest
+     first (Julian, 2026-10-07). After the effect above has put the strip
+     where it opens, so the middle is the one the visitor sees. Not on the
+     portfolio and its disciplines, which keep reading left to right;
+     Motion is a page of films and takes it. */
+  React.useLayoutEffect(() => {
+    const el = scroller.current;
+    if (!el || /^\/portfolio(\/(?!video)[^/]*)?$/.test(location.pathname)) return;
+    const box = el.getBoundingClientRect();
+    const cx = box.left + box.width / 2;
+    const cy = box.top + box.height / 2;
+    [...el.querySelectorAll<HTMLElement>(".strip-cell")]
+      .map((c) => {
+        const r = c.getBoundingClientRect();
+        return { c, d: Math.hypot(r.left + r.width / 2 - cx, r.top + r.height / 2 - cy) };
+      })
+      .sort((a, b) => a.d - b.d)
+      .forEach(({ c }, i) => c.style.setProperty("--i", String(i)));
+  }, []);
+
   /** The scroll position, kept live: a cleanup cannot read it off the
       element, which is detached by then. */
   const seatX = React.useRef(0);

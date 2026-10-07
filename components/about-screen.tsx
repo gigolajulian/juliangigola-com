@@ -32,11 +32,11 @@ const SERVICES = [
 const PHASES = [
   {
     step: "Brief",
-    body: "References, usage, deliverables, and dates. A deck is welcome but not required.",
+    body: "References, usage, deliverables and dates. A deck is welcome but not required.",
   },
   {
     step: "Treatment",
-    body: "A lighting and location approach, a shot list, and a quote covering crew and licensing.",
+    body: "A lighting and location approach, a shot list and a quote covering crew and licensing.",
   },
   {
     step: "Shoot",

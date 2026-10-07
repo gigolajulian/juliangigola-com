@@ -2916,6 +2916,16 @@ h2.contact-title {
 :root[data-reel] {
   --muted-foreground: oklch(0.88 0.004 80);
 }
+/* The film runs on under the footer, and the footer is glass over it
+   (Julian, 2026-10-07): it was the one band the reel did not reach. */
+:root[data-reel] .reel-backdrop {
+  bottom: -8rem;
+}
+:root[data-reel] body > footer {
+  background-color: color-mix(in oklab, var(--background) 40%, transparent);
+  -webkit-backdrop-filter: blur(20px) saturate(1.4);
+  backdrop-filter: blur(20px) saturate(1.4);
+}
 @media (prefers-reduced-motion: reduce) {
   .reel-backdrop {
     display: none;
@@ -4831,6 +4841,15 @@ optgroup {
   }
   :is(.discipline-title, [data-discipline-page] .project-plate) > :nth-child(4) {
     grid-row: 4;
+  }
+  /* A gallery discipline (Automotive, Places, Event coverage) kept the
+     project plate's 24rem floor with its name centred in it, so the
+     photographs started far out. Its name stands on the page's margin
+     and the first frame follows at the same distance as every other
+     discipline's (Julian, 2026-10-07). */
+  [data-discipline-page] .project-plate {
+    min-width: 0;
+    justify-content: start;
   }
 }
 

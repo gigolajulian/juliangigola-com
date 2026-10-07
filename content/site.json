@@ -57,7 +57,7 @@
     {
       "slug": "headshots",
       "name": "Headshots",
-      "blurb": "Clean, current, and usable everywhere: LinkedIn, press, casting, a company about page.",
+      "blurb": "Clean, current and usable everywhere: LinkedIn, press, casting, a company about page.",
       "from": null,
       "includes": [
         "Studio lighting",
@@ -73,7 +73,7 @@
       "blurb": "Agency-standard digitals: clean light, no retouching, accurate to how you actually look.",
       "from": 250,
       "includes": [
-        "Full length, three-quarter, and close",
+        "Full length, three-quarter and close",
         "Front and profile",
         "Unretouched, as agencies require"
       ],
