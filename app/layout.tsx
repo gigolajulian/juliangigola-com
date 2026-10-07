@@ -258,10 +258,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         {/* And the pointer itself: the site's mark in place of the arrow.
             See `pointer-mark.tsx`. */}
         <PointerMark />
-      {/* impeccable-live-start */}
-<script src="http://localhost:8400/live.js?token=bfc9dd22-1259-47cd-ac92-253ac8ff76e6"></script>
-{/* impeccable-live-end */}
-</body>
+      </body>
     </html>
   );
 }
