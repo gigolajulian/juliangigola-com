@@ -43,5 +43,6 @@ blocked. The terms name Google as the text-only exception.
 - Directories: Thumbtack, Expertise.com, Peerspace, Wonderful Machine, ProductionHub, WeddingWire.
 - Decide on photos for the Google profile (they help ranking; conflicts with keeping photos away from Google).
 - Confirm copy Claude wrote: team headshots, campus spots, travel lines, weddings text (`lib/booking.ts`).
+- AI scrapers blocked at the edge (done 2026-10-07): AI Crawl Control blocks the named training crawlers, and a custom rule "Block other scrapers" returns 403 to Diffbot, omgili, ImagesiftBot, img2dataset, AI2Bot, PanguBot, ICC-Crawler, Scrapy and python-requests. Checked with `curl -A`; Googlebot, Bingbot, OAI-SearchBot, PerplexityBot and browsers still get 200. Claude-User is also set to Block in AI Crawl Control.
 - Cloudflare AI Crawl Control: check OAI-SearchBot, Claude-SearchBot, PerplexityBot aren't blocked at the edge.
 - Monthly: Search Console, Bing AI Performance report, and ask ChatGPT, Gemini and Perplexity "best headshot photographer in San Jose".
