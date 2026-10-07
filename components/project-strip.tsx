@@ -7,7 +7,7 @@ import { ViewTransition } from "react";
 import { Lightbox, useLightbox } from "@/components/lightbox";
 import { CreditCard, CreditList } from "@/components/credit-card";
 import { longestWord, titleWidth } from "@/components/strip-page";
-import { Strip, type Lead } from "@/components/strip";
+import { Strip, useWideNow, type Lead } from "@/components/strip";
 import type { Project, TextBlock, Frame } from "@/lib/work-types";
 
 /* ── the sequence, across the screen ──────────────────────────────
@@ -98,6 +98,12 @@ export function ProjectStrip({
     : project.credits;
   const scroller = React.useRef<HTMLDivElement>(null);
   const lightbox = useLightbox(frames);
+  /* Whether the frames past the first screen are fetched at once (the
+     sideways strip) or as the page reaches them (a phone, where the page
+     stacks ten screens tall and SAGO was 1.35MB of frames on arrival,
+     measured 2026-10-07). False in the HTML, true on a wide window as it
+     hydrates; see `useWideNow`. */
+  const wideNow = useWideNow();
 
   /* The photographs with the writing back in its place. `lib/work.ts` pulls
      the two apart — the lightbox and the counts have no use for a paragraph
@@ -430,9 +436,10 @@ export function ProjectStrip({
                    for the rest — which also takes the rest
                    out of the head, so they are asked for after the first
                    frames and the stylesheet rather than alongside them.
-                   They stay eager: the sequence still loads in full. */
+                   They stay eager on the strip: the sequence still loads
+                   in full. Down a phone they are lazy (`wideNow`). */
                 fetchPriority={cell.n < 3 ? "high" : "low"}
-                loading="eager"
+                loading={cell.n < 3 || wideNow ? "eager" : "lazy"}
                 placeholder={
                   cell.n === 0 && project.cover.blur ? "blur" : "empty"
                 }
@@ -454,6 +461,7 @@ export function ProjectStrip({
       project.cover.blur,
       project.slug,
       next,
+      wideNow,
     ],
   );
 

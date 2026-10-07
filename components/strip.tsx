@@ -251,6 +251,17 @@ export const useWide = () =>
     // The server draws the wide page; a phone corrects itself on hydration.
     () => true,
   );
+/** The same question for what the page fetches, answered the other way
+    round on the server: a frame marked eager in the HTML is requested as
+    the parser meets it, before any script can take it back, so the HTML
+    says lazy and a wide window turns the rest eager as it hydrates. A
+    phone, where the page stacks ten screens tall, keeps them lazy. */
+export const useWideNow = () =>
+  React.useSyncExternalStore(
+    subscribeWide,
+    () => window.matchMedia(WIDE).matches,
+    () => false,
+  );
 
 /** A landscape window with room in it: where the ruler runs in chapters.
     It asked for a mouse as well, because a chapter only opened under a
