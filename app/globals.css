@@ -659,7 +659,7 @@
 }
 .cover-cta {
   display: inline-block;
-  font-family: var(--font-mono);
+  font-family: var(--font-display);
   /* Julian: increase weight. The buttons' 700, as `action`. */
   font-weight: 700;
   font-size: var(--h-cta-size, 12px);
@@ -904,12 +904,11 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  /* Body text is the mono (`layout.tsx`); the section titles are the
-     serif. */
-  --font-sans: var(--font-mono);
+  /* Body text is Endless, the titles' face (Julian, 2026-10-07); labels and
+     buttons keep the mono. */
+  --font-sans: var(--font-display);
   --font-mono: var(--font-mono);
   --font-display: var(--font-display);
-  --font-archivo: var(--font-archivo);
   --font-heading: var(--font-display);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
@@ -1303,6 +1302,8 @@
 
   html {
     @apply font-sans;
+    /* Endless is set tight for titles; text needs a little air. */
+    letter-spacing: 0.02em;
     /* The nav is fixed; without this, an in-page jump lands under it. */
     scroll-padding-top: 6rem;
     /* No reserved gutter. This held fifteen pixels open on every page so
@@ -2916,6 +2917,16 @@ h2.contact-title {
 :root[data-reel] {
   --muted-foreground: oklch(0.88 0.004 80);
 }
+/* The film runs on under the footer, and the footer is glass over it
+   (Julian, 2026-10-07): it was the one band the reel did not reach. */
+:root[data-reel] .reel-backdrop {
+  bottom: -8rem;
+}
+:root[data-reel] body > footer {
+  background-color: color-mix(in oklab, var(--background) 40%, transparent);
+  -webkit-backdrop-filter: blur(20px) saturate(1.4);
+  backdrop-filter: blur(20px) saturate(1.4);
+}
 @media (prefers-reduced-motion: reduce) {
   .reel-backdrop {
     display: none;
@@ -3208,6 +3219,9 @@ h2.contact-title {
      cover's index, the frame counters, the rate rows — and proportional
      digits make those shuffle sideways as they change. */
   font-variant-numeric: tabular-nums;
+  /* The small details stay in the mono: labels, captions, counts, buttons
+     (Julian, 2026-10-07). Text and titles are Endless, the logo Inter Tight. */
+  font-family: var(--font-mono);
   font-size: var(--text-label);
   line-height: var(--text-label--line-height);
   letter-spacing: var(--text-label--letter-spacing);
@@ -4832,6 +4846,15 @@ optgroup {
   :is(.discipline-title, [data-discipline-page] .project-plate) > :nth-child(4) {
     grid-row: 4;
   }
+  /* A gallery discipline (Automotive, Places, Event coverage) kept the
+     project plate's 24rem floor with its name centred in it, so the
+     photographs started far out. Its name stands on the page's margin
+     and the first frame follows at the same distance as every other
+     discipline's (Julian, 2026-10-07). */
+  [data-discipline-page] .project-plate {
+    min-width: 0;
+    justify-content: start;
+  }
 }
 
 /* In through it, the deck the other way round (Julian: the card swipe
@@ -5442,6 +5465,12 @@ optgroup {
   pointer-events: none;
   transition: scale 560ms cubic-bezier(0.33, 0, 0.2, 1);
 }
+/* The buttons in the nav's face, Endless (Julian, 2026-10-07). Unlayered,
+   so it outranks the mono the `label` beside it sets. */
+.action,
+.action-quiet {
+  font-family: var(--font-display);
+}
 .action {
   --flood: var(--background);
 }
@@ -5778,7 +5807,7 @@ body:has([data-fit-page]) footer {
  * titles carry.
  * ─────────────────────────────────────────────────────────────── */
 h2:not(.label) {
-  font-family: var(--font-archivo);
+  font-family: var(--font-display);
   font-weight: 900;
   text-transform: uppercase;
 }
