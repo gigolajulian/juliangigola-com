@@ -26,8 +26,9 @@ import { LiquidPair } from "@/components/liquid-pair";
  * ─────────────────────────────────────────────────────────────── */
 
 /** When each frame sets off, in the order of `SLOTS`: out of order, as
-    measured, across about a second and a half. */
-const ORDER = [0, 700, 1100, 850, 560, 1340, 620, 950, 1220, 780];
+    measured, across about a second and a half. Julian (2026-10-06): the
+    third (I Wanna Be a Human, top middle) leads, ahead of the rest. */
+const ORDER = [200, 700, 0, 850, 560, 1340, 620, 950, 1220, 780];
 
 /* Preview (`?deal=new`, `data-deal`, 2026-10-05): the frames arrive
    top to bottom, as one even wave (Julian: top, then the middle, then

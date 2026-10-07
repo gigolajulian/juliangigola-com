@@ -312,7 +312,10 @@ export function ProjectStrip({
             href={next!.href}
             data-hash="next"
             data-ring="Next"
-            className="flex h-full shrink-0 flex-col justify-center gap-2 pl-10 pr-6 sm:pl-24 sm:pr-10"
+            /* Stacked down a phone it is the foot of the page: air above
+               and below so the name is not pressed on the footer's rule
+               (Julian, 2026-10-06). */
+            className="flex h-full shrink-0 flex-col justify-center gap-2 pl-10 pr-6 max-sm:py-14 sm:pl-24 sm:pr-10"
           >
             <span className="label text-muted-foreground">Next project</span>
             <span className="font-display text-2xl uppercase leading-none tracking-[0] transition-opacity duration-200 hoverable:hover:opacity-70 sm:text-4xl">
