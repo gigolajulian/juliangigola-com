@@ -254,7 +254,9 @@ function PickPanel({
                       title={project}
                       disabled={n < 0 && room <= 0}
                       className={cn(
-                        "relative block w-full overflow-hidden rounded-[6px] outline-offset-2 transition-[opacity,outline-color] duration-200 disabled:opacity-40",
+                        "relative block w-full overflow-hidden rounded-[6px] outline-offset-2 transition-[opacity,outline-color,scale] duration-200 disabled:opacity-40",
+                        // A little larger under the hand: it can be picked (Julian, 2026-10-08).
+                        "hoverable:hover:enabled:scale-[1.03]",
                         n >= 0 ? "outline outline-2 outline-foreground" : "outline outline-1 outline-transparent hoverable:hover:outline-border",
                         // Sleeves are square, and shown whole (Julian, 2026-10-08).
                         groups[lit]?.name === "Cover art" ? "aspect-square" : "aspect-[3/4]",

@@ -2235,6 +2235,11 @@ a.strip-cell {
   scale: calc(48 / 120);
   translate: 0 -4px;
 }
+/* In the photo picker the frames are small and close together: a smaller
+   dot, so it does not cover the one it is over (Julian, 2026-10-08). */
+:root:has(.reference-panel[open]) .pointer-mark[data-state="press"] .mark-dot {
+  scale: calc(34 / 120);
+}
 /* Stuck to an icon: the dot sits on it, a little larger than over a
    link, and follows the hand on a short ease so it pours rather than
    jumps; the drop at the hand shows, and the two are run together. */
