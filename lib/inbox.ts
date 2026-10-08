@@ -266,27 +266,64 @@ const subjectOf = (e: Enquiry) => {
   return [`${type} inquiry`, e.name, job].filter(Boolean).join(" · ");
 };
 
-export const emailCopy = (e: Enquiry): { subject: string; text: string } => ({
-  subject: subjectOf(e),
-  text: [
+const esc = (s: string) =>
+  s.replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]!);
+
+/** `looks`: each frame's look in the picker (`lib/picker-looks.json`),
+    passed in so this module stays free of imports. `inline`: the picks
+    attached inline as `cid:pick-<index>`, shown under their link in the
+    HTML copy (Julian, 2026-10-08); one that would not fetch is the link
+    alone. */
+export const emailCopy = (
+  e: Enquiry,
+  looks: Record<string, string> = {},
+  inline: string[] = [],
+): { subject: string; text: string; html: string } => {
+  const head = [
     `Type: ${e.type}`,
     e.detail ? `Details: ${e.detail}` : null,
     `From: ${e.name} <${e.email}>`,
     e.country ? `Country: ${e.country}` : null,
     "",
     e.message,
-    ...(e.picks?.length
-      ? ["", "Picked from my work:", ...e.picks.map((src) => `https://juliangigola.com${src}`)]
-      : []),
+  ].filter((line) => line !== null);
+  const pick = (src: string) =>
+    [`https://juliangigola.com${src}`, looks[src]].filter(Boolean).join("  ");
+  const tail = [
     ...(e.files?.length ? ["", `Their references, attached: ${e.files.join(", ")}`] : []),
     "",
     "",
     "Stored in the site's inbox: https://juliangigola.com/admin (Inbox tab).",
     "Reply to this email to answer them directly.",
-  ]
-    .filter((line) => line !== null)
-    .join("\n"),
-});
+  ];
+  const lines = (l: string[]) => esc(l.join("\n")).replace(/\n/g, "<br>");
+  return {
+    subject: subjectOf(e),
+    text: [
+      ...head,
+      ...(e.picks?.length ? ["", "Picked from my work:", ...e.picks.map(pick)] : []),
+      ...tail,
+    ].join("\n"),
+    html: [
+      `<div style="font:14px/1.5 sans-serif">`,
+      lines(head),
+      ...(e.picks?.length
+        ? [
+            "<br><br>Picked from my work:",
+            ...e.picks.map((src, i) => {
+              const url = `https://juliangigola.com${src}`;
+              const img = inline.includes(src)
+                ? `<br><a href="${esc(url)}"><img src="cid:pick-${i}" width="320" alt="" style="display:block;max-width:100%;height:auto"></a>`
+                : "";
+              return `<p><a href="${esc(url)}">${esc(url)}</a>${looks[src] ? `&nbsp;&nbsp;${esc(looks[src])}` : ""}${img}</p>`;
+            }),
+          ]
+        : []),
+      lines(tail),
+      "</div>",
+    ].join(""),
+  };
+};
 
 export const summary = (e: Enquiry): Summary => ({
   id: e.id,

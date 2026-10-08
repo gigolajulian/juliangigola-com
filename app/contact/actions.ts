@@ -3,6 +3,7 @@
 import { headers } from "next/headers";
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 import imageLoader from "@/image-loader";
+import LOOKS from "@/lib/picker-looks.json";
 import {
   COOLDOWN_MS,
   DAILY_CAP,
@@ -255,7 +256,12 @@ export async function submitEnquiry(
        reply in Gmail answers them. No binding in `next dev`; the optional
        chain covers it. */
     try {
-      const { subject, text } = emailCopy(stored);
+      const inline = await pickAttachments(picks);
+      const { subject, text, html } = emailCopy(
+        stored,
+        LOOKS,
+        inline.map((a) => a.src),
+      );
       /* `to` although the binding already fixes the destination: the docs
          call it optional there, and the runtime threw "Email must have at
          least one recipient" on every enquiry until it was set. */
@@ -264,6 +270,7 @@ export async function submitEnquiry(
         from: { name: "Julian Gigola website", email: FROM },
         subject,
         text,
+        html,
         replyTo: { name: stored.name, email: stored.email },
         attachments: [
           ...(await Promise.all(
@@ -274,7 +281,7 @@ export async function submitEnquiry(
               disposition: "attachment" as const,
             })),
           )),
-          ...(await pickAttachments(picks)),
+          ...inline.map((a) => a.file),
         ],
       });
     } catch (err) {
@@ -301,13 +308,13 @@ export async function submitEnquiry(
   }
 }
 
-/* The frames they picked from the work, attached as well as linked
-   (Julian, 2026-10-05), at 1600px through the same resizer the site uses
-   so the mail stays small. One that will not fetch is left out, not fatal:
+/* The frames they picked from the work, attached (Julian, 2026-10-05)
+   and shown under their links (2026-10-08), at 1600px through the same
+   resizer the site uses so the mail stays small. One that will not fetch is left out, not fatal:
    its link is still in the text. */
 async function pickAttachments(picks: string[]) {
   const got = await Promise.all(
-    picks.map(async (src) => {
+    picks.map(async (src, i) => {
       try {
         const sized = imageLoader({ src, width: 1600, quality: 82 });
         const res = await fetch(new URL(sized, "https://juliangigola.com"), {
@@ -315,10 +322,14 @@ async function pickAttachments(picks: string[]) {
         });
         if (!res.ok) return null;
         return {
-          content: Buffer.from(await res.arrayBuffer()).toString("base64"),
-          filename: src.split("/").slice(-2).join("-"),
-          type: res.headers.get("content-type") ?? "image/jpeg",
-          disposition: "attachment" as const,
+          src,
+          file: {
+            content: Buffer.from(await res.arrayBuffer()).toString("base64"),
+            filename: src.split("/").slice(-2).join("-"),
+            type: res.headers.get("content-type") ?? "image/jpeg",
+            disposition: "inline" as const,
+            contentId: `pick-${i}`,
+          },
         };
       } catch {
         return null;

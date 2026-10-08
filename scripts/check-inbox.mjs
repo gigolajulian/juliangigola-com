@@ -20,6 +20,7 @@ import {
   cooldown,
   cooldownKey,
   dayKey,
+  emailCopy,
   enquiry,
   enquiryKey,
   looksLikeEmail,
@@ -219,7 +220,7 @@ const eq = (a, b, what) => {
   const link = replyLink(e);
 
   ok(link.startsWith("mailto:ada%40example.com?"), "addressed to the sender");
-  ok(link.includes("Re%3A%20your%20editorial%20enquiry"), "with a subject");
+  ok(link.includes("Re%3A%20your%20editorial%20inquiry"), "with a subject");
   ok(link.includes("Hi%20Ada"), "and their first name");
   ok(link.includes("%3E%20Two%20lines"), "their words quoted back");
 }
@@ -251,6 +252,26 @@ const eq = (a, b, what) => {
     "control characters stripped from header fields",
   );
   eq(e.message, "hi\nthere", "the body keeps its newlines");
+}
+
+// The email names each picked frame's look; one with no look is the bare link.
+{
+  const { text } = emailCopy(
+    { type: "Portrait", name: "A", email: "a@b.co", message: "hi", picks: ["/a.jpg", "/b.jpg"] },
+    { "/a.jpg": "Night" },
+  );
+  ok(text.includes("https://juliangigola.com/a.jpg  Night"), "a pick carries its look");
+  ok(/https:\/\/juliangigola\.com\/b\.jpg$/m.test(text), "a pick with no look is the link alone");
+}
+// The HTML copy shows a fetched pick inline under its link, and escapes the message.
+{
+  const { html } = emailCopy(
+    { type: "Portrait", name: "A", email: "a@b.co", message: "<b>hi</b>", picks: ["/a.jpg", "/b.jpg"] },
+    {},
+    ["/b.jpg"],
+  );
+  ok(html.includes('src="cid:pick-1"') && !html.includes("cid:pick-0"), "only fetched picks are inline");
+  ok(html.includes("&lt;b&gt;hi&lt;/b&gt;"), "the message is escaped");
 }
 
 console.log(`inbox: ${n} cases pass`);
