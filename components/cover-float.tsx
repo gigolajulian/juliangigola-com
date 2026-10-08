@@ -6,7 +6,7 @@ import { CoverSpace } from "@/components/cover-space";
 import { CoverRole } from "@/components/cover-role";
 import { FitLines } from "@/components/fit-lines";
 import { CoverCard, HeroDials, HeroName } from "@/components/hero-dials";
-import { DEAL, LANDSCAPE, MIDDLE, PHONE, SIDEWAYS, SLOTS, UPRIGHT, middleVars } from "@/lib/cover-slots";
+import { DEAL, LANDSCAPE, MIDDLE, PHONE, SHORT, SIDEWAYS, SLOTS, UPRIGHT, middleVars } from "@/lib/cover-slots";
 import { LiquidPair } from "@/components/liquid-pair";
 
 /* ── the cover ────────────────────────────────────────────────────
@@ -78,7 +78,7 @@ export function CoverFloat({
              at comes out in front of (`globals.css`). */
           "--zmax-large": `${Math.max(...SLOTS.map((s) => s.z))}px`,
           ...Object.fromEntries(
-            Object.entries({ upright: UPRIGHT, landscape: LANDSCAPE, sideways: SIDEWAYS, phone: PHONE }).map(
+            Object.entries({ short: SHORT, upright: UPRIGHT, landscape: LANDSCAPE, sideways: SIDEWAYS, phone: PHONE }).map(
               ([shape, set]) => [`--zmax-${shape}`, `${Math.max(...set.filter((p) => p.show).map((p) => p.z))}px`],
             ),
           ),
@@ -99,6 +99,7 @@ export function CoverFloat({
           const l = LANDSCAPE[at];
           const ph = PHONE[at];
           const sw = SIDEWAYS[at];
+          const sh = SHORT[at];
           return (
             <Link
               key={`${p.slug}-${i}`}
@@ -113,6 +114,7 @@ export function CoverFloat({
                 "cover-float-frame",
                 !ph.show && "cover-float-off-phone",
                 !sw.show && "cover-float-off-sideways",
+                !sh.show && "cover-float-off-short",
                 // The smaller screens' own layouts (globals.css).
                 !u.show && "cover-float-off-upright",
                 !l.show && "cover-float-off-landscape",
@@ -134,6 +136,10 @@ export function CoverFloat({
                   "--sy": `${sw.y}%`,
                   "--sw": `${sw.w}vw`,
                   "--sz": `${sw.z}px`,
+                  "--tx": `${sh.x}%`,
+                  "--ty": `${sh.y}%`,
+                  "--tw": `${sh.w}vw`,
+                  "--tz": `${sh.z}px`,
                   "--px": `${ph.x}%`,
                   "--py": `${ph.y}%`,
                   "--pw": `${ph.w}vw`,
@@ -147,6 +153,7 @@ export function CoverFloat({
                   "--wave-l": wave(LANDSCAPE, at),
                   "--wave-s": wave(SIDEWAYS, at),
                   "--wave-p": wave(PHONE, at),
+                  "--wave-t": wave(SHORT, at),
                   // Julian: keep each photograph's own proportions.
                   aspectRatio: `${p.cover.width} / ${p.cover.height}`,
                 } as React.CSSProperties
