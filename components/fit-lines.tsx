@@ -63,13 +63,22 @@ export function FitLines() {
         size: parseFloat(getComputedStyle(l).fontSize),
       }));
       probe.remove();
+      // The largest size among the lines: a short one grows to it before
+      // it is spread, so a short line is not set small and far apart.
+      const top = Math.max(...read.filter((r) => r.w).map((r) => r.size));
       all.forEach((l, i) => {
-        const { w, n, size } = read[i];
+        const { n, size } = read[i];
+        let { w } = read[i];
         if (!w || n < 2) return;
         if (w > target) {
           // Too long at its size: smaller, not squeezed.
           l.style.fontSize = `${size * (target / w)}px`;
         } else {
+          const grow = Math.min(top / size, target / w);
+          if (grow > 1) {
+            l.style.fontSize = `${size * grow}px`;
+            w *= grow;
+          }
           const ls = (target - w) / (n - 1);
           l.style.letterSpacing = `${ls}px`;
           // The spacing after the last letter matched before the first,

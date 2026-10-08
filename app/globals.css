@@ -656,7 +656,8 @@
 }
 .cover-float-where {
   font-family: var(--font-mono);
-  font-size: calc(var(--h-where-size, 14px) * var(--m-where));
+  /* The buttons' floor (`--cta-k`, below) for the same short window. */
+  font-size: calc(var(--h-where-size, 14px) * var(--m-where) * max(1, calc(0.9 / var(--mid, 1))));
   color: var(--hero-where);
 }
 /* Julian: on a phone the role and the location one line each, as wide as
@@ -675,18 +676,54 @@
     line-height: 1.3;
   }
 }
+/* The location's short form on a short wide window and an upright
+   tablet, the long one everywhere else (Julian, 2026-10-07). After the
+   phone block above, which sets every line `block`. */
+.cover-float-where .fit-line.where-short {
+  display: none;
+}
+@media (min-width: 80rem) and (min-aspect-ratio: 2 / 1) and (max-height: 56rem),
+  (min-width: 40rem) and (max-width: 64rem) and (orientation: portrait) {
+  .cover-float-where .fit-line.where-long {
+    display: none;
+  }
+  .cover-float-where .fit-line.where-short {
+    display: inline-block;
+  }
+}
 .cover-float-ctas {
   zoom: var(--m-buttons);
+  /* Never under nine tenths of their size, however far a short wide
+     window shrinks the middle (Julian, 2026-10-07: unreadable). The type
+     and padding grow rather than a zoom, which the liquid fill under
+     them does not measure. */
+  --cta-k: max(1, calc(0.9 / var(--mid, 1)));
+}
+/* The location one line, centred, from a tablet up (Julian, 2026-10-07:
+   it broke onto two lines off the middle on an iPad). */
+@media (min-width: 40rem) {
+  .cover-float-where {
+    max-width: none;
+    white-space: nowrap;
+    text-align: center;
+  }
+  .cover-float-where .fit-line {
+    display: inline-block;
+  }
 }
 .cover-cta {
   display: inline-block;
   font-family: var(--font-display);
   /* Julian: increase weight. The buttons' 700, as `action`. */
   font-weight: 700;
-  font-size: var(--h-cta-size, 12px);
+  font-size: calc(var(--h-cta-size, 12px) * var(--cta-k, 1));
   letter-spacing: 0.18em;
+  /* The spacing after the last letter matched before the first, so the
+     words sit in the middle of the button. */
+  text-indent: 0.18em;
+  text-align: center;
   text-transform: uppercase;
-  padding: 13px 22px;
+  padding: calc(13px * var(--cta-k, 1)) calc(22px * var(--cta-k, 1));
   border-radius: 0;
   box-shadow: none;
   background: var(--hero-ink);
