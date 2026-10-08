@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { opening } from "@/lib/opening";
 import { ProjectStrip, type NextUp } from "@/components/project-strip";
 import { StripPage, StripHead } from "@/components/strip-page";
 import { CoverArtGallery } from "@/components/cover-art-gallery";
@@ -160,6 +161,7 @@ export default async function ProjectPage(props: PageProps<"/portfolio/[slug]">)
     ? {
         href: onwards.href,
         name: nextProject?.name ?? onwards.name,
+        warm: isDiscipline ? opening(onwards.href.replace(/^\/portfolio\//, "")) : undefined,
         /* Julian (2026-10-06): the discipline where the client would only
            repeat the name (SAGO, for SAGO), as the grid's caption does. */
         client:

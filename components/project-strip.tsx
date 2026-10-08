@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import Image from "next/image";
+import { frameSizes } from "@/lib/frame-sizes";
 import Link from "next/link";
 import { ViewTransition } from "react";
 import { Lightbox, useLightbox } from "@/components/lightbox";
@@ -398,7 +399,7 @@ export function ProjectStrip({
                 // is told two thirds of the truth, so it fetches about 2x:
                 // full density there was 6.5MB of frames on one page, and
                 // the difference past 2x is not one a phone shows.
-                sizes={`(min-resolution: 2.5dppx) calc((100vh - 8rem) * ${((cell.frame.width / cell.frame.height) * 0.667).toFixed(3)}), calc((100vh - 8rem) * ${(cell.frame.width / cell.frame.height).toFixed(3)})`}
+                sizes={frameSizes(cell.frame)}
                 // The first three lead the page's loading; every other frame
                 // is fetched at once rather than as the strip reaches it.
                 // Left lazy, Julian's recording showed each frame arriving

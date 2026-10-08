@@ -3,7 +3,7 @@
 import { openFrom } from "@/components/lead-window";
 import { runDeck, type Deck } from "@/lib/deck";
 import * as React from "react";
-import { flushSync } from "react-dom";
+import { flushSync, preload } from "react-dom";
 import { useRouter } from "next/navigation";
 import { cn, filterPaths, rubberband, STRIP_SECTION } from "@/lib/utils";
 import { flyCovers } from "@/lib/work-view";
@@ -47,6 +47,10 @@ export type Lead = {
   /** Walking back into it opens at its start, not its end (Julian: back
       from Sessions lands on the first page of the work). */
   start?: boolean;
+  /** The first photographs it opens on, as its page will ask for them,
+      fetched with the page so its card comes in with them (Julian,
+      2026-10-08). */
+  warm?: { src: string; srcSet?: string; sizes?: string }[];
 };
 
 /** Set by a strip on its way out backwards and read by the next one on its
@@ -863,6 +867,7 @@ export function Strip({
   const router = useRouter();
   // Stable for the life of the strip: pages key it by what it shows.
   const nextHref = next?.href;
+  const nextWarm = next?.warm;
   const prevHref = prev?.href;
   const prevStart = prev?.start === true;
   const open = React.useRef(onOpen);
@@ -903,6 +908,8 @@ export function Strip({
       if (nextHref && room - el.scrollLeft < near && !warmed.has(nextHref)) {
         warmed.add(nextHref);
         router.prefetch(nextHref);
+        for (const f of nextWarm ?? [])
+          preload(f.src, { as: "image", imageSrcSet: f.srcSet, imageSizes: f.sizes });
       }
       if (prevHref && el.scrollLeft < near && !warmed.has(prevHref)) {
         warmed.add(prevHref);
@@ -919,7 +926,7 @@ export function Strip({
       cancelAnimationFrame(first);
       el.removeEventListener("scroll", warm);
     };
-  }, [router, nextHref, prevHref, live]);
+  }, [router, nextHref, nextWarm, prevHref, live]);
 
   /* Before the first paint: a deep link opens on its cell, and arriving
      backwards opens at the end with the slide coming from the left. Both

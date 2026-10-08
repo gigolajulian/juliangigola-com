@@ -5,6 +5,7 @@ import { ViewTransition } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
+import { coverSizes } from "@/lib/frame-sizes";
 import type { IndexRow } from "@/lib/work";
 import ACCENTS from "@/lib/accents.json";
 
@@ -131,7 +132,7 @@ export function CoverCell({
           // the cover's ratio wide, so the width is told from the height.
           // 10rem is the bar, the chip row and the ruler. On a 3x screen,
           // two thirds, for the 2x rung (see `project-strip.tsx`).
-          sizes={`(min-width: 640px) and (min-resolution: 2.5dppx) calc((100vh - 10rem) * ${((row.cover.width / row.cover.height) * 0.667).toFixed(3)}), (min-width: 640px) calc((100vh - 10rem) * ${(row.cover.width / row.cover.height).toFixed(3)}), 100vw`}
+          sizes={coverSizes(row.cover)}
           priority={eager}
           loading={eager ? undefined : "lazy"}
           /* No blur placeholder: Next paints it as the picture's own
