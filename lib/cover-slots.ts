@@ -102,15 +102,15 @@ export const SIDEWAYS: Place[] = [
     field ran its bottom row under the rail there. Arranged by Julian in
     the 3D view on "Photo layout, wide short" (`?arrange`), 2026-10-07. */
 export const SHORT: Place[] = [
-  { x: 20.5, y: 15, w: 11.5, z: 85, show: true },
-  { x: 64, y: 13.5, w: 10.5, z: 108, show: true },
-  { x: 34, y: 9, w: 10, z: 3, show: true },
+  { x: 21, y: 13, w: 11, z: 85, show: true },
+  { x: 66, y: 12.5, w: 9, z: 87, show: true },
+  { x: 36, y: 10.5, w: 10, z: 3, show: true },
   { x: 51, y: 78, w: 9, z: 47, show: true },
   { x: 21.5, y: 62.5, w: 11.5, z: 129, show: true },
-  { x: 48.5, y: 12, w: 9.5, z: 65, show: true },
-  { x: 77.5, y: 38, w: 12, z: 58, show: true },
-  { x: 35, y: 74.5, w: 8.5, z: 95, show: true },
-  { x: 6.5, y: 41, w: 13.5, z: 52, show: true },
+  { x: 50.5, y: 13, w: 9.5, z: 65, show: true },
+  { x: 77.5, y: 37.5, w: 12.5, z: 58, show: true },
+  { x: 34.5, y: 77.5, w: 9, z: 95, show: true },
+  { x: 7, y: 42.5, w: 12.5, z: 52, show: true },
   { x: 65, y: 68, w: 11.5, z: 8, show: true },
 ];
 
