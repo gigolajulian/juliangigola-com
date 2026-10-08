@@ -108,6 +108,16 @@ export function ServicesScreen({
     else setOn(i);
   };
 
+  /* A finger has no hover (Julian, 2026-10-08, iPad sideways): the first
+     tap on a row puts its frames on the table, a second one opens it. A
+     phone has no table, its rows open at once. */
+  const touched = useRef(false);
+  const tap = (e: React.MouseEvent, i: number) => {
+    if (!touched.current || i === on || !window.matchMedia("(min-width: 40rem)").matches) return;
+    e.preventDefault();
+    setOn(i);
+  };
+
   /* Julian (2026-10-04): the drop stands proud of its row, the text
      unchanged: 8px over and under (with the ground's own -inset-y-2). */
   const PAD = 8;
@@ -242,9 +252,14 @@ export function ServicesScreen({
                   href={r.href}
                   data-stick="row"
                   onPointerEnter={(e) => enter(e, i)}
+                  onPointerDown={(e) => (touched.current = e.pointerType !== "mouse")}
+                  onKeyDown={() => (touched.current = false)}
+                  onClick={(e) => tap(e, i)}
                   onPointerMove={onMove}
                   onPointerLeave={() => window.clearTimeout(aim.current.t)}
-                  onFocus={() => setOn(i)}
+                  // A finger's press focuses the row before its click: lit
+                  // then, the first tap would already be the second.
+                  onFocus={() => !touched.current && setOn(i)}
                   className="group grid grid-cols-[auto_minmax(0,1fr)] items-baseline gap-x-4 max-sm:items-center py-[clamp(0.25rem,0.7cqh,0.5rem)] max-sm:grid-cols-[auto_minmax(0,1fr)_3.5rem] max-sm:py-2"
                 >
                   <span

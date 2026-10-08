@@ -1680,6 +1680,15 @@ body:has(.strip-scroll[data-past-hero]) .home-wordmark,
     padding-bottom: calc(0.75rem + env(safe-area-inset-bottom));
   }
 }
+/* An iPad held sideways (Julian, 2026-10-08): the line a third thinner.
+   The home indicator's inset is most of the air under it now, rather than
+   added on top of 12px of its own. */
+@media (pointer: coarse) and (min-width: 40rem) and (orientation: landscape) {
+  body:has([data-quiet-footer]) .site-footer-body {
+    padding-top: 0.25rem;
+    padding-bottom: max(0.25rem, calc(env(safe-area-inset-bottom) - 0.25rem));
+  }
+}
 
 /* The cover's index on a short window. The cover is one cell of the
    homepage's strip, so its panel is the screen less the footer's line, and
@@ -2131,6 +2140,55 @@ a.strip-cell {
     border-top: 0;
     padding-top: 0;
   }
+}
+
+/* On an iPad held upright the grid runs down instead (`useTablet` in
+   `strip.tsx`; Julian, 2026-10-08: the rack's covers were too small).
+   The phone's justified rows at a taller line, two covers across, in a
+   box that scrolls while the page stays put. The rack's rules above are written for a size
+   container two rows deep; the repeated class outranks them. */
+.strip-grid.strip-grid[data-sheet] {
+  container-type: normal;
+  display: flex;
+  flex-direction: row !important;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  align-content: flex-start;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding-block: 1.25rem 2rem;
+}
+.strip-grid.strip-grid[data-sheet] > a,
+.strip-grid.strip-grid[data-sheet] > button {
+  width: auto !important;
+  height: auto !important;
+  flex: calc(var(--ar, 0.8) * 100) 1 calc(var(--ar, 0.8) * 23rem);
+  aspect-ratio: var(--ar, 0.8) !important;
+  min-width: 0;
+  /* A row no taller than a full one: a cover left on its own at the end
+     of a section grew to the whole width, a screen and a half tall. */
+  max-width: calc(var(--ar, 0.8) * 30rem);
+}
+.strip-grid.strip-grid.strip-grid[data-sheet] > :is(div, section, article) {
+  flex: 1 0 100%;
+  width: auto !important;
+  max-width: none;
+  padding: 1.5rem 0 0.25rem;
+  border-top: 1px solid var(--color-border);
+}
+.strip-grid.strip-grid.strip-grid[data-sheet] > :is(div, section, article):first-child {
+  border-top: 0;
+  padding-top: 0;
+}
+/* The names read across, as headings over their section. */
+.strip-grid[data-sheet] :is(.chapter-name, .strip-cell > a, h2:has(.title-word)) {
+  writing-mode: horizontal-tb;
+  rotate: none;
+}
+/* Nothing runs sideways, so there is nothing for the ruler to read. */
+.strip-scroll[data-sheet] ~ * {
+  display: none;
 }
 
 /* ── the pointer's mark ──────────────────────────────────────────
@@ -7739,5 +7797,206 @@ h2:not(.label) {
 @media (max-width: 39.99rem) {
   .strip-grid .cover-name {
     font-size: clamp(0.875rem, 9cqw, 1.25rem);
+  }
+}
+
+/* ── an iPad sideways: a slimmer head ──
+   Julian (2026-10-08): smaller nav links and a thinner bar for more room
+   for the work, and the twelve chips replaced by the drop-down the phone
+   has (`.work-filter` above, `filter-trigger` in `work-shell.tsx`).
+   Unlayered, so it outranks the `lg:hidden` both carry. */
+@media (pointer: coarse) and (min-width: 64rem) and (orientation: landscape) {
+  /* Then 1.4 times that, bar and contents (Julian, same day). */
+  .site-bar .page-column {
+    padding-block: 0.175rem;
+  }
+  /* The page up under the slimmer bar: 52px of it, and 64 was reserved. */
+  article[data-quiet-footer]:has(> .head-glass) {
+    padding-top: 3.85rem;
+  }
+  .site-bar .logo-grow {
+    font-size: 1.75rem;
+  }
+  /* The names smaller again in the same height (Julian, same day). */
+  .site-bar nav[aria-label="Main"] a {
+    padding-block: 1rem;
+    font-size: 0.8125rem;
+  }
+  .chip-row {
+    display: none;
+  }
+  .filter-trigger {
+    display: inline-flex;
+  }
+  .work-filter {
+    display: block;
+    top: var(--drop-top, 6rem);
+    background-color: transparent;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+  :root[data-drawer="filter"] .work-filter {
+    background-color: transparent;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+  .work-filter-panel {
+    width: 100%;
+    height: auto;
+    max-height: calc(100dvh - var(--drop-top, 6rem) - 1rem);
+    overflow-y: auto;
+    justify-content: flex-start;
+    padding: 1rem 2.5rem 1.5rem;
+    border-right: 0;
+    border-bottom: 1px solid var(--border);
+    translate: none;
+    clip-path: inset(0 0 100% 0);
+    transition: clip-path 300ms var(--ease-out-strong);
+    background-color: color-mix(in oklab, var(--background) 86%, transparent);
+    -webkit-backdrop-filter: blur(var(--glass-blur, 9px)) saturate(1.5);
+    backdrop-filter: blur(var(--glass-blur, 9px)) saturate(1.5);
+  }
+  :root[data-drawer="filter"] .work-filter-panel {
+    clip-path: inset(0 0 -1px 0);
+    transition: clip-path 460ms var(--ease-out-strong);
+    transition-delay: 0ms;
+  }
+  /* Twelve names in three columns rather than one tall list. */
+  .work-filter-panel ul {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    column-gap: 2rem;
+  }
+  .work-filter-item {
+    translate: 0 -0.5rem;
+  }
+  :root[data-drawer="filter"] .work-filter-item {
+    transition-delay: calc(60ms + var(--reveal-delay, 0ms) * 0.7);
+  }
+}
+
+/* An iPad held upright: the bar's name stays on the homepage's cover too
+   (Julian, 2026-10-08), as it does under `lg` on any other screen. */
+@media (pointer: coarse) and (min-width: 40rem) and (orientation: portrait) {
+  .home-wordmark {
+    opacity: 1;
+    pointer-events: auto;
+    translate: none;
+  }
+}
+
+/* ── an iPad either way: the filter in the title row ──
+   Julian (2026-10-08): the drop-down's button on the line with the title
+   and the view icons, so its own row goes and the work has the height.
+   It takes the crumb's slot on the left; the crumb's way back is the
+   drop-down's first name. Both children of the head share one cell, and
+   the row shrinks to its button so the icons stay pressable. */
+@media (pointer: coarse) and (min-width: 40rem) {
+  .head-glass {
+    display: grid;
+  }
+  .head-glass > * {
+    grid-area: 1 / 1;
+  }
+  .head-glass > .filter-row {
+    z-index: 1;
+    justify-self: start;
+    align-self: center;
+    width: max-content;
+    margin-top: 0;
+  }
+  .head-glass [data-dial="crumb"] > * {
+    visibility: hidden;
+  }
+}
+
+/* ── the inquiry screen on an iPad ──
+   Julian (2026-10-08): the form fits the whole page either way.
+   Sideways: up under the slimmer bar, and the card the width of its
+   column so the six kinds of shoot sit on one line. */
+@media (pointer: coarse) and (min-width: 64rem) and (orientation: landscape) {
+  .contact-inquire {
+    padding-top: 4.75rem;
+    padding-bottom: 1.25rem;
+  }
+  .contact-inquire .contact-card {
+    max-width: none;
+  }
+  .contact-card fieldset > div {
+    flex-wrap: nowrap;
+  }
+  /* The card the full height between the bar and the ruler, and the
+     room it gains goes to the message (Julian: fit the screen). */
+  .contact-inquire {
+    align-items: stretch;
+  }
+  .contact-inquire .glass-surface {
+    display: flex;
+    flex-direction: column;
+  }
+  .contact-inquire .glass-surface > form {
+    flex: 1;
+  }
+  .contact-inquire .contact-field:has(textarea) {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+  .contact-inquire .contact-field textarea {
+    flex: 1;
+    height: auto;
+    min-height: 3.75rem;
+  }
+  /* The words centred on the card's height, not hung from its top. */
+  .contact-inquire > div:not(.enquiry-backdrop, .contact-card) {
+    align-self: center;
+  }
+}
+/* Upright: the words across the top, the form the full width under them.
+   The intro and the details side by side, so the words take two short
+   lines' worth of height rather than a 235px column down the left. */
+@media (pointer: coarse) and (min-width: 40rem) and (orientation: portrait) {
+  .contact-inquire {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto auto;
+    align-content: center;
+    align-items: start;
+    row-gap: 1.75rem;
+    padding-top: 5.5rem;
+    padding-bottom: 1.25rem;
+  }
+  .contact-inquire > div:not(.enquiry-backdrop, .contact-card) {
+    display: grid;
+    grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
+    column-gap: 2.5rem;
+    align-items: end;
+    overflow: visible;
+  }
+  .contact-inquire [data-dial="details"] {
+    border-top: 0;
+    padding-top: 0;
+  }
+  .contact-inquire [data-dial="details"] dl {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1rem;
+  }
+  .contact-inquire .contact-card {
+    max-width: none;
+    justify-self: stretch;
+  }
+  /* The title at about its sideways size: its column is the whole width
+     here, and sized by it the word stood 96px tall. */
+  .contact-inquire h2.contact-title {
+    font-size: 3rem;
+  }
+  /* The room left goes to the message, and the two blocks sit as one in
+     the middle of the screen. */
+  .contact-card textarea {
+    height: 9rem;
+  }
+  .contact-pair {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.5rem;
   }
 }
