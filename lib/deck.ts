@@ -343,6 +343,9 @@ type Card = {
   cell: HTMLElement;
   /** Its sticky offset: where it stands while the screen holds. */
   left: number;
+  /** Placed absolutely, a frame of a gallery's wall (`strip.tsx`): it
+      cannot be sticky, so it is held by `translate` instead. */
+  abs: boolean;
 };
 type Chapter = {
   /** The scroll at which this chapter's last screen fills the window. */
@@ -381,6 +384,7 @@ function runChapters(el: HTMLElement): () => void {
       k.style.removeProperty("left");
       k.style.removeProperty("z-index");
       k.style.removeProperty("transform-origin");
+      k.style.removeProperty("translate");
       delete k.dataset.at;
     }
     kids = [];
@@ -391,6 +395,10 @@ function runChapters(el: HTMLElement): () => void {
     if (ch.held === on) return;
     ch.held = on;
     for (const c of ch.cards) {
+      if (c.abs) {
+        if (!on) c.cell.style.removeProperty("translate");
+        continue;
+      }
       c.cell.style.position = on ? "sticky" : "relative";
       c.cell.style.left = on ? `${c.left}px` : "";
     }
@@ -406,6 +414,10 @@ function runChapters(el: HTMLElement): () => void {
       if (p === ch.p) continue;
       ch.p = p;
       hold(ch, p < 1);
+      if (p < 1) {
+        const by = `${Math.max(0, x - ch.pinX).toFixed(1)}px 0`;
+        for (const c of ch.cards) if (c.abs) c.cell.style.translate = by;
+      }
       // Let go at the far end too: the card is off to its layout spot.
       for (const c of ch.cards) scrub(live, c.cell, p === 1 ? 0 : p, RECEDE);
     }
@@ -424,6 +436,7 @@ function runChapters(el: HTMLElement): () => void {
     const at = kids.map((k) => k.offsetLeft);
     const widths = kids.map((k) => k.offsetWidth);
     const heads = kids.filter((k) => k.hasAttribute("data-deck"));
+    const abs = kids.map((k) => getComputedStyle(k).position === "absolute");
     const pad = parseFloat(getComputedStyle(el).paddingLeft) || 0;
     const vw = el.clientWidth;
     width = vw;
@@ -447,7 +460,7 @@ function runChapters(el: HTMLElement): () => void {
         origins.push([cell, `${vw / 2 - left}px ${mid - (topOf(cell) - top)}px`]);
         // The sticky offset counts from the content edge (measured:
         // `left: 0` held at the padding), so it is short by the padding.
-        cards.push({ cell, left: left - pad });
+        cards.push({ cell, left: left - pad, abs: abs[i] });
       }
       return { pinX, cards, held: false, p: -1 };
     });
@@ -461,6 +474,15 @@ function runChapters(el: HTMLElement): () => void {
       k.style.zIndex = String(i + 1);
     });
     for (const [cell, origin] of origins) cell.style.transformOrigin = origin;
+    /* Each chapter's length from its name to its last cell, for the card
+       drawn behind it (`?cards`, `globals.css`). */
+    heads.forEach((head, h) => {
+      const from = kids.indexOf(head);
+      const end = h + 1 < heads.length ? kids.indexOf(heads[h + 1]) : kids.length;
+      let right = 0;
+      for (let i = from; i < end; i++) right = Math.max(right, at[i] + widths[i]);
+      head.style.setProperty("--chapter-w", `${right - at[from]}px`);
+    });
     depth(x0, vw);
   };
 
@@ -488,6 +510,18 @@ function runChapters(el: HTMLElement): () => void {
      a strip arrives at an end where no card is covered. And once the page
      is idle rather than two frames on (`idle`). */
   const first = idle(deal);
+  /* Dealt again once the galleries' walls are laid out (`strip-relaid`,
+     `strip.tsx`) or held-back sections arrive: from Event coverage on,
+     the first wall, every chapter stood somewhere else than the deal had
+     measured, and the stack stopped working there (Julian, 2026-10-08). */
+  let again = () => {};
+  const redeal = () => {
+    again();
+    again = idle(deal);
+  };
+  const grown = new MutationObserver(redeal);
+  grown.observe(el, { childList: true });
+  el.addEventListener("strip-relaid", redeal);
   el.addEventListener("scroll", onScroll, { passive: true });
   wide.addEventListener("change", deal);
   calm.addEventListener("change", deal);
@@ -495,6 +529,9 @@ function runChapters(el: HTMLElement): () => void {
   const relaid = onRelaid(el, deal);
   return () => {
     first();
+    again();
+    grown.disconnect();
+    el.removeEventListener("strip-relaid", redeal);
     el.removeEventListener("scroll", onScroll);
     cancelAnimationFrame(queued);
     wide.removeEventListener("change", deal);

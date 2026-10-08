@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { Strip } from "@/components/strip";
 import { TitleCell } from "@/components/strip-page";
 import { CoverCell } from "@/components/cover-cell";
-import { ProjectStrip } from "@/components/project-strip";
+import { NextCell, ProjectStrip } from "@/components/project-strip";
 import { CoverArtGallery } from "@/components/cover-art-gallery";
 import {
   LISTINGS,
@@ -246,6 +246,7 @@ export default async function CategoryPage(
           >
             <CoverArtGallery releases={COVER_RELEASES} rows />
           </div>
+          {next ? <NextCell next={next} label="Up next" /> : null}
         </Strip>
       </WorkSheet>
     );
@@ -274,6 +275,7 @@ export default async function CategoryPage(
               eager={i < 3}
             />
           )),
+          ...(next ? [<NextCell key="next" next={next} label="Up next" />] : []),
         ]}
       </Strip>
     </WorkSheet>

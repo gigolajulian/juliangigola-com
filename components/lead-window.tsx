@@ -98,9 +98,6 @@ export function LeadWindow({ covers }: { covers: IndexRow[] }) {
               >
                 Portfolio
               </h2>
-              <span className="lead-all label text-muted-foreground">
-                All projects
-              </span>
             </span>
             {shown.map(({ cover: c, name, credit }) => (
               <span

@@ -30,6 +30,23 @@ export function PointerMark() {
     if (!window.matchMedia("(hover: hover) and (pointer: fine)").matches) return;
     const el = ref.current;
     if (!el) return;
+    /* In the top layer, so a modal dialog does not cover it (Julian,
+       2026-10-07: the dot went under the work picker). A dialog opened
+       later goes over it, so it is lifted again over each new one. */
+    const layered = typeof el.showPopover === "function";
+    let over_: Element | null = null;
+    const lift = () => {
+      if (!layered) return;
+      const modal = document.querySelector("dialog:modal");
+      if (modal === over_ && el.matches(":popover-open")) return;
+      over_ = modal;
+      if (el.matches(":popover-open")) el.hidePopover();
+      el.showPopover();
+    };
+    if (layered) {
+      el.popover = "manual";
+      lift();
+    }
     const root = document.documentElement;
     const still = window.matchMedia("(prefers-reduced-motion: reduce)");
     let x = 0;
@@ -95,8 +112,8 @@ export function PointerMark() {
        speeding up puts nothing in either, so it never falls behind. */
     const K = (2 * Math.PI * 3.6) ** 2; // spring, about 3.6 Hz
     const C = 2 * 0.42 * Math.sqrt(K); // damping: one soft overshoot back
-    const GAIN = 0.6; // how much of the braking the dot carries
-    const REACH = 18; // px, the farthest it runs past the hand
+    const GAIN = 0.35; // how much of the braking the dot carries
+    const REACH = 10; // px, the farthest it runs past the hand
     /* The hand's velocity, from the pointer events and their own clocks,
        not from frame to frame: a 60 Hz mouse on a 120 Hz screen leaves
        every other frame without a move, and read per frame each of those
@@ -119,6 +136,17 @@ export function PointerMark() {
       ex = e.clientX;
       ey = e.clientY;
       et = e.timeStamp;
+    };
+    /* A slight trail behind the hand (Julian, 2026-10-07: "just a slight
+       bit of delay"): the dot closes on it with a 30ms time constant. */
+    const TRAIL = 0.03; // s
+    let sx = NaN, sy = NaN;
+    // Softly held to its reach rather than stopped dead at it.
+    const place = () => {
+      const d = Math.hypot(ox, oy);
+      const k = d > 0 ? (REACH * Math.tanh(d / REACH)) / d : 0;
+      el.style.transform = `translate3d(${sx + ox * k}px, ${sy + oy * k}px, 0)`;
+      return d;
     };
     const draw = (now: number) => {
       raf = 0;
@@ -143,12 +171,13 @@ export function PointerMark() {
       uy += (fy - K * oy - C * uy) * dt;
       ox += ux * dt;
       oy += uy * dt;
-      // Softly held to its reach rather than stopped dead at it.
-      const d = Math.hypot(ox, oy);
-      const k = d > 0 ? (REACH * Math.tanh(d / REACH)) / d : 0;
-      el.style.transform = `translate3d(${x + ox * k}px, ${y + oy * k}px, 0)`;
+      if (Number.isNaN(sx) || still.matches) { sx = x; sy = y; }
+      const f = 1 - Math.exp(-dt / TRAIL);
+      sx += (x - sx) * f;
+      sy += (y - sy) * f;
+      const d = place();
       // Runs while the hand or the dot is moving, and sleeps after.
-      if (Math.hypot(vx, vy) > 2 || d > 0.05 || Math.hypot(ux, uy) > 1) {
+      if (Math.hypot(vx, vy) > 2 || d > 0.05 || Math.hypot(ux, uy) > 1 || Math.hypot(x - sx, y - sy) > 0.1) {
         raf = requestAnimationFrame(draw);
       } else {
         last = 0;
@@ -158,6 +187,7 @@ export function PointerMark() {
        not drag the mark to wherever it landed. */
     const move = (e: PointerEvent) => {
       if (e.pointerType === "touch") return;
+      lift();
       x = e.clientX;
       y = e.clientY;
       sense(e);
@@ -194,6 +224,7 @@ export function PointerMark() {
     };
     // Out of the window (`relatedTarget` null), or the window losing focus.
     const away = () => {
+      sx = NaN; // back in, it lands where the hand is rather than gliding over
       el.removeAttribute("data-on");
       unstick();
       cancel();

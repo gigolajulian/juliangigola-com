@@ -39,7 +39,7 @@ export function StripPage({
            the bar is 77px on a tablet and 69 on a phone at the old
            padding, 61 and 57 at the new, so the reserve comes down with
            it. Every pixel here is a pixel off the photographs. */
-        head && "pt-20 sm:pt-20 max-sm:pt-16 tablet:pt-16 lying:pt-12",
+        head && "pt-24 sm:pt-24 max-sm:pt-16 tablet:pt-16 lying:pt-12",
         className,
       )}
     >

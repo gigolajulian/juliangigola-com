@@ -305,11 +305,8 @@
   --fy: var(--y);
   --fw: var(--w);
   --fz: var(--z, 0px);
-  left: calc(
-    50% + (var(--fx) - 50%) * var(--h-pull-x, 1.05) * var(--wide-x, var(--wide, 1))
-  );
-  /* Plus what clears the name (`--clear-y`, `cover-space.tsx`). */
-  top: calc(50% + (var(--fy) - 50%) * var(--h-pull-y, 0.94) + var(--clear-y, 0px));
+  left: calc(50% + (var(--fx) - 50%) * var(--h-pull-x, 1.05) * var(--wide-x, var(--wide, 1)));
+  top: calc(50% + (var(--fy) - 50%) * var(--h-pull-y, 0.94));
   width: calc(var(--fw) * var(--wide, 1));
   /* Out of order: each frame's place in `ORDER` (`cover-float.tsx`),
      spread out from the start. */
@@ -338,6 +335,12 @@
     --wide: 0.8;
   }
 }
+/* 2560 by 960: at 0.8 the dress came down over the name. */
+@media (min-width: 80rem) and (min-height: 32rem) and (min-aspect-ratio: 5 / 2) {
+  .cover-float {
+    --wide: 0.7;
+  }
+}
 @media (min-width: 80rem) and (min-height: 32rem) and (min-aspect-ratio: 14 / 5) {
   .cover-float {
     --wide: 0.66;
@@ -350,6 +353,30 @@
   .cover-float {
     --wide: 0.55;
     --wide-x: 0.7;
+  }
+}
+/* A big screen, wide and short (1.75 to 2.2 to 1: a 13 or 16 inch laptop in a browser): its own layout,
+   `SHORT` on "Photo layout, wide short" (Julian, 2026-10-07). Wider
+   than that keeps the large one with the ultrawide scaling above. */
+@media (min-width: 80rem) and (min-height: 32rem) and (min-aspect-ratio: 7 / 4) and (max-aspect-ratio: 219 / 100) {
+  .cover-float {
+    --zmax: var(--zmax-short, 0px);
+    --m-name: var(--m-short-name, 1);
+    --m-role: var(--m-short-role, 1);
+    --m-where: var(--m-short-where, 1);
+    --m-buttons: var(--m-short-buttons, 1);
+    --m-x: var(--m-short-x, 0);
+    --m-y: var(--m-short-y, 0);
+  }
+  .cover-float-frame {
+    --fx: var(--tx);
+    --fy: var(--ty);
+    --wave-now: var(--wave-t);
+    --fw: var(--tw);
+    --fz: var(--tz, 0px);
+  }
+  .cover-float-off-short {
+    display: none;
   }
 }
 /* Julian: a layout of their own for the smaller screens (the cards
@@ -440,7 +467,7 @@
   }
   .cover-float-frame {
     left: var(--px);
-    top: calc(var(--py) + var(--clear-y, 0px));
+    top: var(--py);
     --wave-now: var(--wave-p);
     /* And no taller than a short phone's window allows: Safari with its
        bars up leaves an iPhone 659px, where 28vw ran the top row into the
@@ -610,6 +637,19 @@
     --mid-fit: 0.6;
   }
 }
+/* A short phone (iPhone SE): the name ran into the skater and the
+   buttons broke onto two lines, into Sago and the TV. */
+@media (max-width: 39.99rem) and (orientation: portrait) and (max-height: 43.75rem) {
+  .cover-float {
+    --mid-fit: 0.85;
+  }
+  .cover-float-ctas {
+    flex-wrap: nowrap;
+  }
+  .cover-float-ctas .cover-cta {
+    white-space: nowrap;
+  }
+}
 /* A booking page's title runs to three lines where the name is one, and
    on ultrawide reached up into the top row of photographs: lower there,
    Julian (2026-10-02). */
@@ -635,7 +675,8 @@
 }
 .cover-float-where {
   font-family: var(--font-mono);
-  font-size: calc(var(--h-where-size, 14px) * var(--m-where));
+  /* The buttons' floor (`--cta-k`, below) for the same short window. */
+  font-size: calc(var(--h-where-size, 14px) * var(--m-where) * max(1, calc(0.9 / var(--mid, 1))));
   color: var(--hero-where);
 }
 /* Julian: on a phone the role and the location one line each, as wide as
@@ -656,16 +697,37 @@
 }
 .cover-float-ctas {
   zoom: var(--m-buttons);
+  /* Never under nine tenths of their size, however far a short wide
+     window shrinks the middle (Julian, 2026-10-07: unreadable). The type
+     and padding grow rather than a zoom, which the liquid fill under
+     them does not measure. */
+  --cta-k: max(1, calc(0.9 / var(--mid, 1)));
+}
+/* The location one line, centred, from a tablet up (Julian, 2026-10-07:
+   it broke onto two lines off the middle on an iPad). */
+@media (min-width: 40rem) {
+  .cover-float-where {
+    max-width: none;
+    white-space: nowrap;
+    text-align: center;
+  }
+  .cover-float-where .fit-line {
+    display: inline-block;
+  }
 }
 .cover-cta {
   display: inline-block;
   font-family: var(--font-display);
   /* Julian: increase weight. The buttons' 700, as `action`. */
   font-weight: 700;
-  font-size: var(--h-cta-size, 12px);
+  font-size: calc(var(--h-cta-size, 12px) * var(--cta-k, 1));
   letter-spacing: 0.18em;
+  /* The spacing after the last letter matched before the first, so the
+     words sit in the middle of the button. */
+  text-indent: 0.18em;
+  text-align: center;
   text-transform: uppercase;
-  padding: 13px 22px;
+  padding: calc(13px * var(--cta-k, 1)) calc(22px * var(--cta-k, 1));
   border-radius: 0;
   box-shadow: none;
   background: var(--hero-ink);
@@ -1516,20 +1578,6 @@ body:has([data-quiet-footer]) .site-footer-row {
   .strip-grid {
     padding-bottom: 3rem;
   }
-  /* And the names on the grid's plates run to two lines rather than
-     being cut (Julian: readable on an iPhone). Sized for the plate, not
-     for the name's length, since the length no longer has to fit one
-     line. */
-  .strip-grid .cover-name {
-    /* The size is at the end of the sheet, past the one-line formula. */
-    white-space: normal;
-    overflow: hidden;
-    text-overflow: clip;
-    display: -webkit-box;
-    -webkit-box-orient: vertical;
-    -webkit-line-clamp: 2;
-    text-wrap: balance;
-  }
 }
 
 /* The name of the project at the top of a strip page, which waits for the
@@ -1881,8 +1929,47 @@ nav[aria-label="Categories"] ul[data-more] {
    more, which is where 160 comes from; every shorter name rises until the
    cap stops it. One line always — the division is what keeps it there,
    and `truncate` is the backstop. */
+/* The strip's covers the same way, larger on a large screen, where the
+   one-line cap of 3rem set SAGO small on a cover 870px wide (Julian,
+   2026-10-08). The grid's own size follows. */
+.strip-scroll .cover-name {
+  /* One size along the strip, from its height, not each cover's width:
+     sized by width, SAGO and DIESEL beside it sat on different lines
+     (Julian, 2026-10-08). Smaller only where the cover is too narrow. */
+  font-size: clamp(1rem, min(calc((100dvh - 21rem) * 0.095), calc(215cqw / var(--n, 12)), calc(140cqw / var(--w, 8))), 5rem);
+  white-space: normal;
+  overflow: hidden;
+  text-overflow: clip;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  text-wrap: balance;
+}
+/* And the slate's margins the same on every cover, so the names stand on
+   one line across the strip. */
+.strip-scroll:not(.strip-grid) .cover-slate {
+  padding-inline: 2rem;
+  padding-bottom: 1.75rem;
+}
+/* Julian (2026-10-07): larger, and a long name runs to two lines rather
+   than shrinking to fit one. Sized for the plate, not the name's length. */
 .strip-grid .cover-name {
-  font-size: clamp(0.75rem, min(9cqw, calc(160cqw / var(--n, 12))), 1.5rem);
+  /* The longest word (`--w`) has to fit one line on its own. */
+  font-size: clamp(0.875rem, min(16cqw, calc(230cqw / var(--n, 12)), calc(140cqw / var(--w, 8))), 2.5rem);
+  white-space: normal;
+  overflow: hidden;
+  text-overflow: clip;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  text-wrap: balance;
+}
+/* The cell's own colour, a pixel inside the photograph's edge: painted
+   to the edge it showed as a light hairline round the rounded corners,
+   and taken away the photograph's fade showed what was under it. */
+.strip-cell:has(> img.strip-frame) {
+  padding: 1px;
+  background-clip: content-box;
 }
 /* One plate for every cover, at every size. The rack used to stack the
    credit under the name and a narrow cover used to drop it; the type is
@@ -2059,10 +2146,15 @@ a.strip-cell {
    win the arrow back over the surfaces the mark covers.
    Over a text field it becomes a caret of its own (below). */
 @media (hover: hover) and (pointer: fine) {
-  :root[data-mark],
-  :root[data-mark] * {
+  :root[data-mark]:not(:has(.hero-3d, .cover-float[data-arrange])),
+  :root[data-mark]:not(:has(.hero-3d, .cover-float[data-arrange])) * {
     cursor: none !important;
   }
+}
+/* Arranging the cover (the 3D view, drag to arrange): the system's own
+   pointer, not the mark (Julian, 2026-10-07). */
+:root:has(.hero-3d, .cover-float[data-arrange]) .pointer-mark {
+  display: none;
 }
 .pointer-mark {
   /* One curve for every change of size, long enough to be seen as a
@@ -2084,6 +2176,17 @@ a.strip-cell {
 }
 .pointer-mark[data-on] {
   opacity: 1;
+}
+/* In the top layer (`pointer-mark.tsx`): the popover's own box undone. */
+.pointer-mark[popover] {
+  inset: auto;
+  left: 0;
+  top: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  overflow: visible;
 }
 /* Over the colour scope: the colour under it, no ring (Julian)
    (`vectorscope.tsx`). */
@@ -2129,7 +2232,7 @@ a.strip-cell {
 /* Over something that does something: larger, and lifted a little off the
    point, as a thing picked up (Julian). */
 .pointer-mark[data-state="press"] .mark-dot {
-  scale: calc(32 / 120);
+  scale: calc(48 / 120);
   translate: 0 -4px;
 }
 /* Stuck to an icon: the dot sits on it, a little larger than over a
@@ -2616,6 +2719,11 @@ h2.contact-title {
 :has(> .title-word) {
   padding-bottom: 0.35em;
   margin-bottom: -0.35em;
+  /* And past the last letter: set tight, a Black face's final stroke runs
+     beyond its advance, and the clip cut the S off INQUIRIES (Julian,
+     2026-10-07). Given back, so nothing moves. */
+  padding-inline: 0.1em;
+  margin-inline: -0.1em;
 }
 @keyframes jg-rise {
   from {
@@ -3675,6 +3783,15 @@ h2.contact-title {
   :root[data-under] .strip-scroll > * {
     align-self: flex-start;
     height: calc(100% - var(--under, 94px));
+  }
+  /* Each screen carries a ground of its own down under the glass, as a
+     shadow its own height below it, so the one it slides over never
+     shows through the rail and footer (Julian, 2026-10-07: the screen
+     coming over has to be under the footer, the bottom right black). A
+     screen's own pictures still run on over it: a shadow paints under
+     the element's content. */
+  :root[data-under] .strip-scroll > * {
+    box-shadow: 0 var(--under, 94px) 0 var(--background);
   }
   :root[data-under] .strip-scroll > .cover-float {
     overflow: clip visible;
@@ -4754,7 +4871,9 @@ optgroup {
        discipline's own page, where "All projects" leads (2026-10-04): the
        page's 40px before the name, 64px from it to the first cover with
        the strip's 16px gap. */
-    padding-right: 3rem;
+    /* Closer again (Julian, 2026-10-08): 32px to the first cover with
+       the strip's 16px gap. */
+    padding-right: 1rem;
     padding-left: 2.5rem;
   }
   /* The first spine 88px off the left edge: the strip's own 40px and
@@ -4854,6 +4973,21 @@ optgroup {
   [data-discipline-page] .project-plate {
     min-width: 0;
     justify-content: start;
+  }
+  /* A discipline's own page lays its name where the portfolio's first
+     spine stands: 88px in, 32px to the first cover with the strip's gap,
+     and on the page's wash rather than a ground of its own (Julian,
+     2026-10-08: no box, match the headers and margins of All). */
+  :is(.discipline-title, [data-discipline-page] .project-plate) {
+    padding-left: 3rem;
+    padding-right: 1rem;
+  }
+  :is(.discipline-title, [data-discipline-page] .project-plate):not(:has(> :nth-child(2))) {
+    column-gap: 0;
+  }
+  .strip-scroll[data-dealt] > :is(.discipline-title, .project-plate):first-child {
+    background: none;
+    box-shadow: none;
   }
 }
 
@@ -5585,6 +5719,13 @@ optgroup {
   }
 }
 
+/* "Up next" stands on the page's own wash at every width, not on a card
+   of its own (Julian, 2026-10-08: match background). */
+.strip-scroll[data-dealt] > .next-cell {
+  background: none;
+  box-shadow: none;
+}
+
 /* ── pictures arrive ──────────────────────────────────────────────
  * A lazily loaded picture fades up once its bytes have landed, instead of
  * appearing between one frame and the next. `photo-fade.tsx` sets
@@ -5597,11 +5738,10 @@ optgroup {
    zoom jumped to size instead of easing. Measured: transition-property
    read `opacity` on a cover carrying the class. */
 img[data-fade] {
-  opacity: 0;
-  /* Julian: seamless. Long enough to read as arriving, not blinking. */
-  transition:
-    opacity 700ms cubic-bezier(0.22, 1, 0.36, 1),
-    scale 500ms var(--ease-out-strong);
+  /* No fade (Julian, 2026-10-08): a picture shows as soon as it lands.
+     Loading stays lazy, so it still comes in as it reaches the screen. */
+  opacity: 1;
+  transition: scale 500ms var(--ease-out-strong);
 }
 img[data-fade][data-loaded] {
   opacity: 1;
@@ -5812,6 +5952,109 @@ h2:not(.label) {
   text-transform: uppercase;
 }
 
+/* The headers of the screens (Biography, Commissions, Sessions, the
+   footer's ask) in the wordmark's face, Inter Tight Black (Julian,
+   2026-10-07). The names standing up the portfolio's spines and plates
+   keep Endless. Unlayered, so it outranks the `font-display` they carry.
+   The ask at the end of the work ("Have a project in mind?") is in the
+   section titles' Archivo (Julian, 2026-10-08). */
+:is(h1, h2):is(.font-display, .title):not(.chapter-name, .enquiry-title):not(:is(.discipline-title, .project-plate) > *) {
+  font-family: var(--font-wordmark);
+  font-weight: 900;
+}
+
+/* A card under the hand gets no focus ring (Julian, 2026-10-07: the
+   accent frame showed on a click). Keyboard focus with the hand
+   elsewhere still draws it. */
+.strip-cell:focus-visible:hover {
+  outline: none;
+}
+
+/* The lit filter's line, on the pane's hairline (`work-shell.tsx`),
+   sliding from chip to chip. Off on a phone, where the chips sit in a
+   grid and a line at the foot would point at the wrong row. */
+.filter-line {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  height: 1px;
+  background: var(--foreground);
+  pointer-events: none;
+  transition:
+    transform 420ms var(--ease-out-strong),
+    width 420ms var(--ease-out-strong);
+}
+@media (max-width: 39.999rem) {
+  .filter-line {
+    display: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .filter-line {
+    transition: none;
+  }
+}
+
+/* The vertical discipline name comes up at once (Julian, 2026-10-07:
+   reduce the delay): no wait before the first word, a quicker rise. */
+:is(.discipline-title, [data-discipline-page] .project-plate) > h2 .title-word {
+  animation-duration: 520ms;
+  animation-delay: calc(var(--i, 0) * 40ms);
+}
+
+/* The colour page's covers tip toward the pointer as the portfolio's
+   do (`card-tilt.tsx`; Julian, 2026-10-07). */
+.scope-tile {
+  transition:
+    transform 450ms var(--ease-out-strong),
+    box-shadow 450ms var(--ease-out-strong);
+  box-shadow: 0 22px 40px -16px rgb(0 0 0 / 0);
+}
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  .scope-tile:hover {
+    transform: perspective(1000px) translateZ(20px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)) rotateZ(var(--rz, 0deg));
+    box-shadow: var(--sx, 0px) calc(22px + var(--sy, 0px)) 40px -16px rgb(0 0 0 / 0.6);
+    transition:
+      transform 140ms ease-out,
+      box-shadow 500ms var(--ease-out-strong);
+  }
+}
+
+/* Preview (`?cards`, `work-shell.tsx`): each discipline one card, its
+   name and its projects on one panel. The panel is the name cell's own
+   `::before`, as long as the chapter (`--chapter-w`, `lib/deck.ts`): the
+   name cell lies under every cell after it, so the panel does too. */
+@media (min-width: 40rem) {
+  :root[data-cards] .portfolio-arrive .strip-scroll > .strip-cell[data-deck] {
+    overflow: visible;
+    /* More room before the name inside its card (Julian, 2026-10-08). */
+    padding-left: 4rem;
+  }
+  /* No dark frame round each cover on the panel: that ground is the
+     page's colour, and on a card it read as a box. */
+  :root[data-cards] .portfolio-arrive .strip-scroll > .strip-cell {
+    --deal-ground: 0 0 #0000;
+  }
+  :root[data-cards] .portfolio-arrive .strip-scroll > .strip-cell[data-deck]::before {
+    content: "";
+    position: absolute;
+    z-index: -1;
+    /* The page's own colour (Julian, 2026-10-08), and carried left across
+       the room before it: in a slide the chapter going under showed
+       through that room as a dark bar riding the card's edge. */
+    left: -2.75rem;
+    top: -0.75rem;
+    bottom: -0.75rem;
+    width: calc(var(--chapter-w, 100%) + 3.5rem);
+    border-radius: calc(var(--radius-photo) + 0.75rem);
+    background: var(--background);
+    pointer-events: none;
+  }
+  :root[data-cards] .portfolio-arrive .strip-scroll > .strip-cell[data-deck]:not(:first-child) {
+    margin-left: 2rem;
+  }
+}
+
 /* ── small things from the scan ──────────────────────────────────
  * The page's own count showed faintly through the photo viewer, behind
  * the viewer's (an iPad: "01 / 06" under "1 / 6"). */
@@ -5872,9 +6115,9 @@ h2:not(.label) {
     align-items: center;
     justify-content: center;
   }
-  /* The homepage's pair sit in a zoom (`--m-buttons`); 44 as seen. */
+  /* The homepage's pair sit in two zooms (`--m-buttons`, `--mid`); 44 as seen. */
   .cover-float-ctas .cover-cta {
-    min-height: calc(44px / var(--m-buttons, 1));
+    min-height: calc(44px / (var(--m-buttons, 1) * var(--mid, 1)));
   }
 }
 
@@ -5998,7 +6241,9 @@ h2:not(.label) {
 @media (min-width: 40rem) {
   [data-hash="about"] {
     container-type: size;
-    --screen-title-y: max(6rem, 50cqh - 18.875rem);
+    /* 7rem at the least: at 6 a short laptop (1515 by 785) set the
+       title 19px under the bar (Julian, 2026-10-07). */
+    --screen-title-y: max(7rem, 50cqh - 18.875rem);
   }
 }
 /* How tall the bar is, for a screen that lies under it and has to centre
@@ -6865,52 +7110,6 @@ h2:not(.label) {
   }
 }
 
-/* ── the portfolio, coming into the page (Julian, 2026-10-03) ──
-   Each picture comes up out of a fade and settles from a touch large as
-   it crosses into the window, tied to the scroll itself rather than to a
-   timer: it moves with the hand, both ways, and costs no script. Sideways
-   on a screen, downward on a phone. `filter: opacity()` rather than
-   `opacity`, which `data-fade` already owns for the load; no fill, so
-   once in, the picture is itself again and the hover zoom is its own.
-   Where scroll timelines are not supported the pictures simply show. */
-@keyframes jg-arrive {
-  from {
-    filter: opacity(0);
-    scale: 1.08;
-  }
-  to {
-    filter: opacity(1);
-    scale: 1;
-  }
-}
-/* The timeline is the cell's, named, not the picture's own `view()`: the
-   picture sits in a frame that clips, and a clipping box counts as a
-   scroller, so its own view never moved. */
-@supports (animation-timeline: view()) {
-  @media (prefers-reduced-motion: no-preference) {
-    .portfolio-arrive .strip-scroll > * {
-      view-timeline: --arrive x;
-    }
-    .portfolio-arrive img[data-fade] {
-      animation: jg-arrive linear none;
-      animation-timeline: --arrive;
-      animation-range: entry 0% entry 100%;
-    }
-    /* The first picture is in the window from the start, half way through
-       its entry on a phone, and Chrome takes nothing still fading in for
-       the page's largest paint: the portfolio reported none at all
-       (audit, 2026-10-05). It keeps the load's own fade (`data-fade`). */
-    .portfolio-arrive .strip-scroll > :nth-child(-n + 2) img[data-fade] {
-      animation: none;
-    }
-    @media (max-width: 39.99rem) {
-      .portfolio-arrive .strip-scroll > * {
-        view-timeline: --arrive y;
-      }
-    }
-  }
-}
-
 /* The Commissions rows' liquid hover (`services-screen.tsx`), Sessions'
    drop on the same grey a step off the ground. Opaque, as the liquid
    needs. */
@@ -6972,8 +7171,12 @@ h2:not(.label) {
    until they press Inquire. From a tablet up; on a phone the card is the
    screen already. */
 @media (min-width: 40rem) {
+  /* Flat scales, not a step toward the eye in 3D: drawn once at its size
+     and lifted by `translateZ`, the form stayed soft in focus (Julian,
+     2026-10-08). A 2D scale is drawn again sharp once it settles. 1.042
+     and 1.053 are what 56px and 70px toward the eye came to at 1400px. */
   .contact-card {
-    transform: perspective(1400px) translateZ(0);
+    transform: translateX(0) scale(1);
     transition:
       transform 700ms var(--ease-out-strong),
       box-shadow 700ms var(--ease-out-strong);
@@ -6995,12 +7198,12 @@ h2:not(.label) {
      and a step toward the middle, as on hover, still clear of the text
      on the left. */
   .contact-card:focus-within {
-    transform: perspective(1400px) translateX(-3rem) translateZ(70px);
+    transform: translateX(-3rem) scale(1.053);
     box-shadow: 0 50px 90px -40px rgb(0 0 0 / 0.6);
   }
+  /* Dimmed, not blurred (Julian, 2026-10-08: no blur on form select). */
   .contact-inquire:has(.contact-card:focus-within) > :not(.contact-card, style, .enquiry-backdrop) {
     opacity: 0.35;
-    filter: blur(2px);
   }
   .contact-inquire:has(.contact-card:focus-within) > .enquiry-backdrop {
     opacity: 0.5;
@@ -7017,7 +7220,7 @@ h2:not(.label) {
   }
   /* Julian (2026-10-05): bigger, and a step toward the middle. */
   .contact-card:hover:not(:focus-within) {
-    transform: perspective(1400px) translateX(-3rem) translateZ(56px);
+    transform: translateX(-3rem) scale(1.042);
     box-shadow: 0 36px 70px -36px rgb(0 0 0 / 0.5);
   }
 }
@@ -7064,7 +7267,9 @@ h2:not(.label) {
 }
 @media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
   .portfolio-arrive .strip-cell:not([data-deck]):hover {
-    transform: perspective(1000px) translateZ(20px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)) rotateZ(var(--rz, 0deg));
+    /* About the card's own middle (`--cx`, `--cy`, `card-tilt.tsx`), not
+       the origin the deck gave it. */
+    transform: translate(var(--cx, 0px), var(--cy, 0px)) perspective(1000px) translateZ(20px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)) rotateZ(var(--rz, 0deg)) translate(calc(-1 * var(--cx, 0px)), calc(-1 * var(--cy, 0px)));
     box-shadow:
       var(--sx, 0px) calc(22px + var(--sy, 0px)) 40px -16px rgb(0 0 0 / 0.6),
       var(--deal-ground, 0 0 #0000);
@@ -7072,6 +7277,11 @@ h2:not(.label) {
       transform 140ms ease-out,
       box-shadow 500ms var(--ease-out-strong),
       scale 440ms var(--ease-bounce);
+  }
+  /* Not while the strip moves: lifted and turned mid-deal, the card showed
+     what the deck had under it (Julian, 2026-10-08). `card-tilt.tsx`. */
+  :root[data-scrolling] .portfolio-arrive .strip-cell:not([data-deck]):hover {
+    transform: none;
   }
 }
 

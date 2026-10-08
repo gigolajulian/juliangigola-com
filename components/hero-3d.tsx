@@ -3,6 +3,7 @@
 import * as React from "react";
 import { createPortal } from "react-dom";
 import type { ArrangeCard } from "@/components/hero-arrange";
+import { copyText } from "@/components/dial-copy-all";
 
 /* ── the cover in 3D ──────────────────────────────────────────────
  * Julian: he could not see the photographs in 3D space, so a view like
@@ -17,8 +18,10 @@ import type { ArrangeCard } from "@/components/hero-arrange";
  *
  * Axes as Blender colours them: X red (across), Y green (down the
  * screen, as the page counts it), Z blue (toward the viewer, the depth).
- * Drag empty space to orbit, shift or the right button to pan, scroll to
- * zoom. Drag a card to move it across the screen; scroll over it for its
+ * Space and drag to orbit, shift or the right button to pan, scroll to
+ * zoom. With a card picked, the cards in front of it fade and let clicks
+ * through; alt+click picks the next card down; a click on nothing lets go.
+ * Drag a card to move it across the screen; scroll over it for its
  * depth; drag an arrow of the picked card to move it along that axis
  * alone. Keys: 1 front, 3 side, 7 top, 0 home, 5 flat or perspective.
  * Depth is drawn larger than it is (`z ×`), since a card stands at most
@@ -40,6 +43,27 @@ type Scene = {
   middle: { x: number; y: number; w: number; h: number } | null;
 };
 
+/* Common screens, as the browser's viewport (window less its bars). The
+   switch shows only when the live Playwright window lends `__setSize`. */
+const SIZES = [
+  ["1280×720", 1280, 720],
+  ["win 1366", 1366, 657],
+  ["win 1536", 1536, 730],
+  ["mba 13", 1440, 789],
+  ["mbp 14", 1512, 865],
+  ["mbp 16", 1728, 1000],
+  ["1080p", 1920, 960],
+  ["1440p", 2560, 1305],
+  ["ultrawide", 2560, 960],
+  ["ipad", 1180, 820],
+  ["ipad tall", 820, 1180],
+  ["iphone se", 375, 667],
+  ["phone", 390, 844],
+] as const;
+type SetSize = (w: number, h: number) => Promise<void>;
+
+let spaceHeld = false;
+
 const rad = (d: number) => (d * Math.PI) / 180;
 
 export function Hero3D({
@@ -50,6 +74,8 @@ export function Hero3D({
   picked,
   onPick,
   set,
+  mid,
+  setMid,
   onClose,
 }: {
   cover: () => HTMLElement | null | undefined;
@@ -59,6 +85,8 @@ export function Hero3D({
   picked: string | null;
   onPick: (card: string | null) => void;
   set: (card: string, patch: Partial<ArrangeCard>) => void;
+  mid: { x: number; y: number };
+  setMid: (patch: { x: number; y: number }) => void;
   onClose: () => void;
 }) {
   const [scene, setScene] = React.useState<Scene>({ items: [], view: { w: 1, h: 1 }, screen: { w: 1, h: 1 }, middle: null });
@@ -96,7 +124,22 @@ export function Hero3D({
           src: f.querySelector("img")?.currentSrc ?? "",
         }));
       const c = el.getBoundingClientRect();
-      const m = el.querySelector(".cover-float-middle")?.getBoundingClientRect();
+      /* The middle as its text and buttons stand, not its padded box. */
+      const kids = [...(el.querySelector(".cover-float-middle")?.children ?? [])]
+        .map((k) => k.getBoundingClientRect())
+        .filter((r) => r.width > 0);
+      const m = kids.length
+        ? (() => {
+            const left = Math.min(...kids.map((r) => r.left));
+            const top = Math.min(...kids.map((r) => r.top));
+            return {
+              left,
+              top,
+              width: Math.max(...kids.map((r) => r.right)) - left,
+              height: Math.max(...kids.map((r) => r.bottom)) - top,
+            };
+          })()
+        : null;
       const next: Scene = {
         items,
         view: { w: innerWidth, h: innerHeight },
@@ -139,7 +182,27 @@ export function Hero3D({
   const dyPct = (px: number) => (px / scene.screen.h) * 100 / pull.height;
   const round = (v: number, s = 0.5) => Math.round(v / s) * s;
 
-  const drag = (e: React.PointerEvent, run: (dx: number, dy: number) => void) => {
+  /* Space held, for the orbit (module state: read in handlers only). */
+  React.useEffect(() => {
+    const key = (e: KeyboardEvent) => {
+      if (e.code !== "Space" || (e.target as Element).closest?.("input, textarea")) return;
+      e.preventDefault();
+      spaceHeld = e.type === "keydown";
+    };
+    const off = () => (spaceHeld = false);
+    window.addEventListener("keydown", key, true);
+    window.addEventListener("keyup", key, true);
+    window.addEventListener("blur", off);
+    return () => {
+      window.removeEventListener("keydown", key, true);
+      window.removeEventListener("keyup", key, true);
+      window.removeEventListener("blur", off);
+    };
+  }, []);
+
+  const drag = (e: React.PointerEvent, run: (dx: number, dy: number) => void, view = false) => {
+    // With space held every drag turns the view: let it through to the orbit.
+    if (spaceHeld && !view) return;
     e.preventDefault();
     e.stopPropagation();
     const x0 = e.clientX;
@@ -156,6 +219,15 @@ export function Hero3D({
   /* A card dragged: across the screen's plane, however the view is
      turned (the drag solved back through the two axes' directions). */
   const moveCard = (e: React.PointerEvent, card: string) => {
+    if (e.altKey && e.button === 0) {
+      e.preventDefault();
+      e.stopPropagation();
+      const stack = [...new Set(document.elementsFromPoint(e.clientX, e.clientY)
+        .map((el) => el.closest<HTMLElement>("[data-card3d]")?.dataset.card3d)
+        .filter((id): id is string => !!id))];
+      onPick(stack[(stack.indexOf(picked ?? "") + 1) % stack.length] ?? card);
+      return;
+    }
     onPick(card);
     if (e.button !== 0) return;
     const c0 = cards[card];
@@ -176,6 +248,24 @@ export function Hero3D({
     });
   };
 
+  /* The middle dragged, as a card: its x and y are shares of the screen. */
+  const moveMid = (e: React.PointerEvent) => {
+    if (e.button !== 0) return;
+    const m0 = mid;
+    const [ax, ay] = toScreen([1, 0, 0]);
+    const [bx, by] = toScreen([0, 1, 0]);
+    const det = ax * by - bx * ay;
+    drag(e, (dx, dy) => {
+      if (Math.abs(det) < 1e-3 * S * S) return;
+      const wx = (dx * by - bx * dy) / det;
+      const wy = (ax * dy - dx * ay) / det;
+      setMid({
+        x: round(Math.max(-50, Math.min(50, m0.x + (wx / scene.screen.w) * 100))),
+        y: round(Math.max(-50, Math.min(50, m0.y + (wy / scene.screen.h) * 100))),
+      });
+    });
+  };
+
   /* Along one axis alone, from the picked card's arrows. */
   const moveAxis = (e: React.PointerEvent, card: string, axis: 0 | 1 | 2) => {
     const c0 = cards[card];
@@ -192,17 +282,39 @@ export function Hero3D({
     });
   };
 
+  /* Scale from the corner: the card grows about its middle, so the corner
+     moves half the change; the drag read along the card's diagonal. */
+  const scaleCard = (e: React.PointerEvent, card: string, w0: number) => {
+    const c0 = cards[card];
+    if (!c0 || !w0) return;
+    const [sx, sy] = toScreen([1, 1, 0]);
+    const len2 = sx * sx + sy * sy;
+    drag(e, (dx, dy) => {
+      if (len2 < 1e-4) return;
+      const t = (dx * sx + dy * sy) / len2; // scene px along x
+      set(card, { width: round(Math.max(4, Math.min(40, (c0.width * (w0 + 2 * t)) / w0)), 0.5) });
+    });
+  };
+
   /* Empty space: orbit, or pan with shift or the right button. */
   const orbit = (e: React.PointerEvent) => {
     if ((e.target as Element).closest("[data-hud]")) return;
     const v0 = view;
     const pan = e.shiftKey || e.button === 2 || e.button === 1;
-    drag(e, (dx, dy) =>
-      setView(
-        pan
-          ? { ...v0, x: v0.x + dx, y: v0.y + dy }
-          : { ...v0, yaw: v0.yaw + dx * 0.35, pitch: Math.max(-89, Math.min(89, v0.pitch - dy * 0.35)) },
-      ),
+    // Julian: turning only with space held, so a missed grab never turns it.
+    if (!pan && !spaceHeld) {
+      if (e.button === 0) onPick(null); // a click on nothing lets the pick go
+      return;
+    }
+    drag(
+      e,
+      (dx, dy) =>
+        setView(
+          pan
+            ? { ...v0, x: v0.x + dx, y: v0.y + dy }
+            : { ...v0, yaw: v0.yaw + dx * 0.35, pitch: Math.max(-89, Math.min(89, v0.pitch - dy * 0.35)) },
+        ),
+      true,
     );
   };
 
@@ -257,15 +369,30 @@ export function Hero3D({
     return () => window.removeEventListener("keydown", key, true);
   }, [onClose]);
 
+  /* Undo and redo go through the dials' Ctrl+Z; submit posts every
+     panel to the dev route, where Claude reads it back into the code. */
+  const press = (redo: boolean) =>
+    window.dispatchEvent(new KeyboardEvent("keydown", { key: "z", ctrlKey: true, shiftKey: redo }));
+  const [sent, setSent] = React.useState(false);
+  const submit = async () => {
+    const ok = await fetch("/api/tune", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ title: `arrange ${shape}`, values: { text: copyText() } }),
+    }).then((r) => r.ok, () => false);
+    setSent(ok);
+    if (ok) setTimeout(() => setSent(false), 1500);
+  };
+
   const hud: React.CSSProperties = {
     position: "absolute",
     font: "11px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace",
     color: "#ddd",
   };
-  const quiet: React.CSSProperties = { background: "none", border: 0, padding: 0, color: "inherit", font: "inherit", cursor: "pointer" };
+  const quiet: React.CSSProperties = { background: "none", border: 0, padding: 0, color: "inherit", font: "inherit", cursor: "default" };
   const at = (x: number, y: number, z: number) => `translate3d(${x}px, ${y}px, ${z}px)`;
   const zs = (z: number) => z * zScale;
-  const front = Math.max(0, ...Object.values(cards).map((c) => c.depth)) + 40;
+  const front = DEPTH + 40; // in front of the furthest forward a card can go, so no card carries it
   const { w: W, h: H } = scene.screen;
 
   return createPortal(
@@ -281,7 +408,7 @@ export function Hero3D({
         background: "radial-gradient(ellipse at 50% 40%, #262626, #141414 75%)",
         overflow: "hidden",
         perspective: flat ? "none" : `${Math.max(size.w, size.h) * 1.6}px`,
-        cursor: "grab",
+        cursor: "default",
         touchAction: "none",
         userSelect: "none",
       }}
@@ -321,6 +448,9 @@ export function Hero3D({
           const c = cards[it.card];
           const z = zs(c?.depth ?? 0);
           const on = it.card === picked;
+          /* In front of the picked card: faded and clicked through, so
+             one further back can be worked on. */
+          const ahead = !on && picked != null && cards[picked] != null && (c?.depth ?? 0) > cards[picked].depth;
           return (
             <React.Fragment key={it.card}>
               {/* The pin: from the screen to the card, its depth. */}
@@ -340,6 +470,7 @@ export function Hero3D({
                 onPointerDown={(e) => moveCard(e, it.card)}
                 style={{
                   position: "absolute",
+                  ...(ahead ? { opacity: 0.3, pointerEvents: "none" as const } : null),
                   width: it.w,
                   height: it.h,
                   transform: at(it.x - it.w / 2, it.y - it.h / 2, z),
@@ -348,7 +479,7 @@ export function Hero3D({
                   backgroundPosition: "center",
                   backgroundColor: "#333",
                   outline: `${(on ? 2 : 1) / S}px solid ${on ? PICK : "rgb(255 255 255 / 0.35)"}`,
-                  cursor: "move",
+                  cursor: "default",
                 }}
               >
                 <span
@@ -379,47 +510,78 @@ export function Hero3D({
                       style={{
                         position: "absolute",
                         width: 110 / S,
-                        height: 12 / S,
-                        transform: `${at(it.x, it.y - 6 / S, z + 1)} ${turn}`,
-                        transformOrigin: `0 ${6 / S}px`,
-                        cursor: "grab",
+                        height: 32 / S, // the grab, wider than the line drawn
+                        transform: `${at(it.x, it.y - 16 / S, z + 1)} ${turn}`,
+                        transformOrigin: `0 ${16 / S}px`,
+                        cursor: "default",
                         display: "flex",
                         alignItems: "center",
                       }}
                     >
                       <div style={{ flex: 1, height: 3 / S, background: color }} />
-                      <div style={{ width: 0, height: 0, borderTop: `${6 / S}px solid transparent`, borderBottom: `${6 / S}px solid transparent`, borderLeft: `${12 / S}px solid ${color}` }} />
+                      <div style={{ width: 0, height: 0, borderTop: `${8 / S}px solid transparent`, borderBottom: `${8 / S}px solid transparent`, borderLeft: `${16 / S}px solid ${color}` }} />
                     </div>
                   ))
                 : null}
+              {/* The picked card's corner: drag out or in to scale it. */}
+              {on ? (
+                <div
+                  title="Scale: drag the corner"
+                  onPointerDown={(e) => scaleCard(e, it.card, it.w)}
+                  style={{
+                    position: "absolute",
+                    width: 40 / S, // the grab; the square drawn is 16
+                    height: 40 / S,
+                    transform: at(it.x + it.w / 2 - 20 / S, it.y + it.h / 2 - 20 / S, z + 1),
+                    display: "grid",
+                    placeItems: "center",
+                    cursor: "default",
+                  }}
+                >
+                  <div style={{ width: 16 / S, height: 16 / S, background: PICK }} />
+                </div>
+              ) : null}
             </React.Fragment>
           );
         })}
 
         {/* The middle, one pane, in front of every card. */}
-        {scene.middle ? (
+        {scene.middle ? (() => {
+          /* Drawn in front, perspective blows it up: shrunk back so that
+             from the front it covers what it covers on the page (the
+             stage's scale() leaves z alone, so z goes in unscaled). */
+          const k = flat ? 1 : Math.max(0.1, 1 - zs(front) / (Math.max(size.w, size.h) * 1.6));
+          const mw = scene.middle.w * k;
+          const mh = scene.middle.h * k;
+          return (
           <div
             style={{
               position: "absolute",
-              width: scene.middle.w,
-              height: scene.middle.h,
-              transform: at(scene.middle.x - scene.middle.w / 2, scene.middle.y - scene.middle.h / 2, zs(front)),
-              background: "rgb(236 236 236 / 0.86)",
-              color: "#111",
+              pointerEvents: "none", // cards behind it stay in reach; its label moves it
+              width: mw,
+              height: mh,
+              transform: at(scene.middle.x * k - mw / 2, scene.middle.y * k - mh / 2, zs(front)),
+              background: "rgb(236 236 236 / 0.25)",
+              color: "#fff",
               border: `${1 / S}px solid rgb(255 255 255 / 0.9)`,
               boxShadow: `0 ${8 / S}px ${30 / S}px rgb(0 0 0 / 0.5)`,
               display: "grid",
               placeItems: "center",
-              pointerEvents: "none",
+              cursor: "default",
             }}
           >
-            <span style={{ ...hud, position: "static", color: "#111", fontSize: 12 / S, textAlign: "center" }}>
+            <span
+              title="Drag to move the name block"
+              onPointerDown={moveMid}
+              style={{ ...hud, position: "static", color: "#fff", fontSize: 12 / S, textAlign: "center", pointerEvents: "auto", padding: `${8 / S}px ${14 / S}px`, background: "rgb(0 0 0 / 0.35)" }}
+            >
               name · role · buttons
               <br />
               <span style={{ opacity: 0.6 }}>always in front</span>
             </span>
           </div>
-        ) : null}
+          );
+        })() : null}
       </div>
 
       {/* The heads-up: what is showing, the views, the depth scale. */}
@@ -448,7 +610,7 @@ export function Hero3D({
               const z0 = zScale;
               drag(e, (dx) => setZScale(Math.max(1, Math.min(8, Math.round((z0 + dx / 40) * 2) / 2))));
             }}
-            style={{ cursor: "ew-resize" }}
+            style={{ cursor: "default" }}
           >
             <span style={{ opacity: 0.5 }}>z ×</span>
             {zScale}
@@ -456,16 +618,41 @@ export function Hero3D({
           <button type="button" style={{ ...quiet, opacity: help ? 1 : 0.5 }} onClick={() => setHelp(!help)}>
             ?
           </button>
+          <button type="button" style={{ ...quiet, opacity: 0.5 }} onClick={() => press(false)} title="Ctrl+Z">
+            undo
+          </button>
+          <button type="button" style={{ ...quiet, opacity: 0.5 }} onClick={() => press(true)} title="Ctrl+Shift+Z">
+            redo
+          </button>
+          <button type="button" style={{ ...quiet, opacity: sent ? 1 : 0.5 }} onClick={submit}>
+            {sent ? "sent" : "submit"}
+          </button>
           <button type="button" style={{ ...quiet, opacity: 0.5 }} onClick={onClose}>
             close
           </button>
         </div>
       </div>
+      {typeof window !== "undefined" && (window as { __setSize?: SetSize }).__setSize ? (
+        <div data-hud style={{ ...hud, left: 12, top: 34, display: "flex", flexDirection: "column", gap: 2 }}>
+          {SIZES.map(([name, w, h]) => (
+            <button
+              key={name}
+              type="button"
+              style={{ ...quiet, textAlign: "left", opacity: size.w === w && size.h === h ? 1 : 0.5 }}
+              onClick={() => (window as unknown as { __setSize: SetSize }).__setSize(w, h)}
+            >
+              {name} <span style={{ opacity: 0.6 }}>{w}×{h}</span>
+            </button>
+          ))}
+        </div>
+      ) : null}
       {help ? (
         <div data-hud style={{ ...hud, left: 12, bottom: 12, opacity: 0.6, maxWidth: 420 }}>
-          drag empty: orbit · shift or right drag: pan · scroll: zoom
+          space+drag: orbit · shift or right drag: pan · scroll: zoom
           <br />
-          drag a card: move it on the screen · scroll a card: forward/back · shift+scroll: size
+          picked: cards in front fade · alt+click: next card back · click empty: let go
+          <br />
+          drag a card: move it on the screen · scroll a card: forward/back · shift+scroll or the corner: size
           <br />
           drag an arrow: one axis · 1 front · 3 side · 7 top · 0 home · 5 flat · esc close
         </div>
@@ -495,7 +682,7 @@ function Gizmo({ yaw, pitch, onView }: { yaw: number; pitch: number; onView: (ya
     <svg width={R * 2 + 20} height={R * 2 + 20} viewBox={`${-R - 10} ${-R - 10} ${R * 2 + 20} ${R * 2 + 20}`} style={{ overflow: "visible" }}>
       <circle r={R + 8} fill="rgb(255 255 255 / 0.05)" />
       {axes.map((ax) => (
-        <g key={ax.name} style={{ cursor: "pointer" }} onClick={() => onView(ax.view[0], ax.view[1])}>
+        <g key={ax.name} style={{ cursor: "default" }} onClick={() => onView(ax.view[0], ax.view[1])}>
           <line x1={0} y1={0} x2={ax.v.x} y2={ax.v.y} stroke={ax.color} strokeWidth={2} />
           <circle cx={ax.v.x} cy={ax.v.y} r={7} fill={ax.color} />
           <text x={ax.v.x} y={ax.v.y + 3.5} textAnchor="middle" fontSize={9} fontWeight={700} fill="#111">

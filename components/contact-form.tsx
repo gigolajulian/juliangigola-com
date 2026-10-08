@@ -345,8 +345,9 @@ export function ContactForm({
                    ring for somebody arriving by Tab and nobody else.
                    Julian asked. */
                 "has-[:focus-visible]:outline has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-[var(--ring)]",
+                /* Chosen, inverted (Julian, 2026-10-08). */
                 chosen === t.value
-                  ? "border-foreground text-foreground"
+                  ? "border-foreground bg-foreground text-background"
                   : "border-border text-muted-foreground hoverable:hover:border-foreground/40 hoverable:hover:text-foreground",
               )}
             >

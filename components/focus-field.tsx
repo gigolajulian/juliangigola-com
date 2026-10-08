@@ -62,6 +62,9 @@ export function FocusField() {
       const target = e.target as Element | null;
       let g = target?.closest?.(GALLERIES) ?? null;
       if (!mouse && !g?.matches(MENU)) g = null;
+      // Never over the inquiry form (Julian, 2026-10-08): picking a kind
+      // of shoot blurred the screen round it.
+      if (target?.closest("form, .contact-inquire")) g = null;
       // The clearing is a little wider than the frame under the pointer (Julian,
       // 2026-10-04: wider than the half it was, then wider again), so a
       // wide frame and a small one each come into focus whole.

@@ -22,6 +22,7 @@ import {
   MIDDLE,
   PHONE,
   SIDEWAYS,
+  SHORT,
   SLOTS,
   UPRIGHT,
   middleVars,
@@ -121,6 +122,9 @@ const LANDSCAPE_LAYOUT = {
 const PHONE_LAYOUT = {
   cards: cardsOf(PHONE) as Record<string, SmallSlot>,
 } satisfies DialConfig;
+const SHORT_LAYOUT = {
+  cards: cardsOf(SHORT) as Record<string, SmallSlot>,
+} satisfies DialConfig;
 const SIDEWAYS_LAYOUT = {
   cards: cardsOf(SIDEWAYS) as Record<string, SmallSlot>,
 } satisfies DialConfig;
@@ -131,9 +135,11 @@ const LANDSCAPE_MQ =
   "(min-width: 40rem) and (max-width: 79.99rem) and (orientation: landscape)";
 const SIDEWAYS_MQ = "(orientation: landscape) and (max-height: 31.99rem)";
 const PHONE_MQ = "(max-width: 39.99rem) and (orientation: portrait)";
+const SHORT_MQ =
+  "(min-width: 80rem) and (min-height: 32rem) and (min-aspect-ratio: 7 / 4) and (max-aspect-ratio: 219 / 100)";
 
 /** Which layout the window is showing. */
-type Shape = "large" | "landscape" | "upright" | "phone" | "sideways";
+type Shape = "large" | "short" | "landscape" | "upright" | "phone" | "sideways";
 export const shapeNow = (): Shape =>
   matchMedia(PHONE_MQ).matches
     ? "phone"
@@ -143,7 +149,9 @@ export const shapeNow = (): Shape =>
         ? "upright"
         : matchMedia(LANDSCAPE_MQ).matches
           ? "landscape"
-          : "large";
+          : matchMedia(SHORT_MQ).matches
+            ? "short"
+            : "large";
 
 /* Julian arranges across many screen sizes in one tab, and a reload (or
    the dev server's own, on a code change) threw the layouts away. Kept
@@ -253,6 +261,32 @@ const shuffled = (deal: number[]) => {
   return next;
 };
 
+/* Julian: a photo resized grows from its middle. Its place is its top
+   left corner, so the corner goes back by half the change, through the
+   spread the CSS draws it with (`globals.css`). Width is in vw; the height
+   follows the photo's own shape. A phone places its cards itself: as is.
+   `now` is the card's values before the change, place and width together. */
+type Sized = { place?: { x: number; y: number }; width?: number };
+function aboutMiddle<P extends Sized>(card: string, now: Sized | undefined, patch: P): P {
+  if (patch.width === undefined || patch.place || !now?.place || !now.width) return patch;
+  const f = document.querySelector<HTMLElement>(`.cover-float-frame[data-card="${card}"]`);
+  const ring = f?.offsetParent as HTMLElement | null;
+  if (!f?.offsetWidth || !ring || shapeNow() === "phone") return patch;
+  const cs = getComputedStyle(f);
+  const num = (k: string, d: number) => parseFloat(cs.getPropertyValue(k)) || d;
+  const wide = num("--wide", 1);
+  const dw = ((patch.width - now.width) * innerWidth * wide) / 100;
+  const dh = (dw * f.offsetHeight) / f.offsetWidth;
+  const r = (v: number) => Math.round(v * 100) / 100;
+  return {
+    ...patch,
+    place: {
+      x: r(now.place.x - (dw / 2 / (ring.clientWidth * num("--h-pull-x", 1.05) * num("--wide-x", wide))) * 100),
+      y: r(now.place.y + (dh / 2 / (ring.clientHeight * num("--h-pull-y", 0.94))) * 100),
+    },
+  };
+}
+
 /** A value as a ref, for effects that run once and read it each frame. */
 export function useLatest<T>(value: T) {
   const ref = React.useRef(value);
@@ -345,19 +379,27 @@ export function HeroDials() {
       ...keep("hero-layout-sideways"),
     },
   );
+  const short = useDialKitController(
+    "Photo layout, wide short",
+    SHORT_LAYOUT,
+    {
+      id: "hero-layout-short",
+      ...keep("hero-layout-short"),
+    },
+  );
   const middle = useDialKitController("Middle by screen", MIDDLE_DIALS, {
     id: "hero-middle",
     ...keep("hero-middle"),
   });
   const mids = middle.values as unknown as Record<Shape, Middle>;
-  const layouts = { large: kit, upright, landscape, phone, sideways };
+  const layouts = { large: kit, short, upright, landscape, phone, sideways };
   /* The arrange inspector (`hero-arrange.tsx`): the layout showing, the
      card picked, and the field tilted to see its depth. */
   const [shape, setShape] = React.useState<Shape>("large");
   React.useEffect(() => {
     const on = () => setShape(shapeNow());
     on();
-    const lists = [PHONE_MQ, SIDEWAYS_MQ, UPRIGHT_MQ, LANDSCAPE_MQ].map((q) =>
+    const lists = [PHONE_MQ, SIDEWAYS_MQ, UPRIGHT_MQ, LANDSCAPE_MQ, SHORT_MQ].map((q) =>
       matchMedia(q),
     );
     lists.forEach((l) => l.addEventListener("change", on));
@@ -365,14 +407,24 @@ export function HeroDials() {
   }, []);
   const [picked, setPicked] = React.useState<string | null>(null);
   const [tilt, setTilt] = React.useState(false);
-  const [view3d, setView3d] = React.useState(false);
+  /* `?arrange` opens straight into arranging, in 3D, the layout for
+     the window's own shape (Julian, 2026-10-07). Read on the first
+     client render; the server has no address bar and renders it off. */
+  const [view3d, setView3d] = React.useState(
+    () => typeof location !== "undefined" && new URLSearchParams(location.search).has("arrange"),
+  );
   /* The controllers are new each render; the arrange listeners outlive
      that. */
   const kitRef = useLatest(kit);
+  React.useEffect(() => {
+    if (new URLSearchParams(location.search).has("arrange"))
+      kitRef.current.setValues({ dragToArrange: true } as never);
+  }, [kitRef]);
   const uprightRef = useLatest(upright);
   const landscapeRef = useLatest(landscape);
   const phoneRef = useLatest(phone);
   const sidewaysRef = useLatest(sideways);
+  const shortRef = useLatest(short);
   const middleRef = useLatest(middle);
   React.useEffect(() => {
     all.current = { deal };
@@ -452,6 +504,7 @@ export function HeroDials() {
         ["u", upright.values, "cover-float-off-upright"],
         ["l", landscape.values, "cover-float-off-landscape"],
         ["s", sideways.values, "cover-float-off-sideways"],
+        ["t", short.values, "cover-float-off-short"],
       ] as const) {
         const p = set.cards[card];
         if (!p) continue;
@@ -477,6 +530,48 @@ export function HeroDials() {
      cover, below the strip, so a drag or a wheel over a card stops there
      and never pages the strip. */
   const arrange = layout.dragToArrange;
+
+  /* Undo: the shape's cards and middle, kept once they settle. Ctrl+Z
+     steps back, Ctrl+Shift+Z or Ctrl+Y forward. */
+  const history = React.useRef<{ past: string[]; future: string[] }>({ past: [], future: [] });
+  const nowState = JSON.stringify({ cards: layouts[shape].values.cards, middle: mids[shape] });
+  React.useEffect(() => {
+    if (!arrange) return;
+    const t = setTimeout(() => {
+      const h = history.current;
+      if (h.past.at(-1) === nowState) return;
+      h.past.push(nowState);
+      h.future = [];
+    }, 250);
+    return () => clearTimeout(t);
+  }, [arrange, nowState]);
+  React.useEffect(() => {
+    history.current = { past: [], future: [] };
+  }, [shape]);
+  const undoRef = useLatest({ layouts, middle, shape });
+  React.useEffect(() => {
+    if (!arrange) return;
+    const key = (e: KeyboardEvent) => {
+      if (!(e.ctrlKey || e.metaKey)) return;
+      if ((e.target as Element).closest?.("input, textarea")) return;
+      const k = e.key.toLowerCase();
+      const redo = k === "y" || (k === "z" && e.shiftKey);
+      if (k !== "z" && k !== "y") return;
+      e.preventDefault();
+      e.stopImmediatePropagation();
+      const h = history.current;
+      if (redo ? !h.future.length : h.past.length < 2) return;
+      if (redo) h.past.push(h.future.pop()!);
+      else h.future.push(h.past.pop()!);
+      const s = JSON.parse(h.past.at(-1)!);
+      const { layouts, middle, shape } = undoRef.current;
+      layouts[shape].setValues({ cards: s.cards } as never);
+      middle.setValues({ [shape]: s.middle } as never);
+    };
+    window.addEventListener("keydown", key, true);
+    return () => window.removeEventListener("keydown", key, true);
+  }, [arrange, undoRef]);
+
   React.useEffect(() => {
     const el = ref.current?.closest<HTMLElement>(".cover-float");
     if (!el || !arrange) return;
@@ -492,6 +587,7 @@ export function HeroDials() {
       ({
         phone: phoneRef,
         sideways: sidewaysRef,
+        short: shortRef,
         upright: uprightRef,
         landscape: landscapeRef,
         large: kitRef,
@@ -505,7 +601,7 @@ export function HeroDials() {
       (active().getValues() as unknown as { cards: Record<string, Card> })
         .cards[card];
     const set = (card: string, slot: Partial<Slot>) =>
-      active().setValues({ cards: { [card]: slot } } as never);
+      active().setValues({ cards: { [card]: aboutMiddle(card, cardOf(card), slot as Sized) } } as never);
     const mid = (e: Event) =>
       (e.target as Element).closest<HTMLElement>(".cover-float-middle");
     const setMid = (patch: Partial<Middle>) =>
@@ -669,6 +765,7 @@ export function HeroDials() {
     landscapeRef,
     phoneRef,
     sidewaysRef,
+    shortRef,
     middleRef,
   ]);
 
@@ -716,7 +813,9 @@ export function HeroDials() {
           picked={picked}
           onPick={setPicked}
           set={(card, patch) =>
-            layouts[shape].setValues({ cards: { [card]: patch } } as never)
+            layouts[shape].setValues({
+              cards: { [card]: aboutMiddle(card, (layouts[shape].values.cards as unknown as Record<string, Sized>)[card], patch) },
+            } as never)
           }
           photoOf={(card) =>
             cover()?.querySelector<HTMLElement>(
@@ -745,8 +844,12 @@ export function HeroDials() {
           picked={picked}
           onPick={setPicked}
           set={(card, patch) =>
-            layouts[shape].setValues({ cards: { [card]: patch } } as never)
+            layouts[shape].setValues({
+              cards: { [card]: aboutMiddle(card, (layouts[shape].values.cards as unknown as Record<string, Sized>)[card], patch) },
+            } as never)
           }
+          mid={mids[shape]}
+          setMid={(patch) => middle.setValues({ [shape]: patch } as never)}
           onClose={() => setView3d(false)}
         />
       ) : null}

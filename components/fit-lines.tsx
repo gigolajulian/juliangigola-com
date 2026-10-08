@@ -35,17 +35,7 @@ export function FitLines() {
        layout of the whole cover per line, several times a load (mount, the
        fonts, the name's first size), ~190ms on a throttled phone. */
     const fit = () => {
-      if (!phone.matches) {
-        /* Everywhere else the location is set to the role's width, one
-           block under the name (Julian, 2026-10-07). */
-        clear();
-        const [role, where] = lines();
-        const rw = role?.getBoundingClientRect().width;
-        const ww = where?.getBoundingClientRect().width;
-        if (rw && ww)
-          where.style.fontSize = `${parseFloat(getComputedStyle(where).fontSize) * (rw / ww)}px`;
-        return;
-      }
+      if (!phone.matches) return clear();
       const size = getComputedStyle(name).fontSize;
       /* The words of the name, unseen, in its face and size. */
       const probe = document.createElement("span");
@@ -73,13 +63,22 @@ export function FitLines() {
         size: parseFloat(getComputedStyle(l).fontSize),
       }));
       probe.remove();
+      // The largest size among the lines: a short one grows to it before
+      // it is spread, so a short line is not set small and far apart.
+      const top = Math.max(...read.filter((r) => r.w).map((r) => r.size));
       all.forEach((l, i) => {
-        const { w, n, size } = read[i];
+        const { n, size } = read[i];
+        let { w } = read[i];
         if (!w || n < 2) return;
         if (w > target) {
           // Too long at its size: smaller, not squeezed.
           l.style.fontSize = `${size * (target / w)}px`;
         } else {
+          const grow = Math.min(top / size, target / w);
+          if (grow > 1) {
+            l.style.fontSize = `${size * grow}px`;
+            w *= grow;
+          }
           const ls = (target - w) / (n - 1);
           l.style.letterSpacing = `${ls}px`;
           // The spacing after the last letter matched before the first,

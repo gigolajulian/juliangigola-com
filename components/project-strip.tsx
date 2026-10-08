@@ -313,26 +313,7 @@ export function ProjectStrip({
                  the sequence ends, and past the last photograph there is
                  the name of what follows on empty ground. The pictures on
                  a project page are that project's. */
-          <Link
-            key="next"
-            href={next!.href}
-            data-hash="next"
-            data-ring="Next"
-            /* Stacked down a phone it is the foot of the page: air above
-               and below so the name is not pressed on the footer's rule
-               (Julian, 2026-10-06). */
-            className="flex h-full shrink-0 flex-col justify-center gap-2 pl-10 pr-6 max-sm:py-14 sm:pl-24 sm:pr-10"
-          >
-            <span className="label text-muted-foreground">Next project</span>
-            <span className="font-display text-2xl uppercase leading-none tracking-[0] transition-opacity duration-200 hoverable:hover:opacity-70 sm:text-4xl">
-              {next!.name}
-            </span>
-            {next!.client ? (
-              <span className="label text-muted-foreground">
-                {next!.client}
-              </span>
-            ) : null}
-          </Link>
+          <NextCell key="next" next={next!} label={gallery ? "Up next" : "Next project"} />
         ) : cell.kind === "text" ? (
           <div
             key={`text-${cell.block.after}-${cell.block.heading ?? ""}`}
@@ -487,5 +468,29 @@ export function ProjectStrip({
 
       <Lightbox frames={frames} name={project.name} {...lightbox} />
     </>
+  );
+}
+
+/** The last cell: where the sequence goes next, written and not shown. On a
+    discipline's own page too (Julian, 2026-10-08: show up next). */
+export function NextCell({ next, label }: { next: NextUp; label: string }) {
+  return (
+    <Link
+      href={next.href}
+      data-hash="next"
+      data-ring="Next"
+      /* Stacked down a phone it is the foot of the page: air above
+         and below so the name is not pressed on the footer's rule
+         (Julian, 2026-10-06). */
+      className="next-cell flex h-full shrink-0 flex-col justify-center gap-2 pl-10 pr-6 max-sm:py-14 sm:pl-24 sm:pr-10"
+    >
+      <span className="label text-muted-foreground">{label}</span>
+      <span className="font-display text-2xl uppercase leading-none tracking-[0] transition-opacity duration-200 hoverable:hover:opacity-70 sm:text-4xl">
+        {next.name}
+      </span>
+      {next.client ? (
+        <span className="label text-muted-foreground">{next.client}</span>
+      ) : null}
+    </Link>
   );
 }

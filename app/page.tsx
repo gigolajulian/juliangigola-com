@@ -94,6 +94,9 @@ const COVER_PICKS = [
 /* Frames past a project's cover that its discipline shows as well:
    Wrapped Up's heels and lipstick, and a second Crave. */
 const MORE = ["/work/wrapped-up/04.jpg", "/work/crave/03.jpg"];
+// Julian (2026-10-07): the nine campaigns he wants up front; Oakley x Nike
+// and Kala x Sharks picked for the hard light.
+const CAMPAIGN_PICKS = ["hua", "ukiyosunknown", "goodcult", "wired-magazine", "jubo", "paradox", "sago", "oakley-x-nike", "kala-x-sharks"];
 const EDITORIAL_PICKS = ["ghostlight", "threshold", "lithe", "aegis", "vigil", "paranoia", "void", "azure-bloom", "i-wanna-be-a-human"];
 
 const same = (src: string) => (SOURCES as Record<string, string>)[src] ?? src;
@@ -133,8 +136,8 @@ function shotsOf(t: (typeof DISCIPLINE_TILES)[number]): Shot[] {
   };
   /* Julian (2026-10-04): Editorial is his own pick of covers, in his
      order, cut to one 4:5 so the rows are even. */
-  if (t.category === "editorial") {
-    for (const slug of EDITORIAL_PICKS) {
+  if (t.category === "editorial" || t.category === "campaigns") {
+    for (const slug of t.category === "editorial" ? EDITORIAL_PICKS : CAMPAIGN_PICKS) {
       const p = projects.find((q) => q.slug === slug);
       if (p) shots.push({ src: p.cover.src, color: p.cover.color, width: 4, height: 5, title: p.name, href: `/portfolio#${p.slug}` });
     }
@@ -193,6 +196,7 @@ export default function Home() {
         next={WORK_PAGE}
         arrive="none"
         paged
+        pageCount
         // Julian: the ScrollStack, sideways. Each screen slides over the one
         // before, which sinks back under it (`lib/deck.ts`).
         deck="screens"

@@ -11,7 +11,7 @@ import { StripPage, StripHead } from "@/components/strip-page";
 import { ScopePanel, type ScopeRow } from "@/components/vectorscope";
 import { markFilter, StripView, type StripViewMode } from "@/components/strip";
 import { animate } from "motion";
-import { Liquid, useQuiet } from "@/components/liquid";
+import { Liquid } from "@/components/liquid";
 import {
   chooseView,
   morphView,
@@ -128,6 +128,11 @@ export function WorkShell({
   children: React.ReactNode;
 }) {
   const rowBox = React.useRef<HTMLDivElement>(null);
+  /* Preview (`?cards`, Julian 2026-10-08): each discipline drawn as one
+     card, its name and its projects (`globals.css`, `data-cards`). */
+  React.useEffect(() => {
+    if (new URLSearchParams(location.search).has("cards")) document.documentElement.dataset.cards = "";
+  }, []);
   /* The warm-up: on a desktop with a pointer and no request to save data,
      once the page is idle, the two covers each filter's row opens on are
      fetched and decoded, so a filter pressed later has its first screen
@@ -186,7 +191,6 @@ export function WorkShell({
   const [filtering, setFiltering] = React.useState(false);
   /** Whether the colour panel is out. */
   const [scoping, setScoping] = React.useState(false);
-  const quiet = useQuiet();
   /* Julian: colour opens on All, so the photographs show across the
      disciplines at once; the panel then puts the work in its colour where
      the rack was (`vectorscope.tsx`). */
@@ -600,13 +604,26 @@ export function WorkShell({
          page (Julian, 2026-10-05, once the chips joined the bar's pane):
          the words' width less the chip's padding, grown with the chip's
          swell, at the foot of the chip as it is drawn. */
-      const s = 1 + JELLY.swell;
-      const pad = parseFloat(getComputedStyle(c).paddingLeft) || 0;
-      const w = (c.offsetWidth - 2 * pad) * s;
+      /* Julian (2026-10-07): the line sits on the pane's hairline and
+         slides there, thinner, in place of the liquid under the chip. */
+      /* Where the chip comes to rest, not where its spring has it now: read
+         mid-flight, the push from the chip lit before was still on it and
+         the line landed off the words (Julian, 2026-10-07). Seated, the lit
+         chip has no push and its swell is about its own middle. */
+      const a = (c.firstElementChild as HTMLElement | null) ?? c;
+      const s = window.matchMedia("(min-width: 64rem)").matches
+        ? 1 + JELLY.swell
+        : 1;
+      const pad = (parseFloat(getComputedStyle(a).paddingLeft) || 0) * s;
+      const box = a.getBoundingClientRect();
+      const mid =
+        box.left + box.width / 2 - new DOMMatrix(getComputedStyle(c).transform).m41;
+      const w = a.offsetWidth * s;
+      const pane = (r.closest(".head-glass") as HTMLElement | null) ?? r;
       setMark({
-        x: c.offsetLeft + c.offsetWidth / 2 - w / 2,
-        y: c.offsetTop + c.offsetHeight / 2 + (c.offsetHeight * s) / 2 - 4,
-        w,
+        x: mid - w / 2 + pad - pane.getBoundingClientRect().left,
+        y: 0,
+        w: w - 2 * pad,
         h: 1,
         rw: r.scrollWidth,
       });
@@ -615,9 +632,11 @@ export function WorkShell({
     const sized = new ResizeObserver(measure);
     sized.observe(r);
     if (lit.current) sized.observe(lit.current);
+    r.addEventListener("scroll", measure, { passive: true });
     return () => {
       cancelAnimationFrame(first);
       sized.disconnect();
+      r.removeEventListener("scroll", measure);
     };
   }, [litAt]);
 
@@ -1110,39 +1129,15 @@ export function WorkShell({
                     </Chip>
                   </li>
                 ))}
-                <li
-                  aria-hidden
-                  data-liquid=""
-                  className="pointer-events-none absolute left-0 top-0 h-full"
-                  style={{ width: mark?.rw }}
-                >
-                  {mark && quiet ? (
-                    <Liquid
-                      /* The navbar's goo, so a 1px line survives it. */
-                      blur={0.6}
-                      contrast={10}
-                      fill="var(--foreground)"
-                      className="h-full w-full"
-                    >
-                      {/* Julian: less bounce. Wobble is the overshoot on
-                          arrival; the library's own is 0.5. */}
-                      <Liquid.Item effect="move" move={{ wobble: 0.25 }}>
-                        <div
-                          className="absolute left-0 top-0"
-                          style={{
-                            width: mark.w,
-                            height: mark.h,
-                            transform: `translate(${mark.x}px, ${mark.y}px)`,
-                            // `liquid-gooey` reads the corner off this box.
-                            borderRadius: mark.h / 2,
-                          }}
-                        />
-                      </Liquid.Item>
-                    </Liquid>
-                  ) : null}
-                </li>
               </ul>
             </nav>
+            {mark ? (
+              <span
+                aria-hidden
+                className="filter-line"
+                style={{ width: mark.w, transform: `translateX(${mark.x}px)` }}
+              />
+            ) : null}
           </div>
         </div>
       }

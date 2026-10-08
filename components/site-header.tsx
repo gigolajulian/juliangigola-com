@@ -521,7 +521,7 @@ function NavLinks({
       {links.map((link, i) => (
         <li
           key={link.href}
-          className="relative px-2 text-center xl:px-4"
+          className="relative px-2 text-center xl:px-3"
           onPointerEnter={(e) => e.pointerType === "mouse" && setOver(i)}
         >
           <NavLink href={link.href} current={isCurrent(link.href)} lit={at === i}>
@@ -562,7 +562,7 @@ function NavLink({
       href={href}
       aria-current={current ? "page" : undefined}
       className={cn(
-        "block py-3 text-[0.9375rem] uppercase leading-none tracking-[0.08em] transition-[color,scale] duration-300 ease-[var(--ease-out-strong)]",
+        "block py-3 font-mono text-[0.9375rem] uppercase leading-none tracking-[0.08em] transition-[color,scale] duration-300 ease-[var(--ease-out-strong)]",
         // The page you are on stands back while the pointer lights another
         // name, and comes up again when it leaves.
         // Lit, the name is a touch larger (Julian, 2026-10-05).

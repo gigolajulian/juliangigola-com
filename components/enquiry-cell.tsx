@@ -94,7 +94,7 @@ export function EnquiryCell({
         <div>
           {/* Julian: matched with Contact's "Get in Touch" (RisingTitle's
               size: 2.25rem, 3.75rem from sm) and its 40px in. */}
-          <h2 className="title max-w-[22ch] leading-[0.95] [--text-title:2.25rem] sm:[--text-title:min(3.75rem,6vw)] lying:[--text-title:2.25rem]">{title}</h2>
+          <h2 className="title enquiry-title max-w-[22ch] leading-[0.95] [--text-title:2.25rem] sm:[--text-title:min(3.75rem,6vw)] lying:[--text-title:2.25rem]">{title}</h2>
           {body ? (
             <p className="mt-4 max-w-prose text-sm normal-case leading-relaxed text-muted-foreground [zoom:1.02] lying:mt-2">
               {body}

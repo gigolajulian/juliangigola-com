@@ -94,6 +94,55 @@ const FILTER_MS = 10000;
 let dealtAt = 0;
 const DEAL_MS = 10000;
 
+/** Preview (`?cards`, Julian 2026-10-08): the next discipline's card comes
+    over this one under the hand, as the chapters do on All, rather than on
+    its own in 640ms. Once the push past the end has led on, the trip's own
+    animations (`jg-deal-*` in `globals.css`) are held and run by the wheel,
+    six tenths of a screen of wheel to cover it, and play out once the wheel goes quiet.
+    The navigation has already happened, so wheeling back slides the card
+    back but cannot undo it; quiet, it finishes. */
+function scrubDeal(dir: 1 | -1) {
+  const span = window.innerWidth * 0.6;
+  let p = 0;
+  let quiet = 0;
+  let raf = 0;
+  const trip = () =>
+    document
+      .getAnimations()
+      .filter((a) =>
+        (a.effect as KeyframeEffect | null)?.pseudoElement?.startsWith("::view-transition"),
+      );
+  const end = () => {
+    window.removeEventListener("wheel", onWheel, true);
+    cancelAnimationFrame(raf);
+    window.clearTimeout(quiet);
+    for (const a of trip()) a.play();
+  };
+  const onWheel = (e: WheelEvent) => {
+    e.preventDefault();
+    e.stopImmediatePropagation();
+    const d =
+      (Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY) *
+      (e.deltaMode === 1 ? 40 : 1);
+    p = Math.min(1, Math.max(0, p + (d * dir) / span));
+    window.clearTimeout(quiet);
+    if (p >= 1) return end();
+    quiet = window.setTimeout(end, 180);
+  };
+  const hold = () => {
+    for (const a of trip()) {
+      a.pause();
+      a.effect?.updateTiming({ easing: "linear" });
+      a.currentTime = p * Number(a.effect?.getComputedTiming().endTime ?? 0);
+    }
+    raf = requestAnimationFrame(hold);
+  };
+  window.addEventListener("wheel", onWheel, { capture: true, passive: false });
+  raf = requestAnimationFrame(hold);
+  // Led on with no more wheel to come: it plays out as it always has.
+  quiet = window.setTimeout(end, 400);
+}
+
 /** When the browser last went back or forward. A strip mounting just
     after one puts the visitor back where they were on this path instead
     of at the beginning: leaving Portraits five covers in to look at one
@@ -134,15 +183,16 @@ if (typeof window !== "undefined") {
 
 /** How far past the end a wheel has to push before it leads on, in px of
     wheel delta. Three notches on a mouse: an overshoot of one is a
-    reader arriving at the end, not asking to leave it. */
+    reader arriving at the end, not asking to leave it. Halved from 300
+    (Julian, 2026-10-08: less resistance). */
 /** Fired on the scroller when the rack has laid its frames out again. */
 const RELAID = "strip-relaid";
-const LEAVE_AFTER = 300;
+const LEAVE_AFTER = 150;
 /* A finger's pull past the end before the strip leads on. Shorter than
    the wheel's, because a wheel notch is worth tens of pixels and a finger
-   is worth the distance it actually moved: 80px is a deliberate pull and
-   not the last inch of a flick that happened to land on the end. */
-const LEAVE_TOUCH = 80;
+   is worth the distance it actually moved. 80px, then 50 (Julian,
+   2026-10-08: less resistance). */
+const LEAVE_TOUCH = 50;
 
 /** How long a visitor is left alone before the rail says the page runs
     sideways, how long the travel lasts, and where the session remembers
@@ -364,6 +414,7 @@ export function Strip({
   prev,
   onOpen,
   counter,
+  pageCount,
   stack = true,
   paged = false,
   chapters = false,
@@ -387,6 +438,10 @@ export function Strip({
   onOpen?: (n: number) => void;
   /** Drawn left of the ruler, given the index of the cell in the middle. */
   counter?: (at: number) => React.ReactNode;
+  /** The screen you are on, "01 / 06", left of the ruler, read off the
+      ticks. For a page that cannot hand a `counter` across from the
+      server (Julian, 2026-10-07: the homepage). */
+  pageCount?: boolean;
   /** Under 40rem, run the cells down the page instead and switch the
       machine off. Off for the project strips, which swipe on a phone. */
   stack?: boolean;
@@ -1295,6 +1350,7 @@ export function Strip({
            on the first notch of a push on the portfolio, the lag into the
            way back home (scroll-craft pass, 2026-10-02). */
         prevent: (node) => {
+          if (node.closest("dialog[open]")) return true;
           if (Math.abs(dx) > Math.abs(dy)) return false;
           if (node.matches("textarea, select")) return true;
           if (!node.hasAttribute("data-scroll")) return false;
@@ -2325,6 +2381,7 @@ export function Strip({
           delete root.dataset.nav;
           delete root.dataset.navWay;
         }, DEAL_MS);
+        if ("cards" in root.dataset) scrubDeal(dir);
         router.push(href);
         return;
       }
@@ -2474,6 +2531,10 @@ export function Strip({
     const onWheel = (e: WheelEvent) => {
       // A pinch is a zoom.
       if (e.ctrlKey) return;
+      /* An open dialog keeps its own wheel: the reference picker sits in
+         the form, so inside the strip, and its photographs could not be
+         scrolled (Julian, 2026-10-08). */
+      if ((e.target as Element | null)?.closest?.("dialog[open]")) return;
       const now = e.timeStamp || performance.now();
       // Since the last notch here, or since the page came if none has yet.
       const before = gestureAt;
@@ -3423,6 +3484,15 @@ export function Strip({
         data-rail-names={chaptered ? "always" : undefined}
       >
         {counter?.(at)}
+        {pageCount && !counter && ticks.length ? (
+          <p aria-hidden className="strip-count label shrink-0 tabular-nums text-muted-foreground">
+            <span className="text-foreground">
+              {String(Math.max(1, ticks.filter((t) => t.i <= at).length)).padStart(2, "0")}
+            </span>
+            {" / "}
+            {String(ticks.length).padStart(2, "0")}
+          </p>
+        ) : null}
         {/* Where you are, for a reader who cannot see the inked tick. The
             ruler beside this is a row of pointer-only jump controls and
             stays hidden from assistive tech: given a role it became a
