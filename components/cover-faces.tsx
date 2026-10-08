@@ -20,9 +20,9 @@ import type { CoverFrame } from "@/lib/cover-art-types";
  * Focus turns it too, so a keyboard visitor is not the one person who cannot
  * see the back.
  *
- * Both layers use the 800px copy. There is no optimiser on a static host, so
- * a cell asking for 285px is handed whatever file it names — and naming the
- * 1600px master cost a quarter of a megabyte per thumbnail.
+ * Both layers name the full copy. Image Transformations size it to the cell
+ * now (`image-loader.ts`); the 800px copy was stretched to 1750 device px in
+ * the tall rows and read as low resolution (Julian, 2026-10-08).
  * ─────────────────────────────────────────────────────────────── */
 
 export function CoverFaces({
@@ -43,7 +43,7 @@ export function CoverFaces({
       <Image
         data-fade={priority ? undefined : ""}
         data-frame={front.src}
-        src={front.thumb}
+        src={front.src}
         alt={front.alt}
         fill
         sizes={sizes}
@@ -62,7 +62,7 @@ export function CoverFaces({
         <>
           <Image
             data-frame={back.src}
-            src={back.thumb}
+            src={back.src}
             alt={back.alt}
             fill
             sizes={sizes}
