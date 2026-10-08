@@ -5738,11 +5738,10 @@ optgroup {
    zoom jumped to size instead of easing. Measured: transition-property
    read `opacity` on a cover carrying the class. */
 img[data-fade] {
-  opacity: 0;
-  /* Julian: seamless. Long enough to read as arriving, not blinking. */
-  transition:
-    opacity 700ms cubic-bezier(0.22, 1, 0.36, 1),
-    scale 500ms var(--ease-out-strong);
+  /* No fade (Julian, 2026-10-08): a picture shows as soon as it lands.
+     Loading stays lazy, so it still comes in as it reaches the screen. */
+  opacity: 1;
+  transition: scale 500ms var(--ease-out-strong);
 }
 img[data-fade][data-loaded] {
   opacity: 1;
@@ -7108,52 +7107,6 @@ h2:not(.label) {
     /* Half under the bar (Julian: somewhere in between). */
     top: calc(var(--bar-h) / 2) !important;
     height: calc(100% - var(--bar-h) / 2) !important;
-  }
-}
-
-/* ── the portfolio, coming into the page (Julian, 2026-10-03) ──
-   Each picture comes up out of a fade and settles from a touch large as
-   it crosses into the window, tied to the scroll itself rather than to a
-   timer: it moves with the hand, both ways, and costs no script. Sideways
-   on a screen, downward on a phone. `filter: opacity()` rather than
-   `opacity`, which `data-fade` already owns for the load; no fill, so
-   once in, the picture is itself again and the hover zoom is its own.
-   Where scroll timelines are not supported the pictures simply show. */
-@keyframes jg-arrive {
-  from {
-    filter: opacity(0);
-    scale: 1.08;
-  }
-  to {
-    filter: opacity(1);
-    scale: 1;
-  }
-}
-/* The timeline is the cell's, named, not the picture's own `view()`: the
-   picture sits in a frame that clips, and a clipping box counts as a
-   scroller, so its own view never moved. */
-@supports (animation-timeline: view()) {
-  @media (prefers-reduced-motion: no-preference) {
-    .portfolio-arrive .strip-scroll > * {
-      view-timeline: --arrive x;
-    }
-    .portfolio-arrive img[data-fade] {
-      animation: jg-arrive linear none;
-      animation-timeline: --arrive;
-      animation-range: entry 0% entry 100%;
-    }
-    /* The first picture is in the window from the start, half way through
-       its entry on a phone, and Chrome takes nothing still fading in for
-       the page's largest paint: the portfolio reported none at all
-       (audit, 2026-10-05). It keeps the load's own fade (`data-fade`). */
-    .portfolio-arrive .strip-scroll > :nth-child(-n + 2) img[data-fade] {
-      animation: none;
-    }
-    @media (max-width: 39.99rem) {
-      .portfolio-arrive .strip-scroll > * {
-        view-timeline: --arrive y;
-      }
-    }
   }
 }
 
