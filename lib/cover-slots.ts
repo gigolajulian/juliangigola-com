@@ -16,16 +16,16 @@ export const SLOTS: {
   w: number;
   z: number;
 }[] = [
-  { x: 17.5, y: 12.5, w: 12, z: -19 },
+  { x: 17.5, y: 12.5, w: 12, z: 57 },
   { x: 68.5, y: 13, w: 10.5, z: 30 },
-  { x: 33.5, y: 7, w: 11, z: -10 },
-  { x: 53.5, y: 73, w: 9.5, z: 16 },
+  { x: 33.5, y: 7, w: 11, z: 34 },
+  { x: 53.5, y: 75.5, w: 9.5, z: 16 },
   { x: 23, y: 61.5, w: 11.5, z: 25 },
-  { x: 50.5, y: 11, w: 9.5, z: -26 },
+  { x: 49.5, y: 8.5, w: 11.5, z: 53 },
   { x: 83, y: 37, w: 12, z: -10 },
-  { x: 37.5, y: 72, w: 9.5, z: 27 },
-  { x: 5.5, y: 39.5, w: 13.5, z: 45 },
-  { x: 64.5, y: 59, w: 12.5, z: -47 },
+  { x: 37.5, y: 76.5, w: 9.5, z: 27 },
+  { x: 7, y: 46.5, w: 12.25, z: 23 },
+  { x: 68, y: 62.5, w: 11.25, z: 11 },
 ];
 
 /** A place in one of the smaller screens' own layouts: left, top, width
@@ -45,20 +45,20 @@ export const UPRIGHT: Place[] = [
   { x: 64.5, y: 67, w: 18.5, z: 50, show: true },
   { x: 21, y: 66.5, w: 18.5, z: 80, show: true },
   { x: 42.5, y: 6.5, w: 20, z: -50, show: true },
-  { x: 81, y: 42, w: 18.5, z: 5, show: true },
+  { x: 78.5, y: 40.5, w: 18.5, z: 5, show: true },
   { x: 43, y: 74.5, w: 18.5, z: 45, show: true },
   { x: 3.5, y: 41.5, w: 17.5, z: 40, show: true },
   { x: 56, y: 70, w: 21, z: -25, show: false },
 ];
 export const LANDSCAPE: Place[] = [
-  { x: 16, y: 13, w: 13.5, z: 24, show: true },
-  { x: 76.5, y: 7, w: 14.5, z: 30, show: true },
+  { x: 16, y: 13, w: 13.5, z: 148, show: true },
+  { x: 71, y: 12.5, w: 13, z: 30, show: true },
   { x: 31.5, y: 0.5, w: 13.5, z: -2, show: false },
   { x: 67.5, y: 74, w: 13.5, z: 45, show: true },
-  { x: 22.5, y: 73.5, w: 13.5, z: 28, show: true },
-  { x: 42.5, y: 5, w: 14.5, z: -18, show: true },
+  { x: 22.5, y: 73.5, w: 13.5, z: 79, show: true },
+  { x: 46, y: 9.5, w: 12.5, z: 79, show: true },
   { x: 82, y: 45.5, w: 13.5, z: 59, show: true },
-  { x: 43.5, y: 77.5, w: 13, z: 50, show: true },
+  { x: 46.5, y: 77.5, w: 10.75, z: 80, show: true },
   { x: 5.5, y: 46.5, w: 15, z: 38, show: true },
   { x: 55, y: 70, w: 15, z: -25, show: false },
 ];
@@ -68,12 +68,12 @@ export const LANDSCAPE: Place[] = [
     vw, held to the same share of the window's height a short phone allows
     (28vw is 13svh; `globals.css`). On "Photo layout, phone". */
 export const PHONE: Place[] = [
-  { x: 5, y: 22.5, w: 28, z: 26, show: true },
-  { x: 72.5, y: 66, w: 24.25, z: 20, show: true },
+  { x: 7.5, y: 23.5, w: 28, z: 84, show: true },
+  { x: 72.5, y: 66, w: 24.5, z: 20, show: true },
   { x: 36, y: 8.5, w: 31.5, z: 61, show: true },
-  { x: 39, y: 75, w: 30, z: 52, show: true },
-  { x: 7, y: 63.5, w: 29.25, z: 27, show: true },
-  { x: 70, y: 25, w: 26.25, z: 38, show: true },
+  { x: 39.5, y: 77.5, w: 30, z: 52, show: true },
+  { x: 5, y: 65, w: 29.5, z: 27, show: true },
+  { x: 73, y: 19, w: 26.5, z: 38, show: true },
   { x: 50, y: 40, w: 28, z: -10, show: false },
   { x: 50, y: 40, w: 28, z: 45, show: false },
   { x: 50, y: 40, w: 28, z: 40, show: false },
@@ -104,12 +104,12 @@ export const SIDEWAYS: Place[] = [
 export const SHORT: Place[] = [
   { x: 20.5, y: 15, w: 11.5, z: 85, show: true },
   { x: 64, y: 13.5, w: 10.5, z: 108, show: true },
-  { x: 33, y: 12, w: 10, z: 3, show: true },
+  { x: 34, y: 9, w: 10, z: 3, show: true },
   { x: 51, y: 78, w: 9, z: 47, show: true },
   { x: 21.5, y: 62.5, w: 11.5, z: 129, show: true },
   { x: 48.5, y: 12, w: 9.5, z: 65, show: true },
   { x: 77.5, y: 38, w: 12, z: 58, show: true },
-  { x: 35, y: 72.5, w: 8.5, z: 95, show: true },
+  { x: 35, y: 74.5, w: 8.5, z: 95, show: true },
   { x: 6.5, y: 41, w: 13.5, z: 52, show: true },
   { x: 65, y: 68, w: 11.5, z: 8, show: true },
 ];

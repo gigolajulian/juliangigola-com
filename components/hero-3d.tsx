@@ -57,6 +57,7 @@ const SIZES = [
   ["ultrawide", 2560, 960],
   ["ipad", 1180, 820],
   ["ipad tall", 820, 1180],
+  ["iphone se", 375, 667],
   ["phone", 390, 844],
 ] as const;
 type SetSize = (w: number, h: number) => Promise<void>;
@@ -291,7 +292,7 @@ export function Hero3D({
     drag(e, (dx, dy) => {
       if (len2 < 1e-4) return;
       const t = (dx * sx + dy * sy) / len2; // scene px along x
-      set(card, { width: round(Math.max(4, Math.min(40, (c0.width * (w0 + 2 * t)) / w0)), 0.25) });
+      set(card, { width: round(Math.max(4, Math.min(40, (c0.width * (w0 + 2 * t)) / w0)), 0.5) });
     });
   };
 
