@@ -637,6 +637,19 @@
     --mid-fit: 0.6;
   }
 }
+/* A short phone (iPhone SE): the name ran into the skater and the
+   buttons broke onto two lines, into Sago and the TV. */
+@media (max-width: 39.99rem) and (orientation: portrait) and (max-height: 43.75rem) {
+  .cover-float {
+    --mid-fit: 0.85;
+  }
+  .cover-float-ctas {
+    flex-wrap: nowrap;
+  }
+  .cover-float-ctas .cover-cta {
+    white-space: nowrap;
+  }
+}
 /* A booking page's title runs to three lines where the name is one, and
    on ultrawide reached up into the top row of photographs: lower there,
    Julian (2026-10-02). */
@@ -6094,9 +6107,9 @@ h2:not(.label) {
     align-items: center;
     justify-content: center;
   }
-  /* The homepage's pair sit in a zoom (`--m-buttons`); 44 as seen. */
+  /* The homepage's pair sit in two zooms (`--m-buttons`, `--mid`); 44 as seen. */
   .cover-float-ctas .cover-cta {
-    min-height: calc(44px / var(--m-buttons, 1));
+    min-height: calc(44px / (var(--m-buttons, 1) * var(--mid, 1)));
   }
 }
 
