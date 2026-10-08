@@ -16,7 +16,7 @@ export function GroupCell({
   href,
   hash,
   i,
-  cta = "All projects",
+  cta,
   alias,
 }: {
   name: string;
@@ -60,6 +60,9 @@ export function GroupCell({
           name
         )}
       </h2>
+      {/* No "All projects" (Julian, 2026-10-07: not needed); the chips
+          narrow the page. Only a cell given its own way on keeps one. */}
+      {cta ? (
       <Link
         prefetch={false}
         href={href}
@@ -68,6 +71,7 @@ export function GroupCell({
       >
         {cta}
       </Link>
+      ) : null}
     </div>
   );
 }

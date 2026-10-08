@@ -2085,6 +2085,17 @@ a.strip-cell {
 .pointer-mark[data-on] {
   opacity: 1;
 }
+/* In the top layer (`pointer-mark.tsx`): the popover's own box undone. */
+.pointer-mark[popover] {
+  inset: auto;
+  left: 0;
+  top: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  overflow: visible;
+}
 /* Over the colour scope: the colour under it, no ring (Julian)
    (`vectorscope.tsx`). */
 :root[data-mark-fill] .pointer-mark {
@@ -2616,6 +2627,11 @@ h2.contact-title {
 :has(> .title-word) {
   padding-bottom: 0.35em;
   margin-bottom: -0.35em;
+  /* And past the last letter: set tight, a Black face's final stroke runs
+     beyond its advance, and the clip cut the S off INQUIRIES (Julian,
+     2026-10-07). Given back, so nothing moves. */
+  padding-inline: 0.1em;
+  margin-inline: -0.1em;
 }
 @keyframes jg-rise {
   from {
@@ -3675,6 +3691,15 @@ h2.contact-title {
   :root[data-under] .strip-scroll > * {
     align-self: flex-start;
     height: calc(100% - var(--under, 94px));
+  }
+  /* Each screen carries a ground of its own down under the glass, as a
+     shadow its own height below it, so the one it slides over never
+     shows through the rail and footer (Julian, 2026-10-07: the screen
+     coming over has to be under the footer, the bottom right black). A
+     screen's own pictures still run on over it: a shadow paints under
+     the element's content. */
+  :root[data-under] .strip-scroll > * {
+    box-shadow: 0 var(--under, 94px) 0 var(--background);
   }
   :root[data-under] .strip-scroll > .cover-float {
     overflow: clip visible;
@@ -5810,6 +5835,72 @@ h2:not(.label) {
   font-family: var(--font-display);
   font-weight: 900;
   text-transform: uppercase;
+}
+
+/* The headers of the screens (Biography, Commissions, Sessions, the
+   footer's ask) in the wordmark's face, Inter Tight Black (Julian,
+   2026-10-07). The names standing up the portfolio's spines and plates
+   keep Endless. Unlayered, so it outranks the `font-display` they carry. */
+:is(h1, h2):is(.font-display, .title):not(.chapter-name):not(:is(.discipline-title, .project-plate) > *) {
+  font-family: var(--font-wordmark);
+  font-weight: 900;
+}
+
+/* A card under the hand gets no focus ring (Julian, 2026-10-07: the
+   accent frame showed on a click). Keyboard focus with the hand
+   elsewhere still draws it. */
+.strip-cell:focus-visible:hover {
+  outline: none;
+}
+
+/* The lit filter's line, on the pane's hairline (`work-shell.tsx`),
+   sliding from chip to chip. Off on a phone, where the chips sit in a
+   grid and a line at the foot would point at the wrong row. */
+.filter-line {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  height: 1px;
+  background: var(--foreground);
+  pointer-events: none;
+  transition:
+    transform 420ms var(--ease-out-strong),
+    width 420ms var(--ease-out-strong);
+}
+@media (max-width: 39.999rem) {
+  .filter-line {
+    display: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .filter-line {
+    transition: none;
+  }
+}
+
+/* The vertical discipline name comes up at once (Julian, 2026-10-07:
+   reduce the delay): no wait before the first word, a quicker rise. */
+:is(.discipline-title, [data-discipline-page] .project-plate) > h2 .title-word {
+  animation-duration: 520ms;
+  animation-delay: calc(var(--i, 0) * 40ms);
+}
+
+/* The colour page's covers tip toward the pointer as the portfolio's
+   do (`card-tilt.tsx`; Julian, 2026-10-07). */
+.scope-tile {
+  transition:
+    transform 450ms var(--ease-out-strong),
+    box-shadow 450ms var(--ease-out-strong);
+  box-shadow: 0 22px 40px -16px rgb(0 0 0 / 0);
+}
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  .scope-tile:hover {
+    transform: perspective(1000px) translateZ(20px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)) rotateZ(var(--rz, 0deg));
+    box-shadow: var(--sx, 0px) calc(22px + var(--sy, 0px)) 40px -16px rgb(0 0 0 / 0.6);
+    transition:
+      transform 140ms ease-out,
+      box-shadow 500ms var(--ease-out-strong);
+  }
 }
 
 /* ── small things from the scan ──────────────────────────────────

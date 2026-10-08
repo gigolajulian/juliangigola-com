@@ -74,6 +74,14 @@ const FLOOR = 8;
    spacing below is the grid's `gap-4` and the name under each cover. */
 const GAP = 16;
 const NAME = 28;
+/* With no colour chosen, the work by how hard it hits (Julian,
+   2026-10-07): dark frames with one hard, saturated light first, scored
+   off the covers and checked by eye. The rest follow in page order. */
+const DOPE = ["entangled", "vendetta", "lustro", "cyber1a", "channel-orange", "obscura", "true-grit", "cyberscape", "paranoia", "solace", "mirage", "analogue-dreams", "hua", "info-overload", "torteline", "sara", "vesper", "transmutate", "kala-x-sharks", "liminal", "l3na"];
+const rank = (slug: string) => {
+  const i = DOPE.indexOf(slug);
+  return i < 0 ? DOPE.length : i;
+};
 /** Inside this, the point is on neutral and the page shows everything. */
 const NEUTRAL = 5;
 /** The page follows the pointer in steps of this many chroma units, so it
@@ -327,7 +335,7 @@ export function ScopePanel({
   const items = React.useMemo<Item[]>(
     () =>
       neutral
-        ? placed.slice(0, most).map((p) => ({
+        ? [...placed].sort((a, b) => rank(a.slug) - rank(b.slug)).slice(0, most).map((p) => ({
             p,
             shot: p.shots[0],
             count: 0,
@@ -532,10 +540,12 @@ export function ScopePanel({
       const cs = getComputedStyle(el);
       const W = el.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
       const H = el.clientHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom);
-      const rows = H < 560 ? 2 : 3;
-      let w = ((H - (rows - 1) * GAP) / rows - NAME) * 0.8;
-      const cols = Math.max(3, Math.min(8, Math.floor((W + GAP) / (w + GAP))));
-      w = Math.floor(Math.min(w, (W - (cols - 1) * GAP) / cols));
+      // Four across, two down, larger (Julian, 2026-10-07: less grid).
+      const rows = 2;
+      const cols = 4;
+      const w = Math.floor(
+        Math.min(((H - (rows - 1) * GAP) / rows - NAME) * 0.8, (W - (cols - 1) * GAP) / cols),
+      );
       setFit((f) =>
         f.cols === cols && f.rows === rows && f.w === w ? f : { cols, rows, w },
       );
@@ -853,7 +863,7 @@ const ColourTile = React.memo(function ColourTile({ item }: { item: Item }) {
       data-ring="View"
       className="block"
     >
-      <span className="relative isolate block">
+      <span className="scope-tile relative isolate block">
         {/* No stack under the cover (Julian, 2026-10-05: he did not like how
             the edges looked). */}
         <span

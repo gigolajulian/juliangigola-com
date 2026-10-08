@@ -364,6 +364,7 @@ export function Strip({
   prev,
   onOpen,
   counter,
+  pageCount,
   stack = true,
   paged = false,
   chapters = false,
@@ -387,6 +388,10 @@ export function Strip({
   onOpen?: (n: number) => void;
   /** Drawn left of the ruler, given the index of the cell in the middle. */
   counter?: (at: number) => React.ReactNode;
+  /** The screen you are on, "01 / 06", left of the ruler, read off the
+      ticks. For a page that cannot hand a `counter` across from the
+      server (Julian, 2026-10-07: the homepage). */
+  pageCount?: boolean;
   /** Under 40rem, run the cells down the page instead and switch the
       machine off. Off for the project strips, which swipe on a phone. */
   stack?: boolean;
@@ -3423,6 +3428,15 @@ export function Strip({
         data-rail-names={chaptered ? "always" : undefined}
       >
         {counter?.(at)}
+        {pageCount && !counter && ticks.length ? (
+          <p aria-hidden className="strip-count label shrink-0 tabular-nums text-muted-foreground">
+            <span className="text-foreground">
+              {String(Math.max(1, ticks.filter((t) => t.i <= at).length)).padStart(2, "0")}
+            </span>
+            {" / "}
+            {String(ticks.length).padStart(2, "0")}
+          </p>
+        ) : null}
         {/* Where you are, for a reader who cannot see the inked tick. The
             ruler beside this is a row of pointer-only jump controls and
             stays hidden from assistive tech: given a role it became a
