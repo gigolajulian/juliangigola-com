@@ -11,7 +11,6 @@
     "prebuild": "node scripts/make-hero.mjs && node --no-warnings scripts/make-cards.mjs && node scripts/sitemap-dates.mjs"
   },
   "dependencies": {
-    "@fiddle-digital/string-tune": "^1.2.5",
     "@opennextjs/cloudflare": "^1.20.6",
     "border-beam": "^1.4.1",
     "cn": "^0.2.5",
