@@ -128,6 +128,11 @@ export function WorkShell({
   children: React.ReactNode;
 }) {
   const rowBox = React.useRef<HTMLDivElement>(null);
+  /* Preview (`?cards`, Julian 2026-10-08): each discipline drawn as one
+     card, its name and its projects (`globals.css`, `data-cards`). */
+  React.useEffect(() => {
+    if (new URLSearchParams(location.search).has("cards")) document.documentElement.dataset.cards = "";
+  }, []);
   /* The warm-up: on a desktop with a pointer and no request to save data,
      once the page is idle, the two covers each filter's row opens on are
      fetched and decoded, so a filter pressed later has its first screen
@@ -601,14 +606,24 @@ export function WorkShell({
          swell, at the foot of the chip as it is drawn. */
       /* Julian (2026-10-07): the line sits on the pane's hairline and
          slides there, thinner, in place of the liquid under the chip. */
+      /* Where the chip comes to rest, not where its spring has it now: read
+         mid-flight, the push from the chip lit before was still on it and
+         the line landed off the words (Julian, 2026-10-07). Seated, the lit
+         chip has no push and its swell is about its own middle. */
       const a = (c.firstElementChild as HTMLElement | null) ?? c;
-      const pad = parseFloat(getComputedStyle(a).paddingLeft) || 0;
+      const s = window.matchMedia("(min-width: 64rem)").matches
+        ? 1 + JELLY.swell
+        : 1;
+      const pad = (parseFloat(getComputedStyle(a).paddingLeft) || 0) * s;
       const box = a.getBoundingClientRect();
+      const mid =
+        box.left + box.width / 2 - new DOMMatrix(getComputedStyle(c).transform).m41;
+      const w = a.offsetWidth * s;
       const pane = (r.closest(".head-glass") as HTMLElement | null) ?? r;
       setMark({
-        x: box.left + pad - pane.getBoundingClientRect().left,
+        x: mid - w / 2 + pad - pane.getBoundingClientRect().left,
         y: 0,
-        w: box.width - 2 * pad,
+        w: w - 2 * pad,
         h: 1,
         rw: r.scrollWidth,
       });

@@ -676,21 +676,6 @@
     line-height: 1.3;
   }
 }
-/* The location's short form on a short wide window and an upright
-   tablet, the long one everywhere else (Julian, 2026-10-07). After the
-   phone block above, which sets every line `block`. */
-.cover-float-where .fit-line.where-short {
-  display: none;
-}
-@media (min-width: 80rem) and (min-aspect-ratio: 2 / 1) and (max-height: 56rem),
-  (min-width: 40rem) and (max-width: 64rem) and (orientation: portrait) {
-  .cover-float-where .fit-line.where-long {
-    display: none;
-  }
-  .cover-float-where .fit-line.where-short {
-    display: inline-block;
-  }
-}
 .cover-float-ctas {
   zoom: var(--m-buttons);
   /* Never under nine tenths of their size, however far a short wide
@@ -1574,20 +1559,6 @@ body:has([data-quiet-footer]) .site-footer-row {
   .strip-grid {
     padding-bottom: 3rem;
   }
-  /* And the names on the grid's plates run to two lines rather than
-     being cut (Julian: readable on an iPhone). Sized for the plate, not
-     for the name's length, since the length no longer has to fit one
-     line. */
-  .strip-grid .cover-name {
-    /* The size is at the end of the sheet, past the one-line formula. */
-    white-space: normal;
-    overflow: hidden;
-    text-overflow: clip;
-    display: -webkit-box;
-    -webkit-box-orient: vertical;
-    -webkit-line-clamp: 2;
-    text-wrap: balance;
-  }
 }
 
 /* The name of the project at the top of a strip page, which waits for the
@@ -1939,8 +1910,47 @@ nav[aria-label="Categories"] ul[data-more] {
    more, which is where 160 comes from; every shorter name rises until the
    cap stops it. One line always — the division is what keeps it there,
    and `truncate` is the backstop. */
+/* The strip's covers the same way, larger on a large screen, where the
+   one-line cap of 3rem set SAGO small on a cover 870px wide (Julian,
+   2026-10-08). The grid's own size follows. */
+.strip-scroll .cover-name {
+  /* One size along the strip, from its height, not each cover's width:
+     sized by width, SAGO and DIESEL beside it sat on different lines
+     (Julian, 2026-10-08). Smaller only where the cover is too narrow. */
+  font-size: clamp(1rem, min(calc((100dvh - 21rem) * 0.095), calc(215cqw / var(--n, 12)), calc(140cqw / var(--w, 8))), 5rem);
+  white-space: normal;
+  overflow: hidden;
+  text-overflow: clip;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  text-wrap: balance;
+}
+/* And the slate's margins the same on every cover, so the names stand on
+   one line across the strip. */
+.strip-scroll:not(.strip-grid) .cover-slate {
+  padding-inline: 2rem;
+  padding-bottom: 1.75rem;
+}
+/* Julian (2026-10-07): larger, and a long name runs to two lines rather
+   than shrinking to fit one. Sized for the plate, not the name's length. */
 .strip-grid .cover-name {
-  font-size: clamp(0.75rem, min(9cqw, calc(160cqw / var(--n, 12))), 1.5rem);
+  /* The longest word (`--w`) has to fit one line on its own. */
+  font-size: clamp(0.875rem, min(16cqw, calc(230cqw / var(--n, 12)), calc(140cqw / var(--w, 8))), 2.5rem);
+  white-space: normal;
+  overflow: hidden;
+  text-overflow: clip;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  text-wrap: balance;
+}
+/* The cell's own colour, a pixel inside the photograph's edge: painted
+   to the edge it showed as a light hairline round the rounded corners,
+   and taken away the photograph's fade showed what was under it. */
+.strip-cell:has(> img.strip-frame) {
+  padding: 1px;
+  background-clip: content-box;
 }
 /* One plate for every cover, at every size. The rack used to stack the
    credit under the name and a narrow cover used to drop it; the type is
@@ -2203,7 +2213,7 @@ a.strip-cell {
 /* Over something that does something: larger, and lifted a little off the
    point, as a thing picked up (Julian). */
 .pointer-mark[data-state="press"] .mark-dot {
-  scale: calc(32 / 120);
+  scale: calc(48 / 120);
   translate: 0 -4px;
 }
 /* Stuck to an icon: the dot sits on it, a little larger than over a
@@ -4842,7 +4852,9 @@ optgroup {
        discipline's own page, where "All projects" leads (2026-10-04): the
        page's 40px before the name, 64px from it to the first cover with
        the strip's 16px gap. */
-    padding-right: 3rem;
+    /* Closer again (Julian, 2026-10-08): 32px to the first cover with
+       the strip's 16px gap. */
+    padding-right: 1rem;
     padding-left: 2.5rem;
   }
   /* The first spine 88px off the left edge: the strip's own 40px and
@@ -4942,6 +4954,21 @@ optgroup {
   [data-discipline-page] .project-plate {
     min-width: 0;
     justify-content: start;
+  }
+  /* A discipline's own page lays its name where the portfolio's first
+     spine stands: 88px in, 32px to the first cover with the strip's gap,
+     and on the page's wash rather than a ground of its own (Julian,
+     2026-10-08: no box, match the headers and margins of All). */
+  :is(.discipline-title, [data-discipline-page] .project-plate) {
+    padding-left: 3rem;
+    padding-right: 1rem;
+  }
+  :is(.discipline-title, [data-discipline-page] .project-plate):not(:has(> :nth-child(2))) {
+    column-gap: 0;
+  }
+  .strip-scroll[data-dealt] > :is(.discipline-title, .project-plate):first-child {
+    background: none;
+    box-shadow: none;
   }
 }
 
@@ -5963,6 +5990,41 @@ h2:not(.label) {
     transition:
       transform 140ms ease-out,
       box-shadow 500ms var(--ease-out-strong);
+  }
+}
+
+/* Preview (`?cards`, `work-shell.tsx`): each discipline one card, its
+   name and its projects on one panel. The panel is the name cell's own
+   `::before`, as long as the chapter (`--chapter-w`, `lib/deck.ts`): the
+   name cell lies under every cell after it, so the panel does too. */
+@media (min-width: 40rem) {
+  :root[data-cards] .portfolio-arrive .strip-scroll > .strip-cell[data-deck] {
+    overflow: visible;
+    /* More room before the name inside its card (Julian, 2026-10-08). */
+    padding-left: 4rem;
+  }
+  /* No dark frame round each cover on the panel: that ground is the
+     page's colour, and on a card it read as a box. */
+  :root[data-cards] .portfolio-arrive .strip-scroll > .strip-cell {
+    --deal-ground: 0 0 #0000;
+  }
+  :root[data-cards] .portfolio-arrive .strip-scroll > .strip-cell[data-deck]::before {
+    content: "";
+    position: absolute;
+    z-index: -1;
+    /* The page's own colour (Julian, 2026-10-08), and carried left across
+       the room before it: in a slide the chapter going under showed
+       through that room as a dark bar riding the card's edge. */
+    left: -2.75rem;
+    top: -0.75rem;
+    bottom: -0.75rem;
+    width: calc(var(--chapter-w, 100%) + 3.5rem);
+    border-radius: calc(var(--radius-photo) + 0.75rem);
+    background: var(--background);
+    pointer-events: none;
+  }
+  :root[data-cards] .portfolio-arrive .strip-scroll > .strip-cell[data-deck]:not(:first-child) {
+    margin-left: 2rem;
   }
 }
 
@@ -7220,7 +7282,9 @@ h2:not(.label) {
 }
 @media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
   .portfolio-arrive .strip-cell:not([data-deck]):hover {
-    transform: perspective(1000px) translateZ(20px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)) rotateZ(var(--rz, 0deg));
+    /* About the card's own middle (`--cx`, `--cy`, `card-tilt.tsx`), not
+       the origin the deck gave it. */
+    transform: translate(var(--cx, 0px), var(--cy, 0px)) perspective(1000px) translateZ(20px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)) rotateZ(var(--rz, 0deg)) translate(calc(-1 * var(--cx, 0px)), calc(-1 * var(--cy, 0px)));
     box-shadow:
       var(--sx, 0px) calc(22px + var(--sy, 0px)) 40px -16px rgb(0 0 0 / 0.6),
       var(--deal-ground, 0 0 #0000);
@@ -7228,6 +7292,11 @@ h2:not(.label) {
       transform 140ms ease-out,
       box-shadow 500ms var(--ease-out-strong),
       scale 440ms var(--ease-bounce);
+  }
+  /* Not while the strip moves: lifted and turned mid-deal, the card showed
+     what the deck had under it (Julian, 2026-10-08). `card-tilt.tsx`. */
+  :root[data-scrolling] .portfolio-arrive .strip-cell:not([data-deck]):hover {
+    transform: none;
   }
 }
 

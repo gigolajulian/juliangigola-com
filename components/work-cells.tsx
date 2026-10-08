@@ -166,7 +166,7 @@ export function FilmCell({
           </span>
         ) : null}
         <span
-          style={{ "--n": title.length } as React.CSSProperties}
+          style={{ "--n": title.length, "--w": Math.max(...title.split(" ").map((w) => w.length)) } as React.CSSProperties}
           className="cover-name font-display min-w-0 max-w-full truncate uppercase leading-[0.9] text-white"
         >
           {/* The last two words held together, so a title that wraps never

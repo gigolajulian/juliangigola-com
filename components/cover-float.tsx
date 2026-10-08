@@ -231,16 +231,7 @@ export function CoverFloat({
           className="lift cover-float-where mt-[var(--h-gap-where,8px)] mb-[var(--h-gap-cta,19px)] max-w-[34rem]"
           style={{ "--reveal-delay": "calc(var(--h-start, 420ms) + 300ms)" } as React.CSSProperties}
         >
-          {heading?.where ? (
-            <span className="fit-line">{heading.where}</span>
-          ) : (
-            <>
-              <span className="fit-line where-long">Based in the SF Bay Area. Available to travel worldwide</span>
-              {/* Shorter where the middle is small or upright (Julian,
-                  2026-10-07); `globals.css` picks one. */}
-              <span className="fit-line where-short" aria-hidden>SF Bay Area. Available worldwide</span>
-            </>
-          )}
+          <span className="fit-line">{heading?.where ?? "Based in the SF Bay Area. Available to travel worldwide"}</span>
           <FitLines />
         </p>
         <LiquidPair
