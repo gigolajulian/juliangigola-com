@@ -335,6 +335,12 @@
     --wide: 0.8;
   }
 }
+/* 2560 by 960: at 0.8 the dress came down over the name. */
+@media (min-width: 80rem) and (min-height: 32rem) and (min-aspect-ratio: 5 / 2) {
+  .cover-float {
+    --wide: 0.7;
+  }
+}
 @media (min-width: 80rem) and (min-height: 32rem) and (min-aspect-ratio: 14 / 5) {
   .cover-float {
     --wide: 0.66;
