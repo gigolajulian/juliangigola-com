@@ -256,7 +256,7 @@ export async function submitEnquiry(
        reply in Gmail answers them. No binding in `next dev`; the optional
        chain covers it. */
     try {
-      const inline = await pickAttachments(picks);
+      const inline = await pickAttachments(picks, env.ASSETS);
       const { subject, text, html } = emailCopy(
         stored,
         LOOKS,
@@ -309,18 +309,34 @@ export async function submitEnquiry(
 }
 
 /* The frames they picked from the work, attached (Julian, 2026-10-05)
-   and shown under their links (2026-10-08), at 1600px through the same
-   resizer the site uses so the mail stays small. One that will not fetch is left out, not fatal:
-   its link is still in the text. */
-async function pickAttachments(picks: string[]) {
+   and shown under their links (2026-10-08). One that will not fetch is
+   left out, not fatal: its link is still in the text.
+
+   Not through the site's own `/cdn-cgi/image/` address: asked from inside
+   the Worker it never answered, and no pick was attached from 2026-10-05
+   to 10-08. The file is read from the static assets instead, the 1080px
+   copy where there is one so the mail stays small, or resized with
+   `cf.image` (the Workers way) when the archive is on R2. */
+async function pickAttachments(picks: string[], assets?: { fetch: typeof fetch }) {
   const got = await Promise.all(
     picks.map(async (src, i) => {
       try {
-        const sized = imageLoader({ src, width: 1600, quality: 82 });
-        const res = await fetch(new URL(sized, "https://juliangigola.com"), {
-          signal: AbortSignal.timeout(8000),
-        });
-        if (!res.ok) return null;
+        const sized = imageLoader({ src, width: 1080, quality: 82 });
+        const path = sized.replace(/^\/cdn-cgi\/image\/[^/]+\//, "");
+        const signal = AbortSignal.timeout(8000);
+        const res = /^https?:/.test(path)
+          ? await fetch(path, {
+              signal,
+              cf: { image: { width: 1600, quality: 82 } },
+            } as RequestInit)
+          : await assets?.fetch(
+              new URL(path.replace(/^\/?/, "/"), "https://juliangigola.com"),
+              { signal },
+            );
+        if (!res?.ok) {
+          console.error("contact: pick not attached", src, res?.status);
+          return null;
+        }
         return {
           src,
           file: {
@@ -331,7 +347,8 @@ async function pickAttachments(picks: string[]) {
             contentId: `pick-${i}`,
           },
         };
-      } catch {
+      } catch (err) {
+        console.error("contact: pick not attached", src, err);
         return null;
       }
     }),
