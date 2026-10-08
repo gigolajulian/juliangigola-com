@@ -162,6 +162,30 @@ function PickPanel({
   toggle: (src: string) => void;
 }) {
   const [lit, setLit] = React.useState(0);
+  const list = React.useRef<HTMLDivElement>(null);
+  const bar = React.useRef<HTMLSpanElement>(null);
+  const fill = () => {
+    const l = list.current;
+    if (!l || !bar.current) return;
+    const room = l.scrollHeight - l.clientHeight;
+    // How far down the photographs are, at least the share on screen.
+    const shown = l.clientHeight / l.scrollHeight;
+    const p = room > 0 ? l.scrollTop / room : 1;
+    bar.current.style.height = `${(shown + (1 - shown) * p) * 100}%`;
+  };
+  const seek = (e: React.PointerEvent<HTMLDivElement>) => {
+    const l = list.current;
+    if (!l) return;
+    const r = e.currentTarget.getBoundingClientRect();
+    const p = Math.min(1, Math.max(0, (e.clientY - r.top) / r.height));
+    l.scrollTop = p * (l.scrollHeight - l.clientHeight);
+  };
+  // A new look starts at the top, and the bar with it once its photographs are in.
+  React.useEffect(() => {
+    list.current?.scrollTo({ top: 0 });
+    const t = requestAnimationFrame(fill);
+    return () => cancelAnimationFrame(t);
+  }, [lit, groups]);
 
   return (
     <dialog
@@ -195,8 +219,9 @@ function PickPanel({
               onClick={() => setLit(i)}
               className={cn(
                 "label shrink-0 rounded-full border px-4 py-2 transition-colors duration-200",
+                // The look chosen, inverted, as the form's own kinds of shoot are.
                 lit === i
-                  ? "border-foreground text-foreground"
+                  ? "border-foreground bg-foreground text-background"
                   : "border-border text-muted-foreground hoverable:hover:text-foreground",
               )}
             >
@@ -204,11 +229,19 @@ function PickPanel({
             </button>
           ))}
         </div>
-        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-6 pb-6">
+        <div className="relative flex min-h-0 flex-1">
+        <div
+          ref={list}
+          onScroll={fill}
+          className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-6 pb-6 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        >
           {!groups ? (
             <p className="label text-muted-foreground">Loading</p>
           ) : (
-            <ul className="grid grid-cols-[repeat(auto-fill,minmax(8.5rem,1fr))] gap-2">
+            <ul
+              // Four a row (Julian, 2026-10-08), three on a phone.
+              className="grid grid-cols-3 gap-2 sm:grid-cols-4"
+            >
               {groups[lit]?.frames.map(([src, w, h, project]) => {
                 const n = picks.indexOf(src);
                 return (
@@ -221,8 +254,10 @@ function PickPanel({
                       title={project}
                       disabled={n < 0 && room <= 0}
                       className={cn(
-                        "relative block aspect-[3/4] w-full overflow-hidden rounded-[6px] outline-offset-2 transition-[opacity,outline-color] duration-200 disabled:opacity-40",
+                        "relative block w-full overflow-hidden rounded-[6px] outline-offset-2 transition-[opacity,outline-color] duration-200 disabled:opacity-40",
                         n >= 0 ? "outline outline-2 outline-foreground" : "outline outline-1 outline-transparent hoverable:hover:outline-border",
+                        // Sleeves are square, and shown whole (Julian, 2026-10-08).
+                        groups[lit]?.name === "Cover art" ? "aspect-square" : "aspect-[3/4]",
                       )}
                     >
                       <Image
@@ -245,6 +280,23 @@ function PickPanel({
               })}
             </ul>
           )}
+        </div>
+        {/* The page's rail, stood upright (Julian, 2026-10-08: the site's
+            own scroll bar): a hairline track, the ink filling down it as
+            the photographs go by. Pressed or dragged, it scrolls there. */}
+        <div
+          aria-hidden
+          onPointerDown={(e) => {
+            e.currentTarget.setPointerCapture(e.pointerId);
+            seek(e);
+          }}
+          onPointerMove={(e) => e.buttons && seek(e)}
+          className="absolute bottom-6 right-2 top-0 w-3 cursor-pointer touch-none"
+        >
+          <span className="absolute inset-y-0 left-1/2 w-[3px] -translate-x-1/2 rounded-full bg-[color-mix(in_oklab,var(--foreground)_20%,var(--background))]">
+            <span ref={bar} className="block w-full rounded-full bg-foreground" style={{ height: "0%" }} />
+          </span>
+        </div>
         </div>
       </div>
     </dialog>

@@ -14,8 +14,8 @@ export const COVER_RELEASES: CoverRelease[] = [
       {
         "src": "/covers/est-modvs-in-rebvs-a.jpg",
         "thumb": "/covers/est-modvs-in-rebvs-a-800.jpg",
-        "width": 1600,
-        "height": 1600,
+        "width": 2400,
+        "height": 2400,
         "color": "#6B7479",
         "alt": "Cover art for “Est Modvs In Rebvs” by Nameera, front",
         "side": "Front"
@@ -23,8 +23,8 @@ export const COVER_RELEASES: CoverRelease[] = [
       {
         "src": "/covers/est-modvs-in-rebvs-b.jpg",
         "thumb": "/covers/est-modvs-in-rebvs-b-800.jpg",
-        "width": 1600,
-        "height": 1600,
+        "width": 2400,
+        "height": 2400,
         "color": "#848787",
         "alt": "Cover art for “Est Modvs In Rebvs” by Nameera, back",
         "side": "Back"
@@ -39,8 +39,8 @@ export const COVER_RELEASES: CoverRelease[] = [
       {
         "src": "/covers/jahannam-a.jpg",
         "thumb": "/covers/jahannam-a-800.jpg",
-        "width": 1600,
-        "height": 1600,
+        "width": 2000,
+        "height": 2000,
         "color": "#140E09",
         "alt": "Cover art for “Jahannam” by Nameera, side a",
         "side": "Side A"
@@ -48,8 +48,8 @@ export const COVER_RELEASES: CoverRelease[] = [
       {
         "src": "/covers/jahannam-b.jpg",
         "thumb": "/covers/jahannam-b-800.jpg",
-        "width": 1600,
-        "height": 1600,
+        "width": 2000,
+        "height": 2000,
         "color": "#442D1C",
         "alt": "Cover art for “Jahannam” by Nameera, side b",
         "side": "Side B"
@@ -64,26 +64,10 @@ export const COVER_RELEASES: CoverRelease[] = [
       {
         "src": "/covers/problem-child.jpg",
         "thumb": "/covers/problem-child-800.jpg",
-        "width": 1600,
-        "height": 1600,
+        "width": 2400,
+        "height": 2400,
         "color": "#1B282E",
         "alt": "Cover art for “Problem Child” by BANX",
-        "side": null
-      }
-    ]
-  },
-  {
-    "slug": "westside-shawty",
-    "title": "Westside Shawty",
-    "artist": "BANX",
-    "frames": [
-      {
-        "src": "/covers/westside-shawty.jpg",
-        "thumb": "/covers/westside-shawty-800.jpg",
-        "width": 1600,
-        "height": 1600,
-        "color": "#3A494E",
-        "alt": "Cover art for “Westside Shawty” by BANX",
         "side": null
       }
     ]
@@ -96,8 +80,8 @@ export const COVER_RELEASES: CoverRelease[] = [
       {
         "src": "/covers/top-tier.jpg",
         "thumb": "/covers/top-tier-800.jpg",
-        "width": 1600,
-        "height": 1600,
+        "width": 2400,
+        "height": 2400,
         "color": "#2D393D",
         "alt": "Cover art for “Top Tier” by BANX",
         "side": null
@@ -112,8 +96,8 @@ export const COVER_RELEASES: CoverRelease[] = [
       {
         "src": "/covers/pop-out.jpg",
         "thumb": "/covers/pop-out-800.jpg",
-        "width": 1600,
-        "height": 1600,
+        "width": 2400,
+        "height": 2400,
         "color": "#322E29",
         "alt": "Cover art for “Pop Out” by BANX",
         "side": null
@@ -128,8 +112,8 @@ export const COVER_RELEASES: CoverRelease[] = [
       {
         "src": "/covers/do-what-i-want.jpg",
         "thumb": "/covers/do-what-i-want-800.jpg",
-        "width": 1600,
-        "height": 1600,
+        "width": 2000,
+        "height": 2000,
         "color": "#2A2419",
         "alt": "Cover art for “Do What I Want” by BANX",
         "side": null
@@ -144,8 +128,8 @@ export const COVER_RELEASES: CoverRelease[] = [
       {
         "src": "/covers/savage.jpg",
         "thumb": "/covers/savage-800.jpg",
-        "width": 1600,
-        "height": 1600,
+        "width": 2000,
+        "height": 2000,
         "color": "#748489",
         "alt": "Cover art for “Savage” by BANX",
         "side": null
@@ -176,8 +160,8 @@ export const COVER_RELEASES: CoverRelease[] = [
       {
         "src": "/covers/took-time.jpg",
         "thumb": "/covers/took-time-800.jpg",
-        "width": 1600,
-        "height": 1600,
+        "width": 1800,
+        "height": 1800,
         "color": "#474B4C",
         "alt": "Cover art for “Took Time” by BANX",
         "side": null
@@ -192,8 +176,8 @@ export const COVER_RELEASES: CoverRelease[] = [
       {
         "src": "/covers/whole-summer.jpg",
         "thumb": "/covers/whole-summer-800.jpg",
-        "width": 1600,
-        "height": 1600,
+        "width": 2000,
+        "height": 2000,
         "color": "#717674",
         "alt": "Cover art for “Whole Summer” by BANX",
         "side": null
@@ -208,8 +192,8 @@ export const COVER_RELEASES: CoverRelease[] = [
       {
         "src": "/covers/10-shots.jpg",
         "thumb": "/covers/10-shots-800.jpg",
-        "width": 1600,
-        "height": 1600,
+        "width": 2400,
+        "height": 2400,
         "color": "#313032",
         "alt": "Cover art for “10 Shots” by Sammy Shiblaq",
         "side": null
@@ -224,8 +208,8 @@ export const COVER_RELEASES: CoverRelease[] = [
       {
         "src": "/covers/the-description.jpg",
         "thumb": "/covers/the-description-800.jpg",
-        "width": 1600,
-        "height": 1600,
+        "width": 2000,
+        "height": 2000,
         "color": "#1C1C1C",
         "alt": "Cover art for “The Description” by Sammy Shiblaq",
         "side": null
@@ -240,8 +224,8 @@ export const COVER_RELEASES: CoverRelease[] = [
       {
         "src": "/covers/faith-and-hustle.jpg",
         "thumb": "/covers/faith-and-hustle-800.jpg",
-        "width": 1600,
-        "height": 1600,
+        "width": 2400,
+        "height": 2400,
         "color": "#75928A",
         "alt": "Cover art for “Faith & Hustle” by Sammy Shiblaq",
         "side": null
@@ -272,8 +256,8 @@ export const COVER_RELEASES: CoverRelease[] = [
       {
         "src": "/covers/the-river.jpg",
         "thumb": "/covers/the-river-800.jpg",
-        "width": 1600,
-        "height": 1600,
+        "width": 2400,
+        "height": 2400,
         "color": "#303E24",
         "alt": "Cover art for “The River” by TMEUPTEDDY",
         "side": null
@@ -288,8 +272,8 @@ export const COVER_RELEASES: CoverRelease[] = [
       {
         "src": "/covers/new-home.jpg",
         "thumb": "/covers/new-home-800.jpg",
-        "width": 1600,
-        "height": 1600,
+        "width": 2000,
+        "height": 2000,
         "color": "#4B5457",
         "alt": "Cover art for “New Home” by Rechi",
         "side": null
@@ -304,8 +288,8 @@ export const COVER_RELEASES: CoverRelease[] = [
       {
         "src": "/covers/your-way.jpg",
         "thumb": "/covers/your-way-800.jpg",
-        "width": 1600,
-        "height": 1600,
+        "width": 2000,
+        "height": 2000,
         "color": "#1B1716",
         "alt": "Cover art for “Your Way” by The Szns ft. Swavie",
         "side": null
@@ -320,8 +304,8 @@ export const COVER_RELEASES: CoverRelease[] = [
       {
         "src": "/covers/hi-fi.jpg",
         "thumb": "/covers/hi-fi-800.jpg",
-        "width": 1600,
-        "height": 1600,
+        "width": 2340,
+        "height": 2340,
         "color": "#9F978E",
         "alt": "Cover art for “Hi-Fi” by Parsia",
         "side": null
@@ -384,8 +368,8 @@ export const COVER_RELEASES: CoverRelease[] = [
       {
         "src": "/covers/hadaf.jpg",
         "thumb": "/covers/hadaf-800.jpg",
-        "width": 1600,
-        "height": 1600,
+        "width": 2400,
+        "height": 2400,
         "color": "#080A0A",
         "alt": "Cover art for “Hadaf” by Imanemun × Pooyan Ardalan",
         "side": null
@@ -404,6 +388,22 @@ export const COVER_RELEASES: CoverRelease[] = [
         "height": 1600,
         "color": "#8A3F36",
         "alt": "Cover art for “In the Hoodie on Your Sleeve” by Ericalisa",
+        "side": null
+      }
+    ]
+  },
+  {
+    "slug": "westside-shawty",
+    "title": "Westside Shawty",
+    "artist": "BANX",
+    "frames": [
+      {
+        "src": "/covers/westside-shawty.jpg",
+        "thumb": "/covers/westside-shawty-800.jpg",
+        "width": 2000,
+        "height": 1997,
+        "color": "#3A494E",
+        "alt": "Cover art for “Westside Shawty” by BANX",
         "side": null
       }
     ]

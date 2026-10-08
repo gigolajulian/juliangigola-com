@@ -22,7 +22,7 @@ const OUT_DIR = "public/covers";
 const DATA = "lib/cover-art-data.ts";
 
 /** Matches the rest of the archive. Every cover is square, so this is both edges. */
-const MAX = 1600;
+const MAX = 2400;
 const QUALITY = 82;
 /** The small copy used wherever a cover appears as a thumbnail. */
 const COVER = 600;
@@ -71,7 +71,6 @@ const RELEASES = [
     ],
   },
   { title: "Problem Child", artist: "BANX", sides: [{ file: "PROBLEM_CHILD_-_BANX_wex0nt.png" }] },
-  { title: "Westside Shawty", artist: "BANX", sides: [{ file: "WESTSIDE SHAWTY-BANxx copy 3d@3 (Custom).png" }] },
   { title: "Top Tier", artist: "BANX", sides: [{ file: "TOP TIER - BANX.PNG" }] },
   { title: "Pop Out", artist: "BANX", sides: [{ file: "POP OUT - BANX [COVER].jpg" }] },
   { title: "Do What I Want", artist: "BANX", sides: [{ file: "ORIGINAL.png" }] },
@@ -109,6 +108,7 @@ const RELEASES = [
     // the one input that has to survive a fresh clone.
     sides: [{ file: "scripts/sources/in-the-hoodie-on-your-sleeve.jpg" }],
   },
+  { title: "Westside Shawty", artist: "BANX", sides: [{ file: "WESTSIDE SHAWTY-BANxx copy 3d@3 (Custom).png" }] },
 ];
 
 const slugify = (s) =>

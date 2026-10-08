@@ -68,7 +68,9 @@ export function CoverFloat({
   return (
     <section
       data-tick
-      data-label="Cover"
+      /* Home on the homepage's rail (Julian, 2026-10-08); a booking page
+         keeps Cover. */
+      data-label={heading ? "Cover" : "Home"}
       aria-label={heading?.title ?? "Julian Gigola, photographer and creative director"}
       data-booking={heading ? "" : undefined}
       style={

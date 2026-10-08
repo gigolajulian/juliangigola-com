@@ -5719,6 +5719,13 @@ optgroup {
   }
 }
 
+/* "Up next" stands on the page's own wash at every width, not on a card
+   of its own (Julian, 2026-10-08: match background). */
+.strip-scroll[data-dealt] > .next-cell {
+  background: none;
+  box-shadow: none;
+}
+
 /* ── pictures arrive ──────────────────────────────────────────────
  * A lazily loaded picture fades up once its bytes have landed, instead of
  * appearing between one frame and the next. `photo-fade.tsx` sets
@@ -5949,8 +5956,10 @@ h2:not(.label) {
 /* The headers of the screens (Biography, Commissions, Sessions, the
    footer's ask) in the wordmark's face, Inter Tight Black (Julian,
    2026-10-07). The names standing up the portfolio's spines and plates
-   keep Endless. Unlayered, so it outranks the `font-display` they carry. */
-:is(h1, h2):is(.font-display, .title):not(.chapter-name):not(:is(.discipline-title, .project-plate) > *) {
+   keep Endless. Unlayered, so it outranks the `font-display` they carry.
+   The ask at the end of the work ("Have a project in mind?") is in the
+   section titles' Archivo (Julian, 2026-10-08). */
+:is(h1, h2):is(.font-display, .title):not(.chapter-name, .enquiry-title):not(:is(.discipline-title, .project-plate) > *) {
   font-family: var(--font-wordmark);
   font-weight: 900;
 }
@@ -7209,8 +7218,12 @@ h2:not(.label) {
    until they press Inquire. From a tablet up; on a phone the card is the
    screen already. */
 @media (min-width: 40rem) {
+  /* Flat scales, not a step toward the eye in 3D: drawn once at its size
+     and lifted by `translateZ`, the form stayed soft in focus (Julian,
+     2026-10-08). A 2D scale is drawn again sharp once it settles. 1.042
+     and 1.053 are what 56px and 70px toward the eye came to at 1400px. */
   .contact-card {
-    transform: perspective(1400px) translateZ(0);
+    transform: translateX(0) scale(1);
     transition:
       transform 700ms var(--ease-out-strong),
       box-shadow 700ms var(--ease-out-strong);
@@ -7232,12 +7245,12 @@ h2:not(.label) {
      and a step toward the middle, as on hover, still clear of the text
      on the left. */
   .contact-card:focus-within {
-    transform: perspective(1400px) translateX(-3rem) translateZ(70px);
+    transform: translateX(-3rem) scale(1.053);
     box-shadow: 0 50px 90px -40px rgb(0 0 0 / 0.6);
   }
+  /* Dimmed, not blurred (Julian, 2026-10-08: no blur on form select). */
   .contact-inquire:has(.contact-card:focus-within) > :not(.contact-card, style, .enquiry-backdrop) {
     opacity: 0.35;
-    filter: blur(2px);
   }
   .contact-inquire:has(.contact-card:focus-within) > .enquiry-backdrop {
     opacity: 0.5;
@@ -7254,7 +7267,7 @@ h2:not(.label) {
   }
   /* Julian (2026-10-05): bigger, and a step toward the middle. */
   .contact-card:hover:not(:focus-within) {
-    transform: perspective(1400px) translateX(-3rem) translateZ(56px);
+    transform: translateX(-3rem) scale(1.042);
     box-shadow: 0 36px 70px -36px rgb(0 0 0 / 0.5);
   }
 }
