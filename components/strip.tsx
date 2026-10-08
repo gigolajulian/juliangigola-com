@@ -228,21 +228,27 @@ const LEAVE_AFTER = 150;
    is worth the distance it actually moved. 80px, then 50 (Julian,
    2026-10-08: less resistance). */
 const LEAVE_TOUCH = 50;
-/* Preview (`?swipe`, Julian 2026-10-08: swiping on an iPad, the whole
-   site). Read once, so it holds across the visit's navigations. Two
-   changes, both recorded on Julian's iPad first:
-   - A paged strip under a finger (the homepage) waited for iOS's momentum
-     to run out and then slid to the nearest screen. The momentum's tail
-     creeps for seconds, so a swipe glided, stalled, lurched to a screen,
-     and once ran on to the ask card and back. Now the lift decides: a
-     flick goes one screen its way, a slow drag to the nearest, and the
-     momentum is stopped so the slide is the only thing moving the strip.
+/* A finger on a paged strip (the homepage), from Julian's iPad, 2026-10-08,
+   recorded and logged at each step:
+   - The strip waited for iOS's momentum to run out and then slid to the
+     nearest screen. The momentum's tail creeps for seconds, so a swipe
+     glided, stalled, lurched to a screen, and once ran on to the ask card
+     and back. Now the lift decides, and iOS's momentum is stopped so only
+     the strip moves it.
+   - A first version of that slid on a timed ease, and set off at 40 to 70%
+     of the finger's speed: a brake at the moment of letting go. Now the
+     lift is projected the way iOS throws a scroll, the screen is the one
+     nearest where it would land (one at most from where the finger went
+     down), and a spring carries the strip there from the finger's own
+     speed. Critically damped; a flick gets a little give. A finger back on
+     the glass takes it from wherever it is.
    - A swipe that began 16 to 50ms after momentum had carried the strip to
      its end led straight to the next page. The end has to have been
      reached and left alone for `EDGE_REST` first. */
-const SWIPE =
-  typeof window !== "undefined" &&
-  new URLSearchParams(window.location.search).has("swipe");
+/** iOS's normal scroll deceleration, per ms, for the projection. */
+const DECEL = 0.998;
+/** The spring's response, seconds: the period it would ring at undamped. */
+const RESPONSE = 0.42;
 const EDGE_REST = 300;
 /** Finger speed, px per ms, above which a lift is a flick. */
 const FLICK = 0.25;
@@ -2310,6 +2316,34 @@ export function Strip({
     // The slide's speed on its last frame, px per ms, for a handover.
     let pace = 0;
     let paced = 0;
+    /* The lift's spring (`onTouchEnd`): px and px per second, a mass
+       of one. Stepped in 4ms pieces so a long frame does not throw it.
+       Shows past an end only as far as the scroll allows, which is none. */
+    let sx = 0;
+    let zeta = 1;
+    let sAt = 0;
+    const spring = (now: number) => {
+      const dt = sAt ? Math.min(0.064, (now - sAt) / 1000) : 1 / 60;
+      sAt = now;
+      const k = ((2 * Math.PI) / RESPONSE) ** 2;
+      const c = 2 * zeta * Math.sqrt(k);
+      for (let left = dt; left > 0; left -= 0.004) {
+        const h = Math.min(0.004, left);
+        sx += (-k * (x - target) - c * sx) * h;
+        x += sx * h;
+      }
+      if (Math.abs(x - target) < 0.5 && Math.abs(sx) < 20) {
+        x = target;
+        el.scrollLeft = x;
+        frame = 0;
+        sAt = 0;
+        sx = 0;
+        el.style.overflowX = "";
+        return;
+      }
+      el.scrollLeft = x;
+      frame = requestAnimationFrame(spring);
+    };
     const slide = (now: number) => {
       if (!began) began = now;
       const t = Math.min(1, (now - began) / length);
@@ -2327,8 +2361,6 @@ export function Strip({
       v = 0;
       pace = 0;
       paced = 0;
-      // Given back once a lift's slide lands (`SWIPE`, `onTouchEnd`).
-      if (SWIPE) el.style.overflowX = "";
     };
 
     /** Aims the strip: sets the speed that runs out exactly at `where`. */
@@ -2551,6 +2583,8 @@ export function Strip({
       movedAt = performance.now();
     };
     let touchEdge: 1 | -1 | 0 = 0;
+    // The screen under the strip when the finger went down.
+    let downSeat = 0;
     const onTouchStart = (e: TouchEvent) => {
       if (e.touches.length !== 1) {
         touchX = null;
@@ -2563,20 +2597,19 @@ export function Strip({
       // the move reads the direction instead.
       touchEdge =
         r < 1 ? 0 : el.scrollLeft >= r - 2 ? 1 : el.scrollLeft <= 2 ? -1 : 0;
-      if (SWIPE) {
-        // Still arriving at its end: this swipe is not a request to leave.
-        if (r >= 1 && performance.now() - movedAt < EDGE_REST) touchEdge = 0;
-        flick = [{ x: touchX, t: e.timeStamp }];
-        // A finger on a sliding strip takes it.
-        if (frame && paged) {
-          cancelAnimationFrame(frame);
-          frame = 0;
-        }
-        el.style.overflowX = "";
+      // Still arriving at its end: this swipe is not a request to leave.
+      if (r >= 1 && performance.now() - movedAt < EDGE_REST) touchEdge = 0;
+      flick = [{ x: touchX, t: e.timeStamp }];
+      downSeat = nearest(el.scrollLeft);
+      // A finger on a sliding strip takes it.
+      if (frame && paged) {
+        cancelAnimationFrame(frame);
+        frame = 0;
       }
+      el.style.overflowX = "";
     };
     const onTouchMove = (e: TouchEvent) => {
-      if (SWIPE && e.touches.length === 1)
+      if (e.touches.length === 1)
         flick = [...flick, { x: e.touches[0].clientX, t: e.timeStamp }].slice(-8);
       if (touchX === null || e.touches.length !== 1 || leaving) return;
       const x = e.touches[0].clientX;
@@ -2595,7 +2628,7 @@ export function Strip({
     const onTouchEnd = (e: TouchEvent) => {
       touchX = null;
       touchEdge = 0;
-      if (!SWIPE || !paged || !eased || leaving || e.touches.length) return;
+      if (!paged || !eased || leaving || e.touches.length) return;
       const lift = e.changedTouches[0];
       if (!lift || flick.length < 2 || Math.abs(lift.clientX - flick[0].x) < 8) return;
       /* The finger's speed over its last tenth of a second of moving, and
@@ -2606,30 +2639,30 @@ export function Strip({
         e.timeStamp - last.t < 100 && last.t > back.t
           ? (last.x - back.x) / (last.t - back.t)
           : 0;
-      let seat = nearest(el.scrollLeft);
-      if (Math.abs(fv) > FLICK) {
-        const dir = fv < 0 ? 1 : -1;
-        const at = centreOf(el, seat);
-        if (at !== null && Math.sign(at - el.scrollLeft) !== dir) seat += dir;
-      }
+      // The strip moves against the finger.
+      const sv = -fv;
+      const lands = el.scrollLeft + sv * (DECEL / (1 - DECEL));
+      let seat = nearest(lands);
+      seat = Math.max(downSeat - 1, Math.min(downSeat + 1, seat));
       seat = Math.max(0, Math.min(el.children.length - 1, seat));
       const where = centreOf(el, seat);
       if (where === null) return;
-      // iOS's own momentum stops here, so only the slide moves the strip.
       el.style.overflowX = "hidden";
       target = clamp(where);
-      from = el.scrollLeft;
-      const speed = Math.abs(fv);
-      curve = speed > 0.05 ? out : inOut;
-      length =
-        curve === out
-          ? Math.min(PAGE_MS * 1.5, Math.max(PAGE_MS / 2, (2 * Math.abs(target - from)) / speed))
-          : PAGE_MS;
+      x = el.scrollLeft;
+      zeta = Math.abs(fv) > FLICK ? 0.8 : 1;
+      /* The finger's speed, but never more than the spring can stop in
+         the distance left. A hard flick let go just short of a screen set
+         off at 14px/ms for a screen 180px away and ran 236px into the
+         next one before it came back (measured in WebKit, iPad size). A
+         critically damped spring stops dead from `w * distance`; a
+         flick is allowed a quarter more, which is the give. */
+      const d = target - x;
+      const cap = ((2 * Math.PI) / RESPONSE) * Math.abs(d) * (zeta < 1 ? 1.25 : 1);
+      sx = Math.sign(sv) === Math.sign(d) ? Math.sign(sv) * Math.min(Math.abs(sv * 1000), cap) : sv * 1000;
       if (frame) cancelAnimationFrame(frame);
-      began = performance.now();
-      paced = 0;
-      x = from;
-      frame = requestAnimationFrame(slide);
+      sAt = 0;
+      frame = requestAnimationFrame(spring);
     };
 
     /* A wheel moves the strip sideways, whichever way it is turned.
@@ -3978,7 +4011,7 @@ export function Strip({
                     {named[n] ? (
                       <span
                         className={cn(
-                          "label pointer-events-none absolute bottom-full mb-1 whitespace-nowrap text-[0.625rem] transition-opacity duration-200",
+                          "rail-tick-word label pointer-events-none absolute bottom-full mb-1 whitespace-nowrap text-[0.625rem] transition-opacity duration-200",
                           end ? "right-0" : "left-0",
                           over === n
                             ? "text-foreground opacity-100"

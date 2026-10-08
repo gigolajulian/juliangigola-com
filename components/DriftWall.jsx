@@ -51,6 +51,12 @@ const DriftWall = ({
   // near the screen (the intro, where they are the whole point), and say
   // when the wall has come up.
   eager = false,
+  // And a ceiling on the photographs it loads, however many columns it
+  // takes to cover the screen: past it the columns share them.
+  limit = /** @type {number | undefined} */ (undefined),
+  // How sharp, as a share of the tile's width: under 1 the browser picks
+  // a smaller copy for a wall that is only background.
+  density = 1,
   onShown = /** @type {(() => void) | undefined} */ (undefined),
   className = '',
   style = /** @type {Record<string, string | number> | undefined} */ (undefined)
@@ -168,17 +174,25 @@ const DriftWall = ({
     // (3440x1440 showed a card twice).
     const wide = containerWidth > containerHeight * 2 ? 1 : 0;
     const perCol = Math.min(6, Math.max(4, Math.ceil((containerHeight * 1.4) / unit) + 1 + wide));
-    const pool = containerWidth ? items.slice(0, colCount * perCol) : items;
+    const pool = containerWidth ? items.slice(0, Math.min(limit ?? Infinity, colCount * perCol)) : items;
     if (pool.length >= colCount * 4) {
       const cols = Array.from({ length: colCount }, () => []);
       pool.forEach((item, i) => cols[i % colCount].push(item));
       return cols;
     }
+    /* Capped: each column runs through the capped set at a column's
+       length, from its own place in it, so nothing past the ceiling loads
+       and no column is longer than it has to be. */
+    if (limit) {
+      return Array.from({ length: colCount }, (_, c) =>
+        Array.from({ length: perCol }, (_, k) => pool[(c * 7 + k * 5) % pool.length])
+      );
+    }
     const run = Math.min(items.length, 6);
     return Array.from({ length: colCount }, (_, c) =>
       Array.from({ length: run }, (_, k) => items[(c * 7 + k * 5) % items.length])
     );
-  }, [items, colCount, containerWidth, containerHeight, tileHeight, gap]);
+  }, [items, colCount, containerWidth, containerHeight, tileHeight, gap, limit]);
 
   const columnMeta = useMemo(() => {
     const unit = tileHeight + gap;
@@ -409,7 +423,7 @@ const DriftWall = ({
     const inner = (
       <span className="drift-wall__inner">
         {/* eslint-disable-next-line @next/next/no-img-element -- the site passes loader-sized URLs */}
-        <img src={eager || shown ? item.image : undefined} srcSet={eager || shown ? item.srcSet : undefined} data-src={item.image} data-srcset={item.srcSet} sizes={containerWidth && containerWidth < 640 ? '110px' : `${tileWidth}px`} alt={item.title ?? ''} loading={eager || seen ? 'eager' : 'lazy'} decoding="async" draggable={false} onLoad={e => e.currentTarget.classList.add('is-loaded')} />
+        <img src={eager || shown ? item.image : undefined} srcSet={eager || shown ? item.srcSet : undefined} data-src={item.image} data-srcset={item.srcSet} sizes={`${Math.round((containerWidth && containerWidth < 640 ? 110 : tileWidth) * density)}px`} alt={item.title ?? ''} loading={eager || seen ? 'eager' : 'lazy'} decoding="async" draggable={false} onLoad={e => e.currentTarget.classList.add('is-loaded')} />
         <span className="drift-wall__overlay" aria-hidden="true" />
       </span>
     );

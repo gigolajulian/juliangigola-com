@@ -17,7 +17,7 @@ export function InquireWall({ items }: { items: WallTile[] }) {
      veil; 0 is the photographs at full strength. */
   const { scale, tint } = useDialKit(
     "Background wall",
-    { scale: [1.25, 0.2, 2, 0.05], tint: [0.2, 0, 1, 0.01] },
+    { scale: [0.85, 0.2, 2, 0.05], tint: [0.2, 0, 1, 0.01] },
     { id: "inquire-wall" },
   );
   /* Julian: a dial for the blur on the two doors to the right of the
@@ -81,6 +81,16 @@ export function InquireWall({ items }: { items: WallTile[] }) {
       items={items}
       className="inquire-wall"
       columns="fill"
+      /* Julian (2026-10-08): scaled out so more of the work shows (1.25
+         to 0.85), and no more than 24 photographs loaded for it however
+         wide the screen, so it stays light. */
+      limit={24}
+      /* And the small copies (Julian: lower the resolution, not so it
+         shows). A 255px tile on a 2x screen took the 640 file; at 0.6 it
+         takes the 320, a quarter of the pixels to decode and hold for
+         every tile, on a wall that is dimmed, tilted, moving and mostly
+         under the frosted card. */
+      density={0.6}
       tileWidth={Math.round(300 * scale)}
       tileHeight={Math.round(400 * scale)}
       gap={Math.round(28 * scale)}

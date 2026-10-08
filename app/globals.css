@@ -7918,6 +7918,11 @@ h2:not(.label) {
   .contact-inquire {
     padding-top: 4.75rem;
     padding-bottom: 1.25rem;
+    /* Not a scroller here. The card is fitted to the screen, so there is
+       nothing below it to reach; but the wall behind runs on under the
+       rail (`--under`), and in a scroller those 90px were there to scroll
+       to (Julian, 2026-10-08: Inquiries still scrolls up and down). */
+    overflow-y: visible;
   }
   .contact-inquire .contact-card {
     max-width: none;
@@ -7925,31 +7930,54 @@ h2:not(.label) {
   .contact-card fieldset > div {
     flex-wrap: nowrap;
   }
-  /* The card the full height between the bar and the ruler, and the
-     room it gains goes to the message (Julian: fit the screen). */
+  /* The card as tall as what is in it, in the middle of the screen
+     (Julian, 2026-10-08: smaller, and room for what people add). It was
+     stretched the full height with the message taking the rest, so it
+     had nowhere to go when someone wrote at length or added pictures.
+     Now a long message scrolls in its own box, and a card that grows
+     past the screen (eight reference pictures) scrolls inside itself,
+     never the page. */
   .contact-inquire {
-    align-items: stretch;
+    align-items: center;
   }
-  .contact-inquire .glass-surface {
+  .contact-inquire > [data-beam] {
+    max-height: 100%;
     display: flex;
-    flex-direction: column;
   }
-  .contact-inquire .glass-surface > form {
-    flex: 1;
-  }
-  .contact-inquire .contact-field:has(textarea) {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
+  .contact-inquire > [data-beam] > [data-scroll] {
+    max-height: 100%;
+    overflow-y: auto;
+    overscroll-behavior: contain;
   }
   .contact-inquire .contact-field textarea {
-    flex: 1;
-    height: auto;
-    min-height: 3.75rem;
+    height: 4.5rem;
+    resize: none;
+  }
+  /* A booking page's calendar is Google's, and wants all the room there
+     is: its card still the full height. */
+  .contact-inquire:has(.booking-embed) {
+    grid-template-rows: minmax(0, 1fr);
+  }
+  .contact-inquire > [data-beam]:has(.booking-embed) {
+    height: 100%;
   }
   /* The words centred on the card's height, not hung from its top. */
   .contact-inquire > div:not(.enquiry-backdrop, .contact-card) {
     align-self: center;
+  }
+}
+/* Upright the Inquiries screen is a scroller of its own, so the wall's
+   overhang under the rail (`--under`) is clipped out of sight there
+   anyway, and all it did was give the screen 90px more to scroll to
+   (Julian, 2026-10-08: it still scrolls up and down). */
+@media (pointer: coarse) and (min-width: 40rem) and (orientation: portrait) {
+  :root[data-under] .contact-inquire > .enquiry-backdrop {
+    bottom: 0;
+  }
+  /* And a booking page's calendar a height of its own. Its card has none
+     to give it upright, and the frame fell back to a browser's 150px. */
+  .contact-inquire .booking-embed {
+    height: min(62svh, 44rem);
   }
 }
 /* Upright: the words across the top, the form the full width under them.
@@ -7998,5 +8026,31 @@ h2:not(.label) {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 1.5rem;
+  }
+}
+
+/* Julian (2026-10-08): an iPad held sideways reads the page's name under
+   the rail rather than over it. Hung from the bar's lower edge with the
+   same gap, and grown from that edge: the homepage's screen names
+   (`rail-tick-word`) and the archive's (`rail-word`). */
+@media (pointer: coarse) and (min-width: 40rem) and (orientation: landscape) {
+  .strip-rail .rail-tick-word {
+    top: 100%;
+    bottom: auto;
+    margin-top: 0.25rem;
+    margin-bottom: 0;
+  }
+  .strip-rail .rail-word {
+    top: 100%;
+    bottom: auto;
+    margin-top: 0.5rem;
+    margin-bottom: 0;
+    transform-origin: top left;
+  }
+  .strip-rail .rail-word.origin-bottom {
+    transform-origin: top;
+  }
+  .strip-rail .rail-word.origin-bottom-right {
+    transform-origin: top right;
   }
 }
