@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { opening } from "@/lib/opening";
 import { Strip } from "@/components/strip";
 import { TitleCell } from "@/components/strip-page";
 import { CoverCell } from "@/components/cover-cell";
@@ -63,7 +64,7 @@ const LISTED = LISTINGS;
 const after = (slug: string) => {
   const at = WORK_CATEGORY_LINKS.findIndex((c) => c.slug === slug);
   const next = at === -1 ? undefined : WORK_CATEGORY_LINKS[at + 1];
-  return next ? { href: next.href, name: next.name } : undefined;
+  return next ? { href: next.href, name: next.name, warm: opening(next.slug) } : undefined;
 };
 
 /** And the one before it, with All work before the first. Julian: pushing
