@@ -54,11 +54,11 @@ export const LANDSCAPE: Place[] = [
   { x: 16, y: 13, w: 13.5, z: 24, show: true },
   { x: 76.5, y: 7, w: 14.5, z: 30, show: true },
   { x: 31.5, y: 0.5, w: 13.5, z: -2, show: false },
-  { x: 43.5, y: 77.5, w: 13, z: 50, show: true },
+  { x: 67.5, y: 74, w: 13.5, z: 45, show: true },
   { x: 22.5, y: 73.5, w: 13.5, z: 28, show: true },
   { x: 42.5, y: 5, w: 14.5, z: -18, show: true },
   { x: 82, y: 45.5, w: 13.5, z: 59, show: true },
-  { x: 67.5, y: 74, w: 13.5, z: 45, show: true },
+  { x: 43.5, y: 77.5, w: 13, z: 50, show: true },
   { x: 5.5, y: 46.5, w: 15, z: 38, show: true },
   { x: 55, y: 70, w: 15, z: -25, show: false },
 ];
@@ -68,12 +68,12 @@ export const LANDSCAPE: Place[] = [
     vw, held to the same share of the window's height a short phone allows
     (28vw is 13svh; `globals.css`). On "Photo layout, phone". */
 export const PHONE: Place[] = [
-  { x: 10.5, y: 22.5, w: 28, z: -1, show: true },
-  { x: 68, y: 21, w: 28, z: 38, show: true },
-  { x: 35.5, y: 8, w: 31.5, z: 61, show: true },
-  { x: 40.5, y: 76, w: 30, z: 52, show: true },
-  { x: 10, y: 67.5, w: 31, z: 27, show: true },
-  { x: 69, y: 68, w: 28, z: 3, show: true },
+  { x: 5, y: 22.5, w: 28, z: 26, show: true },
+  { x: 72.5, y: 66, w: 24.25, z: 20, show: true },
+  { x: 36, y: 8.5, w: 31.5, z: 61, show: true },
+  { x: 39, y: 75, w: 30, z: 52, show: true },
+  { x: 7, y: 63.5, w: 29.25, z: 27, show: true },
+  { x: 70, y: 25, w: 26.25, z: 38, show: true },
   { x: 50, y: 40, w: 28, z: -10, show: false },
   { x: 50, y: 40, w: 28, z: 45, show: false },
   { x: 50, y: 40, w: 28, z: 40, show: false },
@@ -103,11 +103,11 @@ export const SIDEWAYS: Place[] = [
     the 3D view on "Photo layout, wide short" (`?arrange`), 2026-10-07. */
 export const SHORT: Place[] = [
   { x: 20.5, y: 15, w: 11.5, z: 85, show: true },
-  { x: 48.5, y: 12, w: 9.5, z: 65, show: true },
+  { x: 64, y: 13.5, w: 10.5, z: 108, show: true },
   { x: 33, y: 12, w: 10, z: 3, show: true },
   { x: 51, y: 78, w: 9, z: 47, show: true },
   { x: 21.5, y: 62.5, w: 11.5, z: 129, show: true },
-  { x: 64, y: 13.5, w: 10.5, z: 108, show: true },
+  { x: 48.5, y: 12, w: 9.5, z: 65, show: true },
   { x: 77.5, y: 38, w: 12, z: 58, show: true },
   { x: 35, y: 72.5, w: 8.5, z: 95, show: true },
   { x: 6.5, y: 41, w: 13.5, z: 52, show: true },
