@@ -289,11 +289,11 @@ export function SessionsScreen({ sessions }: { sessions: SessionItem[] }) {
                     {/* Julian (2026-10-02): friendlier. The words in their
                         own case, not the page's capitals, and more air
                         between them; what is a label stays one. */}
-                    <p className="max-w-[32.5rem] text-left text-sm normal-case leading-[1.7] text-muted-foreground text-pretty short:leading-relaxed">
+                    <p className="max-w-[32.5rem] text-left text-[0.9375rem] normal-case leading-[1.7] text-muted-foreground text-pretty short:leading-relaxed">
                       {s.blurb}
                     </p>
                     {/* What the /sessions page used to say about each. */}
-                    <p className="max-w-[32.5rem] text-left text-[0.8125rem] normal-case leading-relaxed text-muted-foreground text-balance">
+                    <p className="max-w-[32.5rem] text-left text-sm normal-case leading-relaxed text-muted-foreground text-balance">
                       {/* Each item whole on its line, and the dot held to the
                           item before it, so no line starts with one. */}
                       {s.includes.map((x, k) => (

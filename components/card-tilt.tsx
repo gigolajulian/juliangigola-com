@@ -10,7 +10,7 @@ import * as React from "react";
  * The portfolio's chapter names are
  * words, not cards, and stay put.
  * ─────────────────────────────────────────────────────────────── */
-const CARDS = ".light-cell, .portfolio-arrive .strip-cell:not([data-deck])";
+const CARDS = ".light-cell, .portfolio-arrive .strip-cell:not([data-deck]), .scope-tile";
 const VARS = ["--rx", "--ry", "--rz", "--sx", "--sy"];
 const TILT = 5;
 
