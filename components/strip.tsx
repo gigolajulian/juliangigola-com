@@ -3612,7 +3612,6 @@ export function Strip({
                         "--tint-next": chapterTints[gi + 1] ?? chapterTints[gi],
                       } as React.CSSProperties
                     }
-                    data-tinted={chapterTints[gi] ? "" : undefined}
                     /* Which thumb it carries in the control
                        (`globals.css`): where you are, or a discipline
                        elsewhere under the pointer. */
@@ -3741,7 +3740,6 @@ export function Strip({
                               "shadow-[inset_-1px_0_0_0_var(--background)]",
                             shown && mark === g.from + k && "bg-foreground",
                           )}
-                          data-tinted={ticks[g.from + k]?.tint ? "" : undefined}
                           style={{ "--tint": ticks[g.from + k]?.tint } as React.CSSProperties}
                         />
                       ))}

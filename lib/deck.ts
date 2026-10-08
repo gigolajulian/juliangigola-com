@@ -461,6 +461,15 @@ function runChapters(el: HTMLElement): () => void {
       k.style.zIndex = String(i + 1);
     });
     for (const [cell, origin] of origins) cell.style.transformOrigin = origin;
+    /* Each chapter's length from its name to its last cell, for the card
+       drawn behind it (`?cards`, `globals.css`). */
+    heads.forEach((head, h) => {
+      const from = kids.indexOf(head);
+      const end = h + 1 < heads.length ? kids.indexOf(heads[h + 1]) : kids.length;
+      let right = 0;
+      for (let i = from; i < end; i++) right = Math.max(right, at[i] + widths[i]);
+      head.style.setProperty("--chapter-w", `${right - at[from]}px`);
+    });
     depth(x0, vw);
   };
 
