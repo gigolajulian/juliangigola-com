@@ -305,11 +305,8 @@
   --fy: var(--y);
   --fw: var(--w);
   --fz: var(--z, 0px);
-  left: calc(
-    50% + (var(--fx) - 50%) * var(--h-pull-x, 1.05) * var(--wide-x, var(--wide, 1))
-  );
-  /* Plus what clears the name (`--clear-y`, `cover-space.tsx`). */
-  top: calc(50% + (var(--fy) - 50%) * var(--h-pull-y, 0.94) + var(--clear-y, 0px));
+  left: calc(50% + (var(--fx) - 50%) * var(--h-pull-x, 1.05) * var(--wide-x, var(--wide, 1)));
+  top: calc(50% + (var(--fy) - 50%) * var(--h-pull-y, 0.94));
   width: calc(var(--fw) * var(--wide, 1));
   /* Out of order: each frame's place in `ORDER` (`cover-float.tsx`),
      spread out from the start. */
@@ -350,6 +347,30 @@
   .cover-float {
     --wide: 0.55;
     --wide-x: 0.7;
+  }
+}
+/* A big screen, wide and short (1.75 to 2.2 to 1: a 13 or 16 inch laptop in a browser): its own layout,
+   `SHORT` on "Photo layout, wide short" (Julian, 2026-10-07). Wider
+   than that keeps the large one with the ultrawide scaling above. */
+@media (min-width: 80rem) and (min-height: 32rem) and (min-aspect-ratio: 7 / 4) and (max-aspect-ratio: 219 / 100) {
+  .cover-float {
+    --zmax: var(--zmax-short, 0px);
+    --m-name: var(--m-short-name, 1);
+    --m-role: var(--m-short-role, 1);
+    --m-where: var(--m-short-where, 1);
+    --m-buttons: var(--m-short-buttons, 1);
+    --m-x: var(--m-short-x, 0);
+    --m-y: var(--m-short-y, 0);
+  }
+  .cover-float-frame {
+    --fx: var(--tx);
+    --fy: var(--ty);
+    --wave-now: var(--wave-t);
+    --fw: var(--tw);
+    --fz: var(--tz, 0px);
+  }
+  .cover-float-off-short {
+    display: none;
   }
 }
 /* Julian: a layout of their own for the smaller screens (the cards
@@ -440,7 +461,7 @@
   }
   .cover-float-frame {
     left: var(--px);
-    top: calc(var(--py) + var(--clear-y, 0px));
+    top: var(--py);
     --wave-now: var(--wave-p);
     /* And no taller than a short phone's window allows: Safari with its
        bars up leaves an iPhone 659px, where 28vw ran the top row into the
@@ -2059,10 +2080,15 @@ a.strip-cell {
    win the arrow back over the surfaces the mark covers.
    Over a text field it becomes a caret of its own (below). */
 @media (hover: hover) and (pointer: fine) {
-  :root[data-mark],
-  :root[data-mark] * {
+  :root[data-mark]:not(:has(.hero-3d, .cover-float[data-arrange])),
+  :root[data-mark]:not(:has(.hero-3d, .cover-float[data-arrange])) * {
     cursor: none !important;
   }
+}
+/* Arranging the cover (the 3D view, drag to arrange): the system's own
+   pointer, not the mark (Julian, 2026-10-07). */
+:root:has(.hero-3d, .cover-float[data-arrange]) .pointer-mark {
+  display: none;
 }
 .pointer-mark {
   /* One curve for every change of size, long enough to be seen as a
@@ -6089,7 +6115,9 @@ h2:not(.label) {
 @media (min-width: 40rem) {
   [data-hash="about"] {
     container-type: size;
-    --screen-title-y: max(6rem, 50cqh - 18.875rem);
+    /* 7rem at the least: at 6 a short laptop (1515 by 785) set the
+       title 19px under the bar (Julian, 2026-10-07). */
+    --screen-title-y: max(7rem, 50cqh - 18.875rem);
   }
 }
 /* How tall the bar is, for a screen that lies under it and has to centre

@@ -29,6 +29,7 @@ export type ArrangeCard = {
 const DEPTH = 200;
 const LAYOUT_NAMES: Record<string, string> = {
   large: "Large screens (Photo layout)",
+  short: "Wide and short (Photo layout, wide short)",
   landscape: "Small landscape (Photo layout, landscape)",
   upright: "Tablet upright (Photo layout, upright)",
   phone: "Phones (Photo layout, phone)",
