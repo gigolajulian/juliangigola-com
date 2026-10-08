@@ -104,8 +104,19 @@ const DEAL_MS = 10000;
     animations (`jg-deal-*` in `globals.css`) are held and run by the wheel,
     six tenths of a screen of wheel to cover it, and play out once the wheel goes quiet.
     The navigation has already happened, so wheeling back slides the card
-    back but cannot undo it; quiet, it finishes. */
-function scrubDeal(dir: 1 | -1) {
+    back but cannot undo it; quiet, it finishes.
+
+    A swipe that led on (`touchX`, where the finger is) drives it the same
+    way for as long as the finger stays down, and it plays out on the lift
+    (Julian, 2026-10-08: the slide follows the finger). A touch's events go
+    to the element the finger came down on, which leaves the page with the
+    strip it was in, and a node out of the page does not pass them up to the
+    window: they are listened for on that element (`touch`). Should they
+    stop anyway, it plays out after three seconds still. */
+function scrubDeal(
+  dir: 1 | -1,
+  touch: { x: number; on: EventTarget } | null = null,
+) {
   const span = window.innerWidth * 0.6;
   let p = 0;
   let quiet = 0;
@@ -118,6 +129,9 @@ function scrubDeal(dir: 1 | -1) {
       );
   const end = () => {
     window.removeEventListener("wheel", onWheel, true);
+    touch?.on.removeEventListener("touchmove", onTouch as EventListener);
+    touch?.on.removeEventListener("touchend", end);
+    touch?.on.removeEventListener("touchcancel", end);
     cancelAnimationFrame(raf);
     window.clearTimeout(quiet);
     for (const a of trip()) a.play();
@@ -133,6 +147,16 @@ function scrubDeal(dir: 1 | -1) {
     if (p >= 1) return end();
     quiet = window.setTimeout(end, 180);
   };
+  let lastX = touch?.x ?? 0;
+  const onTouch = (e: TouchEvent) => {
+    const x = e.touches[0]?.clientX;
+    if (x === undefined) return;
+    p = Math.min(1, Math.max(0, p + ((lastX - x) * dir) / span));
+    lastX = x;
+    window.clearTimeout(quiet);
+    if (p >= 1) return end();
+    quiet = window.setTimeout(end, 3000);
+  };
   const hold = () => {
     for (const a of trip()) {
       a.pause();
@@ -141,8 +165,15 @@ function scrubDeal(dir: 1 | -1) {
     }
     raf = requestAnimationFrame(hold);
   };
-  window.addEventListener("wheel", onWheel, { capture: true, passive: false });
   raf = requestAnimationFrame(hold);
+  if (touch) {
+    touch.on.addEventListener("touchmove", onTouch as EventListener, { passive: true });
+    touch.on.addEventListener("touchend", end);
+    touch.on.addEventListener("touchcancel", end);
+    quiet = window.setTimeout(end, 3000);
+    return;
+  }
+  window.addEventListener("wheel", onWheel, { capture: true, passive: false });
   // Led on with no more wheel to come: it plays out as it always has.
   quiet = window.setTimeout(end, 400);
 }
@@ -197,6 +228,30 @@ const LEAVE_AFTER = 150;
    is worth the distance it actually moved. 80px, then 50 (Julian,
    2026-10-08: less resistance). */
 const LEAVE_TOUCH = 50;
+/* A finger on a paged strip (the homepage), from Julian's iPad, 2026-10-08,
+   recorded and logged at each step:
+   - The strip waited for iOS's momentum to run out and then slid to the
+     nearest screen. The momentum's tail creeps for seconds, so a swipe
+     glided, stalled, lurched to a screen, and once ran on to the ask card
+     and back. Now the lift decides, and iOS's momentum is stopped so only
+     the strip moves it.
+   - A first version of that slid on a timed ease, and set off at 40 to 70%
+     of the finger's speed: a brake at the moment of letting go. Now the
+     lift is projected the way iOS throws a scroll, the screen is the one
+     nearest where it would land (one at most from where the finger went
+     down), and a spring carries the strip there from the finger's own
+     speed. Critically damped; a flick gets a little give. A finger back on
+     the glass takes it from wherever it is.
+   - A swipe that began 16 to 50ms after momentum had carried the strip to
+     its end led straight to the next page. The end has to have been
+     reached and left alone for `EDGE_REST` first. */
+/** iOS's normal scroll deceleration, per ms, for the projection. */
+const DECEL = 0.998;
+/** The spring's response, seconds: the period it would ring at undamped. */
+const RESPONSE = 0.42;
+const EDGE_REST = 300;
+/** Finger speed, px per ms, above which a lift is a flick. */
+const FLICK = 0.25;
 
 /** How long a visitor is left alone before the rail says the page runs
     sideways, how long the travel lasts, and where the session remembers
@@ -304,6 +359,21 @@ export const useWide = () =>
     () => window.matchMedia(WIDE).matches,
     // The server draws the wide page; a phone corrects itself on hydration.
     () => true,
+  );
+/** A touch screen with room, held upright: an iPad. Its grid is a sheet that runs down
+    (Julian, 2026-10-08: the rack's covers were too small there, 210px
+    across. Landscape keeps the rack sideways, Julian asked). */
+const TABLET = "(pointer: coarse) and (min-width: 40rem) and (orientation: portrait)";
+const subscribeTablet = (onChange: () => void) => {
+  const mq = window.matchMedia(TABLET);
+  mq.addEventListener("change", onChange);
+  return () => mq.removeEventListener("change", onChange);
+};
+export const useTablet = () =>
+  React.useSyncExternalStore(
+    subscribeTablet,
+    () => window.matchMedia(TABLET).matches,
+    () => false,
   );
 /** The same question for what the page fetches, answered the other way
     round on the server: a frame marked eager in the HTML is requested as
@@ -568,6 +638,12 @@ export function Strip({
   React.useEffect(() => {
     hydrated = true;
   }, []);
+  const view = React.useContext(StripView);
+  const grid = view === "grid";
+  /* On an iPad the grid runs down instead (`useTablet`): the cells are a
+     sheet in a box that scrolls, and the sideways machine is off. */
+  const tablet = useTablet();
+  const sheet = grid && tablet;
   /* For the wheel, whose effect must not run again as sections arrive. */
   const heldBack = React.useRef(false);
   React.useEffect(() => {
@@ -575,10 +651,10 @@ export function Strip({
   }, [holding]);
   React.useEffect(() => {
     const el = scroller.current;
-    if (!deck || !el) return;
+    if (!deck || !el || sheet) return;
     return runDeck(el, deck);
     // Dealt again as each held-back section arrives.
-  }, [deck, shown]);
+  }, [deck, shown, sheet]);
   React.useImperativeHandle(ref, () => scroller.current!, []);
   const [at, setAt] = React.useState(0);
   /** Which tick the pointer is over, as a place in `ticks`, or null. */
@@ -673,15 +749,13 @@ export function Strip({
   // For the keyboard, which lives in an effect and must not go stale.
   const atRef = React.useRef(0);
   const wide = useWide();
-  const view = React.useContext(StripView);
-  const grid = view === "grid";
   /* The machine runs in both views. The sheet is a rack - two rows deep,
      running sideways - and not a page of its own that scrolls downwards:
      Julian asked for the grid to be horizontal too, and the version that
      scrolled down had to switch the wheel, the drag, the ruler and the
      lead-on off to do it, which is most of what made changing a filter
      feel like changing pages. Same gestures, twice the work on screen. */
-  const live = stack ? wide : true;
+  const live = (stack ? wide : true) && !sheet;
 
   /* Past the opening cell, stacked down a phone as well: the page's own
      scroll, half the cell gone off the top, as `data-past-first` says it
@@ -809,7 +883,8 @@ export function Strip({
     const el = scroller.current;
     if (!el) return;
     const kids = Array.from(el.children) as HTMLElement[];
-    if (!grid) {
+    // The sheet runs in rows, in the strip's own order.
+    if (!grid || sheet) {
       for (const k of kids) {
         k.style.order = "";
         delete k.dataset.alone;
@@ -863,7 +938,7 @@ export function Strip({
        sorts as nought, to the front of the rack. Coming through the door
        into the grid, Artist Presskit and Portraits stood where Editorial
        belonged (Julian, 2026-10-02). */
-  }, [grid, shown]);
+  }, [grid, sheet, shown]);
   const router = useRouter();
   // Stable for the life of the strip: pages key it by what it shows.
   const nextHref = next?.href;
@@ -1504,6 +1579,7 @@ export function Strip({
       until the visitor moves the row themselves (below). A ref, so the
       ruler and a link can spend it as well as the scroller's own events. */
   const aimed = React.useRef("");
+  const arrived = React.useRef(false);
   React.useEffect(() => {
     const el = scroller.current;
     if (!el || !live) return;
@@ -1869,7 +1945,15 @@ export function Strip({
        a strip, and the rack then moves it the better part of a screen
        further on. Until the visitor moves the row themselves, each
        re-lay aims again at the cell the address named on arrival. */
-    aimed.current = decodeURIComponent(window.location.hash.slice(1));
+    /* On arrival only. Read again when the held-back sections mounted
+       (`count`), it was the address the strip had since written for the
+       section in view, and the next re-lay threw the row back to that
+       section's start (Julian's iPad, 2026-10-08: a swipe through
+       Editorial jumped to its title card). */
+    if (!arrived.current) {
+      arrived.current = true;
+      aimed.current = decodeURIComponent(window.location.hash.slice(1));
+    }
     const handed = () => {
       aimed.current = "";
     };
@@ -2232,6 +2316,34 @@ export function Strip({
     // The slide's speed on its last frame, px per ms, for a handover.
     let pace = 0;
     let paced = 0;
+    /* The lift's spring (`onTouchEnd`): px and px per second, a mass
+       of one. Stepped in 4ms pieces so a long frame does not throw it.
+       Shows past an end only as far as the scroll allows, which is none. */
+    let sx = 0;
+    let zeta = 1;
+    let sAt = 0;
+    const spring = (now: number) => {
+      const dt = sAt ? Math.min(0.064, (now - sAt) / 1000) : 1 / 60;
+      sAt = now;
+      const k = ((2 * Math.PI) / RESPONSE) ** 2;
+      const c = 2 * zeta * Math.sqrt(k);
+      for (let left = dt; left > 0; left -= 0.004) {
+        const h = Math.min(0.004, left);
+        sx += (-k * (x - target) - c * sx) * h;
+        x += sx * h;
+      }
+      if (Math.abs(x - target) < 0.5 && Math.abs(sx) < 20) {
+        x = target;
+        el.scrollLeft = x;
+        frame = 0;
+        sAt = 0;
+        sx = 0;
+        el.style.overflowX = "";
+        return;
+      }
+      el.scrollLeft = x;
+      frame = requestAnimationFrame(spring);
+    };
     const slide = (now: number) => {
       if (!began) began = now;
       const t = Math.min(1, (now - began) / length);
@@ -2388,7 +2500,8 @@ export function Strip({
           delete root.dataset.nav;
           delete root.dataset.navWay;
         }, DEAL_MS);
-        if ("cards" in root.dataset) scrubDeal(dir);
+        if ("cards" in root.dataset)
+          scrubDeal(dir, touchX !== null && touchOn ? { x: touchX, on: touchOn } : null);
         router.push(href);
         return;
       }
@@ -2462,20 +2575,42 @@ export function Strip({
        at the end mid-travel does not carry straight through into the next
        page. Two fingers are the platform's, and are ignored. */
     let touchX: number | null = null;
+    let touchOn: EventTarget | null = null;
+    let flick: { x: number; t: number }[] = [];
+    // When the strip last moved, for `EDGE_REST`.
+    let movedAt = 0;
+    const onMoved = () => {
+      movedAt = performance.now();
+    };
     let touchEdge: 1 | -1 | 0 = 0;
+    // The screen under the strip when the finger went down.
+    let downSeat = 0;
     const onTouchStart = (e: TouchEvent) => {
       if (e.touches.length !== 1) {
         touchX = null;
         return;
       }
       touchX = e.touches[0].clientX;
+      touchOn = e.touches[0].target;
       const r = room();
       // A run that fits the window is at both ends at once: 0 here, and
       // the move reads the direction instead.
       touchEdge =
         r < 1 ? 0 : el.scrollLeft >= r - 2 ? 1 : el.scrollLeft <= 2 ? -1 : 0;
+      // Still arriving at its end: this swipe is not a request to leave.
+      if (r >= 1 && performance.now() - movedAt < EDGE_REST) touchEdge = 0;
+      flick = [{ x: touchX, t: e.timeStamp }];
+      downSeat = nearest(el.scrollLeft);
+      // A finger on a sliding strip takes it.
+      if (frame && paged) {
+        cancelAnimationFrame(frame);
+        frame = 0;
+      }
+      el.style.overflowX = "";
     };
     const onTouchMove = (e: TouchEvent) => {
+      if (e.touches.length === 1)
+        flick = [...flick, { x: e.touches[0].clientX, t: e.timeStamp }].slice(-8);
       if (touchX === null || e.touches.length !== 1 || leaving) return;
       const x = e.touches[0].clientX;
       const by = touchX - x;
@@ -2490,9 +2625,44 @@ export function Strip({
       if (over >= LEAVE_TOUCH) leave(1);
       if (over <= -LEAVE_TOUCH) leave(-1);
     };
-    const onTouchEnd = () => {
+    const onTouchEnd = (e: TouchEvent) => {
       touchX = null;
       touchEdge = 0;
+      if (!paged || !eased || leaving || e.touches.length) return;
+      const lift = e.changedTouches[0];
+      if (!lift || flick.length < 2 || Math.abs(lift.clientX - flick[0].x) < 8) return;
+      /* The finger's speed over its last tenth of a second of moving, and
+         nothing if it stood still that long before it lifted. */
+      const last = flick[flick.length - 1];
+      const back = flick.find((p) => last.t - p.t <= 100) ?? flick[0];
+      const fv =
+        e.timeStamp - last.t < 100 && last.t > back.t
+          ? (last.x - back.x) / (last.t - back.t)
+          : 0;
+      // The strip moves against the finger.
+      const sv = -fv;
+      const lands = el.scrollLeft + sv * (DECEL / (1 - DECEL));
+      let seat = nearest(lands);
+      seat = Math.max(downSeat - 1, Math.min(downSeat + 1, seat));
+      seat = Math.max(0, Math.min(el.children.length - 1, seat));
+      const where = centreOf(el, seat);
+      if (where === null) return;
+      el.style.overflowX = "hidden";
+      target = clamp(where);
+      x = el.scrollLeft;
+      zeta = Math.abs(fv) > FLICK ? 0.8 : 1;
+      /* The finger's speed, but never more than the spring can stop in
+         the distance left. A hard flick let go just short of a screen set
+         off at 14px/ms for a screen 180px away and ran 236px into the
+         next one before it came back (measured in WebKit, iPad size). A
+         critically damped spring stops dead from `w * distance`; a
+         flick is allowed a quarter more, which is the give. */
+      const d = target - x;
+      const cap = ((2 * Math.PI) / RESPONSE) * Math.abs(d) * (zeta < 1 ? 1.25 : 1);
+      sx = Math.sign(sv) === Math.sign(d) ? Math.sign(sv) * Math.min(Math.abs(sv * 1000), cap) : sv * 1000;
+      if (frame) cancelAnimationFrame(frame);
+      sAt = 0;
+      frame = requestAnimationFrame(spring);
     };
 
     /* A wheel moves the strip sideways, whichever way it is turned.
@@ -3001,6 +3171,7 @@ export function Strip({
 
     el.addEventListener("jg:home", onHome);
     el.addEventListener("scroll", onSettle, { passive: true });
+    el.addEventListener("scroll", onMoved, { passive: true });
     el.addEventListener("scroll", onNote, { passive: true });
     el.addEventListener("scroll", onStart, { passive: true });
     el.addEventListener("focusin", onFocusIn);
@@ -3034,6 +3205,7 @@ export function Strip({
       window.clearTimeout(noting);
       el.removeEventListener("jg:home", onHome);
       el.removeEventListener("scroll", onSettle);
+      el.removeEventListener("scroll", onMoved);
       el.removeEventListener("scroll", onNote);
       el.removeEventListener("scroll", onStart);
       el.removeEventListener("focusin", onFocusIn);
@@ -3401,7 +3573,8 @@ export function Strip({
         tabIndex={0}
         aria-label={label}
         /* Dealt as a deck: `globals.css` makes every cell opaque. */
-        data-dealt={deck}
+        data-dealt={sheet ? undefined : deck}
+        data-sheet={sheet ? "" : undefined}
         /* The browser's own drag and drop never gets the gesture.
            A cover in the index is a link around a photograph, and both of
            those are things Chrome will happily pick up and carry: a drag
@@ -3838,7 +4011,7 @@ export function Strip({
                     {named[n] ? (
                       <span
                         className={cn(
-                          "label pointer-events-none absolute bottom-full mb-1 whitespace-nowrap text-[0.625rem] transition-opacity duration-200",
+                          "rail-tick-word label pointer-events-none absolute bottom-full mb-1 whitespace-nowrap text-[0.625rem] transition-opacity duration-200",
                           end ? "right-0" : "left-0",
                           over === n
                             ? "text-foreground opacity-100"

@@ -314,7 +314,11 @@ export function WorkShell({
     if (view !== "grid") return;
     const shelf = rowBox.current?.querySelector<HTMLElement>(".strip-grid");
     if (!shelf) return;
-    const mq = window.matchMedia("(pointer: coarse) and (min-width: 40rem)");
+    // Landscape only: upright, the grid is a sheet that runs down
+    // (`useTablet` in `strip.tsx`).
+    const mq = window.matchMedia(
+      "(pointer: coarse) and (min-width: 40rem) and (orientation: landscape)",
+    );
     const fit = () => {
       if (!mq.matches) {
         shelf.style.removeProperty("--rack-w");
@@ -1029,7 +1033,7 @@ export function WorkShell({
           {/* The old site's three dropdowns become one row that can be
               ignored: the default is everything, so nobody has to make a
               choice before they can look at anything. */}
-          <div className="mt-3 flex w-full shrink-0 items-center gap-2 tablet:mt-1.5 max-sm:mt-1.5 short:mt-1.5 lying:mt-1.5">
+          <div className="filter-row mt-3 flex w-full shrink-0 items-center gap-2 tablet:mt-1.5 max-sm:mt-1.5 short:mt-1.5 lying:mt-1.5">
             {/* Where you are, and the way to the other eleven. Gone from
                 `lg` up, where the row itself is the control and this would
                 be a second one saying the same thing.

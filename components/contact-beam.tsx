@@ -7,6 +7,19 @@ import { useSiteTheme } from "@/lib/site-theme";
 /* Julian: the form in a beam (`border-beam`, Libraries.dev), at his
    settings: the full border, in the site's own theme. Mono: Julian
    took the colors off the form (2026-09-29). */
+/** A lap, in seconds, and how many a touchscreen gets before it rests. */
+const LAP = 6;
+const LAPS = 2;
+/* Held where it stands, every layer, so the line and its glow stay put
+   rather than fading. A held animation is not repainted. */
+const REST = `
+[data-beam="{id}"][data-rest],
+[data-beam="{id}"][data-rest]::before,
+[data-beam="{id}"][data-rest]::after,
+[data-beam="{id}"][data-rest] [data-beam-bloom] {
+  animation-play-state: paused !important;
+}`;
+
 export function ContactBeam({
   className,
   children,
@@ -22,6 +35,43 @@ export function ContactBeam({
     const el = edge.current;
     const id = el?.parentElement?.dataset.beam;
     if (el && id) el.style.setProperty("--edge-a", `var(--beam-angle-${id})`);
+  }, []);
+  /* On a touchscreen, two laps and then rest (Julian, 2026-10-08). The
+     glow is repainted every frame it moves, and on an iPad held still on
+     Inquiries that was a third of the frame rate: 38fps with it running,
+     60 with it held. So it runs two laps each time the card comes into
+     view, stops where it stands, and a touch on the card sends it round
+     again. A mouse keeps the lap that never ends. */
+  React.useEffect(() => {
+    const card = edge.current?.parentElement;
+    if (!card || !matchMedia("(pointer: coarse)").matches) return;
+    let rest = 0;
+    const run = () => {
+      card.removeAttribute("data-rest");
+      clearTimeout(rest);
+      rest = window.setTimeout(() => {
+        card.setAttribute("data-rest", "");
+      }, LAPS * LAP * 1000);
+    };
+    const io = new IntersectionObserver(
+      ([e]) => {
+        if (e.isIntersecting) run();
+        else clearTimeout(rest);
+      },
+      { threshold: 0.5 },
+    );
+    io.observe(card);
+    // And from the start, so it comes to rest even if the observer never
+    // reports.
+    run();
+    card.addEventListener("pointerdown", run, { passive: true });
+    card.addEventListener("focusin", run);
+    return () => {
+      io.disconnect();
+      clearTimeout(rest);
+      card.removeEventListener("pointerdown", run);
+      card.removeEventListener("focusin", run);
+    };
   }, []);
   return (
     <BorderBeam
@@ -41,8 +91,9 @@ export function ContactBeam({
          `app/contact/page.tsx`). */
       borderRadius={16}
       /* Julian: slower. A lap in six seconds (four until 2026-10-05),
-         against the default 1.96. */
-      duration={6}
+         against the default 1.96 (`LAP`). */
+      duration={LAP}
+      css={REST}
       className={className}
     >
       <span ref={edge} aria-hidden className="contact-edge" />
