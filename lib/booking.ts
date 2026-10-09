@@ -77,6 +77,27 @@ export const PLACES = [
   "New York",
 ];
 
+/* ── Cal.com ────────────────────────────────────────────────────── */
+
+/** The Cal.com event each session books, by the session's slug in
+    `content/site.json`, as Cal.com writes it after its domain:
+    "username/event-slug". Shown in place of the Google Calendar schedule
+    only with `?cal` on the address while it is tried out
+    (`components/cal-embed.tsx`). An empty one keeps Google's.
+
+    TODO(Julian): fill these in once the Cal.com account and its four
+    events exist. Weddings are booked by inquiry and have none. */
+export const CAL_EVENTS: Record<string, string> = {
+  portraits: "",
+  graduation: "",
+  headshots: "",
+  "studio-digitals": "",
+};
+
+/** A session's Cal.com event, or nothing where it has none yet. */
+export const calEvent = (sessionSlug?: string): string | undefined =>
+  (sessionSlug && CAL_EVENTS[sessionSlug]) || undefined;
+
 /* ── shared wording ─────────────────────────────────────────────── */
 
 const session = (slug: string): SessionType => {

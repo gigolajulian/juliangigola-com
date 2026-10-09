@@ -7476,6 +7476,11 @@ h2:not(.label) {
 .booking-embed {
   animation: jg-fade-in 500ms var(--ease-out-strong) both;
 }
+/* Cal.com's calendar in its place (`cal-embed.tsx`, behind `?cal`) takes
+   the site's colours itself, so it is not turned over. */
+:root:not([data-theme="light"]) .booking-embed.cal-embed {
+  filter: none;
+}
 
 /* ── turn it upright ──────────────────────────────────────────────
  * Julian (2026-10-04): on a phone on its side the site is not at its

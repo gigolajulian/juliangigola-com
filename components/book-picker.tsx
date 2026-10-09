@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
+import { CalEmbed } from "@/components/cal-embed";
 
 export type Bookable = {
   slug: string;
@@ -11,6 +12,8 @@ export type Bookable = {
   length: string;
   /** The Google Calendar appointment schedule's id. */
   calendar: string;
+  /** Its Cal.com event, shown in the calendar's place with `?cal`. */
+  cal?: string;
 };
 
 /* The sessions down the left, the chosen one's calendar beside them:
@@ -87,12 +90,14 @@ export function BookPicker({ sessions, start }: { sessions: Bookable[]; start?: 
           shorter, then a bit longer so it never scrolls inside itself), in
           what the window leaves it: only a short one makes it scroll. */}
       <div className="h-[75svh] overflow-hidden rounded-[12px] border border-border bg-card lg:h-full lg:max-h-[53rem]">
-        <iframe
-          key={current.calendar}
-          src={`https://calendar.google.com/calendar/appointments/schedules/${current.calendar}?gv=true`}
-          title={`Pick a time for ${current.name}`}
-          className="booking-embed block h-full w-full border-0"
-        />
+        <CalEmbed path={current.cal} title={`Pick a time for ${current.name}`} className="booking-embed block h-full w-full border-0">
+          <iframe
+            key={current.calendar}
+            src={`https://calendar.google.com/calendar/appointments/schedules/${current.calendar}?gv=true`}
+            title={`Pick a time for ${current.name}`}
+            className="booking-embed block h-full w-full border-0"
+          />
+        </CalEmbed>
       </div>
     </section>
   );

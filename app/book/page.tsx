@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { BookPicker, type Bookable } from "@/components/book-picker";
+import { calEvent } from "@/lib/booking";
 import { SESSION_TYPES, formatPrice } from "@/lib/sessions";
 
 export const metadata: Metadata = {
@@ -25,7 +26,7 @@ export default async function BookPage({ searchParams }: { searchParams: Promise
   const { session } = await searchParams;
   const sessions: Bookable[] = SESSION_TYPES.flatMap((s) => {
     const c = CALENDARS[s.slug];
-    return c ? [{ slug: s.slug, name: s.name, blurb: s.blurb, rate: formatPrice(s.from), length: c.length, calendar: c.id }] : [];
+    return c ? [{ slug: s.slug, name: s.name, blurb: s.blurb, rate: formatPrice(s.from), length: c.length, calendar: c.id, cal: calEvent(s.slug) }] : [];
   });
   return <BookPicker sessions={sessions} start={session} />;
 }
