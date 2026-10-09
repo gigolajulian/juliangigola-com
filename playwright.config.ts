@@ -1,4 +1,5 @@
-import { existsSync } from "node:fs";
+import { existsSync, mkdtempSync } from "node:fs";
+import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { chromium, defineConfig, firefox, webkit, type Project } from "@playwright/test";
 
@@ -17,6 +18,15 @@ import { chromium, defineConfig, firefox, webkit, type Project } from "@playwrig
    a second and the frame tests would be timing the OS. */
 const mac = process.platform === "darwin";
 if (mac) process.env.PERF_WEBKIT = webkit.executablePath();
+
+/* On macOS 27, Firefox looks in ~/Library/Application Support/Firefox even
+   when Playwright hands it a profile, and the OS guards that folder: every
+   launch hangs or exits with "Could not find profile folder"
+   (microsoft/playwright#42768). Firefox gets an empty home of its own,
+   one per worker so parallel runs never share it. It is left in the temp
+   folder for macOS to clear: removing it on exit kept the worker from
+   ever exiting. */
+const firefoxHome = () => mkdtempSync(join(tmpdir(), "pw-firefox-home-"));
 
 const BROWSERS: Project[] = [
   {
@@ -41,7 +51,13 @@ const BROWSERS: Project[] = [
       },
     },
   },
-  { name: "firefox", use: { browserName: "firefox" } },
+  {
+    name: "firefox",
+    use: {
+      browserName: "firefox",
+      launchOptions: mac ? { env: { ...process.env, CFFIXED_USER_HOME: firefoxHome() } } : {},
+    },
+  },
 ];
 
 /* A browser that is not installed is left out rather than failing every
