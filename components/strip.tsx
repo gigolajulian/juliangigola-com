@@ -3601,12 +3601,22 @@ export function Strip({
     el.addEventListener("scroll", read, { passive: true });
     return () => el.removeEventListener("scroll", read);
   }, [sumFrom, sumTo]);
+  /** Starts the rail's re-reading loop again, when it has stopped. */
+  const wakeRail = React.useRef(() => {});
   React.useEffect(() => {
     if (!chaptered || !onRail) return;
     let frame = 0;
+    /* Frames in a row in which nothing moved. A pointer left resting on
+       the rail kept this loop going for as long as it stayed there, 120
+       callbacks a second with nothing to do (measured on /portfolio,
+       2026-10-09). Once the chapters have finished opening, which is the
+       300ms of their `flex-grow` ease, it stops, and a move wakes it. */
+    let calm = 0;
+    let was = "";
     const step = () => {
       const x = lastX.current;
-      if (x !== null) setOver(hit.current(x));
+      const now = x !== null ? hit.current(x) : null;
+      if (x !== null) setOver(now);
       /* A project's name is centred over its own cell, and the first cell
          of the first chapter is at the edge of the page: I WANNA BE A
          HUMAN, over Editorial's second cover, measured at -5px and lost
@@ -3627,10 +3637,23 @@ export function Strip({
             parseFloat(getComputedStyle(word).left) + (want - mid)
           }px`;
       }
-      frame = requestAnimationFrame(step);
+      /* Where every chapter stands, as the pointer and the word read it. */
+      const key = `${now}:${chapterSegs.current
+        .map((s) => s?.getBoundingClientRect().width.toFixed(1))
+        .join(",")}`;
+      calm = key === was ? calm + 1 : 0;
+      was = key;
+      frame = calm < 24 ? requestAnimationFrame(step) : 0;
+    };
+    wakeRail.current = () => {
+      calm = 0;
+      if (!frame) frame = requestAnimationFrame(step);
     };
     frame = requestAnimationFrame(step);
-    return () => cancelAnimationFrame(frame);
+    return () => {
+      cancelAnimationFrame(frame);
+      wakeRail.current = () => {};
+    };
   }, [chaptered, onRail]);
 
   /** The chapter under `x` if it is another page, or null. Read on the way
@@ -3648,10 +3671,12 @@ export function Strip({
     lastX.current = e.clientX;
     setOverAway(awayAt(e.clientX));
     setOver(tickAt(e.clientX));
+    wakeRail.current();
   };
   const railMove = (e: React.PointerEvent<HTMLDivElement>) => {
     window.clearTimeout(linger.current);
     lastX.current = e.clientX;
+    wakeRail.current();
     const n = tickAt(e.clientX);
     setOverAway(awayAt(e.clientX));
     setOver(n);
