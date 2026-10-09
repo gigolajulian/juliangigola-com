@@ -79,7 +79,7 @@ export function LocalQuestions({
                       onPointerEnter={(e) => {
                         if (e.pointerType === "mouse") setShown(i);
                       }}
-                      className={`label flex w-full items-baseline justify-between gap-4 py-2.5 text-left transition-colors duration-300 ${on ? "text-foreground" : "text-muted-foreground"}`}
+                      className={`tap-44 label flex w-full items-baseline justify-between gap-4 py-2.5 text-left transition-colors duration-300 ${on ? "text-foreground" : "text-muted-foreground"}`}
                     >
                       {b.heading}
                       <span aria-hidden className={`transition-transform duration-300 ${on ? "rotate-45" : ""}`}>

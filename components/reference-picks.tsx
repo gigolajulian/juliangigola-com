@@ -76,7 +76,7 @@ export function ReferencePicks({ resync }: { resync: unknown }) {
     setPicks((p) => (p.includes(src) ? p.filter((s) => s !== src) : room > 0 ? [...p, src] : p));
 
   const button =
-    "label cursor-pointer rounded-full border border-border px-4 py-2 text-muted-foreground transition-colors duration-200 hoverable:hover:border-foreground/40 hoverable:hover:text-foreground disabled:pointer-events-none disabled:opacity-40";
+    "tap-44 label cursor-pointer rounded-full border border-border px-4 py-2 text-muted-foreground transition-colors duration-200 hoverable:hover:border-foreground/40 hoverable:hover:text-foreground disabled:pointer-events-none disabled:opacity-40";
 
   return (
     <div className="contact-field">
@@ -134,13 +134,15 @@ function Thumb({
   children: React.ReactNode;
 }) {
   return (
-    <li className="emerge group relative size-16 overflow-hidden rounded-[6px] border border-border">
-      {children}
+    <li className="emerge group relative size-16">
+      {/* The photograph clipped to its own frame, so the remove button's
+          thumb-sized box (`tap-44`) can reach past the corner. */}
+      <span className="block size-full overflow-hidden rounded-[6px] border border-border">{children}</span>
       <button
         type="button"
         onClick={onRemove}
         aria-label={`Remove ${label}`}
-        className="absolute right-1 top-1 grid size-5 place-items-center rounded-full bg-background/80 text-[0.7rem] leading-none text-foreground opacity-80 transition-opacity hoverable:hover:opacity-100"
+        className="tap-44 absolute right-1 top-1 grid size-5 place-items-center rounded-full bg-background/80 text-[0.7rem] leading-none text-foreground opacity-80 transition-opacity hoverable:hover:opacity-100"
       >
         ×
       </button>

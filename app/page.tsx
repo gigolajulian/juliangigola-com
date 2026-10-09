@@ -347,7 +347,7 @@ function SessionsDoor({ photo }: { photo?: Frame }) {
               <Link
                 prefetch={false}
                 href={page ? `/${page.slug}` : "/#sessions"}
-                className="group label flex items-center justify-between gap-4 py-3 text-foreground lying:py-1.5"
+                className="tap-44 group label flex items-center justify-between gap-4 py-3 text-foreground lying:py-1.5"
               >
                 {s.name}
                 <span

@@ -177,7 +177,7 @@ export function LegalPage({ children }: { children: React.ReactNode }) {
                           onBlur={() => setPeek(null)}
                           aria-current={at.id === c.id ? "true" : undefined}
                           className={cn(
-                            "flex w-full items-center gap-5 py-2.5 text-left text-base uppercase leading-tight tracking-[0.06em] tabular-nums transition-colors duration-200 sm:text-lg",
+                            "tap-44 flex w-full items-center gap-5 py-2.5 text-left text-base uppercase leading-tight tracking-[0.06em] tabular-nums transition-colors duration-200 sm:text-lg",
                             at.id === c.id
                               ? "text-foreground"
                               : "text-muted-foreground",

@@ -1960,7 +1960,11 @@ nav[aria-label="Categories"] ul[data-more] {
   /* One size along the strip, from its height, not each cover's width:
      sized by width, SAGO and DIESEL beside it sat on different lines
      (Julian, 2026-10-08). Smaller only where the cover is too narrow. */
-  font-size: clamp(1rem, min(calc((100dvh - 21rem) * 0.095), calc(215cqw / var(--n, 12)), calc(140cqw / var(--w, 8))), 5rem);
+  /* The last term is the longest run that cannot break (`--g`, the last
+     two words held together) inside the slate's 2rem margins: on a
+     phone's narrow cover `140cqw` alone cut WONDERLAND and LADERA GRANOLA
+     at the margin (plan 3.2, iPhone 18 and 18 Pro Max). */
+  font-size: clamp(1rem, min(calc((100dvh - 21rem) * 0.095), calc(215cqw / var(--n, 12)), calc(140cqw / var(--w, 8)), calc((145cqw - 6rem) / var(--g, var(--w, 8)))), 5rem);
   white-space: normal;
   overflow: hidden;
   text-overflow: clip;
@@ -3327,6 +3331,30 @@ h2.contact-title {
        On an iPad sideways only a 9px band of each chip took a tap. */
     .chip-row a {
       margin-block: 0;
+    }
+  }
+  /* And 44px where the padding cannot reach it (plan 3.2, measured on
+     iPhone SE, 18 and 18 Pro Max sizes: rows of 33 to 40px, links of
+     29px, the photographs' remove button at 20px). `tap-44` puts an
+     invisible box at least 44px square over the middle of the control,
+     so a thumb has the room and nothing on the page moves. Under a
+     thumb only; a pointer keeps the control's own box. */
+  @media (pointer: coarse) {
+    .tap-44 {
+      position: relative;
+    }
+    .tap-44::after {
+      content: "";
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: max(100%, 44px);
+      height: max(100%, 44px);
+      translate: -50% -50%;
+    }
+    /* The form's fields, which cannot carry a box of their own. */
+    .contact-card form :is(input:not([type="file"], [type="radio"], .sr-only), select) {
+      min-height: 44px;
     }
   }
 }

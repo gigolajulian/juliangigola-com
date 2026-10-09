@@ -263,7 +263,7 @@ export function SessionsScreen({ sessions }: { sessions: SessionItem[] }) {
                         go(i);
                       }
                     }}
-                    className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-baseline gap-4 py-2 text-left short:py-1.5"
+                    className="tap-44 grid grid-cols-[auto_minmax(0,1fr)_auto] items-baseline gap-4 py-2 text-left short:py-1.5"
                   >
                     {head}
                   </Link>
@@ -273,7 +273,7 @@ export function SessionsScreen({ sessions }: { sessions: SessionItem[] }) {
                   aria-expanded={on}
                   onClick={() => setOpen(i)}
                   onFocus={() => go(i)}
-                  className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-baseline gap-4 py-2 text-left short:py-1.5"
+                  className="tap-44 grid grid-cols-[auto_minmax(0,1fr)_auto] items-baseline gap-4 py-2 text-left short:py-1.5"
                 >
                   {head}
                 </button>
@@ -324,7 +324,7 @@ export function SessionsScreen({ sessions }: { sessions: SessionItem[] }) {
                       {s.page ? (
                         <Link
                           href={s.page}
-                          className="label block py-2 leading-[1.7] text-muted-foreground short:py-1"
+                          className="tap-44 label block py-2 leading-[1.7] text-muted-foreground short:py-1"
                         >
                           {/* Where it is ("in San Jose & San Francisco") kept
                               whole, so a line breaks before it and never
@@ -338,7 +338,7 @@ export function SessionsScreen({ sessions }: { sessions: SessionItem[] }) {
                             ? `${s.page}#book`
                             : `/?type=session&session=${encodeURIComponent(s.name)}#contact`
                         }
-                        className="label ml-auto block whitespace-nowrap py-2 font-bold short:py-1"
+                        className="tap-44 label ml-auto block whitespace-nowrap py-2 font-bold short:py-1"
                       >
                         Book a session&nbsp;<span aria-hidden>&rarr;</span>
                       </Link>
@@ -404,7 +404,7 @@ export function SessionsScreen({ sessions }: { sessions: SessionItem[] }) {
             </span>
             <a
               href="mailto:hello@juliangigola.com"
-              className="label text-muted-foreground"
+              className="tap-44 label text-muted-foreground"
             >
               hello@juliangigola.com
             </a>
