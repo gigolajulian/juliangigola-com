@@ -1226,6 +1226,74 @@ export function Strip({
       .forEach(({ c }, i) => c.style.setProperty("--i", String(i)));
   }, []);
 
+  /* ── the far cells wait for a gap ──
+     Arriving on a discipline, WebKit painted the photographs two and three
+     screens off as well as the ones in view, in the same frame: one block
+     of 200 to 390ms on Event coverage at 1440 (2026-10-09). With the cells
+     more than two screens away hidden it was 70 to 88ms. So they are,
+     `visibility` and not `display`, so nothing moves, and they come back
+     one at a time, nearest first, in the gaps after the page has landed,
+     or all at once the moment the strip is moved. After the effect above,
+     which has put the strip where it opens. A paged strip's screens are
+     whole windows and stay as they are. */
+  React.useLayoutEffect(() => {
+    const el = scroller.current;
+    if (!el || !live || paged) return;
+    const x = el.scrollLeft;
+    const w = el.clientWidth;
+    const far = (Array.from(el.children) as HTMLElement[])
+      .map((c) => {
+        const left = leftOf(c);
+        const d = Math.max(left - (x + w), x - (left + c.offsetWidth));
+        return { c, d };
+      })
+      .filter(({ c, d }) => d > w && !c.style.visibility)
+      .sort((a, b) => a.d - b.d)
+      .map(({ c }) => c);
+    if (!far.length) return;
+    for (const c of far) c.style.visibility = "hidden";
+    let next = 0;
+    let wait = 0;
+    const idle = (fn: () => void) =>
+      typeof window.requestIdleCallback === "function"
+        ? window.requestIdleCallback(fn, { timeout: 1000 })
+        : window.setTimeout(fn, 60);
+    const unwait = () => {
+      if (typeof window.cancelIdleCallback === "function") window.cancelIdleCallback(wait);
+      window.clearTimeout(wait);
+    };
+    const one = () => {
+      far[next++]?.style.removeProperty("visibility");
+      if (next < far.length) wait = idle(one);
+      else done();
+    };
+    const all = () => {
+      unwait();
+      for (; next < far.length; next++) far[next].style.removeProperty("visibility");
+      done();
+    };
+    const moved = ["scroll", "wheel", "touchstart", "pointerdown", "keydown"];
+    const done = () => {
+      for (const t of moved) el.removeEventListener(t, all);
+    };
+    for (const t of moved) el.addEventListener(t, all, { passive: true });
+    /* Not while the page is arriving (`data-nav` on the root): shown
+       inside the trip, each was painted into its snapshot, and the block
+       came back. Once it has landed they cost nothing to show. */
+    const root = document.documentElement;
+    const landed = new MutationObserver(() => {
+      if (root.dataset.nav !== undefined) return;
+      landed.disconnect();
+      wait = idle(one);
+    });
+    if (root.dataset.nav === undefined) wait = idle(one);
+    else landed.observe(root, { attributes: true, attributeFilter: ["data-nav"] });
+    return () => {
+      landed.disconnect();
+      all();
+    };
+  }, [live, paged]);
+
   /** The scroll position, kept live: a cleanup cannot read it off the
       element, which is detached by then. */
   const seatX = React.useRef(0);
