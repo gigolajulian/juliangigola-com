@@ -83,8 +83,8 @@
     --wide-x: 0.7;
   }
 }
-/* A big screen, wide and short (1.75 to 2.2 to 1: a 13 or 16 inch laptop in a browser): its own layout,
-   `SHORT` on "Photo layout, wide short" (Julian, 2026-10-07). Wider
+/* A big screen, wide and short (1.75 to 2.2 to 1: a 13 or 16 inch laptop in
+   a browser): its own layout, `SHORT` on "Photo layout, wide short". Wider
    than that keeps the large one with the ultrawide scaling above. */
 @media (min-width: 80rem) and (min-height: 32rem) and (min-aspect-ratio: 7 / 4) and (max-aspect-ratio: 219 / 100) {
   .cover-float {
@@ -250,19 +250,19 @@
   pointer-events: none;
   transform: translateZ(calc(var(--fz, 0px) + 1px));
 }
-/* Julian: the cover's photographs looked low quality, and the files were
-   not it. Chrome rasterises a layer inside the turned, perspective space
-   at one pixel per CSS pixel, not the screen's two, so a 2x screen got a
-   picture stretched to twice its raster (measured 2026-10-01: SSIM 0.77
-   against the same file drawn flat). The card is laid out at twice its
-   size and drawn at half (`scale`), so that one pixel per CSS pixel is
-   two on screen. Everything measured in the card's own pixels is doubled
-   to look as it did: the corner, the blurs (`--os`), the glass's rim and
-   the hover shadow (`CoverCard`). `scale` is flat, so `--fz` is not.
-   Not while it fades in (`jg-fade` holds `--os` at 1): a blur on a card
-   twice the size stalled the splash's lift for up to 56ms, so the card
-   blurs in at its own size and doubles once it has landed, which looks
-   the same. */
+/* Julian: the cover's photographs looked low quality, and the files
+   were not it. Chrome rasterises a layer inside the turned,
+   perspective space at one pixel per CSS pixel, not the screen's two,
+   so a 2x screen got a picture stretched to twice its raster
+   (measured: SSIM 0.77 against the same file drawn flat). The card is
+   laid out at twice its size and drawn at half (`scale`), so that one
+   pixel per CSS pixel is two on screen. Everything measured in the
+   card's own pixels is doubled to look as it did: the corner, the
+   blurs (`--os`), the glass's rim and the hover shadow (`CoverCard`).
+   `scale` is flat, so `--fz` is not. Not while it fades in (`jg-fade`
+   holds `--os` at 1): a blur on a card twice the size stalled the
+   splash's lift for up to 56ms, so the card blurs in at its own size
+   and doubles once it has landed, which looks the same. */
 @property --os {
   syntax: "<number>";
   inherits: true;
@@ -322,8 +322,8 @@
 .cover-float {
   --hero-ink: #f2f1ee;
   --hero-sub: #bdbbb5;
-  /* Lifted from #77756f (4.3:1) to clear 4.5:1 on the whole ground, the
-     glow in the middle included (UI/UX review, 2026-10-02). */
+  /* Lifted from #77756f (4.3:1) to clear 4.5:1 on the whole ground,
+     the glow in the middle included. */
   --hero-where: #83817b;
   --hero-line: #3a3936;
   --hero-on-ink: #0b0b0b;
@@ -378,9 +378,9 @@
     white-space: nowrap;
   }
 }
-/* A booking page's title runs to three lines where the name is one, and
-   on ultrawide reached up into the top row of photographs: lower there,
-   Julian (2026-10-02). */
+/* A booking page's title runs to three lines where the name is one,
+   and on ultrawide reached up into the top row of photographs: lower
+   there. */
 @media (min-width: 80rem) and (min-aspect-ratio: 2 / 1) {
   .cover-float[data-booking] {
     --m-y: 11;
@@ -426,13 +426,11 @@
 .cover-float-ctas {
   zoom: var(--m-buttons);
   /* Never under nine tenths of their size, however far a short wide
-     window shrinks the middle (Julian, 2026-10-07: unreadable). The type
-     and padding grow rather than a zoom, which the liquid fill under
-     them does not measure. */
+     window shrinks the middle. The type and padding grow rather than
+     a zoom, which the liquid fill under them does not measure. */
   --cta-k: max(1, calc(0.9 / var(--mid, 1)));
 }
-/* The location one line, centred, from a tablet up (Julian, 2026-10-07:
-   it broke onto two lines off the middle on an iPad). */
+/* The location one line, centred, from a tablet up. */
 @media (min-width: 40rem) {
   .cover-float-where {
     max-width: none;
@@ -462,10 +460,10 @@
   color: var(--hero-on-ink);
   border: 0;
 }
-/* Julian (2026-10-03): the second door read as disabled, a hairline on
-   the dark. Private clients are half the audience, so it is a button in
-   its own right: a lowkey grey fill, the Sessions card's, and an edge
-   that shows. Still second to the solid one beside it. */
+/* The second door read as disabled, a hairline on the dark. Private
+   clients are half the audience, so it is a button in its own right:
+   a lowkey grey fill, the Sessions card's, and an edge that shows.
+   Still second to the solid one beside it. */
 .cover-cta-quiet {
   background: color-mix(in oklab, var(--hero-ink) 9%, var(--background));
   color: var(--hero-ink);
@@ -626,10 +624,11 @@
 /* The fade is on the card, not the frame: opacity below 1 flattens a
    `preserve-3d` element, so a frame fading as it flew would travel flat
    and snap to its depth the moment it landed, 5 to 15% in one frame. */
-/* Two animations, not one (2026-10-08): the fade (opacity and blur) on
-   its own, and `--os` held at 1 beside it. A custom property in the same
-   keyframes kept the whole fade on the main thread in Safari, repainted
-   every frame of the splash's lift; alone, the fade goes to the GPU. */
+/* Two animations, not one: the fade (opacity and blur) on its own,
+   and `--os` held at 1 beside it. A custom property in the same
+   keyframes kept the whole fade on the main thread in Safari,
+   repainted every frame of the splash's lift; alone, the fade goes to
+   the GPU. */
 .cover-float-card {
   animation:
     jg-fade var(--h-fade-ms, 1110ms) cubic-bezier(0.33, 1, 0.68, 1) var(--delay) backwards,

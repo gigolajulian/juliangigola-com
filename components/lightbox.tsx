@@ -1018,10 +1018,10 @@ function Stage({
       {size && zoom.scale === 1
         ? ([[-1, prev, "Prev"], [1, next, "Next"]] as const).map(([d, f, word]) => {
             if (!f) return null;
-            /* Julian (2026-10-03): whole, never cropped, the 3D made
-               elite, and not crowding the picture ("too close"). A cover
-               flow: each neighbour smaller and set back, a clear gap from
-               the picture, turned away from it on its inner edge, whole
+            /* Whole, never cropped, the 3D made elite, and not
+               crowding the picture ("too close"). A cover flow: each
+               neighbour smaller and set back, a clear gap from the
+               picture, turned away from it on its inner edge, whole
                inside the window: shrunk to the room, gone below a
                sliver. */
             const GAP = 56;

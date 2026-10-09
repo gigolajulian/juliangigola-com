@@ -139,9 +139,9 @@ export function InquireWall({ items }: { items: WallTile[] }) {
       items={items}
       className="inquire-wall"
       columns="fill"
-      /* Julian (2026-10-08): scaled out so more of the work shows (1.25
-         to 0.85), and no more than 24 photographs loaded for it however
-         wide the screen, so it stays light. */
+      /* Scaled out so more of the work shows (1.25 to 0.85), and no
+         more than 24 photographs loaded for it however wide the
+         screen, so it stays light. */
       limit={flag.slow ? 18 : 24}
       /* And the small copies (Julian: lower the resolution, not so it
          shows). A 255px tile on a 2x screen took the 640 file; at 0.6 it
@@ -157,7 +157,7 @@ export function InquireWall({ items }: { items: WallTile[] }) {
       turn={-14}
       perspective={1200}
       depth={120}
-      /* Julian (2026-10-05): a third slower (was 24). */
+      /* A third slower (was 24). */
       speed={16 * scale * (flag.slow ? 0.5 : 1)}
       hold={hold}
       direction="up"

@@ -25,10 +25,10 @@
      towards warm). */
   color: #0b0a09;
   /* The layer's own colour is the panel's, which is the page's, and the
-     ground the panel sweeps across is painted over it short of the top
-     and bottom (below): Safari on an iPhone takes the colour of the bands
-     round the page from what is at the window's edge, and Julian asked
-     for them black in dark and light in light, not the ground (2026-10-04). */
+     ground the panel sweeps across is painted over it short of the top and
+     bottom (below): Safari on an iPhone takes the colour of the bands round
+     the page from what is at the window's edge, and Julian asked for them
+     black in dark and light in light, not the ground. */
   background: currentColor;
   --jg-ground: #eee9e0;
 }
@@ -42,9 +42,9 @@
   inset: 0;
   background: var(--jg-ground);
 }
-/* The bands only where Safari on an iPhone or iPad reads them: everywhere
-   else they were a stripe across the top and foot of the opening (audit,
-   2026-10-04). `-webkit-touch-callout` is iOS Safari's alone. */
+/* The bands only where Safari on an iPhone or iPad reads them:
+   everywhere else they were a stripe across the top and foot of the
+   opening. `-webkit-touch-callout` is iOS Safari's alone. */
 @supports (-webkit-touch-callout: none) {
   [data-intro] #jg-intro::before {
     inset: calc(env(safe-area-inset-top, 0px) + 16px) 0
@@ -57,11 +57,10 @@
   background: currentColor;
   transform: translateX(-100%);
 }
-/* The sweep starts with the first paint, not when the script arrives, so
-   the wait for the script is under it rather than before it. It never
-   stops (Julian, 2026-10-06: held back to what had loaded, it stuttered).
-   No `linear()` (an older browser) drops the second line and keeps
-   the nearest curve. */
+/* The sweep starts with the first paint, not when the script arrives,
+   so the wait for the script is under it rather than before it. It
+   never stops. No `linear()` (an older browser) drops the second line
+   and keeps the nearest curve. */
 [data-intro] .jg-intro-panel {
   animation: jg-intro-sweep 1550ms cubic-bezier(0.3, 0.7, 0.4, 1) forwards;
   animation: jg-intro-sweep 1550ms linear(0, 0.0265, 0.0923, 0.1593, 0.2301, 0.3009, 0.3835, 0.4493, 0.5117, 0.5705, 0.6362, 0.6867, 0.7335, 0.7765, 0.8229, 0.8574, 0.8881, 0.9149, 0.9419, 0.9603, 0.9748, 0.9854, 0.9922, 0.9964, 1) forwards;
@@ -85,12 +84,11 @@
   width: 100%;
   height: 100%;
 }
-/* One blink, before the sweep is half way (Julian, 2026-10-06: one is
-   enough; it was two, the second 84 to 90% across). Closed 158ms into the
-   350 (Julian: 240 was too fast, 420 too slow).
-   From the stylesheet, so it keeps the sweep's time however late the
-   script arrives; the moment is picked in `layout.tsx`. The same blink as
-   `blink()` in `not-found-scene.tsx`. */
+/* One blink, before the sweep is half way. Closed 158ms into the 350
+   (Julian: 240 was too fast, 420 too slow). From the stylesheet, so it
+   keeps the sweep's time however late the script arrives; the moment
+   is picked in `layout.tsx`. The same blink as `blink()` in
+   `not-found-scene.tsx`. */
 @keyframes jg-intro-blink {
   0%,
   100% {
@@ -135,9 +133,7 @@
   --delay: calc(var(--h-start, 420ms) + var(--wave-now, var(--wave, 0)) * var(--h-spread, 0.95ms));
 }
 /* The photographs wait while the panel is full and set off with the
-   lift (`data-intro="half"`, `intro.tsx`; Julian, 2026-10-06: after it
-   was too late). It was after the lift from 2026-10-04, when their blur
-   on nine cards at once dropped frames from it on a cold start. */
+   lift (`data-intro="half"`, `intro.tsx`). */
 [data-intro="lift"] :is(.cover-float-frame, .cover-float-card) {
   animation-play-state: paused;
 }
@@ -154,9 +150,9 @@
  * stays clipped once it has landed. `backwards`, so it holds below its
  * line through its delay and lets go of the element at the end.
  * ───────────────────────────────────────────────────────────────── */
-/* The rise and its mask as two animations: the rise alone is a transform
-   the GPU runs, where in one set of keyframes with `--lift-clip` Safari
-   ran both on the main thread (2026-10-08, the splash's lift). */
+/* The rise and its mask as two animations: the rise alone is a
+   transform the GPU runs, where in one set of keyframes with
+   `--lift-clip` Safari ran both on the main thread. */
 .lift {
   animation:
     jg-lift-rise var(--h-lift-ms, 1030ms) cubic-bezier(0.16, 1, 0.3, 1) backwards,

@@ -4,18 +4,17 @@ import * as React from "react";
 import { matches } from "@/lib/device";
 
 /* ── the focus field ──────────────────────────────────────────────
- * Julian (2026-10-04): a hover that spans the gallery. One blurring layer
- * (`.focus-field`, globals.css) is laid over whichever gallery the
- * pointer is in, clear round the pointer: the frames near it come into
- * focus and the rest go out of it by degrees, the further the softer.
- * One layer for every gallery, moved with the pointer once a frame, so
- * nothing in the galleries themselves is touched.
+ * A hover that spans the gallery. One blurring layer (`.focus-field`,
+ * globals.css) is laid over whichever gallery the pointer is in, clear
+ * round the pointer: the frames near it come into focus and the rest go
+ * out of it by degrees, the further the softer. One layer for every
+ * gallery, moved with the pointer once a frame, so nothing in the
+ * galleries themselves is touched.
  * ─────────────────────────────────────────────────────────────── */
 const GALLERIES = ".light-table, .portfolio-arrive .strip-scroll, .contact-sheet, .site-menu nav";
 const CELLS = ".light-cell, .strip-cell, .contact-sheet button, .site-menu a";
-/* The menu's names too, and on a phone under the finger as well as under
-   a mouse (Julian, 2026-10-04: the press in the menu should soften the
-   others the way the pointer does over Commissions). */
+/* The menu's names too, and on a phone under the finger as well as
+   under a mouse. */
 const MENU = ".site-menu nav";
 
 export function FocusField() {
@@ -40,8 +39,8 @@ export function FocusField() {
       el.style.height = `${r.height}px`;
       el.style.setProperty("--ff-x", `${x - r.left}px`);
       el.style.setProperty("--ff-y", `${y - r.top}px`);
-      /* On the portfolio the discipline names between the runs stay sharp
-         (Julian, 2026-10-04): each one in view is cut out of the mask. */
+      /* On the portfolio the discipline names between the runs stay
+         sharp: each one in view is cut out of the mask. */
       const holes = [...on.querySelectorAll<HTMLElement>("[data-deck]")]
         .map((n) => n.getBoundingClientRect())
         .filter((h) => h.right > r.left && h.left < r.right);
@@ -63,11 +62,10 @@ export function FocusField() {
       const target = e.target as Element | null;
       let g = target?.closest?.(GALLERIES) ?? null;
       if (!mouse && !g?.matches(MENU)) g = null;
-      // Never over the inquiry form (Julian, 2026-10-08): picking a kind
-      // of shoot blurred the screen round it.
+      // Never over the inquiry form: picking a kind of shoot blurred the
+      // screen round it.
       if (target?.closest("form, .contact-inquire")) g = null;
-      // The clearing is a little wider than the frame under the pointer (Julian,
-      // 2026-10-04: wider than the half it was, then wider again), so a
+      // The clearing is a little wider than the frame under the pointer, so a
       // wide frame and a small one each come into focus whole.
       const cell = g ? target?.closest<HTMLElement>(CELLS) : null;
       if (cell && g?.contains(cell)) {

@@ -10,9 +10,8 @@ import { useDevice } from "@/lib/device";
     (`wide` in `lib/device.ts`). The server draws the wide page; a phone
     corrects itself on hydration. */
 export const useWide = () => useDevice("wide", true);
-/** A touch screen with room, held upright: an iPad. Its grid is a sheet that runs down
-    (Julian, 2026-10-08: the rack's covers were too small there, 210px
-    across. Landscape keeps the rack sideways, Julian asked). */
+/** A touch screen with room, held upright: an iPad. Its grid is a sheet
+    that runs down; held sideways it keeps the rack. */
 export const useTablet = () => useDevice("tabletUpright");
 /** The same question for what the page fetches, answered the other way
     round on the server: a frame marked eager in the HTML is requested as

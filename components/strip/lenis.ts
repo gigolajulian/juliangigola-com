@@ -60,12 +60,12 @@ export function useLenis(
            Without this Lenis took the wheel over the form and moved nothing,
            and the send button under the fold could not be reached.
 
-           By the strip's own rule (`onWheel`): a textarea or a select keeps
-           it, a `[data-scroll]` box until it has run out. Not Lenis's
-           `allowNestedScroll`, which read the computed style of everything
-           under the pointer and laid the page out again for it: 20 to 35ms
-           on the first notch of a push on the portfolio, the lag into the
-           way back home (scroll-craft pass, 2026-10-02). */
+           By the strip's own rule (`onWheel`): a textarea or a select
+           keeps it, a `[data-scroll]` box until it has run out. Not
+           Lenis's `allowNestedScroll`, which read the computed style of
+           everything under the pointer and laid the page out again for
+           it: 20 to 35ms on the first notch of a push on the portfolio,
+           the lag into the way back home. */
         prevent: (node) => {
           if (node.closest("dialog[open]")) return true;
           if (Math.abs(dx) > Math.abs(dy)) return false;
@@ -94,11 +94,11 @@ export function useLenis(
           dx = data.deltaX;
           dy = data.deltaY;
           if (!(e instanceof WheelEvent)) return true;
-          /* A trackpad is the strip's own (`onWheel`): its events move the
-             scroller directly, since macOS has already eased them. Eased
-             again here it cost a frame loop and a layout a frame, and a
-             home page swipe ran at 31ms a frame against 20 without it
-             (WebKit, 1440 wide, 2026-10-08). A notch is still Lenis's. */
+          /* A trackpad is the strip's own (`onWheel`): its events move
+             the scroller directly, since macOS has already eased them.
+             Eased again here it cost a frame loop and a layout a frame,
+             and a home page swipe ran at 31ms a frame against 20
+             without it (WebKit, 1440 wide). A notch is still Lenis's. */
           if (padGesture.get(el)) {
             // Taken over mid-run: Lenis stops where the strip stands.
             if (lenis.isScrolling === "smooth")
@@ -110,10 +110,10 @@ export function useLenis(
           lenis.options.lerp = MOUSE_LERP;
           /* Firefox's mouse reports lines, and Lenis counts a line as
              16.7px, so a notch of three carried 150px against the 360 of
-             a notch anywhere else, and on a paged strip that is under the
-             fifth of a screen `settle` asks for: the page never turned
-             (2026-10-09). A line is 40px here, as the strip's own model
-             and `scrubDeal` count it. Lenis reads the deltas after this. */
+             a notch anywhere else, and on a paged strip that is under
+             the fifth of a screen `settle` asks for: the page never
+             turned. A line is 40px here, as the strip's own model and
+             `scrubDeal` count it. Lenis reads the deltas after this. */
           if (e.deltaMode === 1) {
             data.deltaX *= LINE / LENIS_LINE;
             data.deltaY *= LINE / LENIS_LINE;
@@ -200,8 +200,8 @@ export function useLenis(
       // Capture, so the wake is booked before Lenis handles the event.
       el.addEventListener("wheel", wake, { capture: true, passive: true });
       /* Lenis watches the strip's box, not how far it scrolls, so the
-         sections that arrive after a crossing (`defer`) never reached it:
-         the wheel stopped at the second screen (Julian, 2026-10-02). */
+         sections that arrive after a crossing (`defer`) never reached
+         it: the wheel stopped at the second screen. */
       const grown = new MutationObserver(() => lenis.resize());
       grown.observe(el, { childList: true });
       el.dataset.lenis = "1";

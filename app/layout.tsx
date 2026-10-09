@@ -25,9 +25,9 @@ import { DebugGate } from "@/components/debug-gate";
    through `next/font`, so a visitor makes no request to Google and the text
    never flashes a fallback face. `globals.css` points `font-sans` at the
    mono so body text needs no class. */
-/* Julian's header face, Endless (2026-10-07): the logo, the titles, the
-   section titles and the nav. One regular cut, declared across every
-   weight so the 900 the titles ask for is not faked bold. */
+/* Julian's header face, Endless: the logo, the titles, the section
+   titles and the nav. One regular cut, declared across every weight
+   so the 900 the titles ask for is not faked bold. */
 const display = localFont({
   src: "./fonts/Endless.woff2",
   variable: "--font-display",
@@ -35,7 +35,7 @@ const display = localFont({
   fallback: ["Helvetica Neue", "Arial", "sans-serif"],
 });
 /* The wordmark stays Inter Tight Black: the logo and the name on the
-   cover (Julian, 2026-10-07). */
+   cover. */
 const wordmark = Inter_Tight({
   variable: "--font-wordmark",
   subsets: ["latin"],
@@ -94,8 +94,8 @@ export const metadata: Metadata = {
        so a shared /sessions link unfurled pointing at the homepage. The
        canonical on each page is the address. */
     /* The wordmark on black, at 1200x630: "Julian Gigola" in Inter Tight 900,
-     * the logo's face. Julian's pick for the thumbnail (2026-10-06); it was
-     * the eye mark before that, and the cover photograph before that.
+     * the logo's face. Julian's pick for the thumbnail; it was the eye mark
+     * before that, and the cover photograph before that.
      *
      * Nothing changes with the cover, so there is nothing to generate per
      * deploy: `public/og.jpg` is a committed file. book.juliangigola.com
@@ -230,9 +230,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           <PageTransition>{children}</PageTransition>
         </main>
         <SiteFooter />
-        {/* A phone on its side is asked to stand it up (Julian, 2026-10-04):
-            the site is laid out for a phone upright. Only a phone, only on
-            its side (`.turn-upright`, globals.css). */}
+        {/* A phone on its side is asked to stand it up: the site is laid
+            out for a phone upright. Only a phone, only on its side
+            (`.turn-upright`, globals.css). */}
         <div className="turn-upright" aria-hidden>
           {/* The phone, and on its screen the small arrow of a turn (Julian:
               a spiral arrow in the phone's screen). */}

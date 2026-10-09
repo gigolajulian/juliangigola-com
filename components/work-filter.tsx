@@ -106,24 +106,24 @@ export function WorkFilter({
                     className={cn(
                       "flex items-baseline justify-between gap-4 py-1.5 [@media(pointer:coarse)]:py-3 max-sm:gap-2 max-sm:[@media(pointer:coarse)]:py-2.5",
                       "transition-opacity duration-200 ease-[var(--ease-out-strong)]",
-                      // 70, not 45: on the glass the faded names fell under 4.5:1
-                      // (audit, 2026-10-05), the site menu's level in the light.
+                      // 70, not 45: on the glass the faded names fell under
+                      // 4.5:1, the site menu's level in the light.
                       here ? "opacity-100" : "opacity-70 hoverable:hover:opacity-85",
                     )}
                   >
-                    {/* Two to a row on a phone, set to the column so the
-                        longest, Brand Campaigns, fits whole: one size for
-                        all of them, 17px at most (Julian, 2026-10-05). */}
+                    {/* Two to a row on a phone, set to the column so
+                        the longest, Brand Campaigns, fits whole: one
+                        size for all of them, 17px at most. */}
                     <span className="font-display uppercase leading-[0.95] tracking-[0] text-[clamp(1.375rem,4.5vw,1.75rem)] max-sm:min-w-0 max-sm:truncate max-sm:text-[min(1.0625rem,calc((100cqi-1.6rem)*0.108))]">
                       {row.name}
                     </span>
-                    {/* The count in the ink of the name beside it, not in
-                        the muted grey: over a dark frame the grey was the
-                        one thing on the panel that did not survive. At the
-                        name's own strength: faded again under a faded name
-                        it fell to 2.7:1 (audit, 2026-10-05). */}
-                    {/* Quieter by size, not by fading: smaller and set
-                        to the cap height of the name (Julian, 2026-10-05). */}
+                    {/* The count in the ink of the name beside it, not
+                        in the muted grey: over a dark frame the grey
+                        was the one thing on the panel that did not
+                        survive. At the name's own strength: faded again
+                        under a faded name it fell to 2.7:1. */}
+                    {/* Quieter by size, not by fading: smaller and set to
+                        the cap height of the name. */}
                     <span className="label shrink-0 tabular-nums max-sm:self-start max-sm:text-[0.625rem]">
                       {head?.count}
                     </span>

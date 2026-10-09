@@ -12,8 +12,8 @@
    zoom jumped to size instead of easing. Measured: transition-property
    read `opacity` on a cover carrying the class. */
 img[data-fade] {
-  /* No fade (Julian, 2026-10-08): a picture shows as soon as it lands.
-     Loading stays lazy, so it still comes in as it reaches the screen. */
+  /* No fade: a picture shows as soon as it lands. Loading stays lazy,
+     so it still comes in as it reaches the screen. */
   opacity: 1;
   transition: scale 500ms var(--ease-out-strong);
 }
@@ -227,19 +227,18 @@ h2:not(.label) {
 }
 
 /* The headers of the screens (Biography, Commissions, Sessions, the
-   footer's ask) in the wordmark's face, Inter Tight Black (Julian,
-   2026-10-07). The names standing up the portfolio's spines and plates
-   keep Endless. Unlayered, so it outranks the `font-display` they carry.
-   The ask at the end of the work ("Have a project in mind?") is in the
-   section titles' Archivo (Julian, 2026-10-08). */
+   footer's ask) in the wordmark's face, Inter Tight Black. The names
+   standing up the portfolio's spines and plates keep Endless.
+   Unlayered, so it outranks the `font-display` they carry. The ask at
+   the end of the work ("Have a project in mind?") is in the section
+   titles' Archivo. */
 :is(h1, h2):is(.font-display, .title):not(.chapter-name, .enquiry-title):not(:is(.discipline-title, .project-plate) > *) {
   font-family: var(--font-wordmark);
   font-weight: 900;
 }
 
-/* A card under the hand gets no focus ring (Julian, 2026-10-07: the
-   accent frame showed on a click). Keyboard focus with the hand
-   elsewhere still draws it. */
+/* A card under the hand gets no focus ring. Keyboard focus with the
+   hand elsewhere still draws it. */
 .strip-cell:focus-visible:hover {
   outline: none;
 }
@@ -269,15 +268,15 @@ h2:not(.label) {
   }
 }
 
-/* The vertical discipline name comes up at once (Julian, 2026-10-07:
-   reduce the delay): no wait before the first word, a quicker rise. */
+/* The vertical discipline name comes up at once: no wait before the
+   first word, a quicker rise. */
 :is(.discipline-title, [data-discipline-page] .project-plate) > h2 .title-word {
   animation-duration: 520ms;
   animation-delay: calc(var(--i, 0) * 40ms);
 }
 
 /* The colour page's covers tip toward the pointer as the portfolio's
-   do (`card-tilt.tsx`; Julian, 2026-10-07). */
+   do (`card-tilt.tsx`). */
 .scope-tile {
   transition:
     transform 450ms var(--ease-out-strong),
@@ -301,7 +300,7 @@ h2:not(.label) {
 @media (min-width: 40rem) {
   :root[data-cards] .portfolio-arrive .strip-scroll > .strip-cell[data-deck] {
     overflow: visible;
-    /* More room before the name inside its card (Julian, 2026-10-08). */
+    /* More room before the name inside its card. */
     padding-left: 4rem;
   }
   /* No dark frame round each cover on the panel: that ground is the
@@ -313,9 +312,9 @@ h2:not(.label) {
     content: "";
     position: absolute;
     z-index: -1;
-    /* The page's own colour (Julian, 2026-10-08), and carried left across
-       the room before it: in a slide the chapter going under showed
-       through that room as a dark bar riding the card's edge. */
+    /* The page's own colour, and carried left across the room before
+       it: in a slide the chapter going under showed through that room
+       as a dark bar riding the card's edge. */
     left: -2.75rem;
     top: -0.75rem;
     bottom: -0.75rem;
@@ -341,10 +340,10 @@ h2:not(.label) {
 .about-marquee:focus-within .about-marquee-track {
   animation: none;
 }
-/* The homepage's ask over the wall: the muted lines ("hello@", "Next",
-   the line under the question, the doors' lines) were faint over a
-   bright tile, under 4.5:1 on a phone in either theme (scroll-craft's
-   contrast pass, 2026-10-02). Nearer the ink. */
+/* The homepage's ask over the wall: the muted lines ("hello@",
+   "Next", the line under the question, the doors' lines) were faint
+   over a bright tile, under 4.5:1 on a phone in either theme. Nearer
+   the ink. */
 .enquiry-backdrop ~ * .text-muted-foreground,
 /* And the doors' lines, over the same wall through a 30% tint: 3.9:1 at
    a bright tile on the light theme (plan 5.1). */

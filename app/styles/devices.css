@@ -1,11 +1,11 @@
 /* Late device passes: upright, phone filter, glass menus, the form's edge, the picker and the iPad head. */
 
 /* ── turn it upright ──────────────────────────────────────────────
- * Julian (2026-10-04): on a phone on its side the site is not at its
- * best, so the screen says so. A phone, not an iPad or a short laptop
- * window: a touch screen whose short side is a phone's. The outline turns
- * from lying to standing, once, and then holds. Over everything, the
- * drawers and the splash included.
+ * On a phone on its side the site is not at its best, so the screen says
+ * so. A phone, not an iPad or a short laptop window: a touch screen whose
+ * short side is a phone's. The outline turns from lying to standing,
+ * once, and then holds. Over everything, the drawers and the splash
+ * included.
  * ─────────────────────────────────────────────────────────────── */
 .turn-upright {
   display: none;
@@ -65,12 +65,12 @@
 }
 
 /* ── the filter as a drop-down, on a phone ────────────────────────
- * Julian (2026-10-04): the title is the filter, so the list drops from
- * under it rather than sliding in from the side and pushing the page
- * away. It unfolds from the head's foot (`--drop-top`, written on open in
- * `work-shell.tsx`), the names dropping in a step apart, the page dimmed
- * under it; it folds back up quicker, all at once, and a pick folds it
- * while the new title rises in its place.
+ * The title is the filter, so the list drops from under it rather than
+ * sliding in from the side and pushing the page away. It unfolds from the
+ * head's foot (`--drop-top`, written on open in `work-shell.tsx`), the
+ * names dropping in a step apart, the page dimmed under it; it folds back
+ * up quicker, all at once, and a pick folds it while the new title rises
+ * in its place.
  * ─────────────────────────────────────────────────────────────── */
 @media (max-width: 39.999rem) {
   :root[data-drawer="filter"] :is(.site-bar, body > main, body > footer) {
@@ -111,12 +111,12 @@
 }
 
 /* ── the menus as glass, over the page ────────────────────────────
- * Julian (2026-10-04): the menu and the phone's filter drop-down are the
- * glass themselves and open over the page, which stays where it is: no
- * push, no frosting of the page around them. The panels take the head's
- * own pane (`.head-glass::before`), so the drop-down and the head it falls
- * from read as one sheet. The window behind stays clear, still there to
- * be pressed to close.
+ * The menu and the phone's filter drop-down are the glass themselves and
+ * open over the page, which stays where it is: no push, no frosting of the
+ * page around them. The panels take the head's own pane
+ * (`.head-glass::before`), so the drop-down and the head it falls from
+ * read as one sheet. The window behind stays clear, still there to be
+ * pressed to close.
  * ─────────────────────────────────────────────────────────────── */
 @media (max-width: 63.999rem) {
   :root[data-drawer="menu"] :is(.site-bar, body > main, body > footer) {
@@ -144,8 +144,8 @@
     -webkit-backdrop-filter: none;
     backdrop-filter: none;
   }
-  /* Thicker than the head's pane: names are read off this one, and a dark
-     frame under the glass took them below 4.5:1 (audit, 2026-10-05). */
+  /* Thicker than the head's pane: names are read off this one, and a
+     dark frame under the glass took them below 4.5:1. */
   .work-filter-panel {
     background-color: color-mix(in oklab, var(--background) 86%, transparent);
     -webkit-backdrop-filter: blur(var(--glass-blur, 9px)) saturate(1.5);
@@ -168,8 +168,8 @@
  * until they come near the window; 1200px holds their place until they
  * have been drawn once, then their own height (`auto`). Measured on
  * production, throttled phone, three runs each: LCP 3.5s to 2.7s, style
- * 1.35s to 0.98s (optimize pass, 2026-10-05). The first screen is never
- * skipped: it is what is seen, and `data-past-hero` reads it.
+ * 1.35s to 0.98s. The first screen is never skipped: it is what is seen,
+ * and `data-past-hero` reads it.
  * ─────────────────────────────────────────────────────────────── */
 @media (max-width: 39.999rem) {
   .strip-scroll[data-dealt="screens"] > [data-hash]:not(:first-child) {
@@ -182,7 +182,7 @@
   }
 }
 
-/* ── the form's edge (Julian, 2026-10-05): a thin white line and its glow
+/* ── the form's edge: a thin white line and its glow
    that travel round the form on the beam's lap (`contact-beam.tsx`), never
    sitting still. The beam's own stroke is grey and too faint to read. */
 .contact-edge {
@@ -212,7 +212,7 @@
   mask-composite: exclude;
 }
 
-/* ── the reference picker (Julian, 2026-10-05) ──
+/* ── the reference picker ──
    Pops out of the inquiry form (`reference-picks.tsx`): a glass panel in
    the top layer, the page dimmed and blurred behind it. */
 .reference-panel {
@@ -264,14 +264,14 @@
 }
 
 /* ── the rail in the photographs' colours ────────────────────────────
- * Julian (2026-10-05): colour from the photos in the All portfolio bar,
- * tastefully. Only the control (the bar under the pointer) shows it:
- * each discipline's stretch of the capsule takes a little of its colour,
- * the project under the pointer in an open one a little more, and the
- * thumb stays neutral so its name reads. The line at rest stays grey.
- * The colours are the projects' accents (`scripts/make-accents.mjs`),
- * held to a lightness and chroma that read on either ground, and that
- * keep the names on them past 4.5:1.
+ * Colour from the photos in the All portfolio bar, tastefully. Only the
+ * control (the bar under the pointer) shows it: each discipline's
+ * stretch of the capsule takes a little of its colour, the project under
+ * the pointer in an open one a little more, and the thumb stays neutral
+ * so its name reads. The line at rest stays grey. The colours are the
+ * projects' accents (`scripts/make-accents.mjs`), held to a lightness
+ * and chroma that read on either ground, and that keep the names on them
+ * past 4.5:1.
  * ─────────────────────────────────────────────────────────────── */
 [data-tinted] {
   --tint-lit: oklch(from var(--tint) clamp(0.5, l, 0.6) clamp(0.07, calc(c * 1.35), 0.17) h);
@@ -314,10 +314,10 @@
   --rail-m: color-mix(in oklab, var(--tint-lit) 75%, var(--rail-track));
   --rail-b: color-mix(in oklab, color-mix(in oklab, var(--tint-lit), var(--next-lit)) 75%, var(--rail-track));
 }
-/* The names on the colours at full strength: the grey at 60% read about
-   2.5:1 on them (audit, 2026-10-05). White on the dark ground, where the
-   colours mix down into the track, and dark ink on the light one. The
-   thumb keeps its own (`[data-tone="lit"]`, `"near"`). */
+/* The names on the colours at full strength: the grey at 60% read
+   about 2.5:1 on them. White on the dark ground, where the colours
+   mix down into the track, and dark ink on the light one. The thumb
+   keeps its own (`[data-tone="lit"]`, `"near"`). */
 .rail-line:hover .rail-chapter[data-tinted]:not([data-tone="lit"], [data-tone="near"]) .rail-name,
 [data-dwell] .rail-line .rail-chapter[data-tinted]:not([data-tone="lit"], [data-tone="near"]) .rail-name {
   color: oklch(0.98 0.003 60);
@@ -346,9 +346,9 @@
 }
 
 /* ── an iPad sideways: a slimmer head ──
-   Julian (2026-10-08): smaller nav links and a thinner bar for more room
-   for the work, and the twelve chips replaced by the drop-down the phone
-   has (`.work-filter` above, `filter-trigger` in `work-shell.tsx`).
+   Smaller nav links and a thinner bar for more room for the work, and
+   the twelve chips replaced by the drop-down the phone has
+   (`.work-filter` above, `filter-trigger` in `work-shell.tsx`).
    Unlayered, so it outranks the `lg:hidden` both carry. */
 @media (pointer: coarse) and (min-width: 64rem) and (orientation: landscape) {
   /* Then 1.4 times that, bar and contents (Julian, same day). */
@@ -420,8 +420,8 @@
   }
 }
 
-/* An iPad held upright: the bar's name stays on the homepage's cover too
-   (Julian, 2026-10-08), as it does under `lg` on any other screen. */
+/* An iPad held upright: the bar's name stays on the homepage's cover
+   too, as it does under `lg` on any other screen. */
 @media (pointer: coarse) and (min-width: 40rem) and (orientation: portrait) {
   .home-wordmark {
     opacity: 1;
@@ -431,11 +431,11 @@
 }
 
 /* ── an iPad either way: the filter in the title row ──
-   Julian (2026-10-08): the drop-down's button on the line with the title
-   and the view icons, so its own row goes and the work has the height.
-   It takes the crumb's slot on the left; the crumb's way back is the
-   drop-down's first name. Both children of the head share one cell, and
-   the row shrinks to its button so the icons stay pressable. */
+   The drop-down's button on the line with the title and the view
+   icons, so its own row goes and the work has the height. It takes
+   the crumb's slot on the left; the crumb's way back is the
+   drop-down's first name. Both children of the head share one cell,
+   and the row shrinks to its button so the icons stay pressable. */
 @media (pointer: coarse) and (min-width: 40rem) {
   .head-glass {
     display: grid;
@@ -456,17 +456,17 @@
 }
 
 /* ── the inquiry screen on an iPad ──
-   Julian (2026-10-08): the form fits the whole page either way.
-   Sideways: up under the slimmer bar, and the card the width of its
-   column so the six kinds of shoot sit on one line. */
+   The form fits the whole page either way. Sideways: up under the
+   slimmer bar, and the card the width of its column so the six kinds
+   of shoot sit on one line. */
 @media (pointer: coarse) and (min-width: 64rem) and (orientation: landscape) {
   .contact-inquire {
     padding-top: 4.75rem;
     padding-bottom: 1.25rem;
-    /* Not a scroller here. The card is fitted to the screen, so there is
-       nothing below it to reach; but the wall behind runs on under the
-       rail (`--under`), and in a scroller those 90px were there to scroll
-       to (Julian, 2026-10-08: Inquiries still scrolls up and down). */
+    /* Not a scroller here. The card is fitted to the screen, so there
+       is nothing below it to reach; but the wall behind runs on under
+       the rail (`--under`), and in a scroller those 90px were there to
+       scroll to. */
     overflow-y: visible;
   }
   .contact-inquire .contact-card {
@@ -475,13 +475,12 @@
   .contact-card fieldset > div {
     flex-wrap: nowrap;
   }
-  /* The card as tall as what is in it, in the middle of the screen
-     (Julian, 2026-10-08: smaller, and room for what people add). It was
-     stretched the full height with the message taking the rest, so it
-     had nowhere to go when someone wrote at length or added pictures.
-     Now a long message scrolls in its own box, and a card that grows
-     past the screen (eight reference pictures) scrolls inside itself,
-     never the page. */
+  /* The card as tall as what is in it, in the middle of the screen.
+     It was stretched the full height with the message taking the
+     rest, so it had nowhere to go when someone wrote at length or
+     added pictures. Now a long message scrolls in its own box, and a
+     card that grows past the screen (eight reference pictures)
+     scrolls inside itself, never the page. */
   .contact-inquire {
     align-items: center;
   }
@@ -511,10 +510,10 @@
     align-self: center;
   }
 }
-/* Upright the Inquiries screen is a scroller of its own, so the wall's
-   overhang under the rail (`--under`) is clipped out of sight there
-   anyway, and all it did was give the screen 90px more to scroll to
-   (Julian, 2026-10-08: it still scrolls up and down). */
+/* Upright the Inquiries screen is a scroller of its own, so the
+   wall's overhang under the rail (`--under`) is clipped out of sight
+   there anyway, and all it did was give the screen 90px more to
+   scroll to. */
 @media (pointer: coarse) and (min-width: 40rem) and (orientation: portrait) {
   :root[data-under] .contact-inquire > .enquiry-backdrop {
     bottom: 0;
@@ -574,9 +573,9 @@
   }
 }
 
-/* Julian (2026-10-08): an iPad held sideways reads the page's name under
-   the rail rather than over it. Hung from the bar's lower edge with the
-   same gap, and grown from that edge: the homepage's screen names
+/* An iPad held sideways reads the page's name under the rail rather
+   than over it. Hung from the bar's lower edge with the same gap, and
+   grown from that edge: the homepage's screen names
    (`rail-tick-word`) and the archive's (`rail-word`). */
 @media (pointer: coarse) and (min-width: 40rem) and (orientation: landscape) {
   .strip-rail .rail-tick-word {

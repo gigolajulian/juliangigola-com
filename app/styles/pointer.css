@@ -18,8 +18,8 @@
     cursor: none !important;
   }
 }
-/* Arranging the cover (the 3D view, drag to arrange): the system's own
-   pointer, not the mark (Julian, 2026-10-07). */
+/* Arranging the cover (the 3D view, drag to arrange): the system's
+   own pointer, not the mark. */
 :root:has(.hero-3d, .cover-float[data-arrange]) .pointer-mark {
   display: none;
 }
@@ -65,9 +65,9 @@
   scale: calc(22 / 120);
   background: var(--mark-fill);
 }
-/* Over a text field (Julian, 2026-10-04: a custom icon for the form): the
-   dot draws itself out into a caret, a thin upright bar, on the same
-   curve as every change of size, and rounds back up on the way out. */
+/* Over a text field: the dot draws itself out into a caret, a thin
+   upright bar, on the same curve as every change of size, and rounds
+   back up on the way out. */
 .pointer-mark[data-state="text"] .mark-dot {
   scale: calc(2.5 / 120) calc(24 / 120);
 }
@@ -102,8 +102,8 @@
   scale: calc(48 / 120);
   translate: 0 -4px;
 }
-/* In the photo picker the frames are small and close together: a smaller
-   dot, so it does not cover the one it is over (Julian, 2026-10-08). */
+/* In the photo picker the frames are small and close together: a
+   smaller dot, so it does not cover the one it is over. */
 :root:has(.reference-panel[open]) .pointer-mark[data-state="press"] .mark-dot {
   scale: calc(34 / 120);
 }

@@ -29,8 +29,8 @@ export function BookPicker({ sessions, start }: { sessions: Bookable[]; start?: 
   const current = sessions[on];
   return (
     <section
-      /* One window, no vertical scroll (Julian, 2026-10-04): the footer's
-         single line and the page held to the screen, as the portfolio is
+      /* One window, no vertical scroll: the footer's single line and
+         the page held to the screen, as the portfolio is
          (`[data-quiet-footer]`, globals.css). */
       data-quiet-footer
       className="book-page mx-auto grid w-full max-w-[110rem] gap-8 px-6 pb-16 pt-28 sm:px-10 lg:h-full lg:min-h-0 lg:items-center lg:pb-6 lg:pt-24 lg:grid-cols-[minmax(0,1fr)_minmax(0,2.2fr)] lg:gap-[clamp(2rem,4vw,5rem)]"
@@ -86,9 +86,8 @@ export function BookPicker({ sessions, start }: { sessions: Bookable[]; start?: 
           </Link>
         </p>
       </div>
-      {/* As tall as Google's page is, and no taller (Julian, 2026-10-04:
-          shorter, then a bit longer so it never scrolls inside itself), in
-          what the window leaves it: only a short one makes it scroll. */}
+      {/* As tall as Google's page is, and no taller, in what the window
+          leaves it: only a short one makes it scroll. */}
       <div className="h-[75svh] overflow-hidden rounded-[12px] border border-border bg-card lg:h-full lg:max-h-[53rem]">
         <CalEmbed path={current.cal} title={`Pick a time for ${current.name}`} className="booking-embed block h-full w-full border-0">
           <iframe

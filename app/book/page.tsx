@@ -10,11 +10,11 @@ export const metadata: Metadata = {
   alternates: { canonical: "/book" },
 };
 
-/* Julian (2026-10-04): book.juliangigola.com, a Cloudflare redirect to
-   here. The four sessions with a Google Calendar appointment schedule on
-   hello@juliangigola.com; weddings are booked by inquiry. Live without
-   the 50% deposit, which waits on Stripe in Calendar's settings. The
-   lengths are the schedules' own. */
+/* book.juliangigola.com, a Cloudflare redirect to here. The four
+   sessions with a Google Calendar appointment schedule on
+   hello@juliangigola.com; weddings are booked by inquiry. Live
+   without the 50% deposit, which waits on Stripe in Calendar's
+   settings. The lengths are the schedules' own. */
 const CALENDARS: Record<string, { id: string; length: string }> = {
   portraits: { id: "AcZssZ14pWKn0PhQZxKSfrSjutq_NM4vtqcRXF4C4PYuzZrXcN54Ec4BO_Rms3HgjKdsDRQYo670AQbD", length: "1 hour" },
   graduation: { id: "AcZssZ1xuDp0FQU0bQESt670XPAJ7R76ql1RdYTRBokN_AybNjkeSrqXLGD8_Qg5bDY9FZBRbDhYiGz7", length: "1 hour" },

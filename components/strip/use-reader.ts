@@ -337,10 +337,10 @@ export function useReader({
            cells with no tick - a page of words, the ask, the card that
            leads on - which lit nothing at all. */
         const gone = Math.max(0, Math.min(1, x / room));
-        /* A paged strip is a screen to a section, so the one in the middle
-           of the window is the one you are on. The sliding eye read a third
-           of the way in early on the homepage and lit Biography with
-           Sessions filling the screen (Julian, 2026-10-04). */
+        /* A paged strip is a screen to a section, so the one in the
+           middle of the window is the one you are on. The sliding eye
+           read a third of the way in early on the homepage and lit
+           Biography with Sessions filling the screen. */
         const eye = paged ? x + span / 2 : x + gone * span;
         let near = best;
         let gap = Infinity;
@@ -386,11 +386,11 @@ export function useReader({
       /* The visitor chose a place, so the arrival's aim (`aimed`) is
          spent. Left standing, the next re-lay of the row set the strip
          back on the cell the address named when this effect last ran:
-         Julian (2026-10-07) pressed Inquiries, Sessions, then Biography,
-         and the glide to Biography was thrown back toward Sessions a few
-         frames in, the bar lighting Sessions. Traced in his Chrome: the
-         end's card mounting and leaving re-ran this effect with the
-         address at Sessions, and a re-lay during the next glide re-aimed. */
+         Julian pressed Inquiries, Sessions, then Biography, and the glide
+         to Biography was thrown back toward Sessions a few frames in, the
+         bar lighting Sessions. Traced in his Chrome: the end's card
+         mounting and leaving re-ran this effect with the address at
+         Sessions, and a re-lay during the next glide re-aimed. */
       aimedRef.current = "";
       const hash = decodeURIComponent(window.location.hash.slice(1));
       const i = cellFor(el, hash);
@@ -424,17 +424,17 @@ export function useReader({
     /* The scroller changing shape is the one thing that moves the cells:
        a window resized, the rack swapped for the strip, a cell arriving.
        Measure again then, and never on a scroll frame. */
-    /* A link straight to a cell, in the rack (Julian, 2026-10-04: every
-       film on the homepage opened Event coverage). The landing is aimed
-       before the rack has placed its frames, at where the cell stands in
-       a strip, and the rack then moves it the better part of a screen
-       further on. Until the visitor moves the row themselves, each
-       re-lay aims again at the cell the address named on arrival. */
-    /* On arrival only. Read again when the held-back sections mounted
-       (`count`), it was the address the strip had since written for the
-       section in view, and the next re-lay threw the row back to that
-       section's start (Julian's iPad, 2026-10-08: a swipe through
-       Editorial jumped to its title card). */
+    /* A link straight to a cell, in the rack. The landing is aimed
+       before the rack has placed its frames, at where the cell stands
+       in a strip, and the rack then moves it the better part of a
+       screen further on. Until the visitor moves the row themselves,
+       each re-lay aims again at the cell the address named on
+       arrival. */
+    /* On arrival only. Read again when the held-back sections
+       mounted (`count`), it was the address the strip had since
+       written for the section in view, and the next re-lay threw the
+       row back to that section's start (Julian's iPad: a swipe
+       through Editorial jumped to its title card). */
     if (!arrived.current) {
       arrived.current = true;
       aimedRef.current = decodeURIComponent(window.location.hash.slice(1));

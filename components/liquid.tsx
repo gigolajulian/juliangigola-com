@@ -8,8 +8,8 @@ import { Liquid as Base, type LiquidProps } from "liquid-gooey";
  * React hangs its event listeners on every portal container, and Chrome
  * makes an SVG element with focus listeners keyboard focusable: a Tab
  * through the hero's buttons stopped on an invisible group with no name
- * and no ring after "See the work" (UI/UX review, 2026-10-02). Every
- * Liquid on the site comes through here.
+ * and no ring after "See the work". Every Liquid on the site comes
+ * through here.
  */
 const Root = React.forwardRef<HTMLDivElement, LiquidProps>(function Liquid(props, ref) {
   const own = React.useRef<HTMLDivElement>(null);
@@ -24,12 +24,12 @@ const Root = React.forwardRef<HTMLDivElement, LiquidProps>(function Liquid(props
 
 export const Liquid = Object.assign(Root, { Item: Base.Item });
 
-/* Once the page has loaded and gone quiet. Every item measures its target
- * as it mounts and the engine goes on measuring for thirty frames, which
- * on a phone was a full restyle of the page in the middle of hydration
- * (optimize pass, 2026-10-05). The drops that only decorate (a hover's
- * ground, the rail's ink, the lit chip) wait for this; nobody points at
- * them in the first second. Once true it stays true for the visit, so a
+/* Once the page has loaded and gone quiet. Every item measures its
+ * target as it mounts and the engine goes on measuring for thirty
+ * frames, which on a phone was a full restyle of the page in the
+ * middle of hydration. The drops that only decorate (a hover's ground,
+ * the rail's ink, the lit chip) wait for this; nobody points at them
+ * in the first second. Once true it stays true for the visit, so a
  * page reached later has them at once. */
 let quiet = false;
 export function useQuiet() {

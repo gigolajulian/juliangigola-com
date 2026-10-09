@@ -218,14 +218,14 @@
     background: var(--ground);
   }
 }
-/* Julian (2026-10-01): a slight shadow under a screen as it comes in, for
-   the depth. A soft band off its leading edge, lying on the screen it is
-   covering. Its opacity is scrubbed by the deck (`shade` in `deck.ts`),
-   which already knows how far each screen is covered: nought at rest, so
-   the next screen waiting flush with the window's edge draws no seam
-   there, full by an eighth of the way in, and once the screen is pinned
-   the band is off the left of the window. Opacity on a pseudo, so the
-   compositor runs it and nothing repaints. */
+/* A slight shadow under a screen as it comes in, for the depth. A soft
+   band off its leading edge, lying on the screen it is covering. Its
+   opacity is scrubbed by the deck (`shade` in `deck.ts`), which
+   already knows how far each screen is covered: nought at rest, so the
+   next screen waiting flush with the window's edge draws no seam
+   there, full by an eighth of the way in, and once the screen is
+   pinned the band is off the left of the window. Opacity on a pseudo,
+   so the compositor runs it and nothing repaints. */
 .strip-scroll[data-dealt="screens"] > * + *::before {
   content: "";
   position: absolute;
@@ -273,16 +273,15 @@
    chapter comes in whole. A spread of the page's own colour, not a
    shadow: it is invisible everywhere but over the card behind. */
 .strip-scroll[data-dealt="chapters"] > * {
-  /* A variable, so the hover's shadow can carry it too (Julian, 2026-10-04:
-     the hover shadow had replaced it and the chapter behind showed). */
+  /* A variable, so the hover's shadow can carry it too. */
   --deal-ground: 0 0 0 calc(0.5rem + 1px) var(--background);
   box-shadow: var(--deal-ground);
 }
-/* A cover with no partner in the rack stands over an empty row, and the
-   chapter behind showed through the hole (Julian, 2026-10-02, Artist
-   Presskit's seven). The same ground carried down a row and a gap, by the
-   shelf's height (`.strip-grid` is the size container); a partner, when
-   there is one, is painted after it and covers it. */
+/* A cover with no partner in the rack stands over an empty row, and
+   the chapter behind showed through the hole. The same ground carried
+   down a row and a gap, by the shelf's height (`.strip-grid` is the
+   size container); a partner, when there is one, is painted after it
+   and covers it. */
 .strip-scroll.strip-grid[data-dealt="chapters"] > [data-alone] {
   --deal-ground:
     0 0 0 calc(0.5rem + 1px) var(--background),
@@ -301,11 +300,11 @@
 .strip-scroll[data-arrive="dealt"] .title-rest {
   animation: none;
 }
-/* Julian (2026-10-01): Contact's title as wide as its column, on one
-   line (two lines at the cover's scale were too big). The column is a
-   container; the whole title reads as 8.4em of capitals (`titleWidth`'s
-   0.76 a letter and 0.3 a space, a little over). Never under 2.25rem:
-   an upright iPad's column is too narrow for one line at a heading's
+/* Contact's title as wide as its column, on one line (two lines at
+   the cover's scale were too big). The column is a container; the
+   whole title reads as 8.4em of capitals (`titleWidth`'s 0.76 a
+   letter and 0.3 a space, a little over). Never under 2.25rem: an
+   upright iPad's column is too narrow for one line at a heading's
    size, and there it takes two. */
 h2.contact-title {
   font-size: clamp(2.25rem, 100cqw / 8.4, 6rem);
@@ -329,15 +328,14 @@ h2.contact-title {
   [data-hash="title"] > h2:has(.title-word) {
     font-size: min(3.75rem, calc((min(30rem, 82vw) - 1.5rem) / var(--word-em, 6)));
   }
-  /* Julian (2026-09-30): a project's title on one line, and larger. Up to
-     4.5rem (6rem was too large), less where the whole name would not fit
-     50rem (or 82% of the window), and the plate widens to hold it, never
-     narrower than it was. `--title-em` is `titleWidth` in
-     `strip-page.tsx`. */
-  /* Then (2026-10-01): large, across, and over two lines when it is long
-     (Julian: I WANNA BE A HUMAN in two lines). Sized so its longest word,
-     or half the title when that is longer, fits the plate's 40rem, to
-     7rem, and the lines balanced; the plate as wide as what is on it. */
+  /* A project's title on one line, and larger. Up to 4.5rem (6rem was
+     too large), less where the whole name would not fit 50rem (or 82%
+     of the window), and the plate widens to hold it, never narrower
+     than it was. `--title-em` is `titleWidth` in `strip-page.tsx`. */
+  /* Then: large, across, and over two lines when it is long (Julian: I
+     WANNA BE A HUMAN in two lines). Sized so its longest word, or half
+     the title when that is longer, fits the plate's 40rem, to 7rem,
+     and the lines balanced; the plate as wide as what is on it. */
   .project-plate {
     width: fit-content;
     min-width: min(24rem, 82vw);
@@ -363,9 +361,9 @@ h2.contact-title {
 :has(> .title-word) {
   padding-bottom: 0.35em;
   margin-bottom: -0.35em;
-  /* And past the last letter: set tight, a Black face's final stroke runs
-     beyond its advance, and the clip cut the S off INQUIRIES (Julian,
-     2026-10-07). Given back, so nothing moves. */
+  /* And past the last letter: set tight, a Black face's final stroke
+     runs beyond its advance, and the clip cut the S off INQUIRIES.
+     Given back, so nothing moves. */
   padding-inline: 0.1em;
   margin-inline: -0.1em;
 }
@@ -657,8 +655,8 @@ h2.contact-title {
   --border: oklch(1 0 0 / 11%);
   --input: oklch(1 0 0 / 14%);
   /* And the ground with it: the light theme's glow stayed behind the
-     footer, the one strip the film does not reach, and read as a grey
-     band (Julian, 2026-10-03). */
+     footer, the one strip the film does not reach, and read as a
+     grey band. */
   --ground: linear-gradient(var(--background), var(--background));
 }
 /* And every quiet word goes nearly white over the film. A muted grey is
@@ -669,8 +667,8 @@ h2.contact-title {
 :root[data-reel] {
   --muted-foreground: oklch(0.88 0.004 80);
 }
-/* The film runs on under the footer, and the footer is glass over it
-   (Julian, 2026-10-07): it was the one band the reel did not reach. */
+/* The film runs on under the footer, and the footer is glass over
+   it: it was the one band the reel did not reach. */
 :root[data-reel] .reel-backdrop {
   bottom: -8rem;
 }

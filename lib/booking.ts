@@ -2,13 +2,13 @@
  * The booking pages: one per service, at the root (/headshots,
  * /graduation-photos...), each for San Francisco and San Jose at once.
  *
- * Julian (2026-10-02): booking pages, "no vertical pages", San Jose and
- * San Francisco mainly, "I can travel to any of those, LA and NY too",
- * and "I don't need separate pages for each" city. So a page per service,
- * a deck of screens like the homepage (`components/local-screens.tsx`),
- * whose title names the two cities he works in and whose "Where" screen
- * names every place he shoots, visibly: a search engine ranks a city it
- * can read on the page, and the structured data says the same thing.
+ * Booking pages, "no vertical pages", San Jose and San Francisco mainly,
+ * "I can travel to any of those, LA and NY too", and "I don't need
+ * separate pages for each" city. So a page per service, a deck of screens
+ * like the homepage (`components/local-screens.tsx`), whose title names
+ * the two cities he works in and whose "Where" screen names every place
+ * he shoots, visibly: a search engine ranks a city it can read on the
+ * page, and the structured data says the same thing.
  *
  * Every fact is one the site already states: the prices, inclusions and
  * turnaround come from the session in `content/site.json` (so /admin
@@ -58,8 +58,8 @@ export type BookingPage = {
   /** The photographs: the first is the cover, the rest the work screen. */
   tiles: Tile[];
   gallery: { href: string; label: string };
-  /** The frames its work screen shows, where the gallery is too large to
-      show whole: chosen, not sampled (Julian, 2026-10-03). */
+  /** The frames its work screen shows, where the gallery is too large
+      to show whole: chosen, not sampled. */
   picks?: string[];
   /** Presets for the form on the Book screen. */
   /** `calendar`: the Google Calendar appointment schedule's id, embedded
@@ -373,8 +373,8 @@ export const BOOKING_PAGES: BookingPage[] = [
     tiles: coversOf("studio-digitals"),
     gallery: { href: "/portfolio/studio-digitals", label: "The digitals gallery" },
     // Only the frames that read as digitals: plain ground, standing or
-    // close, no styling (Julian, 2026-10-03). Taneka's and Zoe's sets are
-    // posed floor work and stay in the gallery.
+    // close, no styling. Taneka's and Zoe's sets are posed floor work and
+    // stay in the gallery.
     picks: [
       "/work/abril/04.jpg",
       "/work/abril/01.jpg",

@@ -32,7 +32,7 @@ const ELSEWHERE = [
 ];
 
 export function ContactScreen({
-  // Julian (2026-10-03): one name for the screen, as the nav says it.
+  // One name for the screen, as the nav says it.
   title = "Inquiries",
   intro,
   label = "Inquiries",
@@ -73,10 +73,10 @@ export function ContactScreen({
       <p data-dial="intro" className="title-rest max-w-prose text-left text-sm normal-case leading-relaxed text-muted-foreground [zoom:1.02]">
         {intro ?? (<>
         {/* A sentence to a line, where there is room: Julian asked
-            for two lines rather than a wrap mid sentence. Where there
-            is not, each sentence wraps balanced and set left: it was
-            justified, and "project." stood on a line of its own
-            (Julian, 2026-10-01: one word doesn't need a whole line). */}
+            for two lines rather than a wrap mid sentence. Where
+            there is not, each sentence wraps balanced and set left:
+            it was justified, and "project." stood on a line of its
+            own. */}
         <span className="sm:block sm:text-balance">
           Commissions, sessions, or a question about a project.
         </span>{" "}
@@ -108,10 +108,10 @@ export function ContactScreen({
       data-hash={hash}
       className="screen-measure contact-inquire relative isolate grid w-full shrink-0 grid-cols-1 gap-10 px-6 py-12 sm:h-full sm:grid-cols-[minmax(0,1fr)_minmax(0,2fr)] sm:grid-rows-[minmax(0,1fr)] sm:items-center sm:gap-x-12 sm:pb-6 sm:pl-10 sm:pr-10 sm:pt-24 lg:gap-x-16"
     >
-      {/* Under the ground the booking pages' questions sit on, 40%, so the
-          words read over it (`.questions-wall`). First, so the rule that
-          brings muted words up over a wall finds what follows it. Inert:
-          Julian (2026-10-05), the wall is not to be clicked here. */}
+      {/* Under the ground the booking pages' questions sit on, 40%, so
+          the words read over it (`.questions-wall`). First, so the rule
+          that brings muted words up over a wall finds what follows it.
+          Inert: the wall is not to be clicked here. */}
       {backdrop ? (
         <div inert className="enquiry-backdrop questions-wall absolute inset-0 -z-10 overflow-hidden">
           {backdrop}
@@ -120,17 +120,16 @@ export function ContactScreen({
       {/* Julian (Pixel): a scroll inside the page on a phone, 2px of it,
           held the finger and the page would not move. Its own scroll from
           `sm` only, where the screen has a fixed height. */}
-      {/* On a phone the column dissolves into the screen's own column, so
-          the address and the handles can follow the form rather than stand
-          between the ask and it (critique, 2026-10-03: the name field was
-          530px down). */}
+      {/* On a phone the column dissolves into the screen's own column,
+          so the address and the handles can follow the form rather than
+          stand between the ask and it. */}
       <div
         data-scroll
         className="flex min-h-0 flex-col gap-8 [container-type:inline-size] max-sm:contents sm:max-h-full sm:overflow-y-auto sm:overscroll-contain short:gap-5"
       >
         <div className="flex flex-col gap-5">
           {/* The homepage's head, unless the visitor came to book a
-              session (critique, 2026-10-03). A booking page has its own. */}
+              session. A booking page has its own. */}
           {intro ? head : (
             <Suspense fallback={head}>
               <WhenBooking booking={booking}>{head}</WhenBooking>

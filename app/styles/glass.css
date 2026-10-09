@@ -103,12 +103,12 @@
   }
 }
 
-/* The play mark on a film (`video-grid.tsx`): a disc of clear glass, not a
-   tile of the bar's frosted kind (Julian, 2026-10-01: circular, liquid
-   glass, less background). A tenth of white for a body, the still blurred
-   and brightened through it, a lit rim along the top and a fainter one
-   round the foot, the way light sits in a drop. The mark is white with its
-   own soft shadow, so the disc no longer has to carry it. */
+/* The play mark on a film (`video-grid.tsx`): a disc of clear glass,
+   not a tile of the bar's frosted kind. A tenth of white for a body,
+   the still blurred and brightened through it, a lit rim along the top
+   and a fainter one round the foot, the way light sits in a drop. The
+   mark is white with its own soft shadow, so the disc no longer has to
+   carry it. */
 .play-glass {
   --glass-fill: color-mix(in oklab, white 10%, transparent);
   --glass-edge: color-mix(in oklab, white 34%, transparent);
@@ -345,8 +345,8 @@
   pointer-events: none;
   transition: scale 560ms cubic-bezier(0.33, 0, 0.2, 1);
 }
-/* The buttons in the nav's face, Endless (Julian, 2026-10-07). Unlayered,
-   so it outranks the mono the `label` beside it sets. */
+/* The buttons in the nav's face, Endless. Unlayered, so it outranks
+   the mono the `label` beside it sets. */
 .action,
 .action-quiet {
   font-family: var(--font-display);
@@ -409,10 +409,9 @@
   }
 }
 
-/* Sessions' button, alone with no liquid under it: its glass at 72% ink
-   over the dark screen read grey, as if it could not be pressed
-   (critique, 2026-10-03). Solid ink at rest, like the liquid buttons;
-   its hover is its own. */
+/* Sessions' button, alone with no liquid under it: its glass at 72%
+   ink over the dark screen read grey, as if it could not be pressed.
+   Solid ink at rest, like the liquid buttons; its hover is its own. */
 :is(.sessions-book, .services-book):not(:hover, :focus-visible, :active) {
   background-color: var(--foreground);
   border-color: var(--foreground);
@@ -465,8 +464,8 @@
   }
 }
 
-/* "Up next" stands on the page's own wash at every width, not on a card
-   of its own (Julian, 2026-10-08: match background). */
+/* "Up next" stands on the page's own wash at every width, not on a
+   card of its own. */
 .strip-scroll[data-dealt] > .next-cell {
   background: none;
   box-shadow: none;

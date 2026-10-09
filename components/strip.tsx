@@ -75,9 +75,8 @@ export type Lead = {
   /** Walking back into it opens at its start, not its end (Julian: back
       from Sessions lands on the first page of the work). */
   start?: boolean;
-  /** The first photographs it opens on, as its page will ask for them,
-      fetched with the page so its card comes in with them (Julian,
-      2026-10-08). */
+  /** The first photographs it opens on, as its page will ask for
+      them, fetched with the page so its card comes in with them. */
   warm?: { src: string; srcSet?: string; sizes?: string }[];
 };
 
@@ -126,9 +125,9 @@ export function Strip({
   onOpen?: (n: number) => void;
   /** Drawn left of the ruler, given the index of the cell in the middle. */
   counter?: (at: number) => React.ReactNode;
-  /** The screen you are on, "01 / 06", left of the ruler, read off the
-      ticks. For a page that cannot hand a `counter` across from the
-      server (Julian, 2026-10-07: the homepage). */
+  /** The screen you are on, "01 / 06", left of the ruler, read off
+      the ticks. For a page that cannot hand a `counter` across from
+      the server. */
   pageCount?: boolean;
   /** Under 40rem, run the cells down the page instead and switch the
       machine off. Off for the project strips, which swipe on a phone. */

@@ -31,9 +31,9 @@ export function PointerMark() {
     if (!matches("fine")) return;
     const el = ref.current;
     if (!el) return;
-    /* In the top layer, so a modal dialog does not cover it (Julian,
-       2026-10-07: the dot went under the work picker). A dialog opened
-       later goes over it, so it is lifted again over each new one. */
+    /* In the top layer, so a modal dialog does not cover it. A
+       dialog opened later goes over it, so it is lifted again over
+       each new one. */
     const layered = typeof el.showPopover === "function";
     let over_: Element | null = null;
     const lift = () => {
@@ -104,11 +104,11 @@ export function PointerMark() {
       stuck.style.setProperty("--lean-y", `${(dy * 0.1).toFixed(1)}px`);
     };
 
-    /* Momentum, not lag (Julian, 2026-10-02). The dot rides the hand
-       exactly while it moves; when the hand slows or stops, the dot keeps
-       going a little the way it was headed and springs back onto it. It is
-       a weight on a spring whose only push is the hand braking: the part
-       of its acceleration against its direction of travel. A hand at any
+    /* Momentum, not lag. The dot rides the hand exactly while it moves;
+       when the hand slows or stops, the dot keeps going a little the
+       way it was headed and springs back onto it. It is a weight on a
+       spring whose only push is the hand braking: the part of its
+       acceleration against its direction of travel. A hand at any
        steady speed puts nothing into it, so the dot never trails, and
        speeding up puts nothing in either, so it never falls behind. */
     const K = (2 * Math.PI * 3.6) ** 2; // spring, about 3.6 Hz
@@ -138,8 +138,8 @@ export function PointerMark() {
       ey = e.clientY;
       et = e.timeStamp;
     };
-    /* A slight trail behind the hand (Julian, 2026-10-07: "just a slight
-       bit of delay"): the dot closes on it with a 30ms time constant. */
+    /* A slight trail behind the hand: the dot closes on it with a
+       30ms time constant. */
     const TRAIL = 0.03; // s
     let sx = NaN, sy = NaN;
     // Softly held to its reach rather than stopped dead at it.
@@ -246,10 +246,9 @@ export function PointerMark() {
     /* Let go: it springs back and a ring runs out from where
        it was pressed. One short-lived element per click, gone when its
        animation ends. */
-    /* A press that leaves the page (Julian, 2026-10-04: a Commissions row
-       or photograph kept its arrow over the page it opened): let go of
-       whatever it is on at once, so the dot eases back to rest as the
-       page changes, and the next page sets it afresh. */
+    /* A press that leaves the page: let go of whatever it is on at
+       once, so the dot eases back to rest as the page changes, and the
+       next page sets it afresh. */
     const leave = (e: MouseEvent) => {
       if (!(e.target as Element | null)?.closest?.("a[href]")) return;
       unstick();
@@ -300,8 +299,8 @@ export function PointerMark() {
         <div className="mark-drop" />
         <div className="mark-neck" />
       </div>
-      {/* Julian (2026-10-04): over a row of the Commissions list the dot
-          grows and an arrow pointing on is cut out of it. */}
+      {/* Over a row of the Commissions list the dot grows and an
+          arrow pointing on is cut out of it. */}
       <svg className="mark-arrow" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="black" strokeWidth="2.25" strokeLinecap="round" strokeLinejoin="round">
         <path d="M5 12h14M13 6l6 6-6 6" />
       </svg>

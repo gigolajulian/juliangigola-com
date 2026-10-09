@@ -68,8 +68,8 @@ export const REEL = {
   /* The title without the year in it, because the year is its own field now
      and printing 2023 twice on one line is how a caption looks careless. */
   title: "Director's Reel",
-  /* Julian's pick (2026-10-03): the opening aerial over the interchange,
-     a 1920 still from his own export of the reel, kept with the app. */
+  /* Julian's pick: the opening aerial over the interchange, a 1920
+     still from his own export of the reel, kept with the app. */
   poster: "/films/directors-reel.jpg",
 };
 
@@ -233,7 +233,7 @@ export const inSection = (videos: Video[], section: VideoSection): Video[] =>
     count on the site reads this, so adding a reel or a section is one edit. */
 export const filmCount = (videos: readonly unknown[]): number => videos.length + 1;
 
-/** The client as a credit, unless the title already names them ("Pear VC
-    Campaign" under "Pear VC" said it twice; Julian, 2026-10-04). */
+/** The client as a credit, unless the title already names them ("Pear
+    VC Campaign" under "Pear VC" said it twice). */
 export const creditOf = (v: Pick<Video, "title" | "client">) =>
   v.client && !v.title.toLowerCase().startsWith(v.client.toLowerCase()) ? v.client : undefined;

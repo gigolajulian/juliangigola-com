@@ -1,6 +1,6 @@
 /* ── the name that becomes the heading ────────────────────────────
- * Julian (2026-10-04): the name pressed in the menu, or in the bar on a
- * desktop, should travel into the heading of the screen it opens.
+ * The name pressed in the menu, or in the bar on a desktop, should
+ * travel into the heading of the screen it opens.
  *
  * Two copies of the word fly together: one in the link's own type, one in
  * the heading's, swapping halfway so the small mono label on a desktop is

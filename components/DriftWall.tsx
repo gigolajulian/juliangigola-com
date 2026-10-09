@@ -220,9 +220,9 @@ const DriftWall = ({
     /* A phone sees three or four of a column at a time, and every tile
        loads once the wall is seen: the 404 fetched all 101 projects there
        for 14 on the screen. Six a column is still no repeat in view. */
-    /* As many as the wall needs and no more (Julian, 2026-10-03): enough a
-       column that its copies are never in view together, at most the six
-       a phone column takes. Every other card was fetched for nothing. */
+    /* As many as the wall needs and no more: enough a column that its
+       copies are never in view together, at most the six a phone column
+       takes. Every other card was fetched for nothing. */
     const unit = tileHeight + gap;
     // A window over twice as wide as tall sees more of each tilted column
     // (3440x1440 showed a card twice).

@@ -15,7 +15,7 @@ import { matches } from "@/lib/device";
  *
  * On a phone or an iPad there is no pointer and the space holds still.
  * It followed the device's tilt there, until Julian took the gyroscope
- * off the homepage (2026-09-29).
+ * off the homepage.
  */
 export function CoverSpace({
   children,

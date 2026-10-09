@@ -24,11 +24,11 @@ export type ServiceRow = {
 };
 
 /* ── services ─────────────────────────────────────────────────────
- * Julian (2026-10-03): a preview of the portfolio, not the whole of it.
- * The disciplines as an index a third wide; the other two thirds a table
- * of the one the pointer is on, its frames whole (he: "dont crop the
- * images"), each opening its project. The way on to the whole portfolio
- * under the list. Under a finger each row carries its own small picture.
+ * A preview of the portfolio, not the whole of it. The disciplines as an
+ * index a third wide; the other two thirds a table of the one the
+ * pointer is on, its frames whole (he: "dont crop the images"), each
+ * opening its project. The way on to the whole portfolio under the list.
+ * Under a finger each row carries its own small picture.
  * ─────────────────────────────────────────────────────────────── */
 
 /* Justified rows: the frames in order, split into whichever number of
@@ -92,12 +92,11 @@ export function ServicesScreen({
 
   const laid = box[0] ? justify(shots, box[0], box[1]) : null;
 
-  /* On the way to the table (Julian, 2026-10-04: a film opened the wrong
-     part of the portfolio). Heading right, across other rows toward the
-     photographs, a row only takes over once the hand has stayed on it a
-     moment; otherwise the table swapped under the hand on the way and the
-     press landed on another discipline's frame. Straight up and down the
-     list it changes at once, as before. */
+  /* On the way to the table. Heading right, across other rows toward
+     the photographs, a row only takes over once the hand has stayed on
+     it a moment; otherwise the table swapped under the hand on the way
+     and the press landed on another discipline's frame. Straight up
+     and down the list it changes at once, as before. */
   const aim = useRef({ x: 0, t: 0 });
   const onMove = (e: React.PointerEvent) => {
     if (e.pointerType === "mouse") aim.current.x = e.movementX;
@@ -109,9 +108,9 @@ export function ServicesScreen({
     else setOn(i);
   };
 
-  /* A finger has no hover (Julian, 2026-10-08, iPad sideways): the first
-     tap on a row puts its frames on the table, a second one opens it. A
-     phone has no table, its rows open at once. */
+  /* A finger has no hover: the first tap on a row puts its frames on
+     the table, a second one opens it. A phone has no table, its rows
+     open at once. */
   const touched = useRef(false);
   const tap = (e: React.MouseEvent, i: number) => {
     if (!touched.current || i === on || !matches("wide")) return;
@@ -119,12 +118,12 @@ export function ServicesScreen({
     setOn(i);
   };
 
-  /* Julian (2026-10-04): the drop stands proud of its row, the text
-     unchanged: 8px over and under (with the ground's own -inset-y-2). */
+  /* The drop stands proud of its row, the text unchanged: 8px over
+     and under (with the ground's own -inset-y-2). */
   const PAD = 8;
-  /* Julian (2026-10-03): the rows' hover in liquid, as Sessions has it.
-     One drop under the row the pointer is on: it fills from the edge the
-     pointer came in by, runs to the next row, drains to a line on leave. */
+  /* The rows' hover in liquid, as Sessions has it. One drop under the
+     row the pointer is on: it fills from the edge the pointer came in
+     by, runs to the next row, drains to a line on leave. */
   const col = useRef<HTMLDivElement>(null);
   type Edge = "top" | "bottom" | "left" | "right";
   const [hot, setHot] = useState(false);
@@ -158,13 +157,12 @@ export function ServicesScreen({
       <div className="services-screen screen-measure grid min-h-0 flex-1 grid-cols-1 items-center gap-10 px-6 py-12 sm:grid-cols-[minmax(0,1fr)_minmax(0,2fr)] sm:gap-x-[clamp(2rem,4vw,5rem)] sm:px-10 sm:pb-6 sm:pt-20 sm:[container-type:size]">
         <div className="flex min-w-0 flex-col gap-5">
           <RisingTitle text="Commissions" />
-          {/* A pitch, not a list heading (Julian, 2026-10-03: less of a menu). */}
+          {/* A pitch, not a list heading. */}
           <p className="title-rest -mt-2 whitespace-nowrap text-left text-sm leading-relaxed text-muted-foreground short:hidden">
             From concept to final frame.
           </p>
-          {/* Under a finger (Julian, 2026-10-04: the names and the pictures
-              too small in a list): the disciplines as frames, two across,
-              the picture leading and the name on its slate, as the
+          {/* Under a finger: the disciplines as frames, two across, the
+              picture leading and the name on its slate, as the
               portfolio's own cards are. */}
           <ul className="grid grid-cols-2 gap-x-3 gap-y-5 sm:hidden">
             {rows.map((r, i) => (
@@ -303,8 +301,8 @@ export function ServicesScreen({
             ))}
           </ul>
           </div>
-          {/* The art director's verb first (critique, 2026-10-03: it was
-              nowhere before About), the whole portfolio beside it. */}
+          {/* The art director's verb first, the whole portfolio
+              beside it. */}
           <div className="flex flex-wrap items-center gap-x-3 gap-y-3">
             <Link
               prefetch={false}
@@ -320,8 +318,7 @@ export function ServicesScreen({
             >
               See the portfolio
             </Link>
-            {/* Not under a finger, where it sat against the buttons (Julian,
-                2026-10-04). */}
+            {/* Not under a finger, where it sat against the buttons. */}
             <span className="label ml-3 text-muted-foreground max-sm:hidden">{total} projects</span>
           </div>
         </div>

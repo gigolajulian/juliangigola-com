@@ -85,16 +85,15 @@ export function VideoGrid({
            is inside the same hover as the frame. Along a strip it sits on
            a plate over the foot of the still instead, so the tile is the
            whole of its half of the height. */
-        /* Along a strip (Julian, 2026-10-03, "slate"): no plate. The title
-           large in the display face over a fall of shadow at the foot of
-           the still, the credit above it, both on the left; the client's
-           mark is baked into the still's bottom right. */
+        /* Along a strip: no plate. The title large in the display face
+           over a fall of shadow at the foot of the still, the credit
+           above it, both on the left; the client's mark is baked into
+           the still's bottom right. */
         const caption = rows ? (
           <div className="pointer-events-none absolute inset-x-0 bottom-0 flex flex-col items-start gap-1.5 rounded-b-[var(--radius-photo)] bg-gradient-to-t from-black/80 via-black/35 to-transparent px-6 pb-5 pt-16">
             <h3 className="font-display text-[clamp(1.75rem,2.6vw,3rem)] uppercase leading-[0.9] text-white">
-              {/* The last two words held together, so a long title never
-                  leaves one alone on its second line (Julian, 2026-10-04:
-                  "Iranian Americans of / Silicon Valley"). */}
+              {/* The last two words held together, so a long title
+                  never leaves one alone on its second line. */}
               {video.title.replace(/ (\S+)$/, "\u00a0$1")}
             </h3>
             {creditOf(video) || video.year ? (
@@ -224,7 +223,7 @@ function Tile({
           // the viewport on a phone.
           sizes="(min-width: 66rem) 33vw, (min-width: 44rem) 50vw, 100vw"
           loading={eager ? "eager" : "lazy"}
-          /* No zoom under the pointer (Julian, 2026-10-04: none anywhere). */
+          /* No zoom under the pointer. */
           className="object-cover"
           /* A 16:9 still from the provider's CDN rather than a frame from
              the archive, and the loader sizes it all the same: a tile is

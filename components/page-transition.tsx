@@ -133,8 +133,8 @@ export function PageTransition({ children }: { children: React.ReactNode }) {
           : "page";
       set(out ? "out" : "in", from);
       const here = sectionOf(location.pathname);
-      /* Portfolio leads the bar (Julian, 2026-09-30), so the homepage's
-         own screens (Sessions, About, Contact) sit to its right; only the
+      /* Portfolio leads the bar, so the homepage's own screens
+         (Sessions, About, Contact) sit to its right; only the
          wordmark's home is to its left. */
       const there =
         a.pathname === "/" && a.hash ? SECTIONS.length : sectionOf(a.pathname);
@@ -153,11 +153,11 @@ export function PageTransition({ children }: { children: React.ReactNode }) {
     // the path, not by the viewer's flag: closing it with Esc or Close
     // takes the flag down before its own `history.back()` pops, and the
     // root was left saying "out" for ten seconds.
-    /* Julian (2026-10-04): going back needs its animation too. React
-       starts no view transition for a pop, so it was a cut. The pop is
-       held here, before the router's own listener, the page snapshotted,
-       and the pop handed back inside the transition; `globals.css` drops
-       the page left and settles the one returned to (`back-page`). */
+    /* Going back needs its animation too. React starts no view
+       transition for a pop, so it was a cut. The pop is held here,
+       before the router's own listener, the page snapshotted, and the
+       pop handed back inside the transition; `globals.css` drops the
+       page left and settles the one returned to (`back-page`). */
     let replaying = false;
     const onPop = (e: PopStateEvent) => {
       if (replaying || location.pathname === shown.current) return;

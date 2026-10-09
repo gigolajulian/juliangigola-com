@@ -125,15 +125,15 @@ export function useFarCells(
   paged: boolean,
 ) {
   /* ── the far cells wait for a gap ──
-     Arriving on a discipline, WebKit painted the photographs two and three
-     screens off as well as the ones in view, in the same frame: one block
-     of 200 to 390ms on Event coverage at 1440 (2026-10-09). With the cells
+     Arriving on a discipline, WebKit painted the photographs two and
+     three screens off as well as the ones in view, in the same frame:
+     one block of 200 to 390ms on Event coverage at 1440. With the cells
      more than two screens away hidden it was 70 to 88ms. So they are,
-     `visibility` and not `display`, so nothing moves, and they come back
-     one at a time, nearest first, in the gaps after the page has landed,
-     or all at once the moment the strip is moved. After the effect above,
-     which has put the strip where it opens. A paged strip's screens are
-     whole windows and stay as they are. */
+     `visibility` and not `display`, so nothing moves, and they come
+     back one at a time, nearest first, in the gaps after the page has
+     landed, or all at once the moment the strip is moved. After the
+     effect above, which has put the strip where it opens. A paged
+     strip's screens are whole windows and stay as they are. */
   React.useLayoutEffect(() => {
     const el = scrollerRef.current;
     if (!el || !live || paged) return;

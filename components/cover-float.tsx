@@ -25,16 +25,16 @@ import { LiquidPair } from "@/components/liquid-pair";
  * as a picture.
  * ─────────────────────────────────────────────────────────────── */
 
-/** When each frame sets off, in the order of `SLOTS`: out of order, as
-    measured, across about a second and a half. Julian (2026-10-06): the
-    third (I Wanna Be a Human, top middle) leads, ahead of the rest. */
+/** When each frame sets off, in the order of `SLOTS`: out of order,
+    as measured, across about a second and a half. The third (I Wanna
+    Be a Human, top middle) leads, ahead of the rest. */
 const ORDER = [200, 700, 0, 850, 560, 1340, 620, 950, 1220, 780];
 
-/* Preview (`?deal=new`, `data-deal`, 2026-10-05): the frames arrive
-   top to bottom, as one even wave (Julian: top, then the middle, then
-   the bottom, with harmony). A frame sets off in proportion to how far
-   down its layout it sits, across the same second and a half as `ORDER`,
-   so frames at one height land together. Each layout has its own wave. */
+/* Preview (`?deal=new`, `data-deal`): the frames arrive top to bottom,
+   as one even wave (Julian: top, then the middle, then the bottom,
+   with harmony). A frame sets off in proportion to how far down its
+   layout it sits, across the same second and a half as `ORDER`, so
+   frames at one height land together. Each layout has its own wave. */
 const SPAN = Math.max(...ORDER);
 const wave = (set: { y: number; show?: boolean }[], at: number) => {
   const ys = set.filter((p) => p.show !== false).map((p) => p.y);
@@ -68,8 +68,7 @@ export function CoverFloat({
   return (
     <section
       data-tick
-      /* Home on the homepage's rail (Julian, 2026-10-08); a booking page
-         keeps Cover. */
+      /* Home on the homepage's rail; a booking page keeps Cover. */
       data-label={heading ? "Cover" : "Home"}
       aria-label={heading?.title ?? "Julian Gigola, photographer and creative director"}
       data-booking={heading ? "" : undefined}
@@ -180,8 +179,8 @@ export function CoverFloat({
       {/* Julian: the words come in as the photographs do, from the first
           photograph's start (`--h-start`, "Load animation"), each part a
           beat after the one above, rather than once they have landed. */}
-      {/* A booking page's title is a sentence, not a name: longer lines,
-          Julian (2026-10-02). */}
+      {/* A booking page's title is a sentence, not a name: longer
+          lines. */}
       <div
         className={cn(
           "cover-float-middle flex flex-col items-center px-6 text-center",

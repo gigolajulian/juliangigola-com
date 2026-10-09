@@ -98,9 +98,9 @@ export const SIDEWAYS: Place[] = [
 ];
 
 /** A big screen that is wide and short, 1.75 to 2.2 to 1 (a laptop at
-    1515 by 785 with the browser's bars, Julian, 2026-10-07): the large
-    field ran its bottom row under the rail there. Arranged by Julian in
-    the 3D view on "Photo layout, wide short" (`?arrange`), 2026-10-07. */
+    1515 by 785 with the browser's bars): the large field ran its bottom
+    row under the rail there. Arranged in the 3D view on "Photo layout,
+    wide short" (`?arrange`). */
 export const SHORT: Place[] = [
   { x: 21, y: 13, w: 11, z: 85, show: true },
   { x: 66, y: 12.5, w: 9, z: 87, show: true },

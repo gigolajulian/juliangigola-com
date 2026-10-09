@@ -13,8 +13,7 @@ export function useStacked(
   /* Past the opening cell, stacked down a phone as well: the page's own
      scroll, half the cell gone off the top, as `data-past-first` says it
      sideways (`read` below). Its own name, so only the navbar's wordmark
-     reads it, not the running heads of the stacked pages (Julian,
-     2026-10-04: the name in the bar on an iPhone once the hero is passed). */
+     reads it, not the running heads of the stacked pages. */
   React.useEffect(() => {
     const el = scrollerRef.current;
     if (!el || live) return;
@@ -92,7 +91,7 @@ export function useStacked(
          through `STRIP_SECTION` and `hashchange`, heard nothing and lit
          the new screen only when something else re-rendered it. The dev
          build re-renders enough to hide that; production did not
-         (measured 2026-10-07). Said here, the moment the address moves. */
+         (measured). Said here, the moment the address moves. */
       window.dispatchEvent(new Event(STRIP_SECTION));
       go(true);
     };

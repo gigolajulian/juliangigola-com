@@ -18,9 +18,9 @@ const SOCIAL = [
     not training data. One link, at Julian's ask. */
 const LEGAL = [{ href: "/legal", label: "Legal" }] as const;
 
-/** The cities in the region, read out but not shown: Julian (2026-10-02)
-    wanted the footer back to the region alone, with the cities still on
-    the page for a search engine. Every one, and the South Bay towns, are
+/** The cities in the region, read out but not shown: Julian wanted
+    the footer back to the region alone, with the cities still on the
+    page for a search engine. Every one, and the South Bay towns, are
     also in the structured data (`areaServed`, `lib/seo.ts`). */
 const AREA_CITIES = ["San Francisco", "San Jose", "Oakland", "Santa Cruz"];
 
@@ -32,8 +32,8 @@ export function SiteFooter() {
       <div className="site-footer-body mx-auto max-w-[100rem] px-6 py-12 sm:px-10 sm:py-16 lying:py-2">
         <div className="site-footer-ask flex flex-col gap-12 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            {/* No label over the heading (critique, 2026-10-03): the
-                heading carries itself. */}
+            {/* No label over the heading: the heading carries
+                itself. */}
             <h2 className="title">
               <Link
                 href="/#contact"
@@ -77,8 +77,8 @@ export function SiteFooter() {
             </strong>{" "}
             All rights reserved.
           </p>
-          {/* Julian (2026-10-06): on a phone both lines start on the left,
-              the legal one first. It was to the right until today. */}
+          {/* On a phone both lines start on the left, the legal one
+              first. */}
           <nav aria-label="Legal" className="label text-muted-foreground">
             <ul className="flex flex-wrap gap-x-6 gap-y-2">
               {LEGAL.map((l) => (
@@ -94,7 +94,7 @@ export function SiteFooter() {
               {/* The region, and the cities in it said to a screen reader
                   and a search engine (the Bay Area as Julian means it runs
                   to Santa Cruz). */}
-              {/* Julian (2026-10-06): on a phone, at the line's right end. */}
+              {/* On a phone, at the line's right end. */}
               <li className="font-bold text-foreground max-sm:ml-auto">
                 San Francisco Bay Area
                 <span className="sr-only">

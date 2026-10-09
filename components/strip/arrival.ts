@@ -165,9 +165,9 @@ export function useArrival({
 
 /** The order the cells rise in as the strip arrives. */
 export function useArrivalOrder(scrollerRef: React.RefObject<HTMLDivElement | null>) {
-  /* The photographs arrive from the middle of the window out, the nearest
-     first (Julian, 2026-10-07). After the effect above has put the strip
-     where it opens, so the middle is the one the visitor sees. Not on the
+  /* The photographs arrive from the middle of the window out, the
+     nearest first. After the effect above has put the strip where it
+     opens, so the middle is the one the visitor sees. Not on the
      portfolio and its disciplines, which keep reading left to right;
      Motion is a page of films and takes it. */
   React.useLayoutEffect(() => {

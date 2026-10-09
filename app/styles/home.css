@@ -98,18 +98,17 @@
   }
 }
 
-/* Julian: About's block in the middle of its screen (his box,
-   2026-09-29). About is about 37.75rem from its title to its foot (the
-   client marks are gone), so its title sits half the screen less
-   18.875rem down. The
-   screen's own height is read as a size container. Contact's column is
-   centred against its form instead (his box again), so the two titles
-   no longer share a line. */
+/* Julian: About's block in the middle of its screen. About is about
+   37.75rem from its title to its foot (the client marks are gone),
+   so its title sits half the screen less 18.875rem down. The
+   screen's own height is read as a size container. Contact's column
+   is centred against its form instead (his box again), so the two
+   titles no longer share a line. */
 @media (min-width: 40rem) {
   [data-hash="about"] {
     container-type: size;
     /* 7rem at the least: at 6 a short laptop (1515 by 785) set the
-       title 19px under the bar (Julian, 2026-10-07). */
+       title 19px under the bar. */
     --screen-title-y: max(7rem, 50cqh - 18.875rem);
   }
 }
@@ -123,14 +122,14 @@
     --bar-h: 3.25rem;
   }
 }
-/* Julian (2026-10-01, bolder): About's portrait leads. It was the
-   narrowest of three columns, his one picture of himself as small as the
-   list of steps beside it, so nothing on the screen led. As tall as the
-   screen allows, the way Sessions sizes its photograph (to 56rem, its
-   3:4 setting the width), with the words and the steps centred on either
-   side of it. Only where there is room for all three at that size: below
-   1440 by 848 the columns could not hold their text and the screen
-   would scroll, so smaller screens keep the mockup's layout. */
+/* About's portrait leads. It was the narrowest of three columns, his
+   one picture of himself as small as the list of steps beside it, so
+   nothing on the screen led. As tall as the screen allows, the way
+   Sessions sizes its photograph (to 56rem, its 3:4 setting the
+   width), with the words and the steps centred on either side of it.
+   Only where there is room for all three at that size: below 1440 by
+   848 the columns could not hold their text and the screen would
+   scroll, so smaller screens keep the mockup's layout. */
 @media (min-width: 90rem) and (min-height: 53rem) {
   [data-hash="about"] > [data-scroll] {
     grid-template-columns: minmax(0, 1.2fr) auto minmax(0, 1fr);
@@ -169,15 +168,15 @@
    The discipline's frames whole, in justified rows (laid out in JS so
    they fit the table uncropped).
 
-   Julian (2026-10-03, /impeccable animate): the one authored moment is
-   the deal. Arriving on Commissions, or pointing at another discipline,
-   the frames rack into focus one after another the way a lens pulls
-   focus, a little large and soft, then sharp. Visible by default: the
-   deal is a keyframe on mount (fill backwards, so it lets go once done),
-   and the arrival a transition from a hidden state that only applies
-   while the strip says it is somewhere else, as the rows do. Pointing at
-   a frame keeps it and sets the rest back, and its project's name comes
-   up in its corner. Reduced motion: an opacity fade, nothing moves. */
+   The one authored moment is the deal. Arriving on Commissions, or
+   pointing at another discipline, the frames rack into focus one
+   after another the way a lens pulls focus, a little large and soft,
+   then sharp. Visible by default: the deal is a keyframe on mount
+   (fill backwards, so it lets go once done), and the arrival a
+   transition from a hidden state that only applies while the strip
+   says it is somewhere else, as the rows do. Pointing at a frame
+   keeps it and sets the rest back, and its project's name comes up in
+   its corner. Reduced motion: an opacity fade, nothing moves. */
 @keyframes light-rack {
   from {
     opacity: 0;
@@ -197,24 +196,23 @@
     box-shadow 450ms var(--ease-out-strong),
     translate 900ms cubic-bezier(0.25, 1, 0.5, 1);
 }
-/* Julian (2026-10-04): the cards stand a little off the table, a few
-   pixels toward the viewer with a soft shadow under them, and the one
-   under the pointer tips toward it on every axis (`--rx`, `--ry`,
-   `--rz`, written by
-   `services-screen.tsx`). `scale` stays free for the arrival. */
-/* Realism (Julian, 2026-10-04): each card has its own perspective, so it
-   turns about its own centre instead of warping toward the sheet's
-   vanishing point; small angles; it follows the pointer quickly and
-   settles slowly; the shadow falls away from the tilt. No glare (Julian,
-   2026-10-04: it read as a glow round the pointer). */
+/* The cards stand a little off the table, a few pixels toward the
+   viewer with a soft shadow under them, and the one under the
+   pointer tips toward it on every axis (`--rx`, `--ry`, `--rz`,
+   written by `services-screen.tsx`). `scale` stays free for the
+   arrival. */
+/* Realism: each card has its own perspective, so it turns about its
+   own centre instead of warping toward the sheet's vanishing point;
+   small angles; it follows the pointer quickly and settles slowly;
+   the shadow falls away from the tilt. No glare. */
 .light-cell {
   transform: perspective(1000px) translateZ(var(--lz, 10px)) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)) rotateZ(var(--rz, 0deg));
-  /* No shadow at rest (Julian, 2026-10-04: only on hover); the same
-     shape, clear, so it fades in rather than snaps. */
+  /* No shadow at rest; the same shape, clear, so it fades in rather
+     than snaps. */
   box-shadow: 0 22px 40px -16px rgb(0 0 0 / 0);
 }
 .light-cell:hover {
-  /* Up off the table toward the viewer (Julian, 2026-10-04: more lift). */
+  /* Up off the table toward the viewer. */
   --lz: 20px;
   box-shadow: var(--sx, 0px) calc(22px + var(--sy, 0px)) 40px -16px rgb(0 0 0 / 0.6);
   transition:
@@ -222,14 +220,14 @@
     filter 620ms var(--ease-out-strong),
     scale 620ms var(--ease-out-strong),
     transform 140ms ease-out,
-    /* Fades in rather than snapping on (Julian, 2026-10-04: smoothly). */
+    /* Fades in rather than snapping on. */
     box-shadow 500ms var(--ease-out-strong),
     translate 900ms cubic-bezier(0.25, 1, 0.5, 1);
 }
-/* Room for it (Julian, 2026-10-04): the lifted card grows a few pixels
-   past the 6px gutter, so its neighbours ease aside by half that, the ones
-   before it back, the ones after it on, the rows above up and the rows
-   below down, and settle again when it does. */
+/* Room for it: the lifted card grows a few pixels past the 6px gutter,
+   so its neighbours ease aside by half that, the ones before it back,
+   the ones after it on, the rows above up and the rows below down, and
+   settle again when it does. */
 .light-sheet:has(.light-cell:hover) {
   --push: 3px;
 }
@@ -255,18 +253,17 @@
     transform: none;
   }
 }
-/* The frame under the pointer (Julian, 2026-10-03: the lift and the push
-   were messy across frames of different shapes; 2026-10-04: no zoom on
-   hover anywhere). Nothing moves on the table: the slate rises over the
-   photograph, and the others hold their places, softened (below). */
+/* The frame under the pointer. Nothing moves on the table: the slate
+   rises over the photograph, and the others hold their places,
+   softened (below). */
 .light-cell img {
   transition:
     filter 300ms var(--ease-out-strong),
     scale 300ms var(--ease-out-strong);
 }
 .light-name {
-  /* The slate (2026-10-03, Julian: the same for #work): a fall of shadow
-     across the foot with the name on it, not a line of text on the photo. */
+  /* The slate: a fall of shadow across the foot with the name on it, not
+     a line of text on the photo. */
   position: absolute;
   inset-inline: 0;
   bottom: 0;
@@ -333,12 +330,12 @@
       translate 640ms var(--ease-out-strong);
     transition-delay: calc(180ms + var(--i, 0) * 110ms);
   }
-  /* In from the right, the way the strip travels (`jg-fade-up`). It rose
-     from below once, and the last step rising past the list's foot gave
-     the list a scrollbar for as long as it moved (Julian saw it). The list
-     clips sideways, so this one cannot. About's label is "Biography"
-     since the menu names changed; the old "About" here left its steps
-     hidden for good (Julian saw it, 2026-10-05). */
+  /* In from the right, the way the strip travels (`jg-fade-up`). It
+     rose from below once, and the last step rising past the list's foot
+     gave the list a scrollbar for as long as it moved (Julian saw it).
+     The list clips sideways, so this one cannot. About's label is
+     "Biography" since the menu names changed; the old "About" here left
+     its steps hidden for good. */
   .strip-scroll[data-at]:not([data-at="Biography"]) .about-step,
   .strip-scroll[data-at]:not([data-at="Sessions"]) .session-step,
   .strip-scroll[data-at]:not([data-at="Commissions"]) .services-step {

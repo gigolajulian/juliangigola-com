@@ -5,7 +5,7 @@ import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { MAX_REFS } from "@/lib/inbox";
 
-/* ── references on the inquiry (Julian, 2026-10-05) ──
+/* ── references on the inquiry ──
    Images the visitor uploads, and frames of Julian's they pick from a
    panel that pops out of the form. Uploads are shrunk in the browser to
    1600px JPEGs and ride the form as `refs`; picks go as their paths in
@@ -241,7 +241,7 @@ function PickPanel({
             <p className="label text-muted-foreground">Loading</p>
           ) : (
             <ul
-              // Four a row (Julian, 2026-10-08), three on a phone.
+              // Four a row, three on a phone.
               className="grid grid-cols-3 gap-2 sm:grid-cols-4"
             >
               {groups[lit]?.frames.map(([src, w, h, project]) => {
@@ -257,10 +257,10 @@ function PickPanel({
                       disabled={n < 0 && room <= 0}
                       className={cn(
                         "relative block w-full overflow-hidden rounded-[6px] outline-offset-2 transition-[opacity,outline-color,scale] duration-200 disabled:opacity-40",
-                        // A little larger under the hand: it can be picked (Julian, 2026-10-08).
+                        // A little larger under the hand: it can be picked.
                         "hoverable:hover:enabled:scale-[1.03]",
                         n >= 0 ? "outline outline-2 outline-foreground" : "outline outline-1 outline-transparent hoverable:hover:outline-border",
-                        // Sleeves are square, and shown whole (Julian, 2026-10-08).
+                        // Sleeves are square, and shown whole.
                         groups[lit]?.name === "Cover art" ? "aspect-square" : "aspect-[3/4]",
                       )}
                     >
@@ -285,9 +285,9 @@ function PickPanel({
             </ul>
           )}
         </div>
-        {/* The page's rail, stood upright (Julian, 2026-10-08: the site's
-            own scroll bar): a hairline track, the ink filling down it as
-            the photographs go by. Pressed or dragged, it scrolls there. */}
+        {/* The page's rail, stood upright: a hairline track, the ink
+            filling down it as the photographs go by. Pressed or
+            dragged, it scrolls there. */}
         <div
           aria-hidden
           onPointerDown={(e) => {

@@ -3,21 +3,21 @@ import { filterPaths } from "@/lib/utils";
 import type { Mover } from "./motion";
 import { DEAL_MS, markFilter, nav } from "./shared";
 
-/** Preview (`?cards`, Julian 2026-10-08): the next discipline's card comes
-    over this one under the hand, as the chapters do on All, rather than on
-    its own in 640ms. Once the push past the end has led on, the trip's own
-    animations (`jg-deal-*` in `globals.css`) are held and run by the wheel,
-    six tenths of a screen of wheel to cover it, and play out once the wheel goes quiet.
-    The navigation has already happened, so wheeling back slides the card
-    back but cannot undo it; quiet, it finishes.
+/** Preview (`?cards`): the next discipline's card comes over this one
+    under the hand, as the chapters do on All, rather than on its own in 640ms.
+    Once the push past the end has led on, the trip's own animations
+    (`jg-deal-*` in `globals.css`) are held and run by the wheel, six tenths of
+    a screen of wheel to cover it, and play out once the wheel goes quiet. The
+    navigation has already happened, so wheeling back slides the card back but
+    cannot undo it; quiet, it finishes.
 
-    A swipe that led on (`touchX`, where the finger is) drives it the same
-    way for as long as the finger stays down, and it plays out on the lift
-    (Julian, 2026-10-08: the slide follows the finger). A touch's events go
-    to the element the finger came down on, which leaves the page with the
-    strip it was in, and a node out of the page does not pass them up to the
-    window: they are listened for on that element (`touch`). Should they
-    stop anyway, it plays out after three seconds still. */
+    A swipe that led on (`touchX`, where the finger is) drives it the
+    same way for as long as the finger stays down, and it plays out on
+    the lift. A touch's events go to the element the finger came down on,
+    which leaves the page with the strip it was in, and a node out of the
+    page does not pass them up to the window: they are listened for on
+    that element (`touch`). Should they stop anyway, it plays out after
+    three seconds still. */
 function scrubDeal(
   dir: 1 | -1,
   touch: { x: number; on: EventTarget } | null = null,

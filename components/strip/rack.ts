@@ -100,11 +100,11 @@ export function useRackPairs({
       if (alone) kids[i].dataset.alone = "";
       else delete kids[i].dataset.alone;
     }
-    /* On `shown`, not `children`: the held-back sections (`defer`) arrive
-       without the parent rendering again, and a cover written no `order`
-       sorts as nought, to the front of the rack. Coming through the door
-       into the grid, Artist Presskit and Portraits stood where Editorial
-       belonged (Julian, 2026-10-02). */
+    /* On `shown`, not `children`: the held-back sections (`defer`)
+       arrive without the parent rendering again, and a cover written
+       no `order` sorts as nought, to the front of the rack. Coming
+       through the door into the grid, Artist Presskit and Portraits
+       stood where Editorial belonged. */
   }, [scrollerRef, grid, sheet, shown]);
 }
 

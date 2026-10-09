@@ -69,9 +69,9 @@ export function wheelHandler(m: Mover, band: Band) {
   return (e: WheelEvent) => {
     // A pinch is a zoom.
     if (e.ctrlKey) return;
-    /* An open dialog keeps its own wheel: the reference picker sits in
-       the form, so inside the strip, and its photographs could not be
-       scrolled (Julian, 2026-10-08). */
+    /* An open dialog keeps its own wheel: the reference picker sits
+       in the form, so inside the strip, and its photographs could
+       not be scrolled. */
     if ((e.target as Element | null)?.closest?.("dialog[open]")) return;
     const now = e.timeStamp || performance.now();
     // Since the last notch here, or since the page came if none has yet.

@@ -15,22 +15,21 @@ export function useSections(
   defer: boolean,
   deck: Deck | undefined,
 ) {
-  /* Julian (2026-10-01): only the discipline being shown and the next.
-     Arriving at the portfolio built all ninety three projects inside the
-     page transition, 1,100 elements and 130ms of long tasks with the
-     screen held; a discipline page of 300 had none. So a navigation here
+  /* Only the discipline being shown and the next. Arriving at the
+     portfolio built all ninety three projects inside the page
+     transition, 1,100 elements and 130ms of long tasks with the screen
+     held; a discipline page of 300 had none. So a navigation here
      mounts the first two sections, and the rest follow a section at a
-     time once the arrival is over (`data-nav` gone from the root) and the
-     page is idle: all at once, mid-transition, they cost 87ms and seven
-     dropped frames. Whole at once when the visitor is coming back to a
-     place in it (the back button's seat, a #discipline typed in), and
-     always on the server and the cold load, so the markup and the
-     crawlers have every project. Not the hash at render: the address
-     still holds the page being left (`/#where-next`).
-     A deck of screens (the homepage) mounts the one it lands on: coming
-     back from the portfolio, the second screen's eight covers and logos
-     were built inside the swap, while the screen held for 300ms
-     (scroll-craft pass, 2026-10-02). */
+     time once the arrival is over (`data-nav` gone from the root) and
+     the page is idle: all at once, mid-transition, they cost 87ms and
+     seven dropped frames. Whole at once when the visitor is coming
+     back to a place in it (the back button's seat, a #discipline typed
+     in), and always on the server and the cold load, so the markup and
+     the crawlers have every project. Not the hash at render: the
+     address still holds the page being left (`/#where-next`). A deck
+     of screens (the homepage) mounts the one it lands on: coming back
+     from the portfolio, the second screen's eight covers and logos
+     were built inside the swap, while the screen held for 300ms. */
   const [sections, setSections] = React.useState(() =>
     !defer || !nav.hydrated || Date.now() - nav.poppedAt < POP_MS || Date.now() - nav.aimedAt < POP_MS
       ? Infinity
@@ -38,14 +37,14 @@ export function useSections(
         ? 1
         : SECTIONS_FIRST,
   );
-  /* Whether anything is still held back is this memo's to say, not a count
-     of the two: `Children.count` counts an empty child and `toArray` drops
-     it, so a page with one (the homepage) counted its children at eight
-     and the sections shown at seven for ever. Coming back from the
-     portfolio, that asked for more sections at every idle slot without
-     end, and each one dealt the deck again: the hero lost its `data-buried`
-     and its photographs showed under the glass as a grey band, and the
-     paging lost its places and the wheel stuck (Julian, 2026-10-02). */
+  /* Whether anything is still held back is this memo's to say, not a
+     count of the two: `Children.count` counts an empty child and
+     `toArray` drops it, so a page with one (the homepage) counted its
+     children at eight and the sections shown at seven for ever. Coming
+     back from the portfolio, that asked for more sections at every idle
+     slot without end, and each one dealt the deck again: the hero lost
+     its `data-buried` and its photographs showed under the glass as a
+     grey band, and the paging lost its places and the wheel stuck. */
   const [shown, holding] = React.useMemo(() => {
     if (sections === Infinity) return [children, false] as const;
     const all = React.Children.toArray(children);
@@ -174,10 +173,10 @@ export function useMoreSections({
   React.useEffect(() => {
     const el = scrollerRef.current;
     if (!holding || !el) return;
-    /* A strip that keeps moving never rests for the idle path above, and
-       ran on past openings with nothing behind them (Julian, 2026-10-02).
-       So the next section also comes in once it is a screen and a half
-       away, moving or not. */
+    /* A strip that keeps moving never rests for the idle path above,
+       and ran on past openings with nothing behind them. So the next
+       section also comes in once it is a screen and a half away,
+       moving or not. */
     let asked = false;
     const near = () => {
       if (asked) return;

@@ -4,13 +4,13 @@ import { centreOf } from "./shared";
 /** The keys that move the strip, and Tab kept from jumping it. */
 export function keyHandlers(m: Mover) {
   const { el } = m;
-  /* The keyboard, on the scroller or anything in it that does not want
-     the keys for itself: the arrows and Page Up and Page Down move a
-     screen, Home and End go to the ends. A paged strip's screen is its
-     next cell; a free one moves by the window's width. A key pressed in
-     a field, or in a box that scrolls on its own, is that one's. It
-     listened on the scroller alone, so with a cover or a link inside it
-     focused the arrows did nothing (2026-10-09). */
+  /* The keyboard, on the scroller or anything in it that does not
+     want the keys for itself: the arrows and Page Up and Page Down
+     move a screen, Home and End go to the ends. A paged strip's
+     screen is its next cell; a free one moves by the window's width.
+     A key pressed in a field, or in a box that scrolls on its own,
+     is that one's. It listened on the scroller alone, so with a
+     cover or a link inside it focused the arrows did nothing. */
   const onKey = (e: KeyboardEvent) => {
     if (e.defaultPrevented || e.altKey || e.ctrlKey || e.metaKey) return;
     const from = e.target as HTMLElement | null;

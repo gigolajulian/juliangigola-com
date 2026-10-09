@@ -4,8 +4,8 @@
  * `withAlt` in `lib/work.ts` lays them over it. A photograph not listed
  * keeps the generated "Project, frame 3 of 14".
  *
- * Started 2026-10-02 with the photographs on the booking pages' covers,
- * the first ones a visitor from a search sees. What a picture shows, not
+ * The booking pages' covers come first: the first photographs a visitor
+ * from a search sees. What a picture shows, not
  * who is in it: no client is named unless the project already is.
  */
 export const ALT: Record<string, string> = {

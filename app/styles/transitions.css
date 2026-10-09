@@ -277,8 +277,8 @@
   --h-start: 0ms !important;
   --h-spread: 0.3ms !important;
 }
-/* Behind the opening (Julian, 2026-10-06: the photographs popped in too
-   late), the first one sets off the moment the panel lifts. */
+/* Behind the opening, the first one sets off the moment the panel
+   lifts. */
 :root[data-splashed] .cover-float {
   --h-start: 0ms !important;
 }

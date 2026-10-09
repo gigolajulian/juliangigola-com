@@ -23,7 +23,7 @@ const SITE = "https://juliangigola.com";
 export const dynamic = "force-static";
 
 /* ── lastmod and images ───────────────────────────────────────────
- * Julian (2026-09-30): "add lastmod dates and images to the sitemap".
+ * Julian: "add lastmod dates and images to the sitemap".
  *
  * A page's date is when the newest of the photographs it shows last
  * changed in git: the photographs are what changes on these pages, and a

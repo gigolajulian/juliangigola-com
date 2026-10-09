@@ -6,10 +6,10 @@ import * as React from "react";
 const CUE_WAIT = 2000;
 const CUE_MS = 900;
 const CUE_SEEN = "strip-cue";
-/** Julian (2026-10-01): the page itself shows there is more. A paged strip
-    slides this far left as the rail travels, the next screen's edge comes
-    in, and it springs back. Preview only, `?peek=1`, which also shows it
-    on every load so it can be watched again. */
+/** The page itself shows there is more. A paged strip slides this far
+    left as the rail travels, the next screen's edge comes in, and it
+    springs back. Preview only, `?peek=1`, which also shows it on every
+    load so it can be watched again. */
 const PEEK = 64;
 
 /** The sideways cue (`cue` in `strip.tsx`): the rail travels once, two

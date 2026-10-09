@@ -88,9 +88,9 @@ export function ProjectStrip({
   className?: string;
 }) {
   const frames = project.images;
-  /* Not "Photographer: Julian Gigola" on a discipline that is a gallery
-     (Places, Automotive, Event coverage): one of his own sets, not a job
-     with a crew (Julian, 2026-10-01; the projects keep it). */
+  /* Not "Photographer: Julian Gigola" on a discipline that is a
+     gallery (Places, Automotive, Event coverage): one of his own
+     sets, not a job with a crew. */
   const credits = gallery
     ? project.credits.filter(
         (c) =>
@@ -100,10 +100,10 @@ export function ProjectStrip({
   const scroller = React.useRef<HTMLDivElement>(null);
   const lightbox = useLightbox(frames);
   /* Whether the frames past the first screen are fetched at once (the
-     sideways strip) or as the page reaches them (a phone, where the page
-     stacks ten screens tall and SAGO was 1.35MB of frames on arrival,
-     measured 2026-10-07). False in the HTML, true on a wide window as it
-     hydrates; see `useWideNow`. */
+     sideways strip) or as the page reaches them (a phone, where the
+     page stacks ten screens tall and SAGO was 1.35MB of frames on
+     arrival, measured). False in the HTML, true on a wide window as
+     it hydrates; see `useWideNow`. */
   const wideNow = useWideNow();
 
   /* The photographs with the writing back in its place. `lib/work.ts` pulls
@@ -260,9 +260,9 @@ export function ProjectStrip({
                       key={`${credit.role}-${i}`}
                       className="flex flex-wrap items-baseline gap-x-2 sm:gap-x-3 sm:contents"
                     >
-                      {/* The role a shade under the name, and both readable: the role
-                          at the muted grey (4.5:1 and up), the name lifted
-                          above it (Julian, 2026-10-02). */}
+                      {/* The role a shade under the name, and both readable:
+                          the role at the muted grey (4.5:1 and up), the name
+                          lifted above it. */}
                       <dt className="label whitespace-nowrap text-muted-foreground max-sm:text-[0.5625rem] max-sm:tracking-[0.06em]">
                         {credit.role}
                       </dt>
@@ -472,8 +472,8 @@ export function ProjectStrip({
   );
 }
 
-/** The last cell: where the sequence goes next, written and not shown. On a
-    discipline's own page too (Julian, 2026-10-08: show up next). */
+/** The last cell: where the sequence goes next, written and not shown.
+    On a discipline's own page too. */
 export function NextCell({ next, label }: { next: NextUp; label: string }) {
   return (
     <Link
@@ -481,8 +481,7 @@ export function NextCell({ next, label }: { next: NextUp; label: string }) {
       data-hash="next"
       data-ring="Next"
       /* Stacked down a phone it is the foot of the page: air above
-         and below so the name is not pressed on the footer's rule
-         (Julian, 2026-10-06). */
+         and below so the name is not pressed on the footer's rule. */
       className="next-cell flex h-full shrink-0 flex-col justify-center gap-2 pl-10 pr-6 max-sm:py-14 sm:pl-24 sm:pr-10"
     >
       <span className="label text-muted-foreground">{label}</span>

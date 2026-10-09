@@ -22,7 +22,7 @@ import type { CoverFrame } from "@/lib/cover-art-types";
  *
  * Both layers name the full copy. Image Transformations size it to the cell
  * now (`image-loader.ts`); the 800px copy was stretched to 1750 device px in
- * the tall rows and read as low resolution (Julian, 2026-10-08).
+ * the tall rows and read as low resolution.
  * ─────────────────────────────────────────────────────────────── */
 
 export function CoverFaces({

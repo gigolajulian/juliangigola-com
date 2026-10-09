@@ -34,8 +34,8 @@
 .contact-pair {
   display: contents;
 }
-/* Any short window, not only a wide one: at 1280x720 the send button sat
-   under the end of its own box (critique, 2026-10-03). */
+/* Any short window, not only a wide one: at 1280x720 the send button
+   sat under the end of its own box. */
 @media (min-width: 40rem) and (max-height: 56rem) {
   .contact-pair {
     display: grid;
@@ -106,9 +106,9 @@
 
 /* ── the ink ──────────────────────────────────────────────────────
  * Julian: a hover state on the session rows, inverted, animated. The
- * open row under a mouse (or the keyboard) is inked, and since
- * 2026-10-03 the ink is liquid: it runs down or up the list to the
- * next row and drains to a line when the pointer leaves.
+ * open row under a mouse (or the keyboard) is inked, and the ink is
+ * liquid: it runs down or up the list to the next row and drains to a
+ * line when the pointer leaves.
  *
  * The fill lies over the row and inverts what is under it (white,
  * `difference`), so each letter turns at the very edge of the ink,
@@ -127,9 +127,9 @@
 .session-ground {
   z-index: -1;
 }
-/* The hover. White ink over the row turned it inside out, a bright card
-   on the dark screen; Julian wanted it lower key (2026-10-03). A grey a
-   step off the ground under the words instead, which keep their own
+/* The hover. White ink over the row turned it inside out, a bright
+   card on the dark screen; Julian wanted it lower key. A grey a step
+   off the ground under the words instead, which keep their own
    colours. Opaque, as the liquid needs. */
 .session-col {
   --session-hover: color-mix(in oklab, var(--foreground) 6%, var(--background));

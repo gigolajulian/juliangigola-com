@@ -72,13 +72,13 @@ export function createPaging(m: Mover) {
     window.clearTimeout(settle);
     settle = window.setTimeout(() => {
       if (m.down || m.held || m.dragging || m.frame || m.leaving) return;
-      /* A wheel's gesture under Lenis is landed by Lenis's own `settle`,
-         which starts 140ms after the wheel rests. This one fired 20ms
-         later, before Lenis had written a frame, and the two pulled two
-         ways: a trackpad swipe of a quarter screen slid back to the
-         screen it left and then jumped a whole screen on in one frame
-         (Chrome and WebKit, 1440 wide, at 1.25x, 1.5x and 2x,
-         2026-10-09). */
+      /* A wheel's gesture under Lenis is landed by Lenis's own
+         `settle`, which starts 140ms after the wheel rests. This one
+         fired 20ms later, before Lenis had written a frame, and the
+         two pulled two ways: a trackpad swipe of a quarter screen
+         slid back to the screen it left and then jumped a whole
+         screen on in one frame (Chrome and WebKit, 1440 wide, at
+         1.25x, 1.5x and 2x). */
       if (m.smooth && performance.now() - m.gestureAt < 1000) return;
       seat = m.nearest(el.scrollLeft);
       const where = centreOf(el, seat);
@@ -90,12 +90,11 @@ export function createPaging(m: Mover) {
      width stood two thirds of the way between two screens (an iPad on
      the homepage). A frame on, once the deck has laid its screens out
      again at the new width. */
-  /* Julian (2026-10-01): the site should scale smoothly while the window
-     is dragged. It reseated a frame late, so every frame of a drag was
-     painted first at the old pixels, between two screens (154 frames in
-     a sweep, up to 640px off), and then jumped. Here it is put back in
-     the observer, after the new layout and before that frame is
-     painted.
+  /* The site should scale smoothly while the window is dragged. It
+     reseated a frame late, so every frame of a drag was painted first at
+     the old pixels, between two screens (154 frames in a sweep, up to
+     640px off), and then jumped. Here it is put back in the observer,
+     after the new layout and before that frame is painted.
 
      A strip that is not paged (the portfolio) kept its pixels too, and
      its grid reflows at a new size, so a drag ended 2300px from the

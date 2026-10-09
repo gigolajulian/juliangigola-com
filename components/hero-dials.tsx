@@ -48,7 +48,7 @@ import { MEDIA } from "@/lib/device";
    (it splits camelCase into words), so every one says what it moves. */
 export const CARDS = {
   motion: { type: "spring", visualDuration: 0.3, bounce: 0.2 },
-  // No swell under the pointer (Julian, 2026-10-04: no hover zoom anywhere).
+  // No swell under the pointer.
   grow: [1, 1, 1.2, 0.005],
   forward: [21, 0, 200, 1],
   towardMiddle: [0.06, 0, 1, 0.01],
@@ -409,8 +409,8 @@ export function HeroDials() {
   const [picked, setPicked] = React.useState<string | null>(null);
   const [tilt, setTilt] = React.useState(false);
   /* `?arrange` opens straight into arranging, in 3D, the layout for
-     the window's own shape (Julian, 2026-10-07). Read on the first
-     client render; the server has no address bar and renders it off. */
+     the window's own shape. Read on the first client render; the
+     server has no address bar and renders it off. */
   const [view3d, setView3d] = React.useState(
     () => typeof location !== "undefined" && new URLSearchParams(location.search).has("arrange"),
   );

@@ -10,20 +10,19 @@ import { useDevice } from "@/lib/device";
  * visitor off the site. Held for a beat it says who they are first: their
  * face, their handle set large, and the way out under it.
  *
- * Julian (2026-10-02, overdrive): the card is poured out of the name. A
- * drop of ink wells up under the word, which turns to the ground's colour
- * inside it, and the card is drawn out of that drop, necking and letting
- * go. Then: the card covered the credits under it, so the list opens to
- * make room for it; and going from one name to the next, the drop slides
- * across as the portfolio's filter bar does (`effect="move"`, wobble
- * 0.25), the card going with it, rather than one card draining and
- * another pouring. The pointer's dot sticks to the name as it does to a
- * filter chip (`data-stick`, `pointer-mark.tsx`), so the mouse runs into
- * the tag.
+ * The card is poured out of the name. A drop of ink wells up under the
+ * word, which turns to the ground's colour inside it, and the card is
+ * drawn out of that drop, necking and letting go. Then: the card covered
+ * the credits under it, so the list opens to make room for it; and going
+ * from one name to the next, the drop slides across as the portfolio's
+ * filter bar does (`effect="move"`, wobble 0.25), the card going with it,
+ * rather than one card draining and another pouring. The pointer's dot
+ * sticks to the name as it does to a filter chip (`data-stick`,
+ * `pointer-mark.tsx`), so the mouse runs into the tag.
  *
  * One liquid for the whole list (`CreditList`), mounted only while a card
  * is open: a group that is not there measures nothing, so the credits cost
- * no frames while scrolling (audit, 2026-10-02).
+ * no frames while scrolling.
  *
  * The photograph is ours, kept in `public/people` and written by /admin
  * when the person was added. Instagram is asked nothing at all from here:
@@ -394,10 +393,10 @@ function Pour({
                   />
                 ) : null}
                 <div className="min-w-0 flex-1">
-                  {/* Who they are, a weight under bold, the role on a line of
-                      its own ("Julian Gigola · Phot…" was cut), then the
-                      handle, a weight lighter, right over the way out to it
-                      (Julian, 2026-10-03). */}
+                  {/* Who they are, a weight under bold, the role on a line
+                      of its own ("Julian Gigola · Phot…" was cut), then
+                      the handle, a weight lighter, right over the way out
+                      to it. */}
                   {named ? (
                     <p className="label truncate font-semibold text-background">{who.name}</p>
                   ) : null}

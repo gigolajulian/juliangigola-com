@@ -252,11 +252,12 @@ export function useRail({
   React.useEffect(() => {
     if (!chaptered || !onRail) return;
     let frame = 0;
-    /* Frames in a row in which nothing moved. A pointer left resting on
-       the rail kept this loop going for as long as it stayed there, 120
-       callbacks a second with nothing to do (measured on /portfolio,
-       2026-10-09). Once the chapters have finished opening, which is the
-       300ms of their `flex-grow` ease, it stops, and a move wakes it. */
+    /* Frames in a row in which nothing moved. A pointer left resting
+       on the rail kept this loop going for as long as it stayed
+       there, 120 callbacks a second with nothing to do (measured on
+       /portfolio). Once the chapters have finished opening, which is
+       the 300ms of their `flex-grow` ease, it stops, and a move wakes
+       it. */
     let calm = 0;
     let was = "";
     const step = () => {

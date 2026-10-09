@@ -33,13 +33,13 @@ export function LiquidPair({
   const mouse = useDevice("fine");
   // When the pointer last left the first button (`Quiet` reads it).
   const left = React.useRef(-Infinity);
-  /* And only while it is on screen, from the first idle moment after it
-     arrives. Each liquid runs a loop of its own that wakes on any scroll
-     on the page and measures its buttons every frame, and the homepage
-     has five: on the way back from the portfolio they were set up inside
-     the page swap and then measured every frame of the strip's travel,
-     the largest cost of both crossings (scroll-craft pass, 2026-10-02).
-     The plain buttons are the same at rest, so the change is not seen. */
+  /* And only while it is on screen, from the first idle moment after
+     it arrives. Each liquid runs a loop of its own that wakes on any
+     scroll on the page and measures its buttons every frame, and the
+     homepage has five: on the way back from the portfolio they were
+     set up inside the page swap and then measured every frame of the
+     strip's travel, the largest cost of both crossings. The plain
+     buttons are the same at rest, so the change is not seen. */
   const [node, setNode] = React.useState<HTMLDivElement | null>(null);
   const [live, setLive] = React.useState(false);
   React.useEffect(() => {

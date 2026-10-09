@@ -22,8 +22,8 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  /* Body text is Endless, the titles' face (Julian, 2026-10-07); labels and
-     buttons keep the mono. */
+  /* Body text is Endless, the titles' face; labels and buttons keep the
+     mono. */
   --font-sans: var(--font-display);
   --font-mono: var(--font-mono);
   --font-display: var(--font-display);
@@ -412,20 +412,20 @@
   ::placeholder {
     text-transform: uppercase;
   }
-  /* Julian: justify body. Base layer, so a `text-center` or `text-right`
-     on the paragraph itself still wins. Then: I just want it to look
-     good. Justified mono needs about 45 characters a line or the gaps
-     open up between the words, and measured on every page, under 1024px
-     wide nearly every paragraph had 19 to 42. So justified from there up,
-     set left below it, and set left too where a desktop column is narrow
-     (the sessions' lines, the contact steps and notes carry `text-left`).
-     Julian (2026-10-03, audit): set left everywhere. The prose is in
+  /* Julian: justify body. Base layer, so a `text-center` or
+     `text-right` on the paragraph itself still wins. Then: I just want
+     it to look good. Justified mono needs about 45 characters a line
+     or the gaps open up between the words, and measured on every page,
+     under 1024px wide nearly every paragraph had 19 to 42. So
+     justified from there up, set left below it, and set left too where
+     a desktop column is narrow (the sessions' lines, the contact steps
+     and notes carry `text-left`). Set left everywhere. The prose is in
      sentence case now and the measure still opens gaps where a column
      narrows (2.5 spaces wide on the last screen's doors). */
   p {
     text-align: left;
-    /* Julian (2026-10-02): never a word broken at the line's end
-       ("accu-rate"). Whole words, the lines evened out instead. */
+    /* Never a word broken at the line's end ("accu-rate"). Whole
+       words, the lines evened out instead. */
     hyphens: manual;
     text-wrap: pretty;
   }

@@ -91,17 +91,16 @@ if (typeof window !== "undefined") {
   );
 }
 
-/** How far past the end a wheel has to push before it leads on, in px of
-    wheel delta. Three notches on a mouse: an overshoot of one is a
-    reader arriving at the end, not asking to leave it. Halved from 300
-    (Julian, 2026-10-08: less resistance). */
+/** How far past the end a wheel has to push before it leads on, in px
+    of wheel delta. Three notches on a mouse: an overshoot of one is a
+    reader arriving at the end, not asking to leave it. Halved from
+    300. */
 export const LEAVE_AFTER = 150;
 /** Fired on the scroller when the rack has laid its frames out again. */
 export const RELAID = "strip-relaid";
 /* A finger's pull past the end before the strip leads on. Shorter than
-   the wheel's, because a wheel notch is worth tens of pixels and a finger
-   is worth the distance it actually moved. 80px, then 50 (Julian,
-   2026-10-08: less resistance). */
+   the wheel's, because a wheel notch is worth tens of pixels and a
+   finger is worth the distance it actually moved. 80px, then 50. */
 export const LEAVE_TOUCH = 50;
 
 /** Lenis, on for everyone. It carries the wheel on every sequence that
@@ -133,9 +132,9 @@ export const GESTURE_GAP_MS = 120;
     the two fought, and the landing read Lenis's target and took the strip
     back to the start. The strip's `onWheel` sets it, Lenis reads it. */
 export const padGesture = new WeakMap<HTMLElement, boolean>();
-/** Preview (`?notch`, 2026-10-09): a mouse notch moves the strip by its
-    own ease, as a trackpad does, rather than by Lenis's. Paged, the notch
-    slides to the next screen (`PAGE_MS`); free, it is the strip's own
+/** Preview (`?notch`): a mouse notch moves the strip by its own ease,
+    as a trackpad does, rather than by Lenis's. Paged, the notch slides
+    to the next screen (`PAGE_MS`); free, it is the strip's own
     momentum, as under `?lenis=0`. Read once, as a strip mounts. */
 export const wantsOwnNotch = () =>
   new URLSearchParams(window.location.search).has("notch");

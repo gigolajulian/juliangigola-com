@@ -4,8 +4,8 @@ import type { Band } from "./band";
 import type { Mover } from "./motion";
 import { centreOf, LEAVE_TOUCH } from "./shared";
 
-/* A finger on a paged strip (the homepage), from Julian's iPad, 2026-10-08,
-   recorded and logged at each step:
+/* A finger on a paged strip (the homepage), from an iPad recording
+   logged at each step:
    - The strip waited for iOS's momentum to run out and then slid to the
      nearest screen. The momentum's tail creeps for seconds, so a swipe
      glided, stalled, lurched to a screen, and once ran on to the ask card
@@ -71,12 +71,12 @@ export function touchHandlers(m: Mover, band: Band) {
       cancelAnimationFrame(m.frame);
       m.frame = 0;
     }
-    /* And on a strip that runs free (the portfolio). A glide the rail or
-       a key had set going kept writing `scrollLeft` under the finger, and
-       `sync` left its target where it was, so after the lift the strip
-       ran on and then glided back to that target with nothing touching
-       it: 300 to 1100px back in 19 of 20 flicks made mid-glide (WebKit,
-       iPad size, 2026-10-09). */
+    /* And on a strip that runs free (the portfolio). A glide the rail
+       or a key had set going kept writing `scrollLeft` under the
+       finger, and `sync` left its target where it was, so after the
+       lift the strip ran on and then glided back to that target with
+       nothing touching it: 300 to 1100px back in 19 of 20 flicks made
+       mid-glide (WebKit, iPad size). */
     if (m.frame && !m.paged) m.stop();
     el.style.overflowX = "";
   };
@@ -108,10 +108,11 @@ export function touchHandlers(m: Mover, band: Band) {
     const last = flick[flick.length - 1];
     let from = flick.findIndex((p) => last.t - p.t <= 100);
     /* A slow phone hands the moves over far apart: on a mid-range
-       Android (Chrome, 4x CPU throttle, 2026-10-09) a swipe's last two
-       came 102ms apart, the tenth of a second held only the last, the
-       speed read nought and a swipe of a third of a screen went back.
-       Then the move before it counts, up to a quarter second back. */
+       Android (Chrome, 4x CPU throttle) a swipe's last two came
+       102ms apart, the tenth of a second held only the last, the
+       speed read nought and a swipe of a third of a screen went
+       back. Then the move before it counts, up to a quarter second
+       back. */
     if (from === flick.length - 1 && from > 0 && last.t - flick[from - 1].t <= 250) from--;
     const back = flick[Math.max(0, from)];
     const fv =

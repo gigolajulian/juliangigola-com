@@ -134,8 +134,7 @@ export function PhotoNotice() {
         // Sentence case, not the `label` treatment the rest of the chrome
         // uses. This is a sentence of plain English making a legal claim, and
         // sixty-odd characters of 11px caps at 0.14em is a thing to decipher
-        // rather than read.
-        // Julian (2026-10-02): smaller.
+        // rather than read. Smaller.
         <p className="max-w-[17rem] bg-foreground px-3 py-2 text-left text-xs leading-snug text-background">
           This photo is Copyright &copy; {new Date().getFullYear()} Julian
           Gigola. All rights reserved.

@@ -185,7 +185,7 @@ export function createMover(
       m.span = el.scrollWidth - m.width;
       // Read with the rest, once a push, not on every notch of it: asked
       // for after the pull's writes, it laid the homepage out again each
-      // notch (scroll-craft pass, 2026-10-02: 25ms a notch at full speed).
+      // notch.
       m.drawn = !!(m.win ??= el.querySelector<HTMLElement>(":scope > [data-lead-window]"))?.getClientRects().length;
     },
     room: () => m.span,

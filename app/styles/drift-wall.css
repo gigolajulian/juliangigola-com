@@ -282,8 +282,8 @@
   transform: perspective(1400px) translateZ(-160px) rotateY(var(--turn));
   transition: transform 500ms var(--ease-out-strong);
 }
-/* Julian (2026-10-03): a cover flow, turned away on the edge that meets
-   the picture, so the outer edge recedes. */
+/* A cover flow, turned away on the edge that meets the picture, so
+   the outer edge recedes. */
 .lightbox-side[data-side="prev"] {
   --turn: -38deg;
   transform-origin: right center;
@@ -305,9 +305,9 @@
   animation: peek-in 500ms var(--ease-out-strong) 120ms backwards;
   box-shadow: 0 24px 60px -24px rgb(0 0 0 / 0.5);
 }
-/* Julian (2026-10-03): glass, not blur. The photograph sharp under a pane:
-   a lit top edge and a darker foot as `.play-glass` draws them, and a
-   broad diagonal sheen that slides across as the card turns to you. */
+/* Glass, not blur. The photograph sharp under a pane: a lit top edge
+   and a darker foot as `.play-glass` draws them, and a broad diagonal
+   sheen that slides across as the card turns to you. */
 .lightbox-glass {
   position: absolute;
   inset: 0;

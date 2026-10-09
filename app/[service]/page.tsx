@@ -15,17 +15,17 @@ import { serviceGraph } from "@/lib/seo";
 
 /* ── a booking page ───────────────────────────────────────────────
  * One service, at the root: /headshots, /graduation-photos. Built from
- * the homepage's own screens (Julian, 2026-10-02): its floating cover
- * with this service's photographs and title, the testimonials, the
- * details and questions on one screen, and the form, set to this service.
- * The words are in `lib/booking.ts`.
+ * the homepage's own screens: its floating cover with this service's
+ * photographs and title, the testimonials, the details and questions on
+ * one screen, and the form, set to this service. The words are in
+ * `lib/booking.ts`.
  * ─────────────────────────────────────────────────────────────── */
 
-/* Prerendered, and rendered on request where the prerendered copy is not
-   there: a Workers preview upload carries no cache, and `dynamicParams =
-   false` turned every miss into a 404 (2026-10-02). Any address at the
-   root that `lib/booking.ts` does not list is a 404 all the same, from
-   `notFound()` below. */
+/* Prerendered, and rendered on request where the prerendered copy is
+   not there: a Workers preview upload carries no cache, and
+   `dynamicParams = false` turned every miss into a 404. Any address
+   at the root that `lib/booking.ts` does not list is a 404 all the
+   same, from `notFound()` below. */
 export function generateStaticParams() {
   return BOOKING_PAGES.map((p) => ({ service: p.slug }));
 }
@@ -60,19 +60,19 @@ export default async function BookingPage(props: PageProps<"/[service]">) {
   if (!page) notFound();
 
   const others = BOOKING_PAGES.filter((p) => p !== page);
-  /* The cover's frames: each tile's photograph, opening what the tile
-     opens (the gallery, or a project). Julian (2026-10-02): headshot 09
-     stays in the gallery, not on the cover. */
+  /* The cover's frames: each tile's photograph, opening what the
+     tile opens (the gallery, or a project). Headshot 09 stays in the
+     gallery, not on the cover. */
   const work = page.tiles
     .filter((t) => !t.frame.src.endsWith("/headshots/09.jpg"))
     .flatMap((t) => {
       const project = getProject(t.href.split("/").pop() ?? "");
       return project ? [{ ...project, cover: t.frame }] : [];
     });
-  /* A session carries its gallery as a screen of its own (Julian,
-     2026-10-03): the frames chosen for it where the gallery is large
-     (`picks`, `lib/booking.ts`), all of it where it fits in four rows of
-     five, and otherwise fourteen, taken in turn from each of the
+  /* A session carries its gallery as a screen of its own: the frames
+     chosen for it where the gallery is large (`picks`,
+     `lib/booking.ts`), all of it where it fits in four rows of five,
+     and otherwise fourteen, taken in turn from each of the
      discipline's projects or spread through the one gallery. */
   const slug = page.gallery.href.split("/").pop() ?? "";
   const one = getProject(slug);

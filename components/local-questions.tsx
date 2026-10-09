@@ -22,22 +22,22 @@ export function LocalQuestions({
   backdrop,
 }: {
   faqs: Faq[];
-  /** The session's price and turnaround, and what was the Details screen,
-      beside the questions, Julian (2026-10-02): one screen for both. */
+  /** The session's price and turnaround, and what was the Details
+      screen, beside the questions: one screen for both. */
   details?: {
     facts: string[];
     blocks: (Block & { links?: { href: string; label: string }[] })[];
   };
-  /** Behind it, the session's own photographs on the drifting wall the
-      homepage's ask has (Julian, 2026-10-03). */
+  /** Behind it, the session's own photographs on the drifting wall
+      the homepage's ask has. */
   backdrop?: ReactNode;
 }) {
   const [open, setOpen] = useState(0);
   const [shown, setShown] = useState(0);
-  /* A rack focus, as a lens pulls it (Julian, delight, 2026-10-03): with
-     the pointer on the words the wall behind them is soft; off the words,
-     over the photographs, the wall comes sharp and up and the words go
-     soft. A mouse only; the words have the focus by default. */
+  /* A rack focus, as a lens pulls it: with the pointer on the words
+     the wall behind them is soft; off the words, over the photographs,
+     the wall comes sharp and up and the words go soft. A mouse only;
+     the words have the focus by default. */
   const [look, setLook] = useState(false);
   return (
     <section
@@ -65,8 +65,8 @@ export function LocalQuestions({
         {details ? (
           <div className="title-rest mt-4 flex flex-col gap-4 border-t border-border pt-5">
             <p className="label text-foreground">{details.facts.join(" · ")}</p>
-            {/* The old Details screen, folded the way the questions are and
-                opened by pointing, Julian (2026-10-02). */}
+            {/* The old Details screen, folded the way the questions are
+                and opened by pointing. */}
             <ul className="flex flex-col">
               {details.blocks.map((b, i) => {
                 const on = i === shown;
@@ -141,7 +141,7 @@ export function LocalQuestions({
                   type="button"
                   aria-expanded={on}
                   onClick={() => setOpen(on ? -1 : i)}
-                  /* Julian (2026-10-02): a mouse opens it by pointing. */
+                  /* A mouse opens it by pointing. */
                   onPointerEnter={(e) => {
                     if (e.pointerType === "mouse") setOpen(i);
                   }}

@@ -90,9 +90,9 @@ export function ClientMarks({
             )}
           >
             <ClientMark client={client} layout={layout} />
-            {/* A logo is a picture with no words in it: the name as text,
-                the logo's alt, so a search engine reads who the client is
-                (Julian, 2026-10-02). */}
+            {/* A logo is a picture with no words in it: the name as
+                text, the logo's alt, so a search engine reads who the
+                client is. */}
             {CLIENT_MARKS[client.slug] ? (
               <span className="sr-only">{client.name}</span>
             ) : null}

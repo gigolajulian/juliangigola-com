@@ -8,8 +8,8 @@ import type { IndexRow } from "@/lib/work";
 import { useWorkView } from "@/lib/work-view";
 
 /* ── the window into the work ─────────────────────────────────────
- * Julian (2026-10-01): past the last screen of the homepage, a peek of the
- * portfolio, so the visitor knows it is opening. Nothing at rest.
+ * Past the last screen of the homepage, a peek of the portfolio, so the
+ * visitor knows it is opening. Nothing at rest.
  *
  * The deck the other way round (Julian: the card swipe reversed, and
  * match the peek and the page): the homepage is the card on top, and
@@ -39,10 +39,10 @@ export function LeadWindow({ covers }: { covers: IndexRow[] }) {
   /* As the page will be: the strip for everybody who has not said
      otherwise, the rack for a visitor who keeps the grid (`work-view`).
      The card came in as the strip and the page landed as the grid, and
-     the grid's own covers came in white (Julian, 2026-10-02). A screen of
-     the rack is ten or twelve covers, so the rack takes every cover it
-     is handed and the strip its first three; their pictures are the
-     page's own at the page's own sizes, so the landing finds them cached. */
+     the grid's own covers came in white. A screen of the rack is ten or
+     twelve covers, so the rack takes every cover it is handed and the
+     strip its first three; their pictures are the page's own at the
+     page's own sizes, so the landing finds them cached. */
   const grid = useWorkView() === "grid";
   const shown = grid ? covers : covers.slice(0, 3);
   const self = React.useRef<HTMLAnchorElement>(null);

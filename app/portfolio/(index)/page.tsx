@@ -186,8 +186,8 @@ export default function WorkPage() {
       label={`Portfolio: ${COMMISSIONS.length} projects, left and right`}
       frames={viewer}
       rows={WORK_ROWS}
-      // Julian: scrolling back past the start goes home, to the hero
-      // (2026-10-01), not to the last screen it left by.
+      // Julian: scrolling back past the start goes home, to the hero,
+      // not to the last screen it left by.
       prev={{ href: "/", name: "Home", start: true }}
       // The pictures come into the page as it is scrolled (globals.css).
       className="portfolio-arrive mt-4 max-sm:mt-2 short:mt-2 flex-1"

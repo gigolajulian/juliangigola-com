@@ -90,13 +90,13 @@
   /* The plate's type is measured off the cover, as on the page. */
   container-type: inline-size;
 }
-/* The rack instead, for a visitor who keeps the grid (`lead-window.tsx`):
-   the page's own `strip-grid` rules on the row, so the two rows, the gap,
-   the padding, the column and the plates are the page's and the landing
-   changes nothing. A cover in the rack is 4:5 whatever it was shot at
-   (`--ar` default), and the spine stands both rows as the page's does.
-   Julian (2026-10-02): the card came in as the strip and the page
-   landed as the grid. */
+/* The rack instead, for a visitor who keeps the grid
+   (`lead-window.tsx`): the page's own `strip-grid` rules on the row,
+   so the two rows, the gap, the padding, the column and the plates are
+   the page's and the landing changes nothing. A cover in the rack is
+   4:5 whatever it was shot at (`--ar` default), and the spine stands
+   both rows as the page's does. The card came in as the strip and the
+   page landed as the grid. */
 .lead-row.strip-grid {
   display: grid;
 }
@@ -110,18 +110,16 @@
 }
 
 /* ── spines ───────────────────────────────────────────────────────
-   Julian (2026-10-01), after the window's word: the same on the work.
-   A discipline's name in the portfolio's rack, a discipline's title and a
-   project's title stand up their cell, reading from the foot as the word
-   on the window does, as tall as the screen allows, and whatever went
-   under the name (the way into the discipline, the writing, the credits)
-   sits beside it at the foot. With the window (Julian made both the
-   default, 2026-10-01), and
-   only where the work runs sideways. */
+   Julian, after the window's word: the same on the work. A
+   discipline's name in the portfolio's rack, a discipline's title and
+   a project's title stand up their cell, reading from the foot as the
+   word on the window does, as tall as the screen allows, and whatever
+   went under the name (the way into the discipline, the writing, the
+   credits) sits beside it at the foot. With the window (Julian made
+   both the default), and only where the work runs sideways. */
 @media (min-width: 40rem) {
-  /* The way in ("All projects") stands at the foot on the name's right,
-     where the name starts reading (Julian, 2026-10-02, after a spell
-     above it). */
+  /* The way in ("All projects") stands at the foot on the name's
+     right, where the name starts reading. */
   .strip-cell:has(> .chapter-name) {
     width: auto;
     flex-direction: row;
@@ -131,17 +129,16 @@
     padding-block: 0 0.25rem;
     /* Julian: space between "All projects" and the first cover, which
        the next screen's shadow also falls across. 88px, then closer to
-       the first project twice (2026-10-02). Then the margins of the
-       discipline's own page, where "All projects" leads (2026-10-04): the
-       page's 40px before the name, 64px from it to the first cover with
-       the strip's 16px gap. */
-    /* Closer again (Julian, 2026-10-08): 32px to the first cover with
-       the strip's 16px gap. */
+       the first project twice. Then the margins of the discipline's
+       own page, where "All projects" leads: the page's 40px before the
+       name, 64px from it to the first cover with the strip's 16px gap. */
+    /* Closer again: 32px to the first cover with the strip's 16px
+       gap. */
     padding-right: 1rem;
     padding-left: 2.5rem;
   }
   /* The first spine 88px off the left edge: the strip's own 40px and
-     this (Julian: 32px, 64px, then wider again 2026-10-02). */
+     this (Julian: 32px, 64px, then wider again). */
   .strip-cell:first-child:has(> .chapter-name) {
     padding-left: 3rem;
   }
@@ -229,19 +226,18 @@
   :is(.discipline-title, [data-discipline-page] .project-plate) > :nth-child(4) {
     grid-row: 4;
   }
-  /* A gallery discipline (Automotive, Places, Event coverage) kept the
-     project plate's 24rem floor with its name centred in it, so the
-     photographs started far out. Its name stands on the page's margin
-     and the first frame follows at the same distance as every other
-     discipline's (Julian, 2026-10-07). */
+  /* A gallery discipline (Automotive, Places, Event coverage) kept
+     the project plate's 24rem floor with its name centred in it, so
+     the photographs started far out. Its name stands on the page's
+     margin and the first frame follows at the same distance as every
+     other discipline's. */
   [data-discipline-page] .project-plate {
     min-width: 0;
     justify-content: start;
   }
   /* A discipline's own page lays its name where the portfolio's first
-     spine stands: 88px in, 32px to the first cover with the strip's gap,
-     and on the page's wash rather than a ground of its own (Julian,
-     2026-10-08: no box, match the headers and margins of All). */
+     spine stands: 88px in, 32px to the first cover with the strip's
+     gap, and on the page's wash rather than a ground of its own. */
   :is(.discipline-title, [data-discipline-page] .project-plate) {
     padding-left: 3rem;
     padding-right: 1rem;
@@ -289,9 +285,8 @@
   z-index: 0;
   animation-name: jg-lead-return;
 }
-/* The default since 2026-10-02, `?stack=0` for the door before it
-   (Julian: the portfolio stacks over the home, not under it):
-   the deck the right way round. The pull brings the portfolio in from the
+/* The default, `?stack=0` for the door before it: the deck the right
+   way round. The pull brings the portfolio in from the
    right as the card on top, in focus, and the last screen sinks back under
    it (`strip.tsx` paint); past the count it carries on over the whole
    window from where the hand left it (`--lead-from`) and the homepage
@@ -304,9 +299,9 @@
   transition: translate 320ms var(--ease-out-strong);
 }
 /* The card runs on down under the glass, as the screens' own pictures
-   do, or the last screen's wall showed through the pane below it; and the
-   homepage's rail gives way as it comes, so the pane never reads Inquire
-   over the portfolio (Julian, 2026-10-02). */
+   do, or the last screen's wall showed through the pane below it; and
+   the homepage's rail gives way as it comes, so the pane never reads
+   Inquire over the portfolio. */
 :root[data-stack][data-under] .lead-pane {
   bottom: calc(-1 * var(--under, 94px));
 }

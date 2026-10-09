@@ -30,7 +30,7 @@ export async function GET(request: Request) {
   if (!token || !(await canPush(token))) return json({ error: "Not authorised." }, 401);
   const { env } = await getCloudflareContext({ async: true });
   // Held in a const: the check above does not narrow `env` inside `gql`,
-  // which failed the production type check (2026-10-05).
+  // which failed the production type check.
   const key = env.CF_ANALYTICS_TOKEN;
   if (!key) return json({ error: "No CF_ANALYTICS_TOKEN on this Worker yet." }, 503);
 
@@ -222,8 +222,8 @@ async function bingWebmaster(key?: string) {
       pages: group(pages, "Query"),
     };
   } catch (e) {
-    // Bing refuses Cloudflare's shared servers outright (2026-10-05), so the
-    // Agentic OS dashboard on Julian's PC asks it instead.
+    // Bing refuses Cloudflare's shared servers outright, so the Agentic OS
+    // dashboard on Julian's PC asks it instead.
     const message = (e as Error).message;
     return {
       error: /ThrottleIP/.test(message)

@@ -210,10 +210,10 @@ export function LegalPage({ children }: { children: React.ReactNode }) {
                   somebody skims past is noise. The buttons name themselves.
                   Selectable, on a strip that is not: a clause gets copied
                   into an email. */}
-                {/* Focusable: from `sm` up the clause scrolls in its own
-                    column, and with nothing in it to take the focus a
-                    keyboard could not scroll it (WCAG 2.1.1, the audit
-                    2026-10-02). Tab to it, then the arrows. */}
+                {/* Focusable: from `sm` up the clause scrolls in its
+                    own column, and with nothing in it to take the
+                    focus a keyboard could not scroll it (WCAG 2.1.1,
+                    the audit). Tab to it, then the arrows. */}
                 <article
                   id={`${d.id}-clause`}
                   aria-labelledby={`${d.id}-reading`}

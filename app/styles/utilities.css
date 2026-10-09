@@ -131,8 +131,8 @@
      cover's index, the frame counters, the rate rows — and proportional
      digits make those shuffle sideways as they change. */
   font-variant-numeric: tabular-nums;
-  /* The small details stay in the mono: labels, captions, counts, buttons
-     (Julian, 2026-10-07). Text and titles are Endless, the logo Inter Tight. */
+  /* The small details stay in the mono: labels, captions, counts, buttons.
+     Text and titles are Endless, the logo Inter Tight. */
   font-family: var(--font-mono);
   font-size: var(--text-label);
   line-height: var(--text-label--line-height);

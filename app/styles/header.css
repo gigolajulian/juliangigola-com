@@ -149,12 +149,11 @@
     align-self: flex-start;
     height: calc(100% - var(--under, 94px));
   }
-  /* Each screen carries a ground of its own down under the glass, as a
-     shadow its own height below it, so the one it slides over never
-     shows through the rail and footer (Julian, 2026-10-07: the screen
-     coming over has to be under the footer, the bottom right black). A
-     screen's own pictures still run on over it: a shadow paints under
-     the element's content. */
+  /* Each screen carries a ground of its own down under the glass, as
+     a shadow its own height below it, so the one it slides over
+     never shows through the rail and footer. A screen's own pictures
+     still run on over it: a shadow paints under the element's
+     content. */
   :root[data-under] .strip-scroll > * {
     box-shadow: 0 var(--under, 94px) 0 var(--background);
   }
@@ -162,21 +161,21 @@
     overflow: clip visible;
   }
   /* Only while it is the screen on top. Once the next one covers it
-     (`data-buried`, `lib/deck.ts`) nothing covered the photos under the
-     glass, which blurred them into a grey band over the footer of every
-     other screen (Julian, 2026-10-01, both themes). */
+     (`data-buried`, `lib/deck.ts`) nothing covered the photos under
+     the glass, which blurred them into a grey band over the footer
+     of every other screen. */
   :root[data-under] .strip-scroll > .cover-float[data-buried] {
     overflow: clip;
   }
   /* And the photographs themselves go, not only their overflow: on
      Julian's machine (Chrome, D3D11, 2321x1334 at 1.5) the frames of a
-     buried hero were still composited where they lie unburied, under the
-     glass, and the clip, the scale and `will-change` each made no
-     difference; the tint over them read as a cool grey band the height of
-     the rail on every other screen (2026-10-02, read off the live tab).
-     A buried screen is wholly under the next one, so nothing of this
-     shows; `visibility` and not `display`, so the frames' places and the
-     observers that count them are kept. */
+     buried hero were still composited where they lie unburied, under
+     the glass, and the clip, the scale and `will-change` each made no
+     difference; the tint over them read as a cool grey band the height
+     of the rail on every other screen. A buried screen is wholly under
+     the next one, so nothing of this shows; `visibility` and not
+     `display`, so the frames' places and the observers that count them
+     are kept. */
   :root[data-under] .strip-scroll > .cover-float[data-buried] .cover-float-frame {
     visibility: hidden;
   }
@@ -217,13 +216,13 @@
     max-width: none;
   }
   /* One pane, not two. Julian: make the scroll bar and the footer one
-     panel. Each had a blur of its own, and two blurs meeting draw a seam
-     where each one's edge samples differently. One layer now, the rail's,
-     running on down under the footer. 9px, a little under the 12 it was
-     (Julian: lower the blur slightly). The tint and the hairline are this
-     layer's too (Julian, 2026-09-30: still two panels): a tint each met
-     where the footer's 38.19px ran into a `--foot` rounded to 38, and the
-     sliver of both read as a line across the glass. */
+     panel. Each had a blur of its own, and two blurs meeting draw a
+     seam where each one's edge samples differently. One layer now, the
+     rail's, running on down under the footer. 9px, a little under the
+     12 it was (Julian: lower the blur slightly). The tint and the
+     hairline are this layer's too: a tint each met where the footer's
+     38.19px ran into a `--foot` rounded to 38, and the sliver of both
+     read as a line across the glass. */
   :root[data-under] .strip-rail::after {
     content: "";
     position: absolute;
@@ -278,9 +277,9 @@
     backdrop-filter: blur(var(--glass-blur, 9px)) saturate(1.5);
   }
 }
-/* And on a phone held upright, the bar and the head are one pane (Julian,
-   2026-10-04): the bar lets go of its own glass and its rule, and the
-   head's glass reaches up behind it to the top of the screen. */
+/* And on a phone held upright, the bar and the head are one pane: the
+   bar lets go of its own glass and its rule, and the head's glass
+   reaches up behind it to the top of the screen. */
 @media (max-width: 39.999rem) and (orientation: portrait) {
   /* `[data-home]` too, now the portfolio has the homepage's glass, so
      this one pane still wins there. */
@@ -297,10 +296,10 @@
     top: calc(-61px - env(safe-area-inset-top, 0px));
   }
 }
-/* From a tablet up as well (Julian, 2026-10-05: integrate the head into
-   the navbar): the portfolio's title row and the bar are one pane of the
-   homepage's glass, with one hairline under both. The pane reaches up
-   past the top of the screen, so it needs no measure of the bar. */
+/* From a tablet up as well: the portfolio's title row and the bar are
+   one pane of the homepage's glass, with one hairline under both. The
+   pane reaches up past the top of the screen, so it needs no measure
+   of the bar. */
 @media (min-width: 40rem) {
   :root:has(.head-glass) .site-bar,
   :root:has(.head-glass) .site-bar[data-home]:not([data-plain="true"]) {
@@ -314,8 +313,7 @@
   .head-glass {
     position: relative;
     isolation: isolate;
-    /* Room under the chips before the pane's hairline (Julian,
-       2026-10-05: some space under the filter). */
+    /* Room under the chips before the pane's hairline. */
     padding-bottom: 0.875rem;
   }
   .head-glass::before {
@@ -406,8 +404,8 @@
    Those are chrome you read type off, so they have to put the picture out
    of the way; this one is the picture, and it should still be the
    visitor’s own page over there — far enough back to be plainly not the
-   thing being looked at, near enough to be read. Then ten (2026-10-01):
-   Julian asked for a blur behind the menu, so four was not being seen.
+   thing being looked at, near enough to be read. Then ten: Julian asked
+   for a blur behind the menu, so four was not being seen.
 
    It comes up with the movement: the same 80ms wait as the slide, then
    520ms of it, so the glass is still arriving for a beat after the drawer
@@ -445,17 +443,17 @@
   transition-delay: 0ms, 80ms, 80ms, 80ms;
 }
 
-/* Preview, `?menu3d=1` (Julian, 2026-10-04): on a phone the page pushed
-   aside swings back in perspective about the edge it shares with the
-   drawer, the drawer turns in on its way, the glass over the page is
-   lighter, and closing is the same movement backwards: the same lengths,
-   the names leaving from the foot up. */
+/* Preview, `?menu3d=1`: on a phone the page pushed aside swings back
+   in perspective about the edge it shares with the drawer, the drawer
+   turns in on its way, the glass over the page is lighter, and
+   closing is the same movement backwards: the same lengths, the names
+   leaving from the foot up. */
 @media (max-width: 39.999rem) and (prefers-reduced-motion: no-preference) {
   :root[data-menu3d] :is(.site-bar, body > main, body > footer) {
     transform-origin: 100% var(--oy, 50vh);
-    /* Inertia (Julian, 2026-10-04): the swing carries a little past and
-       settles back, the slide only just, so the page's edge and the
-       drawer's stay together. */
+    /* Inertia: the swing carries a little past and settles back, the
+       slide only just, so the page's edge and the drawer's stay
+       together. */
     transition:
       translate 620ms var(--ease-spring),
       transform 620ms var(--ease-bounce);
@@ -557,9 +555,8 @@
   translate: none;
 }
 
-/* In the light the names standing back went pale grey on the pale ground
-   (Julian, 2026-10-04): darker there, the one you are on still the
-   darkest. */
+/* In the light the names standing back went pale grey on the pale
+   ground: darker there, the one you are on still the darkest. */
 :root[data-theme="light"] .site-menu a:not([aria-current="page"], :active) {
   opacity: 0.68;
 }
