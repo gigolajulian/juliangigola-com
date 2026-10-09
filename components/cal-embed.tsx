@@ -12,10 +12,17 @@ import { useSiteTheme } from "@/lib/site-theme";
  * Cal.com's script loads only once the calendar is on screen, and takes
  * the site's own colours in either theme, so unlike Google's page it is
  * not turned over on the dark one (`.cal-embed`, globals.css).
+ *
+ * If Cal.com does not arrive (blocked, down, or an event it does not
+ * know), a link to book on Cal.com and the address take its place, inside
+ * 4 seconds of the calendar coming on screen.
  * ─────────────────────────────────────────────────────────────── */
 
 const ORIGIN = "https://app.cal.com";
 const SCRIPT = `${ORIGIN}/embed/embed.js`;
+const EMAIL = "hello@juliangigola.com";
+/** How long Cal.com has to show its page before the way round it shows. */
+const PATIENCE = 3500;
 
 type CalFn = ((...args: unknown[]) => void) & {
   q?: unknown[];
@@ -50,14 +57,28 @@ function stub(): CalFn {
   return cal;
 }
 
-/* The script, added once. */
+/* The script, added once. If it failed before, it is tried again. Calls
+   `failed` if it cannot be fetched; returns how to stop listening. */
 let script: HTMLScriptElement | null = null;
-function load() {
-  if (script) return;
-  script = document.createElement("script");
-  script.src = SCRIPT;
-  script.async = true;
-  document.head.appendChild(script);
+let scriptFailed = false;
+function load(failed: () => void): () => void {
+  if (script && scriptFailed) {
+    script.remove();
+    script = null;
+  }
+  if (!script) {
+    scriptFailed = false;
+    script = document.createElement("script");
+    script.src = SCRIPT;
+    script.async = true;
+    script.addEventListener("error", () => {
+      scriptFailed = true;
+    });
+    document.head.appendChild(script);
+  }
+  const s = script;
+  s.addEventListener("error", failed);
+  return () => s.removeEventListener("error", failed);
 }
 
 /* The site's colours, as the page has them now, for Cal.com's own
@@ -87,18 +108,20 @@ function look() {
 let mounts = 0;
 
 /** Cal.com's calendar for one event, in a box sized like the frame it
-    replaces. */
+    replaces, with a link and the address if it does not arrive. */
 function CalInline({ path, title, className }: { path: string; title: string; className?: string }) {
   const box = React.useRef<HTMLDivElement>(null);
   const host = React.useRef<HTMLDivElement>(null);
   const ns = React.useRef<string | null>(null);
-  const [state, setState] = React.useState<"waiting" | "ready">("waiting");
+  const [state, setState] = React.useState<"waiting" | "ready" | "failed">("waiting");
   const theme = useSiteTheme();
 
   React.useEffect(() => {
     const el = box.current;
     const into = host.current;
     if (!el || !into) return;
+    let timer: number | undefined;
+    let stop = () => {};
     /* Not before it is on screen: a session page's Book screen is the
        last of the deck. */
     const seen = new IntersectionObserver((entries) => {
@@ -106,17 +129,35 @@ function CalInline({ path, title, className }: { path: string; title: string; cl
       seen.disconnect();
       const name = `jg${++mounts}`;
       ns.current = name;
+      timer = window.setTimeout(() => setState((s) => (s === "ready" ? s : "failed")), PATIENCE);
       const cal = stub();
-      load();
+      stop = load(() => setState((s) => (s === "ready" ? s : "failed")));
       cal("init", name, { origin: ORIGIN });
       const api = cal.ns![name];
       const ui = look();
       api("inline", { elementOrSelector: into, calLink: path, config: { layout: ui.layout, theme: ui.theme } });
       api("ui", ui);
-      api("on", { action: "linkReady", callback: () => setState("ready") });
+      api("on", {
+        action: "linkReady",
+        callback: () => {
+          window.clearTimeout(timer);
+          setState("ready");
+        },
+      });
+      api("on", {
+        action: "linkFailed",
+        callback: () => {
+          window.clearTimeout(timer);
+          setState("failed");
+        },
+      });
     });
     seen.observe(el);
-    return () => seen.disconnect();
+    return () => {
+      seen.disconnect();
+      window.clearTimeout(timer);
+      stop();
+    };
   }, [path]);
 
   /* The site's switch flips the calendar with it. */
@@ -127,7 +168,28 @@ function CalInline({ path, title, className }: { path: string; title: string; cl
 
   return (
     <div ref={box} data-cal={state} aria-label={title} role="region" className={`cal-embed relative ${className ?? ""}`}>
-      <div ref={host} className="h-full w-full overflow-y-auto overscroll-contain" />
+      <div ref={host} className={`h-full w-full overflow-y-auto overscroll-contain ${state === "failed" ? "invisible" : ""}`} />
+      {state === "failed" ? (
+        <div className="absolute inset-0 flex flex-col items-center justify-center gap-5 p-6 text-center">
+          <p className="max-w-[24rem] text-balance text-center text-sm normal-case leading-relaxed text-muted-foreground">
+            The calendar did not load here. Pick a time on Cal.com, or write to me.
+          </p>
+          <a
+            href={`https://cal.com/${path}`}
+            target="_blank"
+            rel="noreferrer"
+            className="label inline-block action px-6 py-4 press active:scale-[0.97]"
+          >
+            Book on Cal.com
+          </a>
+          <a
+            href={`mailto:${EMAIL}`}
+            className="inline-block border-b border-border text-sm uppercase leading-none tracking-[0.04em] transition-colors duration-200 hoverable:hover:border-current"
+          >
+            {EMAIL}
+          </a>
+        </div>
+      ) : null}
     </div>
   );
 }
