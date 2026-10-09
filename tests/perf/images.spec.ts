@@ -15,7 +15,7 @@ import { contextFor, PAGES, VIEWPORTS } from "./matrix";
  * did; raise the number only when that was the intent.
  *
  * Measured on a local build (`JG_LOCAL=1`), whose photographs come from
- * the live zone at production sizes and formats.
+ * the live zone at production sizes and formats. Judged in WebKit only.
  */
 
 const IMAGE_BUDGETS = budgets.images as Record<string, Record<string, number>>;
@@ -56,6 +56,11 @@ for (const path of PAGES) {
             kb,
             budget: budget ?? "-",
           });
+          /* The budgets were measured in WebKit and only hold there. Other
+             browsers are reported, not judged: Playwright cannot make
+             Firefox a mobile browser, so at phone and iPad sizes it loads
+             more pictures up front than a phone would. */
+          if (browserName !== "webkit") return;
           expect(budget, `a budget for ${path} at ${v.name} in budgets.json`).toBeDefined();
           expect(kb, `first-screen image KB on ${path} at ${v.name}`).toBeLessThanOrEqual(budget!);
         } finally {

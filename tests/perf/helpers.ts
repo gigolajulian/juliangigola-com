@@ -138,8 +138,16 @@ export function settle(page: Page, selector = ".strip-scroll", ms = 3000): Promi
 export async function wheelFlick(page: Page, sign: 1 | -1, axis: "x" | "y" = "x") {
   const vp = page.viewportSize()!;
   await page.mouse.move(vp.width / 2, vp.height / 2);
+  /* Playwright's Firefox hands the page each delta divided by the
+     display's pixel ratio (a 40 arrives as 20 on a Retina Mac), so the
+     same flick there moved the strip half as far and fell short of a
+     screen at 1920. Scaled back up so every browser gets the same flick. */
+  const gain =
+    page.context().browser()?.browserType().name() === "firefox"
+      ? await page.evaluate(() => devicePixelRatio)
+      : 1;
   for (let i = 0; i < 24; i++) {
-    const d = sign * Math.round(40 * Math.exp(-i / 8));
+    const d = sign * Math.round(40 * gain * Math.exp(-i / 8));
     await page.mouse.wheel(axis === "x" ? d : 0, axis === "y" ? d : 0);
     await page.waitForTimeout(16);
   }
