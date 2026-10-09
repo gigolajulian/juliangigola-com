@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "eslint",
     "scope": "npx tsx scripts/make-scope.mts",
-    "prebuild": "node scripts/make-hero.mjs && node --no-warnings scripts/make-cards.mjs && node scripts/sitemap-dates.mjs"
+    "prebuild": "node scripts/make-hero.mjs && node --no-warnings scripts/make-cards.mjs && node scripts/sitemap-dates.mjs",
+    "postinstall": "patch-package"
   },
   "dependencies": {
     "@opennextjs/cloudflare": "^1.20.6",
@@ -34,6 +35,7 @@
     "@types/react-dom": "^19.3.0",
     "eslint": "^9",
     "eslint-config-next": "16.3.4",
+    "patch-package": "^8.0.0",
     "sharp": "^0.35.4",
     "tailwindcss": "^4",
     "typescript": "^5",

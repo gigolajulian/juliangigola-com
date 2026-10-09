@@ -1,0 +1,134 @@
+diff --git a/node_modules/liquid-gooey/dist/index.cjs b/node_modules/liquid-gooey/dist/index.cjs
+index ca5b486..7ddbc6f 100644
+--- a/node_modules/liquid-gooey/dist/index.cjs
++++ b/node_modules/liquid-gooey/dist/index.cjs
+@@ -695,9 +695,15 @@ var ObserveEngine = class {
+     this.mo = null;
+     this.interval = null;
+     this.removeListeners = [];
++    /* juliangigola.com: a scroll pauses the engine and wakes it once the
++     * scroll has rested (the items scroll with their group), and a group
++     * off screen does not run at all. Measuring every item on every frame
++     * of a swipe forced a layout a frame. */
++    this.scrolling = 0;
++    this.visible = true;
+     this.wake = () => {
+       this.clean = 0;
+-      if (this.awake || this.items.size === 0) return;
++      if (this.awake || this.items.size === 0 || this.scrolling || !this.visible) return;
+       this.awake = true;
+       this.raf = requestAnimationFrame(this.loop);
+     };
+@@ -717,6 +723,11 @@ var ObserveEngine = class {
+       if (this.lastNow) {
+         this.frameEma += (Math.min(now - this.lastNow, 80) - this.frameEma) * 0.12;
+       }
++      if (this.scrolling || !this.visible) {
++        this.awake = false;
++        this.lastNow = 0;
++        return;
++      }
+       this.lastNow = now;
+       if (this.measureAll(dt)) this.clean = 0;
+       else this.clean++;
+@@ -1803,11 +1814,30 @@ var ObserveEngine = class {
+       group.addEventListener(type, wake, true);
+       this.removeListeners.push(() => group.removeEventListener(type, wake, true));
+     }
+-    window.addEventListener("scroll", wake, { capture: true, passive: true });
+-    this.removeListeners.push(() => window.removeEventListener("scroll", wake, true));
++    const onScroll = () => {
++      clearTimeout(this.scrolling);
++      this.scrolling = setTimeout(() => {
++        this.scrolling = 0;
++        this.wake();
++      }, 150);
++    };
++    window.addEventListener("scroll", onScroll, { capture: true, passive: true });
++    this.removeListeners.push(() => {
++      window.removeEventListener("scroll", onScroll, true);
++      clearTimeout(this.scrolling);
++    });
++    if (typeof IntersectionObserver === "function") {
++      const io = new IntersectionObserver(([e]) => {
++        this.visible = e.isIntersecting;
++        if (this.visible) this.wake();
++      });
++      io.observe(group);
++      this.removeListeners.push(() => io.disconnect());
++    }
+     this.interval = setInterval(() => {
++      if (this.scrolling || !this.visible || document.hidden) return;
+       if (!this.awake && this.measureAll()) this.wake();
+-    }, 300);
++    }, 1000);
+   }
+ };
+ 
+diff --git a/node_modules/liquid-gooey/dist/index.js b/node_modules/liquid-gooey/dist/index.js
+index a03ce24..dc6254e 100644
+--- a/node_modules/liquid-gooey/dist/index.js
++++ b/node_modules/liquid-gooey/dist/index.js
+@@ -671,9 +671,15 @@ var ObserveEngine = class {
+     this.mo = null;
+     this.interval = null;
+     this.removeListeners = [];
++    /* juliangigola.com: a scroll pauses the engine and wakes it once the
++     * scroll has rested (the items scroll with their group), and a group
++     * off screen does not run at all. Measuring every item on every frame
++     * of a swipe forced a layout a frame. */
++    this.scrolling = 0;
++    this.visible = true;
+     this.wake = () => {
+       this.clean = 0;
+-      if (this.awake || this.items.size === 0) return;
++      if (this.awake || this.items.size === 0 || this.scrolling || !this.visible) return;
+       this.awake = true;
+       this.raf = requestAnimationFrame(this.loop);
+     };
+@@ -693,6 +699,11 @@ var ObserveEngine = class {
+       if (this.lastNow) {
+         this.frameEma += (Math.min(now - this.lastNow, 80) - this.frameEma) * 0.12;
+       }
++      if (this.scrolling || !this.visible) {
++        this.awake = false;
++        this.lastNow = 0;
++        return;
++      }
+       this.lastNow = now;
+       if (this.measureAll(dt)) this.clean = 0;
+       else this.clean++;
+@@ -1779,11 +1790,30 @@ var ObserveEngine = class {
+       group.addEventListener(type, wake, true);
+       this.removeListeners.push(() => group.removeEventListener(type, wake, true));
+     }
+-    window.addEventListener("scroll", wake, { capture: true, passive: true });
+-    this.removeListeners.push(() => window.removeEventListener("scroll", wake, true));
++    const onScroll = () => {
++      clearTimeout(this.scrolling);
++      this.scrolling = setTimeout(() => {
++        this.scrolling = 0;
++        this.wake();
++      }, 150);
++    };
++    window.addEventListener("scroll", onScroll, { capture: true, passive: true });
++    this.removeListeners.push(() => {
++      window.removeEventListener("scroll", onScroll, true);
++      clearTimeout(this.scrolling);
++    });
++    if (typeof IntersectionObserver === "function") {
++      const io = new IntersectionObserver(([e]) => {
++        this.visible = e.isIntersecting;
++        if (this.visible) this.wake();
++      });
++      io.observe(group);
++      this.removeListeners.push(() => io.disconnect());
++    }
+     this.interval = setInterval(() => {
++      if (this.scrolling || !this.visible || document.hidden) return;
+       if (!this.awake && this.measureAll()) this.wake();
+-    }, 300);
++    }, 1000);
+   }
+ };
+ 
