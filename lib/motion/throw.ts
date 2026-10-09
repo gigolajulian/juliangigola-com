@@ -1,8 +1,7 @@
 /* ── where a throw lands ──────────────────────────────────────────
  * The projection a paged strip makes when a finger lifts
- * (`onTouchEnd` in `components/strip.tsx`): iOS's own scroll
- * deceleration, run out to the end. Copied here to be tested; the strip
- * does not import it yet.
+ * (`onTouchEnd` in `components/strip/touch.ts`): iOS's own scroll
+ * deceleration, run out to the end.
  * ─────────────────────────────────────────────────────────────── */
 
 /** iOS's normal scroll deceleration, per ms. */

@@ -1,7 +1,7 @@
 /* ── which screen a lift lands on ─────────────────────────────────
- * The choice a paged strip makes when a finger lifts (`nearest` and
- * `onTouchEnd` in `components/strip.tsx`). Copied here to be tested; the
- * strip does not import it yet.
+ * The choice a paged strip makes when a finger lifts (`nearest` in
+ * `components/strip/motion.ts`, `onTouchEnd` in
+ * `components/strip/touch.ts`).
  * ─────────────────────────────────────────────────────────────── */
 
 /**
