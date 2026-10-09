@@ -305,6 +305,12 @@ const isPad = (e: WheelEvent) =>
     the two fought, and the landing read Lenis's target and took the strip
     back to the start. The strip's `onWheel` sets it, Lenis reads it. */
 const padGesture = new WeakMap<HTMLElement, boolean>();
+/** Preview (`?notch`, 2026-10-09): a mouse notch moves the strip by its
+    own ease, as a trackpad does, rather than by Lenis's. Paged, the notch
+    slides to the next screen (`PAGE_MS`); free, it is the strip's own
+    momentum, as under `?lenis=0`. Read once, as a strip mounts. */
+const wantsOwnNotch = () =>
+  new URLSearchParams(window.location.search).has("notch");
 /** A wheel and a pointer, where a paged strip rides Lenis (`strip.tsx`). */
 const WHEELED = "(hover: hover) and (pointer: fine)";
 /** How long a push is held after the last notch before it starts to drain,
@@ -1536,6 +1542,7 @@ export function Strip({
     if (paged && !matchMedia(WHEELED).matches) return;
     let off = () => {};
     let gone = false;
+    const ownNotch = wantsOwnNotch();
     /* A frame on: Lenis measures the wrapper as it is made, and made while
        the page arrives that was 18ms of layout inside the trip's freeze. */
     const ready = new Promise((go) => requestAnimationFrame(go));
@@ -1602,6 +1609,8 @@ export function Strip({
               lenis.scrollTo(el.scrollLeft, { immediate: true, force: true });
             return false;
           }
+          // Under `?notch` the strip has the notch too (`onWheel`).
+          if (ownNotch) return false;
           lenis.options.lerp = MOUSE_LERP;
           return true;
         },
@@ -1650,6 +1659,8 @@ export function Strip({
          ease after a notch runs on for a second, and waiting it out put
          the landing back after the wheel. */
       const settle = () => {
+        // A notch under `?notch` lands by the strip's own slide.
+        if (ownNotch && !padGesture.get(el)) return;
         const cs = getComputedStyle(el);
         const gap = parseFloat(cs.columnGap) || 0;
         const end = el.scrollWidth - el.clientWidth;
@@ -2150,6 +2161,7 @@ export function Strip({
        strip's: the band and the lead-on to the next project are counted
        here, off wheel events Lenis would otherwise swallow. */
     const smooth = wantsLenis() && (!paged || matchMedia(WHEELED).matches);
+    const ownNotch = wantsOwnNotch();
 
     /* ── the scroller's own measurements, taken when it changes ──
        `scrollWidth` and `clientWidth` both make the browser lay the page
@@ -2865,6 +2877,9 @@ export function Strip({
       const sideways = Math.abs(e.deltaX) > Math.abs(e.deltaY);
       const raw = sideways ? e.deltaX : e.deltaY;
       if (!raw) return;
+      /* Whether Lenis carries this one: not a trackpad's, and not a
+         notch under `?notch`. */
+      const lenisWheel = smooth && !(ownNotch && !padGesture.get(el));
       /* Half a second of quiet, not half a second since the mount: the
          spin that led here is still that spin until it pauses, so the
          arrival moves with it. A long spin went Sessions to Contact to
@@ -2886,7 +2901,7 @@ export function Strip({
          is dropped; the other way is a new decision and goes through. Not
          under Lenis, which has the wheel there. */
       if (
-        !smooth &&
+        !lenisWheel &&
         arriveDir !== 0 &&
         Math.sign(raw) === arriveDir &&
         performance.now() - arrived < 1000
@@ -3003,7 +3018,7 @@ export function Strip({
       /* Away from the ends, Lenis has the wheel. Nothing is prevented and
          nothing is aimed: its own listener moves the scroller, and this
          handler has already done the only part it keeps. */
-      if (smooth) return;
+      if (lenisWheel) return;
       e.preventDefault();
       /* Paged: the gesture means the next screen, whatever its size. A
          trackpad sends a stream of small deltas for one swipe and a mouse
