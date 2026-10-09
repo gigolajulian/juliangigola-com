@@ -2880,7 +2880,14 @@ export function Strip({
       /* The finger's speed over its last tenth of a second of moving, and
          nothing if it stood still that long before it lifted. */
       const last = flick[flick.length - 1];
-      const back = flick.find((p) => last.t - p.t <= 100) ?? flick[0];
+      let from = flick.findIndex((p) => last.t - p.t <= 100);
+      /* A slow phone hands the moves over far apart: on a mid-range
+         Android (Chrome, 4x CPU throttle, 2026-10-09) a swipe's last two
+         came 102ms apart, the tenth of a second held only the last, the
+         speed read nought and a swipe of a third of a screen went back.
+         Then the move before it counts, up to a quarter second back. */
+      if (from === flick.length - 1 && from > 0 && last.t - flick[from - 1].t <= 250) from--;
+      const back = flick[Math.max(0, from)];
       const fv =
         e.timeStamp - last.t < 100 && last.t > back.t
           ? (last.x - back.x) / (last.t - back.t)
