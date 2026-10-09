@@ -340,6 +340,10 @@ const PAD = 1.8;
     travel and read as lag even at a full frame rate (Julian: the portfolio
     is laggy on a desktop); 0.13 takes about 270. */
 const MOUSE_LERP = 0.13;
+/** A line of a line-mode wheel (Firefox's mouse), in px: the strip's own
+    count, and Lenis's, which it is brought up to. */
+const LINE = 40;
+const LENIS_LINE = 100 / 6;
 
 /** How long after the strip stops before the rail takes the shape of the
     chapter you have landed in. The shape follows the page, and reshaping
@@ -1649,6 +1653,16 @@ export function Strip({
           // Under `?notch` the strip has the notch too (`onWheel`).
           if (ownNotch) return false;
           lenis.options.lerp = MOUSE_LERP;
+          /* Firefox's mouse reports lines, and Lenis counts a line as
+             16.7px, so a notch of three carried 150px against the 360 of
+             a notch anywhere else, and on a paged strip that is under the
+             fifth of a screen `settle` asks for: the page never turned
+             (2026-10-09). A line is 40px here, as the strip's own model
+             and `scrubDeal` count it. Lenis reads the deltas after this. */
+          if (e.deltaMode === 1) {
+            data.deltaX *= LINE / LENIS_LINE;
+            data.deltaY *= LINE / LENIS_LINE;
+          }
           return true;
         },
         /* Not the finger. An iPad's own momentum is better than anything
@@ -3075,7 +3089,7 @@ export function Strip({
       }
       owned = true;
       // Firefox can report lines rather than pixels.
-      const dy = e.deltaMode === 1 ? raw * 40 : raw;
+      const dy = e.deltaMode === 1 ? raw * LINE : raw;
       /* Measured against the quietest the stream has been since its peak,
          not against the event before it. A new push and the tail it lands
          on arrive interleaved — macOS keeps the old fling coming for a
