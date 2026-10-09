@@ -18,6 +18,7 @@ import { PageTransition } from "@/components/page-transition";
 import { CardTilt } from "@/components/card-tilt";
 import { FocusField } from "@/components/focus-field";
 import { ldJson, siteGraph } from "@/lib/seo";
+import { DebugGate } from "@/components/debug-gate";
 
 /* Endless for the name, every heading and the nav, IBM Plex Mono for
    everything else, text, captions, labels, figures. Served from this site
@@ -258,6 +259,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         {/* And the pointer itself: the site's mark in place of the arrow.
             See `pointer-mark.tsx`. */}
         <PointerMark />
+        {/* fps, finger dots and a frame log, only with `?debug`. The
+            overlay itself loads only then: `debug-gate.tsx`. */}
+        <DebugGate />
       </body>
     </html>
   );
