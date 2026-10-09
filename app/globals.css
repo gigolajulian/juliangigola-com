@@ -6560,6 +6560,17 @@ h2:not(.label) {
   .light-cell {
     animation: jg-fade-in 240ms ease-out backwards;
   }
+  /* The slate fades up in place rather than rising. */
+  .light-name {
+    translate: none;
+    transition: opacity 160ms var(--ease-out-strong);
+  }
+  /* The hover drop under the services and sessions lists moves to the
+     row at once rather than gliding there (its glide is an inline
+     style, hence the weight). */
+  :is(.services-ground, .session-ground) div[style*="transition"] {
+    transition: none !important;
+  }
 }
 /* How a commission runs, one step after another as About arrives, and
    the sessions as Sessions does. Hidden
@@ -6797,6 +6808,17 @@ h2:not(.label) {
   .drift-wall__plane,
   .drift-wall__track {
     will-change: auto;
+  }
+  /* A tile under the pointer brightens where it is rather than lifting
+     toward you. */
+  .drift-wall__tile.is-active .drift-wall__inner,
+  .drift-wall__tile:focus-visible .drift-wall__inner {
+    transform: translateZ(0);
+  }
+  .drift-wall__inner {
+    transition:
+      opacity 0.42s cubic-bezier(0.22, 1, 0.36, 1),
+      box-shadow 0.42s cubic-bezier(0.22, 1, 0.36, 1);
   }
 }
 

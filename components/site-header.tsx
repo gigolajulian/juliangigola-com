@@ -562,7 +562,7 @@ function NavLink({
       href={href}
       aria-current={current ? "page" : undefined}
       className={cn(
-        "block py-3 font-mono text-[0.9375rem] uppercase leading-none tracking-[0.08em] transition-[color,scale] duration-300 ease-[var(--ease-out-strong)]",
+        "block py-3 font-mono text-[0.9375rem] uppercase leading-none tracking-[0.08em] transition-[color,scale] duration-300 ease-[var(--ease-out-strong)] motion-reduce:transition-colors",
         // The page you are on stands back while the pointer lights another
         // name, and comes up again when it leaves.
         // Lit, the name is a touch larger (Julian, 2026-10-05).

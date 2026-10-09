@@ -11,13 +11,23 @@ import { useSiteTheme } from "@/lib/site-theme";
 const LAP = 6;
 const LAPS = 2;
 /* Held where it stands, every layer, so the line and its glow stay put
-   rather than fading. A held animation is not repainted. */
+   rather than fading. A held animation is not repainted. And none at all
+   for reduced motion: the library has the same rule, but its sheet did
+   not reach the page and the beam lapped on (measured, plan 3.6). */
 const REST = `
 [data-beam="{id}"][data-rest],
 [data-beam="{id}"][data-rest]::before,
 [data-beam="{id}"][data-rest]::after,
 [data-beam="{id}"][data-rest] [data-beam-bloom] {
   animation-play-state: paused !important;
+}
+@media (prefers-reduced-motion: reduce) {
+  [data-beam="{id}"],
+  [data-beam="{id}"]::before,
+  [data-beam="{id}"]::after,
+  [data-beam="{id}"] [data-beam-bloom] {
+    animation: none !important;
+  }
 }`;
 
 export function ContactBeam({

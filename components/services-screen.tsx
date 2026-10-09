@@ -270,10 +270,10 @@ export function ServicesScreen({
                   {/* The name, and under it what it is. */}
                   {/* The row whose frames are on the table sits a size up. */}
                   <span
-                    className={`flex min-w-0 origin-left flex-col gap-1 transition-[scale] duration-300 ease-[var(--ease-out-strong)] ${i === on ? "sm:[scale:1.06]" : ""}`}
+                    className={`flex min-w-0 origin-left flex-col gap-1 transition-[scale] duration-300 ease-[var(--ease-out-strong)] motion-reduce:transition-none ${i === on ? "sm:[scale:1.06]" : ""}`}
                   >
                     <span
-                      className={`font-display text-[clamp(1.25rem,min(2.2vw,4.2cqh),2.25rem)] leading-none transition-[color,translate] duration-300 ease-[var(--ease-out-strong)] ${i === on ? "translate-x-2 text-foreground" : "text-muted-foreground group-hover:translate-x-2 group-hover:text-foreground max-sm:text-foreground"}`}
+                      className={`font-display text-[clamp(1.25rem,min(2.2vw,4.2cqh),2.25rem)] leading-none transition-[color,translate] duration-300 ease-[var(--ease-out-strong)] motion-reduce:transition-colors ${i === on ? "translate-x-2 text-foreground" : "text-muted-foreground group-hover:translate-x-2 group-hover:text-foreground max-sm:text-foreground"}`}
                     >
                       {r.name}
                     </span>
