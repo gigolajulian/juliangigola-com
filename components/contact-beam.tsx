@@ -65,6 +65,16 @@ export function ContactBeam({
     // And from the start, so it comes to rest even if the observer never
     // reports.
     run();
+    /* `?wall=still` (plan 1.1, on trial): the form in use holds the beam
+       too, so it laps on coming into view and not under a pointer or a
+       field taking focus. At 1920 by 1080 on a 2x screen the lapping beam
+       was what held the form to 10 to 17fps; at rest it ran at 60. */
+    if (new URLSearchParams(location.search).get("wall") === "still") {
+      return () => {
+        io.disconnect();
+        clearTimeout(rest);
+      };
+    }
     card.addEventListener("pointerdown", run, { passive: true });
     card.addEventListener("pointerenter", run, { passive: true });
     card.addEventListener("focusin", run);
