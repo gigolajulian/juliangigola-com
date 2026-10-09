@@ -14,6 +14,30 @@ npm run dev
 
 `npm run build` prerenders every page, including one per project.
 
+## Checks
+
+```bash
+npm run perf                              # the perf suite, on a local production build
+node scripts/perf/safari.mjs <url>        # one page swiped in real Safari
+```
+
+`npm run perf` builds with `JG_LOCAL=1` (or reuses such a build), serves it,
+and runs `tests/perf`: swipe landing and frame timing, splash timing, layout
+and first-screen image weight, on every page at eight sizes. It ends with a
+table per measurement. The budgets are in `tests/perf/budgets.json`.
+
+`.github/workflows/ci.yml` runs typecheck, lint, a build and the perf suite on
+every pull request and every push to `main`.
+
+## Browser support
+
+The last two major versions of each browser: Safari on the Mac, iPhone and
+iPad, Chrome (desktop and Android), Edge and Firefox. It is written down once,
+as `browserslist` in `package.json`, which is also what the build compiles
+for. The perf suite runs in the three engines behind them: WebKit, Chromium
+and Firefox (`playwright.config.ts`). Anything older may work; it is not
+tested.
+
 ## How it is put together
 
 **The work is the interface.** One committed dark theme, Univers Bold Condensed for
@@ -79,9 +103,10 @@ the archive moved from 1600px to 2500px.
 
 Cloudflare Workers, via `@opennextjs/cloudflare`. Push to `main` deploys —
 through **Workers Builds**, which is connected to this repository from the
-Cloudflare dashboard rather than driven by a workflow file. There is no
-`.github/workflows`: the previous GitHub Actions deploy needed a Cloudflare
-API token kept as a repository secret, and this needs no token at all.
+Cloudflare dashboard rather than driven by a workflow file. No workflow in
+`.github/workflows` deploys: the previous GitHub Actions deploy needed a
+Cloudflare API token kept as a repository secret, and this needs no token
+at all. The one workflow there, `ci.yml`, only checks (see "Checks").
 
 Build command `npx opennextjs-cloudflare build`, deploy command
 `npx opennextjs-cloudflare deploy`. Change those in the dashboard under the
