@@ -3349,6 +3349,14 @@ export function Strip({
       window.clearTimeout(settle);
       settle = window.setTimeout(() => {
         if (down || held || dragging || frame || leaving) return;
+        /* A wheel's gesture under Lenis is landed by Lenis's own `settle`,
+           which starts 140ms after the wheel rests. This one fired 20ms
+           later, before Lenis had written a frame, and the two pulled two
+           ways: a trackpad swipe of a quarter screen slid back to the
+           screen it left and then jumped a whole screen on in one frame
+           (Chrome and WebKit, 1440 wide, at 1.25x, 1.5x and 2x,
+           2026-10-09). */
+        if (smooth && performance.now() - gestureAt < 1000) return;
         seat = nearest(el.scrollLeft);
         const where = centreOf(el, seat);
         if (where !== null && Math.abs(where - el.scrollLeft) > 2) to(where);
