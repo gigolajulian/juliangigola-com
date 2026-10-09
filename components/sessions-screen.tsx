@@ -175,7 +175,9 @@ export function SessionsScreen({ sessions }: { sessions: SessionItem[] }) {
             the Commissions table): the rate over the name, on a fall of
             shade (Julian, 2026-10-04: match the rest). */}
         <div className="pointer-events-none absolute inset-x-0 bottom-0 flex flex-col items-start gap-1.5 bg-gradient-to-t from-black/80 via-black/35 to-transparent px-5 pb-5 pt-20">
-          <span className="label leading-none text-white/75">{current.rate}</span>
+          {/* Near full white: at 75% the rate measured 4:1 on a bright
+              frame (plan 5.1). */}
+          <span className="label leading-none text-white/90">{current.rate}</span>
           <span className="font-display text-[clamp(1.25rem,2vw,2rem)] uppercase leading-[0.9] text-white">
             {current.name}
           </span>

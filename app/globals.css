@@ -3997,6 +3997,12 @@ h2.contact-title {
       -webkit-backdrop-filter 300ms var(--ease-out-strong);
     pointer-events: none;
   }
+  /* Over a wall of photographs (Inquiries, Where next, a booking page's
+     Questions) the glass is thicker: through 34% a bright tile left the
+     count and the rail's word at 3.4:1 (plan 5.1, WCAG AA wants 4.5). */
+  :root[data-under]:has(.strip-scroll:is([data-at="Inquiries"], [data-at="Where next"], [data-at="Questions"])) .strip-rail::after {
+    --glass-tint: 62%;
+  }
   @media (prefers-reduced-transparency: reduce) {
     :root[data-under] .strip-rail::after {
       background-color: var(--background);
@@ -6189,7 +6195,10 @@ h2:not(.label) {
    the line under the question, the doors' lines) were faint over a
    bright tile, under 4.5:1 on a phone in either theme (scroll-craft's
    contrast pass, 2026-10-02). Nearer the ink. */
-.enquiry-backdrop ~ * .text-muted-foreground {
+.enquiry-backdrop ~ * .text-muted-foreground,
+/* And the doors' lines, over the same wall through a 30% tint: 3.9:1 at
+   a bright tile on the light theme (plan 5.1). */
+.door-veil ~ * .text-muted-foreground {
   color: color-mix(in oklab, var(--foreground) 82%, transparent);
 }
 

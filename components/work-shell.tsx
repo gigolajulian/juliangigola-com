@@ -1250,8 +1250,9 @@ function Chip({
                a near-black page. Julian: keep the count after the filter
                is selected. Half strength so the name still leads. The
                plate is back (2026-10-04, now in full ink), so it is
-               knocked out of it again. */
-            active ? "text-foreground/60" : "text-muted-foreground/60",
+               knocked out of it again. Unlit, at the muted grey's full
+               strength: at 60% it measured 2.7:1 (plan 5.1, WCAG AA). */
+            active ? "text-foreground/60" : "text-muted-foreground",
           )}
         >
           {count}

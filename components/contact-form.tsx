@@ -456,7 +456,7 @@ export function ContactForm({
           </p>
         ) : null}
         {/* The address is above the form on a phone already. */}
-        <p className="order-first text-left text-xs text-muted-foreground opacity-70 max-sm:hidden">
+        <p className="order-first text-left text-xs text-muted-foreground max-sm:hidden">
           Email{" "}
           <a
             href="mailto:hello@juliangigola.com"

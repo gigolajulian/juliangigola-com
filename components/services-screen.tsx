@@ -178,8 +178,11 @@ export function ServicesScreen({
                       className="object-cover"
                       style={{ backgroundColor: r.cover.color }}
                     />
-                    <span className="absolute inset-x-0 bottom-0 flex flex-col gap-1 bg-gradient-to-t from-black/80 via-black/35 to-transparent px-3 pb-3 pt-12">
-                      <span className="label tabular-nums leading-none text-white/75">
+                    {/* The number in full white over a deeper fall of shade:
+                        at 75% over 35% it measured 2.1:1 on a bright frame
+                        (plan 5.1). */}
+                    <span className="absolute inset-x-0 bottom-0 flex flex-col gap-1 bg-gradient-to-t from-black/80 via-black/50 to-transparent px-3 pb-3 pt-12">
+                      <span className="label tabular-nums leading-none text-white">
                         {String(i + 1).padStart(2, "0")}
                       </span>
                       <span className="font-display line-clamp-2 text-[1.375rem] uppercase leading-[0.9] text-white">
@@ -263,7 +266,7 @@ export function ServicesScreen({
                   className="group grid grid-cols-[auto_minmax(0,1fr)] items-baseline gap-x-4 max-sm:items-center py-[clamp(0.25rem,0.7cqh,0.5rem)] max-sm:grid-cols-[auto_minmax(0,1fr)_3.5rem] max-sm:py-2"
                 >
                   <span
-                    className={`label tabular-nums transition-colors duration-300 ${i === on ? "text-foreground" : "text-muted-foreground/60"}`}
+                    className={`label tabular-nums transition-colors duration-300 ${i === on ? "text-foreground" : "text-muted-foreground"}`}
                   >
                     {String(i + 1).padStart(2, "0")}
                   </span>
