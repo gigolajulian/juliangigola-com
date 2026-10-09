@@ -19,6 +19,8 @@ const eslintConfig = defineConfig([
     // ones.
     ".open-next/**",
     ".wrangler/**",
+    // Claude Code's worktrees: whole copies of the repo, each linted again.
+    ".claude/**",
   ]),
 ]);
 
