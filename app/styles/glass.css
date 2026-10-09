@@ -1,0 +1,473 @@
+/* Liquid glass, the light on it and the site's buttons. */
+
+/* ── Liquid glass ─────────────────────────────────────────────────
+ * Apple's material, in CSS: a surface that blurs and saturates what is
+ * behind it, catches light along its top edge, shades along its bottom, and
+ * brightens where the pointer is. Julian asked for the glass effect and its
+ * button style across the site.
+ *
+ * Three utilities, one material. Blur at 15px on a control and 18px on a
+ * surface — a quarter under where they started, at Julian's ask: enough that
+ * the picture behind reads as a picture, not a haze.
+ *
+ *   glass            — a control over content: buttons, floating labels,
+ *                      lightbox and video controls. Capsule shaped by the
+ *                      caller (`rounded-full`), which is the shape the
+ *                      material is known by.
+ *   glass-prominent  — the same, tinted with the page's ink. The primary
+ *                      button: the one action on a screen that should read
+ *                      as solid.
+ *   glass-surface    — a bar or a plate: the header, the cover's band, the
+ *                      plates under the homepage tiles. Square, no outer
+ *                      shadow, the shine only. These already had blur; this
+ *                      gives them the rest of the material so a button and
+ *                      the bar it sits on are visibly the same glass.
+ *
+ * Where it goes, and where it does not: on the controls layer, over
+ * pictures — which is the whole reason for a material that lets the picture
+ * through. Over a flat page it still reads, through the edge and the
+ * highlight, which is why the buttons on /contact and /about take it too:
+ * one button style. The admin panel keeps its plain borders.
+ *
+ * The highlight follows the pointer through `--gx` / `--gy`, written by
+ * `glass-light.tsx`; without them it rests at the top edge, which is where
+ * light would sit on a phone. Reduced transparency turns the blur off and
+ * the fill opaque, and every colour is mixed from the theme's own tokens so
+ * the material is the same material in light and dark.
+ * ─────────────────────────────────────────────────────────────── */
+/* ── the light, as a thing that can move ──
+   `--gx` / `--gy` are written by `glass-light.tsx` the instant the pointer
+   moves. Registered as lengths they can be transitioned, so the highlight
+   arrives a beat behind the hand and smears across the surface on the way:
+   the glass has weight. Unregistered they snapped, which reads as a decal.
+   Initial values put the light at the top edge, where it rests. */
+@property --gx {
+  syntax: "<length-percentage>";
+  inherits: true;
+  initial-value: 50%;
+}
+@property --gy {
+  syntax: "<length-percentage>";
+  inherits: true;
+  initial-value: 0%;
+}
+
+@utility glass {
+  --glass-fill: color-mix(in oklab, var(--background) 52%, transparent);
+  --glass-edge: color-mix(in oklab, var(--foreground) 18%, transparent);
+  --glass-shine: color-mix(in oklab, white 42%, transparent);
+  --glass-shade: color-mix(in oklab, black 26%, transparent);
+  --glass-light: color-mix(in oklab, white 26%, transparent);
+  position: relative;
+  isolation: isolate;
+  background-color: var(--glass-fill);
+  -webkit-backdrop-filter: blur(24px) saturate(1.9) brightness(1.06);
+  backdrop-filter: blur(24px) saturate(1.9) brightness(1.06);
+  border: 1px solid var(--glass-edge);
+  border-radius: 0;
+  box-shadow: 0 12px 32px -14px color-mix(in oklab, black 55%, transparent);
+  transition:
+    background-color 200ms var(--ease-out-strong),
+    border-color 200ms var(--ease-out-strong),
+    color 200ms var(--ease-out-strong);
+
+  /* The light. A radial highlight at the pointer, or resting at the top
+     edge; painted between the fill and the content. */
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    border-radius: inherit;
+    pointer-events: none;
+    background: radial-gradient(
+      160px circle at var(--gx) var(--gy),
+      var(--glass-light),
+      transparent 70%
+    );
+    opacity: 0;
+    transition: opacity 260ms var(--ease-out-strong);
+  }
+  @media (hover: hover) and (pointer: fine) {
+    &:hover::before {
+      opacity: 1;
+    }
+  }
+  &:focus-visible::before {
+    opacity: 1;
+  }
+  /* Pressed: the glass firms up under the finger. The scale is the `press`
+     utility's job, alongside. */
+  &:active {
+    background-color: color-mix(in oklab, var(--background) 72%, transparent);
+  }
+}
+
+/* The play mark on a film (`video-grid.tsx`): a disc of clear glass, not a
+   tile of the bar's frosted kind (Julian, 2026-10-01: circular, liquid
+   glass, less background). A tenth of white for a body, the still blurred
+   and brightened through it, a lit rim along the top and a fainter one
+   round the foot, the way light sits in a drop. The mark is white with its
+   own soft shadow, so the disc no longer has to carry it. */
+.play-glass {
+  --glass-fill: color-mix(in oklab, white 10%, transparent);
+  --glass-edge: color-mix(in oklab, white 34%, transparent);
+  --glass-light: color-mix(in oklab, white 30%, transparent);
+  border-radius: 9999px;
+  -webkit-backdrop-filter: blur(12px) saturate(1.8) brightness(1.12);
+  backdrop-filter: blur(12px) saturate(1.8) brightness(1.12);
+  box-shadow:
+    inset 0 1px 0.5px color-mix(in oklab, white 60%, transparent),
+    inset 0 -1px 0.5px color-mix(in oklab, white 16%, transparent),
+    inset 0 0 1.25rem color-mix(in oklab, white 8%, transparent),
+    0 0.75rem 2rem -0.875rem color-mix(in oklab, black 55%, transparent);
+}
+.play-glass:active {
+  background-color: color-mix(in oklab, white 18%, transparent);
+}
+
+@utility glass-prominent {
+  --glass-fill: color-mix(in oklab, var(--foreground) 86%, transparent);
+  --glass-edge: color-mix(in oklab, var(--foreground) 60%, transparent);
+  --glass-shine: color-mix(in oklab, white 34%, transparent);
+  --glass-shade: color-mix(in oklab, black 30%, transparent);
+  --glass-light: color-mix(in oklab, white 22%, transparent);
+  position: relative;
+  isolation: isolate;
+  color: var(--background);
+  background-color: var(--glass-fill);
+  -webkit-backdrop-filter: blur(24px) saturate(1.9) brightness(1.06);
+  backdrop-filter: blur(24px) saturate(1.9) brightness(1.06);
+  border: 1px solid var(--glass-edge);
+  border-radius: 0;
+  box-shadow: 0 12px 32px -14px color-mix(in oklab, black 55%, transparent);
+  transition: background-color 200ms var(--ease-out-strong);
+
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    border-radius: inherit;
+    pointer-events: none;
+    background: radial-gradient(
+      160px circle at var(--gx) var(--gy),
+      var(--glass-light),
+      transparent 70%
+    );
+    opacity: 0;
+    transition: opacity 260ms var(--ease-out-strong);
+  }
+  /* The pointer light alone was too quiet to read as a hover on a pill
+     this bright — Julian could not see it. So the fill itself steps a
+     little off-white (off-black in the light theme) under a pointer, and
+     the press still goes to the full colour: hover is the pill noticing
+     you, press is the pill answering. */
+  @media (hover: hover) and (pointer: fine) {
+    &:hover {
+      background-color: color-mix(
+        in oklab,
+        var(--foreground) 78%,
+        var(--background)
+      );
+    }
+    &:hover::before {
+      opacity: 1;
+    }
+  }
+  &:focus-visible::before {
+    opacity: 1;
+  }
+  &:active {
+    background-color: var(--foreground);
+  }
+}
+
+/* ── the site's two buttons ───────────────────────────────────────
+ * The chip in the work index's filter row is this site's own control: ink on
+ * paper when it is the one you are on, a soft fill under the pointer when it
+ * is not. These are that chip at button size, and nothing else.
+ *
+ * Flat on purpose. Glass is a material for floating over a photograph, which
+ * is what the lightbox and the player controls do and these do not: a button
+ * in the flow of a page is page furniture, and page furniture here is ink,
+ * paper and a hairline. Julian: the CTA buttons do not match the website
+ * design at all.
+ *
+ * Shape and padding stay at the call site, as they already were. These carry
+ * the colour and what it does under a pointer, so the eight buttons on the
+ * site cannot drift apart again.
+ * ─────────────────────────────────────────────────────────────── */
+/* ── the two buttons ──
+   Glass, square, no bevel.
+
+   Square because every other edge on the site is: the strip, the ruler, the
+   grid. A lit top edge over a dark bottom one is the other thing that went:
+   it imitates moulded plastic, and under a condensed grotesque on paper it
+   reads as a control borrowed from somebody else's software.
+
+   `action` takes the prominent fill, which is ink at 86% rather than page at
+   52%. That matters and is worth writing down: the pale glass is invisible
+   on the paper ground, near white over near white, with a white pointer
+   highlight that cannot be seen and a blur with nothing behind it. Measured
+   on production it made the primary call to action on /contact a hollow box.
+   Translucent ink reads on paper and over a photograph alike, and it keeps
+   the pair apart, because the quiet one beside it is the pale glass. */
+@utility action {
+  font-weight: 700;
+  border: 1px solid color-mix(in oklab, var(--foreground) 60%, transparent);
+  border-radius: 0;
+  position: relative;
+  isolation: isolate;
+  color: var(--background);
+  background-color: color-mix(in oklab, var(--foreground) 72%, transparent);
+  -webkit-backdrop-filter: blur(24px) saturate(1.9) brightness(1.06);
+  backdrop-filter: blur(24px) saturate(1.9) brightness(1.06);
+  box-shadow: 0 12px 32px -16px color-mix(in oklab, black 55%, transparent);
+  transition:
+    background-color 200ms var(--ease-out-strong),
+    border-color 200ms var(--ease-out-strong),
+    color 200ms var(--ease-out-strong),
+    -webkit-text-stroke-width 200ms var(--ease-out-strong);
+
+  /* Inverts under a pointer: the ground with the ink on it, where at rest
+     it is the ink with the ground on it. It used to go from 72% ink to 74%
+     with the hairline coming up to full, and against a screenshot the whole
+     change was a mean of two levels in 255 — and going to 100% ink measured
+     the same, because 72% of a near-white ink over a pale photograph is
+     already white. Julian, on Enquire and See the work: "hover doesn't
+     seem to be working". The quiet button beside it inverts to ink; this
+     one inverts to ground, so the pair mirror each other and still read
+     as two buttons at every point of the movement. The press is the
+     squeeze the class beside it adds, not a third colour. */
+  @media (hover: hover) and (pointer: fine) {
+    &:hover {
+      background-color: color-mix(in oklab, var(--background) 82%, transparent);
+      border-color: var(--foreground);
+      color: var(--foreground);
+    }
+  }
+  &:focus-visible {
+    background-color: color-mix(in oklab, var(--background) 82%, transparent);
+    border-color: var(--foreground);
+    color: var(--foreground);
+  }
+  &:active {
+    background-color: color-mix(in oklab, var(--background) 82%, transparent);
+    border-color: var(--foreground);
+    color: var(--foreground);
+  }
+}
+
+@utility action-quiet {
+  font-weight: 700;
+  border: 1px solid color-mix(in oklab, var(--foreground) 22%, transparent);
+  border-radius: 0;
+  position: relative;
+  isolation: isolate;
+  color: var(--foreground);
+  background-color: color-mix(in oklab, var(--background) 46%, transparent);
+  -webkit-backdrop-filter: blur(24px) saturate(1.9) brightness(1.06);
+  backdrop-filter: blur(24px) saturate(1.9) brightness(1.06);
+  box-shadow: 0 12px 32px -18px color-mix(in oklab, black 45%, transparent);
+  transition:
+    background-color 200ms var(--ease-out-strong),
+    border-color 200ms var(--ease-out-strong),
+    color 200ms var(--ease-out-strong),
+    -webkit-text-stroke-width 200ms var(--ease-out-strong);
+
+  /* Under the pointer it fills rather than tints: white type needs a ground
+     to be white against, and 7% of ink over the page is not one. The loud
+     one beside it eases off its ink at the same moment, so the pair reads as
+     two different buttons at every point in the movement. */
+  @media (hover: hover) and (pointer: fine) {
+    &:hover {
+      background-color: var(--foreground);
+      border-color: var(--foreground);
+      color: var(--background);
+    }
+  }
+  &:focus-visible {
+    background-color: var(--foreground);
+    border-color: var(--foreground);
+    color: var(--background);
+  }
+  &:active {
+    background-color: color-mix(
+      in oklab,
+      var(--foreground) 88%,
+      var(--background)
+    );
+    border-color: color-mix(in oklab, var(--foreground) 88%, var(--background));
+    color: var(--background);
+  }
+}
+
+/* No light pool and no lean. A white radial under the pointer on a
+   button that is itself pale read as a smear across it, and a button
+   that grows when you point at it moves the thing you were aiming for.
+   What answers the pointer instead is the edge: the hairline comes up
+   to full ink over 200ms and nothing else on the button moves at all.
+   Julian asked. */
+
+/* Julian: the buttons like his recording. Under a pointer the fill
+   floods in as a circle from where it came in and drains back out toward
+   where it left (`glass-light.tsx` writes the point, --fx and --fy, and
+   the circle's size, --fd). The circle is the hover's fill, so the
+   button's own ground stays as it is at rest; the type and the edge
+   still turn over as before. Julian: match the radius, so round ended,
+   as in the recording (his exception to "never a pill shape"). */
+:is(.action, .action-quiet, .cover-cta) {
+  border-radius: 9999px;
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  /* The type turns over as the fill reaches it: a beat after the circle
+     starts going in, and going out, once it has drained off the words. */
+  transition:
+    background-color 200ms var(--ease-out-strong),
+    border-color 200ms var(--ease-out-strong),
+    box-shadow 200ms var(--ease-out-strong),
+    color 220ms ease 170ms;
+}
+:is(.action, .action-quiet, .cover-cta)::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  left: var(--fx, 50%);
+  top: var(--fy, 100%);
+  width: var(--fd, 250%);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  translate: -50% -50%;
+  scale: 0;
+  background: var(--flood);
+  pointer-events: none;
+  transition: scale 560ms cubic-bezier(0.33, 0, 0.2, 1);
+}
+/* The buttons in the nav's face, Endless (Julian, 2026-10-07). Unlayered,
+   so it outranks the mono the `label` beside it sets. */
+.action,
+.action-quiet {
+  font-family: var(--font-display);
+}
+.action {
+  --flood: var(--background);
+}
+.action-quiet {
+  --flood: var(--foreground);
+}
+.cover-cta {
+  --flood: var(--background);
+}
+.cover-cta-quiet {
+  --flood: var(--hero-ink);
+}
+/* Julian: the edge shows on hover. The fill stops inside the border, so
+   the edge is a real border here too (the solid homepage one had it as an
+   inset shadow, which the fill covered), and the ones that fill with ink
+   keep a grey edge rather than one the colour of the fill. */
+.cover-cta:not(.cover-cta-quiet) {
+  border: 1px solid transparent;
+  /* Julian: see through, as every other primary on the site (`action`):
+     72% of the ink over a blur of what is behind it, not a solid pill. */
+  background: color-mix(in oklab, var(--hero-ink) 72%, transparent);
+  -webkit-backdrop-filter: blur(24px) saturate(1.9) brightness(1.06);
+  backdrop-filter: blur(24px) saturate(1.9) brightness(1.06);
+}
+@media (hover: hover) and (pointer: fine) {
+  :is(.action, .action-quiet, .cover-cta):not(:disabled, [aria-disabled="true"]):hover::before {
+    scale: 1;
+  }
+  :is(.action, .action-quiet, .cover-cta):hover {
+    transition-delay: 0s, 0s, 0s, 90ms;
+  }
+  /* Julian: the type a touch heavier under the pointer. Plex stops at
+     700, which the buttons already are, so it is a hairline of the
+     letters' own colour round them rather than a faked weight; it
+     changes no metrics, so nothing moves. */
+  :is(.action, .action-quiet, .cover-cta):not(:disabled, [aria-disabled="true"]):hover {
+    -webkit-text-stroke: 0.45px currentColor;
+  }
+  .action:hover {
+    background-color: color-mix(in oklab, var(--foreground) 72%, transparent);
+  }
+  .action-quiet:hover {
+    background-color: color-mix(in oklab, var(--background) 46%, transparent);
+    border-color: color-mix(in oklab, var(--foreground) 45%, transparent);
+  }
+  .cover-cta:hover {
+    background: var(--hero-ink);
+  }
+  .cover-cta-quiet:hover {
+    background: transparent;
+    border-color: color-mix(in oklab, var(--hero-ink) 45%, transparent);
+  }
+  .cover-cta:not(.cover-cta-quiet):hover {
+    border-color: var(--hero-ink);
+    box-shadow: none;
+  }
+}
+
+/* Sessions' button, alone with no liquid under it: its glass at 72% ink
+   over the dark screen read grey, as if it could not be pressed
+   (critique, 2026-10-03). Solid ink at rest, like the liquid buttons;
+   its hover is its own. */
+:is(.sessions-book, .services-book):not(:hover, :focus-visible, :active) {
+  background-color: var(--foreground);
+  border-color: var(--foreground);
+}
+
+/* Off. A button that cannot be pressed yet says so by going quiet: the
+   fill drops back, the label goes with it, and nothing under the pointer
+   answers. It keeps its size, so the row does not move when the form
+   fills up and the button comes alive. */
+.action:disabled,
+.action[aria-disabled="true"],
+.action-quiet:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+@media (hover: hover) and (pointer: fine) {
+  .action:disabled:hover,
+  .action[aria-disabled="true"]:hover,
+  .action[aria-disabled="true"]:active,
+  .action-quiet:disabled:hover {
+    background-color: color-mix(in oklab, var(--foreground) 72%, transparent);
+    border-color: color-mix(in oklab, var(--foreground) 30%, transparent);
+    color: var(--background);
+  }
+}
+
+@utility glass-surface {
+  background-color: color-mix(in oklab, var(--background) 62%, transparent);
+  -webkit-backdrop-filter: blur(18px) saturate(1.5);
+  backdrop-filter: blur(18px) saturate(1.5);
+  /* No shine along the top edge. It was an inset 1px of white at 16%,
+     the light catching the lip of the glass, and on a plate sitting on a
+     photograph it read as a pixel of light between the picture and the
+     plate: measured on the homepage grid, a row at 76 over a plate at 41.
+     Julian asked for the plates flush. The header never showed it; its
+     top edge is the top of the window. */
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .glass,
+  .glass-surface {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    background-color: var(--background);
+  }
+  .glass-prominent {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    background-color: var(--foreground);
+  }
+}
+
+/* "Up next" stands on the page's own wash at every width, not on a card
+   of its own (Julian, 2026-10-08: match background). */
+.strip-scroll[data-dealt] > .next-cell {
+  background: none;
+  box-shadow: none;
+}

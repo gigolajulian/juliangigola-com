@@ -1,0 +1,136 @@
+/* Ultrawide windows and the ink. */
+
+/* ── ultrawide ────────────────────────────────────────────────────
+   A 21:9 or 32:9 desktop (twice as wide as tall, and wider than a
+   laptop). The words, the forms and the lists of the homepage's screens
+   stand in one column with the header, the page heads and the footer
+   (2.5rem in), and half of what the window has past 100rem is margin
+   either side (Julian: 100rem was too tight, half that): a session's
+   price was 4000px from its name, the about text one line of 2800px, and
+   the contact form the width of a room away from its heading. What is
+   photographs (the cover, the tiles, the wall behind the ask, the
+   portfolio's strip) keeps the whole width. Julian: on ultrawide, chunkier
+   side margins. */
+@media (min-aspect-ratio: 2 / 1) and (min-width: 110rem) {
+  .screen-measure {
+    padding-inline: calc((100vw - 100rem) / 4 + 2.5rem);
+  }
+  .page-column,
+  :root .site-footer-body,
+  :root[data-under] .site-footer-body {
+    max-width: calc(50vw + 50rem);
+  }
+  /* Sized from the window's width, the photograph took the column and
+     left the list too narrow for a session and its price on one line. */
+  .sessions-photo {
+    height: min(40rem, calc(100cqh - 8rem));
+  }
+  /* The wider column let the about text run to 120 letters a line. */
+  .screen-measure p {
+    max-width: 68ch;
+  }
+}
+
+.contact-pair {
+  display: contents;
+}
+/* Any short window, not only a wide one: at 1280x720 the send button sat
+   under the end of its own box (critique, 2026-10-03). */
+@media (min-width: 40rem) and (max-height: 56rem) {
+  .contact-pair {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.5rem;
+  }
+}
+/* A phone's bar is one button tall: a jump to a screen stopped 6rem short,
+   and the end of the screen before showed under it. */
+@media (max-width: 39.99rem) {
+  html {
+    scroll-padding-top: 4rem;
+  }
+}
+/* A wide window that is short: a 32:9 screen, or a wide browser window
+   not full height. The screens were laid out for the height a 21:9 or
+   16:9 window has, and ran out of it. */
+@media (min-width: 80rem) and (min-aspect-ratio: 2 / 1) and (max-height: 48rem) {
+  /* The open session's words beside its booking line, not over it: under
+     each other they put "Book a session" and its button under the rail. */
+  .session-more {
+    display: grid;
+    max-width: 60rem;
+    grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+    column-gap: 2rem;
+    padding-top: 0.5rem;
+  }
+  .session-more > :first-child {
+    grid-row: span 2;
+  }
+  /* Name and email side by side, so the form's button is on the screen
+     and not under the end of its own box. */
+  .contact-pair {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.5rem;
+  }
+  /* And the rest of it closer, wide enough for the kinds of shoot on one
+     line, and two lines of message: the button inside the box. */
+  .contact-card {
+    max-width: 52rem;
+  }
+  .contact-card > * {
+    padding-block: 1rem;
+  }
+  .contact-card form {
+    gap: 0.75rem;
+  }
+  .contact-card textarea {
+    height: 3.75rem;
+    resize: none;
+  }
+  /* Air between the bar and About me, which sat on it. */
+  .about-grid {
+    padding-top: calc(var(--screen-title-y, 6rem) + 1rem);
+    /* Paid for at the foot, so the buttons stay on the screen. */
+    padding-bottom: 0;
+  }
+}
+/* The tiles a discipline in one row where the window is four times as
+   wide as tall or near it: two rows of eight left them small in the
+   middle of a 32:9 screen. */
+@media (min-width: 40rem) and (min-aspect-ratio: 14 / 5) {
+  .disc {
+    --rows: 1;
+  }
+}
+
+/* ── the ink ──────────────────────────────────────────────────────
+ * Julian: a hover state on the session rows, inverted, animated. The
+ * open row under a mouse (or the keyboard) is inked, and since
+ * 2026-10-03 the ink is liquid: it runs down or up the list to the
+ * next row and drains to a line when the pointer leaves.
+ *
+ * The fill lies over the row and inverts what is under it (white,
+ * `difference`), so each letter turns at the very edge of the ink,
+ * not all at once: light on dark becomes dark on light, and the other
+ * way round in the light theme. It reaches a little past the column
+ * so nothing in the row moves.
+ * ─────────────────────────────────────────────────────────────── */
+/* The fill is the liquid's (`sessions-screen.tsx`), a drop under the
+   open row that runs from row to row. It inverts against a second drop
+   of the page's ground under the words, in the column's own group: in
+   the light theme there is nothing opaque under it otherwise and it
+   reads white. Both reach past the column, so nothing in the row moves. */
+.session-col {
+  isolation: isolate;
+}
+.session-ground {
+  z-index: -1;
+}
+/* The hover. White ink over the row turned it inside out, a bright card
+   on the dark screen; Julian wanted it lower key (2026-10-03). A grey a
+   step off the ground under the words instead, which keep their own
+   colours. Opaque, as the liquid needs. */
+.session-col {
+  --session-hover: color-mix(in oklab, var(--foreground) 6%, var(--background));
+}

@@ -1,0 +1,191 @@
+/* The opening and the lift: the splash over the first visit. */
+
+/* ── the opening ──────────────────────────────────────────────────
+ * The screen as the loading bar (`intro.tsx`): the ground in the theme's
+ * ink, a panel in the page's colour sweeping over it from the left, and the eye in the middle,
+ * set in `difference` so it turns over where the panel passes under it.
+ *
+ * Hidden unless the script in `layout.tsx` has decided, before the first
+ * paint, that this visit gets one. Without that attribute this is
+ * `display: none`, so nobody is ever shut behind a curtain that has
+ * nothing to lift it.
+ * ───────────────────────────────────────────────────────────────── */
+#jg-intro {
+  display: none;
+}
+[data-intro] #jg-intro {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: block;
+  /* Julian: invert the splash screen. The ground is the theme's ink and
+     the panel sweeps across it in the page's own colour, so at full it is
+     the page already, and the lift uncovers more of the same. The white
+     a warm off white, paper rather than screen (Julian: more off white,
+     towards warm). */
+  color: #0b0a09;
+  /* The layer's own colour is the panel's, which is the page's, and the
+     ground the panel sweeps across is painted over it short of the top
+     and bottom (below): Safari on an iPhone takes the colour of the bands
+     round the page from what is at the window's edge, and Julian asked
+     for them black in dark and light in light, not the ground (2026-10-04). */
+  background: currentColor;
+  --jg-ground: #eee9e0;
+}
+:root[data-theme="light"][data-intro] #jg-intro {
+  color: #ebedef;
+  --jg-ground: #0b0a09;
+}
+[data-intro] #jg-intro::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--jg-ground);
+}
+/* The bands only where Safari on an iPhone or iPad reads them: everywhere
+   else they were a stripe across the top and foot of the opening (audit,
+   2026-10-04). `-webkit-touch-callout` is iOS Safari's alone. */
+@supports (-webkit-touch-callout: none) {
+  [data-intro] #jg-intro::before {
+    inset: calc(env(safe-area-inset-top, 0px) + 16px) 0
+      calc(env(safe-area-inset-bottom, 0px) + 16px);
+  }
+}
+.jg-intro-panel {
+  position: absolute;
+  inset: 0;
+  background: currentColor;
+  transform: translateX(-100%);
+}
+/* The sweep starts with the first paint, not when the script arrives, so
+   the wait for the script is under it rather than before it. It never
+   stops (Julian, 2026-10-06: held back to what had loaded, it stuttered).
+   No `linear()` (an older browser) drops the second line and keeps
+   the nearest curve. */
+[data-intro] .jg-intro-panel {
+  animation: jg-intro-sweep 1550ms cubic-bezier(0.3, 0.7, 0.4, 1) forwards;
+  animation: jg-intro-sweep 1550ms linear(0, 0.0265, 0.0923, 0.1593, 0.2301, 0.3009, 0.3835, 0.4493, 0.5117, 0.5705, 0.6362, 0.6867, 0.7335, 0.7765, 0.8229, 0.8574, 0.8881, 0.9149, 0.9419, 0.9603, 0.9748, 0.9854, 0.9922, 0.9964, 1) forwards;
+}
+@keyframes jg-intro-sweep {
+  to {
+    transform: none;
+  }
+}
+.jg-intro-eye {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  translate: -50% -50%;
+  width: clamp(4.5rem, 8vw, 7rem);
+  aspect-ratio: 1;
+  color: #fff;
+  mix-blend-mode: difference;
+}
+.jg-intro-eye svg {
+  width: 100%;
+  height: 100%;
+}
+/* One blink, before the sweep is half way (Julian, 2026-10-06: one is
+   enough; it was two, the second 84 to 90% across). Closed 158ms into the
+   350 (Julian: 240 was too fast, 420 too slow).
+   From the stylesheet, so it keeps the sweep's time however late the
+   script arrives; the moment is picked in `layout.tsx`. The same blink as
+   `blink()` in `not-found-scene.tsx`. */
+@keyframes jg-intro-blink {
+  0%,
+  100% {
+    transform: scaleY(1);
+  }
+  45% {
+    transform: scaleY(0.06);
+  }
+}
+[data-intro] .jg-intro-eye [data-lids] {
+  animation: jg-intro-blink 350ms cubic-bezier(0.45, 0, 0.55, 1) var(--jg-blink-at, 180ms);
+}
+/* Full: the whole layer, panel and eye together, lifts off the top of
+   the screen (`intro.tsx`), and lets the pointer through as it goes. */
+/* An orb that only shows if the wait is long enough to need one
+   (`lightbox.tsx`). */
+.orb-late {
+  animation: jg-fade-in 200ms ease-out 330ms both;
+}
+#jg-intro.jg-intro-open {
+  pointer-events: none;
+  /* Julian: bring back the swipe up. Inverted, the panel at full is the
+     page's own colour, so it lifted with no edge to see and only the eye
+     seemed to move. A shadow cast down onto the page and a hairline along
+     its foot, in either theme, so it reads as a sheet leaving. */
+  box-shadow:
+    0 1px 0 rgb(128 128 128 / 0.35),
+    0 28px 60px -12px rgb(0 0 0 / 0.28);
+}
+/* The page's entrance, held at its first frame while the panel fills:
+   the keyframed ones paused (they fill backwards, so paused is their
+   start), the `@starting-style` ones pinned at their start. */
+[data-intro="1"]
+  :is(.strip-cell, .title-word, .title-rest, .dissolve, .lift, .cover-float-frame, .cover-float-card) {
+  animation-play-state: paused;
+}
+/* Preview (`?deal=new`): the frames arrive top to bottom as one wave
+   (`--wave`, the layout's own in `--wave-now`, `cover-float.tsx`), and
+   set off halfway through the lift (`data-intro="half"`, `intro.tsx`)
+   rather than once it has cleared. Off unless the preview is on. */
+:root[data-deal] .cover-float-frame {
+  --delay: calc(var(--h-start, 420ms) + var(--wave-now, var(--wave, 0)) * var(--h-spread, 0.95ms));
+}
+/* The photographs wait while the panel is full and set off with the
+   lift (`data-intro="half"`, `intro.tsx`; Julian, 2026-10-06: after it
+   was too late). It was after the lift from 2026-10-04, when their blur
+   on nine cards at once dropped frames from it on a cold start. */
+[data-intro="lift"] :is(.cover-float-frame, .cover-float-card) {
+  animation-play-state: paused;
+}
+[data-intro="1"] :is(.rise, .emerge) {
+  opacity: 0;
+}
+[data-intro="1"] .rise {
+  transform: translateY(0.75rem);
+}
+
+/* ── the lift ─────────────────────────────────────────────────────
+ * Type rising out of its own line. The element carries its own mask: it
+ * is clipped at its resting foot while it travels up to it, and nothing
+ * stays clipped once it has landed. `backwards`, so it holds below its
+ * line through its delay and lets go of the element at the end.
+ * ───────────────────────────────────────────────────────────────── */
+/* The rise and its mask as two animations: the rise alone is a transform
+   the GPU runs, where in one set of keyframes with `--lift-clip` Safari
+   ran both on the main thread (2026-10-08, the splash's lift). */
+.lift {
+  animation:
+    jg-lift-rise var(--h-lift-ms, 1030ms) cubic-bezier(0.16, 1, 0.3, 1) backwards,
+    jg-lift var(--h-lift-ms, 1030ms) cubic-bezier(0.16, 1, 0.3, 1) backwards;
+  animation-delay: var(--reveal-delay, 0ms);
+}
+@keyframes jg-lift-rise {
+  from {
+    transform: translateY(100%);
+  }
+}
+/* The mask moves by a number, not by the clip itself. Chromium runs an
+   animated `clip-path` on the compositor and until it ends hit-tests the
+   element as fully clipped: "See the work" could not be clicked for the
+   whole of its rise, the last half second of it already in place. A clip that
+   holds still and reads `--lift-clip` is drawn and hit-tested as it
+   stands. */
+@property --lift-clip {
+  syntax: "<number>";
+  inherits: false;
+  initial-value: 0;
+}
+@keyframes jg-lift {
+  from {
+    --lift-clip: 100;
+    clip-path: inset(0 0 calc(var(--lift-clip) * 1%) 0);
+  }
+  to {
+    --lift-clip: 0;
+    clip-path: inset(0 0 calc(var(--lift-clip) * 1%) 0);
+  }
+}

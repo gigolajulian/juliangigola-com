@@ -1,0 +1,229 @@
+/* The pointer's mark that stands in for the system cursor. */
+
+/* ── the pointer's mark ──────────────────────────────────────────
+   The theme switch's circle, solid, in place of the system arrow
+   (`pointer-mark.tsx` moves it). White, difference blended, so it is white
+   over black and black over white wherever it is, a white button on the
+   dark ground included. The outer box only moves, written every frame
+   and never transitioned, so it cannot trail the hand; everything that
+   grows or squeezes is drawn inside it, about the click point.
+
+   Hidden only once the mark is drawn (`data-mark`), and important because
+   the arrange view's grab and the admin's `cursor-grab` would otherwise
+   win the arrow back over the surfaces the mark covers.
+   Over a text field it becomes a caret of its own (below). */
+@media (hover: hover) and (pointer: fine) {
+  :root[data-mark]:not(:has(.hero-3d, .cover-float[data-arrange])),
+  :root[data-mark]:not(:has(.hero-3d, .cover-float[data-arrange])) * {
+    cursor: none !important;
+  }
+}
+/* Arranging the cover (the 3D view, drag to arrange): the system's own
+   pointer, not the mark (Julian, 2026-10-07). */
+:root:has(.hero-3d, .cover-float[data-arrange]) .pointer-mark {
+  display: none;
+}
+.pointer-mark {
+  /* One curve for every change of size, long enough to be seen as a
+     movement and never overshooting (Julian: smooth). A press goes in
+     quickly and comes back on the same curve. */
+  --grow: 450ms var(--ease-out-strong);
+  --press: 380ms var(--ease-out-strong);
+  /* A point at the pointer; the dot is centred on it. */
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 9999;
+  color: white;
+  mix-blend-mode: difference;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 200ms var(--ease-out-strong);
+  will-change: transform;
+}
+.pointer-mark[data-on] {
+  opacity: 1;
+}
+/* In the top layer (`pointer-mark.tsx`): the popover's own box undone. */
+.pointer-mark[popover] {
+  inset: auto;
+  left: 0;
+  top: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  overflow: visible;
+}
+/* Over the colour scope: the colour under it, no ring (Julian)
+   (`vectorscope.tsx`). */
+:root[data-mark-fill] .pointer-mark {
+  mix-blend-mode: normal;
+}
+:root[data-mark-fill] .mark-dot {
+  /* Just a little bigger than at rest (Julian). */
+  scale: calc(22 / 120);
+  background: var(--mark-fill);
+}
+/* Over a text field (Julian, 2026-10-04: a custom icon for the form): the
+   dot draws itself out into a caret, a thin upright bar, on the same
+   curve as every change of size, and rounds back up on the way out. */
+.pointer-mark[data-state="text"] .mark-dot {
+  scale: calc(2.5 / 120) calc(24 / 120);
+}
+/* Drawn large and scaled down, never up, so the edge stays clean at
+   every size and growing it is a compositor-only change. */
+/* The dot and its drop in one box the size of the dot drawn large, so
+   the liquid filter has the room the neck needs (`pointer-mark.tsx`). */
+.mark-goo {
+  position: absolute;
+  left: -60px;
+  top: -60px;
+  width: 120px;
+  height: 120px;
+}
+.mark-dot {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  background: currentColor;
+  scale: calc(18.5 / 120);
+  transition:
+    scale var(--grow),
+    translate var(--grow),
+    transform var(--press);
+}
+/* Over something that does something: larger, and lifted a little off the
+   point, as a thing picked up (Julian). */
+.pointer-mark[data-state="press"] .mark-dot {
+  scale: calc(48 / 120);
+  translate: 0 -4px;
+}
+/* In the photo picker the frames are small and close together: a smaller
+   dot, so it does not cover the one it is over (Julian, 2026-10-08). */
+:root:has(.reference-panel[open]) .pointer-mark[data-state="press"] .mark-dot {
+  scale: calc(34 / 120);
+}
+/* Stuck to an icon: the dot sits on it, a little larger than over a
+   link, and follows the hand on a short ease so it pours rather than
+   jumps; the drop at the hand shows, and the two are run together. */
+.pointer-mark[data-stuck] .mark-goo {
+  filter: url(#mark-goo);
+}
+.pointer-mark[data-stuck] .mark-dot {
+  scale: calc(30 / 120);
+  translate: var(--sx, 0) var(--sy, 0);
+  transition:
+    scale var(--grow),
+    translate 220ms var(--ease-out-strong),
+    transform var(--press);
+}
+/* A row of the Commissions list: the dot grows to hold an arrow pointing
+   on, drawn black so the difference blend cuts it out of the dot (the
+   invert kept, Julian). It slides in from the left as the dot grows, and
+   goes back the same way. */
+.pointer-mark[data-row] .mark-dot {
+  scale: calc(44 / 120);
+}
+.mark-arrow {
+  position: absolute;
+  left: -12px;
+  top: -12px;
+  opacity: 0;
+  scale: 0.5;
+  translate: calc(var(--sx, 0px) - 6px) var(--sy, 0px);
+  transition:
+    opacity 200ms var(--ease-out-strong),
+    scale var(--grow),
+    translate 220ms var(--ease-out-strong);
+}
+.pointer-mark[data-row] .mark-arrow {
+  opacity: 1;
+  scale: 0.8;
+  translate: var(--sx, 0px) var(--sy, 0px);
+}
+.pointer-mark[data-down] .mark-arrow {
+  scale: 0.66;
+}
+.mark-drop {
+  position: absolute;
+  left: 55px;
+  top: 55px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: 0;
+  transition: opacity 150ms var(--ease-out-strong);
+}
+.pointer-mark[data-stuck] .mark-drop {
+  opacity: 1;
+}
+/* From the hand toward the dot: its length, thickness and angle are
+   written by `pointer-mark.tsx` (`--neck-l`, `--neck-t`, `--neck-a`). */
+.mark-neck {
+  position: absolute;
+  left: 60px;
+  top: calc(60px - var(--neck-t, 0px) / 2);
+  width: var(--neck-l, 0px);
+  height: var(--neck-t, 0px);
+  border-radius: 999px;
+  background: currentColor;
+  transform-origin: 0 50%;
+  rotate: var(--neck-a, 0rad);
+  opacity: 0;
+  transition: opacity 150ms var(--ease-out-strong);
+}
+.pointer-mark[data-stuck] .mark-neck {
+  opacity: 1;
+}
+/* The icon under it: larger, leaning toward the hand. */
+/* Not a row (`data-stick="row"`, the Commissions list): the dot snaps to
+   it, and a 1.2 scale on a line of display type would be a lurch. */
+[data-stick]:not([data-stick="row"]) > :is(svg, span) {
+  transition:
+    scale 300ms var(--ease-out-strong),
+    translate 300ms var(--ease-out-strong);
+}
+[data-stick]:not([data-stick="row"])[data-stuck] > :is(svg, span:not(.sr-only)) {
+  scale: 1.2;
+  translate: var(--lean-x, 0) var(--lean-y, 0);
+}
+.pointer-mark[data-down] {
+  --press: 120ms var(--ease-out-strong);
+}
+.pointer-mark[data-down] .mark-dot {
+  transform: scale(0.82);
+}
+/* The ring a click leaves, placed by `translate` so its own `scale`
+   grows it about the click point. */
+.pointer-ripple {
+  position: fixed;
+  left: -10px;
+  top: -10px;
+  z-index: 9999;
+  width: 20px;
+  height: 20px;
+  border: 1px solid white;
+  border-radius: 50%;
+  mix-blend-mode: difference;
+  pointer-events: none;
+  animation: mark-ripple 450ms var(--ease-out-strong) forwards;
+}
+@keyframes mark-ripple {
+  from {
+    opacity: 0.8;
+  }
+  to {
+    opacity: 0;
+    scale: 3;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .mark-dot {
+    transition: none;
+  }
+}

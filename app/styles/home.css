@@ -1,0 +1,396 @@
+/* The homepage's screens: Contact under a finger, About and the light table. */
+
+/* ── contact under a finger (`app/contact/page.tsx`) ──────────────
+ * An iPad either way up, and a phone on its side: the three blocks were
+ * squeezed into one screen's height and each scrolled inside itself with
+ * nothing to say so. Sideways on a phone the details came out 0px tall,
+ * the title lost its top, and on the iPad the steps ran under the rail's
+ * word. Under a finger the page is one scroll instead, from the top, its
+ * foot clear of the rail (which sits 12px under the strip here, not 24).
+ * ─────────────────────────────────────────────────────────────── */
+@media (pointer: coarse) and (min-width: 40rem) {
+  .contact-inquire {
+    align-self: flex-start;
+    height: calc(100% - 0.75rem);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    /* Julian (iPad upright): a nudge down. Centred in the screen where it
+       fits, from the top where it does not (`safe`), so a phone on its
+       side still scrolls from the title. */
+    align-content: start;
+    align-content: safe center;
+    grid-template-rows: auto auto;
+    /* Clear of the bar: a homepage screen now, under a bar 52px tall
+       here, and 1.5rem put the title's top under it. */
+    padding-block: 5rem 2.5rem;
+  }
+  .contact-inquire {
+    align-items: start;
+  }
+  .contact-inquire > [data-scroll],
+  .contact-inquire > [data-beam],
+  .contact-inquire > [data-beam] > [data-scroll] {
+    max-height: none;
+    min-height: auto;
+    overflow: visible;
+  }
+}
+
+/* ── About, a screen of the homepage (`about-screen.tsx`) ────────
+ * Laid out in the markup from Julian's mockup. Here only the client
+ * marks along its foot: one line, looping right to left, faded in and
+ * out at the ends; held while the pointer is on them, still for reduced
+ * motion. */
+.about-marquee {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+}
+.about-marquee-track {
+  display: flex;
+  width: max-content;
+  animation: about-marquee var(--marquee-s, 40s) linear infinite;
+}
+/* A pointer only: a tap left :hover stuck on a phone and the marks
+   stopped for good. */
+@media (hover: hover) and (pointer: fine) {
+  .about-marquee:hover .about-marquee-track {
+    animation-play-state: paused;
+  }
+}
+.about-marquee-list {
+  flex-wrap: nowrap;
+  padding-right: 2rem;
+}
+@keyframes about-marquee {
+  to {
+    transform: translateX(-50%);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .about-marquee-track {
+    animation: none;
+  }
+}
+/* Julian: the loop only where the room is short. A tall screen holds
+   the marks still, spread across the foot as in his mockup, in either
+   theme. */
+@media (min-width: 40rem) and (min-height: 1000px) {
+  .about-marquee {
+    overflow: visible;
+    mask-image: none;
+  }
+  .about-marquee-track {
+    width: auto;
+    animation: none;
+  }
+  .about-marquee-track > [inert] {
+    display: none;
+  }
+  .about-marquee-track > .about-marquee-list {
+    flex: 1;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    padding-right: 0;
+    /* Julian: too wide on a large screen. The spread stops growing. */
+    max-width: 64rem;
+  }
+}
+
+/* Julian: About's block in the middle of its screen (his box,
+   2026-09-29). About is about 37.75rem from its title to its foot (the
+   client marks are gone), so its title sits half the screen less
+   18.875rem down. The
+   screen's own height is read as a size container. Contact's column is
+   centred against its form instead (his box again), so the two titles
+   no longer share a line. */
+@media (min-width: 40rem) {
+  [data-hash="about"] {
+    container-type: size;
+    /* 7rem at the least: at 6 a short laptop (1515 by 785) set the
+       title 19px under the bar (Julian, 2026-10-07). */
+    --screen-title-y: max(7rem, 50cqh - 18.875rem);
+  }
+}
+/* How tall the bar is, for a screen that lies under it and has to centre
+   in what shows (the homepage's last screen): 76px, 52 under a finger. */
+:root {
+  --bar-h: 4.75rem;
+}
+@media (pointer: coarse) {
+  :root {
+    --bar-h: 3.25rem;
+  }
+}
+/* Julian (2026-10-01, bolder): About's portrait leads. It was the
+   narrowest of three columns, his one picture of himself as small as the
+   list of steps beside it, so nothing on the screen led. As tall as the
+   screen allows, the way Sessions sizes its photograph (to 56rem, its
+   3:4 setting the width), with the words and the steps centred on either
+   side of it. Only where there is room for all three at that size: below
+   1440 by 848 the columns could not hold their text and the screen
+   would scroll, so smaller screens keep the mockup's layout. */
+@media (min-width: 90rem) and (min-height: 53rem) {
+  [data-hash="about"] > [data-scroll] {
+    grid-template-columns: minmax(0, 1.2fr) auto minmax(0, 1fr);
+    grid-template-rows: 1fr;
+    align-content: stretch;
+    padding-top: 6rem;
+    padding-bottom: 1.5rem;
+  }
+  [data-hash="about"] > [data-scroll] > div {
+    align-self: center;
+    /* Never taller than the screen, so the words scroll inside themselves
+       rather than the column centring up under the bar. */
+    max-height: 100%;
+  }
+  [data-hash="about"] > [data-scroll] > figure {
+    height: min(56rem, calc(100cqh - 8.5rem));
+    aspect-ratio: 3 / 4;
+    align-self: center;
+  }
+}
+/* Under a finger the bar is 52px, not 76: a tablet sideways (1080 by 810)
+   ran About's buttons off its foot with the laptop's 6rem above. */
+@media (min-width: 40rem) and (pointer: coarse) {
+  [data-hash="about"] {
+    --screen-title-y: max(4.5rem, 50cqh - 18.875rem);
+  }
+}
+/* Sessions centred while it fits, from the top once it does not (the
+   open list ran up under the bar at 1440x840). In CSS, not a utility:
+   `items-[safe_center]` never reached the page. */
+.sessions-screen,
+.services-screen {
+  align-items: safe center;
+}
+/* ── the light table (`services-screen.tsx`) ──
+   The discipline's frames whole, in justified rows (laid out in JS so
+   they fit the table uncropped).
+
+   Julian (2026-10-03, /impeccable animate): the one authored moment is
+   the deal. Arriving on Commissions, or pointing at another discipline,
+   the frames rack into focus one after another the way a lens pulls
+   focus, a little large and soft, then sharp. Visible by default: the
+   deal is a keyframe on mount (fill backwards, so it lets go once done),
+   and the arrival a transition from a hidden state that only applies
+   while the strip says it is somewhere else, as the rows do. Pointing at
+   a frame keeps it and sets the rest back, and its project's name comes
+   up in its corner. Reduced motion: an opacity fade, nothing moves. */
+@keyframes light-rack {
+  from {
+    opacity: 0;
+    filter: blur(10px);
+    scale: 1.035;
+  }
+  45% {
+    opacity: 1;
+  }
+}
+.light-cell {
+  transition:
+    opacity 240ms var(--ease-out-strong),
+    filter 620ms var(--ease-out-strong),
+    scale 620ms var(--ease-out-strong),
+    transform 450ms var(--ease-out-strong),
+    box-shadow 450ms var(--ease-out-strong),
+    translate 900ms cubic-bezier(0.25, 1, 0.5, 1);
+}
+/* Julian (2026-10-04): the cards stand a little off the table, a few
+   pixels toward the viewer with a soft shadow under them, and the one
+   under the pointer tips toward it on every axis (`--rx`, `--ry`,
+   `--rz`, written by
+   `services-screen.tsx`). `scale` stays free for the arrival. */
+/* Realism (Julian, 2026-10-04): each card has its own perspective, so it
+   turns about its own centre instead of warping toward the sheet's
+   vanishing point; small angles; it follows the pointer quickly and
+   settles slowly; the shadow falls away from the tilt. No glare (Julian,
+   2026-10-04: it read as a glow round the pointer). */
+.light-cell {
+  transform: perspective(1000px) translateZ(var(--lz, 10px)) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)) rotateZ(var(--rz, 0deg));
+  /* No shadow at rest (Julian, 2026-10-04: only on hover); the same
+     shape, clear, so it fades in rather than snaps. */
+  box-shadow: 0 22px 40px -16px rgb(0 0 0 / 0);
+}
+.light-cell:hover {
+  /* Up off the table toward the viewer (Julian, 2026-10-04: more lift). */
+  --lz: 20px;
+  box-shadow: var(--sx, 0px) calc(22px + var(--sy, 0px)) 40px -16px rgb(0 0 0 / 0.6);
+  transition:
+    opacity 240ms var(--ease-out-strong),
+    filter 620ms var(--ease-out-strong),
+    scale 620ms var(--ease-out-strong),
+    transform 140ms ease-out,
+    /* Fades in rather than snapping on (Julian, 2026-10-04: smoothly). */
+    box-shadow 500ms var(--ease-out-strong),
+    translate 900ms cubic-bezier(0.25, 1, 0.5, 1);
+}
+/* Room for it (Julian, 2026-10-04): the lifted card grows a few pixels
+   past the 6px gutter, so its neighbours ease aside by half that, the ones
+   before it back, the ones after it on, the rows above up and the rows
+   below down, and settle again when it does. */
+.light-sheet:has(.light-cell:hover) {
+  --push: 3px;
+}
+.light-cell:has(~ .light-cell:hover) {
+  translate: calc(var(--push) * -1) 0;
+}
+.light-cell:hover ~ .light-cell {
+  translate: var(--push) 0;
+}
+.light-sheet:has(~ .light-sheet .light-cell:hover) .light-cell {
+  translate: 0 -3px;
+}
+.light-sheet:has(.light-cell:hover) ~ .light-sheet .light-cell {
+  translate: 0 3px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .light-cell {
+    translate: none !important;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .light-cell {
+    transform: none;
+  }
+}
+/* The frame under the pointer (Julian, 2026-10-03: the lift and the push
+   were messy across frames of different shapes; 2026-10-04: no zoom on
+   hover anywhere). Nothing moves on the table: the slate rises over the
+   photograph, and the others hold their places, softened (below). */
+.light-cell img {
+  transition:
+    filter 300ms var(--ease-out-strong),
+    scale 300ms var(--ease-out-strong);
+}
+.light-name {
+  /* The slate (2026-10-03, Julian: the same for #work): a fall of shadow
+     across the foot with the name on it, not a line of text on the photo. */
+  position: absolute;
+  inset-inline: 0;
+  bottom: 0;
+  padding: 2.5rem 0.75rem 0.625rem;
+  opacity: 0;
+  translate: 0 0.25rem;
+  transition:
+    opacity 160ms var(--ease-out-strong),
+    translate 220ms var(--ease-out-strong);
+}
+.light-cell:focus-visible .light-name {
+  opacity: 1;
+  translate: 0 0;
+}
+@media (hover: hover) and (pointer: fine) {
+  /* The others' softening is the focus field now (`focus-field.tsx`). */
+  .light-cell:hover .light-name {
+    opacity: 1;
+    translate: 0 0;
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .light-cell {
+    animation: light-rack 640ms var(--ease-out-strong) backwards;
+    animation-delay: calc(80ms + var(--i, 0) * 38ms);
+    transition-delay: calc(120ms + var(--i, 0) * 38ms);
+  }
+  .light-table:has(.light-cell:hover) .light-cell {
+    transition-delay: 0s;
+  }
+  .strip-scroll[data-at]:not([data-at="Commissions"]) .light-cell {
+    opacity: 0;
+    filter: blur(10px);
+    scale: 1.035;
+    transition-duration: 0s;
+    transition-delay: 0s;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .light-cell {
+    animation: jg-fade-in 240ms ease-out backwards;
+  }
+  /* The slate fades up in place rather than rising. */
+  .light-name {
+    translate: none;
+    transition: opacity 160ms var(--ease-out-strong);
+  }
+  /* The hover drop under the services and sessions lists moves to the
+     row at once rather than gliding there (its glide is an inline
+     style, hence the weight). */
+  :is(.services-ground, .session-ground) div[style*="transition"] {
+    transition: none !important;
+  }
+}
+/* How a commission runs, one step after another as About arrives, and
+   the sessions as Sessions does. Hidden
+   only while the strip says it is somewhere else, so a page without the
+   strip, or before it has said, shows them as they are. Gone at once on
+   the way out, so the next arrival plays it again. */
+@media (prefers-reduced-motion: no-preference) {
+  :is(.about-step, .session-step, .services-step) {
+    transition:
+      opacity 560ms var(--ease-out-strong),
+      translate 640ms var(--ease-out-strong);
+    transition-delay: calc(180ms + var(--i, 0) * 110ms);
+  }
+  /* In from the right, the way the strip travels (`jg-fade-up`). It rose
+     from below once, and the last step rising past the list's foot gave
+     the list a scrollbar for as long as it moved (Julian saw it). The list
+     clips sideways, so this one cannot. About's label is "Biography"
+     since the menu names changed; the old "About" here left its steps
+     hidden for good (Julian saw it, 2026-10-05). */
+  .strip-scroll[data-at]:not([data-at="Biography"]) .about-step,
+  .strip-scroll[data-at]:not([data-at="Sessions"]) .session-step,
+  .strip-scroll[data-at]:not([data-at="Commissions"]) .services-step {
+    opacity: 0;
+    translate: 2rem 0;
+    transition-duration: 0s;
+    transition-delay: 0s;
+  }
+}
+/* Upright, the screen is tall and its columns narrow: the words need the
+   height the centring gave away (an iPad, 165px above the title). */
+@media (min-width: 40rem) and (orientation: portrait) {
+  [data-hash="about"] {
+    --screen-title-y: 6rem;
+  }
+}
+
+/* DialKit (the dev server only). Julian: its background at 85%, so the
+   page reads through the panel. Its own themes set the colour; these
+   match their specificity and win on order. */
+:root .dialkit-root {
+  --dial-glass-bg: rgb(33 33 33 / 0.85);
+}
+:root .dialkit-root[data-theme="light"] {
+  --dial-glass-bg: rgb(250 250 250 / 0.85);
+}
+@media (prefers-color-scheme: light) {
+  :root .dialkit-root[data-theme="system"] {
+    --dial-glass-bg: rgb(250 250 250 / 0.85);
+  }
+}
+/* "Copy all" (components/dial-copy-all.tsx), in the panel's header,
+   left of the close button; hidden while the panel is folded. The open
+   header is DialKit's sticky one, which it sits against; making the header
+   relative instead pulled the folded button's icon off centre. */
+.dial-copy-all {
+  position: absolute;
+  top: 10px;
+  right: 32px;
+  height: 24px;
+  padding: 0 8px;
+  border: 0;
+  border-radius: 6px;
+  background: var(--dial-surface);
+  color: var(--dial-text-label);
+  font: 500 11px/24px system-ui, sans-serif;
+  cursor: pointer;
+}
+.dial-copy-all:hover {
+  background: var(--dial-surface-hover);
+  color: var(--dial-text-primary);
+}
+.dialkit-folder-root[data-open="false"] .dial-copy-all {
+  display: none;
+}

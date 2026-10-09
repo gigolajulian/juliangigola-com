@@ -1,0 +1,590 @@
+/* The ground: theme tokens, springs, dark and light, base styles, display type. */
+
+/* ── the ground ───────────────────────────────────────────────────
+ * Dark, with light available and never assumed.
+ *
+ * This is a gallery. The work is high-contrast and mostly low-key, and it
+ * glows against near-black the way prints do on a dark wall — on the old
+ * site's light grey it went muddy. So dark is the site, and it is what a
+ * visitor gets with no preference expressed, including one whose system is
+ * set to light.
+ *
+ * The light palette further down is opt-in only, reached by the toggle in the
+ * bar. It is not an inversion: photographs are mounted on a warm off-white,
+ * because paper white beside a photograph reads as a blown highlight and
+ * makes every frame look underexposed.
+ *
+ * Both palettes are deliberately almost neutral: a trace of warmth (hue 70)
+ * at very low chroma, so the ground reads as ink or as paper rather than as a
+ * colour, and nothing competes with what is in the frames.
+ * ─────────────────────────────────────────────────────────────── */
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  /* Body text is Endless, the titles' face (Julian, 2026-10-07); labels and
+     buttons keep the mono. */
+  --font-sans: var(--font-display);
+  --font-mono: var(--font-mono);
+  --font-display: var(--font-display);
+  --font-heading: var(--font-display);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-live: var(--live);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
+
+  /* Display sizes. Fluid, because a masthead that is right at 1440 is
+     comically large at 390 — and clamp beats a stack of breakpoints.
+     Tracking is neutral: Univers Bold Condensed is already tight, and the
+     negative tracking a Didone wants closes it up into a smear. */
+  --text-display: clamp(2.75rem, 8vw, 7rem);
+  --text-title: clamp(1.875rem, 4.5vw, 3.5rem);
+
+  /* Nav, credits, captions. Small caps-ish tracking, set once. */
+  --text-label: 0.6875rem;
+  --text-label--line-height: 1.2;
+  --text-label--letter-spacing: 0.14em;
+
+  /* The built-in CSS easings are too weak to read as intentional. */
+  --ease-out-strong: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out-strong: cubic-bezier(0.77, 0, 0.175, 1);
+
+  /* ── springs ──────────────────────────────────────────────────
+   * A bezier cannot overshoot and come back — it is bounded by its own end
+   * point — so a bounce is impossible to express as one. These are real
+   * damped-spring responses, sampled and written out as `linear()`, which is
+   * the one CSS easing that can describe an arbitrary curve.
+   *
+   * Parameterised the way Apple's are, by duration and bounce rather than by
+   * mass and stiffness: bounce 0 is critically damped, and above that it
+   * overshoots. Both are sampled past their nominal period so the tail
+   * settles on its own instead of being clipped back to 1, which is what
+   * makes a hand-written `linear()` land with a visible tick.
+   *
+   * `--ease-spring` (bounce 0.16, 0.8% overshoot) is the interface default:
+   * enough to feel physical, not enough to notice. `--ease-bounce`
+   * (bounce 0.32, 5.4%) is for the moments that should feel like something
+   * arriving — a press releasing, a panel opening. Anything a visitor sees
+   * dozens of times a session keeps the plain ease-out; a bounce seen that
+   * often stops reading as delight and starts reading as lag.
+   * ───────────────────────────────────────────────────────────── */
+  /* A close cubic-bezier first, for a browser without `linear()`:
+     a `var()` that resolves to an easing it cannot read drops the whole
+     transition. The springs replace them below where `linear()` is
+     understood. Fitted to the samples (worst gap 0.03 and 0.06). */
+  --ease-spring: cubic-bezier(0.32, 0.67, 0.07, 1.11);
+  --ease-bounce: cubic-bezier(0.4, 1.37, 0.03, 0.98);
+}
+
+/* The springs themselves, where `linear()` is understood (see above). */
+@supports (transition-timing-function: linear(0, 1)) {
+  :root {
+    --ease-spring: linear(
+      0,
+      0.0228,
+      0.0803,
+      0.159,
+      0.2488,
+      0.3423,
+      0.4343,
+      0.5213,
+      0.6012,
+      0.6728,
+      0.7357,
+      0.7899,
+      0.8359,
+      0.8743,
+      0.9059,
+      0.9315,
+      0.9519,
+      0.9679,
+      0.9802,
+      0.9894,
+      0.9961,
+      1.0009,
+      1.0041,
+      1.0061,
+      1.0072,
+      1.0077,
+      1.0077,
+      1.0073,
+      1.0068,
+      1.0061,
+      1.0054,
+      1.0047,
+      1.004,
+      1.0033,
+      1.0028,
+      1.0022,
+      1.0018,
+      1.0014,
+      1.0011,
+      1.0008,
+      1
+    );
+    --ease-bounce: linear(
+      0,
+      0.0333,
+      0.1167,
+      0.2295,
+      0.3554,
+      0.4824,
+      0.6022,
+      0.7095,
+      0.8016,
+      0.8774,
+      0.9372,
+      0.9823,
+      1.0145,
+      1.0357,
+      1.048,
+      1.0535,
+      1.0539,
+      1.0509,
+      1.0456,
+      1.039,
+      1.0321,
+      1.0253,
+      1.0191,
+      1.0136,
+      1.009,
+      1.0052,
+      1.0023,
+      1.0002,
+      0.9987,
+      0.9977,
+      0.9972,
+      0.9971,
+      0.9971,
+      0.9973,
+      0.9977,
+      0.998,
+      0.9984,
+      0.9988,
+      0.9991,
+      0.9994,
+      1
+    );
+  }
+}
+
+:root {
+  color-scheme: dark;
+
+  --background: oklch(0.145 0.003 70);
+  --foreground: oklch(0.955 0.004 80);
+
+  /* The ground is not flat: a faint light from above, settling darker into
+     the two bottom corners, all in the ground's own hue so it reads as the
+     room and never as a colour. Drawn by `body::before` and by every
+     surface that stands in for the ground (the dealt screens, the page
+     cards in flight). Sized in vw and vh, not percent, so a box at the
+     window's top left paints exactly the picture behind it, whatever its
+     own size. Each glow eases out over several stops rather than two, so
+     none of them has an edge. The light stays under the cards' 0.185, or
+     a card at the top of the page would stop lifting off it. */
+  --ground: radial-gradient(
+      125vw 75vh at 50vw -12vh,
+      oklch(0.19 0.004 70),
+      oklch(0.178 0.004 70 / 0.6) 30%,
+      oklch(0.165 0.003 70 / 0.25) 55%,
+      transparent 80%
+    ),
+    radial-gradient(
+      70vw 65vh at 0 100vh,
+      oklch(0.11 0.003 70 / 0.85),
+      oklch(0.12 0.003 70 / 0.35) 50%,
+      transparent
+    ),
+    radial-gradient(
+      70vw 65vh at 100vw 100vh,
+      oklch(0.11 0.003 70 / 0.85),
+      oklch(0.12 0.003 70 / 0.35) 50%,
+      transparent
+    ),
+    var(--background);
+
+  /* Cards and popovers lift off the ground rather than sitting in a box —
+     a hair lighter, never outlined. */
+  --card: oklch(0.185 0.003 70);
+  --card-foreground: var(--foreground);
+  --popover: oklch(0.2 0.003 70);
+  --popover-foreground: var(--foreground);
+
+  --primary: oklch(0.955 0.004 80);
+  --primary-foreground: oklch(0.145 0.003 70);
+  --secondary: oklch(0.245 0.003 70);
+  --secondary-foreground: var(--foreground);
+
+  --muted: oklch(0.235 0.003 70);
+  /* 7.4:1 on the ground — captions and credits are real text, not decoration. */
+  --muted-foreground: oklch(0.655 0.005 80);
+
+  /* The one accent, sampled from the teal that recurs across his own work
+     (Oakley, Own Brand, the studio portraits). Focus and hover only — never a
+     fill. An accent taken from the work cannot date; a trend can. */
+  --accent: oklch(0.72 0.095 195);
+  --accent-foreground: oklch(0.145 0.003 70);
+
+  --destructive: oklch(0.62 0.2 25);
+
+  /* Live. The one green on the site, and it earns its place by saying
+     something nothing else can: the deploy carrying your edit has landed and
+     the public site is serving it.
+
+     Not the teal accent, deliberately. The accent is identity and appears on
+     things you can click; this is a status, and a reader who has learned that
+     teal means "interactive" should not have to unlearn it for one label.
+     Same lightness and chroma as the accent so the two sit together, hue
+     rotated to where green actually reads as green. */
+  --live: oklch(0.74 0.115 152);
+
+  --border: oklch(1 0 0 / 11%);
+  --input: oklch(1 0 0 / 14%);
+  --ring: var(--accent);
+
+  /* Sharp. A gallery frame has corners; so does a photograph. Radius stays
+     for the few shadcn primitives that assume it. */
+  --radius: 0.125rem;
+
+  --sidebar: oklch(0.185 0.003 70);
+  --sidebar-foreground: var(--foreground);
+  --sidebar-primary: var(--accent);
+  --sidebar-primary-foreground: var(--accent-foreground);
+  --sidebar-accent: oklch(0.245 0.003 70);
+  --sidebar-accent-foreground: var(--foreground);
+  --sidebar-border: var(--border);
+  --sidebar-ring: var(--ring);
+}
+
+/* ── light ────────────────────────────────────────────────────────
+ * Dark is the site. This is the alternative, and it is opt-in: the
+ * attribute is only ever set by someone choosing it, so no preference —
+ * including a system set to light — leaves the dark ground in place.
+ *
+ * Not an inversion. Photographs are mounted on a warm off-white rather
+ * than on paper white, because pure white next to a photograph reads as a
+ * blown highlight and makes every frame look underexposed. The hue stays
+ * in the same warm neutral family as the dark ground, so the mat colours
+ * pulled from the frames themselves still belong.
+ *
+ * `card` and `secondary` step *down* from the ground here, where in the
+ * dark they step up. The relationship is the same one — a surface lifts
+ * away from its background — expressed in the direction that reads as
+ * lift on a light ground.
+ * ───────────────────────────────────────────────────────────────── */
+:root[data-theme="light"] {
+  color-scheme: light;
+
+  /* Off white rather than white. Paper, not a lightbox: a screen-white ground
+     under a full window of photographs is the thing that makes a light theme
+     tiring, so the ground sits a little below white. Julian: colder, and not
+     bluer. So the hue turns to the cold side of neutral and the chroma comes
+     down with it, which reads as cold paper rather than as a blue cast. Every
+     surface that lifts off the ground steps by the same amount it did before,
+     and the ink is unchanged, so nothing loses contrast. */
+
+  --background: oklch(0.945 0.003 250);
+  --foreground: oklch(0.185 0.003 70);
+
+  /* The same wash, kept nearer the ground than in the dark: paper under a
+     soft top light, not a lightbox, so the glow stops short of white, and
+     the corners stop short of the cards' 0.915 so a card still steps down
+     off the ground there. */
+  --ground: radial-gradient(
+      125vw 75vh at 50vw -12vh,
+      oklch(0.968 0.003 250),
+      oklch(0.962 0.003 250 / 0.6) 30%,
+      oklch(0.955 0.003 250 / 0.25) 55%,
+      transparent 80%
+    ),
+    radial-gradient(
+      70vw 65vh at 0 100vh,
+      oklch(0.925 0.004 250 / 0.85),
+      oklch(0.932 0.004 250 / 0.35) 50%,
+      transparent
+    ),
+    radial-gradient(
+      70vw 65vh at 100vw 100vh,
+      oklch(0.925 0.004 250 / 0.85),
+      oklch(0.932 0.004 250 / 0.35) 50%,
+      transparent
+    ),
+    var(--background);
+
+  --card: oklch(0.915 0.003 250);
+  --card-foreground: var(--foreground);
+  --popover: oklch(0.902 0.003 250);
+  --popover-foreground: var(--foreground);
+
+  --primary: oklch(0.185 0.003 70);
+  --primary-foreground: oklch(0.945 0.003 250);
+  --secondary: oklch(0.872 0.003 250);
+  --secondary-foreground: var(--foreground);
+
+  --muted: oklch(0.884 0.003 250);
+  /* Held to the same ~7:1 the dark ground gives, so credits and captions
+     are no less readable for the theme being lighter. */
+  --muted-foreground: oklch(0.44 0.003 250);
+
+  /* Darkened the same way the accent is below, for the same reason: a green
+     that reads on a dark ground is too pale to read on a light one. */
+  --live: oklch(0.52 0.115 152);
+
+  /* The same teal, taken down far enough to carry contrast against a light
+     ground. Still the only chromatic thing on the page. */
+  --accent: oklch(0.52 0.1 195);
+  --accent-foreground: oklch(0.968 0.004 250);
+
+  --destructive: oklch(0.51 0.2 25);
+
+  /* Black at low alpha, not white: `oklch(1 0 0 / 11%)` is invisible here,
+     which would take every hairline rule on the site with it. */
+  --border: oklch(0 0 0 / 13%);
+  --input: oklch(0 0 0 / 16%);
+  --ring: var(--accent);
+
+  --sidebar: oklch(0.938 0.004 250);
+  --sidebar-foreground: var(--foreground);
+  --sidebar-primary: var(--accent);
+  --sidebar-primary-foreground: var(--accent-foreground);
+  --sidebar-accent: oklch(0.893 0.004 80);
+  --sidebar-accent-foreground: var(--foreground);
+  --sidebar-border: var(--border);
+  --sidebar-ring: var(--ring);
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  /* Julian: capitalize small text everywhere. Inputs keep what is typed
+     (the browser's own `text-transform: none`); their placeholders and
+     every button follow the page. The wordmarks keep their own case. */
+  body {
+    @apply bg-background text-foreground;
+    text-transform: uppercase;
+  }
+  /* The wash (`--ground`), pinned to the window so a long page scrolls over
+     it rather than stretching it. A fixed layer of its own and not
+     `background-attachment: fixed`, which repaints the whole page on every
+     scroll. Under everything: the body makes no stacking context, so -1
+     puts it beneath the page and above the flat ground the body hands the
+     canvas, which stays as the fallback. */
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background: var(--ground);
+  }
+  button,
+  ::placeholder {
+    text-transform: uppercase;
+  }
+  /* Julian: justify body. Base layer, so a `text-center` or `text-right`
+     on the paragraph itself still wins. Then: I just want it to look
+     good. Justified mono needs about 45 characters a line or the gaps
+     open up between the words, and measured on every page, under 1024px
+     wide nearly every paragraph had 19 to 42. So justified from there up,
+     set left below it, and set left too where a desktop column is narrow
+     (the sessions' lines, the contact steps and notes carry `text-left`).
+     Julian (2026-10-03, audit): set left everywhere. The prose is in
+     sentence case now and the measure still opens gaps where a column
+     narrows (2.5 spaces wide on the last screen's doors). */
+  p {
+    text-align: left;
+    /* Julian (2026-10-02): never a word broken at the line's end
+       ("accu-rate"). Whole words, the lines evened out instead. */
+    hyphens: manual;
+    text-wrap: pretty;
+  }
+
+  html {
+    @apply font-sans;
+    /* Endless is set tight for titles; text needs a little air. */
+    letter-spacing: 0.02em;
+    /* The nav is fixed; without this, an in-page jump lands under it. */
+    scroll-padding-top: 6rem;
+    /* No reserved gutter. This held fifteen pixels open on every page so
+       that the window would not step sideways between a strip, which is
+       exactly one window and never scrolls, and the terms and the privacy
+       notice, which are prose and do. The cost was a strip of dead ground
+       down the right of every page, and the cover photograph stopping
+       short of the edge of the screen: Julian asked for the picture to
+       reach it, and a photographer's site is the picture.
+
+       What comes back is a fifteen pixel step on the way into the two
+       legal pages, and only where a scrollbar takes width at all - not on
+       any touch device, and not on a Mac unless the bars are set to show
+       always. That is the cheaper of the two. */
+  }
+
+  /* The half of the copyright notice that JavaScript cannot do.
+     `touch-callout` is the long-press "Save Image" sheet on iOS, which never
+     raises a contextmenu event; `user-drag` is Safari's own drag-the-file-out,
+     which ignores a prevented `dragstart`. See `components/photo-notice.tsx`
+     — and the note there about what this is and is not. */
+  img {
+    -webkit-touch-callout: none;
+    -webkit-user-drag: none;
+    user-select: none;
+  }
+
+  /* ── the text is not selectable ─────────────────────────────────
+   * Julian's call, and the same instinct as the notice on the photographs:
+   * the writing on this site is his as much as the frames are.
+   *
+   * Four exceptions, and each one would be a bug without it:
+   *
+   *   form controls   /admin is a text editor. `user-select: none` on an
+   *                   ancestor leaves an `<input>` editable in every current
+   *                   engine, but selecting inside one — double-clicking a
+   *                   word to replace it — is a different question, and the
+   *                   answer has varied by browser and version. Named here so
+   *                   it cannot vary.
+   *   the workbench   the same page, outside the fields: a slug to copy, a
+   *                   path, an error to paste into a search.
+   *   mailto and tel  a visitor copying his address is the whole point of the
+   *                   contact page. Blocking that to protect body copy is
+   *                   protecting the wrong thing.
+   *
+   * What this does *not* do is stop anyone taking the text. View source, or
+   * the accessibility tree, or a screenshot and OCR. It stops the accidental
+   * drag-select that comes of scrolling with a held mouse button, and it says
+   * the text is not a free asset — the same thing the photo notice says, with
+   * the same limits.
+   * ─────────────────────────────────────────────────────────────── */
+  body {
+    -webkit-user-select: none;
+    user-select: none;
+  }
+
+  input,
+  textarea,
+  select,
+  [contenteditable],
+  [data-workbench],
+  a[href^="mailto:"],
+  a[href^="tel:"] {
+    -webkit-user-select: text;
+    user-select: text;
+  }
+
+  /* Keyboard focus has to be obvious on a dark ground, and the accent is the
+     only saturated thing on the page — so it reads instantly as "you are
+     here" without being decorative. Mouse clicks get nothing. */
+  :focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 3px;
+  }
+
+  ::selection {
+    background: var(--accent);
+    color: var(--accent-foreground);
+  }
+
+  /* Photographs, not UI: never let a frame stretch. */
+  img,
+  video {
+    @apply max-w-full;
+  }
+}
+
+/* Reduced motion means fewer and gentler animations, not none.
+ *
+ * Deliberately NOT a blanket `animation: none !important` reset. The
+ * corridor handles the preference better than a global override could: it
+ * freezes itself mid-flight as a finished still, where a zeroed duration
+ * would instead stack every card at the exit. Colour and opacity
+ * transitions stay, because they carry meaning rather than movement.
+ *
+ * Anything that moves and does not handle this itself opts in at the call
+ * site with Tailwind's `motion-reduce:` variant. */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto !important;
+  }
+}
+
+/**
+ * The masthead. One utility rather than a size, a leading, and a tracking
+ * repeated at every call site — so retuning the display face is one edit.
+ */
+@utility display {
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: var(--text-display);
+  line-height: 0.92;
+  /* Julian's spec: Inter Tight Black, set tight, -0.04em on every heading. */
+  letter-spacing: -0.04em;
+  text-transform: uppercase;
+}
+
+/** Page and project titles. Same face, one step down. */
+@utility title {
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: var(--text-title);
+  line-height: 1;
+  letter-spacing: -0.04em;
+  text-transform: uppercase;
+}
+
+/* Every heading in the display face, Black, -0.04em (Julian's spec). In
+   the base layer for bare headings, so a heading that is styled as a label
+   on purpose can still say so; and unlayered for anything that asks for the
+   display face by class, so the zero tracking set at thirty-odd call sites
+   for the old condensed face gives way to this. */
+@layer base {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: var(--font-display);
+    font-weight: 900;
+    letter-spacing: -0.04em;
+  }
+  /* Julian: a heading set as a label ("Selected work", "Services") in the
+     same face as the labels beside it ("All 88"), not the display Black. */
+  :is(h1, h2, h3, h4, h5, h6).label {
+    font-family: var(--font-mono);
+    font-weight: 400;
+  }
+}
+.font-display {
+  font-weight: 900;
+  letter-spacing: -0.04em;
+}
