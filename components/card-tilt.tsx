@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { matches } from "@/lib/device";
 
 /* ── the card under the pointer tips toward it ────────────────────
  * Julian (2026-10-04): the Commissions table's cards (`.light-cell`), and
@@ -16,7 +17,7 @@ const TILT = 5;
 
 export function CardTilt() {
   React.useEffect(() => {
-    if (!window.matchMedia("(hover: hover) and (pointer: fine)").matches) return;
+    if (!matches("fine")) return;
     let on: HTMLElement | null = null;
     const off = () => {
       if (on) for (const p of VARS) on.style.removeProperty(p);

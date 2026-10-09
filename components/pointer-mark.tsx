@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { matches } from "@/lib/device";
 
 /* ── the pointer's mark ───────────────────────────────────────────
  * The system arrow, replaced by the theme switch's circle
@@ -27,7 +28,7 @@ export function PointerMark() {
   const ref = React.useRef<HTMLDivElement>(null);
 
   React.useEffect(() => {
-    if (!window.matchMedia("(hover: hover) and (pointer: fine)").matches) return;
+    if (!matches("fine")) return;
     const el = ref.current;
     if (!el) return;
     /* In the top layer, so a modal dialog does not cover it (Julian,

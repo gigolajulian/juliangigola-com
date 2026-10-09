@@ -21,6 +21,7 @@ import {
   useWorkView,
   type WorkView,
 } from "@/lib/work-view";
+import { matches, media } from "@/lib/device";
 
 /* JellyRadio's figures, as Julian's example set them, with the bounce
    taken down by a third (from 0.4) and the swell of the lit chip halved
@@ -139,8 +140,7 @@ export function WorkShell({
      already. Covers only, and only the two that will be seen. A phone is
      left alone. */
   React.useEffect(() => {
-    if (!window.matchMedia("(hover: hover) and (pointer: fine)").matches)
-      return;
+    if (!matches("fine")) return;
     const conn = (navigator as { connection?: { saveData?: boolean } })
       .connection;
     if (conn?.saveData) return;
@@ -316,9 +316,7 @@ export function WorkShell({
     if (!shelf) return;
     // Landscape only: upright, the grid is a sheet that runs down
     // (`useTablet` in `strip.tsx`).
-    const mq = window.matchMedia(
-      "(pointer: coarse) and (min-width: 40rem) and (orientation: landscape)",
-    );
+    const mq = media("tabletSideways");
     const fit = () => {
       if (!mq.matches) {
         shelf.style.removeProperty("--rack-w");
@@ -515,7 +513,7 @@ export function WorkShell({
     const chips = (Array.from(r.children) as HTMLElement[]).filter(
       (c) => !("liquid" in c.dataset),
     );
-    const wide = window.matchMedia("(min-width: 64rem)");
+    const wide = media("large");
     const calm = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     /* Seated without motion on arrival, and again whenever the window
        crosses `lg`: cleared going down to the drawer's grid, put back going
@@ -615,7 +613,7 @@ export function WorkShell({
          the line landed off the words (Julian, 2026-10-07). Seated, the lit
          chip has no push and its swell is about its own middle. */
       const a = (c.firstElementChild as HTMLElement | null) ?? c;
-      const s = window.matchMedia("(min-width: 64rem)").matches
+      const s = matches("large")
         ? 1 + JELLY.swell
         : 1;
       const pad = (parseFloat(getComputedStyle(a).paddingLeft) || 0) * s;

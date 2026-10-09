@@ -3,6 +3,7 @@
 import * as React from "react";
 import { createPortal } from "react-dom";
 import { Liquid } from "@/components/liquid";
+import { useDevice } from "@/lib/device";
 
 /* ── who that is ──────────────────────────────────────────────────
  * A credit on a project page is a person's name and a link that takes the
@@ -33,14 +34,8 @@ import { Liquid } from "@/components/liquid";
  * The card is the pointer's and the keyboard's, never a reader's: the name
  * it comes out of is the same link with the same words, so the card is
  * hidden from assistive technology and its own link is out of the tab
- * order. A phone never sees it (`HOVERS`).
+ * order. A phone never sees it (`fine` in `lib/device.ts`).
  * ─────────────────────────────────────────────────────────────── */
-const HOVERS = "(hover: hover) and (pointer: fine)";
-const subscribeHover = (onChange: () => void) => {
-  const mq = window.matchMedia(HOVERS);
-  mq.addEventListener("change", onChange);
-  return () => mq.removeEventListener("change", onChange);
-};
 
 /* The beat a name is held for before it pours, and the grace a pointer has
    to cross the gap from the word into the card. */
@@ -110,11 +105,7 @@ const cellsOf = (dl: Element) => {
 };
 
 export function CreditList({ children }: { children: React.ReactNode }) {
-  const hovers = React.useSyncExternalStore(
-    subscribeHover,
-    () => window.matchMedia(HOVERS).matches,
-    () => false,
-  );
+  const hovers = useDevice("fine");
   const [held, setHeld] = React.useState<Held | null>(null);
   const [shown, setShown] = React.useState(false);
   const live = React.useRef(false);

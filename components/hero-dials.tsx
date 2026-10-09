@@ -28,6 +28,7 @@ import {
   middleVars,
   type Middle,
 } from "@/lib/cover-slots";
+import { MEDIA } from "@/lib/device";
 
 /* ── the hero on DialKit ──────────────────────────────────────────
  * Julian: tune almost everything about the cover live, on DialKit's
@@ -134,7 +135,7 @@ const UPRIGHT_MQ =
 const LANDSCAPE_MQ =
   "(min-width: 40rem) and (max-width: 79.99rem) and (orientation: landscape)";
 const SIDEWAYS_MQ = "(orientation: landscape) and (max-height: 31.99rem)";
-const PHONE_MQ = "(max-width: 39.99rem) and (orientation: portrait)";
+const PHONE_MQ = MEDIA.phoneUpright;
 const SHORT_MQ =
   "(min-width: 80rem) and (min-height: 32rem) and (min-aspect-ratio: 7 / 4) and (max-aspect-ratio: 219 / 100)";
 

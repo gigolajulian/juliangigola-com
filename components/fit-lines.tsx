@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { media } from "@/lib/device";
 
 /* ── the middle on a phone, to the wordmark's width ───────────────
  * Julian: on a phone the lines under the name should be tightened, and
@@ -13,8 +14,6 @@ import * as React from "react";
  * only; everywhere else the lines run on as one.
  * ─────────────────────────────────────────────────────────────── */
 
-const PHONE = "(max-width: 39.99rem) and (orientation: portrait)";
-
 export function FitLines() {
   const ref = React.useRef<HTMLSpanElement>(null);
 
@@ -22,7 +21,7 @@ export function FitLines() {
     const middle = ref.current?.closest<HTMLElement>(".cover-float-middle");
     const name = middle?.querySelector<HTMLElement>(".cover-float-name");
     if (!middle || !name) return;
-    const phone = matchMedia(PHONE);
+    const phone = media("phoneUpright");
     const lines = () => [...middle.querySelectorAll<HTMLElement>(".fit-line")];
     const clear = () =>
       lines().forEach((l) => {

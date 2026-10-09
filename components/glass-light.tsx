@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { matches } from "@/lib/device";
 
 /* ── the light on the glass ───────────────────────────────────────
  * Liquid Glass reacts to the pointer: a soft highlight sits where the light
@@ -26,7 +27,7 @@ const FLOOD = ".action, .action-quiet, .cover-cta";
 
 export function GlassLight() {
   React.useEffect(() => {
-    if (!window.matchMedia("(hover: hover) and (pointer: fine)").matches) {
+    if (!matches("fine")) {
       return;
     }
     const move = (e: PointerEvent) => {

@@ -1,3 +1,5 @@
+import { media } from "@/lib/device";
+
 /* ── the deck ─────────────────────────────────────────────────────
  * React Bits' ScrollStack, turned on its side for a site that moves
  * sideways. Julian: integrate it, but make it make sense.
@@ -163,7 +165,7 @@ const drop = (live: Map<HTMLElement, Animation>) => {
 export function runDeck(el: HTMLElement, mode: Deck): () => void {
   if (mode === "chapters") return runChapters(el);
   if (mode === "leads") return () => {}; // the strip deals at its ends itself
-  const wide = window.matchMedia("(min-width: 40rem)");
+  const wide = media("wide");
   const calm = window.matchMedia("(prefers-reduced-motion: reduce)");
   let cards: HTMLElement[] = [];
   let rest: HTMLElement[] = [];
@@ -371,7 +373,7 @@ const topOf = (box: HTMLElement) => {
 };
 
 function runChapters(el: HTMLElement): () => void {
-  const wide = window.matchMedia("(min-width: 40rem)");
+  const wide = media("wide");
   const calm = window.matchMedia("(prefers-reduced-motion: reduce)");
   let kids: HTMLElement[] = [];
   let chapters: Chapter[] = [];

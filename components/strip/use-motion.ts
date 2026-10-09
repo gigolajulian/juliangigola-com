@@ -1,11 +1,12 @@
 import type { Deck } from "@/lib/deck";
+import { matches } from "@/lib/device";
 import * as React from "react";
 import { createBand } from "./band";
 import { dragHandlers } from "./drag";
 import { createMover } from "./motion";
 import { keyHandlers } from "./keyboard";
 import { createPaging } from "./paging";
-import { wantsLenis, WHEELED } from "./shared";
+import { wantsLenis } from "./shared";
 import { touchHandlers } from "./touch";
 import { wheelHandler } from "./wheel";
 
@@ -49,7 +50,7 @@ export function useMotion({
        paged one, and even where it does the two ends are still the
        strip's: the band and the lead-on to the next project are counted
        here, off wheel events Lenis would otherwise swallow. */
-    const smooth = wantsLenis() && (!paged || matchMedia(WHEELED).matches);
+    const smooth = wantsLenis() && (!paged || matches("fine"));
     const m = createMover(el, {
       paged,
       eased,

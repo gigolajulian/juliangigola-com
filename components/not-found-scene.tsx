@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { usePathname, useRouter } from "next/navigation";
+import { matches } from "@/lib/device";
 
 /* ── the numerals, and the hand that focuses them ──────────────────
  * The 404 opens out of focus: the numerals sit under 16px of blur at 78%,
@@ -42,7 +43,7 @@ export function NotFoundScene({ children }: { children: React.ReactNode }) {
 
     if (
       !numerals ||
-      !window.matchMedia("(hover: hover) and (pointer: fine)").matches ||
+      !matches("fine") ||
       window.matchMedia("(prefers-reduced-motion: reduce)").matches
     ) {
       if (readout) readout.textContent = "FOCUS LOCKED";

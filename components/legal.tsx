@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Strip } from "@/components/strip";
 import { StripPage, StripHead } from "@/components/strip-page";
 import { cn } from "@/lib/utils";
+import { matches } from "@/lib/device";
 
 /* ── the legal page ───────────────────────────────────────────────
  * Two screens, one document each, dealt as a deck like the homepage and
@@ -83,7 +84,7 @@ export function LegalPage({ children }: { children: React.ReactNode }) {
        the whole contents, so a tap would change something the reader
        cannot see. There is no hover there either, so the tap is the only
        way in and it has to arrive. */
-    if (window.matchMedia("(max-width: 39.99rem)").matches)
+    if (matches("phone"))
       document.getElementById(`${d.id}-clause`)?.scrollIntoView({
         behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches
           ? "auto"

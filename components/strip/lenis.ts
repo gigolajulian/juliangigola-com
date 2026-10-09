@@ -1,3 +1,4 @@
+import { matches } from "@/lib/device";
 import * as React from "react";
 import {
   GESTURE_GAP_MS,
@@ -8,7 +9,6 @@ import {
   wantsLenis,
   wantsOwnNotch,
   WHEEL,
-  WHEELED,
 } from "./shared";
 
 /* ── Lenis ────────────────────────────────────────────────────
@@ -34,7 +34,8 @@ export function useLenis(
   React.useEffect(() => {
     const el = scrollerRef.current;
     if (!el || !live || !wantsLenis()) return;
-    if (paged && !matchMedia(WHEELED).matches) return;
+    // A paged strip rides Lenis only under a wheel and a pointer.
+    if (paged && !matches("fine")) return;
     let off = () => {};
     let gone = false;
     const ownNotch = wantsOwnNotch();

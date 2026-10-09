@@ -4,6 +4,7 @@ import * as React from "react";
 import Image from "next/image";
 import { creditOf, embedUrl, posterFor, previewUrl, type Video } from "@/lib/videos";
 import { cn } from "@/lib/utils";
+import { matches } from "@/lib/device";
 
 /* ── the tiles ────────────────────────────────────────────────────
  * A still with a play button. The iframe arrives on the click.
@@ -161,7 +162,7 @@ function Tile({
   const [previewing, setPreviewing] = React.useState(false);
   const rest = React.useRef(0);
   const hoverable = () =>
-    window.matchMedia("(hover: hover) and (pointer: fine)").matches &&
+    matches("fine") &&
     !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   const enter = () => {
     if (!hoverable()) return;

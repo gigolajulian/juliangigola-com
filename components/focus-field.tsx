@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { matches } from "@/lib/device";
 
 /* ── the focus field ──────────────────────────────────────────────
  * Julian (2026-10-04): a hover that spans the gallery. One blurring layer
@@ -22,7 +23,7 @@ export function FocusField() {
   React.useEffect(() => {
     const el = ref.current;
     if (!el) return;
-    const fine = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
+    const fine = matches("fine");
     let frame = 0;
     let x = 0;
     let y = 0;

@@ -16,6 +16,7 @@ import {
   DECODE_CAP_MS,
   type ZoomTrip,
 } from "@/lib/zoom";
+import { matches } from "@/lib/device";
 
 /* ── the lightbox ─────────────────────────────────────────────────
  * A frame at the size of the screen, paged with the arrow keys.
@@ -459,7 +460,7 @@ function useFit(
       /* A landscape frame a little short of the width, so the frames
          either side show past it (Julian: scale down slightly to show the
          next and before). Not on a phone, which has no sides. */
-      if (width > height && window.matchMedia("(min-width: 640px)").matches) w *= 0.76;
+      if (width > height && matches("wide")) w *= 0.76;
       const s = Math.min(w / width, h / height);
       setSize({ w: Math.round(width * s), h: Math.round(height * s), vw: el.clientWidth });
     };

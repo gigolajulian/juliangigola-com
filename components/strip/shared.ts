@@ -139,8 +139,6 @@ export const padGesture = new WeakMap<HTMLElement, boolean>();
     momentum, as under `?lenis=0`. Read once, as a strip mounts. */
 export const wantsOwnNotch = () =>
   new URLSearchParams(window.location.search).has("notch");
-/** A wheel and a pointer, where a paged strip rides Lenis (`strip.tsx`). */
-export const WHEELED = "(hover: hover) and (pointer: fine)";
 /** How long a push is held after the last notch before it starts to drain,
     so the notches of a steady spin add up rather than leak away between
     them: a notched wheel fires about ten times a second, and a drain that

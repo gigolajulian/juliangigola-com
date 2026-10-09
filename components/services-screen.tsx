@@ -7,6 +7,7 @@ import Link from "next/link";
 import { Liquid, useQuiet } from "@/components/liquid";
 import { RisingTitle } from "@/components/strip-page";
 import type { Frame } from "@/lib/work-types";
+import { matches } from "@/lib/device";
 
 /** One frame on the light table: a project's picture and where it opens. */
 export type Shot = { src: string; color?: string; width: number; height: number; title: string; href: string };
@@ -113,7 +114,7 @@ export function ServicesScreen({
      phone has no table, its rows open at once. */
   const touched = useRef(false);
   const tap = (e: React.MouseEvent, i: number) => {
-    if (!touched.current || i === on || !window.matchMedia("(min-width: 40rem)").matches) return;
+    if (!touched.current || i === on || !matches("wide")) return;
     e.preventDefault();
     setOn(i);
   };
