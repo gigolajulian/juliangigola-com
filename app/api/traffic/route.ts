@@ -25,6 +25,12 @@ const json = (body: unknown, status = 200) =>
 
 type Row = { n: number; key: string };
 
+/* The two queries' answers. Each asks for one of these. */
+type Viewer = {
+  accounts: { rumPageloadEventsAdaptiveGroups: { sum: { visits: number }; dimensions: Record<string, string> }[] }[];
+  zones: { httpRequestsAdaptiveGroups: { count: number; dimensions: { userAgent: string } }[] }[];
+};
+
 export async function GET(request: Request) {
   const token = bearer(request);
   if (!token || !(await canPush(token))) return json({ error: "Not authorised." }, 401);
@@ -47,7 +53,7 @@ export async function GET(request: Request) {
       body: JSON.stringify({ query }),
     });
     const text = await res.text();
-    let r: { data?: { viewer: any }; errors?: { message: string }[] };
+    let r: { data?: { viewer: Viewer }; errors?: { message: string }[] };
     try {
       r = JSON.parse(text);
     } catch {
@@ -69,12 +75,10 @@ export async function GET(request: Request) {
     const v = await gql(
       `{viewer{accounts(filter:{accountTag:"${ACCOUNT}"}){rumPageloadEventsAdaptiveGroups(limit:${limit},filter:{datetime_geq:"${ago(7)}",datetime_lt:"${now.toISOString()}",userAgentBrowser_neq:"ChromeHeadless"},orderBy:[sum_visits_DESC]){sum{visits} dimensions{${dim}}}}}}`,
     );
-    return v.accounts[0].rumPageloadEventsAdaptiveGroups.map(
-      (g: { sum: { visits: number }; dimensions: Record<string, string> }) => ({
-        n: g.sum.visits,
-        key: Object.values(g.dimensions).join(" "),
-      }),
-    );
+    return v.accounts[0].rumPageloadEventsAdaptiveGroups.map((g) => ({
+      n: g.sum.visits,
+      key: Object.values(g.dimensions).join(" "),
+    }));
   };
 
   try {
@@ -93,7 +97,7 @@ export async function GET(request: Request) {
     const botLike = /bot|crawl|spider|curl|wget|python|headless|go-http|node|axios|fetch|extended|agent|preview|scan|^$/i;
     let bots = 0;
     const topBots: Row[] = [];
-    for (const a of zone.zones[0].httpRequestsAdaptiveGroups as { count: number; dimensions: { userAgent: string } }[]) {
+    for (const a of zone.zones[0].httpRequestsAdaptiveGroups) {
       const ua = a.dimensions.userAgent;
       if (!botLike.test(ua)) continue;
       bots += a.count;

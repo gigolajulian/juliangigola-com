@@ -97,8 +97,9 @@ export function ThemeToggle({ className }: { className?: string }) {
 
   /* And follows the root, not only its own presses: there are two of
      these (the bar's on a desktop, the menu's under the burger), and an
-     iPad turned from one width to the other shows the one not pressed. */
-  React.useEffect(() => setTheme(read()), []);
+     iPad turned from one width to the other shows the one not pressed.
+     The first read waits for the effect to finish, as React asks. */
+  React.useEffect(() => queueMicrotask(() => setTheme(read())), []);
   React.useEffect(() => {
     const watch = new MutationObserver(() => setTheme(read()));
     watch.observe(document.documentElement, { attributeFilter: ["data-theme"] });
