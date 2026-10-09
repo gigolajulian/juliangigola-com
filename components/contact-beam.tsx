@@ -7,7 +7,7 @@ import { useSiteTheme } from "@/lib/site-theme";
 /* Julian: the form in a beam (`border-beam`, Libraries.dev), at his
    settings: the full border, in the site's own theme. Mono: Julian
    took the colors off the form (2026-09-29). */
-/** A lap, in seconds, and how many a touchscreen gets before it rests. */
+/** A lap, in seconds, and how many it gets before it rests. */
 const LAP = 6;
 const LAPS = 2;
 /* Held where it stands, every layer, so the line and its glow stay put
@@ -36,15 +36,16 @@ export function ContactBeam({
     const id = el?.parentElement?.dataset.beam;
     if (el && id) el.style.setProperty("--edge-a", `var(--beam-angle-${id})`);
   }, []);
-  /* On a touchscreen, two laps and then rest (Julian, 2026-10-08). The
-     glow is repainted every frame it moves, and on an iPad held still on
-     Inquiries that was a third of the frame rate: 38fps with it running,
-     60 with it held. So it runs two laps each time the card comes into
-     view, stops where it stands, and a touch on the card sends it round
-     again. A mouse keeps the lap that never ends. */
+  /* Two laps and then rest (Julian, 2026-10-08), on every screen. The
+     glow is repainted every frame it moves: on an iPad held still on
+     Inquiries it was a third of the frame rate (38fps running, 60 held),
+     and on a 1920 wide window it took Inquiries from 12fps to 4. So it
+     runs two laps each time the card comes into view, stops where it
+     stands, and goes round again under a pointer, a touch or a field
+     taking focus. */
   React.useEffect(() => {
     const card = edge.current?.parentElement;
-    if (!card || !matchMedia("(pointer: coarse)").matches) return;
+    if (!card) return;
     let rest = 0;
     const run = () => {
       card.removeAttribute("data-rest");
@@ -65,11 +66,13 @@ export function ContactBeam({
     // reports.
     run();
     card.addEventListener("pointerdown", run, { passive: true });
+    card.addEventListener("pointerenter", run, { passive: true });
     card.addEventListener("focusin", run);
     return () => {
       io.disconnect();
       clearTimeout(rest);
       card.removeEventListener("pointerdown", run);
+      card.removeEventListener("pointerenter", run);
       card.removeEventListener("focusin", run);
     };
   }, []);

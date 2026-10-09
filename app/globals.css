@@ -244,9 +244,19 @@
  * stays clipped once it has landed. `backwards`, so it holds below its
  * line through its delay and lets go of the element at the end.
  * ───────────────────────────────────────────────────────────────── */
+/* The rise and its mask as two animations: the rise alone is a transform
+   the GPU runs, where in one set of keyframes with `--lift-clip` Safari
+   ran both on the main thread (2026-10-08, the splash's lift). */
 .lift {
-  animation: jg-lift var(--h-lift-ms, 1030ms) cubic-bezier(0.16, 1, 0.3, 1) backwards;
+  animation:
+    jg-lift-rise var(--h-lift-ms, 1030ms) cubic-bezier(0.16, 1, 0.3, 1) backwards,
+    jg-lift var(--h-lift-ms, 1030ms) cubic-bezier(0.16, 1, 0.3, 1) backwards;
   animation-delay: var(--reveal-delay, 0ms);
+}
+@keyframes jg-lift-rise {
+  from {
+    transform: translateY(100%);
+  }
 }
 /* The mask moves by a number, not by the clip itself. Chromium runs an
    animated `clip-path` on the compositor and until it ends hit-tests the
@@ -261,12 +271,10 @@
 }
 @keyframes jg-lift {
   from {
-    transform: translateY(100%);
     --lift-clip: 100;
     clip-path: inset(0 0 calc(var(--lift-clip) * 1%) 0);
   }
   to {
-    transform: translateY(0);
     --lift-clip: 0;
     clip-path: inset(0 0 calc(var(--lift-clip) * 1%) 0);
   }
@@ -898,9 +906,14 @@
 /* The fade is on the card, not the frame: opacity below 1 flattens a
    `preserve-3d` element, so a frame fading as it flew would travel flat
    and snap to its depth the moment it landed, 5 to 15% in one frame. */
+/* Two animations, not one (2026-10-08): the fade (opacity and blur) on
+   its own, and `--os` held at 1 beside it. A custom property in the same
+   keyframes kept the whole fade on the main thread in Safari, repainted
+   every frame of the splash's lift; alone, the fade goes to the GPU. */
 .cover-float-card {
-  animation: jg-fade var(--h-fade-ms, 1110ms) cubic-bezier(0.33, 1, 0.68, 1)
-    var(--delay) backwards;
+  animation:
+    jg-fade var(--h-fade-ms, 1110ms) cubic-bezier(0.33, 1, 0.68, 1) var(--delay) backwards,
+    jg-os-hold var(--h-fade-ms, 1110ms) linear var(--delay) backwards;
 }
 /* Julian: the photographs arrive the way basis's do, measured off his
    recording: out of order, each fading up out of nothing and a blur, and
@@ -925,8 +938,10 @@
   from {
     opacity: 0;
     filter: blur(var(--h-fade-blur, 7px));
-    --os: 1;
   }
+}
+@keyframes jg-os-hold {
+  from,
   to {
     --os: 1;
   }

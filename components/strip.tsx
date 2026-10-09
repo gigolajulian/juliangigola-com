@@ -294,6 +294,17 @@ function wantsLenis() {
     the fingers are down and keeps firing as the fling decays, so anything
     under about a tenth of a second is still the same push. */
 const GESTURE_GAP_MS = 120;
+/** A trackpad's event, not a mouse's notch: under 80 device pixels and
+    in pixels, as the strip and Lenis both tell them apart. */
+const isPad = (e: WheelEvent) =>
+  e.deltaMode === 0 &&
+  Math.max(Math.abs(e.deltaX), Math.abs(e.deltaY)) * (window.devicePixelRatio || 1) < 80;
+/** Whether the gesture under way on a strip is a trackpad's. Decided per
+    gesture, not per event: a fast swipe can open with an event the size of
+    a notch, and with that one given to Lenis and the rest moved directly
+    the two fought, and the landing read Lenis's target and took the strip
+    back to the start. The strip's `onWheel` sets it, Lenis reads it. */
+const padGesture = new WeakMap<HTMLElement, boolean>();
 /** A wheel and a pointer, where a paged strip rides Lenis (`strip.tsx`). */
 const WHEELED = "(hover: hover) and (pointer: fine)";
 /** How long a push is held after the last notch before it starts to drain,
@@ -318,12 +329,11 @@ const STRETCH = 160;
     makes leaving any easier. */
 const WHEEL = 3;
 const PAD = 1.8;
-/** Lenis's ease per frame for each: a notch glides, a trackpad follows.
+/** Lenis's ease per frame for a notch (a trackpad is not eased: `isPad`).
     A notch was 0.08, which took about 460ms to cover nine tenths of its
     travel and read as lag even at a full frame rate (Julian: the portfolio
     is laggy on a desktop); 0.13 takes about 270. */
 const MOUSE_LERP = 0.13;
-const PAD_LERP = 0.2;
 
 /** How long after the strip stops before the rail takes the shape of the
     chapter you have landed in. The shape follows the page, and reshaping
@@ -991,17 +1001,71 @@ export function Strip({
         router.prefetch(prevHref);
       }
       if (warmed.size === Number(!!nextHref) + Number(!!prevHref))
-        el.removeEventListener("scroll", warm);
+        el.removeEventListener("scroll", onScroll);
     };
     // A frame on, not while the page is still being put together: read
     // then, the scroller's size forced a layout inside the arrival.
     const first = requestAnimationFrame(warm);
-    el.addEventListener("scroll", warm, { passive: true });
+    /* And at most every 200ms while it scrolls, between frames rather than
+       on each scroll event: read there, the two widths forced a layout on
+       every frame of a swipe (1.3s of a 24s run of swipes, WebKit). */
+    let soon = 0;
+    const onScroll = () => {
+      if (soon) return;
+      soon = window.setTimeout(() => {
+        soon = 0;
+        warm();
+      }, 200);
+    };
+    el.addEventListener("scroll", onScroll, { passive: true });
     return () => {
       cancelAnimationFrame(first);
-      el.removeEventListener("scroll", warm);
+      window.clearTimeout(soon);
+      el.removeEventListener("scroll", onScroll);
     };
   }, [router, nextHref, nextWarm, prevHref, live]);
+
+  /* The photographs a swipe is about to bring in, ready before it does.
+     A picture that comes on screen undecoded is decoded in the frame that
+     shows it, and a swipe that brought in a dozen did a dozen in a row: the
+     bumps in an otherwise smooth swipe on the portfolio. Once the strip has
+     rested, and when the page is idle, the next two screens' pictures are
+     fetched and decoded either side of where it stands. */
+  React.useEffect(() => {
+    const el = scroller.current;
+    if (!el || !live) return;
+    let rest = 0;
+    let idle = 0;
+    const ahead = () => {
+      const w = el.clientWidth;
+      const from = el.scrollLeft - w;
+      const to = el.scrollLeft + 3 * w;
+      for (const img of Array.from(el.querySelectorAll<HTMLImageElement>("img"))) {
+        if (img.dataset.ahead !== undefined) continue;
+        const x = img.getBoundingClientRect().left - el.getBoundingClientRect().left + el.scrollLeft;
+        if (x < from || x > to) continue;
+        img.dataset.ahead = "";
+        if (img.loading === "lazy") img.loading = "eager";
+        img.decode().catch(() => {});
+      }
+    };
+    const later = () => {
+      window.clearTimeout(rest);
+      rest = window.setTimeout(() => {
+        if (typeof window.requestIdleCallback === "function") {
+          window.cancelIdleCallback(idle);
+          idle = window.requestIdleCallback(ahead, { timeout: 1000 });
+        } else ahead();
+      }, 250);
+    };
+    later();
+    el.addEventListener("scroll", later, { passive: true });
+    return () => {
+      window.clearTimeout(rest);
+      if (typeof window.cancelIdleCallback === "function") window.cancelIdleCallback(idle);
+      el.removeEventListener("scroll", later);
+    };
+  }, [live, count]);
 
   /* Before the first paint: a deep link opens on its cell, and arriving
      backwards opens at the end with the slide coming from the left. Both
@@ -1459,17 +1523,18 @@ export function Strip({
           dx = data.deltaX;
           dy = data.deltaY;
           if (!(e instanceof WheelEvent)) return true;
-          /* In device pixels: at 200% Chrome can report a notch as 50,
-             under the line, and it was eased as a trackpad. */
-          const raw =
-            Math.max(Math.abs(e.deltaX), Math.abs(e.deltaY)) *
-            (window.devicePixelRatio || 1);
-          const notch = e.deltaMode !== 0 || raw >= 80;
-          lenis.options.lerp = notch ? MOUSE_LERP : PAD_LERP;
-          if (!notch) {
-            data.deltaX *= PAD / WHEEL;
-            data.deltaY *= PAD / WHEEL;
+          /* A trackpad is the strip's own (`onWheel`): its events move the
+             scroller directly, since macOS has already eased them. Eased
+             again here it cost a frame loop and a layout a frame, and a
+             home page swipe ran at 31ms a frame against 20 without it
+             (WebKit, 1440 wide, 2026-10-08). A notch is still Lenis's. */
+          if (padGesture.get(el)) {
+            // Taken over mid-run: Lenis stops where the strip stands.
+            if (lenis.isScrolling === "smooth")
+              lenis.scrollTo(el.scrollLeft, { immediate: true, force: true });
+            return false;
           }
+          lenis.options.lerp = MOUSE_LERP;
           return true;
         },
         /* Not the finger. An iPad's own momentum is better than anything
@@ -2720,6 +2785,8 @@ export function Strip({
       gestureAt = now;
       // A new push: take the measurements again, once, before using them.
       if (fresh) size();
+      if (fresh) padGesture.set(el, false);
+      if (isPad(e)) padGesture.set(el, true);
       const sideways = Math.abs(e.deltaX) > Math.abs(e.deltaY);
       const raw = sideways ? e.deltaX : e.deltaY;
       if (!raw) return;
@@ -2847,6 +2914,16 @@ export function Strip({
       if (over) {
         over = 0;
         release();
+      }
+      /* A trackpad, where Lenis has the notches: the strip follows the
+         fingers event by event, at the trackpad's gain, with macOS's own
+         momentum and nothing eased on top. No frame loop and one write per
+         event. A paged strip lands once the stream rests (`settle`, with
+         Lenis). */
+      if (smooth && padGesture.get(el)) {
+        e.preventDefault();
+        el.scrollLeft = Math.max(0, Math.min(room(), el.scrollLeft + dy * PAD));
+        return;
       }
       /* Away from the ends, Lenis has the wheel. Nothing is prevented and
          nothing is aimed: its own listener moves the scroller, and this
@@ -3112,7 +3189,11 @@ export function Strip({
        reads Portfolio there and its own name once the strip moves). Marked
        moved rather than at the start, so the page as it first draws, the
        frame the window's flight lands on, is at the start. */
-    const onStart = () => el.toggleAttribute("data-moved", el.scrollLeft >= 8);
+    // Written only when it changes: a write on every scroll event restyled.
+    const onStart = () => {
+      const moved = el.scrollLeft >= 8;
+      if (moved !== el.hasAttribute("data-moved")) el.toggleAttribute("data-moved", moved);
+    };
     onStart();
     const reseat = () => {
       if (el.clientWidth === across && el.clientHeight === tall) return;
