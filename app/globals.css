@@ -7512,6 +7512,13 @@ h2:not(.label) {
     line-height: 1.8;
   }
 }
+/* Not while something is being typed (plan 2.4): a phone turned on its
+   side mid-message put this over the form, the field being typed in and
+   its send button, with the keyboard still up. The form holds in
+   landscape (measured on iPhone SE, 18 and 18 Pro Max sizes). */
+:root:has(:is(input, textarea, select, [contenteditable]):focus) .turn-upright {
+  display: none;
+}
 @keyframes jg-turn-upright {
   from {
     transform: rotate(-90deg);
