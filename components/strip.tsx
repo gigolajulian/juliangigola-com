@@ -773,6 +773,43 @@ export function Strip({
      feel like changing pages. Same gestures, twice the work on screen. */
   const live = (stack ? wide : true) && !sheet;
 
+  /* A paged strip's screens say which they are to a screen reader: a
+     group, read as a slide, named with its word and where it stands,
+     "Biography, 3 of 7". Written onto the cells here, since a cell is
+     often a component of its own; never onto one that is a control or
+     already has a role, and a name it already has is kept, with the
+     position after it. A free strip says its position once, on the
+     `progressbar` under it. */
+  React.useEffect(() => {
+    const el = scroller.current;
+    if (!el || !live || !paged || !ticks.length) return;
+    const set: { c: HTMLElement; named: boolean }[] = [];
+    ticks.forEach((t, n) => {
+      const c = el.children[t.i] as HTMLElement | undefined;
+      if (!c || c.hasAttribute("role") || c.matches("a, button, input, select, textarea, dialog"))
+        return;
+      c.setAttribute("role", "group");
+      c.setAttribute("aria-roledescription", "slide");
+      const where = `${n + 1} of ${ticks.length}`;
+      const own = c.getAttribute("aria-label");
+      const named = !c.hasAttribute("aria-labelledby");
+      if (named) c.setAttribute("aria-label", `${own ?? t.word ?? ""}${own || t.word ? ", " : ""}${where}`);
+      c.dataset.slide = own ?? "";
+      set.push({ c, named });
+    });
+    return () => {
+      for (const { c, named } of set) {
+        c.removeAttribute("role");
+        c.removeAttribute("aria-roledescription");
+        if (named) {
+          if (c.dataset.slide) c.setAttribute("aria-label", c.dataset.slide);
+          else c.removeAttribute("aria-label");
+        }
+        delete c.dataset.slide;
+      }
+    };
+  }, [live, paged, ticks]);
+
   /* Past the opening cell, stacked down a phone as well: the page's own
      scroll, half the cell gone off the top, as `data-past-first` says it
      sideways (`read` below). Its own name, so only the navbar's wordmark
@@ -2359,7 +2396,9 @@ export function Strip({
          gives easily and then stiffens towards the count, and the
          crossing is a detent given way (Julian: a tiny bit of
          resistance). */
-      if (over > 0 && door(1) && win) {
+      /* Not under reduced motion: the count still leads on, but the
+         last screen does not slide or sink with the pull. */
+      if (eased && over > 0 && door(1) && win) {
         const shown = Math.round(
           stacked(1)
             ? Math.min(innerWidth, over * WHEEL)
@@ -3900,6 +3939,9 @@ export function Strip({
         role="region"
         tabIndex={0}
         aria-label={label}
+        /* What kind of region: a row that moves sideways, screen by
+           screen, under the arrows. Not once it runs down a phone. */
+        aria-roledescription={live ? "carousel" : undefined}
         /* Dealt as a deck: `globals.css` makes every cell opaque. */
         data-dealt={sheet ? undefined : deck}
         data-sheet={sheet ? "" : undefined}
