@@ -6,5 +6,97 @@
   },
   "splash": {
     "liftedMs": 4000
+  },
+  "images": {
+    "/": {
+      "iphone-se": 143,
+      "iphone-18": 143,
+      "iphone-18-pro-max": 228,
+      "ipad-portrait": 1796,
+      "ipad-landscape": 1995,
+      "laptop-1440": 3456,
+      "desktop-1920": 1505,
+      "desktop-2560": 1566
+    },
+    "/#contact": {
+      "iphone-se": 1054,
+      "iphone-18": 1699,
+      "iphone-18-pro-max": 2775,
+      "ipad-portrait": 2919,
+      "ipad-landscape": 2932,
+      "laptop-1440": 5102,
+      "desktop-1920": 2781,
+      "desktop-2560": 3025
+    },
+    "/portfolio": {
+      "iphone-se": 412,
+      "iphone-18": 412,
+      "iphone-18-pro-max": 833,
+      "ipad-portrait": 1285,
+      "ipad-landscape": 1160,
+      "laptop-1440": 4714,
+      "desktop-1920": 3453,
+      "desktop-2560": 3636
+    },
+    "/portfolio/editorial": {
+      "iphone-se": 374,
+      "iphone-18": 374,
+      "iphone-18-pro-max": 805,
+      "ipad-portrait": 964,
+      "ipad-landscape": 840,
+      "laptop-1440": 4393,
+      "desktop-1920": 3133,
+      "desktop-2560": 3316
+    },
+    "/portfolio/nova": {
+      "iphone-se": 385,
+      "iphone-18": 692,
+      "iphone-18-pro-max": 692,
+      "ipad-portrait": 2984,
+      "ipad-landscape": 1469,
+      "laptop-1440": 1469,
+      "desktop-1920": 1360,
+      "desktop-2560": 1469
+    },
+    "/portfolio/video": {
+      "iphone-se": 301,
+      "iphone-18": 345,
+      "iphone-18-pro-max": 490,
+      "ipad-portrait": 654,
+      "ipad-landscape": 654,
+      "laptop-1440": 3790,
+      "desktop-1920": 2302,
+      "desktop-2560": 2542
+    },
+    "/model-digitals": {
+      "iphone-se": 45,
+      "iphone-18": 45,
+      "iphone-18-pro-max": 87,
+      "ipad-portrait": 127,
+      "ipad-landscape": 168,
+      "laptop-1440": 262,
+      "desktop-1920": 127,
+      "desktop-2560": 127
+    },
+    "/book": {
+      "iphone-se": 32,
+      "iphone-18": 32,
+      "iphone-18-pro-max": 32,
+      "ipad-portrait": 32,
+      "ipad-landscape": 32,
+      "laptop-1440": 32,
+      "desktop-1920": 32,
+      "desktop-2560": 32
+    },
+    "/legal": {
+      "iphone-se": 32,
+      "iphone-18": 32,
+      "iphone-18-pro-max": 32,
+      "ipad-portrait": 32,
+      "ipad-landscape": 32,
+      "laptop-1440": 32,
+      "desktop-1920": 32,
+      "desktop-2560": 32
+    }
   }
 }

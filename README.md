@@ -22,8 +22,8 @@ node scripts/perf/safari.mjs <url>        # one page swiped in real Safari
 ```
 
 `npm run perf` builds with `JG_LOCAL=1` (or reuses such a build), serves it,
-and runs `tests/perf`: swipe landing and frame timing, splash timing and
-layout, on every page at eight sizes. It ends with a
+and runs `tests/perf`: swipe landing and frame timing, splash timing, layout
+and first-screen image weight, on every page at eight sizes. It ends with a
 table per measurement. The budgets are in `tests/perf/budgets.json`.
 
 `.github/workflows/ci.yml` runs typecheck, lint, a build and the perf suite on
