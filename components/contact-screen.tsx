@@ -1,5 +1,6 @@
 import { Suspense } from "react";
 import type * as React from "react";
+import { CalEmbed } from "@/components/cal-embed";
 import { ContactBeam } from "@/components/contact-beam";
 import { ContactForm, WhenBooking } from "@/components/contact-form";
 import { RisingTitle } from "@/components/strip-page";
@@ -38,6 +39,7 @@ export function ContactScreen({
   hash = "contact",
   defaults,
   calendar,
+  cal,
   backdrop,
 }: {
   title?: string;
@@ -53,6 +55,9 @@ export function ContactScreen({
       the calendar takes the form's place, and the form stays one link away
       on the homepage for anyone who would rather ask first. */
   calendar?: string;
+  /** The same session's Cal.com event (`CAL_EVENTS`, `lib/booking.ts`),
+      shown in the calendar's place with `?cal` on the address. */
+  cal?: string;
   /** A wall of photographs behind the screen (the homepage's). */
   backdrop?: React.ReactNode;
 } = {}) {
@@ -243,12 +248,14 @@ export function ContactScreen({
             /* Google's own page, so its colours are Google's: the frame
                is the site's card, and on the dark theme the page is
                inverted to sit on it (`.booking-embed`, globals.css). */
-            <iframe
-              src={`https://calendar.google.com/calendar/appointments/schedules/${calendar}?gv=true`}
-              title="Pick a time"
-              loading="lazy"
-              className="booking-embed block h-[75svh] w-full rounded-[8px] border-0 sm:h-full"
-            />
+            <CalEmbed path={cal} title="Pick a time" className="booking-embed block h-[75svh] w-full rounded-[8px] border-0 sm:h-full">
+              <iframe
+                src={`https://calendar.google.com/calendar/appointments/schedules/${calendar}?gv=true`}
+                title="Pick a time"
+                loading="lazy"
+                className="booking-embed block h-[75svh] w-full rounded-[8px] border-0 sm:h-full"
+              />
+            </CalEmbed>
           ) : (
             <Suspense fallback={null}>
               <ContactForm defaults={defaults} sessions={SESSION_TYPES.map((s) => s.name)} />

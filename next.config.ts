@@ -186,7 +186,8 @@ const csp = [
   // The provider stills for the video page, which are 16:9 thumbnails on
   // their own CDNs rather than frames from the archive.
   "img-src 'self' data: blob: https://i.ytimg.com https://i.vimeocdn.com",
-  "font-src 'self'",
+  // Cal.com's embed script sets its loader in its own face, from `cal.com`.
+  "font-src 'self' https://cal.com",
   "style-src 'self' 'unsafe-inline'",
   // Cloudflare Web Analytics. The beacon is injected by the zone, not by
   // this app, so the first CSP blocked it and took the site's only analytics
@@ -203,12 +204,15 @@ const csp = [
      reel stays silent, which is the safe direction). The alternative was
      dropping the volume request or shipping sound at whatever level the
      visitor's last Vimeo session left it at. */
-  `script-src 'self' 'unsafe-inline' https://static.cloudflareinsights.com https://player.vimeo.com${__impeccableLiveDev}`,
+  // `app.cal.com` is Cal.com's embed script, loaded only on a booking
+  // calendar with `?cal` on the address (`components/cal-embed.tsx`).
+  `script-src 'self' 'unsafe-inline' https://static.cloudflareinsights.com https://player.vimeo.com https://app.cal.com${__impeccableLiveDev}`,
   // The two players, and only as an embed — `frame-ancestors 'none'` above
   // is the other direction and still says nobody may frame this site.
   // And the booking calendars on /book and the session pages (Google Calendar
-  // appointment schedules, `components/book-picker.tsx`, `components/contact-screen.tsx`).
-  "frame-src https://www.youtube-nocookie.com https://player.vimeo.com https://calendar.google.com",
+  // appointment schedules, `components/book-picker.tsx`, `components/contact-screen.tsx`),
+  // and Cal.com's in their place behind `?cal` (`components/cal-embed.tsx`).
+  "frame-src https://www.youtube-nocookie.com https://player.vimeo.com https://calendar.google.com https://app.cal.com https://cal.com",
   // `vimeo.com` and `youtube.com` are oEmbed lookups made by /admin when a
   // link is pasted: the title, and the poster Vimeo does not publish at a
   // guessable URL. No page on the site fetches either.
