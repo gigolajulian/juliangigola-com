@@ -2671,6 +2671,13 @@ export function Strip({
         cancelAnimationFrame(frame);
         frame = 0;
       }
+      /* And on a strip that runs free (the portfolio). A glide the rail or
+         a key had set going kept writing `scrollLeft` under the finger, and
+         `sync` left its target where it was, so after the lift the strip
+         ran on and then glided back to that target with nothing touching
+         it: 300 to 1100px back in 19 of 20 flicks made mid-glide (WebKit,
+         iPad size, 2026-10-09). */
+      if (frame && !paged) stop();
       el.style.overflowX = "";
     };
     const onTouchMove = (e: TouchEvent) => {
