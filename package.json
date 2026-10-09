@@ -10,7 +10,8 @@
     "scope": "npx tsx scripts/make-scope.mts",
     "prebuild": "node scripts/make-hero.mjs && node --no-warnings scripts/make-cards.mjs && node scripts/sitemap-dates.mjs",
     "postinstall": "patch-package",
-    "perf": "node scripts/perf/run.mjs"
+    "perf": "node scripts/perf/run.mjs",
+    "test": "vitest run"
   },
   "dependencies": {
     "@opennextjs/cloudflare": "^1.20.6",
@@ -41,6 +42,7 @@
     "sharp": "^0.35.4",
     "tailwindcss": "^4",
     "typescript": "^5",
+    "vitest": "^3.2.7",
     "wrangler": "^4.131.0"
   },
   "browserslist": [
