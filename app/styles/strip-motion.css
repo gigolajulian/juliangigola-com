@@ -1,0 +1,866 @@
+/* The strip in motion: scroll utilities, how a project opens, the rail, the reel and the selected work. */
+
+/* A scroller with no bar of its own. The legal page changes what is in
+   its reading column on a hover, and every change moves the scrollable
+   height, so the platform's overlay bar flashed up and faded out again on
+   each one: a bar that appears and vanishes reads as a fault. The panes
+   still scroll, by wheel, by touch and by keyboard. */
+@utility quiet-scroll {
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+@utility strip-scroll {
+  scrollbar-width: none;
+  overscroll-behavior-x: contain;
+  /* A scroll container's contents do not paint outside it — which ought to
+     go without saying, and does everywhere the arrival animation leaves a
+     transform behind. The homepage's cover must not slide in, so its strip
+     has no animation and no transform, and without one the row of cells was
+     reaching the page: `documentElement.scrollWidth` 10650 on a 1440 screen,
+     a homepage that scrolled sideways as a document. Saying it here says it
+     once, for every strip. */
+  contain: paint;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+  /* Arrives from the right and settles, which is how the reference site
+     brings the next project in when the wheel runs off the end of the last
+     one; and since the page is keyed by project, the same arrival greets a
+     first visit. `backwards`, not `both`: a forwards fill would hold the
+     transform and the leaving transition below could never move it. */
+  animation: jg-strip-in 640ms var(--ease-out-strong) backwards;
+  /* The band at the ends (`project-strip.tsx` writes `translate`). Each
+     notch stretches it over a short ease rather than jumping, and on
+     release it springs back on a curve that overshoots: the snap is what
+     makes it read as rubber and not as a stop. Under the hand there is no
+     easing at all, the band goes where the hand is. */
+  transition: translate 140ms var(--ease-out-strong);
+  &[data-release] {
+    transition: translate 560ms cubic-bezier(0.2, 1.7, 0.4, 1);
+  }
+  &[data-dragged] {
+    transition-duration: 0s;
+  }
+  &[data-leaving] {
+    transition:
+      transform 260ms var(--ease-in-out-strong),
+      opacity 260ms var(--ease-in-out-strong);
+    transform: translateX(-14vw);
+    opacity: 0;
+  }
+  /* Backwards: out to the right, and the previous project's strip comes in
+     from the left (`data-arrive`, set by the strip before first paint). */
+  &[data-leaving="back"] {
+    transform: translateX(14vw);
+  }
+  &[data-arrive="back"] {
+    animation-name: jg-strip-in-back;
+  }
+  /* The homepage: its cover must not move in. */
+  &[data-arrive="none"] {
+    animation: none;
+  }
+  /* Back to a seat the strip was left in: nothing moves, the strip or
+     what is in it (the cells are stilled below, beside the zoom's). */
+  &[data-arrive="seat"] {
+    animation: none;
+  }
+  /* Dealt in as a card over the strip before: the page transition is
+     the arrival (`deal` below), and nothing in here moves on its own. */
+  &[data-arrive="dealt"] {
+    animation: none;
+  }
+  /* A filter changed, and the head and the chip row above it did not: the
+     sequence is what changed, so it comes up where it stands. Sliding it
+     in from 24vw announced a new page every time a chip was pressed, and
+     eleven chips at 640ms is most of what made the filtering feel like
+     reloading. Short, because the only thing it has to cover is one set
+     of covers being replaced by another. */
+  &[data-arrive="fade"] {
+    /* A short slide along with the fade, from whichever side of the row the
+       chip was pressed on: `--fade-from` is written by the strip and is
+       nought when the press was on the chip already lit. Still short —
+       chips are pressed often, and an arrival that takes its time is one
+       that is in the way by the third press. */
+    animation: jg-fade-slide 260ms var(--ease-out-strong) backwards;
+  }
+  /* Under a page zoom (`data-nav` on the root, see `strip.tsx`) the strip
+     itself does nothing. What is inside it is stilled below, next to the
+     cell's own rise, because this block is a utility and a utility loses
+     to any unlayered rule whatever its specificity. */
+  &[data-arrive="zoom"],
+  &[data-arrive="fly"] {
+    animation: none;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+    transition: none;
+    &[data-leaving] {
+      transition: none;
+    }
+  }
+}
+@keyframes jg-strip-in {
+  from {
+    transform: translateX(24vw);
+    opacity: 0;
+  }
+}
+@keyframes jg-fade-in {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes jg-fade-slide {
+  from {
+    opacity: 0;
+    transform: translateX(var(--fade-from, 0px));
+  }
+}
+@keyframes jg-strip-in-back {
+  from {
+    transform: translateX(-24vw);
+    opacity: 0;
+  }
+}
+
+/* ── how a project opens ──
+   The strip slides in (above), and inside it the title's words rise one
+   after another from under their clips, the credits fade up after them,
+   and the frames arrive in order, each a beat behind the one before. The
+   stagger is capped: the seventh frame and after come together, since
+   past the first screen nobody is watching the order. Julian asked for the
+   title to animate and for the images to come in with a delay in order.
+
+   `translate` and `opacity`, never `transform`: the frames lean with the
+   scroll through `transform` (below), and a finished animation that filled
+   `transform` would hold them upright for good. */
+.title-word {
+  animation: jg-rise 720ms var(--ease-out-strong) both;
+  animation-delay: calc(140ms + var(--i, 0) * 70ms);
+}
+.title-rest {
+  animation: jg-fade-up 640ms var(--ease-out-strong) both;
+  animation-delay: 460ms;
+}
+.strip-cell {
+  animation: jg-fade-up 760ms var(--ease-out-strong) both;
+  animation-delay: calc(180ms + min(var(--i, 0), 6) * 90ms);
+  /* This rule is unlayered, so it beats the `press` utility on the same
+     cell. The press timings ride along here for that reason: without them
+     a cover under the finger snapped instead of giving. */
+  transition:
+    transform 420ms var(--ease-out-strong),
+    scale 440ms var(--ease-bounce);
+  &:active {
+    transition:
+      transform 420ms var(--ease-out-strong),
+      scale 90ms cubic-bezier(0.4, 0, 1, 1);
+  }
+}
+/* Only the first dozen arrive. Julian: a first visit lagged until the
+   pictures were in. /work rose all 88 of its covers at once, a layer each
+   and a style pass each a frame for a second and a half, while the
+   pictures were landing in them; the ones past the first screen finished
+   long before anybody got there. */
+.strip-cell:nth-child(n + 13) {
+  animation: none;
+}
+/* Julian: slightly move the photos up when interacting with the scroll
+   bar. `transform`, and not the `translate` the rest of the site uses:
+   the arrival above animates `translate` with `both`, which pins its
+   final frame to the cell for good and would swallow a lift written to
+   the same property. Six pixels, which is enough to read as the strip
+   noticing and not enough to read as the strip moving. */
+[data-dwell] .strip-cell {
+  transform: translateY(-0.375rem);
+}
+@media (prefers-reduced-motion: reduce) {
+  .strip-cell {
+    transition: none;
+  }
+  [data-dwell] .strip-cell {
+    transform: none;
+  }
+}
+/* And when nothing inside the strip arrives separately. A filter: each
+   cell's rise, staggered up to six deep, is right for a page opening and
+   wrong for a filter, where twelve covers popping in one after another
+   is what made changing one feel choppy. The lane: it moves the row. A
+   page zoom: the zoom is the arrival, and the page must be whole for the
+   snapshot the zoom is made of; frozen mid flight on production, the new
+   page's snapshot was empty for the first 180ms because its cells were
+   still waiting on their own rise, so the zoom went to dark and the
+   pictures came up after it. Here and not in the strip's utility block
+   above, where these lived and lost to this rule for being layered. */
+/* A strip dealt as a deck (`lib/deck.ts`): a cell pinned at the edge sits
+   under the one dealt over it, so every cell is opaque or the covered one
+   shows through. The homepage's screens carry no ground of their own. No
+   shadow along the edge: one was tried, and Julian found it bad. The
+   recede is what says which card is on top. */
+.strip-scroll[data-dealt] > * {
+  background-color: var(--background);
+}
+/* A screen (the homepage, the legal page) is a whole window, so it carries
+   the wash rather than the flat ground, or the homepage would never show
+   it. Not the other decks: their cells are photographs, and the wash would
+   lie over a frame's own colour while it loads. Under 40rem nothing is
+   dealt and the screens run down the page, so they carry no ground at all
+   and the window's wash shows through, rather than one per screen. */
+.strip-scroll[data-dealt="screens"] > * {
+  background: none;
+}
+@media (min-width: 40rem) {
+  .strip-scroll[data-dealt="screens"] > * {
+    background: var(--ground);
+  }
+}
+/* Julian (2026-10-01): a slight shadow under a screen as it comes in, for
+   the depth. A soft band off its leading edge, lying on the screen it is
+   covering. Its opacity is scrubbed by the deck (`shade` in `deck.ts`),
+   which already knows how far each screen is covered: nought at rest, so
+   the next screen waiting flush with the window's edge draws no seam
+   there, full by an eighth of the way in, and once the screen is pinned
+   the band is off the left of the window. Opacity on a pseudo, so the
+   compositor runs it and nothing repaints. */
+.strip-scroll[data-dealt="screens"] > * + *::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: 100%;
+  width: 4.5rem;
+  pointer-events: none;
+  background: linear-gradient(
+    to left,
+    rgb(0 0 0 / var(--deal-shade, 0.16)),
+    rgb(0 0 0 / calc(var(--deal-shade, 0.16) * 0.35)) 35%,
+    transparent
+  );
+  opacity: 0;
+}
+:root:not([data-theme="light"]) .strip-scroll[data-dealt="screens"] {
+  --deal-shade: 0.5;
+}
+/* The deck the other way round (`?flyout=1`, `lib/deck.ts`): the shadow
+   is the leaving screen's, off its trailing edge onto the one it is
+   uncovering. */
+:root[data-flyout] .strip-scroll[data-dealt="screens"] > * + *::before {
+  content: none;
+}
+:root[data-flyout] .strip-scroll[data-dealt="screens"] > *::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 100%;
+  width: 4.5rem;
+  pointer-events: none;
+  background: linear-gradient(
+    to right,
+    rgb(0 0 0 / var(--deal-shade, 0.16)),
+    rgb(0 0 0 / calc(var(--deal-shade, 0.16) * 0.35)) 35%,
+    transparent
+  );
+  opacity: 0;
+}
+/* The work index is dealt in chapters, and its cells stand a gap apart:
+   the chapter sliding in showed the one receding behind it through every
+   gap, in slits. Each cell carries half the gap of ground with it, so a
+   chapter comes in whole. A spread of the page's own colour, not a
+   shadow: it is invisible everywhere but over the card behind. */
+.strip-scroll[data-dealt="chapters"] > * {
+  /* A variable, so the hover's shadow can carry it too (Julian, 2026-10-04:
+     the hover shadow had replaced it and the chapter behind showed). */
+  --deal-ground: 0 0 0 calc(0.5rem + 1px) var(--background);
+  box-shadow: var(--deal-ground);
+}
+/* A cover with no partner in the rack stands over an empty row, and the
+   chapter behind showed through the hole (Julian, 2026-10-02, Artist
+   Presskit's seven). The same ground carried down a row and a gap, by the
+   shelf's height (`.strip-grid` is the size container); a partner, when
+   there is one, is painted after it and covers it. */
+.strip-scroll.strip-grid[data-dealt="chapters"] > [data-alone] {
+  --deal-ground:
+    0 0 0 calc(0.5rem + 1px) var(--background),
+    0 calc((100cqh + 1rem) / 2) 0 calc(0.5rem + 1px) var(--background);
+}
+.strip-scroll[data-arrive="fade"] .strip-cell,
+.strip-scroll[data-arrive="fly"] .strip-cell,
+.strip-scroll[data-arrive="seat"] .strip-cell,
+.strip-scroll[data-arrive="seat"] .title-word,
+.strip-scroll[data-arrive="seat"] .title-rest,
+.strip-scroll[data-arrive="zoom"] .strip-cell,
+.strip-scroll[data-arrive="zoom"] .title-word,
+.strip-scroll[data-arrive="zoom"] .title-rest,
+.strip-scroll[data-arrive="dealt"] .strip-cell,
+.strip-scroll[data-arrive="dealt"] .title-word,
+.strip-scroll[data-arrive="dealt"] .title-rest {
+  animation: none;
+}
+/* Julian (2026-10-01): Contact's title as wide as its column, on one
+   line (two lines at the cover's scale were too big). The column is a
+   container; the whole title reads as 8.4em of capitals (`titleWidth`'s
+   0.76 a letter and 0.3 a space, a little over). Never under 2.25rem:
+   an upright iPad's column is too narrow for one line at a heading's
+   size, and there it takes two. */
+h2.contact-title {
+  font-size: clamp(2.25rem, 100cqw / 8.4, 6rem);
+}
+/* Julian: a discipline's name a fifth bigger than a project's title,
+   which shares the component (`text-4xl`, `sm:text-6xl` there). Both of
+   the discipline page's openings: the galleries' strip and the others'
+   title cell. */
+:is([data-discipline-page], .discipline-title) h2:has(.title-word) {
+  font-size: 2.7rem;
+}
+@media (min-width: 40rem) {
+  /* No larger than its longest word fits the cell (30rem less its 1.5rem
+     of padding): AUTOMOTIVE at 4.5rem ran 30px over the first photograph
+     (Julian: overlaying). */
+  :is([data-discipline-page], .discipline-title) h2:has(.title-word) {
+    font-size: min(4.5rem, calc((min(30rem, 82vw) - 1.5rem) / var(--word-em, 6)));
+  }
+  /* A project's title the same way, at its own 3.75rem: UKIYOSUNKNOWN
+     ran 108px under the first photograph (Julian). */
+  [data-hash="title"] > h2:has(.title-word) {
+    font-size: min(3.75rem, calc((min(30rem, 82vw) - 1.5rem) / var(--word-em, 6)));
+  }
+  /* Julian (2026-09-30): a project's title on one line, and larger. Up to
+     4.5rem (6rem was too large), less where the whole name would not fit
+     50rem (or 82% of the window), and the plate widens to hold it, never
+     narrower than it was. `--title-em` is `titleWidth` in
+     `strip-page.tsx`. */
+  /* Then (2026-10-01): large, across, and over two lines when it is long
+     (Julian: I WANNA BE A HUMAN in two lines). Sized so its longest word,
+     or half the title when that is longer, fits the plate's 40rem, to
+     7rem, and the lines balanced; the plate as wide as what is on it. */
+  .project-plate {
+    width: fit-content;
+    min-width: min(24rem, 82vw);
+    max-width: min(40rem, 82vw);
+  }
+  .project-plate > h2:has(.title-word) {
+    font-size: min(
+      7rem,
+      calc(
+        (min(40rem, 82vw) - 1.5rem) /
+          max(var(--word-em, 4), var(--title-em, 8) / 2 + 0.6)
+      )
+    );
+    white-space: normal;
+    text-wrap: balance;
+  }
+}
+/* The clip each rising word sits in (`project-strip.tsx`,
+   `strip-page.tsx`) was its line box, which cut the descenders off the
+   serif titles: Julian saw the g of Event Coverage lose its tail. The
+   clip reaches below the line now and gives the room back, so nothing
+   moves; the rise starts lower to stay hidden in the deeper clip. */
+:has(> .title-word) {
+  padding-bottom: 0.35em;
+  margin-bottom: -0.35em;
+  /* And past the last letter: set tight, a Black face's final stroke runs
+     beyond its advance, and the clip cut the S off INQUIRIES (Julian,
+     2026-10-07). Given back, so nothing moves. */
+  padding-inline: 0.1em;
+  margin-inline: -0.1em;
+}
+@keyframes jg-rise {
+  from {
+    translate: 0 150%;
+  }
+}
+@keyframes jg-fade-up {
+  from {
+    opacity: 0;
+    translate: 3vw 0;
+  }
+}
+/* ── the words come and go with the cell ──
+   Full strength while a cell is near the middle of the window, gone by
+   the time it is a screen away, which is the same thing the eye is
+   already doing. `strip.tsx` writes the value straight onto the columns
+   that fade: it used to hand the cell a `--par` for a rule here to read,
+   and an inherited custom property invalidated the style of the whole
+   subtree under every cell, on every frame of a swipe. The columns
+   carrying a picture are left alone — a photograph must not fade. */
+/* The parallax: where the cell is against the middle of the window, set on
+   the cell by the strip. The picture slides against its frame by a share of
+   that, so the pictures cross the screen a touch slower than the frames
+   holding them and sit behind them. On the picture and not the cell,
+   because the cell's `press` transition would smooth every frame of it
+   into lag.
+
+   It used to skew and breathe with the strip's speed as well. That was a
+   move made by how fast you scrolled rather than by where you were, so a
+   picture arrived bent and straightened itself once it had stopped, which
+   is the one thing a photograph should never do. Position only now. */
+/* Julian: the thumbnail is not cropped. The frame used to stand at a
+   tenth over its cell and slide against it with the scroll; now the cell
+   is the whole photograph, which is also what lets it grow into the viewer
+   as one picture (`lib/zoom.ts`) with nothing to crop or uncrop.
+
+   What used to sit here was `.strip-frame { transform: none }`, left from
+   that parallax. Nothing drives a transform on a frame any more, so it
+   held nothing back and has gone. It was never what stopped the cover
+   answering the pointer either: that hover is the `scale` property, which
+   this never touched. What was missing was a transition, so the picture
+   jumped to its new size in one frame. */
+@media (prefers-reduced-motion: reduce) {
+  .title-word,
+  .title-rest,
+  .strip-cell {
+    animation: none;
+  }
+  /* And the cover holds still under the pointer. Without a transition the
+     utility that should do this is a jump to the larger size in one
+     frame, which is the motion somebody asked not to be shown. */
+  .strip-frame {
+    scale: 1 !important;
+  }
+}
+/* Not while a cover is growing into the viewer: `lib/zoom.ts` measures
+   the thumbnail it is playing from, and a picture caught mid hover is not
+   the rectangle it measured. The hover is the `scale` property and not a
+   transform - Tailwind writes it that way, and zoom drives `transform`
+   itself, so the two would otherwise compose. */
+:root[data-zoom] .strip-frame {
+  scale: 1 !important;
+}
+
+/* The sideways cue. The rail is the instrument for moving the page, so
+   the rail is what says the page moves: the lit chapter travels once and
+   settles. `strip.tsx` puts `data-cue` on the rail two seconds in and
+   takes it off at the first sign of a visitor moving the page. `translate`
+   rather than a transform, so the rail's own drawing is untouched. */
+@keyframes rail-cue {
+  0% {
+    translate: 0;
+  }
+  45% {
+    translate: 16px;
+  }
+  100% {
+    translate: 0;
+  }
+}
+[data-cue] .rail-lit {
+  animation: rail-cue 900ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+@media (prefers-reduced-motion: reduce) {
+  [data-cue] .rail-lit {
+    animation: none;
+  }
+}
+
+/* The archive's rail (`data-rail-names="always"`, `strip.tsx`). At rest
+   it is the one line About has (`rail-sum`), filled as far as the page has
+   got through the discipline it is in. Under the pointer the disciplines
+   come up out of it as an Apple segmented control (Julian): one soft
+   capsule, faint short dividers, and a raised thumb on the discipline you
+   are in. Each discipline is named inside its section, and an open one
+   names the project under the pointer. At rest the sections are the line, shrunk to its height and
+   in its tone, so hovering grows one object rather than swapping two
+   (Julian: seamless). The bar scales rather than growing, so nothing is
+   laid out again. */
+.strip-rail[data-rail-names="always"] {
+  /* Solid, not see-through: two see-through sections meeting on a
+     fraction of a pixel draw a seam where their edges overlap. */
+  --rail-line: color-mix(in oklab, var(--foreground) 20%, var(--background));
+  --rail-track: color-mix(in oklab, var(--foreground) 11%, var(--background));
+  --rail-thumb: color-mix(in oklab, var(--foreground) 24%, var(--background));
+  --rail-shadow: 0 1px 3px rgb(0 0 0 / 0.4), inset 0 0.5px 0 rgb(255 255 255 / 0.08);
+}
+:root[data-theme="light"] .strip-rail[data-rail-names="always"] {
+  --rail-track: color-mix(in oklab, var(--foreground) 8%, var(--background));
+  --rail-thumb: #fff;
+  --rail-shadow: 0 2px 6px rgb(0 0 0 / 0.1), 0 1px 1px rgb(0 0 0 / 0.06), 0 0 0 0.5px rgb(0 0 0 / 0.04);
+}
+.strip-rail[data-rail-names="always"] .rail-chapter {
+  padding-inline: 0;
+  height: 22px;
+}
+.strip-rail[data-rail-names="always"] .rail-bar {
+  position: relative;
+  height: 100%;
+  border-radius: 0;
+  background-color: var(--rail-line);
+  scale: 1 0.36;
+  animation: none;
+  transition:
+    scale 320ms var(--ease-out-strong),
+    background-color 320ms var(--ease-out-strong);
+}
+/* What only the control has: gone while it is the line. */
+.strip-rail[data-rail-names="always"] .rail-bar::before,
+.strip-rail[data-rail-names="always"] .rail-bar::after,
+.strip-rail[data-rail-names="always"] .rail-bar > span {
+  opacity: 0;
+  transition: opacity 120ms var(--ease-out-strong);
+}
+.strip-rail[data-rail-names="always"] .rail-chapter:first-of-type .rail-bar {
+  border-radius: 9999px 0 0 9999px;
+}
+.strip-rail[data-rail-names="always"] .rail-chapter:last-of-type .rail-bar {
+  border-radius: 0 9999px 9999px 0;
+}
+/* Short dividers, gone either side of the thumb. */
+.strip-rail[data-rail-names="always"] .rail-chapter + .rail-chapter .rail-bar::after {
+  content: "";
+  position: absolute;
+  left: -0.5px;
+  top: 6px;
+  bottom: 6px;
+  width: 1px;
+  background: color-mix(in oklab, var(--foreground) 16%, transparent);
+}
+.strip-rail[data-rail-names="always"] .rail-chapter[data-tone="lit"] .rail-bar::after,
+.strip-rail[data-rail-names="always"] .rail-chapter[data-tone="lit"] + .rail-chapter .rail-bar::after,
+.strip-rail[data-rail-names="always"] .rail-chapter[data-tone="near"] .rail-bar::after,
+.strip-rail[data-rail-names="always"] .rail-chapter[data-tone="near"] + .rail-chapter .rail-bar::after {
+  opacity: 0;
+}
+/* The thumb on the discipline you are in, and a quieter one on a
+   discipline elsewhere that the pointer is on. */
+.strip-rail[data-rail-names="always"] .rail-chapter[data-tone="lit"] .rail-bar::before,
+.strip-rail[data-rail-names="always"] .rail-chapter[data-tone="near"] .rail-bar::before {
+  content: "";
+  position: absolute;
+  inset: 2px;
+  border-radius: 9999px;
+  background: var(--rail-thumb);
+  box-shadow: var(--rail-shadow);
+}
+.strip-rail[data-rail-names="always"] .rail-chapter[data-tone="near"] .rail-bar::before {
+  background: color-mix(in oklab, var(--foreground) 8%, transparent);
+  box-shadow: none;
+}
+/* In an open discipline each project is a stretch of the capsule, and the
+   one under the pointer (or where the page is) is lit quietly, as a hover
+   is, so it never competes with the thumb. */
+.strip-rail[data-rail-names="always"] .rail-bar > span {
+  position: relative;
+  background: none;
+  box-shadow: none;
+}
+.strip-rail[data-rail-names="always"] .rail-bar > span.bg-foreground::before {
+  content: "";
+  position: absolute;
+  inset: 2px 1px;
+  min-width: 8px;
+  border-radius: 9999px;
+  background: color-mix(in oklab, var(--foreground) 12%, transparent);
+}
+.strip-rail[data-rail-names="always"] .rail-name {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  padding-inline: 8px;
+  line-height: 22px;
+  text-align: center;
+  /* A discipline too narrow for its name ends it on an ellipsis. */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.5625rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  color: color-mix(in oklab, var(--foreground) 60%, transparent);
+  opacity: 0;
+  pointer-events: none;
+  transition:
+    opacity 120ms var(--ease-out-strong),
+    color 200ms var(--ease-out-strong);
+}
+.strip-rail[data-rail-names="always"] .rail-chapter[data-tone] .rail-name {
+  color: var(--foreground);
+}
+/* The name is in the capsule, so no word stands over it. */
+.strip-rail[data-rail-names="always"] .rail-chapter .rail-word {
+  display: none;
+}
+.rail-sum {
+  transition: opacity 240ms var(--ease-out-strong) 80ms;
+}
+/* The line grows into the control as one piece, and what the control
+   adds comes up once it is most of the way there. */
+.rail-line:hover .rail-bar,
+[data-dwell] .rail-line .rail-bar {
+  scale: none;
+  background-color: var(--rail-track);
+}
+.rail-line:hover .rail-bar::before,
+.rail-line:hover .rail-bar::after,
+.rail-line:hover .rail-bar > span,
+[data-dwell] .rail-line .rail-bar::before,
+[data-dwell] .rail-line .rail-bar::after,
+[data-dwell] .rail-line .rail-bar > span {
+  opacity: 1;
+  transition: opacity 200ms var(--ease-out-strong) 120ms;
+}
+.rail-line:hover .rail-name,
+[data-dwell] .rail-line .rail-name {
+  opacity: 1;
+  transition-delay: 140ms, 0ms;
+}
+.rail-line:hover .rail-sum,
+[data-dwell] .rail-line .rail-sum {
+  opacity: 0;
+  transition: opacity 140ms var(--ease-out-strong);
+}
+@media (prefers-reduced-motion: reduce) {
+  .strip-rail[data-rail-names="always"] .rail-bar,
+  .strip-rail[data-rail-names="always"] .rail-bar::before,
+  .strip-rail[data-rail-names="always"] .rail-bar::after,
+  .strip-rail[data-rail-names="always"] .rail-bar > span,
+  .strip-rail[data-rail-names="always"] .rail-name,
+  .rail-line .rail-sum {
+    transition: none !important;
+  }
+}
+
+/* The rail's ink in liquid (`RailInk`, `strip.tsx`): the drop is the
+   mark, so the mark under it gives up its own ink. */
+[data-goo] [data-ink] {
+  background-color: transparent;
+}
+
+/* ── the reel behind the motion page ──
+   A 16:9 frame cut to cover whatever shape the window is: as wide as the
+   window or as wide as its height needs, whichever is more, centred. The
+   veil is the page's ground at an opacity that runs from a little over a
+   third at the start of the strip to nearly all of it by the end, on
+   `--reel-dim` written by `video-showcase.tsx`. */
+.reel-backdrop-frame {
+  width: max(100vw, calc(100vh * 16 / 9));
+  height: max(100vh, calc(100vw * 9 / 16));
+  translate: -50% -50%;
+  border: 0;
+}
+.reel-veil {
+  background-color: var(--background);
+  opacity: calc(0.38 + var(--reel-dim, 0) * 0.5);
+  transition: opacity 120ms linear;
+}
+/* Over the reel the page is a cinema, not a sheet of paper: the light
+   theme keeps a dark ground so the film reads through it and the type
+   stays white. Set by `video-showcase.tsx` while the backdrop is up. */
+:root[data-theme="light"][data-reel] {
+  color-scheme: dark;
+  --background: oklch(0.145 0.003 70);
+  --foreground: oklch(0.955 0.004 80);
+  --card: oklch(0.185 0.003 70);
+  --border: oklch(1 0 0 / 11%);
+  --input: oklch(1 0 0 / 14%);
+  /* And the ground with it: the light theme's glow stayed behind the
+     footer, the one strip the film does not reach, and read as a grey
+     band (Julian, 2026-10-03). */
+  --ground: linear-gradient(var(--background), var(--background));
+}
+/* And every quiet word goes nearly white over the film. A muted grey is
+   readable on a still ground and not on a reel that is bright in one
+   frame and black in the next: the chips, the counts and the crumb all
+   came and went with the cut. Both themes, so it sits after the block
+   above. Julian asked for the text white on the motion page. */
+:root[data-reel] {
+  --muted-foreground: oklch(0.88 0.004 80);
+}
+/* The film runs on under the footer, and the footer is glass over it
+   (Julian, 2026-10-07): it was the one band the reel did not reach. */
+:root[data-reel] .reel-backdrop {
+  bottom: -8rem;
+}
+:root[data-reel] body > footer {
+  background-color: color-mix(in oklab, var(--background) 40%, transparent);
+  -webkit-backdrop-filter: blur(20px) saturate(1.4);
+  backdrop-filter: blur(20px) saturate(1.4);
+}
+@media (prefers-reduced-motion: reduce) {
+  .reel-backdrop {
+    display: none;
+  }
+}
+
+/* ── a paged strip under a finger ──
+   The browser lands each touch swipe on a section itself, with its own
+   momentum and its own idea of when a gesture is sideways, which an iPad
+   has more consistently than any hand-rolled swipe. Only where the
+   pointer is a finger: a mouse and a wheel are paged by `strip.tsx`, and
+   a snap under a scripted scroll re-aims it as it lands. */
+@media (pointer: coarse) {
+  .strip-paged {
+    scroll-snap-type: x mandatory;
+  }
+  .strip-paged > * {
+    scroll-snap-align: center;
+  }
+}
+/* But not a strip dealt as a deck (the homepage). Every screen of it is
+   pinned (`position: sticky`, `lib/deck.ts`), and a pinned screen's snap
+   point is wherever it is pinned, which is wherever the strip stands: a
+   slow swipe came to rest half way between two screens, and turning an
+   iPad sideways snapped back to the cover. The strip's own settle lands
+   the swipe instead, on the screens' true places (`data-at`). */
+@media (pointer: coarse) {
+  .strip-scroll[data-dealt="screens"] {
+    scroll-snap-type: none;
+  }
+}
+
+/* ── twelve disciplines, on a window that cannot hold them ──
+   The row scrolls sideways, which is an invitation on a desktop where it
+   is 1470 wide against 1425 and one chip hangs off the end. Below that it
+   was never a row at all. At 768 the same 1470 had six of the twelve off
+   the screen with no sign there was more of it; wrapped to two lines it
+   fitted, four pixels apart, which is not a gap but a word space, and
+   BRAND CAMPAIGNS 15 ARTIST PRESSKIT 7 read as one line of type. In four
+   aligned columns it was tidy and still a block of twelve names where the
+   photographs should be. On a phone it was a hundred and thirty seven
+   pixels of small caps, a sixth of the screen, before a visitor saw any
+   work at all.
+
+   So below `lg` the twelve stop being a bar and become a drawer, the
+   mirror of the menu — `work-filter.tsx`, and the rules above. What is
+   left in the bar is one capsule saying where you are. The row itself
+   stays in the page, hidden, because it is twelve links to twelve
+   galleries and a crawler should still find them.
+
+   Julian asked for the filters to do exactly what the menu does, from the
+   other side. */
+@media (max-width: 63.999rem) {
+  .chip-row {
+    display: none;
+  }
+}
+
+/* ── the selected work: a tile a discipline ──
+   Julian: the best photo from each discipline (`DISCIPLINE_TILES`),
+   side by side, in two rows (Julian, after one). Each tile is 4:5, sized from the room the section leaves (container
+   units: the tile asks its container, the section's tile area), from the
+   height first and then held to the width. A phone stacks them. */
+.disc {
+  --g: 12px;
+}
+.disc-inner {
+  /* Julian: a phone takes two to a row (eight full-width photographs
+     were five screens of scrolling before Sessions). */
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--g);
+}
+.disc-tile {
+  width: 100%;
+  aspect-ratio: 4 / 5;
+}
+@media (min-width: 40rem) {
+  .disc {
+    container-type: size;
+  }
+  .disc-inner {
+    display: flex;
+    height: 100%;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-content: center;
+    margin-inline: auto;
+  }
+  .disc-tile {
+    flex: none;
+    /* Not stretched to the line: one row is one line, and a stretched
+       tile loses its 4:5. */
+    align-self: center;
+    width: round(down, var(--tw), 1px);
+    height: auto;
+  }
+  .disc {
+    --rows: 2;
+    --per: round(up, calc(var(--n) / var(--rows)), 1);
+    --tw: min(
+      calc((100cqh - (var(--rows) - 1) * var(--g)) / var(--rows) * 0.8),
+      calc((100cqw - (var(--per) - 1) * var(--g)) / var(--per))
+    );
+  }
+  /* An upright tablet: three rows of three (the last of two), which
+     fills the tall screen where four across left the tiles small in the
+     middle of it. */
+  @media (orientation: portrait) {
+    .disc {
+      --rows: 3;
+    }
+  }
+  /* As wide as a row, so the rest wraps under it, centred. */
+  .disc-inner {
+    max-width: calc(var(--per) * var(--tw) + (var(--per) - 1) * var(--g) + 1px);
+  }
+}
+
+/* A tile's "View more", where its plate has the room: 9.5rem beside a
+   one word medium, 13.75rem beside "Photo / Design" (measured: 142, 150
+   and 215px wanted). Narrower, the arrow alone. */
+@container (max-width: 9.5rem) {
+  .tile-more {
+    display: none;
+  }
+}
+@container (max-width: 13.75rem) {
+  .tile-more-long {
+    display: none;
+  }
+}
+/* Beside "Photo / Design" on the smallest phone (an iPhone SE's plate is
+   8.3rem) not even the arrow fits. */
+@container (max-width: 9rem) {
+  .tile-go-long {
+    display: none;
+  }
+}
+
+/* ── an iPad held sideways ──
+   Between an upright tablet and a laptop there is a third shape: 1024 by
+   768 up to 1366 by 1024, wider than it is tall but not by much. It took
+   the desktop rule, and the desktop rule sizes a tile from the height it
+   is given, so ten tiles came out 163px wide on an iPad mini and the row
+   of marks under them, which is one line on a laptop, broke into two.
+   Julian: the client icons in one row.
+
+   The marks stand 18px tall instead of 23 and
+   sit 16px apart, which is what keeps nine of them and their heading on
+   one line at 1024 with 50px over; at 1180 there is 96 to spare.
+
+   The pointer and not the shape. This was an aspect window of 1.25 to
+   1.5, read off the devices themselves: an iPad sideways is 1.33 to 1.44
+   and the narrowest laptop is 1.54. But a browser is not a device. Safari
+   takes about ninety pixels of height for its own chrome, which puts an
+   iPad at roughly 1.6 — a laptop's shape — and the rule stopped firing on
+   the machine it was written for. A coarse pointer is the one thing a
+   tablet has and a laptop does not, whatever either of them does with the
+   height; `min-width: 64rem` still keeps a phone out and `landscape`
+   keeps an upright tablet out. */
+@media (pointer: coarse) and (min-width: 64rem) and (orientation: landscape) {
+  section[aria-labelledby="press"] {
+    gap: 2rem;
+  }
+  section[aria-labelledby="press"] ul {
+    flex-wrap: nowrap;
+    column-gap: 1rem;
+    --mark-box: 1.125rem;
+    --mark-cap: 6rem;
+  }
+}
+/* ── a phone on its side ──
+   Julian: an iPhone 16 Pro or Pro Max held sideways (874 by 402, 956 by
+   440) should fit better. The strip's cells are about 320 to 360 tall
+   there, under a 56px bar. The marks on one small line. `lying` is the same query as the variant. */
+@media (max-height: 30rem) and (min-width: 40rem) {
+  section[aria-labelledby="press"] ul {
+    flex-wrap: nowrap;
+    column-gap: 0.75rem;
+    --mark-box: 0.9rem;
+    --mark-cap: 5rem;
+  }
+}

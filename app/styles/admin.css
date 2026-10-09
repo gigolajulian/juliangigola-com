@@ -1,0 +1,161 @@
+/* The workbench (/admin): its columns, fields, publish bar and select popups. */
+
+/* ── the workbench takes the screen ───────────────────────────────
+ * `/admin` pins itself to the viewport from `xl` up and scrolls its three
+ * columns internally. The site footer would defeat that on its own — a
+ * 100dvh page plus a footer is a document taller than the screen, so the
+ * whole thing scrolls by exactly the height of a footer nobody wants to
+ * reach from a workbench.
+ *
+ * Hidden at every width, not just where the page is pinned. The footer is a
+ * closing argument — "let's make something", the address, the social links —
+ * aimed at a visitor who has reached the end of the work. Julian editing his
+ * own site is not that visitor, and asking him to commission himself at the
+ * bottom of every screen of the editor is noise on a tool.
+ *
+ * Done here rather than by branching the root layout on a pathname: that
+ * would make every page in the site client-rendered to decide something one
+ * route cares about. `:has()` asks the question where it belongs, in the one
+ * rule that answers it, and costs nothing on any other page.
+ * ─────────────────────────────────────────────────────────────── */
+body:has([data-workbench]) > footer {
+  display: none;
+}
+/* Where it is one screen, the page itself does not scroll: the columns do.
+   Anything poking past the screen (the intro's 0.75rem lift on `.rise`,
+   held while the intro plays) otherwise scrolled the whole editor by that
+   much. Julian: it scrolls past the content. */
+@media (min-width: 80rem) {
+  html:has([data-workbench]) {
+    overflow: hidden;
+  }
+  /* And no lift to poke past it: a jump to a field scrolls into view, and
+     would take the page along by the lift too. */
+  html:has([data-workbench]) #main {
+    transform: none;
+  }
+}
+
+/* ── the field you asked for ──────────────────────────────────────
+ * A jump from the sitemap or the section index scrolls the editor, and a
+ * scroll that lands somewhere plausible is indistinguishable from one that
+ * landed somewhere wrong. This says which of the fields on screen is the one
+ * you clicked, then gets out of the way.
+ *
+ * An animation rather than a transition, because it has to run on an element
+ * that was already on screen and already styled — nothing changed about it
+ * except that you asked for it.
+ * ─────────────────────────────────────────────────────────────── */
+@keyframes jg-found {
+  from {
+    background-color: color-mix(in oklab, var(--foreground) 14%, transparent);
+  }
+  to {
+    background-color: transparent;
+  }
+}
+
+/* Not a utility, because nothing renders it as a class: the editor sets
+   `data-found` on the element it scrolled to. A class would be inside
+   React's `className`, which it rewrites on the next render — and arriving
+   from the sitemap re-renders by definition, because it changes the tab. */
+[data-found] {
+  animation: jg-found 1400ms var(--ease-out-strong);
+  /* So the wash reads as a highlight around the field rather than a box
+     drawn tightly on its text. */
+  box-shadow: 0 0 0 0.75rem transparent;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-found] {
+    animation: none;
+  }
+}
+
+/* ── a line that draws itself ────────────────────────────────────
+ * For the confirmation on /contact, and nothing else yet.
+ *
+ * The one place on this site where a flourish is the right answer: the
+ * visitor has just handed over their name and a description of a job, the
+ * form has vanished, and what replaces it has to feel like a receipt rather
+ * than an empty page. A mark that draws in front of them is the difference
+ * between "it went" and "something happened".
+ *
+ * An animation and not a transition, because the length being animated is the
+ * path's own and is set on the element: `stroke-dasharray` and
+ * `stroke-dashoffset` are written inline per path, and this only says "take
+ * that offset to zero". One keyframe covers a check, a circle, or any other
+ * length of line added later.
+ * ─────────────────────────────────────────────────────────────── */
+@keyframes jg-draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@utility draw {
+  animation: jg-draw var(--draw-dur, 520ms) var(--ease-out-strong)
+    var(--draw-delay, 0ms) forwards;
+
+  /* Drawn already, rather than drawing. The mark is the confirmation, so it
+     has to be there — it is the motion that is optional. */
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+    stroke-dashoffset: 0;
+  }
+}
+
+/* ── the publish bar ─────────────────────────────────────────────
+ * Two phases, and they are not the same kind of waiting.
+ *
+ * Committing is measurable — the editor knows how many files it is sending —
+ * so that half is a real proportion and the width means something. Deploying
+ * is not: Cloudflare builds on its own schedule and the page has no way to
+ * ask how far along it is. Faking a proportion there would be a lie that
+ * looks exactly like the truth, so it runs as a sweep instead, which says
+ * "working, duration unknown" and cannot be misread as "80% done".
+ * ─────────────────────────────────────────────────────────────── */
+@keyframes jg-sweep {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(400%);
+  }
+}
+
+@utility sweep {
+  animation: jg-sweep 1400ms var(--ease-in-out-strong) infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sweep {
+    animation: none;
+    /* Still visibly a bar rather than nothing at all. */
+    transform: none;
+    width: 100%;
+    opacity: 0.4;
+  }
+}
+
+/* ── native select popups ─────────────────────────────────────────
+ * A dropdown's list is drawn by the operating system, and it takes its
+ * colours from the control. `:root` declares `color-scheme: dark`, which is
+ * enough for scrollbars and checkboxes — but a `<select>` styled
+ * `bg-transparent` leaves the list with no background of its own, and Windows
+ * draws it white. With text coloured for a dark ground, that is white on
+ * white: the options were there and unreadable.
+ *
+ * So the options carry their own ground. Stated here rather than per select,
+ * because every one of them has the same problem and none of them wants a
+ * different answer.
+ * ─────────────────────────────────────────────────────────────── */
+option {
+  background-color: var(--background);
+  color: var(--foreground);
+}
+
+optgroup {
+  background-color: var(--background);
+  color: var(--muted-foreground);
+}
