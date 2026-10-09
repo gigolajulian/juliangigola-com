@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import budgets from "./budgets.json";
 import {
   awake,
   frameStats,
@@ -23,6 +24,9 @@ import { contextFor, stacked, VIEWPORTS } from "./matrix";
  *
  * On the homepage every swipe must land exactly one screen on. On the
  * work index the strip runs free, so there only the frames are kept.
+ *
+ * Every page's frames are held to the budgets in `budgets.json`: the
+ * median frame, the share of frames over 20ms, and the worst one.
  *
  * Headed: headless WebKit draws this site at a few frames a second.
  */
@@ -94,7 +98,11 @@ for (const path of SWIPE_PAGES) {
             ...st,
           });
           test.skip(!valid, "window throttled by macOS during the swipes");
-          if (home && !stacked(v)) expect(misses, "each swipe lands exactly one screen on").toEqual([]);
+          if (home && !stacked(v)) expect.soft(misses, "each swipe lands exactly one screen on").toEqual([]);
+          const b = budgets.swipe;
+          expect.soft(st.median, `median frame, budget ${b.medianMs}ms`).toBeLessThanOrEqual(b.medianMs);
+          expect.soft(st.slow, `% of frames over 20ms, budget ${b.slowPct}%`).toBeLessThanOrEqual(b.slowPct);
+          expect.soft(st.worst, `worst frame, budget ${b.worstMs}ms`).toBeLessThanOrEqual(b.worstMs);
         } finally {
           await ctx.close();
         }

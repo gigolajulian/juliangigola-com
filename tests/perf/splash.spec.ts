@@ -1,11 +1,13 @@
 import { expect, test } from "@playwright/test";
+import budgets from "./budgets.json";
 import { awake, frameStats, report } from "./helpers";
 import { contextFor, VIEWPORTS } from "./matrix";
 
 /**
  * The first-visit splash (`components/intro.tsx`): when it lifts, and how
  * its frames go. It is a fixed 3s from the first paint, whatever is still
- * loading, so a lift much later than that means the page held it.
+ * loading, so a lift much later than that means the page held it. The
+ * latest it may lift is `splash.liftedMs` in `budgets.json`.
  *
  * Headed: headless WebKit draws this site at a few frames a second.
  */
@@ -69,6 +71,7 @@ for (const path of SPLASH_PAGES) {
           test.skip(!valid, "window throttled by macOS during the splash");
           expect(s.on, "the splash showed").toBeGreaterThanOrEqual(0);
           expect(s.off, "the splash lifted").toBeGreaterThanOrEqual(0);
+          expect(s.off, `lifted by ${budgets.splash.liftedMs}ms`).toBeLessThanOrEqual(budgets.splash.liftedMs);
         } finally {
           await ctx.close();
         }

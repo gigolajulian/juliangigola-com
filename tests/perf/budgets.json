@@ -1,0 +1,10 @@
+{
+  "swipe": {
+    "medianMs": 20,
+    "slowPct": 25,
+    "worstMs": 250
+  },
+  "splash": {
+    "liftedMs": 4000
+  }
+}
