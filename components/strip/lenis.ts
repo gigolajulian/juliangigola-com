@@ -27,12 +27,12 @@ import {
  * wheel, and once it rests the strip carries on to the next screen or
  * goes back to the one it left. A finger keeps the browser's snap. */
 export function useLenis(
-  scroller: React.RefObject<HTMLDivElement | null>,
+  scrollerRef: React.RefObject<HTMLDivElement | null>,
   live: boolean,
   paged: boolean,
 ) {
   React.useEffect(() => {
-    const el = scroller.current;
+    const el = scrollerRef.current;
     if (!el || !live || !wantsLenis()) return;
     if (paged && !matchMedia(WHEELED).matches) return;
     let off = () => {};
@@ -218,5 +218,5 @@ export function useLenis(
       gone = true;
       off();
     };
-  }, [scroller, live, paged]);
+  }, [scrollerRef, live, paged]);
 }

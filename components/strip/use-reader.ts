@@ -1,5 +1,6 @@
 import * as React from "react";
 import { STRIP_SECTION } from "@/lib/utils";
+import { createBench } from "./keyboard";
 import { cellFor, centreOf, leftOf, RELAID } from "./shared";
 
 /** How long after the strip stops before the rail takes the shape of the
@@ -22,7 +23,7 @@ export type Tick = { i: number; word?: string; name?: string; tint?: string };
  * and Tab kept on screen. And glides to a cell the address names.
  */
 export function useReader({
-  scroller,
+  scroller: scrollerRef,
   live,
   count,
   paged,
@@ -55,7 +56,7 @@ export function useReader({
       order once already (below). */
   const tabbed = React.useRef(false);
   React.useEffect(() => {
-    const el = scroller.current;
+    const el = scrollerRef.current;
     if (!el || !live) return;
     let queued = 0;
     /* The cell in the middle, and its word. The word goes two places by
@@ -212,88 +213,12 @@ export function useReader({
       firstEnd = first ? leftOf(first) + first.offsetWidth * 0.5 : 0;
     };
 
-    /* ── Tab stays on screen ──
-       A cell wholly off the window is taken out of the Tab order, and
-       whatever in it takes focus with it, so Tab never lands on a screen
-       nobody can see; the arrows (`onKey`) are how the strip moves on.
-       Its old `tabindex` is kept on `data-strip-tab` and put back the
-       moment any of it comes into the window. Not `inert`: that would take
-       the cells from a screen reader as well, and a click on a cover
-       arriving under a fling. Set once the page has gone quiet, not in the
-       arrival (`tabbing`). */
-    const benched = new Set<number>();
-    let tabbing = false;
-    /* A box that scrolls on its own is a Tab stop in Chrome without a
-       `tabindex` (the Legal page's contents), so those count too. */
-    const TABBABLE =
-      'a[href], button, input, select, textarea, iframe, summary, [tabindex], [data-scroll], [class*="overflow-y-auto"], [class*="overflow-auto"]';
-    const bench = (cell: HTMLElement, out: boolean) => {
-      const list = Array.from(cell.querySelectorAll<HTMLElement>(TABBABLE));
-      if (cell.matches(TABBABLE)) list.unshift(cell);
-      for (const f of list) {
-        if (out) {
-          const was = f.getAttribute("tabindex");
-          if (was === "-1" || f.dataset.stripTab !== undefined) continue;
-          f.dataset.stripTab = was ?? "";
-          f.setAttribute("tabindex", "-1");
-        } else if (f.dataset.stripTab !== undefined) {
-          const was = f.dataset.stripTab;
-          delete f.dataset.stripTab;
-          if (was) f.setAttribute("tabindex", was);
-          else f.removeAttribute("tabindex");
-        }
-      }
-    };
-    const benchAll = (x: number) => {
-      if (!tabbing) return;
-      const kids = el.children;
-      for (let i = 0; i < kids.length; i++) {
-        const half = (widths[i] ?? 0) / 2;
-        const out = centres[i] + half <= x + 1 || centres[i] - half >= x + span - 1;
-        if (out === benched.has(i)) continue;
-        if (out) benched.add(i);
-        else benched.delete(i);
-        bench(kids[i] as HTMLElement, out);
-      }
-    };
-    const unbenchAll = () => {
-      for (const f of Array.from(el.querySelectorAll<HTMLElement>("[data-strip-tab]"))) {
-        const was = f.dataset.stripTab;
-        delete f.dataset.stripTab;
-        if (was) f.setAttribute("tabindex", was);
-        else f.removeAttribute("tabindex");
-      }
-      benched.clear();
-    };
-    let tabWait = 0;
-    const startTabbing = () => {
-      tabbing = true;
-      tabbed.current = true;
-      benchAll(el.scrollLeft);
-    };
-    /* A screen off the window can still fill in (the Inquiries screen
-       grew from 7 controls to 127 while it was away), and what arrives
-       is out of the Tab order with the rest of it, a frame on. */
-    let rebench = 0;
-    const filled = new MutationObserver(() => {
-      if (rebench || !tabbing || !benched.size) return;
-      rebench = requestAnimationFrame(() => {
-        rebench = 0;
-        for (const i of benched) {
-          const c = el.children[i] as HTMLElement | undefined;
-          if (c) bench(c, true);
-        }
-      });
-    });
-    filled.observe(el, { childList: true, subtree: true });
-    /* Again at once when this runs again for cells that have arrived
-       (`count`): only the page's arrival waits. */
-    if (tabbed.current) startTabbing();
-    else
-      tabWait =
-        typeof window.requestIdleCallback === "function"
-          ? window.requestIdleCallback(startTabbing, { timeout: 1500 })
-          : window.setTimeout(startTabbing, 800);
+    /* ── Tab stays on screen ── (`keyboard.ts`) */
+    const { benchAll, stop: stopBench } = createBench(el, tabbed, () => ({
+      centres,
+      widths,
+      span,
+    }));
 
     const read = () => {
       queued = 0;
@@ -550,11 +475,7 @@ export function useReader({
       if (queued) cancelAnimationFrame(queued);
       window.clearTimeout(rest);
       clearTimeout(hashTimer);
-      if (typeof window.cancelIdleCallback === "function") window.cancelIdleCallback(tabWait);
-      window.clearTimeout(tabWait);
-      filled.disconnect();
-      cancelAnimationFrame(rebench);
-      unbenchAll();
+      stopBench();
     };
-  }, [scroller, live, count, paged, atRef, setAt, setTicks, tickKeyRef, setStill, setAim, seatXRef, glideRef, aimedRef]);
+  }, [scrollerRef, live, count, paged, atRef, setAt, setTicks, tickKeyRef, setStill, setAim, seatXRef, glideRef, aimedRef]);
 }
