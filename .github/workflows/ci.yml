@@ -51,7 +51,7 @@ jobs:
           JG_LOCAL: "1"
 
       - name: Install browsers
-        run: npx playwright install webkit
+        run: npx playwright install webkit chromium firefox
 
       - name: Perf suite
         run: npm run perf

@@ -1,10 +1,15 @@
 import { existsSync } from "node:fs";
-import { defineConfig, webkit, type Project } from "@playwright/test";
+import { dirname, join } from "node:path";
+import { chromium, defineConfig, firefox, webkit, type Project } from "@playwright/test";
 
 /**
  * The perf suite (`tests/perf`). Run it with `npm run perf`, which builds
  * or reuses a local production server first (`scripts/perf/run.mjs`).
  * Run directly, it expects a server at PERF_BASE_URL.
+ *
+ * The browsers are the support policy (README, "Browser support"): WebKit
+ * for Safari on the Mac, iPhone and iPad, Chromium for Chrome and Edge,
+ * and Firefox.
  */
 
 /* On a Mac, WebKit goes through a launcher that keeps App Nap off
@@ -21,13 +26,38 @@ const BROWSERS: Project[] = [
       launchOptions: mac ? { executablePath: "scripts/perf/webkit-awake.sh" } : {},
     },
   },
+  {
+    name: "chromium",
+    use: {
+      browserName: "chromium",
+      /* Chromium's own throttling of a window in the background, off for
+         the same reason as App Nap above. */
+      launchOptions: {
+        args: [
+          "--disable-background-timer-throttling",
+          "--disable-backgrounding-occluded-windows",
+          "--disable-renderer-backgrounding",
+        ],
+      },
+    },
+  },
+  { name: "firefox", use: { browserName: "firefox" } },
 ];
 
 /* A browser that is not installed is left out rather than failing every
-   test it would have run. `npx playwright install` adds it. */
-const BROWSER_TYPES = { webkit };
+   test it would have run. `npx playwright install` adds it, and marks the
+   folder it unpacked with INSTALLATION_COMPLETE once it has finished; a
+   folder without the mark is an install cut short. */
+const BROWSER_TYPES = { webkit, chromium, firefox };
+const complete = (exe: string) => {
+  for (let dir = dirname(exe); dir !== dirname(dir); dir = dirname(dir)) {
+    if (existsSync(join(dir, "INSTALLATION_COMPLETE"))) return true;
+  }
+  return false;
+};
 const installed = BROWSERS.filter((p) => {
-  const ok = existsSync(BROWSER_TYPES[p.name as keyof typeof BROWSER_TYPES].executablePath());
+  const exe = BROWSER_TYPES[p.name as keyof typeof BROWSER_TYPES].executablePath();
+  const ok = existsSync(exe) && complete(exe);
   if (!ok && !process.env.TEST_WORKER_INDEX) console.log(`perf: ${p.name} is not installed, skipped (npx playwright install ${p.name})`);
   return ok;
 });

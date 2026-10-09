@@ -29,6 +29,15 @@ table per measurement. The budgets are in `tests/perf/budgets.json`.
 `.github/workflows/ci.yml` runs typecheck, lint, a build and the perf suite on
 every pull request and every push to `main`.
 
+## Browser support
+
+The last two major versions of each browser: Safari on the Mac, iPhone and
+iPad, Chrome (desktop and Android), Edge and Firefox. It is written down once,
+as `browserslist` in `package.json`, which is also what the build compiles
+for. The perf suite runs in the three engines behind them: WebKit, Chromium
+and Firefox (`playwright.config.ts`). Anything older may work; it is not
+tested.
+
 ## How it is put together
 
 **The work is the interface.** One committed dark theme, Univers Bold Condensed for
