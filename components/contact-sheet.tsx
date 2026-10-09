@@ -75,7 +75,7 @@ export function ContactSheet({
             : "Open any frame to see it whole."}
         </p>
         {total > frames.length ? (
-          <Link href={gallery} className="title-rest label w-fit text-foreground">
+          <Link href={gallery} className="tap-44 title-rest label w-fit text-foreground">
             All {total}&nbsp;<span aria-hidden>&rarr;</span>
           </Link>
         ) : null}

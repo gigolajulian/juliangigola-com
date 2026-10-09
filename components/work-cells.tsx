@@ -166,7 +166,10 @@ export function FilmCell({
           </span>
         ) : null}
         <span
-          style={{ "--n": title.length, "--w": Math.max(...title.split(" ").map((w) => w.length)) } as React.CSSProperties}
+          /* `--g`: the longest run that cannot break, the last two words
+             counted as one (below), for the slate's margin term
+             (`.strip-scroll .cover-name`, globals.css). */
+          style={{ "--n": title.length, "--w": Math.max(...title.split(" ").map((w) => w.length)), "--g": Math.max(...title.replace(/ (\S+)$/, "_$1").split(" ").map((w) => w.length)) } as React.CSSProperties}
           className="cover-name font-display min-w-0 max-w-full truncate uppercase leading-[0.9] text-white"
         >
           {/* The last two words held together, so a title that wraps never

@@ -1189,7 +1189,7 @@ function Chip({
        thin, because the pointer is exact and the band is height the
        photographs would rather have. */
     "label block whitespace-nowrap rounded-full px-3 py-1.5 max-sm:py-3",
-    "transition-[color,background-color,scale] duration-200 ease-[var(--ease-out-strong)]",
+    "transition-[color,background-color,scale] duration-200 ease-[var(--ease-out-strong)] motion-reduce:transition-colors",
     // A chip lifts a touch under the pointer and gives under the press.
     "hoverable:hover:scale-[1.05] active:scale-[0.96] motion-reduce:hover:scale-100",
     // Full ink over its line (the pill it was knocked out of is gone).
@@ -1250,8 +1250,9 @@ function Chip({
                a near-black page. Julian: keep the count after the filter
                is selected. Half strength so the name still leads. The
                plate is back (2026-10-04, now in full ink), so it is
-               knocked out of it again. */
-            active ? "text-foreground/60" : "text-muted-foreground/60",
+               knocked out of it again. Unlit, at the muted grey's full
+               strength: at 60% it measured 2.7:1 (plan 5.1, WCAG AA). */
+            active ? "text-foreground/60" : "text-muted-foreground",
           )}
         >
           {count}

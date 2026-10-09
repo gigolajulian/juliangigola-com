@@ -57,6 +57,9 @@ const DriftWall = ({
   // How sharp, as a share of the tile's width: under 1 the browser picks
   // a smaller copy for a wall that is only background.
   density = 1,
+  // Held still (the site's `?wall=still`): every column eases to a stop
+  // and stays paused until this goes false, then eases back up.
+  hold = false,
   onShown = /** @type {(() => void) | undefined} */ (undefined),
   className = '',
   style = /** @type {Record<string, string | number> | undefined} */ (undefined)
@@ -150,6 +153,7 @@ const DriftWall = ({
     };
   }, []);
   const activeIdRef = useRef(null);
+  const heldRef = useRef(hold);
   const reduced = useSyncExternalStore(subscribeReduced, readReduced, () => false);
 
   /* `columns="fill"` (the site's addition): as many columns as it takes to
@@ -297,11 +301,17 @@ const DriftWall = ({
         busy = true;
       }
 
-      const paused = wallHoveredRef.current && pauseOnHover;
+      const paused = (wallHoveredRef.current && pauseOnHover) || heldRef.current;
       anims.forEach((a, c) => {
         if (!a) return;
         const target = paused || hoveredColRef.current === c ? 0 : 1;
-        if (rates[c] === target) return;
+        if (rates[c] === target) {
+          // Held and stopped: paused outright, so nothing runs at rate 0.
+          if (target === 0 && heldRef.current && a.playState === 'running') a.pause();
+          return;
+        }
+        // Coming out of a hold: running again before it picks up speed.
+        if (visible && a.playState === 'paused') a.play();
         const ease = 1 - Math.exp(-dt / (target === 0 ? 0.16 : 0.28));
         rates[c] += (target - rates[c]) * ease;
         if (Math.abs(target - rates[c]) < 0.005) rates[c] = target;
@@ -357,6 +367,11 @@ const DriftWall = ({
       });
     };
   }, [baseVelocities, columnMeta, pauseOnHover, parallax, reduced, applyPlaneTransform]);
+
+  useEffect(() => {
+    heldRef.current = hold;
+    wakeRef.current();
+  }, [hold]);
 
   const activate = useCallback((id, index) => {
     activeIdRef.current = id;

@@ -125,7 +125,7 @@ export function EnquiryCell({
           data-ring="Email"
           /* Padded to a 29px target and pulled back by as much, so the
              line sits where it did (UI/UX review: it was 13px tall). */
-          className="label -my-2 w-fit py-2 text-muted-foreground transition-colors duration-200 hoverable:hover:text-foreground"
+          className="tap-44 label -my-2 w-fit py-2 text-muted-foreground transition-colors duration-200 hoverable:hover:text-foreground"
         >
           hello@juliangigola.com
         </a>
@@ -136,7 +136,7 @@ export function EnquiryCell({
             data-ring="Next"
             /* Full ink on a phone: in the dark, over the wall's lighter
                photographs the muted grey measured 3.3:1 (UI/UX review). */
-            className="label mt-4 w-fit border-t border-border pt-4 text-muted-foreground transition-colors duration-200 hoverable:hover:text-foreground max-sm:text-foreground lying:hidden"
+            className="tap-44 label mt-4 w-fit border-t border-border pt-4 text-muted-foreground transition-colors duration-200 hoverable:hover:text-foreground max-sm:text-foreground lying:hidden"
           >
             Next: {next.name}
           </Link>

@@ -11,13 +11,23 @@ import { useSiteTheme } from "@/lib/site-theme";
 const LAP = 6;
 const LAPS = 2;
 /* Held where it stands, every layer, so the line and its glow stay put
-   rather than fading. A held animation is not repainted. */
+   rather than fading. A held animation is not repainted. And none at all
+   for reduced motion: the library has the same rule, but its sheet did
+   not reach the page and the beam lapped on (measured, plan 3.6). */
 const REST = `
 [data-beam="{id}"][data-rest],
 [data-beam="{id}"][data-rest]::before,
 [data-beam="{id}"][data-rest]::after,
 [data-beam="{id}"][data-rest] [data-beam-bloom] {
   animation-play-state: paused !important;
+}
+@media (prefers-reduced-motion: reduce) {
+  [data-beam="{id}"],
+  [data-beam="{id}"]::before,
+  [data-beam="{id}"]::after,
+  [data-beam="{id}"] [data-beam-bloom] {
+    animation: none !important;
+  }
 }`;
 
 export function ContactBeam({
@@ -65,6 +75,16 @@ export function ContactBeam({
     // And from the start, so it comes to rest even if the observer never
     // reports.
     run();
+    /* `?wall=still` (plan 1.1, on trial): the form in use holds the beam
+       too, so it laps on coming into view and not under a pointer or a
+       field taking focus. At 1920 by 1080 on a 2x screen the lapping beam
+       was what held the form to 10 to 17fps; at rest it ran at 60. */
+    if (new URLSearchParams(location.search).get("wall") === "still") {
+      return () => {
+        io.disconnect();
+        clearTimeout(rest);
+      };
+    }
     card.addEventListener("pointerdown", run, { passive: true });
     card.addEventListener("pointerenter", run, { passive: true });
     card.addEventListener("focusin", run);

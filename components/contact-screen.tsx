@@ -147,7 +147,7 @@ export function ContactScreen({
           {calendar ? (
             <a
               href={`/?type=${defaults?.type ?? "session"}${defaults?.session ? `&session=${encodeURIComponent(defaults.session)}` : ""}#contact`}
-              className="label flex gap-2.5 self-start py-2"
+              className="tap-44 label flex gap-2.5 self-start py-2"
             >
               Rather ask first? Send a question <span aria-hidden>&rarr;</span>
             </a>
@@ -181,7 +181,7 @@ export function ContactScreen({
                      both. A border rather than an underline, which
                      vanishes when it is brought this close. A thumb's
                      height to a touch screen, the rule drawn where it was. */
-                  className="inline-block border-b border-border pb-0 uppercase pointer-coarse:relative pointer-coarse:before:absolute pointer-coarse:before:-inset-y-2.5 pointer-coarse:before:inset-x-0 pointer-coarse:before:content-[''] leading-none tracking-[0.04em] transition-colors duration-200 hoverable:hover:border-current"
+                  className="inline-block border-b border-border pb-0 uppercase pointer-coarse:relative pointer-coarse:before:absolute pointer-coarse:before:-inset-y-3 pointer-coarse:before:inset-x-0 pointer-coarse:before:content-[''] leading-none tracking-[0.04em] transition-colors duration-200 hoverable:hover:border-current"
                 >
                   hello@juliangigola.com
                 </a>
@@ -190,7 +190,11 @@ export function ContactScreen({
             <div>
               <dt className="label text-muted-foreground">Based in</dt>
               <dd className="mt-2 text-sm">
-                San Francisco Bay Area &middot; Available to travel
+                {/* Each half kept whole, so a narrow column breaks at the
+                    dot and never leaves "travel" on a line of its own
+                    (plan 2.6). */}
+                <span className="whitespace-nowrap">San Francisco Bay Area &middot;</span>{" "}
+                <span className="whitespace-nowrap">Available to travel</span>
               </dd>
             </div>
           </dl>
