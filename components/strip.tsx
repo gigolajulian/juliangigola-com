@@ -1724,6 +1724,9 @@ export function Strip({
       ruler and a link can spend it as well as the scroller's own events. */
   const aimed = React.useRef("");
   const arrived = React.useRef(false);
+  /** Whether the cells off the window have been taken out of the Tab
+      order once already (below). */
+  const tabbed = React.useRef(false);
   React.useEffect(() => {
     const el = scroller.current;
     if (!el || !live) return;
@@ -1860,6 +1863,7 @@ export function Strip({
        a different number of cells. So it is measured on those and read from
        here otherwise, and a scroll frame does no layout at all. */
     let centres: number[] = [];
+    let widths: number[] = [];
     let span = 0;
     let reach = 0;
     let firstEnd = 0;
@@ -1875,10 +1879,94 @@ export function Strip({
       kids.forEach((_, i) => faded.add(i));
       span = el.clientWidth;
       reach = el.scrollWidth - span;
-      centres = kids.map((c) => leftOf(c) + c.offsetWidth / 2);
+      widths = kids.map((c) => c.offsetWidth);
+      centres = kids.map((c, i) => leftOf(c) + widths[i] / 2);
       const first = kids[0];
       firstEnd = first ? leftOf(first) + first.offsetWidth * 0.5 : 0;
     };
+
+    /* ── Tab stays on screen ──
+       A cell wholly off the window is taken out of the Tab order, and
+       whatever in it takes focus with it, so Tab never lands on a screen
+       nobody can see; the arrows (`onKey`) are how the strip moves on.
+       Its old `tabindex` is kept on `data-strip-tab` and put back the
+       moment any of it comes into the window. Not `inert`: that would take
+       the cells from a screen reader as well, and a click on a cover
+       arriving under a fling. Set once the page has gone quiet, not in the
+       arrival (`tabbing`). */
+    const benched = new Set<number>();
+    let tabbing = false;
+    /* A box that scrolls on its own is a Tab stop in Chrome without a
+       `tabindex` (the Legal page's contents), so those count too. */
+    const TABBABLE =
+      'a[href], button, input, select, textarea, iframe, summary, [tabindex], [data-scroll], [class*="overflow-y-auto"], [class*="overflow-auto"]';
+    const bench = (cell: HTMLElement, out: boolean) => {
+      const list = Array.from(cell.querySelectorAll<HTMLElement>(TABBABLE));
+      if (cell.matches(TABBABLE)) list.unshift(cell);
+      for (const f of list) {
+        if (out) {
+          const was = f.getAttribute("tabindex");
+          if (was === "-1" || f.dataset.stripTab !== undefined) continue;
+          f.dataset.stripTab = was ?? "";
+          f.setAttribute("tabindex", "-1");
+        } else if (f.dataset.stripTab !== undefined) {
+          const was = f.dataset.stripTab;
+          delete f.dataset.stripTab;
+          if (was) f.setAttribute("tabindex", was);
+          else f.removeAttribute("tabindex");
+        }
+      }
+    };
+    const benchAll = (x: number) => {
+      if (!tabbing) return;
+      const kids = el.children;
+      for (let i = 0; i < kids.length; i++) {
+        const half = (widths[i] ?? 0) / 2;
+        const out = centres[i] + half <= x + 1 || centres[i] - half >= x + span - 1;
+        if (out === benched.has(i)) continue;
+        if (out) benched.add(i);
+        else benched.delete(i);
+        bench(kids[i] as HTMLElement, out);
+      }
+    };
+    const unbenchAll = () => {
+      for (const f of Array.from(el.querySelectorAll<HTMLElement>("[data-strip-tab]"))) {
+        const was = f.dataset.stripTab;
+        delete f.dataset.stripTab;
+        if (was) f.setAttribute("tabindex", was);
+        else f.removeAttribute("tabindex");
+      }
+      benched.clear();
+    };
+    let tabWait = 0;
+    const startTabbing = () => {
+      tabbing = true;
+      tabbed.current = true;
+      benchAll(el.scrollLeft);
+    };
+    /* A screen off the window can still fill in (the Inquiries screen
+       grew from 7 controls to 127 while it was away), and what arrives
+       is out of the Tab order with the rest of it, a frame on. */
+    let rebench = 0;
+    const filled = new MutationObserver(() => {
+      if (rebench || !tabbing || !benched.size) return;
+      rebench = requestAnimationFrame(() => {
+        rebench = 0;
+        for (const i of benched) {
+          const c = el.children[i] as HTMLElement | undefined;
+          if (c) bench(c, true);
+        }
+      });
+    });
+    filled.observe(el, { childList: true, subtree: true });
+    /* Again at once when this runs again for cells that have arrived
+       (`count`): only the page's arrival waits. */
+    if (tabbed.current) startTabbing();
+    else
+      tabWait =
+        typeof window.requestIdleCallback === "function"
+          ? window.requestIdleCallback(startTabbing, { timeout: 1500 })
+          : window.setTimeout(startTabbing, 800);
 
     const read = () => {
       queued = 0;
@@ -1887,6 +1975,7 @@ export function Strip({
       seatX.current = Math.round(x);
       const kidCount = el.children.length;
       if (centres.length !== kidCount) remeasure();
+      benchAll(x);
       const room = reach;
       /* Whether the opening cell has gone. A page's running head waits for
          this: the sequence opens on its title set large, and two titles on
@@ -2134,6 +2223,11 @@ export function Strip({
       if (queued) cancelAnimationFrame(queued);
       window.clearTimeout(rest);
       clearTimeout(hashTimer);
+      if (typeof window.cancelIdleCallback === "function") window.cancelIdleCallback(tabWait);
+      window.clearTimeout(tabWait);
+      filled.disconnect();
+      cancelAnimationFrame(rebench);
+      unbenchAll();
     };
   }, [live, count, paged]);
 
@@ -3188,33 +3282,56 @@ export function Strip({
       return best;
     };
 
-    /* The keyboard, on the scroller itself and nowhere inside it: arrows
-       step a cell, Home and End go to the ends. A key pressed in a field
-       within a cell is that field's. */
+    /* The keyboard, on the scroller or anything in it that does not want
+       the keys for itself: the arrows and Page Up and Page Down move a
+       screen, Home and End go to the ends. A paged strip's screen is its
+       next cell; a free one moves by the window's width. A key pressed in
+       a field, or in a box that scrolls on its own, is that one's. It
+       listened on the scroller alone, so with a cover or a link inside it
+       focused the arrows did nothing (2026-10-09). */
     const onKey = (e: KeyboardEvent) => {
-      if (e.target !== el) return;
-      const last = el.children.length - 1;
-      /* Where the strip is going, not where it is: three quick presses
-         should step three cells, and each one read the cell in the middle
-         of the window while the glide from the press before it was still
-         on its way there. */
-      const at = nearest(target);
-      const i =
-        e.key === "ArrowRight"
-          ? Math.min(last, at + 1)
-          : e.key === "ArrowLeft"
-            ? Math.max(0, at - 1)
-            : e.key === "Home"
-              ? 0
-              : e.key === "End"
-                ? last
-                : null;
-      if (i === null) return;
+      if (e.defaultPrevented || e.altKey || e.ctrlKey || e.metaKey) return;
+      const from = e.target as HTMLElement | null;
+      if (!from || !el.contains(from)) return;
+      if (
+        from !== el &&
+        from.closest(
+          'input, textarea, select, [contenteditable="true"], [role="slider"], [role="radiogroup"], [role="radio"], [role="listbox"], [role="menu"], dialog[open]',
+        )
+      )
+        return;
+      const page = e.key === "PageDown" || e.key === "PageUp";
+      // Page Up and Page Down scroll a box of words in their own way.
+      if (page && from !== el && from.closest("[data-scroll]")) return;
+      const step =
+        e.key === "ArrowRight" || e.key === "PageDown"
+          ? 1
+          : e.key === "ArrowLeft" || e.key === "PageUp"
+            ? -1
+            : 0;
+      if (!step && e.key !== "Home" && e.key !== "End") return;
       e.preventDefault();
-      // The ends themselves for Home and End: the last cell is often
-      // narrower than half a window, so its centre is short of the end.
-      const where = i === 0 ? 0 : i === last ? room() : centreOf(el, i);
-      if (where !== null) to(where);
+      // The strip may have grown since it was last measured (`defer`).
+      size();
+      const last = el.children.length - 1;
+      let where: number | null;
+      if (e.key === "Home") where = 0;
+      // The end itself: the last cell is often narrower than half a
+      // window, so its centre is short of the end.
+      else if (e.key === "End") where = room();
+      else if (paged) {
+        /* Where the strip is going, not where it is: three quick presses
+           should step three screens, and each one read the cell in the
+           middle of the window while the glide from the press before it
+           was still on its way there. */
+        const i = Math.max(0, Math.min(last, nearest(target) + step));
+        where = i === 0 ? 0 : i === last ? room() : centreOf(el, i);
+      } else where = target + step * width;
+      if (where === null) return;
+      to(where);
+      /* Focus does not stay behind on a screen that is leaving: it goes
+         back to the strip, which says where it now is. */
+      if (from !== el) el.focus({ preventScroll: true });
     };
 
     /* A scroll the strip did not start — a sideways trackpad swipe, a
