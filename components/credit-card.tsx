@@ -62,7 +62,13 @@ const SPRING = (() => {
     const v = 1 - Math.exp(-z * w * t) * Math.cos(w * Math.sqrt(1 - z * z) * t);
     pts.push((i === 40 ? 1 : v).toFixed(4));
   }
-  return `linear(${pts.join(", ")})`;
+  /* A close cubic-bezier where `linear()` is not understood: a style
+     with an easing it cannot read is dropped whole, and the card would
+     jump. Fitted to the samples (worst gap 0.01). */
+  const curve = `linear(${pts.join(", ")})`;
+  return typeof CSS !== "undefined" && !CSS.supports("transition-timing-function", curve)
+    ? "cubic-bezier(0.3, 1.75, 0.3, 0.87)"
+    : curve;
 })();
 const IN = "cubic-bezier(0.23, 1, 0.32, 1)";
 const FALL = "cubic-bezier(0.55, 0, 0.75, 0.2)";
