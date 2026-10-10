@@ -104,56 +104,56 @@ export const PROJECTS: Project[] = [
         "width": 2500,
         "height": 3333,
         "color": "#B8B1B1",
-        "alt": ""
+        "alt": "Woman from behind with a sword, white tank, pink corset and leg warmers, on rocks above the surf"
       },
       {
         "src": "/work/lost-relic/02.jpg",
         "width": 2500,
         "height": 3333,
         "color": "#A8A19E",
-        "alt": ""
+        "alt": "Kneeling woman holds a sword level across her face, white boots, breaking waves behind"
       },
       {
         "src": "/work/lost-relic/03.jpg",
         "width": 2500,
         "height": 3334,
         "color": "#8C8178",
-        "alt": ""
+        "alt": "Woman lies across a concrete ledge gripping the sword hilt, looking up into the lens"
       },
       {
         "src": "/work/lost-relic/04.jpg",
         "width": 2500,
         "height": 3333,
         "color": "#887D78",
-        "alt": ""
+        "alt": "Crouched in a gap between rocks, she leans on a planted sword as surf sprays behind"
       },
       {
         "src": "/work/lost-relic/05.jpg",
         "width": 2500,
         "height": 3333,
         "color": "#8F8585",
-        "alt": ""
+        "alt": "Seated on rocks with the sword raised overhead, a metal eyepiece over one eye, green waves behind"
       },
       {
         "src": "/work/lost-relic/06.jpg",
         "width": 2500,
         "height": 3333,
         "color": "#7E6F66",
-        "alt": ""
+        "alt": "Shot from above, she lies upside down on a boulder with the sword across her chest"
       },
       {
         "src": "/work/lost-relic/07.jpg",
         "width": 2500,
         "height": 3334,
         "color": "#A29B99",
-        "alt": ""
+        "alt": "Tight crop of her face behind the sword hilt, rings and bracelets, backlit by sea glare"
       },
       {
         "src": "/work/lost-relic/08.jpg",
         "width": 2500,
         "height": 3334,
         "color": "#A19A9A",
-        "alt": ""
+        "alt": "Sitting on a boulder with the sword planted upright, white boots, rocks and sea backlit behind"
       }
     ]
   },
