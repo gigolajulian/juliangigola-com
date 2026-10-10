@@ -10275,203 +10275,203 @@ export const PROJECTS: Project[] = [
         "width": 2499,
         "height": 3124,
         "color": "#C0C0C0",
-        "alt": ""
+        "alt": "On hands and knees in a black long-sleeve bodysuit, long dark hair and bangs, looking up, white backdrop"
       },
       {
         "src": "/work/zoe/03.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#F3F3F3",
-        "alt": ""
+        "alt": "Low on one arm in a black bodysuit, long dark hair over the shoulder, glancing up, white backdrop"
       },
       {
         "src": "/work/zoe/04.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#F3F3F3",
-        "alt": ""
+        "alt": "Leaning forward on both arms in a black bodysuit, long hair hanging, steady gaze, white backdrop"
       },
       {
         "src": "/work/zoe/05.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#C0C0C0",
-        "alt": ""
+        "alt": "Seated sideways leaning on one hand in a black bodysuit, long hair down the back, white backdrop"
       },
       {
         "src": "/work/zoe/06.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#F3F3F3",
-        "alt": ""
+        "alt": "Reclining on one elbow in a black bodysuit, long hair spilling across the floor, white backdrop"
       },
       {
         "src": "/work/zoe/07.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#F3F3F3",
-        "alt": ""
+        "alt": "Seen from above lying on the side, black bodysuit, hair across the floor, one hand at the chin"
       },
       {
         "src": "/work/zoe/08.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#F3F3F3",
-        "alt": ""
+        "alt": "Seated leaning on one arm, head tilted, black bodysuit, long hair and bangs, soft grey backdrop"
       },
       {
         "src": "/work/zoe/09.jpg",
         "width": 2429,
         "height": 3641,
         "color": "#F3F3F3",
-        "alt": ""
+        "alt": "Crouched with the head tipped sideways, long black hair falling forward, black bodysuit, grey backdrop"
       },
       {
         "src": "/work/zoe/10.jpg",
         "width": 2429,
         "height": 3641,
         "color": "#F3F3F3",
-        "alt": ""
+        "alt": "Seated on one hip looking up and away, black bodysuit, long hair down the back, soft grey backdrop"
       },
       {
         "src": "/work/zoe/11.jpg",
         "width": 2429,
         "height": 3641,
         "color": "#F3F3F3",
-        "alt": ""
+        "alt": "Seated twisting toward the lens, one hand on the floor, black bodysuit, long hair, grey backdrop"
       },
       {
         "src": "/work/zoe/12.jpg",
         "width": 2429,
         "height": 3641,
         "color": "#D9D9D9",
-        "alt": ""
+        "alt": "Crouched in profile glancing back, black long-sleeve bodysuit, one hand planted, grey backdrop"
       },
       {
         "src": "/work/zoe/13.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#F3F3F3",
-        "alt": ""
+        "alt": "Crouched close to the lens, chin down, long black hair and bangs, black bodysuit, grey backdrop"
       },
       {
         "src": "/work/zoe/14.jpg",
         "width": 2429,
         "height": 3641,
         "color": "#F3F3F3",
-        "alt": ""
+        "alt": "Leaning forward with the head tilted, hair hanging in long strands, black bodysuit, grey backdrop"
       },
       {
         "src": "/work/zoe/15.jpg",
         "width": 2429,
         "height": 3641,
         "color": "#F3F3F3",
-        "alt": ""
+        "alt": "Close crop, chin dropped toward a shoulder, long black hair, black bodysuit, white backdrop"
       },
       {
         "src": "/work/zoe/16.jpg",
         "width": 2429,
         "height": 3641,
         "color": "#C0C0C0",
-        "alt": ""
+        "alt": "Tight crop, face turned to the lens, bangs, long black hair across the shoulders, black bodysuit"
       },
       {
         "src": "/work/zoe/17.jpg",
         "width": 2429,
         "height": 3641,
         "color": "#C0C0C0",
-        "alt": ""
+        "alt": "Crouched with arms wrapped around the knees, glancing sideways, black bodysuit, long hair, grey backdrop"
       },
       {
         "src": "/work/zoe/18.jpg",
         "width": 2429,
         "height": 3641,
         "color": "#F3F3F3",
-        "alt": ""
+        "alt": "Seated with the knees pulled in, one hand on the floor, looking away, black bodysuit, white backdrop"
       },
       {
         "src": "/work/zoe/19.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#F3F3F3",
-        "alt": ""
+        "alt": "Head resting on the floor, face turned up toward the lens, black scoop-neck bodysuit, hair spread"
       },
       {
         "src": "/work/zoe/20.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#D9D9D9",
-        "alt": ""
+        "alt": "Lying on the back with a hand on the collarbone, long dark hair spread, black bodysuit"
       },
       {
         "src": "/work/zoe/21.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#F3F3F3",
-        "alt": ""
+        "alt": "Standing on tiptoe in a deep crouch, long hair straight down the back, black bodysuit, white backdrop"
       },
       {
         "src": "/work/zoe/22.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#F3F3F3",
-        "alt": ""
+        "alt": "Lying on the back, hair spread over the white floor, black long-sleeve bodysuit, eyes on the lens"
       },
       {
         "src": "/work/zoe/23.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#F3F3F3",
-        "alt": ""
+        "alt": "Lying propped on one arm, a hand curled on the floor, black bodysuit, long hair trailing"
       },
       {
         "src": "/work/zoe/24.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#F3F3F3",
-        "alt": ""
+        "alt": "Seated with the knees up and hands clasped overhead, black bodysuit, soft warm backdrop"
       },
       {
         "src": "/work/zoe/25.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#F3F3F3",
-        "alt": ""
+        "alt": "Seated leaning on one hand, knee raised, black long-sleeve bodysuit, hair over the shoulder, white backdrop"
       },
       {
         "src": "/work/zoe/26.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#F3F3F3",
-        "alt": ""
+        "alt": "Seated leaning on one hand, head tilted, black bodysuit, long wavy hair, soft warm backdrop"
       },
       {
         "src": "/work/zoe/27.jpg",
         "width": 2429,
         "height": 3641,
         "color": "#F3F3F3",
-        "alt": ""
+        "alt": "Seated with the legs crossed and hands clasped at the shin, black bodysuit, soft warm backdrop"
       },
       {
         "src": "/work/zoe/28.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#F3F3F3",
-        "alt": ""
+        "alt": "Seated cross-legged with a knee raised, hands around the shin, black bodysuit, white backdrop"
       },
       {
         "src": "/work/zoe/29.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#F3F3F3",
-        "alt": ""
+        "alt": "Seated hugging one knee, direct gaze, black bodysuit, long hair, white backdrop"
       },
       {
         "src": "/work/zoe/30.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#F3F3F3",
-        "alt": ""
+        "alt": "Seated with arms around the knees, black long-sleeve bodysuit, long hair, white backdrop"
       }
     ]
   }
