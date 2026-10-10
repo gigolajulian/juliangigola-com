@@ -3532,91 +3532,91 @@ export const PROJECTS: Project[] = [
         "width": 2499,
         "height": 3498,
         "color": "#F3F3F3",
-        "alt": ""
+        "alt": "Standing with hands on the hips in a black scoop-neck bodysuit, short blond bob, white seamless backdrop"
       },
       {
         "src": "/work/giselle-studio-digitals/02.jpg",
         "width": 2499,
         "height": 3499,
         "color": "#F3F3F3",
-        "alt": ""
+        "alt": "Kneeling on a tan leather chair in a black bodysuit, one hand on the backrest, white backdrop"
       },
       {
         "src": "/work/giselle-studio-digitals/03.jpg",
         "width": 2499,
         "height": 3499,
         "color": "#F3F3F3",
-        "alt": ""
+        "alt": "Reclining across a tan leather chair in a black bodysuit, head turned away, white backdrop"
       },
       {
         "src": "/work/giselle-studio-digitals/04.jpg",
         "width": 2499,
         "height": 3499,
         "color": "#F3F3F3",
-        "alt": ""
+        "alt": "Seated on the floor leaning on one hand in a black bodysuit, glancing back over a shoulder"
       },
       {
         "src": "/work/giselle-studio-digitals/05.jpg",
         "width": 2499,
         "height": 3499,
         "color": "#F3F3F3",
-        "alt": ""
+        "alt": "Leaning back with the head resting on a metal chair seat, black bodysuit, white backdrop"
       },
       {
         "src": "/work/giselle-studio-digitals/06.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#F3F3F3",
-        "alt": ""
+        "alt": "Seated in a tan leather chair with the legs stretched out, black bodysuit, looking at the lens"
       },
       {
         "src": "/work/giselle-studio-digitals/07.jpg",
         "width": 2499,
         "height": 3499,
         "color": "#F3F3F3",
-        "alt": ""
+        "alt": "Seated sideways in a tan leather chair in a black bodysuit, profile, pearl bracelet, white backdrop"
       },
       {
         "src": "/work/giselle-studio-digitals/08.jpg",
         "width": 2499,
         "height": 3499,
         "color": "#D9D9D9",
-        "alt": ""
+        "alt": "Extreme close crop of an eye behind a raised forearm, pearl bracelet, ear cuff, white backdrop"
       },
       {
         "src": "/work/giselle-studio-digitals/09.jpg",
         "width": 2499,
         "height": 3499,
         "color": "#F3F3F3",
-        "alt": ""
+        "alt": "Lying on the floor with arms overhead in a black bikini top, white seamless backdrop"
       },
       {
         "src": "/work/giselle-studio-digitals/10.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#F3F3F3",
-        "alt": ""
+        "alt": "Lying in a bridge pose on a white floor in a black bikini set, looking at the lens"
       },
       {
         "src": "/work/giselle-studio-digitals/11.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#F3F3F3",
-        "alt": ""
+        "alt": "Reclining on one arm in a black bikini set, knees up, pearl bracelet, white backdrop"
       },
       {
         "src": "/work/giselle-studio-digitals/12.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#F3F3F3",
-        "alt": ""
+        "alt": "Seated leaning on one hand in a black triangle top and briefs, hair tucked back, white backdrop"
       },
       {
         "src": "/work/giselle-studio-digitals/13.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#F3F3F3",
-        "alt": ""
+        "alt": "Seated on the floor leaning on an arm in a black bikini set, head tilted, white backdrop"
       },
       {
         "src": "/work/giselle-studio-digitals/14.jpg",
@@ -3630,7 +3630,7 @@ export const PROJECTS: Project[] = [
         "width": 2499,
         "height": 3124,
         "color": "#F3F3F3",
-        "alt": ""
+        "alt": "Standing with a hand on the hip in a black bikini set, direct gaze, white backdrop"
       }
     ]
   },
@@ -8411,84 +8411,84 @@ export const PROJECTS: Project[] = [
         "width": 2499,
         "height": 3124,
         "color": "#26260C",
-        "alt": ""
+        "alt": "Standing in a green quilted jacket and khaki trousers, face wrapped in a scarf, dry grass at night"
       },
       {
         "src": "/work/stratus-lookbook-vol-1/02.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#0C260C",
-        "alt": ""
+        "alt": "Looking down in a green quilted jacket, a camouflage bucket hat and light trousers, dark night sky"
       },
       {
         "src": "/work/stratus-lookbook-vol-1/03.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#408C8C",
-        "alt": ""
+        "alt": "Standing in a quilted jacket, sunglasses and cargo trousers under a teal dusk sky with a moon"
       },
       {
         "src": "/work/stratus-lookbook-vol-1/04.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#262626",
-        "alt": ""
+        "alt": "Two people at night under an oak, one in a denim jacket and mask, one with a bag"
       },
       {
         "src": "/work/stratus-lookbook-vol-1/05.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#8C7340",
-        "alt": ""
+        "alt": "Two people in dry grass, one in a denim jacket and mask, one bent over a duffel bag"
       },
       {
         "src": "/work/stratus-lookbook-vol-1/06.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#594026",
-        "alt": ""
+        "alt": "Walking in a green quilted jacket and cargo trousers, carrying a black bag, patterned scarf over the face"
       },
       {
         "src": "/work/stratus-lookbook-vol-1/07.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#40738C",
-        "alt": ""
+        "alt": "Leaning into a stride in a green quilted jacket, sunglasses and wide cargo trousers, dusk sky"
       },
       {
         "src": "/work/stratus-lookbook-vol-1/08.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#262626",
-        "alt": ""
+        "alt": "Turned away in a green quilted jacket, hand at the head, cargo trousers, dark hills at dusk"
       },
       {
         "src": "/work/stratus-lookbook-vol-1/09.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#F3F3F3",
-        "alt": ""
+        "alt": "Walking away in a green quilted jacket and cargo trousers, one arm out, pale dusk sky"
       },
       {
         "src": "/work/stratus-lookbook-vol-1/10.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#262626",
-        "alt": ""
+        "alt": "Standing with arms loose in a green quilted jacket and sunglasses, cargo trousers, hills at dusk"
       },
       {
         "src": "/work/stratus-lookbook-vol-1/11.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#C0D9D9",
-        "alt": ""
+        "alt": "Looking down in a green quilted jacket and sunglasses, one hand in a pocket, grass and dark hills"
       },
       {
         "src": "/work/stratus-lookbook-vol-1/12.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#8CC0D9",
-        "alt": ""
+        "alt": "Turning away in a green quilted jacket, sunglasses and cargo trousers, dark hills, pale sky"
       }
     ]
   },
@@ -10047,119 +10047,119 @@ export const PROJECTS: Project[] = [
         "width": 2499,
         "height": 3124,
         "color": "#D9D9C0",
-        "alt": ""
+        "alt": "Grinning in a dark cap and black WIRED tee, both hands raised, on a sunlit sidewalk"
       },
       {
         "src": "/work/wired-magazine/03.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#D9D9F3",
-        "alt": ""
+        "alt": "Mid-air on a skateboard above a bike rack, black long-sleeve top, jeans, tree and city behind"
       },
       {
         "src": "/work/wired-magazine/04.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#C0C0A6",
-        "alt": ""
+        "alt": "Seated dog wearing a blue and white WIRED tote bag, grey wall, yellow road paint"
       },
       {
         "src": "/work/wired-magazine/05.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#C0D9F3",
-        "alt": ""
+        "alt": "Three people walking by glass buildings in white tees, one carrying a green tote bag, low wide angle"
       },
       {
         "src": "/work/wired-magazine/06.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#262626",
-        "alt": ""
+        "alt": "Two people in white WIRED tees, one with a printed back, holding a laptop sleeve, building behind"
       },
       {
         "src": "/work/wired-magazine/07.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#262626",
-        "alt": ""
+        "alt": "Passing a bright green tote bag and a yellow water bottle, patterned laptop sleeve, white WIRED tee"
       },
       {
         "src": "/work/wired-magazine/08.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#262626",
-        "alt": ""
+        "alt": "Blue and white WIRED tote bag seen from above against a dark background"
       },
       {
         "src": "/work/wired-magazine/09.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#26598C",
-        "alt": ""
+        "alt": "Hand holding an orange WIRED mug, a ring on one finger, desk and city skyline behind"
       },
       {
         "src": "/work/wired-magazine/10.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#40598C",
-        "alt": ""
+        "alt": "Juggling pencils and a roll of tape above a desk, black pullover, orange sunglasses, skyline behind"
       },
       {
         "src": "/work/wired-magazine/11.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#C0C0C0",
-        "alt": ""
+        "alt": "Pencil in the mouth at a rooftop desk, paper garland and keyboard, black cap and orange sunglasses"
       },
       {
         "src": "/work/wired-magazine/12.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#264073",
-        "alt": ""
+        "alt": "Seated at a rooftop desk in a white WIRED tee and cap, blue mug in the foreground, skyline"
       },
       {
         "src": "/work/wired-magazine/13.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#404040",
-        "alt": ""
+        "alt": "Leaning over a rooftop wall in a white WIRED tee, a black flag blowing beside, skyline behind"
       },
       {
         "src": "/work/wired-magazine/14.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#C0A6A6",
-        "alt": ""
+        "alt": "Seen from above, seated at a laptop on a rooftop with a desk chair and a monitor"
       },
       {
         "src": "/work/wired-magazine/15.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#5973A6",
-        "alt": ""
+        "alt": "Standing at a rooftop wall in a white WIRED tee holding a blue mug, looking aside, skyline"
       },
       {
         "src": "/work/wired-magazine/16.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#262626",
-        "alt": ""
+        "alt": "Two people standing in white and black WIRED tees, sunglasses, long hair, a glass building behind"
       },
       {
         "src": "/work/wired-magazine/17.jpg",
         "width": 2499,
         "height": 3499,
         "color": "#40598C",
-        "alt": ""
+        "alt": "Pencil held to the mouth behind a blue mug, black cap reading ANGRY NERD, orange sunglasses"
       },
       {
         "src": "/work/wired-magazine/18.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#262626",
-        "alt": ""
+        "alt": "Doing a one-arm side plank on a rooftop in a white tee, drinking from an orange mug"
       }
     ]
   },
