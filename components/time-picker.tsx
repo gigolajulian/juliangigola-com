@@ -66,6 +66,8 @@ export function TimePicker({
   const [username, slug] = path.split("/");
   const [tz] = React.useState(() => Intl.DateTimeFormat().resolvedOptions().timeZone || "America/Los_Angeles");
   const [length, setLength] = React.useState(30);
+  /** The event takes its place from the visitor (a studio session or their own address). */
+  const [needsWhere, setNeedsWhere] = React.useState(false);
   const [days, setDays] = React.useState<Record<string, Slot[]> | null>(null);
   const [state, setState] = React.useState<"loading" | "ready" | "fallback">("loading");
   const [view, setView] = React.useState<"week" | "month">("week");
@@ -95,6 +97,7 @@ export function TimePicker({
         return;
       }
       setLength(ev.lengthInMinutes || 30);
+      setNeedsWhere(Array.isArray(ev.locations) && ev.locations.some((l: { type: string }) => l.type === "attendeeDefined"));
       setDays(slots.data);
       setState("ready");
     } catch {
@@ -203,7 +206,8 @@ export function TimePicker({
           eventTypeSlug: slug,
           username,
           attendee: { name: String(form.get("name")), email: String(form.get("email")), timeZone: tz, language: "en" },
-          bookingFieldsResponses: { notes: [where && `Where: ${where}`, notes].filter(Boolean).join("\n") },
+          ...(needsWhere ? { location: { type: "attendeeDefined", location: where } } : {}),
+          ...(notes ? { bookingFieldsResponses: { notes } } : {}),
         }),
       });
       const body = await res.json();
@@ -241,7 +245,7 @@ export function TimePicker({
 
   if (step === "done") {
     return (
-      <div aria-label={title} className={cn("flex flex-col justify-center gap-4 p-6 sm:p-10", className)}>
+      <div aria-label={title} className={cn("tp flex flex-col justify-center gap-4 p-6 sm:p-10", className)}>
         <p className="label text-muted-foreground">Booked</p>
         <p className="font-display text-5xl uppercase leading-[0.92] sm:text-7xl">{sum}</p>
         <p className="max-w-[28rem] text-sm normal-case leading-relaxed text-muted-foreground">
@@ -427,7 +431,9 @@ export function TimePicker({
             <label className="label flex flex-col gap-2 text-muted-foreground">Name<input name="name" required autoComplete="name" className="border-b border-border bg-transparent py-2 text-base normal-case text-foreground outline-none focus:border-foreground" /></label>
             <label className="label flex flex-col gap-2 text-muted-foreground">Email<input name="email" type="email" required autoComplete="email" className="border-b border-border bg-transparent py-2 text-base normal-case text-foreground outline-none focus:border-foreground" /></label>
           </div>
-          <label className="label flex flex-col gap-2 text-muted-foreground">Where, if on location<input name="where" className="border-b border-border bg-transparent py-2 text-base normal-case text-foreground outline-none focus:border-foreground" /></label>
+          {needsWhere ? (
+            <label className="label flex flex-col gap-2 text-muted-foreground">Where: the studio, or an address<input name="where" required className="border-b border-border bg-transparent py-2 text-base normal-case text-foreground outline-none focus:border-foreground" /></label>
+          ) : null}
           <label className="label flex flex-col gap-2 text-muted-foreground">Anything I should know<textarea name="notes" rows={2} className="resize-none border-b border-border bg-transparent py-2 text-base normal-case text-foreground outline-none focus:border-foreground" /></label>
           {error ? <p role="alert" className="text-sm normal-case text-foreground">{error}</p> : null}
           <button type="submit" disabled={step === "sending"} className="label self-start rounded-[2px] border border-foreground bg-foreground px-6 py-4 text-background transition-[opacity,scale] duration-300 hoverable:hover:opacity-85 active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50">
