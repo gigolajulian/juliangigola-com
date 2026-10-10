@@ -164,7 +164,8 @@ const drop = (live: Map<HTMLElement, Animation>) => {
 
 export function runDeck(el: HTMLElement, mode: Deck): () => void {
   if (mode === "chapters") return runChapters(el);
-  if (mode === "leads") return () => {}; // the strip deals at its ends itself
+  // The strip deals at its ends itself; this only fills the window.
+  if (mode === "leads") return runLeads(el);
   const wide = media("wide");
   const calm = window.matchMedia("(prefers-reduced-motion: reduce)");
   let cards: HTMLElement[] = [];
@@ -371,6 +372,64 @@ const topOf = (box: HTMLElement) => {
   return y;
 };
 
+/* Julian: a discipline with few projects still takes a whole window, so
+   the next one deals in over a full screen as it does after a long one.
+   The room left goes before the next chapter's name, which comes in at
+   the right edge. All read first: each margin moves every chapter after
+   it by as much, so they are worked out in order. */
+function fillChapters(el: HTMLElement, kids: HTMLElement[]) {
+  const heads = kids.filter((k) => k.hasAttribute("data-deck"));
+  const at = heads.map((h) => h.offsetLeft);
+  const pad = parseFloat(getComputedStyle(el).paddingLeft) || 0;
+  const vw = el.clientWidth;
+  let shift = 0;
+  const room = heads.map((_, i) => {
+    if (!i) return 0;
+    const m = Math.max(0, at[i - 1] + shift - pad + vw - (at[i] + shift));
+    shift += m;
+    return m;
+  });
+  heads.forEach((h, i) => {
+    if (room[i] > 0) h.style.marginLeft = `${room[i]}px`;
+  });
+}
+
+/* The same on a discipline's or a project's own page: a page shorter
+   than the window has "Up next" at its right edge, so the next page
+   deals in over a full one. Not on a sheet that runs down (`data-sheet`)
+   or a phone's column. */
+function runLeads(el: HTMLElement): () => void {
+  const wide = media("wide");
+  const fill = () => {
+    const up = el.querySelector<HTMLElement>(":scope > .next-cell");
+    if (!up) return;
+    up.style.removeProperty("margin-left");
+    if (!wide.matches || "sheet" in el.dataset) return;
+    const end = el.clientWidth - (parseFloat(getComputedStyle(el).paddingRight) || 0);
+    const m = end - (up.offsetLeft + up.offsetWidth);
+    if (m <= 0) return;
+    up.style.marginLeft = `${m}px`;
+    // The iPad's rack ends on more than its padding: no scroll from this.
+    const over = el.scrollWidth - el.clientWidth;
+    if (over > 0) up.style.marginLeft = `${Math.max(0, m - over)}px`;
+  };
+  fill();
+  const ro = new ResizeObserver(fill);
+  ro.observe(el);
+  // Cells arriving, and the iPad's rack fitted (`work-shell.tsx`).
+  const grown = new MutationObserver(fill);
+  grown.observe(el, { childList: true, attributeFilter: ["data-rack"] });
+  const relaid = onRelaid(el, fill);
+  el.addEventListener("strip-relaid", fill);
+  return () => {
+    ro.disconnect();
+    grown.disconnect();
+    relaid.disconnect();
+    el.removeEventListener("strip-relaid", fill);
+    el.querySelector<HTMLElement>(":scope > .next-cell")?.style.removeProperty("margin-left");
+  };
+}
+
 function runChapters(el: HTMLElement): () => void {
   const wide = media("wide");
   const calm = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -386,6 +445,7 @@ function runChapters(el: HTMLElement): () => void {
       k.style.removeProperty("z-index");
       k.style.removeProperty("transform-origin");
       k.style.removeProperty("translate");
+      k.style.removeProperty("margin-left");
       delete k.dataset.at;
     }
     kids = [];
@@ -409,9 +469,13 @@ function runChapters(el: HTMLElement): () => void {
      writes, for the same reason as above. */
   /* The window's width, as `deal` measured it. */
   let width = 0;
+  /* The strip's padding: a chapter at rest stands that far in, so the
+     one before is covered by then, not a padding later. Held that long,
+     it showed through a short chapter's empty room. */
+  let inset = 0;
   const depth = (x = el.scrollLeft, vw = el.clientWidth) => {
     for (const ch of chapters) {
-      const p = Math.min(1, Math.max(0, (x - ch.pinX) / vw));
+      const p = Math.min(1, Math.max(0, (x - ch.pinX) / (vw - inset)));
       if (p === ch.p) continue;
       ch.p = p;
       hold(ch, p < 1);
@@ -428,6 +492,7 @@ function runChapters(el: HTMLElement): () => void {
     clear();
     if (!wide.matches || calm.matches) return;
     kids = Array.from(el.children) as HTMLElement[];
+    fillChapters(el, kids);
     /* Every reading first, then every write. Written a cell at a time
        between readings, each `transform-origin` made the next reading lay
        the whole page out again: a hundred layouts of the work index while
@@ -441,6 +506,7 @@ function runChapters(el: HTMLElement): () => void {
     const pad = parseFloat(getComputedStyle(el).paddingLeft) || 0;
     const vw = el.clientWidth;
     width = vw;
+    inset = pad;
     const x0 = el.scrollLeft;
     const mid = el.clientHeight / 2;
     const top = topOf(el);
