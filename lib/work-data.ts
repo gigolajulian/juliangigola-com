@@ -5119,70 +5119,70 @@ export const PROJECTS: Project[] = [
         "width": 2499,
         "height": 3124,
         "color": "#0C260C",
-        "alt": ""
+        "alt": "Seated with arms wrapped around the knees, head tilted back, dark underwear set, blue and pink light"
       },
       {
         "src": "/work/lustro/02.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#0C260C",
-        "alt": ""
+        "alt": "Seated sideways on the floor looking away, dark bralette, pink light stripe on a teal wall"
       },
       {
         "src": "/work/lustro/03.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#0C260C",
-        "alt": ""
+        "alt": "Close crop, hand at the cheek, face lit red, short bob, teal backdrop"
       },
       {
         "src": "/work/lustro/04.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#0C260C",
-        "alt": ""
+        "alt": "Seated with crossed legs, one hand at the head, bob, pink and blue light across the wall"
       },
       {
         "src": "/work/lustro/05.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#260C0C",
-        "alt": ""
+        "alt": "Kneeling with arms crossed over the shoulders, dark underwear set, a pink beam across the wall"
       },
       {
         "src": "/work/lustro/06.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#0C260C",
-        "alt": ""
+        "alt": "Close crop, hand on a shoulder, bob lit pink, thin chain necklace, blue backdrop with a pink beam"
       },
       {
         "src": "/work/lustro/07.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#0C260C",
-        "alt": ""
+        "alt": "Close crop, head turned, hand on a shoulder, bob, pink light on the face, blue haze"
       },
       {
         "src": "/work/lustro/08.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#0C260C",
-        "alt": ""
+        "alt": "Kneeling with hands on the knees, face lit white by a beam, dark underwear set, blue wall"
       },
       {
         "src": "/work/lustro/09.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#0C260C",
-        "alt": ""
+        "alt": "Face half-lit in pink and cyan, head tilted down, dark lace set, blue backdrop"
       },
       {
         "src": "/work/lustro/10.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#0C260C",
-        "alt": ""
+        "alt": "Dark silhouette with a cyan beam across the eyes, black lace top, deep blue and magenta backdrop"
       }
     ]
   },
