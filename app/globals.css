@@ -82,3 +82,52 @@
     max-height: calc(100% - 4.5rem) !important;
   }
 }
+
+/* The booking status (`time-picker.tsx`): orbs circle while it is sent, then
+   fold into a green ring and check. */
+@keyframes tp-orbit {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes tp-fold {
+  to {
+    transform: scale(0.15);
+    opacity: 0;
+  }
+}
+@keyframes tp-stroke {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+.tp-arm {
+  animation: tp-orbit linear infinite;
+}
+.tp-ring {
+  stroke-dasharray: 277;
+  stroke-dashoffset: 277;
+}
+.tp-tick {
+  stroke-dasharray: 60;
+  stroke-dashoffset: 60;
+}
+.tp-status[data-ok] .tp-arm {
+  animation: tp-fold 0.45s var(--ease-out-strong, cubic-bezier(0.23, 1, 0.32, 1)) forwards;
+}
+.tp-status[data-ok] .tp-ring {
+  animation: tp-stroke 0.55s 0.25s var(--ease-out-strong, cubic-bezier(0.23, 1, 0.32, 1)) forwards;
+}
+.tp-status[data-ok] .tp-tick {
+  animation: tp-stroke 0.4s 0.7s var(--ease-out-strong, cubic-bezier(0.23, 1, 0.32, 1)) forwards;
+}
+@media (prefers-reduced-motion: reduce) {
+  .tp-arm {
+    animation-duration: 6s;
+  }
+  .tp-status[data-ok] .tp-ring,
+  .tp-status[data-ok] .tp-tick {
+    animation-duration: 0.01s;
+    animation-delay: 0s;
+  }
+}
