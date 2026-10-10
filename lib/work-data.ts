@@ -674,77 +674,77 @@ export const PROJECTS: Project[] = [
         "width": 2500,
         "height": 3334,
         "color": "#B2ADAC",
-        "alt": ""
+        "alt": "Profile of a man with a choppy shag, a stylist's tattooed hand and comb in his hair"
       },
       {
         "src": "/work/paradox/03.jpg",
         "width": 2500,
         "height": 3333,
         "color": "#B4AEAA",
-        "alt": ""
+        "alt": "Man with a textured shag in a knit sweater vest over a white tee, flat grey backdrop"
       },
       {
         "src": "/work/paradox/04.jpg",
         "width": 2500,
         "height": 3333,
         "color": "#675F5E",
-        "alt": ""
+        "alt": "Several hands shape and spray a man's curly black hair, black jacket over white shirt"
       },
       {
         "src": "/work/paradox/05.jpg",
         "width": 2500,
         "height": 3334,
         "color": "#787E8A",
-        "alt": ""
+        "alt": "Stylist in a beanie and blue hockey jersey sets a client's slicked black hair"
       },
       {
         "src": "/work/paradox/06.jpg",
         "width": 2500,
         "height": 3334,
         "color": "#7B7979",
-        "alt": ""
+        "alt": "Back of a head with a black textured crop and shaved nape design, denim jacket"
       },
       {
         "src": "/work/paradox/07.jpg",
         "width": 2500,
         "height": 3333,
         "color": "#756F70",
-        "alt": ""
+        "alt": "Stylist combs and sprays a lavender layered mullet, client in a black denim jacket"
       },
       {
         "src": "/work/paradox/08.jpg",
         "width": 2500,
         "height": 3334,
         "color": "#8E8C8C",
-        "alt": ""
+        "alt": "Lavender shag mullet with a nose ring, black denim jacket, eyes to the side, grey backdrop"
       },
       {
         "src": "/work/paradox/09.jpg",
         "width": 2500,
         "height": 3334,
         "color": "#96939A",
-        "alt": ""
+        "alt": "Back view of the lavender mullet, layers fanned over a black jacket collar"
       },
       {
         "src": "/work/paradox/10.jpg",
         "width": 2500,
         "height": 3333,
         "color": "#8D8D90",
-        "alt": ""
+        "alt": "Platinum shaggy mullet with long braided tails, black work shirt, glancing up and away"
       },
       {
         "src": "/work/paradox/11.jpg",
         "width": 2500,
         "height": 3334,
         "color": "#786F6F",
-        "alt": ""
+        "alt": "Stylist in sunglasses adjusts a tapered brown crop on a man with a neck tattoo"
       },
       {
         "src": "/work/paradox/12.jpg",
         "width": 2500,
         "height": 3333,
         "color": "#827F8B",
-        "alt": ""
+        "alt": "Tight portrait as a tattooed hand sweeps back a man's black wavy hair, blue jacket"
       }
     ]
   },
