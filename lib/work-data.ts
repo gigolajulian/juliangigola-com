@@ -5529,112 +5529,112 @@ export const PROJECTS: Project[] = [
         "width": 2499,
         "height": 3124,
         "color": "#A60C0C",
-        "alt": ""
+        "alt": "Full length in profile, black slip dress and heels, a pale spotlight on the floor, red backdrop"
       },
       {
         "src": "/work/mirage/02.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#400C0C",
-        "alt": ""
+        "alt": "Seated on the floor leaning back on one hand, black camisole and trousers, a pale spotlight, red backdrop"
       },
       {
         "src": "/work/mirage/03.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#400C0C",
-        "alt": ""
+        "alt": "Backlit by a white halo, head tilted, hands behind the back, black camisole dress, red backdrop"
       },
       {
         "src": "/work/mirage/04.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#260C0C",
-        "alt": ""
+        "alt": "Hair swinging in motion, black camisole dress, light streaking across, deep red backdrop"
       },
       {
         "src": "/work/mirage/05.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#590C0C",
-        "alt": ""
+        "alt": "One hand in the hair, black camisole dress, a white glow behind the head, red backdrop"
       },
       {
         "src": "/work/mirage/06.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#400C0C",
-        "alt": ""
+        "alt": "Full length in profile, black fitted dress and heels, shadowed red backdrop"
       },
       {
         "src": "/work/mirage/07.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#A60C0C",
-        "alt": ""
+        "alt": "Head bowed, hands on the hips, black camisole dress, thin gold chain, red light"
       },
       {
         "src": "/work/mirage/08.jpg",
         "width": 2429,
         "height": 3641,
         "color": "#A60C0C",
-        "alt": ""
+        "alt": "Looking down with hands behind the hips, black camisole dress, gold chain, red backdrop"
       },
       {
         "src": "/work/mirage/09.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#8C0C0C",
-        "alt": ""
+        "alt": "Head tilted down, hands behind the back, black dress, warm light on the hair, red backdrop"
       },
       {
         "src": "/work/mirage/10.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#8C0C0C",
-        "alt": ""
+        "alt": "Standing straight, head bowed, arms at the sides, black camisole dress, red backdrop"
       },
       {
         "src": "/work/mirage/11.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#A60C0C",
-        "alt": ""
+        "alt": "Head tilted, one hand on the hip, black camisole dress, gold chain, red backdrop"
       },
       {
         "src": "/work/mirage/12.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#A60C0C",
-        "alt": ""
+        "alt": "Close crop, head tilted, hands at the hips, black camisole top, gold chain, red light"
       },
       {
         "src": "/work/mirage/13.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#730C0C",
-        "alt": ""
+        "alt": "Head bowed, light glowing on the collarbone, black camisole, red backdrop"
       },
       {
         "src": "/work/mirage/14.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#730C0C",
-        "alt": ""
+        "alt": "One arm raised behind the head, hair across the face, light across the chest, red backdrop"
       },
       {
         "src": "/work/mirage/15.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#730C0C",
-        "alt": ""
+        "alt": "Head turned down, hair swept back, thin chain necklace catching light, black camisole, red backdrop"
       },
       {
         "src": "/work/mirage/16.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#400C0C",
-        "alt": ""
+        "alt": "Tight crop, face in profile, hair falling forward, a chain necklace flaring with light, red backdrop"
       }
     ]
   },
