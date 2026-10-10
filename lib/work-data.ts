@@ -5415,91 +5415,91 @@ export const PROJECTS: Project[] = [
         "width": 2499,
         "height": 3124,
         "color": "#264059",
-        "alt": ""
+        "alt": "Crouched in chunky black boots and a fringed skirt, branching silver mask, blue-lit backdrop"
       },
       {
         "src": "/work/metamorphosis/02.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#264040",
-        "alt": ""
+        "alt": "Seated with hands on the knees, branching silver mask, black strapless top and tights, teal backdrop"
       },
       {
         "src": "/work/metamorphosis/03.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#0C260C",
-        "alt": ""
+        "alt": "Seated on top of a CRT showing a silhouette, branching mask, black top and fringe, teal light"
       },
       {
         "src": "/work/metamorphosis/04.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#264059",
-        "alt": ""
+        "alt": "Kneeling with a turned head, branching silver mask, black top, fringed skirt, white spotlight glow"
       },
       {
         "src": "/work/metamorphosis/05.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#264040",
-        "alt": ""
+        "alt": "Kneeling and leaning to one side, branching mask, black top, fringed skirt and boots, grey backdrop"
       },
       {
         "src": "/work/metamorphosis/06.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#405973",
-        "alt": ""
+        "alt": "Seated on the floor with one hand on the face, chunky boots, branching mask, white light"
       },
       {
         "src": "/work/metamorphosis/07.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#264059",
-        "alt": ""
+        "alt": "Seated on a CRT with arms raised overhead, branching mask, black top, a glowing screen below"
       },
       {
         "src": "/work/metamorphosis/08.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#264059",
-        "alt": ""
+        "alt": "Standing on a CRT with one boot up, black gloves, branching mask, a figure on the screen below"
       },
       {
         "src": "/work/metamorphosis/09.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#262626",
-        "alt": ""
+        "alt": "Close crop of a CRT showing a silhouette with a raised boot, a smaller CRT inside the frame"
       },
       {
         "src": "/work/metamorphosis/10.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#264059",
-        "alt": ""
+        "alt": "Seen from behind, seated on a CRT, branching mask, black top and fringe, a screen glowing violet"
       },
       {
         "src": "/work/metamorphosis/11.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#264059",
-        "alt": ""
+        "alt": "Head tilted over a shoulder, branching silver mask wrapped around the face, black strapless top"
       },
       {
         "src": "/work/metamorphosis/12.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#264040",
-        "alt": ""
+        "alt": "Standing with arms overhead inside a ring of twisting clear spikes, branching mask, black outfit"
       },
       {
         "src": "/work/metamorphosis/13.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#262640",
-        "alt": ""
+        "alt": "Hands pulled to the face in black gloves, branching silver mask, black crop top, dark teal backdrop"
       }
     ]
   },
