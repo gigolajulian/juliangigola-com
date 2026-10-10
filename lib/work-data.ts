@@ -520,119 +520,119 @@ export const PROJECTS: Project[] = [
         "width": 2500,
         "height": 1668,
         "color": "#47423E",
-        "alt": ""
+        "alt": "Close crop of a woman with a glossy black bob, head tilted, eyes down, on grey"
       },
       {
         "src": "/work/novocaine/02.jpg",
         "width": 2500,
         "height": 3333,
         "color": "#191C1B",
-        "alt": ""
+        "alt": "Black bob flung out mid-swing over a sheer knit top, hair blurring in hard top light"
       },
       {
         "src": "/work/novocaine/03.jpg",
         "width": 2500,
         "height": 3333,
         "color": "#99968E",
-        "alt": ""
+        "alt": "Full length in an open-knit black top, studded mini skirt and heels, hand at her cheek"
       },
       {
         "src": "/work/novocaine/04.jpg",
         "width": 2500,
         "height": 3334,
         "color": "#7D7974",
-        "alt": ""
+        "alt": "Three-quarter length, chin resting on her hand, black knit top lifted at the hem"
       },
       {
         "src": "/work/novocaine/05.jpg",
         "width": 2500,
         "height": 3334,
         "color": "#7A7773",
-        "alt": ""
+        "alt": "Crouched low in heels on a grey sweep, glancing back over her shoulder"
       },
       {
         "src": "/work/novocaine/06.jpg",
         "width": 2500,
         "height": 3333,
         "color": "#908B84",
-        "alt": ""
+        "alt": "Deep squat with one hand on the floor, knit top slipping off a shoulder, hard light"
       },
       {
         "src": "/work/novocaine/07.jpg",
         "width": 2500,
         "height": 1667,
         "color": "#BDBBB6",
-        "alt": ""
+        "alt": "Lying on her front on the studio floor, heels raised behind her, looking at the camera"
       },
       {
         "src": "/work/novocaine/08.jpg",
         "width": 2500,
         "height": 1668,
         "color": "#817E79",
-        "alt": ""
+        "alt": "Kneeling on one knee in a pool of light, arms crossed over the knit top"
       },
       {
         "src": "/work/novocaine/09.jpg",
         "width": 2500,
         "height": 1667,
         "color": "#9D9A95",
-        "alt": ""
+        "alt": "Wide shot on all fours on the grey floor, head turned toward the light"
       },
       {
         "src": "/work/novocaine/10.jpg",
         "width": 2500,
         "height": 3333,
         "color": "#373029",
-        "alt": ""
+        "alt": "Seated on a wooden chair, arms wrapped around her knee, eyes down, low side light"
       },
       {
         "src": "/work/novocaine/11.jpg",
         "width": 2500,
         "height": 3333,
         "color": "#22221F",
-        "alt": ""
+        "alt": "Black bob swinging across her face, top lit against a dark grey backdrop"
       },
       {
         "src": "/work/novocaine/12.jpg",
         "width": 2500,
         "height": 3333,
         "color": "#383836",
-        "alt": ""
+        "alt": "Side-on on a wooden chair, hair blurred in motion, hand on her knee, dark backdrop"
       },
       {
         "src": "/work/novocaine/13.jpg",
         "width": 2500,
         "height": 3333,
         "color": "#343532",
-        "alt": ""
+        "alt": "Tighter crop on the chair, face lost in moving hair, bracelets catching the light"
       },
       {
         "src": "/work/novocaine/14.jpg",
         "width": 2500,
         "height": 1668,
         "color": "#676764",
-        "alt": ""
+        "alt": "Lying stretched along the floor on her side, heels crossed in the air, grey backdrop"
       },
       {
         "src": "/work/novocaine/15.jpg",
         "width": 2500,
         "height": 1667,
         "color": "#646562",
-        "alt": ""
+        "alt": "Reclining on one elbow on the floor, legs extended, studded skirt in a spotlight"
       },
       {
         "src": "/work/novocaine/16.jpg",
         "width": 2500,
         "height": 1667,
         "color": "#61615E",
-        "alt": ""
+        "alt": "Same reclining pose, head tipped down toward her shoulder, wider pool of light"
       },
       {
         "src": "/work/novocaine/17.jpg",
         "width": 2500,
         "height": 3333,
         "color": "#5D5F5D",
-        "alt": ""
+        "alt": "Standing in profile with head bowed, knit top off one shoulder, studded skirt"
       }
     ]
   },
