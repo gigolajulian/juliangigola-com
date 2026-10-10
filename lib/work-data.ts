@@ -1873,91 +1873,91 @@ export const PROJECTS: Project[] = [
         "width": 2499,
         "height": 3124,
         "color": "#262626",
-        "alt": ""
+        "alt": "Close crop, eyes turned upward, white contact lenses, braided strands in wet hair, white top"
       },
       {
         "src": "/work/astral-allure/02.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#262626",
-        "alt": ""
+        "alt": "Looking up and away in a white printed bodysuit, wet black hair over her shoulders, dark backdrop"
       },
       {
         "src": "/work/astral-allure/03.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#262626",
-        "alt": ""
+        "alt": "Tilted head over a latex-gloved knee in the foreground, white bodysuit, pale light on a dark ground"
       },
       {
         "src": "/work/astral-allure/04.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#262626",
-        "alt": ""
+        "alt": "Reclining with one leg raised in black glossy thigh-high boots and gloves, white bodysuit, wide frame"
       },
       {
         "src": "/work/astral-allure/05.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#262626",
-        "alt": ""
+        "alt": "Hugging her knees in black latex gloves and boots, white eyes, hair falling across her face"
       },
       {
         "src": "/work/astral-allure/06.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#262626",
-        "alt": ""
+        "alt": "Chin on her knees wrapped in glossy black latex, wet hair, direct stare, dark vignette"
       },
       {
         "src": "/work/astral-allure/07.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#262626",
-        "alt": ""
+        "alt": "Seated with one boot raised, black latex gloves, white bodysuit, head turned, hard side light"
       },
       {
         "src": "/work/astral-allure/08.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#262626",
-        "alt": ""
+        "alt": "Motion-blurred close-up leaning toward the lens, a glossy boot above, white bodysuit"
       },
       {
         "src": "/work/astral-allure/09.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#262626",
-        "alt": ""
+        "alt": "Resting on a gloved forearm, wet hair across her face, white bodysuit, grey-blue floor"
       },
       {
         "src": "/work/astral-allure/10.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#595973",
-        "alt": ""
+        "alt": "Pressing a long black glove to her head, other hand reaching toward the camera on the floor"
       },
       {
         "src": "/work/astral-allure/11.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#595973",
-        "alt": ""
+        "alt": "Same pose, face lifted toward the lens, gloved arm raised over her head, light grey floor"
       },
       {
         "src": "/work/astral-allure/12.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#73738C",
-        "alt": ""
+        "alt": "On all fours, a glossy black glove pressed to the floor toward the lens, hair hanging"
       },
       {
         "src": "/work/astral-allure/13.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#262626",
-        "alt": ""
+        "alt": "Crawling low toward the camera, gloved hand stretched forward, wet hair, white bodysuit"
       }
     ]
   },
