@@ -4039,35 +4039,35 @@ export const PROJECTS: Project[] = [
         "width": 2499,
         "height": 3124,
         "color": "#F3D9D9",
-        "alt": ""
+        "alt": "Tan snapback cap with a black brim and an orange script logo, front view on a cream backdrop"
       },
       {
         "src": "/work/hellamack/02.jpg",
         "width": 2429,
         "height": 3641,
         "color": "#A68C73",
-        "alt": ""
+        "alt": "Close crop of black graffiti-style embroidery on the back of a tan cap, snap strap below"
       },
       {
         "src": "/work/hellamack/03.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#D9D9D9",
-        "alt": ""
+        "alt": "Tan cap with a black brim, orange logo on the front, World Series patch on the side"
       },
       {
         "src": "/work/hellamack/04.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#A68C73",
-        "alt": ""
+        "alt": "Side crop of a tan cap showing a colorful World Series Mackin patch, black brim edge at left"
       },
       {
         "src": "/work/hellamack/05.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#F3D9D9",
-        "alt": ""
+        "alt": "Tan cap with black brim from a low side angle, orange logo and patch, soft cream backdrop"
       }
     ]
   },
