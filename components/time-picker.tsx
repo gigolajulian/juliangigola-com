@@ -68,14 +68,16 @@ const clock = (m: number): [string, string] => {
 };
 
 /* A view that folds shut and open, so Week and Month trade places smoothly. */
-function Fold({ on, children }: { on: boolean; children: React.ReactNode }) {
+/** `fill`: open, it takes the room the picker has to spare, and its
+    children stack so one can be pushed down with `mt-auto`. */
+function Fold({ on, fill, children }: { on: boolean; fill?: boolean; children: React.ReactNode }) {
   return (
     <div
       inert={!on}
       aria-hidden={!on}
-      className={cn("grid transition-[grid-template-rows,opacity] duration-500 ease-[var(--ease-out-strong)]", on ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0")}
+      className={cn("grid transition-[grid-template-rows,opacity] duration-500 ease-[var(--ease-out-strong)]", on ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0", fill && on && "flex-1")}
     >
-      <div className="-m-1 min-h-0 overflow-hidden p-1">{children}</div>
+      <div className={cn("-m-1 min-h-0 overflow-hidden p-1", fill && "flex flex-col")}>{children}</div>
     </div>
   );
 }
@@ -471,7 +473,7 @@ export function TimePicker({
         </div>
       ) : null}
       {/* the days, the time and the ruler fold away once a time is confirmed, so the form fits */}
-      <Fold on={step === "pick"}>
+      <Fold on={step === "pick"} fill>
       {/* the days */}
       <div className="flex flex-col gap-5">
         <p className="label text-muted-foreground"><span className="mr-3 text-foreground">01</span>Pick a day</p>
@@ -564,7 +566,7 @@ export function TimePicker({
       {/* the time. Not under a month: the picked button says it, and a
           six-row month on an iPad or a phone had no room for both. */}
       {view === "week" ? (
-      <div className="mt-10 flex flex-col gap-0.5 sm:mt-12 [@media(max-height:50rem)]:mt-3 [@media(max-height:50rem)]:gap-0">
+      <div className="mt-auto flex flex-col gap-0.5 pt-10 sm:pt-[var(--tp-top,5rem)] [@media(max-height:50rem)]:pt-3 [@media(max-height:50rem)]:gap-0">
         {/* The day over its time, or what to do before one is picked. */}
         <p key={chosen ? pick.date : "none"} className={cn("tp-roll font-display text-[clamp(1.25rem,4.5cqw,var(--tp-day,2.25rem))] uppercase leading-none tracking-[-0.02em]", !chosen && "text-muted-foreground")}>
           {chosen ? `${WEEKDAYS[date.getDay()]}, ${MONTHS[date.getMonth()]} ${date.getDate()}` : "Pick a day, then a time"}
