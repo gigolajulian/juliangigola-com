@@ -4730,35 +4730,35 @@ export const PROJECTS: Project[] = [
         "width": 2499,
         "height": 3124,
         "color": "#A67359",
-        "alt": ""
+        "alt": "Standing in profile in a dark bralette and briefs, a large projected portrait behind, warm tones"
       },
       {
         "src": "/work/light-play/02.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#262626",
-        "alt": ""
+        "alt": "Standing, hand on the hip, in a dark bralette and briefs, shadow and projection on the wall"
       },
       {
         "src": "/work/light-play/03.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#A68C73",
-        "alt": ""
+        "alt": "Reclining on one elbow on the floor in a dark bralette and briefs, a projected portrait behind"
       },
       {
         "src": "/work/light-play/04.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#735940",
-        "alt": ""
+        "alt": "Motion-blurred walking figure in front of a projected portrait and a disco ball, warm tones"
       },
       {
         "src": "/work/light-play/05.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#595959",
-        "alt": ""
+        "alt": "Leaning on one gloved hand on the floor, a disco ball held aloft in a long black glove"
       }
     ]
   },
