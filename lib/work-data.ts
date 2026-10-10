@@ -1441,42 +1441,42 @@ export const PROJECTS: Project[] = [
         "width": 2500,
         "height": 3333,
         "color": "#534E48",
-        "alt": ""
+        "alt": "Low angle on a chainmail hood and collar, chin raised, eyes up, dark grey backdrop"
       },
       {
         "src": "/work/aegis/02.jpg",
         "width": 2500,
         "height": 3333,
         "color": "#606364",
-        "alt": ""
+        "alt": "Full length in a chainmail hood, black bandeau and long sheer skirt, hands on her head, pale spotlight"
       },
       {
         "src": "/work/aegis/03.jpg",
         "width": 2500,
         "height": 3333,
         "color": "#616567",
-        "alt": ""
+        "alt": "Standing with hands behind her, chainmail hood, sheer skirt trailing across the floor, face turned aside"
       },
       {
         "src": "/work/aegis/04.jpg",
         "width": 2500,
         "height": 3333,
         "color": "#878C8E",
-        "alt": ""
+        "alt": "Seen from above, kneeling with hands on her knee, sheer skirt spread around her, chainmail hood"
       },
       {
         "src": "/work/aegis/05.jpg",
         "width": 2500,
         "height": 3334,
         "color": "#646361",
-        "alt": ""
+        "alt": "Hand on her head and the other across her chest, chainmail hood, belt with large rings"
       },
       {
         "src": "/work/aegis/06.jpg",
         "width": 2500,
         "height": 3334,
         "color": "#696A6A",
-        "alt": ""
+        "alt": "Turned three-quarters in a chainmail hood and black bandeau, one hand on her hip, eyes closed"
       }
     ]
   },
