@@ -4933,98 +4933,98 @@ export const PROJECTS: Project[] = [
         "width": 2499,
         "height": 3124,
         "color": "#C08C73",
-        "alt": ""
+        "alt": "Seated on a clear plastic sheet in a blue foil one-shoulder dress, curls on the face, warm backdrop"
       },
       {
         "src": "/work/liquid-metal-dreams/02.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#404040",
-        "alt": ""
+        "alt": "Hands framing the face, blue eyeshadow, wet curls and a blue foil dress, teal and orange light"
       },
       {
         "src": "/work/liquid-metal-dreams/03.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#267373",
-        "alt": ""
+        "alt": "Hand at the chin, face gems and wet curls, blue foil dress, teal backdrop, glossy highlights"
       },
       {
         "src": "/work/liquid-metal-dreams/04.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#598C8C",
-        "alt": ""
+        "alt": "Both hands behind the head, wet curls over the face, blue foil dress, teal backdrop"
       },
       {
         "src": "/work/liquid-metal-dreams/05.jpg",
         "width": 2499,
         "height": 3126,
         "color": "#408C8C",
-        "alt": ""
+        "alt": "Close crop, fingers pressed to the cheek, blue eyeshadow, face gems, wet curls, teal backdrop"
       },
       {
         "src": "/work/liquid-metal-dreams/06.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#C0F3F3",
-        "alt": ""
+        "alt": "Seated on crinkled silver foil in a blue foil dress, one arm over the head, pale teal backdrop"
       },
       {
         "src": "/work/liquid-metal-dreams/07.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#73A6A6",
-        "alt": ""
+        "alt": "Kneeling on silver foil, one hand reaching toward the lens, wet curls, blue foil dress"
       },
       {
         "src": "/work/liquid-metal-dreams/08.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#262626",
-        "alt": ""
+        "alt": "Head tilted back against a dark backdrop, silver face jewels, braided hair, soft side light"
       },
       {
         "src": "/work/liquid-metal-dreams/09.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#D9D9D9",
-        "alt": ""
+        "alt": "Leaning on one arm on a white floor, hair in buns with long braids, silver eyeliner, smoke behind"
       },
       {
         "src": "/work/liquid-metal-dreams/10.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#A6A6A6",
-        "alt": ""
+        "alt": "Chin on one hand, eyes closed, silver wire eyeliner, hair in buns, smoky grey backdrop"
       },
       {
         "src": "/work/liquid-metal-dreams/11.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#D9D9F3",
-        "alt": ""
+        "alt": "Seated leaning on both hands, hair in buns and braids, silver strapless top, soft white light"
       },
       {
         "src": "/work/liquid-metal-dreams/12.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#262626",
-        "alt": ""
+        "alt": "Arm raised over the head, hand at the face, silver top, cyan light on a dark backdrop"
       },
       {
         "src": "/work/liquid-metal-dreams/13.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#405959",
-        "alt": ""
+        "alt": "Lying on the side on a white floor, braids spread, silver top, fingers at the cheek"
       },
       {
         "src": "/work/liquid-metal-dreams/14.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#262626",
-        "alt": ""
+        "alt": "Close crop, fingers at the lips, silver eyeliner, a sparkling silver backdrop, pink light"
       }
     ]
   },
