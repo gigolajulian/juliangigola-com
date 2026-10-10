@@ -1346,63 +1346,63 @@ export const PROJECTS: Project[] = [
         "width": 2500,
         "height": 3333,
         "color": "#8B9193",
-        "alt": ""
+        "alt": "Full length in a white long-sleeve top, sheer tights and white fold-over boots, hands at her sleeves"
       },
       {
         "src": "/work/void/02.jpg",
         "width": 2500,
         "height": 3333,
         "color": "#8C9295",
-        "alt": ""
+        "alt": "Leaning forward in profile, white top and fold-over boots, light falling off into a dark vignette"
       },
       {
         "src": "/work/void/03.jpg",
         "width": 2500,
         "height": 3334,
         "color": "#969A9B",
-        "alt": ""
+        "alt": "Pulling the hem of a white top aside, white boots, glancing at the camera, dark vignette above"
       },
       {
         "src": "/work/void/04.jpg",
         "width": 2500,
         "height": 3333,
         "color": "#8D9192",
-        "alt": ""
+        "alt": "Closer crop, black hair across her face, hands gathering the hem of a white long-sleeve top"
       },
       {
         "src": "/work/void/05.jpg",
         "width": 2500,
         "height": 3333,
         "color": "#A7ACAD",
-        "alt": ""
+        "alt": "Looking down, holding the hem of a white top, white shorts and boots, pale sweep"
       },
       {
         "src": "/work/void/06.jpg",
         "width": 2500,
         "height": 3333,
         "color": "#AAAEB0",
-        "alt": ""
+        "alt": "Seated on the floor leaning back on one arm, white tank, sheer tights, white boots, acrylic cuff"
       },
       {
         "src": "/work/void/07.jpg",
         "width": 2500,
         "height": 3333,
         "color": "#ACAFB0",
-        "alt": ""
+        "alt": "Seated, knees raised toward the camera, white tank and boots, a seam line in the backdrop"
       },
       {
         "src": "/work/void/08.jpg",
         "width": 2500,
         "height": 3333,
         "color": "#ADB0B0",
-        "alt": ""
+        "alt": "Seated with one leg folded, boots stretched out, white tank, looking back at the lens, dark top edge"
       },
       {
         "src": "/work/void/09.jpg",
         "width": 2500,
         "height": 3333,
         "color": "#303237",
-        "alt": ""
+        "alt": "Standing in a white tank and boots against a black wall, one hand in her hair, white floor"
       }
     ]
   },
