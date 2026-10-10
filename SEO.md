@@ -22,6 +22,7 @@ blocked. The terms name Google as the text-only exception.
 - About: sessions sentence in Julian's words (c9d43ad)
 - Client logos: the company name as text in each logo link (975e7f4)
 - Video stills: "Still from <title>" alt text (PR #13, 04551d1)
+- Written alt text for every gallery frame, in `lib/work-data.ts` (jg-CONTENT) and `lib/alt-text.ts`, neutral wording, reviewed frame by frame (#104, #107, #108). Live check 2026-10-10: 109 /portfolio/ pages plus /headshots, 0 empty alts, 0 gendered words. Rules: one sentence, 8 to 18 words, what the frame shows only (the site appends project, discipline and credits), no skin or body.
 - Live check 2026-10-02: 119 sitemap URLs all 200; www and http 301 to apex; real 404s; one h1, canonical and description on every checked page; no empty alts on home, booking pages or /portfolio
 - Footer's hidden city text gone; cities live in the description and JSON-LD `areaServed` (checked 2026-10-05)
 - Search numbers in /admin Traffic (Google) and the Agentic OS dashboard (Google and Bing), 2026-10-05
@@ -30,8 +31,7 @@ blocked. The terms name Google as the text-only exception.
 
 1. Campus guides: "Best spots for SJSU grad photos", then SCU and SF State. Live before January for spring commencement. Copy needs Julian's sign-off.
 2. After the Google Business Profile is verified: add it (and Yelp) to `sameAs` in the structured data, and a "Leave a review" link.
-3. Written descriptions for the ~1,200 gallery photos that only have generated alt text. **In progress with jg-CONTENT** (branch `content`, `alt` fields in `lib/work-data.ts`): 559 fields written and cleared against main, head 6beb71f, waiting on jg-RELEASE to merge; 573 still empty, paused by Julian ("later"). Rules: one sentence, 8 to 18 words, what the frame shows only (the site appends project, discipline and credits), no skin or body.
-4. Session links wrap under "Book a session" at 1280px wide (layout, not ranking).
+3. Session links wrap under "Book a session" at 1280px wide (layout, not ranking).
 
 ## Julian only
 
