@@ -4868,42 +4868,42 @@ export const PROJECTS: Project[] = [
         "width": 2499,
         "height": 3124,
         "color": "#592626",
-        "alt": ""
+        "alt": "Head tilted, hair in a bun, teal ruffled oversized shirt, deep orange backdrop"
       },
       {
         "src": "/work/liminal/03.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#8C4026",
-        "alt": ""
+        "alt": "Head tilted forward over a pale ruffled shirt lit teal, bun and fringe, orange backdrop"
       },
       {
         "src": "/work/liminal/04.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#8C4026",
-        "alt": ""
+        "alt": "Full length in an oversized ruffled shirt, ankle boots and tights, crossed legs, light beam from the right"
       },
       {
         "src": "/work/liminal/05.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#A64026",
-        "alt": ""
+        "alt": "Backlit in a sheer ruffled shirt, face in shadow, bun and fringe, white beam from the right"
       },
       {
         "src": "/work/liminal/06.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#262626",
-        "alt": ""
+        "alt": "Double-exposure blur in a ruffled teal shirt, bun and fringe, orange backdrop"
       },
       {
         "src": "/work/liminal/07.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#262626",
-        "alt": ""
+        "alt": "Portrait in a ruffled collar shirt, light striping the face, bun and fringe, orange backdrop"
       }
     ]
   },
