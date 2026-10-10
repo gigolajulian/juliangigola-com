@@ -966,77 +966,77 @@ export const PROJECTS: Project[] = [
         "width": 2500,
         "height": 3333,
         "color": "#7E7069",
-        "alt": ""
+        "alt": "Close crop in an olive bralette and gold chain, taped hands raised beside her face, grinning wide"
       },
       {
         "src": "/work/undisputed/02.jpg",
         "width": 2500,
         "height": 3334,
         "color": "#8B8782",
-        "alt": ""
+        "alt": "Diptych: white boxing gloves held up to her chin above, taped hands at her jaw below"
       },
       {
         "src": "/work/undisputed/03.jpg",
         "width": 2500,
         "height": 3333,
         "color": "#787472",
-        "alt": ""
+        "alt": "Taped hand at her mouth, olive bralette over a black top, gaze drifting past the lens"
       },
       {
         "src": "/work/undisputed/04.jpg",
         "width": 2500,
         "height": 3333,
         "color": "#7D7A77",
-        "alt": ""
+        "alt": "Both white boxing gloves raised to cover her lower face, braids back, direct stare"
       },
       {
         "src": "/work/undisputed/05.jpg",
         "width": 2500,
         "height": 3333,
         "color": "#83817F",
-        "alt": ""
+        "alt": "Low angle, standing with white gloves hanging at her sides, olive bralette and shorts"
       },
       {
         "src": "/work/undisputed/06.jpg",
         "width": 2500,
         "height": 3333,
         "color": "#988F8B",
-        "alt": ""
+        "alt": "Diptych: leaning on a ring rope with taped hands above, a gloved arm raised over her head below"
       },
       {
         "src": "/work/undisputed/07.jpg",
         "width": 2500,
         "height": 3333,
         "color": "#857F7D",
-        "alt": ""
+        "alt": "Leaning forward over a ring rope, taped wrists hanging, braids falling, hard top light"
       },
       {
         "src": "/work/undisputed/08.jpg",
         "width": 2500,
         "height": 3334,
         "color": "#827E7C",
-        "alt": ""
+        "alt": "Slumped over the ring rope with her cheek on a taped forearm, braids hanging"
       },
       {
         "src": "/work/undisputed/09.jpg",
         "width": 2500,
         "height": 3333,
         "color": "#877F7B",
-        "alt": ""
+        "alt": "Chin resting on taped forearms across the rope, eyes cut sideways, dark rope crossing the frame"
       },
       {
         "src": "/work/undisputed/10.jpg",
         "width": 2500,
         "height": 3333,
         "color": "#B0A9A6",
-        "alt": ""
+        "alt": "Crouched low beside the ring rope, taped hands clasped at her knee, looking at the lens"
       },
       {
         "src": "/work/undisputed/11.jpg",
         "width": 2500,
         "height": 3333,
         "color": "#968B84",
-        "alt": ""
+        "alt": "Biting the tape on one wrapped hand, braids over her shoulder, rope across the frame"
       }
     ]
   },
