@@ -75,3 +75,10 @@
 .contact-card:has(.tp) .tp {
   height: auto !important;
 }
+/* And it keeps clear of the bar above and the rail and footer below. */
+@media (min-width: 40rem) {
+  .contact-card:has(.tp) {
+    margin-block: 2.25rem;
+    max-height: calc(100% - 4.5rem) !important;
+  }
+}
