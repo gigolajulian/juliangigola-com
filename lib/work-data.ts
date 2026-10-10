@@ -783,70 +783,70 @@ export const PROJECTS: Project[] = [
         "width": 2500,
         "height": 3333,
         "color": "#CCC6C3",
-        "alt": ""
+        "alt": "Woman with wet red hair in a pinstriped white shirt and torn white tights, standing on grey"
       },
       {
         "src": "/work/relay/02.jpg",
         "width": 2500,
         "height": 3333,
         "color": "#C2BBB7",
-        "alt": ""
+        "alt": "Standing with one hand at her shirt buttons, head tipped back, torn white tights"
       },
       {
         "src": "/work/relay/03.jpg",
         "width": 2500,
         "height": 3333,
         "color": "#D1CCC8",
-        "alt": ""
+        "alt": "Kneeling on the grey sweep, wet red hair falling forward, eyes to the camera"
       },
       {
         "src": "/work/relay/04.jpg",
         "width": 2500,
         "height": 3334,
         "color": "#CEC8C5",
-        "alt": ""
+        "alt": "Kneeling three-quarter turn, looking down and away, pinstriped shirt half open"
       },
       {
         "src": "/work/relay/05.jpg",
         "width": 2500,
         "height": 3334,
         "color": "#BDB8B4",
-        "alt": ""
+        "alt": "Seated on the floor leaning back on one arm, legs stretched out in torn white tights"
       },
       {
         "src": "/work/relay/06.jpg",
         "width": 2500,
         "height": 3333,
         "color": "#BEB9B4",
-        "alt": ""
+        "alt": "Perched on top of an old CRT television, hands on her knees, chin raised"
       },
       {
         "src": "/work/relay/07.jpg",
         "width": 2500,
         "height": 3333,
         "color": "#616263",
-        "alt": ""
+        "alt": "Sitting on the floor against a CRT that shows her face, dark grey backdrop, side light"
       },
       {
         "src": "/work/relay/08.jpg",
         "width": 2500,
         "height": 3333,
         "color": "#53514F",
-        "alt": ""
+        "alt": "On top of a CRT, holding a camcorder overhead, its cable trailing to the screen"
       },
       {
         "src": "/work/relay/09.jpg",
         "width": 2500,
         "height": 3333,
         "color": "#B7B5B3",
-        "alt": ""
+        "alt": "Lying on her front beside a CRT, chin in hand, pointing a camcorder at the screen"
       },
       {
         "src": "/work/relay/10.jpg",
         "width": 2400,
         "height": 3200,
         "color": "#6F7377",
-        "alt": ""
+        "alt": "Poster collage of the set: CRT close-ups, a camcorder still and a RELAY title block"
       }
     ]
   },
