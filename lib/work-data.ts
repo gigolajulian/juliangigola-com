@@ -8432,7 +8432,7 @@ export const PROJECTS: Project[] = [
         "width": 2499,
         "height": 3124,
         "color": "#262626",
-        "alt": "Two people at night under an oak, one in a denim jacket and mask, one with a bag"
+        "alt": "Two people at night under a tree, one in a denim jacket and mask, one with a bag"
       },
       {
         "src": "/work/stratus-lookbook-vol-1/05.jpg",
@@ -8460,7 +8460,7 @@ export const PROJECTS: Project[] = [
         "width": 2499,
         "height": 3124,
         "color": "#262626",
-        "alt": "Turned away in a green quilted jacket, hand at the head, cargo trousers, dark hills at dusk"
+        "alt": "Turned away with the head down in a green quilted jacket, hands together, cargo trousers, dark hills"
       },
       {
         "src": "/work/stratus-lookbook-vol-1/09.jpg",
@@ -9948,7 +9948,7 @@ export const PROJECTS: Project[] = [
         "width": 2499,
         "height": 1667,
         "color": "#724041",
-        "alt": "Reception guests in dresses and suits posing and clapping in a hotel lobby, warm light"
+        "alt": "Guests in dresses and suits posing together in a lobby, drinks table with a red cloth"
       },
       {
         "src": "/work/weddings/34.jpg",
@@ -10061,7 +10061,7 @@ export const PROJECTS: Project[] = [
         "width": 2499,
         "height": 3124,
         "color": "#C0C0A6",
-        "alt": "Seated dog wearing a blue and white WIRED tote bag, grey wall, yellow road paint"
+        "alt": "Seated dog wearing a blue and white printed tote bag, grey wall, yellow road paint"
       },
       {
         "src": "/work/wired-magazine/05.jpg",
@@ -10089,14 +10089,14 @@ export const PROJECTS: Project[] = [
         "width": 2499,
         "height": 3124,
         "color": "#262626",
-        "alt": "Blue and white WIRED tote bag seen from above against a dark background"
+        "alt": "Blue and white printed tote bag seen from above against a dark background"
       },
       {
         "src": "/work/wired-magazine/09.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#26598C",
-        "alt": "Hand holding an orange WIRED mug, a ring on one finger, desk and city skyline behind"
+        "alt": "Hand holding an orange mug printed TIRED, a ring on one finger, desk and city skyline behind"
       },
       {
         "src": "/work/wired-magazine/10.jpg",
