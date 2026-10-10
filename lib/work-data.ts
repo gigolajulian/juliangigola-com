@@ -3324,91 +3324,91 @@ export const PROJECTS: Project[] = [
         "width": 2074,
         "height": 2593,
         "color": "#264059",
-        "alt": ""
+        "alt": "Standing in a rhinestone chain top and black fringed shorts, long silver hair, blue spotlight"
       },
       {
         "src": "/work/frostbite/02.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#262640",
-        "alt": ""
+        "alt": "Lying on the floor propped on elbows, platform boots raised behind, long silver hair, white spotlight circle"
       },
       {
         "src": "/work/frostbite/03.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#264059",
-        "alt": ""
+        "alt": "Crouched in buckled black boots and fishnets, long silver hair, glancing over one shoulder, blue backdrop"
       },
       {
         "src": "/work/frostbite/04.jpg",
         "width": 2256,
         "height": 2820,
         "color": "#D9D9D9",
-        "alt": ""
+        "alt": "Kneeling on both hands, long silver hair falling forward, rhinestone chains, looking up into the light"
       },
       {
         "src": "/work/frostbite/05.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#40A6D9",
-        "alt": ""
+        "alt": "Close crop, head tilted back, rhinestone chain top, long silver hair, deep blue backdrop"
       },
       {
         "src": "/work/frostbite/06.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#26A6C0",
-        "alt": ""
+        "alt": "Seated with head tilted and eyes closed, draped rhinestone chains, long silver hair, hand on knee"
       },
       {
         "src": "/work/frostbite/07.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#D9C0A6",
-        "alt": ""
+        "alt": "One arm raised over the head, rhinestone chain top, silver hair swept to the side, blue backdrop"
       },
       {
         "src": "/work/frostbite/08.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#265973",
-        "alt": ""
+        "alt": "Resting the head on an arm along the floor, silver hair spread, white spotlight, blue backdrop"
       },
       {
         "src": "/work/frostbite/09.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#F3F3F3",
-        "alt": ""
+        "alt": "Head tilted with a raised forearm in shadow, glossy lips, long silver hair, cyan light"
       },
       {
         "src": "/work/frostbite/10.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#265973",
-        "alt": ""
+        "alt": "Seen from behind, looking back over a shoulder, black fringed skirt, long silver hair, blue backdrop"
       },
       {
         "src": "/work/frostbite/11.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#0C260C",
-        "alt": ""
+        "alt": "Reflected in a mirror edge, hands at the neck, long silver hair, blue light"
       },
       {
         "src": "/work/frostbite/12.jpg",
         "width": 2074,
         "height": 3129,
         "color": "#D9C0C0",
-        "alt": ""
+        "alt": "Standing in a rhinestone chain top and black studded shorts, hands at the sides, pale grey-green backdrop"
       },
       {
         "src": "/work/frostbite/13.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#264040",
-        "alt": ""
+        "alt": "Lying on a white spotlit floor in black stockings and a feathered top, silver hair, dark green surround"
       }
     ]
   },
