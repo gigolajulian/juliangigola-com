@@ -249,7 +249,7 @@ export const PROJECTS: Project[] = [
         "width": 2500,
         "height": 3333,
         "color": "#272927",
-        "alt": "Figure in a gas mask and bunny ears stands in drifting smoke, fur boots lit from below"
+        "alt": "Figure from behind in a gas mask, bunny ears and fur tail, standing in drifting smoke under flash"
       },
       {
         "src": "/work/hua/09.jpg",
