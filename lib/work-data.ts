@@ -1601,42 +1601,42 @@ export const PROJECTS: Project[] = [
         "width": 2499,
         "height": 3124,
         "color": "#110A12",
-        "alt": ""
+        "alt": "Standing with a broadsword across her shoulders, chainmail hood, black bandeau, hard blue light"
       },
       {
         "src": "/work/aera-wraith/03.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#080D12",
-        "alt": ""
+        "alt": "Hands clasped at her face in a chainmail hood and dark lipstick, rocky dark teal backdrop"
       },
       {
         "src": "/work/aera-wraith/04.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#000005",
-        "alt": ""
+        "alt": "Hand on a planted sword hilt, chainmail hood, lens flare streaking in from the left, blue backdrop"
       },
       {
         "src": "/work/aera-wraith/05.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#223E57",
-        "alt": ""
+        "alt": "Seated on a blue floor in black thigh-high boots and chainmail hood, sword lying beside her"
       },
       {
         "src": "/work/aera-wraith/06.jpg",
         "width": 2499,
         "height": 3114,
         "color": "#121518",
-        "alt": ""
+        "alt": "Standing among cave rocks in smoke, hand on her hip, chainmail hood, sword planted behind"
       },
       {
         "src": "/work/aera-wraith/07.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#0D080F",
-        "alt": ""
+        "alt": "Close crop, arm across the sword hilt, hand on her head, chainmail hood, deep blue backdrop"
       }
     ]
   },
