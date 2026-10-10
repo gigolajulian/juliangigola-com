@@ -569,7 +569,7 @@ export const PROJECTS: Project[] = [
         "width": 2500,
         "height": 1668,
         "color": "#817E79",
-        "alt": "Kneeling on one knee in a pool of light, arms crossed over the knit top"
+        "alt": "Kneeling on one knee in a pool of light, gripping the knit top across her chest"
       },
       {
         "src": "/work/novocaine/09.jpg",
@@ -783,7 +783,7 @@ export const PROJECTS: Project[] = [
         "width": 2500,
         "height": 3333,
         "color": "#CCC6C3",
-        "alt": "Woman with wet red hair in a pinstriped white shirt and torn white tights, standing on grey"
+        "alt": "Woman with wet red hair in a striped white shirt and torn white tights, standing on grey"
       },
       {
         "src": "/work/relay/02.jpg",
@@ -804,7 +804,7 @@ export const PROJECTS: Project[] = [
         "width": 2500,
         "height": 3334,
         "color": "#CEC8C5",
-        "alt": "Kneeling three-quarter turn, looking down and away, pinstriped shirt half open"
+        "alt": "Kneeling three-quarter turn, looking away to the side, unbuttoned striped shirt"
       },
       {
         "src": "/work/relay/05.jpg",
