@@ -4788,56 +4788,56 @@ export const PROJECTS: Project[] = [
         "width": 2499,
         "height": 3124,
         "color": "#262626",
-        "alt": ""
+        "alt": "Seated in a red bodysuit and lace-up boots, hand over the face, a white beam from the right"
       },
       {
         "src": "/work/lightbeam/02.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#0C260C",
-        "alt": ""
+        "alt": "Seated with knees drawn up, lace-up boots, red bodysuit, sunglasses, a beam of light from behind"
       },
       {
         "src": "/work/lightbeam/03.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#264040",
-        "alt": ""
+        "alt": "Crawling across a pool of white light on a teal floor, red bodysuit, sunglasses"
       },
       {
         "src": "/work/lightbeam/04.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#264040",
-        "alt": ""
+        "alt": "Seated leaning back on one hand, buckled platform boots, red bodysuit, sunglasses with a star flare"
       },
       {
         "src": "/work/lightbeam/05.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#264040",
-        "alt": ""
+        "alt": "Hands at the cheeks in mirrored visor sunglasses, red mesh-sleeve bodysuit, teal haze"
       },
       {
         "src": "/work/lightbeam/06.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#0C260C",
-        "alt": ""
+        "alt": "Both arms raised overhead, red bodysuit, sunglasses with a star flare, teal haze"
       },
       {
         "src": "/work/lightbeam/07.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#264040",
-        "alt": ""
+        "alt": "Close angle, head tilted, hands at the face, visor sunglasses with a flare, red mesh sleeves"
       },
       {
         "src": "/work/lightbeam/08.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#264040",
-        "alt": ""
+        "alt": "Profile with a finger to the lips, red bodysuit, pale haze lit from the left, dark teal backdrop"
       }
     ]
   },
