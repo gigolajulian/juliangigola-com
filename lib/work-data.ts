@@ -2722,91 +2722,91 @@ export const PROJECTS: Project[] = [
         "width": 2499,
         "height": 3124,
         "color": "#0C260C",
-        "alt": ""
+        "alt": "Seated on a CRT in a black leather bodysuit and fringed chaps, revolver, face harness, repeating text behind"
       },
       {
         "src": "/work/cyberscape/02.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#0C260C",
-        "alt": ""
+        "alt": "Looking back over a shoulder, seated on a CRT in fringed chaps, chrome sunglasses, red and blue light"
       },
       {
         "src": "/work/cyberscape/03.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#0C260C",
-        "alt": ""
+        "alt": "Seated on a CRT with a hand on the knee, chrome sunglasses, fringed chaps, leather top, blue backdrop"
       },
       {
         "src": "/work/cyberscape/04.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#0C260C",
-        "alt": ""
+        "alt": "Pointing a revolver at the lens in chrome sunglasses and a face harness, leather bodysuit, red rim light"
       },
       {
         "src": "/work/cyberscape/05.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#0C260C",
-        "alt": ""
+        "alt": "Close angle on a pointed revolver, chrome sunglasses, mouth harness, black leather top, blue light"
       },
       {
         "src": "/work/cyberscape/06.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#0C260C",
-        "alt": ""
+        "alt": "Arm extended with a revolver, chrome sunglasses and a face harness, black leather bodysuit, red light"
       },
       {
         "src": "/work/cyberscape/07.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#0C260C",
-        "alt": ""
+        "alt": "Seated holding a revolver upright, black leather bodysuit, chaps with red stitching, face harness, blue backdrop"
       },
       {
         "src": "/work/cyberscape/08.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#0C260C",
-        "alt": ""
+        "alt": "Head resting on folded arms over a CRT showing a matching frame, chrome sunglasses, magenta glow"
       },
       {
         "src": "/work/cyberscape/09.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#0C400C",
-        "alt": ""
+        "alt": "Camcorder screen in the foreground showing a seated figure, a blurred blue silhouette behind"
       },
       {
         "src": "/work/cyberscape/10.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#D90C0C",
-        "alt": ""
+        "alt": "Hand at the cheek, face tilted up, star stickers by the eye, black top, teal and red light"
       },
       {
         "src": "/work/cyberscape/11.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#0C260C",
-        "alt": ""
+        "alt": "Reclining in a plaid mini skirt and black top beside a glowing CRT, head tipped back"
       },
       {
         "src": "/work/cyberscape/12.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#0C260C",
-        "alt": ""
+        "alt": "Hand in the hair, star stickers on the cheek, black strappy top, plaid skirt, red and cyan light"
       },
       {
         "src": "/work/cyberscape/13.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#0C260C",
-        "alt": ""
+        "alt": "Tight crop, head resting on a hand, loose braids, star stickers, black top, red and blue light"
       }
     ]
   },
@@ -3432,77 +3432,77 @@ export const PROJECTS: Project[] = [
         "width": 2428,
         "height": 3642,
         "color": "#262626",
-        "alt": ""
+        "alt": "Smiling headshot with wavy dark hair in a black tee against a black backdrop"
       },
       {
         "src": "/work/fun-xyz/02.jpg",
         "width": 2428,
         "height": 3642,
         "color": "#262626",
-        "alt": ""
+        "alt": "Headshot with short curly hair, steady gaze, black tee, black backdrop"
       },
       {
         "src": "/work/fun-xyz/03.jpg",
         "width": 2428,
         "height": 3641,
         "color": "#26260C",
-        "alt": ""
+        "alt": "Smiling headshot, closed eyes, black V-neck tee, black backdrop, short dark hair"
       },
       {
         "src": "/work/fun-xyz/04.jpg",
         "width": 2428,
         "height": 3642,
         "color": "#262626",
-        "alt": ""
+        "alt": "Smiling headshot, short dark hair, black crew neck tee, black backdrop"
       },
       {
         "src": "/work/fun-xyz/05.jpg",
         "width": 2428,
         "height": 3642,
         "color": "#260C0C",
-        "alt": ""
+        "alt": "Headshot in a black henley with a neutral expression, short dark hair, black backdrop"
       },
       {
         "src": "/work/fun-xyz/06.jpg",
         "width": 2428,
         "height": 3642,
         "color": "#C08C73",
-        "alt": ""
+        "alt": "Headshot with swept blond hair and a pendant chain over a black tee, black backdrop"
       },
       {
         "src": "/work/fun-xyz/07.jpg",
         "width": 2427,
         "height": 3642,
         "color": "#260C0C",
-        "alt": ""
+        "alt": "Headshot with side-parted brown hair, black tee, soft front light, black backdrop"
       },
       {
         "src": "/work/fun-xyz/08.jpg",
         "width": 2428,
         "height": 3642,
         "color": "#262626",
-        "alt": ""
+        "alt": "Smiling headshot in a thin gold chain and black tee, short dark hair, black backdrop"
       },
       {
         "src": "/work/fun-xyz/09.jpg",
         "width": 2428,
         "height": 3642,
         "color": "#262626",
-        "alt": ""
+        "alt": "Headshot, short dark hair, black tee, slight smile, black backdrop"
       },
       {
         "src": "/work/fun-xyz/10.jpg",
         "width": 2428,
         "height": 3642,
         "color": "#C08C73",
-        "alt": ""
+        "alt": "Smiling headshot with tousled blond hair, black V-neck tee, black backdrop"
       },
       {
         "src": "/work/fun-xyz/11.jpg",
         "width": 2428,
         "height": 3642,
         "color": "#D9A673",
-        "alt": ""
+        "alt": "Smiling headshot in round wire glasses and a black tee, short dark hair, black backdrop"
       }
     ]
   },
@@ -3866,35 +3866,35 @@ export const PROJECTS: Project[] = [
         "width": 719,
         "height": 1079,
         "color": "#5C6B68",
-        "alt": ""
+        "alt": "From behind on concrete steps in a white dress and woven sash, holding a decorated cap, black heels"
       },
       {
         "src": "/work/graduation/12.jpg",
         "width": 719,
         "height": 1079,
         "color": "#9E9E97",
-        "alt": ""
+        "alt": "Standing on concrete steps in a white mini dress, green woven graduation sash, black heels"
       },
       {
         "src": "/work/graduation/13.jpg",
         "width": 2428,
         "height": 3642,
         "color": "#A6C0C0",
-        "alt": ""
+        "alt": "Hand on the hip in a blue graduation sash over a black dress, glass wall behind, looking away"
       },
       {
         "src": "/work/graduation/14.jpg",
         "width": 2428,
         "height": 3642,
         "color": "#F3F3F3",
-        "alt": ""
+        "alt": "Throwing a graduation cap in a gown and blue sash, a stone tower and blue sky behind"
       },
       {
         "src": "/work/graduation/15.jpg",
         "width": 2428,
         "height": 3642,
         "color": "#C0C0C0",
-        "alt": ""
+        "alt": "Throwing a graduation cap overhead on a palm-lined walkway, black dress, blue sash, heeled sandals"
       }
     ]
   },
@@ -3980,7 +3980,7 @@ export const PROJECTS: Project[] = [
         "width": 2428,
         "height": 3642,
         "color": "#262626",
-        "alt": ""
+        "alt": "Smiling headshot in a black crew neck tee against a black backdrop, short dark hair"
       },
       {
         "src": "/work/headshots/10.jpg",
@@ -4001,21 +4001,21 @@ export const PROJECTS: Project[] = [
         "width": 2427,
         "height": 3642,
         "color": "#260C0C",
-        "alt": ""
+        "alt": "Headshot of a person with wavy brown hair, black tee, soft front light on a black backdrop"
       },
       {
         "src": "/work/headshots/13.jpg",
         "width": 2428,
         "height": 3642,
         "color": "#262626",
-        "alt": ""
+        "alt": "Smiling headshot, short dark hair, black long-sleeve tee, black backdrop, crossed arms"
       },
       {
         "src": "/work/headshots/14.jpg",
         "width": 2428,
         "height": 3642,
         "color": "#D9A673",
-        "alt": ""
+        "alt": "Smiling headshot in round wire glasses and a black tee, short dark hair, black backdrop"
       }
     ]
   },
@@ -8660,49 +8660,49 @@ export const PROJECTS: Project[] = [
         "width": 2499,
         "height": 3124,
         "color": "#262626",
-        "alt": ""
+        "alt": "Standing in a black blazer and wide jeans beside a band, an orange limousine and an overpass behind"
       },
       {
         "src": "/work/the-den-talkshow/02.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#F3F3F3",
-        "alt": ""
+        "alt": "Mid-jump with a guitar in flared jeans in front of an orange limousine, a keyboard stand nearby"
       },
       {
         "src": "/work/the-den-talkshow/03.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#F3F3F3",
-        "alt": ""
+        "alt": "Singing into a microphone in a tan blazer, one hand reaching toward the lens, orange limousine behind"
       },
       {
         "src": "/work/the-den-talkshow/04.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#F3F3F3",
-        "alt": ""
+        "alt": "Four people leaning on an orange limousine, one with a guitar, sunglasses, black coats, low angle"
       },
       {
         "src": "/work/the-den-talkshow/05.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#262626",
-        "alt": ""
+        "alt": "Wide angle into the open trunk of a limousine packed with bandmates laughing, a red beret, a guitar"
       },
       {
         "src": "/work/the-den-talkshow/06.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#262626",
-        "alt": ""
+        "alt": "Standing in sunglasses and a puffer vest with a sunburst guitar on the shoulder, orange limousine behind"
       },
       {
         "src": "/work/the-den-talkshow/07.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#260C0C",
-        "alt": ""
+        "alt": "Seated in a limousine interior holding a red guitar, tan blazer, three bandmates behind, purple light"
       }
     ]
   },
@@ -9018,70 +9018,70 @@ export const PROJECTS: Project[] = [
         "width": 2499,
         "height": 3124,
         "color": "#26260C",
-        "alt": ""
+        "alt": "Kneeling in a tank top with hand wraps trailing on the floor, head tipped back, teal light"
       },
       {
         "src": "/work/true-grit/02.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#26C0C0",
-        "alt": ""
+        "alt": "Blurred hand reaching toward the lens, a shaved head and cigarette behind, amber rim on the tank top"
       },
       {
         "src": "/work/true-grit/03.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#260C0C",
-        "alt": ""
+        "alt": "Profile with a cigarette in the mouth, taped fist at the hip, tank top, amber and teal light"
       },
       {
         "src": "/work/true-grit/04.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#26260C",
-        "alt": ""
+        "alt": "Tight low angle on a wrapped hand holding a cigarette at the chin, amber highlight on the fingers"
       },
       {
         "src": "/work/true-grit/05.jpg",
         "width": 2428,
         "height": 3641,
         "color": "#26C0C0",
-        "alt": ""
+        "alt": "Head tipped back with smoke rising, wrapped hand at the chest, ribbed tank top, teal light"
       },
       {
         "src": "/work/true-grit/06.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#260C0C",
-        "alt": ""
+        "alt": "Standing in a tank top with hand wraps, a cigarette raised to the mouth, dark teal room"
       },
       {
         "src": "/work/true-grit/07.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#26C0C0",
-        "alt": ""
+        "alt": "Hand wrap pressed to the temple, smoke over a shaved head, tank top, deep teal shadow"
       },
       {
         "src": "/work/true-grit/08.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#40C0C0",
-        "alt": ""
+        "alt": "Seated on the floor wrapping both hands, head bowed, tank top, teal floor, amber edge light"
       },
       {
         "src": "/work/true-grit/09.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#260C0C",
-        "alt": ""
+        "alt": "Close crop of a raised wrapped fist beside a face, tank top, amber light on the shoulder"
       },
       {
         "src": "/work/true-grit/10.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#73D9D9",
-        "alt": ""
+        "alt": "Seen from above, standing in a tank top clasping wrapped hands at the waist, teal floor"
       }
     ]
   },
