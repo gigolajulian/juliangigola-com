@@ -7934,28 +7934,28 @@ export const PROJECTS: Project[] = [
         "width": 2499,
         "height": 3124,
         "color": "#260C0C",
-        "alt": ""
+        "alt": "Profile silhouette with a hand at the chest, a hard orange light flaring behind the head, dark backdrop"
       },
       {
         "src": "/work/solace/02.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#260C0C",
-        "alt": ""
+        "alt": "Lying on the floor with a hand raised, a red and orange light glowing behind, dark room"
       },
       {
         "src": "/work/solace/03.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#590C0C",
-        "alt": ""
+        "alt": "Seated leaning on one hand, an arm raised, black lace bustier and long black skirt, orange backlight"
       },
       {
         "src": "/work/solace/04.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#260C0C",
-        "alt": ""
+        "alt": "Head tipped back with a hand at the throat, hoop earring, a bright orange haze behind"
       }
     ]
   },
@@ -7992,21 +7992,21 @@ export const PROJECTS: Project[] = [
         "width": 2499,
         "height": 3125,
         "color": "#C0C0C0",
-        "alt": ""
+        "alt": "Crouched in a white ruffled sheer shirt, black tights and heels, hair in a bun"
       },
       {
         "src": "/work/solitude/03.jpg",
         "width": 2499,
         "height": 3125,
         "color": "#C0C0C0",
-        "alt": ""
+        "alt": "Crouched with the head bowed in a white ruffled sheer shirt, black tights and heels, pale backdrop"
       },
       {
         "src": "/work/solitude/04.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#C0C0C0",
-        "alt": ""
+        "alt": "Seen from above, crouched with arms wrapped around the knees, white ruffled shirt, black heels, pale floor"
       }
     ]
   },
@@ -8115,28 +8115,28 @@ export const PROJECTS: Project[] = [
         "width": 2499,
         "height": 3124,
         "color": "#262626",
-        "alt": ""
+        "alt": "Seated on a lit floor leaning on one arm, white lace top, black tie, shorts, sneakers"
       },
       {
         "src": "/work/sonder/03.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#262626",
-        "alt": ""
+        "alt": "Seated on a pool of hard light looking at the lens, lace top, black tie, shorts, striped sneakers"
       },
       {
         "src": "/work/sonder/04.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#262626",
-        "alt": ""
+        "alt": "Seated with the head tilted back, lace top, long black tie, white socks and striped sneakers, dark backdrop"
       },
       {
         "src": "/work/sonder/05.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#262626",
-        "alt": ""
+        "alt": "Seated on a pool of hard white light, lace top, black tie, shorts, striped sneakers, dark backdrop"
       }
     ]
   },
