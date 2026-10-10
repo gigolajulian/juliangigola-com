@@ -170,6 +170,26 @@ const pageRedirects = [
  *                    play (see `components/video-grid.tsx`), so the policy is
  *                    the boundary and the click is the consent.
  */
+/**
+ * A production build for this machine, not for Cloudflare.
+ *
+ * `JG_LOCAL=1` is set by `npm run perf` (`scripts/perf/run.mjs`) and by
+ * nothing that deploys. With it, a build served by `next start` on
+ * http://localhost behaves like the live site in the two ways that matter
+ * for timing a frame:
+ *
+ *   - `/cdn-cgi/image/*` is proxied to https://juliangigola.com, so the
+ *     photographs are the production-sized ones Cloudflare resizes. Without
+ *     it every frame 404s locally and a swipe moves empty boxes.
+ *   - `upgrade-insecure-requests` and HSTS are left out. Safari upgrades
+ *     every request on plain-http localhost to https under that directive,
+ *     and the page loads with no stylesheet and no scripts.
+ *
+ * Read at build time. A Cloudflare build never sets it, so its routes and
+ * headers are exactly as before.
+ */
+const LOCAL = process.env.JG_LOCAL === "1";
+
 // Dev-only allowance so impeccable live mode can load. Guarded by NODE_ENV.
 const __impeccableLiveDev =
   process.env.NODE_ENV === "development" ? " http://localhost:8400" : "";
@@ -186,7 +206,8 @@ const csp = [
   // The provider stills for the video page, which are 16:9 thumbnails on
   // their own CDNs rather than frames from the archive.
   "img-src 'self' data: blob: https://i.ytimg.com https://i.vimeocdn.com",
-  "font-src 'self'",
+  // Cal.com's embed script sets its loader in its own face, from `cal.com`.
+  "font-src 'self' https://cal.com",
   "style-src 'self' 'unsafe-inline'",
   // Cloudflare Web Analytics. The beacon is injected by the zone, not by
   // this app, so the first CSP blocked it and took the site's only analytics
@@ -203,17 +224,21 @@ const csp = [
      reel stays silent, which is the safe direction). The alternative was
      dropping the volume request or shipping sound at whatever level the
      visitor's last Vimeo session left it at. */
-  `script-src 'self' 'unsafe-inline' https://static.cloudflareinsights.com https://player.vimeo.com${__impeccableLiveDev}`,
+  // `app.cal.com` is Cal.com's embed script, loaded only on a booking
+  // calendar with `?cal` on the address (`components/cal-embed.tsx`).
+  `script-src 'self' 'unsafe-inline' https://static.cloudflareinsights.com https://player.vimeo.com https://app.cal.com${__impeccableLiveDev}`,
   // The two players, and only as an embed — `frame-ancestors 'none'` above
   // is the other direction and still says nobody may frame this site.
   // And the booking calendars on /book and the session pages (Google Calendar
-  // appointment schedules, `components/book-picker.tsx`, `components/contact-screen.tsx`).
-  "frame-src https://www.youtube-nocookie.com https://player.vimeo.com https://calendar.google.com",
+  // appointment schedules, `components/book-picker.tsx`, `components/contact-screen.tsx`),
+  // and Cal.com's in their place behind `?cal` (`components/cal-embed.tsx`).
+  "frame-src https://www.youtube-nocookie.com https://player.vimeo.com https://calendar.google.com https://app.cal.com https://cal.com",
   // `vimeo.com` and `youtube.com` are oEmbed lookups made by /admin when a
   // link is pasted: the title, and the poster Vimeo does not publish at a
   // guessable URL. No page on the site fetches either.
   `connect-src 'self' https://api.github.com https://vimeo.com https://www.youtube.com${__impeccableLiveDev}`,
-  "upgrade-insecure-requests",
+  // Not on a local build (`LOCAL` above): there is no https on localhost.
+  ...(LOCAL ? [] : ["upgrade-insecure-requests"]),
 ].join("; ");
 
 const securityHeaders = [
@@ -231,10 +256,14 @@ const securityHeaders = [
   // A year, subdomains included. No `preload`: that is a one-way door onto a
   // list that is slow to leave, and it should be a deliberate decision rather
   // than a side effect of hardening headers.
-  {
-    key: "Strict-Transport-Security",
-    value: "max-age=31536000; includeSubDomains",
-  },
+  ...(LOCAL
+    ? []
+    : [
+        {
+          key: "Strict-Transport-Security",
+          value: "max-age=31536000; includeSubDomains",
+        },
+      ]),
   // The rights reservation, in the two machine-readable forms that exist.
   // `noai`/`noimageai` is the de-facto signal (DeviantArt's, honoured by a
   // growing list of crawlers); `TDM-Reservation: 1` is the W3C TDMRep
@@ -349,10 +378,21 @@ const nextConfig: NextConfig = {
      `/portfolio/[slug]` where a discipline and its one gallery share a
      slug (Automotive, Events, Places). */
   async rewrites() {
-    return LISTINGS.map((c) => ({
+    const listings = LISTINGS.map((c) => ({
       source: `/portfolio/${c.slug}`,
       destination: `/portfolio/discipline/${c.slug}`,
     }));
+    /* A local build or the dev server asks the live zone for its resized
+       photographs (`LOCAL` above). Never in a Cloudflare build, where the
+       zone answers `/cdn-cgi/image/` itself. */
+    if (!LOCAL && process.env.NODE_ENV !== "development") return listings;
+    return [
+      ...listings,
+      {
+        source: "/cdn-cgi/image/:path*",
+        destination: "https://juliangigola.com/cdn-cgi/image/:path*",
+      },
+    ];
   },
 
   async redirects() {

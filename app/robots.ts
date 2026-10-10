@@ -15,18 +15,18 @@ export default function robots(): MetadataRoute.Robots {
       // companies publish for training use specifically. The legal version
       // of this list is clause 5 of /legal#terms; the headers carry it too.
       //
-      // AI search is let in, at Julian's ask (2026-09-26): OAI-SearchBot,
-      // ChatGPT-User, PerplexityBot, Perplexity-User, DuckAssistBot,
-      // MistralAI-User and Meta-ExternalFetcher fetch a page to answer a
-      // question and cite it, and are off this list. Each company's training
-      // crawler (GPTBot, Meta-ExternalAgent...) stays on it. Claude-SearchBot
-      // and Claude-User were never listed; ClaudeBot is Anthropic's trainer.
+      // AI search is let in, at Julian's ask: OAI-SearchBot, ChatGPT-User,
+      // PerplexityBot, Perplexity-User, DuckAssistBot, MistralAI-User and
+      // Meta-ExternalFetcher fetch a page to answer a question and cite it,
+      // and are off this list. Each company's training crawler (GPTBot,
+      // Meta-ExternalAgent...) stays on it. Claude-SearchBot and Claude-User
+      // were never listed; ClaudeBot is Anthropic's trainer.
       //
-      // Google-Extended is off the list at Julian's ask (2026-10-02) so Gemini
-      // can recommend the site. Google uses that one token for both Gemini
-      // answers and Gemini training, so the terms' AI search clause names
-      // Google as the exception. Googlebot-Image is shut out in exchange, so
-      // the photographs themselves stay out of Google.
+      // Google-Extended is off the list at Julian's ask so Gemini can
+      // recommend the site. Google uses that one token for both Gemini answers
+      // and Gemini training, so the terms' AI search clause names Google as
+      // the exception. Googlebot-Image is shut out in exchange, so the
+      // photographs themselves stay out of Google.
       { userAgent: "Googlebot-Image", disallow: "/" },
       {
         userAgent: [

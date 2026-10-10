@@ -100,24 +100,23 @@ export function ContactForm({
   const [ready, setReady] = React.useState(false);
   const [emailHint, setEmailHint] = React.useState<string>();
   const [type, setType] = React.useState<string>(
-    /* Nothing picked until the visitor picks (critique, 2026-10-03): a
-       private client from the nav landed on Editorial. Unpicked, the
-       second question is the general one and the server files it as
-       Other. */
+    /* Nothing picked until the visitor picks: a private client from
+       the nav landed on Editorial. Unpicked, the second question is
+       the general one and the server files it as Other. */
     TYPES.some((t) => t.value === preset) ? (preset as string) : "",
   );
-  /* And again when the link changes under a form already on the page.
-     The form lives on the homepage, so it is mounted long before a
-     session's Inquire is pressed: Graduation landed here on Editorial,
-     asking for a publication and an issue date (2026-10-01). */
+  /* And again when the link changes under a form already on the
+     page. The form lives on the homepage, so it is mounted long
+     before a session's Inquire is pressed: Graduation landed here on
+     Editorial, asking for a publication and an issue date. */
   const [seen, setSeen] = React.useState(preset);
   if (preset !== seen) {
     setSeen(preset);
     if (TYPES.some((t) => t.value === preset)) setType(preset as string);
   }
-  /* Julian (critique, 2026-10-03): Book a session landed on the
-     commission desk, the session pushed into the date field. Booking
-     asks which session, then when and where. */
+  /* Book a session landed on the commission desk, the session pushed
+     into the date field. Booking asks which session, then when and
+     where. */
   const booking = type === "session" && sessions.length > 0;
   const [session, setSession] = React.useState(presetSession ?? "");
   const [seenSession, setSeenSession] = React.useState(presetSession);
@@ -345,7 +344,7 @@ export function ContactForm({
                    ring for somebody arriving by Tab and nobody else.
                    Julian asked. */
                 "has-[:focus-visible]:outline has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-[var(--ring)]",
-                /* Chosen, inverted (Julian, 2026-10-08). */
+                /* Chosen, inverted. */
                 chosen === t.value
                   ? "border-foreground bg-foreground text-background"
                   : "border-border text-muted-foreground hoverable:hover:border-foreground/40 hoverable:hover:text-foreground",
@@ -423,8 +422,8 @@ export function ContactForm({
           column was 54. Wrapping instead, and the sentence takes a line of
           its own below the button until there is a window wide enough to
           hold all three. */}
-      {/* Julian (2026-10-05): the address on the left, the button on the right,
-          the sentence off the screen (still read out with the button). */}
+      {/* The address on the left, the button on the right, the sentence off
+          the screen (still read out with the button). */}
       <div className="flex flex-wrap items-start justify-between gap-x-6 gap-y-3">
         <button
           type="submit"
@@ -456,7 +455,7 @@ export function ContactForm({
           </p>
         ) : null}
         {/* The address is above the form on a phone already. */}
-        <p className="order-first text-left text-xs text-muted-foreground opacity-70 max-sm:hidden">
+        <p className="order-first text-left text-xs text-muted-foreground max-sm:hidden">
           Email{" "}
           <a
             href="mailto:hello@juliangigola.com"
@@ -494,8 +493,8 @@ function Field({
     <div className="contact-field">
       <label htmlFor={id} className="label block text-muted-foreground">
         {label}
-        {/* Said, not only shown: the faint "Optional" placeholder is a
-            look (Julian, 2026-10-05), so the label carries the fact. */}
+        {/* Said, not only shown: the faint "Optional" placeholder is
+            a look, so the label carries the fact. */}
         {props.required ? <span aria-hidden> *</span> : <span className="sr-only">, optional</span>}
       </label>
 
@@ -511,13 +510,12 @@ function Field({
           "mt-1 block w-full border-0 border-b bg-transparent py-2 text-base sm:mt-2 sm:py-2.5",
           // Two lines of message on a phone, where the card has a screen.
           as === "textarea" && "max-sm:h-[3.75rem] max-sm:resize-none sm:h-[clamp(3.75rem,calc(16vh-3rem),6rem)] sm:resize-none",
-          // Placeholders fainter (Julian, 2026-10-05: was 60%).
+          // Placeholders fainter.
           "transition-colors duration-200 placeholder:text-muted-foreground/35",
-          // Focus is the rule under the field darkening, to 40% ink (Julian,
-          // 2026-10-04: lower). No
-          // accent ring as well: a text field shows focus whether the
-          // click or the keyboard put it there, so the ring was on screen
-          // every time somebody typed. Julian did not want it.
+          // Focus is the rule under the field darkening, to 40% ink. No
+          // accent ring as well: a text field shows focus whether the click
+          // or the keyboard put it there, so the ring was on screen every
+          // time somebody typed. Julian did not want it.
           "focus:outline-none focus-visible:outline-none focus:border-foreground/40",
           error ? "border-destructive" : "border-border",
         )}

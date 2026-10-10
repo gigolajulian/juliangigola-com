@@ -28,6 +28,7 @@ import {
   middleVars,
   type Middle,
 } from "@/lib/cover-slots";
+import { MEDIA } from "@/lib/device";
 
 /* ── the hero on DialKit ──────────────────────────────────────────
  * Julian: tune almost everything about the cover live, on DialKit's
@@ -47,7 +48,7 @@ import {
    (it splits camelCase into words), so every one says what it moves. */
 export const CARDS = {
   motion: { type: "spring", visualDuration: 0.3, bounce: 0.2 },
-  // No swell under the pointer (Julian, 2026-10-04: no hover zoom anywhere).
+  // No swell under the pointer.
   grow: [1, 1, 1.2, 0.005],
   forward: [21, 0, 200, 1],
   towardMiddle: [0.06, 0, 1, 0.01],
@@ -134,7 +135,7 @@ const UPRIGHT_MQ =
 const LANDSCAPE_MQ =
   "(min-width: 40rem) and (max-width: 79.99rem) and (orientation: landscape)";
 const SIDEWAYS_MQ = "(orientation: landscape) and (max-height: 31.99rem)";
-const PHONE_MQ = "(max-width: 39.99rem) and (orientation: portrait)";
+const PHONE_MQ = MEDIA.phoneUpright;
 const SHORT_MQ =
   "(min-width: 80rem) and (min-height: 32rem) and (min-aspect-ratio: 7 / 4) and (max-aspect-ratio: 219 / 100)";
 
@@ -408,8 +409,8 @@ export function HeroDials() {
   const [picked, setPicked] = React.useState<string | null>(null);
   const [tilt, setTilt] = React.useState(false);
   /* `?arrange` opens straight into arranging, in 3D, the layout for
-     the window's own shape (Julian, 2026-10-07). Read on the first
-     client render; the server has no address bar and renders it off. */
+     the window's own shape. Read on the first client render; the
+     server has no address bar and renders it off. */
   const [view3d, setView3d] = React.useState(
     () => typeof location !== "undefined" && new URLSearchParams(location.search).has("arrange"),
   );

@@ -76,7 +76,7 @@ const SAMPLES = SESSION_TYPES.map(
   (s) => (s.sample && PROJECTS.find((p) => p.slug === s.sample)) || projectsIn(s.slug)[0],
 );
 const LEAD = commissionsIn(WORK_CATEGORY_LINKS[0].slug).slice(0, 16);
-/* Julian's sleeves for the Cover Art table, in his order (2026-10-03). */
+/* Julian's sleeves for the Cover Art table, in his order. */
 const COVER_PICKS = [
   "problem-child",
   "the-river",
@@ -89,13 +89,13 @@ const COVER_PICKS = [
 ];
 /* A project's cover is a copy of one of its frames under another name
    (`sources.json`, written by `make-cards`). Compared by that frame, a
-   cover and the frame it was cut from count as one picture: Event coverage
-   showed its first photograph twice (Julian, 2026-10-03). */
+   cover and the frame it was cut from count as one picture: Event
+   coverage showed its first photograph twice. */
 /* Frames past a project's cover that its discipline shows as well:
    Wrapped Up's heels and lipstick, and a second Crave. */
 const MORE = ["/work/wrapped-up/04.jpg", "/work/crave/03.jpg"];
-// Julian (2026-10-07): the nine campaigns he wants up front; Oakley x Nike
-// and Kala x Sharks picked for the hard light.
+// The nine campaigns he wants up front; Oakley x Nike and Kala x Sharks
+// picked for the hard light.
 const CAMPAIGN_PICKS = ["hua", "ukiyosunknown", "goodcult", "wired-magazine", "jubo", "paradox", "sago", "oakley-x-nike", "kala-x-sharks"];
 const EDITORIAL_PICKS = ["ghostlight", "threshold", "lithe", "aegis", "vigil", "paranoia", "void", "azure-bloom", "i-wanna-be-a-human"];
 
@@ -110,16 +110,15 @@ const SHOWN = new Set([
   ...DISCIPLINE_TILES.flatMap((t) => [t.cover.src, ...shotsOf(t).map((s) => s.src)]),
 ]);
 const WALL_HERE = WALL.filter((t) => !SHOWN.has(t.src));
-/* A photograph behind each door on the last screen (critique, 2026-10-03:
-   the screen that asks was the only one without work on it). */
-// Julian's pick (2026-10-03): Valgur, the two knights and the lightning.
+/* A photograph behind each door on the last screen. */
+// Julian's pick: Valgur, the two knights and the lightning.
 const DOOR_WORK = PROJECTS.find((p) => p.slug === "valgur")?.images.find((f) => f.src === "/work/valgur/06.jpg");
-// Julian's pick (2026-10-03): Sago, standing in the tall grass.
+// Julian's pick: Sago, standing in the tall grass.
 const DOOR_SESSIONS = PROJECTS.find((p) => p.slug === "sago")?.images.find((f) => f.src === "/work/sago/01.jpg");
 
 /* A discipline's frames for the Commissions table, up to twelve: its
-   projects' covers (Julian, 2026-10-03), the films for Motion, his picked
-   sleeves for Cover Art. */
+   projects' covers, the films for Motion, his picked sleeves for Cover
+   Art. */
 
 function shotsOf(t: (typeof DISCIPLINE_TILES)[number]): Shot[] {
   const projects = projectsIn(t.category);
@@ -130,12 +129,12 @@ function shotsOf(t: (typeof DISCIPLINE_TILES)[number]): Shot[] {
   const every = ["mixed-media", "campaigns", "artist-presskit"].includes(t.category);
   const add = (f: { src: string; color?: string; width: number; height: number }, title: string, href: string) => {
     // Every upright frame at one 4:5, so a 3:4 among them does not leave a
-    // row of mismatched cards (Julian, 2026-10-04: do the ratios match?).
+    // row of mismatched cards.
     const upright = f.width / f.height > 0.7 && f.width / f.height < 0.85;
     if ((every || shots.length < 12) && (every || !ELSEWHERE.has(f.src)) && !shots.some((s) => same(s.src) === same(f.src))) shots.push({ src: f.src, color: f.color, width: upright ? 4 : f.width, height: upright ? 5 : f.height, title, href });
   };
-  /* Julian (2026-10-04): Editorial is his own pick of covers, in his
-     order, cut to one 4:5 so the rows are even. */
+  /* Editorial is his own pick of covers, in his order, cut to one
+     4:5 so the rows are even. */
   if (t.category === "editorial" || t.category === "campaigns") {
     for (const slug of t.category === "editorial" ? EDITORIAL_PICKS : CAMPAIGN_PICKS) {
       const p = projects.find((q) => q.slug === slug);
@@ -149,15 +148,15 @@ function shotsOf(t: (typeof DISCIPLINE_TILES)[number]): Shot[] {
     for (const p of projects) {
       if (p.slug === "hellamack") continue;
       add(p.cover, t.category === "events" ? "01" : p.name, `/portfolio#${p.slug}`);
-      // Frames Julian asked for beside the cover (2026-10-03).
+      // Frames Julian asked for beside the cover.
       for (const f of p.images) if (MORE.includes(f.src)) add(f, p.name, `/portfolio#${p.slug}`);
     }
-  // Julian (2026-10-03): covers only. Motion has no projects: every
-  // film, the reel first, by its poster. Cover Art: eight sleeves, not the
-  // photograph of them laid out (Julian: remove).
-  // Event coverage is one long set: its own frames, as /portfolio runs it.
+  // Covers only. Motion has no projects: every film, the reel first, by
+  // its poster. Cover Art: eight sleeves, not the photograph of them laid
+  // out (Julian: remove). Event coverage is one long set: its own frames,
+  // as /portfolio runs it.
   if (t.category === "events")
-    // Numbered, not its name on every frame (Julian, 2026-10-04).
+    // Numbered, not its name on every frame.
     for (const p of projects) for (const f of p.images) add(f, String(shots.length + 1).padStart(2, "0"), `/portfolio#${frameHash(f.src)}`);
   if (t.category === "video")
     for (const v of [REEL, ...CONTENT.videos]) {
@@ -175,8 +174,7 @@ function shotsOf(t: (typeof DISCIPLINE_TILES)[number]): Shot[] {
   return shots;
 }
 
-/* What each discipline is, one line under its name (Julian, 2026-10-03:
-   a short description of each, in place of the credit names). */
+/* What each discipline is, one line under its name. */
 const ABOUT: Record<string, string> = {
   campaigns: "Product and lifestyle shoots for brands",
   "artist-presskit": "Press photos for musicians and artists",
@@ -211,10 +209,10 @@ export default function Home() {
           className="w-full shrink-0 max-sm:h-[100svh] sm:h-full"
         />
 
-        {/* Julian (2026-10-03): a preview of the portfolio, not all of
-            it: the disciplines as an index beside one large photograph,
-            and the way on to the portfolio (`services-screen.tsx`). It was
-            a grid of eight tiles, every one a door. */}
+        {/* A preview of the portfolio, not all of it: the disciplines
+            as an index beside one large photograph, and the way on to
+            the portfolio (`services-screen.tsx`). It was a grid of
+            eight tiles, every one a door. */}
         <ServicesScreen
           rows={DISCIPLINE_TILES.map((t) => ({
             slug: t.slug,
@@ -230,8 +228,8 @@ export default function Home() {
           {PRESS_HOME.length ? (
             <section
               aria-labelledby="press"
-              /* Above Commissions on a phone (Julian, 2026-10-04): the names
-                 that vouch for the work before the work. */
+              /* Above Commissions on a phone: the names that vouch for
+                 the work before the work. */
               className="flex shrink-0 flex-col items-center gap-4 border-t border-border px-6 py-5 max-sm:order-first max-sm:border-b max-sm:border-t-0 sm:flex-row sm:justify-center sm:gap-10 sm:px-8 lying:gap-5 lying:py-2.5"
             >
               <h2 id="press" className="label shrink-0 text-muted-foreground">
@@ -255,10 +253,10 @@ export default function Home() {
 
         <Testimonials cells />
 
-        {/* Julian: About, Sessions and Contact on the homepage, before
-            the ask, which stays last. /about and /contact redirect here.
-            About before Sessions (Julian, 2026-10-04), as in the bar.
-            Each session shows the sample /sessions shows. */}
+        {/* Julian: About, Sessions and Contact on the homepage,
+            before the ask, which stays last. /about and /contact
+            redirect here. About before Sessions, as in the bar. Each
+            session shows the sample /sessions shows. */}
         <AboutScreen />
         <SessionsScreen
           sessions={SESSION_TYPES.map((s, i) => {
@@ -276,9 +274,9 @@ export default function Home() {
             };
           })}
         />
-        {/* Julian (2026-10-03): the wall behind Inquire, where it was
-            behind the last screen's doors, and none of it a picture the
-            page already shows. */}
+        {/* The wall behind Inquire, where it was behind the last
+            screen's doors, and none of it a picture the page already
+            shows. */}
         <ContactScreen backdrop={<InquireWall items={WALL_HERE} />} />
 
         {/* Julian: merge these, there is too much white space. The ask and
@@ -302,10 +300,10 @@ export default function Home() {
              its project, as on the 404. Four dozen, which covers the widest
              screen (`intro.tsx` has the arithmetic). */
           aside={
-            /* Julian (2026-10-01, layout): the two doors split the screen
-               under the bar, not behind it. The bar (`--bar-h`) lies over the
-               first, so the first row is half the screen plus half the bar
-               and each door shows the same height. */
+            /* The two doors split the screen under the bar, not behind it.
+               The bar (`--bar-h`) lies over the first, so the first row is
+               half the screen plus half the bar and each door shows the
+               same height. */
             <div
               id="where-next"
               className="grid h-full grid-rows-2 divide-y divide-border sm:grid-rows-[minmax(0,calc(50%+var(--bar-h)/2))_minmax(0,1fr)]"
@@ -331,9 +329,9 @@ export default function Home() {
   );
 }
 
-/* The second door, forward rather than back (audit, 2026-10-03): it sent
-   a private client back to Sessions, a screen behind them with Sessions in
-   the bar as well. Each session straight to its own booking page instead. */
+/* The second door, forward rather than back: it sent a private client
+   back to Sessions, a screen behind them with Sessions in the bar as
+   well. Each session straight to its own booking page instead. */
 function SessionsDoor({ photo }: { photo?: Frame }) {
   return (
     <div className="group relative isolate flex flex-col justify-center gap-6 overflow-hidden border-l border-border bg-background/30 px-6 py-12 backdrop-blur-[var(--door-blur,1px)] sm:px-16 lying:gap-3 lying:px-10 lying:py-3">
@@ -347,7 +345,7 @@ function SessionsDoor({ photo }: { photo?: Frame }) {
               <Link
                 prefetch={false}
                 href={page ? `/${page.slug}` : "/#sessions"}
-                className="group label flex items-center justify-between gap-4 py-3 text-foreground lying:py-1.5"
+                className="tap-44 group label flex items-center justify-between gap-4 py-3 text-foreground lying:py-1.5"
               >
                 {s.name}
                 <span

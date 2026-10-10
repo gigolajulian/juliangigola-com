@@ -57,7 +57,8 @@ export function AdminTraffic() {
     }
     setBusy(false);
   }, []);
-  React.useEffect(() => void pull(), [pull]);
+  // After the render, not inside it: `pull` sets state before it awaits.
+  React.useEffect(() => queueMicrotask(() => void pull()), [pull]);
 
   const sum = (rows: Row[], re: RegExp) =>
     rows.filter((r) => re.test(r.key)).reduce((s, r) => s + r.n, 0);

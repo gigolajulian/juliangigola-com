@@ -34,12 +34,11 @@ import { DISCIPLINE_SEO } from "@/lib/seo";
  * not an instruction.
  *
  * Its own folder rather than a share of `/portfolio/[slug]` with the projects,
- * but served at `/portfolio/<slug>` all the same (Julian, 2026-09-29: the
- * disciplines sit beside the projects, not under /portfolio/category/): a
- * rewrite in `next.config.ts` sends each listing's address here. Where a
- * discipline shares its slug with its one gallery (Automotive, Events,
- * Places) the rewrite answers first and this view, the same frames under
- * the filters, is the page.
+ * but served at `/portfolio/<slug>` all the same: a rewrite in
+ * `next.config.ts` sends each listing's address here. Where a discipline
+ * shares its slug with its one gallery (Automotive, Events, Places) the
+ * rewrite answers first and this view, the same frames under the filters, is
+ * the page.
  *
  * The head and the chip row are the `(index)` layout's; this is the strip
  * under them, one discipline's chapter of the whole. Past its last cover

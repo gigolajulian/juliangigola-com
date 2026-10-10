@@ -60,8 +60,8 @@ export function GroupCell({
           name
         )}
       </h2>
-      {/* No "All projects" (Julian, 2026-10-07: not needed); the chips
-          narrow the page. Only a cell given its own way on keeps one. */}
+      {/* No "All projects"; the chips narrow the page. Only a cell
+          given its own way on keeps one. */}
       {cta ? (
       <Link
         prefetch={false}
@@ -128,9 +128,9 @@ export function FilmCell({
       data-tick
       data-hash={hash}
       data-name={title}
-      /* Films have no samples to take a colour from, so the rail is given
-         one that sits with the rest: a muted violet between Event
-         coverage's indigo and Cover art's red (Julian, 2026-10-05). */
+      /* Films have no samples to take a colour from, so the rail is
+         given one that sits with the rest: a muted violet between
+         Event coverage's indigo and Cover art's red. */
       data-tint="#7a5a9e"
       data-ring="Watch"
       data-film
@@ -166,12 +166,14 @@ export function FilmCell({
           </span>
         ) : null}
         <span
-          style={{ "--n": title.length, "--w": Math.max(...title.split(" ").map((w) => w.length)) } as React.CSSProperties}
+          /* `--g`: the longest run that cannot break, the last two words
+             counted as one (below), for the slate's margin term
+             (`.strip-scroll .cover-name`, globals.css). */
+          style={{ "--n": title.length, "--w": Math.max(...title.split(" ").map((w) => w.length)), "--g": Math.max(...title.replace(/ (\S+)$/, "_$1").split(" ").map((w) => w.length)) } as React.CSSProperties}
           className="cover-name font-display min-w-0 max-w-full truncate uppercase leading-[0.9] text-white"
         >
-          {/* The last two words held together, so a title that wraps never
-              leaves one alone (Julian, 2026-10-04: "Iranian Americans of /
-              Silicon Valley"). */}
+          {/* The last two words held together, so a title that wraps
+              never leaves one alone. */}
           {title.replace(/ (\S+)$/, "\u00a0$1")}
         </span>
       </div>

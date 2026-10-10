@@ -16,11 +16,12 @@ export const rubberband = (over: number, dim: number, c = 0.55) =>
     lights About or Contact from it on the homepage. */
 export const STRIP_SECTION = "strip:section";
 
-/* The addresses that are the work index with its row swapped (All, each
-   discipline, Motion) rather than pages of their own. A discipline and a
-   project are both /portfolio/<slug> (Julian, 2026-09-29), so the address
-   cannot tell them apart; the filter drawer, mounted on every /portfolio
-   page, marks its links that are filters (`work-filter.tsx`). */
+/* The addresses that are the work index with its row swapped (All,
+   each discipline, Motion) rather than pages of their own. A
+   discipline and a project are both /portfolio/<slug>, so the address
+   cannot tell them apart; the filter drawer, mounted on every
+   /portfolio page, marks its links that are filters
+   (`work-filter.tsx`). */
 export const filterPaths = (): Set<string> =>
   new Set(
     Array.from(

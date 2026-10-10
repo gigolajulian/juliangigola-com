@@ -240,9 +240,9 @@ const POSTER_HOSTS = ["i.ytimg.com", "i.vimeocdn.com"];
 function posterOrUndefined(value: unknown, path: string): string | undefined {
   if (value === undefined || value === null || value === "") return undefined;
   const url = str(value, path);
-  // A frame pulled from the film itself, kept with the app (Julian,
-  // 2026-10-03: Pear VC's still at 3:09). In /films/, not /covers/: that
-  // folder is cover art, which globals.css draws square.
+  // A frame pulled from the film itself, kept with the app. In /films/,
+  // not /covers/: that folder is cover art, which globals.css draws
+  // square.
   if (/^\/films\/[a-z0-9-]+\.jpg$/.test(url)) return url;
 
   let parsed: URL;

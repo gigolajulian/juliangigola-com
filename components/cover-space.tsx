@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { useLatest, useSpace } from "@/components/hero-dials";
+import { matches } from "@/lib/device";
 
 /**
  * The space the cover's frames hang in.
@@ -14,7 +15,7 @@ import { useLatest, useSpace } from "@/components/hero-dials";
  *
  * On a phone or an iPad there is no pointer and the space holds still.
  * It followed the device's tilt there, until Julian took the gyroscope
- * off the homepage (2026-09-29).
+ * off the homepage.
  */
 export function CoverSpace({
   children,
@@ -62,7 +63,7 @@ export function CoverSpace({
       if (!raf) raf = requestAnimationFrame(tick);
     };
 
-    if (matchMedia("(hover: hover) and (pointer: fine)").matches) {
+    if (matches("fine")) {
       const move = (e: PointerEvent) => {
         /* Julian: the space holds still while he works the DialKit panel. */
         if ((e.target as Element | null)?.closest?.('[class*="dialkit"]')) return;

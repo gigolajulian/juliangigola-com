@@ -1,0 +1,679 @@
+/* The homepage cover: the name, the photographs and their layouts. */
+
+/* ── the cover ────────────────────────────────────────────────────
+ * The featured work in a loose field round the name (`cover-float.tsx`),
+ * upright, each at its own small depth (`--z`); the space turns a few
+ * degrees after the pointer (`cover-space.tsx`), so near and far frames
+ * move apart.
+ *
+ * The depth is kept all the way down: `preserve-3d` on the ring and on
+ * each frame, the depth itself on the card, the camera on the section.
+ * ───────────────────────────────────────────────────────────────── */
+.cover-float {
+  perspective: var(--h-perspective, 3280px);
+  /* The middle's set for the screen's shape (`MIDDLE`, below by query). */
+  --zmax: var(--zmax-large, 0px);
+  --m-name: var(--m-large-name, 1);
+  --m-role: var(--m-large-role, 1);
+  --m-where: var(--m-large-where, 1);
+  --m-buttons: var(--m-large-buttons, 1);
+  --m-x: var(--m-large-x, 0);
+  --m-y: var(--m-large-y, 0);
+}
+.cover-float-ring,
+.cover-float-frame {
+  transform-style: preserve-3d;
+}
+.cover-float-frame {
+  position: absolute;
+  /* Where it sits, from the set for the screen's shape (below). Drawn
+     toward the middle by the "Photo layout" panel's spread (1: as laid
+     out). A phone places them itself, further down. */
+  --fx: var(--x);
+  --fy: var(--y);
+  --fw: var(--w);
+  --fz: var(--z, 0px);
+  left: calc(50% + (var(--fx) - 50%) * var(--h-pull-x, 1.05) * var(--wide-x, var(--wide, 1)));
+  top: calc(50% + (var(--fy) - 50%) * var(--h-pull-y, 0.94));
+  width: calc(var(--fw) * var(--wide, 1));
+  /* Out of order: each frame's place in `ORDER` (`cover-float.tsx`),
+     spread out from the start. */
+  --delay: calc(var(--h-start, 420ms) + var(--order, 0) * var(--h-spread, 0.95ms));
+  animation: jg-fly var(--h-fly-ms, 1020ms) cubic-bezier(0.16, 1, 0.3, 1)
+    var(--delay) backwards;
+}
+/* Julian: refined for 2560 by 1080. The large layout is in vw, so on a
+   screen wider than 16:9 the photographs grew with the width and not the
+   height, a third bigger at 21:9 and into the bar and the rail. `--wide`
+   takes them and their spread across back toward the 16:9 composition, in
+   steps (a ratio of lengths cannot be computed in CSS): about 1.85 times
+   the height wide. Large screens only; a phone on its side is as wide and
+   has its own layout. */
+@media (min-width: 80rem) and (min-height: 32rem) and (min-aspect-ratio: 2 / 1) {
+  .cover-float {
+    --wide: 0.9;
+    /* Julian: on ultrawide, the photographs across the width. Smaller
+       with the shape still, but no longer drawn in with it: the field
+       spreads the whole width as it does at 16:9. */
+    --wide-x: 1;
+  }
+}
+@media (min-width: 80rem) and (min-height: 32rem) and (min-aspect-ratio: 11 / 5) {
+  .cover-float {
+    --wide: 0.8;
+  }
+}
+/* 2560 by 960: at 0.8 the dress came down over the name. */
+@media (min-width: 80rem) and (min-height: 32rem) and (min-aspect-ratio: 5 / 2) {
+  .cover-float {
+    --wide: 0.7;
+  }
+}
+@media (min-width: 80rem) and (min-height: 32rem) and (min-aspect-ratio: 14 / 5) {
+  .cover-float {
+    --wide: 0.66;
+    /* Julian: in the super wide the photographs closer. Across the whole
+       width they stood too far apart to read as one field. */
+    --wide-x: 0.85;
+  }
+}
+@media (min-width: 80rem) and (min-height: 32rem) and (min-aspect-ratio: 16 / 5) {
+  .cover-float {
+    --wide: 0.55;
+    --wide-x: 0.7;
+  }
+}
+/* A big screen, wide and short (1.75 to 2.2 to 1: a 13 or 16 inch laptop in
+   a browser): its own layout, `SHORT` on "Photo layout, wide short". Wider
+   than that keeps the large one with the ultrawide scaling above. */
+@media (min-width: 80rem) and (min-height: 32rem) and (min-aspect-ratio: 7 / 4) and (max-aspect-ratio: 219 / 100) {
+  .cover-float {
+    --zmax: var(--zmax-short, 0px);
+    --m-name: var(--m-short-name, 1);
+    --m-role: var(--m-short-role, 1);
+    --m-where: var(--m-short-where, 1);
+    --m-buttons: var(--m-short-buttons, 1);
+    --m-x: var(--m-short-x, 0);
+    --m-y: var(--m-short-y, 0);
+  }
+  .cover-float-frame {
+    --fx: var(--tx);
+    --fy: var(--ty);
+    --wave-now: var(--wave-t);
+    --fw: var(--tw);
+    --fz: var(--tz, 0px);
+  }
+  .cover-float-off-short {
+    display: none;
+  }
+}
+/* Julian: a layout of their own for the smaller screens (the cards
+   looked too small there, the arrangement not the best), one for a
+   tablet held upright and one for a short landscape screen, each with
+   its places, widths, depths and which cards show (`UPRIGHT` and
+   `LANDSCAPE` in `lib/cover-slots.ts`, each on its own "Photo layout"
+   panel). 1280px wide and up keeps the large screen's. */
+@media (min-width: 40rem) and (max-width: 79.99rem) and (orientation: portrait) {
+  .cover-float {
+    --zmax: var(--zmax-upright, 0px);
+    --m-name: var(--m-upright-name, 1);
+    --m-role: var(--m-upright-role, 1);
+    --m-where: var(--m-upright-where, 1);
+    --m-buttons: var(--m-upright-buttons, 1);
+    --m-x: var(--m-upright-x, 0);
+    --m-y: var(--m-upright-y, 0);
+  }
+  .cover-float-frame {
+    --fx: var(--ux);
+    --fy: var(--uy);
+    --wave-now: var(--wave-u);
+    --fw: var(--uw);
+    --fz: var(--uz, 0px);
+  }
+  .cover-float-off-upright {
+    display: none;
+  }
+}
+@media (min-width: 40rem) and (max-width: 79.99rem) and (orientation: landscape) {
+  .cover-float {
+    --zmax: var(--zmax-landscape, 0px);
+    --m-name: var(--m-landscape-name, 1);
+    --m-role: var(--m-landscape-role, 1);
+    --m-where: var(--m-landscape-where, 1);
+    --m-buttons: var(--m-landscape-buttons, 1);
+    --m-x: var(--m-landscape-x, 0);
+    --m-y: var(--m-landscape-y, 0);
+  }
+  .cover-float-frame {
+    --fx: var(--lx);
+    --fy: var(--ly);
+    --wave-now: var(--wave-l);
+    --fw: var(--lw);
+    --fz: var(--lz, 0px);
+  }
+  .cover-float-off-landscape {
+    display: none;
+  }
+}
+/* A phone on its side, or any landscape window under 512px tall (an
+   iPhone at 844 by 390, the iPhone Duo folded and turned, 678 by 466):
+   its own layout, `SIDEWAYS`. After the landscape one, which it
+   overrides where both match. */
+@media (orientation: landscape) and (max-height: 31.99rem) {
+  .cover-float {
+    --zmax: var(--zmax-sideways, 0px);
+    --m-name: var(--m-sideways-name, 1);
+    --m-role: var(--m-sideways-role, 1);
+    --m-where: var(--m-sideways-where, 1);
+    --m-buttons: var(--m-sideways-buttons, 1);
+    --m-x: var(--m-sideways-x, 0);
+    --m-y: var(--m-sideways-y, 0);
+  }
+  .cover-float-frame {
+    --fx: var(--sx);
+    --fy: var(--sy);
+    --wave-now: var(--wave-s);
+    --fw: var(--sw);
+    --fz: var(--sz, 0px);
+  }
+  .cover-float-off-landscape {
+    display: block;
+  }
+  .cover-float-off-sideways {
+    display: none;
+  }
+}
+@media (max-width: 39.99rem) and (orientation: portrait) {
+  .cover-float {
+    --zmax: var(--zmax-phone, 0px);
+    --m-name: var(--m-phone-name, 1);
+    --m-role: var(--m-phone-role, 1);
+    --m-where: var(--m-phone-where, 1);
+    --m-buttons: var(--m-phone-buttons, 1);
+    --m-x: var(--m-phone-x, 0);
+    --m-y: var(--m-phone-y, 0);
+  }
+  .cover-float-frame {
+    left: var(--px);
+    top: var(--py);
+    --wave-now: var(--wave-p);
+    /* And no taller than a short phone's window allows: Safari with its
+       bars up leaves an iPhone 659px, where 28vw ran the top row into the
+       name and the bottom row into the buttons. `--pwh` is the width's
+       share of the height at that ratio, 28vw to 13svh (`PHONE`,
+       `lib/cover-slots.ts`). */
+    width: min(var(--pw, 28vw), var(--pwh, 13svh));
+    --fz: var(--pz, 0px);
+  }
+  .cover-float-off-phone {
+    display: none;
+  }
+}
+/* Arranging on the "Photo layout" panel: the space holds still, the focus
+   effects stand down, and each card wears the number of its folder. */
+.cover-float[data-arrange] .cover-float-ring {
+  transform: none !important;
+}
+.cover-float[data-arrange] .cover-float-frame {
+  cursor: grab;
+}
+/* The card picked in the arrange inspector (`hero-arrange.tsx`), and Tilt:
+   the field turned so how far forward each card stands can be seen. */
+.cover-float[data-arrange] .cover-float-middle[data-picked],
+.cover-float[data-arrange] .cover-float-frame[data-picked] .cover-float-card {
+  outline: 2px solid #4da3ff;
+  outline-offset: 2px;
+}
+.cover-float[data-arrange][data-tilt] .cover-float-ring {
+  transform: rotateX(14deg) rotateY(-28deg) !important;
+  transition: transform 400ms ease;
+}
+.cover-float[data-arrange] .cover-float-frame:active {
+  cursor: grabbing;
+}
+.cover-float[data-arrange] .cover-float-card {
+  filter: none !important;
+  translate: none !important;
+  outline: 1px dashed rgb(255 255 255 / 0.7);
+}
+.cover-float[data-arrange] .cover-float-frame::after {
+  content: attr(data-card);
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  padding: 2px 5px;
+  background: rgb(0 0 0 / 0.75);
+  color: #fff;
+  font: 500 10px/1.2 var(--font-mono, monospace);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  pointer-events: none;
+  transform: translateZ(calc(var(--fz, 0px) + 1px));
+}
+/* Julian: the cover's photographs looked low quality, and the files
+   were not it. Chrome rasterises a layer inside the turned,
+   perspective space at one pixel per CSS pixel, not the screen's two,
+   so a 2x screen got a picture stretched to twice its raster
+   (measured: SSIM 0.77 against the same file drawn flat). The card is
+   laid out at twice its size and drawn at half (`scale`), so that one
+   pixel per CSS pixel is two on screen. Everything measured in the
+   card's own pixels is doubled to look as it did: the corner, the
+   blurs (`--os`), the glass's rim and the hover shadow (`CoverCard`).
+   `scale` is flat, so `--fz` is not. Not while it fades in (`jg-fade`
+   holds `--os` at 1): a blur on a card twice the size stalled the
+   splash's lift for up to 56ms, so the card blurs in at its own size
+   and doubles once it has landed, which looks the same. */
+@property --os {
+  syntax: "<number>";
+  inherits: true;
+  initial-value: 1;
+}
+.cover-float-card {
+  --os: 2;
+  position: absolute;
+  inset: calc(50% - 50% * var(--os));
+  display: block;
+  overflow: hidden;
+  border-radius: calc(var(--radius-photo) * var(--os));
+  scale: calc(1 / var(--os));
+  transform: translateZ(var(--fz, 0px));
+}
+/* ── one corner for every photograph ──────────────────────────────
+ * Julian: every picture on the site on one corner, 8px, the drifting
+ * wall included (`radius` on `DriftWall`): the cover, the strips, the
+ * grids, the cover art, the lists, the films, the reel.
+ * Controls stay square. `isolation` so Safari clips a picture that zooms
+ * inside its rounded frame instead of drawing square corners over it.
+ * ───────────────────────────────────────────────────────────────── */
+:root {
+  --radius-photo: 8px;
+}
+.strip-cell,
+.photo-corner {
+  border-radius: var(--radius-photo);
+  isolation: isolate;
+}
+/* Julian: cover art always square, wherever it is shown: a sleeve is a
+   square. Known by its folder, `/covers/`, which the image loader keeps
+   in every URL it writes. */
+:is(.strip-cell, .photo-corner, .drift-wall__inner):has(img[src*="/covers/"]) {
+  border-radius: 0;
+}
+/* The name through glass (`warp-text.tsx`): the canvas fills its box. */
+.warp-text {
+  position: relative;
+  display: block;
+  overflow: hidden;
+  isolation: isolate;
+}
+.warp-text canvas {
+  position: absolute;
+  inset: 0;
+  /* Over the pixel size ogl writes on the element, so the canvas always
+     fills its box and can never overhang it and be cut off. */
+  width: 100% !important;
+  height: 100% !important;
+  display: block;
+}
+/* The type on the cover, to Julian's spec: the name in Inter Tight Black,
+   everything under it in IBM Plex Mono. The colours are the spec's, for
+   the dark ground; the light ground, opt-in by the toggle, takes the
+   site's own ink and greys so it keeps its contrast there. */
+.cover-float {
+  --hero-ink: #f2f1ee;
+  --hero-sub: #bdbbb5;
+  /* Lifted from #77756f (4.3:1) to clear 4.5:1 on the whole ground,
+     the glow in the middle included. */
+  --hero-where: #83817b;
+  --hero-line: #3a3936;
+  --hero-on-ink: #0b0b0b;
+}
+:root[data-theme="light"] .cover-float {
+  --hero-ink: var(--foreground);
+  --hero-sub: var(--foreground);
+  --hero-where: var(--muted-foreground);
+  --hero-line: var(--border);
+  --hero-on-ink: var(--background);
+}
+/* The whole middle at once, on the "Text sizes" panel's Middle: zoom
+   rather than a scale, so the name's canvas and the type are drawn at the
+   new size instead of stretched; and moved from the middle of the cover. */
+.cover-float-middle {
+  --mid: calc(var(--h-mid-size, 0.99) * var(--mid-fit, 1));
+  zoom: var(--mid);
+  translate: calc(var(--m-x) * 1vw / var(--mid))
+    calc((var(--h-mid-down, 22px) + var(--m-y) * 1svh) / var(--mid));
+}
+/* Julian: the name never covered by the photographs. A wide window that
+   is short (a 32:9 screen, or a wide browser window not full height)
+   has the photographs' field as wide as ever and no taller than the
+   window, and the name, set in pixels, filled the gap between the row
+   above it and the row below and ran under both. Smaller as the window
+   is shorter. */
+@media (min-width: 80rem) and (min-aspect-ratio: 2 / 1) and (max-height: 56rem) {
+  .cover-float {
+    --mid-fit: 0.85;
+  }
+}
+@media (min-width: 80rem) and (min-aspect-ratio: 2 / 1) and (max-height: 48rem) {
+  .cover-float {
+    --mid-fit: 0.7;
+  }
+}
+@media (min-width: 80rem) and (min-aspect-ratio: 2 / 1) and (max-height: 40rem) {
+  .cover-float {
+    --mid-fit: 0.6;
+  }
+}
+/* A short phone (iPhone SE): the name ran into the skater and the
+   buttons broke onto two lines, into Sago and the TV. */
+@media (max-width: 39.99rem) and (orientation: portrait) and (max-height: 43.75rem) {
+  .cover-float {
+    --mid-fit: 0.85;
+  }
+  .cover-float-ctas {
+    flex-wrap: nowrap;
+  }
+  .cover-float-ctas .cover-cta {
+    white-space: nowrap;
+  }
+}
+/* A booking page's title runs to three lines where the name is one,
+   and on ultrawide reached up into the top row of photographs: lower
+   there. */
+@media (min-width: 80rem) and (min-aspect-ratio: 2 / 1) {
+  .cover-float[data-booking] {
+    --m-y: 11;
+  }
+}
+.cover-float-name {
+  color: var(--hero-ink);
+  line-height: 1;
+}
+.cover-float-title {
+  font-family: var(--font-mono);
+  font-weight: 400;
+  font-size: calc(var(--h-title-size, 16px) * var(--m-role));
+  letter-spacing: var(--h-title-track, 0.15em);
+  /* Julian: the lines centred on each other. The spacing after the last
+     letter, matched before the first. */
+  text-indent: var(--h-title-track, 0.15em);
+  text-transform: uppercase;
+  color: var(--hero-sub);
+}
+.cover-float-where {
+  font-family: var(--font-mono);
+  /* The buttons' floor (`--cta-k`, below) for the same short window. */
+  font-size: calc(var(--h-where-size, 14px) * var(--m-where) * max(1, calc(0.9 / var(--mid, 1))));
+  color: var(--hero-where);
+}
+/* Julian: on a phone the role and the location one line each, as wide as
+   the wordmark (`fit-lines.tsx` spreads them, or scales one down), set
+   close. */
+@media (max-width: 39.99rem) and (orientation: portrait) {
+  .cover-float-middle .fit-line {
+    text-indent: 0;
+    display: block;
+    width: max-content;
+    margin-inline: auto;
+    white-space: nowrap;
+  }
+  .cover-float-title,
+  .cover-float-where {
+    line-height: 1.3;
+  }
+}
+.cover-float-ctas {
+  zoom: var(--m-buttons);
+  /* Never under nine tenths of their size, however far a short wide
+     window shrinks the middle. The type and padding grow rather than
+     a zoom, which the liquid fill under them does not measure. */
+  --cta-k: max(1, calc(0.9 / var(--mid, 1)));
+}
+/* The location one line, centred, from a tablet up. */
+@media (min-width: 40rem) {
+  .cover-float-where {
+    max-width: none;
+    white-space: nowrap;
+    text-align: center;
+  }
+  .cover-float-where .fit-line {
+    display: inline-block;
+  }
+}
+.cover-cta {
+  display: inline-block;
+  font-family: var(--font-display);
+  /* Julian: increase weight. The buttons' 700, as `action`. */
+  font-weight: 700;
+  font-size: calc(var(--h-cta-size, 12px) * var(--cta-k, 1));
+  letter-spacing: 0.18em;
+  /* The spacing after the last letter matched before the first, so the
+     words sit in the middle of the button. */
+  text-indent: 0.18em;
+  text-align: center;
+  text-transform: uppercase;
+  padding: calc(13px * var(--cta-k, 1)) calc(22px * var(--cta-k, 1));
+  border-radius: 0;
+  box-shadow: none;
+  background: var(--hero-ink);
+  color: var(--hero-on-ink);
+  border: 0;
+}
+/* The second door read as disabled, a hairline on the dark. Private
+   clients are half the audience, so it is a button in its own right:
+   a lowkey grey fill, the Sessions card's, and an edge that shows.
+   Still second to the solid one beside it. */
+.cover-cta-quiet {
+  background: color-mix(in oklab, var(--hero-ink) 9%, var(--background));
+  color: var(--hero-ink);
+  border: 1px solid color-mix(in oklab, var(--hero-ink) 35%, transparent);
+}
+/* Julian: a hover on the homepage's buttons. The pair invert, as the
+   site's other buttons do (`action`, `action-quiet`): the solid one
+   goes to the ground with its edge drawn in ink, the outlined one fills
+   with ink, so they still read as two buttons mid-way. The edge is an
+   inset shadow so nothing moves. */
+.cover-cta {
+  transition:
+    background-color 200ms var(--ease-out-strong),
+    border-color 200ms var(--ease-out-strong),
+    box-shadow 200ms var(--ease-out-strong),
+    color 200ms var(--ease-out-strong),
+    -webkit-text-stroke-width 200ms var(--ease-out-strong);
+}
+@media (hover: hover) and (pointer: fine) {
+  .cover-cta:hover {
+    background: var(--background);
+    color: var(--hero-ink);
+    box-shadow: inset 0 0 0 1px var(--hero-ink);
+  }
+  .cover-cta-quiet:hover {
+    background: var(--hero-ink);
+    color: var(--hero-on-ink);
+    border-color: var(--hero-ink);
+    box-shadow: none;
+  }
+}
+.cover-cta:focus-visible {
+  box-shadow: inset 0 0 0 1px var(--hero-ink);
+}
+/* Pointing at a frame: it swells a little, over the ones round it, and
+   the line under the name trades the job title for that frame's
+   discipline (`cover-role.tsx`). The words share one grid cell, so the
+   line keeps its height whichever is showing; the old word drops out of
+   the slot as the new one rises into it. */
+@media (hover: hover) and (pointer: fine) {
+  /* Julian: a beat before it answers, and the one pointed at comes into
+     focus. It waits `--focus-wait` going in, so a pointer crossing the
+     ring on its way somewhere does not set off every frame it passes,
+     and lets go at once coming out. In focus: forward toward the viewer,
+     a little larger, sharp; the rest soften behind it,
+     the way a lens racks focus. */
+  /* Letting go waits `--release-wait`, so a pointer crossing the gap
+     from one frame to the next keeps the room racked instead of the
+     others sharpening for a moment and blurring again. */
+  /* Julian: not everything blurring the moment the pointer lands. The
+     one pointed at comes forward after `--focus-wait`; the rest soften only
+     after `--blur-wait`, once the pointer has stayed long enough to mean
+     it, so passing over a frame on the way somewhere blurs nothing. */
+  .cover-float {
+    --focus-wait: 10ms;
+    --blur-wait: 310ms;
+    --release-wait: 20ms;
+  }
+  /* Julian: an ease on it. The one pointed at glides forward and back
+     on a soft ease in and out rather than snapping to its place. */
+  /* The swell is a spring now (`cover-card.tsx`), through
+     `--hover-scale`; the move forward stays here. */
+  .cover-float-card {
+    scale: calc(var(--hover-scale, 1) / var(--os));
+    transition:
+      transform 700ms cubic-bezier(0.65, 0, 0.35, 1),
+      translate 700ms cubic-bezier(0.65, 0, 0.35, 1),
+      filter 500ms ease;
+    transition-delay: var(--release-wait);
+  }
+  .cover-float-frame:hover {
+    z-index: 1;
+  }
+  /* Julian: on a photograph's hover, the navbar and the floor a little
+     clearer: their tint comes down from 34% to 22%, and (Julian: lower
+     blur when a photo is in hover) their blur from 9px to 4px, easing on
+     each one's own transitions. */
+  :root:has(.cover-float-frame:hover) {
+    --glass-tint: 22%;
+    --glass-blur: 4px;
+  }
+  .cover-float-ring:has(.cover-float-frame:hover) .cover-float-card {
+    /* Julian: less blur round the one in focus, and glass over the rest
+       instead (the pane below). No darkening. */
+    filter: blur(calc(var(--h-others-blur, 0.3px) * var(--os)));
+    transition-delay: var(--blur-wait);
+  }
+  /* The glass: a clear pane over each of the others, the site's own
+     material (`@utility glass`) cut to the frame. A light raking across it
+     from the top left and a lit rim, nothing that darkens the photograph.
+     It comes up with the blur, once the pointer has stayed. */
+  .cover-float-card::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    background: linear-gradient(
+      150deg,
+      color-mix(in oklab, white 22%, transparent),
+      color-mix(in oklab, white 6%, transparent) 38%,
+      transparent 60%
+    );
+    box-shadow:
+      inset 0 0 0 calc(1px * var(--os)) color-mix(in oklab, white 20%, transparent),
+      inset 0 calc(1px * var(--os)) 0 color-mix(in oklab, white 42%, transparent);
+    opacity: 0;
+    transition: opacity 600ms ease;
+    transition-delay: var(--release-wait);
+  }
+  .cover-float-ring:has(.cover-float-frame:hover) .cover-float-card::after {
+    opacity: var(--h-glass, 0.25);
+    transition-delay: var(--blur-wait);
+  }
+  .cover-float-ring .cover-float-frame:hover .cover-float-card::after {
+    opacity: 0;
+    transition-delay: 0ms;
+  }
+  .cover-float-ring .cover-float-frame:hover .cover-float-card {
+    /* Julian: some cards did not cover on hover. The lift was from the
+       card's own depth, so one set far back stayed behind a neighbour
+       further forward; in 3D, depth and not z-index decides. Now it comes
+       out in front of the frontmost photograph as well (`--zmax`, by
+       layout). */
+    transform: translateZ(
+      calc(max(var(--fz, 0px), var(--zmax, 0px)) + var(--h-lift, 21px))
+    );
+    /* Julian: and toward the middle. `--mid-x` and `--mid-y` are the way
+       to the cover's centre, measured as the pointer lands (`CoverCard`);
+       the panel's Toward Middle is the share of it taken. The frame stays
+       put, so the pointer never loses it as the picture moves. */
+    translate: calc(var(--mid-x, 0px) * var(--h-mid, 0.06))
+      calc(var(--mid-y, 0px) * var(--h-mid, 0.06));
+    filter: blur(0px);
+    transition-delay: var(--focus-wait);
+  }
+}
+.cover-role > * {
+  grid-area: 1 / 1;
+}
+.cover-role-word {
+  opacity: 0;
+  translate: 0 0.35em;
+  transition:
+    opacity 220ms var(--ease-out-strong),
+    translate 320ms var(--ease-out-strong);
+}
+.cover-role-word[data-on] {
+  opacity: 1;
+  translate: 0 0;
+}
+@media (prefers-reduced-motion: reduce) {
+  .cover-float-card,
+  .cover-role-word {
+    transition: none;
+  }
+}
+/* The fade is on the card, not the frame: opacity below 1 flattens a
+   `preserve-3d` element, so a frame fading as it flew would travel flat
+   and snap to its depth the moment it landed, 5 to 15% in one frame. */
+/* Two animations, not one: the fade (opacity and blur) on its own,
+   and `--os` held at 1 beside it. A custom property in the same
+   keyframes kept the whole fade on the main thread in Safari,
+   repainted every frame of the splash's lift; alone, the fade goes to
+   the GPU. */
+.cover-float-card {
+  animation:
+    jg-fade var(--h-fade-ms, 1110ms) cubic-bezier(0.33, 1, 0.68, 1) var(--delay) backwards,
+    jg-os-hold var(--h-fade-ms, 1110ms) linear var(--delay) backwards;
+}
+/* Julian: the photographs arrive the way basis's do, measured off his
+   recording: out of order, each fading up out of nothing and a blur, and
+   rising the last of the way into place on a long, soft finish. */
+@keyframes jg-fly {
+  from {
+    transform: translateY(var(--h-fly, 150px));
+  }
+}
+/* Preview (`?deal=drift`): the top frames drift down into place, slowly,
+   while the bottom ones ease up as usual (`data-drift`, `intro.tsx`). */
+:root[data-deal="drift"] .cover-float-frame[data-drift] {
+  --h-fade-ms: 1900ms;
+  animation: jg-drift 2200ms cubic-bezier(0.33, 0, 0.2, 1) var(--delay) backwards;
+}
+@keyframes jg-drift {
+  from {
+    transform: translateY(-70px);
+  }
+}
+@keyframes jg-fade {
+  from {
+    opacity: 0;
+    filter: blur(var(--h-fade-blur, 7px));
+  }
+}
+@keyframes jg-os-hold {
+  from,
+  to {
+    --os: 1;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .lift,
+  .cover-float-frame,
+  .cover-float-card {
+    animation: none;
+  }
+}
+
+@custom-variant squat (
+  @media (min-width: 64rem) and (min-aspect-ratio: 9 / 10) and
+    (max-aspect-ratio: 5 / 4)
+);

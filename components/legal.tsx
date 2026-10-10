@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Strip } from "@/components/strip";
 import { StripPage, StripHead } from "@/components/strip-page";
 import { cn } from "@/lib/utils";
+import { matches } from "@/lib/device";
 
 /* ── the legal page ───────────────────────────────────────────────
  * Two screens, one document each, dealt as a deck like the homepage and
@@ -83,7 +84,7 @@ export function LegalPage({ children }: { children: React.ReactNode }) {
        the whole contents, so a tap would change something the reader
        cannot see. There is no hover there either, so the tap is the only
        way in and it has to arrive. */
-    if (window.matchMedia("(max-width: 39.99rem)").matches)
+    if (matches("phone"))
       document.getElementById(`${d.id}-clause`)?.scrollIntoView({
         behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches
           ? "auto"
@@ -177,7 +178,7 @@ export function LegalPage({ children }: { children: React.ReactNode }) {
                           onBlur={() => setPeek(null)}
                           aria-current={at.id === c.id ? "true" : undefined}
                           className={cn(
-                            "flex w-full items-center gap-5 py-2.5 text-left text-base uppercase leading-tight tracking-[0.06em] tabular-nums transition-colors duration-200 sm:text-lg",
+                            "tap-44 flex w-full items-center gap-5 py-2.5 text-left text-base uppercase leading-tight tracking-[0.06em] tabular-nums transition-colors duration-200 sm:text-lg",
                             at.id === c.id
                               ? "text-foreground"
                               : "text-muted-foreground",
@@ -209,10 +210,10 @@ export function LegalPage({ children }: { children: React.ReactNode }) {
                   somebody skims past is noise. The buttons name themselves.
                   Selectable, on a strip that is not: a clause gets copied
                   into an email. */}
-                {/* Focusable: from `sm` up the clause scrolls in its own
-                    column, and with nothing in it to take the focus a
-                    keyboard could not scroll it (WCAG 2.1.1, the audit
-                    2026-10-02). Tab to it, then the arrows. */}
+                {/* Focusable: from `sm` up the clause scrolls in its
+                    own column, and with nothing in it to take the
+                    focus a keyboard could not scroll it (WCAG 2.1.1,
+                    the audit). Tab to it, then the arrows. */}
                 <article
                   id={`${d.id}-clause`}
                   aria-labelledby={`${d.id}-reading`}

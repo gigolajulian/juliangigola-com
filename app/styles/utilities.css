@@ -1,0 +1,440 @@
+/* Small links, the ruler's word and the motion utilities (press, rise, emerge, dissolve, title). */
+
+/* ── a thumb's worth of link ──
+   The small capitals links (footer, crumbs, credits, the email in an ask)
+   are 13 to 14px tall, and a thumb is not. Padding that the same negative
+   margin takes back: the hit area is 30px, the type does not move, and
+   nothing around it shifts. Wherever there is a thumb: a phone by width,
+   and a tablet by its pointer, which had none of this and put the email
+   and the legal link at 13px.
+
+   In the components layer, so a padding a link sets for itself wins. Out
+   of any layer this beat every utility, and `a.label` is also the two
+   buttons on the cover and the ask's Enquire: their `py-5` and `py-4`
+   came out as 8px on a phone, 31px tall, and the two cover buttons
+   overlapped by 4px where there should have been a gap. */
+@layer components {
+  @media (max-width: 40rem), (pointer: coarse) {
+    a.label,
+    .label a,
+    dd a,
+    a[href^="mailto:"],
+    header a[href="/"],
+    nav[aria-label="Legal"] a {
+      padding-block: 0.5rem;
+      margin-block: -0.5rem;
+    }
+    /* Not the filter chips: their row scrolls sideways, which clips it
+       top and bottom, and the margin shrank the row to 9px of a 28px chip.
+       On an iPad sideways only a 9px band of each chip took a tap. */
+    .chip-row a {
+      margin-block: 0;
+    }
+  }
+  /* And 44px where the padding cannot reach it (plan 3.2, measured on
+     iPhone SE, 18 and 18 Pro Max sizes: rows of 33 to 40px, links of
+     29px, the photographs' remove button at 20px). `tap-44` puts an
+     invisible box at least 44px square over the middle of the control,
+     so a thumb has the room and nothing on the page moves. Under a
+     thumb only; a pointer keeps the control's own box. */
+  @media (pointer: coarse) {
+    .tap-44 {
+      position: relative;
+    }
+    .tap-44::after {
+      content: "";
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: max(100%, 44px);
+      height: max(100%, 44px);
+      translate: -50% -50%;
+    }
+    /* The form's fields, which cannot carry a box of their own. */
+    .contact-card form :is(input:not([type="file"], [type="radio"], .sr-only), select) {
+      min-height: 44px;
+    }
+  }
+}
+
+/* ── the ruler's word, growing while somebody stays on the rail ──
+   Julian: enlarge it so it is easier to see what page you are on, and the
+   longer they stay in the menu the larger it gets.
+
+   So it starts at the tick word's own size and ramps up over a second and
+   a half of dwelling, which is long enough that running the pointer past
+   a chapter on the way somewhere else never triggers it and reading one
+   always does. `letter-spacing` comes down as it grows: 0.14em is set for
+   a ten pixel word and at twenty it is a word with gaps in it.
+
+   The ceiling is not taste, it is the twenty four pixels between the
+   bottom of the covers and the top of the rail. Bigger than this and the
+   word sits over a cover's own name plate. */
+.rail-word {
+  font-size: 0.625rem;
+  line-height: 1;
+  letter-spacing: 0.14em;
+  font-weight: 400;
+  /* The growth is a `scale`, not a font-size. Measured on production: a
+     font-size, tracking and weight tween on this one span cost a layout
+     on every frame of the second and a half, about 170ms of layout and as
+     much again of style over a single dwell, for a word twelve pixels
+     tall. Scaling it from its own edge draws the same picture on the
+     compositor. The tracking and the weight cannot scale, so they switch
+     instead, once, at the small size where the switch is smallest: on the
+     way in they change at the moment the growth starts, on the way out
+     the moment the shrink has ended. The settled state under the pointer
+     is exactly the one Julian signed off. */
+  transition:
+    scale 220ms var(--ease-out-strong),
+    letter-spacing 0ms linear 220ms,
+    font-weight 0ms linear 220ms;
+}
+[data-dwell] .rail-word {
+  /* Twenty, fifteen, thirteen, twelve. Julian has asked for it smaller
+     four times and the direction has not changed once, so this is the
+     size it settles at rather than another step down the same road: a
+     fifth bigger than the word at rest, which is still the difference
+     between glancing at it and reading it, and small enough that EDUCO
+     ACADEMY HAIRJAM reads as the label of the thing under the pointer
+     instead of as a headline over the band. The weight is never touched:
+     it grows, it does not get louder.
+
+     Twelve pixels is ten scaled by 1.2, below, and the tracking is written
+     for the settled size: 0.08em of twelve, divided back out so that it
+     comes to that once the scale has run. */
+  letter-spacing: calc(0.08em / 1.2);
+  /* Julian, twice: it must not look bold. It never was - it is 400, the
+     same regular the rest of the site is set in - but near-white on a
+     near-black page at fifteen pixels reads heavy, and the answer to
+     reading heavy is to weigh less. Inter is loaded here as a variable
+     font with no fixed weight, so 300 is a real cut of it and not a
+     browser thinning one it does not have. Small type needs the weight
+     and large type does not, which is why it comes down as it grows. */
+  font-weight: 300;
+  scale: 1.2;
+  transition:
+    scale 1500ms var(--ease-out-strong) 180ms,
+    letter-spacing 0ms linear 180ms,
+    font-weight 0ms linear 180ms;
+}
+@media (prefers-reduced-motion: reduce) {
+  .rail-word,
+  [data-dwell] .rail-word {
+    transition: none;
+  }
+}
+
+@utility label {
+  /* Inter's figures, set to one width. Every number on the site that is in a
+     column or changes under a pointer wears this face — the counts down the
+     cover's index, the frame counters, the rate rows — and proportional
+     digits make those shuffle sideways as they change. */
+  font-variant-numeric: tabular-nums;
+  /* The small details stay in the mono: labels, captions, counts, buttons.
+     Text and titles are Endless, the logo Inter Tight. */
+  font-family: var(--font-mono);
+  font-size: var(--text-label);
+  line-height: var(--text-label--line-height);
+  letter-spacing: var(--text-label--letter-spacing);
+  text-transform: uppercase;
+}
+
+/**
+ * Press feedback: down fast, back with a spring.
+ *
+ * The asymmetry is the whole point. Going down has to be immediate — that is
+ * the interface acknowledging the finger, and any easing there reads as lag —
+ * so `:active` gets 90ms of plain ease-out. Coming back is the part that can
+ * be expressive, so it releases on the bounce curve and overshoots a few
+ * percent before settling, which is what makes a button feel like a physical
+ * thing rather than a rectangle changing size.
+ *
+ * The scale itself stays at the call site: a full-width button wants about
+ * 0.98, a photograph the size of half the viewport wants 0.995, and one number
+ * cannot serve both.
+ */
+/* The same movement for the round glass controls, which carry `press` and
+   `glass` rather than `action`: the lightbox's arrows and its close. A
+   little more than the pills, because they are small. */
+@media (hover: hover) and (pointer: fine) {
+  .glass.press:hover {
+    scale: 1.06;
+  }
+}
+
+@utility press {
+  /* `scale`, `translate` and `rotate`, not just `transform`: Tailwind v4
+     compiles `active:scale-[0.98]` to the standalone `scale` property, so a
+     transition on `transform` alone would animate nothing at all.
+
+     The colours ride along at their own speed. They were part of the one
+     transition each of these buttons declared by hand, and folding them in
+     here is what stops a `transition-colors` alongside this utility from
+     clobbering the spring — a shorthand and a longhand fighting over the
+     same declaration is not a fight worth having at ten call sites.
+
+     This list wins over the ones `action`, `action-quiet` and `glass`
+     declare when both are on the same element (measured: every button on
+     the site), so it has to carry everything theirs do: the strong curve
+     on the colours, which used to fall back to a plain ease-out here, and
+     the pointer light's `--gx`/`--gy`, which used to snap. */
+  transition:
+    transform 440ms var(--ease-bounce),
+    scale 440ms var(--ease-bounce),
+    translate 440ms var(--ease-bounce),
+    rotate 440ms var(--ease-bounce),
+    background-color 200ms var(--ease-out-strong),
+    border-color 200ms var(--ease-out-strong),
+    color 200ms var(--ease-out-strong),
+    opacity 200ms var(--ease-out-strong),
+    --gx 340ms var(--ease-out-strong),
+    --gy 340ms var(--ease-out-strong);
+
+  &:active {
+    /* Down is not the expressive part. It is the interface acknowledging the
+       finger, so it is fast and accelerating — a spring here would read as
+       the button hesitating. */
+    transition:
+      transform 90ms cubic-bezier(0.4, 0, 1, 1),
+      scale 90ms cubic-bezier(0.4, 0, 1, 1),
+      translate 90ms cubic-bezier(0.4, 0, 1, 1),
+      rotate 90ms cubic-bezier(0.4, 0, 1, 1),
+      background-color 200ms var(--ease-out-strong),
+      border-color 200ms var(--ease-out-strong),
+      color 200ms var(--ease-out-strong),
+      opacity 200ms var(--ease-out-strong),
+      --gx 340ms var(--ease-out-strong),
+      --gy 340ms var(--ease-out-strong);
+  }
+}
+
+/* In the workbench the release is quick and plain.
+ *
+ * The spring above is for a button pressed a few times a visit. /admin's are
+ * pressed dozens of times a day, and at that frequency a 440ms settle reads
+ * as the button being slow rather than alive — the tokens block says exactly
+ * this. Unlayered, so it outranks the utility; `:active` is restated because
+ * this rule would otherwise outrank the utility's own down-stroke as well. */
+[data-workbench] .press {
+  transition:
+    transform 160ms var(--ease-out-strong),
+    scale 160ms var(--ease-out-strong),
+    translate 160ms var(--ease-out-strong),
+    rotate 160ms var(--ease-out-strong),
+    background-color 200ms ease-out,
+    border-color 200ms ease-out,
+    color 200ms ease-out,
+    opacity 200ms ease-out;
+}
+[data-workbench] .press:active {
+  transition:
+    transform 90ms cubic-bezier(0.4, 0, 1, 1),
+    scale 90ms cubic-bezier(0.4, 0, 1, 1),
+    translate 90ms cubic-bezier(0.4, 0, 1, 1),
+    rotate 90ms cubic-bezier(0.4, 0, 1, 1),
+    background-color 200ms ease-out,
+    border-color 200ms ease-out,
+    color 200ms ease-out,
+    opacity 200ms ease-out;
+}
+@media (prefers-reduced-motion: reduce) {
+  [data-workbench] .press {
+    transition: none;
+  }
+}
+
+/**
+ * The first paint.
+ *
+ * `@starting-style` rather than a mounted flag in React: the animation belongs
+ * to the element appearing, not to a state a component has to track, and this
+ * way it runs on the static HTML before any JavaScript has arrived — which is
+ * the only way a load animation can be honest about when the page loaded.
+ *
+ * Short, and opacity-and-transform only, so it never delays the thing it is
+ * animating. A load animation that makes a fast page feel slower has argued
+ * itself out of existence.
+ */
+@utility rise {
+  opacity: 1;
+  transform: translateY(0);
+  transition:
+    opacity 420ms var(--ease-out-strong),
+    transform 620ms var(--ease-spring);
+  /* The same hook `reveal` uses, so a block can be held back a beat without
+     a second utility or a line of JavaScript. */
+  transition-delay: var(--reveal-delay, 0ms);
+
+  @starting-style {
+    opacity: 0;
+    transform: translateY(0.75rem);
+  }
+}
+
+/**
+ * The first paint, for something that must not move.
+ *
+ * `rise` with the travel taken out. The masthead is the largest thing on the
+ * first screen and the one piece of type the eye lands on before the page has
+ * finished arriving; sliding it in is the one entrance that reads as a jolt
+ * rather than as a welcome. Opacity changes nothing about where an element
+ * is, so this arrives with everything around it and stays put.
+ */
+@utility emerge {
+  opacity: 1;
+  transition: opacity 420ms var(--ease-out-strong);
+  transition-delay: var(--reveal-delay, 0ms);
+
+  @starting-style {
+    opacity: 0;
+  }
+}
+
+/**
+ * An exposure ramp: this element arrives over-exposed and settles.
+ *
+ * It was a dissolve — a 520ms fade through a 6px blur, two frames resolving
+ * into one the way a lens does. The argument for the blur was sound and the
+ * character was wrong: the work is hard flash and hard shadow, and the cover
+ * was changing frames like a slideshow easing between two soft images. This
+ * is the same swap in the medium's own language. The incoming frame comes up
+ * blown, holds there for the length of a shutter, and settles to itself.
+ *
+ * What has not changed, and is not up for changing: it does not slide and it
+ * does not zoom. A cover that moves its own photographs is a slideshow of
+ * pictures rather than an index of work. Only the light moves.
+ *
+ * Two animations, because the two halves answer to different clocks.
+ *
+ *   opacity    `--swap-pic-dur` — 520ms at the cover's own pace, 260ms while
+ *              a visitor has hold of the index (`HURRIED` in `hero.tsx`).
+ *              On `--ease-out-strong` this is front-loaded enough to read as
+ *              a cut: past 80% inside the first fifth of its time, so the
+ *              outgoing frame is covered almost at once and there is no
+ *              window where two photographs are both legible.
+ *   filter     a fixed 250ms, whatever the swap is doing. A shutter does not
+ *              get slower because somebody is browsing slowly. 90ms blown,
+ *              then 160ms back down to the photograph.
+ *
+ * Animations and not transitions, for two reasons. The shape goes two ways —
+ * up to the flash and back out of it — which a transition cannot do. And an
+ * animation runs on a node's first render, which is what the `@starting-style`
+ * here was buying: the frame that fades in is a brand new element every time.
+ *
+ * Only the incoming layer is touched. Fading the outgoing one out at the same
+ * time looks like the obvious way to crossfade and is wrong: two layers at
+ * ~50% each let the ground show through, so every switch dips through a wash
+ * of the mat colour before recovering.
+ */
+@utility dissolve {
+  animation:
+    expose var(--swap-pic-dur, 520ms) var(--ease-out-strong) both,
+    flash var(--swap-flash-dur, 250ms) var(--ease-out-strong) both;
+}
+
+@keyframes expose {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes flash {
+  /* 1.4 and no more. It is the highlights going first, which is what a flash
+     does to a frame; past this the midtones go with them and the picture is
+     gone rather than over-exposed. */
+  from,
+  36% {
+    filter: brightness(1.4);
+  }
+  to {
+    filter: brightness(1);
+  }
+}
+
+/**
+ * The cover's title, leaving and arriving — two halves of one swap.
+ *
+ * The gap between them is the whole point. The outgoing word clears the frame
+ * before its replacement starts, so the two names are never both legible and
+ * the eye is never asked to read through a dissolve. A single word crossfading
+ * into another prints one on top of the other; this reads as one word
+ * replacing another, which is what is actually happening.
+ *
+ *     0ms   the phase ticks — the photograph starts its 520ms ramp
+ *   120ms   the outgoing word begins to leave
+ *   320ms   it is gone; the column is briefly empty and the picture carries it
+ *   360ms   the incoming word begins to arrive
+ *   680ms   it has settled, a beat after the picture
+ *
+ * That trailing beat is deliberate rather than slack. The photograph leads and
+ * the name follows it, which is the order they are actually read in — the
+ * picture is what catches the eye and the word is what explains it.
+ *
+ * Held apart from `dissolve` because they are a different gesture: `dissolve`
+ * is one layer fading up over another that stays put, where this is a handover
+ * between two nodes with a deliberate pause in the middle.
+ */
+@utility title-out {
+  opacity: 0;
+  transition: opacity var(--swap-out-dur, 200ms) var(--ease-out-strong)
+    var(--swap-out-delay, 60ms);
+}
+
+@utility title-in {
+  opacity: 1;
+  /* Colour rides along undelayed, because this class stays on the element
+     after the swap has settled and would otherwise be the whole transition
+     list — taking the hover fade off the credit link with it. Tailwind's
+     `transition-colors` cannot be used alongside: both declare
+     `transition-property`, and whichever lands later in the sheet wins. */
+  /* Read from properties rather than written here, so the cover can hand off
+     at two speeds. The defaults are the unhurried ones the automatic cycle
+     wants; `components/hero.tsx` overrides them inline while the visitor has
+     hold of the index. Properties rather than a second utility: two utilities
+     both declaring `transition` fight over source order, which this file
+     already carries a scar from. An inline style cannot lose. */
+  transition:
+    /* 180ms, from 360: the title used to wait for the picture's dissolve
+       to all but finish before it arrived, and read as late — Julian asked
+       for less delay. Half keeps the order (picture first, then the word)
+       without the pause. */
+    opacity var(--swap-in-dur, 320ms) var(--ease-out-strong)
+      var(--swap-in-delay, 180ms),
+    color 200ms ease-out;
+
+  /* The arriving word is a brand new node every phase, and a transition does
+     not run on first render — so, as with `dissolve`, the start has to be
+     declared rather than transitioned from. */
+  @starting-style {
+    opacity: 0;
+  }
+}
+
+/**
+ * A line of the phone menu arriving.
+ *
+ * `rise`, tuned for a menu: quicker, from a little further down, and on the
+ * bounce curve — a menu is opened a handful of times a session, which is
+ * exactly where a spring is worth spending. A transition and not a keyframe
+ * so it retargets if the menu is closed mid-arrival, and `@starting-style`
+ * so it replays each time the panel comes back from `display: none`.
+ * Opacity is in the list, so the hover fade on the link rides along.
+ */
+@media (prefers-reduced-motion: reduce) {
+  .rise,
+  .emerge,
+  .press,
+  .title-out,
+  .title-in {
+    transition: none;
+  }
+  /* The ramp is an animation now, so this is what turns it off. Without a
+     fill there is nothing holding the frame back: it is simply there. */
+  .dissolve {
+    animation: none;
+  }
+}

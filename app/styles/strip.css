@@ -1,0 +1,675 @@
+/* The project strip: the scroller, the rack, cells and the strip on an iPad. */
+
+/* ── the project strip's scroller ─────────────────────────────────
+ * No scrollbar. The strip runs sideways and the ruler under it says both how
+ * long the sequence is and where in it you are, in the same glance; a
+ * horizontal bar beside that ruler is the same fact drawn twice, and on a
+ * Mac it is not drawn at all until you move.
+ *
+ * `overscroll-x: contain` so reaching the end of the sequence does not hand
+ * the gesture to the browser and trigger a back-swipe.
+ * ─────────────────────────────────────────────────────────────── */
+/* The project strips ask for the footer without the ask: one line of
+   housekeeping under the sequence, nothing selling. The page marks itself
+   and the footer, which lives in the root layout, reads the mark. */
+body:has([data-quiet-footer]) .site-footer-ask {
+  display: none;
+}
+body:has([data-quiet-footer]) .site-footer-body {
+  /* One line and the air it needs. Every strip page has to give this band
+     the bottom of its window, so every pixel here is a pixel off the
+     photographs — 24px of padding around a 14px line made a 62px bar under
+     a cover that was fighting for 20. */
+  padding-block: 0.75rem;
+}
+/* And less again where the window is a tablet or a phone, which is where
+   the photographs have least to spare. Julian asked. */
+@media (pointer: coarse) and (min-width: 40rem), (max-width: 40rem) {
+  body:has([data-quiet-footer]) .site-footer-body {
+    padding-block: 0.4rem;
+  }
+  .strip-band {
+    /* The gap the pages leave between the chip row and the first
+       photograph. A desktop can afford 16px of it; a tablet held in two
+       hands cannot. */
+    margin-top: 0.5rem;
+  }
+}
+body:has([data-quiet-footer]) .site-footer-row {
+  margin-top: 0;
+  border-top: 0;
+  padding-top: 0;
+}
+/* Julian: room to breathe on a phone, which scrolls, so the line takes
+   nothing from the photographs; and clear of the home indicator. */
+@media (max-width: 39.99rem) {
+  body:has([data-quiet-footer]) .site-footer-body {
+    /* Squashed on an iPhone. More above the rule, more under the
+       line, and clear of Safari's bar. */
+    /* Close under the rule; the rights line near the page's end. */
+    padding-top: 1.25rem;
+    padding-bottom: calc(1.25rem + env(safe-area-inset-bottom));
+  }
+  body:has([data-quiet-footer]) .site-footer-row {
+    gap: 1.25rem;
+  }
+  /* The grid's last row has the same air before the footer. */
+  .strip-grid {
+    padding-bottom: 3rem;
+  }
+}
+
+/* The name of the project at the top of a strip page, which waits for the
+   opening plate to go by. The sequence starts on the title set large, so
+   without this the first screen carries the same words twice. Opacity and
+   not `display`, so the header keeps its height and nothing reflows as it
+   comes and goes. The attribute is set by the strip's own scroll reader. */
+/* The system cursor is replaced by the site's mark (`.pointer-mark`), and
+   the mark is a transform and nothing else. There used to be a glass drop
+   drawn under the pointer and the arrow was hidden for it; Julian asked
+   for the arrow back and the label on its own. A blurred element moving
+   with the pointer is the most expensive thing that can be on a screen —
+   every pointer move repaints the region behind it — and the trip into
+   the lightbox was stuttering under exactly that. So no blur and no filter
+   on anything that follows the pointer. */
+
+.running-head {
+  opacity: 0;
+  transition: opacity 240ms var(--ease-out-strong);
+}
+article:has(.strip-scroll[data-past-first]) .running-head {
+  opacity: 1;
+}
+@media (prefers-reduced-motion: reduce) {
+  .running-head {
+    transition: none;
+  }
+}
+
+/* The same moment for the homepage's wordmark, which is the cover's masthead
+   in miniature: the two are the same name in the same face on the same left
+   edge, so the bar keeps its name off the screen until the cover cell has
+   gone by, then hands it up from under the bar out of a slight oversize.
+
+   It was a scroll-linked measurement against the masthead. The homepage is a
+   strip now and never scrolls, so there was nothing left to measure: the
+   strip says when the opening cell is half gone and this reads it.
+
+   `pointer-events: none` while it is out, because opacity hides a link from
+   the eye and not from the mouse: an invisible anchor over the top left of
+   the cover reloaded the page for anyone who clicked that patch of
+   photograph. Tabbing to it brings it back, so it is never an invisible
+   focus target, and below `lg` the cover stacks under a fixed bar with no
+   masthead beside it, so the name simply stays. */
+/* It comes in from the left as the cover goes. */
+.home-wordmark {
+  opacity: 0;
+  pointer-events: none;
+  translate: -48px 0;
+  transition:
+    opacity 360ms var(--ease-out-strong),
+    translate 480ms var(--ease-out-strong);
+}
+body:has(.strip-scroll[data-past-first]) .home-wordmark,
+body:has(.strip-scroll[data-past-hero]) .home-wordmark,
+.home-wordmark:focus-visible {
+  opacity: 1;
+  pointer-events: auto;
+  translate: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .home-wordmark {
+    transition: opacity 300ms var(--ease-out-strong);
+    translate: none;
+  }
+}
+
+/* And the page is exactly the window, with that one line on it. A strip page
+   had a vertical wobble of precisely the footer's height — 62px — because
+   the sequence is `h-dvh` and the footer sits under it, so the one thing
+   below the photographs was the one thing you could not see. Julian asked
+   for a horizontal page that does not scroll vertically at all.
+
+   Only from 40rem up. On a phone the nav takes 93px and the footer 83px out
+   of 844, and squeezing the photographs into what is left to save one short
+   scroll is a poor trade; phones keep the scroll they have. */
+@media (min-width: 40rem) {
+  body:has([data-quiet-footer]) {
+    height: 100dvh;
+    overflow: hidden;
+  }
+  /* And the document with it. The body clips, but the scroll belongs to
+     the document, so anything a pixel too tall for one frame while the
+     page settles raised a real scrollbar that then went away again. With
+     no gutter held open any more that flicker is visible, and a bar
+     appearing and vanishing over a photograph is worse than either. A
+     page that is exactly one window cannot scroll, so nothing is put out
+     of reach that was not already clipped. */
+  html:has([data-quiet-footer]) {
+    overflow: hidden;
+  }
+  /* A flex child will not shrink below its content without this, and the
+     strip inside is the thing that has to give. */
+  body:has([data-quiet-footer]) > main {
+    min-height: 0;
+  }
+  /* `viewportFit: "cover"` is set and nothing else pads for it, so held
+     sideways the last line would sit under the home indicator. */
+  body:has([data-quiet-footer]) .site-footer-body {
+    padding-bottom: calc(0.75rem + env(safe-area-inset-bottom));
+  }
+}
+/* An iPad held sideways: the line a third thinner. The home
+   indicator's inset is most of the air under it now, rather than added
+   on top of 12px of its own. */
+@media (pointer: coarse) and (min-width: 40rem) and (orientation: landscape) {
+  body:has([data-quiet-footer]) .site-footer-body {
+    padding-top: 0.25rem;
+    padding-bottom: max(0.25rem, calc(env(safe-area-inset-bottom) - 0.25rem));
+  }
+}
+
+/* The cover's index on a short window. The cover is one cell of the
+   homepage's strip, so its panel is the screen less the footer's line, and
+   ten rows at full height do not fit under the masthead on a 700px laptop.
+   The list scrolls inside itself either way; this is what keeps the number
+   of rows you can see without doing that worth having. */
+/* Same shape as the `short` variant above, and for the same reason. */
+@media (max-height: 52rem) and (min-width: 40rem) {
+  .cover-row {
+    padding-block: 0.375rem;
+  }
+}
+
+/* The filter row, when it runs past the edge of the window: the last chip
+   fades rather than being cut through, which is the difference between a
+   row that continues and a row that is broken. Set by the shell, which is
+   the only thing that can measure it. */
+nav[aria-label="Categories"] ul[data-more] {
+  mask-image: linear-gradient(to right, #000 calc(100% - 4rem), transparent);
+}
+
+/* ── the same cells, as a rack ────────────────────────────────────
+ * A strip shows you one thing at a time and a rack shows you the shelf.
+ * /work is 34,512px of ribbon at 1440 - twenty-four screens - and somebody
+ * who wants to know what is there rather than be walked through it had no
+ * way to see it.
+ *
+ * Two rows deep, running sideways, which is the point: it is the same
+ * gesture as everything else on the site. The first version of this
+ * scrolled downwards like a document, and to do that it had to switch off
+ * the wheel, the drag, the ruler, the lead-on and the panel - so changing a
+ * filter changed the furniture, which is exactly what Julian said it felt
+ * like. This one changes the shelf and nothing else.
+ *
+ * The cells are untouched: the same server-rendered covers, in the same
+ * order, under the same filter. Only the box they sit in changes, which is
+ * why this is CSS and not a second component - two renderings of one
+ * archive is two things to keep in step, and the first to drift is the one
+ * nobody is looking at.
+ *
+ * Unlayered on purpose: it has to beat the `sm:h-full sm:w-auto` a cell
+ * carries for the strip, and a utility in `@layer utilities` loses to any
+ * rule outside a layer whatever its specificity.
+ */
+/* ── the strip under a finger on an iPad ──
+   Two things were taking the swipe away from the shelf on a tablet, both
+   of them over the photographs, which is where the swipe usually starts.
+
+   A frame is a link around a picture, and iPadOS lifts a link out of the
+   page on a press and a pull: the picture comes away under the finger and
+   the shelf stays where it was. `user-drag` on `img` does not reach it,
+   because the thing being lifted is the anchor. This does, and it is the
+   same gesture the prevented `dragstart` on the shelf covers for a mouse.
+
+   `touch-action: pan-x` was here too, to answer up front whether a swipe
+   was the shelf's or the page's. It is gone: anything but `auto` on a
+   scroller takes that region off Safari's fast path, the compositor asks
+   the main thread how to resolve the gesture, and on the iPad the answer
+   arrived as a jump at the moment the finger lifted and momentum took
+   over. The shelf is nearly the whole window on a tablet; Safari can pick
+   the axis itself. */
+.strip-scroll a,
+.strip-scroll a img {
+  -webkit-user-drag: none;
+}
+
+.strip-grid {
+  display: grid;
+  grid-template-rows: repeat(2, minmax(0, 1fr));
+  grid-auto-flow: column;
+  /* A column exactly 4:5 of a row, so a cover in the rack is the same
+     upright frame it is everywhere else on the site rather than whatever
+     shape the window happens to leave. `15rem` was that at 900px of
+     window and nowhere else: a 1080 screen gives rows of 370 and a 240px
+     cover in one is 2:3.
+
+     The shelf is a size container, so a cell can read the shelf's own
+     height and work out what four fifths of a row comes to; the column is
+     then as wide as the cover standing in it. A cell cannot do this from
+     the track list itself — `cqh` in `grid-auto-columns` would measure
+     some ancestor, not the shelf — which is why the width is set on the
+     cover below and the track simply follows it. */
+  container-type: size;
+  grid-auto-columns: min-content;
+  /* Julian: more air in the rack. 0.5rem set the covers almost touching,
+     which is a contact sheet; 1rem is a hung wall. The cover's own width
+     below is worked out from the row's height minus this gap, so the two
+     are one number and have to move together. */
+  gap: 1rem;
+  /* And air above and below the rack, so the covers hang off the chip
+     row rather than starting against it and finishing against the
+     ruler. The shelf is the size container, so `cqh` below is measured
+     inside this padding and the cover's width follows it down.
+     */
+  padding-block: 1.75rem;
+  /* The scroller carries `items-center` for the strip, where one cell is
+     centred in the window's height. Here every cell fills its row. */
+  align-items: stretch;
+  justify-items: stretch;
+}
+/* The cells that are words rather than pictures - a discipline's title, the
+   ask at the end - stand full height and take two columns: they are written
+   for a column the width of a masthead, and 240px of one wraps `Brand
+   campaigns` into three lines. */
+@media (min-width: 40rem) {
+  .strip-grid > :where(div, section, article) {
+    /* A discipline opens the strip on its name, a title page before its run
+       of covers. In the rack that title page was a blank column: 484px of
+       paper with one word on it, and the pictures starting a fifth of the
+       way across the window. Here the name is a label in the top slot of
+       its own column with a cover under it, so the work runs to both edges
+       of the window and the word still says where a chapter begins.
+
+       Full height and one column, not half a column: a cell pinned to the
+       top row makes the auto-placement skip the slot under it, and the rack
+       printed holes a screen wide between disciplines. */
+    grid-row: 1 / -1;
+    grid-column: span 1;
+    justify-content: center;
+    gap: 0.25rem;
+    /* There was a rule down the left of the name, the chapter break the
+       strip gets for free from a whole screen of paper. Julian had it
+       removed once the rack was dealt in chapters (`lib/deck.ts`): the
+       name arriving as a card over the last screen is the break now. */
+    padding: 0 2rem;
+  }
+  .strip-grid > :where(div, section, article):first-child {
+    padding-left: 0.75rem;
+  }
+  /* The discipline's name is the size it is in the strip. It was forced
+     to 3rem here; Julian: the same size in both views. */
+  /* Julian: the words must not sit under the photographs, and the pictures
+     should move over to leave room. The cell took its column's min-content,
+     which a `nowrap` credit reports as narrower than the line it prints —
+     `min-w-0` lets it — so `Photographer · Julian Gigola` ran on under the
+     first cover of Places. The column is the width of its own words now,
+     capped so one long credit cannot take a third of the window, and the
+     rack starts after it. `:is()` for the specificity: the rule that sets
+     every cell to `width: auto !important` is a class and a star, and a
+     bare `:where()` cannot beat it.
+
+     The ask is excepted below; it sets its own width. */
+  .strip-grid
+    > :is(div, section, article):not([data-hash="where-next"]):not(
+      [data-tick]
+    ):not([data-pictures]) {
+    width: max-content !important;
+    /* Wide enough for the longest single word of a discipline at its
+       strip size (Automotive, 363px at 4.5rem) and for a credit under
+       it. Not a share of the window: at 28vw the name itself was cut on
+       a 1000px screen, which is the bug the other way round. */
+    max-width: 28rem;
+  }
+  /* And the backstop, in the rack only: past that cap the credit wraps
+     rather than running out of its column. The one-line credits Julian
+     asked for are the project pages', where there is a page's width for
+     them. */
+  .strip-grid > :is(div, section, article):not([data-tick]) :where(dt, dd) {
+    white-space: normal;
+  }
+  /* And the films, which are a block of pictures rather than one picture.
+     Safari laid the block out at 77px and its tiles printed themselves
+     over the cells either side — the whole of what Julian saw as the
+     motion tab looking horrible. The cause is intrinsic sizing: the tiles
+     take their height from the row and their width from 16:9, and WebKit
+     will not carry that back up as the block's own width the way Blink
+     does. So nothing here is left intrinsic. The block is given the
+     height it asks for in `video-showcase.tsx` as a length the rack can
+     resolve, and the tile column is worked out from it: two rows and the
+     gap between them, at 16:9. Measured after, in both engines and at two
+     window sizes: the same block width to the pixel and nothing
+     overflowing its cell. */
+  /* Cover Art's rack is one cell of the grid holding every sleeve. In the
+     strip it runs one row, the strip's full height; Julian: in grid view
+     it should be a grid, two rows like every other discipline's. */
+  .strip-grid ul[data-rack] {
+    grid-template-rows: repeat(2, minmax(0, 1fr));
+  }
+  .strip-grid > [data-pictures] > * {
+    height: 62cqh;
+  }
+  .strip-grid > [data-pictures] ul {
+    grid-auto-columns: calc((62cqh - 0.75rem) / 2 * 16 / 9);
+  }
+  /* The ask is the exception: a sentence, two buttons and the way on to the
+     studio is not a label and does not fit in a slot. */
+  .strip-grid > [data-hash="where-next"] {
+    grid-row: 1 / -1;
+    /* Julian: a third of the window. The ask was one column of the rack
+       wide — 239px on a 2000px screen, a strip of type in the corner.
+       A share of the window instead; `width` carries `!important`
+       because the rule that sizes every other cell does. */
+    grid-column: span 2;
+    width: 33vw !important;
+    justify-content: center;
+    padding: 0 3rem;
+  }
+}
+/* A chapter heading, sized to the heading. The column is a fixed width and
+   the name was set at one size in it, so `Editorial` took a line and `Brand
+   campaigns` took two: the count and the link under it sat 45px lower on
+   half the chapters and the strip had no baseline running through it. The
+   count of characters comes in as `--n` and the type takes whichever is
+   smaller, the full size or the width one line of that many condensed caps
+   can have in the 296px the column leaves. The constant is measured, not
+   guessed: in Archivo 900 the widest of the names runs at 0.83em a
+   character, so a name of n fits inside 296px at 22rem / n. `nowrap` is the
+   guarantee behind the arithmetic. Julian asked: a long name goes smaller
+   rather than taller. */
+.chapter-name {
+  font-size: clamp(1.25rem, min(3rem, calc(22rem / var(--n, 12))), 3rem);
+  white-space: nowrap;
+}
+/* The first spine's stand-in word is for the sideways strip only. */
+.chapter-alias {
+  display: none;
+}
+@media (min-width: 40rem) {
+  .chapter-alias {
+    display: block;
+  }
+}
+@media (max-width: 40rem) {
+  /* Stacked, the column is the width of the page and a name fits at the
+     phone size whatever it is. */
+  .chapter-name {
+    font-size: 1.875rem;
+  }
+}
+/* The name on a plate, sized to the name. A fixed size either set a short
+   title small on a wide cover or cut a long one: `I Wanna Be A Human` came
+   out as `I Wanna Be A Hu...` at the size `Hua` wanted. The count of
+   characters comes in as `--n` and the type takes whichever is smaller,
+   5.7% of the cover's width or the width one line of that many condensed
+   caps can have. Nothing measures anything; it is one division. */
+.cover-name {
+  /* The slate's title: the films' size, as large as the length lets
+     it be. Was 5.7cqw to 2rem on a plate. */
+  font-size: clamp(1rem, min(9cqw, calc(150cqw / var(--n, 12))), 3rem);
+}
+/* In the rack the same formula came out at its floor on every cover —
+   13.6px under a 240px photograph, a caption rather than a title. Julian:
+   larger, and never on two lines. So the rack gets its own pair of
+   numbers: twice the share of the column for the cap, and a per-character
+   divisor measured against the longest name on the page rather than
+   guessed. `DIESEL: FOR SUCCESSFUL LIVING` fits its plate at 15px and no
+   more, which is where 160 comes from; every shorter name rises until the
+   cap stops it. One line always — the division is what keeps it there,
+   and `truncate` is the backstop. */
+/* The strip's covers the same way, larger on a large screen, where
+   the one-line cap of 3rem set SAGO small on a cover 870px wide. The
+   grid's own size follows. */
+.strip-scroll .cover-name {
+  /* One size along the strip, from its height, not each cover's
+     width: sized by width, SAGO and DIESEL beside it sat on different
+     lines. Smaller only where the cover is too narrow. */
+  /* The last term is the longest run that cannot break (`--g`, the last
+     two words held together) inside the slate's 2rem margins: on a
+     phone's narrow cover `140cqw` alone cut WONDERLAND and LADERA GRANOLA
+     at the margin (plan 3.2, iPhone 18 and 18 Pro Max). */
+  font-size: clamp(1rem, min(calc((100dvh - 21rem) * 0.095), calc(215cqw / var(--n, 12)), calc(140cqw / var(--w, 8)), calc((145cqw - 6rem) / var(--g, var(--w, 8)))), 5rem);
+  white-space: normal;
+  overflow: hidden;
+  text-overflow: clip;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  text-wrap: balance;
+}
+/* And the slate's margins the same on every cover, so the names stand on
+   one line across the strip. */
+.strip-scroll:not(.strip-grid) .cover-slate {
+  padding-inline: 2rem;
+  padding-bottom: 1.75rem;
+}
+/* Larger, and a long name runs to two lines rather than shrinking to fit
+   one. Sized for the plate, not the name's length. */
+.strip-grid .cover-name {
+  /* The longest word (`--w`) has to fit one line on its own. */
+  font-size: clamp(0.875rem, min(16cqw, calc(230cqw / var(--n, 12)), calc(140cqw / var(--w, 8))), 2.5rem);
+  white-space: normal;
+  overflow: hidden;
+  text-overflow: clip;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  text-wrap: balance;
+}
+/* The cell's own colour, a pixel inside the photograph's edge: painted
+   to the edge it showed as a light hairline round the rounded corners,
+   and taken away the photograph's fade showed what was under it. */
+.strip-cell:has(> img.strip-frame) {
+  padding: 1px;
+  background-clip: content-box;
+}
+/* One plate for every cover, at every size. The rack used to stack the
+   credit under the name and a narrow cover used to drop it; the type is
+   measured off the cell now, so neither is needed and a cover is the
+   same object wherever it is printed. Julian asked. */
+/* ── what a skipped cell is worth ──
+   `content-visibility: auto` was here, so the browser could skip the
+   layout, paint and decode of every cell away from the window. It went
+   because of what it reserves for a cell it has not rendered yet: the
+   `auto` in `contain-intrinsic-size` only remembers a cell it has already
+   measured, and every one ahead of the swipe is worth its fallback — a
+   pixel. Safari on the iPad then grew the strip under the hand, a cell at
+   a time, which is the jump in Julian's recording, along with plates drawn
+   twice and cells that came up blank.
+
+   If it comes back it needs a real reserved width, not a pixel, and
+   proof on an iPad rather than in a headless Chromium, where none of
+   this shows. The decode cost it was paying for is real and still there.
+*/
+
+/* On the covers only. `container-type: inline-size` contains the element's
+   own width, so a cell sized by its content stops being: put on every
+   `.strip-cell`, it squeezed the rack's chapter columns to their floor and
+   `Editorial` printed as `Edit...`. A cover is sized by the grid either
+   way and can safely measure itself. */
+a.strip-cell {
+  container-type: inline-size;
+}
+
+/* ── glass costs a tablet more than it is worth ──
+   A backdrop filter re-reads the pixels behind it every frame, and on the
+   iPad thirty of them moving at once came out as plates painted twice and
+   cells that arrived empty. Where the pointer is a finger, the plates on
+   the homepage's work tiles are filled rather than blurred, and the ones
+   that only show on hover, which a touch screen never shows, drop it. */
+@media (pointer: coarse) {
+  :root .glass-surface.opacity-0 {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+}
+
+/* Julian: the Selected work tiles came apart at the edge on hover. A
+   backdrop blur is not carried through the card's 3D tilt, so the plate
+   stood flat while the photograph turned and the two edges split. On a
+   tilting tile the plate is solid instead. */
+:root .tilted-card-inner .glass-surface {
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  background-color: color-mix(in oklab, var(--background) 88%, transparent);
+}
+
+/* Cells arrive from the strip with a height, a width or an aspect of their
+   own; in the rack the grid decides all three. */
+.strip-grid > * {
+  height: auto !important;
+  width: auto !important;
+  aspect-ratio: auto !important;
+}
+/* Except the pictures. A row of the rack gives the height and the picture
+   gives the width, from the shape it was shot at: `--ar` comes off the
+   frame in `work-cells.tsx`, and a cover, which is 4:5 wherever it is
+   printed, sets none and takes the 0.8 default.
+
+   Julian: a horizontal photograph stays horizontal in event coverage,
+   automotive and places. Those three disciplines are one gallery rather
+   than a run of covers, so every cell in them was a landscape frame
+   cropped upright to fill a 4:5 column.
+
+   A cover is a link and a gallery's frame is a button that opens the
+   viewer — the rule named links only, so a discipline that is one gallery
+   laid every frame out at `auto` and the rack showed one picture or
+   none. Julian asked for it fixed. */
+.strip-grid > a,
+.strip-grid > button {
+  height: 100% !important;
+  width: calc((100cqh - 1rem) / 2 * var(--ar, 0.8)) !important;
+}
+/* Julian: on an iPad, whole columns. `--rack-w` is only ever set there
+   (`work-shell.tsx`): the width of a cover once the window is shared out
+   between a whole number of columns, and `--rack-pad` the room that
+   leaves above and below, so each row is exactly a cover tall. A title
+   column takes the same width, so the columns stay on one beat, and a
+   snap brings a swipe to rest on one. A gallery's frames keep their own
+   shape from the row height, as everywhere else.
+
+   Keyed off `data-rack`, never `[style*="--rack-w"]`: a style attribute
+   in front of a combinator made Chrome restyle the whole subtree of any
+   element whose inline style changed, anywhere on any page: 22ms on
+   /portfolio per write, and every slide, tilt and view transition writes
+   one. */
+.strip-grid[data-rack] {
+  padding-block: var(--rack-pad);
+  scroll-snap-type: x proximity;
+  scroll-padding-inline: 2.5rem;
+}
+.strip-grid[data-rack] > * {
+  scroll-snap-align: start;
+}
+/* A cover off screen is not styled, laid out or painted until it comes
+   near. The index has about a hundred, and arriving at it did all of
+   them before the zoom could start: the longest freeze on an iPad went
+   from ~360ms to ~230ms (4x throttle). A cover is clipped already and
+   sized by the strip, never by its contents, so nothing moves:
+   measured on every page at desktop, iPad both ways and iPhone. */
+.strip-scroll > a.strip-cell {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 300px auto 400px;
+}
+.strip-grid[data-rack] > a:not([style*="--ar"]),
+.strip-grid[data-rack]
+  > :where(div, section, article):not([data-hash="where-next"]) {
+  width: var(--rack-w) !important;
+}
+/* On a phone the page is not locked and the strip is already a column, so
+   the sheet is the same idea the other way up: two across, running down,
+   scrolled as a page. A rack held sideways on a 390px screen gives columns
+   101px wide and 1,704px of shelf nothing can reach. */
+@media (max-width: 39.999rem) {
+  .strip-grid {
+    /* Not a size container down here: this sheet's height is its content,
+       and an element that may not read its own content has no height at
+       all. Measured before the rule was scoped: every cell 0 by 0. */
+    container-type: normal;
+    /* Justified rows, the phone's wall. Every picture's width is its
+       shape times a row height of 11rem, and a line shares out what it
+       has left over in the same proportion; with the shape held by
+       `aspect-ratio`, everything on a line comes out the same height and
+       the line fills the width exactly. So nothing is cropped and there
+       are no holes: a horizontal frame in Event coverage is horizontal
+       here too, where the sheet used to cut every frame to 4:5. Covers
+       have no `--ar`, stand at 4:5 and so still go two to a line. */
+    display: flex;
+    /* A row, over the column the strip is on a phone. */
+    flex-direction: row !important;
+    flex-wrap: wrap;
+    align-items: flex-start;
+  }
+  .strip-grid > a,
+  .strip-grid > button {
+    width: auto !important;
+    height: auto !important;
+    /* Grow in proportion to the shape, times a hundred: a line whose
+       grow factors add up to less than one is only given that share of
+       its room, so a portrait on a line of its own stopped short. */
+    flex: calc(var(--ar, 0.8) * 100) 1 calc(var(--ar, 0.8) * 11rem);
+    aspect-ratio: var(--ar, 0.8) !important;
+    min-width: 0;
+  }
+  .strip-grid > :where(div, section, article) {
+    flex: 1 0 100%;
+    /* Running down the page the break is a line across it, not beside
+       it, and the name needs room over it. */
+    border-left: 0;
+    border-top: 1px solid var(--color-border);
+    padding: 1.5rem 0 0.25rem;
+  }
+  .strip-grid > :where(div, section, article):first-child {
+    border-top: 0;
+    padding-top: 0;
+  }
+}
+
+/* On an iPad held upright the grid runs down instead (`useTablet` in
+   `strip.tsx`). The phone's
+   justified rows at a taller line, two covers across, in a box that scrolls
+   while the page stays put. The rack's rules above are written for a size
+   container two rows deep; the repeated class outranks them. */
+.strip-grid.strip-grid[data-sheet] {
+  container-type: normal;
+  display: flex;
+  flex-direction: row !important;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  align-content: flex-start;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding-block: 1.25rem 2rem;
+}
+.strip-grid.strip-grid[data-sheet] > a,
+.strip-grid.strip-grid[data-sheet] > button {
+  width: auto !important;
+  height: auto !important;
+  flex: calc(var(--ar, 0.8) * 100) 1 calc(var(--ar, 0.8) * 23rem);
+  aspect-ratio: var(--ar, 0.8) !important;
+  min-width: 0;
+  /* A row no taller than a full one: a cover left on its own at the end
+     of a section grew to the whole width, a screen and a half tall. */
+  max-width: calc(var(--ar, 0.8) * 30rem);
+}
+.strip-grid.strip-grid.strip-grid[data-sheet] > :is(div, section, article) {
+  flex: 1 0 100%;
+  width: auto !important;
+  max-width: none;
+  padding: 1.5rem 0 0.25rem;
+  border-top: 1px solid var(--color-border);
+}
+.strip-grid.strip-grid.strip-grid[data-sheet] > :is(div, section, article):first-child {
+  border-top: 0;
+  padding-top: 0;
+}
+/* The names read across, as headings over their section. */
+.strip-grid[data-sheet] :is(.chapter-name, .strip-cell > a, h2:has(.title-word)) {
+  writing-mode: horizontal-tb;
+  rotate: none;
+}
+/* Nothing runs sideways, so there is nothing for the ruler to read. */
+.strip-scroll[data-sheet] ~ * {
+  display: none;
+}

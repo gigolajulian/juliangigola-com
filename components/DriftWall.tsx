@@ -1,8 +1,58 @@
 'use client';
 
-import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+  useSyncExternalStore,
+  type CSSProperties,
+  type PointerEvent as ReactPointerEvent,
+  type ReactNode
+} from 'react';
 
-const DEFAULT_ITEMS = Array.from({ length: 15 }, (_, i) => {
+/** One photograph on the wall. With `href` the tile is a link. */
+export type DriftWallItem = {
+  image: string;
+  srcSet?: string;
+  title?: string;
+  href?: string;
+};
+
+export type DriftWallProps = {
+  items?: DriftWallItem[];
+  columns?: number | 'fill';
+  tileWidth?: number;
+  tileHeight?: number;
+  gap?: number;
+  radius?: number;
+  tilt?: number;
+  turn?: number;
+  roll?: number;
+  perspective?: number;
+  depth?: number;
+  speed?: number;
+  direction?: 'up' | 'down';
+  variance?: number;
+  parallax?: number;
+  pauseOnHover?: boolean;
+  lift?: number;
+  fade?: number;
+  dim?: number;
+  grayscale?: boolean;
+  overlayColor?: string;
+  eager?: boolean;
+  limit?: number;
+  density?: number;
+  hold?: boolean;
+  onShown?: () => void;
+  className?: string;
+  style?: Record<string, string | number>;
+};
+
+const DEFAULT_ITEMS: DriftWallItem[] = Array.from({ length: 15 }, (_, i) => {
   const ids = [1015, 1025, 1039, 1043, 1044, 1050, 1062, 1069, 1074, 1080, 1084, 106, 110, 133, 164];
   return {
     image: `https://picsum.photos/id/${ids[i % ids.length]}/600/400`,
@@ -13,21 +63,21 @@ const DEFAULT_ITEMS = Array.from({ length: 15 }, (_, i) => {
 // Read through `useSyncExternalStore` rather than set from an effect: the
 // site's lint forbids setState in an effect body.
 const REDUCED = '(prefers-reduced-motion: reduce)';
-const subscribeReduced = cb => {
+const subscribeReduced = (cb: () => void) => {
   const mq = window.matchMedia(REDUCED);
   mq.addEventListener('change', cb);
   return () => mq.removeEventListener('change', cb);
 };
 const readReduced = () => window.matchMedia(REDUCED).matches;
 
-const columnFactor = (index, variance) => {
+const columnFactor = (index: number, variance: number) => {
   const pseudo = ((index * 0.6180339887 + 0.35) % 1) * 2 - 1;
   return 1 + variance * pseudo;
 };
 
 const DriftWall = ({
   items = DEFAULT_ITEMS,
-  columns = /** @type {number | 'fill'} */ (5),
+  columns = 5,
   tileWidth = 200,
   tileHeight = 132,
   gap = 18,
@@ -53,19 +103,22 @@ const DriftWall = ({
   eager = false,
   // And a ceiling on the photographs it loads, however many columns it
   // takes to cover the screen: past it the columns share them.
-  limit = /** @type {number | undefined} */ (undefined),
+  limit,
   // How sharp, as a share of the tile's width: under 1 the browser picks
   // a smaller copy for a wall that is only background.
   density = 1,
-  onShown = /** @type {(() => void) | undefined} */ (undefined),
+  // Held still (the site's `?wall=still`): every column eases to a stop
+  // and stays paused until this goes false, then eases back up.
+  hold = false,
+  onShown,
   className = '',
-  style = /** @type {Record<string, string | number> | undefined} */ (undefined)
-}) => {
-  const containerRef = useRef(null);
-  const planeRef = useRef(null);
-  const trackRefs = useRef([]);
+  style
+}: DriftWallProps) => {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const planeRef = useRef<HTMLDivElement>(null);
+  const trackRefs = useRef<(HTMLDivElement | null)[]>([]);
 
-  const offsetsRef = useRef([]);
+  const offsetsRef = useRef<number[]>([]);
   const hoveredColRef = useRef(-1);
   const wallHoveredRef = useRef(false);
   const pointerRef = useRef({ x: 0, y: 0 });
@@ -73,7 +126,7 @@ const DriftWall = ({
 
   const [containerHeight, setContainerHeight] = useState(600);
   const [containerWidth, setContainerWidth] = useState(0);
-  const [activeId, setActiveId] = useState(null);
+  const [activeId, setActiveId] = useState<string | null>(null);
   /* The site's addition: the wall stays hidden until every photograph it
      opens on has loaded, then fades in, so it never shows an empty frame.
      Julian: make sure all the photos are loaded before showing it. Capped,
@@ -137,7 +190,7 @@ const DriftWall = ({
         inView.map(img =>
           img.complete
             ? null
-            : new Promise(r => {
+            : new Promise<unknown>(r => {
                 img.addEventListener('load', r, { once: true });
                 img.addEventListener('error', r, { once: true });
               })
@@ -149,7 +202,8 @@ const DriftWall = ({
       cancelAnimationFrame(raf);
     };
   }, []);
-  const activeIdRef = useRef(null);
+  const activeIdRef = useRef<string | null>(null);
+  const heldRef = useRef(hold);
   const reduced = useSyncExternalStore(subscribeReduced, readReduced, () => false);
 
   /* `columns="fill"` (the site's addition): as many columns as it takes to
@@ -166,9 +220,9 @@ const DriftWall = ({
     /* A phone sees three or four of a column at a time, and every tile
        loads once the wall is seen: the 404 fetched all 101 projects there
        for 14 on the screen. Six a column is still no repeat in view. */
-    /* As many as the wall needs and no more (Julian, 2026-10-03): enough a
-       column that its copies are never in view together, at most the six
-       a phone column takes. Every other card was fetched for nothing. */
+    /* As many as the wall needs and no more: enough a column that its
+       copies are never in view together, at most the six a phone column
+       takes. Every other card was fetched for nothing. */
     const unit = tileHeight + gap;
     // A window over twice as wide as tall sees more of each tilted column
     // (3440x1440 showed a card twice).
@@ -176,7 +230,7 @@ const DriftWall = ({
     const perCol = Math.min(6, Math.max(4, Math.ceil((containerHeight * 1.4) / unit) + 1 + wide));
     const pool = containerWidth ? items.slice(0, Math.min(limit ?? Infinity, colCount * perCol)) : items;
     if (pool.length >= colCount * 4) {
-      const cols = Array.from({ length: colCount }, () => []);
+      const cols = Array.from({ length: colCount }, (): DriftWallItem[] => []);
       pool.forEach((item, i) => cols[i % colCount].push(item));
       return cols;
     }
@@ -231,7 +285,7 @@ const DriftWall = ({
   }, [columnMeta, columnItems]);
 
   const applyPlaneTransform = useCallback(
-    (px, py) => {
+    (px: number, py: number) => {
       const plane = planeRef.current;
       if (!plane) return;
       plane.style.transform =
@@ -253,8 +307,8 @@ const DriftWall = ({
   const wakeRef = useRef(() => {});
   useEffect(() => {
     const tracks = trackRefs.current;
-    const anims = [];
-    const rates = [];
+    const anims: Animation[] = [];
+    const rates: number[] = [];
     columnMeta.forEach((meta, c) => {
       const el = tracks[c];
       const v = baseVelocities[c];
@@ -278,9 +332,9 @@ const DriftWall = ({
     });
 
     let frame = 0;
-    let last = null;
+    let last: number | null = null;
     let visible = !containerRef.current;
-    const tick = ts => {
+    const tick = (ts: number) => {
       const dt = last === null ? 1 / 60 : Math.min(0.05, Math.max(0, ts - last) / 1000);
       last = ts;
       let busy = false;
@@ -297,11 +351,17 @@ const DriftWall = ({
         busy = true;
       }
 
-      const paused = wallHoveredRef.current && pauseOnHover;
+      const paused = (wallHoveredRef.current && pauseOnHover) || heldRef.current;
       anims.forEach((a, c) => {
         if (!a) return;
         const target = paused || hoveredColRef.current === c ? 0 : 1;
-        if (rates[c] === target) return;
+        if (rates[c] === target) {
+          // Held and stopped: paused outright, so nothing runs at rate 0.
+          if (target === 0 && heldRef.current && a.playState === 'running') a.pause();
+          return;
+        }
+        // Coming out of a hold: running again before it picks up speed.
+        if (visible && a.playState === 'paused') a.play();
         const ease = 1 - Math.exp(-dt / (target === 0 ? 0.16 : 0.28));
         rates[c] += (target - rates[c]) * ease;
         if (Math.abs(target - rates[c]) < 0.005) rates[c] = target;
@@ -325,7 +385,7 @@ const DriftWall = ({
     // a strip (the homepage's last screen) is mounted from the start and
     // would otherwise run the whole time somebody reads the screens before
     // it. Stopped, it picks up from where it stood.
-    const show = on => {
+    const show = (on: boolean) => {
       visible = on;
       for (const a of anims) {
         if (!a) continue;
@@ -352,13 +412,18 @@ const DriftWall = ({
       // Kept where each column stood, for the next run to start from.
       anims.forEach((a, c) => {
         if (!a) return;
-        offsetsRef.current[c] = (a.effect.getComputedTiming().progress ?? 0) * columnMeta[c].copyHeight;
+        offsetsRef.current[c] = (a.effect?.getComputedTiming().progress ?? 0) * columnMeta[c].copyHeight;
         a.cancel();
       });
     };
   }, [baseVelocities, columnMeta, pauseOnHover, parallax, reduced, applyPlaneTransform]);
 
-  const activate = useCallback((id, index) => {
+  useEffect(() => {
+    heldRef.current = hold;
+    wakeRef.current();
+  }, [hold]);
+
+  const activate = useCallback((id: string, index: number) => {
     activeIdRef.current = id;
     hoveredColRef.current = index;
     wakeRef.current();
@@ -372,7 +437,7 @@ const DriftWall = ({
   }, []);
 
   const handlePointerMove = useCallback(
-    e => {
+    (e: ReactPointerEvent<HTMLDivElement>) => {
       const rect = containerRef.current?.getBoundingClientRect();
       if (!rect) return;
       if (parallax > 0 && !reduced) {
@@ -383,9 +448,9 @@ const DriftWall = ({
         wakeRef.current();
       }
       const hit = document.elementFromPoint(e.clientX, e.clientY);
-      const tile = hit && hit.closest ? hit.closest('[data-tile-id]') : null;
+      const tile = hit ? hit.closest<HTMLElement>('[data-tile-id]') : null;
       if (!tile) return;
-      const id = tile.dataset.tileId;
+      const id = tile.dataset.tileId ?? null;
       if (id === activeIdRef.current) return;
       activeIdRef.current = id;
       hoveredColRef.current = Number(tile.dataset.col);
@@ -415,11 +480,11 @@ const DriftWall = ({
       '--dw-overlay': overlayColor,
       '--dw-edge': `${Math.max(0, (1 - fade) * 100)}%`,
       ...style
-    }),
+    }) as CSSProperties,
     [tileWidth, tileHeight, gap, radius, perspective, lift, dim, grayscale, overlayColor, fade, style]
   );
 
-  const renderTile = (item, id, colIndex) => {
+  const renderTile = (item: DriftWallItem, id: string, colIndex: number): ReactNode => {
     const inner = (
       <span className="drift-wall__inner">
         {/* eslint-disable-next-line @next/next/no-img-element -- the site passes loader-sized URLs */}
@@ -455,7 +520,8 @@ const DriftWall = ({
       );
     }
     return (
-      <div key={id} tabIndex={0} role="button" aria-label={item.title ?? 'tile'} {...commonProps}>
+      // Out of the tab order like the links: `commonProps` sets `tabIndex`.
+      <div key={id} role="button" aria-label={item.title ?? 'tile'} {...commonProps}>
         {inner}
       </div>
     );
@@ -485,7 +551,12 @@ const DriftWall = ({
           const copies = Array.from({ length: meta.copies });
           return (
             <div className="drift-wall__col" key={`col-${c}`}>
-              <div className="drift-wall__track" ref={el => (trackRefs.current[c] = el)}>
+              <div
+                className="drift-wall__track"
+                ref={el => {
+                  trackRefs.current[c] = el;
+                }}
+              >
                 {copies.map((_, copyIndex) =>
                   col.map((item, itemIndex) => renderTile(item, `${c}-${copyIndex}-${itemIndex}`, c))
                 )}

@@ -173,9 +173,13 @@ export function AdminTrash({
       .map((t) => t.slug);
     if (!expired.length) return;
     purged.current = true;
-    void destroy(
-      expired,
-      `${expired.length} expired ${expired.length === 1 ? "project" : "projects"}`,
+    // After the render, not inside it: `destroy` sets state before it awaits.
+    queueMicrotask(
+      () =>
+        void destroy(
+          expired,
+          `${expired.length} expired ${expired.length === 1 ? "project" : "projects"}`,
+        ),
     );
     // Once, against the list this page loaded with.
     // eslint-disable-next-line react-hooks/exhaustive-deps

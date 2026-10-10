@@ -2,13 +2,13 @@
  * The booking pages: one per service, at the root (/headshots,
  * /graduation-photos...), each for San Francisco and San Jose at once.
  *
- * Julian (2026-10-02): booking pages, "no vertical pages", San Jose and
- * San Francisco mainly, "I can travel to any of those, LA and NY too",
- * and "I don't need separate pages for each" city. So a page per service,
- * a deck of screens like the homepage (`components/local-screens.tsx`),
- * whose title names the two cities he works in and whose "Where" screen
- * names every place he shoots, visibly: a search engine ranks a city it
- * can read on the page, and the structured data says the same thing.
+ * Booking pages, "no vertical pages", San Jose and San Francisco mainly,
+ * "I can travel to any of those, LA and NY too", and "I don't need
+ * separate pages for each" city. So a page per service, a deck of screens
+ * like the homepage (`components/local-screens.tsx`), whose title names
+ * the two cities he works in and whose "Where" screen names every place
+ * he shoots, visibly: a search engine ranks a city it can read on the
+ * page, and the structured data says the same thing.
  *
  * Every fact is one the site already states: the prices, inclusions and
  * turnaround come from the session in `content/site.json` (so /admin
@@ -58,8 +58,8 @@ export type BookingPage = {
   /** The photographs: the first is the cover, the rest the work screen. */
   tiles: Tile[];
   gallery: { href: string; label: string };
-  /** The frames its work screen shows, where the gallery is too large to
-      show whole: chosen, not sampled (Julian, 2026-10-03). */
+  /** The frames its work screen shows, where the gallery is too large
+      to show whole: chosen, not sampled. */
   picks?: string[];
   /** Presets for the form on the Book screen. */
   /** `calendar`: the Google Calendar appointment schedule's id, embedded
@@ -76,6 +76,27 @@ export const PLACES = [
   "Los Angeles",
   "New York",
 ];
+
+/* ── Cal.com ────────────────────────────────────────────────────── */
+
+/** The Cal.com event each session books, by the session's slug in
+    `content/site.json`, as Cal.com writes it after its domain:
+    "username/event-slug". Shown in place of the Google Calendar schedule
+    only with `?cal` on the address while it is tried out
+    (`components/cal-embed.tsx`). An empty one keeps Google's.
+
+    TODO(Julian): fill these in once the Cal.com account and its four
+    events exist. Weddings are booked by inquiry and have none. */
+export const CAL_EVENTS: Record<string, string> = {
+  portraits: "",
+  graduation: "",
+  headshots: "",
+  "studio-digitals": "",
+};
+
+/** A session's Cal.com event, or nothing where it has none yet. */
+export const calEvent = (sessionSlug?: string): string | undefined =>
+  (sessionSlug && CAL_EVENTS[sessionSlug]) || undefined;
 
 /* ── shared wording ─────────────────────────────────────────────── */
 
@@ -352,8 +373,8 @@ export const BOOKING_PAGES: BookingPage[] = [
     tiles: coversOf("studio-digitals"),
     gallery: { href: "/portfolio/studio-digitals", label: "The digitals gallery" },
     // Only the frames that read as digitals: plain ground, standing or
-    // close, no styling (Julian, 2026-10-03). Taneka's and Zoe's sets are
-    // posed floor work and stay in the gallery.
+    // close, no styling. Taneka's and Zoe's sets are posed floor work and
+    // stay in the gallery.
     picks: [
       "/work/abril/04.jpg",
       "/work/abril/01.jpg",

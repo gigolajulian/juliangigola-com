@@ -59,24 +59,24 @@ const DEPTH = 0.5;
 /** The share of a photograph's points that must be in reach for it to be
     in the colour. */
 const KEEP = 0.1;
-/* Julian (2026-10-05): more accurate, and not so many. The hue is tight
-   (reach 16° to 11°) and the strongest come first, never more than
-   what the room holds: red took in 35 projects, most of them skin leaning red. Then
-   green came up empty, because green is never much of a photograph here,
-   so a tenth of it in the hue is enough (keep 0.25 to 0.1) and the floor
-   stops at `FLOOR` chroma however far out the click is. */
+/* More accurate, and not so many. The hue is tight (reach 16° to 11°) and
+   the strongest come first, never more than what the room holds: red took in
+   35 projects, most of them skin leaning red. Then green came up empty,
+   because green is never much of a photograph here, so a tenth of it in the
+   hue is enough (keep 0.25 to 0.1) and the floor stops at `FLOOR` chroma
+   however far out the click is. */
 /** The most a point must be saturated to count, in chroma units. */
 const FLOOR = 8;
-/* How many projects a colour shows is the room's, not a number: as many
-   4:5 covers as fit beside the panel without a scroll, three rows (two on
-   a short screen), and the columns that leaves, from three to eight
-   (Julian, 2026-10-05: 6 by 3 on a big screen, 5 by 3 at 1440). The
-   spacing below is the grid's `gap-4` and the name under each cover. */
+/* How many projects a colour shows is the room's, not a number: as
+   many 4:5 covers as fit beside the panel without a scroll, three rows
+   (two on a short screen), and the columns that leaves, from three to
+   eight. The spacing below is the grid's `gap-4` and the name under
+   each cover. */
 const GAP = 16;
 const NAME = 28;
-/* With no colour chosen, the work by how hard it hits (Julian,
-   2026-10-07): dark frames with one hard, saturated light first, scored
-   off the covers and checked by eye. The rest follow in page order. */
+/* With no colour chosen, the work by how hard it hits: dark frames
+   with one hard, saturated light first, scored off the covers and
+   checked by eye. The rest follow in page order. */
 const DOPE = ["entangled", "vendetta", "lustro", "cyber1a", "channel-orange", "obscura", "true-grit", "cyberscape", "paranoia", "solace", "mirage", "analogue-dreams", "hua", "info-overload", "torteline", "sara", "vesper", "transmutate", "kala-x-sharks", "liminal", "l3na"];
 const rank = (slug: string) => {
   const i = DOPE.indexOf(slug);
@@ -517,9 +517,9 @@ export function ScopePanel({
   };
 
   const swatch = point ? colourAt(point[0], point[1]) : null;
-  /* The work in the colour fills the screen and does not scroll (Julian,
-     2026-10-05). The wheel is still kept from the page's own smooth
-     scroll, which would move the hidden rack behind it. */
+  /* The work in the colour fills the screen and does not scroll. The
+     wheel is still kept from the page's own smooth scroll, which
+     would move the hidden rack behind it. */
   const results = React.useRef<HTMLElement>(null);
   React.useEffect(() => {
     const el = results.current;
@@ -540,7 +540,7 @@ export function ScopePanel({
       const cs = getComputedStyle(el);
       const W = el.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
       const H = el.clientHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom);
-      // Four across, two down, larger (Julian, 2026-10-07: less grid).
+      // Four across, two down, larger.
       const rows = 2;
       const cols = 4;
       const w = Math.floor(
@@ -864,8 +864,7 @@ const ColourTile = React.memo(function ColourTile({ item }: { item: Item }) {
       className="block"
     >
       <span className="scope-tile relative isolate block">
-        {/* No stack under the cover (Julian, 2026-10-05: he did not like how
-            the edges looked). */}
+        {/* No stack under the cover. */}
         <span
           className="relative block aspect-[4/5] overflow-hidden"
           style={{ backgroundColor: shot.color }}

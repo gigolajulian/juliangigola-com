@@ -1,0 +1,514 @@
+/* The portfolio: the window into the work, spines and the deck across pages. */
+
+/* ── the window into the work ─────────────────────────────────────
+   `lead-window.tsx`. Only where the homepage runs sideways. Nothing at
+   rest (Julian: only when peeking past the last screen): the window is a
+   cell of no width after it, and its pane, the size of the window, is
+   uncovered as the pull slides the homepage off it. */
+.lead-window {
+  display: none;
+}
+@media (min-width: 40rem) {
+  .lead-window {
+    display: block;
+    position: relative;
+    flex: none;
+    width: 0;
+    align-self: stretch;
+    z-index: 10;
+  }
+}
+.lead-pane {
+  /* Uncovered as the last screen slides off it by the pull
+     (`--lead-pull`, `strip.tsx`), the screen and the edge on the same
+     curves: the strip's band, and its springing back on release. */
+  position: absolute;
+  inset-block: 0;
+  right: 0;
+  width: 100vw;
+  overflow: hidden;
+  /* The wash, as the portfolio it stands in for sits on it. */
+  background: var(--ground);
+  clip-path: inset(0 0 0 calc(100% - var(--lead-pull, 0px)));
+  transition: clip-path 140ms var(--ease-out-strong);
+}
+.strip-scroll > :has(+ .lead-window) {
+  transition:
+    translate 140ms var(--ease-out-strong),
+    scale 140ms var(--ease-out-strong);
+}
+.strip-scroll[data-release] :is(> :has(+ .lead-window), .lead-pane) {
+  transition-duration: 560ms;
+  transition-timing-function: cubic-bezier(0.2, 1.7, 0.4, 1);
+}
+.strip-scroll[data-dragged] :is(> :has(+ .lead-window), .lead-pane) {
+  transition-duration: 0s;
+}
+/* The portfolio's first screen in its strip view, where the page draws
+   it (under its head and chips, over its ruler; the spine and the covers
+   by the same rules), set back and out of focus the way the page comes
+   in under the homepage (`jg-lead-under`), so the crossing has nothing to
+   change. Julian: match the peek and the page. */
+.lead-under {
+  position: absolute;
+  inset: 0;
+  scale: 0.94;
+  filter: blur(10px) brightness(0.6);
+  pointer-events: none;
+}
+.lead-row {
+  position: absolute;
+  inset-block: 11.375rem 0;
+  left: 2.5rem;
+  display: flex;
+  gap: 1rem;
+}
+@media (max-height: 52rem) {
+  .lead-row {
+    top: 10.875rem;
+  }
+}
+.lead-spine {
+  display: flex;
+  align-items: flex-end;
+  gap: 1rem;
+  padding: 0 1.25rem 0.25rem 3rem;
+}
+.lead-all {
+  writing-mode: vertical-rl;
+  rotate: 180deg;
+  white-space: nowrap;
+  border-left: 1px solid var(--border);
+  padding-left: 0.375rem;
+}
+.lead-cover {
+  position: relative;
+  flex: none;
+  height: 100%;
+  overflow: hidden;
+  border-radius: var(--radius-photo) var(--radius-photo) 0 0;
+  /* The plate's type is measured off the cover, as on the page. */
+  container-type: inline-size;
+}
+/* The rack instead, for a visitor who keeps the grid
+   (`lead-window.tsx`): the page's own `strip-grid` rules on the row,
+   so the two rows, the gap, the padding, the column and the plates are
+   the page's and the landing changes nothing. A cover in the rack is
+   4:5 whatever it was shot at (`--ar` default), and the spine stands
+   both rows as the page's does. The card came in as the strip and the
+   page landed as the grid. */
+.lead-row.strip-grid {
+  display: grid;
+}
+.lead-row.strip-grid > .lead-spine {
+  grid-row: 1 / -1;
+}
+.lead-row.strip-grid > .lead-cover {
+  height: 100% !important;
+  width: calc((100cqh - 1rem) / 2 * 0.8) !important;
+  aspect-ratio: auto !important;
+}
+
+/* ── spines ───────────────────────────────────────────────────────
+   Julian, after the window's word: the same on the work. A
+   discipline's name in the portfolio's rack, a discipline's title and
+   a project's title stand up their cell, reading from the foot as the
+   word on the window does, as tall as the screen allows, and whatever
+   went under the name (the way into the discipline, the writing, the
+   credits) sits beside it at the foot. With the window (Julian made
+   both the default), and only where the work runs sideways. */
+@media (min-width: 40rem) {
+  /* The way in ("All projects") stands at the foot on the name's
+     right, where the name starts reading. */
+  .strip-cell:has(> .chapter-name) {
+    width: auto;
+    flex-direction: row;
+    align-items: flex-end;
+    justify-content: flex-start;
+    gap: 1rem;
+    padding-block: 0 0.25rem;
+    /* Julian: space between "All projects" and the first cover, which
+       the next screen's shadow also falls across. 88px, then closer to
+       the first project twice. Then the margins of the discipline's
+       own page, where "All projects" leads: the page's 40px before the
+       name, 64px from it to the first cover with the strip's 16px gap. */
+    /* Closer again: 32px to the first cover with the strip's 16px
+       gap. */
+    padding-right: 1rem;
+    padding-left: 2.5rem;
+  }
+  /* The first spine 88px off the left edge: the strip's own 40px and
+     this (Julian: 32px, 64px, then wider again). */
+  .strip-cell:first-child:has(> .chapter-name) {
+    padding-left: 3rem;
+  }
+  /* "All projects" up beside the name, the same way (Julian: fit it
+     better); across, it broke over two lines in the room the spine left. */
+  /* The portfolio's first spine stands under the word the homepage's
+     window carried in, Portfolio, while the strip is at its start, and
+     takes its own name once it moves (Julian: on All show Portfolio, swap
+     it going into Editorial). The two share one place; the one leaving
+     goes on up the spine and the other comes up from the foot. */
+  .chapter-name:has(> .chapter-alias) {
+    display: grid;
+  }
+  .chapter-name > :is(.chapter-alias, .chapter-own) {
+    grid-area: 1 / 1;
+    transition:
+      opacity 360ms var(--ease-out-strong),
+      translate 520ms var(--ease-out-strong);
+  }
+  .strip-scroll[data-moved] .chapter-alias,
+  .strip-scroll:not([data-moved]) .chapter-own {
+    opacity: 0;
+  }
+  .strip-scroll[data-moved] .chapter-alias {
+    translate: 0 -0.6em;
+  }
+  .strip-scroll:not([data-moved]) .chapter-own {
+    translate: 0 0.6em;
+  }
+  .strip-cell:has(> .chapter-name) > a {
+    writing-mode: vertical-rl;
+    rotate: 180deg;
+    white-space: nowrap;
+    border-bottom: 0;
+    border-left: 1px solid var(--border);
+    padding: 0 0 0 0.375rem;
+  }
+  .chapter-name {
+    writing-mode: vertical-rl;
+    rotate: 180deg;
+    line-height: 0.8;
+    font-size: min(6.5rem, calc((100dvh - 21rem) / (var(--n, 12) * 0.8)));
+  }
+  /* The first name stands on the page's own wash: it never comes in over
+     anything, so it carries no ground of its own (Julian: remove the
+     extra border under the header). */
+  .strip-scroll[data-dealt] > .strip-cell:first-child:has(> .chapter-name) {
+    background: none;
+    box-shadow: none;
+  }
+  :is(.discipline-title, [data-discipline-page] .project-plate) {
+    width: auto;
+    display: grid;
+    grid-template-columns: auto auto;
+    grid-template-rows: minmax(0, 1fr) repeat(3, auto);
+    column-gap: 1.5rem;
+    row-gap: 1.25rem;
+    padding-block: 0 0.25rem;
+  }
+  :is(.discipline-title, [data-discipline-page] .project-plate) > h2:has(.title-word) {
+    grid-column: 1;
+    grid-row: 1 / -1;
+    align-self: end;
+    writing-mode: vertical-rl;
+    rotate: 180deg;
+    line-height: 0.8;
+    white-space: nowrap;
+    /* The whole name up the height the strip has (the screen less the
+       bar, the head and the rail), with a twelfth spare for the widest
+       capitals: BRAND CAMPAIGNS ran off the top when it was sized by its
+       longest word (Julian: fit long ones better). */
+    font-size: min(8rem, calc((100dvh - 21rem) / (var(--title-em, 8) * 1.08)));
+  }
+  :is(.discipline-title, [data-discipline-page] .project-plate) > :not(h2) {
+    grid-column: 2;
+    align-self: end;
+    max-width: 20rem;
+  }
+  :is(.discipline-title, [data-discipline-page] .project-plate) > :nth-child(2) {
+    grid-row: 2;
+  }
+  :is(.discipline-title, [data-discipline-page] .project-plate) > :nth-child(3) {
+    grid-row: 3;
+  }
+  :is(.discipline-title, [data-discipline-page] .project-plate) > :nth-child(4) {
+    grid-row: 4;
+  }
+  /* A gallery discipline (Automotive, Places, Event coverage) kept
+     the project plate's 24rem floor with its name centred in it, so
+     the photographs started far out. Its name stands on the page's
+     margin and the first frame follows at the same distance as every
+     other discipline's. */
+  [data-discipline-page] .project-plate {
+    min-width: 0;
+    justify-content: start;
+  }
+  /* A discipline's own page lays its name where the portfolio's first
+     spine stands: 88px in, 32px to the first cover with the strip's
+     gap, and on the page's wash rather than a ground of its own. */
+  :is(.discipline-title, [data-discipline-page] .project-plate) {
+    padding-left: 3rem;
+    padding-right: 1rem;
+  }
+  :is(.discipline-title, [data-discipline-page] .project-plate):not(:has(> :nth-child(2))) {
+    column-gap: 0;
+  }
+  .strip-scroll[data-dealt] > :is(.discipline-title, .project-plate):first-child {
+    background: none;
+    box-shadow: none;
+  }
+}
+
+/* In through it, the deck the other way round (Julian: the card swipe
+   reversed, `?flyout=1`, made seamless): the homepage, cut at the edge the
+   hand left it at (`--lead-from`), is the card on top and flies out to
+   the left; the portfolio was under it all along, set back and out of
+   focus, and comes up into focus as it is uncovered. Out of it, the same
+   door shutting: the work closes into the right edge and goes, and the
+   hero is there. */
+:root[data-nav-side="open"]::view-transition-old(.page),
+:root[data-nav-side="open"]::view-transition-new(.page),
+:root[data-nav-side="shut"]::view-transition-old(.page),
+:root[data-nav-side="shut"]::view-transition-new(.page) {
+  animation-duration: 620ms;
+  animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+}
+:root[data-nav-side="open"]::view-transition-new(.page) {
+  z-index: 1;
+  animation-name: jg-lead-under;
+}
+:root[data-nav-side="open"]::view-transition-old(.page) {
+  z-index: 2;
+  clip-path: inset(0 calc(100% - var(--lead-from, 100%)) 0 0);
+  animation-name: jg-lead-fly;
+  animation-timing-function: cubic-bezier(0.5, 0, 0.2, 1);
+}
+:root[data-nav-side="shut"]::view-transition-old(.page) {
+  z-index: 2;
+  background: var(--ground);
+  animation-name: jg-lead-shut;
+  animation-timing-function: cubic-bezier(0.65, 0, 0.35, 1);
+}
+:root[data-nav-side="shut"]::view-transition-new(.page) {
+  z-index: 0;
+  animation-name: jg-lead-return;
+}
+/* The default, `?stack=0` for the door before it: the deck the right
+   way round. The pull brings the portfolio in from the
+   right as the card on top, in focus, and the last screen sinks back under
+   it (`strip.tsx` paint); past the count it carries on over the whole
+   window from where the hand left it (`--lead-from`) and the homepage
+   recedes beneath. Back out, the card slides off to the right and the
+   hero comes up from under it. */
+:root[data-stack] .lead-under {
+  scale: 1;
+  filter: none;
+  translate: calc(100% - var(--lead-pull, 0px)) 0;
+  transition: translate 320ms var(--ease-out-strong);
+}
+/* The card runs on down under the glass, as the screens' own pictures
+   do, or the last screen's wall showed through the pane below it; and
+   the homepage's rail gives way as it comes, so the pane never reads
+   Inquire over the portfolio. */
+:root[data-stack][data-under] .lead-pane {
+  bottom: calc(-1 * var(--under, 94px));
+}
+:root[data-stack][data-under] .lead-under {
+  bottom: var(--under, 94px);
+}
+:root[data-stack] .strip-rail > * {
+  opacity: calc(1 - min(1, var(--lead-in, 0) * 2));
+  transition: opacity 320ms var(--ease-out-strong);
+}
+/* The wheel moves the card a screen's worth now, so each notch glides
+   rather than jumps; the edge and the screen under it on the same ease. */
+:root[data-stack] .lead-pane,
+:root[data-stack] .strip-scroll > :has(+ .lead-window) {
+  transition-duration: 320ms;
+}
+:root[data-stack] .strip-scroll[data-release] .lead-under {
+  transition-duration: 560ms;
+  transition-timing-function: cubic-bezier(0.2, 1.7, 0.4, 1);
+}
+:root[data-stack] .strip-scroll[data-dragged] :is(.lead-under, .lead-pane, > :has(+ .lead-window)) {
+  transition-duration: 0s;
+}
+:root[data-stack][data-nav-side="open"]::view-transition-new(.page) {
+  z-index: 2;
+  animation-name: jg-stack-in;
+  animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+  box-shadow: -2rem 0 4rem rgb(0 0 0 / 0.45);
+}
+:root[data-stack][data-nav-side="open"]::view-transition-old(.page) {
+  z-index: 1;
+  clip-path: none;
+  animation-name: jg-stack-sink;
+  animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+}
+:root[data-stack][data-nav-side="shut"]::view-transition-old(.page) {
+  z-index: 2;
+  background: var(--ground);
+  animation-name: jg-stack-out;
+  animation-timing-function: cubic-bezier(0.65, 0, 0.35, 1);
+  box-shadow: -2rem 0 4rem rgb(0 0 0 / 0.45);
+}
+:root[data-stack][data-nav-side="shut"]::view-transition-new(.page) {
+  z-index: 1;
+  animation-name: jg-stack-rise;
+  animation-timing-function: cubic-bezier(0.65, 0, 0.35, 1);
+}
+@keyframes jg-stack-in {
+  from {
+    transform: translateX(var(--lead-from, 100%));
+  }
+}
+@keyframes jg-stack-sink {
+  to {
+    transform: scale(0.9);
+  }
+}
+@keyframes jg-stack-out {
+  to {
+    transform: translateX(100%);
+  }
+}
+@keyframes jg-stack-rise {
+  from {
+    transform: scale(0.9);
+  }
+}
+@keyframes jg-lead-fly {
+  to {
+    transform: translateX(-100%);
+  }
+}
+/* Up from the space behind with a little give past full size, the
+   bounce of a card let go (Julian: make it feel natural). */
+@keyframes jg-lead-under {
+  from {
+    transform: scale(0.94);
+    filter: blur(10px) brightness(0.6);
+  }
+  72% {
+    transform: scale(1.008);
+    filter: blur(0) brightness(1);
+  }
+  to {
+    transform: none;
+    filter: none;
+  }
+}
+@keyframes jg-lead-shut {
+  0% {
+    clip-path: inset(0 0 0 0);
+  }
+  78% {
+    clip-path: inset(0 0 0 90%);
+    opacity: 1;
+  }
+  100% {
+    clip-path: inset(0 0 0 100%);
+    opacity: 0;
+  }
+}
+@keyframes jg-lead-return {
+  from {
+    transform: translateX(-6%) scale(0.94);
+    opacity: 0.3;
+  }
+}
+@keyframes jg-bar-in-right {
+  from {
+    transform: translateX(100%);
+  }
+}
+@keyframes jg-bar-in-left {
+  from {
+    transform: translateX(-100%);
+  }
+}
+
+/* A filter on the work index: no zoom, the row fades on its own. */
+:root[data-nav="filter"]::view-transition-group(.page),
+:root[data-nav="filter"]::view-transition-old(.page),
+:root[data-nav="filter"]::view-transition-new(.page) {
+  animation: none;
+}
+:root[data-nav="filter"]::view-transition-old(.page) {
+  display: none;
+}
+/* ── the deck, across pages ──
+   A strip dealt at its ends (`deck="leads"`, `lib/deck.ts`) leads on to
+   the next page as a card: the strip leaving holds and recedes while the
+   next page's strip slides in over it, and back the other way the strip
+   leaving is the card on top and goes off to the right while the one
+   before comes up from behind. The strip names itself for the trip
+   (`view-transition-name`, `leave` in `strip.tsx`), so it is snapshotted
+   apart from the page; the rest of the page swaps where it stands, as it
+   does for a filter. Nothing fades: Julian wants cards in space. */
+:root[data-nav="deal"]::view-transition-group(.page),
+:root[data-nav="deal"]::view-transition-old(.page),
+:root[data-nav="deal"]::view-transition-new(.page) {
+  animation: none;
+}
+:root[data-nav="deal"]::view-transition-old(.page) {
+  display: none;
+}
+::view-transition-group(strip) {
+  animation: none;
+}
+::view-transition-image-pair(strip) {
+  isolation: auto;
+}
+::view-transition-old(strip),
+::view-transition-new(strip) {
+  /* A strip dealt across pages is the card itself: opaque, or the one it
+     covers shows through the gaps and behind the title (Julian saw it as
+     the background arriving late). On the snapshot and not on the strip,
+     which starts below the page's head: a ground of its own cut the wash
+     behind it off at its top edge. */
+  background: var(--ground);
+  mix-blend-mode: normal;
+  animation-duration: 640ms;
+  animation-timing-function: var(--ease-out-strong);
+  animation-fill-mode: both;
+}
+:root[data-nav-way="on"]::view-transition-old(strip) {
+  animation-name: jg-deal-under;
+}
+:root[data-nav-way="on"]::view-transition-new(strip) {
+  animation-name: jg-deal-over;
+}
+:root[data-nav-way="back"]::view-transition-old(strip) {
+  z-index: 1;
+  animation-name: jg-deal-off;
+}
+:root[data-nav-way="back"]::view-transition-new(strip) {
+  animation-name: jg-deal-up;
+}
+@keyframes jg-deal-under {
+  to {
+    transform: scale(0.9);
+  }
+}
+@keyframes jg-deal-over {
+  from {
+    transform: translateX(100%);
+  }
+}
+@keyframes jg-deal-off {
+  to {
+    transform: translateX(100%);
+  }
+}
+@keyframes jg-deal-up {
+  from {
+    transform: scale(0.9);
+  }
+}
+/* Clicks during a trip reach the page underneath. */
+::view-transition {
+  pointer-events: none;
+}
+
+/* Reduced motion: no trip. The pages still swap; nothing travels. */
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*),
+  ::view-transition-image-pair(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
+  }
+}

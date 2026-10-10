@@ -162,8 +162,8 @@ export default async function ProjectPage(props: PageProps<"/portfolio/[slug]">)
         href: onwards.href,
         name: nextProject?.name ?? onwards.name,
         warm: isDiscipline ? opening(onwards.href.replace(/^\/portfolio\//, "")) : undefined,
-        /* Julian (2026-10-06): the discipline where the client would only
-           repeat the name (SAGO, for SAGO), as the grid's caption does. */
+        /* The discipline where the client would only repeat the name
+           (SAGO, for SAGO), as the grid's caption does. */
         client:
           nextProject &&
           (credited(nextProject, /client/i) ?? nextProject.categories[0]?.name),
@@ -269,9 +269,9 @@ function Crumb() {
     <nav aria-label="Breadcrumb">
       <Link
         href="/portfolio"
-        /* One line: on a phone the head's middle column left it 37px and
-           the arrow stood over the word. Padded to a 26px target and
-           pulled back by as much (UI/UX review, 2026-10-02). */
+        /* One line: on a phone the head's middle column left it 37px
+           and the arrow stood over the word. Padded to a 26px target
+           and pulled back by as much. */
         className="label -my-1.5 inline-block whitespace-nowrap py-1.5 text-muted-foreground transition-colors duration-200 hoverable:hover:text-foreground"
       >
         &larr; Portfolio

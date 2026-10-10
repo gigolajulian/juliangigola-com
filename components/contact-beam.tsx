@@ -6,18 +6,28 @@ import { useSiteTheme } from "@/lib/site-theme";
 
 /* Julian: the form in a beam (`border-beam`, Libraries.dev), at his
    settings: the full border, in the site's own theme. Mono: Julian
-   took the colors off the form (2026-09-29). */
+   took the colors off the form. */
 /** A lap, in seconds, and how many it gets before it rests. */
 const LAP = 6;
 const LAPS = 2;
 /* Held where it stands, every layer, so the line and its glow stay put
-   rather than fading. A held animation is not repainted. */
+   rather than fading. A held animation is not repainted. And none at all
+   for reduced motion: the library has the same rule, but its sheet did
+   not reach the page and the beam lapped on (measured, plan 3.6). */
 const REST = `
 [data-beam="{id}"][data-rest],
 [data-beam="{id}"][data-rest]::before,
 [data-beam="{id}"][data-rest]::after,
 [data-beam="{id}"][data-rest] [data-beam-bloom] {
   animation-play-state: paused !important;
+}
+@media (prefers-reduced-motion: reduce) {
+  [data-beam="{id}"],
+  [data-beam="{id}"]::before,
+  [data-beam="{id}"]::after,
+  [data-beam="{id}"] [data-beam-bloom] {
+    animation: none !important;
+  }
 }`;
 
 export function ContactBeam({
@@ -36,13 +46,13 @@ export function ContactBeam({
     const id = el?.parentElement?.dataset.beam;
     if (el && id) el.style.setProperty("--edge-a", `var(--beam-angle-${id})`);
   }, []);
-  /* Two laps and then rest (Julian, 2026-10-08), on every screen. The
-     glow is repainted every frame it moves: on an iPad held still on
-     Inquiries it was a third of the frame rate (38fps running, 60 held),
-     and on a 1920 wide window it took Inquiries from 12fps to 4. So it
-     runs two laps each time the card comes into view, stops where it
-     stands, and goes round again under a pointer, a touch or a field
-     taking focus. */
+  /* Two laps and then rest, on every screen. The glow is repainted
+     every frame it moves: on an iPad held still on Inquiries it was a
+     third of the frame rate (38fps running, 60 held), and on a 1920
+     wide window it took Inquiries from 12fps to 4. So it runs two
+     laps each time the card comes into view, stops where it stands,
+     and goes round again under a pointer, a touch or a field taking
+     focus. */
   React.useEffect(() => {
     const card = edge.current?.parentElement;
     if (!card) return;
@@ -65,6 +75,16 @@ export function ContactBeam({
     // And from the start, so it comes to rest even if the observer never
     // reports.
     run();
+    /* `?wall=still` (plan 1.1, on trial): the form in use holds the beam
+       too, so it laps on coming into view and not under a pointer or a
+       field taking focus. At 1920 by 1080 on a 2x screen the lapping beam
+       was what held the form to 10 to 17fps; at rest it ran at 60. */
+    if (new URLSearchParams(location.search).get("wall") === "still") {
+      return () => {
+        io.disconnect();
+        clearTimeout(rest);
+      };
+    }
     card.addEventListener("pointerdown", run, { passive: true });
     card.addEventListener("pointerenter", run, { passive: true });
     card.addEventListener("focusin", run);
@@ -80,12 +100,12 @@ export function ContactBeam({
     <BorderBeam
       size="md"
       colorVariant="mono"
-      /* Julian (2026-10-03): brighter. Full strength (was 0.7) and the
-         glow lifted past the library's 1.3. */
+      /* Brighter. Full strength (was 0.7) and the glow lifted past
+         the library's 1.3. */
       strength={1}
-      /* Julian (2026-10-05): a white line and its glow that go round the
-         form, never sitting still: the beam is the whole effect, wider
-         and brighter (a static line and halo on the card were tried and
+      /* A white line and its glow that go round the form, never
+         sitting still: the beam is the whole effect, wider and
+         brighter (a static line and halo on the card were tried and
          taken off). */
       brightness={3}
       glowSize={2.2}
@@ -93,8 +113,8 @@ export function ContactBeam({
       /* Julian: rounded, 16px, with the form's box (`rounded-[16px]`,
          `app/contact/page.tsx`). */
       borderRadius={16}
-      /* Julian: slower. A lap in six seconds (four until 2026-10-05),
-         against the default 1.96 (`LAP`). */
+      /* Julian: slower. A lap in six seconds (it was four), against
+         the default 1.96 (`LAP`). */
       duration={LAP}
       css={REST}
       className={className}

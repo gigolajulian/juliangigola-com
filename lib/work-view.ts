@@ -54,8 +54,8 @@ const readView = (): WorkView => {
   }
 };
 
-/** Julian (2026-10-01): the strip, for everybody who has not said
-    otherwise; it is what the homepage's window shows (`lead-window.tsx`). */
+/** The strip, for everybody who has not said otherwise; it is what the
+    homepage's window shows (`lead-window.tsx`). */
 const server = (): WorkView => "strip";
 
 export const useWorkView = (): WorkView =>

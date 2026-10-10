@@ -49,10 +49,9 @@ const useHash = () =>
  * ─────────────────────────────────────────────────────────────── */
 
 export const LINKS = [
-  // Julian's order (2026-10-01: Portfolio last; 2026-10-03: Commissions
-  // first, the two audiences side by side). All but Portfolio are
-  // homepage screens. Names in one register, plural nouns like
-  // Commissions (2026-10-04): Biography, Inquiries.
+  // Commissions first, the two audiences side by side, and Portfolio
+  // last. All but Portfolio are homepage screens. Names in
+  // one register, plural nouns like Commissions: Biography, Inquiries.
   { href: "/#work", label: "Commissions" },
   { href: "/#about", label: "Biography" },
   { href: "/#sessions", label: "Sessions" },
@@ -102,9 +101,9 @@ export function SiteHeader() {
       const put = (k: string, v: string) => {
         if (root.style.getPropertyValue(k) !== v) root.style.setProperty(k, v);
       };
-      /* Both read before either is written: a write to the root's style
-         and then a read restyled the whole page a second time, 140ms on a
-         throttled phone (optimize pass, 2026-10-05). */
+      /* Both read before either is written: a write to the root's
+         style and then a read restyled the whole page a second time,
+         140ms on a throttled phone. */
       const measure = () => {
         const f = foot.offsetHeight;
         const r = rail.offsetHeight;
@@ -311,7 +310,7 @@ export function SiteHeader() {
        * before, so being open says nothing about what is underneath. */
       data-plain={scrolled ? "true" : "false"}
       // Glass over the homepage's photographs (`.site-bar[data-home]`), and
-      // the same depth on the portfolio (Julian, 2026-10-05: match it).
+      // the same depth on the portfolio.
       data-home={pathname === "/" || pathname.startsWith("/portfolio") ? "" : undefined}
       className={cn(
         // `site-bar` is what `globals.css` slides sideways. The whole bar
@@ -381,7 +380,7 @@ export function SiteHeader() {
             // Julian: a very slight fade on hover. It was to 70%, which
             // greyed the colour split of the warp under the pointer.
             "transition-opacity duration-300 ease-[var(--ease-out-strong)] hoverable:hover:opacity-90",
-            // Julian (2026-10-04): it grows under the pointer (`.logo-grow`).
+            // It grows under the pointer (`.logo-grow`).
             "logo-grow",
             "focus-visible:opacity-100",
             // Deferring only makes sense where the masthead is actually
@@ -430,11 +429,11 @@ export function SiteHeader() {
             <NavLinks links={LINKS} isCurrent={isCurrent} />
           </nav>
 
-          {/* Outside the nav: it is not a destination, it changes how the
-              page looks rather than going anywhere. Here on a desktop only;
-              under the burger it is in the menu (`site-menu.tsx`), at
-              Julian's ask (2026-10-01), so the bar holds the name and the
-              burger and nothing else. */}
+          {/* Outside the nav: it is not a destination, it changes how
+              the page looks rather than going anywhere. Here on a
+              desktop only; under the burger it is in the menu
+              (`site-menu.tsx`), at Julian's ask, so the bar holds the
+              name and the burger and nothing else. */}
           <ThemeToggle className="hidden lg:flex" />
 
           <button
@@ -496,10 +495,8 @@ export function SiteHeader() {
   );
 }
 
-/* The select and the hover: the name lit is a touch larger
-   (Julian, 2026-10-05). The ink line that ran under it, between the names
-   and once out to the wordmark (2026-10-03 to 10-05), is gone: the type
-   alone says where you are. With no page lit (the legal page) only the
+/* The select and the hover: the name lit is a touch larger. No ink
+   line runs under it: the type alone says where you are. With no page lit (the legal page) only the
    name under the pointer lights. */
 function NavLinks({
   links,
@@ -513,8 +510,7 @@ function NavLinks({
   const at = over ?? (lit >= 0 ? lit : null);
   return (
     <ul
-      /* Julian (2026-10-04): every slot the same length, the longest
-         name's and a margin. */
+      /* Every slot the same length, the longest name's and a margin. */
       className="relative grid auto-cols-fr grid-flow-col items-center"
       onPointerLeave={() => setOver(null)}
     >
@@ -562,11 +558,11 @@ function NavLink({
       href={href}
       aria-current={current ? "page" : undefined}
       className={cn(
-        "block py-3 font-mono text-[0.9375rem] uppercase leading-none tracking-[0.08em] transition-[color,scale] duration-300 ease-[var(--ease-out-strong)]",
+        "block py-3 font-mono text-[0.9375rem] uppercase leading-none tracking-[0.08em] transition-[color,scale] duration-300 ease-[var(--ease-out-strong)] motion-reduce:transition-colors",
         // The page you are on stands back while the pointer lights another
-        // name, and comes up again when it leaves.
-        // Lit, the name is a touch larger (Julian, 2026-10-05).
-        // Bold costs no width in a mono face, so nothing beside it moves.
+        // name, and comes up again when it leaves. Lit, the name is a
+        // touch larger. Bold costs no width in a mono face, so nothing
+        // beside it moves.
         lit
           ? "text-foreground scale-[1.06]"
           : current

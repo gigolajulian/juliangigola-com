@@ -422,10 +422,9 @@ const titleCase = (s: string) =>
 
 /**
  * What the project page says about a photograph, as a sentence for its
- * alt (Julian, 2026-10-02: the discipline and the credits): the project,
- * its discipline, who photographed it, who is in it and who it was for.
- * The crew (gaffer, DIT, styling) stays on the page; the alt says what
- * the picture is.
+ * alt: the project, its discipline, who photographed it, who is in it
+ * and who it was for. The crew (gaffer, DIT, styling) stays on the page;
+ * the alt says what the picture is.
  */
 const altContext = (project: Project): string => {
   const name = titleCase(project.name);
@@ -657,10 +656,10 @@ const HAS_VIDEOS = CONTENT.videos.length > 0;
  * nothing. And a category with no work yet has no page to point at, so it
  * falls back to the full index instead of a route that does not exist.
  */
-/** Whether a discipline gets a listing page: not Video (its page is the
-    films), and not one with no work yet. Cover art has one again (Julian,
-    2026-09-30): its rack under the filters, scrolling sideways like every
-    other discipline, rather than a page of its own scrolling down. */
+/** Whether a discipline gets a listing page: not Video (its page is
+    the films), and not one with no work yet. Cover art has one again:
+    its rack under the filters, scrolling sideways like every other
+    discipline, rather than a page of its own scrolling down. */
 const isListing = (slug: string): boolean =>
   slug !== "video" && projectsIn(slug).length > 0;
 
@@ -678,12 +677,12 @@ export const categoryHref = (categorySlug: string): string => {
      where the listing would be. `/portfolio/coverart` still resolves for
      anything already linked to it.
 
-     Julian (2026-09-29): straight under /portfolio, like the projects, not
-     under /portfolio/category/. The page is `app/portfolio/(index)/
-     discipline/[slug]`, reached by a rewrite in `next.config.ts`; the old
-     addresses redirect here. Automotive, Events and Places share their
-     slug with their one gallery, and the discipline view (the same frames
-     under the filters) is what answers there. */
+     Straight under /portfolio, like the projects, not under
+     /portfolio/category/. The page is `app/portfolio/(index)/
+     discipline/[slug]`, reached by a rewrite in `next.config.ts`; the
+     old addresses redirect here. Automotive, Events and Places share
+     their slug with their one gallery, and the discipline view (the
+     same frames under the filters) is what answers there. */
   return `/portfolio/${categorySlug}`;
 };
 
@@ -791,9 +790,9 @@ const withBlur = (cover: Frame): Frame => {
   return blur ? { ...cover, blur } : cover;
 };
 
-/** A credit by role, unless it only repeats the project's own name (SAGO,
-    credited to SAGO): under the name, that line said the same thing twice
-    (polish, 2026-10-06). */
+/** A credit by role, unless it only repeats the project's own name
+    (SAGO, credited to SAGO): under the name, that line said the same
+    thing twice. */
 export const credited = (p: Project, role: RegExp): string | undefined => {
   const name = p.credits.find((c) => role.test(c.role))?.name.trim();
   return name && name.toLowerCase() !== p.name.trim().toLowerCase()
@@ -979,8 +978,8 @@ export const WALL: WallTile[] = [
 
 /**
  * The same wall for one kind of session, behind its booking page's
- * questions (Julian, 2026-10-03): every frame of its gallery, or of every
- * project in its discipline, each opening the project it is from.
+ * questions: every frame of its gallery, or of every project in its
+ * discipline, each opening the project it is from.
  */
 export const wallOf = (slug: string): WallTile[] => {
   const one = getProject(slug);
@@ -1576,8 +1575,8 @@ const mediumOf = (disciplineSlug: string): string =>
    its set's first frame again, so the first one past the tile's).
    Motion has no sets: Julian, the reel, muted, from three seconds in as
    on the motion page. */
-/* Julian's order for the homepage's Commissions (2026-10-03): event
-   coverage in, Chroma out. */
+/* Julian's order for the homepage's Commissions: event coverage in,
+   Chroma out. */
 const TILE_SLUGS = [
   "campaigns",
   "artist-presskit",

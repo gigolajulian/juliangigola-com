@@ -6,11 +6,10 @@ import { LiquidPair } from "@/components/liquid-pair";
 
 /* ── about ────────────────────────────────────────────────
  * A screen of the homepage (Julian: About and Contact on the home page,
- * /about redirects to /#about), laid out from Julian's mockup
- * (2026-09-29): the words, the facts, the services and the ask on the
- * left; a photograph from a set in the middle; how a commission runs on
- * the right, a step a row. The client marks along the foot are gone
- * (Julian, 2026-09-29). His own words only.
+ * /about redirects to /#about), laid out from Julian's mockup: the
+ * words, the facts, the services and the ask on the left; a photograph
+ * from a set in the middle; how a commission runs on the right, a step
+ * a row. The client marks along the foot are gone. His own words only.
  */
 
 const FACTS = [
@@ -48,9 +47,9 @@ const PHASES = [
   },
 ];
 
-/* The photograph in the middle: Julian's own pick (2026-09-29), him on
-   stone steps under a tree. The column is narrower than the frame, so
-   the crop holds on him, right of centre. */
+/* The photograph in the middle: Julian's own pick, him on stone
+   steps under a tree. The column is narrower than the frame, so the
+   crop holds on him, right of centre. */
 const PHOTO = {
   src: "/about/julian-steps.jpg",
   width: 960,
@@ -79,13 +78,13 @@ export function AboutScreen() {
           <RisingTitle
             text="Biography"
           />
-          {/* Julian's words (2026-09-29). */}
+          {/* Julian's words. */}
           {/* Set left, as the mockup has it: justified mono opens up. */}
           {/* Julian: on a phone, smaller and more inviting, in sentence
               case; the capitals stay from `sm` up. */}
-          {/* Critique (2026-10-03): where the window is too short for it
-              all, these words scroll inside themselves, not the column, so
-              the facts and the buttons under them stay on the screen. */}
+          {/* Where the window is too short for it all, these
+              words scroll inside themselves, not the column, so the
+              facts and the buttons under them stay on the screen. */}
           <p data-scroll className="title-rest mt-6 text-left sm:min-h-0 sm:overflow-y-auto sm:overscroll-contain text-[0.9375rem] normal-case leading-[1.7] text-foreground/80 sm:mt-[clamp(0.75rem,2.5cqh,2rem)] sm:text-[clamp(0.875rem,1.8vh,1.0625rem)] sm:leading-[clamp(1.4rem,3.1cqh,1.8rem)] sm:text-muted-foreground">
             Photographer and creative director based in the San Francisco
             Bay Area with 12+ years of experience. As an Assyrian American, I grew up between cultures,
@@ -163,8 +162,8 @@ export function AboutScreen() {
             {PHASES.map((phase, i) => (
               <li
                 key={phase.step}
-                // Julian (2026-10-03): the four steps appear in order as
-                // About arrives (`.about-step`, globals.css).
+                // The four steps appear in order as About arrives
+                // (`.about-step`, globals.css).
                 style={{ "--i": i } as React.CSSProperties}
                 className="about-step grid flex-1 grid-cols-[3.25rem_minmax(0,1fr)] gap-x-5 border-t border-border py-5 sm:grid-cols-[4rem_minmax(0,1fr)] sm:py-[clamp(0.75rem,2vh,1.25rem)]"
               >

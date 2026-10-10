@@ -269,11 +269,11 @@ const subjectOf = (e: Enquiry) => {
 const esc = (s: string) =>
   s.replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]!);
 
-/** `looks`: each frame's look in the picker (`lib/picker-looks.json`),
-    passed in so this module stays free of imports. `inline`: the picks
-    attached inline as `cid:pick-<index>`, shown under their link in the
-    HTML copy (Julian, 2026-10-08); one that would not fetch is the link
-    alone. */
+/** `looks`: each frame's look in the picker
+    (`lib/picker-looks.json`), passed in so this module stays free of
+    imports. `inline`: the picks attached inline as
+    `cid:pick-<index>`, shown under their link in the HTML copy; one
+    that would not fetch is the link alone. */
 export const emailCopy = (
   e: Enquiry,
   looks: Record<string, string> = {},

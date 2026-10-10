@@ -1,14 +1,14 @@
 "use client";
 
 import * as React from "react";
+import { matches } from "@/lib/device";
 
 /* ── the card under the pointer tips toward it ────────────────────
- * Julian (2026-10-04): the Commissions table's cards (`.light-cell`), and
- * the same on the portfolio's projects. One listener for both: it writes
- * where the hand is on the card, and `globals.css` turns that into the
- * tilt, the lift and the shadow that falls away from the side that lifts.
- * The portfolio's chapter names are
- * words, not cards, and stay put.
+ * The Commissions table's cards (`.light-cell`), and the same on the
+ * portfolio's projects. One listener for both: it writes where the hand
+ * is on the card, and `globals.css` turns that into the tilt, the lift
+ * and the shadow that falls away from the side that lifts. The
+ * portfolio's chapter names are words, not cards, and stay put.
  * ─────────────────────────────────────────────────────────────── */
 const CARDS = ".light-cell, .portfolio-arrive .strip-cell:not([data-deck]), .scope-tile";
 const VARS = ["--rx", "--ry", "--rz", "--sx", "--sy", "--cx", "--cy"];
@@ -16,7 +16,7 @@ const TILT = 5;
 
 export function CardTilt() {
   React.useEffect(() => {
-    if (!window.matchMedia("(hover: hover) and (pointer: fine)").matches) return;
+    if (!matches("fine")) return;
     let on: HTMLElement | null = null;
     const off = () => {
       if (on) for (const p of VARS) on.style.removeProperty(p);
@@ -29,9 +29,9 @@ export function CardTilt() {
       if (!el) return;
       if (el !== on) {
         /* The card's own middle, from wherever its origin is: the deck
-           (`lib/deck.ts`) moves a portfolio cell's origin to the screen's
-           middle for its recede, and turned about that the tilt threw the
-           card wide across its neighbours (Julian, 2026-10-08). */
+           (`lib/deck.ts`) moves a portfolio cell's origin to the
+           screen's middle for its recede, and turned about that the
+           tilt threw the card wide across its neighbours. */
         const [ox, oy] = getComputedStyle(el).transformOrigin.split(" ").map(parseFloat);
         el.style.setProperty("--cx", `${(el.offsetWidth / 2 - ox).toFixed(1)}px`);
         el.style.setProperty("--cy", `${(el.offsetHeight / 2 - oy).toFixed(1)}px`);

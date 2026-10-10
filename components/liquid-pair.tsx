@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { Liquid } from "@/components/liquid";
+import { useDevice } from "@/lib/device";
 
 /* Julian: the buttons in liquid (`liquid-gooey`). The first button is a
    body of the ink; the quiet ones beside it stay an outline at rest, and
@@ -29,16 +30,16 @@ export function LiquidPair({
      a second of the main thread in a short scroll (Julian: the motion
      seamless on iPhone and iPad). A finger gets the plain buttons, the
      same at rest. Plain on the server too, so the markup agrees. */
-  const mouse = React.useSyncExternalStore(subscribeMouse, isMouse, () => false);
+  const mouse = useDevice("fine");
   // When the pointer last left the first button (`Quiet` reads it).
   const left = React.useRef(-Infinity);
-  /* And only while it is on screen, from the first idle moment after it
-     arrives. Each liquid runs a loop of its own that wakes on any scroll
-     on the page and measures its buttons every frame, and the homepage
-     has five: on the way back from the portfolio they were set up inside
-     the page swap and then measured every frame of the strip's travel,
-     the largest cost of both crossings (scroll-craft pass, 2026-10-02).
-     The plain buttons are the same at rest, so the change is not seen. */
+  /* And only while it is on screen, from the first idle moment after
+     it arrives. Each liquid runs a loop of its own that wakes on any
+     scroll on the page and measures its buttons every frame, and the
+     homepage has five: on the way back from the portfolio they were
+     set up inside the page swap and then measured every frame of the
+     strip's travel, the largest cost of both crossings. The plain
+     buttons are the same at rest, so the change is not seen. */
   const [node, setNode] = React.useState<HTMLDivElement | null>(null);
   const [live, setLive] = React.useState(false);
   React.useEffect(() => {
@@ -108,14 +109,6 @@ const cancelIdle = (h: number) => {
   const w = window as IdleWindow;
   if (w.cancelIdleCallback) w.cancelIdleCallback(h);
   else window.clearTimeout(h);
-};
-
-const MOUSE = "(hover: hover) and (pointer: fine)";
-const isMouse = () => matchMedia(MOUSE).matches;
-const subscribeMouse = (fn: () => void) => {
-  const m = matchMedia(MOUSE);
-  m.addEventListener("change", fn);
-  return () => m.removeEventListener("change", fn);
 };
 
 /* Julian: the ink runs across only when the pointer goes straight from

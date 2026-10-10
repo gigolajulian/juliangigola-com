@@ -3,26 +3,26 @@
 import * as React from "react";
 import { createPortal } from "react-dom";
 import { Liquid } from "@/components/liquid";
+import { useDevice } from "@/lib/device";
 
 /* ── who that is ──────────────────────────────────────────────────
  * A credit on a project page is a person's name and a link that takes the
  * visitor off the site. Held for a beat it says who they are first: their
  * face, their handle set large, and the way out under it.
  *
- * Julian (2026-10-02, overdrive): the card is poured out of the name. A
- * drop of ink wells up under the word, which turns to the ground's colour
- * inside it, and the card is drawn out of that drop, necking and letting
- * go. Then: the card covered the credits under it, so the list opens to
- * make room for it; and going from one name to the next, the drop slides
- * across as the portfolio's filter bar does (`effect="move"`, wobble
- * 0.25), the card going with it, rather than one card draining and
- * another pouring. The pointer's dot sticks to the name as it does to a
- * filter chip (`data-stick`, `pointer-mark.tsx`), so the mouse runs into
- * the tag.
+ * The card is poured out of the name. A drop of ink wells up under the
+ * word, which turns to the ground's colour inside it, and the card is
+ * drawn out of that drop, necking and letting go. Then: the card covered
+ * the credits under it, so the list opens to make room for it; and going
+ * from one name to the next, the drop slides across as the portfolio's
+ * filter bar does (`effect="move"`, wobble 0.25), the card going with it,
+ * rather than one card draining and another pouring. The pointer's dot
+ * sticks to the name as it does to a filter chip (`data-stick`,
+ * `pointer-mark.tsx`), so the mouse runs into the tag.
  *
  * One liquid for the whole list (`CreditList`), mounted only while a card
  * is open: a group that is not there measures nothing, so the credits cost
- * no frames while scrolling (audit, 2026-10-02).
+ * no frames while scrolling.
  *
  * The photograph is ours, kept in `public/people` and written by /admin
  * when the person was added. Instagram is asked nothing at all from here:
@@ -33,14 +33,8 @@ import { Liquid } from "@/components/liquid";
  * The card is the pointer's and the keyboard's, never a reader's: the name
  * it comes out of is the same link with the same words, so the card is
  * hidden from assistive technology and its own link is out of the tab
- * order. A phone never sees it (`HOVERS`).
+ * order. A phone never sees it (`fine` in `lib/device.ts`).
  * ─────────────────────────────────────────────────────────────── */
-const HOVERS = "(hover: hover) and (pointer: fine)";
-const subscribeHover = (onChange: () => void) => {
-  const mq = window.matchMedia(HOVERS);
-  mq.addEventListener("change", onChange);
-  return () => mq.removeEventListener("change", onChange);
-};
 
 /* The beat a name is held for before it pours, and the grace a pointer has
    to cross the gap from the word into the card. */
@@ -62,7 +56,13 @@ const SPRING = (() => {
     const v = 1 - Math.exp(-z * w * t) * Math.cos(w * Math.sqrt(1 - z * z) * t);
     pts.push((i === 40 ? 1 : v).toFixed(4));
   }
-  return `linear(${pts.join(", ")})`;
+  /* A close cubic-bezier where `linear()` is not understood: a style
+     with an easing it cannot read is dropped whole, and the card would
+     jump. Fitted to the samples (worst gap 0.01). */
+  const curve = `linear(${pts.join(", ")})`;
+  return typeof CSS !== "undefined" && !CSS.supports("transition-timing-function", curve)
+    ? "cubic-bezier(0.3, 1.75, 0.3, 0.87)"
+    : curve;
 })();
 const IN = "cubic-bezier(0.23, 1, 0.32, 1)";
 const FALL = "cubic-bezier(0.55, 0, 0.75, 0.2)";
@@ -104,11 +104,7 @@ const cellsOf = (dl: Element) => {
 };
 
 export function CreditList({ children }: { children: React.ReactNode }) {
-  const hovers = React.useSyncExternalStore(
-    subscribeHover,
-    () => window.matchMedia(HOVERS).matches,
-    () => false,
-  );
+  const hovers = useDevice("fine");
   const [held, setHeld] = React.useState<Held | null>(null);
   const [shown, setShown] = React.useState(false);
   const live = React.useRef(false);
@@ -397,10 +393,10 @@ function Pour({
                   />
                 ) : null}
                 <div className="min-w-0 flex-1">
-                  {/* Who they are, a weight under bold, the role on a line of
-                      its own ("Julian Gigola · Phot…" was cut), then the
-                      handle, a weight lighter, right over the way out to it
-                      (Julian, 2026-10-03). */}
+                  {/* Who they are, a weight under bold, the role on a line
+                      of its own ("Julian Gigola · Phot…" was cut), then
+                      the handle, a weight lighter, right over the way out
+                      to it. */}
                   {named ? (
                     <p className="label truncate font-semibold text-background">{who.name}</p>
                   ) : null}

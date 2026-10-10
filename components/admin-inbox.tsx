@@ -411,11 +411,11 @@ function Unlock({
   );
 }
 
-/* The references an enquiry arrived with (Julian, 2026-10-05): their
-   uploads, fetched with the inbox's credentials since they are theirs and
-   private, and his own frames they picked, which are public. Each opens
-   full size in a new tab. Only what actually loads is shown (Julian,
-   2026-10-05): a broken tile, or a heading over none, says nothing. */
+/* The references an enquiry arrived with: their uploads, fetched with
+   the inbox's credentials since they are theirs and private, and his
+   own frames they picked, which are public. Each opens full size in a
+   new tab. Only what actually loads is shown: a broken tile, or a
+   heading over none, says nothing. */
 function References({
   msgKey,
   enquiry,

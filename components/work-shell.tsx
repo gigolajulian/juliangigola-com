@@ -21,6 +21,7 @@ import {
   useWorkView,
   type WorkView,
 } from "@/lib/work-view";
+import { matches, media } from "@/lib/device";
 
 /* JellyRadio's figures, as Julian's example set them, with the bounce
    taken down by a third (from 0.4) and the swell of the lit chip halved
@@ -128,8 +129,8 @@ export function WorkShell({
   children: React.ReactNode;
 }) {
   const rowBox = React.useRef<HTMLDivElement>(null);
-  /* Preview (`?cards`, Julian 2026-10-08): each discipline drawn as one
-     card, its name and its projects (`globals.css`, `data-cards`). */
+  /* Preview (`?cards`): each discipline drawn as one card,
+     its name and its projects (`globals.css`, `data-cards`). */
   React.useEffect(() => {
     if (new URLSearchParams(location.search).has("cards")) document.documentElement.dataset.cards = "";
   }, []);
@@ -139,8 +140,7 @@ export function WorkShell({
      already. Covers only, and only the two that will be seen. A phone is
      left alone. */
   React.useEffect(() => {
-    if (!window.matchMedia("(hover: hover) and (pointer: fine)").matches)
-      return;
+    if (!matches("fine")) return;
     const conn = (navigator as { connection?: { saveData?: boolean } })
       .connection;
     if (conn?.saveData) return;
@@ -316,9 +316,7 @@ export function WorkShell({
     if (!shelf) return;
     // Landscape only: upright, the grid is a sheet that runs down
     // (`useTablet` in `strip.tsx`).
-    const mq = window.matchMedia(
-      "(pointer: coarse) and (min-width: 40rem) and (orientation: landscape)",
-    );
+    const mq = media("tabletSideways");
     const fit = () => {
       if (!mq.matches) {
         shelf.style.removeProperty("--rack-w");
@@ -515,7 +513,7 @@ export function WorkShell({
     const chips = (Array.from(r.children) as HTMLElement[]).filter(
       (c) => !("liquid" in c.dataset),
     );
-    const wide = window.matchMedia("(min-width: 64rem)");
+    const wide = media("large");
     const calm = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     /* Seated without motion on arrival, and again whenever the window
        crosses `lg`: cleared going down to the drawer's grid, put back going
@@ -604,18 +602,18 @@ export function WorkShell({
     const measure = () => {
       const c = lit.current;
       if (!c) return setMark(null);
-      /* A line under the lit chip's words, as the navbar has under its
-         page (Julian, 2026-10-05, once the chips joined the bar's pane):
-         the words' width less the chip's padding, grown with the chip's
-         swell, at the foot of the chip as it is drawn. */
-      /* Julian (2026-10-07): the line sits on the pane's hairline and
-         slides there, thinner, in place of the liquid under the chip. */
-      /* Where the chip comes to rest, not where its spring has it now: read
-         mid-flight, the push from the chip lit before was still on it and
-         the line landed off the words (Julian, 2026-10-07). Seated, the lit
-         chip has no push and its swell is about its own middle. */
+      /* A line under the lit chip's words, as the navbar has under
+         its page: the words' width less the chip's padding, grown
+         with the chip's swell, at the foot of the chip as it is
+         drawn. */
+      /* The line sits on the pane's hairline and slides there,
+         thinner, in place of the liquid under the chip. */
+      /* Where the chip comes to rest, not where its spring has it now:
+         read mid-flight, the push from the chip lit before was still on
+         it and the line landed off the words. Seated, the lit chip has
+         no push and its swell is about its own middle. */
       const a = (c.firstElementChild as HTMLElement | null) ?? c;
-      const s = window.matchMedia("(min-width: 64rem)").matches
+      const s = matches("large")
         ? 1 + JELLY.swell
         : 1;
       const pad = (parseFloat(getComputedStyle(a).paddingLeft) || 0) * s;
@@ -813,8 +811,7 @@ export function WorkShell({
      or two to a row. The list and the strip both stack one up there, so
      they are one choice here, and it is lit for either. */
   /* On a phone the two views side by side under the burger, small, grid
-     on the right (Julian, 2026-10-04): the one you are in bright, the other
-     back. */
+     on the right: the one you are in bright, the other back. */
   const phoneToggle = (
     // On the title's line: 32px targets held to its 20px height.
     <span className="-mr-1.5 -my-1.5 flex items-center">
@@ -927,10 +924,9 @@ export function WorkShell({
             </svg>
           </button>
         ))}
-        {/* Julian: not a view, a button beside the search that brings the
-            scope in over the page (`vectorscope.tsx`). In both views;
-            from strip view it turns the page to grid first (Julian,
-            2026-10-05, which undid grid-only from 10-04). */}
+        {/* Julian: not a view, a button beside the search that brings
+            the scope in over the page (`vectorscope.tsx`). In both
+            views; from strip view it turns the page to grid first. */}
           <>
             <span aria-hidden className="mx-1 h-3 w-px bg-foreground/15" />
             <button
@@ -985,11 +981,11 @@ export function WorkShell({
   return (
     <StripPage
       head={
-        /* Julian: keep the head pinned on a phone. The page scrolls there,
-           and with the head gone the only way to the other disciplines or
-           the other view was all the way back up. It stops under the bar,
-           61px on a phone (measured). The bar's glass, not the ground
-           (Julian, 2026-10-04), so the work passes under it frosted. */
+        /* Julian: keep the head pinned on a phone. The page scrolls
+           there, and with the head gone the only way to the other
+           disciplines or the other view was all the way back up. It
+           stops under the bar, 61px on a phone (measured). The bar's
+           glass, not the ground, so the work passes under it frosted. */
         <div className="head-glass shrink-0 max-sm:sticky max-sm:top-[61px] max-sm:z-20 max-sm:pb-3">
           <StripHead
             /* Julian: no "Portfolio" on All work, where it only named the
@@ -1023,7 +1019,7 @@ export function WorkShell({
                discipline to the next. */
             open
             pick={{
-              // No count beside the title (Julian, 2026-10-04).
+              // No count beside the title.
               expanded: filtering,
               controls: "work-filter",
               onPick: () => setFiltering((v) => !v),
@@ -1189,7 +1185,7 @@ function Chip({
        thin, because the pointer is exact and the band is height the
        photographs would rather have. */
     "label block whitespace-nowrap rounded-full px-3 py-1.5 max-sm:py-3",
-    "transition-[color,background-color,scale] duration-200 ease-[var(--ease-out-strong)]",
+    "transition-[color,background-color,scale] duration-200 ease-[var(--ease-out-strong)] motion-reduce:transition-colors",
     // A chip lifts a touch under the pointer and gives under the press.
     "hoverable:hover:scale-[1.05] active:scale-[0.96] motion-reduce:hover:scale-100",
     // Full ink over its line (the pill it was knocked out of is gone).
@@ -1243,15 +1239,16 @@ function Chip({
         <span
           className={cn(
             "ml-1 tabular-nums",
-            /* The lit chip's count in the page's own ink, half strength.
-               It used to be `text-background`, which was right while the
-               chosen chip was a filled plate and the count sat on ink; the
-               fill went and the count went with it — near-black at 60% on
-               a near-black page. Julian: keep the count after the filter
-               is selected. Half strength so the name still leads. The
-               plate is back (2026-10-04, now in full ink), so it is
-               knocked out of it again. */
-            active ? "text-foreground/60" : "text-muted-foreground/60",
+            /* The lit chip's count in the page's own ink, half
+               strength. It used to be `text-background`, which was
+               right while the chosen chip was a filled plate and the
+               count sat on ink; the fill went and the count went with
+               it: near-black at 60% on a near-black page. Julian: keep
+               the count after the filter is selected. Half strength so
+               the name still leads. The plate is back, so it is knocked
+               out of it again. Unlit, at the muted grey's full
+               strength: at 60% it measured 2.7:1 (plan 5.1, WCAG AA). */
+            active ? "text-foreground/60" : "text-muted-foreground",
           )}
         >
           {count}

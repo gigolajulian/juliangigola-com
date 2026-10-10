@@ -77,3 +77,7 @@ next-env.d.ts
 # Never committed: the real values are set with `wrangler secret put`.
 .dev.vars
 .dev.vars.*
+
+# The perf suite (`npm run perf`)
+/test-results/
+/playwright-report/

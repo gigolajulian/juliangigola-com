@@ -142,14 +142,14 @@ export function CoverCell({
              as the page came in (116 on /work). The cell's own colour
              stands in. */
           draggable={false}
-          /* No zoom under the pointer (Julian, 2026-10-04: none anywhere). */
+          /* No zoom under the pointer. */
           className="strip-frame object-cover transition-transform duration-500 ease-[var(--ease-out-strong)] motion-reduce:transition-none"
         />
 
-        {/* Julian (2026-10-03): the films' slate on every project. No
-          plate: the name large in the display face over a fall of shadow
-          at the foot of the photograph, who it was for above it, both on
-          the left. The name is sized to its length (`.cover-name`), so a
+        {/* The films' slate on every project. No plate: the name
+          large in the display face over a fall of shadow at the foot
+          of the photograph, who it was for above it, both on the
+          left. The name is sized to its length (`.cover-name`), so a
           long title stays on one line. */}
         <div className="cover-slate pointer-events-none absolute inset-x-0 bottom-0 flex flex-col items-start gap-[1.2cqw] bg-gradient-to-t from-black/80 via-black/35 to-transparent px-[5cqw] pb-[4.5cqw] pt-[16cqw]">
           <span className="label min-w-0 max-w-full truncate text-[clamp(0.625rem,1.6cqw,0.75rem)] leading-none text-white/75">

@@ -16,6 +16,7 @@ import {
   DECODE_CAP_MS,
   type ZoomTrip,
 } from "@/lib/zoom";
+import { matches } from "@/lib/device";
 
 /* ── the lightbox ─────────────────────────────────────────────────
  * A frame at the size of the screen, paged with the arrow keys.
@@ -459,7 +460,7 @@ function useFit(
       /* A landscape frame a little short of the width, so the frames
          either side show past it (Julian: scale down slightly to show the
          next and before). Not on a phone, which has no sides. */
-      if (width > height && window.matchMedia("(min-width: 640px)").matches) w *= 0.76;
+      if (width > height && matches("wide")) w *= 0.76;
       const s = Math.min(w / width, h / height);
       setSize({ w: Math.round(width * s), h: Math.round(height * s), vw: el.clientWidth });
     };
@@ -1017,10 +1018,10 @@ function Stage({
       {size && zoom.scale === 1
         ? ([[-1, prev, "Prev"], [1, next, "Next"]] as const).map(([d, f, word]) => {
             if (!f) return null;
-            /* Julian (2026-10-03): whole, never cropped, the 3D made
-               elite, and not crowding the picture ("too close"). A cover
-               flow: each neighbour smaller and set back, a clear gap from
-               the picture, turned away from it on its inner edge, whole
+            /* Whole, never cropped, the 3D made elite, and not
+               crowding the picture ("too close"). A cover flow: each
+               neighbour smaller and set back, a clear gap from the
+               picture, turned away from it on its inner edge, whole
                inside the window: shrunk to the room, gone below a
                sliver. */
             const GAP = 56;

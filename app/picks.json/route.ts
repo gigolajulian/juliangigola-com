@@ -6,9 +6,9 @@ import LOOKS from "@/lib/picker-looks.json";
    homepage does not carry frames it may never show. */
 export const dynamic = "force-static";
 
-/* Covers only, one a project (Julian, 2026-10-07), and no two looks
-   side by side: the portfolio's order, but each next cover is whichever
-   of the next few in line sits furthest in colour from the last two. */
+/* Covers only, one a project, and no two looks side by side: the
+   portfolio's order, but each next cover is whichever of the next
+   few in line sits furthest in colour from the last two. */
 const rgb = (hex = "#808080") => [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16));
 const far = (a: number[], b: number[]) => Math.hypot(a[0] - b[0], a[1] - b[1], a[2] - b[2]);
 
@@ -28,12 +28,11 @@ function varied<T extends { color?: string }>(items: T[], ahead = 6): T[] {
   return out;
 }
 
-/* The picker by look rather than discipline (Julian, 2026-10-08: a simple
-   way for them to pick the look they are going for). Each photograph's
-   look was sorted by its light and colour and then corrected by eye
+/* The picker by look rather than discipline. Each photograph's look was
+   sorted by its light and colour and then corrected by eye
    (`lib/picker-looks.json`); a photograph added since lands in "More"
-   until it is given one. Events and Cover art are kinds of work rather than
-   looks, and are kept whole (Julian, 2026-10-08). */
+   until it is given one. Events and Cover art are kinds of work rather
+   than looks, and are kept whole. */
 const ORDER = ["Chroma", "Night", "White studio", "Grey studio", "Daylight", "Events", "Cover art", "More"];
 
 export function GET() {

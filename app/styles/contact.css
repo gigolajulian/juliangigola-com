@@ -1,0 +1,358 @@
+/* Contact and booking: the contact sheet, the inquiry card, the focus field and the booking frame. */
+
+/* ── the contact sheet (`contact-sheet.tsx`) ───────────────────
+ * The hover the Commissions table and the portfolio have. The face
+ * pointed at leans in inside its own cell; the rest stay where they are,
+ * a touch soft. Was a rack focus, the others blurred 5px and taken down
+ * to 45%.
+ * ─────────────────────────────────────────────────────────────── */
+@media (hover: hover) and (pointer: fine) {
+  .contact-sheet img {
+    transition:
+      filter 300ms var(--ease-out-strong),
+      scale 900ms var(--ease-out-strong);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .contact-sheet img {
+    transition: none;
+  }
+}
+
+/* The Google Calendar booking frame on a session page's Book screen
+   (`contact-screen.tsx`). Its page cannot be styled from here, so on the
+   dark theme it is turned over: white to near black, and the hue turned back
+   so Google's blue stays blue. */
+:root:not([data-theme="light"]) .booking-embed {
+  filter: invert(0.9) hue-rotate(180deg);
+}
+
+/* Primaries solid under a finger. The 72% glass is drawn over by the
+   liquid under a mouse; a phone has no liquid, and the glass over
+   the dark ground read as a grey, disabled button. */
+@media (hover: none), (pointer: coarse) {
+  .cover-cta:not(.cover-cta-quiet) {
+    background: var(--hero-ink);
+  }
+  .action:not(:disabled, [aria-disabled="true"]) {
+    background-color: var(--foreground);
+  }
+}
+
+/* The last screen's doors, each over a photograph. The veil is the
+   ground, heavier toward the words, so the type keeps its contrast
+   whatever the frame; a hover lets a little more of it through. */
+.door-veil {
+  background: linear-gradient(
+    to right,
+    color-mix(in oklab, var(--background) 90%, transparent),
+    color-mix(in oklab, var(--background) 68%, transparent)
+  );
+  transition: opacity 400ms var(--ease-out-strong);
+}
+@media (hover: hover) and (pointer: fine) {
+  .group:hover > .door-veil {
+    opacity: 0.65;
+  }
+}
+/* The bar lies over the first door; its photograph starts under the bar
+   so the top of the frame is not hidden behind it (Julian: go up on the
+   photo). The fill image sets its box inline, hence the weight. */
+@media (min-width: 40rem) {
+  #where-next > :first-child > .door-photo {
+    /* Half under the bar (Julian: somewhere in between). */
+    top: calc(var(--bar-h) / 2) !important;
+    height: calc(100% - var(--bar-h) / 2) !important;
+  }
+}
+
+/* The Commissions rows' liquid hover (`services-screen.tsx`), Sessions'
+   drop on the same grey a step off the ground. Opaque, as the liquid
+   needs. */
+.services-col {
+  --services-hover: color-mix(in oklab, var(--foreground) 6%, var(--background));
+}
+
+/* A field lifts under the pointer and stays up while it is being typed
+   in. Then: lower key, and one glass plane across the card rather than
+   a plate of its own. So the ground is a band running wall to wall
+   through the card's padding (32px, 20px on a phone), square, with a
+   hairline above and below, and the lift is a few pixels toward the
+   hand, nothing tipped. */
+.contact-field {
+  position: relative;
+  transform: perspective(900px);
+  transition: transform 360ms var(--ease-out-strong);
+}
+.contact-field::before {
+  content: "";
+  position: absolute;
+  inset: -0.5rem -1.25rem;
+  z-index: -1;
+  background-color: color-mix(in oklab, var(--foreground) 5%, transparent);
+  box-shadow:
+    inset 0 1px 0 color-mix(in oklab, var(--foreground) 9%, transparent),
+    inset 0 -1px 0 color-mix(in oklab, var(--foreground) 6%, transparent);
+  opacity: 0;
+  transition: opacity 300ms var(--ease-out-strong);
+  pointer-events: none;
+}
+@media (min-width: 40rem) {
+  .contact-field::before {
+    inset-inline: -2rem;
+  }
+}
+.contact-field:focus-within {
+  transform: perspective(900px) translateZ(8px);
+}
+.contact-field:focus-within::before {
+  opacity: 1;
+}
+@media (hover: hover) and (pointer: fine) {
+  .contact-field:hover::before {
+    opacity: 0.55;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .contact-field,
+  .contact-field:focus-within {
+    transform: none;
+  }
+}
+
+/* ── the inquiry card in depth ──
+   The card grows toward you under the pointer, and once somebody
+   starts typing it comes forward into focus while the rest of the
+   screen steps back, so the form is the one thing in front of them
+   until they press Inquire. From a tablet up; on a phone the card is
+   the screen already. */
+@media (min-width: 40rem) {
+  /* Flat scales, not a step toward the eye in 3D: drawn once at its
+     size and lifted by `translateZ`, the form stayed soft in focus. A
+     2D scale is drawn again sharp once it settles. 1.042 and 1.053 are
+     what 56px and 70px toward the eye came to at 1400px. */
+  .contact-card {
+    transform: translateX(0) scale(1);
+    transition:
+      transform 700ms var(--ease-out-strong),
+      box-shadow 700ms var(--ease-out-strong);
+  }
+  /* Never a scroll bar on it (Julian). It still scrolls if a short
+     window needs it; the wheel and the keys reach the fields. */
+  .contact-card [data-scroll] {
+    scrollbar-width: none;
+  }
+  .contact-card [data-scroll]::-webkit-scrollbar {
+    display: none;
+  }
+  .contact-inquire > :not(.contact-card, style) {
+    transition:
+      opacity 700ms var(--ease-out-strong),
+      filter 700ms var(--ease-out-strong);
+  }
+  /* Further forward (was 44px, now about 1.05x) and a step toward
+     the middle, as on hover, still clear of the text on the left. */
+  .contact-card:focus-within {
+    transform: translateX(-3rem) scale(1.053);
+    box-shadow: 0 50px 90px -40px rgb(0 0 0 / 0.6);
+  }
+  /* Dimmed, not blurred. */
+  .contact-inquire:has(.contact-card:focus-within) > :not(.contact-card, style, .enquiry-backdrop) {
+    opacity: 0.35;
+  }
+  .contact-inquire:has(.contact-card:focus-within) > .enquiry-backdrop {
+    opacity: 0.5;
+  }
+}
+@media (min-width: 40rem) and (hover: hover) and (pointer: fine) {
+  /* The edge's line and glow quieter under the pointer. The beam
+     sets its strength inline, hence !important. */
+  .contact-card:hover {
+    --beam-strength: 0.5 !important;
+  }
+  .contact-card:hover > .contact-edge {
+    opacity: 0.5;
+  }
+  /* Bigger, and a step toward the middle. */
+  .contact-card:hover:not(:focus-within) {
+    transform: translateX(-3rem) scale(1.042);
+    box-shadow: 0 36px 70px -36px rgb(0 0 0 / 0.5);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .contact-card,
+  .contact-card:hover,
+  .contact-card:focus-within {
+    transform: none !important;
+  }
+  .contact-inquire > * {
+    filter: none !important;
+  }
+}
+
+/* ── the portfolio's hover, as the Commissions table has it ──
+   The same on /portfolio, strip and grid. The cell under the pointer
+   holds its frame and its photograph leans in inside it, slowly; every
+   other cell stays where it is, a touch soft, so the one you are on is
+   the sharp one. Nothing moves on the row. */
+.portfolio-arrive .strip-cell img {
+  transition:
+    opacity 700ms cubic-bezier(0.22, 1, 0.36, 1),
+    scale 900ms var(--ease-out-strong),
+    filter 300ms var(--ease-out-strong);
+}
+
+/* And the Commissions table's tilt: the card under the pointer lifts,
+   tips toward it (`card-tilt.tsx` writes where the hand is), casts a
+   shadow away from the side that lifts. At rest no transform at all, so
+   two hundred covers are not each a layer of their own. */
+.portfolio-arrive .strip-cell:not([data-deck]) {
+  box-shadow: 0 22px 40px -16px rgb(0 0 0 / 0), var(--deal-ground, 0 0 #0000);
+  transition:
+    transform 450ms var(--ease-out-strong),
+    box-shadow 450ms var(--ease-out-strong),
+    scale 440ms var(--ease-bounce);
+  &:active {
+    transition:
+      transform 450ms var(--ease-out-strong),
+      box-shadow 450ms var(--ease-out-strong),
+      scale 90ms cubic-bezier(0.4, 0, 1, 1);
+  }
+}
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  .portfolio-arrive .strip-cell:not([data-deck]):hover {
+    /* About the card's own middle (`--cx`, `--cy`, `card-tilt.tsx`), not
+       the origin the deck gave it. */
+    transform: translate(var(--cx, 0px), var(--cy, 0px)) perspective(1000px) translateZ(20px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)) rotateZ(var(--rz, 0deg)) translate(calc(-1 * var(--cx, 0px)), calc(-1 * var(--cy, 0px)));
+    box-shadow:
+      var(--sx, 0px) calc(22px + var(--sy, 0px)) 40px -16px rgb(0 0 0 / 0.6),
+      var(--deal-ground, 0 0 #0000);
+    transition:
+      transform 140ms ease-out,
+      box-shadow 500ms var(--ease-out-strong),
+      scale 440ms var(--ease-bounce);
+  }
+  /* Not while the strip moves: lifted and turned mid-deal, the card
+     showed what the deck had under it. `card-tilt.tsx`. */
+  :root[data-scrolling] .portfolio-arrive .strip-cell:not([data-deck]):hover {
+    transform: none;
+  }
+}
+
+/* ── the focus field ──────────────────────────────────────────────
+ * Focus that follows the pointer across a gallery. One layer over the
+ * gallery blurs what is behind it, and its mask is clear round the
+ * pointer, so the frames near it are sharp and the rest go out of focus
+ * by degrees with their distance, across the whole set rather than
+ * frame by frame (`focus-field.tsx` places it and moves the clearing).
+ * ─────────────────────────────────────────────────────────────── */
+.focus-field {
+  position: fixed;
+  z-index: 30;
+  pointer-events: none;
+  -webkit-backdrop-filter: blur(2.5px);
+  backdrop-filter: blur(2.5px);
+  --ff-mask: radial-gradient(
+    circle at var(--ff-x, 50%) var(--ff-y, 50%),
+    transparent 0,
+    transparent var(--ff-sharp, 160px),
+    /* Eased in and out (smoothstep), so neither edge of the falloff
+       shows as a line. */
+    rgb(0 0 0 / 0.06) calc(var(--ff-sharp, 160px) * 1.5),
+    rgb(0 0 0 / 0.2) calc(var(--ff-sharp, 160px) * 2),
+    rgb(0 0 0 / 0.5) calc(var(--ff-sharp, 160px) * 2.5),
+    rgb(0 0 0 / 0.8) calc(var(--ff-sharp, 160px) * 3),
+    rgb(0 0 0 / 0.94) calc(var(--ff-sharp, 160px) * 3.5),
+    #000 calc(var(--ff-sharp, 160px) * 4)
+  );
+  -webkit-mask-image: var(--ff-mask);
+  mask-image: var(--ff-mask);
+  opacity: 0;
+  transition:
+    opacity 260ms var(--ease-out-strong),
+    --ff-sharp 420ms var(--ease-out-strong);
+}
+/* Typed, so the clearing grows and shrinks between frames of different
+   sizes instead of jumping. */
+@property --ff-sharp {
+  syntax: "<length>";
+  inherits: false;
+  initial-value: 160px;
+}
+.focus-field[data-on] {
+  opacity: 1;
+  transition-duration: 420ms;
+}
+
+/* The navbar's name grows under the pointer, round its own middle so
+   it swells in place: from the link's left edge it slid down and to
+   the right. On the name inside, not the link, whose transform the
+   homepage's handoff from the masthead owns. Lands with a touch of
+   give, lets go quicker. */
+/* And it turns white with a thin outline in the ink, faded in. The
+   name is a picture drawn in the ink, so the white is a filter over
+   it: taken to black, inverted, and four one pixel shadows round it
+   for the line. The same list of steps at rest, each doing nothing,
+   so the two states blend rather than snap. */
+/* No line now, on either ground; the edge stays transparent, kept so
+   the two states still blend. */
+.logo-grow > :not(.sr-only) {
+  --logo-edge: transparent;
+  transform-origin: center;
+  filter: brightness(1) invert(0) drop-shadow(0 0 0 transparent) drop-shadow(0 0 0 transparent)
+    drop-shadow(0 0 0 transparent) drop-shadow(0 0 0 transparent);
+  transition:
+    scale 300ms var(--ease-out-strong),
+    filter 300ms var(--ease-out-strong);
+}
+@media (hover: hover) and (pointer: fine) {
+  .logo-grow:hover > :not(.sr-only) {
+    filter: brightness(0) invert(1) drop-shadow(1px 0 0 var(--logo-edge))
+      drop-shadow(-1px 0 0 var(--logo-edge)) drop-shadow(0 1px 0 var(--logo-edge))
+      drop-shadow(0 -1px 0 var(--logo-edge));
+    transition:
+      scale 500ms cubic-bezier(0.34, 1.56, 0.64, 1),
+      filter 450ms var(--ease-out-strong);
+  }
+}
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  .logo-grow:hover > :not(.sr-only) {
+    scale: 1.06;
+  }
+}
+/* White vanished into the light ground: there it turns the grey of
+   the nav's words instead. */
+@media (hover: hover) and (pointer: fine) {
+  :root[data-theme="light"] .logo-grow:hover > :not(.sr-only) {
+    filter: brightness(0) invert(0.25) drop-shadow(0 0 0 transparent) drop-shadow(0 0 0 transparent)
+      drop-shadow(0 0 0 transparent) drop-shadow(0 0 0 transparent);
+  }
+}
+
+/* The Google Calendar booking frame on /book (`book-picker.tsx`). Its page
+   cannot be styled from here, so on the dark theme it is turned over: white
+   to near black, and the hue turned back so Google's blue stays blue. */
+:root:not([data-theme="light"]) .booking-embed {
+  filter: invert(0.9) hue-rotate(180deg);
+}
+/* And the page itself takes the inverted calendar's grey, so the
+   frame sits in it rather than as a lighter slab on near black.
+   Exactly what `invert(0.9)` makes of Google's white. */
+/* The wash (`body::before`) as well as the body, or the wash covers it. */
+:root:not([data-theme="light"]) body:has(.book-page),
+:root:not([data-theme="light"]) body:has(.book-page)::before {
+  background: rgb(25 25 25);
+}
+:root[data-theme="light"] body:has(.book-page),
+:root[data-theme="light"] body:has(.book-page)::before {
+  background: rgb(225 227 229);
+}
+/* The calendar fades up each time the session changes. */
+.booking-embed {
+  animation: jg-fade-in 500ms var(--ease-out-strong) both;
+}
+/* Cal.com's calendar in its place (`cal-embed.tsx`, behind `?cal`) takes
+   the site's colours itself, so it is not turned over. */
+:root:not([data-theme="light"]) .booking-embed.cal-embed {
+  filter: none;
+}

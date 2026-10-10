@@ -308,13 +308,12 @@ export async function submitEnquiry(
   }
 }
 
-/* The frames they picked from the work, attached (Julian, 2026-10-05)
-   and shown under their links (2026-10-08). One that will not fetch is
-   left out, not fatal: its link is still in the text.
+/* The frames they picked from the work, attached and shown under their
+   links. One that will not fetch is left out, not fatal: its link is
+   still in the text.
 
    Not through the site's own `/cdn-cgi/image/` address: asked from inside
-   the Worker it never answered, and no pick was attached from 2026-10-05
-   to 10-08. The file is read from the static assets instead, the 1080px
+   the Worker it never answers, so nothing was attached. The file is read from the static assets instead, the 1080px
    copy where there is one so the mail stays small, or resized with
    `cf.image` (the Workers way) when the archive is on R2. */
 async function pickAttachments(picks: string[], assets?: { fetch: typeof fetch }) {

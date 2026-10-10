@@ -1,3 +1,5 @@
+import { media } from "@/lib/device";
+
 /* ── the deck ─────────────────────────────────────────────────────
  * React Bits' ScrollStack, turned on its side for a site that moves
  * sideways. Julian: integrate it, but make it make sense.
@@ -40,8 +42,8 @@
  *               the project before.
  *
  * Nothing fades: Julian wants cards in space stacking over each other,
- * every one whole. The recede is the depth, and since 2026-10-01 a slight
- * shadow under a screen coming in (`deal-shade` in `globals.css`).
+ * every one whole. The recede is the depth, and a slight shadow under a
+ * screen coming in (`deal-shade` in `globals.css`).
  *
  * Chrome folds the sticky offset into a stuck cell's `offsetLeft`, so a
  * pinned cover reads as sitting exactly where the screen over it does,
@@ -163,7 +165,7 @@ const drop = (live: Map<HTMLElement, Animation>) => {
 export function runDeck(el: HTMLElement, mode: Deck): () => void {
   if (mode === "chapters") return runChapters(el);
   if (mode === "leads") return () => {}; // the strip deals at its ends itself
-  const wide = window.matchMedia("(min-width: 40rem)");
+  const wide = media("wide");
   const calm = window.matchMedia("(prefers-reduced-motion: reduce)");
   let cards: HTMLElement[] = [];
   let rest: HTMLElement[] = [];
@@ -196,13 +198,13 @@ export function runDeck(el: HTMLElement, mode: Deck): () => void {
      so the depth keeps up with the pin. */
   /* Handed the scroll by `deal`, which reads it before it writes: read
      after, it laid the page out again inside the arrival. */
-  /* Julian (2026-10-01), a preview at `?flyout=1`: the deck the other way
-     round. The screen you are on is the card on top and flies out to the
-     left as you go; the next one waits under it, pinned against the
-     window's right edge (`right: 0` on a screen as wide as the window is
-     the whole window), and comes up from the space behind as it is
-     uncovered. The shadow is the leaving screen's, off its trailing edge
-     (`::after` in `globals.css`). */
+  /* A preview at `?flyout=1`: the deck the other way round.
+     The screen you are on is the card on top and flies out to the left
+     as you go; the next one waits under it, pinned against the
+     window's right edge (`right: 0` on a screen as wide as the window
+     is the whole window), and comes up from the space behind as it is
+     uncovered. The shadow is the leaving screen's, off its trailing
+     edge (`::after` in `globals.css`). */
   let flyout = false;
   const lift = (x: number) => {
     const gone = spots.map((s) => {
@@ -220,15 +222,14 @@ export function runDeck(el: HTMLElement, mode: Deck): () => void {
   };
   const depth = (x = el.scrollLeft) => {
     if (flyout) return lift(x);
-    // How much of each card, pinned, the one after it now covers. Under
-    // two pixels is nothing: `offsetLeft` rounds, a screen is 1761.333 wide,
-    // and a screen at rest read as a third of a pixel covered. It sat at
-    // scale 0.99998, resampled, and every seam in it shimmered. Julian saw
-    // it on Selected work and Cover art.
-    // The same at the other end: at a fractional width (150% zoom) a
-    // covered screen read 0.9997 covered and was never `data-buried`, and
-    // the hero's photographs showed under the footer's glass as a grey
-    // band (Julian, 2026-10-02).
+    // How much of each card, pinned, the one after it now covers. Under two
+    // pixels is nothing: `offsetLeft` rounds, a screen is 1761.333 wide, and
+    // a screen at rest read as a third of a pixel covered. It sat at scale
+    // 0.99998, resampled, and every seam in it shimmered. Julian saw it on
+    // Selected work and Cover art. The same at the other end: at a
+    // fractional width (150% zoom) a covered screen read 0.9997 covered and
+    // was never `data-buried`, and the hero's photographs showed under the
+    // footer's glass as a grey band.
     const cover = spots.map((s) => {
       const over = s.pin + s.width - (s.next - x);
       return over < 2 ? 0 : over > s.width - 2 ? 1 : over / s.width;
@@ -371,7 +372,7 @@ const topOf = (box: HTMLElement) => {
 };
 
 function runChapters(el: HTMLElement): () => void {
-  const wide = window.matchMedia("(min-width: 40rem)");
+  const wide = media("wide");
   const calm = window.matchMedia("(prefers-reduced-motion: reduce)");
   let kids: HTMLElement[] = [];
   let chapters: Chapter[] = [];
@@ -512,8 +513,8 @@ function runChapters(el: HTMLElement): () => void {
   const first = idle(deal);
   /* Dealt again once the galleries' walls are laid out (`strip-relaid`,
      `strip.tsx`) or held-back sections arrive: from Event coverage on,
-     the first wall, every chapter stood somewhere else than the deal had
-     measured, and the stack stopped working there (Julian, 2026-10-08). */
+     the first wall, every chapter stood somewhere else than the deal
+     had measured, and the stack stopped working there. */
   let again = () => {};
   const redeal = () => {
     again();

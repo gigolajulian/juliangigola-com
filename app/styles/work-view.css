@@ -1,0 +1,410 @@
+/* Pictures arriving, the 404, the colour panel, the /work view switch and section titles. */
+
+/* ── pictures arrive ──────────────────────────────────────────────
+ * A lazily loaded picture fades up once its bytes have landed, instead of
+ * appearing between one frame and the next. `photo-fade.tsx` sets
+ * `data-loaded`; without scripting there is nothing to wait for and the
+ * picture is simply shown. Not used above the fold — see the component.
+ * ─────────────────────────────────────────────────────────────── */
+/* `scale` rides along with the fade, and is declared here rather than on
+   the elements: this selector is an element and an attribute, so it beats
+   any `transition-[scale]` a component writes as a class and the hover
+   zoom jumped to size instead of easing. Measured: transition-property
+   read `opacity` on a cover carrying the class. */
+img[data-fade] {
+  /* No fade: a picture shows as soon as it lands. Loading stays lazy,
+     so it still comes in as it reaches the screen. */
+  opacity: 1;
+  transition: scale 500ms var(--ease-out-strong);
+}
+img[data-fade][data-loaded] {
+  opacity: 1;
+}
+@media (scripting: none) {
+  img[data-fade] {
+    opacity: 1;
+  }
+}
+/* Through the window into the work and back (`lead-window.tsx`): the
+   pictures are the ones the window already showed, from the cache, and
+   fading them up again inside the door read as the room going blank. */
+:root:is([data-nav-side="open"], [data-nav-side="shut"]) img[data-fade] {
+  opacity: 1;
+  transition: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  img[data-fade] {
+    transition: none;
+  }
+}
+
+/* ── the 404's room ───────────────────────────────────────────────
+ * Two glows that drift, and a dot that blinks like a record light. Used by
+ * `app/not-found.tsx` and nowhere else; both stop under reduced motion at
+ * the call site. */
+@keyframes jg-drift-a {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(5vw, -4vh, 0) scale(1.16);
+  }
+}
+@keyframes jg-drift-b {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) scale(1.08);
+  }
+  50% {
+    transform: translate3d(-6vw, 4vh, 0) scale(0.94);
+  }
+}
+@keyframes jg-blink {
+  0%,
+  48% {
+    opacity: 1;
+  }
+  49%,
+  100% {
+    opacity: 0.18;
+  }
+}
+
+/* ── the colour panel ─────────────────────────────────────────────
+ * While it is out the page is the work in its colour
+ * (`components/vectorscope.tsx`), and the rack under it, discipline
+ * titles and all, steps away. Hidden rather than removed: which projects
+ * the lit chip puts on the page is read from it.
+ * ─────────────────────────────────────────────────────────────── */
+@media (min-width: 40rem) {
+  /* Julian: a transition when colour is clicked. The rack goes back into
+     the dark as the panel comes in, rather than cutting to an empty page
+     for the moment before the sets are dealt out of the scope
+     (`ColourGrid`); and comes back up when it closes. */
+  main .strip-band,
+  main .work-list {
+    transition:
+      opacity 280ms var(--ease-out-strong),
+      scale 280ms var(--ease-out-strong);
+  }
+  [data-scope-open] main .strip-band,
+  [data-scope-open] main .work-list {
+    visibility: hidden;
+    opacity: 0;
+    scale: 0.97;
+    transition:
+      opacity 280ms var(--ease-out-strong),
+      scale 280ms var(--ease-out-strong),
+      visibility 0s 280ms;
+  }
+}
+@media (min-width: 40rem) and (prefers-reduced-motion: reduce) {
+  main .strip-band,
+  main .work-list,
+  [data-scope-open] main .strip-band,
+  [data-scope-open] main .work-list {
+    transition: none;
+  }
+}
+/* A set and its photographs arrive: up from a few pixels under, out of
+   nothing, one after another on the delays the component writes. */
+@keyframes scope-in {
+  from {
+    opacity: 0;
+    translate: 0 8px;
+    scale: 0.98;
+  }
+}
+.scope-in {
+  animation: scope-in 380ms var(--ease-out-strong) both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .scope-in {
+    animation: none;
+  }
+}
+
+/* The 404 is one screen and never scrolls: Julian asked. The document is
+   held to the window and the site footer, whose one useful line the page
+   already carries in its own foot, is left out. */
+html:has([data-fit-page]),
+body:has([data-fit-page]) {
+  height: 100dvh;
+  overflow: hidden;
+}
+body:has([data-fit-page]) footer {
+  display: none;
+}
+
+/* ── changing view on /work ─────────────────────────────────────────
+ * Julian: something dope. `morphView` in `lib/work-view.ts` names every
+ * cover in sight, and each flies from its place in one view to its place
+ * in the next, a beat behind the one to its left. The strong in-out curve
+ * the site keeps for things moving on screen, long enough to follow, and
+ * the blur mid-flight the covers use when they open a project.
+ * ─────────────────────────────────────────────────────────────── */
+:root[data-nav="view"]::view-transition-group(.view) {
+  animation-duration: 720ms;
+  animation-timing-function: cubic-bezier(0.77, 0, 0.175, 1);
+}
+:root[data-nav="view"]::view-transition-image-pair(.view) {
+  animation-name: jg-via-blur;
+  animation-duration: 720ms;
+  animation-timing-function: cubic-bezier(0.77, 0, 0.175, 1);
+}
+:root[data-nav="view"]::view-transition-old(.view),
+:root[data-nav="view"]::view-transition-new(.view) {
+  block-size: 100%;
+  object-fit: cover;
+  animation-duration: 720ms;
+}
+
+/* The `?tune` sliders for the cover's name (`warp-tuner.tsx`), dev only. */
+.warp-tuner {
+  position: fixed;
+  left: 16px;
+  bottom: 16px;
+  z-index: 100;
+  display: grid;
+  gap: 10px;
+  width: 280px;
+  padding: 14px 16px;
+  border: 1px solid var(--border);
+  font: 400 11px/1.3 var(--font-mono);
+  color: var(--foreground);
+}
+.warp-tuner label {
+  display: grid;
+  gap: 4px;
+}
+.warp-tuner span {
+  display: flex;
+  justify-content: space-between;
+  color: var(--muted-foreground);
+}
+.warp-tuner b {
+  font-weight: 500;
+  color: var(--foreground);
+  font-variant-numeric: tabular-nums;
+}
+.warp-tuner input {
+  width: 100%;
+  accent-color: var(--foreground);
+}
+.warp-tuner[data-corner="right"] {
+  left: auto;
+  right: 16px;
+}
+.warp-tuner p {
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+}
+.warp-tuner-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.warp-tuner button {
+  padding: 8px;
+  border: 1px solid var(--border);
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+}
+
+/* ── the section titles ──────────────────────────────────────────────
+ * Julian: the logo and the page titles (h1) in Inter Tight Black, the
+ * section titles (h2) in Archivo 900 capitals (capitalize them all; they
+ * were Instrument Serif in title case). The h2s set as small mono labels
+ * keep that. Unlayered, so it outranks the `font-display` utility those
+ * titles carry.
+ * ─────────────────────────────────────────────────────────────── */
+h2:not(.label) {
+  font-family: var(--font-display);
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+/* The headers of the screens (Biography, Commissions, Sessions, the
+   footer's ask) in the wordmark's face, Inter Tight Black. The names
+   standing up the portfolio's spines and plates keep Endless.
+   Unlayered, so it outranks the `font-display` they carry. The ask at
+   the end of the work ("Have a project in mind?") is in the section
+   titles' Archivo. */
+:is(h1, h2):is(.font-display, .title):not(.chapter-name, .enquiry-title):not(:is(.discipline-title, .project-plate) > *) {
+  font-family: var(--font-wordmark);
+  font-weight: 900;
+}
+
+/* A card under the hand gets no focus ring. Keyboard focus with the
+   hand elsewhere still draws it. */
+.strip-cell:focus-visible:hover {
+  outline: none;
+}
+
+/* The lit filter's line, on the pane's hairline (`work-shell.tsx`),
+   sliding from chip to chip. Off on a phone, where the chips sit in a
+   grid and a line at the foot would point at the wrong row. */
+.filter-line {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  height: 1px;
+  background: var(--foreground);
+  pointer-events: none;
+  transition:
+    transform 420ms var(--ease-out-strong),
+    width 420ms var(--ease-out-strong);
+}
+@media (max-width: 39.999rem) {
+  .filter-line {
+    display: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .filter-line {
+    transition: none;
+  }
+}
+
+/* The vertical discipline name comes up at once: no wait before the
+   first word, a quicker rise. */
+:is(.discipline-title, [data-discipline-page] .project-plate) > h2 .title-word {
+  animation-duration: 520ms;
+  animation-delay: calc(var(--i, 0) * 40ms);
+}
+
+/* The colour page's covers tip toward the pointer as the portfolio's
+   do (`card-tilt.tsx`). */
+.scope-tile {
+  transition:
+    transform 450ms var(--ease-out-strong),
+    box-shadow 450ms var(--ease-out-strong);
+  box-shadow: 0 22px 40px -16px rgb(0 0 0 / 0);
+}
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  .scope-tile:hover {
+    transform: perspective(1000px) translateZ(20px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)) rotateZ(var(--rz, 0deg));
+    box-shadow: var(--sx, 0px) calc(22px + var(--sy, 0px)) 40px -16px rgb(0 0 0 / 0.6);
+    transition:
+      transform 140ms ease-out,
+      box-shadow 500ms var(--ease-out-strong);
+  }
+}
+
+/* Preview (`?cards`, `work-shell.tsx`): each discipline one card, its
+   name and its projects on one panel. The panel is the name cell's own
+   `::before`, as long as the chapter (`--chapter-w`, `lib/deck.ts`): the
+   name cell lies under every cell after it, so the panel does too. */
+@media (min-width: 40rem) {
+  :root[data-cards] .portfolio-arrive .strip-scroll > .strip-cell[data-deck] {
+    overflow: visible;
+    /* More room before the name inside its card. */
+    padding-left: 4rem;
+  }
+  /* No dark frame round each cover on the panel: that ground is the
+     page's colour, and on a card it read as a box. */
+  :root[data-cards] .portfolio-arrive .strip-scroll > .strip-cell {
+    --deal-ground: 0 0 #0000;
+  }
+  :root[data-cards] .portfolio-arrive .strip-scroll > .strip-cell[data-deck]::before {
+    content: "";
+    position: absolute;
+    z-index: -1;
+    /* The page's own colour, and carried left across the room before
+       it: in a slide the chapter going under showed through that room
+       as a dark bar riding the card's edge. */
+    left: -2.75rem;
+    top: -0.75rem;
+    bottom: -0.75rem;
+    width: calc(var(--chapter-w, 100%) + 3.5rem);
+    border-radius: calc(var(--radius-photo) + 0.75rem);
+    background: var(--background);
+    pointer-events: none;
+  }
+  :root[data-cards] .portfolio-arrive .strip-scroll > .strip-cell[data-deck]:not(:first-child) {
+    margin-left: 2rem;
+  }
+}
+
+/* ── small things from the scan ──────────────────────────────────
+ * The page's own count showed faintly through the photo viewer, behind
+ * the viewer's (an iPad: "01 / 06" under "1 / 6"). */
+:root[data-viewer] .strip-count {
+  visibility: hidden;
+}
+/* A logo reached by Tab while the marks were sliding sat under the
+   heading, so the ring could not be seen: the row holds still at its
+   start while anything in it has the focus. */
+.about-marquee:focus-within .about-marquee-track {
+  animation: none;
+}
+/* The homepage's ask over the wall: the muted lines ("hello@",
+   "Next", the line under the question, the doors' lines) were faint
+   over a bright tile, under 4.5:1 on a phone in either theme. Nearer
+   the ink. */
+.enquiry-backdrop ~ * .text-muted-foreground,
+/* And the doors' lines, over the same wall through a 30% tint: 3.9:1 at
+   a bright tile on the light theme (plan 5.1). */
+.door-veil ~ * .text-muted-foreground {
+  color: color-mix(in oklab, var(--foreground) 82%, transparent);
+}
+
+/* ── a thumb's worth ──────────────────────────────────────────────
+ * Under a finger, 44px each way at the least (Apple's own floor). The
+ * scan measured the view toggles at 26, the crumbs at 30, Legal at 28,
+ * the "All 88" links at 25, the viewer's Close at 35 and the pills at 39
+ * to 40. The small ones get an unseen square of 44 round their middle,
+ * which moves nothing; one already placed absolutely keeps its place and
+ * holds the square itself. The pills grow to 44. */
+@media (pointer: coarse) {
+  :is(
+    button:has(> svg:only-child),
+    a[aria-label]:has(> [aria-hidden]:only-child),
+    a:has(> .sr-only),
+    [data-dial="crumb"] a,
+    nav[aria-label="Legal"] a,
+    [role="dialog"] button
+  ):not([class*="absolute"], [class*="fixed"]) {
+    position: relative;
+  }
+  :is(
+    button:has(> svg:only-child),
+    a[aria-label]:has(> [aria-hidden]:only-child),
+    a:has(> .sr-only),
+    [data-dial="crumb"] a,
+    nav[aria-label="Legal"] a,
+    [role="dialog"] button
+  )::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: max(100%, 44px);
+    height: max(100%, 44px);
+    translate: -50% -50%;
+  }
+  :is(.action, .action-quiet, .cover-cta) {
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+  /* The homepage's pair sit in two zooms (`--m-buttons`, `--mid`); 44 as seen. */
+  .cover-float-ctas .cover-cta {
+    min-height: calc(44px / (var(--m-buttons, 1) * var(--mid, 1)));
+  }
+}
+
+/* ── words over the drifting wall, on the light ground ──
+ * The wall fades toward the ground, which on the light theme leaves a
+ * dark photograph as dark as it was: the grey type over one measured 2:1
+ * (the homepage's ask, the 404). Julian: a little more blur on the
+ * overlay, not a glow round the letters and not a wash. Set on the
+ * photograph under the overlay rather than as a backdrop filter on it:
+ * the same picture, without a few hundred backdrop passes on a moving
+ * wall. The tile under the pointer comes up sharp. */
+:root[data-theme="light"] .drift-wall__tile:not(.is-active) img {
+  filter: grayscale(var(--dw-gray)) saturate(0.92) blur(2px);
+}

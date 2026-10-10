@@ -178,8 +178,7 @@ export function StripHead({
   /** The title is the page's own, shown from the first frame rather than
       after the opening cell has gone. */
   open?: boolean;
-  /** On a phone the title is also the way to the other filters (Julian,
-      2026-10-04: the drop-down beside the title, not a box under it). */
+  /** On a phone the title is also the way to the other filters. */
   pick?: { count?: number; expanded: boolean; controls: string; onPick: () => void };
 }) {
   const words = open
@@ -205,7 +204,7 @@ export function StripHead({
         className={cn(
           "flex items-start justify-between gap-6 max-sm:grid",
           /* Where the title is the filter: the title centred, the views
-             stacked at the right under the burger (Julian, 2026-10-04). */
+             stacked at the right under the burger. */
           // Top, not centre: the title's column carries the line under it.
           pick ? "max-sm:items-start max-sm:gap-x-3" : "",
           "max-sm:grid-cols-[1fr_auto_1fr]",
@@ -230,9 +229,9 @@ export function StripHead({
             key={open ? title : undefined}
             className={cn(
               "font-[family-name:var(--font-wordmark)] font-black line-clamp-2 text-xl uppercase leading-none tracking-[0] sm:line-clamp-none sm:text-3xl lying:text-xl",
-              /* The clamp hides overflow, and with it the button's reach past
-                 its 20px: taps a few pixels off it missed (audit,
-                 2026-10-05). It is one line there anyway. */
+              /* The clamp hides overflow, and with it the button's reach
+                 past its 20px: taps a few pixels off it missed. It is one
+                 line there anyway. */
               pick && "max-sm:line-clamp-none",
             )}
           >

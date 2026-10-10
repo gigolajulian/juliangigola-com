@@ -1,0 +1,603 @@
+/* The header: the drawers, the bar, the menu and the footer. */
+
+/* ── two drawers, and the page is the lid of both ──
+   Julian: the burger should push the screen left and the menu should come
+   out from behind it on the right. Then: the filters should do the exact
+   same thing from the other side.
+
+   So there is one drawer here and two of them on the screen. The menu
+   comes in from the right and pushes the page left; the filters come in
+   from the left and push it right. Everything else about them — the
+   material, the timing, the held breath, the glass over the page, the way
+   the names drop in a step apart — is one set of rules that both wear.
+
+   Why a drawer at all: a panel that fades up over the whole window is the
+   usual answer and it says nothing. The page is gone for as long as the
+   panel is up, and somebody who opened it by accident has lost their
+   place. A drawer keeps the page on screen, off to one side, plainly
+   still there and plainly waiting, and pressing it is how you go back.
+
+   Four things move and they move as one. The bar, the page and the footer
+   travel by the drawer’s width; the drawer travels in by the same width.
+   Same distance, same time, same curve, so the drawer’s edge is against
+   the page’s edge for every frame: nothing is uncovered that was not
+   already behind it.
+
+   `translate` rather than a transform, and `none` rather than zero at
+   rest. An element with any transform on it becomes the frame every fixed
+   thing inside it is measured from, which would quietly re-anchor the
+   lightbox and the viewer on every page in the site. `none` is not a
+   transform, so the cost is paid only while a drawer is open, and
+   `translate: none` still interpolates from a length.
+
+   420ms, after 80. A drawer is the one control on the site allowed to
+   take its time: it is a large object with weight, seen once in a visit,
+   and the curve is the same strong ease-out everything else arrives on.
+   The 80 is a held breath — Julian asked for it — and it is on the way
+   out only: a delay is read from wherever a transition is going, so
+   closing has none and the page comes straight back under the finger.
+
+   One attribute for both, because two drawers open at once would be a
+   page asked to travel in both directions. `data-drawer` on `<html>` is
+   either "menu" or "filter" or absent, and the stylesheet cannot express
+   the broken state — which is cheaper than two components agreeing to
+   behave.
+
+   Only below `lg`, where the burger and the capsule exist. A window wide
+   enough for the four links in the bar and the twelve filters in a row
+   never opens either, and a page pushed halfway off a desktop because
+   somebody resized it while it was open is a bug nobody would find
+   twice. */
+:root {
+  /* Wide enough for the longest name set large, narrow enough that the
+     page keeps most of the window. On a phone both are four fifths of it;
+     on an upright tablet the filters take half the screen, at Julian's
+     ask, and the menu stays at its four words. */
+  --menu-w: min(20rem, 82vw);
+  --filter-w: min(24rem, 82vw);
+}
+/* Julian (iPad upright): more room from the edge. The panel's sides are
+   the page's 40px gutter from `sm`, and 20rem less those left PORTFOLIO
+   at 3.5rem 15px wider than the panel. */
+@media (min-width: 40rem) {
+  :root {
+    --menu-w: min(24rem, 82vw);
+  }
+}
+
+/* ── the bar under the Dynamic Island ─────────────────────────────
+ * Julian, on an iPhone: the bar should carry on up into the island's
+ * band. The page is laid out under it already — the viewport meta says
+ * `viewport-fit=cover` — but the bar's own surface stopped at the top of
+ * its box, so the band above it was flat page colour rather than the
+ * glass the bar is made of.
+ *
+ * A band painted above the bar in the bar's own material, rather than
+ * padding the bar itself: padding would make the bar 59px taller on that
+ * phone and every page reserves room for it by a written number, so the
+ * top of a dozen pages would go under it. This has no layout at all — it
+ * is zero pixels high on every screen that has no inset, which is every
+ * screen but a notched phone.
+ *
+ * `inherit`, so it is the same colour as the bar in whichever of its two
+ * states it is in, and it fades with it. The blur comes from the layer
+ * below, which reaches up over this strip.
+ * ─────────────────────────────────────────────────────────────── */
+.site-bar::before {
+  content: "";
+  position: absolute;
+  bottom: 100%;
+  left: 0;
+  right: 0;
+  height: env(safe-area-inset-top, 0px);
+  background-color: inherit;
+  pointer-events: none;
+}
+
+/* The bar's glass. It used to be `glass-surface` switched on with the
+   scroll, with `backdrop-filter` in the bar's transition list, which
+   means the browser re-filtered everything behind the bar on every frame
+   of the 300ms, ten or twenty times a visit. The blur is now on all the
+   time, on a layer of its own under the bar's contents, and only its
+   opacity moves: the same picture, and the compositor does the work.
+   Under the contents rather than over them, so the wordmark and the menu
+   stay sharp. It reaches up over the notch strip so the safe area is the
+   same material. */
+.site-bar::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  top: calc(-1 * env(safe-area-inset-top, 0px));
+  z-index: -1;
+  /* 9px: Julian, lower the blur slightly on the navbar and the footer.
+     Less again while a photograph is hovered (`--glass-blur`, below). */
+  -webkit-backdrop-filter: blur(var(--glass-blur, 9px)) saturate(1.5);
+  backdrop-filter: blur(var(--glass-blur, 9px)) saturate(1.5);
+  opacity: 0;
+  transition:
+    opacity 300ms var(--ease-out-strong),
+    backdrop-filter 300ms var(--ease-out-strong),
+    -webkit-backdrop-filter 300ms var(--ease-out-strong);
+  pointer-events: none;
+}
+.site-bar[data-plain="true"]::after {
+  opacity: 1;
+}
+/* Julian: glass on the homepage. The bar sits on the cover's photographs
+   and the homepage never scrolls the page, so it never got a ground of its
+   own. It gets the site's glass instead: the frosted layer above at full,
+   a thin tint of the page, a hairline, and light along its top edge. */
+.site-bar[data-home]:not([data-plain="true"]) {
+  border-color: color-mix(in oklab, var(--foreground) 12%, transparent);
+  background-color: color-mix(in oklab, var(--background) var(--glass-tint, 34%), transparent);
+  box-shadow: inset 0 1px 0 color-mix(in oklab, white 12%, transparent);
+}
+.site-bar[data-home]::after {
+  opacity: 1;
+}
+/* And its floor: the rail and the footer float over the foot of the strip
+   as one pane of the same glass, and the strip runs on under them
+   (`site-header.tsx` sets `data-under` and measures `--under`). Each
+   screen keeps its old height, so nothing on it moves; the hero's
+   photographs and the last page's wall carry on below it, under the
+   glass. From 40rem, where the strip runs sideways. */
+@media (min-width: 40rem) {
+  :root[data-under] .strip-band {
+    position: relative;
+  }
+  :root[data-under] .strip-scroll > * {
+    align-self: flex-start;
+    height: calc(100% - var(--under, 94px));
+  }
+  /* Each screen carries a ground of its own down under the glass, as
+     a shadow its own height below it, so the one it slides over
+     never shows through the rail and footer. A screen's own pictures
+     still run on over it: a shadow paints under the element's
+     content. */
+  :root[data-under] .strip-scroll > * {
+    box-shadow: 0 var(--under, 94px) 0 var(--background);
+  }
+  :root[data-under] .strip-scroll > .cover-float {
+    overflow: clip visible;
+  }
+  /* Only while it is the screen on top. Once the next one covers it
+     (`data-buried`, `lib/deck.ts`) nothing covered the photos under
+     the glass, which blurred them into a grey band over the footer
+     of every other screen. */
+  :root[data-under] .strip-scroll > .cover-float[data-buried] {
+    overflow: clip;
+  }
+  /* And the photographs themselves go, not only their overflow: on
+     Julian's machine (Chrome, D3D11, 2321x1334 at 1.5) the frames of a
+     buried hero were still composited where they lie unburied, under
+     the glass, and the clip, the scale and `will-change` each made no
+     difference; the tint over them read as a cool grey band the height
+     of the rail on every other screen. A buried screen is wholly under
+     the next one, so nothing of this shows; `visibility` and not
+     `display`, so the frames' places and the observers that count them
+     are kept. */
+  :root[data-under] .strip-scroll > .cover-float[data-buried] .cover-float-frame {
+    visibility: hidden;
+  }
+  :root[data-under] .enquiry-backdrop {
+    bottom: calc(-1 * var(--under, 94px));
+  }
+  :root[data-under] .strip-rail,
+  :root[data-under] body > footer {
+    left: 0;
+    right: 0;
+  }
+  :root[data-under] .strip-rail {
+    position: absolute;
+    bottom: var(--foot, 38px);
+    z-index: 20;
+    /* Its old margin as padding, so the pane is as tall as the rail was
+       with the space above it and every screen keeps its height. */
+    margin-top: 0;
+    padding-top: 1.5rem;
+  }
+  /* Under a finger it was 0.75rem, and the screen's name over the bar
+     sat on the pane's hairline (Julian, iPad upright). The same room as a
+     desktop now: one pane, one measure. */
+  @media (max-height: 30rem) {
+    :root[data-under] .strip-rail {
+      padding-top: 0.5rem;
+    }
+  }
+  :root[data-under] body > footer {
+    position: fixed;
+    bottom: 0;
+    z-index: 30;
+    border-top-color: transparent;
+  }
+  /* The footer's line to the rail's edges, not a 100rem column in the
+     middle of a wide screen while the rail runs the width of it. */
+  :root[data-under] .site-footer-body {
+    max-width: none;
+  }
+  /* One pane, not two. Julian: make the scroll bar and the footer one
+     panel. Each had a blur of its own, and two blurs meeting draw a
+     seam where each one's edge samples differently. One layer now, the
+     rail's, running on down under the footer. 9px, a little under the
+     12 it was (Julian: lower the blur slightly). The tint and the
+     hairline are this layer's too: a tint each met where the footer's
+     38.19px ran into a `--foot` rounded to 38, and the sliver of both
+     read as a line across the glass. */
+  :root[data-under] .strip-rail::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    bottom: calc(-1 * var(--foot, 38px));
+    z-index: -1;
+    background-color: color-mix(in oklab, var(--background) var(--glass-tint, 34%), transparent);
+    /* The hairline and the light along it as shadows, not a border,
+       which would add a pixel to the pane. */
+    box-shadow:
+      inset 0 1px 0 color-mix(in oklab, var(--foreground) 12%, transparent),
+      inset 0 2px 0 color-mix(in oklab, white 8%, transparent);
+    -webkit-backdrop-filter: blur(var(--glass-blur, 9px)) saturate(1.5);
+    backdrop-filter: blur(var(--glass-blur, 9px)) saturate(1.5);
+    transition:
+      background-color 300ms var(--ease-out-strong),
+      backdrop-filter 300ms var(--ease-out-strong),
+      -webkit-backdrop-filter 300ms var(--ease-out-strong);
+    pointer-events: none;
+  }
+  /* Over a wall of photographs (Inquiries, Where next, a booking page's
+     Questions) the glass is thicker: through 34% a bright tile left the
+     count and the rail's word at 3.4:1 (plan 5.1, WCAG AA wants 4.5). */
+  :root[data-under]:has(.strip-scroll:is([data-at="Inquiries"], [data-at="Where next"], [data-at="Questions"])) .strip-rail::after {
+    --glass-tint: 62%;
+  }
+  @media (prefers-reduced-transparency: reduce) {
+    :root[data-under] .strip-rail::after {
+      background-color: var(--background);
+      -webkit-backdrop-filter: none;
+      backdrop-filter: none;
+    }
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .site-bar::after {
+    transition: none;
+  }
+}
+/* The portfolio's head, pinned under the bar on a phone: the bar's glass
+   carried on down (`work-shell.tsx`). Its own layer, as the bar's is, so
+   the filter's pill inside keeps its own. */
+@media (max-width: 39.999rem) {
+  .head-glass::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background-color: color-mix(in oklab, var(--background) 72%, transparent);
+    -webkit-backdrop-filter: blur(var(--glass-blur, 9px)) saturate(1.5);
+    backdrop-filter: blur(var(--glass-blur, 9px)) saturate(1.5);
+  }
+}
+/* And on a phone held upright, the bar and the head are one pane: the
+   bar lets go of its own glass and its rule, and the head's glass
+   reaches up behind it to the top of the screen. */
+@media (max-width: 39.999rem) and (orientation: portrait) {
+  /* `[data-home]` too, now the portfolio has the homepage's glass, so
+     this one pane still wins there. */
+  :root:has(.head-glass) .site-bar,
+  :root:has(.head-glass) .site-bar[data-home]:not([data-plain="true"]) {
+    background-color: transparent;
+    border-color: transparent;
+    box-shadow: none;
+  }
+  :root:has(.head-glass) .site-bar::after {
+    opacity: 0;
+  }
+  .head-glass::before {
+    top: calc(-61px - env(safe-area-inset-top, 0px));
+  }
+}
+/* From a tablet up as well: the portfolio's title row and the bar are
+   one pane of the homepage's glass, with one hairline under both. The
+   pane reaches up past the top of the screen, so it needs no measure
+   of the bar. */
+@media (min-width: 40rem) {
+  :root:has(.head-glass) .site-bar,
+  :root:has(.head-glass) .site-bar[data-home]:not([data-plain="true"]) {
+    background-color: transparent;
+    border-color: transparent;
+    box-shadow: none;
+  }
+  :root:has(.head-glass) .site-bar::after {
+    opacity: 0;
+  }
+  .head-glass {
+    position: relative;
+    isolation: isolate;
+    /* Room under the chips before the pane's hairline. */
+    padding-bottom: 0.875rem;
+  }
+  .head-glass::before {
+    content: "";
+    position: absolute;
+    inset: -12rem 0 0;
+    margin-inline: calc(50% - 50vw);
+    z-index: -1;
+    pointer-events: none;
+    border-bottom: 1px solid color-mix(in oklab, var(--foreground) 12%, transparent);
+    background-color: color-mix(in oklab, var(--background) var(--glass-tint, 34%), transparent);
+    -webkit-backdrop-filter: blur(var(--glass-blur, 9px)) saturate(1.5);
+    backdrop-filter: blur(var(--glass-blur, 9px)) saturate(1.5);
+  }
+}
+@media (max-width: 39.999rem) and (prefers-reduced-transparency: reduce) {
+  .head-glass::before {
+    background-color: var(--background);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+}
+@media (prefers-reduced-transparency: reduce) {
+  .site-bar::after {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+  .site-bar[data-plain="true"],
+  .site-bar[data-home] {
+    background-color: var(--background);
+  }
+}
+
+@media (max-width: 63.999rem) {
+  .site-bar,
+  body > main,
+  body > footer {
+    transition: translate 420ms var(--ease-out-strong);
+  }
+
+  [data-drawer] .site-bar,
+  [data-drawer] body > main,
+  [data-drawer] body > footer {
+    transition-delay: 80ms;
+  }
+  [data-drawer="menu"] .site-bar,
+  [data-drawer="menu"] body > main,
+  [data-drawer="menu"] body > footer {
+    translate: calc(-1 * var(--menu-w)) 0;
+  }
+  [data-drawer="filter"] .site-bar,
+  [data-drawer="filter"] body > main,
+  [data-drawer="filter"] body > footer {
+    translate: var(--filter-w) 0;
+  }
+  /* Going left costs nothing: there is no scrollable region off the left
+     edge of a page. Going right makes one, and it has to be clipped at
+     the root, not at the body.
+     
+     The bar is `position: fixed`, so its overflow belongs to the window
+     rather than to the body that clips everything else — and on a phone
+     that is not a stray scrollbar but a broken page: measured at 390, the
+     document went 710 wide, Chromium widened the layout viewport to match,
+     and the drawer’s own `inset-0` came out 1537 tall on an 844 screen
+     with five of the twelve disciplines below the fold. */
+  :root[data-drawer="filter"] {
+    overflow-x: clip;
+  }
+}
+
+/* The window, so that a press on the page puts it back. Closed it is
+   `visibility: hidden`: the links leave the tab order and the screen
+   reader, and the drawer stops covering a page it is not on top of.
+   Transitioned rather than switched, because `visibility` holds at
+   `visible` for the length of a transition that ends hidden — which is
+   what lets the panel finish sliding out before it goes.
+
+   It is also the glass. Julian asked for the page that has been pushed
+   aside to go behind the site’s own material, and this element is already
+   lying over exactly that page, so it is the one thing in the stack that
+   can blur it: `backdrop-filter` works on whatever is painted underneath,
+   and the page is underneath while the bar and the drawer are not. The
+   cross and the capsule stay sharp, which is the point — the controls
+   left on that side of the screen should not be behind frosted glass.
+
+   Four pixels, not the eighteen `glass-surface` carries on the header and
+   the plates, and a lighter tint with it. Julian asked for slight, twice.
+   Those are chrome you read type off, so they have to put the picture out
+   of the way; this one is the picture, and it should still be the
+   visitor’s own page over there — far enough back to be plainly not the
+   thing being looked at, near enough to be read. Then ten: Julian asked
+   for a blur behind the menu, so four was not being seen.
+
+   It comes up with the movement: the same 80ms wait as the slide, then
+   520ms of it, so the glass is still arriving for a beat after the drawer
+   has stopped. That is what makes it read as settling rather than as a
+   switch — at four pixels a 260ms ramp is over before the eye has found
+   it. Julian asked for it introduced slowly.
+
+   Out is not the same shape. Closing takes the durations and delays from
+   the rule below, which has neither: the blur is gone inside 240ms and
+   the page is sharp well before it has finished coming back, so it
+   arrives out of the glass rather than through it. */
+.drawer {
+  visibility: hidden;
+  /* The panel is parked one width outside this box. Clipped, so that
+     parked width is never a page somebody can scroll sideways. */
+  overflow: clip;
+  background-color: transparent;
+  -webkit-backdrop-filter: blur(0) saturate(1);
+  backdrop-filter: blur(0) saturate(1);
+  transition:
+    visibility 420ms,
+    background-color 240ms var(--ease-out-strong),
+    -webkit-backdrop-filter 240ms var(--ease-out-strong),
+    backdrop-filter 240ms var(--ease-out-strong);
+}
+[data-drawer="menu"] .site-menu,
+[data-drawer="filter"] .work-filter {
+  visibility: visible;
+  background-color: color-mix(in oklab, var(--background) 16%, transparent);
+  -webkit-backdrop-filter: blur(10px) saturate(1.2);
+  backdrop-filter: blur(10px) saturate(1.2);
+  /* Four values, in the order the shorthand above lists them: the panel
+     has to be visible from the first frame, and the glass takes its time. */
+  transition-duration: 420ms, 520ms, 520ms, 520ms;
+  transition-delay: 0ms, 80ms, 80ms, 80ms;
+}
+
+/* Preview, `?menu3d=1`: on a phone the page pushed aside swings back
+   in perspective about the edge it shares with the drawer, the drawer
+   turns in on its way, the glass over the page is lighter, and
+   closing is the same movement backwards: the same lengths, the names
+   leaving from the foot up. */
+@media (max-width: 39.999rem) and (prefers-reduced-motion: no-preference) {
+  :root[data-menu3d] :is(.site-bar, body > main, body > footer) {
+    transform-origin: 100% var(--oy, 50vh);
+    /* Inertia: the swing carries a little past and settles back, the
+       slide only just, so the page's edge and the drawer's stay
+       together. */
+    transition:
+      translate 620ms var(--ease-spring),
+      transform 620ms var(--ease-bounce);
+  }
+  :root[data-menu3d][data-drawer="menu"] :is(.site-bar, body > main, body > footer) {
+    transform: perspective(900px) rotateY(16deg) scale(0.94);
+    transition-delay: 80ms;
+  }
+  :root[data-menu3d] .site-menu-panel {
+    transform-origin: 0 50%;
+    transform: perspective(900px) rotateY(-28deg);
+    transition:
+      translate 620ms var(--ease-spring),
+      transform 620ms var(--ease-bounce);
+  }
+  :root[data-menu3d][data-drawer="menu"] .site-menu-panel {
+    transform: none;
+    transition-delay: 80ms;
+  }
+  :root[data-menu3d] .site-menu {
+    transition-duration: 420ms, 520ms, 520ms, 520ms;
+  }
+  :root[data-menu3d]:not([data-drawer="menu"]) .site-menu-item {
+    transition-delay: max(0ms, calc(240ms - var(--reveal-delay, 0ms)));
+  }
+}
+
+/* Somebody who has asked for less transparency gets the page plain. The
+   glass is a way of saying the page is not the thing being looked at;
+   dropping to a solid wash instead would say it is not there at all. */
+@media (prefers-reduced-transparency: reduce) {
+  [data-drawer="menu"] .site-menu,
+  [data-drawer="filter"] .work-filter {
+    background-color: transparent;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+}
+
+/* A ground of its own, or the drawer and the page it came out from under
+   are the same colour with a line between them. Five percent of the ink:
+   enough to read as underneath, not enough to read as a different site.
+   `--park` is the only thing that differs between the two: the menu waits
+   off the right edge, the filters off the left. */
+.drawer-panel {
+  translate: var(--park) 0;
+  background-color: color-mix(
+    in oklab,
+    var(--foreground) 5%,
+    var(--background)
+  );
+  transition: translate 420ms var(--ease-out-strong);
+}
+.site-menu-panel {
+  --park: 100%;
+}
+.work-filter-panel {
+  --park: -100%;
+}
+[data-drawer="menu"] .site-menu-panel,
+[data-drawer="filter"] .work-filter-panel {
+  translate: none;
+  transition-delay: 80ms;
+}
+
+/* The names, arriving a step apart, behind the same 80ms the drawer
+   waits: they are inside it, so starting before it moves would be names
+   fading up on a panel that is still off the screen. The delay is on the
+   open state only — `transition-delay` is read from wherever the
+   transition is going — so opening cascades and closing leaves all at
+   once, as one movement.
+
+   Down, not in from the side. Julian asked for them to arrive from the
+   top: each name drops the last few pixels into its place, and with the
+   first one leaving first they read down the page in the order they are
+   in. Sideways, they were travelling the same way the drawer was and the
+   cascade was lost inside it. */
+.drawer-item {
+  opacity: 0;
+  translate: 0 -1.25rem;
+  transition:
+    opacity 200ms var(--ease-out-strong),
+    translate 320ms var(--ease-bounce);
+}
+[data-drawer="menu"] .site-menu-item,
+[data-drawer="filter"] .work-filter-item {
+  opacity: 1;
+  translate: none;
+  transition-delay: calc(80ms + var(--reveal-delay, 0ms));
+}
+/* The heading a menu name is flying into (`nav-fly.ts`): out of sight
+   until the word lands on it, and then without its own rise, which the
+   flight has already done. */
+[data-fly-hold] {
+  visibility: hidden;
+}
+[data-flown] .title-word {
+  animation: none;
+  translate: none;
+}
+
+/* In the light the names standing back went pale grey on the pale
+   ground: darker there, the one you are on still the darkest. */
+:root[data-theme="light"] .site-menu a:not([aria-current="page"], :active) {
+  opacity: 0.68;
+}
+@media (hover: hover) {
+  :root[data-theme="light"] .site-menu a:not([aria-current="page"]):hover {
+    opacity: 0.85;
+  }
+}
+/* The name under the finger at full strength; the others go out of focus
+   round it in the focus field (`focus-field.tsx`). */
+@media (pointer: coarse) {
+  .site-menu a:active {
+    opacity: 1;
+  }
+  /* A finger drawn across the names moves the focus with it; left to
+     pan, the drag was taken for a scroll and the focus let go. */
+  .site-menu nav {
+    touch-action: none;
+  }
+}
+
+/* The footer held with the page while the splash is up, and let in with
+   it. The sheet lifts off the top, so the foot of the screen is uncovered
+   first, and the footer stood there alone for 450ms before the bar and
+   the page (an iPad). The translate is the drawer's (above). */
+[data-intro="1"] body > footer {
+  opacity: 0;
+}
+body > footer {
+  transition:
+    opacity 420ms var(--ease-out-strong),
+    translate 420ms var(--ease-out-strong);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .site-bar,
+  body > main,
+  body > footer,
+  .drawer,
+  .drawer-panel,
+  .drawer-item {
+    transition: none;
+  }
+}

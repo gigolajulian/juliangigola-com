@@ -1,5 +1,6 @@
 import { Suspense } from "react";
 import type * as React from "react";
+import { CalEmbed } from "@/components/cal-embed";
 import { ContactBeam } from "@/components/contact-beam";
 import { ContactForm, WhenBooking } from "@/components/contact-form";
 import { RisingTitle } from "@/components/strip-page";
@@ -31,13 +32,14 @@ const ELSEWHERE = [
 ];
 
 export function ContactScreen({
-  // Julian (2026-10-03): one name for the screen, as the nav says it.
+  // One name for the screen, as the nav says it.
   title = "Inquiries",
   intro,
   label = "Inquiries",
   hash = "contact",
   defaults,
   calendar,
+  cal,
   backdrop,
 }: {
   title?: string;
@@ -53,6 +55,9 @@ export function ContactScreen({
       the calendar takes the form's place, and the form stays one link away
       on the homepage for anyone who would rather ask first. */
   calendar?: string;
+  /** The same session's Cal.com event (`CAL_EVENTS`, `lib/booking.ts`),
+      shown in the calendar's place with `?cal` on the address. */
+  cal?: string;
   /** A wall of photographs behind the screen (the homepage's). */
   backdrop?: React.ReactNode;
 } = {}) {
@@ -68,10 +73,10 @@ export function ContactScreen({
       <p data-dial="intro" className="title-rest max-w-prose text-left text-sm normal-case leading-relaxed text-muted-foreground [zoom:1.02]">
         {intro ?? (<>
         {/* A sentence to a line, where there is room: Julian asked
-            for two lines rather than a wrap mid sentence. Where there
-            is not, each sentence wraps balanced and set left: it was
-            justified, and "project." stood on a line of its own
-            (Julian, 2026-10-01: one word doesn't need a whole line). */}
+            for two lines rather than a wrap mid sentence. Where
+            there is not, each sentence wraps balanced and set left:
+            it was justified, and "project." stood on a line of its
+            own. */}
         <span className="sm:block sm:text-balance">
           Commissions, sessions, or a question about a project.
         </span>{" "}
@@ -103,10 +108,10 @@ export function ContactScreen({
       data-hash={hash}
       className="screen-measure contact-inquire relative isolate grid w-full shrink-0 grid-cols-1 gap-10 px-6 py-12 sm:h-full sm:grid-cols-[minmax(0,1fr)_minmax(0,2fr)] sm:grid-rows-[minmax(0,1fr)] sm:items-center sm:gap-x-12 sm:pb-6 sm:pl-10 sm:pr-10 sm:pt-24 lg:gap-x-16"
     >
-      {/* Under the ground the booking pages' questions sit on, 40%, so the
-          words read over it (`.questions-wall`). First, so the rule that
-          brings muted words up over a wall finds what follows it. Inert:
-          Julian (2026-10-05), the wall is not to be clicked here. */}
+      {/* Under the ground the booking pages' questions sit on, 40%, so
+          the words read over it (`.questions-wall`). First, so the rule
+          that brings muted words up over a wall finds what follows it.
+          Inert: the wall is not to be clicked here. */}
       {backdrop ? (
         <div inert className="enquiry-backdrop questions-wall absolute inset-0 -z-10 overflow-hidden">
           {backdrop}
@@ -115,17 +120,16 @@ export function ContactScreen({
       {/* Julian (Pixel): a scroll inside the page on a phone, 2px of it,
           held the finger and the page would not move. Its own scroll from
           `sm` only, where the screen has a fixed height. */}
-      {/* On a phone the column dissolves into the screen's own column, so
-          the address and the handles can follow the form rather than stand
-          between the ask and it (critique, 2026-10-03: the name field was
-          530px down). */}
+      {/* On a phone the column dissolves into the screen's own column,
+          so the address and the handles can follow the form rather than
+          stand between the ask and it. */}
       <div
         data-scroll
         className="flex min-h-0 flex-col gap-8 [container-type:inline-size] max-sm:contents sm:max-h-full sm:overflow-y-auto sm:overscroll-contain short:gap-5"
       >
         <div className="flex flex-col gap-5">
           {/* The homepage's head, unless the visitor came to book a
-              session (critique, 2026-10-03). A booking page has its own. */}
+              session. A booking page has its own. */}
           {intro ? head : (
             <Suspense fallback={head}>
               <WhenBooking booking={booking}>{head}</WhenBooking>
@@ -142,7 +146,7 @@ export function ContactScreen({
           {calendar ? (
             <a
               href={`/?type=${defaults?.type ?? "session"}${defaults?.session ? `&session=${encodeURIComponent(defaults.session)}` : ""}#contact`}
-              className="label flex gap-2.5 self-start py-2"
+              className="tap-44 label flex gap-2.5 self-start py-2"
             >
               Rather ask first? Send a question <span aria-hidden>&rarr;</span>
             </a>
@@ -176,7 +180,7 @@ export function ContactScreen({
                      both. A border rather than an underline, which
                      vanishes when it is brought this close. A thumb's
                      height to a touch screen, the rule drawn where it was. */
-                  className="inline-block border-b border-border pb-0 uppercase pointer-coarse:relative pointer-coarse:before:absolute pointer-coarse:before:-inset-y-2.5 pointer-coarse:before:inset-x-0 pointer-coarse:before:content-[''] leading-none tracking-[0.04em] transition-colors duration-200 hoverable:hover:border-current"
+                  className="inline-block border-b border-border pb-0 uppercase pointer-coarse:relative pointer-coarse:before:absolute pointer-coarse:before:-inset-y-3 pointer-coarse:before:inset-x-0 pointer-coarse:before:content-[''] leading-none tracking-[0.04em] transition-colors duration-200 hoverable:hover:border-current"
                 >
                   hello@juliangigola.com
                 </a>
@@ -185,7 +189,11 @@ export function ContactScreen({
             <div>
               <dt className="label text-muted-foreground">Based in</dt>
               <dd className="mt-2 text-sm">
-                San Francisco Bay Area &middot; Available to travel
+                {/* Each half kept whole, so a narrow column breaks at the
+                    dot and never leaves "travel" on a line of its own
+                    (plan 2.6). */}
+                <span className="whitespace-nowrap">San Francisco Bay Area &middot;</span>{" "}
+                <span className="whitespace-nowrap">Available to travel</span>
               </dd>
             </div>
           </dl>
@@ -243,12 +251,14 @@ export function ContactScreen({
             /* Google's own page, so its colours are Google's: the frame
                is the site's card, and on the dark theme the page is
                inverted to sit on it (`.booking-embed`, globals.css). */
-            <iframe
-              src={`https://calendar.google.com/calendar/appointments/schedules/${calendar}?gv=true`}
-              title="Pick a time"
-              loading="lazy"
-              className="booking-embed block h-[75svh] w-full rounded-[8px] border-0 sm:h-full"
-            />
+            <CalEmbed path={cal} title="Pick a time" className="booking-embed block h-[75svh] w-full rounded-[8px] border-0 sm:h-full">
+              <iframe
+                src={`https://calendar.google.com/calendar/appointments/schedules/${calendar}?gv=true`}
+                title="Pick a time"
+                loading="lazy"
+                className="booking-embed block h-[75svh] w-full rounded-[8px] border-0 sm:h-full"
+              />
+            </CalEmbed>
           ) : (
             <Suspense fallback={null}>
               <ContactForm defaults={defaults} sessions={SESSION_TYPES.map((s) => s.name)} />

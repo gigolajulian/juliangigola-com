@@ -36,11 +36,11 @@ import { BlinkingMark } from "@/components/not-found-scene";
    whole panel, eye and all, lifts off the top of the screen, gathering
    speed. */
 const OUT = 1000; // the lift
-/* Julian (2026-10-01): the lift should reveal the hero. It
-   lifted off a page whose entrance had not started, black under black,
-   so only the eye seemed to move. Here the page starts its entrance
-   under the full panel, and the panel holds this long before it lifts,
-   uncovering the name already up and the photographs landing. */
+/* The lift should reveal the hero. It lifted off a page whose
+   entrance had not started, black under black, so only the eye
+   seemed to move. Here the page starts its entrance under the full
+   panel, and the panel holds this long before it lifts, uncovering
+   the name already up and the photographs landing. */
 const UNDER = 450;
 
 const lift = () => document.documentElement.removeAttribute("data-intro");
@@ -62,13 +62,13 @@ export function Intro() {
       sessionStorage.setItem("jg-intro", "1");
     } catch {}
 
-    /* Preview (`?deal=ripple|rise|sweep`, 2026-10-06): other landing
-       orders, from where each frame actually sits. Ripple: out from the
-       name. Rise: bottom first, behind the lifting panel. Sweep: left to
-       right, the way the panel came in. Top: the top four together
-       (Julian), then the rest top to bottom; `topall`: the rest together.
-       Drift: all at once, the top ones drifting down slowly, the bottom
-       ones easing up (Julian; `jg-drift`, `globals.css`). */
+    /* Preview (`?deal=ripple|rise|sweep`): other landing orders, from
+       where each frame actually sits. Ripple: out from the name. Rise:
+       bottom first, behind the lifting panel. Sweep: left to right,
+       the way the panel came in. Top: the top four together (Julian),
+       then the rest top to bottom; `topall`: the rest together. Drift:
+       all at once, the top ones drifting down slowly, the bottom ones
+       easing up (Julian; `jg-drift`, `globals.css`). */
     const mode = root.dataset.deal;
     if (mode === "ripple" || mode === "rise" || mode === "sweep" || mode === "top" || mode === "topall" || mode === "drift") {
       const els = Array.from(document.querySelectorAll<HTMLElement>(".cover-float-frame")).filter(
@@ -108,25 +108,25 @@ export function Intro() {
        main thread, from the first paint (`jg-intro-sweep`, `globals.css`):
        quick to start, slowing into full. Nothing holds it back.
 
-       Julian (2026-10-06): "not smooth, make it 3s". Held back to what had
-       loaded, it stopped and started, and the page starting its entrance
-       under it froze it for a sixth of a second on a phone. Now it never
-       stops, the page starts only once it is full, and the whole opening
-       is a fixed 3s from the first paint: sweep, hold, lift. */
+       Julian: "not smooth, make it 3s". Held back to what had loaded,
+       it stopped and started, and the page starting its entrance under
+       it froze it for a sixth of a second on a phone. Now it never
+       stops, the page starts only once it is full, and the whole
+       opening is a fixed 3s from the first paint: sweep, hold, lift. */
     // The sweep is 1550ms in `globals.css`.
     const sweep: Animation | undefined = panel.current?.getAnimations()[0];
     const wait = (ms: number) => new Promise((r) => setTimeout(r, ms));
-    /* Julian: one blink, before the sweep's edge reaches the eye (it was
-       two until 2026-10-06). Played by the stylesheet (`jg-intro-blink`),
-       at a random moment picked in `layout.tsx`, so it keeps the sweep's
+    /* Julian: one blink, before the sweep's edge reaches the eye (it
+       was two). Played by the stylesheet (`jg-intro-blink`), at
+       a random moment picked in `layout.tsx`, so it keeps the sweep's
        time. */
 
     Promise.resolve(sweep?.finished)
       .catch(() => {})
       .then(async () => {
         root.dataset.intro = "lift";
-        /* Julian (2026-10-06): the eye fades out before the panel lifts,
-           so the sheet leaves empty. */
+        /* The eye fades out before the panel lifts, so the sheet
+           leaves empty. */
         eye.current?.animate([{ opacity: 1 }, { opacity: 0 }], {
           duration: 420,
           delay: UNDER - 420,
@@ -141,10 +141,10 @@ export function Intro() {
           [{ transform: "translateY(0)" }, { transform: "translateY(calc(-100% - 6rem))" }],
           { duration: OUT, easing: "cubic-bezier(0.76, 0, 0.24, 1)", fill: "forwards" },
         );
-        /* Julian (2026-10-06): the photographs set off with the lift, not
-           after it (they popped in too late). `half` unpauses them
-           (`globals.css`); the panel is still over them for the first
-           beat, so the first ones land as it clears. */
+        /* The photographs set off with the lift, not after it (they
+           popped in too late). `half` unpauses them (`globals.css`);
+           the panel is still over them for the first beat, so the
+           first ones land as it clears. */
         root.dataset.intro = "half";
         /* And no wait on the first one (`--h-start`, `globals.css`): the
            first photographs land as the panel's foot passes them. Set

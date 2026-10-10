@@ -2,14 +2,14 @@
  * What each page says to a search engine, and the facts about the business
  * that Google, Bing and the AI answer engines read off every page.
  *
- * Julian (2026-10-01): the site should turn searches into bookings, in
- * Google and Bing and in ChatGPT, Claude, Gemini and Perplexity. The
- * keyword research behind each line is in the session that wrote this file;
- * the short version is that a page ranks for what its title says, and
- * "Editorial | Julian Gigola" said nothing anybody types. A person searches
- * for the service and the place ("headshot photographer san francisco",
- * "sjsu grad photos"), so that is what the titles lead with now, and the
- * name follows from the layout's template.
+ * The site should turn searches into bookings, in Google and Bing and in
+ * ChatGPT, Claude, Gemini and Perplexity. The keyword research behind each
+ * line is in the session that wrote this file; the short version is that a
+ * page ranks for what its title says, and "Editorial | Julian Gigola" said
+ * nothing anybody types. A person searches for the service and the place
+ * ("headshot photographer san francisco", "sjsu grad photos"), so that is
+ * what the titles lead with now, and the name follows from the layout's
+ * template.
  *
  * Titles are kept under ~45 characters so the " | Julian Gigola" suffix
  * still fits the ~60 a results page shows. Descriptions stay under ~160.
@@ -35,11 +35,10 @@ export const PROFILES = [
 ];
 
 /** The places a search names. San Francisco and San Jose carry the most
-    searches, and are the two markets every title names (Julian, 2026-10-02:
-    "also market in San Jose"). The rest are where a client books from and
-    the least contested to rank in: the South Bay towns are where a Silicon
-    Valley company or an SJSU or SCU graduate is. Campuses are named on the
-    graduation page, not here. */
+    searches, and are the two markets every title names. The rest are
+    where a client books from and the least contested to rank in: the
+    South Bay towns are where a Silicon Valley company or an SJSU or SCU
+    graduate is. Campuses are named on the graduation page, not here. */
 export const AREA = [
   "San Francisco",
   "San Jose",
@@ -53,7 +52,7 @@ export const AREA = [
   "Campbell",
   "Los Gatos",
   "Milpitas",
-  // Julian (2026-10-02): the Bay Area as he means it runs to Santa Cruz.
+  // The Bay Area as he means it runs to Santa Cruz.
   "Santa Cruz",
 ];
 
@@ -141,8 +140,8 @@ export const DISCIPLINE_SEO: Record<string, PageSeo> = {
 
 /** Motion's page, which is its own route rather than a category listing. */
 export const MOTION_SEO = {
-  /* "Commercial" gave way to San Jose, where a search for a music video
-     director finds only directories (2026-10-02). Brand films stay in the
+  /* "Commercial" gave way to San Jose, where a search for a music
+     video director finds only directories. Brand films stay in the
      description. */
   title: "Music Video Director, San Francisco Bay Area",
   description:
@@ -222,7 +221,7 @@ export function siteGraph() {
     { "@type": "AdministrativeArea", name: "San Francisco Bay Area" },
     { "@type": "Place", name: "Silicon Valley" },
     ...AREA.map((name) => ({ "@type": "City", name })),
-    // Julian (2026-10-02): "I can travel to ... LA and NY too".
+    // Julian: "I can travel to ... LA and NY too".
     ...TRAVEL.map((name) => ({ "@type": "City", name })),
   ];
   /* The area is the business's, said once above rather than per service. */
