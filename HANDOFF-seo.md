@@ -328,3 +328,10 @@ Everything else comes from your existing site copy. Edit any of these in `lib/bo
 - Competitor (Pacifica Studio): https://pacifica.studio/pricing · https://pacifica.studio/locations/san-jose/headshots
 - Model digitals pricing: https://www.brandonandrephoto.com/san-francisco-modeling-digitals
 - SF wedding pricing: https://zoelarkin.com/how-much-does-a-wedding-photographer-cost-in-the-san-francisco-bay-area/
+
+## 9. Threads (2026-10-10)
+
+- **Done:** live check, all Done items in SEO.md still hold (titles, descriptions, canonicals, JSON-LD, one h1, robots policy, 119 sitemap URLs).
+- **In progress, jg-CONTENT:** gallery alt text on branch `content`. Rules sent: one sentence, 8 to 18 words, at most 125 characters, no trailing period, only what the frame shows, no skin or body, no banned words. 81 frames cleared by me (script over every changed frame plus 15 photos opened), head 9e7b982.
+- **Waiting on jg-RELEASE:** merge `content` at 9e7b982, then check a live project page for a new string (for example "Five people in denim and fur" on diesel).
+- **Next for me:** campus guides (needs Julian's sign-off on copy), spot-check each new batch, `sameAs` once the Google Business Profile is verified.
