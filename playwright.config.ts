@@ -40,6 +40,9 @@ const BROWSERS: Project[] = [
     name: "chromium",
     use: {
       browserName: "chromium",
+      /* PERF_CHROME=1 runs this project on the installed Google Chrome, for
+         a machine where Playwright's own Chromium will not launch headed. */
+      ...(process.env.PERF_CHROME ? { channel: "chrome" } : {}),
       /* Chromium's own throttling of a window in the background, off for
          the same reason as App Nap above. */
       launchOptions: {

@@ -20,7 +20,7 @@
  * (`playwright.config.ts`); `npx playwright install` adds them.
  */
 
-import { spawn } from "node:child_process";
+import { spawn, spawnSync } from "node:child_process";
 import { existsSync, readFileSync } from "node:fs";
 import { createServer } from "node:net";
 
@@ -28,9 +28,12 @@ const argv = process.argv.slice(2);
 const REBUILD = argv.includes("--rebuild");
 const passThrough = argv.filter((a) => a !== "--rebuild");
 
+/* On Windows npx is npx.cmd, which only runs through a shell. */
+const win = process.platform === "win32";
+
 const run = (cmd, args, env = {}) =>
   new Promise((resolve) => {
-    const p = spawn(cmd, args, { stdio: "inherit", env: { ...process.env, ...env } });
+    const p = spawn(cmd, args, { stdio: "inherit", shell: win, env: { ...process.env, ...env } });
     p.on("exit", (code) => resolve(code ?? 1));
   });
 
@@ -75,7 +78,14 @@ try {
     }
     const port = await freePort();
     base = `http://localhost:${port}`;
-    server = spawn("npx", ["next", "start", "-p", String(port)], { stdio: "ignore", detached: true });
+    /* Its own process group on POSIX, so the cleanup below can stop it
+       whole. On Windows a detached child would open a console window. */
+    server = spawn("npx", ["next", "start", "-p", String(port)], {
+      stdio: "ignore",
+      shell: win,
+      detached: !win,
+      windowsHide: true,
+    });
     const t0 = Date.now();
     for (;;) {
       const up = await fetch(`${base}/legal`).then((r) => r.ok, () => false);
@@ -102,10 +112,12 @@ try {
   console.error(`perf: ${err.message}`);
   code = code || 1;
 } finally {
-  // The server and the process group `next start` spawned under it.
+  // The server and everything `next start` spawned under it. Windows has
+  // no process groups: taskkill /T walks the tree from the shell down.
   if (server) {
     try {
-      process.kill(-server.pid);
+      if (win) spawnSync("taskkill", ["/pid", String(server.pid), "/T", "/F"], { stdio: "ignore" });
+      else process.kill(-server.pid);
     } catch {}
   }
 }
