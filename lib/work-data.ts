@@ -1515,21 +1515,21 @@ export const PROJECTS: Project[] = [
         "width": 2500,
         "height": 3338,
         "color": "#15130E",
-        "alt": "Kneeling in black lace with a long jagged sword held upright, looking at the lens, dark backdrop"
+        "alt": "Kneeling in a black top and lace skirt, a long jagged sword held upright, eyes on the lens"
       },
       {
         "src": "/work/vigil/02.jpg",
         "width": 2500,
         "height": 3333,
         "color": "#26211B",
-        "alt": "Both hands raised on the hilt of a long sword, black lace top, rim light from the right"
+        "alt": "Both hands raised on the hilt of a long sword, studded black top, rim light from the right"
       },
       {
         "src": "/work/vigil/03.jpg",
         "width": 2500,
         "height": 3333,
         "color": "#1C1712",
-        "alt": "Seated at an angle, gripping an ornate sword upright, black lace top, looking at the lens"
+        "alt": "Seated at an angle, gripping an ornate sword upright, studded black top, looking at the lens"
       },
       {
         "src": "/work/vigil/04.jpg",
@@ -1543,7 +1543,7 @@ export const PROJECTS: Project[] = [
         "width": 2500,
         "height": 3333,
         "color": "#2E2923",
-        "alt": "Hair across her face, a spiked steel gauntlet raised before her, black lace top"
+        "alt": "Hair across her face, a spiked steel gauntlet raised before her, studded black top"
       },
       {
         "src": "/work/vigil/06.jpg",
@@ -1629,7 +1629,7 @@ export const PROJECTS: Project[] = [
         "width": 2499,
         "height": 3114,
         "color": "#121518",
-        "alt": "Standing among cave rocks in smoke, hand on her hip, chainmail hood, sword planted behind"
+        "alt": "Standing among cave rocks in smoke, hand on her hip, chainmail hood, sword planted beside her"
       },
       {
         "src": "/work/aera-wraith/07.jpg",
