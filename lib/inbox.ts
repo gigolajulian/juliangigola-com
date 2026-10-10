@@ -223,6 +223,68 @@ export function enquiry(
   };
 }
 
+/* ── bookings ─────────────────────────────────────────────────────
+ * Cal.com books in the visitor's browser, so the site never sees a booking
+ * happen. Its webhook (`app/api/cal/route.ts`) posts each new one, and it
+ * is stored beside the enquiries with the type "booking", so /admin shows
+ * it in the same list and says what it is. Cal.com mails Julian its own
+ * confirmation, so nothing is mailed from here.
+ * ─────────────────────────────────────────────────────────────── */
+
+/** The parts of Cal.com's BOOKING_CREATED payload the inbox uses. */
+export type CalBooking = {
+  title?: string;
+  /** The event type's slug and title: "portraits", "Portraits". */
+  type?: string;
+  eventTitle?: string;
+  startTime?: string;
+  location?: string;
+  additionalNotes?: string;
+  attendees?: { name?: string; email?: string }[];
+};
+
+/** When, in Julian's time, because that is where the sessions are. */
+const whenPT = (iso?: string) => {
+  const d = iso ? new Date(iso) : null;
+  return d && !isNaN(+d)
+    ? new Intl.DateTimeFormat("en-US", {
+        timeZone: "America/Los_Angeles",
+        weekday: "short",
+        month: "short",
+        day: "numeric",
+        hour: "numeric",
+        minute: "2-digit",
+        timeZoneName: "short",
+      }).format(d)
+    : "";
+};
+
+export function bookingEnquiry(p: CalBooking, at: number, id: string): Enquiry {
+  const who = p.attendees?.[0] ?? {};
+  const message = [
+    p.additionalNotes?.trim(),
+    p.location ? `Location: ${p.location}` : "",
+  ]
+    .filter(Boolean)
+    .join("\n\n");
+  return {
+    ...enquiry(
+      {
+        type: "other",
+        name: who.name || "Unknown",
+        email: who.email ?? "",
+        detail: [p.eventTitle || p.type || p.title, whenPT(p.startTime)]
+          .filter(Boolean)
+          .join(" · "),
+        message: message || "Booked on Cal.com. No notes.",
+      },
+      at,
+      id,
+    ),
+    type: "booking",
+  };
+}
+
 /* ── listing without reading ───────────────────────────────────────
  * KV can carry a little metadata alongside each value and hands it back with
  * the key list, so the summary a list needs — who, when, what kind, read or
@@ -244,6 +306,8 @@ export type Summary = {
   email: string;
   read: boolean;
   country?: string;
+  /** Bookings only: "Portraits · Sat, Oct 17, 2:00 PM PDT". */
+  detail?: string;
 };
 
 /**
@@ -333,6 +397,8 @@ export const summary = (e: Enquiry): Summary => ({
   email: e.email,
   read: e.read,
   ...(e.country ? { country: e.country } : {}),
+  // A booking's session and time, so its row says when without opening.
+  ...(e.type === "booking" && e.detail ? { detail: e.detail } : {}),
 });
 
 /**
@@ -342,7 +408,8 @@ export const summary = (e: Enquiry): Summary => ({
  * mail, where his signature and his sent folder are.
  */
 export function replyLink(e: Enquiry): string {
-  const subject = `Re: your ${e.type} inquiry`;
+  const subject =
+    e.type === "booking" ? "Re: your booking" : `Re: your ${e.type} inquiry`;
   const quoted = e.message
     .split("\n")
     .map((line) => `> ${line}`)
