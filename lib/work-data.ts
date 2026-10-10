@@ -4279,119 +4279,119 @@ export const PROJECTS: Project[] = [
         "width": 2499,
         "height": 3124,
         "color": "#260C0C",
-        "alt": ""
+        "alt": "Head resting on arms over a CRT screen, newspaper-covered walls, red light, hair clips"
       },
       {
         "src": "/work/info-overload/02.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#260C0C",
-        "alt": ""
+        "alt": "Leaning back against newspaper walls in a black top and fishnets, chains at the hips, red light"
       },
       {
         "src": "/work/info-overload/03.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#260C0C",
-        "alt": ""
+        "alt": "Extreme close crop, hands at the face, dark lipstick and face studs, fishnet and red light"
       },
       {
         "src": "/work/info-overload/04.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#260C0C",
-        "alt": ""
+        "alt": "Hand raised to the jaw, head tilted back, dark lipstick, red light, blurred foreground"
       },
       {
         "src": "/work/info-overload/05.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#260C0C",
-        "alt": ""
+        "alt": "Perched on a CRT in a strappy black top and studded trousers, hand at the cheek, red light"
       },
       {
         "src": "/work/info-overload/06.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#260C0C",
-        "alt": ""
+        "alt": "Head tilted on an arm resting on a CRT, hair in buns, dark lipstick, newspaper wall, red light"
       },
       {
         "src": "/work/info-overload/07.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#260C0C",
-        "alt": ""
+        "alt": "Leaning over a CRT showing a face on screen, arms crossed on top, hair buns, red light"
       },
       {
         "src": "/work/info-overload/08.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#262626",
-        "alt": ""
+        "alt": "Close crop with a chrome cuff, a hand drawn across the face, newspaper wall, red and blue light"
       },
       {
         "src": "/work/info-overload/09.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#260C26",
-        "alt": ""
+        "alt": "Wide shot, leaning on a CRT in a black outfit with buckled trousers, red newspaper room"
       },
       {
         "src": "/work/info-overload/10.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#260C0C",
-        "alt": ""
+        "alt": "Tight crop on a chain choker and dog tags, loose black hair, black top, red light"
       },
       {
         "src": "/work/info-overload/11.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#260C0C",
-        "alt": ""
+        "alt": "Hands raised to the head, hair in buns, dark eyeshadow, newspaper wall, red light"
       },
       {
         "src": "/work/info-overload/12.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#260C0C",
-        "alt": ""
+        "alt": "Head tipped back with eyes closed, hair in chains, dark lipstick, red light"
       },
       {
         "src": "/work/info-overload/13.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#0C260C",
-        "alt": ""
+        "alt": "Reaching toward a CRT screen showing a face, black top, rings, deep blue light"
       },
       {
         "src": "/work/info-overload/14.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#262626",
-        "alt": ""
+        "alt": "Profile beside a CRT showing a mouth in close-up, chain earrings, cyan and blue light"
       },
       {
         "src": "/work/info-overload/15.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#0C260C",
-        "alt": ""
+        "alt": "Holding a black chain handbag toward the lens, hair buns, dark lipstick, blue newspaper room"
       },
       {
         "src": "/work/info-overload/16.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#0C260C",
-        "alt": ""
+        "alt": "Arm raised, holding a camcorder cable in the mouth, black crop top with chains, blue light"
       },
       {
         "src": "/work/info-overload/17.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#0C260C",
-        "alt": ""
+        "alt": "Upside-down view of a blue newspaper-covered room corner, a figure at the center, a CRT at left"
       }
     ]
   },
