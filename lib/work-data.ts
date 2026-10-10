@@ -1708,7 +1708,7 @@ export const PROJECTS: Project[] = [
         "width": 2499,
         "height": 3124,
         "color": "#C0C0D9",
-        "alt": "Leaning on one hand on the floor, head tilted back toward the light, braids hanging"
+        "alt": "Leaning back on both hands on the floor, head tilted toward the light, braids hanging"
       },
       {
         "src": "/work/aether/08.jpg",
