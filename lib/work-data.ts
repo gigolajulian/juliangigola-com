@@ -1515,56 +1515,56 @@ export const PROJECTS: Project[] = [
         "width": 2500,
         "height": 3338,
         "color": "#15130E",
-        "alt": ""
+        "alt": "Kneeling in black lace with a long jagged sword held upright, looking at the lens, dark backdrop"
       },
       {
         "src": "/work/vigil/02.jpg",
         "width": 2500,
         "height": 3333,
         "color": "#26211B",
-        "alt": ""
+        "alt": "Both hands raised on the hilt of a long sword, black lace top, rim light from the right"
       },
       {
         "src": "/work/vigil/03.jpg",
         "width": 2500,
         "height": 3333,
         "color": "#1C1712",
-        "alt": ""
+        "alt": "Seated at an angle, gripping an ornate sword upright, black lace top, looking at the lens"
       },
       {
         "src": "/work/vigil/04.jpg",
         "width": 2500,
         "height": 3333,
         "color": "#171717",
-        "alt": ""
+        "alt": "Motion-blurred, near-monochrome, the sword's blade streaking diagonally across the frame"
       },
       {
         "src": "/work/vigil/05.jpg",
         "width": 2500,
         "height": 3333,
         "color": "#2E2923",
-        "alt": ""
+        "alt": "Hair across her face, a spiked steel gauntlet raised before her, black lace top"
       },
       {
         "src": "/work/vigil/06.jpg",
         "width": 2500,
         "height": 3333,
         "color": "#24201B",
-        "alt": ""
+        "alt": "Side-on with a spiked metal gauntlet held up, hair falling, rim light on the metal"
       },
       {
         "src": "/work/vigil/07.jpg",
         "width": 2500,
         "height": 3334,
         "color": "#41342B",
-        "alt": ""
+        "alt": "Seen from behind, one arm raised gripping a sword hilt, blade down her back, dark backdrop"
       },
       {
         "src": "/work/vigil/08.jpg",
         "width": 2500,
         "height": 3333,
         "color": "#18130F",
-        "alt": ""
+        "alt": "From behind, seated in black lace on a dark floor, sword upright, looking over her shoulder"
       }
     ]
   },
