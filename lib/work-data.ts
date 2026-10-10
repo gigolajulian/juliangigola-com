@@ -3153,154 +3153,154 @@ export const PROJECTS: Project[] = [
         "width": 2499,
         "height": 2856,
         "color": "#26260C",
-        "alt": ""
+        "alt": "Crowd with raised hands at the front of a stage, warm orange light, speaker stack ahead"
       },
       {
         "src": "/work/events/02.jpg",
         "width": 2499,
         "height": 2856,
         "color": "#262626",
-        "alt": ""
+        "alt": "Black and white performer in a patterned jacket leaning forward on stage, haze and a spotlight"
       },
       {
         "src": "/work/events/03.jpg",
         "width": 2499,
         "height": 2856,
         "color": "#264040",
-        "alt": ""
+        "alt": "Performer in profile on stage in a graphic jacket, teal haze, a stage monitor and blurred foot above"
       },
       {
         "src": "/work/events/04.jpg",
         "width": 1707,
         "height": 2390,
         "color": "#262626",
-        "alt": ""
+        "alt": "White laser beams fanning over a dark crowd, a DJ in a patterned shirt at the booth"
       },
       {
         "src": "/work/events/05.jpg",
         "width": 1693,
         "height": 2371,
         "color": "#0C260C",
-        "alt": ""
+        "alt": "High angle on a DJ booth under blue and purple laser lines, crowd below, a sign overhead"
       },
       {
         "src": "/work/events/06.jpg",
         "width": 2499,
         "height": 1785,
         "color": "#0C260C",
-        "alt": ""
+        "alt": "DJ in a white patterned jacket at the decks, a bright flare behind, phones raised in the crowd"
       },
       {
         "src": "/work/events/07.jpg",
         "width": 2499,
         "height": 3499,
         "color": "#262626",
-        "alt": ""
+        "alt": "DJ in a patterned sweater mixing at the decks, laser beam across the frame, projections on the wall"
       },
       {
         "src": "/work/events/08.jpg",
         "width": 2390,
         "height": 1707,
         "color": "#262626",
-        "alt": ""
+        "alt": "Black and white crowd shot, a phone held up toward a burst of laser light"
       },
       {
         "src": "/work/events/09.jpg",
         "width": 2499,
         "height": 2856,
         "color": "#262626",
-        "alt": ""
+        "alt": "Black and white performer in a patterned jacket on stage, a DJ at the decks, video wall behind"
       },
       {
         "src": "/work/events/10.jpg",
         "width": 1008,
         "height": 1152,
         "color": "#260C0C",
-        "alt": ""
+        "alt": "Dark stage with an emergency alert text slide on a screen, a faint figure at right"
       },
       {
         "src": "/work/events/11.jpg",
         "width": 2499,
         "height": 2856,
         "color": "#262626",
-        "alt": ""
+        "alt": "Performer pointing a microphone arm out over the crowd in an orange-lit haze, glowing jacket pattern"
       },
       {
         "src": "/work/events/12.jpg",
         "width": 2499,
         "height": 2856,
         "color": "#262626",
-        "alt": ""
+        "alt": "Performer with a microphone in a black jacket with glowing orange lines, a DJ and screens behind"
       },
       {
         "src": "/work/events/13.jpg",
         "width": 2499,
         "height": 2856,
         "color": "#262626",
-        "alt": ""
+        "alt": "Black and white performer with a microphone in a patterned jacket, DJ beside, big timer numbers behind"
       },
       {
         "src": "/work/events/14.jpg",
         "width": 2499,
         "height": 1667,
         "color": "#262626",
-        "alt": ""
+        "alt": "Person at the decks in headphones lit purple, projected graphics on the wall behind"
       },
       {
         "src": "/work/events/15.jpg",
         "width": 2499,
         "height": 1405,
         "color": "#262626",
-        "alt": ""
+        "alt": "Blurred red neon sign in the foreground, a DJ at the booth in the dark"
       },
       {
         "src": "/work/events/16.jpg",
         "width": 2499,
         "height": 1667,
         "color": "#260C0C",
-        "alt": ""
+        "alt": "Disco ball sending light across a dark crowd, raised hands"
       },
       {
         "src": "/work/events/17.jpg",
         "width": 2499,
         "height": 1405,
         "color": "#0C260C",
-        "alt": ""
+        "alt": "Dark club crowd in teal light, bright blue hair above the heads"
       },
       {
         "src": "/work/events/18.jpg",
         "width": 2499,
         "height": 1405,
         "color": "#0C260C",
-        "alt": ""
+        "alt": "Dark club crowd in red light, hands up near the booth"
       },
       {
         "src": "/work/events/19.jpg",
         "width": 2499,
         "height": 1406,
         "color": "#260C0C",
-        "alt": ""
+        "alt": "Crowd in dark red light with a bright stage glow in the distance"
       },
       {
         "src": "/work/events/20.jpg",
         "width": 2499,
         "height": 1405,
         "color": "#0C260C",
-        "alt": ""
+        "alt": "Wide dark crowd under green projections, silhouettes in motion"
       },
       {
         "src": "/work/events/21.jpg",
         "width": 2499,
         "height": 1406,
         "color": "#0C260C",
-        "alt": ""
+        "alt": "Wide dark crowd under blue and purple light, bright screens behind"
       },
       {
         "src": "/work/events/22.jpg",
         "width": 2499,
         "height": 1406,
         "color": "#260C26",
-        "alt": ""
+        "alt": "Dark club crowd under teal and red projections, a glow near the stage"
       }
     ]
   },
@@ -9794,210 +9794,210 @@ export const PROJECTS: Project[] = [
         "width": 2499,
         "height": 3331,
         "color": "#9D816F",
-        "alt": ""
+        "alt": "Couple at the foot of a grand marble staircase, one dipping the other for a kiss"
       },
       {
         "src": "/work/weddings/12.jpg",
         "width": 2499,
         "height": 3333,
         "color": "#846958",
-        "alt": ""
+        "alt": "Couple holding hands on a marble staircase in a white jumpsuit and tan suit, looking back"
       },
       {
         "src": "/work/weddings/13.jpg",
         "width": 2428,
         "height": 3641,
         "color": "#8E8380",
-        "alt": ""
+        "alt": "Couple kissing at a gold ironwork balcony railing under a coffered ceiling, red bouquet"
       },
       {
         "src": "/work/weddings/14.jpg",
         "width": 2499,
         "height": 3333,
         "color": "#B0ACAD",
-        "alt": ""
+        "alt": "Couple kissing on a balcony under tall arched windows, white dress, tan suit, red bouquet"
       },
       {
         "src": "/work/weddings/15.jpg",
         "width": 2499,
         "height": 1667,
         "color": "#ABA4A4",
-        "alt": ""
+        "alt": "Wide shot of a small ceremony on a balcony, an officiant in a black robe, guests watching"
       },
       {
         "src": "/work/weddings/16.jpg",
         "width": 2499,
         "height": 1667,
         "color": "#82786E",
-        "alt": ""
+        "alt": "Couple standing with an officiant in a black robe on a balcony, a guest holding a phone"
       },
       {
         "src": "/work/weddings/17.jpg",
         "width": 2499,
         "height": 3333,
         "color": "#413C36",
-        "alt": ""
+        "alt": "Close on two people smiling in front of an officiant, white dress, tan jacket with a pink flower"
       },
       {
         "src": "/work/weddings/18.jpg",
         "width": 2499,
         "height": 3331,
         "color": "#76665D",
-        "alt": ""
+        "alt": "Hands holding a small bouquet of purple and white mums, a tan jacket and a patterned tie blurred"
       },
       {
         "src": "/work/weddings/19.jpg",
         "width": 2499,
         "height": 1667,
         "color": "#9F9A98",
-        "alt": ""
+        "alt": "Couple embracing at the railing during the ceremony, an officiant and a video camera operator behind"
       },
       {
         "src": "/work/weddings/20.jpg",
         "width": 2499,
         "height": 1667,
         "color": "#574439",
-        "alt": ""
+        "alt": "Couple hugging on a balcony, officiant in a black robe applauding, arched windows behind"
       },
       {
         "src": "/work/weddings/21.jpg",
         "width": 2499,
         "height": 1667,
         "color": "#7E7266",
-        "alt": ""
+        "alt": "Couple in an embrace on a balcony, officiant smiling beside them, soft pink light"
       },
       {
         "src": "/work/weddings/22.jpg",
         "width": 2499,
         "height": 3333,
         "color": "#B3B2B6",
-        "alt": ""
+        "alt": "Couple on a balcony railing in front of arched windows, one taking a phone selfie, bouquet"
       },
       {
         "src": "/work/weddings/23.jpg",
         "width": 2499,
         "height": 1667,
         "color": "#918478",
-        "alt": ""
+        "alt": "Two guests hugging on the balcony with a photographer and onlookers behind"
       },
       {
         "src": "/work/weddings/24.jpg",
         "width": 2499,
         "height": 1667,
         "color": "#C9C2C2",
-        "alt": ""
+        "alt": "Couple greeting guests on a balcony, an officiant in a black robe, a video camera operator nearby"
       },
       {
         "src": "/work/weddings/25.jpg",
         "width": 2429,
         "height": 3641,
         "color": "#544A46",
-        "alt": ""
+        "alt": "Couple holding hands facing each other in front of an officiant, white dress, tan jacket, arched windows"
       },
       {
         "src": "/work/weddings/26.jpg",
         "width": 2499,
         "height": 1667,
         "color": "#85796D",
-        "alt": ""
+        "alt": "Group portrait of the couple and guests lined up on a balcony, arched windows behind"
       },
       {
         "src": "/work/weddings/27.jpg",
         "width": 2499,
         "height": 3331,
         "color": "#464340",
-        "alt": ""
+        "alt": "Couple from behind facing an officiant in a black robe, white one-shoulder dress, tan jacket"
       },
       {
         "src": "/work/weddings/28.jpg",
         "width": 2499,
         "height": 1667,
         "color": "#605A52",
-        "alt": ""
+        "alt": "Couple in front of a leaded window, white dress, tan jacket, red bouquet, nose to nose"
       },
       {
         "src": "/work/weddings/29.jpg",
         "width": 2499,
         "height": 3333,
         "color": "#B78A5D",
-        "alt": ""
+        "alt": "Seen from above, a couple climbing a marble staircase with a brass handrail, holding hands"
       },
       {
         "src": "/work/weddings/30.jpg",
         "width": 2429,
         "height": 3641,
         "color": "#B5A9AB",
-        "alt": ""
+        "alt": "Looking down a marble stairwell at a couple descending, white dress, tan jacket, red bouquet"
       },
       {
         "src": "/work/weddings/31.jpg",
         "width": 2499,
         "height": 3333,
         "color": "#463C35",
-        "alt": ""
+        "alt": "Couple at a marble stair landing, one holding a red bouquet, a brass handrail across the frame"
       },
       {
         "src": "/work/weddings/32.jpg",
         "width": 2499,
         "height": 3333,
         "color": "#EFE5E8",
-        "alt": ""
+        "alt": "Champagne bottles chilling in an ice bucket with frozen pink roses, cocktails on a table"
       },
       {
         "src": "/work/weddings/33.jpg",
         "width": 2499,
         "height": 1667,
         "color": "#724041",
-        "alt": ""
+        "alt": "Reception guests in dresses and suits posing and clapping in a hotel lobby, warm light"
       },
       {
         "src": "/work/weddings/34.jpg",
         "width": 2499,
         "height": 1667,
         "color": "#837464",
-        "alt": ""
+        "alt": "Guests mingling in a modern lobby, a gold hanging light overhead, dark suits and cocktail dresses"
       },
       {
         "src": "/work/weddings/35.jpg",
         "width": 2499,
         "height": 1667,
         "color": "#3A2A25",
-        "alt": ""
+        "alt": "Long reception table with red tablecloth and flowers, guests in conversation, orange chairs"
       },
       {
         "src": "/work/weddings/36.jpg",
         "width": 2499,
         "height": 1667,
         "color": "#B74459",
-        "alt": ""
+        "alt": "Guests clapping and dancing in a lobby near a floral circle arch, orange and navy outfits"
       },
       {
         "src": "/work/weddings/37.jpg",
         "width": 2499,
         "height": 1667,
         "color": "#665253",
-        "alt": ""
+        "alt": "Guests gathered and cheering under a floral arch with warm string lights"
       },
       {
         "src": "/work/weddings/38.jpg",
         "width": 2499,
         "height": 3333,
         "color": "#D9BDA3",
-        "alt": ""
+        "alt": "Pink tulle gown at a gold ring floral arch, hand at the head, mirrored glass behind"
       },
       {
         "src": "/work/weddings/39.jpg",
         "width": 2499,
         "height": 1667,
         "color": "#C8C8C7",
-        "alt": ""
+        "alt": "Family group portrait in front of a floral arch, a pink gown at the center"
       },
       {
         "src": "/work/weddings/40.jpg",
         "width": 2499,
         "height": 1667,
         "color": "#998062",
-        "alt": ""
+        "alt": "Group of guests posing in sparkly and printed dresses and tuxedos in front of a floral arch"
       }
     ]
   },
