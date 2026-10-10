@@ -33,6 +33,19 @@ const pad = (n: number) => String(n).padStart(2, "0");
 const iso = (d: Date) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
 const fromIso = (s: string) => new Date(+s.slice(0, 4), +s.slice(5, 7) - 1, +s.slice(8, 10));
 const minutesOf = (start: string) => +start.slice(11, 13) * 60 + +start.slice(14, 16);
+/** "PDT" or "PST" for a Pacific visitor on that date; the zone's own short name elsewhere. */
+const zone = (start: string, tz: string) =>
+  new Intl.DateTimeFormat("en-US", { timeZone: tz, timeZoneName: "short" })
+    .formatToParts(new Date(start))
+    .find((p) => p.type === "timeZoneName")?.value ?? tz;
+/** A phone number as +E.164: a US number without its country code gets +1. */
+const e164 = (raw: string) => {
+  const digits = raw.replace(/\D/g, "");
+  if (raw.trim().startsWith("+")) return digits.length >= 8 && digits.length <= 15 ? `+${digits}` : "";
+  if (digits.length === 10) return `+1${digits}`;
+  if (digits.length === 11 && digits[0] === "1") return `+${digits}`;
+  return "";
+};
 const clock = (m: number): [string, string] => {
   const h = Math.floor(m / 60);
   return [`${((h + 11) % 12) + 1}:${pad(m % 60)}`, h % 24 < 12 ? "AM" : "PM"];
@@ -68,13 +81,16 @@ export function TimePicker({
   const [length, setLength] = React.useState(30);
   /** The event takes its place from the visitor (a studio session or their own address). */
   const [needsWhere, setNeedsWhere] = React.useState(false);
+  const [session, setSession] = React.useState("");
+  /** Who booked, for the page that follows. */
+  const [booked, setBooked] = React.useState({ name: "", email: "", where: "" });
   const [days, setDays] = React.useState<Record<string, Slot[]> | null>(null);
   const [state, setState] = React.useState<"loading" | "ready" | "fallback">("loading");
   const [view, setView] = React.useState<"week" | "month">("week");
   const [anchor, setAnchor] = React.useState(() => new Date()); // the week or month on show
   const [pick, setPick] = React.useState<Pick | null>(null);
   const [chosen, setChosen] = React.useState(false); // a time picked by hand, not the first one offered
-  const [step, setStep] = React.useState<"pick" | "form" | "sending" | "done">("pick");
+  const [step, setStep] = React.useState<"pick" | "form" | "sending" | "check" | "done">("pick");
   const [error, setError] = React.useState("");
   const ruler = React.useRef<HTMLDivElement>(null);
   const ghost = React.useRef<HTMLSpanElement>(null);
@@ -97,6 +113,7 @@ export function TimePicker({
         return;
       }
       setLength(ev.lengthInMinutes || 30);
+      setSession(ev.title || "");
       setNeedsWhere(Array.isArray(ev.locations) && ev.locations.some((l: { type: string }) => l.type === "attendeeDefined"));
       setDays(slots.data);
       setState("ready");
@@ -195,7 +212,14 @@ export function TimePicker({
     if (!pick) return;
     setStep("sending");
     setError("");
+    const began = Date.now();
     const where = String(form.get("where") || "").trim();
+    const phone = e164(String(form.get("phone") || ""));
+    if (!phone) {
+      setError("Check your phone number. Add the country code if it is not a US number.");
+      setStep("form");
+      return;
+    }
     const notes = String(form.get("notes") || "").trim();
     try {
       const res = await fetch(`${API}/bookings`, {
@@ -205,13 +229,19 @@ export function TimePicker({
           start: new Date(pick.start).toISOString(),
           eventTypeSlug: slug,
           username,
-          attendee: { name: String(form.get("name")), email: String(form.get("email")), timeZone: tz, language: "en" },
+          attendee: { name: String(form.get("name")), email: String(form.get("email")), phoneNumber: phone, timeZone: tz, language: "en" },
           ...(needsWhere ? { location: { type: "attendeeDefined", location: where } } : {}),
-          ...(notes ? { bookingFieldsResponses: { notes } } : {}),
+          bookingFieldsResponses: { notes: [`Phone: ${phone}`, notes].filter(Boolean).join("\n") },
         }),
       });
       const body = await res.json();
       if (!res.ok || body.status !== "success") throw new Error(body?.error?.message || "failed");
+      setBooked({ name: String(form.get("name")).trim(), email: String(form.get("email")).trim(), where });
+      /* The orbs get their moment even when Cal.com answers at once, then
+         turn into the check, which is shown before the page that follows. */
+      await new Promise((go) => setTimeout(go, Math.max(0, 1100 - (Date.now() - began))));
+      setStep("check");
+      await new Promise((go) => setTimeout(go, 1500));
       setStep("done");
     } catch (e) {
       setError(/(already|not available|busy|booked)/i.test(String(e)) ? "That time was just taken. Pick another." : "That did not go through. Try again, or write to hello@juliangigola.com.");
@@ -244,19 +274,69 @@ export function TimePicker({
   const sum = `${DAYS[date.getDay()]} ${date.getDate()} ${MONTHS[date.getMonth()].slice(0, 3)} · ${t} ${ap}`;
 
   if (step === "done") {
+    const first = booked.name.split(/\s+/)[0];
+    const rows: [string, string][] = [
+      ["Session", `${session || title}, ${length} min`],
+      ["When", `${sum.replace(" · ", " at ")} ${zone(pick.start, tz)}`],
+      ...(booked.where ? ([["Where", booked.where]] as [string, string][]) : []),
+      ["Confirmation", booked.email],
+    ];
+    const next = ["The confirmation is in your inbox now.", "I write to you before the day with the details.", "Need another time? The email has a link to move or cancel it."];
     return (
-      <div aria-label={title} className={cn("tp flex flex-col justify-center gap-4 p-6 sm:p-10", className)}>
-        <p className="label text-muted-foreground">Booked</p>
-        <p className="font-display text-5xl uppercase leading-[0.92] sm:text-7xl">{sum}</p>
-        <p className="max-w-[28rem] text-sm normal-case leading-relaxed text-muted-foreground">
-          A confirmation is on its way to your email, with the details. I&rsquo;ll be in touch before the day.
-        </p>
+      <div aria-label={title} role="status" className={cn("tp !flex min-h-[30rem] flex-col justify-center gap-6 p-6 sm:gap-8 sm:p-10 [&>*]:shrink-0", className)}>
+        <div className="flex flex-col gap-4">
+          <p className="label tp-roll text-muted-foreground">Booked</p>
+          <h3 className="tp-roll font-display text-[clamp(2.5rem,9.5cqw,5.5rem)] uppercase leading-[0.9] [text-wrap:balance] tracking-[-0.04em]" style={{ animationDelay: "80ms" }}>
+            {first ? `${first}, you’re in.` : "You’re in."}
+          </h3>
+        </div>
+        <dl className="grid gap-x-10 gap-y-4 sm:grid-cols-2">
+          {rows.map(([k, v], n) => (
+            <div key={k} className="tp-roll flex min-w-0 flex-col gap-1.5" style={{ animationDelay: `${200 + n * 70}ms` }}>
+              <dt className="label text-muted-foreground">{k}</dt>
+              <dd className="break-words text-base normal-case leading-snug">{v}</dd>
+            </div>
+          ))}
+        </dl>
+        <ol className="flex flex-col gap-2 text-sm normal-case leading-relaxed text-muted-foreground sm:flex-row sm:gap-10">
+          {next.map((t, n) => (
+            <li key={t} className="tp-roll flex gap-3 sm:max-w-[16rem]" style={{ animationDelay: `${520 + n * 90}ms` }}>
+              <span className="label text-foreground">{`0${n + 1}`}</span>
+              {t}
+            </li>
+          ))}
+        </ol>
       </div>
     );
   }
 
   return (
-    <div aria-label={title} role="region" className={cn("tp @container flex min-h-0 flex-col gap-8 overflow-x-clip p-5 sm:gap-10 sm:p-10 max-[56rem]:sm:p-6 [@media(max-height:50rem)]:gap-4 [@media(max-height:50rem)]:p-5", className)}>
+    <div aria-label={title} role="region" className={cn("tp @container relative flex min-h-0 flex-col gap-8 overflow-x-clip p-5 sm:gap-10 sm:p-10 max-[56rem]:sm:p-6 [@media(max-height:50rem)]:gap-4 [@media(max-height:50rem)]:p-5", className)}>
+      {step === "sending" || step === "check" ? (
+        <div role="status" aria-live="polite" className="absolute inset-0 z-20 bg-background/85 backdrop-blur-md">
+          <div className="sticky top-[28%] flex flex-col items-center gap-6 py-10">
+            <div className="tp-status relative size-28" data-ok={step === "check" ? "" : undefined}>
+              {[
+                ["2.4s", "1.125rem", "1"],
+                ["3.4s", "0.875rem", "0.7"],
+                ["1.7s", "0.625rem", "0.5"],
+                ["4.6s", "0.5rem", "0.35"],
+              ].map(([d, size, o], n) => (
+                <span key={n} className="tp-arm absolute inset-0" style={{ animationDuration: d, animationDirection: n % 2 ? "reverse" : "normal" }}>
+                  <span className="absolute left-1/2 top-0 -translate-x-1/2 rounded-full bg-foreground" style={{ width: size, height: size, opacity: o }} />
+                </span>
+              ))}
+              <svg viewBox="0 0 112 112" className="absolute inset-0 size-full" fill="none" aria-hidden>
+                <circle className="tp-ring" cx="56" cy="56" r="44" stroke="#34c759" strokeWidth="3" strokeLinecap="round" />
+                <path className="tp-tick" d="M38 58l12 12 24-26" stroke="#34c759" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </div>
+            <p className="label text-muted-foreground">{step === "check" ? "Booked" : "Booking"}</p>
+          </div>
+        </div>
+      ) : null}
+      {/* the days, the time and the ruler fold away once a time is confirmed, so the form fits */}
+      <Fold on={step === "pick"}>
       {/* the days */}
       <div className="flex flex-col gap-5">
         <div className="flex items-center justify-between gap-3">
@@ -406,11 +486,12 @@ export function TimePicker({
           </span>
         ))}
       </div>
+      </Fold>
 
       {/* confirm */}
       {step === "pick" ? (
         <div className="sticky bottom-0 z-10 flex flex-col gap-4 border-t border-border pt-6 [@media(max-height:50rem)]:bg-background/80 [@media(max-height:50rem)]:pb-1 [@media(max-height:50rem)]:pt-4 [@media(max-height:50rem)]:backdrop-blur-md @md:flex-row @md:items-center @md:justify-between">
-          <span className="label text-muted-foreground">{sum} · {tz.replace(/_/g, " ")}</span>
+          <span className="label text-muted-foreground">{sum} {zone(pick.start, tz)}</span>
           <button type="button" onClick={() => setStep("form")} disabled={!chosen} className="label rounded-[2px] border border-foreground bg-foreground px-6 @max-md:w-full py-4 text-background transition-[opacity,scale] duration-300 hoverable:hover:opacity-85 active:scale-[0.98] disabled:pointer-events-none disabled:opacity-35">
             Confirm this time
           </button>
@@ -421,7 +502,7 @@ export function TimePicker({
             e.preventDefault();
             void book(new FormData(e.currentTarget));
           }}
-          className="flex flex-col gap-4 border-t border-border pt-5"
+          className="flex flex-col gap-4"
         >
           <div className="flex items-center justify-between gap-4">
             <span className="label">{sum}</span>
@@ -430,10 +511,12 @@ export function TimePicker({
           <div className="grid gap-4 sm:grid-cols-2">
             <label className="label flex flex-col gap-2 text-muted-foreground">Name<input name="name" required autoComplete="name" className="border-b border-border bg-transparent py-2 text-base normal-case text-foreground outline-none focus:border-foreground" /></label>
             <label className="label flex flex-col gap-2 text-muted-foreground">Email<input name="email" type="email" required autoComplete="email" className="border-b border-border bg-transparent py-2 text-base normal-case text-foreground outline-none focus:border-foreground" /></label>
-          </div>
-          {needsWhere ? (
+            <label className="label flex flex-col gap-2 text-muted-foreground">Phone<input name="phone" type="tel" required autoComplete="tel" inputMode="tel" className="border-b border-border bg-transparent py-2 text-base normal-case text-foreground outline-none focus:border-foreground" /></label>
+            {needsWhere ? (
             <label className="label flex flex-col gap-2 text-muted-foreground">Where: the studio, or an address<input name="where" required className="border-b border-border bg-transparent py-2 text-base normal-case text-foreground outline-none focus:border-foreground" /></label>
           ) : null}
+          </div>
+          
           <label className="label flex flex-col gap-2 text-muted-foreground">Anything I should know<textarea name="notes" rows={2} className="resize-none border-b border-border bg-transparent py-2 text-base normal-case text-foreground outline-none focus:border-foreground" /></label>
           {error ? <p role="alert" className="text-sm normal-case text-foreground">{error}</p> : null}
           <button type="submit" disabled={step === "sending"} className="label self-start rounded-[2px] border border-foreground bg-foreground px-6 py-4 text-background transition-[opacity,scale] duration-300 hoverable:hover:opacity-85 active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50">
