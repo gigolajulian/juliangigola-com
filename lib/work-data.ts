@@ -8376,7 +8376,7 @@ export const PROJECTS: Project[] = [
         "width": 2499,
         "height": 3124,
         "color": "#262626",
-        "alt": "Looking up through a wide black umbrella, brown scarf over the face, goggles on the head, cream sweater"
+        "alt": "Holding a wide black umbrella overhead, brown scarf pulled over the face, goggles on the head, cream sweater"
       }
     ]
   },
@@ -10408,7 +10408,7 @@ export const PROJECTS: Project[] = [
         "width": 2499,
         "height": 3124,
         "color": "#F3F3F3",
-        "alt": "Standing on tiptoe in a deep crouch, long hair straight down the back, black bodysuit, white backdrop"
+        "alt": "Balanced on tiptoe in a deep side-view crouch, long hair straight down the back, black bodysuit, white backdrop"
       },
       {
         "src": "/work/zoe/22.jpg",
