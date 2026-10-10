@@ -99,6 +99,11 @@ for (const path of SWIPE_PAGES) {
           });
           test.skip(!valid, "window throttled by macOS during the swipes");
           if (home && !stacked(v)) expect.soft(misses, "each swipe lands exactly one screen on").toEqual([]);
+          /* The frame budgets hold on a Mac at a desk. A CI runner is a
+             shared machine with no GPU of its own, so there the frames are
+             reported and not judged (PERF_FRAMES=report); the landings
+             above still are. */
+          if (process.env.PERF_FRAMES === "report") return;
           const b = budgets.swipe;
           expect.soft(st.median, `median frame, budget ${b.medianMs}ms`).toBeLessThanOrEqual(b.medianMs);
           expect.soft(st.slow, `% of frames over 20ms, budget ${b.slowPct}%`).toBeLessThanOrEqual(b.slowPct);
