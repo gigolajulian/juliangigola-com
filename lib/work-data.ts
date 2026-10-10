@@ -1149,84 +1149,84 @@ export const PROJECTS: Project[] = [
         "width": 2500,
         "height": 3333,
         "color": "#939494",
-        "alt": ""
+        "alt": "Black buttoned jacket, red hair, hand raised over her mouth, torn tights, soft grey backdrop"
       },
       {
         "src": "/work/nyx/02.jpg",
         "width": 2500,
         "height": 3333,
         "color": "#6E6B68",
-        "alt": ""
+        "alt": "Standing in an open black jacket and bralette, hands in pockets, red hair framing her face"
       },
       {
         "src": "/work/nyx/03.jpg",
         "width": 2500,
         "height": 3334,
         "color": "#828586",
-        "alt": ""
+        "alt": "Full length in boots, torn black tights and an open black jacket, hands on her hips"
       },
       {
         "src": "/work/nyx/04.jpg",
         "width": 2500,
         "height": 3334,
         "color": "#696A6C",
-        "alt": ""
+        "alt": "Motion-blurred in an open black jacket and torn tights, red hair swept across her face"
       },
       {
         "src": "/work/nyx/05.jpg",
         "width": 2500,
         "height": 3334,
         "color": "#898987",
-        "alt": ""
+        "alt": "Turned side-on with her jacket slipping off one arm, red hair over one eye, hand at her hip"
       },
       {
         "src": "/work/nyx/06.jpg",
         "width": 2500,
         "height": 3333,
         "color": "#3B3635",
-        "alt": ""
+        "alt": "Head thrown to the side, red hair flying, black lace bralette, cool blue-grey backdrop"
       },
       {
         "src": "/work/nyx/07.jpg",
         "width": 2500,
         "height": 3333,
         "color": "#7C7D7A",
-        "alt": ""
+        "alt": "Crouched in lace-up boots, one hand in her flying red hair, black jacket off the shoulders"
       },
       {
         "src": "/work/nyx/08.jpg",
         "width": 2294,
         "height": 3059,
         "color": "#332925",
-        "alt": ""
+        "alt": "Tight crop of red hair falling across her face, nose ring, black lace trim, dark left edge"
       },
       {
         "src": "/work/nyx/09.jpg",
         "width": 2500,
         "height": 3334,
         "color": "#575A5A",
-        "alt": ""
+        "alt": "Folded into a deep crouch in a black cap, lace-up heeled boots and torn tights"
       },
       {
         "src": "/work/nyx/10.jpg",
         "width": 2500,
         "height": 3333,
         "color": "#565959",
-        "alt": ""
+        "alt": "Seated low with her jacket off one shoulder, red hair swinging, face turned down"
       },
       {
         "src": "/work/nyx/11.jpg",
         "width": 2500,
         "height": 3333,
         "color": "#3B3E3F",
-        "alt": ""
+        "alt": "Crouching in heeled boots and a buttoned black jacket, one hand on her knee, dark backdrop"
       },
       {
         "src": "/work/nyx/12.jpg",
         "width": 2500,
         "height": 3333,
         "color": "#808181",
-        "alt": ""
+        "alt": "Seated on the floor leaning on one arm, tall lace-up buckled boots, soft light"
       }
     ]
   },
