@@ -7012,70 +7012,70 @@ export const PROJECTS: Project[] = [
         "width": 2142,
         "height": 1225,
         "color": "#BAC4CA",
-        "alt": ""
+        "alt": "Aerial view of suburban rooftops with solar panels, backyard pools and tree-lined lots"
       },
       {
         "src": "/work/realestate/02.jpg",
         "width": 2499,
         "height": 1386,
         "color": "#BACBCB",
-        "alt": ""
+        "alt": "Straight-down aerial of a single-story house, a kidney-shaped pool, solar panels on the garage roof"
       },
       {
         "src": "/work/realestate/03.jpg",
         "width": 2499,
         "height": 1666,
         "color": "#C5D3E8",
-        "alt": ""
+        "alt": "Street view of a single-story house behind a lawn and trees, utility wires and a clear blue sky"
       },
       {
         "src": "/work/realestate/04.jpg",
         "width": 2499,
         "height": 1666,
         "color": "#BACDE8",
-        "alt": ""
+        "alt": "Backyard pool and spa in front of a yellow single-story house, palms and loungers, afternoon sun"
       },
       {
         "src": "/work/realestate/05.jpg",
         "width": 2499,
         "height": 1666,
         "color": "#836F52",
-        "alt": ""
+        "alt": "Bedroom with a wooden bed frame, ceiling fan, sliding glass door and drawn curtains, beige walls"
       },
       {
         "src": "/work/realestate/06.jpg",
         "width": 2499,
         "height": 1712,
         "color": "#E3DBD3",
-        "alt": ""
+        "alt": "Two-story house with a stone walkway and front lawn, shaded by tall trees, a sale sign at right"
       },
       {
         "src": "/work/realestate/07.jpg",
         "width": 2499,
         "height": 1666,
         "color": "#ECEBEB",
-        "alt": ""
+        "alt": "Black ring pendant light hanging from a white ceiling, recessed spotlights beside it"
       },
       {
         "src": "/work/realestate/08.jpg",
         "width": 2499,
         "height": 1761,
         "color": "#312E2C",
-        "alt": ""
+        "alt": "Freestanding white oval bathtub under a window, dark tiled wall, trees outside"
       },
       {
         "src": "/work/realestate/09.jpg",
         "width": 2367,
         "height": 3737,
         "color": "#D4D2D0",
-        "alt": ""
+        "alt": "White staircase with a black horizontal-bar railing, window below, bright light on the walls"
       },
       {
         "src": "/work/realestate/10.jpg",
         "width": 2428,
         "height": 3642,
         "color": "#2A2928",
-        "alt": ""
+        "alt": "Looking down a white stair run with a black railing, window and sunlit wall beside it"
       }
     ]
   },
