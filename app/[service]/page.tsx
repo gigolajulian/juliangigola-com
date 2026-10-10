@@ -7,7 +7,7 @@ import { LdJson } from "@/components/local-screens";
 import { LocalQuestions } from "@/components/local-questions";
 import { CoverFloat } from "@/components/cover-float";
 import { Testimonials } from "@/components/testimonials";
-import { BOOKING_PAGES, bookingHref, bookingPage, calEvent } from "@/lib/booking";
+import { BOOKING_PAGES, bookingHref, bookingPage } from "@/lib/booking";
 import { getProject, projectsIn, wallOf } from "@/lib/work";
 import { InquireWall } from "@/components/inquire-wall";
 import { ContactSheet } from "@/components/contact-sheet";
@@ -157,8 +157,7 @@ export default async function BookingPage(props: PageProps<"/[service]">) {
           label="Book"
           hash="book"
           defaults={{ type: page.book.type, session: page.book.session }}
-          calendar={page.book.calendar}
-          cal={calEvent(page.session)}
+          cal={page.book.cal}
           intro={
             <>
               <span className="sm:block sm:text-balance">

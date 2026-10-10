@@ -10,15 +10,12 @@ export type Bookable = {
   blurb: string;
   rate: string;
   length: string;
-  /** The Google Calendar appointment schedule's id. */
-  calendar: string;
-  /** Its Cal.com event, shown in the calendar's place with `?cal`. */
-  cal?: string;
+  /** Its Cal.com event. */
+  cal: string;
 };
 
 /* The sessions down the left, the chosen one's calendar beside them:
-   Google's own booking page, in the site's frame. On the dark theme it is
-   turned over to sit on the page (`.booking-embed`, globals.css). The
+   Cal.com's booking page, in the site's frame. The
    choice is kept in the address (`?session=`), so a link can open on one. */
 export function BookPicker({ sessions, start }: { sessions: Bookable[]; start?: string }) {
   const [on, setOn] = React.useState(() => Math.max(0, sessions.findIndex((s) => s.slug === start)));
@@ -86,17 +83,10 @@ export function BookPicker({ sessions, start }: { sessions: Bookable[]; start?: 
           </Link>
         </p>
       </div>
-      {/* As tall as Google's page is, and no taller, in what the window
+      {/* As tall as the calendar is, and no taller, in what the window
           leaves it: only a short one makes it scroll. */}
       <div className="h-[75svh] overflow-hidden rounded-[12px] border border-border bg-card lg:h-full lg:max-h-[53rem]">
-        <CalEmbed path={current.cal} title={`Pick a time for ${current.name}`} className="booking-embed block h-full w-full border-0">
-          <iframe
-            key={current.calendar}
-            src={`https://calendar.google.com/calendar/appointments/schedules/${current.calendar}?gv=true`}
-            title={`Pick a time for ${current.name}`}
-            className="booking-embed block h-full w-full border-0"
-          />
-        </CalEmbed>
+        <CalEmbed path={current.cal} title={`Pick a time for ${current.name}`} className="booking-embed block h-full w-full border-0" />
       </div>
     </section>
   );

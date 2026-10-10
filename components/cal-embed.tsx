@@ -4,14 +4,9 @@ import * as React from "react";
 import { useSiteTheme } from "@/lib/site-theme";
 
 /* ── Cal.com, inline ──────────────────────────────────────────────
- * The booking calendar from Cal.com in place of Google's, behind `?cal`
- * on the address while it is tried out. Without the flag, or for a session
- * with no Cal.com event yet (`CAL_EVENTS`, `lib/booking.ts`), it renders
- * what it is given: the Google Calendar frame, exactly as before.
- *
+ * The booking calendar, from Cal.com (`book.cal`, `lib/booking.ts`).
  * Cal.com's script loads only once the calendar is on screen, and takes
- * the site's own colours in either theme, so unlike Google's page it is
- * not turned over on the dark one (`.cal-embed`, globals.css).
+ * the site's own colours in either theme (`.cal-embed`, globals.css).
  *
  * If Cal.com does not arrive (blocked, down, or an event it does not
  * know), a link to book on Cal.com and the address take its place, inside
@@ -194,27 +189,7 @@ function CalInline({ path, title, className }: { path: string; title: string; cl
   );
 }
 
-/** Cal.com's calendar for `path` with `?cal` on the address, and
-    `children` (the Google Calendar frame) otherwise. `className` sizes the
-    box as the frame is sized, so it fits the same place. */
-export function CalEmbed({
-  path,
-  title,
-  className,
-  children,
-}: {
-  path?: string;
-  title: string;
-  className?: string;
-  children: React.ReactNode;
-}) {
-  const [flag, setFlag] = React.useState(false);
-  /* Read once, on mount: the server has no address bar, and /book
-     rewrites its own (`?session=`) as a session is picked. */
-  React.useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    if (new URLSearchParams(location.search).has("cal")) setFlag(true);
-  }, []);
-  if (!flag || !path) return <>{children}</>;
+/** Cal.com's calendar for `path`. `className` sizes the box. */
+export function CalEmbed({ path, title, className }: { path: string; title: string; className?: string }) {
   return <CalInline key={path} path={path} title={title} className={className} />;
 }
