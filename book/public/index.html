@@ -37,11 +37,12 @@
   #list i { font-style: normal; color: var(--muted); grid-column: 1 / -1; }
   #list a:hover b { color: var(--accent, inherit); }
   header a { display: inline-flex; align-items: center; gap: 12px; }
+  .logo { width: 48px; height: 48px; border-radius: 8px; }
   #photo, #who img { width: 48px; height: 48px; border-radius: 8px; object-fit: cover; }
   /* Phone: photo in the header. Tablet and up: photo and name on top of the calendar card. */
   #who { display: none; }
   @media (min-width: 768px) {
-    #photo { display: none; }
+    #photo, header .logo { display: none; }
     #line { padding-bottom: 32px; border-bottom: 1px solid var(--line); margin-bottom: 24px; }
     main #cal { border-top: 0; padding-top: 0; }
     #who { display: flex; align-items: center; gap: 12px; margin: 0 0 12px; font: 900 18px/1 "Inter Tight", sans-serif; letter-spacing: -0.02em; }
@@ -61,10 +62,10 @@
 </head>
 <body>
 <main>
-  <header><a href="https://juliangigola.com"><img id="photo" src="/julian.jpg" alt="" width="48" height="48">Julian Gigola</a></header>
+  <header><a href="https://juliangigola.com"><img class="logo" src="/logo.svg" alt="" width="48" height="48"><img id="photo" src="/julian.jpg" alt="" width="48" height="48">Julian Gigola</a></header>
   <h1 id="title"></h1>
   <p id="line"></p>
-  <div id="who"><img src="/julian.jpg" alt="" width="48" height="48">Julian Gigola</div>
+  <div id="who"><img class="logo" src="/logo.svg" alt="" width="48" height="48"><img src="/julian.jpg" alt="" width="48" height="48">Julian Gigola</div>
   <div id="cal"></div>
 </main>
 <script>
