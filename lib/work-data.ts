@@ -4415,49 +4415,49 @@ export const PROJECTS: Project[] = [
         "width": 2499,
         "height": 3124,
         "color": "#26260C",
-        "alt": ""
+        "alt": "Seated cross-legged on a brick pool edge, hands at the head, black swimsuit, reflection in dark water"
       },
       {
         "src": "/work/isabela/02.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#26260C",
-        "alt": ""
+        "alt": "Seated on the pool edge with feet in the water, arms raised, black swimsuit, dark foliage behind"
       },
       {
         "src": "/work/isabela/03.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#26260C",
-        "alt": ""
+        "alt": "Seated on the pool edge with head resting on the knees, reflected in dark water"
       },
       {
         "src": "/work/isabela/04.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#594026",
-        "alt": ""
+        "alt": "Standing at a bright blue pool in a black swimsuit, holding sandals, looking to the side"
       },
       {
         "src": "/work/isabela/05.jpg",
         "width": 1125,
         "height": 1407,
         "color": "#E3E0DD",
-        "alt": ""
+        "alt": "Seated on a wood-slat outdoor counter under a louvered pergola, teal hair, black swimsuit"
       },
       {
         "src": "/work/isabela/06.jpg",
         "width": 1131,
         "height": 1414,
         "color": "#FAF7F4",
-        "alt": ""
+        "alt": "Teal hair and a patterned black headband, black top, open denim shorts, seated, white wall behind"
       },
       {
         "src": "/work/isabela/07.jpg",
         "width": 1133,
         "height": 1417,
         "color": "#EFE8E5",
-        "alt": ""
+        "alt": "Seated on a wooden counter under a louvered pergola, teal hair, navy swimsuit, ankle bracelet"
       }
     ]
   },
