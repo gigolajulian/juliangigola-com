@@ -2131,119 +2131,119 @@ export const PROJECTS: Project[] = [
         "width": 2499,
         "height": 3124,
         "color": "#A6A6A6",
-        "alt": ""
+        "alt": "Seated on the floor leaning back on one arm, open-knit top, black tie, black shorts"
       },
       {
         "src": "/work/byte-me/02.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#A6A6A6",
-        "alt": ""
+        "alt": "Seated with one knee raised, cream open-knit top, black tie hanging loose, head tilted, grey backdrop"
       },
       {
         "src": "/work/byte-me/03.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#A6A6A6",
-        "alt": ""
+        "alt": "Seated sideways in black shorts and sneakers, white socks, hands clasped at her shin, looking back"
       },
       {
         "src": "/work/byte-me/04.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#8C8C8C",
-        "alt": ""
+        "alt": "Seated leaning on both hands, knit top slipping off one shoulder, black choker tie, pleated skirt"
       },
       {
         "src": "/work/byte-me/05.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#8C8C8C",
-        "alt": ""
+        "alt": "Twisted away from the camera, looking back over her shoulder, open-knit top, black tie, pleated skirt"
       },
       {
         "src": "/work/byte-me/06.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#8C8C8C",
-        "alt": ""
+        "alt": "Crouched low with feet wide in sneakers, one hand holding the end of a black tie"
       },
       {
         "src": "/work/byte-me/07.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#737373",
-        "alt": ""
+        "alt": "Seated on one hip, long knit sleeve reaching to her sneaker, black tie draped over the top"
       },
       {
         "src": "/work/byte-me/08.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#8C8C8C",
-        "alt": ""
+        "alt": "Bent forward in a wide stance, sneakers and white socks, black tie hanging against the knit top"
       },
       {
         "src": "/work/byte-me/09.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#8C8C8C",
-        "alt": ""
+        "alt": "Kneeling on one knee with a hand on the other, off-shoulder knit over a black bralette"
       },
       {
         "src": "/work/byte-me/10.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#737373",
-        "alt": ""
+        "alt": "Close crop, one arm raised in a long open-knit sleeve, black tie falling across her chest"
       },
       {
         "src": "/work/byte-me/11.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#737373",
-        "alt": ""
+        "alt": "Seen from above, standing with feet together in sneakers and white socks, knit top, black tie"
       },
       {
         "src": "/work/byte-me/12.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#737373",
-        "alt": ""
+        "alt": "One hand to her forehead, tie loose around her neck, open-knit top, pleated skirt, wide stance"
       },
       {
         "src": "/work/byte-me/13.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#8C8C8C",
-        "alt": ""
+        "alt": "Close crop, head tipped far to one side, off-shoulder knit over a black strap, black tie"
       },
       {
         "src": "/work/byte-me/14.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#8C8C8C",
-        "alt": ""
+        "alt": "Pulling a black tie out to one side, flared knit sleeves, pleated skirt, looking at the lens"
       },
       {
         "src": "/work/byte-me/15.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#A6A6A6",
-        "alt": ""
+        "alt": "Round black glasses, head tipped to one side, arms bent, knit top over a pleated skirt, black tie"
       },
       {
         "src": "/work/byte-me/16.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#A6A6A6",
-        "alt": ""
+        "alt": "Round black glasses, one hand on her hip, plucking at the knit top off her shoulder, black tie"
       },
       {
         "src": "/work/byte-me/17.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#8C8C8C",
-        "alt": ""
+        "alt": "Holding a white corded phone out behind her, round black glasses, knit top, black tie, grey backdrop"
       }
     ]
   },
