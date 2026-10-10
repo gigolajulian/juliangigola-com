@@ -6481,42 +6481,42 @@ export const PROJECTS: Project[] = [
         "width": 2499,
         "height": 3124,
         "color": "#262626",
-        "alt": ""
+        "alt": "Head bowed in black shield sunglasses and a black zip hoodie, deep teal backdrop"
       },
       {
         "src": "/work/oakley-x-nike/02.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#0C260C",
-        "alt": ""
+        "alt": "Standing in a black tech hoodie and shield sunglasses, hands at the waist, teal light"
       },
       {
         "src": "/work/oakley-x-nike/03.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#0C260C",
-        "alt": ""
+        "alt": "Crop below the chin on a white ribbed tank, rings on the fingers, bracelet, dark teal backdrop"
       },
       {
         "src": "/work/oakley-x-nike/04.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#0C260C",
-        "alt": ""
+        "alt": "Profile in black shield sunglasses, white tank and a silver chain necklace, dark backdrop"
       },
       {
         "src": "/work/oakley-x-nike/05.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#26D9F3",
-        "alt": ""
+        "alt": "Black sport sunglasses with a blue mirrored lens on a white ledge, bright cyan backdrop"
       },
       {
         "src": "/work/oakley-x-nike/06.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#26A6D9",
-        "alt": ""
+        "alt": "Black sport sunglasses suspended at an angle, blue mirrored lens, gradient blue backdrop"
       }
     ]
   },
