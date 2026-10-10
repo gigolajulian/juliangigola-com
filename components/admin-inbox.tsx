@@ -246,6 +246,9 @@ export function AdminInbox({
                   className={cn(
                     "flex w-full flex-wrap items-baseline gap-x-4 gap-y-1 px-4 py-3 text-left transition-colors duration-200 hoverable:hover:bg-card",
                     open === row.key && "bg-card",
+                    // A booking is marked by a 2px rule of the accent on its
+                    // left edge, drawn inside so the row does not shift.
+                    row.type === "booking" && "shadow-[inset_2px_0_0_var(--accent)]",
                   )}
                 >
                   {/* Unread is a dot, not bold type: the row is already set in
@@ -265,9 +268,20 @@ export function AdminInbox({
                   >
                     {row.name}
                   </span>
-                  <span className="label text-muted-foreground">
-                    {row.type}
-                  </span>
+                  {/* A booking says so in the accent, with its session and
+                      time, so when it is reads without opening it. */}
+                  {row.type === "booking" ? (
+                    <span className="label">
+                      <span className="text-accent">Booking</span>
+                      {row.detail ? (
+                        <span className="text-foreground"> {row.detail}</span>
+                      ) : null}
+                    </span>
+                  ) : (
+                    <span className="label text-muted-foreground">
+                      {row.type}
+                    </span>
+                  )}
                   <span className="label ml-auto shrink-0 text-muted-foreground">
                     {when(row.at)}
                     {row.country ? ` · ${row.country}` : ""}
@@ -293,11 +307,15 @@ export function AdminInbox({
                             </a>
                           </dd>
                           <dt className="label text-muted-foreground">Kind</dt>
-                          <dd className="text-sm">{full.type}</dd>
+                          <dd className="text-sm">
+                            {full.type === "booking" ? "Booking" : full.type}
+                          </dd>
                           {full.detail ? (
                             <>
                               <dt className="label text-muted-foreground">
-                                When / where
+                                {full.type === "booking"
+                                  ? "Booked for"
+                                  : "When / where"}
                               </dt>
                               <dd className="text-sm">{full.detail}</dd>
                             </>
