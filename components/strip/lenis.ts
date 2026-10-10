@@ -5,6 +5,7 @@ import {
   LENIS_LINE,
   LINE,
   MOUSE_LERP,
+  NOTCH_TURN_PX,
   padGesture,
   wantsLenis,
   wantsOwnNotch,
@@ -183,7 +184,15 @@ export function useLenis(
         const from = stops[i];
         const to = stops[Math.min(i + 1, stops.length - 1)];
         const gone = to > from ? (x - from) / (to - from) : 0;
-        const onward = lenis.direction >= 0 ? gone > 0.2 : gone > 0.8;
+        /* A notch carries 300 to 360px (`WHEEL`), under a fifth of a
+           screen from about 1800px wide: on a 1920 monitor one notch was
+           taken back every time and the page never turned. For a notch the line
+           is the nearer of a fifth and `NOTCH_TURN_PX`; a trackpad keeps
+           the fifth. */
+        const turn = padGesture.get(el)
+          ? 0.2
+          : Math.min(0.2, NOTCH_TURN_PX / Math.max(1, to - from));
+        const onward = lenis.direction >= 0 ? gone > turn : gone > 1 - turn;
         const target = onward ? to : from;
         if (Math.abs(target - x) < 1 && Math.abs(target - el.scrollLeft) < 1) return;
         lenis.scrollTo(target, {

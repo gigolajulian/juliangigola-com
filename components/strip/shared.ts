@@ -160,6 +160,10 @@ export const STRETCH = 160;
     makes leaving any easier. */
 export const WHEEL = 3;
 export const PAD = 1.8;
+/** How far a notch has to carry a paged strip for the page to turn, when
+    that is less than a fifth of a screen (`settle`, `lenis.ts`). A notch
+    of 100 carries 300px, three lines 360. */
+export const NOTCH_TURN_PX = 160;
 /** Lenis's ease per frame for a notch (a trackpad is not eased: `isPad`).
     A notch was 0.08, which took about 460ms to cover nine tenths of its
     travel and read as lag even at a full frame rate (Julian: the portfolio
