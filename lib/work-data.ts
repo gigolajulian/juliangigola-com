@@ -4487,14 +4487,14 @@ export const PROJECTS: Project[] = [
         "width": 2499,
         "height": 3499,
         "color": "#262626",
-        "alt": ""
+        "alt": "Mid-jump in a green graphic tee, denim shorts and olive high-top sneakers, orange beanie, on a fenced footbridge"
       },
       {
         "src": "/work/jubo/02.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#262626",
-        "alt": ""
+        "alt": "Jumping off the ground on a chain-link footbridge, green tee, denim shorts, olive sneakers, trees behind"
       },
       {
         "src": "/work/jubo/03.jpg",
@@ -4508,7 +4508,7 @@ export const PROJECTS: Project[] = [
         "width": 2499,
         "height": 3124,
         "color": "#F3F3F3",
-        "alt": ""
+        "alt": "Both hands pulling an orange beanie over the eyes, green graphic tee, crossbody bag, chain-link fence"
       }
     ]
   },
