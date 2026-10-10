@@ -39,4 +39,12 @@ interface CloudflareEnv {
 
   /** Bing Webmaster Tools API key (Settings > API access), for the same tab. */
   BING_API_KEY?: string;
+
+  /**
+   * Signs Cal.com's booking webhook (`app/api/cal/route.ts`). The same
+   * string goes in Cal.com > Settings > Developer > Webhooks > Secret and in:
+   *
+   *   wrangler secret put CAL_WEBHOOK_SECRET
+   */
+  CAL_WEBHOOK_SECRET?: string;
 }
