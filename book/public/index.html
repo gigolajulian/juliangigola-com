@@ -42,7 +42,7 @@
   /* Phone: photo in the header. Tablet and up: photo and name on top of the calendar card. */
   #who { display: none; }
   @media (min-width: 768px) {
-    #photo { display: none; }
+    #photo, header .logo { display: none; }
     #line { padding-bottom: 32px; border-bottom: 1px solid var(--line); margin-bottom: 24px; }
     main #cal { border-top: 0; padding-top: 0; }
     #who { display: flex; align-items: center; gap: 12px; margin: 0 0 12px; font: 900 18px/1 "Inter Tight", sans-serif; letter-spacing: -0.02em; }
