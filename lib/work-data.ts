@@ -9368,7 +9368,7 @@ export const PROJECTS: Project[] = [
         "width": 2499,
         "height": 3331,
         "color": "#050605",
-        "alt": ""
+        "alt": "Kneeling in black plate armor resting on a sword planted in the ground, a lightning bolt, stormy sky"
       },
       {
         "src": "/work/valgur/02.jpg",
@@ -9382,98 +9382,98 @@ export const PROJECTS: Project[] = [
         "width": 1302,
         "height": 1737,
         "color": "#060B0E",
-        "alt": ""
+        "alt": "Close crop of plate gauntlets crossed over a sword hilt, a blade rising, soft teal backdrop"
       },
       {
         "src": "/work/valgur/04.jpg",
         "width": 2499,
         "height": 3333,
         "color": "#020303",
-        "alt": ""
+        "alt": "Standing in a black hooded robe and plate armor, sword raised, a shaft of light through storm clouds"
       },
       {
         "src": "/work/valgur/05.jpg",
         "width": 2499,
         "height": 3333,
         "color": "#06090A",
-        "alt": ""
+        "alt": "Kneeling in plate armor with the head bowed over a sword hilt, grey hair, dark stormy sky"
       },
       {
         "src": "/work/valgur/06.jpg",
         "width": 2499,
         "height": 1667,
         "color": "#050505",
-        "alt": ""
+        "alt": "Two small armored figures facing each other across a lightning bolt on a dark hill"
       },
       {
         "src": "/work/valgur/07.jpg",
         "width": 2499,
         "height": 3331,
         "color": "#18303D",
-        "alt": ""
+        "alt": "Gauntleted hand gripping a sword hilt, long pale blades of light in the dark behind"
       },
       {
         "src": "/work/valgur/08.jpg",
         "width": 2499,
         "height": 3333,
         "color": "#080C0D",
-        "alt": ""
+        "alt": "Two people in black plate armor and robes, one holding a stuffed toy, shaft of light, storm clouds"
       },
       {
         "src": "/work/valgur/09.jpg",
         "width": 2499,
         "height": 3333,
         "color": "#040505",
-        "alt": ""
+        "alt": "Kneeling with a sword blade held upright before the face, long dark hair, black robe, pauldron"
       },
       {
         "src": "/work/valgur/10.jpg",
         "width": 2499,
         "height": 3331,
         "color": "#090D0E",
-        "alt": ""
+        "alt": "Two people in black plate armor and robes standing side by side, swords planted, stormy sky"
       },
       {
         "src": "/work/valgur/11.jpg",
         "width": 2499,
         "height": 3270,
         "color": "#1B3C47",
-        "alt": ""
+        "alt": "Armored figure reading from a book above a seated person in a long dark skirt"
       },
       {
         "src": "/work/valgur/12.jpg",
         "width": 2499,
         "height": 1667,
         "color": "#16323E",
-        "alt": ""
+        "alt": "Looking up in plate armor, a long sword blade rising behind the head, teal backdrop"
       },
       {
         "src": "/work/valgur/13.jpg",
         "width": 2499,
         "height": 3331,
         "color": "#030405",
-        "alt": ""
+        "alt": "Standing in plate armor and a long black robe, hand on a sword, storm clouds, shaft of light"
       },
       {
         "src": "/work/valgur/14.jpg",
         "width": 2499,
         "height": 3331,
         "color": "#030303",
-        "alt": ""
+        "alt": "Holding a sword upright in plate armor and gauntlets, long dark hair, faint lightning behind"
       },
       {
         "src": "/work/valgur/15.jpg",
         "width": 2499,
         "height": 3331,
         "color": "#040505",
-        "alt": ""
+        "alt": "Reaching one arm toward a shaft of light in a long black robe, storm clouds, dark hill"
       },
       {
         "src": "/work/valgur/16.jpg",
         "width": 2499,
         "height": 3333,
         "color": "#FFFFFF",
-        "alt": ""
+        "alt": "Armored silhouette in profile against a blown-out white light, sword held low"
       }
     ]
   },
@@ -9503,84 +9503,84 @@ export const PROJECTS: Project[] = [
         "width": 2499,
         "height": 3124,
         "color": "#260C0C",
-        "alt": ""
+        "alt": "Kneeling on a white light circle with one arm raised, white slip dress, braided hair, deep red backdrop"
       },
       {
         "src": "/work/vendetta/02.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#400C0C",
-        "alt": ""
+        "alt": "Seated on a white circle holding a glass sphere, white slip dress, braids, gold bracelets, red backdrop"
       },
       {
         "src": "/work/vendetta/03.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#730C0C",
-        "alt": ""
+        "alt": "Glass sphere held over one eye, braided hair, red light on the face, dark red backdrop"
       },
       {
         "src": "/work/vendetta/04.jpg",
         "width": 2429,
         "height": 3641,
         "color": "#8C0C0C",
-        "alt": ""
+        "alt": "Three glass spheres held up in both hands, blurred slip dress behind, deep red light"
       },
       {
         "src": "/work/vendetta/05.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#400C0C",
-        "alt": ""
+        "alt": "Eyes closed with a bundle of dried lavender over the mouth, braids, white camisole, red backdrop"
       },
       {
         "src": "/work/vendetta/06.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#400C0C",
-        "alt": ""
+        "alt": "Standing with hands pressed together at the waist, dried lavender at the chin, white camisole, red backdrop"
       },
       {
         "src": "/work/vendetta/07.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#260C0C",
-        "alt": ""
+        "alt": "Crouched on a white circle of light with the head bowed, dried lavender in the hair, white shorts"
       },
       {
         "src": "/work/vendetta/08.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#590C0C",
-        "alt": ""
+        "alt": "Crouched in profile on a white circle, looking up, braided hair, white shorts, deep red backdrop"
       },
       {
         "src": "/work/vendetta/09.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#260C0C",
-        "alt": ""
+        "alt": "Crouched looking up with dried lavender in one hand, braids, white top and shorts, red backdrop"
       },
       {
         "src": "/work/vendetta/10.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#730C0C",
-        "alt": ""
+        "alt": "Kneeling on a white circle holding a sword upright, white slip dress, braids, red and black backdrop"
       },
       {
         "src": "/work/vendetta/11.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#730C0C",
-        "alt": ""
+        "alt": "Kneeling with one arm raised high holding a sword, white slip dress, braids, red backdrop"
       },
       {
         "src": "/work/vendetta/12.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#F30C0C",
-        "alt": ""
+        "alt": "Glass sphere held close to the lens showing an inverted face, red and orange blur"
       }
     ]
   },
@@ -9610,91 +9610,91 @@ export const PROJECTS: Project[] = [
         "width": 2499,
         "height": 3124,
         "color": "#262626",
-        "alt": ""
+        "alt": "Lying on dark soil with the legs raised, ivy vines and red roses wrapped around, grey backdrop"
       },
       {
         "src": "/work/vines-roses/02.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#262626",
-        "alt": ""
+        "alt": "Close crop lying down, red roses and ivy vines laid across, blond hair spread on the soil"
       },
       {
         "src": "/work/vines-roses/03.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#262626",
-        "alt": ""
+        "alt": "Lying on one side with a hand under the head, red roses and ivy vines, direct gaze"
       },
       {
         "src": "/work/vines-roses/04.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#260C0C",
-        "alt": ""
+        "alt": "Lying on a mound of soil holding a red rose against the chest, ivy vines, soft grey light"
       },
       {
         "src": "/work/vines-roses/05.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#737373",
-        "alt": ""
+        "alt": "Seen from above on a soil mound, a rose held to the face, ivy vines and scattered petals"
       },
       {
         "src": "/work/vines-roses/06.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#262626",
-        "alt": ""
+        "alt": "Lying back with one leg raised, red roses and ivy vines, blond hair on the soil"
       },
       {
         "src": "/work/vines-roses/07.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#595959",
-        "alt": ""
+        "alt": "Leaning on one hand over the soil, head tilted, red roses and ivy vines, wet-look hair"
       },
       {
         "src": "/work/vines-roses/08.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#262626",
-        "alt": ""
+        "alt": "On hands and knees on the soil mound, red roses and ivy vines, looking up, scattered petals"
       },
       {
         "src": "/work/vines-roses/09.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#262626",
-        "alt": ""
+        "alt": "Crawling forward on soil with ivy vines and red roses, wet-look hair, direct gaze"
       },
       {
         "src": "/work/vines-roses/10.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#262626",
-        "alt": ""
+        "alt": "Standing and bending forward with ivy vines and red roses, looking at the lens, grey backdrop"
       },
       {
         "src": "/work/vines-roses/11.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#262626",
-        "alt": ""
+        "alt": "Standing with both hands in the hair, red roses and ivy vines, soil mound at the feet"
       },
       {
         "src": "/work/vines-roses/12.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#262626",
-        "alt": ""
+        "alt": "Leaning back on one arm, the other arm over the head, red roses and ivy vines, soil beneath"
       },
       {
         "src": "/work/vines-roses/13.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#262626",
-        "alt": ""
+        "alt": "Seated on soil looking up and away, red roses and ivy vines, one hand planted, grey backdrop"
       }
     ]
   },
