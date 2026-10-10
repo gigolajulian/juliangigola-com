@@ -1075,42 +1075,42 @@ export const PROJECTS: Project[] = [
         "width": 2500,
         "height": 3333,
         "color": "#C9BCB3",
-        "alt": ""
+        "alt": "Seated twisted on the floor in a white crop top and leg warmers, hair swinging across her face"
       },
       {
         "src": "/work/decoy/02.jpg",
         "width": 2500,
         "height": 3334,
         "color": "#DBD4D0",
-        "alt": ""
+        "alt": "Profile walking in a white tank, grey shorts and open-toe leg warmers on a pale sweep"
       },
       {
         "src": "/work/decoy/03.jpg",
         "width": 2500,
         "height": 3333,
         "color": "#E5DEDB",
-        "alt": ""
+        "alt": "Bending forward with hands on her shin, wavy hair hanging, white tank and leg warmers"
       },
       {
         "src": "/work/decoy/04.jpg",
         "width": 2500,
         "height": 3333,
         "color": "#E7DFDB",
-        "alt": ""
+        "alt": "Lying back on one elbow with a leg raised in a white leg warmer, looking up"
       },
       {
         "src": "/work/decoy/05.jpg",
         "width": 2500,
         "height": 3333,
         "color": "#DACDC6",
-        "alt": ""
+        "alt": "Seated on the floor, one knee up, hand planted behind her, looking off to the left"
       },
       {
         "src": "/work/decoy/06.jpg",
         "width": 2500,
         "height": 3333,
         "color": "#C4B8B1",
-        "alt": ""
+        "alt": "Head resting on her folded arms on the floor, face in profile, gold hoop earring, soft light"
       }
     ]
   },
