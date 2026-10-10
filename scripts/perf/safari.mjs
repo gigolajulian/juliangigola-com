@@ -9,6 +9,8 @@
  *   node scripts/perf/safari.mjs                        # http://localhost:3100/
  *   node scripts/perf/safari.mjs http://localhost:3100/portfolio --swipes 6
  *   node scripts/perf/safari.mjs --size 1440x900 --back
+ *   node scripts/perf/safari.mjs --synthetic           # page events only
+ *   node scripts/perf/safari.mjs --splash              # the first-visit splash
  *
  * Each swipe is a trackpad-style run of horizontal wheel deltas that tails
  * off, as a flick on a MacBook does. WebDriver wheel actions are tried
@@ -41,6 +43,10 @@ const [WIDTH, HEIGHT] = flag("size", "1440x900").split("x").map(Number);
 const PORT = Number(flag("port", "4445"));
 /** Swipe back the same number of times after going forward. */
 const BACK = args.includes("--back");
+// The page's own wheel events, skipping WebDriver's.
+const SYNTHETIC_ONLY = args.includes("--synthetic");
+// The first-visit splash instead of swipes.
+const SPLASH = args.includes("--splash");
 /** The strip a swipe moves. The homepage and every horizontal page have one. */
 const STRIP = flag("selector", ".strip-scroll");
 
@@ -91,6 +97,10 @@ const RECORD = `
     requestAnimationFrame(tick);
   };
   requestAnimationFrame(tick);
+  // The wheel events that reached the page, to tell input that was sent
+  // from input that arrived.
+  const w = (window.__perfWheel = []);
+  addEventListener("wheel", (e) => w.push([e.deltaMode, e.deltaX, e.deltaY]), { capture: true, passive: true });
 `;
 
 /* Runs in the page: the strip's width and where it stands. */
@@ -167,64 +177,103 @@ try {
     await wd("POST", `${s}/timeouts`, { script: 15000 });
     await wd("POST", `${s}/window/rect`, { x: 0, y: 0, width: WIDTH, height: HEIGHT });
 
-    // The splash runs once a visit: mark it seen, then load the page for real.
-    await wd("POST", `${s}/url`, { url: URL });
-    await run(`try { sessionStorage.setItem("jg-intro", "1"); } catch (e) {}`);
-    await wd("POST", `${s}/url`, { url: URL });
-    await sleep(2500);
-    await run(RECORD);
+    /* The splash (`components/intro.tsx`): a new session has not seen it,
+       so it plays on the first load. Frames from the moment WebDriver
+       hands the page back, which is after its load event, until the
+       splash has lifted (`data-intro` gone). */
+    if (SPLASH) {
+      await wd("POST", `${s}/url`, { url: URL });
+      const r = await runAsync(
+        `const done = arguments[arguments.length - 1];
+         const f = [];
+         let last = 0;
+         const t0 = performance.now();
+         const tick = (t) => {
+           if (last) f.push(t - last);
+           last = t;
+           const on = document.documentElement.dataset.intro !== undefined;
+           if (on && performance.now() - t0 < 12000) requestAnimationFrame(tick);
+           else done({ frames: f, lifted: on ? -1 : performance.now(), played: f.length > 0 });
+         };
+         requestAnimationFrame(tick);`,
+      );
+      const st = stats(r.frames);
+      console.log(`${URL}  ${WIDTH}x${HEIGHT}  splash`);
+      console.log(r.lifted < 0 ? "splash did not lift within 12s" : `lifted at ${Math.round(r.lifted)}ms after navigation`);
+      console.log(
+        `frames ${r.frames.length}  median ${st.median.toFixed(1)}ms  slow>20ms ${st.slow.toFixed(1)}%  worst ${Math.round(st.worst)}ms`,
+      );
+    } else {
+      // The splash runs once a visit: mark it seen, then load the page for real.
+      await wd("POST", `${s}/url`, { url: URL });
+      await run(`try { sessionStorage.setItem("jg-intro", "1"); } catch (e) {}`);
+      await wd("POST", `${s}/url`, { url: URL });
+      await sleep(2500);
+      await run(RECORD);
 
-    const at = await run(WHERE, [STRIP]);
-    if (!at) throw new Error(`No ${STRIP} on ${URL}`);
+      const at = await run(WHERE, [STRIP]);
+      if (!at) throw new Error(`No ${STRIP} on ${URL}`);
 
-    /* WebDriver wheel actions first; the page's own events if refused. */
-    let mode = "webdriver wheel";
-    const swipe = async (deltas) => {
-      if (mode === "webdriver wheel") {
-        try {
-          await wd("POST", `${s}/actions`, {
-            actions: [
-              {
-                type: "wheel",
-                id: "trackpad",
-                actions: deltas.map((d) => ({
-                  type: "scroll",
-                  x: Math.round(at.x),
-                  y: Math.round(at.y),
-                  deltaX: d,
-                  deltaY: 0,
-                  duration: 16,
-                  origin: "viewport",
-                })),
-              },
-            ],
-          });
-          return;
-        } catch {
-          mode = "synthetic wheel";
+      /* WebDriver wheel actions first; the page's own events if refused. */
+      let mode = SYNTHETIC_ONLY ? "synthetic wheel" : "webdriver wheel";
+      const swipe = async (deltas) => {
+        if (mode === "webdriver wheel") {
+          try {
+            /* safaridriver reads each scroll's delta as a running total
+               and sends the page the difference from the one before: sent
+               40, 35, 31 the page got 40, -5, -4, a push and a pull, and
+               nothing moved. So it is sent the running totals. */
+            let total = 0;
+            const totals = deltas.map((d) => (total += d));
+            await wd("POST", `${s}/actions`, {
+              actions: [
+                {
+                  type: "wheel",
+                  id: "trackpad",
+                  actions: totals.map((d) => ({
+                    type: "scroll",
+                    x: Math.round(at.x),
+                    y: Math.round(at.y),
+                    deltaX: d,
+                    deltaY: 0,
+                    duration: 16,
+                    origin: "viewport",
+                  })),
+                },
+              ],
+            });
+            return;
+          } catch {
+            mode = "synthetic wheel";
+          }
         }
+        await runAsync(SYNTHETIC, [deltas, at.x, at.y]);
+      };
+
+      const plan = [...Array(SWIPES).fill(1), ...(BACK ? Array(SWIPES).fill(-1) : [])];
+      const landed = [];
+      await run(`window.__perfOn = true;`);
+      for (const sign of plan) {
+        const from = (await run(WHERE, [STRIP])).left;
+        await swipe(flick(sign));
+        const to = await runAsync(SETTLE, [STRIP]);
+        landed.push((to - from) / at.width);
+        await sleep(400);
       }
-      await runAsync(SYNTHETIC, [deltas, at.x, at.y]);
-    };
+      const frames = await run(`window.__perfOn = false; return window.__perfFrames;`);
+      const wheel = await run(`return window.__perfWheel;`);
+      const st = stats(frames);
 
-    const plan = [...Array(SWIPES).fill(1), ...(BACK ? Array(SWIPES).fill(-1) : [])];
-    const landed = [];
-    await run(`window.__perfOn = true;`);
-    for (const sign of plan) {
-      const from = (await run(WHERE, [STRIP])).left;
-      await swipe(flick(sign));
-      const to = await runAsync(SETTLE, [STRIP]);
-      landed.push((to - from) / at.width);
-      await sleep(400);
+      console.log(`${URL}  ${WIDTH}x${HEIGHT}  ${plan.length} swipes (${mode})`);
+      console.log(
+        `wheel events seen ${wheel.length}` +
+          (wheel.length ? `, first deltaX ${wheel.slice(0, 3).map((e) => e[1]).join(" ")} (mode ${wheel[0][0]})` : ""),
+      );
+      console.log(`landed (screens): ${landed.map((n) => (n >= 0 ? "+" : "") + n.toFixed(2)).join(" ")}`);
+      console.log(
+        `frames ${frames.length}  median ${st.median.toFixed(1)}ms  slow>20ms ${st.slow.toFixed(1)}%  worst ${Math.round(st.worst)}ms`,
+      );
     }
-    const frames = await run(`window.__perfOn = false; return window.__perfFrames;`);
-    const st = stats(frames);
-
-    console.log(`${URL}  ${WIDTH}x${HEIGHT}  ${plan.length} swipes (${mode})`);
-    console.log(`landed (screens): ${landed.map((n) => (n >= 0 ? "+" : "") + n.toFixed(2)).join(" ")}`);
-    console.log(
-      `frames ${frames.length}  median ${st.median.toFixed(1)}ms  slow>20ms ${st.slow.toFixed(1)}%  worst ${Math.round(st.worst)}ms`,
-    );
   }
 } catch (err) {
   console.error(err.message);
