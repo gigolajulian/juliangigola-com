@@ -33,6 +33,15 @@ const pad = (n: number) => String(n).padStart(2, "0");
 const iso = (d: Date) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
 const fromIso = (s: string) => new Date(+s.slice(0, 4), +s.slice(5, 7) - 1, +s.slice(8, 10));
 const minutesOf = (start: string) => +start.slice(11, 13) * 60 + +start.slice(14, 16);
+/** Where the session happens, per event: the choices, and what to ask after one. An event
+    with a single choice asks nothing; one not listed gets a plain text box. */
+const WHERE: Record<string, [label: string, ask?: string][]> = {
+  graduation: [["On campus", "Which campus?"], ["In studio"]],
+  portraits: [["Studio"], ["Outdoor", "Where?"], ["Your location", "Where?"]],
+  headshots: [["Studio"], ["On location", "Address"]],
+  digitals: [["Studio"]],
+};
+
 /** "PDT" or "PST" for a Pacific visitor on that date; the zone's own short name elsewhere. */
 const zone = (start: string, tz: string) =>
   new Intl.DateTimeFormat("en-US", { timeZone: tz, timeZoneName: "short" })
@@ -81,6 +90,9 @@ export function TimePicker({
   const [length, setLength] = React.useState(30);
   /** The event takes its place from the visitor (a studio session or their own address). */
   const [needsWhere, setNeedsWhere] = React.useState(false);
+  const [opt, setOpt] = React.useState("");
+  /** The follow-up question, kept while it folds shut so its text does not vanish first. */
+  const [ask, setAsk] = React.useState("");
   const [session, setSession] = React.useState("");
   /** Who booked, for the page that follows. */
   const [booked, setBooked] = React.useState({ name: "", email: "", where: "" });
@@ -213,7 +225,10 @@ export function TimePicker({
     setStep("sending");
     setError("");
     const began = Date.now();
-    const where = String(form.get("where") || "").trim();
+    const opts = WHERE[slug];
+    const picked = opts?.length === 1 ? opts[0][0] : String(form.get("opt") || "");
+    const asked = opts?.find(([label]) => label === picked)?.[1];
+    const where = opts ? [picked, asked ? String(form.get("detail") || "").trim() : ""].filter(Boolean).join(": ") : String(form.get("where") || "").trim();
     const phone = e164(String(form.get("phone") || ""));
     if (!phone) {
       setError("Check your phone number. Add the country code if it is not a US number.");
@@ -298,7 +313,9 @@ export function TimePicker({
             </div>
           ))}
         </dl>
-        <ol className="flex flex-col gap-2 text-sm normal-case leading-relaxed text-muted-foreground sm:flex-row sm:gap-10">
+        <div className="flex flex-col gap-4 border-t border-border pt-5">
+          <p className="label tp-roll text-muted-foreground" style={{ animationDelay: "480ms" }}>What&rsquo;s next</p>
+          <ol className="flex flex-col gap-2 text-sm normal-case leading-relaxed text-muted-foreground sm:flex-row sm:gap-10">
           {next.map((t, n) => (
             <li key={t} className="tp-roll flex gap-3 sm:max-w-[16rem]" style={{ animationDelay: `${520 + n * 90}ms` }}>
               <span className="label text-foreground">{`0${n + 1}`}</span>
@@ -306,6 +323,7 @@ export function TimePicker({
             </li>
           ))}
         </ol>
+        </div>
       </div>
     );
   }
@@ -502,7 +520,7 @@ export function TimePicker({
             e.preventDefault();
             void book(new FormData(e.currentTarget));
           }}
-          className="flex flex-col gap-4"
+          className="tp-rise flex flex-col gap-4"
         >
           <div className="flex items-center justify-between gap-4">
             <span className="label">{sum}</span>
@@ -513,9 +531,30 @@ export function TimePicker({
             <label className="label flex flex-col gap-2 text-muted-foreground">Last name<input name="last" required autoComplete="family-name" className="border-b border-border bg-transparent py-2 text-base normal-case text-foreground outline-none focus:border-foreground" /></label>
             <label className="label flex flex-col gap-2 text-muted-foreground">Email<input name="email" type="email" required autoComplete="email" className="border-b border-border bg-transparent py-2 text-base normal-case text-foreground outline-none focus:border-foreground" /></label>
             <label className="label flex flex-col gap-2 text-muted-foreground">Phone<input name="phone" type="tel" required autoComplete="tel" inputMode="tel" className="border-b border-border bg-transparent py-2 text-base normal-case text-foreground outline-none focus:border-foreground" /></label>
-            {needsWhere ? (
-            <label className="label flex flex-col gap-2 text-muted-foreground sm:col-span-2">Where: the studio, or an address<input name="where" required className="border-b border-border bg-transparent py-2 text-base normal-case text-foreground outline-none focus:border-foreground" /></label>
-          ) : null}
+            {needsWhere && WHERE[slug]?.length === 1 ? null : needsWhere && WHERE[slug] ? (
+              <>
+                <fieldset className="flex flex-col sm:col-span-2">
+                  <legend className="label mb-2 text-muted-foreground">Location</legend>
+                  <div className="flex flex-wrap gap-2">
+                    {WHERE[slug].map(([label]) => (
+                      <label key={label} className="label cursor-pointer">
+                        <input type="radio" name="opt" value={label} required checked={opt === label} onChange={() => {
+                          setOpt(label);
+                          const next = WHERE[slug].find(([l]) => l === label)?.[1];
+                          if (next) setAsk(next);
+                        }} className="peer sr-only" />
+                        <span className="block rounded-[2px] border border-border px-5 py-3 transition-colors duration-200 hoverable:hover:border-foreground peer-checked:border-foreground peer-checked:bg-foreground peer-checked:text-background peer-focus-visible:outline peer-focus-visible:outline-1 peer-focus-visible:outline-offset-2">{label}</span>
+                      </label>
+                    ))}
+                  </div>
+                  <Fold on={!!WHERE[slug].find(([label]) => label === opt)?.[1]}>
+                    <label className="label flex flex-col gap-2 pt-4 text-muted-foreground">{ask}<input name="detail" required={!!WHERE[slug].find(([label]) => label === opt)?.[1]} className="border-b border-border bg-transparent py-2 text-base normal-case text-foreground outline-none focus:border-foreground" /></label>
+                  </Fold>
+                </fieldset>
+              </>
+            ) : needsWhere ? (
+              <label className="label flex flex-col gap-2 text-muted-foreground sm:col-span-2">Where: the studio, or an address?<input name="where" required className="border-b border-border bg-transparent py-2 text-base normal-case text-foreground outline-none focus:border-foreground" /></label>
+            ) : null}
           </div>
           
           <label className="label flex flex-col gap-2 text-muted-foreground">Anything I should know<textarea name="notes" rows={2} className="resize-none border-b border-border bg-transparent py-2 text-base normal-case text-foreground outline-none focus:border-foreground" /></label>

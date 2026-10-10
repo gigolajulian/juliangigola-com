@@ -65,8 +65,18 @@
 .tp-roll {
   animation: tp-roll 0.45s var(--ease-out-strong, cubic-bezier(0.23, 1, 0.32, 1));
 }
+@keyframes tp-rise {
+  from {
+    opacity: 0;
+    transform: translateY(0.75rem);
+  }
+}
+.tp-rise {
+  animation: tp-rise 0.5s var(--ease-out-strong, cubic-bezier(0.23, 1, 0.32, 1));
+}
 @media (prefers-reduced-motion: reduce) {
-  .tp-roll {
+  .tp-roll,
+  .tp-rise {
     animation: none;
   }
 }
