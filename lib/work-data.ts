@@ -2879,56 +2879,56 @@ export const PROJECTS: Project[] = [
         "width": 2499,
         "height": 3124,
         "color": "#737359",
-        "alt": "Close portrait, a clawed glove at the lips, black paint streaks, pink-streaked blonde hair"
+        "alt": "Close portrait, a clawed glove at the lips, black liquid streaks, pink-streaked blonde hair"
       },
       {
         "src": "/work/dark-matter/09.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#404040",
-        "alt": "Seated with one clawed glove raised, black paint splashed over the figure and the floor"
+        "alt": "Seated with one clawed glove raised, black liquid splashed over the figure and the floor"
       },
       {
         "src": "/work/dark-matter/10.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#404040",
-        "alt": "One arm raised over the head in a clawed glove, black paint streaks, pink-tipped hair, grey backdrop"
+        "alt": "One arm raised over the head in a clawed glove, black liquid streaks, pink-tipped hair, grey backdrop"
       },
       {
         "src": "/work/dark-matter/11.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#C0C0C0",
-        "alt": "Figure on all fours with hair over the face, black paint splashed across the white floor"
+        "alt": "Figure on all fours with hair over the face, black liquid splashed across the white floor"
       },
       {
         "src": "/work/dark-matter/12.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#C0C0C0",
-        "alt": "Figure on hands and knees in a spill of black paint, one hand reaching forward, white floor"
+        "alt": "Figure on hands and knees in a spill of black liquid, one hand reaching forward, white floor"
       },
       {
         "src": "/work/dark-matter/13.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#404040",
-        "alt": "Motion-blurred figure with an arm raised overhead, black paint streaks, pink-streaked hair, grey backdrop"
+        "alt": "Motion-blurred figure with an arm raised overhead, black liquid streaks, pink-streaked hair, grey backdrop"
       },
       {
         "src": "/work/dark-matter/14.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#404040",
-        "alt": "Kneeling with one arm raised in a clawed glove, black paint dripping, pink-streaked hair"
+        "alt": "Kneeling with one arm raised in a clawed glove, black liquid dripping, pink-streaked hair"
       },
       {
         "src": "/work/dark-matter/15.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#C0C0C0",
-        "alt": "Kneeling in a spill of black paint, one hand planted, the other arm raised, hair hanging"
+        "alt": "Kneeling in a spill of black liquid, one hand planted, the other arm raised, hair hanging"
       }
     ]
   },
