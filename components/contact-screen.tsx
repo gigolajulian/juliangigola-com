@@ -237,14 +237,14 @@ export function ContactScreen({
 
           Julian: the form as a card with a beam running round its
           edge (`contact-beam.tsx`), on the header's glass. */}
-      <ContactBeam className={`contact-card flex min-h-0 w-full justify-self-center sm:max-h-full ${cal ? "max-w-[60rem] sm:h-full" : "max-w-[40rem]"}`}>
+      <ContactBeam className={`contact-card flex min-h-0 w-full justify-self-center sm:max-h-full ${cal ? "max-w-[60rem] sm:h-full" : "max-w-[44rem]"}`}>
         <div
           data-scroll
           data-dial="form"
           className="glass-surface min-h-0 flex-1 rounded-[16px] border border-border p-5 sm:max-h-full sm:p-6 sm:overflow-y-auto sm:overscroll-contain sm:px-8 sm:py-[clamp(1rem,3vh,1.5rem)]"
         >
           {cal ? (
-                        <CalEmbed path={cal} title="Pick a time" className="booking-embed block h-[75svh] w-full rounded-[8px] border-0 sm:h-full" />
+            <CalEmbed path={cal} title="Pick a time" className="booking-embed block h-[75svh] w-full rounded-[8px] border-0 sm:h-full" />
           ) : (
             <Suspense fallback={null}>
               <ContactForm defaults={defaults} sessions={SESSION_TYPES.map((s) => s.name)} />
