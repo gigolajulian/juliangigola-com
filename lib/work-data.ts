@@ -8166,217 +8166,217 @@ export const PROJECTS: Project[] = [
         "width": 2499,
         "height": 3124,
         "color": "#262626",
-        "alt": ""
+        "alt": "Low angle on two people in a mossy forest, one in black overalls, fur hat and face mask"
       },
       {
         "src": "/work/steampunk-files-001/02.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#262626",
-        "alt": ""
+        "alt": "Gloved hand at the knee in black overalls and a fur trapper hat, a second person leaning in"
       },
       {
         "src": "/work/steampunk-files-001/03.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#262626",
-        "alt": ""
+        "alt": "Low wide angle, a gloved hand reaching toward the lens, black overalls, fur hat and face mask"
       },
       {
         "src": "/work/steampunk-files-001/04.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#262626",
-        "alt": ""
+        "alt": "Hand pressed to the face under a fur hat, cream sweater, black overalls, a second person behind"
       },
       {
         "src": "/work/steampunk-files-001/05.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#262626",
-        "alt": ""
+        "alt": "Two people on a leaf-covered bank, one in overalls and a face mask, one in a puffer jacket"
       },
       {
         "src": "/work/steampunk-files-001/06.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#262626",
-        "alt": ""
+        "alt": "Two people in a dim tunnel, one in a brown scarf and puffer jacket, one hands on head"
       },
       {
         "src": "/work/steampunk-files-001/07.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#262626",
-        "alt": ""
+        "alt": "Grey puffer jacket, brown headscarf and tall black boots beside a person in overalls, graffiti tunnel"
       },
       {
         "src": "/work/steampunk-files-001/08.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#262626",
-        "alt": ""
+        "alt": "Crouching with the head down in a fur hat beside a person in a scarf and boots, tunnel"
       },
       {
         "src": "/work/steampunk-files-001/09.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#262626",
-        "alt": ""
+        "alt": "Face mask and fur trapper hat, cream sweater and overalls, a second person in a grey puffer beside"
       },
       {
         "src": "/work/steampunk-files-001/10.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#262626",
-        "alt": ""
+        "alt": "Two people side by side in a forest, black overalls with a face mask, a grey puffer jacket"
       },
       {
         "src": "/work/steampunk-files-001/11.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#262626",
-        "alt": ""
+        "alt": "Holding a black parasol over a grey puffer jacket and tall boots, a second person seated, forest"
       },
       {
         "src": "/work/steampunk-files-001/12.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#262626",
-        "alt": ""
+        "alt": "Two people in a forest clearing, one with a boot raised, one in overalls and a face mask"
       },
       {
         "src": "/work/steampunk-files-001/13.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#D9D9D9",
-        "alt": ""
+        "alt": "Close angle on two people in a bare-branch clearing, a hand raised to the brow, puffer jacket, gloves"
       },
       {
         "src": "/work/steampunk-files-001/14.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#262626",
-        "alt": ""
+        "alt": "Two people on a wet forest road, one in black overalls, one in a pleated skirt"
       },
       {
         "src": "/work/steampunk-files-001/15.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#262626",
-        "alt": ""
+        "alt": "Standing alone on a wet road in a grey puffer jacket and pleated mini skirt, hand raised"
       },
       {
         "src": "/work/steampunk-files-001/16.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#F3F3F3",
-        "alt": ""
+        "alt": "Two people on a gravel pile, one seated in padded overalls and boots, one beside a black umbrella"
       },
       {
         "src": "/work/steampunk-files-001/17.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#262626",
-        "alt": ""
+        "alt": "Two people on gravel, one slumped in a cream sweater and padded overalls, one holding an umbrella"
       },
       {
         "src": "/work/steampunk-files-001/18.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#262626",
-        "alt": ""
+        "alt": "Low angle, a gloved hand reaching to the lens, striped beanie, goggles, cream sweater and padded overalls"
       },
       {
         "src": "/work/steampunk-files-001/19.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#262626",
-        "alt": ""
+        "alt": "Two people on a gravel mound, a striped beanie and goggles, a closed umbrella planted in front"
       },
       {
         "src": "/work/steampunk-files-001/20.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#F3F3F3",
-        "alt": ""
+        "alt": "Low angle on a closed black umbrella, a person crouching in black with gloves, another seated in overalls"
       },
       {
         "src": "/work/steampunk-files-001/21.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#262626",
-        "alt": ""
+        "alt": "Standing in a striped beanie and leather gloves, a brown scarf pulled over another person's face, forest behind"
       },
       {
         "src": "/work/steampunk-files-001/22.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#262626",
-        "alt": ""
+        "alt": "Hand over the eyes in a striped beanie and leather gloves, a person in overalls and scarf beside"
       },
       {
         "src": "/work/steampunk-files-001/23.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#262626",
-        "alt": ""
+        "alt": "Leaning forward on a closed umbrella in a striped beanie, black pleated skirt and gloves, a person behind"
       },
       {
         "src": "/work/steampunk-files-001/24.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#262626",
-        "alt": ""
+        "alt": "Wide shot of two people on a gravel pile, a closed umbrella, striped beanie, overalls, pine trees"
       },
       {
         "src": "/work/steampunk-files-001/25.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#262626",
-        "alt": ""
+        "alt": "Standing with legs apart on gravel in a striped beanie, black top and pleated skirt, closed umbrella"
       },
       {
         "src": "/work/steampunk-files-001/26.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#262626",
-        "alt": ""
+        "alt": "Crouching on gravel in a striped beanie and black boots, closed umbrella standing upright, leather glove"
       },
       {
         "src": "/work/steampunk-files-001/27.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#262626",
-        "alt": ""
+        "alt": "Crouching low in a striped beanie, a closed umbrella planted beside, gloves, black boots, pine trees"
       },
       {
         "src": "/work/steampunk-files-001/28.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#262626",
-        "alt": ""
+        "alt": "Holding a black umbrella overhead in a cream sweater and overalls, scarf over the face, goggles"
       },
       {
         "src": "/work/steampunk-files-001/29.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#262626",
-        "alt": ""
+        "alt": "Grinning under a black umbrella in a cream sweater and overalls, goggles on the head, forest green behind"
       },
       {
         "src": "/work/steampunk-files-001/30.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#262626",
-        "alt": ""
+        "alt": "Holding an umbrella with a brown scarf over the mouth, cream sweater, overalls, gravel and ivy behind"
       },
       {
         "src": "/work/steampunk-files-001/31.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#262626",
-        "alt": ""
+        "alt": "Looking up through a wide black umbrella, brown scarf over the face, goggles on the head, cream sweater"
       }
     ]
   },
@@ -9118,161 +9118,161 @@ export const PROJECTS: Project[] = [
         "width": 2499,
         "height": 3333,
         "color": "#939388",
-        "alt": ""
+        "alt": "Stepping onto a vintage CRT in a black leather jacket and trousers, grey seamless backdrop"
       },
       {
         "src": "/work/ukiyosunknown/03.jpg",
         "width": 1628,
         "height": 2171,
         "color": "#3B4A4F",
-        "alt": ""
+        "alt": "Green-tinted video static with the faint outline of a figure in a jacket"
       },
       {
         "src": "/work/ukiyosunknown/04.jpg",
         "width": 2499,
         "height": 3333,
         "color": "#6D7167",
-        "alt": ""
+        "alt": "Seen from behind in a black textured jacket and black trousers, grey backdrop"
       },
       {
         "src": "/work/ukiyosunknown/05.jpg",
         "width": 2499,
         "height": 3334,
         "color": "#797C72",
-        "alt": ""
+        "alt": "Profile standing in a black textured jacket and trousers, tousled hair, grey backdrop"
       },
       {
         "src": "/work/ukiyosunknown/06.jpg",
         "width": 2499,
         "height": 3331,
         "color": "#A4A19A",
-        "alt": ""
+        "alt": "Holding a CRT television out in a black jacket with gathered shoulders, grey backdrop"
       },
       {
         "src": "/work/ukiyosunknown/07.jpg",
         "width": 2499,
         "height": 3333,
         "color": "#95968E",
-        "alt": ""
+        "alt": "Leaning over to lift a CRT with the cord trailing, black jacket and trousers, grey backdrop"
       },
       {
         "src": "/work/ukiyosunknown/08.jpg",
         "width": 2047,
         "height": 2559,
         "color": "#C0C0C0",
-        "alt": ""
+        "alt": "Walking past a concrete wall in a worn grey leather jacket and rust zip pants, motion blur"
       },
       {
         "src": "/work/ukiyosunknown/09.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#D9C0C0",
-        "alt": ""
+        "alt": "Head turned into a leather jacket sleeve, rust zip pants and black boots, leaning on a concrete wall"
       },
       {
         "src": "/work/ukiyosunknown/10.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#D9C0C0",
-        "alt": ""
+        "alt": "Hand in the hair in a worn leather jacket over a white tank, long pendant, rust zip pants"
       },
       {
         "src": "/work/ukiyosunknown/11.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#A6A6A6",
-        "alt": ""
+        "alt": "Low angle against a glass tower, worn leather jacket, white tank and pendant, rust zip pants"
       },
       {
         "src": "/work/ukiyosunknown/12.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#A6A68C",
-        "alt": ""
+        "alt": "Leaning on a white railing in a worn leather jacket and rust zip pants, glass building behind"
       },
       {
         "src": "/work/ukiyosunknown/13.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#D9C0C0",
-        "alt": ""
+        "alt": "Looking down in a worn leather jacket over a white tank, pendant, rust zip pants, concrete wall"
       },
       {
         "src": "/work/ukiyosunknown/14.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#D9C0C0",
-        "alt": ""
+        "alt": "Walking in motion blur in an ivory leather jacket and black flared trousers, concrete wall"
       },
       {
         "src": "/work/ukiyosunknown/15.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#C0C0C0",
-        "alt": ""
+        "alt": "Leaning back against a concrete wall in an ivory zip jacket, arm tucked in, black trousers"
       },
       {
         "src": "/work/ukiyosunknown/16.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#D9D9D9",
-        "alt": ""
+        "alt": "Hunched forward in an ivory leather jacket with hands crossed, black flared trousers, concrete wall"
       },
       {
         "src": "/work/ukiyosunknown/17.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#D9C0C0",
-        "alt": ""
+        "alt": "Standing with a hand in the pocket in an ivory jacket over a white tank, black flared trousers"
       },
       {
         "src": "/work/ukiyosunknown/18.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#D9C0C0",
-        "alt": ""
+        "alt": "Seen from behind in an ivory leather jacket with a large back logo, black trousers, concrete wall"
       },
       {
         "src": "/work/ukiyosunknown/19.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#D9C0C0",
-        "alt": ""
+        "alt": "Back view in an ivory leather jacket and black flared trousers, concrete wall, soft shade"
       },
       {
         "src": "/work/ukiyosunknown/20.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#262626",
-        "alt": ""
+        "alt": "Looking away in a lilac mohair sweater with red marks on the sleeves, pendant, green ivy wall"
       },
       {
         "src": "/work/ukiyosunknown/21.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#262626",
-        "alt": ""
+        "alt": "Standing with a boot raised in a lilac mohair sweater and black trousers, ivy wall, low sun"
       },
       {
         "src": "/work/ukiyosunknown/22.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#262626",
-        "alt": ""
+        "alt": "Seated on a concrete ledge in a lilac mohair sweater with red marks, low angle, ivy behind"
       },
       {
         "src": "/work/ukiyosunknown/23.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#C0A6A6",
-        "alt": ""
+        "alt": "Wide stance on a concrete ledge in a lilac mohair sweater, black wide trousers, ivy wall"
       },
       {
         "src": "/work/ukiyosunknown/24.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#D9C0C0",
-        "alt": ""
+        "alt": "Standing with hands low in a lilac mohair sweater and black flared trousers, concrete wall"
       }
     ]
   },
