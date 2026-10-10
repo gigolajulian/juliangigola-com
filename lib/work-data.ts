@@ -6509,7 +6509,7 @@ export const PROJECTS: Project[] = [
         "width": 2499,
         "height": 3124,
         "color": "#26D9F3",
-        "alt": "Black sport sunglasses with a blue mirrored lens on a white ledge, bright cyan backdrop"
+        "alt": "Black sport sunglasses with a blue mirrored lens across a white band of light, bright cyan backdrop"
       },
       {
         "src": "/work/oakley-x-nike/06.jpg",
