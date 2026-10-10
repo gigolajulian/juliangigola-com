@@ -350,18 +350,6 @@
 :root:not([data-theme="light"]) .booking-embed {
   filter: invert(0.9) hue-rotate(180deg);
 }
-/* And the page itself takes the inverted calendar's grey, so the
-   frame sits in it rather than as a lighter slab on near black.
-   Exactly what `invert(0.9)` makes of Google's white. */
-/* The wash (`body::before`) as well as the body, or the wash covers it. */
-:root:not([data-theme="light"]) body:has(.book-page),
-:root:not([data-theme="light"]) body:has(.book-page)::before {
-  background: rgb(25 25 25);
-}
-:root[data-theme="light"] body:has(.book-page),
-:root[data-theme="light"] body:has(.book-page)::before {
-  background: rgb(225 227 229);
-}
 /* The calendar fades up each time the session changes. */
 .booking-embed {
   animation: jg-fade-in 500ms var(--ease-out-strong) both;
@@ -375,4 +363,46 @@
    colours, so it is not turned over like the frames. */
 :root:not([data-theme="light"]) .booking-embed.tp {
   filter: none;
+}
+
+/* The time picker's open days: a hairline of the accent, the one touch of
+   colour, so the days that can be booked read before the ones that cannot
+   (`time-picker.tsx`). */
+.tp .tp-open {
+  border-color: color-mix(in oklab, var(--accent) var(--tp-tint, 55%), var(--border));
+}
+
+/* The booking page is one window only side by side, from lg. Stacked
+   under it (an upright iPad) it is taller than the screen, and the
+   strips' lock from 40rem (strip.css) left the times and Confirm out of
+   reach of a finger, with the footer drawn across the card. */
+@media (min-width: 40rem) and (max-width: 63.99rem) {
+  html:has(.book-page[data-quiet-footer]),
+  body:has(.book-page[data-quiet-footer]) {
+    height: auto;
+    overflow: visible;
+  }
+}
+
+/* An earlier or later week or month (`time-picker.tsx`): the new days come
+   in from the side the arrow points to. */
+@keyframes tp-slide {
+  from {
+    opacity: 0;
+    translate: calc(var(--tp-dir) * 2.5rem) 0;
+  }
+}
+.tp [data-slide="1"] {
+  --tp-dir: 1;
+}
+.tp [data-slide="-1"] {
+  --tp-dir: -1;
+}
+.tp :is([data-slide="1"], [data-slide="-1"]) [data-day] {
+  animation: tp-slide 420ms var(--ease-out-strong, cubic-bezier(0.23, 1, 0.32, 1));
+}
+@media (prefers-reduced-motion: reduce) {
+  .tp [data-slide] [data-day] {
+    animation: none;
+  }
 }

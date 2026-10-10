@@ -4,10 +4,10 @@ import * as React from "react";
 import { cn } from "@/lib/utils";
 
 /* ── the time picker ──────────────────────────────────────────────
- * Cal.com's open times, drawn as the site draws everything else: a
- * ruler. Days are cards (a week, or the month) with how open each is;
- * the time is a large number you scrub along a ruler of ticks, and the
- * ticks that are not open are faded and skipped.
+ * Cal.com's open times, in two plain steps: a day, then a time. Days
+ * are cards (a week, or the month) with how open each is; the open times
+ * of the day picked are buttons, and the one picked is the large number.
+ * Julian: the ruler of ticks was too minimal to read at a glance.
  *
  * It reads and books through Cal.com's public API, which needs no key
  * and allows any origin, so there is no server here: slots from
@@ -22,6 +22,9 @@ import { cn } from "@/lib/utils";
 
 const API = "https://api.cal.com/v2";
 const DAYS = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
+/** The kinds of time the open times are grouped in, by start, in minutes. */
+const PARTS = [["Morning", 0, 720], ["Afternoon", 720, 1020], ["Evening", 1020, 1440]] as const;
+const WEEKDAYS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 const MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 /** How far ahead times are asked for. */
 const AHEAD = 120;
@@ -42,11 +45,15 @@ const WHERE: Record<string, [label: string, ask?: string][]> = {
   digitals: [["Studio"]],
 };
 
-/** "PDT" or "PST" for a Pacific visitor on that date; the zone's own short name elsewhere. */
-const zone = (start: string, tz: string) =>
-  new Intl.DateTimeFormat("en-US", { timeZone: tz, timeZoneName: "short" })
-    .formatToParts(new Date(start))
-    .find((p) => p.type === "timeZoneName")?.value ?? tz;
+/** "San Jose PDT" (or PST, by the date) for a Pacific visitor, where the
+    studio is; the zone's own short name elsewhere. */
+const zone = (start: string, tz: string) => {
+  const short =
+    new Intl.DateTimeFormat("en-US", { timeZone: tz, timeZoneName: "short" })
+      .formatToParts(new Date(start))
+      .find((p) => p.type === "timeZoneName")?.value ?? tz.replace(/_/g, " ");
+  return tz === "America/Los_Angeles" ? `San Jose ${short}` : short;
+};
 /** A phone number as +E.164: a US number without its country code gets +1. */
 const e164 = (raw: string) => {
   const digits = raw.replace(/\D/g, "");
@@ -87,6 +94,13 @@ export function TimePicker({
 }) {
   const [username, slug] = path.split("/");
   const [tz] = React.useState(() => Intl.DateTimeFormat().resolvedOptions().timeZone || "America/Los_Angeles");
+  /* Julian: the time where I am, with the place, before a time is picked. */
+  const clockHere = () => new Intl.DateTimeFormat("en-US", { timeZone: "America/Los_Angeles", hour: "numeric", minute: "2-digit", timeZoneName: "short" }).format(new Date());
+  const [here, setHere] = React.useState(clockHere);
+  React.useEffect(() => {
+    const t = setInterval(() => setHere(clockHere()), 15000);
+    return () => clearInterval(t);
+  }, []);
   const [length, setLength] = React.useState(30);
   /** The event takes its place from the visitor (a studio session or their own address). */
   const [needsWhere, setNeedsWhere] = React.useState(false);
@@ -101,11 +115,18 @@ export function TimePicker({
   const [view, setView] = React.useState<"week" | "month">("week");
   const [anchor, setAnchor] = React.useState(() => new Date()); // the week or month on show
   const [pick, setPick] = React.useState<Pick | null>(null);
-  const [chosen, setChosen] = React.useState(false); // a time picked by hand, not the first one offered
+  /* Julian: the arrows more defined, larger. Drawn, not the font's. */
+  const arrow = (
+    <svg aria-hidden viewBox="0 0 22 16" className="h-4 w-[1.375rem]" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="square">
+      <path d="M20.5 8H2.5M6.5 5 2.5 8 6.5 11" />
+    </svg>
+  );
+  /* What has been picked by hand: nothing (the first open time is only
+     on show), a day, or a day and its time. A day alone keeps Confirm off:
+     clicking one used to pick its time as well, skipping step two. */
+  const [chosen, setChosen] = React.useState<false | "day" | "time">(false);
   const [step, setStep] = React.useState<"pick" | "form" | "sending" | "check" | "done">("pick");
   const [error, setError] = React.useState("");
-  const ruler = React.useRef<HTMLDivElement>(null);
-  const ghost = React.useRef<HTMLSpanElement>(null);
 
   const load = React.useCallback(async () => {
     try {
@@ -168,57 +189,154 @@ export function TimePicker({
     setAnchor(fromIso(date));
   }, [state, days, pick]);
 
-  const choose = (date: string, min?: number) => {
+  /* A time button picks the time; a day keeps the time already picked
+     when that day has it open, and otherwise waits for one. */
+  const choose = (date: string, min: number, time: boolean) => {
     const list = days?.[date];
     if (!list?.length) return;
-    setChosen(true);
-    const s = list.find((x) => minutesOf(x.start) === min) ?? list[0];
-    setPick({ date, min: minutesOf(s.start), start: s.start });
+    const s = list.find((x) => minutesOf(x.start) === min);
+    setChosen(time || (s && chosen === "time") ? "time" : "day");
+    const t = s ?? list[0];
+    setPick({ date, min: minutesOf(t.start), start: t.start });
   };
 
-  /* The nearest open time to a point along the ruler. */
-  const nearest = (clientX: number) => {
-    const r = ruler.current!.getBoundingClientRect();
-    const x = Math.min(Math.max(clientX - r.left, 0), r.width);
-    const raw = lo + (x / r.width) * (hi - lo) - length / 2;
-    const ok = open(pick!.date);
-    let best: number | undefined;
-    for (const m of ok) if (best === undefined || Math.abs(m - raw) < Math.abs(best - raw)) best = m;
-    return { x, best };
-  };
-  const dragging = React.useRef(false);
-  const onKey = (e: React.KeyboardEvent) => {
-    if (!pick) return;
-    const ok = [...open(pick.date)].sort((a, b) => a - b);
-    const i = ok.indexOf(pick.min);
-    const next = e.key === "ArrowRight" || e.key === "ArrowUp" ? ok[i + 1] : e.key === "ArrowLeft" || e.key === "ArrowDown" ? ok[i - 1] : undefined;
-    if (next !== undefined) {
-      e.preventDefault();
-      choose(pick.date, next);
-    }
-  };
-
-  /* The week or month under the cards. */
+  /* The week or month under the cards. A week is the seven days from the
+     one on show, never from before today: a calendar week opened on a
+     Saturday was six days already gone. */
+  const today = React.useMemo(() => {
+    const d = new Date();
+    d.setHours(0, 0, 0, 0);
+    return d;
+  }, []);
   const week = React.useMemo(() => {
-    const d = new Date(anchor);
-    d.setDate(d.getDate() - d.getDay());
+    const d = new Date(Math.max(+anchor, +today));
+    d.setHours(0, 0, 0, 0);
     return Array.from({ length: 7 }, (_, i) => {
       const x = new Date(d);
       x.setDate(d.getDate() + i);
       return x;
     });
-  }, [anchor]);
+  }, [anchor, today]);
   const month = React.useMemo(() => {
     const first = new Date(anchor.getFullYear(), anchor.getMonth(), 1);
     const count = new Date(anchor.getFullYear(), anchor.getMonth() + 1, 0).getDate();
     return [...Array.from({ length: first.getDay() }, () => null), ...Array.from({ length: count }, (_, i) => new Date(first.getFullYear(), first.getMonth(), i + 1))];
   }, [anchor]);
+  /* Julian: an earlier or later week or month slides in from its side
+     (`[data-slide]`, contact.css). Not on a switch between the two,
+     which has its own glide below. */
+  const [slide, setSlide] = React.useState(0);
   const shift = (dir: number) => {
-    const d = new Date(anchor);
+    setSlide(dir);
+    const d = new Date(view === "week" ? week[0] : anchor);
     if (view === "week") d.setDate(d.getDate() + 7 * dir);
     else d.setMonth(d.getMonth() + dir, 1);
     setAnchor(d);
   };
+  /* Week and month trade places as one set of cards: each day glides from
+     where it stood to where it lands and the box eases to its new height,
+     a day that was not on show fades in. Measured before the switch,
+     played once the new view is laid out. */
+  const daysBox = React.useRef<HTMLDivElement>(null);
+  const flip = React.useRef<{ at: Map<string, DOMRect>; h: number } | null>(null);
+  const switchView = (v: "week" | "month") => {
+    if (v === view) return;
+    setSlide(0);
+    const box = daysBox.current;
+    if (box) {
+      const at = new Map<string, DOMRect>();
+      for (const b of box.querySelectorAll<HTMLElement>("[data-day]")) at.set(b.dataset.day!, b.getBoundingClientRect());
+      flip.current = { at, h: box.offsetHeight };
+    }
+    // Into the week from a month: the week of the day picked, when it is in that month.
+    if (v === "week" && pick && fromIso(pick.date).getMonth() === anchor.getMonth()) setAnchor(fromIso(pick.date));
+    setView(v);
+  };
+  /* A month as tall as the picker has room for: past it, the confirm bar
+     sat over the ruler (six rows, or a short window). The cells give up
+     what the picker overflows by, shared between the rows. */
+  const monthGrid = React.useRef<HTMLDivElement>(null);
+  /* And a week: its big time gives up what the picker overflows by (the
+     times in kinds took a row more, past an iPad held sideways). */
+  const big = React.useRef<HTMLDivElement>(null);
+  React.useLayoutEffect(() => {
+    const el = big.current;
+    const tp = el?.closest<HTMLElement>(".tp");
+    if (view !== "week" || !el || !tp) return;
+    const row = el.parentElement!;
+    const fit = () => {
+      el.style.removeProperty("font-size");
+      row.style.removeProperty("display");
+      // Twice: the line it sits on does not give back all it shrinks by.
+      for (let i = 0; i < 2; i++) {
+        const over = tp.scrollHeight - tp.clientHeight;
+        if (over > 0) el.style.fontSize = `${Math.max(56, parseFloat(getComputedStyle(el).fontSize) - over / 0.85)}px`;
+      }
+      // Smaller than that it is not worth its row: the day over it and the
+      // time picked below say the same, as under a month.
+      if (tp.scrollHeight > tp.clientHeight) row.style.display = "none";
+    };
+    fit();
+    const ro = new ResizeObserver(fit);
+    ro.observe(tp);
+    return () => ro.disconnect();
+  }, [view, pick?.date, days]);
+  const refit = React.useRef(() => {});
+  React.useLayoutEffect(() => {
+    const grid = monthGrid.current;
+    const tp = grid?.closest<HTMLElement>(".tp");
+    if (view !== "month" || !grid || !tp) return;
+    const fit = () => {
+      grid.style.removeProperty("--cell-h");
+      // The fold the days sit in can shrink and hide what does not fit, so
+      // its own overflow counts as well as the picker's.
+      const fold = grid.closest<HTMLElement>(".min-h-0.overflow-hidden");
+      const cell = grid.querySelector<HTMLElement>("[data-day]");
+      const rows = Math.ceil((grid.children.length - 7) / 7);
+      // Twice, for what the first pass leaves over by rounding.
+      for (let i = 0; i < 2; i++) {
+        const over = Math.max(tp.scrollHeight - tp.clientHeight, fold ? fold.scrollHeight - fold.clientHeight : 0);
+        if (over <= 0 || !cell) return;
+        grid.style.setProperty("--cell-h", `${Math.max(28, cell.offsetHeight - Math.ceil(over / rows))}px`);
+      }
+    };
+    fit();
+    refit.current = fit;
+    const ro = new ResizeObserver(fit);
+    ro.observe(tp);
+    return () => {
+      ro.disconnect();
+      refit.current = () => {};
+    };
+  }, [view, month, pick?.date, days]);
+  React.useLayoutEffect(() => {
+    const f = flip.current;
+    flip.current = null;
+    const box = daysBox.current;
+    if (!f || !box || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const ms = 520;
+    const easing = "cubic-bezier(0.22, 1, 0.36, 1)";
+    // Measured again once the box is at its height: until then it hides what overflows.
+    box.animate([{ height: `${f.h}px` }, { height: `${box.offsetHeight}px` }], { duration: ms, easing }).finished.then(() => refit.current(), () => {});
+    let n = 0;
+    for (const el of box.querySelectorAll<HTMLElement>("[data-day]")) {
+      const to = el.getBoundingClientRect();
+      const from = f.at.get(el.dataset.day!);
+      if (from) {
+        el.animate(
+          [
+            { transformOrigin: "0 0", transform: `translate(${from.left - to.left}px, ${from.top - to.top}px) scale(${from.width / to.width}, ${from.height / to.height})` },
+            { transformOrigin: "0 0", transform: "none" },
+          ],
+          { duration: ms, easing },
+        );
+      } else {
+        el.animate([{ opacity: 0, transform: "translateY(6px)" }, { opacity: 1, transform: "none" }], { duration: 380, delay: 80 + n++ * 9, easing, fill: "backwards" });
+      }
+    }
+  }, [view]);
+  /* Nothing to go back to before today. */
+  const atStart = view === "week" ? +week[0] <= +today : anchor.getFullYear() * 12 + anchor.getMonth() <= today.getFullYear() * 12 + today.getMonth();
 
   const book = async (form: FormData) => {
     if (!pick) return;
@@ -284,7 +402,6 @@ export function TimePicker({
 
   const [t, ap] = clock(pick.min);
   const [until] = clock(pick.min + length);
-  const okNow = open(pick.date);
   const date = fromIso(pick.date);
   const sum = `${DAYS[date.getDay()]} ${date.getDate()} ${MONTHS[date.getMonth()].slice(0, 3)} · ${t} ${ap}`;
 
@@ -329,7 +446,7 @@ export function TimePicker({
   }
 
   return (
-    <div aria-label={title} role="region" className={cn("tp @container relative flex min-h-0 flex-col gap-8 overflow-x-clip p-5 sm:gap-10 sm:p-10 max-[56rem]:sm:p-6 [@media(max-height:50rem)]:gap-4 [@media(max-height:50rem)]:p-5", className)}>
+    <div aria-label={title} role="region" className={cn("tp @container relative !flex min-h-0 flex-col overflow-x-clip p-5 sm:p-10 max-[56rem]:sm:p-6 [@media(max-height:50rem)]:p-5", className)}>
       {step === "sending" || step === "check" ? (
         <div role="status" aria-live="polite" className="absolute inset-0 z-20 bg-background/85 backdrop-blur-md">
           <div className="sticky top-[28%] flex flex-col items-center gap-6 py-10">
@@ -357,21 +474,27 @@ export function TimePicker({
       <Fold on={step === "pick"}>
       {/* the days */}
       <div className="flex flex-col gap-5">
-        <div className="flex items-center justify-between gap-3">
+        <p className="label text-muted-foreground"><span className="mr-3 text-foreground">01</span>Pick a day</p>
+        <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
           <div className="label flex items-center gap-2 whitespace-nowrap text-muted-foreground @md:gap-4">
-            <button type="button" aria-label="Earlier" onClick={() => shift(-1)} className="tap-44 px-1 hoverable:hover:text-foreground">&larr;</button>
-            <span className="text-foreground">{view === "week" ? `${MONTHS[week[0].getMonth()].slice(0, 3)} ${week[0].getDate()}` + (week[6].getMonth() !== week[0].getMonth() ? ` to ${MONTHS[week[6].getMonth()].slice(0, 3)} ${week[6].getDate()}` : ` to ${week[6].getDate()}`) : `${MONTHS[anchor.getMonth()]} ${anchor.getFullYear()}`}</span>
-            <button type="button" aria-label="Later" onClick={() => shift(1)} className="tap-44 px-1 hoverable:hover:text-foreground">&rarr;</button>
+            <button type="button" aria-label="Earlier" onClick={() => shift(-1)} disabled={atStart} className="tap-44 flex h-9 items-center justify-center px-1 text-foreground transition-opacity duration-200 hoverable:hover:opacity-60 disabled:opacity-30">{arrow}</button>
+            {/* As wide as the longest it gets, so the arrows hold still. */}
+            <span className="grid text-center text-foreground">
+              <span aria-hidden className="invisible [grid-area:1/1]">Sep 22 to Sep 28</span>
+              <span className="[grid-area:1/1]">{view === "week" ? `${MONTHS[week[0].getMonth()].slice(0, 3)} ${week[0].getDate()} to ${MONTHS[week[6].getMonth()].slice(0, 3)} ${week[6].getDate()}` : `${MONTHS[anchor.getMonth()]} ${anchor.getFullYear()}`}</span>
+            </span>
+            <button type="button" aria-label="Later" onClick={() => shift(1)} className="tap-44 flex h-9 items-center justify-center px-1 text-foreground transition-opacity duration-200 hoverable:hover:opacity-60"><span className="flex rotate-180">{arrow}</span></button>
           </div>
-          <div className="label flex gap-4">
+          <div className="label ml-auto flex gap-4">
             {(["week", "month"] as const).map((v) => (
-              <button key={v} type="button" aria-pressed={view === v} onClick={() => setView(v)} className={cn("border-b pb-1 transition-colors duration-200", view === v ? "border-foreground text-foreground" : "border-transparent text-muted-foreground hoverable:hover:text-foreground")}>
+              <button key={v} type="button" aria-pressed={view === v} onClick={() => switchView(v)} className={cn("border-b pb-1 transition-colors duration-200", view === v ? "border-foreground text-foreground" : "border-transparent text-muted-foreground hoverable:hover:text-foreground")}>
                 {v}
               </button>
             ))}
           </div>
         </div>
-        <Fold on={view === "week"}>
+        <div ref={daysBox} data-slide={slide} className="-m-1 overflow-hidden p-1">
+        {view === "week" ? (
           <div className="grid grid-cols-7 gap-2 sm:gap-2.5">
             {week.map((d) => {
               const id = iso(d);
@@ -380,19 +503,20 @@ export function TimePicker({
               return (
                 <button
                   key={id}
+                  data-day={id}
                   type="button"
                   disabled={!o.size}
                   aria-pressed={on}
-                  onClick={() => choose(id, pick.min)}
+                  onClick={() => choose(id, pick.min, false)}
                   className={cn(
-                    "flex flex-col gap-2 min-w-0 rounded-[6px] border p-1.5 text-left @md:p-2.5 transition-[background-color,color,translate] duration-300 ease-[var(--ease-out-strong)] @xl:p-3",
-                    on ? "border-foreground bg-foreground text-background" : "border-border hoverable:hover:-translate-y-0.5",
-                    !o.size && "pointer-events-none opacity-30",
+                    "flex flex-col gap-2 min-w-0 rounded-[var(--tp-r,6px)] border-[0.5px] p-1.5 text-left @md:p-2.5 transition-[background-color,color,translate] duration-300 ease-[var(--ease-out-strong)] @xl:p-3",
+                    on ? "border-foreground bg-foreground text-background" : o.size ? "tp-open hoverable:hover:-translate-y-0.5" : "",
+                    !o.size && "pointer-events-none border-transparent opacity-30",
                   )}
                 >
                   <span className="label opacity-70">{DAYS[d.getDay()]}</span>
                   <b className="font-display text-base leading-none @md:text-xl @xl:text-3xl">{d.getDate()}</b>
-                  <span aria-hidden className="flex h-3.5 items-end gap-px">
+                  <span aria-hidden className={cn("flex h-3.5 items-end gap-px", !on && "text-accent")}>
                     {steps.map((m) => (
                       <s key={m} className="w-[3px] max-sm:w-px flex-1 rounded-[1px] bg-current no-underline opacity-55 transition-[height] duration-500" style={{ height: o.has(m) ? 14 : 3 }} />
                     ))}
@@ -401,9 +525,8 @@ export function TimePicker({
               );
             })}
           </div>
-        </Fold>
-        <Fold on={view === "month"}>
-          <div className="grid grid-cols-7 gap-1.5 sm:gap-2">
+        ) : (
+          <div ref={monthGrid} className="grid grid-cols-7 gap-1.5 sm:gap-2">
             {DAYS.map((d) => (
               <span key={d} className="label pb-1 text-muted-foreground">{d[0]}<span className="@max-xl:hidden">{d.slice(1)}</span></span>
             ))}
@@ -415,30 +538,39 @@ export function TimePicker({
               return (
                 <button
                   key={id}
+                  data-day={id}
                   type="button"
                   disabled={!o.size}
                   aria-pressed={on}
-                  onClick={() => choose(id, pick.min)}
+                  onClick={() => choose(id, pick.min, false)}
                   className={cn(
-                    "flex aspect-[1/0.8] flex-col justify-between rounded-[6px] border p-2 text-left [@media(max-height:50rem)]:aspect-auto [@media(max-height:50rem)]:gap-1 [@media(max-height:50rem)]:p-1.5 transition-[background-color,color,translate] duration-300 ease-[var(--ease-out-strong)] sm:aspect-[1/0.6]",
-                    on ? "border-foreground bg-foreground text-background" : "border-border hoverable:hover:-translate-y-0.5",
-                    !o.size && "pointer-events-none opacity-30",
+                    "flex aspect-[1/0.8] flex-col justify-between rounded-[var(--tp-r,6px)] border-[0.5px] p-2 text-left [@media(max-height:50rem)]:aspect-auto [@media(max-height:50rem)]:gap-1 [@media(max-height:50rem)]:p-1.5 transition-[background-color,color,translate] duration-300 ease-[var(--ease-out-strong)] sm:aspect-[1/0.6] h-[var(--cell-h,auto)]",
+                    on ? "border-foreground bg-foreground text-background" : o.size ? "tp-open hoverable:hover:-translate-y-0.5" : "",
+                    !o.size && "pointer-events-none border-transparent opacity-30",
                   )}
                 >
-                  <b className="font-display text-base leading-none sm:text-xl">{d.getDate()}</b>
-                  <span aria-hidden className="h-[3px] w-full bg-current/20">
+                  <b className="font-display text-lg leading-none sm:text-2xl @xl:text-3xl">{d.getDate()}</b>
+                  <span aria-hidden className={cn("h-[3px] w-full bg-current/20", !on && "text-accent")}>
                     <span className="block h-full bg-current" style={{ width: `${(o.size / steps.length) * 100}%` }} />
                   </span>
                 </button>
               );
             })}
           </div>
-        </Fold>
+        )}
+        </div>
       </div>
 
-      {/* the time */}
-      <div className="mt-6 flex items-baseline gap-3 sm:mt-8 [@media(max-height:50rem)]:mt-2">
-        <div aria-hidden className="font-display flex text-[clamp(3.5rem,22cqw,9rem)] [@media(max-height:50rem)]:text-[clamp(3rem,10cqw,5rem)] leading-[0.85] tabular-nums tracking-[-0.05em]">
+      {/* the time. Not under a month: the picked button says it, and a
+          six-row month on an iPad or a phone had no room for both. */}
+      {view === "week" ? (
+      <div className="mt-10 flex flex-col gap-0.5 sm:mt-12 [@media(max-height:50rem)]:mt-3 [@media(max-height:50rem)]:gap-0">
+        {/* The day over its time, or what to do before one is picked. */}
+        <p key={chosen ? pick.date : "none"} className={cn("tp-roll font-display text-[clamp(1.25rem,4.5cqw,var(--tp-day,2.25rem))] uppercase leading-none tracking-[-0.02em]", !chosen && "text-muted-foreground")}>
+          {chosen ? `${WEEKDAYS[date.getDay()]}, ${MONTHS[date.getMonth()]} ${date.getDate()}` : "Pick a day, then a time"}
+        </p>
+        <div className="flex items-baseline gap-3">
+        <div ref={big} aria-hidden className={cn("font-display flex tabular-nums tracking-[-0.05em] transition-opacity duration-300 mt-[var(--tp-day-gap,0.15em)] text-[clamp(3.5rem,min(22cqw,14vh),var(--tp-time,9rem))] [@media(max-height:50rem)]:text-[clamp(3rem,10cqw,5rem)] leading-[0.85]", chosen !== "time" && "opacity-25")}>
           {[...t].map((c, i) => (
             <span key={`${i}${c}`} className="tp-roll inline-block">{c}</span>
           ))}
@@ -446,71 +578,59 @@ export function TimePicker({
         <span className="label">{ap}</span>
         <span className="label ml-auto shrink-0 whitespace-nowrap text-right text-muted-foreground">Until<br />{until} {clock(pick.min + length)[1]}</span>
       </div>
+      </div>
+      ) : null}
 
-      {/* the ruler */}
-      <div
-        ref={ruler}
-        role="slider"
-        tabIndex={0}
-        aria-label="Time"
-        aria-valuemin={lo}
-        aria-valuemax={hi - length}
-        aria-valuenow={pick.min}
-        aria-valuetext={`${t} ${ap}`}
-        onKeyDown={onKey}
-        onPointerDown={(e) => {
-          dragging.current = true;
-          e.currentTarget.setPointerCapture(e.pointerId);
-          e.currentTarget.focus({ preventScroll: true }); // stays in focus until you move off it
-          const { best } = nearest(e.clientX);
-          if (best !== undefined) choose(pick.date, best);
-        }}
-        onPointerMove={(e) => {
-          const { x, best } = nearest(e.clientX);
-          if (ghost.current) ghost.current.style.translate = `${x}px 0`;
-          if (dragging.current && best !== undefined && best !== pick.min) choose(pick.date, best);
-        }}
-        onPointerUp={() => (dragging.current = false)}
-        className="relative mb-10 mt-2 h-24 [@media(max-height:50rem)]:h-16 cursor-ew-resize touch-none select-none outline-none focus-visible:[&>.ticks]:opacity-100"
-      >
-        <div className="ticks absolute inset-0 flex items-end justify-between">
-          {Array.from({ length: Math.round((hi - lo) / (length >= 30 ? length / 2 : length)) + 1 }, (_, i) => {
-            const m = lo + i * (length >= 30 ? length / 2 : length);
-            const slot = (m - lo) % length === 0 && m < hi;
-            const isOpen = okNow.has(m);
-            const sel = m === pick.min;
-            const near = !sel && isOpen && Math.abs(m - pick.min) <= length;
-            const hour = m % 60 === 0;
+      {/* the times: the open ones of the day picked, as buttons */}
+      <div className="mt-[var(--tp-gap,1.25rem)] flex flex-col gap-4 pb-4 [@media(max-height:50rem)]:gap-3">
+        <p className="label text-muted-foreground"><span className="mr-3 text-foreground">02</span>Pick a time</p>
+        {/* Julian: the times in kinds, morning, afternoon and evening, side
+            by side on one line the width of the picker, each named over its
+            own and as wide as its share of the times. No AM or PM in the
+            boxes: the kind says it. A kind to a line on a phone. */}
+        <div key={pick.date} className="flex flex-wrap gap-x-6 gap-y-3 @md:flex-nowrap">
+        {PARTS.map(([part, from, to]) => {
+          const list = (days[pick.date] ?? []).filter((x) => minutesOf(x.start) >= from && minutesOf(x.start) < to);
+          return list.length ? (
+          <div key={part} className="flex min-w-0 basis-full flex-col gap-2 @md:basis-0" style={{ flexGrow: list.length }}>
+          <span className="label text-muted-foreground">{part}</span>
+          <div className="flex gap-1.5">
+          {list.map((x) => {
+            const n = (days[pick.date] ?? []).indexOf(x);
+            const m = minutesOf(x.start);
+            const on = chosen === "time" && m === pick.min;
+            const [h, a] = clock(m);
             return (
-              <span
-                key={m}
+              <button
+                key={x.start}
+                data-slot=""
+                type="button"
+                aria-pressed={on}
+                aria-label={`${h} ${a}`}
+                onClick={() => choose(pick.date, m, true)}
+                style={{ animationDelay: `${n * 25}ms` }}
                 className={cn(
-                  "w-px bg-foreground transition-[height,opacity,width] duration-300 ease-[var(--ease-out-strong)]",
-                  sel ? "w-0.5" : "",
+                  "tp-rise label min-w-0 flex-1 rounded-[var(--tp-r,6px)] [animation-fill-mode:backwards] border-[0.5px] py-[min(var(--tp-slot,0.75rem),0.625rem)] text-center sm:py-[var(--tp-slot,0.75rem)] tabular-nums transition-[background-color,color,translate] duration-300 ease-[var(--ease-out-strong)] [@media(max-height:50rem)]:py-2",
+                  on ? "border-foreground bg-foreground text-background" : "tp-open hoverable:hover:-translate-y-0.5",
                 )}
-                style={{
-                  height: sel ? "88%" : near ? "65%" : slot && !isOpen ? "11%" : hour ? "46%" : "23%",
-                  opacity: slot && !isOpen ? 0.22 : 0.9,
-                }}
-              />
+              >
+                {h}
+              </button>
             );
           })}
+          </div>
+          </div>
+          ) : null;
+        })}
         </div>
-        <span ref={ghost} aria-hidden className="pointer-events-none absolute inset-y-0 left-0 w-px bg-foreground/25 opacity-0 transition-opacity duration-200 [[role=slider]:hover_&]:opacity-100 [[role=slider]:focus-within_&]:opacity-100" />
-        {Array.from({ length: Math.floor((hi - lo) / 60) + 1 }, (_, i) => lo + i * 60).map((m, i, all) => { const last = all.length - 1; return (
-          <span key={m} aria-hidden className={cn("label absolute -bottom-6 whitespace-nowrap text-[0.625rem] text-muted-foreground", i === 0 ? "" : i === last ? "-translate-x-full" : "-translate-x-1/2", i % 2 && i !== last && "@max-md:hidden")} style={{ left: `${((m - lo) / (hi - lo)) * 100}%` }}>
-            {clock(m)[0].replace(":00", "")}
-            <span className={cn(m === lo || m % 720 === 0 ? "" : "max-sm:hidden")}> {clock(m)[1]}</span>
-          </span>
-        ) })}
       </div>
       </Fold>
 
       {/* confirm */}
       {step === "pick" ? (
-        <div className="sticky bottom-0 z-10 flex flex-col gap-4 border-t border-border pt-6 [@media(max-height:50rem)]:bg-background/80 [@media(max-height:50rem)]:pb-1 [@media(max-height:50rem)]:pt-4 [@media(max-height:50rem)]:backdrop-blur-md @md:flex-row @md:items-center @md:justify-between">
-          <span className="label text-muted-foreground">{sum} {zone(pick.start, tz)}</span>
-          <button type="button" onClick={() => setStep("form")} disabled={!chosen} className="label rounded-[2px] border border-foreground bg-foreground px-6 @max-md:w-full py-4 text-background transition-[opacity,scale] duration-300 hoverable:hover:opacity-85 active:scale-[0.98] disabled:pointer-events-none disabled:opacity-35">
+        <div className="sticky bottom-0 z-10 mt-auto flex flex-col gap-4 border-t border-border pt-6 bg-background/80 backdrop-blur-md [@media(max-height:50rem)]:pb-1 [@media(max-height:50rem)]:pt-4 @md:flex-row @md:items-center @md:justify-between">
+          <span className="label text-muted-foreground">{chosen === "time" ? `${sum} ${zone(pick.start, tz)}` : `San Jose, CA · ${here}${tz === "America/Los_Angeles" ? "" : ` · times in ${zone(pick.start, tz)}`}`}</span>
+          <button type="button" onClick={() => setStep("form")} disabled={chosen !== "time"} className="label rounded-[2px] border border-foreground bg-foreground px-6 @max-md:w-full py-4 text-background transition-[opacity,scale,background-color,border-color,color] duration-300 enabled:border-accent enabled:bg-accent enabled:text-accent-foreground hoverable:hover:opacity-85 active:scale-[0.98] disabled:pointer-events-none disabled:opacity-35">
             Confirm this time
           </button>
         </div>
