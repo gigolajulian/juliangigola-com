@@ -6241,217 +6241,217 @@ export const PROJECTS: Project[] = [
         "width": 2429,
         "height": 3641,
         "color": "#262626",
-        "alt": ""
+        "alt": "Two people on a park bench under trees, tan shirts, patterned shorts and jeans, low afternoon light"
       },
       {
         "src": "/work/nabu/69.jpg",
         "width": 2429,
         "height": 3641,
         "color": "#262626",
-        "alt": ""
+        "alt": "Two people seated on a park bench, one with legs stretched out, tan shirts, trees overhead"
       },
       {
         "src": "/work/nabu/70.jpg",
         "width": 2429,
         "height": 3641,
         "color": "#262626",
-        "alt": ""
+        "alt": "Reclining across a park bench in a tan shirt and patterned shorts, arm along the backrest, trees behind"
       },
       {
         "src": "/work/nabu/71.jpg",
         "width": 2429,
         "height": 3641,
         "color": "#262626",
-        "alt": ""
+        "alt": "Low angle, leaning back on a park bench in a tan shirt, patterned shorts and tan sneakers"
       },
       {
         "src": "/work/nabu/72.jpg",
         "width": 2429,
         "height": 3641,
         "color": "#262626",
-        "alt": ""
+        "alt": "Seated on a picnic bench in an open tan shirt over a white top, loose jeans, trees behind"
       },
       {
         "src": "/work/nabu/73.jpg",
         "width": 2429,
         "height": 3641,
         "color": "#262626",
-        "alt": ""
+        "alt": "Side view at a stone wall in a tan shirt with a yellow sleeve patch, branches above"
       },
       {
         "src": "/work/nabu/74.jpg",
         "width": 2429,
         "height": 3641,
         "color": "#262626",
-        "alt": ""
+        "alt": "Looking away in profile in a tan shirt at a stone wall, sun breaking through branches"
       },
       {
         "src": "/work/nabu/75.jpg",
         "width": 2429,
         "height": 3641,
         "color": "#262626",
-        "alt": ""
+        "alt": "Leaning on a low stone wall in an open tan shirt and light jeans, head tilted, trees behind"
       },
       {
         "src": "/work/nabu/76.jpg",
         "width": 2429,
         "height": 3641,
         "color": "#262626",
-        "alt": ""
+        "alt": "Standing on a path in a tan shirt, checked shorts and tan sneakers, head down, stone wall behind"
       },
       {
         "src": "/work/nabu/77.jpg",
         "width": 2429,
         "height": 3641,
         "color": "#262626",
-        "alt": ""
+        "alt": "Seated on a stone wall in a tan shirt, checked shorts and tan sneakers, looking aside"
       },
       {
         "src": "/work/nabu/78.jpg",
         "width": 2429,
         "height": 3641,
         "color": "#262626",
-        "alt": ""
+        "alt": "Wide shot, seated on a stone wall in a tan shirt and checked shorts, trees and sky behind"
       },
       {
         "src": "/work/nabu/79.jpg",
         "width": 2499,
         "height": 3331,
         "color": "#262626",
-        "alt": ""
+        "alt": "Seated on mossy rocks in a tan shirt and loose jeans, one hand raised against the rock"
       },
       {
         "src": "/work/nabu/80.jpg",
         "width": 2499,
         "height": 3333,
         "color": "#262626",
-        "alt": ""
+        "alt": "Low angle, seated on rocks in a tan shirt and wide baggy jeans, sunlit stone behind"
       },
       {
         "src": "/work/nabu/81.jpg",
         "width": 2429,
         "height": 3641,
         "color": "#F3D9C0",
-        "alt": ""
+        "alt": "Seen from behind at a stone doorway, tan shirt with a large white star emblem, dark hair"
       },
       {
         "src": "/work/nabu/82.jpg",
         "width": 2429,
         "height": 3641,
         "color": "#D9C0A6",
-        "alt": ""
+        "alt": "Standing in a stone arched doorway in a tan shirt and jeans, hands in pockets"
       },
       {
         "src": "/work/nabu/83.jpg",
         "width": 2429,
         "height": 3641,
         "color": "#D9C0A6",
-        "alt": ""
+        "alt": "Seen from behind in a stone archway, tan shirt with a white star emblem, long dark hair"
       },
       {
         "src": "/work/nabu/84.jpg",
         "width": 2429,
         "height": 3641,
         "color": "#262626",
-        "alt": ""
+        "alt": "Two people by a stone arch, one seated on a block in jeans, one standing, tan shirts"
       },
       {
         "src": "/work/nabu/85.jpg",
         "width": 2429,
         "height": 3641,
         "color": "#262626",
-        "alt": ""
+        "alt": "Two people by a stone arch, one leaning on it, one turned away, star emblem, tan shirts"
       },
       {
         "src": "/work/nabu/86.jpg",
         "width": 2429,
         "height": 3641,
         "color": "#C0A68C",
-        "alt": ""
+        "alt": "Two people standing in a stone archway in tan shirts and baggy jeans, path in front"
       },
       {
         "src": "/work/nabu/87.jpg",
         "width": 2429,
         "height": 3641,
         "color": "#262626",
-        "alt": ""
+        "alt": "Seated on a rock ledge in a tan shirt over a white top and jeans, direct gaze"
       },
       {
         "src": "/work/nabu/88.jpg",
         "width": 2429,
         "height": 3641,
         "color": "#262626",
-        "alt": ""
+        "alt": "Leaning back on a rock face in a tan shirt and jeans, one foot raised, white sneakers"
       },
       {
         "src": "/work/nabu/89.jpg",
         "width": 2429,
         "height": 3641,
         "color": "#262626",
-        "alt": ""
+        "alt": "Seen from behind beside a cliff wall in a tan shirt with a white star emblem, jeans"
       },
       {
         "src": "/work/nabu/90.jpg",
         "width": 2429,
         "height": 3641,
         "color": "#262626",
-        "alt": ""
+        "alt": "Seen from behind, a hand raised to the head, tan shirt with a star emblem, cliff wall"
       },
       {
         "src": "/work/nabu/91.jpg",
         "width": 2429,
         "height": 3641,
         "color": "#262626",
-        "alt": ""
+        "alt": "Standing before a cliff wall in an open tan shirt over a white top, wide-leg jeans"
       },
       {
         "src": "/work/nabu/92.jpg",
         "width": 2429,
         "height": 3641,
         "color": "#262626",
-        "alt": ""
+        "alt": "Full length before a cave-like rock face in a tan shirt and jeans, hands in the pockets"
       },
       {
         "src": "/work/nabu/93.jpg",
         "width": 2429,
         "height": 3641,
         "color": "#262626",
-        "alt": ""
+        "alt": "Full length in a tan shirt over a white top, light jeans and sneakers, cave rock behind"
       },
       {
         "src": "/work/nabu/94.jpg",
         "width": 2429,
         "height": 3641,
         "color": "#262626",
-        "alt": ""
+        "alt": "Side view in a tan shirt with a white star emblem, cap and sunglasses, baggy jeans, cliff behind"
       },
       {
         "src": "/work/nabu/95.jpg",
         "width": 2429,
         "height": 3641,
         "color": "#262626",
-        "alt": ""
+        "alt": "Seen from behind before a cave-like rock face, tan shirt with a star emblem, jeans"
       },
       {
         "src": "/work/nabu/96.jpg",
         "width": 2429,
         "height": 3641,
         "color": "#262626",
-        "alt": ""
+        "alt": "Standing in sunglasses, a tan shirt and baggy jeans, hand in a pocket, rock face behind"
       },
       {
         "src": "/work/nabu/97.jpg",
         "width": 2429,
         "height": 3641,
         "color": "#262626",
-        "alt": ""
+        "alt": "Looking to the side in a tan shirt and jeans, hands in pockets, cave rock behind"
       },
       {
         "src": "/work/nabu/98.jpg",
         "width": 2429,
         "height": 3641,
         "color": "#262626",
-        "alt": ""
+        "alt": "Close crop leaning on a rock wall in a tan shirt with white lettering, head turned, jeans"
       }
     ]
   },
