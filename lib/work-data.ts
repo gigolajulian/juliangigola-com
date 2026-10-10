@@ -5054,42 +5054,42 @@ export const PROJECTS: Project[] = [
         "width": 2499,
         "height": 3124,
         "color": "#262626",
-        "alt": ""
+        "alt": "Kneeling in a black leather jacket and fishnets, head tilted, a full moon projected behind"
       },
       {
         "src": "/work/luna/02.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#262626",
-        "alt": ""
+        "alt": "Kneeling with a hand on the floor, leather jacket and fishnet tights, white-blonde bob, large moon behind"
       },
       {
         "src": "/work/luna/03.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#262626",
-        "alt": ""
+        "alt": "Seated on the knees in a leather jacket over a fishnet top, moon light across the face"
       },
       {
         "src": "/work/luna/04.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#0C260C",
-        "alt": ""
+        "alt": "Seated upright in a leather jacket and fishnets, face striped by moon light, dark floor"
       },
       {
         "src": "/work/luna/05.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#0C260C",
-        "alt": ""
+        "alt": "Profile in a black leather jacket, chin raised, blonde bob lit by a huge projected moon"
       },
       {
         "src": "/work/luna/06.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#C0C0C0",
-        "alt": ""
+        "alt": "Close on a face in profile beside a moon projection, black leather jacket, a dark shadow behind"
       }
     ]
   },
@@ -8874,49 +8874,49 @@ export const PROJECTS: Project[] = [
         "width": 2499,
         "height": 3124,
         "color": "#260C0C",
-        "alt": ""
+        "alt": "Close portrait in white face paint, a black disc over one eye, dots on the cheek, plywood behind"
       },
       {
         "src": "/work/totem/02.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#262626",
-        "alt": ""
+        "alt": "Seated at a tree base in a black leather coat and heels, white face paint, one knee up"
       },
       {
         "src": "/work/totem/03.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#262626",
-        "alt": ""
+        "alt": "Reclining against a tree trunk, one leg raised in a black heel, black coat, white face paint"
       },
       {
         "src": "/work/totem/04.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#262626",
-        "alt": ""
+        "alt": "Standing against a fallen trunk in an open black coat with a fur sleeve, white face paint"
       },
       {
         "src": "/work/totem/05.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#262626",
-        "alt": ""
+        "alt": "Seen from above in an open black leather coat with a fur sleeve, white face paint, fallen branches"
       },
       {
         "src": "/work/totem/06.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#262626",
-        "alt": ""
+        "alt": "Crouched on a fallen log in a black coat and heels, white face paint, trees behind"
       },
       {
         "src": "/work/totem/07.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#A67359",
-        "alt": ""
+        "alt": "Head tilted in a tight portrait, white face paint with a black disc over one eye, plywood backdrop"
       }
     ]
   },
@@ -8946,49 +8946,49 @@ export const PROJECTS: Project[] = [
         "width": 2499,
         "height": 2856,
         "color": "#40738C",
-        "alt": ""
+        "alt": "Crouched on a round plate with hands on the floor, silver body paint, long dark hair, blue backdrop"
       },
       {
         "src": "/work/transmutate/02.jpg",
         "width": 2499,
         "height": 2856,
         "color": "#4073A6",
-        "alt": ""
+        "alt": "Standing with arms crossed over the chest, silver body paint, a pale disc behind, blue light"
       },
       {
         "src": "/work/transmutate/03.jpg",
         "width": 2499,
         "height": 2856,
         "color": "#73C0F3",
-        "alt": ""
+        "alt": "Crawling toward the lens on a silver-painted floor circle, long hair across the face, blue light"
       },
       {
         "src": "/work/transmutate/04.jpg",
         "width": 2499,
         "height": 2856,
         "color": "#4073A6",
-        "alt": ""
+        "alt": "Standing with hands over the chest and head tilted back, silver body paint, pale disc behind, blue light"
       },
       {
         "src": "/work/transmutate/05.jpg",
         "width": 2499,
         "height": 2856,
         "color": "#264059",
-        "alt": ""
+        "alt": "Lying on the floor with one arm stretched out, silver body paint, long dark hair across the face"
       },
       {
         "src": "/work/transmutate/06.jpg",
         "width": 2499,
         "height": 2856,
         "color": "#4073A6",
-        "alt": ""
+        "alt": "Crouched on bare feet, looking up, silver body paint, long dark hair, cold blue light"
       },
       {
         "src": "/work/transmutate/07.jpg",
         "width": 2499,
         "height": 2856,
         "color": "#5973A6",
-        "alt": ""
+        "alt": "Curled forward on a paint-splattered floor in front of a pale disc, silver body paint, blue light"
       }
     ]
   },
@@ -9296,49 +9296,49 @@ export const PROJECTS: Project[] = [
         "width": 2499,
         "height": 3124,
         "color": "#F3F3F3",
-        "alt": ""
+        "alt": "Striding across a downtown street in a long tan trench coat, black dress, white heels, glass towers"
       },
       {
         "src": "/work/urban-reverie/02.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#262626",
-        "alt": ""
+        "alt": "Crossing a street in a tan trench coat and black dress, one hand at the head, steam rising"
       },
       {
         "src": "/work/urban-reverie/03.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#262626",
-        "alt": ""
+        "alt": "Walking toward the lens through street steam in a tan trench coat and black dress, white heels"
       },
       {
         "src": "/work/urban-reverie/04.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#262626",
-        "alt": ""
+        "alt": "Portrait in a tan trench coat slipping off the shoulders, black pinstripe dress, long wavy hair"
       },
       {
         "src": "/work/urban-reverie/05.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#262626",
-        "alt": ""
+        "alt": "Standing on a moving escalator in a tan trench and black dress, one hand on the glass rail"
       },
       {
         "src": "/work/urban-reverie/06.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#262626",
-        "alt": ""
+        "alt": "Small figure in a tan trench coat at the top of an escalator under a station sign"
       },
       {
         "src": "/work/urban-reverie/07.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#262626",
-        "alt": ""
+        "alt": "Standing in a tan trench at the top of an escalator, a dark rail running through the foreground"
       }
     ]
   },
@@ -10189,7 +10189,7 @@ export const PROJECTS: Project[] = [
         "width": 2499,
         "height": 3124,
         "color": "#262626",
-        "alt": ""
+        "alt": "Face behind clear plastic wrap, long nails raised, glossy lip print earrings, pale backdrop"
       },
       {
         "src": "/work/wrapped-up/02.jpg",
@@ -10203,42 +10203,42 @@ export const PROJECTS: Project[] = [
         "width": 2499,
         "height": 3124,
         "color": "#262626",
-        "alt": ""
+        "alt": "Close on a pouting face through plastic wrap, lip print earring, long dark hair, pale backdrop"
       },
       {
         "src": "/work/wrapped-up/04.jpg",
         "width": 1023,
         "height": 1279,
         "color": "#C0C0C0",
-        "alt": ""
+        "alt": "Still life of a pistol, scattered bullets, black stiletto heels and a lipstick on pale satin"
       },
       {
         "src": "/work/wrapped-up/05.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#262626",
-        "alt": ""
+        "alt": "Face pressed against plastic wrap, lipstick marks on the surface, long dark hair, soft grey backdrop"
       },
       {
         "src": "/work/wrapped-up/06.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#262626",
-        "alt": ""
+        "alt": "Extreme close crop of eyes and nose behind streaks of plastic wrap, soft light"
       },
       {
         "src": "/work/wrapped-up/07.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#D9C0C0",
-        "alt": ""
+        "alt": "Standing in a black leather corset top and denim, arms behind, plastic wrap streaked across the frame"
       },
       {
         "src": "/work/wrapped-up/08.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#C0C0C0",
-        "alt": ""
+        "alt": "Reclining under crumpled clear plastic, hand raised to the head, black strapless top, pale backdrop"
       }
     ]
   },
