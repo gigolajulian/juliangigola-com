@@ -6890,105 +6890,105 @@ export const PROJECTS: Project[] = [
         "width": 2499,
         "height": 3124,
         "color": "#595940",
-        "alt": ""
+        "alt": "Dark long hair, tattooed arm resting on a mantel, blurred beer steins and glassware in the foreground"
       },
       {
         "src": "/work/purgatory/02.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#8C8C73",
-        "alt": ""
+        "alt": "Kneeling by a brick fireplace in a black long-sleeve crop top and black shorts, glowing hearth"
       },
       {
         "src": "/work/purgatory/03.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#40260C",
-        "alt": ""
+        "alt": "Seated on a wooden floor before a lit brick fireplace, black long-sleeve top, knees drawn up"
       },
       {
         "src": "/work/purgatory/04.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#737359",
-        "alt": ""
+        "alt": "Leaning across a wooden table in a white camisole and black skirt, grandfather clock behind"
       },
       {
         "src": "/work/purgatory/05.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#260C0C",
-        "alt": ""
+        "alt": "Leaning on a wooden table with a hand at the lips, a pendant necklace, soft window light"
       },
       {
         "src": "/work/purgatory/06.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#260C0C",
-        "alt": ""
+        "alt": "Reclining forward across a polished table, white camisole and stockings, lamp and clock behind"
       },
       {
         "src": "/work/purgatory/07.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#C0A68C",
-        "alt": ""
+        "alt": "Seated at the end of a long wooden table, white camisole, white stockings, clock behind"
       },
       {
         "src": "/work/purgatory/08.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#262626",
-        "alt": ""
+        "alt": "Seated at a wooden table, white satin camisole, long black hair, a tall clock and curtains behind"
       },
       {
         "src": "/work/purgatory/09.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#0C260C",
-        "alt": ""
+        "alt": "Seated at a dark table, hand resting on the wood, white satin camisole, low side light"
       },
       {
         "src": "/work/purgatory/10.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#26260C",
-        "alt": ""
+        "alt": "Seated at a table, one arm raised behind the head, white lace-trim camisole, clock and curtains behind"
       },
       {
         "src": "/work/purgatory/11.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#260C0C",
-        "alt": ""
+        "alt": "Seen from behind at a sideboard mirror, long black hair, glassware and a stein reflected"
       },
       {
         "src": "/work/purgatory/12.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#8C7359",
-        "alt": ""
+        "alt": "Standing at a sideboard in a white camisole and black skirt, one hand on the hip, mirror behind"
       },
       {
         "src": "/work/purgatory/13.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#735940",
-        "alt": ""
+        "alt": "Seated on a chair before a mirrored sideboard, white satin camisole, stockings, glassware beside"
       },
       {
         "src": "/work/purgatory/14.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#595940",
-        "alt": ""
+        "alt": "Close crop, a hand raised to the open mouth, long black nails, patterned curtains behind"
       },
       {
         "src": "/work/purgatory/15.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#40260C",
-        "alt": ""
+        "alt": "Seated on a wooden chair in a parlor, white stockings, black heels, a striped armchair behind"
       }
     ]
   },
