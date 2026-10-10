@@ -16,11 +16,14 @@ sentence JSON, then apply it with a rule check. Tools live in the session scratc
 (`sheet.py`, `apply.mjs`). Rebuild them if they're gone, about 30 lines each.
 Check: `npx tsx` a script that calls `getProject(slug)` and prints `images[i].alt`.
 
-Done, one commit per project. jg-SEO passed everything through 9e7b982 (lost-relic, hua, abril, iris,
-novocaine, paradox, relay, diesel, undisputed, decoy, nyx, serif; 116 frames). jg-RELEASE lands only a
-hash that jg-SEO has passed in full, so send them the head after each batch, then send RELEASE the hash.
-Batch 4 (waiting for jg-SEO): decoy/06 fix, void, aegis, vigil, aera-wraith (30 frames), head 4230ca9.
-Next, in homepage order: aether, analogue-dreams, astral-allure, automotive, byte-me...
+Rules added since: neutral wording (figure, person, two people), no pronouns or possessives, no
+"same", "second", "tighter" or "closer" openers, each string stands alone, no landmark or street names.
+Run a regex for woman|women|man|men|girl|boy|she|her|hers|his|him|he|lady|male|female over every alt; expect 0.
+Done and checked by jg-SEO through 10a3886. Unchecked: realestate, retro-reverie-vol-01, retro-reverie-vol-02,
+revelo (43 frames, head is the commit after this note). Julian paused the rest on 2026-10-10: "later".
+Remaining: about 570 empty alt fields. Order: homepage-first, then by project (rouge, sage, sago, sara, sols ...).
+`content` is pushed to origin. Nothing merged or deployed by this thread. jg-RELEASE lands only hashes jg-SEO has cleared.
+Picks: Julian has the 86 cover sheets and has not named any numbers to swap yet.
 Baseline was 1229 empty of 1278.
 
 ## Picks
