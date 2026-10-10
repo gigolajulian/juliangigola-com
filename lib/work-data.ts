@@ -291,7 +291,7 @@ export const PROJECTS: Project[] = [
         "width": 2500,
         "height": 3333,
         "color": "#400507",
-        "alt": "Tighter shot from behind of the bunny-eared figure, red flare light rimming her fur boots"
+        "alt": "Figure in bunny ears seen from behind, red flare light rimming her fur boots, vent overhead"
       },
       {
         "src": "/work/hua/15.jpg",
@@ -425,7 +425,7 @@ export const PROJECTS: Project[] = [
         "width": 2500,
         "height": 3333,
         "color": "#AAADAB",
-        "alt": "Second take by the CRT, hair blown across her shoulder, hard side light on grey"
+        "alt": "Seated by the CRT with hair blown across her shoulder, hard side light on grey"
       },
       {
         "src": "/work/iris/04.jpg",
@@ -604,7 +604,7 @@ export const PROJECTS: Project[] = [
         "width": 2500,
         "height": 3333,
         "color": "#343532",
-        "alt": "Tighter crop on the chair, face lost in moving hair, bracelets catching the light"
+        "alt": "Seated on a chair with her face lost in moving hair, bracelets catching the light"
       },
       {
         "src": "/work/novocaine/14.jpg",
@@ -625,7 +625,7 @@ export const PROJECTS: Project[] = [
         "width": 2500,
         "height": 1667,
         "color": "#61615E",
-        "alt": "Same reclining pose, head tipped down toward her shoulder, wider pool of light"
+        "alt": "Reclining on the floor, head tipped down toward her shoulder, studded skirt in a wide pool of light"
       },
       {
         "src": "/work/novocaine/17.jpg",
@@ -1367,7 +1367,7 @@ export const PROJECTS: Project[] = [
         "width": 2500,
         "height": 3333,
         "color": "#8D9192",
-        "alt": "Closer crop, black hair across her face, hands gathering the hem of a white long-sleeve top"
+        "alt": "Black hair across her face, hands gathering the hem of a white long-sleeve top"
       },
       {
         "src": "/work/void/05.jpg",
@@ -1708,7 +1708,7 @@ export const PROJECTS: Project[] = [
         "width": 2499,
         "height": 3124,
         "color": "#C0C0D9",
-        "alt": "Same pose, head tilted back toward the light, braids hanging, shadow cast on the floor"
+        "alt": "Leaning on one hand on the floor, head tilted back toward the light, braids hanging"
       },
       {
         "src": "/work/aether/08.jpg",
@@ -1943,7 +1943,7 @@ export const PROJECTS: Project[] = [
         "width": 2499,
         "height": 3124,
         "color": "#595973",
-        "alt": "Same pose, face lifted toward the lens, gloved arm raised over her head, light grey floor"
+        "alt": "On the floor, face lifted toward the lens, one gloved arm raised over her head"
       },
       {
         "src": "/work/astral-allure/12.jpg",
