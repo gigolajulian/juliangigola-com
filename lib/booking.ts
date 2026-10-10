@@ -62,9 +62,9 @@ export type BookingPage = {
       to show whole: chosen, not sampled. */
   picks?: string[];
   /** Presets for the form on the Book screen. */
-  /** `calendar`: the Google Calendar appointment schedule's id, embedded
-      on the Book screen in place of the form (hello@juliangigola.com). */
-  book: { type: string; session?: string; title: string; calendar?: string };
+  /** `cal`: the Cal.com event ("juliangigola/event-slug"), embedded on the
+      Book screen in place of the form. */
+  book: { type: string; session?: string; title: string; cal?: string };
 };
 
 /** Every city the pages name, for the structured data's service area. */
@@ -81,17 +81,13 @@ export const PLACES = [
 
 /** The Cal.com event each session books, by the session's slug in
     `content/site.json`, as Cal.com writes it after its domain:
-    "username/event-slug". Shown in place of the Google Calendar schedule
-    only with `?cal` on the address while it is tried out
-    (`components/cal-embed.tsx`). An empty one keeps Google's.
-
-    TODO(Julian): fill these in once the Cal.com account and its four
-    events exist. Weddings are booked by inquiry and have none. */
+    "username/event-slug". The picker on /book reads these. Weddings, music
+    and brand have a call, set on their own pages (`book.cal`). */
 export const CAL_EVENTS: Record<string, string> = {
-  portraits: "",
-  graduation: "",
-  headshots: "",
-  "studio-digitals": "",
+  portraits: "juliangigola/portraits",
+  graduation: "juliangigola/graduation",
+  headshots: "juliangigola/headshots",
+  "studio-digitals": "juliangigola/digitals",
 };
 
 /** A session's Cal.com event, or nothing where it has none yet. */
@@ -254,7 +250,7 @@ export const BOOKING_PAGES: BookingPage[] = [
     ],
     tiles: framesOf("headshots"),
     gallery: { href: "/portfolio/headshots", label: "The headshots gallery" },
-    book: { type: "session", session: heads.name, title: "Book headshots", calendar: "AcZssZ0uTmIdvTQpdNHXZu7EIbFffjn9qFap_BVZQ0aOFL03IsfZ6CRDagD3cWnaAbkvlrTTCM9_l-OY" },
+    book: { type: "session", session: heads.name, title: "Book headshots", cal: "juliangigola/headshots" },
   },
   {
     slug: "graduation-photos",
@@ -319,7 +315,7 @@ export const BOOKING_PAGES: BookingPage[] = [
     ],
     tiles: framesOf("graduation"),
     gallery: { href: "/portfolio/graduation", label: "The graduation gallery" },
-    book: { type: "session", session: grad.name, title: "Book a graduation session", calendar: "AcZssZ1xuDp0FQU0bQESt670XPAJ7R76ql1RdYTRBokN_AybNjkeSrqXLGD8_Qg5bDY9FZBRbDhYiGz7" },
+    book: { type: "session", session: grad.name, title: "Book a graduation session", cal: "juliangigola/graduation" },
   },
   {
     slug: "model-digitals",
@@ -386,7 +382,7 @@ export const BOOKING_PAGES: BookingPage[] = [
       "/work/mya/06.jpg",
       "/work/mya/05.jpg",
     ],
-    book: { type: "session", session: digitals.name, title: "Book digitals", calendar: "AcZssZ3ZCkVh-KA0BaMB1EDaf9nat1xleBQ0tPBHEhqNlau_nzeVjlOsmnAVHo9dqVtURSSFNSHqjazB" },
+    book: { type: "session", session: digitals.name, title: "Book digitals", cal: "juliangigola/digitals" },
   },
   {
     slug: "portraits",
@@ -427,7 +423,7 @@ export const BOOKING_PAGES: BookingPage[] = [
     ],
     tiles: coversOf("portraits"),
     gallery: { href: "/portfolio/portraits", label: "The portraits" },
-    book: { type: "session", session: portraits.name, title: "Book a portrait session", calendar: "AcZssZ14pWKn0PhQZxKSfrSjutq_NM4vtqcRXF4C4PYuzZrXcN54Ec4BO_Rms3HgjKdsDRQYo670AQbD" },
+    book: { type: "session", session: portraits.name, title: "Book a portrait session", cal: "juliangigola/portraits" },
   },
   {
     slug: "weddings",
@@ -493,7 +489,7 @@ export const BOOKING_PAGES: BookingPage[] = [
       "/work/weddings/38.jpg",
       "/work/weddings/40.jpg",
     ],
-    book: { type: "session", session: weddings.name, title: "Book your wedding" },
+    book: { type: "session", session: weddings.name, title: "Book your wedding", cal: "juliangigola/wedding-call" },
   },
   {
     slug: "music-photography",
@@ -551,7 +547,7 @@ export const BOOKING_PAGES: BookingPage[] = [
     ],
     tiles: coversOf("artist-presskit"),
     gallery: { href: "/portfolio/artist-presskit", label: "Artist press kits" },
-    book: { type: "music", title: "Plan a release" },
+    book: { type: "music", title: "Plan a release", cal: "juliangigola/music-call" },
   },
   {
     slug: "brand-photography",
@@ -606,7 +602,7 @@ export const BOOKING_PAGES: BookingPage[] = [
     ],
     tiles: coversOf("campaigns", Infinity, ["paradox", "ukiyosunknown", "sago", "goodcult", "sols", "jubo", "hua"]),
     gallery: { href: "/portfolio/campaigns", label: "The campaigns" },
-    book: { type: "campaign", title: "Brief a campaign" },
+    book: { type: "campaign", title: "Brief a campaign", cal: "juliangigola/campaign" },
   },
 ];
 
