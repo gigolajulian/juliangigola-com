@@ -3032,98 +3032,98 @@ export const PROJECTS: Project[] = [
         "width": 2499,
         "height": 3124,
         "color": "#A60C0C",
-        "alt": ""
+        "alt": "Seated on a red floor in a dark red lace dress, red cords strung across, red backdrop"
       },
       {
         "src": "/work/entangled/02.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#A60C0C",
-        "alt": ""
+        "alt": "Kneeling in a red lace dress wrapped in red cord, head tipped back, hard top light, red backdrop"
       },
       {
         "src": "/work/entangled/03.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#8C0C0C",
-        "alt": ""
+        "alt": "Kneeling with one hand raised through red cords, dark red ruffled dress, a spotlight on the floor"
       },
       {
         "src": "/work/entangled/04.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#A60C0C",
-        "alt": ""
+        "alt": "Seated leaning on one hand, red cords crossing a dark red dress, head tilted up, red backdrop"
       },
       {
         "src": "/work/entangled/05.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#D9D9D9",
-        "alt": ""
+        "alt": "Kneeling on a white floor, one arm reaching along thick red rope, red lace dress"
       },
       {
         "src": "/work/entangled/06.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#D9D9D9",
-        "alt": ""
+        "alt": "Double-exposure blur of a face and shoulders, red straps and cord, pale backdrop"
       },
       {
         "src": "/work/entangled/07.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#D9D9D9",
-        "alt": ""
+        "alt": "Arms crossed over the chest, red lace dress with halter straps, thick red rope, pale backdrop"
       },
       {
         "src": "/work/entangled/08.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#D9D9D9",
-        "alt": ""
+        "alt": "Kneeling side-on, hands in thick red rope, red lace dress, white backdrop"
       },
       {
         "src": "/work/entangled/09.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#D9D9D9",
-        "alt": ""
+        "alt": "Seated with boots tucked under, red rope looped around the legs, red lace dress, pale backdrop"
       },
       {
         "src": "/work/entangled/10.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#C0C0C0",
-        "alt": ""
+        "alt": "Leaning on a black rope in a sheer black dress with flared sleeves, head tipped back, pale backdrop"
       },
       {
         "src": "/work/entangled/11.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#F3F3F3",
-        "alt": ""
+        "alt": "Standing in a long sheer black dress with a slit, both hands on black ropes overhead"
       },
       {
         "src": "/work/entangled/12.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#D9D9D9",
-        "alt": ""
+        "alt": "Motion-blurred in a black corset dress, arms draped over black rope, pale backdrop"
       },
       {
         "src": "/work/entangled/13.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#D9D9D9",
-        "alt": ""
+        "alt": "Heavily blurred, translucent double image behind black ropes, black corset dress, pale backdrop"
       },
       {
         "src": "/work/entangled/14.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#F3F3F3",
-        "alt": ""
+        "alt": "Seen from above, posed in a sheer black dress, hands at the shoulders, black ropes across the frame"
       }
     ]
   },
