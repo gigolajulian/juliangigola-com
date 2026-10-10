@@ -3153,154 +3153,154 @@ export const PROJECTS: Project[] = [
         "width": 2499,
         "height": 2856,
         "color": "#26260C",
-        "alt": ""
+        "alt": "Crowd with raised hands at the front of a stage, warm orange light, speaker stack ahead"
       },
       {
         "src": "/work/events/02.jpg",
         "width": 2499,
         "height": 2856,
         "color": "#262626",
-        "alt": ""
+        "alt": "Black and white performer in a patterned jacket leaning forward on stage, haze and a spotlight"
       },
       {
         "src": "/work/events/03.jpg",
         "width": 2499,
         "height": 2856,
         "color": "#264040",
-        "alt": ""
+        "alt": "Performer in profile on stage in a graphic jacket, teal haze, a stage monitor and blurred foot above"
       },
       {
         "src": "/work/events/04.jpg",
         "width": 1707,
         "height": 2390,
         "color": "#262626",
-        "alt": ""
+        "alt": "White laser beams fanning over a dark crowd, a DJ in a patterned shirt at the booth"
       },
       {
         "src": "/work/events/05.jpg",
         "width": 1693,
         "height": 2371,
         "color": "#0C260C",
-        "alt": ""
+        "alt": "High angle on a DJ booth under blue and purple laser lines, crowd below, a sign overhead"
       },
       {
         "src": "/work/events/06.jpg",
         "width": 2499,
         "height": 1785,
         "color": "#0C260C",
-        "alt": ""
+        "alt": "DJ in a white patterned jacket at the decks, a bright flare behind, phones raised in the crowd"
       },
       {
         "src": "/work/events/07.jpg",
         "width": 2499,
         "height": 3499,
         "color": "#262626",
-        "alt": ""
+        "alt": "DJ in a patterned sweater mixing at the decks, laser beam across the frame, projections on the wall"
       },
       {
         "src": "/work/events/08.jpg",
         "width": 2390,
         "height": 1707,
         "color": "#262626",
-        "alt": ""
+        "alt": "Black and white crowd shot, a phone held up toward a burst of laser light"
       },
       {
         "src": "/work/events/09.jpg",
         "width": 2499,
         "height": 2856,
         "color": "#262626",
-        "alt": ""
+        "alt": "Black and white performer in a patterned jacket on stage, a DJ at the decks, video wall behind"
       },
       {
         "src": "/work/events/10.jpg",
         "width": 1008,
         "height": 1152,
         "color": "#260C0C",
-        "alt": ""
+        "alt": "Dark stage with an emergency alert text slide on a screen, a faint figure at right"
       },
       {
         "src": "/work/events/11.jpg",
         "width": 2499,
         "height": 2856,
         "color": "#262626",
-        "alt": ""
+        "alt": "Performer pointing a microphone arm out over the crowd in an orange-lit haze, glowing jacket pattern"
       },
       {
         "src": "/work/events/12.jpg",
         "width": 2499,
         "height": 2856,
         "color": "#262626",
-        "alt": ""
+        "alt": "Performer with a microphone in a black jacket with glowing orange lines, a DJ and screens behind"
       },
       {
         "src": "/work/events/13.jpg",
         "width": 2499,
         "height": 2856,
         "color": "#262626",
-        "alt": ""
+        "alt": "Black and white performer with a microphone in a patterned jacket, DJ beside, big timer numbers behind"
       },
       {
         "src": "/work/events/14.jpg",
         "width": 2499,
         "height": 1667,
         "color": "#262626",
-        "alt": ""
+        "alt": "Person at the decks in headphones lit purple, projected graphics on the wall behind"
       },
       {
         "src": "/work/events/15.jpg",
         "width": 2499,
         "height": 1405,
         "color": "#262626",
-        "alt": ""
+        "alt": "Blurred red neon sign in the foreground, a DJ at the booth in the dark"
       },
       {
         "src": "/work/events/16.jpg",
         "width": 2499,
         "height": 1667,
         "color": "#260C0C",
-        "alt": ""
+        "alt": "Disco ball sending light across a dark crowd, raised hands"
       },
       {
         "src": "/work/events/17.jpg",
         "width": 2499,
         "height": 1405,
         "color": "#0C260C",
-        "alt": ""
+        "alt": "Dark club crowd in teal light, bright blue hair above the heads"
       },
       {
         "src": "/work/events/18.jpg",
         "width": 2499,
         "height": 1405,
         "color": "#0C260C",
-        "alt": ""
+        "alt": "Dark club crowd in red light, hands up near the booth"
       },
       {
         "src": "/work/events/19.jpg",
         "width": 2499,
         "height": 1406,
         "color": "#260C0C",
-        "alt": ""
+        "alt": "Crowd in dark red light with a bright stage glow in the distance"
       },
       {
         "src": "/work/events/20.jpg",
         "width": 2499,
         "height": 1405,
         "color": "#0C260C",
-        "alt": ""
+        "alt": "Wide dark crowd under green projections, silhouettes in motion"
       },
       {
         "src": "/work/events/21.jpg",
         "width": 2499,
         "height": 1406,
         "color": "#0C260C",
-        "alt": ""
+        "alt": "Wide dark crowd under blue and purple light, bright screens behind"
       },
       {
         "src": "/work/events/22.jpg",
         "width": 2499,
         "height": 1406,
         "color": "#260C26",
-        "alt": ""
+        "alt": "Dark club crowd under teal and red projections, a glow near the stage"
       }
     ]
   },
@@ -3532,91 +3532,91 @@ export const PROJECTS: Project[] = [
         "width": 2499,
         "height": 3498,
         "color": "#F3F3F3",
-        "alt": ""
+        "alt": "Standing with hands on the hips in a black scoop-neck bodysuit, short blond bob, white seamless backdrop"
       },
       {
         "src": "/work/giselle-studio-digitals/02.jpg",
         "width": 2499,
         "height": 3499,
         "color": "#F3F3F3",
-        "alt": ""
+        "alt": "Kneeling on a tan leather chair in a black bodysuit, one hand on the backrest, white backdrop"
       },
       {
         "src": "/work/giselle-studio-digitals/03.jpg",
         "width": 2499,
         "height": 3499,
         "color": "#F3F3F3",
-        "alt": ""
+        "alt": "Reclining across a tan leather chair in a black bodysuit, head turned away, white backdrop"
       },
       {
         "src": "/work/giselle-studio-digitals/04.jpg",
         "width": 2499,
         "height": 3499,
         "color": "#F3F3F3",
-        "alt": ""
+        "alt": "Seated on the floor leaning on one hand in a black bodysuit, glancing back over a shoulder"
       },
       {
         "src": "/work/giselle-studio-digitals/05.jpg",
         "width": 2499,
         "height": 3499,
         "color": "#F3F3F3",
-        "alt": ""
+        "alt": "Leaning back with the head resting on a metal chair seat, black bodysuit, white backdrop"
       },
       {
         "src": "/work/giselle-studio-digitals/06.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#F3F3F3",
-        "alt": ""
+        "alt": "Seated in a tan leather chair with the legs stretched out, black bodysuit, looking at the lens"
       },
       {
         "src": "/work/giselle-studio-digitals/07.jpg",
         "width": 2499,
         "height": 3499,
         "color": "#F3F3F3",
-        "alt": ""
+        "alt": "Seated sideways in a tan leather chair in a black bodysuit, profile, pearl bracelet, white backdrop"
       },
       {
         "src": "/work/giselle-studio-digitals/08.jpg",
         "width": 2499,
         "height": 3499,
         "color": "#D9D9D9",
-        "alt": ""
+        "alt": "Extreme close crop of an eye behind a raised forearm, pearl bracelet, ear cuff, white backdrop"
       },
       {
         "src": "/work/giselle-studio-digitals/09.jpg",
         "width": 2499,
         "height": 3499,
         "color": "#F3F3F3",
-        "alt": ""
+        "alt": "Lying on the floor with arms overhead in a black bikini top, white seamless backdrop"
       },
       {
         "src": "/work/giselle-studio-digitals/10.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#F3F3F3",
-        "alt": ""
+        "alt": "Lying in a bridge pose on a white floor in a black bikini set, looking at the lens"
       },
       {
         "src": "/work/giselle-studio-digitals/11.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#F3F3F3",
-        "alt": ""
+        "alt": "Reclining on one arm in a black bikini set, knees up, pearl bracelet, white backdrop"
       },
       {
         "src": "/work/giselle-studio-digitals/12.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#F3F3F3",
-        "alt": ""
+        "alt": "Seated leaning on one hand in a black triangle top and briefs, hair tucked back, white backdrop"
       },
       {
         "src": "/work/giselle-studio-digitals/13.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#F3F3F3",
-        "alt": ""
+        "alt": "Seated on the floor leaning on an arm in a black bikini set, head tilted, white backdrop"
       },
       {
         "src": "/work/giselle-studio-digitals/14.jpg",
@@ -3630,7 +3630,7 @@ export const PROJECTS: Project[] = [
         "width": 2499,
         "height": 3124,
         "color": "#F3F3F3",
-        "alt": ""
+        "alt": "Standing with a hand on the hip in a black bikini set, direct gaze, white backdrop"
       }
     ]
   },
@@ -3661,112 +3661,112 @@ export const PROJECTS: Project[] = [
         "width": 2499,
         "height": 3124,
         "color": "#000001",
-        "alt": ""
+        "alt": "Standing in a printed black hoodie and light jeans seen through a hood opening, holding a sunflower"
       },
       {
         "src": "/work/goodcult/03.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#5C828D",
-        "alt": ""
+        "alt": "Standing with hands in the pockets of baggy jeans, printed black hoodie, curly dark hair, pale blue backdrop"
       },
       {
         "src": "/work/goodcult/04.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#4C7279",
-        "alt": ""
+        "alt": "Hood up in a printed black hoodie, grinning, hand in a peace sign, cap, blue-green backdrop"
       },
       {
         "src": "/work/goodcult/05.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#436770",
-        "alt": ""
+        "alt": "Two people in printed hoodies, one holding a sunflower, one in red track pants, blue backdrop"
       },
       {
         "src": "/work/goodcult/06.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#3A5E67",
-        "alt": ""
+        "alt": "Sunflower held over one eye, printed black hoodie, curly dark hair, blue-grey backdrop"
       },
       {
         "src": "/work/goodcult/07.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#3F626B",
-        "alt": ""
+        "alt": "Seated on a yellow block in a printed hoodie and red track pants, glasses, hand at the head"
       },
       {
         "src": "/work/goodcult/08.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#205F5C",
-        "alt": ""
+        "alt": "Hands on the head in a white graphic tee and beanie, gritted teeth, small backpack, teal backdrop"
       },
       {
         "src": "/work/goodcult/09.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#20706C",
-        "alt": ""
+        "alt": "Hands raised to a patched cap in a black graphic tee and baggy jeans, eyes closed, teal backdrop"
       },
       {
         "src": "/work/goodcult/10.jpg",
         "width": 2499,
         "height": 2000,
         "color": "#1B504E",
-        "alt": ""
+        "alt": "Group in black and white graphic tees posing together, hands forming a heart, teal backdrop"
       },
       {
         "src": "/work/goodcult/11.jpg",
         "width": 1199,
         "height": 1499,
         "color": "#2D6C68",
-        "alt": ""
+        "alt": "One person carried across the arms of another, a child standing beside, black graphic tees, teal backdrop"
       },
       {
         "src": "/work/goodcult/12.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#25746F",
-        "alt": ""
+        "alt": "Peace signs raised in a black graphic tee and patched cap, scrunched face, teal backdrop"
       },
       {
         "src": "/work/goodcult/13.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#277773",
-        "alt": ""
+        "alt": "Hands in pockets in a black graphic tee and white cargo pants, curly hair, black glasses, teal backdrop"
       },
       {
         "src": "/work/goodcult/14.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#2B706C",
-        "alt": ""
+        "alt": "Two people embracing in graphic tees, holding a bouquet of flowers, teal backdrop"
       },
       {
         "src": "/work/goodcult/15.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#A6671C",
-        "alt": ""
+        "alt": "Seated on a yellow block in a printed hoodie and jeans, disco ball on the carpet, mustard walls"
       },
       {
         "src": "/work/goodcult/16.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#965917",
-        "alt": ""
+        "alt": "Standing in a printed hoodie and baggy jeans, hands in pockets, mustard corner, deep red carpet"
       },
       {
         "src": "/work/goodcult/17.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#C08025",
-        "alt": ""
+        "alt": "Standing in a black graphic tee, white cargo pants and sneakers, glasses, mustard corner, red carpet"
       }
     ]
   },
@@ -8166,217 +8166,217 @@ export const PROJECTS: Project[] = [
         "width": 2499,
         "height": 3124,
         "color": "#262626",
-        "alt": ""
+        "alt": "Low angle on two people in a mossy forest, one in black overalls, fur hat and face mask"
       },
       {
         "src": "/work/steampunk-files-001/02.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#262626",
-        "alt": ""
+        "alt": "Gloved hand at the knee in black overalls and a fur trapper hat, a second person leaning in"
       },
       {
         "src": "/work/steampunk-files-001/03.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#262626",
-        "alt": ""
+        "alt": "Low wide angle, a gloved hand reaching toward the lens, black overalls, fur hat and face mask"
       },
       {
         "src": "/work/steampunk-files-001/04.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#262626",
-        "alt": ""
+        "alt": "Hand pressed to the face under a fur hat, cream sweater, black overalls, a second person behind"
       },
       {
         "src": "/work/steampunk-files-001/05.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#262626",
-        "alt": ""
+        "alt": "Two people on a leaf-covered bank, one in overalls and a face mask, one in a puffer jacket"
       },
       {
         "src": "/work/steampunk-files-001/06.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#262626",
-        "alt": ""
+        "alt": "Two people in a dim tunnel, one in a brown scarf and puffer jacket, one hands on head"
       },
       {
         "src": "/work/steampunk-files-001/07.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#262626",
-        "alt": ""
+        "alt": "Grey puffer jacket, brown headscarf and tall black boots beside a person in overalls, graffiti tunnel"
       },
       {
         "src": "/work/steampunk-files-001/08.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#262626",
-        "alt": ""
+        "alt": "Crouching with the head down in a fur hat beside a person in a scarf and boots, tunnel"
       },
       {
         "src": "/work/steampunk-files-001/09.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#262626",
-        "alt": ""
+        "alt": "Face mask and fur trapper hat, cream sweater and overalls, a second person in a grey puffer beside"
       },
       {
         "src": "/work/steampunk-files-001/10.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#262626",
-        "alt": ""
+        "alt": "Two people side by side in a forest, black overalls with a face mask, a grey puffer jacket"
       },
       {
         "src": "/work/steampunk-files-001/11.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#262626",
-        "alt": ""
+        "alt": "Holding a black parasol over a grey puffer jacket and tall boots, a second person seated, forest"
       },
       {
         "src": "/work/steampunk-files-001/12.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#262626",
-        "alt": ""
+        "alt": "Two people in a forest clearing, one with a boot raised, one in overalls and a face mask"
       },
       {
         "src": "/work/steampunk-files-001/13.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#D9D9D9",
-        "alt": ""
+        "alt": "Close angle on two people in a bare-branch clearing, a hand raised to the brow, puffer jacket, gloves"
       },
       {
         "src": "/work/steampunk-files-001/14.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#262626",
-        "alt": ""
+        "alt": "Two people on a wet forest road, one in black overalls, one in a pleated skirt"
       },
       {
         "src": "/work/steampunk-files-001/15.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#262626",
-        "alt": ""
+        "alt": "Standing alone on a wet road in a grey puffer jacket and pleated mini skirt, hand raised"
       },
       {
         "src": "/work/steampunk-files-001/16.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#F3F3F3",
-        "alt": ""
+        "alt": "Two people on a gravel pile, one seated in padded overalls and boots, one beside a black umbrella"
       },
       {
         "src": "/work/steampunk-files-001/17.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#262626",
-        "alt": ""
+        "alt": "Two people on gravel, one slumped in a cream sweater and padded overalls, one holding an umbrella"
       },
       {
         "src": "/work/steampunk-files-001/18.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#262626",
-        "alt": ""
+        "alt": "Low angle, a gloved hand reaching to the lens, striped beanie, goggles, cream sweater and padded overalls"
       },
       {
         "src": "/work/steampunk-files-001/19.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#262626",
-        "alt": ""
+        "alt": "Two people on a gravel mound, a striped beanie and goggles, a closed umbrella planted in front"
       },
       {
         "src": "/work/steampunk-files-001/20.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#F3F3F3",
-        "alt": ""
+        "alt": "Low angle on a closed black umbrella, a person crouching in black with gloves, another seated in overalls"
       },
       {
         "src": "/work/steampunk-files-001/21.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#262626",
-        "alt": ""
+        "alt": "Standing in a striped beanie and leather gloves, a brown scarf pulled over another person's face, forest behind"
       },
       {
         "src": "/work/steampunk-files-001/22.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#262626",
-        "alt": ""
+        "alt": "Hand over the eyes in a striped beanie and leather gloves, a person in overalls and scarf beside"
       },
       {
         "src": "/work/steampunk-files-001/23.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#262626",
-        "alt": ""
+        "alt": "Leaning forward on a closed umbrella in a striped beanie, black pleated skirt and gloves, a person behind"
       },
       {
         "src": "/work/steampunk-files-001/24.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#262626",
-        "alt": ""
+        "alt": "Wide shot of two people on a gravel pile, a closed umbrella, striped beanie, overalls, pine trees"
       },
       {
         "src": "/work/steampunk-files-001/25.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#262626",
-        "alt": ""
+        "alt": "Standing with legs apart on gravel in a striped beanie, black top and pleated skirt, closed umbrella"
       },
       {
         "src": "/work/steampunk-files-001/26.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#262626",
-        "alt": ""
+        "alt": "Crouching on gravel in a striped beanie and black boots, closed umbrella standing upright, leather glove"
       },
       {
         "src": "/work/steampunk-files-001/27.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#262626",
-        "alt": ""
+        "alt": "Crouching low in a striped beanie, a closed umbrella planted beside, gloves, black boots, pine trees"
       },
       {
         "src": "/work/steampunk-files-001/28.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#262626",
-        "alt": ""
+        "alt": "Holding a black umbrella overhead in a cream sweater and overalls, scarf over the face, goggles"
       },
       {
         "src": "/work/steampunk-files-001/29.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#262626",
-        "alt": ""
+        "alt": "Grinning under a black umbrella in a cream sweater and overalls, goggles on the head, forest green behind"
       },
       {
         "src": "/work/steampunk-files-001/30.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#262626",
-        "alt": ""
+        "alt": "Holding an umbrella with a brown scarf over the mouth, cream sweater, overalls, gravel and ivy behind"
       },
       {
         "src": "/work/steampunk-files-001/31.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#262626",
-        "alt": ""
+        "alt": "Holding a wide black umbrella overhead, brown scarf pulled over the face, goggles on the head, cream sweater"
       }
     ]
   },
@@ -8411,84 +8411,84 @@ export const PROJECTS: Project[] = [
         "width": 2499,
         "height": 3124,
         "color": "#26260C",
-        "alt": ""
+        "alt": "Standing in a green quilted jacket and khaki trousers, face wrapped in a scarf, dry grass at night"
       },
       {
         "src": "/work/stratus-lookbook-vol-1/02.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#0C260C",
-        "alt": ""
+        "alt": "Looking down in a green quilted jacket, a camouflage bucket hat and light trousers, dark night sky"
       },
       {
         "src": "/work/stratus-lookbook-vol-1/03.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#408C8C",
-        "alt": ""
+        "alt": "Standing in a quilted jacket, sunglasses and cargo trousers under a teal dusk sky with a moon"
       },
       {
         "src": "/work/stratus-lookbook-vol-1/04.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#262626",
-        "alt": ""
+        "alt": "Two people at night under a tree, one in a denim jacket and mask, one with a bag"
       },
       {
         "src": "/work/stratus-lookbook-vol-1/05.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#8C7340",
-        "alt": ""
+        "alt": "Two people in dry grass, one in a denim jacket and mask, one bent over a duffel bag"
       },
       {
         "src": "/work/stratus-lookbook-vol-1/06.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#594026",
-        "alt": ""
+        "alt": "Walking in a green quilted jacket and cargo trousers, carrying a black bag, patterned scarf over the face"
       },
       {
         "src": "/work/stratus-lookbook-vol-1/07.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#40738C",
-        "alt": ""
+        "alt": "Leaning into a stride in a green quilted jacket, sunglasses and wide cargo trousers, dusk sky"
       },
       {
         "src": "/work/stratus-lookbook-vol-1/08.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#262626",
-        "alt": ""
+        "alt": "Turned away with the head down in a green quilted jacket, hands together, cargo trousers, dark hills"
       },
       {
         "src": "/work/stratus-lookbook-vol-1/09.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#F3F3F3",
-        "alt": ""
+        "alt": "Walking away in a green quilted jacket and cargo trousers, one arm out, pale dusk sky"
       },
       {
         "src": "/work/stratus-lookbook-vol-1/10.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#262626",
-        "alt": ""
+        "alt": "Standing with arms loose in a green quilted jacket and sunglasses, cargo trousers, hills at dusk"
       },
       {
         "src": "/work/stratus-lookbook-vol-1/11.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#C0D9D9",
-        "alt": ""
+        "alt": "Looking down in a green quilted jacket and sunglasses, one hand in a pocket, grass and dark hills"
       },
       {
         "src": "/work/stratus-lookbook-vol-1/12.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#8CC0D9",
-        "alt": ""
+        "alt": "Turning away in a green quilted jacket, sunglasses and cargo trousers, dark hills, pale sky"
       }
     ]
   },
@@ -8525,112 +8525,112 @@ export const PROJECTS: Project[] = [
         "width": 2499,
         "height": 3124,
         "color": "#F3F3F3",
-        "alt": ""
+        "alt": "Reclining on one arm on a white floor in a black bodysuit, long streaked hair, glancing sideways"
       },
       {
         "src": "/work/taneka/03.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#F3F3F3",
-        "alt": ""
+        "alt": "Seated leaning on one hand in a black scoop-neck bodysuit, streaked hair, white backdrop"
       },
       {
         "src": "/work/taneka/04.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#F3F3F3",
-        "alt": ""
+        "alt": "Kneeling with a hand at the head in a black bodysuit, streaked hair, white backdrop"
       },
       {
         "src": "/work/taneka/05.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#F3F3F3",
-        "alt": ""
+        "alt": "Seated with an arm over the head in a black bodysuit and white socks, white backdrop"
       },
       {
         "src": "/work/taneka/06.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#F3F3F3",
-        "alt": ""
+        "alt": "Seated leaning on one hand, looking at the lens, black bodysuit, white socks, white backdrop"
       },
       {
         "src": "/work/taneka/07.jpg",
         "width": 2499,
         "height": 2856,
         "color": "#8C8C8C",
-        "alt": ""
+        "alt": "Lying on the front on a grey floor, head on an arm, black bodysuit, streaked hair"
       },
       {
         "src": "/work/taneka/08.jpg",
         "width": 2499,
         "height": 2856,
         "color": "#737373",
-        "alt": ""
+        "alt": "Lying on one side propped on an arm, black bodysuit, long hair, grey backdrop"
       },
       {
         "src": "/work/taneka/09.jpg",
         "width": 2499,
         "height": 2856,
         "color": "#737373",
-        "alt": ""
+        "alt": "Lying on one side, head on a bent arm, black bodysuit, soft light, grey backdrop"
       },
       {
         "src": "/work/taneka/10.jpg",
         "width": 2499,
         "height": 2856,
         "color": "#8C8C8C",
-        "alt": ""
+        "alt": "Propped on both arms over a grey floor, head tilted, black bodysuit, soft side light"
       },
       {
         "src": "/work/taneka/11.jpg",
         "width": 2499,
         "height": 2856,
         "color": "#737373",
-        "alt": ""
+        "alt": "Lying on one side with a hand flat on the floor, black bodysuit, grey backdrop"
       },
       {
         "src": "/work/taneka/12.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#F3D9D9",
-        "alt": ""
+        "alt": "Seated leaning on one arm in a black bodysuit and thin necklace, pink glow, white floor"
       },
       {
         "src": "/work/taneka/13.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#F3F3F3",
-        "alt": ""
+        "alt": "Head tilted over a shoulder in a black bodysuit, one hand planted, pale pink backdrop"
       },
       {
         "src": "/work/taneka/14.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#F3F3F3",
-        "alt": ""
+        "alt": "Seated leaning on one hand, head tilted, black bodysuit, pink halo behind, white floor"
       },
       {
         "src": "/work/taneka/15.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#F3F3F3",
-        "alt": ""
+        "alt": "Seated leaning on one arm, looking at the lens, black bodysuit, soft pink backlight"
       },
       {
         "src": "/work/taneka/16.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#F3F3F3",
-        "alt": ""
+        "alt": "Reclining on a hip with a hand on the knee, black bodysuit, thin necklace, pink-lit backdrop"
       },
       {
         "src": "/work/taneka/17.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#D9D9D9",
-        "alt": ""
+        "alt": "Seated leaning back on one arm, a hand at the hip, black bodysuit, pink backlight"
       }
     ]
   },
@@ -8732,28 +8732,28 @@ export const PROJECTS: Project[] = [
         "width": 2499,
         "height": 3124,
         "color": "#0C260C",
-        "alt": ""
+        "alt": "Leaning forward in a dark blazer and white tee, backlit by a beam of light through teal smoke"
       },
       {
         "src": "/work/torteline/02.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#0C260C",
-        "alt": ""
+        "alt": "Head bowed in a dark blazer and white tee, a bright beam behind in teal smoke"
       },
       {
         "src": "/work/torteline/03.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#0C260C",
-        "alt": ""
+        "alt": "Standing with hands in the pockets of an open dark blazer, teal smoke, pendant necklace"
       },
       {
         "src": "/work/torteline/04.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#408CA6",
-        "alt": ""
+        "alt": "Profile over the shoulder in a dark blazer and white tee, backlit by pale blue light"
       },
       {
         "src": "/work/torteline/05.jpg",
@@ -8767,84 +8767,84 @@ export const PROJECTS: Project[] = [
         "width": 2499,
         "height": 3124,
         "color": "#8CD9D9",
-        "alt": ""
+        "alt": "Seated on the floor in sunglasses and a dark blazer, a small synth beside, bright teal backdrop"
       },
       {
         "src": "/work/torteline/07.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#8C0C0C",
-        "alt": ""
+        "alt": "Standing silhouetted against a deep red backdrop, face lit by a narrow strip of light"
       },
       {
         "src": "/work/torteline/08.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#260C0C",
-        "alt": ""
+        "alt": "Small dark silhouette standing in a red room with a bright magenta glow at left"
       },
       {
         "src": "/work/torteline/09.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#730C0C",
-        "alt": ""
+        "alt": "Head tilted back in a dark silhouette on red, a strip of light across the eyes"
       },
       {
         "src": "/work/torteline/10.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#730C0C",
-        "alt": ""
+        "alt": "Standing in silhouette with hands behind the back holding drumsticks, magenta glow, red room"
       },
       {
         "src": "/work/torteline/11.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#A60C0C",
-        "alt": ""
+        "alt": "Seated on the floor holding drumsticks in a printed white tee and black trousers, red backdrop"
       },
       {
         "src": "/work/torteline/12.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#40260C",
-        "alt": ""
+        "alt": "Standing in a red-lit printed tee and black trousers, hands together, dark red backdrop"
       },
       {
         "src": "/work/torteline/13.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#735940",
-        "alt": ""
+        "alt": "Seated on a stool in a lime cardigan over a white tee, one foot up, hazy warm light"
       },
       {
         "src": "/work/torteline/14.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#594026",
-        "alt": ""
+        "alt": "Seated on a stool in a lime cardigan, legs apart, sneakers, soft smoke and warm light"
       },
       {
         "src": "/work/torteline/15.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#735940",
-        "alt": ""
+        "alt": "Seated on a stool leaning forward on a knee, lime cardigan, white tee, warm hazy light"
       },
       {
         "src": "/work/torteline/16.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#C07326",
-        "alt": ""
+        "alt": "Standing in a dark apron and white tee with a wooden spoon between the teeth, amber backdrop"
       },
       {
         "src": "/work/torteline/17.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#8C8C8C",
-        "alt": ""
+        "alt": "Looking down in a grey pocket tee with hands behind the back, pale grey-green backdrop"
       }
     ]
   },
@@ -9118,161 +9118,161 @@ export const PROJECTS: Project[] = [
         "width": 2499,
         "height": 3333,
         "color": "#939388",
-        "alt": ""
+        "alt": "Stepping onto a vintage CRT in a black leather jacket and trousers, grey seamless backdrop"
       },
       {
         "src": "/work/ukiyosunknown/03.jpg",
         "width": 1628,
         "height": 2171,
         "color": "#3B4A4F",
-        "alt": ""
+        "alt": "Green-tinted video static with the faint outline of a figure in a jacket"
       },
       {
         "src": "/work/ukiyosunknown/04.jpg",
         "width": 2499,
         "height": 3333,
         "color": "#6D7167",
-        "alt": ""
+        "alt": "Seen from behind in a black textured jacket and black trousers, grey backdrop"
       },
       {
         "src": "/work/ukiyosunknown/05.jpg",
         "width": 2499,
         "height": 3334,
         "color": "#797C72",
-        "alt": ""
+        "alt": "Profile standing in a black textured jacket and trousers, tousled hair, grey backdrop"
       },
       {
         "src": "/work/ukiyosunknown/06.jpg",
         "width": 2499,
         "height": 3331,
         "color": "#A4A19A",
-        "alt": ""
+        "alt": "Holding a CRT television out in a black jacket with gathered shoulders, grey backdrop"
       },
       {
         "src": "/work/ukiyosunknown/07.jpg",
         "width": 2499,
         "height": 3333,
         "color": "#95968E",
-        "alt": ""
+        "alt": "Leaning over to lift a CRT with the cord trailing, black jacket and trousers, grey backdrop"
       },
       {
         "src": "/work/ukiyosunknown/08.jpg",
         "width": 2047,
         "height": 2559,
         "color": "#C0C0C0",
-        "alt": ""
+        "alt": "Walking past a concrete wall in a worn grey leather jacket and rust zip pants, motion blur"
       },
       {
         "src": "/work/ukiyosunknown/09.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#D9C0C0",
-        "alt": ""
+        "alt": "Head turned into a leather jacket sleeve, rust zip pants and black boots, leaning on a concrete wall"
       },
       {
         "src": "/work/ukiyosunknown/10.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#D9C0C0",
-        "alt": ""
+        "alt": "Hand in the hair in a worn leather jacket over a white tank, long pendant, rust zip pants"
       },
       {
         "src": "/work/ukiyosunknown/11.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#A6A6A6",
-        "alt": ""
+        "alt": "Low angle against a glass tower, worn leather jacket, white tank and pendant, rust zip pants"
       },
       {
         "src": "/work/ukiyosunknown/12.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#A6A68C",
-        "alt": ""
+        "alt": "Leaning on a white railing in a worn leather jacket and rust zip pants, glass building behind"
       },
       {
         "src": "/work/ukiyosunknown/13.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#D9C0C0",
-        "alt": ""
+        "alt": "Looking down in a worn leather jacket over a white tank, pendant, rust zip pants, concrete wall"
       },
       {
         "src": "/work/ukiyosunknown/14.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#D9C0C0",
-        "alt": ""
+        "alt": "Walking in motion blur in an ivory leather jacket and black flared trousers, concrete wall"
       },
       {
         "src": "/work/ukiyosunknown/15.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#C0C0C0",
-        "alt": ""
+        "alt": "Leaning back against a concrete wall in an ivory zip jacket, arm tucked in, black trousers"
       },
       {
         "src": "/work/ukiyosunknown/16.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#D9D9D9",
-        "alt": ""
+        "alt": "Hunched forward in an ivory leather jacket with hands crossed, black flared trousers, concrete wall"
       },
       {
         "src": "/work/ukiyosunknown/17.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#D9C0C0",
-        "alt": ""
+        "alt": "Standing with a hand in the pocket in an ivory jacket over a white tank, black flared trousers"
       },
       {
         "src": "/work/ukiyosunknown/18.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#D9C0C0",
-        "alt": ""
+        "alt": "Seen from behind in an ivory leather jacket with a large back logo, black trousers, concrete wall"
       },
       {
         "src": "/work/ukiyosunknown/19.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#D9C0C0",
-        "alt": ""
+        "alt": "Back view in an ivory leather jacket and black flared trousers, concrete wall, soft shade"
       },
       {
         "src": "/work/ukiyosunknown/20.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#262626",
-        "alt": ""
+        "alt": "Looking away in a lilac mohair sweater with red marks on the sleeves, pendant, green ivy wall"
       },
       {
         "src": "/work/ukiyosunknown/21.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#262626",
-        "alt": ""
+        "alt": "Standing with a boot raised in a lilac mohair sweater and black trousers, ivy wall, low sun"
       },
       {
         "src": "/work/ukiyosunknown/22.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#262626",
-        "alt": ""
+        "alt": "Seated on a concrete ledge in a lilac mohair sweater with red marks, low angle, ivy behind"
       },
       {
         "src": "/work/ukiyosunknown/23.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#C0A6A6",
-        "alt": ""
+        "alt": "Wide stance on a concrete ledge in a lilac mohair sweater, black wide trousers, ivy wall"
       },
       {
         "src": "/work/ukiyosunknown/24.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#D9C0C0",
-        "alt": ""
+        "alt": "Standing with hands low in a lilac mohair sweater and black flared trousers, concrete wall"
       }
     ]
   },
@@ -9794,210 +9794,210 @@ export const PROJECTS: Project[] = [
         "width": 2499,
         "height": 3331,
         "color": "#9D816F",
-        "alt": ""
+        "alt": "Couple at the foot of a grand marble staircase, one dipping the other for a kiss"
       },
       {
         "src": "/work/weddings/12.jpg",
         "width": 2499,
         "height": 3333,
         "color": "#846958",
-        "alt": ""
+        "alt": "Couple holding hands on a marble staircase in a white jumpsuit and tan suit, looking back"
       },
       {
         "src": "/work/weddings/13.jpg",
         "width": 2428,
         "height": 3641,
         "color": "#8E8380",
-        "alt": ""
+        "alt": "Couple kissing at a gold ironwork balcony railing under a coffered ceiling, red bouquet"
       },
       {
         "src": "/work/weddings/14.jpg",
         "width": 2499,
         "height": 3333,
         "color": "#B0ACAD",
-        "alt": ""
+        "alt": "Couple kissing on a balcony under tall arched windows, white dress, tan suit, red bouquet"
       },
       {
         "src": "/work/weddings/15.jpg",
         "width": 2499,
         "height": 1667,
         "color": "#ABA4A4",
-        "alt": ""
+        "alt": "Wide shot of a small ceremony on a balcony, an officiant in a black robe, guests watching"
       },
       {
         "src": "/work/weddings/16.jpg",
         "width": 2499,
         "height": 1667,
         "color": "#82786E",
-        "alt": ""
+        "alt": "Couple standing with an officiant in a black robe on a balcony, a guest holding a phone"
       },
       {
         "src": "/work/weddings/17.jpg",
         "width": 2499,
         "height": 3333,
         "color": "#413C36",
-        "alt": ""
+        "alt": "Close on two people smiling in front of an officiant, white dress, tan jacket with a pink flower"
       },
       {
         "src": "/work/weddings/18.jpg",
         "width": 2499,
         "height": 3331,
         "color": "#76665D",
-        "alt": ""
+        "alt": "Hands holding a small bouquet of purple and white mums, a tan jacket and a patterned tie blurred"
       },
       {
         "src": "/work/weddings/19.jpg",
         "width": 2499,
         "height": 1667,
         "color": "#9F9A98",
-        "alt": ""
+        "alt": "Couple embracing at the railing during the ceremony, an officiant and a video camera operator behind"
       },
       {
         "src": "/work/weddings/20.jpg",
         "width": 2499,
         "height": 1667,
         "color": "#574439",
-        "alt": ""
+        "alt": "Couple hugging on a balcony, officiant in a black robe applauding, arched windows behind"
       },
       {
         "src": "/work/weddings/21.jpg",
         "width": 2499,
         "height": 1667,
         "color": "#7E7266",
-        "alt": ""
+        "alt": "Couple in an embrace on a balcony, officiant smiling beside them, soft pink light"
       },
       {
         "src": "/work/weddings/22.jpg",
         "width": 2499,
         "height": 3333,
         "color": "#B3B2B6",
-        "alt": ""
+        "alt": "Couple on a balcony railing in front of arched windows, one taking a phone selfie, bouquet"
       },
       {
         "src": "/work/weddings/23.jpg",
         "width": 2499,
         "height": 1667,
         "color": "#918478",
-        "alt": ""
+        "alt": "Two guests hugging on the balcony with a photographer and onlookers behind"
       },
       {
         "src": "/work/weddings/24.jpg",
         "width": 2499,
         "height": 1667,
         "color": "#C9C2C2",
-        "alt": ""
+        "alt": "Couple greeting guests on a balcony, an officiant in a black robe, a video camera operator nearby"
       },
       {
         "src": "/work/weddings/25.jpg",
         "width": 2429,
         "height": 3641,
         "color": "#544A46",
-        "alt": ""
+        "alt": "Couple holding hands facing each other in front of an officiant, white dress, tan jacket, arched windows"
       },
       {
         "src": "/work/weddings/26.jpg",
         "width": 2499,
         "height": 1667,
         "color": "#85796D",
-        "alt": ""
+        "alt": "Group portrait of the couple and guests lined up on a balcony, arched windows behind"
       },
       {
         "src": "/work/weddings/27.jpg",
         "width": 2499,
         "height": 3331,
         "color": "#464340",
-        "alt": ""
+        "alt": "Couple from behind facing an officiant in a black robe, white one-shoulder dress, tan jacket"
       },
       {
         "src": "/work/weddings/28.jpg",
         "width": 2499,
         "height": 1667,
         "color": "#605A52",
-        "alt": ""
+        "alt": "Couple in front of a leaded window, white dress, tan jacket, red bouquet, nose to nose"
       },
       {
         "src": "/work/weddings/29.jpg",
         "width": 2499,
         "height": 3333,
         "color": "#B78A5D",
-        "alt": ""
+        "alt": "Seen from above, a couple climbing a marble staircase with a brass handrail, holding hands"
       },
       {
         "src": "/work/weddings/30.jpg",
         "width": 2429,
         "height": 3641,
         "color": "#B5A9AB",
-        "alt": ""
+        "alt": "Looking down a marble stairwell at a couple descending, white dress, tan jacket, red bouquet"
       },
       {
         "src": "/work/weddings/31.jpg",
         "width": 2499,
         "height": 3333,
         "color": "#463C35",
-        "alt": ""
+        "alt": "Couple at a marble stair landing, one holding a red bouquet, a brass handrail across the frame"
       },
       {
         "src": "/work/weddings/32.jpg",
         "width": 2499,
         "height": 3333,
         "color": "#EFE5E8",
-        "alt": ""
+        "alt": "Champagne bottles chilling in an ice bucket with frozen pink roses, cocktails on a table"
       },
       {
         "src": "/work/weddings/33.jpg",
         "width": 2499,
         "height": 1667,
         "color": "#724041",
-        "alt": ""
+        "alt": "Guests in dresses and suits posing together in a lobby, drinks table with a red cloth"
       },
       {
         "src": "/work/weddings/34.jpg",
         "width": 2499,
         "height": 1667,
         "color": "#837464",
-        "alt": ""
+        "alt": "Guests mingling in a modern lobby, a gold hanging light overhead, dark suits and cocktail dresses"
       },
       {
         "src": "/work/weddings/35.jpg",
         "width": 2499,
         "height": 1667,
         "color": "#3A2A25",
-        "alt": ""
+        "alt": "Long reception table with red tablecloth and flowers, guests in conversation, orange chairs"
       },
       {
         "src": "/work/weddings/36.jpg",
         "width": 2499,
         "height": 1667,
         "color": "#B74459",
-        "alt": ""
+        "alt": "Guests clapping and dancing in a lobby near a floral circle arch, orange and navy outfits"
       },
       {
         "src": "/work/weddings/37.jpg",
         "width": 2499,
         "height": 1667,
         "color": "#665253",
-        "alt": ""
+        "alt": "Guests gathered and cheering under a floral arch with warm string lights"
       },
       {
         "src": "/work/weddings/38.jpg",
         "width": 2499,
         "height": 3333,
         "color": "#D9BDA3",
-        "alt": ""
+        "alt": "Pink tulle gown at a gold ring floral arch, hand at the head, mirrored glass behind"
       },
       {
         "src": "/work/weddings/39.jpg",
         "width": 2499,
         "height": 1667,
         "color": "#C8C8C7",
-        "alt": ""
+        "alt": "Family group portrait in front of a floral arch, a pink gown at the center"
       },
       {
         "src": "/work/weddings/40.jpg",
         "width": 2499,
         "height": 1667,
         "color": "#998062",
-        "alt": ""
+        "alt": "Group of guests posing in sparkly and printed dresses and tuxedos in front of a floral arch"
       }
     ]
   },
@@ -10047,119 +10047,119 @@ export const PROJECTS: Project[] = [
         "width": 2499,
         "height": 3124,
         "color": "#D9D9C0",
-        "alt": ""
+        "alt": "Grinning in a dark cap and black WIRED tee, both hands raised, on a sunlit sidewalk"
       },
       {
         "src": "/work/wired-magazine/03.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#D9D9F3",
-        "alt": ""
+        "alt": "Mid-air on a skateboard above a bike rack, black long-sleeve top, jeans, tree and city behind"
       },
       {
         "src": "/work/wired-magazine/04.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#C0C0A6",
-        "alt": ""
+        "alt": "Seated dog wearing a blue and white printed tote bag, grey wall, yellow road paint"
       },
       {
         "src": "/work/wired-magazine/05.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#C0D9F3",
-        "alt": ""
+        "alt": "Three people walking by glass buildings in white tees, one carrying a green tote bag, low wide angle"
       },
       {
         "src": "/work/wired-magazine/06.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#262626",
-        "alt": ""
+        "alt": "Two people in white WIRED tees, one with a printed back, holding a laptop sleeve, building behind"
       },
       {
         "src": "/work/wired-magazine/07.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#262626",
-        "alt": ""
+        "alt": "Passing a bright green tote bag and a yellow water bottle, patterned laptop sleeve, white WIRED tee"
       },
       {
         "src": "/work/wired-magazine/08.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#262626",
-        "alt": ""
+        "alt": "Blue and white printed tote bag seen from above against a dark background"
       },
       {
         "src": "/work/wired-magazine/09.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#26598C",
-        "alt": ""
+        "alt": "Hand holding an orange mug printed TIRED, a ring on one finger, desk and city skyline behind"
       },
       {
         "src": "/work/wired-magazine/10.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#40598C",
-        "alt": ""
+        "alt": "Juggling pencils and a roll of tape above a desk, black pullover, orange sunglasses, skyline behind"
       },
       {
         "src": "/work/wired-magazine/11.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#C0C0C0",
-        "alt": ""
+        "alt": "Pencil in the mouth at a rooftop desk, paper garland and keyboard, black cap and orange sunglasses"
       },
       {
         "src": "/work/wired-magazine/12.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#264073",
-        "alt": ""
+        "alt": "Seated at a rooftop desk in a white WIRED tee and cap, blue mug in the foreground, skyline"
       },
       {
         "src": "/work/wired-magazine/13.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#404040",
-        "alt": ""
+        "alt": "Leaning over a rooftop wall in a white WIRED tee, a black flag blowing beside, skyline behind"
       },
       {
         "src": "/work/wired-magazine/14.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#C0A6A6",
-        "alt": ""
+        "alt": "Seen from above, seated at a laptop on a rooftop with a desk chair and a monitor"
       },
       {
         "src": "/work/wired-magazine/15.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#5973A6",
-        "alt": ""
+        "alt": "Standing at a rooftop wall in a white WIRED tee holding a blue mug, looking aside, skyline"
       },
       {
         "src": "/work/wired-magazine/16.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#262626",
-        "alt": ""
+        "alt": "Two people standing in white and black WIRED tees, sunglasses, long hair, a glass building behind"
       },
       {
         "src": "/work/wired-magazine/17.jpg",
         "width": 2499,
         "height": 3499,
         "color": "#40598C",
-        "alt": ""
+        "alt": "Pencil held to the mouth behind a blue mug, black cap reading ANGRY NERD, orange sunglasses"
       },
       {
         "src": "/work/wired-magazine/18.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#262626",
-        "alt": ""
+        "alt": "Doing a one-arm side plank on a rooftop in a white tee, drinking from an orange mug"
       }
     ]
   },
@@ -10275,203 +10275,203 @@ export const PROJECTS: Project[] = [
         "width": 2499,
         "height": 3124,
         "color": "#C0C0C0",
-        "alt": ""
+        "alt": "On hands and knees in a black long-sleeve bodysuit, long dark hair and bangs, looking up, white backdrop"
       },
       {
         "src": "/work/zoe/03.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#F3F3F3",
-        "alt": ""
+        "alt": "Low on one arm in a black bodysuit, long dark hair over the shoulder, glancing up, white backdrop"
       },
       {
         "src": "/work/zoe/04.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#F3F3F3",
-        "alt": ""
+        "alt": "Leaning forward on both arms in a black bodysuit, long hair hanging, steady gaze, white backdrop"
       },
       {
         "src": "/work/zoe/05.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#C0C0C0",
-        "alt": ""
+        "alt": "Seated sideways leaning on one hand in a black bodysuit, long hair down the back, white backdrop"
       },
       {
         "src": "/work/zoe/06.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#F3F3F3",
-        "alt": ""
+        "alt": "Reclining on one elbow in a black bodysuit, long hair spilling across the floor, white backdrop"
       },
       {
         "src": "/work/zoe/07.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#F3F3F3",
-        "alt": ""
+        "alt": "Seen from above lying on the side, black bodysuit, hair across the floor, one hand at the chin"
       },
       {
         "src": "/work/zoe/08.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#F3F3F3",
-        "alt": ""
+        "alt": "Seated leaning on one arm, head tilted, black bodysuit, long hair and bangs, soft grey backdrop"
       },
       {
         "src": "/work/zoe/09.jpg",
         "width": 2429,
         "height": 3641,
         "color": "#F3F3F3",
-        "alt": ""
+        "alt": "Crouched with the head tipped sideways, long black hair falling forward, black bodysuit, grey backdrop"
       },
       {
         "src": "/work/zoe/10.jpg",
         "width": 2429,
         "height": 3641,
         "color": "#F3F3F3",
-        "alt": ""
+        "alt": "Seated on one hip looking up and away, black bodysuit, long hair down the back, soft grey backdrop"
       },
       {
         "src": "/work/zoe/11.jpg",
         "width": 2429,
         "height": 3641,
         "color": "#F3F3F3",
-        "alt": ""
+        "alt": "Seated twisting toward the lens, one hand on the floor, black bodysuit, long hair, grey backdrop"
       },
       {
         "src": "/work/zoe/12.jpg",
         "width": 2429,
         "height": 3641,
         "color": "#D9D9D9",
-        "alt": ""
+        "alt": "Crouched in profile glancing back, black long-sleeve bodysuit, one hand planted, grey backdrop"
       },
       {
         "src": "/work/zoe/13.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#F3F3F3",
-        "alt": ""
+        "alt": "Crouched close to the lens, chin down, long black hair and bangs, black bodysuit, grey backdrop"
       },
       {
         "src": "/work/zoe/14.jpg",
         "width": 2429,
         "height": 3641,
         "color": "#F3F3F3",
-        "alt": ""
+        "alt": "Leaning forward with the head tilted, hair hanging in long strands, black bodysuit, grey backdrop"
       },
       {
         "src": "/work/zoe/15.jpg",
         "width": 2429,
         "height": 3641,
         "color": "#F3F3F3",
-        "alt": ""
+        "alt": "Close crop, chin dropped toward a shoulder, long black hair, black bodysuit, white backdrop"
       },
       {
         "src": "/work/zoe/16.jpg",
         "width": 2429,
         "height": 3641,
         "color": "#C0C0C0",
-        "alt": ""
+        "alt": "Tight crop, face turned to the lens, bangs, long black hair across the shoulders, black bodysuit"
       },
       {
         "src": "/work/zoe/17.jpg",
         "width": 2429,
         "height": 3641,
         "color": "#C0C0C0",
-        "alt": ""
+        "alt": "Crouched with arms wrapped around the knees, glancing sideways, black bodysuit, long hair, grey backdrop"
       },
       {
         "src": "/work/zoe/18.jpg",
         "width": 2429,
         "height": 3641,
         "color": "#F3F3F3",
-        "alt": ""
+        "alt": "Seated with the knees pulled in, one hand on the floor, looking away, black bodysuit, white backdrop"
       },
       {
         "src": "/work/zoe/19.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#F3F3F3",
-        "alt": ""
+        "alt": "Head resting on the floor, face turned up toward the lens, black scoop-neck bodysuit, hair spread"
       },
       {
         "src": "/work/zoe/20.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#D9D9D9",
-        "alt": ""
+        "alt": "Lying on the back with a hand on the collarbone, long dark hair spread, black bodysuit"
       },
       {
         "src": "/work/zoe/21.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#F3F3F3",
-        "alt": ""
+        "alt": "Balanced on tiptoe in a deep side-view crouch, long hair straight down the back, black bodysuit, white backdrop"
       },
       {
         "src": "/work/zoe/22.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#F3F3F3",
-        "alt": ""
+        "alt": "Lying on the back, hair spread over the white floor, black long-sleeve bodysuit, eyes on the lens"
       },
       {
         "src": "/work/zoe/23.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#F3F3F3",
-        "alt": ""
+        "alt": "Lying propped on one arm, a hand curled on the floor, black bodysuit, long hair trailing"
       },
       {
         "src": "/work/zoe/24.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#F3F3F3",
-        "alt": ""
+        "alt": "Seated with the knees up and hands clasped overhead, black bodysuit, soft warm backdrop"
       },
       {
         "src": "/work/zoe/25.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#F3F3F3",
-        "alt": ""
+        "alt": "Seated leaning on one hand, knee raised, black long-sleeve bodysuit, hair over the shoulder, white backdrop"
       },
       {
         "src": "/work/zoe/26.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#F3F3F3",
-        "alt": ""
+        "alt": "Seated leaning on one hand, head tilted, black bodysuit, long wavy hair, soft warm backdrop"
       },
       {
         "src": "/work/zoe/27.jpg",
         "width": 2429,
         "height": 3641,
         "color": "#F3F3F3",
-        "alt": ""
+        "alt": "Seated with the legs crossed and hands clasped at the shin, black bodysuit, soft warm backdrop"
       },
       {
         "src": "/work/zoe/28.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#F3F3F3",
-        "alt": ""
+        "alt": "Seated cross-legged with a knee raised, hands around the shin, black bodysuit, white backdrop"
       },
       {
         "src": "/work/zoe/29.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#F3F3F3",
-        "alt": ""
+        "alt": "Seated hugging one knee, direct gaze, black bodysuit, long hair, white backdrop"
       },
       {
         "src": "/work/zoe/30.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#F3F3F3",
-        "alt": ""
+        "alt": "Seated with arms around the knees, black long-sleeve bodysuit, long hair, white backdrop"
       }
     ]
   }
