@@ -292,7 +292,7 @@ Everything else comes from your existing site copy. Edit any of these in `lib/bo
 | 1 | **Graduation travel fee for San Francisco campuses** | Your session copy covers SJSU and SCU in the price, with a travel fee "further out". The page therefore tells SF State, USF and Berkeley students they'll pay one. If San Francisco is a home base, change the Graduation text in /admin. |
 | 2 | **Prices for headshots, portraits and weddings** | They show "On request". Prices are among the most-searched questions, and AI engines quote them. |
 | 3 | **Unblock `Google-Extended`?** | It likely keeps you out of Gemini app answers. Training blocks for other companies (GPTBot, ClaudeBot) don't affect search and can stay. One line in `app/robots.ts`. |
-| 4 | **Weddings booking page?** | Not built. Possible angles: "editorial wedding photographer", and Assyrian weddings in San Jose and Turlock, where no photographer currently targets that search. |
+| 4 | **Weddings booking page?** | Built, /weddings is live. Possible angles: "editorial wedding photographer", and Assyrian weddings in San Jose and Turlock, where no photographer currently targets that search. |
 | 5 | **Visible location lines** | The homepage hero still says "Based in San Francisco, CA". It could name both cities. |
 
 ---
@@ -307,7 +307,7 @@ Everything else comes from your existing site copy. Edit any of these in `lib/bo
    galleries). 1,229 photos currently have none.
 6. Write campus guides ("Best spots for SJSU grad photos") before January, ahead
    of spring commencement. One competitor owns the SJSU results with posts like these.
-7. Build a weddings page if you want more wedding bookings.
+7. ~~Build a weddings page~~ Done: /weddings is live (200) through `app/[service]`.
 8. Check results monthly: Google Search Console (including its AI report), Bing
    Webmaster Tools' AI Performance report, and a few test questions in
    ChatGPT, Gemini and Perplexity ("best headshot photographer in San Jose").
