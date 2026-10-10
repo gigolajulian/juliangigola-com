@@ -351,14 +351,14 @@ export const PROJECTS: Project[] = [
         "width": 2500,
         "height": 3333,
         "color": "#CDC9C6",
-        "alt": ""
+        "alt": "Woman with dark curls in a white ribbed henley, hands at the hem, soft light on grey"
       },
       {
         "src": "/work/abril/02.jpg",
         "width": 2500,
         "height": 3333,
         "color": "#D2CFCE",
-        "alt": ""
+        "alt": "Full length, barefoot in a white henley and briefs, stepping forward on a pale grey sweep"
       },
       {
         "src": "/work/abril/03.jpg",
@@ -372,7 +372,7 @@ export const PROJECTS: Project[] = [
         "width": 2500,
         "height": 3333,
         "color": "#C7C3C1",
-        "alt": ""
+        "alt": "Waist-up portrait in a white henley, curls loose, facing the camera straight on in soft light"
       }
     ]
   },
@@ -411,42 +411,42 @@ export const PROJECTS: Project[] = [
         "width": 2500,
         "height": 3333,
         "color": "#999E9D",
-        "alt": ""
+        "alt": "Woman in a black bandeau and lace-up platform boots sits astride an old CRT television"
       },
       {
         "src": "/work/iris/02.jpg",
         "width": 2500,
         "height": 3333,
         "color": "#A7ABA9",
-        "alt": ""
+        "alt": "Seated on the floor, arm resting on a CRT showing her own face, platform boots forward"
       },
       {
         "src": "/work/iris/03.jpg",
         "width": 2500,
         "height": 3333,
         "color": "#AAADAB",
-        "alt": ""
+        "alt": "Second take by the CRT, hair blown across her shoulder, hard side light on grey"
       },
       {
         "src": "/work/iris/04.jpg",
         "width": 2500,
         "height": 3333,
         "color": "#656A6A",
-        "alt": ""
+        "alt": "Full length in a black leather jacket, grommet skirt and tall boots beside a glowing CRT"
       },
       {
         "src": "/work/iris/05.jpg",
         "width": 2500,
         "height": 3333,
         "color": "#3C3D3C",
-        "alt": ""
+        "alt": "Three-quarter turn, eyes down, chain necklace and bandeau with an oval metal logo, side light"
       },
       {
         "src": "/work/iris/06.jpg",
         "width": 2500,
         "height": 3333,
         "color": "#6C6D6B",
-        "alt": ""
+        "alt": "Facing the camera, hands behind her back, bandeau logo and grommet skirt in hard side light"
       },
       {
         "src": "/work/iris/07.jpg",
@@ -460,28 +460,28 @@ export const PROJECTS: Project[] = [
         "width": 2500,
         "height": 3334,
         "color": "#474848",
-        "alt": ""
+        "alt": "Waist-up with a leather jacket slipped off her shoulders, chain necklaces, flat grey backdrop"
       },
       {
         "src": "/work/iris/09.jpg",
         "width": 2500,
         "height": 3334,
         "color": "#747A79",
-        "alt": ""
+        "alt": "Diptych: seated beside a CRT above, a distorted still from its screen below"
       },
       {
         "src": "/work/iris/10.jpg",
         "width": 2500,
         "height": 3333,
         "color": "#AAA9A5",
-        "alt": ""
+        "alt": "Standing, head bowed, chain belt and grommet skirt, light falling from the left"
       },
       {
         "src": "/work/iris/11.jpg",
         "width": 2500,
         "height": 3333,
         "color": "#6A635C",
-        "alt": ""
+        "alt": "Tight crop of her face and chain necklaces above the bandeau's chrome oval logo"
       }
     ]
   },
