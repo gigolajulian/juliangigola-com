@@ -2229,21 +2229,21 @@ export const PROJECTS: Project[] = [
         "width": 2499,
         "height": 3124,
         "color": "#A6A6A6",
-        "alt": "Round black glasses, head tipped to one side, arms bent, knit top over a pleated skirt, black tie"
+        "alt": "Thick black-framed glasses, head tipped to one side, arms bent, knit top over a pleated skirt, black tie"
       },
       {
         "src": "/work/byte-me/16.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#A6A6A6",
-        "alt": "Round black glasses, one hand on her hip, plucking at the knit top off her shoulder, black tie"
+        "alt": "Thick black-framed glasses, one hand on her hip, plucking at the knit top off her shoulder, black tie"
       },
       {
         "src": "/work/byte-me/17.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#8C8C8C",
-        "alt": "Holding a white corded phone out behind her, round black glasses, knit top, black tie, grey backdrop"
+        "alt": "Holding a white corded phone out behind her, thick black-framed glasses, knit top, black tie, grey backdrop"
       }
     ]
   },
@@ -2615,28 +2615,28 @@ export const PROJECTS: Project[] = [
         "width": 2499,
         "height": 2856,
         "color": "#D9D9D9",
-        "alt": "Two women posing around stacked CRTs showing CYBERIA, one arched back, wood floor, pale wall"
+        "alt": "Two people posing around stacked CRTs showing CYBERIA, one arched back, wood floor, pale wall"
       },
       {
         "src": "/work/cyber1a/04.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#D9D9F3",
-        "alt": "Two seated women among stacked CRTs showing glitch images, green light on the floor"
+        "alt": "Two seated people among stacked CRTs showing glitch images, green light on the floor"
       },
       {
         "src": "/work/cyber1a/05.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#0C260C",
-        "alt": "Two women leaning on a CRT showing CYBERIA, a stack of screens behind, cool light"
+        "alt": "Two people leaning on a CRT showing CYBERIA, a stack of screens behind, cool light"
       },
       {
         "src": "/work/cyber1a/06.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#0C260C",
-        "alt": "Two women close to the lens in sunglasses and black tops, one reaching a hand toward it"
+        "alt": "Two people close to the lens in sunglasses and black tops, one reaching a hand toward it"
       },
       {
         "src": "/work/cyber1a/07.jpg",
