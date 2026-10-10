@@ -5233,154 +5233,154 @@ export const PROJECTS: Project[] = [
         "width": 2499,
         "height": 3124,
         "color": "#A6A6A6",
-        "alt": ""
+        "alt": "A hand with long chrome nails reaching toward the lens, silver ruffled foil top, pale teal backdrop"
       },
       {
         "src": "/work/luxe-meets-future/02.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#8CA6A6",
-        "alt": ""
+        "alt": "Hands pressed to the face, chrome nails and rings, silver foil ruffles, pale teal backdrop"
       },
       {
         "src": "/work/luxe-meets-future/03.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#262626",
-        "alt": ""
+        "alt": "Hands framing the face, silver headpiece, chrome nails, silver ruffled top, soft teal backdrop"
       },
       {
         "src": "/work/luxe-meets-future/04.jpg",
         "width": 2499,
         "height": 3499,
         "color": "#8CA6A6",
-        "alt": ""
+        "alt": "Close crop, hand at the cheek, silver wire headpiece, chrome nails, crumpled foil ruffle"
       },
       {
         "src": "/work/luxe-meets-future/05.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#8CC0C0",
-        "alt": ""
+        "alt": "Head tilted with both hands raised at the headpiece, silver foil ruffled top, pale backdrop"
       },
       {
         "src": "/work/luxe-meets-future/06.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#598C8C",
-        "alt": ""
+        "alt": "Kneeling in a silver foil ruffled top, hand at the cheek, teal and pink haze, fishnet tights"
       },
       {
         "src": "/work/luxe-meets-future/07.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#A6A6A6",
-        "alt": ""
+        "alt": "Kneeling with both arms stretched out, chrome nails splayed, silver foil ruffled top, grey backdrop"
       },
       {
         "src": "/work/luxe-meets-future/08.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#260C0C",
-        "alt": ""
+        "alt": "Seated with a knee up, silver foil ruffles, fishnet tights and clear heels, a pink glow behind"
       },
       {
         "src": "/work/luxe-meets-future/09.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#738C8C",
-        "alt": ""
+        "alt": "Reclining on one arm in a silver foil ruffled dress and fishnets, pale teal backdrop"
       },
       {
         "src": "/work/luxe-meets-future/10.jpg",
         "width": 2499,
         "height": 3499,
         "color": "#8CA6F3",
-        "alt": ""
+        "alt": "Seated in a black glossy puff-sleeve top and gloves, hand at the head, deep blue light"
       },
       {
         "src": "/work/luxe-meets-future/11.jpg",
         "width": 2499,
         "height": 3499,
         "color": "#598CD9",
-        "alt": ""
+        "alt": "Leaning on one arm in a black patent jacket, hand at the shoulder, deep blue backdrop, white floor"
       },
       {
         "src": "/work/luxe-meets-future/12.jpg",
         "width": 2499,
         "height": 3499,
         "color": "#0C260C",
-        "alt": ""
+        "alt": "Head tipped back in black glossy sleeves and gloves, blue backdrop, a white floor circle"
       },
       {
         "src": "/work/luxe-meets-future/13.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#262626",
-        "alt": ""
+        "alt": "Seated in a black glossy puff-sleeve top, hair falling forward, purple and blue gradient"
       },
       {
         "src": "/work/luxe-meets-future/14.jpg",
         "width": 2499,
         "height": 3499,
         "color": "#0C260C",
-        "alt": ""
+        "alt": "Black glove pressed against a misted surface, face faint behind smoke, dark blue light"
       },
       {
         "src": "/work/luxe-meets-future/15.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#0C260C",
-        "alt": ""
+        "alt": "Close crop, a gloved hand at the cheek, glossy lips, dark blue backdrop, red rim light"
       },
       {
         "src": "/work/luxe-meets-future/16.jpg",
         "width": 2499,
         "height": 3499,
         "color": "#8C5940",
-        "alt": ""
+        "alt": "Tight crop, black gem stickers around the eyes, glossy dark lips, a black glove at the jaw"
       },
       {
         "src": "/work/luxe-meets-future/17.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#0C590C",
-        "alt": ""
+        "alt": "Both arms raised overhead in glossy puff sleeves, black bodysuit, blue backdrop"
       },
       {
         "src": "/work/luxe-meets-future/18.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#595973",
-        "alt": ""
+        "alt": "Crouched in black gloves and tights, a white spotlight circle on the floor, pink and blue haze"
       },
       {
         "src": "/work/luxe-meets-future/19.jpg",
         "width": 2499,
         "height": 3499,
         "color": "#0C260C",
-        "alt": ""
+        "alt": "Seated with one leg out in black stiletto heels, glossy puff sleeves, white floor circle, smoke"
       },
       {
         "src": "/work/luxe-meets-future/20.jpg",
         "width": 2499,
         "height": 3499,
         "color": "#0C260C",
-        "alt": ""
+        "alt": "Lying back in a bridge pose in black, a white floor circle, deep blue backdrop"
       },
       {
         "src": "/work/luxe-meets-future/21.jpg",
         "width": 2499,
         "height": 3499,
         "color": "#73A6D9",
-        "alt": ""
+        "alt": "Crouched low with black gloves, hair swept forward, smoke over a blue backdrop"
       },
       {
         "src": "/work/luxe-meets-future/22.jpg",
         "width": 2499,
         "height": 3499,
         "color": "#402640",
-        "alt": ""
+        "alt": "Squatting on a white circle of light, black glossy top and tights, blue and pink haze"
       }
     ]
   },
