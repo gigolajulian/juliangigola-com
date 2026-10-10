@@ -7099,56 +7099,56 @@ export const PROJECTS: Project[] = [
         "width": 2499,
         "height": 3124,
         "color": "#8C5926",
-        "alt": ""
+        "alt": "Seated on a round leather bench in a pale dress and red scarf, plants and a tree behind"
       },
       {
         "src": "/work/retro-reverie-vol-01/02.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#260C0C",
-        "alt": ""
+        "alt": "Close crop, hand at the cheek, winged eyeliner, red scarf, long dark wavy hair, orange wall"
       },
       {
         "src": "/work/retro-reverie-vol-01/03.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#C0A68C",
-        "alt": ""
+        "alt": "Standing at a curved wall under a skylight in a pale dress, red scarf and tan heels"
       },
       {
         "src": "/work/retro-reverie-vol-01/04.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#F3F3F3",
-        "alt": ""
+        "alt": "Seated on a leather bench in a pale full-skirted dress and tan boots, a tree and skylight above"
       },
       {
         "src": "/work/retro-reverie-vol-01/05.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#F3F3F3",
-        "alt": ""
+        "alt": "Seated on a leather bench, looking up toward the skylight, pale dress, red scarf, tan boots"
       },
       {
         "src": "/work/retro-reverie-vol-01/06.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#F3D9C0",
-        "alt": ""
+        "alt": "Leaning on a corridor railing in a pale dress and red scarf, sunlight along a long hallway"
       },
       {
         "src": "/work/retro-reverie-vol-01/07.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#F3D9D9",
-        "alt": ""
+        "alt": "Walking along a sunlit corridor, one hand on the railing, pale dress, red scarf, framed art"
       },
       {
         "src": "/work/retro-reverie-vol-01/08.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#F3F3F3",
-        "alt": ""
+        "alt": "Looking back from a corridor railing, pale dress and red scarf, long sunlit hallway ahead"
       }
     ]
   },
