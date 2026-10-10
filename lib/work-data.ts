@@ -2830,105 +2830,105 @@ export const PROJECTS: Project[] = [
         "width": 2499,
         "height": 3124,
         "color": "#737373",
-        "alt": ""
+        "alt": "Figure crouched in a pool of glossy black liquid, hair streaked pink, black gloves, grey backdrop"
       },
       {
         "src": "/work/dark-matter/02.jpg",
         "width": 1707,
         "height": 2133,
         "color": "#0C260C",
-        "alt": ""
+        "alt": "Figure rising from black liquid in drifting smoke, one clawed black glove raised, head tipped back"
       },
       {
         "src": "/work/dark-matter/03.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#595959",
-        "alt": ""
+        "alt": "Low angle at the surface of black liquid, a clawed glove lifted, smoke and grey backdrop"
       },
       {
         "src": "/work/dark-matter/04.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#404040",
-        "alt": ""
+        "alt": "Figure seated on glossy black liquid, black gloves and boots, head thrown back, pink hair streaks"
       },
       {
         "src": "/work/dark-matter/05.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#262626",
-        "alt": ""
+        "alt": "Distant figure seated on a sheet of black liquid, one clawed black glove raised, pale grey backdrop"
       },
       {
         "src": "/work/dark-matter/06.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#A6A6A6",
-        "alt": ""
+        "alt": "Two black-gloved hands with long claws, liquid dripping in strings, plain grey backdrop"
       },
       {
         "src": "/work/dark-matter/07.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#404040",
-        "alt": ""
+        "alt": "Figure kneeling in black liquid, hands in black gloves planted, hair streaked pink, direct stare"
       },
       {
         "src": "/work/dark-matter/08.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#737359",
-        "alt": ""
+        "alt": "Close portrait, a clawed glove at the lips, black paint streaks, pink-streaked blonde hair"
       },
       {
         "src": "/work/dark-matter/09.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#404040",
-        "alt": ""
+        "alt": "Seated with one clawed glove raised, black paint splashed over the figure and the floor"
       },
       {
         "src": "/work/dark-matter/10.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#404040",
-        "alt": ""
+        "alt": "One arm raised over the head in a clawed glove, black paint streaks, pink-tipped hair, grey backdrop"
       },
       {
         "src": "/work/dark-matter/11.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#C0C0C0",
-        "alt": ""
+        "alt": "Figure on all fours with hair over the face, black paint splashed across the white floor"
       },
       {
         "src": "/work/dark-matter/12.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#C0C0C0",
-        "alt": ""
+        "alt": "Figure on hands and knees in a spill of black paint, one hand reaching forward, white floor"
       },
       {
         "src": "/work/dark-matter/13.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#404040",
-        "alt": ""
+        "alt": "Motion-blurred figure with an arm raised overhead, black paint streaks, pink-streaked hair, grey backdrop"
       },
       {
         "src": "/work/dark-matter/14.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#404040",
-        "alt": ""
+        "alt": "Kneeling with one arm raised in a clawed glove, black paint dripping, pink-streaked hair"
       },
       {
         "src": "/work/dark-matter/15.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#C0C0C0",
-        "alt": ""
+        "alt": "Kneeling in a spill of black paint, one hand planted, the other arm raised, hair hanging"
       }
     ]
   },
