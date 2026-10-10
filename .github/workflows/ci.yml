@@ -58,7 +58,8 @@ jobs:
       - name: Install browsers
         run: npx playwright install webkit
 
-      # Frames are reported, not judged, on a runner (`swipe.spec.ts`).
+      # Frames and the splash's timing are reported, not judged, on a
+      # runner (`swipe.spec.ts`, `splash.spec.ts`).
       - name: Perf suite
         run: npm run perf -- --project=webkit
         env:

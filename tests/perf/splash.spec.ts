@@ -71,6 +71,10 @@ for (const path of SPLASH_PAGES) {
           test.skip(!valid, "window throttled by macOS during the splash");
           expect(s.on, "the splash showed").toBeGreaterThanOrEqual(0);
           expect(s.off, "the splash lifted").toBeGreaterThanOrEqual(0);
+          /* When is timing, like the frames: a CI runner lifted it at 4.1
+             to 5.8s against 3.05s on a Mac, so there it is reported, not
+             judged (PERF_FRAMES=report, `swipe.spec.ts`). */
+          if (process.env.PERF_FRAMES === "report") return;
           expect(s.off, `lifted by ${budgets.splash.liftedMs}ms`).toBeLessThanOrEqual(budgets.splash.liftedMs);
         } finally {
           await ctx.close();

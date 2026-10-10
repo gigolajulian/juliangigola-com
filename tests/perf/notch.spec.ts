@@ -15,6 +15,10 @@ import { contextFor, VIEWPORTS } from "./matrix";
  * The notches are dispatched as wheel events on the middle of the strip,
  * the same way for every browser: Playwright's own wheel arrives in
  * pixels everywhere, and divided by the pixel ratio in Firefox.
+ *
+ * Tagged @motion so it runs on its own (`scripts/perf/run.mjs`): a landing
+ * is timing, and in the parallel pass a Firefox notch at 2560 settled 15px
+ * short of its screen.
  */
 
 const NOTCHES = [
@@ -25,7 +29,7 @@ const PLAN = [1, 1, -1] as const;
 
 for (const v of VIEWPORTS.filter((v) => !v.touch)) {
   for (const n of NOTCHES) {
-    test(`notch ${n.kind} / ${v.name}`, async ({ browser, browserName }) => {
+    test(`notch ${n.kind} / ${v.name} @motion`, async ({ browser, browserName }) => {
       const ctx = await browser.newContext(contextFor(v, browserName));
       try {
         await skipSplash(ctx);
