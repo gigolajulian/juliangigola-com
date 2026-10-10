@@ -5671,84 +5671,84 @@ export const PROJECTS: Project[] = [
         "width": 2499,
         "height": 3124,
         "color": "#F3F3F3",
-        "alt": ""
+        "alt": "Seated on a white floor in a black bodysuit and suede ankle boots, fingers at the lips"
       },
       {
         "src": "/work/mya/03.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#F3F3F3",
-        "alt": ""
+        "alt": "Seated with knees up, arms crossed over them, chin on a hand, black bodysuit, white backdrop"
       },
       {
         "src": "/work/mya/04.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#F3F3F3",
-        "alt": ""
+        "alt": "Seated on the floor, one hand raised to the chin, black bodysuit and ankle boots, white backdrop"
       },
       {
         "src": "/work/mya/05.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#F3F3F3",
-        "alt": ""
+        "alt": "Close crop, head tilted, long wavy hair, black scoop-neck bodysuit, pendant necklace, white backdrop"
       },
       {
         "src": "/work/mya/06.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#F3F3F3",
-        "alt": ""
+        "alt": "Standing, one hand at the collarbone, black high-cut bodysuit, pendant necklace, white backdrop"
       },
       {
         "src": "/work/mya/07.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#F3F3F3",
-        "alt": ""
+        "alt": "Reclining on one arm in a black bodysuit and yellow-lensed sunglasses, white backdrop"
       },
       {
         "src": "/work/mya/08.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#F3F3F3",
-        "alt": ""
+        "alt": "Seated leaning on one hand, black oversized sunglasses lifted by the other, black bodysuit, white backdrop"
       },
       {
         "src": "/work/mya/09.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#F3F3F3",
-        "alt": ""
+        "alt": "Seated leaning back on one hand, oversized black sunglasses, black bodysuit, white backdrop"
       },
       {
         "src": "/work/mya/10.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#26A6C0",
-        "alt": ""
+        "alt": "Standing in a pink bikini, one hand in the hair, smiling, a teal backdrop"
       },
       {
         "src": "/work/mya/11.jpg",
         "width": 2499,
         "height": 3439,
         "color": "#40A6C0",
-        "alt": ""
+        "alt": "Hand at the cheek, head tilted, pink bikini, pendant necklace, bright teal backdrop"
       },
       {
         "src": "/work/mya/12.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#260C0C",
-        "alt": ""
+        "alt": "Close crop, smiling, long wavy hair, pink bikini top, pendant necklace, teal backdrop"
       },
       {
         "src": "/work/mya/13.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#59A6C0",
-        "alt": ""
+        "alt": "Head tilted, fingers at the cheek, pink bikini, tattoo on the forearm, teal backdrop"
       }
     ]
   },
