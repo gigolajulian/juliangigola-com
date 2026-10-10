@@ -7300,70 +7300,70 @@ export const PROJECTS: Project[] = [
         "width": 2499,
         "height": 3124,
         "color": "#262626",
-        "alt": ""
+        "alt": "Seated against a giant projected eye, arms around the knees, fishnet bodysuit, blue light"
       },
       {
         "src": "/work/revelo/02.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#264040",
-        "alt": ""
+        "alt": "Seated sideways before a projected eye, knees drawn up, fishnet tights, dark jacket, blue-white light"
       },
       {
         "src": "/work/revelo/03.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#D9D9F3",
-        "alt": ""
+        "alt": "Curled up inside a projected eye, hugging the knees, fishnets, a shadow behind, cool light"
       },
       {
         "src": "/work/revelo/04.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#F3F3F3",
-        "alt": ""
+        "alt": "Projected X-ray images across the face and shoulders, fishnet skirt, dark jacket, a shadow behind"
       },
       {
         "src": "/work/revelo/05.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#0C260C",
-        "alt": ""
+        "alt": "Lying on the floor under projected chest X-rays, head thrown back, fishnets, pale hair spread"
       },
       {
         "src": "/work/revelo/06.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#0C260C",
-        "alt": ""
+        "alt": "Lying on the side on a floor covered in projected X-rays, fishnets, pale hair, cool light"
       },
       {
         "src": "/work/revelo/07.jpg",
         "width": 2499,
         "height": 2856,
         "color": "#F3F3F3",
-        "alt": ""
+        "alt": "Lying with the head turned toward the lens, X-ray projections on the floor, fishnets, one hand forward"
       },
       {
         "src": "/work/revelo/08.jpg",
         "width": 2499,
         "height": 2856,
         "color": "#F3F3F3",
-        "alt": ""
+        "alt": "Upside-down view, knees raised among projected X-rays of feet and legs, fishnets, dark jacket"
       },
       {
         "src": "/work/revelo/09.jpg",
         "width": 2499,
         "height": 2856,
         "color": "#F3F3F3",
-        "alt": ""
+        "alt": "Seated with a hand at the lips among projected hand and chest X-rays, dark jacket, fishnets"
       },
       {
         "src": "/work/revelo/10.jpg",
         "width": 2499,
         "height": 2856,
         "color": "#F3F3F3",
-        "alt": ""
+        "alt": "Seated hugging the knees between two projected chest X-rays, dark jacket, fishnets, dark room"
       }
     ]
   },
