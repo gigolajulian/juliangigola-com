@@ -190,15 +190,18 @@ function CalInline({ path, title, className }: { path: string; title: string; cl
   );
 }
 
-/** Cal.com's calendar for `path`. `className` sizes the box. With `?picker`
-    on the address, the site's own time picker is tried in its place, and
-    Cal.com's calendar is its fallback. */
+/** The site's own time picker for `path`, with Cal.com's calendar as its
+    fallback (a paid event, or Cal.com not answering). `className` sizes the
+    box. `?cal` on the address asks for Cal.com's calendar alone. */
 export function CalEmbed({ path, title, className }: { path: string; title: string; className?: string }) {
-  const [own, setOwn] = React.useState(false);
+  /* Decided after the first paint, so Cal.com's script is not fetched for a
+     visitor who gets the picker. */
+  const [own, setOwn] = React.useState<boolean | null>(null);
   React.useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
-    setOwn(new URLSearchParams(window.location.search).has("picker"));
+    setOwn(!new URLSearchParams(window.location.search).has("cal"));
   }, []);
+  if (own === null) return <div aria-label={title} className={className} />;
   const inline = <CalInline key={path} path={path} title={title} className={className} />;
   return own ? <TimePicker path={path} title={title} className={className} fallback={inline} /> : inline;
 }
