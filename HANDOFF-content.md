@@ -16,8 +16,11 @@ sentence JSON, then apply it with a rule check. Tools live in the session scratc
 (`sheet.py`, `apply.mjs`). Rebuild them if they're gone, about 30 lines each.
 Check: `npx tsx` a script that calls `getProject(slug)` and prints `images[i].alt`.
 
-Done, one commit each: lost-relic, hua, abril + iris (37 frames, jg-SEO passed), then novocaine, paradox, relay, diesel (44 frames, build passes).
-Next, in homepage order: undisputed, decoy, nyx, serif, void, aegis...
+Done, one commit per project. jg-SEO passed everything through 9e7b982 (lost-relic, hua, abril, iris,
+novocaine, paradox, relay, diesel, undisputed, decoy, nyx, serif; 116 frames). jg-RELEASE lands only a
+hash that jg-SEO has passed in full, so send them the head after each batch, then send RELEASE the hash.
+Batch 4 (waiting for jg-SEO): decoy/06 fix, void, aegis, vigil, aera-wraith (30 frames), head 4230ca9.
+Next, in homepage order: aether, analogue-dreams, astral-allure, automotive, byte-me...
 Baseline was 1229 empty of 1278.
 
 ## Picks
