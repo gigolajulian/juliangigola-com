@@ -229,14 +229,14 @@ export function TimePicker({
           start: new Date(pick.start).toISOString(),
           eventTypeSlug: slug,
           username,
-          attendee: { name: String(form.get("name")), email: String(form.get("email")), phoneNumber: phone, timeZone: tz, language: "en" },
+          attendee: { name: `${String(form.get("first")).trim()} ${String(form.get("last")).trim()}`, email: String(form.get("email")), phoneNumber: phone, timeZone: tz, language: "en" },
           ...(needsWhere ? { location: { type: "attendeeDefined", location: where } } : {}),
           bookingFieldsResponses: { notes: [`Phone: ${phone}`, notes].filter(Boolean).join("\n") },
         }),
       });
       const body = await res.json();
       if (!res.ok || body.status !== "success") throw new Error(body?.error?.message || "failed");
-      setBooked({ name: String(form.get("name")).trim(), email: String(form.get("email")).trim(), where });
+      setBooked({ name: String(form.get("first")).trim(), email: String(form.get("email")).trim(), where });
       /* The orbs get their moment even when Cal.com answers at once, then
          turn into the check, which is shown before the page that follows. */
       await new Promise((go) => setTimeout(go, Math.max(0, 1100 - (Date.now() - began))));
@@ -479,12 +479,12 @@ export function TimePicker({
           })}
         </div>
         <span ref={ghost} aria-hidden className="pointer-events-none absolute inset-y-0 left-0 w-px bg-foreground/25 opacity-0 transition-opacity duration-200 [[role=slider]:hover_&]:opacity-100 [[role=slider]:focus-within_&]:opacity-100" />
-        {Array.from({ length: Math.floor((hi - lo) / 60) + 1 }, (_, i) => lo + i * 60).map((m, i) => (
-          <span key={m} aria-hidden className={cn("label absolute -bottom-6 -translate-x-1/2 whitespace-nowrap text-[0.625rem] text-muted-foreground", i % 2 && "@max-md:hidden")} style={{ left: `${((m - lo) / (hi - lo)) * 100}%` }}>
+        {Array.from({ length: Math.floor((hi - lo) / 60) + 1 }, (_, i) => lo + i * 60).map((m, i, all) => { const last = all.length - 1; return (
+          <span key={m} aria-hidden className={cn("label absolute -bottom-6 whitespace-nowrap text-[0.625rem] text-muted-foreground", i === 0 ? "" : i === last ? "-translate-x-full" : "-translate-x-1/2", i % 2 && i !== last && "@max-md:hidden")} style={{ left: `${((m - lo) / (hi - lo)) * 100}%` }}>
             {clock(m)[0].replace(":00", "")}
             <span className={cn(m === lo || m % 720 === 0 ? "" : "max-sm:hidden")}> {clock(m)[1]}</span>
           </span>
-        ))}
+        ) })}
       </div>
       </Fold>
 
@@ -509,11 +509,12 @@ export function TimePicker({
             <button type="button" onClick={() => setStep("pick")} className="label text-muted-foreground hoverable:hover:text-foreground">Change</button>
           </div>
           <div className="grid gap-4 sm:grid-cols-2">
-            <label className="label flex flex-col gap-2 text-muted-foreground">Name<input name="name" required autoComplete="name" className="border-b border-border bg-transparent py-2 text-base normal-case text-foreground outline-none focus:border-foreground" /></label>
+            <label className="label flex flex-col gap-2 text-muted-foreground">First name<input name="first" required autoComplete="given-name" className="border-b border-border bg-transparent py-2 text-base normal-case text-foreground outline-none focus:border-foreground" /></label>
+            <label className="label flex flex-col gap-2 text-muted-foreground">Last name<input name="last" required autoComplete="family-name" className="border-b border-border bg-transparent py-2 text-base normal-case text-foreground outline-none focus:border-foreground" /></label>
             <label className="label flex flex-col gap-2 text-muted-foreground">Email<input name="email" type="email" required autoComplete="email" className="border-b border-border bg-transparent py-2 text-base normal-case text-foreground outline-none focus:border-foreground" /></label>
             <label className="label flex flex-col gap-2 text-muted-foreground">Phone<input name="phone" type="tel" required autoComplete="tel" inputMode="tel" className="border-b border-border bg-transparent py-2 text-base normal-case text-foreground outline-none focus:border-foreground" /></label>
             {needsWhere ? (
-            <label className="label flex flex-col gap-2 text-muted-foreground">Where: the studio, or an address<input name="where" required className="border-b border-border bg-transparent py-2 text-base normal-case text-foreground outline-none focus:border-foreground" /></label>
+            <label className="label flex flex-col gap-2 text-muted-foreground sm:col-span-2">Where: the studio, or an address<input name="where" required className="border-b border-border bg-transparent py-2 text-base normal-case text-foreground outline-none focus:border-foreground" /></label>
           ) : null}
           </div>
           
