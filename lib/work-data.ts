@@ -6754,119 +6754,119 @@ export const PROJECTS: Project[] = [
         "width": 1659,
         "height": 2074,
         "color": "#8C8C73",
-        "alt": ""
+        "alt": "Black wraparound sunglasses, an oversized leather jacket over a black lace top, olive wall, hard light"
       },
       {
         "src": "/work/poise/02.jpg",
         "width": 2385,
         "height": 2982,
         "color": "#404026",
-        "alt": ""
+        "alt": "Standing in a leather jacket, wraparound sunglasses and tights, olive wall, shadows thrown behind"
       },
       {
         "src": "/work/poise/03.jpg",
         "width": 2369,
         "height": 2962,
         "color": "#F3F3F3",
-        "alt": ""
+        "alt": "Seated in a black leather bralette, sheer gloves and tights, glancing up, white backdrop"
       },
       {
         "src": "/work/poise/04.jpg",
         "width": 2074,
         "height": 2593,
         "color": "#F3F3F3",
-        "alt": ""
+        "alt": "Seated on the floor in a black leather bralette, mesh gloves and tights, jacket off the shoulders"
       },
       {
         "src": "/work/poise/05.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#8C7359",
-        "alt": ""
+        "alt": "Seen from above, standing in a black leather jacket and sunglasses, tights and boots, tan floor"
       },
       {
         "src": "/work/poise/06.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#8C7359",
-        "alt": ""
+        "alt": "Close crop, head tipped forward, long dark hair, a gloved hand on the collar of a leather jacket"
       },
       {
         "src": "/work/poise/07.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#8C7359",
-        "alt": ""
+        "alt": "Full length in an off-shoulder leather jacket, tights and platform boots, a white shape on the tan wall"
       },
       {
         "src": "/work/poise/08.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#8C7373",
-        "alt": ""
+        "alt": "Close crop, head tilted, a gloved hand at the forehead, black leather bralette, sheer cape"
       },
       {
         "src": "/work/poise/09.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#C0A68C",
-        "alt": ""
+        "alt": "Head tilted, a defined wing of black eyeliner, black leather bralette, sheer gloves, tan backdrop"
       },
       {
         "src": "/work/poise/10.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#C0A68C",
-        "alt": ""
+        "alt": "Seated on the floor with one knee up, sheer black cape, gloves, leather bralette, tights and boots"
       },
       {
         "src": "/work/poise/11.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#C0A68C",
-        "alt": ""
+        "alt": "Leaning on one gloved hand, knee raised, sheer black wrap, leather bralette, warm tan backdrop"
       },
       {
         "src": "/work/poise/12.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#C0A68C",
-        "alt": ""
+        "alt": "Crouched with a platform boot extended behind, sheer black wrap, gloves and tights, tan wall"
       },
       {
         "src": "/work/poise/13.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#262626",
-        "alt": ""
+        "alt": "Both gloved hands raised to the head, a black veil across the mouth, bright side light"
       },
       {
         "src": "/work/poise/14.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#262626",
-        "alt": ""
+        "alt": "A black veil drawn up over the nose, gloved hands, a warm light flare from the left"
       },
       {
         "src": "/work/poise/15.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#A68C73",
-        "alt": ""
+        "alt": "Standing under a black sheer veil, hands holding its edges, leather bralette, hazy tan backdrop"
       },
       {
         "src": "/work/poise/16.jpg",
         "width": 1983,
         "height": 2558,
         "color": "#A68C73",
-        "alt": ""
+        "alt": "Head tipped, lips parted, a black veil over the hair, gloved hands at the edges, hazy backdrop"
       },
       {
         "src": "/work/poise/17.jpg",
         "width": 2019,
         "height": 2558,
         "color": "#A68C73",
-        "alt": ""
+        "alt": "Full length in a black veil, leather bralette, shorts, tights and platform boots, hazy tan backdrop"
       }
     ]
   },
