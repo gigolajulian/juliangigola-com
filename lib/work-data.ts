@@ -2952,63 +2952,63 @@ export const PROJECTS: Project[] = [
         "width": 2499,
         "height": 3124,
         "color": "#0C260C",
-        "alt": ""
+        "alt": "Figure lying down in a white VR headset, tangled in black cables, red grid projected over the floor"
       },
       {
         "src": "/work/dystopia/02.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#59C0D9",
-        "alt": ""
+        "alt": "Figure in a VR headset seen from behind, wrapped in black cables, cyan grid on the wall"
       },
       {
         "src": "/work/dystopia/03.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#73C0D9",
-        "alt": ""
+        "alt": "Propped on one hand in a VR headset, other hand lifted, cables looped around, red grid light"
       },
       {
         "src": "/work/dystopia/04.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#73C0D9",
-        "alt": ""
+        "alt": "Close angle, face down in a VR headset, cables across the back, grid light on the floor"
       },
       {
         "src": "/work/dystopia/05.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#0C260C",
-        "alt": ""
+        "alt": "Standing in a VR headset with cables hanging overhead, white tubing at the waist, cyan haze"
       },
       {
         "src": "/work/dystopia/06.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#73C0D9",
-        "alt": ""
+        "alt": "Crouched in a VR headset, cables wound around the torso, white tubing at the hip, grid behind"
       },
       {
         "src": "/work/dystopia/07.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#262626",
-        "alt": ""
+        "alt": "Seated on the floor seen from behind, VR headset on, cables across the back, blue grid light"
       },
       {
         "src": "/work/dystopia/08.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#0C260C",
-        "alt": ""
+        "alt": "One arm raised holding a controller to a VR headset, cables wrapped around, teal light"
       },
       {
         "src": "/work/dystopia/09.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#0C260C",
-        "alt": ""
+        "alt": "Kneeling and leaning back in a VR headset, green and cyan stripes projected, cables trailing"
       }
     ]
   },
