@@ -7172,105 +7172,105 @@ export const PROJECTS: Project[] = [
         "width": 2499,
         "height": 3124,
         "color": "#D9D9F3",
-        "alt": ""
+        "alt": "Seated by a pool in a green cardigan and striped skirt, curved building and bright sky behind"
       },
       {
         "src": "/work/retro-reverie-vol-02/02.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#A65926",
-        "alt": ""
+        "alt": "Leaning on a wood-paneled wall beside a yellow door frame, green cardigan, striped skirt, arm raised"
       },
       {
         "src": "/work/retro-reverie-vol-02/03.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#732626",
-        "alt": ""
+        "alt": "Leaning in a red-walled stairwell, wavy hair across the face, green cardigan, striped skirt"
       },
       {
         "src": "/work/retro-reverie-vol-02/04.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#734026",
-        "alt": ""
+        "alt": "Seated on a leather bench in a green cardigan, striped skirt and tan lace-up shoes, gold screen behind"
       },
       {
         "src": "/work/retro-reverie-vol-02/05.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#734026",
-        "alt": ""
+        "alt": "Seated on a low leather bench, knees together, green cardigan, striped skirt, lace-up shoes, gold screen"
       },
       {
         "src": "/work/retro-reverie-vol-02/06.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#260C0C",
-        "alt": ""
+        "alt": "Close crop, red and white bead necklace, green collar, winged eyeliner, red wall"
       },
       {
         "src": "/work/retro-reverie-vol-02/07.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#260C0C",
-        "alt": ""
+        "alt": "Leaning back against a gold lattice screen, one hand raised, green cardigan, striped skirt"
       },
       {
         "src": "/work/retro-reverie-vol-02/08.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#F3C0A6",
-        "alt": ""
+        "alt": "Seated at a curved wall by a gold screen, hands on the knee, green cardigan, striped skirt"
       },
       {
         "src": "/work/retro-reverie-vol-02/09.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#F3F3F3",
-        "alt": ""
+        "alt": "Seated by a pool edge, a hand in the hair, green cardigan, striped skirt, bright sky"
       },
       {
         "src": "/work/retro-reverie-vol-02/10.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#F3F3F3",
-        "alt": ""
+        "alt": "Leaning on a balcony wall beside greenery, green cardigan, striped skirt, bead necklace, glass roof ribs"
       },
       {
         "src": "/work/retro-reverie-vol-02/11.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#260C0C",
-        "alt": ""
+        "alt": "Standing against a wood-paneled wall, head turned, green cardigan, striped skirt, hand on a rail"
       },
       {
         "src": "/work/retro-reverie-vol-02/12.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#D9D9F3",
-        "alt": ""
+        "alt": "Seated on a leather bench under a glass-ribbed roof, green cardigan, striped skirt, bead necklace"
       },
       {
         "src": "/work/retro-reverie-vol-02/13.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#734026",
-        "alt": ""
+        "alt": "Low angle against wood paneling, one arm along a rail, green cardigan, striped skirt"
       },
       {
         "src": "/work/retro-reverie-vol-02/14.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#A65926",
-        "alt": ""
+        "alt": "Leaning between a yellow door frame and wood paneling, one leg raised, green cardigan, striped skirt"
       },
       {
         "src": "/work/retro-reverie-vol-02/15.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#592626",
-        "alt": ""
+        "alt": "Standing with hands on the hips in a wood-paneled lobby, green cardigan, striped skirt, tan lace-up shoes"
       }
     ]
   },
