@@ -7393,77 +7393,77 @@ export const PROJECTS: Project[] = [
         "width": 2499,
         "height": 3124,
         "color": "#730C0C",
-        "alt": ""
+        "alt": "Lying on a red floor with the head on an arm, black lace bralette and briefs, arm tattoos"
       },
       {
         "src": "/work/rouge/02.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#730C0C",
-        "alt": ""
+        "alt": "Reclining on one hand in a black lace bralette and briefs, head tipped back, red backdrop"
       },
       {
         "src": "/work/rouge/03.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#8C0C0C",
-        "alt": ""
+        "alt": "Lying back with the head near the lens, black lace bodysuit, tattooed arms, red backdrop"
       },
       {
         "src": "/work/rouge/04.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#730C0C",
-        "alt": ""
+        "alt": "On hands and knees in a black lace bralette, long wavy hair, head turned, red backdrop"
       },
       {
         "src": "/work/rouge/05.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#730C0C",
-        "alt": ""
+        "alt": "Profile with a hand at the chin, arm across the chest, black lace bralette, red backdrop"
       },
       {
         "src": "/work/rouge/06.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#730C0C",
-        "alt": ""
+        "alt": "Kneeling in profile with a hand at the chin, black bralette, leg tattoos, red backdrop"
       },
       {
         "src": "/work/rouge/07.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#730C0C",
-        "alt": ""
+        "alt": "Kneeling with both hands in the hair, black lace bralette and briefs, red backdrop"
       },
       {
         "src": "/work/rouge/08.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#8C0C0C",
-        "alt": ""
+        "alt": "Hand at the neck, face tilted up, black lace bralette, long wavy hair, red backdrop"
       },
       {
         "src": "/work/rouge/09.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#730C0C",
-        "alt": ""
+        "alt": "Leaning on one hand on the floor, other hand in the hair, black lace set, red backdrop"
       },
       {
         "src": "/work/rouge/10.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#730C0C",
-        "alt": ""
+        "alt": "Reclining with a hand on the chest, face turned down, black lace set, red backdrop"
       },
       {
         "src": "/work/rouge/11.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#8C2626",
-        "alt": ""
+        "alt": "Reclining with a hand at the cheek, black lace bralette, long wavy hair, red backdrop"
       }
     ]
   },
@@ -7493,70 +7493,70 @@ export const PROJECTS: Project[] = [
         "width": 2499,
         "height": 3124,
         "color": "#260C0C",
-        "alt": ""
+        "alt": "Seated in a black cutout bodysuit and headphones on a pink spotlight circle, dark backdrop"
       },
       {
         "src": "/work/sage/02.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#F30CC0",
-        "alt": ""
+        "alt": "Reclining on one arm in a black cutout bodysuit, headphones at the neck, pink light on the floor"
       },
       {
         "src": "/work/sage/03.jpg",
         "width": 2499,
         "height": 3499,
         "color": "#260C0C",
-        "alt": ""
+        "alt": "Lying with the head tilted in a black cutout bodysuit and headphones, large pink spotlight circle"
       },
       {
         "src": "/work/sage/04.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#260C0C",
-        "alt": ""
+        "alt": "Lying on one side in a black fishnet-sleeve bodysuit, pink spotlight on the floor, dark backdrop"
       },
       {
         "src": "/work/sage/05.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#260C0C",
-        "alt": ""
+        "alt": "Kneeling in a black cutout bodysuit with one arm raised overhead, pink spotlight circle, dark backdrop"
       },
       {
         "src": "/work/sage/06.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#404040",
-        "alt": ""
+        "alt": "Seated with an arm across the knee, white lace-up boots, blue shiny top, grey backdrop"
       },
       {
         "src": "/work/sage/07.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#595959",
-        "alt": ""
+        "alt": "Seated on a white floor with a hand on the head, white lace-up boots, blue top, disco ball"
       },
       {
         "src": "/work/sage/08.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#404040",
-        "alt": ""
+        "alt": "Seated with knees up in white lace-up boots and a blue top, disco ball at left, grey backdrop"
       },
       {
         "src": "/work/sage/09.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#404040",
-        "alt": ""
+        "alt": "Seated with a hand at the head, white boots, blue top, disco ball beside the foot"
       },
       {
         "src": "/work/sage/10.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#8CA6A6",
-        "alt": ""
+        "alt": "Lying on the forearms beside a CRT showing a face, blue top, grey-blue backdrop"
       },
       {
         "src": "/work/sage/11.jpg",
@@ -7570,21 +7570,21 @@ export const PROJECTS: Project[] = [
         "width": 2499,
         "height": 3124,
         "color": "#A67373",
-        "alt": ""
+        "alt": "Crouched in a black and red printed dress and boots, drum machine on the floor, red backdrop"
       },
       {
         "src": "/work/sage/13.jpg",
         "width": 2499,
         "height": 3499,
         "color": "#C08C8C",
-        "alt": ""
+        "alt": "Crouched with a hand at the headphones, black and red printed dress, pink backdrop"
       },
       {
         "src": "/work/sage/14.jpg",
         "width": 2499,
         "height": 3499,
         "color": "#C08C8C",
-        "alt": ""
+        "alt": "Seated leaning back on a hand, headphones, printed dress, red drum machine at the feet, pink backdrop"
       }
     ]
   },
@@ -7621,84 +7621,84 @@ export const PROJECTS: Project[] = [
         "width": 2499,
         "height": 3124,
         "color": "#F3F3F3",
-        "alt": ""
+        "alt": "From behind in a cream and black leather jacket with SG lettering, tall grass, warm backlight"
       },
       {
         "src": "/work/sago/03.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#F3F3D9",
-        "alt": ""
+        "alt": "Multiple exposure of a figure from behind in a cream and black leather jacket with SG lettering"
       },
       {
         "src": "/work/sago/04.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#0C260C",
-        "alt": ""
+        "alt": "From behind in a cream and black leather jacket with SG lettering, wide stance, dark trees"
       },
       {
         "src": "/work/sago/05.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#F3F3F3",
-        "alt": ""
+        "alt": "Portrait in a cream and black leather bomber with SAGO lettering, sunglasses on the head, face tattoos"
       },
       {
         "src": "/work/sago/06.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#C0C0C0",
-        "alt": ""
+        "alt": "Seated on a white stool in a graphic tee, patterned shorts and a tan cap, pale seamless backdrop"
       },
       {
         "src": "/work/sago/07.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#C0C0C0",
-        "alt": ""
+        "alt": "Two people on white stools in graphic tees and patterned shorts, caps, white sneakers, pale backdrop"
       },
       {
         "src": "/work/sago/08.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#D9D9D9",
-        "alt": ""
+        "alt": "Standing in a grey zip jacket and black flared trousers, sunglasses, wooden rack and teal painting behind"
       },
       {
         "src": "/work/sago/09.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#D9D9D9",
-        "alt": ""
+        "alt": "Turned to the side in a grey fleece jacket, black trousers and sunglasses, teal painting behind"
       },
       {
         "src": "/work/sago/10.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#D9D9D9",
-        "alt": ""
+        "alt": "Hands on a black cap and white sunglasses, black jacket, denim shorts, teal painting behind"
       },
       {
         "src": "/work/sago/11.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#D9D9D9",
-        "alt": ""
+        "alt": "Two people in an olive hoodie and a black work jacket, denim shorts, white room, teal painting"
       },
       {
         "src": "/work/sago/12.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#F3F3F3",
-        "alt": ""
+        "alt": "One person from behind in an olive hoodie beside another in a black jacket, bandana and white sunglasses"
       },
       {
         "src": "/work/sago/13.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#F3F3F3",
-        "alt": ""
+        "alt": "Striped knit polo with SAGO across the chest, round purple sunglasses, hair in a top bun"
       }
     ]
   },
@@ -8043,42 +8043,42 @@ export const PROJECTS: Project[] = [
         "width": 2499,
         "height": 3124,
         "color": "#F3F3F3",
-        "alt": ""
+        "alt": "Close portrait in a patterned bandana headband and black halter top, green hair, white backdrop"
       },
       {
         "src": "/work/sols/03.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#8C8C8C",
-        "alt": ""
+        "alt": "Crouching against a white wall in an oversized black graphic tee, green hair, bandana at the wrist"
       },
       {
         "src": "/work/sols/04.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#F3F3F3",
-        "alt": ""
+        "alt": "Seated on a rooftop rail in a black cap and striped graphic tee, green hair, blue sky"
       },
       {
         "src": "/work/sols/05.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#F3F3F3",
-        "alt": ""
+        "alt": "Leaning forward on a rooftop rail in a black cap and striped tee, wrist bandana, green hair"
       },
       {
         "src": "/work/sols/06.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#F3F3F3",
-        "alt": ""
+        "alt": "Seated on a rooftop rail in a black cap and striped oversized tee, clouds behind"
       },
       {
         "src": "/work/sols/07.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#F3F3F3",
-        "alt": ""
+        "alt": "Head down under a black cap, striped oversized tee, green hair, white rooftop and trees behind"
       }
     ]
   },
