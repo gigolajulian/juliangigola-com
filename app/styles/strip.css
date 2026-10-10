@@ -354,6 +354,16 @@ nav[aria-label="Categories"] ul[data-more] {
   }
   /* The ask is the exception: a sentence, two buttons and the way on to the
      studio is not a label and does not fit in a slot. */
+  /* Julian: "Up next" in the top row. After an odd count it fell into
+     the bottom one, under the last cover. Not on the iPad's upright
+     sheet, where row one is the top of the page. */
+  /* Doubled to outrank the iPad rack's column width (`data-rack`). */
+  .strip-grid.strip-grid:not([data-sheet]) > a.next-cell {
+    grid-row: 1;
+    /* As wide as its words: a cover's width ran "Event coverage" off the
+       window at 1440. */
+    width: max-content !important;
+  }
   .strip-grid > [data-hash="where-next"] {
     grid-row: 1 / -1;
     /* Julian: a third of the window. The ask was one column of the rack
