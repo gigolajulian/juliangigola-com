@@ -3661,112 +3661,112 @@ export const PROJECTS: Project[] = [
         "width": 2499,
         "height": 3124,
         "color": "#000001",
-        "alt": ""
+        "alt": "Standing in a printed black hoodie and light jeans seen through a hood opening, holding a sunflower"
       },
       {
         "src": "/work/goodcult/03.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#5C828D",
-        "alt": ""
+        "alt": "Standing with hands in the pockets of baggy jeans, printed black hoodie, curly dark hair, pale blue backdrop"
       },
       {
         "src": "/work/goodcult/04.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#4C7279",
-        "alt": ""
+        "alt": "Hood up in a printed black hoodie, grinning, hand in a peace sign, cap, blue-green backdrop"
       },
       {
         "src": "/work/goodcult/05.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#436770",
-        "alt": ""
+        "alt": "Two people in printed hoodies, one holding a sunflower, one in red track pants, blue backdrop"
       },
       {
         "src": "/work/goodcult/06.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#3A5E67",
-        "alt": ""
+        "alt": "Sunflower held over one eye, printed black hoodie, curly dark hair, blue-grey backdrop"
       },
       {
         "src": "/work/goodcult/07.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#3F626B",
-        "alt": ""
+        "alt": "Seated on a yellow block in a printed hoodie and red track pants, glasses, hand at the head"
       },
       {
         "src": "/work/goodcult/08.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#205F5C",
-        "alt": ""
+        "alt": "Hands on the head in a white graphic tee and beanie, gritted teeth, small backpack, teal backdrop"
       },
       {
         "src": "/work/goodcult/09.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#20706C",
-        "alt": ""
+        "alt": "Hands raised to a patched cap in a black graphic tee and baggy jeans, eyes closed, teal backdrop"
       },
       {
         "src": "/work/goodcult/10.jpg",
         "width": 2499,
         "height": 2000,
         "color": "#1B504E",
-        "alt": ""
+        "alt": "Group in black and white graphic tees posing together, hands forming a heart, teal backdrop"
       },
       {
         "src": "/work/goodcult/11.jpg",
         "width": 1199,
         "height": 1499,
         "color": "#2D6C68",
-        "alt": ""
+        "alt": "One person carried across the arms of another, a child standing beside, black graphic tees, teal backdrop"
       },
       {
         "src": "/work/goodcult/12.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#25746F",
-        "alt": ""
+        "alt": "Peace signs raised in a black graphic tee and patched cap, scrunched face, teal backdrop"
       },
       {
         "src": "/work/goodcult/13.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#277773",
-        "alt": ""
+        "alt": "Hands in pockets in a black graphic tee and white cargo pants, curly hair, black glasses, teal backdrop"
       },
       {
         "src": "/work/goodcult/14.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#2B706C",
-        "alt": ""
+        "alt": "Two people embracing in graphic tees, holding a bouquet of flowers, teal backdrop"
       },
       {
         "src": "/work/goodcult/15.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#A6671C",
-        "alt": ""
+        "alt": "Seated on a yellow block in a printed hoodie and jeans, disco ball on the carpet, mustard walls"
       },
       {
         "src": "/work/goodcult/16.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#965917",
-        "alt": ""
+        "alt": "Standing in a printed hoodie and baggy jeans, hands in pockets, mustard corner, deep red carpet"
       },
       {
         "src": "/work/goodcult/17.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#C08025",
-        "alt": ""
+        "alt": "Standing in a black graphic tee, white cargo pants and sneakers, glasses, mustard corner, red carpet"
       }
     ]
   },
@@ -8525,112 +8525,112 @@ export const PROJECTS: Project[] = [
         "width": 2499,
         "height": 3124,
         "color": "#F3F3F3",
-        "alt": ""
+        "alt": "Reclining on one arm on a white floor in a black bodysuit, long streaked hair, glancing sideways"
       },
       {
         "src": "/work/taneka/03.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#F3F3F3",
-        "alt": ""
+        "alt": "Seated leaning on one hand in a black scoop-neck bodysuit, streaked hair, white backdrop"
       },
       {
         "src": "/work/taneka/04.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#F3F3F3",
-        "alt": ""
+        "alt": "Kneeling with a hand at the head in a black bodysuit, streaked hair, white backdrop"
       },
       {
         "src": "/work/taneka/05.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#F3F3F3",
-        "alt": ""
+        "alt": "Seated with an arm over the head in a black bodysuit and white socks, white backdrop"
       },
       {
         "src": "/work/taneka/06.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#F3F3F3",
-        "alt": ""
+        "alt": "Seated leaning on one hand, looking at the lens, black bodysuit, white socks, white backdrop"
       },
       {
         "src": "/work/taneka/07.jpg",
         "width": 2499,
         "height": 2856,
         "color": "#8C8C8C",
-        "alt": ""
+        "alt": "Lying on the front on a grey floor, head on an arm, black bodysuit, streaked hair"
       },
       {
         "src": "/work/taneka/08.jpg",
         "width": 2499,
         "height": 2856,
         "color": "#737373",
-        "alt": ""
+        "alt": "Lying on one side propped on an arm, black bodysuit, long hair, grey backdrop"
       },
       {
         "src": "/work/taneka/09.jpg",
         "width": 2499,
         "height": 2856,
         "color": "#737373",
-        "alt": ""
+        "alt": "Lying on one side, head on a bent arm, black bodysuit, soft light, grey backdrop"
       },
       {
         "src": "/work/taneka/10.jpg",
         "width": 2499,
         "height": 2856,
         "color": "#8C8C8C",
-        "alt": ""
+        "alt": "Propped on both arms over a grey floor, head tilted, black bodysuit, soft side light"
       },
       {
         "src": "/work/taneka/11.jpg",
         "width": 2499,
         "height": 2856,
         "color": "#737373",
-        "alt": ""
+        "alt": "Lying on one side with a hand flat on the floor, black bodysuit, grey backdrop"
       },
       {
         "src": "/work/taneka/12.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#F3D9D9",
-        "alt": ""
+        "alt": "Seated leaning on one arm in a black bodysuit and thin necklace, pink glow, white floor"
       },
       {
         "src": "/work/taneka/13.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#F3F3F3",
-        "alt": ""
+        "alt": "Head tilted over a shoulder in a black bodysuit, one hand planted, pale pink backdrop"
       },
       {
         "src": "/work/taneka/14.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#F3F3F3",
-        "alt": ""
+        "alt": "Seated leaning on one hand, head tilted, black bodysuit, pink halo behind, white floor"
       },
       {
         "src": "/work/taneka/15.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#F3F3F3",
-        "alt": ""
+        "alt": "Seated leaning on one arm, looking at the lens, black bodysuit, soft pink backlight"
       },
       {
         "src": "/work/taneka/16.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#F3F3F3",
-        "alt": ""
+        "alt": "Reclining on a hip with a hand on the knee, black bodysuit, thin necklace, pink-lit backdrop"
       },
       {
         "src": "/work/taneka/17.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#D9D9D9",
-        "alt": ""
+        "alt": "Seated leaning back on one arm, a hand at the hip, black bodysuit, pink backlight"
       }
     ]
   },
@@ -8732,28 +8732,28 @@ export const PROJECTS: Project[] = [
         "width": 2499,
         "height": 3124,
         "color": "#0C260C",
-        "alt": ""
+        "alt": "Leaning forward in a dark blazer and white tee, backlit by a beam of light through teal smoke"
       },
       {
         "src": "/work/torteline/02.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#0C260C",
-        "alt": ""
+        "alt": "Head bowed in a dark blazer and white tee, a bright beam behind in teal smoke"
       },
       {
         "src": "/work/torteline/03.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#0C260C",
-        "alt": ""
+        "alt": "Standing with hands in the pockets of an open dark blazer, teal smoke, pendant necklace"
       },
       {
         "src": "/work/torteline/04.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#408CA6",
-        "alt": ""
+        "alt": "Profile over the shoulder in a dark blazer and white tee, backlit by pale blue light"
       },
       {
         "src": "/work/torteline/05.jpg",
@@ -8767,84 +8767,84 @@ export const PROJECTS: Project[] = [
         "width": 2499,
         "height": 3124,
         "color": "#8CD9D9",
-        "alt": ""
+        "alt": "Seated on the floor in sunglasses and a dark blazer, a small synth beside, bright teal backdrop"
       },
       {
         "src": "/work/torteline/07.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#8C0C0C",
-        "alt": ""
+        "alt": "Standing silhouetted against a deep red backdrop, face lit by a narrow strip of light"
       },
       {
         "src": "/work/torteline/08.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#260C0C",
-        "alt": ""
+        "alt": "Small dark silhouette standing in a red room with a bright magenta glow at left"
       },
       {
         "src": "/work/torteline/09.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#730C0C",
-        "alt": ""
+        "alt": "Head tilted back in a dark silhouette on red, a strip of light across the eyes"
       },
       {
         "src": "/work/torteline/10.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#730C0C",
-        "alt": ""
+        "alt": "Standing in silhouette with hands behind the back holding drumsticks, magenta glow, red room"
       },
       {
         "src": "/work/torteline/11.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#A60C0C",
-        "alt": ""
+        "alt": "Seated on the floor holding drumsticks in a printed white tee and black trousers, red backdrop"
       },
       {
         "src": "/work/torteline/12.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#40260C",
-        "alt": ""
+        "alt": "Standing in a red-lit printed tee and black trousers, hands together, dark red backdrop"
       },
       {
         "src": "/work/torteline/13.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#735940",
-        "alt": ""
+        "alt": "Seated on a stool in a lime cardigan over a white tee, one foot up, hazy warm light"
       },
       {
         "src": "/work/torteline/14.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#594026",
-        "alt": ""
+        "alt": "Seated on a stool in a lime cardigan, legs apart, sneakers, soft smoke and warm light"
       },
       {
         "src": "/work/torteline/15.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#735940",
-        "alt": ""
+        "alt": "Seated on a stool leaning forward on a knee, lime cardigan, white tee, warm hazy light"
       },
       {
         "src": "/work/torteline/16.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#C07326",
-        "alt": ""
+        "alt": "Standing in a dark apron and white tee with a wooden spoon between the teeth, amber backdrop"
       },
       {
         "src": "/work/torteline/17.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#8C8C8C",
-        "alt": ""
+        "alt": "Looking down in a grey pocket tee with hands behind the back, pale grey-green backdrop"
       }
     ]
   },
