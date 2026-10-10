@@ -881,14 +881,14 @@ export const PROJECTS: Project[] = [
         "width": 2500,
         "height": 1667,
         "color": "#747375",
-        "alt": ""
+        "alt": "Five people in denim and fur slumped on a tan couch in a paint-splattered warehouse, beer keg beside"
       },
       {
         "src": "/work/diesel/02.jpg",
         "width": 2500,
         "height": 1667,
         "color": "#6A5E5A",
-        "alt": ""
+        "alt": "Low close angle on the couch group, a woman with red hair and sunglasses lying across laps"
       },
       {
         "src": "/work/diesel/03.jpg",
@@ -902,28 +902,28 @@ export const PROJECTS: Project[] = [
         "width": 2500,
         "height": 1668,
         "color": "#6E6B6A",
-        "alt": ""
+        "alt": "Man in a fur coat and flared jeans sprawled on the warehouse floor, the group behind"
       },
       {
         "src": "/work/diesel/05.jpg",
         "width": 2500,
         "height": 1667,
         "color": "#74706F",
-        "alt": ""
+        "alt": "Woman in a fur coat strides past with a canvas holdall, crew lounging on the couch behind"
       },
       {
         "src": "/work/diesel/06.jpg",
         "width": 2500,
         "height": 1667,
         "color": "#65696C",
-        "alt": ""
+        "alt": "Woman in a ribbed blue crop top with an oval cutout in the foreground, group behind her"
       },
       {
         "src": "/work/diesel/07.jpg",
         "width": 2500,
         "height": 1667,
         "color": "#6A6D70",
-        "alt": ""
+        "alt": "Low angle from her waist up, ribbed top and jeans, the couch group out of focus behind"
       }
     ]
   },
