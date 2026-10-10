@@ -6591,140 +6591,140 @@ export const PROJECTS: Project[] = [
         "width": 2493,
         "height": 1662,
         "color": "#264059",
-        "alt": ""
+        "alt": "Looking along a dark highway underpass at dusk, bridge piers and lit road reflected in still water"
       },
       {
         "src": "/work/places/02.jpg",
         "width": 2499,
         "height": 1404,
         "color": "#262626",
-        "alt": ""
+        "alt": "Low sun flaring over a downtown skyline at sunrise, a pointed tower silhouetted, long shadows"
       },
       {
         "src": "/work/places/03.jpg",
         "width": 2499,
         "height": 1403,
         "color": "#172917",
-        "alt": ""
+        "alt": "Aerial view straight down on dense dark evergreen treetops"
       },
       {
         "src": "/work/places/04.jpg",
         "width": 2499,
         "height": 1406,
         "color": "#B5C7D1",
-        "alt": ""
+        "alt": "Waterfront piers and downtown towers beside a calm bay, a bridge far off, hazy sky"
       },
       {
         "src": "/work/places/05.jpg",
         "width": 2047,
         "height": 1535,
         "color": "#8C7552",
-        "alt": ""
+        "alt": "Aerial view of a freeway crossing a causeway between teal salt ponds"
       },
       {
         "src": "/work/places/06.jpg",
         "width": 2499,
         "height": 1403,
         "color": "#79C5E1",
-        "alt": ""
+        "alt": "Downtown skyline of tall towers and a bay bridge under a clear blue sky, seen from above"
       },
       {
         "src": "/work/places/07.jpg",
         "width": 2499,
         "height": 1311,
         "color": "#C6D9E1",
-        "alt": ""
+        "alt": "City skyline looking toward a bay and hills, a pointed tower among glass buildings, pale sky"
       },
       {
         "src": "/work/places/08.jpg",
         "width": 2499,
         "height": 1403,
         "color": "#02242F",
-        "alt": ""
+        "alt": "Aerial view of freeway interchanges curving through a green park, cars in motion"
       },
       {
         "src": "/work/places/09.jpg",
         "width": 2046,
         "height": 1151,
         "color": "#1F3237",
-        "alt": ""
+        "alt": "Aerial view of a wide avenue cutting through dense residential blocks, autumn trees"
       },
       {
         "src": "/work/places/10.jpg",
         "width": 1848,
         "height": 1040,
         "color": "#01242E",
-        "alt": ""
+        "alt": "Straight-down aerial on a pyramid-topped tower among rooftops and streets"
       },
       {
         "src": "/work/places/11.jpg",
         "width": 2429,
         "height": 3641,
         "color": "#D9F3F3",
-        "alt": ""
+        "alt": "Dry golden hills under a clear teal sky, a single star faint above, a farmhouse in the valley"
       },
       {
         "src": "/work/places/12.jpg",
         "width": 2429,
         "height": 3641,
         "color": "#1D353D",
-        "alt": ""
+        "alt": "Milky Way arching over dark sea stacks and a rocky coastline at night"
       },
       {
         "src": "/work/places/13.jpg",
         "width": 2499,
         "height": 3125,
         "color": "#93959D",
-        "alt": ""
+        "alt": "A radio tower rising out of fog over a green hill and houses, grey overcast sky"
       },
       {
         "src": "/work/places/14.jpg",
         "width": 2499,
         "height": 1405,
         "color": "#0C260C",
-        "alt": ""
+        "alt": "A lit suspension bridge over dark water at night, reflections on the surface"
       },
       {
         "src": "/work/places/15.jpg",
         "width": 2499,
         "height": 1666,
         "color": "#152631",
-        "alt": ""
+        "alt": "Highway underpass at night, concrete piers, a red-lit road ahead and a green sign"
       },
       {
         "src": "/work/places/16.jpg",
         "width": 2499,
         "height": 3125,
         "color": "#021A1C",
-        "alt": ""
+        "alt": "Steel bridge girders arching over an empty street, glass towers beyond, yellow center line"
       },
       {
         "src": "/work/places/17.jpg",
         "width": 2499,
         "height": 3123,
         "color": "#272623",
-        "alt": ""
+        "alt": "Rugged brown headland with surf breaking below, a second sea stack beyond, blue-green water"
       },
       {
         "src": "/work/places/18.jpg",
         "width": 2499,
         "height": 3123,
         "color": "#23221F",
-        "alt": ""
+        "alt": "Close view of a steep brown ridge dropping into churning surf, teal water"
       },
       {
         "src": "/work/places/19.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#F3F3F3",
-        "alt": ""
+        "alt": "A red neon HOTEL sign glowing against a dark building at night"
       },
       {
         "src": "/work/places/20.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#260C0C",
-        "alt": ""
+        "alt": "Red neon HOTEL sign on a narrow dark tower, lit window bays glowing orange"
       }
     ]
   },
