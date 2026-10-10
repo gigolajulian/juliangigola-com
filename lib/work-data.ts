@@ -1673,84 +1673,84 @@ export const PROJECTS: Project[] = [
         "width": 2499,
         "height": 3124,
         "color": "#404059",
-        "alt": ""
+        "alt": "Tight crop leaning in from the left, braids hanging, sheer camisole, cool light from above"
       },
       {
         "src": "/work/aether/03.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#C0C0D9",
-        "alt": ""
+        "alt": "Seated on the floor leaning back on one arm, braids falling, sheer camisole and denim shorts"
       },
       {
         "src": "/work/aether/04.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#A6A6C0",
-        "alt": ""
+        "alt": "Seen from above, kneeling on a blue-grey floor with one hand planted, braids over her shoulder"
       },
       {
         "src": "/work/aether/05.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#262626",
-        "alt": ""
+        "alt": "Propped on one arm with her head tilted, long braids, sheer camisole, denim shorts"
       },
       {
         "src": "/work/aether/06.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#595973",
-        "alt": ""
+        "alt": "Leaning on her hand on the floor, looking up at the lens, braids down her back"
       },
       {
         "src": "/work/aether/07.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#C0C0D9",
-        "alt": ""
+        "alt": "Same pose, head tilted back toward the light, braids hanging, shadow cast on the floor"
       },
       {
         "src": "/work/aether/08.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#404040",
-        "alt": ""
+        "alt": "Standing and leaning toward the camera, braids hanging forward, sheer camisole with garter straps"
       },
       {
         "src": "/work/aether/09.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#262626",
-        "alt": ""
+        "alt": "Bending forward with a hand on her knee, braids swinging, hard light from the upper left"
       },
       {
         "src": "/work/aether/10.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#262626",
-        "alt": ""
+        "alt": "Close crop, head tilted onto one shoulder, camisole strap and beaded necklaces, dark grey backdrop"
       },
       {
         "src": "/work/aether/11.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#262626",
-        "alt": ""
+        "alt": "Full length standing with ankles crossed, small in a dark room, a pool of light below"
       },
       {
         "src": "/work/aether/12.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#262626",
-        "alt": ""
+        "alt": "Seated on a stool, hands clasped between her knees, braids forward, dark grey backdrop"
       },
       {
         "src": "/work/aether/13.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#262640",
-        "alt": ""
+        "alt": "One hand lifted to her ear, braids falling forward, seated, sheer camisole and denim shorts"
       }
     ]
   },
