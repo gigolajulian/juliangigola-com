@@ -97,7 +97,7 @@ function look() {
     "cal-brand-emphasis": v("--foreground"),
     "cal-brand-text": v("--background"),
   };
-  return { theme, cssVarsPerTheme: { light: vars, dark: vars }, layout: "month_view" };
+  return { theme, cssVarsPerTheme: { light: vars, dark: vars }, layout: "month_view", hideBranding: true };
 }
 
 let mounts = 0;
