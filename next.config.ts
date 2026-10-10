@@ -236,7 +236,7 @@ const csp = [
   // `vimeo.com` and `youtube.com` are oEmbed lookups made by /admin when a
   // link is pasted: the title, and the poster Vimeo does not publish at a
   // guessable URL. No page on the site fetches either.
-  `connect-src 'self' https://api.github.com https://vimeo.com https://www.youtube.com${__impeccableLiveDev}`,
+  `connect-src 'self' https://api.cal.com https://api.github.com https://vimeo.com https://www.youtube.com${__impeccableLiveDev}`,
   // Not on a local build (`LOCAL` above): there is no https on localhost.
   ...(LOCAL ? [] : ["upgrade-insecure-requests"]),
 ].join("; ");

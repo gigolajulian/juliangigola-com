@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { useSiteTheme } from "@/lib/site-theme";
+import { TimePicker } from "@/components/time-picker";
 
 /* ── Cal.com, inline ──────────────────────────────────────────────
  * The booking calendar, from Cal.com (`book.cal`, `lib/booking.ts`).
@@ -84,7 +85,7 @@ function look() {
   const theme = document.documentElement.dataset.theme === "light" ? "light" : "dark";
   const vars = {
     "cal-bg": "transparent",
-    "cal-bg-muted": v("--card"),
+    "cal-bg-muted": "transparent",
     "cal-bg-subtle": v("--muted"),
     "cal-bg-emphasis": v("--muted"),
     "cal-border": v("--border"),
@@ -97,7 +98,7 @@ function look() {
     "cal-brand-emphasis": v("--foreground"),
     "cal-brand-text": v("--background"),
   };
-  return { theme, cssVarsPerTheme: { light: vars, dark: vars }, layout: "month_view" };
+  return { theme, cssVarsPerTheme: { light: vars, dark: vars }, layout: "month_view", hideBranding: true };
 }
 
 let mounts = 0;
@@ -189,7 +190,15 @@ function CalInline({ path, title, className }: { path: string; title: string; cl
   );
 }
 
-/** Cal.com's calendar for `path`. `className` sizes the box. */
+/** Cal.com's calendar for `path`. `className` sizes the box. With `?picker`
+    on the address, the site's own time picker is tried in its place, and
+    Cal.com's calendar is its fallback. */
 export function CalEmbed({ path, title, className }: { path: string; title: string; className?: string }) {
-  return <CalInline key={path} path={path} title={title} className={className} />;
+  const [own, setOwn] = React.useState(false);
+  React.useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setOwn(new URLSearchParams(window.location.search).has("picker"));
+  }, []);
+  const inline = <CalInline key={path} path={path} title={title} className={className} />;
+  return own ? <TimePicker path={path} title={title} className={className} fallback={inline} /> : inline;
 }

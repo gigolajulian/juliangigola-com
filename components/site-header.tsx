@@ -87,7 +87,9 @@ export function SiteHeader() {
      and again with it, in the middle of the door shutting (Julian: back
      to the hero lags). */
   React.useLayoutEffect(() => {
-    if (pathname !== "/") return;
+    /* The homepage, and a session's page, whose last screen is the Book
+       screen: the same rail and footer, the same glass. */
+    if (pathname !== "/" && !document.querySelector("[data-hash=book]")) return;
     const root = document.documentElement;
     let sizes: ResizeObserver | null = null;
     let frame = 0;

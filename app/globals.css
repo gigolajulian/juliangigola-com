@@ -54,3 +54,24 @@
 @import "./styles/ultrawide.css";
 @import "./styles/contact.css";
 @import "./styles/devices.css";
+
+/* Time picker (components/time-picker.tsx): a digit rolls in when it changes. */
+@keyframes tp-roll {
+  from {
+    opacity: 0;
+    transform: translateY(40%);
+  }
+}
+.tp-roll {
+  animation: tp-roll 0.45s var(--ease-out-strong, cubic-bezier(0.23, 1, 0.32, 1));
+}
+@media (prefers-reduced-motion: reduce) {
+  .tp-roll {
+    animation: none;
+  }
+}
+/* The picker is only as tall as it is; the card around it follows. */
+.contact-card:has(.tp),
+.contact-card:has(.tp) .tp {
+  height: auto !important;
+}
