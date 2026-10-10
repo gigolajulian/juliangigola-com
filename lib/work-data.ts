@@ -200,105 +200,105 @@ export const PROJECTS: Project[] = [
         "width": 2500,
         "height": 1563,
         "color": "#33342D",
-        "alt": ""
+        "alt": "Woman in white bunny ears looks up into a ceiling vent's light inside a graffiti tunnel"
       },
       {
         "src": "/work/hua/02.jpg",
         "width": 2500,
         "height": 1563,
         "color": "#20211E",
-        "alt": ""
+        "alt": "Low angle on a figure in bunny ears under a lit vent, her hard shadow on the wall"
       },
       {
         "src": "/work/hua/03.jpg",
         "width": 2500,
         "height": 1562,
         "color": "#232423",
-        "alt": ""
+        "alt": "Wide shot in bunny ears, black crop top and fur leg warmers inside a graffiti tunnel"
       },
       {
         "src": "/work/hua/04.jpg",
         "width": 2500,
         "height": 3333,
         "color": "#1B1A1B",
-        "alt": ""
+        "alt": "Figure in a bunny-ear gas mask and black coat with fur trim, a ringed vent glowing overhead"
       },
       {
         "src": "/work/hua/05.jpg",
         "width": 2500,
         "height": 3333,
         "color": "#2D2C26",
-        "alt": ""
+        "alt": "Shot from above, a crouched figure in a gas mask and bunny ears inside a hard spotlight circle"
       },
       {
         "src": "/work/hua/06.jpg",
         "width": 2500,
         "height": 3334,
         "color": "#31342F",
-        "alt": ""
+        "alt": "Figure in a gas mask and bunny ears crouches low under a ringed vent, graffiti on both walls"
       },
       {
         "src": "/work/hua/07.jpg",
         "width": 2500,
         "height": 1562,
         "color": "#474A41",
-        "alt": ""
+        "alt": "Silhouette in bunny ears seen from behind, walking down a lit graffiti tunnel toward the vent"
       },
       {
         "src": "/work/hua/08.jpg",
         "width": 2500,
         "height": 3333,
         "color": "#272927",
-        "alt": ""
+        "alt": "Figure in a gas mask and bunny ears stands in drifting smoke, fur boots lit from below"
       },
       {
         "src": "/work/hua/09.jpg",
         "width": 2500,
         "height": 1563,
         "color": "#5C090C",
-        "alt": ""
+        "alt": "Close silhouette in bunny ears against a tunnel washed in hard red light"
       },
       {
         "src": "/work/hua/10.jpg",
         "width": 2500,
         "height": 1563,
         "color": "#2F0509",
-        "alt": ""
+        "alt": "Wide red tunnel, a small figure in bunny ears at the far end, flare at her feet"
       },
       {
         "src": "/work/hua/11.jpg",
         "width": 2500,
         "height": 1562,
         "color": "#2E050A",
-        "alt": ""
+        "alt": "Figure in bunny ears stands mid-tunnel under a ringed vent, red light glowing off the graffiti"
       },
       {
         "src": "/work/hua/12.jpg",
         "width": 2500,
         "height": 1563,
         "color": "#3E070C",
-        "alt": ""
+        "alt": "Silhouette in bunny ears seen from the side under the vent, red glow pooling on the floor"
       },
       {
         "src": "/work/hua/13.jpg",
         "width": 2500,
         "height": 3333,
         "color": "#38070B",
-        "alt": ""
+        "alt": "Figure from behind in bunny ears and fur boots, red light backlighting her legs, vent above"
       },
       {
         "src": "/work/hua/14.jpg",
         "width": 2500,
         "height": 3333,
         "color": "#400507",
-        "alt": ""
+        "alt": "Tighter shot from behind of the bunny-eared figure, red flare light rimming her fur boots"
       },
       {
         "src": "/work/hua/15.jpg",
         "width": 2500,
         "height": 3333,
         "color": "#34080B",
-        "alt": ""
+        "alt": "Side profile in bunny ears and a fur-trimmed coat, edged by red flare light"
       },
       {
         "src": "/work/hua/16.jpg",
@@ -312,7 +312,7 @@ export const PROJECTS: Project[] = [
         "width": 2500,
         "height": 3333,
         "color": "#1B1B1A",
-        "alt": ""
+        "alt": "A figure in bunny ears framed inside a round drain pipe, past a dark shoulder in front"
       }
     ]
   },
