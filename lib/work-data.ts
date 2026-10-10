@@ -1272,42 +1272,42 @@ export const PROJECTS: Project[] = [
         "width": 2500,
         "height": 3333,
         "color": "#B7B1AE",
-        "alt": ""
+        "alt": "Seated hugging her knee in a white lace-trim kimono-sleeve top and cream slingback flats"
       },
       {
         "src": "/work/serif/03.jpg",
         "width": 2500,
         "height": 3333,
         "color": "#C2BCB9",
-        "alt": ""
+        "alt": "Reclining on one hand with legs stretched out, white wide-sleeve top, cream slingbacks, grey sweep"
       },
       {
         "src": "/work/serif/04.jpg",
         "width": 2500,
         "height": 3333,
         "color": "#A69C96",
-        "alt": ""
+        "alt": "Tight crop leaning on one hand, black hair loose, white lace-trim top with wide sleeves"
       },
       {
         "src": "/work/serif/05.jpg",
         "width": 2500,
         "height": 3334,
         "color": "#85807E",
-        "alt": ""
+        "alt": "Motion-blurred standing portrait in a white satin slip and wide-sleeve top, head tilted back"
       },
       {
         "src": "/work/serif/06.jpg",
         "width": 2500,
         "height": 3333,
         "color": "#BBB8B7",
-        "alt": ""
+        "alt": "From above, head bowed, seated with legs folded to one side, white wide-sleeve top, gold cuff"
       },
       {
         "src": "/work/serif/07.jpg",
         "width": 2500,
         "height": 3333,
         "color": "#B5B2B0",
-        "alt": ""
+        "alt": "Sitting on one hip with a hand planted on the floor, white top, cream flats, direct gaze"
       }
     ]
   },
