@@ -1000,6 +1000,14 @@ function RailFollow({
     const place = (moving: boolean) => {
       const marks = Array.from(r.querySelectorAll<HTMLElement>("[data-mark]"));
       if (!marks.length) return;
+      /* Julian: the screen the page is heading to darkens as it comes up,
+         from the grey of a tick toward the ink, so it is seen coming. */
+      const coming = (n: number | null, q: number) =>
+        marks.forEach((m, i) => {
+          m.style.backgroundColor =
+            i === n ? `color-mix(in oklab, var(--foreground) ${Math.round(20 + 45 * q)}%, transparent)` : "";
+        });
+      coming(null, 0);
       // Where the scroll puts each marked cell in the middle of the window.
       const stops = (Array.from(el.children) as HTMLElement[])
         .flatMap((c, i) => (c.dataset.tick !== undefined ? [i] : []))
@@ -1042,10 +1050,14 @@ function RailFollow({
         if (left >= h.left) {
           e.left = h.left;
           e.right = Math.max(right, h.right);
+          coming(Math.min(k + 1, marks.length - 1), p);
         } else {
           e.left = left;
           e.right = h.right;
+          coming(k, 1 - p);
         }
+        draw();
+        return;
       } else {
         // Settled: let go, onto the mark the page is on, leaning toward
         // the mark under the pointer if there is one.

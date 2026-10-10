@@ -622,9 +622,12 @@ h2.contact-title {
 }
 
 /* The rail's drop (`RailFollow`, `strip/rail.tsx`) is the mark, so the
-   lit tick under it gives up its own ink. */
+   lit tick under it is a tick like the others. Made see-through, it showed
+   as a hole in the rail mid-scroll, where the lit tick had moved on and
+   the drop had not reached it yet (Julian). */
 .rail-line:has([data-follow]) [data-ink] {
-  background-color: transparent;
+  background-color: color-mix(in oklab, var(--foreground) 20%, transparent);
+  scale: 1 0.5;
 }
 
 /* ── the reel behind the motion page ──
