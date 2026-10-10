@@ -459,9 +459,11 @@ export function WarpText({
       pointer.tx = (e.clientX - rect.left) / rect.width;
       pointer.ty = 1 - (e.clientY - rect.top) / rect.height;
       pointer.activeTarget = 1;
+      wake();
     };
     const onPointerLeave = () => {
       pointer.activeTarget = 0;
+      wake();
     };
     const onContextLost = (e: Event) => {
       e.preventDefault();
@@ -481,6 +483,7 @@ export function WarpText({
       reduceMotion = e.matches;
       uniforms.uMotion.value = reduceMotion ? 0 : 1;
       renderOnce();
+      wake();
     };
 
     /* Under another screen of the homepage's deck (`lib/deck.ts`), the
@@ -505,8 +508,9 @@ export function WarpText({
         return;
       }
       const elapsed = (now - startTime) * 0.001;
-      const idleX = 0.5 + Math.sin(elapsed * 0.33) * 0.12;
-      const idleY = 0.5 + Math.cos(elapsed * 0.27) * 0.1;
+      // Under reduced motion the idle light holds still in the middle.
+      const idleX = reduceMotion ? 0.5 : 0.5 + Math.sin(elapsed * 0.33) * 0.12;
+      const idleY = reduceMotion ? 0.5 : 0.5 + Math.cos(elapsed * 0.27) * 0.1;
       maybePass(now);
       if (pass) {
         const t = (now - pass) / PASS_MS;
@@ -548,7 +552,25 @@ export function WarpText({
       uniforms.uRefraction.value = l.refraction;
       uniforms.uRipple.value = Number(l.ripple);
       renderOnce();
+      /* Under reduced motion nothing moves once the light has settled, so
+         the loop stops there; a pointer over the name starts it again. */
+      if (
+        reduceMotion &&
+        !waiting &&
+        !pass &&
+        !fading &&
+        pointer.activeTarget === 0 &&
+        Math.abs(pointer.active - 0.18) < 0.002 &&
+        Math.abs(pointer.x - idleX) < 0.001 &&
+        Math.abs(pointer.y - idleY) < 0.001
+      ) {
+        raf = 0;
+        return;
+      }
       raf = requestAnimationFrame(loop);
+    };
+    const wake = () => {
+      if (!raf && visible && pageVisible && mesh && !disposed && !contextLost) raf = requestAnimationFrame(loop);
     };
 
     const sizes = new ResizeObserver(resize);
