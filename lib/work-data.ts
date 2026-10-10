@@ -6546,28 +6546,28 @@ export const PROJECTS: Project[] = [
         "width": 2499,
         "height": 3124,
         "color": "#0C260C",
-        "alt": ""
+        "alt": "Silhouette standing behind clear plastic sheeting, orange glow at left, blue light from the right"
       },
       {
         "src": "/work/obscura/02.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#260C0C",
-        "alt": ""
+        "alt": "Profile behind plastic sheeting, hand pressed flat against it, red and cyan light, white lace top"
       },
       {
         "src": "/work/obscura/03.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#260C0C",
-        "alt": ""
+        "alt": "Head turned away behind plastic, a hand raised to the sheet, cyan light, lace top"
       },
       {
         "src": "/work/obscura/04.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#260C0C",
-        "alt": ""
+        "alt": "Plastic draped over the head and shoulders, one hand pressed to the sheet, red and blue light"
       }
     ]
   },
