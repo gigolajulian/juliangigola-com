@@ -4443,7 +4443,7 @@ export const PROJECTS: Project[] = [
         "width": 1125,
         "height": 1407,
         "color": "#E3E0DD",
-        "alt": "Seated on a wood-slat outdoor counter under a louvered pergola, teal hair, black swimsuit"
+        "alt": "Seated on a wood-slat outdoor counter under a louvered pergola, teal hair, dark swimsuit"
       },
       {
         "src": "/work/isabela/06.jpg",
