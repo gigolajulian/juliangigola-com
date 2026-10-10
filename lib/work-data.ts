@@ -2806,7 +2806,7 @@ export const PROJECTS: Project[] = [
         "width": 2499,
         "height": 3124,
         "color": "#0C260C",
-        "alt": "Tight crop, head resting on a hand, loose braids, star stickers, black top, red and blue light"
+        "alt": "Tight crop, head resting on a hand, tousled hair, star stickers, black top, red and blue light"
       }
     ]
   },
@@ -3481,7 +3481,7 @@ export const PROJECTS: Project[] = [
         "width": 2428,
         "height": 3642,
         "color": "#262626",
-        "alt": "Smiling headshot in a thin gold chain and black tee, short dark hair, black backdrop"
+        "alt": "Smiling headshot in a thin chain necklace and black tee, short dark hair, black backdrop"
       },
       {
         "src": "/work/fun-xyz/09.jpg",
@@ -7677,7 +7677,7 @@ export const PROJECTS: Project[] = [
         "width": 2499,
         "height": 3124,
         "color": "#D9D9D9",
-        "alt": "Hands on a black cap and white sunglasses, black jacket, denim shorts, teal painting behind"
+        "alt": "Hands on a black headscarf and white sunglasses, black jacket, denim shorts, teal painting behind"
       },
       {
         "src": "/work/sago/11.jpg",
@@ -7742,7 +7742,7 @@ export const PROJECTS: Project[] = [
         "width": 2499,
         "height": 3124,
         "color": "#262626",
-        "alt": "Chin on a fist, bare shoulder, chain necklace, black top, smoke drifting across a teal backdrop"
+        "alt": "Chin on a fist, chain necklace, black top, smoke drifting across a teal backdrop"
       },
       {
         "src": "/work/sara/04.jpg",
@@ -8043,7 +8043,7 @@ export const PROJECTS: Project[] = [
         "width": 2499,
         "height": 3124,
         "color": "#F3F3F3",
-        "alt": "Close portrait in a patterned bandana headband and black halter top, green hair, white backdrop"
+        "alt": "Close portrait in a patterned bandana headband and black halter top, green hair, bright sky"
       },
       {
         "src": "/work/sols/03.jpg",
@@ -8667,7 +8667,7 @@ export const PROJECTS: Project[] = [
         "width": 2499,
         "height": 3124,
         "color": "#F3F3F3",
-        "alt": "Mid-jump with a guitar in flared jeans in front of an orange limousine, a keyboard stand nearby"
+        "alt": "Mid-jump in flared jeans beside a guitarist, orange limousine behind, a keyboard stand nearby"
       },
       {
         "src": "/work/the-den-talkshow/03.jpg",
@@ -8981,7 +8981,7 @@ export const PROJECTS: Project[] = [
         "width": 2499,
         "height": 2856,
         "color": "#4073A6",
-        "alt": "Crouched on bare feet, looking up, silver body paint, long dark hair, cold blue light"
+        "alt": "Crouched on the toes, looking up, silver body paint, long dark hair, cold blue light"
       },
       {
         "src": "/work/transmutate/07.jpg",
