@@ -241,7 +241,7 @@ export function ContactScreen({
 
           Julian: the form as a card with a beam running round its
           edge (`contact-beam.tsx`), on the header's glass. */}
-      <ContactBeam className={`contact-card flex min-h-0 w-full justify-self-center sm:max-h-full ${calendar ? "max-w-[60rem] sm:h-full" : "max-w-[40rem]"}`}>
+      <ContactBeam className={`contact-card flex min-h-0 w-full justify-self-center sm:max-h-full ${calendar ? "max-w-[60rem] sm:h-full" : "max-w-[44rem]"}`}>
         <div
           data-scroll
           data-dial="form"

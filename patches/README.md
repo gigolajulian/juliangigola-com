@@ -19,8 +19,9 @@ reason here. A patch with no entry here is not allowed.
   - The idle check runs once a second instead of every 300ms, and skips a
     hidden tab, a scroll in progress and a group off screen.
 - **Why:** measuring every item on every frame of a swipe forced a layout a
-  frame on the strips. The rail's ink (`RailInk`, `strip.tsx`) and the
-  buttons in liquid (`liquid-pair.tsx`) both run on this engine.
+  frame on the strips. The buttons in liquid (`liquid-pair.tsx`) run on
+  this engine. The rail's drop no longer does (`RailFollow`,
+  `strip/rail.tsx`).
 - **Check:** `lib/liquid-gooey-patch.test.ts` fails if the patch is not in
   `node_modules`, so `npm test` catches an install that skipped it.
 
