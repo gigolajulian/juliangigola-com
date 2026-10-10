@@ -306,6 +306,8 @@ export type Summary = {
   email: string;
   read: boolean;
   country?: string;
+  /** Bookings only: "Portraits · Sat, Oct 17, 2:00 PM PDT". */
+  detail?: string;
 };
 
 /**
@@ -395,6 +397,8 @@ export const summary = (e: Enquiry): Summary => ({
   email: e.email,
   read: e.read,
   ...(e.country ? { country: e.country } : {}),
+  // A booking's session and time, so its row says when without opening.
+  ...(e.type === "booking" && e.detail ? { detail: e.detail } : {}),
 });
 
 /**

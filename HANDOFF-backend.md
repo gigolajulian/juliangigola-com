@@ -13,7 +13,7 @@ app/api/ (inbox, traffic, tune, cal), app/admin/, app/book/, lib/booking.ts, lib
 - Plan: Workers Free hit the 100k/day cap once (2026-09-13). OpenNext cache interception stays off.
 
 ## Open
-- Bookings into the Inbox (2026-10-10, on `backend`): `POST /api/cal` takes Cal.com's signed BOOKING_CREATED webhook and stores it in KV `INBOX` with type "booking" (detail: event · time PT). Not mailed, Cal.com already mails Julian. Needs, before it does anything: (1) `wrangler secret put CAL_WEBHOOK_SECRET` with a long random string, (2) Cal.com > Settings > Developer > Webhooks: subscriber URL https://juliangigola.com/api/cal, trigger Booking Created, same secret. Until then the route answers 503. Not yet tested end to end against Cal.com.
+- Bookings into the Inbox (2026-10-10, on `backend`; booking rows carry `detail` in KV metadata for the row, jg-UI asked to style them): `POST /api/cal` takes Cal.com's signed BOOKING_CREATED webhook and stores it in KV `INBOX` with type "booking" (detail: event · time PT). Not mailed, Cal.com already mails Julian. Needs, before it does anything: (1) `wrangler secret put CAL_WEBHOOK_SECRET` with a long random string, (2) Cal.com > Settings > Developer > Webhooks: subscriber URL https://juliangigola.com/api/cal, trigger Booking Created, same secret. Until then the route answers 503. Not yet tested end to end against Cal.com.
 - Inbox/email check (2026-10-10): code path intact, self-check 52/52, prod KV reachable, /api/inbox 401 without auth. Mail delivery to hello@ NOT verified from here (no hello@ mail access). Live test submission waits on Julian's OK.
 - KV holds an unread editorial enquiry from 2026-09-28 (looks real) and three 2026-10-08 tests.
 
