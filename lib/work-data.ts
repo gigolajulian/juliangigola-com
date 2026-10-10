@@ -1780,70 +1780,70 @@ export const PROJECTS: Project[] = [
         "width": 1837,
         "height": 2296,
         "color": "#260C0C",
-        "alt": ""
+        "alt": "White wraparound sunglasses, a pistol raised near her face, a lit CRT behind, teal and orange light"
       },
       {
         "src": "/work/analogue-dreams/02.jpg",
         "width": 2074,
         "height": 2593,
         "color": "#F3F3F3",
-        "alt": ""
+        "alt": "White sunglasses and a black mesh top in front of a glowing CRT, near-black teal surround"
       },
       {
         "src": "/work/analogue-dreams/03.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#260C0C",
-        "alt": ""
+        "alt": "Close in on white sunglasses, two pistols held up, a CRT glowing behind, orange light on her face"
       },
       {
         "src": "/work/analogue-dreams/04.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#0C260C",
-        "alt": ""
+        "alt": "Kneeling by a CRT showing a red-lit frame, reaching for pistols laid on dark fabric, orange side light"
       },
       {
         "src": "/work/analogue-dreams/05.jpg",
         "width": 2311,
         "height": 2889,
         "color": "#260C0C",
-        "alt": ""
+        "alt": "A hand holds a pistol toward a CRT screen that shows the same scene, orange and teal"
       },
       {
         "src": "/work/analogue-dreams/06.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#0C260C",
-        "alt": ""
+        "alt": "Seated beside a CRT in sunglasses and a striped top, pistol in hand, looking back at the lens"
       },
       {
         "src": "/work/analogue-dreams/07.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#0C260C",
-        "alt": ""
+        "alt": "Seen from behind, seated beside a CRT, plant leaves behind, orange light on her hair"
       },
       {
         "src": "/work/analogue-dreams/08.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#0C260C",
-        "alt": ""
+        "alt": "Lying back on dark fabric, one arm raised with a camcorder, CRT glowing nearby, teal and pink light"
       },
       {
         "src": "/work/analogue-dreams/09.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#0C260C",
-        "alt": ""
+        "alt": "Tight crop on a CRT screen showing her face, arm over her head, cyan glow"
       },
       {
         "src": "/work/analogue-dreams/10.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#0C260C",
-        "alt": ""
+        "alt": "Seated before an orange backdrop biting a chain, sunglasses, printed top, a CRT behind her"
       }
     ]
   },
