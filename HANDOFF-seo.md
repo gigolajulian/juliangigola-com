@@ -292,7 +292,7 @@ Everything else comes from your existing site copy. Edit any of these in `lib/bo
 | 1 | **Graduation travel fee for San Francisco campuses** | Your session copy covers SJSU and SCU in the price, with a travel fee "further out". The page therefore tells SF State, USF and Berkeley students they'll pay one. If San Francisco is a home base, change the Graduation text in /admin. |
 | 2 | **Prices for headshots, portraits and weddings** | They show "On request". Prices are among the most-searched questions, and AI engines quote them. |
 | 3 | **Unblock `Google-Extended`?** | It likely keeps you out of Gemini app answers. Training blocks for other companies (GPTBot, ClaudeBot) don't affect search and can stay. One line in `app/robots.ts`. |
-| 4 | **Weddings booking page?** | Not built. Possible angles: "editorial wedding photographer", and Assyrian weddings in San Jose and Turlock, where no photographer currently targets that search. |
+| 4 | **Weddings booking page?** | Built, /weddings is live. Possible angles: "editorial wedding photographer", and Assyrian weddings in San Jose and Turlock, where no photographer currently targets that search. |
 | 5 | **Visible location lines** | The homepage hero still says "Based in San Francisco, CA". It could name both cities. |
 
 ---
@@ -307,7 +307,7 @@ Everything else comes from your existing site copy. Edit any of these in `lib/bo
    galleries). 1,229 photos currently have none.
 6. Write campus guides ("Best spots for SJSU grad photos") before January, ahead
    of spring commencement. One competitor owns the SJSU results with posts like these.
-7. Build a weddings page if you want more wedding bookings.
+7. ~~Build a weddings page~~ Done: /weddings is live (200) through `app/[service]`.
 8. Check results monthly: Google Search Console (including its AI report), Bing
    Webmaster Tools' AI Performance report, and a few test questions in
    ChatGPT, Gemini and Perplexity ("best headshot photographer in San Jose").
@@ -333,5 +333,5 @@ Everything else comes from your existing site copy. Edit any of these in `lib/bo
 
 - **Done:** live check, all Done items in SEO.md still hold (titles, descriptions, canonicals, JSON-LD, one h1, robots policy, 119 sitemap URLs).
 - **In progress, jg-CONTENT:** gallery alt text on branch `content`. Rules sent: one sentence, 8 to 18 words, at most 125 characters, no trailing period, only what the frame shows, no skin or body, no banned words. 81 frames cleared by me (script over every changed frame plus 15 photos opened), head 9e7b982.
-- **Waiting on jg-RELEASE:** merge `content` at 6beb71f (559 alt fields cleared, 0 gendered words, on origin) and `seo` (42e7d58, e7c1833, neutral ALT strings), then check a live project page for a new string (for example "Five people in denim and fur" on diesel) and nabu/59 reading "Figure". 573 alt fields remain empty, paused by Julian ("later").
+- **Alt text: done.** Every gallery frame has written alt text (#104, #107, #108, all live). Live check 2026-10-10: 109 /portfolio/ pages plus /headshots, 0 empty alts, 0 gendered words. The 85 empty `cover.jpg` fields are filled from each project's lead frame by `withLeadFrame`, on purpose. `scripts/harvest.mjs` still wipes hand-written alt if it regenerates `work-data.ts`: do not run it without a plan.
 - **Next for me:** campus guides (needs Julian's sign-off on copy), spot-check each new batch, `sameAs` once the Google Business Profile is verified.
