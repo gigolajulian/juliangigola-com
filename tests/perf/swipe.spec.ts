@@ -51,6 +51,21 @@ for (const path of SWIPE_PAGES) {
           await page.waitForTimeout(2500);
           test.skip(!(await awake(page)), "window throttled by macOS (covered, or its display asleep)");
 
+          /* Firefox compiles its WebRender shaders the first time it draws
+             each screen, and Playwright hands it a new profile every launch,
+             so a cold first swipe stalls on that (about 500ms) with the page
+             idle. One untimed pass in the same browser warms it, then a
+             fresh load times what a returning visitor sees. */
+          if (browserName === "firefox" && !stacked(v)) {
+            for (const sign of PLAN) {
+              if (v.touch) await touchSwipe(page, v.width * (sign > 0 ? 0.8 : 0.35), v.width * (sign > 0 ? 0.35 : 0.8), 160);
+              else await wheelFlick(page, sign);
+              await settle(page);
+            }
+            await page.goto(path, { waitUntil: "load" });
+            await page.waitForTimeout(2500);
+          }
+
           const home = path === "/";
           const landed: string[] = [];
           const misses: string[] = [];
