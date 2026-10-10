@@ -1110,7 +1110,7 @@ export const PROJECTS: Project[] = [
         "width": 2500,
         "height": 3333,
         "color": "#C4B8B1",
-        "alt": "Head resting on her folded arms on the floor, face in profile, gold hoop earring, soft light"
+        "alt": "Head resting on her folded arms on the floor, face in profile, gold hoop earring, on white"
       }
     ]
   },
