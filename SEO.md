@@ -30,7 +30,7 @@ blocked. The terms name Google as the text-only exception.
 
 1. Campus guides: "Best spots for SJSU grad photos", then SCU and SF State. Live before January for spring commencement. Copy needs Julian's sign-off.
 2. After the Google Business Profile is verified: add it (and Yelp) to `sameAs` in the structured data, and a "Leave a review" link.
-3. Written descriptions for the ~1,200 gallery photos that only have generated alt text. **In progress with jg-CONTENT** (branch `content`, `alt` fields in `lib/work-data.ts`): 81 frames done and cleared, head 9e7b982, waiting on jg-RELEASE to merge. Rules: one sentence, 8 to 18 words, what the frame shows only (the site appends project, discipline and credits), no skin or body.
+3. Written descriptions for the ~1,200 gallery photos that only have generated alt text. **In progress with jg-CONTENT** (branch `content`, `alt` fields in `lib/work-data.ts`): 559 fields written and cleared against main, head 6beb71f, waiting on jg-RELEASE to merge; 573 still empty, paused by Julian ("later"). Rules: one sentence, 8 to 18 words, what the frame shows only (the site appends project, discipline and credits), no skin or body.
 4. Session links wrap under "Book a session" at 1280px wide (layout, not ranking).
 
 ## Julian only
