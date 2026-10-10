@@ -2608,91 +2608,91 @@ export const PROJECTS: Project[] = [
         "width": 2499,
         "height": 3124,
         "color": "#0C260C",
-        "alt": ""
+        "alt": "Leaning on a CRT in a cyan triangle of light, dark blue room, looking at the lens"
       },
       {
         "src": "/work/cyber1a/03.jpg",
         "width": 2499,
         "height": 2856,
         "color": "#D9D9D9",
-        "alt": ""
+        "alt": "Two women posing around stacked CRTs showing CYBERIA, one arched back, wood floor, pale wall"
       },
       {
         "src": "/work/cyber1a/04.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#D9D9F3",
-        "alt": ""
+        "alt": "Two seated women among stacked CRTs showing glitch images, green light on the floor"
       },
       {
         "src": "/work/cyber1a/05.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#0C260C",
-        "alt": ""
+        "alt": "Two women leaning on a CRT showing CYBERIA, a stack of screens behind, cool light"
       },
       {
         "src": "/work/cyber1a/06.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#0C260C",
-        "alt": ""
+        "alt": "Two women close to the lens in sunglasses and black tops, one reaching a hand toward it"
       },
       {
         "src": "/work/cyber1a/07.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#0C260C",
-        "alt": ""
+        "alt": "Seated on a CRT in a black patent jacket, a screen stack behind, orange wall, blue light"
       },
       {
         "src": "/work/cyber1a/08.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#0C260C",
-        "alt": ""
+        "alt": "In a black studded jacket beside a stack of glitching CRTs, teal light"
       },
       {
         "src": "/work/cyber1a/09.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#0C260C",
-        "alt": ""
+        "alt": "Seated in a black jacket with a glittering chain, smoke and teal beam, CRT stack behind"
       },
       {
         "src": "/work/cyber1a/10.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#0C260C",
-        "alt": ""
+        "alt": "Standing small in a black jacket beside a tall stack of CRTs, smoke in a teal beam"
       },
       {
         "src": "/work/cyber1a/11.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#0C260C",
-        "alt": ""
+        "alt": "Fractured mirror-like reflection of her face in dark teal, CRT scan lines across the frame"
       },
       {
         "src": "/work/cyber1a/12.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#C02659",
-        "alt": ""
+        "alt": "Motion-blurred seated figure in a fur coat against a red wall and blue-lit CRTs"
       },
       {
         "src": "/work/cyber1a/13.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#260C26",
-        "alt": ""
+        "alt": "Seated on a CRT in a mesh-sleeved top and platform shoes, red wall, glowing screens"
       },
       {
         "src": "/work/cyber1a/14.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#400C26",
-        "alt": ""
+        "alt": "Seated on a glowing CRT in a fur coat and fishnets, red wall, face lifted"
       }
     ]
   },
