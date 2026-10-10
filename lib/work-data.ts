@@ -5772,231 +5772,231 @@ export const PROJECTS: Project[] = [
         "width": 2499,
         "height": 3333,
         "color": "#18191D",
-        "alt": ""
+        "alt": "Person in an open black short-sleeve shirt with large white lettering, jeans, concrete garage, a figure behind"
       },
       {
         "src": "/work/nabu/02.jpg",
         "width": 2499,
         "height": 3331,
         "color": "#0B0D10",
-        "alt": ""
+        "alt": "Two people walk away through a dark parking garage, black shirts, white star emblem on the back"
       },
       {
         "src": "/work/nabu/03.jpg",
         "width": 2499,
         "height": 3333,
         "color": "#070A0F",
-        "alt": ""
+        "alt": "Person gripping the collar of a black short-sleeve shirt, paisley shorts, white sneakers, a second person beside"
       },
       {
         "src": "/work/nabu/04.jpg",
         "width": 2499,
         "height": 1562,
         "color": "#01050A",
-        "alt": ""
+        "alt": "Two people leaning on a concrete wall in black shirts with white lettering, hard overhead light"
       },
       {
         "src": "/work/nabu/05.jpg",
         "width": 2499,
         "height": 3331,
         "color": "#1F1E20",
-        "alt": ""
+        "alt": "Two people against a concrete wall in black short-sleeve shirts, paisley shorts, jeans and white sneakers"
       },
       {
         "src": "/work/nabu/06.jpg",
         "width": 2499,
         "height": 3333,
         "color": "#1A1A1D",
-        "alt": ""
+        "alt": "Seen from behind, black shirt with a large white star emblem, loose jeans, concrete wall"
       },
       {
         "src": "/work/nabu/07.jpg",
         "width": 2499,
         "height": 3333,
         "color": "#111216",
-        "alt": ""
+        "alt": "Standing against a concrete wall in an open black shirt over a bralette top, loose jeans"
       },
       {
         "src": "/work/nabu/08.jpg",
         "width": 2499,
         "height": 3333,
         "color": "#15161A",
-        "alt": ""
+        "alt": "Profile in a black short-sleeve shirt with a yellow sleeve patch and white lettering, concrete wall"
       },
       {
         "src": "/work/nabu/09.jpg",
         "width": 2499,
         "height": 3333,
         "color": "#0A0D13",
-        "alt": ""
+        "alt": "Seen from behind against a concrete wall, black shirt with a white star emblem, paisley shorts, sneakers"
       },
       {
         "src": "/work/nabu/10.jpg",
         "width": 2499,
         "height": 3331,
         "color": "#3D3735",
-        "alt": ""
+        "alt": "Standing in a black short-sleeve shirt, paisley shorts and white sneakers, concrete wall, hard light"
       },
       {
         "src": "/work/nabu/11.jpg",
         "width": 2499,
         "height": 1562,
         "color": "#11151F",
-        "alt": ""
+        "alt": "Two people in the front seats of a dark car, black shirts, one with hands on the wheel"
       },
       {
         "src": "/work/nabu/12.jpg",
         "width": 2499,
         "height": 3331,
         "color": "#2D2E37",
-        "alt": ""
+        "alt": "Leaning on a rooftop parking wall at dusk in a black shirt, city buildings and pale sky behind"
       },
       {
         "src": "/work/nabu/13.jpg",
         "width": 2499,
         "height": 3331,
         "color": "#2D323F",
-        "alt": ""
+        "alt": "Leaning on a concrete wall in a black shirt with a yellow sleeve patch, dusk sky, city behind"
       },
       {
         "src": "/work/nabu/14.jpg",
         "width": 2499,
         "height": 3333,
         "color": "#546D93",
-        "alt": ""
+        "alt": "Low angle, two people on a rooftop in black shirts, paisley shorts and loose jeans, dusk sky"
       },
       {
         "src": "/work/nabu/15.jpg",
         "width": 2499,
         "height": 3333,
         "color": "#8692B2",
-        "alt": ""
+        "alt": "Low angle, hand on the hip in an oversized black shirt and jeans, looking up, dusk sky"
       },
       {
         "src": "/work/nabu/16.jpg",
         "width": 2499,
         "height": 3333,
         "color": "#7A87A2",
-        "alt": ""
+        "alt": "Two people at a rooftop wall, one facing the lens, one turned away showing a white star emblem"
       },
       {
         "src": "/work/nabu/17.jpg",
         "width": 2499,
         "height": 3331,
         "color": "#A0ADCC",
-        "alt": ""
+        "alt": "Low angle, seated on a rooftop in a black shirt and grey trousers, sun flaring behind"
       },
       {
         "src": "/work/nabu/18.jpg",
         "width": 2499,
         "height": 3333,
         "color": "#ACB6D1",
-        "alt": ""
+        "alt": "Low angle, standing in a black shirt, grey trousers and white sneakers, rooftop lot, sunset"
       },
       {
         "src": "/work/nabu/19.jpg",
         "width": 2499,
         "height": 3333,
         "color": "#ECEBF5",
-        "alt": ""
+        "alt": "Leaning on a concrete pillar by cable railings, black shirt, jeans, white sneakers, pale sky"
       },
       {
         "src": "/work/nabu/20.jpg",
         "width": 2499,
         "height": 3333,
         "color": "#988270",
-        "alt": ""
+        "alt": "Two people from behind on a path in tan shirts with white star emblems, shorts and jeans"
       },
       {
         "src": "/work/nabu/21.jpg",
         "width": 2499,
         "height": 3331,
         "color": "#3D4020",
-        "alt": ""
+        "alt": "Two people in tan short-sleeve shirts among rocks, one seated, one standing in jeans, trees behind"
       },
       {
         "src": "/work/nabu/22.jpg",
         "width": 2499,
         "height": 3331,
         "color": "#0E0F12",
-        "alt": ""
+        "alt": "Seated on a stone ledge in a tan shirt, patterned shorts and tan sneakers, rocky backdrop"
       },
       {
         "src": "/work/nabu/23.jpg",
         "width": 2499,
         "height": 3333,
         "color": "#B2ACA6",
-        "alt": ""
+        "alt": "Two people seated on a stone bench in tan shirts, patterned shorts and jeans, trees behind"
       },
       {
         "src": "/work/nabu/24.jpg",
         "width": 2499,
         "height": 3333,
         "color": "#A4A2A3",
-        "alt": ""
+        "alt": "Reclining on a stone bench in a tan shirt and patterned shorts, trees overhead"
       },
       {
         "src": "/work/nabu/25.jpg",
         "width": 2499,
         "height": 3333,
         "color": "#E5E2EC",
-        "alt": ""
+        "alt": "Leaning against a tree-lined wall in a tan shirt with a white star emblem, jeans, trees behind"
       },
       {
         "src": "/work/nabu/26.jpg",
         "width": 2499,
         "height": 3331,
         "color": "#C0C4DB",
-        "alt": ""
+        "alt": "Standing in a tan shirt, patterned shorts and tan sneakers, head down, a low stone wall behind"
       },
       {
         "src": "/work/nabu/27.jpg",
         "width": 2499,
         "height": 3331,
         "color": "#D4CDCF",
-        "alt": ""
+        "alt": "Seated on a stone wall in a tan shirt and patterned shorts, tan sneakers, trees behind"
       },
       {
         "src": "/work/nabu/28.jpg",
         "width": 2499,
         "height": 3331,
         "color": "#171614",
-        "alt": ""
+        "alt": "Seated on rocks in a tan shirt and loose jeans, one arm raised on a boulder, greenery behind"
       },
       {
         "src": "/work/nabu/29.jpg",
         "width": 2499,
         "height": 3333,
         "color": "#0F1310",
-        "alt": ""
+        "alt": "Low angle, seated wide in a tan shirt and baggy jeans, stone wall and trees behind"
       },
       {
         "src": "/work/nabu/30.jpg",
         "width": 2499,
         "height": 3333,
         "color": "#23241A",
-        "alt": ""
+        "alt": "Two people near a stone arch among rocks, tan shirts, jeans, one raised, trees behind"
       },
       {
         "src": "/work/nabu/31.jpg",
         "width": 2499,
         "height": 3333,
         "color": "#393324",
-        "alt": ""
+        "alt": "Two people among rocks, one seated in tan shirt and jeans, one from behind with a star emblem"
       },
       {
         "src": "/work/nabu/32.jpg",
         "width": 2499,
         "height": 3331,
         "color": "#59493B",
-        "alt": ""
+        "alt": "Seated on rocks in a tan shirt over a white top, loose jeans, yellow sleeve patch, direct gaze"
       },
       {
         "src": "/work/nabu/33.jpg",
         "width": 2499,
         "height": 3333,
         "color": "#DBDAD7",
-        "alt": ""
+        "alt": "Seen from behind in a tan shirt with a large white star emblem, rock wall and trees"
       },
       {
         "src": "/work/nabu/34.jpg",
