@@ -2273,42 +2273,42 @@ export const PROJECTS: Project[] = [
         "width": 2499,
         "height": 3124,
         "color": "#260C26",
-        "alt": ""
+        "alt": "Crouched low in black latex gloves and boots, one hand on the floor, a pink glowing backdrop"
       },
       {
         "src": "/work/coral-synthmorph/02.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#F38CC0",
-        "alt": ""
+        "alt": "Heavily motion-blurred portrait in pink light, dark hair across her face, white top"
       },
       {
         "src": "/work/coral-synthmorph/03.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#D9738C",
-        "alt": ""
+        "alt": "Standing in a sheer grey bodysuit, wet hair long, wrapped in hazy pink light"
       },
       {
         "src": "/work/coral-synthmorph/04.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#734040",
-        "alt": ""
+        "alt": "Profile with a black glove at her cheek, star sticker by her eye, clear-framed glasses, pink backdrop"
       },
       {
         "src": "/work/coral-synthmorph/05.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#594040",
-        "alt": ""
+        "alt": "Head tipped down, wet hair in loose braids, star sticker over one eye, black glove at the edge"
       },
       {
         "src": "/work/coral-synthmorph/06.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#C08C8C",
-        "alt": ""
+        "alt": "Both gloved hands raised to her head, tinted glasses, grey WET bodysuit, rose backdrop"
       }
     ]
   },
