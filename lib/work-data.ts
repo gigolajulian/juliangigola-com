@@ -4699,7 +4699,7 @@ export const PROJECTS: Project[] = [
         "width": 2499,
         "height": 3124,
         "color": "#260C0C",
-        "alt": "Wide red room, seated at a keyboard on a couch, a table of candles and drinks, balloons"
+        "alt": "Wide red room, seated on a couch beside a keyboard, balloons and a table of drinks and confetti"
       },
       {
         "src": "/work/l3na/25.jpg",
