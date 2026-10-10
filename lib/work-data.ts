@@ -1981,133 +1981,133 @@ export const PROJECTS: Project[] = [
         "width": 2499,
         "height": 3123,
         "color": "#E5F8FD",
-        "alt": ""
+        "alt": "Three coupes drive in line on a hill road at low sun, golden grass on both sides"
       },
       {
         "src": "/work/automotive/02.jpg",
         "width": 2499,
         "height": 3125,
         "color": "#FEFEFE",
-        "alt": ""
+        "alt": "Rear view of a grey coupe with round red taillights and a wing, low sun glowing behind it"
       },
       {
         "src": "/work/automotive/03.jpg",
         "width": 2429,
         "height": 3641,
         "color": "#C4DCE3",
-        "alt": ""
+        "alt": "Two coupes on an empty hill road at dusk, taillights lit, a faint moon above"
       },
       {
         "src": "/work/automotive/04.jpg",
         "width": 2499,
         "height": 3125,
         "color": "#B2C5C6",
-        "alt": ""
+        "alt": "Three coupes on a curving hill road under a pink dusk sky, headlights on"
       },
       {
         "src": "/work/automotive/05.jpg",
         "width": 2499,
         "height": 3125,
         "color": "#1B1B1D",
-        "alt": ""
+        "alt": "Tight crop on a matte grey hood vent and headlight, gravel pavement below"
       },
       {
         "src": "/work/automotive/06.jpg",
         "width": 2499,
         "height": 3125,
         "color": "#02191B",
-        "alt": ""
+        "alt": "Silver coupe seen from behind on a tree-lined road, motion-blurred trees at dusk"
       },
       {
         "src": "/work/automotive/07.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#232828",
-        "alt": ""
+        "alt": "White supercar seen from behind in a concrete parking garage, hard window light and shadow"
       },
       {
         "src": "/work/automotive/08.jpg",
         "width": 2499,
         "height": 3123,
         "color": "#1D2122",
-        "alt": ""
+        "alt": "White supercar facing the camera in a garage, headlights on, long shadows across the floor"
       },
       {
         "src": "/work/automotive/09.jpg",
         "width": 2499,
         "height": 3125,
         "color": "#1D2122",
-        "alt": ""
+        "alt": "White supercar from directly behind with red taillights on a dark garage floor"
       },
       {
         "src": "/work/automotive/10.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#1D2223",
-        "alt": ""
+        "alt": "White supercar at a low angle in a parking garage, red brake calipers, dark ceiling"
       },
       {
         "src": "/work/automotive/11.jpg",
         "width": 2499,
         "height": 3125,
         "color": "#192C33",
-        "alt": ""
+        "alt": "White sedan driving on a highway at dusk, motion-blurred road, pale sky above"
       },
       {
         "src": "/work/automotive/12.jpg",
         "width": 2499,
         "height": 3125,
         "color": "#273C41",
-        "alt": ""
+        "alt": "White sedan in side profile in a parking lot, tree line silhouetted against a dusk sky"
       },
       {
         "src": "/work/automotive/13.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#172125",
-        "alt": ""
+        "alt": "White sedan from the front in a lot at dusk, headlights on, trees behind"
       },
       {
         "src": "/work/automotive/14.jpg",
         "width": 2499,
         "height": 3125,
         "color": "#323A36",
-        "alt": ""
+        "alt": "Close on the rear of a white sedan, red LED taillight glowing, dusk sky"
       },
       {
         "src": "/work/automotive/15.jpg",
         "width": 2499,
         "height": 3125,
         "color": "#070606",
-        "alt": ""
+        "alt": "Black sedan at night under a tree, headlights glowing, pavement reflecting light"
       },
       {
         "src": "/work/automotive/16.jpg",
         "width": 2499,
         "height": 1406,
         "color": "#84B3CA",
-        "alt": ""
+        "alt": "Gold wide-body coupe with a rear wing parked in a lot under a cloudy dusk sky"
       },
       {
         "src": "/work/automotive/17.jpg",
         "width": 2499,
         "height": 1406,
         "color": "#787061",
-        "alt": ""
+        "alt": "Long-exposure light trail beside a dark coupe on a road at night, streaked clouds above"
       },
       {
         "src": "/work/automotive/18.jpg",
         "width": 2499,
         "height": 3332,
         "color": "#20263E",
-        "alt": ""
+        "alt": "Matte blue car front corner, a bright headlight, painted concrete floor, shot from above"
       },
       {
         "src": "/work/automotive/19.jpg",
         "width": 2499,
         "height": 1636,
         "color": "#0C0401",
-        "alt": ""
+        "alt": "Dark coupe at night with a headlight flaring, red light trails on the road behind"
       }
     ]
   },
