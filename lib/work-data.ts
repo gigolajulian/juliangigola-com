@@ -7728,49 +7728,49 @@ export const PROJECTS: Project[] = [
         "width": 2499,
         "height": 3124,
         "color": "#0C260C",
-        "alt": ""
+        "alt": "Seated in a black strapless top and long gloves, arms crossed, chain necklace, teal backdrop and white chair"
       },
       {
         "src": "/work/sara/02.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#73F3F3",
-        "alt": ""
+        "alt": "Hands behind the head in a black strapless top and long black gloves, chain necklace, teal light"
       },
       {
         "src": "/work/sara/03.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#262626",
-        "alt": ""
+        "alt": "Chin on a fist, bare shoulder, chain necklace, black top, smoke drifting across a teal backdrop"
       },
       {
         "src": "/work/sara/04.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#D9F3F3",
-        "alt": ""
+        "alt": "Head tilted toward the lens, black strapless top, chain necklaces, teal backdrop, side light"
       },
       {
         "src": "/work/sara/05.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#A6F3F3",
-        "alt": ""
+        "alt": "Hands on the chest in a black lace long-sleeve top and leather trousers, pale teal haze"
       },
       {
         "src": "/work/sara/06.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#A6F3F3",
-        "alt": ""
+        "alt": "Hand on the hip in a black lace long-sleeve crop top, hair in a bun, teal haze"
       },
       {
         "src": "/work/sara/07.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#0C260C",
-        "alt": ""
+        "alt": "Close portrait with an arm raised behind the head, black long-sleeve top, gold earring, purple backdrop"
       },
       {
         "src": "/work/sara/08.jpg",
@@ -7784,133 +7784,133 @@ export const PROJECTS: Project[] = [
         "width": 2499,
         "height": 3124,
         "color": "#260C40",
-        "alt": ""
+        "alt": "Seated on a white chair hugging the knees, black boots and dark layers, purple haze"
       },
       {
         "src": "/work/sara/10.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#260C26",
-        "alt": ""
+        "alt": "Seated sideways on a white chair looking back, black strapless top and boots, purple smoke"
       },
       {
         "src": "/work/sara/11.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#A68CD9",
-        "alt": ""
+        "alt": "Leaning back on a chair with an arm over the head, black top, shorts and boots, purple light"
       },
       {
         "src": "/work/sara/12.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#8C73C0",
-        "alt": ""
+        "alt": "Reclining on a chair with one arm raised, black strapless top and boots, purple and pink haze"
       },
       {
         "src": "/work/sara/13.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#D98CC0",
-        "alt": ""
+        "alt": "Kneeling on a white floor with a hand planted, black halter top, pink and magenta light"
       },
       {
         "src": "/work/sara/14.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#404040",
-        "alt": ""
+        "alt": "Seated with one arm raised, black halter top and chunky boots, blue and red smoke"
       },
       {
         "src": "/work/sara/15.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#404059",
-        "alt": ""
+        "alt": "Seated hugging a knee in chunky black boots, red light on one side and blue on the other"
       },
       {
         "src": "/work/sara/16.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#735959",
-        "alt": ""
+        "alt": "Seated with crossed ankles in a black bodysuit and chunky boots, blue and red haze"
       },
       {
         "src": "/work/sara/17.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#405973",
-        "alt": ""
+        "alt": "Kneeling with a hand on the head in a black bodysuit and boots, red and blue light"
       },
       {
         "src": "/work/sara/18.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#265973",
-        "alt": ""
+        "alt": "Seated on the floor looking up in a black bodysuit, blue backdrop, red rim light"
       },
       {
         "src": "/work/sara/19.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#260C0C",
-        "alt": ""
+        "alt": "Close portrait in sunglasses and a black zip top with orange piping, a white spotlight circle, orange backdrop"
       },
       {
         "src": "/work/sara/20.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#260C0C",
-        "alt": ""
+        "alt": "Kneeling in a white spotlight circle beside a camera held in a gloved hand, red backdrop, sunglasses"
       },
       {
         "src": "/work/sara/21.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#0C260C",
-        "alt": ""
+        "alt": "Kneeling in a pale spotlight, hand at the head, deep red smoke and an orange glow"
       },
       {
         "src": "/work/sara/22.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#F30C26",
-        "alt": ""
+        "alt": "Crouched on a white light circle in sunglasses and long black sleeves, red and orange backdrop"
       },
       {
         "src": "/work/sara/23.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#0C260C",
-        "alt": ""
+        "alt": "Leaning forward in sunglasses and a black zip top with orange piping, hand on the thigh, red backdrop"
       },
       {
         "src": "/work/sara/24.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#F3C073",
-        "alt": ""
+        "alt": "Seated on the floor in sunglasses, chin on a gloved hand, white light circle, red and orange backdrop"
       },
       {
         "src": "/work/sara/25.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#260C26",
-        "alt": ""
+        "alt": "Seated on a white light circle in smoke, hand at the face, sunglasses, red and orange backdrop"
       },
       {
         "src": "/work/sara/26.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#400C26",
-        "alt": ""
+        "alt": "Kneeling on a white light circle with hands on the thighs, sunglasses, orange and red smoke"
       },
       {
         "src": "/work/sara/27.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#F30C59",
-        "alt": ""
+        "alt": "Kneeling in a pale spotlight in sunglasses and a black sleeved top, hot pink and red backdrop"
       }
     ]
   },
