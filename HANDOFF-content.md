@@ -16,8 +16,8 @@ sentence JSON, then apply it with a rule check. Tools live in the session scratc
 (`sheet.py`, `apply.mjs`). Rebuild them if they're gone, about 30 lines each.
 Check: `npx tsx` a script that calls `getProject(slug)` and prints `images[i].alt`.
 
-Done, one commit each: lost-relic, hua, abril + iris (37 frames).
-Next, in homepage order: novocaine, paradox, relay, diesel, undisputed, decoy, nyx, serif...
+Done, one commit each: lost-relic, hua, abril + iris (37 frames, jg-SEO passed), then novocaine, paradox, relay, diesel (44 frames, build passes).
+Next, in homepage order: undisputed, decoy, nyx, serif, void, aegis...
 Baseline was 1229 empty of 1278.
 
 ## Picks
