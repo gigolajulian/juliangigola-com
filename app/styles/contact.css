@@ -371,3 +371,8 @@
 :root:not([data-theme="light"]) .booking-embed.cal-embed {
   filter: none;
 }
+/* The site's own time picker (`time-picker.tsx`) is drawn in the site's
+   colours, so it is not turned over like the frames. */
+:root:not([data-theme="light"]) .booking-embed.tp {
+  filter: none;
+}

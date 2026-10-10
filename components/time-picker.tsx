@@ -75,7 +75,7 @@ export function TimePicker({
   const [step, setStep] = React.useState<"pick" | "form" | "sending" | "done">("pick");
   const [error, setError] = React.useState("");
   const ruler = React.useRef<HTMLDivElement>(null);
-  const [ghost, setGhost] = React.useState<number | null>(null);
+  const ghost = React.useRef<HTMLSpanElement>(null);
 
   const load = React.useCallback(async () => {
     try {
@@ -252,13 +252,13 @@ export function TimePicker({
   }
 
   return (
-    <div aria-label={title} role="region" className={cn("tp flex min-h-0 flex-col gap-8 overflow-y-auto overscroll-contain p-5 sm:gap-10 sm:p-10", className)}>
+    <div aria-label={title} role="region" className={cn("tp @container flex min-h-0 flex-col gap-8 overflow-x-clip p-5 sm:gap-10 sm:p-10 max-[56rem]:sm:p-6 [@media(max-height:50rem)]:gap-4 [@media(max-height:50rem)]:p-5", className)}>
       {/* the days */}
       <div className="flex flex-col gap-5">
-        <div className="flex items-center justify-between gap-4">
-          <div className="label flex items-center gap-4 text-muted-foreground">
+        <div className="flex items-center justify-between gap-3">
+          <div className="label flex items-center gap-2 whitespace-nowrap text-muted-foreground @md:gap-4">
             <button type="button" aria-label="Earlier" onClick={() => shift(-1)} className="tap-44 px-1 hoverable:hover:text-foreground">&larr;</button>
-            <span className="text-foreground">{view === "week" ? `${MONTHS[week[0].getMonth()]} ${week[0].getDate()}` + (week[6].getMonth() !== week[0].getMonth() ? ` to ${MONTHS[week[6].getMonth()]} ${week[6].getDate()}` : ` to ${week[6].getDate()}`) : `${MONTHS[anchor.getMonth()]} ${anchor.getFullYear()}`}</span>
+            <span className="text-foreground">{view === "week" ? `${MONTHS[week[0].getMonth()].slice(0, 3)} ${week[0].getDate()}` + (week[6].getMonth() !== week[0].getMonth() ? ` to ${MONTHS[week[6].getMonth()].slice(0, 3)} ${week[6].getDate()}` : ` to ${week[6].getDate()}`) : `${MONTHS[anchor.getMonth()]} ${anchor.getFullYear()}`}</span>
             <button type="button" aria-label="Later" onClick={() => shift(1)} className="tap-44 px-1 hoverable:hover:text-foreground">&rarr;</button>
           </div>
           <div className="label flex gap-4">
@@ -283,13 +283,13 @@ export function TimePicker({
                   aria-pressed={on}
                   onClick={() => choose(id, pick.min)}
                   className={cn(
-                    "flex flex-col gap-2 rounded-[6px] border p-2.5 text-left transition-[background-color,color,translate] duration-300 ease-[var(--ease-out-strong)] sm:p-3",
+                    "flex flex-col gap-2 min-w-0 rounded-[6px] border p-1.5 text-left @md:p-2.5 transition-[background-color,color,translate] duration-300 ease-[var(--ease-out-strong)] @xl:p-3",
                     on ? "border-foreground bg-foreground text-background" : "border-border hoverable:hover:-translate-y-0.5",
                     !o.size && "pointer-events-none opacity-30",
                   )}
                 >
                   <span className="label opacity-70">{DAYS[d.getDay()]}</span>
-                  <b className="font-display text-xl leading-none sm:text-3xl">{d.getDate()}</b>
+                  <b className="font-display text-base leading-none @md:text-xl @xl:text-3xl">{d.getDate()}</b>
                   <span aria-hidden className="flex h-3.5 items-end gap-px">
                     {steps.map((m) => (
                       <s key={m} className="w-[3px] max-sm:w-px flex-1 rounded-[1px] bg-current no-underline opacity-55 transition-[height] duration-500" style={{ height: o.has(m) ? 14 : 3 }} />
@@ -303,7 +303,7 @@ export function TimePicker({
         <Fold on={view === "month"}>
           <div className="grid grid-cols-7 gap-1.5 sm:gap-2">
             {DAYS.map((d) => (
-              <span key={d} className="label pb-1 text-muted-foreground">{d[0]}<span className="max-sm:hidden">{d.slice(1)}</span></span>
+              <span key={d} className="label pb-1 text-muted-foreground">{d[0]}<span className="@max-xl:hidden">{d.slice(1)}</span></span>
             ))}
             {month.map((d, i) => {
               if (!d) return <span key={`b${i}`} />;
@@ -318,7 +318,7 @@ export function TimePicker({
                   aria-pressed={on}
                   onClick={() => choose(id, pick.min)}
                   className={cn(
-                    "flex aspect-[1/0.8] flex-col justify-between rounded-[6px] border p-2 text-left transition-[background-color,color,translate] duration-300 ease-[var(--ease-out-strong)] sm:aspect-[1/0.6]",
+                    "flex aspect-[1/0.8] flex-col justify-between rounded-[6px] border p-2 text-left [@media(max-height:50rem)]:aspect-auto [@media(max-height:50rem)]:gap-1 [@media(max-height:50rem)]:p-1.5 transition-[background-color,color,translate] duration-300 ease-[var(--ease-out-strong)] sm:aspect-[1/0.6]",
                     on ? "border-foreground bg-foreground text-background" : "border-border hoverable:hover:-translate-y-0.5",
                     !o.size && "pointer-events-none opacity-30",
                   )}
@@ -335,14 +335,14 @@ export function TimePicker({
       </div>
 
       {/* the time */}
-      <div className="mt-6 flex items-baseline gap-3 sm:mt-8">
-        <div aria-hidden className="font-display flex text-[clamp(4.5rem,13vw,9rem)] leading-[0.85] tabular-nums tracking-[-0.05em]">
+      <div className="mt-6 flex items-baseline gap-3 sm:mt-8 [@media(max-height:50rem)]:mt-2">
+        <div aria-hidden className="font-display flex text-[clamp(3.5rem,22cqw,9rem)] [@media(max-height:50rem)]:text-[clamp(3rem,10cqw,5rem)] leading-[0.85] tabular-nums tracking-[-0.05em]">
           {[...t].map((c, i) => (
             <span key={`${i}${c}`} className="tp-roll inline-block">{c}</span>
           ))}
         </div>
         <span className="label">{ap}</span>
-        <span className="label ml-auto text-right text-muted-foreground">Until<br />{until} {clock(pick.min + length)[1]}</span>
+        <span className="label ml-auto shrink-0 whitespace-nowrap text-right text-muted-foreground">Until<br />{until} {clock(pick.min + length)[1]}</span>
       </div>
 
       {/* the ruler */}
@@ -359,17 +359,17 @@ export function TimePicker({
         onPointerDown={(e) => {
           dragging.current = true;
           e.currentTarget.setPointerCapture(e.pointerId);
+          e.currentTarget.focus({ preventScroll: true }); // stays in focus until you move off it
           const { best } = nearest(e.clientX);
           if (best !== undefined) choose(pick.date, best);
         }}
         onPointerMove={(e) => {
           const { x, best } = nearest(e.clientX);
-          setGhost(x);
+          if (ghost.current) ghost.current.style.translate = `${x}px 0`;
           if (dragging.current && best !== undefined && best !== pick.min) choose(pick.date, best);
         }}
         onPointerUp={() => (dragging.current = false)}
-        onPointerLeave={() => setGhost(null)}
-        className="relative mb-10 mt-2 h-24 cursor-ew-resize touch-none select-none outline-none focus-visible:[&>.ticks]:opacity-100"
+        className="relative mb-10 mt-2 h-24 [@media(max-height:50rem)]:h-16 cursor-ew-resize touch-none select-none outline-none focus-visible:[&>.ticks]:opacity-100"
       >
         <div className="ticks absolute inset-0 flex items-end justify-between">
           {Array.from({ length: Math.round((hi - lo) / (length >= 30 ? length / 2 : length)) + 1 }, (_, i) => {
@@ -387,26 +387,27 @@ export function TimePicker({
                   sel ? "w-0.5" : "",
                 )}
                 style={{
-                  height: sel ? 84 : near ? 62 : slot && !isOpen ? 10 : hour ? 44 : 22,
+                  height: sel ? "88%" : near ? "65%" : slot && !isOpen ? "11%" : hour ? "46%" : "23%",
                   opacity: slot && !isOpen ? 0.22 : 0.9,
                 }}
               />
             );
           })}
         </div>
-        {ghost !== null ? <span aria-hidden className="pointer-events-none absolute inset-y-0 w-px bg-foreground/25" style={{ left: ghost }} /> : null}
-        {Array.from({ length: Math.floor((hi - lo) / 60) + 1 }, (_, i) => lo + i * 60).map((m) => (
-          <span key={m} aria-hidden className="label absolute -bottom-6 -translate-x-1/2 text-[0.625rem] text-muted-foreground" style={{ left: `${((m - lo) / (hi - lo)) * 100}%` }}>
+        <span ref={ghost} aria-hidden className="pointer-events-none absolute inset-y-0 left-0 w-px bg-foreground/25 opacity-0 transition-opacity duration-200 [[role=slider]:hover_&]:opacity-100 [[role=slider]:focus-within_&]:opacity-100" />
+        {Array.from({ length: Math.floor((hi - lo) / 60) + 1 }, (_, i) => lo + i * 60).map((m, i) => (
+          <span key={m} aria-hidden className={cn("label absolute -bottom-6 -translate-x-1/2 whitespace-nowrap text-[0.625rem] text-muted-foreground", i % 2 && "@max-md:hidden")} style={{ left: `${((m - lo) / (hi - lo)) * 100}%` }}>
             {clock(m)[0].replace(":00", "")}
+            <span className={cn(m === lo || m % 720 === 0 ? "" : "max-sm:hidden")}> {clock(m)[1]}</span>
           </span>
         ))}
       </div>
 
       {/* confirm */}
       {step === "pick" ? (
-        <div className="flex items-center justify-between gap-4 border-t border-border pt-6">
+        <div className="sticky bottom-0 z-10 flex flex-col gap-4 border-t border-border pt-6 [@media(max-height:50rem)]:bg-background/80 [@media(max-height:50rem)]:pb-1 [@media(max-height:50rem)]:pt-4 [@media(max-height:50rem)]:backdrop-blur-md @md:flex-row @md:items-center @md:justify-between">
           <span className="label text-muted-foreground">{sum} · {tz.replace(/_/g, " ")}</span>
-          <button type="button" onClick={() => setStep("form")} disabled={!chosen} className="label relative isolate overflow-hidden rounded-[2px] border border-foreground px-6 py-4 transition-[color,opacity] duration-500 before:absolute before:inset-0 before:-z-10 before:-translate-x-[101%] before:bg-foreground before:transition-transform before:duration-500 before:ease-[var(--ease-out-strong)] hoverable:hover:text-background hoverable:hover:before:translate-x-0 active:scale-[0.98] disabled:pointer-events-none disabled:opacity-35">
+          <button type="button" onClick={() => setStep("form")} disabled={!chosen} className="label rounded-[2px] border border-foreground bg-foreground px-6 @max-md:w-full py-4 text-background transition-[opacity,scale] duration-300 hoverable:hover:opacity-85 active:scale-[0.98] disabled:pointer-events-none disabled:opacity-35">
             Confirm this time
           </button>
         </div>
@@ -429,7 +430,7 @@ export function TimePicker({
           <label className="label flex flex-col gap-2 text-muted-foreground">Where, if on location<input name="where" className="border-b border-border bg-transparent py-2 text-base normal-case text-foreground outline-none focus:border-foreground" /></label>
           <label className="label flex flex-col gap-2 text-muted-foreground">Anything I should know<textarea name="notes" rows={2} className="resize-none border-b border-border bg-transparent py-2 text-base normal-case text-foreground outline-none focus:border-foreground" /></label>
           {error ? <p role="alert" className="text-sm normal-case text-foreground">{error}</p> : null}
-          <button type="submit" disabled={step === "sending"} className="label action self-start px-6 py-4 press active:scale-[0.97] disabled:opacity-50">
+          <button type="submit" disabled={step === "sending"} className="label self-start rounded-[2px] border border-foreground bg-foreground px-6 py-4 text-background transition-[opacity,scale] duration-300 hoverable:hover:opacity-85 active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50">
             {step === "sending" ? "Booking" : "Book it"}
           </button>
         </form>
