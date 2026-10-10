@@ -2536,42 +2536,42 @@ export const PROJECTS: Project[] = [
         "width": 2499,
         "height": 3124,
         "color": "#D9D9D9",
-        "alt": ""
+        "alt": "Seated on a spread of black cloth in a corset and fishnets, looking at the lens"
       },
       {
         "src": "/work/crave/02.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#262626",
-        "alt": ""
+        "alt": "Kneeling on all fours with her head bowed, long braid hanging, black corset, fishnets"
       },
       {
         "src": "/work/crave/03.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#D9D9D9",
-        "alt": ""
+        "alt": "Screaming with hands at her head, fake fangs, large cross necklace, black corset"
       },
       {
         "src": "/work/crave/04.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#C0C0C0",
-        "alt": ""
+        "alt": "Standing hunched forward, hair swept across her face, cross choker, black corset, fishnets"
       },
       {
         "src": "/work/crave/05.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#C0C0C0",
-        "alt": ""
+        "alt": "Close profile, chin on her hand, pearl choker with a cross, hair blowing across her face"
       },
       {
         "src": "/work/crave/06.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#F3F3F3",
-        "alt": ""
+        "alt": "Kneeling, hand at her chin and mouth open, braids hanging forward, corset and fishnets"
       }
     ]
   },
