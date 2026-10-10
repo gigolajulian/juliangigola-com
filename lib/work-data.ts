@@ -4545,168 +4545,168 @@ export const PROJECTS: Project[] = [
         "width": 2499,
         "height": 3124,
         "color": "#C0D9F3",
-        "alt": ""
+        "alt": "Seated in a white mesh-sleeve top and white cargo pants, sunglasses, long dark hair, deep blue light"
       },
       {
         "src": "/work/l3na/03.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#73A6F3",
-        "alt": ""
+        "alt": "Kneeling in white cargo pants and black sneakers, sunglasses, a pale circle of light on the wall"
       },
       {
         "src": "/work/l3na/04.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#0C260C",
-        "alt": ""
+        "alt": "Seated leaning on one hand in a white mesh top and cargo pants, sunglasses, blue light"
       },
       {
         "src": "/work/l3na/05.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#0C260C",
-        "alt": ""
+        "alt": "Standing in a white mesh top and dark cargo pants, hands at the chest, green spotlit backdrop"
       },
       {
         "src": "/work/l3na/06.jpg",
         "width": 2499,
         "height": 3499,
         "color": "#C0C0C0",
-        "alt": ""
+        "alt": "One arm raised in a sparkling mesh sleeve, peace sign, white spotlight disc behind, teal backdrop"
       },
       {
         "src": "/work/l3na/07.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#0C260C",
-        "alt": ""
+        "alt": "Seated in a mesh sleeve, hand raised toward the camera, white circle of light behind, teal wall"
       },
       {
         "src": "/work/l3na/08.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#260C26",
-        "alt": ""
+        "alt": "Close crop, a hand shielding the face with a green light beam across the eyes, purple backdrop"
       },
       {
         "src": "/work/l3na/09.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#260C26",
-        "alt": ""
+        "alt": "Arm raised overhead in a black top and skirt, a green light bar across the face, purple backdrop"
       },
       {
         "src": "/work/l3na/10.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#73598C",
-        "alt": ""
+        "alt": "Standing with a lean, long hair, black top and skirt, green light on the face, purple backdrop"
       },
       {
         "src": "/work/l3na/11.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#592673",
-        "alt": ""
+        "alt": "Crouched in platform boots and a black dress, a pale spotlight circle behind, purple backdrop"
       },
       {
         "src": "/work/l3na/12.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#0C260C",
-        "alt": ""
+        "alt": "Seated in a black leather outfit beside a CRT, framed art on the wall, loose confetti, blue light"
       },
       {
         "src": "/work/l3na/13.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#0C260C",
-        "alt": ""
+        "alt": "Seated on the floor facing the camera by a glowing CRT, black leather trousers, balloons, blue room"
       },
       {
         "src": "/work/l3na/14.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#0C260C",
-        "alt": ""
+        "alt": "Leaning on one arm, head resting on a hand, black leather outfit, CRT and clear balloon, blue room"
       },
       {
         "src": "/work/l3na/15.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#0C260C",
-        "alt": ""
+        "alt": "Seated with a knee up among balloons, a CRT glowing at left, black leather outfit, blue light"
       },
       {
         "src": "/work/l3na/16.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#265973",
-        "alt": ""
+        "alt": "Holding a camera on a tripod beside a CRT showing a face, balloons, teal light"
       },
       {
         "src": "/work/l3na/17.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#0C260C",
-        "alt": ""
+        "alt": "Seated at the back of a blue room, a pale spotlight behind, a small CRT in the foreground"
       },
       {
         "src": "/work/l3na/18.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#0C260C",
-        "alt": ""
+        "alt": "Dim blue room with a CRT glowing at left, a figure seated in a pale spotlight, balloons"
       },
       {
         "src": "/work/l3na/19.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#590C0C",
-        "alt": ""
+        "alt": "Wide red room, a figure seated on a couch in black leather, a CRT showing a face, balloons"
       },
       {
         "src": "/work/l3na/20.jpg",
         "width": 2499,
         "height": 3499,
         "color": "#260C0C",
-        "alt": ""
+        "alt": "Both hands at the head, black leather jacket over a white top, keyboard and balloons, red light"
       },
       {
         "src": "/work/l3na/21.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#260C0C",
-        "alt": ""
+        "alt": "Seen from above, reclining on black leather cushions with a keyboard and red balloons, red room"
       },
       {
         "src": "/work/l3na/22.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#260C0C",
-        "alt": ""
+        "alt": "Reclining with an arm behind the head, patterned white top, black leather pants, keyboard, red light"
       },
       {
         "src": "/work/l3na/23.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#260C0C",
-        "alt": ""
+        "alt": "Reclining with eyes closed, one arm over the head, patterned top, black leather pants, red balloons"
       },
       {
         "src": "/work/l3na/24.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#260C0C",
-        "alt": ""
+        "alt": "Wide red room, seated at a keyboard on a couch, a table of candles and drinks, balloons"
       },
       {
         "src": "/work/l3na/25.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#260C0C",
-        "alt": ""
+        "alt": "Seated at a keyboard against framed art, balloons and a spotlight on the wall, red light"
       }
     ]
   },
