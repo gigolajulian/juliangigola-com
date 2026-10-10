@@ -84,7 +84,7 @@ function look() {
   const theme = document.documentElement.dataset.theme === "light" ? "light" : "dark";
   const vars = {
     "cal-bg": "transparent",
-    "cal-bg-muted": v("--card"),
+    "cal-bg-muted": "transparent",
     "cal-bg-subtle": v("--muted"),
     "cal-bg-emphasis": v("--muted"),
     "cal-border": v("--border"),
