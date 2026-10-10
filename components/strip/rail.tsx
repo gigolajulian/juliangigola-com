@@ -1,6 +1,5 @@
 import * as React from "react";
 import { cn } from "@/lib/utils";
-import { Liquid, useQuiet } from "@/components/liquid";
 import { useDesk } from "./media";
 import { centreOf } from "./shared";
 import type { Tick } from "./use-reader";
@@ -392,6 +391,7 @@ export function useRail({
   };
 
   return {
+    scroller: scrollerRef,
     rail,
     chaptered,
     nowIn,
@@ -421,6 +421,7 @@ export function useRail({
    the one under the pointer. */
 export function StripRail({
   rail: {
+    scroller,
     rail,
     chaptered,
     nowIn,
@@ -589,7 +590,7 @@ export function StripRail({
         ) : null}
         {/* The drop, on every rail but the archive's (Julian put that
             one back as it was). */}
-        {chaptered ? null : <RailInk rail={rail} />}
+        {chaptered ? null : <RailFollow rail={rail} scroller={scroller} over={over} />}
         {/* Julian: unhovered, the archive's rail is About's one line,
             filled as far as the page has got through the discipline it
             is in. The line is the sections themselves, shrunk; this is
@@ -860,6 +861,7 @@ export function StripRail({
                   ) : null}
                   <span
                     data-ink={i === at ? "" : undefined}
+                    data-mark=""
                     className={cn(
                       /* The position moves from tick to tick without easing
                      its colour, and only the lit tick's height eases up.
@@ -896,97 +898,200 @@ const tintOf = (cells: { tint?: string }[]) => {
   return best;
 };
 
-/* ── the ink in liquid ──
-   Julian: the gooey UI in the scrollbar, sitewide. Where you are on the
-   rail is a drop of the ink (`liquid-gooey`, Move): it sits over the lit
-   tick (`data-ink`), and when that moves the drop runs after
-   it, stretching and trailing a droplet. The lit mark gives up its own
-   ink while the drop is there (`data-goo`, `globals.css`), so there is
-   one mark and not two. Read after every render of the strip and for a
-   beat after, since a chapter opening and the cue move the mark without
-   one. Not for anybody who asked for less motion: the plain ink stays. */
-function RailInk({ rail }: { rail: React.RefObject<HTMLDivElement | null> }) {
+/** The quiet after the last scroll frame that counts as settled. */
+const SETTLE_MS = 120;
+/** How near its screen the page is, as a share of the way, when the drop
+    lets go of the one it left: before the page's ease has run out. */
+const NEAR = 0.05;
+/** How far the drop leans toward a mark under the pointer. */
+const LEAN = 0.25;
+
+/* ── the drop riding the scroll ──
+   Julian asked for the drop to move with the page and keep its liquid.
+   So it is not sent after the lit mark: every frame of the scroll puts
+   it between the two marks the page is between, as far along as the page
+   is. The stretch and the snap are its own (below). It is drawn plainly:
+   `liquid-gooey` traced it on a spring of its own that ran up to 20px
+   behind, the tail reaching back past the mark it was held on, and with
+   its stretch and droplet off it added nothing else (measured
+   2026-10-10). For anybody who asked for less motion there is no stretch
+   and no snap: exactly where the page is, nothing of its own moving. */
+function RailFollow({
+  rail,
+  scroller,
+  over,
+}: {
+  rail: React.RefObject<HTMLDivElement | null>;
+  scroller: React.RefObject<HTMLDivElement | null>;
+  /** The mark under the pointer, which the drop leans toward. */
+  over: number | null;
+}) {
   const box = React.useRef<HTMLSpanElement>(null);
-  const quiet = useQuiet();
-  const [ink, setInk] = React.useState<{
-    x: number;
-    y: number;
-    w: number;
-    h: number;
-  } | null>(null);
+  const drop = React.useRef<HTMLDivElement>(null);
+  const [still] = React.useState(
+    () =>
+      typeof window !== "undefined" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches,
+  );
+  /* Where the page last came to rest, as a mark, and the drop's edges as
+     drawn. Kept across renders. */
+  const home = React.useRef<number | null>(null);
+  const overRef = React.useRef(over);
+  React.useEffect(() => {
+    overRef.current = over;
+  });
+  const edges = React.useRef({ left: 0, right: 0, vl: 0, vr: 0, frame: 0, busy: false });
+  /* After every render as well as on every scroll: a cell arriving, or
+     the lit mark changing, moves the marks under it.
+
+     Julian, 2026-10-10: while the page is moving the drop is a sling
+     being drawn, held on the mark it left and stretched only the way the
+     page is going, to where the page is now. Once the page has settled it
+     lets go and springs onto the mark it landed on, overshooting a little
+     before it sets; a page that went back slings back home. Under less
+     motion there is no stretch and no snap: the drop is where the page is. */
   React.useEffect(() => {
     const r = rail.current;
-    const b = box.current;
-    if (!r || !b) return;
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    let raf = 0;
-    const until = performance.now() + 950;
-    const read = () => {
-      const el = r.querySelector<HTMLElement>("[data-ink]");
-      if (!el) {
-        delete r.dataset.goo;
-        setInk(null);
+    const el = scroller.current;
+    if (!r || !el) return;
+    const e = edges.current;
+    let rest = 0;
+    const draw = () => {
+      const b = box.current;
+      const d = drop.current;
+      const m = r.querySelector<HTMLElement>("[data-mark]");
+      if (!b || !d || !m) return;
+      const o = b.getBoundingClientRect();
+      const ht = 8;
+      d.style.width = `${Math.max(ht, e.right - e.left)}px`;
+      d.style.height = `${ht}px`;
+      d.style.transform = `translate(${e.left - o.left}px, ${m.getBoundingClientRect().bottom - ht - o.top}px)`;
+    };
+    /* The let-go: each edge on a spring to the mark, a little under
+       critical, so it passes the mark and comes back (Apple's 0.8 for a
+       flung drawer; less here, the snap is the point). */
+    const sling = (left: number, right: number) => {
+      cancelAnimationFrame(e.frame);
+      const RESPONSE = 0.24;
+      const ZETA = 0.55;
+      const k = (2 * Math.PI / RESPONSE) ** 2;
+      const c = (4 * Math.PI * ZETA) / RESPONSE;
+      let last = 0;
+      const step = (t: number) => {
+        const dt = last ? Math.min(0.032, (t - last) / 1000) : 1 / 60;
+        last = t;
+        e.vl += (-k * (e.left - left) - c * e.vl) * dt;
+        e.vr += (-k * (e.right - right) - c * e.vr) * dt;
+        e.left += e.vl * dt;
+        e.right += e.vr * dt;
+        const done =
+          Math.abs(e.left - left) + Math.abs(e.right - right) < 0.3 &&
+          Math.abs(e.vl) + Math.abs(e.vr) < 5;
+        if (done) {
+          e.left = left;
+          e.right = right;
+          e.vl = e.vr = 0;
+          e.frame = 0;
+        } else e.frame = requestAnimationFrame(step);
+        draw();
+      };
+      e.frame = requestAnimationFrame(step);
+    };
+    const place = (moving: boolean) => {
+      const marks = Array.from(r.querySelectorAll<HTMLElement>("[data-mark]"));
+      if (!marks.length) return;
+      // Where the scroll puts each marked cell in the middle of the window.
+      const stops = (Array.from(el.children) as HTMLElement[])
+        .flatMap((c, i) => (c.dataset.tick !== undefined ? [i] : []))
+        .map((i) => centreOf(el, i) ?? 0);
+      const x = el.scrollLeft;
+      let k = 0;
+      while (k < stops.length - 2 && stops[k + 1] <= x) k++;
+      const span = (stops[k + 1] ?? stops[k]) - stops[k];
+      const p = span > 0 ? Math.min(1, Math.max(0, (x - stops[k]) / span)) : 0;
+      const a = marks[k].getBoundingClientRect();
+      const z = (marks[k + 1] ?? marks[k]).getBoundingClientRect();
+      // The page's place on the rail, between two marks.
+      const left = a.left + (z.left - a.left) * p;
+      const right = left + a.width + (z.width - a.width) * p;
+      const here = p < 0.5 ? k : Math.min(k + 1, marks.length - 1);
+      const h = home.current !== null ? marks[home.current]?.getBoundingClientRect() : undefined;
+      if (still || !h) {
+        // Less motion, or nothing to hold on to yet: where the page is.
+        home.current = here;
+        cancelAnimationFrame(e.frame);
+        e.frame = 0;
+        Object.assign(e, { left, right, vl: 0, vr: 0 });
+      } else if (moving && Math.min(p, 1 - p) < NEAR && here !== home.current) {
+        /* Nearly there: let go now, onto the mark the page is coming to
+           rest on, rather than once its ease has run out. */
+        home.current = here;
+        const m = marks[here].getBoundingClientRect();
+        sling(m.left, m.right);
+        return;
+      } else if (moving && Math.min(p, 1 - p) < NEAR) {
+        // Let go already, or never left: the snap has it.
+        if (e.frame) return;
+        const m = marks[here].getBoundingClientRect();
+        Object.assign(e, { left: m.left, right: m.right });
+      } else if (moving) {
+        // Drawn: held on the mark it left, reaching the way the page goes.
+        cancelAnimationFrame(e.frame);
+        e.frame = 0;
+        e.vl = e.vr = 0;
+        if (left >= h.left) {
+          e.left = h.left;
+          e.right = Math.max(right, h.right);
+        } else {
+          e.left = left;
+          e.right = h.right;
+        }
+      } else {
+        // Settled: let go, onto the mark the page is on, leaning toward
+        // the mark under the pointer if there is one.
+        home.current = here;
+        const m = marks[here].getBoundingClientRect();
+        let l = m.left;
+        let rr = m.right;
+        const t = overRef.current !== null && overRef.current !== here ? marks[overRef.current] : undefined;
+        if (t) {
+          const q = t.getBoundingClientRect();
+          if (q.left > m.left) rr += (q.right - m.right) * LEAN;
+          else l -= (m.left - q.left) * LEAN;
+        }
+        if (Math.abs(e.left - l) + Math.abs(e.right - rr) > 1 || e.frame) sling(l, rr);
         return;
       }
-      const a = el.getBoundingClientRect();
-      const o = b.getBoundingClientRect();
-      const next = {
-        x: a.left - o.left,
-        y: a.top - o.top,
-        w: a.width,
-        h: a.height,
-      };
-      setInk((p) =>
-        p &&
-        Math.abs(p.x - next.x) +
-          Math.abs(p.y - next.y) +
-          Math.abs(p.w - next.w) +
-          Math.abs(p.h - next.h) <
-          0.5
-          ? p
-          : next,
-      );
-      r.dataset.goo = "";
-      if (performance.now() < until) raf = requestAnimationFrame(read);
+      draw();
     };
-    /* A frame on, not here: read inside the effect, a drop that moved on
-       every render set state on every render, and a fling on All work
-       ran React out of nested updates. */
-    raf = requestAnimationFrame(read);
-    return () => cancelAnimationFrame(raf);
+    const onScroll = () => {
+      e.busy = true;
+      place(true);
+      window.clearTimeout(rest);
+      rest = window.setTimeout(() => {
+        e.busy = false;
+        place(false);
+      }, SETTLE_MS);
+    };
+    const onResize = () => place(false);
+    // A render mid-move (the lit mark changing) is not a landing.
+    if (e.busy) {
+      rest = window.setTimeout(() => {
+        e.busy = false;
+        place(false);
+      }, SETTLE_MS);
+    } else place(false);
+    el.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onResize);
+    return () => {
+      window.clearTimeout(rest);
+      el.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onResize);
+    };
   });
-  React.useEffect(() => () => void delete rail.current?.dataset.goo, [rail]);
   return (
-    <span
-      ref={box}
-      aria-hidden
-      className="pointer-events-none absolute inset-0 z-[5]"
-    >
-      {ink && quiet ? (
-        /* A blur of two: the lit chapter is four pixels tall, and any
-           more ate it down to a wobbling thread. */
-        <Liquid
-          blur={2}
-          contrast={18}
-          fill="var(--foreground)"
-          className="h-full w-full"
-        >
-          {/* Julian: less bounce, as the filter bar's. */}
-          <Liquid.Item effect="move" move={{ wobble: 0.25 }}>
-            <div
-              /* The drop springs to where the mark is and only then
-                 changes size: a chapter shutting took the width at once
-                 and smeared a bar across the rail. */
-              className="absolute left-0 top-0 rounded-full transition-[width,height] duration-300 ease-[var(--ease-out-strong)]"
-              style={{
-                width: ink.w,
-                height: ink.h,
-                transform: `translate(${ink.x}px, ${ink.y}px)`,
-              }}
-            />
-          </Liquid.Item>
-        </Liquid>
-      ) : null}
+    <span ref={box} aria-hidden data-follow="" className="pointer-events-none absolute inset-0 z-[5]">
+      <div ref={drop} className="absolute left-0 top-0 rounded-full bg-foreground" />
     </span>
   );
 }

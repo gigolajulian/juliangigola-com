@@ -621,9 +621,9 @@ h2.contact-title {
   }
 }
 
-/* The rail's ink in liquid (`RailInk`, `strip.tsx`): the drop is the
-   mark, so the mark under it gives up its own ink. */
-[data-goo] [data-ink] {
+/* The rail's drop (`RailFollow`, `strip/rail.tsx`) is the mark, so the
+   lit tick under it gives up its own ink. */
+.rail-line:has([data-follow]) [data-ink] {
   background-color: transparent;
 }
 
