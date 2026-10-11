@@ -68,14 +68,16 @@ const clock = (m: number): [string, string] => {
 };
 
 /* A view that folds shut and open, so Week and Month trade places smoothly. */
-function Fold({ on, children }: { on: boolean; children: React.ReactNode }) {
+/** `fill`: open, it takes the room the picker has to spare, and its
+    children stack so one can be pushed down with `mt-auto`. */
+function Fold({ on, fill, children }: { on: boolean; fill?: boolean; children: React.ReactNode }) {
   return (
     <div
       inert={!on}
       aria-hidden={!on}
-      className={cn("grid transition-[grid-template-rows,opacity] duration-500 ease-[var(--ease-out-strong)]", on ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0")}
+      className={cn("grid transition-[grid-template-rows,opacity] duration-500 ease-[var(--ease-out-strong)]", on ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0", fill && on && "flex-1")}
     >
-      <div className="-m-1 min-h-0 overflow-hidden p-1">{children}</div>
+      <div className={cn("-m-1 min-h-0 overflow-hidden p-1", fill && "flex flex-col")}>{children}</div>
     </div>
   );
 }
@@ -259,14 +261,28 @@ export function TimePicker({
   /* And a week: its big time gives up what the picker overflows by (the
      times in kinds took a row more, past an iPad held sideways). */
   const big = React.useRef<HTMLDivElement>(null);
+  /* The times' width: they keep to one line while every box has room for
+     its time (Julian: a day of half hours was crammed). */
+  const slotsBox = React.useRef<HTMLDivElement>(null);
+  const [slotsW, setSlotsW] = React.useState(0);
+  const picked = !!pick;
+  React.useLayoutEffect(() => {
+    const el = slotsBox.current;
+    if (!el) return;
+    const ro = new ResizeObserver(() => setSlotsW(el.clientWidth));
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [picked]);
   React.useLayoutEffect(() => {
     const el = big.current;
     const tp = el?.closest<HTMLElement>(".tp");
     if (view !== "week" || !el || !tp) return;
     const row = el.parentElement!;
+    const block = row.parentElement!;
     const fit = () => {
       el.style.removeProperty("font-size");
       row.style.removeProperty("display");
+      block.style.removeProperty("display");
       // Twice: the line it sits on does not give back all it shrinks by.
       for (let i = 0; i < 2; i++) {
         const over = tp.scrollHeight - tp.clientHeight;
@@ -275,12 +291,15 @@ export function TimePicker({
       // Smaller than that it is not worth its row: the day over it and the
       // time picked below say the same, as under a month.
       if (tp.scrollHeight > tp.clientHeight) row.style.display = "none";
+      // Still over (a day of half hours on an iPad held sideways): the day
+      // goes too, the bar under the times says it.
+      if (tp.scrollHeight > tp.clientHeight) block.style.display = "none";
     };
     fit();
     const ro = new ResizeObserver(fit);
     ro.observe(tp);
     return () => ro.disconnect();
-  }, [view, pick?.date, days]);
+  }, [view, pick?.date, days, slotsW]);
   const refit = React.useRef(() => {});
   React.useLayoutEffect(() => {
     const grid = monthGrid.current;
@@ -471,9 +490,9 @@ export function TimePicker({
         </div>
       ) : null}
       {/* the days, the time and the ruler fold away once a time is confirmed, so the form fits */}
-      <Fold on={step === "pick"}>
+      <Fold on={step === "pick"} fill>
       {/* the days */}
-      <div className="flex flex-col gap-5">
+      <div className="flex flex-col gap-5 [@media(max-height:50rem)]:gap-3">
         <p className="label text-muted-foreground"><span className="mr-3 text-foreground">01</span>Pick a day</p>
         <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
           <div className="label flex items-center gap-2 whitespace-nowrap text-muted-foreground @md:gap-4">
@@ -564,7 +583,7 @@ export function TimePicker({
       {/* the time. Not under a month: the picked button says it, and a
           six-row month on an iPad or a phone had no room for both. */}
       {view === "week" ? (
-      <div className="mt-10 flex flex-col gap-0.5 sm:mt-12 [@media(max-height:50rem)]:mt-3 [@media(max-height:50rem)]:gap-0">
+      <div className="flex flex-col gap-0.5 pt-10 sm:pt-[var(--tp-top,2.5rem)] [@media(max-height:50rem)]:pt-3 [@media(max-height:50rem)]:gap-0">
         {/* The day over its time, or what to do before one is picked. */}
         <p key={chosen ? pick.date : "none"} className={cn("tp-roll font-display text-[clamp(1.25rem,4.5cqw,var(--tp-day,2.25rem))] uppercase leading-none tracking-[-0.02em]", !chosen && "text-muted-foreground")}>
           {chosen ? `${WEEKDAYS[date.getDay()]}, ${MONTHS[date.getMonth()]} ${date.getDate()}` : "Pick a day, then a time"}
@@ -582,19 +601,29 @@ export function TimePicker({
       ) : null}
 
       {/* the times: the open ones of the day picked, as buttons */}
-      <div className="mt-[var(--tp-gap,1.25rem)] flex flex-col gap-4 pb-4 [@media(max-height:50rem)]:gap-3">
-        <p className="label text-muted-foreground"><span className="mr-3 text-foreground">02</span>Pick a time</p>
+      {/* the gap dial is tuned for the week; a month keeps 1.25rem */}
+      <div ref={slotsBox} className="mt-5 flex flex-col gap-4 pb-6 [@media(max-height:50rem)]:mt-2 [@media(max-height:50rem)]:gap-2" style={view === "week" ? { marginTop: "var(--tp-gap, 2rem)" } : undefined}>
+        <p className="label text-muted-foreground"><span className="mr-3 text-foreground">02</span>Pick a time
+          {/* Under a month there is no day over the times to say whose they
+              are, and the month shown may not hold it (Julian). */}
+          {view === "month" ? <span className="ml-3 text-foreground">{WEEKDAYS[date.getDay()].slice(0, 3)}, {MONTHS[date.getMonth()].slice(0, 3)} {date.getDate()}</span> : null}
+        </p>
         {/* Julian: the times in kinds, morning, afternoon and evening, side
             by side on one line the width of the picker, each named over its
             own and as wide as its share of the times. No AM or PM in the
-            boxes: the kind says it. A kind to a line on a phone. */}
-        <div key={pick.date} className="flex flex-wrap gap-x-6 gap-y-3 @md:flex-nowrap">
-        {PARTS.map(([part, from, to]) => {
-          const list = (days[pick.date] ?? []).filter((x) => minutesOf(x.start) >= from && minutesOf(x.start) < to);
-          return list.length ? (
-          <div key={part} className="flex min-w-0 basis-full flex-col gap-2 @md:basis-0" style={{ flexGrow: list.length }}>
+            boxes: the kind says it. When a box would be under 4.25rem (a day
+            of half hours, a phone), a kind to a line, named to its left past a
+            phone, the boxes on one grid so they line up from kind to kind. */}
+        {(() => {
+        const kinds = PARTS.map(([part, from, to]) => [part, (days[pick.date] ?? []).filter((x) => minutesOf(x.start) >= from && minutesOf(x.start) < to)] as const).filter(([, list]) => list.length);
+        const n = kinds.reduce((t, [, list]) => t + list.length, 0);
+        const line = n * 68 + (n - kinds.length) * 6 + (kinds.length - 1) * 24 <= slotsW;
+        return (
+        <div key={pick.date} className={cn("flex gap-x-6 gap-y-4 [@media(max-height:50rem)]:gap-y-1", !line && "flex-col")}>
+        {kinds.map(([part, list]) => (
+          <div key={part} className={cn("flex min-w-0 flex-col gap-2", line ? "basis-0" : "@md:grid @md:grid-cols-[6.5rem_minmax(0,1fr)] @md:items-baseline @md:gap-x-4")} style={line ? { flexGrow: list.length } : undefined}>
           <span className="label text-muted-foreground">{part}</span>
-          <div className="flex gap-1.5">
+          <div className={line ? "flex gap-1.5" : "grid grid-cols-[repeat(auto-fill,minmax(5rem,1fr))] gap-1.5"}>
           {list.map((x) => {
             const n = (days[pick.date] ?? []).indexOf(x);
             const m = minutesOf(x.start);
@@ -612,6 +641,9 @@ export function TimePicker({
                 className={cn(
                   "tp-rise label min-w-0 flex-1 rounded-[var(--tp-r,6px)] [animation-fill-mode:backwards] border-[0.5px] py-[min(var(--tp-slot,0.75rem),0.625rem)] text-center sm:py-[var(--tp-slot,0.75rem)] tabular-nums transition-[background-color,color,translate] duration-300 ease-[var(--ease-out-strong)] [@media(max-height:50rem)]:py-2",
                   on ? "border-foreground bg-foreground text-background" : "tp-open hoverable:hover:-translate-y-0.5",
+                  // A month and a crowded day: shorter boxes, or the evening
+                  // fell under the bar on an iPad held sideways.
+                  !line && view === "month" && "py-2 sm:py-2 [@media(max-height:50rem)]:py-1.5",
                 )}
               >
                 {h}
@@ -620,9 +652,10 @@ export function TimePicker({
           })}
           </div>
           </div>
-          ) : null;
-        })}
+        ))}
         </div>
+        );
+        })()}
       </div>
       </Fold>
 

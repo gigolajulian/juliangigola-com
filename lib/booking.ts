@@ -391,7 +391,7 @@ export const BOOKING_PAGES: BookingPage[] = [
     description: `Portrait sessions in San Francisco and San Jose: one person and an hour, in the studio or somewhere that says something about you. Ready in ${portraits.turnaround}.`,
     h1: "Portraits in San Francisco & San Jose",
     kicker: "Studio · Location · Editorial",
-    lead: "One person and an hour, in the studio or somewhere that says something about them. A portrait to keep, rather than a headshot to use.",
+    lead: "One hour in the studio or on location, with direction, lighting and edited selects.",
     ...sessionFacts(portraits),
     service: "Portrait photography",
     back: SESSIONS,
