@@ -9,8 +9,15 @@ const pages = {
   campaign: ["Brand & campaign call", "15 minutes about the brief", "/og-campaign.jpg", 1200, 630],
 };
 
+// The four sessions book on the site's own picker; the calls stay on Cal.com here.
+const picker = { portraits: "portraits", graduation: "graduation", headshots: "headshots", digitals: "studio-digitals" };
+
 export default {
   async fetch(request, env) {
+    const path = new URL(request.url).pathname.split("/")[1];
+    // 302, not 301: one line to undo.
+    if (path === "") return Response.redirect("https://juliangigola.com/book", 302);
+    if (Object.hasOwn(picker, path)) return Response.redirect(`https://juliangigola.com/book?session=${picker[path]}`, 302);
     const res = await env.ASSETS.fetch(request);
     const page = pages[new URL(request.url).pathname.split("/")[1]];
     if (!page || !res.headers.get("content-type")?.includes("text/html")) return res;

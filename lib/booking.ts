@@ -391,7 +391,7 @@ export const BOOKING_PAGES: BookingPage[] = [
     description: `Portrait sessions in San Francisco and San Jose: one person and an hour, in the studio or somewhere that says something about you. Ready in ${portraits.turnaround}.`,
     h1: "Portraits in San Francisco & San Jose",
     kicker: "Studio · Location · Editorial",
-    lead: "One person and an hour, in the studio or somewhere that says something about them. A portrait to keep, rather than a headshot to use.",
+    lead: "One hour in the studio or on location, with direction, lighting and edited selects.",
     ...sessionFacts(portraits),
     service: "Portrait photography",
     back: SESSIONS,
@@ -612,3 +612,38 @@ export const bookingHref = (p: BookingPage) => `/${p.slug}`;
 /** The page that books a session in `content/site.json`, if there is one. */
 export const pageForSession = (sessionSlug: string) =>
   BOOKING_PAGES.find((p) => p.session === sessionSlug);
+
+/* ── the homepage booking menu (`?bookhere`) ──────────────────────── */
+
+/** A way to book on the homepage's Sessions screen: a time from a
+    calendar, or for a commission a call or the form. */
+export type MenuItem = {
+  slug: string;
+  name: string;
+  blurb: string;
+  group: "time" | "commission";
+  /** Its own page, for "More on". */
+  page?: string;
+  /** Its Cal.com event: a session's time, or a commission's call. */
+  cal?: string;
+  /** The form's presets, for a commission's "Send details". */
+  form?: { type: string; session?: string };
+};
+
+const callOf = (slug: BookingSlug, name: string, blurb: string): MenuItem => {
+  const p = BOOKING_PAGES.find((x) => x.slug === slug)!;
+  return { slug, name, blurb, group: "commission", page: bookingHref(p), cal: p.book.cal, form: { type: p.book.type, session: p.book.session } };
+};
+
+export const BOOK_MENU: MenuItem[] = [
+  ...SESSION_TYPES.flatMap((s): MenuItem[] => {
+    const cal = calEvent(s.slug);
+    const page = pageForSession(s.slug);
+    return cal ? [{ slug: s.slug, name: s.name, blurb: s.blurb, group: "time", cal, page: page && bookingHref(page) }] : [];
+  }),
+  callOf("weddings", "Weddings", session("weddings").blurb),
+  callOf("music-photography", "Music & artists", "Press photos, cover art and music videos for a release, planned together so it reads as one thing."),
+  callOf("brand-photography", "Brand campaigns", "Campaign imagery from the concept and the art direction to the shoot and the retouch."),
+  // ponytail: no call yet; add `cal: "juliangigola/event-call"` once the event exists in Cal.com.
+  { slug: "events", name: "Event coverage", blurb: "Launches, brand events, concerts and parties, shot as they happen.", group: "commission", page: "/portfolio/events", form: { type: "other" } },
+];

@@ -87,3 +87,25 @@
    that column empty on a tall display. Past this height both documents
    are listed. */
 @custom-variant roomy (@media (min-height: 75rem) and (min-width: 40rem));
+
+/* The booking picker on a short window, where it tightens its gaps and
+   boxes. Not /book's on a desktop: that page is drawn at 80% there
+   instead (Julian, 1280x720: "scale down", `contact.css`), and has the
+   room of a 900px window. */
+@custom-variant tp-short {
+  @media (max-height: 50rem) and (max-width: 63.99rem) {
+    @slot;
+  }
+  @media (max-height: 50rem) and (min-width: 64rem) {
+    &:not(.book-page *) {
+      @slot;
+    }
+  }
+  /* A browser without zoom (Firefox before 126) draws /book full size,
+     so it tightens there too. */
+  @supports not (zoom: 1) {
+    @media (max-height: 50rem) and (min-width: 64rem) {
+      @slot;
+    }
+  }
+}

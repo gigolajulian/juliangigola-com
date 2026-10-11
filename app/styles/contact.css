@@ -350,18 +350,6 @@
 :root:not([data-theme="light"]) .booking-embed {
   filter: invert(0.9) hue-rotate(180deg);
 }
-/* And the page itself takes the inverted calendar's grey, so the
-   frame sits in it rather than as a lighter slab on near black.
-   Exactly what `invert(0.9)` makes of Google's white. */
-/* The wash (`body::before`) as well as the body, or the wash covers it. */
-:root:not([data-theme="light"]) body:has(.book-page),
-:root:not([data-theme="light"]) body:has(.book-page)::before {
-  background: rgb(25 25 25);
-}
-:root[data-theme="light"] body:has(.book-page),
-:root[data-theme="light"] body:has(.book-page)::before {
-  background: rgb(225 227 229);
-}
 /* The calendar fades up each time the session changes. */
 .booking-embed {
   animation: jg-fade-in 500ms var(--ease-out-strong) both;
@@ -375,4 +363,110 @@
    colours, so it is not turned over like the frames. */
 :root:not([data-theme="light"]) .booking-embed.tp {
   filter: none;
+}
+
+/* The time picker's open days: a hairline of the accent, the one touch of
+   colour, so the days that can be booked read before the ones that cannot
+   (`time-picker.tsx`). */
+.tp .tp-open {
+  border-color: color-mix(in oklab, var(--accent) var(--tp-tint, 55%), var(--border));
+}
+
+/* The booking page is one window only side by side, from lg. Stacked
+   under it (an upright iPad) it is taller than the screen, and the
+   strips' lock from 40rem (strip.css) left the times and Confirm out of
+   reach of a finger, with the footer drawn across the card. */
+@media (min-width: 40rem) and (max-width: 63.99rem) {
+  html:has(.book-page[data-quiet-footer]),
+  body:has(.book-page[data-quiet-footer]) {
+    height: auto;
+    overflow: visible;
+  }
+}
+
+/* An earlier or later week or month (`time-picker.tsx`): the new days come
+   in from the side the arrow points to. */
+@keyframes tp-slide {
+  from {
+    opacity: 0;
+    translate: calc(var(--tp-dir) * 2.5rem) 0;
+  }
+}
+.tp [data-slide="1"] {
+  --tp-dir: 1;
+}
+.tp [data-slide="-1"] {
+  --tp-dir: -1;
+}
+.tp :is([data-slide="1"], [data-slide="-1"]) [data-day] {
+  animation: tp-slide 420ms var(--ease-out-strong, cubic-bezier(0.23, 1, 0.32, 1));
+}
+@media (prefers-reduced-motion: reduce) {
+  .tp [data-slide] [data-day] {
+    animation: none;
+  }
+}
+
+/* Julian, 1280x720: "scale down". On a short desktop the whole booking
+   page is drawn at 80%, so it lays out as a 900px-tall window would,
+   rather than squeezing the picker's gaps and boxes to fit. The height
+   is given back so the page still fills the window. */
+@media (min-width: 64rem) and (max-height: 50rem) {
+  .book-page {
+    zoom: 0.8;
+    height: calc(100% / 0.8);
+    /* Julian: the card too large. Narrower here than the dial's 2.2. */
+    --card-w: 1.5fr !important;
+  }
+}
+
+/* The inquiry form in the Sessions booking card (`book-here.tsx`). The
+   card's pane is a size container, so the gaps follow the card's height:
+   close on a laptop, open on a tall screen, the form in the middle. */
+.book-form form {
+  gap: clamp(1rem, 3.2cqh, 2.25rem);
+}
+/* Name and email side by side wherever the card has the width, as on the
+   short screens (`contact-pair`, devices.css), so the form keeps one shape. */
+@container (min-width: 30rem) {
+  .book-form .contact-pair {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.5rem;
+  }
+}
+/* A big screen's card: the whole form set larger, so it fills the card
+   as it does on a laptop rather than sitting small in the middle. */
+@container (min-height: 50rem) and (min-width: 56rem) {
+  .book-form {
+    zoom: 1.2;
+  }
+}
+@container (min-height: 62rem) and (min-width: 70rem) {
+  .book-form {
+    zoom: 1.4;
+  }
+}
+/* A short card: the shoot type as a dropdown beside the question it
+   leads to, rather than six chips on rows of their own. */
+@container (max-height: 38rem) {
+  .book-form form {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: 1.5rem;
+    align-items: end;
+  }
+  .book-form form > * {
+    grid-column: 1 / -1;
+  }
+  .book-form form > fieldset {
+    display: none;
+  }
+  .book-form form > div:has(#field-type) {
+    display: block;
+    grid-column: 1;
+  }
+  .book-form form > .contact-field:has(#field-detail) {
+    grid-column: 2;
+  }
 }

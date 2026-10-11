@@ -7,6 +7,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Liquid, useQuiet } from "@/components/liquid";
 import { RisingTitle } from "@/components/strip-page";
+import { BookHere } from "@/components/book-here";
+import type { MenuItem } from "@/lib/booking";
 import type { Frame } from "@/lib/work-types";
 
 /* ── sessions ─────────────────────────────────────────────────────
@@ -45,7 +47,7 @@ function where(title: string) {
   );
 }
 
-export function SessionsScreen({ sessions }: { sessions: SessionItem[] }) {
+export function SessionsScreen({ sessions, menu }: { sessions: SessionItem[]; menu?: MenuItem[] }) {
   const quiet = useQuiet();
   const router = useRouter();
   const [open, setOpen] = useState(0);
@@ -106,14 +108,23 @@ export function SessionsScreen({ sessions }: { sessions: SessionItem[] }) {
     return () => cancelAnimationFrame(raf);
   }, [hot, open]);
   const current = sessions[open];
+  /* `?bookhere`: the screen as a booking menu (`book-here.tsx`), until
+     Julian says it replaces this one. The section stays the same
+     element, which the strip keeps hold of. */
+  const [here, setHere] = useState(false);
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setHere(new URLSearchParams(window.location.search).has("bookhere"));
+  }, []);
 
   return (
     <section
       data-tick
       data-label="Sessions"
       data-hash="sessions"
-      className="screen-measure relative grid w-full shrink-0 grid-cols-1 items-center gap-10 sessions-screen px-6 py-12 sm:h-full sm:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] sm:gap-x-[clamp(2rem,3.5vw,4rem)] sm:px-10 sm:pb-8 sm:pt-20 short:pb-4 sm:[container-type:size] xl:grid-cols-[auto_auto_minmax(0,1fr)]"
+      className={here && menu ? "screen-measure relative w-full shrink-0 sm:h-full" : "screen-measure relative grid w-full shrink-0 grid-cols-1 items-center gap-10 sessions-screen px-6 py-12 sm:h-full sm:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] sm:gap-x-[clamp(2rem,3.5vw,4rem)] sm:px-10 sm:pb-8 sm:pt-20 short:pb-4 sm:[container-type:size] xl:grid-cols-[auto_auto_minmax(0,1fr)]"}
     >
+      {here && menu ? <BookHere items={menu} photos={Object.fromEntries(sessions.map((s) => [s.slug, s.cover]))} /> : (<>
       {/* With three columns the photograph sits further right (its
           margin, from about 1600px wide) and larger (to 56rem tall); the
           list keeps the plain gap after it, half the space it had. Below
@@ -418,6 +429,7 @@ export function SessionsScreen({ sessions }: { sessions: SessionItem[] }) {
           </Link>
         </div>
       </div>
+      </>)}
     </section>
   );
 }

@@ -19,9 +19,11 @@ Check: `npx tsx` a script that calls `getProject(slug)` and prints `images[i].al
 Rules added since: neutral wording (figure, person, two people), no pronouns or possessives, no
 "same", "second", "tighter" or "closer" openers, each string stands alone, no landmark or street names.
 Run a regex for woman|women|man|men|girl|boy|she|her|hers|his|him|he|lady|male|female over every alt; expect 0.
-Done and checked by jg-SEO through 10a3886. Unchecked: realestate, retro-reverie-vol-01, retro-reverie-vol-02,
-revelo (43 frames, head is the commit after this note). Julian paused the rest on 2026-10-10: "later".
-Remaining: about 570 empty alt fields. Order: homepage-first, then by project (rouge, sage, sago, sara, sols ...).
+Every frame now has alt text. 2026-10-10: rouge to ukiyosunknown (about 570 frames) written this session.
+Landed: 58160d7 (#107). Cleared or in review by jg-SEO: 2c7bcaf and 6a380b4 (see jg-SEO notes).
+The 85 empty `alt` fields left in lib/work-data.ts are every project's `cover.jpg` object. lib/work.ts
+(withLeadFrame, around line 461) fills those from the lead frame, so they stay empty on purpose.
+Do not re-run scripts/harvest.mjs: it wipes the hand-written alt.
 `content` is pushed to origin. Nothing merged or deployed by this thread. jg-RELEASE lands only hashes jg-SEO has cleared.
 Picks: Julian has the 86 cover sheets and has not named any numbers to swap yet.
 Baseline was 1229 empty of 1278.
