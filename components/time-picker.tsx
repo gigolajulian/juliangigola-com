@@ -73,7 +73,10 @@ const clock = (m: number): [string, string] => {
 const overflowOf = (tp: HTMLElement) => {
   const bar = tp.querySelector<HTMLElement>(":scope > .sticky");
   const end = tp.clientHeight - parseFloat(getComputedStyle(tp).paddingBottom);
-  return Math.max(tp.scrollHeight - tp.clientHeight, bar ? Math.ceil(bar.offsetTop + bar.offsetHeight - end - 1) : 0); // 1px: offsets round
+  // Where the picker grows with its times (a service page's call), the
+  // box around it is what clips, so its overflow counts too.
+  const host = tp.parentElement;
+  return Math.max(tp.scrollHeight - tp.clientHeight, host ? host.scrollHeight - host.clientHeight : 0, bar ? Math.ceil(bar.offsetTop + bar.offsetHeight - end - 1) : 0); // 1px: offsets round
 };
 
 /* A view that folds shut and open, so Week and Month trade places smoothly. */
