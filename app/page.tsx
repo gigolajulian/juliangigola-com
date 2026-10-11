@@ -31,7 +31,7 @@ import { ContactScreen } from "@/components/contact-screen";
 import { SessionsScreen } from "@/components/sessions-screen";
 import { ServicesScreen, type Shot } from "@/components/services-screen";
 import { SESSION_TYPES, formatPrice } from "@/lib/sessions";
-import { pageForSession } from "@/lib/booking";
+import { BOOK_MENU, pageForSession } from "@/lib/booking";
 
 /* ── the homepage ─────────────────────────────────────────────────
  * One screen at a time, sideways. Each screen is a whole section rather
@@ -273,6 +273,7 @@ export default function Home() {
               pageTitle: pageForSession(s.slug)?.h1,
             };
           })}
+          menu={BOOK_MENU}
         />
         {/* The wall behind Inquire, where it was behind the last
             screen's doors, and none of it a picture the page already

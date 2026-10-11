@@ -623,6 +623,9 @@ export function TimePicker({
 
       {/* the time. Not under a month: the picked button says it, and a
           six-row month on an iPad or a phone had no room for both. */}
+      {/* Julian: the big day and time too close to the days and to 02. Spare
+          height splits over it and under it, up to 3rem a side. */}
+      {view === "week" ? <div aria-hidden className="shrink-0 grow basis-0" style={{ maxHeight: "3rem" }} /> : null}
       {view === "week" ? (
       <div className="flex flex-col gap-0.5 pt-10 sm:pt-[var(--tp-top,2.5rem)] tp-short:pt-3 tp-short:gap-0">
         {/* The day over its time, or what to do before one is picked. */}
@@ -641,9 +644,12 @@ export function TimePicker({
       </div>
       ) : null}
 
+      {/* the gap dial is tuned for the week; a month keeps 1.25rem. Julian:
+          "lower". The dial is the least; spare height adds up to 3rem. */}
+      {view === "week" ? <div aria-hidden className="shrink-0 grow basis-0" style={{ minHeight: "var(--tp-gap, 2rem)", maxHeight: "calc(var(--tp-gap, 2rem) + 3rem)" }} /> : null}
+
       {/* the times: the open ones of the day picked, as buttons */}
-      {/* the gap dial is tuned for the week; a month keeps 1.25rem */}
-      <div ref={slotsBox} className="mt-5 flex flex-col gap-4 pb-6 tp-short:mt-2 tp-short:gap-2" style={view === "week" ? { marginTop: "var(--tp-gap, 2rem)" } : undefined}>
+      <div ref={slotsBox} className={cn("flex flex-col gap-4 pb-6 tp-short:gap-2", view === "month" && "mt-5 tp-short:mt-2")}>
         <p className="label text-muted-foreground"><span className="mr-3 text-foreground">02</span>Pick a time
           {/* Under a month there is no day over the times to say whose they
               are, and the month shown may not hold it (Julian). */}
