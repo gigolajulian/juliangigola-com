@@ -109,7 +109,8 @@ export default async function BookingPage(props: PageProps<"/[service]">) {
       />
       <Strip
         label={`${page.h1}: what people say, the details and questions and booking. One screen at a time, left and right.`}
-        next={{ href: "/", name: "Home" }}
+        /* No next page: the deck ends at Book (Julian: do not forward
+           to the homepage). */
         paged
         deck="screens"
         bleed
