@@ -33,12 +33,12 @@ export function BookPicker({ sessions, start }: { sessions: Bookable[]; start?: 
   useDialKitStyles();
   const card = useDialKit(
     "Booking card",
-    { width: [2.2, 1, 4, 0.05], height: [53, 30, 80, 0.5], radius: [12, 0, 32, 1] },
+    { width: [2.2, 1, 4, 0.05], height: [47, 30, 80, 0.5], radius: [12, 0, 32, 1] },
     { id: "book-card" },
   );
   const tp = useDialKit(
     "Time picker",
-    { top: [5, 1, 10, 0.25], day: [2.25, 1, 5, 0.05], dayGap: [0.15, -0.6, 1, 0.05], time: [9, 4, 14, 0.25], gap: [1.25, 0, 5, 0.25], slot: [0.75, 0.25, 1.5, 0.05], radius: [6, 0, 24, 1], tint: [55, 0, 100, 1] },
+    { top: [2.5, 1, 10, 0.25], day: [2.25, 1, 5, 0.05], dayGap: [0.15, -0.6, 1, 0.05], time: [9, 4, 14, 0.25], gap: [1.75, 0, 5, 0.25], slot: [0.75, 0.25, 1.5, 0.05], radius: [6, 0, 24, 1], tint: [55, 0, 100, 1] },
     { id: "book-time" },
   );
   const dials = {
@@ -117,7 +117,7 @@ export function BookPicker({ sessions, start }: { sessions: Bookable[]; start?: 
       </div>
       {/* As tall as the calendar is, and no taller, in what the window
           leaves it: only a short one makes it scroll. */}
-      <div className="min-h-[75svh] overflow-hidden lg:min-h-0 rounded-[var(--card-r,12px)] border-[0.5px] border-border lg:h-full lg:max-h-[var(--card-h,53rem)]">
+      <div className="min-h-[75svh] overflow-hidden lg:min-h-0 rounded-[var(--card-r,12px)] border-[0.5px] border-border lg:h-full lg:max-h-[var(--card-h,47rem)]">
         {/* A fresh picker per session: the last one's time may not be open in this one. */}
         <CalEmbed key={current.cal} path={current.cal} title={`Pick a time for ${current.name}`} className="booking-embed block h-full w-full border-0" />
       </div>

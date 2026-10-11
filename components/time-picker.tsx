@@ -261,6 +261,18 @@ export function TimePicker({
   /* And a week: its big time gives up what the picker overflows by (the
      times in kinds took a row more, past an iPad held sideways). */
   const big = React.useRef<HTMLDivElement>(null);
+  /* The times' width: they keep to one line while every box has room for
+     its time (Julian: a day of half hours was crammed). */
+  const slotsBox = React.useRef<HTMLDivElement>(null);
+  const [slotsW, setSlotsW] = React.useState(0);
+  const picked = !!pick;
+  React.useLayoutEffect(() => {
+    const el = slotsBox.current;
+    if (!el) return;
+    const ro = new ResizeObserver(() => setSlotsW(el.clientWidth));
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [picked]);
   React.useLayoutEffect(() => {
     const el = big.current;
     const tp = el?.closest<HTMLElement>(".tp");
@@ -282,7 +294,7 @@ export function TimePicker({
     const ro = new ResizeObserver(fit);
     ro.observe(tp);
     return () => ro.disconnect();
-  }, [view, pick?.date, days]);
+  }, [view, pick?.date, days, slotsW]);
   const refit = React.useRef(() => {});
   React.useLayoutEffect(() => {
     const grid = monthGrid.current;
@@ -566,7 +578,7 @@ export function TimePicker({
       {/* the time. Not under a month: the picked button says it, and a
           six-row month on an iPad or a phone had no room for both. */}
       {view === "week" ? (
-      <div className="flex flex-col gap-0.5 pt-10 sm:pt-[var(--tp-top,5rem)] [@media(max-height:50rem)]:pt-3 [@media(max-height:50rem)]:gap-0">
+      <div className="flex flex-col gap-0.5 pt-10 sm:pt-[var(--tp-top,2.5rem)] [@media(max-height:50rem)]:pt-3 [@media(max-height:50rem)]:gap-0">
         {/* The day over its time, or what to do before one is picked. */}
         <p key={chosen ? pick.date : "none"} className={cn("tp-roll font-display text-[clamp(1.25rem,4.5cqw,var(--tp-day,2.25rem))] uppercase leading-none tracking-[-0.02em]", !chosen && "text-muted-foreground")}>
           {chosen ? `${WEEKDAYS[date.getDay()]}, ${MONTHS[date.getMonth()]} ${date.getDate()}` : "Pick a day, then a time"}
@@ -584,19 +596,25 @@ export function TimePicker({
       ) : null}
 
       {/* the times: the open ones of the day picked, as buttons */}
-      <div className="mt-[var(--tp-gap,1.25rem)] flex flex-col gap-4 pb-4 [@media(max-height:50rem)]:gap-3">
+      {/* the gap dial is tuned for the week; a month keeps 1.25rem */}
+      <div ref={slotsBox} className={cn("flex flex-col gap-4 pb-4 [@media(max-height:50rem)]:gap-3", view === "week" ? "mt-[var(--tp-gap,1.75rem)]" : "mt-5")}>
         <p className="label text-muted-foreground"><span className="mr-3 text-foreground">02</span>Pick a time</p>
         {/* Julian: the times in kinds, morning, afternoon and evening, side
             by side on one line the width of the picker, each named over its
             own and as wide as its share of the times. No AM or PM in the
-            boxes: the kind says it. A kind to a line on a phone. */}
-        <div key={pick.date} className="flex flex-wrap gap-x-6 gap-y-3 @md:flex-nowrap">
-        {PARTS.map(([part, from, to]) => {
-          const list = (days[pick.date] ?? []).filter((x) => minutesOf(x.start) >= from && minutesOf(x.start) < to);
-          return list.length ? (
-          <div key={part} className="flex min-w-0 basis-full flex-col gap-2 @md:basis-0" style={{ flexGrow: list.length }}>
+            boxes: the kind says it. When a box would be under 4.25rem (a day
+            of half hours, a phone), a kind to a line, the boxes on one grid
+            so they line up from kind to kind. */}
+        {(() => {
+        const kinds = PARTS.map(([part, from, to]) => [part, (days[pick.date] ?? []).filter((x) => minutesOf(x.start) >= from && minutesOf(x.start) < to)] as const).filter(([, list]) => list.length);
+        const n = kinds.reduce((t, [, list]) => t + list.length, 0);
+        const line = n * 68 + (n - kinds.length) * 6 + (kinds.length - 1) * 24 <= slotsW;
+        return (
+        <div key={pick.date} className={cn("flex gap-x-6 gap-y-4 [@media(max-height:50rem)]:gap-y-2", !line && "flex-col")}>
+        {kinds.map(([part, list]) => (
+          <div key={part} className={cn("flex min-w-0 flex-col gap-2", line && "basis-0")} style={line ? { flexGrow: list.length } : undefined}>
           <span className="label text-muted-foreground">{part}</span>
-          <div className="flex gap-1.5">
+          <div className={line ? "flex gap-1.5" : "grid grid-cols-[repeat(auto-fill,minmax(5rem,1fr))] gap-1.5"}>
           {list.map((x) => {
             const n = (days[pick.date] ?? []).indexOf(x);
             const m = minutesOf(x.start);
@@ -622,9 +640,10 @@ export function TimePicker({
           })}
           </div>
           </div>
-          ) : null;
-        })}
+        ))}
         </div>
+        );
+        })()}
       </div>
       </Fold>
 
