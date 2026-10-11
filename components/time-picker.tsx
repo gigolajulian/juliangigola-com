@@ -603,7 +603,11 @@ export function TimePicker({
       {/* the times: the open ones of the day picked, as buttons */}
       {/* the gap dial is tuned for the week; a month keeps 1.25rem */}
       <div ref={slotsBox} className="mt-5 flex flex-col gap-4 pb-6 [@media(max-height:50rem)]:gap-3" style={view === "week" ? { marginTop: "var(--tp-gap, 2rem)" } : undefined}>
-        <p className="label text-muted-foreground"><span className="mr-3 text-foreground">02</span>Pick a time</p>
+        <p className="label text-muted-foreground"><span className="mr-3 text-foreground">02</span>Pick a time
+          {/* Under a month there is no day over the times to say whose they
+              are, and the month shown may not hold it (Julian). */}
+          {view === "month" ? <span className="ml-3 text-foreground">{WEEKDAYS[date.getDay()].slice(0, 3)}, {MONTHS[date.getMonth()].slice(0, 3)} {date.getDate()}</span> : null}
+        </p>
         {/* Julian: the times in kinds, morning, afternoon and evening, side
             by side on one line the width of the picker, each named over its
             own and as wide as its share of the times. No AM or PM in the
