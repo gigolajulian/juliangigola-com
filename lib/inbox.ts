@@ -34,7 +34,7 @@ export type Enquiry = {
   read: boolean;
   /** Two-letter country from Cloudflare, where it was given. Never the IP. */
   country?: string;
-  /** Julian's frames the visitor picked as references, as `/work/...` paths. */
+  /** Julian's frames the visitor picked as references, as `/work/`, `/hero/` or `/covers/` paths. */
   picks?: string[];
   /** Names of the images they uploaded. The images go with the email. */
   files?: string[];
