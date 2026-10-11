@@ -492,7 +492,7 @@ export function TimePicker({
       {/* the days, the time and the ruler fold away once a time is confirmed, so the form fits */}
       <Fold on={step === "pick"} fill>
       {/* the days */}
-      <div className="flex flex-col gap-5">
+      <div className="flex flex-col gap-5 [@media(max-height:50rem)]:gap-3">
         <p className="label text-muted-foreground"><span className="mr-3 text-foreground">01</span>Pick a day</p>
         <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
           <div className="label flex items-center gap-2 whitespace-nowrap text-muted-foreground @md:gap-4">
@@ -602,7 +602,7 @@ export function TimePicker({
 
       {/* the times: the open ones of the day picked, as buttons */}
       {/* the gap dial is tuned for the week; a month keeps 1.25rem */}
-      <div ref={slotsBox} className="mt-5 flex flex-col gap-4 pb-6 [@media(max-height:50rem)]:gap-3" style={view === "week" ? { marginTop: "var(--tp-gap, 2rem)" } : undefined}>
+      <div ref={slotsBox} className="mt-5 flex flex-col gap-4 pb-6 [@media(max-height:50rem)]:mt-3 [@media(max-height:50rem)]:gap-2" style={view === "week" ? { marginTop: "var(--tp-gap, 2rem)" } : undefined}>
         <p className="label text-muted-foreground"><span className="mr-3 text-foreground">02</span>Pick a time
           {/* Under a month there is no day over the times to say whose they
               are, and the month shown may not hold it (Julian). */}
@@ -619,7 +619,7 @@ export function TimePicker({
         const n = kinds.reduce((t, [, list]) => t + list.length, 0);
         const line = n * 68 + (n - kinds.length) * 6 + (kinds.length - 1) * 24 <= slotsW;
         return (
-        <div key={pick.date} className={cn("flex gap-x-6 gap-y-4 [@media(max-height:50rem)]:gap-y-2", !line && "flex-col")}>
+        <div key={pick.date} className={cn("flex gap-x-6 gap-y-4 [@media(max-height:50rem)]:gap-y-1", !line && "flex-col")}>
         {kinds.map(([part, list]) => (
           <div key={part} className={cn("flex min-w-0 flex-col gap-2", line ? "basis-0" : "@md:grid @md:grid-cols-[6.5rem_minmax(0,1fr)] @md:items-baseline @md:gap-x-4")} style={line ? { flexGrow: list.length } : undefined}>
           <span className="label text-muted-foreground">{part}</span>

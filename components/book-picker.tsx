@@ -61,7 +61,7 @@ export function BookPicker({ sessions, start }: { sessions: Bookable[]; start?: 
          the page held to the screen, as the portfolio is
          (`[data-quiet-footer]`, globals.css). */
       data-quiet-footer
-      className="book-page mx-auto grid w-full max-w-[110rem] gap-8 px-6 pb-16 pt-28 sm:px-10 lg:h-full lg:min-h-0 lg:items-center lg:pb-6 lg:pt-24 lg:grid-cols-[minmax(0,1fr)_minmax(0,var(--card-w,2.2fr))] lg:gap-[clamp(2rem,4vw,5rem)]"
+      className="book-page mx-auto grid w-full max-w-[110rem] gap-8 px-6 pb-16 pt-28 sm:px-10 lg:h-full lg:min-h-0 lg:grid-rows-[minmax(0,1fr)] lg:items-center lg:pb-6 lg:pt-24 lg:grid-cols-[minmax(0,1fr)_minmax(0,var(--card-w,2.2fr))] lg:gap-[clamp(2rem,4vw,5rem)]"
     >
       <div className="@container flex min-w-0 flex-col gap-6">
         <div className="flex flex-col gap-3">
