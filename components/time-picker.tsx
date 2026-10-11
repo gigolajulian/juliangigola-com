@@ -608,8 +608,8 @@ export function TimePicker({
             by side on one line the width of the picker, each named over its
             own and as wide as its share of the times. No AM or PM in the
             boxes: the kind says it. When a box would be under 4.25rem (a day
-            of half hours, a phone), a kind to a line, the boxes on one grid
-            so they line up from kind to kind. */}
+            of half hours, a phone), a kind to a line, named to its left past a
+            phone, the boxes on one grid so they line up from kind to kind. */}
         {(() => {
         const kinds = PARTS.map(([part, from, to]) => [part, (days[pick.date] ?? []).filter((x) => minutesOf(x.start) >= from && minutesOf(x.start) < to)] as const).filter(([, list]) => list.length);
         const n = kinds.reduce((t, [, list]) => t + list.length, 0);
@@ -617,7 +617,7 @@ export function TimePicker({
         return (
         <div key={pick.date} className={cn("flex gap-x-6 gap-y-4 [@media(max-height:50rem)]:gap-y-2", !line && "flex-col")}>
         {kinds.map(([part, list]) => (
-          <div key={part} className={cn("flex min-w-0 flex-col gap-2", line && "basis-0")} style={line ? { flexGrow: list.length } : undefined}>
+          <div key={part} className={cn("flex min-w-0 flex-col gap-2", line ? "basis-0" : "@md:grid @md:grid-cols-[6.5rem_minmax(0,1fr)] @md:items-baseline @md:gap-x-4")} style={line ? { flexGrow: list.length } : undefined}>
           <span className="label text-muted-foreground">{part}</span>
           <div className={line ? "flex gap-1.5" : "grid grid-cols-[repeat(auto-fill,minmax(5rem,1fr))] gap-1.5"}>
           {list.map((x) => {
@@ -637,6 +637,9 @@ export function TimePicker({
                 className={cn(
                   "tp-rise label min-w-0 flex-1 rounded-[var(--tp-r,6px)] [animation-fill-mode:backwards] border-[0.5px] py-[min(var(--tp-slot,0.75rem),0.625rem)] text-center sm:py-[var(--tp-slot,0.75rem)] tabular-nums transition-[background-color,color,translate] duration-300 ease-[var(--ease-out-strong)] [@media(max-height:50rem)]:py-2",
                   on ? "border-foreground bg-foreground text-background" : "tp-open hoverable:hover:-translate-y-0.5",
+                  // A month and a crowded day: shorter boxes, or the evening
+                  // fell under the bar on an iPad held sideways.
+                  !line && view === "month" && "py-2 sm:py-2 [@media(max-height:50rem)]:py-1.5",
                 )}
               >
                 {h}
