@@ -406,3 +406,16 @@
     animation: none;
   }
 }
+
+/* Julian, 1280x720: "scale down". On a short desktop the whole booking
+   page is drawn at 80%, so it lays out as a 900px-tall window would,
+   rather than squeezing the picker's gaps and boxes to fit. The height
+   is given back so the page still fills the window. */
+@media (min-width: 64rem) and (max-height: 50rem) {
+  .book-page {
+    zoom: 0.8;
+    height: calc(100% / 0.8);
+    /* Julian: the card too large. Narrower here than the dial's 2.2. */
+    --card-w: 1.5fr !important;
+  }
+}
