@@ -278,9 +278,11 @@ export function TimePicker({
     const tp = el?.closest<HTMLElement>(".tp");
     if (view !== "week" || !el || !tp) return;
     const row = el.parentElement!;
+    const block = row.parentElement!;
     const fit = () => {
       el.style.removeProperty("font-size");
       row.style.removeProperty("display");
+      block.style.removeProperty("display");
       // Twice: the line it sits on does not give back all it shrinks by.
       for (let i = 0; i < 2; i++) {
         const over = tp.scrollHeight - tp.clientHeight;
@@ -289,6 +291,9 @@ export function TimePicker({
       // Smaller than that it is not worth its row: the day over it and the
       // time picked below say the same, as under a month.
       if (tp.scrollHeight > tp.clientHeight) row.style.display = "none";
+      // Still over (a day of half hours on an iPad held sideways): the day
+      // goes too, the bar under the times says it.
+      if (tp.scrollHeight > tp.clientHeight) block.style.display = "none";
     };
     fit();
     const ro = new ResizeObserver(fit);
@@ -597,7 +602,7 @@ export function TimePicker({
 
       {/* the times: the open ones of the day picked, as buttons */}
       {/* the gap dial is tuned for the week; a month keeps 1.25rem */}
-      <div ref={slotsBox} className={cn("flex flex-col gap-4 pb-4 [@media(max-height:50rem)]:gap-3", view === "week" ? "mt-[var(--tp-gap,1.75rem)]" : "mt-5")}>
+      <div ref={slotsBox} className={cn("flex flex-col gap-4 pb-6 [@media(max-height:50rem)]:gap-3", view === "week" ? "mt-[var(--tp-gap,1.75rem)]" : "mt-5")}>
         <p className="label text-muted-foreground"><span className="mr-3 text-foreground">02</span>Pick a time</p>
         {/* Julian: the times in kinds, morning, afternoon and evening, side
             by side on one line the width of the picker, each named over its
