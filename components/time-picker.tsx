@@ -21,6 +21,12 @@ import { cn } from "@/lib/utils";
  * ─────────────────────────────────────────────────────────────── */
 
 const API = "https://api.cal.com/v2";
+/* An event's details and times, kept a minute, so a picker built again
+   (the homepage menu builds one per row pointed at) does not ask Cal.com
+   again. A reload after a failed booking asks fresh. */
+const KEEP = 60_000;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const recent = new Map<string, { at: number; got: Promise<[any, any]> }>();
 const DAYS = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
 /** The kinds of time the open times are grouped in, by start, in minutes. */
 const PARTS = [["Morning", 0, 720], ["Afternoon", 720, 1020], ["Evening", 1020, 1440]] as const;
@@ -154,20 +160,24 @@ export function TimePicker({
     return () => window.clearTimeout(t);
   }, [ok]);
 
-  const load = React.useCallback(async () => {
+  const load = React.useCallback(async (fresh = false) => {
+    const key = `${username}/${slug}/${tz}`;
     try {
       const from = new Date();
       const to = new Date(Date.now() + AHEAD * 864e5);
       // Cal.com not answering at all left "Loading times" up for good: past
       // 8 seconds its own calendar takes over, as for any other failure.
       const signal = AbortSignal.timeout?.(8000);
-      const [meta, slots] = await Promise.all([
+      const hit = recent.get(key);
+      const got = !fresh && hit && Date.now() - hit.at < KEEP ? hit.got : Promise.all([
         fetch(`${API}/event-types?username=${username}&eventSlug=${slug}`, { headers: { "cal-api-version": "2024-06-14" }, signal }).then((r) => r.json()),
         fetch(`${API}/slots?username=${username}&eventTypeSlug=${slug}&start=${iso(from)}&end=${iso(to)}&timeZone=${encodeURIComponent(tz)}&format=range`, {
           headers: { "cal-api-version": "2024-09-04" },
           signal,
         }).then((r) => r.json()),
       ]);
+      if (got !== hit?.got) recent.set(key, { at: Date.now(), got });
+      const [meta, slots] = await got;
       const ev = Array.isArray(meta.data) ? meta.data[0] : meta.data;
       if (!ev || slots.status !== "success") throw new Error("no times");
       // A paid event is booked on Cal.com's own form, where the payment is.
@@ -181,6 +191,7 @@ export function TimePicker({
       setDays(slots.data);
       setState("ready");
     } catch {
+      recent.delete(key);
       // Only before the times have come. A reload after a booking failed
       // keeps the times it had, and the form with what was typed in it.
       setState((s) => (s === "ready" ? s : "fallback"));
@@ -319,10 +330,16 @@ export function TimePicker({
     if (view !== "week" || !el || !tp) return;
     const row = el.parentElement!;
     const block = row.parentElement!;
+    // The spare height around it (Julian's spacers) goes with it, or its
+    // room stayed as an empty band (audit, 2026-10-11).
+    const over = block.previousElementSibling as HTMLElement | null;
+    const under = block.nextElementSibling as HTMLElement | null;
     const fit = () => {
       el.style.removeProperty("font-size");
       row.style.removeProperty("display");
       block.style.removeProperty("display");
+      over?.style.removeProperty("display");
+      under?.style.removeProperty("max-height");
       // Twice: the line it sits on does not give back all it shrinks by.
       for (let i = 0; i < 2; i++) {
         const over = overflowOf(tp);
@@ -333,7 +350,11 @@ export function TimePicker({
       if (overflowOf(tp) > 0) row.style.display = "none";
       // Still over (a day of half hours on an iPad held sideways): the day
       // goes too, the bar under the times says it.
-      if (overflowOf(tp) > 0) block.style.display = "none";
+      if (overflowOf(tp) > 0) {
+        block.style.display = "none";
+        if (over) over.style.display = "none";
+        under?.style.setProperty("max-height", "var(--tp-gap, 2rem)");
+      }
     };
     fit();
     const ro = new ResizeObserver(fit);
@@ -434,11 +455,13 @@ export function TimePicker({
       await new Promise((go) => setTimeout(go, Math.max(0, 1100 - (Date.now() - began))));
       setStep("check");
       await new Promise((go) => setTimeout(go, 1500));
+      // The time is taken now: the next picker asks Cal.com again.
+      recent.delete(`${username}/${slug}/${tz}`);
       setStep("done");
     } catch (e) {
       setError(/(already|not available|busy|booked)/i.test(String(e)) ? "That time was just taken. Pick another." : "That did not go through. Try again, or write to hello@juliangigola.com.");
       setStep("form");
-      void load();
+      void load(true);
     }
   };
 

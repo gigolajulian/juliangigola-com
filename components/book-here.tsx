@@ -84,16 +84,21 @@ export function BookHere({ items, photos = {} }: { items: MenuItem[]; photos?: R
   /* The card pointed at is built on the back before the click, so the
      turn shows a finished card rather than one still building. */
   const [pre, setPre] = React.useState<number | null>(null);
+  /* Built once the pointer rests (150ms), not for every row it crosses:
+     each build asks Cal.com for its times. */
+  const intent = React.useRef(0);
   const look = (i: number) => {
     // Not while a card turns: rows folding under a still pointer would
     // swap the card on its way out.
     if (turning.current) return;
-    setPre(i);
     if (photos[items[i].slug]) setPeek(items[i].slug);
+    window.clearTimeout(intent.current);
+    intent.current = window.setTimeout(() => setPre(i), 150);
   };
 
   const flipper = React.useRef<HTMLDivElement>(null);
   const turning = React.useRef(false);
+  const back = React.useRef<HTMLDivElement>(null);
   /* Over to the card (1) or back to the photograph (-1). It sinks a
      little as it turns and comes back up on the far side, like a thing
      held and turned over rather than a page spun in place. Reduced motion
@@ -132,14 +137,22 @@ export function BookHere({ items, photos = {} }: { items: MenuItem[]; photos?: R
     li.animate([{ height: `${s.h}px`, overflow: "clip" }, { height: `${li.offsetHeight}px`, overflow: "clip" }], FOLD);
     name.animate([{ transform: `scale(${s.px / parseFloat(getComputedStyle(name).fontSize)})` }, { transform: "scale(1)" }], FOLD);
   }, [open]);
-  const go = (i: number | null) => {
+  /** `keys`: opened from the keyboard, so the focus goes into the card. */
+  const go = (i: number | null, keys = false) => {
     if (turning.current) return;
+    window.clearTimeout(intent.current);
+    const enter = () => keys && back.current?.focus();
     if (open === null && i !== null) {
       look(i);
+      window.clearTimeout(intent.current);
+      setPre(i);
       setTab("call");
       setOpen(i);
       turning.current = true;
-      turn(1).then(() => (turning.current = false));
+      turn(1).then(() => {
+        turning.current = false;
+        enter();
+      });
     } else if (open !== null && i === null) {
       // The row folds as the card turns back; the card stays on the back
       // until it is out of sight.
@@ -159,6 +172,7 @@ export function BookHere({ items, photos = {} }: { items: MenuItem[]; photos?: R
       setHold((h) => h ?? { card: was, mode: was.cal ? tab : "form" });
       setTab("call");
       setOpen(i);
+      enter();
     }
   };
   /* Switching while open, the old card stays a beat so the list moves
@@ -207,8 +221,8 @@ export function BookHere({ items, photos = {} }: { items: MenuItem[]; photos?: R
       <div ref={list} className="title-rest flex w-full flex-col gap-6 sm:col-start-2 sm:row-start-2 sm:max-lg:portrait:col-start-1 sm:max-lg:portrait:grid sm:max-lg:portrait:grid-cols-2 sm:max-lg:portrait:items-start sm:max-lg:portrait:gap-x-8 short:gap-4">
         {groups.map(({ label, group }) => (
           <div key={group} className="flex flex-col gap-2">
-            <span className="label text-muted-foreground">{label}</span>
-            <ul className="border-t border-border">
+            <span id={`bh-${group}`} className="label text-muted-foreground">{label}</span>
+            <ul aria-labelledby={`bh-${group}`} className="border-t border-border">
               {items.map((s, i) => {
                 if (s.group !== group) return null;
                 const on = i === open;
@@ -223,10 +237,10 @@ export function BookHere({ items, photos = {} }: { items: MenuItem[]; photos?: R
                       type="button"
                       aria-expanded={on}
                       aria-controls={on ? "book-card" : undefined}
-                      onClick={() => !on && go(i)}
+                      onClick={(e) => !on && go(i, e.detail === 0)}
                       onPointerEnter={() => open === null && look(i)}
                       onFocus={() => open === null && look(i)}
-                      className="group col-span-2 grid grid-cols-subgrid items-baseline py-[0.4em] text-left"
+                      className="group col-span-2 grid grid-cols-subgrid items-baseline py-[0.4em] text-left max-sm:py-[0.7em]"
                     >
                       <span className={cn("font-display tabular-nums leading-none transition-colors duration-300", on ? "text-foreground" : "text-muted-foreground/75")}>
                         {String(i + 1).padStart(2, "0")}
@@ -281,11 +295,13 @@ export function BookHere({ items, photos = {} }: { items: MenuItem[]; photos?: R
             )}
           </div>
           <div
+            ref={back}
             id="book-card"
+            tabIndex={-1}
             role="region"
             aria-label={item ? `Book ${item.name}` : undefined}
             inert={!item}
-            className="absolute inset-0 flex flex-col overflow-hidden rounded-[12px] border-[0.5px] border-border bg-card [backface-visibility:hidden] [transform:rotateY(180deg)]"
+            className="absolute inset-0 flex flex-col overflow-hidden rounded-[12px] border-[0.5px] border-border bg-card outline-none [backface-visibility:hidden] [transform:rotateY(180deg)]"
           >
             {card ? (
               <>
@@ -312,7 +328,7 @@ export function BookHere({ items, photos = {} }: { items: MenuItem[]; photos?: R
                 ) : null}
                 <div key={`${card.slug}-${mode}`} className="min-h-0 flex-1 motion-safe:animate-[jg-fade-up_420ms_var(--ease-out-strong)_both]">
                   {mode === "call" && card.cal ? (
-                    <CalEmbed path={card.cal} title={`Pick a time for ${card.name}`} className="booking-embed block h-full w-full border-0 [&>.sticky]:bg-card/80" />
+                    <CalEmbed path={card.cal} title={`Pick a time for ${card.name}`} className="booking-embed block h-full w-full border-0 [&>.sticky]:bg-card/80 max-sm:overflow-y-auto max-sm:overscroll-contain" />
                   ) : (
                     /* One reading width in the middle of the card; its
                        rhythm is set by the card (`.book-form`, contact.css). */
