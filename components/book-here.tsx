@@ -157,6 +157,10 @@ export function BookHere({ items, photos = {} }: { items: MenuItem[]; photos?: R
       // The row folds as the card turns back; the card stays on the back
       // until it is out of sight.
       keep();
+      // Focus in the card goes back to its row before the card turns
+      // inert, or it falls to the page (QA, #118).
+      if (back.current?.contains(document.activeElement))
+        list.current?.querySelector<HTMLElement>(`li[data-i="${open}"] > button`)?.focus({ preventScroll: true });
       setHold(null);
       setPre(open);
       setOpen(null);
