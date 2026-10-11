@@ -21,6 +21,9 @@ const eslintConfig = defineConfig([
     ".wrangler/**",
     // Claude Code's worktrees: whole copies of the repo, each linted again.
     ".claude/**",
+    // The test suites' reports, which bundle Playwright's own scripts.
+    "test-results/**",
+    "playwright-report/**",
   ]),
 ]);
 

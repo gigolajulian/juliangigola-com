@@ -1,0 +1,103 @@
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { FakeKV } from "./fakes";
+
+/* Cal.com's booking webhook (`app/api/cal/route.ts`): only a body signed
+   with CAL_WEBHOOK_SECRET gets into the inbox, and a new booking lands
+   there as a "booking" row with its summary. */
+
+const ctx = vi.hoisted(() => ({ env: {} as Record<string, unknown> }));
+vi.mock("@opennextjs/cloudflare", () => ({ getCloudflareContext: async () => ({ env: ctx.env }) }));
+
+const { POST } = await import("@/app/api/cal/route");
+
+const SECRET = "test-webhook-secret";
+
+async function sign(body: string, secret = SECRET) {
+  const key = await crypto.subtle.importKey("raw", new TextEncoder().encode(secret), { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
+  const sig = await crypto.subtle.sign("HMAC", key, new TextEncoder().encode(body));
+  return [...new Uint8Array(sig)].map((b) => b.toString(16).padStart(2, "0")).join("");
+}
+
+const post = (body: string, sig?: string) =>
+  POST(new Request("https://juliangigola.com/api/cal", { method: "POST", body, headers: sig === undefined ? {} : { "x-cal-signature-256": sig } }));
+
+const BOOKING = {
+  triggerEvent: "BOOKING_CREATED",
+  payload: {
+    eventTitle: "Portraits",
+    startTime: "2026-10-17T21:00:00Z",
+    location: "Studio",
+    additionalNotes: "Two looks",
+    attendees: [{ name: "QA Test", email: "qa@example.com" }],
+  },
+};
+
+let kv: FakeKV;
+beforeEach(() => {
+  kv = new FakeKV();
+  ctx.env = { CAL_WEBHOOK_SECRET: SECRET, INBOX: kv };
+});
+
+describe("POST /api/cal", () => {
+  it("refuses everything while the secret is unset", async () => {
+    ctx.env = { INBOX: kv };
+    const body = JSON.stringify(BOOKING);
+    expect((await post(body, await sign(body))).status).toBe(503);
+    expect(kv.puts).toEqual([]);
+  });
+
+  it("refuses everything without the INBOX binding", async () => {
+    ctx.env = { CAL_WEBHOOK_SECRET: SECRET };
+    const body = JSON.stringify(BOOKING);
+    expect((await post(body, await sign(body))).status).toBe(503);
+  });
+
+  it("refuses a missing, malformed or wrong signature", async () => {
+    const body = JSON.stringify(BOOKING);
+    expect((await post(body)).status).toBe(401);
+    expect((await post(body, "not-hex")).status).toBe(401);
+    expect((await post(body, await sign(body, "someone-else"))).status).toBe(401);
+    expect((await post(body + " ", await sign(body))).status).toBe(401);
+    expect(kv.puts).toEqual([]);
+  });
+
+  it("answers 400 to a signed body that is not JSON", async () => {
+    const body = "{not json";
+    expect((await post(body, await sign(body))).status).toBe(400);
+  });
+
+  it("acknowledges a PING and other triggers without storing them", async () => {
+    for (const triggerEvent of ["PING", "BOOKING_CANCELLED"]) {
+      const body = JSON.stringify({ triggerEvent });
+      const res = await post(body, await sign(body));
+      expect(res.status).toBe(200);
+    }
+    expect(kv.puts).toEqual([]);
+  });
+
+  it("stores a new booking as a booking row, with its summary as metadata", async () => {
+    const body = JSON.stringify(BOOKING);
+    const res = await post(body, await sign(body));
+    expect(res.status).toBe(200);
+    expect(res.headers.get("cache-control")).toBe("no-store");
+    const [key] = kv.puts;
+    expect(key).toMatch(/^msg:\d{15}:[0-9a-f]{8}$/);
+    const stored = kv.json(key);
+    expect(stored).toMatchObject({ type: "booking", name: "QA Test", email: "qa@example.com", read: false });
+    expect(stored.detail).toMatch(/^Portraits · Sat, Oct 17, 2:00\s?PM PDT$/);
+    expect(stored.message).toBe("Two looks\n\nLocation: Studio");
+    expect(kv.data.get(key)!.metadata).toMatchObject({ type: "booking", name: "QA Test", detail: stored.detail });
+  });
+
+  it("names an attendee with no name Unknown rather than dropping the booking", async () => {
+    const body = JSON.stringify({ triggerEvent: "BOOKING_CREATED", payload: {} });
+    expect((await post(body, await sign(body))).status).toBe(200);
+    expect(kv.json(kv.puts[0])).toMatchObject({ name: "Unknown", type: "booking", message: "Booked on Cal.com. No notes." });
+  });
+
+  it("answers 500 when the write fails, so Cal.com retries", async () => {
+    kv.broken = true;
+    const body = JSON.stringify(BOOKING);
+    await expect(post(body, await sign(body))).rejects.toThrow();
+  });
+});
