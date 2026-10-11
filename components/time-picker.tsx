@@ -602,7 +602,7 @@ export function TimePicker({
 
       {/* the times: the open ones of the day picked, as buttons */}
       {/* the gap dial is tuned for the week; a month keeps 1.25rem */}
-      <div ref={slotsBox} className={cn("flex flex-col gap-4 pb-6 [@media(max-height:50rem)]:gap-3", view === "week" ? "mt-[var(--tp-gap,1.75rem)]" : "mt-5")}>
+      <div ref={slotsBox} className="mt-5 flex flex-col gap-4 pb-6 [@media(max-height:50rem)]:gap-3" style={view === "week" ? { marginTop: "var(--tp-gap, 2rem)" } : undefined}>
         <p className="label text-muted-foreground"><span className="mr-3 text-foreground">02</span>Pick a time</p>
         {/* Julian: the times in kinds, morning, afternoon and evening, side
             by side on one line the width of the picker, each named over its

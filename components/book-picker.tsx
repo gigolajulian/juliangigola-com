@@ -38,7 +38,7 @@ export function BookPicker({ sessions, start }: { sessions: Bookable[]; start?: 
   );
   const tp = useDialKit(
     "Time picker",
-    { top: [2.5, 1, 10, 0.25], day: [2.25, 1, 5, 0.05], dayGap: [0.15, -0.6, 1, 0.05], time: [9, 4, 14, 0.25], gap: [1.75, 0, 5, 0.25], slot: [0.75, 0.25, 1.5, 0.05], radius: [6, 0, 24, 1], tint: [55, 0, 100, 1] },
+    { top: [2.5, 1, 10, 0.25], day: [2.25, 1, 5, 0.05], dayGap: [0.15, -0.6, 1, 0.05], time: [9, 4, 14, 0.25], gap: [2, 0, 5, 0.25], slot: [0.75, 0.25, 1.5, 0.05], radius: [6, 0, 24, 1], tint: [55, 0, 100, 1] },
     { id: "book-time" },
   );
   const dials = {
