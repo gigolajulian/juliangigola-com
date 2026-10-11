@@ -419,3 +419,54 @@
     --card-w: 1.5fr !important;
   }
 }
+
+/* The inquiry form in the Sessions booking card (`book-here.tsx`). The
+   card's pane is a size container, so the gaps follow the card's height:
+   close on a laptop, open on a tall screen, the form in the middle. */
+.book-form form {
+  gap: clamp(1rem, 3.2cqh, 2.25rem);
+}
+/* Name and email side by side wherever the card has the width, as on the
+   short screens (`contact-pair`, devices.css), so the form keeps one shape. */
+@container (min-width: 30rem) {
+  .book-form .contact-pair {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.5rem;
+  }
+}
+/* A big screen's card: the whole form set larger, so it fills the card
+   as it does on a laptop rather than sitting small in the middle. */
+@container (min-height: 50rem) and (min-width: 56rem) {
+  .book-form {
+    zoom: 1.2;
+  }
+}
+@container (min-height: 62rem) and (min-width: 70rem) {
+  .book-form {
+    zoom: 1.4;
+  }
+}
+/* A short card: the shoot type as a dropdown beside the question it
+   leads to, rather than six chips on rows of their own. */
+@container (max-height: 38rem) {
+  .book-form form {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: 1.5rem;
+    align-items: end;
+  }
+  .book-form form > * {
+    grid-column: 1 / -1;
+  }
+  .book-form form > fieldset {
+    display: none;
+  }
+  .book-form form > div:has(#field-type) {
+    display: block;
+    grid-column: 1;
+  }
+  .book-form form > .contact-field:has(#field-detail) {
+    grid-column: 2;
+  }
+}
