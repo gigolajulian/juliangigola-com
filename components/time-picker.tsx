@@ -602,7 +602,7 @@ export function TimePicker({
 
       {/* the times: the open ones of the day picked, as buttons */}
       {/* the gap dial is tuned for the week; a month keeps 1.25rem */}
-      <div ref={slotsBox} className="mt-5 flex flex-col gap-4 pb-6 [@media(max-height:50rem)]:mt-3 [@media(max-height:50rem)]:gap-2" style={view === "week" ? { marginTop: "var(--tp-gap, 2rem)" } : undefined}>
+      <div ref={slotsBox} className="mt-5 flex flex-col gap-4 pb-6 [@media(max-height:50rem)]:mt-2 [@media(max-height:50rem)]:gap-2" style={view === "week" ? { marginTop: "var(--tp-gap, 2rem)" } : undefined}>
         <p className="label text-muted-foreground"><span className="mr-3 text-foreground">02</span>Pick a time
           {/* Under a month there is no day over the times to say whose they
               are, and the month shown may not hold it (Julian). */}
