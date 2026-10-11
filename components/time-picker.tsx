@@ -566,7 +566,7 @@ export function TimePicker({
       {/* the time. Not under a month: the picked button says it, and a
           six-row month on an iPad or a phone had no room for both. */}
       {view === "week" ? (
-      <div className="mt-auto flex flex-col gap-0.5 pt-10 sm:pt-[var(--tp-top,5rem)] [@media(max-height:50rem)]:pt-3 [@media(max-height:50rem)]:gap-0">
+      <div className="flex flex-col gap-0.5 pt-10 sm:pt-[var(--tp-top,5rem)] [@media(max-height:50rem)]:pt-3 [@media(max-height:50rem)]:gap-0">
         {/* The day over its time, or what to do before one is picked. */}
         <p key={chosen ? pick.date : "none"} className={cn("tp-roll font-display text-[clamp(1.25rem,4.5cqw,var(--tp-day,2.25rem))] uppercase leading-none tracking-[-0.02em]", !chosen && "text-muted-foreground")}>
           {chosen ? `${WEEKDAYS[date.getDay()]}, ${MONTHS[date.getMonth()]} ${date.getDate()}` : "Pick a day, then a time"}
