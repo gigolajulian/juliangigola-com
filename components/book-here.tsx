@@ -310,9 +310,11 @@ export function BookHere({ items, photos = {} }: { items: MenuItem[]; photos?: R
             {card ? (
               <>
                 {/* Close in the corner, over the picker's own top line, so a
-                    session's calendar keeps the card's whole height. A
-                    commission's two ways in get a line of their own. */}
-                <button type="button" onClick={() => go(null)} className="tap-44 label absolute right-5 top-3 z-20 text-muted-foreground hoverable:hover:text-foreground sm:right-10 sm:top-4">
+                    session's calendar keeps the card's whole height. On a
+                    phone the calendar scrolls, so Close takes a line of its
+                    own above it rather than having the days run under it
+                    (QA, #118). A commission's two ways in get a line too. */}
+                <button type="button" onClick={() => go(null)} className="tap-44 label absolute right-5 top-3 z-20 text-muted-foreground hoverable:hover:text-foreground max-sm:relative max-sm:right-auto max-sm:top-auto max-sm:mr-5 max-sm:mt-3 max-sm:self-end sm:right-10 sm:top-4">
                   Close <span aria-hidden>&times;</span>
                 </button>
                 {card.cal && card.form ? (
