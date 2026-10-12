@@ -74,13 +74,12 @@ describe("GET /picks.json", async () => {
     }
   });
 
-  /* KNOWN BUG, reported to jg-BACKEND 2026-10-11: the contact action keeps
-     only picks under /work/ (`app/contact/actions.ts`), and the picker also
-     offers /covers/ and /hero/ frames (30 of 179 live), which an enquiry
-     then drops without a word. `it.fails` keeps the suite green until the
-     fix lands; then this fails, and `.fails` comes off. */
-  it.fails("offers only frames the contact form will keep", () => {
-    const kept = /^\/work\/[\w-]+\/[\w.-]+\.(jpe?g|png|webp)$/i;
+  /* The picker must offer only frames an enquiry keeps: the same pattern
+     as the filter in `app/contact/actions.ts`. Found 2026-10-11 when the
+     action kept only /work/ and dropped 30 /covers/ and /hero/ picks
+     (fixed in #119). */
+  it("offers only frames the contact form will keep", () => {
+    const kept = /^\/(work\/[\w-]+|hero|covers)\/[\w.-]+\.(jpe?g|png|webp)$/i;
     const dropped = groups.flatMap((g) => g.frames.map((f) => f[0])).filter((src) => !kept.test(src));
     expect(dropped).toEqual([]);
   });

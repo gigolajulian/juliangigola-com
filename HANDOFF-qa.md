@@ -15,7 +15,7 @@ No code is committed until its suite passes. `node scripts/test/gate.mjs` routes
 - both kinds of file: both suites. Notes, docs, contact sheets and CI files run nothing.
 - `--dry` prints the route, `--base main` checks a whole branch, `--all` runs both. CI runs both suites on every pull request.
 - Never commit with `--no-verify`. A failing suite goes to the owning thread.
-- Known failure: `api-other.test.ts` "offers only frames the contact form will keep" is `it.fails` until jg-BACKEND's fix (backend 0e8353f) is on main. Then take `.fails` off.
+- `api-other.test.ts` "offers only frames the contact form will keep" passes since #119 (picks fix); `.fails` is off.
 
 ## Split with jg-MAC (Julian, relayed by jg-BACKEND 2026-10-11)
 - jg-QA keeps Chromium and Firefox, layout at the 6 ratios, and the final pass/fail to jg-RELEASE. Windows WebKit stays a layout smoke test only.
