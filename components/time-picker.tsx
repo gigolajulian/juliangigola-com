@@ -267,16 +267,14 @@ export function TimePicker({
     setPick({ date, min: minutesOf(t.start), start: t.start });
   };
 
-  /* A day picked in a month brings its times up: under six rows they
-     start below the card's fold (Julian, 2026-10-11). */
+  /* A day picked in a month brings its times up on a phone, where the
+     card is as tall as it needs and the page scrolls (Julian, 2026-10-11). */
   const showTimes = () =>
     requestAnimationFrame(() => {
       const box = slotsBox.current;
-      const tp = box?.closest<HTMLElement>(".tp");
-      if (!box || !tp || tp.scrollHeight <= tp.clientHeight) return;
+      if (!box?.offsetParent || !matchMedia("(max-width: 39.99rem)").matches) return;
       const r = box.getBoundingClientRect();
-      const t = tp.getBoundingClientRect();
-      if (r.top > t.top + t.height * 0.6) tp.scrollTo({ top: tp.scrollTop + r.top - t.top - 24, behavior: "smooth" });
+      if (r.top > innerHeight * 0.6) scrollBy({ top: r.top - innerHeight * 0.25, behavior: "smooth" });
     });
 
   /* The week or month under the cards. A week is the seven days from the
@@ -318,9 +316,14 @@ export function TimePicker({
      played once the new view is laid out. */
   const daysBox = React.useRef<HTMLDivElement>(null);
   const flip = React.useRef<{ at: Map<string, DOMRect>; h: number } | null>(null);
+  /* Where a month and a day's times do not fit together (`data-split`,
+     below): the month, then the day's times in its place. Julian, no
+     scroll in the card, ever (2026-10-11). */
+  const [mstep, setMstep] = React.useState<"days" | "times">("days");
   const switchView = (v: "week" | "month") => {
     if (v === view) return;
     setSlide(0);
+    setMstep("days");
     const box = daysBox.current;
     if (box) {
       const at = new Map<string, DOMRect>();
@@ -366,6 +369,7 @@ export function TimePicker({
       block.style.removeProperty("display");
       over?.style.removeProperty("display");
       under?.style.removeProperty("max-height");
+      tp.removeAttribute("data-tight");
       // Twice: the line it sits on does not give back all it shrinks by.
       for (let i = 0; i < 2; i++) {
         const over = overflowOf(tp);
@@ -381,32 +385,47 @@ export function TimePicker({
         if (over) over.style.display = "none";
         under?.style.setProperty("max-height", "var(--tp-gap, 2rem)");
       }
+      // Still over (half-hour calls at 1280x720): the steps' names go and
+      // the times close up (`[data-tight]`, contact.css).
+      if (overflowOf(tp) > 0) tp.setAttribute("data-tight", "");
     };
     fit();
     const ro = new ResizeObserver(fit);
     ro.observe(tp);
-    return () => ro.disconnect();
+    return () => {
+      ro.disconnect();
+      tp.removeAttribute("data-tight");
+    };
   }, [view, pick?.date, days, slotsW]);
   const refit = React.useRef(() => {});
   React.useLayoutEffect(() => {
     const grid = monthGrid.current;
     const tp = grid?.closest<HTMLElement>(".tp");
     if (view !== "month" || !grid || !tp) return;
-    const fit = () => {
-      // A picker that scrolls (the card on a phone) keeps whole tiles.
-      if (/auto|scroll/.test(getComputedStyle(tp).overflowY)) return;
+    // The fold the days sit in can shrink and hide what does not fit, so
+    // its own overflow counts as well as the picker's.
+    const fold = grid.closest<HTMLElement>(".min-h-0.overflow-hidden");
+    const overBy = () => Math.max(overflowOf(tp), fold ? fold.scrollHeight - fold.clientHeight : 0);
+    const rows = Math.ceil((grid.children.length - 7) / 7);
+    /* The cells give up what the picker is over by, down to `least`. */
+    const squeeze = (least: number) => {
       grid.style.removeProperty("--cell-h");
-      // The fold the days sit in can shrink and hide what does not fit, so
-      // its own overflow counts as well as the picker's.
-      const fold = grid.closest<HTMLElement>(".min-h-0.overflow-hidden");
       const cell = grid.querySelector<HTMLElement>("[data-day]");
-      const rows = Math.ceil((grid.children.length - 7) / 7);
+      if (!cell?.offsetHeight) return 0;
       // Twice, for what the first pass leaves over by rounding.
       for (let i = 0; i < 2; i++) {
-        const over = Math.max(overflowOf(tp), fold ? fold.scrollHeight - fold.clientHeight : 0);
-        if (over <= 0 || !cell) return;
-        grid.style.setProperty("--cell-h", `${Math.max(28, cell.offsetHeight - Math.ceil(over / rows))}px`);
+        const over = overBy();
+        if (over <= 0) return 0;
+        grid.style.setProperty("--cell-h", `${Math.max(least, cell.offsetHeight - Math.ceil(over / rows))}px`);
       }
+      return overBy();
+    };
+    const fit = () => {
+      tp.removeAttribute("data-split");
+      // Both, while a cell keeps 2.5rem: under it they were strips.
+      if (squeeze(40) <= 0) return;
+      tp.setAttribute("data-split", "");
+      squeeze(28);
     };
     fit();
     refit.current = fit;
@@ -415,8 +434,9 @@ export function TimePicker({
     return () => {
       ro.disconnect();
       refit.current = () => {};
+      tp.removeAttribute("data-split");
     };
-  }, [view, month, pick?.date, days]);
+  }, [view, month, pick?.date, days, mstep]);
   React.useLayoutEffect(() => {
     const f = flip.current;
     flip.current = null;
@@ -556,7 +576,7 @@ export function TimePicker({
   }
 
   return (
-    <div aria-label={title} role="region" data-view={view} className={cn("tp @container relative !flex min-h-0 flex-col overflow-x-clip p-5 sm:p-10 max-[56rem]:sm:p-6 tp-short:p-5", className)}>
+    <div aria-label={title} role="region" data-view={view} data-mstep={mstep} className={cn("tp @container relative !flex min-h-0 flex-col overflow-x-clip p-5 sm:p-10 max-[56rem]:sm:p-6 tp-short:p-5", className)}>
       {step === "sending" || step === "check" ? (
         <div role="status" aria-live="polite" className="absolute inset-0 z-20 bg-background/85 backdrop-blur-md">
           <div className="sticky top-[28%] flex flex-col items-center gap-6 py-10">
@@ -654,7 +674,7 @@ export function TimePicker({
                   type="button"
                   disabled={!o.size}
                   aria-pressed={on}
-                  onClick={() => { choose(id, pick.min, false); showTimes(); }}
+                  onClick={() => { choose(id, pick.min, false); setMstep("times"); showTimes(); }}
                   className={cn(
                     "flex aspect-[1/0.9] max-h-[4.5rem] w-full min-w-0 flex-col justify-between gap-1 overflow-hidden rounded-[var(--tp-r,6px)] border-[0.5px] p-[var(--pad)] pb-0 text-left [--pad:min(0.75rem,1.6cqw,calc(var(--cell-h,99rem)*0.14))] tp-short:aspect-auto transition-[background-color,color,translate] duration-300 ease-[var(--ease-out-strong)] h-[var(--cell-h,auto)]",
                     on ? "border-foreground bg-foreground text-background" : o.size ? "tp-open hoverable:hover:-translate-y-0.5" : "",
@@ -703,6 +723,13 @@ export function TimePicker({
 
       {/* the times: the open ones of the day picked, as buttons */}
       <div ref={slotsBox} data-part="times" className={cn("flex flex-col gap-4 pb-6 tp-short:gap-2", view === "month" && "mt-5 tp-short:mt-2")}>
+        {/* Back to the month, in the split's times step only (contact.css). */}
+        {view === "month" ? (
+          <button type="button" data-part="back" onClick={() => setMstep("days")} className="tap-44 label flex items-center gap-3 self-start text-foreground transition-opacity duration-200 hoverable:hover:opacity-60">
+            {arrow}
+            {MONTHS[anchor.getMonth()]}
+          </button>
+        ) : null}
         <p className="label text-muted-foreground"><span className="mr-3 text-foreground">02</span>Pick a time
           {/* Under a month there is no day over the times to say whose they
               are, and the month shown may not hold it (Julian). */}
@@ -725,10 +752,10 @@ export function TimePicker({
            take 6.5rem and a 1rem gap at the left (the @md rail). */
         const room = slotsW >= 448 ? slotsW - 120 : slotsW;
         const most = Math.max(1, ...kinds.map(([, list]) => list.length));
-        const fit = Math.max(1, Math.floor((room + 6) / 86));
+        const fit = Math.max(1, Math.floor((room + 6) / (slotsW >= 448 ? 76 : 86)));
         const cols = Math.min(fit, Math.ceil(most / Math.ceil(most / fit)));
         return (
-        <div key={pick.date} className={cn("flex gap-x-6 gap-y-4 tp-short:gap-y-3", !line && "flex-col")}>
+        <div key={pick.date} className={cn("flex gap-x-6 gap-y-3 tp-short:gap-y-3", !line && "flex-col")}>
         {kinds.map(([part, list]) => (
           <div key={part} className={cn("flex min-w-0 flex-col gap-2 tp-short:gap-1", line ? "basis-0" : "@md:grid @md:grid-cols-[6.5rem_minmax(0,1fr)] @md:items-baseline @md:gap-x-4")} style={line ? { flexGrow: list.length } : undefined}>
           <span className="label text-muted-foreground">{part}</span>
@@ -753,9 +780,10 @@ export function TimePicker({
                   // A day of one or two times: a box, not a bar the width of
                   // the card.
                   line && "max-w-[9rem]",
-                  // A month and a crowded day: shorter boxes, or the evening
-                  // fell under the bar on an iPad held sideways.
-                  !line && view === "month" && "py-2 sm:py-2 tp-short:py-1.5",
+                  // A crowded day: shorter boxes, or the evening fell under
+                  // the bar (an iPad held sideways; a week of half-hour calls
+                  // at 1547x889).
+                  !line && "py-2 sm:py-2 tp-short:py-1.5",
                 )}
               >
                 {h}

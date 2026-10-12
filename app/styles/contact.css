@@ -520,3 +520,63 @@
   padding-bottom: clamp(1.25rem, 4cqh, 2rem);
   border-bottom: 0.5px solid color-mix(in oklab, var(--foreground) 30%, transparent);
 }
+
+/* The picker never scrolls (Julian, 2026-10-11). A month and a day's
+   times that do not fit together take turns: the month alone, then the
+   day's times with a way back (`data-split`, time-picker.tsx). With no
+   time to confirm yet, the month has the bar's room too. */
+.tp[data-split][data-mstep="days"] [data-part="times"],
+.tp[data-split][data-mstep="days"] > .sticky,
+.tp[data-split][data-mstep="times"] [data-part="days"] {
+  display: none;
+}
+.tp:not([data-split][data-mstep="times"]) [data-part="back"] {
+  display: none;
+}
+.tp[data-split] [data-part="times"] {
+  margin-top: 0;
+}
+
+/* A week still over once its big time and day line are gone: the steps'
+   names go and the times close up. */
+.tp[data-tight] [data-part="days"] > p:first-child,
+.tp[data-tight] [data-part="times"] > p {
+  display: none;
+}
+.tp[data-tight] [data-part="times"] {
+  gap: 0.5rem;
+}
+.tp[data-tight] [data-slot] {
+  padding-block: 0.375rem;
+}
+.tp[data-tight] [data-part="days"] {
+  gap: 0.5rem;
+}
+.tp[data-tight] [data-day] > span:last-child {
+  height: 1rem;
+}
+/* Julian's spacers are inline; tight, they give their room back. */
+.tp[data-tight] > div > div > div[aria-hidden].grow {
+  min-height: 0.75rem !important;
+  max-height: 0.75rem !important;
+}
+.tp[data-tight] > .sticky {
+  padding-top: 0.75rem;
+  padding-bottom: 0.75rem;
+}
+/* The month alone has no bar under it: the card's own margin instead. */
+#book-card .tp[data-split][data-mstep="days"] {
+  padding-bottom: 1.25rem;
+}
+/* Julian: more room between them, the times lower. The way back keeps the
+   top; the times sit in the middle of what is left. */
+.tp[data-split][data-mstep="times"] [data-part="times"] {
+  flex: 1;
+  gap: 1.5rem;
+}
+.tp[data-split][data-mstep="times"] [data-part="times"] > p {
+  margin-top: auto;
+}
+.tp[data-split][data-mstep="times"] [data-part="times"] > :last-child {
+  margin-bottom: auto;
+}

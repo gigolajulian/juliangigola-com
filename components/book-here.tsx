@@ -398,7 +398,7 @@ export function BookCard({ item, onClose, className }: { item: MenuItem; onClose
       </div>
       <div key={`${item.slug}-${mode}`} className="min-h-0 flex-1 motion-safe:animate-[jg-fade-up_420ms_var(--ease-out-strong)_both]">
         {mode === "call" && item.cal ? (
-          <CalEmbed path={item.cal} title={`Pick a time for ${item.name}`} className="booking-embed block h-full w-full border-0 [&>.sticky]:bg-card/80 overflow-y-auto overscroll-contain" />
+          <CalEmbed path={item.cal} title={`Pick a time for ${item.name}`} className="booking-embed block h-full w-full border-0 [&>.sticky]:bg-card/80" />
         ) : (
           <div data-scroll className="h-full overflow-y-auto overscroll-contain px-[var(--card-x)] pb-6 pt-5">
             <div className="book-form flex flex-col gap-[clamp(1.25rem,4cqh,2.5rem)] sm:[&_textarea]:h-[3.75rem]">

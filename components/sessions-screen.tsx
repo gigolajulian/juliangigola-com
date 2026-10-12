@@ -195,7 +195,7 @@ export function SessionsScreen({ sessions, menu }: { sessions: SessionItem[]; me
             </div>
           </nav>
           <RisingTitle key={`title-${booking.slug}`} text={booking.name} className="sm:max-lg:text-4xl" />
-          <BookCard key={`card-${booking.slug}`} item={booking} onClose={close} className="min-h-0 flex-1 sm:max-h-[44rem] motion-safe:animate-[jg-fade-up_520ms_var(--ease-out-strong)_both] max-sm:-mx-3 max-sm:h-[80svh] max-sm:flex-none" />
+          <BookCard key={`card-${booking.slug}`} item={booking} onClose={close} className="min-h-0 flex-1 sm:max-h-[44rem] motion-safe:animate-[jg-fade-up_520ms_var(--ease-out-strong)_both] max-sm:-mx-3 max-sm:flex-none max-sm:[container-type:inline-size]" />
         </div>
       ) : (
       <div className="flex w-fit max-w-full flex-col gap-5 self-center">
@@ -344,7 +344,10 @@ export function SessionsScreen({ sessions, menu }: { sessions: SessionItem[]; me
                   if (!wasOpen.current) return go(i);
                   e.currentTarget.querySelector("a")?.click();
                 }}
-                className={`session-step relative flex flex-col border-b border-border py-1.5 ${s.page || here ? "cursor-pointer" : ""}`}
+                /* Julian: the picked session gets a background. A band a
+                   little wider than the row, behind it, so the hairlines
+                   keep their width. */
+                className={`session-step relative isolate flex flex-col border-b border-border py-1.5 before:absolute before:inset-y-0 before:-inset-x-4 before:-z-10 before:bg-foreground/[0.06] before:opacity-0 before:transition-opacity before:duration-300 ${here && i === book ? "before:opacity-100" : ""} ${s.page || here ? "cursor-pointer" : ""}`}
               >
                 {/* A session with a booking page goes there on a click;
                     pointing still opens it here. */}
