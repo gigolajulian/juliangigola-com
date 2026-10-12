@@ -53,6 +53,9 @@ export function errorsOn(page: Page): string[] {
     if (m.type() !== "error") return;
     const t = m.text();
     if (/cal\.com|cloudflareinsights|Failed to load resource/i.test(t)) return;
+    /* CI's Linux runners have no GPU, so headless Firefox there has no
+       WebGL and says so. The page carries on without it. */
+    if (/unable to create webgl context/i.test(t)) return;
     out.push(`console: ${t.slice(0, 200)}`);
   });
   return out;

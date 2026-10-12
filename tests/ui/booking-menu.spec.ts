@@ -60,12 +60,16 @@ for (const r of RATIOS) {
     await row(page, /Event coverage/i).scrollIntoViewIfNeeded();
     await row(page, /Event coverage/i).click();
     await expect(card.locator('input[name="name"]')).toBeVisible({ timeout: 15_000 });
-    await page.waitForTimeout(1200);
-    const send = await card.locator('button[type="submit"]').evaluate((b) => {
-      const q = b.getBoundingClientRect();
-      const hit = document.elementFromPoint(q.x + q.width / 2, q.y + q.height / 2);
-      return { bottom: q.bottom, top: q.top, onTop: !!hit && (hit === b || b.contains(hit)) };
-    });
+    /* The card animates open; under a loaded machine that runs past a fixed
+       wait, so wait until Inquire is the top element, then measure. */
+    const measure = () =>
+      card.locator('button[type="submit"]').evaluate((b) => {
+        const q = b.getBoundingClientRect();
+        const hit = document.elementFromPoint(q.x + q.width / 2, q.y + q.height / 2);
+        return { bottom: q.bottom, top: q.top, onTop: !!hit && (hit === b || b.contains(hit)) };
+      });
+    await expect.poll(async () => (await measure()).onTop, { timeout: 10_000 }).toBe(true).catch(() => {});
+    const send = await measure();
     expect(send.top).toBeGreaterThanOrEqual(0);
     expect(send.bottom, "Inquire on screen").toBeLessThanOrEqual(r.height + 1);
     expect(send.onTop, "Inquire not covered").toBe(true);

@@ -51,6 +51,7 @@ No code is committed until its suite passes. `node scripts/test/gate.mjs` routes
 - WebKit is not installed here (`npx playwright install webkit`).
 
 ## Waiting on
+- CI `checks` red since #114 (aaa1256): /#contact iphone-se images 1274 KB vs 1054 (was 866). Five Sessions photos at 1280w (~463 KB) now load about 870px above the landing. With jg-UI; their PR comes to QA. budgets.json unchanged without Julian. Probe: scratchpad contact-images.cjs.
 - PR #120 (sessions-title, f300770, ?bookhere card): on hold, not tested. Julian said "stop testing until we lock in the design" (2026-10-11), and jg-UI still has an uncommitted design tweak in progress. Test when Julian locks the design. Mock api.cal.com/v2/bookings and use the `company` honeypot.
 - PR #114 (calendar-lower, jg-UI): a10b09f PASS, sent to RELEASE 2026-10-11. /book 144/144, service pages 36/36 (service-check.cjs), Cal.com hang and 500 fall back to the embed. Julian approved the 80% zoom look ("go with A"); the floor under the zoom is 19 screen px. The merge waits on Julian's ship it.
 - ios-16-4 (a978b78, browserslist to Safari/iOS >= 16.4): FAIL sent to RELEASE 2026-10-11. Firefox motion timeouts were 12/138 across 3 runs on the branch against 0/138 on main aaa1256, both production builds in the same worktree. No JS errors anywhere. I offered to bisect.
