@@ -55,6 +55,11 @@ export function SessionsScreen({ sessions, menu }: { sessions: SessionItem[]; me
      inked only then (`.session-dev`, `globals.css`). A finger opens a row
      by going to its page, so it never sees it. */
   const [hot, setHot] = useState(false);
+  /* Only the open session's photograph is in the page until someone
+     reaches the list; then the rest, so pointing swaps at once. Lazy is
+     not enough: on a short phone the hidden four sat inside the browser's
+     lazy margin from Contact and loaded too (463 KB at 375x667). */
+  const [warm, setWarm] = useState(false);
   /* The edge of the row the pointer came in by, which the ink fills
      from, and the one it left by, which it drains to: over the top
      it pours down, in from the side it runs across. Between rows it
@@ -158,7 +163,7 @@ export function SessionsScreen({ sessions, menu }: { sessions: SessionItem[]; me
           list. */}
       <div className="sessions-photo title-rest relative aspect-[3/4] max-sm:aspect-[3/2] w-full overflow-hidden rounded-[4px] bg-card sm:h-[min(48rem,calc(100cqh-8rem),max(34.5vw,calc(100vw-75rem)))] sm:w-auto sm:justify-self-center sm:max-xl:hidden xl:ml-[max(0rem,min(4.25rem,16.5vw-16.5rem))] xl:h-[min(56rem,calc(100cqh-8rem),max(34.5vw,calc(100vw-75rem)))]">
         {sessions.map((s, i) =>
-          s.cover ? (
+          s.cover && (warm || i === open) ? (
             <Image
               key={s.slug}
               src={s.cover.src}
@@ -197,6 +202,7 @@ export function SessionsScreen({ sessions, menu }: { sessions: SessionItem[]; me
         <ul
           className="session-list border-t border-border"
           onPointerEnter={(e) => {
+            setWarm(true);
             if (e.pointerType !== "mouse") return;
             const li = (e.target as HTMLElement).closest("li");
             if (li) setOpen([...e.currentTarget.children].indexOf(li));
@@ -211,7 +217,10 @@ export function SessionsScreen({ sessions, menu }: { sessions: SessionItem[]; me
             setEdge(nearest(e, e.currentTarget.children[open]));
             setHot(false);
           }}
-          onFocus={(e) => e.target.matches(":focus-visible") && setHot(true)}
+          onFocus={(e) => {
+            setWarm(true);
+            if (e.target.matches(":focus-visible")) setHot(true);
+          }}
           onBlur={(e) => {
             if (e.currentTarget.contains(e.relatedTarget)) return;
             setHot(false);
