@@ -272,7 +272,10 @@ export function SessionsScreen({ sessions, menu, walls }: { sessions: SessionIte
       </div>
       )}
 
-      <div ref={col} className={`session-col title-rest relative flex min-w-0 flex-col ${booking ? "max-lg:hidden" : ""}`}>
+      {/* With a card open the list keeps clear of the bar and the pager
+          (Julian): the card's column's top margin, centred in the same
+          height. */}
+      <div ref={col} className={`session-col title-rest relative flex min-w-0 flex-col ${booking ? "max-lg:hidden" : ""} ${here && booking ? "sm:justify-center sm:self-stretch sm:pt-[clamp(1.5rem,4.5vh,3rem)]" : ""}`}>
         <ul
           className="session-list relative border-t border-border"
           onPointerEnter={(e) => {
@@ -391,8 +394,10 @@ export function SessionsScreen({ sessions, menu, walls }: { sessions: SessionIte
                       {s.blurb}
                     </p>
                     {/* What the /sessions page used to say about each. */}
+                    {/* A short window with a card open has no room for it
+                        (Graduation ran under the pager at 1366x768). */}
                     {s.includes.length ? (
-                    <p className="max-w-[32.5rem] text-left text-sm normal-case leading-relaxed text-muted-foreground text-balance">
+                    <p className={`max-w-[32.5rem] text-left text-sm normal-case leading-relaxed text-muted-foreground text-balance ${here && booking ? "[@media(max-height:50rem)]:hidden" : ""}`}>
                       {/* Each item whole on its line, and the dot held to the
                           item before it, so no line starts with one. */}
                       {s.includes.map((x, k) => (
@@ -499,7 +504,9 @@ export function SessionsScreen({ sessions, menu, walls }: { sessions: SessionIte
 
         {/* On a short laptop (1280x800) the heading and its button share
             the line, or the button wraps under it and under the rail. */}
-        <div className="flex flex-wrap items-center justify-between gap-6 pt-6 short:gap-4 short:pt-5">
+        {/* Under 60rem with a card open, the card is the booking: the
+            second button went under the pager (Julian, 1547x889). */}
+        <div className={`flex flex-wrap items-center justify-between gap-6 pt-6 short:gap-4 short:pt-5 ${here && booking ? "[@media(max-height:60rem)]:hidden" : ""}`}>
           <div className="flex flex-col gap-2.5">
             {/* The button says Book a session; said beside it as well,
                 the pair read as a stutter. Julian's words in its place;
