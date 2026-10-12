@@ -470,3 +470,53 @@
     grid-column: 2;
   }
 }
+
+/* In the card, "Change" sits by the time it changes, clear of Close in
+   the corner; and the thank-you is the card's own, not a box in it. */
+#book-card [data-part="when"] {
+  justify-content: flex-start;
+}
+.book-form [data-sent] {
+  align-self: center;
+  border: 0;
+}
+/* One language in the Sessions booking card (Julian, 2026-10-11). Close
+   has its own line, so the picker starts just under it. The actions are
+   the site's solid pill (Book a session beside the card, Inquire), the
+   choices the reference chips' pill, and both forms open on a line over
+   the same hairline with the same gap under it. */
+#book-card .tp {
+  padding: 1.25rem var(--card-x) 0;
+}
+/* The card's foot is solid over a hairline: the month's last rows ran
+   under the see-through bar and its words read over the tiles. */
+#book-card .tp > .sticky {
+  background: var(--card);
+  border-top: 0.5px solid var(--border);
+  padding-bottom: 1.25rem;
+}
+#book-card input:not(:checked) + [data-part="chip"] {
+  color: var(--muted-foreground);
+}
+#book-card [data-part="act"] {
+  border-radius: 9999px;
+  font-family: var(--font-display);
+}
+/* Ready reads the same on every action in the card: solid ink, as Book
+   it and Inquire. Teal stays the colour of what is open. */
+#book-card [data-part="act"]:enabled {
+  background: var(--foreground);
+  border-color: var(--foreground);
+  color: var(--background);
+}
+#book-card [data-part="chip"] {
+  border-radius: 9999px;
+  padding: 0.5rem 1rem;
+}
+#book-card .tp form {
+  gap: clamp(1.25rem, 4cqh, 2.5rem);
+}
+#book-card .tp form > [data-part="when"] {
+  padding-bottom: clamp(1.25rem, 4cqh, 2rem);
+  border-bottom: 0.5px solid color-mix(in oklab, var(--foreground) 30%, transparent);
+}

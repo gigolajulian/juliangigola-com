@@ -85,6 +85,20 @@ const overflowOf = (tp: HTMLElement) => {
   return Math.max(tp.scrollHeight - tp.clientHeight, host ? host.scrollHeight - host.clientHeight : 0, bar ? Math.ceil(bar.offsetTop + bar.offsetHeight - end - 1) : 0); // 1px: offsets round
 };
 
+/* The day's open times as bars: the week and the month draw a day the
+   same way (Julian, 2026-10-11). */
+function Bars({ steps, open, on, className }: { steps: number[]; open: Set<number>; on: boolean; className?: string }) {
+  return (
+    // A day of quarter hours on a phone tile: the gaps alone were wider
+    // than the tile and the bars went to nothing.
+    <span aria-hidden className={cn("flex items-end bg-current/10", steps.length > 16 ? "gap-0" : "gap-px", !on && "text-accent", className)}>
+      {steps.map((m) => (
+        <s key={m} className="w-[3px] max-sm:w-px flex-1 rounded-[1px] bg-current no-underline opacity-55 transition-[height] duration-500" style={{ height: open.has(m) ? "100%" : "22%" }} />
+      ))}
+    </span>
+  );
+}
+
 /* A view that folds shut and open, so Week and Month trade places smoothly. */
 /** `fill`: open, it takes the room the picker has to spare, and its
     children stack so one can be pushed down with `mt-auto`. */
@@ -253,6 +267,18 @@ export function TimePicker({
     setPick({ date, min: minutesOf(t.start), start: t.start });
   };
 
+  /* A day picked in a month brings its times up: under six rows they
+     start below the card's fold (Julian, 2026-10-11). */
+  const showTimes = () =>
+    requestAnimationFrame(() => {
+      const box = slotsBox.current;
+      const tp = box?.closest<HTMLElement>(".tp");
+      if (!box || !tp || tp.scrollHeight <= tp.clientHeight) return;
+      const r = box.getBoundingClientRect();
+      const t = tp.getBoundingClientRect();
+      if (r.top > t.top + t.height * 0.6) tp.scrollTo({ top: tp.scrollTop + r.top - t.top - 24, behavior: "smooth" });
+    });
+
   /* The week or month under the cards. A week is the seven days from the
      one on show, never from before today: a calendar week opened on a
      Saturday was six days already gone. */
@@ -367,6 +393,8 @@ export function TimePicker({
     const tp = grid?.closest<HTMLElement>(".tp");
     if (view !== "month" || !grid || !tp) return;
     const fit = () => {
+      // A picker that scrolls (the card on a phone) keeps whole tiles.
+      if (/auto|scroll/.test(getComputedStyle(tp).overflowY)) return;
       grid.style.removeProperty("--cell-h");
       // The fold the days sit in can shrink and hide what does not fit, so
       // its own overflow counts as well as the picker's.
@@ -528,7 +556,7 @@ export function TimePicker({
   }
 
   return (
-    <div aria-label={title} role="region" className={cn("tp @container relative !flex min-h-0 flex-col overflow-x-clip p-5 sm:p-10 max-[56rem]:sm:p-6 tp-short:p-5", className)}>
+    <div aria-label={title} role="region" data-view={view} className={cn("tp @container relative !flex min-h-0 flex-col overflow-x-clip p-5 sm:p-10 max-[56rem]:sm:p-6 tp-short:p-5", className)}>
       {step === "sending" || step === "check" ? (
         <div role="status" aria-live="polite" className="absolute inset-0 z-20 bg-background/85 backdrop-blur-md">
           <div className="sticky top-[28%] flex flex-col items-center gap-6 py-10">
@@ -555,7 +583,7 @@ export function TimePicker({
       {/* the days, the time and the ruler fold away once a time is confirmed, so the form fits */}
       <Fold on={step === "pick"} fill>
       {/* the days */}
-      <div className="flex flex-col gap-5 tp-short:gap-3">
+      <div data-part="days" className="flex flex-col gap-5 tp-short:gap-3">
         <p className="label text-muted-foreground"><span className="mr-3 text-foreground">01</span>Pick a day</p>
         <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
           <div className="label flex items-center gap-2 whitespace-nowrap text-muted-foreground @md:gap-4">
@@ -591,26 +619,28 @@ export function TimePicker({
                   aria-pressed={on}
                   onClick={() => choose(id, pick.min, false)}
                   className={cn(
-                    "flex flex-col gap-2 min-w-0 rounded-[var(--tp-r,6px)] border-[0.5px] p-1.5 text-left @md:p-2.5 transition-[background-color,color,translate] duration-300 ease-[var(--ease-out-strong)] @xl:p-3",
+                    "flex flex-col gap-2 min-w-0 overflow-hidden rounded-[var(--tp-r,6px)] border-[0.5px] p-[var(--pad)] pb-0 text-left [--pad:0.375rem] @md:[--pad:0.625rem] transition-[background-color,color,translate] duration-300 ease-[var(--ease-out-strong)] @xl:[--pad:0.75rem]",
                     on ? "border-foreground bg-foreground text-background" : o.size ? "tp-open hoverable:hover:-translate-y-0.5" : "",
-                    !o.size && "pointer-events-none border-transparent opacity-30",
+                    // Julian: the square stays round a shut day.
+                    !o.size && "pointer-events-none border-border opacity-50",
                   )}
                 >
                   <span className="label opacity-70">{DAYS[d.getDay()]}</span>
                   <b className="font-display text-base leading-none @md:text-xl @xl:text-3xl">{d.getDate()}</b>
-                  <span aria-hidden className={cn("flex h-3.5 items-end gap-px", !on && "text-accent")}>
-                    {steps.map((m) => (
-                      <s key={m} className="w-[3px] max-sm:w-px flex-1 rounded-[1px] bg-current no-underline opacity-55 transition-[height] duration-500" style={{ height: o.has(m) ? 14 : 3 }} />
-                    ))}
-                  </span>
+                  {/* Julian: the day's times fill the foot of the tile, edge to
+                      edge, round its corners (2026-10-11). */}
+                  <Bars steps={steps} open={o} on={on} className="-mx-[var(--pad)] mt-auto h-5 @md:h-6" />
                 </button>
               );
             })}
           </div>
         ) : (
-          <div ref={monthGrid} className="grid grid-cols-7 gap-1.5 sm:gap-2">
+          <div ref={monthGrid} className="@container grid grid-cols-7 gap-2 sm:gap-2.5">
+            {/* The grid is the measure: a tile's number, padding and bars
+                follow its width (cqw), so the month beside the times keeps
+                the week's proportions rather than cropping them. */}
             {DAYS.map((d) => (
-              <span key={d} className="label pb-1 text-muted-foreground">{d[0]}<span className="@max-xl:hidden">{d.slice(1)}</span></span>
+              <span key={d} className="label pb-1 text-muted-foreground">{d[0]}<span className="@max-[22rem]:hidden">{d.slice(1)}</span></span>
             ))}
             {month.map((d, i) => {
               if (!d) return <span key={`b${i}`} />;
@@ -624,18 +654,18 @@ export function TimePicker({
                   type="button"
                   disabled={!o.size}
                   aria-pressed={on}
-                  onClick={() => choose(id, pick.min, false)}
+                  onClick={() => { choose(id, pick.min, false); showTimes(); }}
                   className={cn(
-                    "flex aspect-[1/0.8] w-full flex-col justify-between rounded-[var(--tp-r,6px)] border-[0.5px] p-2 text-left tp-short:aspect-auto tp-short:gap-1 tp-short:p-1.5 transition-[background-color,color,translate] duration-300 ease-[var(--ease-out-strong)] sm:aspect-[1/0.6] h-[var(--cell-h,auto)]",
+                    "flex aspect-[1/0.9] max-h-[4.5rem] w-full min-w-0 flex-col justify-between gap-1 overflow-hidden rounded-[var(--tp-r,6px)] border-[0.5px] p-[var(--pad)] pb-0 text-left [--pad:min(0.75rem,1.6cqw,calc(var(--cell-h,99rem)*0.14))] tp-short:aspect-auto transition-[background-color,color,translate] duration-300 ease-[var(--ease-out-strong)] h-[var(--cell-h,auto)]",
                     on ? "border-foreground bg-foreground text-background" : o.size ? "tp-open hoverable:hover:-translate-y-0.5" : "",
-                    // Julian: the square stays round a shut day in a month.
                     !o.size && "pointer-events-none border-border opacity-50",
                   )}
                 >
-                  <b className="font-display text-lg leading-none sm:text-2xl @xl:text-3xl">{d.getDate()}</b>
-                  <span aria-hidden className={cn("h-[3px] w-full bg-current/20", !on && "text-accent")}>
-                    <span className="block h-full bg-current" style={{ width: `${(o.size / steps.length) * 100}%` }} />
-                  </span>
+                  {/* The number follows the cell: when a short card squeezes the
+                      month (`--cell-h`), it shrinks with it rather than
+                      spilling out (Julian, 2026-10-11). */}
+                  <b className="font-display text-[min(1.875rem,5cqw,calc(var(--cell-h,99rem)*0.42))] leading-none">{d.getDate()}</b>
+                  <Bars steps={steps} open={o} on={on} className="-mx-[var(--pad)] h-[min(1.25rem,2.8cqw,calc(var(--cell-h,99rem)*0.3))] shrink-0" />
                 </button>
               );
             })}
@@ -672,7 +702,7 @@ export function TimePicker({
       {view === "week" ? <div aria-hidden className="shrink-0 grow basis-0" style={{ minHeight: "var(--tp-gap, 2rem)", maxHeight: "calc(var(--tp-gap, 2rem) + 3rem)" }} /> : null}
 
       {/* the times: the open ones of the day picked, as buttons */}
-      <div ref={slotsBox} className={cn("flex flex-col gap-4 pb-6 tp-short:gap-2", view === "month" && "mt-5 tp-short:mt-2")}>
+      <div ref={slotsBox} data-part="times" className={cn("flex flex-col gap-4 pb-6 tp-short:gap-2", view === "month" && "mt-5 tp-short:mt-2")}>
         <p className="label text-muted-foreground"><span className="mr-3 text-foreground">02</span>Pick a time
           {/* Under a month there is no day over the times to say whose they
               are, and the month shown may not hold it (Julian). */}
@@ -720,6 +750,9 @@ export function TimePicker({
                 className={cn(
                   "tp-rise label min-w-0 flex-1 rounded-[var(--tp-r,6px)] [animation-fill-mode:backwards] border-[0.5px] py-[min(var(--tp-slot,0.75rem),0.625rem)] text-center sm:py-[var(--tp-slot,0.75rem)] tabular-nums transition-[background-color,color,translate] duration-300 ease-[var(--ease-out-strong)] tp-short:py-2",
                   on ? "border-foreground bg-foreground text-background" : "tp-open hoverable:hover:-translate-y-0.5",
+                  // A day of one or two times: a box, not a bar the width of
+                  // the card.
+                  line && "max-w-[9rem]",
                   // A month and a crowded day: shorter boxes, or the evening
                   // fell under the bar on an iPad held sideways.
                   !line && view === "month" && "py-2 sm:py-2 tp-short:py-1.5",
@@ -742,7 +775,7 @@ export function TimePicker({
       {step === "pick" ? (
         <div className="sticky bottom-0 z-10 mt-auto flex flex-col gap-4 pt-6 bg-background/80 backdrop-blur-md tp-short:pb-1 tp-short:pt-4 @md:flex-row @md:items-center @md:justify-between">
           <span className="label text-muted-foreground">{chosen === "time" ? `${sum} ${zone(pick.start, tz)}` : `San Jose, CA · ${here}${tz === "America/Los_Angeles" ? "" : ` · times in ${zone(pick.start, tz)}`}`}</span>
-          <button type="button" onClick={() => setOk("spin")} disabled={chosen !== "time"} aria-busy={!!ok} className="label relative rounded-[2px] border border-foreground bg-foreground px-6 @max-md:w-full py-4 text-background transition-[opacity,scale,background-color,border-color,color] duration-300 enabled:border-accent enabled:bg-accent enabled:text-accent-foreground hoverable:hover:opacity-85 active:scale-[0.98] disabled:pointer-events-none disabled:opacity-35">
+          <button type="button" data-part="act" onClick={() => setOk("spin")} disabled={chosen !== "time"} aria-busy={!!ok} className="label relative rounded-[2px] border border-foreground bg-foreground px-6 @max-md:w-full py-4 text-background transition-[opacity,scale,background-color,border-color,color] duration-300 enabled:border-accent enabled:bg-accent enabled:text-accent-foreground hoverable:hover:opacity-85 active:scale-[0.98] disabled:pointer-events-none disabled:opacity-35">
             <span className={cn("transition-opacity duration-200", ok && "opacity-0")}>Confirm this time</span>
             {ok ? (
               <span aria-hidden className="tp-status absolute inset-0 m-auto size-6" data-ok={ok === "tick" ? "" : undefined}>
@@ -766,19 +799,19 @@ export function TimePicker({
           }}
           className="tp-rise flex flex-col gap-4"
         >
-          <div className="flex items-center justify-between gap-4">
+          <div data-part="when" className="flex items-center justify-between gap-4">
             <span className="label">{sum}</span>
             <button type="button" onClick={() => setStep("pick")} className="label text-muted-foreground hoverable:hover:text-foreground">Change</button>
           </div>
           <div className="grid gap-4 sm:grid-cols-2">
-            <label className="label flex flex-col gap-2 text-muted-foreground">First name<input name="first" required autoComplete="given-name" className="border-b border-border bg-transparent py-2 text-base normal-case text-foreground outline-none focus:border-foreground" /></label>
-            <label className="label flex flex-col gap-2 text-muted-foreground">Last name<input name="last" required autoComplete="family-name" className="border-b border-border bg-transparent py-2 text-base normal-case text-foreground outline-none focus:border-foreground" /></label>
-            <label className="label flex flex-col gap-2 text-muted-foreground">Email<input name="email" type="email" required autoComplete="email" className="border-b border-border bg-transparent py-2 text-base normal-case text-foreground outline-none focus:border-foreground" /></label>
-            <label className="label flex flex-col gap-2 text-muted-foreground">Phone<input name="phone" type="tel" required autoComplete="tel" inputMode="tel" className="border-b border-border bg-transparent py-2 text-base normal-case text-foreground outline-none focus:border-foreground" /></label>
+            <label className="label flex flex-col gap-2 text-muted-foreground">First name *<input name="first" required autoComplete="given-name" className="border-b border-border bg-transparent py-2 text-base normal-case text-foreground outline-none focus:border-foreground" /></label>
+            <label className="label flex flex-col gap-2 text-muted-foreground">Last name *<input name="last" required autoComplete="family-name" className="border-b border-border bg-transparent py-2 text-base normal-case text-foreground outline-none focus:border-foreground" /></label>
+            <label className="label flex flex-col gap-2 text-muted-foreground">Email *<input name="email" type="email" required autoComplete="email" className="border-b border-border bg-transparent py-2 text-base normal-case text-foreground outline-none focus:border-foreground" /></label>
+            <label className="label flex flex-col gap-2 text-muted-foreground">Phone *<input name="phone" type="tel" required autoComplete="tel" inputMode="tel" className="border-b border-border bg-transparent py-2 text-base normal-case text-foreground outline-none focus:border-foreground" /></label>
             {needsWhere && WHERE[slug]?.length === 1 ? null : needsWhere && WHERE[slug] ? (
               <>
                 <fieldset className="flex flex-col sm:col-span-2">
-                  <legend className="label mb-2 text-muted-foreground">Location</legend>
+                  <legend className="label mb-2 text-muted-foreground">Location *</legend>
                   <div className="flex flex-wrap gap-2">
                     {WHERE[slug].map(([label]) => (
                       <label key={label} className="label cursor-pointer">
@@ -787,7 +820,7 @@ export function TimePicker({
                           const next = WHERE[slug].find(([l]) => l === label)?.[1];
                           if (next) setAsk(next);
                         }} className="peer sr-only" />
-                        <span className="block rounded-[2px] border border-border px-5 py-3 transition-colors duration-200 hoverable:hover:border-foreground peer-checked:border-foreground peer-checked:bg-foreground peer-checked:text-background peer-focus-visible:outline peer-focus-visible:outline-1 peer-focus-visible:outline-offset-2">{label}</span>
+                        <span data-part="chip" className="block rounded-[2px] border border-border px-5 py-3 transition-colors duration-200 hoverable:hover:border-foreground peer-checked:border-foreground peer-checked:bg-foreground peer-checked:text-background peer-focus-visible:outline peer-focus-visible:outline-1 peer-focus-visible:outline-offset-2">{label}</span>
                       </label>
                     ))}
                   </div>
@@ -801,9 +834,9 @@ export function TimePicker({
             ) : null}
           </div>
           
-          <label className="label flex flex-col gap-2 text-muted-foreground">Anything I should know<textarea name="notes" rows={2} className="resize-none border-b border-border bg-transparent py-2 text-base normal-case text-foreground outline-none focus:border-foreground" /></label>
+          <label className="label flex flex-col gap-2 text-muted-foreground">Anything I should know<textarea name="notes" rows={2} placeholder="Optional" className="resize-none placeholder:uppercase placeholder:text-muted-foreground/50 border-b border-border bg-transparent py-2 text-base normal-case text-foreground outline-none focus:border-foreground" /></label>
           {error ? <p role="alert" className="text-sm normal-case text-foreground">{error}</p> : null}
-          <button type="submit" disabled={step === "sending"} className="label self-start rounded-[2px] border border-foreground bg-foreground px-6 py-4 text-background transition-[opacity,scale] duration-300 hoverable:hover:opacity-85 active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50">
+          <button type="submit" data-part="act" disabled={step === "sending"} className="label self-end rounded-[2px] border border-foreground bg-foreground px-6 py-4 text-background transition-[opacity,scale] duration-300 hoverable:hover:opacity-85 active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50">
             {step === "sending" ? "Booking" : "Book it"}
           </button>
         </form>

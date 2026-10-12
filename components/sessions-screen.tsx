@@ -1,13 +1,13 @@
 "use client";
 
 import type * as React from "react";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Liquid, useQuiet } from "@/components/liquid";
 import { RisingTitle } from "@/components/strip-page";
-import { BookHere } from "@/components/book-here";
+import { BookCard } from "@/components/book-here";
 import type { MenuItem } from "@/lib/booking";
 import type { Frame } from "@/lib/work-types";
 
@@ -84,9 +84,29 @@ export function SessionsScreen({ sessions, menu }: { sessions: SessionItem[]; me
      finger, the first tap opens a row and the next goes to its page;
      a mouse has opened it already by pointing. */
   const wasOpen = useRef(false);
+  /* `?bookhere`: a session clicked opens its booking card where the
+     title was; the list stays as it is (Julian, 2026-10-11). While a card
+     is open the list holds on its session rather than following the
+     pointer. */
+  const [book, setBook] = useState<number | null>(null);
   const go = (i: number) => {
-    if (i === open) return;
+    if (i === open || book !== null) return;
     setOpen(i);
+  };
+  /* Closing lets the card go first (down and out), then the title and
+     the photograph come back with their own rise (Julian, 2026-10-11). */
+  const [leaving, setLeaving] = useState(false);
+  const close = useCallback(() => {
+    if (matchMedia("(prefers-reduced-motion: reduce)").matches) return setBook(null);
+    setLeaving(true);
+    setTimeout(() => {
+      setBook(null);
+      setLeaving(false);
+    }, 320);
+  }, []);
+  const take = (i: number) => {
+    setOpen(i);
+    setBook(i);
   };
   /* The ink in liquid, the filter bar's. One drop under the open row
      that runs to the next one as a liquid would, and drains to a line
@@ -112,24 +132,43 @@ export function SessionsScreen({ sessions, menu }: { sessions: SessionItem[]; me
     read();
     return () => cancelAnimationFrame(raf);
   }, [hot, open]);
-  const current = sessions[open];
-  /* `?bookhere`: the screen as a booking menu (`book-here.tsx`), until
-     Julian says it replaces this one. The section stays the same
-     element, which the strip keeps hold of. */
+  /* `?bookhere`: the commissions join the sessions in the list, and
+     each books on the screen (`BookCard`), until Julian says it replaces
+     this one. No rates (Julian). */
   const [here, setHere] = useState(false);
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setHere(new URLSearchParams(window.location.search).has("bookhere"));
   }, []);
+  const rows: (SessionItem & { item?: MenuItem })[] =
+    here && menu
+      ? menu.map((m) => {
+          const s = sessions.find((x) => x.slug === m.slug);
+          return { slug: m.slug, name: m.name, rate: "", turnaround: s?.turnaround ?? "", blurb: m.blurb, includes: s?.includes ?? [], cover: s?.cover ?? null, page: m.page, pageTitle: s?.pageTitle, item: m };
+        })
+      : sessions;
+  const current = rows[open];
+  const booking = book === null ? null : rows[book]?.item ?? null;
+  const rail = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (book === null) return;
+    // The rail brings the open session to its middle.
+    const r = rail.current, b = r?.children[book] as HTMLElement | undefined;
+    if (r && b) r.scrollTo({ left: b.offsetLeft - (r.clientWidth - b.offsetWidth) / 2, behavior: "smooth" });
+    // On a phone the card is above the list: take the page to it.
+    if (matchMedia("(max-width: 39.99rem)").matches) document.getElementById("book-open")?.scrollIntoView({ block: "start", behavior: "smooth" });
+    const key = (e: KeyboardEvent) => e.key === "Escape" && close();
+    window.addEventListener("keydown", key);
+    return () => window.removeEventListener("keydown", key);
+  }, [book, close]);
 
   return (
     <section
       data-tick
       data-label="Sessions"
       data-hash="sessions"
-      className={here && menu ? "screen-measure relative w-full shrink-0 sm:h-full" : "screen-measure relative grid w-full shrink-0 grid-cols-1 items-center gap-10 sessions-screen px-6 py-12 sm:h-full sm:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] sm:gap-x-[clamp(2rem,3.5vw,4rem)] sm:px-10 sm:pb-8 sm:pt-20 short:pb-4 sm:[container-type:size] xl:grid-cols-[auto_auto_minmax(0,1fr)]"}
+      className={here && booking ? `screen-measure relative grid w-full shrink-0 grid-cols-1 items-center gap-10 sessions-screen px-6 py-12 sm:h-full sm:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] xl:grid-cols-[minmax(0,1fr)_minmax(0,36rem)] max-lg:!grid-cols-1 lg:max-xl:!grid-cols-[minmax(0,1.25fr)_minmax(0,0.75fr)] sm:grid-rows-[minmax(0,1fr)] sm:gap-x-[clamp(2rem,3.5vw,4rem)] sm:px-10 sm:pb-8 sm:pt-20 short:pb-4 sm:[container-type:size]` : "screen-measure relative grid w-full shrink-0 grid-cols-1 items-center gap-10 sessions-screen px-6 py-12 sm:h-full sm:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] sm:gap-x-[clamp(2rem,3.5vw,4rem)] sm:px-10 sm:pb-8 sm:pt-20 short:pb-4 sm:[container-type:size] xl:grid-cols-[auto_auto_minmax(0,1fr)]"}
     >
-      {here && menu ? <BookHere items={menu} photos={Object.fromEntries(sessions.map((s) => [s.slug, s.cover]))} /> : (<>
       {/* With three columns the photograph sits further right (its
           margin, from about 1600px wide) and larger (to 56rem tall); the
           list keeps the plain gap after it, half the space it had. Below
@@ -138,9 +177,30 @@ export function SessionsScreen({ sessions, menu }: { sessions: SessionItem[]; me
           is centred only while it fits: at 1440x840 the open list ran up
           under the bar. On a short laptop (1280x800) the names are set a
           touch smaller so the open session fits. */}
+      {booking ? (
+        /* The session's name, rising as the title did, over its card. */
+        /* Under 1024px wide the card takes the screen and the list steps
+           aside until it closes (iPad upright had the card in a sliver). */
+        <div id="book-open" className={`flex min-h-0 scroll-mt-20 flex-col gap-6 self-stretch transition-[opacity,translate] duration-300 ease-[var(--ease-out-strong)] sm:justify-center sm:pt-[clamp(1.5rem,4.5vh,3rem)] ${leaving ? "translate-y-3 opacity-0" : ""}`}>
+          {/* Under 1024px the list is away while the card is open, so
+              the sessions run in a line over the title: another session
+              is one swipe and a tap, not a scroll back up (Julian). */}
+          <nav aria-label="Sessions" className="-mx-6 sm:-mx-10 lg:hidden">
+            <div ref={rail} className="label flex snap-x gap-6 overflow-x-auto overscroll-x-contain px-6 [mask-image:linear-gradient(90deg,transparent,#000_1.5rem,#000_calc(100%-1.5rem),transparent)] [scrollbar-width:none] sm:px-10">
+              {rows.map((r, i) => (
+                <button key={r.slug} type="button" aria-current={i === book || undefined} onClick={() => i !== book && take(i)} className={`tap-44 shrink-0 snap-center whitespace-nowrap border-b pb-1 transition-colors duration-200 ${i === book ? "border-foreground text-foreground" : "border-transparent text-muted-foreground"}`}>
+                  <span className="tabular-nums opacity-60">{String(i + 1).padStart(2, "0")}</span> {r.name}
+                </button>
+              ))}
+            </div>
+          </nav>
+          <RisingTitle key={`title-${booking.slug}`} text={booking.name} className="sm:max-lg:text-4xl" />
+          <BookCard key={`card-${booking.slug}`} item={booking} onClose={close} className="min-h-0 flex-1 sm:max-h-[44rem] motion-safe:animate-[jg-fade-up_520ms_var(--ease-out-strong)_both] max-sm:-mx-3 max-sm:h-[80svh] max-sm:flex-none" />
+        </div>
+      ) : (
       <div className="flex w-fit max-w-full flex-col gap-5 self-center">
         {/* Says what the count is, not the title again. */}
-        <span className="label text-muted-foreground">
+        <span className={here ? "hidden" : "label text-muted-foreground"}>
           <span className="mr-2 text-foreground">
             {String(sessions.length).padStart(2, "0")}
           </span>
@@ -155,14 +215,18 @@ export function SessionsScreen({ sessions, menu }: { sessions: SessionItem[]; me
           Everything here is booked directly, with no packages to decode.
         </p>
       </div>
+      )}
 
       {/* As tall as the screen allows, to 48rem (Julian: smaller, then
           larger). On a laptop no wider than a quarter of the screen, so the
           words keep three lines and the names one. Under 1280 there is no
           room for three columns and it is left out: the words and the
           list. */}
+      {/* `?bookhere`: the photograph stands while no card is open, and
+          the card takes its place (Julian, 2026-10-11). */}
+      {here && booking ? null : (
       <div className="sessions-photo title-rest relative aspect-[3/4] max-sm:aspect-[3/2] w-full overflow-hidden rounded-[4px] bg-card sm:h-[min(48rem,calc(100cqh-8rem),max(34.5vw,calc(100vw-75rem)))] sm:w-auto sm:justify-self-center sm:max-xl:hidden xl:ml-[max(0rem,min(4.25rem,16.5vw-16.5rem))] xl:h-[min(56rem,calc(100cqh-8rem),max(34.5vw,calc(100vw-75rem)))]">
-        {sessions.map((s, i) =>
+        {rows.map((s, i) =>
           s.cover && (warm || i === open) ? (
             <Image
               key={s.slug}
@@ -191,16 +255,28 @@ export function SessionsScreen({ sessions, menu }: { sessions: SessionItem[]; me
         <div className="pointer-events-none absolute inset-x-0 bottom-0 flex flex-col items-start gap-1.5 bg-gradient-to-t from-black/80 via-black/35 to-transparent px-5 pb-5 pt-20">
           {/* Near full white: at 75% the rate measured 4:1 on a bright
               frame (plan 5.1). */}
-          <span className="label leading-none text-white/90">{current.rate}</span>
+          {current.rate ? <span className="label leading-none text-white/90">{current.rate}</span> : null}
           <span className="font-display text-[clamp(1.25rem,2vw,2rem)] uppercase leading-[0.9] text-white">
             {current.name}
           </span>
         </div>
       </div>
+      )}
 
-      <div ref={col} className="session-col title-rest relative flex min-w-0 flex-col">
+      <div ref={col} className={`session-col title-rest relative flex min-w-0 flex-col ${booking ? "max-lg:hidden" : ""}`}>
+        {/* Under the flag the photograph is behind the list, faint
+            (Julian: low key). */}
+        {here && booking ? (
+          <div aria-hidden className="pointer-events-none absolute -inset-x-10 -inset-y-12 overflow-hidden [mask-image:radial-gradient(closest-side,#000_45%,transparent)]">
+            {rows.map((s, i) =>
+              s.cover ? (
+                <Image key={s.slug} src={s.cover.src} alt="" fill sizes="40vw" loading="lazy" className={`object-cover object-[50%_25%] transition-opacity duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] ${i === open ? "opacity-[0.16]" : "opacity-0"}`} />
+              ) : null,
+            )}
+          </div>
+        ) : null}
         <ul
-          className="session-list border-t border-border"
+          className="session-list relative border-t border-border"
           onPointerEnter={(e) => {
             setWarm(true);
             if (e.pointerType !== "mouse") return;
@@ -226,16 +302,16 @@ export function SessionsScreen({ sessions, menu }: { sessions: SessionItem[]; me
             setHot(false);
           }}
         >
-          {sessions.map((s, i) => {
+          {rows.map((s, i) => {
             const on = i === open;
             const head = (
               <>
                 <span
-                  className={`font-display text-[clamp(1.5rem,2.4vw,2.5rem)] leading-none short:text-[clamp(1.25rem,2vw,2rem)] tabular-nums transition-colors duration-300 ${on ? "text-foreground" : "text-muted-foreground/75"}`}
+                  className={`font-display ${here ? "text-[clamp(1.25rem,1.9vw,2rem)]" : "text-[clamp(1.5rem,2.4vw,2.5rem)]"} leading-none short:text-[clamp(1.25rem,2vw,2rem)] tabular-nums transition-colors duration-300 ${on ? "text-foreground" : "text-muted-foreground/75"}`}
                 >
                   {String(i + 1).padStart(2, "0")}
                 </span>
-                <span className="font-display text-[clamp(1.5rem,2.4vw,2.5rem)] leading-none short:text-[clamp(1.25rem,2vw,2rem)]">
+                <span className={`font-display ${here ? "text-[clamp(1.25rem,1.9vw,2rem)]" : "text-[clamp(1.5rem,2.4vw,2.5rem)]"} leading-none short:text-[clamp(1.25rem,2vw,2rem)]`}>
                   {s.name}
                 </span>
                 <span className="label text-muted-foreground max-sm:hidden">
@@ -263,15 +339,16 @@ export function SessionsScreen({ sessions, menu }: { sessions: SessionItem[]; me
                    the link a keyboard and a reader get, so it goes the
                    way every link on the site goes. */
                 onClick={(e) => {
+                  if (here) return void (!(e.target as HTMLElement).closest("a, button") && take(i));
                   if (!s.page || (e.target as HTMLElement).closest("a, button")) return;
                   if (!wasOpen.current) return go(i);
                   e.currentTarget.querySelector("a")?.click();
                 }}
-                className={`session-step relative flex flex-col border-b border-border py-1.5 ${s.page ? "cursor-pointer" : ""}`}
+                className={`session-step relative flex flex-col border-b border-border py-1.5 ${s.page || here ? "cursor-pointer" : ""}`}
               >
                 {/* A session with a booking page goes there on a click;
                     pointing still opens it here. */}
-                {s.page ? (
+                {s.page && !here ? (
                   <Link
                     href={s.page}
                     onFocus={() => go(i)}
@@ -291,7 +368,7 @@ export function SessionsScreen({ sessions, menu }: { sessions: SessionItem[]; me
                 <button
                   type="button"
                   aria-expanded={on}
-                  onClick={() => setOpen(i)}
+                  onClick={() => (here ? take(i) : setOpen(i))}
                   onFocus={() => go(i)}
                   className="tap-44 grid grid-cols-[auto_minmax(0,1fr)_auto] items-baseline gap-4 py-2 text-left short:py-1.5"
                 >
@@ -313,6 +390,7 @@ export function SessionsScreen({ sessions, menu }: { sessions: SessionItem[]; me
                       {s.blurb}
                     </p>
                     {/* What the /sessions page used to say about each. */}
+                    {s.includes.length ? (
                     <p className="max-w-[32.5rem] text-left text-sm normal-case leading-relaxed text-muted-foreground text-balance">
                       {/* Each item whole on its line, and the dot held to the
                           item before it, so no line starts with one. */}
@@ -334,6 +412,7 @@ export function SessionsScreen({ sessions, menu }: { sessions: SessionItem[]; me
                         <span className="font-medium">Ready in {s.turnaround}</span>
                       </span>
                     </p>
+                    ) : null}
                     {/* Book a session at the card's bottom right, the
                         page's link on the left; under it where the
                         column is too narrow for both, still at the
@@ -352,6 +431,11 @@ export function SessionsScreen({ sessions, menu }: { sessions: SessionItem[]; me
                           {where(s.pageTitle ?? `More on ${s.name}`)}
                         </Link>
                       ) : null}
+                      {s.item ? (
+                        <button type="button" onClick={() => take(i)} className="tap-44 label ml-auto block whitespace-nowrap py-2 font-bold short:py-1">
+                          {s.item.cal ? (s.item.group === "time" ? "Book a session" : "Book a call") : "Send details"}&nbsp;<span aria-hidden>&rarr;</span>
+                        </button>
+                      ) : (
                       <Link
                         href={
                           s.page
@@ -362,6 +446,7 @@ export function SessionsScreen({ sessions, menu }: { sessions: SessionItem[]; me
                       >
                         Book a session&nbsp;<span aria-hidden>&rarr;</span>
                       </Link>
+                      )}
                     </div>
                   </div>
                   </div>
@@ -438,7 +523,6 @@ export function SessionsScreen({ sessions, menu }: { sessions: SessionItem[]; me
           </Link>
         </div>
       </div>
-      </>)}
     </section>
   );
 }
