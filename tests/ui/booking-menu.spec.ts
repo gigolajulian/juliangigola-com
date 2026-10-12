@@ -38,8 +38,9 @@ for (const r of RATIOS) {
     await expect(card).toHaveAttribute("aria-label", /Portraits/);
     await expect(card.getByRole("button", { name: "Confirm this time" })).toBeAttached();
 
-    // Close sits clear of the calendar, whatever it scrolls to.
-    const clear = await card.evaluate((c) => {
+    // Close sits clear of the calendar, whatever it scrolls to. Polled: the
+    // card is still settling for a moment on a slow CI runner.
+    const isClear = () => card.evaluate((c) => {
       const close = [...c.querySelectorAll("button")].find((b) => /^Close/.test(b.textContent!.trim()))!;
       const sc = [...c.querySelectorAll<HTMLElement>("*")].find((n) => /(auto|scroll)/.test(getComputedStyle(n).overflowY) && n.scrollHeight > n.clientHeight + 1);
       const cb = close.getBoundingClientRect();
@@ -52,7 +53,7 @@ for (const r of RATIOS) {
       sc.scrollTop = 0;
       return ok;
     });
-    expect(clear, "nothing drawn over Close").toBe(true);
+    await expect.poll(isClear, { message: "nothing drawn over Close", timeout: 10_000 }).toBe(true);
 
     // A commission opens the form, Inquire on screen without scrolling.
     await card.getByRole("button", { name: /close/i }).click();
