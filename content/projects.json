@@ -1710,273 +1710,26 @@
       "/work/weddings/01.jpg",
       "/work/weddings/02.jpg",
       "/work/weddings/03.jpg",
-      "/work/weddings/04.jpg",
-      "/work/weddings/05.jpg",
-      "/work/weddings/06.jpg",
       "/work/weddings/07.jpg",
       "/work/weddings/08.jpg",
-      "/work/weddings/09.jpg",
-      "/work/weddings/10.jpg",
       "/work/weddings/11.jpg",
       "/work/weddings/12.jpg",
       "/work/weddings/13.jpg",
       "/work/weddings/14.jpg",
-      "/work/weddings/15.jpg",
-      "/work/weddings/16.jpg",
       "/work/weddings/17.jpg",
-      "/work/weddings/18.jpg",
-      "/work/weddings/19.jpg",
       "/work/weddings/20.jpg",
-      "/work/weddings/21.jpg",
-      "/work/weddings/22.jpg",
-      "/work/weddings/23.jpg",
-      "/work/weddings/24.jpg",
       "/work/weddings/25.jpg",
-      "/work/weddings/26.jpg",
-      "/work/weddings/27.jpg",
-      "/work/weddings/28.jpg",
       "/work/weddings/29.jpg",
-      "/work/weddings/30.jpg",
-      "/work/weddings/31.jpg",
-      "/work/weddings/32.jpg",
-      "/work/weddings/33.jpg",
       "/work/weddings/34.jpg",
       "/work/weddings/35.jpg",
       "/work/weddings/36.jpg",
-      "/work/weddings/37.jpg",
-      "/work/weddings/38.jpg",
-      "/work/weddings/39.jpg",
       "/work/weddings/40.jpg",
-      {
-        "src": "/work/bridal/01.jpg",
-        "width": 1600,
-        "height": 2399,
-        "color": "#F3F3F3",
-        "alt": ""
-      },
-      {
-        "src": "/work/bridal/02.jpg",
-        "width": 1600,
-        "height": 1067,
-        "color": "#C0C0C0",
-        "alt": ""
-      },
-      {
-        "src": "/work/bridal/03.jpg",
-        "width": 1600,
-        "height": 2398,
-        "color": "#D9D9D9",
-        "alt": ""
-      },
-      {
-        "src": "/work/bridal/04.jpg",
-        "width": 1600,
-        "height": 2398,
-        "color": "#C0C0C0",
-        "alt": ""
-      },
-      {
-        "src": "/work/bridal/05.jpg",
-        "width": 1600,
-        "height": 2399,
-        "color": "#F3F3F3",
-        "alt": ""
-      },
-      {
-        "src": "/work/bridal/06.jpg",
-        "width": 1600,
-        "height": 2398,
-        "color": "#F3F3F3",
-        "alt": ""
-      },
-      {
-        "src": "/work/bridal/07.jpg",
-        "width": 1600,
-        "height": 2398,
-        "color": "#262626",
-        "alt": ""
-      },
       {
         "src": "/work/bridal/08.jpg",
         "width": 1600,
         "height": 1067,
         "color": "#C0C0C0",
-        "alt": ""
-      },
-      {
-        "src": "/work/bridal/09.jpg",
-        "width": 1600,
-        "height": 2399,
-        "color": "#F3F3F3",
-        "alt": ""
-      },
-      {
-        "src": "/work/bridal/10.jpg",
-        "width": 1600,
-        "height": 2399,
-        "color": "#C0C0A6",
-        "alt": ""
-      },
-      {
-        "src": "/work/bridal/11.jpg",
-        "width": 1600,
-        "height": 1067,
-        "color": "#737373",
-        "alt": ""
-      },
-      {
-        "src": "/work/bridal/12.jpg",
-        "width": 1600,
-        "height": 2398,
-        "color": "#F3F3F3",
-        "alt": ""
-      },
-      {
-        "src": "/work/bridal/13.jpg",
-        "width": 1600,
-        "height": 2399,
-        "color": "#F3F3F3",
-        "alt": ""
-      },
-      {
-        "src": "/work/bridal/14.jpg",
-        "width": 1600,
-        "height": 2398,
-        "color": "#F3F3F3",
-        "alt": ""
-      },
-      {
-        "src": "/work/bridal/15.jpg",
-        "width": 1600,
-        "height": 1067,
-        "color": "#D9C0A6",
-        "alt": ""
-      },
-      {
-        "src": "/work/bridal/16.jpg",
-        "width": 1600,
-        "height": 1067,
-        "color": "#F3F3F3",
-        "alt": ""
-      },
-      {
-        "src": "/work/bridal/17.jpg",
-        "width": 1600,
-        "height": 1067,
-        "color": "#F3F3F3",
-        "alt": ""
-      },
-      {
-        "src": "/work/bridal/18.jpg",
-        "width": 1600,
-        "height": 2399,
-        "color": "#D9D9D9",
-        "alt": ""
-      },
-      {
-        "src": "/work/bridal/19.jpg",
-        "width": 1600,
-        "height": 2398,
-        "color": "#C0C0C0",
-        "alt": ""
-      },
-      {
-        "src": "/work/bridal/20.jpg",
-        "width": 1600,
-        "height": 2399,
-        "color": "#C0A68C",
-        "alt": ""
-      },
-      {
-        "src": "/work/bridal/21.jpg",
-        "width": 1600,
-        "height": 2398,
-        "color": "#735940",
-        "alt": ""
-      },
-      {
-        "src": "/work/bridal/22.jpg",
-        "width": 1600,
-        "height": 1067,
-        "color": "#737373",
-        "alt": ""
-      },
-      {
-        "src": "/work/bridal/23.jpg",
-        "width": 1600,
-        "height": 1067,
-        "color": "#8C8C73",
-        "alt": ""
-      },
-      {
-        "src": "/work/bridal/24.jpg",
-        "width": 1600,
-        "height": 1067,
-        "color": "#8C7373",
-        "alt": ""
-      },
-      {
-        "src": "/work/bridal/25.jpg",
-        "width": 1600,
-        "height": 1067,
-        "color": "#262626",
-        "alt": ""
-      },
-      {
-        "src": "/work/bridal/26.jpg",
-        "width": 1600,
-        "height": 1067,
-        "color": "#262626",
-        "alt": ""
-      },
-      {
-        "src": "/work/bridal/27.jpg",
-        "width": 1600,
-        "height": 2398,
-        "color": "#262626",
-        "alt": ""
-      },
-      {
-        "src": "/work/bridal/28.jpg",
-        "width": 1600,
-        "height": 2399,
-        "color": "#262626",
-        "alt": ""
-      },
-      {
-        "src": "/work/bridal/29.jpg",
-        "width": 1600,
-        "height": 2398,
-        "color": "#C0C0C0",
-        "alt": ""
-      },
-      {
-        "src": "/work/bridal/30.jpg",
-        "width": 1600,
-        "height": 2398,
-        "color": "#262626",
-        "alt": ""
-      },
-      {
-        "src": "/work/bridal/31.jpg",
-        "width": 1600,
-        "height": 2399,
-        "color": "#26260C",
-        "alt": ""
-      },
-      {
-        "src": "/work/bridal/32.jpg",
-        "width": 1600,
-        "height": 2399,
-        "color": "#262626",
-        "alt": ""
-      },
-      {
-        "src": "/work/bridal/33.jpg",
-        "width": 1600,
-        "height": 1067,
-        "color": "#8C7359",
-        "alt": ""
+        "alt": "Couple walking hand in hand down a pale marble corridor, white dress and tan suit, red bouquet"
       }
     ],
     "light-play": [
@@ -2268,28 +2021,16 @@
     "sara": [
       "/work/sara/08.jpg",
       "/work/sara/01.jpg",
-      "/work/sara/02.jpg",
-      "/work/sara/03.jpg",
-      "/work/sara/04.jpg",
-      "/work/sara/05.jpg",
       "/work/sara/06.jpg",
       "/work/sara/07.jpg",
       "/work/sara/09.jpg",
       "/work/sara/10.jpg",
-      "/work/sara/11.jpg",
-      "/work/sara/13.jpg",
       "/work/sara/14.jpg",
       "/work/sara/15.jpg",
-      "/work/sara/16.jpg",
       "/work/sara/17.jpg",
-      "/work/sara/18.jpg",
       "/work/sara/19.jpg",
       "/work/sara/20.jpg",
-      "/work/sara/21.jpg",
       "/work/sara/23.jpg",
-      "/work/sara/24.jpg",
-      "/work/sara/25.jpg",
-      "/work/sara/26.jpg",
       "/work/sara/27.jpg"
     ],
     "jubo": [
@@ -2330,6 +2071,102 @@
       "/work/lustro/07.jpg",
       "/work/lustro/01.jpg",
       "/work/lustro/02.jpg"
+    ],
+    "steampunk-files-001": [
+      "/work/steampunk-files-001/01.jpg",
+      "/work/steampunk-files-001/03.jpg",
+      "/work/steampunk-files-001/07.jpg",
+      "/work/steampunk-files-001/08.jpg",
+      "/work/steampunk-files-001/11.jpg",
+      "/work/steampunk-files-001/12.jpg",
+      "/work/steampunk-files-001/13.jpg",
+      "/work/steampunk-files-001/14.jpg",
+      "/work/steampunk-files-001/15.jpg",
+      "/work/steampunk-files-001/18.jpg",
+      "/work/steampunk-files-001/20.jpg",
+      "/work/steampunk-files-001/21.jpg",
+      "/work/steampunk-files-001/29.jpg",
+      "/work/steampunk-files-001/30.jpg",
+      "/work/steampunk-files-001/31.jpg"
+    ],
+    "zoe": [
+      "/work/zoe/05.jpg",
+      "/work/zoe/07.jpg",
+      "/work/zoe/09.jpg",
+      "/work/zoe/16.jpg",
+      "/work/zoe/19.jpg",
+      "/work/zoe/24.jpg",
+      "/work/zoe/27.jpg",
+      "/work/zoe/29.jpg",
+      "/work/zoe/30.jpg"
+    ],
+    "l3na": [
+      "/work/l3na/01.jpg",
+      "/work/l3na/02.jpg",
+      "/work/l3na/04.jpg",
+      "/work/l3na/06.jpg",
+      "/work/l3na/09.jpg",
+      "/work/l3na/11.jpg",
+      "/work/l3na/13.jpg",
+      "/work/l3na/14.jpg",
+      "/work/l3na/16.jpg",
+      "/work/l3na/19.jpg",
+      "/work/l3na/22.jpg",
+      "/work/l3na/25.jpg"
+    ],
+    "ukiyosunknown": [
+      "/work/ukiyosunknown/01.jpg",
+      "/work/ukiyosunknown/02.jpg",
+      "/work/ukiyosunknown/03.jpg",
+      "/work/ukiyosunknown/04.jpg",
+      "/work/ukiyosunknown/06.jpg",
+      "/work/ukiyosunknown/07.jpg",
+      "/work/ukiyosunknown/08.jpg",
+      "/work/ukiyosunknown/09.jpg",
+      "/work/ukiyosunknown/10.jpg",
+      "/work/ukiyosunknown/13.jpg",
+      "/work/ukiyosunknown/14.jpg",
+      "/work/ukiyosunknown/15.jpg",
+      "/work/ukiyosunknown/16.jpg",
+      "/work/ukiyosunknown/18.jpg",
+      "/work/ukiyosunknown/19.jpg",
+      "/work/ukiyosunknown/20.jpg",
+      "/work/ukiyosunknown/21.jpg",
+      "/work/ukiyosunknown/23.jpg",
+      "/work/ukiyosunknown/24.jpg"
+    ],
+    "luxe-meets-future": [
+      "/work/luxe-meets-future/02.jpg",
+      "/work/luxe-meets-future/01.jpg",
+      "/work/luxe-meets-future/05.jpg",
+      "/work/luxe-meets-future/06.jpg",
+      "/work/luxe-meets-future/08.jpg",
+      "/work/luxe-meets-future/09.jpg",
+      "/work/luxe-meets-future/12.jpg",
+      "/work/luxe-meets-future/14.jpg",
+      "/work/luxe-meets-future/16.jpg",
+      "/work/luxe-meets-future/18.jpg",
+      "/work/luxe-meets-future/19.jpg",
+      "/work/luxe-meets-future/20.jpg",
+      "/work/luxe-meets-future/21.jpg"
+    ],
+    "i-wanna-be-a-human": [
+      "/work/i-wanna-be-a-human/01.jpg",
+      "/work/i-wanna-be-a-human/02.jpg",
+      "/work/i-wanna-be-a-human/03.jpg",
+      "/work/i-wanna-be-a-human/04.jpg",
+      "/work/i-wanna-be-a-human/05.jpg",
+      "/work/i-wanna-be-a-human/06.jpg",
+      "/work/i-wanna-be-a-human/07.jpg",
+      "/work/i-wanna-be-a-human/08.jpg",
+      "/work/i-wanna-be-a-human/09.jpg",
+      "/work/i-wanna-be-a-human/10.jpg",
+      "/work/i-wanna-be-a-human/11.jpg",
+      "/work/i-wanna-be-a-human/14.jpg",
+      "/work/i-wanna-be-a-human/15.jpg",
+      "/work/i-wanna-be-a-human/17.jpg",
+      "/work/i-wanna-be-a-human/20.jpg",
+      "/work/i-wanna-be-a-human/22.jpg"
     ]
   },
   "hidden": [
