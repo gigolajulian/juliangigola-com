@@ -152,6 +152,15 @@ export function SessionsScreen({ sessions, menu, walls }: { sessions: SessionIte
   const current = rows[open];
   const booking = book === null ? null : rows[book]?.item ?? null;
   const rail = useRef<HTMLDivElement>(null);
+  /* The card closed takes the focus with it: back to its row. */
+  const shut = useRef<number | null>(null);
+  useEffect(() => {
+    if (book !== null || shut.current === null) return;
+    const i = shut.current;
+    shut.current = null;
+    if (document.activeElement && document.activeElement !== document.body) return;
+    col.current?.querySelector("ul")?.children[i]?.querySelector<HTMLElement>("a, button")?.focus({ preventScroll: true });
+  }, [book]);
   useEffect(() => {
     if (book === null) return;
     // The rail brings the open session to its middle.
@@ -159,7 +168,11 @@ export function SessionsScreen({ sessions, menu, walls }: { sessions: SessionIte
     if (r && b) r.scrollTo({ left: b.offsetLeft - (r.clientWidth - b.offsetWidth) / 2, behavior: "smooth" });
     // On a phone the card is above the list: take the page to it.
     if (matchMedia("(max-width: 39.99rem)").matches) document.getElementById("book-open")?.scrollIntoView({ block: "start", behavior: "smooth" });
-    const key = (e: KeyboardEvent) => e.key === "Escape" && close();
+    // Focus goes into the card: under 1024px the row that had it is hidden.
+    shut.current = book;
+    document.getElementById("book-card")?.focus({ preventScroll: true });
+    // Not from inside a field: Escape there threw away a half-typed form.
+    const key = (e: KeyboardEvent) => e.key === "Escape" && !(e.target as Element).closest?.("input, textarea, select") && close();
     window.addEventListener("keydown", key);
     return () => window.removeEventListener("keydown", key);
   }, [book, close]);
@@ -348,7 +361,7 @@ export function SessionsScreen({ sessions, menu, walls }: { sessions: SessionIte
                 /* Julian: the picked session gets a background. A band a
                    little wider than the row, behind it, so the hairlines
                    keep their width. */
-                className={`session-step relative isolate flex flex-col border-b border-border py-1.5 before:absolute before:inset-y-0 before:-inset-x-4 before:-z-10 before:bg-foreground/[0.06] before:opacity-0 before:transition-opacity before:duration-300 ${here && i === book ? "before:opacity-100" : ""} ${s.page || here ? "cursor-pointer" : ""}`}
+                className={`session-step relative isolate flex flex-col border-b border-border py-1.5 before:absolute before:inset-y-0 before:-inset-x-4 before:-z-10 before:bg-[var(--session-pick)] before:opacity-0 before:transition-opacity before:duration-300 ${here && i === book ? "before:opacity-100" : ""} ${s.page || here ? "cursor-pointer" : ""}`}
               >
                 {/* A session with a booking page goes there on a click;
                     pointing still opens it here. */}
@@ -371,7 +384,8 @@ export function SessionsScreen({ sessions, menu, walls }: { sessions: SessionIte
                 ) : (
                 <button
                   type="button"
-                  aria-expanded={on}
+                  aria-expanded={here ? i === book : on}
+                  aria-controls={here && i === book ? "book-card" : undefined}
                   onClick={() => (here ? take(i) : setOpen(i))}
                   onFocus={() => go(i)}
                   className="tap-44 grid grid-cols-[auto_minmax(0,1fr)_auto] items-baseline gap-4 py-2 text-left short:py-1.5"

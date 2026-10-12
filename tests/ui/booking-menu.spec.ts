@@ -1,9 +1,9 @@
 import { expect, test, type Page } from "@playwright/test";
 import { errorsOn, open, RATIOS, upright } from "./ratios";
 
-/* The homepage's Sessions screen as a booking menu, behind `?bookhere`
-   (`components/book-here.tsx`). Without the flag the screen is the plain
-   Sessions list. Never submitted. */
+/* The homepage's Sessions screen with its booking card, behind `?bookhere`
+   (`sessions-screen.tsx`, `BookCard` in `book-here.tsx`). Without the flag
+   the screen is the plain Sessions list. Never submitted. */
 
 const menu = async (page: Page, flag = "?bookhere") => {
   await page.goto(`/${flag}#sessions`, { waitUntil: "load" });
@@ -14,7 +14,7 @@ const menu = async (page: Page, flag = "?bookhere") => {
   return sec;
 };
 const row = (page: Page, name: RegExp) =>
-  page.locator('section[data-hash="sessions"] li[data-i] button').filter({ hasText: name }).first();
+  page.locator('section[data-hash="sessions"] .session-list > li > button').filter({ hasText: name }).first();
 
 for (const r of RATIOS) {
   test(`booking menu at ${r.name}`, async ({ browser, browserName }) => {
@@ -22,16 +22,9 @@ for (const r of RATIOS) {
     const errors = errorsOn(page);
     const sec = await menu(page);
     if (await upright(page, r, browserName)) return ctx.close();
-    const items = await sec.locator("li[data-i]").evaluateAll((ns) => ns.map((n) => {
-      const q = n.getBoundingClientRect();
-      return { x: Math.round(q.x), h: (n.querySelector("button") as HTMLElement).getBoundingClientRect().height };
-    }));
-    expect(items.length).toBeGreaterThanOrEqual(8);
-    if (r.name === "ipad") expect(new Set(items.map((i) => i.x)).size, "two columns on a portrait tablet").toBeGreaterThanOrEqual(2);
-    // 44px rows are the phone's (`max-sm` in book-here.tsx). A tablet's are smaller by design for now.
-    if (r.width < 640) expect(Math.min(...items.map((i) => i.h)), "rows a finger can hit").toBeGreaterThanOrEqual(44);
+    expect(await sec.locator(".session-list > li").count()).toBeGreaterThanOrEqual(8);
 
-    // A session turns the photograph into its calendar.
+    // A session opens its card, with the calendar.
     const card = page.locator("#book-card");
     await row(page, /Portraits/i).click();
     await card.locator("[data-day]").first().waitFor({ state: "visible", timeout: 30_000 });
@@ -60,6 +53,8 @@ for (const r of RATIOS) {
     await row(page, /Event coverage/i).scrollIntoViewIfNeeded();
     await row(page, /Event coverage/i).click();
     await expect(card.locator('input[name="name"]')).toBeVisible({ timeout: 15_000 });
+    // A phone's card grows and the page scrolls (the card never does): Inquire is a scroll away.
+    if (r.width < 640) await card.locator('button[type="submit"]').scrollIntoViewIfNeeded();
     /* The card animates open; under a loaded machine that runs past a fixed
        wait, so wait until Inquire is the top element, then measure. */
     const measure = () =>

@@ -617,7 +617,7 @@ export function TimePicker({
           </div>
           <div className="label ml-auto flex gap-4">
             {(["week", "month"] as const).map((v) => (
-              <button key={v} type="button" aria-pressed={view === v} onClick={() => switchView(v)} className={cn("border-b pb-1 transition-colors duration-200", view === v ? "border-foreground text-foreground" : "border-transparent text-muted-foreground hoverable:hover:text-foreground")}>
+              <button key={v} type="button" aria-pressed={view === v} onClick={() => switchView(v)} className={cn("tap-44 border-b pb-1 transition-colors duration-200", view === v ? "border-foreground text-foreground" : "border-transparent text-muted-foreground hoverable:hover:text-foreground")}>
                 {v}
               </button>
             ))}
@@ -637,6 +637,7 @@ export function TimePicker({
                   type="button"
                   disabled={!o.size}
                   aria-pressed={on}
+                  aria-label={`${WEEKDAYS[d.getDay()]}, ${MONTHS[d.getMonth()]} ${d.getDate()}`}
                   onClick={() => choose(id, pick.min, false)}
                   className={cn(
                     "flex flex-col gap-2 min-w-0 overflow-hidden rounded-[var(--tp-r,6px)] border-[0.5px] p-[var(--pad)] pb-0 text-left [--pad:0.375rem] @md:[--pad:0.625rem] transition-[background-color,color,translate] duration-300 ease-[var(--ease-out-strong)] @xl:[--pad:0.75rem]",
@@ -674,6 +675,7 @@ export function TimePicker({
                   type="button"
                   disabled={!o.size}
                   aria-pressed={on}
+                  aria-label={`${WEEKDAYS[d.getDay()]}, ${MONTHS[d.getMonth()]} ${d.getDate()}`}
                   onClick={() => { choose(id, pick.min, false); setMstep("times"); showTimes(); }}
                   className={cn(
                     "flex aspect-[1/0.9] max-h-[4.5rem] w-full min-w-0 flex-col justify-between gap-1 overflow-hidden rounded-[var(--tp-r,6px)] border-[0.5px] p-[var(--pad)] pb-0 text-left [--pad:min(0.75rem,1.6cqw,calc(var(--cell-h,99rem)*0.14))] tp-short:aspect-auto transition-[background-color,color,translate] duration-300 ease-[var(--ease-out-strong)] h-[var(--cell-h,auto)]",

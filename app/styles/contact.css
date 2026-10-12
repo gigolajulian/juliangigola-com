@@ -581,3 +581,12 @@
 .tp[data-split][data-mstep="times"] [data-part="times"] > :last-child {
   margin-bottom: auto;
 }
+
+/* The picked session's band (`sessions-screen.tsx`): a lighter grey on
+   the dark ground, where 6% barely showed (Julian, 2026-10-12). */
+:root {
+  --session-pick: color-mix(in oklab, var(--foreground) 6%, transparent);
+}
+:root:not([data-theme="light"]) {
+  --session-pick: color-mix(in oklab, var(--foreground) 14%, transparent);
+}
