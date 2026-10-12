@@ -11,11 +11,14 @@ Every branch handed to jg-RELEASE gets checked by jg-QA before it merges:
 ## Test suites and the commit gate (Julian, 2026-10-11)
 No code is committed until its suite passes. `node scripts/test/gate.mjs` routes the staged files. The pre-commit hook `.githooks/pre-commit` runs it once git points at it (`git config core.hooksPath .githooks`). That switch is Julian's call: package.json stays out of commits, so there is no `prepare` script.
 - back-end files only: the backend suite (`--backend`), a few seconds. That is `tests/backend` (Vitest, request-level: /api/cal, /api/inbox, /api/traffic, /api/tune, /picks.json, the contact action, book/worker.js, with fake KV and email, no real mail) plus `scripts/check-*.mjs`.
-- front-end files only: the frontend suite (`--frontend`), about 20-30 minutes. Types, lint, the `lib` unit tests, a production build, then `tests/ui` (pages load clean, the /book picker, the booking menu, the booking pages, at the 6 ratios plus 1280x720) and the perf suite's layout and images, all in Chromium and Firefox. Flakes get one retry and are listed as flaky; all seen so far were Firefox.
+- front-end files only: the frontend suite (`--frontend`), about a minute: types, lint, unit tests. The browser half runs in CI only. Types, lint, the `lib` unit tests, a production build, then `tests/ui` (pages load clean, the /book picker, the booking menu, the booking pages, at the 6 ratios plus 1280x720) and the perf suite's layout and images, all in Chromium and Firefox. Flakes get one retry and are listed as flaky; all seen so far were Firefox.
 - both kinds of file: both suites. Notes, docs, contact sheets and CI files run nothing.
-- `--dry` prints the route, `--base main` checks a whole branch, `--all` runs both. CI runs both suites on every pull request.
+- `--dry` prints the route, `--base main` checks a whole branch, `--all` runs both. CI runs both suites on every pull request. The frontend suite checks layout only, no image weight or frame timing. The WebKit perf suite (`checks`, macOS) runs by hand only: Actions > CI > Run workflow, for an overhaul (Julian, 2026-10-12).
 - Never commit with `--no-verify`. A failing suite goes to the owning thread.
 - `api-other.test.ts` "offers only frames the contact form will keep" passes since #119 (picks fix); `.fails` is off.
+
+## Per-PR checks (Julian, 2026-10-12)
+A normal push or PR gets a design check only: screenshots of the new feature only at the 6 ratios and a numbered contact sheet, then commit when it looks right. No speed tests, image checks or site-wide sweeps. The full suite is for a major overhaul. CI still runs backend and frontend on every PR.
 
 ## Split with jg-MAC (Julian, relayed by jg-BACKEND 2026-10-11)
 - jg-QA keeps Chromium and Firefox, layout at the 6 ratios, and the final pass/fail to jg-RELEASE. Windows WebKit stays a layout smoke test only.

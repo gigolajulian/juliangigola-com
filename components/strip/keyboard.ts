@@ -101,8 +101,8 @@ export function createBench(
      Its old `tabindex` is kept on `data-strip-tab` and put back the
      moment any of it comes into the window. Not `inert`: that would take
      the cells from a screen reader as well, and a click on a cover
-     arriving under a fling. Set once the page has gone quiet, not in the
-     arrival (`tabbing`). */
+     arriving under a fling. Set on the first Tab, not in the arrival
+     (`tabbing`). */
   const benched = new Set<number>();
   let tabbing = false;
   /* A box that scrolls on its own is a Tab stop in Chrome without a
@@ -148,8 +148,8 @@ export function createBench(
     }
     benched.clear();
   };
-  let tabWait = 0;
   const startTabbing = () => {
+    window.removeEventListener("keydown", onFirstTab, true);
     tabbing = true;
     tabbed.current = true;
     benchAll(el.scrollLeft);
@@ -169,18 +169,22 @@ export function createBench(
     });
   });
   filled.observe(el, { childList: true, subtree: true });
-  /* Again at once when this runs again for cells that have arrived
-     (`count`): only the page's arrival waits. */
+  /* Only Tab reads this order, so nothing is benched until the first Tab
+     press, caught on its way down before the browser moves focus. A timer
+     after the arrival was too early: the screens inside a Suspense
+     boundary (the contact form, the booking cards) hydrate after this
+     effect, and WebKit, with no `requestIdleCallback`, ran the 800ms
+     fallback before them, so React found tabindex="-1" and
+     data-strip-tab it had not rendered. Again at once when this runs
+     again for cells that have arrived (`count`). */
+  function onFirstTab(e: KeyboardEvent) {
+    if (e.key === "Tab") startTabbing();
+  }
   if (tabbed.current) startTabbing();
-  else
-    tabWait =
-      typeof window.requestIdleCallback === "function"
-        ? window.requestIdleCallback(startTabbing, { timeout: 1500 })
-        : window.setTimeout(startTabbing, 800);
+  else window.addEventListener("keydown", onFirstTab, true);
 
   const stop = () => {
-    if (typeof window.cancelIdleCallback === "function") window.cancelIdleCallback(tabWait);
-    window.clearTimeout(tabWait);
+    window.removeEventListener("keydown", onFirstTab, true);
     filled.disconnect();
     cancelAnimationFrame(rebench);
     unbenchAll();

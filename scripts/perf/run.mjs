@@ -27,8 +27,9 @@ import { createServer } from "node:net";
 const argv = process.argv.slice(2);
 const REBUILD = argv.includes("--rebuild");
 /* `--ui`: the frontend suite instead of the perf suite. The behaviour
-   checks (`playwright.ui.config.ts`), then the perf suite's static half
-   (layout and image weight) in Chromium and Firefox. No frame timing. */
+   checks (`playwright.ui.config.ts`), then the perf suite's layout checks
+   in Chromium and Firefox. No frame timing and no image weight: those are
+   for an overhaul, run by hand (Julian, 2026-10-12). */
 const UI = argv.includes("--ui");
 const passThrough = argv.filter((a) => a !== "--rebuild" && a !== "--ui");
 
@@ -107,7 +108,7 @@ try {
       "npx",
       /* One retry: Firefox's layout wait times out about once in 288 on a
          busy machine, and a flake must not block a commit. */
-      ["playwright", "test", "--grep-invert", "@motion", "--project", "chromium", "--project", "firefox", "--retries", "1"],
+      ["playwright", "test", "layout.spec", "--project", "chromium", "--project", "firefox", "--retries", "1"],
       { ...env, PERF_PHASE: "static" },
     );
     code = ui || layout;

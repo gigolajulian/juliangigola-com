@@ -16,10 +16,10 @@
  *   backend   tests/backend (Vitest, request-level: the API routes, the
  *             contact action, the book Worker, with fake KV and email),
  *             then the scripts/check-*.mjs self-checks. Seconds.
- *   frontend  route types, tsc, eslint and the lib unit tests, then a local
- *             production build checked in Chromium and Firefox: tests/ui at
- *             the six ratios and the perf suite's layout and image weight
- *             (scripts/perf/run.mjs --ui --rebuild). 20 to 30 minutes.
+ *   frontend  route types, tsc, eslint and the lib unit tests. About a
+ *             minute. The browser checks (tests/ui at the six ratios and the
+ *             perf suite's layout, `scripts/perf/run.mjs --ui --rebuild`) run
+ *             in CI on every pull request, not here (Julian, 2026-10-12).
  *
  * The hook is `.githooks/pre-commit`, on once git is pointed at it:
  *   git config core.hooksPath .githooks
@@ -93,9 +93,8 @@ const FRONTEND = [
   ["npx", "tsc", "--noEmit"],
   ["npx", "eslint"],
   ["npx", "vitest", "run", "--project", "frontend"],
-  [node, "scripts/perf/run.mjs", "--ui", "--rebuild"],
 ];
-// Backend first: it takes seconds, the frontend suite builds the site.
+// Backend first: it takes seconds.
 const failed = (backend && steps("backend", BACKEND)) || (frontend && steps("frontend", FRONTEND));
 console.log(failed ? "\ngate: FAILED, not committed. Fix it, or ask the thread that owns the code." : "\ngate: passed");
 process.exit(failed ? 1 : 0);
