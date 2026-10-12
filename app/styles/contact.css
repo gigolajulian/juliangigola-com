@@ -546,6 +546,11 @@
 }
 .tp[data-tight] [data-part="times"] {
   gap: 0.5rem;
+  /* In the middle of the room between the days and the footer, not
+     under the days with the room left below (Julian, 2026-10-12). */
+  margin-block: auto;
+  /* The spacer's 0.75rem over it, so the room splits evenly. */
+  padding-bottom: 0.75rem;
 }
 .tp[data-tight] [data-slot] {
   padding-block: 0.375rem;
