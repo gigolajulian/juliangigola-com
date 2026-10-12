@@ -203,7 +203,7 @@ export async function submitEnquiry(
        only, and a ceiling on count and size. */
     const picks = String(formData.get("picks") ?? "")
       .split("\n")
-      .filter((src) => /^\/work\/[\w-]+\/[\w.-]+\.(jpe?g|png|webp)$/i.test(src))
+      .filter((src) => /^\/(work\/[\w-]+|hero|covers)\/[\w.-]+\.(jpe?g|png|webp)$/i.test(src))
       .slice(0, MAX_REFS);
     let budget = 20 * 1024 * 1024;
     const uploads = formData

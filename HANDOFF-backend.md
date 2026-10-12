@@ -1,6 +1,6 @@
 # HANDOFF: backend (jg-BACKEND)
 
-Worktree: `C:\Users\Julian\Documents\Claude\Projects\JG WEBSITE BACKEND`, branch `backend`, fast-forwarded to origin/main e5e6d9a on 2026-10-10 (0 ahead).
+Worktree: `C:\Users\Julian\Documents\Claude\Projects\JG WEBSITE BACKEND`, branch `backend`, fast-forwarded to origin/main 3a2e537 on 2026-10-11.
 Never commit to main, never merge, never deploy. jg-RELEASE ("jg - RELEASE") merges. Dependency changes go to jg-RELEASE as a note; never commit package.json or package-lock.json.
 
 ## Owned files
@@ -23,3 +23,4 @@ app/api/ (inbox, traffic, tune, cal), app/admin/, app/book/, lib/booking.ts, lib
 - 2026-10-10: Cal.com webhook to Inbox. Checked: mapping + HMAC verify (scratch cal-check.mjs), check-inbox 52/52, tsc clean for touched files. node_modules here is a junction to the main folder's.
 - 2026-10-10: inbox bookings shipped by jg-RELEASE; Cal.com webhook saved, ping 200.
 - 2026-10-10: webhook confirmed live end to end by jg-RELEASE; backend fast-forwarded to origin/main e5e6d9a.
+- 2026-10-11: contact form kept only /work/ picks, so 30 of 179 picker frames (/hero/, /covers/) vanished from enquiries. Pattern widened in app/contact/actions.ts; all 179 live picks pass, traversal and foreign URLs still refused, the 30 attachment sources return 200. Found by jg-QA tests/backend/api-other.test.ts.
