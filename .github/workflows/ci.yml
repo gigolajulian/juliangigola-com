@@ -1,21 +1,24 @@
-# Checks on every pull request and every push to main: types, lint, a
-# production build, and the perf suite in WebKit: layout, image weight,
-# and swipes and notches landing (`tests/perf/budgets.json`).
+# Every pull request and every push to main: the two suites the commit
+# gate runs (`backend`, `frontend`). The perf suite in WebKit (frame
+# timing, image weight, swipes and notches landing, `tests/perf/budgets.json`)
+# is for an overhaul only, so it runs by hand: Actions > CI > Run workflow
+# (Julian, 2026-10-12: no speed or image checks on a normal PR).
 #
 # Checks only. Deploying is Cloudflare Workers Builds' job (README,
 # "Hosting"), and nothing here holds a token or a secret.
 #
-# macOS, for WebKit in a real window: headless WebKit draws this site at a
-# few frames a second, and Safari is most of the audience. A hosted runner
-# is a shared VM with no GPU of its own, so its frame numbers run slower
-# than a Mac on a desk: they are printed here for comparing one run with
-# the last, and judged against the budgets by `npm run perf` on a Mac.
+# The perf job is on macOS, for WebKit in a real window: headless WebKit
+# draws this site at a few frames a second, and Safari is most of the
+# audience. A hosted runner is a shared VM with no GPU of its own, so its
+# frame numbers run slower than a Mac on a desk: they are printed here for
+# comparing one run with the last, and judged by `npm run perf` on a Mac.
 name: CI
 
 on:
   pull_request:
   push:
     branches: [main]
+  workflow_dispatch:
 
 concurrency:
   group: ci-${{ github.ref }}
@@ -50,6 +53,8 @@ jobs:
       - run: npm ci
       - run: npx playwright install --with-deps chromium firefox
       - run: node scripts/test/gate.mjs --frontend
+      # The browser half, which the commit hook leaves to CI.
+      - run: node scripts/perf/run.mjs --ui --rebuild
       - name: Frontend results
         if: always()
         uses: actions/upload-artifact@v4
@@ -59,6 +64,7 @@ jobs:
           if-no-files-found: ignore
 
   checks:
+    if: github.event_name == 'workflow_dispatch'
     runs-on: macos-latest
     timeout-minutes: 30
     steps:
