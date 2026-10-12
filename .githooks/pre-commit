@@ -1,0 +1,4 @@
+#!/bin/sh
+# The suites this commit needs, from its staged files (scripts/test/gate.mjs).
+# The trailing # keeps a Windows CRLF checkout from passing a carriage return to node.
+exec node scripts/test/gate.mjs #

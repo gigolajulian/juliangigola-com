@@ -26,7 +26,11 @@ import { createServer } from "node:net";
 
 const argv = process.argv.slice(2);
 const REBUILD = argv.includes("--rebuild");
-const passThrough = argv.filter((a) => a !== "--rebuild");
+/* `--ui`: the frontend suite instead of the perf suite. The behaviour
+   checks (`playwright.ui.config.ts`), then the perf suite's static half
+   (layout and image weight) in Chromium and Firefox. No frame timing. */
+const UI = argv.includes("--ui");
+const passThrough = argv.filter((a) => a !== "--rebuild" && a !== "--ui");
 
 /* On Windows npx is npx.cmd, which only runs through a shell. */
 const win = process.platform === "win32";
@@ -97,17 +101,29 @@ try {
   }
 
   const env = { PERF_BASE_URL: base };
-  const motion = await run(
-    "npx",
-    ["playwright", "test", "--grep", "@motion", "--workers", "1", ...passThrough],
-    { ...env, PERF_PHASE: "motion" },
-  );
-  const rest = await run(
-    "npx",
-    ["playwright", "test", "--grep-invert", "@motion", ...passThrough],
-    { ...env, PERF_PHASE: "static" },
-  );
-  code = motion || rest;
+  if (UI) {
+    const ui = await run("npx", ["playwright", "test", "--config", "playwright.ui.config.ts", ...passThrough], env);
+    const layout = await run(
+      "npx",
+      /* One retry: Firefox's layout wait times out about once in 288 on a
+         busy machine, and a flake must not block a commit. */
+      ["playwright", "test", "--grep-invert", "@motion", "--project", "chromium", "--project", "firefox", "--retries", "1"],
+      { ...env, PERF_PHASE: "static" },
+    );
+    code = ui || layout;
+  } else {
+    const motion = await run(
+      "npx",
+      ["playwright", "test", "--grep", "@motion", "--workers", "1", ...passThrough],
+      { ...env, PERF_PHASE: "motion" },
+    );
+    const rest = await run(
+      "npx",
+      ["playwright", "test", "--grep-invert", "@motion", ...passThrough],
+      { ...env, PERF_PHASE: "static" },
+    );
+    code = motion || rest;
+  }
 } catch (err) {
   console.error(`perf: ${err.message}`);
   code = code || 1;
