@@ -8,8 +8,10 @@ import { useRouter } from "next/navigation";
 import { Liquid, useQuiet } from "@/components/liquid";
 import { RisingTitle } from "@/components/strip-page";
 import { BookCard } from "@/components/book-here";
+import { InquireWall } from "@/components/inquire-wall";
 import type { MenuItem } from "@/lib/booking";
 import type { Frame } from "@/lib/work-types";
+import type { WallTile } from "@/lib/work";
 
 /* ── sessions ─────────────────────────────────────────────────────
  * A screen of the homepage, from Julian's design (Sessions Preview v2),
@@ -47,7 +49,7 @@ function where(title: string) {
   );
 }
 
-export function SessionsScreen({ sessions, menu }: { sessions: SessionItem[]; menu?: MenuItem[] }) {
+export function SessionsScreen({ sessions, menu, walls }: { sessions: SessionItem[]; menu?: MenuItem[]; walls?: Record<string, WallTile[]> }) {
   const quiet = useQuiet();
   const router = useRouter();
   const [open, setOpen] = useState(0);
@@ -167,7 +169,7 @@ export function SessionsScreen({ sessions, menu }: { sessions: SessionItem[]; me
       data-tick
       data-label="Sessions"
       data-hash="sessions"
-      className={here && booking ? `screen-measure relative grid w-full shrink-0 grid-cols-1 items-center gap-10 sessions-screen px-6 py-12 sm:h-full sm:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] xl:grid-cols-[minmax(0,1fr)_minmax(0,36rem)] max-lg:!grid-cols-1 lg:max-xl:!grid-cols-[minmax(0,1.25fr)_minmax(0,0.75fr)] sm:grid-rows-[minmax(0,1fr)] sm:gap-x-[clamp(2rem,3.5vw,4rem)] sm:px-10 sm:pb-8 sm:pt-20 short:pb-4 sm:[container-type:size]` : "screen-measure relative grid w-full shrink-0 grid-cols-1 items-center gap-10 sessions-screen px-6 py-12 sm:h-full sm:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] sm:gap-x-[clamp(2rem,3.5vw,4rem)] sm:px-10 sm:pb-8 sm:pt-20 short:pb-4 sm:[container-type:size] xl:grid-cols-[auto_auto_minmax(0,1fr)]"}
+      className={here && booking ? `screen-measure relative isolate grid w-full shrink-0 grid-cols-1 items-center gap-10 sessions-screen px-6 py-12 sm:h-full sm:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] xl:grid-cols-[minmax(0,1fr)_minmax(0,36rem)] max-lg:!grid-cols-1 lg:max-xl:!grid-cols-[minmax(0,1.25fr)_minmax(0,0.75fr)] sm:grid-rows-[minmax(0,1fr)] sm:gap-x-[clamp(2rem,3.5vw,4rem)] sm:px-10 sm:pb-8 sm:pt-20 short:pb-4 sm:[container-type:size]` : "screen-measure relative grid w-full shrink-0 grid-cols-1 items-center gap-10 sessions-screen px-6 py-12 sm:h-full sm:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] sm:gap-x-[clamp(2rem,3.5vw,4rem)] sm:px-10 sm:pb-8 sm:pt-20 short:pb-4 sm:[container-type:size] xl:grid-cols-[auto_auto_minmax(0,1fr)]"}
     >
       {/* With three columns the photograph sits further right (its
           margin, from about 1600px wide) and larger (to 56rem tall); the
@@ -177,6 +179,13 @@ export function SessionsScreen({ sessions, menu }: { sessions: SessionItem[]; me
           is centred only while it fits: at 1440x840 the open list ran up
           under the bar. On a short laptop (1280x800) the names are set a
           touch smaller so the open session fits. */}
+      {/* Behind the whole screen while a session books: the wall of its
+          own page, as its booking page has behind its questions (Julian). */}
+      {here && booking && walls?.[booking.slug]?.length ? (
+        <div key={`wall-${booking.slug}`} inert className="enquiry-backdrop questions-wall absolute inset-0 -z-10 overflow-hidden motion-safe:animate-[jg-fade-up_700ms_var(--ease-out-strong)_both]">
+          <InquireWall items={walls[booking.slug]} />
+        </div>
+      ) : null}
       {booking ? (
         /* The session's name, rising as the title did, over its card. */
         /* Under 1024px wide the card takes the screen and the list steps
@@ -264,17 +273,6 @@ export function SessionsScreen({ sessions, menu }: { sessions: SessionItem[]; me
       )}
 
       <div ref={col} className={`session-col title-rest relative flex min-w-0 flex-col ${booking ? "max-lg:hidden" : ""}`}>
-        {/* Under the flag the photograph is behind the list, faint
-            (Julian: low key). */}
-        {here && booking ? (
-          <div aria-hidden className="pointer-events-none absolute -inset-x-10 -inset-y-12 overflow-hidden [mask-image:radial-gradient(closest-side,#000_45%,transparent)]">
-            {rows.map((s, i) =>
-              s.cover ? (
-                <Image key={s.slug} src={s.cover.src} alt="" fill sizes="40vw" loading="lazy" className={`object-cover object-[50%_25%] transition-opacity duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] ${i === open ? "opacity-[0.16]" : "opacity-0"}`} />
-              ) : null,
-            )}
-          </div>
-        ) : null}
         <ul
           className="session-list relative border-t border-border"
           onPointerEnter={(e) => {

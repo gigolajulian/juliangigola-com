@@ -491,7 +491,8 @@
 /* The card's foot is solid over a hairline: the month's last rows ran
    under the see-through bar and its words read over the tiles. */
 #book-card .tp > .sticky {
-  background: var(--card);
+  background: transparent;
+  backdrop-filter: none;
   border-top: 0.5px solid var(--border);
   padding-bottom: 1.25rem;
 }

@@ -371,7 +371,7 @@ export function BookCard({ item, onClose, className }: { item: MenuItem; onClose
       role="region"
       aria-label={`Book ${item.name}`}
       tabIndex={-1}
-      className={cn("relative flex flex-col overflow-hidden rounded-[12px] border-[0.5px] border-border bg-card outline-none [--card-x:1.25rem] [container-type:size] sm:[--card-x:2.5rem]", className)}
+      className={cn("relative flex flex-col overflow-hidden rounded-[12px] border-[0.5px] border-border bg-card/60 outline-none backdrop-blur-xl backdrop-saturate-150 [--card-x:1.25rem] [container-type:size] sm:[--card-x:2.5rem]", className)}
     >
       {/* The card's own top line: the ways to reach me on the left where
           there are two, Close on the right. Nothing scrolls under it
@@ -398,7 +398,7 @@ export function BookCard({ item, onClose, className }: { item: MenuItem; onClose
       </div>
       <div key={`${item.slug}-${mode}`} className="min-h-0 flex-1 motion-safe:animate-[jg-fade-up_420ms_var(--ease-out-strong)_both]">
         {mode === "call" && item.cal ? (
-          <CalEmbed path={item.cal} title={`Pick a time for ${item.name}`} className="booking-embed block h-full w-full border-0 [&>.sticky]:bg-card/80" />
+          <CalEmbed path={item.cal} title={`Pick a time for ${item.name}`} className="booking-embed block h-full w-full border-0" />
         ) : (
           <div data-scroll className="h-full overflow-y-auto overscroll-contain px-[var(--card-x)] pb-6 pt-5">
             <div className="book-form flex flex-col gap-[clamp(1.25rem,4cqh,2.5rem)] sm:[&_textarea]:h-[3.75rem]">
