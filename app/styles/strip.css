@@ -364,6 +364,15 @@ nav[aria-label="Categories"] ul[data-more] {
        window at 1440. */
     width: max-content !important;
   }
+  /* To an iPad Pro's 1366 the covers leave less room than one line of
+     the name: "Event coverage" sat half off an iPad's edge. A word a
+     line, nearer the covers. */
+  @media (max-width: 85.375rem) {
+    .strip-grid.strip-grid:not([data-sheet]) > a.next-cell {
+      width: min-content !important;
+      padding-left: 2.5rem;
+    }
+  }
   .strip-grid > [data-hash="where-next"] {
     grid-row: 1 / -1;
     /* Julian: a third of the window. The ask was one column of the rack

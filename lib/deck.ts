@@ -446,7 +446,9 @@ function runChapters(el: HTMLElement): () => void {
       k.style.removeProperty("transform-origin");
       k.style.removeProperty("translate");
       k.style.removeProperty("margin-left");
+      k.style.removeProperty("--chapter-fill");
       delete k.dataset.at;
+      delete k.dataset.fill;
     }
     kids = [];
     chapters = [];
@@ -549,6 +551,16 @@ function runChapters(el: HTMLElement): () => void {
       let right = 0;
       for (let i = from; i < end; i++) right = Math.max(right, at[i] + widths[i]);
       head.style.setProperty("--chapter-w", `${right - at[from]}px`);
+      /* A short chapter's room (`fillChapters`) is clear, and the chapter
+         it comes in over showed through it, either side of the frames
+         (Julian: Mixed media, 2026-10-13). Its name cell paints the room
+         in the page's ground (`[data-fill]`, `work-view.css`), so it is
+         held with the chapter and covered by the next one. */
+      const nextHead = heads[h + 1];
+      if (nextHead && parseFloat(nextHead.style.marginLeft) > 0) {
+        head.dataset.fill = "";
+        head.style.setProperty("--chapter-fill", `${at[kids.indexOf(nextHead)] - at[from]}px`);
+      }
     });
     depth(x0, vw);
   };

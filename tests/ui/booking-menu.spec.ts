@@ -1,11 +1,10 @@
 import { expect, test, type Page } from "@playwright/test";
 import { errorsOn, open, RATIOS, upright } from "./ratios";
 
-/* The homepage's Sessions screen with its booking card, behind `?bookhere`
-   (`sessions-screen.tsx`, `BookCard` in `book-here.tsx`). Without the flag
-   the screen is the plain Sessions list. Never submitted. */
+/* The homepage's Sessions screen with its booking card, the default since 2026-10-13
+   (`sessions-screen.tsx`, `BookCard` in `book-here.tsx`). Never submitted. */
 
-const menu = async (page: Page, flag = "?bookhere") => {
+const menu = async (page: Page, flag = "") => {
   await page.goto(`/${flag}#sessions`, { waitUntil: "load" });
   const sec = page.locator('section[data-hash="sessions"]');
   await sec.waitFor();
@@ -90,10 +89,3 @@ test("keyboard: Enter opens the card with focus in it, Tab reaches Close, Escape
   await ctx.close();
 });
 
-test("without the flag, Sessions stays the plain list", async ({ browser, browserName }) => {
-  const { ctx, page } = await open(browser, browserName, RATIOS[4]);
-  await menu(page, "");
-  await expect(page.locator("#book-card")).toHaveCount(0);
-  await expect(page.locator('section[data-hash="sessions"]')).toContainText(/Portraits/i);
-  await ctx.close();
-});

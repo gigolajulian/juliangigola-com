@@ -328,6 +328,27 @@ h2:not(.label) {
   }
 }
 
+/* A short discipline's room, painted from its name cell so the chapter
+   it covers does not show through (`data-fill`, `lib/deck.ts`). */
+@media (min-width: 40rem) {
+  :root:not([data-cards]) .portfolio-arrive .strip-scroll > .strip-cell[data-fill] {
+    overflow: visible;
+  }
+  :root:not([data-cards]) .portfolio-arrive .strip-scroll > .strip-cell[data-fill]::before {
+    content: "";
+    position: absolute;
+    z-index: -1;
+    /* Across the strip's padding before the name too, where the edge of
+       the chapter it covers showed. */
+    left: -3rem;
+    top: 0;
+    bottom: 0;
+    width: calc(var(--chapter-fill) + 3rem);
+    background: var(--background);
+    pointer-events: none;
+  }
+}
+
 /* ── small things from the scan ──────────────────────────────────
  * The page's own count showed faintly through the photo viewer, behind
  * the viewer's (an iPad: "01 / 06" under "1 / 6"). */
