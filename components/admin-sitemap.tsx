@@ -475,7 +475,7 @@ function Tiles({
         const cover = (
           <>
             <span
-              className="relative block aspect-[4/5] overflow-hidden"
+              className={cn("relative block aspect-[4/5] overflow-hidden", dim && "opacity-40")}
               style={{ backgroundColor: p.cover?.color ?? "transparent" }}
             >
               {p.cover ? (
@@ -554,7 +554,6 @@ function Tiles({
                 title={`Edit ${p.name} (/work/${p.slug})`}
                 className={cn(
                   "group block w-full cursor-pointer text-left press",
-                  dim && "opacity-40",
                 )}
               >
                 {cover}
@@ -563,7 +562,7 @@ function Tiles({
               <Open
                 href={`/portfolio/${p.slug}`}
                 origin={origin}
-                className={cn("group block", dim && "opacity-40")}
+                className="group block"
               >
                 <span title={`${p.name} (/work/${p.slug})`}>{cover}</span>
               </Open>

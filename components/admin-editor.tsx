@@ -1173,6 +1173,7 @@ export function AdminEditor({
           to go. Without `min-h-0` a grid track floors at its content height
           and the whole page grows again. */}
         <aside
+          aria-label="Site map"
           className={cn(
             "min-w-0 xl:min-h-0 xl:overflow-y-auto xl:pb-10",
             full && full !== "map" && "xl:hidden",
@@ -1680,6 +1681,7 @@ export function AdminEditor({
           Below `xl` it drops under the form rather than squeezing both. */}
         {page ? null : (
           <aside
+            aria-label="Preview"
             className={cn(
               "min-w-0 xl:min-h-0 xl:overflow-y-auto xl:pb-10",
               full && full !== "preview" && "xl:hidden",
