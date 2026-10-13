@@ -554,7 +554,7 @@ function Tiles({
                 title={`Edit ${p.name} (/work/${p.slug})`}
                 className={cn(
                   "group block w-full cursor-pointer text-left press",
-                  dim && "opacity-40",
+                  dim && "[&_img]:opacity-40",
                 )}
               >
                 {cover}
@@ -563,7 +563,7 @@ function Tiles({
               <Open
                 href={`/portfolio/${p.slug}`}
                 origin={origin}
-                className={cn("group block", dim && "opacity-40")}
+                className={cn("group block", dim && "[&_img]:opacity-40")}
               >
                 <span title={`${p.name} (/work/${p.slug})`}>{cover}</span>
               </Open>
