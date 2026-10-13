@@ -600,6 +600,17 @@
   flex: 1;
   gap: 1.5rem;
 }
+.tp[data-split][data-tight][data-mstep="times"] [data-part="times"] {
+  gap: 0.75rem;
+}
+/* The way back up in the card's top line, across from Close, where the
+   card has nothing else on the left: it cost the times a row there. */
+#book-card:not(:has([aria-label="How to reach me"])) .tp[data-split][data-tight][data-mstep="times"] [data-part="back"] {
+  /* `.tp` starts where that line ends: on its foot, as Close is. */
+  position: absolute;
+  bottom: 100%;
+  left: var(--card-x);
+}
 .tp[data-split][data-mstep="times"] [data-part="times"] > p {
   margin-top: auto;
 }

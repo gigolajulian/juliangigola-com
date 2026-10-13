@@ -178,7 +178,7 @@ export function SessionsScreen({ sessions, menu, walls }: { sessions: SessionIte
       data-tick
       data-label="Sessions"
       data-hash="sessions"
-      className={here && booking ? `screen-measure relative isolate grid w-full shrink-0 grid-cols-1 items-center gap-10 sessions-screen px-6 py-12 sm:h-full sm:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] xl:grid-cols-[minmax(0,1fr)_minmax(0,36rem)] max-lg:!grid-cols-1 lg:max-xl:!grid-cols-[minmax(0,1.25fr)_minmax(0,0.75fr)] sm:grid-rows-[minmax(0,1fr)] sm:gap-x-[clamp(2rem,3.5vw,4rem)] sm:px-10 sm:pb-8 sm:pt-20 short:pb-4 sm:[container-type:size]` : "screen-measure relative grid w-full shrink-0 grid-cols-1 items-center gap-10 sessions-screen px-6 py-12 sm:h-full sm:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] sm:gap-x-[clamp(2rem,3.5vw,4rem)] sm:px-10 sm:pb-8 sm:pt-20 short:pb-4 sm:[container-type:size] xl:grid-cols-[auto_auto_minmax(0,1fr)]"}
+      className={here && booking ? `screen-measure relative isolate grid w-full shrink-0 grid-cols-1 items-center gap-10 sessions-screen px-6 py-12 sm:h-full sm:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] xl:grid-cols-[minmax(0,1fr)_minmax(0,36rem)] max-lg:!grid-cols-1 lg:max-xl:!grid-cols-[minmax(0,1.25fr)_minmax(0,0.75fr)] sm:grid-rows-[minmax(0,1fr)] sm:gap-x-[clamp(2rem,3.5vw,4rem)] sm:px-10 sm:pb-8 sm:pt-20 short:pb-4 sm:[container-type:size]` : "screen-measure relative grid w-full shrink-0 grid-cols-1 items-center gap-10 sessions-screen px-6 py-12 sm:h-full sm:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] sm:gap-x-[clamp(2rem,3.5vw,4rem)] sm:px-10 sm:pb-8 sm:pt-20 short:pb-4 sm:[container-type:size] lying:grid-rows-[minmax(0,1fr)] xl:grid-cols-[auto_auto_minmax(0,1fr)]"}
     >
       {/* With three columns the photograph sits further right (its
           margin, from about 1600px wide) and larger (to 56rem tall); the
@@ -199,7 +199,7 @@ export function SessionsScreen({ sessions, menu, walls }: { sessions: SessionIte
         /* The session's name, rising as the title did, over its card. */
         /* Under 1024px wide the card takes the screen and the list steps
            aside until it closes (iPad upright had the card in a sliver). */
-        <div id="book-open" className={`flex min-h-0 scroll-mt-20 flex-col gap-6 self-stretch transition-[opacity,translate] duration-300 ease-[var(--ease-out-strong)] sm:justify-center sm:pt-[clamp(1.5rem,4.5vh,3rem)] ${leaving ? "translate-y-3 opacity-0" : ""}`}>
+        <div id="book-open" className={`flex min-h-0 scroll-mt-20 flex-col gap-6 lying:gap-3 self-stretch transition-[opacity,translate] duration-300 ease-[var(--ease-out-strong)] sm:justify-center sm:pt-[clamp(1.5rem,4.5vh,3rem)] ${leaving ? "translate-y-3 opacity-0" : ""}`}>
           {/* Under 1024px the list is away while the card is open, so
               the sessions run in a line over the title: another session
               is one swipe and a tap, not a scroll back up (Julian). */}
@@ -212,7 +212,8 @@ export function SessionsScreen({ sessions, menu, walls }: { sessions: SessionIte
               ))}
             </div>
           </nav>
-          <RisingTitle key={`title-${booking.slug}`} text={booking.name} className="sm:max-lg:text-4xl" />
+          {/* A phone on its side: the rail above already names it, and the card wants the room. */}
+          <RisingTitle key={`title-${booking.slug}`} text={booking.name} className="sm:max-lg:text-4xl lying:hidden" />
           <BookCard key={`card-${booking.slug}`} item={booking} onClose={close} className="min-h-0 flex-1 sm:max-h-[44rem] motion-safe:animate-[jg-fade-up_520ms_var(--ease-out-strong)_both] max-sm:-mx-3 max-sm:flex-none max-sm:[container-type:inline-size]" />
         </div>
       ) : (
@@ -225,10 +226,10 @@ export function SessionsScreen({ sessions, menu, walls }: { sessions: SessionIte
           Ways to book
         </span>
         {/* Smaller where its column is narrow (a tablet upright). */}
-        <RisingTitle text="Sessions" className="sm:max-lg:text-4xl" />
+        <RisingTitle text="Sessions" className="sm:max-lg:text-4xl lying:text-3xl" />
         {/* Julian: three lines, whatever the size (44ch is the least), where
             the three columns are. */}
-        <p className="title-rest max-w-full text-left xl:w-[46ch] text-sm normal-case leading-relaxed text-muted-foreground">
+        <p className="title-rest max-w-full text-left lying:hidden xl:w-[46ch] text-sm normal-case leading-relaxed text-muted-foreground">
           Studio and location sessions across the San Francisco Bay Area.
           Everything here is booked directly, with no packages to decode.
         </p>
@@ -400,7 +401,7 @@ export function SessionsScreen({ sessions, menu, walls }: { sessions: SessionIte
                     {/* Friendlier. The words in their own case, not the
                         page's capitals, and more air between them; what
                         is a label stays one. */}
-                    <p className="max-w-[32.5rem] text-left text-[0.9375rem] normal-case leading-[1.7] text-muted-foreground text-pretty short:leading-relaxed">
+                    <p className="max-w-[32.5rem] text-left text-[0.9375rem] normal-case leading-[1.7] text-muted-foreground text-pretty short:leading-relaxed lying:hidden">
                       {s.blurb}
                     </p>
                     {/* What the /sessions page used to say about each. */}

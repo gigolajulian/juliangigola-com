@@ -154,9 +154,9 @@ export function ServicesScreen({
       aria-label={`Commissions, ${rows.length} disciplines`}
       className="relative flex w-full shrink-0 flex-col sm:h-full"
     >
-      <div className="services-screen screen-measure grid min-h-0 flex-1 grid-cols-1 items-center gap-10 px-6 py-12 sm:grid-cols-[minmax(0,1fr)_minmax(0,2fr)] sm:gap-x-[clamp(2rem,4vw,5rem)] sm:px-10 sm:pb-6 sm:pt-20 sm:[container-type:size]">
+      <div className="services-screen screen-measure grid min-h-0 flex-1 grid-cols-1 items-center gap-10 px-6 py-12 sm:grid-cols-[minmax(0,1fr)_minmax(0,2fr)] sm:gap-x-[clamp(2rem,4vw,5rem)] lying:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)] lying:!gap-x-6 sm:px-10 sm:pb-6 sm:pt-20 sm:[container-type:size]">
         <div className="flex min-w-0 flex-col gap-5">
-          <RisingTitle text="Commissions" className="sm:max-xl:text-4xl" />
+          <RisingTitle text="Commissions" className="sm:max-xl:text-4xl lying:text-3xl" />
           {/* A pitch, not a list heading. */}
           <p className="title-rest -mt-2 whitespace-nowrap text-left text-sm leading-relaxed text-muted-foreground short:hidden">
             From concept to final frame.
@@ -262,7 +262,7 @@ export function ServicesScreen({
                   // A finger's press focuses the row before its click: lit
                   // then, the first tap would already be the second.
                   onFocus={() => !touched.current && setOn(i)}
-                  className="group grid grid-cols-[auto_minmax(0,1fr)] items-baseline gap-x-4 max-sm:items-center py-[clamp(0.25rem,0.7cqh,0.5rem)] max-sm:grid-cols-[auto_minmax(0,1fr)_3.5rem] max-sm:py-2"
+                  className="group grid grid-cols-[auto_minmax(0,1fr)] items-baseline gap-x-4 max-sm:items-center py-[clamp(0.25rem,0.7cqh,0.5rem)] lying:py-0 max-sm:grid-cols-[auto_minmax(0,1fr)_3.5rem] max-sm:py-2"
                 >
                   <span
                     className={`label tabular-nums transition-colors duration-300 ${i === on ? "text-foreground" : "text-muted-foreground"}`}
@@ -275,7 +275,7 @@ export function ServicesScreen({
                     className={`flex min-w-0 origin-left flex-col gap-1 transition-[scale] duration-300 ease-[var(--ease-out-strong)] motion-reduce:transition-none ${i === on ? "sm:[scale:1.06]" : ""}`}
                   >
                     <span
-                      className={`font-display text-[clamp(1.25rem,min(2.2vw,4.2cqh),2.25rem)] leading-none transition-[color,translate] duration-300 ease-[var(--ease-out-strong)] motion-reduce:transition-colors ${i === on ? "translate-x-2 text-foreground" : "text-muted-foreground group-hover:translate-x-2 group-hover:text-foreground max-sm:text-foreground"}`}
+                      className={`font-display text-[clamp(1.25rem,min(2.2vw,4.2cqh),2.25rem)] lying:text-base leading-none transition-[color,translate] duration-300 ease-[var(--ease-out-strong)] motion-reduce:transition-colors ${i === on ? "translate-x-2 text-foreground" : "text-muted-foreground group-hover:translate-x-2 group-hover:text-foreground max-sm:text-foreground"}`}
                     >
                       {r.name}
                     </span>
@@ -303,30 +303,30 @@ export function ServicesScreen({
           </div>
           {/* The art director's verb first, the whole portfolio
               beside it. */}
-          <div className="flex flex-wrap items-center gap-x-3 gap-y-5">
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-5 lying:flex-nowrap">
             <Link
               prefetch={false}
               href="/#contact"
-              className="services-book label action px-7 py-4 press active:scale-[0.97] sm:py-[clamp(0.625rem,1.8cqh,1rem)]"
+              className="services-book label action whitespace-nowrap px-7 py-4 lying:px-5 lying:!py-2.5 press active:scale-[0.97] sm:py-[clamp(0.625rem,1.8cqh,1rem)]"
             >
               Inquire
             </Link>
             <Link
               prefetch={false}
               href="/portfolio"
-              className="label action-quiet px-7 py-4 press active:scale-[0.97] sm:py-[clamp(0.625rem,1.8cqh,1rem)]"
+              className="label action-quiet whitespace-nowrap px-7 py-4 lying:px-5 lying:!py-2.5 press active:scale-[0.97] sm:py-[clamp(0.625rem,1.8cqh,1rem)]"
             >
               See the portfolio
             </Link>
             {/* Not under a finger, where it sat against the buttons. */}
-            <span className="label ml-3 text-muted-foreground max-sm:hidden">{total} projects</span>
+            <span className="label ml-3 text-muted-foreground max-sm:hidden lying:hidden">{total} projects</span>
           </div>
         </div>
 
         {/* The table: the frames whole, in justified rows. */}
         <div
           ref={field}
-          className="light-table flex w-full flex-col items-center justify-center max-sm:hidden sm:h-[min(44rem,calc(100cqh-6rem))] 2xl:h-[calc(100cqh-4rem)]"
+          className="light-table flex w-full flex-col items-center justify-center max-sm:hidden sm:h-[min(44rem,calc(100cqh-6rem))] lying:h-[calc(100cqh-1rem)] 2xl:h-[calc(100cqh-4rem)]"
           style={{ gap: GAP }}
         >
           {laid?.rows.map((r, ri) => (

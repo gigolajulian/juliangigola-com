@@ -370,6 +370,7 @@ export function TimePicker({
       over?.style.removeProperty("display");
       under?.style.removeProperty("max-height");
       tp.removeAttribute("data-tight");
+      tp.removeAttribute("data-split");
       // Twice: the line it sits on does not give back all it shrinks by.
       for (let i = 0; i < 2; i++) {
         const over = overflowOf(tp);
@@ -388,6 +389,11 @@ export function TimePicker({
       // Still over (half-hour calls at 1280x720): the steps' names go and
       // the times close up (`[data-tight]`, contact.css).
       if (overflowOf(tp) > 0) tp.setAttribute("data-tight", "");
+      // Still over on a phone on its side: the week, then the day's times
+      // in its place, as a month that does not fit (`data-split`). Only
+      // there: /book at 1440x900 is over too before a day is picked, and
+      // split there it lost its Confirm bar (CI on #134).
+      if (overflowOf(tp) > 0 && matchMedia("(max-height: 30rem) and (min-width: 40rem)").matches) tp.setAttribute("data-split", "");
     };
     fit();
     const ro = new ResizeObserver(fit);
@@ -395,8 +401,9 @@ export function TimePicker({
     return () => {
       ro.disconnect();
       tp.removeAttribute("data-tight");
+      tp.removeAttribute("data-split");
     };
-  }, [view, pick?.date, days, slotsW]);
+  }, [view, pick?.date, days, slotsW, mstep]);
   const refit = React.useRef(() => {});
   React.useLayoutEffect(() => {
     const grid = monthGrid.current;
@@ -638,7 +645,10 @@ export function TimePicker({
                   disabled={!o.size}
                   aria-pressed={on}
                   aria-label={`${WEEKDAYS[d.getDay()]}, ${MONTHS[d.getMonth()]} ${d.getDate()}`}
-                  onClick={() => choose(id, pick.min, false)}
+                  onClick={(e) => {
+                    choose(id, pick.min, false);
+                    if (e.currentTarget.closest(".tp[data-split]")) { setMstep("times"); showTimes(); }
+                  }}
                   className={cn(
                     "flex flex-col gap-2 min-w-0 overflow-hidden rounded-[var(--tp-r,6px)] border-[0.5px] p-[var(--pad)] pb-0 text-left [--pad:0.375rem] @md:[--pad:0.625rem] transition-[background-color,color,translate] duration-300 ease-[var(--ease-out-strong)] @xl:[--pad:0.75rem]",
                     on ? "border-foreground bg-foreground text-background" : o.size ? "tp-open hoverable:hover:-translate-y-0.5" : "",
@@ -725,13 +735,11 @@ export function TimePicker({
 
       {/* the times: the open ones of the day picked, as buttons */}
       <div ref={slotsBox} data-part="times" className={cn("flex flex-col gap-4 pb-6 tp-short:gap-2", view === "month" && "mt-5 tp-short:mt-2")}>
-        {/* Back to the month, in the split's times step only (contact.css). */}
-        {view === "month" ? (
-          <button type="button" data-part="back" onClick={() => setMstep("days")} className="tap-44 label flex items-center gap-3 self-start text-foreground transition-opacity duration-200 hoverable:hover:opacity-60">
-            {arrow}
-            {MONTHS[anchor.getMonth()]}
-          </button>
-        ) : null}
+        {/* Back to the month or the week, in the split's times step only (contact.css). */}
+        <button type="button" data-part="back" onClick={() => setMstep("days")} className="tap-44 label flex items-center gap-3 self-start text-foreground transition-opacity duration-200 hoverable:hover:opacity-60">
+          {arrow}
+          {view === "month" ? MONTHS[anchor.getMonth()] : "Week"}
+        </button>
         <p className="label text-muted-foreground"><span className="mr-3 text-foreground">02</span>Pick a time
           {/* Under a month there is no day over the times to say whose they
               are, and the month shown may not hold it (Julian). */}

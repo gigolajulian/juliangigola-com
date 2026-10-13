@@ -72,11 +72,12 @@ export function AboutScreen() {
           the strip yielding the wheel to it (as the contact form does). */}
       <div
         data-scroll
-        className="about-grid screen-measure grid min-h-0 flex-1 grid-cols-1 gap-12 px-6 pb-10 pt-12 sm:overflow-y-auto sm:overscroll-contain sm:px-10 sm:content-start sm:grid-rows-[minmax(0,1fr)] sm:pb-6 sm:pt-[var(--screen-title-y)] md:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)] md:gap-x-12 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,0.66fr)_minmax(0,1fr)] lg:gap-x-16 lg:max-xl:grid-cols-[minmax(0,1.35fr)_minmax(0,0.5fr)_minmax(0,1fr)] lg:max-xl:gap-x-12"
+        className="about-grid screen-measure grid min-h-0 flex-1 grid-cols-1 gap-12 px-6 pb-10 pt-12 sm:overflow-y-auto sm:overscroll-contain sm:px-10 sm:content-start sm:grid-rows-[minmax(0,1fr)] sm:pb-6 sm:pt-[var(--screen-title-y)] md:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)] md:gap-x-12 lying:grid-cols-[minmax(0,1.5fr)_minmax(0,0.75fr)] lying:gap-x-8 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,0.66fr)_minmax(0,1fr)] lg:gap-x-16 lg:max-xl:grid-cols-[minmax(0,1.35fr)_minmax(0,0.5fr)_minmax(0,1fr)] lg:max-xl:gap-x-12"
       >
         <div className="flex flex-col sm:min-h-0 sm:portrait:justify-center">
           <RisingTitle
             text="Biography"
+            className="lying:text-3xl"
           />
           {/* Julian's words. */}
           {/* Set left, as the mockup has it: justified mono opens up. */}
@@ -104,7 +105,7 @@ export function AboutScreen() {
               </div>
             ))}
           </dl>
-          <div className="title-rest mt-8 sm:mt-[clamp(0.75rem,2.5cqh,2rem)]">
+          <div className="title-rest mt-8 sm:mt-[clamp(0.75rem,2.5cqh,2rem)] lying:hidden">
             <h2 className="label text-muted-foreground">Services</h2>
             {/* Boxes, not pills: pills are the buttons (Julian). Set tight
                 so the six hold one line on a wide screen (Julian). */}
@@ -122,21 +123,22 @@ export function AboutScreen() {
           <LiquidPair className="title-rest mt-auto sm:portrait:mt-0 flex flex-wrap items-center gap-4 pt-10 sm:pt-[clamp(1rem,3cqh,2.5rem)]">
             <Link
               href="/?type=editorial#contact"
-              className="label action px-7 py-4 press active:scale-[0.97] sm:py-[clamp(0.625rem,1.8cqh,1rem)]"
+              className="label action px-7 py-4 press active:scale-[0.97] sm:py-[clamp(0.625rem,1.8cqh,1rem)] lying:px-5 lying:!py-2.5"
             >
               Inquire
             </Link>
             <Link
               prefetch={false}
               href="/portfolio"
-              className="label action-quiet px-7 py-4 press active:scale-[0.97] sm:py-[clamp(0.625rem,1.8cqh,1rem)]"
+              className="label action-quiet px-7 py-4 press active:scale-[0.97] sm:py-[clamp(0.625rem,1.8cqh,1rem)] lying:px-5 lying:!py-2.5"
             >
               See the work
             </Link>
           </LiquidPair>
         </div>
 
-        <figure className="title-rest flex min-h-0 flex-col gap-3 max-lg:hidden">
+        {/* A phone on its side shows him here, not the steps. */}
+        <figure className="title-rest flex min-h-0 flex-col gap-3 max-lg:hidden lying:!flex">
           <div className="photo-corner relative min-h-0 flex-1 overflow-hidden rounded-[16px] bg-card">
             <Image
               src={PHOTO.src}
@@ -155,7 +157,7 @@ export function AboutScreen() {
           </figcaption>
         </figure>
 
-        <div className="title-rest flex flex-col sm:min-h-0 sm:portrait:justify-center">
+        <div className="title-rest flex flex-col sm:min-h-0 sm:portrait:justify-center lying:hidden">
           <h2 className="label text-muted-foreground">How a commission runs</h2>
           {/* And the steps, likewise. */}
           <ol data-scroll className="mt-4 flex flex-1 sm:portrait:flex-none flex-col border-b border-border sm:min-h-0 sm:overflow-x-hidden sm:overflow-y-auto sm:overscroll-contain">
@@ -174,7 +176,7 @@ export function AboutScreen() {
                   <h3 className="font-display text-3xl uppercase leading-none sm:text-[clamp(1.5rem,min(3.6vh,3.4vw),2.6rem)]">
                     {phase.step}
                   </h3>
-                  <p className="label mt-3 max-w-[48ch] text-left sm:mt-[clamp(0.5rem,1.2vh,0.75rem)] leading-relaxed text-muted-foreground">
+                  <p className="label mt-3 max-w-[48ch] lying:hidden text-left sm:mt-[clamp(0.5rem,1.2vh,0.75rem)] leading-relaxed text-muted-foreground">
                     {phase.body}
                   </p>
                 </div>
