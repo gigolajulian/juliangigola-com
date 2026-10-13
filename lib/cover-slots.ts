@@ -129,7 +129,7 @@ export const MIDDLE: Record<"large" | "short" | "upright" | "landscape" | "sidew
   short: { name: 1.04, role: 1, where: 1, buttons: 1, x: 0, y: 3 },
   upright: { name: 1.08, role: 1.08, where: 1.1, buttons: 1, x: 0, y: 0 },
   landscape: { name: 0.98, role: 1.08, where: 1.2, buttons: 1, x: 0, y: 5 },
-  sideways: { name: 1, role: 1.08, where: 1.14, buttons: 0.84, x: 0, y: 3.5 },
+  sideways: { name: 0.8, role: 0.85, where: 0.9, buttons: 0.7, x: 0, y: 3.5 },
   phone: { name: 1.38, role: 0.98, where: 1.12, buttons: 0.88, x: 0, y: -0.5 },
 };
 

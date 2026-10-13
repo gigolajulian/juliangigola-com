@@ -239,7 +239,7 @@ export default function Home() {
               aria-labelledby="press"
               /* Above Commissions on a phone: the names that vouch for
                  the work before the work. */
-              className="flex shrink-0 flex-col items-center gap-4 border-t border-border px-6 py-5 max-sm:order-first max-sm:border-b max-sm:border-t-0 sm:flex-row sm:justify-center sm:gap-10 sm:px-8 lying:gap-5 lying:py-2.5"
+              className="flex shrink-0 flex-col items-center gap-4 border-t border-border px-6 py-5 max-sm:order-first max-sm:border-b max-sm:border-t-0 sm:flex-row sm:justify-center sm:gap-10 sm:px-8 lying:hidden"
             >
               <h2 id="press" className="label shrink-0 text-muted-foreground">
                 Published &amp; commissioned by
@@ -351,7 +351,7 @@ function SessionsDoor({ photo }: { photo?: Frame }) {
           sessions listed on it go straight to their own pages. */}
       <Link prefetch={false} href="/#sessions" aria-label="Book a session" className="absolute inset-0" />
       <h3 className="title pointer-events-none relative lying:[--text-title:1.75rem]">Book a session</h3>
-      <ul className="relative max-w-sm border-t border-border">
+      <ul className="relative max-w-sm border-t border-border lying:hidden">
         {SESSION_TYPES.map((s) => {
           const page = pageForSession(s.slug);
           return (

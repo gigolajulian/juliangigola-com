@@ -425,14 +425,14 @@ export function ContactForm({
           hold all three. */}
       {/* The address on the left, the button on the right, the sentence off
           the screen (still read out with the button). */}
-      <div className="flex flex-wrap items-start justify-between gap-x-6 gap-y-3">
+      <div className="flex flex-wrap items-start justify-between gap-x-6 gap-y-3 lying:justify-end">
         <button
           type="submit"
           data-dial="send"
           disabled={pending}
           aria-disabled={!ready || undefined}
           aria-describedby={!ready ? "enquire-missing" : undefined}
-          className="label action px-6 py-3 press active:scale-[0.97] aria-disabled:active:scale-100 sm:py-4"
+          className="label action px-6 py-3 press active:scale-[0.97] aria-disabled:active:scale-100 sm:py-4 lying:!px-5 lying:!py-2"
         >
           {/* Julian: no orb on the button. StatusMark's cross if it could
               not send. Hidden from screen readers; the words say it. */}
@@ -456,7 +456,7 @@ export function ContactForm({
           </p>
         ) : null}
         {/* The address is above the form on a phone already. */}
-        <p className="order-first text-left text-xs text-muted-foreground max-sm:hidden">
+        <p className="order-first text-left text-xs text-muted-foreground max-sm:hidden lying:hidden">
           Email{" "}
           <a
             href="mailto:hello@juliangigola.com"

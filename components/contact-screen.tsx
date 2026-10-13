@@ -102,7 +102,7 @@ export function ContactScreen({
       data-tick
       data-label={label}
       data-hash={hash}
-      className="screen-measure contact-inquire relative isolate grid w-full shrink-0 grid-cols-1 gap-10 px-6 py-12 sm:h-full sm:grid-cols-[minmax(0,1fr)_minmax(0,2fr)] sm:grid-rows-[minmax(0,1fr)] sm:items-center sm:gap-x-12 sm:pb-6 sm:pl-10 sm:pr-10 sm:pt-24 lg:gap-x-16"
+      className="screen-measure contact-inquire relative isolate grid w-full shrink-0 grid-cols-1 gap-10 px-6 py-12 sm:h-full sm:grid-cols-[minmax(0,1fr)_minmax(0,2fr)] sm:grid-rows-[minmax(0,1fr)] sm:items-center lying:grid-cols-[minmax(0,0.75fr)_minmax(0,2fr)] lying:gap-x-6 sm:gap-x-12 sm:pb-6 sm:pl-10 sm:pr-10 sm:pt-24 lg:gap-x-16"
     >
       {/* Under the ground the booking pages' questions sit on, 40%, so
           the words read over it (`.questions-wall`). First, so the rule

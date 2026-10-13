@@ -370,6 +370,7 @@ export function TimePicker({
       over?.style.removeProperty("display");
       under?.style.removeProperty("max-height");
       tp.removeAttribute("data-tight");
+      tp.removeAttribute("data-split");
       // Twice: the line it sits on does not give back all it shrinks by.
       for (let i = 0; i < 2; i++) {
         const over = overflowOf(tp);
@@ -388,6 +389,9 @@ export function TimePicker({
       // Still over (half-hour calls at 1280x720): the steps' names go and
       // the times close up (`[data-tight]`, contact.css).
       if (overflowOf(tp) > 0) tp.setAttribute("data-tight", "");
+      // Still over (a phone on its side): the week, then the day's times
+      // in its place, as a month that does not fit (`data-split`).
+      if (overflowOf(tp) > 0) tp.setAttribute("data-split", "");
     };
     fit();
     const ro = new ResizeObserver(fit);
@@ -395,8 +399,9 @@ export function TimePicker({
     return () => {
       ro.disconnect();
       tp.removeAttribute("data-tight");
+      tp.removeAttribute("data-split");
     };
-  }, [view, pick?.date, days, slotsW]);
+  }, [view, pick?.date, days, slotsW, mstep]);
   const refit = React.useRef(() => {});
   React.useLayoutEffect(() => {
     const grid = monthGrid.current;
@@ -638,7 +643,10 @@ export function TimePicker({
                   disabled={!o.size}
                   aria-pressed={on}
                   aria-label={`${WEEKDAYS[d.getDay()]}, ${MONTHS[d.getMonth()]} ${d.getDate()}`}
-                  onClick={() => choose(id, pick.min, false)}
+                  onClick={(e) => {
+                    choose(id, pick.min, false);
+                    if (e.currentTarget.closest(".tp[data-split]")) { setMstep("times"); showTimes(); }
+                  }}
                   className={cn(
                     "flex flex-col gap-2 min-w-0 overflow-hidden rounded-[var(--tp-r,6px)] border-[0.5px] p-[var(--pad)] pb-0 text-left [--pad:0.375rem] @md:[--pad:0.625rem] transition-[background-color,color,translate] duration-300 ease-[var(--ease-out-strong)] @xl:[--pad:0.75rem]",
                     on ? "border-foreground bg-foreground text-background" : o.size ? "tp-open hoverable:hover:-translate-y-0.5" : "",
