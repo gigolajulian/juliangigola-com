@@ -357,7 +357,7 @@
 
   /* Darkened the same way the accent is below, for the same reason: a green
      that reads on a dark ground is too pale to read on a light one. */
-  --live: oklch(0.52 0.115 152);
+  --live: oklch(0.5 0.115 152); /* 4.5:1 on the admin card (was 0.52, 4.45) */
 
   /* The same teal, taken down far enough to carry contrast against a light
      ground. Still the only chromatic thing on the page. */
