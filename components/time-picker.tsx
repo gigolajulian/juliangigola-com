@@ -733,13 +733,11 @@ export function TimePicker({
 
       {/* the times: the open ones of the day picked, as buttons */}
       <div ref={slotsBox} data-part="times" className={cn("flex flex-col gap-4 pb-6 tp-short:gap-2", view === "month" && "mt-5 tp-short:mt-2")}>
-        {/* Back to the month, in the split's times step only (contact.css). */}
-        {view === "month" ? (
-          <button type="button" data-part="back" onClick={() => setMstep("days")} className="tap-44 label flex items-center gap-3 self-start text-foreground transition-opacity duration-200 hoverable:hover:opacity-60">
-            {arrow}
-            {MONTHS[anchor.getMonth()]}
-          </button>
-        ) : null}
+        {/* Back to the month or the week, in the split's times step only (contact.css). */}
+        <button type="button" data-part="back" onClick={() => setMstep("days")} className="tap-44 label flex items-center gap-3 self-start text-foreground transition-opacity duration-200 hoverable:hover:opacity-60">
+          {arrow}
+          {view === "month" ? MONTHS[anchor.getMonth()] : "Week"}
+        </button>
         <p className="label text-muted-foreground"><span className="mr-3 text-foreground">02</span>Pick a time
           {/* Under a month there is no day over the times to say whose they
               are, and the month shown may not hold it (Julian). */}
