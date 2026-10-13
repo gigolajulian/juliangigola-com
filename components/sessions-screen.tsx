@@ -407,7 +407,7 @@ export function SessionsScreen({ sessions, menu, walls }: { sessions: SessionIte
                     {/* A short window with a card open has no room for it
                         (Graduation ran under the pager at 1366x768). */}
                     {s.includes.length ? (
-                    <p className={`max-w-[32.5rem] text-left text-sm normal-case leading-relaxed text-muted-foreground text-balance ${here && booking ? "[@media(max-height:50rem)]:hidden" : ""}`}>
+                    <p className={`max-w-[32.5rem] text-left text-sm normal-case leading-relaxed text-muted-foreground text-balance ${here ? "[@media(max-height:50rem)]:hidden" : ""}`}>
                       {/* Each item whole on its line, and the dot held to the
                           item before it, so no line starts with one. */}
                       {s.includes.map((x, k) => (
@@ -516,7 +516,7 @@ export function SessionsScreen({ sessions, menu, walls }: { sessions: SessionIte
             the line, or the button wraps under it and under the rail. */}
         {/* Under 60rem with a card open, the card is the booking: the
             second button went under the pager (Julian, 1547x889). */}
-        <div className={`flex flex-wrap items-center justify-between gap-6 pt-6 short:gap-4 short:pt-5 ${here && booking ? "[@media(max-height:60rem)]:hidden" : ""}`}>
+        <div className={`flex flex-wrap items-center justify-between gap-6 pt-6 short:gap-4 short:pt-5 ${here && booking ? "[@media(max-height:60rem)]:hidden" : here ? "[@media(max-height:50rem)]:hidden" : ""}`}>
           <div className="flex flex-col gap-2.5">
             {/* The button says Book a session; said beside it as well,
                 the pair read as a stutter. Julian's words in its place;

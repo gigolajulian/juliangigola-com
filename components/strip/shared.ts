@@ -191,11 +191,13 @@ export const centreOf = (el: HTMLElement, i: number) => {
      screen between them. Centred, the window was half off it. */
   if (cell.nextElementSibling?.hasAttribute("data-lead-window"))
     return leftOf(cell);
-  /* A discipline's name opens its chapter as a page, flush at the
-     strip's padding. Centred, a short one landed half over the chapter
-     before it (Julian: /portfolio#mixed-media, 2026-10-13). */
+  /* A discipline's name opens its chapter as a page, the name cell flush
+     at the window's edge (it carries its own inset). Centred, a short one
+     landed half over the chapter before it; at the strip's padding, an
+     edge of that chapter showed (Julian: /portfolio#mixed-media,
+     2026-10-13). */
   const centre = cell.hasAttribute("data-deck")
-    ? leftOf(cell) - (parseFloat(getComputedStyle(el).paddingLeft) || 0)
+    ? leftOf(cell)
     : leftOf(cell) - (el.clientWidth - cell.offsetWidth) / 2;
   /* No further than where its chapter holds (`lib/deck.ts`): past that
      the next chapter slides over the screen, and the last cell of one
