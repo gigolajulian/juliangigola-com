@@ -34,14 +34,15 @@ export async function open(browser: Browser, browserName: string, r: Ratio): Pro
   return { ctx, page: await ctx.newPage() };
 }
 
-/** A phone held sideways gets the "turn upright" screen over the page
-    (`.turn-upright`, app/styles/devices.css), by design: checked here, and
-    the caller stops. Firefox cannot emulate a coarse pointer, so there it
-    would be an 844x390 desktop window, which no visitor has: skipped. */
+/** A phone held sideways gets the homepage laid out for it (`lying`,
+    app/styles/variants.css), no "turn upright" screen since #134. Its
+    booking card shows the week, then a day's times, so the Confirm these
+    specs drive is not on screen until a day is picked: phone-land is
+    checked by QA's screenshots, and the caller stops here. */
 export async function upright(page: Page, r: Ratio, browserName: string): Promise<boolean> {
   if (r.name !== "phone-land") return false;
   test.skip(browserName === "firefox", "Firefox cannot emulate a phone held sideways");
-  await expect(page.locator(".turn-upright"), "the turn-upright screen").toBeVisible();
+  await expect(page.locator(".turn-upright"), "no turn-upright screen").toHaveCount(0);
   return true;
 }
 
