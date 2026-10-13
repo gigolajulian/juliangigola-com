@@ -277,6 +277,8 @@ const securityHeaders = [
   { key: "TDM-Policy", value: "https://juliangigola.com/legal#terms" },
 ];
 
+const ADMIN_HOST = "admin.juliangigola.com";
+
 const nextConfig: NextConfig = {
   // Hides the floating dev badge that sits over the bottom-left corner of
   // every page while `next dev` is running. It never shipped to production,
@@ -369,7 +371,15 @@ const nextConfig: NextConfig = {
        this config for anything the Worker renders. The dev server serves
        neither. */
     if (process.env.NODE_ENV === "development") return [];
-    return [{ source: "/:path*", headers: securityHeaders }];
+    return [
+      { source: "/:path*", headers: securityHeaders },
+      // admin.juliangigola.com serves the whole Worker, so nothing on it is indexed.
+      {
+        source: "/:path*",
+        has: [{ type: "host", value: ADMIN_HOST }],
+        headers: [{ key: "X-Robots-Tag", value: "noindex, nofollow" }],
+      },
+    ];
   },
 
   /* A discipline's address is /portfolio/<slug>, beside the projects; its
@@ -385,14 +395,22 @@ const nextConfig: NextConfig = {
     /* A local build or the dev server asks the live zone for its resized
        photographs (`LOCAL` above). Never in a Cloudflare build, where the
        zone answers `/cdn-cgi/image/` itself. */
-    if (!LOCAL && process.env.NODE_ENV !== "development") return listings;
-    return [
-      ...listings,
-      {
-        source: "/cdn-cgi/image/:path*",
-        destination: "https://juliangigola.com/cdn-cgi/image/:path*",
-      },
+    // admin.juliangigola.com opens the editor at its root. Before the files,
+    // or the homepage answers `/` first.
+    const beforeFiles = [
+      { source: "/", has: [{ type: "host" as const, value: ADMIN_HOST }], destination: "/admin" },
     ];
+    if (!LOCAL && process.env.NODE_ENV !== "development") return { beforeFiles, afterFiles: listings };
+    return {
+      beforeFiles,
+      afterFiles: [
+        ...listings,
+        {
+          source: "/cdn-cgi/image/:path*",
+          destination: "https://juliangigola.com/cdn-cgi/image/:path*",
+        },
+      ],
+    };
   },
 
   async redirects() {
