@@ -1,5 +1,5 @@
 import * as React from "react";
-import { leftOf, RELAID } from "./shared";
+import { RELAID } from "./shared";
 
 /** How wide a column of the wall wants to be, as a share of the shelf's
     height, and the width past which a single frame has to share its
@@ -184,11 +184,45 @@ export function useWall({
         `${at}>button{position:absolute!important;margin:0!important;aspect-ratio:auto!important;}`,
       ];
       const top0 = parseFloat(cs.paddingTop) || 0;
-      for (const frames of runs) {
-        const ars = frames.map(
-          (f) =>
-            parseFloat(getComputedStyle(f).getPropertyValue("--ar")) || 0.8,
-        );
+      const pad = parseFloat(cs.paddingLeft) || 0;
+      /* Every reading in one layout, then the writing (Julian: lag on
+         view change). Measured run by run, each gallery laid the whole
+         shelf out again, and the deck's room before a short chapter
+         (`fillChapters`, `lib/deck.ts`) moved the names after the walls
+         were up, so a second pass put them back: two passes of five
+         layouts each on Editorial, and at 1180 the walls still stood
+         half a screen onto their words. Read with the frames out of the
+         flow and nothing the deck left behind (its room, its pins), every
+         cell stands where the flow alone puts it; a wall and a chapter's
+         room are each a margin on one cell, which moves everything after
+         it by as much, so the places are added up from there. */
+      sheet.textContent = [
+        ...rules,
+        `${at}>:not(button){margin-left:0!important;position:relative!important;left:auto!important;translate:none!important;}`,
+      ].join(String.fromCharCode(10));
+      // Off the rectangles, not `offsetLeft`: whole pixels added up a
+      // pixel out by the fourth wall.
+      const o = el.getBoundingClientRect().left + el.clientLeft - el.scrollLeft;
+      const boxes = kids.map((k) => k.getBoundingClientRect());
+      const base = boxes.map((b) => b.left - o);
+      const widths = boxes.map((b) => b.width);
+      const shapes = runs.map((frames) =>
+        frames.map(
+          (f) => parseFloat(getComputedStyle(f).getPropertyValue("--ar")) || 0.8,
+        ),
+      );
+      // The deck's room before a short chapter, worked out here with the walls.
+      const chapters =
+        el.dataset.dealt === "chapters" &&
+        !matchMedia("(prefers-reduced-motion: reduce)").matches;
+      const vw = el.clientWidth;
+      const runAt = new Map(runs.map((frames, r) => [kids.indexOf(frames[0]), r]));
+
+      let shift = 0;
+      let lastHead: number | null = null;
+      const wall = (r: number, left0: number) => {
+        const ars = shapes[r];
+        const frames = runs[r];
         /* Walk the run, taking at each step the number of frames whose
            shared width lands nearest the one the wall wants. */
         const cols: { at: number; k: number; w: number }[] = [];
@@ -204,19 +238,6 @@ export function useWall({
           cols.push({ at: i, k: best.k, w: best.w });
           i += best.k;
         }
-
-        /* The words that open the run stay where they are and keep their
-           own width; the wall starts after them. Where they stand depends
-           on the walls before this one, so what is written so far goes in
-           first and is measured: one layout a gallery, and only when the
-           shelf changes size. */
-        const first = kids.indexOf(frames[0]);
-        const head = first > 0 ? kids[first - 1] : null;
-        sheet.textContent = rules.join(String.fromCharCode(10));
-        const left0 = head
-          ? leftOf(head) + head.offsetWidth + gap
-          : parseFloat(cs.paddingLeft) || 0;
-
         let x = left0;
         for (const col of cols) {
           let y = top0;
@@ -231,13 +252,32 @@ export function useWall({
           }
           x += col.w + gap;
         }
-        /* Out of the flow, the frames take no room, so the words that open
-           the run carry the wall's length on their own margin and whatever
-           follows lands after it. */
-        if (head) {
-          rules.push(
-            `${at}>:nth-child(${first}){margin-right:${(x - left0).toFixed(2)}px!important;}`,
-          );
+        return x - left0;
+      };
+      // A run that opens the shelf has no words before it.
+      if (runAt.has(0)) wall(0, pad);
+      for (let i = 0; i < kids.length; i++) {
+        if (kids[i].tagName === "BUTTON") continue;
+        if (chapters && kids[i].hasAttribute("data-deck")) {
+          const now = base[i] + shift;
+          if (lastHead !== null) {
+            const m = Math.max(0, lastHead - pad + vw - now);
+            if (m > 0) {
+              rules.push(`${at}>:nth-child(${i + 1}){margin-left:${m.toFixed(2)}px!important;}`);
+              shift += m;
+            }
+          }
+          lastHead = base[i] + shift;
+        }
+        /* The words that open a run stay where they are and keep their
+           own width; the wall starts after them, and out of the flow its
+           frames take no room, so the words carry its length on their
+           own margin and whatever follows lands after it. */
+        const r = runAt.get(i + 1);
+        if (r !== undefined) {
+          const long = wall(r, base[i] + shift + widths[i] + gap);
+          rules.push(`${at}>:nth-child(${i + 1}){margin-right:${long.toFixed(2)}px!important;}`);
+          shift += long;
         }
       }
       sheet.textContent = rules.join(String.fromCharCode(10));
@@ -245,9 +285,23 @@ export function useWall({
     };
 
     paint();
-    const watch = new ResizeObserver(paint);
+    /* Again only when the shelf changes size: the observer's first call
+       comes straight after \`observe\` and laid the wall out twice. */
+    let size = `${el.clientWidth}x${el.clientHeight}`;
+    const watch = new ResizeObserver(() => {
+      const now = `${el.clientWidth}x${el.clientHeight}`;
+      if (now === size) return;
+      size = now;
+      paint();
+    });
     watch.observe(el);
+    /* And when the iPad's rack is fitted (`--rack-w`, `work-shell.tsx`):
+       it resizes the covers after this, and the walls stood up to half a
+       screen onto their words at 1180. */
+    const fitted = new MutationObserver(paint);
+    fitted.observe(el, { attributes: true, attributeFilter: ["style", "data-rack"] });
     return () => {
+      fitted.disconnect();
       watch.disconnect();
       sheet.remove();
       delete el.dataset.wall;

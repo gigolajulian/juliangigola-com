@@ -557,7 +557,7 @@ function runChapters(el: HTMLElement): () => void {
          in the page's ground (`[data-fill]`, `work-view.css`), so it is
          held with the chapter and covered by the next one. */
       const nextHead = heads[h + 1];
-      if (nextHead && parseFloat(nextHead.style.marginLeft) > 0) {
+      if (nextHead && parseFloat(getComputedStyle(nextHead).marginLeft) > 0) {
         head.dataset.fill = "";
         head.style.setProperty("--chapter-fill", `${at[kids.indexOf(nextHead)] - at[from]}px`);
       }
