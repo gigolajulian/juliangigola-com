@@ -592,8 +592,8 @@ export function TimePicker({
                 </span>
               ))}
               <svg viewBox="0 0 112 112" className="absolute inset-0 size-full" fill="none" aria-hidden>
-                <circle className="tp-ring" cx="56" cy="56" r="44" stroke="#34c759" strokeWidth="3" strokeLinecap="round" />
-                <path className="tp-tick" d="M38 58l12 12 24-26" stroke="#34c759" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" />
+                <circle className="tp-ring stroke-accent" cx="56" cy="56" r="44" strokeWidth="3" strokeLinecap="round" />
+                <path className="tp-tick stroke-accent" d="M38 58l12 12 24-26" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
             </div>
             <p className="label text-muted-foreground">{step === "check" ? "Booked" : "Booking"}</p>
