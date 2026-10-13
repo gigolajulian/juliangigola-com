@@ -595,3 +595,9 @@
 :root:not([data-theme="light"]) {
   --session-pick: color-mix(in oklab, var(--foreground) 14%, transparent);
 }
+
+/* The card's quiet words over the glass in the light theme: at the
+   page's grey they read about 4.2:1 where a dark wall shows through. */
+:root[data-theme="light"] #book-card {
+  --muted-foreground: oklch(0.4 0.003 250);
+}
