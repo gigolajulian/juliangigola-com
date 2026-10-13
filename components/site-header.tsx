@@ -166,8 +166,9 @@ export function SiteHeader() {
        screen reader read it as if it were there. */
     const behind = [
       ...document.querySelectorAll<HTMLElement>(
-        // The bar goes aside too; only its burger stays, to shut it.
-        "#main, body > footer, header :is(a, button):not([aria-controls='mobile-nav'])",
+        // The bar goes aside too; only its burger stays, to shut it, and
+        // the name, the way home (Julian).
+        "#main, body > footer, header :is(a, button):not([aria-controls='mobile-nav'], [href='/'])",
       ),
     ];
     behind.forEach((el) => (el.inert = true));
@@ -344,6 +345,7 @@ export function SiteHeader() {
           // Any other route still navigates home, and a modifier key still
           // opens a new tab.
           onClick={(e) => {
+            window.dispatchEvent(new Event("jg:menu-close"));
             if (pathname !== "/") return;
             if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
             e.preventDefault();
