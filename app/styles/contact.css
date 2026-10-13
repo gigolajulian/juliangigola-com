@@ -119,6 +119,26 @@
     transform: none;
   }
 }
+/* Julian: the first field's light runs up into the card's corner and
+   takes its radius (the card's 16px inside its border), and two fields
+   side by side split the gap between them rather than overlap. */
+@media (min-width: 40rem) {
+  .contact-card .contact-pair > .contact-field:first-child::before {
+    top: calc(-1 * clamp(1rem, 3vh, 1.5rem));
+    border-radius: 15px 15px 0 0;
+  }
+}
+@media (min-width: 40rem) and (max-height: 56rem), (pointer: coarse) and (min-width: 40rem) and (orientation: portrait) {
+  .contact-card .contact-pair > .contact-field:first-child::before {
+    inset-inline-end: -0.75rem;
+    border-radius: 15px 0 0 0;
+  }
+  .contact-card .contact-pair > .contact-field:last-child::before {
+    top: calc(-1 * clamp(1rem, 3vh, 1.5rem));
+    inset-inline-start: -0.75rem;
+    border-radius: 0 15px 0 0;
+  }
+}
 
 /* ── the inquiry card in depth ──
    The card grows toward you under the pointer, and once somebody

@@ -441,6 +441,17 @@
     display: inline-block;
   }
 }
+/* Julian (iPad upright): the location set closer under the role. Its
+   size follows the role's length (`fit-lines.tsx`). */
+@media (min-width: 40rem) and (max-width: 79.99rem) and (orientation: portrait) {
+  .cover-float-title,
+  .cover-float-where {
+    line-height: 1.2;
+  }
+  .cover-float-where {
+    margin-top: 2px;
+  }
+}
 .cover-cta {
   display: inline-block;
   font-family: var(--font-display);

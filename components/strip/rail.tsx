@@ -490,7 +490,7 @@ export function StripRail({
            width, so anything that changes height mid-gesture moves every
            cell under the pointer - which is the bug `min-h-5` above was
            written to stop. A constant 16px moves nothing. */
-        "strip-rail mt-6 flex min-h-5 items-end gap-6 px-6 pb-4 max-sm:mt-3 sm:px-10 tablet:mt-3 lying:mt-2",
+        "strip-rail mt-6 flex min-h-5 items-end gap-6 px-6 pb-4 max-sm:mt-3 sm:px-10 tablet:mt-6 tablet:pb-2 lying:mt-5 lying:pb-2",
         stack && "max-sm:hidden",
       )}
       /* Julian: one big bar, sectioned off (`rail-names` in

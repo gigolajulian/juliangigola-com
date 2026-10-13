@@ -304,7 +304,7 @@ export default function Home() {
           title="Have something in mind?"
           body="Tell me what you have in mind and I'll come back with an approach and a quote."
           next={WORK_PAGE}
-          className="screen-measure border-l border-border"
+          className="screen-measure where-next-cell border-l border-border"
           /* Julian: the photo wall on the last page, as on the intro and
              the 404. Behind the ask and the two doors, dimmed so both
              still read; the doors are frosted glass over it. Each tile a way into
@@ -347,8 +347,11 @@ function SessionsDoor({ photo }: { photo?: Frame }) {
   return (
     <div className="group relative isolate flex flex-col justify-center gap-6 overflow-hidden border-l border-border bg-background/30 px-6 py-12 backdrop-blur-[var(--door-blur,1px)] sm:px-16 lying:gap-3 lying:px-10 lying:py-3">
       <DoorPhoto photo={photo} />
-      <h3 className="title lying:[--text-title:1.75rem]">Book a session</h3>
-      <ul className="max-w-sm border-t border-border">
+      {/* The door as a whole is the way to Sessions (Julian); the
+          sessions listed on it go straight to their own pages. */}
+      <Link prefetch={false} href="/#sessions" aria-label="Book a session" className="absolute inset-0" />
+      <h3 className="title pointer-events-none relative lying:[--text-title:1.75rem]">Book a session</h3>
+      <ul className="relative max-w-sm border-t border-border">
         {SESSION_TYPES.map((s) => {
           const page = pageForSession(s.slug);
           return (

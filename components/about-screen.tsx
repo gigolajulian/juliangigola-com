@@ -72,9 +72,9 @@ export function AboutScreen() {
           the strip yielding the wheel to it (as the contact form does). */}
       <div
         data-scroll
-        className="about-grid screen-measure grid min-h-0 flex-1 grid-cols-1 gap-12 px-6 pb-10 pt-12 sm:overflow-y-auto sm:overscroll-contain sm:px-10 sm:content-start sm:grid-rows-[minmax(0,1fr)] sm:pb-6 sm:pt-[var(--screen-title-y)] md:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)] md:gap-x-12 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,0.66fr)_minmax(0,1fr)] lg:gap-x-16"
+        className="about-grid screen-measure grid min-h-0 flex-1 grid-cols-1 gap-12 px-6 pb-10 pt-12 sm:overflow-y-auto sm:overscroll-contain sm:px-10 sm:content-start sm:grid-rows-[minmax(0,1fr)] sm:pb-6 sm:pt-[var(--screen-title-y)] md:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)] md:gap-x-12 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,0.66fr)_minmax(0,1fr)] lg:gap-x-16 lg:max-xl:grid-cols-[minmax(0,1.35fr)_minmax(0,0.5fr)_minmax(0,1fr)] lg:max-xl:gap-x-12"
       >
-        <div className="flex flex-col sm:min-h-0">
+        <div className="flex flex-col sm:min-h-0 sm:portrait:justify-center">
           <RisingTitle
             text="Biography"
           />
@@ -85,7 +85,7 @@ export function AboutScreen() {
           {/* Where the window is too short for it all, these
               words scroll inside themselves, not the column, so the
               facts and the buttons under them stay on the screen. */}
-          <p data-scroll className="title-rest mt-6 text-left sm:min-h-0 sm:overflow-y-auto sm:overscroll-contain text-[0.9375rem] normal-case leading-[1.7] text-foreground/80 sm:mt-[clamp(0.75rem,2.5cqh,2rem)] sm:text-[clamp(0.875rem,1.8vh,1.0625rem)] sm:leading-[clamp(1.4rem,3.1cqh,1.8rem)] sm:text-muted-foreground">
+          <p data-scroll className="title-rest mt-6 text-left sm:min-h-0 sm:overflow-y-auto sm:overscroll-contain text-[0.9375rem] normal-case leading-[1.7] text-foreground/80 sm:mt-[clamp(0.75rem,2.5cqh,2rem)] sm:text-[clamp(0.8125rem,1.8vh,1.0625rem)] sm:leading-[clamp(1.25rem,3.1cqh,1.8rem)] sm:text-muted-foreground">
             Photographer and creative director based in the San Francisco
             Bay Area with 12+ years of experience. As an Assyrian American, I grew up between cultures,
             and that sense of being slightly outside the frame shapes how I
@@ -119,7 +119,7 @@ export function AboutScreen() {
               ))}
             </ul>
           </div>
-          <LiquidPair className="title-rest mt-auto flex flex-wrap items-center gap-4 pt-10 sm:pt-[clamp(1rem,3cqh,2.5rem)]">
+          <LiquidPair className="title-rest mt-auto sm:portrait:mt-0 flex flex-wrap items-center gap-4 pt-10 sm:pt-[clamp(1rem,3cqh,2.5rem)]">
             <Link
               href="/?type=editorial#contact"
               className="label action px-7 py-4 press active:scale-[0.97] sm:py-[clamp(0.625rem,1.8cqh,1rem)]"
@@ -155,23 +155,23 @@ export function AboutScreen() {
           </figcaption>
         </figure>
 
-        <div className="title-rest flex flex-col sm:min-h-0">
+        <div className="title-rest flex flex-col sm:min-h-0 sm:portrait:justify-center">
           <h2 className="label text-muted-foreground">How a commission runs</h2>
           {/* And the steps, likewise. */}
-          <ol data-scroll className="mt-4 flex flex-1 flex-col border-b border-border sm:min-h-0 sm:overflow-x-hidden sm:overflow-y-auto sm:overscroll-contain">
+          <ol data-scroll className="mt-4 flex flex-1 sm:portrait:flex-none flex-col border-b border-border sm:min-h-0 sm:overflow-x-hidden sm:overflow-y-auto sm:overscroll-contain">
             {PHASES.map((phase, i) => (
               <li
                 key={phase.step}
                 // The four steps appear in order as About arrives
                 // (`.about-step`, globals.css).
                 style={{ "--i": i } as React.CSSProperties}
-                className="about-step grid flex-1 grid-cols-[3.25rem_minmax(0,1fr)] gap-x-5 border-t border-border py-5 sm:grid-cols-[4rem_minmax(0,1fr)] sm:py-[clamp(0.75rem,2vh,1.25rem)]"
+                className="about-step grid flex-1 sm:portrait:flex-none grid-cols-[3.25rem_minmax(0,1fr)] gap-x-5 border-t border-border py-5 sm:grid-cols-[4rem_minmax(0,1fr)] sm:py-[clamp(0.75rem,2vh,1.25rem)]"
               >
-                <span className="font-display text-3xl leading-none tabular-nums text-muted-foreground/80 sm:text-[clamp(1.75rem,min(3.6vh,3.4vw),2.6rem)]">
+                <span className="font-display text-3xl leading-none tabular-nums text-muted-foreground/80 sm:text-[clamp(1.5rem,min(3.6vh,3.4vw),2.6rem)]">
                   {String(i + 1).padStart(2, "0")}
                 </span>
                 <div>
-                  <h3 className="font-display text-3xl uppercase leading-none sm:text-[clamp(1.75rem,min(3.6vh,3.4vw),2.6rem)]">
+                  <h3 className="font-display text-3xl uppercase leading-none sm:text-[clamp(1.5rem,min(3.6vh,3.4vw),2.6rem)]">
                     {phase.step}
                   </h3>
                   <p className="label mt-3 max-w-[48ch] text-left sm:mt-[clamp(0.5rem,1.2vh,0.75rem)] leading-relaxed text-muted-foreground">
