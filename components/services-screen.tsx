@@ -156,7 +156,7 @@ export function ServicesScreen({
     >
       <div className="services-screen screen-measure grid min-h-0 flex-1 grid-cols-1 items-center gap-10 px-6 py-12 sm:grid-cols-[minmax(0,1fr)_minmax(0,2fr)] sm:gap-x-[clamp(2rem,4vw,5rem)] sm:px-10 sm:pb-6 sm:pt-20 sm:[container-type:size]">
         <div className="flex min-w-0 flex-col gap-5">
-          <RisingTitle text="Commissions" />
+          <RisingTitle text="Commissions" className="sm:max-lg:text-4xl" />
           {/* A pitch, not a list heading. */}
           <p className="title-rest -mt-2 whitespace-nowrap text-left text-sm leading-relaxed text-muted-foreground short:hidden">
             From concept to final frame.
@@ -303,7 +303,7 @@ export function ServicesScreen({
           </div>
           {/* The art director's verb first, the whole portfolio
               beside it. */}
-          <div className="flex flex-wrap items-center gap-x-3 gap-y-3">
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-5">
             <Link
               prefetch={false}
               href="/#contact"

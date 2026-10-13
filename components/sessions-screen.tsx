@@ -134,14 +134,10 @@ export function SessionsScreen({ sessions, menu, walls }: { sessions: SessionIte
     read();
     return () => cancelAnimationFrame(raf);
   }, [hot, open]);
-  /* `?bookhere`: the commissions join the sessions in the list, and
-     each books on the screen (`BookCard`), until Julian says it replaces
-     this one. No rates (Julian). */
-  const [here, setHere] = useState(false);
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setHere(new URLSearchParams(window.location.search).has("bookhere"));
-  }, []);
+  /* The commissions join the sessions in the list, and each books on
+     the screen (`BookCard`). The default since 2026-10-13 (Julian: the
+     card on every device, no `?bookhere`). No rates (Julian). */
+  const here = !!menu;
   const rows: (SessionItem & { item?: MenuItem })[] =
     here && menu
       ? menu.map((m) => {
