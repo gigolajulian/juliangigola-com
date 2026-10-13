@@ -15,6 +15,7 @@ import {
   PROJECTS,
   projectsIn,
   WALL,
+  wallOf,
   WORK_PAGE,
   WORK_CATEGORY_LINKS,
   commissionsIn,
@@ -31,7 +32,7 @@ import { ContactScreen } from "@/components/contact-screen";
 import { SessionsScreen } from "@/components/sessions-screen";
 import { ServicesScreen, type Shot } from "@/components/services-screen";
 import { SESSION_TYPES, formatPrice } from "@/lib/sessions";
-import { BOOK_MENU, pageForSession } from "@/lib/booking";
+import { BOOK_MENU, BOOKING_PAGES, pageForSession } from "@/lib/booking";
 
 /* ── the homepage ─────────────────────────────────────────────────
  * One screen at a time, sideways. Each screen is a whole section rather
@@ -110,6 +111,14 @@ const SHOWN = new Set([
   ...DISCIPLINE_TILES.flatMap((t) => [t.cover.src, ...shotsOf(t).map((s) => s.src)]),
 ]);
 const WALL_HERE = WALL.filter((t) => !SHOWN.has(t.src));
+/* Behind the Sessions screen while a session books there (`?bookhere`):
+   the wall of that session's own page, its gallery's frames (Julian). */
+const SESSION_WALLS = Object.fromEntries(
+  BOOK_MENU.map((m) => {
+    const p = pageForSession(m.slug) ?? BOOKING_PAGES.find((x) => x.slug === m.slug);
+    return [m.slug, wallOf((p?.gallery.href ?? m.page ?? "").split("/").pop() ?? "")];
+  }),
+);
 /* A photograph behind each door on the last screen. */
 // Julian's pick: Valgur, the two knights and the lightning.
 const DOOR_WORK = PROJECTS.find((p) => p.slug === "valgur")?.images.find((f) => f.src === "/work/valgur/06.jpg");
@@ -274,6 +283,7 @@ export default function Home() {
             };
           })}
           menu={BOOK_MENU}
+          walls={SESSION_WALLS}
         />
         {/* The wall behind Inquire, where it was behind the last
             screen's doors, and none of it a picture the page already

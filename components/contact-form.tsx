@@ -160,6 +160,7 @@ export function ContactForm({
          rather than a screen that was always there. */
       <div
         role="status"
+        data-sent
         className="flex flex-col items-center self-start border border-border px-8 py-12 text-center sm:px-12"
       >
         <SentStatus />
