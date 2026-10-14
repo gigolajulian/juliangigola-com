@@ -104,12 +104,16 @@ export function LocalQuestions({
                           </ul>
                         ) : null}
                         {b.links?.length ? (
-                          <ul className="flex flex-col gap-1.5 pb-3 text-sm">
+                          <ul className="flex flex-col gap-1.5 pb-3 text-sm pointer-coarse:gap-0">
+                            {/* Under a thumb each link a row of its own, 30px
+                                tall, so none is under the 24px a finger needs
+                                (they were 14px, 6px apart). On a phone each
+                                on one line, the size following the width. */}
                             {b.links.map((l) => (
                               <li key={l.href}>
                                 <Link
                                   href={l.href}
-                                  className="text-muted-foreground transition-colors duration-200 hoverable:hover:text-foreground"
+                                  className="text-muted-foreground transition-colors duration-200 hoverable:hover:text-foreground pointer-coarse:block pointer-coarse:py-2 max-sm:whitespace-nowrap max-sm:text-[min(0.875rem,3.15vw)]"
                                 >
                                   {l.label} <span aria-hidden>&rarr;</span>
                                 </Link>
