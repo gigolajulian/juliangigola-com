@@ -96,14 +96,28 @@ export function CoverSpace({
       const set = () => {
         if (innerWidth === wide) return;
         wide = innerWidth;
-        scroller.style.removeProperty("scroll-timeline");
         let box: HTMLElement | null = el.parentElement;
         // The window on a phone; the deck, which runs sideways, on an iPad.
         while (box && !/(auto|scroll)/.test(getComputedStyle(box).overflowY + getComputedStyle(box).overflowX)) box = box.parentElement;
         const side = !!box && box.scrollWidth > box.clientWidth;
-        scroller = box ?? document.documentElement;
+        const next = box ?? document.documentElement;
+        const line = `--hero ${side ? "x" : "y"}`;
         const span = side ? innerWidth : innerHeight;
-        scroller.style.setProperty("scroll-timeline", `--hero ${side ? "x" : "y"}`);
+        /* Only when the scroller or its axis changed: a timeline taken
+           away and given back leaves the running animations on the old
+           one, and the photographs stopped following the scroll after a
+           turn (QA on #140). When it does change, they are started again
+           on the new one. */
+        if (next !== scroller || next.style.getPropertyValue("scroll-timeline") !== line) {
+          scroller.style.removeProperty("scroll-timeline");
+          scroller = next;
+          scroller.style.setProperty("scroll-timeline", line);
+          if (section.hasAttribute("data-par")) {
+            section.removeAttribute("data-par");
+            void section.offsetWidth;
+            section.setAttribute("data-par", "");
+          }
+        }
         section.style.setProperty("--par-end", `${span}px`);
         for (const f of el.querySelectorAll<HTMLElement>(".cover-float-frame")) {
           /* Julian: subtle, riding with the page (the first cut, 0.15 to
