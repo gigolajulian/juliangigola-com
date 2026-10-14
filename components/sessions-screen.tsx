@@ -317,7 +317,9 @@ export function SessionsScreen({ sessions, menu, walls }: { sessions: SessionIte
             const on = i === open;
             const head = (
               <>
+                {/* Read as "01Portraits" with no gap: the number is for the eye. */}
                 <span
+                  aria-hidden
                   className={`font-display ${here ? "text-[clamp(1.25rem,1.9vw,2rem)]" : "text-[clamp(1.5rem,2.4vw,2.5rem)]"} leading-none short:text-[clamp(1.25rem,2vw,2rem)] tabular-nums transition-colors duration-300 ${on ? "text-foreground" : "text-muted-foreground/75"}`}
                 >
                   {String(i + 1).padStart(2, "0")}

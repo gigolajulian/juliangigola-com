@@ -74,7 +74,9 @@ export function useReader({
         for (const k of [i - 1, i + 1]) {
           el.children[k]
             ?.querySelectorAll<HTMLImageElement>('img[loading="lazy"]')
-            .forEach((img) => (img.loading = "eager"));
+            /* Not one with no box: the phone-only pictures on a desktop
+               (`sm:hidden`) were fetched at 1280px for nobody. */
+            .forEach((img) => img.getClientRects().length && (img.loading = "eager"));
         }
       }
       /* The word is the nearest labelled cell at or before this one: the
