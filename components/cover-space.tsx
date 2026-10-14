@@ -80,6 +80,47 @@ export function CoverSpace({
       };
     }
 
+    /* Julian: on a phone and an iPad the photographs drift apart as the
+       page scrolls, the near ones (`--fz`) faster than the far, so the
+       depth they hang at shows, and the words with them, slower. The
+       motion is CSS on a scroll timeline (`[data-par]`, `cover.css`);
+       this names the timeline on what scrolls the cover and works out
+       each layer's travel once. */
+    const section = el.closest("section");
+    if (section && !/[?&]tilt=1/.test(location.search)) {
+      let box: HTMLElement | null = el.parentElement;
+      // The window on a phone; the deck, which runs sideways, on an iPad.
+      while (box && !/(auto|scroll)/.test(getComputedStyle(box).overflowY + getComputedStyle(box).overflowX)) box = box.parentElement;
+      const side = !!box && box.scrollWidth > box.clientWidth;
+      const scroller = box ?? document.documentElement;
+      const span = side ? innerWidth : innerHeight;
+      scroller.style.setProperty("scroll-timeline", `--hero ${side ? "x" : "y"}`);
+      section.style.setProperty("--par-end", `${span}px`);
+      for (const f of el.querySelectorAll<HTMLElement>(".cover-float-frame")) {
+        // z runs about -50 to 150: 0.15 to 0.5 of the scroll.
+        const rate = 0.15 + Math.max(0, Math.min(1, (parseFloat(getComputedStyle(f).getPropertyValue("--fz")) + 50) / 200)) * 0.35;
+        /* Julian: down, scrolling up and down, as the page lifts past
+           them; and back into the space, not too far: a screen's scroll
+           sends them 1200px to 2400px back, the near ones furthest
+           (about 0.7 to 0.6 of their size at the cover's 3280px
+           perspective). Faded out by half a screen, so none lies over
+           the name. */
+        f.style.setProperty(side ? "--par-x" : "--par-y", `${(side ? -span : span) * rate}px`);
+        f.style.setProperty("--par-z", `${-(1200 + ((rate - 0.15) / 0.35) * 1200)}px`);
+      }
+      /* The name, the role, the line under it and the buttons, each a
+         little more than the one above. */
+      section.querySelectorAll<HTMLElement>(".cover-float-middle .lift").forEach((f, i) => {
+        const rate = 0.04 + i * 0.03;
+        f.style.setProperty(side ? "--par-x" : "--par-y", `${(side ? -span : span) * rate}px`);
+      });
+      section.setAttribute("data-par", "");
+      return () => {
+        section.removeAttribute("data-par");
+        scroller.style.removeProperty("scroll-timeline");
+      };
+    }
+
     /* Preview (`?tilt=1`), Julian: the hero is too still on a phone and an
        iPad. The space turns after a finger on the cover the way it turns
        after a pointer, and eases back when it lifts. Touch events rather
@@ -87,54 +128,6 @@ export function CoverSpace({
        to scroll, and a touch keeps reporting while it does, so the tilt
        goes on following the finger through a scroll. Passive, so the
        scroll itself is never held. */
-    /* Julian: on a phone and an iPad the
-       photographs drift apart as the page scrolls, the near ones (`--fz`)
-       faster than the far, so the depth they hang at shows. Written in
-       the scroll handler, each frame's `translate` only. */
-    if (!/[?&]tilt=1/.test(location.search)) {
-      let box: HTMLElement | null = el.parentElement;
-      // The window on a phone; the deck, which runs sideways, on an iPad.
-      while (box && !/(auto|scroll)/.test(getComputedStyle(box).overflowY + getComputedStyle(box).overflowX)) box = box.parentElement;
-      const side = !!box && box.scrollWidth > box.clientWidth;
-      const frames = [...el.querySelectorAll<HTMLElement>(".cover-float-frame")].map((f) => ({
-        f,
-        // z runs about -50 to 150: 0.15 to 0.5 of the scroll.
-        rate: 0.15 + Math.max(0, Math.min(1, (parseFloat(getComputedStyle(f).getPropertyValue("--fz")) + 50) / 200)) * 0.35,
-      }));
-      /* Julian: the name, the role, the line under it and the buttons
-         too, each a little more than the one above, all slower than the
-         photographs. Their own `translate`: the rise in is a `transform`. */
-      const words = [...(el.closest("section")?.querySelectorAll<HTMLElement>(".cover-float-middle .lift") ?? [])].map(
-        (f, i) => ({ f, rate: 0.04 + i * 0.03 }),
-      );
-      const scroll = () => {
-        const span = side ? innerWidth : innerHeight;
-        const top = Math.min(box ? (side ? box.scrollLeft : box.scrollTop) : scrollY, span);
-        for (const { f, rate } of frames) {
-          const d = `${(-top * rate).toFixed(1)}px`;
-          /* Julian: and back into the space, not too far. A screen's
-             scroll sends them 1200px to 2400px back, the near ones
-             furthest (about 0.7 to 0.6 of their size at the cover's
-             3280px perspective). */
-          const z = `${((-top / span) * (1200 + ((rate - 0.15) / 0.35) * 1200)).toFixed(1)}px`;
-          // Julian: down, scrolling up and down; the page lifts past them.
-          f.style.translate = side ? `${d} 0 ${z}` : `0 ${(top * rate).toFixed(1)}px ${z}`;
-          /* Julian: faded out as they sink, so none lies over the name;
-             gone by half a screen. On the card: opacity on the frame
-             would flatten its depth. */
-          const card = f.firstElementChild as HTMLElement | null;
-          if (card) card.style.opacity = top ? String(Math.max(0, 1 - top / (span * 0.5))) : "";
-        }
-        for (const { f, rate } of words) {
-          const d = (side ? -top : top) * rate;
-          f.style.translate = side ? `${d.toFixed(1)}px 0` : `0 ${d.toFixed(1)}px`;
-        }
-      };
-      const target: HTMLElement | Window = box ?? window;
-      target.addEventListener("scroll", scroll, { passive: true });
-      scroll();
-      return () => target.removeEventListener("scroll", scroll);
-    }
     if (!/[?&]tilt=1/.test(location.search)) return;
     const cover = el.closest("section") ?? el.parentElement;
     if (!cover) return;
