@@ -360,8 +360,9 @@ export function SessionsScreen({ sessions, menu, walls, covers }: { sessions: Se
                 }}
                 /* Julian: the picked session gets a background. A band a
                    little wider than the row, behind it, so the hairlines
-                   keep their width. */
-                className={`session-step relative isolate flex flex-col border-b border-border py-1.5 before:absolute before:inset-y-0 before:-inset-x-4 before:-z-10 before:bg-[var(--session-pick)] before:opacity-0 before:transition-opacity before:duration-300 ${here && i === book ? "before:opacity-100" : ""} ${s.page || here ? "cursor-pointer" : ""}`}
+                   keep their width. Closer under 58rem tall: at 1547x889
+                   the email under Bookings open sat on the rail. */
+                className={`session-step relative isolate flex flex-col border-b border-border py-1.5 [@media(max-height:58rem)_and_(min-width:40rem)]:py-0.5 before:absolute before:inset-y-0 before:-inset-x-4 before:-z-10 before:bg-[var(--session-pick)] before:opacity-0 before:transition-opacity before:duration-300 ${here && i === book ? "before:opacity-100" : ""} ${s.page || here ? "cursor-pointer" : ""}`}
               >
                 {/* A session with a booking page goes there on a click;
                     pointing still opens it here. */}

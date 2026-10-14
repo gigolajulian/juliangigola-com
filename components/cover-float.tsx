@@ -233,7 +233,16 @@ export function CoverFloat({
           className="lift cover-float-where mt-[var(--h-gap-where,8px)] mb-[var(--h-gap-cta,19px)] max-w-[34rem]"
           style={{ "--reveal-delay": "calc(var(--h-start, 420ms) + 300ms)" } as React.CSSProperties}
         >
-          <span className="fit-line">{heading?.where ?? "Based in the SF Bay Area. Available to travel worldwide"}</span>
+          {/* An upright phone fits the line to the name's width, and the
+              whole sentence came out at 10.9px: a shorter one there. */}
+          <span className="fit-line">
+            {heading?.where ?? (
+              <>
+                <span className="max-sm:portrait:hidden">Based in the SF Bay Area. Available to travel worldwide</span>
+                <span className="hidden max-sm:portrait:inline">SF Bay Area. Available worldwide</span>
+              </>
+            )}
+          </span>
           <FitLines />
         </p>
         <LiquidPair

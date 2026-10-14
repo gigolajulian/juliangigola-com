@@ -39,6 +39,26 @@
   }
 }
 
+/* In the light theme a door stays dark, as the reel does
+   (strip-motion.css): its veil was the paper ground at 68 to 90%, and the
+   photographs went milky under it (Julian, 2026-10-14). White type over a
+   dark veil instead. */
+:root[data-theme="light"] :has(> .door-veil) {
+  color-scheme: dark;
+  --background: oklch(0.145 0.003 70);
+  --foreground: oklch(0.955 0.004 80);
+  --muted-foreground: oklch(0.82 0.004 80);
+  --border: oklch(1 0 0 / 11%);
+  color: var(--foreground);
+}
+/* The bar's dark links lay over the first door's dark top: the door
+   starts under the bar there, on paper. */
+@media (min-width: 40rem) {
+  :root[data-theme="light"] #where-next > :first-child > :is(.door-photo, .door-veil) {
+    top: var(--bar-h) !important;
+    height: calc(100% - var(--bar-h)) !important;
+  }
+}
 /* The last screen's doors, each over a photograph. The veil is the
    ground, heavier toward the words, so the type keeps its contrast
    whatever the frame; a hover lets a little more of it through. */
