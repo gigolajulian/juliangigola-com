@@ -81,3 +81,7 @@ next-env.d.ts
 # The perf suite (`npm run perf`)
 /test-results/
 /playwright-report/
+
+# Thread handoffs stay local (THREADS.md)
+HANDOFF*.md
+THREADS.md
