@@ -391,11 +391,13 @@ export function TimePicker({
       // Still over (half-hour calls at 1280x720): the steps' names go and
       // the times close up (`[data-tight]`, contact.css).
       if (overflowOf(tp) > 0) tp.setAttribute("data-tight", "");
-      // Still over on a phone on its side: the week, then the day's times
-      // in its place, as a month that does not fit (`data-split`). Only
-      // there: /book at 1440x900 is over too before a day is picked, and
-      // split there it lost its Confirm bar (CI on #134).
-      if (overflowOf(tp) > 0 && matchMedia("(max-height: 30rem) and (min-width: 40rem)").matches) tp.setAttribute("data-split", "");
+      // Still over on a short window (a phone on its side, a laptop or an
+      // iPad at 600 tall, where the times ran under Confirm): the week, then
+      // the day's times in its place, as a month that does not fit
+      // (`data-split`). Not on a tall one: /book at 1440x900 is over too
+      // before a day is picked, and split there it lost its Confirm bar
+      // (CI on #134).
+      if (overflowOf(tp) > 0 && matchMedia("(max-height: 40rem) and (min-width: 40rem)").matches) tp.setAttribute("data-split", "");
     };
     fit();
     const ro = new ResizeObserver(fit);
