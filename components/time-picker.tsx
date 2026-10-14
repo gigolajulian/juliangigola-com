@@ -317,7 +317,7 @@ export function TimePicker({
      a day that was not on show fades in. Measured before the switch,
      played once the new view is laid out. */
   const daysBox = React.useRef<HTMLDivElement>(null);
-  const flip = React.useRef<{ at: Map<string, DOMRect>; h: number } | null>(null);
+  const flip = React.useRef<{ at: Map<string, DOMRect>; h: number; card: number } | null>(null);
   /* Where a month and a day's times do not fit together (`data-split`,
      below): the month, then the day's times in its place. Julian, no
      scroll in the card, ever (2026-10-11). */
@@ -330,7 +330,7 @@ export function TimePicker({
     if (box) {
       const at = new Map<string, DOMRect>();
       for (const b of box.querySelectorAll<HTMLElement>("[data-day]")) at.set(b.dataset.day!, b.getBoundingClientRect());
-      flip.current = { at, h: box.offsetHeight };
+      flip.current = { at, h: box.offsetHeight, card: box.closest<HTMLElement>("#book-card")?.offsetHeight ?? 0 };
     }
     // Into the week from a month: the week of the day picked, when it is in that month.
     if (v === "week" && pick && fromIso(pick.date).getMonth() === anchor.getMonth()) setAnchor(fromIso(pick.date));
@@ -432,6 +432,10 @@ export function TimePicker({
       return overBy();
     };
     const fit = () => {
+      /* Not while the days glide to the month (below): the box they sit in
+         is short until it lands and its hidden overflow squeezed the cells
+         to nothing. Fitted again when it lands (`refit`). */
+      if (daysBox.current?.getAnimations().length) return;
       tp.removeAttribute("data-split");
       // Both, while a cell keeps 2.5rem: under it they were strips.
       if (squeeze(40) <= 0) return;
@@ -456,7 +460,15 @@ export function TimePicker({
     const ms = 520;
     const easing = "cubic-bezier(0.22, 1, 0.36, 1)";
     // Measured again once the box is at its height: until then it hides what overflows.
+    /* And the card round it, on a phone where it grows with what it holds,
+       from its height before the switch, measured before the days start
+       their glide. Left to its own ease (`easeHeight`) it was measured
+       after the big time and the week row had gone, and snapped shorter
+       for a frame before it grew (QA, on an iPhone, Week to Month). */
+    const card = f.card ? box.closest<HTMLElement>("#book-card") : null;
+    const to = card?.offsetHeight ?? 0;
     box.animate([{ height: `${f.h}px` }, { height: `${box.offsetHeight}px` }], { duration: ms, easing }).finished.then(() => refit.current(), () => {});
+    if (card && Math.abs(to - f.card) > 1) card.animate([{ height: `${f.card}px` }, { height: `${to}px` }], { duration: ms, easing });
     let n = 0;
     for (const el of box.querySelectorAll<HTMLElement>("[data-day]")) {
       const to = el.getBoundingClientRect();
