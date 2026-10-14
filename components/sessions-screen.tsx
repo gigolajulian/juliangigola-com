@@ -12,6 +12,7 @@ import { InquireWall } from "@/components/inquire-wall";
 import type { MenuItem } from "@/lib/booking";
 import type { Frame } from "@/lib/work-types";
 import type { WallTile } from "@/lib/work";
+import { PendingLabel } from "@/components/pending-label";
 
 /* ── sessions ─────────────────────────────────────────────────────
  * A screen of the homepage, from Julian's design (Sessions Preview v2),
@@ -540,7 +541,7 @@ export function SessionsScreen({ sessions, menu, walls, covers }: { sessions: Se
             className="sessions-book label action px-7 py-4 press active:scale-[0.97] short:px-5 short:py-2.5"
           >
             {/* The private client's verb, not the art director's. */}
-            Book a session
+            <PendingLabel state="connecting">Book a session</PendingLabel>
           </Link>
         </div>
       </div>

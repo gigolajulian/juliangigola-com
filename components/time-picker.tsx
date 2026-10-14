@@ -530,9 +530,10 @@ export function TimePicker({
       // Held to the card's inset and a phone card's height while it waits
       // (the embed's `block` had it on the card's edge, in a sliver).
       <div aria-label={title} className={cn(className, "!flex items-center justify-center px-[var(--card-x,1.25rem)] max-sm:min-h-[24rem]")}>
-        {/* Julian: an orb turning, not the words. Still said to a reader. */}
+        {/* Julian: an orb turning, not the words (shaping, small: picked
+            by eye 2026-10-14). Still said to a reader. */}
         <p role="status" className="text-muted-foreground">
-          <Orb state="connecting" size={64} />
+          <Orb state="shaping" size={20} />
           <span className="sr-only">Loading times</span>
         </p>
       </div>
@@ -598,16 +599,13 @@ export function TimePicker({
         <div role="status" aria-live="polite" className="absolute inset-0 z-20 bg-background/85 backdrop-blur-md">
           <div className="sticky top-[28%] flex flex-col items-center gap-6 py-10">
             <div className="tp-status relative size-28" data-ok={step === "check" ? "" : undefined}>
-              {[
-                ["2.4s", "1.125rem", "1"],
-                ["3.4s", "0.875rem", "0.7"],
-                ["1.7s", "0.625rem", "0.5"],
-                ["4.6s", "0.5rem", "0.35"],
-              ].map(([d, size, o], n) => (
-                <span key={n} className="tp-arm absolute inset-0" style={{ animationDuration: d, animationDirection: n % 2 ? "reverse" : "normal" }}>
-                  <span className="absolute left-1/2 top-0 -translate-x-1/2 rounded-full bg-foreground" style={{ width: size, height: size, opacity: o }} />
+              {/* Julian: the working orb while it books, in place of the
+                  circling dots; the ring and tick once it is booked. */}
+              {step === "sending" ? (
+                <span className="absolute inset-0 grid place-items-center text-foreground">
+                  <Orb state="working" size={64} />
                 </span>
-              ))}
+              ) : null}
               <svg viewBox="0 0 112 112" className="absolute inset-0 size-full" fill="none" aria-hidden>
                 <circle className="tp-ring stroke-accent" cx="56" cy="56" r="44" strokeWidth="3" strokeLinecap="round" />
                 <path className="tp-tick stroke-accent" d="M38 58l12 12 24-26" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" />

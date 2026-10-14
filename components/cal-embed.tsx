@@ -3,6 +3,7 @@
 import * as React from "react";
 import { useSiteTheme } from "@/lib/site-theme";
 import { TimePicker } from "@/components/time-picker";
+import { Orb } from "@/components/orb";
 
 /* ── Cal.com, inline ──────────────────────────────────────────────
  * The booking calendar, from Cal.com (`book.cal`, `lib/booking.ts`).
@@ -165,6 +166,13 @@ function CalInline({ path, title, className }: { path: string; title: string; cl
   return (
     <div ref={box} data-cal={state} aria-label={title} role="region" className={`cal-embed relative ${className ?? ""}`}>
       <div ref={host} className={`h-full w-full overflow-y-auto overscroll-contain ${state === "failed" ? "invisible" : ""}`} />
+      {/* Julian: a small orb while Cal.com's page opens, gone once it is up. */}
+      {state === "waiting" ? (
+        <p role="status" className="pointer-events-none absolute inset-0 grid place-items-center text-muted-foreground">
+          <Orb state="working" size={20} />
+          <span className="sr-only">Loading the calendar</span>
+        </p>
+      ) : null}
       {state === "failed" ? (
         <div className="absolute inset-0 flex flex-col items-center justify-center gap-5 p-6 text-center">
           <p className="max-w-[24rem] text-balance text-center text-sm normal-case leading-relaxed text-muted-foreground">

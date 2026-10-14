@@ -8,6 +8,7 @@ import { Liquid, useQuiet } from "@/components/liquid";
 import { RisingTitle } from "@/components/strip-page";
 import type { Frame } from "@/lib/work-types";
 import { matches } from "@/lib/device";
+import { PendingLabel } from "@/components/pending-label";
 
 /** One frame on the light table: a project's picture and where it opens. */
 export type Shot = { src: string; color?: string; width: number; height: number; title: string; href: string };
@@ -309,7 +310,7 @@ export function ServicesScreen({
               href="/#contact"
               className="services-book label action whitespace-nowrap px-7 py-4 lying:px-5 lying:!py-2.5 press active:scale-[0.97] sm:py-[clamp(0.625rem,1.8cqh,1rem)]"
             >
-              Inquire
+              <PendingLabel state="composing">Inquire</PendingLabel>
             </Link>
             <Link
               prefetch={false}
