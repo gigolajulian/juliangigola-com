@@ -1,5 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
-import { errorsOn, open, RATIOS, SHORT, upright } from "./ratios";
+import { errorsOn, open, pickTime, RATIOS, SHORT, upright } from "./ratios";
 
 /* The /book time picker, at the six ratios and the short desktop where
    it draws at 80%. Times come from Cal.com live. Never submitted: the
@@ -27,7 +27,7 @@ for (const r of [...RATIOS, SHORT]) {
     await expect(confirm).toBeDisabled();
 
     // A time turns it on.
-    await page.locator("[data-slot]:not([disabled]):visible").first().click();
+    await pickTime(page);
     await expect(confirm).toBeEnabled();
     const picked = await page.locator("[data-slot][aria-pressed=true]").getAttribute("aria-label");
 

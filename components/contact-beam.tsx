@@ -3,6 +3,7 @@
 import * as React from "react";
 import { BorderBeam } from "border-beam";
 import { useSiteTheme } from "@/lib/site-theme";
+import { easeHeight } from "@/lib/ease-height";
 
 /* Julian: the form in a beam (`border-beam`, Libraries.dev), at his
    settings: the full border, in the site's own theme. Mono: Julian
@@ -45,6 +46,11 @@ export function ContactBeam({
     const el = edge.current;
     const id = el?.parentElement?.dataset.beam;
     if (el && id) el.style.setProperty("--edge-a", `var(--beam-angle-${id})`);
+  }, []);
+  // A change of height eases (lib/ease-height.ts).
+  React.useEffect(() => {
+    const card = edge.current?.parentElement;
+    return card ? easeHeight(card) : undefined;
   }, []);
   /* Two laps and then rest, on every screen. The glow is repainted
      every frame it moves: on an iPad held still on Inquiries it was a
