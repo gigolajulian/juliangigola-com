@@ -90,7 +90,8 @@ export function useWarmAhead(
       const from = el.scrollLeft - w;
       const to = el.scrollLeft + 3 * w;
       for (const img of Array.from(el.querySelectorAll<HTMLImageElement>("img"))) {
-        if (img.dataset.ahead !== undefined) continue;
+        // Hidden pictures stay lazy; `decode()` would fetch them too.
+        if (img.dataset.ahead !== undefined || !img.getClientRects().length) continue;
         const x = img.getBoundingClientRect().left - el.getBoundingClientRect().left + el.scrollLeft;
         if (x < from || x > to) continue;
         img.dataset.ahead = "";
