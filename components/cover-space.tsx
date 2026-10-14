@@ -97,21 +97,24 @@ export function CoverSpace({
       scroller.style.setProperty("scroll-timeline", `--hero ${side ? "x" : "y"}`);
       section.style.setProperty("--par-end", `${span}px`);
       for (const f of el.querySelectorAll<HTMLElement>(".cover-float-frame")) {
-        // z runs about -50 to 150: 0.15 to 0.5 of the scroll.
-        const rate = 0.15 + Math.max(0, Math.min(1, (parseFloat(getComputedStyle(f).getPropertyValue("--fz")) + 50) / 200)) * 0.35;
+        /* Julian: subtle, riding with the page (the first cut, 0.15 to
+           0.5 and 2400px back, trailed his finger). z runs about -50 to
+           150: 0.05 to 0.1 of the scroll. */
+        const k = Math.max(0, Math.min(1, (parseFloat(getComputedStyle(f).getPropertyValue("--fz")) + 50) / 200));
+        const rate = 0.05 + k * 0.05;
         /* Julian: down, scrolling up and down, as the page lifts past
            them; and back into the space, not too far: a screen's scroll
-           sends them 1200px to 2400px back, the near ones furthest
-           (about 0.7 to 0.6 of their size at the cover's 3280px
+           sends them 300px to 600px back, the near ones furthest
+           (about 0.92 to 0.85 of their size at the cover's 3280px
            perspective). Faded out by half a screen, so none lies over
            the name. */
         f.style.setProperty(side ? "--par-x" : "--par-y", `${(side ? -span : span) * rate}px`);
-        f.style.setProperty("--par-z", `${-(1200 + ((rate - 0.15) / 0.35) * 1200)}px`);
+        f.style.setProperty("--par-z", `${-(300 + k * 300)}px`);
       }
       /* The name, the role, the line under it and the buttons, each a
          little more than the one above. */
       section.querySelectorAll<HTMLElement>(".cover-float-middle .lift").forEach((f, i) => {
-        const rate = 0.04 + i * 0.03;
+        const rate = 0.015 + i * 0.01;
         f.style.setProperty(side ? "--par-x" : "--par-y", `${(side ? -span : span) * rate}px`);
       });
       section.setAttribute("data-par", "");
