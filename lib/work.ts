@@ -16,7 +16,7 @@ import { COVER_RELEASES as RELEASES } from "./cover-art-data";
 import type { CoverRelease } from "./cover-art-types";
 import { CONTENT } from "./content";
 import { ALT } from "./alt-text";
-import imageLoader from "../image-loader";
+import type { WallTile } from "./wall-tile";
 import { REEL } from "./videos";
 import {
   ADDED,
@@ -956,21 +956,11 @@ export const FEATURED: Project[] = FEATURED_SLUGS.map((s) =>
  * each card a different project. With every project on it, each column
  * holds several and no card on screen repeats another. Built here, on the
  * server, so a client component is handed three strings a tile and never
- * the projects. Small copies (640px, a 300px tile on a retina screen)
- * because the intro's are fetched alongside the page's own pictures.
+ * the projects; its image URLs are made where it is drawn (`wall-tile.ts`).
  */
 /** `src` is the frame itself, so a page can leave out what it already shows. */
-export type WallTile = { src: string; image: string; srcSet: string; title: string; href: string };
-const wallTile = (src: string, title: string, href: string): WallTile => ({
-  src,
-  image: imageLoader({ src, width: 640, quality: 70 }),
-  /* And a 320, which a phone's 80px tile takes at three times. */
-  srcSet: [320, 640]
-    .map((w) => `${imageLoader({ src, width: w, quality: 70 })} ${w}w`)
-    .join(", "),
-  title,
-  href,
-});
+export type { WallTile };
+const wallTile = (src: string, title: string, href: string): WallTile => ({ src, title, href });
 export const WALL: WallTile[] = [
   ...FEATURED,
   ...PROJECTS.filter((p) => !FEATURED.includes(p)),

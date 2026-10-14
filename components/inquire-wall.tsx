@@ -3,7 +3,7 @@
 import * as React from "react";
 import { useDialKit } from "dialkit";
 import DriftWall from "@/components/DriftWall";
-import type { WallTile } from "@/lib/work";
+import { wallItem, type WallTile } from "@/lib/wall-tile";
 
 /* The photo wall behind the homepage's last page, on its own DialKit
    panel. Julian: a dial for its scale. 1 is the wall at its full size
@@ -127,6 +127,7 @@ export function InquireWall({ items }: { items: WallTile[] }) {
       scroller.removeEventListener("scroll", moved);
     };
   }, [near]);
+  const tiles = React.useMemo(() => items.map(wallItem), [items]);
   if (!near) return <div ref={box} className="h-full w-full" />;
 
   // `?wall=slow` on a large screen: the tiles a third bigger, half the
@@ -136,7 +137,7 @@ export function InquireWall({ items }: { items: WallTile[] }) {
 
   return (
     <DriftWall
-      items={items}
+      items={tiles}
       className="inquire-wall"
       columns="fill"
       /* Scaled out so more of the work shows (1.25 to 0.85), and no

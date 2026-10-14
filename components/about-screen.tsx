@@ -177,7 +177,10 @@ export function AboutScreen() {
                   <h3 className="font-display text-3xl uppercase leading-none sm:text-[clamp(1.5rem,min(3.6vh,3.4vw),2.6rem)]">
                     {phase.step}
                   </h3>
-                  <p className="label mt-3 max-w-[48ch] lying:hidden text-left sm:mt-[clamp(0.5rem,1.2vh,0.75rem)] leading-relaxed text-muted-foreground">
+                  {/* Sentences in the text face, as the biography beside them:
+                      in the labels' caps they ran three and four lines of
+                      11px uppercase (audit, 2026-10-14). */}
+                  <p className="mt-3 max-w-[48ch] lying:hidden text-left text-[0.8125rem] normal-case sm:mt-[clamp(0.5rem,1.2vh,0.75rem)] leading-relaxed text-muted-foreground">
                     {phase.body}
                   </p>
                 </div>
