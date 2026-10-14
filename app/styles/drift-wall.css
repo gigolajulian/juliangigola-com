@@ -366,6 +366,13 @@
 .questions-wall::after {
   background: color-mix(in oklab, var(--background) 40%, transparent);
 }
+/* Behind Inquiries the wall runs under the bar and the words on the
+   left, and at 40% the bar's links and the column's labels measured
+   3.6 to 4.2 to 1 on its brighter photographs, both themes (contrast
+   pass, 2026-10-14). More of the page's ground there. */
+.enquiry-backdrop.questions-wall::after {
+  background: color-mix(in oklab, var(--background) var(--enquiry-ground, 62%), transparent);
+}
 /* The rack focus (`local-questions.tsx`): under a mouse the wall is held
    a little out of focus while the words are read, and pulled sharp, with
    the ground lifted off it, when the pointer goes to the photographs; the
