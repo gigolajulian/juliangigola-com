@@ -7,6 +7,7 @@ import { ContactForm } from "@/components/contact-form";
 import { SESSION_TYPES } from "@/lib/sessions";
 import type { MenuItem } from "@/lib/booking";
 import { cn } from "@/lib/utils";
+import { easeHeight } from "@/lib/ease-height";
 
 const SESSIONS = SESSION_TYPES.map((s) => s.name);
 
@@ -19,8 +20,11 @@ const SESSIONS = SESSION_TYPES.map((s) => s.name);
 export function BookCard({ item, onClose, className }: { item: MenuItem; onClose: () => void; className?: string }) {
   const [tab, setTab] = React.useState<"call" | "form">("call");
   const mode = item.cal ? tab : "form";
+  const card = React.useRef<HTMLDivElement>(null);
+  React.useEffect(() => (card.current ? easeHeight(card.current) : undefined), []);
   return (
     <div
+      ref={card}
       id="book-card"
       role="region"
       aria-label={`Book ${item.name}`}

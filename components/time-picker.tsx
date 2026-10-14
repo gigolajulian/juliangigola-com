@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { cn } from "@/lib/utils";
+import { Orb } from "@/components/orb";
 
 /* ── the time picker ──────────────────────────────────────────────
  * Cal.com's open times, in two plain steps: a day, then a time. Days
@@ -303,6 +304,7 @@ export function TimePicker({
      (`[data-slide]`, contact.css). Not on a switch between the two,
      which has its own glide below. */
   const [slide, setSlide] = React.useState(0);
+  const swipe = React.useRef<{ x: number; y: number; done: boolean } | null>(null);
   const shift = (dir: number) => {
     setSlide(dir);
     const d = new Date(view === "week" ? week[0] : anchor);
@@ -523,8 +525,14 @@ export function TimePicker({
   if (state === "fallback") return <>{fallback}</>;
   if (state === "loading" || !days) {
     return (
-      <div aria-label={title} className={cn("flex items-center justify-center", className)}>
-        <p className="label text-muted-foreground">Loading times</p>
+      // Held to the card's inset and a phone card's height while it waits
+      // (the embed's `block` had it on the card's edge, in a sliver).
+      <div aria-label={title} className={cn(className, "!flex items-center justify-center px-[var(--card-x,1.25rem)] max-sm:min-h-[24rem]")}>
+        {/* Julian: an orb turning, not the words. Still said to a reader. */}
+        <p role="status" className="text-muted-foreground">
+          <Orb state="connecting" size={64} />
+          <span className="sr-only">Loading times</span>
+        </p>
       </div>
     );
   }
@@ -583,7 +591,7 @@ export function TimePicker({
   }
 
   return (
-    <div aria-label={title} role="region" data-view={view} data-mstep={mstep} className={cn("tp @container relative !flex min-h-0 flex-col overflow-x-clip p-5 sm:p-10 max-[56rem]:sm:p-6 tp-short:p-5 max-sm:!px-1", className)}>
+    <div aria-label={title} role="region" data-view={view} data-mstep={mstep} className={cn("tp @container relative !flex min-h-0 flex-col overflow-x-clip p-5 sm:p-10 max-[56rem]:sm:p-6 tp-short:p-5 max-sm:!px-[var(--card-x,1.25rem)]", className)}>
       {step === "sending" || step === "check" ? (
         <div role="status" aria-live="polite" className="absolute inset-0 z-20 bg-background/85 backdrop-blur-md">
           <div className="sticky top-[28%] flex flex-col items-center gap-6 py-10">
@@ -630,9 +638,34 @@ export function TimePicker({
             ))}
           </div>
         </div>
-        <div ref={daysBox} data-slide={slide} className="-m-1 overflow-hidden p-1">
+        {/* Julian: a swipe across the days on a touchscreen goes to the
+            next or last week or month, as the arrows do. Sideways only;
+            up and down still scroll the page. */}
+        <div
+          ref={daysBox}
+          data-slide={slide}
+          className="-m-1 touch-pan-y overflow-hidden p-1"
+          onPointerDown={(e) => {
+            if (e.pointerType !== "mouse") swipe.current = { x: e.clientX, y: e.clientY, done: false };
+          }}
+          onPointerUp={(e) => {
+            const s = swipe.current;
+            if (!s) return;
+            const dx = e.clientX - s.x, dy = e.clientY - s.y;
+            if (Math.abs(dx) < 40 || Math.abs(dx) < Math.abs(dy) * 1.5) return void (swipe.current = null);
+            s.done = true;
+            if (dx < 0) shift(1);
+            else if (!atStart) shift(-1);
+          }}
+          onPointerCancel={() => (swipe.current = null)}
+          // A swipe that ends on the day it began on is not a pick.
+          onClickCapture={(e) => {
+            if (swipe.current?.done) e.stopPropagation();
+            swipe.current = null;
+          }}
+        >
         {view === "week" ? (
-          <div className="grid grid-cols-7 gap-2 sm:gap-2.5">
+          <div className="grid grid-cols-7 gap-2 max-sm:-mx-0.5 max-sm:gap-1 sm:gap-2.5">
             {week.map((d) => {
               const id = iso(d);
               const o = open(id);
@@ -752,7 +785,8 @@ export function TimePicker({
             of half hours, a phone), a kind to a line, named to its left past a
             phone, the boxes on one grid so they line up from kind to kind. */}
         {(() => {
-        const kinds = PARTS.map(([part, from, to]) => [part, (days[pick.date] ?? []).filter((x) => minutesOf(x.start) >= from && minutesOf(x.start) < to)] as const).filter(([, list]) => list.length);
+        const timesFor = (date: string) => {
+        const kinds = PARTS.map(([part, from, to]) => [part, (days[date] ?? []).filter((x) => minutesOf(x.start) >= from && minutesOf(x.start) < to)] as const).filter(([, list]) => list.length);
         const n = kinds.reduce((t, [, list]) => t + list.length, 0);
         const line = n * 68 + (n - kinds.length) * 6 + (kinds.length - 1) * 24 <= slotsW;
         /* Stacked, the rows are even: ten afternoon times went seven and
@@ -765,13 +799,13 @@ export function TimePicker({
         const fit = Math.max(1, Math.floor((room + 6) / (slotsW >= 448 ? 76 : 86)));
         const cols = Math.min(fit, Math.ceil(most / Math.ceil(most / fit)));
         return (
-        <div key={pick.date} className={cn("flex gap-x-6 gap-y-3 tp-short:gap-y-3", !line && "flex-col")}>
+        <div key={date} className={cn("flex gap-x-6 gap-y-3 tp-short:gap-y-3", !line && "flex-col")}>
         {kinds.map(([part, list]) => (
           <div key={part} className={cn("flex min-w-0 flex-col gap-2 tp-short:gap-1", line ? "basis-0" : "@md:grid @md:grid-cols-[6.5rem_minmax(0,1fr)] @md:items-baseline @md:gap-x-4")} style={line ? { flexGrow: list.length } : undefined}>
           <span className="label text-muted-foreground">{part}</span>
           <div className={line ? "flex gap-1.5" : "grid gap-1.5"} style={line ? undefined : { gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))` }}>
           {list.map((x) => {
-            const n = (days[pick.date] ?? []).indexOf(x);
+            const n = (days[date] ?? []).indexOf(x);
             const m = minutesOf(x.start);
             const on = chosen === "time" && m === pick.min;
             const [h, a] = clock(m);
@@ -782,7 +816,7 @@ export function TimePicker({
                 type="button"
                 aria-pressed={on}
                 aria-label={`${h} ${a}`}
-                onClick={() => choose(pick.date, m, true)}
+                onClick={() => choose(date, m, true)}
                 style={{ animationDelay: `${n * 25}ms` }}
                 className={cn(
                   "tp-rise label min-w-0 flex-1 rounded-[var(--tp-r,6px)] [animation-fill-mode:backwards] border-[0.5px] py-[min(var(--tp-slot,0.75rem),0.625rem)] text-center sm:py-[var(--tp-slot,0.75rem)] tabular-nums transition-[background-color,color,translate] duration-300 ease-[var(--ease-out-strong)] tp-short:py-2",
@@ -804,6 +838,33 @@ export function TimePicker({
           </div>
         ))}
         </div>
+        );
+        };
+        /* Julian: on a phone the day's times in the phone's own wheel,
+           one line, so the card keeps its length from day to day and the
+           wall behind it holds still (the buttons are off there). */
+        const list = days[pick.date] ?? [];
+        return (
+          <>
+            <div className="max-sm:hidden">{timesFor(pick.date)}</div>
+            <label className="relative sm:hidden">
+              <span className="sr-only">Time</span>
+              <select
+                data-part="wheel"
+                value={chosen === "time" ? String(pick.min) : ""}
+                onChange={(e) => e.target.value && choose(pick.date, Number(e.target.value), true)}
+                className="label w-full appearance-none rounded-[var(--tp-r,6px)] border-[0.5px] border-foreground/40 bg-transparent py-3.5 pl-4 pr-10 text-foreground"
+              >
+                <option value="" disabled>{`Choose a time · ${list.length} open`}</option>
+                {list.map((x) => {
+                  const m = minutesOf(x.start);
+                  const [h, a] = clock(m);
+                  return <option key={x.start} value={m}>{`${h} ${a}`}</option>;
+                })}
+              </select>
+              <svg aria-hidden viewBox="0 0 12 8" className="pointer-events-none absolute right-4 top-1/2 w-3 -translate-y-1/2 text-foreground" fill="none"><path d="M1 1.5l5 5 5-5" stroke="currentColor" strokeWidth="1.2" /></svg>
+            </label>
+          </>
         );
         })()}
       </div>

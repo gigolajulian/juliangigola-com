@@ -61,3 +61,17 @@ export function errorsOn(page: Page): string[] {
   });
   return out;
 }
+
+/** Picks an open time, as a person would: on a phone the wheel of the
+    day's times (`[data-part="wheel"]`, time-picker.tsx), elsewhere a
+    time's button; the first, or with `last` the last. */
+export async function pickTime(page: Page, last = false): Promise<void> {
+  const wheel = page.locator("select[data-part=wheel]:visible");
+  if (await wheel.count()) {
+    const times = await wheel.locator("option:not([disabled])").evaluateAll((o) => o.map((x) => (x as HTMLOptionElement).value));
+    await wheel.selectOption(last ? times[times.length - 1] : times[0]);
+  } else {
+    const slots = page.locator("[data-slot]:not([disabled]):visible");
+    await (last ? slots.last() : slots.first()).click();
+  }
+}
