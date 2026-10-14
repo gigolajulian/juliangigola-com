@@ -69,7 +69,8 @@ export function FitLines() {
       );
       const read = all.map((l) => ({
         w: l.getBoundingClientRect().width,
-        n: [...(l.textContent ?? "")].length,
+        // The shown words only: the location keeps a hidden long form.
+        n: [...l.innerText].length,
         size: parseFloat(getComputedStyle(l).fontSize),
       }));
       probe.remove();

@@ -456,7 +456,8 @@ export function ContactForm({
           </p>
         ) : null}
         {/* The address is above the form on a phone already. */}
-        <p className="order-first text-left text-xs text-muted-foreground max-sm:hidden lying:hidden">
+        {/* In the labels' face, as References beside it (Julian, 2026-10-14). */}
+        <p className="label order-first text-left text-muted-foreground max-sm:hidden lying:hidden">
           Email{" "}
           <a
             href="mailto:hello@juliangigola.com"

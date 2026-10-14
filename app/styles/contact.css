@@ -39,6 +39,26 @@
   }
 }
 
+/* In the light theme a door stays dark, as the reel does
+   (strip-motion.css): its veil was the paper ground at 68 to 90%, and the
+   photographs went milky under it (Julian, 2026-10-14). White type over a
+   dark veil instead. */
+:root[data-theme="light"] :has(> .door-veil) {
+  color-scheme: dark;
+  --background: oklch(0.145 0.003 70);
+  --foreground: oklch(0.955 0.004 80);
+  --muted-foreground: oklch(0.82 0.004 80);
+  --border: oklch(1 0 0 / 11%);
+  color: var(--foreground);
+}
+/* The bar's dark links lay over the first door's dark top: the door
+   starts under the bar there, on paper. */
+@media (min-width: 40rem) {
+  :root[data-theme="light"] #where-next > :first-child > :is(.door-photo, .door-veil) {
+    top: var(--bar-h) !important;
+    height: calc(100% - var(--bar-h)) !important;
+  }
+}
 /* The last screen's doors, each over a photograph. The veil is the
    ground, heavier toward the words, so the type keeps its contrast
    whatever the frame; a hover lets a little more of it through. */
@@ -454,6 +474,14 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 1.5rem;
   }
+  /* Their light splits the gap, as on the Inquiries card: at -2rem
+     Name's ran 10px into Email (Julian, 2026-10-14). */
+  .book-form .contact-pair > .contact-field:first-child::before {
+    inset-inline-end: -0.75rem;
+  }
+  .book-form .contact-pair > .contact-field:last-child::before {
+    inset-inline-start: -0.75rem;
+  }
 }
 /* A big screen's card: the whole form set larger, so it fills the card
    as it does on a laptop rather than sitting small in the middle. */
@@ -488,6 +516,45 @@
   }
   .book-form form > .contact-field:has(#field-detail) {
     grid-column: 2;
+  }
+  .book-form form > .contact-field:has(#field-detail)::before {
+    inset-inline-start: -0.75rem;
+  }
+}
+/* A laptop's short card (1333x620: 303px for 495 of form): the inquiry
+   whole in it, Inquire in sight, as a phone on its side has it
+   (devices.css). The promise on two lines, the fields one line each, the
+   message two. */
+@container (max-height: 26rem) {
+  [data-scroll]:has(> .book-form) {
+    padding-block: 0.75rem;
+  }
+  .book-form {
+    gap: 0.5rem;
+  }
+  .book-form > div:first-child {
+    padding-bottom: 0.75rem;
+  }
+  .book-form > div:first-child p {
+    max-width: none;
+  }
+  .book-form form {
+    row-gap: 0.25rem;
+  }
+  .book-form div:has(> #field-type) {
+    margin-top: 0;
+  }
+  .book-form :is(.contact-field :is(input, textarea), #field-type) {
+    margin-top: 0;
+    padding-block: 0.25rem;
+    min-height: 32px;
+  }
+  .book-form .contact-field textarea {
+    height: 2.25rem;
+  }
+  .book-form button[type="submit"] {
+    min-height: 0;
+    padding-block: 0.5rem;
   }
 }
 
