@@ -188,6 +188,12 @@ export function CoverFloat({
           heading ? "max-w-[min(96rem,94vw)]" : "max-w-[min(62rem,92vw)]",
         )}
       >
+        {/* Without scripts the canvas is never drawn: the name set in its
+            face in the same box instead (audit, 2026-10-14). Outside the h1,
+            so the CSS is not part of its text. */}
+        <noscript>
+          <style>{`.cover-float-name::after{content:"Julian Gigola";display:block;font-family:var(--font-wordmark),sans-serif;font-weight:900;letter-spacing:-0.045em;line-height:1.1;white-space:nowrap;text-align:center}`}</style>
+        </noscript>
         {heading ? (
           <h1
             className="lift font-display text-[clamp(2.5rem,6.5vw,6.5rem)] uppercase leading-[0.92] text-balance"
@@ -206,11 +212,6 @@ export function CoverFloat({
                   Tight Black. The canvas is a picture of the words; the words
                   themselves are here for search and screen readers. */}
               <span className="sr-only">Julian Gigola</span>
-              {/* Without scripts the canvas is never drawn: the name set in its
-                  face in the same box instead (audit, 2026-10-14). */}
-              <noscript>
-                <style>{`.cover-float-name::after{content:"Julian Gigola";display:block;font-family:var(--font-wordmark),sans-serif;font-weight:900;letter-spacing:-0.045em;line-height:1.1;white-space:nowrap;text-align:center}`}</style>
-              </noscript>
               <HeroName
                 className="cover-float-name mx-auto normal-case"
                 style={{
