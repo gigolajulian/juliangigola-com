@@ -88,37 +88,52 @@ export function CoverSpace({
        each layer's travel once. */
     const section = el.closest("section");
     if (section && !/[?&]tilt=1/.test(location.search)) {
-      let box: HTMLElement | null = el.parentElement;
-      // The window on a phone; the deck, which runs sideways, on an iPad.
-      while (box && !/(auto|scroll)/.test(getComputedStyle(box).overflowY + getComputedStyle(box).overflowX)) box = box.parentElement;
-      const side = !!box && box.scrollWidth > box.clientWidth;
-      const scroller = box ?? document.documentElement;
-      const span = side ? innerWidth : innerHeight;
-      scroller.style.setProperty("scroll-timeline", `--hero ${side ? "x" : "y"}`);
-      section.style.setProperty("--par-end", `${span}px`);
-      for (const f of el.querySelectorAll<HTMLElement>(".cover-float-frame")) {
-        /* Julian: subtle, riding with the page (the first cut, 0.15 to
-           0.5 and 2400px back, trailed his finger). z runs about -50 to
-           150: 0.05 to 0.1 of the scroll. */
-        const k = Math.max(0, Math.min(1, (parseFloat(getComputedStyle(f).getPropertyValue("--fz")) + 50) / 200));
-        const rate = 0.05 + k * 0.05;
-        /* Julian: down, scrolling up and down, as the page lifts past
-           them; and back into the space, not too far: a screen's scroll
-           sends them 300px to 600px back, the near ones furthest
-           (about 0.92 to 0.85 of their size at the cover's 3280px
-           perspective). Faded out by half a screen, so none lies over
-           the name. */
-        f.style.setProperty(side ? "--par-x" : "--par-y", `${(side ? -span : span) * rate}px`);
-        f.style.setProperty("--par-z", `${-(300 + k * 300)}px`);
-      }
-      /* The name, the role, the line under it and the buttons, each a
-         little more than the one above. */
-      section.querySelectorAll<HTMLElement>(".cover-float-middle .lift").forEach((f, i) => {
-        const rate = 0.015 + i * 0.01;
-        f.style.setProperty(side ? "--par-x" : "--par-y", `${(side ? -span : span) * rate}px`);
-      });
+      let scroller: HTMLElement = document.documentElement;
+      /* Again on a turn of the iPad or the phone (a new width), not on
+         Safari's bar folding away mid-scroll, which only changes the
+         height: the range moving under a finger would jump. */
+      let wide = 0;
+      const set = () => {
+        if (innerWidth === wide) return;
+        wide = innerWidth;
+        scroller.style.removeProperty("scroll-timeline");
+        let box: HTMLElement | null = el.parentElement;
+        // The window on a phone; the deck, which runs sideways, on an iPad.
+        while (box && !/(auto|scroll)/.test(getComputedStyle(box).overflowY + getComputedStyle(box).overflowX)) box = box.parentElement;
+        const side = !!box && box.scrollWidth > box.clientWidth;
+        scroller = box ?? document.documentElement;
+        const span = side ? innerWidth : innerHeight;
+        scroller.style.setProperty("scroll-timeline", `--hero ${side ? "x" : "y"}`);
+        section.style.setProperty("--par-end", `${span}px`);
+        for (const f of el.querySelectorAll<HTMLElement>(".cover-float-frame")) {
+          /* Julian: subtle, riding with the page (the first cut, 0.15 to
+             0.5 and 2400px back, trailed his finger). z runs about -50 to
+             150: 0.05 to 0.1 of the scroll. */
+          const k = Math.max(0, Math.min(1, (parseFloat(getComputedStyle(f).getPropertyValue("--fz")) + 50) / 200));
+          const rate = 0.05 + k * 0.05;
+          /* Julian: down, scrolling up and down, as the page lifts past
+             them; and back into the space, not too far: a screen's scroll
+             sends them 300px to 600px back, the near ones furthest
+             (about 0.92 to 0.85 of their size at the cover's 3280px
+             perspective). Faded out by half a screen, so none lies over
+             the name. */
+          f.style.removeProperty(side ? "--par-y" : "--par-x");
+          f.style.setProperty(side ? "--par-x" : "--par-y", `${(side ? -span : span) * rate}px`);
+          f.style.setProperty("--par-z", `${-(300 + k * 300)}px`);
+        }
+        /* The name, the role, the line under it and the buttons, each a
+           little more than the one above. */
+        section.querySelectorAll<HTMLElement>(".cover-float-middle .lift").forEach((f, i) => {
+          const rate = 0.015 + i * 0.01;
+          f.style.removeProperty(side ? "--par-y" : "--par-x");
+          f.style.setProperty(side ? "--par-x" : "--par-y", `${(side ? -span : span) * rate}px`);
+        });
+      };
+      set();
+      addEventListener("resize", set);
       section.setAttribute("data-par", "");
       return () => {
+        removeEventListener("resize", set);
         section.removeAttribute("data-par");
         scroller.style.removeProperty("scroll-timeline");
       };
