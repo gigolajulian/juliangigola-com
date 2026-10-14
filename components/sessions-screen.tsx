@@ -49,7 +49,7 @@ function where(title: string) {
   );
 }
 
-export function SessionsScreen({ sessions, menu, walls }: { sessions: SessionItem[]; menu?: MenuItem[]; walls?: Record<string, WallTile[]> }) {
+export function SessionsScreen({ sessions, menu, walls, covers }: { sessions: SessionItem[]; menu?: MenuItem[]; walls?: Record<string, WallTile[]>; covers?: Record<string, Frame | null> }) {
   const quiet = useQuiet();
   const router = useRouter();
   const [open, setOpen] = useState(0);
@@ -142,7 +142,7 @@ export function SessionsScreen({ sessions, menu, walls }: { sessions: SessionIte
     here && menu
       ? menu.map((m) => {
           const s = sessions.find((x) => x.slug === m.slug);
-          return { slug: m.slug, name: m.name, rate: "", turnaround: s?.turnaround ?? "", blurb: m.blurb, includes: s?.includes ?? [], cover: s?.cover ?? null, page: m.page, pageTitle: s?.pageTitle, item: m };
+          return { slug: m.slug, name: m.name, rate: "", turnaround: s?.turnaround ?? "", blurb: m.blurb, includes: s?.includes ?? [], cover: s?.cover ?? covers?.[m.slug] ?? null, page: m.page, pageTitle: s?.pageTitle, item: m };
         })
       : sessions;
   const current = rows[open];

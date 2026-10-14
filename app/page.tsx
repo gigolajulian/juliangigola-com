@@ -16,6 +16,7 @@ import {
   projectsIn,
   WALL,
   wallOf,
+  categoryFrame,
   WORK_PAGE,
   WORK_CATEGORY_LINKS,
   commissionsIn,
@@ -117,6 +118,14 @@ const SESSION_WALLS = Object.fromEntries(
   BOOK_MENU.map((m) => {
     const p = pageForSession(m.slug) ?? BOOKING_PAGES.find((x) => x.slug === m.slug);
     return [m.slug, wallOf((p?.gallery.href ?? m.page ?? "").split("/").pop() ?? "")];
+  }),
+);
+/* The commissions in the Sessions list have no session sample: their
+   discipline's cover stands in for the photograph (Julian). */
+const SESSION_COVERS = Object.fromEntries(
+  BOOK_MENU.map((m) => {
+    const p = pageForSession(m.slug) ?? BOOKING_PAGES.find((x) => x.slug === m.slug);
+    return [m.slug, categoryFrame((p?.gallery.href ?? m.page ?? "").split("/").pop() ?? "")];
   }),
 );
 /* A photograph behind each door on the last screen. */
@@ -284,6 +293,7 @@ export default function Home() {
           })}
           menu={BOOK_MENU}
           walls={SESSION_WALLS}
+          covers={SESSION_COVERS}
         />
         {/* The wall behind Inquire, where it was behind the last
             screen's doors, and none of it a picture the page already
