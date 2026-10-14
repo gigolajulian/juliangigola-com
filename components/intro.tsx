@@ -15,7 +15,7 @@ import { BlinkingMark } from "@/components/not-found-scene";
  * the work:
  *
  *   It never holds the page for long. The site is rendered underneath
- *   from the first byte, and the whole opening takes 1.65s from the first
+ *   from the first byte, and the whole opening takes 3s from the first
  *   paint, whatever is still loading.
  *
  *   It runs once a visit, on whichever page the visit starts on.
@@ -35,13 +35,13 @@ import { BlinkingMark } from "@/components/not-found-scene";
    The sweep is quick to start and slows into full; it holds full; then the
    whole panel, eye and all, lifts off the top of the screen, gathering
    speed. */
-const OUT = 550; // the lift (1000 until Julian took the short preview, 2026-10-14)
+const OUT = 1000; // the lift
 /* The lift should reveal the hero. It lifted off a page whose
    entrance had not started, black under black, so only the eye
    seemed to move. Here the page starts its entrance under the full
    panel, and the panel holds this long before it lifts, uncovering
    the name already up and the photographs landing. */
-const UNDER = 250;
+const UNDER = 450;
 
 const lift = () => document.documentElement.removeAttribute("data-intro");
 
@@ -112,10 +112,8 @@ export function Intro() {
        it stopped and started, and the page starting its entrance under
        it froze it for a sixth of a second on a phone. Now it never
        stops, the page starts only once it is full, and the whole
-       opening is a fixed time from the first paint: sweep, hold, lift
-       (3s, then 1.65s from 2026-10-14). */
-    // The sweep is 850ms in `splash.css` (1550 until 2026-10-14: at 55%
-    // of its length the first photographs paint about a second sooner).
+       opening is a fixed 3s from the first paint: sweep, hold, lift. */
+    // The sweep is 1550ms in `globals.css`.
     const sweep: Animation | undefined = panel.current?.getAnimations()[0];
     const wait = (ms: number) => new Promise((r) => setTimeout(r, ms));
     /* Julian: one blink, before the sweep's edge reaches the eye (it
@@ -130,8 +128,8 @@ export function Intro() {
         /* The eye fades out before the panel lifts, so the sheet
            leaves empty. */
         eye.current?.animate([{ opacity: 1 }, { opacity: 0 }], {
-          duration: 230,
-          delay: UNDER - 230,
+          duration: 420,
+          delay: UNDER - 420,
           easing: "cubic-bezier(0.45, 0, 0.55, 1)",
           fill: "forwards",
         });

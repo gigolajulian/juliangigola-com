@@ -165,15 +165,15 @@ export function TimePicker({
   /* Julian: Confirm's words turn into the orbs, then a check, before the
      form opens. */
   const [ok, setOk] = React.useState<"" | "spin" | "tick">("");
-  /* Nothing is waited on here, so the orbs and the check in 0.7s
-     (Julian, 2026-10-14; it was 1.4s). */
+  /* Nothing is waited on here, so the orbs and the check in 1.05s
+     (Julian, 2026-10-14: 1.4s was slow, 0.7s too fast). */
   React.useEffect(() => {
     if (!ok) return;
     const t = window.setTimeout(() => {
       if (ok === "spin") return setOk("tick");
       setOk("");
       setStep("form");
-    }, ok === "spin" ? 300 : 400);
+    }, ok === "spin" ? 450 : 600);
     return () => window.clearTimeout(t);
   }, [ok]);
 

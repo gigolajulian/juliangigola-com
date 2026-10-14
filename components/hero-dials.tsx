@@ -70,7 +70,7 @@ export const SPACE = {
 
 const ENTRANCE = {
   firstPhotoAt: [420, 0, 3000, 10],
-  stagger: [0.5, 0, 4, 0.05],
+  stagger: [0.95, 0, 4, 0.05],
   photosFlyIn: { distance: [150, 0, 300, 1], duration: [1020, 200, 4000, 10] },
   photosFadeIn: { duration: [1110, 100, 4000, 10], blur: [7, 0, 40, 1] },
   textRise: { duration: [1030, 100, 3000, 10] },

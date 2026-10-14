@@ -62,8 +62,8 @@
    never stops. No `linear()` (an older browser) drops the second line
    and keeps the nearest curve. */
 [data-intro] .jg-intro-panel {
-  animation: jg-intro-sweep 850ms cubic-bezier(0.3, 0.7, 0.4, 1) forwards;
-  animation: jg-intro-sweep 850ms linear(0, 0.0265, 0.0923, 0.1593, 0.2301, 0.3009, 0.3835, 0.4493, 0.5117, 0.5705, 0.6362, 0.6867, 0.7335, 0.7765, 0.8229, 0.8574, 0.8881, 0.9149, 0.9419, 0.9603, 0.9748, 0.9854, 0.9922, 0.9964, 1) forwards;
+  animation: jg-intro-sweep 1550ms cubic-bezier(0.3, 0.7, 0.4, 1) forwards;
+  animation: jg-intro-sweep 1550ms linear(0, 0.0265, 0.0923, 0.1593, 0.2301, 0.3009, 0.3835, 0.4493, 0.5117, 0.5705, 0.6362, 0.6867, 0.7335, 0.7765, 0.8229, 0.8574, 0.8881, 0.9149, 0.9419, 0.9603, 0.9748, 0.9854, 0.9922, 0.9964, 1) forwards;
 }
 @keyframes jg-intro-sweep {
   to {
@@ -130,7 +130,7 @@
    set off halfway through the lift (`data-intro="half"`, `intro.tsx`)
    rather than once it has cleared. Off unless the preview is on. */
 :root[data-deal] .cover-float-frame {
-  --delay: calc(var(--h-start, 420ms) + var(--wave-now, var(--wave, 0)) * var(--h-spread, 0.5ms));
+  --delay: calc(var(--h-start, 420ms) + var(--wave-now, var(--wave, 0)) * var(--h-spread, 0.95ms));
 }
 /* The photographs wait while the panel is full and set off with the
    lift (`data-intro="half"`, `intro.tsx`). */

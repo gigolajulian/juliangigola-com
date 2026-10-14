@@ -38,7 +38,7 @@
   width: calc(var(--fw) * var(--wide, 1));
   /* Out of order: each frame's place in `ORDER` (`cover-float.tsx`),
      spread out from the start. */
-  --delay: calc(var(--h-start, 420ms) + var(--order, 0) * var(--h-spread, 0.5ms));
+  --delay: calc(var(--h-start, 420ms) + var(--order, 0) * var(--h-spread, 0.95ms));
   animation: jg-fly var(--h-fly-ms, 1020ms) cubic-bezier(0.16, 1, 0.3, 1)
     var(--delay) backwards;
 }
