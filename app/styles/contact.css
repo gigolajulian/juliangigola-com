@@ -623,6 +623,44 @@
 
 /* A week still over once its big time and day line are gone: the steps'
    names go and the times close up. */
+/* The booking form, once a time is picked, in a short card (QA,
+   2026-10-14: at 1280x720 and 1333x620 Book it sat under the card's
+   edge, out of reach). Closer, the fields one line each, the note one
+   line; and where that is still too tall, this step alone scrolls in
+   the card so Book it is always reached. The picker keeps to no scroll. */
+.tp:has(> form) {
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+@container card (max-height: 34rem) {
+  /* The room under Book it on the form, not the scroller: a scroller's
+     own bottom padding is not scrolled to, and the button met the edge. */
+  .tp:has(> form) {
+    padding-bottom: 0;
+  }
+  .tp > form {
+    gap: 0.625rem;
+    padding-bottom: 1.5rem;
+  }
+  .tp > form > .grid {
+    gap: 0.625rem 1rem;
+  }
+  .tp > form label {
+    gap: 0.25rem;
+  }
+  .tp > form :is(input:not([type="radio"]), textarea) {
+    padding-block: 0.25rem;
+  }
+  .tp > form textarea {
+    height: 2rem;
+  }
+  .tp > form [data-part="chip"] {
+    padding-block: 0.5rem;
+  }
+  .tp > form > [data-part="act"] {
+    padding-block: 0.625rem;
+  }
+}
 .tp[data-tight] [data-part="days"] > p:first-child,
 .tp[data-tight] [data-part="times"] > p {
   display: none;
