@@ -530,10 +530,14 @@ export function TimePicker({
       // Held to the card's inset and a phone card's height while it waits
       // (the embed's `block` had it on the card's edge, in a sliver).
       <div aria-label={title} className={cn(className, "!flex items-center justify-center px-[var(--card-x,1.25rem)] max-sm:min-h-[24rem]")}>
-        {/* Julian: an orb turning, not the words (shaping, small: picked
-            by eye 2026-10-14). Still said to a reader. */}
-        <p role="status" className="text-muted-foreground">
-          <Orb state="shaping" size={20} />
+        {/* Julian: an orb turning, not the words (shaping, picked by eye
+            2026-10-14; 64px, at 20 it was lost in the empty card). Still
+            said to a reader. */}
+        {/* In the middle of the card, not of the room under its top line
+            (QA on #143, Julian: the orb in the center of the card): lifted
+            half that line (`--card-lift`, book-here.tsx). */}
+        <p role="status" className="pointer-events-none absolute inset-0 flex -translate-y-[var(--card-lift,0px)] items-center justify-center text-muted-foreground">
+          <Orb state="shaping" size={64} />
           <span className="sr-only">Loading times</span>
         </p>
       </div>
@@ -597,7 +601,11 @@ export function TimePicker({
     <div aria-label={title} role="region" data-view={view} data-mstep={mstep} className={cn("tp @container relative !flex min-h-0 flex-col overflow-x-clip p-5 sm:p-10 max-[56rem]:sm:p-6 tp-short:p-5 max-sm:!px-[var(--card-x,1.25rem)]", className)}>
       {step === "sending" || step === "check" ? (
         <div role="status" aria-live="polite" className="absolute inset-0 z-20 bg-background/85 backdrop-blur-md">
-          <div className="sticky top-[28%] flex flex-col items-center gap-6 py-10">
+          {/* The orb in the middle of the card, its word under it, out of
+              the reckoning (QA on #143); a phone's card taller than the
+              screen keeps it in the middle of what shows. */}
+          <div className="sticky top-0 flex h-full max-h-[100svh] flex-col items-center justify-center">
+            <div className="relative -translate-y-[var(--card-lift,0px)]">
             <div className="tp-status relative size-28" data-ok={step === "check" ? "" : undefined}>
               {/* Julian: the working orb while it books, in place of the
                   circling dots; the ring and tick once it is booked. */}
@@ -611,7 +619,8 @@ export function TimePicker({
                 <path className="tp-tick stroke-accent" d="M38 58l12 12 24-26" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
             </div>
-            <p className="label text-muted-foreground">{step === "check" ? "Booked" : "Booking"}</p>
+            <p className="label absolute left-1/2 top-full mt-6 -translate-x-1/2 whitespace-nowrap text-muted-foreground">{step === "check" ? "Booked" : "Booking"}</p>
+            </div>
           </div>
         </div>
       ) : null}

@@ -29,7 +29,7 @@ export function BookCard({ item, onClose, className }: { item: MenuItem; onClose
       role="region"
       aria-label={`Book ${item.name}`}
       tabIndex={-1}
-      className={cn("relative flex flex-col overflow-hidden rounded-[12px] border-[0.5px] border-border bg-card/60 outline-none backdrop-blur-xl backdrop-saturate-150 [--card-x:1.25rem] [container-type:size] sm:[--card-x:2.5rem]", className)}
+      className={cn("relative flex flex-col overflow-hidden rounded-[12px] border-[0.5px] border-border bg-card/60 outline-none backdrop-blur-xl backdrop-saturate-150 [--card-x:1.25rem] [--card-lift:0.8125rem] [container-type:size] sm:[--card-x:2.5rem] sm:[--card-lift:0.9375rem]", className)}
     >
       {/* The card's own top line: the ways to reach me on the left where
           there are two, Close on the right. Nothing scrolls under it

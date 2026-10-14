@@ -53,7 +53,10 @@ export function Orb(props: React.ComponentProps<typeof ThinkingOrb>) {
     <span
       ref={ref}
       aria-hidden
-      className="inline-flex shrink-0"
+      /* Not for a wait that ends at once: it fades in from 300ms, so a
+         load done sooner shows nothing and one done just after only a
+         trace (QA on #143). */
+      className="inline-flex shrink-0 animate-[jg-fade-in_300ms_ease-out_300ms_both]"
       style={{ width: props.size ?? 64, height: props.size ?? 64 }}
     >
       {ink ? <ThinkingOrb {...props} color={ink.color} theme={ink.theme} /> : null}
