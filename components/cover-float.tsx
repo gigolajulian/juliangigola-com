@@ -8,6 +8,7 @@ import { FitLines } from "@/components/fit-lines";
 import { CoverCard, HeroDials, HeroName } from "@/components/hero-dials";
 import { DEAL, LANDSCAPE, MIDDLE, PHONE, SHORT, SIDEWAYS, SLOTS, UPRIGHT, middleVars } from "@/lib/cover-slots";
 import { LiquidPair } from "@/components/liquid-pair";
+import { PendingLabel } from "@/components/pending-label";
 
 /* ── the cover ────────────────────────────────────────────────────
  * The name in the middle of the screen and the featured work round it,
@@ -259,7 +260,7 @@ export function CoverFloat({
                 href="/#sessions"
                 className="cover-cta cover-cta-quiet press active:scale-[0.97]"
               >
-                Book a session
+                <PendingLabel state="connecting">Book a session</PendingLabel>
               </Link>
             </>
           )}

@@ -3,6 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { RisingTitle } from "@/components/strip-page";
 import { LiquidPair } from "@/components/liquid-pair";
+import { PendingLabel } from "@/components/pending-label";
 
 /* ── about ────────────────────────────────────────────────
  * A screen of the homepage (Julian: About and Contact on the home page,
@@ -125,7 +126,7 @@ export function AboutScreen() {
               href="/?type=editorial#contact"
               className="label action px-7 py-4 press active:scale-[0.97] sm:py-[clamp(0.625rem,1.8cqh,1rem)] lying:px-5 lying:!py-2.5"
             >
-              Inquire
+              <PendingLabel state="composing">Inquire</PendingLabel>
             </Link>
             <Link
               prefetch={false}
