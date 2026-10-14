@@ -3,6 +3,7 @@ import Link from "next/link";
 import { NotFoundScene, BlinkingMark } from "@/components/not-found-scene";
 import DriftWall from "@/components/DriftWall";
 import { DISCIPLINES, WALL } from "@/lib/work";
+import { wallItem } from "@/lib/wall-tile";
 import { LiquidPair } from "@/components/liquid-pair";
 
 /* ── 404 ──────────────────────────────────────────────────────────
@@ -58,7 +59,7 @@ export default function NotFound() {
             and no grid. */}
         <div className="absolute inset-0">
           <DriftWall
-            items={WALL}
+            items={WALL.map(wallItem)}
             columns="fill"
             tileWidth={300}
             tileHeight={400}

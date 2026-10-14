@@ -11,7 +11,7 @@ import { BookCard } from "@/components/book-here";
 import { InquireWall } from "@/components/inquire-wall";
 import type { MenuItem } from "@/lib/booking";
 import type { Frame } from "@/lib/work-types";
-import type { WallTile } from "@/lib/work";
+import type { WallTile } from "@/lib/wall-tile";
 import { PendingLabel } from "@/components/pending-label";
 
 /* ── sessions ─────────────────────────────────────────────────────
