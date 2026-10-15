@@ -56,6 +56,13 @@
     { "name": "EMAIL", "destination_address": "hello@juliangigola.com" }
   ],
 
+  /* The site's own click-and-scroll beacon (`app/api/beacon`), read back by
+     /admin's SEO tab. Analytics Engine: free to write, kept three months,
+     queried with the same CF_ANALYTICS_TOKEN. No cookie, no id, no IP. */
+  "analytics_engine_datasets": [
+    { "binding": "BEACON", "dataset": "jg_beacon" }
+  ],
+
   "kv_namespaces": [
     {
       "binding": "INBOX",

@@ -14,6 +14,10 @@ const EMAIL = "hello@juliangigola.com";
  * requests it is already handling. The new wording says that, which is
  * both accurate and a stronger position.
  *
+ * Since 2026-10-14 the Site has one first-party beacon of its own
+ * (`click-beacon.tsx`, for /admin's SEO tab), so "Cookies, storage and
+ * analytics" and the retention list describe exactly what it sends.
+ *
  * Clauses are cited by name rather than by number, as in the terms, so
  * inserting one cannot quietly break a reference.
  * ─────────────────────────────────────────────────────────────── */
@@ -24,7 +28,7 @@ export function PrivacyColumn() {
       id="privacy"
       title="Privacy Policy"
       label="Privacy"
-      effective="2026-09-21"
+      effective="2026-10-14"
     >
       <Clause title="What is collected, and when">
         <p>
@@ -116,13 +120,24 @@ export function PrivacyColumn() {
           needed to tell one connection from another.
         </p>
         <p>
-          <strong>There is no analytics script on the Site.</strong> Nothing is
-          loaded to measure you: no tag manager, no pixel, no third-party
-          beacon. What I see is the aggregate traffic Cloudflare counts from
+          <strong>There is no third-party analytics on the Site.</strong> No tag
+          manager, no pixel, no advertising or third-party beacon. What I see is
+          the aggregate traffic Cloudflare counts from
           requests it is already handling to deliver the pages, such as how many
           requests arrived, for which paths, and from which countries. It is
           aggregate from the moment it is recorded, it does not identify you, it
           cannot follow you to another site, and it goes to no advertiser.
+        </p>
+        <p>
+          <strong>One first-party measurement of my own.</strong> When you leave
+          a page, the Site sends one short note to its own server: which page it
+          was, how far down you scrolled, roughly what kind of screen it was
+          (phone, tablet or desktop), and where on the screen you clicked, with
+          the text of the link or button. It sets no cookie, carries no
+          identifier, does not record your IP address, and cannot connect one
+          visit to another. I use it only to see which parts of a page get used,
+          so I can make the Site easier to use. It is stored with Cloudflare and
+          read only by me.
         </p>
         <p>
           <strong>Local storage</strong> holds your theme choice and nothing
@@ -130,9 +145,9 @@ export function PrivacyColumn() {
           own credentials; those pages do nothing for anybody else.
         </p>
         <p>
-          <strong>Do Not Track and Global Privacy Control.</strong> There is no
-          tracking here to switch off, so the Site behaves the same whether or
-          not your browser sends those signals. Where the law treats such a
+          <strong>Do Not Track and Global Privacy Control.</strong> If your
+          browser sends either signal, the measurement above is not sent at
+          all. There is no other tracking here to switch off. Where the law treats such a
           signal as an opt-out of sale or sharing, it is honoured: there is no
           sale and no sharing.
         </p>
@@ -227,6 +242,11 @@ export function PrivacyColumn() {
           <li>
             <strong>Aggregate traffic figures</strong> hold nothing about an
             individual to delete.
+          </li>
+          <li>
+            <strong>Page measurements</strong> (page, scroll depth, screen type
+            and click positions) are kept for three months and then deleted
+            automatically. They hold nothing that identifies you.
           </li>
         </ul>
       </Clause>
