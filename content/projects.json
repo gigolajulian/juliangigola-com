@@ -408,59 +408,10 @@
           "alt": ""
         },
         {
-          "src": "/work/azure-bloom/17.jpg",
-          "width": 2500,
-          "height": 3125,
-          "color": "#e8e8e8",
-          "alt": ""
-        },
-        {
-          "src": "/work/azure-bloom/01.jpg",
-          "width": 2500,
-          "height": 3125,
-          "color": "#d8d8e8",
-          "alt": ""
-        },
-        {
           "src": "/work/azure-bloom/02.jpg",
           "width": 2500,
           "height": 3125,
           "color": "#e8e8e8",
-          "alt": ""
-        },
-        {
-          "src": "/work/azure-bloom/03.jpg",
-          "width": 2500,
-          "height": 3125,
-          "color": "#e8e8e8",
-          "alt": ""
-        },
-        {
-          "src": "/work/azure-bloom/04.jpg",
-          "width": 2500,
-          "height": 3125,
-          "color": "#e8e8e8",
-          "alt": ""
-        },
-        {
-          "src": "/work/azure-bloom/05.jpg",
-          "width": 2500,
-          "height": 3125,
-          "color": "#e8e8e8",
-          "alt": ""
-        },
-        {
-          "src": "/work/azure-bloom/06.jpg",
-          "width": 2500,
-          "height": 3125,
-          "color": "#e8e8e8",
-          "alt": ""
-        },
-        {
-          "src": "/work/azure-bloom/07.jpg",
-          "width": 2500,
-          "height": 3125,
-          "color": "#181818",
           "alt": ""
         },
         {
@@ -492,13 +443,6 @@
           "alt": ""
         },
         {
-          "src": "/work/azure-bloom/13.jpg",
-          "width": 2500,
-          "height": 3125,
-          "color": "#d8d8d8",
-          "alt": ""
-        },
-        {
           "src": "/work/azure-bloom/14.jpg",
           "width": 2500,
           "height": 3125,
@@ -506,24 +450,10 @@
           "alt": ""
         },
         {
-          "src": "/work/azure-bloom/15.jpg",
-          "width": 2500,
-          "height": 3125,
-          "color": "#e8e8e8",
-          "alt": ""
-        },
-        {
           "src": "/work/azure-bloom/16.jpg",
           "width": 2500,
           "height": 3125,
           "color": "#b88878",
-          "alt": ""
-        },
-        {
-          "src": "/work/azure-bloom/18.jpg",
-          "width": 2500,
-          "height": 3125,
-          "color": "#d8d8d8",
           "alt": ""
         }
       ]
