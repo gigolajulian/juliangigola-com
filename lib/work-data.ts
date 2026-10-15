@@ -210,13 +210,6 @@ export const PROJECTS: Project[] = [
         "alt": "Low angle on a figure in bunny ears under a lit vent, a hard shadow on the wall"
       },
       {
-        "src": "/work/hua/03.jpg",
-        "width": 2500,
-        "height": 1562,
-        "color": "#232423",
-        "alt": "Wide shot in bunny ears, black crop top and fur leg warmers inside a graffiti tunnel"
-      },
-      {
         "src": "/work/hua/04.jpg",
         "width": 2500,
         "height": 3333,
@@ -238,20 +231,6 @@ export const PROJECTS: Project[] = [
         "alt": "Figure in a gas mask and bunny ears crouches low under a ringed vent, graffiti on both walls"
       },
       {
-        "src": "/work/hua/07.jpg",
-        "width": 2500,
-        "height": 1562,
-        "color": "#474A41",
-        "alt": "Silhouette in bunny ears seen from behind, walking down a lit graffiti tunnel toward the vent"
-      },
-      {
-        "src": "/work/hua/08.jpg",
-        "width": 2500,
-        "height": 3333,
-        "color": "#272927",
-        "alt": "Figure from behind in a gas mask, bunny ears and fur tail, standing in drifting smoke under flash"
-      },
-      {
         "src": "/work/hua/09.jpg",
         "width": 2500,
         "height": 1563,
@@ -259,25 +238,11 @@ export const PROJECTS: Project[] = [
         "alt": "Close silhouette in bunny ears against a tunnel washed in hard red light"
       },
       {
-        "src": "/work/hua/10.jpg",
-        "width": 2500,
-        "height": 1563,
-        "color": "#2F0509",
-        "alt": "Wide red tunnel, a small figure in bunny ears at the far end, flare at the feet"
-      },
-      {
         "src": "/work/hua/11.jpg",
         "width": 2500,
         "height": 1562,
         "color": "#2E050A",
         "alt": "Figure in bunny ears stands mid-tunnel under a ringed vent, red light glowing off the graffiti"
-      },
-      {
-        "src": "/work/hua/12.jpg",
-        "width": 2500,
-        "height": 1563,
-        "color": "#3E070C",
-        "alt": "Silhouette in bunny ears seen from the side under the vent, red glow pooling on the floor"
       },
       {
         "src": "/work/hua/13.jpg",
@@ -537,13 +502,6 @@ export const PROJECTS: Project[] = [
         "alt": "Three-quarter length, chin resting on a hand, black knit top lifted at the hem"
       },
       {
-        "src": "/work/novocaine/05.jpg",
-        "width": 2500,
-        "height": 3334,
-        "color": "#7A7773",
-        "alt": "Crouched low in heels on a grey sweep, glancing back over a shoulder"
-      },
-      {
         "src": "/work/novocaine/06.jpg",
         "width": 2500,
         "height": 3333,
@@ -563,13 +521,6 @@ export const PROJECTS: Project[] = [
         "height": 1668,
         "color": "#817E79",
         "alt": "Kneeling on one knee in a pool of light, gripping the knit top across the chest"
-      },
-      {
-        "src": "/work/novocaine/09.jpg",
-        "width": 2500,
-        "height": 1667,
-        "color": "#9D9A95",
-        "alt": "Wide shot on all fours on the grey floor, head turned toward the light"
       },
       {
         "src": "/work/novocaine/10.jpg",
@@ -1827,13 +1778,6 @@ export const PROJECTS: Project[] = [
     },
     "images": [
       {
-        "src": "/work/astral-allure/01.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#262626",
-        "alt": "Close crop, eyes turned upward, white contact lenses, braided strands in wet hair, white top"
-      },
-      {
         "src": "/work/astral-allure/02.jpg",
         "width": 2499,
         "height": 3124,
@@ -1855,25 +1799,11 @@ export const PROJECTS: Project[] = [
         "alt": "Reclining with one leg raised in black glossy thigh-high boots and gloves, white bodysuit, wide frame"
       },
       {
-        "src": "/work/astral-allure/05.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#262626",
-        "alt": "Hugging the knees in black latex gloves and boots, white eyes, hair falling across the face"
-      },
-      {
         "src": "/work/astral-allure/06.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#262626",
         "alt": "Chin on the knees wrapped in glossy black latex, wet hair, direct stare, dark vignette"
-      },
-      {
-        "src": "/work/astral-allure/07.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#262626",
-        "alt": "Seated with one boot raised, black latex gloves, white bodysuit, head turned, hard side light"
       },
       {
         "src": "/work/astral-allure/08.jpg",
@@ -1895,13 +1825,6 @@ export const PROJECTS: Project[] = [
         "height": 3124,
         "color": "#595973",
         "alt": "Pressing a long black glove to the head, other hand reaching toward the camera on the floor"
-      },
-      {
-        "src": "/work/astral-allure/11.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#595973",
-        "alt": "On the floor, face lifted toward the lens, one gloved arm raised overhead"
       },
       {
         "src": "/work/astral-allure/12.jpg",
@@ -2812,13 +2735,6 @@ export const PROJECTS: Project[] = [
         "alt": "Figure seated on glossy black liquid, black gloves and boots, head thrown back, pink hair streaks"
       },
       {
-        "src": "/work/dark-matter/05.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#262626",
-        "alt": "Distant figure seated on a sheet of black liquid, one clawed black glove raised, pale grey backdrop"
-      },
-      {
         "src": "/work/dark-matter/06.jpg",
         "width": 2499,
         "height": 3124,
@@ -2826,39 +2742,11 @@ export const PROJECTS: Project[] = [
         "alt": "Two black-gloved hands with long claws, liquid dripping in strings, plain grey backdrop"
       },
       {
-        "src": "/work/dark-matter/07.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#404040",
-        "alt": "Figure kneeling in black liquid, hands in black gloves planted, hair streaked pink, direct stare"
-      },
-      {
-        "src": "/work/dark-matter/08.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#737359",
-        "alt": "Close portrait, a clawed glove at the lips, black liquid streaks, pink-streaked blonde hair"
-      },
-      {
         "src": "/work/dark-matter/09.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#404040",
         "alt": "Seated with one clawed glove raised, black liquid splashed over the figure and the floor"
-      },
-      {
-        "src": "/work/dark-matter/10.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#404040",
-        "alt": "One arm raised over the head in a clawed glove, black liquid streaks, pink-tipped hair, grey backdrop"
-      },
-      {
-        "src": "/work/dark-matter/11.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#C0C0C0",
-        "alt": "Figure on all fours with hair over the face, black liquid splashed across the white floor"
       },
       {
         "src": "/work/dark-matter/12.jpg",
@@ -2873,13 +2761,6 @@ export const PROJECTS: Project[] = [
         "height": 3124,
         "color": "#404040",
         "alt": "Motion-blurred figure with an arm raised overhead, black liquid streaks, pink-streaked hair, grey backdrop"
-      },
-      {
-        "src": "/work/dark-matter/14.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#404040",
-        "alt": "Kneeling with one arm raised in a clawed glove, black liquid dripping, pink-streaked hair"
       },
       {
         "src": "/work/dark-matter/15.jpg",
@@ -3142,13 +3023,6 @@ export const PROJECTS: Project[] = [
         "alt": "High angle on a DJ booth under blue and purple laser lines, crowd below, a sign overhead"
       },
       {
-        "src": "/work/events/06.jpg",
-        "width": 2499,
-        "height": 1785,
-        "color": "#0C260C",
-        "alt": "DJ in a white patterned jacket at the decks, a bright flare behind, phones raised in the crowd"
-      },
-      {
         "src": "/work/events/07.jpg",
         "width": 2499,
         "height": 3499,
@@ -3168,13 +3042,6 @@ export const PROJECTS: Project[] = [
         "height": 2856,
         "color": "#262626",
         "alt": "Black and white performer in a patterned jacket on stage, a DJ at the decks, video wall behind"
-      },
-      {
-        "src": "/work/events/10.jpg",
-        "width": 1008,
-        "height": 1152,
-        "color": "#260C0C",
-        "alt": "Dark stage with an emergency alert text slide on a screen, a faint figure at right"
       },
       {
         "src": "/work/events/11.jpg",
@@ -3226,13 +3093,6 @@ export const PROJECTS: Project[] = [
         "alt": "Dark club crowd in teal light, bright blue hair above the heads"
       },
       {
-        "src": "/work/events/18.jpg",
-        "width": 2499,
-        "height": 1405,
-        "color": "#0C260C",
-        "alt": "Dark club crowd in red light, hands up near the booth"
-      },
-      {
         "src": "/work/events/19.jpg",
         "width": 2499,
         "height": 1406,
@@ -3245,13 +3105,6 @@ export const PROJECTS: Project[] = [
         "height": 1405,
         "color": "#0C260C",
         "alt": "Wide dark crowd under green projections, silhouettes in motion"
-      },
-      {
-        "src": "/work/events/21.jpg",
-        "width": 2499,
-        "height": 1406,
-        "color": "#0C260C",
-        "alt": "Wide dark crowd under blue and purple light, bright screens behind"
       },
       {
         "src": "/work/events/22.jpg",
@@ -3278,25 +3131,11 @@ export const PROJECTS: Project[] = [
     },
     "images": [
       {
-        "src": "/work/frostbite/01.jpg",
-        "width": 2074,
-        "height": 2593,
-        "color": "#264059",
-        "alt": "Standing in a rhinestone chain top and black fringed shorts, long silver hair, blue spotlight"
-      },
-      {
         "src": "/work/frostbite/02.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#262640",
         "alt": "Lying on the floor propped on elbows, platform boots raised behind, long silver hair, white spotlight circle"
-      },
-      {
-        "src": "/work/frostbite/03.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#264059",
-        "alt": "Crouched in buckled black boots and fishnets, long silver hair, glancing over one shoulder, blue backdrop"
       },
       {
         "src": "/work/frostbite/04.jpg",
@@ -3327,13 +3166,6 @@ export const PROJECTS: Project[] = [
         "alt": "One arm raised over the head, rhinestone chain top, silver hair swept to the side, blue backdrop"
       },
       {
-        "src": "/work/frostbite/08.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#265973",
-        "alt": "Resting the head on an arm along the floor, silver hair spread, white spotlight, blue backdrop"
-      },
-      {
         "src": "/work/frostbite/09.jpg",
         "width": 2499,
         "height": 3124,
@@ -3346,27 +3178,6 @@ export const PROJECTS: Project[] = [
         "height": 3124,
         "color": "#265973",
         "alt": "Seen from behind, looking back over a shoulder, black fringed skirt, long silver hair, blue backdrop"
-      },
-      {
-        "src": "/work/frostbite/11.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#0C260C",
-        "alt": "Reflected in a mirror edge, hands at the neck, long silver hair, blue light"
-      },
-      {
-        "src": "/work/frostbite/12.jpg",
-        "width": 2074,
-        "height": 3129,
-        "color": "#D9C0C0",
-        "alt": "Standing in a rhinestone chain top and black studded shorts, hands at the sides, pale grey-green backdrop"
-      },
-      {
-        "src": "/work/frostbite/13.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#264040",
-        "alt": "Lying on a white spotlit floor in black stockings and a feathered top, silver hair, dark green surround"
       }
     ]
   },
@@ -4084,13 +3895,6 @@ export const PROJECTS: Project[] = [
         "alt": "i wanna be a human vol. 2"
       },
       {
-        "src": "/work/i-wanna-be-a-human/05.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#A6A6A6",
-        "alt": "i wanna be a human vol. 2"
-      },
-      {
         "src": "/work/i-wanna-be-a-human/06.jpg",
         "width": 2499,
         "height": 3124,
@@ -4145,20 +3949,6 @@ export const PROJECTS: Project[] = [
         "height": 3124,
         "color": "#C0C0C0",
         "alt": "i wanna be a human vol. 4"
-      },
-      {
-        "src": "/work/i-wanna-be-a-human/17.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#8C8C8C",
-        "alt": "i wanna be a human vol. 5"
-      },
-      {
-        "src": "/work/i-wanna-be-a-human/20.jpg",
-        "width": 2499,
-        "height": 3331,
-        "color": "#8C8C8C",
-        "alt": "i wanna be a human vol. 3"
       },
       {
         "src": "/work/i-wanna-be-a-human/22.jpg",
@@ -4754,32 +4544,11 @@ export const PROJECTS: Project[] = [
     },
     "images": [
       {
-        "src": "/work/liquid-metal-dreams/01.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#C08C73",
-        "alt": "Seated on a clear plastic sheet in a blue foil one-shoulder dress, curls on the face, warm backdrop"
-      },
-      {
         "src": "/work/liquid-metal-dreams/02.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#404040",
         "alt": "Hands framing the face, blue eyeshadow, wet curls and a blue foil dress, teal and orange light"
-      },
-      {
-        "src": "/work/liquid-metal-dreams/03.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#267373",
-        "alt": "Hand at the chin, face gems and wet curls, blue foil dress, teal backdrop, glossy highlights"
-      },
-      {
-        "src": "/work/liquid-metal-dreams/04.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#598C8C",
-        "alt": "Both hands behind the head, wet curls over the face, blue foil dress, teal backdrop"
       },
       {
         "src": "/work/liquid-metal-dreams/05.jpg",
@@ -4794,20 +4563,6 @@ export const PROJECTS: Project[] = [
         "height": 3124,
         "color": "#C0F3F3",
         "alt": "Seated on crinkled silver foil in a blue foil dress, one arm over the head, pale teal backdrop"
-      },
-      {
-        "src": "/work/liquid-metal-dreams/07.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#73A6A6",
-        "alt": "Kneeling on silver foil, one hand reaching toward the lens, wet curls, blue foil dress"
-      },
-      {
-        "src": "/work/liquid-metal-dreams/08.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#262626",
-        "alt": "Head tilted back against a dark backdrop, silver face jewels, braided hair, soft side light"
       },
       {
         "src": "/work/liquid-metal-dreams/09.jpg",
@@ -4829,27 +4584,6 @@ export const PROJECTS: Project[] = [
         "height": 3124,
         "color": "#D9D9F3",
         "alt": "Seated leaning on both hands, hair in buns and braids, silver strapless top, soft white light"
-      },
-      {
-        "src": "/work/liquid-metal-dreams/12.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#262626",
-        "alt": "Arm raised over the head, hand at the face, silver top, cyan light on a dark backdrop"
-      },
-      {
-        "src": "/work/liquid-metal-dreams/13.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#405959",
-        "alt": "Lying on the side on a white floor, braids spread, silver top, fingers at the cheek"
-      },
-      {
-        "src": "/work/liquid-metal-dreams/14.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#262626",
-        "alt": "Close crop, fingers at the lips, silver eyeliner, a sparkling silver backdrop, pink light"
       }
     ]
   },
@@ -5075,13 +4809,6 @@ export const PROJECTS: Project[] = [
         "alt": "Head tilted with both hands raised at the headpiece, silver foil ruffled top, pale backdrop"
       },
       {
-        "src": "/work/luxe-meets-future/06.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#598C8C",
-        "alt": "Kneeling in a silver foil ruffled top, hand at the cheek, teal and pink haze, fishnet tights"
-      },
-      {
         "src": "/work/luxe-meets-future/08.jpg",
         "width": 2499,
         "height": 3124,
@@ -5108,13 +4835,6 @@ export const PROJECTS: Project[] = [
         "height": 3499,
         "color": "#0C260C",
         "alt": "Black glove pressed against a misted surface, face faint behind smoke, dark blue light"
-      },
-      {
-        "src": "/work/luxe-meets-future/16.jpg",
-        "width": 2499,
-        "height": 3499,
-        "color": "#8C5940",
-        "alt": "Tight crop, black gem stickers around the eyes, glossy dark lips, a black glove at the jaw"
       },
       {
         "src": "/work/luxe-meets-future/18.jpg",
@@ -5294,13 +5014,6 @@ export const PROJECTS: Project[] = [
         "alt": "Full length in profile, black slip dress and heels, a pale spotlight on the floor, red backdrop"
       },
       {
-        "src": "/work/mirage/02.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#400C0C",
-        "alt": "Seated on the floor leaning back on one hand, black camisole and trousers, a pale spotlight, red backdrop"
-      },
-      {
         "src": "/work/mirage/03.jpg",
         "width": 2499,
         "height": 3124,
@@ -5315,34 +5028,6 @@ export const PROJECTS: Project[] = [
         "alt": "Hair swinging in motion, black camisole dress, light streaking across, deep red backdrop"
       },
       {
-        "src": "/work/mirage/05.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#590C0C",
-        "alt": "One hand in the hair, black camisole dress, a white glow behind the head, red backdrop"
-      },
-      {
-        "src": "/work/mirage/06.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#400C0C",
-        "alt": "Full length in profile, black fitted dress and heels, shadowed red backdrop"
-      },
-      {
-        "src": "/work/mirage/07.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#A60C0C",
-        "alt": "Head bowed, hands on the hips, black camisole dress, thin gold chain, red light"
-      },
-      {
-        "src": "/work/mirage/08.jpg",
-        "width": 2429,
-        "height": 3641,
-        "color": "#A60C0C",
-        "alt": "Looking down with hands behind the hips, black camisole dress, gold chain, red backdrop"
-      },
-      {
         "src": "/work/mirage/09.jpg",
         "width": 2499,
         "height": 3124,
@@ -5355,13 +5040,6 @@ export const PROJECTS: Project[] = [
         "height": 3124,
         "color": "#8C0C0C",
         "alt": "Standing straight, head bowed, arms at the sides, black camisole dress, red backdrop"
-      },
-      {
-        "src": "/work/mirage/11.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#A60C0C",
-        "alt": "Head tilted, one hand on the hip, black camisole dress, gold chain, red backdrop"
       },
       {
         "src": "/work/mirage/12.jpg",
@@ -5383,13 +5061,6 @@ export const PROJECTS: Project[] = [
         "height": 3124,
         "color": "#730C0C",
         "alt": "One arm raised behind the head, hair across the face, light across the chest, red backdrop"
-      },
-      {
-        "src": "/work/mirage/15.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#730C0C",
-        "alt": "Head turned down, hair swept back, thin chain necklace catching light, black camisole, red backdrop"
       },
       {
         "src": "/work/mirage/16.jpg",
@@ -5551,32 +5222,11 @@ export const PROJECTS: Project[] = [
         "alt": "Two people in the front seats of a dark car, black shirts, one with hands on the wheel"
       },
       {
-        "src": "/work/nabu/13.jpg",
-        "width": 2499,
-        "height": 3331,
-        "color": "#2D323F",
-        "alt": "Leaning on a concrete wall in a black shirt with a yellow sleeve patch, dusk sky, city behind"
-      },
-      {
         "src": "/work/nabu/17.jpg",
         "width": 2499,
         "height": 3331,
         "color": "#A0ADCC",
         "alt": "Low angle, seated on a rooftop in a black shirt and grey trousers, sun flaring behind"
-      },
-      {
-        "src": "/work/nabu/18.jpg",
-        "width": 2499,
-        "height": 3333,
-        "color": "#ACB6D1",
-        "alt": "Low angle, standing in a black shirt, grey trousers and white sneakers, rooftop lot, sunset"
-      },
-      {
-        "src": "/work/nabu/20.jpg",
-        "width": 2499,
-        "height": 3333,
-        "color": "#988270",
-        "alt": "Two people from behind on a path in tan shirts with white star emblems, shorts and jeans"
       },
       {
         "src": "/work/nabu/29.jpg",
@@ -5607,13 +5257,6 @@ export const PROJECTS: Project[] = [
         "alt": "Seen from behind at full length, black shirt with a white star emblem, paisley shorts and sneakers"
       },
       {
-        "src": "/work/nabu/54.jpg",
-        "width": 2499,
-        "height": 1667,
-        "color": "#0C260C",
-        "alt": "Driver in a black shirt gripping the steering wheel, a second person beside, dark car interior"
-      },
-      {
         "src": "/work/nabu/57.jpg",
         "width": 2499,
         "height": 3333,
@@ -5626,13 +5269,6 @@ export const PROJECTS: Project[] = [
         "height": 3641,
         "color": "#A6A6C0",
         "alt": ""
-      },
-      {
-        "src": "/work/nabu/63.jpg",
-        "width": 2499,
-        "height": 3333,
-        "color": "#262626",
-        "alt": "Seated on a rooftop wall in a black shirt and sunglasses, baggy trousers, sun flaring behind"
       },
       {
         "src": "/work/nabu/67.jpg",
@@ -5661,13 +5297,6 @@ export const PROJECTS: Project[] = [
         "height": 3641,
         "color": "#262626",
         "alt": "Leaning back on a rock face in a tan shirt and jeans, one foot raised, white sneakers"
-      },
-      {
-        "src": "/work/nabu/98.jpg",
-        "width": 2429,
-        "height": 3641,
-        "color": "#262626",
-        "alt": "Close crop leaning on a rock wall in a tan shirt with white lettering, head turned, jeans"
       }
     ]
   },
@@ -5901,32 +5530,11 @@ export const PROJECTS: Project[] = [
         "alt": "A lit suspension bridge over dark water at night, reflections on the surface"
       },
       {
-        "src": "/work/places/16.jpg",
-        "width": 2499,
-        "height": 3125,
-        "color": "#021A1C",
-        "alt": "Steel bridge girders arching over an empty street, glass towers beyond, yellow center line"
-      },
-      {
-        "src": "/work/places/17.jpg",
-        "width": 2499,
-        "height": 3123,
-        "color": "#272623",
-        "alt": "Rugged brown headland with surf breaking below, a second sea stack beyond, blue-green water"
-      },
-      {
         "src": "/work/places/18.jpg",
         "width": 2499,
         "height": 3123,
         "color": "#23221F",
         "alt": "Close view of a steep brown ridge dropping into churning surf, teal water"
-      },
-      {
-        "src": "/work/places/19.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#F3F3F3",
-        "alt": "A red neon HOTEL sign glowing against a dark building at night"
       },
       {
         "src": "/work/places/20.jpg",
@@ -6067,39 +5675,11 @@ export const PROJECTS: Project[] = [
         "alt": "Dark long hair, tattooed arm resting on a mantel, blurred beer steins and glassware in the foreground"
       },
       {
-        "src": "/work/purgatory/02.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#8C8C73",
-        "alt": "Kneeling by a brick fireplace in a black long-sleeve crop top and black shorts, glowing hearth"
-      },
-      {
-        "src": "/work/purgatory/03.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#40260C",
-        "alt": "Seated on a wooden floor before a lit brick fireplace, black long-sleeve top, knees drawn up"
-      },
-      {
         "src": "/work/purgatory/04.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#737359",
         "alt": "Leaning across a wooden table in a white camisole and black skirt, grandfather clock behind"
-      },
-      {
-        "src": "/work/purgatory/05.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#260C0C",
-        "alt": "Leaning on a wooden table with a hand at the lips, a pendant necklace, soft window light"
-      },
-      {
-        "src": "/work/purgatory/06.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#260C0C",
-        "alt": "Reclining forward across a polished table, white camisole and stockings, lamp and clock behind"
       },
       {
         "src": "/work/purgatory/07.jpg",
@@ -6135,20 +5715,6 @@ export const PROJECTS: Project[] = [
         "height": 3124,
         "color": "#8C7359",
         "alt": "Standing at a sideboard in a white camisole and black skirt, one hand on the hip, mirror behind"
-      },
-      {
-        "src": "/work/purgatory/13.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#735940",
-        "alt": "Seated on a chair before a mirrored sideboard, white satin camisole, stockings, glassware beside"
-      },
-      {
-        "src": "/work/purgatory/14.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#595940",
-        "alt": "Close crop, a hand raised to the open mouth, long black nails, patterned curtains behind"
       },
       {
         "src": "/work/purgatory/15.jpg",
@@ -6342,32 +5908,11 @@ export const PROJECTS: Project[] = [
         "alt": "Seated by a pool in a green cardigan and striped skirt, curved building and bright sky behind"
       },
       {
-        "src": "/work/retro-reverie-vol-02/02.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#A65926",
-        "alt": "Leaning on a wood-paneled wall beside a yellow door frame, green cardigan, striped skirt, arm raised"
-      },
-      {
         "src": "/work/retro-reverie-vol-02/03.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#732626",
         "alt": "Leaning in a red-walled stairwell, wavy hair across the face, green cardigan, striped skirt"
-      },
-      {
-        "src": "/work/retro-reverie-vol-02/04.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#734026",
-        "alt": "Seated on a leather bench in a green cardigan, striped skirt and tan lace-up shoes, gold screen behind"
-      },
-      {
-        "src": "/work/retro-reverie-vol-02/05.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#734026",
-        "alt": "Seated on a low leather bench, knees together, green cardigan, striped skirt, lace-up shoes, gold screen"
       },
       {
         "src": "/work/retro-reverie-vol-02/06.jpg",
@@ -6398,27 +5943,6 @@ export const PROJECTS: Project[] = [
         "alt": "Seated by a pool edge, a hand in the hair, green cardigan, striped skirt, bright sky"
       },
       {
-        "src": "/work/retro-reverie-vol-02/10.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#F3F3F3",
-        "alt": "Leaning on a balcony wall beside greenery, green cardigan, striped skirt, bead necklace, glass roof ribs"
-      },
-      {
-        "src": "/work/retro-reverie-vol-02/11.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#260C0C",
-        "alt": "Standing against a wood-paneled wall, head turned, green cardigan, striped skirt, hand on a rail"
-      },
-      {
-        "src": "/work/retro-reverie-vol-02/12.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#D9D9F3",
-        "alt": "Seated on a leather bench under a glass-ribbed roof, green cardigan, striped skirt, bead necklace"
-      },
-      {
         "src": "/work/retro-reverie-vol-02/13.jpg",
         "width": 2499,
         "height": 3124,
@@ -6431,13 +5955,6 @@ export const PROJECTS: Project[] = [
         "height": 3124,
         "color": "#A65926",
         "alt": "Leaning between a yellow door frame and wood paneling, one leg raised, green cardigan, striped skirt"
-      },
-      {
-        "src": "/work/retro-reverie-vol-02/15.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#592626",
-        "alt": "Standing with hands on the hips in a wood-paneled lobby, green cardigan, striped skirt, tan lace-up shoes"
       }
     ]
   },
@@ -6898,13 +6415,6 @@ export const PROJECTS: Project[] = [
         "alt": "Hand on the hip in a black lace long-sleeve crop top, hair in a bun, teal haze"
       },
       {
-        "src": "/work/sara/07.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#0C260C",
-        "alt": "Close portrait with an arm raised behind the head, black long-sleeve top, gold earring, purple backdrop"
-      },
-      {
         "src": "/work/sara/08.jpg",
         "width": 2499,
         "height": 3124,
@@ -6926,13 +6436,6 @@ export const PROJECTS: Project[] = [
         "alt": "Seated sideways on a white chair looking back, black strapless top and boots, purple smoke"
       },
       {
-        "src": "/work/sara/14.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#404040",
-        "alt": "Seated with one arm raised, black halter top and chunky boots, blue and red smoke"
-      },
-      {
         "src": "/work/sara/15.jpg",
         "width": 2499,
         "height": 3124,
@@ -6940,32 +6443,11 @@ export const PROJECTS: Project[] = [
         "alt": "Seated hugging a knee in chunky black boots, red light on one side and blue on the other"
       },
       {
-        "src": "/work/sara/17.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#405973",
-        "alt": "Kneeling with a hand on the head in a black bodysuit and boots, red and blue light"
-      },
-      {
         "src": "/work/sara/19.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#260C0C",
         "alt": "Close portrait in sunglasses and a black zip top with orange piping, a white spotlight circle, orange backdrop"
-      },
-      {
-        "src": "/work/sara/20.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#260C0C",
-        "alt": "Kneeling in a white spotlight circle beside a camera held in a gloved hand, red backdrop, sunglasses"
-      },
-      {
-        "src": "/work/sara/23.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#0C260C",
-        "alt": "Leaning forward in sunglasses and a black zip top with orange piping, hand on the thigh, red backdrop"
       },
       {
         "src": "/work/sara/27.jpg",
@@ -7271,27 +6753,6 @@ export const PROJECTS: Project[] = [
         "height": 3124,
         "color": "#D9D9D9",
         "alt": "Close angle on two people in a bare-branch clearing, a hand raised to the brow, puffer jacket, gloves"
-      },
-      {
-        "src": "/work/steampunk-files-001/14.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#262626",
-        "alt": "Two people on a wet forest road, one in black overalls, one in a pleated skirt"
-      },
-      {
-        "src": "/work/steampunk-files-001/15.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#262626",
-        "alt": "Standing alone on a wet road in a grey puffer jacket and pleated mini skirt, hand raised"
-      },
-      {
-        "src": "/work/steampunk-files-001/18.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#262626",
-        "alt": "Low angle, a gloved hand reaching to the lens, striped beanie, goggles, cream sweater and padded overalls"
       },
       {
         "src": "/work/steampunk-files-001/20.jpg",
@@ -7678,13 +7139,6 @@ export const PROJECTS: Project[] = [
     },
     "images": [
       {
-        "src": "/work/torteline/01.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#0C260C",
-        "alt": "Leaning forward in a dark blazer and white tee, backlit by a beam of light through teal smoke"
-      },
-      {
         "src": "/work/torteline/02.jpg",
         "width": 2499,
         "height": 3124,
@@ -7713,20 +7167,6 @@ export const PROJECTS: Project[] = [
         "alt": ""
       },
       {
-        "src": "/work/torteline/06.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#8CD9D9",
-        "alt": "Seated on the floor in sunglasses and a dark blazer, a small synth beside, bright teal backdrop"
-      },
-      {
-        "src": "/work/torteline/07.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#8C0C0C",
-        "alt": "Standing silhouetted against a deep red backdrop, face lit by a narrow strip of light"
-      },
-      {
         "src": "/work/torteline/08.jpg",
         "width": 2499,
         "height": 3124,
@@ -7746,13 +7186,6 @@ export const PROJECTS: Project[] = [
         "height": 3124,
         "color": "#730C0C",
         "alt": "Standing in silhouette with hands behind the back holding drumsticks, magenta glow, red room"
-      },
-      {
-        "src": "/work/torteline/11.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#A60C0C",
-        "alt": "Seated on the floor holding drumsticks in a printed white tee and black trousers, red backdrop"
       },
       {
         "src": "/work/torteline/12.jpg",
@@ -7776,25 +7209,11 @@ export const PROJECTS: Project[] = [
         "alt": "Seated on a stool in a lime cardigan, legs apart, sneakers, soft smoke and warm light"
       },
       {
-        "src": "/work/torteline/15.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#735940",
-        "alt": "Seated on a stool leaning forward on a knee, lime cardigan, white tee, warm hazy light"
-      },
-      {
         "src": "/work/torteline/16.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#C07326",
         "alt": "Standing in a dark apron and white tee with a wooden spoon between the teeth, amber backdrop"
-      },
-      {
-        "src": "/work/torteline/17.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#8C8C8C",
-        "alt": "Looking down in a grey pocket tee with hands behind the back, pale grey-green backdrop"
       }
     ]
   },
@@ -8078,13 +7497,6 @@ export const PROJECTS: Project[] = [
         "alt": "Green-tinted video static with the faint outline of a figure in a jacket"
       },
       {
-        "src": "/work/ukiyosunknown/04.jpg",
-        "width": 2499,
-        "height": 3333,
-        "color": "#6D7167",
-        "alt": "Seen from behind in a black textured jacket and black trousers, grey backdrop"
-      },
-      {
         "src": "/work/ukiyosunknown/06.jpg",
         "width": 2499,
         "height": 3331,
@@ -8092,25 +7504,11 @@ export const PROJECTS: Project[] = [
         "alt": "Holding a CRT television out in a black jacket with gathered shoulders, grey backdrop"
       },
       {
-        "src": "/work/ukiyosunknown/07.jpg",
-        "width": 2499,
-        "height": 3333,
-        "color": "#95968E",
-        "alt": "Leaning over to lift a CRT with the cord trailing, black jacket and trousers, grey backdrop"
-      },
-      {
         "src": "/work/ukiyosunknown/08.jpg",
         "width": 2047,
         "height": 2559,
         "color": "#C0C0C0",
         "alt": "Walking past a concrete wall in a worn grey leather jacket and rust zip pants, motion blur"
-      },
-      {
-        "src": "/work/ukiyosunknown/09.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#D9C0C0",
-        "alt": "Head turned into a leather jacket sleeve, rust zip pants and black boots, leaning on a concrete wall"
       },
       {
         "src": "/work/ukiyosunknown/10.jpg",
@@ -8132,13 +7530,6 @@ export const PROJECTS: Project[] = [
         "height": 3124,
         "color": "#D9C0C0",
         "alt": "Walking in motion blur in an ivory leather jacket and black flared trousers, concrete wall"
-      },
-      {
-        "src": "/work/ukiyosunknown/15.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#C0C0C0",
-        "alt": "Leaning back against a concrete wall in an ivory zip jacket, arm tucked in, black trousers"
       },
       {
         "src": "/work/ukiyosunknown/16.jpg",
@@ -8181,13 +7572,6 @@ export const PROJECTS: Project[] = [
         "height": 3124,
         "color": "#C0A6A6",
         "alt": "Wide stance on a concrete ledge in a lilac mohair sweater, black wide trousers, ivy wall"
-      },
-      {
-        "src": "/work/ukiyosunknown/24.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#D9C0C0",
-        "alt": "Standing with hands low in a lilac mohair sweater and black flared trousers, concrete wall"
       }
     ]
   },
@@ -8307,13 +7691,6 @@ export const PROJECTS: Project[] = [
         "alt": "Standing in a black hooded robe and plate armor, sword raised, a shaft of light through storm clouds"
       },
       {
-        "src": "/work/valgur/05.jpg",
-        "width": 2499,
-        "height": 3333,
-        "color": "#06090A",
-        "alt": "Kneeling in plate armor with the head bowed over a sword hilt, grey hair, dark stormy sky"
-      },
-      {
         "src": "/work/valgur/06.jpg",
         "width": 2499,
         "height": 1667,
@@ -8356,25 +7733,11 @@ export const PROJECTS: Project[] = [
         "alt": "Armored figure reading from a book above a seated person in a long dark skirt"
       },
       {
-        "src": "/work/valgur/12.jpg",
-        "width": 2499,
-        "height": 1667,
-        "color": "#16323E",
-        "alt": "Looking up in plate armor, a long sword blade rising behind the head, teal backdrop"
-      },
-      {
         "src": "/work/valgur/13.jpg",
         "width": 2499,
         "height": 3331,
         "color": "#030405",
         "alt": "Standing in plate armor and a long black robe, hand on a sword, storm clouds, shaft of light"
-      },
-      {
-        "src": "/work/valgur/14.jpg",
-        "width": 2499,
-        "height": 3331,
-        "color": "#030303",
-        "alt": "Holding a sword upright in plate armor and gauntlets, long dark hair, faint lightning behind"
       },
       {
         "src": "/work/valgur/15.jpg",
@@ -8794,20 +8157,6 @@ export const PROJECTS: Project[] = [
         "height": 1667,
         "color": "#837464",
         "alt": "Guests mingling in a modern lobby, a gold hanging light overhead, dark suits and cocktail dresses"
-      },
-      {
-        "src": "/work/weddings/35.jpg",
-        "width": 2499,
-        "height": 1667,
-        "color": "#3A2A25",
-        "alt": "Long reception table with red tablecloth and flowers, guests in conversation, orange chairs"
-      },
-      {
-        "src": "/work/weddings/36.jpg",
-        "width": 2499,
-        "height": 1667,
-        "color": "#B74459",
-        "alt": "Guests clapping and dancing in a lobby near a floral circle arch, orange and navy outfits"
       },
       {
         "src": "/work/weddings/38.jpg",
