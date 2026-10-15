@@ -12,6 +12,7 @@ import { gsap } from "gsap";
 
 export const FLY = 1.3; // s
 export const WAVE = 0.15; // s, the second wave after the first
+const LOAD_CAP_MS = 3000; // the longest a wall waits for its photographs
 
 /** Where a frame starts and how long after the first it leaves. */
 type Path = (
@@ -44,7 +45,7 @@ export const streams: Path = (f, r) => {
 export const builds: Path = (f, r) => {
   const row = Math.max(0, Math.floor((innerHeight - r.bottom) / r.height + 0.5));
   const col = Math.max(0, Math.floor(r.left / r.width));
-  return { x: 0, y: r.height * 0.35, delay: row * 0.22 + col * 0.06, duration: 0.7, ease: "power3.out", hide: true };
+  return { x: 0, y: r.height * 0.35, delay: row * 0.32 + col * 0.09, duration: 0.9, ease: "power3.out", hide: true };
 };
 
 /** Julian (2026-10-14), for a project: the frames come in from past the
@@ -99,6 +100,8 @@ export function gatherWhenSeen(box: HTMLElement, pick: (box: HTMLElement) => Ite
   // from a layout effect.
   document.documentElement.dataset.moves = "";
   let frames: HTMLElement[] = [];
+  let cap = 0;
+  let gone = false;
   const io = new IntersectionObserver(([e]) => {
     if (!e.isIntersecting) return;
     io.disconnect();
@@ -108,10 +111,22 @@ export function gatherWhenSeen(box: HTMLElement, pick: (box: HTMLElement) => Ite
     });
     const go = gather(frames, path);
     done();
-    go();
+    // Julian: the photographs that come in are loaded first. Capped, so a
+    // slow connection still gets the wall.
+    const imgs = frames.flatMap((f) => [...f.querySelectorAll("img")]);
+    let started = false;
+    const start = () => {
+      if (started || gone) return;
+      started = true;
+      go();
+    };
+    Promise.all(imgs.map((i) => i.decode().catch(() => {}))).then(start);
+    cap = window.setTimeout(start, LOAD_CAP_MS);
   });
   io.observe(box);
   return () => {
+    gone = true;
+    clearTimeout(cap);
     io.disconnect();
     gsap.killTweensOf(frames);
     frames.forEach((f) => {
