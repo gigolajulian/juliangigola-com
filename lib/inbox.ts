@@ -38,6 +38,78 @@ export type Enquiry = {
   picks?: string[];
   /** Names of the images they uploaded. The images go with the email. */
   files?: string[];
+  /** Where it came from, unasked (`visitContext`). */
+  context?: VisitContext;
+};
+
+/* ── where an inquiry came from ───────────────────────────────────
+ * Julian (2026-10-14): more to go on without more to fill in. The page
+ * it was sent from, where the visit began (referrer, utm_ tags), the
+ * pages read on the way (`components/visit-trail.tsx`), the device, and
+ * the city Cloudflare places the request in. Never the IP.
+ * ─────────────────────────────────────────────────────────────── */
+export type VisitContext = {
+  page?: string;
+  landing?: string;
+  referrer?: string;
+  utm?: string;
+  trail?: string[];
+  device?: string;
+  place?: string;
+};
+
+const PATH = /^\/[\w\-./#%~]*$/;
+const clip = (v: unknown, n: number) => (typeof v === "string" ? oneLine(v).slice(0, n) : "");
+
+/** The browser's half, checked: paths of the site's own shape only,
+    a referrer as its host alone, and short. */
+export function visitContext(raw: string, place?: string): VisitContext | undefined {
+  let c: Record<string, unknown> = {};
+  try {
+    const parsed: unknown = JSON.parse(raw || "{}");
+    if (parsed && typeof parsed === "object") c = parsed as Record<string, unknown>;
+  } catch {}
+  const path = (v: unknown) => {
+    const s = clip(v, 120);
+    return PATH.test(s) ? s : "";
+  };
+  let referrer = "";
+  try {
+    const host = new URL(clip(c.referrer, 300)).hostname;
+    referrer = host === "juliangigola.com" ? "" : host;
+  } catch {}
+  const out: VisitContext = {
+    page: path(c.page),
+    landing: path(c.path),
+    referrer,
+    utm: clip(c.utm, 160),
+    trail: (Array.isArray(c.trail) ? c.trail : []).map(path).filter(Boolean).slice(-12),
+    device: ["phone", "tablet", "desktop"].includes(c.device as string) ? (c.device as string) : "",
+    place: clip(place, 80),
+  };
+  const kept = Object.fromEntries(Object.entries(out).filter(([, v]) => (Array.isArray(v) ? v.length : v)));
+  return Object.keys(kept).length ? kept : undefined;
+}
+
+const FREE_MAIL = /^(gmail|googlemail|yahoo|ymail|outlook|hotmail|live|msn|icloud|me|mac|aol|proton|protonmail|pm|gmx|mail|zoho|yandex|hey|fastmail)\./i;
+
+/** Their company's site, read off a work address; none for a free one. */
+export const companySite = (email: string): string | undefined => {
+  const domain = email.split("@")[1]?.toLowerCase();
+  return domain && domain.includes(".") && !FREE_MAIL.test(domain) && !/\.edu$/.test(domain) ? `https://${domain}` : undefined;
+};
+
+/** The context as lines, for the email and /admin. */
+export const contextLines = (e: Enquiry): string[] => {
+  const c = e.context ?? {};
+  const company = companySite(e.email);
+  return [
+    c.page ? `Sent from: ${c.page}` : null,
+    c.landing || c.referrer ? `Came in: ${[c.referrer || "direct", c.landing].filter(Boolean).join(" to ")}${c.utm ? ` (${c.utm})` : ""}` : null,
+    c.trail?.length ? `Read: ${c.trail.join(", ")}` : null,
+    c.place || c.device ? `Where: ${[c.place, c.device].filter(Boolean).join(", ")}` : null,
+    company ? `Company: ${company}` : null,
+  ].filter((l): l is string => l !== null);
 };
 
 /**
@@ -107,6 +179,7 @@ export const SHOOT_TYPES = [
   "music",
   "portrait",
   "session",
+  "event",
   "other",
 ] as const;
 
@@ -347,7 +420,8 @@ export const emailCopy = (
     `Type: ${e.type}`,
     e.detail ? `Details: ${e.detail}` : null,
     `From: ${e.name} <${e.email}>`,
-    e.country ? `Country: ${e.country}` : null,
+    e.country && !e.context?.place ? `Country: ${e.country}` : null,
+    ...contextLines(e),
     "",
     e.message,
   ].filter((line) => line !== null);

@@ -645,5 +645,5 @@ export const BOOK_MENU: MenuItem[] = [
   callOf("music-photography", "Music & artists", "Press photos, cover art and music videos for a release, planned together so it reads as one thing."),
   callOf("brand-photography", "Brand campaigns", "Campaign imagery from the concept and the art direction to the shoot and the retouch."),
   // ponytail: no call yet; add `cal: "juliangigola/event-call"` once the event exists in Cal.com.
-  { slug: "events", name: "Event coverage", blurb: "Launches, brand events, concerts and parties, shot as they happen.", group: "commission", page: "/portfolio/events", form: { type: "other" } },
+  { slug: "events", name: "Event coverage", blurb: "Launches, brand events, concerts and parties, shot as they happen.", group: "commission", page: "/portfolio/events", form: { type: "event" } },
 ];

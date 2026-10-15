@@ -180,6 +180,33 @@
 .pointer-mark[data-stuck] .mark-neck {
   opacity: 1;
 }
+/* An option filled by the dot (`data-stick="fill"`, `pointer-mark.tsx`):
+   the chip's box in the same liquid, poured from where the hand came in
+   and drained back toward it. */
+.mark-fill {
+  position: absolute;
+  left: var(--fl, 0px);
+  top: var(--ft, 0px);
+  width: var(--fw, 0px);
+  height: var(--fh, 0px);
+  background: currentColor;
+  transform-origin: var(--fo, 50% 50%);
+  scale: 0;
+  transition: scale 260ms var(--ease-out-strong);
+}
+.pointer-mark[data-fill] .mark-fill {
+  scale: 1;
+  transition-duration: 420ms;
+}
+/* Over a picked (teal) option the dot is the teal's own ink, not a
+   difference: that blended it red. */
+.pointer-mark[data-picked] {
+  mix-blend-mode: normal;
+  color: var(--accent-foreground);
+}
+.pointer-mark[data-drain] .mark-goo {
+  filter: url(#mark-goo);
+}
 /* The icon under it: larger, leaning toward the hand. */
 /* Not a row (`data-stick="row"`, the Commissions list): the dot snaps to
    it, and a 1.2 scale on a line of display type would be a lurch. */
