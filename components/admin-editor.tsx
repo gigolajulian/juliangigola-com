@@ -1158,8 +1158,9 @@ export function AdminEditor({
           // preview, of one page, and it wants the width.
           full
             ? // Seen from above: the sitemap and the preview as many covers
-              // across as fit.
-              "xl:grid-cols-1 2xl:grid-cols-1 [&_[data-map-grid]]:grid-cols-[repeat(auto-fill,minmax(7rem,1fr))] [&_[data-preview-grid]]:grid-cols-[repeat(auto-fill,minmax(9rem,1fr))]"
+              // across as fit. Over the whole window, the site's bar and the
+              // page margins included (Julian: see everything).
+              "xl:fixed xl:inset-0 xl:z-50 xl:m-0 xl:grid-rows-[minmax(0,1fr)] xl:bg-background xl:px-10 xl:pt-6 xl:grid-cols-1 2xl:grid-cols-1 [&_[data-map-grid]]:grid-cols-[repeat(auto-fill,minmax(7rem,1fr))] [&_[data-preview-grid]]:grid-cols-[repeat(auto-fill,minmax(9rem,1fr))]"
             : page
               ? "xl:grid-cols-[17rem_1fr] 2xl:grid-cols-[1fr_5fr]"
               : "xl:grid-cols-[17rem_1fr_23rem] 2xl:grid-cols-[1fr_minmax(34rem,1.6fr)_26rem]",
