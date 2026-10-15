@@ -512,20 +512,14 @@
 }
 /* A laptop's short card (1333x620: 303px for 495 of form): the inquiry
    whole in it, Inquire in sight, as a phone on its side has it
-   (devices.css). The promise on two lines, the fields one line each, the
-   message two. */
+   (devices.css). The fields one line each, the message
+   two. */
 @container (max-height: 26rem) {
   [data-scroll]:has(> .book-form) {
     padding-block: 0.75rem;
   }
   .book-form {
     gap: 0.5rem;
-  }
-  .book-form > div:first-child {
-    padding-bottom: 0.75rem;
-  }
-  .book-form > div:first-child p {
-    max-width: none;
   }
   .book-form form {
     row-gap: 0.25rem;
