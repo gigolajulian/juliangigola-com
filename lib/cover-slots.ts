@@ -114,6 +114,16 @@ export const SHORT: Place[] = [
   { x: 65, y: 68, w: 11.5, z: 8, show: true },
 ];
 
+/* A booking page's title runs two lines nearly the window wide, over the
+   two side cards at mid height (Julian, /headshots, 2026-10-15). There they
+   go down to the bottom corners. Slot index to place, per layout. */
+export const BOOKING_MOVES: Record<"large" | "landscape" | "short" | "upright", Record<number, { x: number; y: number }>> = {
+  large: { 6: { x: 85, y: 64 }, 8: { x: 4, y: 66 } },
+  landscape: { 6: { x: 84, y: 68 }, 8: { x: 3, y: 70 } },
+  short: { 6: { x: 80, y: 64 }, 8: { x: 5, y: 66 } },
+  upright: { 6: { x: 80, y: 58 }, 8: { x: 5, y: 62 } },
+};
+
 /** Which place each photograph takes, in the order the cover lists them:
     the first photograph at `SLOTS[DEAL[0]]`, and so on. The "Photo layout"
     panel's Shuffle deals them again. */
