@@ -546,8 +546,10 @@
   font-weight: 900;
   font-size: var(--text-display);
   line-height: 0.92;
-  /* Julian's spec: Inter Tight Black, set tight, -0.04em on every heading. */
+  /* Julian's spec: Inter Tight Black, set tight, -0.04em on every heading.
+     The tracking eats the spaces too, so words get theirs back. */
   letter-spacing: -0.04em;
+  word-spacing: 0.12em;
   text-transform: uppercase;
 }
 
@@ -558,6 +560,7 @@
   font-size: var(--text-title);
   line-height: 1;
   letter-spacing: -0.04em;
+  word-spacing: 0.12em;
   text-transform: uppercase;
 }
 
@@ -576,15 +579,18 @@
     font-family: var(--font-display);
     font-weight: 900;
     letter-spacing: -0.04em;
+    word-spacing: 0.12em;
   }
   /* Julian: a heading set as a label ("Selected work", "Services") in the
      same face as the labels beside it ("All 88"), not the display Black. */
   :is(h1, h2, h3, h4, h5, h6).label {
     font-family: var(--font-mono);
     font-weight: 400;
+    word-spacing: normal;
   }
 }
 .font-display {
   font-weight: 900;
   letter-spacing: -0.04em;
+  word-spacing: 0.12em;
 }
