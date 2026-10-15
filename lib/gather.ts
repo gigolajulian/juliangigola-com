@@ -19,7 +19,7 @@ type Path = (
   f: HTMLElement,
   r: DOMRect,
   rank: number,
-) => { x: number; y: number; delay: number; duration?: number; ease?: string; hide?: boolean };
+) => { x: number; y: number; delay: number; duration?: number; ease?: string };
 
 /** Out along the line from the middle of the screen, in two waves. */
 const radial: Path = (f, r, rank) => {
@@ -45,7 +45,7 @@ export const streams: Path = (f, r) => {
 export const builds: Path = (f, r) => {
   const row = Math.max(0, Math.floor((innerHeight - r.bottom) / r.height + 0.5));
   const col = Math.max(0, Math.floor(r.left / r.width));
-  return { x: 0, y: r.height * 0.35, delay: row * 0.32 + col * 0.09, duration: 0.9, ease: "power3.out", hide: true };
+  return { x: 0, y: r.height * 0.35, delay: row * 0.32 + col * 0.09, duration: 0.9, ease: "power3.out" };
 };
 
 /** Julian (2026-10-14), for a project: the frames come in from past the
@@ -59,7 +59,9 @@ export function gather(frames: HTMLElement[], path: Path = radial) {
   const how = new Map<HTMLElement, ReturnType<Path>>();
   for (const f of frames) {
     const p = path(f, f.getBoundingClientRect(), rank.get(f)!);
-    gsap.set(f, { x: p.x, y: p.y, ...(p.hide ? { visibility: "hidden" } : {}) });
+    // Hidden until its own flight starts: parked at the edge, waiting on
+    // its photograph, a frame could show empty.
+    gsap.set(f, { x: p.x, y: p.y, visibility: "hidden" });
     how.set(f, p);
   }
   return () =>
@@ -109,18 +111,30 @@ export function gatherWhenSeen(box: HTMLElement, pick: (box: HTMLElement) => Ite
       const r = f.getBoundingClientRect();
       return r.width > 0 && r.right > 0 && r.bottom > 0 && r.left < innerWidth && r.top < innerHeight;
     });
+    // Julian: the photographs that come in are loaded first. Capped, so a
+    // slow connection still gets the wall. Asked for now and eagerly: once
+    // a frame is moved off the page to come in, lazy loading never fetched
+    // it (QA, /book/headshots with slow images, 2026-10-15).
+    const imgs = frames.flatMap((f) => [...f.querySelectorAll("img")]);
+    for (const i of imgs) i.loading = "eager";
     const go = gather(frames, path);
     done();
-    // Julian: the photographs that come in are loaded first. Capped, so a
-    // slow connection still gets the wall.
-    const imgs = frames.flatMap((f) => [...f.querySelectorAll("img")]);
     let started = false;
     const start = () => {
       if (started || gone) return;
       started = true;
       go();
     };
-    Promise.all(imgs.map((i) => i.decode().catch(() => {}))).then(start);
+    // Their load, not `decode()`: turning a lazy picture eager restarts its
+    // request, which rejected a pending decode at once and let empty frames go.
+    const loaded = (i: HTMLImageElement) =>
+      i.complete && i.naturalWidth
+        ? Promise.resolve()
+        : new Promise<void>((ok) => {
+            i.addEventListener("load", () => ok(), { once: true });
+            i.addEventListener("error", () => ok(), { once: true });
+          });
+    Promise.all(imgs.map(loaded)).then(start);
     cap = window.setTimeout(start, LOAD_CAP_MS);
   });
   io.observe(box);
