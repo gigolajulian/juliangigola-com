@@ -9,6 +9,7 @@ import { Lightbox, useLightbox } from "@/components/lightbox";
 import { CreditCard, CreditList } from "@/components/credit-card";
 import { longestWord, titleWidth } from "@/components/strip-page";
 import { Strip, useWideNow, type Lead } from "@/components/strip";
+import { gatherWhenSeen, slides } from "@/lib/gather";
 import type { Project, TextBlock, Frame } from "@/lib/work-types";
 
 /* ── the sequence, across the screen ──────────────────────────────
@@ -98,6 +99,11 @@ export function ProjectStrip({
       )
     : project.credits;
   const scroller = React.useRef<HTMLDivElement>(null);
+  // The frames in view slide in from the right up to the title (`lib/gather.ts`).
+  React.useEffect(() => {
+    const band = scroller.current?.closest<HTMLElement>(".gather-strip");
+    return band ? gatherWhenSeen(band, (b) => b.querySelectorAll<HTMLElement>(".strip-cell"), slides) : undefined;
+  }, []);
   const lightbox = useLightbox(frames);
   /* Whether the frames past the first screen are fetched at once (the
      sideways strip) or as the page reaches them (a phone, where the
@@ -462,7 +468,7 @@ export function ProjectStrip({
         // Dealt at the ends: the next project comes in as a card over
         // this one, and the one before comes back from behind.
         deck="leads"
-        className={className}
+        className={`gather-strip ${className ?? ""}`}
       >
         {cellNodes}
       </Strip>

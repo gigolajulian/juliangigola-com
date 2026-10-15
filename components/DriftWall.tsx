@@ -1,5 +1,6 @@
 'use client';
 
+import { gatherWhenSeen, streams } from '@/lib/gather';
 import {
   useCallback,
   useEffect,
@@ -115,6 +116,11 @@ const DriftWall = ({
   style
 }: DriftWallProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
+  // The tiles in view stream in as the wall is first seen (`lib/gather.ts`).
+  useEffect(() => {
+    const box = containerRef.current;
+    return box ? gatherWhenSeen(box, b => b.querySelectorAll<HTMLElement>('.drift-wall__inner'), streams) : undefined;
+  }, []);
   const planeRef = useRef<HTMLDivElement>(null);
   const trackRefs = useRef<(HTMLDivElement | null)[]>([]);
 
