@@ -661,9 +661,14 @@ function Field({
         // the border, which says nothing to anyone not looking at it.
         aria-describedby={error ? errorId : undefined}
         className={cn(
-          "mt-1 block w-full border-0 border-b bg-transparent py-2 text-base sm:mt-2 sm:py-2.5",
-          // Three lines at most, the padding and the rule on top.
-          as === "textarea" && "resize-none overflow-y-auto max-h-[calc(3lh+1rem+1px)] sm:max-h-[calc(3lh+1.25rem+1px)]",
+          "block w-full border-0 border-b bg-transparent pb-2 text-base sm:pb-2.5",
+          /* Three lines at most, the padding and the rule on top. Its top
+             padding is margin instead: scrolled, the text ran up into the
+             padding under the label and a fourth line showed (iPhone, QA
+             2026-10-15). Same place at rest. */
+          as === "textarea"
+            ? "mt-3 resize-none overflow-y-auto max-h-[calc(3lh+0.5rem+1px)] sm:mt-[1.125rem] sm:max-h-[calc(3lh+0.625rem+1px)]"
+            : "mt-1 pt-2 sm:mt-2 sm:pt-2.5",
           // Placeholders fainter.
           "transition-colors duration-200 placeholder:text-muted-foreground/35",
           // Focus is the rule under the field darkening, to 40% ink. No
