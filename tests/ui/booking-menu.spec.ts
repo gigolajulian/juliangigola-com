@@ -22,10 +22,16 @@ for (const r of RATIOS) {
     const sec = await menu(page);
     if (await upright(page, r, browserName)) return ctx.close();
     expect(await sec.locator(".session-list > li").count()).toBeGreaterThanOrEqual(8);
+    /* A finger, where the ratio is a touch screen. Firefox cannot emulate a
+       phone and keeps a hovering mouse there: a hovered row opens its line
+       and moves the rows round it by up to ~225px, so a mouse click on
+       Event coverage landed on whichever row slid under it (Headshots, in
+       CI's flaky runs). A tap has no hover. */
+    const press = (l: ReturnType<typeof row>) => (r.touch ? l.tap() : l.click());
 
     // A session opens its card, with the calendar.
     const card = page.locator("#book-card");
-    await row(page, /Portraits/i).click();
+    await press(row(page, /Portraits/i));
     await card.locator("[data-day]").first().waitFor({ state: "visible", timeout: 30_000 });
     await expect(card).toHaveAttribute("aria-label", /Portraits/);
     await expect(card.getByRole("button", { name: "Confirm this time" })).toBeAttached();
@@ -51,7 +57,7 @@ for (const r of RATIOS) {
     await card.getByRole("button", { name: /close/i }).click();
     await page.waitForTimeout(1200);
     await row(page, /Event coverage/i).scrollIntoViewIfNeeded();
-    await row(page, /Event coverage/i).click();
+    await press(row(page, /Event coverage/i));
     await expect(card.locator('input[name="name"]')).toBeVisible({ timeout: 15_000 });
     // A phone's card grows and the page scrolls (the card never does): Inquire is a scroll away.
     if (r.width < 640) await card.locator('button[type="submit"]').scrollIntoViewIfNeeded();

@@ -65,11 +65,8 @@ export function BookCard({ item, onClose, className }: { item: MenuItem; onClose
         ) : (
           <div data-scroll className="h-full overflow-y-auto overscroll-contain px-[var(--card-x)] pb-6 pt-5">
             <div className="book-form flex flex-col gap-[clamp(1.25rem,4cqh,2.5rem)] sm:[&_textarea]:h-[3.75rem]">
-              {/* The promise in the labels' voice over a hairline, so the
-                  card opens as a conversation. */}
-              <div className="border-b-[0.5px] border-foreground/30 pb-[clamp(1.25rem,4cqh,2rem)]">
-                <p className="label leading-relaxed text-muted-foreground text-balance">Tell me what you have in mind. I reply within 24 hours with an approach and a quote.</p>
-              </div>
+              {/* Julian (2026-10-14): no promise line over the form; it
+                  opens on the fields. */}
               <Suspense fallback={null}>
                 <ContactForm defaults={item.form} sessions={SESSIONS} />
               </Suspense>
