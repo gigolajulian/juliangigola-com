@@ -10,10 +10,15 @@ export function keyHandlers(m: Mover) {
      screen is its next cell; a free one moves by the window's width.
      A key pressed in a field, or in a box that scrolls on its own,
      is that one's. It listened on the scroller alone, so with a
-     cover or a link inside it focused the arrows did nothing. */
+     cover or a link inside it focused the arrows did nothing. And with
+     nothing focused at all, as on landing, the keys are the strip's too:
+     they went to the page, and the arrows did nothing until a click.
+     Unless a lightbox or the booking sheet is open over it: those
+     keys are the dialog's, and the strip behind moved with it (QA). */
   const onKey = (e: KeyboardEvent) => {
     if (e.defaultPrevented || e.altKey || e.ctrlKey || e.metaKey) return;
-    const from = e.target as HTMLElement | null;
+    let from = e.target as HTMLElement | null;
+    if (from === document.body && !document.querySelector('[aria-modal="true"]')) from = el;
     if (!from || !el.contains(from)) return;
     if (
       from !== el &&

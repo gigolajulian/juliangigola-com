@@ -317,7 +317,7 @@ export function ServicesScreen({
               href="/portfolio"
               className="label action-quiet whitespace-nowrap px-7 py-4 lying:px-5 lying:!py-2.5 press active:scale-[0.97] sm:py-[clamp(0.625rem,1.8cqh,1rem)]"
             >
-              See the portfolio
+              See the work
             </Link>
             {/* Not under a finger, where it sat against the buttons. */}
             <span className="label ml-3 text-muted-foreground max-sm:hidden lying:hidden">{total} projects</span>
