@@ -90,6 +90,11 @@ export function SessionsScreen({ sessions, menu, walls, covers }: { sessions: Se
      While it is open the list holds on its session rather than following
      the pointer. */
   const [book, setBook] = useState<number | null>(null);
+  /* The open row follows the pointer only in two columns. In one (a
+     phone's width, or a narrow window) the open line wraps long, and
+     closing the one above moved the list up to 225px under a pointer at
+     rest (QA, 2026-10-15); a press opens it there, as under a finger. */
+  const follows = () => matchMedia("(min-width: 40rem)").matches;
   const go = (i: number) => {
     if (i === open || book !== null) return;
     setOpen(i);
@@ -230,7 +235,7 @@ export function SessionsScreen({ sessions, menu, walls, covers }: { sessions: Se
             setWarm(true);
             if (e.pointerType !== "mouse" || performance.now() < hush.current) return;
             const li = (e.target as HTMLElement).closest("li");
-            if (li) setOpen([...e.currentTarget.children].indexOf(li));
+            if (li && follows()) setOpen([...e.currentTarget.children].indexOf(li));
             /* Laid shut along that edge at once, then filled from it. */
             setEdge(nearest(e, li));
             setPinch(true);
@@ -279,7 +284,7 @@ export function SessionsScreen({ sessions, menu, walls, covers }: { sessions: Se
                 // The rows appear in order as Sessions arrives, as About's
                 // steps do (`.session-step`, globals.css).
                 style={{ "--i": i } as React.CSSProperties}
-                onPointerMove={() => go(i)}
+                onPointerMove={() => follows() && go(i)}
                 onPointerDown={() => (wasOpen.current = i === open)}
                 /* The booking page fetched on the pointer, so the press
                    has nothing to wait for. Five rows at most, and the
