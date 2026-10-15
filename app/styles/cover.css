@@ -698,3 +698,10 @@
     }
   }
 }
+
+/* The walls and a project's frames are hidden until they come in
+   (`lib/gather.ts`); `data-moves` is not set under reduced motion. */
+:root[data-moves] .drift-wall:not([data-gathered]) .drift-wall__inner,
+:root[data-moves] .gather-strip:not([data-gathered]) .strip-cell {
+  visibility: hidden;
+}

@@ -4,6 +4,7 @@ import * as React from "react";
 import { createPortal } from "react-dom";
 import { BookCard } from "@/components/book-here";
 import { InquireWall } from "@/components/inquire-wall";
+import { gsap } from "gsap";
 import type { WallTile } from "@/lib/wall-tile";
 import type { MenuItem } from "@/lib/booking";
 
@@ -12,19 +13,12 @@ import type { MenuItem } from "@/lib/booking";
  * fills the screen over the session's wall, and goes back into the row
  * on X, Escape or a press outside it. The page under it never moves.
  *
- * The card is laid out at its full size from the first frame and only
- * its clip opens, from the row's box to its own: transform-free, so the
- * card's contents never stretch, and nothing is laid out twice. Leaving
- * runs at about 60% of arriving (exit faster than enter).
+ * It turns over into place like a card (Julian: flip in, smooth), and
+ * the name, the blurb and the card come up one after another; it turns
+ * away on the way out, in about a third of the time. GSAP.
  * ─────────────────────────────────────────────────────────────────── */
 
-const IN = 520;
-const OUT = 320;
-const EASE_IN = "cubic-bezier(0.22, 1, 0.36, 1)";
-const EASE_OUT = "cubic-bezier(0.4, 0, 0.9, 0.6)";
-
-const inset = (from: DOMRect, to: DOMRect, r: number) =>
-  `inset(${from.top - to.top}px ${to.right - from.right}px ${to.bottom - from.bottom}px ${from.left - to.left}px round ${r}px)`;
+const IN = 1000; // ms, the flip in
 
 export function BookSheet({
   item,
@@ -33,7 +27,7 @@ export function BookSheet({
   onClosed,
 }: {
   item: MenuItem;
-  /* The row pressed: where the card comes from and goes back to. */
+  /* The row pressed: the focus goes back to it on close. */
   origin: HTMLElement | null;
   wall?: WallTile[];
   onClosed: () => void;
@@ -75,18 +69,16 @@ export function BookSheet({
     ready.current = performance.now() + (calm.current ? 0 : IN);
     document.getElementById("book-card")?.focus({ preventScroll: true });
     const s = sheet.current;
-    if (calm.current || !s || !origin) return;
-    const from = origin.getBoundingClientRect();
-    const to = s.getBoundingClientRect();
-    s.animate([{ clipPath: inset(from, to, 4) }, { clipPath: inset(to, to, 16) }], { duration: IN, easing: EASE_IN });
-    body.current?.animate([{ opacity: 0, transform: "translateY(0.75rem)" }, { opacity: 1, transform: "none" }], {
-      duration: 360,
-      delay: 160,
-      easing: EASE_IN,
-      fill: "backwards",
-    });
-    back.current?.animate([{ opacity: 0 }, { opacity: 1 }], { duration: IN, easing: "ease-out" });
-  }, [mounted, origin]);
+    if (calm.current || !s) return;
+    const parts = body.current ? [...body.current.querySelectorAll(":scope > header > *"), body.current.lastElementChild] : [];
+    gsap.fromTo(
+      s,
+      { rotationY: -100, opacity: 0, transformPerspective: 1600, transformOrigin: "50% 50%" },
+      { rotationY: 0, opacity: 1, duration: 1, ease: "power3.out", clearProps: "transform,opacity" },
+    );
+    gsap.fromTo(parts, { opacity: 0 }, { opacity: 1, duration: 0.45, ease: "power2.out", stagger: 0.06, delay: 0.14, clearProps: "opacity" });
+    if (back.current) gsap.fromTo(back.current, { opacity: 0 }, { opacity: 1, duration: 0.5, ease: "power1.out", clearProps: "opacity" });
+  }, [mounted]);
 
   const close = React.useCallback(() => {
     if (going.current) return;
@@ -96,16 +88,11 @@ export function BookSheet({
       origin?.querySelector<HTMLElement>("button, a")?.focus({ preventScroll: true });
     };
     const s = sheet.current;
-    if (calm.current || !s || !origin) return done();
-    const to = s.getBoundingClientRect();
-    const from = origin.getBoundingClientRect();
-    body.current?.animate([{ opacity: 1 }, { opacity: 0 }], { duration: OUT * 0.5, easing: "ease-in", fill: "forwards" });
-    back.current?.animate([{ opacity: 1 }, { opacity: 0 }], { duration: OUT, easing: "ease-in", fill: "forwards" });
-    s.animate([{ clipPath: inset(to, to, 16) }, { clipPath: inset(from, to, 4) }], {
-      duration: OUT,
-      easing: EASE_OUT,
-      fill: "forwards",
-    }).finished.then(done, done);
+    if (calm.current || !s) return done();
+    gsap.killTweensOf([s, back.current, body.current]);
+    gsap.to(body.current, { opacity: 0, duration: 0.14, ease: "power1.in" });
+    gsap.to(back.current, { opacity: 0, duration: 0.3, ease: "power1.in" });
+    gsap.to(s, { rotationY: 90, opacity: 0, transformPerspective: 1600, duration: 0.36, ease: "power2.in", onComplete: done });
   }, [onClosed, origin]);
 
   React.useEffect(() => {
@@ -136,7 +123,7 @@ export function BookSheet({
       </div>
       <div
         ref={sheet}
-        className="relative flex h-dvh w-full flex-col will-change-[clip-path] max-sm:bg-background sm:h-[min(46rem,100%)] sm:w-[min(46rem,100%)]"
+        className="relative flex h-dvh w-full flex-col will-change-transform max-sm:bg-background sm:h-[min(46rem,100%)] sm:w-[min(46rem,100%)]"
       >
         {/* On a phone the sheet scrolls as a page does and the card keeps
             its own length; from `sm` the card fills what the header leaves. */}
