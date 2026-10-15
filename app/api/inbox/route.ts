@@ -120,7 +120,7 @@ async function guard(request: Request) {
       ),
     };
   }
-  return { error: json({ error: "Not authorised." }, 401) };
+  return { error: json({ error: "Not authorized." }, 401) };
 }
 
 /**
