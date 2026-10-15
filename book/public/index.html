@@ -58,6 +58,14 @@
     #line { padding-bottom: 20px; margin-bottom: 20px; }
     #who { box-sizing: border-box; max-width: 760px; margin: 0 auto -10px; padding: 24px 20px 16px; background: var(--card); border: 1px solid var(--card-line); border-bottom: 0; border-radius: 8px 8px 0 0; position: relative; z-index: 1; }
   }
+  /* A call's wall behind it, as the site's booking pages have theirs: that discipline's photographs, tilted, blurred and veiled. Not on a phone, as there. */
+  #wall { position: fixed; inset: 0; z-index: -1; overflow: hidden; perspective: 1200px; }
+  #wall div { position: absolute; left: 50%; top: 50%; width: 2600px; display: grid; grid-template-columns: repeat(8, 1fr); gap: 28px; transform: translate(-50%, -50%) rotateX(12deg) rotateZ(-6deg); filter: blur(5px); animation: drift 90s linear infinite alternate; }
+  #wall img { display: block; width: 100%; aspect-ratio: 3 / 4; object-fit: cover; border-radius: 6px; }
+  #wall::after { content: ""; position: absolute; inset: 0; background: color-mix(in oklab, var(--bg) 62%, transparent); }
+  @keyframes drift { to { transform: translate(-50%, -44%) rotateX(12deg) rotateZ(-6deg); } }
+  @media (prefers-reduced-motion: reduce) { #wall div { animation: none; } }
+  @media (max-width: 639px) { #wall { display: none; } }
 </style>
 </head>
 <body>
@@ -80,6 +88,8 @@
     editorial: ["Editorial call", "Editorial call", "Fifteen minutes about the idea, the team and the dates. I quote after the call."],
     campaign: ["Brand call", "Brand & campaign call", "Fifteen minutes about the brief, deliverables, usage and dates. I quote after the call."],
   };
+  // Each call's wall: its discipline's photographs on the site, through its image resizing.
+  const walls = {"editorial":["/work/nova/06.jpg","/work/nova/08.jpg","/work/fauxtopia/05.jpg","/work/ghostlight/09.jpg","/work/ghostlight/08.jpg","/work/lithe/04.jpg","/work/threshold/03.jpg","/work/azure-bloom/02.jpg","/work/paranoia/01.jpg","/work/paranoia/08.jpg","/work/ravaged/01.jpg","/work/second-skin/01.jpg","/work/second-skin/08.jpg","/work/second-skin/17.jpg","/work/i-wanna-be-a-human/02.jpg","/work/i-wanna-be-a-human/14.jpg","/work/novocaine/06.jpg","/work/novocaine/08.jpg","/work/relay/01.jpg","/work/undisputed/01.jpg","/work/undisputed/10.jpg","/work/decoy/06.jpg","/work/nyx/07.jpg","/work/void/01.jpg","/work/aegis/03.jpg","/work/vigil/01.jpg","/work/astral-allure/04.jpg","/work/astral-allure/03.jpg","/work/lost-relic/06.jpg","/work/byte-me/05.jpg","/work/byte-me/12.jpg","/work/coral-synthmorph/05.jpg","/work/dark-matter/06.jpg","/work/entangled/02.jpg","/work/entangled/09.jpg","/work/frostbite/06.jpg","/work/isabela/02.jpg","/work/light-play/03.jpg","/work/lightbeam/02.jpg","/work/liquid-metal-dreams/06.jpg","/work/luxe-meets-future/08.jpg","/work/luxe-meets-future/20.jpg","/work/poise/08.jpg","/work/purgatory/09.jpg","/work/retro-reverie-vol-01/01.jpg","/work/retro-reverie-vol-01/08.jpg","/work/retro-reverie-vol-02/08.jpg","/work/steampunk-files-001/11.jpg"],"campaign":["/work/paradox/01.jpg","/work/paradox/04.jpg","/work/paradox/07.jpg","/work/paradox/10.jpg","/work/ukiyosunknown/01.jpg","/work/ukiyosunknown/06.jpg","/work/ukiyosunknown/13.jpg","/work/ukiyosunknown/18.jpg","/work/ukiyosunknown/21.jpg","/work/sago/02.jpg","/work/sago/05.jpg","/work/sago/08.jpg","/work/sago/11.jpg","/work/diesel/03.jpg","/work/diesel/04.jpg","/work/diesel/07.jpg","/work/wired-magazine/03.jpg","/work/wired-magazine/06.jpg","/work/wired-magazine/09.jpg","/work/wired-magazine/12.jpg","/work/wired-magazine/15.jpg","/work/wired-magazine/18.jpg","/work/goodcult/03.jpg","/work/goodcult/06.jpg","/work/goodcult/09.jpg","/work/goodcult/12.jpg","/work/goodcult/15.jpg","/work/jubo/03.jpg","/work/jubo/04.jpg","/work/nabu/59.jpg","/work/nabu/17.jpg","/work/nabu/29.jpg","/work/nabu/79.jpg","/work/oakley-x-nike/01.jpg","/work/oakley-x-nike/04.jpg","/work/hua/16.jpg","/work/hua/15.jpg","/work/hua/02.jpg","/work/hua/04.jpg","/work/kala-x-sharks/06.jpg","/work/kala-x-sharks/03.jpg","/work/kala-x-sharks/07.jpg","/work/sols/02.jpg","/work/sols/05.jpg","/work/the-den-talkshow/01.jpg","/work/the-den-talkshow/04.jpg","/work/the-den-talkshow/07.jpg","/work/hellamack/03.jpg"]};
   const length = { headshots: "30 min", portraits: "60 min", graduation: "90 min", digitals: "45 min", editorial: "15 min call", campaign: "15 min call" };
   const slug = location.pathname.split("/")[1];
   const $ = (id) => document.getElementById(id);
@@ -97,6 +107,9 @@
   document.title = title + " | Julian Gigola";
   $("title").innerHTML = "Book <br>" + name;
   $("line").textContent = line;
+  if (walls[slug] && matchMedia("(min-width: 640px)").matches)
+    document.body.insertAdjacentHTML("afterbegin", `<div id="wall" aria-hidden="true"><div>${walls[slug]
+      .map((src) => `<img src="https://juliangigola.com/cdn-cgi/image/width=320,quality=70,format=auto${src}" alt="" decoding="async">`).join("")}</div></div>`);
   // Sessions (not the calls) take a deposit; collected by hand until Stripe is connected in Cal.com.
   if (!/call$/.test(name)) $("line").insertAdjacentHTML("beforeend", " • Deposit required to confirm booking");
 

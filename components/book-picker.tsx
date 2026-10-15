@@ -5,6 +5,8 @@ import Link from "next/link";
 import { DialRoot, useDialKit } from "dialkit";
 import { CalEmbed } from "@/components/cal-embed";
 import { DialCopyAll } from "@/components/dial-copy-all";
+import { InquireWall } from "@/components/inquire-wall";
+import type { WallTile } from "@/lib/wall-tile";
 import { useDialKitStyles } from "@/lib/dialkit-styles";
 
 export type Bookable = {
@@ -15,6 +17,8 @@ export type Bookable = {
   length: string;
   /** Its Cal.com event. */
   cal: string;
+  /** The photographs behind it while it is the one picked. */
+  wall: WallTile[];
 };
 
 /* The sessions down the left, the chosen one's calendar beside them:
@@ -61,8 +65,13 @@ export function BookPicker({ sessions, start }: { sessions: Bookable[]; start?: 
          the page held to the screen, as the portfolio is
          (`[data-quiet-footer]`, globals.css). */
       data-quiet-footer
-      className="book-page mx-auto grid w-full max-w-[110rem] gap-8 px-6 pb-16 pt-28 sm:px-10 lg:h-full lg:min-h-0 lg:grid-rows-[minmax(0,1fr)] lg:items-center lg:pb-6 lg:pt-24 lg:grid-cols-[minmax(0,1fr)_minmax(0,var(--card-w,2.2fr))] lg:gap-[clamp(2rem,4vw,5rem)]"
+      className="book-page relative isolate mx-auto grid w-full max-w-[110rem] gap-8 px-6 pb-16 pt-28 sm:px-10 lg:h-full lg:min-h-0 lg:grid-rows-[minmax(0,1fr)] lg:items-center lg:pb-6 lg:pt-24 lg:grid-cols-[minmax(0,1fr)_minmax(0,var(--card-w,2.2fr))] lg:gap-[clamp(2rem,4vw,5rem)]"
     >
+      {/* The picked session's wall behind the page, as its own booking
+          page has it (`/book/[slug]`); it changes with the pick. */}
+      <div inert className="enquiry-backdrop questions-wall fixed inset-0 -z-10 overflow-hidden bg-background max-sm:hidden">
+        {current.wall.length ? <InquireWall key={current.slug} items={current.wall} /> : null}
+      </div>
       <div className="@container flex min-w-0 flex-col gap-6">
         <div className="flex flex-col gap-3">
           <p className="label text-muted-foreground">Bay Area, studio or location</p>
