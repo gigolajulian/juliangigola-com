@@ -173,9 +173,9 @@ export function PointerMark() {
       ey = e.clientY;
       et = e.timeStamp;
     };
-    /* A slight trail behind the hand: the dot closes on it with a
-       30ms time constant. */
-    const TRAIL = 0.03; // s
+    /* Where the hand is. Julian (2026-10-15): no delay, so no trail: the
+       dot sits on the hand, written on the move itself rather than on the
+       next frame. The momentum below still runs it past on a stop. */
     let sx = NaN, sy = NaN;
     // Softly held to its reach rather than stopped dead at it.
     const place = () => {
@@ -208,13 +208,11 @@ export function PointerMark() {
       uy += (fy - K * oy - C * uy) * dt;
       ox += ux * dt;
       oy += uy * dt;
-      if (Number.isNaN(sx) || still.matches) { sx = x; sy = y; }
-      const f = 1 - Math.exp(-dt / TRAIL);
-      sx += (x - sx) * f;
-      sy += (y - sy) * f;
+      sx = x;
+      sy = y;
       const d = place();
       // Runs while the hand or the dot is moving, and sleeps after.
-      if (Math.hypot(vx, vy) > 2 || d > 0.05 || Math.hypot(ux, uy) > 1 || Math.hypot(x - sx, y - sy) > 0.1) {
+      if (Math.hypot(vx, vy) > 2 || d > 0.05 || Math.hypot(ux, uy) > 1) {
         raf = requestAnimationFrame(draw);
       } else {
         last = 0;
@@ -225,9 +223,10 @@ export function PointerMark() {
     const move = (e: PointerEvent) => {
       if (e.pointerType === "touch") return;
       lift();
-      x = e.clientX;
-      y = e.clientY;
+      x = sx = e.clientX;
+      y = sy = e.clientY;
       sense(e);
+      place();
       // What it was stuck to may be gone with the page it was on.
       if (stuck && !stuck.isConnected) unstick();
       pull();
