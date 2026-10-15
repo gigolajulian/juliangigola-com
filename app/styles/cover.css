@@ -691,3 +691,7 @@
 :root[data-moves] .gather-strip .strip-cell {
   animation: none;
 }
+/* And a wall shows at once rather than fading up over its tiles' entrance. */
+:root[data-moves] .drift-wall {
+  transition: none;
+}
