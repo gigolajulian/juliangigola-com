@@ -198,10 +198,12 @@ const csp = [
   "default-src 'self'",
   "base-uri 'self'",
   "object-src 'none'",
-  // Nothing here is meant to be embedded. Two spellings of one rule, because
-  // `frame-ancestors` is the real one and `X-Frame-Options` below is what
-  // older browsers read.
-  "frame-ancestors 'none'",
+  // Nothing here is meant to be embedded by another site. Two spellings of one
+  // rule, because `frame-ancestors` is the real one and `X-Frame-Options`
+  // below is what older browsers read. 'self' rather than 'none' for one
+  // frame: /admin's SEO tab shows a page live under its click map
+  // (`admin-seo.tsx`). Julian chose this over a per-URL exception, 2026-10-14.
+  "frame-ancestors 'self'",
   "form-action 'self'",
   // The provider stills for the video page, which are 16:9 thumbnails on
   // their own CDNs rather than frames from the archive.
@@ -227,12 +229,13 @@ const csp = [
   // `app.cal.com` is Cal.com's embed script, loaded only on a booking
   // calendar with `?cal` on the address (`components/cal-embed.tsx`).
   `script-src 'self' 'unsafe-inline' https://static.cloudflareinsights.com https://player.vimeo.com https://app.cal.com${__impeccableLiveDev}`,
-  // The two players, and only as an embed — `frame-ancestors 'none'` above
-  // is the other direction and still says nobody may frame this site.
+  // The two players, and only as an embed. `frame-ancestors 'self'` above
+  // is the other direction and still says no other site may frame this one.
+  // 'self' is the SEO tab's frame of the site's own pages.
   // And the booking calendars on /book and the session pages (Google Calendar
   // appointment schedules, `components/book-picker.tsx`, `components/contact-screen.tsx`),
   // and Cal.com's in their place behind `?cal` (`components/cal-embed.tsx`).
-  "frame-src https://www.youtube-nocookie.com https://player.vimeo.com https://calendar.google.com https://app.cal.com https://cal.com",
+  "frame-src 'self' https://www.youtube-nocookie.com https://player.vimeo.com https://calendar.google.com https://app.cal.com https://cal.com",
   // `vimeo.com` and `youtube.com` are oEmbed lookups made by /admin when a
   // link is pasted: the title, and the poster Vimeo does not publish at a
   // guessable URL. No page on the site fetches either.
@@ -243,7 +246,7 @@ const csp = [
 
 const securityHeaders = [
   { key: "Content-Security-Policy", value: csp },
-  { key: "X-Frame-Options", value: "DENY" },
+  { key: "X-Frame-Options", value: "SAMEORIGIN" },
   { key: "X-Content-Type-Options", value: "nosniff" },
   // Send the origin cross-site, never the path — a project URL can name a
   // client before the work is public.

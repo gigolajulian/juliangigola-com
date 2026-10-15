@@ -17,6 +17,7 @@ import { AdminPicker, type PickerItem } from "@/components/admin-picker";
 import { AdminTrash } from "@/components/admin-trash";
 import { AdminInbox, unreadCount } from "@/components/admin-inbox";
 import { AdminTraffic } from "@/components/admin-traffic";
+import { AdminSeo } from "@/components/admin-seo";
 import { AdminVideos } from "@/components/admin-videos";
 import { isTextRef, type FrameRef, type TrashedProject } from "@/lib/added";
 import { ADDED_PATH } from "@/lib/added";
@@ -127,6 +128,8 @@ const TABS = [
     { id: "inbox", label: "Inbox" },
     // Read-only too: who came to the site and from where.
     { id: "traffic", label: "Traffic" },
+    // And how search and visitors use each page: `admin-seo.tsx`.
+    { id: "seo", label: "SEO" },
   ],
 ] as const;
 
@@ -1503,6 +1506,7 @@ export function AdminEditor({
             : null}
           {!page && view === "inbox" ? <AdminInbox onUnread={setUnread} /> : null}
           {!page && view === "traffic" ? <AdminTraffic /> : null}
+          {!page && view === "seo" ? <AdminSeo /> : null}
 
           {!page && view === "coverart" ? CoverArtFields() : null}
 

@@ -3,6 +3,7 @@
 interface __BaseEnv_CloudflareEnv {
 	INBOX: KVNamespace;
 	EMAIL: SendEmail;
+	BEACON: AnalyticsEngineDataset;
 	ASSETS: Fetcher;
 	INBOX_KEY: string;
 }
