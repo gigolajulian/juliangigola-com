@@ -36,6 +36,7 @@ export function SiteFooter() {
                 itself. */}
             <h2 className="title">
               <Link
+                prefetch={false}
                 href="/#contact"
                 className="transition-opacity duration-200 hoverable:hover:opacity-70"
               >
@@ -84,6 +85,7 @@ export function SiteFooter() {
               {LEGAL.map((l) => (
                 <li key={l.href}>
                   <Link
+                    prefetch={false}
                     href={l.href}
                     className="transition-colors duration-200 hoverable:hover:text-foreground"
                   >

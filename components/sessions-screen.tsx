@@ -476,7 +476,7 @@ export function SessionsScreen({ sessions, menu, walls, covers }: { sessions: Se
               hello@juliangigola.com
             </a>
           </div>
-          <Link
+          <Link prefetch={false}
             href="/?type=session#contact"
             className="sessions-book label action px-7 py-4 press active:scale-[0.97] short:px-5 short:py-2.5"
           >

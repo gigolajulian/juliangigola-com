@@ -274,7 +274,7 @@ export function CoverFloat({
               <Link href="/portfolio" className="cover-cta press active:scale-[0.97]">
                 See the work
               </Link>
-              <Link
+              <Link prefetch={false}
                 href="/#sessions"
                 className="cover-cta cover-cta-quiet press active:scale-[0.97]"
               >
