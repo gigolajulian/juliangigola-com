@@ -20,6 +20,7 @@ import { FocusField } from "@/components/focus-field";
 import { ldJson, siteGraph } from "@/lib/seo";
 import { DebugGate } from "@/components/debug-gate";
 import { VisitTrail } from "@/components/visit-trail";
+import { ClickBeacon } from "@/components/click-beacon";
 
 /* Endless for the name, every heading and the nav, IBM Plex Mono for
    everything else, text, captions, labels, figures. Served from this site
@@ -246,6 +247,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         {/* fps, finger dots and a frame log, only with `?debug`. The
             overlay itself loads only then: `debug-gate.tsx`. */}
         <DebugGate />
+        {/* Clicks and scroll depth for /admin's SEO tab, one beacon per
+            page view, no cookie. See `click-beacon.tsx`. Renders nothing. */}
+        <ClickBeacon />
       </body>
     </html>
   );

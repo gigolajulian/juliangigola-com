@@ -50,6 +50,8 @@ export function VisitTrail() {
 /** What goes with an inquiry: the page it was sent from, where the visit
     began, the trail, and the kind of device. */
 export function trailContext(): string {
+  // Do Not Track or Global Privacy Control: nothing of the visit goes (privacy.tsx says so).
+  if (navigator.doNotTrack === "1" || (navigator as Navigator & { globalPrivacyControl?: boolean }).globalPrivacyControl) return "";
   const device = matchMedia("(max-width: 39.99rem)").matches ? "phone" : matchMedia("(pointer: coarse)").matches ? "tablet" : "desktop";
   return JSON.stringify({
     page: location.pathname + location.hash,
