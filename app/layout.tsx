@@ -19,6 +19,7 @@ import { CardTilt } from "@/components/card-tilt";
 import { FocusField } from "@/components/focus-field";
 import { ldJson, siteGraph } from "@/lib/seo";
 import { DebugGate } from "@/components/debug-gate";
+import { VisitTrail } from "@/components/visit-trail";
 
 /* Endless for the name, every heading and the nav, IBM Plex Mono for
    everything else, text, captions, labels, figures. Served from this site
@@ -206,6 +207,8 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <Intro />
 
         <SiteHeader />
+        {/* Where a visit began and what it read, for an inquiry to carry. */}
+        <VisitTrail />
         {/* The drawer the burger opens. A sibling of the header and of
             `main`, because both of those are what it comes out from under
             — see `site-menu.tsx`. */}

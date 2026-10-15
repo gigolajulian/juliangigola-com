@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils";
 import StatusMark from "@/components/StatusMark";
 import { Orb, ORB_ROUND } from "@/components/orb";
 import { ReferencePicks } from "@/components/reference-picks";
+import { trailContext } from "@/components/visit-trail";
 
 /* ── the enquiry ──────────────────────────────────────────────────
  * The old form was three fields: name, email, message. Which means every
@@ -26,6 +27,7 @@ const TYPES = [
   { value: "music", label: "Music" },
   { value: "portrait", label: "Portrait" },
   { value: "session", label: "Session" },
+  { value: "event", label: "Event" },
   { value: "other", label: "Other" },
 ] as const;
 
@@ -51,11 +53,83 @@ const FOLLOW_UP: Record<string, { label: string; placeholder: string }> = {
     label: "Preferred date and how many people",
     placeholder: "e.g. a Saturday in May, two of us",
   },
+  event: {
+    label: "The event",
+    placeholder: "venue, how many people, what matters most",
+  },
   other: {
     label: "What it is",
     placeholder: "where and roughly when",
   },
 };
+
+/* Julian (2026-10-14): one or two taps that answer what he would ask
+   first, per kind of shoot, in place of typing it. Optional; the answers
+   go in as the inquiry's details ("Date: 2026-11-08 · Coverage: 4 hours"). */
+type Ask = { label: string; date?: true; options?: string[]; many?: true };
+/* With the taps above it, the message asks what they don't. */
+const REST: Record<string, string> = {
+  event: "What it is and where, how many people",
+  music: "The artist and the release",
+  campaign: "The brand, the brief, the territory",
+  wedding: "Where, and what matters most to you",
+};
+const ASKS: Record<string, Ask[]> = {
+  event: [{ label: "Date", date: true }, { label: "Coverage", options: ["2 hours", "4 hours", "Full day"] }],
+  music: [{ label: "Release date", date: true }, { label: "For", options: ["Press", "Cover", "Video"], many: true }],
+  campaign: [{ label: "Runs on", options: ["Social", "Web", "Print", "Out of home"], many: true }, { label: "Deadline", date: true }],
+  wedding: [{ label: "Date", date: true }, { label: "Guests", options: ["Under 50", "50 to 150", "Over 150"] }],
+};
+
+function Asks({ asks, onChange }: { asks: Ask[]; onChange: (detail: string) => void }) {
+  const [got, setGot] = React.useState<Record<string, string[]>>({});
+  const set = (label: string, v: string[]) => {
+    const next = { ...got, [label]: v };
+    setGot(next);
+    onChange(asks.filter((a) => next[a.label]?.length).map((a) => `${a.label}: ${next[a.label].join(", ")}`).join(" · "));
+  };
+  return (
+    <div className="flex flex-col gap-3.5 sm:gap-[clamp(0.75rem,2.4vh,1.25rem)]">
+      {asks.map((a) =>
+        a.date ? (
+          <label key={a.label} className="label flex items-center justify-between gap-4 text-muted-foreground">
+            {a.label}
+            <input
+              type="date"
+              value={got[a.label]?.[0] ?? ""}
+              onChange={(e) => set(a.label, e.target.value ? [e.target.value] : [])}
+              className="border-0 border-b border-border bg-transparent py-1.5 text-base text-foreground [color-scheme:inherit] focus:border-foreground/40 focus:outline-none"
+            />
+          </label>
+        ) : (
+          <fieldset key={a.label} className="flex flex-wrap items-center gap-2">
+            <legend className="label float-left mr-2 text-muted-foreground">{a.label}</legend>
+            {a.options!.map((o) => {
+              const on = got[a.label]?.includes(o) ?? false;
+              return (
+                <label
+                  key={o}
+                  className={cn(
+                    "label cursor-pointer border px-3 py-1.5 transition-colors duration-200 [@media(pointer:coarse)]:py-2.5 has-[:focus-visible]:outline has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-[var(--ring)]",
+                    on ? "border-foreground bg-foreground text-background" : "border-border text-muted-foreground hoverable:hover:border-foreground/40 hoverable:hover:text-foreground",
+                  )}
+                >
+                  <input
+                    type={a.many ? "checkbox" : "radio"}
+                    checked={on}
+                    onChange={() => set(a.label, a.many ? (on ? got[a.label].filter((x) => x !== o) : [...(got[a.label] ?? []), o]) : on ? [] : [o])}
+                    className="sr-only"
+                  />
+                  {o}
+                </label>
+              );
+            })}
+          </fieldset>
+        ),
+      )}
+    </div>
+  );
+}
 
 const INITIAL: ContactState = { status: "idle" };
 
@@ -129,6 +203,12 @@ export function ContactForm({
     : TYPES;
   const chosen = booking ? session : type;
   const choose = booking ? setSession : setType;
+  /* Julian (2026-10-14): on a page that is about one kind of shoot (a
+     commission's card, a booking page's form) it is not asked again; the
+     answer goes in unseen. */
+  const fixed = !!defaults?.type && (defaults.type !== "session" || !!defaults.session);
+  const kind = booking ? (/wedding/i.test(session) ? "wedding" : "") : type;
+  const [answers, setAnswers] = React.useState("");
   const [state, formAction, pending] = React.useActionState(
     submitEnquiry,
     INITIAL,
@@ -228,6 +308,9 @@ export function ContactForm({
          still empty, which is the answer to "what is missing". React
          skips the action when the event is prevented. */
       onSubmit={(e) => {
+        // Where they came from and what they read (`visit-trail.tsx`).
+        const ctx = e.currentTarget.elements.namedItem("context");
+        if (ctx instanceof HTMLInputElement) ctx.value = trailContext();
         if (e.currentTarget.checkValidity()) return;
         e.preventDefault();
         e.currentTarget.querySelector<HTMLElement>(":invalid")?.focus();
@@ -252,6 +335,7 @@ export function ContactForm({
         aria-hidden="true"
         hidden
       />
+      <input type="hidden" name="context" />
       {/* One box to the page; side by side where the window is short and
           wide (`contact-pair`, `globals.css`). */}
       <div className="contact-pair">
@@ -296,6 +380,10 @@ export function ContactForm({
       {/* Julian: a dropdown on a phone, where the six chips took two rows
           and a third of the screen. It only sets the choice; the chips stay
           in the form (hidden) and carry the value, so there is one answer. */}
+      {fixed ? (
+        <input type="hidden" name={booking ? "session" : "type"} value={chosen} />
+      ) : (
+      <>
       <div className="sm:hidden">
         <label htmlFor="field-type" className="label block text-muted-foreground">
           {booking ? "Which session?" : "What kind of shoot?"}
@@ -366,16 +454,20 @@ export function ContactForm({
           ))}
         </div>
       </fieldset>
+      </>
+      )}
       {booking ? <input type="hidden" name="type" value="session" /> : null}
 
       {/* Julian (2026-10-14): a simpler, shorter form. The follow-up
           question is the message's placeholder now, not a field of its
           own; what it was filled with from a link still goes in. */}
-      {values.detail || presetRef || (presetSession && type === "session" && !booking) ? (
+      {ASKS[kind] ? <Asks key={kind} asks={ASKS[kind]} onChange={setAnswers} /> : null}
+
+      {values.detail || presetRef || answers || (presetSession && type === "session" && !booking) ? (
         <input
           type="hidden"
           name="detail"
-          value={values.detail || (presetRef ? `Similar to ${presetRef}` : presetSession ?? "")}
+          value={values.detail || [presetRef ? `Similar to ${presetRef}` : type === "session" && !booking ? presetSession : "", answers].filter(Boolean).join(" · ")}
         />
       ) : null}
 
@@ -383,7 +475,7 @@ export function ContactForm({
         name="message"
         label={booking ? "Anything I should know" : "About the project"}
         as="textarea"
-        placeholder={`${followUp.label}, ${followUp.placeholder}`}
+        placeholder={REST[kind] ?? `${followUp.label}, ${followUp.placeholder}`}
         defaultValue={values.message}
         error={state.errors?.message}
         required
