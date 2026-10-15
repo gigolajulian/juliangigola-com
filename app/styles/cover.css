@@ -705,3 +705,8 @@
 :root[data-moves] .gather-strip:not([data-gathered]) .strip-cell {
   visibility: hidden;
 }
+/* A project's frames slide in instead of rising (`jg-fade-up`,
+   `strip-motion.css`): with both, a phone saw the rise (QA, iOS 27). */
+:root[data-moves] .gather-strip .strip-cell {
+  animation: none;
+}
