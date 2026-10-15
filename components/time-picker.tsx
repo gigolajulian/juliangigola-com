@@ -149,6 +149,8 @@ export function TimePicker({
   const [state, setState] = React.useState<"loading" | "ready" | "fallback">("loading");
   /* Julian (2026-10-14): the orb goes one whole round before the days
      come in, however fast the times arrive (`ORB_ROUND`, orb.tsx). */
+  /* The picker is not drawn while held: the effects that measure it
+     re-run on `held`, or they ran on nothing and the week never fitted. */
   const [held, setHeld] = React.useState(true);
   React.useEffect(() => {
     const t = window.setTimeout(() => setHeld(false), ORB_ROUND.working);
@@ -363,7 +365,7 @@ export function TimePicker({
     const ro = new ResizeObserver(() => setSlotsW(el.clientWidth));
     ro.observe(el);
     return () => ro.disconnect();
-  }, [picked]);
+  }, [picked, held]);
   React.useLayoutEffect(() => {
     const el = big.current;
     const tp = el?.closest<HTMLElement>(".tp");
@@ -416,7 +418,7 @@ export function TimePicker({
       tp.removeAttribute("data-tight");
       tp.removeAttribute("data-split");
     };
-  }, [view, pick?.date, days, slotsW, mstep]);
+  }, [view, pick?.date, days, slotsW, mstep, held]);
   const refit = React.useRef(() => {});
   React.useLayoutEffect(() => {
     const grid = monthGrid.current;
@@ -460,7 +462,7 @@ export function TimePicker({
       refit.current = () => {};
       tp.removeAttribute("data-split");
     };
-  }, [view, month, pick?.date, days, mstep]);
+  }, [view, month, pick?.date, days, mstep, held]);
   React.useLayoutEffect(() => {
     const f = flip.current;
     flip.current = null;
