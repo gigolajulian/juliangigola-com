@@ -64,12 +64,47 @@ export function PointerMark() {
        together as liquid (`#mark-goo`), so pulling away draws a neck that
        snaps. The icon grows and leans the other way (`globals.css`). */
     let stuck: HTMLElement | null = null;
+    /* Julian (2026-10-14): on an option (`data-stick="fill"`, the
+       inquiry form's chips) the dot pours out into the whole chip, in the
+       same liquid, and drains back out of it when the hand pulls away.
+       The fill is drawn in the mark (difference, so the chip's words show
+       through) at the chip's place, held there as the mark moves. */
+    let fill: HTMLElement | null = null;
+    let drain = 0;
+    const drained = () => {
+      el.removeAttribute("data-fill");
+      // The goo stays on while it drains, or the last of it is a hard box.
+      el.setAttribute("data-drain", "");
+      clearTimeout(drain);
+      drain = window.setTimeout(() => el.removeAttribute("data-drain"), 340);
+    };
+    /* Not over a picked one: it is teal (Julian), and the difference of
+       the fill turned it red. Again after a press picks or unpicks it. */
+    const refill = () => {
+      if (!fill) return;
+      const picked = !!fill.querySelector("input:checked");
+      el.toggleAttribute("data-picked", picked);
+      if (picked && el.hasAttribute("data-fill")) drained();
+      else if (!picked && !el.hasAttribute("data-fill")) {
+        el.setAttribute("data-fill", "");
+        fillAt(sx, sy);
+      }
+    };
+    const fillAt = (tx: number, ty: number) => {
+      if (!fill?.isConnected || !el.hasAttribute("data-fill")) return;
+      const r = fill.getBoundingClientRect();
+      el.style.setProperty("--fl", `${(r.left - tx + 60).toFixed(1)}px`);
+      el.style.setProperty("--ft", `${(r.top - ty + 60).toFixed(1)}px`);
+    };
     // px from the icon's centre. Julian: more resistance, then a touch
     // less (34 and 0.75 at first, then 46 and 0.85).
     const RELEASE = 40;
     const HOLD = 0.8;
     const unstick = () => {
       if (!stuck) return;
+      if (el.hasAttribute("data-fill")) drained();
+      el.removeAttribute("data-picked");
+      fill = null;
       stuck.removeAttribute("data-stuck");
       stuck.style.removeProperty("--lean-x");
       stuck.style.removeProperty("--lean-y");
@@ -147,6 +182,7 @@ export function PointerMark() {
       const d = Math.hypot(ox, oy);
       const k = d > 0 ? (REACH * Math.tanh(d / REACH)) / d : 0;
       el.style.transform = `translate3d(${sx + ox * k}px, ${sy + oy * k}px, 0)`;
+      fillAt(sx + ox * k, sy + oy * k);
       return d;
     };
     const draw = (now: number) => {
@@ -213,6 +249,15 @@ export function PointerMark() {
         stick.setAttribute("data-stuck", "");
         el.setAttribute("data-stuck", "");
         el.toggleAttribute("data-row", stick.dataset.stick === "row");
+        if (stick.dataset.stick === "fill") {
+          const r = stick.getBoundingClientRect();
+          fill = stick;
+          el.style.setProperty("--fw", `${r.width}px`);
+          el.style.setProperty("--fh", `${r.height}px`);
+          // It pours from where the hand came in.
+          el.style.setProperty("--fo", `${(x - r.left).toFixed(1)}px ${(y - r.top).toFixed(1)}px`);
+          refill();
+        }
         pull();
       }
       const state = t?.closest?.(TEXT)
@@ -275,7 +320,10 @@ export function PointerMark() {
     document.addEventListener("pointercancel", cancel, { passive: true });
     window.addEventListener("blur", away);
     document.addEventListener("click", leave);
+    const picked = () => setTimeout(refill);
+    document.addEventListener("change", picked);
     return () => {
+      document.removeEventListener("change", picked);
       document.removeEventListener("click", leave);
       document.removeEventListener("pointermove", move);
       document.removeEventListener("pointerover", over);
@@ -298,6 +346,7 @@ export function PointerMark() {
         <div className="mark-dot" />
         <div className="mark-drop" />
         <div className="mark-neck" />
+        <div className="mark-fill" />
       </div>
       {/* Over a row of the Commissions list the dot grows and an
           arrow pointing on is cut out of it. */}
@@ -305,7 +354,8 @@ export function PointerMark() {
         <path d="M5 12h14M13 6l6 6-6 6" />
       </svg>
       <svg aria-hidden width="0" height="0" className="absolute">
-        <filter id="mark-goo">
+        {/* Room for a chip's fill, well past the dot's own box. */}
+        <filter id="mark-goo" filterUnits="userSpaceOnUse" x="-300" y="-300" width="720" height="720">
           <feGaussianBlur stdDeviation="3.5" />
           <feColorMatrix values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 18 -7" />
         </filter>

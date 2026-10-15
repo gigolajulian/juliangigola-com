@@ -111,10 +111,11 @@ function Asks({ asks, onChange }: { asks: Ask[]; onChange: (detail: string) => v
                   key={o}
                   /* Julian: the pointer sticks to the options a little
                      (`pointer-mark.tsx`); the word grows less than an icon. */
-                  data-stick=""
+                  data-stick="fill"
                   className={cn(
                     "[&[data-stuck]>span]:!scale-[1.06] label cursor-pointer border px-3 py-1.5 transition-colors duration-200 [@media(pointer:coarse)]:py-2.5 has-[:focus-visible]:outline has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-[var(--ring)]",
-                    on ? "border-foreground bg-foreground text-background" : "border-border text-muted-foreground hoverable:hover:border-foreground/40 hoverable:hover:text-foreground",
+                    // Julian: a picked option in the site's teal.
+                    on ? "border-accent bg-accent text-accent-foreground" : "border-border text-muted-foreground hoverable:hover:border-foreground/40 hoverable:hover:text-foreground",
                   )}
                 >
                   <input
@@ -426,7 +427,7 @@ export function ContactForm({
           {choices.map((t) => (
             <label
               key={t.value}
-              data-stick=""
+              data-stick="fill"
               className={cn(
                 "[&[data-stuck]>span]:!scale-[1.06] label cursor-pointer border px-4 py-2 transition-colors duration-200 [@media(pointer:coarse)]:py-3",
                 /* Keyboard focus only. `focus-within` put the accent ring
@@ -437,9 +438,9 @@ export function ContactForm({
                    ring for somebody arriving by Tab and nobody else.
                    Julian asked. */
                 "has-[:focus-visible]:outline has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-[var(--ring)]",
-                /* Chosen, inverted. */
+                /* Chosen, in the site's teal (Julian, 2026-10-14). */
                 chosen === t.value
-                  ? "border-foreground bg-foreground text-background"
+                  ? "border-accent bg-accent text-accent-foreground"
                   : "border-border text-muted-foreground hoverable:hover:border-foreground/40 hoverable:hover:text-foreground",
               )}
             >
