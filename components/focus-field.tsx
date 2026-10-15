@@ -75,7 +75,7 @@ export function FocusField() {
         // clearing as wide as one would leave them all sharp.
         const sharp = g.matches(MENU)
           ? cell.offsetHeight * 0.7
-          : cell.offsetWidth * (g.matches(".portfolio-arrive .strip-scroll") ? 0.55 : 1.1);
+          : cell.offsetWidth * (g.matches(".portfolio-arrive .strip-scroll") ? 1.155 : 1.1);
         el.style.setProperty("--ff-sharp", `${Math.round(sharp)}px`);
       }
       on = g;
