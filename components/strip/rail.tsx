@@ -579,15 +579,16 @@ export function StripRail({
             A descendant of the rail rather than a sibling, so leaving
             the rail's own box for it is not leaving the rail:
             `pointerleave` counts an element and its descendants as one
-            place. Chapters only, where the pointer is a mouse - on a
-            tablet this would be a strip of page that swallows a swipe
-            on its way past. */}
-        {chaptered ? (
-          <span
-            aria-hidden
-            className="absolute -bottom-2 -top-6 left-0 right-0 z-10"
-          />
-        ) : null}
+            place. Where the pointer is a mouse - on a tablet this would
+            be a strip of page that swallows a swipe on its way past. On
+            every rail, not only in chapters: the names over the ticks
+            sit in this band, and a press on "Terms of service" over
+            /legal's rail fell through to the page (found by QA in Safari,
+            2026-10-14; every browser, measured). */}
+        <span
+          aria-hidden
+          className={cn("absolute -bottom-2 -top-6 left-0 right-0 z-10", !chaptered && "hidden pointer-fine:block")}
+        />
         {/* The drop, on every rail but the archive's (Julian put that
             one back as it was). */}
         {chaptered ? null : <RailFollow rail={rail} scroller={scroller} over={over} />}
