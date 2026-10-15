@@ -3,6 +3,7 @@
 import * as React from "react";
 import { useSiteTheme } from "@/lib/site-theme";
 import { TimePicker } from "@/components/time-picker";
+import { DenseTimePicker } from "@/components/time-picker-dense";
 import { Orb, ORB_ROUND } from "@/components/orb";
 
 /* ── Cal.com, inline ──────────────────────────────────────────────
@@ -212,11 +213,16 @@ export function CalEmbed({ path, title, className }: { path: string; title: stri
   /* Decided after the first paint, so Cal.com's script is not fetched for a
      visitor who gets the picker. */
   const [own, setOwn] = React.useState<boolean | null>(null);
+  /* `?dense`: the tighter picker while it is tried (time-picker-dense.tsx). */
+  const [dense, setDense] = React.useState(false);
   React.useEffect(() => {
+    const q = new URLSearchParams(window.location.search);
     // eslint-disable-next-line react-hooks/set-state-in-effect
-    setOwn(!new URLSearchParams(window.location.search).has("cal"));
+    setOwn(!q.has("cal"));
+    setDense(q.has("dense"));
   }, []);
   if (own === null) return <div aria-label={title} className={className} />;
   const inline = <CalInline key={path} path={path} title={title} className={className} />;
-  return own ? <TimePicker path={path} title={title} className={className} fallback={inline} /> : inline;
+  if (!own) return inline;
+  return dense ? <DenseTimePicker path={path} title={title} className={className} fallback={inline} /> : <TimePicker path={path} title={title} className={className} fallback={inline} />;
 }
