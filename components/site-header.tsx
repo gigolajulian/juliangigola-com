@@ -336,6 +336,7 @@ export function SiteHeader() {
     >
       <div className="page-column relative mx-auto flex max-w-[100rem] items-center justify-between px-6 py-3 max-sm:py-2 sm:px-10 sm:py-4 tablet:py-1.5 lying:py-1.5">
         <Link
+          prefetch={false}
           href="/"
           data-ring="Home"
           // On the homepage the name is a way back to the top, not a reload.
@@ -559,6 +560,7 @@ function NavLink({
 }) {
   return (
     <Link
+      prefetch={false}
       href={href}
       aria-current={current ? "page" : undefined}
       className={cn(

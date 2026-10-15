@@ -122,7 +122,7 @@ export function AboutScreen() {
             </ul>
           </div>
           <LiquidPair className="title-rest mt-auto sm:portrait:mt-0 flex flex-wrap items-center gap-4 pt-10 sm:pt-[clamp(1rem,3cqh,2.5rem)]">
-            <Link
+            <Link prefetch={false}
               href="/?type=editorial#contact"
               className="label action px-7 py-4 press active:scale-[0.97] sm:py-[clamp(0.625rem,1.8cqh,1rem)] lying:px-5 lying:!py-2.5"
             >

@@ -105,6 +105,7 @@ export function EnquiryCell({
 
         <LiquidPair className="flex flex-wrap items-center gap-3">
           <Link
+            prefetch={false}
             href={href}
             className="label action px-6 py-4 press active:scale-[0.97]"
           >

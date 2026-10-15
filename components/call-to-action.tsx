@@ -57,6 +57,7 @@ export function CallToAction({
 
         <LiquidPair className="flex shrink-0 flex-wrap items-center gap-3">
           <Link
+            prefetch={false}
             href={href}
             className="label action px-6 py-4 press active:scale-[0.97]"
           >
@@ -64,6 +65,7 @@ export function CallToAction({
           </Link>
           {secondary ? (
             <Link
+              prefetch={false}
               href={secondary.href}
               className="label action-quiet px-6 py-4 press active:scale-[0.97]"
             >
