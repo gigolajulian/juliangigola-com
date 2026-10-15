@@ -117,7 +117,7 @@ const DriftWall = ({
 }: DriftWallProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
   // The tiles in view stream in as the wall is first seen (`lib/gather.ts`).
-  useEffect(() => {
+  useLayoutEffect(() => {
     const box = containerRef.current;
     return box ? gatherWhenSeen(box, b => b.querySelectorAll<HTMLElement>('.drift-wall__inner'), streams) : undefined;
   }, []);

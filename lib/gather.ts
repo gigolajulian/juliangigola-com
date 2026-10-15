@@ -69,17 +69,20 @@ export function gather(frames: HTMLElement[], path: Path = radial) {
 }
 
 /** Where motion is allowed (`data-moves`, set before the first paint in
-    `layout.tsx`): `box` stays
+    `layout.tsx`, or here): `box` stays
     hidden (`:not([data-gathered])` in `cover.css`) until it is first on
     screen, then the frames `pick` finds in view gather into it. Returns
     the cleanup. */
 export function gatherWhenSeen(box: HTMLElement, pick: (box: HTMLElement) => Iterable<HTMLElement>, path?: Path) {
-  if (!("moves" in document.documentElement.dataset)) return () => {};
   const done = () => (box.dataset.gathered = "");
   if (matchMedia("(prefers-reduced-motion: reduce)").matches) {
     done();
     return () => {};
   }
+  // The 404 is drawn in the browser and never runs the head script that
+  // sets this (QA, 2026-10-15): set here, before the paint, when called
+  // from a layout effect.
+  document.documentElement.dataset.moves = "";
   let frames: HTMLElement[] = [];
   const io = new IntersectionObserver(([e]) => {
     if (!e.isIntersecting) return;
