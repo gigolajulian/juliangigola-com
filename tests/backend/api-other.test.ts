@@ -57,7 +57,7 @@ describe("GET /picks.json", async () => {
   const groups = (await GET().json()) as { name: string; frames: [string, number, number, string][] }[];
 
   it("answers groups in the picker's order, none empty", () => {
-    const ORDER = ["Chroma", "Night", "White studio", "Grey studio", "Daylight", "Events", "Cover art", "More"];
+    const ORDER = ["Chroma", "Night", "White studio", "Gray studio", "Daylight", "Events", "Cover art", "More"];
     expect(groups.length).toBeGreaterThan(0);
     expect(groups.map((g) => g.name)).toEqual(ORDER.filter((n) => groups.some((g) => g.name === n)));
     for (const g of groups) expect(g.frames.length).toBeGreaterThan(0);

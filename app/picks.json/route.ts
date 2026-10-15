@@ -33,7 +33,7 @@ function varied<T extends { color?: string }>(items: T[], ahead = 6): T[] {
    (`lib/picker-looks.json`); a photograph added since lands in "More"
    until it is given one. Events and Cover art are kinds of work rather
    than looks, and are kept whole. */
-const ORDER = ["Chroma", "Night", "White studio", "Grey studio", "Daylight", "Events", "Cover art", "More"];
+const ORDER = ["Chroma", "Night", "White studio", "Gray studio", "Daylight", "Events", "Cover art", "More"];
 
 export function GET() {
   const seen = new Set<string>();

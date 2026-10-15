@@ -157,7 +157,7 @@ export function PrivacyColumn() {
           <strong>Do Not Track and Global Privacy Control.</strong> If your
           browser sends either signal, the measurement above is not sent at
           all, and an inquiry goes without the visit note. There is no other tracking here to switch off. Where the law treats such a
-          signal as an opt-out of sale or sharing, it is honoured: there is no
+          signal as an opt-out of sale or sharing, it is honored: there is no
           sale and no sharing.
         </p>
         <p>
@@ -305,8 +305,8 @@ export function PrivacyColumn() {
           content of your message; I do not sell or share personal information
           and have not done so in the preceding twelve months; I collect no
           sensitive personal information; and I use nothing beyond the purposes
-          in <em>Why, and on what legal basis</em>. You may use an authorised
-          agent, and I will ask that agent to prove your authorisation.
+          in <em>Why, and on what legal basis</em>. You may use an authorized
+          agent, and I will ask that agent to prove your authorization.
           California&rsquo;s Shine the Light law lets you ask which third
           parties received your personal information for their own direct
           marketing: the answer is none.

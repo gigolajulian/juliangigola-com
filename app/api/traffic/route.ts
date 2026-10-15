@@ -30,7 +30,7 @@ type Viewer = {
 
 export async function GET(request: Request) {
   const token = bearer(request);
-  if (!token || !(await canPush(token))) return json({ error: "Not authorised." }, 401);
+  if (!token || !(await canPush(token))) return json({ error: "Not authorized." }, 401);
   const { env } = await getCloudflareContext({ async: true });
   // Held in a const: the check above does not narrow `env` inside `gql`,
   // which failed the production type check.

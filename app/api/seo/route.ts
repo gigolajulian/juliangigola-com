@@ -31,7 +31,7 @@ const PATH = /^\/[\w\-/.#]{0,200}$/;
 
 export async function GET(request: Request) {
   const token = bearer(request);
-  if (!token || !(await canPush(token))) return json({ error: "Not authorised." }, 401);
+  if (!token || !(await canPush(token))) return json({ error: "Not authorized." }, 401);
   const { env } = await getCloudflareContext({ async: true });
   const key = env.CF_ANALYTICS_TOKEN;
   if (!key) return json({ error: "No CF_ANALYTICS_TOKEN on this Worker yet." }, 503);
