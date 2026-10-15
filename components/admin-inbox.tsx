@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Image from "next/image";
-import { replyLink, type Enquiry, type Summary } from "@/lib/inbox";
+import { contextLines, replyLink, type Enquiry, type Summary } from "@/lib/inbox";
 import { cn } from "@/lib/utils";
 import { TOKEN_STORE } from "@/lib/admin-github";
 
@@ -326,6 +326,16 @@ export function AdminInbox({
                           <dd className="text-sm">
                             {new Date(full.at).toLocaleString()}
                           </dd>
+                          {/* Where it came from, unasked (`visitContext`). */}
+                          {contextLines(full).map((line) => {
+                            const [k, v] = [line.slice(0, line.indexOf(":")), line.slice(line.indexOf(":") + 2)];
+                            return (
+                              <React.Fragment key={k}>
+                                <dt className="label text-muted-foreground">{k}</dt>
+                                <dd className="break-words text-sm">{k === "Company" ? <a href={v} target="_blank" rel="noreferrer" className="underline decoration-border underline-offset-4">{v}</a> : v}</dd>
+                              </React.Fragment>
+                            );
+                          })}
                         </dl>
 
                         {/* Their words, as typed. `whitespace-pre-wrap` because

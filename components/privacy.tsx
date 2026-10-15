@@ -33,11 +33,16 @@ export function PrivacyColumn() {
       <Clause title="What is collected, and when">
         <p>
           <strong>If you send an inquiry.</strong> The form collects your name,
-          your email address, the kind of shoot you are asking about, the
-          optional detail line such as a publication, a release date or a
-          location, and your message. On submission the Site also records the
-          date and time and the two-letter country code Cloudflare derives from
-          your connection. That is the complete list. Your IP address is not
+          your email address, the kind of shoot you are asking about, your
+          answers to its optional short questions such as a date or how many
+          hours, and your message. On submission the Site also records the date
+          and time and the city, region and country Cloudflare derives from your
+          connection. With the inquiry it sends a short note of that visit: the
+          page you sent it from, the page you arrived on, the site that linked
+          you here, any campaign tags on that link, the last twelve pages you
+          opened, and whether you were on a phone, a tablet or a desktop. That
+          note is kept in your browser for that tab only and leaves it only with
+          an inquiry you send. That is the complete list. Your IP address is not
           stored with your inquiry.
         </p>
         <p>
@@ -140,14 +145,18 @@ export function PrivacyColumn() {
           read only by me.
         </p>
         <p>
-          <strong>Local storage</strong> holds your theme choice and nothing
-          else. On the private editing pages that only I use it also holds my
+          <strong>Local storage</strong> holds your theme choice. While a tab is
+          open, its session storage also keeps the visit note described under{" "}
+          <em>What is collected, and when</em>: the page you arrived on, the site
+          that linked you here, any campaign tags and the last twelve pages you
+          opened. It is sent only with an inquiry and is gone when you close the
+          tab. On the private editing pages that only I use it also holds my
           own credentials; those pages do nothing for anybody else.
         </p>
         <p>
           <strong>Do Not Track and Global Privacy Control.</strong> If your
           browser sends either signal, the measurement above is not sent at
-          all. There is no other tracking here to switch off. Where the law treats such a
+          all, and an inquiry goes without the visit note. There is no other tracking here to switch off. Where the law treats such a
           signal as an opt-out of sale or sharing, it is honoured: there is no
           sale and no sharing.
         </p>
