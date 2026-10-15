@@ -16,7 +16,7 @@ import { ArrangeInspector, type ArrangeCard } from "@/components/hero-arrange";
 import { Hero3D } from "@/components/hero-3d";
 import { WarpText } from "@/components/warp-text";
 import { NAME_WARP } from "@/lib/name-warp";
-import {
+import { BOOKING_MOVES,
   DEAL,
   LANDSCAPE,
   MIDDLE,
@@ -489,8 +489,11 @@ export function HeroDials() {
       const c = layout.cards[card];
       if (!c) return;
       f.dataset.card = card;
-      f.style.setProperty("--x", `${c.place.x}%`);
-      f.style.setProperty("--y", `${-c.place.y}%`);
+      /* A booking page moves two cards off its long title (`BOOKING_MOVES`). */
+      const moves = el.hasAttribute("data-booking") ? BOOKING_MOVES : null;
+      const big = moves?.large[deal[i] ?? i];
+      f.style.setProperty("--x", `${big?.x ?? c.place.x}%`);
+      f.style.setProperty("--y", `${big?.y ?? -c.place.y}%`);
       f.style.setProperty("--w", `${c.width}vw`);
       f.style.setProperty("--z", `${c.depth}px`);
       for (const [k, set, off] of [
@@ -501,8 +504,9 @@ export function HeroDials() {
       ] as const) {
         const p = set.cards[card];
         if (!p) continue;
-        f.style.setProperty(`--${k}x`, `${p.place.x}%`);
-        f.style.setProperty(`--${k}y`, `${-p.place.y}%`);
+        const mv = k === "l" ? moves?.landscape[deal[i] ?? i] : k === "t" ? moves?.short[deal[i] ?? i] : k === "u" ? moves?.upright[deal[i] ?? i] : undefined;
+        f.style.setProperty(`--${k}x`, `${mv?.x ?? p.place.x}%`);
+        f.style.setProperty(`--${k}y`, `${mv?.y ?? -p.place.y}%`);
         f.style.setProperty(`--${k}w`, `${p.width}vw`);
         f.style.setProperty(`--${k}z`, `${p.depth}px`);
         f.classList.toggle(off, !p.show);

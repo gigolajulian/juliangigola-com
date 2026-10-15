@@ -82,9 +82,9 @@ export function TermsColumn() {
         <p>
           The Content is protected by copyright and, where it applies, by other
           intellectual property and personality rights. I own it or hold a
-          licence to it from the people it was made for. All rights are
+          license to it from the people it was made for. All rights are
           reserved. Nothing on the Site transfers any right, title or interest
-          to you, and no licence arises by implication, estoppel, course of
+          to you, and no license arises by implication, estoppel, course of
           dealing, or otherwise, apart from the narrow one in{" "}
           <em>What you may do</em>.
         </p>
@@ -110,7 +110,7 @@ export function TermsColumn() {
           may share that link.
         </p>
         <p>
-          That is the whole of the licence, and it is revocable at any time.
+          That is the whole of the license, and it is revocable at any time.
         </p>
       </Clause>
 
@@ -177,7 +177,7 @@ export function TermsColumn() {
           </li>
         </ul>
         <p>
-          That list is not exhaustive. Anything the licence in{" "}
+          That list is not exhaustive. Anything the license in{" "}
           <em>What you may do</em> does not expressly permit is prohibited.
         </p>
       </Clause>
@@ -194,8 +194,8 @@ export function TermsColumn() {
           classifiers, embedding and retrieval systems, recommendation systems
           and style-transfer tools, and to every stage of their life:
           collecting, crawling, scraping, downloading, copying, mirroring,
-          caching, labelling, annotating, captioning, embedding, vectorising,
-          indexing, tokenising, compiling into a dataset or corpus, using as a
+          caching, labeling, annotating, captioning, embedding, vectorizing,
+          indexing, tokenizing, compiling into a dataset or corpus, using as a
           reference image, or generating output that imitates, reproduces, or is
           derived from the Content or my style.
         </p>
@@ -246,7 +246,7 @@ export function TermsColumn() {
           permitted by law, I expressly reserve all rights in the Content for
           the purposes of text and data mining, machine learning, and artificial
           intelligence, and I opt out of and object to every exception,
-          limitation, or licence that would otherwise permit those uses. This is
+          limitation, or license that would otherwise permit those uses. This is
           an express reservation for the purposes of Article 4(3) of Directive
           (EU) 2019/790 and its implementations in the member states, of the
           corresponding provisions of United Kingdom law, and of any equivalent
@@ -266,7 +266,7 @@ export function TermsColumn() {
           Nothing in this clause ratifies a past use or waives a claim for it.
         </p>
         <p>
-          <strong>No implied licence.</strong> The absence of a technical
+          <strong>No implied license.</strong> The absence of a technical
           barrier is not permission. That a file can be fetched, that a page
           renders in a headless browser, or that an opt-out form exists on
           somebody else&rsquo;s platform, gives you no right to use the Content
@@ -274,27 +274,27 @@ export function TermsColumn() {
         </p>
       </Clause>
 
-      <Clause title="Unauthorised use, and what it costs">
+      <Clause title="Unauthorized use, and what it costs">
         <p>
           If you use the Content without permission, you owe me a fee for that
-          use. It is the greater of three times my standard licence fee for the
-          use actually made, and my then-current minimum licence fee, calculated
+          use. It is the greater of three times my standard license fee for the
+          use actually made, and my then-current minimum license fee, calculated
           per work, per use and per territory, together with my costs of
           detection and enforcement. That is a genuine pre-estimate of the
-          damage: unauthorised use destroys the exclusivity a licence is sold
+          damage: unauthorized use destroys the exclusivity a license is sold
           on, devalues the work for the client it was made for, and takes time
           to find and stop. It is not a penalty, and it is not a price list for
           buying permission after the fact.
         </p>
         <p>
-          Paying it does not make the use lawful, does not grant a licence, and
+          Paying it does not make the use lawful, does not grant a license, and
           does not stop me electing instead to pursue any other remedy, whether
           statutory damages, an account of profits, or an injunction. Where the
           law gives me a larger remedy than this clause, I may take it.
         </p>
         <p>
-          <strong>Credit is not a licence.</strong> Attribution, a tag, or a
-          link back does not authorise a use and does not reduce the fee.
+          <strong>Credit is not a license.</strong> Attribution, a tag, or a
+          link back does not authorize a use and does not reduce the fee.
         </p>
       </Clause>
 
@@ -308,7 +308,7 @@ export function TermsColumn() {
           .
         </p>
         <p>
-          A licence exists only once I have confirmed it in writing and its
+          A license exists only once I have confirmed it in writing and its
           scope has been agreed: the use, the media, the territory, the
           duration, and the fee. Rates shown or described anywhere on the Site
           are indicative, are not an offer, and do not survive a change of
@@ -318,7 +318,7 @@ export function TermsColumn() {
         </p>
         <p>
           Where a separate written agreement between us exists, whether a
-          licence, an estimate, a booking confirmation, or a contract for
+          license, an estimate, a booking confirmation, or a contract for
           services, that agreement governs the work it describes and prevails
           over these terms to the extent the two conflict.
         </p>
@@ -366,9 +366,9 @@ export function TermsColumn() {
           If you believe Content on the Site infringes your rights, write to{" "}
           {EMAIL} with your name and contact details, identification of the work
           you say is infringed, the address of the page on this Site, a
-          statement of your good faith belief that the use is not authorised, a
+          statement of your good faith belief that the use is not authorized, a
           statement under penalty of perjury that your notice is accurate and
-          that you are the owner or are authorised to act for the owner, and
+          that you are the owner or are authorized to act for the owner, and
           your physical or electronic signature. Notices that meet 17 U.S.C.
           &sect;512(c)(3), and the equivalent requirements elsewhere, are acted
           on promptly. Knowingly sending a false notice carries liability under
@@ -420,8 +420,8 @@ export function TermsColumn() {
           You will indemnify me and hold me harmless from every claim, loss,
           liability, damage, cost and expense, including reasonable legal fees,
           arising out of your breach of these terms, your use of any Content
-          beyond the licence in <em>What you may do</em>, or your violation of
-          any law or of anybody&rsquo;s rights. I may take over the defence of
+          beyond the license in <em>What you may do</em>, or your violation of
+          any law or of anybody&rsquo;s rights. I may take over the defense of
           any matter covered by this clause, and you will cooperate with it. You
           will not settle anything in a way that admits fault on my part or
           binds me, without my written consent.
@@ -437,7 +437,7 @@ export function TermsColumn() {
           addition to every other remedy.
         </p>
         <p>
-          Unauthorised use of the Content is also copyright infringement, for
+          Unauthorized use of the Content is also copyright infringement, for
           which the law provides remedies including statutory damages of up to
           US$150,000 per work for wilful infringement. Removing or altering
           rights-management information is separately actionable under 17 U.S.C.
@@ -522,7 +522,7 @@ export function TermsColumn() {
         <p>
           <em>Definitions</em>, <em>Ownership</em>, <em>What you may not do</em>
           , <em>No use for AI or machine learning</em>,{" "}
-          <em>Unauthorised use, and what it costs</em>, <em>No warranty</em>,{" "}
+          <em>Unauthorized use, and what it costs</em>, <em>No warranty</em>,{" "}
           <em>Limitation of liability</em>, <em>Indemnity</em>,{" "}
           <em>Enforcement</em>, <em>Governing law and disputes</em> and this
           clause survive any end to your access. Headings are there to be read

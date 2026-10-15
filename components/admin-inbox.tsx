@@ -112,7 +112,7 @@ export function AdminInbox({
         setError(e instanceof Error ? e.message : String(e));
         // A rejected key is not worth keeping — otherwise every visit retries
         // it and the tab looks broken rather than locked.
-        if (String(e).includes("Not authorised")) {
+        if (String(e).includes("Not authorized")) {
           window.localStorage.removeItem(KEY_STORE);
           setRows(null);
         }
