@@ -109,8 +109,11 @@ function Asks({ asks, onChange }: { asks: Ask[]; onChange: (detail: string) => v
               return (
                 <label
                   key={o}
+                  /* Julian: the pointer sticks to the options a little
+                     (`pointer-mark.tsx`); the word grows less than an icon. */
+                  data-stick=""
                   className={cn(
-                    "label cursor-pointer border px-3 py-1.5 transition-colors duration-200 [@media(pointer:coarse)]:py-2.5 has-[:focus-visible]:outline has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-[var(--ring)]",
+                    "[&[data-stuck]>span]:!scale-[1.06] label cursor-pointer border px-3 py-1.5 transition-colors duration-200 [@media(pointer:coarse)]:py-2.5 has-[:focus-visible]:outline has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-[var(--ring)]",
                     on ? "border-foreground bg-foreground text-background" : "border-border text-muted-foreground hoverable:hover:border-foreground/40 hoverable:hover:text-foreground",
                   )}
                 >
@@ -120,7 +123,7 @@ function Asks({ asks, onChange }: { asks: Ask[]; onChange: (detail: string) => v
                     onChange={() => set(a.label, a.many ? (on ? got[a.label].filter((x) => x !== o) : [...(got[a.label] ?? []), o]) : on ? [] : [o])}
                     className="sr-only"
                   />
-                  {o}
+                  <span className="inline-block">{o}</span>
                 </label>
               );
             })}
@@ -423,8 +426,9 @@ export function ContactForm({
           {choices.map((t) => (
             <label
               key={t.value}
+              data-stick=""
               className={cn(
-                "label cursor-pointer border px-4 py-2 transition-colors duration-200 [@media(pointer:coarse)]:py-3",
+                "[&[data-stuck]>span]:!scale-[1.06] label cursor-pointer border px-4 py-2 transition-colors duration-200 [@media(pointer:coarse)]:py-3",
                 /* Keyboard focus only. `focus-within` put the accent ring
                    around whichever kind of shoot had been pressed and left
                    it there, so a chosen type wore two outlines: its own
@@ -449,7 +453,7 @@ export function ContactForm({
                 // tab order and arrow keys still walk the radio group.
                 className="sr-only"
               />
-              {t.label}
+              <span className="inline-block">{t.label}</span>
             </label>
           ))}
         </div>
