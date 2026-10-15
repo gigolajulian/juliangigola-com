@@ -345,15 +345,23 @@ export function ContactForm({
          form. The button stays a button now and says it is not ready
          (`aria-disabled`), and this refuses the submit — a press or Enter
          in a field alike — and puts the focus on the first field that is
-         still empty, which is the answer to "what is missing". React
-         skips the action when the event is prevented. */
+         still empty, which is the answer to "what is missing".
+
+         Sent from here rather than by `action`: React resets a form after
+         its action, and the reset put the kind of shoot back to the first
+         option while the state still held the chosen one (QA, a failed
+         send, 2026-10-15). `action` stays for before the page hydrates. */
       onSubmit={(e) => {
+        e.preventDefault();
         // Where they came from and what they read (`visit-trail.tsx`).
         const ctx = e.currentTarget.elements.namedItem("context");
         if (ctx instanceof HTMLInputElement) ctx.value = trailContext();
-        if (e.currentTarget.checkValidity()) return;
-        e.preventDefault();
-        e.currentTarget.querySelector<HTMLElement>(":invalid")?.focus();
+        if (!e.currentTarget.checkValidity()) {
+          e.currentTarget.querySelector<HTMLElement>(":invalid")?.focus();
+          return;
+        }
+        const data = new FormData(e.currentTarget);
+        React.startTransition(() => formAction(data));
       }}
       /* Julian: on a phone the whole card fits a screen, so tighter there. */
       className="flex flex-col gap-3.5 sm:gap-[clamp(0.75rem,2.4vh,1.25rem)]"
@@ -603,6 +611,13 @@ export function ContactForm({
   );
 }
 
+/** A textarea as tall as what is in it; `max-h` stops it at three lines. */
+const fit = (el: HTMLTextAreaElement | HTMLInputElement | null) => {
+  if (!el) return;
+  el.style.height = "auto";
+  el.style.height = `${el.scrollHeight + el.offsetHeight - el.clientHeight}px`;
+};
+
 function Field({
   name,
   label,
@@ -634,15 +649,21 @@ function Field({
       <Element
         id={id}
         name={name}
-        rows={as === "textarea" ? 3 : undefined}
+        /* Julian (2026-10-15): the brief starts as one line, on its rule,
+           and grows as it is typed, up to three lines; past that it
+           scrolls. Sized here rather than by `field-sizing`, which Safari
+           lacks. */
+        rows={as === "textarea" ? 1 : undefined}
+        ref={as === "textarea" ? fit : undefined}
+        onInput={as === "textarea" ? (e: { currentTarget: HTMLTextAreaElement | HTMLInputElement }) => fit(e.currentTarget) : undefined}
         aria-invalid={error ? true : undefined}
         // Points a screen reader at the message rather than only colouring
         // the border, which says nothing to anyone not looking at it.
         aria-describedby={error ? errorId : undefined}
         className={cn(
           "mt-1 block w-full border-0 border-b bg-transparent py-2 text-base sm:mt-2 sm:py-2.5",
-          // Two lines of message on a phone, where the card has a screen.
-          as === "textarea" && "max-sm:h-[3.75rem] max-sm:resize-none sm:h-[clamp(3.25rem,calc(14vh-3rem),4.75rem)] sm:resize-none",
+          // Three lines at most, the padding and the rule on top.
+          as === "textarea" && "resize-none overflow-y-auto max-h-[calc(3lh+1rem+1px)] sm:max-h-[calc(3lh+1.25rem+1px)]",
           // Placeholders fainter.
           "transition-colors duration-200 placeholder:text-muted-foreground/35",
           // Focus is the rule under the field darkening, to 40% ink. No
