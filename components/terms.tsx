@@ -27,7 +27,7 @@ export function TermsColumn() {
     <LegalColumn
       id="terms"
       title="Terms of Service"
-      label="Terms"
+      label="Terms of service"
       effective="2026-09-26"
     >
       <Clause title="Definitions">

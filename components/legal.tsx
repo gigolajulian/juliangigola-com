@@ -123,6 +123,7 @@ export function LegalPage({ children }: { children: React.ReactNode }) {
           }
           title="Legal"
           live
+          open
         />
       }
     >
@@ -153,7 +154,7 @@ export function LegalPage({ children }: { children: React.ReactNode }) {
               >
                 {/* The document and its contents. */}
                 <div
-                  className="flex min-h-0 flex-col sm:w-[min(40rem,42%)] sm:shrink-0"
+                  className="flex min-h-0 flex-col sm:w-[min(40rem,42%)] sm:shrink-0 2xl:w-[min(34rem,30%)]"
                   onMouseLeave={() => setPeek(null)}
                 >
                   <h2 className="font-display text-3xl uppercase leading-none tracking-[0.01em] sm:text-5xl">
@@ -238,7 +239,11 @@ export function LegalPage({ children }: { children: React.ReactNode }) {
                     >
                       {at.title}
                     </h3>
-                    <div className="mt-8 max-w-[46rem] text-lg leading-relaxed [&_li]:mt-2 [&_p+p]:mt-5 [&_strong]:font-medium [&_strong]:text-foreground [&_ul]:list-disc [&_ul]:pl-5">
+                    {/* Sentence case: long legal prose in capitals is hard
+                        to read (Julian). The measure is in em, so it grows
+                        with the type on wide screens and stays near 70
+                        characters a line. */}
+                    <div className="mt-8 max-w-[36em] text-lg normal-case leading-relaxed xl:text-xl 2xl:text-2xl [&_li]:mt-2 [&_p+p]:mt-5 [&_strong]:font-medium [&_strong]:text-foreground [&_ul]:list-disc [&_ul]:pl-5">
                       {at.body}
                     </div>
                   </div>

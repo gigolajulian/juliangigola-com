@@ -144,7 +144,12 @@ export function useReader({
       if (word === el.dataset.at) return;
       el.dataset.at = word;
       const out = el.closest("article")?.querySelector("[data-strip-at]");
-      if (out) out.textContent = word;
+      /* A paged strip's first screen is a document of its own, so its head
+         names it from the start (Julian: Legal, then Terms of service).
+         Only the head's line: `data-at` stays empty there. */
+      if (out)
+        out.textContent =
+          word || (paged ? ((el.children[0] as HTMLElement | undefined)?.dataset.label ?? "") : "");
     };
     /* The columns of a cell that fade with it: the ones carrying no
        picture. A cell is often a photograph and a column of words side by
