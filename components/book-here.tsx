@@ -17,7 +17,7 @@ const SESSIONS = SESSION_TYPES.map((s) => s.name);
  * commission a call or the form. Its own size container, so the form
  * keeps its fit (`.book-form`, contact.css).
  * ─────────────────────────────────────────────────────────────── */
-export function BookCard({ item, onClose, className }: { item: MenuItem; onClose: () => void; className?: string }) {
+export function BookCard({ item, onClose, className }: { item: MenuItem; onClose?: () => void; className?: string }) {
   const [tab, setTab] = React.useState<"call" | "form">("call");
   const mode = item.cal ? tab : "form";
   const card = React.useRef<HTMLDivElement>(null);
@@ -53,10 +53,11 @@ export function BookCard({ item, onClose, className }: { item: MenuItem; onClose
         /* Julian: the calendar says what it is for, where no tabs do. */
         <h3 className="label font-bold text-foreground">Book a session</h3>
       ) : <span />}
-        {/* Julian: the X larger, an easy target under a thumb. */}
-        <button type="button" onClick={onClose} className="tap-44 label inline-flex items-center gap-2 text-muted-foreground hoverable:hover:text-foreground">
+        {/* Julian: the X larger, an easy target under a thumb. None on a
+            booking page of its own (`app/book/[slug]`): nothing to close. */}
+        {onClose ? <button type="button" onClick={onClose} className="tap-44 label inline-flex items-center gap-2 text-muted-foreground hoverable:hover:text-foreground">
           Close <span aria-hidden className="text-[1.75rem] font-light leading-none text-foreground">&times;</span>
-        </button>
+        </button> : null}
       </div>
       <div key={`${item.slug}-${mode}`} className="min-h-0 flex-1 motion-safe:animate-[jg-fade-up_420ms_var(--ease-out-strong)_both]">
         {mode === "call" && item.cal ? (
