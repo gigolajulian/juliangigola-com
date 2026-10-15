@@ -137,6 +137,42 @@ function Asks({ asks, onChange }: { asks: Ask[]; onChange: (detail: string) => v
 
 const INITIAL: ContactState = { status: "idle" };
 
+/* The request itself failing (offline, a dropped connection, the Worker
+   erroring) threw out of the action and took the whole page to its error
+   screen, the brief gone with it. Caught here instead: the fields come
+   back as typed, and the mail app is offered, as when nothing could be
+   stored (`app/contact/actions.ts`). */
+async function submitOrKeep(prev: ContactState, data: FormData): Promise<ContactState> {
+  try {
+    return await submitEnquiry(prev, data);
+  } catch {
+    const read = (key: string) => String(data.get(key) ?? "").trim();
+    const values = {
+      type: read("type"),
+      name: read("name"),
+      email: read("email"),
+      detail: [read("session"), read("detail")].filter(Boolean).join(" · "),
+      message: read("message"),
+    };
+    const body = [
+      values.type ? `Type: ${values.type}` : null,
+      values.detail ? `Details: ${values.detail}` : null,
+      `From: ${values.name} <${values.email}>`,
+      "",
+      values.message,
+    ]
+      .filter((line) => line !== null)
+      .join("\n");
+    return {
+      status: "error",
+      values,
+      message:
+        "That didn't go through, so nothing was sent. Your message is still here. Try again, or open it in your mail app and it will reach me directly.",
+      mailto: `mailto:hello@juliangigola.com?subject=${encodeURIComponent(`${values.type || "other"} inquiry from ${values.name}`)}&body=${encodeURIComponent(body)}`,
+    };
+  }
+}
+
 /** The contact screen's head, or the booking one when the link came
     from a session (`?type=session`). */
 export function WhenBooking({
@@ -214,7 +250,7 @@ export function ContactForm({
   const kind = booking ? (/wedding/i.test(session) ? "wedding" : "") : type;
   const [answers, setAnswers] = React.useState("");
   const [state, formAction, pending] = React.useActionState(
-    submitEnquiry,
+    submitOrKeep,
     INITIAL,
   );
 
@@ -309,15 +345,23 @@ export function ContactForm({
          form. The button stays a button now and says it is not ready
          (`aria-disabled`), and this refuses the submit — a press or Enter
          in a field alike — and puts the focus on the first field that is
-         still empty, which is the answer to "what is missing". React
-         skips the action when the event is prevented. */
+         still empty, which is the answer to "what is missing".
+
+         Sent from here rather than by `action`: React resets a form after
+         its action, and the reset put the kind of shoot back to the first
+         option while the state still held the chosen one (QA, a failed
+         send, 2026-10-15). `action` stays for before the page hydrates. */
       onSubmit={(e) => {
+        e.preventDefault();
         // Where they came from and what they read (`visit-trail.tsx`).
         const ctx = e.currentTarget.elements.namedItem("context");
         if (ctx instanceof HTMLInputElement) ctx.value = trailContext();
-        if (e.currentTarget.checkValidity()) return;
-        e.preventDefault();
-        e.currentTarget.querySelector<HTMLElement>(":invalid")?.focus();
+        if (!e.currentTarget.checkValidity()) {
+          e.currentTarget.querySelector<HTMLElement>(":invalid")?.focus();
+          return;
+        }
+        const data = new FormData(e.currentTarget);
+        React.startTransition(() => formAction(data));
       }}
       /* Julian: on a phone the whole card fits a screen, so tighter there. */
       className="flex flex-col gap-3.5 sm:gap-[clamp(0.75rem,2.4vh,1.25rem)]"
@@ -567,6 +611,13 @@ export function ContactForm({
   );
 }
 
+/** A textarea as tall as what is in it; `max-h` stops it at three lines. */
+const fit = (el: HTMLTextAreaElement | HTMLInputElement | null) => {
+  if (!el) return;
+  el.style.height = "auto";
+  el.style.height = `${el.scrollHeight + el.offsetHeight - el.clientHeight}px`;
+};
+
 function Field({
   name,
   label,
@@ -598,15 +649,21 @@ function Field({
       <Element
         id={id}
         name={name}
-        rows={as === "textarea" ? 3 : undefined}
+        /* Julian (2026-10-15): the brief starts as one line, on its rule,
+           and grows as it is typed, up to three lines; past that it
+           scrolls. Sized here rather than by `field-sizing`, which Safari
+           lacks. */
+        rows={as === "textarea" ? 1 : undefined}
+        ref={as === "textarea" ? fit : undefined}
+        onInput={as === "textarea" ? (e: { currentTarget: HTMLTextAreaElement | HTMLInputElement }) => fit(e.currentTarget) : undefined}
         aria-invalid={error ? true : undefined}
         // Points a screen reader at the message rather than only colouring
         // the border, which says nothing to anyone not looking at it.
         aria-describedby={error ? errorId : undefined}
         className={cn(
           "mt-1 block w-full border-0 border-b bg-transparent py-2 text-base sm:mt-2 sm:py-2.5",
-          // Two lines of message on a phone, where the card has a screen.
-          as === "textarea" && "max-sm:h-[3.75rem] max-sm:resize-none sm:h-[clamp(3.25rem,calc(14vh-3rem),4.75rem)] sm:resize-none",
+          // Three lines at most, the padding and the rule on top.
+          as === "textarea" && "resize-none overflow-y-auto max-h-[calc(3lh+1rem+1px)] sm:max-h-[calc(3lh+1.25rem+1px)]",
           // Placeholders fainter.
           "transition-colors duration-200 placeholder:text-muted-foreground/35",
           // Focus is the rule under the field darkening, to 40% ink. No
