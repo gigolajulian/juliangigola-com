@@ -127,6 +127,39 @@ describe("submitEnquiry", () => {
     expect(kv.data.get(`ref:${key}:1`)!.metadata).toEqual({ type: "image/png" });
   });
 
+  it("keeps where it came from, checked, and mails it", async () => {
+    ctx.cf = { country: "US", city: "San Jose", region: "California" };
+    const context = JSON.stringify({
+      page: "/book/events",
+      path: "/",
+      referrer: "https://www.instagram.com/juliangigola",
+      utm: "source=ig",
+      trail: ["/", "/portfolio/events", "javascript:alert(1)"],
+      device: "phone",
+    });
+    await send({ ...GOOD, email: "ana@acme.studio", context });
+    expect(kv.json(msgs()[0]).context).toEqual({
+      page: "/book/events",
+      landing: "/",
+      referrer: "www.instagram.com",
+      utm: "source=ig",
+      trail: ["/", "/portfolio/events"],
+      device: "phone",
+      place: "San Jose, California, US",
+    });
+    const text = email.sent[0].text as string;
+    expect(text).toContain("Came in: www.instagram.com to / (source=ig)");
+    expect(text).toContain("Company: https://acme.studio");
+    expect(text).not.toContain("Country: US");
+  });
+
+  it("stores no context when the browser sent none", async () => {
+    ctx.cf = {};
+    await send({ ...GOOD, email: "qa@gmail.com" });
+    expect(kv.json(msgs()[0]).context).toBeUndefined();
+    expect(email.sent[0].text).not.toContain("Company:");
+  });
+
   it("files an unknown shoot type as other", async () => {
     await send({ ...GOOD, type: "<script>" });
     expect(kv.json(msgs()[0]).type).toBe("other");

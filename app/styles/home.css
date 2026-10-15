@@ -192,8 +192,8 @@
     opacity 240ms var(--ease-out-strong),
     filter 620ms var(--ease-out-strong),
     scale 620ms var(--ease-out-strong),
-    transform 450ms var(--ease-out-strong),
-    box-shadow 450ms var(--ease-out-strong),
+    transform 700ms cubic-bezier(0.45, 0, 0.2, 1),
+    box-shadow 700ms cubic-bezier(0.45, 0, 0.2, 1),
     translate 900ms cubic-bezier(0.25, 1, 0.5, 1);
 }
 /* The cards stand a little off the table, a few pixels toward the
@@ -219,7 +219,7 @@
     opacity 240ms var(--ease-out-strong),
     filter 620ms var(--ease-out-strong),
     scale 620ms var(--ease-out-strong),
-    transform 140ms ease-out,
+    transform 420ms var(--ease-out-strong),
     /* Fades in rather than snapping on. */
     box-shadow 500ms var(--ease-out-strong),
     translate 900ms cubic-bezier(0.25, 1, 0.5, 1);
