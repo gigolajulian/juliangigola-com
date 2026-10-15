@@ -9,6 +9,7 @@ import { CoverCard, HeroDials, HeroName } from "@/components/hero-dials";
 import { DEAL, LANDSCAPE, MIDDLE, PHONE, SHORT, SIDEWAYS, SLOTS, UPRIGHT, middleVars } from "@/lib/cover-slots";
 import { LiquidPair } from "@/components/liquid-pair";
 import { PendingLabel } from "@/components/pending-label";
+import { HeroGather } from "@/components/hero-gather";
 
 /* ── the cover ────────────────────────────────────────────────────
  * The name in the middle of the screen and the featured work round it,
@@ -93,6 +94,8 @@ export function CoverFloat({
     >
       {/* First, so its panels are listed before the cards' own. */}
       <HeroDials />
+      {/* The frames come in from outside the page (`hero-gather.tsx`). */}
+      <HeroGather />
       <CoverSpace className="cover-float-ring absolute inset-0 -z-10">
         {frames.map((p, i) => {
           const at = DEAL[i] ?? i;
