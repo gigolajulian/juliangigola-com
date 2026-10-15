@@ -3,7 +3,7 @@
 import * as React from "react";
 import { useSiteTheme } from "@/lib/site-theme";
 import { TimePicker } from "@/components/time-picker";
-import { Orb } from "@/components/orb";
+import { Orb, ORB_ROUND } from "@/components/orb";
 
 /* ── Cal.com, inline ──────────────────────────────────────────────
  * The booking calendar, from Cal.com (`book.cal`, `lib/booking.ts`).
@@ -111,6 +111,13 @@ function CalInline({ path, title, className }: { path: string; title: string; cl
   const host = React.useRef<HTMLDivElement>(null);
   const ns = React.useRef<string | null>(null);
   const [state, setState] = React.useState<"waiting" | "ready" | "failed">("waiting");
+  // The orb breathes one round before the calendar shows (Julian, 2026-10-14).
+  const [held, setHeld] = React.useState(true);
+  React.useEffect(() => {
+    const t = window.setTimeout(() => setHeld(false), ORB_ROUND.working);
+    return () => window.clearTimeout(t);
+  }, []);
+  const waiting = state === "waiting" || (held && state === "ready");
   const theme = useSiteTheme();
 
   React.useEffect(() => {
@@ -165,12 +172,12 @@ function CalInline({ path, title, className }: { path: string; title: string; cl
 
   return (
     <div ref={box} data-cal={state} aria-label={title} role="region" className={`cal-embed relative ${className ?? ""}`}>
-      <div ref={host} className={`h-full w-full overflow-y-auto overscroll-contain ${state === "failed" ? "invisible" : ""}`} />
+      <div ref={host} className={`h-full w-full overflow-y-auto overscroll-contain ${state === "failed" || waiting ? "invisible" : ""}`} />
       {/* Julian: a small orb while Cal.com's page opens, gone once it is up. */}
-      {state === "waiting" ? (
-        <p role="status" className="pointer-events-none absolute inset-0 grid place-items-center text-muted-foreground">
+      {waiting ? (
+        <p role="status" className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center gap-3 text-muted-foreground">
           <Orb state="working" size={20} />
-          <span className="sr-only">Loading the calendar</span>
+          <span className="label animate-[jg-fade-in_300ms_ease-out_300ms_both]">Loading availability</span>
         </p>
       ) : null}
       {state === "failed" ? (

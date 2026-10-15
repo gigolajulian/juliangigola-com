@@ -17,7 +17,7 @@ const SESSIONS = SESSION_TYPES.map((s) => s.name);
  * commission a call or the form. Its own size container, so the form
  * keeps its fit (`.book-form`, contact.css).
  * ─────────────────────────────────────────────────────────────── */
-export function BookCard({ item, onClose, className }: { item: MenuItem; onClose: () => void; className?: string }) {
+export function BookCard({ item, onClose, className }: { item: MenuItem; onClose?: () => void; className?: string }) {
   const [tab, setTab] = React.useState<"call" | "form">("call");
   const mode = item.cal ? tab : "form";
   const card = React.useRef<HTMLDivElement>(null);
@@ -49,10 +49,15 @@ export function BookCard({ item, onClose, className }: { item: MenuItem; onClose
             </button>
           ))}
         </div>
+      ) : item.cal ? (
+        /* Julian: the calendar says what it is for, where no tabs do. */
+        <h3 className="label font-bold text-foreground">Book a session</h3>
       ) : <span />}
-        <button type="button" onClick={onClose} className="tap-44 label text-muted-foreground hoverable:hover:text-foreground">
-          Close <span aria-hidden>&times;</span>
-        </button>
+        {/* Julian: the X larger, an easy target under a thumb. None on a
+            booking page of its own (`app/book/[slug]`): nothing to close. */}
+        {onClose ? <button type="button" onClick={onClose} className="tap-44 label inline-flex items-center gap-2 text-muted-foreground hoverable:hover:text-foreground">
+          Close <span aria-hidden className="text-[1.75rem] font-light leading-none text-foreground">&times;</span>
+        </button> : null}
       </div>
       <div key={`${item.slug}-${mode}`} className="min-h-0 flex-1 motion-safe:animate-[jg-fade-up_420ms_var(--ease-out-strong)_both]">
         {mode === "call" && item.cal ? (
@@ -63,7 +68,7 @@ export function BookCard({ item, onClose, className }: { item: MenuItem; onClose
               {/* The promise in the labels' voice over a hairline, so the
                   card opens as a conversation. */}
               <div className="border-b-[0.5px] border-foreground/30 pb-[clamp(1.25rem,4cqh,2rem)]">
-                <p className="label max-w-[48ch] leading-relaxed text-muted-foreground">Tell me what you have in mind. I reply within 24 hours with an approach and a quote.</p>
+                <p className="label leading-relaxed text-muted-foreground text-balance">Tell me what you have in mind. I reply within 24 hours with an approach and a quote.</p>
               </div>
               <Suspense fallback={null}>
                 <ContactForm defaults={item.form} sessions={SESSIONS} />

@@ -1,8 +1,8 @@
 import { describe, expect, it, vi } from "vitest";
 import worker from "@/book/worker.js";
 
-/* book.juliangigola.com (`book/worker.js`): the four sessions go to the
-   site's own picker, the calls stay on the static Cal.com page, and each
+/* book.juliangigola.com (`book/worker.js`): the four sessions go to
+   their own page on the site (`app/book/[slug]`), the calls stay on the static Cal.com page, and each
    call's link preview gets its own title. HTMLRewriter is the Workers
    runtime's; here a stand-in records what it was told to set. */
 
@@ -36,11 +36,11 @@ describe("book.juliangigola.com", () => {
     ["graduation", "graduation"],
     ["headshots", "headshots"],
     ["digitals", "studio-digitals"],
-  ])("sends /%s to the site's picker for %s", async (path, session) => {
+  ])("sends /%s to the site's page for %s", async (path, session) => {
     const env = { ASSETS: assets() };
     const res = await go(`/${path}`, env);
     expect(res.status).toBe(302);
-    expect(res.headers.get("location")).toBe(`https://juliangigola.com/book?session=${session}`);
+    expect(res.headers.get("location")).toBe(`https://juliangigola.com/book/${session}`);
     expect(env.ASSETS.fetch).not.toHaveBeenCalled();
   });
 

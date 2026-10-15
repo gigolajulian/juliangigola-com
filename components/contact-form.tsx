@@ -7,7 +7,7 @@ import { submitEnquiry, type ContactState } from "@/app/contact/actions";
 import { RESPONSE_TIME } from "@/lib/site";
 import { cn } from "@/lib/utils";
 import StatusMark from "@/components/StatusMark";
-import { Orb } from "@/components/orb";
+import { Orb, ORB_ROUND } from "@/components/orb";
 import { ReferencePicks } from "@/components/reference-picks";
 
 /* ── the enquiry ──────────────────────────────────────────────────
@@ -52,8 +52,8 @@ const FOLLOW_UP: Record<string, { label: string; placeholder: string }> = {
     placeholder: "e.g. a Saturday in May, two of us",
   },
   other: {
-    label: "Anything that helps place it",
-    placeholder: "Optional",
+    label: "What it is",
+    placeholder: "where and roughly when",
   },
 };
 
@@ -331,12 +331,12 @@ export function ContactForm({
         <legend className="label text-muted-foreground">
           {booking ? "Which session?" : "What kind of shoot?"}
         </legend>
-        <div className="mt-4 flex flex-wrap gap-2">
+        <div className="mt-2.5 flex flex-wrap gap-2">
           {choices.map((t) => (
             <label
               key={t.value}
               className={cn(
-                "label cursor-pointer border px-4 py-2.5 transition-colors duration-200 [@media(pointer:coarse)]:py-4",
+                "label cursor-pointer border px-4 py-2 transition-colors duration-200 [@media(pointer:coarse)]:py-3",
                 /* Keyboard focus only. `focus-within` put the accent ring
                    around whichever kind of shoot had been pressed and left
                    it there, so a chosen type wore two outlines: its own
@@ -368,24 +368,22 @@ export function ContactForm({
       </fieldset>
       {booking ? <input type="hidden" name="type" value="session" /> : null}
 
-      <Field
-        name="detail"
-        label={followUp.label}
-        placeholder={followUp.placeholder}
-        // Keyed on `type` so switching shoot type actually swaps the field
-        // rather than leaving an answer to the previous question in it.
-        key={`detail-${type}-${presetSession ?? ""}`}
-        defaultValue={
-          values.detail ||
-          (presetRef ? `Similar to ${presetRef}` : undefined) ||
-          (presetSession && type === "session" && !booking ? presetSession : undefined)
-        }
-      />
+      {/* Julian (2026-10-14): a simpler, shorter form. The follow-up
+          question is the message's placeholder now, not a field of its
+          own; what it was filled with from a link still goes in. */}
+      {values.detail || presetRef || (presetSession && type === "session" && !booking) ? (
+        <input
+          type="hidden"
+          name="detail"
+          value={values.detail || (presetRef ? `Similar to ${presetRef}` : presetSession ?? "")}
+        />
+      ) : null}
 
       <Field
         name="message"
         label={booking ? "Anything I should know" : "About the project"}
         as="textarea"
+        placeholder={`${followUp.label}, ${followUp.placeholder}`}
         defaultValue={values.message}
         error={state.errors?.message}
         required
@@ -511,7 +509,7 @@ function Field({
         className={cn(
           "mt-1 block w-full border-0 border-b bg-transparent py-2 text-base sm:mt-2 sm:py-2.5",
           // Two lines of message on a phone, where the card has a screen.
-          as === "textarea" && "max-sm:h-[3.75rem] max-sm:resize-none sm:h-[clamp(3.75rem,calc(16vh-3rem),6rem)] sm:resize-none",
+          as === "textarea" && "max-sm:h-[3.75rem] max-sm:resize-none sm:h-[clamp(3.25rem,calc(14vh-3rem),4.75rem)] sm:resize-none",
           // Placeholders fainter.
           "transition-colors duration-200 placeholder:text-muted-foreground/35",
           // Focus is the rule under the field darkening, to 40% ink. No
@@ -538,7 +536,8 @@ function Field({
 function SentStatus() {
   const [done, setDone] = React.useState(false);
   React.useEffect(() => {
-    const t = window.setTimeout(() => setDone(true), 420);
+    // One round of the orb before the check (Julian, 2026-10-14).
+    const t = window.setTimeout(() => setDone(true), ORB_ROUND.composing);
     return () => window.clearTimeout(t);
   }, []);
   return (

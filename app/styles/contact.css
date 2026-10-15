@@ -491,8 +491,8 @@
     zoom: 1.4;
   }
 }
-/* A short card: the shoot type as a dropdown beside the question it
-   leads to, rather than six chips on rows of their own. */
+/* A short card: the shoot type as a dropdown rather than six chips on
+   rows of their own. */
 @container (max-height: 38rem) {
   .book-form form {
     display: grid;
@@ -508,13 +508,6 @@
   }
   .book-form form > div:has(#field-type) {
     display: block;
-    grid-column: 1;
-  }
-  .book-form form > .contact-field:has(#field-detail) {
-    grid-column: 2;
-  }
-  .book-form form > .contact-field:has(#field-detail)::before {
-    inset-inline-start: -0.75rem;
   }
 }
 /* A laptop's short card (1333x620: 303px for 495 of form): the inquiry
@@ -631,6 +624,18 @@
 .tp:has(> form) {
   overflow-y: auto;
   overscroll-behavior: contain;
+}
+/* Julian (2026-10-14): air between the card's sections. The day row
+   off the tabs, and never less than this between the days, the time
+   and the times (the spacers are the `grow basis-0` boxes). A phone's
+   card is not a size container, so it gets the same by width. */
+@container card (min-height: 30rem) {
+  .tp [data-part="days"] { padding-top: 0.75rem; }
+  .tp [data-part="days"] ~ .grow.basis-0 { min-height: 1.5rem; }
+}
+@media (max-width: 39.99rem) {
+  .tp [data-part="days"] { padding-top: 0.75rem; }
+  .tp [data-part="days"] ~ .grow.basis-0 { min-height: 1.75rem; }
 }
 @container card (max-height: 34rem) {
   /* The room under Book it on the form, not the scroller: a scroller's
