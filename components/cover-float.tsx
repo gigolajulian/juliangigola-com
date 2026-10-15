@@ -6,7 +6,7 @@ import { CoverSpace } from "@/components/cover-space";
 import { CoverRole } from "@/components/cover-role";
 import { FitLines } from "@/components/fit-lines";
 import { CoverCard, HeroDials, HeroName } from "@/components/hero-dials";
-import { BOOKING_MOVES, DEAL, LANDSCAPE, MIDDLE, PHONE, SHORT, SIDEWAYS, SLOTS, UPRIGHT, middleVars } from "@/lib/cover-slots";
+import { DEAL, LANDSCAPE, MIDDLE, PHONE, SHORT, SIDEWAYS, SLOTS, UPRIGHT, middleVars } from "@/lib/cover-slots";
 import { LiquidPair } from "@/components/liquid-pair";
 import { PendingLabel } from "@/components/pending-label";
 import { HeroGather } from "@/components/hero-gather";
@@ -86,12 +86,12 @@ export function CoverFloat({
       <CoverSpace className="cover-float-ring absolute inset-0 -z-10">
         {frames.map((p, i) => {
           const at = DEAL[i] ?? i;
-          const s = { ...SLOTS[at], ...(heading && BOOKING_MOVES.large[at]) };
-          const u = { ...UPRIGHT[at], ...(heading && BOOKING_MOVES.upright[at]) };
-          const l = { ...LANDSCAPE[at], ...(heading && BOOKING_MOVES.landscape[at]) };
+          const s = SLOTS[at];
+          const u = UPRIGHT[at];
+          const l = LANDSCAPE[at];
           const ph = PHONE[at];
           const sw = SIDEWAYS[at];
-          const sh = { ...SHORT[at], ...(heading && BOOKING_MOVES.short[at]) };
+          const sh = SHORT[at];
           return (
             <Link
               key={`${p.slug}-${i}`}

@@ -29,8 +29,8 @@
   /* Where it sits, from the set for the screen's shape (below). Drawn
      toward the middle by the "Photo layout" panel's spread (1: as laid
      out). A phone places them itself, further down. */
-  --fx: var(--x);
-  --fy: var(--y);
+  --fx: var(--cx, var(--x));
+  --fy: var(--cy, var(--y));
   --fw: var(--w);
   --fz: var(--z, 0px);
   left: calc(50% + (var(--fx) - 50%) * var(--h-pull-x, 1.05) * var(--wide-x, var(--wide, 1)));
@@ -100,8 +100,8 @@
     --m-y: var(--m-short-y, 0);
   }
   .cover-float-frame {
-    --fx: var(--tx);
-    --fy: var(--ty);
+    --fx: var(--ctx, var(--tx));
+    --fy: var(--cty, var(--ty));
     --fw: var(--tw);
     --fz: var(--tz, 0px);
   }
@@ -126,8 +126,8 @@
     --m-y: var(--m-upright-y, 0);
   }
   .cover-float-frame {
-    --fx: var(--ux);
-    --fy: var(--uy);
+    --fx: var(--cux, var(--ux));
+    --fy: var(--cuy, var(--uy));
     --fw: var(--uw);
     --fz: var(--uz, 0px);
   }
@@ -146,8 +146,8 @@
     --m-y: var(--m-landscape-y, 0);
   }
   .cover-float-frame {
-    --fx: var(--lx);
-    --fy: var(--ly);
+    --fx: var(--clx, var(--lx));
+    --fy: var(--cly, var(--ly));
     --fw: var(--lw);
     --fz: var(--lz, 0px);
   }

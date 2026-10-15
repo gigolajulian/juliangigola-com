@@ -489,11 +489,8 @@ export function HeroDials() {
       const c = layout.cards[card];
       if (!c) return;
       f.dataset.card = card;
-      /* A booking page moves two cards off its long title (`BOOKING_MOVES`). */
-      const moves = el.hasAttribute("data-booking") ? BOOKING_MOVES : null;
-      const big = moves?.large[deal[i] ?? i];
-      f.style.setProperty("--x", `${big?.x ?? c.place.x}%`);
-      f.style.setProperty("--y", `${big?.y ?? -c.place.y}%`);
+      f.style.setProperty("--x", `${c.place.x}%`);
+      f.style.setProperty("--y", `${-c.place.y}%`);
       f.style.setProperty("--w", `${c.width}vw`);
       f.style.setProperty("--z", `${c.depth}px`);
       for (const [k, set, off] of [
@@ -504,9 +501,8 @@ export function HeroDials() {
       ] as const) {
         const p = set.cards[card];
         if (!p) continue;
-        const mv = k === "l" ? moves?.landscape[deal[i] ?? i] : k === "t" ? moves?.short[deal[i] ?? i] : k === "u" ? moves?.upright[deal[i] ?? i] : undefined;
-        f.style.setProperty(`--${k}x`, `${mv?.x ?? p.place.x}%`);
-        f.style.setProperty(`--${k}y`, `${mv?.y ?? -p.place.y}%`);
+        f.style.setProperty(`--${k}x`, `${p.place.x}%`);
+        f.style.setProperty(`--${k}y`, `${-p.place.y}%`);
         f.style.setProperty(`--${k}w`, `${p.width}vw`);
         f.style.setProperty(`--${k}z`, `${p.depth}px`);
         f.classList.toggle(off, !p.show);
@@ -522,6 +518,66 @@ export function HeroDials() {
       }
     });
   });
+
+  /* A booking page's title can run nearly the window wide. A card that
+     would sit on it goes down to a bottom corner (`BOOKING_MOVES`), and
+     only one that would: which ones depends on the title and the window
+     (Julian, 2026-10-15). Measured where things come to rest: the cards
+     by their layout boxes, the title with its entrance seeked to the end
+     and back, all before a paint. Again on resize and once the fonts are
+     in, which change the title's width. */
+  React.useEffect(() => {
+    const el = cover();
+    if (!el?.hasAttribute("data-booking")) return;
+    const title = el.querySelector("h1");
+    if (!title) return;
+    // Each layout's override, read by `--fx`/`--fy` in cover.css.
+    const SHAPES = [["large", ""], ["short", "t"], ["landscape", "l"], ["upright", "u"]] as const;
+    const fit = () => {
+      const anims: Animation[] = [];
+      for (let n: Element | null = title; n && n !== el.parentElement; n = n.parentElement)
+        anims.push(...n.getAnimations());
+      const was = anims.map((a) => a.currentTime);
+      for (const a of anims) {
+        const end = a.effect?.getComputedTiming().endTime;
+        if (typeof end === "number" && Number.isFinite(end)) a.currentTime = end;
+      }
+      const at = el.getBoundingClientRect();
+      const range = document.createRange();
+      range.selectNodeContents(title);
+      const words = Array.from(range.getClientRects(), (r) => {
+        // The line box's leading is not ink.
+        const pad = r.height * 0.18;
+        return [r.left - at.left, r.top - at.top + pad, r.right - at.left, r.bottom - at.top - pad];
+      });
+      anims.forEach((a, i) => (a.currentTime = was[i]));
+      el.querySelectorAll<HTMLElement>(".cover-float-frame").forEach((f) => {
+        const slot = Number(f.dataset.card?.slice(5)) - 1;
+        for (const [, k] of SHAPES) {
+          f.style.removeProperty(`--c${k}x`);
+          f.style.removeProperty(`--c${k}y`);
+        }
+        if (!(slot in BOOKING_MOVES.large) || !f.offsetWidth) return;
+        let x = 0;
+        let y = 0;
+        for (let n: HTMLElement | null = f; n && n !== el; n = n.offsetParent as HTMLElement | null) {
+          x += n.offsetLeft;
+          y += n.offsetTop;
+        }
+        const box = [x, y, x + f.offsetWidth, y + f.offsetHeight];
+        if (!words.some((w) => box[0] < w[2] && box[2] > w[0] && box[1] < w[3] && box[3] > w[1])) return;
+        for (const [shape, k] of SHAPES) {
+          const to = BOOKING_MOVES[shape][slot];
+          f.style.setProperty(`--c${k}x`, `${to.x}%`);
+          f.style.setProperty(`--c${k}y`, `${to.y}%`);
+        }
+      });
+    };
+    fit();
+    void document.fonts.ready.then(fit);
+    window.addEventListener("resize", fit);
+    return () => window.removeEventListener("resize", fit);
+  }, []);
 
   /* Arrange: the cards moved on the page itself. The listeners sit on the
      cover, below the strip, so a drag or a wheel over a card stops there
