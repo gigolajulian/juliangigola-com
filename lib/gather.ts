@@ -14,7 +14,11 @@ export const FLY = 1.3; // s
 export const WAVE = 0.15; // s, the second wave after the first
 
 /** Where a frame starts and how long after the first it leaves. */
-type Path = (f: HTMLElement, r: DOMRect, rank: number) => { x: number; y: number; delay: number };
+type Path = (
+  f: HTMLElement,
+  r: DOMRect,
+  rank: number,
+) => { x: number; y: number; delay: number; duration?: number; ease?: string; hide?: boolean };
 
 /** Out along the line from the middle of the screen, in two waves. */
 const radial: Path = (f, r, rank) => {
@@ -34,6 +38,15 @@ export const streams: Path = (f, r) => {
   return { x: 0, y: (col % 2 ? 1 : -1) * (innerHeight + r.height), delay: col * 0.05 };
 };
 
+/** Julian (2026-10-15), for the 404: the wall builds up. Row by row from
+    the bottom, left to right in a row, each tile out of nowhere a short
+    way under its place and up into it; hidden until its turn, no fade. */
+export const builds: Path = (f, r) => {
+  const row = Math.max(0, Math.floor((innerHeight - r.bottom) / r.height + 0.5));
+  const col = Math.max(0, Math.floor(r.left / r.width));
+  return { x: 0, y: r.height * 0.35, delay: row * 0.22 + col * 0.06, duration: 0.7, ease: "power3.out", hide: true };
+};
+
 /** Julian (2026-10-14), for a project: the frames come in from past the
     right edge and run left, in order, up to the title. */
 export const slides: Path = (f, r, rank) => ({ x: innerWidth - r.left + 40, y: 0, delay: rank * 0.08 });
@@ -42,22 +55,24 @@ export const slides: Path = (f, r, rank) => ({ x: innerWidth - r.left + 40, y: 0
 export function gather(frames: HTMLElement[], path: Path = radial) {
   const order = (f: HTMLElement) => parseFloat(getComputedStyle(f).getPropertyValue("--order")) || 0;
   const rank = new Map([...frames].sort((a, b) => order(a) - order(b)).map((f, i) => [f, i]));
-  const delay = new Map<HTMLElement, number>();
+  const how = new Map<HTMLElement, ReturnType<Path>>();
   for (const f of frames) {
-    const { x, y, delay: d } = path(f, f.getBoundingClientRect(), rank.get(f)!);
-    gsap.set(f, { x, y });
-    delay.set(f, d);
+    const p = path(f, f.getBoundingClientRect(), rank.get(f)!);
+    gsap.set(f, { x: p.x, y: p.y, ...(p.hide ? { visibility: "hidden" } : {}) });
+    how.set(f, p);
   }
   return () =>
     frames.forEach((f) => {
       // A frame with its own transform transition would chase GSAP's.
       f.style.transition = "none";
+      const p = how.get(f)!;
       gsap.to(f, {
         x: 0,
         y: 0,
-        duration: FLY,
-        ease: "expo.out",
-        delay: 0.05 + delay.get(f)!,
+        duration: p.duration ?? FLY,
+        ease: p.ease ?? "expo.out",
+        delay: 0.05 + p.delay,
+        onStart: () => f.style.removeProperty("visibility"),
         // Nothing left behind once it lands (`clearProps` left an identity
         // transform on a phone).
         onComplete: () => {
@@ -102,6 +117,7 @@ export function gatherWhenSeen(box: HTMLElement, pick: (box: HTMLElement) => Ite
     frames.forEach((f) => {
       f.style.removeProperty("transform");
       f.style.removeProperty("transition");
+      f.style.removeProperty("visibility");
     });
   };
 }

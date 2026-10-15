@@ -76,6 +76,7 @@ export default function NotFound() {
             lift={16}
             fade={0.6}
             dim={0.4}
+            build
             overlayColor="var(--background)"
           />
         </div>

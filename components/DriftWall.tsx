@@ -1,6 +1,6 @@
 'use client';
 
-import { gatherWhenSeen, streams } from '@/lib/gather';
+import { builds, gatherWhenSeen, streams } from '@/lib/gather';
 import {
   useCallback,
   useEffect,
@@ -48,6 +48,8 @@ export type DriftWallProps = {
   limit?: number;
   density?: number;
   hold?: boolean;
+  /** The tiles build up row by row instead of streaming in (the 404). */
+  build?: boolean;
   onShown?: () => void;
   className?: string;
   style?: Record<string, string | number>;
@@ -111,16 +113,12 @@ const DriftWall = ({
   // Held still (the site's `?wall=still`): every column eases to a stop
   // and stays paused until this goes false, then eases back up.
   hold = false,
+  build = false,
   onShown,
   className = '',
   style
 }: DriftWallProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
-  // The tiles in view stream in as the wall is first seen (`lib/gather.ts`).
-  useLayoutEffect(() => {
-    const box = containerRef.current;
-    return box ? gatherWhenSeen(box, b => b.querySelectorAll<HTMLElement>('.drift-wall__inner'), streams) : undefined;
-  }, []);
   const planeRef = useRef<HTMLDivElement>(null);
   const trackRefs = useRef<(HTMLDivElement | null)[]>([]);
 
@@ -142,6 +140,14 @@ const DriftWall = ({
      boxes the wall's tilt throws off, so tiles in plain view sat empty
      (measured: 31 of 96 loaded on the homepage's last screen). Once the
      wall is seen every tile loads. Julian: no empty slots. */
+  // The tiles in view stream in (or build up) once the wall shows, not
+  // while it waits for its photographs hidden (`lib/gather.ts`).
+  useLayoutEffect(() => {
+    const box = containerRef.current;
+    if (!shown || !box) return;
+    return gatherWhenSeen(box, b => b.querySelectorAll<HTMLElement>('.drift-wall__inner'), build ? builds : streams);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- once, as the wall shows
+  }, [shown]);
   const [seen, setSeen] = useState(false);
   const onShownRef = useRef(onShown);
   useEffect(() => {
