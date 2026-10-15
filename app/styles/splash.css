@@ -125,13 +125,6 @@
   :is(.strip-cell, .title-word, .title-rest, .dissolve, .lift, .cover-float-frame, .cover-float-card) {
   animation-play-state: paused;
 }
-/* Preview (`?deal=new`): the frames arrive top to bottom as one wave
-   (`--wave`, the layout's own in `--wave-now`, `cover-float.tsx`), and
-   set off halfway through the lift (`data-intro="half"`, `intro.tsx`)
-   rather than once it has cleared. Off unless the preview is on. */
-:root[data-deal] .cover-float-frame {
-  --delay: calc(var(--h-start, 420ms) + var(--wave-now, var(--wave, 0)) * var(--h-spread, 0.95ms));
-}
 /* The photographs wait while the panel is full and set off with the
    lift (`data-intro="half"`, `intro.tsx`). */
 [data-intro="lift"] :is(.cover-float-frame, .cover-float-card) {
