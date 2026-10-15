@@ -125,14 +125,8 @@ export function Intro() {
       .catch(() => {})
       .then(async () => {
         root.dataset.intro = "lift";
-        /* The eye fades out before the panel lifts, so the sheet
-           leaves empty. */
-        eye.current?.animate([{ opacity: 1 }, { opacity: 0 }], {
-          duration: 420,
-          delay: UNDER - 420,
-          easing: "cubic-bezier(0.45, 0, 0.55, 1)",
-          fill: "forwards",
-        });
+        /* Julian (2026-10-14): the eye stays on and leaves with the
+           panel (it used to fade out first, so the sheet left empty). */
         await wait(UNDER);
         box.current?.classList.add("jg-intro-open");
         box.current?.animate(
