@@ -32,19 +32,6 @@ import { HeroGather } from "@/components/hero-gather";
     Be a Human, top middle) leads, ahead of the rest. */
 const ORDER = [200, 700, 0, 850, 560, 1340, 620, 950, 1220, 780];
 
-/* Preview (`?deal=new`, `data-deal`): the frames arrive top to bottom,
-   as one even wave (Julian: top, then the middle, then the bottom,
-   with harmony). A frame sets off in proportion to how far down its
-   layout it sits, across the same second and a half as `ORDER`, so
-   frames at one height land together. Each layout has its own wave. */
-const SPAN = Math.max(...ORDER);
-const wave = (set: { y: number; show?: boolean }[], at: number) => {
-  const ys = set.filter((p) => p.show !== false).map((p) => p.y);
-  const lo = Math.min(...ys);
-  const hi = Math.max(...ys);
-  return hi > lo ? Math.round(((set[at].y - lo) / (hi - lo)) * SPAN) : 0;
-};
-
 export function CoverFloat({
   work,
   heading,
@@ -153,12 +140,6 @@ export function CoverFloat({
                   "--z": `${s.z}px`,
                   /* When it sets off: `--delay` in `globals.css`. */
                   "--order": ORDER[i] ?? 0,
-                  "--wave": wave(SLOTS, at),
-                  "--wave-u": wave(UPRIGHT, at),
-                  "--wave-l": wave(LANDSCAPE, at),
-                  "--wave-s": wave(SIDEWAYS, at),
-                  "--wave-p": wave(PHONE, at),
-                  "--wave-t": wave(SHORT, at),
                   // Julian: keep each photograph's own proportions.
                   aspectRatio: `${p.cover.width} / ${p.cover.height}`,
                 } as React.CSSProperties

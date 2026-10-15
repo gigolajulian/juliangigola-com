@@ -71,8 +71,6 @@ export const SPACE = {
 const ENTRANCE = {
   firstPhotoAt: [420, 0, 3000, 10],
   stagger: [0.95, 0, 4, 0.05],
-  photosFlyIn: { distance: [150, 0, 300, 1], duration: [1020, 200, 4000, 10] },
-  photosFadeIn: { duration: [1110, 100, 4000, 10], blur: [7, 0, 40, 1] },
   textRise: { duration: [1030, 100, 3000, 10] },
 } satisfies DialConfig;
 
@@ -237,8 +235,6 @@ const DIAL_TARGETS: Record<string, string> = {
   middle: ".cover-float-middle",
   "load animation":
     ".cover-float-frame, .cover-float-name, .cover-float-title, .cover-float-where, .cover-cta",
-  "photos fly in": ".cover-float-frame",
-  "photos fade in": ".cover-float-frame",
   "text rise":
     ".cover-float-name, .cover-float-title, .cover-float-where, .cover-cta",
   "name effect": ".cover-float-name",
@@ -470,10 +466,6 @@ export function HeroDials() {
       "--h-perspective": `${space.perspective}px`,
       "--h-start": `${entrance.firstPhotoAt}ms`,
       "--h-spread": `${entrance.stagger}ms`,
-      "--h-fly": `${entrance.photosFlyIn.distance}px`,
-      "--h-fly-ms": `${entrance.photosFlyIn.duration}ms`,
-      "--h-fade-ms": `${entrance.photosFadeIn.duration}ms`,
-      "--h-fade-blur": `${entrance.photosFadeIn.blur}px`,
       "--h-lift-ms": `${entrance.textRise.duration}ms`,
       "--h-title-size": `${type.roleLine.size}px`,
       "--h-title-track": `${type.roleLine.letterSpacing}em`,

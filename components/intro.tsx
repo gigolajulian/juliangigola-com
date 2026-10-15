@@ -62,48 +62,6 @@ export function Intro() {
       sessionStorage.setItem("jg-intro", "1");
     } catch {}
 
-    /* Preview (`?deal=ripple|rise|sweep`): other landing orders, from
-       where each frame actually sits. Ripple: out from the name. Rise:
-       bottom first, behind the lifting panel. Sweep: left to right,
-       the way the panel came in. Top: the top four together (Julian),
-       then the rest top to bottom; `topall`: the rest together. Drift:
-       all at once, the top ones drifting down slowly, the bottom ones
-       easing up (Julian; `jg-drift`, `globals.css`). */
-    const mode = root.dataset.deal;
-    if (mode === "ripple" || mode === "rise" || mode === "sweep" || mode === "top" || mode === "topall" || mode === "drift") {
-      const els = Array.from(document.querySelectorAll<HTMLElement>(".cover-float-frame")).filter(
-        (el) => el.getBoundingClientRect().width > 0,
-      );
-      const at = els.map((el) => {
-        const r = el.getBoundingClientRect();
-        const x = r.left + r.width / 2 - innerWidth / 2;
-        const y = r.top + r.height / 2 - innerHeight / 2;
-        return mode === "ripple" ? Math.hypot(x, y) : mode === "rise" ? -y : mode === "sweep" ? x : y;
-      });
-      if (mode === "drift") {
-        els.forEach((el, i) => {
-          el.style.setProperty("--wave-now", "0");
-          if (at[i] < 0) el.dataset.drift = "";
-        });
-      } else if (mode === "top" || mode === "topall") {
-        const cut = [...at].sort((a, b) => a - b)[3];
-        const rest = at.filter((y) => y > cut);
-        const lo = Math.min(...rest);
-        const hi = Math.max(...rest);
-        els.forEach((el, i) => {
-          const w =
-            at[i] <= cut ? 0 : mode === "topall" || hi === lo ? 600 : 600 + Math.round(((at[i] - lo) / (hi - lo)) * 600);
-          el.style.setProperty("--wave-now", String(w));
-        });
-      } else {
-        const lo = Math.min(...at);
-        const hi = Math.max(...at);
-        els.forEach((el, i) =>
-          el.style.setProperty("--wave-now", String(hi > lo ? Math.round(((at[i] - lo) / (hi - lo)) * 1340) : 0)),
-        );
-      }
-    }
-
     /* The sweep runs as an animation the browser moves on its own, off the
        main thread, from the first paint (`jg-intro-sweep`, `globals.css`):
        quick to start, slowing into full. Nothing holds it back.
