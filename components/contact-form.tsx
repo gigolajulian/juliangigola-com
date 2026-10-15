@@ -238,9 +238,11 @@ export function ContactForm({
     setSeenSession(presetSession);
     setSession(presetSession ?? "");
   }
+  /* Sessions are booked from Book a session, so the commission desk does
+     not offer one; a link that names it (`?type=session`) still lands. */
   const choices = booking
     ? sessions.map((s) => ({ value: s, label: s }))
-    : TYPES;
+    : TYPES.filter((t) => t.value !== "session" || type === "session");
   const chosen = booking ? session : type;
   const choose = booking ? setSession : setType;
   /* Julian (2026-10-14): on a page that is about one kind of shoot (a

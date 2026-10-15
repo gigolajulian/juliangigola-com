@@ -132,7 +132,7 @@ export function useMotion({
     el.addEventListener("pointerup", onLet, { passive: true });
     el.addEventListener("pointercancel", onLet, { passive: true });
     el.addEventListener("click", swallowClick, true);
-    el.addEventListener("keydown", onKey);
+    document.addEventListener("keydown", onKey);
     // A touchscreen writes `scrollLeft` itself; the target has to follow,
     // or the next wheel notch would spring back.
     const sync = () => {
@@ -165,7 +165,7 @@ export function useMotion({
       el.removeEventListener("pointerup", onLet);
       el.removeEventListener("pointercancel", onLet);
       el.removeEventListener("click", swallowClick, true);
-      el.removeEventListener("keydown", onKey);
+      document.removeEventListener("keydown", onKey);
       el.removeEventListener("scroll", sync);
       if (m.frame) cancelAnimationFrame(m.frame);
       if (m.band) cancelAnimationFrame(m.band);
