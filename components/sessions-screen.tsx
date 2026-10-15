@@ -1,14 +1,13 @@
 "use client";
 
 import type * as React from "react";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Liquid, useQuiet } from "@/components/liquid";
 import { RisingTitle } from "@/components/strip-page";
-import { BookCard } from "@/components/book-here";
-import { InquireWall } from "@/components/inquire-wall";
+import { BookSheet } from "@/components/book-sheet";
 import type { MenuItem } from "@/lib/booking";
 import type { Frame } from "@/lib/work-types";
 import type { WallTile } from "@/lib/wall-tile";
@@ -87,28 +86,22 @@ export function SessionsScreen({ sessions, menu, walls, covers }: { sessions: Se
      finger, the first tap opens a row and the next goes to its page;
      a mouse has opened it already by pointing. */
   const wasOpen = useRef(false);
-  /* `?bookhere`: a session clicked opens its booking card where the
-     title was; the list stays as it is (Julian, 2026-10-11). While a card
-     is open the list holds on its session rather than following the
-     pointer. */
+  /* A session clicked opens its booking sheet; the list stays as it is.
+     While it is open the list holds on its session rather than following
+     the pointer. */
   const [book, setBook] = useState<number | null>(null);
   const go = (i: number) => {
     if (i === open || book !== null) return;
     setOpen(i);
   };
-  /* Closing lets the card go first (down and out), then the title and
-     the photograph come back with their own rise (Julian, 2026-10-11). */
-  const [leaving, setLeaving] = useState(false);
-  const close = useCallback(() => {
-    if (matchMedia("(prefers-reduced-motion: reduce)").matches) return setBook(null);
-    setLeaving(true);
-    setTimeout(() => {
-      setBook(null);
-      setLeaving(false);
-    }, 320);
-  }, []);
+  /* The card grows out of the row into a sheet over the session's wall,
+     and back (`book-sheet.tsx`, Julian 2026-10-14). */
+  const [origin, setOrigin] = useState<HTMLElement | null>(null);
+  /* The sheet gone, the pointer is over some row it never moved to:
+     that row must not open and push the pressed one down. */
+  const hush = useRef(0);
   const take = (i: number) => {
-    setOpen(i);
+    setOrigin((col.current?.querySelector("ul")?.children[i] as HTMLElement | undefined) ?? null);
     setBook(i);
   };
   /* The ink in liquid, the filter bar's. One drop under the open row
@@ -148,38 +141,13 @@ export function SessionsScreen({ sessions, menu, walls, covers }: { sessions: Se
       : sessions;
   const current = rows[open];
   const booking = book === null ? null : rows[book]?.item ?? null;
-  const rail = useRef<HTMLDivElement>(null);
-  /* The card closed takes the focus with it: back to its row. */
-  const shut = useRef<number | null>(null);
-  useEffect(() => {
-    if (book !== null || shut.current === null) return;
-    const i = shut.current;
-    shut.current = null;
-    if (document.activeElement && document.activeElement !== document.body) return;
-    col.current?.querySelector("ul")?.children[i]?.querySelector<HTMLElement>("a, button")?.focus({ preventScroll: true });
-  }, [book]);
-  useEffect(() => {
-    if (book === null) return;
-    // The rail brings the open session to its middle.
-    const r = rail.current, b = r?.children[book] as HTMLElement | undefined;
-    if (r && b) r.scrollTo({ left: b.offsetLeft - (r.clientWidth - b.offsetWidth) / 2, behavior: "smooth" });
-    // On a phone the card is above the list: take the page to it.
-    if (matchMedia("(max-width: 39.99rem)").matches) document.getElementById("book-open")?.scrollIntoView({ block: "start", behavior: "smooth" });
-    // Focus goes into the card: under 1024px the row that had it is hidden.
-    shut.current = book;
-    document.getElementById("book-card")?.focus({ preventScroll: true });
-    // Not from inside a field: Escape there threw away a half-typed form.
-    const key = (e: KeyboardEvent) => e.key === "Escape" && !(e.target as Element).closest?.("input, textarea, select") && close();
-    window.addEventListener("keydown", key);
-    return () => window.removeEventListener("keydown", key);
-  }, [book, close]);
 
   return (
     <section
       data-tick
       data-label="Sessions"
       data-hash="sessions"
-      className={here && booking ? `screen-measure relative isolate grid w-full shrink-0 grid-cols-1 items-center gap-10 sessions-screen px-6 py-12 sm:h-full sm:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] xl:grid-cols-[minmax(0,1fr)_minmax(0,36rem)] max-lg:!grid-cols-1 lg:max-xl:!grid-cols-[minmax(0,1.25fr)_minmax(0,0.75fr)] sm:grid-rows-[minmax(0,1fr)] sm:gap-x-[clamp(2rem,3.5vw,4rem)] sm:px-10 sm:pb-8 sm:pt-20 short:pb-4 sm:[container-type:size]` : "screen-measure relative grid w-full shrink-0 grid-cols-1 items-center gap-10 sessions-screen px-6 py-12 sm:h-full sm:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] sm:gap-x-[clamp(2rem,3.5vw,4rem)] sm:px-10 sm:pb-8 sm:pt-20 short:pb-4 sm:[container-type:size] lying:grid-rows-[minmax(0,1fr)] xl:grid-cols-[auto_auto_minmax(0,1fr)]"}
+      className={`${booking ? "isolate " : ""}screen-measure relative grid w-full shrink-0 grid-cols-1 items-center gap-10 sessions-screen px-6 py-12 sm:h-full sm:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] sm:gap-x-[clamp(2rem,3.5vw,4rem)] sm:px-10 sm:pb-8 sm:pt-20 short:pb-4 sm:[container-type:size] lying:grid-rows-[minmax(0,1fr)] xl:grid-cols-[auto_auto_minmax(0,1fr)]`}
     >
       {/* With three columns the photograph sits further right (its
           margin, from about 1600px wide) and larger (to 56rem tall); the
@@ -189,35 +157,9 @@ export function SessionsScreen({ sessions, menu, walls, covers }: { sessions: Se
           is centred only while it fits: at 1440x840 the open list ran up
           under the bar. On a short laptop (1280x800) the names are set a
           touch smaller so the open session fits. */}
-      {/* Behind the whole screen while a session books: the wall of its
-          own page, as its booking page has behind its questions (Julian). */}
-      {here && booking && walls?.[booking.slug]?.length ? (
-        <div key={`wall-${booking.slug}`} inert className="enquiry-backdrop questions-wall absolute inset-0 -z-10 overflow-hidden motion-safe:animate-[jg-fade-up_700ms_var(--ease-out-strong)_both]">
-          <InquireWall items={walls[booking.slug]} />
-        </div>
-      ) : null}
       {booking ? (
-        /* The session's name, rising as the title did, over its card. */
-        /* Under 1024px wide the card takes the screen and the list steps
-           aside until it closes (iPad upright had the card in a sliver). */
-        <div id="book-open" className={`flex min-h-0 scroll-mt-20 flex-col gap-6 lying:gap-3 self-stretch transition-[opacity,translate] duration-300 ease-[var(--ease-out-strong)] sm:justify-center sm:pt-[clamp(1.5rem,4.5vh,3rem)] ${leaving ? "translate-y-3 opacity-0" : ""}`}>
-          {/* Under 1024px the list is away while the card is open, so
-              the sessions run in a line over the title: another session
-              is one swipe and a tap, not a scroll back up (Julian). */}
-          <nav aria-label="Sessions" className="-mx-6 sm:-mx-10 lg:hidden">
-            <div ref={rail} className="label flex snap-x gap-6 overflow-x-auto overscroll-x-contain px-6 [mask-image:linear-gradient(90deg,transparent,#000_1.5rem,#000_calc(100%-1.5rem),transparent)] [scrollbar-width:none] sm:px-10">
-              {rows.map((r, i) => (
-                <button key={r.slug} type="button" aria-current={i === book || undefined} onClick={() => i !== book && take(i)} className={`tap-44 shrink-0 snap-center whitespace-nowrap border-b pb-1 transition-colors duration-200 ${i === book ? "border-foreground text-foreground" : "border-transparent text-muted-foreground"}`}>
-                  <span className="tabular-nums opacity-60">{String(i + 1).padStart(2, "0")}</span> {r.name}
-                </button>
-              ))}
-            </div>
-          </nav>
-          {/* A phone on its side: the rail above already names it, and the card wants the room. */}
-          <RisingTitle key={`title-${booking.slug}`} text={booking.name} className="sm:max-lg:text-4xl lying:hidden" />
-          <BookCard key={`card-${booking.slug}`} item={booking} onClose={close} className="min-h-0 flex-1 sm:max-h-[44rem] motion-safe:animate-[jg-fade-up_520ms_var(--ease-out-strong)_both] max-sm:-mx-3 max-sm:flex-none max-sm:[container-type:inline-size]" />
-        </div>
-      ) : (
+        <BookSheet item={booking} origin={origin} wall={walls?.[booking.slug]} onClosed={() => { hush.current = performance.now() + 500; setBook(null); setOrigin(null); }} />
+      ) : null}
       <div className="flex w-fit max-w-full flex-col gap-5 self-center">
         {/* Says what the count is, not the title again. */}
         <span className={here ? "hidden" : "label text-muted-foreground"}>
@@ -235,16 +177,12 @@ export function SessionsScreen({ sessions, menu, walls, covers }: { sessions: Se
           Everything here is booked directly, with no packages to decode.
         </p>
       </div>
-      )}
 
       {/* As tall as the screen allows, to 48rem (Julian: smaller, then
           larger). On a laptop no wider than a quarter of the screen, so the
           words keep three lines and the names one. Under 1280 there is no
           room for three columns and it is left out: the words and the
           list. */}
-      {/* `?bookhere`: the photograph stands while no card is open, and
-          the card takes its place (Julian, 2026-10-11). */}
-      {here && booking ? null : (
       <div className="sessions-photo title-rest relative aspect-[3/4] max-sm:aspect-[3/2] w-full overflow-hidden rounded-[4px] bg-card sm:h-[min(48rem,calc(100cqh-8rem),max(34.5vw,calc(100vw-75rem)))] sm:w-auto sm:justify-self-center sm:max-xl:hidden xl:ml-[max(0rem,min(4.25rem,16.5vw-16.5rem))] xl:h-[min(56rem,calc(100cqh-8rem),max(34.5vw,calc(100vw-75rem)))]">
         {rows.map((s, i) =>
           s.cover && (warm || i === open) ? (
@@ -281,17 +219,16 @@ export function SessionsScreen({ sessions, menu, walls, covers }: { sessions: Se
           </span>
         </div>
       </div>
-      )}
 
       {/* With a card open the list keeps clear of the bar and the pager
           (Julian): the card's column's top margin, centred in the same
           height. */}
-      <div ref={col} className={`session-col title-rest relative flex min-w-0 flex-col ${booking ? "max-lg:hidden" : ""} ${here && booking ? "sm:justify-center sm:self-stretch sm:pt-[clamp(1.5rem,4.5vh,3rem)]" : ""}`}>
+      <div ref={col} className="session-col title-rest relative flex min-w-0 flex-col">
         <ul
           className="session-list relative border-t border-border"
           onPointerEnter={(e) => {
             setWarm(true);
-            if (e.pointerType !== "mouse") return;
+            if (e.pointerType !== "mouse" || performance.now() < hush.current) return;
             const li = (e.target as HTMLElement).closest("li");
             if (li) setOpen([...e.currentTarget.children].indexOf(li));
             /* Laid shut along that edge at once, then filled from it. */
@@ -388,7 +325,9 @@ export function SessionsScreen({ sessions, menu, walls, covers }: { sessions: Se
                   aria-expanded={here ? i === book : on}
                   aria-controls={here && i === book ? "book-card" : undefined}
                   onClick={() => (here ? take(i) : setOpen(i))}
-                  onFocus={() => go(i)}
+                  /* A press's focus does not open the row: the sheet does,
+                     and the rows above stay put. */
+                  onFocus={(e) => e.currentTarget.matches(":focus-visible") && go(i)}
                   className="tap-44 grid grid-cols-[auto_minmax(0,1fr)_auto] items-baseline gap-4 py-2 text-left short:py-1.5"
                 >
                   {head}
@@ -521,7 +460,7 @@ export function SessionsScreen({ sessions, menu, walls, covers }: { sessions: Se
             the line, or the button wraps under it and under the rail. */}
         {/* Under 60rem with a card open, the card is the booking: the
             second button went under the pager (Julian, 1547x889). */}
-        <div className={`flex flex-wrap items-center justify-between gap-6 pt-6 short:gap-4 short:pt-5 ${here && booking ? "[@media(max-height:60rem)]:hidden" : here ? "[@media(max-height:50rem)]:hidden" : ""}`}>
+        <div className={`flex flex-wrap items-center justify-between gap-6 pt-6 short:gap-4 short:pt-5  ${here ? "[@media(max-height:50rem)]:hidden" : ""}`}>
           <div className="flex flex-col gap-2.5">
             {/* The button says Book a session; said beside it as well,
                 the pair read as a stutter. Julian's words in its place;

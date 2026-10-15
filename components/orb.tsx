@@ -13,6 +13,15 @@ import { ThinkingOrb } from "thinking-orbs";
  * plain RGB, and again whenever the theme changes. Hidden from screen
  * readers: the words beside it say what is happening.
  */
+/* Julian (2026-10-14): a wait the site controls lasts one round of its
+   orb, after the orb's 300ms wait to show. From thinking-orbs at 64px:
+   shaping goes circle, triangle, square (3 × 2.3 at speed 2.405);
+   composing's wave is 2π/1.7 at 2.34. Working's dots orbit at their own
+   speeds and never line up, so it is held about as long as the rest.
+   Solving scrambles 14 moves and solves them back (2 × 14 × 0.42 at 1.82),
+   held until it is whole again, before its rest. */
+export const ORB_ROUND = { shaping: 300 + 2870, composing: 300 + 1580, working: 300 + 1140, solving: 300 + 6460 } as const;
+
 export function Orb(props: React.ComponentProps<typeof ThinkingOrb>) {
   const ref = React.useRef<HTMLSpanElement>(null);
   const [ink, setInk] = React.useState<{

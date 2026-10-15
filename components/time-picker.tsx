@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { cn } from "@/lib/utils";
-import { Orb } from "@/components/orb";
+import { Orb, ORB_ROUND } from "@/components/orb";
 
 /* ── the time picker ──────────────────────────────────────────────
  * Cal.com's open times, in two plain steps: a day, then a time. Days
@@ -147,6 +147,13 @@ export function TimePicker({
   const [booked, setBooked] = React.useState({ name: "", email: "", where: "" });
   const [days, setDays] = React.useState<Record<string, Slot[]> | null>(null);
   const [state, setState] = React.useState<"loading" | "ready" | "fallback">("loading");
+  /* Julian (2026-10-14): the orb goes one whole round before the days
+     come in, however fast the times arrive (`ORB_ROUND`, orb.tsx). */
+  const [held, setHeld] = React.useState(true);
+  React.useEffect(() => {
+    const t = window.setTimeout(() => setHeld(false), ORB_ROUND.working);
+    return () => window.clearTimeout(t);
+  }, []);
   const [view, setView] = React.useState<"week" | "month">("week");
   const [anchor, setAnchor] = React.useState(() => new Date()); // the week or month on show
   const [pick, setPick] = React.useState<Pick | null>(null);
@@ -523,7 +530,7 @@ export function TimePicker({
       setBooked({ name: String(form.get("first")).trim(), email: String(form.get("email")).trim(), where });
       /* The orbs get their moment even when Cal.com answers at once, then
          turn into the check, which is shown before the page that follows. */
-      await new Promise((go) => setTimeout(go, Math.max(0, 1100 - (Date.now() - began))));
+      await new Promise((go) => setTimeout(go, Math.max(0, ORB_ROUND.solving - (Date.now() - began))));
       setStep("check");
       await new Promise((go) => setTimeout(go, 1500));
       // The time is taken now: the next picker asks Cal.com again.
@@ -537,20 +544,21 @@ export function TimePicker({
   };
 
   if (state === "fallback") return <>{fallback}</>;
-  if (state === "loading" || !days) {
+  if (state === "loading" || !days || (held && state === "ready")) {
     return (
       // Held to the card's inset and a phone card's height while it waits
       // (the embed's `block` had it on the card's edge, in a sliver).
       <div aria-label={title} className={cn(className, "!flex items-center justify-center px-[var(--card-x,1.25rem)] max-sm:min-h-[24rem]")}>
-        {/* Julian: an orb turning, not the words (shaping, picked by eye
-            2026-10-14; 64px, at 20 it was lost in the empty card). Still
+        {/* Julian: an orb turning, not the words (working, picked from
+            orb-options 2026-10-14; 64px, at 20 it was lost in the empty card). Still
             said to a reader. */}
         {/* In the middle of the card, not of the room under its top line
             (QA on #143, Julian: the orb in the center of the card): lifted
             half that line (`--card-lift`, book-here.tsx). */}
-        <p role="status" className="pointer-events-none absolute inset-0 flex -translate-y-[var(--card-lift,0px)] items-center justify-center text-muted-foreground">
-          <Orb state="shaping" size={64} />
-          <span className="sr-only">Loading times</span>
+        {/* Julian (2026-10-14): what it is waiting for, under the orb. */}
+        <p role="status" className="pointer-events-none absolute inset-0 flex -translate-y-[var(--card-lift,0px)] flex-col items-center justify-center gap-4 text-muted-foreground">
+          <Orb state="working" size={64} />
+          <span className="label animate-[jg-fade-in_300ms_ease-out_300ms_both]">Loading availability</span>
         </p>
       </div>
     );
@@ -577,7 +585,7 @@ export function TimePicker({
       ...(booked.where ? ([["Where", booked.where]] as [string, string][]) : []),
       ["Confirmation", booked.email],
     ];
-    const next = ["The confirmation is in your inbox now.", "I write to you before the day with the details.", "Need another time? The email has a link to move or cancel it."];
+    const next = ["The confirmation is in your inbox now.", "Need another time? The email has a link to move or cancel it."];
     return (
       <div aria-label={title} role="status" className={cn("tp !flex min-h-[30rem] flex-col justify-center gap-6 p-6 sm:gap-8 sm:p-10 [&>*]:shrink-0", className)}>
         <div className="flex flex-col gap-4">
@@ -585,6 +593,10 @@ export function TimePicker({
           <h3 className="tp-roll font-display text-[clamp(2.5rem,9.5cqw,5.5rem)] uppercase leading-[0.9] [text-wrap:balance] tracking-[-0.04em]" style={{ animationDelay: "80ms" }}>
             {first ? `${first}, you’re in.` : "You’re in."}
           </h3>
+          {/* Julian: say it plainly, under the headline, not as a step. */}
+          <p className="tp-roll max-w-[40ch] text-base normal-case leading-relaxed text-foreground/80 text-pretty" style={{ animationDelay: "140ms" }}>
+            I&rsquo;ll contact you with the further details before the day.
+          </p>
         </div>
         <dl className="grid gap-x-10 gap-y-4 sm:grid-cols-2">
           {rows.map(([k, v], n) => (
@@ -619,11 +631,11 @@ export function TimePicker({
           <div className="sticky top-0 flex h-full max-h-[100svh] flex-col items-center justify-center">
             <div className="relative -translate-y-[var(--card-lift,0px)]">
             <div className="tp-status relative size-28" data-ok={step === "check" ? "" : undefined}>
-              {/* Julian: the working orb while it books, in place of the
-                  circling dots; the ring and tick once it is booked. */}
+              {/* Julian: the solving orb while it books (2026-10-14, was
+                  working); the ring and tick once it is booked. */}
               {step === "sending" ? (
                 <span className="absolute inset-0 grid place-items-center text-foreground">
-                  <Orb state="working" size={64} />
+                  <Orb state="solving" size={64} />
                 </span>
               ) : null}
               <svg viewBox="0 0 112 112" className="absolute inset-0 size-full" fill="none" aria-hidden>
