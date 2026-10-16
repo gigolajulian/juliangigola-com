@@ -642,8 +642,11 @@ export function TimePicker({
     const first = booked.name.split(/\s+/)[0];
     const rows: [string, string][] = [
       ["Session", `${session || title}, ${length} min`],
-      ["When", `${sum.replace(" · ", " at ")} ${zone(pick.start, tz)}`],
+      // Just the zone, no city, as on the deposit step (Julian).
+      ["When", `${sum.replace(" · ", " at ")} ${zone(pick.start, tz).replace("San Jose ", "")}`],
       ...(booked.where ? ([["Where", booked.where]] as [string, string][]) : []),
+      // Only reached through the deposit step once it was paid (Julian).
+      ...(deposit ? ([["Deposit", "$100 paid"]] as [string, string][]) : []),
       ["Confirmation", booked.email],
     ];
     const next = ["The confirmation is in your inbox now.", "Need another time? The email has a link to move or cancel it."];
