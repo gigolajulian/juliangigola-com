@@ -1054,3 +1054,19 @@
 :root[data-layout] #book-card .tp [data-part="days"] {
   row-gap: 0.75rem;
 }
+/* The inquiry form takes the same floor: the address on the left, the
+   button on the right, on a rule at the card's bottom (Julian). */
+:root[data-layout] #book-card [data-scroll] {
+  display: flex;
+  flex-direction: column;
+}
+:root[data-layout] #book-card .book-form,
+:root[data-layout] #book-card .book-form > form {
+  flex: 1;
+}
+:root[data-layout] #book-card .book-form form > div:has(> button[type="submit"]) {
+  margin-top: auto;
+  align-items: center;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--border);
+}
