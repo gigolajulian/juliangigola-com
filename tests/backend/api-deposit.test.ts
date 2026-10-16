@@ -173,9 +173,11 @@ describe("GET /api/deposit/<id>", () => {
     expect((await (await read(PI)).json()).status).toBe("booked");
   });
 
-  it("answers 404 to an intent that is not a deposit", async () => {
+  it("answers 404 to an intent that is not a deposit, or that Stripe does not have", async () => {
     intent.metadata = {};
     expect((await read(PI)).status).toBe(404);
+    vi.stubGlobal("fetch", async () => reply({ error: { code: "resource_missing" } }, 404));
+    expect((await read("pi_MADEUP12345678")).status).toBe(404);
   });
 
   it("keeps the booking when the copy to Stripe fails", async () => {

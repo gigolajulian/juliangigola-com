@@ -23,7 +23,9 @@ export async function GET(_request: Request, ctx: { params: Promise<{ id: string
   let pi: { amount?: number; currency?: string; metadata?: { [k: string]: string } };
   try {
     pi = await stripe(env.STRIPE_SECRET_KEY, `/payment_intents/${id}`);
-  } catch {
+  } catch (e) {
+    // Stripe has no such intent: a made-up id, not one still settling.
+    if (String(e).endsWith(" 404")) return json({ error: "Unknown deposit." }, 404);
     return json({ status: "pending" });
   }
   if (!isDeposit(pi)) return json({ error: "Unknown deposit." }, 404);
