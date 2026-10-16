@@ -117,14 +117,35 @@ describe("submitEnquiry", () => {
     expect(inline.map((a) => a.contentId)).toEqual(Array.from({ length: 8 }, (_, i) => `pick-${i}`));
   });
 
-  it("stores uploaded images beside the enquiry, images only and within the size limits", async () => {
-    const img = (name: string, size: number, type = "image/jpeg") => new File([new Uint8Array(size)], name, { type });
-    const res = await send({ ...GOOD, refs: [img("a.jpg", 1000), img("notes.pdf", 1000, "application/pdf"), img("huge.jpg", 7 * 1024 * 1024), img("b.png", 2000, "image/png")] });
+  it("stores uploaded images beside the enquiry, JPEG and PNG only, real ones, within the size limits", async () => {
+    const HEIC = [0, 0, 0, 0x18, ...[..."ftypheic"].map((c) => c.charCodeAt(0))];
+    const HEAD: Record<string, number[]> = { "image/jpeg": [0xff, 0xd8, 0xff], "image/png": [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a], "image/heic": HEIC, "": HEIC };
+    const img = (name: string, size: number, type = "image/jpeg", head = HEAD[type] ?? []) => {
+      const b = new Uint8Array(size);
+      b.set(head);
+      return new File([b], name, { type });
+    };
+    const svg = new File(['<svg xmlns="http://www.w3.org/2000/svg"><script>alert(1)</script></svg>'], "x.svg", { type: "image/svg+xml" });
+    const res = await send({
+      ...GOOD,
+      refs: [
+        img("a.jpg", 1000),
+        img("notes.pdf", 1000, "application/pdf"),
+        svg,
+        img("fake.jpg", 1000, "image/jpeg", [0x3c, 0x73, 0x76, 0x67]), // an SVG calling itself a JPEG
+        img("huge.jpg", 7 * 1024 * 1024),
+        img("b.png", 2000, "image/png"),
+        img("c.heic", 1500, "image/heic"),
+        img("d.HEIC", 1500, ""), // no type, as a browser that does not know HEIC sends it
+        img("fake.heic", 1500, "image/heic", [0x3c, 0x73, 0x76, 0x67]),
+      ],
+    });
     expect(res.status).toBe("sent");
     const key = msgs()[0];
-    expect(kv.json(key).files).toEqual(["a.jpg", "b.png"]);
-    expect([...kv.data.keys()].filter((k) => k.startsWith(`ref:${key}:`)).sort()).toEqual([`ref:${key}:0`, `ref:${key}:1`]);
+    expect(kv.json(key).files).toEqual(["a.jpg", "b.png", "c.heic", "d.HEIC"]);
+    expect([...kv.data.keys()].filter((k) => k.startsWith(`ref:${key}:`)).length).toBe(4);
     expect(kv.data.get(`ref:${key}:1`)!.metadata).toEqual({ type: "image/png" });
+    expect(kv.data.get(`ref:${key}:3`)!.metadata).toEqual({ type: "image/heic" });
   });
 
   it("keeps where it came from, checked, and mails it", async () => {

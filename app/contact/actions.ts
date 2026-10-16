@@ -19,6 +19,8 @@ import {
   summary,
   waitPhrase,
   MAX_REFS,
+  SAFE_IMAGE,
+  isPicture,
   visitContext,
 } from "@/lib/inbox";
 
@@ -207,11 +209,20 @@ export async function submitEnquiry(
       .filter((src) => /^\/(work\/[\w-]+|hero|covers)\/[\w.-]+\.(jpe?g|png|webp)$/i.test(src))
       .slice(0, MAX_REFS);
     let budget = 20 * 1024 * 1024;
-    const uploads = formData
+    const offered = formData
       .getAll("refs")
-      .filter((f): f is File => f instanceof File && f.size > 0 && f.type.startsWith("image/"))
+      .filter((f): f is File => f instanceof File && f.size > 0)
+      // A HEIC can arrive with no type from a browser that does not know it.
+      .map((f) => (!f.type && /\.hei[cf]$/i.test(f.name) ? new File([f], f.name, { type: "image/heic" }) : f))
+      .filter((f) => SAFE_IMAGE.test(f.type))
       .slice(0, MAX_REFS - picks.length)
       .filter((f) => f.size <= 6 * 1024 * 1024 && (budget -= f.size) >= 0);
+    // And the file is what it says it is (`isPicture`, lib/inbox.ts).
+    const uploads = (
+      await Promise.all(
+        offered.map(async (f) => (isPicture(new Uint8Array(await f.slice(0, 12).arrayBuffer()), f.type) ? f : null)),
+      )
+    ).filter((f): f is File => f !== null);
 
     // The city Cloudflare places them in, never the address.
     const place = [cf?.city, cf?.region, country].filter((v) => typeof v === "string" && v).join(", ");

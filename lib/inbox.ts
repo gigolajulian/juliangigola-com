@@ -93,6 +93,29 @@ export function visitContext(raw: string, place?: string): VisitContext | undefi
 
 const FREE_MAIL = /^(gmail|googlemail|yahoo|ymail|outlook|hotmail|live|msn|icloud|me|mac|aol|proton|protonmail|pm|gmx|mail|zoho|yandex|hey|fastmail)\./i;
 
+/* JPEG, PNG and HEIC only (Julian), pictures that never run.
+   `image/` alone let an SVG in, and an SVG carries script: opened from
+   /admin's Inbox it ran on this site, where the GitHub token lives
+   (security review, 2026-10-15). A visitor's photo is a JPEG already,
+   re-drawn in their browser (`reference-picks.tsx`), unless it is a
+   HEIC the browser cannot draw (anything but Safari): taken as is. Checked on the way
+   in (`app/contact/actions.ts`) and on the way out
+   (`app/api/inbox/route.ts`). */
+export const SAFE_IMAGE = /^image\/(jpeg|png|heic|heif)$/;
+
+/** Whether a file's first bytes are what its type says: the type is the
+    sender's word, the bytes are the file. */
+export const isPicture = (head: Uint8Array, type: string) =>
+  type === "image/jpeg"
+    ? head[0] === 0xff && head[1] === 0xd8 && head[2] === 0xff
+    : type === "image/png"
+      ? [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a].every((b, i) => head[i] === b)
+      : /^image\/hei[cf]$/.test(type)
+        ? // An ISO box: `ftyp`, then a HEIF brand.
+          String.fromCharCode(...head.slice(4, 8)) === "ftyp" &&
+          /^(heic|heix|hevc|hevx|heim|heis|mif1|msf1)$/.test(String.fromCharCode(...head.slice(8, 12)))
+        : false;
+
 /** Their company's site, read off a work address; none for a free one. */
 export const companySite = (email: string): string | undefined => {
   const domain = email.split("@")[1]?.toLowerCase();
