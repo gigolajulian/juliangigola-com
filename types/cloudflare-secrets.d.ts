@@ -47,4 +47,20 @@ interface CloudflareEnv {
    *   wrangler secret put CAL_WEBHOOK_SECRET
    */
   CAL_WEBHOOK_SECRET?: string;
+
+  /**
+   * Stripe's secret key for the $100 deposit (`lib/deposit.ts`). Test mode
+   * (`sk_test_`) until Julian says live. Unset, deposits are off. Set with:
+   *
+   *   wrangler versions secret put STRIPE_SECRET_KEY
+   */
+  STRIPE_SECRET_KEY?: string;
+
+  /**
+   * Signs Stripe's webhook (`app/api/stripe/route.ts`): the endpoint's
+   * `whsec_` secret from Stripe > Developers > Webhooks. Set with:
+   *
+   *   wrangler versions secret put STRIPE_WEBHOOK_SECRET
+   */
+  STRIPE_WEBHOOK_SECRET?: string;
 }
