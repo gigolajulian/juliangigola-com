@@ -23,18 +23,25 @@ let calls: Call[];
 let open: boolean;
 let calOk: boolean;
 let refundOk: boolean;
+/** The intent as Stripe holds it: the webhook writes its outcome here. */
+let intent: { amount: number; currency: string; metadata: Record<string, string> };
 
 beforeEach(() => {
   calls = [];
   open = true;
   calOk = true;
   refundOk = true;
+  intent = { amount: 10000, currency: "usd", metadata: { kind: "deposit" } };
   ctx.env = { INBOX: new FakeKV(), STRIPE_SECRET_KEY: "sk_test_x", STRIPE_WEBHOOK_SECRET: WHSEC };
   vi.stubGlobal("fetch", async (url: string, init?: RequestInit) => {
     calls.push({ url, init });
     if (url.includes("/v2/slots")) return reply({ status: "success", data: { day: open ? [{ start: START }] : [] } });
     if (url.includes("/v2/bookings")) return calOk ? reply({ status: "success", data: { uid: "cal_uid", start: START } }) : reply({ status: "error" }, 400);
     if (url.endsWith("/payment_intents")) return reply({ id: PI, client_secret: `${PI}_secret_x` });
+    if (url.endsWith(`/payment_intents/${PI}`)) {
+      if (init?.method === "POST") for (const [k, v] of new URLSearchParams(String(init.body))) intent.metadata[k.slice(9, -1)] = v;
+      return reply({ id: PI, ...intent });
+    }
     if (url.endsWith("/refunds")) return refundOk ? reply({ id: "re_1" }) : reply({ error: {} }, 500);
     throw new Error(`unexpected fetch ${url}`);
   });
@@ -158,6 +165,26 @@ describe("GET /api/deposit/<id>", () => {
     expect(await (await read(PI)).json()).toEqual({ status: "pending" });
     await kv().put(`deposit:${PI}`, JSON.stringify({ status: "booking", at: "" }));
     expect(await (await read(PI)).json()).toEqual({ status: "pending" });
+  });
+
+  it("reads the outcome from Stripe, not KV, so another location sees it at once", async () => {
+    await deliver(paid());
+    ctx.env.INBOX = new FakeKV();
+    expect((await (await read(PI)).json()).status).toBe("booked");
+  });
+
+  it("answers 404 to an intent that is not a deposit", async () => {
+    intent.metadata = {};
+    expect((await read(PI)).status).toBe(404);
+  });
+
+  it("keeps the booking when the copy to Stripe fails", async () => {
+    const real = globalThis.fetch;
+    vi.stubGlobal("fetch", async (url: string, init?: RequestInit) =>
+      url.endsWith(`/payment_intents/${PI}`) ? reply({ error: {} }, 500) : real(url, init));
+    await deliver(paid());
+    expect(kv().json(`deposit:${PI}`).status).toBe("booked");
+    expect(calls.some((c) => c.url.endsWith("/refunds"))).toBe(false);
   });
 
   it("reports the booking without who made it", async () => {
