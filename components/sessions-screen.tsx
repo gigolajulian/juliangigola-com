@@ -181,6 +181,17 @@ export function SessionsScreen({ sessions, menu, walls, covers }: { sessions: Se
           Studio and location sessions across the San Francisco Bay Area.
           Everything here is booked directly, with no packages to decode.
         </p>
+        {/* The deposit, said once beside the sessions (Julian's copy,
+            2026-10-16): Cal.com takes it on the four booked online. Here
+            and not under the list, which it pushed under the rail. */}
+        <div className="title-rest flex max-w-full flex-col gap-1.5 text-left text-sm normal-case lying:hidden xl:w-[46ch]">
+          <p className="text-sm leading-relaxed text-muted-foreground text-pretty">
+            $100 deposit to reserve your date. I&apos;ll follow up by phone to confirm the concept, rate and schedule. Balance due after the shoot.
+          </p>
+          <p className="text-xs leading-relaxed text-muted-foreground/70 text-pretty">
+            (Deposit moves with a new date, or is refunded up to 2 business days before.)
+          </p>
+        </div>
       </div>
 
       {/* As tall as the screen allows, to 48rem (Julian: smaller, then
