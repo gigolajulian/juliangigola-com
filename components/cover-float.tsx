@@ -32,6 +32,20 @@ import { HeroGather } from "@/components/hero-gather";
     Be a Human, top middle) leads, ahead of the rest. */
 const ORDER = [200, 700, 0, 850, 560, 1340, 620, 950, 1220, 780];
 
+/** A booking page on a phone on its side: its long title takes the
+    middle, so the six cards sort into a row of four above it and two
+    either side of its buttons; four or fewer all go on top (Julian,
+    2026-10-16). The slots left to right, then their places, %. */
+const SIDEWAYS_BOOKING_SLOTS = [3, 0, 6, 1, 4, 5];
+const SIDEWAYS_BOOKING = [
+  { x: 23, y: 10 },
+  { x: 38, y: 10 },
+  { x: 53, y: 10 },
+  { x: 68, y: 7 },
+  { x: 20, y: 64 },
+  { x: 72, y: 64 },
+];
+
 export function CoverFloat({
   work,
   heading,
@@ -48,6 +62,7 @@ export function CoverFloat({
   className?: string;
 }) {
   const frames = work.slice(0, SLOTS.length);
+  const sideways = SIDEWAYS_BOOKING_SLOTS.filter((s) => frames.some((_, i) => (DEAL[i] ?? i) === s));
   /* What each frame is, for the line under the name to say while it is
      pointed at. Worked out here, on the server, so the archive that
      `categoryLabel` reads never reaches the browser. */
@@ -120,6 +135,11 @@ export function CoverFloat({
                   "--uy": `${u.y}%`,
                   "--uw": `${u.w}vw`,
                   "--uz": `${u.z}px`,
+                  ...(heading &&
+                    sideways.includes(at) && {
+                      "--bsx": `${SIDEWAYS_BOOKING[sideways.indexOf(at)].x}%`,
+                      "--bsy": `${SIDEWAYS_BOOKING[sideways.indexOf(at)].y}%`,
+                    }),
                   "--lx": `${l.x}%`,
                   "--ly": `${l.y}%`,
                   "--lw": `${l.w}vw`,
@@ -180,7 +200,7 @@ export function CoverFloat({
         </noscript>
         {heading ? (
           <h1
-            className="lift font-display text-[clamp(2.5rem,6.5vw,6.5rem)] uppercase leading-[0.92] text-balance"
+            className="lift font-display text-[clamp(2.5rem,6.5vw,6.5rem)] uppercase leading-[0.92] text-balance lying:text-[clamp(1.75rem,4.2vw,2.5rem)]"
             style={{ "--reveal-delay": "var(--h-start, 420ms)" } as React.CSSProperties}
           >
             {heading.title}
