@@ -114,9 +114,10 @@ export const SHORT: Place[] = [
   { x: 65, y: 68, w: 11.5, z: 8, show: true },
 ];
 
-/* A booking page's title runs two lines nearly the window wide, over the
-   two side cards at mid height (Julian, /headshots, 2026-10-15). There they
-   go down to the bottom corners. Slot index to place, per layout. */
+/* Where a side card goes on a booking page when the title, two lines
+   nearly the window wide, would sit on it: a bottom corner (Julian,
+   /headshots, 2026-10-15). Only when it would (`hero-dials.tsx`). Slot
+   index to place, per layout. */
 export const BOOKING_MOVES: Record<"large" | "landscape" | "short" | "upright", Record<number, { x: number; y: number }>> = {
   large: { 6: { x: 85, y: 64 }, 8: { x: 4, y: 66 } },
   landscape: { 6: { x: 84, y: 68 }, 8: { x: 3, y: 70 } },
