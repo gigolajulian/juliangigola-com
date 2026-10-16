@@ -55,14 +55,14 @@ const WHERE: Record<string, [label: string, ask?: string][]> = {
   digitals: [["Studio"]],
 };
 
-/** "San Jose PDT" (or PST, by the date) for a Pacific visitor, where the
-    studio is; the zone's own short name elsewhere. */
+/** The zone's short name ("PDT", or PST by the date); no city (Julian,
+    2026-10-16). */
 const zone = (start: string, tz: string) => {
-  const short =
+  return (
     new Intl.DateTimeFormat("en-US", { timeZone: tz, timeZoneName: "short" })
       .formatToParts(new Date(start))
-      .find((p) => p.type === "timeZoneName")?.value ?? tz.replace(/_/g, " ");
-  return tz === "America/Los_Angeles" ? `San Jose ${short}` : short;
+      .find((p) => p.type === "timeZoneName")?.value ?? tz.replace(/_/g, " ")
+  );
 };
 /** A phone number as +E.164: a US number without its country code gets +1. */
 const e164 = (raw: string) => {
@@ -624,8 +624,7 @@ export function TimePicker({
         body={deposit}
         rows={[
           ["Session", `${session || title}, ${length} min`],
-          // Just the zone, no city (Julian).
-          ["When", `${sum.replace(" · ", " at ")} ${zone(pick.start, tz).replace("San Jose ", "")}`],
+          ["When", `${sum.replace(" · ", " at ")} ${zone(pick.start, tz)}`],
         ]}
         onBooked={() => {
           recent.delete(`${username}/${slug}/${tz}`);
@@ -642,8 +641,7 @@ export function TimePicker({
     const first = booked.name.split(/\s+/)[0];
     const rows: [string, string][] = [
       ["Session", `${session || title}, ${length} min`],
-      // Just the zone, no city, as on the deposit step (Julian).
-      ["When", `${sum.replace(" · ", " at ")} ${zone(pick.start, tz).replace("San Jose ", "")}`],
+      ["When", `${sum.replace(" · ", " at ")} ${zone(pick.start, tz)}`],
       ...(booked.where ? ([["Where", booked.where]] as [string, string][]) : []),
       // Only reached through the deposit step once it was paid (Julian).
       ...(deposit ? ([["Deposit", "$100 paid"]] as [string, string][]) : []),
