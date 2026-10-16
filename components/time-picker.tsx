@@ -862,6 +862,20 @@ export function TimePicker({
           {arrow}
           {view === "month" ? MONTHS[anchor.getMonth()] : "Week"}
         </button>
+        {/* A month too tall to share (January, six weeks): its times alone
+            left a hole over them, so the day and time picked fill it, big,
+            as under the week (Julian, 2026-10-16). Shown in that step only
+            (contact.css). */}
+        {view === "month" ? (
+          <div data-part="big" aria-hidden className="flex flex-1 flex-col justify-center gap-0.5">
+            <p className="font-display text-[clamp(1.25rem,4.5cqw,2.25rem)] uppercase leading-none tracking-[-0.02em]">{`${WEEKDAYS[date.getDay()]}, ${MONTHS[date.getMonth()]} ${date.getDate()}`}</p>
+            <div className="flex items-baseline gap-3">
+              <span className={cn("font-display tabular-nums tracking-[-0.05em] mt-[0.15em] text-[clamp(3rem,min(18cqw,12vh),7rem)] leading-[0.85] transition-opacity duration-300", chosen !== "time" && "opacity-25")}>{t}</span>
+              <span className="label">{ap}</span>
+              <span className="label ml-auto shrink-0 whitespace-nowrap text-right text-muted-foreground">Until<br />{until} {clock(pick.min + length)[1]}</span>
+            </div>
+          </div>
+        ) : null}
         <p className="label text-muted-foreground"><span className="mr-3 text-foreground">02</span>Pick a time
           {/* Under a month there is no day over the times to say whose they
               are, and the month shown may not hold it (Julian). */}
