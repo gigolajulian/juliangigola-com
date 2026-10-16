@@ -1101,7 +1101,7 @@
   border-radius: 9999px; font-family: var(--font-display);
   background: color-mix(in oklab, var(--foreground) 72%, transparent); border-color: transparent; color: var(--background);
 }
-:root[data-layout] #book-card [aria-label="Deposit"] :is(p.text-base, dd, [role="status"] p, span.text-sm) {
+:root[data-layout] #book-card [aria-label="Deposit"] :is(p.text-base, p.text-sm, dd, [role="status"] p, span.text-sm) {
   font-family: var(--font-mono);
   letter-spacing: calc(0.6875rem * 0.14);
 }

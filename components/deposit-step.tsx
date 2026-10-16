@@ -284,13 +284,13 @@ export function DepositStep({
             <label className="label flex flex-col gap-2 text-muted-foreground">CVC<div ref={cvc} className="border-b border-border py-2.5 transition-colors focus-within:border-foreground" /></label>
           </div>
           {/* What the $100 does, under the card it comes off (Julian, 2026-10-16). */}
-          <p className="max-w-[56ch] text-base normal-case leading-relaxed text-foreground/80 text-pretty">
-            $100 holds your date. I&rsquo;ll call to go over the concept, rate and schedule. The balance is due after the shoot.
+          <p className="text-sm normal-case leading-relaxed text-muted-foreground text-pretty">
+            $100 holds your date. I&rsquo;ll call to plan the shoot. Balance due after.
           </p>
           {error ? <p role="alert" className="text-sm normal-case text-foreground">{error}</p> : null}
           <div className="flex flex-col gap-4 border-t border-border pt-5 sm:flex-row sm:items-center sm:justify-between">
-            <span className="max-w-[40ch] text-sm normal-case leading-relaxed text-muted-foreground">If the date changes, your deposit carries over. Refundable up to 2 business days before the session.</span>
-            <button type="button" onClick={pay} disabled={stage !== "ready"} className="label shrink-0 rounded-[2px] border border-accent bg-accent px-6 py-4 text-accent-foreground transition-[opacity,scale] duration-300 hoverable:hover:opacity-85 active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50">
+            <span className="max-w-[40ch] text-sm normal-case leading-relaxed text-muted-foreground">Moves if you reschedule. Refundable up to 2 business days before.</span>
+            <button type="button" onClick={pay} data-stick="fill" disabled={stage !== "ready"} className="label shrink-0 rounded-[2px] border border-accent bg-accent px-6 py-4 text-accent-foreground transition-[opacity,scale] duration-300 hoverable:hover:opacity-85 active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50">
               {stage === "paying" ? "Paying" : stage === "confirming" ? "Confirming" : error ? "Try again · $100" : "Pay $100 deposit"}
             </button>
           </div>

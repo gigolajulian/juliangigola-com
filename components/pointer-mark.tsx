@@ -253,6 +253,8 @@ export function PointerMark() {
           fill = stick;
           el.style.setProperty("--fw", `${r.width}px`);
           el.style.setProperty("--fh", `${r.height}px`);
+          // A pill fills as a pill.
+          el.style.setProperty("--fr", getComputedStyle(stick).borderRadius);
           // It pours from where the hand came in.
           el.style.setProperty("--fo", `${(x - r.left).toFixed(1)}px ${(y - r.top).toFixed(1)}px`);
           refill();
