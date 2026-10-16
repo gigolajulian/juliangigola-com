@@ -1070,3 +1070,15 @@
   padding-top: 1.5rem;
   border-top: 1px solid var(--border);
 }
+
+/* The two forms read as one (Julian): the tabs top right, the inquiry's
+   answers in the booking form's mono with the labels' tracking, and the
+   date's label over its field as every other one. */
+:root[data-layout] #book-card [aria-label="How to reach me"] { margin-left: auto; }
+:root[data-layout] #book-card .book-form .contact-field :is(input, textarea) {
+  font-family: var(--font-mono);
+  letter-spacing: calc(0.6875rem * 0.14);
+}
+:root[data-layout] #book-card .book-form label:has(> input[type="date"]) {
+  flex-direction: column; align-items: stretch; gap: 0.5rem;
+}
