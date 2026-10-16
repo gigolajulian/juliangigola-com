@@ -13,7 +13,11 @@ import { enquiry, enquiryKey, summary } from "@/lib/inbox";
  *   3. Stripe's signed webhook (`/api/stripe`) books Cal.com. If the time
  *      went in the meantime, or Cal.com refuses, the deposit is refunded
  *      at once. If even the refund fails, the Inbox gets a row saying so.
- *   4. The card polls GET /api/deposit/<id> for the outcome.
+ *   4. The card polls GET /api/deposit/<id> for the outcome. The webhook
+ *      copies it onto the intent's metadata and the poll reads it from
+ *      Stripe: KV caches a miss for up to a minute at the visitor's
+ *      location, so the card read "pending" after the booking was made
+ *      (QA, 2026-10-16).
  *
  * Stripe is called over its REST API with fetch, no SDK: three calls do
  * not need a dependency. Test-mode keys until Julian says live.
@@ -128,10 +132,10 @@ export async function bookCal(b: Booking): Promise<{ uid: string; start: string 
   return { uid: out.data.uid, start: out.data.start ?? b.start };
 }
 
-/** A call to Stripe's API, form-encoded as it expects. */
-export async function stripe(key: string, path: string, form: { [k: string]: string }, idempotency?: string) {
+/** A call to Stripe's API: a form-encoded POST, or a GET without a form. */
+export async function stripe(key: string, path: string, form?: { [k: string]: string }, idempotency?: string) {
   const res = await fetch(`${STRIPE}${path}`, {
-    method: "POST",
+    method: form ? "POST" : "GET",
     headers: {
       Authorization: `Bearer ${key}`,
       "Content-Type": "application/x-www-form-urlencoded",
@@ -139,7 +143,7 @@ export async function stripe(key: string, path: string, form: { [k: string]: str
       "Stripe-Version": "2025-09-30.clover",
       ...(idempotency ? { "Idempotency-Key": idempotency } : {}),
     },
-    body: new URLSearchParams(form),
+    body: form ? new URLSearchParams(form) : undefined,
   });
   const out = (await res.json().catch(() => ({}))) as { [k: string]: unknown };
   if (!res.ok) {
@@ -202,7 +206,15 @@ export async function settle(env: Env, intent: string, metadata: { [k: string]: 
   const seen = await env.INBOX.get(key);
   if (seen) return (JSON.parse(seen) as DepositRecord).status;
 
-  const put = (r: Omit<DepositRecord, "at">) => env.INBOX.put(key, JSON.stringify({ ...r, at: new Date().toISOString() }), { expirationTtl: 90 * 864e2 });
+  const put = async (r: Omit<DepositRecord, "at">) => {
+    await env.INBOX.put(key, JSON.stringify({ ...r, at: new Date().toISOString() }), { expirationTtl: 90 * 864e2 });
+    if (r.status === "booking") return;
+    // The card's copy (see 4. above). A failed copy only leaves the card on
+    // "Still confirming"; it must never turn a booking into a refund.
+    const form: { [k: string]: string } = { "metadata[outcome]": r.status };
+    if (r.booking) Object.assign(form, { "metadata[cal_uid]": r.booking.uid, "metadata[cal_start]": r.booking.start });
+    await stripe(env.STRIPE_SECRET_KEY, `/payment_intents/${intent}`, form).catch(() => {});
+  };
   await put({ status: "booking" });
 
   const b = fromMetadata(metadata);
