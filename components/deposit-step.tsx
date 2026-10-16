@@ -283,13 +283,18 @@ export function DepositStep({
             <label className="label flex flex-col gap-2 text-muted-foreground">Expiry<div ref={expiry} className="border-b border-border py-2.5 transition-colors focus-within:border-foreground" /></label>
             <label className="label flex flex-col gap-2 text-muted-foreground">CVC<div ref={cvc} className="border-b border-border py-2.5 transition-colors focus-within:border-foreground" /></label>
           </div>
+          {/* The card goes to Stripe's own fields, never to this site (Julian). */}
+          <p className="-mt-2 flex items-center gap-2 text-sm normal-case text-muted-foreground">
+            <svg aria-hidden viewBox="0 0 12 14" className="w-3 shrink-0" fill="none" stroke="currentColor" strokeWidth="1.3"><rect x="1" y="6" width="10" height="7" rx="1" /><path d="M3.5 6V4a2.5 2.5 0 0 1 5 0v2" /></svg>
+            Secured by Stripe. Your card details never reach me.
+          </p>
           {/* What the $100 does, under the card it comes off (Julian, 2026-10-16). */}
           <p className="text-sm normal-case leading-relaxed text-muted-foreground text-pretty">
             $100 holds your date. I&rsquo;ll call to plan the shoot. Balance due after.
           </p>
           {error ? <p role="alert" className="text-sm normal-case text-foreground">{error}</p> : null}
           <div className="flex flex-col gap-4 border-t border-border pt-5 sm:flex-row sm:items-center sm:justify-between">
-            <span className="max-w-[40ch] text-sm normal-case leading-relaxed text-muted-foreground">Moves if you reschedule. Refundable up to 2 business days before.</span>
+            <span className="max-w-[40ch] text-sm normal-case leading-relaxed text-muted-foreground">Refundable, or transferable to another day, up to 2 business days before your session.</span>
             <button type="button" onClick={pay} data-stick="fill" disabled={stage !== "ready"} className="label shrink-0 rounded-[2px] border border-accent bg-accent px-6 py-4 text-accent-foreground transition-[opacity,scale] duration-300 hoverable:hover:opacity-85 active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50">
               {stage === "paying" ? "Paying" : stage === "confirming" ? "Confirming" : error ? "Try again · $100" : "Pay $100 deposit"}
             </button>
