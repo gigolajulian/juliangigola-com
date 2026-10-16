@@ -601,7 +601,8 @@ export function TimePicker({
         body={deposit}
         rows={[
           ["Session", `${session || title}, ${length} min`],
-          ["When", `${sum.replace(" · ", " at ")} ${zone(pick.start, tz)}`],
+          // The zone on a line of its own (Julian).
+          ["When", `${sum.replace(" · ", " at ")}\n${zone(pick.start, tz)}`],
         ]}
         onBooked={() => {
           recent.delete(`${username}/${slug}/${tz}`);
