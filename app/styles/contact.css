@@ -953,3 +953,104 @@
     animation: none;
   }
 }
+
+/* ── one frame, `?layout` (Julian, 2026-10-16, /impeccable layout): every
+   step of the card reads top to bottom the same way. Where you are at the
+   top, the step's one job in the middle, and a bar on the card's floor
+   with what is chosen so far on the left and the one action on the right,
+   as the picker already has. The details step had its time on top and
+   Book it floating under the note with the room left empty below. ──── */
+:root[data-layout] #book-card .tp > form {
+  flex: 1;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-rows: auto auto auto 1fr auto;
+  column-gap: 0;
+  row-gap: 0;
+  padding-bottom: 0;
+}
+:root[data-layout] #book-card .tp > form > .grid {
+  grid-column: 1 / -1;
+  grid-row: 1;
+  /* Who, then how to reach them: a row each, a breath between. */
+  column-gap: 2rem;
+  row-gap: 1.5rem;
+  padding-top: 0.5rem;
+}
+:root[data-layout] #book-card .tp > form > label {
+  grid-column: 1 / -1;
+  grid-row: 2;
+  margin-top: 1.5rem;
+}
+:root[data-layout] #book-card .tp > form > [role="alert"] {
+  grid-column: 1 / -1;
+  grid-row: 3;
+  margin-top: 1rem;
+}
+/* The floor: the chosen time and Change on the left, Book it on the right. */
+:root[data-layout] #book-card .tp > form > [data-part="when"],
+:root[data-layout] #book-card .tp > form > [data-part="act"] {
+  grid-row: 5;
+  align-self: stretch;
+  margin-top: 1.5rem;
+  border-top: 1px solid var(--border);
+}
+:root[data-layout] #book-card .tp > form > [data-part="when"] {
+  grid-column: 1;
+  justify-content: flex-start;
+  gap: 1.25rem;
+  padding-block: 1.5rem;
+  border-bottom: 0;
+}
+:root[data-layout] #book-card .tp > form > [data-part="act"] {
+  grid-column: 2;
+  align-self: end;
+  margin-block: 0 1.5rem;
+  border-top: 0;
+  box-shadow: 0 -1.5rem 0 -1.5rem transparent;
+}
+/* The bar's rule runs under the button too. */
+:root[data-layout] #book-card .tp > form::after {
+  content: "";
+  grid-column: 2;
+  grid-row: 5;
+  align-self: start;
+  margin-top: 1.5rem;
+  border-top: 1px solid var(--border);
+}
+/* A phone: the time over a full-width Book it, as Confirm sits. */
+@container card (max-width: 34rem) {
+  :root[data-layout] #book-card .tp > form {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto auto auto 1fr auto auto;
+  }
+  :root[data-layout] #book-card .tp > form > [data-part="when"] {
+    padding-block: 1.25rem 1rem;
+  }
+  :root[data-layout] #book-card .tp > form > [data-part="act"] {
+    grid-column: 1;
+    grid-row: 6;
+    width: 100%;
+  }
+  :root[data-layout] #book-card .tp > form::after {
+    content: none;
+  }
+}
+@media (max-width: 39.99rem) {
+  :root[data-layout] #book-card .tp > form {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto auto auto 1fr auto auto;
+  }
+  :root[data-layout] #book-card .tp > form > [data-part="act"] {
+    grid-column: 1;
+    grid-row: 6;
+    width: 100%;
+  }
+  :root[data-layout] #book-card .tp > form::after {
+    content: none;
+  }
+}
+/* The day's name sits with its days: nothing between them but the week. */
+:root[data-layout] #book-card .tp [data-part="days"] {
+  row-gap: 0.75rem;
+}

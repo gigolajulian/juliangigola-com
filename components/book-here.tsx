@@ -22,6 +22,10 @@ export function BookCard({ item, onClose, className }: { item: MenuItem; onClose
   const mode = item.cal ? tab : "form";
   const card = React.useRef<HTMLDivElement>(null);
   React.useEffect(() => (card.current ? easeHeight(card.current) : undefined), []);
+  /* `?layout`: one frame for every step while Julian looks (contact.css). */
+  React.useEffect(() => {
+    if (new URLSearchParams(location.search).has("layout")) document.documentElement.dataset.layout = "";
+  }, []);
   return (
     <div
       ref={card}
