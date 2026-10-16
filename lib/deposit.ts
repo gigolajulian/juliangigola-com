@@ -23,6 +23,11 @@ import { enquiry, enquiryKey, summary } from "@/lib/inbox";
 export const PAID = ["portraits", "headshots", "graduation", "digitals"] as const;
 export const AMOUNT = 10000;
 export const CURRENCY = "usd";
+export const KIND = "deposit";
+
+/** Whether a paid intent is one of the site's deposits, not any other payment on the account. */
+export const isDeposit = (pi: { amount?: number; currency?: string; metadata?: { [k: string]: string } }) =>
+  pi.metadata?.kind === KIND && pi.amount === AMOUNT && pi.currency === CURRENCY;
 const USER = "juliangigola";
 const CAL = "https://api.cal.com/v2";
 const STRIPE = "https://api.stripe.com/v1";
@@ -150,6 +155,9 @@ export function intentForm(b: Booking): { [k: string]: string } {
     description: `Deposit: ${b.slug}, ${b.start}`,
   };
   for (const [k, v] of Object.entries(b)) if (v) form[`metadata[${k}]`] = v;
+  // Marks the site's own intents: the webhook leaves every other payment
+  // on the account (Cal.com's, invoices, payment links) alone.
+  form["metadata[kind]"] = KIND;
   return form;
 }
 

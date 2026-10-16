@@ -49,8 +49,8 @@ async function signed(body: string, at = Math.floor(Date.now() / 1000), secret =
   const sig = await crypto.subtle.sign("HMAC", key, new TextEncoder().encode(`${at}.${body}`));
   return `t=${at},v1=${[...new Uint8Array(sig)].map((b) => b.toString(16).padStart(2, "0")).join("")}`;
 }
-const paid = (metadata: Record<string, string> = { slug: "portraits", start: START, timeZone: "America/Los_Angeles", name: "QA Test", email: "qa@example.com", where: "Studio" }) =>
-  JSON.stringify({ type: "payment_intent.succeeded", data: { object: { id: PI, metadata } } });
+const paid = (metadata: Record<string, string> = { kind: "deposit", slug: "portraits", start: START, timeZone: "America/Los_Angeles", name: "QA Test", email: "qa@example.com", where: "Studio" }, amount = 10000) =>
+  JSON.stringify({ type: "payment_intent.succeeded", data: { object: { id: PI, amount, currency: "usd", metadata } } });
 const deliver = async (body: string, sig?: string) =>
   hook(new Request("https://juliangigola.com/api/stripe", { method: "POST", body, headers: { "stripe-signature": sig ?? (await signed(body)) } }));
 
@@ -84,6 +84,7 @@ describe("POST /api/deposit", () => {
     expect(form.get("metadata[slug]")).toBe("portraits");
     expect(form.get("metadata[start]")).toBe(START);
     expect(form.get("metadata[amount]")).toBeNull();
+    expect(form.get("metadata[kind]")).toBe("deposit");
     expect(kv().puts).toEqual([]);
   });
 });
@@ -105,6 +106,15 @@ describe("POST /api/stripe", () => {
   it("ignores other events", async () => {
     expect((await deliver(JSON.stringify({ type: "payment_intent.created", data: { object: { id: PI } } }))).status).toBe(200);
     expect(calls).toEqual([]);
+  });
+
+  it("leaves every other payment on the account alone", async () => {
+    // Cal.com's own $100 charge, an invoice, a deposit-shaped intent at another amount.
+    for (const body of [paid({}), paid({ slug: "portraits", start: START }), paid(undefined, 25000)]) {
+      expect((await deliver(body)).status).toBe(200);
+    }
+    expect(calls).toEqual([]);
+    expect(kv().puts).toEqual([]);
   });
 
   it("books Cal.com on payment, once, however often Stripe delivers", async () => {
