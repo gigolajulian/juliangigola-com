@@ -709,13 +709,6 @@
           "alt": ""
         },
         {
-          "src": "/work/paranoia/05.jpg",
-          "width": 2500,
-          "height": 3125,
-          "color": "#080808",
-          "alt": ""
-        },
-        {
           "src": "/work/paranoia/06.jpg",
           "width": 2500,
           "height": 3125,
@@ -731,13 +724,6 @@
         },
         {
           "src": "/work/paranoia/08.jpg",
-          "width": 2500,
-          "height": 3125,
-          "color": "#080808",
-          "alt": ""
-        },
-        {
-          "src": "/work/paranoia/09.jpg",
           "width": 2500,
           "height": 3125,
           "color": "#080808",
@@ -878,21 +864,7 @@
           "alt": ""
         },
         {
-          "src": "/work/second-skin/09.jpg",
-          "width": 2500,
-          "height": 3125,
-          "color": "#080808",
-          "alt": ""
-        },
-        {
           "src": "/work/second-skin/01.jpg",
-          "width": 2500,
-          "height": 3125,
-          "color": "#080808",
-          "alt": ""
-        },
-        {
-          "src": "/work/second-skin/02.jpg",
           "width": 2500,
           "height": 3125,
           "color": "#080808",
@@ -910,20 +882,6 @@
           "width": 2500,
           "height": 3125,
           "color": "#082838",
-          "alt": ""
-        },
-        {
-          "src": "/work/second-skin/05.jpg",
-          "width": 2500,
-          "height": 3125,
-          "color": "#080808",
-          "alt": ""
-        },
-        {
-          "src": "/work/second-skin/06.jpg",
-          "width": 2500,
-          "height": 3125,
-          "color": "#080808",
           "alt": ""
         },
         {
