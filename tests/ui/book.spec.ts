@@ -2,7 +2,7 @@ import { expect, test, type Page } from "@playwright/test";
 import { errorsOn, open, pickTime, RATIOS, SHORT, upright } from "./ratios";
 
 /* The /book time picker, at the six ratios and the short desktop where
-   it draws at 80%. Times come from Cal.com live. Never submitted: the
+   it draws at 80%. Times come from fixtures (`open`, ratios.ts). Never submitted: the
    form is opened and filled "QA TEST", then Change takes it back. */
 
 const rect = (page: Page, sel: string) =>

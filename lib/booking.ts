@@ -256,10 +256,10 @@ export const BOOKING_PAGES: BookingPage[] = [
     slug: "graduation-photos",
     name: "Graduation",
     title: "Graduation Photos in San Jose & San Francisco",
-    description: `Graduation photos at SJSU, Santa Clara University, SF State, USF and across the Bay Area. ${formatPrice(grad.from)}: one hour, two outfit changes, edited gallery.`,
+    description: `Graduation photos at SJSU, Santa Clara University, SF State, USF and across the Bay Area. ${formatPrice(grad.from)}: 90 minutes, two outfit changes, edited gallery.`,
     h1: "Graduation photos in San Jose & San Francisco",
     kicker: "SJSU · Santa Clara · SF State · USF · Berkeley",
-    lead: "Cap and gown on campus or in the studio, at SJSU and Santa Clara University or anywhere else in the Bay Area. An hour, two outfit changes and enough coverage for the family frame and the announcement.",
+    lead: "Cap and gown on campus or in the studio, at SJSU and Santa Clara University or anywhere else in the Bay Area. 90 minutes, two outfit changes and enough coverage for the family frame and the announcement.",
     ...sessionFacts(grad),
     service: "Graduation photography",
     back: SESSIONS,
@@ -293,7 +293,7 @@ export const BOOKING_PAGES: BookingPage[] = [
         q: "How much are graduation photos?",
         a: costAnswer(
           grad,
-          "{price} for an hour on campus at SJSU or Santa Clara University, with two outfit changes, an edited gallery and a print release. At SF State, USF, UC Berkeley and further out, a travel fee applies.",
+          "{price} for 90 minutes on campus at SJSU or Santa Clara University, with two outfit changes, an edited gallery and a print release. At SF State, USF, UC Berkeley and further out, a travel fee applies.",
         ),
       },
       {

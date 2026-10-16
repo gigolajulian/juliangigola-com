@@ -30,7 +30,7 @@
     {
       "slug": "portraits",
       "name": "Portraits",
-      "blurb": "One hour in the studio or on location, with direction, lighting and edited selects.",
+      "blurb": "One hour with direction, lighting and edited selects. Studio located in San Jose, available to travel across the SF Bay Area.",
       "from": null,
       "includes": [
         "One hour, studio or location",
@@ -44,10 +44,10 @@
     {
       "slug": "graduation",
       "name": "Graduation",
-      "blurb": "Cap and gown, on campus or in studio. Enough coverage for the family frame and the announcement. On campus at SJSU or SCU; a travel fee applies further out.",
+      "blurb": "Cap and gown, on campus or in studio. Enough coverage for the family frame and the announcement. Studio located in San Jose, available to travel across the SF Bay Area. On campus at SJSU or SCU; a travel fee applies further out.",
       "from": 400,
       "includes": [
-        "One hour on location",
+        "90 minutes on location",
         "Two outfit changes",
         "Edited gallery",
         "Print release"
@@ -57,7 +57,7 @@
     {
       "slug": "headshots",
       "name": "Headshots",
-      "blurb": "Clean, current and usable everywhere: LinkedIn, press, casting, a company about page.",
+      "blurb": "Clean, current and usable everywhere: LinkedIn, press, casting, a company about page. Studio located in San Jose, available to travel across the SF Bay Area.",
       "from": null,
       "includes": [
         "Studio lighting",
@@ -70,7 +70,7 @@
     {
       "slug": "studio-digitals",
       "name": "Studio digitals",
-      "blurb": "Agency-standard digitals: clean light, no retouching, accurate to how you actually look.",
+      "blurb": "Agency-standard digitals: clean light, no retouching, accurate to how you actually look. Studio located in San Jose.",
       "from": 250,
       "includes": [
         "Full length, three-quarter and close",

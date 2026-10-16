@@ -170,7 +170,7 @@ export const SESSION_SEO: Record<string, { title: string; description: string }>
     description: sentence(
       "Graduation photos across the SF Bay Area: on campus at SJSU and Santa Clara University, or further out.",
       from("graduation") ? `${from("graduation")}.` : null,
-      "One hour, two outfit changes.",
+      "90 minutes, two outfit changes.",
     ),
   },
   weddings: {
