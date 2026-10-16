@@ -1110,9 +1110,8 @@
 }
 :root[data-layout] #book-card [aria-label="Deposit"] :is(p.text-base, span.text-sm) { max-width: 56ch; }
 /* The card and its note sit down on the floor, the room above them
-   (Julian): the wallet, or the card where there is none, takes the slack. */
-:root[data-layout] #book-card [aria-label="Deposit"] > div:not(.hidden):has(+ div[aria-busy]),
-:root[data-layout] #book-card [aria-label="Deposit"] > div.hidden + div[aria-busy] { margin-top: auto; }
+   (Julian): the card fields take the slack, the wallet under them. */
+:root[data-layout] #book-card [aria-label="Deposit"] > div[aria-busy] { margin-top: auto; }
 :root[data-layout] #book-card [aria-label="Deposit"] > div:has(> button[type="button"]:last-child) { margin-top: 0; }
 /* ...and it splits the room above and below, so the card sits near the
    card's middle on a laptop or an iPad (Julian). */

@@ -85,6 +85,13 @@ function fieldStyle(el: HTMLElement) {
   };
 }
 
+/** The wallet button in the page's ink: black in dark, white in light
+    (Julian, 2026-10-16). Light ink means a dark page. */
+function walletTheme(el: HTMLElement) {
+  const dark = Number(/\d+/.exec(ink(el).fg)?.[0] ?? 0) > 128;
+  return dark ? { applePay: "black", googlePay: "black" } : { applePay: "white-outline", googlePay: "white" };
+}
+
 const FONTS = [{ cssSrc: "https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&display=swap" }];
 const PAY_FAILED = "That did not go through. Try again, or write to hello@juliangigola.com.";
 
@@ -186,7 +193,7 @@ export function DepositStep({
         const wall = express.create("expressCheckout", {
           paymentMethods: { applePay: "always", googlePay: "always", link: "never", paypal: "never", amazonPay: "never", klarna: "never" },
           buttonHeight: 48,
-          buttonTheme: { applePay: "white-outline", googlePay: "white" },
+          buttonTheme: walletTheme(box.current),
         });
         wall.on("ready", (e) => !gone && setWallets(!!e.availablePaymentMethods));
         wall.on("confirm", async () => {
@@ -212,7 +219,11 @@ export function DepositStep({
       })
       .catch(() => !gone && setStage("broken"));
     // Light and dark, as the rest of the card.
-    const retheme = () => box.current && made.slice(0, 3).forEach((f) => f.update({ style: fieldStyle(box.current!) }));
+    const retheme = () => {
+      if (!box.current) return;
+      made.slice(0, 3).forEach((f) => f.update({ style: fieldStyle(box.current!) }));
+      made[3]?.update({ buttonTheme: walletTheme(box.current) });
+    };
     const mq = matchMedia("(prefers-color-scheme: dark)");
     mq.addEventListener("change", retheme);
     const mo = new MutationObserver(() => requestAnimationFrame(retheme));
@@ -276,13 +287,14 @@ export function DepositStep({
         </div>
       ) : (
         <>
-          {/* Apple Pay or Google Pay, where there is one; nothing otherwise. */}
-          <div ref={wallet} className={cn(!wallets && "hidden")} />
           <div aria-busy={stage === "loading"} className="grid grid-cols-2 gap-x-6 gap-y-5 sm:grid-cols-4">
             <label className="label flex flex-col gap-2 text-muted-foreground col-span-2">Card number<div ref={number} className="border-b border-border py-2.5 transition-colors focus-within:border-foreground" /></label>
             <label className="label flex flex-col gap-2 text-muted-foreground">Expiry<div ref={expiry} className="border-b border-border py-2.5 transition-colors focus-within:border-foreground" /></label>
             <label className="label flex flex-col gap-2 text-muted-foreground">CVC<div ref={cvc} className="border-b border-border py-2.5 transition-colors focus-within:border-foreground" /></label>
           </div>
+          {/* Apple Pay or Google Pay, where there is one, under the card
+              fields (Julian, 2026-10-16); nothing otherwise. */}
+          <div ref={wallet} className={cn(!wallets && "hidden")} />
           {/* What the $100 does, under the card it comes off (Julian, 2026-10-16). */}
           <p className="text-sm normal-case leading-relaxed text-muted-foreground text-pretty">
             $100 holds your date. Refundable or transferable up to 2 business days before booking. Balance due after the shoot.
