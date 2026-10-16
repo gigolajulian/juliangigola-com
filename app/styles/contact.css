@@ -631,7 +631,7 @@
   .tp [data-part="days"] { padding-top: 0.75rem; }
   .tp [data-part="days"] ~ .grow.basis-0 { min-height: 1.75rem; }
 }
-@container card (max-height: 34rem) {
+@container card (max-height: 38rem) {
   /* The room under Book it on the form, not the scroller: a scroller's
      own bottom padding is not scrolled to, and the button met the edge. */
   .tp:has(> form) {
