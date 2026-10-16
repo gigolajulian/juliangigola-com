@@ -1106,3 +1106,8 @@
   letter-spacing: calc(0.6875rem * 0.14);
 }
 :root[data-layout] #book-card [aria-label="Deposit"] :is(p.text-base, span.text-sm) { max-width: 56ch; }
+/* The card and its note sit down on the floor, the room above them
+   (Julian): the wallet, or the card where there is none, takes the slack. */
+:root[data-layout] #book-card [aria-label="Deposit"] > div:not(.hidden):has(+ div[aria-busy]),
+:root[data-layout] #book-card [aria-label="Deposit"] > div.hidden + div[aria-busy] { margin-top: auto; }
+:root[data-layout] #book-card [aria-label="Deposit"] > div:has(> button[type="button"]:last-child) { margin-top: 0; }
