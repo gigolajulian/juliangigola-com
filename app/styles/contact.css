@@ -905,12 +905,12 @@
 /* On /book the card is as tall as the dense picker needs, not the
    window: the old picker's height left it a band of nothing. One height
    for every step side by side, so the bar holds still between them. */
-.book-page > div:has(> .tpd) {
+.book-page div:has(> .tpd) {
   min-height: 0;
   height: auto;
 }
 @media (min-width: 64rem) {
-  .book-page > div:has(> .tpd) > .tpd {
+  .book-page div:has(> .tpd) > .tpd {
     height: 31rem;
   }
 }

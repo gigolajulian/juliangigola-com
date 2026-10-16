@@ -22,9 +22,32 @@ export type Bookable = {
    choice is kept in the address (`?session=`), so a link can open on one. */
 export function BookPicker({ sessions, start }: { sessions: Bookable[]; start?: string }) {
   const [on, setOn] = React.useState(() => Math.max(0, sessions.findIndex((s) => s.slug === start)));
+  /* Stacked (a phone, an upright iPad) the card opens under the session
+     picked, not under the whole list, and the page glides down to it
+     (Julian, 2026-10-15). Side by side from lg it stays beside the list. */
+  const [stacked, setStacked] = React.useState(false);
+  React.useEffect(() => {
+    const mq = matchMedia("(max-width: 63.99rem)");
+    const set = () => setStacked(mq.matches);
+    set();
+    mq.addEventListener("change", set);
+    return () => mq.removeEventListener("change", set);
+  }, []);
+  const under = React.useRef<HTMLDivElement>(null);
+  const glide = React.useRef(false);
+  React.useEffect(() => {
+    if (!glide.current) return;
+    glide.current = false;
+    // After the old card has gone and the new one is laid out.
+    requestAnimationFrame(() => under.current?.scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "start" }));
+  }, [on]);
   const pick = (i: number) => {
+    glide.current = stacked && i !== on;
     setOn(i);
-    history.replaceState(null, "", `?session=${sessions[i].slug}`);
+    // The rest of the address kept (`?dense`, `?cal`): the picker reads it.
+    const q = new URLSearchParams(location.search);
+    q.set("session", sessions[i].slug);
+    history.replaceState(null, "", `?${q}`);
   };
   const current = sessions[on];
   /* Julian: dials for the booking card and the time picker in it. They
@@ -54,6 +77,12 @@ export function BookPicker({ sessions, start }: { sessions: Bookable[]; start?: 
     "--tp-r": `${tp.radius}px`,
     "--tp-tint": `${tp.tint}%`,
   } as React.CSSProperties;
+  const cardOf = () => (
+    <div className="min-h-[75svh] overflow-hidden lg:min-h-0 rounded-[var(--card-r,12px)] border-[0.5px] border-border lg:h-full lg:max-h-[var(--card-h,47rem)]">
+      {/* A fresh picker per session: the last one's time may not be open in this one. */}
+      <CalEmbed key={current.cal} path={current.cal} title={`Pick a time for ${current.name}`} className="booking-embed block h-full w-full border-0" />
+    </div>
+  );
   return (
     <section
       style={dials}
@@ -105,6 +134,9 @@ export function BookPicker({ sessions, start }: { sessions: Bookable[]; start?: 
                   </span>
                 </span>
               </button>
+              {stacked && i === on ? (
+                <div ref={under} className="scroll-mt-24 pb-5">{cardOf()}</div>
+              ) : null}
             </li>
           ))}
         </ul>
@@ -117,10 +149,7 @@ export function BookPicker({ sessions, start }: { sessions: Bookable[]; start?: 
       </div>
       {/* As tall as the calendar is, and no taller, in what the window
           leaves it: only a short one makes it scroll. */}
-      <div className="min-h-[75svh] overflow-hidden lg:min-h-0 rounded-[var(--card-r,12px)] border-[0.5px] border-border lg:h-full lg:max-h-[var(--card-h,47rem)]">
-        {/* A fresh picker per session: the last one's time may not be open in this one. */}
-        <CalEmbed key={current.cal} path={current.cal} title={`Pick a time for ${current.name}`} className="booking-embed block h-full w-full border-0" />
-      </div>
+      {stacked ? null : cardOf()}
       <DialRoot position="top-right" defaultOpen={false} />
       <DialCopyAll />
     </section>
