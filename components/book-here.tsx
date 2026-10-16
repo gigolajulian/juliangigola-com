@@ -26,6 +26,36 @@ export function BookCard({ item, onClose, className }: { item: MenuItem; onClose
   React.useEffect(() => {
     if (new URLSearchParams(location.search).has("layout")) document.documentElement.dataset.layout = "";
   }, []);
+  /* The browser's "Please fill out this field" bubble, said in the card's
+     own type instead (Julian): a line under the field, gone once it is
+     answered. The first one missing still takes the focus. */
+  React.useEffect(() => {
+    const el = card.current;
+    if (!el) return;
+    const say = (f: HTMLInputElement) =>
+      f.validity.valueMissing ? (f.type === "radio" ? "Pick one" : "Required") : f.validity.typeMismatch && f.type === "email" ? "Check the email" : f.validationMessage;
+    const onInvalid = (e: Event) => {
+      const f = e.target as HTMLInputElement;
+      e.preventDefault();
+      const at = (f.type === "radio" ? (f.closest("fieldset") ?? f.parentElement?.parentElement) : (f.closest("label, .contact-field") ?? f.parentElement)) as HTMLElement | null;
+      if (!at || at.querySelector(":scope > [data-said]")) return;
+      const note = document.createElement("span");
+      note.dataset.said = "";
+      note.className = "label mt-2 block text-foreground";
+      note.textContent = say(f);
+      at.append(note);
+      if (!el.querySelector(":focus:invalid")) f.focus();
+      const clear = () => {
+        note.remove();
+        at.removeEventListener("input", clear);
+        at.removeEventListener("change", clear);
+      };
+      at.addEventListener("input", clear);
+      at.addEventListener("change", clear);
+    };
+    el.addEventListener("invalid", onInvalid, true);
+    return () => el.removeEventListener("invalid", onInvalid, true);
+  }, []);
   return (
     <div
       ref={card}

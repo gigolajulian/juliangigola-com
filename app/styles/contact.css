@@ -998,16 +998,19 @@
 :root[data-layout] #book-card .tp > form > [data-part="when"] {
   grid-column: 1;
   justify-content: flex-start;
+  align-items: center;
   gap: 1.25rem;
-  padding-block: 1.5rem;
+  padding-block: 1rem;
+  /* Tall enough to hold Book it beside it, so the two centre on one line
+     and the button stays off the rule (Julian). */
+  min-height: calc(2.875rem + 2rem);
   border-bottom: 0;
 }
 :root[data-layout] #book-card .tp > form > [data-part="act"] {
   grid-column: 2;
-  align-self: end;
-  margin-block: 0 1.5rem;
+  align-self: center;
+  margin-block: 1.5rem 0;
   border-top: 0;
-  box-shadow: 0 -1.5rem 0 -1.5rem transparent;
 }
 /* The bar's rule runs under the button too. */
 :root[data-layout] #book-card .tp > form::after {

@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { gsap } from "gsap";
 import { cn } from "@/lib/utils";
 import { DepositStep, type DepositBody } from "@/components/deposit-step";
 import { Orb, ORB_ROUND } from "@/components/orb";
@@ -363,6 +364,10 @@ export function TimePicker({
   /* The times' width: they keep to one line while every box has room for
      its time (Julian: a day of half hours was crammed). */
   const slotsBox = React.useRef<HTMLDivElement>(null);
+  /* `?layout`: the times come in with GSAP, each one once. The CSS rise
+     replayed whenever the list re-rendered, and read as a glitch (Julian). */
+  const [gs] = React.useState(() => typeof location !== "undefined" && new URLSearchParams(location.search).has("layout"));
+  const seen = React.useRef(new WeakSet<Element>());
   const [slotsW, setSlotsW] = React.useState(0);
   const picked = !!pick;
   React.useLayoutEffect(() => {
@@ -425,6 +430,13 @@ export function TimePicker({
       tp.removeAttribute("data-split");
     };
   }, [view, pick?.date, days, slotsW, mstep, held]);
+  React.useLayoutEffect(() => {
+    if (!gs || !slotsBox.current || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const fresh = [...slotsBox.current.querySelectorAll("[data-slot]")].filter((b) => !seen.current.has(b));
+    if (!fresh.length) return;
+    fresh.forEach((b) => seen.current.add(b));
+    gsap.fromTo(fresh, { autoAlpha: 0, y: 12 }, { autoAlpha: 1, y: 0, duration: 0.5, ease: "expo.out", stagger: 0.025, clearProps: "opacity,visibility,transform" });
+  });
   const refit = React.useRef(() => {});
   React.useLayoutEffect(() => {
     const grid = monthGrid.current;
@@ -888,9 +900,10 @@ export function TimePicker({
                 aria-pressed={on}
                 aria-label={`${h} ${a}`}
                 onClick={() => choose(date, m, true)}
-                style={{ animationDelay: `${n * 25}ms` }}
+                style={gs ? undefined : { animationDelay: `${n * 25}ms` }}
                 className={cn(
-                  "tp-rise label min-w-0 flex-1 rounded-[var(--tp-r,6px)] [animation-fill-mode:backwards] border-[0.5px] py-[min(var(--tp-slot,0.75rem),0.625rem)] text-center sm:py-[var(--tp-slot,0.75rem)] tabular-nums transition-[background-color,color,translate] duration-300 ease-[var(--ease-out-strong)] tp-short:py-2",
+                  !gs && "tp-rise",
+                  "label min-w-0 flex-1 rounded-[var(--tp-r,6px)] [animation-fill-mode:backwards] border-[0.5px] py-[min(var(--tp-slot,0.75rem),0.625rem)] text-center sm:py-[var(--tp-slot,0.75rem)] tabular-nums transition-[background-color,color,translate] duration-300 ease-[var(--ease-out-strong)] tp-short:py-2",
                   on ? "border-foreground bg-foreground text-background" : "tp-open hoverable:hover:-translate-y-0.5",
                   // A day of one or two times: a box, not a bar the width of
                   // the card.
