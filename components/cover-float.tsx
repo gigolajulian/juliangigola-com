@@ -43,7 +43,7 @@ const SIDEWAYS_BOOKING = [
   { x: 53, y: 10 },
   { x: 68, y: 7 },
   { x: 20, y: 64 },
-  { x: 72, y: 64 },
+  { x: 73, y: 64 },
 ];
 
 export function CoverFloat({
