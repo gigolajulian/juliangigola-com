@@ -525,7 +525,7 @@ export function TimePicker({
     if (paid) {
       const name = `${String(form.get("first")).trim()} ${String(form.get("last")).trim()}`;
       setBooked({ name: String(form.get("first")).trim(), email: String(form.get("email")).trim(), where });
-      setDeposit({ slug, start: new Date(pick.start).toISOString(), timeZone: tz, name, email: String(form.get("email")), notes: [`Phone: ${phone}`, notes].filter(Boolean).join("\n"), ...(needsWhere ? { where } : {}), session });
+      setDeposit({ slug, start: new Date(pick.start).toISOString(), timeZone: tz, name, email: String(form.get("email")), phone, ...(notes ? { notes } : {}), ...(needsWhere ? { where } : {}), session });
       setStep("pay");
       return;
     }

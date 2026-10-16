@@ -104,6 +104,8 @@ export type DepositBody = {
   timeZone: string;
   name: string;
   email: string;
+  /** E.164; the server adds it to the notes itself. */
+  phone: string;
   notes?: string;
   where?: string;
   session?: string;
