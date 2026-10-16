@@ -60,7 +60,8 @@ function rgb(css: string) {
   c.fillStyle = css;
   c.fillRect(0, 0, 1, 1);
   const [r, g, b, a] = c.getImageData(0, 0, 1, 1).data;
-  return `rgba(${r}, ${g}, ${b}, ${+(a / 255).toFixed(3)})`;
+  // Stripe's variables take rgb() only; the hairline's alpha goes in a rule.
+  return a === 255 ? `rgb(${r}, ${g}, ${b})` : `rgba(${r}, ${g}, ${b}, ${+(a / 255).toFixed(3)})`;
 }
 
 /** The card's own look, read off the page so it follows light and dark. */
@@ -142,8 +143,8 @@ export function DepositStep({
     loadStripe()
       .then((s) => {
         if (gone || !box.current || !field.current) return;
-        const elements = s.elements({ mode: "payment", amount: AMOUNT, currency: "usd", paymentMethodTypes: ["card"], appearance: appearance(box.current), fonts: [{ cssSrc: "https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&display=swap" }] });
-        el = elements.create("payment", { layout: "tabs", fields: { billingDetails: { name: "never", email: "never" } } });
+        const elements = s.elements({ mode: "payment", amount: AMOUNT, currency: "usd", allowedPaymentMethodTypes: ["card"], appearance: appearance(box.current), fonts: [{ cssSrc: "https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&display=swap" }] });
+        el = elements.create("payment", { layout: "tabs", wallets: { link: "never" }, terms: { card: "never" }, fields: { billingDetails: { name: "never", email: "never" } } });
         el.on("ready", () => !gone && setStage("ready"));
         el.mount(field.current);
         els.current = { stripe: s, elements };
