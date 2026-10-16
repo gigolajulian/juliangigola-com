@@ -113,6 +113,15 @@ describe("GET", () => {
     expect(new Uint8Array(await res.arrayBuffer())).toEqual(new Uint8Array([1, 2, 3]));
     expect((await GET(req("GET", { query: `?key=ref:${k}:9` }))).status).toBe(404);
   });
+
+  it("serves anything stored that is not a JPEG or PNG as a download that cannot run", async () => {
+    const k = await seed(1_000, "aaaaaaaa");
+    await kv.put(`ref:${k}:0`, new TextEncoder().encode("<svg><script>alert(1)</script></svg>").buffer, { metadata: { type: "image/svg+xml" } });
+    const res = await GET(req("GET", { query: `?key=ref:${k}:0` }));
+    expect(res.headers.get("content-type")).toBe("application/octet-stream");
+    expect(res.headers.get("content-disposition")).toBe("attachment");
+    expect(res.headers.get("x-content-type-options")).toBe("nosniff");
+  });
 });
 
 describe("PATCH", () => {

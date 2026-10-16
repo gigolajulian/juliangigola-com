@@ -1,6 +1,6 @@
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { bearer, canPush } from "@/lib/vouch";
-import { summary, type Enquiry, type Summary } from "@/lib/inbox";
+import { SAFE_IMAGE, summary, type Enquiry, type Summary } from "@/lib/inbox";
 
 /* ── reading the inbox ────────────────────────────────────────────
  * The one endpoint /admin's Inbox tab talks to. Lists enquiries, opens one,
@@ -141,8 +141,17 @@ export async function GET(request: Request) {
   if (wanted?.startsWith("ref:msg:")) {
     const got = await gate.inbox.getWithMetadata<{ type?: string }>(wanted, "arrayBuffer");
     if (got.value === null) return json({ error: "Gone." }, 404);
+    // Anything stored before the check, or not a plain picture, goes out
+    // as a download that cannot run (`SAFE_IMAGE`, lib/inbox.ts).
+    const type = got.metadata?.type ?? "image/jpeg";
+    const safe = SAFE_IMAGE.test(type);
     return new Response(got.value, {
-      headers: { ...NO_STORE, "content-type": got.metadata?.type ?? "image/jpeg" },
+      headers: {
+        ...NO_STORE,
+        "content-type": safe ? type : "application/octet-stream",
+        "x-content-type-options": "nosniff",
+        ...(safe ? {} : { "content-disposition": "attachment" }),
+      },
     });
   }
 

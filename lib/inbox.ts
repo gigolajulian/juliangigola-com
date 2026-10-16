@@ -93,6 +93,24 @@ export function visitContext(raw: string, place?: string): VisitContext | undefi
 
 const FREE_MAIL = /^(gmail|googlemail|yahoo|ymail|outlook|hotmail|live|msn|icloud|me|mac|aol|proton|protonmail|pm|gmx|mail|zoho|yandex|hey|fastmail)\./i;
 
+/* JPEG and PNG only (Julian), pictures a browser shows and never runs.
+   `image/` alone let an SVG in, and an SVG carries script: opened from
+   /admin's Inbox it ran on this site, where the GitHub token lives
+   (security review, 2026-10-15). A visitor's photo is a JPEG already,
+   re-drawn in their browser (`reference-picks.tsx`). Checked on the way
+   in (`app/contact/actions.ts`) and on the way out
+   (`app/api/inbox/route.ts`). */
+export const SAFE_IMAGE = /^image\/(jpeg|png)$/;
+
+/** Whether a file's first bytes are what its type says: the type is the
+    sender's word, the bytes are the file. */
+export const isPicture = (head: Uint8Array, type: string) =>
+  type === "image/jpeg"
+    ? head[0] === 0xff && head[1] === 0xd8 && head[2] === 0xff
+    : type === "image/png"
+      ? [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a].every((b, i) => head[i] === b)
+      : false;
+
 /** Their company's site, read off a work address; none for a free one. */
 export const companySite = (email: string): string | undefined => {
   const domain = email.split("@")[1]?.toLowerCase();
