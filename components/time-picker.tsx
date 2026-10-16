@@ -4,6 +4,7 @@ import * as React from "react";
 import { gsap } from "gsap";
 import { cn } from "@/lib/utils";
 import { DepositStep, type DepositBody } from "@/components/deposit-step";
+import { PAID } from "@/lib/deposit";
 import { Orb, ORB_ROUND } from "@/components/orb";
 
 /* ── the time picker ──────────────────────────────────────────────
@@ -211,14 +212,17 @@ export function TimePicker({
       const [meta, slots] = await got;
       const ev = Array.isArray(meta.data) ? meta.data[0] : meta.data;
       if (!ev || slots.status !== "success") throw new Error("no times");
-      // A paid event's deposit is taken here (deposit-step.tsx) where the
+      // A paid session's deposit is taken here (deposit-step.tsx) where the
       // build has Stripe's key; without it, on Cal.com's own form (Julian:
-      // the site's calendar everywhere, the homepage's sessions too).
-      if (ev.requiresConfirmation || ((ev.price ?? 0) > 0 && !process.env.NEXT_PUBLIC_STRIPE_PK)) {
+      // the site's calendar everywhere, the homepage's sessions too). Which
+      // sessions are paid is the site's list, not Cal.com's price: Cal.com
+      // is $0 so it never charges, and the backend books it once Stripe has.
+      const paid = (PAID as readonly string[]).includes(slug) || (ev.price ?? 0) > 0;
+      if (ev.requiresConfirmation || (paid && !process.env.NEXT_PUBLIC_STRIPE_PK)) {
         setState("fallback");
         return;
       }
-      setPaid((ev.price ?? 0) > 0);
+      setPaid(paid);
       setLength(ev.lengthInMinutes || 30);
       setSession(ev.title || "");
       setNeedsWhere(Array.isArray(ev.locations) && ev.locations.some((l: { type: string }) => l.type === "attendeeDefined"));
