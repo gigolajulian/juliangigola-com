@@ -42,6 +42,8 @@ export type Enquiry = {
   context?: VisitContext;
   /** Bookings only: the Stripe dashboard link of a $100 deposit paid on the site, once Stripe has confirmed it. */
   deposit?: string;
+  /** Bookings only: a paid session booked with no Stripe-confirmed deposit. */
+  noDeposit?: boolean;
 };
 
 /* ── where an inquiry came from ───────────────────────────────────
@@ -410,6 +412,7 @@ export type Summary = {
   detail?: string;
   /** Bookings only: the deposit's Stripe link, so the row says it was paid. */
   deposit?: string;
+  noDeposit?: boolean;
 };
 
 /**
@@ -503,6 +506,7 @@ export const summary = (e: Enquiry): Summary => ({
   // A booking's session and time, so its row says when without opening.
   ...(e.type === "booking" && e.detail ? { detail: e.detail } : {}),
   ...(e.deposit ? { deposit: e.deposit } : {}),
+  ...(e.noDeposit ? { noDeposit: true } : {}),
 });
 
 /**

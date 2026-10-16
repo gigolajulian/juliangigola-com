@@ -235,20 +235,36 @@ const NEXT = {
 };
 
 /** A plain mail to hello@ saying how a deposit ended. A failed send is logged, never a failed webhook. */
-async function tell(env: Env, status: keyof typeof SAID, b: Booking | string, link: string) {
-  const who = typeof b === "string" ? null : b;
-  const what = who ? [SESSION[who.slug] ?? who.slug, whenPT(who.start), who.name, "$100"].join(", ") : "$100";
+async function mail(email: Env["EMAIL"], subject: string, lines: string[], who?: { name: string; email: string }) {
   try {
-    await env.EMAIL?.send({
+    await email?.send({
       to: MAIL_TO,
       from: { name: "Julian Gigola website", email: MAIL_FROM },
-      subject: `${SAID[status]}: ${what}`,
-      text: [who ? `${who.name} <${who.email}>` : "Unknown client", NEXT[status], `Stripe: ${link}`, "", "Inbox: https://juliangigola.com/admin"].join("\n"),
-      ...(who ? { replyTo: { name: who.name, email: who.email } } : {}),
+      subject,
+      text: [...lines, "", "Inbox: https://juliangigola.com/admin"].join("\n"),
+      ...(who?.email ? { replyTo: who } : {}),
     });
   } catch (e) {
-    console.error("deposit mail", status, String(e));
+    console.error("deposit mail", subject.split(":")[0], String(e));
   }
+}
+
+async function tell(env: Env, status: keyof typeof SAID, b: Booking | string, link: string) {
+  const who = typeof b === "string" ? undefined : b;
+  const what = who ? [SESSION[who.slug] ?? who.slug, whenPT(who.start), who.name, "$100"].join(", ") : "$100";
+  await mail(env.EMAIL, `${SAID[status]}: ${what}`, [who ? `${who.name} <${who.email}>` : "Unknown client", NEXT[status], `Stripe: ${link}`], who);
+}
+
+/**
+ * Julian (2026-10-16): Cal.com is $0, so its public page books a paid
+ * session with no deposit. Such a booking is flagged, not stopped: a mail
+ * to hello@ so he can cancel it or ask for the $100.
+ */
+export async function tellNoDeposit(email: Env["EMAIL"], slug: string, start: string | undefined, who: { name: string; email: string }) {
+  await mail(email, `Booked without a deposit: ${[SESSION[slug] ?? slug, whenPT(start), who.name].join(", ")}`, [
+    `${who.name} <${who.email}>`,
+    "Stripe confirms no deposit for this booking, so it most likely came through cal.com directly. Cancel it in Cal.com or ask them for the $100.",
+  ], who);
 }
 
 /**

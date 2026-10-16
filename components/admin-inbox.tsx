@@ -278,6 +278,8 @@ export function AdminInbox({
                       ) : null}
                       {row.deposit ? (
                         <span className="text-accent"> · Deposit paid · $100</span>
+                      ) : row.noDeposit ? (
+                        <span className="text-foreground"> · No deposit</span>
                       ) : null}
                     </span>
                   ) : (
@@ -321,6 +323,12 @@ export function AdminInbox({
                                   : "When / where"}
                               </dt>
                               <dd className="text-sm">{full.detail}</dd>
+                            </>
+                          ) : null}
+                          {full.noDeposit ? (
+                            <>
+                              <dt className="label text-muted-foreground">Deposit</dt>
+                              <dd className="text-sm">None. Booked on cal.com without paying: cancel it or ask for the $100.</dd>
                             </>
                           ) : null}
                           {full.deposit ? (

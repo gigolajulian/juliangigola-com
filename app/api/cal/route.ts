@@ -1,5 +1,5 @@
 import { getCloudflareContext } from "@opennextjs/cloudflare";
-import { paidFor } from "@/lib/deposit";
+import { PAID, paidFor, tellNoDeposit } from "@/lib/deposit";
 import { bookingEnquiry, enquiryKey, summary, type CalBooking } from "@/lib/inbox";
 
 /* ── Cal.com's booking webhook ─────────────────────────────────────
@@ -59,6 +59,10 @@ export async function POST(request: Request) {
   // "Deposit paid" only once Stripe agrees (`paidFor`); the notes alone prove nothing.
   const deposit = env.STRIPE_SECRET_KEY ? await paidFor(env.STRIPE_SECRET_KEY, hook.payload ?? {}) : undefined;
   if (deposit) stored.deposit = deposit;
+  else if ((PAID as readonly string[]).includes(hook.payload?.type ?? "")) {
+    stored.noDeposit = true;
+    await tellNoDeposit(env.EMAIL, hook.payload!.type!, hook.payload?.startTime, { name: stored.name, email: stored.email });
+  }
   // ponytail: a retry after a write that succeeded stores the booking twice;
   // key on Cal's `uid` if that ever shows up in the inbox.
   await env.INBOX.put(enquiryKey(now, id.slice(0, 8)), JSON.stringify(stored), {

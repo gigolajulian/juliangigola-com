@@ -101,3 +101,43 @@ describe("POST /api/cal", () => {
     await expect(post(body, await sign(body))).rejects.toThrow();
   });
 });
+
+describe("the four paid sessions", () => {
+  const PI = "pi_TEST1234567890";
+  let mails: { subject: string }[];
+  let paid: boolean;
+  beforeEach(() => {
+    mails = [];
+    paid = true;
+    ctx.env = { ...ctx.env, STRIPE_SECRET_KEY: "sk_test_x", EMAIL: { send: async (m: { subject: string }) => void mails.push(m) } };
+    vi.stubGlobal("fetch", async () =>
+      Response.json({ status: paid ? "succeeded" : "requires_payment_method", amount: 10000, currency: "usd", metadata: { kind: "deposit", email: "qa@example.com", start: BOOKING.payload.startTime } }),
+    );
+  });
+  const book = async (extra: object) => {
+    const body = JSON.stringify({ ...BOOKING, payload: { ...BOOKING.payload, type: "portraits", ...extra } });
+    expect((await post(body, await sign(body))).status).toBe(200);
+    return kv.json(kv.puts[0]);
+  };
+
+  it("are marked paid when Stripe confirms the deposit", async () => {
+    const row = await book({ metadata: { deposit: PI } });
+    expect(row.deposit).toBe(`https://dashboard.stripe.com/test/payments/${PI}`);
+    expect(row.noDeposit).toBeUndefined();
+    expect(mails).toEqual([]);
+  });
+
+  it("are flagged, and Julian told, when booked with no deposit", async () => {
+    paid = false;
+    const row = await book({ metadata: { deposit: PI } });
+    expect(row.deposit).toBeUndefined();
+    expect(row.noDeposit).toBe(true);
+    expect(mails[0].subject).toMatch(/^Booked without a deposit: Portraits, .+, QA Test$/);
+  });
+
+  it("leave the free calls alone", async () => {
+    const row = await book({ type: "wedding-call" });
+    expect(row.noDeposit).toBeUndefined();
+    expect(mails).toEqual([]);
+  });
+});
