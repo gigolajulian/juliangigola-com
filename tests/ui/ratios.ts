@@ -26,6 +26,28 @@ export async function open(browser: Browser, browserName: string, r: Ratio): Pro
     colorScheme: "dark",
   });
   await skipSplash(ctx);
+  /* Cal.com answered from fixtures, not the live account: a deposit there
+     (price > 0) or a refused call sends the picker to Cal.com's own form,
+     and no day ever draws (CI on #180). A free event, Wednesday to Sunday
+     open 10:00 to 17:30 every half hour, Monday and Tuesday closed. */
+  await ctx.route("https://api.cal.com/v2/event-types?**", (route) => {
+    const slug = new URL(route.request().url()).searchParams.get("eventSlug") ?? "session";
+    const title = slug.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+    return route.fulfill({ json: { status: "success", data: [{ slug, title, lengthInMinutes: 30, price: 0, locations: [{ type: "attendeeDefined" }] }] } });
+  });
+  await ctx.route("https://api.cal.com/v2/slots?**", (route) => {
+    const q = new URL(route.request().url()).searchParams;
+    const data: Record<string, { start: string; end: string }[]> = {};
+    const day = new Date(`${q.get("start")!.slice(0, 10)}T12:00:00Z`);
+    const end = new Date(`${q.get("end")!.slice(0, 10)}T12:00:00Z`);
+    for (; day <= end; day.setUTCDate(day.getUTCDate() + 1)) {
+      if (day.getUTCDay() === 1 || day.getUTCDay() === 2) continue;
+      const date = day.toISOString().slice(0, 10);
+      const at = (m: number) => `${date}T${String(m / 60 | 0).padStart(2, "0")}:${String(m % 60).padStart(2, "0")}:00.000-07:00`;
+      data[date] = Array.from({ length: 16 }, (_, i) => ({ start: at(600 + i * 30), end: at(630 + i * 30) }));
+    }
+    return route.fulfill({ json: { status: "success", data } });
+  });
   await ctx.addInitScript(() => {
     try {
       sessionStorage.setItem("jg-intro", "1");
