@@ -24,7 +24,7 @@ type Element = {
   update: (o: object) => void;
   destroy: () => void;
 };
-type Elements = { create: (t: "cardNumber" | "cardExpiry" | "cardCvc" | "expressCheckout", o?: object) => Element };
+type Elements = { create: (t: "card" | "expressCheckout", o?: object) => Element };
 declare global {
   interface Window {
     Stripe?: (key: string) => Stripe;
@@ -119,8 +119,6 @@ export function DepositStep({
 }) {
   const box = React.useRef<HTMLDivElement>(null);
   const number = React.useRef<HTMLDivElement>(null);
-  const expiry = React.useRef<HTMLDivElement>(null);
-  const cvc = React.useRef<HTMLDivElement>(null);
   const wallet = React.useRef<HTMLDivElement>(null);
   const els = React.useRef<{ stripe: Stripe; card: Element } | null>(null);
   const [stage, setStage] = React.useState<Stage>("loading");
@@ -164,24 +162,21 @@ export function DepositStep({
     now.current = { make, back, words, paid };
   });
 
-  /* Stripe's separate card fields (they carry a one-color brand icon,
-     which the Payment Element does not), and Apple Pay or Google Pay
+  /* Stripe's card field (it carries a one-color brand icon, which the
+     Payment Element does not), and Apple Pay or Google Pay
      over them where the browser has one (Express Checkout). */
   React.useEffect(() => {
     let gone = false;
     const made: Element[] = [];
     loadStripe()
       .then((s) => {
-        if (gone || !box.current || !number.current || !expiry.current || !cvc.current || !wallet.current) return;
+        if (gone || !box.current || !number.current || !wallet.current) return;
         const style = fieldStyle(box.current);
         const fields = s.elements({ fonts: FONTS });
-        const card = fields.create("cardNumber", { style, showIcon: true, iconStyle: "solid", disableLink: true, placeholder: "1234 1234 1234 1234" });
-        const exp = fields.create("cardExpiry", { style });
-        const code = fields.create("cardCvc", { style });
+        // One line for the whole card (Julian: in one panel).
+        const card = fields.create("card", { style, iconStyle: "solid", disableLink: true });
         card.on("ready", () => !gone && setStage("ready"));
         card.mount(number.current);
-        exp.mount(expiry.current);
-        code.mount(cvc.current);
         const express = s.elements({ mode: "payment", amount: AMOUNT, currency: "usd", allowedPaymentMethodTypes: ["card"], appearance: { variables: { borderRadius: "2px" } } });
         const wall = express.create("expressCheckout", {
           paymentMethods: { applePay: "always", googlePay: "always", link: "never", paypal: "never", amazonPay: "never", klarna: "never" },
@@ -207,12 +202,12 @@ export function DepositStep({
           }
         });
         wall.mount(wallet.current);
-        made.push(card, exp, code, wall);
+        made.push(card, wall);
         els.current = { stripe: s, card };
       })
       .catch(() => !gone && setStage("broken"));
     // Light and dark, as the rest of the card.
-    const retheme = () => box.current && made.slice(0, 3).forEach((f) => f.update({ style: fieldStyle(box.current!) }));
+    const retheme = () => box.current && made.slice(0, 1).forEach((f) => f.update({ style: fieldStyle(box.current!) }));
     const mq = matchMedia("(prefers-color-scheme: dark)");
     mq.addEventListener("change", retheme);
     const mo = new MutationObserver(() => requestAnimationFrame(retheme));
@@ -283,11 +278,7 @@ export function DepositStep({
         <>
           {/* Apple Pay or Google Pay, where there is one; nothing otherwise. */}
           <div ref={wallet} className={cn(!wallets && "hidden")} />
-          <div aria-busy={stage === "loading"} className="grid grid-cols-2 gap-x-6 gap-y-5 sm:grid-cols-4">
-            <label className="label flex flex-col gap-2 text-muted-foreground col-span-2">Card number<div ref={number} className="border-b border-border py-2.5 transition-colors focus-within:border-foreground" /></label>
-            <label className="label flex flex-col gap-2 text-muted-foreground">Expiry<div ref={expiry} className="border-b border-border py-2.5 transition-colors focus-within:border-foreground" /></label>
-            <label className="label flex flex-col gap-2 text-muted-foreground">CVC<div ref={cvc} className="border-b border-border py-2.5 transition-colors focus-within:border-foreground" /></label>
-          </div>
+          <label aria-busy={stage === "loading"} className="label flex flex-col gap-2 text-muted-foreground">Card<div ref={number} className="border-b border-border py-2.5 transition-colors focus-within:border-foreground" /></label>
           {error ? <p role="alert" className="text-sm normal-case text-foreground">{error}</p> : null}
           <div className="flex flex-col gap-4 border-t border-border pt-5 sm:flex-row sm:items-center sm:justify-between">
             <span className="max-w-[40ch] text-sm normal-case leading-relaxed text-muted-foreground">(Deposit moves with a new date, or is refunded up to 2 business days before.)</span>
