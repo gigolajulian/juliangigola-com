@@ -1111,3 +1111,6 @@
 :root[data-layout] #book-card [aria-label="Deposit"] > div:not(.hidden):has(+ div[aria-busy]),
 :root[data-layout] #book-card [aria-label="Deposit"] > div.hidden + div[aria-busy] { margin-top: auto; }
 :root[data-layout] #book-card [aria-label="Deposit"] > div:has(> button[type="button"]:last-child) { margin-top: 0; }
+/* ...and it splits the room above and below, so the card sits near the
+   card's middle on a laptop or an iPad (Julian). */
+:root[data-layout] #book-card [aria-label="Deposit"] > p.text-sm { margin-bottom: auto; }
