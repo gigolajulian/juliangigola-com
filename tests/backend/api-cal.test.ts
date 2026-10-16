@@ -135,6 +135,22 @@ describe("the four paid sessions", () => {
     expect(mails[0].subject).toMatch(/^Booked without a deposit: Portraits, .+, QA Test$/);
   });
 
+  it("are not called unpaid when Stripe cannot be asked", async () => {
+    vi.stubGlobal("fetch", async () => Response.json({ error: {} }, { status: 500 }));
+    const row = await book({ metadata: { deposit: PI } });
+    expect(row.deposit).toBeUndefined();
+    expect(row.noDeposit).toBeUndefined();
+    expect(mails).toEqual([]);
+  });
+
+  it("mail nothing when the Inbox write fails, so Cal.com's retry mails once", async () => {
+    paid = false;
+    kv.broken = true;
+    const body = JSON.stringify({ ...BOOKING, payload: { ...BOOKING.payload, type: "portraits" } });
+    await expect(post(body, await sign(body))).rejects.toThrow();
+    expect(mails).toEqual([]);
+  });
+
   it("leave the free calls alone", async () => {
     const row = await book({ type: "wedding-call" });
     expect(row.noDeposit).toBeUndefined();

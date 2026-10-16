@@ -187,9 +187,11 @@ export function intentForm(b: Booking): { [k: string]: string } {
 }
 
 /**
- * The Stripe link of the deposit that paid for this Cal.com booking, or
- * nothing. Only an intent Stripe says succeeded, that is one of the site's
- * deposits, and that was made for this booking's email and start counts.
+ * The Stripe link of the deposit that paid for this Cal.com booking;
+ * `undefined` when there is none; `false` when Stripe could not be asked,
+ * so a real deposit is never called missing (QA on #192). Only an intent
+ * Stripe says succeeded, that is one of the site's deposits, and that was
+ * made for this booking's email and start counts.
  */
 export async function paidFor(key: string, p: { startTime?: string; attendees?: { email?: string }[]; additionalNotes?: string; metadata?: { [k: string]: unknown } }) {
   const ref = typeof p.metadata?.deposit === "string" ? p.metadata.deposit : p.additionalNotes?.match(/\bpi_[A-Za-z0-9]{8,64}\b/)?.[0];
@@ -199,8 +201,9 @@ export async function paidFor(key: string, p: { startTime?: string; attendees?: 
     const m = pi.metadata ?? {};
     const same = m.email?.toLowerCase() === p.attendees?.[0]?.email?.toLowerCase() && Date.parse(m.start ?? "") === Date.parse(p.startTime ?? "");
     return pi.status === "succeeded" && isDeposit(pi) && same ? dashboardLink(ref, key) : undefined;
-  } catch {
-    return undefined;
+  } catch (e) {
+    // Stripe has no such intent: a made-up ref, so no deposit. Anything else: unknown.
+    return String(e).endsWith(" 404") ? undefined : false;
   }
 }
 
