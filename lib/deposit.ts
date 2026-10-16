@@ -1,4 +1,4 @@
-import { enquiry, enquiryKey, summary } from "@/lib/inbox";
+import { enquiry, enquiryKey, summary, whenPT } from "@/lib/inbox";
 
 /* ── the $100 deposit ─────────────────────────────────────────────
  * Julian (2026-10-16): the four paid sessions take a $100 deposit on the
@@ -18,6 +18,11 @@ import { enquiry, enquiryKey, summary } from "@/lib/inbox";
  *      Stripe: KV caches a miss for up to a minute at the visitor's
  *      location, so the card read "pending" after the booking was made
  *      (QA, 2026-10-16).
+ *   5. Julian (2026-10-16) hears about it: hello@ gets a mail for every
+ *      deposit booked, refunded, or paid and stuck. The booking's Cal.com
+ *      notes carry the Stripe link, which is how its Inbox row (from
+ *      Cal.com's own webhook) knows to say "Deposit paid". The client's
+ *      receipt is Stripe's, from `receipt_email` on the intent.
  *
  * Stripe is called over its REST API with fetch, no SDK: three calls do
  * not need a dependency. Test-mode keys until Julian says live.
@@ -37,6 +42,13 @@ const CAL = "https://api.cal.com/v2";
 const STRIPE = "https://api.stripe.com/v1";
 /** How old a webhook's timestamp may be before it is treated as a replay. */
 const TOLERANCE_S = 300;
+const MAIL_TO = "hello@juliangigola.com";
+const MAIL_FROM = "enquiries@notifications.juliangigola.com";
+const SESSION: { [slug: string]: string } = { portraits: "Portraits", headshots: "Headshots", graduation: "Graduation photos", digitals: "Studio digitals" };
+
+/** The intent in Stripe's dashboard, test or live as the key is. */
+export const dashboardLink = (intent: string, key: string) =>
+  `https://dashboard.stripe.com/${/_live_/.test(key) ? "" : "test/"}payments/${intent}`;
 
 export type Booking = {
   slug: string;
@@ -111,7 +123,7 @@ export async function isOpen(b: Booking): Promise<boolean> {
 }
 
 /** Books the time on Cal.com, as the picker does from the browser. */
-export async function bookCal(b: Booking): Promise<{ uid: string; start: string }> {
+export async function bookCal(b: Booking, link: string): Promise<{ uid: string; start: string }> {
   const res = await fetch(`${CAL}/bookings`, {
     method: "POST",
     headers: { "cal-api-version": "2024-08-13", "Content-Type": "application/json" },
@@ -122,7 +134,7 @@ export async function bookCal(b: Booking): Promise<{ uid: string; start: string 
       attendee: { name: b.name, email: b.email, timeZone: b.timeZone, language: "en", ...(b.phone ? { phoneNumber: b.phone } : {}) },
       ...(b.where ? { location: { type: "attendeeDefined", location: b.where } } : {}),
       bookingFieldsResponses: {
-        notes: [b.phone ? `Phone: ${b.phone}` : "", "Deposit paid on the site.", b.notes ?? ""].filter(Boolean).join("\n"),
+        notes: [b.phone ? `Phone: ${b.phone}` : "", `Deposit paid on the site: $100. Stripe: ${link}`, b.notes ?? ""].filter(Boolean).join("\n"),
       },
     }),
   });
@@ -192,7 +204,31 @@ export async function verifyStripe(body: string, header: string, secret: string,
   return sigs.some((s) => s.length === want.length && [...s].reduce((d, c, i) => d | (c.charCodeAt(0) ^ want.charCodeAt(i)), 0) === 0);
 }
 
-type Env = { INBOX: NonNullable<CloudflareEnv["INBOX"]>; STRIPE_SECRET_KEY: string };
+type Env = { INBOX: NonNullable<CloudflareEnv["INBOX"]>; STRIPE_SECRET_KEY: string; EMAIL?: CloudflareEnv["EMAIL"] };
+
+const SAID = { booked: "Deposit paid", refunded: "Deposit refunded", failed: "Deposit paid, not booked, not refunded" } as const;
+const NEXT = {
+  booked: "Booked on Cal.com.",
+  refunded: "The time was gone or Cal.com refused the booking, so Stripe refunded them. Nothing is booked.",
+  failed: "Cal.com did not take the booking and the automatic refund failed. Refund it by hand in Stripe and email them.",
+};
+
+/** A plain mail to hello@ saying how a deposit ended. A failed send is logged, never a failed webhook. */
+async function tell(env: Env, status: keyof typeof SAID, b: Booking | string, link: string) {
+  const who = typeof b === "string" ? null : b;
+  const what = who ? [SESSION[who.slug] ?? who.slug, whenPT(who.start), who.name, "$100"].join(", ") : "$100";
+  try {
+    await env.EMAIL?.send({
+      to: MAIL_TO,
+      from: { name: "Julian Gigola website", email: MAIL_FROM },
+      subject: `${SAID[status]}: ${what}`,
+      text: [who ? `${who.name} <${who.email}>` : "Unknown client", NEXT[status], `Stripe: ${link}`, "", "Inbox: https://juliangigola.com/admin"].join("\n"),
+      ...(who ? { replyTo: { name: who.name, email: who.email } } : {}),
+    });
+  } catch (e) {
+    console.error("deposit mail", status, String(e));
+  }
+}
 
 /**
  * A paid intent becomes a booking, once. Stripe may deliver the same event
@@ -217,11 +253,13 @@ export async function settle(env: Env, intent: string, metadata: { [k: string]: 
   await put({ status: "booking" });
 
   const b = fromMetadata(metadata);
+  const link = dashboardLink(intent, env.STRIPE_SECRET_KEY);
   if (typeof b !== "string") {
     try {
       if (await isOpen(b)) {
-        const booking = await bookCal(b);
+        const booking = await bookCal(b, link);
         await put({ status: "booked", booking });
+        await tell(env, "booked", b, link);
         return "booked";
       }
     } catch {
@@ -232,6 +270,7 @@ export async function settle(env: Env, intent: string, metadata: { [k: string]: 
   try {
     await stripe(env.STRIPE_SECRET_KEY, "/refunds", { payment_intent: intent }, `refund-${intent}`);
     await put({ status: "refunded" });
+    await tell(env, "refunded", b, link);
     return "refunded";
   } catch {
     await put({ status: "failed" });
@@ -253,6 +292,7 @@ export async function settle(env: Env, intent: string, metadata: { [k: string]: 
       type: "booking",
     };
     await env.INBOX.put(enquiryKey(now, id.slice(0, 8)), JSON.stringify(row), { metadata: summary(row) });
+    await tell(env, "failed", b, link);
     return "failed";
   }
 }

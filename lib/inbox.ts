@@ -40,6 +40,8 @@ export type Enquiry = {
   files?: string[];
   /** Where it came from, unasked (`visitContext`). */
   context?: VisitContext;
+  /** Bookings only: the Stripe dashboard link of a $100 deposit paid on the site. */
+  deposit?: string;
 };
 
 /* ── where an inquiry came from ───────────────────────────────────
@@ -340,7 +342,7 @@ export type CalBooking = {
 };
 
 /** When, in Julian's time, because that is where the sessions are. */
-const whenPT = (iso?: string) => {
+export const whenPT = (iso?: string) => {
   const d = iso ? new Date(iso) : null;
   return d && !isNaN(+d)
     ? new Intl.DateTimeFormat("en-US", {
@@ -355,8 +357,12 @@ const whenPT = (iso?: string) => {
     : "";
 };
 
+/** The deposit line `lib/deposit.ts` writes into a booking's notes. */
+const STRIPE_LINK = /https:\/\/dashboard\.stripe\.com\/(?:test\/)?payments\/pi_[A-Za-z0-9]+/;
+
 export function bookingEnquiry(p: CalBooking, at: number, id: string): Enquiry {
   const who = p.attendees?.[0] ?? {};
+  const deposit = p.additionalNotes?.match(STRIPE_LINK)?.[0];
   const message = [
     p.additionalNotes?.trim(),
     p.location ? `Location: ${p.location}` : "",
@@ -378,6 +384,7 @@ export function bookingEnquiry(p: CalBooking, at: number, id: string): Enquiry {
       id,
     ),
     type: "booking",
+    ...(deposit ? { deposit } : {}),
   };
 }
 
@@ -404,6 +411,8 @@ export type Summary = {
   country?: string;
   /** Bookings only: "Portraits · Sat, Oct 17, 2:00 PM PDT". */
   detail?: string;
+  /** Bookings only: the deposit's Stripe link, so the row says it was paid. */
+  deposit?: string;
 };
 
 /**
@@ -496,6 +505,7 @@ export const summary = (e: Enquiry): Summary => ({
   ...(e.country ? { country: e.country } : {}),
   // A booking's session and time, so its row says when without opening.
   ...(e.type === "booking" && e.detail ? { detail: e.detail } : {}),
+  ...(e.deposit ? { deposit: e.deposit } : {}),
 });
 
 /**

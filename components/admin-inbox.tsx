@@ -276,6 +276,9 @@ export function AdminInbox({
                       {row.detail ? (
                         <span className="text-foreground"> {row.detail}</span>
                       ) : null}
+                      {row.deposit ? (
+                        <span className="text-accent"> · Deposit paid · $100</span>
+                      ) : null}
                     </span>
                   ) : (
                     <span className="label text-muted-foreground">
@@ -318,6 +321,22 @@ export function AdminInbox({
                                   : "When / where"}
                               </dt>
                               <dd className="text-sm">{full.detail}</dd>
+                            </>
+                          ) : null}
+                          {full.deposit ? (
+                            <>
+                              <dt className="label text-muted-foreground">Deposit</dt>
+                              <dd className="text-sm">
+                                Paid · $100 ·{" "}
+                                <a
+                                  href={full.deposit}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                  className="underline decoration-border underline-offset-4 hoverable:hover:decoration-foreground"
+                                >
+                                  {full.deposit.split("/").pop()}
+                                </a>
+                              </dd>
                             </>
                           ) : null}
                           <dt className="label text-muted-foreground">
