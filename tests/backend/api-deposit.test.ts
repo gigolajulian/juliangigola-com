@@ -80,6 +80,7 @@ describe("POST /api/deposit", () => {
     expect(await res.json()).toEqual({ clientSecret: `${PI}_secret_x`, intentId: PI, amount: 10000, currency: "usd" });
     const form = new URLSearchParams(String(calls.find((c) => c.url.endsWith("/payment_intents"))!.init!.body));
     expect(form.get("amount")).toBe("10000");
+    expect(form.getAll("payment_method_types[]")).toEqual(["card"]);
     expect(form.get("metadata[slug]")).toBe("portraits");
     expect(form.get("metadata[start]")).toBe(START);
     expect(form.get("metadata[amount]")).toBeNull();

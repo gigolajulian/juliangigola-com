@@ -143,7 +143,9 @@ export function intentForm(b: Booking): { [k: string]: string } {
   const form: { [k: string]: string } = {
     amount: String(AMOUNT),
     currency: CURRENCY,
-    "automatic_payment_methods[enabled]": "true",
+    // Card only, to match the card's deferred-intent Elements. Apple Pay and
+    // Google Pay ride on card.
+    "payment_method_types[]": "card",
     receipt_email: b.email,
     description: `Deposit: ${b.slug}, ${b.start}`,
   };
