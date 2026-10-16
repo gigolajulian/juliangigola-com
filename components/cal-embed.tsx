@@ -4,6 +4,7 @@ import * as React from "react";
 import { useSiteTheme } from "@/lib/site-theme";
 import { TimePicker } from "@/components/time-picker";
 import { DenseTimePicker } from "@/components/time-picker-dense";
+import { isPaid } from "@/lib/paid";
 import { Orb, ORB_ROUND } from "@/components/orb";
 
 /* ── Cal.com, inline ──────────────────────────────────────────────
@@ -224,5 +225,6 @@ export function CalEmbed({ path, title, className }: { path: string; title: stri
   if (own === null) return <div aria-label={title} className={className} />;
   const inline = <CalInline key={path} path={path} title={title} className={className} />;
   if (!own) return inline;
-  return dense ? <DenseTimePicker path={path} title={title} className={className} fallback={inline} /> : <TimePicker path={path} title={title} className={className} fallback={inline} />;
+  // `?dense` has no deposit step: a paid session keeps the main picker.
+  return dense && !isPaid(path.split("/")[1]) ? <DenseTimePicker path={path} title={title} className={className} fallback={inline} /> : <TimePicker path={path} title={title} className={className} fallback={inline} />;
 }

@@ -44,6 +44,10 @@ jobs:
   frontend:
     runs-on: ubuntu-latest
     timeout-minutes: 45
+    # A placeholder, not a key: the paid sessions keep the site's picker
+    # only where the build has one (time-picker.tsx), as live does.
+    env:
+      NEXT_PUBLIC_STRIPE_PK: pk_test_ci_placeholder
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
