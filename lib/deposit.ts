@@ -31,7 +31,8 @@ import { enquiry, enquiryKey, summary, whenPT } from "@/lib/inbox";
  * ─────────────────────────────────────────────────────────────── */
 
 /** Cal.com event slugs that take the deposit. */
-export const PAID = ["portraits", "headshots", "graduation", "digitals"] as const;
+import { PAID } from "@/lib/paid";
+export { PAID };
 export const AMOUNT = 10000;
 export const CURRENCY = "usd";
 export const KIND = "deposit";

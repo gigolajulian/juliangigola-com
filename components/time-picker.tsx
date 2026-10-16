@@ -4,6 +4,7 @@ import * as React from "react";
 import { gsap } from "gsap";
 import { cn } from "@/lib/utils";
 import { DepositStep, type DepositBody } from "@/components/deposit-step";
+import { isPaid } from "@/lib/paid";
 import { Orb, ORB_ROUND } from "@/components/orb";
 
 /* ── the time picker ──────────────────────────────────────────────
@@ -214,11 +215,14 @@ export function TimePicker({
       // A paid event's deposit is taken here (deposit-step.tsx) where the
       // build has Stripe's key; without it, on Cal.com's own form (Julian:
       // the site's calendar everywhere, the homepage's sessions too).
-      if (ev.requiresConfirmation || ((ev.price ?? 0) > 0 && !process.env.NEXT_PUBLIC_STRIPE_PK)) {
+      // Paid by the site's list (lib/paid.ts): Cal.com's price reads 0 with
+      // its own Stripe app off.
+      const owes = isPaid(slug) || (ev.price ?? 0) > 0;
+      if (ev.requiresConfirmation || (owes && !process.env.NEXT_PUBLIC_STRIPE_PK)) {
         setState("fallback");
         return;
       }
-      setPaid((ev.price ?? 0) > 0);
+      setPaid(owes);
       setLength(ev.lengthInMinutes || 30);
       setSession(ev.title || "");
       setNeedsWhere(Array.isArray(ev.locations) && ev.locations.some((l: { type: string }) => l.type === "attendeeDefined"));
