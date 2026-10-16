@@ -631,7 +631,7 @@
   .tp [data-part="days"] { padding-top: 0.75rem; }
   .tp [data-part="days"] ~ .grow.basis-0 { min-height: 1.75rem; }
 }
-@container card (max-height: 34rem) {
+@container card (max-height: 38rem) {
   /* The room under Book it on the form, not the scroller: a scroller's
      own bottom padding is not scrolled to, and the button met the edge. */
   .tp:has(> form) {
@@ -952,4 +952,172 @@
   .tpd-sk {
     animation: none;
   }
+}
+
+/* ── one frame, `?layout` (Julian, 2026-10-16, /impeccable layout): every
+   step of the card reads top to bottom the same way. Where you are at the
+   top, the step's one job in the middle, and a bar on the card's floor
+   with what is chosen so far on the left and the one action on the right,
+   as the picker already has. The details step had its time on top and
+   Book it floating under the note with the room left empty below. ──── */
+:root[data-layout] #book-card .tp > form {
+  flex: 1;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-rows: auto auto auto 1fr auto;
+  column-gap: 0;
+  row-gap: 0;
+  padding-bottom: 0;
+}
+:root[data-layout] #book-card .tp > form > .grid {
+  grid-column: 1 / -1;
+  grid-row: 1;
+  /* Who, then how to reach them: a row each, a breath between. */
+  column-gap: 2rem;
+  row-gap: 1.5rem;
+  padding-top: 0.5rem;
+}
+:root[data-layout] #book-card .tp > form > label {
+  grid-column: 1 / -1;
+  grid-row: 2;
+  margin-top: 1.5rem;
+}
+:root[data-layout] #book-card .tp > form > [role="alert"] {
+  grid-column: 1 / -1;
+  grid-row: 3;
+  margin-top: 1rem;
+}
+/* The floor: the chosen time and Change on the left, Book it on the right. */
+:root[data-layout] #book-card .tp > form > [data-part="when"],
+:root[data-layout] #book-card .tp > form > [data-part="act"] {
+  grid-row: 5;
+  align-self: stretch;
+  margin-top: 1.5rem;
+  border-top: 1px solid var(--border);
+}
+:root[data-layout] #book-card .tp > form > [data-part="when"] {
+  grid-column: 1;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 1.25rem;
+  padding-block: 1rem;
+  /* Tall enough to hold Book it beside it, so the two centre on one line
+     and the button stays off the rule (Julian). */
+  min-height: calc(2.875rem + 2rem);
+  border-bottom: 0;
+}
+:root[data-layout] #book-card .tp > form > [data-part="act"] {
+  grid-column: 2;
+  align-self: center;
+  margin-block: 1.5rem 0;
+  border-top: 0;
+}
+/* The bar's rule runs under the button too. */
+:root[data-layout] #book-card .tp > form::after {
+  content: "";
+  grid-column: 2;
+  grid-row: 5;
+  align-self: start;
+  margin-top: 1.5rem;
+  border-top: 1px solid var(--border);
+}
+/* A phone: the time over a full-width Book it, as Confirm sits. */
+@container card (max-width: 34rem) {
+  :root[data-layout] #book-card .tp > form {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto auto auto 1fr auto auto;
+  }
+  :root[data-layout] #book-card .tp > form > [data-part="when"] {
+    padding-block: 1.25rem 1rem;
+  }
+  :root[data-layout] #book-card .tp > form > [data-part="act"] {
+    grid-column: 1;
+    grid-row: 6;
+    width: 100%;
+  }
+  :root[data-layout] #book-card .tp > form::after {
+    content: none;
+  }
+}
+@media (max-width: 39.99rem) {
+  :root[data-layout] #book-card .tp > form {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto auto auto 1fr auto auto;
+  }
+  :root[data-layout] #book-card .tp > form > [data-part="act"] {
+    grid-column: 1;
+    grid-row: 6;
+    width: 100%;
+  }
+  :root[data-layout] #book-card .tp > form::after {
+    content: none;
+  }
+}
+/* The day's name sits with its days: nothing between them but the week. */
+:root[data-layout] #book-card .tp [data-part="days"] {
+  row-gap: 0.75rem;
+}
+/* The inquiry form takes the same floor: the address on the left, the
+   button on the right, on a rule at the card's bottom (Julian). */
+:root[data-layout] #book-card [data-scroll] {
+  display: flex;
+  flex-direction: column;
+}
+:root[data-layout] #book-card .book-form,
+:root[data-layout] #book-card .book-form > form {
+  flex: 1;
+}
+:root[data-layout] #book-card .book-form form > div:has(> button[type="submit"]) {
+  margin-top: auto;
+  align-items: center;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--border);
+}
+
+/* The two forms read as one (Julian): the tabs top right, the inquiry's
+   answers in the booking form's mono with the labels' tracking, and the
+   date's label over its field as every other one. */
+:root[data-layout] #book-card [aria-label="How to reach me"] { margin-left: auto; }
+:root[data-layout] #book-card .book-form .contact-field :is(input, textarea) {
+  font-family: var(--font-mono);
+  letter-spacing: calc(0.6875rem * 0.14);
+}
+:root[data-layout] #book-card .book-form label:has(> input[type="date"]) {
+  flex-direction: column; align-items: stretch; gap: 0.5rem;
+}
+/* Focus as the booking form has it: the rule under the field goes to full
+   ink, no lit box, no lift. */
+:root[data-layout] #book-card .book-form .contact-field::before { display: none; }
+:root[data-layout] #book-card .book-form .contact-field:focus-within { transform: none; }
+:root[data-layout] #book-card .book-form .contact-field :is(input, textarea):focus { border-color: var(--foreground); }
+
+/* The deposit on the same floor: the refund line left, Pay right, on the
+   rule at the card's bottom, in the card's solid-ink button. */
+:root[data-layout] #book-card [aria-label="Deposit"] > div:has(> button[type="button"]:last-child) {
+  margin-top: auto; padding-block: 1.5rem;
+}
+:root[data-layout] #book-card [aria-label="Deposit"] > div > button:last-child:not([disabled]) {
+  border-radius: 9999px; font-family: var(--font-display);
+  background: var(--foreground); border-color: var(--foreground); color: var(--background);
+}
+:root[data-layout] #book-card [aria-label="Deposit"] > div > button:last-child[disabled] {
+  border-radius: 9999px; font-family: var(--font-display);
+  background: color-mix(in oklab, var(--foreground) 72%, transparent); border-color: transparent; color: var(--background);
+}
+:root[data-layout] #book-card [aria-label="Deposit"] :is(p.text-base, p.text-sm, dd, [role="status"] p, span.text-sm) {
+  font-family: var(--font-mono);
+  letter-spacing: calc(0.6875rem * 0.14);
+}
+:root[data-layout] #book-card [aria-label="Deposit"] :is(p.text-base, span.text-sm) { max-width: 56ch; }
+/* The card and its note sit down on the floor, the room above them
+   (Julian): the wallet, or the card where there is none, takes the slack. */
+:root[data-layout] #book-card [aria-label="Deposit"] > div:not(.hidden):has(+ div[aria-busy]),
+:root[data-layout] #book-card [aria-label="Deposit"] > div.hidden + div[aria-busy] { margin-top: auto; }
+:root[data-layout] #book-card [aria-label="Deposit"] > div:has(> button[type="button"]:last-child) { margin-top: 0; }
+/* ...and it splits the room above and below, so the card sits near the
+   card's middle on a laptop or an iPad (Julian). */
+:root[data-layout] #book-card [aria-label="Deposit"] > p.text-sm { margin-bottom: auto; }
+/* The big day and time over a split month's times, in that step only. */
+.tp:not([data-split][data-mstep="times"]) [data-part="big"] {
+  display: none;
 }

@@ -1,7 +1,9 @@
 "use client";
 
 import * as React from "react";
+import { gsap } from "gsap";
 import { cn } from "@/lib/utils";
+import { DepositStep, type DepositBody } from "@/components/deposit-step";
 import { Orb, ORB_ROUND } from "@/components/orb";
 
 /* ── the time picker ──────────────────────────────────────────────
@@ -169,7 +171,10 @@ export function TimePicker({
      on show), a day, or a day and its time. A day alone keeps Confirm off:
      clicking one used to pick its time as well, skipping step two. */
   const [chosen, setChosen] = React.useState<false | "day" | "time">(false);
-  const [step, setStep] = React.useState<"pick" | "form" | "sending" | "check" | "done">("pick");
+  const [step, setStep] = React.useState<"pick" | "form" | "sending" | "check" | "pay" | "done">("pick");
+  /* A paid session, its deposit taken here (`?deposit`, deposit-step.tsx). */
+  const [paid, setPaid] = React.useState(false);
+  const [deposit, setDeposit] = React.useState<DepositBody | null>(null);
   const [error, setError] = React.useState("");
   /* Julian: Confirm's words turn into the orbs, then a check, before the
      form opens. */
@@ -206,11 +211,14 @@ export function TimePicker({
       const [meta, slots] = await got;
       const ev = Array.isArray(meta.data) ? meta.data[0] : meta.data;
       if (!ev || slots.status !== "success") throw new Error("no times");
-      // A paid event is booked on Cal.com's own form, where the payment is.
-      if ((ev.price ?? 0) > 0 || ev.requiresConfirmation) {
+      // A paid event's deposit is taken here (deposit-step.tsx) where the
+      // build has Stripe's key; without it, on Cal.com's own form (Julian:
+      // the site's calendar everywhere, the homepage's sessions too).
+      if (ev.requiresConfirmation || ((ev.price ?? 0) > 0 && !process.env.NEXT_PUBLIC_STRIPE_PK)) {
         setState("fallback");
         return;
       }
+      setPaid((ev.price ?? 0) > 0);
       setLength(ev.lengthInMinutes || 30);
       setSession(ev.title || "");
       setNeedsWhere(Array.isArray(ev.locations) && ev.locations.some((l: { type: string }) => l.type === "attendeeDefined"));
@@ -357,6 +365,10 @@ export function TimePicker({
   /* The times' width: they keep to one line while every box has room for
      its time (Julian: a day of half hours was crammed). */
   const slotsBox = React.useRef<HTMLDivElement>(null);
+  /* `?layout`: the times come in with GSAP, each one once. The CSS rise
+     replayed whenever the list re-rendered, and read as a glitch (Julian). */
+  const [gs] = React.useState(() => typeof location !== "undefined" && new URLSearchParams(location.search).has("layout"));
+  const seen = React.useRef(new WeakSet<Element>());
   const [slotsW, setSlotsW] = React.useState(0);
   const picked = !!pick;
   React.useLayoutEffect(() => {
@@ -413,12 +425,25 @@ export function TimePicker({
     fit();
     const ro = new ResizeObserver(fit);
     ro.observe(tp);
+    /* Back from the form (Change) the steps slide open (grid rows) and it
+       was measured mid-slide, saw room, and kept the big time full height
+       over the times: fitted again when the slide lands (Julian). */
+    const landed = (e: TransitionEvent) => e.propertyName === "grid-template-rows" && fit();
+    tp.addEventListener("transitionend", landed);
     return () => {
       ro.disconnect();
+      tp.removeEventListener("transitionend", landed);
       tp.removeAttribute("data-tight");
       tp.removeAttribute("data-split");
     };
   }, [view, pick?.date, days, slotsW, mstep, held]);
+  React.useLayoutEffect(() => {
+    if (!gs || !slotsBox.current || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const fresh = [...slotsBox.current.querySelectorAll("[data-slot]")].filter((b) => !seen.current.has(b));
+    if (!fresh.length) return;
+    fresh.forEach((b) => seen.current.add(b));
+    gsap.fromTo(fresh, { autoAlpha: 0, y: 12 }, { autoAlpha: 1, y: 0, duration: 0.5, ease: "expo.out", stagger: 0.025, clearProps: "opacity,visibility,transform" });
+  });
   const refit = React.useRef(() => {});
   React.useLayoutEffect(() => {
     const grid = monthGrid.current;
@@ -516,6 +541,13 @@ export function TimePicker({
       return;
     }
     const notes = String(form.get("notes") || "").trim();
+    if (paid) {
+      const name = `${String(form.get("first")).trim()} ${String(form.get("last")).trim()}`;
+      setBooked({ name: String(form.get("first")).trim(), email: String(form.get("email")).trim(), where });
+      setDeposit({ slug, start: new Date(pick.start).toISOString(), timeZone: tz, name, email: String(form.get("email")), phone, ...(notes ? { notes } : {}), ...(needsWhere ? { where } : {}), session });
+      setStep("pay");
+      return;
+    }
     try {
       const res = await fetch(`${API}/bookings`, {
         method: "POST",
@@ -581,6 +613,27 @@ export function TimePicker({
   const date = fromIso(pick.date);
   const sum = `${DAYS[date.getDay()]} ${date.getDate()} ${MONTHS[date.getMonth()].slice(0, 3)} · ${t} ${ap}`;
 
+  if (step === "pay" && deposit) {
+    return (
+      <DepositStep
+        className={className}
+        body={deposit}
+        rows={[
+          ["Session", `${session || title}, ${length} min`],
+          // Just the zone, no city (Julian).
+          ["When", `${sum.replace(" · ", " at ")} ${zone(pick.start, tz).replace("San Jose ", "")}`],
+        ]}
+        onBooked={() => {
+          recent.delete(`${username}/${slug}/${tz}`);
+          setStep("done");
+        }}
+        onTaken={() => {
+          setStep("pick");
+          void load(true);
+        }}
+      />
+    );
+  }
   if (step === "done") {
     const first = booked.name.split(/\s+/)[0];
     const rows: [string, string][] = [
@@ -810,6 +863,20 @@ export function TimePicker({
           {arrow}
           {view === "month" ? MONTHS[anchor.getMonth()] : "Week"}
         </button>
+        {/* A month too tall to share (January, six weeks): its times alone
+            left a hole over them, so the day and time picked fill it, big,
+            as under the week (Julian, 2026-10-16). Shown in that step only
+            (contact.css). */}
+        {view === "month" ? (
+          <div data-part="big" aria-hidden className="flex flex-1 flex-col justify-center gap-0.5">
+            <p className="font-display text-[clamp(1.25rem,4.5cqw,2.25rem)] uppercase leading-none tracking-[-0.02em]">{`${WEEKDAYS[date.getDay()]}, ${MONTHS[date.getMonth()]} ${date.getDate()}`}</p>
+            <div className="flex items-baseline gap-3">
+              <span className={cn("font-display tabular-nums tracking-[-0.05em] mt-[0.15em] text-[clamp(3rem,min(18cqw,12vh),7rem)] leading-[0.85] transition-opacity duration-300", chosen !== "time" && "opacity-25")}>{t}</span>
+              <span className="label">{ap}</span>
+              <span className="label ml-auto shrink-0 whitespace-nowrap text-right text-muted-foreground">Until<br />{until} {clock(pick.min + length)[1]}</span>
+            </div>
+          </div>
+        ) : null}
         <p className="label text-muted-foreground"><span className="mr-3 text-foreground">02</span>Pick a time
           {/* Under a month there is no day over the times to say whose they
               are, and the month shown may not hold it (Julian). */}
@@ -854,9 +921,10 @@ export function TimePicker({
                 aria-pressed={on}
                 aria-label={`${h} ${a}`}
                 onClick={() => choose(date, m, true)}
-                style={{ animationDelay: `${n * 25}ms` }}
+                style={gs ? undefined : { animationDelay: `${n * 25}ms` }}
                 className={cn(
-                  "tp-rise label min-w-0 flex-1 rounded-[var(--tp-r,6px)] [animation-fill-mode:backwards] border-[0.5px] py-[min(var(--tp-slot,0.75rem),0.625rem)] text-center sm:py-[var(--tp-slot,0.75rem)] tabular-nums transition-[background-color,color,translate] duration-300 ease-[var(--ease-out-strong)] tp-short:py-2",
+                  !gs && "tp-rise",
+                  "label min-w-0 flex-1 rounded-[var(--tp-r,6px)] [animation-fill-mode:backwards] border-[0.5px] py-[min(var(--tp-slot,0.75rem),0.625rem)] text-center sm:py-[var(--tp-slot,0.75rem)] tabular-nums transition-[background-color,color,translate] duration-300 ease-[var(--ease-out-strong)] tp-short:py-2",
                   on ? "border-foreground bg-foreground text-background" : "tp-open hoverable:hover:-translate-y-0.5",
                   // A day of one or two times: a box, not a bar the width of
                   // the card.
@@ -972,7 +1040,7 @@ export function TimePicker({
           
           <label className="label flex flex-col gap-2 text-muted-foreground">Anything I should know<textarea name="notes" rows={2} placeholder="Optional" className="resize-none placeholder:uppercase placeholder:text-muted-foreground/50 border-b border-border bg-transparent py-2 text-base normal-case text-foreground outline-none focus:border-foreground" /></label>
           {error ? <p role="alert" className="text-sm normal-case text-foreground">{error}</p> : null}
-          <button type="submit" data-part="act" disabled={step === "sending"} className="label self-end rounded-[2px] border border-foreground bg-foreground px-6 py-4 text-background transition-[opacity,scale] duration-300 hoverable:hover:opacity-85 active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50">
+          <button type="submit" data-part="act" data-stick="fill" disabled={step === "sending"} className="label self-end rounded-[2px] border border-foreground bg-foreground px-6 py-4 text-background transition-[opacity,scale] duration-300 hoverable:hover:opacity-85 active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50">
             {step === "sending" ? "Booking" : "Book it"}
           </button>
         </form>

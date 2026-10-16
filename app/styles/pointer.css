@@ -189,6 +189,7 @@
   top: var(--ft, 0px);
   width: var(--fw, 0px);
   height: var(--fh, 0px);
+  border-radius: var(--fr, 0px);
   background: currentColor;
   transform-origin: var(--fo, 50% 50%);
   scale: 0;
