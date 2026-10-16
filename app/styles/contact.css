@@ -1087,3 +1087,22 @@
 :root[data-layout] #book-card .book-form .contact-field::before { display: none; }
 :root[data-layout] #book-card .book-form .contact-field:focus-within { transform: none; }
 :root[data-layout] #book-card .book-form .contact-field :is(input, textarea):focus { border-color: var(--foreground); }
+
+/* The deposit on the same floor: the refund line left, Pay right, on the
+   rule at the card's bottom, in the card's solid-ink button. */
+:root[data-layout] #book-card [aria-label="Deposit"] > div:has(> button[type="button"]:last-child) {
+  margin-top: auto; padding-block: 1.5rem;
+}
+:root[data-layout] #book-card [aria-label="Deposit"] > div > button:last-child:not([disabled]) {
+  border-radius: 9999px; font-family: var(--font-display);
+  background: var(--foreground); border-color: var(--foreground); color: var(--background);
+}
+:root[data-layout] #book-card [aria-label="Deposit"] > div > button:last-child[disabled] {
+  border-radius: 9999px; font-family: var(--font-display);
+  background: color-mix(in oklab, var(--foreground) 72%, transparent); border-color: transparent; color: var(--background);
+}
+:root[data-layout] #book-card [aria-label="Deposit"] :is(p.text-base, dd, [role="status"] p, span.text-sm) {
+  font-family: var(--font-mono);
+  letter-spacing: calc(0.6875rem * 0.14);
+}
+:root[data-layout] #book-card [aria-label="Deposit"] :is(p.text-base, span.text-sm) { max-width: 56ch; }

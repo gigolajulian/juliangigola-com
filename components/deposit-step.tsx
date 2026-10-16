@@ -80,7 +80,7 @@ function ink(el: HTMLElement) {
 function fieldStyle(el: HTMLElement) {
   const { fg, muted, accent } = ink(el);
   return {
-    base: { color: fg, iconColor: fg, fontFamily: '"IBM Plex Mono", ui-monospace, monospace', fontSize: "16px", fontSmoothing: "antialiased", "::placeholder": { color: muted } },
+    base: { color: fg, iconColor: fg, fontFamily: '"IBM Plex Mono", ui-monospace, monospace', fontSize: "16px", fontSmoothing: "antialiased", ...(document.documentElement.hasAttribute("data-layout") && { letterSpacing: "1.54px" }), "::placeholder": { color: muted } },
     invalid: { color: accent, iconColor: accent },
   };
 }
