@@ -34,27 +34,47 @@ export function BookCard({ item, onClose, className }: { item: MenuItem; onClose
     if (!el) return;
     const say = (f: HTMLInputElement) =>
       f.validity.valueMissing ? (f.type === "radio" ? "Pick one" : "Required") : f.validity.typeMismatch && f.type === "email" ? "Check the email" : f.validationMessage;
+    /* The inquiry form asks `checkValidity` as you type (contact-form.tsx),
+       which fires these too: there, only on a send. */
+    let sending = false;
+    const onSubmit = () => {
+      sending = true;
+      setTimeout(() => (sending = false));
+    };
+    let n = 0;
     const onInvalid = (e: Event) => {
       const f = e.target as HTMLInputElement;
       e.preventDefault();
+      if (f.form?.noValidate && !sending) return;
       const at = (f.type === "radio" ? (f.closest("fieldset") ?? f.parentElement?.parentElement) : (f.closest("label, .contact-field") ?? f.parentElement)) as HTMLElement | null;
       if (!at || at.querySelector(":scope > [data-said]")) return;
       const note = document.createElement("span");
       note.dataset.said = "";
+      note.id = `said-${++n}`;
       note.className = "label mt-2 block text-foreground";
       note.textContent = say(f);
       at.append(note);
+      // Read out with the field, and the field marked wrong.
+      f.setAttribute("aria-describedby", `${f.getAttribute("aria-describedby") ?? ""} ${note.id}`.trim());
+      f.setAttribute("aria-invalid", "true");
       if (!el.querySelector(":focus:invalid")) f.focus();
       const clear = () => {
         note.remove();
+        f.setAttribute("aria-describedby", (f.getAttribute("aria-describedby") ?? "").replace(note.id, "").trim());
+        if (!f.getAttribute("aria-describedby")) f.removeAttribute("aria-describedby");
+        f.removeAttribute("aria-invalid");
         at.removeEventListener("input", clear);
         at.removeEventListener("change", clear);
       };
       at.addEventListener("input", clear);
       at.addEventListener("change", clear);
     };
+    el.addEventListener("submit", onSubmit, true);
     el.addEventListener("invalid", onInvalid, true);
-    return () => el.removeEventListener("invalid", onInvalid, true);
+    return () => {
+      el.removeEventListener("submit", onSubmit, true);
+      el.removeEventListener("invalid", onInvalid, true);
+    };
   }, []);
   return (
     <div
