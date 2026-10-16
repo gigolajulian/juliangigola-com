@@ -6,21 +6,25 @@ import { cn } from "@/lib/utils";
 /* ── the deposit ─────────────────────────────────────────────────────
  * Julian (2026-10-16), behind `?deposit`: a paid session's $100 deposit
  * taken in the card, after its form, in place of Cal.com's own checkout.
- * Stripe's Payment Element, dressed as the site (its Appearance API).
+ * Stripe's card fields, dressed as the site.
  * The server side is JG - BACKEND's: POST /api/deposit makes the
  * PaymentIntent (and says 409 when the time has gone), its webhook books
  * Cal.com, GET /api/deposit/<id> says how that went.
  * ─────────────────────────────────────────────────────────────────── */
 
+type StripeError = { type: string; message?: string };
 type Stripe = {
   elements: (o: object) => Elements;
-  confirmPayment: (o: object) => Promise<{ error?: { type: string; message?: string } }>;
+  confirmCardPayment: (secret: string, o: object) => Promise<{ error?: StripeError }>;
+  confirmPayment: (o: object) => Promise<{ error?: StripeError }>;
 };
-type Elements = {
-  create: (t: "payment", o?: object) => { mount: (el: HTMLElement) => void; on: (e: string, f: () => void) => void; destroy: () => void };
+type Element = {
+  mount: (el: HTMLElement) => void;
+  on: (e: string, f: (ev: { availablePaymentMethods?: object }) => void) => void;
   update: (o: object) => void;
-  submit: () => Promise<{ error?: { message?: string } }>;
+  destroy: () => void;
 };
+type Elements = { create: (t: "cardNumber" | "cardExpiry" | "cardCvc" | "expressCheckout", o?: object) => Element };
 declare global {
   interface Window {
     Stripe?: (key: string) => Stripe;
@@ -64,40 +68,25 @@ function rgb(css: string) {
   return a === 255 ? `rgb(${r}, ${g}, ${b})` : `rgba(${r}, ${g}, ${b}, ${+(a / 255).toFixed(3)})`;
 }
 
-/** The card's own look, read off the page so it follows light and dark. */
-function appearance(el: HTMLElement) {
+/** The page's ink, read off it so the fields follow light and dark. */
+function ink(el: HTMLElement) {
   const s = getComputedStyle(el);
   const v = (n: string) => rgb(s.getPropertyValue(n).trim());
-  const [fg, muted, line, accent] = [v("--foreground"), v("--muted-foreground"), v("--border"), v("--accent")];
+  return { fg: v("--foreground"), muted: v("--muted-foreground"), accent: v("--accent") };
+}
+
+/** The card fields' type and color; their hairlines are the page's own
+    (the boxes they mount in). One-color brand icon (Julian, 2026-10-16). */
+function fieldStyle(el: HTMLElement) {
+  const { fg, muted, accent } = ink(el);
   return {
-    theme: "flat",
-    labels: "above",
-    variables: {
-      fontFamily: '"IBM Plex Mono", ui-monospace, monospace',
-      fontSizeBase: "16px",
-      colorPrimary: accent,
-      colorBackground: v("--background"),
-      colorText: fg,
-      colorTextSecondary: muted,
-      colorTextPlaceholder: muted,
-      colorDanger: accent,
-      borderRadius: "2px",
-      spacingUnit: "4px",
-      gridRowSpacing: "20px",
-      gridColumnSpacing: "24px",
-    },
-    // The form's own fields: a hairline under, nothing else.
-    rules: {
-      ".Label": { fontSize: "11px", letterSpacing: "0.12em", textTransform: "uppercase", color: muted, marginBottom: "8px" },
-      ".Input": { backgroundColor: "transparent", border: "none", borderBottom: `1px solid ${line}`, borderRadius: "0", boxShadow: "none", padding: "8px 0" },
-      ".Input:focus": { borderBottomColor: fg, boxShadow: "none" },
-      ".Input--invalid": { borderBottomColor: accent, boxShadow: "none" },
-      ".Tab": { backgroundColor: "transparent", border: `1px solid ${line}`, boxShadow: "none" },
-      ".Tab--selected, .Tab--selected:focus, .Tab--selected:hover": { borderColor: fg, boxShadow: "none" },
-      ".Error": { fontSize: "13px" },
-    },
+    base: { color: fg, iconColor: fg, fontFamily: '"IBM Plex Mono", ui-monospace, monospace', fontSize: "16px", fontSmoothing: "antialiased", "::placeholder": { color: muted } },
+    invalid: { color: accent, iconColor: accent },
   };
 }
+
+const FONTS = [{ cssSrc: "https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&display=swap" }];
+const PAY_FAILED = "That did not go through. Try again, or write to hello@juliangigola.com.";
 
 export type DepositBody = {
   slug: string;
@@ -129,29 +118,101 @@ export function DepositStep({
   onTaken: () => void;
 }) {
   const box = React.useRef<HTMLDivElement>(null);
-  const field = React.useRef<HTMLDivElement>(null);
-  const els = React.useRef<{ stripe: Stripe; elements: Elements } | null>(null);
+  const number = React.useRef<HTMLDivElement>(null);
+  const expiry = React.useRef<HTMLDivElement>(null);
+  const cvc = React.useRef<HTMLDivElement>(null);
+  const wallet = React.useRef<HTMLDivElement>(null);
+  const els = React.useRef<{ stripe: Stripe; card: Element } | null>(null);
   const [stage, setStage] = React.useState<Stage>("loading");
   const [error, setError] = React.useState("");
   const [tries, setTries] = React.useState(0);
+  const [wallets, setWallets] = React.useState(false);
 
-  // The Payment Element, mounted before any PaymentIntent exists (Stripe's
-  // deferred intent): the fields are there at once, the intent made on Pay.
+  /* The intent, made on Pay (409: the time has gone). */
+  const make = async (): Promise<{ clientSecret: string; intentId: string } | null> => {
+    const res = await fetch("/api/deposit", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+    if (res.status === 409) {
+      setStage("taken");
+      return null;
+    }
+    if (!res.ok) throw new Error(String(res.status));
+    return res.json();
+  };
+  const back = (msg: string) => {
+    setError(msg);
+    setStage("ready");
+  };
+  // Stripe's own words for a declined card; mine for anything else.
+  const words = (no: StripeError) => (no.type === "card_error" || no.type === "validation_error" ? no.message || "Your card was declined." : PAY_FAILED);
+  /* Paid: the booking is the webhook's. Asked once a second for 20. */
+  const paid = async (intentId: string) => {
+    setStage("confirming");
+    for (let n = 0; n < 20; n++) {
+      await new Promise((go) => setTimeout(go, 1000));
+      try {
+        const r = await fetch(`/api/deposit/${encodeURIComponent(intentId)}`);
+        const { status } = await r.json();
+        if (status === "booked") return onBooked();
+        if (status === "refunded" || status === "failed") return setStage(status);
+      } catch {}
+    }
+    setStage("slow");
+  };
+  // The wallet's handler is set once; it calls these as they are now.
+  const now = React.useRef({ make, back, words, paid });
+  React.useEffect(() => {
+    now.current = { make, back, words, paid };
+  });
+
+  /* Stripe's separate card fields (they carry a one-color brand icon,
+     which the Payment Element does not), and Apple Pay or Google Pay
+     over them where the browser has one (Express Checkout). */
   React.useEffect(() => {
     let gone = false;
-    let el: ReturnType<Elements["create"]> | null = null;
+    const made: Element[] = [];
     loadStripe()
       .then((s) => {
-        if (gone || !box.current || !field.current) return;
-        const elements = s.elements({ mode: "payment", amount: AMOUNT, currency: "usd", allowedPaymentMethodTypes: ["card"], appearance: appearance(box.current), fonts: [{ cssSrc: "https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&display=swap" }] });
-        el = elements.create("payment", { layout: "tabs", wallets: { link: "never" }, terms: { card: "never" }, fields: { billingDetails: { name: "never", email: "never" } } });
-        el.on("ready", () => !gone && setStage("ready"));
-        el.mount(field.current);
-        els.current = { stripe: s, elements };
+        if (gone || !box.current || !number.current || !expiry.current || !cvc.current || !wallet.current) return;
+        const style = fieldStyle(box.current);
+        const fields = s.elements({ fonts: FONTS });
+        const card = fields.create("cardNumber", { style, showIcon: true, iconStyle: "solid", disableLink: true, placeholder: "1234 1234 1234 1234" });
+        const exp = fields.create("cardExpiry", { style });
+        const code = fields.create("cardCvc", { style });
+        card.on("ready", () => !gone && setStage("ready"));
+        card.mount(number.current);
+        exp.mount(expiry.current);
+        code.mount(cvc.current);
+        const express = s.elements({ mode: "payment", amount: AMOUNT, currency: "usd", allowedPaymentMethodTypes: ["card"], appearance: { variables: { borderRadius: "2px" } } });
+        const wall = express.create("expressCheckout", {
+          paymentMethods: { applePay: "always", googlePay: "always", link: "never", paypal: "never", amazonPay: "never", klarna: "never" },
+          buttonHeight: 48,
+          buttonTheme: { applePay: "white-outline", googlePay: "white" },
+        });
+        wall.on("ready", (e) => !gone && setWallets(!!e.availablePaymentMethods));
+        wall.on("confirm", async () => {
+          setError("");
+          try {
+            const m = await now.current.make();
+            if (!m) return;
+            const { error: no } = await s.confirmPayment({
+              elements: express,
+              clientSecret: m.clientSecret,
+              redirect: "if_required",
+              confirmParams: { return_url: location.href, payment_method_data: { billing_details: { name: body.name, email: body.email } } },
+            });
+            if (no) return now.current.back(now.current.words(no));
+            void now.current.paid(m.intentId);
+          } catch {
+            now.current.back(PAY_FAILED);
+          }
+        });
+        wall.mount(wallet.current);
+        made.push(card, exp, code, wall);
+        els.current = { stripe: s, card };
       })
       .catch(() => !gone && setStage("broken"));
     // Light and dark, as the rest of the card.
-    const retheme = () => box.current && els.current?.elements.update({ appearance: appearance(box.current) });
+    const retheme = () => box.current && made.slice(0, 3).forEach((f) => f.update({ style: fieldStyle(box.current!) }));
     const mq = matchMedia("(prefers-color-scheme: dark)");
     mq.addEventListener("change", retheme);
     const mo = new MutationObserver(() => requestAnimationFrame(retheme));
@@ -160,53 +221,28 @@ export function DepositStep({
       gone = true;
       mq.removeEventListener("change", retheme);
       mo.disconnect();
-      el?.destroy();
+      made.forEach((f) => f.destroy());
       els.current = null;
     };
-  }, [tries]);
+  }, [tries, body.name, body.email]);
 
   const pay = async () => {
     const e = els.current;
     if (!e || stage === "paying") return;
     setStage("paying");
     setError("");
-    const back = (msg: string) => {
-      setError(msg);
-      setStage("ready");
-    };
-    const checked = await e.elements.submit();
-    if (checked.error) return back(checked.error.message || "Check the card details.");
-    let made: { clientSecret: string; intentId: string };
+    let m: Awaited<ReturnType<typeof make>>;
     try {
-      const res = await fetch("/api/deposit", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
-      if (res.status === 409) return setStage("taken");
-      if (!res.ok) throw new Error(String(res.status));
-      made = await res.json();
+      m = await make();
     } catch {
-      return back("That did not go through. Try again, or write to hello@juliangigola.com.");
+      return back(PAY_FAILED);
     }
-    const { error: no } = await e.stripe.confirmPayment({
-      elements: e.elements,
-      clientSecret: made.clientSecret,
-      redirect: "if_required",
-      // ponytail: card only, so no redirect comes back here; if more methods
-      // are added, /book/<slug>?deposit_return=<id> has to resume the poll.
-      confirmParams: { return_url: `${location.origin}${location.pathname}?deposit_return=${made.intentId}`, payment_method_data: { billing_details: { name: body.name, email: body.email } } },
-    });
-    // Stripe's own words for a declined card; mine for anything else.
-    if (no) return back(no.type === "card_error" || no.type === "validation_error" ? no.message || "Your card was declined." : "That did not go through. Try again, or write to hello@juliangigola.com.");
-    setStage("confirming");
-    // Paid: the booking is the webhook's. Asked once a second for 20.
-    for (let n = 0; n < 20; n++) {
-      await new Promise((go) => setTimeout(go, 1000));
-      try {
-        const r = await fetch(`/api/deposit/${encodeURIComponent(made.intentId)}`);
-        const { status } = await r.json();
-        if (status === "booked") return onBooked();
-        if (status === "refunded" || status === "failed") return setStage(status);
-      } catch {}
-    }
-    setStage("slow");
+    if (!m) return;
+    // 3D Secure, where the bank asks for it, opens over the page.
+    const { error: no } = await e.stripe.confirmCardPayment(m.clientSecret, { payment_method: { card: e.card, billing_details: { name: body.name, email: body.email } } })
+      .catch(() => ({ error: { type: "api_connection_error" } as StripeError }));
+    if (no) return back(words(no));
+    void paid(m.intentId);
   };
 
   const after: Partial<Record<Stage, string>> = {
@@ -245,8 +281,13 @@ export function DepositStep({
         </div>
       ) : (
         <>
-          {/* Held at the form's height while Stripe's fields load, so the card does not jump. */}
-          <div ref={field} aria-busy={stage === "loading"} className="min-h-[9.5rem]" />
+          {/* Apple Pay or Google Pay, where there is one; nothing otherwise. */}
+          <div ref={wallet} className={cn(!wallets && "hidden")} />
+          <div aria-busy={stage === "loading"} className="grid grid-cols-2 gap-x-6 gap-y-5 sm:grid-cols-4">
+            <label className="label flex flex-col gap-2 text-muted-foreground col-span-2">Card number<div ref={number} className="border-b border-border py-2.5 transition-colors focus-within:border-foreground" /></label>
+            <label className="label flex flex-col gap-2 text-muted-foreground">Expiry<div ref={expiry} className="border-b border-border py-2.5 transition-colors focus-within:border-foreground" /></label>
+            <label className="label flex flex-col gap-2 text-muted-foreground">CVC<div ref={cvc} className="border-b border-border py-2.5 transition-colors focus-within:border-foreground" /></label>
+          </div>
           {error ? <p role="alert" className="text-sm normal-case text-foreground">{error}</p> : null}
           <div className="flex flex-col gap-4 border-t border-border pt-5 sm:flex-row sm:items-center sm:justify-between">
             <span className="max-w-[40ch] text-sm normal-case leading-relaxed text-muted-foreground">(Deposit moves with a new date, or is refunded up to 2 business days before.)</span>
