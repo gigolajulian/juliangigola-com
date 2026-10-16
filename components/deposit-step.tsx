@@ -285,8 +285,8 @@ export function DepositStep({
           </div>
           {/* What the $100 does, under the card it comes off (Julian, 2026-10-16). */}
           <p className="text-sm normal-case leading-relaxed text-muted-foreground text-pretty">
-            $100 holds your date. Balance due after the shoot.<br />
-            Refundable or movable up to 2 business days before.
+            $100 holds your date. Refundable or movable up to 2 business days before.<br />
+            Balance due after the shoot.
           </p>
           {error ? <p role="alert" className="text-sm normal-case text-foreground">{error}</p> : null}
           <div className="flex flex-col gap-4 border-t border-border pt-5 sm:flex-row sm:items-center sm:justify-between">
