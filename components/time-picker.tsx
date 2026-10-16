@@ -211,9 +211,10 @@ export function TimePicker({
       const [meta, slots] = await got;
       const ev = Array.isArray(meta.data) ? meta.data[0] : meta.data;
       if (!ev || slots.status !== "success") throw new Error("no times");
-      // A paid event is booked on Cal.com's own form, where the payment is,
-      // unless its deposit is taken here (`?deposit`, while it is tried).
-      if (ev.requiresConfirmation || ((ev.price ?? 0) > 0 && !new URLSearchParams(location.search).has("deposit"))) {
+      // A paid event's deposit is taken here (deposit-step.tsx) where the
+      // build has Stripe's key; without it, on Cal.com's own form (Julian:
+      // the site's calendar everywhere, the homepage's sessions too).
+      if (ev.requiresConfirmation || ((ev.price ?? 0) > 0 && !process.env.NEXT_PUBLIC_STRIPE_PK)) {
         setState("fallback");
         return;
       }
