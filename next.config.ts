@@ -228,18 +228,21 @@ const csp = [
      visitor's last Vimeo session left it at. */
   // `app.cal.com` is Cal.com's embed script, loaded only on a booking
   // calendar with `?cal` on the address (`components/cal-embed.tsx`).
-  `script-src 'self' 'unsafe-inline' https://static.cloudflareinsights.com https://player.vimeo.com https://app.cal.com${__impeccableLiveDev}`,
+  `script-src 'self' 'unsafe-inline' https://static.cloudflareinsights.com https://player.vimeo.com https://app.cal.com https://js.stripe.com https://*.js.stripe.com${__impeccableLiveDev}`,
   // The two players, and only as an embed. `frame-ancestors 'self'` above
   // is the other direction and still says no other site may frame this one.
   // 'self' is the SEO tab's frame of the site's own pages.
   // And the booking calendars on /book and the session pages (Google Calendar
   // appointment schedules, `components/book-picker.tsx`, `components/contact-screen.tsx`),
   // and Cal.com's in their place behind `?cal` (`components/cal-embed.tsx`).
-  "frame-src 'self' https://www.youtube-nocookie.com https://player.vimeo.com https://calendar.google.com https://app.cal.com https://cal.com",
+  // Stripe's Payment Element for the $100 deposit (`lib/deposit.ts`): its
+  // script and frames from js.stripe.com, 3D Secure from hooks.stripe.com,
+  // and its calls to api.stripe.com.
+  "frame-src 'self' https://www.youtube-nocookie.com https://player.vimeo.com https://calendar.google.com https://app.cal.com https://cal.com https://js.stripe.com https://*.js.stripe.com https://hooks.stripe.com",
   // `vimeo.com` and `youtube.com` are oEmbed lookups made by /admin when a
   // link is pasted: the title, and the poster Vimeo does not publish at a
   // guessable URL. No page on the site fetches either.
-  `connect-src 'self' https://api.cal.com https://api.github.com https://vimeo.com https://www.youtube.com${__impeccableLiveDev}`,
+  `connect-src 'self' https://api.cal.com https://api.stripe.com https://api.github.com https://vimeo.com https://www.youtube.com${__impeccableLiveDev}`,
   // Not on a local build (`LOCAL` above): there is no https on localhost.
   ...(LOCAL ? [] : ["upgrade-insecure-requests"]),
 ].join("; ");

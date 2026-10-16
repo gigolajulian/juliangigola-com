@@ -181,6 +181,13 @@
   .cover-float-off-sideways {
     display: none;
   }
+  /* A booking page's own places, clear of its long title, and smaller
+     (`SIDEWAYS_BOOKING`; the dials leave these alone). */
+  [data-booking] .cover-float-frame {
+    --fx: var(--bsx, var(--sx));
+    --fy: var(--bsy, var(--sy));
+    --fw: calc(var(--sw) * 0.8);
+  }
 }
 @media (max-width: 39.99rem) and (orientation: portrait) {
   .cover-float {
