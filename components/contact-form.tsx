@@ -570,6 +570,7 @@ export function ContactForm({
         <button
           type="submit"
           data-dial="send"
+          data-stick="fill"
           disabled={pending}
           aria-disabled={!ready || undefined}
           aria-describedby={!ready ? "enquire-missing" : undefined}

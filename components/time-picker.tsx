@@ -1006,7 +1006,7 @@ export function TimePicker({
           
           <label className="label flex flex-col gap-2 text-muted-foreground">Anything I should know<textarea name="notes" rows={2} placeholder="Optional" className="resize-none placeholder:uppercase placeholder:text-muted-foreground/50 border-b border-border bg-transparent py-2 text-base normal-case text-foreground outline-none focus:border-foreground" /></label>
           {error ? <p role="alert" className="text-sm normal-case text-foreground">{error}</p> : null}
-          <button type="submit" data-part="act" disabled={step === "sending"} className="label self-end rounded-[2px] border border-foreground bg-foreground px-6 py-4 text-background transition-[opacity,scale] duration-300 hoverable:hover:opacity-85 active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50">
+          <button type="submit" data-part="act" data-stick="fill" disabled={step === "sending"} className="label self-end rounded-[2px] border border-foreground bg-foreground px-6 py-4 text-background transition-[opacity,scale] duration-300 hoverable:hover:opacity-85 active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50">
             {step === "sending" ? "Booking" : "Book it"}
           </button>
         </form>
