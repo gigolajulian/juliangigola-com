@@ -584,7 +584,7 @@ export function ContactForm({
                 <StatusMark status="failed" size={14} errorColor="var(--destructive)" />
               </span>
             ) : null}
-            {pending ? "Sending…" : booking ? "Book a session" : "Inquire"}
+            {pending ? "Sending…" : "Inquire"}
           </span>
         </button>
         {/* What is still missing, where the button is, and only once
