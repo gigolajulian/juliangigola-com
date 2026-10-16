@@ -14,16 +14,15 @@
   "compatibility_date": "2026-09-11",
   "compatibility_flags": ["nodejs_compat"],
 
-  // Julian: the homepage took 0.1s to 1.15s to start answering, every
-  // request a page-cache hit, because every request still ran the Worker
-  // (2026-10-13, 12 samples). Workers Caching answers from the edge
-  // without running it. The pages already say how to keep them
-  // (`s-maxage`, a year), and `Vary` keeps a page and its RSC payloads
-  // apart; the APIs say `no-store` and pass through. The version is in the
-  // key, so a deploy never serves the last build's HTML against this
-  // build's chunks. A Cache Rule in the dashboard cannot do this: on a
-  // custom domain the Worker is the origin, in front of the zone's cache.
-  "cache": { "enabled": true },
+  // Workers Caching is OFF, and must stay off. It was turned on 2026-10-13
+  // for a faster homepage, on the belief that the version in the cache key
+  // meant a deploy could never serve the last build's HTML. It did: on
+  // 2026-10-16 a request seven seconds into the #184 rollout got the new
+  // version answering with the old build's homepage, which was kept for a
+  // year (`s-maxage`) and linked a stylesheet the deploy had removed. Every
+  // visitor got the page unstyled, and no dashboard purge reaches this cache.
+  // Julian: avoid that at all costs. A slower first byte is the price.
+  "cache": { "enabled": false },
 
   // Everything `next build` emits as a file — the photographs in
   // `public/hero` and `public/covers`, the JS chunks, the prerendered HTML.
