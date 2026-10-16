@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { cn } from "@/lib/utils";
+import { DepositStep, type DepositBody } from "@/components/deposit-step";
 import { Orb, ORB_ROUND } from "@/components/orb";
 
 /* ── the time picker ──────────────────────────────────────────────
@@ -169,7 +170,10 @@ export function TimePicker({
      on show), a day, or a day and its time. A day alone keeps Confirm off:
      clicking one used to pick its time as well, skipping step two. */
   const [chosen, setChosen] = React.useState<false | "day" | "time">(false);
-  const [step, setStep] = React.useState<"pick" | "form" | "sending" | "check" | "done">("pick");
+  const [step, setStep] = React.useState<"pick" | "form" | "sending" | "check" | "pay" | "done">("pick");
+  /* A paid session, its deposit taken here (`?deposit`, deposit-step.tsx). */
+  const [paid, setPaid] = React.useState(false);
+  const [deposit, setDeposit] = React.useState<DepositBody | null>(null);
   const [error, setError] = React.useState("");
   /* Julian: Confirm's words turn into the orbs, then a check, before the
      form opens. */
@@ -206,11 +210,13 @@ export function TimePicker({
       const [meta, slots] = await got;
       const ev = Array.isArray(meta.data) ? meta.data[0] : meta.data;
       if (!ev || slots.status !== "success") throw new Error("no times");
-      // A paid event is booked on Cal.com's own form, where the payment is.
-      if ((ev.price ?? 0) > 0 || ev.requiresConfirmation) {
+      // A paid event is booked on Cal.com's own form, where the payment is,
+      // unless its deposit is taken here (`?deposit`, while it is tried).
+      if (ev.requiresConfirmation || ((ev.price ?? 0) > 0 && !new URLSearchParams(location.search).has("deposit"))) {
         setState("fallback");
         return;
       }
+      setPaid((ev.price ?? 0) > 0);
       setLength(ev.lengthInMinutes || 30);
       setSession(ev.title || "");
       setNeedsWhere(Array.isArray(ev.locations) && ev.locations.some((l: { type: string }) => l.type === "attendeeDefined"));
@@ -516,6 +522,13 @@ export function TimePicker({
       return;
     }
     const notes = String(form.get("notes") || "").trim();
+    if (paid) {
+      const name = `${String(form.get("first")).trim()} ${String(form.get("last")).trim()}`;
+      setBooked({ name: String(form.get("first")).trim(), email: String(form.get("email")).trim(), where });
+      setDeposit({ slug, start: new Date(pick.start).toISOString(), timeZone: tz, name, email: String(form.get("email")), notes: [`Phone: ${phone}`, notes].filter(Boolean).join("\n"), ...(needsWhere ? { where } : {}), session });
+      setStep("pay");
+      return;
+    }
     try {
       const res = await fetch(`${API}/bookings`, {
         method: "POST",
@@ -581,6 +594,26 @@ export function TimePicker({
   const date = fromIso(pick.date);
   const sum = `${DAYS[date.getDay()]} ${date.getDate()} ${MONTHS[date.getMonth()].slice(0, 3)} · ${t} ${ap}`;
 
+  if (step === "pay" && deposit) {
+    return (
+      <DepositStep
+        className={className}
+        body={deposit}
+        rows={[
+          ["Session", `${session || title}, ${length} min`],
+          ["When", `${sum.replace(" · ", " at ")} ${zone(pick.start, tz)}`],
+        ]}
+        onBooked={() => {
+          recent.delete(`${username}/${slug}/${tz}`);
+          setStep("done");
+        }}
+        onTaken={() => {
+          setStep("pick");
+          void load(true);
+        }}
+      />
+    );
+  }
   if (step === "done") {
     const first = booked.name.split(/\s+/)[0];
     const rows: [string, string][] = [
