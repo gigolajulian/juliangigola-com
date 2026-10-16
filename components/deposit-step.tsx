@@ -256,12 +256,7 @@ export function DepositStep({
 
   return (
     <div ref={box} aria-label="Deposit" role="region" className={cn("tp !flex flex-col gap-6 p-6 sm:gap-8 sm:p-10 [&>*]:shrink-0", className)}>
-      <div className="flex flex-col gap-4">
-        <p className="label tp-roll text-muted-foreground">Deposit</p>
-        <p className="tp-roll max-w-[46ch] text-base normal-case leading-relaxed text-foreground/80 text-pretty" style={{ animationDelay: "80ms" }}>
-          $100 deposit to reserve your date. I&rsquo;ll follow up by phone to confirm the concept, rate and schedule. Balance due after the shoot.
-        </p>
-      </div>
+      <p className="label tp-roll text-muted-foreground">Reserve your date</p>
       <dl className="grid gap-x-10 gap-y-4 sm:grid-cols-2">
         {rows.map(([k, v], n) => (
           <div key={k} className="tp-roll flex min-w-0 flex-col gap-1.5" style={{ animationDelay: `${140 + n * 70}ms` }}>
@@ -288,9 +283,13 @@ export function DepositStep({
             <label className="label flex flex-col gap-2 text-muted-foreground">Expiry<div ref={expiry} className="border-b border-border py-2.5 transition-colors focus-within:border-foreground" /></label>
             <label className="label flex flex-col gap-2 text-muted-foreground">CVC<div ref={cvc} className="border-b border-border py-2.5 transition-colors focus-within:border-foreground" /></label>
           </div>
+          {/* What the $100 does, under the card it comes off (Julian, 2026-10-16). */}
+          <p className="max-w-[56ch] text-base normal-case leading-relaxed text-foreground/80 text-pretty">
+            $100 holds your date. I&rsquo;ll call to go over the concept, rate and schedule. The balance is due after the shoot.
+          </p>
           {error ? <p role="alert" className="text-sm normal-case text-foreground">{error}</p> : null}
           <div className="flex flex-col gap-4 border-t border-border pt-5 sm:flex-row sm:items-center sm:justify-between">
-            <span className="max-w-[40ch] text-sm normal-case leading-relaxed text-muted-foreground">(Deposit moves with a new date, or is refunded up to 2 business days before.)</span>
+            <span className="max-w-[40ch] text-sm normal-case leading-relaxed text-muted-foreground">If the date changes, your deposit carries over. Refundable up to 2 business days before the session.</span>
             <button type="button" onClick={pay} disabled={stage !== "ready"} className="label shrink-0 rounded-[2px] border border-accent bg-accent px-6 py-4 text-accent-foreground transition-[opacity,scale] duration-300 hoverable:hover:opacity-85 active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50">
               {stage === "paying" ? "Paying" : stage === "confirming" ? "Confirming" : error ? "Try again · $100" : "Pay $100 deposit"}
             </button>
