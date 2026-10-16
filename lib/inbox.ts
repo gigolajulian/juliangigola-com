@@ -40,7 +40,7 @@ export type Enquiry = {
   files?: string[];
   /** Where it came from, unasked (`visitContext`). */
   context?: VisitContext;
-  /** Bookings only: the Stripe dashboard link of a $100 deposit paid on the site. */
+  /** Bookings only: the Stripe dashboard link of a $100 deposit paid on the site, once Stripe has confirmed it. */
   deposit?: string;
 };
 
@@ -339,6 +339,8 @@ export type CalBooking = {
   location?: string;
   additionalNotes?: string;
   attendees?: { name?: string; email?: string }[];
+  /** Set by `bookCal` for a booking the site's deposit paid for. */
+  metadata?: { [k: string]: unknown };
 };
 
 /** When, in Julian's time, because that is where the sessions are. */
@@ -357,12 +359,8 @@ export const whenPT = (iso?: string) => {
     : "";
 };
 
-/** The deposit line `lib/deposit.ts` writes into a booking's notes. */
-const STRIPE_LINK = /https:\/\/dashboard\.stripe\.com\/(?:test\/)?payments\/pi_[A-Za-z0-9]+/;
-
 export function bookingEnquiry(p: CalBooking, at: number, id: string): Enquiry {
   const who = p.attendees?.[0] ?? {};
-  const deposit = p.additionalNotes?.match(STRIPE_LINK)?.[0];
   const message = [
     p.additionalNotes?.trim(),
     p.location ? `Location: ${p.location}` : "",
@@ -384,7 +382,6 @@ export function bookingEnquiry(p: CalBooking, at: number, id: string): Enquiry {
       id,
     ),
     type: "booking",
-    ...(deposit ? { deposit } : {}),
   };
 }
 

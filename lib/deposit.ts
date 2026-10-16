@@ -19,10 +19,12 @@ import { enquiry, enquiryKey, summary, whenPT } from "@/lib/inbox";
  *      location, so the card read "pending" after the booking was made
  *      (QA, 2026-10-16).
  *   5. Julian (2026-10-16) hears about it: hello@ gets a mail for every
- *      deposit booked, refunded, or paid and stuck. The booking's Cal.com
- *      notes carry the Stripe link, which is how its Inbox row (from
- *      Cal.com's own webhook) knows to say "Deposit paid". The client's
- *      receipt is Stripe's, from `receipt_email` on the intent.
+ *      deposit booked, refunded, or paid and stuck. The Cal.com booking
+ *      carries the intent id (metadata, and a ref in the notes). When
+ *      Cal.com's own webhook stores the booking, `paidFor` asks Stripe
+ *      whether that intent really paid for this booking before the Inbox
+ *      row says "Deposit paid": anyone can type a ref into their notes.
+ *      The client's receipt is Stripe's, from `receipt_email`.
  *
  * Stripe is called over its REST API with fetch, no SDK: three calls do
  * not need a dependency. Test-mode keys until Julian says live.
@@ -123,7 +125,7 @@ export async function isOpen(b: Booking): Promise<boolean> {
 }
 
 /** Books the time on Cal.com, as the picker does from the browser. */
-export async function bookCal(b: Booking, link: string): Promise<{ uid: string; start: string }> {
+export async function bookCal(b: Booking, intent: string): Promise<{ uid: string; start: string }> {
   const res = await fetch(`${CAL}/bookings`, {
     method: "POST",
     headers: { "cal-api-version": "2024-08-13", "Content-Type": "application/json" },
@@ -133,8 +135,9 @@ export async function bookCal(b: Booking, link: string): Promise<{ uid: string; 
       username: USER,
       attendee: { name: b.name, email: b.email, timeZone: b.timeZone, language: "en", ...(b.phone ? { phoneNumber: b.phone } : {}) },
       ...(b.where ? { location: { type: "attendeeDefined", location: b.where } } : {}),
+      metadata: { deposit: intent },
       bookingFieldsResponses: {
-        notes: [b.phone ? `Phone: ${b.phone}` : "", `Deposit paid on the site: $100. Stripe: ${link}`, b.notes ?? ""].filter(Boolean).join("\n"),
+        notes: [b.phone ? `Phone: ${b.phone}` : "", `Deposit paid on the site: $100 (ref ${intent}).`, b.notes ?? ""].filter(Boolean).join("\n"),
       },
     }),
   });
@@ -181,6 +184,24 @@ export function intentForm(b: Booking): { [k: string]: string } {
   // on the account (Cal.com's, invoices, payment links) alone.
   form["metadata[kind]"] = KIND;
   return form;
+}
+
+/**
+ * The Stripe link of the deposit that paid for this Cal.com booking, or
+ * nothing. Only an intent Stripe says succeeded, that is one of the site's
+ * deposits, and that was made for this booking's email and start counts.
+ */
+export async function paidFor(key: string, p: { startTime?: string; attendees?: { email?: string }[]; additionalNotes?: string; metadata?: { [k: string]: unknown } }) {
+  const ref = typeof p.metadata?.deposit === "string" ? p.metadata.deposit : p.additionalNotes?.match(/\bpi_[A-Za-z0-9]{8,64}\b/)?.[0];
+  if (!ref || !isIntentId(ref)) return undefined;
+  try {
+    const pi = (await stripe(key, `/payment_intents/${ref}`)) as { status?: string; amount?: number; currency?: string; metadata?: { [k: string]: string } };
+    const m = pi.metadata ?? {};
+    const same = m.email?.toLowerCase() === p.attendees?.[0]?.email?.toLowerCase() && Date.parse(m.start ?? "") === Date.parse(p.startTime ?? "");
+    return pi.status === "succeeded" && isDeposit(pi) && same ? dashboardLink(ref, key) : undefined;
+  } catch {
+    return undefined;
+  }
 }
 
 /** The booking back out of an intent's metadata. */
@@ -257,7 +278,7 @@ export async function settle(env: Env, intent: string, metadata: { [k: string]: 
   if (typeof b !== "string") {
     try {
       if (await isOpen(b)) {
-        const booking = await bookCal(b, link);
+        const booking = await bookCal(b, intent);
         await put({ status: "booked", booking });
         await tell(env, "booked", b, link);
         return "booked";

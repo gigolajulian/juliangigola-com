@@ -12,7 +12,7 @@ vi.mock("@opennextjs/cloudflare", () => ({ getCloudflareContext: async () => ({ 
 const { POST: start } = await import("@/app/api/deposit/route");
 const { GET: status } = await import("@/app/api/deposit/[id]/route");
 const { POST: hook } = await import("@/app/api/stripe/route");
-const { bookingEnquiry, summary } = await import("@/lib/inbox");
+const { paidFor } = await import("@/lib/deposit");
 
 const WHSEC = "whsec_test";
 const PI = "pi_TEST1234567890";
@@ -27,7 +27,7 @@ let refundOk: boolean;
 type Mail = { subject: string; text: string; replyTo?: { email: string } };
 let mails: Mail[];
 /** The intent as Stripe holds it: the webhook writes its outcome here. */
-let intent: { amount: number; currency: string; metadata: Record<string, string> };
+let intent: { status?: string; amount: number; currency: string; metadata: Record<string, string> };
 
 beforeEach(() => {
   calls = [];
@@ -170,7 +170,9 @@ describe("telling Julian", () => {
     expect(mails[0].text).toContain(LINK);
     expect(mails[0].replyTo?.email).toBe("qa@example.com");
     const cal = JSON.parse(String(calls.find((c) => c.url.includes("/v2/bookings"))!.init!.body));
-    expect(cal.bookingFieldsResponses.notes).toContain(`Deposit paid on the site: $100. Stripe: ${LINK}`);
+    expect(cal.metadata).toEqual({ deposit: PI });
+    expect(cal.bookingFieldsResponses.notes).toContain(`Deposit paid on the site: $100 (ref ${PI}).`);
+    expect(cal.bookingFieldsResponses.notes).not.toContain("dashboard.stripe.com");
   });
 
   it("mails a refund, and a deposit stuck paid", async () => {
@@ -189,11 +191,19 @@ describe("telling Julian", () => {
     expect(kv().json(`deposit:${PI}`).status).toBe("booked");
   });
 
-  it("marks the booking's Inbox row as paid from the Cal.com notes", () => {
-    const row = bookingEnquiry({ type: "portraits", attendees: [{ name: "QA Test", email: "qa@example.com" }], additionalNotes: `Deposit paid on the site: $100. Stripe: ${LINK}` }, 0, "id");
-    expect(row.deposit).toBe(LINK);
-    expect(summary(row).deposit).toBe(LINK);
-    expect(bookingEnquiry({ additionalNotes: "No deposit here." }, 0, "id").deposit).toBeUndefined();
+  it("marks a Cal.com booking paid only when Stripe agrees", async () => {
+    const booking = { startTime: START, attendees: [{ email: "QA@example.com" }], metadata: { deposit: PI } };
+    const paidIntent = { status: "succeeded", amount: 10000, currency: "usd", metadata: { kind: "deposit", email: "qa@example.com", start: START } };
+    intent = { ...paidIntent };
+    expect(await paidFor("sk_test_x", booking)).toBe(LINK);
+    // The same ref typed into the notes of a public Cal.com booking.
+    expect(await paidFor("sk_test_x", { startTime: START, attendees: [{ email: "qa@example.com" }], additionalNotes: `ref ${PI}` })).toBe(LINK);
+    // Someone else's deposit, another time, a payment that never went through, or no ref at all.
+    expect(await paidFor("sk_test_x", { ...booking, attendees: [{ email: "other@example.com" }] })).toBeUndefined();
+    expect(await paidFor("sk_test_x", { ...booking, startTime: "2030-01-01T00:00:00Z" })).toBeUndefined();
+    intent = { ...paidIntent, status: "requires_payment_method" };
+    expect(await paidFor("sk_test_x", booking)).toBeUndefined();
+    expect(await paidFor("sk_test_x", { startTime: START, additionalNotes: "Deposit paid on the site." })).toBeUndefined();
   });
 });
 
