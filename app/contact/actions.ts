@@ -73,7 +73,6 @@ const FROM = "enquiries@notifications.juliangigola.com";
  * only ever development — a shared bucket there is the right failure, since
  * the alternative is no cooldown at all.
  */
-
 async function senderHash(headers: Headers, day: string): Promise<string> {
   const ip =
     headers.get("cf-connecting-ip") ??
@@ -212,13 +211,16 @@ export async function submitEnquiry(
     let budget = 20 * 1024 * 1024;
     const offered = formData
       .getAll("refs")
-      .filter((f): f is File => f instanceof File && f.size > 0 && SAFE_IMAGE.test(f.type))
+      .filter((f): f is File => f instanceof File && f.size > 0)
+      // A HEIC can arrive with no type from a browser that does not know it.
+      .map((f) => (!f.type && /\.hei[cf]$/i.test(f.name) ? new File([f], f.name, { type: "image/heic" }) : f))
+      .filter((f) => SAFE_IMAGE.test(f.type))
       .slice(0, MAX_REFS - picks.length)
       .filter((f) => f.size <= 6 * 1024 * 1024 && (budget -= f.size) >= 0);
     // And the file is what it says it is (`isPicture`, lib/inbox.ts).
     const uploads = (
       await Promise.all(
-        offered.map(async (f) => (isPicture(new Uint8Array(await f.slice(0, 8).arrayBuffer()), f.type) ? f : null)),
+        offered.map(async (f) => (isPicture(new Uint8Array(await f.slice(0, 12).arrayBuffer()), f.type) ? f : null)),
       )
     ).filter((f): f is File => f !== null);
 

@@ -89,7 +89,7 @@ export function ReferencePicks({ resync }: { resync: unknown }) {
         <label className={cn(button, room <= 0 && "pointer-events-none opacity-40")}>
           <input
             type="file"
-            accept="image/*"
+            accept="image/*,.heic,.heif"
             multiple
             className="sr-only"
             disabled={room <= 0}
