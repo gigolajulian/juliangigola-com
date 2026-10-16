@@ -709,13 +709,6 @@
           "alt": ""
         },
         {
-          "src": "/work/paranoia/05.jpg",
-          "width": 2500,
-          "height": 3125,
-          "color": "#080808",
-          "alt": ""
-        },
-        {
           "src": "/work/paranoia/06.jpg",
           "width": 2500,
           "height": 3125,
@@ -731,13 +724,6 @@
         },
         {
           "src": "/work/paranoia/08.jpg",
-          "width": 2500,
-          "height": 3125,
-          "color": "#080808",
-          "alt": ""
-        },
-        {
-          "src": "/work/paranoia/09.jpg",
           "width": 2500,
           "height": 3125,
           "color": "#080808",
@@ -878,21 +864,7 @@
           "alt": ""
         },
         {
-          "src": "/work/second-skin/09.jpg",
-          "width": 2500,
-          "height": 3125,
-          "color": "#080808",
-          "alt": ""
-        },
-        {
           "src": "/work/second-skin/01.jpg",
-          "width": 2500,
-          "height": 3125,
-          "color": "#080808",
-          "alt": ""
-        },
-        {
-          "src": "/work/second-skin/02.jpg",
           "width": 2500,
           "height": 3125,
           "color": "#080808",
@@ -910,20 +882,6 @@
           "width": 2500,
           "height": 3125,
           "color": "#082838",
-          "alt": ""
-        },
-        {
-          "src": "/work/second-skin/05.jpg",
-          "width": 2500,
-          "height": 3125,
-          "color": "#080808",
-          "alt": ""
-        },
-        {
-          "src": "/work/second-skin/06.jpg",
-          "width": 2500,
-          "height": 3125,
-          "color": "#080808",
           "alt": ""
         },
         {
@@ -1557,14 +1515,14 @@
       "/work/valgur/04.jpg",
       "/work/valgur/06.jpg",
       "/work/valgur/08.jpg",
-      "/work/valgur/16.jpg",
       "/work/valgur/11.jpg",
-      "/work/valgur/01.jpg",
       "/work/valgur/13.jpg",
+      "/work/valgur/01.jpg",
+      "/work/valgur/10.jpg",
       "/work/valgur/03.jpg",
       "/work/valgur/15.jpg",
+      "/work/valgur/16.jpg",
       "/work/valgur/07.jpg",
-      "/work/valgur/10.jpg",
       "/work/valgur/09.jpg"
     ],
     "coral-synthmorph": [
@@ -1616,16 +1574,15 @@
       "/work/weddings/01.jpg",
       "/work/weddings/02.jpg",
       "/work/weddings/07.jpg",
+      "/work/weddings/25.jpg",
+      "/work/weddings/20.jpg",
       "/work/weddings/13.jpg",
       "/work/weddings/29.jpg",
       "/work/weddings/03.jpg",
-      "/work/weddings/12.jpg",
-      "/work/weddings/08.jpg",
       "/work/weddings/14.jpg",
-      "/work/weddings/20.jpg",
-      "/work/weddings/25.jpg",
-      "/work/weddings/34.jpg",
-      "/work/weddings/40.jpg"
+      "/work/weddings/12.jpg",
+      "/work/weddings/40.jpg",
+      "/work/weddings/34.jpg"
     ],
     "light-play": [
       "/work/light-play/01.jpg",
@@ -1684,19 +1641,15 @@
     ],
     "nabu": [
       "/work/nabu/57.jpg",
-      "/work/nabu/01.jpg",
+      "/work/nabu/43.jpg",
       "/work/nabu/59.jpg",
+      "/work/nabu/01.jpg",
       "/work/nabu/02.jpg",
       "/work/nabu/11.jpg",
-      "/work/nabu/17.jpg",
-      "/work/nabu/43.jpg",
-      "/work/nabu/51.jpg",
       "/work/nabu/29.jpg",
       "/work/nabu/32.jpg",
       "/work/nabu/67.jpg",
-      "/work/nabu/79.jpg",
-      "/work/nabu/83.jpg",
-      "/work/nabu/88.jpg"
+      "/work/nabu/83.jpg"
     ],
     "frostbite": [
       "/work/frostbite/02.jpg",
@@ -1956,18 +1909,18 @@
     "ukiyosunknown": [
       "/work/ukiyosunknown/01.jpg",
       "/work/ukiyosunknown/03.jpg",
-      "/work/ukiyosunknown/02.jpg",
       "/work/ukiyosunknown/06.jpg",
+      "/work/ukiyosunknown/02.jpg",
       "/work/ukiyosunknown/08.jpg",
-      "/work/ukiyosunknown/10.jpg",
       "/work/ukiyosunknown/13.jpg",
-      "/work/ukiyosunknown/19.jpg",
+      "/work/ukiyosunknown/10.jpg",
       "/work/ukiyosunknown/14.jpg",
       "/work/ukiyosunknown/18.jpg",
       "/work/ukiyosunknown/16.jpg",
+      "/work/ukiyosunknown/19.jpg",
+      "/work/ukiyosunknown/23.jpg",
       "/work/ukiyosunknown/20.jpg",
-      "/work/ukiyosunknown/21.jpg",
-      "/work/ukiyosunknown/23.jpg"
+      "/work/ukiyosunknown/21.jpg"
     ],
     "luxe-meets-future": [
       "/work/luxe-meets-future/02.jpg",
@@ -2036,6 +1989,242 @@
       "/work/events/19.jpg",
       "/work/events/20.jpg",
       "/work/events/22.jpg"
+    ],
+    "aether": [
+      "/work/aether/11.jpg",
+      "/work/aether/03.jpg",
+      "/work/aether/05.jpg",
+      "/work/aether/01.jpg",
+      "/work/aether/13.jpg",
+      "/work/aether/12.jpg",
+      "/work/aether/02.jpg"
+    ],
+    "byte-me": [
+      "/work/byte-me/17.jpg",
+      "/work/byte-me/01.jpg",
+      "/work/byte-me/12.jpg",
+      "/work/byte-me/03.jpg",
+      "/work/byte-me/11.jpg",
+      "/work/byte-me/05.jpg",
+      "/work/byte-me/09.jpg",
+      "/work/byte-me/07.jpg",
+      "/work/byte-me/08.jpg",
+      "/work/byte-me/10.jpg"
+    ],
+    "cyber1a": [
+      "/work/cyber1a/01.jpg",
+      "/work/cyber1a/09.jpg",
+      "/work/cyber1a/02.jpg",
+      "/work/cyber1a/10.jpg",
+      "/work/cyber1a/08.jpg",
+      "/work/cyber1a/11.jpg",
+      "/work/cyber1a/13.jpg",
+      "/work/cyber1a/12.jpg",
+      "/work/cyber1a/05.jpg",
+      "/work/cyber1a/06.jpg",
+      "/work/cyber1a/04.jpg",
+      "/work/cyber1a/03.jpg"
+    ],
+    "cyberscape": [
+      "/work/cyberscape/01.jpg",
+      "/work/cyberscape/09.jpg",
+      "/work/cyberscape/10.jpg",
+      "/work/cyberscape/06.jpg",
+      "/work/cyberscape/03.jpg",
+      "/work/cyberscape/07.jpg",
+      "/work/cyberscape/05.jpg",
+      "/work/cyberscape/12.jpg",
+      "/work/cyberscape/04.jpg"
+    ],
+    "entangled": [
+      "/work/entangled/01.jpg",
+      "/work/entangled/03.jpg",
+      "/work/entangled/04.jpg",
+      "/work/entangled/02.jpg",
+      "/work/entangled/14.jpg",
+      "/work/entangled/11.jpg",
+      "/work/entangled/12.jpg",
+      "/work/entangled/10.jpg",
+      "/work/entangled/13.jpg",
+      "/work/entangled/08.jpg",
+      "/work/entangled/05.jpg",
+      "/work/entangled/07.jpg",
+      "/work/entangled/09.jpg"
+    ],
+    "goodcult": [
+      "/work/goodcult/01.jpg",
+      "/work/goodcult/02.jpg",
+      "/work/goodcult/07.jpg",
+      "/work/goodcult/04.jpg",
+      "/work/goodcult/05.jpg",
+      "/work/goodcult/06.jpg",
+      "/work/goodcult/15.jpg",
+      "/work/goodcult/17.jpg",
+      "/work/goodcult/12.jpg",
+      "/work/goodcult/08.jpg",
+      "/work/goodcult/11.jpg",
+      "/work/goodcult/13.jpg",
+      "/work/goodcult/14.jpg",
+      "/work/goodcult/10.jpg"
+    ],
+    "graduation": [
+      "/work/graduation/01.jpg",
+      "/work/graduation/03.jpg",
+      "/work/graduation/04.jpg",
+      "/work/graduation/02.jpg",
+      "/work/graduation/06.jpg",
+      "/work/graduation/07.jpg",
+      "/work/graduation/05.jpg",
+      "/work/graduation/08.jpg",
+      "/work/graduation/09.jpg",
+      "/work/graduation/10.jpg",
+      "/work/graduation/11.jpg",
+      "/work/graduation/13.jpg",
+      "/work/graduation/14.jpg",
+      "/work/graduation/15.jpg"
+    ],
+    "headshots": [
+      "/work/headshots/01.jpg",
+      "/work/headshots/02.jpg",
+      "/work/headshots/03.jpg",
+      "/work/headshots/04.jpg",
+      "/work/headshots/05.jpg",
+      "/work/headshots/12.jpg",
+      "/work/headshots/06.jpg",
+      "/work/headshots/07.jpg",
+      "/work/headshots/10.jpg",
+      "/work/headshots/13.jpg",
+      "/work/headshots/08.jpg",
+      "/work/headshots/11.jpg"
+    ],
+    "info-overload": [
+      "/work/info-overload/01.jpg",
+      "/work/info-overload/04.jpg",
+      "/work/info-overload/05.jpg",
+      "/work/info-overload/11.jpg",
+      "/work/info-overload/12.jpg",
+      "/work/info-overload/02.jpg",
+      "/work/info-overload/14.jpg",
+      "/work/info-overload/17.jpg",
+      "/work/info-overload/13.jpg",
+      "/work/info-overload/16.jpg"
+    ],
+    "metamorphosis": [
+      "/work/metamorphosis/12.jpg",
+      "/work/metamorphosis/05.jpg",
+      "/work/metamorphosis/09.jpg",
+      "/work/metamorphosis/06.jpg",
+      "/work/metamorphosis/07.jpg",
+      "/work/metamorphosis/01.jpg",
+      "/work/metamorphosis/10.jpg",
+      "/work/metamorphosis/11.jpg",
+      "/work/metamorphosis/13.jpg",
+      "/work/metamorphosis/03.jpg"
+    ],
+    "mya": [
+      "/work/mya/01.jpg",
+      "/work/mya/06.jpg",
+      "/work/mya/05.jpg",
+      "/work/mya/02.jpg",
+      "/work/mya/13.jpg",
+      "/work/mya/09.jpg",
+      "/work/mya/07.jpg"
+    ],
+    "paranoia": [
+      "/work/paranoia/13.jpg",
+      "/work/paranoia/01.jpg",
+      "/work/paranoia/02.jpg",
+      "/work/paranoia/04.jpg",
+      "/work/paranoia/03.jpg",
+      "/work/paranoia/06.jpg",
+      "/work/paranoia/11.jpg",
+      "/work/paranoia/08.jpg",
+      "/work/paranoia/07.jpg",
+      "/work/paranoia/12.jpg",
+      "/work/paranoia/10.jpg"
+    ],
+    "sage": [
+      "/work/sage/11.jpg",
+      "/work/sage/08.jpg",
+      "/work/sage/10.jpg",
+      "/work/sage/06.jpg",
+      "/work/sage/09.jpg",
+      "/work/sage/02.jpg",
+      "/work/sage/04.jpg",
+      "/work/sage/01.jpg",
+      "/work/sage/05.jpg",
+      "/work/sage/03.jpg",
+      "/work/sage/13.jpg",
+      "/work/sage/14.jpg"
+    ],
+    "sago": [
+      "/work/sago/01.jpg",
+      "/work/sago/05.jpg",
+      "/work/sago/02.jpg",
+      "/work/sago/03.jpg",
+      "/work/sago/04.jpg",
+      "/work/sago/11.jpg",
+      "/work/sago/12.jpg",
+      "/work/sago/13.jpg",
+      "/work/sago/09.jpg",
+      "/work/sago/06.jpg",
+      "/work/sago/07.jpg"
+    ],
+    "second-skin": [
+      "/work/second-skin/13.jpg",
+      "/work/second-skin/08.jpg",
+      "/work/second-skin/17.jpg",
+      "/work/second-skin/07.jpg",
+      "/work/second-skin/10.jpg",
+      "/work/second-skin/03.jpg",
+      "/work/second-skin/15.jpg",
+      "/work/second-skin/11.jpg",
+      "/work/second-skin/14.jpg",
+      "/work/second-skin/16.jpg",
+      "/work/second-skin/04.jpg",
+      "/work/second-skin/12.jpg"
+    ],
+    "taneka": [
+      "/work/taneka/09.jpg",
+      "/work/taneka/07.jpg",
+      "/work/taneka/10.jpg",
+      "/work/taneka/04.jpg",
+      "/work/taneka/05.jpg",
+      "/work/taneka/01.jpg",
+      "/work/taneka/17.jpg",
+      "/work/taneka/13.jpg",
+      "/work/taneka/12.jpg"
+    ],
+    "vines-roses": [
+      "/work/vines-roses/09.jpg",
+      "/work/vines-roses/13.jpg",
+      "/work/vines-roses/02.jpg",
+      "/work/vines-roses/07.jpg",
+      "/work/vines-roses/10.jpg",
+      "/work/vines-roses/06.jpg",
+      "/work/vines-roses/04.jpg",
+      "/work/vines-roses/05.jpg",
+      "/work/vines-roses/03.jpg",
+      "/work/vines-roses/12.jpg"
+    ],
+    "wired-magazine": [
+      "/work/wired-magazine/05.jpg",
+      "/work/wired-magazine/14.jpg",
+      "/work/wired-magazine/01.jpg",
+      "/work/wired-magazine/04.jpg",
+      "/work/wired-magazine/13.jpg",
+      "/work/wired-magazine/07.jpg",
+      "/work/wired-magazine/03.jpg",
+      "/work/wired-magazine/10.jpg",
+      "/work/wired-magazine/08.jpg",
+      "/work/wired-magazine/11.jpg",
+      "/work/wired-magazine/06.jpg",
+      "/work/wired-magazine/09.jpg",
+      "/work/wired-magazine/18.jpg",
+      "/work/wired-magazine/12.jpg",
+      "/work/wired-magazine/02.jpg",
+      "/work/wired-magazine/17.jpg",
+      "/work/wired-magazine/15.jpg"
     ]
   },
   "hidden": [

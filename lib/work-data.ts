@@ -1592,53 +1592,11 @@ export const PROJECTS: Project[] = [
         "alt": "Seated on the floor leaning back on one arm, braids falling, sheer camisole and denim shorts"
       },
       {
-        "src": "/work/aether/04.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#A6A6C0",
-        "alt": "Seen from above, kneeling on a blue-grey floor with one hand planted, braids over a shoulder"
-      },
-      {
         "src": "/work/aether/05.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#262626",
         "alt": "Propped on one arm with the head tilted, long braids, sheer camisole, denim shorts"
-      },
-      {
-        "src": "/work/aether/06.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#595973",
-        "alt": "Leaning on a hand on the floor, looking up at the lens, braids down the back"
-      },
-      {
-        "src": "/work/aether/07.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#C0C0D9",
-        "alt": "Leaning back on both hands on the floor, head tilted toward the light, braids hanging"
-      },
-      {
-        "src": "/work/aether/08.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#404040",
-        "alt": "Standing and leaning toward the camera, braids hanging forward, sheer camisole with garter straps"
-      },
-      {
-        "src": "/work/aether/09.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#262626",
-        "alt": "Bending forward with a hand on a knee, braids swinging, hard light from the upper left"
-      },
-      {
-        "src": "/work/aether/10.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#262626",
-        "alt": "Close crop, head tilted onto one shoulder, camisole strap and beaded necklaces, dark grey backdrop"
       },
       {
         "src": "/work/aether/11.jpg",
@@ -2015,13 +1973,6 @@ export const PROJECTS: Project[] = [
         "alt": "Seated on the floor leaning back on one arm, open-knit top, black tie, black shorts"
       },
       {
-        "src": "/work/byte-me/02.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#A6A6A6",
-        "alt": "Seated with one knee raised, cream open-knit top, black tie hanging loose, head tilted, grey backdrop"
-      },
-      {
         "src": "/work/byte-me/03.jpg",
         "width": 2499,
         "height": 3124,
@@ -2029,25 +1980,11 @@ export const PROJECTS: Project[] = [
         "alt": "Seated sideways in black shorts and sneakers, white socks, hands clasped at a shin, looking back"
       },
       {
-        "src": "/work/byte-me/04.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#8C8C8C",
-        "alt": "Seated leaning on both hands, knit top slipping off one shoulder, black choker tie, pleated skirt"
-      },
-      {
         "src": "/work/byte-me/05.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#8C8C8C",
         "alt": "Twisted away from the camera, looking back over a shoulder, open-knit top, black tie, pleated skirt"
-      },
-      {
-        "src": "/work/byte-me/06.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#8C8C8C",
-        "alt": "Crouched low with feet wide in sneakers, one hand holding the end of a black tie"
       },
       {
         "src": "/work/byte-me/07.jpg",
@@ -2090,34 +2027,6 @@ export const PROJECTS: Project[] = [
         "height": 3124,
         "color": "#737373",
         "alt": "One hand to the forehead, tie loose around the neck, open-knit top, pleated skirt, wide stance"
-      },
-      {
-        "src": "/work/byte-me/13.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#8C8C8C",
-        "alt": "Close crop, head tipped far to one side, off-shoulder knit over a black strap, black tie"
-      },
-      {
-        "src": "/work/byte-me/14.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#8C8C8C",
-        "alt": "Pulling a black tie out to one side, flared knit sleeves, pleated skirt, looking at the lens"
-      },
-      {
-        "src": "/work/byte-me/15.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#A6A6A6",
-        "alt": "Thick black-framed glasses, head tipped to one side, arms bent, knit top over a pleated skirt, black tie"
-      },
-      {
-        "src": "/work/byte-me/16.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#A6A6A6",
-        "alt": "Thick black-framed glasses, one hand on the hip, plucking at the knit top off a shoulder, black tie"
       },
       {
         "src": "/work/byte-me/17.jpg",
@@ -2520,13 +2429,6 @@ export const PROJECTS: Project[] = [
         "alt": "Two people close to the lens in sunglasses and black tops, one reaching a hand toward it"
       },
       {
-        "src": "/work/cyber1a/07.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#0C260C",
-        "alt": "Seated on a CRT in a black patent jacket, a screen stack behind, orange wall, blue light"
-      },
-      {
         "src": "/work/cyber1a/08.jpg",
         "width": 2499,
         "height": 3124,
@@ -2567,13 +2469,6 @@ export const PROJECTS: Project[] = [
         "height": 3124,
         "color": "#260C26",
         "alt": "Seated on a CRT in a mesh-sleeved top and platform shoes, red wall, glowing screens"
-      },
-      {
-        "src": "/work/cyber1a/14.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#400C26",
-        "alt": "Seated on a glowing CRT in a fur coat and fishnets, red wall, face lifted"
       }
     ]
   },
@@ -2604,13 +2499,6 @@ export const PROJECTS: Project[] = [
         "height": 3124,
         "color": "#0C260C",
         "alt": "Seated on a CRT in a black leather bodysuit and fringed chaps, revolver, face harness, repeating text behind"
-      },
-      {
-        "src": "/work/cyberscape/02.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#0C260C",
-        "alt": "Looking back over a shoulder, seated on a CRT in fringed chaps, chrome sunglasses, red and blue light"
       },
       {
         "src": "/work/cyberscape/03.jpg",
@@ -2648,13 +2536,6 @@ export const PROJECTS: Project[] = [
         "alt": "Seated holding a revolver upright, black leather bodysuit, chaps with red stitching, face harness, blue backdrop"
       },
       {
-        "src": "/work/cyberscape/08.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#0C260C",
-        "alt": "Head resting on folded arms over a CRT showing a matching frame, chrome sunglasses, magenta glow"
-      },
-      {
         "src": "/work/cyberscape/09.jpg",
         "width": 2499,
         "height": 3124,
@@ -2669,25 +2550,11 @@ export const PROJECTS: Project[] = [
         "alt": "Hand at the cheek, face tilted up, star stickers by the eye, black top, teal and red light"
       },
       {
-        "src": "/work/cyberscape/11.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#0C260C",
-        "alt": "Reclining in a plaid mini skirt and black top beside a glowing CRT, head tipped back"
-      },
-      {
         "src": "/work/cyberscape/12.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#0C260C",
         "alt": "Hand in the hair, star stickers on the cheek, black strappy top, plaid skirt, red and cyan light"
-      },
-      {
-        "src": "/work/cyberscape/13.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#0C260C",
-        "alt": "Tight crop, head resting on a hand, tousled hair, star stickers, black top, red and blue light"
       }
     ]
   },
@@ -2900,13 +2767,6 @@ export const PROJECTS: Project[] = [
         "height": 3124,
         "color": "#D9D9D9",
         "alt": "Kneeling on a white floor, one arm reaching along thick red rope, red lace dress"
-      },
-      {
-        "src": "/work/entangled/06.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#D9D9D9",
-        "alt": "Double-exposure blur of a face and shoulders, red straps and cord, pale backdrop"
       },
       {
         "src": "/work/entangled/07.jpg",
@@ -3524,13 +3384,6 @@ export const PROJECTS: Project[] = [
         "alt": "Seated on a yellow block in a printed hoodie and jeans, disco ball on the carpet, mustard walls"
       },
       {
-        "src": "/work/goodcult/16.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#965917",
-        "alt": "Standing in a printed hoodie and baggy jeans, hands in pockets, mustard corner, deep red carpet"
-      },
-      {
         "src": "/work/goodcult/17.jpg",
         "width": 2499,
         "height": 3124,
@@ -3638,13 +3491,6 @@ export const PROJECTS: Project[] = [
         "alt": "From behind on concrete steps in a white dress and woven sash, holding a decorated cap, black heels"
       },
       {
-        "src": "/work/graduation/12.jpg",
-        "width": 719,
-        "height": 1079,
-        "color": "#9E9E97",
-        "alt": "Standing on concrete steps in a white mini dress, green woven graduation sash, black heels"
-      },
-      {
         "src": "/work/graduation/13.jpg",
         "width": 2428,
         "height": 3642,
@@ -3745,13 +3591,6 @@ export const PROJECTS: Project[] = [
         "alt": ""
       },
       {
-        "src": "/work/headshots/09.jpg",
-        "width": 2428,
-        "height": 3642,
-        "color": "#262626",
-        "alt": "Smiling headshot in a black crew neck tee against a black backdrop, short dark hair"
-      },
-      {
         "src": "/work/headshots/10.jpg",
         "width": 2428,
         "height": 3642,
@@ -3778,13 +3617,6 @@ export const PROJECTS: Project[] = [
         "height": 3642,
         "color": "#262626",
         "alt": "Smiling headshot, short dark hair, black long-sleeve tee, black backdrop, crossed arms"
-      },
-      {
-        "src": "/work/headshots/14.jpg",
-        "width": 2428,
-        "height": 3642,
-        "color": "#D9A673",
-        "alt": "Smiling headshot in round wire glasses and a black tee, short dark hair, black backdrop"
       }
     ]
   },
@@ -3995,13 +3827,6 @@ export const PROJECTS: Project[] = [
         "alt": "Leaning back against newspaper walls in a black top and fishnets, chains at the hips, red light"
       },
       {
-        "src": "/work/info-overload/03.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#260C0C",
-        "alt": "Extreme close crop, hands at the face, dark lipstick and face studs, fishnet and red light"
-      },
-      {
         "src": "/work/info-overload/04.jpg",
         "width": 2499,
         "height": 3124,
@@ -4014,41 +3839,6 @@ export const PROJECTS: Project[] = [
         "height": 3124,
         "color": "#260C0C",
         "alt": "Perched on a CRT in a strappy black top and studded trousers, hand at the cheek, red light"
-      },
-      {
-        "src": "/work/info-overload/06.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#260C0C",
-        "alt": "Head tilted on an arm resting on a CRT, hair in buns, dark lipstick, newspaper wall, red light"
-      },
-      {
-        "src": "/work/info-overload/07.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#260C0C",
-        "alt": "Leaning over a CRT showing a face on screen, arms crossed on top, hair buns, red light"
-      },
-      {
-        "src": "/work/info-overload/08.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#262626",
-        "alt": "Close crop with a chrome cuff, a hand drawn across the face, newspaper wall, red and blue light"
-      },
-      {
-        "src": "/work/info-overload/09.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#260C26",
-        "alt": "Wide shot, leaning on a CRT in a black outfit with buckled trousers, red newspaper room"
-      },
-      {
-        "src": "/work/info-overload/10.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#260C0C",
-        "alt": "Tight crop on a chain choker and dog tags, loose black hair, black top, red light"
       },
       {
         "src": "/work/info-overload/11.jpg",
@@ -4077,13 +3867,6 @@ export const PROJECTS: Project[] = [
         "height": 3124,
         "color": "#262626",
         "alt": "Profile beside a CRT showing a mouth in close-up, chain earrings, cyan and blue light"
-      },
-      {
-        "src": "/work/info-overload/15.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#0C260C",
-        "alt": "Holding a black chain handbag toward the lens, hair buns, dark lipstick, blue newspaper room"
       },
       {
         "src": "/work/info-overload/16.jpg",
@@ -4900,25 +4683,11 @@ export const PROJECTS: Project[] = [
         "alt": "Crouched in chunky black boots and a fringed skirt, branching silver mask, blue-lit backdrop"
       },
       {
-        "src": "/work/metamorphosis/02.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#264040",
-        "alt": "Seated with hands on the knees, branching silver mask, black strapless top and tights, teal backdrop"
-      },
-      {
         "src": "/work/metamorphosis/03.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#0C260C",
         "alt": "Seated on top of a CRT showing a silhouette, branching mask, black top and fringe, teal light"
-      },
-      {
-        "src": "/work/metamorphosis/04.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#264059",
-        "alt": "Kneeling with a turned head, branching silver mask, black top, fringed skirt, white spotlight glow"
       },
       {
         "src": "/work/metamorphosis/05.jpg",
@@ -4940,13 +4709,6 @@ export const PROJECTS: Project[] = [
         "height": 3124,
         "color": "#264059",
         "alt": "Seated on a CRT with arms raised overhead, branching mask, black top, a glowing screen below"
-      },
-      {
-        "src": "/work/metamorphosis/08.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#264059",
-        "alt": "Standing on a CRT with one boot up, black gloves, branching mask, a figure on the screen below"
       },
       {
         "src": "/work/metamorphosis/09.jpg",
@@ -5107,20 +4869,6 @@ export const PROJECTS: Project[] = [
         "alt": "Seated on a white floor in a black bodysuit and suede ankle boots, fingers at the lips"
       },
       {
-        "src": "/work/mya/03.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#F3F3F3",
-        "alt": "Seated with knees up, arms crossed over them, chin on a hand, black bodysuit, white backdrop"
-      },
-      {
-        "src": "/work/mya/04.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#F3F3F3",
-        "alt": "Seated on the floor, one hand raised to the chin, black bodysuit and ankle boots, white backdrop"
-      },
-      {
         "src": "/work/mya/05.jpg",
         "width": 2499,
         "height": 3124,
@@ -5142,39 +4890,11 @@ export const PROJECTS: Project[] = [
         "alt": "Reclining on one arm in a black bodysuit and yellow-lensed sunglasses, white backdrop"
       },
       {
-        "src": "/work/mya/08.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#F3F3F3",
-        "alt": "Seated leaning on one hand, black oversized sunglasses lifted by the other, black bodysuit, white backdrop"
-      },
-      {
         "src": "/work/mya/09.jpg",
         "width": 2499,
         "height": 3124,
         "color": "#F3F3F3",
         "alt": "Seated leaning back on one hand, oversized black sunglasses, black bodysuit, white backdrop"
-      },
-      {
-        "src": "/work/mya/10.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#26A6C0",
-        "alt": "Standing in a pink bikini, one hand in the hair, smiling, a teal backdrop"
-      },
-      {
-        "src": "/work/mya/11.jpg",
-        "width": 2499,
-        "height": 3439,
-        "color": "#40A6C0",
-        "alt": "Hand at the cheek, head tilted, pink bikini, pendant necklace, bright teal backdrop"
-      },
-      {
-        "src": "/work/mya/12.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#260C0C",
-        "alt": "Close crop, smiling, long wavy hair, pink bikini top, pendant necklace, teal backdrop"
       },
       {
         "src": "/work/mya/13.jpg",
@@ -5250,13 +4970,6 @@ export const PROJECTS: Project[] = [
         "alt": "Tight crop of two people in black shirts with white lettering, stark overhead light"
       },
       {
-        "src": "/work/nabu/51.jpg",
-        "width": 2499,
-        "height": 3333,
-        "color": "#262626",
-        "alt": "Seen from behind at full length, black shirt with a white star emblem, paisley shorts and sneakers"
-      },
-      {
         "src": "/work/nabu/57.jpg",
         "width": 2499,
         "height": 3333,
@@ -5290,13 +5003,6 @@ export const PROJECTS: Project[] = [
         "height": 3641,
         "color": "#D9C0A6",
         "alt": "Seen from behind in a stone archway, tan shirt with a white star emblem, long dark hair"
-      },
-      {
-        "src": "/work/nabu/88.jpg",
-        "width": 2429,
-        "height": 3641,
-        "color": "#262626",
-        "alt": "Leaning back on a rock face in a tan shirt and jeans, one foot raised, white sneakers"
       }
     ]
   },
@@ -6208,13 +5914,6 @@ export const PROJECTS: Project[] = [
         "alt": "Seated with an arm across the knee, white lace-up boots, blue shiny top, grey backdrop"
       },
       {
-        "src": "/work/sage/07.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#595959",
-        "alt": "Seated on a white floor with a hand on the head, white lace-up boots, blue top, disco ball"
-      },
-      {
         "src": "/work/sage/08.jpg",
         "width": 2499,
         "height": 3124,
@@ -6241,13 +5940,6 @@ export const PROJECTS: Project[] = [
         "height": 3124,
         "color": "#8CA6A6",
         "alt": ""
-      },
-      {
-        "src": "/work/sage/12.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#A67373",
-        "alt": "Crouched in a black and red printed dress and boots, drum machine on the floor, red backdrop"
       },
       {
         "src": "/work/sage/13.jpg",
@@ -6348,13 +6040,6 @@ export const PROJECTS: Project[] = [
         "height": 3124,
         "color": "#D9D9D9",
         "alt": "Turned to the side in a grey fleece jacket, black trousers and sunglasses, teal painting behind"
-      },
-      {
-        "src": "/work/sago/10.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#D9D9D9",
-        "alt": "Hands on a black headscarf and white sunglasses, black jacket, denim shorts, teal painting behind"
       },
       {
         "src": "/work/sago/11.jpg",
@@ -6932,20 +6617,6 @@ export const PROJECTS: Project[] = [
         "alt": ""
       },
       {
-        "src": "/work/taneka/02.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#F3F3F3",
-        "alt": "Reclining on one arm on a white floor in a black bodysuit, long streaked hair, glancing sideways"
-      },
-      {
-        "src": "/work/taneka/03.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#F3F3F3",
-        "alt": "Seated leaning on one hand in a black scoop-neck bodysuit, streaked hair, white backdrop"
-      },
-      {
         "src": "/work/taneka/04.jpg",
         "width": 2499,
         "height": 3124,
@@ -6960,25 +6631,11 @@ export const PROJECTS: Project[] = [
         "alt": "Seated with an arm over the head in a black bodysuit and white socks, white backdrop"
       },
       {
-        "src": "/work/taneka/06.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#F3F3F3",
-        "alt": "Seated leaning on one hand, looking at the lens, black bodysuit, white socks, white backdrop"
-      },
-      {
         "src": "/work/taneka/07.jpg",
         "width": 2499,
         "height": 2856,
         "color": "#8C8C8C",
         "alt": "Lying on the front on a grey floor, head on an arm, black bodysuit, streaked hair"
-      },
-      {
-        "src": "/work/taneka/08.jpg",
-        "width": 2499,
-        "height": 2856,
-        "color": "#737373",
-        "alt": "Lying on one side propped on an arm, black bodysuit, long hair, grey backdrop"
       },
       {
         "src": "/work/taneka/09.jpg",
@@ -6995,13 +6652,6 @@ export const PROJECTS: Project[] = [
         "alt": "Propped on both arms over a grey floor, head tilted, black bodysuit, soft side light"
       },
       {
-        "src": "/work/taneka/11.jpg",
-        "width": 2499,
-        "height": 2856,
-        "color": "#737373",
-        "alt": "Lying on one side with a hand flat on the floor, black bodysuit, grey backdrop"
-      },
-      {
         "src": "/work/taneka/12.jpg",
         "width": 2499,
         "height": 3124,
@@ -7014,27 +6664,6 @@ export const PROJECTS: Project[] = [
         "height": 3124,
         "color": "#F3F3F3",
         "alt": "Head tilted over a shoulder in a black bodysuit, one hand planted, pale pink backdrop"
-      },
-      {
-        "src": "/work/taneka/14.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#F3F3F3",
-        "alt": "Seated leaning on one hand, head tilted, black bodysuit, pink halo behind, white floor"
-      },
-      {
-        "src": "/work/taneka/15.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#F3F3F3",
-        "alt": "Seated leaning on one arm, looking at the lens, black bodysuit, soft pink backlight"
-      },
-      {
-        "src": "/work/taneka/16.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#F3F3F3",
-        "alt": "Reclining on a hip with a hand on the knee, black bodysuit, thin necklace, pink-lit backdrop"
       },
       {
         "src": "/work/taneka/17.jpg",
@@ -7933,13 +7562,6 @@ export const PROJECTS: Project[] = [
         "alt": "Leaning on one hand over the soil, head tilted, red roses and ivy vines, wet-look hair"
       },
       {
-        "src": "/work/vines-roses/08.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#262626",
-        "alt": "On hands and knees on the soil mound, red roses and ivy vines, looking up, scattered petals"
-      },
-      {
         "src": "/work/vines-roses/09.jpg",
         "width": 2499,
         "height": 3124,
@@ -7952,13 +7574,6 @@ export const PROJECTS: Project[] = [
         "height": 3124,
         "color": "#262626",
         "alt": "Standing and bending forward with ivy vines and red roses, looking at the lens, grey backdrop"
-      },
-      {
-        "src": "/work/vines-roses/11.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#262626",
-        "alt": "Standing with both hands in the hair, red roses and ivy vines, soil mound at the feet"
       },
       {
         "src": "/work/vines-roses/12.jpg",
@@ -8312,13 +7927,6 @@ export const PROJECTS: Project[] = [
         "height": 3124,
         "color": "#5973A6",
         "alt": "Standing at a rooftop wall in a white WIRED tee holding a blue mug, looking aside, skyline"
-      },
-      {
-        "src": "/work/wired-magazine/16.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#262626",
-        "alt": "Two people standing in white and black WIRED tees, sunglasses, long hair, a glass building behind"
       },
       {
         "src": "/work/wired-magazine/17.jpg",
