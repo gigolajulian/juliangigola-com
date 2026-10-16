@@ -290,9 +290,9 @@ export function DepositStep({
           {error ? <p role="alert" className="text-sm normal-case text-foreground">{error}</p> : null}
           <div className="flex flex-col gap-4 border-t border-border pt-5 sm:flex-row sm:items-center sm:justify-between">
             {/* The card goes to Stripe's own fields, never to this site (Julian). */}
-            <span className="flex max-w-[40ch] items-center gap-2 text-sm normal-case leading-relaxed text-muted-foreground">
+            <span className="label flex items-center gap-2 whitespace-nowrap text-muted-foreground">
               <svg aria-hidden viewBox="0 0 12 14" className="w-3 shrink-0" fill="none" stroke="currentColor" strokeWidth="1.3"><rect x="1" y="6" width="10" height="7" rx="1" /><path d="M3.5 6V4a2.5 2.5 0 0 1 5 0v2" /></svg>
-              Secured by Stripe. Your card details never reach me.
+              Secured by Stripe. I never see your card.
             </span>
             <button type="button" onClick={pay} data-stick="fill" disabled={stage !== "ready"} className="label shrink-0 rounded-[2px] border border-accent bg-accent px-6 py-4 text-accent-foreground transition-[opacity,scale] duration-300 hoverable:hover:opacity-85 active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50">
               {stage === "paying" ? "Paying" : stage === "confirming" ? "Confirming" : error ? "Try again · $100" : "Pay $100 deposit"}
