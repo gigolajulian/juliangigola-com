@@ -374,6 +374,25 @@ export function DenseTimePicker({ path, title, className, fallback }: { path: st
       </div>
     );
   };
+  /* Julian (2026-10-15): use the empty space, and let it adjust to the
+     availability. A call's open times only, in a grid sized to the card:
+     as many columns as the width takes, cells that grow when a day has
+     few and shrink as it fills, and the card's height fixed, so the bar
+     never falls off it (QA, #177: nine hours ran 34px past 31rem). */
+  const fit = (list: Slot[]) => (
+    <div className="tpd-fit">
+      {list.map((s) => {
+        const m = minutesOf(s.start);
+        const on = timed && s.start === pick.start;
+        return (
+          <button key={s.start} type="button" aria-pressed={on} aria-label={`${clock(m)} ${ampm(m)}`} onClick={() => chooseTime(s)} className={cn("tpd-cell tpd-pick flex flex-col items-start justify-between p-2.5 text-left @lg:p-3", on && "tpd-on")}>
+            <span className="text-[0.9375rem] font-medium leading-none tabular-nums">{clock(m)}</span>
+            <span className="label leading-none opacity-60">{ampm(m)}</span>
+          </button>
+        );
+      })}
+    </div>
+  );
   const dayList = days[pick.date] ?? [];
 
   const picker = (
@@ -463,8 +482,8 @@ export function DenseTimePicker({ path, title, className, fallback }: { path: st
         ) : null}
       </div>
       {view === "week" ? (
-        call && hours(dayList) ? (
-          <div key={pick.date} className="tpd-fade p-4 @lg:px-5">{hours(dayList)}</div>
+        call ? (
+          <div key={pick.date} className="tpd-fade min-h-0 flex-1 overflow-y-auto overscroll-contain p-4 @lg:px-5">{fit(dayList)}</div>
         ) : (
         <div key={pick.date} className="tpd-fade grid grid-cols-1 gap-x-4 gap-y-2 p-4 @lg:grid-cols-[6rem_minmax(0,1fr)] @lg:gap-y-2.5 @lg:px-5">
           {times(dayList)}

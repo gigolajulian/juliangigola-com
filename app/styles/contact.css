@@ -752,6 +752,21 @@
   flex-wrap: wrap;
   padding: 1px 0 0 1px;
 }
+/* A call's open times, fitted to the card (`fit`, time-picker-dense.tsx):
+   the columns as many as the width takes, empty ones folded away so a
+   thin day gets wide cells, the rows between a tap target and a block. */
+.tpd-fit {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(6.5rem, 1fr));
+  grid-auto-rows: minmax(2.75rem, 4.5rem);
+  align-content: start;
+  padding: 1px 0 0 1px;
+}
+.tpd .tpd-fit > .tpd-cell {
+  margin: -1px 0 0 -1px;
+  border: 1px solid var(--border);
+  box-shadow: none;
+}
 .tpd .tpd-grid > .tpd-cell {
   flex: 0 0 var(--tw, 4.5rem);
   margin: -1px 0 0 -1px;
