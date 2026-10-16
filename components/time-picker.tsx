@@ -424,8 +424,14 @@ export function TimePicker({
     fit();
     const ro = new ResizeObserver(fit);
     ro.observe(tp);
+    /* Back from the form (Change) the steps slide open (grid rows) and it
+       was measured mid-slide, saw room, and kept the big time full height
+       over the times: fitted again when the slide lands (Julian). */
+    const landed = (e: TransitionEvent) => e.propertyName === "grid-template-rows" && fit();
+    tp.addEventListener("transitionend", landed);
     return () => {
       ro.disconnect();
+      tp.removeEventListener("transitionend", landed);
       tp.removeAttribute("data-tight");
       tp.removeAttribute("data-split");
     };

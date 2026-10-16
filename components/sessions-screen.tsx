@@ -409,7 +409,7 @@ export function SessionsScreen({ sessions, menu, walls, covers }: { sessions: Se
                       ) : null}
                       {s.item ? (
                         <button type="button" onClick={() => take(i)} className="tap-44 label ml-auto block whitespace-nowrap py-2 font-bold short:py-1">
-                          {s.item.cal ? (s.item.group === "time" ? "Book a session" : "Book a call") : "Send details"}&nbsp;<span aria-hidden>&rarr;</span>
+                          {s.item.cal ? (s.item.group === "time" ? "Book a session" : "Book a call") : "Inquire"}&nbsp;<span aria-hidden>&rarr;</span>
                         </button>
                       ) : (
                       <Link

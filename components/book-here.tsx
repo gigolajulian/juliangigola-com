@@ -79,7 +79,7 @@ export function BookCard({ item, onClose, className }: { item: MenuItem; onClose
               onClick={() => setTab(t)}
               className={cn("tap-44 label border-b pb-1 transition-colors duration-200", mode === t ? "border-current text-foreground" : "border-transparent text-muted-foreground hoverable:hover:text-foreground")}
             >
-              {t === "call" ? "Book a call" : "Send details"}
+              {t === "call" ? "Book a call" : "Inquire"}
             </button>
           ))}
         </div>
