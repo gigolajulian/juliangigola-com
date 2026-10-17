@@ -237,11 +237,11 @@ export function ContactScreen({
 
           Julian: the form as a card with a beam running round its
           edge (`contact-beam.tsx`), on the header's glass. */}
-      <ContactBeam className={`contact-card flex min-h-0 w-full max-sm:-mx-3 max-sm:w-[calc(100%+1.5rem)] justify-self-center sm:max-h-full ${cal ? "max-w-[60rem] sm:h-full" : "max-w-[44rem]"}`}>
+      <ContactBeam className={`contact-card flex min-h-0 w-full justify-self-center sm:max-h-full ${cal ? "max-w-[60rem] sm:h-full max-sm:-mx-[calc(1.5rem_-_3px)] max-sm:w-[calc(100%_+_3rem_-_6px)]" : "max-w-[44rem] max-sm:-mx-3 max-sm:w-[calc(100%+1.5rem)]"}`}>
         <div
           data-scroll
           data-dial="form"
-          className="glass-surface min-h-0 flex-1 rounded-[16px] border border-border p-4 sm:max-h-full sm:p-6 sm:overflow-y-auto sm:overscroll-contain sm:px-8 sm:py-[clamp(1rem,3vh,1.5rem)]"
+          className={`glass-surface min-h-0 min-w-0 flex-1 rounded-[16px] border border-border p-4 sm:max-h-full sm:p-6 sm:overflow-y-auto sm:overscroll-contain sm:px-8 sm:py-[clamp(1rem,3vh,1.5rem)] ${cal ? "max-sm:[container:card/inline-size] max-sm:px-0" : ""}`}
         >
           {cal ? (
             <CalEmbed path={cal} title="Pick a time" className="booking-embed block h-[75svh] w-full rounded-[8px] border-0 sm:h-full" />
