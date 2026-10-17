@@ -650,9 +650,6 @@
   .tp > form :is(input:not([type="radio"]), textarea) {
     padding-block: 0.25rem;
   }
-  .tp > form textarea {
-    height: 2rem;
-  }
   .tp > form [data-part="chip"] {
     padding-block: 0.5rem;
   }
@@ -1175,3 +1172,14 @@
 .tp:not([data-split][data-mstep="times"]) [data-part="big"] {
   display: none;
 }
+
+/* The note in the booking form: never a bar past its five lines, and the
+   scrollbar in the card's own colours where one appears. */
+.tp-notes {
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in oklab, var(--foreground) 35%, transparent) transparent;
+}
+.tp-notes::-webkit-scrollbar { width: 6px; }
+.tp-notes::-webkit-scrollbar-track { background: transparent; }
+.tp-notes::-webkit-scrollbar-thumb { background: color-mix(in oklab, var(--foreground) 35%, transparent); border-radius: 3px; }

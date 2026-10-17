@@ -271,3 +271,5 @@ fieldset.ed-row > legend { float: left; padding: 0; }
 .ed-huge.ed-tel { text-transform: none; font-variant-numeric: tabular-nums; font-size: 3.75rem; line-height: 1; overflow-wrap: normal; text-wrap: nowrap; }
 @container card (min-width: 52rem) { .ed-huge.ed-tel { font-size: 4.25rem; } }
 @container card (max-width: 36rem) { .ed-huge.ed-tel { font-size: 2.5rem; } .ed-call { display: none; } }
+.ed-row textarea.tp-notes { width: 100%; min-width: 0; resize: none; background: transparent; outline: none; font: 400 1rem/1.4 var(--font-mono); color: var(--foreground); text-transform: none; }
+.ed-row textarea.tp-notes::placeholder { color: color-mix(in oklab, var(--foreground) 30%, transparent); }
