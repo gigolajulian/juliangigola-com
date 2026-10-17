@@ -141,7 +141,7 @@ export function BookSheet({
               <p className="text-[0.9375rem] normal-case leading-relaxed text-muted-foreground text-balance">{item.blurb}</p>
             ) : null}
           </header>
-          <BookCard item={item} onClose={close} className="min-h-0 flex-1 max-sm:flex-none max-sm:rounded-none max-sm:border-x-0 max-sm:border-b-0 max-sm:bg-transparent max-sm:shadow-none max-sm:backdrop-blur-none max-sm:[container-type:inline-size]" />
+          <BookCard item={item} onClose={close} className="min-h-0 flex-1 max-sm:flex-none max-sm:mx-[3px] max-sm:bg-transparent max-sm:shadow-none max-sm:backdrop-blur-none max-sm:[container-type:inline-size]" />
         </div>
       </div>
     </div>,
