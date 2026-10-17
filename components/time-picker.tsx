@@ -24,6 +24,7 @@ import { Orb, ORB_ROUND } from "@/components/orb";
  * booking form is Cal.com's, so `fallback` (its own calendar) is shown.
  * ─────────────────────────────────────────────────────────────── */
 
+const noop = () => () => {};
 const API = "https://api.cal.com/v2";
 /* An event's details and times, kept a minute, so a picker built again
    (the homepage menu builds one per row pointed at) does not ask Cal.com
@@ -178,6 +179,29 @@ export function TimePicker({
   const [deposit, setDeposit] = React.useState<DepositBody | null>(null);
   /* What was typed, put back when the deposit step goes back to the form. */
   const typed = React.useRef<Record<string, string>>({});
+  /* `?smooth`, while Julian looks: each step slides in from the side it
+     comes from (GSAP), the big time rolls to a new pick, and the booked
+     card turns teal. */
+  const smooth = React.useSyncExternalStore(noop, () => new URLSearchParams(location.search).has("smooth"), () => false);
+  React.useEffect(() => {
+    if (smooth) document.documentElement.dataset.smooth = "";
+  }, [smooth]);
+  const root = React.useRef<HTMLDivElement>(null);
+  const was = React.useRef(step);
+  React.useLayoutEffect(() => {
+    const ORDER = { pick: 0, form: 1, sending: 1, check: 1, pay: 2, done: 3 };
+    const dir = Math.sign(ORDER[step] - ORDER[was.current]);
+    was.current = step;
+    const el = root.current;
+    if (!smooth || !dir || step === "pick" || !el || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const box = step === "form" ? el.querySelector("form") : step === "pay" ? el.firstElementChild : el;
+    if (!box?.children.length) return;
+    gsap.fromTo(
+      box.children,
+      { autoAlpha: 0, x: 32 * dir, filter: "blur(6px)" },
+      { autoAlpha: 1, x: 0, filter: "blur(0px)", duration: 0.6, ease: "expo.out", stagger: 0.04, clearProps: "opacity,visibility,transform,filter" },
+    );
+  }, [step, smooth]);
   const [error, setError] = React.useState("");
   /* Julian: Confirm's words turn into the orbs, then a check, before the
      form opens. */
@@ -450,6 +474,15 @@ export function TimePicker({
     fresh.forEach((b) => seen.current.add(b));
     gsap.fromTo(fresh, { autoAlpha: 0, y: 12 }, { autoAlpha: 1, y: 0, duration: 0.5, ease: "expo.out", stagger: 0.025, clearProps: "opacity,visibility,transform" });
   });
+  const at = pick?.start;
+  const lastPick = React.useRef(at);
+  React.useLayoutEffect(() => {
+    const from = lastPick.current;
+    lastPick.current = at;
+    if (!smooth || !from || !at || from === at || !big.current || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const dir = +new Date(at) > +new Date(from) ? 1 : -1;
+    gsap.fromTo(big.current, { yPercent: 18 * dir, filter: "blur(4px)" }, { yPercent: 0, filter: "blur(0px)", duration: 0.45, ease: "expo.out", clearProps: "transform,filter" });
+  }, [at, smooth]);
   const refit = React.useRef(() => {});
   React.useLayoutEffect(() => {
     const grid = monthGrid.current;
@@ -622,6 +655,7 @@ export function TimePicker({
 
   if (step === "pay" && deposit) {
     return (
+      <div ref={root} className="contents">
       <DepositStep
         className={className}
         body={deposit}
@@ -639,6 +673,7 @@ export function TimePicker({
         }}
         onBack={() => setStep("form")}
       />
+      </div>
     );
   }
   if (step === "done") {
@@ -653,9 +688,17 @@ export function TimePicker({
     ];
     const next = ["The confirmation is in your inbox now.", "Need another time? The email has a link to move or cancel it."];
     return (
-      <div aria-label={title} role="status" className={cn("tp !flex min-h-[30rem] flex-col justify-center gap-6 p-6 sm:gap-8 sm:p-10 [&>*]:shrink-0", className)}>
+      <div ref={root} aria-label={title} role="status" data-booked={smooth ? "" : undefined} className={cn("tp !flex min-h-[30rem] flex-col justify-center gap-6 p-6 sm:gap-8 sm:p-10 [&>*]:shrink-0", className)}>
         <div className="flex flex-col gap-4">
-          <p className="label tp-roll text-muted-foreground">Booked</p>
+          {smooth ? (
+            <p className="label flex items-center gap-3 text-foreground">
+              <svg viewBox="0 0 112 112" aria-hidden className="tp-status size-7" data-ok="" fill="none">
+                <circle className="tp-ring" cx="56" cy="56" r="44" stroke="currentColor" strokeWidth="8" />
+                <path className="tp-tick" d="M38 58l12 12 24-26" stroke="currentColor" strokeWidth="10" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+              Booked
+            </p>
+          ) : <p className="label tp-roll text-muted-foreground">Booked</p>}
           <h3 className="tp-roll font-display text-[clamp(2.5rem,9.5cqw,5.5rem)] uppercase leading-[0.9] [text-wrap:balance] tracking-[-0.04em]" style={{ animationDelay: "80ms" }}>
             {first ? `${first}, you’re in.` : "You’re in."}
           </h3>
@@ -688,7 +731,7 @@ export function TimePicker({
   }
 
   return (
-    <div aria-label={title} role="region" data-view={view} data-mstep={mstep} className={cn("tp @container relative !flex min-h-0 flex-col overflow-x-clip p-5 sm:p-10 max-[56rem]:sm:p-6 tp-short:p-5 max-sm:!px-[var(--card-x,1.25rem)]", className)}>
+    <div ref={root} aria-label={title} role="region" data-view={view} data-mstep={mstep} className={cn("tp @container relative !flex min-h-0 flex-col overflow-x-clip p-5 sm:p-10 max-[56rem]:sm:p-6 tp-short:p-5 max-sm:!px-[var(--card-x,1.25rem)]", className)}>
       {step === "sending" || step === "check" ? (
         <div role="status" aria-live="polite" className="absolute inset-0 z-20 bg-background/85 backdrop-blur-md">
           {/* The orb in the middle of the card, its word under it, out of

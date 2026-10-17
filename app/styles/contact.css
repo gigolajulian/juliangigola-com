@@ -760,6 +760,24 @@
   }
 }
 
+/* `?smooth` (time-picker.tsx): GSAP brings the steps in, so the CSS
+   entrances stand down; and booked, the whole card turns the teal of the
+   check, its words in the teal's own ink. */
+:root[data-smooth] #book-card :is(.tp-roll, .tp-rise) {
+  animation: none;
+}
+:root[data-smooth] #book-card {
+  transition: background-color 700ms var(--ease-out-strong);
+}
+:root[data-smooth] #book-card:has([data-booked]) {
+  background-color: var(--accent);
+  border-color: transparent;
+  --foreground: var(--accent-foreground);
+  --muted-foreground: color-mix(in oklab, var(--accent-foreground) 80%, var(--accent));
+  --border: color-mix(in oklab, var(--accent-foreground) 25%, transparent);
+  color: var(--foreground);
+}
+
 /* The card's quiet words over the glass in the light theme: at the
    page's grey they read about 4.2:1 where a dark wall shows through. */
 :root[data-theme="light"] #book-card {
