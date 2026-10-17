@@ -192,6 +192,13 @@
     transform: translateX(-3rem) scale(1.053);
     box-shadow: 0 50px 90px -40px rgb(0 0 0 / 0.6);
   }
+  /* The booking card stays at the hover step: a pick focuses a button
+     in it, and the second step moved the times 8px under the finger
+     (Julian, 2026-10-17). The form keeps the deeper step. */
+  .contact-card:has(.ed):focus-within {
+    transform: translateX(-3rem) scale(1.042);
+    box-shadow: 0 36px 70px -36px rgb(0 0 0 / 0.5);
+  }
   /* Dimmed, not blurred. */
   .contact-inquire:has(.contact-card:focus-within) > :not(.contact-card, style, .enquiry-backdrop) {
     opacity: 0.35;
