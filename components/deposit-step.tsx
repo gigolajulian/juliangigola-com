@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { gsap } from "gsap";
 import { cn } from "@/lib/utils";
 
 /* ── the deposit ─────────────────────────────────────────────────────
@@ -108,7 +109,7 @@ export type DepositBody = {
   session?: string;
 };
 
-type Stage = "loading" | "ready" | "paying" | "confirming" | "taken" | "refunded" | "failed" | "slow" | "broken";
+type Stage = "loading" | "ready" | "paying" | "confirming" | "taken" | "refunded" | "failed" | "slow" | "broken" | "declined";
 
 export function DepositStep({
   body,
@@ -117,8 +118,15 @@ export function DepositStep({
   onTaken,
   onBack,
   className,
+  editorial,
+  head,
+  holds,
 }: {
   className?: string;
+  /** `?editorial` (editorial.css): its step bar over it, and what the $100 holds. */
+  editorial?: boolean;
+  head?: React.ReactNode;
+  holds?: string;
   body: DepositBody;
   rows: [string, string][];
   onBooked: () => void;
@@ -137,6 +145,47 @@ export function DepositStep({
   const [error, setError] = React.useState("");
   const [tries, setTries] = React.useState(0);
   const [wallets, setWallets] = React.useState(false);
+  const payBtn = React.useRef<HTMLButtonElement>(null);
+  /* Editorial: Pay turns red and shakes on a decline, then grows into the
+     red card; paid, it grows into the teal booked card (Julian). */
+  const [bad, setBad] = React.useState(false);
+  const calm = () => matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const grow = (no: boolean, then: () => void) => {
+    const b = payBtn.current;
+    const card = box.current?.closest<HTMLElement>("#book-card") ?? box.current;
+    if (!editorial || !b || !card || calm()) return then();
+    const c = card.getBoundingClientRect();
+    const r = b.getBoundingClientRect();
+    const g = document.createElement("div");
+    g.className = "ed-grow";
+    if (no) g.dataset.bad = "";
+    card.append(g);
+    gsap.set(g, { left: r.left - c.left, top: r.top - c.top, width: r.width, height: r.height, borderRadius: 2 });
+    gsap.to(g, {
+      left: 0, top: 0, width: c.width, height: c.height, borderRadius: getComputedStyle(card).borderRadius, duration: 0.7, ease: "expo.inOut",
+      onComplete: () => {
+        then();
+        gsap.to(g, { autoAlpha: 0, duration: 0.35, delay: 0.05, onComplete: () => g.remove() });
+      },
+    });
+  };
+  const decline = (msg: string) => {
+    setError(msg);
+    setBad(true);
+    if (!calm() && payBtn.current) gsap.to(payBtn.current, { keyframes: { x: [0, -6, 5, -3, 2, 0] }, duration: 0.34, ease: "power1.out", clearProps: "transform" });
+    gsap.delayedCall(calm() ? 0 : 0.6, () => grow(true, () => setStage("declined")));
+  };
+  /* The red card and back again come in as the steps do. */
+  const was = React.useRef(stage);
+  React.useLayoutEffect(() => {
+    const from = was.current;
+    was.current = stage;
+    if (!editorial || calm() || !box.current || (stage !== "declined" && from !== "declined")) return;
+    gsap.fromTo(box.current.querySelectorAll(".ed-l > *, .ed-r > *, .ed-floor"), { autoAlpha: 0, y: 14 }, { autoAlpha: 1, y: 0, duration: 0.5, ease: "expo.out", stagger: 0.035, clearProps: "opacity,visibility,transform" });
+  }, [stage, editorial]);
+  /* Development only, to see the ends without a charge: `?sim=no` (a
+     decline), `ok`, `taken`, `refunded`, `failed`, `slow`, `broken`. */
+  const sim = process.env.NODE_ENV === "production" ? null : typeof location === "undefined" ? null : new URLSearchParams(location.search).get("sim");
 
   /* The intent, made on Pay (409: the time has gone). */
   const make = async (): Promise<{ clientSecret: string; intentId: string } | null> => {
@@ -162,16 +211,18 @@ export function DepositStep({
       try {
         const r = await fetch(`/api/deposit/${encodeURIComponent(intentId)}`);
         const { status } = await r.json();
-        if (status === "booked") return onBooked();
+        if (status === "booked") return grow(false, onBooked);
         if (status === "refunded" || status === "failed") return setStage(status);
       } catch {}
     }
     setStage("slow");
   };
   // The wallet's handler is set once; it calls these as they are now.
-  const now = React.useRef({ make, back, words, paid });
+  // A card the bank turned down is the red card in the editorial look.
+  const no = (e: StripeError) => (editorial && e.type === "card_error" ? decline(words(e)) : back(words(e)));
+  const now = React.useRef({ make, back, words, paid, no });
   React.useEffect(() => {
-    now.current = { make, back, words, paid };
+    now.current = { make, back, words, paid, no };
   });
 
   /* Stripe's separate card fields (they carry a one-color brand icon,
@@ -210,7 +261,7 @@ export function DepositStep({
               redirect: "if_required",
               confirmParams: { return_url: location.href, payment_method_data: { billing_details: { name: body.name, email: body.email } } },
             });
-            if (no) return now.current.back(now.current.words(no));
+            if (no) return now.current.no(no);
             void now.current.paid(m.intentId);
           } catch {
             now.current.back(PAY_FAILED);
@@ -242,7 +293,16 @@ export function DepositStep({
 
   const pay = async () => {
     const e = els.current;
-    if (!e || stage === "paying") return;
+    if (stage === "paying") return;
+    if (sim) {
+      setStage("paying");
+      setError("");
+      await new Promise((go) => setTimeout(go, 900));
+      if (sim === "no") return decline("Your card was declined.");
+      if (sim === "ok") return grow(false, onBooked);
+      return setStage(sim as Stage);
+    }
+    if (!e) return;
     setStage("paying");
     setError("");
     let m: Awaited<ReturnType<typeof make>>;
@@ -255,8 +315,14 @@ export function DepositStep({
     // 3D Secure, where the bank asks for it, opens over the page.
     const { error: no } = await e.stripe.confirmCardPayment(m.clientSecret, { payment_method: { card: e.card, billing_details: { name: body.name, email: body.email } } })
       .catch(() => ({ error: { type: "api_connection_error" } as StripeError }));
-    if (no) return back(words(no));
+    if (no) return now.current.no(no);
     void paid(m.intentId);
+  };
+  const retry = () => {
+    setBad(false);
+    setError("");
+    setStage("loading");
+    setTries((t) => t + 1);
   };
 
   const after: Partial<Record<Stage, string>> = {
@@ -267,6 +333,73 @@ export function DepositStep({
     broken: "The payment form did not load.",
   };
   const said = after[stage];
+
+  if (editorial) {
+    /* The ends: a word, a headline, what happened, and the way on. */
+    const ends: Partial<Record<Stage, [mark: string, line: string, why: string, act?: [string, () => void]]>> = {
+      declined: ["Not paid", "Card declined.", `${error} Nothing was charged, and the time isn’t held yet.`, ["Try again · $100", retry]],
+      taken: ["Not paid", "Time taken.", after.taken!, ["Pick another time", onTaken]],
+      refunded: ["Refunded", "Time taken.", after.refunded!, ["Pick another time", onTaken]],
+      failed: ["Paid", "Paid.", after.failed!],
+      slow: ["Paid", "Confirming.", after.slow!],
+      broken: ["Not paid", "Not loaded.", after.broken!, ["Try again", retry]],
+    };
+    const end = ends[stage];
+    return (
+      <div ref={box} aria-label="Deposit" role="region" data-declined={stage === "declined" ? "" : undefined} className={cn("tp ed", className)}>
+        {head}
+        {end ? (
+          <>
+            <div className="ed-body" role="status">
+              <div className="ed-l">
+                <p className="label ed-mark"><i />{end[0]}</p>
+                <h2 className="ed-huge">{end[1]}</h2>
+                <p className="ed-why">{end[2]}</p>
+              </div>
+              <div className="ed-r">
+                {rows.map(([k, v]) => (
+                  <div key={k} className="ed-row"><span className="label">{k}</span><span className="ed-v break-words">{v}</span></div>
+                ))}
+                <div className="ed-row"><span className="label">Help</span><a href="mailto:hello@juliangigola.com" className="ed-v break-words">hello@juliangigola.com</a></div>
+              </div>
+            </div>
+            <div className="ed-floor">
+              {stage === "declined" || stage === "broken" ? <button type="button" onClick={onBack} className="label ed-quiet">Edit details</button> : <span />}
+              {end[3] ? <button type="button" onClick={end[3][1]} className="ed-btn">{end[3][0]}</button> : null}
+            </div>
+          </>
+        ) : (
+          <>
+            <div className="ed-body">
+              <div className="ed-l ed-amount">
+                <h2><sup>$</sup>100</h2>
+                <span className="label">Holds{" "}<br />{holds}</span>
+              </div>
+              <div className="ed-r" aria-busy={stage === "loading"}>
+                <label className="ed-row"><span className="label">Card</span><div ref={number} className="ed-field" /></label>
+                <div className="ed-exp">
+                  <label className="ed-row"><span className="label">Expiry</span><div ref={expiry} className="ed-field" /></label>
+                  <label className="ed-row"><span className="label">CVC</span><div ref={cvc} className="ed-field" /></label>
+                </div>
+                <div ref={wallet} className={cn("ed-wallet", !wallets && "hidden")} />
+                <p className="ed-copy">$100 holds your date. Refundable or transferable up to 2 business days before booking. Balance due after the shoot.</p>
+                {error && !bad ? <p role="alert" className="ed-err">{error}</p> : null}
+              </div>
+            </div>
+            <div className="ed-floor">
+              <span className="label ed-lock">
+                <svg aria-hidden viewBox="0 0 12 14" className="w-3 shrink-0" fill="none" stroke="currentColor" strokeWidth="1.3"><rect x="1" y="6" width="10" height="7" rx="1" /><path d="M3.5 6V4a2.5 2.5 0 0 1 5 0v2" /></svg>
+                Secured by Stripe. I never see your card.
+              </span>
+              <button ref={payBtn} type="button" onClick={pay} disabled={bad || (stage !== "ready" && !(sim && stage === "loading"))} data-accent="" data-bad={bad ? "" : undefined} className="ed-btn">
+                {bad ? "Declined" : stage === "paying" ? "Paying" : stage === "confirming" ? "Confirming" : error ? "Try again · $100" : "Pay $100"}
+              </button>
+            </div>
+          </>
+        )}
+      </div>
+    );
+  }
 
   return (
     <div ref={box} aria-label="Deposit" role="region" className={cn("tp !flex flex-col gap-6 p-6 sm:gap-8 sm:p-10 [&>*]:shrink-0", className)}>

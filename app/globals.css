@@ -53,6 +53,7 @@
 @import "./styles/drift-wall.css";
 @import "./styles/ultrawide.css";
 @import "./styles/contact.css";
+@import "./styles/editorial.css";
 @import "./styles/devices.css";
 
 /* Time picker (components/time-picker.tsx): a digit rolls in when it changes. */

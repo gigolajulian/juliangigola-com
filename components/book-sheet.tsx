@@ -127,6 +127,7 @@ export function BookSheet({
       </div>
       <div
         ref={sheet}
+        data-book-frame
         className="relative flex h-dvh w-full flex-col will-change-transform max-sm:bg-background sm:h-[min(46rem,100%)] sm:w-[min(46rem,100%)]"
       >
         {/* On a phone the sheet scrolls as a page does and the card keeps
