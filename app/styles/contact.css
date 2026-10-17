@@ -650,9 +650,6 @@
   .tp > form :is(input:not([type="radio"]), textarea) {
     padding-block: 0.25rem;
   }
-  .tp > form textarea {
-    height: 2rem;
-  }
   .tp > form [data-part="chip"] {
     padding-block: 0.5rem;
   }
@@ -725,6 +722,61 @@
 }
 :root:not([data-theme="light"]) {
   --session-pick: color-mix(in oklab, var(--foreground) 14%, transparent);
+}
+
+/* Pressed the moment the finger lands, let go at the old pace (Apple's
+   ~100ms press). One list for the card's buttons, so the scale has a
+   way back on the cells as well; `.press` keeps its own list. */
+#book-card button:not(.press) {
+  transition:
+    scale 300ms var(--ease-out-strong),
+    opacity 300ms var(--ease-out-strong),
+    translate 300ms var(--ease-out-strong),
+    background-color 300ms var(--ease-out-strong),
+    border-color 300ms var(--ease-out-strong),
+    color 300ms var(--ease-out-strong);
+}
+#book-card button:not(:disabled, [aria-disabled="true"]):active {
+  scale: 0.97;
+  transition-duration: 90ms;
+  transition-timing-function: cubic-bezier(0.4, 0, 1, 1);
+}
+/* The glass made solid where it is asked for (reduced transparency, more
+   contrast): Tailwind's blur on the card is not `.glass-surface`. */
+@media (prefers-reduced-transparency: reduce), (prefers-contrast: more) {
+  #book-card {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    background-color: var(--card);
+  }
+}
+@media (prefers-contrast: more) {
+  #book-card {
+    border-color: var(--foreground);
+    --muted-foreground: color-mix(in oklab, var(--foreground) 80%, var(--card));
+  }
+}
+
+/* `?smooth` (time-picker.tsx): GSAP brings the steps in, so the CSS
+   entrances stand down; and booked, the whole card turns the teal of the
+   check, its words in the teal's own ink. */
+:root[data-smooth] #book-card :is(.tp-roll, .tp-rise) {
+  animation: none;
+}
+:root[data-smooth] #book-card {
+  transition: background-color 700ms var(--ease-out-strong);
+}
+/* The times are what you tap: 13px, not the 11px of the labels round them. */
+:root[data-smooth] #book-card [data-slot] {
+  font-size: 0.8125rem;
+}
+:root[data-smooth] #book-card:has([data-booked]) {
+  background-color: var(--accent);
+  border-color: transparent;
+  --foreground: var(--accent-foreground);
+  --muted-foreground: color-mix(in oklab, var(--accent-foreground) 80%, var(--accent));
+  --border: color-mix(in oklab, var(--accent-foreground) 25%, transparent);
+  color: var(--foreground);
 }
 
 /* The card's quiet words over the glass in the light theme: at the
@@ -1120,3 +1172,14 @@
 .tp:not([data-split][data-mstep="times"]) [data-part="big"] {
   display: none;
 }
+
+/* The note in the booking form: never a bar past its five lines, and the
+   scrollbar in the card's own colours where one appears. */
+.tp-notes {
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in oklab, var(--foreground) 35%, transparent) transparent;
+}
+.tp-notes::-webkit-scrollbar { width: 6px; }
+.tp-notes::-webkit-scrollbar-track { background: transparent; }
+.tp-notes::-webkit-scrollbar-thumb { background: color-mix(in oklab, var(--foreground) 35%, transparent); border-radius: 3px; }
