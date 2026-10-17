@@ -38,6 +38,6 @@ export async function POST(request: Request) {
   // Every other payment on the account (Cal.com's own, invoices, payment
   // links) is none of this route's business: acknowledged, never refunded.
   if (!isDeposit(pi)) return text("ok", 200);
-  await settle({ INBOX: env.INBOX, STRIPE_SECRET_KEY: env.STRIPE_SECRET_KEY }, pi.id, pi.metadata);
+  await settle({ INBOX: env.INBOX, STRIPE_SECRET_KEY: env.STRIPE_SECRET_KEY, EMAIL: env.EMAIL }, pi.id, pi.metadata);
   return text("ok", 200);
 }

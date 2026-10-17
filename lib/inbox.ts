@@ -40,6 +40,10 @@ export type Enquiry = {
   files?: string[];
   /** Where it came from, unasked (`visitContext`). */
   context?: VisitContext;
+  /** Bookings only: the Stripe dashboard link of a $100 deposit paid on the site, once Stripe has confirmed it. */
+  deposit?: string;
+  /** Bookings only: a paid session booked with no Stripe-confirmed deposit. */
+  noDeposit?: boolean;
 };
 
 /* ── where an inquiry came from ───────────────────────────────────
@@ -337,10 +341,12 @@ export type CalBooking = {
   location?: string;
   additionalNotes?: string;
   attendees?: { name?: string; email?: string }[];
+  /** Set by `bookCal` for a booking the site's deposit paid for. */
+  metadata?: { [k: string]: unknown };
 };
 
 /** When, in Julian's time, because that is where the sessions are. */
-const whenPT = (iso?: string) => {
+export const whenPT = (iso?: string) => {
   const d = iso ? new Date(iso) : null;
   return d && !isNaN(+d)
     ? new Intl.DateTimeFormat("en-US", {
@@ -404,6 +410,9 @@ export type Summary = {
   country?: string;
   /** Bookings only: "Portraits · Sat, Oct 17, 2:00 PM PDT". */
   detail?: string;
+  /** Bookings only: the deposit's Stripe link, so the row says it was paid. */
+  deposit?: string;
+  noDeposit?: boolean;
 };
 
 /**
@@ -496,6 +505,8 @@ export const summary = (e: Enquiry): Summary => ({
   ...(e.country ? { country: e.country } : {}),
   // A booking's session and time, so its row says when without opening.
   ...(e.type === "booking" && e.detail ? { detail: e.detail } : {}),
+  ...(e.deposit ? { deposit: e.deposit } : {}),
+  ...(e.noDeposit ? { noDeposit: true } : {}),
 });
 
 /**
