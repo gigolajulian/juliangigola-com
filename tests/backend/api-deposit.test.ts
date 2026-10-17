@@ -12,6 +12,7 @@ vi.mock("@opennextjs/cloudflare", () => ({ getCloudflareContext: async () => ({ 
 const { POST: start } = await import("@/app/api/deposit/route");
 const { GET: status } = await import("@/app/api/deposit/[id]/route");
 const { POST: hook } = await import("@/app/api/stripe/route");
+const { paidFor } = await import("@/lib/deposit");
 
 const WHSEC = "whsec_test";
 const PI = "pi_TEST1234567890";
@@ -23,18 +24,28 @@ let calls: Call[];
 let open: boolean;
 let calOk: boolean;
 let refundOk: boolean;
+type Mail = { subject: string; text: string; replyTo?: { email: string } };
+let mails: Mail[];
+/** The intent as Stripe holds it: the webhook writes its outcome here. */
+let intent: { status?: string; amount: number; currency: string; metadata: Record<string, string> };
 
 beforeEach(() => {
   calls = [];
   open = true;
   calOk = true;
   refundOk = true;
-  ctx.env = { INBOX: new FakeKV(), STRIPE_SECRET_KEY: "sk_test_x", STRIPE_WEBHOOK_SECRET: WHSEC };
+  intent = { amount: 10000, currency: "usd", metadata: { kind: "deposit" } };
+  mails = [];
+  ctx.env = { INBOX: new FakeKV(), STRIPE_SECRET_KEY: "sk_test_x", STRIPE_WEBHOOK_SECRET: WHSEC, EMAIL: { send: async (m: Mail) => void mails.push(m) } };
   vi.stubGlobal("fetch", async (url: string, init?: RequestInit) => {
     calls.push({ url, init });
     if (url.includes("/v2/slots")) return reply({ status: "success", data: { day: open ? [{ start: START }] : [] } });
     if (url.includes("/v2/bookings")) return calOk ? reply({ status: "success", data: { uid: "cal_uid", start: START } }) : reply({ status: "error" }, 400);
     if (url.endsWith("/payment_intents")) return reply({ id: PI, client_secret: `${PI}_secret_x` });
+    if (url.endsWith(`/payment_intents/${PI}`)) {
+      if (init?.method === "POST") for (const [k, v] of new URLSearchParams(String(init.body))) intent.metadata[k.slice(9, -1)] = v;
+      return reply({ id: PI, ...intent });
+    }
     if (url.endsWith("/refunds")) return refundOk ? reply({ id: "re_1" }) : reply({ error: {} }, 500);
     throw new Error(`unexpected fetch ${url}`);
   });
@@ -149,6 +160,53 @@ describe("POST /api/stripe", () => {
   });
 });
 
+describe("telling Julian", () => {
+  const LINK = `https://dashboard.stripe.com/test/payments/${PI}`;
+
+  it("mails hello@ when a deposit books, and puts the Stripe link in the Cal.com notes", async () => {
+    await deliver(paid());
+    expect(mails).toHaveLength(1);
+    expect(mails[0].subject).toMatch(/^Deposit paid: Portraits, .+, QA Test, \$100$/);
+    expect(mails[0].text).toContain(LINK);
+    expect(mails[0].replyTo?.email).toBe("qa@example.com");
+    const cal = JSON.parse(String(calls.find((c) => c.url.includes("/v2/bookings"))!.init!.body));
+    expect(cal.metadata).toEqual({ deposit: PI });
+    expect(cal.bookingFieldsResponses.notes).toContain(`Deposit paid on the site: $100 (ref ${PI}).`);
+    expect(cal.bookingFieldsResponses.notes).not.toContain("dashboard.stripe.com");
+  });
+
+  it("mails a refund, and a deposit stuck paid", async () => {
+    open = false;
+    await deliver(paid());
+    expect(mails.map((m) => m.subject.split(":")[0])).toEqual(["Deposit refunded"]);
+    ctx.env.INBOX = new FakeKV();
+    refundOk = false;
+    await deliver(paid());
+    expect(mails[1].subject).toMatch(/^Deposit paid, not booked, not refunded: /);
+  });
+
+  it("keeps the booking when the mail fails", async () => {
+    ctx.env.EMAIL = { send: async () => { throw new Error("quota"); } };
+    expect((await deliver(paid())).status).toBe(200);
+    expect(kv().json(`deposit:${PI}`).status).toBe("booked");
+  });
+
+  it("marks a Cal.com booking paid only when Stripe agrees", async () => {
+    const booking = { startTime: START, attendees: [{ email: "QA@example.com" }], metadata: { deposit: PI } };
+    const paidIntent = { status: "succeeded", amount: 10000, currency: "usd", metadata: { kind: "deposit", email: "qa@example.com", start: START } };
+    intent = { ...paidIntent };
+    expect(await paidFor("sk_test_x", booking)).toBe(LINK);
+    // The same ref typed into the notes of a public Cal.com booking.
+    expect(await paidFor("sk_test_x", { startTime: START, attendees: [{ email: "qa@example.com" }], additionalNotes: `ref ${PI}` })).toBe(LINK);
+    // Someone else's deposit, another time, a payment that never went through, or no ref at all.
+    expect(await paidFor("sk_test_x", { ...booking, attendees: [{ email: "other@example.com" }] })).toBeUndefined();
+    expect(await paidFor("sk_test_x", { ...booking, startTime: "2030-01-01T00:00:00Z" })).toBeUndefined();
+    intent = { ...paidIntent, status: "requires_payment_method" };
+    expect(await paidFor("sk_test_x", booking)).toBeUndefined();
+    expect(await paidFor("sk_test_x", { startTime: START, additionalNotes: "Deposit paid on the site." })).toBeUndefined();
+  });
+});
+
 describe("GET /api/deposit/<id>", () => {
   it("answers 404 to anything that is not an intent id", async () => {
     expect((await read("../INBOX")).status).toBe(404);
@@ -158,6 +216,28 @@ describe("GET /api/deposit/<id>", () => {
     expect(await (await read(PI)).json()).toEqual({ status: "pending" });
     await kv().put(`deposit:${PI}`, JSON.stringify({ status: "booking", at: "" }));
     expect(await (await read(PI)).json()).toEqual({ status: "pending" });
+  });
+
+  it("reads the outcome from Stripe, not KV, so another location sees it at once", async () => {
+    await deliver(paid());
+    ctx.env.INBOX = new FakeKV();
+    expect((await (await read(PI)).json()).status).toBe("booked");
+  });
+
+  it("answers 404 to an intent that is not a deposit, or that Stripe does not have", async () => {
+    intent.metadata = {};
+    expect((await read(PI)).status).toBe(404);
+    vi.stubGlobal("fetch", async () => reply({ error: { code: "resource_missing" } }, 404));
+    expect((await read("pi_MADEUP12345678")).status).toBe(404);
+  });
+
+  it("keeps the booking when the copy to Stripe fails", async () => {
+    const real = globalThis.fetch;
+    vi.stubGlobal("fetch", async (url: string, init?: RequestInit) =>
+      url.endsWith(`/payment_intents/${PI}`) ? reply({ error: {} }, 500) : real(url, init));
+    await deliver(paid());
+    expect(kv().json(`deposit:${PI}`).status).toBe("booked");
+    expect(calls.some((c) => c.url.endsWith("/refunds"))).toBe(false);
   });
 
   it("reports the booking without who made it", async () => {
