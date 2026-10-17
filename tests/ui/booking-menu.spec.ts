@@ -1,5 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
-import { errorsOn, open, RATIOS, upright } from "./ratios";
+import { CONFIRM, errorsOn, open, RATIOS, upright } from "./ratios";
 
 /* The homepage's Sessions screen with its booking card, the default since 2026-10-13
    (`sessions-screen.tsx`, `BookCard` in `book-here.tsx`). Never submitted. */
@@ -34,7 +34,7 @@ for (const r of RATIOS) {
     await press(row(page, /Portraits/i));
     await card.locator("[data-day]").first().waitFor({ state: "visible", timeout: 30_000 });
     await expect(card).toHaveAttribute("aria-label", /Portraits/);
-    await expect(card.getByRole("button", { name: "Confirm this time" })).toBeAttached();
+    await expect(card.getByRole("button", { name: CONFIRM })).toBeAttached();
 
     // Close sits clear of the calendar, whatever it scrolls to. Polled: the
     // card is still settling for a moment on a slow CI runner.

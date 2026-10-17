@@ -1,5 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
-import { errorsOn, open, pickTime, RATIOS, SHORT, upright } from "./ratios";
+import { CONFIRM, errorsOn, open, pickTime, RATIOS, SHORT, upright } from "./ratios";
 
 /* The /book time picker, at the six ratios and the short desktop where
    it draws at 80%. Times come from fixtures (`open`, ratios.ts). Never submitted: the
@@ -17,7 +17,7 @@ for (const r of [...RATIOS, SHORT]) {
     const errors = errorsOn(page);
     await page.goto("/book?session=headshots", { waitUntil: "load" });
     if (await upright(page, r, browserName)) return ctx.close();
-    const confirm = page.getByRole("button", { name: "Confirm this time" });
+    const confirm = page.getByRole("button", { name: CONFIRM });
     await page.locator("[data-day]").first().waitFor({ timeout: 30_000 });
     await page.waitForTimeout(800);
 
@@ -46,11 +46,12 @@ for (const r of [...RATIOS, SHORT]) {
       const slots = [...document.querySelectorAll("[data-slot]")].filter((n) => (n as HTMLElement).offsetParent && !n.closest('[aria-hidden="true"]'));
       const last = Math.max(...slots.map((n) => n.getBoundingClientRect().bottom));
       const zoom = parseFloat(getComputedStyle(document.querySelector(".book-page")!).zoom) || 1;
-      return { top: q.top, bottom: q.bottom, barTop: bar.top, footTop: foot?.top ?? Infinity, gap: bar.top - last, zoom };
+      return { top: q.top, bottom: q.bottom, barTop: bar.top, footTop: foot?.top ?? Infinity, gap: bar.top - last, zoom, ed: !!b.closest(".ed") };
     });
     expect(c.bottom, "Confirm on screen").toBeLessThanOrEqual(r.height + 1);
     expect(c.bottom, "Confirm above the footer").toBeLessThanOrEqual(c.footTop + 1);
-    expect(c.gap, "last time clear of the Confirm bar").toBeGreaterThanOrEqual(Math.floor(24 * c.zoom) - 0.5);
+    // The 24px under the times is the classic card's bar; the editorial card has its own floor.
+    if (!c.ed) expect(c.gap, "last time clear of the Confirm bar").toBeGreaterThanOrEqual(Math.floor(24 * c.zoom) - 0.5);
 
     // The form opens after Confirm's orbs, and Change keeps the pick.
     await confirm.click();
@@ -71,9 +72,9 @@ for (const r of [...RATIOS, SHORT]) {
   });
 }
 
-test("/book month view: the label on one line, January's six rows clear of Confirm on a short screen", async ({ browser, browserName }) => {
+test("/book?classic month view: the label on one line, January's six rows clear of Confirm on a short screen", async ({ browser, browserName }) => {
   const { ctx, page } = await open(browser, browserName, SHORT);
-  await page.goto("/book?session=headshots", { waitUntil: "load" });
+  await page.goto("/book?session=headshots&classic", { waitUntil: "load" });
   await page.locator("[data-day]").first().waitFor({ timeout: 30_000 });
   await page.getByRole("button", { name: /^month$/i }).click();
   await page.waitForTimeout(700);
