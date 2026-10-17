@@ -1093,11 +1093,12 @@ export function TimePicker({
                     <span className="ed-when-line">
                       <b>{chosen ? `${WEEKDAYS[date.getDay()]}, ${MONTHS[date.getMonth()]} ${date.getDate()}` : "Pick a day, then a time"}</b>
                       {call ? (
-                        <span className="label ed-timer">{handset}<span>{timer}</span>{chosen === "time" ? `Until ${until} ${apEnd} ${tzName}` : null}</span>
-                      ) : chosen === "time" ? (
-                        /* Only once a time is picked (Julian, 2026-10-17): before, the default read as chosen. */
-                        <span className="label">Until {until} {apEnd} {tzName}</span>
-                      ) : null}
+                        <span className="label ed-timer">{handset}<span>{timer}</span><i className="not-italic" style={chosen === "time" ? undefined : { visibility: "hidden" }}>Until {until} {apEnd} {tzName}</i></span>
+                      ) : (
+                        /* Shown once a time is picked (Julian, 2026-10-17): before, the
+                           default read as chosen. Hidden, not removed, so a pick moves nothing. */
+                        <span className="label" style={chosen === "time" ? undefined : { visibility: "hidden" }}>Until {until} {apEnd} {tzName}</span>
+                      )}
                     </span>
                   </div>
                 ) : null}
