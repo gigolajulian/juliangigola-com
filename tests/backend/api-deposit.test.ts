@@ -197,6 +197,7 @@ describe("the client's confirmation", () => {
     const { html } = confirmMail({ name: "<b>x</b>", email: "x@example.com", session: "Portraits", start: START, where: "<script>", uid: "u" });
     expect(html).not.toContain("<script>");
     expect(html).not.toContain("<b>x</b>");
+    expect(confirmMail({ name: "A", email: "a@example.com", session: "Graduation photos", start: START, uid: "u" }).text).toContain("Your graduation session is booked.");
   });
 
   it("reads the time in Pacific with no city", async () => {
