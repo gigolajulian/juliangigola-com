@@ -692,8 +692,21 @@ export function TimePicker({
     if (!matchMedia("(pointer: coarse)").matches || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     try { if (sessionStorage.getItem("ed-nudged")) return; } catch {}
     const seen = () => { try { sessionStorage.setItem("ed-nudged", "1"); } catch {} };
-    const tl = gsap.timeline({ delay: 1.1, onStart: seen }).to(row, { x: -8, duration: 0.4, ease: "power2.out" }).to(row, { x: 0, duration: 0.5, ease: "power2.inOut" });
-    return () => void tl.progress(1).kill();
+    let tl: gsap.core.Timeline | undefined;
+    const play = () => { tl = gsap.timeline({ delay: 1.1, onStart: seen }).to(row, { x: -8, duration: 0.4, ease: "power2.out" }).to(row, { x: 0, duration: 0.5, ease: "power2.inOut" }); };
+    /* Not behind the opening splash (MAC, real iOS): the delay starts once it has lifted. */
+    const root = document.documentElement;
+    const watch = new MutationObserver(() => { if (!root.hasAttribute("data-intro")) { watch.disconnect(); play(); } });
+    if (root.hasAttribute("data-intro")) watch.observe(root, { attributes: true, attributeFilter: ["data-intro"] });
+    else play();
+    /* Undone without spending the visit's nudge: it only counts once it has really started. */
+    return () => {
+      watch.disconnect();
+      if (!tl) return;
+      const begun = tl.progress() > 0;
+      tl.kill();
+      if (begun) gsap.set(row, { x: 0 });
+    };
   }, [editorial, step, view, held, state]);
   /* Nothing to go back to before today. */
   const atStart = view === "week" ? +week[0] <= +today : anchor.getFullYear() * 12 + anchor.getMonth() <= today.getFullYear() * 12 + today.getMonth();
