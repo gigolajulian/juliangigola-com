@@ -682,6 +682,32 @@ export function TimePicker({
     );
     return () => tw.forEach((t) => t.progress(1).kill());
   }, [editorial, step, shown, view, held, state]);
+  /* `?nudge` (Julian, 2026-10-17, opt-in until he has seen it): on a touch
+     screen the week eases 8px left and back after the cascade, no
+     bounce (Julian: the 16px spring was too much), so the strip reads as
+     something that swipes. Once a visit. */
+  React.useEffect(() => {
+    const row = daysBox.current?.firstElementChild as HTMLElement | null;
+    if (!editorial || step !== "pick" || view !== "week" || !row || !new URLSearchParams(location.search).has("nudge")) return;
+    if (!matchMedia("(pointer: coarse)").matches || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    try { if (sessionStorage.getItem("ed-nudged")) return; } catch {}
+    const seen = () => { try { sessionStorage.setItem("ed-nudged", "1"); } catch {} };
+    let tl: gsap.core.Timeline | undefined;
+    const play = () => { tl = gsap.timeline({ delay: 1.1, onStart: seen }).to(row, { x: -8, duration: 0.4, ease: "power2.out" }).to(row, { x: 0, duration: 0.5, ease: "power2.inOut" }); };
+    /* Not behind the opening splash (MAC, real iOS): the delay starts once it has lifted. */
+    const root = document.documentElement;
+    const watch = new MutationObserver(() => { if (!root.hasAttribute("data-intro")) { watch.disconnect(); play(); } });
+    if (root.hasAttribute("data-intro")) watch.observe(root, { attributes: true, attributeFilter: ["data-intro"] });
+    else play();
+    /* Undone without spending the visit's nudge: it only counts once it has really started. */
+    return () => {
+      watch.disconnect();
+      if (!tl) return;
+      const begun = tl.progress() > 0;
+      tl.kill();
+      if (begun) gsap.set(row, { x: 0 });
+    };
+  }, [editorial, step, view, held, state]);
   /* Nothing to go back to before today. */
   const atStart = view === "week" ? +week[0] <= +today : anchor.getFullYear() * 12 + anchor.getMonth() <= today.getFullYear() * 12 + today.getMonth();
 
@@ -1093,9 +1119,11 @@ export function TimePicker({
                     <span className="ed-when-line">
                       <b>{chosen ? `${WEEKDAYS[date.getDay()]}, ${MONTHS[date.getMonth()]} ${date.getDate()}` : "Pick a day, then a time"}</b>
                       {call ? (
-                        <span className="label ed-timer">{handset}<span>{timer}</span>Until {until} {apEnd} {tzName}</span>
+                        <span className="label ed-timer">{handset}<span>{timer}</span><i className="not-italic" style={chosen === "time" ? undefined : { visibility: "hidden" }}>Until {until} {apEnd} {tzName}</i></span>
                       ) : (
-                        <span className="label">Until {until} {apEnd} {tzName}</span>
+                        /* Shown once a time is picked (Julian, 2026-10-17): before, the
+                           default read as chosen. Hidden, not removed, so a pick moves nothing. */
+                        <span className="label" style={chosen === "time" ? undefined : { visibility: "hidden" }}>Until {until} {apEnd} {tzName}</span>
                       )}
                     </span>
                   </div>
