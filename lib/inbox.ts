@@ -337,7 +337,9 @@ export type CalBooking = {
   /** The event type's slug and title: "portraits", "Portraits". */
   type?: string;
   eventTitle?: string;
+  uid?: string;
   startTime?: string;
+  endTime?: string;
   location?: string;
   additionalNotes?: string;
   attendees?: { name?: string; email?: string }[];
