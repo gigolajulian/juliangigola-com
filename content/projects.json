@@ -1626,8 +1626,8 @@
     ],
     "abril": [
       "/work/abril/03.jpg",
-      "/work/abril/01.jpg",
       "/work/abril/02.jpg",
+      "/work/abril/01.jpg",
       "/work/abril/04.jpg"
     ],
     "diesel": [
@@ -2225,6 +2225,32 @@
       "/work/wired-magazine/02.jpg",
       "/work/wired-magazine/17.jpg",
       "/work/wired-magazine/15.jpg"
+    ],
+    "lost-relic": [
+      "/work/lost-relic/07.jpg",
+      "/work/lost-relic/03.jpg",
+      "/work/lost-relic/08.jpg",
+      "/work/lost-relic/01.jpg",
+      "/work/lost-relic/05.jpg",
+      "/work/lost-relic/06.jpg",
+      "/work/lost-relic/02.jpg",
+      "/work/lost-relic/04.jpg"
+    ],
+    "automotive": [
+      "/work/automotive/07.jpg",
+      "/work/automotive/08.jpg",
+      "/work/automotive/01.jpg",
+      "/work/automotive/05.jpg",
+      "/work/automotive/02.jpg",
+      "/work/automotive/04.jpg",
+      "/work/automotive/17.jpg",
+      "/work/automotive/19.jpg",
+      "/work/automotive/11.jpg",
+      "/work/automotive/14.jpg",
+      "/work/automotive/12.jpg",
+      "/work/automotive/15.jpg",
+      "/work/automotive/16.jpg",
+      "/work/automotive/18.jpg"
     ]
   },
   "hidden": [

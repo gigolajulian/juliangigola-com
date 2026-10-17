@@ -1830,13 +1830,6 @@ export const PROJECTS: Project[] = [
         "alt": "Rear view of a grey coupe with round red taillights and a wing, low sun glowing behind it"
       },
       {
-        "src": "/work/automotive/03.jpg",
-        "width": 2429,
-        "height": 3641,
-        "color": "#C4DCE3",
-        "alt": "Two coupes on an empty hill road at dusk, taillights lit, a faint moon above"
-      },
-      {
         "src": "/work/automotive/04.jpg",
         "width": 2499,
         "height": 3125,
@@ -1849,13 +1842,6 @@ export const PROJECTS: Project[] = [
         "height": 3125,
         "color": "#1B1B1D",
         "alt": "Tight crop on a matte grey hood vent and headlight, gravel pavement below"
-      },
-      {
-        "src": "/work/automotive/06.jpg",
-        "width": 2499,
-        "height": 3125,
-        "color": "#02191B",
-        "alt": "Silver coupe seen from behind on a tree-lined road, motion-blurred trees at dusk"
       },
       {
         "src": "/work/automotive/07.jpg",
@@ -1872,20 +1858,6 @@ export const PROJECTS: Project[] = [
         "alt": "White supercar facing the camera in a garage, headlights on, long shadows across the floor"
       },
       {
-        "src": "/work/automotive/09.jpg",
-        "width": 2499,
-        "height": 3125,
-        "color": "#1D2122",
-        "alt": "White supercar from directly behind with red taillights on a dark garage floor"
-      },
-      {
-        "src": "/work/automotive/10.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#1D2223",
-        "alt": "White supercar at a low angle in a parking garage, red brake calipers, dark ceiling"
-      },
-      {
         "src": "/work/automotive/11.jpg",
         "width": 2499,
         "height": 3125,
@@ -1898,13 +1870,6 @@ export const PROJECTS: Project[] = [
         "height": 3125,
         "color": "#273C41",
         "alt": "White sedan in side profile in a parking lot, tree line silhouetted against a dusk sky"
-      },
-      {
-        "src": "/work/automotive/13.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#172125",
-        "alt": "White sedan from the front in a lot at dusk, headlights on, trees behind"
       },
       {
         "src": "/work/automotive/14.jpg",
