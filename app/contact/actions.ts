@@ -58,7 +58,7 @@ export type ContactState = {
   values?: Record<string, string>;
 };
 
-const TO = "hello@juliangigola.com";
+const TO = "contact@juliangigola.com";
 /** The sending subdomain onboarded to Cloudflare Email Sending. See wrangler.jsonc. */
 const FROM = "enquiries@notifications.juliangigola.com";
 
