@@ -132,7 +132,7 @@ export function BookSheet({
       >
         {/* On a phone the sheet scrolls as a page does and the card keeps
             its own length; from `sm` the card fills what the header leaves. */}
-        <div ref={body} className="flex min-h-0 flex-1 flex-col gap-5 overflow-y-auto overscroll-contain pb-[env(safe-area-inset-bottom)] pt-[env(safe-area-inset-top)] sm:gap-6 sm:pb-0 sm:overflow-visible sm:pt-0">
+        <div ref={body} data-book-scroll className="flex min-h-0 flex-1 flex-col gap-5 overflow-y-auto overscroll-contain pb-[env(safe-area-inset-bottom)] pt-[env(safe-area-inset-top)] sm:gap-6 sm:pb-0 sm:overflow-visible sm:pt-0">
           {/* Julian: say what is being booked, over the card it books. */}
           <header className="flex flex-col gap-3 px-[var(--card-x,1.25rem)] pt-8 sm:px-0 sm:pt-0">
             <p className="label text-muted-foreground">You&apos;re booking</p>
