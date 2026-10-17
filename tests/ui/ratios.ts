@@ -13,6 +13,9 @@ export const RATIOS: Ratio[] = [
   { name: "laptop", width: 1440, height: 900, scale: 2, touch: false },
   { name: "wide", width: 2560, height: 1080, scale: 1, touch: false },
 ];
+/** The card's go-ahead: "Continue" on the editorial card (the default since #204), "Confirm this time" on `?classic`. */
+export const CONFIRM = /^(Continue|Confirm this time)$/;
+
 export const SHORT: Ratio = { name: "short", width: 1280, height: 720, scale: 1, touch: false };
 
 /** A page at a ratio, Pacific time, the splash and the intro skipped. */
