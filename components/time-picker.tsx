@@ -682,6 +682,18 @@ export function TimePicker({
     );
     return () => tw.forEach((t) => t.progress(1).kill());
   }, [editorial, step, shown, view, held, state]);
+  /* `?nudge` (Julian, 2026-10-17, opt-in until he has seen it): on a touch
+     screen the week slides 16px left once and springs back after the
+     cascade, so the strip reads as something that swipes. Once a visit. */
+  React.useEffect(() => {
+    const row = daysBox.current?.firstElementChild as HTMLElement | null;
+    if (!editorial || step !== "pick" || view !== "week" || !row || !new URLSearchParams(location.search).has("nudge")) return;
+    if (!matchMedia("(pointer: coarse)").matches || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    try { if (sessionStorage.getItem("ed-nudged")) return; } catch {}
+    const seen = () => { try { sessionStorage.setItem("ed-nudged", "1"); } catch {} };
+    const tl = gsap.timeline({ delay: 1.1, onStart: seen }).to(row, { x: -16, duration: 0.35, ease: "power2.out" }).to(row, { x: 0, duration: 0.9, ease: "elastic.out(1, 0.45)" });
+    return () => void tl.progress(1).kill();
+  }, [editorial, step, view, held, state]);
   /* Nothing to go back to before today. */
   const atStart = view === "week" ? +week[0] <= +today : anchor.getFullYear() * 12 + anchor.getMonth() <= today.getFullYear() * 12 + today.getMonth();
 
