@@ -45,7 +45,11 @@
   flex: 1;
   min-width: 0;
   overflow: hidden;
-  mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+  /* Room above and below for each logo's 44px tap area, taken back by
+     the margin so the row sits where it did. */
+  padding-block: 6px;
+  margin-block: -6px;
+  mask-image: linear-gradient(90deg, transparent, #000 13.6%, #000 86.4%, transparent);
 }
 .about-marquee-track {
   display: flex;
@@ -61,7 +65,14 @@
 }
 .about-marquee-list {
   flex-wrap: nowrap;
-  padding-right: 2rem;
+  padding-right: 2.5rem;
+  /* Julian: the marks in full ink and a quarter bigger on a phone. */
+  --mark-box: 1.8125rem;
+  --mark-cap: 8.75rem;
+  column-gap: 2.5rem;
+}
+.about-marquee-list a {
+  color: var(--foreground);
 }
 @keyframes about-marquee {
   to {
