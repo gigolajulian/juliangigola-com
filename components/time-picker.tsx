@@ -176,6 +176,8 @@ export function TimePicker({
   /* A paid session, its deposit taken here (`?deposit`, deposit-step.tsx). */
   const [paid, setPaid] = React.useState(false);
   const [deposit, setDeposit] = React.useState<DepositBody | null>(null);
+  /* What was typed, put back when the deposit step goes back to the form. */
+  const typed = React.useRef<Record<string, string>>({});
   const [error, setError] = React.useState("");
   /* Julian: Confirm's words turn into the orbs, then a check, before the
      form opens. */
@@ -374,14 +376,17 @@ export function TimePicker({
   const [gs] = React.useState(() => typeof location !== "undefined" && new URLSearchParams(location.search).has("layout"));
   const seen = React.useRef(new WeakSet<Element>());
   const [slotsW, setSlotsW] = React.useState(0);
-  const picked = !!pick;
-  React.useLayoutEffect(() => {
-    const el = slotsBox.current;
+  /* Watched by whichever box is drawn now: one replaced under the old
+     observer read 0 as it left, and the times stacked one to a line under
+     Confirm (Julian, 2026-10-16). Hidden (0) keeps the last width. */
+  const slotsRO = React.useRef<ResizeObserver | null>(null);
+  const slotsRef = React.useCallback((el: HTMLDivElement | null) => {
+    slotsRO.current?.disconnect();
+    slotsBox.current = el;
     if (!el) return;
-    const ro = new ResizeObserver(() => setSlotsW(el.clientWidth));
-    ro.observe(el);
-    return () => ro.disconnect();
-  }, [picked, held]);
+    slotsRO.current = new ResizeObserver(() => el.clientWidth && setSlotsW(el.clientWidth));
+    slotsRO.current.observe(el);
+  }, []);
   React.useLayoutEffect(() => {
     const el = big.current;
     const tp = el?.closest<HTMLElement>(".tp");
@@ -531,6 +536,7 @@ export function TimePicker({
 
   const book = async (form: FormData) => {
     if (!pick) return;
+    typed.current = Object.fromEntries([...form].map(([k, v]) => [k, String(v)]));
     setStep("sending");
     setError("");
     const began = Date.now();
@@ -634,6 +640,7 @@ export function TimePicker({
           setStep("pick");
           void load(true);
         }}
+        onBack={() => setStep("form")}
       />
     );
   }
@@ -862,7 +869,7 @@ export function TimePicker({
       {view === "week" ? <div aria-hidden className="shrink-0 grow basis-0" style={{ minHeight: "var(--tp-gap, 2rem)", maxHeight: "calc(var(--tp-gap, 2rem) + 3rem)" }} /> : null}
 
       {/* the times: the open ones of the day picked, as buttons */}
-      <div ref={slotsBox} data-part="times" className={cn("flex flex-col gap-4 pb-6 tp-short:gap-2", view === "month" && "mt-5 tp-short:mt-2")}>
+      <div ref={slotsRef} data-part="times" className={cn("flex flex-col gap-4 pb-6 tp-short:gap-2", view === "month" && "mt-5 tp-short:mt-2")}>
         {/* Back to the month or the week, in the split's times step only (contact.css). */}
         <button type="button" data-part="back" onClick={() => setMstep("days")} className="tap-44 label flex items-center gap-3 self-start text-foreground transition-opacity duration-200 hoverable:hover:opacity-60">
           {arrow}
@@ -1002,6 +1009,13 @@ export function TimePicker({
         </div>
       ) : (
         <form
+          ref={(f) => {
+            if (!f) return;
+            for (const [k, v] of Object.entries(typed.current)) {
+              const el = f.elements.namedItem(k);
+              if ((el instanceof HTMLInputElement && el.type !== "radio") || el instanceof HTMLTextAreaElement) el.value = v;
+            }
+          }}
           onSubmit={(e) => {
             e.preventDefault();
             void book(new FormData(e.currentTarget));
