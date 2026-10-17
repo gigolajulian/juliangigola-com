@@ -30,7 +30,7 @@ export default async function BookSession({ params }: { params: Promise<{ slug: 
       <div inert className="enquiry-backdrop questions-wall fixed inset-0 -z-10 overflow-hidden bg-background max-sm:hidden">
         {wall.length ? <InquireWall items={wall} /> : null}
       </div>
-      <div className="flex w-full flex-col gap-5 sm:h-[min(50rem,calc(100dvh-8rem))] sm:w-[min(46rem,100%)] sm:gap-6">
+      <div data-book-frame className="flex w-full flex-col gap-5 sm:h-[min(50rem,calc(100dvh-8rem))] sm:w-[min(46rem,100%)] sm:gap-6">
         <header className="flex flex-col gap-3 px-[var(--card-x,1.25rem)] pt-24 sm:px-0 sm:pt-0">
           <p className="label text-muted-foreground">You&apos;re booking</p>
           <h1 className="font-display text-4xl uppercase leading-[0.9] sm:text-6xl">{m.name}</h1>
