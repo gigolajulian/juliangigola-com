@@ -62,7 +62,7 @@ describe("submitEnquiry", () => {
     expect(kv.data.get(cool)!.ttl).toBe(COOLDOWN_MS / 1000);
     expect(kv.data.get(dayKey(Date.now()))!.value).toBe("1");
     expect(email.sent).toHaveLength(1);
-    expect(email.sent[0]).toMatchObject({ to: "hello@juliangigola.com", replyTo: { name: "QA Test", email: "qa@example.com" } });
+    expect(email.sent[0]).toMatchObject({ to: "contact@juliangigola.com", replyTo: { name: "QA Test", email: "qa@example.com" } });
   });
 
   it("keeps a header out of the name: no newline reaches the stored copy", async () => {
@@ -75,7 +75,7 @@ describe("submitEnquiry", () => {
     const again = await send();
     expect(again.status).toBe("error");
     expect(again.message).toMatch(/write again in 5 minutes/);
-    expect(again.mailto).toMatch(/^mailto:hello@juliangigola\.com\?subject=/);
+    expect(again.mailto).toMatch(/^mailto:contact@juliangigola\.com\?subject=/);
     expect(msgs()).toHaveLength(1);
   });
 

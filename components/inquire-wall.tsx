@@ -3,7 +3,7 @@
 import * as React from "react";
 import { useDialKit } from "dialkit";
 import DriftWall from "@/components/DriftWall";
-import { wallItem, type WallTile } from "@/lib/wall-tile";
+import { softItem, type WallTile } from "@/lib/wall-tile";
 
 /* The photo wall behind the homepage's last page, on its own DialKit
    panel. Julian: a dial for its scale. 1 is the wall at its full size
@@ -127,7 +127,7 @@ export function InquireWall({ items }: { items: WallTile[] }) {
       scroller.removeEventListener("scroll", moved);
     };
   }, [near]);
-  const tiles = React.useMemo(() => items.map(wallItem), [items]);
+  const tiles = React.useMemo(() => items.map(softItem), [items]);
   if (!near) return <div ref={box} className="h-full w-full" />;
 
   // `?wall=slow` on a large screen: the tiles a third bigger, half the
@@ -145,11 +145,11 @@ export function InquireWall({ items }: { items: WallTile[] }) {
          screen, so it stays light. */
       limit={flag.slow ? 18 : 24}
       /* And the small copies (Julian: lower the resolution, not so it
-         shows). A 255px tile on a 2x screen took the 640 file; at 0.6 it
-         takes the 320, a quarter of the pixels to decode and hold for
-         every tile, on a wall that is dimmed, tilted, moving and mostly
-         under the frosted card. */
-      density={flag.slow ? 0.45 : 0.6}
+         shows). The wall is dimmed, tilted, moving and blurred under the
+         frosted card, so `softItem` offers only a 160 and a 320 at
+         quality 45: at 0.4 a 255px tile takes the 160 on a 1x screen and
+         the 320 on a 2x (2026-10-17, was the 320 and 640 at 70). */
+      density={flag.slow ? 0.3 : 0.4}
       tileWidth={Math.round(300 * scale * k)}
       tileHeight={Math.round(400 * scale * k)}
       gap={Math.round(28 * scale * k)}

@@ -14,3 +14,14 @@ export const wallItem = ({ src, title, href }: WallTile): DriftWallItem => ({
   title,
   href,
 });
+
+/* Julian (2026-10-17): the walls behind a frosted card (Inquiries, Sessions,
+   a service's booking page) are only ever seen blurred, so they take half
+   the pixels and a lower quality. The 404's wall is seen sharp and keeps
+   `wallItem`. */
+export const softItem = ({ src, title, href }: WallTile): DriftWallItem => ({
+  image: imageLoader({ src, width: 320, quality: 45 }),
+  srcSet: [160, 320].map((w) => `${imageLoader({ src, width: w, quality: 45 })} ${w}w`).join(", "),
+  title,
+  href,
+});
