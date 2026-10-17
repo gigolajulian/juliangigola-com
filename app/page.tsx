@@ -257,7 +257,7 @@ export default function Home() {
               {/* Julian: on a phone, one line that scrolls, as on the About
                   page (`about-marquee` in `globals.css`): the list twice,
                   the second out of reach of keys and readers. */}
-              <div className="about-marquee w-full sm:hidden">
+              <div className="about-marquee -mx-6 w-[calc(100%+3rem)] sm:hidden">
                 <div className="about-marquee-track">
                   <ClientMarks clients={PRESS_HOME} layout="row" className="about-marquee-list" />
                   <div inert aria-hidden>
