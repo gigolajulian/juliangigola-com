@@ -253,6 +253,10 @@ export function TimePicker({
     const dir = Math.sign(ORDER[step] - ORDER[was.current]);
     was.current = step;
     const el = root.current;
+    // A step opens at its top: on an iPhone Details opened where Continue
+    // had been, Name and Email above the screen (JG - MAC, 2026-10-17).
+    const card = el?.matches(".ed") ? el : el?.querySelector<HTMLElement>(".ed");
+    if (editorial && dir && card && card.getBoundingClientRect().top < 0) card.scrollIntoView({ block: "start" });
     if (!(smooth || editorial) || !dir || !el || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     if (editorial) {
       // Booked rises in; any other step slides in from the side it comes from.
