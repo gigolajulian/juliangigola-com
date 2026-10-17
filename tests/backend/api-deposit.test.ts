@@ -170,7 +170,7 @@ describe("the client's confirmation", () => {
     expect(sent).toHaveLength(1);
     const [m] = sent;
     expect(m.to).toEqual({ email: "qa@example.com", name: "QA Test" });
-    expect(m.from.email).toBe("bookings@notifications.juliangigola.com");
+    expect(m.from.email).toBe("book@juliangigola.com");
     expect(m.replyTo).toBe("hello@juliangigola.com");
     expect(m.subject).toMatch(/^Booked: Portraits, \w{3}, \w{3} \d+, .+ to .+ P[DS]T$/);
     for (const part of [m.html, m.text]) {
