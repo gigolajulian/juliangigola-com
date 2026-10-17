@@ -241,7 +241,7 @@ export function ContactScreen({
         <div
           data-scroll
           data-dial="form"
-          className="glass-surface min-h-0 flex-1 rounded-[16px] border border-border p-4 sm:max-h-full sm:p-6 sm:overflow-y-auto sm:overscroll-contain sm:px-8 sm:py-[clamp(1rem,3vh,1.5rem)]"
+          className="glass-surface min-h-0 min-w-0 flex-1 max-sm:[container:card/inline-size] max-sm:px-0 rounded-[16px] border border-border p-4 sm:max-h-full sm:p-6 sm:overflow-y-auto sm:overscroll-contain sm:px-8 sm:py-[clamp(1rem,3vh,1.5rem)]"
         >
           {cal ? (
             <CalEmbed path={cal} title="Pick a time" className="booking-embed block h-[75svh] w-full rounded-[8px] border-0 sm:h-full" />
