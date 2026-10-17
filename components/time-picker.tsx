@@ -1179,7 +1179,7 @@ export function TimePicker({
                 ) : null}
                 {asking ? <label className="ed-row"><span className="label">{ask}</span><input name="detail" required /></label> : null}
                 {needsWhere && !opts ? <label className="ed-row"><span className="label">Where</span><input name="where" required placeholder="The studio, or an address" /></label> : null}
-                <label className="ed-row"><span className="label">Notes</span><textarea name="notes" rows={3} onInput={grow} placeholder="Optional" className="tp-notes" /></label>
+                <label className="ed-row"><span className="label">Notes</span><textarea name="notes" rows={3} autoComplete="off" onInput={grow} placeholder="Optional" className="tp-notes" /></label>
                 {error ? <p role="alert" className="ed-err">{error}</p> : null}
               </div>
             </div>
@@ -1578,7 +1578,7 @@ export function TimePicker({
             ) : null}
           </div>
           
-          <label className="label flex flex-col gap-2 text-muted-foreground">Anything I should know<textarea name="notes" rows={3} onInput={grow} placeholder="Optional" className="tp-notes resize-none placeholder:uppercase placeholder:text-muted-foreground/50 border-b border-border bg-transparent py-2 text-base normal-case text-foreground outline-none focus:border-foreground" /></label>
+          <label className="label flex flex-col gap-2 text-muted-foreground">Anything I should know<textarea name="notes" rows={3} autoComplete="off" onInput={grow} placeholder="Optional" className="tp-notes resize-none placeholder:uppercase placeholder:text-muted-foreground/50 border-b border-border bg-transparent py-2 text-base normal-case text-foreground outline-none focus:border-foreground" /></label>
           {error ? <p role="alert" className="text-sm normal-case text-foreground">{error}</p> : null}
           <button type="submit" data-part="act" data-stick="fill" disabled={step === "sending"} className="label self-end rounded-[2px] border border-foreground bg-foreground px-6 py-4 text-background transition-[opacity,scale] duration-300 hoverable:hover:opacity-85 active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50">
             {step === "sending" ? "Booking" : "Book it"}
