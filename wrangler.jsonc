@@ -52,7 +52,9 @@
      and the binding fills it in. The address had to be verified once
      (Cloudflare emailed it a link). */
   "send_email": [
-    { "name": "EMAIL", "destination_address": "hello@juliangigola.com" }
+    { "name": "EMAIL", "destination_address": "hello@juliangigola.com" },
+    // The client's booking confirmation (`lib/confirm.ts`): any recipient, one sender.
+    { "name": "CLIENT_EMAIL", "allowed_sender_addresses": ["bookings@notifications.juliangigola.com"] }
   ],
 
   /* The site's own click-and-scroll beacon (`app/api/beacon`), read back by

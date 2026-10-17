@@ -1,4 +1,5 @@
 import { getCloudflareContext } from "@opennextjs/cloudflare";
+import { sendConfirm } from "@/lib/confirm";
 import { PAID, paidFor, tellNoDeposit } from "@/lib/deposit";
 import { bookingEnquiry, enquiryKey, summary, type CalBooking } from "@/lib/inbox";
 
@@ -68,5 +69,19 @@ export async function POST(request: Request) {
   });
   // After the write, so a failed write's retry does not mail twice.
   if (stored.noDeposit) await tellNoDeposit(env.EMAIL, hook.payload!.type!, hook.payload?.startTime, { name: stored.name, email: stored.email });
+  // Free calls only: a paid session's confirmation comes from the deposit
+  // webhook, and one booked on cal.com without paying gets none.
+  const p = hook.payload ?? {};
+  if (p.uid && p.startTime && !(PAID as readonly string[]).includes(p.type ?? ""))
+    await sendConfirm(env.CLIENT_EMAIL, {
+      name: stored.name,
+      email: stored.email,
+      session: p.eventTitle || p.title || "Call",
+      call: true,
+      start: p.startTime,
+      end: p.endTime,
+      where: p.location && !p.location.startsWith("integrations:") ? p.location : undefined,
+      uid: p.uid,
+    });
   return text("ok", 200);
 }
