@@ -47,12 +47,13 @@
   /* Cloudflare Email Sending. Each enquiry the form stores is also mailed
      to Julian, from `enquiries@notifications.juliangigola.com` — a sending
      subdomain onboarded on 2026-09-13 so the apex's own mail records, which
-     are Google's, were never touched. `destination_address` pins the
-     binding to the one address it may send to; `to` is left off the call
-     and the binding fills it in. The address had to be verified once
-     (Cloudflare emailed it a link). */
+     are Google's, were never touched. `allowed_destination_addresses`
+     keeps the binding to Julian's own inbox: enquiries go to contact@
+     and deposit alerts to hello@, both the same Workspace mailbox. */
   "send_email": [
-    { "name": "EMAIL", "destination_address": "hello@juliangigola.com" }
+    { "name": "EMAIL", "allowed_destination_addresses": ["hello@juliangigola.com", "contact@juliangigola.com"] },
+    // The client's booking confirmation (`lib/confirm.ts`): any recipient, one sender.
+    { "name": "CLIENT_EMAIL", "allowed_sender_addresses": ["book@juliangigola.com"] }
   ],
 
   /* The site's own click-and-scroll beacon (`app/api/beacon`), read back by

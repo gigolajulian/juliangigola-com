@@ -168,7 +168,7 @@ async function submitOrKeep(prev: ContactState, data: FormData): Promise<Contact
       values,
       message:
         "That didn't go through, so nothing was sent. Your message is still here. Try again, or open it in your mail app and it will reach me directly.",
-      mailto: `mailto:hello@juliangigola.com?subject=${encodeURIComponent(`${values.type || "other"} inquiry from ${values.name}`)}&body=${encodeURIComponent(body)}`,
+      mailto: `mailto:contact@juliangigola.com?subject=${encodeURIComponent(`${values.type || "other"} inquiry from ${values.name}`)}&body=${encodeURIComponent(body)}`,
     };
   }
 }

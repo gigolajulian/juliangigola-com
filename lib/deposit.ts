@@ -1,3 +1,4 @@
+import { sendConfirm } from "@/lib/confirm";
 import { enquiry, enquiryKey, summary, whenPT } from "@/lib/inbox";
 
 /* ── the $100 deposit ─────────────────────────────────────────────
@@ -24,7 +25,8 @@ import { enquiry, enquiryKey, summary, whenPT } from "@/lib/inbox";
  *      Cal.com's own webhook stores the booking, `paidFor` asks Stripe
  *      whether that intent really paid for this booking before the Inbox
  *      row says "Deposit paid": anyone can type a ref into their notes.
- *      The client's receipt is Stripe's, from `receipt_email`.
+ *      The client's receipt is Stripe's, from `receipt_email`, and the
+ *      site's own confirmation (`lib/confirm.ts`) once Cal.com books.
  *
  * Stripe is called over its REST API with fetch, no SDK: three calls do
  * not need a dependency. Test-mode keys until Julian says live.
@@ -47,7 +49,7 @@ const STRIPE = "https://api.stripe.com/v1";
 const TOLERANCE_S = 300;
 const MAIL_TO = "hello@juliangigola.com";
 const MAIL_FROM = "enquiries@notifications.juliangigola.com";
-const SESSION: { [slug: string]: string } = { portraits: "Portraits", headshots: "Headshots", graduation: "Graduation photos", digitals: "Studio digitals" };
+export const SESSION: { [slug: string]: string } = { portraits: "Portraits", headshots: "Headshots", graduation: "Graduation photos", digitals: "Studio digitals" };
 
 /** The intent in Stripe's dashboard, test or live as the key is. */
 export const dashboardLink = (intent: string, key: string) =>
@@ -126,7 +128,7 @@ export async function isOpen(b: Booking): Promise<boolean> {
 }
 
 /** Books the time on Cal.com, as the picker does from the browser. */
-export async function bookCal(b: Booking, intent: string): Promise<{ uid: string; start: string }> {
+export async function bookCal(b: Booking, intent: string): Promise<{ uid: string; start: string; end?: string }> {
   const res = await fetch(`${CAL}/bookings`, {
     method: "POST",
     headers: { "cal-api-version": "2024-08-13", "Content-Type": "application/json" },
@@ -142,9 +144,9 @@ export async function bookCal(b: Booking, intent: string): Promise<{ uid: string
       },
     }),
   });
-  const out = (await res.json().catch(() => ({}))) as { status?: string; data?: { uid?: string; start?: string } };
+  const out = (await res.json().catch(() => ({}))) as { status?: string; data?: { uid?: string; start?: string; end?: string } };
   if (!res.ok || out.status !== "success" || !out.data?.uid) throw new Error(`Cal.com booking ${res.status}`);
-  return { uid: out.data.uid, start: out.data.start ?? b.start };
+  return { uid: out.data.uid, start: out.data.start ?? b.start, end: out.data.end };
 }
 
 /** A call to Stripe's API: a form-encoded POST, or a GET without a form. */
@@ -229,7 +231,18 @@ export async function verifyStripe(body: string, header: string, secret: string,
   return sigs.some((s) => s.length === want.length && [...s].reduce((d, c, i) => d | (c.charCodeAt(0) ^ want.charCodeAt(i)), 0) === 0);
 }
 
-type Env = { INBOX: NonNullable<CloudflareEnv["INBOX"]>; STRIPE_SECRET_KEY: string; EMAIL?: CloudflareEnv["EMAIL"] };
+type Env = { INBOX: NonNullable<CloudflareEnv["INBOX"]>; STRIPE_SECRET_KEY: string; EMAIL?: CloudflareEnv["EMAIL"]; CLIENT_EMAIL?: CloudflareEnv["CLIENT_EMAIL"] };
+
+/** "Visa ending 4242", from the charge; nothing if Stripe will not say. */
+async function cardOf(key: string, intent: string) {
+  try {
+    const pi = (await stripe(key, `/payment_intents/${intent}?expand[]=latest_charge`)) as { latest_charge?: { payment_method_details?: { card?: { brand?: string; last4?: string } } } };
+    const c = pi.latest_charge?.payment_method_details?.card;
+    return c?.last4 ? `${c.brand ? c.brand[0].toUpperCase() + c.brand.slice(1) : "Card"} ending ${c.last4}` : undefined;
+  } catch {
+    return undefined;
+  }
+}
 
 const SAID = { booked: "Deposit paid", refunded: "Deposit refunded", failed: "Deposit paid, not booked, not refunded" } as const;
 const NEXT = {
@@ -299,8 +312,16 @@ export async function settle(env: Env, intent: string, metadata: { [k: string]: 
     try {
       if (await isOpen(b)) {
         const booking = await bookCal(b, intent);
-        await put({ status: "booked", booking });
+        await put({ status: "booked", booking: { uid: booking.uid, start: booking.start } });
         await tell(env, "booked", b, link);
+        await sendConfirm(env.CLIENT_EMAIL, {
+          ...b,
+          session: SESSION[b.slug] ?? b.slug,
+          start: booking.start,
+          end: booking.end,
+          uid: booking.uid,
+          deposit: { ref: intent, at: new Date().toISOString(), card: await cardOf(env.STRIPE_SECRET_KEY, intent) },
+        });
         return "booked";
       }
     } catch {

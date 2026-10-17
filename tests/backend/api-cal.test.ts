@@ -156,4 +156,29 @@ describe("the four paid sessions", () => {
     expect(row.noDeposit).toBeUndefined();
     expect(mails).toEqual([]);
   });
+
+  describe("the client's confirmation", () => {
+    let sent: { to: { email: string }; subject: string; text: string }[];
+    beforeEach(() => {
+      sent = [];
+      ctx.env.CLIENT_EMAIL = { send: async (m: (typeof sent)[0]) => void sent.push(m) };
+    });
+
+    it("goes out for a free call, with no deposit block", async () => {
+      await book({ type: "wedding-call", eventTitle: "Wedding call", uid: "call_uid", endTime: "2026-10-17T21:30:00Z", location: "integrations:daily" });
+      expect(sent).toHaveLength(1);
+      expect(sent[0].to.email).toBe("qa@example.com");
+      expect(sent[0].subject).toMatch(/^Booked: Wedding call, Sat, Oct 17, 2:00 to 2:30 PM PDT$/);
+      expect(sent[0].text).toContain("Your wedding call is booked. I'll call you then.");
+      expect(sent[0].text).not.toContain("Deposit");
+      expect(sent[0].text).not.toContain("integrations:");
+    });
+
+    it("never goes out from here for a paid session, paid or not", async () => {
+      await book({ uid: "u1", metadata: { deposit: PI } });
+      paid = false;
+      await book({ uid: "u2" });
+      expect(sent).toEqual([]);
+    });
+  });
 });
