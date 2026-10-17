@@ -769,6 +769,10 @@
 :root[data-smooth] #book-card {
   transition: background-color 700ms var(--ease-out-strong);
 }
+/* The times are what you tap: 13px, not the 11px of the labels round them. */
+:root[data-smooth] #book-card [data-slot] {
+  font-size: 0.8125rem;
+}
 :root[data-smooth] #book-card:has([data-booked]) {
   background-color: var(--accent);
   border-color: transparent;

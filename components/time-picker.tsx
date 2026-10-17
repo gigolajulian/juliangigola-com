@@ -353,7 +353,7 @@ export function TimePicker({
      (`[data-slide]`, contact.css). Not on a switch between the two,
      which has its own glide below. */
   const [slide, setSlide] = React.useState(0);
-  const swipe = React.useRef<{ x: number; y: number; done: boolean } | null>(null);
+  const swipe = React.useRef<{ x: number; y: number; done: boolean; drag?: boolean; v?: number; t?: number; lx?: number } | null>(null);
   const shift = (dir: number) => {
     setSlide(dir);
     const d = new Date(view === "week" ? week[0] : anchor);
@@ -788,12 +788,53 @@ export function TimePicker({
           data-slide={slide}
           className="-m-1 touch-pan-y overflow-hidden p-1"
           onPointerDown={(e) => {
-            if (e.pointerType !== "mouse") swipe.current = { x: e.clientX, y: e.clientY, done: false };
+            if (e.pointerType !== "mouse") swipe.current = { x: e.clientX, y: e.clientY, done: false, v: 0, t: e.timeStamp, lx: e.clientX };
+          }}
+          /* `?smooth`: the days follow the finger once it is clearly
+             sideways, give at the start of the calendar, and a flick or
+             a third of the row turns the week; less springs back. */
+          onPointerMove={(e) => {
+            const s = swipe.current, row = daysBox.current?.firstElementChild as HTMLElement | null;
+            if (!smooth || !s || !row) return;
+            const dx = e.clientX - s.x, dy = e.clientY - s.y;
+            if (!s.drag) {
+              if (Math.abs(dx) < 10 || Math.abs(dx) < Math.abs(dy) * 1.5) return;
+              s.drag = true;
+              e.currentTarget.setPointerCapture(e.pointerId);
+              gsap.killTweensOf(row);
+            }
+            const dt = e.timeStamp - s.t! || 16;
+            s.v = (e.clientX - s.lx!) / dt; // px per ms
+            s.t = e.timeStamp;
+            s.lx = e.clientX;
+            const w = row.offsetWidth;
+            const x = atStart && dx > 0 ? (dx * w * 0.55) / (w + 0.55 * dx) : dx;
+            gsap.set(row, { x });
           }}
           onPointerUp={(e) => {
             const s = swipe.current;
             if (!s) return;
             const dx = e.clientX - s.x, dy = e.clientY - s.y;
+            const row = daysBox.current?.firstElementChild as HTMLElement | null;
+            if (s.drag && row) {
+              s.done = true;
+              const w = row.offsetWidth;
+              // Where the flick was going: Apple's projection (0.998), damped to 40%.
+              const ahead = dx + (s.v ?? 0) * 499 * 0.4;
+              const dir = ahead < -w / 3 ? 1 : ahead > w / 3 && !atStart ? -1 : 0;
+              if (!dir) return void gsap.to(row, { x: 0, duration: 0.5, ease: "expo.out" });
+              gsap.to(row, {
+                x: -dir * w,
+                autoAlpha: 0,
+                duration: 0.2,
+                ease: "power2.in",
+                onComplete: () => {
+                  shift(dir);
+                  gsap.set(row, { x: 0, autoAlpha: 1, clearProps: "transform,opacity,visibility" });
+                },
+              });
+              return;
+            }
             if (Math.abs(dx) < 40 || Math.abs(dx) < Math.abs(dy) * 1.5) return void (swipe.current = null);
             s.done = true;
             if (dx < 0) shift(1);
