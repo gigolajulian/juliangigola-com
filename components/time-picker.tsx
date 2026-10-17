@@ -909,7 +909,7 @@ export function TimePicker({
     const short = `${d3(date)} ${date.getDate()} ${mon(date)}, ${t} ${ap}`;
     const range = `${d3(date)} ${date.getDate()} ${mon(date)}, ${t}${ap === apEnd ? "" : ` ${ap}`} to ${until} ${apEnd} ${tzName}`;
     const at = step === "pick" ? 0 : step === "pay" ? 2 : step === "done" ? -1 : 1;
-    /* A call (no deposit): a handset, its length as a timer (Julian). */
+    /* A call (no deposit): a handset, its length in minutes (Julian, 2026-10-17: "15:00" read as 3 PM). */
     const call = !paid;
     const handset = (
       <svg aria-hidden viewBox="0 0 24 24" className="ed-handset" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round">
@@ -922,7 +922,7 @@ export function TimePicker({
         <path d="M15.5 10.5 21.5 7v10l-6-3.5z" />
       </svg>
     );
-    const timer = length >= 60 ? `${Math.floor(length / 60)}:${pad(length % 60)}:00` : `${length}:00`;
+    const timer = length >= 60 ? `${Math.floor(length / 60)} hr${length % 60 ? ` ${length % 60} min` : ""}` : `${length} min`;
     const tel = (n: string) => (/^\+1\d{10}$/.test(n) ? `(${n.slice(2, 5)}) ${n.slice(5, 8)} ${n.slice(8)}` : n);
     const bar = (
       <nav aria-label="Steps" className="ed-steps label">
