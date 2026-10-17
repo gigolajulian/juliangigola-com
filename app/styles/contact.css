@@ -727,6 +727,39 @@
   --session-pick: color-mix(in oklab, var(--foreground) 14%, transparent);
 }
 
+/* Pressed the moment the finger lands, let go at the old pace (Apple's
+   ~100ms press). One list for the card's buttons, so the scale has a
+   way back on the cells as well; `.press` keeps its own list. */
+#book-card button:not(.press) {
+  transition:
+    scale 300ms var(--ease-out-strong),
+    opacity 300ms var(--ease-out-strong),
+    translate 300ms var(--ease-out-strong),
+    background-color 300ms var(--ease-out-strong),
+    border-color 300ms var(--ease-out-strong),
+    color 300ms var(--ease-out-strong);
+}
+#book-card button:not(:disabled, [aria-disabled="true"]):active {
+  scale: 0.97;
+  transition-duration: 90ms;
+  transition-timing-function: cubic-bezier(0.4, 0, 1, 1);
+}
+/* The glass made solid where it is asked for (reduced transparency, more
+   contrast): Tailwind's blur on the card is not `.glass-surface`. */
+@media (prefers-reduced-transparency: reduce), (prefers-contrast: more) {
+  #book-card {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    background-color: var(--card);
+  }
+}
+@media (prefers-contrast: more) {
+  #book-card {
+    border-color: var(--foreground);
+    --muted-foreground: color-mix(in oklab, var(--foreground) 80%, var(--card));
+  }
+}
+
 /* The card's quiet words over the glass in the light theme: at the
    page's grey they read about 4.2:1 where a dark wall shows through. */
 :root[data-theme="light"] #book-card {

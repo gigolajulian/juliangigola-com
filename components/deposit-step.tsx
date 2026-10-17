@@ -115,6 +115,7 @@ export function DepositStep({
   rows,
   onBooked,
   onTaken,
+  onBack,
   className,
 }: {
   className?: string;
@@ -123,6 +124,8 @@ export function DepositStep({
   onBooked: () => void;
   /** The time went before the payment: back to the times. */
   onTaken: () => void;
+  /** Back to the form, what was typed still in it. */
+  onBack: () => void;
 }) {
   const box = React.useRef<HTMLDivElement>(null);
   const number = React.useRef<HTMLDivElement>(null);
@@ -267,7 +270,12 @@ export function DepositStep({
 
   return (
     <div ref={box} aria-label="Deposit" role="region" className={cn("tp !flex flex-col gap-6 p-6 sm:gap-8 sm:p-10 [&>*]:shrink-0", className)}>
-      <p className="label tp-roll text-muted-foreground">Reserve your date</p>
+      <div className="flex items-center justify-between gap-4">
+        <p className="label tp-roll text-muted-foreground">Reserve your date</p>
+        {stage === "ready" || stage === "loading" || stage === "broken" ? (
+          <button type="button" onClick={onBack} className="label text-muted-foreground hoverable:hover:text-foreground">Edit details</button>
+        ) : null}
+      </div>
       <dl className="grid gap-x-10 gap-y-4 sm:grid-cols-2">
         {rows.map(([k, v], n) => (
           <div key={k} className="tp-roll flex min-w-0 flex-col gap-1.5" style={{ animationDelay: `${140 + n * 70}ms` }}>

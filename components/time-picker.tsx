@@ -176,6 +176,8 @@ export function TimePicker({
   /* A paid session, its deposit taken here (`?deposit`, deposit-step.tsx). */
   const [paid, setPaid] = React.useState(false);
   const [deposit, setDeposit] = React.useState<DepositBody | null>(null);
+  /* What was typed, put back when the deposit step goes back to the form. */
+  const typed = React.useRef<Record<string, string>>({});
   const [error, setError] = React.useState("");
   /* Julian: Confirm's words turn into the orbs, then a check, before the
      form opens. */
@@ -531,6 +533,7 @@ export function TimePicker({
 
   const book = async (form: FormData) => {
     if (!pick) return;
+    typed.current = Object.fromEntries([...form].map(([k, v]) => [k, String(v)]));
     setStep("sending");
     setError("");
     const began = Date.now();
@@ -634,6 +637,7 @@ export function TimePicker({
           setStep("pick");
           void load(true);
         }}
+        onBack={() => setStep("form")}
       />
     );
   }
@@ -1002,6 +1006,13 @@ export function TimePicker({
         </div>
       ) : (
         <form
+          ref={(f) => {
+            if (!f) return;
+            for (const [k, v] of Object.entries(typed.current)) {
+              const el = f.elements.namedItem(k);
+              if ((el instanceof HTMLInputElement && el.type !== "radio") || el instanceof HTMLTextAreaElement) el.value = v;
+            }
+          }}
           onSubmit={(e) => {
             e.preventDefault();
             void book(new FormData(e.currentTarget));
