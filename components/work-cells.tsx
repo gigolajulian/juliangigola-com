@@ -134,7 +134,8 @@ export function FilmCell({
       data-tint="#7a5a9e"
       data-ring="Watch"
       data-film
-      aria-label={`${title}, film`}
+      /* The slate's words first, as they read (WCAG 2.5.3): the credit, the title. */
+      aria-label={`${credit ? `${credit}, ` : ""}${title}, film`}
       className="group strip-cell relative block aspect-video w-full shrink-0 overflow-hidden bg-card press active:scale-[0.995] sm:h-full sm:w-auto"
       /* A film is 16:9 and says so. In the strip the cell is full height and
          `aspect-video` settles its width, but the rack overrules both with
