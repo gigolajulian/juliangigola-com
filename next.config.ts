@@ -286,6 +286,8 @@ const securityHeaders = [
 const ADMIN_HOST = "admin.juliangigola.com";
 
 const nextConfig: NextConfig = {
+  // The build stamp `/api/build` reports (Workers Builds sets the sha).
+  env: { BUILD_SHA: process.env.WORKERS_CI_COMMIT_SHA ?? "local" },
   // Hides the floating dev badge that sits over the bottom-left corner of
   // every page while `next dev` is running. It never shipped to production,
   // but it lands exactly where the masthead and the numbered index are, which

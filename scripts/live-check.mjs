@@ -41,6 +41,15 @@ for (const [file, page] of assets) {
   if (res.status !== 200) failures.push(`${res.status} ${file} (linked from ${page})`);
 }
 
+// The live build must be main's newest commit (`/api/build`, #187 over #185).
+if (origin === "https://juliangigola.com") {
+  const { sha } = await (await fetch(`${origin}/api/build`, { headers: { "cache-control": "no-cache" } })).json();
+  const { execFileSync } = await import("node:child_process");
+  const head = execFileSync("git", ["ls-remote", "https://github.com/gigolajulian/juliangigola-com.git", "refs/heads/main"], { encoding: "utf8" }).split(/\s/)[0];
+  if (sha !== head) failures.push(`live build ${String(sha).slice(0, 7)} is not main ${head.slice(0, 7)}`);
+  else console.log(`live build is main ${head.slice(0, 7)}`);
+}
+
 console.log(`${pages.length} pages, ${assets.size} files`);
 if (failures.length) {
   console.log(failures.join("\n"));
