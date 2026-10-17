@@ -9,12 +9,12 @@
  *     without a deposit gets nothing that says it is confirmed.
  *
  * Sent through `CLIENT_EMAIL`, the one binding that may mail outside
- * hello@, and only from bookings@. A failed send is logged, never a
+ * hello@, and only from book@ (an alias of hello@). A failed send is logged, never a
  * failed booking. Look: the mock Julian approved (dark, IBM Plex Mono,
  * one accent, hairlines), table layout because mail clients need it.
  * ─────────────────────────────────────────────────────────────── */
 
-const FROM = { name: "Julian Gigola", email: "bookings@notifications.juliangigola.com" };
+const FROM = { name: "Julian Gigola", email: "book@juliangigola.com" };
 const REPLY_TO = "hello@juliangigola.com";
 const SITE = "https://juliangigola.com";
 const TZ = "America/Los_Angeles";
