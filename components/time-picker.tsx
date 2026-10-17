@@ -682,13 +682,13 @@ export function TimePicker({
     );
     return () => tw.forEach((t) => t.progress(1).kill());
   }, [editorial, step, shown, view, held, state]);
-  /* `?nudge` (Julian, 2026-10-17, opt-in until he has seen it): on a touch
+  /* The swipe nudge (Julian, 2026-10-17, on for everyone): on a touch
      screen the week eases 8px left and back after the cascade, no
      bounce (Julian: the 16px spring was too much), so the strip reads as
      something that swipes. Once a visit. */
   React.useEffect(() => {
     const row = daysBox.current?.firstElementChild as HTMLElement | null;
-    if (!editorial || step !== "pick" || view !== "week" || !row || !new URLSearchParams(location.search).has("nudge")) return;
+    if (!editorial || step !== "pick" || view !== "week" || !row) return;
     if (!matchMedia("(pointer: coarse)").matches || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     try { if (sessionStorage.getItem("ed-nudged")) return; } catch {}
     const seen = () => { try { sessionStorage.setItem("ed-nudged", "1"); } catch {} };
