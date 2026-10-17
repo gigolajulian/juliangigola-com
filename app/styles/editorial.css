@@ -308,3 +308,10 @@ fieldset.ed-row > legend { float: left; padding: 0; }
 }
 /* Scrolled to on a new step: clear of the site's fixed header. */
 .ed { scroll-margin-top: 4.5rem; }
+
+/* /book: the card over the photo wall gets the fill of the session
+   pages' card (`bg-card/60`), not none (Julian, 2026-10-17: too
+   transparent). Phones have no wall behind it. */
+@media (min-width: 40rem) {
+  .book-page div:has(> .ed) { background-color: color-mix(in oklab, var(--card) 60%, transparent); }
+}
