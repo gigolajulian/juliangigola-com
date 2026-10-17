@@ -1,4 +1,4 @@
-/* ── `?editorial` (time-picker.tsx, deposit-step.tsx) ─────────────────
+/* ── the booking card, editorial (time-picker.tsx, deposit-step.tsx); `?classic` the one before ─────────────────
    The booking card as a magazine page (Julian, 2026-10-16, from
    booking-editorial-mock.html): a step bar, hairline rows, big Inter
    Tight numbers that turn like a departures board, square buttons. Two
@@ -155,8 +155,8 @@ fieldset.ed-row > legend { float: left; padding: 0; }
 .ed-grow { position: absolute; z-index: 30; background: var(--accent); pointer-events: none; }
 .ed-grow[data-bad] { background: var(--ed-bad); }
 #book-card { --ed-bad: oklch(0.5 0.19 25); }
-:root[data-editorial] #book-card { transition: background-color 500ms var(--ease-out-strong); }
-:root[data-editorial] #book-card:has(.ed[data-booked]) {
+:root:not([data-classic]) #book-card { transition: background-color 500ms var(--ease-out-strong); }
+:root:not([data-classic]) #book-card:has(.ed[data-booked]) {
   background-color: var(--accent);
   border-color: transparent;
   --foreground: var(--accent-foreground);
@@ -165,7 +165,7 @@ fieldset.ed-row > legend { float: left; padding: 0; }
   --muted-foreground: color-mix(in oklab, var(--accent-foreground) 72%, var(--accent));
   color: var(--foreground);
 }
-:root[data-editorial] #book-card:has(.ed[data-declined]) {
+:root:not([data-classic]) #book-card:has(.ed[data-declined]) {
   background-color: var(--ed-bad);
   border-color: transparent;
   --foreground: oklch(0.97 0.004 80);
@@ -175,10 +175,10 @@ fieldset.ed-row > legend { float: left; padding: 0; }
   --muted-foreground: color-mix(in oklab, oklch(0.97 0.004 80) 75%, var(--ed-bad));
   color: var(--foreground);
 }
-:root[data-editorial] #book-card:has(.ed:is([data-booked], [data-declined])) :is(.ed-steps button, .ed-steps b) { color: var(--foreground); }
-:root[data-editorial] #book-card:has(.ed[data-booked]) .ed-steps button { border-color: transparent; }
-:root[data-editorial] #book-card:has(.ed[data-declined]) .ed-steps [aria-current] { border-color: var(--foreground); }
-:root[data-editorial] #book-card:has(.ed[data-declined]) .ed-btn { background: var(--foreground); color: var(--ed-bad); }
+:root:not([data-classic]) #book-card:has(.ed:is([data-booked], [data-declined])) :is(.ed-steps button, .ed-steps b) { color: var(--foreground); }
+:root:not([data-classic]) #book-card:has(.ed[data-booked]) .ed-steps button { border-color: transparent; }
+:root:not([data-classic]) #book-card:has(.ed[data-declined]) .ed-steps [aria-current] { border-color: var(--foreground); }
+:root:not([data-classic]) #book-card:has(.ed[data-declined]) .ed-btn { background: var(--foreground); color: var(--ed-bad); }
 
 /* fitted to a short card, a step at a time */
 .ed[data-fit="1"] { --ed-time: 4rem; --ed-cell: 2.625rem; }
@@ -212,7 +212,7 @@ fieldset.ed-row > legend { float: left; padding: 0; }
 }
 /* a landscape screen gives the card the room for two columns */
 @media (min-width: 64rem) and (min-aspect-ratio: 5/4) {
-  :root[data-editorial] [data-book-frame] { width: min(70rem, 100%); }
+  :root:not([data-classic]) [data-book-frame] { width: min(70rem, 100%); }
 }
 
 /* a phone: one column, the times four to a row */

@@ -239,11 +239,12 @@ export function TimePicker({
   React.useEffect(() => {
     if (smooth) document.documentElement.dataset.smooth = "";
   }, [smooth]);
-  /* `?editorial`, while Julian looks: the card as a magazine page
-     (editorial.css, booking-editorial-mock.html). */
-  const editorial = React.useSyncExternalStore(noop, () => new URLSearchParams(location.search).has("editorial"), () => false);
+  /* The card as a magazine page (editorial.css, booking-editorial-mock.html),
+     everywhere since 2026-10-17 (Julian: "make sure the new card design is
+     out"). The card before it stays behind `?classic`. */
+  const editorial = React.useSyncExternalStore(noop, () => !new URLSearchParams(location.search).has("classic"), () => true);
   React.useEffect(() => {
-    if (editorial) document.documentElement.dataset.editorial = "";
+    if (!editorial) document.documentElement.dataset.classic = "";
   }, [editorial]);
   const root = React.useRef<HTMLDivElement>(null);
   const was = React.useRef(step);
