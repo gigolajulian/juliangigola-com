@@ -82,7 +82,7 @@ export function BookPicker({ sessions, start }: { sessions: Bookable[]; start?: 
     "--tp-tint": `${tp.tint}%`,
   } as React.CSSProperties;
   const cardOf = () => (
-    <div className="min-h-[75svh] overflow-hidden lg:min-h-0 rounded-[var(--card-r,12px)] border-[0.5px] border-border lg:h-full lg:max-h-[var(--card-h,47rem)]">
+    <div className="min-h-[75svh] overflow-hidden lg:min-h-0 rounded-[var(--card-r,12px)] border-[0.5px] border-border lg:h-full lg:max-h-[var(--card-h,47rem)] max-sm:[container:card/inline-size] max-sm:-mx-[calc(1.5rem_-_3px)]">
       {/* A fresh picker per session: the last one's time may not be open in this one. */}
       <CalEmbed key={current.cal} path={current.cal} title={`Pick a time for ${current.name}`} className="booking-embed block h-full w-full border-0" />
     </div>
