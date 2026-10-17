@@ -644,16 +644,26 @@ export function TimePicker({
     const body = el?.querySelector<HTMLElement>(".ed-body");
     if (!editorial || step !== "pick" || !el || !body) return;
     const fit = () => {
+      el.removeAttribute("data-scroll");
       for (let n = 0; n <= 3; n++) {
         el.dataset.fit = String(n);
         if (body.scrollHeight - body.clientHeight <= 1) return;
       }
+      // Still over at the last step (a phone on its side, QA on #204): the
+      // days were clipped out of reach. Reachable beats no scroll.
+      el.dataset.scroll = "";
     };
     fit();
     const ro = new ResizeObserver(fit);
     ro.observe(el);
     return () => ro.disconnect();
   }, [editorial, step, view, month, week, pick?.date, chosen, days, mstep, held]);
+  /* Split in two and scrolling, each screen opens at its top: the times
+     opened where the days had been scrolled to, their way back hidden. */
+  React.useLayoutEffect(() => {
+    const body = root.current?.querySelector<HTMLElement>(".ed-body");
+    if (editorial && body) body.scrollTop = 0;
+  }, [editorial, mstep]);
   /* Editorial: the days cascade in on the beat of their numbers' flaps,
      left to right across a week, a ripple from the top left of a month
      (Julian, 2026-10-16). On load and on every week or month shown. */
