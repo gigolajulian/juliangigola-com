@@ -39,7 +39,7 @@ for (const r of RATIOS) {
     // Close sits clear of the calendar, whatever it scrolls to. Polled: the
     // card is still settling for a moment on a slow CI runner.
     const isClear = () => card.evaluate((c) => {
-      const close = [...c.querySelectorAll("button")].find((b) => /^Close/.test(b.textContent!.trim()))!;
+      const close = [...c.querySelectorAll("button")].find((b) => b.getAttribute("aria-label") === "Close")!;
       const sc = [...c.querySelectorAll<HTMLElement>("*")].find((n) => /(auto|scroll)/.test(getComputedStyle(n).overflowY) && n.scrollHeight > n.clientHeight + 1);
       const cb = close.getBoundingClientRect();
       if (!sc) return true;
@@ -88,7 +88,7 @@ test("keyboard: Enter opens the card with focus in it, Tab reaches Close, Escape
   await page.waitForTimeout(2000);
   expect(await page.evaluate(() => document.activeElement?.id)).toBe("book-card");
   await page.keyboard.press("Tab");
-  expect(await page.evaluate(() => document.activeElement?.textContent?.trim())).toMatch(/^Close/);
+  expect(await page.evaluate(() => document.activeElement?.getAttribute("aria-label"))).toBe("Close");
   await page.keyboard.press("Escape");
   await page.waitForTimeout(1800);
   expect(await page.evaluate(() => document.activeElement?.textContent?.replace(/\s+/g, ""))).toMatch(/Portraits/i);
