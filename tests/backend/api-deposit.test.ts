@@ -26,6 +26,8 @@ let calOk: boolean;
 let refundOk: boolean;
 type Mail = { subject: string; text: string; replyTo?: { email: string } };
 let mails: Mail[];
+type ClientMail = { to: { email: string; name: string }; from: { email: string }; replyTo: string; subject: string; html: string; text: string };
+let sent: ClientMail[];
 /** The intent as Stripe holds it: the webhook writes its outcome here. */
 let intent: { status?: string; amount: number; currency: string; metadata: Record<string, string> };
 
@@ -36,11 +38,13 @@ beforeEach(() => {
   refundOk = true;
   intent = { amount: 10000, currency: "usd", metadata: { kind: "deposit" } };
   mails = [];
-  ctx.env = { INBOX: new FakeKV(), STRIPE_SECRET_KEY: "sk_test_x", STRIPE_WEBHOOK_SECRET: WHSEC, EMAIL: { send: async (m: Mail) => void mails.push(m) } };
+  sent = [];
+  ctx.env = { INBOX: new FakeKV(), STRIPE_SECRET_KEY: "sk_test_x", STRIPE_WEBHOOK_SECRET: WHSEC, EMAIL: { send: async (m: Mail) => void mails.push(m) }, CLIENT_EMAIL: { send: async (m: ClientMail) => void sent.push(m) } };
   vi.stubGlobal("fetch", async (url: string, init?: RequestInit) => {
     calls.push({ url, init });
     if (url.includes("/v2/slots")) return reply({ status: "success", data: { day: open ? [{ start: START }] : [] } });
-    if (url.includes("/v2/bookings")) return calOk ? reply({ status: "success", data: { uid: "cal_uid", start: START } }) : reply({ status: "error" }, 400);
+    if (url.includes("/v2/bookings")) return calOk ? reply({ status: "success", data: { uid: "cal_uid", start: START, end: new Date(Date.parse(START) + 36e5).toISOString() } }) : reply({ status: "error" }, 400);
+    if (url.endsWith(`/payment_intents/${PI}?expand[]=latest_charge`)) return reply({ id: PI, ...intent, latest_charge: { payment_method_details: { card: { brand: "visa", last4: "4242" } } } });
     if (url.endsWith("/payment_intents")) return reply({ id: PI, client_secret: `${PI}_secret_x` });
     if (url.endsWith(`/payment_intents/${PI}`)) {
       if (init?.method === "POST") for (const [k, v] of new URLSearchParams(String(init.body))) intent.metadata[k.slice(9, -1)] = v;
@@ -157,6 +161,49 @@ describe("POST /api/stripe", () => {
     expect(kv().json(`deposit:${PI}`).status).toBe("failed");
     const row = kv().puts.find((k) => !k.startsWith("deposit:"))!;
     expect(kv().json(row)).toMatchObject({ type: "booking", email: "qa@example.com" });
+  });
+});
+
+describe("the client's confirmation", () => {
+  it("mails the client once Cal.com books, with the deposit receipt", async () => {
+    await deliver(paid());
+    expect(sent).toHaveLength(1);
+    const [m] = sent;
+    expect(m.to).toEqual({ email: "qa@example.com", name: "QA Test" });
+    expect(m.from.email).toBe("book@juliangigola.com");
+    expect(m.replyTo).toBe("hello@juliangigola.com");
+    expect(m.subject).toMatch(/^Booked: Portraits, \w{3}, \w{3} \d+, .+ to .+ P[DS]T$/);
+    for (const part of [m.html, m.text]) {
+      expect(part).toContain("Deposit paid");
+      expect(part).toContain("Visa ending 4242");
+      expect(part).toContain("https://cal.com/reschedule/cal_uid");
+      expect(part).toContain("https://cal.com/booking/cal_uid?cancel=true");
+      expect(part).toContain("Thanks, QA.");
+    }
+    expect(m.html).not.toMatch(/—/);
+  });
+
+  it("mails the client nothing when the deposit is refunded", async () => {
+    open = false;
+    await deliver(paid());
+    expect(sent).toEqual([]);
+  });
+
+  it("keeps the booking when the client's mail fails, and escapes what they typed", async () => {
+    ctx.env.CLIENT_EMAIL = { send: async () => { throw new Error("quota"); } };
+    expect((await deliver(paid())).status).toBe(200);
+    expect(kv().json(`deposit:${PI}`).status).toBe("booked");
+    const { confirmMail } = await import("@/lib/confirm");
+    const { html } = confirmMail({ name: "<b>x</b>", email: "x@example.com", session: "Portraits", start: START, where: "<script>", uid: "u" });
+    expect(html).not.toContain("<script>");
+    expect(html).not.toContain("<b>x</b>");
+    expect(confirmMail({ name: "A", email: "a@example.com", session: "Graduation photos", start: START, uid: "u" }).text).toContain("Your graduation session is booked.");
+  });
+
+  it("reads the time in Pacific with no city", async () => {
+    const { when } = await import("@/lib/confirm");
+    expect(when("2026-10-21T23:00:00Z", "2026-10-22T00:00:00Z")).toBe("Wed, Oct 21, 4:00 to 5:00 PM PDT");
+    expect(when("2026-12-02T18:30:00Z")).toBe("Wed, Dec 2, 10:30 AM PST");
   });
 });
 
