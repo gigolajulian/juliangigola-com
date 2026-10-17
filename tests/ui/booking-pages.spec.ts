@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { open, pickTime, RATIOS } from "./ratios";
+import { CONFIRM, open, pickTime, RATIOS } from "./ratios";
 
 /* The booking pages (/portraits, /weddings...): the deck ends at Book and
    stays there, and the page's own picker lets a time be confirmed. */
@@ -43,7 +43,7 @@ for (const slug of ["portraits", "music-photography"]) {
       });
       await page.waitForTimeout(300);
       await pickTime(page, true);
-      const confirm = page.getByRole("button", { name: "Confirm this time" });
+      const confirm = page.getByRole("button", { name: CONFIRM });
       await expect(confirm).toBeEnabled();
       await confirm.scrollIntoViewIfNeeded();
       const reach = await confirm.evaluate((b) => {
