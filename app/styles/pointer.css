@@ -11,10 +11,14 @@
    Hidden only once the mark is drawn (`data-mark`), and important because
    the arrange view's grab and the admin's `cursor-grab` would otherwise
    win the arrow back over the surfaces the mark covers.
-   Over a text field it becomes a caret of its own (below). */
+   Over a text field it becomes a caret of its own (below).
+   Arranging is flagged on the root (`hero-dials.tsx`), not asked with
+   `:root:has(…) *`: Chrome lumps every `:has` together, and that `*`
+   made any hover anywhere restyle all ~1200 elements of the page, 20 to
+   50ms a time, the lag under the pointer right after load. */
 @media (hover: hover) and (pointer: fine) {
-  :root[data-mark]:not(:has(.hero-3d, .cover-float[data-arrange])),
-  :root[data-mark]:not(:has(.hero-3d, .cover-float[data-arrange])) * {
+  :root[data-mark]:not([data-arrange]),
+  :root[data-mark]:not([data-arrange]) * {
     cursor: none !important;
   }
 }
