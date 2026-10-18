@@ -56,7 +56,7 @@ const DEFAULTS: Record<Level, Setting> = {
   /* The two lines under the name on the cover; they were in Small labels
      when these were set. */
   role: { font: "Old Mono", cut: "Medium", size: 1.06, spacing: 0.04 },
-  where: { font: "Old Mono", cut: "Medium", size: 1.46, spacing: -0.015 },
+  where: { font: "Old Mono", cut: "Medium", size: 1.46, spacing: -0.05 },
   labels: { font: "Old Mono", cut: "Medium", size: 1.06, spacing: 0.04 },
   buttons: { font: "Old Mono", cut: "Regular", size: 1.13, spacing: 0.04 },
 };

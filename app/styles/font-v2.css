@@ -73,7 +73,7 @@ html[data-font="v2"] .cover-float-title {
 html[data-font="v2"] .cover-float-where {
   font-family: var(--v2-where-family, "IBM Plex Mono", monospace);
   font-weight: var(--v2-where-weight, 500);
-  letter-spacing: var(--v2-where-track, -0.015em);
+  letter-spacing: var(--v2-where-track, -0.05em);
 }
 /* Julian: the gap from the name down to the two lines was wider than the
    one between them. Set solid, the role line pulled up until the gap
