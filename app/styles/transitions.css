@@ -341,3 +341,11 @@
     opacity: 0.25;
   }
 }
+
+/* A page too tall to snapshot (`gauge` in page-transition.tsx): out of the
+   trip, so it crossfades with the screen. Its whole length at 3x was 2GB
+   on an iPhone, and Safari gave up on the tab. */
+:root[data-page-tall] #main,
+:root[data-page-tall] #main > * {
+  view-transition-name: none !important;
+}

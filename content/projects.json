@@ -1527,11 +1527,11 @@
     ],
     "coral-synthmorph": [
       "/work/coral-synthmorph/06.jpg",
-      "/work/coral-synthmorph/05.jpg",
-      "/work/coral-synthmorph/03.jpg",
       "/work/coral-synthmorph/04.jpg",
+      "/work/coral-synthmorph/03.jpg",
+      "/work/coral-synthmorph/01.jpg",
       "/work/coral-synthmorph/02.jpg",
-      "/work/coral-synthmorph/01.jpg"
+      "/work/coral-synthmorph/05.jpg"
     ],
     "transmutate": [
       "/work/transmutate/01.jpg",
@@ -1539,8 +1539,7 @@
       "/work/transmutate/03.jpg",
       "/work/transmutate/05.jpg",
       "/work/transmutate/06.jpg",
-      "/work/transmutate/07.jpg",
-      "/work/transmutate/04.jpg"
+      "/work/transmutate/07.jpg"
     ],
     "lightbeam": [
       "/work/lightbeam/03.jpg",
@@ -1562,13 +1561,11 @@
     ],
     "purgatory": [
       "/work/purgatory/04.jpg",
-      "/work/purgatory/09.jpg",
       "/work/purgatory/07.jpg",
-      "/work/purgatory/08.jpg",
+      "/work/purgatory/09.jpg",
       "/work/purgatory/12.jpg",
       "/work/purgatory/10.jpg",
-      "/work/purgatory/15.jpg",
-      "/work/purgatory/01.jpg"
+      "/work/purgatory/15.jpg"
     ],
     "weddings": [
       "/work/weddings/01.jpg",
@@ -1592,23 +1589,20 @@
       "/work/light-play/05.jpg"
     ],
     "revelo": [
-      "/work/revelo/06.jpg",
-      "/work/revelo/01.jpg",
       "/work/revelo/05.jpg",
-      "/work/revelo/03.jpg",
-      "/work/revelo/02.jpg",
-      "/work/revelo/04.jpg",
-      "/work/revelo/07.jpg",
+      "/work/revelo/10.jpg",
       "/work/revelo/08.jpg",
       "/work/revelo/09.jpg",
-      "/work/revelo/10.jpg"
+      "/work/revelo/06.jpg",
+      "/work/revelo/03.jpg",
+      "/work/revelo/01.jpg"
     ],
     "retro-reverie-vol-02": [
       "/work/retro-reverie-vol-02/09.jpg",
-      "/work/retro-reverie-vol-02/07.jpg",
-      "/work/retro-reverie-vol-02/03.jpg",
-      "/work/retro-reverie-vol-02/13.jpg",
       "/work/retro-reverie-vol-02/14.jpg",
+      "/work/retro-reverie-vol-02/03.jpg",
+      "/work/retro-reverie-vol-02/07.jpg",
+      "/work/retro-reverie-vol-02/13.jpg",
       "/work/retro-reverie-vol-02/06.jpg",
       "/work/retro-reverie-vol-02/08.jpg",
       "/work/retro-reverie-vol-02/01.jpg"
@@ -1641,15 +1635,15 @@
     ],
     "nabu": [
       "/work/nabu/57.jpg",
-      "/work/nabu/43.jpg",
-      "/work/nabu/59.jpg",
-      "/work/nabu/01.jpg",
-      "/work/nabu/02.jpg",
-      "/work/nabu/11.jpg",
       "/work/nabu/29.jpg",
+      "/work/nabu/59.jpg",
       "/work/nabu/32.jpg",
+      "/work/nabu/02.jpg",
+      "/work/nabu/01.jpg",
       "/work/nabu/67.jpg",
-      "/work/nabu/83.jpg"
+      "/work/nabu/11.jpg",
+      "/work/nabu/83.jpg",
+      "/work/nabu/43.jpg"
     ],
     "frostbite": [
       "/work/frostbite/02.jpg",
@@ -1739,10 +1733,9 @@
       "/work/relay/09.jpg",
       "/work/relay/10.jpg",
       "/work/relay/07.jpg",
-      "/work/relay/01.jpg",
+      "/work/relay/06.jpg",
       "/work/relay/04.jpg",
       "/work/relay/05.jpg",
-      "/work/relay/06.jpg",
       "/work/relay/08.jpg"
     ],
     "aera-wraith": [
@@ -1779,10 +1772,10 @@
     ],
     "analogue-dreams": [
       "/work/analogue-dreams/07.jpg",
+      "/work/analogue-dreams/04.jpg",
       "/work/analogue-dreams/09.jpg",
       "/work/analogue-dreams/08.jpg",
       "/work/analogue-dreams/03.jpg",
-      "/work/analogue-dreams/04.jpg",
       "/work/analogue-dreams/05.jpg",
       "/work/analogue-dreams/06.jpg",
       "/work/analogue-dreams/10.jpg",
@@ -1826,8 +1819,8 @@
       "/work/sara/09.jpg",
       "/work/sara/10.jpg",
       "/work/sara/01.jpg",
-      "/work/sara/06.jpg",
       "/work/sara/15.jpg",
+      "/work/sara/06.jpg",
       "/work/sara/19.jpg",
       "/work/sara/27.jpg"
     ],
@@ -1883,14 +1876,13 @@
     ],
     "zoe": [
       "/work/zoe/05.jpg",
-      "/work/zoe/07.jpg",
       "/work/zoe/09.jpg",
-      "/work/zoe/16.jpg",
-      "/work/zoe/19.jpg",
-      "/work/zoe/24.jpg",
+      "/work/zoe/30.jpg",
       "/work/zoe/27.jpg",
+      "/work/zoe/16.jpg",
       "/work/zoe/29.jpg",
-      "/work/zoe/30.jpg"
+      "/work/zoe/19.jpg",
+      "/work/zoe/07.jpg"
     ],
     "l3na": [
       "/work/l3na/01.jpg",
@@ -1925,8 +1917,8 @@
     "luxe-meets-future": [
       "/work/luxe-meets-future/02.jpg",
       "/work/luxe-meets-future/01.jpg",
-      "/work/luxe-meets-future/05.jpg",
       "/work/luxe-meets-future/08.jpg",
+      "/work/luxe-meets-future/05.jpg",
       "/work/luxe-meets-future/09.jpg",
       "/work/luxe-meets-future/14.jpg",
       "/work/luxe-meets-future/18.jpg",
@@ -2126,9 +2118,9 @@
       "/work/mya/06.jpg",
       "/work/mya/05.jpg",
       "/work/mya/02.jpg",
-      "/work/mya/13.jpg",
       "/work/mya/09.jpg",
-      "/work/mya/07.jpg"
+      "/work/mya/07.jpg",
+      "/work/mya/13.jpg"
     ],
     "paranoia": [
       "/work/paranoia/13.jpg",
@@ -2232,9 +2224,9 @@
       "/work/lost-relic/08.jpg",
       "/work/lost-relic/01.jpg",
       "/work/lost-relic/05.jpg",
-      "/work/lost-relic/06.jpg",
       "/work/lost-relic/02.jpg",
-      "/work/lost-relic/04.jpg"
+      "/work/lost-relic/04.jpg",
+      "/work/lost-relic/06.jpg"
     ],
     "automotive": [
       "/work/automotive/07.jpg",
@@ -2251,6 +2243,60 @@
       "/work/automotive/15.jpg",
       "/work/automotive/16.jpg",
       "/work/automotive/18.jpg"
+    ],
+    "isabela": [
+      "/work/isabela/01.jpg",
+      "/work/isabela/02.jpg",
+      "/work/isabela/06.jpg",
+      "/work/isabela/05.jpg",
+      "/work/isabela/04.jpg",
+      "/work/isabela/07.jpg",
+      "/work/isabela/03.jpg"
+    ],
+    "liminal": [
+      "/work/liminal/01.jpg",
+      "/work/liminal/03.jpg",
+      "/work/liminal/06.jpg",
+      "/work/liminal/04.jpg",
+      "/work/liminal/07.jpg",
+      "/work/liminal/05.jpg",
+      "/work/liminal/02.jpg"
+    ],
+    "stratus-lookbook-vol-1": [
+      "/work/stratus-lookbook-vol-1/04.jpg",
+      "/work/stratus-lookbook-vol-1/08.jpg",
+      "/work/stratus-lookbook-vol-1/12.jpg",
+      "/work/stratus-lookbook-vol-1/06.jpg",
+      "/work/stratus-lookbook-vol-1/01.jpg",
+      "/work/stratus-lookbook-vol-1/03.jpg",
+      "/work/stratus-lookbook-vol-1/05.jpg",
+      "/work/stratus-lookbook-vol-1/07.jpg",
+      "/work/stratus-lookbook-vol-1/09.jpg",
+      "/work/stratus-lookbook-vol-1/10.jpg",
+      "/work/stratus-lookbook-vol-1/11.jpg",
+      "/work/stratus-lookbook-vol-1/02.jpg"
+    ],
+    "the-den-talkshow": [
+      "/work/the-den-talkshow/01.jpg",
+      "/work/the-den-talkshow/06.jpg",
+      "/work/the-den-talkshow/02.jpg",
+      "/work/the-den-talkshow/04.jpg",
+      "/work/the-den-talkshow/03.jpg",
+      "/work/the-den-talkshow/05.jpg",
+      "/work/the-den-talkshow/07.jpg"
+    ],
+    "vendetta": [
+      "/work/vendetta/11.jpg",
+      "/work/vendetta/01.jpg",
+      "/work/vendetta/10.jpg",
+      "/work/vendetta/12.jpg",
+      "/work/vendetta/04.jpg",
+      "/work/vendetta/02.jpg",
+      "/work/vendetta/03.jpg",
+      "/work/vendetta/07.jpg",
+      "/work/vendetta/05.jpg",
+      "/work/vendetta/06.jpg",
+      "/work/vendetta/08.jpg"
     ]
   },
   "hidden": [
