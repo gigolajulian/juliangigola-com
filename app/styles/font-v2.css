@@ -250,7 +250,7 @@ html[data-font="v2"] .cover-float-ctas {
    from a laptop up only: a phone's or an upright iPad's column left wide
    gaps (his pick). */
 @media (min-width: 64rem) {
-  html[data-font="v2"] .about-grid p[data-scroll] {
+  html[data-font="v2"] .about-grid .about-bio {
     text-align: justify;
     hyphens: none;
   }
