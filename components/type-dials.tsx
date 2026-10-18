@@ -278,16 +278,22 @@ function useTypeApply(
 
     // After the page has loaded and gone idle: a size set on text React has
     // not hydrated yet is a hydration mismatch.
-    let idle = 0;
+    // Safari has no requestIdleCallback (QA, #239): a short timeout there.
+    let stop = () => {};
     let ready = false;
-    const start = () =>
-      (idle = requestIdleCallback(
-        () => {
-          ready = true;
-          apply();
-        },
-        { timeout: 1500 },
-      ));
+    const start = () => {
+      const go = () => {
+        ready = true;
+        apply();
+      };
+      if (typeof window.requestIdleCallback === "function") {
+        const id = requestIdleCallback(go, { timeout: 1500 });
+        stop = () => cancelIdleCallback(id);
+      } else {
+        const id = setTimeout(go, 250);
+        stop = () => clearTimeout(id);
+      }
+    };
     if (document.readyState === "complete") start();
     else addEventListener("load", start, { once: true });
     let frame = 0;
@@ -320,7 +326,7 @@ function useTypeApply(
     addEventListener("scroll", redraw, true);
     return () => {
       watch?.disconnect();
-      cancelIdleCallback(idle);
+      stop();
       removeEventListener("load", start);
       removeEventListener("resize", later);
       removeEventListener("scroll", redraw, true);
