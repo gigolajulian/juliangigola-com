@@ -80,22 +80,22 @@ export function AboutScreen() {
             text="Biography"
             className="lying:text-3xl"
           />
-          {/* Julian's words. */}
+          {/* Julian's words, cut down by him (2026-10-18). I&nbsp;: an
+              "I" never ends a line. */}
           {/* Set left, as the mockup has it: justified mono opens up. */}
           {/* Julian: on a phone, smaller and more inviting, in sentence
               case; the capitals stay from `sm` up. */}
-          {/* Where the window is too short for it all, these
-              words scroll inside themselves, not the column, so the
-              facts and the buttons under them stay on the screen. */}
-          <p data-scroll className="title-rest mt-6 text-left sm:min-h-0 sm:overflow-y-auto sm:overscroll-contain text-[0.9375rem] normal-case leading-[1.7] text-foreground/80 sm:mt-[clamp(0.75rem,2.5cqh,2rem)] sm:text-[clamp(0.8125rem,1.8vh,1.0625rem)] sm:leading-[clamp(1.25rem,3.1cqh,1.8rem)] sm:text-muted-foreground">
-            {/* I&nbsp;: Julian, an "I" never ends a line. */}
-            Photographer and creative director based in the San Francisco
-            Bay Area with 12+ years of experience. As an Assyrian American, I&nbsp;grew up between cultures,
-            and that sense of being slightly outside the frame shapes how I&nbsp;see. I&nbsp;work across editorial fashion, commercial campaigns and
-            artist development, helping emerging labels, musicians and
-            technology brands find the image that feels most like them. I&nbsp;bring that same approach to people&apos;s own milestones,
-            photographing headshots, portraits, graduations and weddings
-            across San Francisco, San Jose and the Bay Area.
+          {/* Julian: the words in full, never a scroll of their own
+              (its bar clipped the last line). A window too short for
+              it all scrolls the screen instead. */}
+          <p className="about-bio title-rest mt-6 text-left text-[0.9375rem] normal-case leading-[1.7] text-foreground/80 sm:mt-[clamp(0.75rem,2.5cqh,2rem)] sm:text-[clamp(0.8125rem,1.8vh,1.0625rem)] sm:leading-[clamp(1.25rem,3.1cqh,1.8rem)] sm:text-muted-foreground">
+            As an Assyrian American, I&nbsp;grew up between cultures, and
+            that sense of being slightly outside the frame shapes how
+            I&nbsp;see. I&nbsp;shoot editorial fashion and campaigns for
+            brands, and shape the image of labels and musicians. I&nbsp;also
+            photograph people&apos;s milestones: headshots, portraits,
+            graduations and weddings across San Francisco, San Jose and the
+            Bay Area.
           </p>
           <dl className="title-rest mt-8 sm:mt-[clamp(0.75rem,2.5cqh,2rem)] grid grid-cols-3 gap-4 border-t border-border pt-6 sm:pt-[clamp(0.75rem,2.5cqh,1.5rem)]">
             {FACTS.map(([term, value]) => (
