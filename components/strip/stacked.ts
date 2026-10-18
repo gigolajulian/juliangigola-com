@@ -2,6 +2,9 @@ import * as React from "react";
 import { STRIP_SECTION } from "@/lib/utils";
 import { cellFor } from "./shared";
 
+// What ends a landing's hold (`pin` below): the visitor moving the page.
+const TAKE = ["touchstart", "wheel", "keydown", "pointerdown"] as const;
+
 /**
  * A strip stacked down a phone: the page's own scroll says when the
  * opening cell has gone, and a link to a cell scrolls the page to it.
@@ -50,6 +53,33 @@ export function useStacked(
     const el = scrollerRef.current;
     if (!el || live) return;
     let jumped = 0;
+    /* Julian (iPhone): the menu's Inquiries landed a whole Sessions screen
+       short, or 70pt past its heading, and stayed there. Reproduced on an
+       iPhone sim, never in WebKit on a desk: on a phone the screens above
+       were still settling their height after the jump, and the page moved
+       under the landing. So the screen is held where it landed, under the
+       bar, until the page is still, for up to 3s, and let go the moment a
+       finger, a wheel or a key takes over. */
+    let hold = 0;
+    const letGo = () => {
+      cancelAnimationFrame(hold);
+      hold = 0;
+      for (const t of TAKE) window.removeEventListener(t, letGo, true);
+    };
+    const pin = (cell: HTMLElement) => {
+      letGo();
+      const pad = (e: Element, p: string) => parseFloat(getComputedStyle(e).getPropertyValue(p)) || 0;
+      const at = pad(document.documentElement, "scroll-padding-top") + pad(cell, "scroll-margin-top");
+      const until = performance.now() + 3000;
+      const keep = () => {
+        const off = cell.getBoundingClientRect().top - at;
+        if (Math.abs(off) > 1) window.scrollBy(0, off);
+        hold = performance.now() < until ? requestAnimationFrame(keep) : 0;
+        if (!hold) letGo();
+      };
+      for (const t of TAKE) window.addEventListener(t, letGo, { capture: true, passive: true });
+      hold = requestAnimationFrame(keep);
+    };
     const go = (smooth: boolean) => {
       const i = cellFor(el, decodeURIComponent(window.location.hash.slice(1)));
       const cell = el.children[i] as HTMLElement | undefined;
@@ -61,11 +91,13 @@ export function useStacked(
          pixels short. Drawn in full for the journey, skipped again after. */
       el.setAttribute("data-jump", "");
       clearTimeout(jumped);
+      letGo();
       /* Two frames on: a screen drawn once keeps its real height when it
          is skipped again (`auto`), so nothing above the window moves. */
       const done = () => {
         clearTimeout(jumped);
         window.removeEventListener("scrollend", done);
+        pin(cell);
         requestAnimationFrame(() =>
           requestAnimationFrame(() => el.removeAttribute("data-jump")),
         );
@@ -101,6 +133,7 @@ export function useStacked(
       window.removeEventListener("hashchange", onHash);
       document.removeEventListener("click", onLink, true);
       clearTimeout(jumped);
+      letGo();
     };
   }, [scrollerRef, live]);
 }
