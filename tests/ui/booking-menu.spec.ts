@@ -62,14 +62,27 @@ for (const r of RATIOS) {
     // A phone's card grows and the page scrolls (the card never does): Inquire is a scroll away.
     if (r.width < 640) await card.locator('button[type="submit"]').scrollIntoViewIfNeeded();
     /* The card animates open; under a loaded machine that runs past a fixed
-       wait, so wait until Inquire is the top element, then measure. */
+       wait, so wait until Inquire is the top element and has stopped moving
+       (the same box two reads running), then measure. Read while the card
+       was still growing, Firefox in an overlapped CI run saw Inquire below
+       the fold. */
     const measure = () =>
       card.locator('button[type="submit"]').evaluate((b) => {
         const q = b.getBoundingClientRect();
         const hit = document.elementFromPoint(q.x + q.width / 2, q.y + q.height / 2);
         return { bottom: q.bottom, top: q.top, onTop: !!hit && (hit === b || b.contains(hit)) };
       });
-    await expect.poll(async () => (await measure()).onTop, { timeout: 10_000 }).toBe(true).catch(() => {});
+    let last = "";
+    await expect
+      .poll(async () => {
+        const m = await measure();
+        const now = `${Math.round(m.top)},${Math.round(m.bottom)}`;
+        const still = now === last;
+        last = now;
+        return m.onTop && still;
+      }, { timeout: 15_000, intervals: [250] })
+      .toBe(true)
+      .catch(() => {});
     const send = await measure();
     expect(send.top).toBeGreaterThanOrEqual(0);
     expect(send.bottom, "Inquire on screen").toBeLessThanOrEqual(r.height + 1);
