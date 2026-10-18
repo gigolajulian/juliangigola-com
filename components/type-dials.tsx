@@ -114,9 +114,12 @@ const ORDER: Level[] = ["titles", "names", "text", "role", "where", "labels", "b
 const KEY = "jg-font-v2-bar";
 /* Not the liquid buttons: their fill re-measures every frame until the
    button holds still, and a size written here kept it from ever settling
-   (QA, #239). The cover's are sized in `font-v2.css` through `--cta-k`. */
+   (QA, #239). The cover's are sized in `font-v2.css` through `--cta-k`.
+   Nor the cover's wordmark, a canvas that sizes itself: a size written
+   here kept it and the buttons redrawing on hover (QA, #239), and Julian
+   kept the wordmark as it was. */
 const SKIP = ".logo-grow, .v2-bar, .v2-tags";
-const LIQUID = ".liquid-pair, .cover-float-ctas";
+const LIQUID = ".liquid-pair, .cover-float-ctas, .cover-float-name";
 
 /** "Display Bold" from what the browser actually drew with. */
 function realFace(cs: CSSStyleDeclaration) {
@@ -208,8 +211,8 @@ function useTypeApply(
        laptop pushes a long word out of a phone's card or a fitted line off
        the screen. Anything enlarged gives back just enough to fit its own
        box and the window (16px clear), never below the size it had. */
-    const fit = () => {
-      for (const [el] of scaled) {
+    const fit = (els: Iterable<HTMLElement> = scaled.keys()) => {
+      for (const el of els) {
         const px = parseFloat(el.style.fontSize);
         const r = el.getBoundingClientRect();
         let f = 1;
@@ -232,23 +235,52 @@ function useTypeApply(
     const levelOf = new Map<Element, Level>();
     let watch: MutationObserver | null = null;
     let fitWatch: MutationObserver | null = null;
+    /* The text inside `roots` (and the roots), each kind at its size.
+       Returns what it sized. */
+    const scan = (roots: Element[]) => {
+      const fresh: HTMLElement[] = [];
+      for (const [level, sel] of LEVELS) {
+        for (const root of roots) {
+          const found = [...root.querySelectorAll<HTMLElement>(sel)];
+          if (root.matches(sel)) found.unshift(root as HTMLElement);
+          for (const el of found) {
+            if (levelOf.has(el) || el.closest(SKIP)) continue;
+            levelOf.set(el, level);
+            const k = set[level].size;
+            if (k === 1 || el.closest(LIQUID)) continue;
+            // A line that fits itself (`fit-lines.tsx`) sets its own size, so
+            // that is the one to scale, not the box around it.
+            const fitted = el.querySelectorAll<HTMLElement>("[style*='font-size']");
+            for (const c of fitted.length ? [...fitted] : [el]) {
+              if (scaled.has(c) || c.closest(LIQUID)) continue;
+              scale(c, k);
+              fresh.push(c);
+            }
+          }
+        }
+      }
+      return fresh;
+    };
     const apply = () => {
       restore();
       levelOf.clear();
-      for (const [level, sel] of LEVELS) {
-        for (const el of document.querySelectorAll<HTMLElement>(sel)) {
-          if (levelOf.has(el) || el.closest(SKIP)) continue;
-          levelOf.set(el, level);
-          const k = set[level].size;
-          if (k === 1 || el.closest(LIQUID)) continue;
-          // A line that fits itself (`fit-lines.tsx`) sets its own size, so
-          // that is the one to scale, not the box around it.
-          const fitted = el.querySelectorAll<HTMLElement>("[style*='font-size']");
-          if (fitted.length) fitted.forEach((c) => scale(c, k));
-          else scale(el, k);
-        }
-      }
+      added.clear();
+      scan([document.body]);
       fit();
+      settle();
+    };
+    /* QA (#239): text that arrives later is sized on its own; the rest of
+       the page is not touched again until the window or the fonts change. */
+    const added = new Set<Element>();
+    const applyAdded = () => {
+      const roots = [...added].filter((el) => el.isConnected);
+      added.clear();
+      for (const el of scaled.keys()) if (!el.isConnected) scaled.delete(el);
+      const fresh = scan(roots);
+      if (fresh.length) fit(fresh);
+      settle();
+    };
+    const settle = () => {
       // Our own size changes are not news.
       watch?.takeRecords();
       fitWatch?.disconnect();
@@ -319,10 +351,16 @@ function useTypeApply(
        on each motion frame forced a layout a frame and brought back the
        hover lag #233 fixed. */
     let quiet = 0;
-    const later = () => {
+    let whole = false;
+    const later = (all = true) => {
       if (!ready) return;
+      whole ||= all;
       clearTimeout(quiet);
-      quiet = window.setTimeout(apply, 300);
+      quiet = window.setTimeout(() => {
+        if (whole) apply();
+        else applyAdded();
+        whole = false;
+      }, 300);
     };
     const redraw = () => {
       if (!ready) return;
@@ -334,12 +372,17 @@ function useTypeApply(
        writes styles every frame. A line that fits itself (`fit-lines.tsx`)
        re-fits after we size it, so those few lines are watched alone. */
     watch = new MutationObserver((list) => {
-      if (list.some((m) => !(m.target as Element).closest?.(".v2-tags, .v2-bar"))) later();
+      for (const m of list) {
+        if ((m.target as Element).closest?.(".v2-tags, .v2-bar")) continue;
+        m.addedNodes.forEach((n) => n instanceof Element && added.add(n));
+      }
+      if (added.size) later(false);
     });
     watch.observe(document.body, { childList: true, subtree: true });
-    fitWatch = new MutationObserver(later);
-    void document.fonts.ready.then(later);
-    addEventListener("resize", later);
+    const all = () => later();
+    fitWatch = new MutationObserver(all);
+    void document.fonts.ready.then(all);
+    addEventListener("resize", all);
     if (show) addEventListener("scroll", redraw, true);
     return () => {
       watch?.disconnect();
@@ -347,7 +390,7 @@ function useTypeApply(
       clearTimeout(quiet);
       stop();
       removeEventListener("load", start);
-      removeEventListener("resize", later);
+      removeEventListener("resize", all);
       removeEventListener("scroll", redraw, true);
       cancelAnimationFrame(frame);
       restore();
