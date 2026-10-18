@@ -9,6 +9,8 @@ import {
 } from "@/lib/added";
 import { commitFiles, readFile } from "@/lib/admin-github";
 import { AdminFrames, type PendingUpload } from "@/components/admin-frames";
+import { srcOf } from "@/lib/admin-sequence";
+import { twinStats } from "@/lib/frame-twins";
 import { AdminCredits } from "@/components/admin-credits";
 import type { FrameRef } from "@/lib/added";
 import type { Credit } from "@/lib/work-types";
@@ -195,8 +197,21 @@ export function AdminProjects({
      does not have yet, which is the list to read before pressing Publish.
      The open row stays whatever the filter says, for the same reason it
      survives the search. */
-  type Show = "all" | "unpublished" | "hidden" | "deleted";
+  type Show =
+    | "all"
+    | "unpublished"
+    | "hidden"
+    | "deleted"
+    | "twins"
+    | "b2b"
+    | "unordered";
   const [show, setShow] = React.useState<Show>("all");
+  /* Near-twins and back-to-back pairs on the draft sequence, and whether
+     the set was ever put in order here (`content/projects.json` frames). */
+  const sequenceOf = (p: AdminProject) =>
+    (reframed[p.slug] ?? p.images).map((f) => srcOf(f));
+  const ordered = (p: AdminProject) =>
+    reframed[p.slug] !== undefined || reframed[p.origin] !== undefined;
   const shows = (p: AdminProject, s: Show) =>
     s === "all"
       ? true
@@ -204,7 +219,13 @@ export function AdminProjects({
         ? changed.has(p.slug) || changed.has(p.origin)
         : s === "hidden"
           ? unlisted.has(p.slug)
-          : hidden.has(p.slug);
+          : s === "deleted"
+            ? hidden.has(p.slug)
+            : s === "twins"
+              ? twinStats(sequenceOf(p)).twins > 0
+              : s === "b2b"
+                ? twinStats(sequenceOf(p)).backToBack > 0
+                : !ordered(p);
   const live = projects.filter((p) => !gone.has(p.slug));
   const visible = live.filter(
     (p) =>
@@ -355,6 +376,9 @@ export function AdminProjects({
             ["unpublished", "Unpublished"],
             ["hidden", "Hidden"],
             ["deleted", "Deleted"],
+            ["twins", "Twins"],
+            ["b2b", "Back-to-back"],
+            ["unordered", "Unordered"],
           ] as const
         ).map(([id, label]) => {
           const count = live.filter((p) => shows(p, id)).length;
@@ -410,6 +434,9 @@ export function AdminProjects({
           const filedName =
             disciplines.find((d) => d.slug === filedAs)?.name ?? "Unfiled";
           const frames = reframed[p.slug] ?? null;
+          const seq = sequenceOf(p);
+          const photoCount = seq.filter(Boolean).length;
+          const twin = twinStats(seq);
           return (
             <li
               key={p.slug}
@@ -442,7 +469,16 @@ export function AdminProjects({
                     {p.name}
                   </span>
                   <span className="label block truncate text-muted-foreground">
-                    {filedName} · {(frames ?? p.images).length} frames · /
+                    {filedName} ·{" "}
+                    {photoCount === p.images.length
+                      ? photoCount
+                      : `${p.images.length} → ${photoCount}`}{" "}
+                    frames
+                    {twin.twins > 0 ? ` · ${twin.twins} twins` : ""}
+                    {twin.backToBack > 0
+                      ? ` · ${twin.backToBack} back-to-back`
+                      : ""}
+                    {ordered(p) ? "" : " · never ordered"} · /
                     {addressOf(p)}
                     {slugs[p.origin] ? " · renamed" : ""}
                     {frames ? " · edited" : ""}

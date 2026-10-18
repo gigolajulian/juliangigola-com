@@ -5,6 +5,7 @@ import Image from "next/image";
 import { isTextRef, type FrameRef, type TextRef } from "@/lib/added";
 import { useSequence, srcOf, type PendingUpload } from "@/lib/admin-sequence";
 import { cn } from "@/lib/utils";
+import { backToBack, twinGroups } from "@/lib/frame-twins";
 
 /* ── a project's sequence ─────────────────────────────────────────
  * Photographs and writing, in one list. Sequence, trim, extend.
@@ -82,6 +83,7 @@ export function AdminFrames({
     reset,
     dragProps,
   } = seq;
+  const [zoom, setZoom] = React.useState<number | null>(null);
 
   const photos = list.filter((f) => !isTextRef(f));
   const passages = list.length - photos.length;
@@ -98,6 +100,25 @@ export function AdminFrames({
     return list.map((f) => (isTextRef(f) ? 0 : ++n));
   })();
 
+  /* Near-twins (`lib/frame-twins.ts`), read off the draft so they follow
+     every move and cut. A letter per group; a line on a frame that plays
+     straight after its twin. A passage between two frames breaks the run. */
+  const srcs = list.map(srcOf);
+  const letters = twinGroups(srcs.filter(Boolean));
+  const b2b = backToBack(srcs);
+  const twinsLeft = letters.size - new Set(letters.values()).size;
+
+  /** Cut from the zoom: the next photograph takes its place, or the one
+   * before it at the end. The last photograph stays, as in the grid. */
+  const cut = (i: number) => {
+    if (photos.length === 1) return;
+    drop(i);
+    const rest = list.filter((_, n) => n !== i);
+    const after = rest.findIndex((f, n) => n >= i && !isTextRef(f));
+    const before = rest.findLastIndex((f) => !isTextRef(f));
+    setZoom(after >= 0 ? after : before >= 0 ? before : null);
+  };
+
   return (
     <div className="border-t border-border bg-card/40 p-5">
       <div className="flex flex-wrap items-baseline justify-between gap-4">
@@ -108,6 +129,10 @@ export function AdminFrames({
             : ""}
           {staged > 0 ? ` · ${staged} not yet uploaded` : ""}
           {frames ? " · edited" : ""}
+          {twinsLeft > 0
+            ? ` · ${twinsLeft} near-twin${twinsLeft === 1 ? "" : "s"}`
+            : ""}
+          {b2b.size > 0 ? ` · ${b2b.size} back-to-back` : ""}
         </p>
         <div className="flex items-center gap-2">
           {frames ? (
@@ -219,8 +244,11 @@ export function AdminFrames({
                   </span>
                 </button>
               ) : (
-                <span
-                  className="relative block aspect-[4/5] overflow-hidden bg-card"
+                <button
+                  type="button"
+                  onClick={() => setZoom(i)}
+                  aria-label={`Open frame ${ordinal[i]} full screen`}
+                  className="relative block aspect-[4/5] w-full overflow-hidden bg-card"
                   style={mat ? { backgroundColor: mat } : undefined}
                 >
                   {pending ? (
@@ -249,10 +277,24 @@ export function AdminFrames({
                   )}
                   <span className="label absolute left-0 top-0 bg-background/80 px-2 py-1 tabular-nums">
                     {ordinal[i] === 1
-                      ? "CVR"
+                      ? "COVER"
                       : String(ordinal[i]).padStart(2, "0")}
                   </span>
-                </span>
+                  {letters.has(src) ? (
+                    <span
+                      title="Near-twin group"
+                      className="label absolute right-0 top-0 bg-background/80 px-2 py-1 text-accent"
+                    >
+                      {letters.get(src)}
+                    </span>
+                  ) : null}
+                  {b2b.has(src) ? (
+                    <span
+                      aria-label="Plays straight after its near-twin"
+                      className="absolute inset-y-0 left-0 w-0.5 bg-accent"
+                    />
+                  ) : null}
+                </button>
               )}
 
               {/* Always present rather than revealed on hover: this grid is
@@ -311,8 +353,198 @@ export function AdminFrames({
         and is the card shown on every index. Text sits on the page exactly
         where it sits in this list. Removing a photograph takes it out of the
         sequence and keeps the file. Nothing here is live until you press
-        Publish.
+        Publish. A letter marks frames that are near-twins of each other; a
+        line on a frame&rsquo;s left edge means it plays straight after its
+        twin. Open a frame to see it full size.
       </p>
+
+      {zoom !== null && list[zoom] && !isTextRef(list[zoom]) ? (
+        <FrameZoom
+          // Keyed by frame, so a step or a cut opens the next one unzoomed.
+          key={srcOf(list[zoom])}
+          src={
+            uploads[`public${srcOf(list[zoom])}`]?.preview ??
+            srcOf(list[zoom])
+          }
+          number={ordinal[zoom]}
+          count={photos.length}
+          letter={letters.get(srcOf(list[zoom]))}
+          after={b2b.has(srcOf(list[zoom]))}
+          canCut={photos.length > 1}
+          onStep={(d) => {
+            for (let n = zoom + d; n >= 0 && n < list.length; n += d)
+              if (!isTextRef(list[n])) return setZoom(n);
+          }}
+          onCut={() => cut(zoom)}
+          onClose={() => setZoom(null)}
+        />
+      ) : null}
+    </div>
+  );
+}
+
+/**
+ * One frame at full size over the whole window. Tap zooms to 2x around the
+ * tap and a second tap comes back; drag pans while zoomed. ← → step through
+ * the photographs, X cuts the one shown, Escape closes. The real file, not a
+ * thumbnail: /admin is the one place the full originals are worth sending.
+ */
+function FrameZoom({
+  src,
+  number,
+  count,
+  letter,
+  after,
+  canCut,
+  onStep,
+  onCut,
+  onClose,
+}: {
+  src: string;
+  number: number;
+  count: number;
+  letter?: string;
+  after: boolean;
+  canCut: boolean;
+  onStep: (d: 1 | -1) => void;
+  onCut: () => void;
+  onClose: () => void;
+}) {
+  const [origin, setOrigin] = React.useState<{ x: number; y: number } | null>(
+    null,
+  );
+  const [pan, setPan] = React.useState({ x: 0, y: 0 });
+  const [dragging, setDragging] = React.useState(false);
+  const [help, setHelp] = React.useState(false);
+  const press = React.useRef<{
+    x: number;
+    y: number;
+    px: number;
+    py: number;
+    moved: boolean;
+  } | null>(null);
+
+  React.useEffect(() => {
+    const key = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+      else if (e.key === "ArrowRight") onStep(1);
+      else if (e.key === "ArrowLeft") onStep(-1);
+      else if ((e.key === "x" || e.key === "X") && canCut) onCut();
+      else return;
+      e.preventDefault();
+    };
+    window.addEventListener("keydown", key);
+    return () => window.removeEventListener("keydown", key);
+  }, [onClose, onStep, onCut, canCut]);
+
+  const ctl =
+    "label border border-border px-3 py-2 press hoverable:hover:bg-card disabled:opacity-30";
+
+  return (
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-label={`Frame ${number}`}
+      className="fixed inset-0 z-[60] flex flex-col bg-background"
+    >
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border px-5 py-3">
+        <p className="label tabular-nums text-muted-foreground">
+          <span className="text-foreground">
+            {number === 1 ? "COVER" : String(number).padStart(2, "0")}
+          </span>{" "}
+          / {count}
+          {letter ? <span className="text-accent"> · twin {letter}</span> : null}
+          {after ? <span className="text-accent"> · back-to-back</span> : null}
+        </p>
+        <div className="flex items-center gap-2">
+          <button type="button" onClick={() => onStep(-1)} aria-label="Previous frame" className={ctl}>
+            ←
+          </button>
+          <button type="button" onClick={() => onStep(1)} aria-label="Next frame" className={ctl}>
+            →
+          </button>
+          <button
+            type="button"
+            onClick={onCut}
+            disabled={!canCut}
+            className={cn(ctl, "hoverable:hover:text-destructive")}
+          >
+            Cut
+          </button>
+          <button
+            type="button"
+            onClick={() => setHelp((h) => !h)}
+            aria-expanded={help}
+            aria-label="Help"
+            className={ctl}
+          >
+            ?
+          </button>
+          <button type="button" onClick={onClose} aria-label="Close" className={ctl}>
+            ×
+          </button>
+        </div>
+        {help ? (
+          <p className="label w-full text-muted-foreground">
+            Tap to zoom 2x where you tap, tap again to come back. Drag to pan.
+            ← → step. X cuts. Esc closes.
+          </p>
+        ) : null}
+      </div>
+      <div
+        className={cn(
+          "relative min-h-0 flex-1 touch-none select-none overflow-hidden",
+          origin ? "cursor-grab active:cursor-grabbing" : "cursor-zoom-in",
+        )}
+        onPointerDown={(e) => {
+          e.currentTarget.setPointerCapture(e.pointerId);
+          press.current = { x: e.clientX, y: e.clientY, px: pan.x, py: pan.y, moved: false };
+        }}
+        onPointerMove={(e) => {
+          const p = press.current;
+          if (!p || !origin) return;
+          const dx = e.clientX - p.x;
+          const dy = e.clientY - p.y;
+          if (!p.moved && Math.abs(dx) + Math.abs(dy) > 4) {
+            p.moved = true;
+            setDragging(true);
+          }
+          if (p.moved) setPan({ x: p.px + dx, y: p.py + dy });
+        }}
+        onPointerUp={(e) => {
+          const p = press.current;
+          press.current = null;
+          setDragging(false);
+          if (!p || p.moved) return;
+          if (origin) {
+            setOrigin(null);
+            setPan({ x: 0, y: 0 });
+            return;
+          }
+          const r = e.currentTarget.getBoundingClientRect();
+          setOrigin({
+            x: ((e.clientX - r.left) / r.width) * 100,
+            y: ((e.clientY - r.top) / r.height) * 100,
+          });
+        }}
+      >
+        {/* The original, unoptimised: the point of this view is the real
+            pixels, and an object URL for a staged upload has no other copy. */}
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={src}
+          alt=""
+          draggable={false}
+          className={cn(
+            "absolute inset-0 h-full w-full object-contain",
+            !dragging && "transition-transform duration-200 ease-[var(--ease-out-strong)]",
+          )}
+          style={{
+            transform: `translate(${pan.x}px, ${pan.y}px) scale(${origin ? 2 : 1})`,
+            transformOrigin: origin ? `${origin.x}% ${origin.y}%` : "50% 50%",
+          }}
+        />
+      </div>
     </div>
   );
 }
