@@ -124,15 +124,15 @@ export function BookPicker({ sessions, start }: { sessions: Bookable[]; start?: 
                 onClick={() => pick(i)}
                 className="group grid w-full grid-cols-[minmax(0,1fr)_auto] items-baseline gap-x-4 py-4 text-left"
               >
+                {/* The length top left, the price bottom right (Julian,
+                    2026-10-18): both show at any width. */}
+                <span className="label col-span-2 pb-1 text-muted-foreground">{s.length}</span>
                 <span
                   className={`font-display text-[clamp(1.5rem,2.4vw,2.25rem)] uppercase leading-none transition-[color,translate] duration-300 ease-[var(--ease-out-strong)] ${i === on ? "translate-x-2 text-foreground" : "text-muted-foreground group-hover:translate-x-2 group-hover:text-foreground"}`}
                 >
                   {s.name}
                 </span>
-                <span className="label text-muted-foreground">
-                  {/* Julian: no price when the column is squeezed. */}
-                  {s.length}<span className="@max-md:hidden"> &middot; {s.rate}</span>
-                </span>
+                <span className="label text-right text-muted-foreground">{s.rate}</span>
                 {/* The chosen one's words unfold under it, the rest fold
                     away: the row's height eases, not jumps. */}
                 <span
