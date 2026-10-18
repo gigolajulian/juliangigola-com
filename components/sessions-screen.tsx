@@ -11,7 +11,6 @@ import { BookSheet } from "@/components/book-sheet";
 import type { MenuItem } from "@/lib/booking";
 import type { Frame } from "@/lib/work-types";
 import type { WallTile } from "@/lib/wall-tile";
-import { PendingLabel } from "@/components/pending-label";
 
 /* ── sessions ─────────────────────────────────────────────────────
  * A screen of the homepage, from Julian's design (Sessions Preview v2),
@@ -179,17 +178,15 @@ export function SessionsScreen({ sessions, menu, walls, covers }: { sessions: Se
             the three columns are. */}
         <p className="title-rest max-w-full text-left lying:hidden xl:w-[46ch] text-sm normal-case leading-relaxed text-muted-foreground">
           Studio and location sessions across the San Francisco Bay Area.
-          Everything here is booked directly, with no packages to decode.
         </p>
         {/* The deposit, said once beside the sessions (Julian's copy,
             2026-10-16): Cal.com takes it on the four booked online. Here
             and not under the list, which it pushed under the rail. */}
         <div className="title-rest flex max-w-full flex-col gap-1.5 text-left text-sm normal-case lying:hidden xl:w-[46ch]">
+          {/* One line (2026-10-18, critique): the locked card copy's
+              first and last sentences; the card says the rest. */}
           <p className="text-sm leading-relaxed text-muted-foreground text-pretty">
-            $100 deposit to reserve your date. I&apos;ll follow up by phone to confirm the concept, rate and schedule. Balance due after the shoot.
-          </p>
-          <p className="text-xs leading-relaxed text-muted-foreground/70 text-pretty">
-            (Deposit moves with a new date, or is refunded up to 2 business days before.)
+            $100 holds your date. Balance due after the shoot.
           </p>
         </div>
       </div>
@@ -472,34 +469,6 @@ export function SessionsScreen({ sessions, menu, walls, covers }: { sessions: Se
               </div>
             ))}
 
-        {/* On a short laptop (1280x800) the heading and its button share
-            the line, or the button wraps under it and under the rail. */}
-        {/* Under 60rem with a card open, the card is the booking: the
-            second button went under the pager (Julian, 1547x889). */}
-        <div className={`flex flex-wrap items-center justify-between gap-6 pt-6 short:gap-4 short:pt-5  ${here ? "[@media(max-height:50rem)]:hidden" : ""}`}>
-          <div className="flex flex-col gap-2.5">
-            {/* The button says Book a session; said beside it as well,
-                the pair read as a stutter. Julian's words in its place;
-                "Bookings" since Commissions became the art directors'
-                screen in the nav. */}
-            <span className="font-display text-[2rem] leading-none short:text-[1.625rem]">
-              Bookings open
-            </span>
-            <a
-              href="mailto:hello@juliangigola.com"
-              className="tap-44 label text-muted-foreground"
-            >
-              hello@juliangigola.com
-            </a>
-          </div>
-          <Link prefetch={false}
-            href="/?type=session#contact"
-            className="sessions-book label action px-7 py-4 press active:scale-[0.97] short:px-5 short:py-2.5"
-          >
-            {/* The private client's verb, not the art director's. */}
-            <PendingLabel state="connecting">Book a session</PendingLabel>
-          </Link>
-        </div>
       </div>
     </section>
   );
