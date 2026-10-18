@@ -576,8 +576,6 @@ export function ContactForm({
       {/* The address on the left, the button on the right, the sentence off
           the screen (still read out with the button). */}
       <div className="flex flex-wrap items-start justify-between gap-x-6 gap-y-3 lying:justify-end">
-        <div className="ml-auto flex items-center gap-x-5">
-        {RESPONSE_TIME ? <p className="label text-muted-foreground">Replies {RESPONSE_TIME}</p> : null}
         <button
           type="submit"
           data-dial="send"
@@ -598,7 +596,6 @@ export function ContactForm({
             {pending ? "Sending…" : "Inquire"}
           </span>
         </button>
-        </div>
         {/* What is still missing, where the button is, and only once
             there is any reason to say it. */}
         {!ready && !pending ? (
