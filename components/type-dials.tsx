@@ -52,7 +52,7 @@ type State = {
 const DEFAULTS: Record<Level, Setting> = {
   titles: { font: "Display", cut: "Bold", size: 1.1, spacing: -0.035, gap: 0.95 },
   names: { font: "Display", cut: "Regular", size: 1.33, spacing: -0.035 },
-  text: { font: "Text", cut: "Regular", size: 1.25, spacing: -0.015, gap: 1.13 },
+  text: { font: "Text", cut: "Regular", size: 1.25, spacing: -0.015, gap: 1.4 },
   /* The two lines under the name on the cover; they were in Small labels
      when these were set. */
   role: { font: "Old Mono", cut: "Medium", size: 1.06, spacing: 0.04 },
@@ -102,7 +102,7 @@ const LEVELS: [Level, string][] = [
   ["labels", ".label, .font-mono"],
   [
     "titles",
-    ":is(h1, h2):is(.font-display, .title):not(.chapter-name, .enquiry-title):not(:is(.discipline-title, .project-plate) > *), .display, .title",
+    ":is(h1, h2):is(.font-display, .title):not(.chapter-name, .enquiry-title):not(:is(.discipline-title, .project-plate) > *), .display, .title, h1[class*='font-wordmark']:not(.logo-grow)",
   ],
   ["names", "h1, h2, h3, h4, h5, h6, .font-display"],
   ["text", "p"],
