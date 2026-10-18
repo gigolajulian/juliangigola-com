@@ -49,15 +49,16 @@ const sectionOf = (path: string) =>
    would pass this budget keeps out of the trip (`data-page-tall`,
    transitions.css) and crossfades with the screen instead. The homepage
    (~100MB) keeps its zoom.
-   PREVIEW: only under `?vt=cap` until Julian has seen it. */
+   On for everyone since Julian tried it on his iPhone ("ITS GOOD",
+   2026-10-18); `?vt=full` snapshots every page whole again, for testing. */
 const SNAPSHOT_BUDGET = 192 * 2 ** 20;
 const gauge = () => {
   const root = document.documentElement;
-  let on = false;
+  let on = true;
   try {
     const q = new URLSearchParams(location.search).get("vt");
     if (q) sessionStorage.setItem("jg-vt", q);
-    on = sessionStorage.getItem("jg-vt") === "cap";
+    on = sessionStorage.getItem("jg-vt") !== "full";
   } catch {}
   const m = document.getElementById("main");
   const d = window.devicePixelRatio || 1;
