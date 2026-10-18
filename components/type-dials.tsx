@@ -200,32 +200,42 @@ function useTypeApply(
       scaled.clear();
       base.clear();
     };
-    const scale = (el: HTMLElement, k: number) => {
-      if (scaled.has(el)) return;
-      scaled.set(el, el.style.fontSize);
-      const px = parseFloat(getComputedStyle(el).fontSize);
-      base.set(el, px);
-      el.style.fontSize = `${px * k}px`;
+    /* QA (#239): every size read first, then every size written. Reading
+       after each write made the browser restyle the page once per element,
+       a 120ms frame after load. */
+    const scaleAll = (list: [HTMLElement, number][]) => {
+      const px = list.map(([el]) => parseFloat(getComputedStyle(el).fontSize));
+      list.forEach(([el, k], i) => {
+        scaled.set(el, el.style.fontSize);
+        base.set(el, px[i]);
+        el.style.fontSize = `${px[i] * k}px`;
+      });
     };
     /* Julian: "adjust for different sizes". A size that is right on a
        laptop pushes a long word out of a phone's card or a fitted line off
        the screen. Anything enlarged gives back just enough to fit its own
        box and the window (16px clear), never below the size it had. */
     const fit = (els: HTMLElement[] = [...scaled.keys()]) => {
-      for (const el of els) {
-        const px = parseFloat(el.style.fontSize);
+      // One layout for every reading, then the writes.
+      const shrink = els.map((el) => {
         const r = el.getBoundingClientRect();
         let f = 1;
         if (el.clientWidth > 0 && el.scrollWidth > el.clientWidth + 1) f = el.clientWidth / el.scrollWidth;
         const room = innerWidth - 16 - Math.max(r.left, 16);
         if (r.width > room && r.left < innerWidth && r.right > 0) f = Math.min(f, room / r.width);
-        if (f < 1) el.style.fontSize = `${Math.max(base.get(el)!, px * f)}px`;
+        return f;
+      });
+      const boxes = els.filter((el) => /auto|scroll/.test(getComputedStyle(el).overflowY));
+      els.forEach((el, i) => {
+        if (shrink[i] < 1)
+          el.style.fontSize = `${Math.max(base.get(el)!, parseFloat(el.style.fontSize) * shrink[i])}px`;
+      });
+      for (const el of boxes) {
         /* Julian: the Biography text scrolled in its box. Text in a box of
            its own height (a scroll box) comes down until it fits, below its old size too
            (12px floor). Area goes with the square of the size, so the root
            of the overflow, a few times over for the rewrap. */
-        const scrolls = /auto|scroll/.test(getComputedStyle(el).overflowY);
-        for (let i = 0; scrolls && i < 4 && el.clientHeight > 0 && el.scrollHeight > el.clientHeight + 1; i++) {
+        for (let i = 0; i < 4 && el.clientHeight > 0 && el.scrollHeight > el.clientHeight + 1; i++) {
           const now = parseFloat(el.style.fontSize);
           if (now <= 12) break;
           el.style.fontSize = `${Math.max(12, now * Math.sqrt(el.clientHeight / el.scrollHeight) * 0.99)}px`;
@@ -239,16 +249,23 @@ function useTypeApply(
       const screens = new Set<Element>();
       for (const el of els) {
         const s = el.closest(".screen-measure");
-        if (s) screens.add(s);
+        // Not Inquiries: it runs past its box at the old sizes too, by design.
+        if (s && !s.classList.contains("contact-inquire")) screens.add(s);
       }
-      for (const s of screens) {
-        const inside = [...scaled.keys()].filter((el) => s.contains(el));
-        for (let i = 0; i < 10 && s.scrollHeight > s.clientHeight + 1; i++) {
-          for (const el of inside) {
+      /* A few rounds, every screen read at once and then written: one
+         layout a round, not one a screen a step (QA, #239). Height goes
+         roughly with size, so each round takes the overflow's ratio. */
+      const inside = [...screens].map((s) => [...scaled.keys()].filter((el) => s.contains(el)));
+      for (let round = 0; round < 3; round++) {
+        const over = [...screens].map((s) => (s.scrollHeight > s.clientHeight + 1 ? s.clientHeight / s.scrollHeight : 1));
+        if (over.every((r) => r === 1)) break;
+        over.forEach((r, n) => {
+          if (r === 1) return;
+          for (const el of inside[n]) {
             const floor = base.get(el)! * 0.85;
-            el.style.fontSize = `${floor + (parseFloat(el.style.fontSize) - floor) * 0.7}px`;
+            el.style.fontSize = `${Math.max(floor, parseFloat(el.style.fontSize) * r * 0.98)}px`;
           }
-        }
+        });
       }
     };
     const levelOf = new Map<Element, Level>();
@@ -258,6 +275,7 @@ function useTypeApply(
        Returns what it sized. */
     const scan = (roots: Element[]) => {
       const fresh: HTMLElement[] = [];
+      const todo: [HTMLElement, number][] = [];
       for (const [level, sel] of LEVELS) {
         for (const root of roots) {
           const found = [...root.querySelectorAll<HTMLElement>(sel)];
@@ -271,13 +289,14 @@ function useTypeApply(
             // that is the one to scale, not the box around it.
             const fitted = el.querySelectorAll<HTMLElement>("[style*='font-size']");
             for (const c of fitted.length ? [...fitted] : [el]) {
-              if (scaled.has(c) || c.closest(LIQUID)) continue;
-              scale(c, k);
+              if (scaled.has(c) || fresh.includes(c) || c.closest(LIQUID)) continue;
+              todo.push([c, k]);
               fresh.push(c);
             }
           }
         }
       }
+      scaleAll(todo);
       return fresh;
     };
     const apply = () => {
@@ -400,7 +419,9 @@ function useTypeApply(
     watch.observe(document.body, { childList: true, subtree: true });
     const all = () => later();
     fitWatch = new MutationObserver(all);
-    void document.fonts.ready.then(all);
+    // Only when they land after the first pass, not on every load.
+    const loaded = document.fonts.status === "loaded";
+    if (!loaded) void document.fonts.ready.then(all);
     addEventListener("resize", all);
     if (show) addEventListener("scroll", redraw, true);
     return () => {
