@@ -48,7 +48,10 @@ html[data-font="v2"]
   :is(h1, h2):is(.font-display, .title):not(.chapter-name, .enquiry-title):not(
     :is(.discipline-title, .project-plate) > *
   ),
-html[data-font="v2"] :is(.display, .title) {
+html[data-font="v2"] :is(.display, .title),
+/* The page titles over Portfolio, its disciplines and Legal (Julian: back
+   with the big titles; they fell to the list names' Regular). */
+html[data-font="v2"] h1[class*="font-wordmark"]:not(.logo-grow) {
   font-family: var(--v2-title-family, var(--font-display));
   font-weight: var(--v2-title-weight, 700);
   letter-spacing: var(--v2-title-track, -0.035em);
@@ -107,7 +110,7 @@ html[data-font="v2"] :is(.action, .action-quiet, .cover-cta) {
 html[data-font="v2"] p {
   font-family: var(--v2-body-family, var(--font-v2-text));
   font-weight: var(--v2-body-weight, 400);
-  line-height: var(--v2-body-lead, 1.13);
+  line-height: var(--v2-body-lead, 1.4);
   letter-spacing: var(--v2-body-track, -0.015em);
 }
 
@@ -272,10 +275,22 @@ html[data-font="v2"] .cover-float-ctas {
    past both). One line per name. */
 @media (min-width: 64rem) {
   html[data-font="v2"] .book-page h1 {
-    font-size: min(clamp(2.75rem, 6.6vw, 5.5rem), 7.5vh);
+    font-size: min(clamp(2.75rem, 6.6vw, 5.5rem), 7vh);
   }
   html[data-font="v2"] .book-page ul .font-display {
-    font-size: min(clamp(2rem, 3.2vw, 3rem), 3.8vh);
+    font-size: min(clamp(2rem, 3.2vw, 3rem), 3.5vh);
     white-space: nowrap;
+  }
+}
+
+/* Legal: its long text at 1.5 (Julian), and its contents list showing all
+   twelve rows on a laptop, as before the new faces made the head above it
+   taller. */
+html[data-font="v2"] .legal-text :is(p, li) {
+  line-height: 1.5;
+}
+@media (min-width: 40rem) {
+  html[data-font="v2"] .legal-toc li > button {
+    padding-block: 0.5625rem;
   }
 }
