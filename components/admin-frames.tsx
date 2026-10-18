@@ -430,6 +430,7 @@ function FrameZoom({
       else if (e.key === "ArrowRight") onStep(1);
       else if (e.key === "ArrowLeft") onStep(-1);
       else if ((e.key === "x" || e.key === "X") && canCut) onCut();
+      else if (e.key === "?") setHelp((h) => !h);
       else return;
       e.preventDefault();
     };
