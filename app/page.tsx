@@ -96,9 +96,8 @@ const COVER_PICKS = [
 /* Frames past a project's cover that its discipline shows as well:
    Wrapped Up's heels and lipstick, and a second Crave. */
 const MORE = ["/work/wrapped-up/04.jpg", "/work/crave/03.jpg"];
-// The nine campaigns he wants up front; Oakley x Nike and Kala x Sharks
-// picked for the hard light.
-const CAMPAIGN_PICKS = ["hua", "ukiyosunknown", "goodcult", "wired-magazine", "jubo", "paradox", "sago", "oakley-x-nike", "kala-x-sharks"];
+// The eight campaigns he wants up front, in his order (2026-10-17).
+const CAMPAIGN_PICKS = ["sago", "jubo", "wired-magazine", "goodcult", "ukiyosunknown", "the-den-talkshow", "oakley-x-nike", "paradox"];
 const EDITORIAL_PICKS = ["ghostlight", "threshold", "lithe", "aegis", "vigil", "paranoia", "void", "azure-bloom", "i-wanna-be-a-human"];
 
 const same = (src: string) => (SOURCES as Record<string, string>)[src] ?? src;
