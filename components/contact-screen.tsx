@@ -74,7 +74,7 @@ export function ContactScreen({
             it was justified, and "project." stood on a line of its
             own. */}
         <span className="sm:block sm:text-balance">
-          Commissions, sessions, or a question about a project.
+          Editorial, campaigns, cover art and press kits.
         </span>{" "}
         <span className="sm:block sm:text-balance">
           Tell me what kind of shoot it is and I&rsquo;ll come back with

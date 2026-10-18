@@ -12,18 +12,19 @@ export const metadata: Metadata = {
 };
 
 /* The four sessions, each a Cal.com event (`CAL_EVENTS`, `lib/booking.ts`);
-   weddings are booked by inquiry. The lengths are the events' own. */
+   weddings book a call (its page's `book.cal`). The lengths are the events' own. */
 const LENGTHS: Record<string, string> = {
   portraits: "1 hour",
   graduation: "90 minutes",
   headshots: "30 minutes",
   "studio-digitals": "45 minutes",
+  weddings: "Call",
 };
 
 export default async function BookPage({ searchParams }: { searchParams: Promise<{ session?: string }> }) {
   const { session } = await searchParams;
   const sessions: Bookable[] = SESSION_TYPES.flatMap((s) => {
-    const cal = calEvent(s.slug);
+    const cal = calEvent(s.slug) ?? pageForSession(s.slug)?.book.cal;
     // Its wall, as its own booking page has (`/book/[slug]`).
     const wall = wallOf(pageForSession(s.slug)?.gallery.href.split("/").pop() ?? "");
     return cal ? [{ slug: s.slug, name: s.name, blurb: s.blurb, rate: formatPrice(s.from), length: LENGTHS[s.slug], cal, wall }] : [];

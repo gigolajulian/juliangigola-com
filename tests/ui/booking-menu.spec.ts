@@ -21,7 +21,8 @@ for (const r of RATIOS) {
     const errors = errorsOn(page);
     const sec = await menu(page);
     if (await upright(page, r, browserName)) return ctx.close();
-    expect(await sec.locator(".session-list > li").count()).toBeGreaterThanOrEqual(8);
+    // The four sessions and the wedding call; commissions go through Inquire (two doors).
+    expect(await sec.locator(".session-list > li").count()).toBe(5);
     /* A finger, where the ratio is a touch screen. Firefox cannot emulate a
        phone and keeps a hovering mouse there: a hovered row opens its line
        and moves the rows round it by up to ~225px, so a mouse click on
@@ -53,40 +54,6 @@ for (const r of RATIOS) {
     });
     await expect.poll(isClear, { message: "nothing drawn over Close", timeout: 10_000 }).toBe(true);
 
-    // A commission opens the form, Inquire on screen without scrolling.
-    await card.getByRole("button", { name: /close/i }).click();
-    await page.waitForTimeout(1200);
-    await row(page, /Event coverage/i).scrollIntoViewIfNeeded();
-    await press(row(page, /Event coverage/i));
-    await expect(card.locator('input[name="name"]')).toBeVisible({ timeout: 15_000 });
-    // A phone's card grows and the page scrolls (the card never does): Inquire is a scroll away.
-    if (r.width < 640) await card.locator('button[type="submit"]').scrollIntoViewIfNeeded();
-    /* The card animates open; under a loaded machine that runs past a fixed
-       wait, so wait until Inquire is the top element and has stopped moving
-       (the same box two reads running), then measure. Read while the card
-       was still growing, Firefox in an overlapped CI run saw Inquire below
-       the fold. */
-    const measure = () =>
-      card.locator('button[type="submit"]').evaluate((b) => {
-        const q = b.getBoundingClientRect();
-        const hit = document.elementFromPoint(q.x + q.width / 2, q.y + q.height / 2);
-        return { bottom: q.bottom, top: q.top, onTop: !!hit && (hit === b || b.contains(hit)) };
-      });
-    let last = "";
-    await expect
-      .poll(async () => {
-        const m = await measure();
-        const now = `${Math.round(m.top)},${Math.round(m.bottom)}`;
-        const still = now === last;
-        last = now;
-        return m.onTop && still;
-      }, { timeout: 15_000, intervals: [250] })
-      .toBe(true)
-      .catch(() => {});
-    const send = await measure();
-    expect(send.top).toBeGreaterThanOrEqual(0);
-    expect(send.bottom, "Inquire on screen").toBeLessThanOrEqual(r.height + 1);
-    expect(send.onTop, "Inquire not covered").toBe(true);
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1), "sideways scroll").toBe(true);
     expect(errors).toEqual([]);
     await ctx.close();
