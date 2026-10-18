@@ -160,7 +160,7 @@ export function CoverCell({
                 {row.frames} frames
               </>
             ) : null}
-          </span>
+          </span>{" "}
           <span
             style={{ "--n": row.name.length, "--w": Math.max(...row.name.split(" ").map((w) => w.length)) } as React.CSSProperties}
             className="cover-name font-display min-w-0 max-w-full truncate uppercase leading-[0.9] text-white"

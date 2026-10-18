@@ -166,6 +166,8 @@ export function FilmCell({
             {credit}
           </span>
         ) : null}
+        {/* A space between the words, unseen in the column: without it a
+           reader of the visible text gets "CAMRClean". */}{" "}
         <span
           /* `--g`: the longest run that cannot break, the last two words
              counted as one (below), for the slate's margin term
