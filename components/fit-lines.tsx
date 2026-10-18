@@ -85,7 +85,10 @@ export function FitLines() {
           // Too long at its size: smaller, not squeezed.
           l.style.fontSize = `${size * (target / w)}px`;
         } else {
-          const grow = Math.min(top / size, target / w);
+          // Font v2 (Julian): the location grows to the width instead of
+          // spreading, so its letters stay tight.
+          const tight = document.documentElement.dataset.font === "v2" && !!l.closest(".cover-float-where");
+          const grow = tight ? target / w : Math.min(top / size, target / w);
           if (grow > 1) {
             l.style.fontSize = `${size * grow}px`;
             w *= grow;

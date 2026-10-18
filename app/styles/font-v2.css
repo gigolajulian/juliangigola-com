@@ -1,0 +1,267 @@
+/*
+ * Font v2 preview: Neue Haas Grotesk (Adobe Fonts kit wxg8xur), only
+ * while `<html data-font="v2">` (`?font=v2`, `?font=0` to leave). The live
+ * look is untouched.
+ *
+ * Scale taken from basicagency.com (measured 2026-10-17): one grotesk in
+ * three registers. Big caps for titles, regular sentence case for prose,
+ * small caps for labels. Tight negative tracking on everything large.
+ * Display cut for titles, Text cut for everything small. Nothing under
+ * 12px. The wordmark stays Inter Tight (Julian, 2026-10-17).
+ *
+ * Kit weights: Display 500 (55 Roman), 600 (65 Medium), 700 (75 Bold);
+ * Text 400 (55 Roman), 500 (65 Medium), 700 (75 Bold).
+ *
+ * Every weight, tracking and leading below is a `--v2-*` variable so the
+ * Type panel (`components/type-dials.tsx`, dev server only) can scrub it;
+ * the fallbacks are the defaults.
+ */
+html[data-font="v2"] {
+  --font-display: "neue-haas-grotesk-display", "Helvetica Neue", Arial, sans-serif;
+  --font-mono: "neue-haas-grotesk-text", "Helvetica Neue", Arial, sans-serif;
+  --font-v2-text: "neue-haas-grotesk-text", "Helvetica Neue", Arial, sans-serif;
+
+  --text-display: clamp(2.75rem, 6.5vw, 8rem);
+  --text-title: clamp(1.75rem, 3.2vw, 3.5rem);
+  --text-label: 0.75rem;
+  --text-label--line-height: 1.2;
+  --text-label--letter-spacing: var(--v2-label-track, 0.04em);
+
+  font-family: var(--v2-body-family, var(--font-v2-text));
+  letter-spacing: 0;
+}
+
+/* Rows and headings: the discipline and session names, set names. Display
+   55 Roman, the nearest cut to the Endless they replace. */
+html[data-font="v2"] :is(h1, h2, h3, h4, h5, h6),
+html[data-font="v2"] .font-display:not(.logo-grow) {
+  font-family: var(--v2-row-family, var(--font-display));
+  font-weight: var(--v2-row-weight, 500);
+  letter-spacing: var(--v2-row-track, -0.035em);
+}
+
+/* Titles: the screen headers (Commissions, Sessions, Biography), page
+   titles and the masthead. Display 75 Bold. The first selector is
+   work-view.css's, prefixed, so it outranks the Inter Tight it sets there.
+   The name stays Inter Tight. */
+html[data-font="v2"]
+  :is(h1, h2):is(.font-display, .title):not(.chapter-name, .enquiry-title):not(
+    :is(.discipline-title, .project-plate) > *
+  ),
+html[data-font="v2"] :is(.display, .title) {
+  font-family: var(--v2-title-family, var(--font-display));
+  font-weight: var(--v2-title-weight, 700);
+  letter-spacing: var(--v2-title-track, -0.035em);
+  line-height: var(--v2-title-lead, 0.95);
+}
+
+/* A heading set as a label stays a label: Text 65 Medium. */
+html[data-font="v2"] :is(h1, h2, h3, h4, h5, h6).label,
+html[data-font="v2"] .label,
+html[data-font="v2"] .font-mono {
+  font-family: var(--v2-label-family, "IBM Plex Mono", monospace);
+  font-weight: var(--v2-label-weight, 500);
+  letter-spacing: var(--text-label--letter-spacing);
+}
+
+/* The two lines under the name on the cover, each on its own. */
+html[data-font="v2"] .cover-float-title {
+  font-family: var(--v2-role-family, "IBM Plex Mono", monospace);
+  font-weight: var(--v2-role-weight, 500);
+  letter-spacing: var(--v2-role-track, 0.04em);
+}
+html[data-font="v2"] .cover-float-where {
+  font-family: var(--v2-where-family, "IBM Plex Mono", monospace);
+  font-weight: var(--v2-where-weight, 500);
+  letter-spacing: var(--v2-where-track, -0.05em);
+}
+/* Julian: the gap from the name down to the two lines was wider than the
+   one between them. Set solid, the role line pulled up until the gap
+   under the name's descender matches the one down to the Based in line,
+   so the three read as one block with even steps. */
+html[data-font="v2"] :is(.cover-float-title, .cover-float-where) {
+  line-height: 1.15;
+}
+html[data-font="v2"] .cover-float-title {
+  margin-top: -0.1em;
+}
+html[data-font="v2"] .cover-float-where {
+  margin-top: 0.3em;
+  /* Julian: tighter word gaps on this line only. A mono space is a full cell. */
+  word-spacing: -0.3em;
+}
+html[data-font="v2"] :is(.cover-float-title, .cover-float-where) * {
+  font-family: inherit;
+  font-weight: inherit;
+  letter-spacing: inherit;
+}
+
+/* Buttons: small, so the Text cut and a little air. */
+html[data-font="v2"] :is(.action, .action-quiet, .cover-cta) {
+  font-family: var(--v2-button-family, "IBM Plex Mono", monospace);
+  font-weight: var(--v2-button-weight, 400);
+  letter-spacing: var(--v2-button-track, 0.04em);
+}
+
+/* Prose: Text 55 Roman, sentence case, open leading. */
+html[data-font="v2"] p {
+  font-family: var(--v2-body-family, var(--font-v2-text));
+  font-weight: var(--v2-body-weight, 400);
+  line-height: var(--v2-body-lead, 1.13);
+  letter-spacing: var(--v2-body-track, -0.015em);
+}
+
+/* The floor. Sizes under 12px were the Lighthouse small-text flag. */
+html[data-font="v2"] :is(
+    .text-\[0\.5rem\],
+    .text-\[0\.55rem\],
+    .text-\[0\.5625rem\],
+    .text-\[0\.625rem\],
+    .text-\[0\.6875rem\],
+    .text-\[0\.7rem\],
+    .text-\[10px\],
+    .text-\[11px\]
+  ) {
+  font-size: 0.75rem;
+}
+
+/* "Show fonts" on the Type panel (dev server): every piece of text boxed
+   in its level's colour, its real face, cut and size on a tab above it. */
+.v2-tags {
+  position: fixed;
+  inset: 0;
+  z-index: 2147483000;
+  pointer-events: none;
+  text-transform: none;
+  font: 500 10px/1 ui-monospace, monospace;
+  letter-spacing: 0;
+  opacity: 0.45;
+}
+.v2-tag {
+  position: fixed;
+  outline: 1px solid currentColor;
+}
+.v2-tag > span {
+  position: absolute;
+  left: -1px;
+  bottom: 100%;
+  padding: 2px 4px;
+  white-space: nowrap;
+  background: #000;
+  border: 1px solid currentColor;
+}
+.v2-bar {
+  position: fixed;
+  left: 50%;
+  bottom: 16px;
+  translate: -50% 0;
+  z-index: 2147483001;
+  display: grid;
+  gap: 6px;
+  max-width: calc(100vw - 32px);
+  padding: 8px 10px;
+  background: #0b0a09;
+  border: 1px solid #333;
+  color: #9a9a9a;
+  font: 400 11px/1 ui-monospace, monospace;
+  letter-spacing: 0;
+  text-transform: none;
+}
+.v2-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+}
+.v2-bar button,
+.v2-scrub {
+  padding: 5px 7px;
+  border: 1px solid transparent;
+  color: inherit;
+  font: inherit;
+  letter-spacing: 0;
+  text-transform: none;
+  cursor: pointer;
+}
+.v2-bar button:hover,
+.v2-scrub:hover {
+  color: #eee;
+}
+.v2-bar button[aria-pressed="true"] {
+  color: #eee;
+  border-color: #eee;
+}
+/* The kinds of text wear their overlay colour as a dot. */
+.v2-bar button[style*="--dot"]::before {
+  content: "";
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  margin-right: 6px;
+  background: var(--dot);
+}
+.v2-scrub {
+  cursor: ew-resize;
+  user-select: none;
+  touch-action: none;
+}
+.v2-scrub b {
+  color: #eee;
+  font-weight: 400;
+}
+.v2-grip {
+  padding: 4px 6px 4px 0;
+  color: #666;
+  font-size: 14px;
+  cursor: grab;
+  user-select: none;
+  touch-action: none;
+}
+.v2-grip:hover {
+  color: #eee;
+}
+.v2-grip:active {
+  cursor: grabbing;
+}
+.v2-gap {
+  flex: 1;
+}
+.v2-sep {
+  width: 1px;
+  height: 14px;
+  margin: 0 4px;
+  background: #333;
+}
+.v2-open {
+  display: block;
+  padding: 8px 12px;
+  color: #eee;
+  cursor: pointer;
+}
+
+/* The cover's buttons grow through their own `--cta-k` (`cover.css`), not
+   a size written by `type-dials.tsx`: their liquid fill never settled
+   under one (QA, #239). */
+html[data-font="v2"] .cover-float-ctas {
+  --cta-k: calc(max(1, calc(0.9 / var(--mid, 1))) * var(--v2-button-size, 1.13));
+}
+
+/* Julian: the Biography paragraph justified, no word split over two lines;
+   from a laptop up only: a phone's or an upright iPad's column left wide
+   gaps (his pick). */
+@media (min-width: 64rem) {
+  html[data-font="v2"] .about-grid p[data-scroll] {
+    text-align: justify;
+    hyphens: none;
+  }
+}
+
+/* The Commissions card captions in two even lines on a phone, as live
+   (#244): the old size, weight and tracking, not the labels' 12px floor. */
+@media (max-width: 39.99rem) {
+  html[data-font="v2"] .services-cap {
+    font-size: 0.6875rem;
+    font-weight: 400;
+    letter-spacing: 0.06em;
+  }
+}
