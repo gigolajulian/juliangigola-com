@@ -247,10 +247,21 @@ html[data-font="v2"] .cover-float-ctas {
 }
 
 /* Julian: the Biography paragraph justified, no word split over two lines;
-   from a tablet up only, a phone's column left wide gaps (his pick). */
-@media (min-width: 40rem) {
+   from a laptop up only: a phone's or an upright iPad's column left wide
+   gaps (his pick). */
+@media (min-width: 64rem) {
   html[data-font="v2"] .about-grid p[data-scroll] {
     text-align: justify;
     hyphens: none;
+  }
+}
+
+/* The Commissions card captions in two even lines on a phone, as live
+   (#244): the old size, weight and tracking, not the labels' 12px floor. */
+@media (max-width: 39.99rem) {
+  html[data-font="v2"] .services-cap {
+    font-size: 0.6875rem;
+    font-weight: 400;
+    letter-spacing: 0.06em;
   }
 }

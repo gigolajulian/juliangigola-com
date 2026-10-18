@@ -119,7 +119,9 @@ const KEY = "jg-font-v2-bar";
    here kept it and the buttons redrawing on hover (QA, #239), and Julian
    kept the wordmark as it was. */
 const SKIP = ".logo-grow, .v2-bar, .v2-tags";
-const LIQUID = ".liquid-pair, .cover-float-ctas, .cover-float-name";
+// And the card captions under Commissions, held to two lines on a phone
+// in `font-v2.css` (QA, #239).
+const LIQUID = ".liquid-pair, .cover-float-ctas, .cover-float-name, .services-cap";
 
 /** "Display Bold" from what the browser actually drew with. */
 function realFace(cs: CSSStyleDeclaration) {
