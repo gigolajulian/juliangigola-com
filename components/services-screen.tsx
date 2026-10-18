@@ -165,7 +165,7 @@ export function ServicesScreen({
           {/* Under a finger: the disciplines as frames, two across, the
               picture leading and the name on its slate, as the
               portfolio's own cards are. */}
-          <ul className="grid grid-cols-2 gap-x-3 gap-y-5 sm:hidden">
+          <ul className="grid grid-cols-2 gap-x-5 gap-y-9 sm:hidden">
             {rows.map((r, i) => (
               <li key={r.slug} style={{ "--i": i } as React.CSSProperties} className="services-step min-w-0">
                 <Link prefetch={false} href={r.href} className="group block press active:scale-[0.98]">
@@ -191,7 +191,7 @@ export function ServicesScreen({
                     </span>
                   </span>
                   {r.about ? (
-                    <span className="label mt-2 line-clamp-2 block text-muted-foreground">{r.about}</span>
+                    <span className="services-cap label mt-2 block text-muted-foreground">{r.about}</span>
                   ) : null}
                 </Link>
               </li>
