@@ -67,6 +67,19 @@ export function PageTransition({ children }: { children: React.ReactNode }) {
     return () => window.clearTimeout(t);
   }, [path]);
 
+  /* MEASUREMENT ONLY, not for merge: `?vt=off` drops every named
+     snapshot for the visit (only the root's, the size of the screen), to
+     compare WebKit's memory opening a set from /portfolio. `?vt=on` undoes. */
+  React.useEffect(() => {
+    try {
+      const q = new URLSearchParams(location.search).get("vt");
+      if (q) sessionStorage.setItem("jg-vt", q);
+      if (sessionStorage.getItem("jg-vt") === "off")
+        document.documentElement.dataset.vtOff = "";
+      else delete document.documentElement.dataset.vtOff;
+    } catch {}
+  }, [path]);
+
   React.useEffect(() => {
     const root = document.documentElement;
     let clear = 0;

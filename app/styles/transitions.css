@@ -341,3 +341,8 @@
     opacity: 0.25;
   }
 }
+
+/* MEASUREMENT ONLY (`?vt=off`, page-transition.tsx): no named snapshots. */
+:root[data-vt-off] body * {
+  view-transition-name: none !important;
+}
