@@ -211,7 +211,7 @@ function useTypeApply(
        laptop pushes a long word out of a phone's card or a fitted line off
        the screen. Anything enlarged gives back just enough to fit its own
        box and the window (16px clear), never below the size it had. */
-    const fit = (els: Iterable<HTMLElement> = scaled.keys()) => {
+    const fit = (els: HTMLElement[] = [...scaled.keys()]) => {
       for (const el of els) {
         const px = parseFloat(el.style.fontSize);
         const r = el.getBoundingClientRect();
@@ -229,6 +229,25 @@ function useTypeApply(
           const now = parseFloat(el.style.fontSize);
           if (now <= 12) break;
           el.style.fontSize = `${Math.max(12, now * Math.sqrt(el.clientHeight / el.scrollHeight) * 0.99)}px`;
+        }
+      }
+      /* Julian: on Commissions at 1440x900 the bigger list pushed Inquire
+         onto the logos. A screen taller than its box gives back part of the
+         enlargement of everything in it, together, until it fits. Sessions
+         ran 17px over even at the old sizes (the new faces sit taller), so
+         down to 85% of them if it must. */
+      const screens = new Set<Element>();
+      for (const el of els) {
+        const s = el.closest(".screen-measure");
+        if (s) screens.add(s);
+      }
+      for (const s of screens) {
+        const inside = [...scaled.keys()].filter((el) => s.contains(el));
+        for (let i = 0; i < 10 && s.scrollHeight > s.clientHeight + 1; i++) {
+          for (const el of inside) {
+            const floor = base.get(el)! * 0.85;
+            el.style.fontSize = `${floor + (parseFloat(el.style.fontSize) - floor) * 0.7}px`;
+          }
         }
       }
     };
