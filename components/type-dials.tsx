@@ -225,20 +225,25 @@ function useTypeApply(
         if (r.width > room && r.left < innerWidth && r.right > 0) f = Math.min(f, room / r.width);
         return f;
       });
-      const boxes = els.filter((el) => /auto|scroll/.test(getComputedStyle(el).overflowY));
+      // Boxes that scroll, and boxes that clip (QA: a Commissions card title
+      // lost its third line); the second never below the old size.
+      const boxes = els.flatMap((el) => {
+        const o = getComputedStyle(el).overflowY;
+        return /auto|scroll/.test(o) ? [[el, 12] as const] : /hidden|clip/.test(o) ? [[el, base.get(el)!] as const] : [];
+      });
       els.forEach((el, i) => {
         if (shrink[i] < 1)
           el.style.fontSize = `${Math.max(base.get(el)!, parseFloat(el.style.fontSize) * shrink[i])}px`;
       });
-      for (const el of boxes) {
+      for (const [el, least] of boxes) {
         /* Julian: the Biography text scrolled in its box. Text in a box of
            its own height (a scroll box) comes down until it fits, below its old size too
            (12px floor). Area goes with the square of the size, so the root
            of the overflow, a few times over for the rewrap. */
         for (let i = 0; i < 4 && el.clientHeight > 0 && el.scrollHeight > el.clientHeight + 1; i++) {
           const now = parseFloat(el.style.fontSize);
-          if (now <= 12) break;
-          el.style.fontSize = `${Math.max(12, now * Math.sqrt(el.clientHeight / el.scrollHeight) * 0.99)}px`;
+          if (now <= least) break;
+          el.style.fontSize = `${Math.max(least, now * Math.sqrt(el.clientHeight / el.scrollHeight) * 0.99)}px`;
         }
       }
       /* Julian: on Commissions at 1440x900 the bigger list pushed Inquire
@@ -251,6 +256,10 @@ function useTypeApply(
         const s = el.closest(".screen-measure");
         // Not Inquiries: it runs past its box at the old sizes too, by design.
         if (s && !s.classList.contains("contact-inquire")) screens.add(s);
+        // A scrolling list around the text the same way (QA: Biography's
+        // steps at 1280x720 hid the end of 04).
+        const list = el.parentElement?.closest("[data-scroll]");
+        if (list) screens.add(list);
       }
       /* A few rounds, every screen read at once and then written: one
          layout a round, not one a screen a step (QA, #239). Height goes
