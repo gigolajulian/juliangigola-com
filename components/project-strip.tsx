@@ -10,6 +10,7 @@ import { CreditCard, CreditList } from "@/components/credit-card";
 import { longestWord, titleWidth } from "@/components/strip-page";
 import { Strip, useWideNow, type Lead } from "@/components/strip";
 import { gatherWhenSeen, slides } from "@/lib/gather";
+import { PendingLabel } from "@/components/pending-label";
 import type { Project, TextBlock, Frame } from "@/lib/work-types";
 
 /* ── the sequence, across the screen ──────────────────────────────
@@ -133,7 +134,8 @@ export function ProjectStrip({
     for (const block of byPosition.get(frames.length) ?? []) {
       out.push({ kind: "text", block });
     }
-    if (next) out.push({ kind: "next" });
+    // Always: the ask ends every sequence, with or without a next project.
+    out.push({ kind: "next" });
     return out;
   }, [frames, project.blocks, next]);
 
@@ -313,14 +315,17 @@ export function ProjectStrip({
             ) : null}
           </div>
         ) : cell.kind === "next" ? (
-          /* The last cell: where the sequence goes next, written and
-                 not shown. It carried the next project's cover for a day
-                 and Julian said the image from the next page was showing
-                 up on this one — which is also how the reference has it:
-                 the sequence ends, and past the last photograph there is
-                 the name of what follows on empty ground. The pictures on
-                 a project page are that project's. */
-          <NextCell key="next" next={next!} label={gallery ? "Up next" : "Next project"} />
+          /* The last cell: the ask, then where the sequence goes next.
+                 Art directors arrive deep from Instagram and never see the
+                 homepage, so the end of the frames is where they meet
+                 Inquire. The next project stays written and not shown: the
+                 pictures on a project page are that project's. */
+          <EndCell
+            key="next"
+            name={project.name}
+            next={next}
+            label={gallery ? "Up next" : "Next project"}
+          />
         ) : cell.kind === "text" ? (
           <div
             key={`text-${cell.block.after}-${cell.block.heading ?? ""}`}
@@ -498,5 +503,61 @@ export function NextCell({ next, label }: { next: NextUp; label: string }) {
         <span className="label text-muted-foreground">{next.client}</span>
       ) : null}
     </Link>
+  );
+}
+
+/** A project's last cell: Inquire, carrying the project into the form
+    (`ref`, read by `contact-form.tsx`), and the next project under a
+    hairline. `next-cell` so the deck still pins it to the right edge. */
+function EndCell({
+  name,
+  next,
+  label,
+}: {
+  name: string;
+  next?: NextUp;
+  label: string;
+}) {
+  return (
+    <div
+      data-hash="next"
+      className="next-cell flex w-[min(26rem,100%)] shrink-0 flex-col justify-center gap-8 pl-0 max-sm:py-14 sm:h-full sm:w-auto sm:pl-24 sm:pr-10"
+    >
+      <div className="flex flex-col items-start gap-4">
+        <span className="label text-muted-foreground">Commission</span>
+        <p className="font-display text-2xl leading-[0.95] tracking-[0] sm:text-4xl">
+          <span className="block whitespace-nowrap">Your next story,</span>
+          <span className="block whitespace-nowrap uppercase">lit like this</span>
+        </p>
+        <p className="text-sm normal-case leading-relaxed text-muted-foreground max-sm:text-[min(0.8125rem,3.4vw)]">
+          <span className="block whitespace-nowrap">Send me the brief and the date.</span>
+          <span className="block whitespace-nowrap">
+            I&apos;ll come back with an approach, a crew and a quote.
+          </span>
+        </p>
+        <Link
+          prefetch={false}
+          href={`/?ref=${encodeURIComponent(name)}#contact`}
+          className="label action mt-2 self-end px-6 py-4 press active:scale-[0.97]"
+        >
+          <PendingLabel state="composing">Inquire</PendingLabel>
+        </Link>
+      </div>
+      {next ? (
+        <Link
+          href={next.href}
+          data-ring="Next"
+          className="group flex flex-col gap-2 border-t border-border pt-6"
+        >
+          <span className="label text-muted-foreground">{label}</span>
+          <span className="font-display text-xl uppercase leading-none tracking-[0] transition-opacity duration-200 hoverable:group-hover:opacity-70 sm:text-2xl">
+            {next.name}
+          </span>
+          {next.client ? (
+            <span className="label text-muted-foreground">{next.client}</span>
+          ) : null}
+        </Link>
+      ) : null}
+    </div>
   );
 }
