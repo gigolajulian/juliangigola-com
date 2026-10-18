@@ -629,6 +629,8 @@ export function HeroDials() {
     const el = ref.current?.closest<HTMLElement>(".cover-float");
     if (!el || !arrange) return;
     el.dataset.arrange = "";
+    // The system's own pointer while arranging (pointer.css).
+    document.documentElement.dataset.arrange = "";
     const at = (e: Event) =>
       (e.target as Element).closest<HTMLElement>(".cover-float-frame");
     const step = (v: number, s: number) => Math.round(v / s) * s;
@@ -800,6 +802,7 @@ export function HeroDials() {
     el.addEventListener("dragstart", stop);
     return () => {
       delete el.dataset.arrange;
+      delete document.documentElement.dataset.arrange;
       delete el.dataset.tilt;
       el.querySelectorAll("[data-picked]").forEach((f) =>
         f.removeAttribute("data-picked"),
@@ -962,7 +965,15 @@ export function CoverCard({ children }: { children: React.ReactNode }) {
   React.useEffect(() => {
     const frame = ref.current?.parentElement;
     if (!frame) return;
+    /* The navbar and floor's clearer glass (`data-photo-hover`,
+       cover.css), flagged on the glass itself: anywhere higher, the root
+       included, Chrome restyled the whole page for it. */
+    const glass = (on: boolean) => {
+      for (const g of document.querySelectorAll(".site-bar, .strip-rail, .head-glass"))
+        g.toggleAttribute("data-photo-hover", on);
+    };
     const on = (e: PointerEvent) => {
+      glass(true);
       if (e.pointerType !== "mouse") return;
       /* The way from this card to the cover's centre, for the stylesheet
          to take a share of (Toward Middle). Measured off the frame, which
@@ -982,10 +993,14 @@ export function CoverCard({ children }: { children: React.ReactNode }) {
       }
       setHover(true);
     };
-    const off = () => setHover(false);
+    const off = () => {
+      glass(false);
+      setHover(false);
+    };
     frame.addEventListener("pointerenter", on);
     frame.addEventListener("pointerleave", off);
     return () => {
+      glass(false);
       frame.removeEventListener("pointerenter", on);
       frame.removeEventListener("pointerleave", off);
     };

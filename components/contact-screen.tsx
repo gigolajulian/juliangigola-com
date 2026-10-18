@@ -121,7 +121,7 @@ export function ContactScreen({
           stand between the ask and it. */}
       <div
         data-scroll
-        className="flex min-h-0 flex-col gap-8 [container-type:inline-size] max-sm:contents sm:max-h-full sm:overflow-y-auto sm:overscroll-contain short:gap-5"
+        className="contact-copy flex min-h-0 flex-col gap-8 [container-type:inline-size] max-sm:contents sm:max-h-full sm:overflow-y-auto sm:overscroll-contain short:gap-5"
       >
         <div className="flex flex-col gap-5">
           {/* The homepage's head, unless the visitor came to book a
