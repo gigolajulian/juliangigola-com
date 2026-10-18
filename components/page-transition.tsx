@@ -42,6 +42,30 @@ const sectionOf = (path: string) =>
     -1,
   );
 
+/* Julian (iPhone): opening a set from the portfolio crashed Safari, and the
+   wordmark home went black for half a second. The page is snapshotted whole
+   for the trip, and on a phone the portfolio is 71,570px tall: about 2GB at
+   3x (measured on an iPhone sim, 114MB without it). A page whose snapshot
+   would pass this budget keeps out of the trip (`data-page-tall`,
+   transitions.css) and crossfades with the screen instead. The homepage
+   (~100MB) keeps its zoom.
+   PREVIEW: only under `?vt=cap` until Julian has seen it. */
+const SNAPSHOT_BUDGET = 192 * 2 ** 20;
+const gauge = () => {
+  const root = document.documentElement;
+  let on = false;
+  try {
+    const q = new URLSearchParams(location.search).get("vt");
+    if (q) sessionStorage.setItem("jg-vt", q);
+    on = sessionStorage.getItem("jg-vt") === "cap";
+  } catch {}
+  const m = document.getElementById("main");
+  const d = window.devicePixelRatio || 1;
+  if (on && m && m.scrollHeight * m.clientWidth * d * d * 4 > SNAPSHOT_BUDGET)
+    root.dataset.pageTall = "";
+  else delete root.dataset.pageTall;
+};
+
 export function PageTransition({ children }: { children: React.ReactNode }) {
   /* Over when the trip lands, not on a clock from the press. The page's
      animations are read off the root while they run, and a page slower
@@ -51,6 +75,8 @@ export function PageTransition({ children }: { children: React.ReactNode }) {
   const shown = React.useRef(path);
   React.useLayoutEffect(() => {
     shown.current = path;
+    // The page arriving, before it is snapshotted.
+    gauge();
     landed?.();
     landed = null;
     if (document.documentElement.dataset.nav === undefined) return;
@@ -111,6 +137,8 @@ export function PageTransition({ children }: { children: React.ReactNode }) {
       );
       if (!a || a.target === "_blank" || a.origin !== location.origin) return;
       if (a.pathname === location.pathname) return;
+      // The page leaving, before it is snapshotted.
+      gauge();
       /* A chip on the work index is a filter, not a page: /work, a
          category and the motion page are one page with one row swapped,
          and the strip already fades the row (`data-arrive="fade"`). The
@@ -166,6 +194,7 @@ export function PageTransition({ children }: { children: React.ReactNode }) {
         .hasUAVisualTransition;
       if (ua || !document.startViewTransition) return;
       e.stopImmediatePropagation();
+      gauge();
       const main = document.getElementById("main");
       main?.style.setProperty("view-transition-name", "back-page");
       const trip = document.startViewTransition(
