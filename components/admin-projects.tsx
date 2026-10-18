@@ -474,7 +474,9 @@ export function AdminProjects({
                       ? photoCount
                       : `${p.images.length} → ${photoCount}`}{" "}
                     frames
-                    {twin.twins > 0 ? ` · ${twin.twins} twins` : ""}
+                    {twin.twins > 0
+                      ? ` · ${twin.twins} ${twin.twins === 1 ? "twin" : "twins"}`
+                      : ""}
                     {twin.backToBack > 0
                       ? ` · ${twin.backToBack} back-to-back`
                       : ""}
