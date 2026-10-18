@@ -31,10 +31,6 @@ export function usePrefetch({
     const warm = () => {
       const near = el.clientWidth * 1.5;
       const room = el.scrollWidth - el.clientWidth;
-      /* A strip that does not run sideways (the homepage on a phone) has
-         no end to push past, and read as standing at both: /portfolio and
-         its pictures were fetched on arrival, inside the trip home. */
-      if (room <= 0) return;
       if (nextHref && room - el.scrollLeft < near && !warmed.has(nextHref)) {
         warmed.add(nextHref);
         router.prefetch(nextHref);
