@@ -75,6 +75,25 @@ html[data-font="v2"] .cover-float-where {
   font-weight: var(--v2-where-weight, 500);
   letter-spacing: var(--v2-where-track, -0.015em);
 }
+/* Julian: the gap from the name down to the two lines was wider than the
+   one between them. Set solid, the role line pulled up until the gap
+   under the name's descender matches the one down to the Based in line,
+   so the three read as one block with even steps. */
+html[data-font="v2"] :is(.cover-float-title, .cover-float-where) {
+  line-height: 1.15;
+}
+html[data-font="v2"] .cover-float-title {
+  margin-top: -0.1em;
+}
+html[data-font="v2"] .cover-float-where {
+  margin-top: 0.3em;
+}
+/* The wordmark box carries more room under its descender on a phone. */
+@media (max-width: 39.99rem) {
+  html[data-font="v2"] .cover-float-title {
+    margin-top: -0.65em;
+  }
+}
 html[data-font="v2"] :is(.cover-float-title, .cover-float-where) * {
   font-family: inherit;
   font-weight: inherit;

@@ -186,16 +186,36 @@ function useTypeApply(
     // Each scaled element's own inline size, put back after: lines that fit
     // themselves (`fit-lines.tsx`) carry one.
     const scaled = new Map<HTMLElement, string>();
+    const base = new Map<HTMLElement, number>();
     const restore = () => {
       for (const [el, was] of scaled) el.style.fontSize = was;
       scaled.clear();
+      base.clear();
     };
     const scale = (el: HTMLElement, k: number) => {
       if (scaled.has(el)) return;
       scaled.set(el, el.style.fontSize);
-      el.style.fontSize = `${parseFloat(getComputedStyle(el).fontSize) * k}px`;
+      const px = parseFloat(getComputedStyle(el).fontSize);
+      base.set(el, px);
+      el.style.fontSize = `${px * k}px`;
+    };
+    /* Julian: "adjust for different sizes". A size that is right on a
+       laptop pushes a long word out of a phone's card or a fitted line off
+       the screen. Anything enlarged gives back just enough to fit its own
+       box and the window (16px clear), never below the size it had. */
+    const fit = () => {
+      for (const [el] of scaled) {
+        const px = parseFloat(el.style.fontSize);
+        const r = el.getBoundingClientRect();
+        let f = 1;
+        if (el.clientWidth > 0 && el.scrollWidth > el.clientWidth + 1) f = el.clientWidth / el.scrollWidth;
+        const room = innerWidth - 16 - Math.max(r.left, 16);
+        if (r.width > room && r.left < innerWidth && r.right > 0) f = Math.min(f, room / r.width);
+        if (f < 1) el.style.fontSize = `${Math.max(base.get(el)!, px * f)}px`;
+      }
     };
     const levelOf = new Map<Element, Level>();
+    let watch: MutationObserver | null = null;
     const apply = () => {
       restore();
       levelOf.clear();
@@ -212,6 +232,9 @@ function useTypeApply(
           else scale(el, k);
         }
       }
+      fit();
+      // Our own size changes are not news.
+      watch?.takeRecords();
       draw();
     };
 
@@ -253,25 +276,52 @@ function useTypeApply(
       setTags(out);
     };
 
-    apply();
+    // After the page has loaded and gone idle: a size set on text React has
+    // not hydrated yet is a hydration mismatch.
+    let idle = 0;
+    let ready = false;
+    const start = () =>
+      (idle = requestIdleCallback(
+        () => {
+          ready = true;
+          apply();
+        },
+        { timeout: 1500 },
+      ));
+    if (document.readyState === "complete") start();
+    else addEventListener("load", start, { once: true });
     let frame = 0;
     const later = () => {
+      if (!ready) return;
       cancelAnimationFrame(frame);
       frame = requestAnimationFrame(apply);
     };
     const redraw = () => {
+      if (!ready) return;
       cancelAnimationFrame(frame);
       frame = requestAnimationFrame(draw);
     };
-    // Not the bar's or the tags' own redraws, or they tag themselves forever.
-    const watch = new MutationObserver((list) => {
-      if (list.some((m) => !(m.target as Element).closest?.(".v2-tags, .v2-bar"))) later();
+    /* Not the bar's or the tags' own redraws, or they tag themselves
+       forever. A line that fits itself (`fit-lines.tsx`) re-fits after we
+       size it, so its style changing is news too. */
+    watch = new MutationObserver((list) => {
+      if (
+        list.some((m) =>
+          m.type === "attributes"
+            ? (m.target as Element).classList.contains("fit-line")
+            : !(m.target as Element).closest?.(".v2-tags, .v2-bar"),
+        )
+      )
+        later();
     });
-    watch.observe(document.body, { childList: true, subtree: true });
+    watch.observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ["style"] });
+    void document.fonts.ready.then(later);
     addEventListener("resize", later);
     addEventListener("scroll", redraw, true);
     return () => {
-      watch.disconnect();
+      watch?.disconnect();
+      cancelIdleCallback(idle);
+      removeEventListener("load", start);
       removeEventListener("resize", later);
       removeEventListener("scroll", redraw, true);
       cancelAnimationFrame(frame);
