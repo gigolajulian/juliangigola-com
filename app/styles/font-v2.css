@@ -87,6 +87,8 @@ html[data-font="v2"] .cover-float-title {
 }
 html[data-font="v2"] .cover-float-where {
   margin-top: 0.3em;
+  /* Julian: tighter word gaps on this line only. A mono space is a full cell. */
+  word-spacing: -0.3em;
 }
 /* The wordmark box carries more room under its descender on a phone. */
 @media (max-width: 39.99rem) {
