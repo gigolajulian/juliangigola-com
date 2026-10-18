@@ -121,7 +121,10 @@ const KEY = "jg-font-v2-bar";
 const SKIP = ".logo-grow, .v2-bar, .v2-tags";
 // And the card captions under Commissions, held to two lines on a phone
 // in `font-v2.css` (QA, #239).
-const LIQUID = ".liquid-pair, .cover-float-ctas, .cover-float-name, .services-cap";
+// And /book's title and session names, sized to the window's height in
+// `font-v2.css` (QA: the column outgrew the screen with #247's lines).
+const LIQUID =
+  ".liquid-pair, .cover-float-ctas, .cover-float-name, .services-cap, .book-page h1, .book-page ul .font-display";
 
 /** "Display Bold" from what the browser actually drew with. */
 function realFace(cs: CSSStyleDeclaration) {

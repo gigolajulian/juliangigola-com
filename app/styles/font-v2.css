@@ -265,3 +265,17 @@ html[data-font="v2"] .cover-float-ctas {
     letter-spacing: 0.06em;
   }
 }
+
+/* /book: the title and the session names at the new sizes, but no taller
+   than the window allows, so the column clears the header and the footer
+   with every row (QA, v1.2.15: Studio Digitals on two lines pushed it
+   past both). One line per name. */
+@media (min-width: 64rem) {
+  html[data-font="v2"] .book-page h1 {
+    font-size: min(clamp(2.75rem, 6.6vw, 5.5rem), 7.5vh);
+  }
+  html[data-font="v2"] .book-page ul .font-display {
+    font-size: min(clamp(2rem, 3.2vw, 3rem), 3.8vh);
+    white-space: nowrap;
+  }
+}
