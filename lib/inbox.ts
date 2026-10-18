@@ -205,6 +205,8 @@ export const SHOOT_TYPES = [
   "campaign",
   "music",
   "portrait",
+  "coverart",
+  "presskit",
   "session",
   "event",
   "other",

@@ -304,7 +304,9 @@ export default function Home() {
               pageTitle: pageForSession(s.slug)?.h1,
             };
           })}
-          menu={BOOK_MENU}
+          // Two doors (2026-10-18): private clients only here, the four
+          // sessions and the wedding call; commissions go through Inquire.
+          menu={BOOK_MENU.filter((m) => m.group === "time" || m.slug === "weddings")}
           walls={SESSION_WALLS}
           covers={SESSION_COVERS}
         />

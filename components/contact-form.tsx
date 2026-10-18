@@ -25,7 +25,8 @@ const TYPES = [
   { value: "editorial", label: "Editorial" },
   { value: "campaign", label: "Campaign" },
   { value: "music", label: "Music" },
-  { value: "portrait", label: "Portrait" },
+  { value: "coverart", label: "Cover art" },
+  { value: "presskit", label: "Presskit" },
   { value: "session", label: "Session" },
   { value: "event", label: "Event" },
   { value: "other", label: "Other" },
@@ -44,6 +45,14 @@ const FOLLOW_UP: Record<string, { label: string; placeholder: string }> = {
   music: {
     label: "Artist and release date",
     placeholder: "e.g. cover art, single out 3 May",
+  },
+  coverart: {
+    label: "Artist and release date",
+    placeholder: "e.g. a single, out 3 May",
+  },
+  presskit: {
+    label: "Artist and what it is for",
+    placeholder: "e.g. a tour, an EP campaign",
   },
   portrait: {
     label: "Who it is for, and roughly when",
@@ -567,6 +576,8 @@ export function ContactForm({
       {/* The address on the left, the button on the right, the sentence off
           the screen (still read out with the button). */}
       <div className="flex flex-wrap items-start justify-between gap-x-6 gap-y-3 lying:justify-end">
+        <div className="ml-auto flex items-center gap-x-5">
+        {RESPONSE_TIME ? <p className="label text-muted-foreground">Replies {RESPONSE_TIME}</p> : null}
         <button
           type="submit"
           data-dial="send"
@@ -587,6 +598,7 @@ export function ContactForm({
             {pending ? "Sending…" : "Inquire"}
           </span>
         </button>
+        </div>
         {/* What is still missing, where the button is, and only once
             there is any reason to say it. */}
         {!ready && !pending ? (

@@ -209,8 +209,11 @@ const csp = [
   // their own CDNs rather than frames from the archive.
   "img-src 'self' data: blob: https://i.ytimg.com https://i.vimeocdn.com",
   // Cal.com's embed script sets its loader in its own face, from `cal.com`.
-  "font-src 'self' https://cal.com",
-  "style-src 'self' 'unsafe-inline'",
+  // Adobe Fonts for the `?font=v2` preview (`app/layout.tsx`): the kit's
+  // stylesheet and files from use.typekit.net, its counting stylesheet
+  // from p.typekit.net. Nothing loads from either without the flag.
+  "font-src 'self' https://cal.com https://use.typekit.net",
+  "style-src 'self' 'unsafe-inline' https://use.typekit.net https://p.typekit.net",
   // Cloudflare Web Analytics. The beacon is injected by the zone, not by
   // this app, so the first CSP blocked it and took the site's only analytics
   // with it — found by reading the console after deploying, not by guessing.
