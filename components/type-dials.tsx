@@ -1,0 +1,461 @@
+"use client";
+
+import * as React from "react";
+import { createPortal } from "react-dom";
+
+/* ── font v2: the type bar ───────────────────────────────────────
+ * Julian: set the type live, switch faces and cuts with a click, see
+ * which text is in which face. A bar at the foot of the window on the dev
+ * server with `?font=v2` only (not DialKit: "make it easier to switch").
+ * Pick a kind of text, click a face and a thickness, drag a number. Face,
+ * thickness, spacing and line gap go to the `--v2-*` variables
+ * `font-v2.css` reads. Size multiplies whatever size the element has now,
+ * set inline, because the sizes live at the call sites. Kept for the tab
+ * (sessionStorage); Copy puts it on the clipboard to paste back.
+ * ─────────────────────────────────────────────────────────────── */
+
+/* The faces on the page: the kit's two, and today's three to compare. */
+const FACES: Record<string, string> = {
+  Display: '"neue-haas-grotesk-display", sans-serif',
+  Text: '"neue-haas-grotesk-text", sans-serif',
+  "Old Endless": 'display, "display Fallback", sans-serif',
+  "Old Mono": '"IBM Plex Mono", monospace',
+  "Old Inter": '"Inter Tight", sans-serif',
+};
+
+/* How a face is written in the bar: the kit's two are Neue Haas. */
+const label = (f: string) => (f === "Display" || f === "Text" ? `Neue Haas ${f}` : f);
+
+/* The kit's cuts, and the CSS weight each one is in each face. Endless is
+   one cut, Inter Tight only its 900: those draw the same at any weight. */
+const CUTS = ["Regular", "Medium", "Bold"];
+const WEIGHT: Record<string, number[]> = {
+  Display: [500, 600, 700],
+  Text: [400, 500, 700],
+  "Old Endless": [900, 900, 900],
+  "Old Mono": [400, 500, 700],
+  "Old Inter": [900, 900, 900],
+};
+
+type Level = "titles" | "names" | "text" | "role" | "where" | "labels" | "buttons";
+type Setting = { font: string; cut: string; size: number; spacing: number; gap?: number };
+type State = {
+  level: Level;
+  show: boolean;
+  open: boolean;
+  /** Where the bar was dragged to; null is its place at the foot. */
+  at: { x: number; y: number } | null;
+  set: Record<Level, Setting>;
+};
+
+/* Julian's settings from the bar, 2026-10-18 (second paste). */
+const DEFAULTS: Record<Level, Setting> = {
+  titles: { font: "Display", cut: "Bold", size: 1.1, spacing: -0.035, gap: 0.95 },
+  names: { font: "Display", cut: "Regular", size: 1.33, spacing: -0.035 },
+  text: { font: "Text", cut: "Regular", size: 1.25, spacing: -0.015, gap: 1.13 },
+  /* The two lines under the name on the cover; they were in Small labels
+     when these were set. */
+  role: { font: "Old Mono", cut: "Medium", size: 1.06, spacing: 0.04 },
+  where: { font: "Old Mono", cut: "Medium", size: 1.46, spacing: -0.015 },
+  labels: { font: "Old Mono", cut: "Medium", size: 1.06, spacing: 0.04 },
+  buttons: { font: "Old Mono", cut: "Regular", size: 1.13, spacing: 0.04 },
+};
+
+/* What each kind is called in the bar, its colour when shown, and the
+   `--v2-*` name `font-v2.css` reads. */
+const NAME: Record<Level | "other", string> = {
+  titles: "Big titles",
+  names: "List names",
+  text: "Paragraphs",
+  role: "Role line",
+  where: "Based in line",
+  labels: "Small labels",
+  buttons: "Buttons",
+  other: "Other",
+};
+const COLOUR: Record<Level | "other", string> = {
+  titles: "#ff4d4d",
+  names: "#2ad4ff",
+  text: "#ffd23f",
+  role: "#ff9f43",
+  where: "#b98cff",
+  labels: "#ff5cf0",
+  buttons: "#5cff8a",
+  other: "#8a8a8a",
+};
+const VAR: Record<Level, string> = {
+  titles: "title",
+  names: "row",
+  text: "body",
+  role: "role",
+  where: "where",
+  labels: "label",
+  buttons: "button",
+};
+
+/* The same levels `font-v2.css` styles, most specific first: an element
+   takes the first level it matches. */
+const LEVELS: [Level, string][] = [
+  ["buttons", ".action, .action-quiet, .cover-cta"],
+  ["role", ".cover-float-title"],
+  ["where", ".cover-float-where"],
+  ["labels", ".label, .font-mono"],
+  [
+    "titles",
+    ":is(h1, h2):is(.font-display, .title):not(.chapter-name, .enquiry-title):not(:is(.discipline-title, .project-plate) > *), .display, .title",
+  ],
+  ["names", "h1, h2, h3, h4, h5, h6, .font-display"],
+  ["text", "p"],
+];
+
+/* The bar lists them top down, biggest first. */
+const ORDER: Level[] = ["titles", "names", "text", "role", "where", "labels", "buttons"];
+
+const KEY = "jg-font-v2-bar";
+const SKIP = ".logo-grow, .v2-bar, .v2-tags";
+
+/** "Display Bold" from what the browser actually drew with. */
+function realFace(cs: CSSStyleDeclaration) {
+  const f = cs.fontFamily.toLowerCase();
+  const name = f.includes("neue-haas-grotesk-display")
+    ? "Display"
+    : f.includes("neue-haas-grotesk-text")
+      ? "Text"
+      : f.includes("plex")
+        ? "Old Mono"
+        : f.includes("inter tight")
+          ? "Old Inter"
+          : f.startsWith("display")
+            ? "Old Endless"
+            : f.split(",")[0].replace(/"/g, "");
+  const i = WEIGHT[name]?.indexOf(Number(cs.fontWeight)) ?? -1;
+  return i >= 0 && !name.startsWith("Old") ? `${label(name)} ${CUTS[i]}` : name;
+}
+
+const noop = () => () => {};
+
+export function TypeDials() {
+  // Set before the first paint by the head script in `app/layout.tsx`.
+  const on = React.useSyncExternalStore(
+    noop,
+    () => document.documentElement.dataset.font === "v2",
+    () => false,
+  );
+  if (!on) return null;
+  // The bar is for the dev server; a deployed preview gets the settings.
+  return process.env.NODE_ENV === "production" ? <TypeDefaults /> : <TypeBar />;
+}
+
+function TypeDefaults() {
+  useTypeApply(DEFAULTS, false, noop);
+  return null;
+}
+
+type Tag = { x: number; y: number; w: number; h: number; level: Level | "other"; text: string };
+
+function load(): State {
+  const base: State = { level: "titles", show: false, open: true, at: null, set: DEFAULTS };
+  try {
+    const saved = JSON.parse(sessionStorage.getItem(KEY) ?? "null");
+    if (saved) return { ...base, ...saved, set: { ...DEFAULTS, ...saved.set } };
+  } catch {}
+  return base;
+}
+
+/* Puts the settings on the page: faces, cuts, spacing and line gaps as
+   the `--v2-*` variables, sizes as a multiple of each element's own, and
+   (with `show`) the boxes naming every piece of text. */
+function useTypeApply(
+  set: Record<Level, Setting>,
+  show: boolean,
+  setTags: (t: Tag[]) => void,
+) {
+  React.useEffect(() => {
+    const root = document.documentElement.style;
+    for (const [level] of LEVELS) {
+      const v = set[level];
+      const name = VAR[level];
+      root.setProperty(`--v2-${name}-family`, FACES[v.font]);
+      root.setProperty(`--v2-${name}-weight`, String(WEIGHT[v.font][CUTS.indexOf(v.cut)]));
+      root.setProperty(`--v2-${name}-track`, `${v.spacing}em`);
+      if (v.gap !== undefined) root.setProperty(`--v2-${name}-lead`, String(v.gap));
+    }
+
+    // ponytail: sizes multiply the measured px, so a fluid clamp() freezes
+    // at this window's size until the next resize; fine for tuning.
+    // Each scaled element's own inline size, put back after: lines that fit
+    // themselves (`fit-lines.tsx`) carry one.
+    const scaled = new Map<HTMLElement, string>();
+    const restore = () => {
+      for (const [el, was] of scaled) el.style.fontSize = was;
+      scaled.clear();
+    };
+    const scale = (el: HTMLElement, k: number) => {
+      if (scaled.has(el)) return;
+      scaled.set(el, el.style.fontSize);
+      el.style.fontSize = `${parseFloat(getComputedStyle(el).fontSize) * k}px`;
+    };
+    const levelOf = new Map<Element, Level>();
+    const apply = () => {
+      restore();
+      levelOf.clear();
+      for (const [level, sel] of LEVELS) {
+        for (const el of document.querySelectorAll<HTMLElement>(sel)) {
+          if (levelOf.has(el) || el.closest(SKIP)) continue;
+          levelOf.set(el, level);
+          const k = set[level].size;
+          if (k === 1) continue;
+          // A line that fits itself (`fit-lines.tsx`) sets its own size, so
+          // that is the one to scale, not the box around it.
+          const fitted = el.querySelectorAll<HTMLElement>("[style*='font-size']");
+          if (fitted.length) fitted.forEach((c) => scale(c, k));
+          else scale(el, k);
+        }
+      }
+      draw();
+    };
+
+    /* Every visible piece of text: its kind (or "other", grey), the face
+       and cut it is really drawn in, its size. */
+    const draw = () => {
+      if (!show) return setTags([]);
+      const out: Tag[] = [];
+      const done = new Set<Element>();
+      const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+      for (let n = walker.nextNode(); n; n = walker.nextNode()) {
+        if (!n.textContent?.trim()) continue;
+        const parent = n.parentElement;
+        if (!parent || parent.closest(`${SKIP}, [class*=dialkit], script, style, .sr-only`)) continue;
+        let el: Element | null = parent;
+        while (el && !levelOf.has(el)) el = el.parentElement;
+        const box = el ?? parent;
+        if (done.has(box)) continue;
+        done.add(box);
+        const r = box.getBoundingClientRect();
+        if (r.width < 2 || r.bottom < 0 || r.top > innerHeight || r.right < 0 || r.left > innerWidth) continue;
+        if (!parent.checkVisibility({ opacityProperty: true, visibilityProperty: true })) continue;
+        // Only text that is on top where it sits, not a screen sunk under another.
+        const hit = document.elementFromPoint(
+          Math.min(Math.max(r.left + Math.min(r.width, 40) / 2, 0), innerWidth - 1),
+          Math.min(Math.max(r.top + r.height / 2, 0), innerHeight - 1),
+        );
+        if (hit && !box.contains(hit) && !hit.contains(box) && !hit.closest(".v2-bar")) continue;
+        const cs = getComputedStyle(parent);
+        out.push({
+          x: r.left,
+          y: r.top,
+          w: r.width,
+          h: r.height,
+          level: el ? levelOf.get(el)! : "other",
+          text: `${realFace(cs)} · ${Math.round(parseFloat(cs.fontSize))}`,
+        });
+      }
+      setTags(out);
+    };
+
+    apply();
+    let frame = 0;
+    const later = () => {
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(apply);
+    };
+    const redraw = () => {
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(draw);
+    };
+    // Not the bar's or the tags' own redraws, or they tag themselves forever.
+    const watch = new MutationObserver((list) => {
+      if (list.some((m) => !(m.target as Element).closest?.(".v2-tags, .v2-bar"))) later();
+    });
+    watch.observe(document.body, { childList: true, subtree: true });
+    addEventListener("resize", later);
+    addEventListener("scroll", redraw, true);
+    return () => {
+      watch.disconnect();
+      removeEventListener("resize", later);
+      removeEventListener("scroll", redraw, true);
+      cancelAnimationFrame(frame);
+      restore();
+    };
+  }, [set, show, setTags]);
+}
+
+function TypeBar() {
+  const [s, setS] = React.useState<State>(load);
+  const [tags, setTags] = React.useState<Tag[]>([]);
+  const [copied, setCopied] = React.useState(false);
+  const cur = s.set[s.level];
+  const change = (patch: Partial<Setting>) =>
+    setS((p) => ({ ...p, set: { ...p.set, [p.level]: { ...p.set[p.level], ...patch } } }));
+
+  React.useEffect(() => {
+    try {
+      sessionStorage.setItem(KEY, JSON.stringify(s));
+    } catch {}
+  }, [s]);
+
+  useTypeApply(s.set, s.show, setTags);
+
+  const copy = () => {
+    const lines = ORDER.map((l) => {
+      const v = s.set[l];
+      return `${NAME[l]}: ${label(v.font)} ${v.cut}, size ×${+v.size.toFixed(2)}, spacing ${+v.spacing.toFixed(3)}${v.gap !== undefined ? `, line gap ${+v.gap.toFixed(2)}` : ""}`;
+    });
+    void navigator.clipboard.writeText(`Font v2 settings:\n${lines.join("\n")}`);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 1500);
+  };
+
+  return createPortal(
+    <>
+      {s.show && (
+        <div className="v2-tags" aria-hidden>
+          {tags.map((g, i) => (
+            <div
+              key={i}
+              className="v2-tag"
+              style={{ left: g.x, top: g.y, width: g.w, height: g.h, color: COLOUR[g.level] }}
+            >
+              <span>
+                {NAME[g.level]} · {g.text}
+              </span>
+            </div>
+          ))}
+        </div>
+      )}
+      {s.open ? (
+        <div
+          className="v2-bar"
+          role="toolbar"
+          aria-label="Type"
+          style={s.at ? { left: s.at.x, top: s.at.y, bottom: "auto", translate: "none" } : undefined}
+        >
+          <div className="v2-row">
+            <span
+              className="v2-grip"
+              title="Drag to move, double-click to put back"
+              onDoubleClick={() => setS((p) => ({ ...p, at: null }))}
+              onPointerDown={(e) => {
+                const bar = e.currentTarget.closest<HTMLElement>(".v2-bar")!.getBoundingClientRect();
+                const dx = e.clientX - bar.left;
+                const dy = e.clientY - bar.top;
+                e.currentTarget.setPointerCapture(e.pointerId);
+                const move = (m: PointerEvent) =>
+                  setS((p) => ({
+                    ...p,
+                    at: {
+                      x: Math.min(Math.max(m.clientX - dx, 0), innerWidth - bar.width),
+                      y: Math.min(Math.max(m.clientY - dy, 0), innerHeight - bar.height),
+                    },
+                  }));
+                const up = () => {
+                  removeEventListener("pointermove", move);
+                  removeEventListener("pointerup", up);
+                };
+                addEventListener("pointermove", move);
+                addEventListener("pointerup", up);
+              }}
+            >
+              ⠿
+            </span>
+            {ORDER.map((l) => (
+              <button
+                key={l}
+                aria-pressed={s.level === l}
+                onClick={() => setS((p) => ({ ...p, level: l }))}
+                style={{ "--dot": COLOUR[l] } as React.CSSProperties}
+              >
+                {NAME[l]}
+              </button>
+            ))}
+            <span className="v2-gap" />
+            <button aria-pressed={s.show} onClick={() => setS((p) => ({ ...p, show: !p.show }))}>
+              Show fonts
+            </button>
+            <button onClick={copy}>{copied ? "Copied" : "Copy"}</button>
+            <button onClick={() => setS((p) => ({ ...p, set: { ...p.set, [p.level]: DEFAULTS[p.level] } }))}>
+              Reset
+            </button>
+            <button aria-label="Hide" onClick={() => setS((p) => ({ ...p, open: false }))}>
+              ×
+            </button>
+          </div>
+          <div className="v2-row">
+            {Object.keys(FACES).map((f) => (
+              <button key={f} aria-pressed={cur.font === f} onClick={() => change({ font: f })}>
+                {label(f)}
+              </button>
+            ))}
+            <span className="v2-sep" />
+            {CUTS.map((c) => (
+              <button key={c} aria-pressed={cur.cut === c} onClick={() => change({ cut: c })}>
+                {c}
+              </button>
+            ))}
+            <span className="v2-sep" />
+            <Scrub label="Size" value={cur.size} step={0.01} min={0.5} max={2} onChange={(size) => change({ size })} />
+            <Scrub
+              label="Spacing"
+              value={cur.spacing}
+              step={0.005}
+              min={-0.1}
+              max={0.2}
+              onChange={(spacing) => change({ spacing })}
+            />
+            {cur.gap !== undefined && (
+              <Scrub label="Line gap" value={cur.gap} step={0.01} min={0.8} max={2} onChange={(gap) => change({ gap })} />
+            )}
+          </div>
+        </div>
+      ) : (
+        <button className="v2-bar v2-open" onClick={() => setS((p) => ({ ...p, open: true }))}>
+          Aa
+        </button>
+      )}
+    </>,
+    document.body,
+  );
+}
+
+/** A number you drag sideways (or nudge with the arrows) to change. */
+function Scrub(props: {
+  label: string;
+  value: number;
+  step: number;
+  min: number;
+  max: number;
+  onChange: (v: number) => void;
+}) {
+  const { label, value, step, min, max, onChange } = props;
+  const set = (v: number) => onChange(Math.round(Math.min(max, Math.max(min, v)) / step) * step);
+  const digits = step < 0.01 ? 3 : 2;
+  return (
+    <span
+      className="v2-scrub"
+      role="slider"
+      tabIndex={0}
+      aria-label={label}
+      aria-valuenow={value}
+      aria-valuemin={min}
+      aria-valuemax={max}
+      onKeyDown={(e) => {
+        if (e.key === "ArrowRight" || e.key === "ArrowUp") set(value + step);
+        if (e.key === "ArrowLeft" || e.key === "ArrowDown") set(value - step);
+      }}
+      onPointerDown={(e) => {
+        const x0 = e.clientX;
+        const v0 = value;
+        e.currentTarget.setPointerCapture(e.pointerId);
+        const move = (m: PointerEvent) => set(v0 + Math.round((m.clientX - x0) / 4) * step);
+        const up = () => {
+          removeEventListener("pointermove", move);
+          removeEventListener("pointerup", up);
+        };
+        addEventListener("pointermove", move);
+        addEventListener("pointerup", up);
+      }}
+    >
+      {label} <b>{value.toFixed(digits)}</b>
+    </span>
+  );
+}

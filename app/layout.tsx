@@ -19,6 +19,7 @@ import { CardTilt } from "@/components/card-tilt";
 import { FocusField } from "@/components/focus-field";
 import { ldJson, siteGraph } from "@/lib/seo";
 import { DebugGate } from "@/components/debug-gate";
+import { TypeDials } from "@/components/type-dials";
 import { VisitTrail } from "@/components/visit-trail";
 import { ClickBeacon } from "@/components/click-beacon";
 
@@ -164,6 +165,15 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             __html: `(function(){try{var q=location.search,f="deck-flyout";if(/[?&]flyout=1/.test(q))sessionStorage.setItem(f,"1");if(/[?&]flyout=0/.test(q))sessionStorage.removeItem(f);if(sessionStorage.getItem(f)==="1")document.documentElement.dataset.flyout="";var k="door-stack";if(/[?&]stack=0/.test(q))sessionStorage.setItem(k,"0");if(/[?&]stack=1/.test(q))sessionStorage.removeItem(k);if(sessionStorage.getItem(k)!=="0")document.documentElement.dataset.stack=""}catch(e){}var t=null;try{localStorage.removeItem("theme");t=sessionStorage.getItem("theme")}catch(e){}var l=t==="light"||(t!=="dark"&&matchMedia("(prefers-color-scheme: light)").matches);if(l)document.documentElement.dataset.theme="light";var m=document.querySelectorAll('meta[name="theme-color"]');for(var i=0;i<m.length;i++)m[i].setAttribute("content",l?"#ebedef":"#0b0a09")})()`,
           }}
         />
+        {/* Font v2 preview (`app/styles/font-v2.css`): `?font=v2` turns it
+            on for the tab, `?font=0` off. Before the first paint, so the
+            page never shows the live faces first. The Adobe Fonts kit
+            loads only then; a visitor without the flag fetches nothing. */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var q=location.search,k="jg-font";if(/[?&]font=v2/.test(q))sessionStorage.setItem(k,"v2");if(/[?&]font=0/.test(q))sessionStorage.removeItem(k);if(sessionStorage.getItem(k)!=="v2")return;document.documentElement.dataset.font="v2";var l=document.createElement("link");l.rel="stylesheet";l.href="https://use.typekit.net/wxg8xur.css";document.head.appendChild(l)}catch(e){}})()`,
+          }}
+        />
         {/* Whether this visit gets the opening, decided before the first
             paint because it cannot be decided after one: a frame of the
             site showing and then a curtain dropping over it is worse than
@@ -247,6 +257,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         {/* fps, finger dots and a frame log, only with `?debug`. The
             overlay itself loads only then: `debug-gate.tsx`. */}
         <DebugGate />
+        <TypeDials />
         {/* Clicks and scroll depth for /admin's SEO tab, one beacon per
             page view, no cookie. See `click-beacon.tsx`. Renders nothing. */}
         <ClickBeacon />
