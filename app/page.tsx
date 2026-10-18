@@ -96,9 +96,16 @@ const COVER_PICKS = [
 /* Frames past a project's cover that its discipline shows as well:
    Wrapped Up's heels and lipstick, and a second Crave. */
 const MORE = ["/work/wrapped-up/04.jpg", "/work/crave/03.jpg"];
-// The eight campaigns he wants up front, in his order (2026-10-17).
-const CAMPAIGN_PICKS = ["sago", "jubo", "wired-magazine", "goodcult", "ukiyosunknown", "the-den-talkshow", "oakley-x-nike", "paradox"];
-const EDITORIAL_PICKS = ["ghostlight", "threshold", "lithe", "aegis", "vigil", "paranoia", "void", "azure-bloom", "i-wanna-be-a-human"];
+/* Tables Julian laid out frame by frame on the arrange page
+   (2026-10-17), in his order. */
+const FRAME_PICKS: Record<string, string[]> = {
+  campaigns: ["/work/ukiyosunknown/cover.jpg", "/work/paradox/cover.jpg", "/work/sago/cover.jpg", "/work/wired-magazine/05.jpg", "/work/jubo/03.jpg", "/work/goodcult/cover.jpg", "/work/hua/16.jpg", "/work/the-den-talkshow/cover.jpg"],
+  "artist-presskit": ["/work/valgur/02.jpg", "/work/iris/01.jpg", "/work/l3na/16.jpg", "/work/cyber1a/cover.jpg", "/work/sara/09.jpg", "/work/sage/11.jpg"],
+  editorial: ["/work/threshold/cover.jpg", "/work/i-wanna-be-a-human/cover.jpg", "/work/azure-bloom/cover.jpg", "/work/astral-allure/04.jpg", "/work/vigil/05.jpg", "/work/aegis/03.jpg"],
+  portraits: ["/work/opal/cover.jpg", "/work/aether/11.jpg", "/work/solitude/cover.jpg", "/work/sonder/cover.jpg", "/work/serif/04.jpg", "/work/aether/02.jpg"],
+  "mixed-media": ["/work/wrapped-up/02.jpg", "/work/aera-wraith/02.jpg", "/work/crave/cover.jpg", "/hero/metamorphosis-12.jpg", "/work/wrapped-up/04.jpg", "/work/aera-wraith/cover.jpg", "/work/crave/03.jpg", "/work/metamorphosis/05.jpg"],
+  events: ["/work/events/cover.jpg", "/work/events/09.jpg", "/work/events/03.jpg", "/work/events/04.jpg", "/work/events/11.jpg", "/work/events/17.jpg", "/work/events/08.jpg", "/work/events/14.jpg", "/work/events/12.jpg", "/work/events/16.jpg", "/work/events/20.jpg", "/work/events/07.jpg"],
+};
 
 const same = (src: string) => (SOURCES as Record<string, string>)[src] ?? src;
 
@@ -152,10 +159,17 @@ function shotsOf(t: (typeof DISCIPLINE_TILES)[number]): Shot[] {
   };
   /* Editorial is his own pick of covers, in his order, cut to one
      4:5 so the rows are even. */
-  if (t.category === "editorial" || t.category === "campaigns") {
-    for (const slug of t.category === "editorial" ? EDITORIAL_PICKS : CAMPAIGN_PICKS) {
-      const p = projects.find((q) => q.slug === slug);
-      if (p) shots.push({ src: p.cover.src, color: p.cover.color, width: 4, height: 5, title: p.name, href: `/portfolio#${p.slug}` });
+  const frames = FRAME_PICKS[t.category];
+  if (frames) {
+    for (const src of frames) {
+      const p = projects.find((q) => q.cover.src === src || q.images.some((f) => f.src === src));
+      const f = p && (p.cover.src === src ? p.cover : p.images.find((g) => g.src === src));
+      if (!p || !f) continue;
+      // Campaigns and editorial stay one 4:5, as before; the rest keep their shape.
+      const cut = t.category === "campaigns" || t.category === "editorial" || (f.width / f.height > 0.7 && f.width / f.height < 0.85);
+      // Event coverage numbered and opening on its frame, as before.
+      const ev = t.category === "events";
+      shots.push({ src: f.src, color: f.color, width: cut ? 4 : f.width, height: cut ? 5 : f.height, title: ev ? String(shots.length + 1).padStart(2, "0") : p.name, href: ev ? `/portfolio#${frameHash(f.src)}` : `/portfolio#${p.slug}` });
     }
     return shots;
   }
