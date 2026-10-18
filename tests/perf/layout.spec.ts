@@ -99,7 +99,8 @@ for (const path of PAGES) {
           await page.waitForTimeout(1800);
 
           /* Polled, so a page still settling under a loaded machine gets a
-             few more seconds. What is still wrong after that is a fault. */
+             few more seconds (15: Firefox in an overlapped CI run took past 5).
+             What is still wrong after that is a fault. */
           await expect
             .poll(
               () =>
@@ -115,10 +116,10 @@ for (const path of PAGES) {
                   if (!clips && body > innerWidth + 1) out.push(`the body is ${body} wide on ${innerWidth}`);
                   return out;
                 }),
-              { message: "no sideways overflow", timeout: 5000 },
+              { message: "no sideways overflow", timeout: 15_000 },
             )
             .toEqual([]);
-          await expect.poll(() => page.evaluate(cutOff), { message: "nothing cut off by the screen's edge", timeout: 5000 }).toEqual([]);
+          await expect.poll(() => page.evaluate(cutOff), { message: "nothing cut off by the screen's edge", timeout: 15_000 }).toEqual([]);
         } finally {
           await ctx.close();
         }
