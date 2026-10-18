@@ -402,3 +402,11 @@
 .dialkit-folder-root[data-open="false"] .dial-copy-all {
   display: none;
 }
+
+/* Julian: the line under each card on a phone, in two even lines. The
+   label's wide tracking left one word alone on a third line in a half
+   column ("BRANDS"); a little tighter, and balanced. */
+.services-cap {
+  letter-spacing: 0.06em;
+  text-wrap: balance;
+}
