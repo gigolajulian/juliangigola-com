@@ -150,7 +150,7 @@ export function BookPicker({ sessions, start }: { sessions: Bookable[]; start?: 
           ))}
         </ul>
         <p className="label text-muted-foreground">
-          A wedding, or something else?{" "}
+          Something else?{" "}
           <Link prefetch={false} href="/#contact" className="text-foreground underline decoration-border underline-offset-4 hoverable:hover:decoration-current">
             Inquire
           </Link>
