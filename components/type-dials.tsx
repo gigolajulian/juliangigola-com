@@ -112,7 +112,11 @@ const LEVELS: [Level, string][] = [
 const ORDER: Level[] = ["titles", "names", "text", "role", "where", "labels", "buttons"];
 
 const KEY = "jg-font-v2-bar";
+/* Not the liquid buttons: their fill re-measures every frame until the
+   button holds still, and a size written here kept it from ever settling
+   (QA, #239). The cover's are sized in `font-v2.css` through `--cta-k`. */
 const SKIP = ".logo-grow, .v2-bar, .v2-tags";
+const LIQUID = ".liquid-pair, .cover-float-ctas";
 
 /** "Display Bold" from what the browser actually drew with. */
 function realFace(cs: CSSStyleDeclaration) {
@@ -178,6 +182,7 @@ function useTypeApply(
       root.setProperty(`--v2-${name}-family`, FACES[v.font]);
       root.setProperty(`--v2-${name}-weight`, String(WEIGHT[v.font][CUTS.indexOf(v.cut)]));
       root.setProperty(`--v2-${name}-track`, `${v.spacing}em`);
+      root.setProperty(`--v2-${name}-size`, String(v.size));
       if (v.gap !== undefined) root.setProperty(`--v2-${name}-lead`, String(v.gap));
     }
 
@@ -212,10 +217,21 @@ function useTypeApply(
         const room = innerWidth - 16 - Math.max(r.left, 16);
         if (r.width > room && r.left < innerWidth && r.right > 0) f = Math.min(f, room / r.width);
         if (f < 1) el.style.fontSize = `${Math.max(base.get(el)!, px * f)}px`;
+        /* Julian: the Biography text scrolled in its box. Text in a box of
+           its own height (a scroll box) comes down until it fits, below its old size too
+           (12px floor). Area goes with the square of the size, so the root
+           of the overflow, a few times over for the rewrap. */
+        const scrolls = /auto|scroll/.test(getComputedStyle(el).overflowY);
+        for (let i = 0; scrolls && i < 4 && el.clientHeight > 0 && el.scrollHeight > el.clientHeight + 1; i++) {
+          const now = parseFloat(el.style.fontSize);
+          if (now <= 12) break;
+          el.style.fontSize = `${Math.max(12, now * Math.sqrt(el.clientHeight / el.scrollHeight) * 0.99)}px`;
+        }
       }
     };
     const levelOf = new Map<Element, Level>();
     let watch: MutationObserver | null = null;
+    let fitWatch: MutationObserver | null = null;
     const apply = () => {
       restore();
       levelOf.clear();
@@ -224,7 +240,7 @@ function useTypeApply(
           if (levelOf.has(el) || el.closest(SKIP)) continue;
           levelOf.set(el, level);
           const k = set[level].size;
-          if (k === 1) continue;
+          if (k === 1 || el.closest(LIQUID)) continue;
           // A line that fits itself (`fit-lines.tsx`) sets its own size, so
           // that is the one to scale, not the box around it.
           const fitted = el.querySelectorAll<HTMLElement>("[style*='font-size']");
@@ -235,6 +251,8 @@ function useTypeApply(
       fit();
       // Our own size changes are not news.
       watch?.takeRecords();
+      fitWatch?.disconnect();
+      document.querySelectorAll(".fit-line").forEach((l) => fitWatch?.observe(l, { attributes: true, attributeFilter: ["style"] }));
       draw();
     };
 
@@ -297,35 +315,36 @@ function useTypeApply(
     if (document.readyState === "complete") start();
     else addEventListener("load", start, { once: true });
     let frame = 0;
+    /* QA (#239): once per quiet spell, not per frame. Re-sizing every level
+       on each motion frame forced a layout a frame and brought back the
+       hover lag #233 fixed. */
+    let quiet = 0;
     const later = () => {
       if (!ready) return;
-      cancelAnimationFrame(frame);
-      frame = requestAnimationFrame(apply);
+      clearTimeout(quiet);
+      quiet = window.setTimeout(apply, 300);
     };
     const redraw = () => {
       if (!ready) return;
       cancelAnimationFrame(frame);
       frame = requestAnimationFrame(draw);
     };
-    /* Not the bar's or the tags' own redraws, or they tag themselves
-       forever. A line that fits itself (`fit-lines.tsx`) re-fits after we
-       size it, so its style changing is news too. */
+    /* New text only, not the bar's or the tags' own redraws, or they tag
+       themselves forever. No style watching on the whole page: motion
+       writes styles every frame. A line that fits itself (`fit-lines.tsx`)
+       re-fits after we size it, so those few lines are watched alone. */
     watch = new MutationObserver((list) => {
-      if (
-        list.some((m) =>
-          m.type === "attributes"
-            ? (m.target as Element).classList.contains("fit-line")
-            : !(m.target as Element).closest?.(".v2-tags, .v2-bar"),
-        )
-      )
-        later();
+      if (list.some((m) => !(m.target as Element).closest?.(".v2-tags, .v2-bar"))) later();
     });
-    watch.observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ["style"] });
+    watch.observe(document.body, { childList: true, subtree: true });
+    fitWatch = new MutationObserver(later);
     void document.fonts.ready.then(later);
     addEventListener("resize", later);
-    addEventListener("scroll", redraw, true);
+    if (show) addEventListener("scroll", redraw, true);
     return () => {
       watch?.disconnect();
+      fitWatch?.disconnect();
+      clearTimeout(quiet);
       stop();
       removeEventListener("load", start);
       removeEventListener("resize", later);
