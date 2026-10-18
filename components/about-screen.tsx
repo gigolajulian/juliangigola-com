@@ -84,10 +84,10 @@ export function AboutScreen() {
           {/* Set left, as the mockup has it: justified mono opens up. */}
           {/* Julian: on a phone, smaller and more inviting, in sentence
               case; the capitals stay from `sm` up. */}
-          {/* Where the window is too short for it all, these
-              words scroll inside themselves, not the column, so the
-              facts and the buttons under them stay on the screen. */}
-          <p data-scroll className="title-rest mt-6 text-left sm:min-h-0 sm:overflow-y-auto sm:overscroll-contain text-[0.9375rem] normal-case leading-[1.7] text-foreground/80 sm:mt-[clamp(0.75rem,2.5cqh,2rem)] sm:text-[clamp(0.8125rem,1.8vh,1.0625rem)] sm:leading-[clamp(1.25rem,3.1cqh,1.8rem)] sm:text-muted-foreground">
+          {/* Julian: the words in full, never a scroll of their own
+              (its bar clipped the last line). A window too short for
+              it all scrolls the screen instead. */}
+          <p className="about-bio title-rest mt-6 text-left text-[0.9375rem] normal-case leading-[1.7] text-foreground/80 sm:mt-[clamp(0.75rem,2.5cqh,2rem)] sm:text-[clamp(0.8125rem,1.8vh,1.0625rem)] sm:leading-[clamp(1.25rem,3.1cqh,1.8rem)] sm:text-muted-foreground">
             Photographer and creative director based in the San Francisco
             Bay Area with 12+ years of experience. As an Assyrian American, I grew up between cultures,
             and that sense of being slightly outside the frame shapes how I

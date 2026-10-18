@@ -151,8 +151,8 @@
   }
   [data-hash="about"] > [data-scroll] > div {
     align-self: center;
-    /* Never taller than the screen, so the words scroll inside themselves
-       rather than the column centring up under the bar. */
+    /* Never taller than the screen, so the column does not centre up
+       under the bar. */
     max-height: 100%;
   }
   [data-hash="about"] > [data-scroll] > figure {
