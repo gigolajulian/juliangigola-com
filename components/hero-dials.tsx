@@ -973,6 +973,8 @@ export function CoverCard({ children }: { children: React.ReactNode }) {
         g.toggleAttribute("data-photo-hover", on);
     };
     const on = (e: PointerEvent) => {
+      // Not while the page settles (`hover-settle.tsx`).
+      if (!document.documentElement.hasAttribute("data-hover")) return;
       glass(true);
       if (e.pointerType !== "mouse") return;
       /* The way from this card to the cover's centre, for the stylesheet
