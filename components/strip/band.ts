@@ -153,10 +153,14 @@ export function createBand(m: Mover): Band {
           return;
         }
       }
-      release();
-      // The count drains on its own clock, unseen.
+      /* The band eases back as the count drains, drawn where the count
+         has got to, and is let go (nothing left to spring) only once it
+         is spent. Let go at every pause, the `[data-release]` spring took
+         most of it back in one frame on WebKit and overshot (QA, #257). */
       m.over *= Math.exp(-16 / RELAX);
       if (Math.abs(m.over) < 1) m.over = 0;
+      if (m.over) paint();
+      else release();
     }
     m.band = m.over ? requestAnimationFrame(relax) : 0;
   };
