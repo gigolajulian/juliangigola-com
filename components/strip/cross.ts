@@ -44,6 +44,8 @@ export function createCross(m: Mover): Cross {
   let dim: HTMLElement | null = null;
   let page: HTMLElement | null = null;
   let tl: gsap.core.Timeline | null = null;
+  /** The title's words and their text, split into letters for the fold. */
+  let words: [HTMLElement, string][] = [];
   const W = () => window.innerWidth;
 
   const paint = () => {
@@ -114,13 +116,37 @@ export function createCross(m: Mover): Cross {
     }
     card.append(row);
     document.body.append(dim, card);
-    /* The title and credits settle in as the card comes, scrubbed by
-       it, so they move with the fingers and back, and are at rest by the
-       time it lands: nothing plays again on the page (Julian, 2026-10-19). */
+    /* The title folds in letter by letter, right to left, each one
+       swinging open on its left edge; the credits build up after it: the
+       rule drawn, then the lines rising one by one. Scrubbed by the card,
+       so it moves with the fingers and back, and is at rest by the time
+       it lands: nothing plays again on the page (Julian, 2026-10-19). */
+    words = [...card.querySelectorAll<HTMLElement>(".title-word")].map((w) => [w, w.textContent ?? ""]);
+    const chars = words.flatMap(([w, t]) => {
+      w.textContent = "";
+      return [...t].map((ch) => {
+        const s = document.createElement("span");
+        s.textContent = ch;
+        s.style.display = "inline-block";
+        w.append(s);
+        return s;
+      });
+    });
+    const dl = card.querySelector<HTMLElement>("dl");
     tl = gsap
-      .timeline({ paused: true, defaults: { ease: "power2.out" } })
-      .from(card.querySelectorAll(".title-word"), { x: 56 * dir, opacity: 0.25, duration: 0.7, stagger: 0.12 }, 0)
-      .from(card.querySelectorAll("dl"), { y: 12, opacity: 0, duration: 0.45 }, 0.45);
+      .timeline({ paused: true })
+      .from(chars, {
+        rotationY: -100 * dir,
+        transformPerspective: 600,
+        x: 40 * dir,
+        opacity: 0,
+        transformOrigin: dir > 0 ? "0% 50%" : "100% 50%",
+        duration: 0.45,
+        ease: "power3.out",
+        stagger: { each: 0.04, from: dir > 0 ? "end" : "start" },
+      }, 0)
+      .from(dl, { clipPath: "inset(0 100% 0 0)", duration: 0.35, ease: "power2.inOut" }, 0.5)
+      .from(dl ? dl.querySelectorAll("dt, dd") : [], { y: 18, opacity: 0, duration: 0.3, ease: "power3.out", stagger: 0.06 }, 0.62);
     m.el.dataset.crossing = "";
     return true;
   };
@@ -130,6 +156,7 @@ export function createCross(m: Mover): Cross {
     window.clearTimeout(quiet);
     tl?.kill();
     tl = null;
+    words = [];
     card?.remove();
     dim?.remove();
     delete m.el.dataset.crossing;
@@ -184,6 +211,9 @@ export function createCross(m: Mover): Cross {
          page while the trip runs (`portfolio.css`). */
       document.documentElement.dataset.nav = "cross";
       c?.style.setProperty("view-transition-name", "cross-card");
+      // Whole words again before the swap, kerned as the page's are.
+      for (const [w, t] of words) w.textContent = t;
+      words = [];
       m.go(href);
       /* Off only once the page under it is the picture on it: its title
          at the card's size (the type pass sets it some 300ms after the
