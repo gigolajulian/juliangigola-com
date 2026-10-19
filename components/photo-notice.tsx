@@ -121,8 +121,8 @@ export function PhotoNotice() {
       .set(el, { autoAlpha: 1, y: 0 })
       .fromTo(
         el,
-        { clipPath: "inset(0 100% 100% 0)" },
-        { clipPath: "inset(0 0% 0% 0)", duration: 0.42, ease: "expo.out" },
+        { clipPath: "inset(0 100% 100% 0 round 4px)" },
+        { clipPath: "inset(0 0% 0% 0 round 4px)", duration: 0.42, ease: "expo.out" },
       )
       .from(
         lines,
@@ -178,7 +178,7 @@ export function PhotoNotice() {
       // must not be seen travelling there from wherever the last one was.
       // A dark plate with a hairline, square, the site's own mono for the
       // small lines and its display face for the name.
-      className="pointer-events-none fixed z-50 w-[17rem] border border-foreground/25 bg-background/95 px-4 py-3.5 text-foreground"
+      className="pointer-events-none fixed z-50 w-[17rem] rounded-[4px] border border-foreground/25 bg-background/95 px-4 py-3.5 text-foreground"
     >
       {/* Said once per raise; the lines below stay through the fade out. */}
       {shown ? (
@@ -189,7 +189,7 @@ export function PhotoNotice() {
       ) : null}
       <span aria-hidden className="block overflow-hidden">
         <span data-line className="label block text-muted-foreground">
-          &copy; {year}
+          &copy; Copyright {year}
         </span>
       </span>
       <span aria-hidden className="mt-2 block overflow-hidden">
