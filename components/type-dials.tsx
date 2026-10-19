@@ -287,7 +287,16 @@ function useTypeApply(
     let fitWatch: MutationObserver | null = null;
     /* The text inside `roots` (and the roots), each kind at its size.
        Returns what it sized. */
+    /* Julian: text looked bad on smaller laptops, and shorter still with
+       the tab bar open. The sizes were tuned on his 1547x889 window and
+       grew everything by the same amount everywhere. From the laptop up
+       the enlargement now goes with the window: all of it from 1536 by
+       860, none at 1180 wide or 600 tall, in between in proportion. A
+       phone and a tablet upright keep theirs. */
+    const ramp = (v: number, lo: number, hi: number) => Math.min(1, Math.max(0, (v - lo) / (hi - lo)));
+    let room = 1;
     const scan = (roots: Element[]) => {
+      room = innerWidth < 1024 ? 1 : Math.min(ramp(innerWidth, 1180, 1536), ramp(innerHeight, 600, 860));
       const fresh: HTMLElement[] = [];
       const todo: [HTMLElement, number][] = [];
       for (const [level, sel] of LEVELS) {
@@ -297,8 +306,9 @@ function useTypeApply(
           for (const el of found) {
             if (levelOf.has(el) || el.closest(SKIP)) continue;
             levelOf.set(el, level);
-            const k = set[level].size;
-            if (k === 1 || el.closest(LIQUID)) continue;
+            const k = 1 + (set[level].size - 1) * room;
+            // At 1 on a small window it is still sized, so `fit` can bring it down.
+            if (set[level].size === 1 || el.closest(LIQUID)) continue;
             // A line that fits itself (`fit-lines.tsx`) sets its own size, so
             // that is the one to scale, not the box around it.
             const fitted = el.querySelectorAll<HTMLElement>("[style*='font-size']");
