@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { opening } from "@/lib/opening";
 import { ProjectStrip, type NextUp } from "@/components/project-strip";
+import { endLine } from "@/lib/end-lines";
 import { StripPage, StripHead } from "@/components/strip-page";
 import { CoverArtGallery } from "@/components/cover-art-gallery";
 import { CallToAction } from "@/components/call-to-action";
@@ -257,6 +258,7 @@ export default async function ProjectPage(props: PageProps<"/portfolio/[slug]">)
         project={project}
         next={nextUp}
         prev={prevUp}
+        line={endLine(project)}
         className="mt-6 flex-1"
       />
     </StripPage>

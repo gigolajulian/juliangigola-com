@@ -1125,7 +1125,7 @@ export const nextDiscipline = (
  * seventy-three carry exactly one category, so this is a tie-break rather
  * than a policy.
  */
-const disciplineOf = (p: Project): string | undefined =>
+export const disciplineOf = (p: Project): string | undefined =>
   (
     p.categories.find((c) =>
       WORK_CATEGORY_LINKS.some((l) => l.slug === c.slug),

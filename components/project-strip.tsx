@@ -12,6 +12,8 @@ import { Strip, useWideNow, type Lead } from "@/components/strip";
 import { gatherWhenSeen, slides } from "@/lib/gather";
 import { PendingLabel } from "@/components/pending-label";
 import type { Project, TextBlock, Frame } from "@/lib/work-types";
+import type { EndLine } from "@/lib/end-lines";
+import { wantsCross } from "@/components/strip/shared";
 
 /* ── the sequence, across the screen ──────────────────────────────
  * A project is one screen and the frames run across it, all at the same
@@ -74,9 +76,12 @@ export function ProjectStrip({
   prev,
   map,
   gallery = false,
+  line,
   className,
 }: {
   project: Project;
+  /** The end card's headline and ask (`lib/end-lines.ts`), under `?cross=1`. */
+  line?: EndLine;
   /** A discipline shown as one set of photographs (`discipline/[slug]`). */
   gallery?: boolean;
   /** The archive's chapters, where this sequence is one of them: a
@@ -325,6 +330,7 @@ export function ProjectStrip({
             name={project.name}
             next={next}
             label={gallery ? "Up next" : "Next project"}
+            line={line}
           />
         ) : cell.kind === "text" ? (
           <div
@@ -454,6 +460,7 @@ export function ProjectStrip({
       project.cover.blur,
       project.slug,
       next,
+      line,
       wideNow,
     ],
   );
@@ -509,15 +516,22 @@ export function NextCell({ next, label }: { next: NextUp; label: string }) {
 /** A project's last cell: Inquire, carrying the project into the form
     (`ref`, read by `contact-form.tsx`), and the next project under a
     hairline. `next-cell` so the deck still pins it to the right edge. */
+const noop = () => () => {};
+
 function EndCell({
   name,
   next,
   label,
+  line,
 }: {
   name: string;
   next?: NextUp;
   label: string;
+  line?: EndLine;
 }) {
+  /* Read after hydration, so the HTML is the live card either way. */
+  const cross = React.useSyncExternalStore(noop, wantsCross, () => false);
+  if (cross && line) return <CrossEnd name={name} next={next} label={label} line={line} />;
   return (
     <div
       data-hash="next"
@@ -548,6 +562,69 @@ function EndCell({
           href={next.href}
           data-ring="Next"
           className="group flex flex-col gap-2 border-t border-border pt-6"
+        >
+          <span className="label text-muted-foreground">{label}</span>
+          <span className="font-display text-xl uppercase leading-none tracking-[0] transition-opacity duration-200 hoverable:group-hover:opacity-70 sm:text-2xl">
+            {next.name}
+          </span>
+          {next.client ? (
+            <span className="label text-muted-foreground">{next.client}</span>
+          ) : null}
+        </Link>
+      ) : null}
+    </div>
+  );
+}
+
+/** Preview (`?cross=1`): the end card Julian locked from the mock on
+    2026-10-18. The headline is the discipline's own, the lead in regular
+    and the punch in capitals a size down and tighter, so the two read as
+    one line broken; the next project sits right-aligned in the bottom
+    corner, no rule over it. */
+function CrossEnd({
+  name,
+  next,
+  label,
+  line,
+}: {
+  name: string;
+  next?: NextUp;
+  label: string;
+  line: EndLine;
+}) {
+  return (
+    <div
+      data-hash="next"
+      className="next-cell flex w-[min(26rem,100%)] shrink-0 flex-col gap-8 pl-0 max-sm:py-14 sm:h-full sm:w-auto sm:pl-24 sm:pr-10"
+    >
+      <div className="flex flex-col items-start gap-4 sm:my-auto">
+        <span className="label text-muted-foreground">Commission</span>
+        {/* A div, not a p: under font v2 every p takes body leading. */}
+        <div className="font-display text-2xl leading-[0.9] tracking-[0] sm:text-4xl">
+          <span className="block whitespace-nowrap font-normal normal-case">{line.lead}</span>
+          <span className="mt-[0.06em] block whitespace-nowrap text-[0.9em] font-medium uppercase tracking-[-0.045em] [word-spacing:0.04em]">
+            {line.punch}
+          </span>
+        </div>
+        <p className="text-sm normal-case leading-relaxed text-muted-foreground max-sm:text-[min(0.8125rem,3.4vw)]">
+          <span className="block whitespace-nowrap">Send me the brief and the date.</span>
+          <span className="block whitespace-nowrap">
+            I&apos;ll come back with an approach, a crew and a quote.
+          </span>
+        </p>
+        <Link
+          prefetch={false}
+          href={line.book ? "/#sessions" : `/?ref=${encodeURIComponent(name)}#contact`}
+          className="label action mt-2 self-end px-6 py-4 press active:scale-[0.97]"
+        >
+          <PendingLabel state="composing">{line.book ? "Book a session" : "Inquire"}</PendingLabel>
+        </Link>
+      </div>
+      {next ? (
+        <Link
+          href={next.href}
+          data-ring="Next"
+          className="group flex flex-col items-end gap-2 self-end text-right sm:pb-2"
         >
           <span className="label text-muted-foreground">{label}</span>
           <span className="font-display text-xl uppercase leading-none tracking-[0] transition-opacity duration-200 hoverable:group-hover:opacity-70 sm:text-2xl">

@@ -236,3 +236,18 @@ export const cellFor = (el: HTMLElement, hash: string): number => {
     (c) => c.querySelector(`[data-frame$="${file}"]`) !== null,
   );
 };
+
+/** Preview (`?cross=1`): the reworked end of a project, its headline per
+    discipline, the next project under the fingers and the ask opening in
+    place. `?cross=0` turns it off. Held for the tab, so a page led on to
+    keeps it. */
+export function wantsCross() {
+  try {
+    const asked = new URLSearchParams(window.location.search).get("cross");
+    if (asked === "1") window.sessionStorage.setItem("jg-cross", "1");
+    if (asked === "0") window.sessionStorage.removeItem("jg-cross");
+    return window.sessionStorage.getItem("jg-cross") === "1";
+  } catch {
+    return false;
+  }
+}
