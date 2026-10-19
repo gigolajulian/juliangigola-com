@@ -22,6 +22,9 @@ const FLICK = 0.5;
 /** The quiet that ends a wheel push. Long enough that a stalled frame
     in a momentum stream is not taken for a lift (QA, 2026-10-19). */
 const QUIET = 120;
+/** How long a wheel's card holds where it was left before it goes back:
+    swipes a beat apart add up, as one push (QA, MAC, 2026-10-19). */
+const HOLD_BACK = 450;
 
 export type Cross = {
   /** Whether a card is out. */
@@ -259,8 +262,14 @@ export function createCross(m: Mover): Cross {
        zeroed, the card stopped dead for the quiet and then lurched
        (trace, 2026-10-19). */
     if (m.touchX !== null && performance.now() - at > 90) v = 0;
-    if (x > W() * 0.5 || v > FLICK) finish();
-    else spring(0, teardown);
+    if (x > W() * 0.5 || v > FLICK) return finish();
+    const left = HOLD_BACK - (performance.now() - at);
+    if (m.touchX === null && left > 0) {
+      quiet = window.setTimeout(lift, left);
+      return;
+    }
+    v = 0;
+    spring(0, teardown);
   };
 
   const push = (by: number) => {

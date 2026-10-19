@@ -63,6 +63,8 @@ export function wheelHandler(m: Mover, band: Band) {
      full second after the fingers lifted, moved one section between
      them. That is the hit-and-miss Julian reported on the Mac. */
   let peak = 0;
+  /** When this page's strip came, for the release below. */
+  const born = performance.now();
   let trough = Infinity;
   let again = false;
 
@@ -98,6 +100,14 @@ export function wheelHandler(m: Mover, band: Band) {
        300ms, and a second for the first notch here: the page mounting
        under the spin stalls it. Only for a page a spin or a drag led
        to; one reached from the bar owes nothing to a wheel. */
+    /* A trackpad's new swipe once the page is here is a new decision,
+       never the tail: the tail is one unbroken stream, and a gap long
+       enough to end a gesture ends it. Without this, swipes a few hundred
+       ms apart kept the window below open for good and a page reached by
+       a swipe ignored the next ones (MAC, Safari, 2026-10-19). */
+    // Not while the page is still mounting: that stall can split a tail.
+    if (fresh && padGesture.get(el) && performance.now() - born > 400)
+      nav.arriveDir = 0;
     if (!paused) {
       if (!nav.arriveDir || gap > (before > m.arrived ? 300 : 1000)) paused = true;
       else m.arrived = performance.now();
