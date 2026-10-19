@@ -25,11 +25,27 @@ import * as React from "react";
  * components have to remember and a sixth will forget.
  * ─────────────────────────────────────────────────────────────── */
 
-/** Long enough to read twenty words, short enough not to be in the way. */
-const DWELL_MS = 2600;
+/** Long enough to read, short enough not to be in the way (Julian: 3s). */
+const DWELL_MS = 3000;
 /** Two right clicks this close together are one ask. Julian, 2026-10-19:
     the notice answers the second, the first only keeps the menu shut. */
 const AGAIN_MS = 500;
+
+/** Which frame of which set it is, as a contact sheet labels it: the
+    project's title and the frame's place in its strip ("BYTE ME · 03 / 10").
+    Empty off a strip (the cover, the lightbox), where there is no count. */
+function slugOf(target: HTMLElement) {
+  const cell = target.closest(".strip-cell");
+  const title = document.querySelector("main h1")?.textContent?.trim();
+  if (!cell?.parentElement || !title) return "";
+  const frames = [...cell.parentElement.children].filter(
+    (c) => c.classList.contains("strip-cell") && c.querySelector("img"),
+  );
+  const n = frames.indexOf(cell);
+  if (n < 0) return "";
+  const pad = (v: number) => String(v).padStart(2, "0");
+  return `${title} · ${pad(n + 1)} / ${pad(frames.length)}`;
+}
 
 export function PhotoNotice() {
   /**
@@ -49,6 +65,8 @@ export function PhotoNotice() {
     y: number;
     /** Down again, kept where it was so it fades out there. */
     open: boolean;
+    /** The frame reached for, as a contact sheet labels it. */
+    slug: string;
   } | null>(null);
 
   React.useEffect(() => {
@@ -66,7 +84,13 @@ export function PhotoNotice() {
         return;
       }
       first = 0;
-      setRaised({ at: Date.now(), x: e.clientX, y: e.clientY, open: true });
+      setRaised({
+        at: Date.now(),
+        x: e.clientX,
+        y: e.clientY,
+        open: true,
+        slug: slugOf(target),
+      });
     };
 
     // The one path that actually moves a file: dragging a frame to the
@@ -83,14 +107,19 @@ export function PhotoNotice() {
     };
   }, []);
 
+  /* The hand on it holds it up: the dot has poured into it
+     (`data-stick="fill"`, `pointer-mark.tsx`), and it going away under
+     the hand would drop the liquid. Let go, it stays its full time. */
+  const [held, setHeld] = React.useState(false);
+
   React.useEffect(() => {
-    if (!raised?.open) return;
+    if (!raised?.open || held) return;
     const id = window.setTimeout(
       () => setRaised((r) => r && { ...r, open: false }),
       DWELL_MS,
     );
     return () => window.clearTimeout(id);
-  }, [raised]);
+  }, [raised, held]);
 
   const shown = raised?.open === true;
   const box = React.useRef<HTMLDivElement>(null);
@@ -122,7 +151,11 @@ export function PhotoNotice() {
       .fromTo(
         el,
         { clipPath: "inset(0 100% 100% 0 round 4px)" },
-        { clipPath: "inset(0 0% 0% 0 round 4px)", duration: 0.42, ease: "expo.out" },
+        {
+          clipPath: "inset(0 0% 0% 0 round 4px)",
+          duration: 0.42,
+          ease: "expo.out",
+        },
       )
       .from(
         lines,
@@ -144,7 +177,7 @@ export function PhotoNotice() {
    * further inside the edge than it strictly needed to.
    */
   const BOX_W = 272; // `w-[17rem]`
-  const BOX_H = 112; // three lines plus padding
+  const BOX_H = 132; // four lines plus padding
   const GAP = 12;
   const MARGIN = 16;
 
@@ -178,36 +211,56 @@ export function PhotoNotice() {
       // must not be seen travelling there from wherever the last one was.
       // A dark plate with a hairline, square, the site's own mono for the
       // small lines and its display face for the name.
-      className="pointer-events-none fixed z-50 w-[17rem] rounded-[4px] border border-foreground/25 bg-background/95 px-4 py-3.5 text-foreground"
+      data-stick="fill"
+      data-box=""
+      onPointerEnter={() => setHeld(true)}
+      onPointerLeave={() => setHeld(false)}
+      className="fixed z-50 w-[17rem] rounded-[4px] border border-foreground/25 bg-background/95 px-4 py-3.5 text-foreground"
     >
       {/* Said once per raise; the lines below stay through the fade out. */}
       {shown ? (
         <span className="sr-only">
-          This photo is Copyright &copy; {year} Julian Gigola. All rights
-          reserved.
+          This photo{raised?.slug ? `, ${raised.slug},` : ""} is Copyright
+          &copy; {year} Julian Gigola. All rights reserved.
         </span>
       ) : null}
-      <span aria-hidden className="block overflow-hidden">
-        <span data-line className="label block text-muted-foreground">
-          &copy; Copyright {year}
+      {/* In a box of its own: the stuck dot grows and leans an icon's
+          direct spans (`pointer.css`), which shoved these off the edge. */}
+      <div>
+        <span aria-hidden className="block overflow-hidden">
+          <span data-line className="label block text-muted-foreground">
+            &copy; Copyright {year}
+          </span>
         </span>
-      </span>
-      <span aria-hidden className="mt-2 block overflow-hidden">
+        <span aria-hidden className="mt-2 block overflow-hidden">
+          <span
+            data-line
+            className="font-display block text-2xl font-medium uppercase leading-none tracking-[-0.03em]"
+          >
+            Julian Gigola
+          </span>
+        </span>
         <span
-          data-line
-          className="font-display block text-2xl font-medium uppercase leading-none tracking-[-0.03em]"
+          aria-hidden
+          className="mt-3 block border-t border-foreground/15 pt-2"
         >
-          Julian Gigola
+          {raised?.slug ? (
+            <span className="block overflow-hidden">
+              <span
+                data-line
+                className="label block truncate text-foreground/80"
+              >
+                {raised.slug}
+              </span>
+            </span>
+          ) : null}
+          <span className="block overflow-hidden">
+            <span data-line className="label block text-muted-foreground">
+              All rights reserved
+            </span>
+          </span>
         </span>
-      </span>
-      <span
-        aria-hidden
-        className="mt-3 block overflow-hidden border-t border-foreground/15 pt-2"
-      >
-        <span data-line className="label block text-muted-foreground">
-          All rights reserved
-        </span>
-      </span>
+      </div>
     </div>
   );
 }
