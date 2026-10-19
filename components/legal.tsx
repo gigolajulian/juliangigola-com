@@ -164,7 +164,7 @@ export function LegalPage({ children }: { children: React.ReactNode }) {
                     As of{" "}
                     <time dateTime={d.effective}>{dated(d.effective)}</time>
                   </p>
-                  <ol className="mt-8 m-0 min-h-0 list-none p-0 sm:quiet-scroll sm:flex-1 sm:overflow-y-auto sm:overscroll-contain">
+                  <ol className="legal-toc mt-8 m-0 min-h-0 list-none p-0 sm:quiet-scroll sm:flex-1 sm:overflow-y-auto sm:overscroll-contain">
                     {d.clauses.map((c) => (
                       <li
                         key={c.id}
@@ -243,7 +243,7 @@ export function LegalPage({ children }: { children: React.ReactNode }) {
                         to read (Julian). The measure is in em, so it grows
                         with the type on wide screens and stays near 70
                         characters a line. */}
-                    <div className="mt-8 max-w-[36em] text-lg normal-case leading-relaxed xl:text-xl 2xl:text-2xl [&_li]:mt-2 [&_p+p]:mt-5 [&_strong]:font-medium [&_strong]:text-foreground [&_ul]:list-disc [&_ul]:pl-5">
+                    <div className="legal-text mt-8 max-w-[36em] text-lg normal-case leading-relaxed xl:text-xl 2xl:text-2xl [&_li]:mt-2 [&_p+p]:mt-5 [&_strong]:font-medium [&_strong]:text-foreground [&_ul]:list-disc [&_ul]:pl-5">
                       {at.body}
                     </div>
                   </div>

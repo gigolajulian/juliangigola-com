@@ -25,7 +25,8 @@ const TYPES = [
   { value: "editorial", label: "Editorial" },
   { value: "campaign", label: "Campaign" },
   { value: "music", label: "Music" },
-  { value: "portrait", label: "Portrait" },
+  { value: "coverart", label: "Cover art" },
+  { value: "presskit", label: "Presskit" },
   { value: "session", label: "Session" },
   { value: "event", label: "Event" },
   { value: "other", label: "Other" },
@@ -44,6 +45,14 @@ const FOLLOW_UP: Record<string, { label: string; placeholder: string }> = {
   music: {
     label: "Artist and release date",
     placeholder: "e.g. cover art, single out 3 May",
+  },
+  coverart: {
+    label: "Artist and release date",
+    placeholder: "e.g. a single, out 3 May",
+  },
+  presskit: {
+    label: "Artist and what it is for",
+    placeholder: "e.g. a tour, an EP campaign",
   },
   portrait: {
     label: "Who it is for, and roughly when",
