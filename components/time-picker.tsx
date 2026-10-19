@@ -1158,7 +1158,11 @@ export function TimePicker({
               </div>
             </div>
             <div className="ed-floor">
-              <span className="label">{chosen === "time" ? `${sum} ${tzName}` : `San Jose, CA · ${here}${tz === "America/Los_Angeles" ? "" : ` · times in ${tzName}`}`}</span>
+              <span className="label flex flex-col gap-1">
+                {chosen === "time" ? `${sum} ${tzName}` : `San Jose, CA · ${here}${tz === "America/Los_Angeles" ? "" : ` · times in ${tzName}`}`}
+                {/* The locked deposit copy, said before the pick (2026-10-18). */}
+                {paid ? <span className="text-foreground">$100 holds your date. Balance due after the shoot.</span> : null}
+              </span>
               <button type="button" className="ed-btn" onClick={() => setOk("spin")} disabled={chosen !== "time"} aria-busy={!!ok}>
                 <span className={cn("transition-opacity duration-200", ok && "opacity-0")}>Continue</span>
                 {okMark}
