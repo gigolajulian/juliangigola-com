@@ -84,7 +84,7 @@ export function createCross(m: Mover): Cross {
     dim.style.cssText = `position:fixed;left:0;right:0;top:${box.top}px;height:${tall}px;background:#000;opacity:0;z-index:34;pointer-events:none`;
     card = document.createElement("div");
     card.setAttribute("aria-hidden", "true");
-    card.style.cssText = `position:fixed;left:0;width:100vw;top:${box.top}px;height:${tall}px;overflow:hidden;z-index:35;background-color:var(--background);background-image:var(--ground);background-size:100vw 100vh;background-position:0 ${-box.top}px;pointer-events:none;will-change:translate;box-shadow:${dir > 0 ? "-30px" : "30px"} 0 60px rgb(0 0 0 / 0.18)`;
+    card.style.cssText = `position:fixed;left:0;width:100vw;top:${box.top}px;height:${tall}px;overflow:hidden;z-index:35;background-color:var(--background);background-image:var(--ground);background-size:100vw 100vh;background-position:0 ${-box.top}px;pointer-events:none;will-change:translate;clip-path:inset(0 -120px);box-shadow:${dir > 0 ? "-30px" : "30px"} 0 60px rgb(0 0 0 / 0.18)`;
     const row = tpl.firstElementChild!.cloneNode(true) as HTMLElement;
     row.style.cssText = `position:absolute;left:0;right:0;top:${strip.top - box.top}px;height:${strip.height}px;${dir > 0 ? "padding-left" : "padding-right"}:${cs.paddingLeft};column-gap:${cs.columnGap}`;
     /* The frames with this page's corners. */

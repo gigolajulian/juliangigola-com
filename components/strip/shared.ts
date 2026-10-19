@@ -46,6 +46,9 @@ export const nav = {
   /** When a card last crossed over into the page arriving (`cross.ts`):
       the card was its arrival, so nothing on it comes in again. */
   crossedAt: 0,
+  /** The last wheel event's time, on any strip: a page that has just
+      mounted has no gap of its own to read (`wheel.ts`). */
+  wheelAt: 0,
   /** When the browser last went back or forward. A strip mounting just
       after one puts the visitor back where they were on this path instead
       of at the beginning: leaving Portraits five covers in to look at one

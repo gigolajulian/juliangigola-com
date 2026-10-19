@@ -63,8 +63,6 @@ export function wheelHandler(m: Mover, band: Band) {
      full second after the fingers lifted, moved one section between
      them. That is the hit-and-miss Julian reported on the Mac. */
   let peak = 0;
-  /** When this page's strip came, for the release below. */
-  const born = performance.now();
   let trough = Infinity;
   let again = false;
 
@@ -80,6 +78,10 @@ export function wheelHandler(m: Mover, band: Band) {
     const before = m.gestureAt;
     const gap = now - Math.max(before, m.arrived);
     const fresh = now - before > GESTURE_GAP_MS;
+    /* Across pages: event times are stamped as they happen, so a mount
+       that stalls the page leaves no gap in them, and a tail stays one. */
+    const freshAll = now - nav.wheelAt > GESTURE_GAP_MS;
+    nav.wheelAt = now;
     m.gestureAt = now;
     // A new push: take the measurements again, once, before using them.
     if (fresh) m.size();
@@ -105,9 +107,7 @@ export function wheelHandler(m: Mover, band: Band) {
        enough to end a gesture ends it. Without this, swipes a few hundred
        ms apart kept the window below open for good and a page reached by
        a swipe ignored the next ones (MAC, Safari, 2026-10-19). */
-    // Not while the page is still mounting: that stall can split a tail.
-    if (fresh && padGesture.get(el) && performance.now() - born > 400)
-      nav.arriveDir = 0;
+    if (freshAll && padGesture.get(el)) nav.arriveDir = 0;
     if (!paused) {
       if (!nav.arriveDir || gap > (before > m.arrived ? 300 : 1000)) paused = true;
       else m.arrived = performance.now();
