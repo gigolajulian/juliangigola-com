@@ -83,6 +83,8 @@ export type Lead = {
   /** And its credits and frame count, for the same card. */
   credits?: { role: string; name: string }[];
   count?: number;
+  /** Its title as its page sets it (the headline, where there is one). */
+  title?: string;
 };
 
 /* ── the other way of looking at it ───────────────────────────────

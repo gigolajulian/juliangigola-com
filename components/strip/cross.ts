@@ -67,15 +67,7 @@ export function createCross(m: Mover): Cross {
     card.style.cssText = `position:fixed;left:0;width:100vw;top:${box.top}px;height:${box.height}px;z-index:35;background:var(--background);pointer-events:none;will-change:translate;box-shadow:${dir > 0 ? "-30px" : "30px"} 0 60px rgb(0 0 0 / 0.18)`;
     const row = tpl.firstElementChild!.cloneNode(true) as HTMLElement;
     row.style.cssText = `position:absolute;left:0;right:0;top:${strip.top - box.top}px;height:${strip.height}px;padding-left:${cs.paddingLeft};column-gap:${cs.columnGap}`;
-    /* Set as this page's own are: the title at the size the type pass
-       gave this one, the frames with its corners. */
-    const h2 = page.querySelector<HTMLElement>(".project-plate > h2");
-    const t = row.querySelector<HTMLElement>("h2");
-    if (h2 && t) {
-      const s = getComputedStyle(h2);
-      const fs = parseFloat(s.fontSize);
-      t.style.cssText += `;font-size:${s.fontSize};line-height:${(parseFloat(s.lineHeight) / fs).toFixed(3)};letter-spacing:${(parseFloat(s.letterSpacing) / fs).toFixed(4)}em;font-weight:${s.fontWeight}`;
-    }
+    /* The frames with this page's corners. */
     const cell = m.el.querySelector<HTMLElement>(".strip-cell");
     if (cell) for (const f of row.querySelectorAll<HTMLElement>(":scope > .relative")) f.style.borderRadius = getComputedStyle(cell).borderRadius;
     /* The head: the crumb and the frame count, no title, as a page
@@ -93,19 +85,6 @@ export function createCross(m: Mover): Cross {
     }
     card.append(row);
     document.body.append(dim, card);
-    /* The type pass fits a plate's title to the plate; this one is not
-       in its reach, so it is fitted here, once, the same way. */
-    if (t) {
-      const room = t.parentElement!.clientWidth - parseFloat(getComputedStyle(t.parentElement!).paddingRight);
-      let fs = parseFloat(getComputedStyle(t).fontSize);
-      t.style.whiteSpace = "nowrap";
-      t.style.width = "max-content";
-      const name = t.textContent ?? "";
-      t.textContent = name.split(" ").reduce((a, b) => (b.length > a.length ? b : a), "");
-      while (t.offsetWidth > room && fs > 12) t.style.fontSize = `${(fs -= 1)}px`;
-      t.textContent = name;
-      t.style.whiteSpace = t.style.width = "";
-    }
     m.el.dataset.crossing = "";
     return true;
   };

@@ -609,7 +609,7 @@ function CrossEnd({
         {/* A div, not a p: under font v2 every p takes body leading. */}
         <div className="font-display text-2xl leading-[0.9] tracking-[0] sm:text-4xl">
           <span className="block whitespace-nowrap font-normal normal-case">{line.lead}</span>
-          <span className="mt-[0.06em] block whitespace-nowrap text-[0.9em] font-medium uppercase tracking-[-0.045em] [word-spacing:0.04em]">
+          <span className="mt-[0.06em] block whitespace-nowrap text-[0.9em] font-medium uppercase tracking-[-0.045em]">
             {line.punch}
           </span>
         </div>
@@ -661,20 +661,31 @@ function CrossEnd({
     in with its pictures. */
 function CrossCard({ to, up }: { to: "next" | "prev"; up: NextUp }) {
   return (
-    <div hidden data-cross-card={to} data-count={up.count}>
-      <div className="flex items-stretch">
+    /* Laid out on screen and invisible rather than hidden, so the type
+       pass sizes its title as it sizes the page's own plate (off screen,
+       its fit to the screen shrank it), and the copy carries that size. */
+    <div aria-hidden inert data-cross-card={to} data-count={up.count} className="pointer-events-none invisible fixed inset-x-0 top-0 -z-10 h-[71vh]">
+      <div className="flex h-full items-stretch">
         <div
-          style={{ "--title-em": titleWidth(up.name) } as React.CSSProperties}
+          style={{ "--title-em": titleWidth(up.title ?? up.name) } as React.CSSProperties}
           className="project-plate flex w-[min(30rem,82vw)] shrink-0 flex-col justify-center gap-5 pr-2 sm:h-full sm:pr-6"
         >
           <h2
             className="font-display text-4xl uppercase leading-[0.95] tracking-[0] sm:text-6xl"
-            style={{ "--word-em": longestWord(up.name) } as React.CSSProperties}
+            style={{ "--word-em": longestWord(up.title ?? up.name) } as React.CSSProperties}
           >
-            {up.name}
+            {/* Word by word as the plate sets it, which is what its size
+                rule keys on (`strip-motion.css`); still here, no rise. */}
+            {(up.title ?? up.name).split(" ").map((word, i) => (
+              <React.Fragment key={i}>
+                <span className="inline-block overflow-hidden align-top">
+                  <span className="title-word inline-block" style={{ animation: "none" }}>{word}</span>
+                </span>{" "}
+              </React.Fragment>
+            ))}
           </h2>
           {up.credits?.length ? (
-            <dl className="title-rest flex flex-col gap-1.5 border-t border-border pt-4 sm:grid sm:grid-cols-[max-content_minmax(0,1fr)] sm:gap-x-3 sm:gap-y-1.5">
+            <dl style={{ animation: "none" }} className="title-rest flex flex-col gap-1.5 border-t border-border pt-4 sm:grid sm:grid-cols-[max-content_minmax(0,1fr)] sm:gap-x-3 sm:gap-y-1.5">
               {up.credits.map((c, i) => (
                 <div key={i} className="flex flex-wrap items-baseline gap-x-2 sm:gap-x-3 sm:contents">
                   <dt className="label whitespace-nowrap text-muted-foreground">{c.role}</dt>
