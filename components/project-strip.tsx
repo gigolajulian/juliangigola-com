@@ -13,6 +13,9 @@ import { gatherWhenSeen, slides } from "@/lib/gather";
 import { PendingLabel } from "@/components/pending-label";
 import { BtsCredit, BtsStripGrid } from "@/components/bts";
 import type { Project, TextBlock, Frame } from "@/lib/work-types";
+import type { EndLine } from "@/lib/end-lines";
+import { DEAL_MS, nav, wantsCross } from "@/components/strip/shared";
+import { BookSheet } from "@/components/book-sheet";
 
 /* ── the sequence, across the screen ──────────────────────────────
  * A project is one screen and the frames run across it, all at the same
@@ -76,9 +79,12 @@ export function ProjectStrip({
   prev,
   map,
   gallery = false,
+  line,
   className,
 }: {
   project: Project;
+  /** The end card's headline and ask (`lib/end-lines.ts`), under `?cross=1`. */
+  line?: EndLine;
   /** A discipline shown as one set of photographs (`discipline/[slug]`). */
   gallery?: boolean;
   /** The archive's chapters, where this sequence is one of them: a
@@ -105,6 +111,12 @@ export function ProjectStrip({
   // The frames in view slide in from the right up to the title (`lib/gather.ts`).
   React.useEffect(() => {
     const band = scroller.current?.closest<HTMLElement>(".gather-strip");
+    // Carried in by a card (`strip/cross.ts`), the frames are already in.
+    if (band && Date.now() - nav.crossedAt < DEAL_MS) {
+      nav.crossedAt = 0;
+      band.dataset.gathered = "";
+      return;
+    }
     return band ? gatherWhenSeen(band, (b) => b.querySelectorAll<HTMLElement>(".strip-cell"), slides) : undefined;
   }, []);
   const lightbox = useLightbox(frames);
@@ -114,6 +126,7 @@ export function ProjectStrip({
      arrival, measured). False in the HTML, true on a wide window as
      it hydrates; see `useWideNow`. */
   const wideNow = useWideNow();
+  const cross = React.useSyncExternalStore(noop, wantsCross, () => false);
 
   /* The photographs with the writing back in its place. `lib/work.ts` pulls
      the two apart — the lightbox and the counts have no use for a paragraph
@@ -330,6 +343,7 @@ export function ProjectStrip({
             name={project.name}
             next={next}
             label={gallery ? "Up next" : "Next project"}
+            line={line}
           />
         ) : cell.kind === "bts" ? (
           project.bts ? (
@@ -477,6 +491,7 @@ export function ProjectStrip({
       project.slug,
       project.bts,
       next,
+      line,
       wideNow,
     ],
   );
@@ -502,6 +517,8 @@ export function ProjectStrip({
       </Strip>
 
       <Lightbox frames={frames} name={project.name} {...lightbox} />
+      {cross && next?.open ? <CrossCard to="next" up={next} /> : null}
+      {cross && prev?.open ? <CrossCard to="prev" up={prev} /> : null}
     </>
   );
 }
@@ -532,15 +549,22 @@ export function NextCell({ next, label }: { next: NextUp; label: string }) {
 /** A project's last cell: Inquire, carrying the project into the form
     (`ref`, read by `contact-form.tsx`), and the next project under a
     hairline. `next-cell` so the deck still pins it to the right edge. */
+const noop = () => () => {};
+
 function EndCell({
   name,
   next,
   label,
+  line,
 }: {
   name: string;
   next?: NextUp;
   label: string;
+  line?: EndLine;
 }) {
+  /* Read after hydration, so the HTML is the live card either way. */
+  const cross = React.useSyncExternalStore(noop, wantsCross, () => false);
+  if (cross && line) return <CrossEnd name={name} next={next} label={label} line={line} />;
   return (
     <div
       data-hash="next"
@@ -581,6 +605,137 @@ function EndCell({
           ) : null}
         </Link>
       ) : null}
+    </div>
+  );
+}
+
+/** Preview (`?cross=1`): the end card Julian locked from the mock on
+    2026-10-18. The headline is the discipline's own, the lead in regular
+    and the punch in capitals a size down and tighter, so the two read as
+    one line broken; the next project sits right-aligned in the bottom
+    corner, no rule over it. */
+function CrossEnd({
+  name,
+  next,
+  label,
+  line,
+}: {
+  name: string;
+  next?: NextUp;
+  label: string;
+  line: EndLine;
+}) {
+  /* The ask opens in place over the discipline's wall rather than
+     leaving for the homepage; the link stays for a new tab. */
+  const [open, setOpen] = React.useState<HTMLElement | null>(null);
+  return (
+    <div
+      data-hash="next"
+      className="next-cell flex w-[min(26rem,100%)] shrink-0 flex-col gap-8 pl-0 max-sm:py-14 sm:h-full sm:w-auto sm:pl-24 sm:pr-10"
+    >
+      <div className="flex flex-col items-start gap-4 sm:my-auto">
+        <span className="label text-muted-foreground">Commission</span>
+        {/* A div, not a p: under font v2 every p takes body leading. */}
+        <div className="font-display text-2xl leading-[0.9] tracking-[0] sm:text-4xl">
+          <span className="block whitespace-nowrap font-normal normal-case">{line.lead}</span>
+          <span className="mt-[0.06em] block whitespace-nowrap text-[0.9em] font-medium uppercase tracking-[-0.045em]">
+            {line.punch}
+          </span>
+        </div>
+        <p className="text-sm normal-case leading-relaxed text-muted-foreground max-sm:text-[min(0.8125rem,3.4vw)]">
+          <span className="block whitespace-nowrap">Send me the brief and the date.</span>
+          <span className="block whitespace-nowrap">
+            I&apos;ll come back with an approach, a crew and a quote.
+          </span>
+        </p>
+        <Link
+          prefetch={false}
+          href={line.book ? "/#sessions" : `/?ref=${encodeURIComponent(name)}#contact`}
+          onClick={(e) => {
+            if (e.metaKey || e.ctrlKey || e.shiftKey || e.button) return;
+            e.preventDefault();
+            setOpen(e.currentTarget);
+          }}
+          className="label action mt-2 self-end px-6 py-4 press active:scale-[0.97]"
+        >
+          {line.book ? "Book a session" : "Inquire"}
+        </Link>
+      </div>
+      {open ? (
+        <BookSheet chrome item={line.ask.item} wall={line.ask.wall} origin={open.parentElement} onClosed={() => setOpen(null)} />
+      ) : null}
+      {next ? (
+        <Link
+          href={next.href}
+          data-ring="Next"
+          className="group flex flex-col items-end gap-2 self-end text-right sm:pb-2"
+        >
+          <span className="label text-muted-foreground">{label}</span>
+          <span className="font-display text-xl uppercase leading-none tracking-[0] transition-opacity duration-200 hoverable:group-hover:opacity-70 sm:text-2xl">
+            {next.name}
+          </span>
+          {next.client ? (
+            <span className="label text-muted-foreground">{next.client}</span>
+          ) : null}
+        </Link>
+      ) : null}
+    </div>
+  );
+}
+
+/** Preview (`?cross=1`): the opening of the project either side, laid out
+    as its page opens (the plate, then its first frames at the strip's
+    height), hidden until the crossing copies it over the page
+    (`strip/cross.ts`). Its frames load with this page, so the card comes
+    in with its pictures. */
+function CrossCard({ to, up }: { to: "next" | "prev"; up: NextUp }) {
+  return (
+    /* Laid out on screen and invisible rather than hidden, so the type
+       pass sizes its title as it sizes the page's own plate (off screen,
+       its fit to the screen shrank it), and the copy carries that size. */
+    <div aria-hidden inert data-cross-card={to} data-count={up.count} data-title={up.title ?? up.name} data-sub={up.sub} className="pointer-events-none invisible fixed inset-x-0 top-0 -z-10 h-[71vh] overflow-hidden">
+      {/* Backwards, the project before as its last screen: its closing
+          frames up to the right edge, where walking back lands. */}
+      <div className={`flex h-full items-stretch${to === "prev" ? " justify-end" : ""}`}>
+        {to === "next" ? <div
+          style={{ "--title-em": titleWidth(up.title ?? up.name) } as React.CSSProperties}
+          className="project-plate flex w-[min(30rem,82vw)] shrink-0 flex-col justify-center gap-5 pr-2 sm:h-full sm:pr-6"
+        >
+          <h2
+            className="font-display text-4xl uppercase leading-[0.95] tracking-[0] sm:text-6xl"
+            style={{ "--word-em": longestWord(up.title ?? up.name) } as React.CSSProperties}
+          >
+            {/* Word by word as the plate sets it, which is what its size
+                rule keys on (`strip-motion.css`); still here, no rise. */}
+            {(up.title ?? up.name).split(" ").map((word, i) => (
+              <React.Fragment key={i}>
+                <span className="inline-block overflow-hidden align-top">
+                  <span className="title-word inline-block" style={{ animation: "none" }}>{word}</span>
+                </span>{" "}
+              </React.Fragment>
+            ))}
+          </h2>
+          {up.credits?.length ? (
+            <dl style={{ animation: "none" }} className="title-rest flex flex-col gap-1.5 border-t border-border pt-4 sm:grid sm:grid-cols-[max-content_minmax(0,1fr)] sm:gap-x-3 sm:gap-y-1.5">
+              {up.credits.map((c, i) => (
+                <div key={i} className="flex flex-wrap items-baseline gap-x-2 sm:gap-x-3 sm:contents">
+                  <dt className="label whitespace-nowrap text-muted-foreground">{c.role}</dt>
+                  <dd className="label min-w-0 whitespace-nowrap text-foreground/80">{c.name}</dd>
+                </div>
+              ))}
+            </dl>
+          ) : null}
+        </div> : null}
+        {up.open?.map((f) => (
+          <div
+            key={f.src}
+            className="relative h-full shrink-0 overflow-hidden"
+            style={{ aspectRatio: `${f.width} / ${f.height}`, backgroundColor: f.color }}
+          >
+            <Image src={f.src} alt="" fill sizes={frameSizes(f)} loading="eager" fetchPriority="low" className="object-cover" />
+          </div>
+        ))}
+      </div>
     </div>
   );
 }

@@ -67,7 +67,7 @@
   transition: opacity 400ms var(--ease-out-strong);
 }
 @media (hover: hover) and (pointer: fine) {
-  .group:hover > .door-veil {
+  :where(:root[data-hover]) .group:hover > .door-veil {
     opacity: 0.65;
   }
 }
@@ -279,7 +279,7 @@
   }
 }
 @media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
-  .portfolio-arrive .strip-cell:not([data-deck]):hover {
+  :where(:root[data-hover]) .portfolio-arrive .strip-cell:not([data-deck]):hover {
     /* About the card's own middle (`--cx`, `--cy`, `card-tilt.tsx`), not
        the origin the deck gave it. */
     transform: translate(var(--cx, 0px), var(--cy, 0px)) perspective(1000px) translateZ(20px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)) rotateZ(var(--rz, 0deg)) translate(calc(-1 * var(--cx, 0px)), calc(-1 * var(--cy, 0px)));
@@ -338,7 +338,7 @@
   inherits: false;
   initial-value: 160px;
 }
-.focus-field[data-on] {
+:where(:root[data-hover]) .focus-field[data-on] {
   opacity: 1;
   transition-duration: 420ms;
 }
@@ -1191,3 +1191,36 @@
 .tp-notes::-webkit-scrollbar { width: 6px; }
 .tp-notes::-webkit-scrollbar-track { background: transparent; }
 .tp-notes::-webkit-scrollbar-thumb { background: color-mix(in oklab, var(--foreground) 35%, transparent); border-radius: 3px; }
+
+/* Preview (`?cross=1`, Julian's mock of 2026-10-18): a card opened in
+   place (`book-sheet.tsx`, `chrome`). The wall runs full bleed, no edge
+   fade and no pale wash over it, oversized so its blur has no rim. The
+   bar stays over it at half, the strip's panel and the footer clear over
+   it with a fifth of the ground under the footer's words. */
+.cross-wall::after {
+  display: none;
+}
+.questions-wall.cross-wall {
+  filter: blur(9px);
+}
+.cross-wall .inquire-wall {
+  mask: none;
+  -webkit-mask: none;
+}
+html[data-sheet] header.site-bar {
+  background: color-mix(in oklab, var(--background) 50%, transparent);
+  backdrop-filter: none;
+  border-color: transparent;
+}
+html[data-sheet] main.rise {
+  transform: none;
+}
+html[data-sheet] :has(> .strip-count),
+html[data-sheet] footer {
+  position: relative;
+  z-index: 39;
+  border-color: transparent;
+}
+html[data-sheet] footer {
+  background: linear-gradient(transparent, color-mix(in oklab, var(--background) 20%, transparent) 45%);
+}

@@ -9,6 +9,10 @@
  * guard is one definition rather than a condition repeated at each call site.
  */
 @custom-variant hoverable (@media (hover: hover) and (pointer: fine));
+/* A photograph's hover, only once the page has settled: `data-hover` comes
+   on 600ms after a page lands (`hover-settle.tsx`). `:where` so it adds no
+   specificity. Links and buttons answer at once and do not use it. */
+@custom-variant settled (:where(:root[data-hover]) &);
 /* A tablet: a finger on a screen wide enough to lay the work out as a
    desktop does. Hover never happens there, so anything that hides itself
    until the pointer arrives is parked on screen for good. */

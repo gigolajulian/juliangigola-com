@@ -1,3 +1,4 @@
+import { endLine } from "@/lib/end-lines";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { opening } from "@/lib/opening";
@@ -199,6 +200,7 @@ export default async function CategoryPage(
             next={next}
             prev={prev}
             map={archive}
+            line={endLine(gallery)}
             className="mt-4 flex-1"
           />
         </div>

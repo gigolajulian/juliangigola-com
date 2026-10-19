@@ -200,7 +200,7 @@ export function ContactForm({
 }: {
   /** What a page that holds its own form is about: a booking page's
       session or kind of shoot, used when the address names none. */
-  defaults?: { type?: string; session?: string };
+  defaults?: { type?: string; session?: string; ref?: string };
   /** The names on the Sessions screen, offered in place of the kinds of
       shoot once the visitor came to book one. */
   sessions?: string[];
@@ -214,7 +214,7 @@ export function ContactForm({
   // Set by the CTA at the end of a project page, so the enquiry arrives
   // saying which work prompted it — the single most useful thing an enquiry
   // can carry, and the visitor never had to type it.
-  const presetRef = params.get("ref");
+  const presetRef = params.get("ref") ?? defaults?.ref ?? null;
 
   /* The send button is dead until there is something to send. Julian
      asked: an enquiry that goes nowhere because a field was missed is
