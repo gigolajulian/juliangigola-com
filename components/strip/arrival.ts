@@ -61,6 +61,8 @@ export function useArrival({
       if (trip) trip.finished.finally(done);
       else window.setTimeout(done, 1000);
     }
+    // Carried in by a card (`cross.ts`): it already showed the page.
+    if (Date.now() - nav.crossedAt < DEAL_MS) el.dataset.arrive = "dealt";
     // The filter changed under a row that stayed: a fade, not an arrival.
     /* Julian: the covers fly across the filters as they do between the
        views (`flyCovers` in `lib/work-view.ts`), from where they stood

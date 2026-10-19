@@ -133,6 +133,7 @@ export function createCross(m: Mover): Cross {
          arrival drops the same way's tail for a second (`wheel.ts`). */
       nav.cameBack = false;
       nav.arriveDir = dir || 1;
+      nav.crossedAt = Date.now();
       m.leaving = true;
       const c = card;
       const d = dim;

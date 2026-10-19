@@ -13,7 +13,7 @@ import { gatherWhenSeen, slides } from "@/lib/gather";
 import { PendingLabel } from "@/components/pending-label";
 import type { Project, TextBlock, Frame } from "@/lib/work-types";
 import type { EndLine } from "@/lib/end-lines";
-import { wantsCross } from "@/components/strip/shared";
+import { DEAL_MS, nav, wantsCross } from "@/components/strip/shared";
 import { BookSheet } from "@/components/book-sheet";
 
 /* ── the sequence, across the screen ──────────────────────────────
@@ -109,6 +109,12 @@ export function ProjectStrip({
   // The frames in view slide in from the right up to the title (`lib/gather.ts`).
   React.useEffect(() => {
     const band = scroller.current?.closest<HTMLElement>(".gather-strip");
+    // Carried in by a card (`strip/cross.ts`), the frames are already in.
+    if (band && Date.now() - nav.crossedAt < DEAL_MS) {
+      nav.crossedAt = 0;
+      band.dataset.gathered = "";
+      return;
+    }
     return band ? gatherWhenSeen(band, (b) => b.querySelectorAll<HTMLElement>(".strip-cell"), slides) : undefined;
   }, []);
   const lightbox = useLightbox(frames);

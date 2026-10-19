@@ -43,6 +43,9 @@ export const nav = {
       used to be a second and a half, and a slow page lost the deal: the
       strip froze and the next one popped in. Julian saw it often. */
   dealtAt: 0,
+  /** When a card last crossed over into the page arriving (`cross.ts`):
+      the card was its arrival, so nothing on it comes in again. */
+  crossedAt: 0,
   /** When the browser last went back or forward. A strip mounting just
       after one puts the visitor back where they were on this path instead
       of at the beginning: leaving Portraits five covers in to look at one
