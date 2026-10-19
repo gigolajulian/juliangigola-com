@@ -1,7 +1,7 @@
 import { rubberband } from "@/lib/utils";
 import { leadOn } from "./lead";
 import type { Mover } from "./motion";
-import { HOLD, LEAVE_AFTER, RELAX, STRETCH, WHEEL, wantsBandEase } from "./shared";
+import { HOLD, LEAVE_AFTER, RELAX, STRETCH, WHEEL } from "./shared";
 
 /* ── the band ──
    Push past either end and the strip does not stop dead, it gives a
@@ -43,7 +43,6 @@ export type Band = {
 
 export function createBand(m: Mover): Band {
   const { el } = m;
-  const ease = wantsBandEase();
   /* Through the window it is one scroll past it, either way (Julian:
      seamless): the word already said what is next, so there is nothing
      to make sure of. Everywhere else the band asks for a persistent
@@ -154,16 +153,14 @@ export function createBand(m: Mover): Band {
           return;
         }
       }
-      if (!ease) release();
-      // The count drains on its own clock, unseen.
+      /* The band eases back as the count drains, drawn where the count
+         has got to, and is let go (nothing left to spring) only once it
+         is spent. Let go at every pause, the `[data-release]` spring took
+         most of it back in one frame on WebKit and overshot (QA, #257). */
       m.over *= Math.exp(-16 / RELAX);
       if (Math.abs(m.over) < 1) m.over = 0;
-      /* `?bandease`: seen too, the band drawn where the count has got
-         to, and only let go (nothing left to spring) once it is spent. */
-      if (ease) {
-        if (m.over) paint();
-        else release();
-      }
+      if (m.over) paint();
+      else release();
     }
     m.band = m.over ? requestAnimationFrame(relax) : 0;
   };

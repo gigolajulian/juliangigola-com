@@ -122,38 +122,6 @@ export function wantsLenis() {
     return true;
   }
 }
-/** Preview (`?endhold=1`, `?endhold=0` to leave; kept for the visit):
-    the strip's end under Safari's trackpad. Julian saw the last card
-    creep out and snap back about twice a second on a hard swipe past the
-    end (QA measured +131px in one frame, then a 0.13s snap, Lenis on).
-    With it, a push outward past an end keeps holding the band while the
-    band is out, rather than letting go whenever the scroller reads a
-    pixel short of the end, and Lenis takes no outward push at an end. */
-export function wantsEndHold() {
-  try {
-    const asked = new URLSearchParams(window.location.search).get("endhold");
-    if (asked === "1" || asked === "0") window.sessionStorage.setItem("jg-endhold", asked);
-    return window.sessionStorage.getItem("jg-endhold") === "1";
-  } catch {
-    return false;
-  }
-}
-/** Preview (`?bandease=1`, `?bandease=0` to leave; kept for the visit):
-    the band past an end eases back as its pull drains, frame by frame,
-    instead of being handed to the `[data-release]` spring. QA traced
-    Julian's creep and snap to that spring: every pause between swipes
-    longer than HOLD let go, and WebKit dropped most of the band in one
-    frame (-39 to -4) and overshot. Drained, it comes back with no drop
-    and no overshoot, and the next swipe picks up wherever it is. */
-export function wantsBandEase() {
-  try {
-    const asked = new URLSearchParams(window.location.search).get("bandease");
-    if (asked === "1" || asked === "0") window.sessionStorage.setItem("jg-bandease", asked);
-    return window.sessionStorage.getItem("jg-bandease") === "1";
-  } catch {
-    return false;
-  }
-}
 /** The quiet that ends a swipe. A trackpad fires every frame or so while
     the fingers are down and keeps firing as the fling decays, so anything
     under about a tenth of a second is still the same push. */
