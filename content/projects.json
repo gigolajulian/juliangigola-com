@@ -3824,20 +3824,6 @@
       "by": "lightbender_mark",
       "frames": [
         {
-          "src": "/work/luxe-meets-future/bts/01.jpg",
-          "width": 1440,
-          "height": 1080,
-          "color": "#696969",
-          "alt": ""
-        },
-        {
-          "src": "/work/luxe-meets-future/bts/02.jpg",
-          "width": 1440,
-          "height": 1080,
-          "color": "#505050",
-          "alt": ""
-        },
-        {
           "src": "/work/luxe-meets-future/bts/03.jpg",
           "width": 1440,
           "height": 1080,
@@ -3845,17 +3831,10 @@
           "alt": ""
         },
         {
-          "src": "/work/luxe-meets-future/bts/04.jpg",
+          "src": "/work/luxe-meets-future/bts/01.jpg",
           "width": 1440,
           "height": 1080,
-          "color": "#494949",
-          "alt": ""
-        },
-        {
-          "src": "/work/luxe-meets-future/bts/05.jpg",
-          "width": 1440,
-          "height": 1085,
-          "color": "#797979",
+          "color": "#696969",
           "alt": ""
         },
         {
@@ -3866,6 +3845,13 @@
           "alt": ""
         },
         {
+          "src": "/work/luxe-meets-future/bts/02.jpg",
+          "width": 1440,
+          "height": 1080,
+          "color": "#505050",
+          "alt": ""
+        },
+        {
           "src": "/work/luxe-meets-future/bts/07.jpg",
           "width": 1440,
           "height": 1080,
@@ -3873,17 +3859,10 @@
           "alt": ""
         },
         {
-          "src": "/work/luxe-meets-future/bts/08.jpg",
-          "width": 1440,
-          "height": 1080,
-          "color": "#8d8589",
-          "alt": ""
-        },
-        {
-          "src": "/work/luxe-meets-future/bts/09.jpg",
+          "src": "/work/luxe-meets-future/bts/05.jpg",
           "width": 1440,
           "height": 1085,
-          "color": "#937c7e",
+          "color": "#797979",
           "alt": ""
         }
       ]
