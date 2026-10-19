@@ -83,7 +83,7 @@ export function ReferencePicks({ resync }: { resync: unknown }) {
       <input ref={refs} type="file" name="refs" multiple hidden tabIndex={-1} />
       <input type="hidden" name="picks" value={picks.join("\n")} />
       <div className="flex flex-wrap items-center gap-2">
-        <p className="label mr-auto text-muted-foreground">
+        <p className="label mr-auto text-muted-foreground max-sm:basis-full">
           References <span>· optional</span>
         </p>
         <label className={cn(button, room <= 0 && "pointer-events-none opacity-40")}>
