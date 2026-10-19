@@ -1,5 +1,7 @@
 import type { Project } from "./work-types";
-import { SESSIONS, commissionsIn, disciplineOf } from "./work";
+import { SESSIONS, commissionsIn, disciplineOf, enquiryTypeFor, wallOf } from "./work";
+import { BOOK_MENU, type MenuItem } from "./booking";
+import type { WallTile } from "./wall-tile";
 
 /* The end card's headline (`EndCell`, preview `?cross=1`): Julian's locked
    lines per discipline, 2026-10-18. Each project takes the next line of its
@@ -81,7 +83,14 @@ const LINES: Record<string, [string, string][]> = {
 /** Sessions sets end on Book a session rather than Inquire. */
 const BOOK = new Set(["studio-digitals", "headshots", "graduation", "weddings"]);
 
-export type EndLine = { lead: string; punch: string; book: boolean };
+export type EndLine = {
+  lead: string;
+  punch: string;
+  book: boolean;
+  /** What the button opens in place: the session's calendar or the
+      inquiry form carrying the project, over the discipline's wall. */
+  ask: { item: MenuItem; wall: WallTile[] };
+};
 
 export function endLine(p: Project): EndLine {
   const session = p.categories.find((c) => c.section === "SESSIONS")?.slug;
@@ -92,5 +101,14 @@ export function endLine(p: Project): EndLine {
   const list = LINES[here] ?? LINES.editorial;
   const i = Math.max(0, pool.findIndex((x) => x.slug === p.slug));
   const [lead, punch] = list[i % list.length];
-  return { lead, punch, book: BOOK.has(here) };
+  const book = BOOK.has(here);
+  const item: MenuItem =
+    (book && BOOK_MENU.find((m) => m.slug === here)) || {
+      slug: "commission",
+      name: "Commission",
+      blurb: "",
+      group: "commission",
+      form: { type: enquiryTypeFor(p), ref: p.name },
+    };
+  return { lead, punch, book, ask: { item, wall: wallOf(here) } };
 }

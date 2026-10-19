@@ -25,8 +25,14 @@ export function BookSheet({
   origin,
   wall,
   onClosed,
+  chrome = false,
 }: {
   item: MenuItem;
+  /** Preview (`?cross=1`, Julian's mock of 2026-10-18): the wall runs
+      full bleed under the bar and the footer, which stay over it, the
+      bar at half and the footer clear (`contact.css`, `data-sheet`). The
+      card alone, no header. */
+  chrome?: boolean;
   /* The row pressed: the focus goes back to it on close. */
   origin: HTMLElement | null;
   wall?: WallTile[];
@@ -58,10 +64,12 @@ export function BookSheet({
     const root = document.documentElement;
     const was = root.style.overflow;
     root.style.overflow = "hidden";
+    if (chrome) root.dataset.sheet = "";
     return () => {
       root.style.overflow = was;
+      delete root.dataset.sheet;
     };
-  }, []);
+  }, [chrome]);
 
   React.useLayoutEffect(() => {
     if (!mounted) return;
@@ -114,13 +122,17 @@ export function BookSheet({
       aria-label={`Book ${item.name}`}
       data-scroll=""
       onWheel={(e) => e.stopPropagation()}
-      className="fixed inset-0 z-[90] flex items-center justify-center overscroll-contain sm:p-[clamp(1rem,4vh,3rem)]"
+      className={
+        chrome
+          ? "fixed inset-0 z-[38] flex items-center justify-center overscroll-contain sm:px-[clamp(1rem,4vh,3rem)] sm:pb-[calc(var(--bar-h,4rem)+2.5rem)] sm:pt-[calc(var(--bar-h,4rem)+1rem)]"
+          : "fixed inset-0 z-[90] flex items-center justify-center overscroll-contain sm:p-[clamp(1rem,4vh,3rem)]"
+      }
     >
       {/* The session's wall, and a press on it closes the sheet. */}
       <div ref={back} className="absolute inset-0">
         {/* Inert: its tiles are links, and a press meant to close the
             sheet went to a project. */}
-        <div inert className="enquiry-backdrop questions-wall absolute inset-0 overflow-hidden bg-background">
+        <div inert className={`enquiry-backdrop questions-wall absolute overflow-hidden bg-background ${chrome ? "cross-wall -inset-6" : "inset-0"}`}>
           {wall?.length && !phone ? <InquireWall items={wall} /> : null}
         </div>
         <div aria-hidden onClick={() => performance.now() >= ready.current && close()} className="absolute inset-0" />
@@ -128,19 +140,19 @@ export function BookSheet({
       <div
         ref={sheet}
         data-book-frame
-        className="relative flex h-dvh w-full flex-col will-change-transform max-sm:bg-background sm:h-[min(46rem,100%)] sm:w-[min(46rem,100%)]"
+        className={`relative flex h-dvh w-full flex-col will-change-transform max-sm:bg-background ${chrome && item.cal ? "sm:h-[min(38rem,100%)] sm:w-[min(70rem,100%)]" : chrome ? "sm:h-[min(30rem,100%)] sm:w-[min(44rem,100%)]" : "sm:h-[min(46rem,100%)] sm:w-[min(46rem,100%)]"}`}
       >
         {/* On a phone the sheet scrolls as a page does and the card keeps
             its own length; from `sm` the card fills what the header leaves. */}
         <div ref={body} data-book-scroll className="flex min-h-0 flex-1 flex-col gap-5 overflow-y-auto overscroll-contain pb-[env(safe-area-inset-bottom)] pt-[env(safe-area-inset-top)] sm:gap-6 sm:pb-0 sm:overflow-visible sm:pt-0">
           {/* Julian: say what is being booked, over the card it books. */}
-          <header className="flex flex-col gap-3 px-[var(--card-x,1.25rem)] pt-8 sm:px-0 sm:pt-0">
+          {chrome ? null : <header className="flex flex-col gap-3 px-[var(--card-x,1.25rem)] pt-8 sm:px-0 sm:pt-0">
             <p className="label text-muted-foreground">You&apos;re booking</p>
             <h2 className="font-display text-4xl uppercase leading-[0.9] sm:text-6xl">{item.name}</h2>
             {item.blurb ? (
               <p className="text-[0.9375rem] normal-case leading-relaxed text-muted-foreground text-balance">{item.blurb}</p>
             ) : null}
-          </header>
+          </header>}
           <BookCard item={item} onClose={close} className="min-h-0 flex-1 max-sm:flex-none max-sm:mx-[3px] max-sm:bg-transparent max-sm:shadow-none max-sm:backdrop-blur-none max-sm:[container-type:inline-size]" />
         </div>
       </div>

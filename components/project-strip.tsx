@@ -14,6 +14,7 @@ import { PendingLabel } from "@/components/pending-label";
 import type { Project, TextBlock, Frame } from "@/lib/work-types";
 import type { EndLine } from "@/lib/end-lines";
 import { wantsCross } from "@/components/strip/shared";
+import { BookSheet } from "@/components/book-sheet";
 
 /* ── the sequence, across the screen ──────────────────────────────
  * A project is one screen and the frames run across it, all at the same
@@ -592,6 +593,9 @@ function CrossEnd({
   label: string;
   line: EndLine;
 }) {
+  /* The ask opens in place over the discipline's wall rather than
+     leaving for the homepage; the link stays for a new tab. */
+  const [open, setOpen] = React.useState<HTMLElement | null>(null);
   return (
     <div
       data-hash="next"
@@ -615,11 +619,19 @@ function CrossEnd({
         <Link
           prefetch={false}
           href={line.book ? "/#sessions" : `/?ref=${encodeURIComponent(name)}#contact`}
+          onClick={(e) => {
+            if (e.metaKey || e.ctrlKey || e.shiftKey || e.button) return;
+            e.preventDefault();
+            setOpen(e.currentTarget);
+          }}
           className="label action mt-2 self-end px-6 py-4 press active:scale-[0.97]"
         >
-          <PendingLabel state="composing">{line.book ? "Book a session" : "Inquire"}</PendingLabel>
+          {line.book ? "Book a session" : "Inquire"}
         </Link>
       </div>
+      {open ? (
+        <BookSheet chrome item={line.ask.item} wall={line.ask.wall} origin={open.parentElement} onClosed={() => setOpen(null)} />
+      ) : null}
       {next ? (
         <Link
           href={next.href}

@@ -627,7 +627,7 @@ export type MenuItem = {
   /** Its Cal.com event: a session's time, or a commission's call. */
   cal?: string;
   /** The form's presets, for a commission's "Send details". */
-  form?: { type: string; session?: string };
+  form?: { type: string; session?: string; ref?: string };
 };
 
 const callOf = (slug: BookingSlug, name: string, blurb: string): MenuItem => {
