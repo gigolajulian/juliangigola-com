@@ -1,6 +1,6 @@
 import { gsap } from "gsap";
 import type { Mover } from "./motion";
-import { nav } from "./shared";
+import { nav, titleLook } from "./shared";
 
 /* ── the crossing (preview `?cross=1`) ──
    Past the end of a project the next one comes in as a card over it,
@@ -122,20 +122,41 @@ export function createCross(m: Mover): Cross {
        so it moves with the fingers and back, and is at rest by the time
        it lands: nothing plays again on the page (Julian, 2026-10-19). */
     words = [...card.querySelectorAll<HTMLElement>(".title-word")].map((w) => [w, w.textContent ?? ""]);
-    const chars = words.flatMap(([w, t]) => {
-      w.textContent = "";
-      return [...t].map((ch) => {
+    const els = words.map(([w]) => w);
+    const dl = card.querySelector<HTMLElement>("dl");
+    tl = gsap.timeline({ paused: true });
+    /* Preview (`?title=`): which way the title comes in, to compare. */
+    const look = titleLook();
+    if (look === "mask") {
+      // Each line rises from behind its own lower edge.
+      const inner = words.map(([w, t]) => {
+        w.textContent = "";
         const s = document.createElement("span");
-        s.textContent = ch;
+        s.textContent = t;
         s.style.display = "inline-block";
         w.append(s);
+        w.style.clipPath = "inset(-0.3em -0.3em 0 -0.3em)";
         return s;
       });
-    });
-    const dl = card.querySelector<HTMLElement>("dl");
-    tl = gsap
-      .timeline({ paused: true })
-      .from(chars, {
+      tl.from(inner, { yPercent: 110, duration: 0.6, ease: "power3.out", stagger: 0.18 }, 0);
+    } else if (look === "stretch") {
+      // Wide on its left edge, squeezed to its true width.
+      tl.from(els, { scaleX: 1.4, transformOrigin: "0% 50%", opacity: 0.3, duration: 0.8, ease: "power3.out", stagger: 0.1 }, 0);
+    } else if (look === "split") {
+      // The lines from opposite sides, meeting at rest.
+      tl.from(els, { x: (i) => (i % 2 ? 1 : -1) * 180, opacity: 0, duration: 0.7, ease: "power3.out" }, 0);
+    } else {
+      const chars = words.flatMap(([w, t]) => {
+        w.textContent = "";
+        return [...t].map((ch) => {
+          const s = document.createElement("span");
+          s.textContent = ch;
+          s.style.display = "inline-block";
+          w.append(s);
+          return s;
+        });
+      });
+      tl.from(chars, {
         rotationY: -100 * dir,
         transformPerspective: 600,
         x: 40 * dir,
@@ -144,7 +165,9 @@ export function createCross(m: Mover): Cross {
         duration: 0.45,
         ease: "power3.out",
         stagger: { each: 0.04, from: dir > 0 ? "end" : "start" },
-      }, 0)
+      }, 0);
+    }
+    tl
       // Once the last letter is down.
       .from(dl, { clipPath: "inset(0 100% 0 0)", duration: 0.35, ease: "power2.inOut" }, ">")
       .from(dl ? dl.querySelectorAll("dt, dd") : [], { y: 18, opacity: 0, duration: 0.3, ease: "power3.out", stagger: 0.06 }, "<0.12");
@@ -213,7 +236,10 @@ export function createCross(m: Mover): Cross {
       document.documentElement.dataset.nav = "cross";
       c?.style.setProperty("view-transition-name", "cross-card");
       // Whole words again before the swap, kerned as the page's are.
-      for (const [w, t] of words) w.textContent = t;
+      for (const [w, t] of words) {
+        w.textContent = t;
+        w.style.clipPath = "";
+      }
       words = [];
       m.go(href);
       /* Off only once the page under it is the picture on it: its title
