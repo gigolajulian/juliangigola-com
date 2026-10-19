@@ -215,7 +215,7 @@ export function PhotoNotice() {
       data-box=""
       onPointerEnter={() => setHeld(true)}
       onPointerLeave={() => setHeld(false)}
-      className="fixed z-50 w-[17rem] rounded-[4px] border border-foreground/25 bg-background/95 px-4 py-3.5 text-foreground"
+      className="fixed z-50 w-[17rem] rounded-[4px] border border-foreground/25 bg-background/80 px-4 py-3.5 text-foreground"
     >
       {/* Said once per raise; the lines below stay through the fade out. */}
       {shown ? (
