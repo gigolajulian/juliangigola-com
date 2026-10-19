@@ -52,6 +52,12 @@ export function createCross(m: Mover): Cross {
   /** The title's words and their text, wrapped for the rise. */
   let words: [HTMLElement, string][] = [];
   const W = () => window.innerWidth;
+  /* The cards' photographs decoded ahead, while the page is idle: laid out
+     invisible they never are, and decoded mid slide the card ran at 20fps
+     (QA, 2026-10-19). One shared decode, so the copy gets it too. */
+  window.setTimeout(() => {
+    for (const i of document.querySelectorAll<HTMLImageElement>("[data-cross-card] img")) i.decode().catch(() => {});
+  }, 1200);
 
   const paint = () => {
     if (!card || !dim) return;
@@ -70,24 +76,36 @@ export function createCross(m: Mover): Cross {
     const box = page.getBoundingClientRect();
     const strip = m.el.getBoundingClientRect();
     const cs = getComputedStyle(m.el);
+    /* Down to the footer, not over it: the dim greyed its text for the
+       length of every crossing (QA, 2026-10-19). */
+    const foot = [...document.querySelectorAll("footer")].pop()?.getBoundingClientRect().top;
+    const tall = Math.min(box.bottom, foot ?? Infinity) - box.top;
     dim = document.createElement("div");
-    dim.style.cssText = `position:fixed;left:0;right:0;top:${box.top}px;height:${box.height}px;background:#000;opacity:0;z-index:34;pointer-events:none`;
+    dim.style.cssText = `position:fixed;left:0;right:0;top:${box.top}px;height:${tall}px;background:#000;opacity:0;z-index:34;pointer-events:none`;
     card = document.createElement("div");
     card.setAttribute("aria-hidden", "true");
-    card.style.cssText = `position:fixed;left:0;width:100vw;top:${box.top}px;height:${box.height}px;z-index:35;background:var(--background);pointer-events:none;will-change:translate;box-shadow:${dir > 0 ? "-30px" : "30px"} 0 60px rgb(0 0 0 / 0.18)`;
+    card.style.cssText = `position:fixed;left:0;width:100vw;top:${box.top}px;height:${tall}px;overflow:hidden;z-index:35;background-color:var(--background);background-image:var(--ground);background-size:100vw 100vh;background-position:0 ${-box.top}px;pointer-events:none;will-change:translate;box-shadow:${dir > 0 ? "-30px" : "30px"} 0 60px rgb(0 0 0 / 0.18)`;
     const row = tpl.firstElementChild!.cloneNode(true) as HTMLElement;
-    row.style.cssText = `position:absolute;left:0;right:0;top:${strip.top - box.top}px;height:${strip.height}px;padding-left:${cs.paddingLeft};column-gap:${cs.columnGap}`;
+    row.style.cssText = `position:absolute;left:0;right:0;top:${strip.top - box.top}px;height:${strip.height}px;${dir > 0 ? "padding-left" : "padding-right"}:${cs.paddingLeft};column-gap:${cs.columnGap}`;
     /* The frames with this page's corners. */
     const cell = m.el.querySelector<HTMLElement>(".strip-cell");
     if (cell) for (const f of row.querySelectorAll<HTMLElement>(":scope > .relative")) f.style.borderRadius = getComputedStyle(cell).borderRadius;
     /* The head: the crumb and the frame count, no title, as a page
-       opens on its plate. */
+       opens on its plate. Backwards it lands past the plate, where the
+       head carries the title (`running-head`), so the card's does. */
     const head = page.querySelector<HTMLElement>(":scope > header, header.page-column");
     if (head) {
       const hb = head.getBoundingClientRect();
       const h = head.cloneNode(true) as HTMLElement;
       h.style.cssText += `;position:absolute;left:${hb.left}px;width:${hb.width}px;top:${hb.top - box.top}px;margin:0`;
-      for (const e of h.querySelectorAll<HTMLElement>("h1, h2, h1 ~ p, h2 ~ p, img, svg")) e.style.visibility = "hidden";
+      for (const e of h.querySelectorAll<HTMLElement>(dir > 0 ? "h1, h2, h1 ~ p, h2 ~ p, img, svg" : "img, svg")) e.style.visibility = "hidden";
+      if (dir < 0) {
+        const t = h.querySelector<HTMLElement>("h1, h2");
+        const sub = t?.parentElement?.querySelector<HTMLElement>("p");
+        if (t) t.textContent = tpl.dataset.title ?? "";
+        if (sub) sub.textContent = tpl.dataset.sub ?? "";
+        for (const e of h.querySelectorAll<HTMLElement>(".running-head")) e.style.opacity = "1";
+      }
       const n = tpl.dataset.count;
       for (const e of h.querySelectorAll<HTMLElement>("*"))
         if (!e.children.length && /^\d+ frames?$/i.test(e.textContent?.trim() ?? "") && n) e.textContent = `${n} frames`;
@@ -105,14 +123,15 @@ export function createCross(m: Mover): Cross {
       r.style.cssText += `;position:absolute;left:${rb.left}px;width:${rb.width}px;top:${rb.top - box.top}px;margin:0`;
       const count = rail.querySelector(".strip-count")?.cloneNode(false) as HTMLElement | undefined;
       if (count) {
-        count.innerHTML = `<span class="text-foreground">01</span> / ${String(n).padStart(2, "0")}`;
+        const nn = String(n).padStart(2, "0");
+        count.innerHTML = `<span class="text-foreground">${dir > 0 ? "01" : nn}</span> / ${nn}`;
         r.append(count);
       }
       const line = off.parentElement!.parentElement!.cloneNode(false) as HTMLElement;
       for (let i = 0; i < n; i++) {
         const b = off.parentElement!.cloneNode(false) as HTMLElement;
         const k = off.cloneNode(false) as HTMLElement;
-        if (!i) k.className = k.className.replace("scale-y-50 bg-foreground/20", "rail-lit scale-y-100 bg-foreground");
+        if (i === (dir > 0 ? 0 : n - 1)) k.className = k.className.replace("scale-y-50 bg-foreground/20", "rail-lit scale-y-100 bg-foreground");
         b.append(k);
         line.append(b);
       }
@@ -143,6 +162,9 @@ export function createCross(m: Mover): Cross {
       // Once the title is up.
       .from(dl, { clipPath: "inset(0 100% 0 0)", duration: 0.35, ease: "power2.inOut" }, ">")
       .from(dl ? dl.querySelectorAll("dt, dd") : [], { y: 18, opacity: 0, duration: 0.3, ease: "power3.out", stagger: 0.06 }, "<0.12");
+    /* Its own layer while it is nudged under the card: unpromoted, every
+       frame of the slide repainted the page (QA, 15fps backwards). */
+    page.style.willChange = "translate";
     m.el.dataset.crossing = "";
     return true;
   };
@@ -156,7 +178,7 @@ export function createCross(m: Mover): Cross {
     card?.remove();
     dim?.remove();
     delete m.el.dataset.crossing;
-    if (page) page.style.translate = "";
+    if (page) page.style.translate = page.style.willChange = "";
     card = dim = page = null;
     dir = 0;
     x = v = 0;
@@ -193,7 +215,9 @@ export function createCross(m: Mover): Cross {
       if (!href) return teardown();
       /* Lands on the title, and the push that brought it is spent: the
          arrival drops the same way's tail for a second (`wheel.ts`). */
-      nav.cameBack = false;
+      // Back lands at the project's end (`arrival.ts`), forward on its title.
+      const back = dir < 0;
+      nav.cameBack = back;
       nav.arriveDir = dir || 1;
       nav.crossedAt = Date.now();
       m.leaving = true;
@@ -218,7 +242,7 @@ export function createCross(m: Mover): Cross {
          at the card's size (the type pass sets it some 300ms after the
          page mounts, Julian's recording 2026-10-19), held two frames, and
          its first frame painted. Then gone in one frame, nothing faded. */
-      const want = parseFloat(getComputedStyle(c?.querySelector("h2") ?? document.body).fontSize);
+      const want = back ? 0 : parseFloat(getComputedStyle(c?.querySelector("h2") ?? document.body).fontSize);
       let landed = 0;
       let still = 0;
       let seen = "";
@@ -226,8 +250,9 @@ export function createCross(m: Mover): Cross {
         if (location.pathname === from) return void requestAnimationFrame(wait);
         landed ||= performance.now();
         const t = document.querySelector<HTMLElement>("main .project-plate > h2");
-        const img = document.querySelector<HTMLImageElement>("main .strip-cell img");
-        const sized = !t || Math.abs(parseFloat(getComputedStyle(t).fontSize) - want) < 0.5;
+        const imgs = document.querySelectorAll<HTMLImageElement>("main .strip-cell img");
+        const img = imgs[back ? imgs.length - 1 : 0];
+        const sized = back || !t || Math.abs(parseFloat(getComputedStyle(t).fontSize) - want) < 0.5;
         /* And every heading sized by the type pass, which writes each one
            inline: the head's h1 stepped 30 to 32px 300 to 700ms in (QA,
            WebKit). */

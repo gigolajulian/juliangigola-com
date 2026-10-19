@@ -670,9 +670,11 @@ function CrossCard({ to, up }: { to: "next" | "prev"; up: NextUp }) {
     /* Laid out on screen and invisible rather than hidden, so the type
        pass sizes its title as it sizes the page's own plate (off screen,
        its fit to the screen shrank it), and the copy carries that size. */
-    <div aria-hidden inert data-cross-card={to} data-count={up.count} className="pointer-events-none invisible fixed inset-x-0 top-0 -z-10 h-[71vh] overflow-hidden">
-      <div className="flex h-full items-stretch">
-        <div
+    <div aria-hidden inert data-cross-card={to} data-count={up.count} data-title={up.title ?? up.name} data-sub={up.sub} className="pointer-events-none invisible fixed inset-x-0 top-0 -z-10 h-[71vh] overflow-hidden">
+      {/* Backwards, the project before as its last screen: its closing
+          frames up to the right edge, where walking back lands. */}
+      <div className={`flex h-full items-stretch${to === "prev" ? " justify-end" : ""}`}>
+        {to === "next" ? <div
           style={{ "--title-em": titleWidth(up.title ?? up.name) } as React.CSSProperties}
           className="project-plate flex w-[min(30rem,82vw)] shrink-0 flex-col justify-center gap-5 pr-2 sm:h-full sm:pr-6"
         >
@@ -700,7 +702,7 @@ function CrossCard({ to, up }: { to: "next" | "prev"; up: NextUp }) {
               ))}
             </dl>
           ) : null}
-        </div>
+        </div> : null}
         {up.open?.map((f) => (
           <div
             key={f.src}

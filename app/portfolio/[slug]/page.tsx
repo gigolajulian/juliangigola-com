@@ -185,7 +185,8 @@ export default async function ProjectPage(props: PageProps<"/portfolio/[slug]">)
      the same walk. A discipline gallery has no project before it. */
   const prevProject = isDiscipline ? undefined : prevBefore(project);
   const prevUp: NextUp | undefined = prevProject
-    ? { href: `/portfolio/${prevProject.slug}`, name: prevProject.name, ...(isDisciplineGallery(prevProject) ? {} : { open: prevProject.images.slice(0, 3), credits: prevProject.credits.map((c) => ({ role: c.role, name: c.name })), count: prevProject.images.length, title: prevProject.headline ?? prevProject.name }) }
+    ? { href: `/portfolio/${prevProject.slug}`, name: prevProject.name, ...(isDisciplineGallery(prevProject) ? {} : { /* Its last screen: back lands at its end, where the visitor left it. */
+        open: prevProject.images.slice(-3), count: prevProject.images.length, title: prevProject.headline ?? prevProject.name, sub: [billing(prevProject), prevProject.categories[0]?.name].filter(Boolean).join(" · ") || undefined }) }
     : undefined;
 
   /* Cover art keeps the rack it was given: twenty-four sleeves at 1:1, two

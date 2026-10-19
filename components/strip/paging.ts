@@ -104,8 +104,23 @@ export function createPaging(m: Mover) {
   let across = el.clientWidth;
   let tall = el.clientHeight;
   let anchor = { i: 0, off: 0 };
-  const note = () => {
+  /* Held by its right edge instead: a crossing back seats the last frame
+     on the right margin (`arrival.ts`), and the head's late resize
+     reflowed it off that by the frames' change in width. */
+  let byRight = false;
+  const note = (e?: Event) => {
     const kids = el.children;
+    byRight = e?.type === "jg:note";
+    if (byRight) {
+      for (let i = kids.length - 1; i >= 0; i--) {
+        const cell = kids[i] as HTMLElement;
+        const right = leftOf(cell) + cell.offsetWidth;
+        if (leftOf(cell) < el.scrollLeft + el.clientWidth - 1) {
+          anchor = { i, off: right - el.scrollLeft };
+          return;
+        }
+      }
+    }
     for (let i = 0; i < kids.length; i++) {
       const cell = kids[i] as HTMLElement;
       const left = leftOf(cell);
@@ -118,7 +133,7 @@ export function createPaging(m: Mover) {
   let noting = 0;
   const onNote = () => {
     window.clearTimeout(noting);
-    noting = window.setTimeout(note, 120);
+    noting = window.setTimeout(() => note(), 120);
   };
   note();
   /* Moved off the start or not, for what stands at the start
@@ -141,7 +156,7 @@ export function createPaging(m: Mover) {
       if (where !== null) el.scrollLeft = where;
     } else {
       const cell = el.children[anchor.i] as HTMLElement | undefined;
-      if (cell) el.scrollLeft = leftOf(cell) - anchor.off;
+      if (cell) el.scrollLeft = leftOf(cell) + (byRight ? cell.offsetWidth : 0) - anchor.off;
     }
     m.x = m.target = el.scrollLeft;
   };
@@ -150,5 +165,5 @@ export function createPaging(m: Mover) {
     window.clearTimeout(settle);
     window.clearTimeout(noting);
   };
-  return { onSettle, onNote, onStart, reseat, stop };
+  return { onSettle, onNote, note, onStart, reseat, stop };
 }

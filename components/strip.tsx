@@ -85,6 +85,8 @@ export type Lead = {
   count?: number;
   /** Its title as its page sets it (the headline, where there is one). */
   title?: string;
+  /** The line under its title in the head. */
+  sub?: string;
 };
 
 /* ── the other way of looking at it ───────────────────────────────
