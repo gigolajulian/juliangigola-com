@@ -58,8 +58,12 @@ const PHOTO = {
   alt: "Julian Gigola sitting on stone steps under a tree",
   position: "58% 50%",
   caption: "Julian Gigola",
-  tag: "Portrait",
 };
+
+/* Julian: a way from the biography to the BTS page. Under the photograph
+   where it shows, under the buttons where it does not. */
+const BTS_LINK =
+  "label text-muted-foreground underline decoration-border underline-offset-4 transition-colors duration-200 hoverable:hover:text-foreground";
 
 export function AboutScreen() {
   return (
@@ -135,6 +139,13 @@ export function AboutScreen() {
               See the work
             </Link>
           </LiquidPair>
+          <Link
+            prefetch={false}
+            href="/bts"
+            className={`${BTS_LINK} title-rest mt-5 self-start py-1.5 lg:hidden lying:hidden`}
+          >
+            Behind the scenes &rarr;
+          </Link>
         </div>
 
         {/* A phone on its side shows him here, not the steps. */}
@@ -153,7 +164,9 @@ export function AboutScreen() {
           </div>
           <figcaption className="label flex justify-between gap-4 text-muted-foreground">
             <span>{PHOTO.caption}</span>
-            <span>{PHOTO.tag}</span>
+            <Link prefetch={false} href="/bts" className={`${BTS_LINK} -my-1.5 py-1.5`}>
+              Behind the scenes &rarr;
+            </Link>
           </figcaption>
         </figure>
 
