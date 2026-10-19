@@ -96,6 +96,13 @@ export type TextBlock = {
  */
 export type Copy = { title: string; intent: string | null };
 
+/**
+ * Behind-the-scenes frames for one shoot, from `bts` in
+ * `content/projects.json`. `by` is the Instagram handle of whoever shot them.
+ * A frame whose `src` ends in `.mp4` is a clip.
+ */
+export type Bts = { by: string | null; frames: Frame[] };
+
 export type Project = {
   slug: string;
   /**
@@ -129,4 +136,6 @@ export type Project = {
    */
   cover: Frame;
   images: Frame[];
+  /** Only on a project that has BTS. */
+  bts?: Bts;
 };

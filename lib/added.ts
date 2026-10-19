@@ -21,7 +21,7 @@
 // Relative, not `@/`: `next.config.ts` reaches this module through `work.ts`
 // and is transpiled outside the app's path mapping.
 import raw from "../content/projects.json";
-import type { Copy, Credit, Frame, Section } from "./work-types";
+import type { Bts, Copy, Credit, Frame, Section } from "./work-types";
 
 export type AddedProject = {
   slug: string;
@@ -289,6 +289,11 @@ export type AddedFile = {
    */
   copy: Record<string, Copy>;
   /**
+   * Behind-the-scenes frames, by slug. Only the projects that have any are
+   * named; every other project is untouched. See `Bts` in `work-types.ts`.
+   */
+  bts: Record<string, Bts>;
+  /**
    * The running order of the work, by slug.
    *
    * One order for the whole site rather than one per discipline. A project
@@ -503,6 +508,18 @@ function parse(v: unknown): AddedFile {
     };
   }
 
+  const rawBts = v.bts === undefined ? {} : v.bts;
+  if (!isRecord(rawBts)) return fail("bts", "an object", rawBts);
+  const bts: Record<string, Bts> = {};
+  for (const [slug, b] of Object.entries(rawBts)) {
+    if (!isRecord(b) || !Array.isArray(b.frames) || !b.frames.length)
+      return fail(`bts["${slug}"]`, "{ by, frames: [at least one] }", b);
+    bts[slug] = {
+      by: b.by == null ? null : str(b.by, `bts["${slug}"].by`).replace(/^@/, ""),
+      frames: b.frames.map((f, i) => frame(f, `bts["${slug}"].frames[${i}]`)),
+    };
+  }
+
   const rawOrder = v.order === undefined ? [] : v.order;
   if (!Array.isArray(rawOrder)) return fail("order", "an array", rawOrder);
   const order = rawOrder.map((slug, i) => str(slug, `order[${i}]`));
@@ -580,6 +597,7 @@ function parse(v: unknown): AddedFile {
     frames,
     credits,
     copy,
+    bts,
     order,
     covers,
     avatars,
@@ -598,6 +616,7 @@ export const RECATEGORISED: Readonly<Record<string, string>> = FILE.categories;
 export const REFRAMED: Readonly<Record<string, FrameRef[]>> = FILE.frames;
 export const RECREDITED: Readonly<Record<string, Credit[]>> = FILE.credits;
 export const RECOPIED: Readonly<Record<string, Copy>> = FILE.copy;
+export const BTS: Readonly<Record<string, Bts>> = FILE.bts;
 
 /** The running order of the work, by slug. Partial; see `AddedFile.order`. */
 export const ORDER: readonly string[] = FILE.order;
