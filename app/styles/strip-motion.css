@@ -14,7 +14,7 @@
 
 @utility strip-scroll {
   scrollbar-width: none;
-  overscroll-behavior-x: contain;
+  overscroll-behavior-x: none;
   /* A scroll container's contents do not paint outside it — which ought to
      go without saying, and does everywhere the arrival animation leaves a
      transform behind. The homepage's cover must not slide in, so its strip
