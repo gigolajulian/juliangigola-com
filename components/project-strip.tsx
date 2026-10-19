@@ -118,6 +118,7 @@ export function ProjectStrip({
      arrival, measured). False in the HTML, true on a wide window as
      it hydrates; see `useWideNow`. */
   const wideNow = useWideNow();
+  const cross = React.useSyncExternalStore(noop, wantsCross, () => false);
 
   /* The photographs with the writing back in its place. `lib/work.ts` pulls
      the two apart — the lightbox and the counts have no use for a paragraph
@@ -487,6 +488,8 @@ export function ProjectStrip({
       </Strip>
 
       <Lightbox frames={frames} name={project.name} {...lightbox} />
+      {cross && next?.open ? <CrossCard to="next" up={next} /> : null}
+      {cross && prev?.open ? <CrossCard to="prev" up={prev} /> : null}
     </>
   );
 }
@@ -647,6 +650,50 @@ function CrossEnd({
           ) : null}
         </Link>
       ) : null}
+    </div>
+  );
+}
+
+/** Preview (`?cross=1`): the opening of the project either side, laid out
+    as its page opens (the plate, then its first frames at the strip's
+    height), hidden until the crossing copies it over the page
+    (`strip/cross.ts`). Its frames load with this page, so the card comes
+    in with its pictures. */
+function CrossCard({ to, up }: { to: "next" | "prev"; up: NextUp }) {
+  return (
+    <div hidden data-cross-card={to} data-count={up.count}>
+      <div className="flex items-stretch">
+        <div
+          style={{ "--title-em": titleWidth(up.name) } as React.CSSProperties}
+          className="project-plate flex w-[min(30rem,82vw)] shrink-0 flex-col justify-center gap-5 pr-2 sm:h-full sm:pr-6"
+        >
+          <h2
+            className="font-display text-4xl uppercase leading-[0.95] tracking-[0] sm:text-6xl"
+            style={{ "--word-em": longestWord(up.name) } as React.CSSProperties}
+          >
+            {up.name}
+          </h2>
+          {up.credits?.length ? (
+            <dl className="title-rest flex flex-col gap-1.5 border-t border-border pt-4 sm:grid sm:grid-cols-[max-content_minmax(0,1fr)] sm:gap-x-3 sm:gap-y-1.5">
+              {up.credits.map((c, i) => (
+                <div key={i} className="flex flex-wrap items-baseline gap-x-2 sm:gap-x-3 sm:contents">
+                  <dt className="label whitespace-nowrap text-muted-foreground">{c.role}</dt>
+                  <dd className="label min-w-0 whitespace-nowrap text-foreground/80">{c.name}</dd>
+                </div>
+              ))}
+            </dl>
+          ) : null}
+        </div>
+        {up.open?.map((f) => (
+          <div
+            key={f.src}
+            className="relative h-full shrink-0 overflow-hidden"
+            style={{ aspectRatio: `${f.width} / ${f.height}`, backgroundColor: f.color }}
+          >
+            <Image src={f.src} alt="" fill sizes={frameSizes(f)} loading="eager" fetchPriority="low" className="object-cover" />
+          </div>
+        ))}
+      </div>
     </div>
   );
 }

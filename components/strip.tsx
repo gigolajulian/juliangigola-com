@@ -78,6 +78,11 @@ export type Lead = {
   /** The first photographs it opens on, as its page will ask for
       them, fetched with the page so its card comes in with them. */
   warm?: { src: string; srcSet?: string; sizes?: string }[];
+  /** Its first frames, for the card that crosses over (`?cross=1`). */
+  open?: import("@/lib/work-types").Frame[];
+  /** And its credits and frame count, for the same card. */
+  credits?: { role: string; name: string }[];
+  count?: number;
 };
 
 /* ── the other way of looking at it ───────────────────────────────

@@ -168,6 +168,9 @@ export default async function ProjectPage(props: PageProps<"/portfolio/[slug]">)
         client:
           nextProject &&
           (credited(nextProject, /client/i) ?? nextProject.categories[0]?.name),
+        open: nextProject?.images.slice(0, 3),
+        credits: nextProject?.credits.map((c) => ({ role: c.role, name: c.name })),
+        count: nextProject?.images.length,
       }
     : undefined;
 
@@ -175,7 +178,7 @@ export default async function ProjectPage(props: PageProps<"/portfolio/[slug]">)
      the same walk. A discipline gallery has no project before it. */
   const prevProject = isDiscipline ? undefined : prevBefore(project);
   const prevUp: NextUp | undefined = prevProject
-    ? { href: `/portfolio/${prevProject.slug}`, name: prevProject.name }
+    ? { href: `/portfolio/${prevProject.slug}`, name: prevProject.name, open: prevProject.images.slice(0, 3), credits: prevProject.credits.map((c) => ({ role: c.role, name: c.name })), count: prevProject.images.length }
     : undefined;
 
   /* Cover art keeps the rack it was given: twenty-four sleeves at 1:1, two

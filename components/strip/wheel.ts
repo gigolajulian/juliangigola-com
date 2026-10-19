@@ -172,6 +172,12 @@ export function wheelHandler(m: Mover, band: Band) {
       if (mag < peak / 2) trough = Math.min(trough, mag);
     }
 
+    /* A card coming over (`cross.ts`) has the wheel both ways. */
+    if (band.cross?.active()) {
+      e.preventDefault();
+      band.cross.push(dy);
+      return;
+    }
     /* By where the strip is, not where it is heading: a notch that lands
        while the strip is still gliding up to the end aims it there and
        no further, and only once it has got there does the next one pull
