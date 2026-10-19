@@ -121,8 +121,12 @@ export function PointerMark() {
          square icon, and along its length on a wide one (a filter chip),
          so the dot slides along a chip with the hand and only the pull
          off it meets the resistance. */
+      /* A panel (`data-box`, the photo notice) holds the dot anywhere
+         inside it, not along a spine, and lets it go once it is gone. */
+      const box = stuck.hasAttribute("data-box");
+      if (box && getComputedStyle(stuck).visibility === "hidden") return unstick();
       const r = stuck.getBoundingClientRect();
-      const half = Math.min(r.width, r.height) / 2;
+      const half = box ? 0 : Math.min(r.width, r.height) / 2;
       const dx = x - Math.min(Math.max(x, r.left + half), r.right - half);
       const dy = y - Math.min(Math.max(y, r.top + half), r.bottom - half);
       const d = Math.hypot(dx, dy);
