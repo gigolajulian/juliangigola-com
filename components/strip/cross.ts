@@ -145,8 +145,9 @@ export function createCross(m: Mover): Cross {
         ease: "power3.out",
         stagger: { each: 0.04, from: dir > 0 ? "end" : "start" },
       }, 0)
-      .from(dl, { clipPath: "inset(0 100% 0 0)", duration: 0.35, ease: "power2.inOut" }, 0.5)
-      .from(dl ? dl.querySelectorAll("dt, dd") : [], { y: 18, opacity: 0, duration: 0.3, ease: "power3.out", stagger: 0.06 }, 0.62);
+      // Once the last letter is down.
+      .from(dl, { clipPath: "inset(0 100% 0 0)", duration: 0.35, ease: "power2.inOut" }, ">")
+      .from(dl ? dl.querySelectorAll("dt, dd") : [], { y: 18, opacity: 0, duration: 0.3, ease: "power3.out", stagger: 0.06 }, "<0.12");
     m.el.dataset.crossing = "";
     return true;
   };
