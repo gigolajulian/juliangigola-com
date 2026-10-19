@@ -110,9 +110,11 @@ export function wheelHandler(m: Mover, band: Band) {
        560ms after the mount. So for the first second, a push the same
        way as the one that led here is that push still running out, and
        is dropped; the other way is a new decision and goes through. Not
-       under Lenis, which has the wheel there. */
+       under Lenis, which has the wheel there, except a trackpad's: this
+       handler moves the strip for those (below), and a crossing that landed
+       mid-swipe was carried on by its momentum (2026-10-19). */
     if (
-      !lenisWheel &&
+      (!lenisWheel || padGesture.get(el)) &&
       nav.arriveDir !== 0 &&
       Math.sign(raw) === nav.arriveDir &&
       performance.now() - m.arrived < 1000
