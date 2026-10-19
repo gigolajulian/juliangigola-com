@@ -177,7 +177,7 @@ export function PhotoNotice() {
    * further inside the edge than it strictly needed to.
    */
   const BOX_W = 352; // `w-[22rem]`
-  const BOX_H = 116; // three lines plus padding
+  const BOX_H = 132; // three lines plus padding
   const GAP = 12;
   const MARGIN = 16;
 
@@ -235,18 +235,18 @@ export function PhotoNotice() {
         <span aria-hidden className="mt-1.5 block overflow-hidden">
           <span
             data-line
-            className="block font-[family-name:var(--font-wordmark)] text-[1.75rem] font-black normal-case leading-[1.15] tracking-[-0.045em]"
+            className="block font-[family-name:var(--font-wordmark)] text-[2.5rem] font-black normal-case leading-[1.15] tracking-[-0.045em]"
           >
             Julian Gigola
           </span>
         </span>
         <span aria-hidden className="mt-3 flex gap-3 overflow-hidden border-t border-foreground/15 pt-2">
           {raised?.slug ? (
-            <span data-line className="label min-w-0 truncate text-foreground/80">
+            <span data-line className="label min-w-0 truncate text-muted-foreground">
               {raised.slug}
             </span>
           ) : null}
-          <span data-line className="label ml-auto shrink-0 text-muted-foreground">
+          <span data-line className="label ml-auto shrink-0 text-foreground/80">
             All rights reserved
           </span>
         </span>
