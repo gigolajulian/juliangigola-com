@@ -429,6 +429,16 @@
 :root[data-nav="filter"]::view-transition-old(.page) {
   display: none;
 }
+/* The crossing (`cross.ts`): the card is already the next page, so the
+   router's trip is a cut under it, the card held on top. */
+:root[data-nav="cross"]::view-transition-group(*),
+:root[data-nav="cross"]::view-transition-old(*),
+:root[data-nav="cross"]::view-transition-new(*) {
+  animation: none;
+}
+:root[data-nav="cross"]::view-transition-old(.page) {
+  display: none;
+}
 /* ── the deck, across pages ──
    A strip dealt at its ends (`deck="leads"`, `lib/deck.ts`) leads on to
    the next page as a card: the strip leaving holds and recedes while the

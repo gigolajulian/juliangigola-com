@@ -19,7 +19,7 @@ const OMEGA = (2 * Math.PI) / 0.35;
 /** A flick: px per ms in the leading direction at the lift. */
 const FLICK = 0.5;
 /** The quiet that ends a wheel push. */
-const QUIET = 140;
+const QUIET = 70;
 
 export type Cross = {
   /** Whether a card is out. */
@@ -112,7 +112,8 @@ export function createCross(m: Mover): Cross {
       const a = -OMEGA * OMEGA * (x - to) - 2 * OMEGA * vel;
       vel += a * dt;
       x += vel * dt;
-      if (Math.abs(x - to) < 0.5 && Math.abs(vel) < 20) {
+      // Within 2px it is there: the last of a spring is a crawl nobody reads.
+      if (Math.abs(x - to) < 2 && Math.abs(vel) < 60) {
         x = to;
         paint();
         return done();
@@ -139,20 +140,38 @@ export function createCross(m: Mover): Cross {
       const d = dim;
       card = dim = null;
       if (page) page.style.translate = "";
+      /* The router's own page trip would snapshot this page as a layer
+         over the card and fade it out: Julian saw the old page flash
+         back. Muted, and the card named so it stays on top of the new
+         page while the trip runs (`portfolio.css`). */
+      document.documentElement.dataset.nav = "cross";
+      c?.style.setProperty("view-transition-name", "cross-card");
       m.go(href);
+      /* Off only once the page under it is the picture on it: its title
+         at the card's size (the type pass sets it some 300ms after the
+         page mounts, Julian's recording 2026-10-19), held two frames, and
+         its first frame painted. Then gone in one frame, nothing faded. */
+      const want = parseFloat(getComputedStyle(c?.querySelector("h2") ?? document.body).fontSize);
+      let landed = 0;
+      let still = 0;
       const wait = () => {
         if (location.pathname === from) return void requestAnimationFrame(wait);
-        // Two frames for the page to paint under it, then off.
-        window.setTimeout(() => {
-          d?.remove();
-          c?.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 220, easing: "ease-out" }).finished.finally(() => c.remove());
-          going = false;
-        }, 260);
+        landed ||= performance.now();
+        const t = document.querySelector<HTMLElement>("main .project-plate > h2");
+        const img = document.querySelector<HTMLImageElement>("main .strip-cell img");
+        const sized = !t || Math.abs(parseFloat(getComputedStyle(t).fontSize) - want) < 0.5;
+        still = sized ? still + 1 : 0;
+        const ready = still >= 2 && (!img || (img.complete && img.naturalWidth > 0));
+        if (!ready && performance.now() - landed < 1500) return void requestAnimationFrame(wait);
+        d?.remove();
+        c?.remove();
+        going = false;
       };
       requestAnimationFrame(wait);
       // A navigation that never lands leaves nothing behind.
       window.setTimeout(() => {
         if (location.pathname !== from) return;
+        if (document.documentElement.dataset.nav === "cross") delete document.documentElement.dataset.nav;
         c?.remove();
         d?.remove();
         going = false;
@@ -165,8 +184,11 @@ export function createCross(m: Mover): Cross {
   const lift = () => {
     window.clearTimeout(quiet);
     if (!dir || going) return;
-    // Still the speed of the hand, or nothing if it rested before letting go.
-    if (performance.now() - at > 90) v = 0;
+    /* A finger that rested before it lifted threw nothing. A wheel's
+       quiet is the lift itself, so it hands the spring the speed it had:
+       zeroed, the card stopped dead for the quiet and then lurched
+       (trace, 2026-10-19). */
+    if (m.touchX !== null && performance.now() - at > 90) v = 0;
     if (x > W() * 0.5 || v > FLICK) finish();
     else spring(0, teardown);
   };
