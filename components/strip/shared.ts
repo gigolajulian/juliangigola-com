@@ -255,14 +255,3 @@ export function wantsCross() {
   }
 }
 
-/** Preview (`?title=mask|stretch|split|fold`): how the crossing card's
-    title comes in. Kept for the visit. */
-export function titleLook() {
-  try {
-    const asked = new URLSearchParams(window.location.search).get("title");
-    if (asked) window.sessionStorage.setItem("jg-title", asked);
-    return window.sessionStorage.getItem("jg-title") ?? "stretch";
-  } catch {
-    return "stretch";
-  }
-}
