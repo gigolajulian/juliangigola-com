@@ -94,7 +94,7 @@ export function useMotion({
 
     const { onKey, onTab, onFocusIn } = keyHandlers(m);
 
-    const { onSettle, onNote, onStart, reseat, stop: stopPaging } = createPaging(m);
+    const { onSettle, onNote, note, onStart, reseat, stop: stopPaging } = createPaging(m);
     const { onDown, onMove, onUp, onCancel, onHold, onLet, swallowClick } =
       dragHandlers(m, band, onSettle);
     /* The way back to the top of a page that has no top. The wordmark in
@@ -116,6 +116,8 @@ export function useMotion({
     el.addEventListener("scroll", onSettle, { passive: true });
     el.addEventListener("scroll", onMoved, { passive: true });
     el.addEventListener("scroll", onNote, { passive: true });
+    // A seat set from outside (`arrival.ts`) is the place a resize keeps.
+    el.addEventListener("jg:note", note);
     el.addEventListener("scroll", onStart, { passive: true });
     el.addEventListener("focusin", onFocusIn);
     document.addEventListener("keydown", onTab, true);
@@ -149,6 +151,7 @@ export function useMotion({
       el.removeEventListener("scroll", onSettle);
       el.removeEventListener("scroll", onMoved);
       el.removeEventListener("scroll", onNote);
+      el.removeEventListener("jg:note", note);
       el.removeEventListener("scroll", onStart);
       el.removeEventListener("focusin", onFocusIn);
       document.removeEventListener("keydown", onTab, true);

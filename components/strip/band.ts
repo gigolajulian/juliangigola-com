@@ -1,7 +1,8 @@
 import { rubberband } from "@/lib/utils";
 import { leadOn } from "./lead";
+import { createCross, type Cross } from "./cross";
 import type { Mover } from "./motion";
-import { HOLD, LEAVE_AFTER, RELAX, STRETCH, WHEEL } from "./shared";
+import { HOLD, LEAVE_AFTER, RELAX, STRETCH, WHEEL, wantsCross } from "./shared";
 
 /* ── the band ──
    Push past either end and the strip does not stop dead, it gives a
@@ -39,10 +40,13 @@ export type Band = {
   release: () => void;
   push: (by: number) => void;
   leave: (dir: 1 | -1) => void;
+  /** Preview (`?cross=1`): the next project as a card under the hand. */
+  cross: Cross | null;
 };
 
 export function createBand(m: Mover): Band {
   const { el } = m;
+  const cross = m.deck === "leads" && m.eased && wantsCross() ? createCross(m) : null;
   /* Through the window it is one scroll past it, either way (Julian:
      seamless): the word already said what is next, so there is nothing
      to make sure of. Everywhere else the band asks for a persistent
@@ -169,6 +173,7 @@ export function createBand(m: Mover): Band {
        to stretch against: the band was give with nothing behind it,
        which reads as the page wobbling. Julian asked for it gone. */
     if (m.room() < 1 && !(by > 0 ? m.nextHref : m.prevHref)) return;
+    if (cross?.push(by)) return;
     m.over += by;
     m.pushed = performance.now();
     delete el.dataset.release;
@@ -216,5 +221,5 @@ export function createBand(m: Mover): Band {
     leadOn(m, dir, href, door);
   };
 
-  return { door, after, bounce, release, push, leave };
+  return { door, after, bounce, release, push, leave, cross };
 }

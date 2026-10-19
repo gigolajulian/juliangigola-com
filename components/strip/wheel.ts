@@ -78,6 +78,10 @@ export function wheelHandler(m: Mover, band: Band) {
     const before = m.gestureAt;
     const gap = now - Math.max(before, m.arrived);
     const fresh = now - before > GESTURE_GAP_MS;
+    /* Across pages: event times are stamped as they happen, so a mount
+       that stalls the page leaves no gap in them, and a tail stays one. */
+    const freshAll = now - nav.wheelAt > GESTURE_GAP_MS;
+    nav.wheelAt = now;
     m.gestureAt = now;
     // A new push: take the measurements again, once, before using them.
     if (fresh) m.size();
@@ -98,6 +102,12 @@ export function wheelHandler(m: Mover, band: Band) {
        300ms, and a second for the first notch here: the page mounting
        under the spin stalls it. Only for a page a spin or a drag led
        to; one reached from the bar owes nothing to a wheel. */
+    /* A trackpad's new swipe once the page is here is a new decision,
+       never the tail: the tail is one unbroken stream, and a gap long
+       enough to end a gesture ends it. Without this, swipes a few hundred
+       ms apart kept the window below open for good and a page reached by
+       a swipe ignored the next ones (MAC, Safari, 2026-10-19). */
+    if (freshAll && padGesture.get(el)) nav.arriveDir = 0;
     if (!paused) {
       if (!nav.arriveDir || gap > (before > m.arrived ? 300 : 1000)) paused = true;
       else m.arrived = performance.now();
@@ -110,9 +120,11 @@ export function wheelHandler(m: Mover, band: Band) {
        560ms after the mount. So for the first second, a push the same
        way as the one that led here is that push still running out, and
        is dropped; the other way is a new decision and goes through. Not
-       under Lenis, which has the wheel there. */
+       under Lenis, which has the wheel there, except a trackpad's: this
+       handler moves the strip for those (below), and a crossing that landed
+       mid-swipe was carried on by its momentum (2026-10-19). */
     if (
-      !lenisWheel &&
+      (!lenisWheel || padGesture.get(el)) &&
       nav.arriveDir !== 0 &&
       Math.sign(raw) === nav.arriveDir &&
       performance.now() - m.arrived < 1000
@@ -172,6 +184,12 @@ export function wheelHandler(m: Mover, band: Band) {
       if (mag < peak / 2) trough = Math.min(trough, mag);
     }
 
+    /* A card coming over (`cross.ts`) has the wheel both ways. */
+    if (band.cross?.active()) {
+      e.preventDefault();
+      band.cross.push(dy);
+      return;
+    }
     /* By where the strip is, not where it is heading: a notch that lands
        while the strip is still gliding up to the end aims it there and
        no further, and only once it has got there does the next one pull

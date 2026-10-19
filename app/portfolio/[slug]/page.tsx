@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { opening } from "@/lib/opening";
 import { ProjectStrip, type NextUp } from "@/components/project-strip";
+import { endLine } from "@/lib/end-lines";
 import { StripPage, StripHead } from "@/components/strip-page";
 import { CoverArtGallery } from "@/components/cover-art-gallery";
 import { CallToAction } from "@/components/call-to-action";
@@ -167,6 +168,16 @@ export default async function ProjectPage(props: PageProps<"/portfolio/[slug]">)
         client:
           nextProject &&
           (credited(nextProject, /client/i) ?? nextProject.categories[0]?.name),
+        /* The crossing's card, only where the next page is that project's
+           own strip (a session's next is its booking page). */
+        ...(nextProject && !isDisciplineGallery(nextProject) && onwards.href === `/portfolio/${nextProject.slug}`
+          ? {
+              open: nextProject.images.slice(0, 3),
+              credits: nextProject.credits.map((c) => ({ role: c.role, name: c.name })),
+              count: nextProject.images.length,
+              title: nextProject.headline ?? nextProject.name,
+            }
+          : {}),
       }
     : undefined;
 
@@ -174,7 +185,8 @@ export default async function ProjectPage(props: PageProps<"/portfolio/[slug]">)
      the same walk. A discipline gallery has no project before it. */
   const prevProject = isDiscipline ? undefined : prevBefore(project);
   const prevUp: NextUp | undefined = prevProject
-    ? { href: `/portfolio/${prevProject.slug}`, name: prevProject.name }
+    ? { href: `/portfolio/${prevProject.slug}`, name: prevProject.name, ...(isDisciplineGallery(prevProject) ? {} : { /* Its last screen: back lands at its end, where the visitor left it. */
+        open: prevProject.images.slice(-3), count: prevProject.images.length, title: prevProject.headline ?? prevProject.name, sub: [billing(prevProject), prevProject.categories[0]?.name].filter(Boolean).join(" · ") || undefined }) }
     : undefined;
 
   /* Cover art keeps the rack it was given: twenty-four sleeves at 1:1, two
@@ -257,6 +269,7 @@ export default async function ProjectPage(props: PageProps<"/portfolio/[slug]">)
         project={project}
         next={nextUp}
         prev={prevUp}
+        line={endLine(project)}
         className="mt-6 flex-1"
       />
     </StripPage>

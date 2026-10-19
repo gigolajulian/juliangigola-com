@@ -61,6 +61,10 @@ export function useArrival({
       if (trip) trip.finished.finally(done);
       else window.setTimeout(done, 1000);
     }
+    /* Carried in by a card (`cross.ts`): it already showed the page. Read
+       now: the strip clears the mark before the next frame. */
+    const carried = Date.now() - nav.crossedAt < DEAL_MS;
+    if (carried) el.dataset.arrive = "dealt";
     // The filter changed under a row that stayed: a fade, not an arrival.
     /* Julian: the covers fly across the filters as they do between the
        views (`flyCovers` in `lib/work-view.ts`), from where they stood
@@ -122,7 +126,7 @@ export function useArrival({
       document.documentElement.dataset.nav === "out";
     if (back) {
       // Dealt whole as a page (`nav-side`), the page's trip is the arrival.
-      el.dataset.arrive = dealt ? "dealt" : zooming ? "zoom" : "back";
+      el.dataset.arrive = dealt || carried ? "dealt" : zooming ? "zoom" : "back";
       /* The end of the sequence, not the end of the scroller. Walking
          back into a filter used to land on whatever the strip finishes
          with - which since the ask came off the discipline pages is the
@@ -141,7 +145,13 @@ export function useArrival({
           (found, cell, i) => (cell.dataset.tick !== undefined ? i : found),
           -1,
         );
-        const where = last >= 0 ? centreOf(el, last) : null;
+        /* Crossed back under a card (`cross.ts`): the card showed the last
+           frame against the right margin, so the strip sits that way. */
+        const crossed = carried && last >= 0;
+        const end = crossed
+          ? el.scrollLeft + cells[last].getBoundingClientRect().right - el.getBoundingClientRect().left + parseFloat(getComputedStyle(el).paddingLeft) - el.clientWidth
+          : null;
+        const where = end ?? (last >= 0 ? centreOf(el, last) : null);
         if (where === null) return;
         const at = Math.max(
           0,
@@ -154,6 +164,9 @@ export function useArrival({
         if (at < el.scrollLeft && at > el.scrollLeft - el.clientWidth * 1.5) {
           el.scrollLeft = at;
         }
+        /* Kept through the head's late resize (the type pass): without it
+           the strip went back to where it stood a frame ago, its very end. */
+        if (crossed) el.dispatchEvent(new Event("jg:note"));
       });
     } else if (zooming) {
       el.dataset.arrive = "zoom";

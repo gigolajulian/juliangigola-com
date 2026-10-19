@@ -95,6 +95,8 @@ export function useLenis(
           dx = data.deltaX;
           dy = data.deltaY;
           if (!(e instanceof WheelEvent)) return true;
+          // A card crossing over has the wheel (`cross.ts`).
+          if ("crossing" in el.dataset) return false;
           /* A trackpad is the strip's own (`onWheel`): its events move
              the scroller directly, since macOS has already eased them.
              Eased again here it cost a frame loop and a layout a frame,

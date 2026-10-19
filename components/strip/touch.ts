@@ -87,6 +87,10 @@ export function touchHandlers(m: Mover, band: Band) {
     const x = e.touches[0].clientX;
     const by = m.touchX - x;
     m.touchX = x;
+    if (band.cross?.active()) {
+      band.cross.push(by);
+      return;
+    }
     // Which way the finger is going, as the band counts it: forward is
     // positive, the same sign the wheel gives `push`.
     const dir: 1 | -1 = by > 0 ? 1 : -1;
@@ -100,6 +104,7 @@ export function touchHandlers(m: Mover, band: Band) {
   const onTouchEnd = (e: TouchEvent) => {
     m.touchX = null;
     touchEdge = 0;
+    if (band.cross?.active()) return band.cross.lift();
     if (!m.paged || !m.eased || m.leaving || e.touches.length) return;
     const lift = e.changedTouches[0];
     if (!lift || flick.length < 2 || Math.abs(lift.clientX - flick[0].x) < 8) return;
