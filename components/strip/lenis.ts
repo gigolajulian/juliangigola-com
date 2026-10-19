@@ -7,6 +7,7 @@ import {
   MOUSE_LERP,
   NOTCH_TURN_PX,
   padGesture,
+  wantsEndHold,
   wantsLenis,
   wantsOwnNotch,
   WHEEL,
@@ -40,6 +41,7 @@ export function useLenis(
     let off = () => {};
     let gone = false;
     const ownNotch = wantsOwnNotch();
+    const endHold = wantsEndHold();
     /* A frame on: Lenis measures the wrapper as it is made, and made while
        the page arrives that was 18ms of layout inside the trip's freeze. */
     const ready = new Promise((go) => requestAnimationFrame(go));
@@ -108,6 +110,14 @@ export function useLenis(
           }
           // Under `?notch` the strip has the notch too (`onWheel`).
           if (ownNotch) return false;
+          /* `?endhold`: a push outward at an end is the band's
+             (`wheel.ts`). Taken here too, Lenis eased a target pinned at
+             the end and kept writing the scroller under the band. */
+          if (endHold) {
+            const d = Math.abs(dx) > Math.abs(dy) ? dx : dy;
+            const end = el.scrollWidth - el.clientWidth;
+            if (d > 0 ? el.scrollLeft >= end - 1 : d < 0 && el.scrollLeft <= 0) return false;
+          }
           lenis.options.lerp = MOUSE_LERP;
           /* Firefox's mouse reports lines, and Lenis counts a line as
              16.7px, so a notch of three carried 150px against the 360 of

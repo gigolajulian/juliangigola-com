@@ -122,6 +122,22 @@ export function wantsLenis() {
     return true;
   }
 }
+/** Preview (`?endhold=1`, `?endhold=0` to leave; kept for the visit):
+    the strip's end under Safari's trackpad. Julian saw the last card
+    creep out and snap back about twice a second on a hard swipe past the
+    end (QA measured +131px in one frame, then a 0.13s snap, Lenis on).
+    With it, a push outward past an end keeps holding the band while the
+    band is out, rather than letting go whenever the scroller reads a
+    pixel short of the end, and Lenis takes no outward push at an end. */
+export function wantsEndHold() {
+  try {
+    const asked = new URLSearchParams(window.location.search).get("endhold");
+    if (asked === "1" || asked === "0") window.sessionStorage.setItem("jg-endhold", asked);
+    return window.sessionStorage.getItem("jg-endhold") === "1";
+  } catch {
+    return false;
+  }
+}
 /** The quiet that ends a swipe. A trackpad fires every frame or so while
     the fingers are down and keeps firing as the fling decays, so anything
     under about a tenth of a second is still the same push. */

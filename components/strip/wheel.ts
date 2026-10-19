@@ -8,6 +8,7 @@ import {
   nav,
   PAD,
   padGesture,
+  wantsEndHold,
   wantsOwnNotch,
   WHEEL,
 } from "./shared";
@@ -39,6 +40,7 @@ const SWIPE_LOCK = 380;
 export function wheelHandler(m: Mover, band: Band) {
   const { el } = m;
   const ownNotch = wantsOwnNotch();
+  const endHold = wantsEndHold();
   /** While a paged move is landing, another gesture is the same gesture. */
   let locked = 0;
   let paused = false;
@@ -177,7 +179,11 @@ export function wheelHandler(m: Mover, band: Band) {
        no further, and only once it has got there does the next one pull
        the band. That tail of the glide is the beat between arriving and
        asking to leave, and it comes free with the friction. */
-    if (dy > 0 ? el.scrollLeft >= m.room() - 1 : el.scrollLeft <= 0) {
+    /* `?endhold`: a band already out stays held by a push the same way,
+       even where the scroller reads short of the end (Lenis's ease still
+       arriving, Safari's fractional scrollLeft); only a push back lets go. */
+    const held = endHold && (dy > 0 ? m.over > 0 : m.over < 0);
+    if (held || (dy > 0 ? el.scrollLeft >= m.room() - 1 : el.scrollLeft <= 0)) {
       /* A page that can still scroll vertically goes first, in both
          directions: a project strip on a phone has its footer below it.
          From 40rem up a strip page cannot scroll at all (`globals.css`),
