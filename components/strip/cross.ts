@@ -1,3 +1,4 @@
+import { gsap } from "gsap";
 import type { Mover } from "./motion";
 import { nav } from "./shared";
 
@@ -42,6 +43,7 @@ export function createCross(m: Mover): Cross {
   let card: HTMLElement | null = null;
   let dim: HTMLElement | null = null;
   let page: HTMLElement | null = null;
+  let tl: gsap.core.Timeline | null = null;
   const W = () => window.innerWidth;
 
   const paint = () => {
@@ -51,6 +53,7 @@ export function createCross(m: Mover): Cross {
     card.style.translate = `${(dir > 0 ? w - x : x - w).toFixed(1)}px 0`;
     dim.style.opacity = (0.28 * k).toFixed(3);
     if (page) page.style.translate = `${(-dir * 0.12 * x).toFixed(1)}px 0`;
+    tl?.progress(k);
   };
 
   const build = () => {
@@ -111,6 +114,13 @@ export function createCross(m: Mover): Cross {
     }
     card.append(row);
     document.body.append(dim, card);
+    /* The title and credits settle in as the card comes, scrubbed by
+       it, so they move with the fingers and back, and are at rest by the
+       time it lands: nothing plays again on the page (Julian, 2026-10-19). */
+    tl = gsap
+      .timeline({ paused: true, defaults: { ease: "power2.out" } })
+      .from(card.querySelectorAll(".title-word"), { x: 56 * dir, opacity: 0.25, duration: 0.7, stagger: 0.12 }, 0)
+      .from(card.querySelectorAll("dl"), { y: 12, opacity: 0, duration: 0.45 }, 0.45);
     m.el.dataset.crossing = "";
     return true;
   };
@@ -118,6 +128,8 @@ export function createCross(m: Mover): Cross {
   const teardown = () => {
     cancelAnimationFrame(raf);
     window.clearTimeout(quiet);
+    tl?.kill();
+    tl = null;
     card?.remove();
     dim?.remove();
     delete m.el.dataset.crossing;
