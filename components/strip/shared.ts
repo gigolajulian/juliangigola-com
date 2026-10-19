@@ -261,8 +261,8 @@ export function titleLook() {
   try {
     const asked = new URLSearchParams(window.location.search).get("title");
     if (asked) window.sessionStorage.setItem("jg-title", asked);
-    return window.sessionStorage.getItem("jg-title") ?? "fold";
+    return window.sessionStorage.getItem("jg-title") ?? "stretch";
   } catch {
-    return "fold";
+    return "stretch";
   }
 }

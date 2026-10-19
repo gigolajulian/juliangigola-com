@@ -46,6 +46,8 @@ export function createCross(m: Mover): Cross {
   let tl: gsap.core.Timeline | null = null;
   /** The title's words and their text, split into letters for the fold. */
   let words: [HTMLElement, string][] = [];
+  /** What plays once the card has landed, before it lifts. */
+  let settle: (() => gsap.core.Timeline) | null = null;
   const W = () => window.innerWidth;
 
   const paint = () => {
@@ -127,6 +129,18 @@ export function createCross(m: Mover): Cross {
     tl = gsap.timeline({ paused: true });
     /* Preview (`?title=`): which way the title comes in, to compare. */
     const look = titleLook();
+    const letters = () =>
+      words.flatMap(([w, t]) => {
+        w.textContent = "";
+        return [...t].map((ch) => {
+          const s = document.createElement("span");
+          s.textContent = ch;
+          s.style.display = "inline-block";
+          w.append(s);
+          return s;
+        });
+      });
+    const rows = dl ? [...dl.querySelectorAll<HTMLElement>("dt, dd")] : [];
     if (look === "mask") {
       // Each line rises from behind its own lower edge.
       const inner = words.map(([w, t]) => {
@@ -140,22 +154,30 @@ export function createCross(m: Mover): Cross {
       });
       tl.from(inner, { yPercent: 110, duration: 0.6, ease: "power3.out", stagger: 0.18 }, 0);
     } else if (look === "stretch") {
-      // Wide on its left edge, squeezed to its true width.
-      tl.from(els, { scaleX: 1.4, transformOrigin: "0% 50%", opacity: 0.3, duration: 0.8, ease: "power3.out", stagger: 0.1 }, 0);
+      /* The letters come in pulled wide and spread, and the card's
+         arrival squeezes them past their width; once it lands they spring
+         back to it, rubber-banding, and the credits build up after
+         (`settle`). */
+      const chars = letters();
+      tl.fromTo(
+        chars,
+        { scaleX: 1.9, x: (i) => i * 18 * dir, transformOrigin: dir > 0 ? "0% 100%" : "100% 100%" },
+        { scaleX: 0.84, x: 0, duration: 1, ease: "power2.inOut" },
+        0,
+      );
+      if (dl) gsap.set(dl, { clipPath: "inset(0 100% 0 0)" });
+      gsap.set(rows, { y: 18, opacity: 0 });
+      settle = () =>
+        gsap
+          .timeline()
+          .to(chars, { scaleX: 1, duration: 0.75, ease: "elastic.out(1.15, 0.32)", stagger: { each: 0.015, from: dir > 0 ? "end" : "start" } }, 0)
+          .to(dl, { clipPath: "inset(0 0% 0 0)", duration: 0.3, ease: "power2.inOut" }, 0.35)
+          .to(rows, { y: 0, opacity: 1, duration: 0.3, ease: "power3.out", stagger: 0.05 }, 0.45);
     } else if (look === "split") {
       // The lines from opposite sides, meeting at rest.
       tl.from(els, { x: (i) => (i % 2 ? 1 : -1) * 180, opacity: 0, duration: 0.7, ease: "power3.out" }, 0);
     } else {
-      const chars = words.flatMap(([w, t]) => {
-        w.textContent = "";
-        return [...t].map((ch) => {
-          const s = document.createElement("span");
-          s.textContent = ch;
-          s.style.display = "inline-block";
-          w.append(s);
-          return s;
-        });
-      });
+      const chars = letters();
       tl.from(chars, {
         rotationY: -100 * dir,
         transformPerspective: 600,
@@ -167,10 +189,10 @@ export function createCross(m: Mover): Cross {
         stagger: { each: 0.04, from: dir > 0 ? "end" : "start" },
       }, 0);
     }
-    tl
+    if (!settle) tl
       // Once the last letter is down.
       .from(dl, { clipPath: "inset(0 100% 0 0)", duration: 0.35, ease: "power2.inOut" }, ">")
-      .from(dl ? dl.querySelectorAll("dt, dd") : [], { y: 18, opacity: 0, duration: 0.3, ease: "power3.out", stagger: 0.06 }, "<0.12");
+      .from(rows, { y: 18, opacity: 0, duration: 0.3, ease: "power3.out", stagger: 0.06 }, "<0.12");
     m.el.dataset.crossing = "";
     return true;
   };
@@ -181,6 +203,7 @@ export function createCross(m: Mover): Cross {
     tl?.kill();
     tl = null;
     words = [];
+    settle = null;
     card?.remove();
     dim?.remove();
     delete m.el.dataset.crossing;
@@ -235,12 +258,20 @@ export function createCross(m: Mover): Cross {
          page while the trip runs (`portfolio.css`). */
       document.documentElement.dataset.nav = "cross";
       c?.style.setProperty("view-transition-name", "cross-card");
-      // Whole words again before the swap, kerned as the page's are.
-      for (const [w, t] of words) {
-        w.textContent = t;
-        w.style.clipPath = "";
-      }
+      /* The landing's own beat (the stretch's rubber band) plays on the
+         card, then whole words again before the swap, kerned as the
+         page's are. */
+      const ws = words;
       words = [];
+      const whole = () => {
+        for (const [w, t] of ws) {
+          w.textContent = t;
+          w.style.clipPath = "";
+        }
+      };
+      const play = settle?.();
+      if (play) play.eventCallback("onComplete", whole);
+      else whole();
       m.go(href);
       /* Off only once the page under it is the picture on it: its title
          at the card's size (the type pass sets it some 300ms after the
@@ -256,7 +287,7 @@ export function createCross(m: Mover): Cross {
         const img = document.querySelector<HTMLImageElement>("main .strip-cell img");
         const sized = !t || Math.abs(parseFloat(getComputedStyle(t).fontSize) - want) < 0.5;
         still = sized ? still + 1 : 0;
-        const ready = still >= 2 && (!img || (img.complete && img.naturalWidth > 0));
+        const ready = still >= 2 && (!play || play.progress() === 1) && (!img || (img.complete && img.naturalWidth > 0));
         if (!ready && performance.now() - landed < 1500) return void requestAnimationFrame(wait);
         d?.remove();
         c?.remove();
