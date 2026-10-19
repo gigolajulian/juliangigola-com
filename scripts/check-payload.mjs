@@ -36,6 +36,7 @@ const edit = {
   covers: {},
   avatars: {},
   slugs: {},
+  bts: {},
 };
 
 // What is already in the repo is carried through, not clobbered.
@@ -230,6 +231,7 @@ const edit = {
     hidden: ["old"],
     unlisted: [],
     slugs: {},
+    bts: {},
     categories: { a: "editorial" },
     frames: { a: ["/work/a/01.jpg"] },
     credits: { a: [{ role: "Model", name: "X" }] },
@@ -288,6 +290,7 @@ const edit = {
       hidden: [],
       unlisted: [],
       slugs: {},
+      bts: {},
       categories: {},
       frames: {},
       credits: {},
@@ -413,6 +416,7 @@ const edit = {
     covers: { editorial: "/work/p/01.jpg" },
     avatars: { x: "/people/x.jpg" },
     slugs: { p: "pp" },
+    bts: { p: { by: "x", frames: [{ src: "/work/p/bts/01.jpg" }] } },
   };
   const back = adoptable(projectsFile({ projects: [], trash: [] }, rich), edit);
   assert.equal(
@@ -428,6 +432,16 @@ const edit = {
     Object.keys(rich).sort(),
     "projectsFile writes exactly the manifest's fields and no others",
   );
+}
+
+// BTS cleared of every frame leaves no entry; none left, no key.
+{
+  const file = projectsFile(null, {
+    ...edit,
+    bts: { a: { by: "x", frames: [] }, b: { by: null, frames: ["/b.jpg"] } },
+  });
+  assert.deepEqual(Object.keys(file.bts), ["b"], "an empty BTS entry goes");
+  assert.equal(projectsFile(null, edit).bts, undefined, "no BTS, no key");
 }
 
 console.log("admin payload: all cases pass");

@@ -26,6 +26,7 @@ import {
   ORDER,
   AVATARS,
   DISCIPLINE_COVERS,
+  BTS,
 } from "@/lib/added";
 
 /* ── admin ────────────────────────────────────────────────────────
@@ -188,6 +189,7 @@ export default function AdminPage() {
         initialOrder={[...ORDER]}
         initialCovers={{ ...DISCIPLINE_COVERS }}
         initialAvatars={{ ...AVATARS }}
+        initialBts={{ ...BTS }}
         /* Imported from the section itself rather than restated, so the
            picker's limit cannot drift away from the number the grid is
            actually built around. */

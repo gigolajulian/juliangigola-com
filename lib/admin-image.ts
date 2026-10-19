@@ -151,6 +151,51 @@ export async function processImage(
   }
 }
 
+/**
+ * The 25 MiB a Workers static asset may weigh. A clip over it would publish
+ * and then fail the deploy, so it is refused here instead.
+ */
+const MAX_CLIP = 25 * 1024 * 1024;
+
+/**
+ * A BTS clip, kept as shot: an MP4 is uploaded byte for byte, and only its
+ * size and the mean colour of its first frame are read off it.
+ */
+export async function processClip(file: File): Promise<ProcessedImage> {
+  if (file.type !== "video/mp4") {
+    throw new Error(`${file.name} is a ${file.type || "unknown type"}, not an MP4.`);
+  }
+  if (file.size > MAX_CLIP) {
+    throw new Error(`${file.name} is over 25 MB. Export it smaller first.`);
+  }
+
+  const url = URL.createObjectURL(file);
+  const video = document.createElement("video");
+  video.muted = true;
+  video.preload = "auto";
+  video.src = url;
+  try {
+    await new Promise<void>((resolve, reject) => {
+      video.onloadeddata = () => resolve();
+      video.onerror = () => reject(new Error(`${file.name} will not play here.`));
+    });
+    const still = await createImageBitmap(video);
+    try {
+      return {
+        base64: toBase64(await file.arrayBuffer()),
+        width: video.videoWidth,
+        height: video.videoHeight,
+        color: meanColour(still),
+        bytes: file.size,
+      };
+    } finally {
+      still.close();
+    }
+  } finally {
+    URL.revokeObjectURL(url);
+  }
+}
+
 /** `Some Shoot Name` → `some-shoot-name`, which is both a route and a folder. */
 export const toSlug = (name: string): string =>
   name
