@@ -11,6 +11,7 @@ import { longestWord, titleWidth } from "@/components/strip-page";
 import { Strip, useWideNow, type Lead } from "@/components/strip";
 import { gatherWhenSeen, slides } from "@/lib/gather";
 import { PendingLabel } from "@/components/pending-label";
+import { BtsCredit, BtsStripGrid } from "@/components/bts";
 import type { Project, TextBlock, Frame } from "@/lib/work-types";
 
 /* ── the sequence, across the screen ──────────────────────────────
@@ -41,6 +42,7 @@ type Cell =
   | { kind: "title" }
   | { kind: "frame"; frame: Frame; n: number }
   | { kind: "text"; block: TextBlock }
+  | { kind: "bts" }
   | { kind: "next" };
 
 /** The morph's landing side. The index covers and the homepage tiles carry
@@ -134,10 +136,13 @@ export function ProjectStrip({
     for (const block of byPosition.get(frames.length) ?? []) {
       out.push({ kind: "text", block });
     }
+    // Behind the scenes, after the work and before the ask, where a
+    // project has any.
+    if (project.bts) out.push({ kind: "bts" });
     // Always: the ask ends every sequence, with or without a next project.
     out.push({ kind: "next" });
     return out;
-  }, [frames, project.blocks, next]);
+  }, [frames, project.blocks, project.bts, next]);
 
   // The number under the strip counts photographs, so a paragraph between
   // two of them holds the count of the frame it was written after: the last
@@ -326,6 +331,23 @@ export function ProjectStrip({
             next={next}
             label={gallery ? "Up next" : "Next project"}
           />
+        ) : cell.kind === "bts" ? (
+          project.bts ? (
+          <React.Fragment key="bts">
+            <div
+              data-hash="bts"
+              data-tick
+              className="flex shrink-0 flex-col justify-end gap-3 border-border max-sm:w-full max-sm:border-t max-sm:pt-8 sm:h-full sm:border-l sm:pb-1 sm:pl-8 sm:pr-4"
+            >
+              <span className="label text-muted-foreground">Behind the scenes</span>
+              <h2 className="font-display whitespace-nowrap text-4xl uppercase leading-[0.95] tracking-[0] sm:text-6xl">
+                On set
+              </h2>
+              <BtsCredit bts={project.bts} />
+            </div>
+            <BtsStripGrid bts={project.bts} name={project.name} />
+          </React.Fragment>
+          ) : null
         ) : cell.kind === "text" ? (
           <div
             key={`text-${cell.block.after}-${cell.block.heading ?? ""}`}
@@ -453,6 +475,7 @@ export function ProjectStrip({
       credits,
       project.cover.blur,
       project.slug,
+      project.bts,
       next,
       wideNow,
     ],

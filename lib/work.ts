@@ -27,6 +27,7 @@ import {
   REFRAMED,
   RECREDITED,
   RECOPIED,
+  BTS,
   ORDER,
   DISCIPLINE_COVERS,
   ADDED_DISCIPLINES,
@@ -258,6 +259,10 @@ const recopy = (project: Project): Project => {
     ? { ...project, name: c.title, headline: null, intent: c.intent }
     : project;
 };
+
+/** Behind-the-scenes frames, where a project has any; see `AddedFile.bts`. */
+const withBts = (project: Project): Project =>
+  BTS[project.slug] ? { ...project, bts: BTS[project.slug] } : project;
 
 const recredit = (project: Project): Project =>
   project.slug in RECREDITED
@@ -499,7 +504,7 @@ export const ALL_PROJECTS: Project[] = [
   ),
 ]
   .map((p) =>
-    withFaces(withAlt(relabel(reframe(recopy(recredit(refile(reslug(p)))))))),
+    withBts(withFaces(withAlt(relabel(reframe(recopy(recredit(refile(reslug(p))))))))),
   )
   .sort(byRunningOrder);
 
@@ -533,6 +538,9 @@ export const PROJECTS: Project[] = LINKABLE.filter(
 );
 
 export { HIDDEN, UNLISTED };
+
+/** The listed projects that have BTS, in the running order: the /bts page. */
+export const WITH_BTS: Project[] = PROJECTS.filter((p) => p.bts);
 
 /**
  * The old nav split commissioned work across WORK and MUSIC, which asked a

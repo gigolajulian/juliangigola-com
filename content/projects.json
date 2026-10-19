@@ -3818,5 +3818,54 @@
       "title": "METAMORPHOSIS",
       "intent": null
     }
+  },
+  "bts": {
+    "luxe-meets-future": {
+      "by": "lightbender_mark",
+      "frames": [
+        {
+          "src": "/work/luxe-meets-future/bts/03.jpg",
+          "width": 1440,
+          "height": 1080,
+          "color": "#7a7a7a",
+          "alt": ""
+        },
+        {
+          "src": "/work/luxe-meets-future/bts/01.jpg",
+          "width": 1440,
+          "height": 1080,
+          "color": "#696969",
+          "alt": ""
+        },
+        {
+          "src": "/work/luxe-meets-future/bts/06.jpg",
+          "width": 1440,
+          "height": 1080,
+          "color": "#4c4c4c",
+          "alt": ""
+        },
+        {
+          "src": "/work/luxe-meets-future/bts/02.jpg",
+          "width": 1440,
+          "height": 1080,
+          "color": "#505050",
+          "alt": ""
+        },
+        {
+          "src": "/work/luxe-meets-future/bts/07.jpg",
+          "width": 1440,
+          "height": 1080,
+          "color": "#3a3a3a",
+          "alt": ""
+        },
+        {
+          "src": "/work/luxe-meets-future/bts/05.jpg",
+          "width": 1440,
+          "height": 1085,
+          "color": "#797979",
+          "alt": ""
+        }
+      ]
+    }
   }
 }
