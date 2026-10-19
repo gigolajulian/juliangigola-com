@@ -235,7 +235,7 @@ export function PhotoNotice() {
         <span aria-hidden className="mt-2 block overflow-hidden">
           <span
             data-line
-            className="font-display block text-2xl font-medium uppercase leading-none tracking-[-0.03em]"
+            className="block font-[family-name:var(--font-wordmark)] text-[1.75rem] font-black normal-case leading-none tracking-[-0.045em]"
           >
             Julian Gigola
           </span>
