@@ -176,8 +176,8 @@ export function PhotoNotice() {
    * The estimate is generous, so the worst case is a notice sitting slightly
    * further inside the edge than it strictly needed to.
    */
-  const BOX_W = 272; // `w-[17rem]`
-  const BOX_H = 132; // four lines plus padding
+  const BOX_W = 352; // `w-[22rem]`
+  const BOX_H = 116; // three lines plus padding
   const GAP = 12;
   const MARGIN = 16;
 
@@ -215,7 +215,7 @@ export function PhotoNotice() {
       data-box=""
       onPointerEnter={() => setHeld(true)}
       onPointerLeave={() => setHeld(false)}
-      className="fixed z-50 w-[17rem] rounded-[4px] border border-foreground/25 bg-background/70 px-4 backdrop-blur-xl backdrop-saturate-150 py-3.5 text-foreground"
+      className="fixed z-50 w-[22rem] rounded-[4px] border border-foreground/25 bg-background/70 px-4 backdrop-blur-xl backdrop-saturate-150 py-3.5 text-foreground"
     >
       {/* Said once per raise; the lines below stay through the fade out. */}
       {shown ? (
@@ -232,32 +232,22 @@ export function PhotoNotice() {
             &copy; Copyright {year}
           </span>
         </span>
-        <span aria-hidden className="mt-2 block overflow-hidden">
+        <span aria-hidden className="mt-1.5 block overflow-hidden">
           <span
             data-line
-            className="block font-[family-name:var(--font-wordmark)] text-[1.75rem] font-black normal-case leading-none tracking-[-0.045em]"
+            className="block font-[family-name:var(--font-wordmark)] text-[1.75rem] font-black normal-case leading-[1.15] tracking-[-0.045em]"
           >
             Julian Gigola
           </span>
         </span>
-        <span
-          aria-hidden
-          className="mt-3 block border-t border-foreground/15 pt-2"
-        >
+        <span aria-hidden className="mt-3 flex gap-3 overflow-hidden border-t border-foreground/15 pt-2">
           {raised?.slug ? (
-            <span className="block overflow-hidden">
-              <span
-                data-line
-                className="label block truncate text-foreground/80"
-              >
-                {raised.slug}
-              </span>
+            <span data-line className="label min-w-0 truncate text-foreground/80">
+              {raised.slug}
             </span>
           ) : null}
-          <span className="block overflow-hidden">
-            <span data-line className="label block text-muted-foreground">
-              All rights reserved
-            </span>
+          <span data-line className="label ml-auto shrink-0 text-muted-foreground">
+            All rights reserved
           </span>
         </span>
       </div>
