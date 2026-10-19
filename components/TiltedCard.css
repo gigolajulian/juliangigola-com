@@ -38,7 +38,7 @@
 
 /* Ours: the card being tilted sits over its neighbours, which it grows
    into in a rack with no gaps. */
-.tilted-card-figure:hover {
+:where(:root[data-hover]) .tilted-card-figure:hover {
   z-index: 1;
 }
 

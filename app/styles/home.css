@@ -222,7 +222,7 @@
      than snaps. */
   box-shadow: 0 22px 40px -16px rgb(0 0 0 / 0);
 }
-.light-cell:hover {
+:where(:root[data-hover]) .light-cell:hover {
   /* Up off the table toward the viewer. */
   --lz: 20px;
   box-shadow: var(--sx, 0px) calc(22px + var(--sy, 0px)) 40px -16px rgb(0 0 0 / 0.6);
@@ -239,19 +239,19 @@
    so its neighbours ease aside by half that, the ones before it back,
    the ones after it on, the rows above up and the rows below down, and
    settle again when it does. */
-.light-sheet:has(.light-cell:hover) {
+:where(:root[data-hover]) .light-sheet:has(.light-cell:hover) {
   --push: 3px;
 }
-.light-cell:has(~ .light-cell:hover) {
+:where(:root[data-hover]) .light-cell:has(~ .light-cell:hover) {
   translate: calc(var(--push) * -1) 0;
 }
-.light-cell:hover ~ .light-cell {
+:where(:root[data-hover]) .light-cell:hover ~ .light-cell {
   translate: var(--push) 0;
 }
-.light-sheet:has(~ .light-sheet .light-cell:hover) .light-cell {
+:where(:root[data-hover]) .light-sheet:has(~ .light-sheet .light-cell:hover) .light-cell {
   translate: 0 -3px;
 }
-.light-sheet:has(.light-cell:hover) ~ .light-sheet .light-cell {
+:where(:root[data-hover]) .light-sheet:has(.light-cell:hover) ~ .light-sheet .light-cell {
   translate: 0 3px;
 }
 @media (prefers-reduced-motion: reduce) {
@@ -291,7 +291,7 @@
 }
 @media (hover: hover) and (pointer: fine) {
   /* The others' softening is the focus field now (`focus-field.tsx`). */
-  .light-cell:hover .light-name {
+  :where(:root[data-hover]) .light-cell:hover .light-name {
     opacity: 1;
     translate: 0 0;
   }
@@ -302,7 +302,7 @@
     animation-delay: calc(80ms + var(--i, 0) * 38ms);
     transition-delay: calc(120ms + var(--i, 0) * 38ms);
   }
-  .light-table:has(.light-cell:hover) .light-cell {
+  :where(:root[data-hover]) .light-table:has(.light-cell:hover) .light-cell {
     transition-delay: 0s;
   }
   .strip-scroll[data-at]:not([data-at="Commissions"]) .light-cell {

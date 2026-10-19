@@ -53,8 +53,8 @@ export function CoverFaces({
           // With a back to show, the front gets out of the way entirely.
           // Without one, the dim is the hover feedback on its own.
           back
-            ? "hoverable:group-hover:opacity-0 group-focus-visible:opacity-0"
-            : "hoverable:group-hover:opacity-70",
+            ? "hoverable:settled:group-hover:opacity-0 group-focus-visible:opacity-0"
+            : "hoverable:settled:group-hover:opacity-70",
         )}
       />
 
@@ -69,7 +69,7 @@ export function CoverFaces({
             // Never the priority image: it is invisible until someone asks
             // for it, and the front of the sleeve is what the page is for.
             loading="lazy"
-            className="object-cover opacity-0 transition-opacity duration-300 ease-out hoverable:group-hover:opacity-100 group-focus-visible:opacity-100 motion-reduce:transition-none"
+            className="object-cover opacity-0 transition-opacity duration-300 ease-out hoverable:settled:group-hover:opacity-100 group-focus-visible:opacity-100 motion-reduce:transition-none"
           />
 
           {/* Two ticks, the way the scrub tiles mark position. This is the

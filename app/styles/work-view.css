@@ -284,7 +284,7 @@ h2:not(.label) {
   box-shadow: 0 22px 40px -16px rgb(0 0 0 / 0);
 }
 @media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
-  .scope-tile:hover {
+  :where(:root[data-hover]) .scope-tile:hover {
     transform: perspective(1000px) translateZ(20px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)) rotateZ(var(--rz, 0deg));
     box-shadow: var(--sx, 0px) calc(22px + var(--sy, 0px)) 40px -16px rgb(0 0 0 / 0.6);
     transition:

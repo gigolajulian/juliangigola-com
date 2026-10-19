@@ -67,7 +67,7 @@
   transition: opacity 400ms var(--ease-out-strong);
 }
 @media (hover: hover) and (pointer: fine) {
-  .group:hover > .door-veil {
+  :where(:root[data-hover]) .group:hover > .door-veil {
     opacity: 0.65;
   }
 }
@@ -279,7 +279,7 @@
   }
 }
 @media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
-  .portfolio-arrive .strip-cell:not([data-deck]):hover {
+  :where(:root[data-hover]) .portfolio-arrive .strip-cell:not([data-deck]):hover {
     /* About the card's own middle (`--cx`, `--cy`, `card-tilt.tsx`), not
        the origin the deck gave it. */
     transform: translate(var(--cx, 0px), var(--cy, 0px)) perspective(1000px) translateZ(20px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)) rotateZ(var(--rz, 0deg)) translate(calc(-1 * var(--cx, 0px)), calc(-1 * var(--cy, 0px)));
@@ -338,7 +338,7 @@
   inherits: false;
   initial-value: 160px;
 }
-.focus-field[data-on] {
+:where(:root[data-hover]) .focus-field[data-on] {
   opacity: 1;
   transition-duration: 420ms;
 }

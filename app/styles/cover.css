@@ -551,7 +551,7 @@
       filter 500ms ease;
     transition-delay: var(--release-wait);
   }
-  .cover-float-frame:hover {
+  :where(:root[data-hover]) .cover-float-frame:hover {
     z-index: 1;
   }
   /* Julian: on a photograph's hover, the navbar and the floor a little
@@ -565,7 +565,7 @@
     --glass-tint: 22%;
     --glass-blur: 4px;
   }
-  .cover-float-ring:has(.cover-float-frame:hover) .cover-float-card {
+  :where(:root[data-hover]) .cover-float-ring:has(.cover-float-frame:hover) .cover-float-card {
     /* Julian: less blur round the one in focus, and glass over the rest
        instead (the pane below). No darkening. */
     filter: blur(calc(var(--h-others-blur, 0.3px) * var(--os)));
@@ -594,15 +594,15 @@
     transition: opacity 600ms ease;
     transition-delay: var(--release-wait);
   }
-  .cover-float-ring:has(.cover-float-frame:hover) .cover-float-card::after {
+  :where(:root[data-hover]) .cover-float-ring:has(.cover-float-frame:hover) .cover-float-card::after {
     opacity: var(--h-glass, 0.25);
     transition-delay: var(--blur-wait);
   }
-  .cover-float-ring .cover-float-frame:hover .cover-float-card::after {
+  :where(:root[data-hover]) .cover-float-ring .cover-float-frame:hover .cover-float-card::after {
     opacity: 0;
     transition-delay: 0ms;
   }
-  .cover-float-ring .cover-float-frame:hover .cover-float-card {
+  :where(:root[data-hover]) .cover-float-ring .cover-float-frame:hover .cover-float-card {
     /* Julian: some cards did not cover on hover. The lift was from the
        card's own depth, so one set far back stayed behind a neighbour
        further forward; in 3D, depth and not z-index decides. Now it comes

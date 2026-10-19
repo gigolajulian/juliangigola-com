@@ -16,6 +16,7 @@ import "./globals.css";
 import { ImageFallback } from "@/components/image-fallback";
 import { PageTransition } from "@/components/page-transition";
 import { CardTilt } from "@/components/card-tilt";
+import { HoverSettle } from "@/components/hover-settle";
 import { FocusField } from "@/components/focus-field";
 import { ldJson, siteGraph } from "@/lib/seo";
 import { DebugGate } from "@/components/debug-gate";
@@ -247,6 +248,8 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         {/* Focus round the pointer over a gallery: `focus-field.tsx`. */}
         <FocusField />
         <CardTilt />
+        {/* A photograph's hover waits 600ms after a page lands: `hover-settle.tsx`. */}
+        <HoverSettle />
         <PhotoNotice />
         {/* The pointer over anything that opens large, site wide. One
             mount: it follows the pointer and shows only over `[data-ring]`,
