@@ -95,10 +95,9 @@ export function PhotoNotice() {
   const shown = raised?.open === true;
   const box = React.useRef<HTMLDivElement>(null);
 
-  /* In: the panel opens out of the click, a hairline wipe from the corner
-     nearest the pointer, and its three lines rise from behind their own
-     edges, as the crossing's title does. Out: it lifts and fades. Every
-     raise starts it again from closed. */
+  /* In: the block opens out of the click, a wipe from the corner nearest
+     the pointer, and the sentence rises from behind its lower edge. Out:
+     it lifts and fades where it was. Every raise starts it from closed. */
   React.useLayoutEffect(() => {
     const el = box.current;
     if (!el) return;
@@ -115,20 +114,17 @@ export function PhotoNotice() {
       });
       return () => void out.kill();
     }
-    const lines = el.querySelectorAll("[data-line]");
+    const plate = el.querySelector("p");
+    const line = el.querySelector("[data-line]");
     const tl = gsap
       .timeline()
       .set(el, { autoAlpha: 1, y: 0 })
       .fromTo(
-        el,
+        plate,
         { clipPath: "inset(0 100% 100% 0)" },
         { clipPath: "inset(0 0% 0% 0)", duration: 0.42, ease: "expo.out" },
       )
-      .from(
-        lines,
-        { yPercent: 110, duration: 0.5, ease: "power3.out", stagger: 0.07 },
-        0.12,
-      );
+      .from(line, { yPercent: 110, duration: 0.5, ease: "power3.out" }, 0.1);
     return () => void tl.kill();
   }, [raised, shown]);
 
@@ -143,8 +139,8 @@ export function PhotoNotice() {
    * The estimate is generous, so the worst case is a notice sitting slightly
    * further inside the edge than it strictly needed to.
    */
-  const BOX_W = 272; // `w-[17rem]`
-  const BOX_H = 112; // three lines plus padding
+  const BOX_W = 272; // `max-w-[17rem]`
+  const BOX_H = 64; // three short lines plus padding
   const GAP = 12;
   const MARGIN = 16;
 
@@ -176,38 +172,30 @@ export function PhotoNotice() {
       style={{ ...position, visibility: "hidden" }}
       // No transition on position: it is placed where the click was and
       // must not be seen travelling there from wherever the last one was.
-      // A dark plate with a hairline, square, the site's own mono for the
-      // small lines and its display face for the name.
-      className="pointer-events-none fixed z-50 w-[17rem] border border-foreground/25 bg-background/95 px-4 py-3.5 text-foreground"
+      className="pointer-events-none fixed z-50"
     >
-      {/* Said once per raise; the lines below stay through the fade out. */}
-      {shown ? (
-        <span className="sr-only">
-          This photo is Copyright &copy; {year} Julian Gigola. All rights
-          reserved.
-        </span>
-      ) : null}
-      <span aria-hidden className="block overflow-hidden">
-        <span data-line className="label block text-muted-foreground">
-          &copy; {year} &middot; Photograph
-        </span>
-      </span>
-      <span aria-hidden className="mt-2 block overflow-hidden">
-        <span
-          data-line
-          className="font-display block text-2xl font-medium uppercase leading-none tracking-[-0.03em]"
+      {raised ? (
+        // Inverted rather than another dark panel: this has to read as an
+        // interruption over a photograph, and the site's one light surface
+        // is already the primary button. Square, like every other edge here.
+        //
+        // Sentence case, not the `label` treatment the rest of the chrome
+        // uses. This is a sentence of plain English making a legal claim, and
+        // sixty-odd characters of 11px caps at 0.14em is a thing to decipher
+        // rather than read. Smaller.
+        //
+        // Kept through the fade out; keyed by the raise so each one is
+        // announced afresh.
+        <p
+          key={raised.at}
+          className="max-w-[17rem] overflow-hidden bg-foreground px-3 py-2 text-left text-xs leading-snug text-background"
         >
-          Julian Gigola
-        </span>
-      </span>
-      <span
-        aria-hidden
-        className="mt-3 block overflow-hidden border-t border-foreground/15 pt-2"
-      >
-        <span data-line className="label block text-muted-foreground">
-          All rights reserved
-        </span>
-      </span>
+          <span data-line className="block">
+            This photo is Copyright &copy; {year} Julian Gigola. All rights
+            reserved.
+          </span>
+        </p>
+      ) : null}
     </div>
   );
 }
