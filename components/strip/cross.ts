@@ -83,6 +83,32 @@ export function createCross(m: Mover): Cross {
         if (!e.children.length && /^\d+ frames?$/i.test(e.textContent?.trim() ?? "") && n) e.textContent = `${n} frames`;
       card.append(h);
     }
+    /* The rail comes in with the card, already at the next project's
+       first frame: left under the card it went out and came back
+       (Julian, 2026-10-19). */
+    const rail = page.querySelector<HTMLElement>(".strip-rail");
+    const off = rail && [...rail.querySelectorAll<HTMLElement>("[data-mark]")].find((e) => !e.hasAttribute("data-ink"));
+    const n = Number(tpl.dataset.count);
+    if (rail && off && n) {
+      const rb = rail.getBoundingClientRect();
+      const r = rail.cloneNode(false) as HTMLElement;
+      r.style.cssText += `;position:absolute;left:${rb.left}px;width:${rb.width}px;top:${rb.top - box.top}px;margin:0`;
+      const count = rail.querySelector(".strip-count")?.cloneNode(false) as HTMLElement | undefined;
+      if (count) {
+        count.innerHTML = `<span class="text-foreground">01</span> / ${String(n).padStart(2, "0")}`;
+        r.append(count);
+      }
+      const line = off.parentElement!.parentElement!.cloneNode(false) as HTMLElement;
+      for (let i = 0; i < n; i++) {
+        const b = off.parentElement!.cloneNode(false) as HTMLElement;
+        const k = off.cloneNode(false) as HTMLElement;
+        if (!i) k.className = k.className.replace("scale-y-50 bg-foreground/20", "rail-lit scale-y-100 bg-foreground");
+        b.append(k);
+        line.append(b);
+      }
+      r.append(line);
+      card.append(r);
+    }
     card.append(row);
     document.body.append(dim, card);
     m.el.dataset.crossing = "";
