@@ -20,7 +20,7 @@ const pad = (n: number) => String(n).padStart(2, "0");
 export default function BtsPage() {
   if (!WITH_BTS.length) notFound();
   return (
-    <article className="mx-auto max-w-[100rem] px-6 pb-24 pt-28 sm:px-10">
+    <article className="mx-auto w-full max-w-[100rem] px-6 pb-24 pt-28 sm:px-10">
       <header className="flex items-end justify-between gap-6 border-b border-border pb-6">
         <div>
           <p className="label text-muted-foreground">On set</p>
