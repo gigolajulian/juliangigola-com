@@ -670,7 +670,7 @@ function CrossCard({ to, up }: { to: "next" | "prev"; up: NextUp }) {
     /* Laid out on screen and invisible rather than hidden, so the type
        pass sizes its title as it sizes the page's own plate (off screen,
        its fit to the screen shrank it), and the copy carries that size. */
-    <div aria-hidden inert data-cross-card={to} data-count={up.count} className="pointer-events-none invisible fixed inset-x-0 top-0 -z-10 h-[71vh]">
+    <div aria-hidden inert data-cross-card={to} data-count={up.count} className="pointer-events-none invisible fixed inset-x-0 top-0 -z-10 h-[71vh] overflow-hidden">
       <div className="flex h-full items-stretch">
         <div
           style={{ "--title-em": titleWidth(up.title ?? up.name) } as React.CSSProperties}

@@ -19,8 +19,9 @@ import { nav } from "./shared";
 const OMEGA = (2 * Math.PI) / 0.35;
 /** A flick: px per ms in the leading direction at the lift. */
 const FLICK = 0.5;
-/** The quiet that ends a wheel push. */
-const QUIET = 70;
+/** The quiet that ends a wheel push. Long enough that a stalled frame
+    in a momentum stream is not taken for a lift (QA, 2026-10-19). */
+const QUIET = 120;
 
 export type Cross = {
   /** Whether a card is out. */
@@ -216,13 +217,20 @@ export function createCross(m: Mover): Cross {
       const want = parseFloat(getComputedStyle(c?.querySelector("h2") ?? document.body).fontSize);
       let landed = 0;
       let still = 0;
+      let seen = "";
       const wait = () => {
         if (location.pathname === from) return void requestAnimationFrame(wait);
         landed ||= performance.now();
         const t = document.querySelector<HTMLElement>("main .project-plate > h2");
         const img = document.querySelector<HTMLImageElement>("main .strip-cell img");
         const sized = !t || Math.abs(parseFloat(getComputedStyle(t).fontSize) - want) < 0.5;
-        still = sized ? still + 1 : 0;
+        /* And every heading sized by the type pass, which writes each one
+           inline: the head's h1 stepped 30 to 32px 300 to 700ms in (QA,
+           WebKit). */
+        const heads = [...document.querySelectorAll<HTMLElement>("main h1, main h2")];
+        const sizes = heads.map((e) => e.style.fontSize).join();
+        still = sized && heads.every((e) => e.style.fontSize) && sizes === seen ? still + 1 : 0;
+        seen = sizes;
         const ready = still >= 2 && (!img || (img.complete && img.naturalWidth > 0));
         if (!ready && performance.now() - landed < 1500) return void requestAnimationFrame(wait);
         d?.remove();
