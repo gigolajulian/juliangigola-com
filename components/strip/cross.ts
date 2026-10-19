@@ -23,8 +23,9 @@ const FLICK = 0.5;
     in a momentum stream is not taken for a lift (QA, 2026-10-19). */
 const QUIET = 120;
 /** How long a wheel's card holds where it was left before it goes back:
-    swipes a beat apart add up, as one push (QA, MAC, 2026-10-19). */
-const HOLD_BACK = 450;
+    swipes a beat apart add up, as one push; Safari leaves over a second
+    between swipes (QA, MAC, 2026-10-19). */
+const HOLD_BACK = 1500;
 
 export type Cross = {
   /** Whether a card is out. */
