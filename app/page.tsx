@@ -8,6 +8,7 @@ import { StripPage } from "@/components/strip-page";
 import { EnquiryCell } from "@/components/enquiry-cell";
 import { Testimonials } from "@/components/testimonials";
 import { InquireWall } from "@/components/inquire-wall";
+import { SidewaysBuild } from "@/components/sideways-build";
 import {
   FEATURED,
   DISCIPLINE_TILES,
@@ -220,6 +221,8 @@ const ABOUT: Record<string, string> = {
 export default function Home() {
   return (
     <StripPage>
+      {/* `?motion=sideways`: the screens build as they arrive. */}
+      <SidewaysBuild />
       <Strip
         label="Julian Gigola: the cover, selected work, cover art, about, contact and how to get in touch. One screen at a time, left and right."
         next={WORK_PAGE}

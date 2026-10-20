@@ -1,0 +1,126 @@
+/* ── the sideways build-up (`components/sideways-build.tsx`) ──────
+ * Opt in with `?motion=sideways`. A screen's pieces enter from the side
+ * the strip travels from: the label, the title, then the rest, 75ms
+ * apart, starting 120ms before the screen it replaces is gone (250ms).
+ * Photographs wipe open over 800ms and settle. Down a phone the travel
+ * is up, so the pieces rise as they scroll into frame and the
+ * photographs open from the bottom. The cover is the splash's.
+ *
+ * A piece is the outermost of these, so a label in a title moves once.
+ * `translate` and `scale`, not `transform`, so a piece keeps its own.
+ * ─────────────────────────────────────────────────────────────── */
+
+:root[data-build] .strip-scroll > :not(:first-child) {
+  --b-out: 250ms;
+  --b-lead: 130ms; /* 250 - 120: in before out is done */
+  --b-step: 75ms;
+  --b-in: 500ms;
+  --b-wipe: 800ms;
+  --b-ease: cubic-bezier(0.23, 1, 0.32, 1);
+  --b-ease-io: cubic-bezier(0.72, 0, 0.28, 1);
+
+  & :is(.label, .title, .contact-title, h2, h3, .title-rest, .font-display):not(:is(.label, .title, .contact-title, h2, h3, .title-rest, .font-display) *) {
+    --b-t: 2;
+  }
+  & .label:not(:is(.title, .contact-title, h2, h3, .title-rest, .font-display) *) {
+    --b-t: 0;
+  }
+  & :is(.title, .contact-title, h2, h3, .font-display):not(:is(.label, .title, .contact-title, h2, h3, .title-rest, .font-display) *) {
+    --b-t: 1;
+  }
+}
+
+/* ── sideways: iPad and up ── */
+:root[data-build="sideways"] .strip-scroll > :not(:first-child) {
+  --b-x: calc(var(--build-dir, 1) * 40px);
+
+  &[data-build="in"] {
+    & :is(.label, .title, .contact-title, h2, h3, .title-rest, .font-display):not(:is(.label, .title, .contact-title, h2, h3, .title-rest, .font-display) *) {
+      animation: b-side-in var(--b-in) var(--b-ease) backwards;
+      animation-delay: calc(var(--b-lead) + var(--b-t) * var(--b-step));
+    }
+    & :is(.title, .contact-title, h2, h3, .font-display):not(:is(.label, .title, .contact-title, h2, h3, .title-rest, .font-display) *) {
+      animation-name: b-side-mask;
+    }
+    & img {
+      animation:
+        b-wipe-side var(--b-wipe) var(--b-ease-io) backwards,
+        b-settle var(--b-wipe) var(--b-ease) backwards;
+      animation-delay: var(--b-lead);
+    }
+  }
+  &[data-build="wait"] :is(:is(.label, .title, .contact-title, h2, h3, .title-rest, .font-display):not(:is(.label, .title, .contact-title, h2, h3, .title-rest, .font-display) *), img) {
+    opacity: 0;
+  }
+  &[data-build="out"] :is(:is(.label, .title, .contact-title, h2, h3, .title-rest, .font-display):not(:is(.label, .title, .contact-title, h2, h3, .title-rest, .font-display) *), img) {
+    animation: b-side-out var(--b-out) var(--b-ease-io) forwards;
+  }
+}
+
+/* ── stacked: a phone ── */
+:root[data-build="stacked"] .strip-scroll > :not(:first-child) {
+  & :is(.label, .title, .contact-title, h2, h3, .title-rest, .font-display):not(:is(.label, .title, .contact-title, h2, h3, .title-rest, .font-display) *):not([data-build]) {
+    opacity: 0;
+  }
+  & img:not([data-build]) {
+    clip-path: inset(100% 0 0 0);
+  }
+  & :is(.label, .title, .contact-title, h2, h3, .title-rest, .font-display):not(:is(.label, .title, .contact-title, h2, h3, .title-rest, .font-display) *)[data-build] {
+    animation: b-rise var(--b-in) var(--b-ease) backwards;
+    animation-delay: calc(var(--b-t) * var(--b-step));
+  }
+  & img[data-build] {
+    animation:
+      b-wipe-up var(--b-wipe) var(--b-ease-io) backwards,
+      b-settle var(--b-wipe) var(--b-ease) backwards;
+  }
+}
+
+@keyframes b-side-in {
+  from { opacity: 0; translate: var(--b-x) 0; }
+}
+@keyframes b-side-mask {
+  from {
+    opacity: 0;
+    translate: var(--b-x) 0;
+    clip-path: inset(0 calc(50% - var(--build-dir, 1) * 50%) 0 calc(50% + var(--build-dir, 1) * 50%));
+  }
+  to { clip-path: inset(0); }
+}
+@keyframes b-side-out {
+  to { opacity: 0; translate: calc(var(--b-x) * -1) 0; }
+}
+@keyframes b-wipe-side {
+  from { clip-path: inset(0 calc(50% - var(--build-dir, 1) * 50%) 0 calc(50% + var(--build-dir, 1) * 50%)); }
+  to { clip-path: inset(0); }
+}
+@keyframes b-rise {
+  from { opacity: 0; translate: 0 24px; }
+}
+@keyframes b-wipe-up {
+  from { clip-path: inset(100% 0 0 0); }
+  to { clip-path: inset(0); }
+}
+@keyframes b-settle {
+  from { scale: 1.08; }
+}
+@keyframes b-fade {
+  from { opacity: 0; }
+}
+@keyframes b-fade-out {
+  to { opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root[data-build="sideways"] .strip-scroll > [data-build="in"]:not(:first-child) :is(:is(.label, .title, .contact-title, h2, h3, .title-rest, .font-display):not(:is(.label, .title, .contact-title, h2, h3, .title-rest, .font-display) *), img),
+  :root[data-build="stacked"] .strip-scroll > :not(:first-child) :is(:is(.label, .title, .contact-title, h2, h3, .title-rest, .font-display):not(:is(.label, .title, .contact-title, h2, h3, .title-rest, .font-display) *), img)[data-build] {
+    animation: b-fade 200ms ease-out backwards !important;
+  }
+  :root[data-build="sideways"] .strip-scroll > [data-build="out"]:not(:first-child) :is(:is(.label, .title, .contact-title, h2, h3, .title-rest, .font-display):not(:is(.label, .title, .contact-title, h2, h3, .title-rest, .font-display) *), img) {
+    animation: b-fade-out 200ms ease-out forwards !important;
+  }
+  :root[data-build="stacked"] .strip-scroll > :not(:first-child) img:not([data-build]) {
+    clip-path: none;
+    opacity: 0;
+  }
+}
