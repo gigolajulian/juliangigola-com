@@ -178,3 +178,32 @@
     clip-path: inset(0 0 calc(var(--lift-clip) * 1%) 0);
   }
 }
+
+/* `?splash=basic` (`intro.tsx`): the name alone on the page ground, no
+   sweep, no eye, no shadow on the lift. */
+.jg-intro-word {
+  display: none;
+}
+[data-splash="basic"][data-intro] #jg-intro {
+  background: var(--background);
+  color: var(--foreground);
+}
+[data-splash="basic"] #jg-intro::before,
+[data-splash="basic"] :is(.jg-intro-panel, .jg-intro-eye) {
+  display: none;
+}
+[data-splash="basic"] .jg-intro-word {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-family: var(--font-wordmark);
+  font-weight: 900;
+  letter-spacing: -0.045em;
+  text-transform: none;
+  font-size: clamp(2.5rem, 9vw, 8rem);
+  line-height: 1;
+}
+[data-splash="basic"] #jg-intro.jg-intro-open {
+  box-shadow: none;
+}
