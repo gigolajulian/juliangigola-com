@@ -120,55 +120,6 @@ function Fold({ on, fill, children }: { on: boolean; fill?: boolean; children: R
   );
 }
 
-/* `?editorial`: a departures board. Each character on its own tile turns
-   through a few others before it lands, left to right; `rest`: the tiles
-   show only while turning (the days). Text written here, not by React,
-   so a tile mid-turn is never overwritten (Julian, 2026-10-16). */
-const DIG = "0123456789";
-function Flap({ text, delay = 0, rest, className }: { text: string; delay?: number; rest?: boolean; className?: string }) {
-  const box = React.useRef<HTMLSpanElement>(null);
-  const was = React.useRef<string | null>(null);
-  React.useLayoutEffect(() => {
-    const el = box.current;
-    if (!el) return;
-    const from = was.current;
-    was.current = text;
-    const tiles = [...el.children] as HTMLElement[];
-    const put = (t: HTMLElement, c: string | undefined) => (t.textContent = c === " " || !c ? " " : c);
-    tiles.forEach((t, i) => put(t, text[i]));
-    if (from === text || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    const tls: gsap.core.Timeline[] = [];
-    tiles.forEach((t, i) => {
-      const end = text[i];
-      if (end === ":" || (from?.[i] === end && Math.random() < 0.5)) return;
-      const n = 3 + (i % 3) + Math.floor(Math.random() * 2);
-      put(t, from?.[i]);
-      const tl = gsap.timeline({ delay: delay + i * 0.045 });
-      for (let k = 0; k <= n; k++) {
-        const c = k === n ? end : DIG[Math.floor(Math.random() * 10)];
-        tl.to(t, { rotationX: -90, duration: 0.045, ease: "power1.in" }).call(() => put(t, c)).fromTo(t, { rotationX: 90 }, { rotationX: 0, duration: 0.05, ease: "power1.out" });
-      }
-      tls.push(tl);
-    });
-    if (rest) el.classList.add("going");
-    const done = gsap.delayedCall(delay + text.length * 0.045 + 0.6, () => el.classList.remove("going"));
-    return () => {
-      tls.forEach((tl) => tl.kill());
-      done.kill();
-      el.classList.remove("going");
-      tiles.forEach((t, i) => {
-        gsap.set(t, { clearProps: "transform" });
-        put(t, text[i]);
-      });
-    };
-  }, [text, delay, rest]);
-  return (
-    <span aria-hidden ref={box} className={cn("flap", className)}>
-      {[...text].map((c, i) => <span key={i} className={cn("ft", c === ":" && "colon", c === " " && "sp")} />)}
-    </span>
-  );
-}
-
 export function TimePicker({
   path,
   title,
@@ -451,7 +402,7 @@ export function TimePicker({
     setSlide(0);
     setMstep("days");
     const box = daysBox.current;
-    // Editorial: the new view's numbers turn in instead (`Flap`).
+    // Editorial: the new view is drawn in place, no flip.
     if (box && !editorial) {
       const at = new Map<string, DOMRect>();
       for (const b of box.querySelectorAll<HTMLElement>("[data-day]")) at.set(b.dataset.day!, b.getBoundingClientRect());
@@ -668,8 +619,7 @@ export function TimePicker({
     const body = root.current?.querySelector<HTMLElement>(".ed-body");
     if (editorial && body) body.scrollTop = 0;
   }, [editorial, mstep]);
-  /* Editorial: the days cascade in on the beat of their numbers' flaps,
-     left to right across a week, a ripple from the top left of a month
+  /* Editorial: the days cascade in, left to right across a week, a ripple from the top left of a month
      (Julian, 2026-10-16). On load and on every week or month shown. */
   const shown = view === "week" ? `w${iso(week[0])}` : `m${anchor.getFullYear()}-${anchor.getMonth()}`;
   React.useLayoutEffect(() => {
@@ -1081,12 +1031,12 @@ export function TimePicker({
                 <div ref={daysBox} className="touch-pan-y overflow-hidden" {...swipeProps}>
                   {view === "week" ? (
                     <div className="ed-week">
-                      {week.map((d, i) => {
+                      {week.map((d) => {
                         const id = iso(d);
                         return (
                           <button key={id} data-day={id} type="button" disabled={!open(id).size} aria-pressed={pick.date === id} aria-label={`${WEEKDAYS[d.getDay()]}, ${MONTHS[d.getMonth()]} ${d.getDate()}`} onClick={() => dayPick(id)} className="ed-day">
                             <span className="label">{DAYS[d.getDay()]}</span>
-                            <span className="ed-n"><Flap text={String(d.getDate())} delay={i * 0.06} rest /></span>
+                            <span className="ed-n">{d.getDate()}</span>
                             <i />
                           </button>
                         );
@@ -1101,7 +1051,7 @@ export function TimePicker({
                           const id = iso(d);
                           return (
                             <button key={id} data-day={id} type="button" disabled={!open(id).size} aria-pressed={pick.date === id} aria-label={`${WEEKDAYS[d.getDay()]}, ${MONTHS[d.getMonth()]} ${d.getDate()}`} onClick={() => dayPick(id)} className="ed-cell">
-                              <span className="ed-n"><Flap text={String(d.getDate())} delay={(k % 7) * 0.03 + Math.floor(k / 7) * 0.06} rest /></span>
+                              <span className="ed-n">{d.getDate()}</span>
                               <i />
                             </button>
                           );
@@ -1110,24 +1060,27 @@ export function TimePicker({
                     </div>
                   )}
                 </div>
-                {view === "week" ? (
-                  <div className="ed-big" aria-hidden data-none={chosen !== "time" ? "" : undefined}>
-                    <h3>
-                      <Flap text={t.padStart(5, " ")} />
+                {/* The time picked, large, only once one is picked (Julian,
+                    2026-10-20: the split-flap went); it rises in again on each
+                    new pick. Its room is held, so a pick moves nothing. */}
+                <div className="ed-big" aria-hidden>
+                  {chosen === "time" ? (
+                    <span key={pick.start} className="ed-bt">
+                      {t}
                       <small>{ap}</small>
-                    </h3>
-                    <span className="ed-when-line">
-                      <b>{chosen ? `${WEEKDAYS[date.getDay()]}, ${MONTHS[date.getMonth()]} ${date.getDate()}` : "Pick a day, then a time"}</b>
-                      {call ? (
-                        <span className="label ed-timer">{handset}<span>{timer}</span><i className="not-italic" style={chosen === "time" ? undefined : { visibility: "hidden" }}>Until {until} {apEnd} {tzName}</i></span>
-                      ) : (
-                        /* Shown once a time is picked (Julian, 2026-10-17): before, the
-                           default read as chosen. Hidden, not removed, so a pick moves nothing. */
-                        <span className="label" style={chosen === "time" ? undefined : { visibility: "hidden" }}>Until {until} {apEnd} {tzName}</span>
-                      )}
                     </span>
-                  </div>
-                ) : null}
+                  ) : null}
+                  <span className="ed-when-line">
+                    <b>{chosen ? `${WEEKDAYS[date.getDay()]}, ${MONTHS[date.getMonth()]} ${date.getDate()}` : "Pick a day, then a time"}</b>
+                    {call ? (
+                      <span className="label ed-timer">{handset}<span>{timer}</span><i className="not-italic" style={chosen === "time" ? undefined : { visibility: "hidden" }}>{t}{ap === apEnd ? "" : ` ${ap}`} to {until} {apEnd} {tzName}</i></span>
+                    ) : (
+                      /* Shown once a time is picked (Julian, 2026-10-17): before, the
+                         default read as chosen. Hidden, not removed, so a pick moves nothing. */
+                      <span className="label ed-hour" style={chosen === "time" ? undefined : { visibility: "hidden" }}>{t}{ap === apEnd ? "" : ` ${ap}`} to {until} {apEnd} {tzName}</span>
+                    )}
+                  </span>
+                </div>
               </div>
               <div ref={slotsRef} className="ed-r ed-times">
                 <button type="button" className="ed-back label" onClick={() => setMstep("days")}>
