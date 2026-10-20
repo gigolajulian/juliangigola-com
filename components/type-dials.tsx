@@ -154,8 +154,9 @@ export function TypeDials() {
     () => false,
   );
   if (!on) return null;
-  // The bar is for the dev server; a deployed preview gets the settings.
-  return process.env.NODE_ENV === "production" ? <TypeDefaults /> : <TypeBar />;
+  // The bar is for the dev server, and only with `?dials` (Julian: remove
+  // the panel); everywhere else the page gets the settings.
+  return process.env.NODE_ENV !== "production" && /[?&]dials/.test(location.search) ? <TypeBar /> : <TypeDefaults />;
 }
 
 function TypeDefaults() {
