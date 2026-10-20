@@ -45,6 +45,39 @@ const UNDER = 450;
 
 const lift = () => document.documentElement.removeAttribute("data-intro");
 
+/* Preview, `?splash=basic`: basicagency.com's opening, from the teardown
+   in SITE TEARDOWN/basicagency. The eye alone on the page ground; at
+   500ms it lifts off the top while the first screen slides up in under
+   it over a second; then the header's logo and each item fade and rise,
+   500ms each, 25ms apart. No sweep. */
+const SOFT = "cubic-bezier(0.28, 0, 0.49, 1)";
+function basic(box: HTMLDivElement | null) {
+  const root = document.documentElement;
+  setTimeout(() => {
+    root.dataset.intro = "half";
+    root.dataset.splashed = "";
+    box?.classList.add("jg-intro-open");
+    box?.animate([{ transform: "none" }, { transform: "translateY(-100%)" }], {
+      duration: 500,
+      easing: SOFT,
+      fill: "forwards",
+    });
+    document.querySelector("main")?.animate(
+      [{ transform: "translateY(100%)" }, { transform: "none" }],
+      { duration: 1000, easing: "cubic-bezier(0.72, 0, 0.28, 1)" },
+    );
+    document
+      .querySelectorAll(".site-bar .page-column > a, .site-bar nav li, .site-bar .page-column > div > :not(nav)")
+      .forEach((el, i) =>
+        el.animate(
+          [{ opacity: 0, transform: "translateY(100%)" }, { opacity: 1, transform: "none" }],
+          { duration: 500, delay: 500 + i * 25, easing: SOFT, fill: "backwards" },
+        ),
+      );
+    setTimeout(lift, 500);
+  }, 500);
+}
+
 /* Once per page load. React remounts effects in development, and a second
    take would start a sweep the first had already finished. */
 let played = false;
@@ -61,6 +94,8 @@ export function Intro() {
     try {
       sessionStorage.setItem("jg-intro", "1");
     } catch {}
+
+    if (root.dataset.splash === "basic") return basic(box.current);
 
     /* The sweep runs as an animation the browser moves on its own, off the
        main thread, from the first paint (`jg-intro-sweep`, `globals.css`):
