@@ -154,8 +154,8 @@ export function TypeDials() {
     () => false,
   );
   if (!on) return null;
-  // The bar is for the dev server; a deployed preview gets the settings.
-  return process.env.NODE_ENV === "production" ? <TypeDefaults /> : <TypeBar />;
+  // The bar is off (Julian, 2026-10-19); the dev server gets the settings too.
+  return <TypeDefaults />;
 }
 
 function TypeDefaults() {
