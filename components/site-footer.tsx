@@ -63,7 +63,7 @@ export function SiteFooter() {
                     data-ring={s.label}
                     className="label text-muted-foreground transition-colors duration-200 hoverable:hover:text-foreground"
                   >
-                    {s.label}
+                    <span className="nav-trace">{s.label}</span>
                   </a>
                 </li>
               ))}
@@ -89,7 +89,7 @@ export function SiteFooter() {
                     href={l.href}
                     className="transition-colors duration-200 hoverable:hover:text-foreground"
                   >
-                    {l.label}
+                    <span className="nav-trace">{l.label}</span>
                   </Link>
                 </li>
               ))}

@@ -590,6 +590,20 @@ body > footer {
     opacity var(--dur-lg) var(--ease-out-strong),
     translate var(--dur-lg) var(--ease-out-strong);
 }
+/* Without the splash the footer fades in once on load, 650ms (Julian,
+   from the `?motion=elements` preview). With it, the rule above holds it
+   until the splash lifts. Its links trace a line like the navbar's
+   (`.nav-trace`). */
+@keyframes foot-in {
+  from {
+    opacity: 0;
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  body > footer {
+    animation: foot-in 650ms var(--ease-in-out-strong) backwards;
+  }
+}
 
 @media (prefers-reduced-motion: reduce) {
   .site-bar,
