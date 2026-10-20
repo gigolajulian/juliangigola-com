@@ -30,6 +30,7 @@ export type ProjectsFile = {
   covers?: Record<string, string>;
   avatars?: Record<string, string>;
   slugs?: Record<string, string>;
+  bts?: Record<string, unknown>;
 };
 
 /**
@@ -72,7 +73,12 @@ export const tidySequence = <T>(list: T[]): T[] =>
  * baseline it is compared against, and what gets written — and a tuple of six
  * loose records is how those three drift apart.
  */
-export type Manifest<Frame = unknown, Credit = unknown, Copy = unknown> = {
+export type Manifest<
+  Frame = unknown,
+  Credit = unknown,
+  Copy = unknown,
+  Bts = unknown,
+> = {
   hidden: string[];
   /** Off every listing, still a page. See `AddedFile.unlisted`. */
   unlisted: string[];
@@ -87,6 +93,8 @@ export type Manifest<Frame = unknown, Credit = unknown, Copy = unknown> = {
   avatars: Record<string, string>;
   /** Renamed addresses, original slug to current. */
   slugs: Record<string, string>;
+  /** Behind-the-scenes frames, slug to `{ by, frames }`. */
+  bts: Record<string, Bts>;
 };
 
 export function projectsFile(
@@ -142,6 +150,16 @@ export function projectsFile(
   // And the renames.
   if (Object.keys(edit.slugs).length) next.slugs = edit.slugs;
   else delete next.slugs;
+
+  // BTS: a shoot with every frame cleared leaves no entry, and the handle
+  // typed beside it goes with it, since `lib/added.ts` wants one frame.
+  const bts = Object.fromEntries(
+    Object.entries(edit.bts).filter(
+      ([, b]) => isRecord(b) && Array.isArray(b.frames) && b.frames.length > 0,
+    ),
+  );
+  if (Object.keys(bts).length) next.bts = bts;
+  else delete next.bts;
 
   return next;
 }
@@ -224,10 +242,10 @@ const listMap = (v: unknown): Record<string, unknown[]> | null =>
     ? (v as Record<string, unknown[]>)
     : null;
 
-export function adoptable<F, C, P>(
+export function adoptable<F, C, P, B>(
   file: ProjectsFile,
-  fallback: Manifest<F, C, P>,
-): Manifest<F, C, P> {
+  fallback: Manifest<F, C, P, B>,
+): Manifest<F, C, P, B> {
   /* The sequences and credit lists come back as "a list of something": this
      module does not know what a frame is, on purpose. `lib/added.ts` is what
      validates them, at build time, where a bad one fails the deploy and the
@@ -275,6 +293,12 @@ export function adoptable<F, C, P>(
         : (stringMap(file.covers) ?? fallback.covers),
     slugs:
       file.slugs === undefined ? {} : (stringMap(file.slugs) ?? fallback.slugs),
+    bts:
+      file.bts === undefined
+        ? {}
+        : isRecord(file.bts)
+          ? (file.bts as Record<string, B>)
+          : fallback.bts,
   };
 }
 

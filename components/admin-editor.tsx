@@ -37,7 +37,7 @@ import {
   type CommitFile,
   TOKEN_STORE,
 } from "@/lib/admin-github";
-import type { Copy, Credit } from "@/lib/work-types";
+import type { Bts, Copy, Credit } from "@/lib/work-types";
 import { cn } from "@/lib/utils";
 
 /* ── the editor ───────────────────────────────────────────────────
@@ -170,7 +170,7 @@ const fromBase64 = (b64: string): string => {
  * credit are — that module deliberately knows only that a sequence is a list,
  * which is what lets the check script run it. Here they are the real things.
  */
-type Draft = Manifest<FrameRef, Credit, Copy>;
+type Draft = Manifest<FrameRef, Credit, Copy, Bts>;
 
 /* ── a rename, carried through ────────────────────────────────────
  * Every override this editor holds is keyed by slug, and while the page
@@ -206,6 +206,7 @@ function remapSlugs(draft: Draft, slugs: Record<string, string>): Draft {
     frames: moveKeys(draft.frames),
     credits: moveKeys(draft.credits),
     copy: moveKeys(draft.copy),
+    bts: moveKeys(draft.bts),
     order: moveList(draft.order),
   };
 }
@@ -241,6 +242,7 @@ export function AdminEditor({
   initialOrder,
   initialCovers,
   initialAvatars,
+  initialBts,
   releases,
   releaseLimit,
   heroChoices,
@@ -288,6 +290,8 @@ export function AdminEditor({
   initialCovers: Record<string, string>;
   /** Collaborators' faces the last build applied, handle to picture path. */
   initialAvatars: Record<string, string>;
+  /** BTS the last build applied, slug → `{ by, frames }`. */
+  initialBts: Record<string, Bts>;
   /** Every cover-art release, for the homepage rack picker. */
   releases: PickerItem[];
   /**
@@ -382,6 +386,7 @@ export function AdminEditor({
       one picture, however many shoots they are credited on. */
   const [avatars, setAvatars] =
     React.useState<Record<string, string>>(initialAvatars);
+  const [bts, setBts] = React.useState<Record<string, Bts>>(initialBts);
   /**
    * The project whose row is expanded, if any.
    *
@@ -445,6 +450,7 @@ export function AdminEditor({
           covers,
           avatars,
           slugs: reslugged,
+          bts,
         },
         reslugged,
       ),
@@ -459,6 +465,7 @@ export function AdminEditor({
       order,
       covers,
       avatars,
+      bts,
     ],
   );
 
@@ -499,6 +506,7 @@ export function AdminEditor({
       order: initialOrder,
       covers: initialCovers,
       avatars: initialAvatars,
+      bts: initialBts,
     },
   }));
 
@@ -536,7 +544,7 @@ export function AdminEditor({
   /** The rows with unpublished edits, for the Projects filter. */
   const changed = React.useMemo(() => {
     const out = new Set<string>();
-    const maps = ["categories", "frames", "credits", "copy", "slugs"] as const;
+    const maps = ["categories", "frames", "credits", "copy", "slugs", "bts"] as const;
     for (const key of maps) {
       const a = manifest[key] as Record<string, unknown>;
       const b = baseline.manifest[key] as Record<string, unknown>;
@@ -877,6 +885,7 @@ export function AdminEditor({
         setOrder(repo.order);
         setCovers(repo.covers);
         setAvatars(repo.avatars);
+        setBts(repo.bts);
         setBaseline({ content, manifest: repo });
       } else {
         // The edits stay, and so does the baseline they are measured against
@@ -1003,7 +1012,7 @@ export function AdminEditor({
       // sequences. Only the ones still in a gallery: staging a frame and then
       // taking it out again should not leave the file in the repository.
       const referenced = new Set(
-        Object.values(reframed)
+        [...Object.values(reframed), ...Object.values(bts).map((b) => b.frames)]
           .flat()
           // A passage names no file, so it contributes nothing here.
           .flatMap((f) =>
@@ -1051,6 +1060,7 @@ export function AdminEditor({
       setRecredited(written.credits);
       setRecopied(written.copy);
       setReslugged(written.slugs);
+      setBts(written.bts);
 
       // A fresh publish is not live yet by definition, whatever the last one
       // was — so the green is dropped before the wait begins.
@@ -1574,6 +1584,17 @@ export function AdminEditor({
                   setRecategorised((r) => ({ ...r, [slug]: categorySlug }))
                 }
                 reframed={reframed}
+                bts={bts}
+                publishedBts={baseline.manifest.bts}
+                onBts={(slug, next) =>
+                  setBts((b) => {
+                    const copy = { ...b };
+                    // Nothing left to say: no entry, rather than an empty one.
+                    if (!next.frames.length && !next.by) delete copy[slug];
+                    else copy[slug] = next;
+                    return copy;
+                  })
+                }
                 /* `null` is the sequence editor saying the frames are back in
                  the order it found them — which is the published order, and
                  that may itself be an override. `withOverride` puts that
