@@ -286,3 +286,14 @@ html[data-font="v2"] .legal-text :is(p, li) {
     padding-block: 0.5625rem;
   }
 }
+
+/* The navbar's names, at the size `type-dials.tsx` gives labels, but from
+   the first paint: written there after load they grew and the row jumped
+   (Julian). The same ramp: none at 1180 wide or 600 tall, all of it from
+   1536 by 860. `type-dials.tsx` skips them. */
+html[data-font="v2"] .site-bar nav a {
+  font-size: calc(
+    0.9375rem + 15 * (var(--v2-label-size, 1.06) - 1) *
+      min(clamp(0px, (100vw - 1180px) / 356, 1px), clamp(0px, (100vh - 600px) / 260, 1px))
+  );
+}
