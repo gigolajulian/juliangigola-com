@@ -200,11 +200,11 @@
 }
 .light-cell {
   transition:
-    opacity 240ms var(--ease-out-strong),
+    opacity var(--dur-sm) var(--ease-out-strong),
     filter 620ms var(--ease-out-strong),
     scale 620ms var(--ease-out-strong),
-    transform 700ms cubic-bezier(0.45, 0, 0.2, 1),
-    box-shadow 700ms cubic-bezier(0.45, 0, 0.2, 1),
+    transform var(--dur-2xl) cubic-bezier(0.45, 0, 0.2, 1),
+    box-shadow var(--dur-2xl) cubic-bezier(0.45, 0, 0.2, 1),
     translate 900ms cubic-bezier(0.25, 1, 0.5, 1);
 }
 /* The cards stand a little off the table, a few pixels toward the
@@ -227,12 +227,12 @@
   --lz: 20px;
   box-shadow: var(--sx, 0px) calc(22px + var(--sy, 0px)) 40px -16px rgb(0 0 0 / 0.6);
   transition:
-    opacity 240ms var(--ease-out-strong),
+    opacity var(--dur-sm) var(--ease-out-strong),
     filter 620ms var(--ease-out-strong),
     scale 620ms var(--ease-out-strong),
-    transform 420ms var(--ease-out-strong),
+    transform var(--dur-lg) var(--ease-out-strong),
     /* Fades in rather than snapping on. */
-    box-shadow 500ms var(--ease-out-strong),
+    box-shadow var(--dur-xl) var(--ease-out-strong),
     translate 900ms cubic-bezier(0.25, 1, 0.5, 1);
 }
 /* Room for it: the lifted card grows a few pixels past the 6px gutter,
@@ -269,8 +269,8 @@
    softened (below). */
 .light-cell img {
   transition:
-    filter 300ms var(--ease-out-strong),
-    scale 300ms var(--ease-out-strong);
+    filter var(--dur-md) var(--ease-out-strong),
+    scale var(--dur-md) var(--ease-out-strong);
 }
 .light-name {
   /* The slate: a fall of shadow across the foot with the name on it, not
@@ -315,7 +315,7 @@
 }
 @media (prefers-reduced-motion: reduce) {
   .light-cell {
-    animation: jg-fade-in 240ms ease-out backwards;
+    animation: jg-fade-in var(--dur-sm) ease-out backwards;
   }
   /* The slate fades up in place rather than rising. */
   .light-name {

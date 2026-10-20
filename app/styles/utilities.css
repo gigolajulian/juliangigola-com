@@ -180,14 +180,14 @@
      on the colours, which used to fall back to a plain ease-out here, and
      the pointer light's `--gx`/`--gy`, which used to snap. */
   transition:
-    transform 440ms var(--ease-bounce),
-    scale 440ms var(--ease-bounce),
-    translate 440ms var(--ease-bounce),
-    rotate 440ms var(--ease-bounce),
-    background-color 200ms var(--ease-out-strong),
-    border-color 200ms var(--ease-out-strong),
-    color 200ms var(--ease-out-strong),
-    opacity 200ms var(--ease-out-strong),
+    transform var(--dur-lg) var(--ease-bounce),
+    scale var(--dur-lg) var(--ease-bounce),
+    translate var(--dur-lg) var(--ease-bounce),
+    rotate var(--dur-lg) var(--ease-bounce),
+    background-color var(--dur-xs) var(--ease-out-strong),
+    border-color var(--dur-xs) var(--ease-out-strong),
+    color var(--dur-xs) var(--ease-out-strong),
+    opacity var(--dur-xs) var(--ease-out-strong),
     --gx 340ms var(--ease-out-strong),
     --gy 340ms var(--ease-out-strong);
 
@@ -196,14 +196,14 @@
        finger, so it is fast and accelerating — a spring here would read as
        the button hesitating. */
     transition:
-      transform 90ms cubic-bezier(0.4, 0, 1, 1),
-      scale 90ms cubic-bezier(0.4, 0, 1, 1),
-      translate 90ms cubic-bezier(0.4, 0, 1, 1),
-      rotate 90ms cubic-bezier(0.4, 0, 1, 1),
-      background-color 200ms var(--ease-out-strong),
-      border-color 200ms var(--ease-out-strong),
-      color 200ms var(--ease-out-strong),
-      opacity 200ms var(--ease-out-strong),
+      transform var(--dur-2xs) var(--ease-in-strong),
+      scale var(--dur-2xs) var(--ease-in-strong),
+      translate var(--dur-2xs) var(--ease-in-strong),
+      rotate var(--dur-2xs) var(--ease-in-strong),
+      background-color var(--dur-xs) var(--ease-out-strong),
+      border-color var(--dur-xs) var(--ease-out-strong),
+      color var(--dur-xs) var(--ease-out-strong),
+      opacity var(--dur-xs) var(--ease-out-strong),
       --gx 340ms var(--ease-out-strong),
       --gy 340ms var(--ease-out-strong);
   }
@@ -222,21 +222,21 @@
     scale 160ms var(--ease-out-strong),
     translate 160ms var(--ease-out-strong),
     rotate 160ms var(--ease-out-strong),
-    background-color 200ms ease-out,
-    border-color 200ms ease-out,
-    color 200ms ease-out,
-    opacity 200ms ease-out;
+    background-color var(--dur-xs) ease-out,
+    border-color var(--dur-xs) ease-out,
+    color var(--dur-xs) ease-out,
+    opacity var(--dur-xs) ease-out;
 }
 [data-workbench] .press:active {
   transition:
-    transform 90ms cubic-bezier(0.4, 0, 1, 1),
-    scale 90ms cubic-bezier(0.4, 0, 1, 1),
-    translate 90ms cubic-bezier(0.4, 0, 1, 1),
-    rotate 90ms cubic-bezier(0.4, 0, 1, 1),
-    background-color 200ms ease-out,
-    border-color 200ms ease-out,
-    color 200ms ease-out,
-    opacity 200ms ease-out;
+    transform var(--dur-2xs) var(--ease-in-strong),
+    scale var(--dur-2xs) var(--ease-in-strong),
+    translate var(--dur-2xs) var(--ease-in-strong),
+    rotate var(--dur-2xs) var(--ease-in-strong),
+    background-color var(--dur-xs) ease-out,
+    border-color var(--dur-xs) ease-out,
+    color var(--dur-xs) ease-out,
+    opacity var(--dur-xs) ease-out;
 }
 @media (prefers-reduced-motion: reduce) {
   [data-workbench] .press {
@@ -260,7 +260,7 @@
   opacity: 1;
   transform: translateY(0);
   transition:
-    opacity 420ms var(--ease-out-strong),
+    opacity var(--dur-lg) var(--ease-out-strong),
     transform 620ms var(--ease-spring);
   /* The same hook `reveal` uses, so a block can be held back a beat without
      a second utility or a line of JavaScript. */
@@ -283,7 +283,7 @@
  */
 @utility emerge {
   opacity: 1;
-  transition: opacity 420ms var(--ease-out-strong);
+  transition: opacity var(--dur-lg) var(--ease-out-strong);
   transition-delay: var(--reveal-delay, 0ms);
 
   @starting-style {
@@ -329,8 +329,8 @@
  */
 @utility dissolve {
   animation:
-    expose var(--swap-pic-dur, 520ms) var(--ease-out-strong) both,
-    flash var(--swap-flash-dur, 250ms) var(--ease-out-strong) both;
+    expose var(--swap-pic-dur, var(--dur-xl)) var(--ease-out-strong) both,
+    flash var(--swap-flash-dur, var(--dur-sm)) var(--ease-out-strong) both;
 }
 
 @keyframes expose {
@@ -380,7 +380,7 @@
  */
 @utility title-out {
   opacity: 0;
-  transition: opacity var(--swap-out-dur, 200ms) var(--ease-out-strong)
+  transition: opacity var(--swap-out-dur, var(--dur-xs)) var(--ease-out-strong)
     var(--swap-out-delay, 60ms);
 }
 
@@ -404,7 +404,7 @@
        without the pause. */
     opacity var(--swap-in-dur, 320ms) var(--ease-out-strong)
       var(--swap-in-delay, 180ms),
-    color 200ms ease-out;
+    color var(--dur-xs) ease-out;
 
   /* The arriving word is a brand new node every phase, and a transition does
      not run on first render — so, as with `dissolve`, the start has to be

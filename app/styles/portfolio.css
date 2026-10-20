@@ -156,7 +156,7 @@
     grid-area: 1 / 1;
     transition:
       opacity 360ms var(--ease-out-strong),
-      translate 520ms var(--ease-out-strong);
+      translate var(--dur-xl) var(--ease-out-strong);
   }
   .strip-scroll[data-moved] .chapter-alias,
   .strip-scroll:not([data-moved]) .chapter-own {
@@ -263,7 +263,7 @@
 :root[data-nav-side="shut"]::view-transition-old(.page),
 :root[data-nav-side="shut"]::view-transition-new(.page) {
   animation-duration: 620ms;
-  animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+  animation-timing-function: var(--ease-out-strong);
 }
 :root[data-nav-side="open"]::view-transition-new(.page) {
   z-index: 1;
@@ -328,14 +328,14 @@
 :root[data-stack][data-nav-side="open"]::view-transition-new(.page) {
   z-index: 2;
   animation-name: jg-stack-in;
-  animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+  animation-timing-function: var(--ease-out-strong);
   box-shadow: -2rem 0 4rem rgb(0 0 0 / 0.45);
 }
 :root[data-stack][data-nav-side="open"]::view-transition-old(.page) {
   z-index: 1;
   clip-path: none;
   animation-name: jg-stack-sink;
-  animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+  animation-timing-function: var(--ease-out-strong);
 }
 :root[data-stack][data-nav-side="shut"]::view-transition-old(.page) {
   z-index: 2;

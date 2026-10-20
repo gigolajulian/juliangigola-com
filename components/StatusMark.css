@@ -6,13 +6,13 @@
   --sm-error: #ef4444;
   --sm-fill: 0.06;
   --sm-font: 14px;
-  --sm-draw: 240ms;
+  --sm-draw: var(--dur-sm);
   --sm-strike-delay: 180ms;
   --sm-muted: 0.55;
   --sm-check-delay: 120ms;
   --sm-label-o: 0.65;
-  --sm-ease-out: cubic-bezier(0.23, 1, 0.32, 1);
-  --sm-ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+  --sm-ease-out: var(--ease-out-strong);
+  --sm-ease-in-out: var(--ease-in-out-strong);
 
   position: relative;
   display: inline-flex;
@@ -26,7 +26,7 @@
   flex: none;
   overflow: visible;
   color: var(--sm-color);
-  transition: color 200ms ease;
+  transition: color var(--dur-xs) ease;
 }
 
 .status-mark[data-status='done'] .status-mark__glyph {
@@ -45,7 +45,7 @@
   stroke-opacity: 0;
   transition:
     fill-opacity 180ms ease,
-    stroke-opacity 200ms ease;
+    stroke-opacity var(--dur-xs) ease;
 }
 
 .status-mark[data-status='running'] .status-mark__track {
@@ -63,7 +63,7 @@
   stroke-width: var(--sm-stroke);
   stroke-linecap: round;
   opacity: var(--sm-muted);
-  transition: opacity 200ms ease;
+  transition: opacity var(--dur-xs) ease;
 }
 
 .status-mark[data-status='running'] .status-mark__ring,
@@ -103,7 +103,7 @@
   font-size: var(--sm-font);
   line-height: 1.25;
   opacity: var(--sm-label-o);
-  transition: opacity 200ms ease;
+  transition: opacity var(--dur-xs) ease;
 }
 
 .status-mark[data-status='running'] {
@@ -164,13 +164,13 @@
   .status-mark__check,
   .status-mark__cross {
     stroke-dashoffset: 0;
-    transition: opacity 200ms ease;
+    transition: opacity var(--dur-xs) ease;
   }
 
   .status-mark__strike {
     opacity: 0;
     transform: scaleX(1) !important;
-    transition: opacity 200ms ease;
+    transition: opacity var(--dur-xs) ease;
   }
 
   .status-mark[data-status='done'][data-strike] .status-mark__strike {

@@ -65,7 +65,7 @@
   }
 }
 .tp-roll {
-  animation: tp-roll 0.45s var(--ease-out-strong, cubic-bezier(0.23, 1, 0.32, 1));
+  animation: tp-roll 0.45s var(--ease-out-strong, var(--ease-out-strong));
 }
 @keyframes tp-rise {
   from {
@@ -74,7 +74,7 @@
   }
 }
 .tp-rise {
-  animation: tp-rise 0.5s var(--ease-out-strong, cubic-bezier(0.23, 1, 0.32, 1));
+  animation: tp-rise var(--dur-xl) var(--ease-out-strong, var(--ease-out-strong));
 }
 @media (prefers-reduced-motion: reduce) {
   .tp-roll,
@@ -125,13 +125,13 @@
   stroke-dashoffset: 60;
 }
 .tp-status[data-ok] .tp-arm {
-  animation: tp-fold 0.45s var(--ease-out-strong, cubic-bezier(0.23, 1, 0.32, 1)) forwards;
+  animation: tp-fold 0.45s var(--ease-out-strong, var(--ease-out-strong)) forwards;
 }
 .tp-status[data-ok] .tp-ring {
-  animation: tp-stroke 0.55s 0.25s var(--ease-out-strong, cubic-bezier(0.23, 1, 0.32, 1)) forwards;
+  animation: tp-stroke 0.55s var(--dur-sm) var(--ease-out-strong, var(--ease-out-strong)) forwards;
 }
 .tp-status[data-ok] .tp-tick {
-  animation: tp-stroke 0.4s 0.7s var(--ease-out-strong, cubic-bezier(0.23, 1, 0.32, 1)) forwards;
+  animation: tp-stroke 0.4s 0.7s var(--ease-out-strong, var(--ease-out-strong)) forwards;
 }
 @media (prefers-reduced-motion: reduce) {
   .tp-arm {

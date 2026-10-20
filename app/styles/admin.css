@@ -94,7 +94,7 @@ body:has([data-workbench]) > footer {
 }
 
 @utility draw {
-  animation: jg-draw var(--draw-dur, 520ms) var(--ease-out-strong)
+  animation: jg-draw var(--draw-dur, var(--dur-xl)) var(--ease-out-strong)
     var(--draw-delay, 0ms) forwards;
 
   /* Drawn already, rather than drawing. The mark is the confirmation, so it
