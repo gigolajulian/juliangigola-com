@@ -75,7 +75,15 @@ export function PhotoNotice() {
       // `closest`, not `tagName`: a frame is often behind a link or a figure,
       // and the event target is whatever sits on top of it.
       const target = e.target as HTMLElement | null;
-      if (!target?.closest("img")) return;
+      if (!target) return;
+      /* Julian (2026-10-19): no menu on the page around them either. Text
+         fields keep theirs for copy and paste, and a link keeps its own
+         (open in a new tab). Only a photograph raises the notice. */
+      if (target.closest("input, textarea, select, [contenteditable]")) return;
+      if (!target.closest("img")) {
+        if (!target.closest("a")) e.preventDefault();
+        return;
+      }
 
       e.preventDefault();
       const now = e.timeStamp;
@@ -135,6 +143,13 @@ export function PhotoNotice() {
       gsap.set(el, { autoAlpha: shown ? 1 : 0 });
       return;
     }
+    // Never raised yet: closed, with nothing to fade. Tweening out from the
+    // first paint drew it at the corner for a moment on every page load
+    // (QA, live v1.2.18): `autoAlpha` shows it while it fades.
+    if (!raised) {
+      gsap.set(el, { autoAlpha: 0 });
+      return;
+    }
     if (!shown) {
       const out = gsap.to(el, {
         autoAlpha: 0,
@@ -176,8 +191,8 @@ export function PhotoNotice() {
    * The estimate is generous, so the worst case is a notice sitting slightly
    * further inside the edge than it strictly needed to.
    */
-  const BOX_W = 352; // `w-[22rem]`
-  const BOX_H = 132; // three lines plus padding
+  const BOX_W = 236; // `w-[14.75rem]`
+  const BOX_H = 112; // four lines plus padding
   const GAP = 12;
   const MARGIN = 16;
 
@@ -206,7 +221,7 @@ export function PhotoNotice() {
       role="status"
       aria-live="polite"
       ref={box}
-      style={{ ...position, visibility: "hidden" }}
+      style={{ ...position, visibility: "hidden", opacity: 0 }}
       // No transition on position: it is placed where the click was and
       // must not be seen travelling there from wherever the last one was.
       // A dark plate with a hairline, square, the site's own mono for the
@@ -215,7 +230,7 @@ export function PhotoNotice() {
       data-box=""
       onPointerEnter={() => setHeld(true)}
       onPointerLeave={() => setHeld(false)}
-      className="fixed z-50 w-[22rem] rounded-[4px] border border-foreground/25 bg-background/60 px-4 backdrop-blur-xl backdrop-saturate-150 [:root[data-theme=light]_&]:bg-background/70 py-3.5 text-foreground"
+      className="fixed z-50 w-[14.75rem] rounded-[4px] border border-foreground/25 bg-background/60 px-3 backdrop-blur-xl backdrop-saturate-150 [:root[data-theme=light]_&]:bg-background/70 py-2.5 text-foreground"
     >
       {/* Said once per raise; the lines below stay through the fade out. */}
       {shown ? (
@@ -232,21 +247,23 @@ export function PhotoNotice() {
             &copy; Copyright {year}
           </span>
         </span>
-        <span aria-hidden className="mt-1.5 block overflow-hidden">
+        <span aria-hidden className="mt-1 block overflow-hidden">
           <span
             data-line
-            className="block font-[family-name:var(--font-wordmark)] text-[2.5rem] font-black normal-case leading-[1.15] tracking-[-0.045em]"
+            className="block font-[family-name:var(--font-wordmark)] text-[1.67rem] font-black normal-case leading-[1.15] tracking-[-0.045em]"
           >
             Julian Gigola
           </span>
         </span>
-        <span aria-hidden className="mt-3 flex gap-3 overflow-hidden border-t border-foreground/15 pt-2">
+        {/* Two lines at this width (Julian, 2026-10-20): side by side the
+            frame's name was cut to "BYTE…". */}
+        <span aria-hidden className="mt-2 block overflow-hidden border-t border-foreground/15 pt-1.5">
           {raised?.slug ? (
-            <span data-line className="label min-w-0 truncate text-muted-foreground">
+            <span data-line className="label block truncate text-muted-foreground">
               {raised.slug}
             </span>
           ) : null}
-          <span data-line className="label ml-auto shrink-0 text-foreground/80">
+          <span data-line className="label block text-foreground/80">
             All rights reserved
           </span>
         </span>
