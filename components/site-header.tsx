@@ -536,13 +536,10 @@ function NavLinks({
 
 /**
  * Where you are is the one at full strength and the other three stand back.
- * No mark under it: Julian picked ink alone out of eight, and it is what the
- * menu drawer has always done with the same four names — the navbar and the
- * drawer now say "you are here" the same way, with one less mark on the
- * screen. The pointer answers in the same language, a name coming up to full
- * ink rather than a rule drawing itself.
+ * Julian brought the line back (2026-10-20, from the `?motion=elements`
+ * preview): the page you are on keeps a hairline under it, and under the
+ * pointer one traces in from the left and leaves to the right. No scale.
  *
- * The underline that used to grow from the left on hover is gone with it.
  * The keyboard is unaffected: the focus ring is the accent outline every
  * focusable thing on the site gets, set once in `globals.css`.
  */
@@ -564,19 +561,18 @@ function NavLink({
       href={href}
       aria-current={current ? "page" : undefined}
       className={cn(
-        "block py-3 font-mono text-[0.9375rem] uppercase leading-none tracking-[0.08em] transition-[color,scale] duration-300 ease-[var(--ease-out-strong)] motion-reduce:transition-colors",
+        "block py-3 font-mono text-[0.9375rem] uppercase leading-none tracking-[0.08em] transition-colors duration-300 ease-[var(--ease-out-strong)]",
         // The page you are on stands back while the pointer lights another
-        // name, and comes up again when it leaves. Lit, the name is a
-        // touch larger. Bold costs no width in a mono face, so nothing
-        // beside it moves.
+        // name, and comes up again when it leaves. The line under it is
+        // `.nav-trace` in `header.css`.
         lit
-          ? "text-foreground scale-[1.06]"
+          ? "text-foreground"
           : current
             ? "text-foreground/70"
             : "text-muted-foreground",
       )}
     >
-      {children}
+      <span className="nav-trace">{children}</span>
     </Link>
   );
 }

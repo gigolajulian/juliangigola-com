@@ -628,3 +628,37 @@ body > footer {
   .site-bar nav li:nth-child(5) { --bar-d: 125ms; }
   .site-bar .page-column > div > :not(nav) { --bar-d: 150ms; }
 }
+
+/* The navbar's line (`NavLink`): a hairline under the page you are on,
+   and under the pointer one that traces in from the left and leaves to
+   the right. Julian picked it from the `?motion=elements` preview. */
+.nav-trace {
+  position: relative;
+  display: inline-block;
+}
+.nav-trace::after {
+  content: "";
+  position: absolute;
+  inset-inline: 0;
+  bottom: -5px;
+  height: 1px;
+  background: currentColor;
+  scale: 0 1;
+  transform-origin: right center;
+  transition: scale 250ms var(--ease-out-strong);
+  pointer-events: none;
+}
+[aria-current="page"] > .nav-trace::after {
+  scale: 1 1;
+}
+@media (hover: hover) and (pointer: fine) {
+  :hover > .nav-trace::after {
+    scale: 1 1;
+    transform-origin: left center;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .nav-trace::after {
+    transition: none;
+  }
+}
