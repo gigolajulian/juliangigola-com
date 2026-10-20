@@ -263,7 +263,7 @@ export function PhotoNotice() {
               {raised.slug}
             </span>
           ) : null}
-          <span data-line className="label block text-foreground/80">
+          <span data-line className="label block text-right text-foreground/80">
             All rights reserved
           </span>
         </span>
