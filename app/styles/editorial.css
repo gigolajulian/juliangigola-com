@@ -88,7 +88,7 @@
 .ed-when-line b { font: 500 1.75rem/1.1 var(--font-display); letter-spacing: -0.025em; text-transform: none; }
 .ed-when-line .label { color: var(--muted-foreground); }
 .ed-when-line .ed-hour { font: 400 1rem/1.3 var(--font-mono); letter-spacing: -0.005em; text-transform: none; color: var(--foreground); font-variant-numeric: tabular-nums; }
-.ed[data-view="month"] .ed-big { display: none; }
+/* A phone month shows the time picked too, as the week does (MAC, 2026-10-20). */
 
 /* the times, a kind to a row */
 .ed-times { margin-top: 1.5rem; }
