@@ -21,6 +21,7 @@ import { FocusField } from "@/components/focus-field";
 import { ldJson, siteGraph } from "@/lib/seo";
 import { DebugGate } from "@/components/debug-gate";
 import { TypeDials } from "@/components/type-dials";
+import { clips, DEFAULTS, LATE, LEVELS, LIQUID, SKIP, sizesOf, typeSizer } from "@/lib/type-size";
 import { VisitTrail } from "@/components/visit-trail";
 import { ClickBeacon } from "@/components/click-beacon";
 
@@ -126,6 +127,15 @@ export const metadata: Metadata = {
   verification: { other: { "msvalidate.01": "DEF796C06E3ACDCBF969BF1FF3E4EA6A" } },
 };
 
+/* Font v2's sizes before the first paint (Julian: the text grew and moved
+   about 1.4s after load, when `type-dials.tsx` first sized it). The same
+   sizing, run as the parser reaches the foot of the page; `type-dials.tsx`
+   takes over what it sized, and fits it again once the faces are in.
+   The cover's two lines (`LATE`) and text in clipping boxes (`clips`) are
+   left to that later pass, as before. Chrome holds the first paint until then
+   (`rel="expect"` in the head). */
+const TYPE_EARLY = `(function(){try{if(document.documentElement.dataset.font!=="v2")return;var s=(${typeSizer.toString()})(${JSON.stringify(LEVELS)},${JSON.stringify(sizesOf(DEFAULTS))},${JSON.stringify(SKIP)},${JSON.stringify(LIQUID)});s.scan([document.body],${JSON.stringify(`${SKIP}, ${LATE}`)},${clips.toString()});s.fit();window.__jgType=s}catch(e){}})()`;
+
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
@@ -196,6 +206,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             __html: `(function(){try{if(!matchMedia("(prefers-reduced-motion: reduce)").matches){document.documentElement.dataset.gather="";document.documentElement.dataset.moves=""}}catch(e){}try{var q=location.search;try{if(/[?&]menu3d=1/.test(q))sessionStorage.setItem("jg-menu3d","1");if(/[?&]menu3d=0/.test(q))sessionStorage.removeItem("jg-menu3d");if(sessionStorage.getItem("jg-menu3d"))document.documentElement.dataset.menu3d=""}catch(e){}if(/[?&]intro=0/.test(q))return;var basic=/[?&]splash=basic/.test(q);var force=basic||/[?&]intro=1/.test(q);var seen=false;try{seen=!!sessionStorage.getItem("jg-intro")}catch(e){}var calm=matchMedia("(prefers-reduced-motion: reduce)").matches;var admin=location.pathname.indexOf("/admin")===0;if(force||(!admin&&!seen&&!calm)){var r=document.documentElement;r.dataset.intro="1";if(basic){r.dataset.splash="basic";setTimeout(function(){r.dataset.intro="half";r.dataset.splashed="";setTimeout(function(){r.removeAttribute("data-intro");r.removeAttribute("data-splash")},1200)},500)}r.style.setProperty("--jg-blink-at",Math.round(100+Math.random()*160)+"ms")}}catch(e){}})()`,
           }}
         />
+        {process.env.NODE_ENV === "production" ? (
+          <link rel="expect" href="#jg-sized" {...{ blocking: "render" }} />
+        ) : null}
       </head>
       <body className="min-h-full flex flex-col">
         {/* Who Julian is, where he works and what can be booked, for
@@ -265,6 +278,14 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         {/* Clicks and scroll depth for /admin's SEO tab, one beacon per
             page view, no cookie. See `click-beacon.tsx`. Renders nothing. */}
         <ClickBeacon />
+        {/* Production only: on the dev server React reports the sizes as
+            a hydration mismatch, and its double mount undoes them. */}
+        {process.env.NODE_ENV === "production" ? (
+          <>
+            <script dangerouslySetInnerHTML={{ __html: TYPE_EARLY }} />
+            <div id="jg-sized" hidden />
+          </>
+        ) : null}
       </body>
     </html>
   );
