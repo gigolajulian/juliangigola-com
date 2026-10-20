@@ -79,7 +79,7 @@
 /* the time picked, big, only once one is picked, its day under it
    (Julian, 2026-10-20: the split-flap went). Its room is held, so a pick
    moves nothing below; it rises in on each new pick. */
-.ed-big { margin-top: 1.5rem; min-height: calc(var(--ed-time, 6rem) * 0.8 + 3.75rem); display: flex; flex-direction: column; justify-content: flex-end; align-items: flex-start; gap: 0.5rem; }
+.ed-big { margin-top: 1.5rem; min-height: calc(var(--ed-time, 6rem) * 0.8 + 4.4rem); display: flex; flex-direction: column; justify-content: flex-end; align-items: flex-start; gap: 0.5rem; }
 .ed-bt { display: flex; align-items: flex-end; gap: 0.625rem; font: 900 var(--ed-time, 6rem)/0.8 var(--font-wordmark); letter-spacing: -0.045em; margin-bottom: 0.375rem; animation: ed-bt-in 420ms cubic-bezier(0.16, 1, 0.3, 1) both; }
 .ed-bt small { font: 400 0.6875rem/1 var(--font-mono); letter-spacing: 0.14em; color: var(--muted-foreground); padding-bottom: 0.25rem; }
 @keyframes ed-bt-in { from { opacity: 0; transform: translateY(0.35em); filter: blur(6px); } }
