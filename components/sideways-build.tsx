@@ -58,11 +58,11 @@ export function SidewaysBuild() {
         { threshold: [0, 0.6] },
       );
       const watch = () => {
-        // The cover builds itself (the splash); the window into the work is no screen.
-        [...strip.children].slice(1).forEach((c) => {
+        // The cover leaves like any screen but builds itself (the splash).
+        [...strip.children].forEach((c, i) => {
           const cell = c as HTMLElement;
           // Held empty until it builds, or it shows, blanks and builds.
-          if (!cell.dataset.build && cell.offsetWidth) cell.dataset.build = "wait";
+          if (i && !cell.dataset.build && cell.offsetWidth) cell.dataset.build = "wait";
           io.observe(c);
         });
       };

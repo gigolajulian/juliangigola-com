@@ -10,7 +10,7 @@
  * `translate` and `scale`, not `transform`, so a piece keeps its own.
  * ─────────────────────────────────────────────────────────────── */
 
-:root[data-build] .strip-scroll > :not(:first-child) {
+:root[data-build] .strip-scroll > * {
   --b-out: 250ms;
   --b-lead: 130ms; /* 250 - 120: in before out is done */
   --b-step: 75ms;
@@ -30,7 +30,21 @@
   }
 }
 
-/* ── sideways: iPad and up ── */
+/* ── sideways: iPad and up ──
+ * The strip jumps (`motion.ts`), so no screen glides: the one leaving
+ * stays on top while it goes, 250ms, and the one arriving builds under
+ * it. The deck's recede and shade would show the jump, so they are off. */
+:root[data-build="sideways"] .strip-scroll > * {
+  scale: none !important;
+  &::before { content: none !important; }
+  &[data-build="out"] {
+    /* Over the deck's own stacking, which it writes inline. */
+    z-index: 999 !important;
+    /* Its ground off, so the next screen's pieces show as they arrive. */
+    background: none !important;
+    animation: b-cell-out var(--b-out) var(--b-ease-io) forwards;
+  }
+}
 :root[data-build="sideways"] .strip-scroll > :not(:first-child) {
   --b-x: calc(var(--build-dir, 1) * 40px);
 
@@ -76,6 +90,9 @@
   }
 }
 
+@keyframes b-cell-out {
+  to { opacity: 0; visibility: hidden; }
+}
 @keyframes b-side-in {
   from { opacity: 0; translate: var(--b-x) 0; }
 }

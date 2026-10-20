@@ -276,7 +276,9 @@ export function createMover(
 
   m.to = (where: number) => {
     m.target = m.clamp(where);
-    if (!m.eased) {
+    /* `?motion=sideways` (`sideways-build.tsx`): a screen does not glide
+       in, the page swaps it where it stands and its pieces build. */
+    if (!m.eased || (m.paged && document.documentElement.dataset.build === "sideways")) {
       el.scrollLeft = m.target;
       return;
     }
