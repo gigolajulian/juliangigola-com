@@ -46,8 +46,8 @@
   }
   &[data-leaving] {
     transition:
-      transform 260ms var(--ease-in-out-strong),
-      opacity 260ms var(--ease-in-out-strong);
+      transform var(--dur-sm) var(--ease-in-out-strong),
+      opacity var(--dur-sm) var(--ease-in-out-strong);
     transform: translateX(-14vw);
     opacity: 0;
   }
@@ -85,7 +85,7 @@
        nought when the press was on the chip already lit. Still short —
        chips are pressed often, and an arrival that takes its time is one
        that is in the way by the third press. */
-    animation: jg-fade-slide 260ms var(--ease-out-strong) backwards;
+    animation: jg-fade-slide var(--dur-sm) var(--ease-out-strong) backwards;
   }
   /* Under a page zoom (`data-nav` on the root, see `strip.tsx`) the strip
      itself does nothing. What is inside it is stilled below, next to the
@@ -139,7 +139,7 @@
    scroll through `transform` (below), and a finished animation that filled
    `transform` would hold them upright for good. */
 .title-word {
-  animation: jg-rise 720ms var(--ease-out-strong) both;
+  animation: jg-rise var(--dur-2xl) var(--ease-out-strong) both;
   animation-delay: calc(140ms + var(--i, 0) * 70ms);
 }
 .title-rest {
@@ -153,12 +153,12 @@
      cell. The press timings ride along here for that reason: without them
      a cover under the finger snapped instead of giving. */
   transition:
-    transform 420ms var(--ease-out-strong),
-    scale 440ms var(--ease-bounce);
+    transform var(--dur-lg) var(--ease-out-strong),
+    scale var(--dur-lg) var(--ease-bounce);
   &:active {
     transition:
-      transform 420ms var(--ease-out-strong),
-      scale 90ms cubic-bezier(0.4, 0, 1, 1);
+      transform var(--dur-lg) var(--ease-out-strong),
+      scale var(--dur-2xs) var(--ease-in-strong);
   }
 }
 /* Only the first dozen arrive. Julian: a first visit lagged until the
@@ -447,7 +447,7 @@ h2.contact-title {
   }
 }
 [data-cue] .rail-lit {
-  animation: rail-cue 900ms cubic-bezier(0.23, 1, 0.32, 1);
+  animation: rail-cue 900ms var(--ease-out-strong);
 }
 @media (prefers-reduced-motion: reduce) {
   [data-cue] .rail-lit {
@@ -572,7 +572,7 @@ h2.contact-title {
   pointer-events: none;
   transition:
     opacity 120ms var(--ease-out-strong),
-    color 200ms var(--ease-out-strong);
+    color var(--dur-xs) var(--ease-out-strong);
 }
 .strip-rail[data-rail-names="always"] .rail-chapter[data-tone] .rail-name {
   color: var(--foreground);
@@ -582,7 +582,7 @@ h2.contact-title {
   display: none;
 }
 .rail-sum {
-  transition: opacity 240ms var(--ease-out-strong) 80ms;
+  transition: opacity var(--dur-sm) var(--ease-out-strong) 80ms;
 }
 /* The line grows into the control as one piece, and what the control
    adds comes up once it is most of the way there. */
@@ -598,7 +598,7 @@ h2.contact-title {
 [data-dwell] .rail-line .rail-bar::after,
 [data-dwell] .rail-line .rail-bar > span {
   opacity: 1;
-  transition: opacity 200ms var(--ease-out-strong) 120ms;
+  transition: opacity var(--dur-xs) var(--ease-out-strong) 120ms;
 }
 .rail-line:hover .rail-name,
 [data-dwell] .rail-line .rail-name {

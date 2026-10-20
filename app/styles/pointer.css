@@ -42,7 +42,7 @@
   mix-blend-mode: difference;
   pointer-events: none;
   opacity: 0;
-  transition: opacity 200ms var(--ease-out-strong);
+  transition: opacity var(--dur-xs) var(--ease-out-strong);
   will-change: transform;
 }
 .pointer-mark[data-on] {
@@ -140,7 +140,7 @@
   scale: 0.5;
   translate: calc(var(--sx, 0px) - 6px) var(--sy, 0px);
   transition:
-    opacity 200ms var(--ease-out-strong),
+    opacity var(--dur-xs) var(--ease-out-strong),
     scale var(--grow),
     translate 220ms var(--ease-out-strong);
 }
@@ -197,11 +197,11 @@
   background: currentColor;
   transform-origin: var(--fo, 50% 50%);
   scale: 0;
-  transition: scale 260ms var(--ease-out-strong);
+  transition: scale var(--dur-sm) var(--ease-out-strong);
 }
 .pointer-mark[data-fill] .mark-fill {
   scale: 1;
-  transition-duration: 420ms;
+  transition-duration: var(--dur-lg);
 }
 /* Over a picked (teal) option the dot is the teal's own ink, not a
    difference: that blended it red. */
@@ -217,8 +217,8 @@
    it, and a 1.2 scale on a line of display type would be a lurch. */
 [data-stick]:not([data-stick="row"]) > :is(svg, span) {
   transition:
-    scale 300ms var(--ease-out-strong),
-    translate 300ms var(--ease-out-strong);
+    scale var(--dur-md) var(--ease-out-strong),
+    translate var(--dur-md) var(--ease-out-strong);
 }
 [data-stick]:not([data-stick="row"])[data-stuck] > :is(svg, span:not(.sr-only)) {
   scale: 1.2;

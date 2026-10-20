@@ -115,9 +115,9 @@
   backdrop-filter: blur(var(--glass-blur, 9px)) saturate(1.5);
   opacity: 0;
   transition:
-    opacity 300ms var(--ease-out-strong),
-    backdrop-filter 300ms var(--ease-out-strong),
-    -webkit-backdrop-filter 300ms var(--ease-out-strong);
+    opacity var(--dur-md) var(--ease-out-strong),
+    backdrop-filter var(--dur-md) var(--ease-out-strong),
+    -webkit-backdrop-filter var(--dur-md) var(--ease-out-strong);
   pointer-events: none;
 }
 .site-bar[data-plain="true"]::after {
@@ -238,9 +238,9 @@
     -webkit-backdrop-filter: blur(var(--glass-blur, 9px)) saturate(1.5);
     backdrop-filter: blur(var(--glass-blur, 9px)) saturate(1.5);
     transition:
-      background-color 300ms var(--ease-out-strong),
-      backdrop-filter 300ms var(--ease-out-strong),
-      -webkit-backdrop-filter 300ms var(--ease-out-strong);
+      background-color var(--dur-md) var(--ease-out-strong),
+      backdrop-filter var(--dur-md) var(--ease-out-strong),
+      -webkit-backdrop-filter var(--dur-md) var(--ease-out-strong);
     pointer-events: none;
   }
   /* Over a wall of photographs (Inquiries, Where next, a booking page's
@@ -351,7 +351,7 @@
   .site-bar,
   body > main,
   body > footer {
-    transition: translate 420ms var(--ease-out-strong);
+    transition: translate var(--dur-lg) var(--ease-out-strong);
   }
 
   [data-drawer] .site-bar,
@@ -426,10 +426,10 @@
   -webkit-backdrop-filter: blur(0) saturate(1);
   backdrop-filter: blur(0) saturate(1);
   transition:
-    visibility 420ms,
-    background-color 240ms var(--ease-out-strong),
-    -webkit-backdrop-filter 240ms var(--ease-out-strong),
-    backdrop-filter 240ms var(--ease-out-strong);
+    visibility var(--dur-lg),
+    background-color var(--dur-sm) var(--ease-out-strong),
+    -webkit-backdrop-filter var(--dur-sm) var(--ease-out-strong),
+    backdrop-filter var(--dur-sm) var(--ease-out-strong);
 }
 [data-drawer="menu"] .site-menu,
 [data-drawer="filter"] .work-filter {
@@ -439,7 +439,7 @@
   backdrop-filter: blur(10px) saturate(1.2);
   /* Four values, in the order the shorthand above lists them: the panel
      has to be visible from the first frame, and the glass takes its time. */
-  transition-duration: 420ms, 520ms, 520ms, 520ms;
+  transition-duration: var(--dur-lg), var(--dur-xl), var(--dur-xl), var(--dur-xl);
   transition-delay: 0ms, 80ms, 80ms, 80ms;
 }
 
@@ -474,10 +474,10 @@
     transition-delay: 80ms;
   }
   :root[data-menu3d] .site-menu {
-    transition-duration: 420ms, 520ms, 520ms, 520ms;
+    transition-duration: var(--dur-lg), var(--dur-xl), var(--dur-xl), var(--dur-xl);
   }
   :root[data-menu3d]:not([data-drawer="menu"]) .site-menu-item {
-    transition-delay: max(0ms, calc(240ms - var(--reveal-delay, 0ms)));
+    transition-delay: max(0ms, calc(var(--dur-sm) - var(--reveal-delay, 0ms)));
   }
 }
 
@@ -505,7 +505,7 @@
     var(--foreground) 5%,
     var(--background)
   );
-  transition: translate 420ms var(--ease-out-strong);
+  transition: translate var(--dur-lg) var(--ease-out-strong);
 }
 .site-menu-panel {
   --park: 100%;
@@ -535,7 +535,7 @@
   opacity: 0;
   translate: 0 -1.25rem;
   transition:
-    opacity 200ms var(--ease-out-strong),
+    opacity var(--dur-xs) var(--ease-out-strong),
     translate 320ms var(--ease-bounce);
 }
 [data-drawer="menu"] .site-menu-item,
@@ -587,8 +587,8 @@
 }
 body > footer {
   transition:
-    opacity 420ms var(--ease-out-strong),
-    translate 420ms var(--ease-out-strong);
+    opacity var(--dur-lg) var(--ease-out-strong),
+    translate var(--dur-lg) var(--ease-out-strong);
 }
 
 @media (prefers-reduced-motion: reduce) {

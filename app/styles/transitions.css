@@ -79,7 +79,7 @@
    crossfades with itself, which is invisible. */
 ::view-transition-old(root),
 ::view-transition-new(root) {
-  animation-duration: 240ms;
+  animation-duration: var(--dur-sm);
   animation-timing-function: var(--ease-out-strong);
 }
 
@@ -94,7 +94,7 @@
    into a project's first frame flies over both, on its own group. Blend
    mode normal, for the reason the lift's rules give. */
 ::view-transition-group(.page) {
-  animation-duration: 420ms;
+  animation-duration: var(--dur-lg);
   animation-timing-function: cubic-bezier(0.32, 0.72, 0, 1);
 }
 ::view-transition-image-pair(.page) {
@@ -111,11 +111,11 @@
      headlines written over each other is the one thing the scale used to
      keep apart. Gone by 200ms, the rest of the trip is the new page
      alone. */
-  animation: jg-page-away 200ms cubic-bezier(0.32, 0.72, 0, 1) both;
+  animation: jg-page-away var(--dur-xs) cubic-bezier(0.32, 0.72, 0, 1) both;
   mix-blend-mode: normal;
 }
 ::view-transition-new(.page) {
-  animation: jg-page-up 420ms cubic-bezier(0.32, 0.72, 0, 1) both;
+  animation: jg-page-up var(--dur-lg) cubic-bezier(0.32, 0.72, 0, 1) both;
   mix-blend-mode: normal;
   opacity: 1;
 }
@@ -130,7 +130,7 @@
    comes up from nothing instead, and the screen is the site's own ground
    in between. */
 :root[data-nav-bar]::view-transition-new(.page) {
-  animation: jg-page-in 420ms cubic-bezier(0.32, 0.72, 0, 1) 300ms both;
+  animation: jg-page-in var(--dur-lg) cubic-bezier(0.32, 0.72, 0, 1) var(--dur-md) both;
 }
 /* And a longer one out of a drawer, which has a door to shut first. The
    menu and the filters take 420ms to travel back out; at the bar's 300ms
@@ -205,7 +205,7 @@
    way out above. The one left drops and goes on top; the one returned to
    is whole underneath and settles down from above. */
 ::view-transition-group(back-page) {
-  animation-duration: 420ms;
+  animation-duration: var(--dur-lg);
   animation-timing-function: cubic-bezier(0.32, 0.72, 0, 1);
 }
 ::view-transition-image-pair(back-page) {
@@ -213,11 +213,11 @@
 }
 ::view-transition-old(back-page) {
   z-index: 1;
-  animation: jg-page-down 200ms cubic-bezier(0.32, 0.72, 0, 1) both;
+  animation: jg-page-down var(--dur-xs) cubic-bezier(0.32, 0.72, 0, 1) both;
   mix-blend-mode: normal;
 }
 ::view-transition-new(back-page) {
-  animation: jg-page-settle 420ms cubic-bezier(0.32, 0.72, 0, 1) both;
+  animation: jg-page-settle var(--dur-lg) cubic-bezier(0.32, 0.72, 0, 1) both;
   mix-blend-mode: normal;
 }
 /* ── along the bar ──
@@ -232,7 +232,7 @@
    as a second move after the card had landed. */
 :root[data-nav-side]::view-transition-old(.page),
 :root[data-nav-side]::view-transition-new(.page) {
-  animation-duration: 480ms;
+  animation-duration: var(--dur-xl);
   animation-delay: 0ms;
   animation-timing-function: cubic-bezier(0.25, 1, 0.5, 1);
   animation-fill-mode: both;

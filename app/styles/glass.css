@@ -67,9 +67,9 @@
   border-radius: 0;
   box-shadow: 0 12px 32px -14px color-mix(in oklab, black 55%, transparent);
   transition:
-    background-color 200ms var(--ease-out-strong),
-    border-color 200ms var(--ease-out-strong),
-    color 200ms var(--ease-out-strong);
+    background-color var(--dur-xs) var(--ease-out-strong),
+    border-color var(--dur-xs) var(--ease-out-strong),
+    color var(--dur-xs) var(--ease-out-strong);
 
   /* The light. A radial highlight at the pointer, or resting at the top
      edge; painted between the fill and the content. */
@@ -86,7 +86,7 @@
       transparent 70%
     );
     opacity: 0;
-    transition: opacity 260ms var(--ease-out-strong);
+    transition: opacity var(--dur-sm) var(--ease-out-strong);
   }
   @media (hover: hover) and (pointer: fine) {
     &:hover::before {
@@ -141,7 +141,7 @@
   border: 1px solid var(--glass-edge);
   border-radius: 0;
   box-shadow: 0 12px 32px -14px color-mix(in oklab, black 55%, transparent);
-  transition: background-color 200ms var(--ease-out-strong);
+  transition: background-color var(--dur-xs) var(--ease-out-strong);
 
   &::before {
     content: "";
@@ -156,7 +156,7 @@
       transparent 70%
     );
     opacity: 0;
-    transition: opacity 260ms var(--ease-out-strong);
+    transition: opacity var(--dur-sm) var(--ease-out-strong);
   }
   /* The pointer light alone was too quiet to read as a hover on a pill
      this bright — Julian could not see it. So the fill itself steps a
@@ -225,10 +225,10 @@
   backdrop-filter: blur(24px) saturate(1.9) brightness(1.06);
   box-shadow: 0 12px 32px -16px color-mix(in oklab, black 55%, transparent);
   transition:
-    background-color 200ms var(--ease-out-strong),
-    border-color 200ms var(--ease-out-strong),
-    color 200ms var(--ease-out-strong),
-    -webkit-text-stroke-width 200ms var(--ease-out-strong);
+    background-color var(--dur-xs) var(--ease-out-strong),
+    border-color var(--dur-xs) var(--ease-out-strong),
+    color var(--dur-xs) var(--ease-out-strong),
+    -webkit-text-stroke-width var(--dur-xs) var(--ease-out-strong);
 
   /* Inverts under a pointer: the ground with the ink on it, where at rest
      it is the ink with the ground on it. It used to go from 72% ink to 74%
@@ -271,10 +271,10 @@
   backdrop-filter: blur(24px) saturate(1.9) brightness(1.06);
   box-shadow: 0 12px 32px -18px color-mix(in oklab, black 45%, transparent);
   transition:
-    background-color 200ms var(--ease-out-strong),
-    border-color 200ms var(--ease-out-strong),
-    color 200ms var(--ease-out-strong),
-    -webkit-text-stroke-width 200ms var(--ease-out-strong);
+    background-color var(--dur-xs) var(--ease-out-strong),
+    border-color var(--dur-xs) var(--ease-out-strong),
+    color var(--dur-xs) var(--ease-out-strong),
+    -webkit-text-stroke-width var(--dur-xs) var(--ease-out-strong);
 
   /* Under the pointer it fills rather than tints: white type needs a ground
      to be white against, and 7% of ink over the page is not one. The loud
@@ -325,9 +325,9 @@
   /* The type turns over as the fill reaches it: a beat after the circle
      starts going in, and going out, once it has drained off the words. */
   transition:
-    background-color 200ms var(--ease-out-strong),
-    border-color 200ms var(--ease-out-strong),
-    box-shadow 200ms var(--ease-out-strong),
+    background-color var(--dur-xs) var(--ease-out-strong),
+    border-color var(--dur-xs) var(--ease-out-strong),
+    box-shadow var(--dur-xs) var(--ease-out-strong),
     color 220ms ease 170ms;
 }
 :is(.action, .action-quiet, .cover-cta)::before {
@@ -380,7 +380,7 @@
     scale: 1;
   }
   :is(.action, .action-quiet, .cover-cta):hover {
-    transition-delay: 0s, 0s, 0s, 90ms;
+    transition-delay: 0s, 0s, 0s, var(--dur-2xs);
   }
   /* Julian: the type a touch heavier under the pointer. Plex stops at
      700, which the buttons already are, so it is a hairline of the
