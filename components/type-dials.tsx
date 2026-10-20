@@ -119,7 +119,9 @@ const KEY = "jg-font-v2-bar";
    here kept it and the buttons redrawing on hover (QA, #239), and Julian
    kept the wordmark as it was. */
 // The copyright card's footer is sized to fit its width (photo-notice.tsx).
-const SKIP = ".logo-grow, .v2-bar, .v2-tags, .notice-foot";
+// The navbar's names are sized in `font-v2.css` from the first paint:
+// written here after load, they grew 4% and the row jumped (Julian).
+const SKIP = ".logo-grow, .v2-bar, .v2-tags, .notice-foot, .site-bar nav";
 // And the card captions under Commissions, held to two lines on a phone
 // in `font-v2.css` (QA, #239).
 // And /book's title and session names, sized to the window's height in
