@@ -61,7 +61,7 @@ export function SiteFooter() {
                     target="_blank"
                     rel="me noreferrer"
                     data-ring={s.label}
-                    className="label text-muted-foreground transition-colors duration-200 hoverable:hover:text-foreground"
+                    className="nav-trace label text-muted-foreground transition-colors duration-200 hoverable:hover:text-foreground"
                   >
                     {s.label}
                   </a>
@@ -87,7 +87,7 @@ export function SiteFooter() {
                   <Link
                     prefetch={false}
                     href={l.href}
-                    className="transition-colors duration-200 hoverable:hover:text-foreground"
+                    className="nav-trace transition-colors duration-200 hoverable:hover:text-foreground"
                   >
                     {l.label}
                   </Link>
