@@ -4,10 +4,23 @@ import type { Bts, Frame } from "@/lib/work-types";
 /* Behind the scenes: the plate that names who shot it, and the grid of
    frames. On a project page they sit after the last frame, before the end
    cell (`project-strip.tsx`); on /bts every shoot gets one of each. The
-   tiles are all cropped 4:3 so the grid reads as a contact sheet and not as
-   a second sequence competing with the work. */
+   photo tiles are all cropped 4:3 so the grid reads as a contact sheet and
+   not as a second sequence competing with the work; clips keep their shape. Photos show in black and white
+   (the files stay in color); clips keep their color. */
 
 const pad = (n: number) => String(n).padStart(2, "0");
+
+/** "04 frames · 01 clip": photos and clips counted apart, an empty kind left out. */
+const count = (bts: Bts) => {
+  const clips = bts.frames.filter((f) => f.src.endsWith(".mp4")).length;
+  const photos = bts.frames.length - clips;
+  return [
+    photos ? `${pad(photos)} ${photos === 1 ? "frame" : "frames"}` : "",
+    clips ? `${pad(clips)} ${clips === 1 ? "clip" : "clips"}` : "",
+  ]
+    .filter(Boolean)
+    .join(" · ");
+};
 
 export function BtsCredit({ bts }: { bts: Bts }) {
   return (
@@ -26,7 +39,7 @@ export function BtsCredit({ bts }: { bts: Bts }) {
         </p>
       ) : null}
       <p className="label tabular-nums text-muted-foreground">
-        {pad(bts.frames.length)} frames
+        {count(bts)}
       </p>
     </>
   );
@@ -45,14 +58,20 @@ function Tile({
   sizes: string;
   className?: string;
 }) {
+  // Clips keep their own shape, uncropped; photos stay on the 4:3 sheet.
+  const clip = frame.src.endsWith(".mp4");
   return (
     <div
-      className={`relative aspect-[4/3] overflow-hidden ${className}`}
-      style={{ backgroundColor: frame.color }}
+      className={`relative overflow-hidden ${clip ? "" : "aspect-[4/3]"} ${className}`}
+      style={{
+        backgroundColor: frame.color,
+        ...(clip ? { aspectRatio: `${frame.width} / ${frame.height}` } : {}),
+      }}
     >
-      {frame.src.endsWith(".mp4") ? (
+      {clip ? (
         <video
           src={frame.src}
+          poster={frame.src.replace(/\.mp4$/, ".poster.jpg")}
           muted
           loop
           autoPlay
@@ -69,7 +88,7 @@ function Tile({
           sizes={sizes}
           loading="lazy"
           data-fade=""
-          className="object-cover"
+          className="object-cover grayscale"
         />
       )}
     </div>
@@ -91,7 +110,10 @@ export function BtsStripGrid({ bts, name }: { bts: Bts; name: string }) {
           name={name}
           n={i + 1}
           sizes="(min-width: 40rem) 30vw, 50vw"
-          className="sm:h-full"
+          // A vertical clip stands the full height of the strip, both rows.
+          className={`sm:h-full ${
+            f.src.endsWith(".mp4") && f.height > f.width ? "sm:row-span-2" : ""
+          }`}
         />
       ))}
     </div>
@@ -101,7 +123,7 @@ export function BtsStripGrid({ bts, name }: { bts: Bts; name: string }) {
 /** A grid down the page, for /bts. */
 export function BtsPageGrid({ bts, name }: { bts: Bts; name: string }) {
   return (
-    <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 sm:gap-3 xl:grid-cols-4">
+    <div className="grid grid-cols-2 items-start gap-2 sm:grid-cols-3 sm:gap-3 xl:grid-cols-4">
       {bts.frames.map((f, i) => (
         <Tile
           key={f.src}
