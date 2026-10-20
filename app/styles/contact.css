@@ -9,7 +9,7 @@
 @media (hover: hover) and (pointer: fine) {
   .contact-sheet img {
     transition:
-      filter 300ms var(--ease-out-strong),
+      filter var(--dur-md) var(--ease-out-strong),
       scale 900ms var(--ease-out-strong);
   }
 }
@@ -110,7 +110,7 @@
     inset 0 1px 0 color-mix(in oklab, var(--foreground) 9%, transparent),
     inset 0 -1px 0 color-mix(in oklab, var(--foreground) 6%, transparent);
   opacity: 0;
-  transition: opacity 300ms var(--ease-out-strong);
+  transition: opacity var(--dur-md) var(--ease-out-strong);
   pointer-events: none;
 }
 @media (min-width: 40rem) {
@@ -170,8 +170,8 @@
   .contact-card {
     transform: translateX(0) scale(1);
     transition:
-      transform 700ms var(--ease-out-strong),
-      box-shadow 700ms var(--ease-out-strong);
+      transform var(--dur-2xl) var(--ease-out-strong),
+      box-shadow var(--dur-2xl) var(--ease-out-strong);
   }
   /* Never a scroll bar on it (Julian). It still scrolls if a short
      window needs it; the wheel and the keys reach the fields. */
@@ -183,8 +183,8 @@
   }
   .contact-inquire > :not(.contact-card, style) {
     transition:
-      opacity 700ms var(--ease-out-strong),
-      filter 700ms var(--ease-out-strong);
+      opacity var(--dur-2xl) var(--ease-out-strong),
+      filter var(--dur-2xl) var(--ease-out-strong);
   }
   /* Further forward (was 44px, now about 1.05x) and a step toward
      the middle, as on hover, still clear of the text on the left. */
@@ -256,9 +256,9 @@
    the sharp one. Nothing moves on the row. */
 .portfolio-arrive .strip-cell img {
   transition:
-    opacity 700ms cubic-bezier(0.22, 1, 0.36, 1),
+    opacity var(--dur-2xl) var(--ease-out-strong),
     scale 900ms var(--ease-out-strong),
-    filter 300ms var(--ease-out-strong);
+    filter var(--dur-md) var(--ease-out-strong);
 }
 
 /* And the Commissions table's tilt: the card under the pointer lifts,
@@ -268,14 +268,14 @@
 .portfolio-arrive .strip-cell:not([data-deck]) {
   box-shadow: 0 22px 40px -16px rgb(0 0 0 / 0), var(--deal-ground, 0 0 #0000);
   transition:
-    transform 700ms cubic-bezier(0.45, 0, 0.2, 1),
-    box-shadow 700ms cubic-bezier(0.45, 0, 0.2, 1),
-    scale 440ms var(--ease-bounce);
+    transform var(--dur-2xl) cubic-bezier(0.45, 0, 0.2, 1),
+    box-shadow var(--dur-2xl) cubic-bezier(0.45, 0, 0.2, 1),
+    scale var(--dur-lg) var(--ease-bounce);
   &:active {
     transition:
       transform 450ms var(--ease-out-strong),
       box-shadow 450ms var(--ease-out-strong),
-      scale 90ms cubic-bezier(0.4, 0, 1, 1);
+      scale var(--dur-2xs) var(--ease-in-strong);
   }
 }
 @media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
@@ -287,9 +287,9 @@
       var(--sx, 0px) calc(22px + var(--sy, 0px)) 40px -16px rgb(0 0 0 / 0.6),
       var(--deal-ground, 0 0 #0000);
     transition:
-      transform 420ms var(--ease-out-strong),
-      box-shadow 500ms var(--ease-out-strong),
-      scale 440ms var(--ease-bounce);
+      transform var(--dur-lg) var(--ease-out-strong),
+      box-shadow var(--dur-xl) var(--ease-out-strong),
+      scale var(--dur-lg) var(--ease-bounce);
   }
   /* Not while the strip moves: lifted and turned mid-deal, the card
      showed what the deck had under it. `card-tilt.tsx`. */
@@ -328,8 +328,8 @@
   mask-image: var(--ff-mask);
   opacity: 0;
   transition:
-    opacity 260ms var(--ease-out-strong),
-    --ff-sharp 420ms var(--ease-out-strong);
+    opacity var(--dur-sm) var(--ease-out-strong),
+    --ff-sharp var(--dur-lg) var(--ease-out-strong);
 }
 /* Typed, so the clearing grows and shrinks between frames of different
    sizes instead of jumping. */
@@ -340,7 +340,7 @@
 }
 :where(:root[data-hover]) .focus-field[data-on] {
   opacity: 1;
-  transition-duration: 420ms;
+  transition-duration: var(--dur-lg);
 }
 
 /* The navbar's name grows under the pointer, round its own middle so
@@ -361,8 +361,8 @@
   filter: brightness(1) invert(0) drop-shadow(0 0 0 transparent) drop-shadow(0 0 0 transparent)
     drop-shadow(0 0 0 transparent) drop-shadow(0 0 0 transparent);
   transition:
-    scale 300ms var(--ease-out-strong),
-    filter 300ms var(--ease-out-strong);
+    scale var(--dur-md) var(--ease-out-strong),
+    filter var(--dur-md) var(--ease-out-strong);
 }
 @media (hover: hover) and (pointer: fine) {
   .logo-grow:hover > :not(.sr-only) {
@@ -370,7 +370,7 @@
       drop-shadow(-1px 0 0 var(--logo-edge)) drop-shadow(0 1px 0 var(--logo-edge))
       drop-shadow(0 -1px 0 var(--logo-edge));
     transition:
-      scale 500ms cubic-bezier(0.34, 1.56, 0.64, 1),
+      scale var(--dur-xl) cubic-bezier(0.34, 1.56, 0.64, 1),
       filter 450ms var(--ease-out-strong);
   }
 }
@@ -396,7 +396,7 @@
 }
 /* The calendar fades up each time the session changes. */
 .booking-embed {
-  animation: jg-fade-in 500ms var(--ease-out-strong) both;
+  animation: jg-fade-in var(--dur-xl) var(--ease-out-strong) both;
 }
 /* Cal.com's calendar in its place (`cal-embed.tsx`, behind `?cal`) takes
    the site's colours itself, so it is not turned over. */
@@ -443,7 +443,7 @@
   --tp-dir: -1;
 }
 .tp :is([data-slide="1"], [data-slide="-1"]) [data-day] {
-  animation: tp-slide 420ms var(--ease-out-strong, cubic-bezier(0.23, 1, 0.32, 1));
+  animation: tp-slide var(--dur-lg) var(--ease-out-strong, var(--ease-out-strong));
 }
 @media (prefers-reduced-motion: reduce) {
   .tp [data-slide] [data-day] {
@@ -737,17 +737,17 @@
    way back on the cells as well; `.press` keeps its own list. */
 #book-card button:not(.press) {
   transition:
-    scale 300ms var(--ease-out-strong),
-    opacity 300ms var(--ease-out-strong),
-    translate 300ms var(--ease-out-strong),
-    background-color 300ms var(--ease-out-strong),
-    border-color 300ms var(--ease-out-strong),
-    color 300ms var(--ease-out-strong);
+    scale var(--dur-md) var(--ease-out-strong),
+    opacity var(--dur-md) var(--ease-out-strong),
+    translate var(--dur-md) var(--ease-out-strong),
+    background-color var(--dur-md) var(--ease-out-strong),
+    border-color var(--dur-md) var(--ease-out-strong),
+    color var(--dur-md) var(--ease-out-strong);
 }
 #book-card button:not(:disabled, [aria-disabled="true"]):active {
   scale: 0.97;
-  transition-duration: 90ms;
-  transition-timing-function: cubic-bezier(0.4, 0, 1, 1);
+  transition-duration: var(--dur-2xs);
+  transition-timing-function: var(--ease-in-strong);
 }
 /* The glass made solid where it is asked for (reduced transparency, more
    contrast): Tailwind's blur on the card is not `.glass-surface`. */
@@ -772,7 +772,7 @@
   animation: none;
 }
 :root[data-smooth] #book-card {
-  transition: background-color 700ms var(--ease-out-strong);
+  transition: background-color var(--dur-2xl) var(--ease-out-strong);
 }
 /* The times are what you tap: 13px, not the 11px of the labels round them. */
 :root[data-smooth] #book-card [data-slot] {
@@ -866,7 +866,7 @@
   letter-spacing: 0.14em;
   text-transform: uppercase;
   white-space: nowrap;
-  transition: opacity 200ms, background-color 200ms, color 200ms;
+  transition: opacity var(--dur-xs), background-color var(--dur-xs), color var(--dur-xs);
 }
 .tpd-act:disabled,
 .tpd-act.tpd-quiet {
@@ -904,7 +904,7 @@
   color: var(--destructive);
 }
 .tpd-row {
-  transition: opacity 300ms;
+  transition: opacity var(--dur-md);
 }
 .tpd-busy .tpd-row {
   opacity: 0.45;
@@ -927,10 +927,10 @@
 }
 .tpd-step {
   --d: var(--tpd-dir, 1);
-  animation: tpd-in 360ms var(--ease-out-strong, cubic-bezier(0.23, 1, 0.32, 1)) both;
+  animation: tpd-in 360ms var(--ease-out-strong, var(--ease-out-strong)) both;
 }
 .tpd-slide {
-  animation: tpd-in 320ms var(--ease-out-strong, cubic-bezier(0.23, 1, 0.32, 1)) both;
+  animation: tpd-in 320ms var(--ease-out-strong, var(--ease-out-strong)) both;
 }
 .tpd-slide[data-slide="-1"] {
   --d: -1;
@@ -939,7 +939,7 @@
   --d: 1;
 }
 .tpd-fade {
-  animation: jg-fade-in 240ms ease-out both;
+  animation: jg-fade-in var(--dur-sm) ease-out both;
 }
 @keyframes tpd-run {
   from {
@@ -959,7 +959,7 @@
 }
 .tpd-rule {
   transform-origin: left;
-  animation: tpd-draw 700ms var(--ease-out-strong, cubic-bezier(0.23, 1, 0.32, 1)) both;
+  animation: tpd-draw var(--dur-2xl) var(--ease-out-strong, var(--ease-out-strong)) both;
 }
 .tpd-spec:nth-child(even) {
   padding-left: 0.875rem;

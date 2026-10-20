@@ -75,7 +75,7 @@ body:has([data-quiet-footer]) .site-footer-row {
 
 .running-head {
   opacity: 0;
-  transition: opacity 240ms var(--ease-out-strong);
+  transition: opacity var(--dur-sm) var(--ease-out-strong);
 }
 article:has(.strip-scroll[data-past-first]) .running-head {
   opacity: 1;
@@ -108,7 +108,7 @@ article:has(.strip-scroll[data-past-first]) .running-head {
   translate: -48px 0;
   transition:
     opacity 360ms var(--ease-out-strong),
-    translate 480ms var(--ease-out-strong);
+    translate var(--dur-xl) var(--ease-out-strong);
 }
 body:has(.strip-scroll[data-past-first]) .home-wordmark,
 body:has(.strip-scroll[data-past-hero]) .home-wordmark,
@@ -119,7 +119,7 @@ body:has(.strip-scroll[data-past-hero]) .home-wordmark,
 }
 @media (prefers-reduced-motion: reduce) {
   .home-wordmark {
-    transition: opacity 300ms var(--ease-out-strong);
+    transition: opacity var(--dur-md) var(--ease-out-strong);
     translate: none;
   }
 }

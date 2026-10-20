@@ -32,7 +32,7 @@
   mask-composite: intersect;
   /* Hidden until its opening photographs have loaded (see the component). */
   opacity: 0;
-  transition: opacity 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+  transition: opacity 0.6s var(--ease-out-strong);
 }
 
 .drift-wall.is-shown {
@@ -100,9 +100,9 @@
   transform: translateZ(0);
   pointer-events: none;
   transition:
-    transform 0.42s cubic-bezier(0.22, 1, 0.36, 1),
-    opacity 0.42s cubic-bezier(0.22, 1, 0.36, 1),
-    box-shadow 0.42s cubic-bezier(0.22, 1, 0.36, 1);
+    transform var(--dur-lg) var(--ease-out-strong),
+    opacity var(--dur-lg) var(--ease-out-strong),
+    box-shadow var(--dur-lg) var(--ease-out-strong);
 }
 
 .drift-wall__tile img {
@@ -111,7 +111,7 @@
   object-fit: cover;
   display: block;
   filter: grayscale(var(--dw-gray)) saturate(0.92);
-  transition: filter 0.42s cubic-bezier(0.22, 1, 0.36, 1);
+  transition: filter var(--dur-lg) var(--ease-out-strong);
   user-select: none;
   -webkit-user-drag: none;
   /* A tile that drifts into view later comes up as its photograph arrives,
@@ -122,8 +122,8 @@
 .drift-wall__tile img.is-loaded {
   opacity: 1;
   transition:
-    filter 0.42s cubic-bezier(0.22, 1, 0.36, 1),
-    opacity 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+    filter var(--dur-lg) var(--ease-out-strong),
+    opacity 0.4s var(--ease-out-strong);
 }
 
 .drift-wall__overlay {
@@ -132,7 +132,7 @@
   background: var(--dw-overlay);
   opacity: var(--dw-veil, 0.42);
   pointer-events: none;
-  transition: opacity 0.42s cubic-bezier(0.22, 1, 0.36, 1);
+  transition: opacity var(--dur-lg) var(--ease-out-strong);
 }
 
 .drift-wall__tile.is-active .drift-wall__inner,
@@ -171,15 +171,15 @@
   }
   .drift-wall__inner {
     transition:
-      opacity 0.42s cubic-bezier(0.22, 1, 0.36, 1),
-      box-shadow 0.42s cubic-bezier(0.22, 1, 0.36, 1);
+      opacity var(--dur-lg) var(--ease-out-strong),
+      box-shadow var(--dur-lg) var(--ease-out-strong);
   }
 }
 
 /* The search's liquid ground (`work-shell.tsx`): there while the box is
    open, gone a beat after it shuts, once the drop has drawn back in. */
 .finder-liquid > [data-gooey-svg] {
-  transition: opacity 150ms ease 200ms;
+  transition: opacity 150ms ease var(--dur-xs);
 }
 .finder-liquid:not([data-open]) > [data-gooey-svg] {
   opacity: 0;
@@ -242,7 +242,7 @@
   pointer-events: none;
 }
 .liquid-pair [data-on] .liquid-drop {
-  animation: liquid-run 520ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  animation: liquid-run var(--dur-xl) var(--ease-out-strong) forwards;
 }
 .liquid-pair [data-was] .liquid-drop {
   animation: liquid-drain 380ms cubic-bezier(0.4, 0, 0.2, 1) forwards;
@@ -280,7 +280,7 @@
    middle and set back, so the outer edge does not swell toward the eye. */
 .lightbox-side {
   transform: perspective(1400px) translateZ(-160px) rotateY(var(--turn));
-  transition: transform 500ms var(--ease-out-strong);
+  transition: transform var(--dur-xl) var(--ease-out-strong);
 }
 /* A cover flow, turned away on the edge that meets the picture, so
    the outer edge recedes. */
@@ -302,7 +302,7 @@
 }
 /* Full opacity (Julian: dont fade the images). */
 .lightbox-peek {
-  animation: peek-in 500ms var(--ease-out-strong) 120ms backwards;
+  animation: peek-in var(--dur-xl) var(--ease-out-strong) 120ms backwards;
   box-shadow: 0 24px 60px -24px rgb(0 0 0 / 0.5);
 }
 /* Glass, not blur. The photograph sharp under a pane: a lit top edge
@@ -330,7 +330,7 @@
     inset -1px 0 0.5px color-mix(in oklab, white 30%, transparent),
     inset 0 -1px 0.5px color-mix(in oklab, white 18%, transparent),
     inset 0 0 2.5rem color-mix(in oklab, white 10%, transparent);
-  transition: background-position 700ms var(--ease-out-strong);
+  transition: background-position var(--dur-2xl) var(--ease-out-strong);
 }
 @media (hover: hover) and (pointer: fine) {
   button:hover .lightbox-glass {
@@ -397,14 +397,14 @@
   .questions-wall,
   .questions-words {
     transition:
-      filter 700ms var(--ease-out-strong),
-      opacity 700ms var(--ease-out-strong);
+      filter var(--dur-2xl) var(--ease-out-strong),
+      opacity var(--dur-2xl) var(--ease-out-strong);
   }
   .questions-wall {
     filter: blur(5px);
   }
   .questions-wall::after {
-    transition: background-color 700ms var(--ease-out-strong);
+    transition: background-color var(--dur-2xl) var(--ease-out-strong);
   }
   [data-look] > .questions-wall {
     filter: none;
