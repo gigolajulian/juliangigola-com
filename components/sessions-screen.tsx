@@ -179,16 +179,6 @@ export function SessionsScreen({ sessions, menu, walls, covers }: { sessions: Se
         <p className="title-rest max-w-full text-left lying:hidden xl:w-[46ch] text-sm normal-case leading-relaxed text-muted-foreground">
           Studio and location sessions across the San Francisco Bay Area.
         </p>
-        {/* The deposit, said once beside the sessions (Julian's copy,
-            2026-10-16): Cal.com takes it on the four booked online. Here
-            and not under the list, which it pushed under the rail. */}
-        <div className="title-rest flex max-w-full flex-col gap-1.5 text-left text-sm normal-case lying:hidden xl:w-[46ch]">
-          {/* One line (2026-10-18, critique): the locked card copy's
-              first and last sentences; the card says the rest. */}
-          <p className="text-sm leading-relaxed text-muted-foreground text-pretty">
-            $100 holds your date. Balance due after the shoot.
-          </p>
-        </div>
       </div>
 
       {/* As tall as the screen allows, to 48rem (Julian: smaller, then
