@@ -201,7 +201,7 @@
   font-weight: 900;
   letter-spacing: -0.045em;
   text-transform: none;
-  font-size: clamp(2.5rem, 9vw, 8rem);
+  font-size: clamp(1.75rem, 5vw, 4.5rem);
   line-height: 1;
 }
 [data-splash="basic"] #jg-intro.jg-intro-open {
