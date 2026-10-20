@@ -3831,13 +3831,6 @@
           "alt": ""
         },
         {
-          "src": "/work/luxe-meets-future/bts/01.jpg",
-          "width": 1440,
-          "height": 1080,
-          "color": "#696969",
-          "alt": ""
-        },
-        {
           "src": "/work/luxe-meets-future/bts/06.jpg",
           "width": 1440,
           "height": 1080,
@@ -3845,10 +3838,10 @@
           "alt": ""
         },
         {
-          "src": "/work/luxe-meets-future/bts/02.jpg",
+          "src": "/work/luxe-meets-future/bts/01.jpg",
           "width": 1440,
           "height": 1080,
-          "color": "#505050",
+          "color": "#696969",
           "alt": ""
         },
         {
@@ -3859,10 +3852,133 @@
           "alt": ""
         },
         {
-          "src": "/work/luxe-meets-future/bts/05.jpg",
+          "src": "/work/luxe-meets-future/bts/02.jpg",
           "width": 1440,
-          "height": 1085,
-          "color": "#797979",
+          "height": 1080,
+          "color": "#505050",
+          "alt": ""
+        },
+        {
+          "src": "/work/luxe-meets-future/bts/08.mp4",
+          "width": 1280,
+          "height": 720,
+          "color": "#787b8c",
+          "alt": ""
+        }
+      ]
+    },
+    "valgur": {
+      "by": "ozwzrd",
+      "frames": [
+        {
+          "src": "/work/valgur/bts/10.jpg",
+          "width": 1600,
+          "height": 1066,
+          "color": "#4d4b48",
+          "alt": ""
+        },
+        {
+          "src": "/work/valgur/bts/08.jpg",
+          "width": 1600,
+          "height": 1066,
+          "color": "#676460",
+          "alt": ""
+        },
+        {
+          "src": "/work/valgur/bts/04.jpg",
+          "width": 1600,
+          "height": 1066,
+          "color": "#94928e",
+          "alt": ""
+        },
+        {
+          "src": "/work/valgur/bts/01.jpg",
+          "width": 1600,
+          "height": 1066,
+          "color": "#584e45",
+          "alt": ""
+        },
+        {
+          "src": "/work/valgur/bts/05.jpg",
+          "width": 1600,
+          "height": 1066,
+          "color": "#514f4c",
+          "alt": ""
+        }
+      ]
+    },
+    "i-wanna-be-a-human": {
+      "by": null,
+      "frames": [
+        {
+          "src": "/work/i-wanna-be-a-human/bts/04.jpg",
+          "width": 1600,
+          "height": 1200,
+          "color": "#818283",
+          "alt": ""
+        },
+        {
+          "src": "/work/i-wanna-be-a-human/bts/03.jpg",
+          "width": 640,
+          "height": 480,
+          "color": "#6b6c6d",
+          "alt": ""
+        },
+        {
+          "src": "/work/i-wanna-be-a-human/bts/02.jpg",
+          "width": 1200,
+          "height": 1600,
+          "color": "#b5b5b7",
+          "alt": ""
+        },
+        {
+          "src": "/work/i-wanna-be-a-human/bts/01.jpg",
+          "width": 1200,
+          "height": 1600,
+          "color": "#b5b6b7",
+          "alt": ""
+        },
+        {
+          "src": "/work/i-wanna-be-a-human/bts/05.mp4",
+          "width": 640,
+          "height": 480,
+          "color": "#57565a",
+          "alt": ""
+        }
+      ]
+    },
+    "paranoia": {
+      "by": null,
+      "frames": [
+        {
+          "src": "/work/paranoia/bts/01.mp4",
+          "width": 1280,
+          "height": 1024,
+          "color": "#302f38",
+          "alt": ""
+        }
+      ]
+    },
+    "cyberscape": {
+      "by": null,
+      "frames": [
+        {
+          "src": "/work/cyberscape/bts/01.mp4",
+          "width": 1024,
+          "height": 1280,
+          "color": "#2f6fa6",
+          "alt": ""
+        }
+      ]
+    },
+    "l3na": {
+      "by": null,
+      "frames": [
+        {
+          "src": "/work/l3na/bts/01.mp4",
+          "width": 720,
+          "height": 1280,
+          "color": "#6c3d43",
           "alt": ""
         }
       ]
