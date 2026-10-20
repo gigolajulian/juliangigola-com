@@ -46,10 +46,10 @@ const UNDER = 450;
 const lift = () => document.documentElement.removeAttribute("data-intro");
 
 /* Preview, `?splash=basic`: basicagency.com's opening, from the teardown
-   in SITE TEARDOWN/basicagency. The name alone on the page ground; at
+   in SITE TEARDOWN/basicagency. The eye alone on the page ground; at
    500ms it lifts off the top while the first screen slides up in under
    it over a second; then the header's logo and each item fade and rise,
-   500ms each, 25ms apart. No sweep, no eye. */
+   500ms each, 25ms apart. No sweep. */
 const SOFT = "cubic-bezier(0.28, 0, 0.49, 1)";
 function basic(box: HTMLDivElement | null) {
   const root = document.documentElement;
@@ -157,7 +157,6 @@ export function Intro() {
         <div ref={eye} className="jg-intro-eye">
           <BlinkingMark still />
         </div>
-        <div className="jg-intro-word">Julian Gigola</div>
       </div>
     </>
   );
