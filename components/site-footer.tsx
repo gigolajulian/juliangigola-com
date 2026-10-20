@@ -61,9 +61,9 @@ export function SiteFooter() {
                     target="_blank"
                     rel="me noreferrer"
                     data-ring={s.label}
-                    className="label text-muted-foreground transition-colors duration-200 hoverable:hover:text-foreground"
+                    className="nav-trace label text-muted-foreground transition-colors duration-200 hoverable:hover:text-foreground"
                   >
-                    <span className="nav-trace">{s.label}</span>
+                    {s.label}
                   </a>
                 </li>
               ))}
@@ -87,9 +87,9 @@ export function SiteFooter() {
                   <Link
                     prefetch={false}
                     href={l.href}
-                    className="transition-colors duration-200 hoverable:hover:text-foreground"
+                    className="nav-trace transition-colors duration-200 hoverable:hover:text-foreground"
                   >
-                    <span className="nav-trace">{l.label}</span>
+                    {l.label}
                   </Link>
                 </li>
               ))}

@@ -666,7 +666,7 @@ body > footer {
   scale: 1 1;
 }
 @media (hover: hover) and (pointer: fine) {
-  :hover > .nav-trace::after {
+  :is(:hover > .nav-trace, a.nav-trace:hover)::after {
     scale: 1 1;
     transform-origin: left center;
   }
