@@ -192,7 +192,7 @@ export function PhotoNotice() {
    * further inside the edge than it strictly needed to.
    */
   const BOX_W = 236; // `w-[14.75rem]`
-  const BOX_H = 112; // four lines plus padding
+  const BOX_H = 92; // three lines plus padding
   const GAP = 12;
   const MARGIN = 16;
 
@@ -255,15 +255,17 @@ export function PhotoNotice() {
             Julian Gigola
           </span>
         </span>
-        {/* Two lines at this width (Julian, 2026-10-20): side by side the
-            frame's name was cut to "BYTE…". */}
-        <span aria-hidden className="mt-2 block overflow-hidden border-t border-foreground/15 pt-1.5">
+        {/* One line, both ends (Julian, 2026-10-20). At this width the
+            set's name never fits beside "All rights reserved", so the
+            line keeps the frame's place in it; the name is read out in
+            full above. */}
+        <span aria-hidden className="notice-foot mt-2 flex gap-2 overflow-hidden border-t border-foreground/15 pt-1.5">
           {raised?.slug ? (
-            <span data-line className="label block truncate text-muted-foreground">
-              {raised.slug}
+            <span data-line className="label shrink-0 text-muted-foreground">
+              {raised.slug.split(" · ").pop()}
             </span>
           ) : null}
-          <span data-line className="label block text-right text-foreground/80">
+          <span data-line className="label ml-auto shrink-0 text-foreground/80">
             All rights reserved
           </span>
         </span>
