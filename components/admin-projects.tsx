@@ -12,6 +12,8 @@ import { AdminFrames, type PendingUpload } from "@/components/admin-frames";
 import { srcOf } from "@/lib/admin-sequence";
 import { twinStats } from "@/lib/frame-twins";
 import { AdminCredits } from "@/components/admin-credits";
+import { AdminBts } from "@/components/admin-bts";
+import type { Bts } from "@/lib/work-types";
 import type { FrameRef } from "@/lib/added";
 import type { Credit } from "@/lib/work-types";
 import { cn } from "@/lib/utils";
@@ -96,6 +98,9 @@ export function AdminProjects({
   onRecategorise,
   reframed,
   onReframe,
+  bts,
+  publishedBts,
+  onBts,
   uploads,
   onUpload,
   credits,
@@ -130,6 +135,10 @@ export function AdminProjects({
   /** Draft galleries, slug → sequence. Absent while it is the original. */
   reframed: Record<string, FrameRef[]>;
   onReframe: (slug: string, frames: FrameRef[] | null) => void;
+  /** Draft BTS, slug → `{ by, frames }`, and what the repo holds. */
+  bts: Record<string, Bts>;
+  publishedBts: Record<string, Bts>;
+  onBts: (slug: string, next: Bts) => void;
   /** Photographs staged for this publish, by repo path. */
   uploads: Record<string, PendingUpload>;
   onUpload: (added: PendingUpload[]) => void;
@@ -656,6 +665,14 @@ export function AdminProjects({
                     frames={frames}
                     uploads={uploads}
                     onChange={(next) => onReframe(p.slug, next)}
+                    onUpload={onUpload}
+                  />
+                  <AdminBts
+                    slug={p.slug}
+                    published={publishedBts[p.slug]}
+                    value={bts[p.slug]}
+                    uploads={uploads}
+                    onChange={(next) => onBts(p.slug, next)}
                     onUpload={onUpload}
                   />
                   <div className="border-t border-border bg-card/40 p-5">
