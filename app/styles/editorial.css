@@ -446,3 +446,7 @@ fieldset.ed-row > legend { float: left; padding: 0; }
 .ed-fields > .ed-row:first-child { border-top: 0; }
 .ed-fields > label.ed-row:has(textarea) { grid-column: 1 / -1; }
 .ed .ed-row input::placeholder, .ed .ed-row textarea.tp-notes::placeholder { text-transform: uppercase; }
+
+/* Under the cursor's fill (`?goo`) the line goes with the number, or the
+   difference turns its teal red. */
+.ed .ed-cell[data-stuck]:not([aria-pressed="true"]) i { background: currentColor; }

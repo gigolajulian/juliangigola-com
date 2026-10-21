@@ -213,7 +213,11 @@
    (Julian, 2026-10-20). */
 .pointer-mark[data-gray] {
   mix-blend-mode: normal;
-  color: oklch(0.55 0 0 / 0.5);
+  color: oklch(0.55 0 0);
+}
+/* See-through as one piece, so the dot is not a darker circle in it. */
+.pointer-mark[data-gray] .mark-goo {
+  opacity: 0.5;
 }
 .pointer-mark[data-square] .mark-goo {
   filter: none;
