@@ -497,7 +497,7 @@ fieldset.ed-row > legend { float: left; padding: 0; }
 /* Small, in the navbar's mono (Julian, 2026-10-21); `.ed.ed-inq` outranks the
    caps rule above, which had been winning. The colour, not opacity, keeps it
    readable. */
-.ed.ed-inq .ed-kinds small { font-family: var(--font-mono) !important; font-size: 0.625rem !important; font-weight: 400 !important; letter-spacing: 0.08em !important; margin-top: auto; padding-top: 0.5rem; color: var(--ed-mu); }
+.ed.ed-inq .ed-kinds small { font-family: var(--v2-label-family, "IBM Plex Mono", monospace) !important; font-size: 0.625rem !important; font-weight: var(--v2-label-weight, 500) !important; letter-spacing: 0.08em !important; margin-top: auto; padding-top: 0.5rem; color: var(--ed-mu); }
 .ed-kinds input:checked + span { background: var(--foreground); border-color: var(--foreground); }
 .ed-kinds input:checked + span :is(em, small) { color: var(--background); }
 .ed-kinds input:focus-visible + span { outline: 1px solid var(--foreground); outline-offset: 3px; }
