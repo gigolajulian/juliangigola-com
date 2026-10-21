@@ -28,7 +28,7 @@
 @media (hover: hover) { .ed-steps [data-done]:not(:disabled):hover { opacity: 0.6; } }
 .ed-body { flex: 1; min-height: 0; overflow: hidden; padding: 1.5rem var(--ed-x) 0; display: flex; flex-direction: column; }
 .ed-l, .ed-r { display: flex; flex-direction: column; min-width: 0; }
-.ed-floor { flex-shrink: 0; border-top: 0.5px solid var(--ed-line); padding: 1rem var(--ed-x) 1.25rem; display: flex; justify-content: space-between; align-items: center; gap: 1rem; }
+.ed-floor { flex-shrink: 0; padding: 1rem var(--ed-x) 1.25rem; display: flex; justify-content: space-between; align-items: center; gap: 1rem; }
 .ed-floor > .label { color: var(--muted-foreground); min-width: 0; }
 .ed-btn { position: relative; flex-shrink: 0; font: 500 0.6875rem/1 var(--font-mono); letter-spacing: 0.14em; text-transform: uppercase; background: var(--foreground); color: var(--background); padding: 1rem 1.375rem; border-radius: 2px; min-height: 3rem; }
 .ed-btn:disabled { opacity: 0.35; pointer-events: none; }
@@ -395,7 +395,6 @@ fieldset.ed-row > legend { float: left; padding: 0; }
 }
 
 /* the floor: the same button on every step */
-.ed-floor { border-top: 1px solid var(--ed-line); }
 .ed-btn, .ed-btn[data-accent] { background: var(--foreground); color: var(--background) !important; border-radius: 0; padding: 0.95rem 1.5rem; }
 .ed-btn[data-bad] { background: var(--ed-err); color: var(--background) !important; }
 
