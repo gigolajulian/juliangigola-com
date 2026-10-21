@@ -338,7 +338,8 @@ fieldset.ed-row > legend { float: left; padding: 0; }
 /* the steps: dots between, two squares at the end */
 .ed-steps { gap: 0.625rem; padding-bottom: 0.875rem; border-bottom: 1px solid var(--ed-line); align-items: center; }
 .ed-steps button { padding: 0; border: 0; display: flex; align-items: center; gap: 0.625rem; color: var(--ed-mu); }
-.ed-steps button + button::before { content: ""; width: 3px; height: 3px; background: var(--ed-mu); }
+/* ::after, so the 44px touch target (::before, below) keeps its own. */
+.ed-steps button + button::after { content: ""; order: -1; width: 3px; height: 3px; background: var(--ed-mu); }
 .ed-steps b { margin-right: 0.3em; color: inherit; }
 .ed-steps :is([aria-current], [data-done]) { color: var(--foreground); }
 .ed-steps::after { content: ""; margin-left: auto; width: 5px; height: 5px; background: var(--foreground); box-shadow: -9px 0 0 var(--foreground); }
@@ -430,8 +431,13 @@ fieldset.ed-row > legend { float: left; padding: 0; }
 .ed, .ed * { word-spacing: normal !important; }
 .ed-hero h2 { font-weight: 700 !important; }
 .ed-steps button { gap: 0.3em; }
-.ed-steps button + button::before { margin: 0 0.5rem 0 0.2rem; }
+.ed-steps button + button::after { margin: 0 0.5rem 0 0.2rem; }
 /* The month keeps its full height with the big time gone (its row shrank to clip it). */
 .ed[data-view="month"]:not([data-fit="3"]) > .ed-body { grid-template-rows: auto auto 1fr; }
 .ed-l > .touch-pan-y { min-height: max-content; }
 .ed-cell { display: flex; align-items: flex-start; }
+
+/* Details: the heading's hairline is the first; notes take the full width; hints in caps. */
+.ed-fields > .ed-row:first-child { border-top: 0; }
+.ed-fields > label.ed-row:has(textarea) { grid-column: 1 / -1; }
+.ed .ed-row input::placeholder, .ed .ed-row textarea.tp-notes::placeholder { text-transform: uppercase; }
