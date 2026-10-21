@@ -12,11 +12,12 @@ import { cn } from "@/lib/utils";
 
 /* ── the inquiry, editorial ───────────────────────────────────────
  * The inquiry form in the booking card's page (Julian, 2026-10-21, from
- * the mocks of 10-20): a step bar, one huge line, hairlines, square
- * boxes. Two steps, Shoot then Details, and Sent after. The kinds are
- * six tiles with who each is for; picking one brings its two questions
- * in under it. `?classic` keeps the form before (`contact-form.tsx`),
- * which also still does the sending (`submitOrKeep`).
+ * the mocks of 10-20): one huge line, hairlines, square boxes. One page
+ * (Julian, 2026-10-21, "the 2 step is confusing"): the kinds are six
+ * tiles with who each is for, picking one brings its two questions in
+ * under it, and the details sit beside them, one Send. Sent after.
+ * `?classic` keeps the form before (`contact-form.tsx`), which also
+ * still does the sending (`submitOrKeep`).
  * ─────────────────────────────────────────────────────────────── */
 
 const classic = () => typeof location !== "undefined" && new URLSearchParams(location.search).has("classic");
@@ -40,7 +41,6 @@ const NEXT = [
   ["We get to work", "The shoot. Edited selects follow in about a week"],
 ];
 
-type Step = "pick" | "form";
 type Props = NonNullable<React.ComponentProps<typeof ContactForm>>;
 type Tile = { value: string; label: string; who: string; asks: [string, string, string, string] | null };
 
@@ -58,11 +58,7 @@ function Editorial({ defaults, sessions = [] }: Props) {
      sessions, and the kind goes in as "session". */
   const booking = preset === "session" && sessions.length > 0;
   const tiles: Tile[] = booking ? sessions.map((s) => ({ value: s, label: s, who: "", asks: null })) : KINDS;
-  /* On a page about one kind of shoot (a commission's card) the kind is
-     not asked: it opens on Details with Shoot done. */
-  const fixed = !!defaults?.type && tiles.some((t) => t.value === (booking ? defaults?.session : defaults?.type));
   const [kind, setKind] = React.useState(() => (booking ? presetSession ?? "" : tiles.some((t) => t.value === preset) ? preset! : ""));
-  const [step, setStep] = React.useState<Step>(fixed ? "form" : "pick");
   const [ask, setAsk] = React.useState(["", ""]);
   const [state, formAction, pending] = React.useActionState(submitOrKeep, INITIAL);
   const root = React.useRef<HTMLFormElement>(null);
@@ -75,20 +71,19 @@ function Editorial({ defaults, sessions = [] }: Props) {
     if (process.env.NODE_ENV !== "production" && new URLSearchParams(location.search).get("sim") === "sent") setSim(true);
   }, []);
   const sent = state.status === "sent" || sim;
-  const at = sent ? 2 : step === "pick" ? 0 : 1;
   const detail = [
     presetRef ? `Similar to ${presetRef}` : "",
     ...(tile?.asks ? [ask[0] && `${tile.asks[0]}: ${ask[0]}`, ask[1] && `${tile.asks[2]}: ${ask[1]}`] : []),
   ].filter(Boolean).join(" · ");
   const side = (tile ? [tile.label, ask[0]].filter(Boolean).join(" · ") : "Editorial, campaigns, cover art and press kits");
 
-  /* The step's pieces cascade in, left to right, row by row, as the
+  /* The page's pieces cascade in, left to right, row by row, as the
      calendar's days do (time-picker.tsx); a pick brings its questions in
      the same way. */
   const shownKind = React.useRef(kind);
   React.useLayoutEffect(() => {
     const el = root.current;
-    const sel = step === "pick" && kind !== shownKind.current ? ".ed-ask" : "[data-in]";
+    const sel = kind !== shownKind.current ? ".ed-ask" : "[data-in]";
     shownKind.current = kind;
     if (!el || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     const items = [...el.querySelectorAll<HTMLElement>(sel)];
@@ -98,21 +93,8 @@ function Editorial({ defaults, sessions = [] }: Props) {
     });
     return () => tw.forEach((t) => t.progress(1).kill());
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [step, kind, sent]);
+  }, [kind, sent]);
 
-  const bar = (
-    <nav aria-label="Steps" className="ed-steps label">
-      {["Shoot", "Details"].map((s, i) => {
-        const back = !sent && at > i ? () => setStep(i ? "form" : "pick") : undefined;
-        return (
-          <button key={s} type="button" disabled={!back} onClick={back} aria-current={at === i ? "step" : undefined} data-done={at > i ? "" : undefined}>
-            <b>{`0${i + 1}`}</b>
-            {s}
-          </button>
-        );
-      })}
-    </nav>
-  );
   const hero = (big: string, small: React.ReactNode, mark: React.ReactNode, act?: React.ReactNode) => (
     <div className="ed-hero">
       <h2>{big}<small>{small}</small></h2>
@@ -120,12 +102,12 @@ function Editorial({ defaults, sessions = [] }: Props) {
     </div>
   );
   const replies = RESPONSE_TIME ? `Replies ${RESPONSE_TIME}` : null;
+  const floor = `hello@juliangigola.com${RESPONSE_TIME ? ` · replies ${RESPONSE_TIME}` : ""}`;
   const stick = goo ? "fill" : undefined;
 
   if (sent) {
     return (
       <div role="status" className="tp ed ed-inq" data-sent>
-        {bar}
         {hero("Sent", <>{side}<br />To Julian Gigola</>, "What happens next")}
         <div className="ed-body">
           <div className="ed-nx">
@@ -153,7 +135,6 @@ function Editorial({ defaults, sessions = [] }: Props) {
       action={formAction}
       noValidate
       className="tp ed ed-inq"
-      data-step={step}
       onSubmit={(e) => {
         e.preventDefault();
         const form = e.currentTarget;
@@ -173,56 +154,49 @@ function Editorial({ defaults, sessions = [] }: Props) {
       <input type="hidden" name="type" value={booking ? "session" : kind || "other"} />
       {booking ? <input type="hidden" name="session" value={kind} /> : null}
       {detail ? <input type="hidden" name="detail" value={detail} /> : null}
-      {bar}
-      {step === "pick"
-        ? hero("Inquire", <>{side}{replies ? <><br />{replies}</> : null}</>, kind ? "Then your details" : "Pick the kind of shoot")
-        : hero("Details", <>{side}{replies ? <><br />{replies}</> : null}</>, "Who you are and what it is", fixed ? undefined : <button type="button" data-stick={stick} className="ed-box" onClick={() => setStep("pick")}>Change</button>)}
-      <div className="ed-body" hidden={step !== "pick"}>
-        <div className="ed-r ed-fields">
-          <fieldset className="ed-row ed-kind-row">
-            <legend className="label">{booking ? "Which session" : "What kind of shoot"}</legend>
-            <div className="ed-kinds">
-              {tiles.map((t) => (
-                <label key={t.value} data-stick={stick} data-in>
-                  <input type="radio" name="kind" value={t.value} checked={kind === t.value} onChange={() => { setKind(t.value); setAsk(["", ""]); }} className="sr-only" />
-                  <span><em>{t.label}</em>{t.who ? <small>{t.who}</small> : null}</span>
-                </label>
-              ))}
-            </div>
-          </fieldset>
-          {tile?.asks ? (
-            <div className="ed-asks" key={tile.value}>
-              {[0, 1].map((i) => (
-                <label key={i} className="ed-row ed-ask" data-in>
-                  <span className="label">{tile.asks![i * 2]}</span>
-                  <input value={ask[i]} onChange={(e) => setAsk(i ? [ask[0], e.target.value] : [e.target.value, ask[1]])} placeholder={tile.asks![i * 2 + 1]} autoComplete="off" />
-                </label>
-              ))}
-            </div>
-          ) : null}
+      {hero("Inquire", <>{side}{replies ? <><br />{replies}</> : null}</>, "The kind of shoot, and who you are")}
+      <div className="ed-body">
+        <div className="ed-r ed-fields ed-one">
+          <div>
+            <fieldset className="ed-row ed-kind-row">
+              <legend className="label">{booking ? "Which session" : "What kind of shoot"}</legend>
+              <div className="ed-kinds">
+                {tiles.map((t) => (
+                  <label key={t.value} data-stick={stick} data-in>
+                    <input type="radio" name="kind" value={t.value} checked={kind === t.value} onChange={() => { setKind(t.value); setAsk(["", ""]); }} className="sr-only" />
+                    <span><em>{t.label}</em>{t.who ? <small>{t.who}</small> : null}</span>
+                  </label>
+                ))}
+              </div>
+            </fieldset>
+            {tile?.asks ? (
+              <div className="ed-asks" key={tile.value}>
+                {[0, 1].map((i) => (
+                  <label key={i} className="ed-row ed-ask" data-in>
+                    <span className="label">{tile.asks![i * 2]}</span>
+                    <input value={ask[i]} onChange={(e) => setAsk(i ? [ask[0], e.target.value] : [e.target.value, ask[1]])} placeholder={tile.asks![i * 2 + 1]} autoComplete="off" />
+                  </label>
+                ))}
+              </div>
+            ) : null}
+          </div>
+          <div>
+            <label className="ed-row" data-in><span className="label">Name</span><input name="name" required autoComplete="name" defaultValue={values.name} placeholder="Your name" /></label>
+            <label className="ed-row" data-in><span className="label">Email</span><input name="email" type="email" required autoComplete="email" defaultValue={values.email} placeholder="you@studio.com" /></label>
+            <label className="ed-row" data-in><span className="label">About the project</span><textarea name="message" required rows={3} defaultValue={values.message} ref={fit} onInput={(e) => fit(e.currentTarget)} placeholder="What it is, where and roughly when" className="tp-notes" /></label>
+            <div className="ed-row ed-refs" data-in><ReferencePicks resync={state} /></div>
+            {state.status === "error" || state.status === "unconfigured" ? (
+              <p role="alert" className={cn("ed-err", state.status !== "error" && "text-muted-foreground")}>
+                {state.message}
+                {state.mailto ? <> <a href={state.mailto} className="underline underline-offset-4">Open in your mail app</a></> : null}
+              </p>
+            ) : null}
+          </div>
         </div>
       </div>
-      <div className="ed-floor" hidden={step !== "pick"}>
-        <span className="label">hello@juliangigola.com</span>
-        <button type="button" data-stick={stick} className="ed-btn" disabled={!kind} onClick={() => setStep("form")}>Continue</button>
-      </div>
-      <div className="ed-body" hidden={step !== "form"}>
-        <div className="ed-r ed-fields">
-          <label className="ed-row" data-in><span className="label">Name</span><input name="name" required autoComplete="name" defaultValue={values.name} placeholder="Your name" /></label>
-          <label className="ed-row" data-in><span className="label">Email</span><input name="email" type="email" required autoComplete="email" defaultValue={values.email} placeholder="you@studio.com" /></label>
-          <label className="ed-row" data-in><span className="label">About the project</span><textarea name="message" required rows={3} defaultValue={values.message} ref={fit} onInput={(e) => fit(e.currentTarget)} placeholder="What it is, where and roughly when" className="tp-notes" /></label>
-          <div className="ed-row ed-refs" data-in><ReferencePicks resync={state} /></div>
-          {state.status === "error" || state.status === "unconfigured" ? (
-            <p role="alert" className={cn("ed-err", state.status !== "error" && "text-muted-foreground")}>
-              {state.message}
-              {state.mailto ? <> <a href={state.mailto} className="underline underline-offset-4">Open in your mail app</a></> : null}
-            </p>
-          ) : null}
-        </div>
-      </div>
-      <div className="ed-floor" hidden={step !== "form"}>
-        <span className="label">{replies ?? "hello@juliangigola.com"}</span>
-        <button type="submit" data-stick={stick} className="ed-btn" disabled={pending}>{pending ? "Sending" : "Inquire"}</button>
+      <div className="ed-floor">
+        <span className="label">{floor}</span>
+        <button type="submit" data-stick={stick} className="ed-btn" disabled={pending}>{pending ? "Sending" : "Send"}</button>
       </div>
     </form>
   );
