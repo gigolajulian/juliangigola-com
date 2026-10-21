@@ -5,6 +5,7 @@ import { createPortal } from "react-dom";
 import { BookCard } from "@/components/book-here";
 import { InquireWall } from "@/components/inquire-wall";
 import { gsap } from "gsap";
+import { OMEGA } from "@/lib/motion/spring";
 import type { WallTile } from "@/lib/wall-tile";
 import type { MenuItem } from "@/lib/booking";
 
@@ -13,12 +14,16 @@ import type { MenuItem } from "@/lib/booking";
  * fills the screen over the session's wall, and goes back into the row
  * on X, Escape or a press outside it. The page under it never moves.
  *
- * It turns over into place like a card (Julian: flip in, smooth), and
- * the name, the blurb and the card come up one after another; it turns
- * away on the way out, in about a third of the time. GSAP.
+ * It fades in, then the name, the blurb and the card come up one after
+ * another; it fades out in about two thirds of the time. GSAP. The flip
+ * in went (Julian, 2026-10-20). Lift (his pick, OKd 2026-10-21): the name
+ * pressed in the list travels up to be the heading, and the rest rises
+ * and comes sharp under it, on the deck's own spring. `?sheet=fade` keeps
+ * the plain fade.
  * ─────────────────────────────────────────────────────────────────── */
 
-const IN = 1000; // ms, the flip in
+const IN = 300; // ms, the fade in
+const lift = () => typeof location === "undefined" || new URLSearchParams(location.search).get("sheet") !== "fade";
 
 export function BookSheet({
   item,
@@ -47,6 +52,8 @@ export function BookSheet({
   // A press on the wall closes, once the sheet has opened: not the
   // second half of a double tap on the row.
   const ready = React.useRef(0);
+  /* The row's name, hidden while its copy is the heading. */
+  const carried = React.useRef<HTMLElement | null>(null);
 
   /* No wall on a phone (Julian's recording, 2026-10-14: Safari reloaded
      the page as a sheet opened, twice, after the third). A screen of
@@ -79,15 +86,28 @@ export function BookSheet({
     const s = sheet.current;
     if (calm.current || !s) return;
     const parts = body.current ? [...body.current.querySelectorAll(":scope > header > *"), body.current.lastElementChild] : [];
-    // The fade is short and its own: on the turn's curve the card only
-    // showed once it was nearly flat, and iOS read it as a cross fade
-    // (QA on iOS 27, 2026-10-15).
-    gsap.fromTo(
-      s,
-      { rotationY: -100, transformPerspective: 1000, transformOrigin: "50% 50%" },
-      { rotationY: 0, duration: 1, ease: "power3.out", clearProps: "transform" },
-    );
-    gsap.fromTo(s, { opacity: 0 }, { opacity: 1, duration: 0.2, ease: "none", clearProps: "opacity" });
+    if (lift()) {
+      // The deck's spring (critically damped, `RESPONSE`), settled by T.
+      const T = 0.6;
+      const w = OMEGA * T;
+      const deck = (p: number) => (1 - (1 + w * p) * Math.exp(-w * p)) / (1 - (1 + w) * Math.exp(-w));
+      ready.current = performance.now() + T * 1000;
+      const name = s.querySelector<HTMLElement>("header h2");
+      const from = origin?.querySelectorAll<HTMLElement>("span.font-display")[1];
+      const rest = parts.filter((p) => !from || p !== name);
+      gsap.fromTo(rest, { opacity: 0, y: 24, filter: "blur(8px)" }, { opacity: 1, y: 0, filter: "blur(0px)", duration: T, ease: deck, stagger: 0.06, delay: 0.08, clearProps: "opacity,transform,filter" });
+      if (name && from) {
+        const a = from.getBoundingClientRect();
+        const b = name.getBoundingClientRect();
+        const k = parseFloat(getComputedStyle(from).fontSize) / parseFloat(getComputedStyle(name).fontSize);
+        carried.current = from;
+        from.style.visibility = "hidden";
+        gsap.fromTo(name, { x: a.left - b.left, y: a.top - b.top, scale: k, transformOrigin: "0 0" }, { x: 0, y: 0, scale: 1, duration: T, ease: deck, clearProps: "transform,transformOrigin" });
+      }
+      if (back.current) gsap.fromTo(back.current, { opacity: 0 }, { opacity: 1, duration: 0.4, ease: "power1.out", clearProps: "opacity" });
+      return;
+    }
+    gsap.fromTo(s, { opacity: 0 }, { opacity: 1, duration: 0.3, ease: "power2.out", clearProps: "opacity" });
     gsap.fromTo(parts, { opacity: 0 }, { opacity: 1, duration: 0.45, ease: "power2.out", stagger: 0.06, delay: 0.14, clearProps: "opacity" });
     if (back.current) gsap.fromTo(back.current, { opacity: 0 }, { opacity: 1, duration: 0.5, ease: "power1.out", clearProps: "opacity" });
   }, [mounted]);
@@ -96,6 +116,7 @@ export function BookSheet({
     if (going.current) return;
     going.current = true;
     const done = () => {
+      if (carried.current) carried.current.style.visibility = "";
       onClosed();
       origin?.querySelector<HTMLElement>("button, a")?.focus({ preventScroll: true });
     };
@@ -104,7 +125,8 @@ export function BookSheet({
     gsap.killTweensOf([s, back.current, body.current]);
     gsap.to(body.current, { opacity: 0, duration: 0.14, ease: "power1.in" });
     gsap.to(back.current, { opacity: 0, duration: 0.3, ease: "power1.in" });
-    gsap.to(s, { rotationY: 90, opacity: 0, transformPerspective: 1000, duration: 0.36, ease: "power2.in", onComplete: done });
+    if (lift()) gsap.to(s, { y: 16, filter: "blur(6px)", duration: 0.24, ease: "power2.in" });
+    gsap.to(s, { opacity: 0, duration: lift() ? 0.24 : 0.2, ease: "power2.in", onComplete: done });
   }, [onClosed, origin]);
 
   React.useEffect(() => {
@@ -140,7 +162,7 @@ export function BookSheet({
       <div
         ref={sheet}
         data-book-frame
-        className={`relative flex h-dvh w-full flex-col will-change-transform max-sm:bg-background ${chrome && item.cal ? "sm:h-[min(38rem,100%)] sm:w-[min(70rem,100%)]" : chrome ? "sm:h-[min(30rem,100%)] sm:w-[min(44rem,100%)]" : "sm:h-[min(46rem,100%)] sm:w-[min(46rem,100%)]"}`}
+        className={`relative flex h-dvh w-full flex-col will-change-transform max-sm:bg-background ${item.cal ? "sm:h-[min(56rem,100%)] sm:w-[min(74rem,100%)]" : chrome ? "sm:h-[min(30rem,100%)] sm:w-[min(44rem,100%)]" : "sm:h-[min(46rem,100%)] sm:w-[min(46rem,100%)]"}`}
       >
         {/* On a phone the sheet scrolls as a page does and the card keeps
             its own length; from `sm` the card fills what the header leaves. */}

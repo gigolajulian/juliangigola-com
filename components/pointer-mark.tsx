@@ -71,7 +71,13 @@ export function PointerMark() {
        through) at the chip's place, held there as the mark moves. */
     let fill: HTMLElement | null = null;
     let drain = 0;
+    /* Into a square box (a calendar day, a time) the liquid ends square:
+       its goo, which rounds every corner, goes once the pour has settled
+       (Julian, 2026-10-20: no radius on the calendar). */
+    let settle = 0;
     const drained = () => {
+      clearTimeout(settle);
+      el.removeAttribute("data-square");
       el.removeAttribute("data-fill");
       // The goo stays on while it drains, or the last of it is a hard box.
       el.setAttribute("data-drain", "");
@@ -82,13 +88,20 @@ export function PointerMark() {
        the fill turned it red. Again after a press picks or unpicks it. */
     const refill = () => {
       if (!fill) return;
-      const picked = !!fill.querySelector("input:checked");
+      /* A picked day or time (`aria-pressed`) still fills, in a see-through
+         grey over its teal (Julian, 2026-10-20), so its number shows. */
+      const gray = fill.getAttribute("aria-pressed") === "true";
+      el.toggleAttribute("data-gray", gray);
+      const picked = !gray && !!fill.querySelector("input:checked");
       el.toggleAttribute("data-picked", picked);
       if (picked && el.hasAttribute("data-fill")) drained();
       else if (!picked && !el.hasAttribute("data-fill")) {
         el.setAttribute("data-fill", "");
         fillAt(sx, sy);
       }
+      clearTimeout(settle);
+      if (el.hasAttribute("data-fill") && getComputedStyle(fill).borderRadius === "0px")
+        settle = window.setTimeout(() => el.hasAttribute("data-fill") && el.setAttribute("data-square", ""), 450);
     };
     const fillAt = (tx: number, ty: number) => {
       if (!fill?.isConnected || !el.hasAttribute("data-fill")) return;
@@ -104,6 +117,7 @@ export function PointerMark() {
       if (!stuck) return;
       if (el.hasAttribute("data-fill")) drained();
       el.removeAttribute("data-picked");
+      el.removeAttribute("data-gray");
       fill = null;
       stuck.removeAttribute("data-stuck");
       stuck.style.removeProperty("--lean-x");
@@ -327,8 +341,11 @@ export function PointerMark() {
     document.addEventListener("click", leave);
     const picked = () => setTimeout(refill);
     document.addEventListener("change", picked);
+    // A day or a time is picked by a press, not a change (`aria-pressed`).
+    document.addEventListener("click", picked);
     return () => {
       document.removeEventListener("change", picked);
+      document.removeEventListener("click", picked);
       document.removeEventListener("click", leave);
       document.removeEventListener("pointermove", move);
       document.removeEventListener("pointerover", over);

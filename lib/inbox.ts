@@ -204,6 +204,7 @@ export const SHOOT_TYPES = [
   "editorial",
   "campaign",
   "music",
+  "video",
   "portrait",
   "coverart",
   "presskit",

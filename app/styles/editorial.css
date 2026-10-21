@@ -1,11 +1,12 @@
 /* ── the booking card, editorial (time-picker.tsx, deposit-step.tsx); `?classic` the one before ─────────────────
    The booking card as a magazine page (Julian, 2026-10-16, from
    booking-editorial-mock.html): a step bar, hairline rows, big Inter
-   Tight numbers that turn like a departures board, square buttons. Two
+   Tight numbers, square buttons. Two
    columns where the card is wide, one on a phone. Its height is fitted
    in steps (`data-fit`, 0 to 3), never scrolled: 3 splits the days and
    the times into two screens. */
 .ed {
+  container: ed / inline-size;
   --ed-line: color-mix(in oklab, var(--foreground) 11%, transparent);
   --ed-line2: color-mix(in oklab, var(--foreground) 24%, transparent);
   --ed-x: var(--card-x, 2.25rem);
@@ -75,40 +76,31 @@
 .ed-day[aria-pressed="true"] .label { color: var(--background); }
 .ed-day[aria-pressed="true"] i, .ed-cell[aria-pressed="true"] i { background: var(--background); }
 
-/* split-flap tiles (`Flap`): a hairline across each; on the days only
-   while they turn */
-.flap { display: inline-flex; gap: 0.06em; vertical-align: bottom; }
-.ft { position: relative; display: inline-grid; place-items: center; min-width: 0.62em; padding: 0.04em 0.05em; background: color-mix(in oklab, var(--foreground) 7%, var(--card)); border-radius: 0.06em; backface-visibility: hidden; transition: background-color var(--dur-sm); }
-.ft::after { content: ""; position: absolute; left: 0; right: 0; top: 50%; height: max(1px, 0.018em); background: var(--card); }
-.ft.colon { background: none; min-width: 0.3em; }
-.ft.colon::after { display: none; }
-.ft.sp { background: color-mix(in oklab, var(--foreground) 3%, var(--card)); }
-.ed-n .flap { gap: 2px; }
-.ed-n .ft { min-width: 0.6em; padding: 0.06em 0.04em; border-radius: 3px; }
-.ed-n .ft::after { height: 1px; }
-.ed-n .flap:not(.going) .ft { background: none; }
-.ed-n .flap:not(.going) .ft::after { display: none; }
-[aria-pressed="true"] .ed-n .ft { background: color-mix(in oklab, var(--background) 12%, var(--foreground)); }
-[aria-pressed="true"] .ed-n .ft::after { background: var(--foreground); }
-
-/* the time picked, big, its day under it */
-.ed-big { margin-top: 1.75rem; display: flex; flex-direction: column; align-items: flex-start; gap: 0.875rem; }
-.ed-big h3 { display: flex; align-items: flex-end; gap: 0.08em; font: 900 var(--ed-time, 5.5rem)/0.82 var(--font-wordmark); letter-spacing: -0.05em; perspective: 600px; transition: opacity var(--dur-md); }
-.ed-big h3 small { font: 400 0.6875rem/1 var(--font-mono); letter-spacing: 0.14em; margin-left: 0.625rem; }
-.ed-big[data-none] h3 { opacity: 0.25; }
-.ed-when-line { display: flex; flex-direction: column; gap: 0.375rem; }
-.ed-when-line b { font: 500 1.125rem/1.2 var(--font-mono); letter-spacing: -0.01em; text-transform: none; }
+/* the time picked, big, only once one is picked, its day under it
+   (Julian, 2026-10-20: the split-flap went). Its room is held, so a pick
+   moves nothing below; it rises in on each new pick. */
+.ed-big { margin-top: 1.5rem; min-height: calc(var(--ed-time, 6rem) * 0.8 + 4.4rem); display: flex; flex-direction: column; justify-content: flex-end; align-items: flex-start; gap: 0.5rem; }
+.ed-bt { display: flex; align-items: flex-end; gap: 0.625rem; font: 900 var(--ed-time, 6rem)/0.8 var(--font-wordmark); letter-spacing: -0.045em; margin-bottom: 0.375rem; animation: ed-bt-in 420ms cubic-bezier(0.16, 1, 0.3, 1) both; }
+.ed-bt small { font: 400 0.6875rem/1 var(--font-mono); letter-spacing: 0.14em; color: var(--muted-foreground); padding-bottom: 0.25rem; }
+@keyframes ed-bt-in { from { opacity: 0; transform: translateY(0.35em); filter: blur(6px); } }
+@media (prefers-reduced-motion: reduce) { .ed-bt { animation-name: ed-fade-in; animation-duration: 200ms; } @keyframes ed-fade-in { from { opacity: 0; } } }
+.ed-when-line { display: flex; flex-direction: column; gap: 0.5rem; }
+.ed-when-line b { font: 500 1.75rem/1.1 var(--font-display); letter-spacing: -0.025em; text-transform: none; }
 .ed-when-line .label { color: var(--muted-foreground); }
+.ed-when-line .ed-hour { font: 400 1rem/1.3 var(--font-mono); letter-spacing: -0.005em; text-transform: none; color: var(--foreground); font-variant-numeric: tabular-nums; }
+/* A phone month shows the time picked too, as the week does (MAC, 2026-10-20). */
 
 /* the times, a kind to a row */
 .ed-times { margin-top: 1.5rem; }
 .ed-times > .ed-on { display: none; padding-bottom: 0.75rem; }
 .ed[data-view="month"] .ed-times > .ed-on { display: block; }
-.ed-kind { display: grid; grid-template-columns: 5.75rem minmax(0, 1fr); align-items: center; gap: 0.5rem; border-top: 0.5px solid var(--ed-line); padding: 0.75rem 0; }
+.ed-kind { display: grid; grid-template-columns: 6.5rem minmax(0, 1fr); align-items: center; gap: 0.5rem; border-top: 0.5px solid var(--ed-line); padding: 0.875rem 0; }
 .ed-kind:last-child { border-bottom: 0.5px solid var(--ed-line); }
 .ed-kind > .label { color: var(--muted-foreground); }
-.ed-slots { display: flex; flex-wrap: wrap; gap: 0.375rem; }
-.ed-slot { font: 500 0.8125rem/1 var(--font-mono); font-variant-numeric: tabular-nums; width: 4rem; height: 2.375rem; display: grid; place-items: center; border: 0.5px solid var(--ed-line2); border-radius: 2px; }
+/* Bigger, legible times (Julian, 2026-10-20) */
+.ed-slots { display: grid; grid-template-columns: repeat(auto-fill, minmax(5.75rem, 1fr)); gap: 0.5rem; }
+.ed-slot { font: 500 1.0625rem/1 var(--font-mono); letter-spacing: -0.01em; font-variant-numeric: tabular-nums; height: 3.25rem; display: grid; place-items: center; border: 0.5px solid var(--ed-line2); border-radius: 2px; transition: background-color 0.15s, color 0.15s, border-color 0.15s, transform 0.1s ease-out; }
+.ed-slot:active { transform: scale(0.97); }
 .ed-slot[aria-pressed="true"] { background: var(--foreground); color: var(--background); border-color: var(--foreground); }
 @media (hover: hover) { .ed-slot:not([aria-pressed="true"]):hover { border-color: var(--foreground); } }
 .ed-none { padding: 1rem 0; color: var(--muted-foreground); border-top: 0.5px solid var(--ed-line); border-bottom: 0.5px solid var(--ed-line); }
@@ -156,29 +148,8 @@ fieldset.ed-row > legend { float: left; padding: 0; }
 .ed-grow[data-bad] { background: var(--ed-bad); }
 #book-card { --ed-bad: oklch(0.5 0.19 25); }
 :root:not([data-classic]) #book-card { transition: background-color var(--dur-xl) var(--ease-out-strong); }
-:root:not([data-classic]) #book-card:has(.ed[data-booked]) {
-  background-color: var(--accent);
-  border-color: transparent;
-  --foreground: var(--accent-foreground);
-  --background: var(--accent);
-  --card: var(--accent);
-  --muted-foreground: color-mix(in oklab, var(--accent-foreground) 72%, var(--accent));
-  color: var(--foreground);
-}
-:root:not([data-classic]) #book-card:has(.ed[data-declined]) {
-  background-color: var(--ed-bad);
-  border-color: transparent;
-  --foreground: oklch(0.97 0.004 80);
-  --background: var(--ed-bad);
-  --card: var(--ed-bad);
-  --accent: oklch(0.97 0.004 80);
-  --muted-foreground: color-mix(in oklab, oklch(0.97 0.004 80) 75%, var(--ed-bad));
-  color: var(--foreground);
-}
-:root:not([data-classic]) #book-card:has(.ed:is([data-booked], [data-declined])) :is(.ed-steps button, .ed-steps b) { color: var(--foreground); }
-:root:not([data-classic]) #book-card:has(.ed[data-booked]) .ed-steps button { border-color: transparent; }
-:root:not([data-classic]) #book-card:has(.ed[data-declined]) .ed-steps [aria-current] { border-color: var(--foreground); }
-:root:not([data-classic]) #book-card:has(.ed[data-declined]) .ed-btn { background: var(--foreground); color: var(--ed-bad); }
+/* Booked and declined keep the card dark (2026-10-20 mock): the red is
+   the card field's line and the words, not the whole card. */
 
 /* fitted to a short card, a step at a time */
 .ed[data-fit="1"] { --ed-time: 4rem; --ed-cell: 2.625rem; }
@@ -214,9 +185,40 @@ fieldset.ed-row > legend { float: left; padding: 0; }
   .ed-day { padding-inline: min(0.625rem, 0.9cqw); }
   .ed-day .ed-n { font-size: min(2.125rem, 3.3cqw); }
 }
+/* A card 40rem wide or more (Julian, 2026-10-20): the month name and the
+   week run full width; under them the time picked and its day sit left,
+   the times stand in a column on the right. In a month, the month takes
+   the left with the time under it, the times run down the right. Not at
+   fit 3, where the days and the times take turns. */
+@container ed (min-width: 40rem) {
+  .ed:not([data-fit="3"]) > .ed-body:has(> .ed-times) { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr); column-gap: 3rem; align-content: start; }
+  .ed:not([data-fit="3"]) > .ed-body > .ed-l { display: contents; }
+  .ed:not([data-fit="3"]) > .ed-body > .ed-l > * { grid-column: 1 / -1; }
+  .ed:not([data-fit="3"]) > .ed-body > .ed-l > .ed-big { grid-column: 1; grid-row: 3; align-self: start; justify-content: flex-start; min-height: 0; margin-top: 1.75rem; }
+  .ed:not([data-fit="3"]) > .ed-body > .ed-times { grid-column: 2; grid-row: 3; margin-top: 1.75rem; }
+  .ed:not([data-fit="3"]) .ed-times > .ed-on { display: none; }
+  .ed:not([data-fit="3"]) .ed-kind { grid-template-columns: minmax(0, 1fr); gap: 0.625rem; }
+  .ed:not([data-fit="3"]) .ed-kind:first-child { border-top: 0; padding-top: 0; }
+  .ed:not([data-fit="3"]) .ed-slots { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .ed:not([data-fit="1"], [data-fit="3"]) .ed-big { --ed-time: 7rem; }
+  .ed[data-view="month"]:not([data-fit="3"]) .ed-big { display: flex; --ed-time: 5.5rem; }
+  .ed[data-view="month"]:not([data-fit="3"]) > .ed-body > .ed-l > div:not(.ed-head, .ed-big) { grid-column: 1; grid-row: 2; }
+  .ed[data-view="month"]:not([data-fit="3"]) > .ed-body > .ed-times { grid-row: 2 / span 2; margin-top: 1rem; }
+  .ed:is([data-fit="2"]) .ed-big { display: flex; }
+  /* A bigger calendar on a desktop (Julian, 2026-10-21): the month takes
+     more of the width, the times scroll in their own column instead of
+     forcing the smallest fit, and at fit 0 the cells grow into the room
+     (`--ed-cell`, set by the fit loop in time-picker.tsx) with their
+     numbers. */
+  .ed[data-view="month"]:not([data-fit="3"]) > .ed-body:has(> .ed-times) { grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); column-gap: 2.5rem; grid-template-rows: auto minmax(0, 1fr) auto; align-content: stretch; }
+  .ed[data-view="month"]:not([data-fit="3"]) > .ed-body > .ed-times { overflow-y: auto; min-height: 0; overscroll-behavior: contain; scrollbar-width: thin; scrollbar-color: color-mix(in oklab, var(--foreground) 35%, transparent) transparent; }
+  .ed[data-view="month"][data-fit="0"] .ed-cell .ed-n { font-size: clamp(0.75rem, var(--ed-cell) * 0.3, 1.25rem) !important; }
+  .ed[data-view="month"][data-fit="0"] .ed-cell { padding-top: calc(var(--ed-cell) * 0.14); }
+  .ed[data-view="month"][data-fit="0"] .ed-cell i { width: calc(var(--ed-cell) * 0.36); bottom: calc(var(--ed-cell) * 0.16); }
+}
 /* a landscape screen gives the card the room for two columns */
 @media (min-width: 64rem) and (min-aspect-ratio: 5/4) {
-  :root:not([data-classic]) [data-book-frame] { width: min(70rem, 100%); }
+  :root:not([data-classic]) [data-book-frame] { width: min(74rem, 100%); }
 }
 
 /* a phone: one column, the times four to a row */
@@ -231,10 +233,14 @@ fieldset.ed-row > legend { float: left; padding: 0; }
   .ed-cell { padding: 0.375rem 0 0 0.3125rem; }
   .ed-cell .ed-n { font-size: 1rem; }
   .ed-cell i { left: 0.3125rem; width: 0.75rem; }
-  .ed-big { --ed-time: min(4rem, 17cqw); }
-  .ed-kind { grid-template-columns: minmax(0, 1fr); }
-  .ed-slots { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); }
-  .ed-slot { width: auto; }
+  .ed-big { --ed-time: min(4.5rem, 19cqw); }
+  .ed-when-line b { font-size: 1.5rem; }
+  .ed-kind { grid-template-columns: minmax(0, 1fr); gap: 0.625rem; padding: 1rem 0; }
+  /* One line that swipes on a phone (Julian, via MAC, 2026-10-20). The
+     fade says there are more; the end padding lets the last clear it. */
+  .ed-slots { display: flex; overflow-x: auto; overscroll-behavior-x: contain; scroll-snap-type: x proximity; scrollbar-width: none; padding-right: 2.5rem; mask-image: linear-gradient(to right, #000 calc(100% - 2.5rem), transparent); }
+  .ed-slots::-webkit-scrollbar { display: none; }
+  .ed-slot { height: 3.5rem; font-size: 1.125rem; flex: 0 0 5.75rem; scroll-snap-align: start; }
   .ed-when h2 { font-size: 1.375rem; }
   .ed-row, .ed-next { grid-template-columns: 5.25rem minmax(0, 1fr); }
   .ed-exp { grid-template-columns: minmax(0, 1fr); }
@@ -253,8 +259,6 @@ fieldset.ed-row > legend { float: left; padding: 0; }
 
 /* touch: every target 44px, 8px apart */
 @media (pointer: coarse) {
-  .ed-slots { gap: 0.5rem; }
-  .ed-slot { height: 2.75rem; }
   .ed-ctl { gap: 1.75rem; }
   .ed-steps { gap: 1.25rem; }
   :is(.ed-steps button, .ed-ctl button, .ed-when > button, .ed-opts label, .ed-quiet, .ed-back)::before { content: ""; position: absolute; left: 50%; top: 50%; width: max(100%, 2.75rem); height: 2.75rem; translate: -50% -50%; }
@@ -315,4 +319,217 @@ fieldset.ed-row > legend { float: left; padding: 0; }
    transparent). Phones have no wall behind it. */
 @media (min-width: 40rem) {
   .book-page div:has(> .ed) { background-color: color-mix(in oklab, var(--card) 60%, transparent); }
+}
+
+/* ── one face, two sizes (Julian, 2026-10-20, from the Tenebra reference) ─────────────────
+   Every step opens on one huge line in caps; everything else is small
+   bold caps in the same face. Square markers, hairlines, boxed choices. */
+.ed {
+  --ed-f: "neue-haas-grotesk-text", "Helvetica Neue", Arial, sans-serif;
+  --ed-mu: color-mix(in oklab, var(--foreground) 50%, transparent);
+  --ed-line: color-mix(in oklab, var(--foreground) 18%, transparent);
+  --ed-line2: var(--ed-line);
+  --ed-err: oklch(0.66 0.19 27);
+  font-family: var(--ed-f);
+}
+.ed :is(.label, .ed-v, .ed-n, .ed-slot, .ed-btn, .ed-box, .ed-why, .ed-said, .ed-copy, .ed-err, .ed-opts label, .ed-row input, .ed-row textarea.tp-notes, .ed-blank, .ed-steps button, .ed-steps b, .ed-head h2, .ed-mk, .ed-hero small, .ed-quiet, .ed-on, .ed-none) {
+  font-family: var(--ed-f) !important;
+  font-size: 0.75rem !important;
+  font-weight: 600 !important;
+  line-height: 1.3 !important;
+  letter-spacing: 0.01em !important;
+  text-transform: uppercase !important;
+  font-style: normal;
+}
+.ed .label, .ed .ed-row > .label { color: var(--ed-mu); }
+/* Typed into on a touch screen: 16px, or iOS zooms in on focus. */
+@media (pointer: coarse) { .ed :is(.ed-row input, .ed-row textarea.tp-notes) { font-size: 1rem !important; } }
+
+/* the steps: dots between, two squares at the end */
+.ed-steps { gap: 0.625rem; padding-bottom: 0.875rem; border-bottom: 1px solid var(--ed-line); align-items: center; }
+.ed-steps button { padding: 0; border: 0; display: flex; align-items: center; gap: 0.625rem; color: var(--ed-mu); }
+/* ::after, so the 44px touch target (::before, below) keeps its own. */
+.ed-steps button + button::after { content: ""; order: -1; width: 3px; height: 3px; background: var(--ed-mu); }
+.ed-steps b { margin-right: 0.3em; color: inherit; }
+.ed-steps :is([aria-current], [data-done]) { color: var(--foreground); }
+.ed-steps::after { content: ""; margin-left: auto; width: 5px; height: 5px; background: var(--foreground); box-shadow: -9px 0 0 var(--foreground); }
+
+/* the heading: one huge line, its context small at the right */
+.ed-hero { flex-shrink: 0; padding: 2rem var(--ed-x) 0; display: flex; flex-direction: column; gap: 1rem; }
+.ed-hero h2 { display: flex; justify-content: space-between; align-items: flex-end; gap: 0.5rem 1.5rem; flex-wrap: wrap; font: 700 clamp(3rem, 6.2cqw, 5.4rem)/0.84 var(--font-display); letter-spacing: -0.045em; text-transform: uppercase; margin: 0; }
+.ed-hero small { color: var(--ed-mu); text-align: right; padding-bottom: 0.35rem; }
+.ed-mk { display: flex; align-items: center; gap: 0.625rem; color: var(--ed-mu); padding-bottom: 1.25rem; border-bottom: 1px solid var(--ed-line); }
+.ed-mk i { width: 5px; height: 5px; background: var(--foreground); flex-shrink: 0; }
+.ed-box { border: 1px solid var(--foreground); color: var(--foreground) !important; padding: 0.3rem 0.5rem; margin-left: 0.25rem; }
+@media (hover: hover) { .ed-box:hover { background: var(--foreground); color: var(--background) !important; } }
+.ed-body { padding-top: 1.25rem; }
+
+/* the month: boxes all round, the days either side barely there, the pick filled */
+.ed-head h2 { color: var(--foreground); }
+.ed-ctl [aria-pressed] { display: none; }
+.ed-mhead { margin-top: 0.75rem; padding: 0; border: 1px solid var(--ed-line); border-bottom: 0; }
+.ed-mhead > span { padding: 0.5rem; color: var(--ed-mu); }
+.ed-mhead > span + span, .ed-month > :not(:nth-child(7n + 1)) { border-left: 1px solid var(--ed-line); }
+.ed-month { border: 1px solid var(--ed-line); }
+.ed-cell, .ed-blank { border-top: 1px solid var(--ed-line); padding: 0.5rem 0 0 0.5rem; }
+.ed-cell .ed-n { color: inherit; }
+.ed-cell:disabled { color: color-mix(in oklab, var(--foreground) 28%, transparent); }
+.ed-blank { display: block; color: color-mix(in oklab, var(--foreground) 9%, transparent); }
+/* Open days carry a teal line under the date; the day picked is teal (Julian, 2026-10-20). */
+.ed-cell { flex-direction: column; justify-content: space-between; padding-bottom: 0.5rem; }
+.ed-cell i { display: block; position: static; width: 1.25rem; height: 2px; background: var(--accent); }
+.ed-cell:disabled i { visibility: hidden; }
+.ed .ed-cell[aria-pressed="true"] { background: var(--accent); color: var(--accent-foreground); }
+.ed .ed-cell[aria-pressed="true"] i { background: var(--accent-foreground); }
+
+/* the times: a list down the right, the pick marked with a square */
+.ed-on { color: var(--ed-mu); }
+.ed-slot { height: auto; min-height: 2.75rem; border: 0; border-top: 1px solid var(--ed-line); border-radius: 0; display: flex; justify-content: space-between; align-items: center; padding: 0 0.125rem; color: var(--ed-mu); }
+.ed-slot[aria-pressed="true"] { background: transparent; color: var(--foreground); border-color: var(--ed-line); }
+.ed-slot[aria-pressed="true"]::after { content: ""; width: 5px; height: 5px; background: var(--foreground); }
+@media (hover: hover) { .ed-slot:not([aria-pressed="true"]):hover { color: var(--foreground); border-color: var(--ed-line); } }
+.ed-slots { gap: 0 !important; border-bottom: 1px solid var(--ed-line); }
+@container ed (min-width: 40rem) {
+  .ed:not([data-fit="3"]) .ed-slots { display: flex; flex-direction: column; }
+  .ed[data-view="month"]:not([data-fit="3"]) > .ed-body > .ed-times { margin-top: 0.75rem; }
+}
+
+/* the floor: the same button on every step */
+.ed-floor { border-top: 1px solid var(--ed-line); }
+.ed-btn, .ed-btn[data-accent] { background: var(--foreground); color: var(--background) !important; border-radius: 0; padding: 0.95rem 1.5rem; }
+.ed-btn[data-bad] { background: var(--ed-err); color: var(--background) !important; }
+
+/* details: two fields to a row, labels over values */
+.ed-fields { display: grid !important; grid-template-columns: 1fr 1fr; gap: 0 2rem; align-content: start; }
+.ed-fields > * { grid-column: 1 / -1; }
+.ed-fields > label.ed-row { grid-column: auto; }
+.ed .ed-row { display: flex; flex-direction: column; align-items: stretch; gap: 0.5rem; padding: 0.875rem 0 0.75rem; }
+.ed .ed-row { border-bottom: 1px solid var(--ed-line); }
+.ed-r > .ed-row:first-child, .ed-l > .ed-row:first-child { border-top: 1px solid var(--ed-line); }
+.ed .ed-v { color: var(--foreground); }
+.ed-opts { gap: 0.5rem; }
+.ed-opts label > span { display: inline-flex; border: 1px solid var(--ed-line); padding: 0.55rem 0.8rem; color: var(--ed-mu); }
+.ed-opts input:checked + span { background: var(--foreground); color: var(--background); border-color: var(--foreground); text-decoration: none; }
+.ed-row textarea.tp-notes { border: 1px solid var(--ed-line); padding: 0.75rem; min-height: 4.5rem; }
+.ed-pair { gap: 2rem; }
+
+/* deposit, and its ends */
+.ed-l .ed-row { flex-direction: row; justify-content: space-between; align-items: center; }
+.ed-l .ed-v { width: auto; text-align: right; }
+.ed-copy { margin-top: auto; padding-top: 1rem; color: var(--ed-mu); }
+.ed[data-declined] .ed-said b { color: var(--ed-err); }
+.ed-said { color: var(--ed-mu); max-width: 34ch; }
+.ed-said b { color: var(--foreground); font-weight: 600; }
+.ed-err { color: var(--ed-err); }
+
+/* booked: the check, what was sent, then the rows */
+.ed-ok { gap: 1.25rem; justify-content: space-between; }
+.ed-ok > svg { width: 2.5rem; height: 2.5rem; }
+.ed-why { color: var(--ed-mu); max-width: 34ch; margin: 0; }
+.ed-next { display: none; }
+
+@container ed (min-width: 40rem) {
+  .ed[data-booked] .ed-body, .ed .ed-body:has(> .ed-l + .ed-r):not(:has(> .ed-times)) { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); column-gap: 2rem; align-content: stretch; }
+}
+@container card (max-width: 36rem) {
+  .ed-hero { padding-top: 1.5rem; }
+  .ed-hero h2 { font-size: 3rem; flex-direction: column; align-items: flex-start; }
+  .ed-hero small { text-align: left; }
+  .ed-fields { grid-template-columns: minmax(0, 1fr); }
+  .ed-slots { border: 0; gap: 0.4rem !important; }
+  .ed-slot { border: 1px solid var(--ed-line); justify-content: center; min-height: 3.25rem; flex: 0 0 6.5rem; }
+  .ed-slot[aria-pressed="true"] { background: var(--foreground); color: var(--background); border-color: var(--foreground); }
+  .ed-slot[aria-pressed="true"]::after { display: none; }
+}
+
+/* The site's type pass spaces words and sets weights on headings; the card keeps its own. */
+.ed, .ed * { word-spacing: normal !important; }
+.ed-hero h2 { font-weight: 700 !important; }
+.ed-steps button { gap: 0.3em; }
+.ed-steps button + button::after { margin: 0 0.5rem 0 0.2rem; }
+/* The month keeps its full height with the big time gone (its row shrank to clip it). */
+.ed[data-view="month"]:not([data-fit="3"]) > .ed-body { grid-template-rows: auto auto 1fr; }
+.ed-l > .touch-pan-y { min-height: max-content; }
+.ed-cell { display: flex; align-items: flex-start; }
+
+/* Details: the heading's hairline is the first; notes take the full width; hints in caps. */
+.ed-fields > .ed-row:first-child { border-top: 0; }
+.ed-fields > label.ed-row:has(textarea) { grid-column: 1 / -1; }
+.ed .ed-row input::placeholder, .ed .ed-row textarea.tp-notes::placeholder { text-transform: uppercase; }
+
+/* Under the cursor's fill (`?goo`) the line goes with the number, or the
+   difference turns its teal red. */
+.ed .ed-cell[data-stuck]:not([aria-pressed="true"]) i { background: currentColor; }
+
+/* ── the inquiry (inquire-card.tsx) ─────────────────────────────────
+   The inquiry on the same page: six tiles for the kinds, each with who
+   it is for, its two questions in boxes under it, then the details, then
+   what happens next (Julian, 2026-10-21). */
+.ed-inq [hidden] { display: none !important; }
+/* Never clipped: past its room the body scrolls (the Inquiries card is shorter than the booking one). */
+.ed-inq .ed-body { overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; padding-top: 1rem; }
+.ed-inq .ed-hero { padding-top: 1.5rem; gap: 0.75rem; }
+.ed-inq .ed-mk { padding-bottom: 1rem; }
+.ed-inq .ed-floor > .label { min-width: 0; overflow-wrap: anywhere; }
+.ed-inq .ed-fields { display: flex !important; flex-direction: column; flex: 1; min-height: 0; }
+.ed-inq .ed-fields > .ed-row:first-child { border-top: 0; }
+.ed :is(.ed-nx-row b, .ed-nx-d, .ed-kinds em, .ed-kinds small, .ed-inq .ed-floor a) {
+  font-family: var(--ed-f) !important;
+  font-size: 0.75rem !important;
+  font-weight: 600 !important;
+  line-height: 1.3 !important;
+  letter-spacing: 0.01em !important;
+  text-transform: uppercase !important;
+  font-style: normal;
+}
+/* the kinds: tiles, three across, the pick filled */
+.ed-inq .ed-kind-row { flex: none; padding-bottom: 0.25rem; border-bottom: 0; }
+.ed-kinds { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); grid-auto-rows: 4.25rem; gap: 0.5rem; padding-top: 0.5rem; }
+.ed-kinds label { position: relative; display: flex; cursor: pointer; }
+.ed-kinds label > span { flex: 1; display: flex; flex-direction: column; justify-content: space-between; align-items: flex-start; padding: 0.75rem 0.5rem 0.65rem 0.8rem; border: 1px solid var(--ed-line); color: var(--ed-mu); transition: border-color 0.2s; }
+.ed-kinds em { color: var(--foreground); }
+.ed .ed-kinds small { font-size: 0.6rem !important; font-weight: 500 !important; letter-spacing: 0 !important; margin-top: auto; padding-top: 0.5rem; opacity: 0.55; }
+.ed-kinds input:checked + span { background: var(--foreground); border-color: var(--foreground); }
+.ed-kinds input:checked + span :is(em, small) { color: var(--background); }
+.ed-kinds input:focus-visible + span { outline: 1px solid var(--foreground); outline-offset: 3px; }
+@media (hover: hover) { .ed-kinds label:hover > span { border-color: color-mix(in oklab, var(--foreground) 40%, transparent); } }
+/* its questions: the same box, a field line inside */
+.ed-asks { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; padding: 0.75rem 0 0.5rem; flex: none; }
+.ed .ed-ask { border: 1px solid var(--ed-line); padding: 0.75rem 0.8rem 0.65rem; gap: 0; justify-content: space-between; min-height: 4rem; transition: border-color 0.2s; }
+.ed .ed-ask > .label { color: var(--foreground); }
+.ed .ed-ask input { border-bottom: 1px solid color-mix(in oklab, var(--foreground) 28%, transparent); padding-bottom: 0.45rem; transition: border-color 0.2s; }
+.ed .ed-ask:focus-within { border-color: color-mix(in oklab, var(--foreground) 40%, transparent); }
+.ed .ed-ask:focus-within input { border-bottom-color: var(--accent); }
+/* details: the project box takes the room */
+.ed-inq .ed-row:has(textarea) { flex: 1; min-height: 7rem; }
+@container ed (min-width: 40rem) { .ed-inq .ed-row:has(textarea) { min-height: 0; } .ed-inq textarea.tp-notes { flex: 1; height: auto !important; min-height: 2.75rem; } }
+.ed-inq .ed-refs { border-bottom: 0; }
+.ed-inq .ed-refs .contact-field > div { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; }
+.ed-inq .ed-refs .contact-field > div > .label { flex-basis: 100%; margin: 0 0 0.25rem; }
+.ed-inq .ed-refs .tap-44 { border-radius: 0; border-color: var(--ed-line); padding: 0.55rem 0.8rem; }
+/* sent: three equal bands, the first marked */
+.ed-nx { flex: 1; display: grid; grid-auto-rows: minmax(3.5rem, 1fr); padding: 1.5rem 0 1.25rem; min-height: 0; }
+.ed-nx-row { display: grid; grid-template-columns: 2.5rem minmax(0, 1fr) 1.25rem; align-items: start; align-content: center; gap: 0.4rem 1rem; color: var(--ed-mu); }
+.ed-nx-row b { color: var(--foreground); padding-top: 0.35em; }
+.ed-nx-row .ed-nx-t { grid-column: 2; font: 700 clamp(1.35rem, 3.4cqw, 2.6rem)/0.95 var(--font-display); letter-spacing: -0.02em; text-transform: uppercase; color: var(--foreground); }
+.ed-nx-row .ed-nx-d { grid-column: 2; }
+.ed-nx-row i { grid-row: 1; grid-column: 3; width: 1.25rem; height: 2px; background: var(--ed-line); margin-top: 0.6em; }
+.ed-nx-row[data-on] i { background: var(--accent); }
+.ed-inq .ed-floor a.ed-btn { text-decoration: none; display: inline-flex; align-items: center; }
+/* in its boxes: the card's own padding, not the box's */
+.contact-card > div:has(> .ed-inq), #book-card [data-scroll]:has(.ed-inq) { padding: 0 !important; }
+.contact-card > div:has(> .ed-inq) { display: flex; flex-direction: column; }
+.contact-card > div > .ed-inq { flex: 1 1 auto; min-height: 0; height: auto; }
+/* The Inquiries card takes the screen's height, as the booking card does, so the steps have their room. */
+@media (min-width: 40rem) { .contact-card:has(.ed-inq) { align-self: stretch; height: auto; max-height: none; } }
+.book-form:has(> .ed-inq) { display: contents; }
+@container ed (max-width: 39.99rem) {
+  .ed-kinds { grid-template-columns: repeat(2, minmax(0, 1fr)); grid-auto-rows: auto; }
+  .ed .ed-kinds small { padding-top: 0.9rem; }
+  .ed-asks { grid-template-columns: 1fr; }
+  .ed .ed-ask { min-height: 0; }
+  .ed-inq .ed-row:has(textarea) { flex: none; min-height: 0; }
+  .ed-nx-row .ed-nx-t { font-size: 1.35rem; }
+  .ed-inq .ed-floor { flex-wrap: wrap; }
+  .ed-inq .ed-floor > .ed-btn { flex: 1 0 100%; }
 }

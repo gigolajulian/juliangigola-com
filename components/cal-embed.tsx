@@ -116,7 +116,7 @@ function CalInline({ path, title, className }: { path: string; title: string; cl
   // The orb breathes one round before the calendar shows (Julian, 2026-10-14).
   const [held, setHeld] = React.useState(true);
   React.useEffect(() => {
-    const t = window.setTimeout(() => setHeld(false), ORB_ROUND.working);
+    const t = window.setTimeout(() => setHeld(false), ORB_ROUND.composing);
     return () => window.clearTimeout(t);
   }, []);
   const waiting = state === "waiting" || (held && state === "ready");
@@ -178,7 +178,7 @@ function CalInline({ path, title, className }: { path: string; title: string; cl
       {/* Julian: a small orb while Cal.com's page opens, gone once it is up. */}
       {waiting ? (
         <p role="status" className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center gap-3 text-muted-foreground">
-          <Orb state="working" size={20} />
+          <Orb state="composing" size={20} />
           <span className="label animate-[jg-fade-in_300ms_ease-out_300ms_both]">Loading availability</span>
         </p>
       ) : null}
