@@ -109,7 +109,7 @@ export function BookCard({ item, onClose, className }: { item: MenuItem; onClose
       ) : <span />}
         {/* Julian: the X larger, an easy target under a thumb. None on a
             booking page of its own (`app/book/[slug]`): nothing to close. */}
-        {onClose ? <button type="button" onClick={onClose} aria-label="Close" className="tap-44 inline-flex items-center text-foreground hoverable:hover:opacity-60">
+        {onClose ? <button type="button" onClick={onClose} aria-label="Close" className="tap-44 inline-flex min-w-6 items-center justify-center text-foreground hoverable:hover:opacity-60">
           <span aria-hidden className="text-[1.75rem] font-light leading-none text-foreground">&times;</span>
         </button> : null}
       </div>
