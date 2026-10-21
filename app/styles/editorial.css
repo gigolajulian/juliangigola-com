@@ -494,10 +494,10 @@ fieldset.ed-row > legend { float: left; padding: 0; }
 .ed-kinds label { position: relative; display: flex; cursor: pointer; }
 .ed-kinds label > span { flex: 1; display: flex; flex-direction: column; justify-content: space-between; align-items: flex-start; padding: 0.75rem 0.5rem 0.65rem 0.8rem; border: 1px solid var(--ed-line); color: var(--ed-mu); transition: border-color 0.2s; }
 .ed-kinds em { color: var(--foreground); }
-/* Small and thin under the name (Julian, 2026-10-21); `.ed.ed-inq` outranks the
+/* Small, in the navbar's mono (Julian, 2026-10-21); `.ed.ed-inq` outranks the
    caps rule above, which had been winning. The colour, not opacity, keeps it
    readable. */
-.ed.ed-inq .ed-kinds small { font-size: 0.6rem !important; font-weight: 400 !important; letter-spacing: 0.02em !important; margin-top: auto; padding-top: 0.5rem; color: var(--ed-mu); }
+.ed.ed-inq .ed-kinds small { font-family: var(--font-mono) !important; font-size: 0.625rem !important; font-weight: 400 !important; letter-spacing: 0.08em !important; margin-top: auto; padding-top: 0.5rem; color: var(--ed-mu); }
 .ed-kinds input:checked + span { background: var(--foreground); border-color: var(--foreground); }
 .ed-kinds input:checked + span :is(em, small) { color: var(--background); }
 .ed-kinds input:focus-visible + span { outline: 1px solid var(--foreground); outline-offset: 3px; }
