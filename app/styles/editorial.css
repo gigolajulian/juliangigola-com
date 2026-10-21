@@ -247,8 +247,11 @@ fieldset.ed-row > legend { float: left; padding: 0; }
   .ed-big { --ed-time: min(4.5rem, 19cqw); }
   .ed-when-line b { font-size: 1.5rem; }
   .ed-kind { grid-template-columns: minmax(0, 1fr); gap: 0.625rem; padding: 1rem 0; }
-  .ed-slots { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-  .ed-slot { height: 3.5rem; font-size: 1.125rem; }
+  /* One line that swipes on a phone (Julian, via MAC, 2026-10-20). The
+     fade says there are more; the end padding lets the last clear it. */
+  .ed-slots { display: flex; overflow-x: auto; overscroll-behavior-x: contain; scroll-snap-type: x proximity; scrollbar-width: none; padding-right: 2.5rem; mask-image: linear-gradient(to right, #000 calc(100% - 2.5rem), transparent); }
+  .ed-slots::-webkit-scrollbar { display: none; }
+  .ed-slot { height: 3.5rem; font-size: 1.125rem; flex: 0 0 5.75rem; scroll-snap-align: start; }
   .ed-when h2 { font-size: 1.375rem; }
   .ed-row, .ed-next { grid-template-columns: 5.25rem minmax(0, 1fr); }
   .ed-exp { grid-template-columns: minmax(0, 1fr); }
