@@ -883,7 +883,6 @@ export function TimePicker({
     const mon = (d: Date) => MONTHS[d.getMonth()].slice(0, 3);
     const [, apEnd] = clock(pick.min + length);
     const tzName = zone(pick.start, tz);
-    const short = `${d3(date)} ${date.getDate()} ${mon(date)}, ${t} ${ap}`;
     const range = `${d3(date)} ${date.getDate()} ${mon(date)}, ${t}${ap === apEnd ? "" : ` ${ap}`} to ${until} ${apEnd} ${tzName}`;
     const at = step === "pick" ? 0 : step === "pay" ? 2 : step === "done" ? -1 : 1;
     /* A call (no deposit): a handset, its length in minutes (Julian, 2026-10-17: "15:00" read as 3 PM). */
@@ -931,7 +930,6 @@ export function TimePicker({
           <DepositStep
             editorial
             head={<>{bar}{hero("$100", `Deposit. Holds ${dayLine}`, "Balance due after the shoot", <button type="button" className="ed-box" onClick={() => setStep("form")}>Change</button>)}</>}
-            holds={short}
             className={className}
             body={deposit}
             rows={[

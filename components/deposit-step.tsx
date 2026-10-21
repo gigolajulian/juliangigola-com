@@ -120,13 +120,11 @@ export function DepositStep({
   className,
   editorial,
   head,
-  holds,
 }: {
   className?: string;
-  /** `?editorial` (editorial.css): its step bar over it, and what the $100 holds. */
+  /** `?editorial` (editorial.css): its step bar and heading over it. */
   editorial?: boolean;
   head?: React.ReactNode;
-  holds?: string;
   body: DepositBody;
   rows: [string, string][];
   onBooked: () => void;

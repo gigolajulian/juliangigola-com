@@ -425,3 +425,13 @@ fieldset.ed-row > legend { float: left; padding: 0; }
   .ed-slot[aria-pressed="true"] { background: var(--foreground); color: var(--background); border-color: var(--foreground); }
   .ed-slot[aria-pressed="true"]::after { display: none; }
 }
+
+/* The site's type pass spaces words and sets weights on headings; the card keeps its own. */
+.ed, .ed * { word-spacing: normal !important; }
+.ed-hero h2 { font-weight: 700 !important; }
+.ed-steps button { gap: 0.3em; }
+.ed-steps button + button::before { margin: 0 0.5rem 0 0.2rem; }
+/* The month keeps its full height with the big time gone (its row shrank to clip it). */
+.ed[data-view="month"]:not([data-fit="3"]) > .ed-body { grid-template-rows: auto auto 1fr; }
+.ed-l > .touch-pan-y { min-height: max-content; }
+.ed-cell { display: flex; align-items: flex-start; }
