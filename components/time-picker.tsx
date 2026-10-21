@@ -164,7 +164,8 @@ export function TimePicker({
     const t = window.setTimeout(() => setHeld(false), ORB_ROUND.working);
     return () => window.clearTimeout(t);
   }, []);
-  const [view, setView] = React.useState<"week" | "month">("week");
+  // The editorial card opens on its month (2026-10-20); `?classic` keeps the week.
+  const [view, setView] = React.useState<"week" | "month">(() => (typeof location !== "undefined" && new URLSearchParams(location.search).has("classic") ? "week" : "month"));
   const [anchor, setAnchor] = React.useState(() => new Date()); // the week or month on show
   const [pick, setPick] = React.useState<Pick | null>(null);
   /* Julian: the arrows more defined, larger. Drawn, not the font's. */
@@ -914,12 +915,22 @@ export function TimePicker({
         })}
       </nav>
     );
+    /* One face, two sizes (Julian, 2026-10-20, from the Tenebra reference):
+       each step opens on one huge line, small caps beside and under it. */
+    const what = `${session || title} · ${timer}`;
+    const dayLine = `${d3(date)} ${date.getDate()} ${mon(date)} · ${t} ${ap}`;
+    const hero = (big: React.ReactNode, side: React.ReactNode, mark: React.ReactNode, act?: React.ReactNode) => (
+      <div className="ed-hero">
+        <h2>{big}<small>{side}</small></h2>
+        <p className="ed-mk"><i />{mark}{act}</p>
+      </div>
+    );
     if (step === "pay" && deposit) {
       return (
         <div ref={root} className="contents">
           <DepositStep
             editorial
-            head={bar}
+            head={<>{bar}{hero("$100", `Deposit. Holds ${dayLine}`, "Balance due after the shoot", <button type="button" className="ed-box" onClick={() => setStep("form")}>Change</button>)}</>}
             holds={short}
             className={className}
             body={deposit}
@@ -954,24 +965,15 @@ export function TimePicker({
       return (
         <div ref={root} aria-label={title} role="status" data-booked="" className={cn("tp ed", className)}>
           {bar}
+          {hero(<>You&rsquo;re in</>, <>{dayLine}<br />{what}</>, call && booked.via ? `${booked.via} call booked` : "Booked")}
           <div className="ed-body">
-            <div className="ed-l">
-              <p className="label ed-mark">
-                {call && booked.via ? (booked.via === "Video" ? camera : handset) : <svg aria-hidden width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="currentColor" strokeWidth="1.6"><circle cx="11" cy="11" r="10" /><path d="M6.5 11.5l3 3 6-6.5" strokeLinecap="round" strokeLinejoin="round" /></svg>}
-                {call && booked.via ? `${booked.via} call booked` : "Booked"}
-              </p>
+            <div className="ed-l ed-ok">
+              {call && booked.via ? (booked.via === "Video" ? camera : handset) : <svg aria-hidden viewBox="0 0 22 22" fill="none" stroke="currentColor" strokeWidth="1.2"><circle cx="11" cy="11" r="10" /><path d="M6.5 11.5l3 3 6-6.5" strokeLinecap="round" strokeLinejoin="round" /></svg>}
               {call && booked.via ? (
-                <>
-                  {/* Julian: a call reads as a call, the number I ring big. */}
-                  <p className="ed-lead">{first ? `${first}, ` : ""}{ring ? "I’ll call you at" : "see you on"}</p>
-                  <h2 className="ed-huge ed-tel">{ring ? tel(booked.phone) : "Google Meet."}</h2>
-                  <p className="ed-why">{ring ? `${range}.` : "The link is in your confirmation email."}</p>
-                </>
+                /* Julian: a call reads as a call, the number I ring. */
+                <p className="ed-why">{first ? `${first}, ` : ""}{ring ? <>I&rsquo;ll call you at {tel(booked.phone)}.</> : <>see you on Google Meet. The link is in your confirmation email.</>}</p>
               ) : (
-                <>
-                  <h2 className="ed-huge">{first ? <>{first},<br />you&rsquo;re in.</> : <>You&rsquo;re in.</>}</h2>
-                  <p className="ed-why">I&rsquo;ll contact you with the further details before the day.</p>
-                </>
+                <p className="ed-why">{first ? `${first}, a` : "A"} confirmation is on its way to {booked.email}. I&rsquo;ll contact you with the further details before the day.</p>
               )}
             </div>
             <div className="ed-r">
@@ -1015,6 +1017,9 @@ export function TimePicker({
       <div ref={root} aria-label={title} role="region" data-view={view} data-mstep={mstep} className={cn("tp ed", className)}>
         {busy}
         {bar}
+        {step === "pick"
+          ? hero(`${d3(date)} ${date.getDate()} ${mon(date)}`, <>{chosen === "time" ? `${t}${ap === apEnd ? "" : ` ${ap}`} to ${until} ${apEnd}` : "Pick a time"}<br />{what}</>, chosen === "time" ? "Then your details" : "Pick a day, then a time")
+          : hero("Details", <>{dayLine}<br />{what}</>, "Who and where", <button type="button" className="ed-box" onClick={() => setStep("pick")}>Change</button>)}
         {step === "pick" ? (
           <>
             <div className="ed-body">
@@ -1051,7 +1056,12 @@ export function TimePicker({
                       <div className="ed-mhead label">{DAYS.map((d) => <span key={d}>{d}</span>)}</div>
                       <div className="ed-month">
                         {cells.map((d, k) => {
-                          if (!d) return <span key={`b${k}`} className="ed-blank" />;
+                          /* The days either side of the month, barely there (Julian, 2026-10-20). */
+                          if (!d) {
+                            const lead = month.findIndex(Boolean);
+                            const n = k < lead ? new Date(anchor.getFullYear(), anchor.getMonth(), k - lead + 1).getDate() : k - month.length + 1;
+                            return <span key={`b${k}`} aria-hidden className="ed-blank">{n}</span>;
+                          }
                           const id = iso(d);
                           return (
                             <button key={id} data-day={id} type="button" disabled={!open(id).size} aria-pressed={pick.date === id} aria-label={`${WEEKDAYS[d.getDay()]}, ${MONTHS[d.getMonth()]} ${d.getDate()}`} onClick={() => dayPick(id)} className="ed-cell">
@@ -1063,27 +1073,6 @@ export function TimePicker({
                       </div>
                     </div>
                   )}
-                </div>
-                {/* The time picked, large, only once one is picked (Julian,
-                    2026-10-20: the split-flap went); it rises in again on each
-                    new pick. Its room is held, so a pick moves nothing. */}
-                <div className="ed-big" aria-hidden>
-                  {chosen === "time" ? (
-                    <span key={pick.start} className="ed-bt">
-                      {t}
-                      <small>{ap}</small>
-                    </span>
-                  ) : null}
-                  <span className="ed-when-line">
-                    <b>{chosen ? `${WEEKDAYS[date.getDay()]}, ${MONTHS[date.getMonth()]} ${date.getDate()}` : "Pick a day, then a time"}</b>
-                    {call ? (
-                      <span className="label ed-timer">{handset}<span>{timer}</span><i className="not-italic" style={chosen === "time" ? undefined : { visibility: "hidden" }}>{t}{ap === apEnd ? "" : ` ${ap}`} to {until} {apEnd} {tzName}</i></span>
-                    ) : (
-                      /* Shown once a time is picked (Julian, 2026-10-17): before, the
-                         default read as chosen. Hidden, not removed, so a pick moves nothing. */
-                      <span className="label ed-hour" style={chosen === "time" ? undefined : { visibility: "hidden" }}>{t}{ap === apEnd ? "" : ` ${ap}`} to {until} {apEnd} {tzName}</span>
-                    )}
-                  </span>
                 </div>
               </div>
               <div ref={slotsRef} className="ed-r ed-times">
@@ -1098,7 +1087,7 @@ export function TimePicker({
                       const m = minutesOf(x.start);
                       const [h, a] = clock(m);
                       return (
-                        <button key={x.start} data-slot="" type="button" aria-pressed={chosen === "time" && m === pick.min} aria-label={`${h} ${a}`} onClick={() => choose(pick.date, m, true)} className="ed-slot">{h}</button>
+                        <button key={x.start} data-slot="" type="button" aria-pressed={chosen === "time" && m === pick.min} aria-label={`${h} ${a}`} onClick={() => choose(pick.date, m, true)} className="ed-slot">{h} {a}</button>
                       );
                     })}
                   </div>
@@ -1129,16 +1118,7 @@ export function TimePicker({
             className="ed-form flex min-h-0 flex-1 flex-col"
           >
             <div className="ed-body">
-              <div className="ed-l">
-                <div className="ed-when">
-                  <h2>
-                    {`${d3(date)} ${date.getDate()} ${mon(date)}, `}
-                    <span className="whitespace-nowrap">{t} {ap}</span>
-                  </h2>
-                  <button type="button" className="ed-quiet label" onClick={() => setStep("pick")}>Change</button>
-                </div>
-              </div>
-              <div className="ed-r">
+              <div className="ed-r ed-fields">
                 {call ? (
                   <div className="ed-row" role="radiogroup" aria-label="Phone call or video call">
                     <span className="label">Call</span>

@@ -81,7 +81,7 @@ function ink(el: HTMLElement) {
 function fieldStyle(el: HTMLElement) {
   const { fg, muted, accent } = ink(el);
   return {
-    base: { color: fg, iconColor: fg, fontFamily: '"IBM Plex Mono", ui-monospace, monospace', fontSize: "16px", fontSmoothing: "antialiased", ...(document.documentElement.hasAttribute("data-layout") && { letterSpacing: "1.54px" }), "::placeholder": { color: muted } },
+    base: { color: fg, iconColor: fg, fontFamily: '"Helvetica Neue", Arial, sans-serif', fontWeight: "600", fontSize: "16px", fontSmoothing: "antialiased", ...(document.documentElement.hasAttribute("data-layout") && { letterSpacing: "1.54px" }), "::placeholder": { color: muted } },
     invalid: { color: accent, iconColor: accent },
   };
 }
@@ -352,9 +352,7 @@ export function DepositStep({
           <>
             <div className="ed-body" role="status">
               <div className="ed-l">
-                <p className="label ed-mark"><i />{end[0]}</p>
-                <h2 className="ed-huge">{end[1]}</h2>
-                <p className="ed-why">{end[2]}</p>
+                <p className="ed-said"><b>{end[1]}</b> {end[2]}</p>
               </div>
               <div className="ed-r">
                 {rows.map(([k, v]) => (
@@ -371,9 +369,12 @@ export function DepositStep({
         ) : (
           <>
             <div className="ed-body">
-              <div className="ed-l ed-amount">
-                <h2><sup>$</sup>100</h2>
-                <span className="label">Holds{" "}<br />{holds}</span>
+              {/* What the $100 is for; the amount is the heading over it (2026-10-20). */}
+              <div className="ed-l">
+                {rows.map(([k, v]) => (
+                  <div key={k} className="ed-row"><span className="label">{k}</span><span className="ed-v break-words">{v}</span></div>
+                ))}
+                <div className="ed-row"><span className="label">Due now</span><span className="ed-v">$100</span></div>
               </div>
               <div className="ed-r" aria-busy={stage === "loading"}>
                 <label className="ed-row"><span className="label">Card</span><div ref={number} className="ed-field" /></label>
