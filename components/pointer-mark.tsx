@@ -82,7 +82,11 @@ export function PointerMark() {
        the fill turned it red. Again after a press picks or unpicks it. */
     const refill = () => {
       if (!fill) return;
-      const picked = !!fill.querySelector("input:checked") || fill.getAttribute("aria-pressed") === "true";
+      /* A picked day or time (`aria-pressed`) still fills, in a see-through
+         grey over its teal (Julian, 2026-10-20), so its number shows. */
+      const gray = fill.getAttribute("aria-pressed") === "true";
+      el.toggleAttribute("data-gray", gray);
+      const picked = !gray && !!fill.querySelector("input:checked");
       el.toggleAttribute("data-picked", picked);
       if (picked && el.hasAttribute("data-fill")) drained();
       else if (!picked && !el.hasAttribute("data-fill")) {
@@ -104,6 +108,7 @@ export function PointerMark() {
       if (!stuck) return;
       if (el.hasAttribute("data-fill")) drained();
       el.removeAttribute("data-picked");
+      el.removeAttribute("data-gray");
       fill = null;
       stuck.removeAttribute("data-stuck");
       stuck.style.removeProperty("--lean-x");

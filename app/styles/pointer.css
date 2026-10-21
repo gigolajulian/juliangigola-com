@@ -209,6 +209,12 @@
   mix-blend-mode: normal;
   color: var(--accent-foreground);
 }
+/* Over a picked day or time: a see-through grey, so its number shows
+   (Julian, 2026-10-20). */
+.pointer-mark[data-gray] {
+  mix-blend-mode: normal;
+  color: oklch(0.55 0 0 / 0.5);
+}
 .pointer-mark[data-drain] .mark-goo {
   filter: url(#mark-goo);
 }
