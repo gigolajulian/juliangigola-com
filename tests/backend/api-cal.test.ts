@@ -5,8 +5,8 @@ import { FakeKV } from "./fakes";
    with CAL_WEBHOOK_SECRET gets into the inbox, and a new booking lands
    there as a "booking" row with its summary. */
 
-const ctx = vi.hoisted(() => ({ env: {} as Record<string, unknown> }));
-vi.mock("@opennextjs/cloudflare", () => ({ getCloudflareContext: async () => ({ env: ctx.env }) }));
+const ctx = vi.hoisted(() => ({ env: {} as Record<string, unknown>, waits: [] as Promise<unknown>[] }));
+vi.mock("@opennextjs/cloudflare", () => ({ getCloudflareContext: async () => ({ env: ctx.env, ctx: { waitUntil: (p: Promise<unknown>) => void ctx.waits.push(p) } }) }));
 
 const { POST } = await import("@/app/api/cal/route");
 
@@ -192,6 +192,7 @@ describe("the four paid sessions", () => {
     const body = JSON.stringify({ ...BOOKING, payload: { ...BOOKING.payload, type: "headshots", uid: "cal-1" } });
     expect((await post(body, await sign(body))).status).toBe(200);
     expect(kv.puts).toHaveLength(1);
+    await Promise.all(ctx.waits);
     const p = calls.find((c) => c.url.includes("api.notion.com"))!.body.properties;
     expect(p).toMatchObject({
       Status: { select: { name: "Confirmed" } },
