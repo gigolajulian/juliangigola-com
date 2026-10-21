@@ -605,9 +605,17 @@ export function TimePicker({
     if (!editorial || step !== "pick" || !el || !body) return;
     const fit = () => {
       el.removeAttribute("data-scroll");
+      /* Measured two ways: WebKit reported no scroll while the month's
+         last week sat under the floor (MAC on #279, 2026-10-21), so the
+         month's own bottom is checked against the body's as well. */
+      const over = () => {
+        const month = body.querySelector(".ed-month, .ed-days");
+        const past = month ? month.getBoundingClientRect().bottom - body.getBoundingClientRect().bottom : 0;
+        return Math.max(body.scrollHeight - body.clientHeight, past);
+      };
       for (let n = 0; n <= 3; n++) {
         el.dataset.fit = String(n);
-        if (body.scrollHeight - body.clientHeight <= 1) return;
+        if (over() <= 1) return;
       }
       // Still over at the last step (a phone on its side, QA on #204): the
       // days were clipped out of reach. Reachable beats no scroll.

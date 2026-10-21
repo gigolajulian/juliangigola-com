@@ -450,3 +450,77 @@ fieldset.ed-row > legend { float: left; padding: 0; }
 /* Under the cursor's fill (`?goo`) the line goes with the number, or the
    difference turns its teal red. */
 .ed .ed-cell[data-stuck]:not([aria-pressed="true"]) i { background: currentColor; }
+
+/* ── the inquiry (inquire-card.tsx) ─────────────────────────────────
+   The inquiry on the same page: six tiles for the kinds, each with who
+   it is for, its two questions in boxes under it, then the details, then
+   what happens next (Julian, 2026-10-21). */
+.ed-inq [hidden] { display: none !important; }
+/* Never clipped: past its room the body scrolls (the Inquiries card is shorter than the booking one). */
+.ed-inq .ed-body { overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; padding-top: 1rem; }
+.ed-inq .ed-hero { padding-top: 1.5rem; gap: 0.75rem; }
+.ed-inq .ed-mk { padding-bottom: 1rem; }
+.ed-inq .ed-floor > .label { min-width: 0; overflow-wrap: anywhere; }
+.ed-inq .ed-fields { display: flex !important; flex-direction: column; flex: 1; min-height: 0; }
+.ed-inq .ed-fields > .ed-row:first-child { border-top: 0; }
+.ed :is(.ed-nx-row b, .ed-nx-d, .ed-kinds em, .ed-kinds small, .ed-inq .ed-floor a) {
+  font-family: var(--ed-f) !important;
+  font-size: 0.75rem !important;
+  font-weight: 600 !important;
+  line-height: 1.3 !important;
+  letter-spacing: 0.01em !important;
+  text-transform: uppercase !important;
+  font-style: normal;
+}
+/* the kinds: tiles, three across, the pick filled */
+.ed-inq .ed-kind-row { flex: 1 1 auto; display: flex; flex-direction: column; min-height: 0; padding-bottom: 0.25rem; border-bottom: 0; }
+.ed-kinds { flex: 1 1 auto; min-height: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); grid-auto-rows: minmax(4.25rem, 1fr); gap: 0.5rem; padding-top: 0.5rem; }
+.ed-kinds label { position: relative; display: flex; cursor: pointer; }
+.ed-kinds label > span { flex: 1; display: flex; flex-direction: column; justify-content: space-between; align-items: flex-start; padding: 0.75rem 0.5rem 0.65rem 0.8rem; border: 1px solid var(--ed-line); color: var(--ed-mu); transition: border-color 0.2s; }
+.ed-kinds em { color: var(--foreground); }
+.ed .ed-kinds small { font-size: 0.6rem !important; font-weight: 500 !important; letter-spacing: 0 !important; margin-top: auto; padding-top: 0.5rem; opacity: 0.55; }
+.ed-kinds input:checked + span { background: var(--foreground); border-color: var(--foreground); }
+.ed-kinds input:checked + span :is(em, small) { color: var(--background); }
+.ed-kinds input:focus-visible + span { outline: 1px solid var(--foreground); outline-offset: 3px; }
+@media (hover: hover) { .ed-kinds label:hover > span { border-color: color-mix(in oklab, var(--foreground) 40%, transparent); } }
+/* its questions: the same box, a field line inside */
+.ed-asks { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; padding: 0.75rem 0 0.5rem; flex: none; }
+.ed .ed-ask { border: 1px solid var(--ed-line); padding: 0.75rem 0.8rem 0.65rem; gap: 0; justify-content: space-between; min-height: 4rem; transition: border-color 0.2s; }
+.ed .ed-ask > .label { color: var(--foreground); }
+.ed .ed-ask input { border-bottom: 1px solid color-mix(in oklab, var(--foreground) 28%, transparent); padding-bottom: 0.45rem; transition: border-color 0.2s; }
+.ed .ed-ask:focus-within { border-color: color-mix(in oklab, var(--foreground) 40%, transparent); }
+.ed .ed-ask:focus-within input { border-bottom-color: var(--accent); }
+/* details: the project box takes the room */
+.ed-inq .ed-row:has(textarea) { flex: 1; min-height: 7rem; }
+@container ed (min-width: 40rem) { .ed-inq textarea.tp-notes { flex: 1; height: auto !important; } }
+.ed-inq .ed-refs { border-bottom: 0; }
+.ed-inq .ed-refs .contact-field > div { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; }
+.ed-inq .ed-refs .contact-field > div > .label { flex-basis: 100%; margin: 0 0 0.25rem; }
+.ed-inq .ed-refs .tap-44 { border-radius: 0; border-color: var(--ed-line); padding: 0.55rem 0.8rem; }
+/* sent: three equal bands, the first marked */
+.ed-nx { flex: 1; display: grid; grid-auto-rows: minmax(3.5rem, 1fr); padding: 1.5rem 0 1.25rem; min-height: 0; }
+.ed-nx-row { display: grid; grid-template-columns: 2.5rem minmax(0, 1fr) 1.25rem; align-items: start; align-content: center; gap: 0.4rem 1rem; color: var(--ed-mu); }
+.ed-nx-row b { color: var(--foreground); padding-top: 0.35em; }
+.ed-nx-row .ed-nx-t { grid-column: 2; font: 700 clamp(1.35rem, 3.4cqw, 2.6rem)/0.95 var(--font-display); letter-spacing: -0.02em; text-transform: uppercase; color: var(--foreground); }
+.ed-nx-row .ed-nx-d { grid-column: 2; }
+.ed-nx-row i { grid-row: 1; grid-column: 3; width: 1.25rem; height: 2px; background: var(--ed-line); margin-top: 0.6em; }
+.ed-nx-row[data-on] i { background: var(--accent); }
+.ed-inq .ed-floor a.ed-btn { text-decoration: none; display: inline-flex; align-items: center; }
+/* in its boxes: the card's own padding, not the box's */
+.contact-card > div:has(> .ed-inq), #book-card [data-scroll]:has(.ed-inq) { padding: 0 !important; }
+.contact-card > div:has(> .ed-inq) { display: flex; flex-direction: column; }
+.contact-card > div > .ed-inq { flex: 1 1 auto; min-height: 0; height: auto; }
+/* The Inquiries card takes the screen's height, as the booking card does, so the steps have their room. */
+@media (min-width: 40rem) { .contact-card:has(.ed-inq) { align-self: stretch; height: auto; max-height: none; } }
+.book-form:has(> .ed-inq) { display: contents; }
+@container ed (max-width: 39.99rem) {
+  .ed-inq .ed-kind-row { flex: none; }
+  .ed-kinds { flex: none; grid-template-columns: repeat(2, minmax(0, 1fr)); grid-auto-rows: auto; }
+  .ed .ed-kinds small { padding-top: 0.9rem; }
+  .ed-asks { grid-template-columns: 1fr; }
+  .ed .ed-ask { min-height: 0; }
+  .ed-inq .ed-row:has(textarea) { flex: none; min-height: 0; }
+  .ed-nx-row .ed-nx-t { font-size: 1.35rem; }
+  .ed-inq .ed-floor { flex-wrap: wrap; }
+  .ed-inq .ed-floor > .ed-btn { flex: 1 0 100%; }
+}

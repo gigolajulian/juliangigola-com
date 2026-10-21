@@ -3,7 +3,7 @@
 import * as React from "react";
 import { Suspense } from "react";
 import { CalEmbed } from "@/components/cal-embed";
-import { ContactForm } from "@/components/contact-form";
+import { InquireCard } from "@/components/inquire-card";
 import { SESSION_TYPES } from "@/lib/sessions";
 import type { MenuItem } from "@/lib/booking";
 import { cn } from "@/lib/utils";
@@ -122,7 +122,7 @@ export function BookCard({ item, onClose, className }: { item: MenuItem; onClose
               {/* Julian (2026-10-14): no promise line over the form; it
                   opens on the fields. */}
               <Suspense fallback={null}>
-                <ContactForm defaults={item.form} sessions={SESSIONS} />
+                <InquireCard defaults={item.form} sessions={SESSIONS} />
               </Suspense>
             </div>
           </div>
