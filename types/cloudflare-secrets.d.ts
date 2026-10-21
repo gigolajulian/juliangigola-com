@@ -63,4 +63,13 @@ interface CloudflareEnv {
    *   wrangler versions secret put STRIPE_WEBHOOK_SECRET
    */
   STRIPE_WEBHOOK_SECRET?: string;
+
+  /**
+   * Notion internal integration token (`lib/notion-lead.ts`): copies each
+   * enquiry and booking onto the Business Hub Bookings board. Unset, nothing
+   * is copied. Set with:
+   *
+   *   wrangler versions secret put NOTION_TOKEN
+   */
+  NOTION_TOKEN?: string;
 }

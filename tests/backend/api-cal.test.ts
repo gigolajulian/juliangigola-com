@@ -181,4 +181,24 @@ describe("the four paid sessions", () => {
       expect(sent).toEqual([]);
     });
   });
+
+  it("copies a booking onto the Notion board, and still answers when Notion fails", async () => {
+    const calls: { url: string; body: { parent: unknown; properties: unknown } }[] = [];
+    vi.stubGlobal("fetch", async (url: string, init: RequestInit) => {
+      calls.push({ url, body: JSON.parse(init.body as string) });
+      return new Response("down", { status: 500 });
+    });
+    ctx.env = { ...ctx.env, NOTION_TOKEN: "test" };
+    const body = JSON.stringify({ ...BOOKING, payload: { ...BOOKING.payload, type: "headshots", uid: "cal-1" } });
+    expect((await post(body, await sign(body))).status).toBe(200);
+    expect(kv.puts).toHaveLength(1);
+    const p = calls.find((c) => c.url.includes("api.notion.com"))!.body.properties;
+    expect(p).toMatchObject({
+      Status: { select: { name: "Confirmed" } },
+      "Shoot Type": { select: { name: "Headshots" } },
+      "Cal UID": { rich_text: [{ text: { content: "cal-1" } }] },
+      "Contact Email": { email: "qa@example.com" },
+    });
+    vi.unstubAllGlobals();
+  });
 });

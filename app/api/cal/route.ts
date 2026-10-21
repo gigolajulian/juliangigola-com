@@ -1,6 +1,7 @@
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { sendConfirm } from "@/lib/confirm";
 import { PAID, paidFor, tellNoDeposit } from "@/lib/deposit";
+import { toNotion } from "@/lib/notion-lead";
 import { bookingEnquiry, enquiryKey, summary, type CalBooking } from "@/lib/inbox";
 
 /* ── Cal.com's booking webhook ─────────────────────────────────────
@@ -66,6 +67,14 @@ export async function POST(request: Request) {
   // key on Cal's `uid` if that ever shows up in the inbox.
   await env.INBOX.put(enquiryKey(now, id.slice(0, 8)), JSON.stringify(stored), {
     metadata: summary(stored),
+  });
+  const paid = (PAID as readonly string[]).includes(hook.payload?.type ?? "");
+  await toNotion(env.NOTION_TOKEN, {
+    stored,
+    status: paid ? "Confirmed" : "Call booked",
+    kind: hook.payload?.type,
+    calUid: hook.payload?.uid,
+    shootDate: paid ? hook.payload?.startTime : undefined,
   });
   // After the write, so a failed write's retry does not mail twice.
   if (stored.noDeposit) await tellNoDeposit(env.EMAIL, hook.payload!.type!, hook.payload?.startTime, { name: stored.name, email: stored.email });
