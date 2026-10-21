@@ -2,6 +2,7 @@
 
 import { headers } from "next/headers";
 import { getCloudflareContext } from "@opennextjs/cloudflare";
+import { toNotion } from "@/lib/notion-lead";
 import imageLoader from "@/image-loader";
 import LOOKS from "@/lib/picker-looks.json";
 import {
@@ -240,6 +241,7 @@ export async function submitEnquiry(
     await inbox.put(key, JSON.stringify(stored), {
       metadata: summary(stored),
     });
+    await toNotion(env.NOTION_TOKEN, { stored, status: "Inquiry", kind: stored.type });
     /* Their images beside it, for /admin's Inbox (`ref:<key>:<n>`, read
        and deleted with the message by `app/api/inbox/route.ts`). Best
        effort like the email: the enquiry is already stored. */
