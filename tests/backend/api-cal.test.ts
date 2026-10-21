@@ -5,8 +5,8 @@ import { FakeKV } from "./fakes";
    with CAL_WEBHOOK_SECRET gets into the inbox, and a new booking lands
    there as a "booking" row with its summary. */
 
-const ctx = vi.hoisted(() => ({ env: {} as Record<string, unknown> }));
-vi.mock("@opennextjs/cloudflare", () => ({ getCloudflareContext: async () => ({ env: ctx.env }) }));
+const ctx = vi.hoisted(() => ({ env: {} as Record<string, unknown>, waits: [] as Promise<unknown>[] }));
+vi.mock("@opennextjs/cloudflare", () => ({ getCloudflareContext: async () => ({ env: ctx.env, ctx: { waitUntil: (p: Promise<unknown>) => void ctx.waits.push(p) } }) }));
 
 const { POST } = await import("@/app/api/cal/route");
 
@@ -180,5 +180,26 @@ describe("the four paid sessions", () => {
       await book({ uid: "u2" });
       expect(sent).toEqual([]);
     });
+  });
+
+  it("copies a booking onto the Notion board, and still answers when Notion fails", async () => {
+    const calls: { url: string; body: { parent: unknown; properties: unknown } }[] = [];
+    vi.stubGlobal("fetch", async (url: string, init: RequestInit) => {
+      calls.push({ url, body: JSON.parse(init.body as string) });
+      return new Response("down", { status: 500 });
+    });
+    ctx.env = { ...ctx.env, NOTION_TOKEN: "test" };
+    const body = JSON.stringify({ ...BOOKING, payload: { ...BOOKING.payload, type: "headshots", uid: "cal-1" } });
+    expect((await post(body, await sign(body))).status).toBe(200);
+    expect(kv.puts).toHaveLength(1);
+    await Promise.all(ctx.waits);
+    const p = calls.find((c) => c.url.includes("api.notion.com"))!.body.properties;
+    expect(p).toMatchObject({
+      Status: { select: { name: "Confirmed" } },
+      "Shoot Type": { select: { name: "Headshots" } },
+      "Cal UID": { rich_text: [{ text: { content: "cal-1" } }] },
+      "Contact Email": { email: "qa@example.com" },
+    });
+    vi.unstubAllGlobals();
   });
 });

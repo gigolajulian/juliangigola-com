@@ -8,7 +8,7 @@ import { FakeEmail, FakeKV, reply } from "./fakes";
    stored enquiry into an error. No real mail is sent: EMAIL is a fake. */
 
 const ctx = vi.hoisted(() => ({ env: {} as Record<string, unknown>, cf: {} as Record<string, unknown>, ip: "203.0.113.7" }));
-vi.mock("@opennextjs/cloudflare", () => ({ getCloudflareContext: async () => ({ env: ctx.env, cf: ctx.cf }) }));
+vi.mock("@opennextjs/cloudflare", () => ({ getCloudflareContext: async () => ({ env: ctx.env, cf: ctx.cf, ctx: { waitUntil: () => {} } }) }));
 vi.mock("next/headers", () => ({ headers: async () => new Headers({ "cf-connecting-ip": ctx.ip }) }));
 
 const { submitEnquiry } = await import("@/app/contact/actions");

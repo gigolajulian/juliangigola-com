@@ -1,6 +1,7 @@
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { sendConfirm } from "@/lib/confirm";
 import { PAID, paidFor, tellNoDeposit } from "@/lib/deposit";
+import { toNotion } from "@/lib/notion-lead";
 import { bookingEnquiry, enquiryKey, summary, type CalBooking } from "@/lib/inbox";
 
 /* ── Cal.com's booking webhook ─────────────────────────────────────
@@ -25,7 +26,7 @@ const bytes = (hex: string) =>
   Uint8Array.from(hex.match(/../g) ?? [], (b) => parseInt(b, 16));
 
 export async function POST(request: Request) {
-  const { env } = await getCloudflareContext({ async: true });
+  const { env, ctx } = await getCloudflareContext({ async: true });
   const secret = env.CAL_WEBHOOK_SECRET;
   if (!secret || !env.INBOX) return text("Not set up.", 503);
 
@@ -67,6 +68,14 @@ export async function POST(request: Request) {
   await env.INBOX.put(enquiryKey(now, id.slice(0, 8)), JSON.stringify(stored), {
     metadata: summary(stored),
   });
+  const paid = (PAID as readonly string[]).includes(hook.payload?.type ?? "");
+  ctx.waitUntil(toNotion(env.NOTION_TOKEN, {
+    stored,
+    status: paid ? "Confirmed" : "Call booked",
+    kind: hook.payload?.type,
+    calUid: hook.payload?.uid,
+    shootDate: paid ? hook.payload?.startTime : undefined,
+  }));
   // After the write, so a failed write's retry does not mail twice.
   if (stored.noDeposit) await tellNoDeposit(env.EMAIL, hook.payload!.type!, hook.payload?.startTime, { name: stored.name, email: stored.email });
   // Free calls only: a paid session's confirmation comes from the deposit
