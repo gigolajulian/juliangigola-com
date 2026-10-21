@@ -1003,7 +1003,11 @@ export function TimePicker({
       if (root.current?.dataset.fit === "3") setMstep("times");
       showTimes();
     };
-    const kinds = PARTS.map(([part, from, to]) => [part, (days[pick.date] ?? []).filter((x) => minutesOf(x.start) >= from && minutesOf(x.start) < to)] as const).filter(([, list]) => list.length);
+    /* Julian (via MAC, 2026-10-20): the day's times in a line or two, no
+       morning, afternoon or evening. One line when they fit at 5.75rem,
+       else two even rows. */
+    const dayTimes = days[pick.date] ?? [];
+    const cols = dayTimes.length * 92 + (dayTimes.length - 1) * 8 <= slotsW ? dayTimes.length : Math.ceil(dayTimes.length / 2);
     const cells = [...month, ...Array.from({ length: (7 - (month.length % 7)) % 7 }, () => null)];
     const opts = needsWhere ? WHERE[slug] : undefined;
     const asking = opts?.find(([label]) => label === opt)?.[1];
@@ -1088,22 +1092,15 @@ export function TimePicker({
                   {view === "month" ? MONTHS[anchor.getMonth()] : "Week"}
                 </button>
                 <p className="ed-on label">{`${WEEKDAYS[date.getDay()]}, ${MONTHS[date.getMonth()]} ${date.getDate()}`}</p>
-                {kinds.length ? (
-                  <div>
-                    {kinds.map(([part, list]) => (
-                      <div key={part} className="ed-kind">
-                        <span className="label">{part}</span>
-                        <div className="ed-slots">
-                          {list.map((x) => {
-                            const m = minutesOf(x.start);
-                            const [h, a] = clock(m);
-                            return (
-                              <button key={x.start} data-slot="" type="button" aria-pressed={chosen === "time" && m === pick.min} aria-label={`${h} ${a}`} onClick={() => choose(pick.date, m, true)} className="ed-slot">{h}</button>
-                            );
-                          })}
-                        </div>
-                      </div>
-                    ))}
+                {dayTimes.length ? (
+                  <div className="ed-slots" style={{ gridTemplateColumns: `repeat(${Math.max(1, cols)}, minmax(0, 1fr))` }}>
+                    {dayTimes.map((x) => {
+                      const m = minutesOf(x.start);
+                      const [h, a] = clock(m);
+                      return (
+                        <button key={x.start} data-slot="" type="button" aria-pressed={chosen === "time" && m === pick.min} aria-label={`${h} ${a}`} onClick={() => choose(pick.date, m, true)} className="ed-slot">{h}</button>
+                      );
+                    })}
                   </div>
                 ) : (
                   <p className="ed-none label">No open times this day.</p>
