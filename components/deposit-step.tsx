@@ -4,6 +4,9 @@ import * as React from "react";
 import { gsap } from "gsap";
 import { cn } from "@/lib/utils";
 
+/* Goo: the cursor pours into the buttons (`time-picker.tsx`); `?goo=0` off. */
+const goo = typeof location === "undefined" || new URLSearchParams(location.search).get("goo") !== "0";
+
 /* ── the deposit ─────────────────────────────────────────────────────
  * Julian (2026-10-16), behind `?deposit`: a paid session's $100 deposit
  * taken in the card, after its form, in place of Cal.com's own checkout.
@@ -81,7 +84,7 @@ function ink(el: HTMLElement) {
 function fieldStyle(el: HTMLElement) {
   const { fg, muted, accent } = ink(el);
   return {
-    base: { color: fg, iconColor: fg, fontFamily: '"IBM Plex Mono", ui-monospace, monospace', fontSize: "16px", fontSmoothing: "antialiased", ...(document.documentElement.hasAttribute("data-layout") && { letterSpacing: "1.54px" }), "::placeholder": { color: muted } },
+    base: { color: fg, iconColor: fg, fontFamily: '"Helvetica Neue", Arial, sans-serif', fontWeight: "600", fontSize: "16px", fontSmoothing: "antialiased", ...(document.documentElement.hasAttribute("data-layout") && { letterSpacing: "1.54px" }), "::placeholder": { color: muted } },
     invalid: { color: accent, iconColor: accent },
   };
 }
@@ -120,13 +123,11 @@ export function DepositStep({
   className,
   editorial,
   head,
-  holds,
 }: {
   className?: string;
-  /** `?editorial` (editorial.css): its step bar over it, and what the $100 holds. */
+  /** `?editorial` (editorial.css): its step bar and heading over it. */
   editorial?: boolean;
   head?: React.ReactNode;
-  holds?: string;
   body: DepositBody;
   rows: [string, string][];
   onBooked: () => void;
@@ -352,9 +353,7 @@ export function DepositStep({
           <>
             <div className="ed-body" role="status">
               <div className="ed-l">
-                <p className="label ed-mark"><i />{end[0]}</p>
-                <h2 className="ed-huge">{end[1]}</h2>
-                <p className="ed-why">{end[2]}</p>
+                <p className="ed-said"><b>{end[1]}</b> {end[2]}</p>
               </div>
               <div className="ed-r">
                 {rows.map(([k, v]) => (
@@ -365,15 +364,18 @@ export function DepositStep({
             </div>
             <div className="ed-floor">
               {stage === "declined" || stage === "broken" ? <button type="button" onClick={onBack} className="label ed-quiet">Edit details</button> : <span />}
-              {end[3] ? <button type="button" onClick={end[3][1]} className="ed-btn">{end[3][0]}</button> : null}
+              {end[3] ? <button type="button" onClick={end[3][1]} data-stick={goo ? "fill" : undefined} className="ed-btn">{end[3][0]}</button> : null}
             </div>
           </>
         ) : (
           <>
             <div className="ed-body">
-              <div className="ed-l ed-amount">
-                <h2><sup>$</sup>100</h2>
-                <span className="label">Holds{" "}<br />{holds}</span>
+              {/* What the $100 is for; the amount is the heading over it (2026-10-20). */}
+              <div className="ed-l">
+                {rows.map(([k, v]) => (
+                  <div key={k} className="ed-row"><span className="label">{k}</span><span className="ed-v break-words">{v}</span></div>
+                ))}
+                <div className="ed-row"><span className="label">Due now</span><span className="ed-v">$100</span></div>
               </div>
               <div className="ed-r" aria-busy={stage === "loading"}>
                 <label className="ed-row"><span className="label">Card</span><div ref={number} className="ed-field" /></label>
@@ -391,7 +393,7 @@ export function DepositStep({
                 <svg aria-hidden viewBox="0 0 12 14" className="w-3 shrink-0" fill="none" stroke="currentColor" strokeWidth="1.3"><rect x="1" y="6" width="10" height="7" rx="1" /><path d="M3.5 6V4a2.5 2.5 0 0 1 5 0v2" /></svg>
                 Secured by Stripe. I never see your card.
               </span>
-              <button ref={payBtn} type="button" onClick={pay} disabled={bad || (stage !== "ready" && !(sim && stage === "loading"))} data-accent="" data-bad={bad ? "" : undefined} className="ed-btn">
+              <button ref={payBtn} type="button" onClick={pay} disabled={bad || (stage !== "ready" && !(sim && stage === "loading"))} data-accent="" data-bad={bad ? "" : undefined} data-stick={goo ? "fill" : undefined} className="ed-btn">
                 {bad ? "Declined" : stage === "paying" ? "Paying" : stage === "confirming" ? "Confirming" : error ? "Try again · $100" : "Pay $100"}
               </button>
             </div>

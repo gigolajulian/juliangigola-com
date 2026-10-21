@@ -2,7 +2,8 @@ import { Suspense } from "react";
 import type * as React from "react";
 import { CalEmbed } from "@/components/cal-embed";
 import { ContactBeam } from "@/components/contact-beam";
-import { ContactForm, WhenBooking } from "@/components/contact-form";
+import { WhenBooking } from "@/components/contact-form";
+import { InquireCard } from "@/components/inquire-card";
 import { RisingTitle } from "@/components/strip-page";
 import { BOOKING_URL, RESPONSE_TIME } from "@/lib/site";
 import { SESSION_TYPES } from "@/lib/sessions";
@@ -247,7 +248,7 @@ export function ContactScreen({
             <CalEmbed path={cal} title="Pick a time" className="booking-embed block h-[75svh] w-full rounded-[8px] border-0 sm:h-full" />
           ) : (
             <Suspense fallback={null}>
-              <ContactForm defaults={defaults} sessions={SESSION_TYPES.map((s) => s.name)} />
+              <InquireCard defaults={defaults} sessions={SESSION_TYPES.map((s) => s.name)} />
             </Suspense>
           )}
         </div>

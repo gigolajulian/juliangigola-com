@@ -21,7 +21,7 @@ import { trailContext } from "@/components/visit-trail";
  * rights. One extra tap, and the enquiry arrives answerable.
  * ─────────────────────────────────────────────────────────────── */
 
-const TYPES = [
+export const TYPES = [
   { value: "editorial", label: "Editorial" },
   { value: "campaign", label: "Campaign" },
   { value: "music", label: "Music" },
@@ -33,7 +33,7 @@ const TYPES = [
 ] as const;
 
 /** What to ask second, given the first answer. */
-const FOLLOW_UP: Record<string, { label: string; placeholder: string }> = {
+export const FOLLOW_UP: Record<string, { label: string; placeholder: string }> = {
   editorial: {
     label: "Publication and issue date",
     placeholder: "e.g. print, due Feb 14",
@@ -144,14 +144,14 @@ function Asks({ asks, onChange }: { asks: Ask[]; onChange: (detail: string) => v
   );
 }
 
-const INITIAL: ContactState = { status: "idle" };
+export const INITIAL: ContactState = { status: "idle" };
 
 /* The request itself failing (offline, a dropped connection, the Worker
    erroring) threw out of the action and took the whole page to its error
    screen, the brief gone with it. Caught here instead: the fields come
    back as typed, and the mail app is offered, as when nothing could be
    stored (`app/contact/actions.ts`). */
-async function submitOrKeep(prev: ContactState, data: FormData): Promise<ContactState> {
+export async function submitOrKeep(prev: ContactState, data: FormData): Promise<ContactState> {
   try {
     return await submitEnquiry(prev, data);
   } catch {
@@ -627,7 +627,7 @@ export function ContactForm({
 }
 
 /** A textarea as tall as what is in it; `max-h` stops it at three lines. */
-const fit = (el: HTMLTextAreaElement | HTMLInputElement | null) => {
+export const fit = (el: HTMLTextAreaElement | HTMLInputElement | null) => {
   if (!el) return;
   el.style.height = "auto";
   el.style.height = `${el.scrollHeight + el.offsetHeight - el.clientHeight}px`;

@@ -8,6 +8,11 @@ import { DepositStep, type DepositBody } from "@/components/deposit-step";
 import { isPaid } from "@/lib/paid";
 import { Orb, ORB_ROUND } from "@/components/orb";
 
+/* Goo (Julian, 2026-10-20, OKd 10-21): the cursor pours into the card's
+   buttons, times and open days, as on the inquiry chips (`pointer-mark.tsx`).
+   `?goo=0` turns it off. */
+const goo = typeof location === "undefined" || new URLSearchParams(location.search).get("goo") !== "0";
+
 /* ── the time picker ──────────────────────────────────────────────
  * Cal.com's open times, in two plain steps: a day, then a time. Days
  * are cards (a week, or the month) with how open each is; the open times
@@ -120,55 +125,6 @@ function Fold({ on, fill, children }: { on: boolean; fill?: boolean; children: R
   );
 }
 
-/* `?editorial`: a departures board. Each character on its own tile turns
-   through a few others before it lands, left to right; `rest`: the tiles
-   show only while turning (the days). Text written here, not by React,
-   so a tile mid-turn is never overwritten (Julian, 2026-10-16). */
-const DIG = "0123456789";
-function Flap({ text, delay = 0, rest, className }: { text: string; delay?: number; rest?: boolean; className?: string }) {
-  const box = React.useRef<HTMLSpanElement>(null);
-  const was = React.useRef<string | null>(null);
-  React.useLayoutEffect(() => {
-    const el = box.current;
-    if (!el) return;
-    const from = was.current;
-    was.current = text;
-    const tiles = [...el.children] as HTMLElement[];
-    const put = (t: HTMLElement, c: string | undefined) => (t.textContent = c === " " || !c ? " " : c);
-    tiles.forEach((t, i) => put(t, text[i]));
-    if (from === text || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    const tls: gsap.core.Timeline[] = [];
-    tiles.forEach((t, i) => {
-      const end = text[i];
-      if (end === ":" || (from?.[i] === end && Math.random() < 0.5)) return;
-      const n = 3 + (i % 3) + Math.floor(Math.random() * 2);
-      put(t, from?.[i]);
-      const tl = gsap.timeline({ delay: delay + i * 0.045 });
-      for (let k = 0; k <= n; k++) {
-        const c = k === n ? end : DIG[Math.floor(Math.random() * 10)];
-        tl.to(t, { rotationX: -90, duration: 0.045, ease: "power1.in" }).call(() => put(t, c)).fromTo(t, { rotationX: 90 }, { rotationX: 0, duration: 0.05, ease: "power1.out" });
-      }
-      tls.push(tl);
-    });
-    if (rest) el.classList.add("going");
-    const done = gsap.delayedCall(delay + text.length * 0.045 + 0.6, () => el.classList.remove("going"));
-    return () => {
-      tls.forEach((tl) => tl.kill());
-      done.kill();
-      el.classList.remove("going");
-      tiles.forEach((t, i) => {
-        gsap.set(t, { clearProps: "transform" });
-        put(t, text[i]);
-      });
-    };
-  }, [text, delay, rest]);
-  return (
-    <span aria-hidden ref={box} className={cn("flap", className)}>
-      {[...text].map((c, i) => <span key={i} className={cn("ft", c === ":" && "colon", c === " " && "sp")} />)}
-    </span>
-  );
-}
-
 export function TimePicker({
   path,
   title,
@@ -210,10 +166,11 @@ export function TimePicker({
      re-run on `held`, or they ran on nothing and the week never fitted. */
   const [held, setHeld] = React.useState(true);
   React.useEffect(() => {
-    const t = window.setTimeout(() => setHeld(false), ORB_ROUND.working);
+    const t = window.setTimeout(() => setHeld(false), ORB_ROUND.composing);
     return () => window.clearTimeout(t);
   }, []);
-  const [view, setView] = React.useState<"week" | "month">("week");
+  // The editorial card opens on its month (2026-10-20); `?classic` keeps the week.
+  const [view, setView] = React.useState<"week" | "month">(() => (typeof location !== "undefined" && new URLSearchParams(location.search).has("classic") ? "week" : "month"));
   const [anchor, setAnchor] = React.useState(() => new Date()); // the week or month on show
   const [pick, setPick] = React.useState<Pick | null>(null);
   /* Julian: the arrows more defined, larger. Drawn, not the font's. */
@@ -451,7 +408,7 @@ export function TimePicker({
     setSlide(0);
     setMstep("days");
     const box = daysBox.current;
-    // Editorial: the new view's numbers turn in instead (`Flap`).
+    // Editorial: the new view is drawn in place, no flip.
     if (box && !editorial) {
       const at = new Map<string, DOMRect>();
       for (const b of box.querySelectorAll<HTMLElement>("[data-day]")) at.set(b.dataset.day!, b.getBoundingClientRect());
@@ -649,9 +606,31 @@ export function TimePicker({
     if (!editorial || step !== "pick" || !el || !body) return;
     const fit = () => {
       el.removeAttribute("data-scroll");
+      /* Measured two ways: WebKit reported no scroll while the month's
+         last week sat under the floor (MAC on #279, 2026-10-21), so the
+         month's own bottom is checked against the body's as well. */
+      const over = () => {
+        const month = body.querySelector(".ed-month, .ed-days");
+        const past = month ? month.getBoundingClientRect().bottom - body.getBoundingClientRect().bottom : 0;
+        return Math.max(body.scrollHeight - body.clientHeight, past);
+      };
+      el.style.removeProperty("--ed-cell");
       for (let n = 0; n <= 3; n++) {
         el.dataset.fit = String(n);
-        if (body.scrollHeight - body.clientHeight <= 1) return;
+        if (over() <= 1) {
+          /* A wide card with room to spare (Julian, 2026-10-21): the
+             month's cells grow into it, a quarter rem at a time. */
+          if (n === 0 && view === "month" && el.clientWidth >= 640) {
+            let kept = 3.125;
+            for (let r = 3.375; r <= 5.5; r += 0.25) {
+              el.style.setProperty("--ed-cell", r + "rem");
+              if (over() > 1) break;
+              kept = r;
+            }
+            el.style.setProperty("--ed-cell", kept + "rem");
+          }
+          return;
+        }
       }
       // Still over at the last step (a phone on its side, QA on #204): the
       // days were clipped out of reach. Reachable beats no scroll.
@@ -668,13 +647,15 @@ export function TimePicker({
     const body = root.current?.querySelector<HTMLElement>(".ed-body");
     if (editorial && body) body.scrollTop = 0;
   }, [editorial, mstep]);
-  /* Editorial: the days cascade in on the beat of their numbers' flaps,
-     left to right across a week, a ripple from the top left of a month
-     (Julian, 2026-10-16). On load and on every week or month shown. */
+  /* Editorial: the days cascade in, left to right across a week, a ripple from the top left of a month
+     (Julian, 2026-10-16). On every week or month shown, but not the first:
+     once the orb goes the card is there whole (Julian, 2026-10-20). */
+  const first = React.useRef(false);
   const shown = view === "week" ? `w${iso(week[0])}` : `m${anchor.getFullYear()}-${anchor.getMonth()}`;
   React.useLayoutEffect(() => {
     const box = daysBox.current;
     if (!editorial || step !== "pick" || !box || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    if (!first.current) return void (first.current = true);
     const cells = [...box.querySelectorAll<HTMLElement>(".ed-day, .ed-cell, .ed-blank")];
     const at = (k: number) => (view === "week" ? k * 0.06 : (k % 7) * 0.03 + Math.floor(k / 7) * 0.06);
     const tw = cells.map((c, k) =>
@@ -899,7 +880,7 @@ export function TimePicker({
       // Held to the card's inset and a phone card's height while it waits
       // (the embed's `block` had it on the card's edge, in a sliver).
       <div aria-label={title} className={cn(className, "!flex items-center justify-center px-[var(--card-x,1.25rem)] max-sm:min-h-[24rem]")}>
-        {/* Julian: an orb turning, not the words (working, picked from
+        {/* Julian: an orb turning, not the words (composing since 2026-10-20; working was picked from
             orb-options 2026-10-14; 64px, at 20 it was lost in the empty card). Still
             said to a reader. */}
         {/* In the middle of the card, not of the room under its top line
@@ -907,7 +888,7 @@ export function TimePicker({
             half that line (`--card-lift`, book-here.tsx). */}
         {/* Julian (2026-10-14): what it is waiting for, under the orb. */}
         <p role="status" className="pointer-events-none absolute inset-0 flex -translate-y-[var(--card-lift,0px)] flex-col items-center justify-center gap-4 text-muted-foreground">
-          <Orb state="working" size={64} />
+          <Orb state="composing" size={64} />
           <span className="label animate-[jg-fade-in_300ms_ease-out_300ms_both]">Loading availability</span>
         </p>
       </div>
@@ -932,7 +913,6 @@ export function TimePicker({
     const mon = (d: Date) => MONTHS[d.getMonth()].slice(0, 3);
     const [, apEnd] = clock(pick.min + length);
     const tzName = zone(pick.start, tz);
-    const short = `${d3(date)} ${date.getDate()} ${mon(date)}, ${t} ${ap}`;
     const range = `${d3(date)} ${date.getDate()} ${mon(date)}, ${t}${ap === apEnd ? "" : ` ${ap}`} to ${until} ${apEnd} ${tzName}`;
     const at = step === "pick" ? 0 : step === "pay" ? 2 : step === "done" ? -1 : 1;
     /* A call (no deposit): a handset, its length in minutes (Julian, 2026-10-17: "15:00" read as 3 PM). */
@@ -964,13 +944,22 @@ export function TimePicker({
         })}
       </nav>
     );
+    /* One face, two sizes (Julian, 2026-10-20, from the Tenebra reference):
+       each step opens on one huge line, small caps beside and under it. */
+    const what = `${session || title} · ${timer}`;
+    const dayLine = `${d3(date)} ${date.getDate()} ${mon(date)} · ${t} ${ap}`;
+    const hero = (big: React.ReactNode, side: React.ReactNode, mark: React.ReactNode, act?: React.ReactNode) => (
+      <div className="ed-hero">
+        <h2>{big}<small>{side}</small></h2>
+        <p className="ed-mk"><i />{mark}{act}</p>
+      </div>
+    );
     if (step === "pay" && deposit) {
       return (
         <div ref={root} className="contents">
           <DepositStep
             editorial
-            head={bar}
-            holds={short}
+            head={<>{bar}{hero("$100", `Deposit. Holds ${dayLine}`, "Balance due after the shoot", <button type="button" data-stick={goo ? "fill" : undefined} className="ed-box" onClick={() => setStep("form")}>Change</button>)}</>}
             className={className}
             body={deposit}
             rows={[
@@ -1004,24 +993,15 @@ export function TimePicker({
       return (
         <div ref={root} aria-label={title} role="status" data-booked="" className={cn("tp ed", className)}>
           {bar}
+          {hero(<>You&rsquo;re in</>, <>{dayLine}<br />{what}</>, call && booked.via ? `${booked.via} call booked` : "Booked")}
           <div className="ed-body">
-            <div className="ed-l">
-              <p className="label ed-mark">
-                {call && booked.via ? (booked.via === "Video" ? camera : handset) : <svg aria-hidden width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="currentColor" strokeWidth="1.6"><circle cx="11" cy="11" r="10" /><path d="M6.5 11.5l3 3 6-6.5" strokeLinecap="round" strokeLinejoin="round" /></svg>}
-                {call && booked.via ? `${booked.via} call booked` : "Booked"}
-              </p>
+            <div className="ed-l ed-ok">
+              {call && booked.via ? (booked.via === "Video" ? camera : handset) : <svg aria-hidden viewBox="0 0 22 22" fill="none" stroke="currentColor" strokeWidth="1.2"><circle cx="11" cy="11" r="10" /><path d="M6.5 11.5l3 3 6-6.5" strokeLinecap="round" strokeLinejoin="round" /></svg>}
               {call && booked.via ? (
-                <>
-                  {/* Julian: a call reads as a call, the number I ring big. */}
-                  <p className="ed-lead">{first ? `${first}, ` : ""}{ring ? "I’ll call you at" : "see you on"}</p>
-                  <h2 className="ed-huge ed-tel">{ring ? tel(booked.phone) : "Google Meet."}</h2>
-                  <p className="ed-why">{ring ? `${range}.` : "The link is in your confirmation email."}</p>
-                </>
+                /* Julian: a call reads as a call, the number I ring. */
+                <p className="ed-why">{first ? `${first}, ` : ""}{ring ? <>I&rsquo;ll call you at {tel(booked.phone)}.</> : <>see you on Google Meet. The link is in your confirmation email.</>}</p>
               ) : (
-                <>
-                  <h2 className="ed-huge">{first ? <>{first},<br />you&rsquo;re in.</> : <>You&rsquo;re in.</>}</h2>
-                  <p className="ed-why">I&rsquo;ll contact you with the further details before the day.</p>
-                </>
+                <p className="ed-why">{first ? `${first}, a` : "A"} confirmation is on its way to {booked.email}. I&rsquo;ll contact you with the further details before the day.</p>
               )}
             </div>
             <div className="ed-r">
@@ -1053,7 +1033,11 @@ export function TimePicker({
       if (root.current?.dataset.fit === "3") setMstep("times");
       showTimes();
     };
-    const kinds = PARTS.map(([part, from, to]) => [part, (days[pick.date] ?? []).filter((x) => minutesOf(x.start) >= from && minutesOf(x.start) < to)] as const).filter(([, list]) => list.length);
+    /* Julian (via MAC, 2026-10-20): the day's times in a line or two, no
+       morning, afternoon or evening. One line when they fit at 5.75rem,
+       else two even rows. */
+    const dayTimes = days[pick.date] ?? [];
+    const cols = dayTimes.length * 92 + (dayTimes.length - 1) * 8 <= slotsW ? dayTimes.length : Math.ceil(dayTimes.length / 2);
     const cells = [...month, ...Array.from({ length: (7 - (month.length % 7)) % 7 }, () => null)];
     const opts = needsWhere ? WHERE[slug] : undefined;
     const asking = opts?.find(([label]) => label === opt)?.[1];
@@ -1061,6 +1045,9 @@ export function TimePicker({
       <div ref={root} aria-label={title} role="region" data-view={view} data-mstep={mstep} className={cn("tp ed", className)}>
         {busy}
         {bar}
+        {step === "pick"
+          ? hero(`${d3(date)} ${date.getDate()} ${mon(date)}`, <>{chosen === "time" ? `${t}${ap === apEnd ? "" : ` ${ap}`} to ${until} ${apEnd}` : "Pick a time"}<br />{what}</>, chosen === "time" ? "Then your details" : "Pick a day, then a time")
+          : hero("Details", <>{dayLine}<br />{what}</>, "Who and where", <button type="button" data-stick={goo ? "fill" : undefined} className="ed-box" onClick={() => setStep("pick")}>Change</button>)}
         {step === "pick" ? (
           <>
             <div className="ed-body">
@@ -1074,19 +1061,19 @@ export function TimePicker({
                     {(["week", "month"] as const).map((v) => (
                       <button key={v} type="button" aria-pressed={view === v} onClick={() => switchView(v)}>{v}</button>
                     ))}
-                    <button type="button" className="ed-arrow" aria-label="Earlier" disabled={atStart} onClick={() => shift(-1)}>{arrow}</button>
-                    <button type="button" className="ed-arrow" aria-label="Later" disabled={atEnd} onClick={() => shift(1)}><span className="flex rotate-180">{arrow}</span></button>
+                    <button type="button" data-stick={goo ? "" : undefined} className="ed-arrow" aria-label="Earlier" disabled={atStart} onClick={() => shift(-1)}>{arrow}</button>
+                    <button type="button" data-stick={goo ? "" : undefined} className="ed-arrow" aria-label="Later" disabled={atEnd} onClick={() => shift(1)}><span className="flex rotate-180">{arrow}</span></button>
                   </div>
                 </div>
                 <div ref={daysBox} className="touch-pan-y overflow-hidden" {...swipeProps}>
                   {view === "week" ? (
                     <div className="ed-week">
-                      {week.map((d, i) => {
+                      {week.map((d) => {
                         const id = iso(d);
                         return (
                           <button key={id} data-day={id} type="button" disabled={!open(id).size} aria-pressed={pick.date === id} aria-label={`${WEEKDAYS[d.getDay()]}, ${MONTHS[d.getMonth()]} ${d.getDate()}`} onClick={() => dayPick(id)} className="ed-day">
                             <span className="label">{DAYS[d.getDay()]}</span>
-                            <span className="ed-n"><Flap text={String(d.getDate())} delay={i * 0.06} rest /></span>
+                            <span className="ed-n">{d.getDate()}</span>
                             <i />
                           </button>
                         );
@@ -1097,11 +1084,16 @@ export function TimePicker({
                       <div className="ed-mhead label">{DAYS.map((d) => <span key={d}>{d}</span>)}</div>
                       <div className="ed-month">
                         {cells.map((d, k) => {
-                          if (!d) return <span key={`b${k}`} className="ed-blank" />;
+                          /* The days either side of the month, barely there (Julian, 2026-10-20). */
+                          if (!d) {
+                            const lead = month.findIndex(Boolean);
+                            const n = k < lead ? new Date(anchor.getFullYear(), anchor.getMonth(), k - lead + 1).getDate() : k - month.length + 1;
+                            return <span key={`b${k}`} aria-hidden className="ed-blank">{n}</span>;
+                          }
                           const id = iso(d);
                           return (
-                            <button key={id} data-day={id} type="button" disabled={!open(id).size} aria-pressed={pick.date === id} aria-label={`${WEEKDAYS[d.getDay()]}, ${MONTHS[d.getMonth()]} ${d.getDate()}`} onClick={() => dayPick(id)} className="ed-cell">
-                              <span className="ed-n"><Flap text={String(d.getDate())} delay={(k % 7) * 0.03 + Math.floor(k / 7) * 0.06} rest /></span>
+                            <button key={id} data-day={id} type="button" disabled={!open(id).size} aria-pressed={pick.date === id} aria-label={`${WEEKDAYS[d.getDay()]}, ${MONTHS[d.getMonth()]} ${d.getDate()}`} onClick={() => dayPick(id)} data-stick={goo && open(id).size ? "fill" : undefined} className="ed-cell">
+                              <span className="ed-n">{d.getDate()}</span>
                               <i />
                             </button>
                           );
@@ -1110,24 +1102,6 @@ export function TimePicker({
                     </div>
                   )}
                 </div>
-                {view === "week" ? (
-                  <div className="ed-big" aria-hidden data-none={chosen !== "time" ? "" : undefined}>
-                    <h3>
-                      <Flap text={t.padStart(5, " ")} />
-                      <small>{ap}</small>
-                    </h3>
-                    <span className="ed-when-line">
-                      <b>{chosen ? `${WEEKDAYS[date.getDay()]}, ${MONTHS[date.getMonth()]} ${date.getDate()}` : "Pick a day, then a time"}</b>
-                      {call ? (
-                        <span className="label ed-timer">{handset}<span>{timer}</span><i className="not-italic" style={chosen === "time" ? undefined : { visibility: "hidden" }}>Until {until} {apEnd} {tzName}</i></span>
-                      ) : (
-                        /* Shown once a time is picked (Julian, 2026-10-17): before, the
-                           default read as chosen. Hidden, not removed, so a pick moves nothing. */
-                        <span className="label" style={chosen === "time" ? undefined : { visibility: "hidden" }}>Until {until} {apEnd} {tzName}</span>
-                      )}
-                    </span>
-                  </div>
-                ) : null}
               </div>
               <div ref={slotsRef} className="ed-r ed-times">
                 <button type="button" className="ed-back label" onClick={() => setMstep("days")}>
@@ -1135,22 +1109,15 @@ export function TimePicker({
                   {view === "month" ? MONTHS[anchor.getMonth()] : "Week"}
                 </button>
                 <p className="ed-on label">{`${WEEKDAYS[date.getDay()]}, ${MONTHS[date.getMonth()]} ${date.getDate()}`}</p>
-                {kinds.length ? (
-                  <div>
-                    {kinds.map(([part, list]) => (
-                      <div key={part} className="ed-kind">
-                        <span className="label">{part}</span>
-                        <div className="ed-slots">
-                          {list.map((x) => {
-                            const m = minutesOf(x.start);
-                            const [h, a] = clock(m);
-                            return (
-                              <button key={x.start} data-slot="" type="button" aria-pressed={chosen === "time" && m === pick.min} aria-label={`${h} ${a}`} onClick={() => choose(pick.date, m, true)} className="ed-slot">{h}</button>
-                            );
-                          })}
-                        </div>
-                      </div>
-                    ))}
+                {dayTimes.length ? (
+                  <div className="ed-slots" style={{ gridTemplateColumns: `repeat(${Math.max(1, cols)}, minmax(0, 1fr))` }}>
+                    {dayTimes.map((x) => {
+                      const m = minutesOf(x.start);
+                      const [h, a] = clock(m);
+                      return (
+                        <button key={x.start} data-slot="" type="button" aria-pressed={chosen === "time" && m === pick.min} aria-label={`${h} ${a}`} onClick={() => choose(pick.date, m, true)} data-stick={goo ? "fill" : undefined} className="ed-slot">{h} {a}</button>
+                      );
+                    })}
                   </div>
                 ) : (
                   <p className="ed-none label">No open times this day.</p>
@@ -1160,10 +1127,8 @@ export function TimePicker({
             <div className="ed-floor">
               <span className="label flex flex-col gap-1">
                 {chosen === "time" ? `${sum} ${tzName}` : `San Jose, CA · ${here}${tz === "America/Los_Angeles" ? "" : ` · times in ${tzName}`}`}
-                {/* The locked deposit copy, said before the pick (2026-10-18). */}
-                {paid ? <span className="text-foreground">$100 holds your date. Balance due after the shoot.</span> : null}
               </span>
-              <button type="button" className="ed-btn" onClick={() => setOk("spin")} disabled={chosen !== "time"} aria-busy={!!ok}>
+              <button type="button" data-stick={goo ? "fill" : undefined} className="ed-btn" onClick={() => setOk("spin")} disabled={chosen !== "time"} aria-busy={!!ok}>
                 <span className={cn("transition-opacity duration-200", ok && "opacity-0")}>Continue</span>
                 {okMark}
               </button>
@@ -1179,22 +1144,13 @@ export function TimePicker({
             className="ed-form flex min-h-0 flex-1 flex-col"
           >
             <div className="ed-body">
-              <div className="ed-l">
-                <div className="ed-when">
-                  <h2>
-                    {`${d3(date)} ${date.getDate()} ${mon(date)}, `}
-                    <span className="whitespace-nowrap">{t} {ap}</span>
-                  </h2>
-                  <button type="button" className="ed-quiet label" onClick={() => setStep("pick")}>Change</button>
-                </div>
-              </div>
-              <div className="ed-r">
+              <div className="ed-r ed-fields">
                 {call ? (
                   <div className="ed-row" role="radiogroup" aria-label="Phone call or video call">
                     <span className="label">Call</span>
                     <div className="ed-opts">
                       {(["Video", "Phone"] as const).map((v) => (
-                        <label key={v}>
+                        <label key={v} data-stick={goo ? "fill" : undefined}>
                           <input type="radio" name="via" value={v} checked={via === v} onChange={() => setVia(v)} className="sr-only" />
                           <span className="ed-via">{v === "Video" ? camera : handset}{v} call</span>
                         </label>
@@ -1216,7 +1172,7 @@ export function TimePicker({
                     <span className="label">Location</span>
                     <div className="ed-opts">
                       {opts.map(([label, q]) => (
-                        <label key={label}>
+                        <label key={label} data-stick={goo ? "fill" : undefined}>
                           <input type="radio" name="opt" value={label} required checked={opt === label} onChange={() => { setOpt(label); if (q) setAsk(q); }} className="sr-only" />
                           <span>{label}</span>
                         </label>
@@ -1232,7 +1188,7 @@ export function TimePicker({
             </div>
             <div className="ed-floor">
               <span className="label">{paid ? "Next: $100 deposit" : `${sum} ${tzName}`}</span>
-              <button type="submit" className="ed-btn" disabled={step === "sending"}>{paid ? "Continue" : step === "sending" ? "Booking" : "Book it"}</button>
+              <button type="submit" data-stick={goo ? "fill" : undefined} className="ed-btn" disabled={step === "sending"}>{paid ? "Continue" : step === "sending" ? "Booking" : "Book it"}</button>
             </div>
           </form>
         )}
