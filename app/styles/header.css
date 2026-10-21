@@ -590,6 +590,20 @@ body > footer {
     opacity var(--dur-lg) var(--ease-out-strong),
     translate var(--dur-lg) var(--ease-out-strong);
 }
+/* Without the splash the footer fades in once on load, 650ms (Julian,
+   from the `?motion=elements` preview). With it, the rule above holds it
+   until the splash lifts. Its links trace a line like the navbar's
+   (`.nav-trace`). */
+@keyframes foot-in {
+  from {
+    opacity: 0;
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  body > footer {
+    animation: foot-in 650ms var(--ease-in-out-strong) backwards;
+  }
+}
 
 @media (prefers-reduced-motion: reduce) {
   .site-bar,
@@ -627,4 +641,38 @@ body > footer {
   .site-bar nav li:nth-child(4) { --bar-d: 100ms; }
   .site-bar nav li:nth-child(5) { --bar-d: 125ms; }
   .site-bar .page-column > div > :not(nav) { --bar-d: 150ms; }
+}
+
+/* The navbar's line (`NavLink`): a hairline under the page you are on,
+   and under the pointer one that traces in from the left and leaves to
+   the right. Julian picked it from the `?motion=elements` preview. */
+.nav-trace {
+  position: relative;
+  display: inline-block;
+}
+.nav-trace::after {
+  content: "";
+  position: absolute;
+  inset-inline: 0;
+  bottom: -5px;
+  height: 1px;
+  background: currentColor;
+  scale: 0 1;
+  transform-origin: right center;
+  transition: scale 250ms var(--ease-out-strong);
+  pointer-events: none;
+}
+[aria-current="page"] > .nav-trace::after {
+  scale: 1 1;
+}
+@media (hover: hover) and (pointer: fine) {
+  :is(:hover > .nav-trace, a.nav-trace:hover)::after {
+    scale: 1 1;
+    transform-origin: left center;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .nav-trace::after {
+    transition: none;
+  }
 }
