@@ -13,12 +13,12 @@ import type { MenuItem } from "@/lib/booking";
  * fills the screen over the session's wall, and goes back into the row
  * on X, Escape or a press outside it. The page under it never moves.
  *
- * It turns over into place like a card (Julian: flip in, smooth), and
- * the name, the blurb and the card come up one after another; it turns
- * away on the way out, in about a third of the time. GSAP.
+ * It fades in, then the name, the blurb and the card come up one after
+ * another; it fades out in about two thirds of the time. GSAP. The flip
+ * in went (Julian, 2026-10-20); what replaces it is still to pick.
  * ─────────────────────────────────────────────────────────────────── */
 
-const IN = 1000; // ms, the flip in
+const IN = 300; // ms, the fade in
 
 export function BookSheet({
   item,
@@ -79,15 +79,7 @@ export function BookSheet({
     const s = sheet.current;
     if (calm.current || !s) return;
     const parts = body.current ? [...body.current.querySelectorAll(":scope > header > *"), body.current.lastElementChild] : [];
-    // The fade is short and its own: on the turn's curve the card only
-    // showed once it was nearly flat, and iOS read it as a cross fade
-    // (QA on iOS 27, 2026-10-15).
-    gsap.fromTo(
-      s,
-      { rotationY: -100, transformPerspective: 1000, transformOrigin: "50% 50%" },
-      { rotationY: 0, duration: 1, ease: "power3.out", clearProps: "transform" },
-    );
-    gsap.fromTo(s, { opacity: 0 }, { opacity: 1, duration: 0.2, ease: "none", clearProps: "opacity" });
+    gsap.fromTo(s, { opacity: 0 }, { opacity: 1, duration: 0.3, ease: "power2.out", clearProps: "opacity" });
     gsap.fromTo(parts, { opacity: 0 }, { opacity: 1, duration: 0.45, ease: "power2.out", stagger: 0.06, delay: 0.14, clearProps: "opacity" });
     if (back.current) gsap.fromTo(back.current, { opacity: 0 }, { opacity: 1, duration: 0.5, ease: "power1.out", clearProps: "opacity" });
   }, [mounted]);
@@ -104,7 +96,7 @@ export function BookSheet({
     gsap.killTweensOf([s, back.current, body.current]);
     gsap.to(body.current, { opacity: 0, duration: 0.14, ease: "power1.in" });
     gsap.to(back.current, { opacity: 0, duration: 0.3, ease: "power1.in" });
-    gsap.to(s, { rotationY: 90, opacity: 0, transformPerspective: 1000, duration: 0.36, ease: "power2.in", onComplete: done });
+    gsap.to(s, { opacity: 0, duration: 0.2, ease: "power2.in", onComplete: done });
   }, [onClosed, origin]);
 
   React.useEffect(() => {
