@@ -71,7 +71,13 @@ export function PointerMark() {
        through) at the chip's place, held there as the mark moves. */
     let fill: HTMLElement | null = null;
     let drain = 0;
+    /* Into a square box (a calendar day, a time) the liquid ends square:
+       its goo, which rounds every corner, goes once the pour has settled
+       (Julian, 2026-10-20: no radius on the calendar). */
+    let settle = 0;
     const drained = () => {
+      clearTimeout(settle);
+      el.removeAttribute("data-square");
       el.removeAttribute("data-fill");
       // The goo stays on while it drains, or the last of it is a hard box.
       el.setAttribute("data-drain", "");
@@ -93,6 +99,9 @@ export function PointerMark() {
         el.setAttribute("data-fill", "");
         fillAt(sx, sy);
       }
+      clearTimeout(settle);
+      if (el.hasAttribute("data-fill") && getComputedStyle(fill).borderRadius === "0px")
+        settle = window.setTimeout(() => el.hasAttribute("data-fill") && el.setAttribute("data-square", ""), 450);
     };
     const fillAt = (tx: number, ty: number) => {
       if (!fill?.isConnected || !el.hasAttribute("data-fill")) return;

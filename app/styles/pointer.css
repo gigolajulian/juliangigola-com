@@ -215,6 +215,9 @@
   mix-blend-mode: normal;
   color: oklch(0.55 0 0 / 0.5);
 }
+.pointer-mark[data-square] .mark-goo {
+  filter: none;
+}
 .pointer-mark[data-drain] .mark-goo {
   filter: url(#mark-goo);
 }
