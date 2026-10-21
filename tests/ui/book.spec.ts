@@ -31,9 +31,11 @@ for (const r of [...RATIOS, SHORT]) {
     await expect(confirm).toBeEnabled();
     const picked = await page.locator("[data-slot][aria-pressed=true]").getAttribute("aria-label");
 
-    // The picker never scrolls inside itself, nor the page sideways.
+    // The picker never scrolls inside itself, nor the page sideways. The one
+    // exception: in a wide editorial card the times run in their own column
+    // beside the month and scroll there (2026-10-21), the month never does.
     const inner = await page.locator("[role=region].tp").evaluate((e) =>
-      [e, ...e.querySelectorAll("*")].filter((n) => /(auto|scroll)/.test(getComputedStyle(n).overflowY) && n.scrollHeight > n.clientHeight + 1).length);
+      [e, ...e.querySelectorAll("*")].filter((n) => !n.classList.contains("ed-times") && /(auto|scroll)/.test(getComputedStyle(n).overflowY) && n.scrollHeight > n.clientHeight + 1).length);
     expect(inner, "picker scrolls inside").toBe(0);
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1), "sideways scroll").toBe(true);
 
