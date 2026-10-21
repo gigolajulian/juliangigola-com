@@ -161,7 +161,7 @@ export function TimePicker({
      re-run on `held`, or they ran on nothing and the week never fitted. */
   const [held, setHeld] = React.useState(true);
   React.useEffect(() => {
-    const t = window.setTimeout(() => setHeld(false), ORB_ROUND.working);
+    const t = window.setTimeout(() => setHeld(false), ORB_ROUND.composing);
     return () => window.clearTimeout(t);
   }, []);
   // The editorial card opens on its month (2026-10-20); `?classic` keeps the week.
@@ -621,11 +621,14 @@ export function TimePicker({
     if (editorial && body) body.scrollTop = 0;
   }, [editorial, mstep]);
   /* Editorial: the days cascade in, left to right across a week, a ripple from the top left of a month
-     (Julian, 2026-10-16). On load and on every week or month shown. */
+     (Julian, 2026-10-16). On every week or month shown, but not the first:
+     once the orb goes the card is there whole (Julian, 2026-10-20). */
+  const first = React.useRef(false);
   const shown = view === "week" ? `w${iso(week[0])}` : `m${anchor.getFullYear()}-${anchor.getMonth()}`;
   React.useLayoutEffect(() => {
     const box = daysBox.current;
     if (!editorial || step !== "pick" || !box || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    if (!first.current) return void (first.current = true);
     const cells = [...box.querySelectorAll<HTMLElement>(".ed-day, .ed-cell, .ed-blank")];
     const at = (k: number) => (view === "week" ? k * 0.06 : (k % 7) * 0.03 + Math.floor(k / 7) * 0.06);
     const tw = cells.map((c, k) =>
@@ -850,7 +853,7 @@ export function TimePicker({
       // Held to the card's inset and a phone card's height while it waits
       // (the embed's `block` had it on the card's edge, in a sliver).
       <div aria-label={title} className={cn(className, "!flex items-center justify-center px-[var(--card-x,1.25rem)] max-sm:min-h-[24rem]")}>
-        {/* Julian: an orb turning, not the words (working, picked from
+        {/* Julian: an orb turning, not the words (composing since 2026-10-20; working was picked from
             orb-options 2026-10-14; 64px, at 20 it was lost in the empty card). Still
             said to a reader. */}
         {/* In the middle of the card, not of the room under its top line
@@ -858,7 +861,7 @@ export function TimePicker({
             half that line (`--card-lift`, book-here.tsx). */}
         {/* Julian (2026-10-14): what it is waiting for, under the orb. */}
         <p role="status" className="pointer-events-none absolute inset-0 flex -translate-y-[var(--card-lift,0px)] flex-col items-center justify-center gap-4 text-muted-foreground">
-          <Orb state="working" size={64} />
+          <Orb state="composing" size={64} />
           <span className="label animate-[jg-fade-in_300ms_ease-out_300ms_both]">Loading availability</span>
         </p>
       </div>
