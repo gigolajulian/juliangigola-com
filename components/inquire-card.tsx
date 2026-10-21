@@ -28,7 +28,7 @@ const KINDS: { value: string; label: string; who: string; asks: [string, string,
   { value: "editorial", label: "Editorial", who: "Magazines, stylists, designers", asks: ["Publication and issue date", "Vogue Italia, March", "Usage and territory", "Print and web, worldwide"] },
   { value: "campaign", label: "Campaign", who: "Brands and agencies", asks: ["The brand and the brief", "A spring drop, three looks", "Runs on and territory", "Social and web, 12 months, US"] },
   { value: "music", label: "Music", who: "Artists, labels, press kits", asks: ["Artist and release", "A single, out in May", "For", "Press, cover art, a video"] },
-  { value: "video", label: "Video", who: "Music videos, lookbook, visualizers, BTS", asks: ["What it is", "A visualizer, about a minute", "Deadline and where it runs", "End of June, YouTube and IG"] },
+  { value: "video", label: "Video", who: "Music videos, fashion films, visualizers, BTS", asks: ["What it is", "A visualizer, about a minute", "Deadline and where it runs", "End of June, YouTube and IG"] },
   { value: "portrait", label: "Portraits", who: "Actors, founders, you", asks: ["Who it is for", "Headshots for an agency", "Roughly when", "Some time in June"] },
   { value: "event", label: "Events", who: "Launches, shows, parties", asks: ["The event and date", "A launch, Oct 24", "Coverage", "Four hours, the room and the guests"] },
 ];
