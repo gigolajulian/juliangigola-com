@@ -4,8 +4,8 @@ import * as React from "react";
 import { gsap } from "gsap";
 import { cn } from "@/lib/utils";
 
-/* Preview `?goo`: the cursor pours into the buttons (`time-picker.tsx`). */
-const goo = typeof location !== "undefined" && new URLSearchParams(location.search).has("goo");
+/* Goo: the cursor pours into the buttons (`time-picker.tsx`); `?goo=0` off. */
+const goo = typeof location === "undefined" || new URLSearchParams(location.search).get("goo") !== "0";
 
 /* ── the deposit ─────────────────────────────────────────────────────
  * Julian (2026-10-16), behind `?deposit`: a paid session's $100 deposit

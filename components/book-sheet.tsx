@@ -16,13 +16,14 @@ import type { MenuItem } from "@/lib/booking";
  *
  * It fades in, then the name, the blurb and the card come up one after
  * another; it fades out in about two thirds of the time. GSAP. The flip
- * in went (Julian, 2026-10-20). Preview `?sheet=lift` (his pick, look
- * not OKd): the name pressed in the list travels up to be the heading,
- * and the rest rises and comes sharp under it, on the deck's own spring.
+ * in went (Julian, 2026-10-20). Lift (his pick, OKd 2026-10-21): the name
+ * pressed in the list travels up to be the heading, and the rest rises
+ * and comes sharp under it, on the deck's own spring. `?sheet=fade` keeps
+ * the plain fade.
  * ─────────────────────────────────────────────────────────────────── */
 
 const IN = 300; // ms, the fade in
-const lift = () => typeof location !== "undefined" && new URLSearchParams(location.search).get("sheet") === "lift";
+const lift = () => typeof location === "undefined" || new URLSearchParams(location.search).get("sheet") !== "fade";
 
 export function BookSheet({
   item,

@@ -8,9 +8,10 @@ import { DepositStep, type DepositBody } from "@/components/deposit-step";
 import { isPaid } from "@/lib/paid";
 import { Orb, ORB_ROUND } from "@/components/orb";
 
-/* Preview `?goo` (Julian, 2026-10-20): the cursor pours into the card's
-   buttons, times and open days, as on the inquiry chips (`pointer-mark.tsx`). */
-const goo = typeof location !== "undefined" && new URLSearchParams(location.search).has("goo");
+/* Goo (Julian, 2026-10-20, OKd 10-21): the cursor pours into the card's
+   buttons, times and open days, as on the inquiry chips (`pointer-mark.tsx`).
+   `?goo=0` turns it off. */
+const goo = typeof location === "undefined" || new URLSearchParams(location.search).get("goo") !== "0";
 
 /* ── the time picker ──────────────────────────────────────────────
  * Cal.com's open times, in two plain steps: a day, then a time. Days
