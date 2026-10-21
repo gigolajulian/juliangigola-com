@@ -614,9 +614,23 @@ export function TimePicker({
         const past = month ? month.getBoundingClientRect().bottom - body.getBoundingClientRect().bottom : 0;
         return Math.max(body.scrollHeight - body.clientHeight, past);
       };
+      el.style.removeProperty("--ed-cell");
       for (let n = 0; n <= 3; n++) {
         el.dataset.fit = String(n);
-        if (over() <= 1) return;
+        if (over() <= 1) {
+          /* A wide card with room to spare (Julian, 2026-10-21): the
+             month's cells grow into it, a quarter rem at a time. */
+          if (n === 0 && view === "month" && el.clientWidth >= 640) {
+            let kept = 3.125;
+            for (let r = 3.375; r <= 5.5; r += 0.25) {
+              el.style.setProperty("--ed-cell", r + "rem");
+              if (over() > 1) break;
+              kept = r;
+            }
+            el.style.setProperty("--ed-cell", kept + "rem");
+          }
+          return;
+        }
       }
       // Still over at the last step (a phone on its side, QA on #204): the
       // days were clipped out of reach. Reachable beats no scroll.

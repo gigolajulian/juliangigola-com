@@ -205,10 +205,20 @@ fieldset.ed-row > legend { float: left; padding: 0; }
   .ed[data-view="month"]:not([data-fit="3"]) > .ed-body > .ed-l > div:not(.ed-head, .ed-big) { grid-column: 1; grid-row: 2; }
   .ed[data-view="month"]:not([data-fit="3"]) > .ed-body > .ed-times { grid-row: 2 / span 2; margin-top: 1rem; }
   .ed:is([data-fit="2"]) .ed-big { display: flex; }
+  /* A bigger calendar on a desktop (Julian, 2026-10-21): the month takes
+     more of the width, the times scroll in their own column instead of
+     forcing the smallest fit, and at fit 0 the cells grow into the room
+     (`--ed-cell`, set by the fit loop in time-picker.tsx) with their
+     numbers. */
+  .ed[data-view="month"]:not([data-fit="3"]) > .ed-body:has(> .ed-times) { grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); column-gap: 2.5rem; grid-template-rows: auto minmax(0, 1fr) auto; align-content: stretch; }
+  .ed[data-view="month"]:not([data-fit="3"]) > .ed-body > .ed-times { overflow-y: auto; min-height: 0; overscroll-behavior: contain; scrollbar-width: thin; scrollbar-color: color-mix(in oklab, var(--foreground) 35%, transparent) transparent; }
+  .ed[data-view="month"][data-fit="0"] .ed-cell .ed-n { font-size: clamp(0.75rem, var(--ed-cell) * 0.3, 1.25rem) !important; }
+  .ed[data-view="month"][data-fit="0"] .ed-cell { padding-top: calc(var(--ed-cell) * 0.14); }
+  .ed[data-view="month"][data-fit="0"] .ed-cell i { width: calc(var(--ed-cell) * 0.36); bottom: calc(var(--ed-cell) * 0.16); }
 }
 /* a landscape screen gives the card the room for two columns */
 @media (min-width: 64rem) and (min-aspect-ratio: 5/4) {
-  :root:not([data-classic]) [data-book-frame] { width: min(70rem, 100%); }
+  :root:not([data-classic]) [data-book-frame] { width: min(74rem, 100%); }
 }
 
 /* a phone: one column, the times four to a row */

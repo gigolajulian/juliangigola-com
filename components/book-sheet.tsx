@@ -162,7 +162,7 @@ export function BookSheet({
       <div
         ref={sheet}
         data-book-frame
-        className={`relative flex h-dvh w-full flex-col will-change-transform max-sm:bg-background ${chrome && item.cal ? "sm:h-[min(38rem,100%)] sm:w-[min(70rem,100%)]" : chrome ? "sm:h-[min(30rem,100%)] sm:w-[min(44rem,100%)]" : "sm:h-[min(46rem,100%)] sm:w-[min(46rem,100%)]"}`}
+        className={`relative flex h-dvh w-full flex-col will-change-transform max-sm:bg-background ${item.cal ? "sm:h-[min(56rem,100%)] sm:w-[min(74rem,100%)]" : chrome ? "sm:h-[min(30rem,100%)] sm:w-[min(44rem,100%)]" : "sm:h-[min(46rem,100%)] sm:w-[min(46rem,100%)]"}`}
       >
         {/* On a phone the sheet scrolls as a page does and the card keeps
             its own length; from `sm` the card fills what the header leaves. */}
