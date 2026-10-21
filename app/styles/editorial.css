@@ -258,10 +258,14 @@ fieldset.ed-row > legend { float: left; padding: 0; }
 }
 
 /* touch: every target 44px, 8px apart */
+/* The step bar, the month arrows and the small links keep their drawn
+   size; an unseen box gives a mouse 24px (WCAG 2.2, audit 2026-10-21)
+   and a thumb 2.75rem. */
+:is(.ed-steps button, .ed-ctl button, .ed-when > button, .ed-opts label, .ed-quiet, .ed-back)::before { content: ""; position: absolute; left: 50%; top: 50%; width: max(100%, 1.5rem); height: max(100%, 1.5rem); translate: -50% -50%; }
 @media (pointer: coarse) {
   .ed-ctl { gap: 1.75rem; }
   .ed-steps { gap: 1.25rem; }
-  :is(.ed-steps button, .ed-ctl button, .ed-when > button, .ed-opts label, .ed-quiet, .ed-back)::before { content: ""; position: absolute; left: 50%; top: 50%; width: max(100%, 2.75rem); height: 2.75rem; translate: -50% -50%; }
+  :is(.ed-steps button, .ed-ctl button, .ed-when > button, .ed-opts label, .ed-quiet, .ed-back)::before { width: max(100%, 2.75rem); height: 2.75rem; }
 }
 
 /* the form and the ends may run longer than a short card: they alone scroll */
@@ -328,6 +332,9 @@ fieldset.ed-row > legend { float: left; padding: 0; }
   --ed-f: "neue-haas-grotesk-text", "Helvetica Neue", Arial, sans-serif;
   --ed-mu: color-mix(in oklab, var(--foreground) 50%, transparent);
   --ed-line: color-mix(in oklab, var(--foreground) 18%, transparent);
+  /* Light: 50% of near-black on the pale card read 3.4:1 (audit, 2026-10-21);
+     62% clears 4.5 at 12px. Dark keeps 50%, which already does. */
+  &:where(:root[data-theme="light"] *) { --ed-mu: color-mix(in oklab, var(--foreground) 62%, transparent); }
   --ed-line2: var(--ed-line);
   --ed-err: oklch(0.66 0.19 27);
   font-family: var(--ed-f);
@@ -487,7 +494,7 @@ fieldset.ed-row > legend { float: left; padding: 0; }
 .ed-kinds label { position: relative; display: flex; cursor: pointer; }
 .ed-kinds label > span { flex: 1; display: flex; flex-direction: column; justify-content: space-between; align-items: flex-start; padding: 0.75rem 0.5rem 0.65rem 0.8rem; border: 1px solid var(--ed-line); color: var(--ed-mu); transition: border-color 0.2s; }
 .ed-kinds em { color: var(--foreground); }
-.ed .ed-kinds small { font-size: 0.6rem !important; font-weight: 500 !important; letter-spacing: 0 !important; margin-top: auto; padding-top: 0.5rem; opacity: 0.55; }
+.ed .ed-kinds small { font-size: 0.6rem !important; font-weight: 500 !important; letter-spacing: 0 !important; margin-top: auto; padding-top: 0.5rem; color: var(--ed-mu); }
 .ed-kinds input:checked + span { background: var(--foreground); border-color: var(--foreground); }
 .ed-kinds input:checked + span :is(em, small) { color: var(--background); }
 .ed-kinds input:focus-visible + span { outline: 1px solid var(--foreground); outline-offset: 3px; }
