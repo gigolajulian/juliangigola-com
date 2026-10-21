@@ -284,11 +284,12 @@ export function LegalColumn({
             c,
           ): c is React.ReactElement<{
             title: string;
+            id?: string;
             children: React.ReactNode;
           }> => React.isValidElement(c),
         )
         .map((c, i) => ({
-          id: `${id}-${anchor(c.props.title)}`,
+          id: c.props.id ?? `${id}-${anchor(c.props.title)}`,
           n: i + 1,
           title: c.props.title,
           body: c.props.children,
@@ -304,8 +305,9 @@ export function LegalColumn({
 }
 
 /** One clause. A declaration, not a component: `LegalColumn` reads the
-    title and the body off it. */
-export function Clause(props: { title: string; children: React.ReactNode }) {
+    title and the body off it. `id` replaces the anchor made from the title,
+    for an address given out elsewhere (`/legal#deletion`, Meta's form). */
+export function Clause(props: { title: string; id?: string; children: React.ReactNode }) {
   void props;
   return null;
 }

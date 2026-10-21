@@ -18,6 +18,10 @@ const EMAIL = "hello@juliangigola.com";
  * (`click-beacon.tsx`, for /admin's SEO tab), so "Cookies, storage and
  * analytics" and the retention list describe exactly what it sends.
  *
+ * 2026-10-20: the booking flow (Cal.com, the Stripe deposit), the
+ * Instagram tool Meta App Review asks about, and a deletion clause at
+ * `#deletion`, the address given to Meta as the data deletion URL.
+ *
  * Clauses are cited by name rather than by number, as in the terms, so
  * inserting one cannot quietly break a reference.
  * ─────────────────────────────────────────────────────────────── */
@@ -28,7 +32,7 @@ export function PrivacyColumn() {
       id="privacy"
       title="Privacy Policy"
       label="Privacy"
-      effective="2026-10-14"
+      effective="2026-10-20"
     >
       <Clause title="What is collected, and when">
         <p>
@@ -44,6 +48,17 @@ export function PrivacyColumn() {
           note is kept in your browser for that tab only and leaves it only with
           an inquiry you send. That is the complete list. Your IP address is not
           stored with your inquiry.
+        </p>
+        <p>
+          <strong>If you book a session or a call.</strong> The booking card
+          collects your name, your email address, the time you pick and your
+          time zone, and, where the session asks for them, your phone number,
+          where the shoot is, and any notes you add. The booking is made in
+          Cal.com, my scheduling service, and a copy is kept in the
+          Site&rsquo;s inbox. The four paid sessions take a $100 deposit by
+          card. The card form is Stripe&rsquo;s: your card number goes straight
+          to Stripe and never reaches the Site or me. I see the amount, the
+          date, and the card&rsquo;s brand and last four digits.
         </p>
         <p>
           <strong>If you email me directly.</strong> Your address and whatever
@@ -67,9 +82,27 @@ export function PrivacyColumn() {
           <code>theme</code>. It never leaves your device.
         </p>
         <p>
-          <strong>What is not collected.</strong> No account, no payment
-          details, no location request, no fingerprint, and nothing bought from
+          <strong>What is not collected.</strong> No account, no full card
+          number, no location request, no fingerprint, and nothing bought from
           or matched against a third party.
+        </p>
+      </Clause>
+
+      <Clause title="Instagram">
+        <p>
+          I use a private tool, connected through Meta&rsquo;s official
+          Instagram API, to read my own Instagram account, @juliangigola: the
+          direct messages sent to it, the comments on my posts, and my post
+          statistics. It only reads. It never posts, sends, replies or deletes,
+          and nobody else uses it.
+        </p>
+        <p>
+          If you message me or comment on a post, the tool shows me your
+          Instagram name, your message or comment and when you sent it, so I can
+          answer booking questions in one place. It reads live from Instagram
+          and does not store what it reads. It runs on my own computer, is used
+          only to manage my own inbox and work, and is never sold, shared or
+          used for advertising.
         </p>
       </Clause>
 
@@ -77,7 +110,7 @@ export function PrivacyColumn() {
         <ul>
           <li>
             <strong>
-              To answer you and, if we work together, to do the work.
+              To answer you and, if you hire me, to do the work.
             </strong>{" "}
             Basis: the steps you have asked me to take before entering a
             contract, and then the contract itself (GDPR Article 6(1)(b)).
@@ -180,6 +213,20 @@ export function PrivacyColumn() {
             handled at the location nearest you.
           </li>
           <li>
+            <strong>Cal.com, Inc.</strong>: my scheduling service. It holds
+            each booking and sends its own confirmation and reminder emails.
+          </li>
+          <li>
+            <strong>Stripe, Inc.</strong>: takes the deposit. It receives your
+            card details and email address, sends the receipt, and keeps the
+            payment record under its own legal obligations.
+          </li>
+          <li>
+            <strong>Meta Platforms, Inc.</strong>: Instagram itself. If you
+            message me or comment there, Meta already holds that; my tool only
+            reads it back to me.
+          </li>
+          <li>
             <strong>Google LLC</strong> (Google Workspace): my email service. A
             copy of each inquiry is delivered to my mailbox there, and any email
             you send me is stored there.
@@ -238,6 +285,16 @@ export function PrivacyColumn() {
             my mailbox is kept as long as ordinary business correspondence, and
             longer where it forms part of the record of commissioned work that
             tax and accounting rules oblige me to keep, generally seven years.
+          </li>
+          <li>
+            <strong>Bookings and deposits</strong> are kept in Cal.com, Stripe
+            and my records as long as needed for the job, and then as long as
+            tax and accounting rules oblige me to keep them, generally seven
+            years.
+          </li>
+          <li>
+            <strong>Instagram data</strong> is read live and not stored by the
+            tool. It stays on Instagram, under Meta&rsquo;s own policy.
           </li>
           <li>
             <strong>The cooldown hash</strong> deletes itself five minutes after
@@ -301,8 +358,9 @@ export function PrivacyColumn() {
           of its sale or sharing; to limit the use of sensitive personal
           information; and not to be discriminated against for exercising any of
           them. For the record: I collect only the categories set out in{" "}
-          <em>What is collected, and when</em>, which are identifiers and the
-          content of your message; I do not sell or share personal information
+          <em>What is collected, and when</em>, which are identifiers, the
+          content of your message and, for a deposit, the card&rsquo;s brand and
+          last four digits; I do not sell or share personal information
           and have not done so in the preceding twelve months; I collect no
           sensitive personal information; and I use nothing beyond the purposes
           in <em>Why, and on what legal basis</em>. You may use an authorized
@@ -315,6 +373,20 @@ export function PrivacyColumn() {
           <strong>If you are elsewhere</strong>, including in another US state
           with a privacy law of its own, you are offered the same rights as a
           matter of course and exercise them the same way.
+        </p>
+      </Clause>
+
+      <Clause title="Deleting your data" id="deletion">
+        <p>
+          Email {EMAIL} with the subject &ldquo;Delete my data&rdquo; and the
+          name, email address or Instagram handle you used. I delete what I
+          hold about you within thirty days and confirm by email. The only
+          exception is what tax and accounting rules oblige me to keep for a
+          paid job, and I will tell you if that applies.
+        </p>
+        <p>
+          You can also remove a message or comment on Instagram itself, and my
+          tool will no longer see it.
         </p>
       </Clause>
 
