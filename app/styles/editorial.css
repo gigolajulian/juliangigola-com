@@ -492,7 +492,7 @@ fieldset.ed-row > legend { float: left; padding: 0; }
 .ed .ed-ask:focus-within input { border-bottom-color: var(--accent); }
 /* details: the project box takes the room */
 .ed-inq .ed-row:has(textarea) { flex: 1; min-height: 7rem; }
-@container ed (min-width: 40rem) { .ed-inq textarea.tp-notes { flex: 1; height: auto !important; } }
+@container ed (min-width: 40rem) { .ed-inq .ed-row:has(textarea) { min-height: 0; } .ed-inq textarea.tp-notes { flex: 1; height: auto !important; min-height: 2.75rem; } }
 .ed-inq .ed-refs { border-bottom: 0; }
 .ed-inq .ed-refs .contact-field > div { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; }
 .ed-inq .ed-refs .contact-field > div > .label { flex-basis: 100%; margin: 0 0 0.25rem; }
