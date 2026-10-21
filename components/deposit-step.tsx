@@ -4,6 +4,9 @@ import * as React from "react";
 import { gsap } from "gsap";
 import { cn } from "@/lib/utils";
 
+/* Preview `?goo`: the cursor pours into the buttons (`time-picker.tsx`). */
+const goo = typeof location !== "undefined" && new URLSearchParams(location.search).has("goo");
+
 /* ── the deposit ─────────────────────────────────────────────────────
  * Julian (2026-10-16), behind `?deposit`: a paid session's $100 deposit
  * taken in the card, after its form, in place of Cal.com's own checkout.
@@ -361,7 +364,7 @@ export function DepositStep({
             </div>
             <div className="ed-floor">
               {stage === "declined" || stage === "broken" ? <button type="button" onClick={onBack} className="label ed-quiet">Edit details</button> : <span />}
-              {end[3] ? <button type="button" onClick={end[3][1]} className="ed-btn">{end[3][0]}</button> : null}
+              {end[3] ? <button type="button" onClick={end[3][1]} data-stick={goo ? "fill" : undefined} className="ed-btn">{end[3][0]}</button> : null}
             </div>
           </>
         ) : (
@@ -390,7 +393,7 @@ export function DepositStep({
                 <svg aria-hidden viewBox="0 0 12 14" className="w-3 shrink-0" fill="none" stroke="currentColor" strokeWidth="1.3"><rect x="1" y="6" width="10" height="7" rx="1" /><path d="M3.5 6V4a2.5 2.5 0 0 1 5 0v2" /></svg>
                 Secured by Stripe. I never see your card.
               </span>
-              <button ref={payBtn} type="button" onClick={pay} disabled={bad || (stage !== "ready" && !(sim && stage === "loading"))} data-accent="" data-bad={bad ? "" : undefined} className="ed-btn">
+              <button ref={payBtn} type="button" onClick={pay} disabled={bad || (stage !== "ready" && !(sim && stage === "loading"))} data-accent="" data-bad={bad ? "" : undefined} data-stick={goo ? "fill" : undefined} className="ed-btn">
                 {bad ? "Declined" : stage === "paying" ? "Paying" : stage === "confirming" ? "Confirming" : error ? "Try again · $100" : "Pay $100"}
               </button>
             </div>

@@ -82,7 +82,7 @@ export function PointerMark() {
        the fill turned it red. Again after a press picks or unpicks it. */
     const refill = () => {
       if (!fill) return;
-      const picked = !!fill.querySelector("input:checked");
+      const picked = !!fill.querySelector("input:checked") || fill.getAttribute("aria-pressed") === "true";
       el.toggleAttribute("data-picked", picked);
       if (picked && el.hasAttribute("data-fill")) drained();
       else if (!picked && !el.hasAttribute("data-fill")) {
@@ -327,8 +327,11 @@ export function PointerMark() {
     document.addEventListener("click", leave);
     const picked = () => setTimeout(refill);
     document.addEventListener("change", picked);
+    // A day or a time is picked by a press, not a change (`aria-pressed`).
+    document.addEventListener("click", picked);
     return () => {
       document.removeEventListener("change", picked);
+      document.removeEventListener("click", picked);
       document.removeEventListener("click", leave);
       document.removeEventListener("pointermove", move);
       document.removeEventListener("pointerover", over);
