@@ -22,8 +22,9 @@ import { GESTURE_GAP_MS } from "./shared";
 export type FlatSlide = { wheel: (dy: number, pad: boolean, at: number) => void };
 export const flatSlide = new WeakMap<HTMLElement, FlatSlide>();
 
-/** A notch and a half, a Chrome notch being 100. */
-const TURN = 150;
+/** Two notches, counted as wheel events, not pixels: Safari's notch is
+    far smaller than Chrome's 100, and 150px took four of them (MAC). */
+const TURN = 2;
 const SLIDE_MS = 650;
 const EASE = "cubic-bezier(0.22, 1, 0.36, 1)";
 
@@ -179,10 +180,10 @@ export function slideStrip(el: HTMLElement) {
     if (busy) return;
     if (at - accAt > 250) acc = 0;
     accAt = at;
-    acc += dy;
+    acc += Math.sign(dy);
     if (Math.abs(acc) >= TURN) return turn(Math.sign(acc));
     // Not yet a turn: a little of the way, and back once the hand rests.
-    nudge(Math.sign(acc) * Math.min(Math.abs(acc) * 0.3, 48), 160);
+    nudge(Math.sign(acc) * Math.min(Math.abs(acc) * 30, 48), 160);
     window.clearTimeout(rest);
     rest = window.setTimeout(() => {
       acc = 0;
