@@ -35,11 +35,15 @@ export function PointerMark() {
        dialog opened later goes over it, so it is lifted again over
        each new one. */
     const layered = typeof el.showPopover === "function";
-    /* Safari draws the top layer without blending it into the page: the
-       fill poured over a day went solid white and its number vanished
-       (MAC, real Safari, 2026-10-21). There the mark stays in the page
-       and goes up only while a modal dialog is open. */
+    /* Safari draws the top layer without blending it into the page, and
+       does not blend a filtered, fixed mark either: the fill poured over
+       a day went solid white and its number vanished (MAC, real Safari,
+       2026-10-21). There the mark stays in the page, going up into the
+       top layer only while a modal dialog is open, and the blend sits on
+       the goo group (`pointer.css`, `[data-blendless]`). Chrome needs it
+       as it was. */
     const blendless = /AppleWebKit/.test(navigator.userAgent) && !/Chrome|CriOS|Edg|Android/.test(navigator.userAgent);
+    el.toggleAttribute("data-blendless", blendless);
     let over_: Element | null = null;
     const lift = () => {
       if (!layered) return;
