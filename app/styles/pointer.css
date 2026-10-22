@@ -203,6 +203,18 @@
   scale: 1;
   transition-duration: var(--dur-lg);
 }
+/* Safari (`[data-blendless]`, pointer-mark.tsx) blends the goo group,
+   not the mark; the same picked and grey cases below, on the group. */
+.pointer-mark[data-blendless] {
+  mix-blend-mode: normal;
+}
+.pointer-mark[data-blendless] .mark-goo {
+  mix-blend-mode: difference;
+}
+.pointer-mark[data-blendless]:is([data-picked], [data-gray]) .mark-goo,
+:root[data-mark-fill] .pointer-mark[data-blendless] .mark-goo {
+  mix-blend-mode: normal;
+}
 /* Over a picked (teal) option the dot is the teal's own ink, not a
    difference: that blended it red. */
 .pointer-mark[data-picked] {
