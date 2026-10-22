@@ -438,6 +438,9 @@ fieldset.ed-row > legend { float: left; padding: 0; }
 
 @container ed (min-width: 40rem) {
   .ed[data-booked] .ed-body, .ed .ed-body:has(> .ed-l + .ed-r):not(:has(> .ed-times)) { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); column-gap: 2rem; align-content: stretch; }
+  /* Booked: the summary rows two across under the message (Julian, 2026-10-21). */
+  .ed[data-booked] .ed-r { grid-column: 1 / -1; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); column-gap: 2rem; align-content: start; }
+  .ed[data-booked] .ed-r > .ed-next { grid-column: 1 / -1; }
 }
 @container card (max-width: 36rem) {
   .ed-hero { padding-top: 1.5rem; }
