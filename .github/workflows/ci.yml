@@ -42,7 +42,7 @@ jobs:
       - run: node scripts/test/gate.mjs --backend
 
   frontend:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 45
     # A placeholder, not a key: the paid sessions keep the site's picker
     # only where the build has one (time-picker.tsx), as live does.
