@@ -516,6 +516,17 @@ fieldset.ed-row > legend { float: left; padding: 0; }
 /* details: the project box takes the room */
 .ed-inq .ed-row:has(textarea) { flex: 1; min-height: 7rem; }
 @container ed (min-width: 40rem) { .ed-inq .ed-row:has(textarea) { min-height: 0; } .ed-inq textarea.tp-notes { flex: 1; height: auto !important; min-height: 2.75rem; } }
+/* One page (Julian, 2026-10-21): the kinds and their questions on the
+   left, the details on the right from 40rem; one column under it. */
+.ed-inq .ed-one { display: grid !important; grid-template-columns: minmax(0, 1fr); flex: 1 1 auto; min-height: 0; }
+.ed-inq .ed-one > div { display: flex; flex-direction: column; min-width: 0; grid-column: auto; }
+.ed-inq .ed-one .ed-asks { padding: 0.5rem 0 0.75rem; }
+@container ed (min-width: 40rem) {
+  .ed-inq .ed-one { grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); column-gap: 3rem; }
+  .ed-inq .ed-one .ed-kinds { grid-template-columns: repeat(2, minmax(0, 1fr)); grid-auto-rows: minmax(3.5rem, auto); }
+  .ed-inq .ed-one .ed-asks { grid-template-columns: minmax(0, 1fr); }
+  .ed-inq .ed-one textarea.tp-notes { min-height: 4rem; }
+}
 .ed-inq .ed-refs { border-bottom: 0; }
 .ed-inq .ed-refs .contact-field > div { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; }
 .ed-inq .ed-refs .contact-field > div > .label { flex-basis: 100%; margin: 0 0 0.25rem; }
@@ -533,8 +544,12 @@ fieldset.ed-row > legend { float: left; padding: 0; }
 .contact-card > div:has(> .ed-inq), #book-card [data-scroll]:has(.ed-inq) { padding: 0 !important; }
 .contact-card > div:has(> .ed-inq) { display: flex; flex-direction: column; }
 .contact-card > div > .ed-inq { flex: 1 1 auto; min-height: 0; height: auto; }
-/* The Inquiries card takes the screen's height, as the booking card does, so the steps have their room. */
-@media (min-width: 40rem) { .contact-card:has(.ed-inq) { align-self: stretch; height: auto; max-height: none; } }
+/* The Inquiries card is as tall as its one page needs: it grows into the
+   screen's padding on a short window (Julian, 2026-10-21, "grow") before
+   the body scrolls inside. */
+@media (min-width: 40rem) { .contact-card:has(.ed.ed-inq) { align-self: center; height: auto; max-width: 48rem; margin-block: 0; max-height: calc(100% + 1.5rem) !important; } }
+/* A short window with a mouse sits closer under the bar (contact.css), so less room to grow into. */
+@media (min-width: 40rem) and (pointer: fine) and (max-height: 48rem) { .contact-card:has(.ed.ed-inq) { max-height: calc(100% + 0.5rem) !important; } }
 .book-form:has(> .ed-inq) { display: contents; }
 @container ed (max-width: 39.99rem) {
   .ed-kinds { grid-template-columns: repeat(2, minmax(0, 1fr)); grid-auto-rows: auto; }
