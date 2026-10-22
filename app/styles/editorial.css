@@ -539,8 +539,9 @@ fieldset.ed-row > legend { float: left; padding: 0; }
 .ed.ed-inq .ed-one > div > label.ed-row:not(:has(textarea)) { gap: 0.4rem; padding-bottom: 0.3rem; }
 .ed-inq .ed-refs { border-bottom: 0; }
 .ed-inq .ed-refs .contact-field > div { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; }
-.ed-inq .ed-refs .contact-field > div > .label { flex-basis: 100%; margin: 0 0 0.25rem; }
-.ed-inq .ed-refs .tap-44 { border-radius: 0; border-color: var(--ed-line); padding: 0.55rem 0.8rem; }
+.ed-inq .ed-refs .contact-field > div > p.label { flex-basis: 100%; margin: 0 0 0.25rem; }
+/* The two on one line (Julian, 2026-10-21), a size down so both fit a phone's column. */
+.ed.ed-inq .ed-refs .tap-44 { border-radius: 0; border-color: var(--ed-line); padding: 0.6rem 0.4rem; flex: 1 1 0; min-width: 0; text-align: center; white-space: nowrap; font-size: 0.6875rem !important; }
 /* sent: three equal bands, the first marked */
 .ed-nx { flex: 1; display: grid; grid-auto-rows: minmax(3.5rem, 1fr); padding: 1.5rem 0 1.25rem; min-height: 0; }
 .ed-nx-row { display: grid; grid-template-columns: 2.5rem minmax(0, 1fr) 1.25rem; align-items: start; align-content: center; gap: 0.4rem 1rem; color: var(--ed-mu); }

@@ -98,7 +98,7 @@ export function ReferencePicks({ resync }: { resync: unknown }) {
               e.currentTarget.value = "";
             }}
           />
-          Upload images
+          Upload references
         </label>
         <button type="button" className={button} onClick={open}>
           Pick from my work
