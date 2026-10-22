@@ -76,7 +76,7 @@ function Editorial({ defaults, sessions = [] }: Props) {
     presetRef ? `Similar to ${presetRef}` : "",
     ...(tile?.asks ? [ask[0] && `${tile.asks[0]}: ${ask[0]}`, ask[1] && `${tile.asks[2]}: ${ask[1]}`] : []),
   ].filter(Boolean).join(" · ");
-  const side = (tile ? [tile.label, ask[0]].filter(Boolean).join(" · ") : "Editorial, campaigns, cover art and press kits");
+  const side = (tile ? [tile.label, ask[0]].filter(Boolean).join(" · ") : "Photo, film and creative direction");
 
   /* The page's pieces cascade in, left to right, row by row, as the
      calendar's days do (time-picker.tsx); a pick brings its questions in
