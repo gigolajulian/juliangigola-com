@@ -441,14 +441,23 @@ fieldset.ed-row > legend { float: left; padding: 0; }
 .ed-err { color: var(--ed-err); }
 
 /* booked: the check, what was sent, then the rows */
-.ed-ok { gap: 1.25rem; justify-content: space-between; }
-.ed-ok > svg { width: 2.5rem; height: 2.5rem; }
+/* Booked (Julian, 2026-10-21): the check sits on the Booked line in
+   the square's place, and the message is a sentence in the body face,
+   the page's ink, two lines wide, straight over the rows. */
+.ed[data-booked] .ed-mk > i { display: none; }
+.ed[data-booked] .ed-mk > svg { width: 1.125rem; height: 1.125rem; flex-shrink: 0; color: var(--accent); }
+.ed.tp[data-booked] .ed-why { font-family: var(--font-sans) !important; font-size: 1.0625rem !important; font-weight: 400 !important; line-height: 1.5 !important; letter-spacing: 0 !important; text-transform: none !important; color: var(--foreground); max-width: none; margin: 1.5rem 0 1.75rem; text-align: justify; text-wrap: pretty; }
+.ed-nb { white-space: nowrap; }
+/* One long line over the rows, not one per column (Julian). */
+.ed[data-booked] .ed-r { border-top: 1px solid var(--ed-line); }
+.ed[data-booked] .ed-r > .ed-row:first-child { border-top: 0; }
 .ed-why { color: var(--ed-mu); max-width: 34ch; margin: 0; }
 .ed-next { display: none; }
 
 @container ed (min-width: 40rem) {
   .ed[data-booked] .ed-body, .ed .ed-body:has(> .ed-l + .ed-r):not(:has(> .ed-times)) { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); column-gap: 2rem; align-content: stretch; }
   /* Booked: the summary rows two across under the message (Julian, 2026-10-21). */
+  .ed[data-booked] .ed-body:has(> .ed-l + .ed-r) { grid-template-columns: minmax(0, 1fr); align-content: start; }
   .ed[data-booked] .ed-r { grid-column: 1 / -1; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); column-gap: 2rem; align-content: start; }
   .ed[data-booked] .ed-r > .ed-next { grid-column: 1 / -1; }
 }
