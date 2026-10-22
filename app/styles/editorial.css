@@ -349,7 +349,9 @@ fieldset.ed-row > legend { float: left; padding: 0; }
   --ed-err: oklch(0.66 0.19 27);
   font-family: var(--ed-f);
 }
-.ed :is(.label, .ed-v, .ed-n, .ed-slot, .ed-btn, .ed-box, .ed-why, .ed-said, .ed-copy, .ed-err, .ed-opts label, .ed-row input, .ed-row textarea.tp-notes, .ed-blank, .ed-steps button, .ed-steps b, .ed-head h2, .ed-mk, .ed-hero small, .ed-quiet, .ed-on, .ed-none) {
+/* Not inside the reference picker: its labels stay the site's Plex Mono
+   (Julian, 2026-10-21). */
+.ed :is(.label, .ed-v, .ed-n, .ed-slot, .ed-btn, .ed-box, .ed-why, .ed-said, .ed-copy, .ed-err, .ed-opts label, .ed-row input, .ed-row textarea.tp-notes, .ed-blank, .ed-steps button, .ed-steps b, .ed-head h2, .ed-mk, .ed-hero small, .ed-quiet, .ed-on, .ed-none):not(.reference-panel *) {
   font-family: var(--ed-f) !important;
   font-size: 0.75rem !important;
   font-weight: 600 !important;
