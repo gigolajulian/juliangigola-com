@@ -411,7 +411,7 @@
   text-wrap: balance;
 }
 
-/* `?scroll=1` (Julian: the appear animations match the new scroll). One
+/* The homepage strip (Julian: the appear animations match the new scroll). One
    language with the strip: what is on a screen comes in the way the strip
    travels, on the strip's own curve and time (600ms, `page` in
    `lenis.ts`), a short beat apart, and is gone at once on the way out so

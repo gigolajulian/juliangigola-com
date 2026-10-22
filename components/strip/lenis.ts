@@ -41,7 +41,10 @@ export function useLenis(
     let off = () => {};
     let gone = false;
     const ownNotch = wantsOwnNotch();
-    const free = new URLSearchParams(location.search).get("scroll") === "1";
+    /* The homepage's strip (`[data-flat]`, `deck.tsx`; Julian: default,
+       2026-10-22): a notch is a page and a trackpad follows 1:1. Read as
+       it is used, since the deck marks the strip after this mounts. */
+    const free = () => el.hasAttribute("data-flat");
     /* A frame on: Lenis measures the wrapper as it is made, and made while
        the page arrives that was 18ms of layout inside the trip's freeze. */
     const ready = new Promise((go) => requestAnimationFrame(go));
@@ -105,7 +108,7 @@ export function useLenis(
              and a home page swipe ran at 31ms a frame against 20
              without it (WebKit, 1440 wide). A notch is still Lenis's. */
           if (padGesture.get(el)) {
-            // `?scroll=1`: a swipe landing keeps its landing.
+            // The homepage strip: a swipe landing keeps its landing.
             if (padLand.has(el)) return false;
             // Taken over mid-run: Lenis stops where the strip stands.
             if (lenis.isScrolling === "smooth")
@@ -115,11 +118,8 @@ export function useLenis(
           // Under `?notch` the strip has the notch too (`onWheel`).
           if (ownNotch) return false;
           lenis.options.lerp = MOUSE_LERP;
-          /* `?scroll=1`: the first notch of a turn carries half, so a lone
-             notch is a small nudge (Julian: the first nudge too much); the
-             notches after it in the same flick carry the whole, so a flick
-             gets past a screen (Julian: too much work to go past one). */
-          if (free) {
+          // The homepage strip: a notch is a page (`page`).
+          if (free()) {
             e.preventDefault();
             const d = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
             if (d) page(Math.sign(d));
@@ -203,7 +203,7 @@ export function useLenis(
         const to = stops[Math.min(i + 1, stops.length - 1)];
         return { from, to, gone: to > from ? (x - from) / (to - from) : 0 };
       };
-      /* `?scroll=1`, a mouse: every notch is one page (Julian: it should
+      /* The homepage strip, a mouse: every notch is one page (Julian: it should
          move from notch one). Notches during a slide add a page each to
          where it is going. */
       let pageTo = 0;
@@ -225,16 +225,13 @@ export function useLenis(
       const settle = () => {
         // A notch under `?notch` lands by the strip's own slide.
         if (ownNotch && !padGesture.get(el)) return;
-        /* `?scroll=1`: not while the wheel's own glide is still going.
-           Landing mid-glide turned the strip round in one frame, 54px a
-           frame onward to 10px back (Julian: the nudge is too abrupt). */
-        // `?scroll=1`, a notch: it went a whole page already (`page`).
-        if (free && !padGesture.get(el)) return;
-        /* `?scroll=1`, a trackpad: where the strip stands, and the way the
+        // The homepage strip, a notch: it went a whole page already (`page`).
+        if (free() && !padGesture.get(el)) return;
+        /* The homepage strip, a trackpad: where the strip stands, and the way the
            fingers went. The pad moves the scroller past Lenis, so Lenis's
            target and direction were a swipe old, and a strong flick was
            taken back to where it began (MAC, Safari). */
-        const pad = free && padGesture.get(el);
+        const pad = free() && padGesture.get(el);
         if (pad && padLand.has(el)) {
           padLand.delete(el);
           return;
@@ -248,23 +245,19 @@ export function useLenis(
            taken back every time and the page never turned. For a notch the line
            is the nearer of a fifth and `NOTCH_TURN_PX`; a trackpad keeps
            the fifth. */
-        /* `?scroll=1` (Julian, 2026-10-22, a preview), a mouse: the deck
-           goes where the wheel puts it, and at rest a quarter of the way
-           turns the page: a lone notch is taken back, a flick of two or
-           more goes on. A trackpad lands as it always has. */
         const turn = padGesture.get(el)
-            ? 0.2
-            : Math.min(0.2, NOTCH_TURN_PX / Math.max(1, to - from));
+          ? 0.2
+          : Math.min(0.2, NOTCH_TURN_PX / Math.max(1, to - from));
         const dir = pad ? Math.sign(padNet) || 1 : lenis.direction;
         const onward = dir >= 0 ? gone > turn : gone > 1 - turn;
         const target = onward ? to : from;
         if (Math.abs(target - x) < 1 && Math.abs(target - el.scrollLeft) < 1) return;
         if (pad) lenis.scrollTo(el.scrollLeft, { immediate: true, force: true });
-        if (free) el.dataset.way = target > x ? "on" : "back";
+        if (free()) el.dataset.way = target > x ? "on" : "back";
         lenis.scrollTo(target, { duration: 0.6, easing: (t) => 1 - (1 - t) ** 3 });
         wake();
       };
-      /* `?scroll=1`, a trackpad (Julian: make it work naturally). The
+      /* The homepage strip, a trackpad (Julian: make it work naturally). The
          strip follows the fingers one to one and carries the momentum;
          once the momentum is falling away the swipe lands on the screen
          it is heading for, at the speed it was going, rather than
@@ -334,7 +327,7 @@ export function useLenis(
       const onRest = (e: WheelEvent) => {
         window.clearTimeout(rest);
         rest = window.setTimeout(settle, GESTURE_GAP_MS + 20);
-        if (free && padGesture.get(el)) onPad(e);
+        if (free() && padGesture.get(el)) onPad(e);
       };
       if (paged) el.addEventListener("wheel", onRest, { passive: true });
       // Capture, so the wake is booked before Lenis handles the event.

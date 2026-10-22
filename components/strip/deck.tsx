@@ -119,10 +119,10 @@ export function useDeal({
   React.useEffect(() => {
     const el = scrollerRef.current;
     if (!deck || !el || sheet) return;
-    /* `?scroll=1` (Julian, 2026-10-22, a preview): no card stack. The
-       screens sit side by side and move with the scroll, a hairline at
-       each one's edge (`[data-flat]`, `globals.css`). */
-    if (deck === "screens" && new URLSearchParams(location.search).get("scroll") === "1") {
+    /* No card stack (Julian, 2026-10-22: default). The screens sit side
+       by side and move with the scroll, a hairline at each one's edge
+       (`[data-flat]`, `globals.css`). `?scroll=0` keeps the old deck. */
+    if (deck === "screens" && new URLSearchParams(location.search).get("scroll") !== "0") {
       el.toggleAttribute("data-flat", true);
       return () => el.removeAttribute("data-flat");
     }

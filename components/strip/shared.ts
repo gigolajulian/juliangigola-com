@@ -138,7 +138,7 @@ export const GESTURE_GAP_MS = 120;
     the two fought, and the landing read Lenis's target and took the strip
     back to the start. The strip's `onWheel` sets it, Lenis reads it. */
 export const padGesture = new WeakMap<HTMLElement, boolean>();
-/** `?scroll=1`: a trackpad's swipe is landing (`lenis.ts`), and the rest
+/** The homepage strip: a trackpad's swipe is landing (`lenis.ts`), and the rest
     of its momentum is not the strip's to follow. */
 export const padLand = new WeakSet<HTMLElement>();
 /** Preview (`?notch`): a mouse notch moves the strip by its own ease,
