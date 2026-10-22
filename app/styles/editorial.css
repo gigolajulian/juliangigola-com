@@ -534,6 +534,7 @@ fieldset.ed-row > legend { float: left; padding: 0; }
 /* What is written in the fields, in the navbar's mono (Julian, 2026-10-21,
    "change written text to mono plex"), sitting right above its line. */
 .ed.ed-inq :is(.ed-row input, .ed-row textarea.tp-notes) { font-family: var(--v2-label-family, "IBM Plex Mono", monospace) !important; font-weight: var(--v2-label-weight, 500) !important; letter-spacing: 0.03em !important; }
+.ed.ed-inq :is(.ed-row input, .ed-row textarea.tp-notes)::placeholder { font-family: var(--v2-label-family, "IBM Plex Mono", monospace) !important; font-weight: 400 !important; }
 .ed.ed-inq .ed-ask input { padding-bottom: 0.15rem; }
 .ed.ed-inq .ed-one > div > label.ed-row:not(:has(textarea)) { gap: 0.4rem; padding-bottom: 0.3rem; }
 .ed-inq .ed-refs { border-bottom: 0; }
