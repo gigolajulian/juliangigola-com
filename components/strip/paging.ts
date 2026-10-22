@@ -133,7 +133,14 @@ export function createPaging(m: Mover) {
   let noting = 0;
   const onNote = () => {
     window.clearTimeout(noting);
-    noting = window.setTimeout(() => note(), 120);
+    noting = window.setTimeout(() => {
+      note();
+      /* And the screen it rests on, for `reseat`. Lenis lands the wheel
+         without `onSettle`, so the seat stayed on an old screen and a
+         resize put the strip back there: resting on 04, a window a pixel
+         shorter jumped Home (MAC: Home, then 02 a moment later). */
+      if (m.paged) seat = m.nearest(el.scrollLeft);
+    }, 120);
   };
   note();
   /* Moved off the start or not, for what stands at the start

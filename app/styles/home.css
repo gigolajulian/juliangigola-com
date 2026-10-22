@@ -410,3 +410,40 @@
   letter-spacing: 0.06em;
   text-wrap: balance;
 }
+
+/* The homepage strip (Julian: the appear animations match the new scroll). One
+   language with the strip: what is on a screen comes in the way the strip
+   travels, on the strip's own curve and time (600ms, `page` in
+   `lenis.ts`), a short beat apart, and is gone at once on the way out so
+   the next arrival plays it again. The commission cards drop their blur
+   and swell for the same slide. */
+@media (prefers-reduced-motion: no-preference) {
+  [data-flat] :is(.about-step, .session-step, .services-step) {
+    transition:
+      opacity 600ms var(--ease-out-strong),
+      translate 600ms var(--ease-out-strong);
+    transition-delay: calc(min(var(--i, 0), 8) * 50ms);
+  }
+  [data-flat] .light-cell {
+    animation: none;
+    transition-duration: 600ms, 0s, 0s, var(--dur-2xl), var(--dur-2xl), 600ms;
+    transition-delay: calc(min(var(--i, 0), 8) * 50ms);
+  }
+  [data-flat][data-at]:not([data-at="Biography"]) .about-step,
+  [data-flat][data-at]:not([data-at="Sessions"]) .session-step,
+  [data-flat][data-at]:not([data-at="Commissions"]) .services-step,
+  [data-flat][data-at]:not([data-at="Commissions"]) .light-cell {
+    opacity: 0;
+    filter: none;
+    scale: none;
+    translate: 3vw 0;
+    transition-duration: 0s;
+    transition-delay: 0s;
+  }
+  [data-flat][data-way="back"][data-at]:not([data-at="Biography"]) .about-step,
+  [data-flat][data-way="back"][data-at]:not([data-at="Sessions"]) .session-step,
+  [data-flat][data-way="back"][data-at]:not([data-at="Commissions"]) .services-step,
+  [data-flat][data-way="back"][data-at]:not([data-at="Commissions"]) .light-cell {
+    translate: -3vw 0;
+  }
+}

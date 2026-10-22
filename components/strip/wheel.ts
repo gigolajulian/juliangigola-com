@@ -8,6 +8,7 @@ import {
   nav,
   PAD,
   padGesture,
+  padLand,
   wantsOwnNotch,
   WHEEL,
 } from "./shared";
@@ -241,7 +242,8 @@ export function wheelHandler(m: Mover, band: Band) {
        Lenis). */
     if (m.smooth && padGesture.get(el)) {
       e.preventDefault();
-      el.scrollLeft = Math.max(0, Math.min(m.room(), el.scrollLeft + dy * PAD));
+      if (padLand.has(el)) return;
+      el.scrollLeft = Math.max(0, Math.min(m.room(), el.scrollLeft + dy * (el.hasAttribute("data-flat") ? 1 : PAD)));
       return;
     }
     /* Away from the ends, Lenis has the wheel. Nothing is prevented and
