@@ -41,6 +41,7 @@ export function useLenis(
     let gone = false;
     const ownNotch = wantsOwnNotch();
     const free = new URLSearchParams(location.search).get("scroll") === "1";
+    let notchAt = -Infinity;
     /* A frame on: Lenis measures the wrapper as it is made, and made while
        the page arrives that was 18ms of layout inside the trip's freeze. */
     const ready = new Promise((go) => requestAnimationFrame(go));
@@ -81,8 +82,7 @@ export function useLenis(
            judged is the easing and not how far a notch carries: at one to
            one a notch moved 120px against 360 and Lenis would lose on a
            difference nobody asked about. */
-        // Half under `?scroll=1`: a lone notch nudged too far (Julian).
-        wheelMultiplier: free ? WHEEL / 2 : WHEEL,
+        wheelMultiplier: WHEEL,
         /* A notch and a trackpad are not the same gesture, and Lenis
            treated them as one: a trackpad got the mouse's gain of three
            on top of its own momentum, eased again, which is twitchy under
@@ -113,6 +113,18 @@ export function useLenis(
           // Under `?notch` the strip has the notch too (`onWheel`).
           if (ownNotch) return false;
           lenis.options.lerp = MOUSE_LERP;
+          /* `?scroll=1`: the first notch of a turn carries half, so a lone
+             notch is a small nudge (Julian: the first nudge too much); the
+             notches after it in the same flick carry the whole, so a flick
+             gets past a screen (Julian: too much work to go past one). */
+          if (free) {
+            const first = e.timeStamp - notchAt > 250;
+            notchAt = e.timeStamp;
+            if (first) {
+              data.deltaX *= 0.5;
+              data.deltaY *= 0.5;
+            }
+          }
           /* Firefox's mouse reports lines, and Lenis counts a line as
              16.7px, so a notch of three carried 150px against the 360 of
              a notch anywhere else, and on a paged strip that is under
@@ -175,7 +187,8 @@ export function useLenis(
         /* `?scroll=1`: not while the wheel's own glide is still going.
            Landing mid-glide turned the strip round in one frame, 54px a
            frame onward to 10px back (Julian: the nudge is too abrupt). */
-        if (free && lenis.isScrolling) {
+        const notch = free && !padGesture.get(el);
+        if (notch && lenis.isScrolling) {
           rest = window.setTimeout(settle, 50);
           return;
         }
@@ -200,11 +213,12 @@ export function useLenis(
            taken back every time and the page never turned. For a notch the line
            is the nearer of a fifth and `NOTCH_TURN_PX`; a trackpad keeps
            the fifth. */
-        /* `?scroll=1` (Julian, 2026-10-22, a preview): the deck goes where
-           the scroll puts it, and at rest it settles on the nearer screen
-           instead of turning the page at a fifth. */
-        const turn = free
-          ? 0.5
+        /* `?scroll=1` (Julian, 2026-10-22, a preview), a mouse: the deck
+           goes where the wheel puts it, and at rest a quarter of the way
+           turns the page: a lone notch is taken back, a flick of two or
+           more goes on. A trackpad lands as it always has. */
+        const turn = notch
+          ? 0.25
           : padGesture.get(el)
             ? 0.2
             : Math.min(0.2, NOTCH_TURN_PX / Math.max(1, to - from));
@@ -213,8 +227,8 @@ export function useLenis(
         if (Math.abs(target - x) < 1 && Math.abs(target - el.scrollLeft) < 1) return;
         lenis.scrollTo(target, {
           // From rest under `?scroll=1`, so it eases in as well as out.
-          duration: free ? 0.7 : 0.6,
-          easing: free
+          duration: notch ? 0.7 : 0.6,
+          easing: notch
             ? (t) => (t < 0.5 ? 4 * t ** 3 : 1 - (-2 * t + 2) ** 3 / 2)
             : (t) => 1 - (1 - t) ** 3,
         });
