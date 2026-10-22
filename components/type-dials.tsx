@@ -286,6 +286,18 @@ function useTypeApply(
     });
     watch.observe(document.body, { childList: true, subtree: true });
     const all = () => later();
+    /* A strip switched between its grid and the strip (`work-shell.tsx`)
+       sets its names for another width, so they are measured again, as on
+       a resize. Kept at the strip view's size, the grid's long titles ran
+       out of their cards (Julian: hidden in grid view). */
+    const views = new MutationObserver((list) => {
+      const flipped = list.some((m) => {
+        const el = m.target as Element;
+        return el.classList.contains("strip-scroll") && (m.oldValue ?? "").includes("strip-grid") !== el.classList.contains("strip-grid");
+      });
+      if (flipped) all();
+    });
+    views.observe(document.body, { subtree: true, attributes: true, attributeFilter: ["class"], attributeOldValue: true });
     fitWatch = new MutationObserver(all);
     // Only when they land after the first pass, not on every load.
     const loaded = document.fonts.status === "loaded";
@@ -294,6 +306,7 @@ function useTypeApply(
     if (show) addEventListener("scroll", redraw, true);
     return () => {
       watch?.disconnect();
+      views.disconnect();
       fitWatch?.disconnect();
       clearTimeout(quiet);
       stop();
