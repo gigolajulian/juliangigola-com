@@ -95,10 +95,10 @@ function Editorial({ defaults, sessions = [] }: Props) {
     return () => tw.forEach((t) => t.progress(1).kill());
   }, [kind, sent]);
 
-  const hero = (big: string, small: React.ReactNode, mark: React.ReactNode, act?: React.ReactNode) => (
+  const hero = (big: string, small: React.ReactNode, mark?: React.ReactNode, act?: React.ReactNode) => (
     <div className="ed-hero">
       <h2>{big}<small>{small}</small></h2>
-      <p className="ed-mk"><i />{mark}{act}</p>
+      {mark || act ? <p className="ed-mk"><i />{mark}{act}</p> : null}
     </div>
   );
   const replies = RESPONSE_TIME ? `Replies ${RESPONSE_TIME}` : null;
@@ -154,7 +154,7 @@ function Editorial({ defaults, sessions = [] }: Props) {
       <input type="hidden" name="type" value={booking ? "session" : kind || "other"} />
       {booking ? <input type="hidden" name="session" value={kind} /> : null}
       {detail ? <input type="hidden" name="detail" value={detail} /> : null}
-      {hero("Inquire", <>{side}{replies ? <><br />{replies}</> : null}</>, "The kind of shoot, and who you are")}
+      {hero("Inquire", <>{side}{replies ? <><br />{replies}</> : null}</>)}
       <div className="ed-body">
         <div className="ed-r ed-fields ed-one">
           <div>
