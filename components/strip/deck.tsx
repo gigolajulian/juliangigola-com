@@ -119,6 +119,13 @@ export function useDeal({
   React.useEffect(() => {
     const el = scrollerRef.current;
     if (!deck || !el || sheet) return;
+    /* `?scroll=1` (Julian, 2026-10-22, a preview): no card stack. The
+       screens sit side by side and move with the scroll, a hairline at
+       each one's edge (`[data-flat]`, `globals.css`). */
+    if (deck === "screens" && new URLSearchParams(location.search).get("scroll") === "1") {
+      el.toggleAttribute("data-flat", true);
+      return () => el.removeAttribute("data-flat");
+    }
     return runDeck(el, deck);
     // Dealt again as each held-back section arrives.
   }, [scrollerRef, deck, shown, sheet]);

@@ -40,6 +40,7 @@ export function useLenis(
     let off = () => {};
     let gone = false;
     const ownNotch = wantsOwnNotch();
+    const free = new URLSearchParams(location.search).get("scroll") === "1";
     /* A frame on: Lenis measures the wrapper as it is made, and made while
        the page arrives that was 18ms of layout inside the trip's freeze. */
     const ready = new Promise((go) => requestAnimationFrame(go));
@@ -80,7 +81,8 @@ export function useLenis(
            judged is the easing and not how far a notch carries: at one to
            one a notch moved 120px against 360 and Lenis would lose on a
            difference nobody asked about. */
-        wheelMultiplier: WHEEL,
+        // Half under `?scroll=1`: a lone notch nudged too far (Julian).
+        wheelMultiplier: free ? WHEEL / 2 : WHEEL,
         /* A notch and a trackpad are not the same gesture, and Lenis
            treated them as one: a trackpad got the mouse's gain of three
            on top of its own momentum, eased again, which is twitchy under
@@ -170,6 +172,13 @@ export function useLenis(
       const settle = () => {
         // A notch under `?notch` lands by the strip's own slide.
         if (ownNotch && !padGesture.get(el)) return;
+        /* `?scroll=1`: not while the wheel's own glide is still going.
+           Landing mid-glide turned the strip round in one frame, 54px a
+           frame onward to 10px back (Julian: the nudge is too abrupt). */
+        if (free && lenis.isScrolling) {
+          rest = window.setTimeout(settle, 50);
+          return;
+        }
         const cs = getComputedStyle(el);
         const gap = parseFloat(cs.columnGap) || 0;
         const end = el.scrollWidth - el.clientWidth;
@@ -191,15 +200,23 @@ export function useLenis(
            taken back every time and the page never turned. For a notch the line
            is the nearer of a fifth and `NOTCH_TURN_PX`; a trackpad keeps
            the fifth. */
-        const turn = padGesture.get(el)
-          ? 0.2
-          : Math.min(0.2, NOTCH_TURN_PX / Math.max(1, to - from));
+        /* `?scroll=1` (Julian, 2026-10-22, a preview): the deck goes where
+           the scroll puts it, and at rest it settles on the nearer screen
+           instead of turning the page at a fifth. */
+        const turn = free
+          ? 0.5
+          : padGesture.get(el)
+            ? 0.2
+            : Math.min(0.2, NOTCH_TURN_PX / Math.max(1, to - from));
         const onward = lenis.direction >= 0 ? gone > turn : gone > 1 - turn;
         const target = onward ? to : from;
         if (Math.abs(target - x) < 1 && Math.abs(target - el.scrollLeft) < 1) return;
         lenis.scrollTo(target, {
-          duration: 0.6,
-          easing: (t) => 1 - (1 - t) ** 3,
+          // From rest under `?scroll=1`, so it eases in as well as out.
+          duration: free ? 0.7 : 0.6,
+          easing: free
+            ? (t) => (t < 0.5 ? 4 * t ** 3 : 1 - (-2 * t + 2) ** 3 / 2)
+            : (t) => 1 - (1 - t) ** 3,
         });
         wake();
       };

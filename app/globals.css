@@ -143,3 +143,9 @@
     animation-delay: 0s;
   }
 }
+
+/* `?scroll=1` (`strip/deck.tsx`): the homepage's screens side by side,
+   a hairline where one ends and the next begins. */
+[data-flat] > :not(:first-child) {
+  box-shadow: inset 1px 0 0 var(--border);
+}
