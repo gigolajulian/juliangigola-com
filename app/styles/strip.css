@@ -465,8 +465,9 @@ nav[aria-label="Categories"] ul[data-more] {
 /* Larger, and a long name runs to two lines rather than shrinking to fit
    one. Sized for the plate, not the name's length. */
 .strip-grid .cover-name {
-  /* The longest word (`--w`) has to fit one line on its own. */
-  font-size: clamp(0.875rem, min(16cqw, calc(230cqw / var(--n, 12)), calc(140cqw / var(--w, 8))), 2.5rem);
+  /* The longest word (`--w`) has to fit one line on its own. 135, not
+     140, for Neue Haas's wider caps: ANDROMEDA ran 2px out at 1440. */
+  font-size: clamp(0.875rem, min(16cqw, calc(230cqw / var(--n, 12)), calc(135cqw / var(--w, 8))), 2.5rem);
   white-space: normal;
   overflow: hidden;
   text-overflow: clip;
