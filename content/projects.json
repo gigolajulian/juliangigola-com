@@ -1450,6 +1450,2158 @@
           "alt": ""
         }
       ]
+    },
+    {
+      "slug": "future-noir",
+      "name": "FUTURE NOIR",
+      "categorySlug": "artist-presskit",
+      "credits": [
+        {
+          "role": "Model",
+          "name": "@justirismusic",
+          "instagram": "justirismusic"
+        },
+        {
+          "role": "Photographer",
+          "name": "Julian Gigola",
+          "instagram": "juliangigola"
+        }
+      ],
+      "cover": {
+        "src": "/work/future-noir/cover.jpg",
+        "width": 600,
+        "height": 800,
+        "color": "#54514F",
+        "alt": ""
+      },
+      "images": [
+        {
+          "src": "/work/future-noir/01.jpg",
+          "width": 2500,
+          "height": 3125,
+          "color": "#524F4D",
+          "alt": ""
+        },
+        {
+          "src": "/work/future-noir/02.jpg",
+          "width": 2500,
+          "height": 3125,
+          "color": "#50514E",
+          "alt": ""
+        },
+        {
+          "src": "/work/future-noir/03.jpg",
+          "width": 2500,
+          "height": 3125,
+          "color": "#6E6E6C",
+          "alt": ""
+        },
+        {
+          "src": "/work/future-noir/04.jpg",
+          "width": 2500,
+          "height": 3126,
+          "color": "#686058",
+          "alt": ""
+        }
+      ]
+    },
+    {
+      "slug": "prowess-unleashed",
+      "name": "PROWESS UNLEASHED",
+      "categorySlug": "editorial",
+      "credits": [
+        {
+          "role": "Model",
+          "name": "@rice666s",
+          "instagram": "rice666s"
+        },
+        {
+          "role": "Photographer",
+          "name": "Julian Gigola",
+          "instagram": "juliangigola"
+        }
+      ],
+      "cover": {
+        "src": "/work/prowess-unleashed/cover.jpg",
+        "width": 600,
+        "height": 800,
+        "color": "#433D3A",
+        "alt": ""
+      },
+      "images": [
+        {
+          "src": "/work/prowess-unleashed/01.jpg",
+          "width": 2500,
+          "height": 3125,
+          "color": "#423D3A",
+          "alt": ""
+        },
+        {
+          "src": "/work/prowess-unleashed/02.jpg",
+          "width": 2500,
+          "height": 3125,
+          "color": "#7A6054",
+          "alt": ""
+        },
+        {
+          "src": "/work/prowess-unleashed/03.jpg",
+          "width": 2500,
+          "height": 3125,
+          "color": "#7B584D",
+          "alt": ""
+        },
+        {
+          "src": "/work/prowess-unleashed/04.jpg",
+          "width": 2500,
+          "height": 3125,
+          "color": "#6B5661",
+          "alt": ""
+        },
+        {
+          "src": "/work/prowess-unleashed/05.jpg",
+          "width": 2500,
+          "height": 3125,
+          "color": "#854D43",
+          "alt": ""
+        }
+      ]
+    },
+    {
+      "slug": "vile",
+      "name": "VILE",
+      "categorySlug": "chroma",
+      "credits": [
+        {
+          "role": "Model",
+          "name": "@vile.honey",
+          "instagram": "vile.honey"
+        },
+        {
+          "role": "Dress",
+          "name": "@by_vicious",
+          "instagram": "by_vicious"
+        },
+        {
+          "role": "Set design",
+          "name": "@thisguysdope_disguise",
+          "instagram": "thisguysdope_disguise"
+        },
+        {
+          "role": "Assist",
+          "name": "@anonymous.ports",
+          "instagram": "anonymous.ports"
+        },
+        {
+          "role": "Photographer",
+          "name": "Julian Gigola",
+          "instagram": "juliangigola"
+        }
+      ],
+      "cover": {
+        "src": "/work/vile/cover.jpg",
+        "width": 600,
+        "height": 800,
+        "color": "#3A0B0D",
+        "alt": ""
+      },
+      "images": [
+        {
+          "src": "/work/vile/01.jpg",
+          "width": 2500,
+          "height": 3333,
+          "color": "#3A0B0D",
+          "alt": ""
+        },
+        {
+          "src": "/work/vile/02.jpg",
+          "width": 2500,
+          "height": 3125,
+          "color": "#480810",
+          "alt": ""
+        },
+        {
+          "src": "/work/vile/03.jpg",
+          "width": 2500,
+          "height": 3125,
+          "color": "#550A09",
+          "alt": ""
+        },
+        {
+          "src": "/work/vile/04.jpg",
+          "width": 2500,
+          "height": 3125,
+          "color": "#430A0B",
+          "alt": ""
+        },
+        {
+          "src": "/work/vile/05.jpg",
+          "width": 2500,
+          "height": 3125,
+          "color": "#380E0E",
+          "alt": ""
+        },
+        {
+          "src": "/work/vile/06.jpg",
+          "width": 2500,
+          "height": 3125,
+          "color": "#340B0C",
+          "alt": ""
+        }
+      ]
+    },
+    {
+      "slug": "wild-and-unapologetic",
+      "name": "WILD & UNAPOLOGETIC",
+      "categorySlug": "editorial",
+      "credits": [
+        {
+          "role": "Model",
+          "name": "@meow.torrey",
+          "instagram": "meow.torrey"
+        },
+        {
+          "role": "Styling & HMUA",
+          "name": "@beauty.by.torrey",
+          "instagram": "beauty.by.torrey"
+        },
+        {
+          "role": "Photographer",
+          "name": "Julian Gigola",
+          "instagram": "juliangigola"
+        }
+      ],
+      "cover": {
+        "src": "/work/wild-and-unapologetic/cover.jpg",
+        "width": 600,
+        "height": 800,
+        "color": "#282B22",
+        "alt": ""
+      },
+      "images": [
+        {
+          "src": "/work/wild-and-unapologetic/01.jpg",
+          "width": 2500,
+          "height": 2000,
+          "color": "#262A21",
+          "alt": ""
+        },
+        {
+          "src": "/work/wild-and-unapologetic/02.jpg",
+          "width": 2500,
+          "height": 2000,
+          "color": "#15191A",
+          "alt": ""
+        },
+        {
+          "src": "/work/wild-and-unapologetic/03.jpg",
+          "width": 2500,
+          "height": 2000,
+          "color": "#2E3228",
+          "alt": ""
+        },
+        {
+          "src": "/work/wild-and-unapologetic/04.jpg",
+          "width": 2500,
+          "height": 2000,
+          "color": "#181E1A",
+          "alt": ""
+        },
+        {
+          "src": "/work/wild-and-unapologetic/05.jpg",
+          "width": 2500,
+          "height": 2000,
+          "color": "#1D1E22",
+          "alt": ""
+        },
+        {
+          "src": "/work/wild-and-unapologetic/06.jpg",
+          "width": 2500,
+          "height": 2000,
+          "color": "#262C24",
+          "alt": ""
+        }
+      ]
+    },
+    {
+      "slug": "untamed",
+      "name": "UNTAMED",
+      "categorySlug": "editorial",
+      "credits": [
+        {
+          "role": "Model",
+          "name": "@rice666s",
+          "instagram": "rice666s"
+        },
+        {
+          "role": "Assist",
+          "name": "@takyon.nanoplex",
+          "instagram": "takyon.nanoplex"
+        },
+        {
+          "role": "Photographer",
+          "name": "Julian Gigola",
+          "instagram": "juliangigola"
+        }
+      ],
+      "cover": {
+        "src": "/work/untamed/cover.jpg",
+        "width": 600,
+        "height": 800,
+        "color": "#6F5F56",
+        "alt": ""
+      },
+      "images": [
+        {
+          "src": "/work/untamed/01.jpg",
+          "width": 2500,
+          "height": 3125,
+          "color": "#6E5F56",
+          "alt": ""
+        },
+        {
+          "src": "/work/untamed/02.jpg",
+          "width": 2500,
+          "height": 3125,
+          "color": "#66564F",
+          "alt": ""
+        },
+        {
+          "src": "/work/untamed/03.jpg",
+          "width": 2500,
+          "height": 3125,
+          "color": "#CBC3BA",
+          "alt": ""
+        },
+        {
+          "src": "/work/untamed/04.jpg",
+          "width": 2500,
+          "height": 3125,
+          "color": "#ACA29B",
+          "alt": ""
+        },
+        {
+          "src": "/work/untamed/05.jpg",
+          "width": 2500,
+          "height": 3125,
+          "color": "#CAC2BC",
+          "alt": ""
+        }
+      ]
+    },
+    {
+      "slug": "accomplice",
+      "name": "ACCOMPLICE",
+      "categorySlug": "editorial",
+      "credits": [
+        {
+          "role": "Model",
+          "name": "@ccccolee",
+          "instagram": "ccccolee"
+        },
+        {
+          "role": "Model",
+          "name": "@carti.kun",
+          "instagram": "carti.kun"
+        },
+        {
+          "role": "Photographer",
+          "name": "Julian Gigola",
+          "instagram": "juliangigola"
+        }
+      ],
+      "cover": {
+        "src": "/work/accomplice/cover.jpg",
+        "width": 600,
+        "height": 800,
+        "color": "#7C7B79",
+        "alt": ""
+      },
+      "images": [
+        {
+          "src": "/work/accomplice/01.jpg",
+          "width": 2500,
+          "height": 3125,
+          "color": "#7D7C7A",
+          "alt": ""
+        },
+        {
+          "src": "/work/accomplice/02.jpg",
+          "width": 2500,
+          "height": 3125,
+          "color": "#A1A09D",
+          "alt": ""
+        },
+        {
+          "src": "/work/accomplice/03.jpg",
+          "width": 2500,
+          "height": 3125,
+          "color": "#94867E",
+          "alt": ""
+        },
+        {
+          "src": "/work/accomplice/04.jpg",
+          "width": 2500,
+          "height": 3125,
+          "color": "#A2A09E",
+          "alt": ""
+        },
+        {
+          "src": "/work/accomplice/05.jpg",
+          "width": 2500,
+          "height": 3125,
+          "color": "#A7A5A3",
+          "alt": ""
+        }
+      ]
+    },
+    {
+      "slug": "fleece",
+      "name": "FLEECE",
+      "categorySlug": "editorial",
+      "credits": [
+        {
+          "role": "Model",
+          "name": "@meow.torrey",
+          "instagram": "meow.torrey"
+        },
+        {
+          "role": "HMUA & Styling",
+          "name": "@beauty.by.torrey",
+          "instagram": "beauty.by.torrey"
+        },
+        {
+          "role": "Photographer",
+          "name": "Julian Gigola",
+          "instagram": "juliangigola"
+        }
+      ],
+      "cover": {
+        "src": "/work/fleece/cover.jpg",
+        "width": 600,
+        "height": 800,
+        "color": "#928B87",
+        "alt": ""
+      },
+      "images": [
+        {
+          "src": "/work/fleece/01.jpg",
+          "width": 2500,
+          "height": 3125,
+          "color": "#938C88",
+          "alt": ""
+        },
+        {
+          "src": "/work/fleece/02.jpg",
+          "width": 2500,
+          "height": 3125,
+          "color": "#827971",
+          "alt": ""
+        },
+        {
+          "src": "/work/fleece/03.jpg",
+          "width": 2500,
+          "height": 3125,
+          "color": "#877A71",
+          "alt": ""
+        },
+        {
+          "src": "/work/fleece/04.jpg",
+          "width": 2500,
+          "height": 3125,
+          "color": "#8F8378",
+          "alt": ""
+        },
+        {
+          "src": "/work/fleece/05.jpg",
+          "width": 2500,
+          "height": 3125,
+          "color": "#7F756F",
+          "alt": ""
+        }
+      ]
+    },
+    {
+      "slug": "veil",
+      "name": "VEIL",
+      "categorySlug": "chroma",
+      "credits": [
+        {
+          "role": "Model",
+          "name": "@luellalvnne",
+          "instagram": "luellalvnne"
+        },
+        {
+          "role": "Assist",
+          "name": "@thisguysdope_disguise",
+          "instagram": "thisguysdope_disguise"
+        },
+        {
+          "role": "Photographer",
+          "name": "Julian Gigola",
+          "instagram": "juliangigola"
+        }
+      ],
+      "cover": {
+        "src": "/work/veil/cover.jpg",
+        "width": 600,
+        "height": 800,
+        "color": "#6A666D",
+        "alt": ""
+      },
+      "images": [
+        {
+          "src": "/work/veil/01.jpg",
+          "width": 2500,
+          "height": 3125,
+          "color": "#6B686F",
+          "alt": ""
+        },
+        {
+          "src": "/work/veil/02.jpg",
+          "width": 2500,
+          "height": 3125,
+          "color": "#073246",
+          "alt": ""
+        },
+        {
+          "src": "/work/veil/03.jpg",
+          "width": 2500,
+          "height": 3125,
+          "color": "#875C4C",
+          "alt": ""
+        },
+        {
+          "src": "/work/veil/04.jpg",
+          "width": 2500,
+          "height": 3125,
+          "color": "#696374",
+          "alt": ""
+        },
+        {
+          "src": "/work/veil/05.jpg",
+          "width": 2500,
+          "height": 3125,
+          "color": "#2A5874",
+          "alt": ""
+        },
+        {
+          "src": "/work/veil/06.jpg",
+          "width": 2500,
+          "height": 3125,
+          "color": "#1D393B",
+          "alt": ""
+        },
+        {
+          "src": "/work/veil/07.jpg",
+          "width": 2500,
+          "height": 3125,
+          "color": "#10374B",
+          "alt": ""
+        }
+      ]
+    },
+    {
+      "slug": "flux-form",
+      "name": "FLUX FORM",
+      "categorySlug": "studio-digitals",
+      "credits": [
+        {
+          "role": "Model",
+          "name": "@0414lei",
+          "instagram": "0414lei"
+        },
+        {
+          "role": "Styling",
+          "name": "@leena_kema",
+          "instagram": "leena_kema"
+        },
+        {
+          "role": "Wardrobe",
+          "name": "@starcasevintage",
+          "instagram": "starcasevintage"
+        },
+        {
+          "role": "Photographer",
+          "name": "Julian Gigola",
+          "instagram": "juliangigola"
+        }
+      ],
+      "cover": {
+        "src": "/work/flux-form/cover.jpg",
+        "width": 600,
+        "height": 800,
+        "color": "#B0ADAB",
+        "alt": ""
+      },
+      "images": [
+        {
+          "src": "/work/flux-form/01.jpg",
+          "width": 2500,
+          "height": 3333,
+          "color": "#B0ADAB",
+          "alt": ""
+        },
+        {
+          "src": "/work/flux-form/02.jpg",
+          "width": 2500,
+          "height": 3333,
+          "color": "#AFADAB",
+          "alt": ""
+        },
+        {
+          "src": "/work/flux-form/03.jpg",
+          "width": 2500,
+          "height": 3333,
+          "color": "#BCB9B6",
+          "alt": ""
+        },
+        {
+          "src": "/work/flux-form/04.jpg",
+          "width": 2500,
+          "height": 3334,
+          "color": "#A7A39F",
+          "alt": ""
+        },
+        {
+          "src": "/work/flux-form/05.jpg",
+          "width": 2500,
+          "height": 3333,
+          "color": "#B5B5B3",
+          "alt": ""
+        },
+        {
+          "src": "/work/flux-form/06.jpg",
+          "width": 2500,
+          "height": 3333,
+          "color": "#BBB9B7",
+          "alt": ""
+        },
+        {
+          "src": "/work/flux-form/07.jpg",
+          "width": 2500,
+          "height": 3333,
+          "color": "#ADA9A5",
+          "alt": ""
+        },
+        {
+          "src": "/work/flux-form/08.jpg",
+          "width": 2500,
+          "height": 3334,
+          "color": "#ADAAA8",
+          "alt": ""
+        }
+      ]
+    },
+    {
+      "slug": "redtide",
+      "name": "REDTIDE",
+      "categorySlug": "chroma",
+      "credits": [
+        {
+          "role": "Model",
+          "name": "@bby_kimchi",
+          "instagram": "bby_kimchi"
+        },
+        {
+          "role": "Assist",
+          "name": "@ozwzrd",
+          "instagram": "ozwzrd"
+        },
+        {
+          "role": "Photographer",
+          "name": "Julian Gigola",
+          "instagram": "juliangigola"
+        }
+      ],
+      "cover": {
+        "src": "/work/redtide/cover.jpg",
+        "width": 600,
+        "height": 800,
+        "color": "#211B25",
+        "alt": ""
+      },
+      "images": [
+        {
+          "src": "/work/redtide/01.jpg",
+          "width": 2500,
+          "height": 3333,
+          "color": "#211B25",
+          "alt": ""
+        },
+        {
+          "src": "/work/redtide/02.jpg",
+          "width": 2500,
+          "height": 3333,
+          "color": "#2D2121",
+          "alt": ""
+        },
+        {
+          "src": "/work/redtide/03.jpg",
+          "width": 2500,
+          "height": 3333,
+          "color": "#1A2D43",
+          "alt": ""
+        },
+        {
+          "src": "/work/redtide/04.jpg",
+          "width": 2500,
+          "height": 1668,
+          "color": "#0D0303",
+          "alt": ""
+        },
+        {
+          "src": "/work/redtide/05.jpg",
+          "width": 2500,
+          "height": 3333,
+          "color": "#191F29",
+          "alt": ""
+        }
+      ]
+    },
+    {
+      "slug": "noct",
+      "name": "NØCT",
+      "categorySlug": "chroma",
+      "credits": [
+        {
+          "role": "Model",
+          "name": "@rice666s",
+          "instagram": "rice666s"
+        },
+        {
+          "role": "Video",
+          "name": "@arrowsevil",
+          "instagram": "arrowsevil"
+        },
+        {
+          "role": "Photographer",
+          "name": "Julian Gigola",
+          "instagram": "juliangigola"
+        }
+      ],
+      "cover": {
+        "src": "/work/noct/cover.jpg",
+        "width": 600,
+        "height": 800,
+        "color": "#221313",
+        "alt": ""
+      },
+      "images": [
+        {
+          "src": "/work/noct/01.jpg",
+          "width": 2500,
+          "height": 3333,
+          "color": "#221313",
+          "alt": ""
+        },
+        {
+          "src": "/work/noct/02.jpg",
+          "width": 2500,
+          "height": 3333,
+          "color": "#291614",
+          "alt": ""
+        },
+        {
+          "src": "/work/noct/03.jpg",
+          "width": 2500,
+          "height": 1668,
+          "color": "#2D140F",
+          "alt": ""
+        },
+        {
+          "src": "/work/noct/04.jpg",
+          "width": 2500,
+          "height": 3333,
+          "color": "#181010",
+          "alt": ""
+        },
+        {
+          "src": "/work/noct/05.jpg",
+          "width": 2500,
+          "height": 3333,
+          "color": "#241A16",
+          "alt": ""
+        },
+        {
+          "src": "/work/noct/06.jpg",
+          "width": 2500,
+          "height": 1667,
+          "color": "#1D1816",
+          "alt": ""
+        },
+        {
+          "src": "/work/noct/07.jpg",
+          "width": 2500,
+          "height": 3333,
+          "color": "#2F1715",
+          "alt": ""
+        },
+        {
+          "src": "/work/noct/08.jpg",
+          "width": 2500,
+          "height": 3334,
+          "color": "#201C1B",
+          "alt": ""
+        },
+        {
+          "src": "/work/noct/09.jpg",
+          "width": 2500,
+          "height": 3333,
+          "color": "#2A1715",
+          "alt": ""
+        },
+        {
+          "src": "/work/noct/10.jpg",
+          "width": 2500,
+          "height": 3334,
+          "color": "#261515",
+          "alt": ""
+        },
+        {
+          "src": "/work/noct/11.jpg",
+          "width": 2500,
+          "height": 3333,
+          "color": "#290D0E",
+          "alt": ""
+        }
+      ]
+    },
+    {
+      "slug": "shred",
+      "name": "SHRED",
+      "categorySlug": "editorial",
+      "credits": [
+        {
+          "role": "Model",
+          "name": "@bbyxshey",
+          "instagram": "bbyxshey"
+        },
+        {
+          "role": "Photographer",
+          "name": "Julian Gigola",
+          "instagram": "juliangigola"
+        }
+      ],
+      "cover": {
+        "src": "/work/shred/cover.jpg",
+        "width": 600,
+        "height": 800,
+        "color": "#454547",
+        "alt": ""
+      },
+      "images": [
+        {
+          "src": "/work/shred/01.jpg",
+          "width": 2500,
+          "height": 3333,
+          "color": "#454547",
+          "alt": ""
+        },
+        {
+          "src": "/work/shred/02.jpg",
+          "width": 2500,
+          "height": 3333,
+          "color": "#262222",
+          "alt": ""
+        },
+        {
+          "src": "/work/shred/03.jpg",
+          "width": 2500,
+          "height": 3333,
+          "color": "#5B5149",
+          "alt": ""
+        },
+        {
+          "src": "/work/shred/04.jpg",
+          "width": 2500,
+          "height": 3333,
+          "color": "#948C86",
+          "alt": ""
+        },
+        {
+          "src": "/work/shred/05.jpg",
+          "width": 2500,
+          "height": 3334,
+          "color": "#45403E",
+          "alt": ""
+        },
+        {
+          "src": "/work/shred/06.jpg",
+          "width": 2500,
+          "height": 3334,
+          "color": "#29292A",
+          "alt": ""
+        },
+        {
+          "src": "/work/shred/07.jpg",
+          "width": 2500,
+          "height": 3333,
+          "color": "#333334",
+          "alt": ""
+        },
+        {
+          "src": "/work/shred/08.jpg",
+          "width": 2500,
+          "height": 3334,
+          "color": "#565859",
+          "alt": ""
+        }
+      ]
+    },
+    {
+      "slug": "distortion-zone",
+      "name": "DISTORTION ZONE",
+      "categorySlug": "editorial",
+      "credits": [
+        {
+          "role": "Model",
+          "name": "@rice666s",
+          "instagram": "rice666s"
+        },
+        {
+          "role": "Photographer",
+          "name": "Julian Gigola",
+          "instagram": "juliangigola"
+        }
+      ],
+      "cover": {
+        "src": "/work/distortion-zone/cover.jpg",
+        "width": 600,
+        "height": 800,
+        "color": "#383E38",
+        "alt": ""
+      },
+      "images": [
+        {
+          "src": "/work/distortion-zone/01.jpg",
+          "width": 2500,
+          "height": 3333,
+          "color": "#383E38",
+          "alt": ""
+        },
+        {
+          "src": "/work/distortion-zone/02.jpg",
+          "width": 2500,
+          "height": 3333,
+          "color": "#3B3F3C",
+          "alt": ""
+        },
+        {
+          "src": "/work/distortion-zone/03.jpg",
+          "width": 2500,
+          "height": 3333,
+          "color": "#363B36",
+          "alt": ""
+        },
+        {
+          "src": "/work/distortion-zone/04.jpg",
+          "width": 2500,
+          "height": 3333,
+          "color": "#42413B",
+          "alt": ""
+        },
+        {
+          "src": "/work/distortion-zone/05.jpg",
+          "width": 2500,
+          "height": 3333,
+          "color": "#3E423D",
+          "alt": ""
+        },
+        {
+          "src": "/work/distortion-zone/06.jpg",
+          "width": 2500,
+          "height": 3333,
+          "color": "#373C38",
+          "alt": ""
+        },
+        {
+          "src": "/work/distortion-zone/07.jpg",
+          "width": 2500,
+          "height": 3333,
+          "color": "#42453F",
+          "alt": ""
+        },
+        {
+          "src": "/work/distortion-zone/08.jpg",
+          "width": 2500,
+          "height": 3333,
+          "color": "#2A2B27",
+          "alt": ""
+        }
+      ]
+    },
+    {
+      "slug": "vacancy",
+      "name": "VACANCY",
+      "categorySlug": "editorial",
+      "credits": [
+        {
+          "role": "Photographer",
+          "name": "Julian Gigola",
+          "instagram": "juliangigola"
+        }
+      ],
+      "cover": {
+        "src": "/work/vacancy/cover.jpg",
+        "width": 600,
+        "height": 800,
+        "color": "#554136",
+        "alt": ""
+      },
+      "images": [
+        {
+          "src": "/work/vacancy/01.jpg",
+          "width": 2500,
+          "height": 3333,
+          "color": "#554136",
+          "alt": ""
+        },
+        {
+          "src": "/work/vacancy/02.jpg",
+          "width": 2500,
+          "height": 1563,
+          "color": "#634F41",
+          "alt": ""
+        },
+        {
+          "src": "/work/vacancy/03.jpg",
+          "width": 2500,
+          "height": 3333,
+          "color": "#78655B",
+          "alt": ""
+        },
+        {
+          "src": "/work/vacancy/04.jpg",
+          "width": 2500,
+          "height": 3333,
+          "color": "#2A2520",
+          "alt": ""
+        },
+        {
+          "src": "/work/vacancy/05.jpg",
+          "width": 2500,
+          "height": 3334,
+          "color": "#31312F",
+          "alt": ""
+        },
+        {
+          "src": "/work/vacancy/06.jpg",
+          "width": 2500,
+          "height": 3333,
+          "color": "#4F4840",
+          "alt": ""
+        }
+      ]
+    },
+    {
+      "slug": "sector-07",
+      "name": "SECTOR⊹07",
+      "categorySlug": "campaigns",
+      "credits": [
+        {
+          "role": "Styling",
+          "name": "@tokio.arc",
+          "instagram": "tokio.arc"
+        },
+        {
+          "role": "In frame",
+          "name": "@jeffrey.hopson",
+          "instagram": "jeffrey.hopson"
+        },
+        {
+          "role": "Design",
+          "name": "@ukiyosunknown",
+          "instagram": "ukiyosunknown"
+        },
+        {
+          "role": "Photographer",
+          "name": "Julian Gigola",
+          "instagram": "juliangigola"
+        }
+      ],
+      "cover": {
+        "src": "/work/sector-07/cover.jpg",
+        "width": 600,
+        "height": 800,
+        "color": "#50463D",
+        "alt": ""
+      },
+      "images": [
+        {
+          "src": "/work/sector-07/01.jpg",
+          "width": 2500,
+          "height": 3333,
+          "color": "#50463D",
+          "alt": ""
+        },
+        {
+          "src": "/work/sector-07/02.jpg",
+          "width": 2500,
+          "height": 3334,
+          "color": "#756E63",
+          "alt": ""
+        },
+        {
+          "src": "/work/sector-07/03.jpg",
+          "width": 2500,
+          "height": 3333,
+          "color": "#999083",
+          "alt": ""
+        },
+        {
+          "src": "/work/sector-07/04.jpg",
+          "width": 2500,
+          "height": 3333,
+          "color": "#767167",
+          "alt": ""
+        },
+        {
+          "src": "/work/sector-07/05.jpg",
+          "width": 2500,
+          "height": 3334,
+          "color": "#6F6459",
+          "alt": ""
+        },
+        {
+          "src": "/work/sector-07/06.jpg",
+          "width": 2500,
+          "height": 3333,
+          "color": "#7B6F64",
+          "alt": ""
+        }
+      ]
+    },
+    {
+      "slug": "laced",
+      "name": "LACED",
+      "categorySlug": "editorial",
+      "credits": [
+        {
+          "role": "Model",
+          "name": "@kissedbyconstance",
+          "instagram": "kissedbyconstance"
+        },
+        {
+          "role": "Photographer",
+          "name": "Julian Gigola",
+          "instagram": "juliangigola"
+        }
+      ],
+      "cover": {
+        "src": "/work/laced/cover.jpg",
+        "width": 600,
+        "height": 800,
+        "color": "#BAB4A9",
+        "alt": ""
+      },
+      "images": [
+        {
+          "src": "/work/laced/01.jpg",
+          "width": 2500,
+          "height": 3333,
+          "color": "#BAB4A9",
+          "alt": ""
+        },
+        {
+          "src": "/work/laced/02.jpg",
+          "width": 2500,
+          "height": 3333,
+          "color": "#5A5752",
+          "alt": ""
+        },
+        {
+          "src": "/work/laced/03.jpg",
+          "width": 2500,
+          "height": 3333,
+          "color": "#312F29",
+          "alt": ""
+        },
+        {
+          "src": "/work/laced/04.jpg",
+          "width": 2500,
+          "height": 3333,
+          "color": "#5B534D",
+          "alt": ""
+        },
+        {
+          "src": "/work/laced/05.jpg",
+          "width": 2500,
+          "height": 3333,
+          "color": "#78726C",
+          "alt": ""
+        },
+        {
+          "src": "/work/laced/06.jpg",
+          "width": 2500,
+          "height": 1668,
+          "color": "#54504B",
+          "alt": ""
+        }
+      ]
+    },
+    {
+      "slug": "omen",
+      "name": "OMEN",
+      "categorySlug": "editorial",
+      "credits": [
+        {
+          "role": "Model",
+          "name": "@ccccolee",
+          "instagram": "ccccolee"
+        },
+        {
+          "role": "Photographer",
+          "name": "Julian Gigola",
+          "instagram": "juliangigola"
+        }
+      ],
+      "cover": {
+        "src": "/work/omen/cover.jpg",
+        "width": 600,
+        "height": 800,
+        "color": "#0F1316",
+        "alt": ""
+      },
+      "images": [
+        {
+          "src": "/work/omen/01.jpg",
+          "width": 2500,
+          "height": 3125,
+          "color": "#0F1316",
+          "alt": ""
+        },
+        {
+          "src": "/work/omen/02.jpg",
+          "width": 2500,
+          "height": 3125,
+          "color": "#222125",
+          "alt": ""
+        },
+        {
+          "src": "/work/omen/03.jpg",
+          "width": 2500,
+          "height": 3125,
+          "color": "#3E3835",
+          "alt": ""
+        },
+        {
+          "src": "/work/omen/04.jpg",
+          "width": 2500,
+          "height": 3125,
+          "color": "#1D1D21",
+          "alt": ""
+        }
+      ]
+    },
+    {
+      "slug": "angelic",
+      "name": "ANGELIC",
+      "categorySlug": "editorial",
+      "credits": [
+        {
+          "role": "Model",
+          "name": "@d33jnuts",
+          "instagram": "d33jnuts"
+        },
+        {
+          "role": "Photographer",
+          "name": "Julian Gigola",
+          "instagram": "juliangigola"
+        }
+      ],
+      "cover": {
+        "src": "/work/angelic/cover.jpg",
+        "width": 600,
+        "height": 800,
+        "color": "#9B8C83",
+        "alt": ""
+      },
+      "images": [
+        {
+          "src": "/work/angelic/01.jpg",
+          "width": 2500,
+          "height": 3125,
+          "color": "#A1938B",
+          "alt": ""
+        },
+        {
+          "src": "/work/angelic/02.jpg",
+          "width": 2500,
+          "height": 3125,
+          "color": "#B0AAA8",
+          "alt": ""
+        },
+        {
+          "src": "/work/angelic/03.jpg",
+          "width": 2500,
+          "height": 3125,
+          "color": "#92827A",
+          "alt": ""
+        },
+        {
+          "src": "/work/angelic/04.jpg",
+          "width": 2500,
+          "height": 3125,
+          "color": "#7E7B78",
+          "alt": ""
+        }
+      ]
+    },
+    {
+      "slug": "celestica",
+      "name": "CELESTICA",
+      "categorySlug": "editorial",
+      "credits": [
+        {
+          "role": "Model",
+          "name": "@iaiupo",
+          "instagram": "iaiupo"
+        },
+        {
+          "role": "Photographer",
+          "name": "Julian Gigola",
+          "instagram": "juliangigola"
+        }
+      ],
+      "cover": {
+        "src": "/work/celestica/cover.jpg",
+        "width": 600,
+        "height": 800,
+        "color": "#3B3532",
+        "alt": ""
+      },
+      "images": [
+        {
+          "src": "/work/celestica/01.jpg",
+          "width": 2500,
+          "height": 3333,
+          "color": "#3B3532",
+          "alt": ""
+        },
+        {
+          "src": "/work/celestica/02.jpg",
+          "width": 2500,
+          "height": 3125,
+          "color": "#2A2726",
+          "alt": ""
+        },
+        {
+          "src": "/work/celestica/03.jpg",
+          "width": 2500,
+          "height": 3126,
+          "color": "#6D5F57",
+          "alt": ""
+        },
+        {
+          "src": "/work/celestica/04.jpg",
+          "width": 2500,
+          "height": 3125,
+          "color": "#68605A",
+          "alt": ""
+        },
+        {
+          "src": "/work/celestica/05.jpg",
+          "width": 2500,
+          "height": 3125,
+          "color": "#4E433B",
+          "alt": ""
+        },
+        {
+          "src": "/work/celestica/06.jpg",
+          "width": 2500,
+          "height": 3125,
+          "color": "#887C74",
+          "alt": ""
+        },
+        {
+          "src": "/work/celestica/07.jpg",
+          "width": 2500,
+          "height": 3125,
+          "color": "#85786E",
+          "alt": ""
+        },
+        {
+          "src": "/work/celestica/08.jpg",
+          "width": 2500,
+          "height": 3125,
+          "color": "#3E3937",
+          "alt": ""
+        },
+        {
+          "src": "/work/celestica/09.jpg",
+          "width": 2500,
+          "height": 3125,
+          "color": "#494440",
+          "alt": ""
+        }
+      ]
+    },
+    {
+      "slug": "faerus-machina",
+      "name": "FÆRUS MACHINA",
+      "categorySlug": "editorial",
+      "credits": [
+        {
+          "role": "Model",
+          "name": "@draculina97",
+          "instagram": "draculina97"
+        },
+        {
+          "role": "Photographer",
+          "name": "Julian Gigola",
+          "instagram": "juliangigola"
+        }
+      ],
+      "cover": {
+        "src": "/work/faerus-machina/cover.jpg",
+        "width": 600,
+        "height": 800,
+        "color": "#4C4445",
+        "alt": ""
+      },
+      "images": [
+        {
+          "src": "/work/faerus-machina/01.jpg",
+          "width": 2500,
+          "height": 3333,
+          "color": "#4C4445",
+          "alt": ""
+        },
+        {
+          "src": "/work/faerus-machina/02.jpg",
+          "width": 2500,
+          "height": 3333,
+          "color": "#4A3F3D",
+          "alt": ""
+        },
+        {
+          "src": "/work/faerus-machina/03.jpg",
+          "width": 2500,
+          "height": 3333,
+          "color": "#423B37",
+          "alt": ""
+        },
+        {
+          "src": "/work/faerus-machina/04.jpg",
+          "width": 2500,
+          "height": 3333,
+          "color": "#504848",
+          "alt": ""
+        },
+        {
+          "src": "/work/faerus-machina/05.jpg",
+          "width": 2500,
+          "height": 3333,
+          "color": "#575455",
+          "alt": ""
+        },
+        {
+          "src": "/work/faerus-machina/06.jpg",
+          "width": 2500,
+          "height": 3333,
+          "color": "#4C4241",
+          "alt": ""
+        }
+      ]
+    },
+    {
+      "slug": "tonights-the-night",
+      "name": "TONIGHT'S THE NIGHT",
+      "categorySlug": "editorial",
+      "credits": [
+        {
+          "role": "MUA & Styling",
+          "name": "@fkhbeauty",
+          "instagram": "fkhbeauty"
+        },
+        {
+          "role": "Model",
+          "name": "@libby_4763",
+          "instagram": "libby_4763"
+        },
+        {
+          "role": "Photographer",
+          "name": "Julian Gigola",
+          "instagram": "juliangigola"
+        }
+      ],
+      "cover": {
+        "src": "/work/tonights-the-night/cover.jpg",
+        "width": 600,
+        "height": 800,
+        "color": "#4F4747",
+        "alt": ""
+      },
+      "images": [
+        {
+          "src": "/work/tonights-the-night/01.jpg",
+          "width": 2500,
+          "height": 3334,
+          "color": "#4F4747",
+          "alt": ""
+        },
+        {
+          "src": "/work/tonights-the-night/02.jpg",
+          "width": 2500,
+          "height": 3333,
+          "color": "#363538",
+          "alt": ""
+        },
+        {
+          "src": "/work/tonights-the-night/03.jpg",
+          "width": 2500,
+          "height": 3333,
+          "color": "#2B2627",
+          "alt": ""
+        },
+        {
+          "src": "/work/tonights-the-night/04.jpg",
+          "width": 2500,
+          "height": 3333,
+          "color": "#443D3D",
+          "alt": ""
+        },
+        {
+          "src": "/work/tonights-the-night/05.jpg",
+          "width": 2500,
+          "height": 3333,
+          "color": "#5E5553",
+          "alt": ""
+        },
+        {
+          "src": "/work/tonights-the-night/06.jpg",
+          "width": 2500,
+          "height": 3333,
+          "color": "#383739",
+          "alt": ""
+        },
+        {
+          "src": "/work/tonights-the-night/07.jpg",
+          "width": 2500,
+          "height": 1875,
+          "color": "#443E3E",
+          "alt": ""
+        },
+        {
+          "src": "/work/tonights-the-night/08.jpg",
+          "width": 2500,
+          "height": 1875,
+          "color": "#4D4948",
+          "alt": ""
+        },
+        {
+          "src": "/work/tonights-the-night/09.jpg",
+          "width": 2500,
+          "height": 3333,
+          "color": "#4A4545",
+          "alt": ""
+        }
+      ]
+    },
+    {
+      "slug": "celestial-duality",
+      "name": "CELESTIAL DUALITY",
+      "categorySlug": "editorial",
+      "credits": [
+        {
+          "role": "Model",
+          "name": "@xhwinniex",
+          "instagram": "xhwinniex"
+        },
+        {
+          "role": "Photographer",
+          "name": "Julian Gigola",
+          "instagram": "juliangigola"
+        }
+      ],
+      "cover": {
+        "src": "/work/celestial-duality/cover.jpg",
+        "width": 600,
+        "height": 800,
+        "color": "#B1AAA5",
+        "alt": ""
+      },
+      "images": [
+        {
+          "src": "/work/celestial-duality/01.jpg",
+          "width": 2500,
+          "height": 3333,
+          "color": "#B1AAA5",
+          "alt": ""
+        },
+        {
+          "src": "/work/celestial-duality/02.jpg",
+          "width": 2500,
+          "height": 3333,
+          "color": "#ADA6A0",
+          "alt": ""
+        },
+        {
+          "src": "/work/celestial-duality/03.jpg",
+          "width": 2500,
+          "height": 3333,
+          "color": "#6E6F6D",
+          "alt": ""
+        },
+        {
+          "src": "/work/celestial-duality/04.jpg",
+          "width": 2500,
+          "height": 3333,
+          "color": "#C4BCB7",
+          "alt": ""
+        },
+        {
+          "src": "/work/celestial-duality/05.jpg",
+          "width": 2500,
+          "height": 3333,
+          "color": "#B2ABA8",
+          "alt": ""
+        },
+        {
+          "src": "/work/celestial-duality/06.jpg",
+          "width": 2500,
+          "height": 3333,
+          "color": "#C2BAB8",
+          "alt": ""
+        },
+        {
+          "src": "/work/celestial-duality/07.jpg",
+          "width": 2500,
+          "height": 3333,
+          "color": "#817472",
+          "alt": ""
+        },
+        {
+          "src": "/work/celestial-duality/08.jpg",
+          "width": 2500,
+          "height": 3334,
+          "color": "#C5BCB9",
+          "alt": ""
+        },
+        {
+          "src": "/work/celestial-duality/09.jpg",
+          "width": 2500,
+          "height": 3333,
+          "color": "#BEB3AD",
+          "alt": ""
+        },
+        {
+          "src": "/work/celestial-duality/10.jpg",
+          "width": 2500,
+          "height": 3334,
+          "color": "#BAAFAB",
+          "alt": ""
+        },
+        {
+          "src": "/work/celestial-duality/11.jpg",
+          "width": 2500,
+          "height": 3125,
+          "color": "#28292C",
+          "alt": ""
+        }
+      ]
+    },
+    {
+      "slug": "andromeda",
+      "name": "ANDROMEDA",
+      "categorySlug": "editorial",
+      "credits": [
+        {
+          "role": "Model",
+          "name": "@sydneyj.xo",
+          "instagram": "sydneyj.xo"
+        },
+        {
+          "role": "Photographer",
+          "name": "Julian Gigola",
+          "instagram": "juliangigola"
+        }
+      ],
+      "cover": {
+        "src": "/work/andromeda/cover.jpg",
+        "width": 600,
+        "height": 800,
+        "color": "#615F6E",
+        "alt": ""
+      },
+      "images": [
+        {
+          "src": "/work/andromeda/01.jpg",
+          "width": 2500,
+          "height": 3125,
+          "color": "#615F6E",
+          "alt": ""
+        },
+        {
+          "src": "/work/andromeda/02.jpg",
+          "width": 2500,
+          "height": 3125,
+          "color": "#313344",
+          "alt": ""
+        },
+        {
+          "src": "/work/andromeda/03.jpg",
+          "width": 2500,
+          "height": 3125,
+          "color": "#221D24",
+          "alt": ""
+        },
+        {
+          "src": "/work/andromeda/04.jpg",
+          "width": 2500,
+          "height": 3125,
+          "color": "#626171",
+          "alt": ""
+        },
+        {
+          "src": "/work/andromeda/05.jpg",
+          "width": 2500,
+          "height": 3125,
+          "color": "#777591",
+          "alt": ""
+        },
+        {
+          "src": "/work/andromeda/06.jpg",
+          "width": 2500,
+          "height": 3125,
+          "color": "#44475F",
+          "alt": ""
+        },
+        {
+          "src": "/work/andromeda/07.jpg",
+          "width": 2500,
+          "height": 3125,
+          "color": "#5D5D7A",
+          "alt": ""
+        },
+        {
+          "src": "/work/andromeda/08.jpg",
+          "width": 2500,
+          "height": 3125,
+          "color": "#413A5D",
+          "alt": ""
+        },
+        {
+          "src": "/work/andromeda/09.jpg",
+          "width": 2500,
+          "height": 3125,
+          "color": "#736F97",
+          "alt": ""
+        }
+      ]
+    },
+    {
+      "slug": "retrovision",
+      "name": "RETROVISION",
+      "categorySlug": "editorial",
+      "credits": [
+        {
+          "role": "Model",
+          "name": "@teaseduffy",
+          "instagram": "teaseduffy"
+        },
+        {
+          "role": "Photographer",
+          "name": "Julian Gigola",
+          "instagram": "juliangigola"
+        }
+      ],
+      "cover": {
+        "src": "/work/retrovision/cover.jpg",
+        "width": 600,
+        "height": 800,
+        "color": "#4F2516",
+        "alt": ""
+      },
+      "images": [
+        {
+          "src": "/work/retrovision/01.jpg",
+          "width": 2500,
+          "height": 3125,
+          "color": "#4E2516",
+          "alt": ""
+        },
+        {
+          "src": "/work/retrovision/02.jpg",
+          "width": 2500,
+          "height": 3125,
+          "color": "#3D2827",
+          "alt": ""
+        },
+        {
+          "src": "/work/retrovision/03.jpg",
+          "width": 2500,
+          "height": 3125,
+          "color": "#653221",
+          "alt": ""
+        },
+        {
+          "src": "/work/retrovision/04.jpg",
+          "width": 2500,
+          "height": 3125,
+          "color": "#2C1511",
+          "alt": ""
+        },
+        {
+          "src": "/work/retrovision/05.jpg",
+          "width": 2500,
+          "height": 3125,
+          "color": "#2E2122",
+          "alt": ""
+        },
+        {
+          "src": "/work/retrovision/06.jpg",
+          "width": 2500,
+          "height": 3125,
+          "color": "#42231A",
+          "alt": ""
+        },
+        {
+          "src": "/work/retrovision/07.jpg",
+          "width": 2500,
+          "height": 3125,
+          "color": "#582B1B",
+          "alt": ""
+        }
+      ]
+    },
+    {
+      "slug": "glare",
+      "name": "GLARE",
+      "categorySlug": "campaigns",
+      "credits": [
+        {
+          "role": "Brand",
+          "name": "@angelic__boutique",
+          "instagram": "angelic__boutique"
+        },
+        {
+          "role": "Model",
+          "name": "@thatbihangelic",
+          "instagram": "thatbihangelic"
+        },
+        {
+          "role": "Photographer",
+          "name": "Julian Gigola",
+          "instagram": "juliangigola"
+        }
+      ],
+      "cover": {
+        "src": "/work/glare/cover.jpg",
+        "width": 600,
+        "height": 800,
+        "color": "#504C48",
+        "alt": ""
+      },
+      "images": [
+        {
+          "src": "/work/glare/01.jpg",
+          "width": 2500,
+          "height": 3333,
+          "color": "#504C48",
+          "alt": ""
+        },
+        {
+          "src": "/work/glare/02.jpg",
+          "width": 2500,
+          "height": 3333,
+          "color": "#726B64",
+          "alt": ""
+        },
+        {
+          "src": "/work/glare/03.jpg",
+          "width": 2500,
+          "height": 3333,
+          "color": "#494039",
+          "alt": ""
+        },
+        {
+          "src": "/work/glare/04.jpg",
+          "width": 2500,
+          "height": 3333,
+          "color": "#292522",
+          "alt": ""
+        }
+      ]
+    },
+    {
+      "slug": "gilt",
+      "name": "GILT",
+      "categorySlug": "editorial",
+      "credits": [
+        {
+          "role": "Muse",
+          "name": "@imaniisles",
+          "instagram": "imaniisles"
+        },
+        {
+          "role": "HMUA",
+          "name": "@courtneysagemakeup",
+          "instagram": "courtneysagemakeup"
+        },
+        {
+          "role": "Styling",
+          "name": "@esse_styling",
+          "instagram": "esse_styling"
+        },
+        {
+          "role": "Styling Assist",
+          "name": "@itsmaria.aa",
+          "instagram": "itsmaria.aa"
+        },
+        {
+          "role": "Video",
+          "name": "@ptenfilms",
+          "instagram": "ptenfilms"
+        },
+        {
+          "role": "Photographer",
+          "name": "Julian Gigola",
+          "instagram": "juliangigola"
+        }
+      ],
+      "cover": {
+        "src": "/work/gilt/cover.jpg",
+        "width": 600,
+        "height": 800,
+        "color": "#4C453B",
+        "alt": ""
+      },
+      "images": [
+        {
+          "src": "/work/gilt/01.jpg",
+          "width": 2500,
+          "height": 3333,
+          "color": "#4C453B",
+          "alt": ""
+        },
+        {
+          "src": "/work/gilt/02.jpg",
+          "width": 2500,
+          "height": 3334,
+          "color": "#73736B",
+          "alt": ""
+        },
+        {
+          "src": "/work/gilt/03.jpg",
+          "width": 2500,
+          "height": 3334,
+          "color": "#4C3D34",
+          "alt": ""
+        },
+        {
+          "src": "/work/gilt/04.jpg",
+          "width": 2500,
+          "height": 3333,
+          "color": "#63605B",
+          "alt": ""
+        },
+        {
+          "src": "/work/gilt/05.jpg",
+          "width": 2500,
+          "height": 3333,
+          "color": "#5A574E",
+          "alt": ""
+        },
+        {
+          "src": "/work/gilt/06.jpg",
+          "width": 2500,
+          "height": 3333,
+          "color": "#615B52",
+          "alt": ""
+        }
+      ]
+    },
+    {
+      "slug": "industrial-zone",
+      "name": "INDUSTRIAL ZØNE",
+      "categorySlug": "mixed-media",
+      "credits": [
+        {
+          "role": "3D",
+          "name": "@nikxdesigns",
+          "instagram": "nikxdesigns"
+        },
+        {
+          "role": "Model",
+          "name": "@gracerob1nson",
+          "instagram": "gracerob1nson"
+        },
+        {
+          "role": "Photo",
+          "name": "@thisguysdope_disguise",
+          "instagram": "thisguysdope_disguise"
+        },
+        {
+          "role": "Video",
+          "name": "@whoisoseje",
+          "instagram": "whoisoseje"
+        },
+        {
+          "role": "Photographer",
+          "name": "Julian Gigola",
+          "instagram": "juliangigola"
+        }
+      ],
+      "cover": {
+        "src": "/work/industrial-zone/cover.jpg",
+        "width": 600,
+        "height": 800,
+        "color": "#928C8A",
+        "alt": ""
+      },
+      "images": [
+        {
+          "src": "/work/industrial-zone/01.jpg",
+          "width": 2500,
+          "height": 3334,
+          "color": "#928C8A",
+          "alt": ""
+        },
+        {
+          "src": "/work/industrial-zone/02.jpg",
+          "width": 2500,
+          "height": 1668,
+          "color": "#A09BA3",
+          "alt": ""
+        },
+        {
+          "src": "/work/industrial-zone/03.jpg",
+          "width": 2500,
+          "height": 3333,
+          "color": "#5C5756",
+          "alt": ""
+        },
+        {
+          "src": "/work/industrial-zone/04.jpg",
+          "width": 2500,
+          "height": 3333,
+          "color": "#8C7F7C",
+          "alt": ""
+        },
+        {
+          "src": "/work/industrial-zone/05.jpg",
+          "width": 2500,
+          "height": 3334,
+          "color": "#7D8C99",
+          "alt": ""
+        },
+        {
+          "src": "/work/industrial-zone/06.jpg",
+          "width": 2500,
+          "height": 3333,
+          "color": "#677077",
+          "alt": ""
+        },
+        {
+          "src": "/work/industrial-zone/07.jpg",
+          "width": 2500,
+          "height": 1668,
+          "color": "#979298",
+          "alt": ""
+        }
+      ]
+    },
+    {
+      "slug": "shattered-mercury",
+      "name": "SHATTERED MERCURY",
+      "categorySlug": "editorial",
+      "credits": [
+        {
+          "role": "Muse",
+          "name": "@draculina97",
+          "instagram": "draculina97"
+        },
+        {
+          "role": "Wardrobe/assist",
+          "name": "@lightbender_mark",
+          "instagram": "lightbender_mark"
+        },
+        {
+          "role": "Photographer",
+          "name": "Julian Gigola",
+          "instagram": "juliangigola"
+        }
+      ],
+      "cover": {
+        "src": "/work/shattered-mercury/cover.jpg",
+        "width": 600,
+        "height": 800,
+        "color": "#33282B",
+        "alt": ""
+      },
+      "images": [
+        {
+          "src": "/work/shattered-mercury/01.jpg",
+          "width": 2500,
+          "height": 3125,
+          "color": "#33272A",
+          "alt": ""
+        },
+        {
+          "src": "/work/shattered-mercury/02.jpg",
+          "width": 2500,
+          "height": 3125,
+          "color": "#3B2B2F",
+          "alt": ""
+        },
+        {
+          "src": "/work/shattered-mercury/03.jpg",
+          "width": 2500,
+          "height": 3125,
+          "color": "#25262D",
+          "alt": ""
+        },
+        {
+          "src": "/work/shattered-mercury/04.jpg",
+          "width": 2500,
+          "height": 3125,
+          "color": "#4C191A",
+          "alt": ""
+        },
+        {
+          "src": "/work/shattered-mercury/05.jpg",
+          "width": 2500,
+          "height": 3125,
+          "color": "#483638",
+          "alt": ""
+        },
+        {
+          "src": "/work/shattered-mercury/06.jpg",
+          "width": 2500,
+          "height": 3125,
+          "color": "#342729",
+          "alt": ""
+        },
+        {
+          "src": "/work/shattered-mercury/07.jpg",
+          "width": 2500,
+          "height": 3125,
+          "color": "#5F2828",
+          "alt": ""
+        },
+        {
+          "src": "/work/shattered-mercury/08.jpg",
+          "width": 2500,
+          "height": 3125,
+          "color": "#3F3E42",
+          "alt": ""
+        },
+        {
+          "src": "/work/shattered-mercury/09.jpg",
+          "width": 2500,
+          "height": 3125,
+          "color": "#3A3940",
+          "alt": ""
+        },
+        {
+          "src": "/work/shattered-mercury/10.jpg",
+          "width": 2500,
+          "height": 3125,
+          "color": "#1F1720",
+          "alt": ""
+        }
+      ]
     }
   ],
   "trash": [],
