@@ -372,7 +372,7 @@
    phone rules): sized for the plate, past the one-line formula. */
 @media (max-width: 39.99rem) {
   .strip-grid .cover-name {
-    font-size: clamp(0.875rem, 9cqw, 1.25rem);
+    font-size: clamp(0.875rem, 9cqw, 1.25rem) !important;
   }
 }
 
