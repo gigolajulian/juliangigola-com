@@ -358,7 +358,9 @@ fieldset.ed-row > legend { float: left; padding: 0; }
   text-transform: uppercase !important;
   font-style: normal;
 }
-.ed .label, .ed .ed-row > .label { color: var(--ed-mu); }
+/* Not the reference picker (`reference-picks.tsx`): its chips keep their
+   own colours, or the lit chip is a white pill with a white label. */
+.ed .label:not(.reference-panel *), .ed .ed-row > .label { color: var(--ed-mu); }
 /* Typed into on a touch screen: 16px, or iOS zooms in on focus. */
 @media (pointer: coarse) { .ed :is(.ed-row input, .ed-row textarea.tp-notes) { font-size: 1rem !important; } }
 
