@@ -993,10 +993,13 @@ export function TimePicker({
       return (
         <div ref={root} aria-label={title} role="status" data-booked="" className={cn("tp ed", className)}>
           {bar}
-          {hero(<>You&rsquo;re in</>, <>{dayLine}<br />{what}</>, call && booked.via ? `${booked.via} call booked` : "Booked")}
+          {/* The check (or the handset, the camera) on the Booked line, in
+              the square's place; the message a sentence over the rows
+              (Julian, 2026-10-21: the check in a better spot, the text
+              beautified). */}
+          {hero(<>You&rsquo;re in</>, <>{dayLine}<br />{what}</>, <>{call && booked.via ? (booked.via === "Video" ? camera : handset) : <svg aria-hidden viewBox="0 0 22 22" fill="none" stroke="currentColor" strokeWidth="1.4"><circle cx="11" cy="11" r="10" /><path d="M6.5 11.5l3 3 6-6.5" strokeLinecap="round" strokeLinejoin="round" /></svg>}{call && booked.via ? `${booked.via} call booked` : "Booked"}</>)}
           <div className="ed-body">
             <div className="ed-l ed-ok">
-              {call && booked.via ? (booked.via === "Video" ? camera : handset) : <svg aria-hidden viewBox="0 0 22 22" fill="none" stroke="currentColor" strokeWidth="1.2"><circle cx="11" cy="11" r="10" /><path d="M6.5 11.5l3 3 6-6.5" strokeLinecap="round" strokeLinejoin="round" /></svg>}
               {call && booked.via ? (
                 /* Julian: a call reads as a call, the number I ring. */
                 <p className="ed-why">{first ? `${first}, ` : ""}{ring ? <>I&rsquo;ll call you at {tel(booked.phone)}.</> : <>see you on Google Meet. The link is in your confirmation email.</>}</p>
