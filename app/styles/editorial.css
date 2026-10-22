@@ -349,7 +349,9 @@ fieldset.ed-row > legend { float: left; padding: 0; }
   --ed-err: oklch(0.66 0.19 27);
   font-family: var(--ed-f);
 }
-.ed :is(.label, .ed-v, .ed-n, .ed-slot, .ed-btn, .ed-box, .ed-why, .ed-said, .ed-copy, .ed-err, .ed-opts label, .ed-row input, .ed-row textarea.tp-notes, .ed-blank, .ed-steps button, .ed-steps b, .ed-head h2, .ed-mk, .ed-hero small, .ed-quiet, .ed-on, .ed-none) {
+/* Not inside the reference picker: its labels stay the site's Plex Mono
+   (Julian, 2026-10-21). */
+.ed :is(.label, .ed-v, .ed-n, .ed-slot, .ed-btn, .ed-box, .ed-why, .ed-said, .ed-copy, .ed-err, .ed-opts label, .ed-row input, .ed-row textarea.tp-notes, .ed-blank, .ed-steps button, .ed-steps b, .ed-head h2, .ed-mk, .ed-hero small, .ed-quiet, .ed-on, .ed-none):not(.reference-panel *) {
   font-family: var(--ed-f) !important;
   font-size: 0.75rem !important;
   font-weight: 600 !important;
@@ -358,7 +360,9 @@ fieldset.ed-row > legend { float: left; padding: 0; }
   text-transform: uppercase !important;
   font-style: normal;
 }
-.ed .label, .ed .ed-row > .label { color: var(--ed-mu); }
+/* Not the reference picker (`reference-picks.tsx`): its chips keep their
+   own colours, or the lit chip is a white pill with a white label. */
+.ed .label:not(.reference-panel *), .ed .ed-row > .label { color: var(--ed-mu); }
 /* Typed into on a touch screen: 16px, or iOS zooms in on focus. */
 @media (pointer: coarse) { .ed :is(.ed-row input, .ed-row textarea.tp-notes) { font-size: 1rem !important; } }
 
