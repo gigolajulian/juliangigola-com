@@ -92,7 +92,6 @@ function Editorial({ defaults, sessions = [] }: Props) {
       return gsap.fromTo(c, { autoAlpha: 0, y: 10, rotationX: -35, transformPerspective: 500, transformOrigin: "50% 0%" }, { autoAlpha: 1, y: 0, rotationX: 0, duration: 0.45, delay: (k % cols) * 0.03 + Math.floor(k / cols) * 0.06, ease: "expo.out", clearProps: "opacity,visibility,transform" });
     });
     return () => tw.forEach((t) => t.progress(1).kill());
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [kind, sent]);
 
   const hero = (big: string, small: React.ReactNode, mark: React.ReactNode, act?: React.ReactNode) => (
