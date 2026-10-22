@@ -21,8 +21,9 @@ import { cn } from "@/lib/utils";
  * ─────────────────────────────────────────────────────────────── */
 
 const classic = () => typeof location !== "undefined" && new URLSearchParams(location.search).has("classic");
-/* Preview `?goo` (time-picker.tsx): the cursor pours into the tiles and buttons. */
-const goo = typeof location !== "undefined" && new URLSearchParams(location.search).has("goo");
+/* The cursor pours into the tiles and buttons, as on the booking card
+   (time-picker.tsx); `?goo=0` turns it off. */
+const goo = typeof location === "undefined" || new URLSearchParams(location.search).get("goo") !== "0";
 
 /** The kinds, who each is for, and the two questions it opens. */
 const KINDS: { value: string; label: string; who: string; asks: [string, string, string, string] }[] = [
