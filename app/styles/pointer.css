@@ -205,9 +205,17 @@
 }
 /* Safari (`[data-blendless]`, pointer-mark.tsx): the blend holds only
    once the mark is no compositing layer of its own (MAC, real Safari,
-   2026-10-21). */
+   2026-10-21). In the top layer it loses the blend, so over a modal
+   dialog the mark hides and the system pointer takes over. */
 .pointer-mark[data-blendless] {
   will-change: auto;
+}
+:root:has(dialog:modal) .pointer-mark[data-blendless] {
+  display: none;
+}
+:root[data-mark]:has(.pointer-mark[data-blendless]):has(dialog:modal),
+:root[data-mark]:has(.pointer-mark[data-blendless]):has(dialog:modal) * {
+  cursor: auto !important;
 }
 /* Over a picked (teal) option the dot is the teal's own ink, not a
    difference: that blended it red. */
