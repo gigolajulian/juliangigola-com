@@ -7,7 +7,6 @@ import { gsap } from "gsap";
 import { ContactForm, INITIAL, fit, submitOrKeep } from "@/components/contact-form";
 import { ReferencePicks } from "@/components/reference-picks";
 import { trailContext } from "@/components/visit-trail";
-import { RESPONSE_TIME } from "@/lib/site";
 import { cn } from "@/lib/utils";
 
 /* ── the inquiry, editorial ───────────────────────────────────────
@@ -101,8 +100,7 @@ function Editorial({ defaults, sessions = [] }: Props) {
       {mark || act ? <p className="ed-mk"><i />{mark}{act}</p> : null}
     </div>
   );
-  const replies = RESPONSE_TIME ? `Replies ${RESPONSE_TIME}` : null;
-  const floor = `hello@juliangigola.com${RESPONSE_TIME ? ` · replies ${RESPONSE_TIME}` : ""}`;
+  const floor = "hello@juliangigola.com";
   const stick = goo ? "fill" : undefined;
 
   if (sent) {
@@ -154,7 +152,7 @@ function Editorial({ defaults, sessions = [] }: Props) {
       <input type="hidden" name="type" value={booking ? "session" : kind || "other"} />
       {booking ? <input type="hidden" name="session" value={kind} /> : null}
       {detail ? <input type="hidden" name="detail" value={detail} /> : null}
-      {hero("Inquire", <>{side}{replies ? <><br />{replies}</> : null}</>)}
+      {hero("Inquire", side)}
       <div className="ed-body">
         <div className="ed-r ed-fields ed-one">
           <div>
