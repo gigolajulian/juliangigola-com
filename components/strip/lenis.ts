@@ -217,6 +217,8 @@ export function useLenis(
         const next = Math.max(0, Math.min(stops.length - 1, i + dir));
         if (Math.abs(stops[next] - x) < 1) return;
         pageTo = stops[next];
+        // Which way the screens' contents come in (`home.css`).
+        el.dataset.way = dir > 0 ? "on" : "back";
         lenis.scrollTo(pageTo, { duration: 0.6, easing: (t) => 1 - (1 - t) ** 3, force: true });
         wake();
       };
@@ -258,6 +260,7 @@ export function useLenis(
         const target = onward ? to : from;
         if (Math.abs(target - x) < 1 && Math.abs(target - el.scrollLeft) < 1) return;
         if (pad) lenis.scrollTo(el.scrollLeft, { immediate: true, force: true });
+        if (free) el.dataset.way = target > x ? "on" : "back";
         lenis.scrollTo(target, { duration: 0.6, easing: (t) => 1 - (1 - t) ** 3 });
         wake();
       };
@@ -289,6 +292,7 @@ export function useLenis(
         const d = Math.abs(target - x);
         if (d < 1) return;
         padLand.add(el);
+        el.dataset.way = target > x ? "on" : "back";
         lenis.scrollTo(x, { immediate: true, force: true });
         const ahead = Math.sign(target - x) === dir;
         // Cubic out starts at three times its mean speed: match the fingers.
