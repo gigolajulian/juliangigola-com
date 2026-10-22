@@ -2436,6 +2436,11 @@
       "categorySlug": "editorial",
       "credits": [
         {
+          "role": "Model",
+          "name": "@kissedbyconstance",
+          "instagram": "kissedbyconstance"
+        },
+        {
           "role": "Photographer",
           "name": "Julian Gigola",
           "instagram": "juliangigola"
