@@ -66,6 +66,9 @@ export function wheelHandler(m: Mover, band: Band) {
   let peak = 0;
   let trough = Infinity;
   let again = false;
+  // `?scroll=1`: a mouse's notches past the end, signed, and the last one's time.
+  let endN = 0;
+  let endAt = -Infinity;
 
   return (e: WheelEvent) => {
     // A pinch is a zoom.
@@ -222,6 +225,22 @@ export function wheelHandler(m: Mover, band: Band) {
       // mouse's notch is a knock of its own.
       if (!(dy > 0 ? m.nextHref : m.prevHref)) {
         if (fresh || again || Math.abs(dy) >= 80) band.bounce(dy > 0 ? 1 : -1, Math.abs(dy));
+        return;
+      }
+      /* `?scroll=1`, a mouse: notches past the end, not pixels, as a turn
+         counts them (`slide.ts`). A notch shows a tenth of the card and
+         goes back; past one and a half (Julian), the second, it crosses.
+         Safari's 40px notch took four (MAC). Notches while the last turn
+         still glides never get here: the strip is not at its end yet. */
+      if ("flat" in el.dataset && !padGesture.get(el)) {
+        const s = Math.sign(dy);
+        endN = e.timeStamp - endAt > 250 || Math.sign(endN) !== s ? s : endN + s;
+        endAt = e.timeStamp;
+        band.push((s * innerWidth * 0.1) / WHEEL);
+        if (Math.abs(endN) >= 1.5) {
+          endN = 0;
+          band.leave(s > 0 ? 1 : -1);
+        }
         return;
       }
       band.push(dy);
