@@ -106,12 +106,20 @@ html[data-font="v2"] :is(.action, .action-quiet, .cover-cta) {
   letter-spacing: var(--v2-button-track, 0.04em);
 }
 
-/* Prose: Text 55 Roman, sentence case, open leading. */
-html[data-font="v2"] p {
+/* Prose: Text 55 Roman, sentence case, open leading
+   (Julian, 2026-10-22: 1.4 read cramped on long text).
+   One rule for every paragraph, so a new one is right without asking.
+   Labels and display lines set as a <p> keep their own type; the
+   :where() keeps this rule's weight where it was. */
+html[data-font="v2"] p:not(:where(.label, .font-display, .whitespace-nowrap)) {
   font-family: var(--v2-body-family, var(--font-v2-text));
   font-weight: var(--v2-body-weight, 400);
-  line-height: var(--v2-body-lead, 1.4);
+  line-height: var(--v2-body-lead, 1.55);
   letter-spacing: var(--v2-body-track, -0.015em);
+}
+/* Muted prose a step lighter: the old grey read tired on charcoal. */
+html[data-font="v2"] p[class*="text-muted-foreground"]:not(:where(.label)) {
+  color: color-mix(in oklab, var(--foreground) 82%, var(--background));
 }
 
 /* The floor. Sizes under 12px were the Lighthouse small-text flag. */

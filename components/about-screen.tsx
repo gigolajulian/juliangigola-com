@@ -98,8 +98,8 @@ export function AboutScreen() {
             I&nbsp;see. I&nbsp;shoot editorial fashion and campaigns for
             brands, and shape the image of labels and musicians. I&nbsp;also
             photograph people&apos;s milestones: headshots, portraits,
-            graduations and weddings across San Francisco, San Jose and the
-            Bay Area.
+            graduations and weddings across San&nbsp;Francisco, San&nbsp;Jose
+            and the Bay&nbsp;Area.
           </p>
           <dl className="title-rest mt-8 sm:mt-[clamp(0.75rem,2.5cqh,2rem)] grid grid-cols-3 gap-4 border-t border-border pt-6 sm:pt-[clamp(0.75rem,2.5cqh,1.5rem)]">
             {FACTS.map(([term, value]) => (

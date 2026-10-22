@@ -4,6 +4,7 @@ import { useState, type ReactNode } from "react";
 import Link from "next/link";
 import { RisingTitle } from "@/components/strip-page";
 import type { Block, Faq } from "@/lib/booking";
+import { keep } from "@/lib/keep";
 
 /* ── the questions ────────────────────────────────────────────────
  * A booking page's screen of questions, the ones people search for
@@ -93,7 +94,7 @@ export function LocalQuestions({
                       <div className="min-h-0 overflow-hidden">
                         {b.body ? (
                           <p className="max-w-[48ch] pb-3 text-left text-sm leading-relaxed text-muted-foreground">
-                            {b.body}
+                            {keep(b.body)}
                           </p>
                         ) : null}
                         {b.items?.length ? (
@@ -175,7 +176,7 @@ export function LocalQuestions({
               >
                 <div className="min-h-0 overflow-hidden">
                   <p className="max-w-[60ch] pb-5 pl-[clamp(2rem,3vw,3rem)] text-left text-sm leading-relaxed text-muted-foreground">
-                    {f.a}
+                    {keep(f.a)}
                   </p>
                 </div>
               </div>
