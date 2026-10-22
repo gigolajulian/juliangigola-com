@@ -3607,6 +3607,110 @@
           "alt": ""
         }
       ]
+    },
+    {
+      "slug": "reconstructed",
+      "name": "RECONSTRUCTED",
+      "categorySlug": "editorial",
+      "credits": [
+        {
+          "role": "Creative direction and styling",
+          "name": "@anikka_xdr",
+          "instagram": "anikka_xdr"
+        },
+        {
+          "role": "Model",
+          "name": "@_amaniim",
+          "instagram": "_amaniim"
+        },
+        {
+          "role": "Styling assist",
+          "name": "@ccleoppatraa",
+          "instagram": "ccleoppatraa"
+        },
+        {
+          "role": "Photographer",
+          "name": "Julian Gigola",
+          "instagram": "juliangigola"
+        }
+      ],
+      "cover": {
+        "src": "/work/reconstructed/cover.jpg",
+        "width": 600,
+        "height": 800,
+        "color": "#C0BDBD",
+        "alt": ""
+      },
+      "images": [
+        {
+          "src": "/work/reconstructed/01.jpg",
+          "width": 2500,
+          "height": 3333,
+          "color": "#C0BDBD",
+          "alt": ""
+        },
+        {
+          "src": "/work/reconstructed/02.jpg",
+          "width": 2500,
+          "height": 3333,
+          "color": "#D4D3D2",
+          "alt": ""
+        },
+        {
+          "src": "/work/reconstructed/03.jpg",
+          "width": 2500,
+          "height": 3333,
+          "color": "#D7D4D3",
+          "alt": ""
+        }
+      ]
+    },
+    {
+      "slug": "glyph",
+      "name": "GLYPH",
+      "categorySlug": "editorial",
+      "credits": [
+        {
+          "role": "Model",
+          "name": "@xtc_ryan",
+          "instagram": "xtc_ryan"
+        },
+        {
+          "role": "Photographer",
+          "name": "Julian Gigola",
+          "instagram": "juliangigola"
+        }
+      ],
+      "cover": {
+        "src": "/work/glyph/cover.jpg",
+        "width": 600,
+        "height": 800,
+        "color": "#C6AD9C",
+        "alt": ""
+      },
+      "images": [
+        {
+          "src": "/work/glyph/01.jpg",
+          "width": 2049,
+          "height": 2732,
+          "color": "#C6AD9C",
+          "alt": ""
+        },
+        {
+          "src": "/work/glyph/02.jpg",
+          "width": 2500,
+          "height": 3333,
+          "color": "#CDC2BB",
+          "alt": ""
+        },
+        {
+          "src": "/work/glyph/03.jpg",
+          "width": 2500,
+          "height": 3333,
+          "color": "#9E8E87",
+          "alt": ""
+        }
+      ]
     }
   ],
   "trash": [],
