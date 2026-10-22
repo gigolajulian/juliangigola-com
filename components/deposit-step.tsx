@@ -251,6 +251,7 @@ export function DepositStep({
           buttonTheme: walletTheme(box.current),
         });
         wall.on("ready", (e) => !gone && setWallets(!!e.availablePaymentMethods));
+        wall.on("loaderror", () => !gone && setWallets(false));
         wall.on("confirm", async () => {
           setError("");
           try {
@@ -281,13 +282,16 @@ export function DepositStep({
     };
     const mq = matchMedia("(prefers-color-scheme: dark)");
     mq.addEventListener("change", retheme);
-    const mo = new MutationObserver(() => requestAnimationFrame(retheme));
+    const mo = new MutationObserver(() => requestAnimationFrame(() => !gone && retheme()));
     mo.observe(document.documentElement, { attributes: true, attributeFilter: ["class", "data-theme"] });
     return () => {
       gone = true;
       mq.removeEventListener("change", retheme);
       mo.disconnect();
-      made.forEach((f) => f.destroy());
+      /* Stripe destroys an element itself when it fails to load (the
+         wallet with no Apple or Google Pay, a key the account rejects);
+         destroying it again throws and took the page down (MAC, 2026-10-21). */
+      made.forEach((f) => { try { f.destroy(); } catch {} });
       els.current = null;
     };
   }, [tries, body.name, body.email]);

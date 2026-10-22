@@ -506,6 +506,10 @@ fieldset.ed-row > legend { float: left; padding: 0; }
 .ed-kinds input:checked + span :is(em, small) { color: var(--background); }
 .ed-kinds input:focus-visible + span { outline: 1px solid var(--foreground); outline-offset: 3px; }
 @media (hover: hover) { .ed-kinds label:hover > span { border-color: color-mix(in oklab, var(--foreground) 40%, transparent); } }
+/* The pointer's icon rule (pointer.css) scales a stuck target's span 1.2
+   and leans it; a tile is a box, not an icon, so it only takes the fill
+   (Julian, 2026-10-21, "why they lift so much"). */
+.ed .ed-kinds label[data-stick][data-stuck] > span { scale: none; translate: none; }
 /* its questions: the same box, a field line inside */
 .ed-asks { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; padding: 0.75rem 0 0.5rem; flex: none; }
 .ed .ed-ask { border: 1px solid var(--ed-line); padding: 0.75rem 0.8rem 0.65rem; gap: 0; justify-content: space-between; min-height: 4rem; transition: border-color 0.2s; }
@@ -527,10 +531,17 @@ fieldset.ed-row > legend { float: left; padding: 0; }
   .ed-inq .ed-one .ed-asks { grid-template-columns: minmax(0, 1fr); }
   .ed-inq .ed-one textarea.tp-notes { min-height: 4rem; }
 }
+/* What is written in the fields, in the navbar's mono (Julian, 2026-10-21,
+   "change written text to mono plex"), sitting right above its line. */
+.ed.ed-inq :is(.ed-row input, .ed-row textarea.tp-notes) { font-family: var(--v2-label-family, "IBM Plex Mono", monospace) !important; font-weight: var(--v2-label-weight, 500) !important; letter-spacing: 0.03em !important; }
+.ed.ed-inq :is(.ed-row input, .ed-row textarea.tp-notes)::placeholder { font-family: var(--v2-label-family, "IBM Plex Mono", monospace) !important; font-weight: 400 !important; }
+.ed.ed-inq .ed-ask input { padding-bottom: 0.15rem; }
+.ed.ed-inq .ed-one > div > label.ed-row:not(:has(textarea)) { gap: 0.4rem; padding-bottom: 0.3rem; }
 .ed-inq .ed-refs { border-bottom: 0; }
 .ed-inq .ed-refs .contact-field > div { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; }
-.ed-inq .ed-refs .contact-field > div > .label { flex-basis: 100%; margin: 0 0 0.25rem; }
-.ed-inq .ed-refs .tap-44 { border-radius: 0; border-color: var(--ed-line); padding: 0.55rem 0.8rem; }
+.ed-inq .ed-refs .contact-field > div > p.label { flex-basis: 100%; margin: 0 0 0.25rem; }
+/* The two on one line (Julian, 2026-10-21), a size down so both fit a phone's column. */
+.ed.ed-inq .ed-refs .tap-44 { border-radius: 0; border-color: var(--ed-line); padding: 0.6rem 0.4rem; flex: 1 1 0; min-width: 0; text-align: center; white-space: nowrap; font-size: 0.6875rem !important; }
 /* sent: three equal bands, the first marked */
 .ed-nx { flex: 1; display: grid; grid-auto-rows: minmax(3.5rem, 1fr); padding: 1.5rem 0 1.25rem; min-height: 0; }
 .ed-nx-row { display: grid; grid-template-columns: 2.5rem minmax(0, 1fr) 1.25rem; align-items: start; align-content: center; gap: 0.4rem 1rem; color: var(--ed-mu); }
