@@ -35,19 +35,28 @@ export function PointerMark() {
        dialog opened later goes over it, so it is lifted again over
        each new one. */
     const layered = typeof el.showPopover === "function";
+    /* Safari draws the top layer without blending it into the page: the
+       fill poured over a day went solid white and its number vanished
+       (MAC, real Safari, 2026-10-21). There the mark stays in the page
+       and goes up only while a modal dialog is open. */
+    const blendless = /AppleWebKit/.test(navigator.userAgent) && !/Chrome|CriOS|Edg|Android/.test(navigator.userAgent);
     let over_: Element | null = null;
     const lift = () => {
       if (!layered) return;
       const modal = document.querySelector("dialog:modal");
+      if (blendless && !modal) {
+        if (el.matches(":popover-open")) el.hidePopover();
+        if (el.hasAttribute("popover")) el.removeAttribute("popover");
+        over_ = null;
+        return;
+      }
       if (modal === over_ && el.matches(":popover-open")) return;
       over_ = modal;
+      if (!el.hasAttribute("popover")) el.popover = "manual";
       if (el.matches(":popover-open")) el.hidePopover();
       el.showPopover();
     };
-    if (layered) {
-      el.popover = "manual";
-      lift();
-    }
+    if (layered) lift();
     const root = document.documentElement;
     const still = window.matchMedia("(prefers-reduced-motion: reduce)");
     let x = 0;
