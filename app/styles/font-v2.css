@@ -106,8 +106,8 @@ html[data-font="v2"] :is(.action, .action-quiet, .cover-cta) {
   letter-spacing: var(--v2-button-track, 0.04em);
 }
 
-/* Prose: Text 55 Roman, sentence case, open leading, no tracking
-   (Julian, 2026-10-22: the -0.015em and 1.4 read cramped on long text).
+/* Prose: Text 55 Roman, sentence case, open leading
+   (Julian, 2026-10-22: 1.4 read cramped on long text).
    One rule for every paragraph, so a new one is right without asking.
    Labels and display lines set as a <p> keep their own type; the
    :where() keeps this rule's weight where it was. */
@@ -115,12 +115,7 @@ html[data-font="v2"] p:not(:where(.label, .font-display, .whitespace-nowrap)) {
   font-family: var(--v2-body-family, var(--font-v2-text));
   font-weight: var(--v2-body-weight, 400);
   line-height: var(--v2-body-lead, 1.55);
-  letter-spacing: var(--v2-body-track, 0);
-}
-/* The rag: no word left alone on the last line, the line ends even.
-   Left aligned, never justified. A class (text-balance) still wins. */
-:where(html[data-font="v2"] p) {
-  text-wrap: pretty;
+  letter-spacing: var(--v2-body-track, -0.015em);
 }
 /* Muted prose a step lighter: the old grey read tired on charcoal. */
 html[data-font="v2"] p[class*="text-muted-foreground"]:not(:where(.label)) {

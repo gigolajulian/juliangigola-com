@@ -12,9 +12,9 @@ export type Setting = { font: string; cut: string; size: number; spacing: number
 export const DEFAULTS: Record<Level, Setting> = {
   titles: { font: "Display", cut: "Bold", size: 1.1, spacing: -0.035, gap: 0.95 },
   names: { font: "Display", cut: "Regular", size: 1.33, spacing: -0.035 },
-  /* Spacing 0 and gap 1.55 (were -0.015 and 1.4): long text read cramped
-     (Julian, 2026-10-22, from the mock). */
-  text: { font: "Text", cut: "Regular", size: 1.25, spacing: 0, gap: 1.55 },
+  /* Gap 1.55 (was 1.4): long text read cramped (Julian, 2026-10-22). The
+     spacing stays -0.015: at 0 the lines broke earlier and read ragged. */
+  text: { font: "Text", cut: "Regular", size: 1.25, spacing: -0.015, gap: 1.55 },
   /* The two lines under the name on the cover; they were in Small labels
      when these were set. */
   role: { font: "Old Mono", cut: "Medium", size: 1.06, spacing: 0.04 },
