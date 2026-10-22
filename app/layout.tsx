@@ -24,6 +24,7 @@ import { TypeDials } from "@/components/type-dials";
 import { clips, DEFAULTS, LATE, LEVELS, LIQUID, SKIP, sizesOf, typeSizer } from "@/lib/type-size";
 import { VisitTrail } from "@/components/visit-trail";
 import { ClickBeacon } from "@/components/click-beacon";
+import { RagGuard } from "@/components/rag-guard";
 
 /* Endless for the name, every heading and the nav, IBM Plex Mono for
    everything else, text, captions, labels, figures. Served from this site
@@ -278,6 +279,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         {/* Clicks and scroll depth for /admin's SEO tab, one beacon per
             page view, no cookie. See `click-beacon.tsx`. Renders nothing. */}
         <ClickBeacon />
+        <RagGuard />
         {/* Production only: on the dev server React reports the sizes as
             a hydration mismatch, and its double mount undoes them. */}
         {process.env.NODE_ENV === "production" ? (

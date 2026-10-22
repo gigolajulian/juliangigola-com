@@ -9,6 +9,7 @@ import { Liquid, useQuiet } from "@/components/liquid";
 import { RisingTitle } from "@/components/strip-page";
 import { BookSheet } from "@/components/book-sheet";
 import type { MenuItem } from "@/lib/booking";
+import { keep } from "@/lib/keep";
 import type { Frame } from "@/lib/work-types";
 import type { WallTile } from "@/lib/wall-tile";
 
@@ -177,7 +178,7 @@ export function SessionsScreen({ sessions, menu, walls, covers }: { sessions: Se
         {/* Julian: three lines, whatever the size (44ch is the least), where
             the three columns are. */}
         <p className="title-rest max-w-full text-left lying:hidden xl:w-[46ch] text-sm normal-case leading-relaxed text-muted-foreground">
-          Studio and location sessions across the San Francisco Bay Area.
+          Studio and location sessions across the San&nbsp;Francisco Bay&nbsp;Area.
         </p>
       </div>
 
@@ -348,7 +349,7 @@ export function SessionsScreen({ sessions, menu, walls, covers }: { sessions: Se
                         page's capitals, and more air between them; what
                         is a label stays one. */}
                     <p className="max-w-[32.5rem] text-left text-[0.9375rem] normal-case leading-[1.7] text-muted-foreground text-pretty short:leading-relaxed lying:hidden">
-                      {s.blurb}
+                      {keep(s.blurb)}
                     </p>
                     {/* What the /sessions page used to say about each. */}
                     {/* A short window with a card open has no room for it
