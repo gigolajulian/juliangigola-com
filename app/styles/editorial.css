@@ -447,6 +447,7 @@ fieldset.ed-row > legend { float: left; padding: 0; }
 .ed[data-booked] .ed-mk > i { display: none; }
 .ed[data-booked] .ed-mk > svg { width: 1.125rem; height: 1.125rem; flex-shrink: 0; color: var(--accent); }
 .ed.tp[data-booked] .ed-why { font-family: var(--font-sans) !important; font-size: 1.0625rem !important; font-weight: 400 !important; line-height: 1.5 !important; letter-spacing: 0 !important; text-transform: none !important; color: var(--foreground); max-width: none; margin: 1.5rem 0 1.75rem; text-align: justify; text-wrap: pretty; }
+.ed-nb { white-space: nowrap; }
 /* One long line over the rows, not one per column (Julian). */
 .ed[data-booked] .ed-r { border-top: 1px solid var(--ed-line); }
 .ed[data-booked] .ed-r > .ed-row:first-child { border-top: 0; }

@@ -1004,7 +1004,7 @@ export function TimePicker({
                 /* Julian: a call reads as a call, the number I ring. */
                 <p className="ed-why">{first ? `${first}, ` : ""}{ring ? <>I&rsquo;ll call you at {tel(booked.phone)}.</> : <>see you on Google Meet. The link is in your confirmation email.</>}</p>
               ) : (
-                <p className="ed-why">{first ? `${first}, a` : "A"} confirmation is on its way to {booked.email}. I&rsquo;ll contact you with the further details before the day.</p>
+                <p className="ed-why">{first ? `${first}, a` : "A"} confirmation is on its way to <span className="ed-nb">{booked.email}</span>. I&rsquo;ll contact you with the further details before the day.</p>
               )}
             </div>
             <div className="ed-r">
