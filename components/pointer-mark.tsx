@@ -44,6 +44,10 @@ export function PointerMark() {
        as it was. */
     const blendless = /AppleWebKit/.test(navigator.userAgent) && !/Chrome|CriOS|Edg|Android/.test(navigator.userAgent);
     el.toggleAttribute("data-blendless", blendless);
+    /* Preview `?blend=a|b|c|d` (pointer.css): the Safari blend variants
+       MAC tries in the real browser. Off in production. */
+    const variant = process.env.NODE_ENV === "production" && !/workers\.dev$/.test(location.hostname) ? null : new URLSearchParams(location.search).get("blend");
+    if (variant) el.dataset.blendvar = variant;
     let over_: Element | null = null;
     const lift = () => {
       if (!layered) return;

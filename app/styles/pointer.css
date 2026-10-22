@@ -215,6 +215,18 @@
 :root[data-mark-fill] .pointer-mark[data-blendless] .mark-goo {
   mix-blend-mode: normal;
 }
+/* Safari variants for the real browser (`?blend=`, pointer-mark.tsx):
+   a: the blend back on the mark, no will-change;
+   b: as a, and no goo filter;
+   c: no blend at all: the mark in the page's ink, and the words under a
+      fill turned to the page's ground (`editorial.css`);
+   d: the blend on the mark, no z-index. */
+.pointer-mark[data-blendvar="a"], .pointer-mark[data-blendvar="b"], .pointer-mark[data-blendvar="d"] { mix-blend-mode: difference; will-change: auto; }
+.pointer-mark[data-blendvar="a"] .mark-goo, .pointer-mark[data-blendvar="b"] .mark-goo, .pointer-mark[data-blendvar="d"] .mark-goo { mix-blend-mode: normal; }
+.pointer-mark[data-blendvar="b"] .mark-goo { filter: none !important; }
+.pointer-mark[data-blendvar="d"] { z-index: auto; }
+.pointer-mark[data-blendvar="c"] { mix-blend-mode: normal; color: var(--foreground); }
+.pointer-mark[data-blendvar="c"] .mark-goo { mix-blend-mode: normal; }
 /* Over a picked (teal) option the dot is the teal's own ink, not a
    difference: that blended it red. */
 .pointer-mark[data-picked] {

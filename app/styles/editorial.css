@@ -481,6 +481,9 @@ fieldset.ed-row > legend { float: left; padding: 0; }
 /* Under the cursor's fill (`?goo`) the line goes with the number, or the
    difference turns its teal red. */
 .ed .ed-cell[data-stuck]:not([aria-pressed="true"]) i { background: currentColor; }
+/* Variant c (pointer.css): no blend, so the words under the fill turn to the ground themselves. */
+:root:has(.pointer-mark[data-blendvar="c"][data-fill]) .ed :is(.ed-cell, .ed-slot, .ed-btn, .ed-kinds label > span)[data-stuck]:not([aria-pressed="true"]), :root:has(.pointer-mark[data-blendvar="c"][data-fill]) .ed .ed-kinds label[data-stuck] > span { color: var(--background); transition: color 120ms; }
+:root:has(.pointer-mark[data-blendvar="c"][data-fill]) .ed .ed-kinds label[data-stuck] > span :is(em, small) { color: var(--background); }
 
 /* ── the inquiry (inquire-card.tsx) ─────────────────────────────────
    The inquiry on the same page: six tiles for the kinds, each with who
