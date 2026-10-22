@@ -40,6 +40,8 @@ const SWIPE_LOCK = 380;
 export function wheelHandler(m: Mover, band: Band) {
   const { el } = m;
   const ownNotch = wantsOwnNotch();
+  // `?scroll=1`: a trackpad moves the strip one to one.
+  const free = new URLSearchParams(window.location.search).get("scroll") === "1";
   /** While a paged move is landing, another gesture is the same gesture. */
   let locked = 0;
   let paused = false;
@@ -243,7 +245,7 @@ export function wheelHandler(m: Mover, band: Band) {
     if (m.smooth && padGesture.get(el)) {
       e.preventDefault();
       if (padLand.has(el)) return;
-      el.scrollLeft = Math.max(0, Math.min(m.room(), el.scrollLeft + dy * (el.hasAttribute("data-flat") ? 1 : PAD)));
+      el.scrollLeft = Math.max(0, Math.min(m.room(), el.scrollLeft + dy * (free ? 1 : PAD)));
       return;
     }
     /* Away from the ends, Lenis has the wheel. Nothing is prevented and
