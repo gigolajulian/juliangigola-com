@@ -465,9 +465,13 @@ nav[aria-label="Categories"] ul[data-more] {
 /* Larger, and a long name runs to two lines rather than shrinking to fit
    one. Sized for the plate, not the name's length. */
 .strip-grid .cover-name {
-  /* The longest word (`--w`) has to fit one line on its own. 135, not
-     140, for Neue Haas's wider caps: ANDROMEDA ran 2px out at 1440. */
-  font-size: clamp(0.875rem, min(16cqw, calc(230cqw / var(--n, 12)), calc(135cqw / var(--w, 8))), 2.5rem);
+  /* The longest run that cannot break has to fit one line on its own:
+     the longest word (`--w`), or a film's last two words, held together
+     (`--g`, LADERA GRANOLA ran out at 1280x720). 135, not 140, for Neue
+     Haas's wider caps: ANDROMEDA ran 2px out at 1440. `!important` over
+     the type pass's inline size, which is the strip view's (QA: the
+     grid showed cut titles for 2 to 4s after each switch). */
+  font-size: clamp(0.875rem, min(16cqw, calc(230cqw / var(--n, 12)), calc(135cqw / var(--g, var(--w, 8)))), 2.5rem) !important;
   white-space: normal;
   overflow: hidden;
   text-overflow: clip;
