@@ -138,6 +138,17 @@ export const GESTURE_GAP_MS = 120;
     the two fought, and the landing read Lenis's target and took the strip
     back to the start. The strip's `onWheel` sets it, Lenis reads it. */
 export const padGesture = new WeakMap<HTMLElement, boolean>();
+/** `?scroll=1`, held for the tab: the homepage's slide and the
+    portfolio's turns. `?scroll=0` lets it go. */
+export const scrollFlag = () => {
+  const q = new URLSearchParams(location.search).get("scroll");
+  try {
+    if (q) sessionStorage.setItem("jg-scroll", q);
+    return (q ?? sessionStorage.getItem("jg-scroll")) === "1";
+  } catch {
+    return q === "1";
+  }
+};
 /** Preview (`?notch`): a mouse notch moves the strip by its own ease,
     as a trackpad does, rather than by Lenis's. Paged, the notch slides
     to the next screen (`PAGE_MS`); free, it is the strip's own

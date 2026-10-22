@@ -1,8 +1,9 @@
 import { runDeck, type Deck } from "@/lib/deck";
 import * as React from "react";
 import { flushSync } from "react-dom";
-import { leftOf, nav, POP_MS, SECTIONS_FIRST } from "./shared";
+import { leftOf, nav, POP_MS, scrollFlag, SECTIONS_FIRST } from "./shared";
 import { slideStrip } from "./slide";
+import { chapterTurns } from "./turns";
 
 /* ── the deck, and the sections it deals ──────────────────────────
  * Which of a strip's cells are mounted yet (`defer`), and the deck that
@@ -123,7 +124,7 @@ export function useDeal({
     /* `?scroll=1` (Julian, 2026-10-22, a preview): no card stack. The
        screens sit side by side and move with the scroll, a hairline at
        each one's edge (`[data-flat]`, `globals.css`). */
-    if (deck === "screens" && new URLSearchParams(location.search).get("scroll") === "1") {
+    if (deck === "screens" && scrollFlag()) {
       el.toggleAttribute("data-flat", true);
       const off = slideStrip(el);
       return () => {
@@ -131,6 +132,10 @@ export function useDeal({
         el.removeAttribute("data-flat");
       };
     }
+    /* And the portfolio's disciplines turn over each other instead of
+       dealing as cards (`turns.ts`). Wide screens only, as the deal. */
+    if (deck === "chapters" && scrollFlag() && window.matchMedia("(min-width: 40rem)").matches)
+      return chapterTurns(el);
     return runDeck(el, deck);
     // Dealt again as each held-back section arrives.
   }, [scrollerRef, deck, shown, sheet]);

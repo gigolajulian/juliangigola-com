@@ -2,6 +2,7 @@ import { isTrackpad } from "@/lib/motion/wheel";
 import type { Band } from "./band";
 import type { Mover } from "./motion";
 import { flatSlide } from "./slide";
+import { turns } from "./turns";
 import {
   centreOf,
   GESTURE_GAP_MS,
@@ -256,6 +257,11 @@ export function wheelHandler(m: Mover, band: Band) {
     }
     /* The homepage strip under `?scroll=1` moves by its own slide
        (`slide.ts`), past the ends and the crossings above. */
+    // The portfolio's disciplines under `?scroll=1` (`turns.ts`).
+    if (turns.get(el)?.take(e)) {
+      e.preventDefault();
+      return;
+    }
     const flat = flatSlide.get(el);
     if (flat) {
       e.preventDefault();
