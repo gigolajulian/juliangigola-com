@@ -36,18 +36,13 @@ export function PointerMark() {
        each new one. */
     const layered = typeof el.showPopover === "function";
     /* Safari draws the top layer without blending it into the page, and
-       does not blend a filtered, fixed mark either: the fill poured over
-       a day went solid white and its number vanished (MAC, real Safari,
-       2026-10-21). There the mark stays in the page, going up into the
-       top layer only while a modal dialog is open, and the blend sits on
-       the goo group (`pointer.css`, `[data-blendless]`). Chrome needs it
-       as it was. */
+       a `will-change: transform` layer no better: the fill poured over a
+       day went solid white and its number vanished (MAC, real Safari,
+       2026-10-21, variant a of four). There the mark stays in the page,
+       going up into the top layer only while a modal dialog is open,
+       and drops the will-change (`pointer.css`, `[data-blendless]`). */
     const blendless = /AppleWebKit/.test(navigator.userAgent) && !/Chrome|CriOS|Edg|Android/.test(navigator.userAgent);
     el.toggleAttribute("data-blendless", blendless);
-    /* Preview `?blend=a|b|c|d` (pointer.css): the Safari blend variants
-       MAC tries in the real browser. Off in production. */
-    const variant = process.env.NODE_ENV === "production" && !/workers\.dev$/.test(location.hostname) ? null : new URLSearchParams(location.search).get("blend");
-    if (variant) el.dataset.blendvar = variant;
     let over_: Element | null = null;
     const lift = () => {
       if (!layered) return;
