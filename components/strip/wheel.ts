@@ -1,6 +1,7 @@
 import { isTrackpad } from "@/lib/motion/wheel";
 import type { Band } from "./band";
 import type { Mover } from "./motion";
+import { flatSlide } from "./slide";
 import {
   centreOf,
   GESTURE_GAP_MS,
@@ -8,7 +9,6 @@ import {
   nav,
   PAD,
   padGesture,
-  padLand,
   wantsOwnNotch,
   WHEEL,
 } from "./shared";
@@ -40,8 +40,6 @@ const SWIPE_LOCK = 380;
 export function wheelHandler(m: Mover, band: Band) {
   const { el } = m;
   const ownNotch = wantsOwnNotch();
-  // `?scroll=1`: a trackpad moves the strip one to one.
-  const free = new URLSearchParams(window.location.search).get("scroll") === "1";
   /** While a paged move is landing, another gesture is the same gesture. */
   let locked = 0;
   let paused = false;
@@ -237,6 +235,14 @@ export function wheelHandler(m: Mover, band: Band) {
       m.over = 0;
       band.release();
     }
+    /* The homepage strip under `?scroll=1` moves by its own slide
+       (`slide.ts`), past the ends and the crossings above. */
+    const flat = flatSlide.get(el);
+    if (flat) {
+      e.preventDefault();
+      flat.wheel(dy, !!padGesture.get(el), e.timeStamp);
+      return;
+    }
     /* A trackpad, where Lenis has the notches: the strip follows the
        fingers event by event, at the trackpad's gain, with macOS's own
        momentum and nothing eased on top. No frame loop and one write per
@@ -244,8 +250,7 @@ export function wheelHandler(m: Mover, band: Band) {
        Lenis). */
     if (m.smooth && padGesture.get(el)) {
       e.preventDefault();
-      if (padLand.has(el)) return;
-      el.scrollLeft = Math.max(0, Math.min(m.room(), el.scrollLeft + dy * (free ? 1 : PAD)));
+      el.scrollLeft = Math.max(0, Math.min(m.room(), el.scrollLeft + dy * PAD));
       return;
     }
     /* Away from the ends, Lenis has the wheel. Nothing is prevented and

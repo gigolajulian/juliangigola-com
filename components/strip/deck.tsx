@@ -2,6 +2,7 @@ import { runDeck, type Deck } from "@/lib/deck";
 import * as React from "react";
 import { flushSync } from "react-dom";
 import { leftOf, nav, POP_MS, SECTIONS_FIRST } from "./shared";
+import { slideStrip } from "./slide";
 
 /* ── the deck, and the sections it deals ──────────────────────────
  * Which of a strip's cells are mounted yet (`defer`), and the deck that
@@ -124,7 +125,11 @@ export function useDeal({
        each one's edge (`[data-flat]`, `globals.css`). */
     if (deck === "screens" && new URLSearchParams(location.search).get("scroll") === "1") {
       el.toggleAttribute("data-flat", true);
-      return () => el.removeAttribute("data-flat");
+      const off = slideStrip(el);
+      return () => {
+        off();
+        el.removeAttribute("data-flat");
+      };
     }
     return runDeck(el, deck);
     // Dealt again as each held-back section arrives.
