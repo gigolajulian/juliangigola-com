@@ -35,7 +35,7 @@ export function TermsColumn() {
           <strong>
             &ldquo;I&rdquo;, &ldquo;me&rdquo; and &ldquo;my&rdquo;
           </strong>{" "}
-          mean Julian Gigola, a sole proprietor in the San Francisco Bay Area,
+          mean Julian Gigola, a sole proprietor in the San&nbsp;Francisco Bay&nbsp;Area,
           California, who owns and operates {SITE}.
         </p>
         <p>
@@ -532,7 +532,7 @@ export function TermsColumn() {
 
       <Clause title="Contact">
         <p>
-          Julian Gigola, San Francisco Bay Area, California.{" "}
+          Julian Gigola, San&nbsp;Francisco Bay&nbsp;Area, California.{" "}
           <a href={`mailto:${EMAIL}`} data-ring="Email" className="underline underline-offset-4">
             {EMAIL}
           </a>

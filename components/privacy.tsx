@@ -173,7 +173,7 @@ export function PrivacyColumn() {
         </p>
         <ul>
           <li>
-            <strong>Cloudflare, Inc.</strong> (San Francisco, USA): hosts and
+            <strong>Cloudflare, Inc.</strong> (San&nbsp;Francisco, USA): hosts and
             delivers the Site, stores inquiries in its key-value storage,
             derives the country code, and sends the email copy of each inquiry
             to my mailbox. Cloudflare runs a global network and your request is
@@ -350,7 +350,7 @@ export function PrivacyColumn() {
 
       <Clause title="Contact">
         <p>
-          Julian Gigola, San Francisco Bay Area, California.{" "}
+          Julian Gigola, San&nbsp;Francisco Bay&nbsp;Area, California.{" "}
           <a href={`mailto:${EMAIL}`} data-ring="Email" className="underline underline-offset-4">
             {EMAIL}
           </a>
