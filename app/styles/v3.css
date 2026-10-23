@@ -209,7 +209,9 @@
 .v3 .pmenu{position:fixed;inset:0;z-index:29;background:var(--bg);display:flex;flex-direction:column;justify-content:center;gap:6px;padding:72px var(--gr) 40px var(--g)}
 .v3 .pmenu a{font:900 3rem/1 var(--display);letter-spacing:-.05em;padding:6px 0}
 .v3 .pmenu .lbl{margin-top:28px}
-.v3 .chips{display:flex;flex-wrap:wrap;gap:6px;padding:28px var(--gr) 0 var(--g)}
+/* One scrolling row at every width, a fade on the cut chip. */
+.v3 .chips{display:flex;flex-wrap:nowrap;gap:6px;padding:28px var(--gr) 0 var(--g);overflow-x:auto;scrollbar-width:none;-webkit-mask-image:linear-gradient(to right,#000 calc(100% - 48px),transparent);mask-image:linear-gradient(to right,#000 calc(100% - 48px),transparent)}
+.v3 .chips.at-end{-webkit-mask-image:none;mask-image:none}
 .v3 .chips::-webkit-scrollbar{display:none}
 .v3 .chips button{flex:none;height:36px;padding:0 14px;background:none;border:1px solid var(--line);border-radius:999px;color:var(--mute);font:inherit;letter-spacing:inherit;text-transform:inherit;cursor:pointer}
 .v3 .chips button[aria-pressed="true"]{border-color:var(--ink);color:var(--ink)}
@@ -421,9 +423,7 @@
 @media (max-width:700px){.v3 .wtools{width:100%;flex-wrap:wrap}
 .v3 .wsearch{flex:1;width:auto}}
 .v3 .chips-bar{display:none}
-@media (max-width:700px){.v3 .chips{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;-webkit-mask-image:linear-gradient(to right,#000 calc(100% - 48px),transparent);mask-image:linear-gradient(to right,#000 calc(100% - 48px),transparent)}
-.v3 .chips.at-end{-webkit-mask-image:none;mask-image:none}
-.v3 .chips-bar{display:block;height:1px;margin:10px var(--gr) 0 var(--g);background:var(--line)}
+@media (max-width:700px){.v3 .chips-bar{display:block;height:1px;margin:10px var(--gr) 0 var(--g);background:var(--line)}
 .v3 .chips-bar i{display:block;height:100%;width:30%;background:var(--ink)}}
 .v3 .calldlg{width:min(760px,calc(100vw - 32px));max-height:calc(100svh - 32px);padding:0;border:1px solid var(--line);border-radius:4px;background:var(--bg);color:var(--ink);overflow:auto}
 .v3 .calldlg::backdrop{background:rgba(10,10,9,.6);backdrop-filter:blur(8px)}
@@ -594,10 +594,8 @@ html{font-family:var(--font-mono),ui-monospace,monospace}
 .v3 .f-main{padding:28px var(--gr) 40px var(--g)}
 .v3 .f-body{max-width:none}
 .v3 .kind b{font-size:1.75rem}}
-/* Tablets: the chips stay one scrolling row, as on a phone, not three stacked rows. */
-@media (min-width:701px) and (max-width:1100px){.v3 .chips{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;-webkit-mask-image:linear-gradient(to right,#000 calc(100% - 48px),transparent);mask-image:linear-gradient(to right,#000 calc(100% - 48px),transparent)}
-.v3 .chips.at-end{-webkit-mask-image:none;mask-image:none}
-.v3 .chips-bar{display:block;height:1px;margin:10px var(--gr) 0 var(--g);background:var(--line)}
+/* Tablets: the progress line under the chips, as on a phone. */
+@media (min-width:701px) and (max-width:1100px){.v3 .chips-bar{display:block;height:1px;margin:10px var(--gr) 0 var(--g);background:var(--line)}
 .v3 .chips-bar i{display:block;height:100%;width:30%;background:var(--ink)}}
 /* Firefox compiles the glass header's blur the first time it draws one
    (about 330ms on a cold profile), which landed on the first scroll. A 2px

@@ -272,7 +272,8 @@ export function V3Work({ work }: { work: WorkItem[] }) {
     };
   }, [view, list, stripBar]);
 
-  /* Chips on phone: one row, a fade on the cut chip, a progress line. */
+  /* Chips: one row at every width, a fade on the cut chip, and a progress
+     line up to tablets. */
   const syncChips = React.useCallback(() => {
     const c = chips.current,
       i = chipsBar.current?.firstElementChild as HTMLElement | null;
@@ -287,7 +288,21 @@ export function V3Work({ work }: { work: WorkItem[] }) {
   React.useEffect(() => {
     syncChips();
     addEventListener("resize", syncChips);
-    return () => removeEventListener("resize", syncChips);
+    /* A mouse wheel has no sideways motion: over the row it scrolls the
+       chips until they run out, then the page again. */
+    const c = chips.current;
+    const wheel = (e: WheelEvent) => {
+      if (!c || Math.abs(e.deltaX) >= Math.abs(e.deltaY)) return;
+      const m = c.scrollWidth - c.clientWidth;
+      if (e.deltaY > 0 ? c.scrollLeft >= m - 1 : c.scrollLeft <= 0) return;
+      e.preventDefault();
+      c.scrollLeft += e.deltaY;
+    };
+    c?.addEventListener("wheel", wheel, { passive: false });
+    return () => {
+      removeEventListener("resize", syncChips);
+      c?.removeEventListener("wheel", wheel);
+    };
   }, [syncChips]);
 
   const VIEWS = [
