@@ -599,3 +599,8 @@ html{font-family:var(--font-mono),ui-monospace,monospace}
 .v3 .chips.at-end{-webkit-mask-image:none;mask-image:none}
 .v3 .chips-bar{display:block;height:1px;margin:10px var(--gr) 0 var(--g);background:var(--line)}
 .v3 .chips-bar i{display:block;height:100%;width:30%;background:var(--ink)}}
+/* Firefox compiles the glass header's blur the first time it draws one
+   (about 330ms on a cold profile), which landed on the first scroll. A 2px
+   speck with the same filter draws it 1.5s after load instead. */
+@supports (-moz-appearance:none){body:has(.v3)::after{content:"";position:fixed;left:0;top:0;width:2px;height:2px;pointer-events:none;visibility:hidden;-webkit-backdrop-filter:blur(20px) saturate(1.4);backdrop-filter:blur(20px) saturate(1.4);animation:v3-warm 0s 1.5s forwards}}
+@keyframes v3-warm{to{visibility:visible}}

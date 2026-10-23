@@ -27,6 +27,9 @@ const NOTCHES = [
 ] as const;
 const PLAN = [1, 1, -1] as const;
 
+/* Retired with JG V3: the homepage has no paged strip for a notch to turn. */
+test.skip(true, "JG V3 homepage has no paged strip");
+
 for (const v of VIEWPORTS.filter((v) => !v.touch)) {
   for (const n of NOTCHES) {
     test(`notch ${n.kind} / ${v.name} @motion`, async ({ browser, browserName }) => {

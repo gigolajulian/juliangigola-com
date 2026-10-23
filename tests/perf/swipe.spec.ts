@@ -33,7 +33,9 @@ import { contextFor, stacked, VIEWPORTS } from "./matrix";
 
 test.use({ headless: false });
 
-const SWIPE_PAGES = ["/", "/portfolio"] as const;
+/* The homepage left out since JG V3: it scrolls down the page, with no
+   paged strip to swipe. */
+const SWIPE_PAGES: readonly string[] = ["/portfolio"];
 /** Three on, one back. */
 const PLAN = [1, 1, 1, -1] as const;
 
