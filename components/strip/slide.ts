@@ -25,8 +25,8 @@ export const flatSlide = new WeakMap<HTMLElement, FlatSlide>();
 /** Two notches, counted as wheel events, not pixels: Safari's notch is
     far smaller than Chrome's 100, and 150px took four of them (MAC). */
 const TURN = 2;
-const SLIDE_MS = 650;
-const EASE = "cubic-bezier(0.22, 1, 0.36, 1)";
+export const SLIDE_MS = 650;
+export const EASE = "cubic-bezier(0.22, 1, 0.36, 1)";
 
 export function slideStrip(el: HTMLElement) {
   const still = window.matchMedia("(prefers-reduced-motion: reduce)");
