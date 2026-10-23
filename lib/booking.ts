@@ -172,8 +172,14 @@ const framesOf = (slug: string, n = Infinity): Tile[] => {
 
 /** A discipline's projects, a frame each, each opening its project. */
 /* `per`: frames from each project, for a discipline with few projects
-   (Julian: more photographs round the portraits cover). */
-const coversOf = (category: string, n = Infinity, prefer: string[] = [], per = 1): Tile[] => {
+   (Julian: more photographs round the portraits cover), or by project
+   slug for one or two of them (the digitals: Zoe and Giselle). */
+const coversOf = (
+  category: string,
+  n = Infinity,
+  prefer: string[] = [],
+  per: number | Record<string, number> = 1,
+): Tile[] => {
   const all = projectsIn(category);
   const first = prefer
     .map((s) => all.find((p) => p.slug === s))
@@ -181,7 +187,7 @@ const coversOf = (category: string, n = Infinity, prefer: string[] = [], per = 1
   return [...first, ...all.filter((p) => !first.includes(p))]
     .slice(0, n)
     .flatMap((p) =>
-      (p.images.length ? p.images.slice(0, per) : [p.cover]).map((frame) => ({
+      (p.images.length ? p.images.slice(0, typeof per === "number" ? per : (per[p.slug] ?? 1)) : [p.cover]).map((frame) => ({
         frame,
         href: `/portfolio/${p.slug}`,
         caption: caption(p.name),
@@ -370,7 +376,7 @@ export const BOOKING_PAGES: BookingPage[] = [
         a: "Yes. A styled test is a different shoot from digitals and is quoted on request: the editorial work shows what one looks like.",
       },
     ],
-    tiles: coversOf("studio-digitals"),
+    tiles: coversOf("studio-digitals", Infinity, [], { zoe: 2, giselle: 2 }),
     gallery: { href: "/portfolio/studio-digitals", label: "The digitals gallery" },
     // Only the frames that read as digitals: plain ground, standing or
     // close, no styling. Taneka's and Zoe's sets are posed floor work and

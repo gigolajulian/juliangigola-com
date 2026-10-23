@@ -610,7 +610,10 @@ export function HeroDials() {
          first in the top row; the rest of it filled from the dark ones
          that stood lowest. */
       // A wide screen has no row under the buttons: the rest go above.
-      const topN = wide ? m - sideN : Math.floor((m - sideN) / 2);
+      const even2 = Math.floor((m - sideN) / 2);
+      /* Julian (/headshots): three or more on a light ground make the top
+         row on their own, left, middle and right; a dark one goes below. */
+      const topN = wide ? m - sideN : light.length >= 3 ? Math.min(light.length, even2) : even2;
       const dark = shown.filter((f) => !light.includes(f)).sort((p, q) => q.offsetTop - p.offsetTop);
       const top = [...light, ...dark].slice(0, topN);
       const others = shown.filter((f) => !top.includes(f)).sort((p, q) => p.offsetLeft - q.offsetLeft);
