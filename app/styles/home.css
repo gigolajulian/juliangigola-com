@@ -341,6 +341,14 @@
       translate 640ms var(--ease-out-strong);
     transition-delay: calc(180ms + var(--i, 0) * 110ms);
   }
+  /* Sessions' rows land with the screen, not after it: they start as
+     the strip names Sessions, halfway through the turn, and the last
+     was still coming 800ms after the screen stopped (Julian: they come
+     too late). No wait, a third of the stagger, shorter moves. */
+  .session-step {
+    transition-duration: 380ms, 440ms;
+    transition-delay: calc(var(--i, 0) * 40ms);
+  }
   /* In from the right, the way the strip travels (`jg-fade-up`). It
      rose from below once, and the last step rising past the list's foot
      gave the list a scrollbar for as long as it moved (Julian saw it).
