@@ -32,7 +32,8 @@ for (const r of [...RATIOS, SHORT]) {
     // The picker never scrolls inside itself, nor the page sideways. The one
     // exception: in a wide editorial card the times run in their own column
     // beside the month and scroll there (2026-10-21), the month never does.
-    const inner = await page.locator("[role=region].tp").evaluate((e) =>
+    // The V3 stepper (`.f-main`) or the classic card's region.
+    const inner = await page.locator("[role=region].tp, .flow .f-main").first().evaluate((e) =>
       [e, ...e.querySelectorAll("*")].filter((n) => !n.classList.contains("ed-times") && /(auto|scroll)/.test(getComputedStyle(n).overflowY) && n.scrollHeight > n.clientHeight + 1).length);
     expect(inner, "picker scrolls inside").toBe(0);
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1), "sideways scroll").toBe(true);
