@@ -653,7 +653,9 @@ export function HeroDials() {
           // Staggered a little, as the homepage's field is, not a ruled line.
           const bow = 24 * (1 - (2 * t - 1) ** 2) + (i % 2 ? 14 : 0);
           const h = hOf(f);
-          place(f, x, up ? Math.max(ceil, T - GAP - h - bow) : Math.min(floor - h, B + GAP + bow));
+          // Under the buttons it may run off the cover's foot rather than climb onto
+          // them (QA: a 2560 by 1080 monitor's browser, about 950 tall).
+          place(f, x, up ? Math.max(ceil, T - GAP - h - bow) : B + GAP + Math.min(bow, Math.max(0, floor - h - B - GAP)));
           x += ws[i] + gap;
         });
       };

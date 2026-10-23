@@ -189,7 +189,7 @@ export function CoverFloat({
       <div
         className={cn(
           "cover-float-middle flex flex-col items-center px-6 text-center",
-          heading ? "max-w-[min(46rem,80vw)]" : "max-w-[min(62rem,92vw)]",
+          heading ? "max-w-[min(46rem,80vw)] [@media(min-aspect-ratio:2/1)]:max-w-[min(72rem,70vw)]" : "max-w-[min(62rem,92vw)]",
         )}
       >
         {/* Without scripts the canvas is never drawn: the name set in its
