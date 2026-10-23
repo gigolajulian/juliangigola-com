@@ -598,17 +598,25 @@ export function HeroDials() {
          the title gives its photograph to the end of a row. */
       const m = shown.length;
       const light = shown.filter(bright);
-      const sideN = Math.min(2, m);
+      /* Julian, 2026-10-23: on a screen twice as wide as tall the room is
+         beside the title, not above and below it, so up to three a side
+         there, larger, and fewer in the rows. */
+      const wide = at.width >= 2 * at.height;
+      const sideN = Math.min(wide ? 6 : 2, wide ? m - 2 : m);
+      // Clear of the title and the buttons; more where the photographs are larger.
+      const clear = wide ? 3 * GAP : GAP;
       /* Julian (graduation, 2026-10-22): the rows as even as the count
          allows, an odd one under the buttons. Light-ground photographs
          first in the top row; the rest of it filled from the dark ones
          that stood lowest. */
-      const topN = Math.floor((m - sideN) / 2);
+      // A wide screen has no row under the buttons: the rest go above.
+      const topN = wide ? m - sideN : Math.floor((m - sideN) / 2);
       const dark = shown.filter((f) => !light.includes(f)).sort((p, q) => q.offsetTop - p.offsetTop);
       const top = [...light, ...dark].slice(0, topN);
       const others = shown.filter((f) => !top.includes(f)).sort((p, q) => p.offsetLeft - q.offsetLeft);
-      const sides = sideN === 2 ? [others[0], others[others.length - 1]] : others.slice(0, sideN);
-      const bottom = others.filter((f) => !sides.includes(f));
+      const leftN = Math.ceil(sideN / 2);
+      const sides = [others.slice(0, leftN), others.slice(others.length - (sideN - leftN))];
+      const bottom = others.filter((f) => !sides.flat().includes(f));
       /* Julian: a landscape frame at a slot's width came out small. Each
          is sized toward the same area as the middle one, so a wide frame
          grows and a large upright one gives a little. */
@@ -618,31 +626,53 @@ export function HeroDials() {
       const tallest = Math.max(...shown.map((f) => f.offsetHeight * even.get(f)!));
       // The rows' stagger (`row`, below) takes up to 38px of the room too.
       // Smaller rather than over the text on a short wide screen (QA, 2560 by 1080).
-      const scale = Math.min(1, Math.max(0.4, (Math.min(T - ceil, floor - B) - GAP - 38) / tallest));
-      const place = (f: HTMLElement, left: number, top: number) => {
+      const scale = Math.min(1, Math.max(0.4, (Math.min(T - ceil, floor - B) - clear - 38) / tallest));
+      const place = (f: HTMLElement, left: number, top: number, size = scale) => {
         const x = 50 + ((left / at.width) * 100 - 50) / kx;
         const y = 50 + ((top / at.height) * 100 - 50) / ky;
-        f.style.setProperty("--cs", `${scale * even.get(f)!}`);
+        f.style.setProperty("--cs", `${size * even.get(f)!}`);
         for (const [, k] of SHAPES) {
           f.style.setProperty(`--c${k}x`, `${x}%`);
           f.style.setProperty(`--c${k}y`, `${y}%`);
         }
       };
-      const wOf = (f: HTMLElement) => f.offsetWidth * scale * even.get(f)!;
-      const hOf = (f: HTMLElement) => f.offsetHeight * scale * even.get(f)!;
-      for (const [f, dir] of sides.map((f, i) => [f, i === 0 ? -1 : 1] as const)) {
-        const w = wOf(f);
-        // Julian: the side ones well apart from the title, not tucked in.
-        const left = dir < 0 ? L - 6 * GAP - w : R + 6 * GAP;
-        if (left >= GAP && left + w <= at.width - GAP) place(f, left, my - hOf(f) / 2);
-        else if (dir < 0) top.unshift(f);
-        else bottom.push(f);
-      }
+      // On a wide screen the row above is sized by the room above alone.
+      const above = wide
+        ? Math.min(1.4, Math.max(0.4, (T - ceil - clear - 38) / Math.max(...top.map((f) => f.offsetHeight * even.get(f)!))))
+        : scale;
+      const wOf = (f: HTMLElement, size = scale) => f.offsetWidth * size * even.get(f)!;
+      const hOf = (f: HTMLElement, size = scale) => f.offsetHeight * size * even.get(f)!;
+      /* A side: its photographs stacked down beside the title, centred on
+         it, every other one stepped out a little. Larger on a wide screen,
+         as large as the height allows. */
+      sides.forEach((fs, s) => {
+        const dir = s === 0 ? -1 : 1;
+        if (!fs.length) return;
+        const raw = fs.map((f) => f.offsetHeight * even.get(f)!);
+        const size = wide
+          ? Math.min(1.4, (floor - ceil - 2 * GAP * (fs.length - 1)) / raw.reduce((t, h) => t + h, 0))
+          : scale;
+        const hs = raw.map((h) => h * size);
+        const tall = hs.reduce((t, h) => t + h, 0) + 2 * GAP * (fs.length - 1);
+        let y = Math.max(ceil, Math.min(floor - tall, my - tall / 2));
+        fs.forEach((f, i) => {
+          const w = f.offsetWidth * even.get(f)! * size;
+          const step = i % 2 ? 4 * GAP : 0;
+          // Julian: the side ones well apart from the title, not tucked in.
+          const left = dir < 0 ? L - 6 * GAP - w - step : R + 6 * GAP + step;
+          if (left >= GAP && left + w <= at.width - GAP) place(f, left, y, size);
+          else if (dir < 0) top.unshift(f);
+          else bottom.push(f);
+          y += hs[i] + 2 * GAP;
+        });
+      });
       /* A row, centred on the title and spaced evenly, a little lower
          toward its ends above the title and toward its middle below. */
       const row = (fs: HTMLElement[], up: boolean) => {
+        if (!fs.length) return;
+        const size = up ? above : scale;
         fs.sort((p, q) => p.offsetLeft - q.offsetLeft);
-        const ws = fs.map(wOf);
+        const ws = fs.map((f) => wOf(f, size));
         const need = ws.reduce((t, w) => t + w, 0);
         // Julian: kept together ("way apart"), about the middle half of the screen.
         const span = Math.min(at.width - 2 * GAP, Math.max(R - L, at.width * 0.55), need + 6 * GAP * (fs.length - 1));
@@ -652,10 +682,10 @@ export function HeroDials() {
           const t = fs.length > 1 ? i / (fs.length - 1) : 0.5;
           // Staggered a little, as the homepage's field is, not a ruled line.
           const bow = 24 * (1 - (2 * t - 1) ** 2) + (i % 2 ? 14 : 0);
-          const h = hOf(f);
+          const h = hOf(f, size);
           // Under the buttons it may run off the cover's foot rather than climb onto
           // them (QA: a 2560 by 1080 monitor's browser, about 950 tall).
-          place(f, x, up ? Math.max(ceil, T - GAP - h - bow) : B + GAP + Math.min(bow, Math.max(0, floor - h - B - GAP)));
+          place(f, x, up ? Math.max(ceil, T - clear - h - bow) : B + clear + Math.min(bow, Math.max(0, floor - h - B - clear)), size);
           x += ws[i] + gap;
         });
       };
