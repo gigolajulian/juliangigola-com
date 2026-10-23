@@ -487,3 +487,7 @@
 .v3 :focus-visible{outline:1px solid var(--accent);outline-offset:3px}
 
 :root{--font-wordmark:var(--font-display)}
+/* Touch: 44px targets for the toggle and Menu. */
+@media (pointer:coarse){.v3 .tbtn{width:44px;height:44px}.v3 .menu-btn{min-height:44px}}
+/* The header's wordmark and links clear a notch on a phone on its side. */
+.v3 .site-hdr{padding-top:max(14px,env(safe-area-inset-top,0px))}

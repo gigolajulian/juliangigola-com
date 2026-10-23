@@ -23,6 +23,7 @@ import { TypeDials } from "@/components/type-dials";
 import { clips, DEFAULTS, LATE, LEVELS, LIQUID, SKIP, sizesOf, typeSizer } from "@/lib/type-size";
 import { VisitTrail } from "@/components/visit-trail";
 import { ClickBeacon } from "@/components/click-beacon";
+import { MotionGate, OnLegacy, OnV3, V3Footer, V3Header } from "@/components/v3/chrome";
 
 /* JG V3 (DESIGN.md): Inter Tight for the display type and the wordmark,
    IBM Plex Mono for everything else. No other faces. Served from this site
@@ -160,7 +161,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
          */}
         <script
           dangerouslySetInnerHTML={{
-            __html: `(function(){try{var q=location.search,f="deck-flyout";if(/[?&]flyout=1/.test(q))sessionStorage.setItem(f,"1");if(/[?&]flyout=0/.test(q))sessionStorage.removeItem(f);if(sessionStorage.getItem(f)==="1")document.documentElement.dataset.flyout="";var k="door-stack";if(/[?&]stack=0/.test(q))sessionStorage.setItem(k,"0");if(/[?&]stack=1/.test(q))sessionStorage.removeItem(k);if(sessionStorage.getItem(k)!=="0")document.documentElement.dataset.stack=""}catch(e){}var t=null;try{localStorage.removeItem("theme");t=sessionStorage.getItem("theme")}catch(e){}var l=t==="light"||(t!=="dark"&&matchMedia("(prefers-color-scheme: light)").matches);if(l)document.documentElement.dataset.theme="light";var m=document.querySelectorAll('meta[name="theme-color"]');for(var i=0;i<m.length;i++)m[i].setAttribute("content",l?"#ebedef":"#0b0a09")})()`,
+            __html: `(function(){try{var q=location.search,f="deck-flyout";if(/[?&]flyout=1/.test(q))sessionStorage.setItem(f,"1");if(/[?&]flyout=0/.test(q))sessionStorage.removeItem(f);if(sessionStorage.getItem(f)==="1")document.documentElement.dataset.flyout="";var k="door-stack";if(/[?&]stack=0/.test(q))sessionStorage.setItem(k,"0");if(/[?&]stack=1/.test(q))sessionStorage.removeItem(k);if(sessionStorage.getItem(k)!=="0")document.documentElement.dataset.stack=""}catch(e){}var t=null;try{localStorage.removeItem("theme");t=sessionStorage.getItem("theme")}catch(e){}var l=t==="light"||(t!=="dark"&&matchMedia("(prefers-color-scheme: light)").matches);document.documentElement.dataset.theme=l?"light":"dark";var m=document.querySelectorAll('meta[name="theme-color"]');for(var i=0;i<m.length;i++)m[i].setAttribute("content",l?"#ebedef":"#0b0a09")})()`,
           }}
         />
         {/* Font v2 (`app/styles/font-v2.css`), off since V3 (Inter Tight and
@@ -189,7 +190,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             sweep's clock rather than the script's. */}
         <script
           dangerouslySetInnerHTML={{
-            __html: `(function(){try{if(!matchMedia("(prefers-reduced-motion: reduce)").matches){document.documentElement.dataset.gather="";document.documentElement.dataset.moves=""}}catch(e){}try{var q=location.search;try{if(/[?&]menu3d=1/.test(q))sessionStorage.setItem("jg-menu3d","1");if(/[?&]menu3d=0/.test(q))sessionStorage.removeItem("jg-menu3d");if(sessionStorage.getItem("jg-menu3d"))document.documentElement.dataset.menu3d=""}catch(e){}if(/[?&]intro=0/.test(q))return;var basic=/[?&]splash=basic/.test(q);var force=basic||/[?&]intro=1/.test(q);var seen=false;try{seen=!!sessionStorage.getItem("jg-intro")}catch(e){}var calm=matchMedia("(prefers-reduced-motion: reduce)").matches;var admin=location.pathname.indexOf("/admin")===0;if(force||(!admin&&!seen&&!calm)){var r=document.documentElement;r.dataset.intro="1";if(basic){r.dataset.splash="basic";setTimeout(function(){r.dataset.intro="half";r.dataset.splashed="";setTimeout(function(){r.removeAttribute("data-intro");r.removeAttribute("data-splash")},1200)},500)}r.style.setProperty("--jg-blink-at",Math.round(100+Math.random()*160)+"ms")}}catch(e){}})()`,
+            __html: `(function(){var mo=false;try{var k3="jg-v3motion",q3=location.search;if(/[?&]v3motion=0/.test(q3))sessionStorage.removeItem(k3);else if(/[?&]v3motion/.test(q3))sessionStorage.setItem(k3,"1");mo=!!sessionStorage.getItem(k3)||location.pathname.indexOf("/bts")===0;if(sessionStorage.getItem(k3))document.documentElement.dataset.v3motion=""}catch(e){}try{if(!matchMedia("(prefers-reduced-motion: reduce)").matches){document.documentElement.dataset.gather="";document.documentElement.dataset.moves=""}}catch(e){}try{var q=location.search;try{if(/[?&]menu3d=1/.test(q))sessionStorage.setItem("jg-menu3d","1");if(/[?&]menu3d=0/.test(q))sessionStorage.removeItem("jg-menu3d");if(sessionStorage.getItem("jg-menu3d"))document.documentElement.dataset.menu3d=""}catch(e){}if(/[?&]intro=0/.test(q)||!mo)return;var basic=/[?&]splash=basic/.test(q);var force=basic||/[?&]intro=1/.test(q);var seen=false;try{seen=!!sessionStorage.getItem("jg-intro")}catch(e){}var calm=matchMedia("(prefers-reduced-motion: reduce)").matches;var admin=location.pathname.indexOf("/admin")===0;if(force||(!admin&&!seen&&!calm)){var r=document.documentElement;r.dataset.intro="1";if(basic){r.dataset.splash="basic";setTimeout(function(){r.dataset.intro="half";r.dataset.splashed="";setTimeout(function(){r.removeAttribute("data-intro");r.removeAttribute("data-splash")},1200)},500)}r.style.setProperty("--jg-blink-at",Math.round(100+Math.random()*160)+"ms")}}catch(e){}})()`,
           }}
         />
         {process.env.NODE_ENV === "production" ? (
@@ -216,47 +217,71 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
 
         {/* The wall of work opens over the page on a first arrival, and the
             page is already underneath it. See `intro.tsx`. */}
-        <Intro />
+        <MotionGate>
+          <Intro />
+        </MotionGate>
 
-        <SiteHeader />
+        <OnLegacy>
+          <SiteHeader />
+        </OnLegacy>
+        <OnV3>
+          <V3Header />
+        </OnV3>
         {/* Where a visit began and what it read, for an inquiry to carry. */}
         <VisitTrail />
         {/* The drawer the burger opens. A sibling of the header and of
             `main`, because both of those are what it comes out from under
             — see `site-menu.tsx`. */}
-        <SiteMenu />
+        <OnLegacy>
+          <SiteMenu />
         {/* And the one /work opens from the other side. Here rather than
             in the work route's own shell for the same reason: that shell
             is inside `main`, and `main` is what this slides out from
             under. It renders nothing off /work. */}
-        <WorkFilter categories={WORK_CATEGORY_LINKS} heads={WORK_HEADS} />
+          <WorkFilter categories={WORK_CATEGORY_LINKS} heads={WORK_HEADS} />
+        </OnLegacy>
         {/* Writes the pointer's position onto whichever glass control is
             under it — see `glass` in globals.css. Renders nothing. */}
-        <GlassLight />
+        <MotionGate>
+          <GlassLight />
+        </MotionGate>
         {/* Marks lazily loaded pictures as they land so they fade in rather
             than pop — see `photo-fade.tsx`. Renders nothing. */}
-        <PhotoFade />
+        <MotionGate>
+          <PhotoFade />
+        </MotionGate>
         {/* `tabIndex={-1}` so the skip link's focus lands here and the next Tab
             is the first thing in the content, not the header again. */}
         <main id="main" tabIndex={-1} className="rise flex flex-1 flex-col outline-none">
           {/* Every page zooms in and out of the next: `page-transition.tsx`
               and `.page` in `globals.css`. */}
           <ImageFallback />
-          <PageTransition>{children}</PageTransition>
+          <MotionGate fallback={children}>
+            <PageTransition>{children}</PageTransition>
+          </MotionGate>
         </main>
-        <SiteFooter />
+        <OnLegacy>
+          <SiteFooter />
+        </OnLegacy>
+        <OnV3>
+          <V3Footer />
+        </OnV3>
         {/* Focus round the pointer over a gallery: `focus-field.tsx`. */}
-        <FocusField />
-        <CardTilt />
-        {/* A photograph's hover waits 600ms after a page lands: `hover-settle.tsx`. */}
-        <HoverSettle />
+        <MotionGate>
+          <FocusField />
+          <CardTilt />
+          {/* A photograph's hover waits 600ms after a page lands: `hover-settle.tsx`. */}
+          <HoverSettle />
+        </MotionGate>
         <PhotoNotice />
         {/* The pointer over anything that opens large, site wide. One
             mount: it follows the pointer and shows only over `[data-ring]`,
             so every gallery and strip shares it and none carries its own. */}
         {/* And the pointer itself: the site's mark in place of the arrow.
             See `pointer-mark.tsx`. */}
-        <PointerMark />
+        <MotionGate>
+          <PointerMark />
+        </MotionGate>
         {/* fps, finger dots and a frame log, only with `?debug`. The
             overlay itself loads only then: `debug-gate.tsx`. */}
         <DebugGate />
