@@ -56,14 +56,19 @@ const MARKS: [slug: string, name: string, w: number, h: number][] = [
   ["ukiyosunknown", "Ukiyosunknown", 58, 30],
 ];
 
-export function Marks({ hidden }: { hidden?: boolean }) {
+/** `cell`: each mark in its own box (the About grid). */
+export function Marks({ hidden, cell }: { hidden?: boolean; cell?: boolean }) {
   return MARKS.map(([slug, name, w, h]) => {
     const m = CLIENT_MARKS[slug];
     if (!m) return null;
     const label = hidden ? { "aria-hidden": true } : { role: "img", "aria-label": name };
-    if (m.kind === "svg")
-      return <svg key={slug} className="mk" viewBox={m.viewBox} width={w} height={h} fill="currentColor" data-mk={slug} {...label} dangerouslySetInnerHTML={{ __html: m.body }} />;
-    const mask = `url(${m.src}) center/contain no-repeat`;
-    return <span key={slug} className="mk" data-mk={slug} {...label} style={{ width: w, height: h, WebkitMask: mask, mask }} />;
+    const mask = `url(${m.kind === "mask" ? m.src : ""}) center/contain no-repeat`;
+    const mark =
+      m.kind === "svg" ? (
+        <svg key={slug} className="mk" viewBox={m.viewBox} width={w} height={h} fill="currentColor" data-mk={slug} {...label} dangerouslySetInnerHTML={{ __html: m.body }} />
+      ) : (
+        <span key={slug} className="mk" data-mk={slug} {...label} style={{ width: w, height: h, WebkitMask: mask, mask }} />
+      );
+    return cell ? <div key={slug}>{mark}</div> : mark;
   });
 }
