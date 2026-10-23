@@ -236,10 +236,9 @@ export function TermsColumn() {
           setting, <code>Google-Extended</code>, for both Gemini answers and
           Gemini training, and my robots.txt admits it so that Gemini can
           recommend the Site. Google may use the Site&rsquo;s text for Gemini
-          as that setting allows. The photographs are not included: my
-          robots.txt shuts out <code>Googlebot-Image</code>, and no one,
-          Google included, may train on them or generate images from them or
-          in their manner.
+          as that setting allows. The photographs are not included: Google may
+          show them in its image search, but no one, Google included, may
+          train on them or generate images from them or in their manner.
         </p>
         <p>
           <strong>Reservation of rights.</strong> To the fullest extent
