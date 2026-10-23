@@ -1,0 +1,81 @@
+/* The homepage buttons' entrance, on trial behind `?cta=1|2|3`
+   (`data-cta`, `layout.tsx`). Off by default: the row keeps its `.lift`.
+   With a flag the row's own lift is spent at once (0ms, no delay; the
+   phone's scroll drift on the same element keeps running) and each
+   button comes in on its own, the second a beat after the first.
+     1  rise: each out of its own mask, as the type above does.
+     2  wipe: each box opens from its left edge.
+     3  focus: each fades up out of a soft blur. */
+:root[data-cta] .cover-float-ctas.lift {
+  --h-lift-ms: 0ms;
+  animation-delay: 0ms !important;
+}
+:root[data-cta] .cover-float-ctas .cover-cta {
+  --cta-at: var(--reveal-delay, 0ms);
+  animation-duration: 700ms;
+  animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+  animation-delay: var(--cta-at);
+  animation-fill-mode: backwards;
+}
+:root[data-cta] .cover-float-ctas > :nth-child(2) .cover-cta,
+:root[data-cta] .cover-float-ctas > .cover-cta:nth-child(2) {
+  --cta-at: calc(var(--reveal-delay, 0ms) + 110ms);
+}
+[data-intro="1"] .cover-float-ctas .cover-cta {
+  animation-play-state: paused;
+}
+
+/* The masks move by a number, not the clip itself: an animated clip
+   hit-tests as fully clipped until it ends (`--lift-clip`, `splash.css`). */
+@property --cta-clip {
+  syntax: "<number>";
+  inherits: false;
+  initial-value: 0;
+}
+
+:root[data-cta="1"] .cover-float-ctas .cover-cta {
+  animation-name: jg-cta-rise;
+  clip-path: inset(0 0 calc(var(--cta-clip) * 1%) 0);
+}
+@keyframes jg-cta-rise {
+  from {
+    translate: 0 100%;
+    --cta-clip: 100;
+  }
+}
+
+:root[data-cta="2"] .cover-float-ctas .cover-cta {
+  animation-name: jg-cta-wipe;
+  animation-duration: 820ms;
+  clip-path: inset(0 calc(var(--cta-clip) * 1%) 0 0);
+}
+@keyframes jg-cta-wipe {
+  from {
+    --cta-clip: 100;
+  }
+}
+
+:root[data-cta="3"] .cover-float-ctas .cover-cta {
+  animation-name: jg-cta-focus;
+}
+@keyframes jg-cta-focus {
+  from {
+    opacity: 0;
+    translate: 0 8px;
+    scale: 0.96;
+    filter: blur(6px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root[data-cta] .cover-float-ctas .cover-cta {
+    animation: none;
+  }
+}
+
+/* Played once. Under a mouse the liquid takes the buttons' place at
+   the first idle moment (`liquid-pair.tsx`), a new element, and a new
+   element starts its entrance over: they went out and came in twice. */
+:root[data-cta-in] .cover-float-ctas .cover-cta {
+  animation: none;
+}

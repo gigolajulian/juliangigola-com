@@ -45,13 +45,28 @@ export function LiquidPair({
   React.useEffect(() => {
     if (!mouse || !node) return;
     let soon = 0;
+    let gone = false;
+    /* `?cta` trial (`cta-entrance.css`): the liquid is a new element, and
+       a new element starts the buttons' entrance over. It waits for it. */
+    const entered = document.documentElement.dataset.cta
+      ? Promise.all(
+          node
+            .getAnimations({ subtree: true })
+            .filter((a) => a.timeline === document.timeline)
+            .map((a) => a.finished.catch(() => {})),
+        )
+      : Promise.resolve();
     const io = new IntersectionObserver(([e]) => {
       cancelIdle(soon);
-      if (e.isIntersecting) soon = whenIdle(() => setLive(true));
+      if (e.isIntersecting)
+        entered.then(() => {
+          if (!gone) soon = whenIdle(() => setLive(true));
+        });
       else setLive(false);
     });
     io.observe(node);
     return () => {
+      gone = true;
       io.disconnect();
       cancelIdle(soon);
     };
