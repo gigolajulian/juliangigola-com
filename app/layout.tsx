@@ -1,6 +1,5 @@
 import type { Metadata, Viewport } from "next";
 import { IBM_Plex_Mono, Inter_Tight } from "next/font/google";
-import localFont from "next/font/local";
 import { Intro } from "@/components/intro";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
@@ -25,26 +24,14 @@ import { clips, DEFAULTS, LATE, LEVELS, LIQUID, SKIP, sizesOf, typeSizer } from 
 import { VisitTrail } from "@/components/visit-trail";
 import { ClickBeacon } from "@/components/click-beacon";
 
-/* Endless for the name, every heading and the nav, IBM Plex Mono for
-   everything else, text, captions, labels, figures. Served from this site
-   through `next/font`, so a visitor makes no request to Google and the text
-   never flashes a fallback face. `globals.css` points `font-sans` at the
-   mono so body text needs no class. */
-/* Julian's header face, Endless: the logo, the titles, the section
-   titles and the nav. One regular cut, declared across every weight
-   so the 900 the titles ask for is not faked bold. */
-const display = localFont({
-  src: "./fonts/Endless.woff2",
+/* JG V3 (DESIGN.md): Inter Tight for the display type and the wordmark,
+   IBM Plex Mono for everything else. No other faces. Served from this site
+   through `next/font`, so a visitor makes no request to Google.
+   `--font-wordmark` points at the same face (`styles/v3.css`). */
+const display = Inter_Tight({
   variable: "--font-display",
-  weight: "100 900",
-  fallback: ["Helvetica Neue", "Arial", "sans-serif"],
-});
-/* The wordmark stays Inter Tight Black: the logo and the name on the
-   cover. */
-const wordmark = Inter_Tight({
-  variable: "--font-wordmark",
   subsets: ["latin"],
-  weight: "900",
+  weight: ["500", "800", "900"],
   fallback: ["Helvetica Neue", "Arial", "sans-serif"],
 });
 const mono = IBM_Plex_Mono({
@@ -140,7 +127,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="en"
-      className={`${display.variable} ${wordmark.variable} ${mono.variable} h-full antialiased`}
+      className={`${display.variable} ${mono.variable} h-full antialiased`}
       // Dark is the default and is what the CSS already declares, so the
       // server renders the correct theme for everyone except the visitor who
       // has chosen light. That one case is what the script below fixes.
@@ -176,13 +163,12 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             __html: `(function(){try{var q=location.search,f="deck-flyout";if(/[?&]flyout=1/.test(q))sessionStorage.setItem(f,"1");if(/[?&]flyout=0/.test(q))sessionStorage.removeItem(f);if(sessionStorage.getItem(f)==="1")document.documentElement.dataset.flyout="";var k="door-stack";if(/[?&]stack=0/.test(q))sessionStorage.setItem(k,"0");if(/[?&]stack=1/.test(q))sessionStorage.removeItem(k);if(sessionStorage.getItem(k)!=="0")document.documentElement.dataset.stack=""}catch(e){}var t=null;try{localStorage.removeItem("theme");t=sessionStorage.getItem("theme")}catch(e){}var l=t==="light"||(t!=="dark"&&matchMedia("(prefers-color-scheme: light)").matches);if(l)document.documentElement.dataset.theme="light";var m=document.querySelectorAll('meta[name="theme-color"]');for(var i=0;i<m.length;i++)m[i].setAttribute("content",l?"#ebedef":"#0b0a09")})()`,
           }}
         />
-        {/* Font v2 (`app/styles/font-v2.css`), the site's type since
-            2026-10-18 (Julian). `?font=0` brings back the old faces for the
-            tab, `?font=v2` returns. Before the first paint, so the page
-            never shows the old faces first. */}
+        {/* Font v2 (`app/styles/font-v2.css`), off since V3 (Inter Tight and
+            Plex Mono only). `?font=v2` brings it back for the tab, `?font=0`
+            clears it. Before the first paint. */}
         <script
           dangerouslySetInnerHTML={{
-            __html: `(function(){try{var q=location.search,k="jg-font";if(/[?&]font=0/.test(q))sessionStorage.setItem(k,"0");if(/[?&]font=v2/.test(q))sessionStorage.removeItem(k);if(sessionStorage.getItem(k)==="0")return;document.documentElement.dataset.font="v2";var l=document.createElement("link");l.rel="stylesheet";l.href="https://use.typekit.net/wxg8xur.css";document.head.appendChild(l)}catch(e){}})()`,
+            __html: `(function(){try{var q=location.search,k="jg-font";if(/[?&]font=v2/.test(q))sessionStorage.setItem(k,"v2");if(/[?&]font=0/.test(q))sessionStorage.removeItem(k);if(sessionStorage.getItem(k)!=="v2")return;document.documentElement.dataset.font="v2";var l=document.createElement("link");l.rel="stylesheet";l.href="https://use.typekit.net/wxg8xur.css";document.head.appendChild(l)}catch(e){}})()`,
           }}
         />
         {/* Whether this visit gets the opening, decided before the first
