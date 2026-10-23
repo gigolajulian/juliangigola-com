@@ -79,6 +79,7 @@ function Tile({ p, swatch }: { p: WorkItem; swatch?: string[] }) {
 export function V3Work({ work }: { work: WorkItem[] }) {
   const [filter, setFilter] = React.useState("All");
   const [view, setView] = React.useState<"grid" | "strip" | "color">("grid");
+  const back = React.useRef<"grid" | "strip">("grid");
   const [q, setQ] = React.useState("");
   const [pick, setPick] = React.useState<PickAt | null>(null);
   const [scope, setScope] = React.useState<Scope | null>(null);
@@ -375,7 +376,13 @@ export function V3Work({ work }: { work: WorkItem[] }) {
     <div className="v3 contents">
       <section
         ref={page}
-        className={view === "strip" ? "v3page strip-on" : "v3page"}
+        className={
+          view === "strip"
+            ? "v3page strip-on"
+            : view === "color"
+              ? "v3page color-on"
+              : "v3page"
+        }
         id="p-work"
       >
         <div className="pg-head">
@@ -408,7 +415,7 @@ export function V3Work({ work }: { work: WorkItem[] }) {
             />
           </label>
           <div className="wviews" role="group" aria-label="View">
-            {VIEWS.map(([v, label, icon]) => (
+            {VIEWS.slice(0, 2).map(([v, label, icon]) => (
               <button
                 key={v}
                 type="button"
@@ -420,6 +427,24 @@ export function V3Work({ work }: { work: WorkItem[] }) {
                 {icon}
               </button>
             ))}
+            {/* The vectorscope is a mode of its own: on, then off back to
+                the view it came from. */}
+            <button
+              type="button"
+              className="wcolor"
+              aria-pressed={view === "color"}
+              title={VIEWS[2][1]}
+              onClick={() => {
+                if (view === "color") setView(back.current);
+                else {
+                  back.current = view;
+                  setView("color");
+                }
+              }}
+            >
+              {VIEWS[2][2]}
+              <span>Color</span>
+            </button>
           </div>
         </div>
         <div

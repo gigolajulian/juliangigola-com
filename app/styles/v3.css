@@ -613,3 +613,28 @@ html{font-family:var(--font-mono),ui-monospace,monospace}
 .v3 .ab-bio{order:1}.v3 .about .facts{order:2}.v3 .ab-block{order:3}
 .v3 .ab-photo{order:4;position:static;max-width:560px}
 .v3 .about .ctas{order:5}}
+/* Strip and Color are one screen each: the title and the count step aside,
+   so strip photos run almost the full height. */
+.v3 #p-work:is(.strip-on,.color-on) .pg-head{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}
+.v3 #p-work:is(.strip-on,.color-on) .wnote{display:none}
+.v3 #p-work.strip-on .wstrip{padding-top:20px}
+@media (max-width:767px){.v3 #p-work.strip-on .sc{aspect-ratio:auto;height:calc(100svh - 270px);min-height:360px}}
+/* Color: a mode set apart from Grid and Strip, a hairline and a word. */
+.v3 .wviews .wcolor{display:inline-flex;align-items:center;gap:8px;width:auto;margin-left:12px;padding:0 12px;box-shadow:-13px 0 0 -12px var(--line)}
+@media (max-width:700px){.v3 .wviews .wcolor{width:auto;padding:0 8px}}
+.v3 #p-work.color-on{height:100svh;min-height:0;overflow:hidden}
+.v3 #p-work.color-on .wscope{flex:1;min-height:0;padding-bottom:16px}
+.v3 #p-work.color-on .sc-panel{position:static;min-height:0}
+.v3 #p-work.color-on .sc-panel canvas{width:min(100%,calc(100svh - 380px))}
+.v3 #p-work.color-on .sc-res{grid-template-rows:repeat(2,minmax(0,1fr));min-height:0;gap:16px 12px}
+.v3 #p-work.color-on .sc-res .wt{display:flex;flex-direction:column;min-height:0}
+.v3 #p-work.color-on .sc-res .wt>a{flex:1;min-height:0;display:block}
+.v3 #p-work.color-on .sc-res .ph{height:100%;aspect-ratio:auto}
+@media (max-width:900px){.v3 #p-work.color-on{height:auto;min-height:100svh;overflow:visible}
+.v3 #p-work.color-on .sc-panel canvas{width:min(100%,34svh)}
+.v3 #p-work.color-on .sc-res{display:flex;overflow-x:auto;scrollbar-width:none;scroll-snap-type:x mandatory}
+.v3 #p-work.color-on .sc-res .wt{flex:none;width:42vw;scroll-snap-align:start}
+.v3 #p-work.color-on .sc-res .ph{aspect-ratio:4/5;height:auto}}
+/* One-screen modes keep the screen for the photos: no footer line, tools pulled up. */
+.v3 #p-work:is(.strip-on,.color-on) .foot-line{display:none}
+.v3 #p-work:is(.strip-on,.color-on) .wtools{margin-top:8px}
