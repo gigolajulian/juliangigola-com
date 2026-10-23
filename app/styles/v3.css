@@ -373,7 +373,7 @@
 .v3 .reach{grid-template-columns:1fr;padding-top:48px}
 .v3 .reach-call{border-left:0;padding-left:0;border-top:1px solid var(--line);padding-top:28px}}
 .v3 .fig .cn{margin:0 .09em 0 .03em}
-@media (max-width:800px){.v3 .f-photo{height:auto;aspect-ratio:4/3}}
+@media (max-width:800px){.v3 .f-photo{height:auto;aspect-ratio:4/3;min-width:0;max-width:100%}}
 .v3 .in-steps{padding:32px var(--gr) 32px var(--g)}
 .v3 .in-steps li{align-content:start}
 .v3 .in-steps ol{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:0 clamp(16px,2.5vw,40px)}
