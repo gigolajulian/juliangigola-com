@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { V3Work, type WorkItem } from "@/components/v3/work";
 import { PROJECTS, categoryLabel } from "@/lib/work";
+import ORDER from "@/lib/portfolio-order.json";
 
 export const metadata: Metadata = {
   title: "Photography Portfolio, San Francisco Bay Area",
@@ -9,12 +10,11 @@ export const metadata: Metadata = {
   alternates: { canonical: "/portfolio" },
 };
 
-/* Best first: the vectorscope's DOPE list (`components/vectorscope.tsx`),
-   then the site's running order. */
-const DOPE = ["entangled", "vendetta", "lustro", "cyber1a", "channel-orange", "obscura", "true-grit", "cyberscape", "paranoia", "solace", "mirage", "analogue-dreams", "hua", "info-overload", "torteline", "sara", "vesper", "transmutate", "kala-x-sharks", "liminal", "l3na"];
+/* Julian's order from the Work Order arrange page, then any project it
+   doesn't know yet in the site's running order. */
 const rank = (slug: string) => {
-  const i = DOPE.indexOf(slug);
-  return i < 0 ? DOPE.length : i;
+  const i = ORDER.indexOf(slug);
+  return i < 0 ? ORDER.length : i;
 };
 const WORK: WorkItem[] = PROJECTS.map((p, i) => [p, i] as const)
   .sort((a, b) => rank(a[0].slug) - rank(b[0].slug) || a[1] - b[1])
