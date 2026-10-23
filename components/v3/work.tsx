@@ -4,6 +4,7 @@ import * as React from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { V3Foot } from "@/components/v3/chrome";
+import DISC from "@/lib/discipline-order.json";
 
 /* JG V3 Portfolio (master v39, /work): search, discipline chips, and the
    Grid, Strip and Color views. Best first (lib's order: the vectorscope's
@@ -94,7 +95,11 @@ export function V3Work({ work }: { work: WorkItem[] }) {
     return c;
   }, [work]);
   const order = React.useMemo(
-    () => Object.keys(counts).sort((a, b) => counts[b] - counts[a]),
+    /* Julian's order from the Work Order page, then any new discipline by count. */
+    () => {
+      const rank = (d: string) => (DISC.indexOf(d) + 1 || DISC.length + 1);
+      return Object.keys(counts).sort((a, b) => rank(a) - rank(b) || counts[b] - counts[a]);
+    },
     [counts],
   );
   const list = React.useMemo(
