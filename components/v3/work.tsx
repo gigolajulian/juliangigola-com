@@ -433,6 +433,7 @@ export function V3Work({ work }: { work: WorkItem[] }) {
               type="button"
               className="wcolor"
               aria-pressed={view === "color"}
+              aria-label={VIEWS[2][1]}
               title={VIEWS[2][1]}
               onClick={() => {
                 if (view === "color") setView(back.current);
@@ -443,7 +444,6 @@ export function V3Work({ work }: { work: WorkItem[] }) {
               }}
             >
               {VIEWS[2][2]}
-              <span>Color</span>
             </button>
           </div>
         </div>
