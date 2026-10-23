@@ -551,6 +551,8 @@ export function HeroDials() {
         ...Array.from(range.getClientRects(), (r) => ink(r, r.height * 0.18)),
         ...Array.from(block.querySelectorAll(".cover-float-where, .cover-cta"), (n) => ink(n.getBoundingClientRect())),
       ].filter((r) => r[2] > r[0]);
+      const words = Array.from(range.getClientRects(), (r) => ink(r, r.height * 0.18)).filter((r) => r[2] > r[0]);
+      const ctas = Array.from(block.querySelectorAll(".cover-cta"), (n) => ink(n.getBoundingClientRect()));
       anims.forEach((a, i) => (a.currentTime = was[i]));
       /* Julian, 2026-10-22: the photographs round the title, as the
          homepage's field stands round the name (below). Each keeps its own
@@ -609,11 +611,10 @@ export function HeroDials() {
          allows, an odd one under the buttons. Light-ground photographs
          first in the top row; the rest of it filled from the dark ones
          that stood lowest. */
-      // A wide screen has no row under the buttons: the rest go above.
       const even2 = Math.floor((m - sideN) / 2);
       /* Julian (/headshots): three or more on a light ground make the top
          row on their own, left, middle and right; a dark one goes below. */
-      const topN = wide ? m - sideN : light.length >= 3 ? Math.min(light.length, even2) : even2;
+      const topN = wide ? Math.ceil((m - sideN) / 2) : light.length >= 3 ? Math.min(light.length, even2) : even2;
       const dark = shown.filter((f) => !light.includes(f)).sort((p, q) => q.offsetTop - p.offsetTop);
       const top = [...light, ...dark].slice(0, topN);
       const others = shown.filter((f) => !top.includes(f)).sort((p, q) => p.offsetLeft - q.offsetLeft);
@@ -639,10 +640,12 @@ export function HeroDials() {
           f.style.setProperty(`--c${k}y`, `${y}%`);
         }
       };
-      // On a wide screen the row above is sized by the room above alone.
-      const above = wide
-        ? Math.min(1.4, Math.max(0.4, (T - ceil - clear - 38) / Math.max(...top.map((f) => f.offsetHeight * even.get(f)!))))
-        : scale;
+      // On a wide screen each row is sized by its own room (Julian: a photo
+      // under the buttons too, where the screen left a gap).
+      const fits = (fs: HTMLElement[], room: number) =>
+        Math.min(1.4, Math.max(0.3, room / Math.max(...fs.map((f) => f.offsetHeight * even.get(f)!))));
+      const above = wide ? fits(top, T - ceil - clear - 38) : scale;
+      const below = wide ? fits(bottom, floor - B - 2 * GAP) : scale;
       const wOf = (f: HTMLElement, size = scale) => f.offsetWidth * size * even.get(f)!;
       const hOf = (f: HTMLElement, size = scale) => f.offsetHeight * size * even.get(f)!;
       /* A side: its photographs stacked down beside the title, centred on
@@ -673,7 +676,7 @@ export function HeroDials() {
          toward its ends above the title and toward its middle below. */
       const row = (fs: HTMLElement[], up: boolean) => {
         if (!fs.length) return;
-        const size = up ? above : scale;
+        const size = up ? above : below;
         fs.sort((p, q) => p.offsetLeft - q.offsetLeft);
         const ws = fs.map((f) => wOf(f, size));
         const need = ws.reduce((t, w) => t + w, 0);
@@ -684,16 +687,37 @@ export function HeroDials() {
         fs.forEach((f, i) => {
           const t = fs.length > 1 ? i / (fs.length - 1) : 0.5;
           // Staggered a little, as the homepage's field is, not a ruled line.
-          const bow = 24 * (1 - (2 * t - 1) ** 2) + (i % 2 ? 14 : 0);
+          const bow = wide && !up ? 0 : 24 * (1 - (2 * t - 1) ** 2) + (i % 2 ? 14 : 0);
           const h = hOf(f, size);
           // Under the buttons it may run off the cover's foot rather than climb onto
           // them (QA: a 2560 by 1080 monitor's browser, about 950 tall).
-          place(f, x, up ? Math.max(ceil, T - clear - h - bow) : B + clear + Math.min(bow, Math.max(0, floor - h - B - clear)), size);
+          place(f, x, up ? Math.max(ceil, T - clear - h - bow) : B + (wide ? 2 * GAP : clear) + Math.min(bow, Math.max(0, floor - h - B - clear)), size);
           x += ws[i] + gap;
         });
       };
+      /* A wide screen: under the title, either side of the buttons, where
+         there is the height for them (Julian, 2026-10-23: a photo here). */
+      const flank = (fs: HTMLElement[]) => {
+        if (!fs.length || !ctas.length || !words.length) return row(fs, false);
+        const y = Math.max(...words.map((r) => r[3])) + clear;
+        const size = fits(fs, floor - y);
+        const sorted = [...fs].sort((p, q) => p.offsetLeft - q.offsetLeft);
+        const half = Math.ceil(sorted.length / 2);
+        let x = Math.min(...ctas.map((r) => r[0])) - 3 * GAP;
+        for (const f of sorted.slice(0, half).reverse()) {
+          x -= wOf(f, size);
+          place(f, x, y, size);
+          x -= 2 * GAP;
+        }
+        x = Math.max(...ctas.map((r) => r[2])) + 3 * GAP;
+        for (const f of sorted.slice(half)) {
+          place(f, x, y, size);
+          x += wOf(f, size) + 2 * GAP;
+        }
+      };
       row(top, true);
-      row(bottom, false);
+      if (wide) flank(bottom);
+      else row(bottom, false);
     };
     fit();
     void document.fonts.ready.then(fit);
