@@ -616,7 +616,9 @@ export function HeroDials() {
       const mid = areas[Math.floor(areas.length / 2)];
       const even = new Map(shown.map((f) => [f, Math.min(1.6, Math.max(0.85, Math.sqrt(mid / (f.offsetWidth * f.offsetHeight))))]));
       const tallest = Math.max(...shown.map((f) => f.offsetHeight * even.get(f)!));
-      const scale = Math.min(1, Math.max(0.65, (Math.min(T - ceil, floor - B) - GAP) / tallest));
+      // The rows' stagger (`row`, below) takes up to 38px of the room too.
+      // Smaller rather than over the text on a short wide screen (QA, 2560 by 1080).
+      const scale = Math.min(1, Math.max(0.4, (Math.min(T - ceil, floor - B) - GAP - 38) / tallest));
       const place = (f: HTMLElement, left: number, top: number) => {
         const x = 50 + ((left / at.width) * 100 - 50) / kx;
         const y = 50 + ((top / at.height) * 100 - 50) / ky;
