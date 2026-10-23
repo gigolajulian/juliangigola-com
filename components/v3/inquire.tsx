@@ -124,11 +124,11 @@ const STEPS = [
 ] as const;
 
 /* ── /contact/form: the commission stepper (Project, Scope, You, Sent) ── */
-const KINDS = ["Campaign", "Editorial", "Cover art", "Presskit", "Music video", "Something else"];
+const KINDS = ["Brand campaign", "Editorial", "Cover art", "Artist presskit", "Music video", "Event coverage", "Other"];
 const WHEN = ["This month", "Next month", "Later this year", "Flexible"];
 const BUDGET = ["Under $2k", "$2k to $5k", "$5k to $10k", "$10k and up", "Not sure yet"];
 /* The inbox's shoot types (lib/inbox.ts SHOOT_TYPES). */
-const TYPE: Record<string, string> = { Campaign: "campaign", Editorial: "editorial", "Cover art": "coverart", Presskit: "presskit", "Music video": "video" };
+const TYPE: Record<string, string> = { "Brand campaign": "campaign", Editorial: "editorial", "Cover art": "coverart", "Artist presskit": "presskit", "Music video": "video", "Event coverage": "event" };
 
 export function V3Commission() {
   const router = useRouter();

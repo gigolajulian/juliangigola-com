@@ -306,6 +306,8 @@
 .v3 .fld.bad input{border-bottom-color:var(--err)}
 .v3 .err{margin:6px 0 0;padding:10px 12px;border:1px solid color-mix(in srgb,var(--err) 55%,transparent);font-size:13px}
 .v3 .kinds{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+/* Seven tiles: Other takes the last row whole at three columns and at two. */
+.v3 .kinds .kind:last-child{grid-column:1/-1}
 .v3 .kind{display:flex;justify-content:space-between;align-items:flex-end;gap:8px;min-height:112px;padding:14px;background:none;border:1px solid var(--line);color:var(--ink);text-align:left;font:inherit;cursor:pointer}
 .v3 .kind b{font:800 1.75rem/.95 var(--display);letter-spacing:-.035em}
 .v3 .wrapopts{display:flex;flex-wrap:wrap;gap:6px}
