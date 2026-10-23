@@ -632,8 +632,9 @@ export function HeroDials() {
         const w = wOf(f);
         // Julian: the side ones well apart from the title, not tucked in.
         const left = dir < 0 ? L - 6 * GAP - w : R + 6 * GAP;
-        if (left < GAP || left + w > at.width - GAP) (dir < 0 ? top.unshift(f) : bottom.push(f));
-        else place(f, left, my - hOf(f) / 2);
+        if (left >= GAP && left + w <= at.width - GAP) place(f, left, my - hOf(f) / 2);
+        else if (dir < 0) top.unshift(f);
+        else bottom.push(f);
       }
       /* A row, centred on the title and spaced evenly, a little lower
          toward its ends above the title and toward its middle below. */
