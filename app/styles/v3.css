@@ -286,7 +286,8 @@
 .v3 .srow[aria-pressed="true"]{color:var(--ink)}
 .v3 .srow[aria-pressed="true"] .lbl:first-child{color:var(--accent)}
 .v3 .slist{border-top:1px solid var(--line)}
-.v3 .inc{display:flex;flex-wrap:wrap;gap:6px 18px;color:var(--mute)}
+/* One run to the tiles' edge, dots between items, no short last line (Julian, 2026-10-23). */
+.v3 .inc{margin:0;color:var(--mute);line-height:1.9;text-wrap:pretty}
 .v3 .f-month{display:flex;justify-content:space-between;align-items:center}
 .v3 .days{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:6px}
 .v3 .days button{display:flex;flex-direction:column;align-items:center;gap:8px;padding:16px 0 12px;background:none;border:1px solid var(--line);color:var(--ink);font:inherit;cursor:pointer}

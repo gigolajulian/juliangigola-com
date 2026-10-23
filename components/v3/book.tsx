@@ -36,10 +36,7 @@ export function V3BookFlow({ slug }: { slug: SessionSlug }) {
         p.at === 1 ? (
           <>
             <Tabs at={slug} />
-            <div className="inc lbl">
-              {S.includes.map((i) => <span key={i}>{i}</span>)}
-              {S.turnaround ? <span>Ready in {S.turnaround}</span> : null}
-            </div>
+            <p className="inc lbl">{[...S.includes, S.turnaround && `Ready in ${S.turnaround}`].filter(Boolean).join(" · ")}</p>
             {p.body}
           </>
         ) : (
