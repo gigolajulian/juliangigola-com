@@ -16,7 +16,10 @@ const rank = (slug: string) => {
   const i = ORDER.indexOf(slug);
   return i < 0 ? ORDER.length : i;
 };
-const WORK: WorkItem[] = PROJECTS.map((p, i) => [p, i] as const)
+/* Off the V3 portfolio grid (Julian, 2026-10-23); the project page stays up. */
+const HIDDEN = ["realestate"];
+const WORK: WorkItem[] = PROJECTS.filter((p) => !HIDDEN.includes(p.slug))
+  .map((p, i) => [p, i] as const)
   .sort((a, b) => rank(a[0].slug) - rank(b[0].slug) || a[1] - b[1])
   .map(([p]) => ({
     s: p.slug,
