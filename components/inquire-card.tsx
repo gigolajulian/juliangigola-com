@@ -7,7 +7,6 @@ import { gsap } from "gsap";
 import { ContactForm, INITIAL, fit, submitOrKeep } from "@/components/contact-form";
 import { ReferencePicks } from "@/components/reference-picks";
 import { trailContext } from "@/components/visit-trail";
-import { RESPONSE_TIME } from "@/lib/site";
 import { cn } from "@/lib/utils";
 
 /* ── the inquiry, editorial ───────────────────────────────────────
@@ -76,7 +75,7 @@ function Editorial({ defaults, sessions = [] }: Props) {
     presetRef ? `Similar to ${presetRef}` : "",
     ...(tile?.asks ? [ask[0] && `${tile.asks[0]}: ${ask[0]}`, ask[1] && `${tile.asks[2]}: ${ask[1]}`] : []),
   ].filter(Boolean).join(" · ");
-  const side = (tile ? [tile.label, ask[0]].filter(Boolean).join(" · ") : "Editorial, campaigns, cover art and press kits");
+  const side = (tile ? [tile.label, ask[0]].filter(Boolean).join(" · ") : "Photo, film and creative direction");
 
   /* The page's pieces cascade in, left to right, row by row, as the
      calendar's days do (time-picker.tsx); a pick brings its questions in
@@ -95,14 +94,13 @@ function Editorial({ defaults, sessions = [] }: Props) {
     return () => tw.forEach((t) => t.progress(1).kill());
   }, [kind, sent]);
 
-  const hero = (big: string, small: React.ReactNode, mark: React.ReactNode, act?: React.ReactNode) => (
+  const hero = (big: string, small: React.ReactNode, mark?: React.ReactNode, act?: React.ReactNode) => (
     <div className="ed-hero">
       <h2>{big}<small>{small}</small></h2>
-      <p className="ed-mk"><i />{mark}{act}</p>
+      {mark || act ? <p className="ed-mk"><i />{mark}{act}</p> : null}
     </div>
   );
-  const replies = RESPONSE_TIME ? `Replies ${RESPONSE_TIME}` : null;
-  const floor = `hello@juliangigola.com${RESPONSE_TIME ? ` · replies ${RESPONSE_TIME}` : ""}`;
+  const floor = "hello@juliangigola.com";
   const stick = goo ? "fill" : undefined;
 
   if (sent) {
@@ -154,7 +152,7 @@ function Editorial({ defaults, sessions = [] }: Props) {
       <input type="hidden" name="type" value={booking ? "session" : kind || "other"} />
       {booking ? <input type="hidden" name="session" value={kind} /> : null}
       {detail ? <input type="hidden" name="detail" value={detail} /> : null}
-      {hero("Inquire", <>{side}{replies ? <><br />{replies}</> : null}</>, "The kind of shoot, and who you are")}
+      {hero("Inquire", side)}
       <div className="ed-body">
         <div className="ed-r ed-fields ed-one">
           <div>

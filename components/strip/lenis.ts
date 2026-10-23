@@ -11,6 +11,7 @@ import {
   wantsOwnNotch,
   WHEEL,
 } from "./shared";
+import { haltLenis, turns } from "./turns";
 
 /* ── Lenis ────────────────────────────────────────────────────
  * On by default; `?lenis=0` opts a browser out. It takes the wheel on
@@ -99,6 +100,8 @@ export function useLenis(
           if ("crossing" in el.dataset) return false;
           // The homepage strip under `?scroll=1` has its own (`slide.ts`).
           if ("flat" in el.dataset) return false;
+          // A discipline turning over (`turns.ts`).
+          if (turns.get(el)?.take(e)) return false;
           /* A trackpad is the strip's own (`onWheel`): its events move
              the scroller directly, since macOS has already eased them.
              Eased again here it cost a frame loop and a layout a frame,
@@ -219,7 +222,9 @@ export function useLenis(
       const grown = new MutationObserver(() => lenis.resize());
       grown.observe(el, { childList: true });
       el.dataset.lenis = "1";
+      haltLenis.set(el, () => lenis.scrollTo(el.scrollLeft, { immediate: true, force: true }));
       off = () => {
+        haltLenis.delete(el);
         grown.disconnect();
         cancelAnimationFrame(frame);
         window.clearTimeout(rest);
