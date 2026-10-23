@@ -1,19 +1,17 @@
-/* The homepage buttons' entrance, on trial behind `?cta=1` (`data-cta`,
-   `layout.tsx`). Off by default: the row keeps its `.lift`. With the
-   flag the row's own lift is spent at once (0ms, no delay; the phone's
-   scroll drift on the same element keeps running) and each button fades
-   up out of a soft blur on its own, the second a beat after the first
-   (Julian's pick of three, 2026-10-22). */
-:root[data-cta] .cover-float-ctas.lift {
+/* The homepage buttons' entrance: each fades up out of a soft blur on
+   its own, the second a beat after the first (Julian's pick of three,
+   2026-10-22). The row's own lift is spent at once (0ms, no delay; the
+   phone's scroll drift on the same element keeps running). */
+:root .cover-float-ctas.lift {
   --h-lift-ms: 0ms;
   animation-delay: 0ms !important;
 }
-:root[data-cta] .cover-float-ctas .cover-cta {
+:root .cover-float-ctas .cover-cta {
   --cta-at: var(--reveal-delay, 0ms);
   animation: jg-cta-focus 700ms cubic-bezier(0.22, 1, 0.36, 1) var(--cta-at) backwards;
 }
-:root[data-cta] .cover-float-ctas > :nth-child(2) .cover-cta,
-:root[data-cta] .cover-float-ctas > .cover-cta:nth-child(2) {
+:root .cover-float-ctas > :nth-child(2) .cover-cta,
+:root .cover-float-ctas > .cover-cta:nth-child(2) {
   --cta-at: calc(var(--reveal-delay, 0ms) + 110ms);
 }
 [data-intro="1"] .cover-float-ctas .cover-cta {
@@ -35,7 +33,7 @@
   animation: none;
 }
 @media (prefers-reduced-motion: reduce) {
-  :root[data-cta] .cover-float-ctas .cover-cta {
+  :root .cover-float-ctas .cover-cta {
     animation: none;
   }
 }

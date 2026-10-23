@@ -46,9 +46,10 @@ export function LiquidPair({
     if (!mouse || !node) return;
     let soon = 0;
     let gone = false;
-    /* `?cta` trial (`cta-entrance.css`): the liquid is a new element, and
-       a new element starts the buttons' entrance over. It waits for it. */
-    const entered = document.documentElement.dataset.cta
+    /* The cover's buttons (`cta-entrance.css`): the liquid is a new
+       element, and a new element starts their entrance over. It waits
+       for it. */
+    const entered = node.matches(".cover-float-ctas")
       ? Promise.all(
           node
             .getAnimations({ subtree: true })
