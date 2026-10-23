@@ -1,0 +1,217 @@
+import * as React from "react";
+import Image from "next/image";
+
+/* JG V3 stepper (master v39, "one stepper" for booking and inquiry): the
+   step rail, the head, the body, the action bar, and the sticky photo with
+   a live summary. Each flow owns its state and fills these slots. */
+
+const pad = (n: number) => String(n).padStart(2, "0");
+
+export const Check = () => (
+  <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true">
+    <path d="M2 7.5l3.2 3L12 3.5" fill="none" stroke="currentColor" strokeWidth="1.5" />
+  </svg>
+);
+
+export function FlowShell({
+  steps,
+  at,
+  ok,
+  head,
+  sub,
+  body,
+  bar,
+  photo,
+  name,
+  sum,
+}: {
+  /** Step names; `at` is 1-based. An empty list draws no rail. */
+  steps: string[];
+  at: number;
+  /** The last step's word over the head ("Booked", "Sent"). */
+  ok?: string;
+  head: React.ReactNode;
+  sub?: React.ReactNode;
+  body: React.ReactNode;
+  bar?: React.ReactNode;
+  photo: { d: string; l: string };
+  name: string;
+  sum: [string, React.ReactNode][];
+}) {
+  const last = at === steps.length && steps.length > 0;
+  return (
+    <div className="flow">
+      <div className="f-main">
+        {steps.length ? (
+          <ol className="rail lbl" aria-label="Steps">
+            {steps.map((n, i) => (
+              <li key={n} className={i + 1 === at ? "cur" : i + 1 < at || last ? "done" : undefined} aria-current={i + 1 === at ? "step" : undefined}>
+                {pad(i + 1)} <span className="nm">{n}</span>
+              </li>
+            ))}
+          </ol>
+        ) : null}
+        <div className="f-head">
+          {ok ? (
+            <span className="f-ok lbl">
+              <Check />
+              {ok}
+            </span>
+          ) : null}
+          <h2>{head}</h2>
+          {sub ? <p>{sub}</p> : null}
+        </div>
+        <div className="f-body">{body}</div>
+        {bar ? <div className="f-bar">{bar}</div> : null}
+      </div>
+      <figure className="f-photo">
+        <div className="in">
+          <Image className="v3d" src={photo.d} alt={`${name} sample frame`} fill sizes="(max-width: 800px) 100vw, 44vw" />
+          <Image className="v3l" src={photo.l} alt={`${name} sample frame`} fill sizes="(max-width: 800px) 100vw, 44vw" />
+          <div className="cap">
+            <b>{name}</b>
+            <dl className="lbl">
+              {sum.map(([a, b]) => (
+                <div key={a}>
+                  <dt>{a}</dt>
+                  <dd>{b}</dd>
+                </div>
+              ))}
+            </dl>
+          </div>
+        </div>
+      </figure>
+    </div>
+  );
+}
+
+/** A labelled field with the master's error box under it. */
+export function Field({
+  k,
+  label,
+  hint,
+  type = "text",
+  value,
+  onChange,
+  err,
+  ac = "off",
+  area,
+}: {
+  k: string;
+  label: string;
+  hint?: string;
+  type?: string;
+  value: string;
+  onChange: (v: string) => void;
+  err?: string;
+  ac?: string;
+  area?: boolean;
+}) {
+  const id = `f-${k}`;
+  return (
+    <div className={err ? "fld bad" : "fld"}>
+      <label className="lbl mute" htmlFor={id}>
+        <span>{label}</span>
+        <span>{hint}</span>
+      </label>
+      {area ? (
+        <textarea id={id} name={k} rows={3} value={value} onChange={(e) => onChange(e.target.value)} aria-invalid={!!err || undefined} />
+      ) : (
+        <input id={id} name={k} type={type} autoComplete={ac} value={value} onChange={(e) => onChange(e.target.value)} aria-invalid={!!err || undefined} />
+      )}
+      {err ? (
+        <p className="err" role="alert">
+          {err}
+        </p>
+      ) : null}
+    </div>
+  );
+}
+
+/** Name and a real email (master `check()`): field → the one sentence that fixes it. */
+export const checkYou = (name: string, email: string) => {
+  const err: Record<string, string> = {};
+  if (!name.trim()) err.name = "Add your name so I know who to reply to.";
+  if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email.trim())) err.email = "That email looks incomplete. Check it and try again.";
+  return err;
+};
+
+/* Dates and times the way the master prints them. */
+export const dlabel = (t: Date) => t.toLocaleDateString("en-US", { weekday: "short", day: "numeric", month: "short" });
+export const fmt = (m: number) => {
+  const h = Math.floor(m / 60) % 24;
+  return `${((h + 11) % 12) + 1}:${pad(m % 60)} ${h < 12 ? "AM" : "PM"}`;
+};
+export const duration = (min: number) => (min >= 120 ? `${min / 60} hours` : `${min} minutes`);
+export const WD = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+export const iso = (d: Date) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+/** The month's cells, Monday first, blanks before the 1st. */
+export const monthCells = (base: Date) => {
+  const first = new Date(base.getFullYear(), base.getMonth(), 1);
+  const lead = (first.getDay() + 6) % 7;
+  const n = new Date(base.getFullYear(), base.getMonth() + 1, 0).getDate();
+  return [...Array<Date | null>(lead).fill(null), ...Array.from({ length: n }, (_, i) => new Date(base.getFullYear(), base.getMonth(), i + 1))];
+};
+/** The Monday-to-Sunday week holding `d`. */
+export const weekCells = (d: Date) => {
+  const m = new Date(d.getFullYear(), d.getMonth(), d.getDate() - ((d.getDay() + 6) % 7));
+  return Array.from({ length: 7 }, (_, i) => new Date(m.getFullYear(), m.getMonth(), m.getDate() + i));
+};
+
+/** The calendar block (master step 1): title, Week / Month, arrows, the days. */
+export function Calendar({
+  view,
+  setView,
+  anchor,
+  shift,
+  canBack,
+  canNext = true,
+  picked,
+  tag,
+  onPick,
+}: {
+  view: "week" | "month";
+  setView: (v: "week" | "month") => void;
+  anchor: Date;
+  shift: (dir: number) => void;
+  canBack: boolean;
+  canNext?: boolean;
+  picked: string;
+  /** A day's tag ("3 open", "Open") or null when it cannot be picked. */
+  tag: (d: Date) => string | null;
+  onPick: (d: Date) => void;
+}) {
+  const cells = view === "month" ? monthCells(anchor) : weekCells(anchor);
+  const head = view === "month" ? anchor : (cells[0] as Date);
+  return (
+    <>
+      <div className="cal-top lbl">
+        <span>{head.toLocaleDateString("en-US", { month: "long", year: "numeric" })}</span>
+        <span className="seg">
+          <button type="button" aria-pressed={view === "week"} onClick={() => setView("week")}>Week</button>
+          <button type="button" aria-pressed={view === "month"} onClick={() => setView("month")}>Month</button>
+        </span>
+        <span className="arrows">
+          <button type="button" aria-label="Earlier" disabled={!canBack} onClick={() => shift(-1)}>&larr;</button>
+          <button type="button" aria-label="Later" disabled={!canNext} onClick={() => shift(1)}>&rarr;</button>
+        </span>
+      </div>
+      <div className={`cal lbl ${view}`}>
+        {WD.map((w) => (
+          <span key={w} className="wd">{w}</span>
+        ))}
+        {cells.map((t, k) => {
+          if (!t) return <span key={`b${k}`} />;
+          const id = iso(t);
+          const tg = tag(t);
+          return (
+            <button key={id} type="button" data-day={id} aria-pressed={id === picked} disabled={tg === null} aria-label={`${dlabel(t)}${tg ? `, ${tg}` : ""}`} onClick={() => onPick(t)}>
+              <b>{t.getDate()}</b>
+              <span>{tg}</span>
+            </button>
+          );
+        })}
+      </div>
+    </>
+  );
+}
