@@ -16,7 +16,7 @@ import { ArrangeInspector, type ArrangeCard } from "@/components/hero-arrange";
 import { Hero3D } from "@/components/hero-3d";
 import { WarpText } from "@/components/warp-text";
 import { NAME_WARP } from "@/lib/name-warp";
-import { BOOKING_MOVES,
+import {
   DEAL,
   LANDSCAPE,
   MIDDLE,
@@ -519,13 +519,11 @@ export function HeroDials() {
     });
   });
 
-  /* A booking page's title can run nearly the window wide. A card that
-     would sit on it goes down to a bottom corner (`BOOKING_MOVES`), and
-     only one that would: which ones depends on the title and the window
-     (Julian, 2026-10-15). Measured where things come to rest: the cards
-     by their layout boxes, the title with its entrance seeked to the end
-     and back, all before a paint. Again on resize and once the fonts are
-     in, which change the title's width. */
+  /* A booking page's photographs, in an arc under its title (below).
+     Measured where things come to rest: the cards by their layout boxes,
+     the title with its entrance seeked to the end and back, all before a
+     paint. Again on resize, once the fonts are in and whenever the text
+     block changes size. */
   React.useEffect(() => {
     const el = cover();
     if (!el?.hasAttribute("data-booking")) return;
@@ -534,8 +532,9 @@ export function HeroDials() {
     // Each layout's override, read by `--fx`/`--fy` in cover.css.
     const SHAPES = [["large", ""], ["short", "t"], ["landscape", "l"], ["upright", "u"]] as const;
     const fit = () => {
-      const anims: Animation[] = [];
-      for (let n: Element | null = title; n && n !== el.parentElement; n = n.parentElement)
+      const block = title.parentElement!;
+      const anims: Animation[] = block.getAnimations({ subtree: true });
+      for (let n: Element | null = block; n && n !== el.parentElement; n = n.parentElement)
         anims.push(...n.getAnimations());
       const was = anims.map((a) => a.currentTime);
       for (const a of anims) {
@@ -543,40 +542,131 @@ export function HeroDials() {
         if (typeof end === "number" && Number.isFinite(end)) a.currentTime = end;
       }
       const at = el.getBoundingClientRect();
+      // What the cards keep off: the title's words, the line under it, the buttons.
       const range = document.createRange();
       range.selectNodeContents(title);
-      const words = Array.from(range.getClientRects(), (r) => {
+      const ink = (r: DOMRect, pad = 0) => [r.left - at.left, r.top - at.top + pad, r.right - at.left, r.bottom - at.top - pad];
+      const keep = [
         // The line box's leading is not ink.
-        const pad = r.height * 0.18;
-        return [r.left - at.left, r.top - at.top + pad, r.right - at.left, r.bottom - at.top - pad];
-      });
+        ...Array.from(range.getClientRects(), (r) => ink(r, r.height * 0.18)),
+        ...Array.from(block.querySelectorAll(".cover-float-where, .cover-cta"), (n) => ink(n.getBoundingClientRect())),
+      ].filter((r) => r[2] > r[0]);
       anims.forEach((a, i) => (a.currentTime = was[i]));
-      el.querySelectorAll<HTMLElement>(".cover-float-frame").forEach((f) => {
-        const slot = Number(f.dataset.card?.slice(5)) - 1;
+      /* Julian, 2026-10-22: the photographs round the title, as the
+         homepage's field stands round the name (below). Each keeps its own
+         size and depth, a little smaller where the room asks for it
+         (`--cs`). `--c*` is read through the pull (`cover.css`). */
+      const frames = Array.from(el.querySelectorAll<HTMLElement>(".cover-float-frame"));
+      for (const f of frames) {
+        f.style.removeProperty("--cs");
         for (const [, k] of SHAPES) {
           f.style.removeProperty(`--c${k}x`);
           f.style.removeProperty(`--c${k}y`);
         }
-        if (!(slot in BOOKING_MOVES.large) || !f.offsetWidth) return;
-        let x = 0;
-        let y = 0;
-        for (let n: HTMLElement | null = f; n && n !== el; n = n.offsetParent as HTMLElement | null) {
-          x += n.offsetLeft;
-          y += n.offsetTop;
+      }
+      const shown = frames.filter((f) => f.offsetWidth);
+      if (!shown.length || !keep.length) return;
+      const cs = getComputedStyle(el);
+      const kx = (parseFloat(cs.getPropertyValue("--h-pull-x")) || 1.05) * (parseFloat(cs.getPropertyValue("--wide-x") || cs.getPropertyValue("--wide")) || 1);
+      const ky = parseFloat(cs.getPropertyValue("--h-pull-y")) || 0.94;
+      const GAP = 16;
+      const [L, T, R, B] = [0, 1, 2, 3].map((j) => (j < 2 ? Math.min : Math.max)(...keep.map((r) => r[j])));
+      const mx = (L + R) / 2;
+      const my = (T + B) / 2;
+      const ceil = Math.max(GAP, (document.querySelector("header")?.getBoundingClientRect().bottom ?? 0) - at.top + GAP);
+      const floor = at.height - 2 * GAP;
+      /* A photograph on a light ground, read from its picture once it is
+         in (the fit runs again as each one loads). */
+      const bright = (f: HTMLElement) => {
+        const img = f.querySelector("img");
+        if (!img?.complete || !img.naturalWidth) {
+          img?.addEventListener("load", fit, { once: true });
+          return false;
         }
-        const box = [x, y, x + f.offsetWidth, y + f.offsetHeight];
-        if (!words.some((w) => box[0] < w[2] && box[2] > w[0] && box[1] < w[3] && box[3] > w[1])) return;
-        for (const [shape, k] of SHAPES) {
-          const to = BOOKING_MOVES[shape][slot];
-          f.style.setProperty(`--c${k}x`, `${to.x}%`);
-          f.style.setProperty(`--c${k}y`, `${to.y}%`);
+        const c = document.createElement("canvas");
+        c.width = c.height = 8;
+        const g = c.getContext("2d", { willReadFrequently: true });
+        if (!g) return false;
+        g.drawImage(img, 0, 0, 8, 8);
+        const d = g.getImageData(0, 0, 8, 8).data;
+        let sum = 0;
+        for (let i = 0; i < d.length; i += 4) sum += d[i] + d[i + 1] + d[i + 2];
+        return sum / (d.length / 4) / 3 > 140;
+      };
+      /* Julian: one photograph each side of the title, the rest in a row
+         above it and a row under the buttons. A side with no room beside
+         the title gives its photograph to the end of a row. */
+      const m = shown.length;
+      const light = shown.filter(bright);
+      const sideN = Math.min(2, m);
+      /* Julian (graduation, 2026-10-22): the rows as even as the count
+         allows, an odd one under the buttons. Light-ground photographs
+         first in the top row; the rest of it filled from the dark ones
+         that stood lowest. */
+      const topN = Math.floor((m - sideN) / 2);
+      const dark = shown.filter((f) => !light.includes(f)).sort((p, q) => q.offsetTop - p.offsetTop);
+      const top = [...light, ...dark].slice(0, topN);
+      const others = shown.filter((f) => !top.includes(f)).sort((p, q) => p.offsetLeft - q.offsetLeft);
+      const sides = sideN === 2 ? [others[0], others[others.length - 1]] : others.slice(0, sideN);
+      const bottom = others.filter((f) => !sides.includes(f));
+      /* Julian: a landscape frame at a slot's width came out small. Each
+         is sized toward the same area as the middle one, so a wide frame
+         grows and a large upright one gives a little. */
+      const areas = shown.map((f) => f.offsetWidth * f.offsetHeight).sort((p, q) => p - q);
+      const mid = areas[Math.floor(areas.length / 2)];
+      const even = new Map(shown.map((f) => [f, Math.min(1.6, Math.max(0.85, Math.sqrt(mid / (f.offsetWidth * f.offsetHeight))))]));
+      const tallest = Math.max(...shown.map((f) => f.offsetHeight * even.get(f)!));
+      const scale = Math.min(1, Math.max(0.65, (Math.min(T - ceil, floor - B) - GAP) / tallest));
+      const place = (f: HTMLElement, left: number, top: number) => {
+        const x = 50 + ((left / at.width) * 100 - 50) / kx;
+        const y = 50 + ((top / at.height) * 100 - 50) / ky;
+        f.style.setProperty("--cs", `${scale * even.get(f)!}`);
+        for (const [, k] of SHAPES) {
+          f.style.setProperty(`--c${k}x`, `${x}%`);
+          f.style.setProperty(`--c${k}y`, `${y}%`);
         }
-      });
+      };
+      const wOf = (f: HTMLElement) => f.offsetWidth * scale * even.get(f)!;
+      const hOf = (f: HTMLElement) => f.offsetHeight * scale * even.get(f)!;
+      for (const [f, dir] of sides.map((f, i) => [f, i === 0 ? -1 : 1] as const)) {
+        const w = wOf(f);
+        // Julian: the side ones well apart from the title, not tucked in.
+        const left = dir < 0 ? L - 6 * GAP - w : R + 6 * GAP;
+        if (left < GAP || left + w > at.width - GAP) (dir < 0 ? top.unshift(f) : bottom.push(f));
+        else place(f, left, my - hOf(f) / 2);
+      }
+      /* A row, centred on the title and spaced evenly, a little lower
+         toward its ends above the title and toward its middle below. */
+      const row = (fs: HTMLElement[], up: boolean) => {
+        fs.sort((p, q) => p.offsetLeft - q.offsetLeft);
+        const ws = fs.map(wOf);
+        const need = ws.reduce((t, w) => t + w, 0);
+        // Julian: kept together ("way apart"), about the middle half of the screen.
+        const span = Math.min(at.width - 2 * GAP, Math.max(R - L, at.width * 0.55), need + 6 * GAP * (fs.length - 1));
+        const gap = fs.length > 1 ? Math.max(GAP, (span - need) / (fs.length - 1)) : 0;
+        let x = mx - (need + gap * (fs.length - 1)) / 2;
+        fs.forEach((f, i) => {
+          const t = fs.length > 1 ? i / (fs.length - 1) : 0.5;
+          // Staggered a little, as the homepage's field is, not a ruled line.
+          const bow = 24 * (1 - (2 * t - 1) ** 2) + (i % 2 ? 14 : 0);
+          const h = hOf(f);
+          place(f, x, up ? Math.max(ceil, T - GAP - h - bow) : Math.min(floor - h, B + GAP + bow));
+          x += ws[i] + gap;
+        });
+      };
+      row(top, true);
+      row(bottom, false);
     };
     fit();
     void document.fonts.ready.then(fit);
     window.addEventListener("resize", fit);
-    return () => window.removeEventListener("resize", fit);
+    // The text block settles late (its fitted line): fit again when it does.
+    const ro = new ResizeObserver(fit);
+    ro.observe(title.parentElement!);
+    return () => {
+      window.removeEventListener("resize", fit);
+      ro.disconnect();
+    };
   }, []);
 
   /* Arrange: the cards moved on the page itself. The listeners sit on the

@@ -35,7 +35,8 @@
   --fz: var(--z, 0px);
   left: calc(50% + (var(--fx) - 50%) * var(--h-pull-x, 1.05) * var(--wide-x, var(--wide, 1)));
   top: calc(50% + (var(--fy) - 50%) * var(--h-pull-y, 0.94));
-  width: calc(var(--fw) * var(--wide, 1));
+  /* `--cs`: a booking page shrinks its cards to fit the arc (`hero-dials.tsx`). */
+  width: calc(var(--fw) * var(--wide, 1) * var(--cs, 1));
   /* Out of order: each frame's place in `ORDER` (`cover-float.tsx`),
      spread out from the start. */
   --delay: calc(var(--h-start, 420ms) + var(--order, 0) * var(--h-spread, 0.95ms));

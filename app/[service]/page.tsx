@@ -61,10 +61,10 @@ export default async function BookingPage(props: PageProps<"/[service]">) {
 
   const others = BOOKING_PAGES.filter((p) => p !== page);
   /* The cover's frames: each tile's photograph, opening what the
-     tile opens (the gallery, or a project). Headshot 09 stays in the
-     gallery, not on the cover. */
+     tile opens (the gallery, or a project). Headshots 09 and 12 stay in
+     the gallery, not on the cover (Julian: 12 off the hero). */
   const work = page.tiles
-    .filter((t) => !t.frame.src.endsWith("/headshots/09.jpg"))
+    .filter((t) => !/\/headshots\/(09|12)\.jpg$/.test(t.frame.src))
     .flatMap((t) => {
       const project = getProject(t.href.split("/").pop() ?? "");
       return project ? [{ ...project, cover: t.frame }] : [];
