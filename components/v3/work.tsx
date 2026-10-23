@@ -415,20 +415,8 @@ export function V3Work({ work }: { work: WorkItem[] }) {
             />
           </label>
           <div className="wviews" role="group" aria-label="View">
-            {VIEWS.slice(0, 2).map(([v, label, icon]) => (
-              <button
-                key={v}
-                type="button"
-                aria-pressed={view === v}
-                aria-label={label}
-                title={label}
-                onClick={() => setView(v)}
-              >
-                {icon}
-              </button>
-            ))}
             {/* The vectorscope is a mode of its own: on, then off back to
-                the view it came from. */}
+                the view it came from. Then Strip, and Grid in the corner. */}
             <button
               type="button"
               className="wcolor"
@@ -445,6 +433,18 @@ export function V3Work({ work }: { work: WorkItem[] }) {
             >
               {VIEWS[2][2]}
             </button>
+            {[VIEWS[1], VIEWS[0]].map(([v, label, icon]) => (
+              <button
+                key={v}
+                type="button"
+                aria-pressed={view === v}
+                aria-label={label}
+                title={label}
+                onClick={() => setView(v)}
+              >
+                {icon}
+              </button>
+            ))}
           </div>
         </div>
         <div
