@@ -82,8 +82,10 @@ export function FlowShell({
       </div>
       <figure className="f-photo">
         <div className="in">
-          <Image className="v3d" src={photo.d} alt={`${name} sample frame`} fill sizes="(max-width: 800px) 100vw, 44vw" />
-          <Image className="v3l" src={photo.l} alt={`${name} sample frame`} fill sizes="(max-width: 800px) 100vw, 44vw" />
+          <div className="ph">
+            <Image className="v3d" src={photo.d} alt={`${name} sample frame`} fill sizes="(max-width: 800px) 100vw, 44vw" />
+            <Image className="v3l" src={photo.l} alt={`${name} sample frame`} fill sizes="(max-width: 800px) 100vw, 44vw" />
+          </div>
           <div className="cap">
             <b>{name}</b>
             <dl className="lbl">
