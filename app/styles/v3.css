@@ -580,3 +580,8 @@ html{font-family:var(--font-mono),ui-monospace,monospace}
 @media (pointer:coarse) and (max-width:360px){.v3 .cal{gap:0}}
 /* The 44px links above must not bring the header links back on a phone: Menu holds them. */
 @media (pointer:coarse) and (max-width:700px){.v3 .site-hdr .links a{display:none}}
+/* Tablet widths: the kind tiles and the photo's name scale with the column,
+   so "Something" and "Commissions" stay inside their borders (the master
+   overflows here). */
+@media (min-width:801px){.v3 .kind b{font-size:clamp(1.125rem,2.4vw,1.75rem)}
+.v3 .f-photo .cap b{font-size:clamp(2.25rem,5vw,4.5rem)}}
