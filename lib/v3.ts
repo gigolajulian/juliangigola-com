@@ -142,6 +142,7 @@ export const SESSIONS: Record<SessionSlug, Session> = {
     photo: { d: ABOUT_PHOTO, l: ABOUT_PHOTO },
   },
 };
+export const isSession = (s?: string): s is SessionSlug => !!s && Object.hasOwn(SESSIONS, s);
 /** The session tabs' order (DESIGN.md, Stepper). */
 export const TAB_ORDER: SessionSlug[] = ["portraits", "headshots", "studio-digitals", "graduation", "weddings", "consultation"];
 /** The homepage index and the doors' order. */

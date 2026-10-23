@@ -4,6 +4,8 @@ import { BookCard } from "@/components/book-here";
 import { InquireWall } from "@/components/inquire-wall";
 import { BOOK_MENU, BOOKING_PAGES, pageForSession } from "@/lib/booking";
 import { wallOf } from "@/lib/work";
+import { V3Book } from "@/components/v3/book";
+import { isSession } from "@/lib/v3";
 
 /* One session's booking on a page of its own (Julian, 2026-10-14), for
    book.juliangigola.com/<session>: the booking sheet's look, standing
@@ -12,16 +14,21 @@ import { wallOf } from "@/lib/work";
 const item = (slug: string) => BOOK_MENU.find((m) => m.slug === slug);
 
 export function generateStaticParams() {
-  return BOOK_MENU.map((m) => ({ slug: m.slug }));
+  return [...BOOK_MENU.map((m) => ({ slug: m.slug })), { slug: "consultation" }];
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
-  const m = item((await params).slug);
+  const slug = (await params).slug;
+  if (slug === "consultation") return { title: "Book a consultation", description: "15 minutes, phone or video. Pick a time on my calendar.", alternates: { canonical: "/book/consultation" } };
+  const m = item(slug);
   return m ? { title: `Book ${m.name}`, description: m.blurb, alternates: { canonical: `/book/${m.slug}` } } : {};
 }
 
 export default async function BookSession({ params }: { params: Promise<{ slug: string }> }) {
-  const m = item((await params).slug);
+  const slug = (await params).slug;
+  // JG V3: the master's sessions get its stepper; the rest keep this card.
+  if (isSession(slug)) return <V3Book slug={slug} />;
+  const m = item(slug);
   if (!m) notFound();
   const p = pageForSession(m.slug) ?? BOOKING_PAGES.find((x) => x.slug === m.slug);
   const wall = wallOf((p?.gallery.href ?? m.page ?? "").split("/").pop() ?? "");

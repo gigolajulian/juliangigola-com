@@ -1,5 +1,8 @@
 import * as React from "react";
 import Image from "next/image";
+import { INITIAL, submitOrKeep } from "@/components/contact-form";
+import { trailContext } from "@/components/visit-trail";
+import type { ContactState } from "@/app/contact/actions";
 
 /* JG V3 stepper (master v39, "one stepper" for booking and inquiry): the
    step rail, the head, the body, the action bar, and the sticky photo with
@@ -12,6 +15,19 @@ export const Check = () => (
     <path d="M2 7.5l3.2 3L12 3.5" fill="none" stroke="currentColor" strokeWidth="1.5" />
   </svg>
 );
+
+/** What a flow fills in; the page adds the photo, the name and anything of its own. */
+export type ShellParts = {
+  steps: string[];
+  at: number;
+  ok?: string;
+  head: React.ReactNode;
+  sub?: React.ReactNode;
+  body: React.ReactNode;
+  bar?: React.ReactNode;
+  sum: [string, React.ReactNode][];
+};
+export type Shell = (p: ShellParts) => React.ReactNode;
 
 export function FlowShell({
   steps,
@@ -215,3 +231,43 @@ export function Calendar({
     </>
   );
 }
+
+/* ── the enquiry, shared by the note, the commission stepper and weddings ── */
+const simSent = () => process.env.NODE_ENV !== "production" && new URLSearchParams(location.search).get("sim") === "sent";
+export const first = (name: string) => name.trim().split(" ")[0] ?? "";
+export const NEED_MSG = "Tell me a little about what you have in mind.";
+
+/** What the server could not take, with the mail-app way round it. */
+export function Failed({ state }: { state: ContactState }) {
+  if (state.status !== "error" && state.status !== "unconfigured") return null;
+  return (
+    <p className="err" role="alert">
+      {state.message}
+      {state.mailto ? <> <a href={state.mailto}>Open in your mail app</a></> : null}
+    </p>
+  );
+}
+
+/** The enquiry, posted the way `inquire-card.tsx` posts it. */
+export function useEnquiry() {
+  const [state, act, pending] = React.useActionState(submitOrKeep, INITIAL);
+  const [sim, setSim] = React.useState(false);
+  const send = (form: HTMLFormElement) => {
+    if (simSent()) return setSim(true);
+    const ctx = form.elements.namedItem("context");
+    if (ctx instanceof HTMLInputElement) ctx.value = trailContext();
+    const data = new FormData(form);
+    React.startTransition(() => act(data));
+  };
+  return { state, pending, sent: sim || state.status === "sent", send };
+}
+
+export const Hidden = ({ type, detail }: { type: string; detail?: string }) => (
+  <>
+    {/* The honeypot (`contact-form.tsx`). */}
+    <input type="text" name="company" tabIndex={-1} autoComplete="off" aria-hidden="true" hidden />
+    <input type="hidden" name="context" />
+    <input type="hidden" name="type" value={type} />
+    {detail ? <input type="hidden" name="detail" value={detail} /> : null}
+  </>
+);

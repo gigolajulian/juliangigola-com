@@ -529,3 +529,12 @@ html{font-family:var(--font-mono),ui-monospace,monospace}
 .svc :is(.action,.cover-cta:not(.cover-cta-quiet)){background:var(--i);color:var(--o);border:1px solid var(--i)}
 .svc :is(.action-quiet,.cover-cta-quiet){background:transparent;color:var(--i);border:1px solid var(--i)}
 @media (hover:hover){.svc :is(.action,.cover-cta:not(.cover-cta-quiet)):hover{background:transparent;color:var(--i)}.svc :is(.action-quiet,.cover-cta-quiet):hover{background:var(--i);color:var(--o)}}
+
+/* Booking: the deposit's card fields (Stripe's own inputs) as the master's fields. */
+.v3 .f-stack{display:flex;flex-direction:column;gap:22px}
+.v3 .f-two{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.v3 .f-card{padding:12px 0;border-bottom:1px solid color-mix(in srgb,var(--ink) 22%,transparent)}
+.v3 .f-card:focus-within{border-bottom-color:var(--accent)}
+.v3 .f-bar a.btn{display:inline-flex;align-items:center}
+/* The call dialog: the base reset zeroes a dialog's centering margin. */
+.v3 .calldlg{margin:auto}

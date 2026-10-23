@@ -123,8 +123,12 @@ export function DepositStep({
   className,
   editorial,
   head,
+  v3,
 }: {
   className?: string;
+  /** JG V3: the step's parts for the page's stepper; `head` is the $100
+      figure, `rows` the bill (the "Deposit today" row is the live one). */
+  v3?: (p: { head: string; sub?: string; body: React.ReactNode; bar: React.ReactNode }) => React.ReactNode;
   /** `?editorial` (editorial.css): its step bar and heading over it. */
   editorial?: boolean;
   head?: React.ReactNode;
@@ -338,6 +342,57 @@ export function DepositStep({
     broken: "The payment form did not load.",
   };
   const said = after[stage];
+
+  if (v3) {
+    const bill = (
+      <div className="bill lbl">
+        {rows.map(([k, v]) => (
+          <div key={k} className={k === "Deposit today" ? "now" : undefined}><span>{k}</span><span>{v}</span></div>
+        ))}
+      </div>
+    );
+    /* The ends in the master's error box, with the way on. */
+    const ends: Partial<Record<Stage, [line: string, why: string, acts: [string, () => void][]]>> = {
+      declined: ["Card declined.", `${error} Nothing was charged, and the time isn’t held yet.`, [["Edit details", onBack], ["Try again · $100", retry]]],
+      taken: ["Time taken.", after.taken!, [["Pick another time", onTaken]]],
+      refunded: ["Time taken.", after.refunded!, [["Pick another time", onTaken]]],
+      failed: ["Paid.", after.failed!, []],
+      slow: ["Confirming.", after.slow!, []],
+      broken: ["Not loaded.", after.broken!, [["Edit details", onBack], ["Try again", retry]]],
+    };
+    const end = ends[stage];
+    const btns = (acts: [string, () => void][]) =>
+      acts.map(([label, go], i) => (
+        <button key={label} type="button" className={i === acts.length - 1 ? "btn fill" : "btn"} onClick={go}>{label}</button>
+      ));
+    if (end) return v3({ head: end[0], body: <div ref={box} className="f-stack" role="region" aria-label="Deposit"><p className="err" role="alert">{end[1]}</p>{bill}</div>, bar: btns(end[2]) });
+    return v3({
+      head: "Hold the date",
+      sub: "$100 holds your date. The balance is due after the shoot.",
+      body: (
+        <div ref={box} className="f-stack" role="region" aria-label="Deposit" aria-busy={stage === "loading"}>
+          {head}
+          {bill}
+          <label className="fld"><span className="lbl mute">Card</span><div ref={number} className="f-card" /></label>
+          <div className="f-two">
+            <label className="fld"><span className="lbl mute">Expiry</span><div ref={expiry} className="f-card" /></label>
+            <label className="fld"><span className="lbl mute">CVC</span><div ref={cvc} className="f-card" /></label>
+          </div>
+          <div ref={wallet} className={cn(!wallets && "hidden")} />
+          <p className="lbl mute">Refundable or transferable up to 2 business days before the shoot. Card payment through Stripe.</p>
+          {error ? <p className="err" role="alert">{error}</p> : null}
+        </div>
+      ),
+      bar: (
+        <>
+          <button type="button" className="btn" onClick={onBack}>Back</button>
+          <button type="button" className="btn fill" onClick={pay} disabled={stage !== "ready" && !(sim && stage === "loading")}>
+            {stage === "paying" ? "Paying" : stage === "confirming" ? "Confirming" : error ? "Try again · $100" : "Pay $100 deposit"}
+          </button>
+        </>
+      ),
+    });
+  }
 
   if (editorial) {
     /* The ends: a word, a headline, what happened, and the way on. */

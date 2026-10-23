@@ -1,8 +1,6 @@
 import type { Metadata } from "next";
-import { BookPicker, type Bookable } from "@/components/book-picker";
-import { calEvent, pageForSession } from "@/lib/booking";
-import { wallOf } from "@/lib/work";
-import { SESSION_TYPES, formatPrice } from "@/lib/sessions";
+import { V3Book } from "@/components/v3/book";
+import { isSession } from "@/lib/v3";
 
 export const metadata: Metadata = {
   title: "Book a session",
@@ -11,23 +9,8 @@ export const metadata: Metadata = {
   alternates: { canonical: "/book" },
 };
 
-/* The four sessions, each a Cal.com event (`CAL_EVENTS`, `lib/booking.ts`);
-   weddings book a call (its page's `book.cal`). The lengths are the events' own. */
-const LENGTHS: Record<string, string> = {
-  portraits: "1 hour",
-  graduation: "90 minutes",
-  headshots: "30 minutes",
-  "studio-digitals": "45 minutes",
-  weddings: "Call",
-};
-
+/* JG V3: the stepper, on graduation unless `?session=` names another (master `#/book`). */
 export default async function BookPage({ searchParams }: { searchParams: Promise<{ session?: string }> }) {
   const { session } = await searchParams;
-  const sessions: Bookable[] = SESSION_TYPES.flatMap((s) => {
-    const cal = calEvent(s.slug) ?? pageForSession(s.slug)?.book.cal;
-    // Its wall, as its own booking page has (`/book/[slug]`).
-    const wall = wallOf(pageForSession(s.slug)?.gallery.href.split("/").pop() ?? "");
-    return cal ? [{ slug: s.slug, name: s.name, blurb: s.blurb, rate: formatPrice(s.from), length: LENGTHS[s.slug], cal, wall }] : [];
-  });
-  return <BookPicker sessions={sessions} start={session} />;
+  return <V3Book slug={isSession(session) ? session : "graduation"} />;
 }

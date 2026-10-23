@@ -3,57 +3,16 @@
 import * as React from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { INITIAL, submitOrKeep } from "@/components/contact-form";
-import { trailContext } from "@/components/visit-trail";
 import { V3Foot } from "@/components/v3/chrome";
+import { CallDialog } from "@/components/v3/book";
 import { Duo } from "@/components/v3/duo";
-import { Check, Field, FlowShell, checkYou } from "@/components/v3/flow";
+import { Check, Failed, Field, FlowShell, Hidden, NEED_MSG, checkYou, first, useEnquiry } from "@/components/v3/flow";
 import { CALL_CARD, DOORS } from "@/lib/v3";
-import type { ContactState } from "@/app/contact/actions";
 
 /* JG V3 Inquire (master v39, /inquire and /inquire/form). Both forms post
    through the site's enquiry action (`app/contact/actions.ts`) with its
    honeypot and visit context; `?sim=sent` (dev only) shows Sent without
    sending, as `?sim` does on the deposit. */
-
-const simSent = () => process.env.NODE_ENV !== "production" && new URLSearchParams(location.search).get("sim") === "sent";
-const first = (name: string) => name.trim().split(" ")[0] ?? "";
-const NEED_MSG = "Tell me a little about what you have in mind.";
-
-/** What the server could not take, with the mail-app way round it. */
-function Failed({ state }: { state: ContactState }) {
-  if (state.status !== "error" && state.status !== "unconfigured") return null;
-  return (
-    <p className="err" role="alert">
-      {state.message}
-      {state.mailto ? <> <a href={state.mailto}>Open in your mail app</a></> : null}
-    </p>
-  );
-}
-
-/** The enquiry, posted the way `inquire-card.tsx` posts it. */
-function useEnquiry() {
-  const [state, act, pending] = React.useActionState(submitOrKeep, INITIAL);
-  const [sim, setSim] = React.useState(false);
-  const send = (form: HTMLFormElement) => {
-    if (simSent()) return setSim(true);
-    const ctx = form.elements.namedItem("context");
-    if (ctx instanceof HTMLInputElement) ctx.value = trailContext();
-    const data = new FormData(form);
-    React.startTransition(() => act(data));
-  };
-  return { state, pending, sent: sim || state.status === "sent", send };
-}
-
-const Hidden = ({ type, detail }: { type: string; detail?: string }) => (
-  <>
-    {/* The honeypot (`contact-form.tsx`). */}
-    <input type="text" name="company" tabIndex={-1} autoComplete="off" aria-hidden="true" hidden />
-    <input type="hidden" name="context" />
-    <input type="hidden" name="type" value={type} />
-    {detail ? <input type="hidden" name="detail" value={detail} /> : null}
-  </>
-);
 
 function Note() {
   const { state, pending, sent, send } = useEnquiry();
@@ -105,7 +64,7 @@ function Note() {
   );
 }
 
-export function V3Inquire({ call }: { call?: React.ReactNode }) {
+export function V3Inquire() {
   return (
     <div className="v3 contents">
       <section className="v3page" id="p-inquire">
@@ -118,7 +77,7 @@ export function V3Inquire({ call }: { call?: React.ReactNode }) {
               <span className="lbl">Prefer to talk</span>
               <h3>Book a consultation</h3>
               <p>15 minutes, phone or video. Pick a time on my calendar.</p>
-              <div>{call ?? <Link className="btn fill" href="/book/consultation">Schedule a call</Link>}</div>
+              <div><CallDialog /></div>
             </div>
           </div>
         </div>

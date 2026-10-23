@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils";
 import { DepositStep, type DepositBody } from "@/components/deposit-step";
 import { isPaid } from "@/lib/paid";
 import { Orb, ORB_ROUND } from "@/components/orb";
+import { Calendar, dlabel, duration, fmt, type Shell } from "@/components/v3/flow";
 
 /* Goo (Julian, 2026-10-20, OKd 10-21): the cursor pours into the card's
    buttons, times and open days, as on the inquiry chips (`pointer-mark.tsx`).
@@ -47,6 +48,7 @@ const MONTHS = ["January", "February", "March", "April", "May", "June", "July", 
 const AHEAD = 120;
 
 type Slot = { start: string; end: string };
+export type V3Book = { shell: Shell; name: string; from: number | null };
 type Pick = { date: string; min: number; start: string };
 
 const pad = (n: number) => String(n).padStart(2, "0");
@@ -130,12 +132,15 @@ export function TimePicker({
   title,
   className,
   fallback,
+  v3,
 }: {
   /** "username/event-slug" */
   path: string;
   title: string;
   className?: string;
   fallback: React.ReactNode;
+  /** JG V3: the booking as the master's stepper, inside the page's shell. */
+  v3?: V3Book;
 }) {
   const [username, slug] = path.split("/");
   const [tz] = React.useState(() => Intl.DateTimeFormat().resolvedOptions().timeZone || "America/Los_Angeles");
@@ -235,6 +240,8 @@ export function TimePicker({
     );
   }, [step, smooth, editorial]);
   const [error, setError] = React.useState("");
+  /* JG V3: a field's one sentence (master `check()`). */
+  const [bad, setBad] = React.useState<Record<string, string>>({});
   /* Julian: Confirm's words turn into the orbs, then a check, before the
      form opens. */
   const [ok, setOk] = React.useState<"" | "spin" | "tick">("");
@@ -702,16 +709,20 @@ export function TimePicker({
     const picked = opts?.length === 1 ? opts[0][0] : String(form.get("opt") || "");
     const asked = opts?.find(([label]) => label === picked)?.[1];
     const where = opts ? [picked, asked ? String(form.get("detail") || "").trim() : ""].filter(Boolean).join(": ") : String(form.get("where") || "").trim();
-    const phone = e164(String(form.get("phone") || ""));
-    if (!phone) {
+    const raw = String(form.get("phone") || "").trim();
+    const phone = e164(raw);
+    // JG V3: the phone is optional; one typed has to be a number.
+    if (!phone && (!v3 || raw)) {
       setError("Check your phone number. Add the country code if it is not a US number.");
       setStep("form");
       return;
     }
     const notes = String(form.get("notes") || "").trim();
+    // JG V3 asks one Name; the classic and editorial cards ask first and last.
+    const name = String(form.get("name") ?? `${String(form.get("first")).trim()} ${String(form.get("last")).trim()}`).trim();
+    const firstName = name.split(/\s+/)[0];
     if (paid) {
-      const name = `${String(form.get("first")).trim()} ${String(form.get("last")).trim()}`;
-      setBooked({ name: String(form.get("first")).trim(), email: String(form.get("email")).trim(), where, phone, via: "" });
+      setBooked({ name: firstName, email: String(form.get("email")).trim(), where, phone, via: "" });
       setDeposit({ slug, start: new Date(pick.start).toISOString(), timeZone: tz, name, email: String(form.get("email")), phone, ...(notes ? { notes } : {}), ...(needsWhere ? { where } : {}), session });
       setStep("pay");
       return;
@@ -730,20 +741,23 @@ export function TimePicker({
           start: new Date(pick.start).toISOString(),
           eventTypeSlug: slug,
           username,
-          attendee: { name: `${String(form.get("first")).trim()} ${String(form.get("last")).trim()}`, email: String(form.get("email")), phoneNumber: phone, timeZone: tz, language: "en" },
+          attendee: { name, email: String(form.get("email")), ...(phone ? { phoneNumber: phone } : {}), timeZone: tz, language: "en" },
           ...(needsWhere ? { location: { type: "attendeeDefined", location: where } } : {}),
-          bookingFieldsResponses: { notes: [said, `Phone: ${phone}`, notes].filter(Boolean).join("\n") },
+          bookingFieldsResponses: { notes: [said, phone && `Phone: ${phone}`, notes].filter(Boolean).join("\n") },
         }),
       });
       const body = await res.json();
       if (!res.ok || body.status !== "success") throw new Error(body?.error?.message || "failed");
       }
-      setBooked({ name: String(form.get("first")).trim(), email: String(form.get("email")).trim(), where, phone, via });
+      setBooked({ name: firstName, email: String(form.get("email")).trim(), where, phone, via });
       /* The orbs get their moment even when Cal.com answers at once, then
          turn into the check, which is shown before the page that follows. */
-      await new Promise((go) => setTimeout(go, Math.max(0, ORB_ROUND.solving - (Date.now() - began))));
-      setStep("check");
-      await new Promise((go) => setTimeout(go, 1500));
+      // JG V3 draws no orb, so it has no moment to wait for.
+      if (!v3) {
+        await new Promise((go) => setTimeout(go, Math.max(0, ORB_ROUND.solving - (Date.now() - began))));
+        setStep("check");
+        await new Promise((go) => setTimeout(go, 1500));
+      }
       // The time is taken now: the next picker asks Cal.com again.
       recent.delete(`${username}/${slug}/${tz}`);
       setStep("done");
@@ -765,13 +779,14 @@ export function TimePicker({
     el.style.height = `${Math.min(el.scrollHeight + el.offsetHeight - el.clientHeight, line * 5 + frame)}px`;
   };
   /* What was typed, put back in a form drawn again. */
-  const refill = (f: HTMLFormElement | null) => {
+  /* Stable, so a form drawn again for its error lines keeps what is in it. */
+  const refill = React.useCallback((f: HTMLFormElement | null) => {
     if (!f) return;
     for (const [k, v] of Object.entries(typed.current)) {
       const el = f.elements.namedItem(k);
       if ((el instanceof HTMLInputElement && el.type !== "radio") || el instanceof HTMLTextAreaElement) el.value = v;
     }
-  };
+  }, []);
   /* Booking: the orb, then the ring and its check, over the card. */
   const busy = step === "sending" || step === "check" ? (
         <div role="status" aria-live="polite" className="absolute inset-0 z-20 bg-background/85 backdrop-blur-md">
@@ -874,8 +889,15 @@ export function TimePicker({
       swipe.current = null;
     },
   };
-  if (state === "fallback") return <>{fallback}</>;
-  if (state === "loading" || !days || (held && state === "ready")) {
+  /* JG V3: the steps around anything that is not the picker itself. */
+  const v3paid = paid || isPaid(slug);
+  const v3steps = v3paid ? ["Time", "You", "Deposit", "Booked"] : ["Time", "You", "Booked"];
+  const v3plain = (body: React.ReactNode) => v3!.shell({ steps: v3steps, at: 1, head: v3paid ? "Book a session" : "Book a consultation", body, sum: [] });
+  if (state === "fallback") return v3 ? v3plain(fallback) : <>{fallback}</>;
+  const waiting = <p role="status" className="lbl mute">Loading availability</p>;
+  if (v3 && (state === "loading" || !days)) return v3plain(waiting);
+  if (v3 && !pick) return v3plain(Object.values(days ?? {}).some((l) => l.length) ? waiting : <p className="lbl mute">No open times in the next few months. <a href="mailto:hello@juliangigola.com">hello@juliangigola.com</a></p>);
+  if (state === "loading" || !days || (held && state === "ready" && !v3)) {
     return (
       // Held to the card's inset and a phone card's height while it waits
       // (the embed's `block` had it on the card's edge, in a sliver).
@@ -907,6 +929,171 @@ export function TimePicker({
   const [until] = clock(pick.min + length);
   const date = fromIso(pick.date);
   const sum = `${DAYS[date.getDay()]} ${date.getDate()} ${MONTHS[date.getMonth()].slice(0, 3)} · ${t} ${ap}`;
+
+  /* ── JG V3 (master v39 stepper): Time, You, (Deposit), Booked. The same
+     times, booking and deposit as the cards below; only the look is new. */
+  if (v3 && editorial) {
+    const end = pick.min + length;
+    const range = `${fmt(pick.min)} to ${fmt(end)}`;
+    const at = step === "pick" ? 1 : step === "pay" ? 3 : step === "done" ? v3steps.length : 2;
+    const rows: [string, React.ReactNode][] = [["Day", dlabel(date)], ["Time", range], ["Length", duration(length)]];
+    const shell = (p: Omit<Parameters<Shell>[0], "steps" | "at" | "sum">) => v3.shell({ steps: v3steps, at, sum: rows, ...p });
+    const back = (to: typeof step) => <button type="button" className="btn" onClick={() => { setBad({}); setStep(to); }}>Back</button>;
+    if (step === "pay" && deposit) {
+      const price = v3.from != null ? `$${v3.from}` : "Quoted";
+      return (
+        <DepositStep
+          v3={(p) => shell(p)}
+          head={<div className="fig"><b>$100</b><span className="lbl mute">Holds {dlabel(date)}, {fmt(pick.min)}</span></div>}
+          body={deposit}
+          rows={[
+            [`${v3.name}, ${duration(length)}`, price],
+            ["Deposit today", "$100"],
+            ["Balance after the shoot", v3.from != null ? `$${v3.from - 100}` : "Rest of the quote"],
+          ]}
+          onBooked={() => {
+            recent.delete(`${username}/${slug}/${tz}`);
+            setStep("done");
+          }}
+          onTaken={() => {
+            setStep("pick");
+            void load(true);
+          }}
+          onBack={() => setStep("form")}
+        />
+      );
+    }
+    if (step === "done") {
+      const studio = !booked.where || /studio/i.test(booked.where);
+      const lines = paid
+        ? [`${dlabel(date)}, ${range}.`, studio ? "San Jose studio. I send the address the day before." : `${booked.where}.`, "Need to move it? Reply to the confirmation up to 2 business days before."]
+        : [`${dlabel(date)}, ${range}.`, "I call the number you gave, or send a video link the day before.", "Need to move it? Reply to the confirmation."];
+      const stamp = (ms: number) => new Date(ms).toISOString().replace(/[-:]|\.\d{3}/g, "");
+      const s0 = +new Date(pick.start);
+      const ics = ["BEGIN:VCALENDAR", "VERSION:2.0", "BEGIN:VEVENT", `UID:${s0}@juliangigola.com`, `DTSTAMP:${stamp(s0)}`, `DTSTART:${stamp(s0)}`, `DTEND:${stamp(s0 + length * 6e4)}`, `SUMMARY:${v3.name} with Julian Gigola`, "END:VEVENT", "END:VCALENDAR"].join("\r\n");
+      return shell({
+        ok: "Booked",
+        head: `${booked.name}, you're in.`,
+        sub: `Your confirmation is on its way to ${booked.email}.`,
+        body: <div className="done-lines">{lines.map((l) => <p key={l}>{l}</p>)}</div>,
+        bar: (
+          <>
+            <a className="btn" href={`data:text/calendar;charset=utf-8,${encodeURIComponent(ics)}`} download="julian-gigola.ics">Add to calendar</a>
+            <Link className="btn fill" href="/portfolio">See the work</Link>
+          </>
+        ),
+      });
+    }
+    if (step !== "pick") {
+      const opts = needsWhere ? WHERE[slug] : undefined;
+      const asking = opts?.find(([label]) => label === (opt || opts[0][0]))?.[1];
+      const f = (k: string, label: string, type = "text", hint = "", ac = "off", area = false) => {
+        const id = `f-${k}`;
+        return (
+          <div className={bad[k] ? "fld bad" : "fld"}>
+            <label className="lbl mute" htmlFor={id}><span>{label}</span><span>{hint}</span></label>
+            {area ? <textarea id={id} name={k} rows={3} aria-invalid={!!bad[k] || undefined} /> : <input id={id} name={k} type={type} autoComplete={ac} aria-invalid={!!bad[k] || undefined} />}
+            {bad[k] ? <p className="err" role="alert">{bad[k]}</p> : null}
+          </div>
+        );
+      };
+      return (
+        <form
+          ref={refill}
+          noValidate
+          onSubmit={(e) => {
+            e.preventDefault();
+            const form = e.currentTarget;
+            const data = new FormData(form);
+            const no: Record<string, string> = {};
+            if (!String(data.get("name") || "").trim()) no.name = "Add your name so I know who to reply to.";
+            if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(String(data.get("email") || "").trim())) no.email = "That email looks incomplete. Check it and try again.";
+            setBad(no);
+            if (Object.keys(no).length) return form.querySelector<HTMLElement>(`#f-${Object.keys(no)[0]}`)?.focus();
+            void book(data);
+          }}
+        >
+          {shell({
+            head: "About you",
+            sub: "Your confirmation goes to this email.",
+            body: (
+              <>
+                {f("name", "Name", "text", "", "name")}
+                {f("email", "Email", "email", "", "email")}
+                {f("phone", "Phone", "tel", "Optional", "tel")}
+                {opts && opts.length > 1 ? (
+                  <div className="fld" role="group" aria-label="Where">
+                    <span className="lbl mute">Where</span>
+                    <input type="hidden" name="opt" value={opt || opts[0][0]} />
+                    <div className="wrapopts lbl">
+                      {opts.map(([label]) => (
+                        <button key={label} type="button" className="opt" aria-pressed={(opt || opts[0][0]) === label} onClick={() => setOpt(label)}>{label}</button>
+                      ))}
+                    </div>
+                  </div>
+                ) : null}
+                {asking ? f("detail", asking) : null}
+                {needsWhere && !WHERE[slug] ? f("where", "Where") : null}
+                {f("notes", "Anything I should know", "text", "Optional")}
+                {error ? <p className="err" role="alert">{error}</p> : null}
+              </>
+            ),
+            bar: (
+              <>
+                {back("pick")}
+                <button type="submit" className="btn fill" disabled={step === "sending" || step === "check"}>{paid ? "Continue to deposit" : "Book the call"}</button>
+              </>
+            ),
+          })}
+        </form>
+      );
+    }
+    const monday = (d: Date) => new Date(d.getFullYear(), d.getMonth(), d.getDate() - ((d.getDay() + 6) % 7));
+    const canBack = view === "week" ? +monday(anchor) > +monday(today) : anchor.getFullYear() * 12 + anchor.getMonth() > today.getFullYear() * 12 + today.getMonth();
+    const canNext = +(view === "week" ? monday(anchor) : new Date(anchor.getFullYear(), anchor.getMonth() + 1, 0)) < +today + AHEAD * 864e5;
+    const times = days[pick.date] ?? [];
+    const [hh, mm] = fmt(pick.min).replace(/ (AM|PM)$/, "").split(":");
+    return shell({
+      head: paid ? "Book a session" : "Book a consultation",
+      sub: paid ? "My studio is in San Jose, and I travel across the Bay Area." : "15 minutes, phone or video. Bring your dates and references.",
+      body: (
+        <>
+          <Calendar
+            view={view}
+            setView={(v) => { setView(v); setAnchor(fromIso(pick.date)); }}
+            anchor={anchor}
+            shift={(dir) => {
+              const d = new Date(anchor);
+              if (view === "week") d.setDate(d.getDate() + 7 * dir);
+              else d.setMonth(d.getMonth() + dir, 1);
+              setAnchor(d);
+            }}
+            canBack={canBack}
+            canNext={canNext}
+            picked={pick.date}
+            tag={(d) => {
+              const n = days[iso(d)]?.length ?? 0;
+              return n ? `${n} open` : null;
+            }}
+            onPick={(d) => choose(iso(d), pick.min, false)}
+          />
+          <div className="times lbl">
+            {times.map((x) => {
+              const m = minutesOf(x.start);
+              return (
+                <button key={x.start} type="button" className="opt" data-slot="" aria-pressed={m === pick.min} aria-label={fmt(m)} onClick={() => choose(pick.date, m, true)}>{fmt(m)}</button>
+              );
+            })}
+          </div>
+          <div className="fig">
+            <b>{hh}<span className="cn">:</span>{mm}</b>
+            <span className="lbl mute">{pick.min < 720 ? "AM" : "PM"} | until {fmt(end)} | {dlabel(date)}</span>
+          </div>
+        </>
+      ),
+      bar: <button type="button" className="btn fill" onClick={() => { setChosen("time"); setStep("form"); }}>Continue</button>,
+    });
+  }
 
   if (editorial) {
     const d3 = (d: Date) => DAYS[d.getDay()][0] + DAYS[d.getDay()].slice(1).toLowerCase();

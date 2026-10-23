@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { useSiteTheme } from "@/lib/site-theme";
-import { TimePicker } from "@/components/time-picker";
+import { TimePicker, type V3Book } from "@/components/time-picker";
 import { DenseTimePicker } from "@/components/time-picker-dense";
 import { isPaid } from "@/lib/paid";
 import { Orb, ORB_ROUND } from "@/components/orb";
@@ -210,7 +210,8 @@ function CalInline({ path, title, className }: { path: string; title: string; cl
 /** The site's own time picker for `path`, with Cal.com's calendar as its
     fallback (a paid event, or Cal.com not answering). `className` sizes the
     box. `?cal` on the address asks for Cal.com's calendar alone. */
-export function CalEmbed({ path, title, className }: { path: string; title: string; className?: string }) {
+/** `v3`: the JG V3 stepper; `?cal` and `?dense` keep their own look inside it. */
+export function CalEmbed({ path, title, className, v3 }: { path: string; title: string; className?: string; v3?: V3Book }) {
   /* Decided after the first paint, so Cal.com's script is not fetched for a
      visitor who gets the picker. */
   const [own, setOwn] = React.useState<boolean | null>(null);
@@ -222,9 +223,11 @@ export function CalEmbed({ path, title, className }: { path: string; title: stri
     setOwn(!q.has("cal"));
     setDense(q.has("dense"));
   }, []);
-  if (own === null) return <div aria-label={title} className={className} />;
+  const paid = isPaid(path.split("/")[1]);
+  const wrap = (body: React.ReactNode) => (v3 ? v3.shell({ steps: [], at: 1, head: paid ? "Book a session" : "Book a consultation", body, sum: [] }) : body);
+  if (own === null) return wrap(<div aria-label={title} className={className} />);
   const inline = <CalInline key={path} path={path} title={title} className={className} />;
-  if (!own) return inline;
+  if (!own) return wrap(inline);
   // `?dense` has no deposit step: a paid session keeps the main picker.
-  return dense && !isPaid(path.split("/")[1]) ? <DenseTimePicker path={path} title={title} className={className} fallback={inline} /> : <TimePicker path={path} title={title} className={className} fallback={inline} />;
+  return dense && !paid ? wrap(<DenseTimePicker path={path} title={title} className={className} fallback={inline} />) : <TimePicker path={path} title={title} className={className} fallback={inline} v3={v3} />;
 }
