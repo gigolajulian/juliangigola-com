@@ -3,7 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { CoverNav } from "@/components/v3/chrome";
+import { CoverNav, V3Foot } from "@/components/v3/chrome";
 import { Duo, Marks, Pick } from "@/components/v3/duo";
 import { COMMISSIONS, COMMISSION_TABS, DOORS, HERO, HERO_ALT, INDEX_ORDER, RECENT, SESSIONS, rate } from "@/lib/v3";
 
@@ -334,6 +334,7 @@ export function V3Home({ count }: { count: number }) {
       <Commissions count={count} />
       <SessionsIndex />
       <Doors />
+      <V3Foot />
     </section>
   );
 }

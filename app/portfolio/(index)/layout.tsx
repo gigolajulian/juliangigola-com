@@ -9,6 +9,7 @@ import {
 import { WORK_HEADS } from "@/lib/work-heads";
 import { WORK_ROWS } from "@/lib/work-rows";
 import { CONTENT } from "@/lib/content";
+import { IndexFrame } from "@/components/v3/index-frame";
 
 /**
  * One frame for the work index, its category pages and the video page:
@@ -56,13 +57,19 @@ export default function WorkIndexLayout({
   children: React.ReactNode;
 }) {
   return (
-    <WorkShell
-      heads={WORK_HEADS}
-      categories={WORK_CATEGORY_LINKS}
-      passes={PASSES}
-      scope={SCOPE}
+    <IndexFrame
+      shell={
+        <WorkShell
+          heads={WORK_HEADS}
+          categories={WORK_CATEGORY_LINKS}
+          passes={PASSES}
+          scope={SCOPE}
+        >
+          {children}
+        </WorkShell>
+      }
     >
       {children}
-    </WorkShell>
+    </IndexFrame>
   );
 }

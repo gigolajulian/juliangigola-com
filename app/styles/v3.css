@@ -306,6 +306,7 @@
 .v3 .wrapopts{display:flex;flex-wrap:wrap;gap:6px}
 .v3 .bill{border-top:1px solid var(--line)}
 .v3 .bill div{display:flex;justify-content:space-between;gap:16px;padding:12px 0;border-bottom:1px solid var(--line);color:var(--mute)}
+.v3 .bill div.now{color:var(--ink)}
 .v3 .done-lines p{margin:0;padding:12px 0;border-bottom:1px solid var(--line);font-size:13px}
 .v3 .done-lines{border-top:1px solid var(--line)}
 :root{--live:oklch(0.74 0.115 152);--err:oklch(0.62 0.2 25)}
@@ -398,7 +399,11 @@
 .v3 .sc b{font:900 clamp(2rem,3.4vw,3.5rem)/.9 var(--display);letter-spacing:-.05em;text-transform:uppercase}
 .v3 .wbar{height:2px;margin:14px var(--gr) 16px var(--g);background:var(--line)}
 .v3 .wbar i{display:block;height:100%;width:0;background:var(--ink)}
-@media (max-width:767px){.v3 .sc{height:auto;width:82vw;scroll-snap-align:start}}
+.v3 #p-work.strip-on{height:100svh;min-height:0;overflow:hidden}
+.v3 #p-work.strip-on .wstrip{flex:1;min-height:0;touch-action:none;overscroll-behavior:contain}
+@media (max-width:767px){.v3 #p-work.strip-on{height:auto;min-height:100svh;overflow:visible}
+.v3 #p-work.strip-on .wstrip{flex:none;touch-action:auto;scroll-snap-type:x mandatory;scroll-padding-inline:var(--g)}
+.v3 .sc{height:auto;width:82vw;scroll-snap-align:start}}
 .v3 .wscope{display:grid;grid-template-columns:minmax(260px,360px) minmax(0,1fr);gap:clamp(24px,3vw,48px);padding:16px var(--gr) 48px var(--g)}
 .v3 .sc-panel{display:flex;flex-direction:column;gap:14px;position:sticky;top:88px;align-self:start}
 .v3 .sc-head{display:flex;justify-content:space-between;align-items:center}
@@ -479,6 +484,7 @@
 @media (max-width:700px){.v3 .wviews button{width:36px;padding:0}}
 .v3 .mq{-webkit-mask:linear-gradient(90deg,transparent,#000 14%,#000 86%,transparent);mask:linear-gradient(90deg,transparent,#000 14%,#000 86%,transparent)}
 @media (max-width:600px){.v3 .ab-bio{text-align:left;word-spacing:normal;hyphens:none;-webkit-hyphens:none;text-wrap:pretty}}
+
 /* ---- site additions, not in the master's mock chrome ---- */
 /* The old tokens follow V3's, so the screens restyled by tokens only
    (project pages, service pages, legal) read in the same palette. */
@@ -508,3 +514,6 @@ html{font-family:var(--font-mono),ui-monospace,monospace}
 .v3 :is(h1,h2,h3):not(.lbl){text-transform:none}
 /* The lead frame keeps its 4:5 on phone, where no other cell sets its rows. */
 @media (max-width:700px){.v3 .sheet figure:first-child{aspect-ratio:4/5}}
+/* Tiles open their project: the link wraps the photo. */
+.v3 .wt>a{display:block}
+.v3 .sc>a{position:absolute;inset:0}

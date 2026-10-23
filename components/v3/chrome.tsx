@@ -171,14 +171,26 @@ export function V3Header() {
   );
 }
 
+/** The footer line, as the master puts it: the last row inside each page. */
+export function V3Foot() {
+  return (
+    <div className="foot-line lbl mute">
+      <span>© 2026 Julian Gigola</span>
+      <a href="mailto:hello@juliangigola.com">hello@juliangigola.com</a>
+      <span>San Francisco Bay Area</span>
+    </div>
+  );
+}
+
+/* Screens built from the master carry their own footer line (`V3Foot`);
+   the pages restyled by tokens only get it here, after `main`. */
+const OWN_FOOT = /^\/($|portfolio$|about$|contact(\/form)?$|book(\/|$))/;
+
 export function V3Footer() {
+  if (OWN_FOOT.test(usePathname())) return null;
   return (
     <div className="v3 contents">
-      <div className="foot-line lbl mute">
-        <span>© 2026 Julian Gigola</span>
-        <a href="mailto:hello@juliangigola.com">hello@juliangigola.com</a>
-        <span>San Francisco Bay Area</span>
-      </div>
+      <V3Foot />
     </div>
   );
 }
