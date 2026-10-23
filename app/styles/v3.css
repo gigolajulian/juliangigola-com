@@ -585,3 +585,17 @@ html{font-family:var(--font-mono),ui-monospace,monospace}
    overflows here). */
 @media (min-width:801px){.v3 .kind b{font-size:clamp(1.125rem,2.4vw,1.75rem)}
 .v3 .f-photo .cap b{font-size:clamp(2.25rem,5vw,4.5rem)}}
+/* Portrait tablets: the stepper stacks under a wide photo, as on a phone,
+   so the steps get the full width and the photo is not a narrow sliver. */
+@media (min-width:801px) and (max-width:1100px) and (orientation:portrait){.v3 .flow{display:flex;flex-direction:column}
+.v3 .f-photo{order:-1;position:static;height:auto;aspect-ratio:16/9;padding:24px var(--gr) 0 var(--g)}
+.v3 .f-photo img{object-position:50% 30%}
+.v3 .f-photo dl{display:none}
+.v3 .f-main{padding:28px var(--gr) 40px var(--g)}
+.v3 .f-body{max-width:none}
+.v3 .kind b{font-size:1.75rem}}
+/* Tablets: the chips stay one scrolling row, as on a phone, not three stacked rows. */
+@media (min-width:701px) and (max-width:1100px){.v3 .chips{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;-webkit-mask-image:linear-gradient(to right,#000 calc(100% - 48px),transparent);mask-image:linear-gradient(to right,#000 calc(100% - 48px),transparent)}
+.v3 .chips.at-end{-webkit-mask-image:none;mask-image:none}
+.v3 .chips-bar{display:block;height:1px;margin:10px var(--gr) 0 var(--g);background:var(--line)}
+.v3 .chips-bar i{display:block;height:100%;width:30%;background:var(--ink)}}
