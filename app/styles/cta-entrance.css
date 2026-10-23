@@ -1,0 +1,39 @@
+/* The homepage buttons' entrance: each fades up out of a soft blur on
+   its own, the second a beat after the first (Julian's pick of three,
+   2026-10-22). The row's own lift is spent at once (0ms, no delay; the
+   phone's scroll drift on the same element keeps running). */
+:root .cover-float-ctas.lift {
+  --h-lift-ms: 0ms;
+  animation-delay: 0ms !important;
+}
+:root .cover-float-ctas .cover-cta {
+  --cta-at: var(--reveal-delay, 0ms);
+  animation: jg-cta-focus 700ms cubic-bezier(0.22, 1, 0.36, 1) var(--cta-at) backwards;
+}
+:root .cover-float-ctas > :nth-child(2) .cover-cta,
+:root .cover-float-ctas > .cover-cta:nth-child(2) {
+  --cta-at: calc(var(--reveal-delay, 0ms) + 110ms);
+}
+[data-intro="1"] .cover-float-ctas .cover-cta {
+  animation-play-state: paused;
+}
+@keyframes jg-cta-focus {
+  from {
+    opacity: 0;
+    translate: 0 8px;
+    scale: 0.96;
+    filter: blur(6px);
+  }
+}
+
+/* Played once. Under a mouse the liquid takes the buttons' place at
+   the first idle moment (`liquid-pair.tsx`), a new element, and a new
+   element starts its entrance over: they went out and came in twice. */
+:root[data-cta-in] .cover-float-ctas .cover-cta {
+  animation: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  :root .cover-float-ctas .cover-cta {
+    animation: none;
+  }
+}
