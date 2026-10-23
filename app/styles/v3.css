@@ -576,3 +576,7 @@ html{font-family:var(--font-mono),ui-monospace,monospace}
   .v3 .a-cover .right>.lbl .ticks button::after{left:15px;right:15px}
 }
 .v3 .tbtn:focus-visible{outline-color:var(--accent)}
+/* Narrow phones: the calendar's gaps cost the day cells their 44px. */
+@media (pointer:coarse) and (max-width:360px){.v3 .cal{gap:0}}
+/* The 44px links above must not bring the header links back on a phone: Menu holds them. */
+@media (pointer:coarse) and (max-width:700px){.v3 .site-hdr .links a{display:none}}
