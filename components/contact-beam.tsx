@@ -46,6 +46,18 @@ export function ContactBeam({
     const el = edge.current;
     const id = el?.parentElement?.dataset.beam;
     if (el && id) el.style.setProperty("--edge-a", `var(--beam-angle-${id})`);
+    /* The lap's angle and fade are inherited properties, so every frame
+       of a lap restyled the whole form under the card, some 220 elements
+       (Julian: Inquiries laggy once it comes on screen). The form takes
+       none of the beam: held at nought on the card's own children, the
+       restyle stops there. Not a wrapper: `.contact-card > div` rules
+       reach for the form directly. */
+    if (!el || !id) return;
+    for (const k of Array.from(el.parentElement!.children) as HTMLElement[]) {
+      if (k === el || k.matches("[data-beam-bloom]") || k.querySelector("[data-beam-bloom]")) continue;
+      k.style.setProperty(`--beam-angle-${id}`, "0deg");
+      k.style.setProperty(`--beam-opacity-${id}`, "0");
+    }
   }, []);
   // A change of height eases (lib/ease-height.ts).
   React.useEffect(() => {
