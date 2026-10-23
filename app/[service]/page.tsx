@@ -95,7 +95,8 @@ export default async function BookingPage(props: PageProps<"/[service]">) {
   const facts = [page.rate, ...(page.turnaround ? [`Ready in ${page.turnaround}`] : [])];
 
   return (
-    <StripPage>
+    /* `svc`: the JG V3 tokens over these screens (`styles/v3.css`). */
+    <StripPage className="svc">
       <LdJson
         data={serviceGraph({
           url: bookingHref(page),

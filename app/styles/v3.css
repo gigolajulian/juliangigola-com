@@ -517,3 +517,15 @@ html{font-family:var(--font-mono),ui-monospace,monospace}
 /* Tiles open their project: the link wraps the photo. */
 .v3 .wt>a{display:block}
 .v3 .sc>a{position:absolute;inset:0}
+
+/* Service pages (/[service]): their own screens, in the V3 tokens. */
+.svc{--radius-photo:4px}
+.svc :is(h1,h2,h3){text-transform:none}
+.svc :focus-visible{outline:1px solid var(--accent);outline-offset:3px}
+.svc :is(.action,.action-quiet,.cover-cta){display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:0 20px;border-radius:0;font:500 11px/1 var(--font-mono),ui-monospace,monospace;letter-spacing:.14em;text-indent:0;-webkit-backdrop-filter:none;backdrop-filter:none;-webkit-text-stroke:0}
+.svc :is(.action,.action-quiet,.cover-cta)::before{display:none}
+.svc .cover-cta{--i:var(--hero-ink);--o:var(--hero-on-ink)}
+.svc :is(.action,.action-quiet){--i:var(--ink);--o:var(--bg)}
+.svc :is(.action,.cover-cta:not(.cover-cta-quiet)){background:var(--i);color:var(--o);border:1px solid var(--i)}
+.svc :is(.action-quiet,.cover-cta-quiet){background:transparent;color:var(--i);border:1px solid var(--i)}
+@media (hover:hover){.svc :is(.action,.cover-cta:not(.cover-cta-quiet)):hover{background:transparent;color:var(--i)}.svc :is(.action-quiet,.cover-cta-quiet):hover{background:var(--i);color:var(--o)}}
