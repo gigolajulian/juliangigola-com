@@ -353,21 +353,11 @@ export function V3Work({ work }: { work: WorkItem[] }) {
         viewBox="0 0 16 16"
         aria-hidden="true"
       >
-        <circle
-          cx="8"
-          cy="8"
-          r="6.5"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="1.3"
-        />
-        <path
-          d="M8 1.5v13M1.5 8h13"
-          stroke="currentColor"
-          strokeWidth=".8"
-          opacity=".5"
-        />
-        <circle cx="10.6" cy="5.6" r="1.6" />
+        <g transform="rotate(45 8 8)">
+          <rect x="6.4" y=".6" width="3.2" height="4.4" rx="1.4" />
+          <rect x="5.2" y="5" width="5.6" height="1.5" rx=".5" />
+          <path d="M7 6.5h2l-.35 6.4L8 14.6l-.65-1.7Z" opacity=".8" />
+        </g>
       </svg>,
     ],
   ] as const;

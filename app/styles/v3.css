@@ -620,7 +620,8 @@ html{font-family:var(--font-mono),ui-monospace,monospace}
 .v3 #p-work.strip-on .wstrip{padding-top:20px}
 @media (max-width:767px){.v3 #p-work.strip-on .sc{aspect-ratio:auto;height:calc(100svh - 270px);min-height:360px}}
 /* Color: a mode set apart from Grid and Strip by a hairline. */
-.v3 .wviews .wcolor{display:inline-flex;align-items:center;gap:8px;width:auto;margin-right:12px;padding:0 12px;box-shadow:13px 0 0 -12px var(--line)}
+.v3 .wviews .wcolor{position:relative;display:inline-flex;align-items:center;gap:8px;width:auto;margin-right:12px;padding:0 12px}
+.v3 .wviews .wcolor::after{content:"";position:absolute;right:-8.5px;top:10px;bottom:10px;width:1px;background:var(--line)}
 @media (max-width:700px){.v3 .wviews .wcolor{width:36px;padding:0;justify-content:center}}
 .v3 #p-work.color-on{height:100svh;min-height:0;overflow:hidden}
 .v3 #p-work.color-on .wscope{flex:1;min-height:0;padding-bottom:16px}
