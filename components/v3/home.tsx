@@ -226,7 +226,8 @@ function Commissions({ count }: { count: number }) {
         <h2>Commissions</h2>
         <Link className="btn" href="/portfolio">See all {count} projects</Link>
       </div>
-      <div className="tabs lbl" ref={tabs}>
+      {/* Focusable so the row scrolls from the keyboard too (axe). */}
+      <div className="tabs lbl" ref={tabs} tabIndex={0} aria-label="Disciplines">
         {COMMISSION_TABS.map((t, n) => (
           <span key={t} className={n === 0 ? "on" : undefined}>{t}</span>
         ))}

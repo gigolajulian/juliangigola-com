@@ -8,9 +8,9 @@
   --display:var(--font-display),"Helvetica Neue",Arial,sans-serif; --mono:var(--font-mono),ui-monospace,monospace;
   --g:max(16px,env(safe-area-inset-left,0px)); --gr:max(16px,env(safe-area-inset-right,0px));
   color-scheme:dark;}
-@media (prefers-color-scheme:light){:root:not([data-theme="dark"]){--bg:oklch(0.945 0.003 250);--ink:oklch(0.185 0.003 70);--mute:oklch(0.44 0.003 250);--line:oklch(0 0 0 / 13%);--card:oklch(0.915 0.003 250);--accent:oklch(0.52 0.1 195);color-scheme:light}}
-:root[data-theme="light"]{--bg:oklch(0.945 0.003 250);--ink:oklch(0.185 0.003 70);--mute:oklch(0.44 0.003 250);--line:oklch(0 0 0 / 13%);--card:oklch(0.915 0.003 250);--accent:oklch(0.52 0.1 195);color-scheme:light}
-@media (max-width:700px) and (prefers-color-scheme:light){:root:not([data-theme="dark"]) .v3 .a-cover .foot{--bg:oklch(0.945 0.003 250);--ink:oklch(0.185 0.003 70);--mute:oklch(0.44 0.003 250);--line:oklch(0 0 0 / 13%);--accent:oklch(0.52 0.1 195);color:var(--ink)}}
+@media (prefers-color-scheme:light){:root:not([data-theme="dark"]){--bg:oklch(0.945 0.003 250);--ink:oklch(0.185 0.003 70);--mute:oklch(0.44 0.003 250);--line:oklch(0 0 0 / 13%);--card:oklch(0.915 0.003 250);--accent:oklch(0.47 0.1 195);color-scheme:light}}
+:root[data-theme="light"]{--bg:oklch(0.945 0.003 250);--ink:oklch(0.185 0.003 70);--mute:oklch(0.44 0.003 250);--line:oklch(0 0 0 / 13%);--card:oklch(0.915 0.003 250);--accent:oklch(0.47 0.1 195);color-scheme:light}
+@media (max-width:700px) and (prefers-color-scheme:light){:root:not([data-theme="dark"]) .v3 .a-cover .foot{--bg:oklch(0.945 0.003 250);--ink:oklch(0.185 0.003 70);--mute:oklch(0.44 0.003 250);--line:oklch(0 0 0 / 13%);--accent:oklch(0.47 0.1 195);color:var(--ink)}}
 .v3 .a-cover,.v3 .sheet figcaption{--bg:oklch(0.145 0.003 70);--ink:oklch(0.955 0.004 80);--mute:oklch(0.78 0.005 80);--line:oklch(1 0 0 / 20%);--accent:oklch(0.72 0.095 195);color:var(--ink)}
 .v3 *{box-sizing:border-box}
 .v3 [hidden]{display:none!important}
@@ -65,7 +65,7 @@
 .v3 .a-cover .foot{grid-template-columns:1fr;padding-top:20px}
 .v3 .a-cover .right{align-items:flex-start}
 .v3 .a-cover .ctas{justify-content:flex-start}
-:root[data-theme="light"] .v3 .a-cover .foot{--bg:oklch(0.945 0.003 250);--ink:oklch(0.185 0.003 70);--mute:oklch(0.44 0.003 250);--line:oklch(0 0 0 / 13%);--accent:oklch(0.52 0.1 195);color:var(--ink)}
+:root[data-theme="light"] .v3 .a-cover .foot{--bg:oklch(0.945 0.003 250);--ink:oklch(0.185 0.003 70);--mute:oklch(0.44 0.003 250);--line:oklch(0 0 0 / 13%);--accent:oklch(0.47 0.1 195);color:var(--ink)}
 .v3 .a-cover .slides::after{content:"";position:absolute;inset:auto 0 0;height:22%;z-index:1;background:linear-gradient(to top,oklch(0.1 0.003 70 / .45),transparent);pointer-events:none}
 .v3 .a-cover .right>.lbl{position:absolute;z-index:2;left:var(--g);right:var(--gr);bottom:calc(100% + 14px);--ink:oklch(0.955 0.004 80);--mute:oklch(0.78 0.005 80);--line:oklch(1 0 0 / 30%);--accent:oklch(0.72 0.095 195);color:oklch(0.955 0.004 80 / .72);justify-content:flex-end;gap:10px!important;font-size:9px;bottom:calc(100% + 10px)}
 .v3 .a-cover .right>.lbl .ticks{gap:4px}
@@ -213,7 +213,7 @@
 .v3 .chips::-webkit-scrollbar{display:none}
 .v3 .chips button{flex:none;height:36px;padding:0 14px;background:none;border:1px solid var(--line);border-radius:999px;color:var(--mute);font:inherit;letter-spacing:inherit;text-transform:inherit;cursor:pointer}
 .v3 .chips button[aria-pressed="true"]{border-color:var(--ink);color:var(--ink)}
-.v3 .chips button span{opacity:.6;margin-left:6px}
+.v3 .chips button span{margin-left:6px;color:var(--mute)}
 .v3 .wgrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:28px 12px;padding:28px var(--gr) 48px var(--g)}
 .v3 .wt{margin:0}
 .v3 .wt .ph{aspect-ratio:4/5;overflow:hidden;background:var(--card);border-radius:4px}
@@ -538,3 +538,41 @@ html{font-family:var(--font-mono),ui-monospace,monospace}
 .v3 .f-bar a.btn{display:inline-flex;align-items:center}
 /* The call dialog: the base reset zeroes a dialog's centering margin. */
 .v3 .calldlg{margin:auto}
+
+/* Dual screen (Surface Duo and other foldables, spanned): no line of text and
+   no control crosses the hinge. Two-column layouts split on it; a padded grid
+   ends one gutter before it and starts one gutter after it. */
+@media (horizontal-viewport-segments: 2) {
+  :root{--s0:env(viewport-segment-width 0 0,50vw);--s1:env(viewport-segment-width 1 0,50vw);--hg:calc(env(viewport-segment-left 1 0,50vw) - env(viewport-segment-right 0 0,50vw));--split:calc(var(--s0) - 2 * var(--g)) calc(var(--s1) - 2 * var(--gr));--split-gap:calc(var(--hg) + var(--g) + var(--gr))}
+  .v3 :is(.a-index,.about,.reach,.a-seq,.wgrid,.in-steps ol,.ab-logos .lg,.scres){grid-template-columns:var(--split);column-gap:var(--split-gap)}
+  .v3 :is(.foot-line,.direct){display:grid;grid-template-columns:var(--split);column-gap:var(--split-gap)}
+  .v3 .a-seq :is(.big,.sm,.big.r,.sm.l){grid-column:auto;margin-top:0}
+  .v3 :is(.doors,.sheet,.flow){grid-template-columns:var(--s0) var(--s1);column-gap:var(--hg)}
+  .v3 .sheet figure:first-child{grid-column:auto;grid-row:auto;aspect-ratio:4/5}
+  .v3 .f-main{padding-right:var(--g)}
+  .v3 .f-photo{padding-left:var(--g)}
+  .v3 .a-cover h1{max-width:calc(var(--s0) - 2 * var(--g));white-space:normal}
+  .v3 :is(.chips,.tabs){max-width:var(--s0)}
+  .v3 .a-seq{padding-inline:var(--g) var(--gr)}
+  .v3 .calldlg{width:calc(var(--s0) - 32px);margin:auto auto auto 16px}
+}
+
+/* Responsive pass: 44px targets on touch (the hit area grows, the drawing stays). */
+@media (pointer:coarse){
+  .v3 .a-cover .nav{padding-top:6px}
+  .v3 :is(.a-cover .nav,.site-hdr .links) a,.v3 .site-wm{display:inline-flex;align-items:center;justify-content:center;min-height:44px;min-width:44px}
+  .v3 .btn{min-height:44px}
+  .v3 .door li a{display:flex;align-items:center;min-height:44px}
+  .v3 .wsearch input{align-self:stretch}
+  nav[aria-label="Categories"] a.label{display:flex;align-items:center;min-height:44px}
+  .v3 .menu-btn{min-width:44px}
+  .v3 .seg button{height:44px}
+  .v3 :is(.wsearch,.chips button,.wviews button){min-height:44px}
+  .v3 .wviews button{min-width:44px}
+  .v3 :is(.foot-line,.direct) a{display:inline-flex;align-items:center;min-height:44px}
+  .v3 .ticks button{width:44px;height:44px;margin:-12px -8px}
+  .v3 .ticks button::after{left:8px;right:8px}
+  .v3 .a-cover .right>.lbl .ticks button{width:44px;margin:-12px -15px}
+  .v3 .a-cover .right>.lbl .ticks button::after{left:15px;right:15px}
+}
+.v3 .tbtn:focus-visible{outline-color:var(--accent)}
