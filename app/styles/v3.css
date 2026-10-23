@@ -413,7 +413,7 @@
 @media (hover:hover){.v3 .sc-x:hover{color:var(--ink)}}
 .v3 .sc-panel canvas{display:block;width:100%;aspect-ratio:1;cursor:crosshair}
 .v3 .sc-panel p{margin:0}
-.v3 .sc-tip{font:800 1rem/1.15 var(--display);letter-spacing:-.02em;text-transform:uppercase}
+.v3 .sc-tip{font:400 13px/1.6 var(--mono);text-wrap:pretty}
 .v3 .sc-res{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:28px 12px;align-content:start}
 .v3 .sw{position:absolute;top:0;left:0;display:flex;gap:3px;padding:3px;background:#fff}
 .v3 .sw i{width:14px;height:14px}
