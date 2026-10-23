@@ -189,7 +189,7 @@ export function CoverFloat({
       <div
         className={cn(
           "cover-float-middle flex flex-col items-center px-6 text-center",
-          heading ? "max-w-[min(96rem,94vw)]" : "max-w-[min(62rem,92vw)]",
+          heading ? "max-w-[min(46rem,80vw)] [@media(min-aspect-ratio:2/1)]:max-w-[min(72rem,70vw)]" : "max-w-[min(62rem,92vw)]",
         )}
       >
         {/* Without scripts the canvas is never drawn: the name set in its
@@ -200,7 +200,7 @@ export function CoverFloat({
         </noscript>
         {heading ? (
           <h1
-            className="lift font-display text-[clamp(2.5rem,6.5vw,6.5rem)] uppercase leading-[0.92] text-balance lying:text-[clamp(1.75rem,4.2vw,2.5rem)]"
+            className="lift font-display text-[clamp(2rem,4vw,4rem)] uppercase leading-[0.92] text-balance lying:text-[clamp(1.75rem,4.2vw,2.5rem)]"
             style={{ "--reveal-delay": "var(--h-start, 420ms)" } as React.CSSProperties}
           >
             {heading.title}
