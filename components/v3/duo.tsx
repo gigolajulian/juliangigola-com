@@ -56,9 +56,13 @@ const MARKS: [slug: string, name: string, w: number, h: number][] = [
   ["ukiyosunknown", "Ukiyosunknown", 58, 30],
 ];
 
-/** `cell`: each mark in its own box (the About grid). */
+/* The About grid's own order (Julian's Arrange, master v45); the homepage strip keeps MARKS order. */
+const ABOUT_ORDER = ["empire", "goodcult", "jubo", "wired-magazine", "paradox", "sols", "ladera-granola", "pear-vc", "sago", "ukiyosunknown"];
+
+/** `cell`: each mark in its own box, in ABOUT_ORDER (the About grid). */
 export function Marks({ hidden, cell }: { hidden?: boolean; cell?: boolean }) {
-  return MARKS.map(([slug, name, w, h]) => {
+  const list = cell ? ABOUT_ORDER.map((s) => MARKS.find(([slug]) => slug === s)!) : MARKS;
+  return list.map(([slug, name, w, h]) => {
     const m = CLIENT_MARKS[slug];
     if (!m) return null;
     const label = hidden ? { "aria-hidden": true } : { role: "img", "aria-label": name };
