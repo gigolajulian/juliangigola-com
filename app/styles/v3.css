@@ -710,7 +710,7 @@ html{font-family:var(--font-mono),ui-monospace,monospace}
 .v3 .pj-top{grid-column:1/-2;display:flex;flex-direction:column;gap:20px;padding:56px 0 40px var(--g)}
 .v3 .pj-back{text-decoration:none;align-self:flex-start}
 .v3 .pj-row{display:flex;flex-direction:column;align-items:flex-start}
-.v3 .pj-row .pg-t{margin-bottom:14px;text-wrap:balance;font-size:clamp(3rem,6.4vw,6.5rem)}
+.v3 .pj-row .pg-t{margin-bottom:24px;text-wrap:balance;font-size:clamp(3rem,6.4vw,6.5rem)}
 .v3 .pj-row .pj-mark{margin-bottom:22px;line-height:0;color:var(--ink);opacity:.8;transition:opacity .2s}
 @media (hover:hover){.v3 .pj-mark:hover{opacity:1}}
 .v3 .pj-big{grid-column:-2/-1;grid-row:1/3;position:relative;margin:0;min-height:520px;background:var(--card)}
@@ -758,3 +758,26 @@ html{font-family:var(--font-mono),ui-monospace,monospace}
 .v3 .pj-lead{grid-template-columns:minmax(0,1fr)}}
 @media (min-width:901px){.v3 .pj-lead{display:flex;gap:20px}
 .v3 .pj-lead .pj-r{height:100%;min-width:0}}
+/* Julian: the logo sits at the right of its row; the second lead frame steps down. */
+@media (min-width:901px){.v3 .pj-row .pj-mark{align-self:flex-end}
+.v3 .pj-lead .pj-r:nth-child(2){translate:0 clamp(48px,7vw,112px)}
+.v3 .pj-lead .pj-r img{background:none!important}
+.v3 .pj-top{padding-bottom:64px}}
+/* 404 (app/not-found.tsx): the master's type over the drift wall. */
+.v3.nf{display:flex;flex-direction:column;justify-content:center;gap:clamp(16px,2.6dvh,28px);height:100dvh;padding:88px var(--gr) 0 var(--g);background:none;color:var(--ink)}
+.v3 .nf-slate{display:flex;flex-wrap:wrap;align-items:center;gap:12px}
+.v3 .nf-tag{display:inline-flex;align-items:center;gap:8px;padding:7px 12px;background:var(--ink);color:var(--bg);border-radius:4px}
+.v3 .nf-tag.q{background:none;color:var(--accent);border:1px solid color-mix(in oklab,var(--accent) 45%,transparent)}
+.v3 .nf-dot{width:6px;height:6px;border-radius:50%;background:var(--accent);animation:jg-blink 1.8s steps(1) infinite}
+@media (prefers-reduced-motion:reduce){.v3 .nf-dot{animation:none}}
+.v3 .nf-num{font:900 clamp(64px,min(26vw,26dvh),340px)/.82 var(--display);letter-spacing:-.06em;user-select:none;transition:filter .1s linear,opacity .1s linear}
+.v3 .nf-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.35fr);gap:clamp(24px,4vw,64px);align-items:end}
+.v3 .nf-h{font:900 clamp(2rem,5.2dvh,3.5rem)/.95 var(--display);letter-spacing:-.04em;margin:0;max-width:14ch;text-wrap:balance}
+.v3 .nf-p{margin:16px 0 24px;max-width:46ch;color:var(--mute);line-height:1.6}
+.v3.nf .ctas{display:flex;gap:10px;flex-wrap:wrap}
+.v3 .nf-list ol{list-style:none;margin:12px 0 0;padding:0;border-bottom:1px solid var(--line)}
+.v3 .nf-list a{display:flex;align-items:baseline;gap:20px;padding:clamp(8px,1.3dvh,16px) 2px;border-top:1px solid var(--line);color:inherit;text-decoration:none}
+.v3 .nf-list b{flex:1;font:800 clamp(1.125rem,2.8dvh,2rem)/1 var(--display);letter-spacing:-.03em}
+@media (hover:hover){.v3 .nf-list a:hover b{color:var(--accent)}}
+.v3.nf .foot-line{margin-top:auto}
+@media (max-width:700px){.v3 .nf-grid{grid-template-columns:1fr}.v3 .nf-list,.v3 .nf-p{display:none}.v3.nf .ctas{margin-top:24px}}

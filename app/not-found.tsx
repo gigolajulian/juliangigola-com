@@ -2,9 +2,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { NotFoundScene, BlinkingMark } from "@/components/not-found-scene";
 import DriftWall from "@/components/DriftWall";
-import { DISCIPLINES, WALL } from "@/lib/work";
+import { DISCIPLINES, WALL, titleCase } from "@/lib/work";
 import { wallItem } from "@/lib/wall-tile";
-import { LiquidPair } from "@/components/liquid-pair";
 
 /* ── 404 ──────────────────────────────────────────────────────────
  * From a design Julian made in Claude Design and asked to have on the site,
@@ -32,15 +31,12 @@ export const metadata: Metadata = {
   alternates: { canonical: null },
 };
 
-const MONO = "font-mono text-[11px] uppercase tracking-[0.2em]";
-const LIST_MONO =
-  "font-mono text-[clamp(11px,1.35dvh,13px)] uppercase tracking-[0.16em]";
 
 export default function NotFound() {
   const places = [
     ...DISCIPLINES.filter((d) => d.href.startsWith("/portfolio"))
       .slice(0, 4)
-      .map((d) => ({ label: d.name, count: String(d.count), href: d.href })),
+      .map((d) => ({ label: titleCase(d.name), count: String(d.count), href: d.href })),
     { label: "Book a session", count: "→", href: "/#sessions" },
     { label: "Contact", count: "→", href: "/#contact" },
   ];
@@ -90,124 +86,45 @@ export default function NotFound() {
           }}
         />
 
-        <section className="pointer-events-none relative mx-auto flex [&_a]:pointer-events-auto h-dvh w-full max-w-[100rem] flex-col justify-center gap-4 px-6 pb-6 pt-20 sm:gap-6 sm:px-10 sm:pt-24">
-          {/* The slate. */}
-          <div className="rise flex flex-wrap items-center gap-3.5">
+        {/* JG V3 (leftovers card H): the master's type, buttons and rows over the same wall. */}
+        <section className="v3 nf pointer-events-none relative [&_a]:pointer-events-auto">
+          <div className="rise nf-slate lbl">
             <BlinkingMark className="size-6 shrink-0 text-foreground" />
-            <span
-              className={`${MONO} inline-flex items-center gap-2 bg-foreground px-3 py-1.5 font-bold text-background`}
-            >
-              <span
-                aria-hidden
-                className="size-1.5 rounded-full bg-accent animate-[jg-blink_1.8s_steps(1)_infinite] motion-reduce:animate-none"
-              />
+            <span className="nf-tag">
+              <span aria-hidden className="nf-dot" />
               Frame not found
             </span>
-            <span
-              className={`${MONO} inline-flex items-center border border-[color-mix(in_oklab,var(--accent)_40%,transparent)] px-3 py-1.5 font-bold text-accent`}
-            >
-              Error 404
-            </span>
-            <span
-              data-requested-path
-              className={`${MONO} text-muted-foreground`}
-            >
-              this address
-            </span>
+            <span className="nf-tag q">Error 404</span>
+            <span data-requested-path className="mute">this address</span>
           </div>
 
-          {/* The frame that has not been found. Blur is applied by the scene
-              once it knows a pointer can clear it; without one it stays
-              sharp. */}
-          <div
-            data-numerals
-            className="rise select-none font-display font-bold leading-[0.82] tracking-[-0.05em] text-foreground"
-            style={{
-              // By the window's height as well as its width: the page never
-              // scrolls, so the numerals give way on a short window.
-              fontSize: "clamp(64px, min(26vw, 26dvh), 340px)",
-              transition: "filter 0.1s linear, opacity 0.1s linear",
-              ["--reveal-delay" as string]: "80ms",
-            }}
-          >
+          {/* The frame that has not been found: blurred until the pointer pulls it sharp (`not-found-scene.tsx`). */}
+          <div data-numerals className="rise nf-num" style={{ ["--reveal-delay" as string]: "80ms" }}>
             404
           </div>
 
-          {/* The list is the wider column: Julian wanted the ways out to
-              take up more of the page. */}
-          <div
-            className="rise grid items-end gap-6 sm:grid-cols-[minmax(0,1fr)_minmax(0,1.35fr)] sm:gap-11"
-            style={{ ["--reveal-delay" as string]: "160ms" }}
-          >
-            <div className="@container max-w-[40rem]">
-              {/* Julian: the body as long as the title. The title breaks
-                  where it always did, and the block takes the width of its
-                  longer line; the paragraph fills that width and no more
-                  (`w-0 min-w-full`), justified, its last line left as set
-                  so it does not open into gaps. */}
-              <div className="w-fit max-w-full">
-                <h1 className="font-display text-2xl uppercase leading-[1.02] tracking-[0] text-foreground sm:text-[clamp(2.25rem,5.2dvh,3.5rem)]">
-                  This frame never
-                  <br /> made the edit.
-                </h1>
-                {/* For a mouse, so not on a phone, where the page has no room. */}
-                <p className="mt-4 w-0 min-w-full lg:text-justify text-[clamp(11.5px,2.39cqi,17px)] leading-[1.7] text-muted-foreground max-sm:hidden">
-                  The page you were looking for has been moved, renamed, or cut
-                  from the selects.{" "}
-                  {/* A finger has no cursor to drag (an iPad shows this). */}
-                  <span className="hoverable:hidden">Head back to the work.</span>
-                  <span className="hidden hoverable:inline">
-                    Drag your cursor across the numerals to pull them into
-                    focus, or head back to the work.
-                  </span>
-                </p>
+          <div className="rise nf-grid" style={{ ["--reveal-delay" as string]: "160ms" }}>
+            <div>
+              <h1 className="nf-h">This frame never made the edit.</h1>
+              <p className="nf-p">
+                The page you were looking for has been moved, renamed, or cut from the selects.{" "}
+                <span className="hoverable:hidden">Head back to the work.</span>
+                <span className="hidden hoverable:inline">Drag your cursor across the numerals to pull them into focus, or head back to the work.</span>
+              </p>
+              <div className="ctas">
+                <Link href="/portfolio" className="btn fill">See the work</Link>
+                <Link href="/" className="btn">Back to home</Link>
               </div>
-              <LiquidPair className="mt-6 flex flex-wrap gap-3 sm:mt-7">
-                <Link
-                  href="/portfolio"
-                  className={`${MONO} action inline-flex items-center gap-3 px-6 py-4 font-bold press active:scale-[0.97]`}
-                >
-                  <span className="opacity-60">01</span>
-                  See the work
-                </Link>
-                <Link
-                  href="/"
-                  className={`${MONO} action-quiet inline-flex items-center gap-3 px-6 py-4 font-bold press active:scale-[0.97]`}
-                >
-                  <span className="opacity-60">02</span>
-                  Back to home
-                </Link>
-              </LiquidPair>
             </div>
-
-            {/* Not on a phone: the page never scrolls, and the wall's tiles
-                behind are ways into the work already. */}
-            <div className="flex flex-col gap-3.5 max-sm:hidden">
-              <div className={`${MONO} text-muted-foreground`}>
-                Try one of these
-              </div>
-              <ol className="flex flex-col">
+            <div className="nf-list">
+              <div className="lbl mute">Try one of these</div>
+              <ol>
                 {places.map((p, i) => (
                   <li key={p.href}>
-                    <Link
-                      prefetch={false}
-                      href={p.href}
-                      className="group flex items-baseline gap-5 border-t border-border px-0.5 py-[clamp(0.4rem,1.3dvh,1rem)] text-foreground transition-colors duration-200 hoverable:hover:text-accent"
-                    >
-                      {/* Sized by the window's height as well, like the
-                          numerals: six rows this size and the page never
-                          scrolls. */}
-                      <span
-                        className={`${LIST_MONO} min-w-[2.5ch] text-accent`}
-                      >
-                        {String(i + 1).padStart(2, "0")}
-                      </span>
-                      <span className="flex-1 font-display text-[clamp(1.125rem,2.8dvh,2rem)] uppercase leading-none tracking-[0]">
-                        {p.label}
-                      </span>
-                      <span className={`${LIST_MONO} text-muted-foreground`}>
-                        {p.count}
-                      </span>
+                    <Link prefetch={false} href={p.href}>
+                      <span className="lbl mute">{String(i + 1).padStart(2, "0")}</span>
+                      <b>{p.label}</b>
+                      <span className="lbl mute">{p.count}</span>
                     </Link>
                   </li>
                 ))}
@@ -215,17 +132,10 @@ export default function NotFound() {
             </div>
           </div>
 
-          {/* The foot of the slate: the focus readout, live. */}
-          <div
-            className={`${MONO} rise flex flex-wrap justify-between gap-4 border-t border-border pt-3.5 text-muted-foreground`}
-            style={{ ["--reveal-delay" as string]: "240ms" }}
-          >
+          <div className="rise foot-line lbl mute" style={{ ["--reveal-delay" as string]: "240ms" }}>
             <span>&copy; {new Date().getFullYear()} Julian Gigola</span>
             <span className="inline-flex items-center gap-2">
-              <span
-                aria-hidden
-                className="size-1.5 rounded-full bg-accent animate-[jg-blink_1.8s_steps(1)_infinite] motion-reduce:animate-none"
-              />
+              <span aria-hidden className="nf-dot" />
               <span data-focus-readout>Focus</span>
             </span>
             <span>San Francisco Bay Area</span>
