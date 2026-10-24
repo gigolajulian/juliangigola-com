@@ -1,16 +1,8 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { Strip } from "@/components/strip";
-import { StripPage } from "@/components/strip-page";
-import { ContactScreen } from "@/components/contact-screen";
 import { LdJson } from "@/components/local-screens";
-import { LocalQuestions } from "@/components/local-questions";
-import { CoverFloat } from "@/components/cover-float";
-import { Testimonials } from "@/components/testimonials";
 import { BOOKING_PAGES, bookingHref, bookingPage } from "@/lib/booking";
-import { getProject, projectsIn, wallOf } from "@/lib/work";
-import { InquireWall } from "@/components/inquire-wall";
-import { ContactSheet } from "@/components/contact-sheet";
+import { getProject, projectsIn } from "@/lib/work";
 import { serviceGraph } from "@/lib/seo";
 import { V3Service } from "@/components/v3/service";
 
@@ -60,7 +52,6 @@ export default async function BookingPage(props: PageProps<"/[service]">) {
   const page = bookingPage(service);
   if (!page) notFound();
 
-  const others = BOOKING_PAGES.filter((p) => p !== page);
   /* The cover's frames: each tile's photograph, opening what the
      tile opens (the gallery, or a project). Headshot 09 stays in the
      gallery, not on the cover. */
@@ -93,7 +84,6 @@ export default async function BookingPage(props: PageProps<"/[service]">) {
           )
             .flat()
             .slice(0, 14);
-  const facts = [page.rate, ...(page.turnaround ? [`Ready in ${page.turnaround}`] : [])];
   const graph = (
     <LdJson
       data={serviceGraph({
@@ -108,88 +98,11 @@ export default async function BookingPage(props: PageProps<"/[service]">) {
     />
   );
 
-  /* JG V3 (leftovers card A): Portraits first; the other six follow once
-     it is approved. */
-  if (page.slug === "portraits")
-    return (
-      <>
-        {graph}
-        <V3Service page={page} frames={sheet ?? work.map((p) => p.cover)} />
-      </>
-    );
-
+  /* JG V3 (leftovers card A). */
   return (
-    /* `svc`: the JG V3 tokens over these screens (`styles/v3.css`). */
-    <StripPage className="svc">
+    <>
       {graph}
-      <Strip
-        label={`${page.h1}: what people say, the details and questions and booking. One screen at a time, left and right.`}
-        /* No next page: the deck ends at Book (Julian: do not forward
-           to the homepage). */
-        paged
-        deck="screens"
-        bleed
-        className="flex-1"
-      >
-        <CoverFloat
-          work={work}
-          heading={{
-            title: page.h1.replace(/San (Francisco|Jose)/g, "San\u00a0$1"),
-            where: facts.join(" · "),
-            ctas: [
-              { href: "#book", label: page.book.title },
-              { href: sheet ? "#work" : page.gallery.href, label: "See the work" },
-            ],
-          }}
-          className="w-full shrink-0 max-sm:h-[100svh] sm:h-full"
-        />
-        {sheet ? (
-          <ContactSheet
-            frames={sheet}
-            total={total}
-            name={page.name}
-            book={page.book.title}
-            gallery={page.gallery.href}
-            even={page.slug === "headshots"}
-          />
-        ) : null}
-        <Testimonials cells />
-        <LocalQuestions
-          faqs={page.faqs}
-          backdrop={<InquireWall items={wallOf(slug)} />}
-          details={{
-            facts,
-            blocks: [
-              ...page.blocks,
-              {
-                heading: "Also booking",
-                links: others.map((p) => ({ href: bookingHref(p), label: p.h1 })),
-              },
-            ],
-          }}
-        />
-        <ContactScreen
-          title={page.book.title}
-          label="Book"
-          hash="book"
-          defaults={{ type: page.book.type, session: page.book.session }}
-          cal={page.book.cal}
-          intro={
-            <>
-              <span className="sm:block sm:text-balance">
-                {[page.rate, page.turnaround ? `ready in ${page.turnaround}` : null]
-                  .filter(Boolean)
-                  .join(", ")}
-                .
-              </span>{" "}
-              <span className="sm:block sm:text-balance">
-                Say when and where, and I&rsquo;ll come back to confirm the
-                date{page.price === null ? " with a quote" : ""}.
-              </span>
-            </>
-          }
-        />
-      </Strip>
-    </StripPage>
+      <V3Service page={page} frames={sheet ?? work.map((p) => p.cover)} />
+    </>
   );
 }

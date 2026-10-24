@@ -13,7 +13,9 @@ import type { Frame } from "@/lib/work-types";
    the two doors. The words are `lib/booking.ts`'s, unchanged. */
 
 export function V3Service({ page, frames }: { page: BookingPage; frames: Frame[] }) {
-  const s = SESSIONS[page.slug as SessionSlug];
+  /* Its booking on the V3 stepper: the same slug, or the session that books the same Cal.com event. */
+  const s = SESSIONS[page.slug as SessionSlug] ?? Object.values(SESSIONS).find((x) => x.cal === page.book.cal);
+  const includes = page.blocks.find((b) => b.heading === "What's included")?.items ?? [];
   const cols = [0, 1, 2].map((c) => frames.filter((_, i) => i % 3 === c));
   const others = BOOKING_PAGES.filter((p) => p !== page);
   return (
@@ -23,7 +25,7 @@ export function V3Service({ page, frames }: { page: BookingPage; frames: Frame[]
           <p className="lbl mute">{page.kicker}</p>
           <h1 className="pg-t">{page.h1.replace(/San (Francisco|Jose)/g, "San $1")}</h1>
           <p className="sv-lead">{page.lead}</p>
-          <Run className="inc lbl" items={[page.rate, ...(s?.includes ?? []), ...(page.turnaround ? [`Ready in ${page.turnaround}`] : [])]} />
+          <Run className="inc lbl" items={[page.rate, ...includes, ...(page.turnaround ? [`Ready in ${page.turnaround}`] : [])]} />
           <div className="ctas">
             <Link className="btn fill" href={s ? `/book/${s.slug}` : "/contact/form"}>{page.book.title}</Link>
             <Link className="btn" href="#work">See the work</Link>
