@@ -769,7 +769,9 @@ html{font-family:var(--font-mono),ui-monospace,monospace}
 .v3 .pj-big .pj-mark{position:absolute;right:clamp(16px,2vw,32px);bottom:clamp(16px,2vw,32px);z-index:2;line-height:0;color:var(--ink)}
 .v3 .pj-big:has(.pj-mark)::after{content:"";position:absolute;inset:0;z-index:1;pointer-events:none;background:linear-gradient(315deg,color-mix(in oklab,var(--bg) 62%,transparent) 0%,color-mix(in oklab,var(--bg) 28%,transparent) 14%,transparent 34%)}
 @media (min-width:901px){.v3 .pj-lead{justify-content:space-between}
-.v3 .pj-lead .pj-r:nth-child(2){translate:0 clamp(48px,7vw,112px)}
+.v3 .pj-lead:has(.pj-r:nth-child(2)){padding-right:0}
+/* Julian: the second frame sits centred between the first and the hero. */
+.v3 .pj-lead .pj-r:nth-child(2){translate:0 clamp(48px,7vw,112px);margin-inline:auto}
 .v3 .pj-lead .pj-r img{background:none!important}
 .v3 .pj-top{padding-bottom:64px}}
 /* 404 (app/not-found.tsx): the master's type over the drift wall. */
