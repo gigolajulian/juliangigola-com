@@ -103,6 +103,23 @@ export function FlowShell({
   );
 }
 
+/** A run of short items (the session's includes): each item stays whole,
+    a dot rides at the end of every item but the last, so a line may end on
+    a dot but never starts with one or splits an item, and `.run` keeps the
+    last line from holding a lone item. */
+export function Run({ items, className = "" }: { items: string[]; className?: string }) {
+  return (
+    <p className={`run ${className}`}>
+      {items.map((x, i) => (
+        <React.Fragment key={x}>
+          <span>{i < items.length - 1 ? `${x} ·` : x}</span>
+          {i < items.length - 1 ? " " : null}
+        </React.Fragment>
+      ))}
+    </p>
+  );
+}
+
 /** A labelled field with the master's error box under it. */
 export function Field({
   k,

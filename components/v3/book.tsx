@@ -5,7 +5,7 @@ import Link from "next/link";
 import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
 import { CalEmbed } from "@/components/cal-embed";
-import { Calendar, Failed, Field, FlowShell, Hidden, dlabel, duration, iso, useEnquiry, type Shell } from "@/components/v3/flow";
+import { Calendar, Failed, Field, FlowShell, Hidden, Run, dlabel, duration, iso, useEnquiry, type Shell } from "@/components/v3/flow";
 import { LENGTH, SESSIONS, TAB_ORDER, rate, type SessionSlug } from "@/lib/v3";
 
 /* JG V3 booking (master v39, /book/<session>): one stepper. The sessions
@@ -36,7 +36,7 @@ export function V3BookFlow({ slug }: { slug: SessionSlug }) {
         p.at === 1 ? (
           <>
             <Tabs at={slug} />
-            <p className="inc lbl">{[...S.includes, S.turnaround && `Ready in ${S.turnaround}`].filter(Boolean).join(" · ")}</p>
+            <Run className="inc lbl" items={[...S.includes, ...(S.turnaround ? [`Ready in ${S.turnaround}`] : [])]} />
             {p.body}
           </>
         ) : (

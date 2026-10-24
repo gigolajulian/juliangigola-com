@@ -286,8 +286,12 @@
 .v3 .srow[aria-pressed="true"]{color:var(--ink)}
 .v3 .srow[aria-pressed="true"] .lbl:first-child{color:var(--accent)}
 .v3 .slist{border-top:1px solid var(--line)}
-/* One run to the tiles' edge, dots between items, no short last line (Julian, 2026-10-23). */
-.v3 .inc{margin:0;color:var(--mute);line-height:1.9;text-wrap:pretty}
+/* Run (`flow.tsx`): items whole, dots at item ends, no lone last item (Julian, 2026-10-23).
+   Under 360px an item may break, so nothing runs past the column. */
+.v3 .run{margin:0;text-wrap:pretty}
+.v3 .run>span{white-space:nowrap}
+@media (max-width:360px){.v3 .run>span{white-space:normal}}
+.v3 .inc{color:var(--mute);line-height:1.9}
 .v3 .f-month{display:flex;justify-content:space-between;align-items:center}
 .v3 .days{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:6px}
 .v3 .days button{display:flex;flex-direction:column;align-items:center;gap:8px;padding:16px 0 12px;background:none;border:1px solid var(--line);color:var(--ink);font:inherit;cursor:pointer}
