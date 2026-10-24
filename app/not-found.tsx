@@ -45,8 +45,8 @@ export default function NotFound() {
     <NotFoundScene>
       <div
         data-fit-page
-        className="relative overflow-hidden bg-background"
-        style={{ minHeight: "100dvh" }}
+        className="relative overflow-hidden"
+        style={{ minHeight: "100dvh", background: "var(--bg)" }}
       >
         {/* The room: the work itself, drifting on a wall behind the page
             (`DriftWall`), each tile a way into its project. Dimmed toward
@@ -73,7 +73,7 @@ export default function NotFound() {
             fade={0.6}
             dim={0.4}
             build
-            overlayColor="var(--background)"
+            overlayColor="var(--bg)"
           />
         </div>
         <div
@@ -81,7 +81,7 @@ export default function NotFound() {
           className="pointer-events-none absolute inset-0 opacity-20 mix-blend-overlay"
           style={{
             backgroundImage:
-              "radial-gradient(color-mix(in oklab, var(--foreground) 50%, transparent) 0.5px, transparent 0.5px)",
+              "radial-gradient(color-mix(in oklab, var(--ink) 50%, transparent) 0.5px, transparent 0.5px)",
             backgroundSize: "3px 3px",
           }}
         />
@@ -89,7 +89,7 @@ export default function NotFound() {
         {/* JG V3 (leftovers card H): the master's type, buttons and rows over the same wall. */}
         <section className="v3 nf pointer-events-none relative [&_a]:pointer-events-auto">
           <div className="rise nf-slate lbl">
-            <BlinkingMark className="size-6 shrink-0 text-foreground" />
+            <BlinkingMark className="size-6 shrink-0 text-(--ink)" />
             <span className="nf-tag">
               <span aria-hidden className="nf-dot" />
               Frame not found

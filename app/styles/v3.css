@@ -757,7 +757,8 @@ html{font-family:var(--font-mono),ui-monospace,monospace}
 @media (min-width:901px){.v3 .pj-lead{display:flex;gap:20px}
 .v3 .pj-lead .pj-r{height:100%;min-width:0}}
 /* Julian: the logo sits at the right of its row; the second lead frame steps down. */
-.v3 .pj-big .pj-mark{position:absolute;right:clamp(16px,2vw,32px);bottom:clamp(16px,2vw,32px);z-index:1;line-height:0;color:#fff;mix-blend-mode:difference;opacity:.9}
+/* A low tint of the page ground under the logo, so it reads on any frame in either theme (Julian). */
+.v3 .pj-big .pj-mark{position:absolute;right:clamp(8px,1.2vw,20px);bottom:clamp(8px,1.2vw,20px);z-index:1;line-height:0;color:var(--ink);padding:14px 18px;border-radius:6px;background:color-mix(in oklab,var(--bg) 22%,transparent);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
 @media (min-width:901px){.v3 .pj-lead{justify-content:space-between}
 .v3 .pj-lead .pj-r:nth-child(2){translate:0 clamp(48px,7vw,112px)}
 .v3 .pj-lead .pj-r img{background:none!important}
@@ -777,6 +778,11 @@ html{font-family:var(--font-mono),ui-monospace,monospace}
 .v3 .nf-list ol{list-style:none;margin:12px 0 0;padding:0;border-bottom:1px solid var(--line)}
 .v3 .nf-list a{display:flex;align-items:baseline;gap:20px;padding:clamp(8px,1.3dvh,16px) 2px;border-top:1px solid var(--line);color:inherit;text-decoration:none}
 .v3 .nf-list b{flex:1;font:800 clamp(1.125rem,2.8dvh,2rem)/1 var(--display);letter-spacing:-.03em}
-@media (hover:hover){.v3 .nf-list a:hover b{color:var(--accent)}}
+@media (hover:hover){.v3 .nf-list a:hover b,.v3 .nf-list a:hover .lbl{color:var(--accent)}}
+/* Delight (Julian's /impeccable pass): focus locked holds the dots; the rows lean in. */
+[data-locked] .v3 .nf-dot{animation:none;background:var(--accent);box-shadow:0 0 0 3px color-mix(in oklab,var(--accent) 25%,transparent)}
+.v3 .nf-list b{transition:color .2s}
+@media (hover:hover) and (prefers-reduced-motion:no-preference){:root[data-v3motion] .v3 .nf-list b{transition:color .2s,translate .3s cubic-bezier(.2,.8,.2,1)}
+:root[data-v3motion] .v3 .nf-list a:hover b{translate:8px 0}}
 .v3.nf .foot-line{margin-top:auto}
 @media (max-width:700px){.v3 .nf-grid{grid-template-columns:1fr}.v3 .nf-list,.v3 .nf-p{display:none}.v3.nf .ctas{margin-top:24px}}
