@@ -88,14 +88,13 @@ export default function NotFound() {
 
         {/* JG V3 (leftovers card H): the master's type, buttons and rows over the same wall. */}
         <section className="v3 nf pointer-events-none relative [&_a]:pointer-events-auto">
-          <div className="rise nf-slate lbl">
-            <BlinkingMark className="size-6 shrink-0 text-(--ink)" />
-            <span className="nf-tag">
-              <span aria-hidden className="nf-dot" />
-              Frame not found
+          <div className="rise nf-slate lbl mute">
+            <BlinkingMark className="size-5 shrink-0 text-(--ink)" />
+            <span>
+              <span aria-hidden className="nf-dot" /> Frame not found
             </span>
-            <span className="nf-tag q">Error 404</span>
-            <span data-requested-path className="mute">this address</span>
+            <span>Error 404</span>
+            <span data-requested-path>this address</span>
           </div>
 
           {/* The frame that has not been found: blurred until the pointer pulls it sharp (`not-found-scene.tsx`). */}
@@ -121,10 +120,10 @@ export default function NotFound() {
               <ol>
                 {places.map((p, i) => (
                   <li key={p.href}>
-                    <Link prefetch={false} href={p.href}>
-                      <span className="lbl mute">{String(i + 1).padStart(2, "0")}</span>
-                      <b>{p.label}</b>
-                      <span className="lbl mute">{p.count}</span>
+                    <Link prefetch={false} href={p.href} className="row">
+                      <span className="n lbl">{String(i + 1).padStart(2, "0")}</span>
+                      <b className="t">{p.label}</b>
+                      <span className="p lbl mute">{p.count}</span>
                     </Link>
                   </li>
                 ))}
