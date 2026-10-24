@@ -91,14 +91,16 @@ export function V3Work({ work }: { work: WorkItem[] }) {
   const [filter, setFilter] = React.useState("All");
   const [view, setView] = React.useState<"grid" | "strip" | "color">("grid");
   const back = React.useRef<"grid" | "strip">("grid");
-  /* Grid, strip and color views: the covers on screen fly from where they
-     were to where they land, new ones fade in (GSAP Flip). Only with ?v3motion. */
+  /* Grid, strip and color views, and the discipline chips: the covers on
+     screen fly from where they were to where they land, new ones fade in
+     (GSAP Flip). Only with ?v3motion. */
   const flip = React.useRef<Flip.FlipState | null>(null);
-  const go = (v: typeof view) => {
+  const flipped = (set: () => void) => {
     if (document.documentElement.hasAttribute("data-v3motion") && !matchMedia("(prefers-reduced-motion: reduce)").matches)
       flip.current = Flip.getState(seen());
-    setView(v);
+    set();
   };
+  const go = (v: typeof view) => flipped(() => setView(v));
   const [q, setQ] = React.useState("");
   const [pick, setPick] = React.useState<PickAt | null>(null);
   const [scope, setScope] = React.useState<Scope | null>(null);
@@ -120,7 +122,7 @@ export function V3Work({ work }: { work: WorkItem[] }) {
       onComplete: () => void (w && (w.style.overflow = "")),
     });
     return () => void tl.progress(1);
-  }, [view]);
+  }, [view, filter]);
   const bar = React.useRef<HTMLDivElement>(null);
   const chips = React.useRef<HTMLDivElement>(null);
   const chipsBar = React.useRef<HTMLDivElement>(null);
@@ -485,7 +487,7 @@ export function V3Work({ work }: { work: WorkItem[] }) {
               key={d}
               type="button"
               aria-pressed={d === filter}
-              onClick={() => setFilter(d)}
+              onClick={() => flipped(() => setFilter(d))}
             >
               {d}
               {d === "All" || counts[d] > 1 ? (

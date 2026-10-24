@@ -25,7 +25,7 @@ function rhythm(frames: Frame[]) {
   return rows;
 }
 
-export function V3Project({ project, next }: { project: Project; next?: { href: string; name: string } }) {
+export function V3Project({ project, next }: { project: Project; next?: { href: string; name: string; cover?: Frame } }) {
   const mark = markFor(project.slug);
   const client = billing(project);
   const sub = [client, project.categories[0] && titleCase(project.categories[0].name), `${project.images.length} frames`].filter(Boolean).join(" · ");
@@ -101,6 +101,12 @@ export function V3Project({ project, next }: { project: Project; next?: { href: 
           {next ? (
             <Link className="pj-next" href={next.href}>
               <span className="lbl mute">Next</span>
+              {/* The next set's cover, so it can grow into that page's hero (page-fly.tsx). */}
+              {next.cover ? (
+                <span className="pj-nx">
+                  <Image src={next.cover.src} alt="" fill sizes="120px" style={{ objectFit: "cover", background: next.cover.color }} />
+                </span>
+              ) : null}
               <b>{titleCase(next.name.replace(/^Next: /, ""))}</b>
               <span aria-hidden>&rarr;</span>
             </Link>

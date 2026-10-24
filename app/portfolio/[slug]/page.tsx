@@ -130,7 +130,7 @@ export default async function ProjectPage(props: PageProps<"/portfolio/[slug]">)
     : (() => {
         const next = nextAfter(project);
         return next
-          ? { href: `/portfolio/${next.slug}`, name: `Next: ${next.name}` }
+          ? { href: `/portfolio/${next.slug}`, name: `Next: ${next.name}`, cover: next.images.find((f) => f.width <= f.height) ?? next.images[0] }
           : undefined;
       })();
 

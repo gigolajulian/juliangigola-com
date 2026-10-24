@@ -22,13 +22,15 @@ function shown(i: HTMLImageElement) {
 export function PageFly() {
   const path = usePathname();
   const fly = React.useRef<Fly | null>(null);
+  const pushed = React.useRef<string | null>(null);
 
   React.useEffect(() => {
     const click = (e: MouseEvent) => {
-      if (!document.documentElement.hasAttribute("data-v3motion") || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
       const el = (e.target as Element).closest<HTMLElement>(".v3 a[href], .v3 [data-fly-to]");
       if (!el || e.metaKey || e.ctrlKey || e.shiftKey || e.button) return;
-      const to = el.dataset.flyTo ?? (el instanceof HTMLAnchorElement && el.origin === location.origin ? el.pathname : null);
+      const to = el.dataset.flyTo ?? (el instanceof HTMLAnchorElement && el.origin === location.origin && !el.hash ? el.pathname : null);
+      pushed.current = to;
+      if (!document.documentElement.hasAttribute("data-v3motion") || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
       const scope = el.dataset.flySrc ? document.querySelector(el.dataset.flySrc) : el.querySelector("img") ? el : el.closest(".door");
       const img = scope && [...scope.querySelectorAll("img")].find(shown);
       fly.current = to && img ? { to, t: Date.now(), r: img.getBoundingClientRect(), src: img.currentSrc || img.src } : null;
@@ -39,6 +41,11 @@ export function PageFly() {
 
   // Layout phase: the hero is hidden before the page crossfade captures it.
   React.useLayoutEffect(() => {
+    /* A link opens the next page at its top, flag or not: the V3 pages sit in
+       a `display: contents` wrapper whose empty box Next reads as already in
+       view, so it kept the old scroll. Back and forward keep theirs. */
+    if (pushed.current === path) scrollTo(0, 0);
+    pushed.current = null;
     const f = fly.current;
     if (!f || f.to !== path || Date.now() - f.t > 4000) return;
     fly.current = null;
