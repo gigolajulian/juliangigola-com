@@ -12,6 +12,8 @@ import { MAX_REFS } from "@/lib/inbox";
    `picks`. Both arrive with the enquiry email (`app/contact/actions.ts`). */
 
 const EDGE = 1600;
+/** How near a dragged image pulls the V3 Upload button, in px. */
+const PULL = 30;
 
 type Upload = { file: File; url: string };
 type Group = { name: string; frames: [string, number, number, string][] };
@@ -35,9 +37,32 @@ async function shrink(file: File): Promise<File> {
   }
 }
 
-export function ReferencePicks({ resync }: { resync: unknown }) {
-  const [uploads, setUploads] = React.useState<Upload[]>([]);
-  const [picks, setPicks] = React.useState<string[]>([]);
+/* What was added, kept for 3 minutes after the block leaves the page (Back
+   on the Commissions stepper), per page, in memory only (Julian, 2026-10-23). */
+const KEEP_MS = 3 * 60 * 1000;
+const kept = new Map<string, { uploads: Upload[]; picks: string[]; at: number }>();
+const fresh = () => {
+  const k = kept.get(location.pathname);
+  return k && Date.now() - k.at < KEEP_MS ? k : undefined;
+};
+
+export function ReferencePicks({ resync, v3 }: { resync: unknown; v3?: boolean }) {
+  const [over, setOver] = React.useState(false);
+  const upw = React.useRef<HTMLSpanElement>(null);
+  const [uploads, setUploads] = React.useState<Upload[]>(() => (typeof window === "undefined" ? [] : (fresh()?.uploads ?? [])));
+  const [picks, setPicks] = React.useState<string[]>(() => (typeof window === "undefined" ? [] : (fresh()?.picks ?? [])));
+  const keep = React.useRef({ uploads, picks, sent: false });
+  React.useEffect(() => {
+    keep.current = { uploads, picks, sent: (resync as { status?: string } | null)?.status === "sent" };
+  });
+  React.useEffect(() => {
+    const path = location.pathname;
+    return () => {
+      const { uploads, picks, sent } = keep.current;
+      if (sent) kept.delete(path);
+      else kept.set(path, { uploads, picks, at: Date.now() });
+    };
+  }, []);
   const refs = React.useRef<HTMLInputElement>(null);
   const dialog = React.useRef<HTMLDialogElement>(null);
   const [groups, setGroups] = React.useState<Group[] | null>(null);
@@ -75,6 +100,112 @@ export function ReferencePicks({ resync }: { resync: unknown }) {
   const toggle = (src: string) =>
     setPicks((p) => (p.includes(src) ? p.filter((s) => s !== src) : room > 0 ? [...p, src] : p));
 
+  const thumbs = uploads.length + picks.length ? (
+    <ul className="mt-4 flex flex-wrap gap-2">
+      {uploads.map((u, i) => (
+        <Thumb key={u.url} label={u.file.name} onRemove={() => drop(i)}>
+          {/* eslint-disable-next-line @next/next/no-img-element -- a local blob */}
+          <img src={u.url} alt="" className="size-full object-cover" />
+        </Thumb>
+      ))}
+      {picks.map((src) => (
+        <Thumb key={src} label="my photograph" onRemove={() => toggle(src)}>
+          <Image src={src} alt="" width={128} height={128} sizes="64px" className="size-full object-cover" />
+        </Thumb>
+      ))}
+    </ul>
+  ) : null;
+
+  /* V3 (/contact, /contact/form): Upload references and Pick from my work,
+     two buttons. A PNG or JPEG dragged within 30px of Upload pulls the
+     button toward it, and a drop there is taken (Julian, 2026-10-23). */
+  const addRef = React.useRef(add);
+  React.useEffect(() => {
+    addRef.current = add;
+  });
+  React.useEffect(() => {
+    if (!v3) return;
+    const wrap = upw.current;
+    const btn = wrap?.firstElementChild as HTMLElement | null;
+    if (!wrap || !btn) return;
+    const still = matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const image = (dt: DataTransfer | null) => !!dt && [...dt.items].some((i) => i.kind === "file" && /^image\/(png|jpeg)$/.test(i.type));
+    // Measured on the wrapper, which never moves, so the pull does not feed back.
+    const near = (e: DragEvent) => {
+      const r = wrap.getBoundingClientRect();
+      const d = Math.hypot(e.clientX - Math.min(Math.max(e.clientX, r.left), r.right), e.clientY - Math.min(Math.max(e.clientY, r.top), r.bottom));
+      return { d, x: e.clientX - (r.left + r.width / 2), y: e.clientY - (r.top + r.height / 2) };
+    };
+    const rest = () => {
+      btn.style.translate = "";
+      setOver(false);
+    };
+    const onOver = (e: DragEvent) => {
+      const n = near(e);
+      if (!image(e.dataTransfer) || n.d > PULL) return rest();
+      e.preventDefault();
+      e.dataTransfer!.dropEffect = "copy";
+      setOver(true);
+      // Up to 12px, a third of it at the 30px edge and all of it on the button.
+      const k = 1 - n.d / (PULL * 1.5);
+      const clamp = (v: number) => Math.min(12, Math.max(-12, v)) * k;
+      if (!still) btn.style.translate = `${clamp(n.x * 0.2)}px ${clamp(n.y * 0.35)}px`;
+    };
+    const onDrop = (e: DragEvent) => {
+      if (!image(e.dataTransfer) || near(e).d > PULL) return;
+      e.preventDefault();
+      rest();
+      addRef.current(e.dataTransfer!.files);
+    };
+    const onLeave = (e: DragEvent) => !e.relatedTarget && rest();
+    document.addEventListener("dragover", onOver);
+    document.addEventListener("drop", onDrop);
+    document.addEventListener("dragleave", onLeave);
+    document.addEventListener("dragend", rest);
+    return () => {
+      document.removeEventListener("dragover", onOver);
+      document.removeEventListener("drop", onDrop);
+      document.removeEventListener("dragleave", onLeave);
+      document.removeEventListener("dragend", rest);
+    };
+  }, [v3]);
+
+  if (v3)
+    return (
+      <div className="fld refs">
+        <input ref={refs} type="file" name="refs" multiple hidden tabIndex={-1} />
+        <input type="hidden" name="picks" value={picks.join("\n")} />
+        <span className="lbl mute">References <span>· up to {MAX_REFS}</span></span>
+        <div className="acts">
+          <span ref={upw} className="upw">
+            <label className={cn("btn up", over && "over", room <= 0 && "full")}>
+              <input
+                type="file"
+                accept="image/*,.heic,.heif"
+                multiple
+                className="sr-only"
+                disabled={room <= 0}
+                onChange={(e) => {
+                  add(e.currentTarget.files);
+                  e.currentTarget.value = "";
+                }}
+              />
+              {/* Both in one cell, so the button keeps the wider one's width; hover shows the second. */}
+              <span className="swap">
+                <span>Upload references</span>
+                <span className="drag" aria-hidden="true">Drag a JPG or PNG here</span>
+              </span>
+            </label>
+          </span>
+          <button type="button" className="btn" onClick={open}>
+            Pick from my work
+          </button>
+        </div>
+        {thumbs}
+        <PickPanel dialog={dialog} groups={groups} picks={picks} room={room} toggle={toggle} />
+      </div>
+    );
+
   const button =
     "tap-44 label cursor-pointer rounded-full border border-border px-4 py-2 text-muted-foreground transition-colors duration-200 hoverable:hover:border-foreground/40 hoverable:hover:text-foreground disabled:pointer-events-none disabled:opacity-40";
 
@@ -104,21 +235,7 @@ export function ReferencePicks({ resync }: { resync: unknown }) {
           Pick from my work
         </button>
       </div>
-      {uploads.length + picks.length ? (
-        <ul className="mt-4 flex flex-wrap gap-2">
-          {uploads.map((u, i) => (
-            <Thumb key={u.url} label={u.file.name} onRemove={() => drop(i)}>
-              {/* eslint-disable-next-line @next/next/no-img-element -- a local blob */}
-              <img src={u.url} alt="" className="size-full object-cover" />
-            </Thumb>
-          ))}
-          {picks.map((src) => (
-            <Thumb key={src} label="my photograph" onRemove={() => toggle(src)}>
-              <Image src={src} alt="" width={128} height={128} sizes="64px" className="size-full object-cover" />
-            </Thumb>
-          ))}
-        </ul>
-      ) : null}
+      {thumbs}
       <PickPanel dialog={dialog} groups={groups} picks={picks} room={room} toggle={toggle} />
     </div>
   );

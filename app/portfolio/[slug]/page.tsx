@@ -1,15 +1,10 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { opening } from "@/lib/opening";
-import { ProjectStrip, type NextUp } from "@/components/project-strip";
-import { endLine } from "@/lib/end-lines";
-import { StripPage, StripHead } from "@/components/strip-page";
 import { CoverArtGallery } from "@/components/cover-art-gallery";
 import { CallToAction } from "@/components/call-to-action";
-import { SoleMark } from "@/components/client-marks";
-import { CLIENT_MARKS } from "@/lib/clients-data";
 import { SESSION_SEO } from "@/lib/seo";
+import { V3Project } from "@/components/v3/project";
 import {
   LINKABLE,
   UNLISTED,
@@ -20,11 +15,8 @@ import {
   enquiryTypeFor,
   isDisciplineGallery,
   nextAfter,
-  prevBefore,
-  billing,
   credited,
   nextDiscipline,
-  markFor,
 } from "@/lib/work";
 
 /* ── the case study ───────────────────────────────────────────────
@@ -116,8 +108,6 @@ export default async function ProjectPage(props: PageProps<"/portfolio/[slug]">)
   const project = getProject(slug);
   if (!project) notFound();
 
-  const client = billing(project);
-
   /* Four of these pages are not projects at all: Event coverage, Cover art,
      Automotive and Places are each one gallery published under a
      discipline's own slug, because there are no separate commissions behind
@@ -132,14 +122,6 @@ export default async function ProjectPage(props: PageProps<"/portfolio/[slug]">)
      subject for an unrelated mixed-media shoot. Both are fixed below. */
   const isDiscipline = isDisciplineGallery(project);
 
-  /* A brand campaign whose client has a logo on file shows the logo top
-     right, in place of the discipline and the frame count. Julian asked
-     for it at 80% and full on hover. A campaign with no logo keeps the
-     text. */
-  const mark = project.categories.some((c) => c.slug === "campaigns")
-    ? markFor(project.slug)
-    : undefined;
-
   /* Where the foot of the page goes. A discipline has no sibling project, so
      it follows the chips on /work to the next discipline instead of being
      handed whatever sits next in the running order. */
@@ -148,46 +130,9 @@ export default async function ProjectPage(props: PageProps<"/portfolio/[slug]">)
     : (() => {
         const next = nextAfter(project);
         return next
-          ? { href: `/portfolio/${next.slug}`, name: `Next: ${next.name}` }
+          ? { href: `/portfolio/${next.slug}`, name: `Next: ${next.name}`, cover: next.images.find((f) => f.width <= f.height) ?? next.images[0] }
           : undefined;
       })();
-
-  /* The strip's last cell and where the wheel goes past the end: the name
-     of the next project, or of the next discipline's gallery when this page
-     is a discipline. Its name and its client, not its pictures. */
-  const nextProject = isDiscipline
-    ? onwards && getProject(onwards.href.replace(/^\/work\//, ""))
-    : nextAfter(project);
-  const nextUp: NextUp | undefined = onwards
-    ? {
-        href: onwards.href,
-        name: nextProject?.name ?? onwards.name,
-        warm: isDiscipline ? opening(onwards.href.replace(/^\/portfolio\//, "")) : undefined,
-        /* The discipline where the client would only repeat the name
-           (SAGO, for SAGO), as the grid's caption does. */
-        client:
-          nextProject &&
-          (credited(nextProject, /client/i) ?? nextProject.categories[0]?.name),
-        /* The crossing's card, only where the next page is that project's
-           own strip (a session's next is its booking page). */
-        ...(nextProject && !isDisciplineGallery(nextProject) && onwards.href === `/portfolio/${nextProject.slug}`
-          ? {
-              open: nextProject.images.slice(0, 3),
-              credits: nextProject.credits.map((c) => ({ role: c.role, name: c.name })),
-              count: nextProject.images.length,
-              title: nextProject.headline ?? nextProject.name,
-            }
-          : {}),
-      }
-    : undefined;
-
-  /* And where a wheel pushed past the start goes: the project before, by
-     the same walk. A discipline gallery has no project before it. */
-  const prevProject = isDiscipline ? undefined : prevBefore(project);
-  const prevUp: NextUp | undefined = prevProject
-    ? { href: `/portfolio/${prevProject.slug}`, name: prevProject.name, ...(isDisciplineGallery(prevProject) ? {} : { /* Its last screen: back lands at its end, where the visitor left it. */
-        open: prevProject.images.slice(-3), count: prevProject.images.length, title: prevProject.headline ?? prevProject.name, sub: [billing(prevProject), prevProject.categories[0]?.name].filter(Boolean).join(" · ") || undefined }) }
-    : undefined;
 
   /* Cover art keeps the rack it was given: twenty-four sleeves at 1:1, two
      of them two-sided, which is a catalogue and not a sequence. Everything
@@ -217,63 +162,8 @@ export default async function ProjectPage(props: PageProps<"/portfolio/[slug]">)
     );
   }
 
-  return (
-    /* One screen: the head over the sequence, the sequence across it, a
-       panel under it (`strip-page.tsx`, the chrome every horizontal page
-       shares). On a phone it stacks down the page like the rest of the
-       work; from 40rem up the page is exactly the window. */
-    <StripPage
-      head={
-        <StripHead
-          crumb={<Crumb />}
-          title={project.headline ?? project.name}
-          /* Julian: the discipline under the title, after the client
-             where there is one. Moved here from the top right. A
-             discipline's own gallery is titled with it already. */
-          sub={
-            [client, isDiscipline ? null : project.categories[0]?.name]
-              .filter(Boolean)
-              .join(" · ") || undefined
-          }
-          aside={
-            mark && CLIENT_MARKS[mark.slug] ? (
-              <span
-                role="img"
-                aria-label={mark.name}
-                title={mark.name}
-                data-aside-mark
-              >
-                <SoleMark
-                  client={mark}
-                  className="h-auto justify-end overflow-visible text-foreground opacity-80 transition-opacity duration-200 hoverable:hover:opacity-100 [--mark-box:1.45rem] [--mark-cap:9rem]"
-                />
-              </span>
-            ) : (
-              `${project.images.length} frames`
-            )
-          }
-        />
-      }
-    >
-      {/* Keyed, because the way from one project to the next is this same
-          page with a new slug, and a strip that kept its scroll position and
-          its counter across that would arrive at the end of the new sequence
-          rather than the start.
-
-          It carries the credits and the writing now. They used to be a row
-          under the sequence; they open it instead, which is where Julian
-          asked for them and which gives the page back the height that
-          showing the footer costs. */}
-      <ProjectStrip
-        key={project.slug}
-        project={project}
-        next={nextUp}
-        prev={prevUp}
-        line={endLine(project)}
-        className="mt-6 flex-1"
-      />
-    </StripPage>
-  );
+  /* JG V3 (leftovers card B): a vertical page, the client's logo in the head. */
+  return <V3Project project={project} next={onwards} />;
 }
 
 /** Back where they came from, in the corner both layouts put it. */

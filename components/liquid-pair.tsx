@@ -43,7 +43,8 @@ export function LiquidPair({
   const [node, setNode] = React.useState<HTMLDivElement | null>(null);
   const [live, setLive] = React.useState(false);
   React.useEffect(() => {
-    if (!mouse || !node) return;
+    /* JG V3: the liquid is motion the master does not have (`?v3motion`). */
+    if (!mouse || !node || !document.documentElement.hasAttribute("data-v3motion")) return;
     let soon = 0;
     const io = new IntersectionObserver(([e]) => {
       cancelIdle(soon);

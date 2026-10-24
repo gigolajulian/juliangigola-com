@@ -21,12 +21,10 @@ for (const r of [...RATIOS, SHORT]) {
     await page.locator("[data-day]").first().waitFor({ timeout: 30_000 });
     await page.waitForTimeout(800);
 
-    // Nothing picked: Confirm is off. A day alone keeps it off.
-    await expect(confirm).toBeDisabled();
+    // JG V3 (master stepper): it opens on the first open day and time, so
+    // Continue is on from the start; a day and a time change the pick.
+    await expect(confirm).toBeEnabled();
     await page.locator("[data-day]:not([disabled]):visible").first().click();
-    await expect(confirm).toBeDisabled();
-
-    // A time turns it on.
     await pickTime(page);
     await expect(confirm).toBeEnabled();
     const picked = await page.locator("[data-slot][aria-pressed=true]").getAttribute("aria-label");
@@ -34,7 +32,8 @@ for (const r of [...RATIOS, SHORT]) {
     // The picker never scrolls inside itself, nor the page sideways. The one
     // exception: in a wide editorial card the times run in their own column
     // beside the month and scroll there (2026-10-21), the month never does.
-    const inner = await page.locator("[role=region].tp").evaluate((e) =>
+    // The V3 stepper (`.f-main`) or the classic card's region.
+    const inner = await page.locator("[role=region].tp, .flow .f-main").first().evaluate((e) =>
       [e, ...e.querySelectorAll("*")].filter((n) => !n.classList.contains("ed-times") && /(auto|scroll)/.test(getComputedStyle(n).overflowY) && n.scrollHeight > n.clientHeight + 1).length);
     expect(inner, "picker scrolls inside").toBe(0);
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1), "sideways scroll").toBe(true);
@@ -47,7 +46,8 @@ for (const r of [...RATIOS, SHORT]) {
       const foot = document.querySelector("footer")?.getBoundingClientRect();
       const slots = [...document.querySelectorAll("[data-slot]")].filter((n) => (n as HTMLElement).offsetParent && !n.closest('[aria-hidden="true"]'));
       const last = Math.max(...slots.map((n) => n.getBoundingClientRect().bottom));
-      const zoom = parseFloat(getComputedStyle(document.querySelector(".book-page")!).zoom) || 1;
+      const bp = document.querySelector(".book-page");
+      const zoom = bp ? parseFloat(getComputedStyle(bp).zoom) || 1 : 1;
       return { top: q.top, bottom: q.bottom, barTop: bar.top, footTop: foot?.top ?? Infinity, gap: bar.top - last, zoom, ed: !!b.closest(".ed") };
     });
     expect(c.bottom, "Confirm on screen").toBeLessThanOrEqual(r.height + 1);
@@ -60,15 +60,16 @@ for (const r of [...RATIOS, SHORT]) {
     const name = page.locator('input[name="first"], input[name="name"]').first();
     await expect(name).toBeVisible({ timeout: 5000 });
     await name.fill("QA TEST");
-    await page.getByRole("button", { name: /^change$/i }).click();
+    // "Back" in the V3 stepper, "Change" on the classic card.
+    await page.getByRole("button", { name: /^(change|back)$/i }).click();
     await expect(page.locator("[data-slot][aria-pressed=true]")).toHaveAttribute("aria-label", picked!);
     await expect(confirm).toBeEnabled();
 
     // Another session starts over.
     await page.evaluate(() => scrollTo(0, 0));
-    await page.locator("button.group.grid[aria-pressed=false]").first().click();
+    await page.locator(".stabs button[aria-pressed=false]").first().click();
     await page.locator("[data-day]").first().waitFor({ timeout: 30_000 });
-    await expect(confirm).toBeDisabled();
+    await expect(confirm).toBeEnabled();
     expect(errors).toEqual([]);
     await ctx.close();
   });

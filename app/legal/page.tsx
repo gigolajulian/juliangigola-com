@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { LegalPage } from "@/components/legal";
+import { V3LegalPage } from "@/components/legal";
 import { TermsColumn } from "@/components/terms";
 import { PrivacyColumn } from "@/components/privacy";
 
@@ -17,9 +17,9 @@ export const metadata: Metadata = {
    strip handles now, so the old `OpenOnHash` is not needed here. */
 export default function LegalPage_() {
   return (
-    <LegalPage>
+    <V3LegalPage>
       <TermsColumn />
       <PrivacyColumn />
-    </LegalPage>
+    </V3LegalPage>
   );
 }
