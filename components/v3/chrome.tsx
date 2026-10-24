@@ -184,7 +184,7 @@ export function V3Foot() {
 
 /* Screens built from the master carry their own footer line (`V3Foot`);
    the pages restyled by tokens only get it here, after `main`. */
-const OWN_FOOT = /^\/($|portfolio$|about$|contact(\/form)?$|book(\/|$)|portraits$|headshots$|graduation-photos$|model-digitals$|weddings$|music-photography$|brand-photography$)/;
+const OWN_FOOT = /^\/($|portfolio(\/video)?$|about$|contact(\/form)?$|book(\/|$)|portraits$|headshots$|graduation-photos$|model-digitals$|weddings$|music-photography$|brand-photography$)/;
 
 export function V3Footer() {
   if (OWN_FOOT.test(usePathname())) return null;

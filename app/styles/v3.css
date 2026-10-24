@@ -786,3 +786,15 @@ html{font-family:var(--font-mono),ui-monospace,monospace}
 :root[data-v3motion] .v3 .nf-list a:hover b{translate:8px 0}}
 .v3.nf .foot-line{margin-top:auto}
 @media (max-width:700px){.v3 .nf-grid{grid-template-columns:1fr}.v3 .nf-list,.v3 .nf-p{display:none}.v3.nf .ctas{margin-top:24px}}
+/* Video (components/v3/video.tsx): 16:9 tiles, the reel full width, two a row under it. */
+.v3 .vgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:48px 20px;padding:32px var(--gr) 0 var(--g)}
+.v3 .vt{margin:0}.v3 .vt.wide{grid-column:1/-1}
+.v3 .vt .ph{position:relative;aspect-ratio:16/9;background:var(--card);border-radius:4px;overflow:hidden}
+.v3 .vt button{all:unset;position:absolute;inset:0;cursor:pointer}
+.v3 .vt button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.v3 .vt iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+.v3 .vt-play{position:absolute;left:16px;bottom:14px;padding:8px 12px;border-radius:4px;color:var(--ink);background:color-mix(in oklab,var(--bg) 40%,transparent);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
+@media (hover:hover){.v3 .vt button:hover .vt-play{color:var(--accent)}}
+.v3 .vt figcaption{display:flex;justify-content:space-between;gap:16px;padding-top:10px}
+#p-video>.foot-line{margin-top:96px}
+@media (max-width:700px){.v3 .vgrid{grid-template-columns:minmax(0,1fr);gap:32px}}

@@ -1,14 +1,7 @@
 import type { Metadata } from "next";
 import { MOTION_SEO } from "@/lib/seo";
-import { VideoShowcase } from "@/components/video-showcase";
-import { EnquiryCell } from "@/components/enquiry-cell";
 import { CONTENT } from "@/lib/content";
-import { SECTIONS, inSection, posterFor, REEL } from "@/lib/videos";
-import { WorkSheet } from "@/components/work-sheet";
-import { WORK_ROWS } from "@/lib/work-rows";
-import type { ListRow } from "@/components/work-list";
-import type { Frame } from "@/lib/work-types";
-import { WORK_CATEGORY_LINKS } from "@/lib/work";
+import { V3Video } from "@/components/v3/video";
 
 /* ── /work/video ──────────────────────────────────────────────────
  * The moving work, as one more filter on the work index: the `(index)`
@@ -31,75 +24,8 @@ export const metadata: Metadata = {
   alternates: { canonical: "/portfolio/video" },
 };
 
-/* The filter before the films in the chip row, so pushing back off the
-   start lands on it the way it does on every other filter. */
-const BEFORE = (() => {
-  const at = WORK_CATEGORY_LINKS.findIndex((c) => c.slug === "video");
-  const prev = at > 0 ? WORK_CATEGORY_LINKS[at - 1] : undefined;
-  return prev
-    ? { href: prev.href, name: prev.name }
-    : { href: "/portfolio", name: "Portfolio" };
-})();
-
-/* The poster of a film as a frame, for its line in the list: a still with
-   the name of the film beside it. A film has no page of its own — it plays
-   on this one — so the line leads back here. */
-const still = (src: string | null): Frame => ({
-  src: src ?? REEL.poster,
-  width: 1280,
-  height: 720,
-  color: "#111111",
-  alt: "",
-});
-
+/* JG V3 (leftovers card D): the films as 16:9 tiles. The old strip
+   (`VideoShowcase` in the work sheet) is retired, not deleted. */
 export default function VideoPage() {
-  const videos = CONTENT.videos;
-  /* Julian: the list must show what is on this filter. The films, by
-     name, with the reel at the top of them the way the strip has it. */
-  const films: ListRow[] = [
-    {
-      slug: "reel",
-      name: REEL.title,
-      href: "/portfolio/video",
-      discipline: "Motion",
-      credit: "The reel",
-      cover: still(REEL.poster),
-      find: `motion reel ${REEL.title}`.toLowerCase(),
-    },
-    ...videos.map((v) => ({
-      slug: v.id,
-      film: v.id,
-      name: v.title,
-      href: "/portfolio/video",
-      discipline: "Motion",
-      credit: [v.client, v.year].filter(Boolean).join(" · ") || "Film",
-      cover: still(posterFor(v)),
-      find: `motion ${v.title} ${v.client ?? ""} ${v.year ?? ""}`.toLowerCase(),
-    })),
-  ];
-
-  return (
-    <WorkSheet rows={WORK_ROWS} mine={films} videos={videos} within="Motion">
-      <VideoShowcase
-        prev={BEFORE}
-        sections={SECTIONS.map((s) => ({
-          id: s.id,
-          name: s.name,
-          films: inSection(videos, s.id),
-        }))}
-        /* No lead-on, for the reason `(index)/page.tsx` gives: the end of
-         the films is the end of the films. */
-        ask={
-          <EnquiryCell
-            key="enquire"
-            title="Have a project in mind?"
-            body="Tell me what you have in mind and I'll come back with an approach and a quote."
-            type="editorial"
-            secondary={{ href: "/portfolio", label: "See the work" }}
-            className="sm:w-[100vw] sm:px-[10vw]"
-          />
-        }
-      />
-    </WorkSheet>
-  );
+  return <V3Video videos={CONTENT.videos} />;
 }
