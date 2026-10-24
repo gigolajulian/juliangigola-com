@@ -483,6 +483,7 @@
 .v3 .rc-in .lbl{color:rgba(242,241,238,.72)}
 .v3 .rc-in p{margin:0;color:rgba(242,241,238,.82)}
 .v3 .reach-call .btn.fill{background:#f2f1ee;color:#0b0b0a;border-color:#f2f1ee}
+.v3 .reach-call{--btn-ink:#f2f1ee}
 @media (hover:hover){.v3 .reach-call .btn.fill:hover{background:transparent;color:#f2f1ee}}
 @media (max-width:800px){.v3 .reach-call{border-top:0;padding-top:0}}
 .v3 .ab-logos{display:flex;flex-direction:column;gap:16px;padding:24px var(--gr) 72px var(--g)}
@@ -731,7 +732,10 @@ html{font-family:var(--font-mono),ui-monospace,monospace}
 /* The reveal: each frame unmasks upward and rises as it scrolls in. Only with ?v3motion, only where the browser runs scroll timelines. */
 @supports (animation-timeline:view()){@media (prefers-reduced-motion:no-preference){
 :root[data-v3motion] .v3 .pj-r{animation:pj-in linear both;animation-timeline:view();animation-range:entry 0% entry 70%}}}
-@keyframes pj-in{from{clip-path:inset(100% 0 0 0);translate:0 24px}to{clip-path:inset(0 0 0 0);translate:0 0}}
+@keyframes pj-in{from{clip-path:inset(0 0 6% 0)}to{clip-path:inset(0 0 0 0)}}
+@supports (animation-timeline:view()){@media (prefers-reduced-motion:no-preference){
+:root[data-v3motion] .v3 .pj-r img{animation:pj-img linear both;animation-timeline:view();animation-range:entry 0% entry 70%}}}
+@keyframes pj-img{from{scale:1.04}to{scale:1}}
 @media (max-width:900px){.v3 .pj-hero,.v3 .pj-hero.two{grid-template-columns:minmax(0,1fr);min-height:0}
 .v3 .pj-top{grid-column:1;padding:40px var(--gr) 32px var(--g)}
 .v3 .pj-big{grid-column:1;grid-row:auto;min-height:0;aspect-ratio:4/5}
@@ -978,3 +982,20 @@ dialog.v3.mo-player,.mo-player>iframe{background:#000}
 .mo-player .pl-info .lbl{color:rgba(242,241,238,.7)}
 .mo-player .pl-info .mk{color:#f2f1ee;flex:none}
 @media (prefers-reduced-motion:reduce){.mo-player .pl-bar,.mo-player .pl-info,.mo-player .pl-tint{transition:none}}
+
+/* Motion plan 01: the ink rises from the bottom on hover (180ms in, 120ms out), a press dips to .97. Only with ?v3motion; the glass Play keeps its own look. */
+:root[data-v3motion] .v3 .btn:not(.cn-light){background:linear-gradient(var(--btn-ink,var(--ink)),var(--btn-ink,var(--ink))) bottom/100% 0 no-repeat transparent;transition:background-size .12s cubic-bezier(.4,0,.2,1),color .12s,scale .08s}
+:root[data-v3motion] .v3 .btn.fill:not(.cn-light){background-size:100% 100%}
+@media (hover:hover){:root[data-v3motion] .v3 .btn:not(.cn-light):hover{background-size:100% 100%;color:var(--bg);transition-duration:.18s,.18s,.08s}
+:root[data-v3motion] .v3 .reach-call .btn:hover{color:#0b0b0a}
+:root[data-v3motion] .v3 .btn.fill:not(.cn-light):hover{background-size:100% 0;color:var(--btn-ink,var(--ink))}}
+:root[data-v3motion] .v3 .btn{transition-property:background-size,color,scale}
+:root[data-v3motion] .v3 .btn:active{scale:.97}
+/* Motion plan 03: a new step's heading rises in a mask (0.45s expo.out) and the current rail segment fills left to right (0.3s). */
+@media (prefers-reduced-motion:no-preference){
+:root[data-v3motion] .v3 .f-head h2{overflow:hidden;padding-bottom:.12em;margin-bottom:-.12em}
+:root[data-v3motion] .v3 .f-head h2>.rh{display:block;animation:rh-in .45s cubic-bezier(.16,1,.3,1) both}
+:root[data-v3motion] .v3 .rail li.cur{border-top-width:0;padding-top:12px;position:relative}
+:root[data-v3motion] .v3 .rail li.cur::before{content:"";position:absolute;inset:0 0 auto;height:2px;background:var(--accent);transform-origin:left;animation:rail-in .3s cubic-bezier(.4,0,.2,1) both}}
+@keyframes rh-in{from{translate:0 105%}to{translate:0 0}}
+@keyframes rail-in{from{scale:0 1}to{scale:1 1}}

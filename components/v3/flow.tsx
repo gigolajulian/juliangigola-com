@@ -78,7 +78,10 @@ export function FlowShell({
               {ok}
             </span>
           ) : null}
-          <h2>{head}</h2>
+          {/* keyed by step so a new heading mounts and rises (v3.css, motion plan 03) */}
+          <h2>
+            <span key={at} className="rh">{head}</span>
+          </h2>
           {sub ? <p>{sub}</p> : null}
         </div>
         <div className="f-body">{body}</div>
