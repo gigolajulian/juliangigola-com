@@ -90,6 +90,9 @@
 .v3 .clients>.mute{flex:none}
 .v3 .mq{flex:1;min-width:0;overflow:hidden;-webkit-mask:linear-gradient(90deg,transparent,#000 5.33%,#000 94.67%,transparent);mask:linear-gradient(90deg,transparent,#000 5.33%,#000 94.67%,transparent)}
 .v3 .mq-track{display:flex;align-items:center;gap:80px;width:max-content;padding-right:80px;will-change:transform}
+.v3 .mq{touch-action:pan-y;cursor:grab;user-select:none;-webkit-user-select:none}
+.v3 .mq:active{cursor:grabbing}
+.v3 .mq img,.v3 .mq svg{-webkit-user-drag:none;pointer-events:none}
 @media (max-width:700px){.v3 .clients{flex-direction:column;align-items:flex-start}
 .v3 .mq{width:100%}
 .v3 .mq-track{gap:56px;padding-right:56px}}
