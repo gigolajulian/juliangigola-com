@@ -699,3 +699,6 @@ html{font-family:var(--font-mono),ui-monospace,monospace}
 .v3 .f-photo.over .sub{margin:0;max-width:52ch;font-size:14px;line-height:1.5;color:oklch(1 0 0 / 82%);text-wrap:pretty}}
 .v3 .f-photo .sub{margin:0}
 @media (max-width:800px){.v3 .f-photo .sub{display:none}}
+/* A flow photo's phone frame (`photo.m`): it stands in for both themes' frames on phones. */
+.v3 .f-photo .v3m{display:none}
+@media (max-width:800px){.v3 .f-photo .ph:has(.v3m) :is(.v3d,.v3l){display:none}.v3 .f-photo .v3m{display:block}}

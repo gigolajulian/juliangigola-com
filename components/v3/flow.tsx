@@ -51,7 +51,7 @@ export function FlowShell({
   sub?: React.ReactNode;
   body: React.ReactNode;
   bar?: React.ReactNode;
-  photo: { d: string; l: string };
+  photo: { d: string; l: string; m?: string };
   name: string;
   sum: [string, React.ReactNode][];
   /** The caption over the photo with a line under the name, the photo
@@ -89,6 +89,7 @@ export function FlowShell({
           <div className="ph">
             <Image className="v3d" src={photo.d} alt={`${name} sample frame`} fill sizes="(max-width: 800px) 100vw, 44vw" />
             <Image className="v3l" src={photo.l} alt={`${name} sample frame`} fill sizes="(max-width: 800px) 100vw, 44vw" />
+            {photo.m ? <Image className="v3m" src={photo.m} alt={`${name} sample frame`} fill sizes="100vw" /> : null}
           </div>
           <div className="cap">
             <b>{name}</b>

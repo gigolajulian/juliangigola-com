@@ -73,7 +73,8 @@ export type Session = {
   cal?: string;
   /** Takes the $100 deposit (`lib/paid.ts`). */
   paid: boolean;
-  photo: { d: string; l: string };
+  /** `m`: a horizontal frame for the phone banner, where the tall one crops badly. */
+  photo: { d: string; l: string; m?: string };
   /** The enquiry type an on-request booking posts (`lib/inbox.ts`); "session" when unset. */
   type?: string;
 };
@@ -174,7 +175,7 @@ export const SESSIONS: Record<SessionSlug, Session> = {
     includes: ["Phone or video", "Dates and references"],
     cal: "juliangigola/editorial",
     paid: false,
-    photo: { d: w("novocaine", "04"), l: w("novocaine", "04") },
+    photo: { d: w("novocaine", "04"), l: w("novocaine", "04"), m: w("novocaine", "01") },
   },
   events: {
     slug: "events",
