@@ -91,6 +91,15 @@ export function Intro() {
     const n = cols * rows;
     p.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
     p.style.gridTemplateRows = `repeat(${rows}, 1fr)`;
+    /* Julian: the frames at 4:5, and the sheet over the whole screen. The
+       plane covers the window on whichever side runs short (a little over,
+       so the tilt never shows an edge) and is cut at the window's edge. */
+    {
+      const W = innerWidth, H = innerHeight, g = parseFloat(getComputedStyle(p).columnGap) || 0;
+      const cw = Math.max((W - (cols - 1) * g) / cols, ((H - (rows - 1) * g) / rows) * 0.8) * 1.06;
+      const pw = cols * cw + (cols - 1) * g, ph = rows * cw * 1.25 + (rows - 1) * g;
+      Object.assign(p.style, { width: `${pw}px`, height: `${ph}px`, left: `${(W - pw) / 2}px`, top: `${(H - ph) / 2}px`, right: "auto", bottom: "auto" });
+    }
     const cells = Array.from({ length: n }, () => {
       const cell = document.createElement("div");
       cell.className = "jg-sheet-cell";
@@ -145,19 +154,24 @@ export function Intro() {
       cell.animate([{ opacity: 1 }, { opacity: 1, offset: 0.3 }, { opacity: 0 }],
         { duration: PER, delay, easing: S, fill: "forwards" });
     });
-    for (const sel of [".jg-sheet-ground", ".jg-sheet-count"])
-      layer.querySelector(sel)?.animate([{ opacity: 1 }, { opacity: 0 }],
-        { duration: total, delay: out, easing: S, fill: "forwards" });
+    layer.querySelector(".jg-sheet-count")?.animate([{ opacity: 1 }, { opacity: 0 }],
+      { duration: PER, delay: out, easing: S, fill: "forwards" });
+    /* Julian: the ground holds while the photographs leave and fades once
+       the last row is half way up, so it reads as one move. */
+    const clear = out + (rows - 1) * ROW + (cols - 1) * COL + PER * 0.5;
+    const CLEAR = 520;
+    layer.querySelector(".jg-sheet-ground")?.animate([{ opacity: 1 }, { opacity: 0 }],
+      { duration: CLEAR, delay: clear, easing: S, fill: "forwards" });
     /* The page's entrance sets off as the ground starts to clear
        (`half` unpauses it, `splash.css`), and the pointer goes through. */
     setTimeout(() => {
       root.dataset.intro = "half";
       root.dataset.splashed = "";
       layer.classList.add("jg-intro-open");
-    }, out);
+    }, clear);
     /* No cleanup: React's development remount would clear these, and
        `played` stops the second take from setting them again. */
-    setTimeout(lift, out + total);
+    setTimeout(lift, Math.max(out + total, clear + CLEAR));
   }, []);
 
   return (
