@@ -287,7 +287,71 @@ function Chapter({ v, n, ratio, small = false, sizes, onPlay }: { v: Video; n: n
   );
 }
 
-/* Retired 2026-10-24: phones get the stage too (Julian). Kept, unused. */
+function Row({ v, i, onOpen }: { v: Video; i: number; onOpen: (v: Video) => void }) {
+  const poster = posterFor(v);
+  return (
+    <button type="button" className="mo-row" onClick={() => onOpen(v)} aria-label={`Open ${v.title}`}>
+      <span className="mo-frame">{poster ? <Image src={poster} alt="" fill sizes="100vw" priority={i === 0} style={{ objectFit: "cover" }} /> : null}</span>
+      <span className="mo-row-cap">
+        <span className="lbl mute">{two(i)} · {subOf(v)}</span>
+        <b>{v.title}</b>
+      </span>
+      {v.client ? <span className="mo-row-mk"><Mark slug={markOf(v.client)} name={v.client} h={20} even /></span> : null}
+    </button>
+  );
+}
+
+/* Phones (Julian): the films stacked, one 16:9 still each, for an easy
+   scroll. A tap opens that film's page: it plays at the top, its title,
+   credit and logo under it, the next two films side by side. A history entry
+   per page, so the back gesture returns to the list. Stills in the list,
+   because YouTube keeps its own controls on a phone's muted preview. */
+function Stack({ films }: { films: Video[] }) {
+  const [open, setOpen] = React.useState<Video | null>(null);
+  React.useEffect(() => {
+    const onPop = () => setOpen(films.find((f) => f.id === history.state?.film) ?? null);
+    addEventListener("popstate", onPop);
+    return () => removeEventListener("popstate", onPop);
+  }, [films]);
+  const go = (v: Video) => {
+    if (history.state?.film) history.replaceState({ film: v.id }, "");
+    else history.pushState({ film: v.id }, "");
+    setOpen(v);
+    scrollTo(0, 0);
+  };
+  if (!open)
+    return (
+      <div className="mo-stack">
+        <h1 className="lbl mute">Motion · {two(films.length)} films</h1>
+        {films.map((v, i) => <Row key={v.id} v={v} i={i} onOpen={go} />)}
+      </div>
+    );
+  const n = films.findIndex((f) => f.id === open.id);
+  return (
+    <div className="mo-stack">
+      <button type="button" className="mo-back lbl" onClick={() => history.back()}>← Motion</button>
+      <div className="mo-film">
+        <iframe key={open.id} src={embedUrl(open)} title={open.title} allow="autoplay; fullscreen; picture-in-picture" allowFullScreen />
+      </div>
+      <div className="mo-row mo-now">
+        <span className="mo-row-cap">
+          <span className="lbl mute">{two(n)} · {subOf(open)}</span>
+          <b>{open.title}</b>
+        </span>
+        {open.client ? <span className="mo-row-mk"><Mark slug={markOf(open.client)} name={open.client} h={24} even /></span> : null}
+      </div>
+      <h2 className="lbl mute mo-more">More films</h2>
+      <div className="mo-pair">
+        {[1, 2].map((k) => {
+          const i = (n + k) % films.length;
+          return <Row key={films[i].id} v={films[i]} i={i} onOpen={go} />;
+        })}
+      </div>
+    </div>
+  );
+}
+
+/* Retired 2026-10-24: phones get the stacked stills (Julian). Kept, unused. */
 export function Mob({ videos, onPlay }: { videos: Video[]; onPlay: (v: Video) => void }) {
   const [tab, setTab] = React.useState<"all" | VideoSection>("all");
   const [ref, on] = useInView<HTMLDivElement>();
@@ -347,6 +411,7 @@ export function V3Video({ videos }: { videos: Video[] }) {
     <div className="v3 contents">
       <section className="v3page" id="p-video">
         <Desk films={all} onPlay={setPlaying} />
+        <Stack films={all} />
         <V3Foot />
       </section>
       <Player v={playing} list={all} onGo={setPlaying} onClose={close} />
