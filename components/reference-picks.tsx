@@ -37,11 +37,32 @@ async function shrink(file: File): Promise<File> {
   }
 }
 
+/* What was added, kept for 3 minutes after the block leaves the page (Back
+   on the Commissions stepper), per page, in memory only (Julian, 2026-10-23). */
+const KEEP_MS = 3 * 60 * 1000;
+const kept = new Map<string, { uploads: Upload[]; picks: string[]; at: number }>();
+const fresh = () => {
+  const k = kept.get(location.pathname);
+  return k && Date.now() - k.at < KEEP_MS ? k : undefined;
+};
+
 export function ReferencePicks({ resync, v3 }: { resync: unknown; v3?: boolean }) {
   const [over, setOver] = React.useState(false);
   const upw = React.useRef<HTMLSpanElement>(null);
-  const [uploads, setUploads] = React.useState<Upload[]>([]);
-  const [picks, setPicks] = React.useState<string[]>([]);
+  const [uploads, setUploads] = React.useState<Upload[]>(() => (typeof window === "undefined" ? [] : (fresh()?.uploads ?? [])));
+  const [picks, setPicks] = React.useState<string[]>(() => (typeof window === "undefined" ? [] : (fresh()?.picks ?? [])));
+  const keep = React.useRef({ uploads, picks, sent: false });
+  React.useEffect(() => {
+    keep.current = { uploads, picks, sent: (resync as { status?: string } | null)?.status === "sent" };
+  });
+  React.useEffect(() => {
+    const path = location.pathname;
+    return () => {
+      const { uploads, picks, sent } = keep.current;
+      if (sent) kept.delete(path);
+      else kept.set(path, { uploads, picks, at: Date.now() });
+    };
+  }, []);
   const refs = React.useRef<HTMLInputElement>(null);
   const dialog = React.useRef<HTMLDialogElement>(null);
   const [groups, setGroups] = React.useState<Group[] | null>(null);
