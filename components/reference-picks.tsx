@@ -154,7 +154,7 @@ export function ReferencePicks({ resync, v3 }: { resync: unknown; v3?: boolean }
       <div className="fld refs">
         <input ref={refs} type="file" name="refs" multiple hidden tabIndex={-1} />
         <input type="hidden" name="picks" value={picks.join("\n")} />
-        <span className="lbl mute">References <span>· optional, up to {MAX_REFS}</span></span>
+        <span className="lbl mute">References <span>· up to {MAX_REFS}</span></span>
         <div className="acts">
           <span ref={upw} className="upw">
             <label className={cn("btn up", over && "over", room <= 0 && "full")}>

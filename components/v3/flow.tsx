@@ -114,6 +114,7 @@ export function Field({
   err,
   ac = "off",
   area,
+  req,
 }: {
   k: string;
   label: string;
@@ -124,18 +125,23 @@ export function Field({
   err?: string;
   ac?: string;
   area?: boolean;
+  /** Required: an asterisk after the label. */
+  req?: boolean;
 }) {
   const id = `f-${k}`;
   return (
     <div className={err ? "fld bad" : "fld"}>
       <label className="lbl mute" htmlFor={id}>
-        <span>{label}</span>
+        <span>
+          {label}
+          {req ? <span className="req" aria-hidden="true"> *</span> : null}
+        </span>
         <span>{hint}</span>
       </label>
       {area ? (
-        <textarea id={id} name={k} rows={3} value={value} onChange={(e) => onChange(e.target.value)} aria-invalid={!!err || undefined} />
+        <textarea id={id} name={k} rows={3} value={value} onChange={(e) => onChange(e.target.value)} aria-invalid={!!err || undefined} aria-required={req || undefined} />
       ) : (
-        <input id={id} name={k} type={type} autoComplete={ac} value={value} onChange={(e) => onChange(e.target.value)} aria-invalid={!!err || undefined} />
+        <input id={id} name={k} type={type} autoComplete={ac} value={value} onChange={(e) => onChange(e.target.value)} aria-invalid={!!err || undefined} aria-required={req || undefined} />
       )}
       {err ? (
         <p className="err" role="alert">

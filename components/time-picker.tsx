@@ -987,12 +987,12 @@ export function TimePicker({
     if (step !== "pick") {
       const opts = needsWhere ? WHERE[slug] : undefined;
       const asking = opts?.find(([label]) => label === (opt || opts[0][0]))?.[1];
-      const f = (k: string, label: string, type = "text", hint = "", ac = "off", area = false) => {
+      const f = (k: string, label: string, type = "text", hint = "", ac = "off", area = false, req = false) => {
         const id = `f-${k}`;
         return (
           <div className={bad[k] ? "fld bad" : "fld"}>
-            <label className="lbl mute" htmlFor={id}><span>{label}</span><span>{hint}</span></label>
-            {area ? <textarea id={id} name={k} rows={3} aria-invalid={!!bad[k] || undefined} /> : <input id={id} name={k} type={type} autoComplete={ac} aria-invalid={!!bad[k] || undefined} />}
+            <label className="lbl mute" htmlFor={id}><span>{label}{req ? <span className="req" aria-hidden="true"> *</span> : null}</span><span>{hint}</span></label>
+            {area ? <textarea id={id} name={k} rows={3} aria-invalid={!!bad[k] || undefined} aria-required={req || undefined} /> : <input id={id} name={k} type={type} autoComplete={ac} aria-invalid={!!bad[k] || undefined} aria-required={req || undefined} />}
             {bad[k] ? <p className="err" role="alert">{bad[k]}</p> : null}
           </div>
         );
@@ -1018,9 +1018,9 @@ export function TimePicker({
             sub: "Your confirmation goes to this email.",
             body: (
               <>
-                {f("name", "Name", "text", "", "name")}
-                {f("email", "Email", "email", "", "email")}
-                {f("phone", "Phone", "tel", "Optional", "tel")}
+                {f("name", "Name", "text", "", "name", false, true)}
+                {f("email", "Email", "email", "", "email", false, true)}
+                {f("phone", "Phone", "tel", "", "tel")}
                 {opts && opts.length > 1 ? (
                   <div className="fld" role="group" aria-label="Where">
                     <span className="lbl mute">Where</span>
@@ -1034,7 +1034,7 @@ export function TimePicker({
                 ) : null}
                 {asking ? f("detail", asking) : null}
                 {needsWhere && !WHERE[slug] ? f("where", "Where") : null}
-                {f("notes", "Anything I should know", "text", "Optional")}
+                {f("notes", "Anything I should know")}
                 {error ? <p className="err" role="alert">{error}</p> : null}
               </>
             ),

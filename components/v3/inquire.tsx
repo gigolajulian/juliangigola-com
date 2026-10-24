@@ -22,7 +22,12 @@ function Note() {
   const set = (k: keyof typeof v) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setV({ ...v, [k]: e.target.value });
   const fld = (k: keyof typeof v, label: string, el: React.ReactNode) => (
     <div className={err[k] ? "fld bad" : "fld"}>
-      <label className="lbl mute" htmlFor={`r-${k}`}>{label}</label>
+      <label className="lbl mute" htmlFor={`r-${k}`}>
+        <span>
+          {label}
+          <span className="req" aria-hidden="true"> *</span>
+        </span>
+      </label>
       {el}
       {err[k] ? <p className="err" role="alert">{err[k]}</p> : null}
     </div>
@@ -47,10 +52,10 @@ function Note() {
         <h3>Start a project</h3>
         <p className="mute">A few lines is enough. Dates and a reference help.</p>
         <div className="reach-row">
-          {fld("name", "Name", <input id="r-name" name="name" autoComplete="name" placeholder="Your name" value={v.name} onChange={set("name")} aria-invalid={!!err.name || undefined} />)}
-          {fld("email", "Email", <input id="r-email" name="email" type="email" autoComplete="email" placeholder="you@email.com" value={v.email} onChange={set("email")} aria-invalid={!!err.email || undefined} />)}
+          {fld("name", "Name", <input id="r-name" name="name" autoComplete="name" aria-required placeholder="Your name" value={v.name} onChange={set("name")} aria-invalid={!!err.name || undefined} />)}
+          {fld("email", "Email", <input id="r-email" name="email" type="email" autoComplete="email" aria-required placeholder="you@email.com" value={v.email} onChange={set("email")} aria-invalid={!!err.email || undefined} />)}
         </div>
-        {fld("message", "Message", <textarea id="r-message" name="message" rows={4} placeholder="What are you planning, and when?" value={v.message} onChange={set("message")} aria-invalid={!!err.message || undefined} />)}
+        {fld("message", "Message", <textarea id="r-message" name="message" rows={4} aria-required placeholder="What are you planning, and when?" value={v.message} onChange={set("message")} aria-invalid={!!err.message || undefined} />)}
         <ReferencePicks resync={state} v3 />
         <Failed state={state} />
         <div className="reach-send">
@@ -196,11 +201,11 @@ export function V3Commission() {
     sub = "I reply to this email.";
     body = (
       <>
-        <Field label="Name" ac="name" {...f("name")} />
-        <Field label="Email" type="email" ac="email" {...f("email")} />
+        <Field label="Name" ac="name" req {...f("name")} />
+        <Field label="Email" type="email" ac="email" req {...f("email")} />
         <Field label="Company or artist" ac="organization" {...f("org")} />
         <ReferencePicks resync={state} v3 />
-        <Field label="What you have in mind" area {...f("msg")} />
+        <Field label="What you have in mind" area req {...f("msg")} />
         <Failed state={state} />
       </>
     );

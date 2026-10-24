@@ -151,10 +151,10 @@ function OnRequest({ slug, shell }: { slug: SessionSlug; shell: Shell }) {
       sub: "I reply to this email.",
       body: (
         <>
-          <Field label="Name" ac="name" {...f("name")} />
-          <Field label="Email" type="email" ac="email" {...f("email")} />
-          <Field label="Phone" type="tel" hint="Optional" ac="tel" {...f("phone")} />
-          <Field label="Anything I should know" hint="Optional" {...f("note")} />
+          <Field label="Name" ac="name" req {...f("name")} />
+          <Field label="Email" type="email" ac="email" req {...f("email")} />
+          <Field label="Phone" type="tel" ac="tel" {...f("phone")} />
+          <Field label="Anything I should know" {...f("note")} />
           <Failed state={state} />
         </>
       ),
