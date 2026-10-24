@@ -59,7 +59,7 @@ export function V3Project({ project, next }: { project: Project; next?: { href: 
             {project.intent ? <p className="sv-lead">{project.intent}</p> : null}
           </header>
           {big ? (
-            <figure className="pj-big">
+            <figure className="pj-big" style={{ aspectRatio: `${big.width} / ${big.height}` }}>
               <Image src={big.src} alt={alt(big.alt)} fill sizes="(max-width: 900px) 100vw, 40vw" priority style={{ objectFit: "cover", background: big.color }} />
             </figure>
           ) : null}
