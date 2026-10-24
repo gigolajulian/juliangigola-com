@@ -116,6 +116,74 @@ export function CoverNav() {
   );
 }
 
+/** The text's own box, without line-height or tap padding. */
+function ink(el: Node) {
+  const r = document.createRange();
+  r.selectNodeContents(el);
+  return r.getBoundingClientRect();
+}
+
+/* Flies a copy of the cover name to the wordmark (450ms) or back (350ms),
+   then crossfades into the real one, so the hand-over never pops. */
+function useDock(dock: boolean, past: boolean, hdr: React.RefObject<HTMLElement | null>, setLanded: (b: boolean) => void) {
+  const was = React.useRef(false);
+  const fly = React.useRef<HTMLElement | null>(null);
+  React.useEffect(() => {
+    if (!dock || past === was.current) return;
+    was.current = past;
+    const root = document.documentElement;
+    const h1 = document.querySelector<HTMLElement>(".a-cover h1");
+    const wm = hdr.current?.querySelector(".site-wm");
+    fly.current?.remove();
+    setLanded(false);
+    if (past) root.setAttribute("data-dock", "");
+    const a = h1 && ink(h1), b = wm && ink(wm), cs = h1 && getComputedStyle(h1);
+    // Off screen, or wrapped on a phone: no flight, it just lands.
+    if (!h1 || !a || !b || !cs || a.bottom < 0 || a.height > parseFloat(cs.fontSize) * 1.3) {
+      if (past) setLanded(true);
+      else root.removeAttribute("data-dock");
+      return;
+    }
+    /* The copy holds both spellings: the cover's (caps) and the wordmark's,
+       sized so the scaled copy lands exactly on the real wordmark. They
+       crossfade over the second half of the flight. */
+    const ws = getComputedStyle(wm), k = b.width / a.width;
+    const f = document.createElement("div");
+    f.setAttribute("aria-hidden", "");
+    f.innerHTML = "<span>Julian Gigola</span><span>Julian Gigola</span>";
+    const [big, small] = f.children as unknown as [HTMLElement, HTMLElement];
+    Object.assign(f.style, { position: "fixed", left: "0", top: "0", margin: "0", zIndex: "31", pointerEvents: "none", whiteSpace: "nowrap", transformOrigin: "0 0", fontFamily: cs.fontFamily, fontWeight: cs.fontWeight, fontSize: cs.fontSize, lineHeight: cs.lineHeight, letterSpacing: cs.letterSpacing, textTransform: cs.textTransform });
+    Object.assign(small.style, { position: "absolute", left: "0", top: "0", fontFamily: ws.fontFamily, fontWeight: ws.fontWeight, fontSize: `${parseFloat(ws.fontSize) / k}px`, lineHeight: "1", letterSpacing: `${parseFloat(ws.letterSpacing) / k}px`, textTransform: ws.textTransform });
+    document.body.append(f);
+    const o = ink(big), fl = a.left - o.left, ft = a.top - o.top;
+    f.style.left = `${fl}px`;
+    f.style.top = `${ft}px`;
+    // the wordmark spelling sits centred on the caps, in the copy's own coordinates
+    const sb = ink(small);
+    small.style.left = `${a.left - sb.left}px`;
+    small.style.top = `${a.top + a.height / 2 - (sb.top + sb.height / 2)}px`;
+    const s2 = ink(small), sx = s2.left - fl, sy = s2.top - ft;
+    fly.current = f;
+    const up = { transform: "none", color: cs.color };
+    const down = { transform: `translate(${b.left - fl - sx * k}px,${b.top - ft - sy * k}px) scale(${k})`, color: ws.color };
+    const t = { duration: past ? 450 : 350, easing: "cubic-bezier(.16,1,.3,1)", fill: "forwards" as const };
+    const caps = [{ opacity: 1 }, { opacity: 1, offset: 0.35 }, { opacity: 0 }];
+    big.animate(past ? caps : [...caps].reverse().map((x, n) => ({ ...x, offset: [0, 0.65, 1][n] })), t);
+    small.animate(past ? [{ opacity: 0 }, { opacity: 0, offset: 0.35 }, { opacity: 1 }] : [{ opacity: 1 }, { opacity: 0, offset: 0.65 }, { opacity: 0 }], t);
+    f.animate(past ? [up, down] : [down, up], t).finished.then(() => {
+      if (fly.current !== f) return;
+      fly.current = null;
+      if (!past) return void (root.removeAttribute("data-dock"), f.remove());
+      setLanded(true);
+      f.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 120, fill: "forwards" }).finished.then(() => f.remove());
+    }, () => {});
+  }, [dock, past, hdr, setLanded]);
+  React.useEffect(() => () => {
+    fly.current?.remove();
+    document.documentElement.removeAttribute("data-dock");
+  }, []);
+}
+
 export function V3Header() {
   const path = usePathname();
   const home = path === "/";
@@ -123,16 +191,23 @@ export function V3Header() {
   /* Over the homepage cover it waits until the big name has scrolled under
      it; on every other page it is there from the start. */
   const [past, setPast] = React.useState(false);
+  /* ?v3motion (mock https://claude.ai/artifact/VDtydGRZFjpd4W1kibeqBm, 4b):
+     it starts as the name's top reaches it, the name shrinks into the
+     wordmark and the bar unrolls from its top edge. */
+  const dock = React.useSyncExternalStore(noop, () => home && document.documentElement.hasAttribute("data-v3motion") && !matchMedia("(prefers-reduced-motion: reduce)").matches, () => false);
+  const [landed, setLanded] = React.useState(false);
   React.useEffect(() => {
+    const on = dock;
     if (!home) return;
     const sync = () => {
-      const name = document.querySelector(".a-cover h1");
-      setPast(!!name && name.getBoundingClientRect().bottom < (hdr.current?.offsetHeight ?? 0));
+      const r = document.querySelector(".a-cover h1")?.getBoundingClientRect();
+      setPast(!!r && (on ? r.top : r.bottom) < (hdr.current?.offsetHeight ?? 0));
     };
     addEventListener("scroll", sync, { passive: true });
     sync();
     return () => removeEventListener("scroll", sync);
-  }, [home]);
+  }, [home, dock]);
+  useDock(dock, past, hdr, setLanded);
   const show = !home || past;
   const [menu, setMenu] = React.useState(false);
   /* A route change closes it. */
@@ -150,7 +225,7 @@ export function V3Header() {
   }, [menu]);
   return (
     <div className="v3 contents">
-      <header ref={hdr} className={show || menu ? "site-hdr show" : "site-hdr"} inert={!(show || menu)}>
+      <header ref={hdr} className={`site-hdr${show || menu ? " show" : ""}${dock ? " dock" : ""}${landed || menu ? " landed" : ""}`} inert={!(show || menu)}>
         <Link className="wm site-wm" href="/">Julian Gigola</Link>
         <nav className="links lbl" aria-label="Main">
           {NAV.map((n) => (
