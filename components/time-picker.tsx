@@ -892,7 +892,7 @@ export function TimePicker({
   /* JG V3: the steps around anything that is not the picker itself. */
   const v3paid = paid || isPaid(slug);
   const v3steps = v3paid ? ["Time", "You", "Deposit", "Booked"] : ["Time", "You", "Booked"];
-  const v3plain = (body: React.ReactNode) => v3!.shell({ steps: v3steps, at: 1, head: v3paid ? "Book a session" : "Book a consultation", body, sum: [] });
+  const v3plain = (body: React.ReactNode) => v3!.shell({ steps: v3steps, at: 1, head: v3paid ? "Book a session" : v3!.name === "Consultation" ? "Book a consultation" : "Book a call", body, sum: [] });
   if (state === "fallback") return v3 ? v3plain(fallback) : <>{fallback}</>;
   const waiting = <p role="status" className="lbl mute">Loading availability</p>;
   if (v3 && (state === "loading" || !days)) return v3plain(waiting);
@@ -1054,7 +1054,7 @@ export function TimePicker({
     const times = days[pick.date] ?? [];
     const [hh, mm] = fmt(pick.min).replace(/ (AM|PM)$/, "").split(":");
     return shell({
-      head: paid ? "Book a session" : "Book a consultation",
+      head: paid ? "Book a session" : v3?.name === "Consultation" ? "Book a consultation" : "Book a call",
       sub: paid ? "My studio is in San Jose, and I travel across the Bay Area." : "15 minutes, phone or video. Bring your dates and references.",
       body: (
         <>

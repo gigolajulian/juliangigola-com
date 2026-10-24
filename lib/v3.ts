@@ -61,7 +61,7 @@ export const CALL_CARD = { d: w("channel-orange", "01"), l: w("second-skin", "13
 export const ABOUT_PHOTO = "/about/julian-steps.jpg";
 
 /* ── sessions (master SESS; deposit list from lib/paid.ts) ── */
-export type SessionSlug = "portraits" | "headshots" | "studio-digitals" | "graduation" | "weddings" | "consultation";
+export type SessionSlug = "portraits" | "headshots" | "studio-digitals" | "graduation" | "weddings" | "consultation" | "music-photography" | "brand-photography" | "editorial" | "events";
 export type Session = {
   slug: SessionSlug;
   name: string;
@@ -74,6 +74,8 @@ export type Session = {
   /** Takes the $100 deposit (`lib/paid.ts`). */
   paid: boolean;
   photo: { d: string; l: string };
+  /** The enquiry type an on-request booking posts (`lib/inbox.ts`); "session" when unset. */
+  type?: string;
 };
 
 export const SESSIONS: Record<SessionSlug, Session> = {
@@ -141,6 +143,49 @@ export const SESSIONS: Record<SessionSlug, Session> = {
     /* The master's call card shows the About portrait. */
     photo: { d: ABOUT_PHOTO, l: ABOUT_PHOTO },
   },
+  /* The commission calls and events (BOOK_MENU in `lib/booking.ts`, same words),
+     on the stepper but not in its tabs. */
+  "music-photography": {
+    slug: "music-photography",
+    name: "Music & artists",
+    blurb: "Press photos, cover art and music videos for a release, planned together so it reads as one thing.",
+    from: null,
+    includes: ["Phone or video", "Dates and references"],
+    cal: "juliangigola/music-call",
+    paid: false,
+    photo: { d: w("valgur", "02"), l: w("iris", "07") },
+  },
+  "brand-photography": {
+    slug: "brand-photography",
+    name: "Brand campaigns",
+    blurb: "Campaign imagery from the concept and the art direction to the shoot and the retouch.",
+    from: null,
+    includes: ["Phone or video", "Dates and references"],
+    cal: "juliangigola/campaign",
+    paid: false,
+    photo: { d: w("oakley-x-nike", "01"), l: w("paradox", "01") },
+  },
+  /* book.juliangigola.com/editorial's call, its words from `book/public/index.html`. */
+  editorial: {
+    slug: "editorial",
+    name: "Editorial call",
+    blurb: "Fifteen minutes about the idea, the team and the dates. I quote after the call.",
+    from: null,
+    includes: ["Phone or video", "Dates and references"],
+    cal: "juliangigola/editorial",
+    paid: false,
+    photo: { d: w("nyx", "07"), l: w("second-skin", "01") },
+  },
+  events: {
+    slug: "events",
+    name: "Event coverage",
+    blurb: "Launches, brand events, concerts and parties, shot as they happen.",
+    from: null,
+    includes: [],
+    paid: false,
+    photo: { d: w("events", "01"), l: w("events", "01") },
+    type: "event",
+  },
 };
 export const isSession = (s?: string): s is SessionSlug => !!s && Object.hasOwn(SESSIONS, s);
 /** The session tabs' order (DESIGN.md, Stepper). */
@@ -148,6 +193,6 @@ export const TAB_ORDER: SessionSlug[] = ["portraits", "headshots", "studio-digit
 /** The homepage index and the doors' order. */
 export const INDEX_ORDER: SessionSlug[] = ["portraits", "graduation", "headshots", "studio-digitals", "weddings"];
 export const rate = (s: Session) =>
-  s.slug === "consultation" ? "15 min" : s.from != null ? `From $${s.from}` : s.paid ? "$100 deposit" : "On request";
+  !s.paid && s.cal ? "15 min" : s.from != null ? `From $${s.from}` : s.paid ? "$100 deposit" : "On request";
 /** Session lengths in minutes (master MIN); Cal.com's own length wins where it answers. */
-export const LENGTH: Record<SessionSlug, number> = { portraits: 60, graduation: 90, headshots: 45, "studio-digitals": 60, weddings: 480, consultation: 15 };
+export const LENGTH: Record<SessionSlug, number> = { portraits: 60, graduation: 90, headshots: 45, "studio-digitals": 60, weddings: 480, consultation: 15, "music-photography": 15, "brand-photography": 15, editorial: 15, events: 0 };

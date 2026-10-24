@@ -5,7 +5,7 @@ import { InquireWall } from "@/components/inquire-wall";
 import { BOOK_MENU, BOOKING_PAGES, pageForSession } from "@/lib/booking";
 import { wallOf } from "@/lib/work";
 import { V3Book } from "@/components/v3/book";
-import { isSession } from "@/lib/v3";
+import { SESSIONS, isSession } from "@/lib/v3";
 
 /* One session's booking on a page of its own (Julian, 2026-10-14), for
    book.juliangigola.com/<session>: the booking sheet's look, standing
@@ -14,13 +14,14 @@ import { isSession } from "@/lib/v3";
 const item = (slug: string) => BOOK_MENU.find((m) => m.slug === slug);
 
 export function generateStaticParams() {
-  return [...BOOK_MENU.map((m) => ({ slug: m.slug })), { slug: "consultation" }];
+  return [...BOOK_MENU.map((m) => ({ slug: m.slug })), { slug: "consultation" }, { slug: "editorial" }];
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const slug = (await params).slug;
   if (slug === "consultation") return { title: "Book a consultation", description: "15 minutes, phone or video. Pick a time on my calendar.", alternates: { canonical: "/book/consultation" } };
   const m = item(slug);
+  if (!m && isSession(slug)) return { title: `Book ${SESSIONS[slug].name}`, description: SESSIONS[slug].blurb, alternates: { canonical: `/book/${slug}` } };
   return m ? { title: `Book ${m.name}`, description: m.blurb, alternates: { canonical: `/book/${m.slug}` } } : {};
 }
 

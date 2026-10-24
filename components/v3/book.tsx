@@ -35,7 +35,7 @@ export function V3BookFlow({ slug }: { slug: SessionSlug }) {
       body={
         p.at === 1 ? (
           <>
-            <Tabs at={slug} />
+            {TAB_ORDER.includes(slug) ? <Tabs at={slug} /> : null}
             <Run className="inc lbl" items={[...S.includes, ...(S.turnaround ? [`Ready in ${S.turnaround}`] : [])]} />
             {p.body}
           </>
@@ -89,7 +89,7 @@ function OnRequest({ slug, shell }: { slug: SessionSlug; shell: Shell }) {
     scrollTo(0, 0);
   };
   const place = where === "studio" ? "Studio in San Jose" : "On location";
-  const sum: [string, React.ReactNode][] = [["Date", dlabel(day)], ["Length", duration(LENGTH[slug])]];
+  const sum: [string, React.ReactNode][] = [["Date", dlabel(day)], ...(LENGTH[slug] ? [["Length", duration(LENGTH[slug])] as [string, string]] : [])];
   const monday = (d: Date) => new Date(d.getFullYear(), d.getMonth(), d.getDate() - ((d.getDay() + 6) % 7));
   const canBack = view === "week" ? +monday(anchor) > +monday(today) : anchor.getFullYear() * 12 + anchor.getMonth() > today.getFullYear() * 12 + today.getMonth();
   const steps = ["Date", "Shoot", "You", "Sent"];
@@ -194,7 +194,7 @@ function OnRequest({ slug, shell }: { slug: SessionSlug; shell: Shell }) {
         send(e.currentTarget);
       }}
     >
-      <Hidden type="session" detail={`${dlabel(day)} · ${place}`} />
+      <Hidden type={S.type ?? "session"} detail={`${dlabel(day)} · ${place}`} />
       <input type="hidden" name="session" value={S.name} />
       <input type="hidden" name="message" value={message} />
       {shell({ steps, at, sum, ...parts })}

@@ -224,7 +224,7 @@ export function CalEmbed({ path, title, className, v3 }: { path: string; title: 
     setDense(q.has("dense"));
   }, []);
   const paid = isPaid(path.split("/")[1]);
-  const wrap = (body: React.ReactNode) => (v3 ? v3.shell({ steps: [], at: 1, head: paid ? "Book a session" : "Book a consultation", body, sum: [] }) : body);
+  const wrap = (body: React.ReactNode) => (v3 ? v3.shell({ steps: [], at: 1, head: paid ? "Book a session" : v3.name === "Consultation" ? "Book a consultation" : "Book a call", body, sum: [] }) : body);
   if (own === null) return wrap(<div aria-label={title} className={className} />);
   const inline = <CalInline key={path} path={path} title={title} className={className} />;
   if (!own) return wrap(inline);
