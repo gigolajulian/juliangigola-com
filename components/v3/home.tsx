@@ -295,7 +295,7 @@ function SessionsIndex() {
   );
 }
 
-function Doors() {
+export function Doors() {
   return (
     <div className="doors">
       <div className="door">

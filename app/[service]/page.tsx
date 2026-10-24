@@ -12,6 +12,7 @@ import { getProject, projectsIn, wallOf } from "@/lib/work";
 import { InquireWall } from "@/components/inquire-wall";
 import { ContactSheet } from "@/components/contact-sheet";
 import { serviceGraph } from "@/lib/seo";
+import { V3Service } from "@/components/v3/service";
 
 /* ── a booking page ───────────────────────────────────────────────
  * One service, at the root: /headshots, /graduation-photos. Built from
@@ -93,21 +94,34 @@ export default async function BookingPage(props: PageProps<"/[service]">) {
             .flat()
             .slice(0, 14);
   const facts = [page.rate, ...(page.turnaround ? [`Ready in ${page.turnaround}`] : [])];
+  const graph = (
+    <LdJson
+      data={serviceGraph({
+        url: bookingHref(page),
+        name: page.name,
+        service: page.service,
+        description: page.description,
+        price: page.price,
+        faqs: page.faqs,
+        places: page.where.map((w) => w.name),
+      })}
+    />
+  );
+
+  /* JG V3 (leftovers card A): Portraits first; the other six follow once
+     it is approved. */
+  if (page.slug === "portraits")
+    return (
+      <>
+        {graph}
+        <V3Service page={page} frames={sheet ?? work.map((p) => p.cover)} />
+      </>
+    );
 
   return (
     /* `svc`: the JG V3 tokens over these screens (`styles/v3.css`). */
     <StripPage className="svc">
-      <LdJson
-        data={serviceGraph({
-          url: bookingHref(page),
-          name: page.name,
-          service: page.service,
-          description: page.description,
-          price: page.price,
-          faqs: page.faqs,
-          places: page.where.map((w) => w.name),
-        })}
-      />
+      {graph}
       <Strip
         label={`${page.h1}: what people say, the details and questions and booking. One screen at a time, left and right.`}
         /* No next page: the deck ends at Book (Julian: do not forward

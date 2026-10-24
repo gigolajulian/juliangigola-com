@@ -663,3 +663,30 @@ html{font-family:var(--font-mono),ui-monospace,monospace}
 /* One-screen modes keep the screen for the photos: no footer line, tools pulled up. */
 .v3 #p-work:is(.strip-on,.color-on) .foot-line{display:none}
 .v3 #p-work:is(.strip-on,.color-on) .wtools{margin-top:8px}
+/* Service page (components/v3/service.tsx): head, sequence, rows. */
+.v3 .sv-top{display:flex;flex-direction:column;align-items:flex-start;gap:20px;padding:96px var(--gr) 0 var(--g)}
+.v3 .sv-top .pg-t{max-width:12ch;text-wrap:balance}
+.v3 .sv-lead{margin:0;max-width:46ch;font-size:clamp(1rem,1.3vw,1.125rem);line-height:1.55;text-wrap:pretty}
+.v3 .sv-top .inc{max-width:72ch}
+.v3 .sv-top .ctas{display:flex;gap:10px;flex-wrap:wrap}
+.v3 .sv-seq .ph{position:relative;overflow:hidden;border-radius:4px;background:var(--card);aspect-ratio:4/5}
+.v3 .sv-info{padding:24px var(--gr) 96px var(--g);border-top:1px solid var(--line);margin-top:24px}
+.v3 .sv-row{display:grid;grid-template-columns:minmax(0,4fr) minmax(0,8fr);gap:24px;padding:28px 0;border-bottom:1px solid var(--line)}
+.v3 .sv-row h2{margin:4px 0 0}
+.v3 .sv-row p{margin:0;max-width:62ch;line-height:1.6;text-wrap:pretty}
+.v3 .sv-row ul{list-style:none;margin:0;padding:0;border-top:1px solid var(--line)}
+.v3 .sv-row li{display:flex;justify-content:space-between;gap:24px;padding:12px 0;border-bottom:1px solid var(--line)}
+.v3 .sv-row li b{font:800 clamp(1.125rem,1.6vw,1.5rem)/1 var(--display);letter-spacing:-.03em;white-space:nowrap}
+.v3 .sv-row li .mute{text-align:right;max-width:44ch}
+.v3 .sv-row li a{display:flex;justify-content:space-between;width:100%;color:inherit;text-decoration:none}
+.v3 .sv-row details{border-bottom:1px solid var(--line)}
+.v3 .sv-row details:first-child{border-top:1px solid var(--line)}
+.v3 .sv-row summary{cursor:pointer;list-style:none;padding:14px 0;font:800 clamp(1.125rem,1.6vw,1.5rem)/1.15 var(--display);letter-spacing:-.03em}
+.v3 .sv-row summary::-webkit-details-marker{display:none}
+.v3 .sv-row details p{padding:0 0 16px}
+@media (hover:hover){.v3 .sv-row summary:hover,.v3 .sv-row li a:hover{color:var(--accent)}}
+@media (max-width:800px){.v3 .sv-top{padding-top:64px}
+.v3 .sv-row{grid-template-columns:minmax(0,1fr);gap:14px}
+.v3 .sv-row li{flex-direction:column;gap:4px}
+.v3 .sv-row li .mute{text-align:left}
+.v3 .sv-row li a{flex-direction:row}}
