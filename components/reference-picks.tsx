@@ -169,11 +169,6 @@ export function ReferencePicks({ resync, v3 }: { resync: unknown; v3?: boolean }
                   e.currentTarget.value = "";
                 }}
               />
-              {/* A frame with an arrow dropping into it: drag one here. */}
-              <svg viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="1.4">
-                <rect x="1.5" y="6" width="13" height="8.5" rx="1" strokeDasharray="2 1.6" />
-                <path d="M8 .5v9M5 6.5l3 3 3-3" />
-              </svg>
               Upload references
             </label>
           </span>
@@ -181,6 +176,7 @@ export function ReferencePicks({ resync, v3 }: { resync: unknown; v3?: boolean }
             Pick from my work
           </button>
         </div>
+        <p className="hint mute">Or drag a JPG or PNG onto Upload references.</p>
         {thumbs}
         <PickPanel dialog={dialog} groups={groups} picks={picks} room={room} toggle={toggle} />
       </div>
