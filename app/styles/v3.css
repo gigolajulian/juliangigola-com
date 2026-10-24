@@ -773,13 +773,15 @@ html{font-family:var(--font-mono),ui-monospace,monospace}
    width (48px from 384 up), and a longer word still wraps. */
 @media (max-width:700px){.v3 .pj-next{flex-wrap:wrap;row-gap:10px}.v3 .pj-next .lbl{flex-basis:100%}.v3 .pj-next b{min-width:0;overflow-wrap:break-word}
 .v3 .pj-row .pg-t{font-size:min(3rem,12.5vw);overflow-wrap:break-word;max-width:100%}}
-/* The reveal: each frame unmasks upward and rises as it scrolls in. Only with ?v3motion, only where the browser runs scroll timelines. */
+/* The reveal: each frame unmasks upward and rises as it scrolls in. Only with V3 motion, only where the browser runs scroll timelines.
+   A rise, not a zoom: the 1.04 zoom put frames 7px past a phone's edge and made desktop pages 12 to 35px wider than the window. */
+.v3 .pj-r{overflow:clip}
 @supports (animation-timeline:view()){@media (prefers-reduced-motion:no-preference){
 :root[data-v3motion] .v3 .pj-r{animation:pj-in linear both;animation-timeline:view();animation-range:entry 0% entry 70%}}}
 @keyframes pj-in{from{clip-path:inset(0 0 6% 0)}to{clip-path:inset(0 0 0 0)}}
 @supports (animation-timeline:view()){@media (prefers-reduced-motion:no-preference){
 :root[data-v3motion] .v3 .pj-r img{animation:pj-img linear both;animation-timeline:view();animation-range:entry 0% entry 70%}}}
-@keyframes pj-img{from{scale:1.04}to{scale:1}}
+@keyframes pj-img{from{translate:0 3%}to{translate:0 0}}
 @media (max-width:900px){.v3 .pj-hero,.v3 .pj-hero.two{grid-template-columns:minmax(0,1fr);min-height:0}
 .v3 .pj-top{grid-column:1;padding:40px var(--gr) 32px var(--g)}
 .v3 .pj-big{grid-column:1;grid-row:auto;min-height:0;aspect-ratio:4/5}
