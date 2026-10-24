@@ -12,8 +12,47 @@ import { COMMISSIONS, COMMISSION_TABS, DOORS, HERO, HERO_ALT, INDEX_ORDER, RECEN
 
 const calm = () => matchMedia("(prefers-reduced-motion: reduce)").matches;
 
+/* The big name docks (scroll motion 1): it rides up with the cover,
+   shrinking as it goes, and becomes the header's wordmark where they meet.
+   Tied to the scroll, both ways. Only with ?v3motion, only while the name is
+   one line. */
+function useDock() {
+  React.useEffect(() => {
+    if (!document.documentElement.hasAttribute("data-v3motion") || calm()) return;
+    const name = document.querySelector<HTMLElement>(".a-cover h1");
+    const wm = document.querySelector<HTMLElement>(".site-hdr .site-wm");
+    if (!name || !wm) return;
+    let m: { x: number; y: number; w: number; h: number; tx: number; ty: number; k: number } | null = null;
+    const measure = () => {
+      name.style.transform = "";
+      const r = name.getBoundingClientRect();
+      const one = r.height < parseFloat(getComputedStyle(name).fontSize) * 1.3;
+      const k = wm.offsetWidth / r.width;
+      m = one ? { x: r.left, y: r.top + scrollY, w: r.width, h: r.height, tx: wm.offsetLeft, ty: wm.offsetTop + wm.offsetHeight / 2 - (r.height * k) / 2, k } : null;
+    };
+    const sync = () => {
+      if (!m) return;
+      const at = m.y - scrollY, p = Math.min(1, Math.max(0, scrollY / (m.y - m.ty)));
+      const k = 1 + (m.k - 1) * p;
+      name.style.transform = `translate(${(m.tx - m.x) * p}px, ${Math.max(at, m.ty) - at}px) scale(${k})`;
+      name.style.opacity = p >= 1 ? "0" : "";
+    };
+    name.style.transformOrigin = "0 0";
+    const fit = () => (measure(), sync());
+    document.fonts.ready.then(fit);
+    addEventListener("scroll", sync, { passive: true });
+    addEventListener("resize", fit);
+    return () => {
+      removeEventListener("scroll", sync);
+      removeEventListener("resize", fit);
+      name.style.transform = name.style.opacity = "";
+    };
+  }, []);
+}
+
 /* Hero: four frames, a 1.2s crossfade every 6s; the ticks pick one. */
 function Hero() {
+  useDock();
   const [i, setI] = React.useState(0);
   const [round, setRound] = React.useState(0);
   React.useEffect(() => {
