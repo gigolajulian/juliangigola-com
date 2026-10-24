@@ -12,6 +12,8 @@ import { MAX_REFS } from "@/lib/inbox";
    `picks`. Both arrive with the enquiry email (`app/contact/actions.ts`). */
 
 const EDGE = 1600;
+/** How near a dragged image pulls the V3 Upload button, in px. */
+const PULL = 30;
 
 type Upload = { file: File; url: string };
 type Group = { name: string; frames: [string, number, number, string][] };
@@ -37,6 +39,7 @@ async function shrink(file: File): Promise<File> {
 
 export function ReferencePicks({ resync, v3 }: { resync: unknown; v3?: boolean }) {
   const [over, setOver] = React.useState(false);
+  const upw = React.useRef<HTMLSpanElement>(null);
   const [uploads, setUploads] = React.useState<Upload[]>([]);
   const [picks, setPicks] = React.useState<string[]>([]);
   const refs = React.useRef<HTMLInputElement>(null);
@@ -92,41 +95,88 @@ export function ReferencePicks({ resync, v3 }: { resync: unknown; v3?: boolean }
     </ul>
   ) : null;
 
-  // V3 (/contact): a drop zone that also opens the file picker, and the same panel of my frames.
+  /* V3 (/contact, /contact/form): Upload references and Pick from my work,
+     two buttons. A PNG or JPEG dragged within 30px of Upload pulls the
+     button toward it, and a drop there is taken (Julian, 2026-10-23). */
+  const addRef = React.useRef(add);
+  React.useEffect(() => {
+    addRef.current = add;
+  });
+  React.useEffect(() => {
+    if (!v3) return;
+    const wrap = upw.current;
+    const btn = wrap?.firstElementChild as HTMLElement | null;
+    if (!wrap || !btn) return;
+    const still = matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const image = (dt: DataTransfer | null) => !!dt && [...dt.items].some((i) => i.kind === "file" && /^image\/(png|jpeg)$/.test(i.type));
+    // Measured on the wrapper, which never moves, so the pull does not feed back.
+    const near = (e: DragEvent) => {
+      const r = wrap.getBoundingClientRect();
+      const d = Math.hypot(e.clientX - Math.min(Math.max(e.clientX, r.left), r.right), e.clientY - Math.min(Math.max(e.clientY, r.top), r.bottom));
+      return { d, x: e.clientX - (r.left + r.width / 2), y: e.clientY - (r.top + r.height / 2) };
+    };
+    const rest = () => {
+      btn.style.translate = "";
+      setOver(false);
+    };
+    const onOver = (e: DragEvent) => {
+      const n = near(e);
+      if (!image(e.dataTransfer) || n.d > PULL) return rest();
+      e.preventDefault();
+      e.dataTransfer!.dropEffect = "copy";
+      setOver(true);
+      // Up to 12px, a third of it at the 30px edge and all of it on the button.
+      const k = 1 - n.d / (PULL * 1.5);
+      const clamp = (v: number) => Math.min(12, Math.max(-12, v)) * k;
+      if (!still) btn.style.translate = `${clamp(n.x * 0.2)}px ${clamp(n.y * 0.35)}px`;
+    };
+    const onDrop = (e: DragEvent) => {
+      if (!image(e.dataTransfer) || near(e).d > PULL) return;
+      e.preventDefault();
+      rest();
+      addRef.current(e.dataTransfer!.files);
+    };
+    const onLeave = (e: DragEvent) => !e.relatedTarget && rest();
+    document.addEventListener("dragover", onOver);
+    document.addEventListener("drop", onDrop);
+    document.addEventListener("dragleave", onLeave);
+    document.addEventListener("dragend", rest);
+    return () => {
+      document.removeEventListener("dragover", onOver);
+      document.removeEventListener("drop", onDrop);
+      document.removeEventListener("dragleave", onLeave);
+      document.removeEventListener("dragend", rest);
+    };
+  }, [v3]);
+
   if (v3)
     return (
       <div className="fld refs">
         <input ref={refs} type="file" name="refs" multiple hidden tabIndex={-1} />
         <input type="hidden" name="picks" value={picks.join("\n")} />
-        <span className="lbl mute">References</span>
-        <label
-          className={cn("drop", over && "over", room <= 0 && "full")}
-          onDragOver={(e) => {
-            e.preventDefault();
-            setOver(true);
-          }}
-          onDragLeave={(e) => !e.currentTarget.contains(e.relatedTarget as Node) && setOver(false)}
-          onDrop={(e) => {
-            e.preventDefault();
-            setOver(false);
-            add(e.dataTransfer.files);
-          }}
-        >
-          <input
-            type="file"
-            accept="image/*,.heic,.heif"
-            multiple
-            className="sr-only"
-            disabled={room <= 0}
-            onChange={(e) => {
-              add(e.currentTarget.files);
-              e.currentTarget.value = "";
-            }}
-          />
-          <span>{room <= 0 ? `${MAX_REFS} references, that is the most` : "Drop images here, or upload from your computer"}</span>
-          <span className="lbl mute">Optional · up to {MAX_REFS}</span>
-        </label>
-        <div>
+        <span className="lbl mute">References <span>· optional, up to {MAX_REFS}</span></span>
+        <div className="acts">
+          <span ref={upw} className="upw">
+            <label className={cn("btn up", over && "over", room <= 0 && "full")}>
+              <input
+                type="file"
+                accept="image/*,.heic,.heif"
+                multiple
+                className="sr-only"
+                disabled={room <= 0}
+                onChange={(e) => {
+                  add(e.currentTarget.files);
+                  e.currentTarget.value = "";
+                }}
+              />
+              {/* A frame with an arrow dropping into it: drag one here. */}
+              <svg viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="1.4">
+                <rect x="1.5" y="6" width="13" height="8.5" rx="1" strokeDasharray="2 1.6" />
+                <path d="M8 .5v9M5 6.5l3 3 3-3" />
+              </svg>
+              Upload references
+            </label>
+          </span>
           <button type="button" className="btn" onClick={open}>
             Pick from my work
           </button>

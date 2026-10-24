@@ -372,11 +372,15 @@
 .v3 .reach .fld input,.v3 .reach .fld textarea{font-size:16px;padding:12px 0}
 .v3 .reach .fld ::placeholder{color:var(--mute);opacity:.6}
 .v3 .reach-out{display:flex;flex-direction:column;gap:12px}
-/* References on /contact (`reference-picks.tsx`): a dashed drop zone, then Pick from my work. */
+/* References (`reference-picks.tsx`): Upload references (pulled toward a dragged image) and Pick from my work. */
 .v3 .refs{gap:10px}
-.v3 .refs .drop{display:flex;flex-direction:column;gap:6px;align-items:flex-start;padding:22px 18px;border:1px dashed color-mix(in srgb,var(--ink) 28%,transparent);border-radius:4px;cursor:pointer;transition:border-color .15s,background .15s}
-.v3 .refs .drop:is(.over,:hover,:focus-within){border-color:var(--accent);background:color-mix(in srgb,var(--accent) 7%,transparent)}
-.v3 .refs .drop.full{cursor:default;opacity:.5}
+.v3 .refs .acts{display:flex;flex-wrap:wrap;gap:12px}
+.v3 .refs .upw{display:inline-flex}
+.v3 .refs .up{gap:10px;transition:translate .18s cubic-bezier(.2,.8,.2,1),background .15s,color .15s,border-color .15s}
+.v3 .refs .up svg{width:16px;height:16px;flex:none}
+.v3 .refs .up.over{border-color:var(--accent);color:var(--accent);background:color-mix(in srgb,var(--accent) 9%,transparent)}
+.v3 .refs .up.full{opacity:.4;pointer-events:none}
+.v3 .refs .up:focus-within{outline:1px solid var(--accent);outline-offset:3px}
 .v3 .reference-panel{border-radius:4px;border-color:var(--line);background:var(--bg);color:var(--ink);-webkit-backdrop-filter:none;backdrop-filter:none}
 .v3 .reach-out b,.v3 .reach-call h3,.v3 .reach-fields h3{font:900 clamp(2rem,4vw,3.25rem)/.92 var(--display);letter-spacing:-.045em;margin:0}
 .v3 .reach-out p,.v3 .reach-call p{margin:0}
