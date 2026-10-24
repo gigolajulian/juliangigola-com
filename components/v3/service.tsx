@@ -16,7 +16,8 @@ export function V3Service({ page, frames }: { page: BookingPage; frames: Frame[]
   /* Its booking on the V3 stepper: the same slug, or the session that books the same Cal.com event. */
   const s = SESSIONS[page.slug as SessionSlug] ?? Object.values(SESSIONS).find((x) => x.cal === page.book.cal);
   const includes = page.blocks.find((b) => b.heading === "What's included")?.items ?? [];
-  const cols = [0, 1, 2].map((c) => frames.filter((_, i) => i % 3 === c));
+  /* Six frames, two a column (Julian); the gallery holds the rest. */
+  const cols = [0, 1, 2].map((c) => frames.slice(0, 6).filter((_, i) => i % 3 === c));
   const others = BOOKING_PAGES.filter((p) => p !== page);
   return (
     <div className="v3 contents">
