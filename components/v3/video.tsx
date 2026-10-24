@@ -6,9 +6,9 @@ import { V3Foot } from "@/components/v3/chrome";
 import { Mark } from "@/components/v3/duo";
 import { REEL, SECTIONS, creditOf, embedUrl, previewUrl, posterFor, sectionName, type Video, type VideoSection } from "@/lib/videos";
 
-/* JG V3 Motion. Desktop (Julian): A as an index over one full-screen
-   stage; scrolling swaps the film and its title, bottom left. Phone: C,
-   the reel then the films as chapters. Every film plays muted once it is
+/* JG V3 Motion (Julian): A as an index over one full-screen stage;
+   scrolling swaps the film and its title, bottom left. Phones get the same
+   stage, on stills. Every film plays muted once it is
    in frame; a click opens the player, and Back, Esc, the browser's back or
    a click outside the film puts the visitor where they were. */
 
@@ -37,8 +37,35 @@ function useInView<T extends Element>() {
   return [ref, on] as const;
 }
 
+/* A muted preview. YouTube draws its own controls while a film loads, is
+   paused or has just started (on phones even with controls=0), so the
+   poster stays on top until the player says it has been playing a moment.
+   A phone that blocks autoplay keeps the still. Vimeo's background mode
+   has no controls; it shows after the same short wait. */
 function Loop({ v }: { v: Video }) {
-  return <iframe className="mo-loop" src={previewUrl(v)} title="" aria-hidden tabIndex={-1} allow="autoplay" />;
+  const ref = React.useRef<HTMLIFrameElement>(null);
+  const [ready, setReady] = React.useState(false);
+  const yt = v.provider === "youtube";
+  React.useEffect(() => {
+    let t: ReturnType<typeof setTimeout> | undefined;
+    const onMsg = (e: MessageEvent) => {
+      if (e.source !== ref.current?.contentWindow) return;
+      let m;
+      try { m = typeof e.data === "string" ? JSON.parse(e.data) : e.data; } catch { return; }
+      const state = m?.event === "onStateChange" ? m.info : m?.event === "infoDelivery" ? m.info?.playerState : undefined;
+      if (typeof state !== "number") return;
+      clearTimeout(t);
+      if (state === 1) t = setTimeout(() => setReady(true), 2500);
+      else setReady(false);
+    };
+    addEventListener("message", onMsg);
+    return () => { clearTimeout(t); removeEventListener("message", onMsg); };
+  }, []);
+  const hello = () => {
+    if (yt) ref.current?.contentWindow?.postMessage(JSON.stringify({ event: "listening", id: 1 }), "*");
+    else setTimeout(() => setReady(true), 2500);
+  };
+  return <iframe ref={ref} onLoad={hello} className="mo-loop" data-ready={ready || undefined} src={previewUrl(v) + (yt ? "&enablejsapi=1" : "")} title="" aria-hidden tabIndex={-1} allow="autoplay" />;
 }
 
 /* The player: the film over the whole screen, in a modal dialog with a
@@ -260,7 +287,8 @@ function Chapter({ v, n, ratio, small = false, sizes, onPlay }: { v: Video; n: n
   );
 }
 
-function Mob({ videos, onPlay }: { videos: Video[]; onPlay: (v: Video) => void }) {
+/* Retired 2026-10-24: phones get the stage too (Julian). Kept, unused. */
+export function Mob({ videos, onPlay }: { videos: Video[]; onPlay: (v: Video) => void }) {
   const [tab, setTab] = React.useState<"all" | VideoSection>("all");
   const [ref, on] = useInView<HTMLDivElement>();
   const films = tab === "all" ? videos : videos.filter((v) => v.section === tab);
@@ -319,7 +347,6 @@ export function V3Video({ videos }: { videos: Video[] }) {
     <div className="v3 contents">
       <section className="v3page" id="p-video">
         <Desk films={all} onPlay={setPlaying} />
-        <Mob videos={sorted} onPlay={setPlaying} />
         <V3Foot />
       </section>
       <Player v={playing} list={all} onGo={setPlaying} onClose={close} />
