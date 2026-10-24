@@ -44,12 +44,13 @@ describe("book.juliangigola.com", () => {
     expect(env.ASSETS.fetch).not.toHaveBeenCalled();
   });
 
-  it("serves a call's page with its own preview title and image", async () => {
-    Rewriter.set = {};
-    const res = await go("/editorial");
-    expect(res.status).toBe(200);
-    expect(Rewriter.set['meta[property="og:title"]']).toBe("Editorial call");
-    expect(Rewriter.set['meta[property="og:image"]']).toBe("https://book.juliangigola.com/og-editorial.jpg");
+  it.each([
+    ["editorial", "editorial"],
+    ["campaign", "brand-photography"],
+  ])("sends the %s call to its V3 page, as a 302", async (call, page) => {
+    const res = await go(`/${call}`);
+    expect(res.status).toBe(302);
+    expect(res.headers.get("location")).toBe(`https://juliangigola.com/book/${page}`);
   });
 
   it("passes other files through untouched", async () => {

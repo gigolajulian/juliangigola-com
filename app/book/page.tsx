@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { BookPicker, type Bookable } from "@/components/book-picker";
+import { V3Book } from "@/components/v3/book";
 import { calEvent, pageForSession } from "@/lib/booking";
+import { isSession } from "@/lib/v3";
 import { wallOf } from "@/lib/work";
 import { SESSION_TYPES, formatPrice } from "@/lib/sessions";
 
@@ -21,8 +23,11 @@ const LENGTHS: Record<string, string> = {
   weddings: "Call",
 };
 
-export default async function BookPage({ searchParams }: { searchParams: Promise<{ session?: string }> }) {
-  const { session } = await searchParams;
+/* JG V3: the stepper, on graduation unless `?session=` names another (master
+   `#/book`). `?classic` keeps the page as it was before V3. */
+export default async function BookPage({ searchParams }: { searchParams: Promise<{ session?: string; classic?: string }> }) {
+  const { session, classic } = await searchParams;
+  if (classic === undefined) return <V3Book slug={isSession(session) ? session : "graduation"} />;
   const sessions: Bookable[] = SESSION_TYPES.flatMap((s) => {
     const cal = calEvent(s.slug) ?? pageForSession(s.slug)?.book.cal;
     // Its wall, as its own booking page has (`/book/[slug]`).

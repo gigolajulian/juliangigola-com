@@ -215,7 +215,7 @@ export const embedUrl = (v: Video): string =>
 export const previewUrl = (v: Video): string => {
   const at = Math.max(0, Math.round(v.previewAt ?? 8));
   return v.provider === "youtube"
-    ? `https://www.youtube-nocookie.com/embed/${v.videoId}?autoplay=1&mute=1&controls=0&start=${at}&loop=1&playlist=${v.videoId}&rel=0&modestbranding=1&playsinline=1&disablekb=1`
+    ? `https://www.youtube-nocookie.com/embed/${v.videoId}?autoplay=1&mute=1&controls=0&start=${at}&loop=1&playlist=${v.videoId}&rel=0&modestbranding=1&playsinline=1&disablekb=1&cc_load_policy=0&iv_load_policy=3`
     : `https://player.vimeo.com/video/${v.videoId}?background=1&autoplay=1&loop=1&muted=1&dnt=1#t=${at}s`;
 };
 

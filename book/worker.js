@@ -9,9 +9,9 @@ const pages = {
   campaign: ["Brand & campaign call", "15 minutes about the brief", "/og-campaign.jpg", 1200, 630],
 };
 
-// The four sessions book on a page of their own on the site (/book/<session>);
-// the calls stay on Cal.com here.
-const picker = { portraits: "portraits", graduation: "graduation", headshots: "headshots", digitals: "studio-digitals" };
+// The sessions and the two calls book on a page of their own on the site
+// (/book/<slug>), on the V3 stepper.
+const picker = { portraits: "portraits", graduation: "graduation", headshots: "headshots", digitals: "studio-digitals", editorial: "editorial", campaign: "brand-photography" };
 
 export default {
   async fetch(request, env) {

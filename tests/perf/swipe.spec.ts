@@ -33,13 +33,16 @@ import { contextFor, stacked, VIEWPORTS } from "./matrix";
 
 test.use({ headless: false });
 
-const SWIPE_PAGES = ["/", "/portfolio"] as const;
+/* Since JG V3 the homepage scrolls down the page and the work index opens
+   on a grid: no paged strip to swipe on either. What stays is the work
+   index on a phone, where a finger scrolls the page. */
+const SWIPE_PAGES: readonly string[] = ["/portfolio"];
 /** Three on, one back. */
 const PLAN = [1, 1, 1, -1] as const;
 
 for (const path of SWIPE_PAGES) {
   test.describe(`swipe ${path} @motion`, () => {
-    for (const v of VIEWPORTS) {
+    for (const v of VIEWPORTS.filter(stacked)) {
       test(`${v.name}`, async ({ browser, browserName }, info) => {
         const ctx = await browser.newContext(contextFor(v, browserName));
         try {

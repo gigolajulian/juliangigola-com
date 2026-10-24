@@ -97,10 +97,6 @@ const pageRedirects = [
   { source: "/portfolio/graduation", destination: "/graduation-photos#work", permanent: false },
   // Julian: change Studio to About. The page moved; the old name follows.
   { source: "/studio", destination: "/#about", permanent: true },
-  // Julian: About and Contact are homepage screens now. The query rides
-  // along, so /contact?type=session still fills the form in.
-  { source: "/about", destination: "/#about", permanent: true },
-  { source: "/contact", destination: "/#contact", permanent: true },
   // /rates never got written — it still served the Format demo's biography.
   // Sessions is where a rate question actually gets answered now.
   { source: "/rates", destination: "/#sessions", permanent: true },
