@@ -377,8 +377,11 @@
 .v3 .refs .acts{display:flex;flex-wrap:wrap;gap:12px}
 .v3 .refs .upw{display:inline-flex}
 .v3 .refs .up{gap:10px;transition:translate .18s cubic-bezier(.2,.8,.2,1),background .15s,color .15s,border-color .15s}
-.v3 .refs .hint{margin:0;font-size:12px}
-@media (max-width:700px) and (pointer:coarse){.v3 .refs .hint{display:none}}
+.v3 .refs .swap{display:grid}
+.v3 .refs .swap>span{grid-area:1/1;text-align:center;transition:opacity .15s}
+.v3 .refs .swap .drag{opacity:0;font-size:12px;letter-spacing:0;text-transform:none}
+@media (hover:hover){.v3 .refs .up:hover .swap>span:first-child{opacity:0}
+.v3 .refs .up:hover .swap .drag{opacity:1}}
 .v3 .refs .up.over{border-color:var(--accent);color:var(--accent);background:color-mix(in srgb,var(--accent) 9%,transparent)}
 .v3 .refs .up.full{opacity:.4;pointer-events:none}
 .v3 .refs .up:focus-within{outline:1px solid var(--accent);outline-offset:3px}

@@ -169,14 +169,17 @@ export function ReferencePicks({ resync, v3 }: { resync: unknown; v3?: boolean }
                   e.currentTarget.value = "";
                 }}
               />
-              Upload references
+              {/* Both in one cell, so the button keeps the wider one's width; hover shows the second. */}
+              <span className="swap">
+                <span>Upload references</span>
+                <span className="drag" aria-hidden="true">Drag a JPG or PNG here</span>
+              </span>
             </label>
           </span>
           <button type="button" className="btn" onClick={open}>
             Pick from my work
           </button>
         </div>
-        <p className="hint mute">Or drag a JPG or PNG onto Upload references.</p>
         {thumbs}
         <PickPanel dialog={dialog} groups={groups} picks={picks} room={room} toggle={toggle} />
       </div>
