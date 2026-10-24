@@ -30,7 +30,7 @@ import loader from "@/image-loader";
  *   It is skipped for anybody who asks their system for less motion.
  *
  * All three decisions are made by the inline script in `layout.tsx`
- * before the first paint, for everyone unless `?v3motion=0`. The stylesheet
+ * before the first paint, for every visitor (Julian, 2026-10-24). The stylesheet
  * keeps this layer hidden unless that script has set `data-intro`, so a
  * visitor with no JavaScript is never shut behind a curtain that cannot
  * lift.
