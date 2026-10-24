@@ -35,7 +35,8 @@ async function shrink(file: File): Promise<File> {
   }
 }
 
-export function ReferencePicks({ resync }: { resync: unknown }) {
+export function ReferencePicks({ resync, v3 }: { resync: unknown; v3?: boolean }) {
+  const [over, setOver] = React.useState(false);
   const [uploads, setUploads] = React.useState<Upload[]>([]);
   const [picks, setPicks] = React.useState<string[]>([]);
   const refs = React.useRef<HTMLInputElement>(null);
@@ -75,6 +76,66 @@ export function ReferencePicks({ resync }: { resync: unknown }) {
   const toggle = (src: string) =>
     setPicks((p) => (p.includes(src) ? p.filter((s) => s !== src) : room > 0 ? [...p, src] : p));
 
+  const thumbs = uploads.length + picks.length ? (
+    <ul className="mt-4 flex flex-wrap gap-2">
+      {uploads.map((u, i) => (
+        <Thumb key={u.url} label={u.file.name} onRemove={() => drop(i)}>
+          {/* eslint-disable-next-line @next/next/no-img-element -- a local blob */}
+          <img src={u.url} alt="" className="size-full object-cover" />
+        </Thumb>
+      ))}
+      {picks.map((src) => (
+        <Thumb key={src} label="my photograph" onRemove={() => toggle(src)}>
+          <Image src={src} alt="" width={128} height={128} sizes="64px" className="size-full object-cover" />
+        </Thumb>
+      ))}
+    </ul>
+  ) : null;
+
+  // V3 (/contact): a drop zone that also opens the file picker, and the same panel of my frames.
+  if (v3)
+    return (
+      <div className="fld refs">
+        <input ref={refs} type="file" name="refs" multiple hidden tabIndex={-1} />
+        <input type="hidden" name="picks" value={picks.join("\n")} />
+        <span className="lbl mute">References</span>
+        <label
+          className={cn("drop", over && "over", room <= 0 && "full")}
+          onDragOver={(e) => {
+            e.preventDefault();
+            setOver(true);
+          }}
+          onDragLeave={(e) => !e.currentTarget.contains(e.relatedTarget as Node) && setOver(false)}
+          onDrop={(e) => {
+            e.preventDefault();
+            setOver(false);
+            add(e.dataTransfer.files);
+          }}
+        >
+          <input
+            type="file"
+            accept="image/*,.heic,.heif"
+            multiple
+            className="sr-only"
+            disabled={room <= 0}
+            onChange={(e) => {
+              add(e.currentTarget.files);
+              e.currentTarget.value = "";
+            }}
+          />
+          <span>{room <= 0 ? `${MAX_REFS} references, that is the most` : "Drop images here, or upload from your computer"}</span>
+          <span className="lbl mute">Optional · up to {MAX_REFS}</span>
+        </label>
+        <div>
+          <button type="button" className="btn" onClick={open}>
+            Pick from my work
+          </button>
+        </div>
+        {thumbs}
+        <PickPanel dialog={dialog} groups={groups} picks={picks} room={room} toggle={toggle} />
+      </div>
+    );
+
   const button =
     "tap-44 label cursor-pointer rounded-full border border-border px-4 py-2 text-muted-foreground transition-colors duration-200 hoverable:hover:border-foreground/40 hoverable:hover:text-foreground disabled:pointer-events-none disabled:opacity-40";
 
@@ -104,21 +165,7 @@ export function ReferencePicks({ resync }: { resync: unknown }) {
           Pick from my work
         </button>
       </div>
-      {uploads.length + picks.length ? (
-        <ul className="mt-4 flex flex-wrap gap-2">
-          {uploads.map((u, i) => (
-            <Thumb key={u.url} label={u.file.name} onRemove={() => drop(i)}>
-              {/* eslint-disable-next-line @next/next/no-img-element -- a local blob */}
-              <img src={u.url} alt="" className="size-full object-cover" />
-            </Thumb>
-          ))}
-          {picks.map((src) => (
-            <Thumb key={src} label="my photograph" onRemove={() => toggle(src)}>
-              <Image src={src} alt="" width={128} height={128} sizes="64px" className="size-full object-cover" />
-            </Thumb>
-          ))}
-        </ul>
-      ) : null}
+      {thumbs}
       <PickPanel dialog={dialog} groups={groups} picks={picks} room={room} toggle={toggle} />
     </div>
   );

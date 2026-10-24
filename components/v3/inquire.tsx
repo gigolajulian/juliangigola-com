@@ -3,6 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { ReferencePicks } from "@/components/reference-picks";
 import { V3Foot } from "@/components/v3/chrome";
 import { CallDialog } from "@/components/v3/book";
 import { Duo } from "@/components/v3/duo";
@@ -50,6 +51,7 @@ function Note() {
           {fld("email", "Email", <input id="r-email" name="email" type="email" autoComplete="email" placeholder="you@email.com" value={v.email} onChange={set("email")} aria-invalid={!!err.email || undefined} />)}
         </div>
         {fld("message", "Message", <textarea id="r-message" name="message" rows={4} placeholder="What are you planning, and when?" value={v.message} onChange={set("message")} aria-invalid={!!err.message || undefined} />)}
+        <ReferencePicks resync={state} v3 />
         <Failed state={state} />
         <div className="reach-send">
           <button className="btn fill" type="submit" disabled={pending}>Send note</button>
