@@ -3,6 +3,8 @@
 import * as React from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { gsap } from "gsap";
+import { Flip } from "gsap/Flip";
 import { V3Foot } from "@/components/v3/chrome";
 import DISC from "@/lib/discipline-order.json";
 
@@ -49,6 +51,15 @@ const TARGETS = (
 type PickAt = { a: number; c: number };
 
 /** Motion plan 05: remember the clicked cover's box so the project page can grow its hero from it (tile-fly.tsx). */
+gsap.registerPlugin(Flip);
+
+/** The covers on screen, for the view change below. */
+const seen = () =>
+  [...document.querySelectorAll<HTMLElement>("#p-work [data-flip-id]")].filter((e) => {
+    const r = e.getBoundingClientRect();
+    return r.bottom > 0 && r.top < innerHeight && r.right > 0 && r.left < innerWidth;
+  });
+
 function flyFrom(a: HTMLElement, s: string) {
   const r = a.querySelector(".ph")?.getBoundingClientRect();
   try {
@@ -60,7 +71,7 @@ function Tile({ p, swatch }: { p: WorkItem; swatch?: string[] }) {
   return (
     <figure className="wt">
       <Link href={`/portfolio/${p.s}`} aria-label={p.n} onClick={(e) => flyFrom(e.currentTarget, p.s)}>
-        <div className="ph">
+        <div className="ph" data-flip-id={p.s}>
           <Image
             src={p.cover}
             alt={p.n}
@@ -88,11 +99,36 @@ export function V3Work({ work }: { work: WorkItem[] }) {
   const [filter, setFilter] = React.useState("All");
   const [view, setView] = React.useState<"grid" | "strip" | "color">("grid");
   const back = React.useRef<"grid" | "strip">("grid");
+  /* Grid, strip and color views: the covers on screen fly from where they
+     were to where they land, new ones fade in (GSAP Flip). Only with ?v3motion. */
+  const flip = React.useRef<Flip.FlipState | null>(null);
+  const go = (v: typeof view) => {
+    if (document.documentElement.hasAttribute("data-v3motion") && !matchMedia("(prefers-reduced-motion: reduce)").matches)
+      flip.current = Flip.getState(seen());
+    setView(v);
+  };
   const [q, setQ] = React.useState("");
   const [pick, setPick] = React.useState<PickAt | null>(null);
   const [scope, setScope] = React.useState<Scope | null>(null);
   const page = React.useRef<HTMLElement>(null);
   const strip = React.useRef<HTMLDivElement>(null);
+  React.useLayoutEffect(() => {
+    const st = flip.current;
+    if (!st) return;
+    flip.current = null;
+    const w = strip.current;
+    if (w) w.style.overflow = "visible"; // the strip would clip covers flying up into it
+    const tl = Flip.from(st, {
+      targets: seen(),
+      duration: 0.6,
+      ease: "expo.out",
+      scale: true,
+      stagger: 0.015,
+      onEnter: (els) => gsap.fromTo(els, { opacity: 0 }, { opacity: 1, duration: 0.3 }),
+      onComplete: () => void (w && (w.style.overflow = "")),
+    });
+    return () => void tl.progress(1);
+  }, [view]);
   const bar = React.useRef<HTMLDivElement>(null);
   const chips = React.useRef<HTMLDivElement>(null);
   const chipsBar = React.useRef<HTMLDivElement>(null);
@@ -422,10 +458,10 @@ export function V3Work({ work }: { work: WorkItem[] }) {
               aria-label={VIEWS[2][1]}
               title={VIEWS[2][1]}
               onClick={() => {
-                if (view === "color") setView(back.current);
+                if (view === "color") go(back.current);
                 else {
                   back.current = view;
-                  setView("color");
+                  go("color");
                 }
               }}
             >
@@ -438,7 +474,7 @@ export function V3Work({ work }: { work: WorkItem[] }) {
                 aria-pressed={view === v}
                 aria-label={label}
                 title={label}
-                onClick={() => setView(v)}
+                onClick={() => go(v)}
               >
                 {icon}
               </button>
@@ -483,7 +519,7 @@ export function V3Work({ work }: { work: WorkItem[] }) {
           <>
             <div className="wstrip" ref={strip} onScroll={stripBar}>
               {list.map((p, n) => (
-                <figure key={p.s} className="sc">
+                <figure key={p.s} className="sc" data-flip-id={p.s}>
                   <Link href={`/portfolio/${p.s}`} aria-label={p.n}>
                     <Image
                       src={p.cover}
