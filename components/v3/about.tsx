@@ -11,7 +11,7 @@ import { ABOUT_PHOTO } from "@/lib/v3";
 const S = "­";
 const BIO = `I photo${S}graph people, mostly for fash${S}ion, music and brands. I shoot edi${S}to${S}ri${S}als and cam${S}paigns, and help la${S}bels and mu${S}si${S}cians shape how they're seen. I also cover the mo${S}ments people want to keep: head${S}shots, por${S}traits, grad${S}u${S}a${S}tions and wed${S}dings across San Fran${S}cis${S}co, San Jose and the Bay Area. Grow${S}ing up As${S}syr${S}i${S}an Amer${S}i${S}can, be${S}tween cul${S}tures, taught me to watch from slight${S}ly out${S}side the frame.`;
 
-const DOES = ["Still photography", "Post-production", "Camera operation", "Editorials", "Brand imagery", "Creative direction"];
+const DOES = ["Editorials", "Still photography", "Camera operation", "Brand imagery", "Post-production", "Creative direction"];
 
 export function V3About() {
   return (
