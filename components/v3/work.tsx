@@ -95,7 +95,6 @@ export function V3Work({ work }: { work: WorkItem[] }) {
      screen fly from where they were to where they land, new ones fade in
      (GSAP Flip). Only with ?v3motion. */
   const flip = React.useRef<Flip.FlipState | null>(null);
-  const flippedAt = React.useRef(0);
   const flipped = (set: () => void) => {
     if (document.documentElement.hasAttribute("data-v3motion") && !matchMedia("(prefers-reduced-motion: reduce)").matches)
       flip.current = Flip.getState(seen());
@@ -113,7 +112,6 @@ export function V3Work({ work }: { work: WorkItem[] }) {
     flip.current = null;
     const w = strip.current;
     if (w) w.style.overflow = "visible"; // the strip would clip covers flying up into it
-    flippedAt.current = performance.now();
     const tl = Flip.from(st, {
       targets: seen(),
       duration: 0.6,
@@ -401,34 +399,6 @@ export function V3Work({ work }: { work: WorkItem[] }) {
       </svg>,
     ],
   ] as const;
-
-  /* Covers settle as they come into view: down the grid and the color
-     results they rise 24px out of a slight zoom; along the strip, where a
-     slide would cross the next caption, only the zoom (0.5s, 50ms apart). Once per cover; not
-     right after a Flip, which has already moved them. Only with ?v3motion. */
-  React.useEffect(() => {
-    if (!document.documentElement.hasAttribute("data-v3motion") || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    const along = view === "strip";
-    const io = new IntersectionObserver(
-      (es) => {
-        const now = es
-          .filter((e) => e.isIntersecting)
-          .map((e) => e.target as HTMLElement)
-          .sort((a, b) => a.offsetTop - b.offsetTop || a.offsetLeft - b.offsetLeft);
-        const late = performance.now() - flippedAt.current > 700;
-        now.forEach((f, k) => {
-          io.unobserve(f);
-          if (!late) return;
-          const d = { duration: 500, delay: k * 50, easing: "cubic-bezier(.16,1,.3,1)", fill: "backwards" as const };
-          if (!along) f.animate([{ translate: "0 24px" }, { translate: "0 0" }], d);
-          f.querySelector("img")?.animate([{ scale: 1.04 }, { scale: 1 }], d);
-        });
-      },
-      { root: along ? strip.current : null, rootMargin: along ? "0px -4% 0px 0px" : "0px 0px -6% 0px" },
-    );
-    document.querySelectorAll("#p-work :is(.wgrid .wt, .wstrip .sc, .sc-res .wt)").forEach((f) => io.observe(f));
-    return () => io.disconnect();
-  }, [view, list, res]);
 
   return (
     <div className="v3 contents">

@@ -1026,5 +1026,3 @@ dialog.v3.mo-player,.mo-player>iframe{background:#000}
 @keyframes t-rise{from{translate:0 100%;clip-path:inset(-.2em -1em 100% -1em)}to{translate:0 0;clip-path:inset(-.2em -1em -.2em -1em)}}
 /* The next set's cover beside its name, at the height of the type. */
 .v3 .pj-nx{position:relative;flex:none;align-self:center;height:clamp(64px,7vw,112px);aspect-ratio:4/5;border-radius:4px;overflow:hidden;background:var(--card)}
-/* Scroll motion 1: over the homepage cover the header fades in where the big name docks, without its slide. */
-@media (prefers-reduced-motion:no-preference){:root[data-v3motion] .v3 .site-hdr{transform:none;transition:opacity .15s ease}}
