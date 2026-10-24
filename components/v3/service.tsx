@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { V3Foot } from "@/components/v3/chrome";
+import { V3BookFlow } from "@/components/v3/book";
 import { Run } from "@/components/v3/flow";
 import { Doors } from "@/components/v3/home";
 import { BOOKING_PAGES, bookingHref, type BookingPage } from "@/lib/booking";
@@ -28,7 +29,7 @@ export function V3Service({ page, frames }: { page: BookingPage; frames: Frame[]
           <p className="sv-lead">{page.lead}</p>
           <Run className="inc lbl" items={[page.rate, ...includes, ...(page.turnaround ? [`Ready in ${page.turnaround}`] : [])]} />
           <div className="ctas">
-            <Link className="btn fill" href={s ? `/book/${s.slug}` : "/contact/form"}>{page.book.title}</Link>
+            <Link className="btn fill" href={s ? "#book" : "/contact/form"}>{page.book.title}</Link>
             <Link className="btn" href="#work">See the work</Link>
           </div>
         </header>
@@ -49,6 +50,11 @@ export function V3Service({ page, frames }: { page: BookingPage; frames: Frame[]
             </div>
           ))}
         </div>
+        {s ? (
+          <section className="sv-book" id="book">
+            <V3BookFlow slug={s.slug} tabs={false} />
+          </section>
+        ) : null}
         <div className="sv-info">
           {page.blocks.map((b) => (
             <section className="sv-row" key={b.heading}>

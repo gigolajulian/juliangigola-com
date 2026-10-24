@@ -27,7 +27,8 @@ function Tabs({ at }: { at: SessionSlug }) {
   );
 }
 
-export function V3BookFlow({ slug }: { slug: SessionSlug }) {
+/** `tabs`: false where the page is already about one booking (the service pages). */
+export function V3BookFlow({ slug, tabs = true }: { slug: SessionSlug; tabs?: boolean }) {
   const S = SESSIONS[slug];
   const shell: Shell = (p) => (
     <FlowShell
@@ -35,7 +36,7 @@ export function V3BookFlow({ slug }: { slug: SessionSlug }) {
       body={
         p.at === 1 ? (
           <>
-            {TAB_ORDER.includes(slug) ? <Tabs at={slug} /> : null}
+            {tabs && TAB_ORDER.includes(slug) ? <Tabs at={slug} /> : null}
             <Run className="inc lbl" items={[...S.includes, ...(S.turnaround ? [`Ready in ${S.turnaround}`] : [])]} />
             {p.body}
           </>

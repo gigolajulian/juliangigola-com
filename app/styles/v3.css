@@ -702,3 +702,5 @@ html{font-family:var(--font-mono),ui-monospace,monospace}
 /* A flow photo's phone frame (`photo.m`): it stands in for both themes' frames on phones. */
 .v3 .f-photo .v3m{display:none}
 @media (max-width:800px){.v3 .f-photo .ph:has(.v3m) :is(.v3d,.v3l){display:none}.v3 .f-photo .v3m{display:block}}
+/* The booking under a service page's frames. */
+.v3 .sv-book{border-top:1px solid var(--line);margin-top:48px;scroll-margin-top:64px}
