@@ -55,7 +55,7 @@ export function FlowShell({
   name: string;
   sum: [string, React.ReactNode][];
   /** The caption over the photo with a line under the name, the photo
-      running to the foot of the screen (Julian, on the calls). */
+      running to the foot of the screen (Julian, every booking). */
   over?: string;
 }) {
   const last = at === steps.length && steps.length > 0;
@@ -84,7 +84,7 @@ export function FlowShell({
         <div className="f-body">{body}</div>
         {bar ? <div className="f-bar">{bar}</div> : null}
       </div>
-      <figure className={over ? "f-photo over" : "f-photo"}>
+      <figure className={over != null ? "f-photo over" : "f-photo"}>
         <div className="in">
           <div className="ph">
             <Image className="v3d" src={photo.d} alt={`${name} sample frame`} fill sizes="(max-width: 800px) 100vw, 44vw" />

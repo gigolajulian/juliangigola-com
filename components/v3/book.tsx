@@ -46,7 +46,7 @@ export function V3BookFlow({ slug }: { slug: SessionSlug }) {
       sum={[["Session", rate(S)], ...p.sum]}
       photo={S.photo}
       name={S.name}
-      over={TAB_ORDER.includes(slug) ? undefined : S.blurb}
+      over={S.blurb ?? ""}
     />
   );
   if (!S.cal) return <OnRequest key={slug} slug={slug} shell={shell} />;
