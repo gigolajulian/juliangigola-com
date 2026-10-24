@@ -19,7 +19,11 @@
   z-index: 60;
   display: block;
   overflow: hidden;
-  /* The sheet's plane tilts in this space (`intro.tsx`). */
+}
+/* The sheet's plane tilts in this space (`intro.tsx`). */
+.jg-sheet-wrap {
+  position: absolute;
+  inset: 0;
   perspective: 1600px;
   perspective-origin: 50% 40%;
 }
@@ -93,7 +97,7 @@
 .jg-intro-eye {
   display: none;
 }
-[data-splash="basic"] :is(.jg-sheet-ground, .jg-sheet-plane, .jg-sheet-count) {
+[data-splash="basic"] .jg-sheet-wrap {
   display: none;
 }
 [data-splash="basic"] .jg-intro-eye {

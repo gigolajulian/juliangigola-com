@@ -216,11 +216,12 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           Skip to content
         </a>
 
-        {/* The wall of work opens over the page on a first arrival, and the
-            page is already underneath it. See `intro.tsx`. */}
-        <MotionGate>
-          <Intro />
-        </MotionGate>
+        {/* The contact sheet opens over the page on a first arrival, and the
+            page is already underneath it. See `intro.tsx`. Not behind
+            MotionGate: that renders nothing on the server, and the sheet
+            has to be in the HTML to start before hydration. The head
+            script above only sets `data-intro` under `?v3motion`. */}
+        <Intro />
 
         <OnLegacy>
           <SiteHeader />
