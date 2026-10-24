@@ -69,30 +69,6 @@
   object-fit: cover;
   opacity: 0;
 }
-.jg-sheet-count {
-  position: absolute;
-  z-index: 2;
-  left: max(18px, env(safe-area-inset-left, 0px));
-  bottom: calc(18px + env(safe-area-inset-bottom, 0px));
-  /* Over the photographs now the sheet fills the screen: a chip of the
-     ground keeps it readable. */
-  padding: 7px 9px;
-  background: var(--bg);
-  color: var(--ink);
-  font: 500 11px/1 var(--mono);
-  letter-spacing: 0.08em;
-  font-variant-numeric: tabular-nums;
-}
-.jg-sheet-count span:first-child {
-  color: var(--accent);
-}
-@media (min-width: 700px) {
-  .jg-sheet-count {
-    left: 40px;
-    bottom: 32px;
-    font-size: 12px;
-  }
-}
 /* The eye is the `?splash=basic` preview's alone. */
 .jg-intro-eye {
   display: none;

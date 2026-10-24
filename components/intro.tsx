@@ -7,7 +7,7 @@ import loader from "@/image-loader";
 /* ── the opening ──────────────────────────────────────────────────
  * A contact sheet. On the page's ground, a grid of frames on a tilted
  * plane fills in from the centre outward, each a grey card and then its
- * photograph, a counter in the corner; the plane settles toward flat as
+ * photograph; the plane settles toward flat as
  * it fills. Then the photographs whoosh up off the screen, top row
  * first so no row passes over another, fading as they go, and the
  * ground fades once the last row is half way up, with the page there
@@ -62,8 +62,7 @@ function run(picks: string[]) {
   if (root.dataset.splash === "basic") return;
   const layer = document.getElementById("jg-intro");
   const p = layer?.querySelector<HTMLElement>(".jg-sheet-plane");
-  const count = layer?.querySelector<HTMLElement>(".jg-sheet-count");
-  if (!layer || !p || !count) return;
+  if (!layer || !p) return;
 
   const FILL = 1450; // every frame has started by then
   const LAND = 360; // a card dropping onto the plane
@@ -101,8 +100,6 @@ function run(picks: string[]) {
     p.append(cell);
     return cell;
   });
-  const num = count.firstChild as HTMLElement;
-  (count.lastChild as HTMLElement).textContent = ` / ${String(n).padStart(3, "0")}`;
 
   /* Centre outward, measured on the flat grid before it tilts. */
   const r0 = p.getBoundingClientRect();
@@ -133,7 +130,6 @@ function run(picks: string[]) {
       { duration: LAND, delay: k * step, easing: "cubic-bezier(0.2, 0.8, 0.25, 1)", fill: "forwards" },
     );
     img.animate([{ opacity: 0 }, { opacity: 1 }], { duration: PHOTO, delay: k * step + 150, fill: "forwards" });
-    setTimeout(() => (num.textContent = String(k + 1).padStart(3, "0")), k * step + 150);
   });
 
   /* Out: top row first, so a lower row never catches the one above. */
@@ -147,7 +143,6 @@ function run(picks: string[]) {
     cell.animate([{ opacity: 1 }, { opacity: 1, offset: 0.3 }, { opacity: 0 }],
       { duration: PER, delay, easing: S, fill: "forwards" });
   });
-  count.animate([{ opacity: 1 }, { opacity: 0 }], { duration: PER, delay: out, easing: S, fill: "forwards" });
   /* Julian: the ground holds while the photographs leave and fades once
      the last row is half way up, so it reads as one move. */
   const clear = out + (rows - 1) * ROW + (cols - 1) * COL + PER * 0.5;
@@ -174,7 +169,6 @@ function run(picks: string[]) {
    only from the server's HTML, never again on a client render. */
 const SHEET =
   '<div class="jg-sheet-ground"></div><div class="jg-sheet-plane"></div>' +
-  '<div class="jg-sheet-count"><span>000</span><span> / 000</span></div>' +
   `<script>(${run.toString()})(${JSON.stringify(PICKS)})</script>`;
 
 export function Intro() {
