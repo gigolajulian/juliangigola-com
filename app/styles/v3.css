@@ -482,6 +482,8 @@
 .v3 .reach-call .btn.fill{background:#f2f1ee;color:#0b0b0a;border-color:#f2f1ee}
 @media (hover:hover){.v3 .reach-call .btn.fill:hover{background:transparent;color:#f2f1ee}}
 @media (max-width:800px){.v3 .reach-call{border-top:0;padding-top:0}}
+.v3 .ab-end{margin:0}
+.v3 .ab-end img{display:block;width:100%;height:auto}
 .v3 .ab-logos{display:flex;flex-direction:column;gap:16px;padding:24px var(--gr) 72px var(--g)}
 .v3 .ab-logos h2{margin:0}
 .v3 .lg{display:grid;grid-template-columns:repeat(5,minmax(0,1fr))}

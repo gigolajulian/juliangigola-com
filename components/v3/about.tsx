@@ -11,7 +11,7 @@ import { ABOUT_PHOTO } from "@/lib/v3";
 const S = "­";
 const BIO = `I photo${S}graph people, mostly for fash${S}ion, music and brands. I shoot edi${S}to${S}ri${S}als and cam${S}paigns, and help la${S}bels and mu${S}si${S}cians shape how they're seen. I also cover the mo${S}ments people want to keep: head${S}shots, por${S}traits, grad${S}u${S}a${S}tions and wed${S}dings across San Fran${S}cis${S}co, San Jose and the Bay Area. Grow${S}ing up As${S}syr${S}i${S}an Amer${S}i${S}can, be${S}tween cul${S}tures, taught me to watch from slight${S}ly out${S}side the frame.`;
 
-const DOES = ["Photography", "Creative direction", "Post-production", "Camera operation", "Brand imagery", "Editorials"];
+const DOES = ["Still photography", "Creative direction", "Post-production", "Camera operation", "Brand imagery", "Editorials"];
 
 export function V3About() {
   return (
@@ -52,6 +52,10 @@ export function V3About() {
             <Marks cell />
           </div>
         </section>
+        {/* Julian: full bleed, the last thing before the footer. */}
+        <figure className="ab-end">
+          <Image src="/about/julian-studio.jpg" alt="Julian Gigola at a monitor on set in a studio" width={2048} height={1365} sizes="100vw" />
+        </figure>
         <V3Foot />
       </section>
     </div>
