@@ -999,3 +999,26 @@ dialog.v3.mo-player,.mo-player>iframe{background:#000}
 :root[data-v3motion] .v3 .rail li.cur::before{content:"";position:absolute;inset:0 0 auto;height:2px;background:var(--accent);transform-origin:left;animation:rail-in .3s cubic-bezier(.4,0,.2,1) both}}
 @keyframes rh-in{from{translate:0 105%}to{translate:0 0}}
 @keyframes rail-in{from{scale:0 1}to{scale:1 1}}
+/* Motion plan 04: the check draws (0.35s), then the word arrives (0.2s). */
+@media (prefers-reduced-motion:no-preference){
+:root[data-v3motion] .v3 .f-ok{animation:ok-in .2s .3s cubic-bezier(.4,0,.2,1) backwards}
+:root[data-v3motion] .v3 .f-ok svg{color:var(--live)}
+:root[data-v3motion] .v3 .f-ok path{stroke-dasharray:1;animation:ok-draw .35s cubic-bezier(.4,0,.2,1) backwards}}
+@keyframes ok-in{from{color:transparent}}
+@keyframes ok-draw{from{stroke-dashoffset:1}}
+/* Motion plan 06: a new film's title rises in a mask, its credit line follows. */
+@media (prefers-reduced-motion:no-preference){
+:root[data-v3motion] .v3 .mo-cap{animation:none}
+:root[data-v3motion] .v3 .mo-cap h2{animation:t-rise .45s cubic-bezier(.16,1,.3,1) backwards}
+:root[data-v3motion] .v3 .mo-cap .lbl{animation:mo-in .3s .08s cubic-bezier(.16,1,.3,1) backwards}}
+/* Motion plan 07: the sessions frame settles as it swaps in; the row under the pointer steps right. */
+@media (prefers-reduced-motion:no-preference){
+:root[data-v3motion] .v3 .a-index .frame figure{overflow:hidden}
+:root[data-v3motion] .v3 .a-index .frame img.on{animation:ix-in .5s cubic-bezier(.16,1,.3,1)}
+:root[data-v3motion] .v3 .a-index .row .t{display:inline-block;transition:translate .3s cubic-bezier(.16,1,.3,1)}
+@media (hover:hover){:root[data-v3motion] .v3 .a-index .row:hover .t{translate:6px 0}}}
+@keyframes ix-in{from{scale:1.03}}
+/* Motion plan 08: page titles rise in a mask on arrival (the clip travels with the type, so the mask holds still). */
+@media (prefers-reduced-motion:no-preference){
+:root[data-v3motion] .v3 .pg-t{animation:t-rise .5s .1s cubic-bezier(.16,1,.3,1) backwards}}
+@keyframes t-rise{from{translate:0 100%;clip-path:inset(-.2em -1em 100% -1em)}to{translate:0 0;clip-path:inset(-.2em -1em -.2em -1em)}}

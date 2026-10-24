@@ -12,7 +12,7 @@ const pad = (n: number) => String(n).padStart(2, "0");
 
 export const Check = () => (
   <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true">
-    <path d="M2 7.5l3.2 3L12 3.5" fill="none" stroke="currentColor" strokeWidth="1.5" />
+    <path d="M2 7.5l3.2 3L12 3.5" pathLength={1} fill="none" stroke="currentColor" strokeWidth="1.5" />
   </svg>
 );
 
