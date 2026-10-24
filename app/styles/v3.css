@@ -823,3 +823,15 @@ html{font-family:var(--font-mono),ui-monospace,monospace}
 #p-bts .text-muted-foreground{color:var(--mute)}#p-bts .text-foreground{color:var(--ink)}
 #p-bts .label{font:400 11px/1.4 var(--mono);letter-spacing:.12em;text-transform:uppercase}
 @media (max-width:800px){.v3 .bts-row{grid-template-columns:minmax(0,1fr);padding-top:32px}}
+/* Inner page heads (DESIGN.md: the Inquire head): the title 96px down, 64px on phones, a mute line under it. */
+#p-legal>.pg-head,#p-bts>.pg-head,#p-video>.pg-head{padding-top:96px}
+@media (max-width:800px){#p-legal>.pg-head,#p-bts>.pg-head,#p-video>.pg-head{padding-top:64px}}
+/* BTS: the finished frames beside the day, the fourth opening the set. */
+.v3 .bts-main{display:flex;flex-direction:column;gap:28px;min-width:0}
+.v3 .bts-shoot{display:flex;flex-direction:column;gap:10px}
+.v3 .bts-frames{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.v3 .bts-f{position:relative;aspect-ratio:4/5;border-radius:4px;overflow:hidden;background:var(--card)}
+.v3 .bts-f img{transition:transform .6s cubic-bezier(.2,.7,.2,1)}
+@media (hover:hover){.v3 .bts-f:hover img{transform:scale(1.03)}}
+.v3 .bts-more{position:absolute;inset:auto 0 0;padding:48px 14px 14px;color:#f2f1ee;background:linear-gradient(to top,rgba(10,10,9,.78),rgba(10,10,9,0))}
+@media (max-width:800px){.v3 .bts-frames{grid-template-columns:repeat(2,minmax(0,1fr))}}

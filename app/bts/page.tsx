@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { WITH_BTS, titleCase } from "@/lib/work";
@@ -25,10 +26,7 @@ export default function BtsPage() {
     <div className="v3 contents">
       <section className="v3page" id="p-bts">
         <div className="pg-head">
-          <div>
-            <p className="lbl mute">On set</p>
-            <h1 className="pg-t">Behind the scenes</h1>
-          </div>
+          <h1 className="pg-t">Behind the scenes</h1>
           <p className="lbl mute">
             {pad(WITH_BTS.length)} {WITH_BTS.length === 1 ? "shoot" : "shoots"}
           </p>
@@ -39,9 +37,23 @@ export default function BtsPage() {
               <span className="lbl mute">{pad(i + 1)}</span>
               <h2>{titleCase(p.headline ?? p.name)}</h2>
               <BtsCredit bts={p.bts!} />
-              <Link className="btn" href={`/portfolio/${p.slug}`}>See the shoot</Link>
+              <Link className="btn fill" href={`/portfolio/${p.slug}`}>See the shoot</Link>
             </div>
-            <BtsPageGrid bts={p.bts!} name={p.name} />
+            <div className="bts-main">
+              <BtsPageGrid bts={p.bts!} name={p.name} />
+              {/* The finished frames the day made, the last one opening the set. */}
+              <div className="bts-shoot">
+                <p className="lbl mute">The shoot · {pad(p.images.length)} frames</p>
+                <div className="bts-frames">
+                  {p.images.slice(0, 4).map((f, k) => (
+                    <Link key={f.src} href={`/portfolio/${p.slug}`} className="bts-f" aria-label={k === 3 ? `See all ${p.images.length} frames of ${p.name}` : undefined} tabIndex={k === 3 ? 0 : -1}>
+                      <Image src={f.src} alt={f.alt || `${p.name} by Julian Gigola`} fill sizes="(max-width: 800px) 50vw, 18vw" style={{ objectFit: "cover", background: f.color }} />
+                      {k === 3 && p.images.length > 4 ? <span className="bts-more lbl">+{p.images.length - 4} · See the shoot</span> : null}
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            </div>
           </section>
         ))}
         <V3Foot />
