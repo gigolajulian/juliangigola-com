@@ -177,8 +177,11 @@ function Recent() {
       <div className="a-seq" ref={seq}>
         {RECENT.map((c, k) => (
           <div className="col" data-speed={c.speed} key={k}>
-            {c.shots.map((s, n) => (
-              <figure key={n}>
+            {/* Phones run two columns: the third column's pair joins the
+                first two, one frame each (v3.css hides it there and shows
+                these), so neither column waits on the other. */}
+            {[...c.shots.map((s) => ({ s, m: false })), ...(k < 2 && RECENT[2] ? [{ s: RECENT[2].shots[k], m: true }] : [])].map(({ s, m }, n) => (
+              <figure key={n} className={m ? "m-only" : undefined}>
                 <div className="ph">
                   <Duo d={s.d.src} l={s.l.src} alt={s.d.name} altL={s.l.name} sizes="(max-width: 700px) 50vw, 30vw" />
                 </div>
@@ -195,7 +198,7 @@ function Recent() {
   );
 }
 
-function Commissions({ count }: { count: number }) {
+function Commissions() {
   const tabs = React.useRef<HTMLDivElement>(null);
   const bar = React.useRef<HTMLDivElement>(null);
   /* The tabs' drawn scrollbar: only when they overflow. */
@@ -224,7 +227,7 @@ function Commissions({ count }: { count: number }) {
     <>
       <div className="b-head">
         <h2>Commissions</h2>
-        <Link className="btn" href="/portfolio">See all {count} projects</Link>
+        <Link className="btn" href="/portfolio">See all projects</Link>
       </div>
       {/* Focusable so the row scrolls from the keyboard too (axe). */}
       <div className="tabs lbl" ref={tabs} tabIndex={0} aria-label="Disciplines">
@@ -328,13 +331,13 @@ export function Doors() {
   );
 }
 
-export function V3Home({ count }: { count: number }) {
+export function V3Home() {
   return (
     <section className="v3 v3home">
       <Hero />
       <Clients />
       <Recent />
-      <Commissions count={count} />
+      <Commissions />
       <SessionsIndex />
       <Doors />
       <V3Foot />

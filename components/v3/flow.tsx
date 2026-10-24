@@ -51,7 +51,7 @@ export function FlowShell({
   sub?: React.ReactNode;
   body: React.ReactNode;
   bar?: React.ReactNode;
-  photo: { d: string; l: string; m?: string };
+  photo: { d: string; l: string; m?: string; at?: { d?: string; l?: string } };
   name: string;
   sum: [string, React.ReactNode][];
   /** The caption over the photo with a line under the name, the photo
@@ -90,8 +90,8 @@ export function FlowShell({
       <figure className={over != null ? "f-photo over" : "f-photo"}>
         <div className="in">
           <div className="ph">
-            <Image className="v3d" src={photo.d} alt={`${name} sample frame`} fill sizes="(max-width: 800px) 100vw, 44vw" />
-            <Image className="v3l" src={photo.l} alt={`${name} sample frame`} fill sizes="(max-width: 800px) 100vw, 44vw" />
+            <Image className="v3d" src={photo.d} alt={`${name} sample frame`} fill sizes="(max-width: 800px) 100vw, 44vw" style={photo.at?.d ? ({ "--at": photo.at.d } as React.CSSProperties) : undefined} />
+            <Image className="v3l" src={photo.l} alt={`${name} sample frame`} fill sizes="(max-width: 800px) 100vw, 44vw" style={photo.at?.l ? ({ "--at": photo.at.l } as React.CSSProperties) : undefined} />
             {photo.m ? <Image className="v3m" src={photo.m} alt={`${name} sample frame`} fill sizes="100vw" /> : null}
           </div>
           <div className="cap">

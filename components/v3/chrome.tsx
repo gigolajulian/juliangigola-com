@@ -76,6 +76,10 @@ function ThemeButton() {
     try {
       sessionStorage.setItem(KEY, next);
     } catch {}
+    /* iPhone Safari keeps the old colour in the bars above and below the
+       page until it loads again (Julian): reload, and the head script
+       paints the chosen theme from the first frame. */
+    if (matchMedia("(max-width: 700px) and (pointer: coarse)").matches) return void location.reload();
     turns += 360;
     document.documentElement.style.setProperty("--tb-r", `${turns}deg`);
     setSpun(true);
@@ -97,7 +101,7 @@ function ThemeButton() {
 }
 
 export const NAV = [
-  { href: "/portfolio", label: "Work" },
+  { href: "/portfolio", label: "Portfolio" },
   { href: "/book", label: "Sessions" },
   { href: "/about", label: "About" },
   { href: "/contact", label: "Inquire" },
@@ -208,7 +212,26 @@ export function V3Header() {
     return () => removeEventListener("scroll", sync);
   }, [home, dock]);
   useDock(dock, past, hdr, setLanded);
-  const show = !home || past;
+  /* Portfolio: the header steps away while you scroll down into the work
+     and comes back on the way up (Julian). */
+  const tucks = path.startsWith("/portfolio");
+  const [tuck, setTuck] = React.useState(false);
+  React.useEffect(() => {
+    if (!tucks) return;
+    let last = scrollY;
+    const sync = () => {
+      const y = scrollY, d = y - last;
+      if (Math.abs(d) < 6) return;
+      setTuck(d > 0 && y > 80);
+      last = y;
+    };
+    addEventListener("scroll", sync, { passive: true });
+    return () => {
+      removeEventListener("scroll", sync);
+      setTuck(false);
+    };
+  }, [tucks, path]);
+  const show = (!home || past) && !(tucks && tuck);
   const [menu, setMenu] = React.useState(false);
   /* A route change closes it. */
   const [was, setWas] = React.useState(path);
@@ -227,21 +250,35 @@ export function V3Header() {
     <div className="v3 contents">
       <header ref={hdr} className={`site-hdr${show || menu ? " show" : ""}${dock ? " dock" : ""}${landed || menu ? " landed" : ""}`} inert={!(show || menu)}>
         <Link className="wm site-wm" href="/">Julian Gigola</Link>
-        <nav className="links lbl" aria-label="Main">
+        <nav className="links lbl burger" aria-label="Main">
           {NAV.map((n) => (
             <Link key={n.href} href={n.href} aria-current={current(path, n.href) ? "page" : undefined}>{n.label}</Link>
           ))}
-          <button className="menu-btn" type="button" aria-expanded={menu} aria-controls="pmenu" onClick={() => setMenu(!menu)}>{menu ? "Close" : "Menu"}</button>
+          <button className={menu ? "menu-btn burger-btn open" : "menu-btn burger-btn"} type="button" aria-expanded={menu} aria-controls="pmenu" aria-label={menu ? "Close menu" : "Menu"} onClick={() => setMenu(!menu)}>
+            <i aria-hidden />
+            <i aria-hidden />
+          </button>
           <ThemeButton />
         </nav>
       </header>
-      <nav className="pmenu" id="pmenu" aria-label="Menu" hidden={!menu}>
-        <Link href="/">Home</Link>
-        {NAV.map((n) => (
-          <Link key={n.href} href={n.href}>{n.label}</Link>
-        ))}
-        <span className="lbl mute">hello@juliangigola.com</span>
-      </nav>
+      {/* Julian: on iPhone screens a hamburger, the menu sliding in from the
+          right, light and dark at its bottom left; the homepage's sticky
+          header too (its cover nav stays). Held in a screen-sized box that
+          clips: iOS Safari pans sideways to a fixed panel waiting past the
+          right edge (Julian's iPhone). */}
+      <div className="pwrap">
+        <div className={menu ? "pdim open" : "pdim"} aria-hidden onClick={() => setMenu(false)} />
+        <nav className={menu ? "pmenu drawer open" : "pmenu drawer"} id="pmenu" aria-label="Menu" inert={!menu}>
+          <Link href="/">Home</Link>
+          {NAV.map((n) => (
+            <Link key={n.href} href={n.href} aria-current={current(path, n.href) ? "page" : undefined}>{n.label}</Link>
+          ))}
+          <div className="pmenu-foot">
+            <ThemeButton />
+            <span className="lbl mute">hello@juliangigola.com</span>
+          </div>
+        </nav>
+      </div>
     </div>
   );
 }

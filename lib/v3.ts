@@ -73,8 +73,10 @@ export type Session = {
   cal?: string;
   /** Takes the $100 deposit (`lib/paid.ts`). */
   paid: boolean;
-  /** `m`: a horizontal frame for the phone banner, where the tall one crops badly. */
-  photo: { d: string; l: string; m?: string };
+  /** `m`: a horizontal frame for the phone banner, where the tall one crops badly.
+      `at`: where the phone and portrait-tablet banner sits on each frame (an
+      object-position), where the middle cuts the heads off. */
+  photo: { d: string; l: string; m?: string; at?: { d?: string; l?: string } };
   /** The enquiry type an on-request booking posts (`lib/inbox.ts`); "session" when unset. */
   type?: string;
 };
@@ -89,7 +91,7 @@ export const SESSIONS: Record<SessionSlug, Session> = {
     turnaround: "1 week",
     cal: "juliangigola/portraits",
     paid: true,
-    photo: { d: w("sonder", "05"), l: w("serif", "03") },
+    photo: { d: w("sonder", "05"), l: w("serif", "03"), at: { l: "50% 30%" } },
   },
   graduation: {
     slug: "graduation",
@@ -100,7 +102,7 @@ export const SESSIONS: Record<SessionSlug, Session> = {
     turnaround: "1 week",
     cal: "juliangigola/graduation",
     paid: true,
-    photo: { d: "/work/graduation/cover.jpg", l: w("graduation", "06") },
+    photo: { d: "/work/graduation/cover.jpg", l: w("graduation", "06"), at: { d: "50% 12%" } },
   },
   headshots: {
     slug: "headshots",
@@ -122,7 +124,7 @@ export const SESSIONS: Record<SessionSlug, Session> = {
     turnaround: "2 days",
     cal: "juliangigola/digitals",
     paid: true,
-    photo: { d: w("abril", "03"), l: w("abril", "03") },
+    photo: { d: w("abril", "03"), l: w("abril", "03"), at: { d: "50% 10%", l: "50% 10%" } },
   },
   weddings: {
     slug: "weddings",
@@ -142,7 +144,7 @@ export const SESSIONS: Record<SessionSlug, Session> = {
     cal: "juliangigola/consultation",
     paid: false,
     /* The master's call card shows the About portrait. */
-    photo: { d: ABOUT_PHOTO, l: ABOUT_PHOTO },
+    photo: { d: ABOUT_PHOTO, l: ABOUT_PHOTO, at: { d: "50% 85%", l: "50% 85%" } },
   },
   /* The commission calls and events (BOOK_MENU in `lib/booking.ts`, same words),
      on the stepper but not in its tabs. */
@@ -154,7 +156,7 @@ export const SESSIONS: Record<SessionSlug, Session> = {
     includes: ["Phone or video", "Dates and references"],
     cal: "juliangigola/music-call",
     paid: false,
-    photo: { d: w("valgur", "02"), l: w("iris", "07") },
+    photo: { d: w("valgur", "02"), l: w("iris", "02"), at: { d: "50% 12%", l: "50% 40%" } },
   },
   "brand-photography": {
     slug: "brand-photography",
