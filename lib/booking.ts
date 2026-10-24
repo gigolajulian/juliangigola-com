@@ -422,6 +422,15 @@ export const BOOKING_PAGES: BookingPage[] = [
       },
     ],
     tiles: coversOf("portraits"),
+    // Julian's six (2026-10-24): faces in frame, from his other sets.
+    picks: [
+      "/work/gilt/03.jpg",
+      "/work/retro-reverie-vol-02/06.jpg",
+      "/work/poise/06.jpg",
+      "/work/sage/06.jpg",
+      "/work/shattered-mercury/04.jpg",
+      "/work/channel-orange/05.jpg",
+    ],
     gallery: { href: "/portfolio/portraits", label: "The portraits" },
     book: { type: "session", session: portraits.name, title: "Book a portrait session", cal: "juliangigola/portraits" },
   },

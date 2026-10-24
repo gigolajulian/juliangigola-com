@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { LdJson } from "@/components/local-screens";
 import { BOOKING_PAGES, bookingHref, bookingPage } from "@/lib/booking";
-import { getProject, projectsIn } from "@/lib/work";
+import { LINKABLE, getProject, projectsIn } from "@/lib/work";
 import { serviceGraph } from "@/lib/seo";
 import { V3Service } from "@/components/v3/service";
 
@@ -74,7 +74,8 @@ export default async function BookingPage(props: PageProps<"/[service]">) {
   const sheet = !page.session
     ? undefined
     : page.picks
-      ? page.picks.flatMap((src) => all.filter((f) => f.src === src).slice(0, 1))
+      ? /* A pick may come from any set (Portraits). */
+        page.picks.flatMap((src) => [...all, ...LINKABLE.flatMap((p) => p.images)].filter((f) => f.src === src).slice(0, 1))
       : total <= 19
       ? all
       : sets.length === 1
