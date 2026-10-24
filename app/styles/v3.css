@@ -930,6 +930,7 @@ html{font-family:var(--font-mono),ui-monospace,monospace}
 .v3 .mo-pair{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:-12px}
 .v3 .mo-pair .mo-row{grid-template-columns:minmax(0,1fr);gap:10px;align-content:start}
 .v3 .mo-pair .mo-row-cap b{font-size:1.25rem}
+.v3 .mo-pair .mo-row-cap .lbl{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .v3 .mo-pair .mo-row-mk{display:none}}
 @keyframes mo-in{from{opacity:0;translate:0 16px}}
 @keyframes mo-fade{from{opacity:0}}

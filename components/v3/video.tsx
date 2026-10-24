@@ -287,13 +287,13 @@ function Chapter({ v, n, ratio, small = false, sizes, onPlay }: { v: Video; n: n
   );
 }
 
-function Row({ v, i, onOpen }: { v: Video; i: number; onOpen: (v: Video) => void }) {
+function Row({ v, i, onOpen, bare = false }: { v: Video; i: number; onOpen: (v: Video) => void; bare?: boolean }) {
   const poster = posterFor(v);
   return (
     <button type="button" className="mo-row" onClick={() => onOpen(v)} aria-label={`Open ${v.title}`}>
       <span className="mo-frame">{poster ? <Image src={poster} alt="" fill sizes="100vw" priority={i === 0} style={{ objectFit: "cover" }} /> : null}</span>
       <span className="mo-row-cap">
-        <span className="lbl mute">{two(i)} · {subOf(v)}</span>
+        <span className="lbl mute">{bare ? subOf(v).split(" · ")[0] : `${two(i)} · ${subOf(v)}`}</span>
         <b>{v.title}</b>
       </span>
       {v.client ? <span className="mo-row-mk"><Mark slug={markOf(v.client)} name={v.client} h={20} even /></span> : null}
@@ -342,10 +342,11 @@ function Stack({ films }: { films: Video[] }) {
       </div>
       <h2 className="lbl mute mo-more">More films</h2>
       <div className="mo-pair">
-        {[1, 2].map((k) => {
-          const i = (n + k) % films.length;
-          return <Row key={films[i].id} v={films[i]} i={i} onOpen={go} />;
-        })}
+        {films
+          .map((_, k) => films[(n + 1 + k) % films.length])
+          .filter((f) => f.id !== open.id && !f.title.startsWith("Iranian Americans")) // Julian: never suggested
+          .slice(0, 2)
+          .map((f) => <Row key={f.id} v={f} i={films.indexOf(f)} onOpen={go} bare />)}
       </div>
     </div>
   );
