@@ -250,6 +250,8 @@ export const BOOKING_PAGES: BookingPage[] = [
     ],
     tiles: framesOf("headshots"),
     gallery: { href: "/portfolio/headshots", label: "The headshots gallery" },
+    // Six on the page, men and women in turn (Julian).
+    picks: ["04", "01", "06", "03", "05", "02"].map((n) => `/work/headshots/${n}.jpg`),
     book: { type: "session", session: heads.name, title: "Book headshots", cal: "juliangigola/headshots" },
   },
   {
@@ -372,13 +374,10 @@ export const BOOKING_PAGES: BookingPage[] = [
     // close, no styling. Taneka's and Zoe's sets are posed floor work and
     // stay in the gallery.
     picks: [
-      "/work/abril/04.jpg",
-      "/work/abril/01.jpg",
+      "/work/giselle-studio-digitals/02.jpg",
+      "/work/giselle-studio-digitals/13.jpg",
       "/work/abril/03.jpg",
       "/work/abril/02.jpg",
-      "/work/giselle-studio-digitals/14.jpg",
-      "/work/giselle-studio-digitals/15.jpg",
-      "/work/giselle-studio-digitals/01.jpg",
       "/work/mya/06.jpg",
       "/work/mya/05.jpg",
     ],
@@ -422,6 +421,15 @@ export const BOOKING_PAGES: BookingPage[] = [
       },
     ],
     tiles: coversOf("portraits"),
+    // Julian's six (2026-10-24): faces in frame, from his other sets.
+    picks: [
+      "/work/gilt/03.jpg",
+      "/work/retro-reverie-vol-02/06.jpg",
+      "/work/poise/06.jpg",
+      "/work/sage/06.jpg",
+      "/work/shattered-mercury/04.jpg",
+      "/work/channel-orange/05.jpg",
+    ],
     gallery: { href: "/portfolio/portraits", label: "The portraits" },
     book: { type: "session", session: portraits.name, title: "Book a portrait session", cal: "juliangigola/portraits" },
   },
@@ -474,20 +482,13 @@ export const BOOKING_PAGES: BookingPage[] = [
     tiles: framesOf("weddings"),
     gallery: { href: "/portfolio/weddings", label: "The weddings gallery" },
     picks: [
+      // Only frames still in the gallery after the /admin trim.
       "/work/weddings/02.jpg",
       "/work/weddings/03.jpg",
-      "/work/weddings/05.jpg",
-      "/work/weddings/10.jpg",
-      "/work/weddings/11.jpg",
-      "/work/weddings/13.jpg",
-      "/work/weddings/17.jpg",
-      "/work/weddings/18.jpg",
+      "/work/weddings/07.jpg",
       "/work/weddings/29.jpg",
-      "/work/weddings/30.jpg",
-      "/work/weddings/31.jpg",
-      "/work/weddings/32.jpg",
-      "/work/weddings/38.jpg",
-      "/work/weddings/40.jpg",
+      "/work/weddings/13.jpg",
+      "/work/weddings/14.jpg",
     ],
     book: { type: "session", session: weddings.name, title: "Book your wedding", cal: "juliangigola/wedding-call" },
   },

@@ -68,6 +68,8 @@ export function NotFoundScene({ children }: { children: React.ReactNode }) {
       numerals.style.opacity = String(0.74 + f * 0.26);
 
       const pct = Math.round(f * 100);
+      // Locked: the slate's dots stop blinking and hold (v3.css).
+      scene.toggleAttribute("data-locked", pct > 92);
       if (readout && pct !== last) {
         last = pct;
         readout.textContent =

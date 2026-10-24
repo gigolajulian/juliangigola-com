@@ -103,7 +103,7 @@
 /* Over something that does something: larger, and lifted a little off the
    point, as a thing picked up (Julian). */
 .pointer-mark[data-state="press"] .mark-dot {
-  scale: calc(48 / 120);
+  scale: calc(32 / 120);
   translate: 0 -4px;
 }
 /* In the photo picker the frames are small and close together: a

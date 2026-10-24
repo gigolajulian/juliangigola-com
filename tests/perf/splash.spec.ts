@@ -54,7 +54,8 @@ for (const path of SPLASH_PAGES) {
           });
           const page = await ctx.newPage();
           await page.bringToFront();
-          await page.goto(path, { waitUntil: "commit" });
+          // JG V3 shows the splash only under `?v3motion` (`layout.tsx`).
+          await page.goto(`${path}?v3motion`, { waitUntil: "commit" });
           await page
             .waitForFunction(() => window.__splash.off >= 0, null, { timeout: 10_000 })
             .catch(() => {});

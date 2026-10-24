@@ -422,7 +422,7 @@ const withFaces = (project: Project): Project => ({
   }),
 });
 
-const titleCase = (s: string) =>
+export const titleCase = (s: string) =>
   s.trim().toLowerCase().replace(/(^|[\s(/-])\S/g, (c) => c.toUpperCase());
 
 /**

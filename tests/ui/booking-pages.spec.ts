@@ -26,9 +26,11 @@ for (const r of RATIOS.filter((x) => !x.touch)) {
   });
 }
 
+// V3: service pages link to /book/<slug> and no longer carry a picker. Skipped on
+// Julian's call (2026-10-24) until this is rewritten for /book/<slug>.
 for (const slug of ["portraits", "music-photography"]) {
   for (const r of [RATIOS[0], RATIOS[4]]) {
-    test(`/${slug}#book: a time can be confirmed at ${r.name}`, async ({ browser, browserName }) => {
+    test.skip(`/${slug}#book: a time can be confirmed at ${r.name}`, async ({ browser, browserName }) => {
       const { ctx, page } = await open(browser, browserName, r);
       await page.goto(`/${slug}#book`, { waitUntil: "load" });
       const region = page.locator("[role=region].tp");
