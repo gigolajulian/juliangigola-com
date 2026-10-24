@@ -174,7 +174,7 @@ export const SESSIONS: Record<SessionSlug, Session> = {
     includes: ["Phone or video", "Dates and references"],
     cal: "juliangigola/editorial",
     paid: false,
-    photo: { d: w("nyx", "07"), l: w("second-skin", "01") },
+    photo: { d: w("novocaine", "04"), l: w("novocaine", "04") },
   },
   events: {
     slug: "events",

@@ -690,3 +690,12 @@ html{font-family:var(--font-mono),ui-monospace,monospace}
 .v3 .sv-row li{flex-direction:column;gap:4px}
 .v3 .sv-row li .mute{text-align:left}
 .v3 .sv-row li a{flex-direction:row}}
+/* Flow photo, overlaid (FlowShell `over`): caption on the photo, the photo to the screen's foot. */
+@media (min-width:801px){.v3 .f-photo.over{padding-bottom:0}
+.v3 .f-photo.over .in{position:relative}
+.v3 .f-photo.over .ph{border-radius:4px 4px 0 0}
+.v3 .f-photo.over .ph::after{content:"";position:absolute;inset:0;background:linear-gradient(to top,oklch(0 0 0 / 82%) 0%,oklch(0 0 0 / 45%) 32%,transparent 58%)}
+.v3 .f-photo.over .cap{position:absolute;left:0;right:0;bottom:0;padding:0 28px 32px;color:oklch(0.955 0.004 80);--line:oklch(1 0 0 / 22%);--mute:oklch(1 0 0 / 66%)}
+.v3 .f-photo.over .sub{margin:0;max-width:52ch;font-size:14px;line-height:1.5;color:oklch(1 0 0 / 82%);text-wrap:pretty}}
+.v3 .f-photo .sub{margin:0}
+@media (max-width:800px){.v3 .f-photo .sub{display:none}}
