@@ -4,6 +4,9 @@ import * as React from "react";
 import { ViewTransition } from "react";
 import { usePathname } from "next/navigation";
 import { filterPaths } from "@/lib/utils";
+import { isLegacy } from "@/components/v3/chrome";
+
+const noop = () => () => {};
 
 /* ── one page becomes the next by zooming ─────────────────────────
  * Julian asked for it: opening a page should read as zooming into it, and
@@ -73,6 +76,9 @@ export function PageTransition({ children }: { children: React.ReactNode }) {
      than the clock (a cold Worker, a route compiling on dev) lost its
      way halfway and fell back to the browser's own crossfade. */
   const path = usePathname();
+  /* Off unless V3 motion is on for the tab (`data-v3motion`, `app/layout.tsx`).
+     The boundary stays mounted either way so the page is never rebuilt. */
+  const on = React.useSyncExternalStore(noop, () => document.documentElement.hasAttribute("data-v3motion"), () => false) || isLegacy(path);
   const shown = React.useRef(path);
   React.useLayoutEffect(() => {
     shown.current = path;
@@ -95,6 +101,7 @@ export function PageTransition({ children }: { children: React.ReactNode }) {
   }, [path]);
 
   React.useEffect(() => {
+    if (!on) return;
     const root = document.documentElement;
     let clear = 0;
     const set = (
@@ -221,10 +228,10 @@ export function PageTransition({ children }: { children: React.ReactNode }) {
       window.removeEventListener("popstate", onPop, true);
       window.clearTimeout(clear);
     };
-  }, []);
+  }, [on]);
 
   return (
-    <ViewTransition update="page" default="none">
+    <ViewTransition update={on ? "page" : "none"} default="none">
       {children}
     </ViewTransition>
   );
