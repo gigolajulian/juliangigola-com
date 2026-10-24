@@ -740,3 +740,8 @@ html{font-family:var(--font-mono),ui-monospace,monospace}
 .v3 .pj-lead{padding:16px 0 0;gap:16px}
 .v3 .pj-r img{border-radius:0}}
 .v3 .sv-row li a{color:inherit}
+/* The hero is one screen on desktop: the frames under the title crop to what is left. */
+@media (min-width:901px){.v3 .pj-hero{height:calc(100svh - 64px);min-height:620px}
+.v3 .pj-lead{align-self:stretch;min-height:0;grid-template-rows:100%}
+.v3 .pj-lead .pj-r{min-height:0}
+.v3 .pj-lead .pj-r img{height:100%;object-fit:cover}}
