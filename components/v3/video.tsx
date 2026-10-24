@@ -220,8 +220,9 @@ function Desk({ films, onPlay }: { films: Video[]; onPlay: (v: Video) => void })
             </li>
           ))}
         </ol>
-        <div className="mo-play" key={`${v.id}-mk`}>
-          {v.client ? <Mark slug={markOf(v.client)} name={v.client} h={26} even /> : null}
+        {/* The client's logo at the top of the film, under the page label (Julian). */}
+        {v.client ? <span className="mo-mark" key={`${v.id}-mk`}><Mark slug={markOf(v.client)} name={v.client} h={26} even /></span> : null}
+        <div className="mo-play">
           <button type="button" className="btn fill cn-light" onClick={() => onPlay(v)}>Play with sound</button>
         </div>
       </div>

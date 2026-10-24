@@ -857,8 +857,9 @@ html{font-family:var(--font-mono),ui-monospace,monospace}
 .v3 .cn-hero-foot>div{display:flex;flex-direction:column;gap:14px}
 .v3 .cn-hero-foot .lbl{color:rgba(242,241,238,.78)}
 .v3 .cn-t{margin:0;font:900 min(13vw,10rem)/.84 var(--display);letter-spacing:-.05em}
-.v3 .btn.fill.cn-light{background:#f2f1ee;color:#0b0a09;border-color:#f2f1ee}
-@media (hover:hover){.v3 .btn.fill.cn-light:hover{background:transparent;color:#f2f1ee}}
+/* Play with sound over the film: glass with a dark tint (Julian). */
+.v3 .btn.fill.cn-light{background:rgba(10,10,9,.28);color:#f2f1ee;border-color:rgba(242,241,238,.28);-webkit-backdrop-filter:blur(14px) saturate(1.2);backdrop-filter:blur(14px) saturate(1.2)}
+@media (hover:hover){.v3 .btn.fill.cn-light:hover{background:rgba(10,10,9,.5);color:#f2f1ee;border-color:rgba(242,241,238,.5)}}
 .v3 .cn-tabs{display:flex;gap:28px;padding:20px var(--gr) 0 var(--g);border-bottom:1px solid var(--line);overflow-x:auto;scrollbar-width:none}
 .v3 .cn-tabs button{flex:none;background:none;border:0;padding:0 0 12px;color:var(--mute);font:inherit;letter-spacing:inherit;text-transform:inherit;cursor:pointer}
 .v3 .cn-tabs button span{opacity:.6;margin-left:6px}
@@ -905,7 +906,7 @@ html{font-family:var(--font-mono),ui-monospace,monospace}
 .v3 .mo-index button[aria-current]{color:#f2f1ee}.v3 .mo-index button[aria-current] span{color:var(--accent)}
 .v3 .mo-index button:hover{color:#f2f1ee}.v3 .mo-index button:focus-visible{outline:1px solid var(--accent);outline-offset:3px}
 .v3 .mo-play{right:var(--gr);bottom:32px;display:flex;align-items:center;gap:24px}
-.v3 .mo-play .mk{color:#f2f1ee;animation:mo-in .5s cubic-bezier(.2,.7,.2,1)}}
+.v3 .mo-mark{position:absolute;z-index:3;top:64px;left:var(--g);line-height:0;color:#f2f1ee;animation:mo-in .5s cubic-bezier(.2,.7,.2,1)}}
 @keyframes mo-in{from{opacity:0;translate:0 16px}}
 @keyframes mo-fade{from{opacity:0}}
 @media (prefers-reduced-motion:reduce){.v3 .mo-cap{animation:none}.v3 .mo-shot{transition:none}}
