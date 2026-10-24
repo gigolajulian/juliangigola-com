@@ -41,7 +41,7 @@ export const CLIENT_MARKS: Record<string, ClientMarkData> = {
     src: "/clients/paydar.webp",
     width: 126,
     height: 160,
-    scale: 1.36,
+    scale: 1.7,
   },
   "empire": {
     kind: "mask",

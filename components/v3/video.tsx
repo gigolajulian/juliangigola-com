@@ -91,7 +91,7 @@ function Player({ v, list, onGo, onClose }: { v: Video | null; list: Video[]; on
       } else if (m?.event === "onStateChange") setPaused(m.info === 2);
       else if (m?.event === "pause" || m?.event === "play") setPaused(m.event === "pause");
       else if ((m?.event === "timeupdate" || m?.event === "playProgress") && m.data) setTime({ at: m.data.seconds, dur: m.data.duration });
-      else if (m?.event === "ready" || m?.event === "onReady" || m?.event === "initialDelivery") hello();
+      else if (m?.event === "ready" || m?.event === "onReady" || m?.event === "initialDelivery" || m?.event === "onApiChange") hello();
     };
     addEventListener("message", onMsg);
     return () => {
@@ -160,7 +160,7 @@ function Player({ v, list, onGo, onClose }: { v: Video | null; list: Video[]; on
                 <b>{v.title}</b>
                 <span className="lbl">{subOf(v)}</span>
               </div>
-              {v.client ? <Mark slug={markOf(v.client)} name={v.client} h={28} /> : null}
+              {v.client ? <Mark slug={markOf(v.client)} name={v.client} h={26} even /> : null}
             </div>
             <div className="pl-ctl lbl">
               <button type="button" onClick={toggle}>{paused ? "Play" : "Pause"}</button>
@@ -221,7 +221,7 @@ function Desk({ films, onPlay }: { films: Video[]; onPlay: (v: Video) => void })
           ))}
         </ol>
         <div className="mo-play" key={`${v.id}-mk`}>
-          {v.client ? <Mark slug={markOf(v.client)} name={v.client} h={28} /> : null}
+          {v.client ? <Mark slug={markOf(v.client)} name={v.client} h={26} even /> : null}
           <button type="button" className="btn fill cn-light" onClick={() => onPlay(v)}>Play with sound</button>
         </div>
       </div>

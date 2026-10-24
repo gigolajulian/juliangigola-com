@@ -73,10 +73,12 @@ export function Marks({ hidden, cell }: { hidden?: boolean; cell?: boolean }) {
   });
 }
 
-/** One client's mark at height `h`, its width from its own proportions (a project page's head). */
-export function Mark({ slug, name, h }: { slug: string; name: string; h: number }) {
+/** One client's mark at height `h`, its width from its own proportions (a project page's head).
+    `even` scales `h` by the mark's own evening factor, so a row of different marks reads one size. */
+export function Mark({ slug, name, h: base, even = false }: { slug: string; name: string; h: number; even?: boolean }) {
   const m = CLIENT_MARKS[slug];
   if (!m) return null;
+  const h = even ? Math.round(base * m.scale) : base;
   if (m.kind === "svg") {
     const [, , vw, vh] = m.viewBox.split(/\s+/).map(Number);
     return <svg className="mk" viewBox={m.viewBox} height={h} width={(h * vw) / vh} fill="currentColor" role="img" aria-label={name} dangerouslySetInnerHTML={{ __html: m.body }} />;
