@@ -309,3 +309,64 @@ export function Clause(props: { title: string; children: React.ReactNode }) {
   void props;
   return null;
 }
+
+/* ── JG V3 (leftovers card G) ─────────────────────────────────────
+ * The same documents in the V3 page: the page head, then each document
+ * with its contents held to the left while the clauses run in full on the
+ * right at a reading measure. Every clause keeps its anchor, so
+ * `/legal#terms-ownership` still lands on it. `LegalPage` above is retired.
+ * ─────────────────────────────────────────────────────────────── */
+export function V3LegalPage({ children }: { children: React.ReactNode }) {
+  const [docs, setDocs] = React.useState<Doc[]>([]);
+  const shelve = React.useCallback((d: Doc) => {
+    setDocs((was) => (was.some((o) => o.id === d.id) ? was : [...was, d]));
+  }, []);
+  /* The address names a clause: once the documents are in, go to it. */
+  React.useEffect(() => {
+    if (!docs.length) return;
+    const want = decodeURIComponent(window.location.hash.slice(1));
+    if (want) document.getElementById(want)?.scrollIntoView({ block: "start" });
+  }, [docs]);
+  return (
+    <div className="v3 contents">
+      <section className="v3page" id="p-legal">
+        <Shelf.Provider value={shelve}>{children}</Shelf.Provider>
+        <div className="pg-head">
+          <h1 className="pg-t">Legal</h1>
+        </div>
+        {docs.map((d) => (
+          <section key={d.id} id={d.id} className="lg-doc" aria-label={d.title}>
+            <nav className="lg-toc" aria-label={`${d.title}: contents`}>
+              <h2 className="lg-t">{d.title}</h2>
+              <p className="lbl mute">
+                As of <time dateTime={d.effective}>{dated(d.effective)}</time>
+              </p>
+              <ol>
+                {d.clauses.map((c) => (
+                  <li key={c.id}>
+                    <a href={`#${c.id}`}>
+                      <span className="mute">{two(c.n)}</span>
+                      {c.title}
+                    </a>
+                  </li>
+                ))}
+              </ol>
+            </nav>
+            <div className="lg-body">
+              {d.clauses.map((c) => (
+                <article key={c.id} id={c.id} className="lg-clause">
+                  <p className="lbl mute">
+                    {d.label}
+                    <span>{two(c.n)}</span>
+                  </p>
+                  <h3>{c.title}</h3>
+                  <div className="lg-text">{c.body}</div>
+                </article>
+              ))}
+            </div>
+          </section>
+        ))}
+      </section>
+    </div>
+  );
+}

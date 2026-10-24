@@ -798,3 +798,18 @@ html{font-family:var(--font-mono),ui-monospace,monospace}
 .v3 .vt figcaption{display:flex;justify-content:space-between;gap:16px;padding-top:10px}
 #p-video>.foot-line{margin-top:96px}
 @media (max-width:700px){.v3 .vgrid{grid-template-columns:minmax(0,1fr);gap:32px}}
+/* Legal (components/legal.tsx, V3LegalPage): contents held left, the clauses in full at a reading measure. */
+.v3 .lg-doc{display:grid;grid-template-columns:minmax(0,22rem) minmax(0,1fr);gap:clamp(32px,6vw,96px);padding:64px var(--gr) 0 var(--g);border-top:1px solid var(--line);margin-top:48px}
+.v3 .lg-toc{position:sticky;top:88px;align-self:start;max-height:calc(100svh - 112px);overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin}
+.v3 .lg-t{font:900 clamp(2rem,3.4vw,3rem)/.95 var(--display);letter-spacing:-.04em;margin:0 0 12px}
+.v3 .lg-toc ol{list-style:none;margin:24px 0 0;padding:0;border-bottom:1px solid var(--line)}
+.v3 .lg-toc a{display:flex;gap:14px;padding:9px 0;border-top:1px solid var(--line);color:var(--mute);text-decoration:none;font-size:13px;line-height:1.35}
+@media (hover:hover){.v3 .lg-toc a:hover{color:var(--ink)}}
+.v3 .lg-clause{max-width:65ch;padding-bottom:56px;scroll-margin-top:88px}
+.v3 .lg-clause>.lbl{display:flex;gap:16px}
+.v3 .lg-clause h3{font:800 clamp(1.5rem,2.4vw,2rem)/1.05 var(--display);letter-spacing:-.03em;margin:10px 0 18px}
+.v3 .lg-text{font-size:15px;line-height:1.65;color:var(--ink);text-wrap:pretty}
+.v3 .lg-text p+p{margin-top:14px}.v3 .lg-text p{margin:0}
+.v3 .lg-text ul{list-style:disc;padding-left:20px;margin:12px 0}.v3 .lg-text li{margin-top:6px}
+.v3 .lg-text strong{font-weight:600}.v3 .lg-text a{color:inherit;text-underline-offset:4px}
+@media (max-width:800px){.v3 .lg-doc{grid-template-columns:minmax(0,1fr);padding-top:40px}.v3 .lg-toc{position:static;max-height:none}}
