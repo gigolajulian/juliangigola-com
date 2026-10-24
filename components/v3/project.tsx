@@ -23,15 +23,13 @@ export function V3Project({ project, next }: { project: Project; next?: { href: 
         <header className="pj-top">
           <Link className="lbl mute pj-back" href="/portfolio">&larr; Portfolio</Link>
           <div className="pj-row">
-            <div>
-              <h1 className="pg-t">{name}</h1>
-              <p className="lbl mute">{sub}</p>
-            </div>
             {mark ? (
               <span className="pj-mark">
-                <Mark slug={mark.slug} name={mark.name} h={40} />
+                <Mark slug={mark.slug} name={mark.name} h={28} />
               </span>
             ) : null}
+            <h1 className="pg-t">{name}</h1>
+            <p className="lbl mute">{sub}</p>
           </div>
           {project.intent ? <p className="sv-lead">{project.intent}</p> : null}
         </header>

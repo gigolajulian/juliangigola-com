@@ -707,8 +707,9 @@ html{font-family:var(--font-mono),ui-monospace,monospace}
 /* Project page (components/v3/project.tsx): head with logo, the opening frame, three columns, credits, next. */
 .v3 .pj-top{display:flex;flex-direction:column;gap:20px;padding:56px var(--gr) 48px var(--g)}
 .v3 .pj-back{text-decoration:none;align-self:flex-start}
-.v3 .pj-row{display:flex;justify-content:space-between;align-items:flex-end;gap:24px}
+.v3 .pj-row{display:flex;flex-direction:column;align-items:flex-start}
 .v3 .pj-row .pg-t{margin-bottom:14px;text-wrap:balance}
+.v3 .pj-row .pj-mark{margin-bottom:22px;line-height:0}
 .v3 .pj-mark{color:var(--ink);opacity:.8;flex:none;transition:opacity .2s}
 @media (hover:hover){.v3 .pj-mark:hover{opacity:1}}
 .v3 .pj-open{margin:0 var(--gr) 0 var(--g)}
@@ -727,4 +728,4 @@ html{font-family:var(--font-mono),ui-monospace,monospace}
 .v3 .pj-seq .col{gap:16px;padding-top:0!important}
 .v3 .pj-open{margin:0}.v3 .pj-open img,.v3 .pj-seq img{border-radius:0}
 .v3 .pj-seq{padding-left:0;padding-right:0}
-.v3 .pj-row{flex-direction:column;align-items:flex-start}}
+}
