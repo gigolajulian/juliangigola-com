@@ -50,7 +50,6 @@ const TARGETS = (
 );
 type PickAt = { a: number; c: number };
 
-/** Motion plan 05: remember the clicked cover's box so the project page can grow its hero from it (tile-fly.tsx). */
 gsap.registerPlugin(Flip);
 
 /** The covers on screen, for the view change below. */
@@ -60,17 +59,10 @@ const seen = () =>
     return r.bottom > 0 && r.top < innerHeight && r.right > 0 && r.left < innerWidth;
   });
 
-function flyFrom(a: HTMLElement, s: string) {
-  const r = a.querySelector(".ph")?.getBoundingClientRect();
-  try {
-    if (r) sessionStorage.setItem("jg-fly", JSON.stringify({ s, t: Date.now(), x: r.left, y: r.top, w: r.width }));
-  } catch {}
-}
-
 function Tile({ p, swatch }: { p: WorkItem; swatch?: string[] }) {
   return (
     <figure className="wt">
-      <Link href={`/portfolio/${p.s}`} aria-label={p.n} onClick={(e) => flyFrom(e.currentTarget, p.s)}>
+      <Link href={`/portfolio/${p.s}`} aria-label={p.n}>
         <div className="ph" data-flip-id={p.s}>
           <Image
             src={p.cover}

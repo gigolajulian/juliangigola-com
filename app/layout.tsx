@@ -11,6 +11,7 @@ import { WORK_HEADS } from "@/lib/work-heads";
 import { GlassLight } from "@/components/glass-light";
 import { PhotoFade } from "@/components/photo-fade";
 import { PointerMark } from "@/components/pointer-mark";
+import { PageFly } from "@/components/v3/page-fly";
 import "./globals.css";
 import { ImageFallback } from "@/components/image-fallback";
 import { PageTransition } from "@/components/page-transition";
@@ -282,6 +283,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <MotionGate>
           <PointerMark />
         </MotionGate>
+        <PageFly />
         {/* fps, finger dots and a frame log, only with `?debug`. The
             overlay itself loads only then: `debug-gate.tsx`. */}
         <DebugGate />

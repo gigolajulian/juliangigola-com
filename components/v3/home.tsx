@@ -275,6 +275,8 @@ function SessionsIndex() {
                 onPointerEnter={() => setOn(slug)}
                 onFocus={() => setOn(slug)}
                 onClick={() => router.push(`/book/${slug}`)}
+                data-fly-to={`/book/${slug}`}
+                data-fly-src=".a-index .frame figure"
               >
                 <span className="n lbl">{String(n + 1).padStart(2, "0")}</span>
                 <span className="t">{s.name}</span>
