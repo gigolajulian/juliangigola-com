@@ -5,12 +5,12 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 /* JG V3 chrome (master v39): the glass header, the phone menu, the theme
-   toggle and the footer line. /admin and /bts keep the old chrome. */
+   toggle and the footer line. /admin keeps the old chrome. */
 
 const noop = () => () => {};
 
-/** /admin and /bts are out of V3's scope and keep the old chrome. */
-export const isLegacy = (path: string) => /^\/(admin|bts)(\/|$)/.test(path);
+/** /admin is out of V3's scope and keeps the old chrome. */
+export const isLegacy = (path: string) => /^\/admin(\/|$)/.test(path);
 
 export function OnLegacy({ children }: { children: React.ReactNode }) {
   return isLegacy(usePathname()) ? <>{children}</> : null;
@@ -184,7 +184,7 @@ export function V3Foot() {
 
 /* Screens built from the master carry their own footer line (`V3Foot`);
    the pages restyled by tokens only get it here, after `main`. */
-const OWN_FOOT = /^\/($|portfolio(\/video)?$|about$|contact(\/form)?$|book(\/|$)|portraits$|headshots$|graduation-photos$|model-digitals$|weddings$|music-photography$|brand-photography$)/;
+const OWN_FOOT = /^\/($|portfolio(\/video)?$|bts$|about$|contact(\/form)?$|book(\/|$)|portraits$|headshots$|graduation-photos$|model-digitals$|weddings$|music-photography$|brand-photography$)/;
 
 export function V3Footer() {
   if (OWN_FOOT.test(usePathname())) return null;

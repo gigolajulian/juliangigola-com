@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { WITH_BTS } from "@/lib/work";
+import { WITH_BTS, titleCase } from "@/lib/work";
+import { V3Foot } from "@/components/v3/chrome";
 import { BtsCredit, BtsPageGrid } from "@/components/bts";
 
 export const metadata: Metadata = {
@@ -19,41 +20,32 @@ const pad = (n: number) => String(n).padStart(2, "0");
    `content/projects.json` are here. */
 export default function BtsPage() {
   if (!WITH_BTS.length) notFound();
+  /* JG V3 (leftovers card I): the V3 head, a row per shoot, the V3 foot. */
   return (
-    <article className="mx-auto w-full max-w-[100rem] px-6 pb-24 pt-28 sm:px-10">
-      <header className="flex items-end justify-between gap-6 border-b border-border pb-6">
-        <div>
-          <p className="label text-muted-foreground">On set</p>
-          <h1 className="title mt-3">Behind the scenes</h1>
-        </div>
-        <p className="label tabular-nums text-muted-foreground">
-          {pad(WITH_BTS.length)} {WITH_BTS.length === 1 ? "shoot" : "shoots"}
-        </p>
-      </header>
-      {WITH_BTS.map((p, i) => (
-        <section
-          key={p.slug}
-          id={p.slug}
-          className="grid gap-6 border-b border-border py-10 lg:grid-cols-[18rem_minmax(0,1fr)] lg:gap-10"
-        >
-          <div className="flex flex-col gap-3">
-            <span className="label tabular-nums text-muted-foreground">
-              {pad(i + 1)}
-            </span>
-            <h2 className="font-display text-4xl uppercase leading-[0.95] tracking-[0]">
-              {p.headline ?? p.name}
-            </h2>
-            <BtsCredit bts={p.bts!} />
-            <Link
-              href={`/portfolio/${p.slug}`}
-              className="label mt-2 self-start py-1.5 text-muted-foreground underline decoration-border underline-offset-4 transition-colors duration-200 hoverable:hover:text-foreground"
-            >
-              See the shoot &rarr;
-            </Link>
+    <div className="v3 contents">
+      <section className="v3page" id="p-bts">
+        <div className="pg-head">
+          <div>
+            <p className="lbl mute">On set</p>
+            <h1 className="pg-t">Behind the scenes</h1>
           </div>
-          <BtsPageGrid bts={p.bts!} name={p.name} />
-        </section>
-      ))}
-    </article>
+          <p className="lbl mute">
+            {pad(WITH_BTS.length)} {WITH_BTS.length === 1 ? "shoot" : "shoots"}
+          </p>
+        </div>
+        {WITH_BTS.map((p, i) => (
+          <section key={p.slug} id={p.slug} className="bts-row">
+            <div className="bts-side">
+              <span className="lbl mute">{pad(i + 1)}</span>
+              <h2>{titleCase(p.headline ?? p.name)}</h2>
+              <BtsCredit bts={p.bts!} />
+              <Link className="btn" href={`/portfolio/${p.slug}`}>See the shoot</Link>
+            </div>
+            <BtsPageGrid bts={p.bts!} name={p.name} />
+          </section>
+        ))}
+        <V3Foot />
+      </section>
+    </div>
   );
 }
