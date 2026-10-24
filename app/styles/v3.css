@@ -230,7 +230,10 @@
 .v3 .ab-say{white-space:nowrap}
 .v3 .ab-photo{margin:0;position:sticky;top:88px}
 .v3 .ab-photo img{width:100%;aspect-ratio:4/5;object-fit:cover;object-position:58% 50%;border-radius:8px;display:block;background:var(--card)}
-.v3 .ab-photo figcaption{padding-top:10px}
+.v3 .ab-photo figcaption{padding-top:10px;display:flex;justify-content:space-between;align-items:center;gap:12px}
+.v3 .ab-frame{position:relative;aspect-ratio:4/5;border-radius:8px;overflow:hidden;background:var(--card);cursor:pointer}
+.v3 .ab-frame img{position:absolute;inset:0;height:100%;aspect-ratio:auto;border-radius:0;opacity:0;transition:opacity 1.2s ease}
+.v3 .ab-frame img.on{opacity:1}
 .v3 .ab-text{display:flex;flex-direction:column;gap:56px;max-width:720px}
 .v3 .ab-bio{margin:0;font-size:clamp(15px,1.25vw,18px);line-height:1.7;color:color-mix(in srgb,var(--ink) 88%,transparent);text-align:justify;text-align-last:left;hyphens:manual;-webkit-hyphens:manual;word-spacing:-.06em}
 .v3 .facts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:24px;margin:0;padding-top:20px;border-top:1px solid var(--line)}
@@ -482,8 +485,6 @@
 .v3 .reach-call .btn.fill{background:#f2f1ee;color:#0b0b0a;border-color:#f2f1ee}
 @media (hover:hover){.v3 .reach-call .btn.fill:hover{background:transparent;color:#f2f1ee}}
 @media (max-width:800px){.v3 .reach-call{border-top:0;padding-top:0}}
-.v3 .ab-end{margin:0}
-.v3 .ab-end img{display:block;width:100%;height:auto}
 .v3 .ab-logos{display:flex;flex-direction:column;gap:16px;padding:24px var(--gr) 72px var(--g)}
 .v3 .ab-logos h2{margin:0}
 .v3 .lg{display:grid;grid-template-columns:repeat(5,minmax(0,1fr))}

@@ -1,10 +1,9 @@
-import Image from "next/image";
 import Link from "next/link";
 import { V3Foot } from "@/components/v3/chrome";
 import { Marks } from "@/components/v3/duo";
-import { ABOUT_PHOTO } from "@/lib/v3";
+import { AboutGallery } from "@/components/v3/about-gallery";
 
-/* JG V3 About (master v43, /about): portrait, the justified bio, facts,
+/* JG V3 About (master v50, /about): portrait gallery, the justified bio, facts,
    What I do, the two CTAs, and the client marks as a grid. */
 
 /* Locked copy (DESIGN.md, Bio), with the master's soft hyphens. */
@@ -21,10 +20,7 @@ export function V3About() {
           <header className="ab-top">
             <h1 className="pg-t ab-say">About me</h1>
           </header>
-          <figure className="ab-photo">
-            <Image src={ABOUT_PHOTO} alt="Julian Gigola sitting on stone steps under a tree" width={960} height={1280} sizes="(max-width: 800px) 100vw, 40vw" priority />
-            <figcaption className="lbl mute">Julian Gigola, San Jose</figcaption>
-          </figure>
+          <AboutGallery />
           <div className="ab-text">
             <p className="ab-bio">{BIO}</p>
             <dl className="facts">
@@ -52,10 +48,6 @@ export function V3About() {
             <Marks cell />
           </div>
         </section>
-        {/* Julian: full bleed, the last thing before the footer. */}
-        <figure className="ab-end">
-          <Image src="/about/julian-studio.jpg" alt="Julian Gigola at a monitor on set in a studio" width={2048} height={1365} sizes="100vw" />
-        </figure>
         <V3Foot />
       </section>
     </div>
