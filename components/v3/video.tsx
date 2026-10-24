@@ -2,64 +2,326 @@
 
 import * as React from "react";
 import Image from "next/image";
-import Link from "next/link";
 import { V3Foot } from "@/components/v3/chrome";
-import { REEL, SECTIONS, creditOf, embedUrl, inSection, posterFor, type Video } from "@/lib/videos";
+import { Mark } from "@/components/v3/duo";
+import { REEL, SECTIONS, creditOf, embedUrl, previewUrl, posterFor, sectionName, type Video, type VideoSection } from "@/lib/videos";
 
-/* JG V3 Video (leftovers card D): the films as 16:9 tiles in the V3 grid,
-   the reel first, then each section. A tile plays its film in place on
-   the click; the still is the only thing loaded before that. */
+/* JG V3 Motion. Desktop (Julian): A as an index over one full-screen
+   stage; scrolling swaps the film and its title, bottom left. Phone: C,
+   the reel then the films as chapters. Every film plays muted once it is
+   in frame; a click opens the player, and Back, Esc, the browser's back or
+   a click outside the film puts the visitor where they were. */
 
-const reel: Video = { id: "reel", title: REEL.title, provider: REEL.provider, videoId: REEL.videoId, section: "music", poster: REEL.poster };
+const reel: Video = { id: "reel", title: REEL.title, provider: REEL.provider, videoId: REEL.videoId, section: "music", poster: REEL.poster, previewAt: 0 };
+/* Julian's order: the reel, Clean, Ladera Granola, The Description, then
+   the rest varied between the two sections. */
+const ORDER = ["youtube-lmR6-qjutn0", "vimeo-895734192", "youtube-E7N7HDnQjfI", "youtube-9QGO20Jgz7s", "youtube-ym7xEK50OT0", "youtube-pwzi7LKu-_I", "youtube-bqw03DYQavM", "youtube-1e1fYalqTJs"];
+const rank = (v: Video) => (ORDER.indexOf(v.id) + 1 || 99);
+/* A client's logo slug; Sammy Shiblaq releases under Empire, Imanemun's
+   Dide O Del under Paydar (Julian). */
+const markOf = (client: string) => (client === "Sammy Shiblaq" ? "empire" : client === "Imanemun" ? "paydar" : client.toLowerCase().replace(/\s+/g, "-"));
+const two = (n: number) => String(n).padStart(2, "0");
+const subOf = (v: Video) => (v.id === "reel" ? "Reel" : [creditOf(v), v.year ?? sectionName(v.section)].filter(Boolean).join(" · "));
+const still = () => typeof window !== "undefined" && matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-function Tile({ v, wide = false }: { v: Video; wide?: boolean }) {
+function useInView<T extends Element>() {
+  const ref = React.useRef<T>(null);
   const [on, setOn] = React.useState(false);
-  const poster = posterFor(v);
-  const sub = [creditOf(v), v.year].filter(Boolean).join(" · ");
+  React.useEffect(() => {
+    const el = ref.current;
+    if (!el || still()) return;
+    const io = new IntersectionObserver(([e]) => setOn(e.isIntersecting), { threshold: 0.5 });
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
+  return [ref, on] as const;
+}
+
+function Loop({ v }: { v: Video }) {
+  return <iframe className="mo-loop" src={previewUrl(v)} title="" aria-hidden tabIndex={-1} allow="autoplay" />;
+}
+
+/* The player: the film over the whole screen, in a modal dialog with a
+   history entry so the phone's back gesture closes it instead of leaving
+   the page. YouTube's and Vimeo's own controls are off; ours drive both
+   players over postMessage. A clear layer over the film takes every move
+   and click (an iframe would swallow them): a move brings the bars back,
+   a click plays or pauses. Paused, the film dims and the bars stay up. */
+const clock = (s: number) => `${String(Math.floor(s / 60)).padStart(2, "0")}:${String(Math.floor(s % 60)).padStart(2, "0")}`;
+const playerSrc = (v: Video) => embedUrl(v) + (v.provider === "youtube" ? "&controls=0&enablejsapi=1&iv_load_policy=3&cc_load_policy=0" : "&controls=0&api=1");
+
+function Player({ v, list, onGo, onClose }: { v: Video | null; list: Video[]; onGo: (v: Video) => void; onClose: () => void }) {
+  const n = v ? list.findIndex((x) => x.id === v.id) : 0;
+  const prev = list[n - 1];
+  const next = list[n + 1];
+  const ref = React.useRef<HTMLDialogElement>(null);
+  const frame = React.useRef<HTMLIFrameElement>(null);
+  const [shown, setShown] = React.useState(true);
+  const [paused, setPaused] = React.useState(false);
+  const [muted, setMuted] = React.useState(false);
+  const [time, setTime] = React.useState({ at: 0, dur: 0 });
+  const t = React.useRef<ReturnType<typeof setTimeout>>(undefined);
+  const poke = React.useCallback(() => {
+    setShown(true);
+    clearTimeout(t.current);
+    t.current = setTimeout(() => setShown(false), 2500);
+  }, []);
+  React.useEffect(() => {
+    const d = ref.current;
+    if (!v || !d) return;
+    setPaused(false);
+    setMuted(false);
+    setTime({ at: 0, dur: 0 });
+    d.showModal();
+    d.focus(); // not the iframe, which would swallow the keys
+    poke();
+    // One history entry for the player, however many films are stepped through in it.
+    if (history.state?.player) history.replaceState({ player: v.id }, "");
+    else history.pushState({ player: v.id }, "");
+    addEventListener("popstate", onClose);
+    const onMsg = (e: MessageEvent) => {
+      if (e.source !== frame.current?.contentWindow) return;
+      let m;
+      try { m = typeof e.data === "string" ? JSON.parse(e.data) : e.data; } catch { return; }
+      if (m?.event === "infoDelivery" && m.info) {
+        const i = m.info;
+        if (typeof i.playerState === "number") setPaused(i.playerState === 2);
+        if (typeof i.muted === "boolean") setMuted(i.muted);
+        if (typeof i.currentTime === "number") setTime((p) => ({ at: i.currentTime, dur: i.duration ?? p.dur }));
+      } else if (m?.event === "onStateChange") setPaused(m.info === 2);
+      else if (m?.event === "pause" || m?.event === "play") setPaused(m.event === "pause");
+      else if ((m?.event === "timeupdate" || m?.event === "playProgress") && m.data) setTime({ at: m.data.seconds, dur: m.data.duration });
+      else if (m?.event === "ready" || m?.event === "onReady" || m?.event === "initialDelivery") hello();
+    };
+    addEventListener("message", onMsg);
+    return () => {
+      clearTimeout(t.current);
+      removeEventListener("popstate", onClose);
+      removeEventListener("message", onMsg);
+      if (d.open) d.close();
+    };
+  }, [v, onClose, poke]);
+
+  const post = (yt: string, args: unknown[], vimeo: string, value?: unknown) => {
+    const w = frame.current?.contentWindow;
+    if (!w || !v) return;
+    w.postMessage(JSON.stringify(v.provider === "youtube" ? { event: "command", func: yt, args } : { method: vimeo, value }), "*");
+  };
+  function hello() {
+    const w = frame.current?.contentWindow;
+    if (!w || !v) return;
+    if (v.provider === "youtube") {
+      w.postMessage(JSON.stringify({ event: "listening", id: 1 }), "*");
+      // Captions off by default, whatever the viewer's YouTube setting.
+      for (const mod of ["captions", "cc"]) w.postMessage(JSON.stringify({ event: "command", func: "unloadModule", args: [mod] }), "*");
+      w.postMessage(JSON.stringify({ event: "command", func: "setOption", args: ["captions", "track", {}] }), "*");
+    } else for (const value of ["pause", "play", "timeupdate", "playProgress"]) w.postMessage(JSON.stringify({ method: "addEventListener", value }), "*");
+  }
+  const toggle = () => { post(paused ? "playVideo" : "pauseVideo", [], paused ? "play" : "pause"); setPaused(!paused); poke(); };
+  const seek = (s: number) => { const at = Math.max(0, Math.min(time.dur, s)); post("seekTo", [at, true], "setCurrentTime", at); setTime((p) => ({ ...p, at })); poke(); };
+  const sound = () => { post(muted ? "unMute" : "mute", [], "setMuted", !muted); setMuted(!muted); poke(); };
+  const full = () => (document.fullscreenElement ? document.exitFullscreen() : ref.current?.requestFullscreen());
+  const back = () => history.back();
+  const keys = (e: React.KeyboardEvent) => {
+    poke();
+    if ((e.target as HTMLElement).closest("button, input")) return;
+    if (e.key === " " || e.key === "k") { e.preventDefault(); toggle(); }
+    else if (e.key === "ArrowRight") seek(time.at + 5);
+    else if (e.key === "ArrowLeft") seek(time.at - 5);
+    else if (e.key === "m") sound();
+    else if (e.key === "f") full();
+  };
+  const up = shown || paused;
   return (
-    <figure className={wide ? "vt wide" : "vt"}>
-      <div className="ph">
-        {on ? (
-          <iframe src={embedUrl(v)} title={v.title} allow="autoplay; fullscreen; picture-in-picture" allowFullScreen />
-        ) : (
-          <button type="button" onClick={() => setOn(true)} aria-label={`Play ${v.title}`}>
-            {poster ? <Image src={poster} alt="" fill sizes={wide ? "100vw" : "(max-width: 700px) 100vw, 50vw"} style={{ objectFit: "cover" }} /> : null}
-            <span className="vt-play lbl" aria-hidden>Play</span>
+    <dialog ref={ref} tabIndex={-1} className="v3 mo-player" aria-label={v?.title} data-shown={up || undefined} data-paused={paused || undefined} onPointerMove={poke} onKeyDown={keys} onCancel={(e) => { e.preventDefault(); if (document.fullscreenElement) document.exitFullscreen(); else back(); }}>
+      {v ? (
+        <>
+          <iframe ref={frame} onLoad={hello} src={playerSrc(v)} title={v.title} tabIndex={-1} allow="autoplay; fullscreen; picture-in-picture" />
+          <div className="pl-tint" />
+          <div className="pl-wake" onClick={toggle} />
+          {/* Paused (Julian): the outer thirds step to the film before and after. */}
+          {paused && prev ? (
+            <button type="button" className="pl-step prev" onClick={() => onGo(prev)}>
+              <span className="lbl">← {two(n - 1)}</span><b>{prev.title}</b>
+            </button>
+          ) : null}
+          {paused && next ? (
+            <button type="button" className="pl-step next" onClick={() => onGo(next)}>
+              <span className="lbl">{two(n + 1)} →</span><b>{next.title}</b>
+            </button>
+          ) : null}
+          <div className="pl-bar lbl">
+            <button type="button" onClick={back}>← Back</button>
+            <span>{two(n)} / {two(list.length - 1)}</span>
+          </div>
+          <div className="pl-info">
+            <div className="pl-meta">
+              <div>
+                <b>{v.title}</b>
+                <span className="lbl">{subOf(v)}</span>
+              </div>
+              {v.client ? <Mark slug={markOf(v.client)} name={v.client} h={28} /> : null}
+            </div>
+            <div className="pl-ctl lbl">
+              <button type="button" onClick={toggle}>{paused ? "Play" : "Pause"}</button>
+              <span className="pl-time">{clock(time.at)} / {clock(time.dur)}</span>
+              <input type="range" min={0} max={time.dur || 1} step={0.1} value={time.at} onChange={(e) => seek(Number(e.target.value))} aria-label="Seek" style={{ "--p": `${time.dur ? (time.at / time.dur) * 100 : 0}%` } as React.CSSProperties} />
+              <button type="button" onClick={sound}>{muted ? "Sound off" : "Sound on"}</button>
+              <button type="button" onClick={full}>Full</button>
+            </div>
+          </div>
+        </>
+      ) : null}
+    </dialog>
+  );
+}
+
+function Desk({ films, onPlay }: { films: Video[]; onPlay: (v: Video) => void }) {
+  const [i, setI] = React.useState(0);
+  const moving = React.useSyncExternalStore(
+    () => () => {},
+    () => !still() && matchMedia("(min-width: 801px)").matches,
+    () => false,
+  );
+  const steps = React.useRef<(HTMLDivElement | null)[]>([]);
+  React.useEffect(() => {
+    const io = new IntersectionObserver(
+      (es) => es.forEach((e) => e.isIntersecting && setI(Number((e.target as HTMLElement).dataset.i))),
+      { rootMargin: "-50% 0px -50% 0px" },
+    );
+    steps.current.forEach((el) => el && io.observe(el));
+    return () => io.disconnect();
+  }, []);
+  const v = films[i];
+  return (
+    <div className="mo-desk">
+      <div className="mo-stage">
+        {films.map((f, j) => {
+          const poster = posterFor(f);
+          return (
+            <div key={f.id} className="mo-shot" data-on={j === i || undefined}>
+              {poster ? <Image src={poster} alt="" fill priority={j === 0} sizes="100vw" style={{ objectFit: "cover" }} /> : null}
+              {moving && j === i ? <Loop v={f} /> : null}
+            </div>
+          );
+        })}
+        <button type="button" className="mo-hit" onClick={() => onPlay(v)} aria-label={`Play ${v.title}`} />
+        <h1 className="mo-h lbl">Motion · {two(films.length)} films</h1>
+        <div className="mo-cap" key={v.id}>
+          <span className="lbl">{two(i)} · {subOf(v)}</span>
+          <h2>{v.title}</h2>
+        </div>
+        <ol className="mo-index lbl">
+          {films.map((f, j) => (
+            <li key={f.id}>
+              <button type="button" aria-current={j === i || undefined} onClick={() => steps.current[j]?.scrollIntoView({ behavior: still() ? "auto" : "smooth" })}>
+                <span>{two(j)}</span>{f.title}
+              </button>
+            </li>
+          ))}
+        </ol>
+        <div className="mo-play" key={`${v.id}-mk`}>
+          {v.client ? <Mark slug={markOf(v.client)} name={v.client} h={28} /> : null}
+          <button type="button" className="btn fill cn-light" onClick={() => onPlay(v)}>Play with sound</button>
+        </div>
+      </div>
+      <div className="mo-steps" aria-hidden>
+        {films.map((f, j) => <div key={f.id} data-i={j} ref={(el) => { steps.current[j] = el; }} />)}
+      </div>
+    </div>
+  );
+}
+
+function Frame({ v, ratio, sizes, onPlay }: { v: Video; ratio: string; sizes: string; onPlay: (v: Video) => void }) {
+  const [ref, on] = useInView<HTMLDivElement>();
+  const poster = posterFor(v);
+  return (
+    <div ref={ref} className="cn-frame" style={{ aspectRatio: ratio }}>
+      {poster ? <Image src={poster} alt="" fill sizes={sizes} style={{ objectFit: "cover" }} /> : null}
+      {on ? <Loop v={v} /> : null}
+      <button type="button" onClick={() => onPlay(v)} aria-label={`Play ${v.title}`} />
+    </div>
+  );
+}
+
+function Chapter({ v, n, ratio, small = false, sizes, onPlay }: { v: Video; n: number; ratio: string; small?: boolean; sizes: string; onPlay: (v: Video) => void }) {
+  return (
+    <article className={small ? "cn-ch sm" : "cn-ch"}>
+      <Frame v={v} ratio={ratio} sizes={sizes} onPlay={onPlay} />
+      <div className="cn-cap">
+        <span className="cn-n">{two(n)}</span>
+        <div>
+          <h3>{v.title}</h3>
+          <span className="lbl mute">{subOf(v)}</span>
+        </div>
+      </div>
+    </article>
+  );
+}
+
+function Mob({ videos, onPlay }: { videos: Video[]; onPlay: (v: Video) => void }) {
+  const [tab, setTab] = React.useState<"all" | VideoSection>("all");
+  const [ref, on] = useInView<HTMLDivElement>();
+  const films = tab === "all" ? videos : videos.filter((v) => v.section === tab);
+  /* The rhythm: a wide letterbox, then a big and a small side by side. */
+  const rows: Video[][] = [];
+  for (let i = 0; i < films.length; ) {
+    const wide = rows.length % 2 === 0;
+    rows.push(films.slice(i, i + (wide ? 1 : 2)));
+    i += wide ? 1 : 2;
+  }
+  let n = 0;
+  return (
+    <div className="mo-mob">
+      <div ref={ref} className="cn-hero">
+        <Image src={REEL.poster} alt="" fill priority sizes="100vw" style={{ objectFit: "cover" }} />
+        {on ? <Loop v={reel} /> : null}
+        <div className="cn-hero-foot">
+          <div>
+            <span className="lbl">{REEL.title}</span>
+            <h1 className="cn-t">Motion</h1>
+          </div>
+          <button type="button" className="btn fill cn-light" onClick={() => onPlay(reel)}>Play with sound</button>
+        </div>
+      </div>
+      <div className="cn-tabs lbl" role="group" aria-label="Filter films">
+        <button type="button" aria-pressed={tab === "all"} onClick={() => setTab("all")}>All <span>{two(videos.length)}</span></button>
+        {SECTIONS.map((s) => (
+          <button key={s.id} type="button" aria-pressed={tab === s.id} onClick={() => setTab(s.id)}>
+            {s.name} <span>{two(videos.filter((v) => v.section === s.id).length)}</span>
           </button>
+        ))}
+      </div>
+      <div className="cn-run">
+        {rows.map((r) =>
+          r.length === 1 ? (
+            <Chapter key={r[0].id} v={r[0]} n={++n} ratio="2.39 / 1" sizes="100vw" onPlay={onPlay} />
+          ) : (
+            <div key={r[0].id} className="cn-pair">
+              {r.map((v, j) => (
+                <Chapter key={v.id} v={v} n={++n} ratio="16 / 9" small={j === 1} sizes="100vw" onPlay={onPlay} />
+              ))}
+            </div>
+          ),
         )}
       </div>
-      <figcaption className="lbl">
-        <span>{v.title}</span>
-        {sub ? <span className="mute">{sub}</span> : null}
-      </figcaption>
-    </figure>
+    </div>
   );
 }
 
 export function V3Video({ videos }: { videos: Video[] }) {
+  const sorted = React.useMemo(() => [...videos].sort((a, b) => rank(a) - rank(b)), [videos]);
+  const all = React.useMemo(() => [reel, ...sorted], [sorted]);
+  const [playing, setPlaying] = React.useState<Video | null>(null);
+  const close = React.useCallback(() => setPlaying(null), []);
   return (
     <div className="v3 contents">
       <section className="v3page" id="p-video">
-        <div className="pg-head">
-          <h1 className="pg-t">Video</h1>
-          <Link className="btn" href="/portfolio">See the work</Link>
-        </div>
-        <div className="vgrid">
-          <Tile v={reel} wide />
-        </div>
-        {SECTIONS.map((s) => {
-          const films = inSection(videos, s.id);
-          return films.length ? (
-            <React.Fragment key={s.id}>
-              <div className="b-head"><h2>{s.name}</h2></div>
-              <div className="vgrid">
-                {films.map((v) => <Tile key={v.id} v={v} />)}
-              </div>
-            </React.Fragment>
-          ) : null;
-        })}
+        <Desk films={all} onPlay={setPlaying} />
+        <Mob videos={sorted} onPlay={setPlaying} />
         <V3Foot />
       </section>
+      <Player v={playing} list={all} onGo={setPlaying} onClose={close} />
     </div>
   );
 }
