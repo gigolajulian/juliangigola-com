@@ -293,7 +293,7 @@ function Row({ v, i, onOpen, bare = false }: { v: Video; i: number; onOpen: (v: 
     <button type="button" className="mo-row" onClick={() => onOpen(v)} aria-label={`Open ${v.title}`}>
       <span className="mo-frame">{poster ? <Image src={poster} alt="" fill sizes="100vw" priority={i === 0} style={{ objectFit: "cover" }} /> : null}</span>
       <span className="mo-row-cap">
-        <span className="lbl mute">{bare ? subOf(v).split(" · ")[0] : `${two(i)} · ${subOf(v)}`}</span>
+        <span className="lbl mute">{bare ? subOf(v).split(" · ")[0] : subOf(v)}</span>
         <b>{v.title}</b>
       </span>
       {v.client ? <span className="mo-row-mk"><Mark slug={markOf(v.client)} name={v.client} h={20} even /></span> : null}
@@ -335,7 +335,7 @@ function Stack({ films }: { films: Video[] }) {
       </div>
       <div className="mo-row mo-now">
         <span className="mo-row-cap">
-          <span className="lbl mute">{two(n)} · {subOf(open)}</span>
+          <span className="lbl mute">{subOf(open)}</span>
           <b>{open.title}</b>
         </span>
         {open.client ? <span className="mo-row-mk"><Mark slug={markOf(open.client)} name={open.client} h={24} even /></span> : null}
