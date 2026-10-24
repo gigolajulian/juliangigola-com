@@ -138,7 +138,7 @@ export function V3Commission() {
   const [k, setK] = React.useState(1);
   const [kinds, setKinds] = React.useState<string[]>([]);
   const [pick, setPick] = React.useState({ when: "", budget: "" });
-  const [v, setV] = React.useState({ place: "", name: "", email: "", org: "", refs: "", msg: "" });
+  const [v, setV] = React.useState({ place: "", name: "", email: "", org: "", msg: "" });
   const [err, setErr] = React.useState<Record<string, string>>({});
   const f = (key: keyof typeof v) => ({ k: key, value: v[key], err: err[key], onChange: (x: string) => setV({ ...v, [key]: x }) });
   const at = sent ? 4 : k;
@@ -199,7 +199,7 @@ export function V3Commission() {
         <Field label="Name" ac="name" {...f("name")} />
         <Field label="Email" type="email" ac="email" {...f("email")} />
         <Field label="Company or artist" ac="organization" {...f("org")} />
-        <Field label="References" type="url" hint="Optional" ac="url" {...f("refs")} />
+        <ReferencePicks resync={state} v3 />
         <Field label="What you have in mind" area {...f("msg")} />
         <Failed state={state} />
       </>
@@ -221,7 +221,7 @@ export function V3Commission() {
   }
 
   const detail = [kinds.join(", "), pick.when, pick.budget, v.place.trim(), v.org.trim()].filter(Boolean).join(" · ");
-  const message = [v.msg.trim(), v.refs.trim() && `References: ${v.refs.trim()}`].filter(Boolean).join("\n\n");
+  const message = v.msg.trim();
   const next = (form: HTMLFormElement) => {
     if (at === 4) return router.push("/portfolio");
     if (at < 3) {
