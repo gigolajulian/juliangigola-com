@@ -485,10 +485,10 @@ export const BOOKING_PAGES: BookingPage[] = [
       // Only frames still in the gallery after the /admin trim.
       "/work/weddings/02.jpg",
       "/work/weddings/03.jpg",
-      "/work/weddings/13.jpg",
+      "/work/weddings/07.jpg",
       "/work/weddings/29.jpg",
-      "/work/weddings/40.jpg",
-      "/work/weddings/12.jpg",
+      "/work/weddings/13.jpg",
+      "/work/weddings/14.jpg",
     ],
     book: { type: "session", session: weddings.name, title: "Book your wedding", cal: "juliangigola/wedding-call" },
   },

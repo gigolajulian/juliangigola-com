@@ -48,11 +48,6 @@ export function V3Project({ project, next }: { project: Project; next?: { href: 
           <header className="pj-top">
             <Link className="lbl mute pj-back" href="/portfolio">&larr; Portfolio</Link>
             <div className="pj-row">
-              {mark ? (
-                <span className="pj-mark">
-                  <Mark slug={mark.slug} name={mark.name} h={28} />
-                </span>
-              ) : null}
               <h1 className="pg-t">{name}</h1>
               <p className="lbl mute">{sub}</p>
             </div>
@@ -61,6 +56,12 @@ export function V3Project({ project, next }: { project: Project; next?: { href: 
           {big ? (
             <figure className="pj-big" style={{ aspectRatio: `${big.width} / ${big.height}` }}>
               <Image src={big.src} alt={alt(big.alt)} fill sizes="(max-width: 900px) 100vw, 40vw" priority style={{ objectFit: "cover", background: big.color }} />
+              {/* The client's logo signs the opening frame, bottom right (Julian). */}
+              {mark ? (
+                <span className="pj-mark">
+                  <Mark slug={mark.slug} name={mark.name} h={28} />
+                </span>
+              ) : null}
             </figure>
           ) : null}
           {lead.length ? (
