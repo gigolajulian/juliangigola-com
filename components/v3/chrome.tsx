@@ -156,7 +156,7 @@ function useDock(dock: boolean, past: boolean, hdr: React.RefObject<HTMLElement 
     f.setAttribute("aria-hidden", "");
     f.innerHTML = "<span>Julian Gigola</span><span>Julian Gigola</span>";
     const [big, small] = f.children as unknown as [HTMLElement, HTMLElement];
-    Object.assign(f.style, { position: "fixed", left: "0", top: "0", margin: "0", zIndex: "31", pointerEvents: "none", whiteSpace: "nowrap", transformOrigin: "0 0", fontFamily: cs.fontFamily, fontWeight: cs.fontWeight, fontSize: cs.fontSize, lineHeight: cs.lineHeight, letterSpacing: cs.letterSpacing, textTransform: cs.textTransform });
+    Object.assign(f.style, { position: "fixed", left: "0", top: "0", margin: "0", zIndex: "31", pointerEvents: "none", whiteSpace: "nowrap", transformOrigin: "0 0", willChange: "transform", fontFamily: cs.fontFamily, fontWeight: cs.fontWeight, fontSize: cs.fontSize, lineHeight: cs.lineHeight, letterSpacing: cs.letterSpacing, textTransform: cs.textTransform });
     Object.assign(small.style, { position: "absolute", left: "0", top: "0", fontFamily: ws.fontFamily, fontWeight: ws.fontWeight, fontSize: `${parseFloat(ws.fontSize) / k}px`, lineHeight: "1", letterSpacing: `${parseFloat(ws.letterSpacing) / k}px`, textTransform: ws.textTransform });
     document.body.append(f);
     const o = ink(big), fl = a.left - o.left, ft = a.top - o.top;
@@ -168,9 +168,16 @@ function useDock(dock: boolean, past: boolean, hdr: React.RefObject<HTMLElement 
     small.style.top = `${a.top + a.height / 2 - (sb.top + sb.height / 2)}px`;
     const s2 = ink(small), sx = s2.left - fl, sy = s2.top - ft;
     fly.current = f;
-    const up = { transform: "none", color: cs.color };
-    const down = { transform: `translate(${b.left - fl - sx * k}px,${b.top - ft - sy * k}px) scale(${k})`, color: ws.color };
-    const t = { duration: past ? 450 : 350, easing: "cubic-bezier(.16,1,.3,1)", fill: "forwards" as const };
+    /* Each spelling keeps its own colour and the crossfade carries the
+       change: animating the copy's colour repainted its 140px text every
+       frame, and on an iPhone the flight stuttered (Julian, 2026-10-24).
+       An even ease over 0.7s: the expo curve did most of the move in its
+       first tenth, and read as a snap. */
+    big.style.color = cs.color;
+    small.style.color = ws.color;
+    const up = { transform: "translate(0,0) scale(1)" };
+    const down = { transform: `translate(${b.left - fl - sx * k}px,${b.top - ft - sy * k}px) scale(${k})` };
+    const t = { duration: past ? 700 : 500, easing: "cubic-bezier(.65,0,.25,1)", fill: "forwards" as const };
     const caps = [{ opacity: 1 }, { opacity: 1, offset: 0.35 }, { opacity: 0 }];
     big.animate(past ? caps : [...caps].reverse().map((x, n) => ({ ...x, offset: [0, 0.65, 1][n] })), t);
     small.animate(past ? [{ opacity: 0 }, { opacity: 0, offset: 0.35 }, { opacity: 1 }] : [{ opacity: 1 }, { opacity: 0, offset: 0.65 }, { opacity: 0 }], t);

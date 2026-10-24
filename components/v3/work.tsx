@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import Image from "next/image";
+import Image, { getImageProps } from "next/image";
 import Link from "next/link";
 import { gsap } from "gsap";
 import { Flip } from "gsap/Flip";
@@ -52,6 +52,8 @@ type PickAt = { a: number; c: number };
 
 gsap.registerPlugin(Flip);
 
+const STRIP_SIZES = "(max-width: 767px) 82vw, 50vh";
+
 /** The covers on screen, for the view change below. */
 const seen = () =>
   [...document.querySelectorAll<HTMLElement>("#p-work [data-flip-id]")].filter((e) => {
@@ -69,6 +71,7 @@ function Tile({ p, swatch }: { p: WorkItem; swatch?: string[] }) {
             alt={p.n}
             fill
             sizes="(max-width: 700px) 50vw, (max-width: 1000px) 33vw, 25vw"
+            decoding="sync"
           />
           {swatch ? (
             <span className="sw">
@@ -150,6 +153,24 @@ export function V3Work({ work }: { work: WorkItem[] }) {
       ),
     [work, filter, q],
   );
+  /* The strip asks for larger files than the grid, so on a phone its covers
+     flew in empty and the photos popped in after (Julian, iPhone and iPad).
+     Its first frames are fetched and decoded once the grid is up. */
+  React.useEffect(() => {
+    if (view === "strip") return;
+    const go = () => {
+      for (const p of list.slice(0, 8)) {
+        const { props } = getImageProps({ src: p.cover, alt: "", fill: true, sizes: STRIP_SIZES });
+        const im = new window.Image();
+        if (props.sizes) im.sizes = props.sizes;
+        if (props.srcSet) im.srcset = props.srcSet;
+        im.src = props.src;
+        im.decode().catch(() => {});
+      }
+    };
+    const t = setTimeout(go, 1200);
+    return () => clearTimeout(t);
+  }, [list, view]);
 
   /* The scope's points arrive with the Color view, not with the page. */
   React.useEffect(() => {
@@ -519,7 +540,8 @@ export function V3Work({ work }: { work: WorkItem[] }) {
                       src={p.cover}
                       alt={p.n}
                       fill
-                      sizes="(max-width: 767px) 82vw, 50vh"
+                      sizes={STRIP_SIZES}
+                      decoding="sync"
                       loading={n < 4 ? "eager" : "lazy"}
                     />
                     <figcaption>
