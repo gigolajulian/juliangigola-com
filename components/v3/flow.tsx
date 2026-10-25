@@ -90,9 +90,9 @@ export function FlowShell({
       <figure className={over != null ? "f-photo over" : "f-photo"}>
         <div className="in">
           <div className="ph">
-            <Image className="v3d" src={photo.d} alt={`${name} sample frame`} fill sizes="(max-width: 800px) 100vw, 44vw" style={photo.at?.d ? ({ "--at": photo.at.d } as React.CSSProperties) : undefined} />
-            <Image className="v3l" src={photo.l} alt={`${name} sample frame`} fill sizes="(max-width: 800px) 100vw, 44vw" style={photo.at?.l ? ({ "--at": photo.at.l } as React.CSSProperties) : undefined} />
-            {photo.m ? <Image className="v3m" src={photo.m} alt={`${name} sample frame`} fill sizes="100vw" /> : null}
+            <Image className="v3d" src={photo.d} alt={`${name} sample frame`} fill sizes="(max-width: 800px) 100vw, 44vw" loading="eager" fetchPriority="high" decoding="sync" style={photo.at?.d ? ({ "--at": photo.at.d } as React.CSSProperties) : undefined} />
+            <Image className="v3l" src={photo.l} alt={`${name} sample frame`} fill sizes="(max-width: 800px) 100vw, 44vw" loading="eager" decoding="sync" style={photo.at?.l ? ({ "--at": photo.at.l } as React.CSSProperties) : undefined} />
+            {photo.m ? <Image className="v3m" src={photo.m} alt={`${name} sample frame`} fill sizes="100vw" loading="eager" decoding="sync" /> : null}
           </div>
           <div className="cap">
             <b>{name}</b>
