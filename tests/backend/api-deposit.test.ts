@@ -255,13 +255,13 @@ describe("telling Julian", () => {
     expect(mails[0].text).toContain(LINK);
     expect(kv().json(`deposit:${PI}`)).toMatchObject({ status: "booking", warned: true });
     expect(calls.some((c) => c.url.includes("/v2/bookings"))).toBe(false);
-    await deliver(paid());
+    expect((await deliver(paid())).status).toBe(200);
     expect(mails).toHaveLength(1);
   });
 
-  it("says nothing while a booking is under two minutes old", async () => {
+  it("says nothing while a booking is under two minutes old, and asks Stripe to come back", async () => {
     await kv().put(`deposit:${PI}`, JSON.stringify({ status: "booking", at: new Date().toISOString() }));
-    await deliver(paid());
+    expect((await deliver(paid())).status).toBe(503);
     expect(mails).toHaveLength(0);
   });
 

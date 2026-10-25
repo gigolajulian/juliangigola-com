@@ -302,7 +302,10 @@ export async function settle(env: Env, intent: string, metadata: { [k: string]: 
        off there, every retry from Stripe returned here in silence and the
        deposit sat paid, maybe booked, maybe not. Past two minutes, hello@
        hears once; the record keeps its status and is marked warned. */
-    if (r.status === "booking" && !r.warned && Date.now() - Date.parse(r.at) > STUCK_MS) {
+    // Under two minutes and not yet warned: "booking", so the webhook asks
+    // Stripe to come back (503). Once hello@ has heard, Stripe may stop.
+    if (r.status === "booking" && r.warned) return "failed";
+    if (r.status === "booking" && Date.now() - Date.parse(r.at) > STUCK_MS) {
       const b = fromMetadata(metadata);
       const who = typeof b === "string" ? undefined : b;
       const what = who ? [SESSION[who.slug] ?? who.slug, whenPT(who.start), who.name, "$100"].join(", ") : "$100";
@@ -312,6 +315,7 @@ export async function settle(env: Env, intent: string, metadata: { [k: string]: 
         `Paid, and the booking was started at ${r.at} but never finished. Check Cal.com for the booking, then book or refund in Stripe by hand.`,
         `Stripe: ${dashboardLink(intent, env.STRIPE_SECRET_KEY)}`,
       ], who);
+      return "failed";
     }
     return r.status;
   }

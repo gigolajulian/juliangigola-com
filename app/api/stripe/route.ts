@@ -38,6 +38,8 @@ export async function POST(request: Request) {
   // Every other payment on the account (Cal.com's own, invoices, payment
   // links) is none of this route's business: acknowledged, never refunded.
   if (!isDeposit(pi)) return text("ok", 200);
-  await settle({ INBOX: env.INBOX, STRIPE_SECRET_KEY: env.STRIPE_SECRET_KEY, EMAIL: env.EMAIL, CLIENT_EMAIL: env.CLIENT_EMAIL }, pi.id, pi.metadata);
+  const status = await settle({ INBOX: env.INBOX, STRIPE_SECRET_KEY: env.STRIPE_SECRET_KEY, EMAIL: env.EMAIL, CLIENT_EMAIL: env.CLIENT_EMAIL }, pi.id, pi.metadata);
+  // Still booking from an earlier delivery: Stripe retries until it ends or hello@ is warned.
+  if (status === "booking") return text("Still booking.", 503);
   return text("ok", 200);
 }
