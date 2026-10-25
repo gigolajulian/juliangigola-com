@@ -66,14 +66,19 @@ export function V3Book({ slug }: { slug: SessionSlug }) {
 
 /* Weddings: Date, Shoot, You, Sent. Nothing is booked; the request is an
    enquiry and the date is confirmed with a quote. */
-function OnRequest({ slug, shell }: { slug: SessionSlug; shell: Shell }) {
+const noop = () => () => {};
+
+/* Client only: the page is prerendered, so a date baked in at build time
+   no longer matches the visitor's today and hydration fails. */
+function OnRequest(props: { slug: SessionSlug; shell: Shell }) {
+  const stamp = React.useSyncExternalStore(noop, () => new Date().toDateString(), () => "");
+  return stamp ? <OnRequestFlow {...props} stamp={stamp} /> : null;
+}
+
+function OnRequestFlow({ slug, shell, stamp }: { slug: SessionSlug; shell: Shell; stamp: string }) {
   const S = SESSIONS[slug];
   const { state, pending, sent, send } = useEnquiry();
-  const today = React.useMemo(() => {
-    const d = new Date();
-    d.setHours(0, 0, 0, 0);
-    return d;
-  }, []);
+  const today = React.useMemo(() => new Date(stamp), [stamp]);
   const [k, setK] = React.useState(1);
   const [view, setView] = React.useState<"week" | "month">("month");
   const [day, setDay] = React.useState(() => new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1));
