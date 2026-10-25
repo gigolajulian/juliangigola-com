@@ -53,6 +53,7 @@ type PickAt = { a: number; c: number };
 gsap.registerPlugin(Flip);
 
 const STRIP_SIZES = "(max-width: 767px) 82vw, 50vh";
+const GRID_SIZES = "(max-width: 700px) 50vw, (max-width: 1000px) 33vw, 25vw";
 
 /** The covers on screen, for the view change below. */
 const seen = () =>
@@ -61,7 +62,7 @@ const seen = () =>
     return r.bottom > 0 && r.top < innerHeight && r.right > 0 && r.left < innerWidth;
   });
 
-function Tile({ p, swatch }: { p: WorkItem; swatch?: string[] }) {
+function Tile({ p, swatch, first }: { p: WorkItem; swatch?: string[]; first?: boolean }) {
   return (
     <figure className="wt">
       <Link href={`/portfolio/${p.s}`} aria-label={p.n}>
@@ -70,8 +71,11 @@ function Tile({ p, swatch }: { p: WorkItem; swatch?: string[] }) {
             src={p.cover}
             alt={p.n}
             fill
-            sizes="(max-width: 700px) 50vw, (max-width: 1000px) 33vw, 25vw"
+            sizes={GRID_SIZES}
             decoding="sync"
+            /* The first rows load at once: back from the strip, lazy covers
+               waited a beat and landed as empty cards. */
+            loading={first ? "eager" : "lazy"}
           />
           {swatch ? (
             <span className="sw">
@@ -155,12 +159,13 @@ export function V3Work({ work }: { work: WorkItem[] }) {
   );
   /* The strip asks for larger files than the grid, so on a phone its covers
      flew in empty and the photos popped in after (Julian, iPhone and iPad).
-     Its first frames are fetched and decoded once the grid is up. */
+     The other view's first frames are fetched and decoded while this one is
+     up, both ways: back to the grid showed one grey frame too. */
   React.useEffect(() => {
-    if (view === "strip") return;
+    if (view === "color") return;
     const go = () => {
-      for (const p of list.slice(0, 8)) {
-        const { props } = getImageProps({ src: p.cover, alt: "", fill: true, sizes: STRIP_SIZES });
+      for (const p of list.slice(0, view === "strip" ? 12 : 8)) {
+        const { props } = getImageProps({ src: p.cover, alt: "", fill: true, sizes: view === "strip" ? GRID_SIZES : STRIP_SIZES });
         const im = new window.Image();
         if (props.sizes) im.sizes = props.sizes;
         if (props.srcSet) im.srcset = props.srcSet;
@@ -525,8 +530,8 @@ export function V3Work({ work }: { work: WorkItem[] }) {
         </p>
         {view === "grid" ? (
           <div className="wgrid">
-            {list.map((p) => (
-              <Tile key={p.s} p={p} />
+            {list.map((p, n) => (
+              <Tile key={p.s} p={p} first={n < 12} />
             ))}
           </div>
         ) : null}
