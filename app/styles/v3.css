@@ -547,7 +547,7 @@
 .v3 .wviews button{display:grid;place-items:center;width:40px;padding:0}
 .v3 .wviews svg{fill:currentColor}
 @media (max-width:700px){.v3 .wviews button{width:36px;padding:0}}
-.v3 .mq{-webkit-mask:linear-gradient(90deg,transparent,#000 14%,#000 86%,transparent);mask:linear-gradient(90deg,transparent,#000 14%,#000 86%,transparent)}
+.v3 .mq{-webkit-mask:linear-gradient(90deg,transparent,#000 7%,#000 93%,transparent);mask:linear-gradient(90deg,transparent,#000 7%,#000 93%,transparent)}
 @media (max-width:600px){.v3 .ab-bio{text-align:left;word-spacing:normal;hyphens:none;-webkit-hyphens:none;text-wrap:pretty}}
 
 /* ---- site additions, not in the master's mock chrome ---- */
