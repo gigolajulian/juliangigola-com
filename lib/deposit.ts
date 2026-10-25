@@ -197,16 +197,19 @@ export function intentForm(b: Booking): { [k: string]: string } {
  * `undefined` when there is none; `false` when Stripe could not be asked,
  * so a real deposit is never called missing (QA on #192). Only an intent
  * Stripe says succeeded, that is one of the site's deposits, and that was
- * made for this booking's email and start counts.
+ * made for this booking's email and start counts. A refunded or failed one
+ * never does (a refund keeps the intent's status succeeded), and once the
+ * site booked it, only for that Cal.com booking.
  */
-export async function paidFor(key: string, p: { startTime?: string; attendees?: { email?: string }[]; additionalNotes?: string; metadata?: { [k: string]: unknown } }) {
+export async function paidFor(key: string, p: { uid?: string; startTime?: string; attendees?: { email?: string }[]; additionalNotes?: string; metadata?: { [k: string]: unknown } }) {
   const ref = typeof p.metadata?.deposit === "string" ? p.metadata.deposit : p.additionalNotes?.match(/\bpi_[A-Za-z0-9]{8,64}\b/)?.[0];
   if (!ref || !isIntentId(ref)) return undefined;
   try {
     const pi = (await stripe(key, `/payment_intents/${ref}`)) as { status?: string; amount?: number; currency?: string; metadata?: { [k: string]: string } };
     const m = pi.metadata ?? {};
     const same = m.email?.toLowerCase() === p.attendees?.[0]?.email?.toLowerCase() && Date.parse(m.start ?? "") === Date.parse(p.startTime ?? "");
-    return pi.status === "succeeded" && isDeposit(pi) && same ? dashboardLink(ref, key) : undefined;
+    const live = m.outcome !== "refunded" && m.outcome !== "failed" && (!m.cal_uid || m.cal_uid === p.uid);
+    return pi.status === "succeeded" && isDeposit(pi) && same && live ? dashboardLink(ref, key) : undefined;
   } catch (e) {
     // Stripe has no such intent: a made-up ref, so no deposit. Anything else: unknown.
     return String(e).endsWith(" 404") ? undefined : false;
