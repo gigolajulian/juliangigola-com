@@ -617,10 +617,22 @@ html{font-family:var(--font-mono),ui-monospace,monospace}
 
 /* Dual screen (Surface Duo and other foldables, spanned): no line of text and
    no control crosses the hinge. Two-column layouts split on it; a padded grid
-   ends one gutter before it and starts one gutter after it. */
+   ends one gutter before it and starts one gutter after it. The second query
+   is the iPhone duo opened flat (1114x705, 28px hinge at the center), which
+   reports no segments: the fallbacks draw that hinge. */
+/* WebKit drops a custom property built on an env() it does not know, so the
+   duo's plain values live in their own query, away from env(). */
 @media (horizontal-viewport-segments: 2) {
-  :root{--s0:env(viewport-segment-width 0 0,50vw);--s1:env(viewport-segment-width 1 0,50vw);--hg:calc(env(viewport-segment-left 1 0,50vw) - env(viewport-segment-right 0 0,50vw));--split:calc(var(--s0) - 2 * var(--g)) calc(var(--s1) - 2 * var(--gr));--split-gap:calc(var(--hg) + var(--g) + var(--gr))}
-  .v3 :is(.a-index,.about,.reach,.a-seq,.wgrid,.in-steps ol,.ab-logos .lg,.scres){grid-template-columns:var(--split);column-gap:var(--split-gap)}
+  :root{--s0:env(viewport-segment-width 0 0,50vw);--s1:env(viewport-segment-width 1 0,50vw);--hg:calc(env(viewport-segment-left 1 0,50vw) - env(viewport-segment-right 0 0,50vw))}
+}
+@media (pointer:coarse) and (min-width:1100px) and (max-width:1130px) and (min-aspect-ratio:3/2) and (max-aspect-ratio:5/3) {
+  :root{--s0:calc(50vw - 14px);--s1:calc(50vw - 14px);--hg:28px}
+}
+@media (horizontal-viewport-segments: 2), (pointer:coarse) and (min-width:1100px) and (max-width:1130px) and (min-aspect-ratio:3/2) and (max-aspect-ratio:5/3) {
+  :root{--split:calc(var(--s0) - 2 * var(--g)) calc(var(--s1) - 2 * var(--gr));--split-gap:calc(var(--hg) + var(--g) + var(--gr))}
+  .v3 :is(.a-index,.about,.reach,.a-seq,.wgrid,.in-steps ol,.ab-logos .lg,.scres,.lg-doc,.bts-row,.sv-row){grid-template-columns:var(--split);column-gap:var(--split-gap)}
+  .v3 .pg-t{max-width:calc(var(--s0) - 2 * var(--g));font-size:min(clamp(3rem,calc(8*var(--v3u)),7rem),calc((var(--s0) - 2 * var(--g)) * .12))}
+  .v3 .b-head h2{max-width:calc(var(--s0) - 2 * var(--g));font-size:min(clamp(2.5rem,calc(6*var(--v3u)),5.5rem),calc((var(--s0) - 2 * var(--g)) * .1))}
   .v3 :is(.foot-line,.direct){display:grid;grid-template-columns:var(--split);column-gap:var(--split-gap)}
   .v3 .a-seq :is(.big,.sm,.big.r,.sm.l){grid-column:auto;margin-top:0}
   .v3 :is(.doors,.sheet,.flow){grid-template-columns:var(--s0) var(--s1);column-gap:var(--hg)}
