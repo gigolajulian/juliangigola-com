@@ -118,6 +118,20 @@ describe("POST /api/stripe", () => {
     expect(calls).toEqual([]);
   });
 
+  it("keeps the booking when KV refuses the outcome write", async () => {
+    const store = kv();
+    const put = store.put.bind(store);
+    let n = 0;
+    store.put = async (k, v, o) => {
+      if (k === `deposit:${PI}` && n++ > 0) throw new Error("KV PUT failed: 429 Too Many Requests");
+      return put(k, v, o);
+    };
+    expect((await deliver(paid())).status).toBe(200);
+    expect(calls.some((c) => c.url.endsWith("/refunds"))).toBe(false);
+    expect(intent.metadata.outcome).toBe("booked");
+    expect(mails.map((m) => m.subject)).toEqual([expect.stringMatching(/^Deposit paid:/)]);
+  });
+
   it("ignores other events", async () => {
     expect((await deliver(JSON.stringify({ type: "payment_intent.created", data: { object: { id: PI } } }))).status).toBe(200);
     expect(calls).toEqual([]);

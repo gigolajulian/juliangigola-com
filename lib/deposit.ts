@@ -296,8 +296,12 @@ export async function settle(env: Env, intent: string, metadata: { [k: string]: 
   if (seen) return (JSON.parse(seen) as DepositRecord).status;
 
   const put = async (r: Omit<DepositRecord, "at">) => {
-    await env.INBOX.put(key, JSON.stringify({ ...r, at: new Date().toISOString() }), { expirationTtl: 90 * 864e2 });
-    if (r.status === "booking") return;
+    const write = env.INBOX.put(key, JSON.stringify({ ...r, at: new Date().toISOString() }), { expirationTtl: 90 * 864e2 });
+    // "booking" must land, or a retry books twice. The outcome is only a
+    // record, and KV refuses a second write to a key within a second: a
+    // failed one must never turn a booking into a refund.
+    if (r.status === "booking") return write;
+    await write.catch((e: unknown) => console.error("deposit record", r.status, String(e)));
     // The card's copy (see 4. above). A failed copy only leaves the card on
     // "Still confirming"; it must never turn a booking into a refund.
     const form: { [k: string]: string } = { "metadata[outcome]": r.status };
