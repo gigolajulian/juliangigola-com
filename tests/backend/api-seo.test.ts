@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { githubToken, reply } from "./fakes";
+import { SCOPED, githubToken, reply } from "./fakes";
 import { parseBeacon } from "@/lib/beacon";
 
 /* /api/seo (behind the GitHub gate, like /api/traffic) and the public
@@ -22,7 +22,7 @@ describe("GET /api/seo", async () => {
   });
 
   it("answers 503 without CF_ANALYTICS_TOKEN, and refuses a map path that is not a page", async () => {
-    vi.stubGlobal("fetch", vi.fn(async () => reply({ permissions: { push: true } })));
+    vi.stubGlobal("fetch", vi.fn(async () => reply({ permissions: { push: true } }, 200, SCOPED)));
     ctx.env = {};
     expect((await get("", githubToken())).status).toBe(503);
     ctx.env = { CF_ANALYTICS_TOKEN: "k" };
