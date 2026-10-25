@@ -201,7 +201,7 @@
 .v3 .a-seq .col:nth-child(2) figure.m-only .ph{aspect-ratio:3/4}
 /* iOS zooms into a field under 16px and the page then pans sideways. */
 .v3 :is(input,textarea,select){font-size:max(16px,1em)}}
-.v3 .site-hdr{position:fixed;left:0;right:0;top:0;z-index:30;display:flex;justify-content:space-between;align-items:center;padding:14px var(--gr) 14px var(--g);background:color-mix(in srgb,var(--bg) 52%,transparent);-webkit-backdrop-filter:blur(20px) saturate(1.4);backdrop-filter:blur(20px) saturate(1.4);border-bottom:1px solid var(--line);transform:translateY(-100%);opacity:0;pointer-events:none;transition:transform .25s ease,opacity .2s ease}
+.v3 .site-hdr{position:fixed;left:0;right:0;top:0;z-index:30;display:flex;justify-content:space-between;align-items:center;padding:14px var(--gr) 14px var(--g);background:color-mix(in srgb,var(--bg) 52%,transparent);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);transform:translateY(-100%);opacity:0;pointer-events:none;transition:transform .25s ease,opacity .2s ease}
 .v3 .site-hdr.show{transform:none;opacity:1;pointer-events:auto}
 .v3 .site-wm{font-size:20px;letter-spacing:-.045em;text-transform:none}
 .v3 .site-hdr .links{display:flex;gap:28px}
