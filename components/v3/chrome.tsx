@@ -294,9 +294,11 @@ export function V3Header() {
 export function V3Foot() {
   return (
     <div className="foot-line lbl mute">
-      <span>© 2026 Julian Gigola</span>
-      <a href="mailto:hello@juliangigola.com">hello@juliangigola.com</a>
-      <span>San Francisco Bay Area</span>
+      <span className="foot-c">© 2026 Julian Gigola</span>
+      <span className="foot-p">
+        <Link href="/legal">Legal</Link>
+        <span>San Francisco Bay Area</span>
+      </span>
     </div>
   );
 }
