@@ -26,23 +26,15 @@ for (const r of RATIOS.filter((x) => !x.touch)) {
   });
 }
 
-// V3: service pages link to /book/<slug> and no longer carry a picker. Skipped on
-// Julian's call (2026-10-24) until this is rewritten for /book/<slug>.
+// V3: the booking lives at /book/<slug>, where the stepper's picker confirms
+// a time (the service pages no longer carry an inline picker).
 for (const slug of ["portraits", "music-photography"]) {
   for (const r of [RATIOS[0], RATIOS[4]]) {
-    test.skip(`/${slug}#book: a time can be confirmed at ${r.name}`, async ({ browser, browserName }) => {
+    test(`/book/${slug}: a time can be confirmed at ${r.name}`, async ({ browser, browserName }) => {
       const { ctx, page } = await open(browser, browserName, r);
-      await page.goto(`/${slug}#book`, { waitUntil: "load" });
-      const region = page.locator("[role=region].tp");
-      await region.scrollIntoViewIfNeeded({ timeout: 30_000 });
+      await page.goto(`/book/${slug}`, { waitUntil: "load" });
       await page.locator("[data-day]").first().waitFor({ timeout: 30_000 });
-      await page.locator("[data-day]:not([disabled]):visible").first().click();
-      // The card may scroll inside: take it to its end, as a person would.
-      await region.evaluate((e) => {
-        let c = e.parentElement;
-        while (c && getComputedStyle(c).overflowY === "visible") c = c.parentElement;
-        if (c && c !== document.documentElement && c !== document.body) c.scrollTop = c.scrollHeight;
-      });
+      await page.locator("[data-day]:not([disabled]):visible").last().click();
       await page.waitForTimeout(300);
       await pickTime(page, true);
       const confirm = page.getByRole("button", { name: CONFIRM });
