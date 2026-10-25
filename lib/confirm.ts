@@ -43,7 +43,10 @@ export function when(start: string, end?: string) {
   const day = fmt({ weekday: "short", month: "short", day: "numeric" }).format(s);
   const time = fmt({ hour: "numeric", minute: "2-digit", timeZoneName: "short" });
   const e = end ? new Date(end) : null;
-  const range = e && +e > +s ? time.formatRange(s, e).replace(/\s*[–-]\s*/, " to ") : time.format(s);
+  /* ICU folds 1:00 AM PDT to 1:00 AM PST (the night clocks fall back) into
+     one "1:00 AM PDT", so a range with no dash is written out both ends. */
+  const r = e && +e > +s ? time.formatRange(s, e) : "";
+  const range = !e || !r ? time.format(s) : /[–-]/.test(r) ? r.replace(/\s*[–-]\s*/, " to ") : `${time.format(s)} to ${time.format(e)}`;
   return `${day}, ${range}`.replace(/ | /g, " ");
 }
 

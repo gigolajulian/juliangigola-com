@@ -28,6 +28,21 @@ export function NotFoundScene({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
 
+  /* A notFound() under a dynamic segment is served as Next's bare error
+     shell and rendered on the client, where the layout's inline theme
+     script never runs. Same logic, before this tree's first paint. */
+  React.useLayoutEffect(() => {
+    const html = document.documentElement;
+    if (html.dataset.theme) return;
+    let t = null;
+    try {
+      t = sessionStorage.getItem("theme");
+    } catch {}
+    const l = t === "light" || (t !== "dark" && matchMedia("(prefers-color-scheme: light)").matches);
+    html.dataset.theme = l ? "light" : "dark";
+    document.querySelectorAll('meta[name="theme-color"]').forEach((m) => m.setAttribute("content", l ? "#ebedef" : "#0b0a09"));
+  }, []);
+
   React.useEffect(() => {
     const scene = ref.current;
     if (!scene) return;
