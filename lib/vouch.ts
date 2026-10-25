@@ -26,39 +26,58 @@ export const digest = async (s: string) =>
     .join("");
 
 /**
- * The shapes GitHub tokens come in. Anything else is refused before the
- * fetch: otherwise every request with a made-up bearer string costs a call
- * to GitHub, and enough of those from one origin gets the Worker's egress
- * rate-limited there.
+ * The two kinds of token /admin is set up with: a fine-grained one (what its
+ * setup page asks for) or a classic PAT. OAuth, app and refresh tokens
+ * (gho_, ghu_, ghs_, ghr_) are refused before any fetch, as is anything
+ * else: otherwise every made-up bearer string costs a call to GitHub, and
+ * enough of those gets the Worker's egress rate-limited there.
  */
-const GITHUB_TOKEN =
-  /^(gh[pousr]_[A-Za-z0-9]{20,255}|github_pat_[A-Za-z0-9_]{20,255})$/;
+const CLASSIC = /^ghp_[A-Za-z0-9]{20,255}$/;
+const FINE = /^github_pat_[A-Za-z0-9_]{20,255}$/;
+
+const API = `https://api.github.com/repos/${REPO.owner}/${REPO.repo}`;
+// Bounded, and closed on failure: a slow GitHub must not hang the gate
+// open, and an unreachable one must not open it.
+const ask = (token: string, path = "", init: RequestInit = {}) =>
+  fetch(API + path, {
+    ...init,
+    signal: AbortSignal.timeout(8000),
+    headers: {
+      authorization: `Bearer ${token}`,
+      accept: "application/vnd.github+json",
+      "user-agent": "juliangigola-admin",
+    },
+  });
 
 async function vouch(token: string): Promise<boolean> {
-  if (!GITHUB_TOKEN.test(token)) return false;
+  const classic = CLASSIC.test(token);
+  if (!classic && !FINE.test(token)) return false;
   const id = await digest(token);
   const until = vouched.get(id);
   if (until && until > Date.now()) return true;
 
-  // Bounded, and closed on failure: a slow GitHub must not hang the gate
-  // open, and an unreachable one must not open it.
-  const res = await fetch(
-    `https://api.github.com/repos/${REPO.owner}/${REPO.repo}`,
-    {
-      signal: AbortSignal.timeout(8000),
-      headers: {
-        authorization: `Bearer ${token}`,
-        accept: "application/vnd.github+json",
-        "user-agent": "juliangigola-admin",
-      },
-    },
-  );
+  // The user's role: can whoever owns this token push here at all?
+  const res = await ask(token);
   if (!res.ok) {
     await res.body?.cancel();
     return false;
   }
   const repo = (await res.json()) as { permissions?: { push?: boolean } };
-  const ok = repo.permissions?.push === true;
+  if (repo.permissions?.push !== true) return false;
+
+  // The token's own grant. A classic token lists its scopes in a header.
+  // A fine-grained one has none to read, so it is asked to write a file with
+  // no content: GitHub answers 403/404 when the token lacks Contents write,
+  // and 422 (fields missing) when it has it. Nothing is ever written.
+  let ok: boolean;
+  if (classic) {
+    const scopes = (res.headers.get("x-oauth-scopes") ?? "").split(",").map((s) => s.trim());
+    ok = scopes.includes("repo") || scopes.includes("public_repo");
+  } else {
+    const probe = await ask(token, "/contents/.vouch", { method: "PUT", body: "{}" });
+    await probe.body?.cancel();
+    ok = probe.status === 422;
+  }
   if (ok) vouched.set(id, Date.now() + VOUCHED_MS);
   return ok;
 }
