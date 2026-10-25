@@ -30,10 +30,12 @@ import { MotionGate, OnLegacy, OnV3, V3Footer, V3Header } from "@/components/v3/
    IBM Plex Mono for everything else. No other faces. Served from this site
    through `next/font`, so a visitor makes no request to Google.
    `--font-wordmark` points at the same face (`styles/v3.css`).
-   The files are committed (Google's latin subsets) rather than fetched by
-   `next/font/google`: that fetch failed Turbopack on the v3.0.2 and v3.0.3
-   production builds, 21 "Can't resolve .../font/google/font" errors, and
-   a retry passed. A build must not depend on Google answering. */
+   The files are committed rather than fetched by `next/font/google`
+   (latin, latin-ext A, arrows and punctuation, cut from google/fonts with
+   pyftsubset; Inter Tight limited to wght 500-900). That fetch failed
+   Turbopack on the v3.0.2 and v3.0.3 production builds, 21 "Can't resolve
+   .../font/google/font" errors, and a retry passed. A build must not
+   depend on Google answering. */
 const display = localFont({
   variable: "--font-display",
   src: "./fonts/InterTight-Variable.woff2",
