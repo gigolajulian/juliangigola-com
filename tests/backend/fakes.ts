@@ -42,12 +42,17 @@ export class FakeKV {
     this.data.delete(key);
   }
 
-  async list({ prefix = "", limit = 1000 }: { prefix?: string; limit?: number } = {}) {
+  async list({ prefix = "", limit = 1000, cursor }: { prefix?: string; limit?: number; cursor?: string } = {}) {
     this.check();
     const names = [...this.data.keys()].filter((k) => k.startsWith(prefix)).sort();
+    // As KV pages a long list: the cursor here is where the next page starts.
+    const from = cursor ? Number(cursor) : 0;
+    const page = names.slice(from, from + limit);
+    const complete = from + limit >= names.length;
     return {
-      keys: names.slice(0, limit).map((name) => ({ name, metadata: this.data.get(name)!.metadata })),
-      list_complete: names.length <= limit,
+      keys: page.map((name) => ({ name, metadata: this.data.get(name)!.metadata })),
+      list_complete: complete,
+      ...(complete ? {} : { cursor: String(from + limit) }),
     };
   }
 
