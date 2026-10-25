@@ -59,56 +59,91 @@ function Hero() {
   );
 }
 
-/* Logo strip: still until scroll, then maps A to B over the hero's height,
-   eased (lerp 0.06), no clamp. A tracks WIRED's right edge at 56.38% of the
-   strip; B is 538px to its right (tuned at 1440: A -347, B 191). */
+/* Logo strip: one slow, constant loop (Julian, 2026-10-24: "make them go
+   in a loop"; it used to follow the scroll), and a swipe or a trackpad
+   drag scrubs it either way ("swipe left and right to see the rest").
+   The set runs twice and the position wraps by one set, so the seam never
+   shows. A finger holds it; on release it carries the throw and eases
+   back to the drift from wherever it stopped. Only sideways intent is
+   taken: `touch-action: pan-y` (v3.css) leaves the page's own scroll to
+   the browser. No drift under Reduce Motion; the swipe still works. */
+const DRIFT = 40; // px per second, leftward
 function Clients() {
   const mq = React.useRef<HTMLDivElement>(null);
   React.useEffect(() => {
     const box = mq.current!;
     const tr = box.firstElementChild as HTMLElement;
-    const band = box.closest(".clients") as HTMLElement;
-    const wired = tr.querySelector('[data-mk="wired-magazine"]')!;
-    const T = { a: 0, b: 0 };
-    let cur: number | null = null;
-    let running = false;
+    const drift = calm() ? 0 : DRIFT;
+    let x = 0;
+    let v = drift; // px/s, positive moves the logos left
+    let held = false;
+    let last = 0;
     let raf = 0;
-    const still = calm();
-    const fit = () => {
-      T.a = Math.round(box.clientWidth * 0.5638 - (wired.getBoundingClientRect().right - tr.getBoundingClientRect().left));
-      T.b = T.a + 538;
+    const paint = () => {
+      const half = tr.scrollWidth / 2 || 1;
+      x = ((x % half) + half) % half;
+      tr.style.transform = `translate3d(${(-x).toFixed(2)}px,0,0)`;
     };
-    const goal = () => (still ? T.a : T.a + (T.b - T.a) * Math.max(0, scrollY / (band.offsetTop + band.offsetHeight)));
-    const draw = () => {
-      const g = goal();
-      cur = cur === null ? g : cur + (g - cur) * 0.06;
-      const half = tr.scrollWidth / 2;
-      const x = -((((-cur) % half) + half) % half);
-      tr.style.transform = `translate3d(${x.toFixed(2)}px,0,0)`;
-      running = Math.abs(g - cur) > 0.1;
-      if (running) raf = requestAnimationFrame(draw);
-    };
-    const kick = () => {
-      if (!running) {
-        running = true;
-        raf = requestAnimationFrame(draw);
+    const tick = (t: number) => {
+      const dt = last ? Math.min(0.05, (t - last) / 1000) : 0;
+      last = t;
+      if (!held) {
+        x += v * dt;
+        // A throw settles back to the drift, about a second.
+        v = drift + (v - drift) * Math.exp(-dt * 3);
       }
+      paint();
+      raf = requestAnimationFrame(tick);
     };
-    const refit = () => {
-      fit();
-      cur = null;
-      draw();
+    raf = requestAnimationFrame(tick);
+
+    let id = -1;
+    let px = 0;
+    let pt = 0;
+    const down = (e: PointerEvent) => {
+      if (e.pointerType === "mouse" && e.button !== 0) return;
+      id = e.pointerId;
+      px = e.clientX;
+      pt = e.timeStamp;
+      held = true;
+      v = 0;
     };
-    fit();
-    draw();
-    addEventListener("scroll", kick, { passive: true });
-    addEventListener("resize", refit);
-    addEventListener("load", refit);
+    const move = (e: PointerEvent) => {
+      if (e.pointerId !== id) return;
+      const dx = e.clientX - px;
+      const dt = Math.max(1, e.timeStamp - pt) / 1000;
+      x -= dx;
+      v = -dx / dt;
+      px = e.clientX;
+      pt = e.timeStamp;
+      if (Math.abs(dx) > 0) box.setPointerCapture?.(id);
+    };
+    const up = (e: PointerEvent) => {
+      if (e.pointerId !== id) return;
+      id = -1;
+      held = false;
+      // A finger that stopped before lifting throws nothing.
+      if (e.timeStamp - pt > 80) v = drift;
+      v = Math.max(-3000, Math.min(3000, v));
+    };
+    // Trackpads: a sideways two-finger swipe scrubs; a vertical one scrolls the page.
+    const wheel = (e: WheelEvent) => {
+      if (Math.abs(e.deltaX) <= Math.abs(e.deltaY)) return;
+      e.preventDefault();
+      x += e.deltaX;
+    };
+    box.addEventListener("pointerdown", down);
+    box.addEventListener("pointermove", move);
+    box.addEventListener("pointerup", up);
+    box.addEventListener("pointercancel", up);
+    box.addEventListener("wheel", wheel, { passive: false });
     return () => {
       cancelAnimationFrame(raf);
-      removeEventListener("scroll", kick);
-      removeEventListener("resize", refit);
-      removeEventListener("load", refit);
+      box.removeEventListener("pointerdown", down);
+      box.removeEventListener("pointermove", move);
+      box.removeEventListener("pointerup", up);
+      box.removeEventListener("pointercancel", up);
+      box.removeEventListener("wheel", wheel);
     };
   }, []);
   return (
