@@ -126,6 +126,13 @@
 .v3 .foot-line{display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;padding:20px var(--gr) 28px var(--g);border-top:1px solid var(--line)}
 .v3 .foot-p{display:flex;flex-direction:column;align-items:flex-end;gap:6px}
 @media (max-width:700px){.v3 .foot-line{align-items:flex-end}.v3 .foot-p{order:-1;align-items:flex-start}}
+/* Julian: on desktop and iPad the footer is one line, the place bottom
+   left, Legal then the copyright bottom right. */
+@media (min-width:701px){.v3 .foot-line{flex-wrap:nowrap;align-items:baseline;gap:28px}
+.v3 .foot-p{display:contents}
+.v3 .foot-p>span{order:-1;margin-right:auto}
+.v3 .foot-p>a{order:1}
+.v3 .foot-c{order:2}}
 .v3 .tabs{display:flex;gap:28px;overflow-x:auto;padding:20px var(--gr) 0 var(--g);scrollbar-width:none}
 .v3 .tabs::-webkit-scrollbar{display:none}
 .v3 .tabs-bar{position:relative;height:1px;margin:8px var(--gr) 0 var(--g);background:var(--line)}
