@@ -284,6 +284,15 @@ describe("telling Julian", () => {
     intent = { ...paidIntent, status: "requires_payment_method" };
     expect(await paidFor("sk_test_x", booking)).toBeUndefined();
     expect(await paidFor("sk_test_x", { startTime: START, additionalNotes: "Deposit paid on the site." })).toBeUndefined();
+    // Refunded or failed by the site: a refund leaves the intent succeeded.
+    intent = { ...paidIntent, metadata: { ...paidIntent.metadata, outcome: "refunded" } };
+    expect(await paidFor("sk_test_x", booking)).toBeUndefined();
+    intent = { ...paidIntent, metadata: { ...paidIntent.metadata, outcome: "failed" } };
+    expect(await paidFor("sk_test_x", booking)).toBeUndefined();
+    // Booked by the site: only for that Cal.com booking.
+    intent = { ...paidIntent, metadata: { ...paidIntent.metadata, outcome: "booked", cal_uid: "cal-1" } };
+    expect(await paidFor("sk_test_x", { ...booking, uid: "cal-1" })).toBe(LINK);
+    expect(await paidFor("sk_test_x", { ...booking, uid: "cal-2" })).toBeUndefined();
   });
 });
 
