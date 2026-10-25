@@ -246,6 +246,25 @@ describe("telling Julian", () => {
     expect(mails[1].subject).toMatch(/^Deposit paid, not booked, not refunded: /);
   });
 
+  it("mails hello@ once when a retry finds a deposit stuck at booking", async () => {
+    // A Worker cut off after "booking" was written: the record stays.
+    const at = new Date(Date.now() - 3 * 60 * 1000).toISOString();
+    await kv().put(`deposit:${PI}`, JSON.stringify({ status: "booking", at }));
+    expect((await deliver(paid())).status).toBe(200);
+    expect(mails.map((m) => m.subject)).toEqual([expect.stringMatching(/^Deposit stuck: check Stripe and Cal\.com: Portraits, .+, QA Test, \$100$/)]);
+    expect(mails[0].text).toContain(LINK);
+    expect(kv().json(`deposit:${PI}`)).toMatchObject({ status: "booking", warned: true });
+    expect(calls.some((c) => c.url.includes("/v2/bookings"))).toBe(false);
+    await deliver(paid());
+    expect(mails).toHaveLength(1);
+  });
+
+  it("says nothing while a booking is under two minutes old", async () => {
+    await kv().put(`deposit:${PI}`, JSON.stringify({ status: "booking", at: new Date().toISOString() }));
+    await deliver(paid());
+    expect(mails).toHaveLength(0);
+  });
+
   it("keeps the booking when the mail fails", async () => {
     ctx.env.EMAIL = { send: async () => { throw new Error("quota"); } };
     expect((await deliver(paid())).status).toBe(200);
