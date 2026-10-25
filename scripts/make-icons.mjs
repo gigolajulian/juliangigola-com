@@ -22,32 +22,13 @@ import sharp from "sharp";
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const svg = await readFile(join(root, "app/icon.svg"));
 
-/* ── the mark at 16 pixels is a different drawing ─────────────────
- * Rendered straight, the full mark turns to mud at 16px: the white ring
- * between the pupil and the iris is about one pixel, so the pupil dissolves
- * into the iris and the lids blur into the ground. Compared side by side at
- * 6x, the pupil is not a detail that survives — it is the thing making the
- * centre grey.
- *
- * So the smallest size drops it and opens the aperture slightly. The
- * silhouette is the same mark — a lens with a dark iris in it — and it is the
- * silhouette that identifies a favicon at the size a tab actually gives it.
- * Size-specific drawings are what icon sets have always done; the alternative
- * is one drawing that looks right at one size.
- * ─────────────────────────────────────────────────────────────── */
-const SMALL = Buffer.from(
-  `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="512" height="512">` +
-    `<rect width="100" height="100" fill="#000"/>` +
-    // Scaled out with the big mark (Julian, 2026-10-04).
-    `<g transform="translate(50 50) scale(1.15) translate(-50 -50)">` +
-    `<path d="M4 49.6 A58 58 0 0 1 96 49.6 A58 58 0 0 1 4 49.6 Z" fill="#fff"/>` +
-    `<circle cx="50" cy="41" r="19" fill="#000"/>` +
-    `</g></svg>`,
-);
+/* The mark is "JG" in Inter Tight 900, bleeding off the right edge
+ * (Julian's 1b, 2026-10-25), outlined to a path so no font is needed. Two
+ * heavy letters hold at 16px, so every size is the same drawing. */
 
-/** The mark at one size, as PNG. Under 24px it is the simplified drawing. */
+/** The mark at one size, as PNG. */
 const png = (size) =>
-  sharp(size < 24 ? SMALL : svg, { density: 384 })
+  sharp(svg, { density: 384 })
     .resize(size, size, { fit: "contain" })
     .png({ compressionLevel: 9 })
     .toBuffer();
@@ -97,11 +78,5 @@ await writeFile(
  * that has already rounded its own gets clipped twice.
  * ─────────────────────────────────────────────────────────────── */
 await writeFile(join(root, "app/apple-icon.png"), await png(180));
-
-/* The share card is not made here, but it is this same mark: `public/og.jpg`
- * is the eye on a 1200x630 black field, committed rather than generated,
- * since a mark has nothing to regenerate from. Remake it from `app/icon.svg`
- * if the mark ever changes.
- */
 
 console.log("icons written: favicon.ico (16/32/48), apple-icon.png");
