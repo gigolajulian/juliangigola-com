@@ -25,6 +25,7 @@ import { clips, DEFAULTS, LATE, LEVELS, LIQUID, SKIP, sizesOf, typeSizer } from 
 import { VisitTrail } from "@/components/visit-trail";
 import { ClickBeacon } from "@/components/click-beacon";
 import { MotionGate, OnLegacy, OnV3, V3Footer, V3Header } from "@/components/v3/chrome";
+import { ScrollThumb } from "@/components/v3/scroll-thumb";
 
 /* JG V3 (DESIGN.md): Inter Tight for the display type and the wordmark,
    IBM Plex Mono for everything else. No other faces. Served from this site
@@ -237,6 +238,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         </OnLegacy>
         <OnV3>
           <V3Header />
+          <ScrollThumb />
         </OnV3>
         {/* Where a visit began and what it read, for an inquiry to carry. */}
         <VisitTrail />
