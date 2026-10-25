@@ -5,8 +5,8 @@ import { frameDt, springSettled, stepSpring, type SpringState } from "@/lib/moti
 
 /* The page's own scrollbar (`?sb=0` turns it off, `?sb=1` back on):
    a hairline thumb that trails the scroll on the lift's spring, so it
-   glides and settles instead of jumping. Drag it to scroll. Mouse only;
-   touch keeps the system's overlay bar. */
+   glides and settles instead of jumping. Drag it to scroll, mouse or
+   finger. */
 export function ScrollThumb() {
   const ref = React.useRef<HTMLDivElement>(null);
 
@@ -17,7 +17,7 @@ export function ScrollThumb() {
       const q = location.search;
       if (/[?&]sb=0/.test(q)) sessionStorage.setItem("jg-sb-off", "1");
       else if (/[?&]sb=1/.test(q)) sessionStorage.removeItem("jg-sb-off");
-      on = !sessionStorage.getItem("jg-sb-off") && matchMedia("(pointer:fine)").matches;
+      on = !sessionStorage.getItem("jg-sb-off");
     } catch {}
     if (!on || !el) return;
     const root = document.documentElement;
