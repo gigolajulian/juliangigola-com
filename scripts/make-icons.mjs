@@ -22,9 +22,10 @@ import sharp from "sharp";
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const svg = await readFile(join(root, "app/icon.svg"));
 
-/* The mark is "JG" in Inter Tight 900, bleeding off the right edge
- * (Julian's 1b, 2026-10-25), outlined to a path so no font is needed. Two
- * heavy letters hold at 16px, so every size is the same drawing. */
+/* The mark is "JG" in Inter Tight 900, the J raised and the G dropped, fitted
+ * inside the square (Julian's pick, 2026-10-25), outlined to a path so no
+ * font is needed. Two heavy letters hold at 16px, so every size is the same
+ * drawing. */
 
 /** The mark at one size, as PNG. */
 const png = (size) =>
