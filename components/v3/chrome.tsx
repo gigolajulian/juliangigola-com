@@ -111,7 +111,7 @@ const current = (path: string, href: string) => path === href || path.startsWith
 /** The cover's own nav on the homepage: the links and the toggle over the photo. */
 export function CoverNav() {
   return (
-    <nav className="nav lbl" aria-label="Main">
+    <nav className="nav lbl" aria-label="Cover">
       {NAV.map((n) => (
         <Link key={n.href} href={n.href}>{n.label}</Link>
       ))}

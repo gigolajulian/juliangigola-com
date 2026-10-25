@@ -58,6 +58,7 @@ export function V3Book({ slug }: { slug: SessionSlug }) {
   return (
     <div className="v3 contents">
       <section className="v3page" id="p-flow">
+        <h1 className="sr-only">Book a session</h1>
         <V3BookFlow slug={slug} />
       </section>
     </div>
