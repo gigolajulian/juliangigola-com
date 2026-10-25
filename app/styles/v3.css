@@ -128,6 +128,13 @@
 @media (max-width:700px){.v3 .foot-line{align-items:flex-end}.v3 .foot-p{order:-1;align-items:flex-start}}
 /* ?blur=0: solid header, no backdrop blur (Chrome scroll cost). */
 [data-solidhdr] .v3 .site-hdr{background:var(--bg);-webkit-backdrop-filter:none;backdrop-filter:none}
+/* Julian: on desktop and iPad the footer is one line, the place bottom
+   left, Legal then the copyright bottom right. */
+@media (min-width:701px){.v3 .foot-line{flex-wrap:nowrap;align-items:baseline;gap:28px}
+.v3 .foot-p{display:contents}
+.v3 .foot-p>span{order:-1;margin-right:auto}
+.v3 .foot-p>a{order:1}
+.v3 .foot-c{order:2}}
 .v3 .tabs{display:flex;gap:28px;overflow-x:auto;padding:20px var(--gr) 0 var(--g);scrollbar-width:none}
 .v3 .tabs::-webkit-scrollbar{display:none}
 .v3 .tabs-bar{position:relative;height:1px;margin:8px var(--gr) 0 var(--g);background:var(--line)}
