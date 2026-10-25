@@ -6,6 +6,7 @@ import { BOOK_MENU, BOOKING_PAGES, pageForSession } from "@/lib/booking";
 import { wallOf } from "@/lib/work";
 import { V3Book } from "@/components/v3/book";
 import { SESSIONS, isSession } from "@/lib/v3";
+import { BOOK_CARDS, ogCard } from "@/lib/og";
 
 /* One session's booking on a page of its own (Julian, 2026-10-14), for
    book.juliangigola.com/<session>: the booking sheet's look, standing
@@ -21,8 +22,9 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const slug = (await params).slug;
   if (slug === "consultation") return { title: "Book a consultation", description: "15 minutes, phone or video. Pick a time on my calendar.", alternates: { canonical: "/book/consultation" } };
   const m = item(slug);
-  if (!m && isSession(slug)) return { title: `Book ${SESSIONS[slug].name}`, description: SESSIONS[slug].blurb, alternates: { canonical: `/book/${slug}` } };
-  return m ? { title: `Book ${m.name}`, description: m.blurb, alternates: { canonical: `/book/${m.slug}` } } : {};
+  const card = BOOK_CARDS[slug] ? ogCard(BOOK_CARDS[slug], "Julian Gigola") : {};
+  if (!m && isSession(slug)) return { title: `Book ${SESSIONS[slug].name}`, description: SESSIONS[slug].blurb, alternates: { canonical: `/book/${slug}` }, ...card };
+  return m ? { title: `Book ${m.name}`, description: m.blurb, alternates: { canonical: `/book/${m.slug}` }, ...card } : {};
 }
 
 export default async function BookSession({ params }: { params: Promise<{ slug: string }> }) {
