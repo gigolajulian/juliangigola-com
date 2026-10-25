@@ -259,13 +259,15 @@ export async function submitEnquiry(
     }
     // The cooldown expires itself, so nothing has to clean it up. The counter
     // is given two days so a message near midnight cannot be double-counted
-    // against a bucket that has already gone.
+    // against a bucket that has already gone. Both are spam limits, not the
+    // record: KV refuses a second write to the day's key within a second, and
+    // that must not turn a stored enquiry into an error or skip the mail.
     await inbox.put(cooldownKey(hash), String(now), {
       expirationTtl: Math.ceil(COOLDOWN_MS / 1000),
-    });
+    }).catch((err: unknown) => console.error("contact: cooldown not written", err));
     await inbox.put(dayKey(now), String(today + 1), {
       expirationTtl: 2 * 24 * 60 * 60,
-    });
+    }).catch((err: unknown) => console.error("contact: day count not written", err));
 
     /* A copy to Julian's mail, so an enquiry reaches him where he already
        looks. Strictly after the store and strictly best-effort: the stored

@@ -65,6 +65,17 @@ describe("submitEnquiry", () => {
     expect(email.sent[0]).toMatchObject({ to: "contact@juliangigola.com", replyTo: { name: "QA Test", email: "qa@example.com" } });
   });
 
+  it("still says sent and mails the copy when KV refuses the day count", async () => {
+    const put = kv.put.bind(kv);
+    kv.put = async (k, v, o) => {
+      if (k === dayKey(Date.now())) throw new Error("KV PUT failed: 429 Too Many Requests");
+      return put(k, v, o);
+    };
+    expect((await send()).status).toBe("sent");
+    expect(msgs()).toHaveLength(1);
+    expect(email.sent).toHaveLength(1);
+  });
+
   it("keeps a header out of the name: no newline reaches the stored copy", async () => {
     await send({ ...GOOD, name: "QA\r\nBcc: victim@example.com" });
     expect(kv.json(msgs()[0]).name).toBe("QA Bcc: victim@example.com");
