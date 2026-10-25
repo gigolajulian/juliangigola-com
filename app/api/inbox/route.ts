@@ -162,17 +162,20 @@ export async function GET(request: Request) {
     return json({ enquiry: JSON.parse(body) as Enquiry });
   }
 
-  const listed = await gate.inbox.list<Summary>({ prefix: "msg:", limit: 400 });
-  // Keys sort oldest first because the timestamp leads them; the inbox reads
-  // the other way round.
-  const rows = listed.keys
-    .map((k: { name: string; metadata?: Summary }) => ({
-      key: k.name,
-      ...k.metadata,
-    }))
-    .reverse();
+  // Keys sort oldest first because the timestamp leads them, so a single
+  // page of 400 kept the oldest and dropped the newest: read every page,
+  // then the inbox reads the other way round.
+  const keys: { name: string; metadata?: Summary }[] = [];
+  let cursor: string | undefined;
+  for (;;) {
+    const listed = await gate.inbox.list<Summary>({ prefix: "msg:", cursor });
+    keys.push(...listed.keys);
+    if (listed.list_complete) break;
+    cursor = listed.cursor;
+  }
+  const rows = keys.map((k) => ({ key: k.name, ...k.metadata })).reverse();
 
-  return json({ rows, complete: listed.list_complete });
+  return json({ rows, complete: true });
 }
 
 /** PATCH — mark one read or unread. The only thing a row's state can be. */

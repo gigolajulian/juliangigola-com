@@ -83,6 +83,18 @@ describe("the gate", () => {
 });
 
 describe("GET", () => {
+  it("returns every message past one page of keys, newest first", async () => {
+    // KV pages its list (1000 a page; 400 was asked for before), oldest
+    // first: the newest are the ones a single page would drop. 1,001 rows
+    // take two pages and pass the old 400.
+    for (let i = 0; i < 1001; i++) await seed(1_700_000_000_000 + i * 1000, `m${String(i).padStart(4, "0")}`);
+    const res = await GET(req("GET"));
+    const body = (await res.json()) as { rows: { key: string }[]; complete: boolean };
+    expect(body.rows).toHaveLength(1001);
+    expect(body.rows[0].key).toBe(enquiryKey(1_700_000_000_000 + 1000 * 1000, "m1000"));
+    expect(body.complete).toBe(true);
+  });
+
   it("lists newest first from metadata, without reading a message", async () => {
     await seed(1_000, "aaaaaaaa");
     await seed(3_000, "cccccccc");

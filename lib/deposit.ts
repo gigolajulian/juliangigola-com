@@ -69,7 +69,10 @@ export type Booking = {
 
 /** What GET /api/deposit/<id> reports. "booking" is internal: a webhook is on it. */
 export type Status = "pending" | "booking" | "booked" | "refunded" | "failed";
-export type DepositRecord = { status: Status; at: string; booking?: { uid: string; start: string } };
+export type DepositRecord = { status: Status; at: string; booking?: { uid: string; start: string }; warned?: true };
+
+/** How long "booking" may stand before Stripe's retry takes it as stuck. */
+const STUCK_MS = 2 * 60 * 1000;
 
 export const recordKey = (intent: string) => `deposit:${intent}`;
 export const isIntentId = (s: string) => /^pi_[A-Za-z0-9]{8,64}$/.test(s);
@@ -293,11 +296,33 @@ export async function tellNoDeposit(email: Env["EMAIL"], slug: string, start: st
 export async function settle(env: Env, intent: string, metadata: { [k: string]: string } | undefined): Promise<Status> {
   const key = recordKey(intent);
   const seen = await env.INBOX.get(key);
-  if (seen) return (JSON.parse(seen) as DepositRecord).status;
+  if (seen) {
+    const r = JSON.parse(seen) as DepositRecord;
+    /* "booking" is written before Cal.com is asked. If the Worker was cut
+       off there, every retry from Stripe returned here in silence and the
+       deposit sat paid, maybe booked, maybe not. Past two minutes, hello@
+       hears once; the record keeps its status and is marked warned. */
+    if (r.status === "booking" && !r.warned && Date.now() - Date.parse(r.at) > STUCK_MS) {
+      const b = fromMetadata(metadata);
+      const who = typeof b === "string" ? undefined : b;
+      const what = who ? [SESSION[who.slug] ?? who.slug, whenPT(who.start), who.name, "$100"].join(", ") : "$100";
+      await env.INBOX.put(key, JSON.stringify({ ...r, warned: true }), { expirationTtl: 90 * 864e2 }).catch((e: unknown) => console.error("deposit record", "warned", String(e)));
+      await mail(env.EMAIL, `Deposit stuck: check Stripe and Cal.com: ${what}`, [
+        who ? `${who.name} <${who.email}>` : "Unknown client",
+        `Paid, and the booking was started at ${r.at} but never finished. Check Cal.com for the booking, then book or refund in Stripe by hand.`,
+        `Stripe: ${dashboardLink(intent, env.STRIPE_SECRET_KEY)}`,
+      ], who);
+    }
+    return r.status;
+  }
 
   const put = async (r: Omit<DepositRecord, "at">) => {
-    await env.INBOX.put(key, JSON.stringify({ ...r, at: new Date().toISOString() }), { expirationTtl: 90 * 864e2 });
-    if (r.status === "booking") return;
+    const write = env.INBOX.put(key, JSON.stringify({ ...r, at: new Date().toISOString() }), { expirationTtl: 90 * 864e2 });
+    // "booking" must land, or a retry books twice. The outcome is only a
+    // record, and KV refuses a second write to a key within a second: a
+    // failed one must never turn a booking into a refund.
+    if (r.status === "booking") return write;
+    await write.catch((e: unknown) => console.error("deposit record", r.status, String(e)));
     // The card's copy (see 4. above). A failed copy only leaves the card on
     // "Still confirming"; it must never turn a booking into a refund.
     const form: { [k: string]: string } = { "metadata[outcome]": r.status };
