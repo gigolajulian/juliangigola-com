@@ -79,3 +79,6 @@ export const reply = (body: unknown, status = 200, headers: Record<string, strin
     (five minutes, module-wide) never answers for another test. */
 let n = 0;
 export const githubToken = () => `ghp_${"t".repeat(30)}${String(++n).padStart(6, "0")}`;
+
+/** The scope header GitHub sends back for a classic token that may push. */
+export const SCOPED = { "x-oauth-scopes": "repo" };

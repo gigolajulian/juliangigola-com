@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { summary, enquiry, enquiryKey } from "@/lib/inbox";
-import { FakeKV, githubToken, reply } from "./fakes";
+import { FakeKV, SCOPED, githubToken, reply } from "./fakes";
 
 /* /admin's inbox (`app/api/inbox/route.ts`): somebody's name, email and
    message, so the gate is the point. Either the INBOX_KEY or a GitHub
@@ -57,7 +57,7 @@ describe("the gate", () => {
   });
 
   it("opens with a GitHub token that can push, and asks GitHub once per token", async () => {
-    const fetch = vi.fn(async () => reply({ permissions: { push: true } }));
+    const fetch = vi.fn(async () => reply({ permissions: { push: true } }, 200, SCOPED));
     vi.stubGlobal("fetch", fetch);
     const token = githubToken();
     expect((await GET(req("GET", { key: null, token }))).status).toBe(200);

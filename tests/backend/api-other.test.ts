@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { githubToken, reply } from "./fakes";
+import { SCOPED, githubToken, reply } from "./fakes";
 
 /* The smaller routes: /api/traffic (behind the GitHub gate, the Cloudflare
    token never leaves the Worker), /api/tune (dev server only) and
@@ -22,7 +22,7 @@ describe("GET /api/traffic", async () => {
   });
 
   it("answers 503 when the Worker has no CF_ANALYTICS_TOKEN, and asks Cloudflare nothing", async () => {
-    const fetch = vi.fn<(u: string) => Promise<Response>>(async () => reply({ permissions: { push: true } }));
+    const fetch = vi.fn<(u: string) => Promise<Response>>(async () => reply({ permissions: { push: true } }, 200, SCOPED));
     vi.stubGlobal("fetch", fetch);
     ctx.env = {};
     const res = await get(githubToken());
@@ -35,7 +35,7 @@ describe("GET /api/traffic", async () => {
     const secret = "cf-analytics-secret-value";
     ctx.env = { CF_ANALYTICS_TOKEN: secret };
     vi.stubGlobal("fetch", vi.fn(async (u: string) =>
-      String(u).startsWith("https://api.github.com/") ? reply({ permissions: { push: true } }) : reply("not json at all", 400)));
+      String(u).startsWith("https://api.github.com/") ? reply({ permissions: { push: true } }, 200, SCOPED) : reply("not json at all", 400)));
     const res = await get(githubToken());
     expect(await res.text()).not.toContain(secret);
   });
