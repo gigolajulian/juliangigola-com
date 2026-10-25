@@ -49,7 +49,7 @@ function Note() {
       <Hidden type="other" />
       <div className="reach-fields" hidden={sent}>
         <span className="lbl mute">Write to me</span>
-        <h3>Start a project</h3>
+        <h2>Start a project</h2>
         <p className="mute">A few lines is enough. Dates and a reference help.</p>
         <div className="reach-row">
           {fld("name", "Name", <input id="r-name" name="name" autoComplete="name" aria-required placeholder="Your name" value={v.name} onChange={set("name")} aria-invalid={!!err.name || undefined} />)}
@@ -82,7 +82,7 @@ export function V3Inquire() {
             <Duo d={CALL_CARD.d} l={CALL_CARD.l} alt="" sizes="(max-width: 800px) 100vw, 40vw" />
             <div className="rc-in">
               <span className="lbl">Prefer to talk</span>
-              <h3>Book a consultation</h3>
+              <h2>Book a consultation</h2>
               <p>15 minutes, phone or video. Pick a time on my calendar.</p>
               <div><CallDialog /></div>
             </div>
