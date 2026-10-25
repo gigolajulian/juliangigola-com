@@ -97,9 +97,9 @@ export const metadata: Metadata = {
     /* No `url` here: set once at the root it was inherited by every page,
        so a shared /sessions link unfurled pointing at the homepage. The
        canonical on each page is the address. */
-    /* The wordmark on black, at 1200x630: "Julian Gigola" in Inter Tight 900,
-     * the logo's face. Julian's pick for the thumbnail; it was the eye mark
-     * before that, and the cover photograph before that.
+    /* The home link card at 1200x630: a photo with "Julian Gigola" over it,
+     * framed and locked on the Link Card Locks page (2026-10-25), like the
+     * per-page cards in public/og/ (`lib/og.ts`).
      *
      * Nothing changes with the cover, so there is nothing to generate per
      * deploy: `public/og.jpg` is a committed file. book.juliangigola.com
