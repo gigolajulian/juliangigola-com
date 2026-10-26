@@ -1,6 +1,5 @@
 "use client";
 
-import { gsap } from "gsap";
 import * as React from "react";
 
 /* ── the copyright notice ─────────────────────────────────────────
@@ -30,6 +29,8 @@ const DWELL_MS = 3000;
 /** Two right clicks this close together are one ask. Julian, 2026-10-19:
     the notice answers the second, the first only keeps the menu shut. */
 const AGAIN_MS = 500;
+/** gsap's power2.in, expo.out and power3.out, which these fades were first drawn with. */
+const EASE = { in: "cubic-bezier(0.55, 0.085, 0.68, 0.53)", expo: "cubic-bezier(0.19, 1, 0.22, 1)", out: "cubic-bezier(0.215, 0.61, 0.355, 1)" };
 
 /** Which frame of which set it is, as a contact sheet labels it: the
     project's title and the frame's place in its strip ("BYTE ME · 03 / 10").
@@ -139,45 +140,45 @@ export function PhotoNotice() {
   React.useLayoutEffect(() => {
     const el = box.current;
     if (!el) return;
+    // Visible and opaque, or neither: what gsap's `autoAlpha` set.
+    const show = (on: boolean) => {
+      el.style.visibility = on ? "visible" : "hidden";
+      el.style.opacity = on ? "1" : "0";
+    };
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      gsap.set(el, { autoAlpha: shown ? 1 : 0 });
+      show(shown);
       return;
     }
-    // Never raised yet: closed, with nothing to fade. Tweening out from the
+    // Never raised yet: closed, with nothing to fade. Animating out from the
     // first paint drew it at the corner for a moment on every page load
-    // (QA, live v1.2.18): `autoAlpha` shows it while it fades.
+    // (QA, live v1.2.18).
     if (!raised) {
-      gsap.set(el, { autoAlpha: 0 });
+      show(false);
       return;
     }
     if (!shown) {
-      const out = gsap.to(el, {
-        autoAlpha: 0,
-        y: -6,
-        duration: 0.22,
-        ease: "power2.in",
-      });
-      return () => void out.kill();
-    }
-    const lines = el.querySelectorAll("[data-line]");
-    const tl = gsap
-      .timeline()
-      .set(el, { autoAlpha: 1, y: 0 })
-      .fromTo(
-        el,
-        { clipPath: "inset(0 100% 100% 0 round 4px)" },
-        {
-          clipPath: "inset(0 0% 0% 0 round 4px)",
-          duration: 0.42,
-          ease: "expo.out",
-        },
-      )
-      .from(
-        lines,
-        { yPercent: 110, duration: 0.5, ease: "power3.out", stagger: 0.07 },
-        0.12,
+      const out = el.animate(
+        [{ opacity: getComputedStyle(el).opacity, transform: "none" }, { opacity: 0, transform: "translateY(-6px)" }],
+        { duration: 220, easing: EASE.in },
       );
-    return () => void tl.kill();
+      el.style.opacity = "0";
+      out.onfinish = () => (el.style.visibility = "hidden");
+      return () => out.cancel();
+    }
+    show(true);
+    const wipe = el.animate(
+      [{ clipPath: "inset(0 100% 100% 0 round 4px)" }, { clipPath: "inset(0 0% 0% 0 round 4px)" }],
+      { duration: 420, easing: EASE.expo },
+    );
+    const lines = [...el.querySelectorAll("[data-line]")].map((l, i) =>
+      l.animate([{ transform: "translateY(110%)" }, { transform: "none" }], {
+        duration: 500,
+        delay: 120 + i * 70,
+        easing: EASE.out,
+        fill: "backwards",
+      }),
+    );
+    return () => [wipe, ...lines].forEach((a) => a.cancel());
   }, [raised, shown]);
 
   /**

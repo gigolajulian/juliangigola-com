@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
+import dynamic from "next/dynamic";
 import { usePathname } from "next/navigation";
 
 /* JG V3 chrome (master v39): the glass header, the phone menu, the theme
@@ -15,6 +16,11 @@ export const isLegacy = (path: string) => /^\/admin(\/|$)/.test(path);
 export function OnLegacy({ children }: { children: React.ReactNode }) {
   return isLegacy(usePathname()) ? <>{children}</> : null;
 }
+
+/* The old header and drawer, loaded only when /admin renders them, so their
+   code stays out of every public page's JavaScript. */
+export const LegacyHeader = dynamic(() => import("@/components/site-header").then((m) => m.SiteHeader), { ssr: false });
+export const LegacyMenu = dynamic(() => import("@/components/site-menu").then((m) => m.SiteMenu), { ssr: false });
 
 export function OnV3({ children }: { children: React.ReactNode }) {
   return isLegacy(usePathname()) ? null : <>{children}</>;
