@@ -121,8 +121,8 @@ export function LeadWindow({ covers }: { covers: IndexRow[] }) {
                   />
                 )}
                 {/* The page's slate (`cover-cell.tsx`), credit and name. */}
-                <span className="cover-slate absolute inset-x-0 bottom-0 flex flex-col items-start gap-[1.2cqw] bg-gradient-to-t from-black/80 via-black/35 to-transparent px-[5cqw] pb-[4.5cqw] pt-[16cqw]">
-                  <span className="label min-w-0 max-w-full truncate text-[clamp(0.625rem,1.6cqw,0.75rem)] leading-none text-white/75">
+                <span className="cover-slate absolute inset-x-0 bottom-0 flex flex-col items-start gap-[1.2cqw] bg-gradient-to-t from-black/85 via-black/60 to-transparent px-[5cqw] pb-[4.5cqw] pt-[16cqw]">
+                  <span className="label min-w-0 max-w-full truncate text-[clamp(0.625rem,1.6cqw,0.75rem)] leading-none text-white">
                     {credit}
                   </span>
                   <span

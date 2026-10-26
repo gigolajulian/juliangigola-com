@@ -79,11 +79,14 @@ function Clients() {
     let held = false;
     let last = 0;
     let raf = 0;
+    // The loop's width, measured when it changes rather than every frame.
+    let half = 1;
+    let seen = false;
     const paint = () => {
-      const half = tr.scrollWidth / 2 || 1;
       x = ((x % half) + half) % half;
       tr.style.transform = `translate3d(${(-x).toFixed(2)}px,0,0)`;
     };
+    // Runs only while on screen and moving: drifting, held, or a throw settling.
     const tick = (t: number) => {
       const dt = last ? Math.min(0.05, (t - last) / 1000) : 0;
       last = t;
@@ -93,9 +96,23 @@ function Clients() {
         v = drift + (v - drift) * Math.exp(-dt * 3);
       }
       paint();
+      raf = seen && (held || Math.abs(v) > 0.5) ? requestAnimationFrame(tick) : 0;
+    };
+    const wake = () => {
+      if (raf || !seen) return;
+      last = 0;
       raf = requestAnimationFrame(tick);
     };
-    raf = requestAnimationFrame(tick);
+    const ro = new ResizeObserver(() => {
+      half = tr.scrollWidth / 2 || 1;
+      paint();
+    });
+    ro.observe(tr);
+    const io = new IntersectionObserver(([e]) => {
+      seen = e.isIntersecting;
+      wake();
+    });
+    io.observe(box);
 
     let id = -1;
     let px = 0;
@@ -107,6 +124,7 @@ function Clients() {
       pt = e.timeStamp;
       held = true;
       v = 0;
+      wake();
     };
     const move = (e: PointerEvent) => {
       if (e.pointerId !== id) return;
@@ -125,12 +143,14 @@ function Clients() {
       // A finger that stopped before lifting throws nothing.
       if (e.timeStamp - pt > 80) v = drift;
       v = Math.max(-3000, Math.min(3000, v));
+      wake();
     };
     // Trackpads: a sideways two-finger swipe scrubs; a vertical one scrolls the page.
     const wheel = (e: WheelEvent) => {
       if (Math.abs(e.deltaX) <= Math.abs(e.deltaY)) return;
       e.preventDefault();
       x += e.deltaX;
+      paint();
     };
     box.addEventListener("pointerdown", down);
     box.addEventListener("pointermove", move);
@@ -139,6 +159,8 @@ function Clients() {
     box.addEventListener("wheel", wheel, { passive: false });
     return () => {
       cancelAnimationFrame(raf);
+      ro.disconnect();
+      io.disconnect();
       box.removeEventListener("pointerdown", down);
       box.removeEventListener("pointermove", move);
       box.removeEventListener("pointerup", up);

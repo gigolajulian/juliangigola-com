@@ -1,13 +1,8 @@
 import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
 import { Intro } from "@/components/intro";
-import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { PhotoNotice } from "@/components/photo-notice";
-import { SiteMenu } from "@/components/site-menu";
-import { WorkFilter } from "@/components/work-filter";
-import { WORK_CATEGORY_LINKS } from "@/lib/work";
-import { WORK_HEADS } from "@/lib/work-heads";
 import { GlassLight } from "@/components/glass-light";
 import { PhotoFade } from "@/components/photo-fade";
 import { PointerMark } from "@/components/pointer-mark";
@@ -24,7 +19,7 @@ import { TypeDials } from "@/components/type-dials";
 import { clips, DEFAULTS, LATE, LEVELS, LIQUID, SKIP, sizesOf, typeSizer } from "@/lib/type-size";
 import { VisitTrail } from "@/components/visit-trail";
 import { ClickBeacon } from "@/components/click-beacon";
-import { MotionGate, OnLegacy, OnV3, V3Footer, V3Header } from "@/components/v3/chrome";
+import { LegacyHeader, LegacyMenu, MotionGate, OnLegacy, OnV3, V3Footer, V3Header } from "@/components/v3/chrome";
 import { ScrollThumb } from "@/components/v3/scroll-thumb";
 
 /* JG V3 (DESIGN.md): Inter Tight for the display type and the wordmark,
@@ -234,7 +229,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <Intro />
 
         <OnLegacy>
-          <SiteHeader />
+          <LegacyHeader />
         </OnLegacy>
         <OnV3>
           <V3Header />
@@ -246,12 +241,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             `main`, because both of those are what it comes out from under
             — see `site-menu.tsx`. */}
         <OnLegacy>
-          <SiteMenu />
-        {/* And the one /work opens from the other side. Here rather than
-            in the work route's own shell for the same reason: that shell
-            is inside `main`, and `main` is what this slides out from
-            under. It renders nothing off /work. */}
-          <WorkFilter categories={WORK_CATEGORY_LINKS} heads={WORK_HEADS} />
+          <LegacyMenu />
         </OnLegacy>
         {/* Writes the pointer's position onto whichever glass control is
             under it — see `glass` in globals.css. Renders nothing. */}
