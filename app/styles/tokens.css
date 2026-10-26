@@ -103,6 +103,11 @@
      understood. Fitted to the samples (worst gap 0.03 and 0.06). */
   --ease-spring: cubic-bezier(0.32, 0.67, 0.07, 1.11);
   --ease-bounce: cubic-bezier(0.4, 1.37, 0.03, 0.98);
+  /* The rubber band at the ends of a strip, on release (560ms). It
+     overshoots on purpose: the snap past rest is what makes the edge read
+     as rubber and not as a stop. Only for a release after the hand pulls
+     past an end; under the hand the band has no easing at all. */
+  --ease-rubber: cubic-bezier(0.2, 1.7, 0.4, 1);
 }
 
 /* The springs themselves, where `linear()` is understood (see above). */

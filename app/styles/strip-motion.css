@@ -39,7 +39,7 @@
      easing at all, the band goes where the hand is. */
   transition: translate 140ms var(--ease-out-strong);
   &[data-release] {
-    transition: translate 560ms cubic-bezier(0.2, 1.7, 0.4, 1);
+    transition: translate 560ms var(--ease-rubber);
   }
   &[data-dragged] {
     transition-duration: 0s;
