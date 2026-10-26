@@ -173,14 +173,18 @@ function useDock(dock: boolean, past: boolean, hdr: React.RefObject<HTMLElement 
     small.style.color = ws.color;
     const up = { transform: "translate(0,0) scale(1)" };
     const down = { transform: `translate(${b.left - fl - sx * k}px,${b.top - ft - sy * k}px) scale(${k})` };
-    const t = { duration: past ? 600 : 450, easing: "cubic-bezier(0.16, 1, 0.3, 1)", fill: "forwards" as const };
+    const t = { duration: 550, easing: "cubic-bezier(0.16, 1, 0.3, 1)", fill: "forwards" as const };
     const caps = [{ opacity: 1 }, { opacity: 0.6, offset: 0.5 }, { opacity: 0 }];
     big.animate(past ? caps : [...caps].reverse().map((x, n) => ({ ...x, offset: [0, 0.5, 1][n] })), t);
     small.animate(past ? [{ opacity: 0 }, { opacity: 0.4, offset: 0.5 }, { opacity: 1 }] : [{ opacity: 1 }, { opacity: 0.4, offset: 0.5 }, { opacity: 0 }], t);
     f.animate(past ? [up, down] : [down, up], t).finished.then(() => {
       if (fly.current !== f) return;
       fly.current = null;
-      if (!past) return void (root.removeAttribute("data-dock"), f.remove());
+      if (!past) {
+        root.removeAttribute("data-dock");
+        f.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 150, easing: "ease-out", fill: "forwards" }).finished.then(() => f.remove());
+        return;
+      }
       setLanded(true);
       f.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 180, easing: "ease-out", fill: "forwards" }).finished.then(() => f.remove());
     }, () => {});

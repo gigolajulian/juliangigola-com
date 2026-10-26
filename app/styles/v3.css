@@ -1104,7 +1104,7 @@ dialog.v3.mo-player,.mo-player>iframe{background:#000}
 /* The next set's cover beside its name, at the height of the type. */
 .v3 .pj-nx{position:relative;flex:none;align-self:center;height:clamp(64px,7vw,112px);aspect-ratio:4/5;border-radius:4px;overflow:hidden;background:var(--card)}
 /* The name becomes the header (mock 4b): only with ?v3motion on the homepage; V3Header leaves .dock off under reduced motion. */
-:root[data-v3motion] .v3 .site-hdr.dock{transform:none;opacity:1;clip-path:inset(0 0 100% 0);transition:clip-path .3s ease-out}
+:root[data-v3motion] .v3 .site-hdr.dock{transform:none;opacity:1;clip-path:inset(0 0 100% 0);transition:clip-path .55s cubic-bezier(0.16,1,0.3,1)}
 :root[data-v3motion] .v3 .site-hdr.dock.show{clip-path:inset(0);transition:clip-path .55s cubic-bezier(0.16,1,0.3,1)}
 :root[data-v3motion] .v3 .site-hdr.dock .site-wm{opacity:0}
 :root[data-v3motion] .v3 .site-hdr.dock.landed .site-wm{opacity:1;transition:opacity .2s cubic-bezier(0.16,1,0.3,1)}
