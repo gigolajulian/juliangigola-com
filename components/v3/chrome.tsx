@@ -230,8 +230,8 @@ function useDock(dock: boolean, past: boolean, hdr: React.RefObject<HTMLElement 
       const targetX = curB.left - curA.left - sx * curK;
       const targetY = curB.top - curA.top - sy * curK;
 
-      const posX = curA.left + (past ? targetX * easeP : targetX * (1 - easeP));
-      const posY = curA.top + (past ? targetY * easeP : targetY * (1 - easeP));
+      const posX = curA.left - o.left + (past ? targetX * easeP : targetX * (1 - easeP));
+      const posY = curA.top - o.top + (past ? targetY * easeP : targetY * (1 - easeP));
       const scale = past ? 1 + (curK - 1) * easeP : curK + (1 - curK) * easeP;
 
       f.style.transform = `translate3d(${posX}px, ${posY}px, 0) scale(${scale})`;
@@ -287,7 +287,7 @@ export function V3Header() {
       setPast((prevPast) => {
         if (!r) return false;
         if (prevPast) {
-          return r.top < hdrH + 20;
+          return r.top < hdrH + 50;
         } else {
           return r.top < hdrH;
         }
