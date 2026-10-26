@@ -23,8 +23,16 @@ export function SmoothScroll() {
     const onResize = () => lenis.resize();
     window.addEventListener("resize", onResize);
 
+    const resizeObserver = new ResizeObserver(() => {
+      lenis.resize();
+    });
+    if (document.body) {
+      resizeObserver.observe(document.body);
+    }
+
     return () => {
       window.removeEventListener("resize", onResize);
+      resizeObserver.disconnect();
       lenis.destroy();
     };
   }, []);
