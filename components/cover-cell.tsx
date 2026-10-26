@@ -151,12 +151,12 @@ export function CoverCell({
           of the photograph, who it was for above it, both on the
           left. The name is sized to its length (`.cover-name`), so a
           long title stays on one line. */}
-        <div className="cover-slate pointer-events-none absolute inset-x-0 bottom-0 flex flex-col items-start gap-[1.2cqw] bg-gradient-to-t from-black/80 via-black/35 to-transparent px-[5cqw] pb-[4.5cqw] pt-[16cqw]">
-          <span className="label min-w-0 max-w-full truncate text-[clamp(0.625rem,1.6cqw,0.75rem)] leading-none text-white/75">
+        <div className="cover-slate pointer-events-none absolute inset-x-0 bottom-0 flex flex-col items-start gap-[1.2cqw] bg-gradient-to-t from-black/85 via-black/60 to-transparent px-[5cqw] pb-[4.5cqw] pt-[16cqw]">
+          <span className="label min-w-0 max-w-full truncate text-[clamp(0.625rem,1.6cqw,0.75rem)] leading-none text-white">
             {row.credit}
             {row.frames ? (
               <>
-                <span className="px-1.5 text-white/45">/</span>
+                <span className="px-1.5 text-white/70">/</span>
                 {row.frames} frames
               </>
             ) : null}
