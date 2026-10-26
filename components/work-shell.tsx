@@ -831,8 +831,10 @@ export function WorkShell({
               })
             }
             className={cn(
-              // 24 by 32: small to the eye, enough to a thumb.
-              "flex h-8 w-6 items-center justify-center text-foreground transition-opacity duration-200",
+              // 24 by 32 to the eye; the hit area is 44 tall and reaches
+              // 10px past the pair's outer edges (they touch, so 34 wide each).
+              "relative flex h-8 w-6 items-center justify-center text-foreground transition-opacity duration-200 before:absolute before:-inset-y-1.5 before:content-['']",
+              mode === "strip" ? "before:-left-2.5 before:right-0" : "before:-right-2.5 before:left-0",
               on ? "opacity-100" : "opacity-35",
             )}
           >

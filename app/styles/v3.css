@@ -667,7 +667,22 @@ html{font-family:var(--font-mono),ui-monospace,monospace}
   .v3 .ticks button::after{left:8px;right:8px}
   .v3 .a-cover .right>.lbl .ticks button{width:44px;margin:-12px -15px}
   .v3 .a-cover .right>.lbl .ticks button::after{left:15px;right:15px}
+  .v3 .lg-toc a{min-height:44px;align-items:center}
 }
+/* Mouse at phone widths: the cover nav's 28px gaps pushed Portfolio off the
+   left edge and squeezed the toggle to 14px; ticks and links get 24px hit
+   areas without moving what is drawn. */
+@media (pointer:fine){
+  .v3 .a-cover .nav a{display:inline-flex;align-items:center;min-height:24px}
+  .v3 .tbtn{flex:none}
+}
+@media (pointer:fine) and (max-width:700px){
+  .v3 .a-cover .right>.lbl .ticks{gap:0}
+  .v3 .a-cover .right>.lbl .ticks button{width:18px;height:24px}
+  .v3 .a-cover .right>.lbl .ticks button::after{left:2px;right:2px}
+}
+@media (pointer:fine) and (max-width:420px){.v3 .a-cover .nav{gap:16px}}
+.v3 .wsearch:has(input:focus-visible){outline:1px solid var(--accent);outline-offset:4px}
 .v3 .tbtn:focus-visible{outline-color:var(--accent)}
 /* Narrow phones: the calendar's gaps cost the day cells their 44px. */
 @media (pointer:coarse) and (max-width:360px){.v3 .cal{gap:0}}
