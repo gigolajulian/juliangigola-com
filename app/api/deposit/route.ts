@@ -17,6 +17,10 @@ export async function POST(request: Request) {
   const { env } = await getCloudflareContext({ async: true });
   if (!env.STRIPE_SECRET_KEY) return json({ error: "Deposits are off." }, 503);
 
+  const ip = request.headers.get("cf-connecting-ip") ?? "unknown";
+  if (!(await env.DEPOSIT_LIMIT.limit({ key: ip })).success)
+    return json({ error: "Too many tries. Wait a minute." }, 429);
+
   const b = parseBooking(await request.json().catch(() => null));
   if (typeof b === "string") return json({ error: b }, 400);
 
