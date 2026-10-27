@@ -24,6 +24,7 @@ let calls: Call[];
 let open: boolean;
 let calOk: boolean;
 let refundOk: boolean;
+let allowed: boolean;
 type Mail = { subject: string; text: string; replyTo?: { email: string } };
 let mails: Mail[];
 type ClientMail = { to: { email: string; name: string }; from: { email: string }; replyTo: string; subject: string; html: string; text: string };
@@ -39,7 +40,8 @@ beforeEach(() => {
   intent = { amount: 10000, currency: "usd", metadata: { kind: "deposit" } };
   mails = [];
   sent = [];
-  ctx.env = { INBOX: new FakeKV(), STRIPE_SECRET_KEY: "sk_test_x", STRIPE_WEBHOOK_SECRET: WHSEC, EMAIL: { send: async (m: Mail) => void mails.push(m) }, CLIENT_EMAIL: { send: async (m: ClientMail) => void sent.push(m) } };
+  allowed = true;
+  ctx.env = { INBOX: new FakeKV(), DEPOSIT_LIMIT: { limit: async () => ({ success: allowed }) }, STRIPE_SECRET_KEY: "sk_test_x", STRIPE_WEBHOOK_SECRET: WHSEC, EMAIL: { send: async (m: Mail) => void mails.push(m) }, CLIENT_EMAIL: { send: async (m: ClientMail) => void sent.push(m) } };
   vi.stubGlobal("fetch", async (url: string, init?: RequestInit) => {
     calls.push({ url, init });
     if (url.includes("/v2/slots")) return reply({ status: "success", data: { day: open ? [{ start: START }] : [] } });
@@ -73,6 +75,12 @@ describe("POST /api/deposit", () => {
   it("is off while the Stripe key is unset", async () => {
     delete ctx.env.STRIPE_SECRET_KEY;
     expect((await post(BODY)).status).toBe(503);
+  });
+
+  it("answers 429 past the rate limit, before asking Cal.com or Stripe", async () => {
+    allowed = false;
+    expect((await post(BODY)).status).toBe(429);
+    expect(calls).toEqual([]);
   });
 
   it("refuses a session that takes no deposit, a past time and a bad email", async () => {
