@@ -4,6 +4,9 @@ import * as React from "react";
 import Lenis from "lenis";
 import { usePathname } from "next/navigation";
 
+/* The live instance, for code that needs where a glide will end (chrome.tsx). */
+export const lenisNow: { current: Lenis | null } = { current: null };
+
 export function SmoothScroll() {
   const pathname = usePathname();
   const lenisRef = React.useRef<Lenis | null>(null);
@@ -23,6 +26,7 @@ export function SmoothScroll() {
       autoRaf: true,
     });
     lenisRef.current = lenis;
+    lenisNow.current = lenis;
 
     // Sync Lenis with window scroll on navigation / dynamic content changes
     const onResize = () => lenis.resize();
@@ -38,6 +42,7 @@ export function SmoothScroll() {
       resizeObserver.disconnect();
       lenis.destroy();
       lenisRef.current = null;
+      lenisNow.current = null;
     };
   }, []);
 

@@ -3,6 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import dynamic from "next/dynamic";
+import { lenisNow } from "@/components/v3/smooth-scroll";
 import { usePathname } from "next/navigation";
 
 /* JG V3 chrome (master v39): the glass header, the phone menu, the theme
@@ -179,24 +180,30 @@ function useDock(dock: boolean, past: boolean, hdr: React.RefObject<HTMLElement 
     const up = { transform: "translate(0,0) scale(1)" };
     const down = { transform: `translate(${b.left - fl - sx * k}px,${b.top - ft - sy * k}px) scale(${k})` };
     // Docking eases out; the way back eases in and out so it reads as the same move reversed.
-    const t = { duration: 550, easing: past ? "cubic-bezier(0.16, 1, 0.3, 1)" : "cubic-bezier(0.65, 0, 0.35, 1)", fill: "forwards" as const };
-    /* On the way back the page keeps scrolling (Lenis glides on after the
-       wheel stops), so the cover name moves while the copy flies. Follow it
-       each frame, so the copy lands where the name is and not where it was. */
-    if (!past) {
-      const follow = () => {
-        if (fly.current !== f) return;
-        const n = ink(h1);
-        f.style.left = `${fl + n.left - a.left}px`;
-        f.style.top = `${ft + n.top - a.top}px`;
-        requestAnimationFrame(follow);
-      };
-      requestAnimationFrame(follow);
-    }
+    const t = { duration: 550, easing: past ? "cubic-bezier(0.16, 1, 0.3, 1)" : "cubic-bezier(0.65, 0, 0.35, 1)" /* matches e() below */, fill: "forwards" as const };
     const caps = [{ opacity: 1 }, { opacity: 0.6, offset: 0.5 }, { opacity: 0 }];
     big.animate(past ? caps : [...caps].reverse().map((x, n) => ({ ...x, offset: [0, 0.5, 1][n] })), t);
     small.animate(past ? [{ opacity: 0 }, { opacity: 0.4, offset: 0.5 }, { opacity: 1 }] : [{ opacity: 1 }, { opacity: 0.4, offset: 0.5 }, { opacity: 0 }], t);
-    f.animate(past ? [up, down] : [down, up], t).finished.then(() => {
+    /* On the way back Lenis keeps the page gliding, so the cover name is a
+       moving target. The copy is driven each frame on one curve, e, for x, y
+       and scale together, aimed at where the name will be when the glide
+       stops (Lenis's target) and blending to where it is now as e reaches 1.
+       So it moves in one straight, clean line and lands exactly on it. */
+    const back = !past && f.animate([{}, {}], t);
+    if (back) {
+      const dx = b.left - fl - sx * k, dy = b.top - ft - sy * k, y0 = scrollY;
+      const e = (x: number) => (x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2);
+      const step = () => {
+        if (!f.isConnected) return;
+        const p = e(Math.min(1, Number(back.currentTime ?? 0) / t.duration));
+        const live = y0 - scrollY, aim = y0 - (lenisNow.current?.targetScroll ?? scrollY);
+        const ty = dy * (1 - p) + (aim + (live - aim) * p) * p;
+        f.style.transform = `translate(${dx * (1 - p)}px,${ty}px) scale(${k + (1 - k) * p})`;
+        requestAnimationFrame(step);
+      };
+      step();
+    }
+    (back || f.animate([up, down], t)).finished.then(() => {
       if (fly.current !== f) return;
       fly.current = null;
       if (!past) {
