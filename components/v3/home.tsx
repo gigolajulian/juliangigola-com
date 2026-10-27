@@ -103,11 +103,26 @@ function Clients() {
       last = 0;
       raf = requestAnimationFrame(tick);
     };
+    /* Never the same logo twice on screen (Julian, 2026-10-27): on a strip
+       wider than the set, the gap grows until one set is longer than the
+       strip plus its widest logo, so a copy can't come in before its
+       original has gone. */
+    const base = parseFloat(getComputedStyle(tr).columnGap) || 0;
     const ro = new ResizeObserver(() => {
+      const kids = [...tr.children] as HTMLElement[];
+      const n = kids.length / 2;
+      const ws = kids.slice(0, n).map((k) => k.getBoundingClientRect().width);
+      const sum = ws.reduce((a, w) => a + w, 0);
+      const gap = Math.max(base, Math.ceil((box.clientWidth + Math.max(0, ...ws) - sum) / Math.max(1, n - 1)));
+      if (Math.abs(parseFloat(tr.style.columnGap || "0") - gap) > 0.5) {
+        tr.style.columnGap = `${gap}px`;
+        tr.style.paddingRight = `${gap}px`;
+      }
       half = tr.scrollWidth / 2 || 1;
       paint();
     });
     ro.observe(tr);
+    ro.observe(box);
     const io = new IntersectionObserver(([e]) => {
       seen = e.isIntersecting;
       wake();

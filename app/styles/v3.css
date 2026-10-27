@@ -96,13 +96,13 @@ html[data-sb]{scrollbar-width:none}html[data-sb]::-webkit-scrollbar{display:none
 .v3 .clients{align-items:center;flex-wrap:nowrap;overflow:hidden}
 .v3 .clients>.mute{flex:none}
 .v3 .mq{flex:1;min-width:0;overflow:hidden;-webkit-mask:linear-gradient(90deg,transparent,#000 5.33%,#000 94.67%,transparent);mask:linear-gradient(90deg,transparent,#000 5.33%,#000 94.67%,transparent)}
-.v3 .mq-track{display:flex;align-items:center;gap:80px;width:max-content;padding-right:80px;will-change:transform}
+.v3 .mq-track{display:flex;align-items:center;gap:112px;width:max-content;padding-right:112px;will-change:transform}
 .v3 .mq{touch-action:pan-y;cursor:grab;user-select:none;-webkit-user-select:none}
 .v3 .mq:active{cursor:grabbing}
 .v3 .mq img,.v3 .mq svg{-webkit-user-drag:none;pointer-events:none}
 @media (max-width:700px){.v3 .clients{flex-direction:column;align-items:flex-start}
 .v3 .mq{width:100%}
-.v3 .mq-track{gap:56px;padding-right:56px}}
+.v3 .mq-track{gap:72px;padding-right:72px}}
 .v3 .clients b{font:900 1.05rem/1 var(--display);letter-spacing:-.03em;color:var(--mute)}
 @media (max-width:800px){.v3 .a-index{grid-template-columns:1fr}
 .v3 .a-index .frame{position:relative;top:0;order:-1}}
@@ -1281,3 +1281,11 @@ dialog.v3.mo-player,.mo-player>iframe{background:#000}
   .slv-b{transform:none;opacity:0}
   .slv-card.b .slv-b{opacity:1}.slv-card.b .slv-f:not(.slv-b){opacity:0}
 }
+
+/* Laptop and desktop (a mouse, not a tablet): the hero and the logo strip
+   under it are the first screen together (Julian, 2026-10-27). Phones and
+   iPads keep their own. */
+@media (min-width:701px) and (hover:hover) and (pointer:fine){
+.v3{--clients-h:88px}
+.v3 .a-cover{height:calc(100svh - var(--clients-h));min-height:520px}
+.v3 .a-cover+.clients{height:var(--clients-h);padding-block:0}}
