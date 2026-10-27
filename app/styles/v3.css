@@ -815,12 +815,20 @@ html{font-family:var(--font-mono),ui-monospace,monospace}
 .v3 .pj-lead{grid-column:1/-2;display:grid;grid-template-columns:repeat(auto-fit,minmax(0,1fr));gap:20px;padding:0 0 40px var(--g);align-self:end}
 .v3 .pj-lead figure,.v3 .pj-flow figure{margin:0}
 .v3 .pj-r img{display:block;width:100%;height:auto;border-radius:4px}
-.v3 .pj-flow{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:clamp(64px,8vw,128px) 20px;padding:clamp(64px,8vw,128px) var(--gr) 96px var(--g)}
-.v3 .pj-flow .w{grid-column:1/-1}
-.v3 .pj-pair{grid-column:1/-1;display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start}
-.v3 .pj-pair .pj-r:nth-child(2){margin-top:12vw}
-.v3 .pj-flow .one{grid-column:2/7}
-.v3 .pj-flow .one.r{grid-column:7/12}
+/* The rest of a set as a contact sheet: three columns, every row one height (a vertical's 4:5),
+   a horizontal spans two cells; dense packing fills a hole a horizontal would leave. */
+.v3 .pj-flow{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));grid-auto-flow:dense;gap:20px;padding:clamp(64px,8vw,128px) var(--gr) 96px var(--g)}
+.v3 .pj-flow .pj-r{position:relative;aspect-ratio:4/5;align-self:stretch}
+.v3 .pj-flow .pj-r.w{grid-column:span 2;aspect-ratio:8/5}
+.v3 .pj-flow .pj-r img{position:absolute;inset:0;height:100%;object-fit:cover}
+/* The credits in the cells the last row leaves empty (project.tsx): set at the foot like a caption, each
+   role over its name, one line each. A phone has no sheet, so they follow the frames. */
+.v3 .pj-cr{grid-column:1/-1;display:flex;flex-direction:column;justify-content:flex-end}
+.v3 .pj-cr .sv-row{grid-template-columns:minmax(0,1fr);gap:14px;padding:0;border:0}
+.v3 .pj-cr li{flex-direction:column;gap:4px}
+.v3 .pj-cr li .mute{text-align:left}
+.v3 .pj-cr li a{align-self:flex-start}
+@media (min-width:701px){.v3 .pj-cr{grid-row:var(--row);grid-column:var(--col)/span var(--span)}}
 .v3 .pj-next{display:flex;align-items:baseline;gap:20px;padding:40px 0 0;color:inherit;text-decoration:none}
 .v3 .pj-next b{font:900 clamp(2.5rem,calc(6*var(--v3u)),5.5rem)/.9 var(--display);letter-spacing:-.05em;flex:1}
 @media (hover:hover){.v3 .pj-next:hover b{color:var(--accent)}}
@@ -843,9 +851,10 @@ html{font-family:var(--font-mono),ui-monospace,monospace}
 .v3 .pj-top{grid-column:1;padding:40px var(--gr) 32px var(--g)}
 .v3 .pj-big{grid-column:1;grid-row:auto;min-height:0;aspect-ratio:4/5}
 .v3 .pj-lead{grid-column:1;padding:20px var(--gr) 0 var(--g)}}
-@media (max-width:700px){.v3 .pj-flow{grid-template-columns:minmax(0,1fr);gap:16px;padding:16px 0 64px}
-.v3 .pj-flow .w,.v3 .pj-flow .one,.v3 .pj-flow .one.r,.v3 .pj-pair{grid-column:1}
-.v3 .pj-pair{grid-template-columns:1fr;gap:16px}.v3 .pj-pair .pj-r:nth-child(2){margin-top:0}
+@media (max-width:700px){.v3 .pj-flow{grid-template-columns:minmax(0,1fr);grid-auto-flow:row;gap:16px;padding:16px 0 64px}
+.v3 .pj-flow .pj-r,.v3 .pj-flow .pj-r.w{grid-column:1;aspect-ratio:auto}
+.v3 .pj-flow .pj-r img{position:static;height:auto}
+.v3 .pj-cr{padding:24px var(--gr) 0 var(--g)}
 .v3 .pj-lead{padding:16px 0 0;gap:16px}
 .v3 .pj-r img{border-radius:0}}
 .v3 .sv-row li a{color:inherit}
