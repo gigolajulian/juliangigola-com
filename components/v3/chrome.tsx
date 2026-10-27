@@ -4,6 +4,7 @@ import * as React from "react";
 import Link from "next/link";
 import dynamic from "next/dynamic";
 import { usePathname } from "next/navigation";
+import { onLenisScroll } from "./smooth-scroll";
 
 /* JG V3 chrome (master v39): the glass header, the phone menu, the theme
    toggle and the footer line. /admin keeps the old chrome. */
@@ -210,6 +211,112 @@ function useDock(dock: boolean, past: boolean, hdr: React.RefObject<HTMLElement 
   }, []);
 }
 
+/* ?flag=1 (kept for the tab, ?flag=0 clears it): the name rides the scroll
+   instead of a timed flight. Off, everything is as before. */
+function scrubFlag() {
+  try {
+    const q = location.search;
+    if (/[?&]flag=1/.test(q)) sessionStorage.setItem("jg-scrub", "1");
+    if (/[?&]flag=0/.test(q)) sessionStorage.removeItem("jg-scrub");
+    return sessionStorage.getItem("jg-scrub") === "1";
+  } catch {
+    return false;
+  }
+}
+
+/* Scroll-tied dock (behind ?flag=1). One value p, 0 to 1, from the scroll
+   position alone: 0 as the cover name's top reaches the header's bottom
+   edge (the old dock point), 1 once the page has moved one more name
+   height. A single copy of the big spelling is placed on screen between
+   the name's live box and the wordmark, x, y and scale all from the same
+   smoothstep of p, so it is continuous at both ends and reverses exactly.
+   At p = 0 the real name shows, at p = 1 the real wordmark (at that size
+   the two spellings differ by well under a pixel). Boxes are measured on
+   mount and resize; each scroll event (Lenis writes the window scroll
+   every frame) only does arithmetic. Returns false where it does not
+   apply, such as a name that wraps on a phone, so the old path runs. */
+function useScrub(on: boolean, hdr: React.RefObject<HTMLElement | null>, setLanded: (b: boolean) => void) {
+  const [active, setActive] = React.useState(false);
+  React.useLayoutEffect(() => {
+    const h1 = document.querySelector<HTMLElement>(".a-cover h1");
+    const header = hdr.current, wm = header?.querySelector<HTMLElement>(".site-wm");
+    if (!on || !h1 || !header || !wm) return;
+    const root = document.documentElement;
+    const f = document.createElement("div");
+    f.setAttribute("aria-hidden", "");
+    const big = document.createElement("span");
+    big.textContent = "Julian Gigola";
+    f.append(big);
+    Object.assign(f.style, { position: "fixed", left: "0", top: "0", margin: "0", zIndex: "31", pointerEvents: "none", whiteSpace: "nowrap", transformOrigin: "0 0", willChange: "transform", visibility: "hidden" });
+    document.body.append(f);
+    let m: { docTop: number; left: number; h: number; w: number; ox: number; oy: number; bx: number; by: number; k: number; range: number; edge: number } | null = null;
+    let last = -1;
+    const measure = () => {
+      const cs = getComputedStyle(h1), a = ink(h1);
+      if (a.height > parseFloat(cs.fontSize) * 1.3) { m = null; return; }
+      Object.assign(f.style, { transform: "none", fontFamily: cs.fontFamily, fontWeight: cs.fontWeight, fontSize: cs.fontSize, lineHeight: cs.lineHeight, letterSpacing: cs.letterSpacing, textTransform: cs.textTransform, color: cs.color });
+      const o = ink(big), b = ink(wm), k = b.width / o.width;
+      m = { docTop: a.top + scrollY, left: a.left, h: a.height, w: a.width, ox: o.left, oy: o.top, bx: b.left, by: b.top + b.height / 2 - (a.height * k) / 2, k, range: a.height, edge: header.offsetHeight };
+      last = -1;
+    };
+    const at = (sy: number) => (m ? Math.min(1, Math.max(0, (m.edge - (m.docTop - sy)) / m.range)) : 0);
+    const paint = (sy = scrollY) => {
+      if (!m) return;
+      // Near the range while nothing of this shows yet: measure again, so late
+      // fonts or layout above the cover can never put the copy off its mark.
+      if (last <= 0 && (m.edge - (m.docTop - sy)) / m.range > -0.5) measure();
+      if (!m) return;
+      const top = m.docTop - sy;
+      const p = at(sy);
+      if (p === last) return;
+      last = p;
+      const e = p * p * (3 - 2 * p);
+      const s = 1 + (m.k - 1) * e;
+      const x = m.left + (m.bx - m.left) * e, y = top + (m.by - top) * e;
+      f.style.transform = `translate(${x - m.ox * s}px,${y - m.oy * s}px) scale(${s})`;
+      const mid = p > 0 && p < 1;
+      f.style.visibility = mid ? "visible" : "hidden";
+      if (p > 0) root.setAttribute("data-dock", "");
+      else root.removeAttribute("data-dock");
+      wm.style.opacity = p >= 1 ? "1" : "0";
+      header.style.setProperty("opacity", String(e));
+      setLanded(p >= 1);
+    };
+    // The bar follows p, so it is measured where it rests, not mid fade.
+    Object.assign(header.style, { transition: "none", transform: "none" });
+    wm.style.transition = "none";
+    measure();
+    if (!m) {
+      header.removeAttribute("style");
+      wm.style.cssText = "";
+      return () => f.remove();
+    }
+    // Whether it applies is only known after measuring the laid out name.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setActive(true);
+    const onResize = () => { measure(); paint(); };
+    document.fonts?.ready.then(onResize, () => {});
+    // Lenis drives p in the same frame it moves the page; the native event
+    // (a frame later, and a no-op by then) covers keys, the scrollbar, no Lenis.
+    const onScroll = () => paint();
+    const offLenis = onLenisScroll(paint);
+    addEventListener("scroll", onScroll, { passive: true });
+    addEventListener("resize", onResize);
+    paint();
+    return () => {
+      offLenis();
+      removeEventListener("scroll", onScroll);
+      removeEventListener("resize", onResize);
+      f.remove();
+      header.removeAttribute("style");
+      wm.style.cssText = "";
+      root.removeAttribute("data-dock");
+      setActive(false);
+    };
+  }, [on, hdr, setLanded]);
+  return active;
+}
+
 export function V3Header() {
   const path = usePathname();
   const home = path === "/";
@@ -233,7 +340,9 @@ export function V3Header() {
     sync();
     return () => removeEventListener("scroll", sync);
   }, [home, dock]);
-  useDock(dock, past, hdr, setLanded);
+  const flag = React.useSyncExternalStore(noop, scrubFlag, () => false);
+  const scrub = useScrub(dock && flag, hdr, setLanded);
+  useDock(dock && !scrub, past, hdr, setLanded);
   /* Portfolio: the header steps away while you scroll down into the work
      and comes back on the way up (Julian). */
   const tucks = path.startsWith("/portfolio");
