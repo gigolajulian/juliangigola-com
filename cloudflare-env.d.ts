@@ -5,6 +5,7 @@ interface __BaseEnv_CloudflareEnv {
 	EMAIL: SendEmail;
 	CLIENT_EMAIL: SendEmail;
 	BEACON: AnalyticsEngineDataset;
+	DEPOSIT_LIMIT: RateLimit;
 	ASSETS: Fetcher;
 	INBOX_KEY: string;
 }
