@@ -1119,10 +1119,10 @@ dialog.v3.mo-player,.mo-player>iframe{background:#000}
 /* The next set's cover beside its name, at the height of the type. */
 .v3 .pj-nx{position:relative;flex:none;align-self:center;height:clamp(64px,7vw,112px);aspect-ratio:4/5;border-radius:4px;overflow:hidden;background:var(--card)}
 /* The name becomes the header (mock 4b): only with ?v3motion on the homepage; V3Header leaves .dock off under reduced motion. */
-:root[data-v3motion] .v3 .site-hdr.dock{transform:none;opacity:1;clip-path:inset(0 0 100% 0);transition:clip-path .2s cubic-bezier(.4,0,1,1)}
-:root[data-v3motion] .v3 .site-hdr.dock.show{clip-path:inset(0);transition:clip-path .7s cubic-bezier(.65,0,.25,1)}
+:root[data-v3motion] .v3 .site-hdr.dock{transform:none;opacity:1;clip-path:inset(0 0 100% 0);transition:clip-path .55s cubic-bezier(0.16,1,0.3,1)}
+:root[data-v3motion] .v3 .site-hdr.dock.show{clip-path:inset(0);transition:clip-path .55s cubic-bezier(0.16,1,0.3,1)}
 :root[data-v3motion] .v3 .site-hdr.dock .site-wm{opacity:0}
-:root[data-v3motion] .v3 .site-hdr.dock.landed .site-wm{opacity:1;transition:opacity .12s linear}
+:root[data-v3motion] .v3 .site-hdr.dock.landed .site-wm{opacity:1;transition:opacity .2s cubic-bezier(0.16,1,0.3,1)}
 :root[data-v3motion] .v3 .site-hdr.dock .links>*{opacity:0;translate:0 -4px;transition:opacity .15s ease,translate .15s ease}
 :root[data-v3motion] .v3 .site-hdr.dock.show .links>*{opacity:1;translate:0 0;transition:opacity .35s ease .25s,translate .5s cubic-bezier(.65,0,.25,1) .25s}
 :root[data-v3motion] .v3 .site-hdr.dock.show .links>:nth-child(2){transition-delay:.28s}
@@ -1150,3 +1150,75 @@ dialog.v3.mo-player,.mo-player>iframe{background:#000}
 .v3 .sheet{grid-template-columns:repeat(6,minmax(0,1fr));padding-inline:var(--g) var(--gr)}
 /* The portfolio's grid and the Color results: six covers a row, not four. */
 .v3 .wgrid,.v3 .sc-res{grid-template-columns:repeat(6,minmax(0,1fr))}}
+
+/* Scroll-driven dynamic image reveal & scale-up (brandonyasin inspired) */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .v3 .a-seq figure .ph,
+    .v3 .sheet figure,
+    .v3 .door,
+    .v3 .wgrid .wt .ph,
+    .v3 .sc-res .wt .ph {
+      animation: v3-card-scroll-reveal linear both;
+      animation-timeline: view();
+      animation-range: entry 0% cover 30%;
+      overflow: hidden;
+    }
+    .v3 .a-seq figure .ph img,
+    .v3 .sheet figure img,
+    .v3 .door > img,
+    .v3 .wgrid .wt img,
+    .v3 .sc-res .wt img {
+      animation: v3-img-parallax linear both;
+      animation-timeline: view();
+      animation-range: entry 0% cover 40%;
+    }
+  }
+}
+
+@keyframes v3-card-scroll-reveal {
+  from {
+    scale: 0.95;
+    opacity: 0.85;
+  }
+  to {
+    scale: 1;
+    opacity: 1;
+  }
+}
+
+@keyframes v3-img-parallax {
+  from {
+    scale: 1.08;
+    translate: 0 -2%;
+  }
+  to {
+    scale: 1;
+    translate: 0 0;
+  }
+}
+
+/* Fallback for browsers without animation-timeline support */
+@media (prefers-reduced-motion: no-preference) {
+  @supports not (animation-timeline: view()) {
+    .v3 .a-seq figure,
+    .v3 .sheet figure,
+    .v3 .door,
+    .v3 .wgrid .wt,
+    .v3 .sc-res .wt {
+      opacity: 0.85;
+      transform: scale(0.96);
+      transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1),
+                  transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+      will-change: opacity, transform;
+    }
+    .v3 .a-seq figure[data-in-view="true"],
+    .v3 .sheet figure[data-in-view="true"],
+    .v3 .door[data-in-view="true"],
+    .v3 .wgrid .wt[data-in-view="true"],
+    .v3 .sc-res .wt[data-in-view="true"] {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+}

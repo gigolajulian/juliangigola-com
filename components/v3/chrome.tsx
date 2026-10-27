@@ -174,25 +174,25 @@ function useDock(dock: boolean, past: boolean, hdr: React.RefObject<HTMLElement 
     small.style.top = `${a.top + a.height / 2 - (sb.top + sb.height / 2)}px`;
     const s2 = ink(small), sx = s2.left - fl, sy = s2.top - ft;
     fly.current = f;
-    /* Each spelling keeps its own colour and the crossfade carries the
-       change: animating the copy's colour repainted its 140px text every
-       frame, and on an iPhone the flight stuttered (Julian, 2026-10-24).
-       An even ease over 0.7s: the expo curve did most of the move in its
-       first tenth, and read as a snap. */
+    /* Smooth, subtle custom ease for fluid wordmark flight into header bar without abrupt snapping */
     big.style.color = cs.color;
     small.style.color = ws.color;
     const up = { transform: "translate(0,0) scale(1)" };
     const down = { transform: `translate(${b.left - fl - sx * k}px,${b.top - ft - sy * k}px) scale(${k})` };
-    const t = { duration: past ? 700 : 500, easing: "cubic-bezier(.65,0,.25,1)", fill: "forwards" as const };
-    const caps = [{ opacity: 1 }, { opacity: 1, offset: 0.35 }, { opacity: 0 }];
-    big.animate(past ? caps : [...caps].reverse().map((x, n) => ({ ...x, offset: [0, 0.65, 1][n] })), t);
-    small.animate(past ? [{ opacity: 0 }, { opacity: 0, offset: 0.35 }, { opacity: 1 }] : [{ opacity: 1 }, { opacity: 0, offset: 0.65 }, { opacity: 0 }], t);
+    const t = { duration: 550, easing: "cubic-bezier(0.16, 1, 0.3, 1)", fill: "forwards" as const };
+    const caps = [{ opacity: 1 }, { opacity: 0.6, offset: 0.5 }, { opacity: 0 }];
+    big.animate(past ? caps : [...caps].reverse().map((x, n) => ({ ...x, offset: [0, 0.5, 1][n] })), t);
+    small.animate(past ? [{ opacity: 0 }, { opacity: 0.4, offset: 0.5 }, { opacity: 1 }] : [{ opacity: 1 }, { opacity: 0.4, offset: 0.5 }, { opacity: 0 }], t);
     f.animate(past ? [up, down] : [down, up], t).finished.then(() => {
       if (fly.current !== f) return;
       fly.current = null;
-      if (!past) return void (root.removeAttribute("data-dock"), f.remove());
+      if (!past) {
+        root.removeAttribute("data-dock");
+        f.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 150, easing: "ease-out", fill: "forwards" }).finished.then(() => f.remove());
+        return;
+      }
       setLanded(true);
-      f.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 120, fill: "forwards" }).finished.then(() => f.remove());
+      f.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 180, easing: "ease-out", fill: "forwards" }).finished.then(() => f.remove());
     }, () => {});
   }, [dock, past, hdr, setLanded]);
   React.useEffect(() => () => {
