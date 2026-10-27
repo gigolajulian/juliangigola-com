@@ -892,7 +892,9 @@ export function TimePicker({
   /* JG V3: the steps around anything that is not the picker itself. */
   const v3paid = paid || isPaid(slug);
   const v3steps = v3paid ? ["Time", "You", "Deposit", "Booked"] : ["Time", "You", "Booked"];
-  const v3plain = (body: React.ReactNode) => v3!.shell({ steps: v3steps, at: 1, head: v3paid ? "Book a session" : v3!.name === "Consultation" ? "Book a consultation" : "Book a call", body, sum: [] });
+  // The same subtitle as the picker, so nothing below it jumps when the times arrive.
+  const v3sub = v3paid ? "My studio is in San Jose, and I travel across the Bay Area." : "15 minutes, phone or video. Bring your dates and references.";
+  const v3plain = (body: React.ReactNode) => v3!.shell({ steps: v3steps, at: 1, head: v3paid ? "Book a session" : v3!.name === "Consultation" ? "Book a consultation" : "Book a call", sub: v3sub, body, sum: [] });
   if (state === "fallback") return v3 ? v3plain(fallback) : <>{fallback}</>;
   const waiting = <p role="status" className="lbl mute">Loading availability</p>;
   if (v3 && (state === "loading" || !days)) return v3plain(waiting);
@@ -1055,9 +1057,10 @@ export function TimePicker({
     const [hh, mm] = fmt(pick.min).replace(/ (AM|PM)$/, "").split(":");
     return shell({
       head: paid ? "Book a session" : v3?.name === "Consultation" ? "Book a consultation" : "Book a call",
-      sub: paid ? "My studio is in San Jose, and I travel across the Bay Area." : "15 minutes, phone or video. Bring your dates and references.",
+      sub: v3sub,
       body: (
-        <>
+        // Rises in once the times arrive, in place of "Loading availability" (Julian, 2026-10-27).
+        <div className="f-in">
           <Calendar
             view={view}
             setView={(v) => { setView(v); setAnchor(fromIso(pick.date)); }}
@@ -1089,7 +1092,7 @@ export function TimePicker({
             <b>{hh}<span className="cn">:</span>{mm}</b>
             <span className="lbl mute">{pick.min < 720 ? "AM" : "PM"} | until {fmt(end)} | {dlabel(date)}</span>
           </div>
-        </>
+        </div>
       ),
       bar: <button type="button" className="btn fill" onClick={() => { setChosen("time"); setStep("form"); }}>Continue</button>,
     });
