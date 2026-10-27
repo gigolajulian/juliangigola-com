@@ -57,6 +57,20 @@ const categoryRedirects = CATEGORIES.map((c) => ({
 }));
 
 /**
+ * Julian (2026-10-27): the discipline pages are retired for /portfolio with
+ * the chip on. Where a discipline shares its slug with its one gallery
+ * (Automotive, Events, Places, Cover art) the project page answers instead.
+ */
+const disciplineRedirects = [
+  ...LISTINGS.filter((c) => !LINKABLE.some((p) => p.slug === c.slug)).map((c) => ({
+    source: `/portfolio/${c.slug}`,
+    destination: categoryHref(c.slug),
+    permanent: true,
+  })),
+  { source: "/portfolio/discipline/:slug([a-z0-9-]+)", destination: "/portfolio?d=:slug", permanent: true },
+];
+
+/**
  * Julian: Portfolio at /portfolio. The work lived at /work, and every
  * address under it is in the index, in his Instagram and in inboxes, so
  * each one answers with a permanent redirect to the same place under
@@ -395,10 +409,7 @@ const nextConfig: NextConfig = {
      `/portfolio/[slug]` where a discipline and its one gallery share a
      slug (Automotive, Events, Places). */
   async rewrites() {
-    const listings = LISTINGS.map((c) => ({
-      source: `/portfolio/${c.slug}`,
-      destination: `/portfolio/discipline/${c.slug}`,
-    }));
+    const listings: { source: string; destination: string }[] = [];
     /* A local build or the dev server asks the live zone for its resized
        photographs (`LOCAL` above). Never in a Cloudflare build, where the
        zone answers `/cdn-cgi/image/` itself. */
@@ -434,6 +445,7 @@ const nextConfig: NextConfig = {
       ...categoryRedirects,
       ...projectRedirects,
       ...workRedirects,
+      ...disciplineRedirects,
     ].filter(
       (r) => {
         if (seen.has(r.source)) return false;

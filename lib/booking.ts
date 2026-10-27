@@ -369,7 +369,7 @@ export const BOOKING_PAGES: BookingPage[] = [
       },
     ],
     tiles: coversOf("studio-digitals"),
-    gallery: { href: "/portfolio/studio-digitals", label: "The digitals gallery" },
+    gallery: { href: "/portfolio?d=studio-digitals", label: "The digitals gallery" },
     // Only the frames that read as digitals: plain ground, standing or
     // close, no styling. Taneka's and Zoe's sets are posed floor work and
     // stay in the gallery.
@@ -430,7 +430,7 @@ export const BOOKING_PAGES: BookingPage[] = [
       "/work/shattered-mercury/04.jpg",
       "/work/channel-orange/05.jpg",
     ],
-    gallery: { href: "/portfolio/portraits", label: "The portraits" },
+    gallery: { href: "/portfolio?d=portraits", label: "The portraits" },
     book: { type: "session", session: portraits.name, title: "Book a portrait session", cal: "juliangigola/portraits" },
   },
   {
@@ -547,7 +547,7 @@ export const BOOKING_PAGES: BookingPage[] = [
       },
     ],
     tiles: coversOf("artist-presskit"),
-    gallery: { href: "/portfolio/artist-presskit", label: "Artist press kits" },
+    gallery: { href: "/portfolio?d=artist-presskit", label: "Artist press kits" },
     book: { type: "music", title: "Plan a release", cal: "juliangigola/music-call" },
   },
   {
@@ -602,7 +602,7 @@ export const BOOKING_PAGES: BookingPage[] = [
       },
     ],
     tiles: coversOf("campaigns", Infinity, ["paradox", "ukiyosunknown", "sago", "goodcult", "sols", "jubo", "hua"]),
-    gallery: { href: "/portfolio/campaigns", label: "The campaigns" },
+    gallery: { href: "/portfolio?d=campaigns", label: "The campaigns" },
     book: { type: "campaign", title: "Brief a campaign", cal: "juliangigola/campaign" },
   },
 ];

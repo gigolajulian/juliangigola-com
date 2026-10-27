@@ -206,7 +206,7 @@ const SESSION_SERVICE: Record<string, string> = {
 /** The commissions, which are quoted rather than priced: at their booking
     page where they have one (`lib/booking.ts`), their work where not. */
 const COMMISSIONS = [
-  ["Fashion & editorial photography", "/portfolio/editorial"],
+  ["Fashion & editorial photography", "/portfolio?d=editorial"],
   ["Brand campaign photography", "/brand-photography"],
   ["Musician press photos", "/music-photography"],
   ["Album cover art", "/portfolio/coverart"],
