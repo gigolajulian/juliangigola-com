@@ -7771,7 +7771,8 @@ export const PROJECTS: Project[] = [
       },
       {
         "role": "Client",
-        "name": "WIRED"
+        "name": "Wired",
+        "instagram": "wired"
       }
     ],
     "categories": [
