@@ -211,8 +211,8 @@ function useDock(dock: boolean, past: boolean, hdr: React.RefObject<HTMLElement 
   }, []);
 }
 
-/* ?flag=1 (kept for the tab, ?flag=0 clears it): the name rides the scroll
-   instead of a timed flight. Off, everything is as before. */
+/* By default the name rides the scroll instead of a timed flight.
+   ?flag=0 (kept for the tab, ?flag=1 clears it) brings the timed flight back. */
 function scrubFlag() {
   try {
     const q = location.search;
