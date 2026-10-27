@@ -1119,11 +1119,14 @@ dialog.v3.mo-player,.mo-player>iframe{background:#000}
 /* The next set's cover beside its name, at the height of the type. */
 .v3 .pj-nx{position:relative;flex:none;align-self:center;height:clamp(64px,7vw,112px);aspect-ratio:4/5;border-radius:4px;overflow:hidden;background:var(--card)}
 /* The name becomes the header (mock 4b): only with ?v3motion on the homepage; V3Header leaves .dock off under reduced motion. */
-:root[data-v3motion] .v3 .site-hdr.dock{transform:none;opacity:1;clip-path:inset(0 0 100% 0);transition:clip-path .55s cubic-bezier(0.16,1,0.3,1)}
-:root[data-v3motion] .v3 .site-hdr.dock.show{clip-path:inset(0);transition:clip-path .55s cubic-bezier(0.16,1,0.3,1)}
+/* The bar fades and settles in, and fades and lifts out on the same in-out
+   curve as the name flying back, so the two leave together. A clip wipe on
+   an expo ease cut half the bar in the first few frames and read as a pop. */
+:root[data-v3motion] .v3 .site-hdr.dock{transform:translateY(-8px);opacity:0;transition:opacity .4s cubic-bezier(0.65,0,0.35,1),transform .4s cubic-bezier(0.65,0,0.35,1)}
+:root[data-v3motion] .v3 .site-hdr.dock.show{transform:none;opacity:1;transition:opacity .4s cubic-bezier(0.22,1,0.36,1),transform .4s cubic-bezier(0.22,1,0.36,1)}
 :root[data-v3motion] .v3 .site-hdr.dock .site-wm{opacity:0}
 :root[data-v3motion] .v3 .site-hdr.dock.landed .site-wm{opacity:1;transition:opacity .2s cubic-bezier(0.16,1,0.3,1)}
-:root[data-v3motion] .v3 .site-hdr.dock .links>*{opacity:0;translate:0 -4px;transition:opacity .15s ease,translate .15s ease}
+:root[data-v3motion] .v3 .site-hdr.dock .links>*{opacity:0;translate:0 -4px;transition:opacity .3s ease,translate .3s ease}
 :root[data-v3motion] .v3 .site-hdr.dock.show .links>*{opacity:1;translate:0 0;transition:opacity .35s ease .25s,translate .5s cubic-bezier(.65,0,.25,1) .25s}
 :root[data-v3motion] .v3 .site-hdr.dock.show .links>:nth-child(2){transition-delay:.28s}
 :root[data-v3motion] .v3 .site-hdr.dock.show .links>:nth-child(3){transition-delay:.31s}
