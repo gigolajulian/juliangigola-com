@@ -351,7 +351,8 @@ export const PROJECTS: Project[] = [
       },
       {
         "role": "Model",
-        "name": "@justjustiris"
+        "name": "Iris Zhangy",
+        "instagram": "iriszhangy"
       }
     ],
     "categories": [
