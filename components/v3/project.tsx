@@ -14,8 +14,13 @@ const wide = (f: Frame) => f.width > f.height;
 /* A client or brand is credited by its name, never "@wired" (Julian,
    2026-10-27); people keep their @handle. Still links to the Instagram. */
 const ORG = /^(client|brand)$/i;
-const creditLabel = (c: Project["credits"][number]) =>
-  ORG.test(c.role.trim()) ? c.name.replace(/^@/, "") : c.instagram ? `@${c.instagram}` : c.name;
+type Credit = Project["credits"][number];
+/* The handle: the Instagram field, else one typed into the name
+   ("@anisajadee", "Ryan Ohaya (@carti.kun)"), else Julian's own. */
+const handleOf = (c: Credit) =>
+  c.instagram ?? c.name.match(/@([\w.]+)/)?.[1] ?? (/^julian gigola$/i.test(c.name.trim()) ? "juliangigola" : null);
+const creditLabel = (c: Credit, h: string | null) =>
+  ORG.test(c.role.trim()) ? c.name.replace(/^@/, "") : h ? `@${h}` : c.name;
 
 /** The rest of a set in the magazine rhythm: a horizontal full width, two
     verticals side by side, a lone vertical offset left or right in turn. */
@@ -96,12 +101,29 @@ export function V3Project({ project, next }: { project: Project; next?: { href: 
           <section className="sv-row">
             <h2 className="lbl mute">Credits</h2>
             <ul>
-              {project.credits.map((c) => (
-                <li key={`${c.role}${c.name}`}>
-                  <span className="mute">{c.role}</span>
-                  <b>{c.instagram ? <a href={`https://instagram.com/${c.instagram}`}>{creditLabel(c)}</a> : creditLabel(c)}</b>
-                </li>
-              ))}
+              {project.credits.map((c) => {
+                const h = handleOf(c);
+                const label = creditLabel(c, h);
+                const av = c.avatar ?? (h === "juliangigola" ? "/people/juliangigola.jpg" : null);
+                return (
+                  <li key={`${c.role}${c.name}`}>
+                    <span className="mute">{c.role}</span>
+                    <b>
+                      {h ? (
+                        <a href={`https://instagram.com/${h}`} target="_blank" rel="noopener noreferrer">
+                          {/* Their avatar, on hover (always on a phone); the initial where there is none. */}
+                          <span className="cr-av" aria-hidden="true">
+                            {av ? <Image src={av} alt="" fill sizes="28px" /> : label.replace(/^@/, "")[0]}
+                          </span>
+                          {label}
+                        </a>
+                      ) : (
+                        label
+                      )}
+                    </b>
+                  </li>
+                );
+              })}
             </ul>
           </section>
           {next ? (
