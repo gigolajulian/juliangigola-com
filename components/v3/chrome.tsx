@@ -174,12 +174,25 @@ function useDock(dock: boolean, past: boolean, hdr: React.RefObject<HTMLElement 
     small.style.top = `${a.top + a.height / 2 - (sb.top + sb.height / 2)}px`;
     const s2 = ink(small), sx = s2.left - fl, sy = s2.top - ft;
     fly.current = f;
-    /* Smooth, subtle custom ease for fluid wordmark flight into header bar without abrupt snapping */
     big.style.color = cs.color;
     small.style.color = ws.color;
     const up = { transform: "translate(0,0) scale(1)" };
     const down = { transform: `translate(${b.left - fl - sx * k}px,${b.top - ft - sy * k}px) scale(${k})` };
-    const t = { duration: 550, easing: "cubic-bezier(0.16, 1, 0.3, 1)", fill: "forwards" as const };
+    // Docking eases out; the way back eases in and out so it reads as the same move reversed.
+    const t = { duration: 550, easing: past ? "cubic-bezier(0.16, 1, 0.3, 1)" : "cubic-bezier(0.65, 0, 0.35, 1)", fill: "forwards" as const };
+    /* On the way back the page keeps scrolling (Lenis glides on after the
+       wheel stops), so the cover name moves while the copy flies. Follow it
+       each frame, so the copy lands where the name is and not where it was. */
+    if (!past) {
+      const follow = () => {
+        if (fly.current !== f) return;
+        const n = ink(h1);
+        f.style.left = `${fl + n.left - a.left}px`;
+        f.style.top = `${ft + n.top - a.top}px`;
+        requestAnimationFrame(follow);
+      };
+      requestAnimationFrame(follow);
+    }
     const caps = [{ opacity: 1 }, { opacity: 0.6, offset: 0.5 }, { opacity: 0 }];
     big.animate(past ? caps : [...caps].reverse().map((x, n) => ({ ...x, offset: [0, 0.5, 1][n] })), t);
     small.animate(past ? [{ opacity: 0 }, { opacity: 0.4, offset: 0.5 }, { opacity: 1 }] : [{ opacity: 1 }, { opacity: 0.4, offset: 0.5 }, { opacity: 0 }], t);
