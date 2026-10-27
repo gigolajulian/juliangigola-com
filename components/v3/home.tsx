@@ -132,11 +132,14 @@ function Clients() {
     let id = -1;
     let px = 0;
     let pt = 0;
+    let sx = 0;
+    let dragged = false;
     const down = (e: PointerEvent) => {
       if (e.pointerType === "mouse" && e.button !== 0) return;
       id = e.pointerId;
-      px = e.clientX;
+      px = sx = e.clientX;
       pt = e.timeStamp;
+      dragged = false;
       held = true;
       v = 0;
       wake();
@@ -149,7 +152,11 @@ function Clients() {
       v = -dx / dt;
       px = e.clientX;
       pt = e.timeStamp;
-      if (Math.abs(dx) > 0) box.setPointerCapture?.(id);
+      // Past a tap's jitter it is a drag: capture, and the logo under it does not open.
+      if (!dragged && Math.abs(e.clientX - sx) > 6) {
+        dragged = true;
+        box.setPointerCapture?.(id);
+      }
     };
     const up = (e: PointerEvent) => {
       if (e.pointerId !== id) return;
@@ -172,6 +179,10 @@ function Clients() {
     box.addEventListener("pointerup", up);
     box.addEventListener("pointercancel", up);
     box.addEventListener("wheel", wheel, { passive: false });
+    const click = (e: MouseEvent) => {
+      if (dragged) e.preventDefault();
+    };
+    box.addEventListener("click", click, true);
     return () => {
       cancelAnimationFrame(raf);
       ro.disconnect();
@@ -181,6 +192,7 @@ function Clients() {
       box.removeEventListener("pointerup", up);
       box.removeEventListener("pointercancel", up);
       box.removeEventListener("wheel", wheel);
+      box.removeEventListener("click", click, true);
     };
   }, []);
   return (
@@ -303,8 +315,8 @@ function Commissions() {
       </div>
       {/* Focusable so the row scrolls from the keyboard too (axe). */}
       <div className="tabs lbl" ref={tabs} tabIndex={0} aria-label="Disciplines">
-        {COMMISSION_TABS.map((t, n) => (
-          <span key={t} className={n === 0 ? "on" : undefined}>{t}</span>
+        {COMMISSION_TABS.map(([t, href], n) => (
+          <Link key={t} href={href} className={n === 0 ? "on" : undefined}>{t}</Link>
         ))}
       </div>
       <div className="tabs-bar" ref={bar} hidden>
@@ -320,6 +332,9 @@ function Commissions() {
               </span>
               {s.d.meta ? <span className="mute"><Pick d={s.d.meta} l={s.l.meta!} /></span> : null}
             </figcaption>
+            {/* The frame opens its project; the theme hides the other one's link. */}
+            <Link className="v3d tile" href={`/portfolio/${s.d.src.split("/")[2]}`} aria-label={s.d.name} />
+            <Link className="v3l tile" href={`/portfolio/${s.l.src.split("/")[2]}`} aria-label={s.l.name} />
           </figure>
         ))}
       </div>
