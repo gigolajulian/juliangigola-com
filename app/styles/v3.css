@@ -1285,3 +1285,16 @@ dialog.v3.mo-player,.mo-player>iframe{background:#000}
    you scroll the work (Julian, 2026-10-27). */
 .v3 #p-work .wtools{position:sticky;top:calc(max(14px,env(safe-area-inset-top,0px)) + 47px);z-index:5;background:var(--bg)}
 @media (max-width:700px){.v3 #p-work .wtools{top:calc(max(14px,env(safe-area-inset-top,0px)) + 59px)}}
+/* Credits: a person's avatar comes in beside their @handle on hover, and
+   is always there on a phone. The handle opens their Instagram in a new tab. */
+.v3 .sv-row li a{display:inline-flex;align-items:center;justify-content:flex-end;width:auto}
+.v3 .cr-av{position:relative;display:inline-grid;place-items:center;flex:none;width:0;height:28px;margin-right:0;border-radius:50%;overflow:hidden;background:var(--accent);color:#fff;font:600 15px/1 var(--mono);text-transform:uppercase;opacity:0;transition:width .3s cubic-bezier(.2,.7,.2,1),margin-right .3s cubic-bezier(.2,.7,.2,1),opacity .2s}
+.v3 .cr-av img{object-fit:cover}
+@media (hover:hover){.v3 .sv-row li:hover .cr-av,.v3 .sv-row li a:focus-visible .cr-av{width:28px;margin-right:10px;opacity:1}
+.v3 .sv-row li a:hover{color:var(--accent)}}
+@media (hover:none){.v3 .cr-av{width:24px;height:24px;margin-right:10px;opacity:1}}
+@media (prefers-reduced-motion:reduce){.v3 .cr-av{transition:none}}
+/* Credits: the name leads, the @handle in the accent takes its place on hover. */
+.v3 .cr-h{display:none;color:var(--accent)}
+@media (hover:hover){.v3 .sv-row li:hover .cr-n,.v3 .sv-row li a:focus-visible .cr-n{display:none}
+.v3 .sv-row li:hover .cr-h,.v3 .sv-row li a:focus-visible .cr-h{display:inline}}

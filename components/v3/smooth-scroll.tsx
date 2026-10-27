@@ -6,6 +6,14 @@ import { usePathname } from "next/navigation";
 
 type ScrollFn = (y: number) => void;
 const scrollFns = new Set<ScrollFn>();
+let live: Lenis | null = null;
+
+/** Jumps to the top, through Lenis when it runs: a plain scrollTo mid-glide
+ *  is written over by Lenis's next frame (page-fly.tsx). */
+export function scrollTop() {
+  if (live) live.scrollTo(0, { immediate: true, force: true });
+  else scrollTo(0, 0);
+}
 
 /** Called inside Lenis's own frame, right after it moves the page, with the
  *  page scroll it just wrote. Native scroll events only arrive a frame later. */
@@ -32,7 +40,7 @@ export function SmoothScroll() {
       touchMultiplier: 1.5,
       autoRaf: true,
     });
-    lenisRef.current = lenis;
+    lenisRef.current = live = lenis;
     lenis.on("scroll", () => scrollFns.forEach((fn) => fn(window.scrollY)));
 
     // Sync Lenis with window scroll on navigation / dynamic content changes
@@ -48,7 +56,7 @@ export function SmoothScroll() {
       window.removeEventListener("resize", onResize);
       resizeObserver.disconnect();
       lenis.destroy();
-      lenisRef.current = null;
+      lenisRef.current = live = null;
     };
   }, []);
 
