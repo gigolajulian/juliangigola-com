@@ -677,21 +677,12 @@ export const categoryHref = (categorySlug: string): string => {
   if (categorySlug === "video") return "/portfolio/video";
 
   if (!isListing(categorySlug)) return "/portfolio";
-  /* A one-gallery discipline used to go to its project page instead —
-     `/portfolio/coverart` — which took a visitor who had just clicked a chip on
-     the index off to a different page with a different shape. Julian asked
-     for the gallery to open under the filters instead, so it goes through
-     the category route like every other chip; that page renders the frames
-     where the listing would be. `/portfolio/coverart` still resolves for
-     anything already linked to it.
-
-     Straight under /portfolio, like the projects, not under
-     /portfolio/category/. The page is `app/portfolio/(index)/
-     discipline/[slug]`, reached by a rewrite in `next.config.ts`; the
-     old addresses redirect here. Automotive, Events and Places share
-     their slug with their one gallery, and the discipline view (the
-     same frames under the filters) is what answers there. */
-  return `/portfolio/${categorySlug}`;
+  /* Julian (2026-10-27): the discipline pages are retired. A discipline is
+     /portfolio with its chip on (`components/v3/work.tsx` reads `?d=`), and
+     the old `/portfolio/<discipline>` addresses redirect there
+     (`next.config.ts`). Automotive, Events, Places and Cover art share their
+     slug with their one gallery, so those addresses are the project pages. */
+  return `/portfolio?d=${categorySlug}`;
 };
 
 /** The disciplines with a listing page of their own, at `/portfolio/<slug>`:

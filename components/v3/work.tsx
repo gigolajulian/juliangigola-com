@@ -94,8 +94,38 @@ function Tile({ p, swatch, first }: { p: WorkItem; swatch?: string[]; first?: bo
   );
 }
 
-export function V3Work({ work }: { work: WorkItem[] }) {
+export type FrameItem = { s: string; src: string; alt: string; wide: boolean };
+const WIDE_SIZES = "(max-width: 700px) 100vw, (max-width: 1000px) 66vw, 50vw";
+
+function FrameTile({ f, first }: { f: FrameItem; first?: boolean }) {
+  return (
+    <figure className={f.wide ? "wt wide" : "wt"}>
+      <Link href={`/portfolio/${f.s}`}>
+        <div className="ph">
+          <Image src={f.src} alt={f.alt} fill sizes={f.wide ? WIDE_SIZES : GRID_SIZES} loading={first ? "eager" : "lazy"} />
+        </div>
+      </Link>
+    </figure>
+  );
+}
+
+export function V3Work({
+  work,
+  chip = {},
+  frames = {},
+}: {
+  work: WorkItem[];
+  chip?: Record<string, string>;
+  frames?: Record<string, FrameItem[]>;
+}) {
   const [filter, setFilter] = React.useState("All");
+  /* `?d=<slug>`: the retired discipline pages and the site's links land here
+     with that chip on. Read after mount, so the page itself stays static. */
+  React.useEffect(() => {
+    const d = chip[new URLSearchParams(location.search).get("d") ?? ""];
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    if (d) setFilter(d);
+  }, [chip]);
   const [view, setView] = React.useState<"grid" | "strip" | "color">("grid");
   const back = React.useRef<"grid" | "strip">("grid");
   /* Grid, strip and color views, and the discipline chips: the covers on
@@ -157,6 +187,8 @@ export function V3Work({ work }: { work: WorkItem[] }) {
       ),
     [work, filter, q],
   );
+  /* A gallery chip with no search shows its frames, not its one cover. */
+  const shown = !q ? frames[filter] : undefined;
   /* The strip asks for larger files than the grid, so on a phone its covers
      flew in empty and the photos popped in after (Julian, iPhone and iPad).
      The other view's first frames are fetched and decoded while this one is
@@ -526,9 +558,16 @@ export function V3Work({ work }: { work: WorkItem[] }) {
           <i />
         </div>
         <p className="wnote lbl mute" aria-live="polite">
-          {q ? `${plural(list.length)} matching “${q}”` : plural(list.length)}
+          {q ? `${plural(list.length)} matching “${q}”` : shown ? `${shown.length} frames` : plural(list.length)}
         </p>
-        {view === "grid" ? (
+        {view === "grid" && shown ? (
+          <div className="wgrid wframes">
+            {shown.map((f, n) => (
+              <FrameTile key={f.src} f={f} first={n < 12} />
+            ))}
+          </div>
+        ) : null}
+        {view === "grid" && !shown ? (
           <div className="wgrid">
             {list.map((p, n) => (
               <Tile key={p.s} p={p} first={n < 12} />
