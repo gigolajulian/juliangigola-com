@@ -19,8 +19,14 @@ type Credit = Project["credits"][number];
    ("@anisajadee", "Ryan Ohaya (@carti.kun)"), else Julian's own. */
 const handleOf = (c: Credit) =>
   c.instagram ?? c.name.match(/@([\w.]+)/)?.[1] ?? (/^julian gigola$/i.test(c.name.trim()) ? "juliangigola" : null);
+/* The name leads (Julian, 2026-10-27); the @handle takes its place on hover.
+   A name typed as only a handle has no name to lead with. */
+const nameOf = (c: Credit) => {
+  const n = c.name.replace(/\s*\(@[\w.]+\)/, "").trim();
+  return n.startsWith("@") ? null : n;
+};
 const creditLabel = (c: Credit, h: string | null) =>
-  ORG.test(c.role.trim()) ? c.name.replace(/^@/, "") : h ? `@${h}` : c.name;
+  ORG.test(c.role.trim()) ? c.name.replace(/^@/, "") : (nameOf(c) ?? (h ? `@${h}` : c.name));
 
 /** The rest of a set in the magazine rhythm: a horizontal full width, two
     verticals side by side, a lone vertical offset left or right in turn. */
@@ -115,7 +121,14 @@ export function V3Project({ project, next }: { project: Project; next?: { href: 
                           <span className="cr-av" aria-hidden="true">
                             {av ? <Image src={av} alt="" fill sizes="28px" /> : label.replace(/^@/, "")[0]}
                           </span>
-                          {label}
+                          {label === `@${h}` || ORG.test(c.role.trim()) ? (
+                            label
+                          ) : (
+                            <>
+                              <span className="cr-n">{label}</span>
+                              <span className="cr-h">@{h}</span>
+                            </>
+                          )}
                         </a>
                       ) : (
                         label
