@@ -344,7 +344,33 @@ export function V3Header() {
   const flag = React.useSyncExternalStore(noop, scrubFlag, () => false);
   const scrub = useScrub(dock && flag, hdr, setLanded);
   useDock(dock && !scrub, past, hdr, setLanded);
-  const show = !home || past;
+  /* Portfolio: the header steps away while you scroll down into the work and
+     comes back, joined to the pinned search bar, when you scroll up (Julian,
+     2026-10-27). The root attributes drive the search bar's ride in v3.css. */
+  const tucks = path.startsWith("/portfolio");
+  const [tuck, setTuck] = React.useState(false);
+  React.useEffect(() => {
+    if (!tucks) return;
+    const root = document.documentElement;
+    root.setAttribute("data-pf", "");
+    let last = scrollY;
+    const sync = () => {
+      const y = scrollY, d = y - last;
+      if (Math.abs(d) < 6) return;
+      setTuck(d > 0 && y > 80);
+      last = y;
+    };
+    addEventListener("scroll", sync, { passive: true });
+    return () => {
+      removeEventListener("scroll", sync);
+      root.removeAttribute("data-pf");
+      setTuck(false);
+    };
+  }, [tucks, path]);
+  React.useEffect(() => {
+    document.documentElement.toggleAttribute("data-tuck", tuck);
+  }, [tuck]);
+  const show = (!home || past) && !tuck;
   const [menu, setMenu] = React.useState(false);
   /* A route change closes it. */
   const [was, setWas] = React.useState(path);
