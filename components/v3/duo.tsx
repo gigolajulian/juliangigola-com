@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 import { CLIENT_MARKS } from "@/lib/clients-data";
 
 /* A photo slot with its dark and light frame. Both are rendered and the
@@ -56,6 +57,9 @@ const MARKS: [slug: string, name: string, w: number, h: number][] = [
   ["ukiyosunknown", "Ukiyosunknown", 58, 30],
 ];
 
+/* Where a strip mark goes when it is not its project's page (PRESS in lib/work.ts). */
+const MARK_HREF: Record<string, string> = { empire: "https://www.empi.re/", "pear-vc": "/portfolio/video", "ladera-granola": "/portfolio/video" };
+
 /* The About grid's own order (Julian's Arrange, master v45); the homepage strip keeps MARKS order. */
 const ABOUT_ORDER = ["empire", "goodcult", "jubo", "wired-magazine", "paradox", "sols", "ladera-granola", "pear-vc", "sago", "ukiyosunknown"];
 
@@ -73,7 +77,13 @@ export function Marks({ hidden, cell }: { hidden?: boolean; cell?: boolean }) {
       ) : (
         <span key={slug} className="mk" data-mk={slug} {...label} style={{ width: w, height: h, WebkitMask: mask, mask }} />
       );
-    return cell ? <div key={slug}>{mark}</div> : mark;
+    if (cell) return <div key={slug}>{mark}</div>;
+    const href = MARK_HREF[slug] ?? `/portfolio/${slug}`;
+    return (
+      <Link key={slug} href={href} draggable={false} {...(hidden ? { tabIndex: -1, "aria-hidden": true } : {})}>
+        {mark}
+      </Link>
+    );
   });
 }
 

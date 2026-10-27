@@ -39,7 +39,7 @@
 }
 .strip-scroll[data-release] :is(> :has(+ .lead-window), .lead-pane) {
   transition-duration: 560ms;
-  transition-timing-function: cubic-bezier(0.2, 1.7, 0.4, 1);
+  transition-timing-function: var(--ease-rubber);
 }
 .strip-scroll[data-dragged] :is(> :has(+ .lead-window), .lead-pane) {
   transition-duration: 0s;
@@ -320,7 +320,7 @@
 }
 :root[data-stack] .strip-scroll[data-release] .lead-under {
   transition-duration: 560ms;
-  transition-timing-function: cubic-bezier(0.2, 1.7, 0.4, 1);
+  transition-timing-function: var(--ease-rubber);
 }
 :root[data-stack] .strip-scroll[data-dragged] :is(.lead-under, .lead-pane, > :has(+ .lead-window)) {
   transition-duration: 0s;

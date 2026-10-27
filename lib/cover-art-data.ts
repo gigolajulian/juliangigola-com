@@ -391,21 +391,5 @@ export const COVER_RELEASES: CoverRelease[] = [
         "side": null
       }
     ]
-  },
-  {
-    "slug": "westside-shawty",
-    "title": "Westside Shawty",
-    "artist": "BANX",
-    "frames": [
-      {
-        "src": "/covers/westside-shawty.jpg",
-        "thumb": "/covers/westside-shawty-800.jpg",
-        "width": 2000,
-        "height": 1997,
-        "color": "#3A494E",
-        "alt": "Cover art for “Westside Shawty” by BANX",
-        "side": null
-      }
-    ]
   }
 ];
