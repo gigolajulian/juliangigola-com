@@ -4,6 +4,16 @@ import * as React from "react";
 import Lenis from "lenis";
 import { usePathname } from "next/navigation";
 
+type ScrollFn = (y: number) => void;
+const scrollFns = new Set<ScrollFn>();
+
+/** Called inside Lenis's own frame, right after it moves the page, with the
+ *  page scroll it just wrote. Native scroll events only arrive a frame later. */
+export function onLenisScroll(fn: ScrollFn) {
+  scrollFns.add(fn);
+  return () => void scrollFns.delete(fn);
+}
+
 export function SmoothScroll() {
   const pathname = usePathname();
   const lenisRef = React.useRef<Lenis | null>(null);
@@ -23,6 +33,7 @@ export function SmoothScroll() {
       autoRaf: true,
     });
     lenisRef.current = lenis;
+    lenis.on("scroll", () => scrollFns.forEach((fn) => fn(window.scrollY)));
 
     // Sync Lenis with window scroll on navigation / dynamic content changes
     const onResize = () => lenis.resize();
