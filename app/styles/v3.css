@@ -1306,6 +1306,13 @@ dialog.v3.mo-player,.mo-player>iframe{background:#000}
    you scroll the work (Julian, 2026-10-27). */
 .v3 #p-work .wtools{position:sticky;top:calc(max(14px,env(safe-area-inset-top,0px)) + 47px);z-index:5;background:var(--bg)}
 @media (max-width:700px){.v3 #p-work .wtools{top:calc(max(14px,env(safe-area-inset-top,0px)) + 59px)}}
+/* Scrolling down tucks the header and the search bar rides up to the top; scrolling up brings
+   the header back and the two read as one bar: the same solid ground edge to edge, one rule
+   between them (chrome.tsx sets data-pf and data-tuck). */
+:root[data-pf] .v3 .site-hdr{background:var(--bg);-webkit-backdrop-filter:none;backdrop-filter:none;border-bottom-color:transparent}
+.v3 #p-work .wtools{transition:top .25s ease;box-shadow:0 0 0 100vmax var(--bg);clip-path:inset(0 -100vmax)}
+:root[data-tuck] .v3 #p-work .wtools{top:env(safe-area-inset-top,0px)}
+@media (prefers-reduced-motion:reduce){.v3 #p-work .wtools{transition:none}}
 /* Credits: a person's avatar comes in beside their @handle on hover, and
    is always there on a phone. The handle opens their Instagram in a new tab. */
 .v3 .sv-row li a{display:inline-flex;align-items:center;justify-content:flex-end;width:auto}
