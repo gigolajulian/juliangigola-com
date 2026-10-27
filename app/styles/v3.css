@@ -285,6 +285,7 @@ html[data-sb]{scrollbar-width:none}html[data-sb]::-webkit-scrollbar{display:none
 .v3 .wframes>.wt{--cw:calc((100cqw - 36px)/4)}
 .v3 .wframes .ph{aspect-ratio:auto;height:calc(var(--cw)*1.25)}
 .v3 .wframes .wide{grid-column:span 2}
+.v3 .wframes.square .ph{height:var(--cw)}
 @media (max-width:1000px){.v3 .wframes>.wt{--cw:calc((100cqw - 24px)/3)}}
 @media (max-width:700px){.v3 .wframes>.wt{--cw:calc((100cqw - 10px)/2)}}
 .v3 .about{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:clamp(40px,5vw,96px) clamp(24px,4vw,72px);padding:96px var(--gr) 72px var(--g);align-items:start}
@@ -1234,4 +1235,49 @@ dialog.v3.mo-player,.mo-player>iframe{background:#000}
       transform: scale(1);
     }
   }
+}
+/* Cover Art sleeves (`components/v3/sleeves.tsx`, ?sleeve=1). The record
+   slides out of the sleeve on hover and tucks under its neighbour; the
+   viewer turns the sleeve over. Vinyl is black in both themes. */
+.slv{--vinyl:oklch(0.13 0 0);--groove:oklch(0.18 0 0);list-style:none;margin:48px 0 0;padding:0 var(--gr) 0 var(--g);display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:28px 12px;overflow-x:clip}
+@media (max-width:700px){.slv{grid-template-columns:repeat(2,minmax(0,1fr));gap:20px 10px}}
+.slv li{position:relative;display:grid;gap:10px;min-width:0}
+/* The hovered sleeve's record comes out over its neighbour, not under it. */
+.slv li:hover,.slv li:focus-within{z-index:2}
+.slv-s{all:unset;position:relative;display:block;aspect-ratio:1;cursor:pointer}
+.slv-s:focus-visible{outline:1px solid var(--accent);outline-offset:4px}
+.slv-s img{z-index:1;object-fit:cover;box-shadow:0 0 0 1px var(--line)}
+.slv-d{position:absolute;inset:3%;border-radius:50%;transition:transform .5s cubic-bezier(.2,.7,.2,1);background:radial-gradient(circle,var(--lb,var(--card)) 0 17%,var(--vinyl) 17.5% 19%,transparent 19%),repeating-radial-gradient(circle,var(--groove) 0 1px,var(--vinyl) 1px 3px)}
+.slv-d::after{content:"";position:absolute;inset:48.6%;border-radius:50%;background:var(--bg)}
+@media (hover:hover){.slv-s:hover .slv-d,.slv-s:focus-visible .slv-d{transform:translateX(18%)}}
+.slv-c{display:flex;justify-content:space-between;gap:8px;margin:0;min-width:0}
+.slv-c span:first-child{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.slv-v{position:fixed;inset:0;width:100%;height:100%;max-width:none;max-height:none;margin:0;border:0;padding:max(18px,env(safe-area-inset-top,0px)) var(--gr) max(22px,env(safe-area-inset-bottom,0px)) var(--g);background:var(--bg);color:var(--ink);font:400 14px/1.6 var(--mono)}
+.slv-v[open]{display:grid;grid-template-rows:auto minmax(0,1fr) auto;gap:16px}
+.slv-v::backdrop{background:var(--bg)}
+.slv-bar{display:flex;justify-content:space-between;align-items:center;gap:16px}
+.slv-btn{all:unset;cursor:pointer;padding:8px 2px;white-space:nowrap}
+@media (hover:hover){.slv-btn:hover{color:var(--accent)}}
+.slv-btn:focus-visible,.slv-card:focus-visible,.slv-ab button:focus-visible{outline:1px solid var(--accent);outline-offset:3px}
+.slv-stage{display:grid;place-items:center;min-height:0;perspective:1800px;touch-action:pan-y}
+.slv-card{all:unset;position:relative;display:block;width:min(100%,calc(100svh - 190px));aspect-ratio:1;transform-style:preserve-3d;transition:transform .6s cubic-bezier(.2,.7,.2,1);cursor:pointer}
+.slv-card.b{transform:rotateY(180deg)}
+.slv-f{position:absolute;inset:0;overflow:hidden;backface-visibility:hidden;-webkit-backface-visibility:hidden;box-shadow:0 0 0 1px var(--line)}
+.slv-f img{object-fit:cover}
+.slv-b{transform:rotateY(180deg)}
+.slv-t{position:absolute;inset:0;display:grid;grid-template-rows:auto 1fr auto;gap:6%;padding:7%;background:var(--card);color:var(--ink)}
+.slv-tt{display:flex;justify-content:space-between}
+.slv-t b{align-self:end;font:900 clamp(26px,min(6.4vw,6.4svh),64px)/.9 var(--display);letter-spacing:-.045em;text-wrap:balance}
+.slv-dl{display:grid;grid-template-columns:auto 1fr;gap:6px 18px;border-top:1px solid var(--line);padding-top:14px}
+.slv-dl span:nth-child(even){text-align:right}
+.slv-mid{display:grid;justify-items:center;gap:8px;min-width:0;text-align:center}
+.slv-ab{display:flex}
+.slv-ab button{all:unset;cursor:pointer;padding:6px 12px;border:1px solid var(--line);color:var(--mute)}
+.slv-ab button[aria-pressed="true"]{color:var(--ink);border-color:var(--ink)}
+@media (prefers-reduced-motion:reduce){
+  .slv-d{transition:none}
+  .slv-card{transition:none;transform:none!important}
+  .slv-f{transition:opacity .3s;backface-visibility:visible}
+  .slv-b{transform:none;opacity:0}
+  .slv-card.b .slv-b{opacity:1}.slv-card.b .slv-f:not(.slv-b){opacity:0}
 }
