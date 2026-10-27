@@ -472,7 +472,7 @@ export function V3Work({
         id="p-work"
       >
         <div className="pg-head">
-          <h1 className="pg-t">Portfolio</h1>
+          <h1 className="pg-t">{filter === "All" ? "Portfolio" : filter}</h1>
         </div>
         <div className="wtools lbl">
           <label className="wsearch">
