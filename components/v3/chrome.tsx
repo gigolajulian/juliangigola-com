@@ -216,11 +216,12 @@ function useDock(dock: boolean, past: boolean, hdr: React.RefObject<HTMLElement 
 function scrubFlag() {
   try {
     const q = location.search;
-    if (/[?&]flag=1/.test(q)) sessionStorage.setItem("jg-scrub", "1");
-    if (/[?&]flag=0/.test(q)) sessionStorage.removeItem("jg-scrub");
-    return sessionStorage.getItem("jg-scrub") === "1";
+    // On by default; ?flag=0 brings back the timed flight for the session.
+    if (/[?&]flag=0/.test(q)) sessionStorage.setItem("jg-scrub-off", "1");
+    if (/[?&]flag=1/.test(q)) sessionStorage.removeItem("jg-scrub-off");
+    return sessionStorage.getItem("jg-scrub-off") !== "1";
   } catch {
-    return false;
+    return true;
   }
 }
 
