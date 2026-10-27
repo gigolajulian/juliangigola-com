@@ -1,23 +1,14 @@
 {
-  "/work/lost-relic/cover.jpg": [
-    1080
-  ],
-  "/work/iris/cover.jpg": [
+  "/work/iris/01.jpg": [
+    640,
     1080
   ],
   "/work/iris/08.jpg": [
     640,
     1080
   ],
-  "/work/iris/07.jpg": [
-    640,
-    1080
-  ],
   "/work/iris/02.jpg": [
     640,
-    1080
-  ],
-  "/work/novocaine/cover.jpg": [
     1080
   ],
   "/work/paradox/cover.jpg": [
@@ -47,15 +38,6 @@
     640,
     1080
   ],
-  "/work/aether/cover.jpg": [
-    1080
-  ],
-  "/work/automotive/cover.jpg": [
-    1080
-  ],
-  "/work/byte-me/cover.jpg": [
-    1080
-  ],
   "/work/crave/cover.jpg": [
     1080
   ],
@@ -63,9 +45,6 @@
     1080
   ],
   "/work/cyberscape/cover.jpg": [
-    1080
-  ],
-  "/work/dark-matter/cover.jpg": [
     1080
   ],
   "/work/dystopia/cover.jpg": [
@@ -103,7 +82,7 @@
     640,
     1080
   ],
-  "/work/i-wanna-be-a-human/04.jpg": [
+  "/work/i-wanna-be-a-human/06.jpg": [
     640,
     1080
   ],
@@ -122,11 +101,11 @@
   "/work/liminal/cover.jpg": [
     1080
   ],
-  "/work/liminal/02.jpg": [
+  "/work/liminal/03.jpg": [
     640,
     1080
   ],
-  "/work/liminal/03.jpg": [
+  "/work/liminal/06.jpg": [
     640,
     1080
   ],
@@ -135,15 +114,6 @@
     1080
   ],
   "/work/luna/cover.jpg": [
-    1080
-  ],
-  "/work/lustro/cover.jpg": [
-    1080
-  ],
-  "/work/luxe-meets-future/cover.jpg": [
-    1080
-  ],
-  "/work/metamorphosis/cover.jpg": [
     1080
   ],
   "/work/mya/cover.jpg": [
@@ -155,19 +125,17 @@
   "/work/obscura/cover.jpg": [
     1080
   ],
-  "/work/places/cover.jpg": [
-    1080
-  ],
   "/work/retro-reverie-vol-01/cover.jpg": [
     1080
   ],
   "/work/rouge/cover.jpg": [
     1080
   ],
-  "/work/sage/cover.jpg": [
+  "/work/sago/cover.jpg": [
     1080
   ],
-  "/work/sago/cover.jpg": [
+  "/work/sago/05.jpg": [
+    640,
     1080
   ],
   "/work/sago/02.jpg": [
@@ -175,10 +143,6 @@
     1080
   ],
   "/work/sago/03.jpg": [
-    640,
-    1080
-  ],
-  "/work/sago/04.jpg": [
     640,
     1080
   ],
@@ -197,25 +161,7 @@
   "/work/steampunk-files-001/cover.jpg": [
     1080
   ],
-  "/work/stratus-lookbook-vol-1/cover.jpg": [
-    1080
-  ],
-  "/work/taneka/cover.jpg": [
-    1080
-  ],
   "/work/the-den-talkshow/cover.jpg": [
-    1080
-  ],
-  "/work/the-den-talkshow/02.jpg": [
-    640,
-    1080
-  ],
-  "/work/the-den-talkshow/03.jpg": [
-    640,
-    1080
-  ],
-  "/work/the-den-talkshow/04.jpg": [
-    640,
     1080
   ],
   "/work/totem/cover.jpg": [
@@ -230,46 +176,41 @@
   "/work/ukiyosunknown/cover.jpg": [
     1080
   ],
-  "/work/ukiyosunknown/02.jpg": [
+  "/work/ukiyosunknown/03.jpg": [
     640,
     1080
   ],
-  "/work/ukiyosunknown/03.jpg": [
+  "/work/ukiyosunknown/06.jpg": [
+    640,
+    1080
+  ],
+  "/work/ukiyosunknown/02.jpg": [
     640,
     1080
   ],
   "/work/urban-reverie/cover.jpg": [
     1080
   ],
-  "/work/valgur/01.jpg": [
-    640,
-    1080
-  ],
-  "/work/valgur/03.jpg": [
-    640,
-    1080
-  ],
   "/work/valgur/04.jpg": [
     640,
     1080
   ],
-  "/work/vendetta/cover.jpg": [
+  "/work/valgur/06.jpg": [
+    640,
     1080
   ],
-  "/work/vines-roses/cover.jpg": [
+  "/work/valgur/08.jpg": [
+    640,
     1080
   ],
   "/work/weddings/cover.jpg": [
     1080
   ],
-  "/work/wired-magazine/cover.jpg": [
-    1080
-  ],
-  "/work/wired-magazine/02.jpg": [
+  "/work/wired-magazine/14.jpg": [
     640,
     1080
   ],
-  "/work/wired-magazine/03.jpg": [
+  "/work/wired-magazine/01.jpg": [
     640,
     1080
   ],
@@ -289,9 +230,6 @@
     640,
     1080
   ],
-  "/work/zoe/cover.jpg": [
-    1080
-  ],
   "/work/ghostlight/cover.jpg": [
     1080
   ],
@@ -305,6 +243,18 @@
     1080
   ],
   "/work/azure-bloom/cover.jpg": [
+    1080
+  ],
+  "/work/azure-bloom/16.jpg": [
+    640,
+    1080
+  ],
+  "/work/azure-bloom/02.jpg": [
+    640,
+    1080
+  ],
+  "/work/azure-bloom/10.jpg": [
+    640,
     1080
   ],
   "/work/channel-orange/cover.jpg": [
@@ -338,6 +288,78 @@
     1080
   ],
   "/work/nova/cover-06.jpg": [
+    1080
+  ],
+  "/work/future-noir/cover.jpg": [
+    1080
+  ],
+  "/work/vile/cover.jpg": [
+    1080
+  ],
+  "/work/fleece/cover.jpg": [
+    1080
+  ],
+  "/work/flux-form/cover.jpg": [
+    1080
+  ],
+  "/work/redtide/cover.jpg": [
+    1080
+  ],
+  "/work/noct/cover.jpg": [
+    1080
+  ],
+  "/work/shred/cover.jpg": [
+    1080
+  ],
+  "/work/distortion-zone/cover.jpg": [
+    1080
+  ],
+  "/work/vacancy/cover.jpg": [
+    1080
+  ],
+  "/work/sector-07/cover.jpg": [
+    1080
+  ],
+  "/work/laced/cover.jpg": [
+    1080
+  ],
+  "/work/omen/cover.jpg": [
+    1080
+  ],
+  "/work/celestica/cover.jpg": [
+    1080
+  ],
+  "/work/faerus-machina/cover.jpg": [
+    1080
+  ],
+  "/work/tonights-the-night/cover.jpg": [
+    1080
+  ],
+  "/work/celestial-duality/cover.jpg": [
+    1080
+  ],
+  "/work/andromeda/cover.jpg": [
+    1080
+  ],
+  "/work/retrovision/cover.jpg": [
+    1080
+  ],
+  "/work/glare/cover.jpg": [
+    1080
+  ],
+  "/work/gilt/cover.jpg": [
+    1080
+  ],
+  "/work/industrial-zone/cover.jpg": [
+    1080
+  ],
+  "/work/shattered-mercury/cover.jpg": [
+    1080
+  ],
+  "/work/reconstructed/cover.jpg": [
+    1080
+  ],
+  "/work/glyph/cover.jpg": [
     1080
   ]
 }
