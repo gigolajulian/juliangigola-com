@@ -42,7 +42,7 @@ const FRAMES = Object.fromEntries(
   CATEGORIES.filter((c) => FRAME_CHIPS.includes(c.slug)).map((c) => [
     categoryLabel(c),
     WORK_PROJECTS.filter((p) => p.categories.some((k) => k.slug === c.slug)).flatMap((p) =>
-      p.images.map((f) => ({ s: p.slug, src: f.src, alt: f.alt ?? p.name, wide: f.width > f.height * 1.05 })),
+      p.images.map((f) => ({ s: p.slug, src: f.src, alt: f.alt ?? p.name, wide: f.width > f.height * 1.05, sq: Math.abs(f.width / f.height - 1) < 0.02 })),
     ),
   ]),
 );

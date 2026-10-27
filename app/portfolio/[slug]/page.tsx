@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { CoverArtGallery } from "@/components/cover-art-gallery";
+import { CoverArt } from "@/components/v3/sleeves";
 import { CallToAction } from "@/components/call-to-action";
 import { SESSION_SEO } from "@/lib/seo";
 import { V3Project } from "@/components/v3/project";
@@ -147,7 +147,7 @@ export default async function ProjectPage(props: PageProps<"/portfolio/[slug]">)
             {COVER_RELEASES.length} releases
           </p>
         </header>
-        <CoverArtGallery releases={COVER_RELEASES} />
+        <CoverArt releases={COVER_RELEASES} />
         <CallToAction
           className="mt-24"
           title="Want something like this?"
