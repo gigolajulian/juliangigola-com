@@ -94,7 +94,7 @@ function Tile({ p, swatch, first }: { p: WorkItem; swatch?: string[]; first?: bo
   );
 }
 
-export type FrameItem = { s: string; src: string; alt: string; wide: boolean };
+export type FrameItem = { s: string; src: string; alt: string; wide: boolean; sq: boolean };
 const WIDE_SIZES = "(max-width: 700px) 100vw, (max-width: 1000px) 66vw, 50vw";
 
 function FrameTile({ f, first }: { f: FrameItem; first?: boolean }) {
@@ -561,7 +561,7 @@ export function V3Work({
           {q ? `${plural(list.length)} matching “${q}”` : shown ? `${shown.length} frames` : plural(list.length)}
         </p>
         {view === "grid" && shown ? (
-          <div className="wgrid wframes">
+          <div className={shown.every((f) => f.sq) ? "wgrid wframes square" : "wgrid wframes"}>
             {shown.map((f, n) => (
               <FrameTile key={f.src} f={f} first={n < 12} />
             ))}
