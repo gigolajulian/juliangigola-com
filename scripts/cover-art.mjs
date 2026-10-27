@@ -108,7 +108,6 @@ const RELEASES = [
     // the one input that has to survive a fresh clone.
     sides: [{ file: "scripts/sources/in-the-hoodie-on-your-sleeve.jpg" }],
   },
-  { title: "Westside Shawty", artist: "BANX", sides: [{ file: "WESTSIDE SHAWTY-BANxx copy 3d@3 (Custom).png" }] },
 ];
 
 const slugify = (s) =>
