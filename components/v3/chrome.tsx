@@ -344,26 +344,7 @@ export function V3Header() {
   const flag = React.useSyncExternalStore(noop, scrubFlag, () => false);
   const scrub = useScrub(dock && flag, hdr, setLanded);
   useDock(dock && !scrub, past, hdr, setLanded);
-  /* Portfolio: the header steps away while you scroll down into the work
-     and comes back on the way up (Julian). */
-  const tucks = path.startsWith("/portfolio");
-  const [tuck, setTuck] = React.useState(false);
-  React.useEffect(() => {
-    if (!tucks) return;
-    let last = scrollY;
-    const sync = () => {
-      const y = scrollY, d = y - last;
-      if (Math.abs(d) < 6) return;
-      setTuck(d > 0 && y > 80);
-      last = y;
-    };
-    addEventListener("scroll", sync, { passive: true });
-    return () => {
-      removeEventListener("scroll", sync);
-      setTuck(false);
-    };
-  }, [tucks, path]);
-  const show = (!home || past) && !(tucks && tuck);
+  const show = !home || past;
   const [menu, setMenu] = React.useState(false);
   /* A route change closes it. */
   const [was, setWas] = React.useState(path);

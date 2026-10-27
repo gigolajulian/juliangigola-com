@@ -1281,6 +1281,10 @@ dialog.v3.mo-player,.mo-player>iframe{background:#000}
   .slv-b{transform:none;opacity:0}
   .slv-card.b .slv-b{opacity:1}.slv-card.b .slv-f:not(.slv-b){opacity:0}
 }
+/* Portfolio: the search and view buttons stay pinned under the header while
+   you scroll the work (Julian, 2026-10-27). */
+.v3 #p-work .wtools{position:sticky;top:calc(max(14px,env(safe-area-inset-top,0px)) + 47px);z-index:5;background:var(--bg)}
+@media (max-width:700px){.v3 #p-work .wtools{top:calc(max(14px,env(safe-area-inset-top,0px)) + 59px)}}
 /* Credits: a person's avatar comes in beside their @handle on hover, and
    is always there on a phone. The handle opens their Instagram in a new tab. */
 .v3 .sv-row li a{display:inline-flex;align-items:center;justify-content:flex-end;width:auto}
