@@ -77,7 +77,8 @@ export const PROJECTS: Project[] = [
     "credits": [
       {
         "role": "In frame",
-        "name": "@0414lei"
+        "name": "Leila",
+        "instagram": "0414lei"
       },
       {
         "role": "Photo",
@@ -165,11 +166,13 @@ export const PROJECTS: Project[] = [
     "credits": [
       {
         "role": "In frame",
-        "name": "@0414lei"
+        "name": "Leila",
+        "instagram": "0414lei"
       },
       {
         "role": "Styling",
-        "name": "@leena_kema"
+        "name": "Leena Kema",
+        "instagram": "leena_kema"
       },
       {
         "role": "Photo",
@@ -177,7 +180,8 @@ export const PROJECTS: Project[] = [
       },
       {
         "role": "Wardrobe",
-        "name": "@starcasevintage"
+        "name": "Starcase Vintage",
+        "instagram": "starcasevintage"
       }
     ],
     "categories": [
@@ -286,7 +290,8 @@ export const PROJECTS: Project[] = [
       },
       {
         "role": "Model",
-        "name": "Abril"
+        "name": "Abril Alvarez",
+        "instagram": "abril.alvz"
       }
     ],
     "categories": [
@@ -346,7 +351,8 @@ export const PROJECTS: Project[] = [
       },
       {
         "role": "Model",
-        "name": "@justjustiris"
+        "name": "Iris Zhangy",
+        "instagram": "iriszhangy"
       }
     ],
     "categories": [
@@ -683,7 +689,8 @@ export const PROJECTS: Project[] = [
       },
       {
         "role": "Model",
-        "name": "@anisajadee"
+        "name": "Anisa Jadee",
+        "instagram": "anisajadee"
       }
     ],
     "categories": [
@@ -859,7 +866,8 @@ export const PROJECTS: Project[] = [
       },
       {
         "role": "MUA & Styling",
-        "name": "@amana_mana11"
+        "name": "Brie Amana",
+        "instagram": "amana_mana11"
       }
     ],
     "categories": [
@@ -1042,7 +1050,8 @@ export const PROJECTS: Project[] = [
       },
       {
         "role": "Model",
-        "name": "@anisajadee"
+        "name": "Anisa Jadee",
+        "instagram": "anisajadee"
       }
     ],
     "categories": [
@@ -1239,7 +1248,8 @@ export const PROJECTS: Project[] = [
       },
       {
         "role": "Model",
-        "name": "@kniiivess"
+        "name": "kniiivess",
+        "instagram": "kniiivess"
       }
     ],
     "categories": [
@@ -1401,7 +1411,8 @@ export const PROJECTS: Project[] = [
       },
       {
         "role": "Model",
-        "name": "@kissedbyconstance"
+        "name": "Constance",
+        "instagram": "kissedbyconstance"
       }
     ],
     "categories": [
@@ -4501,7 +4512,8 @@ export const PROJECTS: Project[] = [
     "credits": [
       {
         "role": "Stylist",
-        "name": "@stylingbylydia"
+        "name": "Lydia Mikulka",
+        "instagram": "stylingbylydia"
       },
       {
         "role": "Model",
@@ -4513,7 +4525,8 @@ export const PROJECTS: Project[] = [
       },
       {
         "role": "Lighting",
-        "name": "@thisguysdope_disguise"
+        "name": "Seydina Seck",
+        "instagram": "thisguysdope_disguise"
       },
       {
         "role": "BTS",
@@ -7050,7 +7063,7 @@ export const PROJECTS: Project[] = [
   },
   {
     "slug": "ukiyosunknown",
-    "name": "UKIYOSUNKNOWN",
+    "name": "ukiyosunknown",
     "headline": null,
     "intent": null,
     "credits": [],
@@ -7770,7 +7783,8 @@ export const PROJECTS: Project[] = [
       },
       {
         "role": "Client",
-        "name": "WIRED"
+        "name": "Wired",
+        "instagram": "wired"
       }
     ],
     "categories": [
