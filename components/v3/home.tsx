@@ -36,7 +36,7 @@ function Hero() {
       <div className="foot">
         <div>
           <h1>Julian Gigola</h1>
-          <div className="lbl">Photographer and creative director | San Francisco Bay Area</div>
+          <div className="lbl">Photographer and creative director<span className="lbl-sep"> | </span><span className="lbl-place">San Francisco Bay Area</span></div>
         </div>
         <div className="right">
           <div className="lbl" style={{ display: "flex", gap: 14, alignItems: "center" }}>
