@@ -2,7 +2,6 @@ import type { MetadataRoute } from "next";
 import {
   PROJECTS,
   WORK_CATEGORY_LINKS,
-  LISTINGS,
   COMMISSIONS,
   COVER_ART,
   FEATURED,
@@ -107,7 +106,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
     // ("bay area music video director" is the search it answers). The other
     // one-gallery disciplines arrive below as projects, because that is what
     // they are.
-    (c) => c.filter,
+    // The discipline pages are retired (2026-10-27); Video is the one left.
+    (c) => c.slug === "video",
   ).map((c) => {
     const gallery = galleryOf(c.slug);
     return {
@@ -129,10 +129,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     };
   });
 
-  // Once each: where a discipline shares its slug with its one gallery
-  // (Automotive, Events, Places), the address is the discipline's above.
-  const listed = new Set(LISTINGS.map((c) => c.slug));
-  const projects = PROJECTS.filter((p) => !listed.has(p.slug)).map((p) => ({
+  const projects = PROJECTS.map((p) => ({
     url: `${SITE}/portfolio/${p.slug}`,
     ...showing([p.cover, ...p.images]),
     changeFrequency: "yearly" as const,

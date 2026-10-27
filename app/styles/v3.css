@@ -277,6 +277,14 @@ html[data-sb]{scrollbar-width:none}html[data-sb]::-webkit-scrollbar{display:none
 @media (max-width:1000px){.v3 .wgrid{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media (max-width:700px){.v3 .wgrid{grid-template-columns:repeat(2,minmax(0,1fr));gap:20px 10px}
 .v3 .wt figcaption{flex-direction:column;gap:2px}}
+/* A gallery chip's frames (Automotive, Places…): every cell one height, a
+   horizontal frame two columns wide at that height, so the rows stay even. */
+.v3 .wframes{container-type:inline-size;grid-auto-flow:dense}
+.v3 .wframes>.wt{--cw:calc((100cqw - 36px)/4)}
+.v3 .wframes .ph{aspect-ratio:auto;height:calc(var(--cw)*1.25)}
+.v3 .wframes .wide{grid-column:span 2}
+@media (max-width:1000px){.v3 .wframes>.wt{--cw:calc((100cqw - 24px)/3)}}
+@media (max-width:700px){.v3 .wframes>.wt{--cw:calc((100cqw - 10px)/2)}}
 .v3 .about{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:clamp(40px,5vw,96px) clamp(24px,4vw,72px);padding:96px var(--gr) 72px var(--g);align-items:start}
 .v3 .ab-top{grid-column:1/-1;display:flex;flex-direction:column;gap:20px}
 .v3 .ab-say{white-space:nowrap}
