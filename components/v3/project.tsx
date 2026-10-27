@@ -11,6 +11,12 @@ import type { Frame, Project } from "@/lib/work-types";
 
 const wide = (f: Frame) => f.width > f.height;
 
+/* A client or brand is credited by its name, never "@wired" (Julian,
+   2026-10-27); people keep their @handle. Still links to the Instagram. */
+const ORG = /^(client|brand)$/i;
+const creditLabel = (c: Project["credits"][number]) =>
+  ORG.test(c.role.trim()) ? c.name.replace(/^@/, "") : c.instagram ? `@${c.instagram}` : c.name;
+
 /** The rest of a set in the magazine rhythm: a horizontal full width, two
     verticals side by side, a lone vertical offset left or right in turn. */
 function rhythm(frames: Frame[]) {
@@ -93,7 +99,7 @@ export function V3Project({ project, next }: { project: Project; next?: { href: 
               {project.credits.map((c) => (
                 <li key={`${c.role}${c.name}`}>
                   <span className="mute">{c.role}</span>
-                  <b>{c.instagram ? <a href={`https://instagram.com/${c.instagram}`}>@{c.instagram}</a> : c.name}</b>
+                  <b>{c.instagram ? <a href={`https://instagram.com/${c.instagram}`}>{creditLabel(c)}</a> : creditLabel(c)}</b>
                 </li>
               ))}
             </ul>
