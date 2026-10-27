@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Mark } from "@/components/v3/duo";
 import { billing, markFor, titleCase } from "@/lib/work";
+import { tailHole } from "@/lib/sheet";
 import type { Frame, Project } from "@/lib/work-types";
 
 /* JG V3 project page (leftovers sheet, card B; Julian: vertical, with the
@@ -11,19 +12,22 @@ import type { Frame, Project } from "@/lib/work-types";
 
 const wide = (f: Frame) => f.width > f.height;
 
-/** The rest of a set in the magazine rhythm: a horizontal full width, two
-    verticals side by side, a lone vertical offset left or right in turn. */
-function rhythm(frames: Frame[]) {
-  const rows: ({ k: "wide"; f: Frame } | { k: "pair"; a: Frame; b: Frame } | { k: "one"; f: Frame; right: boolean })[] = [];
-  let side = false;
-  for (let i = 0; i < frames.length; i++) {
-    const f = frames[i];
-    if (wide(f)) rows.push({ k: "wide", f });
-    else if (frames[i + 1] && !wide(frames[i + 1])) rows.push({ k: "pair", a: f, b: frames[++i] });
-    else rows.push({ k: "one", f, right: (side = !side) });
-  }
-  return rows;
-}
+/* A client or brand is credited by its name, never "@wired" (Julian,
+   2026-10-27); people keep their @handle. Still links to the Instagram. */
+const ORG = /^(client|brand)$/i;
+type Credit = Project["credits"][number];
+/* The handle: the Instagram field, else one typed into the name
+   ("@anisajadee", "Ryan Ohaya (@carti.kun)"), else Julian's own. */
+const handleOf = (c: Credit) =>
+  c.instagram ?? c.name.match(/@([\w.]+)/)?.[1] ?? (/^julian gigola$/i.test(c.name.trim()) ? "juliangigola" : null);
+/* The name leads (Julian, 2026-10-27); the @handle takes its place on hover.
+   A name typed as only a handle has no name to lead with. */
+const nameOf = (c: Credit) => {
+  const n = c.name.replace(/\s*\(@[\w.]+\)/, "").trim();
+  return n.startsWith("@") ? null : n;
+};
+const creditLabel = (c: Credit, h: string | null) =>
+  ORG.test(c.role.trim()) ? c.name.replace(/^@/, "") : (nameOf(c) ?? (h ? `@${h}` : c.name));
 
 export function V3Project({ project, next }: { project: Project; next?: { href: string; name: string; cover?: Frame } }) {
   const mark = markFor(project.slug);
@@ -40,6 +44,47 @@ export function V3Project({ project, next }: { project: Project; next?: { href: 
   const rest = imgs.filter((f) => f !== big && !lead.includes(f));
   const pic = (f: Frame, sizes: string, priority = false) => (
     <Image src={f.src} alt={alt(f.alt)} width={f.width} height={f.height} sizes={sizes} priority={priority} style={{ background: f.color }} />
+  );
+  /* The credits fill the cells the sheet's last row leaves empty, when they fit there
+     (up to six names, one a line); else they keep their own row under it. */
+  const tail = tailHole(rest);
+  const hole = tail && project.credits.length && project.credits.length <= 6 ? tail : null;
+  const credits = (
+    <section className="sv-row">
+      <h2 className="lbl mute">Credits</h2>
+      <ul>
+        {project.credits.map((c) => {
+          const h = handleOf(c);
+          const label = creditLabel(c, h);
+          const av = c.avatar ?? (h === "juliangigola" ? "/people/juliangigola.jpg" : null);
+          return (
+            <li key={`${c.role}${c.name}`}>
+              <span className="mute">{c.role}</span>
+              <b>
+                {h ? (
+                  <a href={`https://instagram.com/${h}`} target="_blank" rel="noopener noreferrer">
+                    {/* Their avatar, on hover (always on a phone); the initial where there is none. */}
+                    <span className="cr-av" aria-hidden="true">
+                      {av ? <Image src={av} alt="" fill sizes="28px" /> : label.replace(/^@/, "")[0]}
+                    </span>
+                    {label === `@${h}` || ORG.test(c.role.trim()) ? (
+                      label
+                    ) : (
+                      <>
+                        <span className="cr-n">{label}</span>
+                        <span className="cr-h">@{h}</span>
+                      </>
+                    )}
+                  </a>
+                ) : (
+                  label
+                )}
+              </b>
+            </li>
+          );
+        })}
+      </ul>
+    </section>
   );
   return (
     <div className="v3 contents">
@@ -72,32 +117,21 @@ export function V3Project({ project, next }: { project: Project; next?: { href: 
             </div>
           ) : null}
         </div>
+        {/* The rest as a contact sheet (Julian, 2026-10-27): even rows of three, a horizontal takes two cells. */}
         <div className="pj-flow">
-          {rhythm(rest).map((r) =>
-            r.k === "wide" ? (
-              <figure key={r.f.src} className="pj-r w">{pic(r.f, "100vw")}</figure>
-            ) : r.k === "pair" ? (
-              <div key={r.a.src} className="pj-pair">
-                <figure className="pj-r">{pic(r.a, "(max-width: 700px) 100vw, 50vw")}</figure>
-                <figure className="pj-r">{pic(r.b, "(max-width: 700px) 100vw, 50vw")}</figure>
-              </div>
-            ) : (
-              <figure key={r.f.src} className={r.right ? "pj-r one r" : "pj-r one"}>{pic(r.f, "(max-width: 700px) 100vw, 42vw")}</figure>
-            ),
-          )}
+          {rest.map((f) => (
+            <figure key={f.src} className={wide(f) ? "pj-r w" : "pj-r"}>
+              {pic(f, wide(f) ? "(max-width: 700px) 100vw, 66vw" : "(max-width: 700px) 100vw, 33vw")}
+            </figure>
+          ))}
+          {hole ? (
+            <div className="pj-cr" style={{ "--row": hole.row, "--col": hole.col, "--span": hole.span } as React.CSSProperties}>
+              {credits}
+            </div>
+          ) : null}
         </div>
         <div className="sv-info">
-          <section className="sv-row">
-            <h2 className="lbl mute">Credits</h2>
-            <ul>
-              {project.credits.map((c) => (
-                <li key={`${c.role}${c.name}`}>
-                  <span className="mute">{c.role}</span>
-                  <b>{c.instagram ? <a href={`https://instagram.com/${c.instagram}`}>@{c.instagram}</a> : c.name}</b>
-                </li>
-              ))}
-            </ul>
-          </section>
+          {hole ? null : credits}
           {next ? (
             <Link className="pj-next" href={next.href}>
               <span className="lbl mute">Next</span>

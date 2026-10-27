@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { usePathname } from "next/navigation";
+import { scrollTop } from "@/components/v3/smooth-scroll";
 
 /* Page opening A (mock https://claude.ai/artifact/6Nbep18kL572cWznUuA66K):
    the photo you click grows into the next page's hero. Any link, or a row
@@ -44,7 +45,7 @@ export function PageFly() {
     /* A link opens the next page at its top, flag or not: the V3 pages sit in
        a `display: contents` wrapper whose empty box Next reads as already in
        view, so it kept the old scroll. Back and forward keep theirs. */
-    if (pushed.current === path) scrollTo(0, 0);
+    if (pushed.current === path) scrollTop();
     pushed.current = null;
     const f = fly.current;
     if (!f || f.to !== path || Date.now() - f.t > 4000) return;
