@@ -100,6 +100,8 @@ html[data-sb]{scrollbar-width:none}html[data-sb]::-webkit-scrollbar{display:none
 .v3 .mq{touch-action:pan-y;cursor:grab;user-select:none;-webkit-user-select:none}
 .v3 .mq:active{cursor:grabbing}
 .v3 .mq img,.v3 .mq svg{-webkit-user-drag:none;pointer-events:none}
+.v3 .mq-track a{display:flex;-webkit-user-drag:none}
+.v3 .mq-track a:hover .mk{color:var(--ink)}
 @media (max-width:700px){.v3 .clients{flex-direction:column;align-items:flex-start}
 .v3 .mq{width:100%}
 .v3 .mq-track{gap:56px;padding-right:56px}}
@@ -147,14 +149,16 @@ html[data-sb]{scrollbar-width:none}html[data-sb]::-webkit-scrollbar{display:none
 .v3 .tabs-bar{position:relative;height:1px;margin:8px var(--gr) 0 var(--g);background:var(--line)}
 .v3 .tabs-bar[hidden]{display:none}
 .v3 .tabs-bar i{position:absolute;top:-1px;left:0;height:3px;background:var(--ink);opacity:.6}
-.v3 .tabs span{padding-bottom:10px;white-space:nowrap;color:var(--mute)}
-.v3 .tabs span.on{color:var(--ink);box-shadow:inset 0 -2px var(--accent)}
+.v3 .tabs a{padding-bottom:10px;white-space:nowrap;color:var(--mute)}
+.v3 .tabs a:hover{color:var(--ink)}
+.v3 .tabs a.on{color:var(--ink);box-shadow:inset 0 -2px var(--accent)}
 .v3 .b-head{display:flex;justify-content:space-between;align-items:end;gap:16px;flex-wrap:wrap;padding:80px var(--gr) 0 var(--g)}
 .v3 .b-head h2{font:900 clamp(2.5rem,calc(6*var(--v3u)),5.5rem)/.9 var(--display);letter-spacing:-.05em}
 /* When the button wraps under the title on a phone it keeps to the right (Julian). */
 .v3 .b-head>.btn{margin-left:auto}
 .v3 .sheet{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:0;margin-top:20px}
 .v3 .sheet figure{margin:0;position:relative;aspect-ratio:4/5;background:var(--bg)}
+.v3 .sheet .tile{position:absolute;inset:0}
 .v3 .sheet figcaption{position:absolute;inset:auto 0 0;display:flex;justify-content:space-between;padding:10px 12px;background:linear-gradient(to top,oklch(0.1 0.003 70 / .7),transparent)}
 .v3 .sheet figure:first-child{grid-column:span 2;grid-row:span 2;aspect-ratio:auto}
 @media (max-width:700px){.v3 .sheet{grid-template-columns:repeat(2,minmax(0,1fr))}}
