@@ -370,7 +370,7 @@
       drop-shadow(-1px 0 0 var(--logo-edge)) drop-shadow(0 1px 0 var(--logo-edge))
       drop-shadow(0 -1px 0 var(--logo-edge));
     transition:
-      scale var(--dur-xl) var(--ease-bounce),
+      scale var(--dur-xl) var(--ease-spring),
       filter 450ms var(--ease-out-strong);
   }
 }
