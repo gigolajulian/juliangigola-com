@@ -1,7 +1,7 @@
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { ImageResponse } from "next/og";
-import sharp, { type Sharp } from "sharp";
+import type { Sharp } from "sharp";
 import framing from "@/lib/share-framing.json";
 import picks from "@/lib/share-picks.json";
 import type { Frame } from "@/lib/work-types";
@@ -19,6 +19,11 @@ const ACCENT = "#50b7b7";
 const WORDMARK = "Julian Gigola";
 const portrait = (f: Frame) => f.height > f.width;
 
+/* Loaded only when a card is drawn, at build. A page rendered per request on
+   the Worker (/book reads its query) still imports this file for its card's
+   size and alt, and sharp cannot load there: a top-level import took /book down. */
+const loadSharp = () => import("sharp").then((m) => m.default);
+
 /** The frames a card shows. The first of the pool is always one of them. */
 export const pickFrames = (pool: Frame[]): Frame[] => {
   const [first, ...rest] = pool;
@@ -35,6 +40,7 @@ const FRAMING = framing as Record<string, { x: number; y: number; z: number }>;
 /* Cropped to its slot at 1.5x with Lanczos, centred on the subject (from the top in a wide slot, where the face is), so the
    renderer never has to resample a 2500px photograph itself. */
 const dataUri = async (key: string, src: string, w: number, h: number): Promise<{ uri: string; x: number; y: number }> => {
+  const sharp = await loadSharp();
   const [tw, th] = [Math.round(w * 1.5), Math.round(h * 1.5)];
   const file = join(process.cwd(), "public", src);
   const jpeg = async (img: Sharp) => `data:image/jpeg;base64,${(await img.jpeg({ quality: 92, mozjpeg: true }).toBuffer()).toString("base64")}`;
@@ -84,6 +90,7 @@ const font = (name: string) => readFile(join(process.cwd(), "lib/og-fonts", name
 /** A client's mark from `assets/clients/`, as a light PNG for the dark panel,
     or null when it is not a transparent mark (a logo on its own tile). */
 export const clientMark = async (file: string): Promise<string | null> => {
+  const sharp = await loadSharp();
   const src = await readFile(join(process.cwd(), "assets/clients", file));
   const { data, info } = await sharp(src, { density: 300 }).trim().ensureAlpha().raw().toBuffer({ resolveWithObject: true });
   let min = 255, sum = 0, n = 0;
@@ -101,7 +108,7 @@ export const clientMark = async (file: string): Promise<string | null> => {
 /** Frames from public/ paths, sized from the files. */
 export const framesOf = (srcs: string[]) =>
   Promise.all(srcs.map(async (src) => {
-    const m = await sharp(join(process.cwd(), "public", src)).metadata();
+    const m = await (await loadSharp())(join(process.cwd(), "public", src)).metadata();
     return { src, width: m.width ?? 1, height: m.height ?? 1, alt: "", color: "#0b0b0a" };
   }));
 
