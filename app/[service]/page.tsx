@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { shareOg } from "@/lib/share";
 import { notFound } from "next/navigation";
 import { LdJson } from "@/components/local-screens";
 import { BOOKING_PAGES, bookingHref, bookingPage } from "@/lib/booking";
@@ -29,21 +30,11 @@ export async function generateMetadata(
   const { service } = await props.params;
   const page = bookingPage(service);
   if (!page) return {};
-  const cover = page.tiles[0]?.frame;
   return {
     title: page.title,
     description: page.description,
     alternates: { canonical: bookingHref(page) },
-    openGraph: {
-      title: page.title,
-      description: page.description,
-      ...(cover
-        ? { images: [{ url: cover.src, width: cover.width, height: cover.height, alt: page.h1 }] }
-        : {}),
-    },
-    ...(cover
-      ? { twitter: { card: "summary_large_image", images: [cover.src] } }
-      : {}),
+    ...shareOg(page.name, `${page.name} with Julian Gigola in the San Francisco Bay Area. ${page.rate}.`),
   };
 }
 

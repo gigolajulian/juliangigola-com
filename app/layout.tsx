@@ -94,30 +94,8 @@ export const metadata: Metadata = {
     /* No `url` here: set once at the root it was inherited by every page,
        so a shared /sessions link unfurled pointing at the homepage. The
        canonical on each page is the address. */
-    /* The home link card at 1200x630: a photo with "Julian Gigola" over it,
-     * framed and locked on the Link Card Locks page (2026-10-25), like the
-     * per-page cards in public/og/ (`lib/og.ts`).
-     *
-     * Nothing changes with the cover, so there is nothing to generate per
-     * deploy: `public/og.jpg` is a committed file. book.juliangigola.com
-     * uses the same card for its list page. */
-    images: [
-      {
-        url: "/og.jpg",
-        width: 1200,
-        height: 630,
-        alt: "Julian Gigola",
-      },
-    ],
   },
-  /* Named rather than inherited: Next fills `twitter:image` from the
-     `opengraph-image` *file convention* on its own, but not from an
-     `openGraph.images` written here — and a `summary_large_image` card with
-     no image unfurls as a blank slab with the title beside it. */
-  twitter: {
-    card: "summary_large_image",
-    images: ["/og.jpg"],
-  },
+  twitter: { card: "summary_large_image" },
   alternates: { canonical: "/" },
   // Bing Webmaster Tools ownership. Removing it unverifies the site there.
   verification: { other: { "msvalidate.01": "DEF796C06E3ACDCBF969BF1FF3E4EA6A" } },

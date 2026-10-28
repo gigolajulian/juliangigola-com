@@ -4579,7 +4579,7 @@
         "instagram": "rice666s"
       },
       {
-        "role": "3D Artist",
+        "role": "3D",
         "name": "Nikoo Sheybani",
         "instagram": "nikxdesigns"
       }
@@ -4598,7 +4598,12 @@
     ],
     "aera-wraith": [
       {
-        "role": "Creative Direction & Photography",
+        "role": "Creative direction",
+        "name": "Julian Gigola",
+        "instagram": "juliangigola"
+      },
+      {
+        "role": "Photographer",
         "name": "Julian Gigola",
         "instagram": "juliangigola"
       },
@@ -4608,7 +4613,7 @@
         "instagram": "rice666s"
       },
       {
-        "role": "3D Artist",
+        "role": "3D",
         "name": "Nikoo Sheybani",
         "instagram": "nikxdesigns"
       }
@@ -4638,7 +4643,12 @@
     ],
     "i-wanna-be-a-human": [
       {
-        "role": "Art Direction & Styling",
+        "role": "Art direction",
+        "name": "Henny Oh",
+        "instagram": "henny__oh"
+      },
+      {
+        "role": "Styling",
         "name": "Henny Oh",
         "instagram": "henny__oh"
       },
@@ -4703,7 +4713,12 @@
         "instagram": "juliangigola"
       },
       {
-        "role": "Makeup, Hair & Styling",
+        "role": "Styling",
+        "name": "Torrey Bernal",
+        "instagram": "meow.torrey"
+      },
+      {
+        "role": "Hair & makeup",
         "name": "Torrey Bernal",
         "instagram": "meow.torrey"
       },
@@ -4749,12 +4764,12 @@
         "instagram": "bad.juuju"
       },
       {
-        "role": "Brand",
+        "role": "Client",
         "name": "cyber1a.sf",
         "instagram": "cyber1a.sf"
       },
       {
-        "role": "Director",
+        "role": "Direction",
         "name": "Luke Lasley",
         "instagram": "lukelasley"
       },
@@ -4769,7 +4784,7 @@
         "instagram": "mind.of.carlos"
       },
       {
-        "role": "Assist",
+        "role": "Assistant",
         "name": "wu.sh0",
         "instagram": "wu.sh0"
       }
@@ -4822,7 +4837,7 @@
         "instagram": "draculina97"
       },
       {
-        "role": "Assist",
+        "role": "Assistant",
         "name": "Seanie Tsunami",
         "instagram": "seanietsunami300"
       }
@@ -4908,32 +4923,32 @@
         "instagram": "carolinethuyle"
       },
       {
-        "role": "Designer",
+        "role": "Design",
         "name": "by_vicious",
         "instagram": "by_vicious"
       },
       {
-        "role": "Designer",
+        "role": "Design",
         "name": "Vile Honey",
         "instagram": "vile.honey"
       },
       {
-        "role": "Hair",
+        "role": "Hair & makeup",
         "name": "Cassie Sanidad",
         "instagram": "cassieofalltrades"
       },
       {
-        "role": "Hair",
+        "role": "Hair & makeup",
         "name": "hoelihair",
         "instagram": "hoelihair"
       },
       {
-        "role": "Makeup",
+        "role": "Hair & makeup",
         "name": "Lilia Mercedes",
         "instagram": "lilia.mercedes"
       },
       {
-        "role": "Assist",
+        "role": "Assistant",
         "name": "euphotic_photography",
         "instagram": "euphotic_photography"
       },
@@ -4962,12 +4977,17 @@
         "instagram": "juliangigola"
       },
       {
-        "role": "Model & Stylist",
+        "role": "Model",
         "name": "Ryan Ohaya",
         "instagram": "carti.kun"
       },
       {
-        "role": "Brand",
+        "role": "Styling",
+        "name": "Ryan Ohaya",
+        "instagram": "carti.kun"
+      },
+      {
+        "role": "Client",
         "name": "Jubo",
         "instagram": "juboclothing"
       }
@@ -5032,22 +5052,27 @@
         "instagram": "carolinethuyle"
       },
       {
-        "role": "Designer",
+        "role": "Design",
         "name": "Haus of Puglielli",
         "instagram": "hausofpuglielli"
       },
       {
-        "role": "Hair",
+        "role": "Hair & makeup",
         "name": "Cassie Sanidad",
         "instagram": "cassieofalltrades"
       },
       {
-        "role": "Makeup",
+        "role": "Hair & makeup",
         "name": "kaleidopop",
         "instagram": "kaleidopop"
       },
       {
-        "role": "Assist & Second Shooter",
+        "role": "Assistant",
+        "name": "euphotic_photography",
+        "instagram": "euphotic_photography"
+      },
+      {
+        "role": "Second shooter",
         "name": "euphotic_photography",
         "instagram": "euphotic_photography"
       }
@@ -5083,12 +5108,17 @@
         "instagram": "juliangigola"
       },
       {
-        "role": "Model & Styling",
+        "role": "Model",
         "name": "Anya Fam",
         "instagram": "rice666s"
       },
       {
-        "role": "Mask Design",
+        "role": "Styling",
+        "name": "Anya Fam",
+        "instagram": "rice666s"
+      },
+      {
+        "role": "Mask design",
         "name": "Yuan Plygr3d",
         "instagram": "_plygr3d_"
       },
@@ -5140,17 +5170,17 @@
         "instagram": "juliangigola"
       },
       {
-        "role": "Talent",
+        "role": "Model",
         "name": "mypotnawill",
         "instagram": "mypotnawill"
       },
       {
-        "role": "Photo Assist",
+        "role": "Assistant",
         "name": "Sergio Urbina",
         "instagram": "sondersergio"
       },
       {
-        "role": "Photo Assist",
+        "role": "Assistant",
         "name": "Seydina Seck",
         "instagram": "thisguysdope_disguise"
       },
@@ -5210,7 +5240,7 @@
         "instagram": "juliangigola"
       },
       {
-        "role": "Stylist",
+        "role": "Styling",
         "name": "Khloe Farran",
         "instagram": "khloefarranstyling"
       },
@@ -5220,7 +5250,7 @@
         "instagram": "kenziecalvird"
       },
       {
-        "role": "Hair & Makeup",
+        "role": "Hair & makeup",
         "name": "Brie Amana",
         "instagram": "amana_mana11"
       }
@@ -5232,7 +5262,7 @@
         "instagram": "juliangigola"
       },
       {
-        "role": "Stylist",
+        "role": "Styling",
         "name": "Khloe Farran",
         "instagram": "khloefarranstyling"
       },
@@ -5242,7 +5272,7 @@
         "instagram": "kenziecalvird"
       },
       {
-        "role": "Hair & Makeup",
+        "role": "Hair & makeup",
         "name": "Brie Amana",
         "instagram": "amana_mana11"
       }
@@ -5259,7 +5289,7 @@
         "instagram": "annekeharmonica"
       },
       {
-        "role": "Projected Image",
+        "role": "Projected image",
         "name": "Jay Adams",
         "instagram": "jay_adams"
       }
@@ -5349,7 +5379,12 @@
         "instagram": "juliangigola"
       },
       {
-        "role": "Styling & Makeup",
+        "role": "Styling",
+        "name": "Torrey Bernal",
+        "instagram": "meow.torrey"
+      },
+      {
+        "role": "Hair & makeup",
         "name": "Torrey Bernal",
         "instagram": "meow.torrey"
       },
@@ -5438,7 +5473,12 @@
     ],
     "true-grit": [
       {
-        "role": "Creative Direction & Model",
+        "role": "Creative direction",
+        "name": "Mark Tsui",
+        "instagram": "lightbender_mark"
+      },
+      {
+        "role": "Model",
         "name": "Mark Tsui",
         "instagram": "lightbender_mark"
       },
@@ -5470,7 +5510,7 @@
         "instagram": "nxcoleramos"
       },
       {
-        "role": "Garments",
+        "role": "Wardrobe",
         "name": "ukiyosunknown",
         "instagram": "ukiyosunknown"
       }
@@ -5489,7 +5529,7 @@
     ],
     "valgur": [
       {
-        "role": "Creative Director",
+        "role": "Creative direction",
         "name": "frankie4fingers_",
         "instagram": "frankie4fingers_"
       },
@@ -5504,7 +5544,7 @@
         "instagram": "soyvalgur"
       },
       {
-        "role": "BTS Photographer",
+        "role": "BTS",
         "name": "Aracely Martinez",
         "instagram": "aramar.mp4"
       },
@@ -5519,17 +5559,16 @@
         "instagram": "phinite"
       },
       {
-        "role": "Key Grip",
+        "role": "Grip",
         "name": "Ryan Yen",
         "instagram": "ryen_20"
       },
       {
-        "role": "Art Director",
-        "name": "Shane Richard",
-        "instagram": ""
+        "role": "Art direction",
+        "name": "Shane Richard"
       },
       {
-        "role": "Hair & Makeup Artist",
+        "role": "Hair & makeup",
         "name": "Kali Lorenzo",
         "instagram": "kalilorenzomuha"
       },
@@ -5539,7 +5578,7 @@
         "instagram": "fr4nk.c0m"
       },
       {
-        "role": "CG Artist",
+        "role": "3D",
         "name": "Nikoo Sheybani",
         "instagram": "nikxdesigns"
       },
@@ -5554,7 +5593,7 @@
         "instagram": "steadimacho"
       },
       {
-        "role": "Poster Editor",
+        "role": "Poster editor",
         "name": "resting_swan",
         "instagram": "resting_swan"
       },
@@ -5607,7 +5646,7 @@
         "instagram": "sosorhea"
       },
       {
-        "role": "3D Artist",
+        "role": "3D",
         "name": "Nikoo Sheybani",
         "instagram": "nikxdesigns"
       }
@@ -5631,7 +5670,12 @@
         "instagram": "juliangigola"
       },
       {
-        "role": "MUA & Styling",
+        "role": "Styling",
+        "name": "Brie Amana",
+        "instagram": "amana_mana11"
+      },
+      {
+        "role": "Hair & makeup",
         "name": "Brie Amana",
         "instagram": "amana_mana11"
       },
@@ -5655,7 +5699,7 @@
     ],
     "diesel": [
       {
-        "role": "Creative Director",
+        "role": "Creative direction",
         "name": "Lynette",
         "instagram": "lyn3ett3"
       },
@@ -5665,12 +5709,12 @@
         "instagram": "juliangigola"
       },
       {
-        "role": "Lead Stylist",
+        "role": "Styling",
         "name": "Stefan Salazar",
         "instagram": "dumb_texan"
       },
       {
-        "role": "Stylist Assistant",
+        "role": "Styling assistant",
         "name": "Farida Atta",
         "instagram": "faridaxatta"
       },
@@ -5700,7 +5744,7 @@
         "instagram": "comradepiss"
       },
       {
-        "role": "Creative Producer",
+        "role": "Producer",
         "name": "Donovan Martel",
         "instagram": "donovan.martel"
       },
@@ -5715,17 +5759,22 @@
         "instagram": "phelleston"
       },
       {
-        "role": "1st AD & HMUA",
+        "role": "1st AD",
         "name": "laeliella",
         "instagram": "laeliella"
       },
       {
-        "role": "Art Director",
+        "role": "Hair & makeup",
+        "name": "laeliella",
+        "instagram": "laeliella"
+      },
+      {
+        "role": "Art direction",
         "name": "kianiixchel",
         "instagram": "kianiixchel"
       },
       {
-        "role": "Photo Assistant",
+        "role": "Assistant",
         "name": "Seydina Seck",
         "instagram": "thisguysdope_disguise"
       },
@@ -5772,7 +5821,7 @@
         "instagram": "educo.academy"
       },
       {
-        "role": "Assist",
+        "role": "Assistant",
         "name": "Andy Zertuche",
         "instagram": "zertuche.photography"
       }
@@ -5809,7 +5858,7 @@
         "name": "Julian Gigola"
       },
       {
-        "role": "Light Assist",
+        "role": "Lighting assistant",
         "name": "Mark Tsui",
         "instagram": "lightbender_mark"
       },
@@ -5828,6 +5877,544 @@
         "role": "Model",
         "name": "Carmen",
         "instagram": "tamakgo"
+      }
+    ],
+    "threshold": [
+      {
+        "role": "Creative direction",
+        "name": "Julian Gigola",
+        "instagram": "juliangigola"
+      },
+      {
+        "role": "Photographer",
+        "name": "Julian Gigola",
+        "instagram": "juliangigola"
+      },
+      {
+        "role": "Design",
+        "name": "Tokio Arc",
+        "instagram": "tokio.arc"
+      },
+      {
+        "role": "In frame",
+        "name": "xtc_ryan",
+        "instagram": "xtc_ryan"
+      },
+      {
+        "role": "BTS",
+        "name": "Nicole Ramos",
+        "instagram": "nxcoleramos"
+      },
+      {
+        "role": "Archive",
+        "name": "ukiyosunknown",
+        "instagram": "ukiyosunknown"
+      }
+    ],
+    "azure-bloom": [
+      {
+        "role": "Photographer",
+        "name": "Julian Gigola",
+        "instagram": "juliangigola"
+      },
+      {
+        "role": "Muse",
+        "name": "Zoe Monet",
+        "instagram": "iaiupo"
+      },
+      {
+        "role": "Styling",
+        "name": "Zoe Monet",
+        "instagram": "iaiupo"
+      },
+      {
+        "role": "Hair & makeup",
+        "name": "Courtney Sage",
+        "instagram": "courtneysagemakeup"
+      },
+      {
+        "role": "Photographer",
+        "name": "Mark Tsui",
+        "instagram": "lightbender_mark"
+      },
+      {
+        "role": "Assistant",
+        "name": "Mark Tsui",
+        "instagram": "lightbender_mark"
+      }
+    ],
+    "paranoia": [
+      {
+        "role": "Photographer",
+        "name": "Julian Gigola",
+        "instagram": "juliangigola"
+      },
+      {
+        "role": "Art direction",
+        "name": "Khloe Farran",
+        "instagram": "khloefarranstyling"
+      },
+      {
+        "role": "Styling",
+        "name": "Khloe Farran",
+        "instagram": "khloefarranstyling"
+      },
+      {
+        "role": "Model",
+        "name": "xanubis",
+        "instagram": "xanubis"
+      },
+      {
+        "role": "Grip",
+        "name": "Alireza Sanayei",
+        "instagram": "alirezahope"
+      },
+      {
+        "role": "BTS",
+        "name": "Mark Tsui",
+        "instagram": "lightbender_mark"
+      },
+      {
+        "role": "CRT tech",
+        "name": "327.fm",
+        "instagram": "327.fm"
+      }
+    ],
+    "second-skin": [
+      {
+        "role": "Photographer",
+        "name": "Julian Gigola",
+        "instagram": "juliangigola"
+      },
+      {
+        "role": "Model",
+        "name": "Carla Dano-Arango",
+        "instagram": "draculina97"
+      },
+      {
+        "role": "Styling",
+        "name": "Carla Dano-Arango",
+        "instagram": "draculina97"
+      },
+      {
+        "role": "BTS",
+        "name": "Mark Tsui",
+        "instagram": "lightbender_mark"
+      },
+      {
+        "role": "Assistant",
+        "name": "Mark Tsui",
+        "instagram": "lightbender_mark"
+      }
+    ],
+    "aesc": [
+      {
+        "role": "Photographer",
+        "name": "Julian Gigola",
+        "instagram": "juliangigola"
+      },
+      {
+        "role": "Styling",
+        "name": "Starcase Vintage",
+        "instagram": "starcasevintage"
+      },
+      {
+        "role": "Model",
+        "name": "Anya Fam",
+        "instagram": "rice666s"
+      },
+      {
+        "role": "Hair & makeup",
+        "name": "Anya Fam",
+        "instagram": "rice666s"
+      },
+      {
+        "role": "Video",
+        "name": "Peter Ten",
+        "instagram": "ptenfilms"
+      }
+    ],
+    "aegis": [
+      {
+        "role": "Photographer",
+        "name": "Julian Gigola"
+      },
+      {
+        "role": "Model",
+        "name": "Phoebe",
+        "instagram": "phoebe2phly"
+      }
+    ],
+    "luxe-meets-future": [
+      {
+        "role": "Styling",
+        "name": "Lydia Mikulka",
+        "instagram": "stylingbylydia"
+      },
+      {
+        "role": "Model",
+        "name": "Anya Fam",
+        "instagram": "rice666s"
+      },
+      {
+        "role": "Photographer",
+        "name": "@juliangigola"
+      },
+      {
+        "role": "Lighting",
+        "name": "Seydina Seck",
+        "instagram": "thisguysdope_disguise"
+      },
+      {
+        "role": "BTS",
+        "name": "Mark Tsui",
+        "instagram": "lightbender_mark"
+      }
+    ],
+    "stratus-lookbook-vol-1": [
+      {
+        "role": "Model",
+        "name": "Ryan Ohaya",
+        "instagram": "carti.kun"
+      }
+    ],
+    "prowess-unleashed": [
+      {
+        "role": "Model",
+        "name": "Anya Fam",
+        "instagram": "rice666s"
+      },
+      {
+        "role": "Photographer",
+        "name": "Julian Gigola",
+        "instagram": "juliangigola"
+      }
+    ],
+    "vile": [
+      {
+        "role": "Model",
+        "name": "Vile Honey",
+        "instagram": "vile.honey"
+      },
+      {
+        "role": "Wardrobe",
+        "name": "by_vicious",
+        "instagram": "by_vicious"
+      },
+      {
+        "role": "Set design",
+        "name": "Seydina Seck",
+        "instagram": "thisguysdope_disguise"
+      },
+      {
+        "role": "Assistant",
+        "name": "Anonymous Ports",
+        "instagram": "anonymous.ports"
+      },
+      {
+        "role": "Photographer",
+        "name": "Julian Gigola",
+        "instagram": "juliangigola"
+      }
+    ],
+    "wild-and-unapologetic": [
+      {
+        "role": "Model",
+        "name": "Torrey Bernal",
+        "instagram": "meow.torrey"
+      },
+      {
+        "role": "Styling",
+        "name": "Torrey Bernal",
+        "instagram": "meow.torrey"
+      },
+      {
+        "role": "Hair & makeup",
+        "name": "Torrey Bernal",
+        "instagram": "meow.torrey"
+      },
+      {
+        "role": "Photographer",
+        "name": "Julian Gigola",
+        "instagram": "juliangigola"
+      }
+    ],
+    "untamed": [
+      {
+        "role": "Model",
+        "name": "Anya Fam",
+        "instagram": "rice666s"
+      },
+      {
+        "role": "Assistant",
+        "name": "Takyon Nanoplex",
+        "instagram": "takyon.nanoplex"
+      },
+      {
+        "role": "Photographer",
+        "name": "Julian Gigola",
+        "instagram": "juliangigola"
+      }
+    ],
+    "accomplice": [
+      {
+        "role": "Model",
+        "name": "Cole",
+        "instagram": "ccccolee"
+      },
+      {
+        "role": "Model",
+        "name": "Ryan Ohaya",
+        "instagram": "carti.kun"
+      },
+      {
+        "role": "Photographer",
+        "name": "Julian Gigola",
+        "instagram": "juliangigola"
+      }
+    ],
+    "fleece": [
+      {
+        "role": "Model",
+        "name": "Torrey Bernal",
+        "instagram": "meow.torrey"
+      },
+      {
+        "role": "Styling",
+        "name": "Torrey Bernal",
+        "instagram": "meow.torrey"
+      },
+      {
+        "role": "Hair & makeup",
+        "name": "Torrey Bernal",
+        "instagram": "meow.torrey"
+      },
+      {
+        "role": "Photographer",
+        "name": "Julian Gigola",
+        "instagram": "juliangigola"
+      }
+    ],
+    "veil": [
+      {
+        "role": "Model",
+        "name": "Luella Lvnne",
+        "instagram": "luellalvnne"
+      },
+      {
+        "role": "Assistant",
+        "name": "Seydina Seck",
+        "instagram": "thisguysdope_disguise"
+      },
+      {
+        "role": "Photographer",
+        "name": "Julian Gigola",
+        "instagram": "juliangigola"
+      }
+    ],
+    "redtide": [
+      {
+        "role": "Model",
+        "name": "bby_kimchi",
+        "instagram": "bby_kimchi"
+      },
+      {
+        "role": "Assistant",
+        "name": "ozwzrd",
+        "instagram": "ozwzrd"
+      },
+      {
+        "role": "Photographer",
+        "name": "Julian Gigola",
+        "instagram": "juliangigola"
+      }
+    ],
+    "noct": [
+      {
+        "role": "Model",
+        "name": "Anya Fam",
+        "instagram": "rice666s"
+      },
+      {
+        "role": "Video",
+        "name": "arrowsevil",
+        "instagram": "arrowsevil"
+      },
+      {
+        "role": "Photographer",
+        "name": "Julian Gigola",
+        "instagram": "juliangigola"
+      }
+    ],
+    "distortion-zone": [
+      {
+        "role": "Model",
+        "name": "Anya Fam",
+        "instagram": "rice666s"
+      },
+      {
+        "role": "Photographer",
+        "name": "Julian Gigola",
+        "instagram": "juliangigola"
+      }
+    ],
+    "celestica": [
+      {
+        "role": "Model",
+        "name": "Zoe Monet",
+        "instagram": "iaiupo"
+      },
+      {
+        "role": "Photographer",
+        "name": "Julian Gigola",
+        "instagram": "juliangigola"
+      }
+    ],
+    "tonights-the-night": [
+      {
+        "role": "Styling",
+        "name": "Faith Hawley",
+        "instagram": "fkhbeauty"
+      },
+      {
+        "role": "Hair & makeup",
+        "name": "Faith Hawley",
+        "instagram": "fkhbeauty"
+      },
+      {
+        "role": "Model",
+        "name": "libby_4763",
+        "instagram": "libby_4763"
+      },
+      {
+        "role": "Photographer",
+        "name": "Julian Gigola",
+        "instagram": "juliangigola"
+      }
+    ],
+    "glare": [
+      {
+        "role": "Client",
+        "name": "Angelic Boutique",
+        "instagram": "angelic__boutique"
+      },
+      {
+        "role": "Model",
+        "name": "thatbihangelic",
+        "instagram": "thatbihangelic"
+      },
+      {
+        "role": "Photographer",
+        "name": "Julian Gigola",
+        "instagram": "juliangigola"
+      }
+    ],
+    "gilt": [
+      {
+        "role": "Muse",
+        "name": "Imani Isles",
+        "instagram": "imaniisles"
+      },
+      {
+        "role": "Hair & makeup",
+        "name": "Courtney Sage",
+        "instagram": "courtneysagemakeup"
+      },
+      {
+        "role": "Styling",
+        "name": "esse_styling",
+        "instagram": "esse_styling"
+      },
+      {
+        "role": "Styling assistant",
+        "name": "itsmaria.aa",
+        "instagram": "itsmaria.aa"
+      },
+      {
+        "role": "Video",
+        "name": "Peter Ten",
+        "instagram": "ptenfilms"
+      },
+      {
+        "role": "Photographer",
+        "name": "Julian Gigola",
+        "instagram": "juliangigola"
+      }
+    ],
+    "industrial-zone": [
+      {
+        "role": "3D",
+        "name": "Nikoo Sheybani",
+        "instagram": "nikxdesigns"
+      },
+      {
+        "role": "Model",
+        "name": "Grace Robinson",
+        "instagram": "gracerob1nson"
+      },
+      {
+        "role": "Photo",
+        "name": "Seydina Seck",
+        "instagram": "thisguysdope_disguise"
+      },
+      {
+        "role": "Video",
+        "name": "Oseje Akhile",
+        "instagram": "whoisoseje"
+      },
+      {
+        "role": "Photographer",
+        "name": "Julian Gigola",
+        "instagram": "juliangigola"
+      }
+    ],
+    "shattered-mercury": [
+      {
+        "role": "Muse",
+        "name": "Carla Dano-Arango",
+        "instagram": "draculina97"
+      },
+      {
+        "role": "Wardrobe",
+        "name": "Mark Tsui",
+        "instagram": "lightbender_mark"
+      },
+      {
+        "role": "Assistant",
+        "name": "Mark Tsui",
+        "instagram": "lightbender_mark"
+      },
+      {
+        "role": "Photographer",
+        "name": "Julian Gigola",
+        "instagram": "juliangigola"
+      }
+    ],
+    "reconstructed": [
+      {
+        "role": "Creative direction",
+        "name": "Anikka Xdr",
+        "instagram": "anikka_xdr"
+      },
+      {
+        "role": "Styling",
+        "name": "Anikka Xdr",
+        "instagram": "anikka_xdr"
+      },
+      {
+        "role": "Model",
+        "name": "_amaniim",
+        "instagram": "_amaniim"
+      },
+      {
+        "role": "Styling assistant",
+        "name": "ccleoppatraa",
+        "instagram": "ccleoppatraa"
+      },
+      {
+        "role": "Photographer",
+        "name": "Julian Gigola",
+        "instagram": "juliangigola"
       }
     ]
   },

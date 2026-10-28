@@ -7063,7 +7063,7 @@ export const PROJECTS: Project[] = [
   },
   {
     "slug": "ukiyosunknown",
-    "name": "ukiyosunknown",
+    "name": "UKIYOSUNKNOWN",
     "headline": null,
     "intent": null,
     "credits": [],
