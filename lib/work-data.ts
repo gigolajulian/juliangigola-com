@@ -3652,7 +3652,7 @@ export const PROJECTS: Project[] = [
     "slug": "i-wanna-be-a-human",
     "name": "I WANNA BE A HUMAN",
     "headline": null,
-    "intent": "styling/art direction: @henny__oh\nphotography: @juliangigola",
+    "intent": null,
     "credits": [
       {
         "role": "model",
