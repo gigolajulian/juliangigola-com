@@ -161,6 +161,7 @@ html[data-sb]{scrollbar-width:none}html[data-sb]::-webkit-scrollbar{display:none
 .v3 .sheet figure{margin:0;position:relative;aspect-ratio:4/5;background:var(--bg)}
 .v3 .sheet .tile{position:absolute;inset:0}
 .v3 .sheet figcaption{position:absolute;inset:auto 0 0;display:flex;justify-content:space-between;padding:64px 12px 10px;background:linear-gradient(to top,oklch(0.1 0.003 70 / .78),oklch(0.1 0.003 70 / .6) 24px,oklch(0.1 0.003 70 / .34) 48px,oklch(0.1 0.003 70 / .14) 68px,oklch(0.1 0.003 70 / .04) 84px,transparent)}
+.v3 .sheet figcaption>span{min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .v3 .sheet figure:first-child{grid-column:span 2;grid-row:span 2;aspect-ratio:auto}
 @media (max-width:700px){.v3 .sheet{grid-template-columns:repeat(2,minmax(0,1fr))}}
 .v3 .b-doors{display:grid;grid-template-columns:1fr 1fr;border-top:1px solid var(--line);margin-top:96px}
