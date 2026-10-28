@@ -681,8 +681,9 @@ html{font-family:var(--font-mono),ui-monospace,monospace}
   .v3 :is(.foot-line,.direct) a{display:inline-flex;align-items:center;min-height:44px}
   .v3 .ticks button{width:44px;height:44px;margin:-12px -8px}
   .v3 .ticks button::after{left:8px;right:8px}
-  .v3 .a-cover .right>.lbl .ticks button{width:44px;margin:-12px -15px}
-  .v3 .a-cover .right>.lbl .ticks button::after{left:15px;right:15px}
+  .v3 .a-cover .right>.lbl .ticks{gap:0}
+  .v3 .a-cover .right>.lbl .ticks button{width:24px;margin:-12px 0}
+  .v3 .a-cover .right>.lbl .ticks button::after{left:5px;right:5px}
   .v3 .lg-toc a{min-height:44px;align-items:center}
 }
 /* Mouse at phone widths: the cover nav's 28px gaps pushed Portfolio off the
