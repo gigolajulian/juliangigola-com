@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { CoverNav, V3Foot } from "@/components/v3/chrome";
 import { Duo, Marks, Pick } from "@/components/v3/duo";
-import { COMMISSIONS, COMMISSION_TABS, DOORS, HERO, HERO_ALT, INDEX_ORDER, RECENT, SESSIONS, rate } from "@/lib/v3";
+import { COMMISSIONS, COMMISSION_TABS, DOORS, HERO, HERO_ALT, INDEX_ORDER, RECENT, SESSIONS, rate, type SessionSlug } from "@/lib/v3";
 
 /* JG V3 homepage (master v39, section A): hero crossfade, logo strip,
    Recent work, Commissions sheet, Sessions index, the two doors. */
@@ -343,10 +343,47 @@ function Commissions() {
   );
 }
 
+/* `?scrollfx=rows` prototype, phones only: the first of each booking page's
+   picks (lib/booking.ts); Graduation has none and keeps its SESSIONS photo. */
+const ROW_SAMPLES: Partial<Record<SessionSlug, string>> = {
+  portraits: "/work/gilt/03.jpg",
+  headshots: "/work/headshots/04.jpg",
+  "studio-digitals": "/work/giselle-studio-digitals/02.jpg",
+  weddings: "/work/weddings/02.jpg",
+};
+
 /* Sessions index: pointing at a row brings its photo up; a click books it. */
 function SessionsIndex() {
   const [on, setOn] = React.useState(INDEX_ORDER[0]);
+  const fx = React.useSyncExternalStore(
+    () => () => {},
+    () => new URLSearchParams(location.search).get("scrollfx") === "rows" && matchMedia("(max-width: 800px)").matches,
+    () => false,
+  );
+  const list = React.useRef<HTMLDivElement>(null);
   const router = useRouter();
+  /* `?scrollfx=rows`: the row on the screen's center line takes the photo;
+     v3.css inks it. Observed against the top half of the screen, not a
+     center line like the videos' Desk: a jump past a zero-height line fires
+     nothing. The lowest row in the top half is the one on the line. */
+  React.useEffect(() => {
+    if (!fx) return;
+    document.documentElement.dataset.scrollfx = "rows";
+    const rows = [...list.current!.children];
+    const up = new Set<number>();
+    const io = new IntersectionObserver(
+      (es) => {
+        es.forEach((e) => (e.isIntersecting ? up.add(rows.indexOf(e.target)) : up.delete(rows.indexOf(e.target))));
+        if (up.size) setOn(INDEX_ORDER[Math.max(...up)]);
+      },
+      { rootMargin: "0px 0px -50% 0px" },
+    );
+    rows.forEach((r) => io.observe(r));
+    return () => {
+      io.disconnect();
+      delete document.documentElement.dataset.scrollfx;
+    };
+  }, [fx]);
   return (
     <div className="a-index" id="sessions">
       <div>
@@ -354,7 +391,7 @@ function SessionsIndex() {
           <h2>Sessions</h2>
           <p className="lbl mute">Book a shoot</p>
         </div>
-        <div className="list">
+        <div className="list" ref={list}>
           {INDEX_ORDER.map((slug, n) => {
             const s = SESSIONS[slug];
             return (
@@ -378,7 +415,9 @@ function SessionsIndex() {
       </div>
       <div className="frame" style={{ margin: 0 }}>
         <figure style={{ margin: 0, height: "100%", position: "relative" }}>
-          {INDEX_ORDER.map((slug) => (
+          {INDEX_ORDER.map((slug) => fx && ROW_SAMPLES[slug] ? (
+            <Duo key={slug} d={ROW_SAMPLES[slug]} l={ROW_SAMPLES[slug]} alt={`${SESSIONS[slug].name} sample`} sizes="100vw" className={slug === on ? "on" : "off"} />
+          ) : (
             <Duo key={slug} d={SESSIONS[slug].photo.d} l={SESSIONS[slug].photo.l} alt={`${SESSIONS[slug].name} sample`} sizes="(max-width: 800px) 100vw, 44vw" className={slug === on ? "on" : "off"} />
           ))}
         </figure>
