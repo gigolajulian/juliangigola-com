@@ -354,10 +354,12 @@ export function V3Header() {
     const root = document.documentElement;
     root.setAttribute("data-pf", "");
     let last = scrollY;
+    // Desktop keeps the header: it and the toolbar are one glass bar (Julian, 2026-10-28).
+    const desk = matchMedia("(min-width: 701px) and (hover: hover) and (pointer: fine)");
     const sync = () => {
       const y = scrollY, d = y - last;
       if (Math.abs(d) < 6) return;
-      setTuck(d > 0 && y > 80);
+      setTuck(d > 0 && y > 80 && !desk.matches);
       last = y;
     };
     addEventListener("scroll", sync, { passive: true });
