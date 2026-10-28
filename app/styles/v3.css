@@ -1363,6 +1363,17 @@ dialog.v3.mo-player,.mo-player>iframe{background:#000}
    390x844 phone. Without scroll timelines the `.on` row inks as today. */
 @media (max-width:800px){
   :root[data-scrollfx=rows] .v3 .a-index .frame img{transition:opacity 240ms cubic-bezier(.2,0,0,1)}
+  /* Each row's photo opens under it (home.tsx, gsap); the shared frame steps aside. */
+  :root[data-scrollfx=rows] .v3 .a-index .frame{display:none}
+  :root[data-scrollfx=rows]{overflow-anchor:none}
+  /* Only the open row is inked; the scroll band below would light a row
+     mid-screen that is not the one open. */
+  :root[data-scrollfx=rows] .v3 .a-index .row .t{animation:none!important;color:color-mix(in srgb,var(--ink) 45%,transparent)}
+  :root[data-scrollfx=rows] .v3 .a-index .rx{height:0;overflow:hidden;border-bottom:1px solid var(--line)}
+  :root[data-scrollfx=rows] .v3 .a-index .rx-f{position:relative;aspect-ratio:4/5;margin:12px 0 16px;background:var(--card)}
+  :root[data-scrollfx=rows] .v3 .a-index .rx-f img{object-fit:cover}
+  /* The price only on the row whose photo is open (the one under the center line). */
+  :root[data-scrollfx=rows] .v3 .a-index .row:not([data-open]) .p{opacity:0}
   @supports (animation-timeline:view()){
     :root[data-scrollfx=rows] .v3 .a-index .row{view-timeline:--row block;view-timeline-inset:0}
     :root[data-scrollfx=rows] .v3 .a-index .row .t,:root[data-scrollfx=rows] .v3 .a-index .row.on .t{color:color-mix(in srgb,var(--ink) 45%,transparent);transition:none;animation:row-ink linear;animation-timeline:--row;animation-range:contain calc(50% - 26px) contain calc(50% + 26px)}
@@ -1370,3 +1381,6 @@ dialog.v3.mo-player,.mo-player>iframe{background:#000}
   @media (prefers-reduced-motion:reduce){:root[data-scrollfx=rows] .v3 .a-index .frame img{transition:none}}
 }
 @keyframes row-ink{from,to{color:var(--ink)}}
+/* The row whose photo is open and under the center line stays inked; the
+   scroll band above only inks a row while its header sits on that line. */
+@media (max-width:800px){:root[data-scrollfx=rows] .v3 .a-index .row.on[data-open] .t{animation:none;color:var(--ink)}}

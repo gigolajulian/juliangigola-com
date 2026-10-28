@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { CoverNav, V3Foot } from "@/components/v3/chrome";
 import { Duo, Marks, Pick } from "@/components/v3/duo";
+import { shiftScroll } from "@/components/v3/smooth-scroll";
 import { COMMISSIONS, COMMISSION_TABS, DOORS, HERO, HERO_ALT, INDEX_ORDER, RECENT, SESSIONS, rate, type SessionSlug } from "@/lib/v3";
 
 /* JG V3 homepage (master v39, section A): hero crossfade, logo strip,
@@ -373,25 +374,63 @@ function SessionsIndex() {
   );
   const list = React.useRef<HTMLDivElement>(null);
   const router = useRouter();
-  /* `?scrollfx=rows`: the row on the screen's center line takes the photo;
-     v3.css inks it. Observed against the top half of the screen, not a
-     center line like the videos' Desk: a jump past a zero-height line fires
-     nothing. The lowest row in the top half is the one on the line. */
+  /* `?scrollfx=rows`: the row on the screen's center line takes the photo,
+     its own, opening under it (gsap, loaded only with the flag); the one
+     open before closes. A photo closing above the row would pull the list
+     up under the center line and set off the next row, so the page scrolls
+     back by exactly what it gives up, frame by frame (the browser's own
+     anchoring is off for the flag, v3.css). v3.css inks it. Observed against
+     the screen above the line, not the line itself like the videos' Desk: a
+     jump past a zero-height line fires nothing. The lowest row above the
+     line is the one on it. */
   React.useEffect(() => {
     if (!fx) return;
     document.documentElement.dataset.scrollfx = "rows";
-    const rows = [...list.current!.children];
+    const rows = [...list.current!.querySelectorAll<HTMLElement>(".row")];
+    const panel = (i: number) => rows[i].nextElementSibling as HTMLElement;
     const up = new Set<number>();
+    let cur = -1;
+    const still = matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const gsap = import("gsap").then((m) => m.gsap);
+    const show = (at: number) => {
+      if (at === cur) return;
+      const was = cur;
+      cur = at;
+      rows.forEach((r, i) => r.toggleAttribute("data-open", i === at));
+      gsap.then((g) => {
+        // One curve for both, so one photo grows exactly as the other gives way.
+        const t = { duration: still ? 0 : 0.7, ease: "power2.inOut", overwrite: true };
+        g.to(panel(at), { height: "auto", ...t });
+        if (was < 0) return;
+        const p = panel(was);
+        let h = p.offsetHeight;
+        g.to(p, {
+          height: 0,
+          ...t,
+          onUpdate: () => {
+            const now = p.offsetHeight;
+            if (was < at) shiftScroll(now - h);
+            h = now;
+          },
+        });
+      });
+    };
     const io = new IntersectionObserver(
       (es) => {
-        es.forEach((e) => (e.isIntersecting ? up.add(rows.indexOf(e.target)) : up.delete(rows.indexOf(e.target))));
-        if (up.size) setOn(INDEX_ORDER[Math.max(...up)]);
+        es.forEach((e) => (e.isIntersecting ? up.add(rows.indexOf(e.target as HTMLElement)) : up.delete(rows.indexOf(e.target as HTMLElement))));
+        if (!up.size) return;
+        const at = Math.max(...up);
+        setOn(INDEX_ORDER[at]);
+        show(at);
       },
-      { rootMargin: "0px 0px -50% 0px" },
+      // The line sits just under the site header (160px down), so the open
+      // photo and the two rows after it are all on screen (Julian).
+      { rootMargin: `0px 0px ${160 - innerHeight}px 0px` },
     );
     rows.forEach((r) => io.observe(r));
     return () => {
       io.disconnect();
+      gsap.then((g) => g.killTweensOf(rows.map((_, i) => panel(i))));
       delete document.documentElement.dataset.scrollfx;
     };
   }, [fx]);
@@ -405,12 +444,12 @@ function SessionsIndex() {
         <div className="list" ref={list}>
           {INDEX_ORDER.map((slug, n) => {
             const s = SESSIONS[slug];
-            return (
+            return [
               <button
                 key={slug}
                 type="button"
                 className={slug === on ? "row on" : "row"}
-                onPointerEnter={() => setOn(slug)}
+                onPointerEnter={() => !fx && setOn(slug)}
                 onFocus={() => setOn(slug)}
                 onClick={() => router.push(`/book/${slug}`)}
                 data-fly-to={`/book/${slug}`}
@@ -419,8 +458,15 @@ function SessionsIndex() {
                 <span className="n lbl">{String(n + 1).padStart(2, "0")}</span>
                 <span className="t">{s.name}</span>
                 <span className="p lbl">{rate(s)}</span>
-              </button>
-            );
+              </button>,
+              fx ? (
+                <div key={`${slug}-rx`} className="rx" aria-hidden>
+                  <div className="rx-f">
+                    <Duo d={ROW_SAMPLES[slug] ?? s.photo.d} l={ROW_SAMPLES[slug] ?? s.photo.l} alt="" sizes="100vw" />
+                  </div>
+                </div>
+              ) : null,
+            ];
           })}
         </div>
       </div>
