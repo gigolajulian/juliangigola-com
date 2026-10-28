@@ -1033,8 +1033,8 @@ html{font-family:var(--font-mono),ui-monospace,monospace}
 .v3 .mo-cap{left:var(--g);bottom:32px;display:flex;flex-direction:column;gap:14px;max-width:min(70vw,1000px);pointer-events:none;animation:mo-in .5s cubic-bezier(.2,.7,.2,1)}
 .v3 .mo-cap .lbl{color:rgb(var(--on-photo) / .9)}
 .v3 .mo-cap h2{margin:0;font:900 clamp(3rem,calc(8*var(--v3u)),7rem)/.86 var(--display);letter-spacing:-.05em;text-wrap:balance}
-.v3 .mo-index{top:24px;right:var(--gr);list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:2px;text-align:right}
-.v3 .mo-index button{all:unset;cursor:pointer;color:rgb(var(--on-photo) / .66);padding:4px 0}
+.v3 .mo-index{top:24px;right:var(--gr);list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:0;text-align:right}
+.v3 .mo-index button{all:unset;cursor:pointer;color:rgb(var(--on-photo) / .66);display:inline-block;line-height:24px}
 .v3 .mo-index button span{margin-right:12px}
 .v3 .mo-index button[aria-current]{color:rgb(var(--on-photo))}.v3 .mo-index button[aria-current] span{color:var(--accent)}
 .v3 .mo-index button:hover{color:rgb(var(--on-photo))}.v3 .mo-index button:focus-visible{outline:1px solid var(--accent);outline-offset:3px}
