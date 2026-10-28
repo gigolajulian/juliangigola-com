@@ -1355,3 +1355,17 @@ dialog.v3.mo-player,.mo-player>iframe{background:#000}
 .v3 .f-in>:nth-child(3){animation-delay:.12s}
 .v3 .f-in>:nth-child(4){animation-delay:.18s}
 @media (prefers-reduced-motion:reduce){.v3 .f-in>*{animation:none}}
+
+/* `?scrollfx=rows` prototype (home.tsx SessionsIndex), phones only: the row
+   on the screen's center line is full ink, the rest 45%. The band is half a
+   row (26px) each side of center: contain 35%-65% inked 3-4 rows at once on a
+   390x844 phone. Without scroll timelines the `.on` row inks as today. */
+@media (max-width:800px){
+  :root[data-scrollfx=rows] .v3 .a-index .frame img{transition:opacity 240ms cubic-bezier(.2,0,0,1)}
+  @supports (animation-timeline:view()){
+    :root[data-scrollfx=rows] .v3 .a-index .row{view-timeline:--row block;view-timeline-inset:0}
+    :root[data-scrollfx=rows] .v3 .a-index .row .t,:root[data-scrollfx=rows] .v3 .a-index .row.on .t{color:color-mix(in srgb,var(--ink) 45%,transparent);transition:none;animation:row-ink linear;animation-timeline:--row;animation-range:contain calc(50% - 26px) contain calc(50% + 26px)}
+  }
+  @media (prefers-reduced-motion:reduce){:root[data-scrollfx=rows] .v3 .a-index .frame img{transition:none}}
+}
+@keyframes row-ink{from,to{color:var(--ink)}}
