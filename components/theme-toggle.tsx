@@ -3,6 +3,7 @@
 import * as React from "react";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
+import { THEME_COLOR } from "@/lib/theme-color";
 
 /* ── the theme switch ─────────────────────────────────────────────
  * Dark is the site and the default. This offers the alternative without
@@ -58,7 +59,7 @@ const read = (): Theme =>
    carry the theme that is actually showing and the first of them is the
    right one. */
 const paint = (next: Theme) => {
-  const colour = next === "light" ? "#ebedef" : "#0b0a09";
+  const colour = THEME_COLOR[next];
   for (const m of document.querySelectorAll('meta[name="theme-color"]')) {
     m.setAttribute("content", colour);
     m.removeAttribute("media");

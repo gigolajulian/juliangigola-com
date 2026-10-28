@@ -7,6 +7,7 @@ import { GlassLight } from "@/components/glass-light";
 import { PhotoFade } from "@/components/photo-fade";
 import { PointerMark } from "@/components/pointer-mark";
 import { PageFly } from "@/components/v3/page-fly";
+import { THEME_COLOR } from "@/lib/theme-color";
 import "./globals.css";
 import { ImageFallback } from "@/components/image-fallback";
 import { PageTransition } from "@/components/page-transition";
@@ -71,8 +72,8 @@ export const viewport: Viewport = {
      the `--background` tokens in `globals.css`, written out because a meta
      tag cannot read a custom property. */
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#ebedef" },
-    { media: "(prefers-color-scheme: dark)", color: "#0b0a09" },
+    { media: "(prefers-color-scheme: light)", color: THEME_COLOR.light },
+    { media: "(prefers-color-scheme: dark)", color: THEME_COLOR.dark },
   ],
 };
 
