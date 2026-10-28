@@ -1323,6 +1323,9 @@ dialog.v3.mo-player,.mo-player>iframe{background:#000}
 @media (min-width:701px) and (hover:hover) and (pointer:fine){
 :root[data-pf] .v3 .site-hdr{background:color-mix(in srgb,var(--bg) 52%,transparent);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
 .v3 #p-work .whead{display:block;margin-top:32px;position:sticky;top:calc(max(14px,env(safe-area-inset-top,0px)) + 47px);z-index:5;padding-bottom:14px;background:color-mix(in srgb,var(--bg) 52%,transparent);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+.v3 #p-work:is(.strip-on,.color-on) .whead{margin-top:8px}
+/* Strip and colour don't scroll, and their overflow lock would offset a sticky bar by the page's padding. */
+.v3 #p-work:is(.strip-on,.color-on) .whead{position:static}
 .v3 #p-work .whead .wtools{margin-top:0;position:static;background:none;box-shadow:none;clip-path:none}
 /* Project page: the hero sits on the sheet's three columns and gutters below it. */
 .v3 .pj-hero,.v3 .pj-hero.two{grid-template-columns:repeat(3,minmax(0,1fr));padding:0 var(--gr) 0 var(--g)}
