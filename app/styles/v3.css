@@ -75,7 +75,7 @@ html[data-sb]{scrollbar-width:none}html[data-sb]::-webkit-scrollbar{display:none
 .v3 .a-cover .ctas{justify-content:flex-start}
 :root[data-theme="light"] .v3 .a-cover .foot{--bg:oklch(0.945 0.003 250);--ink:oklch(0.185 0.003 70);--mute:oklch(0.44 0.003 250);--line:oklch(0 0 0 / 13%);--accent:oklch(0.47 0.1 195);color:var(--ink)}
 .v3 .a-cover .slides::after{content:"";position:absolute;inset:auto 0 0;height:22%;z-index:1;background:linear-gradient(to top,oklch(0.1 0.003 70 / .45),transparent);pointer-events:none}
-.v3 .a-cover .right>.lbl{position:absolute;z-index:2;left:var(--g);right:var(--gr);bottom:calc(100% + 14px);--ink:oklch(0.955 0.004 80);--mute:oklch(0.78 0.005 80);--line:oklch(1 0 0 / 30%);--accent:oklch(0.72 0.095 195);color:oklch(0.955 0.004 80 / .72);justify-content:flex-end;gap:10px!important;font-size:9px;bottom:calc(100% + 10px)}
+.v3 .a-cover .right>.lbl{position:absolute;z-index:2;left:var(--g);right:var(--gr);bottom:calc(100% + 14px);--ink:oklch(0.955 0.004 80);--mute:oklch(0.78 0.005 80);--line:oklch(1 0 0 / 30%);--accent:oklch(0.72 0.095 195);color:oklch(0.955 0.004 80 / .72);justify-content:flex-end;gap:10px!important;font-size:11px;bottom:calc(100% + 10px)}
 .v3 .a-cover .right>.lbl .ticks{gap:4px}
 .v3 .a-cover .right>.lbl .ticks button{width:14px}}
 .v3 .a-index{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,4fr);gap:clamp(24px,5vw,80px);padding:96px var(--gr) 72px var(--g);align-items:start}
@@ -812,7 +812,8 @@ html{font-family:var(--font-mono),ui-monospace,monospace}
 .v3 .pj-hero{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));grid-template-rows:auto 1fr;column-gap:20px;min-height:calc(100svh - 64px)}
 .v3 .pj-hero.two{grid-template-columns:minmax(0,3fr) minmax(0,2fr)}
 .v3 .pj-top{grid-column:1/-2;display:flex;flex-direction:column;gap:20px;padding:56px 0 40px var(--g)}
-.v3 .pj-back{text-decoration:none;align-self:flex-start}
+@media (max-width:700px){.v3 .a-cover .foot .lbl-sep{display:none}.v3 .a-cover .foot .lbl-place{display:block;opacity:.78}}
+.v3 .pj-back{text-decoration:none;align-self:flex-start;padding:16px 0;margin:-16px 0}
 .v3 .pj-row{display:flex;flex-direction:column;align-items:flex-start}
 .v3 .pj-row .pg-t{margin-bottom:24px;text-wrap:balance;font-size:clamp(3rem,calc(6.4*var(--v3u)),6.5rem)}
 .v3 .pj-big{grid-column:-2/-1;grid-row:1/3;position:relative;margin:0;min-height:520px;background:var(--card)}
