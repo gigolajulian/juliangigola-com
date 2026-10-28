@@ -1316,6 +1316,21 @@ dialog.v3.mo-player,.mo-player>iframe{background:#000}
 .v3 #p-work .wtools{transition:top .25s ease;box-shadow:0 0 0 100vmax var(--bg);clip-path:inset(0 -100vmax)}
 :root[data-tuck] .v3 #p-work .wtools{top:env(safe-area-inset-top,0px)}
 @media (prefers-reduced-motion:reduce){.v3 #p-work .wtools{transition:none}}
+.v3 #p-work .whead{display:contents}
+/* Laptop and desktop (a mouse): the header stays on the portfolio, and it and the search,
+   chips and view buttons read as one glass bar the work scrolls under (Julian, 2026-10-28).
+   Phones and iPads keep the tuck above. */
+@media (min-width:701px) and (hover:hover) and (pointer:fine){
+:root[data-pf] .v3 .site-hdr{background:color-mix(in srgb,var(--bg) 52%,transparent);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
+.v3 #p-work .whead{display:block;margin-top:32px;position:sticky;top:calc(max(14px,env(safe-area-inset-top,0px)) + 47px);z-index:5;padding-bottom:14px;background:color-mix(in srgb,var(--bg) 52%,transparent);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+.v3 #p-work .whead .wtools{margin-top:0;position:static;background:none;box-shadow:none;clip-path:none}
+/* Project page: the hero sits on the sheet's three columns and gutters below it. */
+.v3 .pj-hero,.v3 .pj-hero.two{grid-template-columns:repeat(3,minmax(0,1fr));padding:0 var(--gr) 0 var(--g)}
+.v3 .pj-top,.v3 .pj-lead{padding-left:0;padding-right:0}
+.v3 .pj-big{width:100%;max-width:none}
+.v3 .pj-lead{display:grid;grid-template-columns:subgrid}
+.v3 .pj-lead .pj-r:only-child{grid-column:1/-1}
+.v3 .pj-lead .pj-r:nth-child(2){margin-inline:0}}
 /* Credits: a person's avatar comes in beside their @handle on hover, and
    is always there on a phone. The handle opens their Instagram in a new tab. */
 .v3 .sv-row li a{display:inline-flex;align-items:center;justify-content:flex-end;width:auto}

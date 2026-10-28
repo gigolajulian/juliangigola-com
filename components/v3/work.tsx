@@ -474,88 +474,91 @@ export function V3Work({
         <div className="pg-head">
           <h1 className="pg-t">{filter === "All" ? "Portfolio" : filter}</h1>
         </div>
-        <div className="wtools lbl">
-          <label className="wsearch">
-            <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true">
-              <circle
-                cx="6"
-                cy="6"
-                r="4.5"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.3"
+        {/* One sticky glass bar on desktop; display:contents elsewhere. */}
+        <div className="whead">
+          <div className="wtools lbl">
+            <label className="wsearch">
+              <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true">
+                <circle
+                  cx="6"
+                  cy="6"
+                  r="4.5"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.3"
+                />
+                <path
+                  d="M9.4 9.4L13 13"
+                  stroke="currentColor"
+                  strokeWidth="1.3"
+                />
+              </svg>
+              <input
+                type="search"
+                placeholder="Search the work"
+                aria-label="Search the work by name, discipline or credit"
+                autoComplete="off"
+                value={q}
+                onChange={(e) => setQ(e.target.value.trim().toLowerCase())}
               />
-              <path
-                d="M9.4 9.4L13 13"
-                stroke="currentColor"
-                strokeWidth="1.3"
-              />
-            </svg>
-            <input
-              type="search"
-              placeholder="Search the work"
-              aria-label="Search the work by name, discipline or credit"
-              autoComplete="off"
-              value={q}
-              onChange={(e) => setQ(e.target.value.trim().toLowerCase())}
-            />
-          </label>
-          <div className="wviews" role="group" aria-label="View">
-            {/* The vectorscope is a mode of its own: on, then off back to
-                the view it came from. Then Strip, and Grid in the corner. */}
-            <button
-              type="button"
-              className="wcolor"
-              aria-pressed={view === "color"}
-              aria-label={VIEWS[2][1]}
-              title={VIEWS[2][1]}
-              onClick={() => {
-                if (view === "color") go(back.current);
-                else {
-                  back.current = view;
-                  go("color");
-                }
-              }}
-            >
-              {VIEWS[2][2]}
-            </button>
-            {[VIEWS[1], VIEWS[0]].map(([v, label, icon]) => (
+            </label>
+            <div className="wviews" role="group" aria-label="View">
+              {/* The vectorscope is a mode of its own: on, then off back to
+                  the view it came from. Then Strip, and Grid in the corner. */}
               <button
-                key={v}
                 type="button"
-                aria-pressed={view === v}
-                aria-label={label}
-                title={label}
-                onClick={() => go(v)}
+                className="wcolor"
+                aria-pressed={view === "color"}
+                aria-label={VIEWS[2][1]}
+                title={VIEWS[2][1]}
+                onClick={() => {
+                  if (view === "color") go(back.current);
+                  else {
+                    back.current = view;
+                    go("color");
+                  }
+                }}
               >
-                {icon}
+                {VIEWS[2][2]}
+              </button>
+              {[VIEWS[1], VIEWS[0]].map(([v, label, icon]) => (
+                <button
+                  key={v}
+                  type="button"
+                  aria-pressed={view === v}
+                  aria-label={label}
+                  title={label}
+                  onClick={() => go(v)}
+                >
+                  {icon}
+                </button>
+              ))}
+            </div>
+          </div>
+          <div
+            className="chips lbl"
+            ref={chips}
+            role="group"
+            aria-label="Filter by discipline"
+            onScroll={syncChips}
+          >
+            {["All", ...order].map((d) => (
+              <button
+                key={d}
+                type="button"
+                aria-pressed={d === filter}
+                onClick={() => flipped(() => setFilter(d))}
+              >
+                {d}
+                {d === "All" || counts[d] > 1 ? (
+                  <span>{d === "All" ? work.length : counts[d]}</span>
+                ) : null}
               </button>
             ))}
           </div>
-        </div>
-        <div
-          className="chips lbl"
-          ref={chips}
-          role="group"
-          aria-label="Filter by discipline"
-          onScroll={syncChips}
-        >
-          {["All", ...order].map((d) => (
-            <button
-              key={d}
-              type="button"
-              aria-pressed={d === filter}
-              onClick={() => flipped(() => setFilter(d))}
-            >
-              {d}
-              {d === "All" || counts[d] > 1 ? (
-                <span>{d === "All" ? work.length : counts[d]}</span>
-              ) : null}
-            </button>
-          ))}
-        </div>
-        <div className="chips-bar" ref={chipsBar}>
-          <i />
+          <div className="chips-bar" ref={chipsBar}>
+            <i />
+          </div>
         </div>
         <p className="wnote lbl mute" aria-live="polite">
           {q ? `${plural(list.length)} matching “${q}”` : shown ? `${shown.length} frames` : plural(list.length)}
