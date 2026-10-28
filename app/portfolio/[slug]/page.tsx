@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { CoverArt } from "@/components/v3/sleeves";
 import { CallToAction } from "@/components/call-to-action";
 import { SESSION_SEO } from "@/lib/seo";
+import { projectFacts, share } from "@/lib/share";
 import { V3Project } from "@/components/v3/project";
 import {
   LINKABLE,
@@ -11,11 +12,9 @@ import {
   COVER_ART,
   COVER_RELEASES,
   getProject,
-  coverOf,
   enquiryTypeFor,
   isDisciplineGallery,
   nextAfter,
-  credited,
   nextDiscipline,
 } from "@/lib/work";
 
@@ -42,33 +41,13 @@ export async function generateMetadata(
   const project = getProject(slug);
   if (!project) return {};
 
-  const client = credited(project, /client/i);
-  const model = project.credits.find((c) => /model|in frame/i.test(c.role));
-  const discipline = project.categories[0]?.name.toLowerCase();
-  const n = project.images.length;
-  /* What a pasted link shows under the title. The intent copy when there
-     is one, cut to a sentence's worth; otherwise built from what the
-     manifest knows: "HUA: brand campaigns by Julian Gigola, 17 frames, with
-     @0414lei. San Francisco Bay Area." Twenty characters was what a shared
-     project used to get. */
-  /* A bookable session's gallery (Headshots, Graduation, Weddings) is
-     titled for the search that books it, from `lib/seo.ts`. */
+  /* A bookable session's gallery (Headshots, Graduation, Weddings) keeps the
+     title `lib/seo.ts` gives it for the search; its share card is unified. */
   const session = SESSION_SEO[project.slug];
+  const facts = projectFacts(project);
+  const card = share(project.name, facts.description);
   const title = session?.title ?? project.name;
-  const description = session
-    ? session.description
-    : project.intent
-    ? project.intent.length > 155
-      ? project.intent.slice(0, 152).replace(/\s+\S*$/, "") + "…"
-      : project.intent
-    : [
-        `${project.headline ?? project.name}: ${discipline ?? "photography"} by Julian Gigola`,
-        client ? `for ${client}` : null,
-        `${n} ${n === 1 ? "frame" : "frames"}`,
-        model ? `with ${model.name}` : null,
-      ]
-        .filter(Boolean)
-        .join(", ") + ". San Francisco Bay Area.";
+  const description = session?.description ?? facts.description;
 
   return {
     title,
@@ -82,24 +61,8 @@ export async function generateMetadata(
     ...(UNLISTED.has(project.slug)
       ? { robots: { index: false, follow: true } }
       : {}),
-    openGraph: {
-      title,
-      description,
-      // The opening frame is the project's cover everywhere else on the site;
-      // it should be the card in a Slack paste too.
-      images: [
-        {
-          url: coverOf(project).src,
-          width: coverOf(project).width,
-          height: coverOf(project).height,
-          alt: project.name,
-        },
-      ],
-    },
-    /* The root names the eye mark for every card, and a named field is
-       inherited whole: a project pasted into X or Slack showed the logo
-       while the Open Graph card next to it showed the work. */
-    twitter: { card: "summary_large_image", images: [coverOf(project).src] },
+    openGraph: card.openGraph,
+    twitter: card.twitter,
   };
 }
 

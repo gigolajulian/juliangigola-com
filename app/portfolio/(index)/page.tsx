@@ -1,15 +1,15 @@
 import type { Metadata } from "next";
+import { shareOg } from "@/lib/share";
 import { V3Work, type WorkItem } from "@/components/v3/work";
 import { CATEGORIES, PROJECTS, categoryLabel } from "@/lib/work";
 import ORDER from "@/lib/portfolio-order.json";
-import { ogCard } from "@/lib/og";
 
 export const metadata: Metadata = {
   title: "Photography Portfolio, San Francisco Bay Area",
   description:
     "Fashion editorials, brand campaigns, portraits, musician press photos, cover art and music videos by Julian Gigola, photographer in the San Francisco Bay Area.",
   alternates: { canonical: "/portfolio" },
-  ...ogCard("portfolio", "Julian Gigola"),
+...shareOg("Portfolio","Fashion editorials, brand campaigns, portraits, press photos and cover art by Julian Gigola."),
 };
 
 /* Julian's order from the Work Order arrange page, then any project it

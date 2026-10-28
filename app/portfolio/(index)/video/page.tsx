@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { shareOg } from "@/lib/share";
 import { MOTION_SEO } from "@/lib/seo";
 import { CONTENT } from "@/lib/content";
 import { V3Video } from "@/components/v3/video";
@@ -22,6 +23,7 @@ export const metadata: Metadata = {
   title: MOTION_SEO.title,
   description: MOTION_SEO.description,
   alternates: { canonical: "/portfolio/video" },
+  ...shareOg("Video","Music videos and commercials directed and shot by Julian Gigola."),
 };
 
 /* JG V3 (leftovers card D): the films as 16:9 tiles. The old strip

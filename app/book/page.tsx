@@ -1,18 +1,18 @@
 import type { Metadata } from "next";
+import { shareOg } from "@/lib/share";
 import { BookPicker, type Bookable } from "@/components/book-picker";
 import { V3Book } from "@/components/v3/book";
 import { calEvent, pageForSession } from "@/lib/booking";
 import { isSession } from "@/lib/v3";
 import { wallOf } from "@/lib/work";
 import { SESSION_TYPES, formatPrice } from "@/lib/sessions";
-import { ogCard } from "@/lib/og";
 
 export const metadata: Metadata = {
   title: "Book a session",
   description:
     "Pick a session and a time: portraits, graduation, headshots and studio digitals in the San Francisco Bay Area.",
   alternates: { canonical: "/book" },
-  ...ogCard("book", "Julian Gigola"),
+...shareOg("Book a session","Portraits, graduation, headshots and studio digitals in the San Francisco Bay Area. Pick a time on my calendar."),
 };
 
 /* The four sessions, each a Cal.com event (`CAL_EVENTS`, `lib/booking.ts`);
