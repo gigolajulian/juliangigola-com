@@ -408,6 +408,13 @@ export function V3Video({ videos }: { videos: Video[] }) {
   const all = React.useMemo(() => [reel, ...sorted], [sorted]);
   const [playing, setPlaying] = React.useState<Video | null>(null);
   const close = React.useCallback(() => setPlaying(null), []);
+  /* A client logo links here as #<client slug>: open on that client's film. */
+  React.useEffect(() => {
+    const j = all.findIndex((f) => f.client && `#${markOf(f.client)}` === location.hash);
+    if (j < 1) return;
+    const phone = matchMedia("(max-width: 800px)").matches;
+    document.querySelectorAll(phone ? ".mo-stack .mo-row" : ".mo-steps > div")[j]?.scrollIntoView({ block: phone ? "center" : "start" });
+  }, [all]);
   return (
     <div className="v3 contents">
       <section className="v3page" id="p-video">

@@ -1026,8 +1026,8 @@ export type Client = {
  */
 export const PRESS: Client[] = [
   { name: "WIRED", slug: "wired-magazine", href: "/portfolio/wired-magazine" },
-  { name: "Pear VC", slug: "pear-vc", href: "/portfolio/video" },
-  { name: "Ladera Granola", slug: "ladera-granola", href: "/portfolio/video" },
+  { name: "Pear VC", slug: "pear-vc", href: "/portfolio/video#pear-vc" },
+  { name: "Ladera Granola", slug: "ladera-granola", href: "/portfolio/video#ladera-granola" },
   { name: "SOLSWEAR", slug: "sols", href: "/portfolio/sols" },
   { name: "UKIYOSUNKNOWN", slug: "ukiyosunknown", href: "/portfolio/ukiyosunknown" },
   { name: "JUBO", slug: "jubo", href: "/portfolio/jubo" },
