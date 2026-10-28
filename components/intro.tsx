@@ -3,6 +3,23 @@
 import * as React from "react";
 import { BlinkingMark } from "@/components/not-found-scene";
 import loader from "@/image-loader";
+import { sand } from "@/components/sand-splash";
+import { burst } from "@/components/burst-splash";
+import { HERO } from "@/lib/v3";
+
+/* `?splash=sand`: the hero's first photograph, small, for the sand to read. */
+const HERO_FIRST = { d: loader({ src: HERO[0].d.src, width: 640 }), l: loader({ src: HERO[0].l.src, width: 640 }) };
+
+/* `?splash=burst`: the run of frames, then the hero's first photograph,
+   each sized for a whole screen: [phone, wider]. */
+const BURST = [
+  "/work/nyx/cover.jpg", "/work/omen/cover.jpg", "/work/vesper/cover.jpg", "/work/ghostlight/cover.jpg", "/work/vendetta/cover.jpg",
+  "/work/novocaine/cover.jpg", "/work/paranoia/cover.jpg", "/work/mirage/cover.jpg", "/work/celestis/cover.jpg",
+].map((src) => [loader({ src, width: 640 }), loader({ src, width: 1080 })]);
+const HERO_FULL = {
+  d: [loader({ src: HERO[0].d.src, width: 1080 }), loader({ src: HERO[0].d.src, width: 1920 })],
+  l: [loader({ src: HERO[0].l.src, width: 1080 }), loader({ src: HERO[0].l.src, width: 1920 })],
+};
 
 /* ── the opening ──────────────────────────────────────────────────
  * A contact sheet. On the page's ground, a grid of frames on a tilted
@@ -60,6 +77,15 @@ function run(picks: string[]) {
     sessionStorage.setItem("jg-intro", "1");
   } catch {}
   if (root.dataset.splash === "basic") return;
+  if (root.dataset.splash === "burst") return; // `burst-splash.ts` plays instead of the sheet
+  /* `?splash=sand` (`sand-splash.ts`): the sheet waits for the sand. */
+  if (root.dataset.splash === "sand") {
+    addEventListener("jg-sand-done", () => {
+      delete root.dataset.splash;
+      run(picks);
+    }, { once: true });
+    return;
+  }
   const layer = document.getElementById("jg-intro");
   const p = layer?.querySelector<HTMLElement>(".jg-sheet-plane");
   if (!layer || !p) return;
@@ -169,7 +195,7 @@ function run(picks: string[]) {
    only from the server's HTML, never again on a client render. */
 const SHEET =
   '<div class="jg-sheet-ground"></div><div class="jg-sheet-plane"></div>' +
-  `<script>(${run.toString()})(${JSON.stringify(PICKS)})</script>`;
+  `<script>(${run.toString()})(${JSON.stringify(PICKS)});(${sand.toString()})(${JSON.stringify(HERO_FIRST)});(${burst.toString()})(${JSON.stringify(BURST)},${JSON.stringify(HERO_FULL)})</script>`;
 
 export function Intro() {
   return (

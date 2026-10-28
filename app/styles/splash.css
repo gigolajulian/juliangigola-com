@@ -69,6 +69,142 @@
   object-fit: cover;
   opacity: 0;
 }
+/* `?splash=sand` (`sand-splash.ts`): the name, then the hero, in grains
+   over the ground. */
+.jg-sand {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+/* `?splash=burst` (`burst-splash.ts`): the wordmark in the hero's own
+   type (a third of the hero's size on a wider screen, Julian), then the
+   frames, each whole on the ground, never cropped. */
+.jg-burst-word {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font: 900 min(13vw, 10rem) / 0.86 var(--font-display);
+  letter-spacing: -0.05em;
+  text-transform: none;
+  white-space: nowrap;
+  color: var(--foreground);
+  opacity: 0;
+}
+@media (min-width: 700px) {
+  .jg-burst-word {
+    font-size: min(4.33vw, 3.33rem);
+  }
+}
+/* The loader, the page's scrollbar laid along the foot: a hairline track
+   in `--line` 6px in from the edges, a 2px bar in `--ink` (`.sb-thumb`). */
+.jg-burst-bar {
+  position: absolute;
+  left: 6px;
+  right: 6px;
+  bottom: calc(6px + env(safe-area-inset-bottom, 0px));
+  height: 1px;
+  background: var(--line);
+  opacity: 0;
+}
+.jg-burst-bar i {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: -0.5px;
+  height: 2px;
+  background: var(--ink);
+  transform: scaleX(0);
+  transform-origin: left;
+}
+.jg-burst-pic {
+  position: absolute;
+  left: 6vw;
+  top: 12vh;
+  width: 88vw;
+  height: 76vh;
+  object-fit: contain;
+  opacity: 0;
+}
+@media (min-width: 700px) {
+  .jg-burst-pic {
+    left: 10vw;
+    top: 10vh;
+    width: 80vw;
+    height: 80vh;
+  }
+}
+/* As the hero lands, the cover's nav and name come up over it, the rest of
+   the page round it (`burst-splash.ts` sets `data-landing`). The page is
+   not held back for its own rise here: the ground thinning is its way in,
+   and a held `main` (opacity and transform) would keep the name under
+   the splash however high its z-index. */
+[data-splash="burst"][data-intro] :is(.rise, .emerge) {
+  opacity: 1;
+  transform: none;
+}
+/* The cover's two shades come up over the landing photograph with it, so
+   the picture darkens as it lands rather than at the hand-over.
+   Pattern for all of these: held while the splash is up and the hero has
+   not started landing; the transition is on for as long as `data-landing`
+   lasts, which is past the splash, so nothing is cut off midway. */
+[data-splash="burst"][data-intro] .v3 .a-cover::before,
+[data-splash="burst"][data-intro] .v3 .a-cover::after {
+  z-index: 61;
+}
+[data-splash="burst"]:is([data-intro], [data-landing]) .v3 .a-cover::before,
+[data-splash="burst"]:is([data-intro], [data-landing]) .v3 .a-cover::after {
+  transition: opacity 1s cubic-bezier(0.65, 0, 0.35, 1);
+}
+[data-splash="burst"][data-intro]:not([data-landing]) .v3 .a-cover::before,
+[data-splash="burst"][data-intro]:not([data-landing]) .v3 .a-cover::after {
+  opacity: 0;
+}
+/* No fades on the type (Julian): once the photograph has landed
+   (`data-landed`), the name and its line rise out of their own line,
+   clipped at their resting foot; the buttons and the frame count come in
+   from the right edge; the nav drops in from the top. The cover's own
+   overflow clips the last two. */
+[data-splash="burst"][data-intro] .v3 .a-cover :is(.nav, .foot) {
+  z-index: 62;
+}
+[data-splash="burst"]:is([data-intro], [data-landed]) .v3 .a-cover {
+  --land: cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+[data-splash="burst"]:is([data-intro], [data-landed]) .v3 .a-cover .foot > div:first-child > * {
+  transition: transform 0.9s var(--land), clip-path 0.9s var(--land);
+}
+[data-splash="burst"]:is([data-intro], [data-landed]) .v3 .a-cover .foot > div:first-child > .lbl {
+  transition-delay: 0.12s;
+}
+[data-splash="burst"]:is([data-intro], [data-landed]) .v3 .a-cover .foot > .right > * {
+  transition: transform 0.9s var(--land) 0.18s;
+}
+[data-splash="burst"]:is([data-intro], [data-landed]) .v3 .a-cover .nav {
+  transition: transform 0.8s var(--land) 0.1s;
+}
+[data-splash="burst"][data-intro]:not([data-landed]) .v3 .a-cover .foot > div:first-child > * {
+  transform: translateY(100%);
+  /* the mask sits where the line comes to rest, not on the moving line, so
+     a two-line subtitle rises whole instead of opening a line at a time */
+  clip-path: inset(-100% 0 100% 0);
+}
+[data-splash="burst"][data-intro]:not([data-landed]) .v3 .a-cover .foot > .right > * {
+  transform: translateX(100vw);
+}
+[data-splash="burst"][data-intro]:not([data-landed]) .v3 .a-cover .nav {
+  transform: translateY(-100%);
+}
+
+/* The page's scrollbar (`.sb-thumb`, v3.css) wakes as the page grows under
+   the splash: kept out of sight until the hero has landed (Julian, phone). */
+html:is([data-intro], [data-landing]) .sb-thumb,
+html[data-sb]:is([data-intro], [data-landing])::after {
+  visibility: hidden;
+}
+
 /* The eye is the `?splash=basic` preview's alone. */
 .jg-intro-eye {
   display: none;
