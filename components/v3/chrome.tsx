@@ -3,6 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import dynamic from "next/dynamic";
+import { THEME_COLOR } from "@/lib/theme-color";
 import { usePathname } from "next/navigation";
 import { onLenisScroll } from "./smooth-scroll";
 
@@ -44,7 +45,7 @@ const read = (): Theme => (document.documentElement.dataset.theme === "light" ? 
 /* The browser bar takes the page's ground (values from `app/layout.tsx`). */
 const paint = (t: Theme) => {
   for (const m of document.querySelectorAll('meta[name="theme-color"]')) {
-    m.setAttribute("content", t === "light" ? "#ebedef" : "#0b0a09");
+    m.setAttribute("content", THEME_COLOR[t]);
     m.removeAttribute("media");
   }
 };

@@ -205,6 +205,15 @@
 :root {
   color-scheme: dark;
 
+  /* The light palette, once: the light theme below and the v3 screens
+     (`v3.css`) read it from here. */
+  --l-bg: oklch(0.945 0.003 250);
+  --l-ink: oklch(0.185 0.003 70);
+  --l-mute: oklch(0.44 0.003 250);
+  --l-line: oklch(0 0 0 / 13%);
+  --l-card: oklch(0.915 0.003 250);
+  --l-accent: oklch(0.47 0.1 195);
+
   /* Durations. The site's own most-used values, so nothing moved when
      they became tokens; values within 5% of one were folded into it.
      Hand-picked timings (splash, Confirm 450/600) stay literal. */
@@ -358,7 +367,7 @@
     ),
     var(--background);
 
-  --card: oklch(0.915 0.003 250);
+  --card: var(--l-card);
   --card-foreground: var(--foreground);
   --popover: oklch(0.902 0.003 250);
   --popover-foreground: var(--foreground);
@@ -379,7 +388,7 @@
 
   /* The same teal, taken down far enough to carry contrast against a light
      ground. Still the only chromatic thing on the page. */
-  --accent: oklch(0.52 0.1 195);
+  --accent: var(--l-accent);
   --accent-foreground: oklch(0.968 0.004 250);
 
   --destructive: oklch(0.51 0.2 25);
