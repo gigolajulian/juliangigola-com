@@ -29,7 +29,7 @@ function Note() {
         </span>
       </label>
       {el}
-      {err[k] ? <p className="err" role="alert">{err[k]}</p> : null}
+      {err[k] ? <p className="err" id={`r-${k}-err`} role="alert">{err[k]}</p> : null}
     </div>
   );
   return (
@@ -52,10 +52,10 @@ function Note() {
         <h2>Start a project</h2>
         <p className="mute">A few lines is enough. Dates and a reference help.</p>
         <div className="reach-row">
-          {fld("name", "Name", <input id="r-name" name="name" autoComplete="name" aria-required placeholder="Your name" value={v.name} onChange={set("name")} aria-invalid={!!err.name || undefined} />)}
-          {fld("email", "Email", <input id="r-email" name="email" type="email" autoComplete="email" aria-required placeholder="you@email.com" value={v.email} onChange={set("email")} aria-invalid={!!err.email || undefined} />)}
+          {fld("name", "Name", <input id="r-name" name="name" autoComplete="name" aria-required placeholder="Your name" value={v.name} onChange={set("name")} aria-invalid={!!err.name || undefined} aria-describedby={err.name ? "r-name-err" : undefined} />)}
+          {fld("email", "Email", <input id="r-email" name="email" type="email" autoComplete="email" aria-required placeholder="you@email.com" value={v.email} onChange={set("email")} aria-invalid={!!err.email || undefined} aria-describedby={err.email ? "r-email-err" : undefined} />)}
         </div>
-        {fld("message", "Message", <textarea id="r-message" name="message" rows={4} aria-required placeholder="What are you planning, and when?" value={v.message} onChange={set("message")} aria-invalid={!!err.message || undefined} />)}
+        {fld("message", "Message", <textarea id="r-message" name="message" rows={4} aria-required placeholder="What are you planning, and when?" value={v.message} onChange={set("message")} aria-invalid={!!err.message || undefined} aria-describedby={err.message ? "r-message-err" : undefined} />)}
         <ReferencePicks resync={state} v3 />
         <Failed state={state} />
         <div className="reach-send">

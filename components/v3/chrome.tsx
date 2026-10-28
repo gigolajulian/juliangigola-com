@@ -428,13 +428,13 @@ export function V3Header() {
 /** The footer line, as the master puts it: the last row inside each page. */
 export function V3Foot() {
   return (
-    <div className="foot-line lbl mute">
+    <footer className="foot-line lbl mute">
       <span className="foot-c">© 2026 Julian Gigola</span>
       <span className="foot-p">
         <Link href="/legal">Legal</Link>
         <span>San Francisco Bay Area</span>
       </span>
-    </div>
+    </footer>
   );
 }
 
