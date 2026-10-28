@@ -12,7 +12,7 @@ import type { Frame } from "@/lib/work-types";
    photographs are read from disk. */
 
 export const CARD_SIZE = { width: 1200, height: 630 };
-export const CARD_TYPE = "image/png";
+export const CARD_TYPE = "image/jpeg";
 
 const ACCENT = "#50b7b7";
 /** The site wordmark: mixed case, set tight, as in the header. */
@@ -183,8 +183,13 @@ export async function renderCard({ kicker, title: raw, byline = "by Julian Gigol
       ],
     },
   );
+  // JPEG, not the PNG satori makes: 2 MB a card across 130 projects filled the build output (Vercel failed) and is heavy for a share preview.
+  const jpeg = await sharp(Buffer.from(await res.arrayBuffer())).jpeg({ quality: 86, mozjpeg: true }).toBuffer();
+  const out = new Response(new Uint8Array(jpeg), { headers: { "content-type": CARD_TYPE, "cache-control": res.headers.get("cache-control") ?? "" } });
   // Dev only: the slots, for the Reframe page to draw.
-  if (process.env.NODE_ENV === "development") res.headers.set("x-card-key", encodeURIComponent(`${kicker}|${raw}`));
-  if (process.env.NODE_ENV === "development") res.headers.set("x-card-slots", JSON.stringify(shown.map((f, i) => ({ src: f.src, w: Math.round(widths[i]), h: H, x: +crops[i].x.toFixed(3), y: +crops[i].y.toFixed(3) }))));
-  return res;
+  if (process.env.NODE_ENV === "development") {
+    out.headers.set("x-card-key", encodeURIComponent(`${kicker}|${raw}`));
+    out.headers.set("x-card-slots", JSON.stringify(shown.map((f, i) => ({ src: f.src, w: Math.round(widths[i]), h: H, x: +crops[i].x.toFixed(3), y: +crops[i].y.toFixed(3) }))));
+  }
+  return out;
 }
