@@ -103,8 +103,9 @@ html[data-sb]{scrollbar-width:none}html[data-sb]::-webkit-scrollbar{display:none
 .v3 .mq-track a{display:flex;-webkit-user-drag:none}
 .v3 .mq-track a:hover .mk{color:var(--ink)}
 @media (max-width:700px){.v3 .clients{flex-direction:column;align-items:flex-start}
-.v3 .mq{width:100%}
-.v3 .mq-track{gap:72px;padding-right:72px}}
+.v3 .mq{width:100%;margin-block:-13px}
+.v3 .mq-track{gap:72px;padding-right:72px}
+.v3 .mq-track a{padding-block:13px}}
 .v3 .clients b{font:900 1.05rem/1 var(--display);letter-spacing:-.03em;color:var(--mute)}
 @media (max-width:800px){.v3 .a-index{grid-template-columns:1fr}
 .v3 .a-index .frame{position:relative;top:0;order:-1}}
