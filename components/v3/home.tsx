@@ -18,8 +18,19 @@ function Hero() {
   const [round, setRound] = React.useState(0);
   React.useEffect(() => {
     if (calm()) return;
-    const t = setInterval(() => setI((n) => (n + 1) % HERO.length), 6000);
-    return () => clearInterval(t);
+    /* `?splash=sand` and `?splash=burst` land on the first frame, so the turning waits for them. */
+    const root = document.documentElement;
+    let t: ReturnType<typeof setInterval> | undefined;
+    const go = () => (t = setInterval(() => setI((n) => (n + 1) % HERO.length), 6000));
+    if (!["sand", "burst"].includes(root.dataset.splash ?? "") || !root.hasAttribute("data-intro")) go();
+    const mo = new MutationObserver(() => {
+      if (!t && !root.hasAttribute("data-intro")) go();
+    });
+    if (!t) mo.observe(root, { attributeFilter: ["data-intro"] });
+    return () => {
+      mo.disconnect();
+      clearInterval(t);
+    };
   }, [round]);
   const pick = (n: number) => {
     setI(n);
