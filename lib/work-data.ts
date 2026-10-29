@@ -155,6 +155,13 @@ export const PROJECTS: Project[] = [
         "height": 3334,
         "color": "#A19A9A",
         "alt": "Sitting on a boulder with the sword planted upright, white boots, rocks and sea backlit behind"
+      },
+      {
+        "src": "/work/lost-relic/09.jpg",
+        "width": 2500,
+        "height": 3333,
+        "color": "#9F9A9B",
+        "alt": "Standing on one leg on a sea wall with the sword upright, mirrored in the still pool below"
       }
     ]
   },
