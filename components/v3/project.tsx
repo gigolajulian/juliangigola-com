@@ -100,8 +100,8 @@ export function V3Project({ project, next }: { project: Project; next?: { href: 
             {project.intent ? <p className="sv-lead">{project.intent}</p> : null}
           </header>
           {big ? (
-            <figure className="pj-big" style={{ aspectRatio: `${big.width} / ${big.height}` }}>
-              <Image src={big.src} alt={alt(big.alt)} fill sizes="(max-width: 900px) 100vw, 40vw" priority style={{ objectFit: "cover", background: big.color }} />
+            <figure className="pj-big" style={{ aspectRatio: `${big.width} / ${big.height}`, "--ar": big.width / big.height } as React.CSSProperties}>
+              <Image src={big.src} alt={alt(big.alt)} fill sizes={across ? "(max-width: 900px) 100vw, 60vw" : "(max-width: 900px) 100vw, 40vw"} priority style={{ objectFit: "cover", background: big.color }} />
               {/* The client's logo signs the opening frame, bottom right (Julian). */}
               {mark ? (
                 <span className="pj-mark">
