@@ -282,6 +282,7 @@ html[data-sb]{scrollbar-width:none}html[data-sb]::-webkit-scrollbar{display:none
 .v3 .wt img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .6s cubic-bezier(.2,.7,.2,1),opacity .4s}
 @media (hover:hover){.v3 .wt:hover img{transform:scale(1.03)}}
 .v3 .wt figcaption{display:flex;justify-content:space-between;gap:8px;padding-top:10px}
+.v3 .wt figcaption>:first-child{text-wrap:pretty} /* no lone word ("VOL. 1") on a last line */
 @media (max-width:1000px){.v3 .wgrid{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media (max-width:700px){.v3 .wgrid{grid-template-columns:repeat(2,minmax(0,1fr));gap:20px 10px}
 .v3 .wt figcaption{flex-direction:column;gap:2px}}
