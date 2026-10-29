@@ -274,6 +274,8 @@ async function mail(email: Env["EMAIL"], subject: string, lines: string[], who?:
     });
   } catch (e) {
     console.error("deposit mail", subject.split(":")[0], String(e));
+    // Images can push a mail past the size limit: the mail matters more, so it goes again without them.
+    if (attachments.length) await mail(email, subject, [...lines, "", `${attachments.length} reference image(s) were too large to attach. Ask the client to email them.`], who);
   }
 }
 

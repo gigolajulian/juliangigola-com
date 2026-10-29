@@ -366,6 +366,15 @@ describe("references with a deposit", () => {
     expect(m.text).not.toContain("evil.example");
   });
 
+  it("sends the mail again without the images when the send with them fails", async () => {
+    await send(refs());
+    ctx.env.EMAIL = { send: async (m: Mail & { attachments?: unknown[] }) => { if (m.attachments) throw new Error("too big"); mails.push(m); } };
+    await deliver(paid());
+    expect(mails).toHaveLength(1);
+    expect(mails[0].subject).toMatch(/^Deposit paid: /);
+    expect(mails[0].text).toContain("too large to attach");
+  });
+
   it("refuses a settled or unknown deposit, and the mail goes without", async () => {
     intent.metadata.outcome = "booked";
     expect((await send(refs())).status).toBe(404);
