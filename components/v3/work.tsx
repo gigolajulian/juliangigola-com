@@ -119,6 +119,9 @@ function FrameTile({ f, first, onOpen }: { f: FrameItem; first?: boolean; onOpen
 /** A gallery's frames full size over the page: arrows step, Escape or Back closes. */
 function FrameView({ list, at, onGo, onClose }: { list: FrameItem[]; at: number | null; onGo: (n: number) => void; onClose: () => void }) {
   const ref = React.useRef<HTMLDialogElement>(null);
+  // Where a touch went down, and whether it ended as a swipe (its click must not close).
+  const down = React.useRef<{ x: number; y: number } | null>(null);
+  const swiped = React.useRef(false);
   const open = at !== null;
   React.useEffect(() => {
     const d = ref.current;
@@ -146,7 +149,25 @@ function FrameView({ list, at, onGo, onClose }: { list: FrameItem[]; at: number 
         if (e.key === "ArrowRight") step(1);
         if (e.key === "ArrowLeft") step(-1);
       }}
-      onClick={(e) => e.target === e.currentTarget && onClose()}
+      /* Phones have no arrows: a sideways swipe steps, an instant swap. */
+      onPointerDown={(e) => {
+        swiped.current = false;
+        down.current = e.pointerType === "mouse" || (e.target as Element).closest("button") ? null : { x: e.clientX, y: e.clientY };
+      }}
+      onPointerUp={(e) => {
+        const d = down.current;
+        down.current = null;
+        if (!d || list.length < 2) return;
+        const dx = e.clientX - d.x;
+        if (Math.abs(dx) < 40 || Math.abs(dx) < Math.abs(e.clientY - d.y) * 1.5) return;
+        swiped.current = true;
+        step(dx < 0 ? 1 : -1);
+      }}
+      onPointerCancel={() => (down.current = null)}
+      onClick={(e) => {
+        if (swiped.current) return void (swiped.current = false);
+        if (e.target === e.currentTarget) onClose();
+      }}
     >
       <Image key={f.src} src={f.src} alt={f.alt} fill sizes="100vw" />
       <div className="fv-bar lbl">
