@@ -15,15 +15,20 @@ import { LENGTH, SESSIONS, TAB_ORDER, rate, type SessionSlug } from "@/lib/v3";
 
 function Tabs({ at }: { at: SessionSlug }) {
   const router = useRouter();
+  const go = (x: SessionSlug) => router.replace(`/book/${x}`, { scroll: false });
+  /* The call is a way in, not a session: a quiet link under the grid (critique, 2026-10-29). */
   return (
-    <div className="stabs lbl" role="group" aria-label="Session">
-      {TAB_ORDER.map((x) => (
-        <button key={x} type="button" aria-pressed={x === at} onClick={() => router.replace(`/book/${x}`, { scroll: false })}>
-          <b>{SESSIONS[x].name}</b>
-          <span>{rate(SESSIONS[x])}</span>
-        </button>
-      ))}
-    </div>
+    <>
+      <div className="stabs lbl" role="group" aria-label="Session">
+        {TAB_ORDER.filter((x) => x !== "consultation").map((x) => (
+          <button key={x} type="button" aria-pressed={x === at} onClick={() => go(x)}>
+            <b>{SESSIONS[x].name}</b>
+            <span>{rate(SESSIONS[x])}</span>
+          </button>
+        ))}
+      </div>
+      <button type="button" className="stabs-call lbl" aria-pressed={at === "consultation"} onClick={() => go("consultation")}>Not sure? 15 min call</button>
+    </>
   );
 }
 
