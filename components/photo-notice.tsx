@@ -116,9 +116,7 @@ export function PhotoNotice() {
     };
   }, []);
 
-  /* The hand on it holds it up: the dot has poured into it
-     (`data-stick="fill"`, `pointer-mark.tsx`), and it going away under
-     the hand would drop the liquid. Let go, it stays its full time. */
+  /* The hand on it holds it up. Let go, it stays its full time. */
   const [held, setHeld] = React.useState(false);
 
   React.useEffect(() => {
@@ -240,8 +238,8 @@ export function PhotoNotice() {
           &copy; {year} Julian Gigola. All rights reserved.
         </span>
       ) : null}
-      {/* In a box of its own: the stuck dot grows and leans an icon's
-          direct spans (`pointer.css`), which shoved these off the edge. */}
+      {/* In a box of its own, so nothing that styles an icon's direct
+          spans shoves these off the edge. */}
       <div>
         <span aria-hidden className="block overflow-hidden">
           <span data-line className="label block text-muted-foreground">

@@ -629,7 +629,6 @@ export function HeroDials() {
     const el = ref.current?.closest<HTMLElement>(".cover-float");
     if (!el || !arrange) return;
     el.dataset.arrange = "";
-    // The system's own pointer while arranging (pointer.css).
     document.documentElement.dataset.arrange = "";
     const at = (e: Event) =>
       (e.target as Element).closest<HTMLElement>(".cover-float-frame");
