@@ -52,6 +52,10 @@ const mono = localFont({
     { path: "./fonts/IBMPlexMono-700.woff2", weight: "700" },
   ],
   fallback: ["ui-monospace", "monospace"],
+  /* The automatic fallback is Arial, proportional and wider than Plex, so
+     the cover's role line wrapped until Plex landed (CLS on phones). A
+     monospace fallback already has Plex's 0.6em advance. */
+  adjustFontFallback: false,
 });
 
 const SITE = "https://juliangigola.com";
