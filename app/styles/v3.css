@@ -337,7 +337,7 @@ html[data-sb]{scrollbar-width:none}html[data-sb]::-webkit-scrollbar{display:none
 .v3 .rail li.done{border-top-color:var(--ink);color:var(--ink)}
 .v3 .rail li.cur{border-top:2px solid var(--accent);color:var(--ink)}
 .v3 .f-head{display:flex;flex-direction:column;gap:12px}
-.v3 .f-head h2{font:900 clamp(2.6rem,calc(5.8*var(--v3u)),5.25rem)/.9 var(--display);letter-spacing:-.05em;margin:0;text-wrap:balance}
+.v3 .f-head :is(h1,h2){font:900 clamp(2.6rem,calc(5.8*var(--v3u)),5.25rem)/.9 var(--display);letter-spacing:-.05em;margin:0;text-wrap:balance}
 .v3 .f-head p{margin:0;color:var(--mute);font-size:13px;max-width:66ch;text-wrap:balance}
 .v3 .f-ok{display:inline-flex;align-items:center;gap:8px;color:var(--live)}
 .v3 .f-body{display:flex;flex-direction:column;gap:22px;max-width:640px}
@@ -1115,8 +1115,8 @@ dialog.v3.mo-player,.mo-player>iframe{background:#000}
 :root[data-v3motion] .v3 .btn:active{scale:.97}
 /* Motion plan 03: a new step's heading rises in a mask (0.45s expo.out) and the current rail segment fills left to right (0.3s). */
 @media (prefers-reduced-motion:no-preference){
-:root[data-v3motion] .v3 .f-head h2{overflow:hidden;padding-bottom:.12em;margin-bottom:-.12em}
-:root[data-v3motion] .v3 .f-head h2>.rh{display:block;animation:rh-in .45s cubic-bezier(.16,1,.3,1) both}
+:root[data-v3motion] .v3 .f-head :is(h1,h2){overflow:hidden;padding-bottom:.12em;margin-bottom:-.12em}
+:root[data-v3motion] .v3 .f-head :is(h1,h2)>.rh{display:block;animation:rh-in .45s cubic-bezier(.16,1,.3,1) both}
 :root[data-v3motion] .v3 .rail li.cur{border-top-width:0;padding-top:12px;position:relative}
 :root[data-v3motion] .v3 .rail li.cur::before{content:"";position:absolute;inset:0 0 auto;height:2px;background:var(--accent);transform-origin:left;animation:rail-in .3s cubic-bezier(.4,0,.2,1) both}}
 @keyframes rh-in{from{translate:0 105%}to{translate:0 0}}

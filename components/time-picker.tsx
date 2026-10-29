@@ -994,8 +994,8 @@ export function TimePicker({
         return (
           <div className={bad[k] ? "fld bad" : "fld"}>
             <label className="lbl mute" htmlFor={id}><span>{label}{req ? <span className="req" aria-hidden="true"> *</span> : null}</span><span>{hint}</span></label>
-            {area ? <textarea id={id} name={k} rows={3} aria-invalid={!!bad[k] || undefined} aria-required={req || undefined} /> : <input id={id} name={k} type={type} autoComplete={ac} aria-invalid={!!bad[k] || undefined} aria-required={req || undefined} />}
-            {bad[k] ? <p className="err" role="alert">{bad[k]}</p> : null}
+            {area ? <textarea id={id} name={k} rows={3} aria-invalid={!!bad[k] || undefined} aria-describedby={bad[k] ? `${id}-err` : undefined} aria-required={req || undefined} /> : <input id={id} name={k} type={type} autoComplete={ac} aria-invalid={!!bad[k] || undefined} aria-describedby={bad[k] ? `${id}-err` : undefined} aria-required={req || undefined} />}
+            {bad[k] ? <p className="err" id={`${id}-err`} role="alert">{bad[k]}</p> : null}
           </div>
         );
       };

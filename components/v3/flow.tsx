@@ -41,6 +41,7 @@ export function FlowShell({
   name,
   sum,
   over,
+  h1,
 }: {
   /** Step names; `at` is 1-based. An empty list draws no rail. */
   steps: string[];
@@ -57,6 +58,8 @@ export function FlowShell({
   /** The caption over the photo with a line under the name, the photo
       running to the foot of the screen (Julian, every booking). */
   over?: string;
+  /** The page's own heading (the booking page has no other). */
+  h1?: boolean;
 }) {
   const last = at === steps.length && steps.length > 0;
   return (
@@ -79,9 +82,7 @@ export function FlowShell({
             </span>
           ) : null}
           {/* keyed by step so a new heading mounts and rises (v3.css, motion plan 03) */}
-          <h2>
-            <span key={at} className="rh">{head}</span>
-          </h2>
+          {React.createElement(h1 ? "h1" : "h2", null, <span key={at} className="rh">{head}</span>)}
           {sub ? <p>{sub}</p> : null}
         </div>
         <div className="f-body">{body}</div>
@@ -165,12 +166,12 @@ export function Field({
         <span>{hint}</span>
       </label>
       {area ? (
-        <textarea id={id} name={k} rows={3} value={value} onChange={(e) => onChange(e.target.value)} aria-invalid={!!err || undefined} aria-required={req || undefined} />
+        <textarea id={id} name={k} rows={3} value={value} onChange={(e) => onChange(e.target.value)} aria-invalid={!!err || undefined} aria-describedby={err ? `${id}-err` : undefined} aria-required={req || undefined} />
       ) : (
-        <input id={id} name={k} type={type} autoComplete={ac} value={value} onChange={(e) => onChange(e.target.value)} aria-invalid={!!err || undefined} aria-required={req || undefined} />
+        <input id={id} name={k} type={type} autoComplete={ac} value={value} onChange={(e) => onChange(e.target.value)} aria-invalid={!!err || undefined} aria-describedby={err ? `${id}-err` : undefined} aria-required={req || undefined} />
       )}
       {err ? (
-        <p className="err" role="alert">
+        <p className="err" id={`${id}-err`} role="alert">
           {err}
         </p>
       ) : null}

@@ -28,11 +28,12 @@ function Tabs({ at }: { at: SessionSlug }) {
 }
 
 /** `tabs`: false where the page is already about one booking (the service pages). */
-export function V3BookFlow({ slug, tabs = true }: { slug: SessionSlug; tabs?: boolean }) {
+export function V3BookFlow({ slug, tabs = true, h1 = false }: { slug: SessionSlug; tabs?: boolean; h1?: boolean }) {
   const S = SESSIONS[slug];
   const shell: Shell = (p) => (
     <FlowShell
       {...p}
+      h1={h1}
       body={
         p.at === 1 ? (
           <>
@@ -58,8 +59,7 @@ export function V3Book({ slug }: { slug: SessionSlug }) {
   return (
     <div className="v3 contents">
       <section className="v3page" id="p-flow">
-        <h1 className="sr-only">Book a session</h1>
-        <V3BookFlow slug={slug} />
+        <V3BookFlow slug={slug} h1 />
       </section>
     </div>
   );
