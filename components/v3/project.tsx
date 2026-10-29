@@ -160,7 +160,8 @@ export function V3Project({ project, next }: { project: Project; next?: { href: 
                   <Image src={next.cover.src} alt="" fill sizes="120px" style={{ objectFit: "cover", background: next.cover.color }} />
                 </span>
               ) : null}
-              <b>{titleCase(next.name.replace(/^Next: /, ""))}</b>
+              {/* --lw: its longest word, so a phone shrinks the name to keep each word whole (Julian). */}
+              <b style={{ "--lw": Math.max(...next.name.replace(/^Next: /, "").split(/s+/).map((w) => w.length)) } as React.CSSProperties}>{titleCase(next.name.replace(/^Next: /, ""))}</b>
               <span aria-hidden>&rarr;</span>
             </Link>
           ) : null}
