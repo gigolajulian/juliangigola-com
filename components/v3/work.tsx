@@ -120,9 +120,21 @@ function FrameTile({ f, first, onOpen }: { f: FrameItem; first?: boolean; onOpen
 function FrameView({ list, at, onGo, onClose }: { list: FrameItem[]; at: number | null; onGo: (n: number) => void; onClose: () => void }) {
   const ref = React.useRef<HTMLDialogElement>(null);
   // Where a touch went down, and whether it ended as a swipe (its click must not close).
-  const down = React.useRef<{ x: number; y: number } | null>(null);
+  const down = React.useRef<{ x: number; y: number; axis: "x" | "y" | null } | null>(null);
   const swiped = React.useRef(false);
+  // The photo's layer, and the side the last step went to (the next photo slides in from it).
+  const ph = React.useRef<HTMLDivElement>(null);
+  const dir = React.useRef(0);
   const open = at !== null;
+  React.useLayoutEffect(() => {
+    const el = ph.current;
+    const by = dir.current;
+    dir.current = 0;
+    if (!el || !by) return;
+    el.getAnimations().forEach((a) => a.cancel());
+    if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    el.animate([{ transform: `translateX(${by * 24}%)`, opacity: 0 }, { transform: "none", opacity: 1 }], { duration: 320, easing: "cubic-bezier(.2,.8,.2,1)" });
+  }, [at]);
   React.useEffect(() => {
     const d = ref.current;
     if (!open || !d) return;
@@ -138,7 +150,11 @@ function FrameView({ list, at, onGo, onClose }: { list: FrameItem[]; at: number 
   }, [open, onClose]);
   if (at === null) return null;
   const f = list[at];
-  const step = (by: number) => onGo((at + by + list.length) % list.length);
+  const step = (by: number) => {
+    dir.current = by;
+    onGo((at + by + list.length) % list.length);
+  };
+  const still = () => matchMedia("(prefers-reduced-motion: reduce)").matches;
   return (
     <dialog
       ref={ref}
@@ -149,27 +165,61 @@ function FrameView({ list, at, onGo, onClose }: { list: FrameItem[]; at: number 
         if (e.key === "ArrowRight") step(1);
         if (e.key === "ArrowLeft") step(-1);
       }}
-      /* Phones have no arrows: a sideways swipe steps, an instant swap. */
+      /* Touch: the photo follows the finger. Sideways it slides out that
+         way and the next one slides in behind it; up or down it fades and
+         the viewer closes. The axis locks after 10px. A new touch finishes
+         a slide still running. */
       onPointerDown={(e) => {
         swiped.current = false;
-        down.current = e.pointerType === "mouse" || (e.target as Element).closest("button") ? null : { x: e.clientX, y: e.clientY };
+        ph.current?.getAnimations().forEach((a) => a.finish());
+        down.current = e.pointerType === "mouse" || (e.target as Element).closest("button") ? null : { x: e.clientX, y: e.clientY, axis: null };
+      }}
+      onPointerMove={(e) => {
+        const d = down.current;
+        if (!d) return;
+        const dx = e.clientX - d.x;
+        const dy = e.clientY - d.y;
+        if (!d.axis && Math.max(Math.abs(dx), Math.abs(dy)) > 10) d.axis = Math.abs(dx) > Math.abs(dy) ? "x" : "y";
+        if (still()) return;
+        const el = ph.current!;
+        if (d.axis === "x" && list.length > 1) el.style.transform = `translateX(${dx}px)`;
+        if (d.axis === "y") {
+          el.style.transform = `translateY(${dy}px)`;
+          el.style.opacity = String(Math.max(0.3, 1 - Math.abs(dy) / 400));
+        }
       }}
       onPointerUp={(e) => {
         const d = down.current;
         down.current = null;
-        if (!d || list.length < 2) return;
-        const dx = e.clientX - d.x;
-        if (Math.abs(dx) < 40 || Math.abs(dx) < Math.abs(e.clientY - d.y) * 1.5) return;
+        const el = ph.current!;
+        if (!d?.axis) return;
+        const y = d.axis === "y";
+        const delta = y ? e.clientY - d.y : e.clientX - d.x;
+        const from = { transform: `translate${y ? "Y" : "X"}(${delta}px)`, opacity: el.style.opacity || 1 };
+        el.style.transform = el.style.opacity = "";
+        if (Math.abs(delta) < (y ? 90 : 40) || (!y && list.length < 2)) {
+          if (!still()) el.animate([from, { transform: "none", opacity: 1 }], { duration: 220, easing: "cubic-bezier(.2,.8,.2,1)" });
+          return;
+        }
         swiped.current = true;
-        step(dx < 0 ? 1 : -1);
+        const by = delta < 0 ? 1 : -1;
+        const done = () => (y ? onClose() : step(by));
+        if (still()) return done();
+        const to = y ? `translateY(${-by * 30}%)` : `translateX(${-by * 40}%)`;
+        el.animate([from, { transform: to, opacity: 0 }], { duration: y ? 200 : 160, easing: "ease-in", fill: "forwards" }).onfinish = done;
       }}
-      onPointerCancel={() => (down.current = null)}
+      onPointerCancel={() => {
+        down.current = null;
+        if (ph.current) ph.current.style.transform = ph.current.style.opacity = "";
+      }}
       onClick={(e) => {
         if (swiped.current) return void (swiped.current = false);
         if (e.target === e.currentTarget) onClose();
       }}
     >
-      <Image key={f.src} src={f.src} alt={f.alt} fill sizes="100vw" />
+      <div className="fv-ph" ref={ph}>
+        <Image key={f.src} src={f.src} alt={f.alt} fill sizes="100vw" />
+      </div>
       <div className="fv-bar lbl">
         <span>{String(at + 1).padStart(2, "0")} / {String(list.length).padStart(2, "0")}</span>
         <button type="button" onClick={onClose}>Close</button>
