@@ -6,6 +6,7 @@ import loader from "@/image-loader";
 import { sand } from "@/components/sand-splash";
 import { burst } from "@/components/burst-splash";
 import { HERO } from "@/lib/v3";
+import { keepNames } from "@/lib/keep-names";
 
 /* `?splash=sand`: the hero's first photograph, small, for the sand to read. */
 const HERO_FIRST = { d: loader({ src: HERO[0].d.src, width: 640 }), l: loader({ src: HERO[0].l.src, width: 640 }) };
@@ -195,7 +196,7 @@ function run(picks: string[]) {
    only from the server's HTML, never again on a client render. */
 const SHEET =
   '<div class="jg-sheet-ground"></div><div class="jg-sheet-plane"></div>' +
-  `<script>(${run.toString()})(${JSON.stringify(PICKS)});(${sand.toString()})(${JSON.stringify(HERO_FIRST)});(${burst.toString()})(${JSON.stringify(BURST)},${JSON.stringify(HERO_FULL)})</script>`;
+  `<script>${keepNames(`(${run.toString()})(${JSON.stringify(PICKS)});(${sand.toString()})(${JSON.stringify(HERO_FIRST)});(${burst.toString()})(${JSON.stringify(BURST)},${JSON.stringify(HERO_FULL)})`)}</script>`;
 
 export function Intro() {
   return (
