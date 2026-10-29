@@ -27,7 +27,7 @@ function Tabs({ at }: { at: SessionSlug }) {
           </button>
         ))}
       </div>
-      <button type="button" className="stabs-call lbl" aria-pressed={at === "consultation"} onClick={() => go("consultation")}>Not sure? 15 min call</button>
+      <button type="button" className="stabs-call lbl" aria-pressed={at === "consultation"} onClick={() => go("consultation")}>Not sure what you need? Book a 15 min call</button>
     </>
   );
 }
