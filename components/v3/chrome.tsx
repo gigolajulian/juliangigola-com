@@ -112,7 +112,7 @@ export const NAV = [
   { href: "/portfolio", label: "Portfolio" },
   { href: "/book", label: "Sessions" },
   { href: "/about", label: "About" },
-  { href: "/contact", label: "Inquire" },
+  { href: "/contact/form", label: "Inquire" },
 ];
 const current = (path: string, href: string) => path === href || path.startsWith(`${href}/`);
 

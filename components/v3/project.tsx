@@ -30,6 +30,10 @@ const nameOf = (c: Credit) => {
 const creditLabel = (c: Credit, h: string | null) =>
   ORG.test(c.role.trim()) ? c.name.replace(/^@/, "") : (nameOf(c) ?? (h ? `@${h}` : c.name));
 
+/* The commission form's types (components/v3/inquire.tsx TYPE) by discipline. */
+const KIND: Record<string, string> = { campaigns: "campaign", editorial: "editorial", coverart: "coverart", "artist-presskit": "presskit", "music-video": "video", events: "event" };
+const kindOf = (p: Project) => p.categories.map((c) => KIND[c.slug]).find(Boolean);
+
 export function V3Project({ project, next }: { project: Project; next?: { href: string; name: string; cover?: Frame } }) {
   const mark = markFor(project.slug);
   const client = billing(project);
@@ -139,6 +143,14 @@ export function V3Project({ project, next }: { project: Project; next?: { href: 
         </div>
         <div className="sv-info">
           {hole ? null : credits}
+          {/* The page closes on an ask (critique, 2026-10-29), pre-tagged so the form opens on this kind of job. */}
+          <div className="pj-ask">
+            <div>
+              <h2>Want something like this?</h2>
+              <p className="mute">Tell me what you have in mind and I&apos;ll come back with an approach and a quote.</p>
+            </div>
+            <Link className="btn fill" href={`/contact/form?${new URLSearchParams({ ...(kindOf(project) ? { type: kindOf(project)! } : {}), ref: name })}`}>Inquire</Link>
+          </div>
           {next ? (
             <Link className="pj-next" href={next.href}>
               <span className="lbl mute">Next</span>
@@ -148,7 +160,8 @@ export function V3Project({ project, next }: { project: Project; next?: { href: 
                   <Image src={next.cover.src} alt="" fill sizes="120px" style={{ objectFit: "cover", background: next.cover.color }} />
                 </span>
               ) : null}
-              <b>{titleCase(next.name.replace(/^Next: /, ""))}</b>
+              {/* --lw: its longest word, so a phone shrinks the name to keep each word whole (Julian). */}
+              <b style={{ "--lw": Math.max(...next.name.replace(/^Next: /, "").split(" ").map((w) => w.length)) } as React.CSSProperties}>{titleCase(next.name.replace(/^Next: /, ""))}</b>
               <span aria-hidden>&rarr;</span>
             </Link>
           ) : null}
