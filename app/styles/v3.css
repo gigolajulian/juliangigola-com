@@ -1440,3 +1440,9 @@ dialog.v3.mo-player,.mo-player>iframe{background:#000}
 .v3 .tabs{padding-bottom:11px;margin-bottom:-11px}
 .v3 .tabs-bar{pointer-events:none} /* drawn only; it sits over the tabs' grown hit areas */
 @media (pointer:fine){.v3 .door li a{position:relative}.v3 .door li a::after{content:"";position:absolute;inset:-10px 0}}
+/* Phone: the client's logo sits on the Back row, right, instead of on the
+   opening frame (Julian). Centred on the Back line: 40px down, half its 28px. */
+.v3 .pj-mark-top{display:none}
+@media (max-width:700px){.v3 .pj-top{position:relative}
+.v3 .pj-mark-top{display:block;position:absolute;right:var(--gr);top:calc(40px + .5lh - 14px);line-height:0;color:var(--ink)}
+.v3 .pj-big .pj-mark{display:none}.v3 .pj-big:has(.pj-mark)::after{content:none}}
