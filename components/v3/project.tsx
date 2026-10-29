@@ -93,6 +93,12 @@ export function V3Project({ project, next }: { project: Project; next?: { href: 
         <div className={across ? "pj-hero two" : "pj-hero"}>
           <header className="pj-top">
             <BackLink className="lbl mute pj-back" />
+            {/* On a phone the logo moves up to the Back row (Julian); the one on the frame hides there. */}
+            {mark ? (
+              <span className="pj-mark-top">
+                <Mark slug={mark.slug} name={mark.name} h={28} />
+              </span>
+            ) : null}
             <div className="pj-row">
               <h1 className="pg-t">{name}</h1>
               <p className="lbl mute">{sub}</p>

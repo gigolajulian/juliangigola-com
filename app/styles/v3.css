@@ -1448,3 +1448,9 @@ dialog.v3.mo-player,.mo-player>iframe{background:#000}
 @media (min-width:901px){.v3 .pj-hero.two{grid-template-columns:minmax(0,1fr) minmax(0,1.6fr);column-gap:20px}
 /* a vertical one stays the screen's height, at its own width */
 .v3 .pj-hero.two .pj-big{height:auto;min-height:0;width:min(100%,calc((100svh - 64px) * var(--ar)));max-width:none;align-self:end;justify-self:end}}
+/* Phone: the client's logo sits on the Back row, right, instead of on the
+   opening frame (Julian). Centred on the Back line: 40px down, half its 28px. */
+.v3 .pj-mark-top{display:none}
+@media (max-width:700px){.v3 .pj-top{position:relative}
+.v3 .pj-mark-top{display:block;position:absolute;right:var(--gr);top:calc(40px + .5lh - 14px);line-height:0;color:var(--ink)}
+.v3 .pj-big .pj-mark{display:none}.v3 .pj-big:has(.pj-mark)::after{content:none}}
