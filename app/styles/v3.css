@@ -1458,3 +1458,6 @@ dialog.v3.mo-player,.mo-player>iframe{background:#000}
 .v3 .pj-ask{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:20px 40px;padding:40px 0;border-bottom:1px solid var(--line)}
 .v3 .pj-ask h2{margin:0;font:900 clamp(2rem,calc(4*var(--v3u)),3.75rem)/.95 var(--display);letter-spacing:-.045em}
 .v3 .pj-ask p{margin:12px 0 0;max-width:44ch}
+/* The form's quiet way out to a call or an email (critique, 2026-10-29). */
+.v3 .in-alt{margin:20px 0 0;display:flex;flex-wrap:wrap;gap:6px 10px}
+.v3 .in-alt a{color:var(--ink);text-underline-offset:3px}
