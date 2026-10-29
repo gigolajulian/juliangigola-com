@@ -7777,7 +7777,7 @@ export const PROJECTS: Project[] = [
   {
     "slug": "wired-magazine",
     "name": "WIRED MAGAZINE",
-    "headline": "WIRED MAGAZINE MERCH SHOOT",
+    "headline": null,
     "intent": null,
     "credits": [
       {
