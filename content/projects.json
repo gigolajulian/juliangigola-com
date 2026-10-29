@@ -3718,6 +3718,312 @@
           "alt": ""
         }
       ]
+    },
+    {
+      "slug": "amaya",
+      "name": "AMAYA",
+      "categorySlug": "portraits",
+      "credits": [
+        {
+          "role": "Model",
+          "name": "amayalanae",
+          "instagram": "amayalanae"
+        },
+        {
+          "role": "Photographer",
+          "name": "Julian Gigola",
+          "instagram": "juliangigola"
+        }
+      ],
+      "cover": {
+        "src": "/work/amaya/cover.jpg",
+        "width": 600,
+        "height": 800,
+        "color": "#9D8B80",
+        "alt": ""
+      },
+      "images": [
+        {
+          "src": "/work/amaya/01.jpg",
+          "width": 2500,
+          "height": 3333,
+          "color": "#9D8B80",
+          "alt": ""
+        },
+        {
+          "src": "/work/amaya/02.jpg",
+          "width": 2500,
+          "height": 3333,
+          "color": "#736763",
+          "alt": ""
+        },
+        {
+          "src": "/work/amaya/03.jpg",
+          "width": 2500,
+          "height": 3333,
+          "color": "#9A8B83",
+          "alt": ""
+        },
+        {
+          "src": "/work/amaya/04.jpg",
+          "width": 2500,
+          "height": 3333,
+          "color": "#786861",
+          "alt": ""
+        },
+        {
+          "src": "/work/amaya/05.jpg",
+          "width": 2500,
+          "height": 3334,
+          "color": "#9A8A81",
+          "alt": ""
+        },
+        {
+          "src": "/work/amaya/06.jpg",
+          "width": 2500,
+          "height": 3333,
+          "color": "#907D71",
+          "alt": ""
+        },
+        {
+          "src": "/work/amaya/07.jpg",
+          "width": 2500,
+          "height": 3333,
+          "color": "#8E7F77",
+          "alt": ""
+        }
+      ]
+    },
+    {
+      "slug": "bbyxshey",
+      "name": "BBYXSHEY",
+      "categorySlug": "editorial",
+      "credits": [
+        {
+          "role": "Model",
+          "name": "bbyxshey",
+          "instagram": "bbyxshey"
+        },
+        {
+          "role": "Photographer",
+          "name": "Julian Gigola",
+          "instagram": "juliangigola"
+        }
+      ],
+      "cover": {
+        "src": "/work/bbyxshey/cover.jpg",
+        "width": 600,
+        "height": 800,
+        "color": "#454547",
+        "alt": ""
+      },
+      "images": [
+        {
+          "src": "/work/bbyxshey/01.jpg",
+          "width": 2500,
+          "height": 3333,
+          "color": "#454547",
+          "alt": ""
+        },
+        {
+          "src": "/work/bbyxshey/02.jpg",
+          "width": 2500,
+          "height": 3333,
+          "color": "#262222",
+          "alt": ""
+        },
+        {
+          "src": "/work/bbyxshey/03.jpg",
+          "width": 2500,
+          "height": 3334,
+          "color": "#29292A",
+          "alt": ""
+        },
+        {
+          "src": "/work/bbyxshey/04.jpg",
+          "width": 2500,
+          "height": 3333,
+          "color": "#948C86",
+          "alt": ""
+        },
+        {
+          "src": "/work/bbyxshey/05.jpg",
+          "width": 2500,
+          "height": 3333,
+          "color": "#352D29",
+          "alt": ""
+        },
+        {
+          "src": "/work/bbyxshey/06.jpg",
+          "width": 2500,
+          "height": 3333,
+          "color": "#333334",
+          "alt": ""
+        },
+        {
+          "src": "/work/bbyxshey/07.jpg",
+          "width": 2500,
+          "height": 3334,
+          "color": "#565859",
+          "alt": ""
+        }
+      ]
+    },
+    {
+      "slug": "rupture",
+      "name": "RUPTURE",
+      "categorySlug": "editorial",
+      "credits": [
+        {
+          "role": "Model",
+          "name": "0414lei",
+          "instagram": "0414lei"
+        },
+        {
+          "role": "Styling",
+          "name": "leena_kema",
+          "instagram": "leena_kema"
+        },
+        {
+          "role": "Wardrobe",
+          "name": "starcasevintage",
+          "instagram": "starcasevintage"
+        },
+        {
+          "role": "Photographer",
+          "name": "Julian Gigola",
+          "instagram": "juliangigola"
+        }
+      ],
+      "cover": {
+        "src": "/work/rupture/cover.jpg",
+        "width": 600,
+        "height": 800,
+        "color": "#A49B96",
+        "alt": ""
+      },
+      "images": [
+        {
+          "src": "/work/rupture/01.jpg",
+          "width": 2500,
+          "height": 3333,
+          "color": "#A49B96",
+          "alt": ""
+        },
+        {
+          "src": "/work/rupture/02.jpg",
+          "width": 2500,
+          "height": 3334,
+          "color": "#DEDCDB",
+          "alt": ""
+        },
+        {
+          "src": "/work/rupture/03.jpg",
+          "width": 2500,
+          "height": 3333,
+          "color": "#DAD6D4",
+          "alt": ""
+        },
+        {
+          "src": "/work/rupture/04.jpg",
+          "width": 2500,
+          "height": 3333,
+          "color": "#979291",
+          "alt": ""
+        }
+      ]
+    },
+    {
+      "slug": "no-vacancy",
+      "name": "NO VACANCY",
+      "categorySlug": "editorial",
+      "credits": [
+        {
+          "role": "In frame",
+          "name": "jeffrey.hopson",
+          "instagram": "jeffrey.hopson"
+        },
+        {
+          "role": "Styling",
+          "name": "tokio.arc",
+          "instagram": "tokio.arc"
+        },
+        {
+          "role": "Design",
+          "name": "ukiyosunknown",
+          "instagram": "ukiyosunknown"
+        },
+        {
+          "role": "Photographer",
+          "name": "Julian Gigola",
+          "instagram": "juliangigola"
+        }
+      ],
+      "cover": {
+        "src": "/work/no-vacancy/cover.jpg",
+        "width": 600,
+        "height": 800,
+        "color": "#6D5847",
+        "alt": ""
+      },
+      "images": [
+        {
+          "src": "/work/no-vacancy/01.jpg",
+          "width": 2500,
+          "height": 3333,
+          "color": "#6D5847",
+          "alt": ""
+        },
+        {
+          "src": "/work/no-vacancy/02.jpg",
+          "width": 2500,
+          "height": 3334,
+          "color": "#6F5D4F",
+          "alt": ""
+        },
+        {
+          "src": "/work/no-vacancy/03.jpg",
+          "width": 2500,
+          "height": 3334,
+          "color": "#817472",
+          "alt": ""
+        },
+        {
+          "src": "/work/no-vacancy/04.jpg",
+          "width": 2451,
+          "height": 3268,
+          "color": "#696566",
+          "alt": ""
+        },
+        {
+          "src": "/work/no-vacancy/05.jpg",
+          "width": 2500,
+          "height": 3334,
+          "color": "#6D5E54",
+          "alt": ""
+        },
+        {
+          "src": "/work/no-vacancy/06.jpg",
+          "width": 2500,
+          "height": 3333,
+          "color": "#917C6A",
+          "alt": ""
+        },
+        {
+          "src": "/work/no-vacancy/07.jpg",
+          "width": 2500,
+          "height": 3334,
+          "color": "#908886",
+          "alt": ""
+        },
+        {
+          "src": "/work/no-vacancy/08.jpg",
+          "width": 2500,
+          "height": 3333,
+          "color": "#978578",
+          "alt": ""
+        }
+      ]
     }
   ],
   "trash": [],
@@ -6417,6 +6723,62 @@
         "role": "Styling assistant",
         "name": "ccleoppatraa",
         "instagram": "ccleoppatraa"
+      },
+      {
+        "role": "Photographer",
+        "name": "Julian Gigola",
+        "instagram": "juliangigola"
+      }
+    ],
+    "bbyxshey": [
+      {
+        "role": "Model",
+        "name": "Mariella Miller",
+        "instagram": "bbyxshey"
+      },
+      {
+        "role": "Photographer",
+        "name": "Julian Gigola",
+        "instagram": "juliangigola"
+      }
+    ],
+    "rupture": [
+      {
+        "role": "Model",
+        "name": "Leila",
+        "instagram": "0414lei"
+      },
+      {
+        "role": "Styling",
+        "name": "Leena Kema",
+        "instagram": "leena_kema"
+      },
+      {
+        "role": "Wardrobe",
+        "name": "Starcase Vintage",
+        "instagram": "starcasevintage"
+      },
+      {
+        "role": "Photographer",
+        "name": "Julian Gigola",
+        "instagram": "juliangigola"
+      }
+    ],
+    "no-vacancy": [
+      {
+        "role": "In frame",
+        "name": "Jeffrey Hopson",
+        "instagram": "jeffrey.hopson"
+      },
+      {
+        "role": "Styling",
+        "name": "Tokio Arc",
+        "instagram": "tokio.arc"
+      },
+      {
+        "role": "Design",
+        "name": "ukiyosunknown",
+        "instagram": "ukiyosunknown"
       },
       {
         "role": "Photographer",
