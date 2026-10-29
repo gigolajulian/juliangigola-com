@@ -112,6 +112,7 @@ html[data-sb]{scrollbar-width:none}html[data-sb]::-webkit-scrollbar{display:none
 .v3 .a-seq{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:20px;padding:96px var(--gr) 96px var(--g);row-gap:96px}
 .v3 .a-seq figure{margin:0}
 .v3 .a-seq figcaption{padding-top:10px;display:flex;justify-content:space-between}
+.v3 .a-seq figcaption>:first-child{text-wrap:pretty} /* no lone "01" on a last line */
 .v3 .a-seq .big{grid-column:1/8;aspect-ratio:4/5}
 .v3 .a-seq .sm{grid-column:9/13;aspect-ratio:4/5;align-self:end}
 .v3 .a-seq .big.r{grid-column:6/13}
