@@ -1461,8 +1461,12 @@ dialog.v3.mo-player,.mo-player>iframe{background:#000}
 /* The form's quiet way out to a call or an email (critique, 2026-10-29). */
 .v3 .in-alt{margin:20px 0 0;display:flex;flex-wrap:wrap;gap:6px 10px}
 .v3 .in-alt a{color:var(--ink);text-underline-offset:3px}
-/* Desktop: the ask starts on the credits' second column, the button close by (Julian). */
-@media (min-width:701px){.v3 .pj-ask{padding-left:calc((100% - 24px) * 4 / 12 + 24px);justify-content:flex-start;gap:20px 48px}
+/* Desktop: the ask a little in from the left, the button halfway out (Julian). */
+@media (min-width:701px){.v3 .pj-ask{padding-left:clamp(16px,2vw,32px);justify-content:flex-start;gap:20px 48px}
 .v3 .pj-ask>.btn{margin-inline:auto} /* halfway between the text and the edge */}
 /* Phone: the Next name keeps each word whole, shrinking to fit its longest word (Julian). */
 @media (max-width:700px){.v3 .pj-next b{overflow-wrap:normal;font-size:min(2.5rem,calc((100vw - 2 * var(--g) - 88px) / (var(--lw,8) * .6)))}}
+/* /book: the call as a quiet link under the session grid (critique, 2026-10-29). */
+.v3 .stabs-call{align-self:flex-start;margin:-4px 0 0;padding:12px 0;background:none;border:0;color:var(--mute);font:inherit;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+.v3 .stabs-call[aria-pressed="true"]{color:var(--accent)}
+@media (hover:hover){.v3 .stabs-call:hover{color:var(--ink)}}
