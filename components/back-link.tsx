@@ -10,7 +10,9 @@ import { usePathname, useRouter } from "next/navigation";
 
 let steps = 0; // client navigations in this document
 
-const cameFromSite = () => steps > 0 || document.referrer.startsWith(location.origin + "/");
+// A tab opened from the site (cmd or middle click) has the referrer but no history to go back to.
+const cameFromSite = () =>
+  steps > 0 || (history.length > 1 && document.referrer.startsWith(location.origin + "/"));
 
 /** Mounted once in the root layout: counts client navigations. */
 export function NavMemo() {
