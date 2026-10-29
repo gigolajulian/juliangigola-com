@@ -1463,7 +1463,7 @@ dialog.v3.mo-player,.mo-player>iframe{background:#000}
 .v3 .in-alt a{color:var(--ink);text-underline-offset:3px}
 /* Desktop: the ask a little in from the left, the button halfway out (Julian). */
 @media (min-width:701px){.v3 .pj-ask{padding-left:clamp(16px,2vw,32px);justify-content:flex-start;gap:20px 48px}
-.v3 .pj-ask>.btn{margin-inline:auto} /* halfway between the text and the edge */}
+.v3 .pj-ask>.btn{margin:0 clamp(40px,7vw,140px) 0 auto} /* toward the right edge, a little in (Julian) */}
 /* Phone: the Next name keeps each word whole, shrinking to fit its longest word (Julian). */
 @media (max-width:700px){.v3 .pj-next b{overflow-wrap:normal;font-size:min(2.5rem,calc((100vw - 2 * var(--g) - 88px) / (var(--lw,8) * .6)))}}
 /* /book: the call as a quiet link under the session grid (critique, 2026-10-29). */
