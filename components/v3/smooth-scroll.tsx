@@ -15,6 +15,23 @@ export function scrollTop() {
   else scrollTo(0, 0);
 }
 
+/** Moves the page by `dy` without breaking a glide: Lenis writes its own
+ *  position every frame, so a plain scrollBy is undone (home.tsx rows). */
+export function shiftScroll(dy: number) {
+  if (live) {
+    // shortcut: shifts Lenis's internal glide (from/to/value, lenis 1.3), recheck on a Lenis upgrade
+    const glide = (live as unknown as { animate?: { from: number; to: number; value: number } }).animate;
+    if (glide) {
+      glide.from += dy;
+      glide.to += dy;
+      glide.value += dy;
+    }
+    live.animatedScroll += dy;
+    live.targetScroll += dy;
+  }
+  scrollBy(0, dy);
+}
+
 /** Called inside Lenis's own frame, right after it moves the page, with the
  *  page scroll it just wrote. Native scroll events only arrive a frame later. */
 export function onLenisScroll(fn: ScrollFn) {
