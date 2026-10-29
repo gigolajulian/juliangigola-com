@@ -3,8 +3,7 @@
 import * as React from "react";
 import Image, { getImageProps } from "next/image";
 import Link from "next/link";
-import { gsap } from "gsap";
-import { Flip } from "gsap/Flip";
+import type { Flip as FlipT } from "gsap/Flip";
 import { V3Foot } from "@/components/v3/chrome";
 import DISC from "@/lib/discipline-order.json";
 
@@ -49,8 +48,6 @@ const TARGETS = (
     ] as const,
 );
 type PickAt = { a: number; c: number };
-
-gsap.registerPlugin(Flip);
 
 const STRIP_SIZES = "(max-width: 767px) 82vw, 50vh";
 const GRID_SIZES = "(max-width: 700px) 50vw, (max-width: 1000px) 33vw, 25vw";
@@ -131,10 +128,15 @@ export function V3Work({
   /* Grid, strip and color views, and the discipline chips: the covers on
      screen fly from where they were to where they land, new ones fade in
      (GSAP Flip). Only with ?v3motion. */
-  const flip = React.useRef<Flip.FlipState | null>(null);
+  const flip = React.useRef<ReturnType<typeof FlipT.getState> | null>(null);
+  const Flip = React.useRef<typeof FlipT | null>(null);
+  React.useEffect(() => {
+    if (!document.documentElement.hasAttribute("data-v3motion")) return;
+    void Promise.all([import("gsap"), import("gsap/Flip")]).then(([g, f]) => { g.gsap.registerPlugin(f.Flip); Flip.current = f.Flip; });
+  }, []);
   const flipped = (set: () => void) => {
-    if (document.documentElement.hasAttribute("data-v3motion") && !matchMedia("(prefers-reduced-motion: reduce)").matches)
-      flip.current = Flip.getState(seen());
+    if (Flip.current && !matchMedia("(prefers-reduced-motion: reduce)").matches)
+      flip.current = Flip.current.getState(seen());
     set();
   };
   const go = (v: typeof view) => flipped(() => setView(v));
@@ -144,18 +146,18 @@ export function V3Work({
   const page = React.useRef<HTMLElement>(null);
   const strip = React.useRef<HTMLDivElement>(null);
   React.useLayoutEffect(() => {
-    const st = flip.current;
-    if (!st) return;
+    const st = flip.current, F = Flip.current;
+    if (!st || !F) return;
     flip.current = null;
     const w = strip.current;
     if (w) w.style.overflow = "visible"; // the strip would clip covers flying up into it
-    const tl = Flip.from(st, {
+    const tl = F.from(st, {
       targets: seen(),
       duration: 0.6,
       ease: "expo.out",
       scale: true,
       stagger: 0.015,
-      onEnter: (els) => gsap.fromTo(els, { opacity: 0 }, { opacity: 1, duration: 0.3 }),
+      onEnter: (els) => els.forEach((e) => e.animate({ opacity: [0, 1] }, 300)),
       onComplete: () => void (w && (w.style.overflow = "")),
     });
     return () => void tl.progress(1);

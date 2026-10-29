@@ -32,7 +32,7 @@ export function BtsCredit({ bts }: { bts: Bts }) {
             href={`https://instagram.com/${bts.by}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="-my-2 inline-block py-2 text-foreground transition-opacity duration-200 hoverable:hover:opacity-70"
+            className="-my-[15px] inline-block py-[15px] text-foreground transition-opacity duration-200 hoverable:hover:opacity-70"
           >
             @{bts.by}
           </a>
