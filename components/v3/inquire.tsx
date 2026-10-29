@@ -148,6 +148,15 @@ export function V3Commission() {
   const f = (key: keyof typeof v) => ({ k: key, value: v[key], err: err[key], onChange: (x: string) => setV({ ...v, [key]: x }) });
   const at = sent ? 4 : k;
   const top = () => scrollTo(0, 0);
+  // A project page's Inquire names the job (?type) and the set (?ref).
+  const [seen, setSeen] = React.useState("");
+  React.useEffect(() => {
+    const q = new URLSearchParams(location.search);
+    const kind = Object.keys(TYPE).find((x) => TYPE[x] === q.get("type"));
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- read once after hydration, the page is static
+    if (kind) setKinds([kind]);
+    setSeen(q.get("ref")?.slice(0, 80) ?? "");
+  }, []);
   React.useEffect(() => {
     if (sent) scrollTo(0, 0);
   }, [sent]);
@@ -175,6 +184,8 @@ export function V3Commission() {
             );
           })}
         </div>
+        {/* Every Inquire lands here now (critique, 2026-10-29); the call and the email stay one tap away. */}
+        <p className="lbl mute in-alt">Prefer to talk? <Link href="/book/consultation">15 min call</Link> <span aria-hidden>·</span> <a href="mailto:hello@juliangigola.com">hello@juliangigola.com</a></p>
       </>
     );
   } else if (at === 2) {
@@ -225,7 +236,7 @@ export function V3Commission() {
     cta = "See the work";
   }
 
-  const detail = [kinds.join(", "), pick.when, pick.budget, v.place.trim(), v.org.trim()].filter(Boolean).join(" · ");
+  const detail = [kinds.join(", "), pick.when, pick.budget, v.place.trim(), v.org.trim(), seen && `Seen: ${seen}`].filter(Boolean).join(" · ");
   const message = v.msg.trim();
   const next = (form: HTMLFormElement) => {
     if (at === 4) return router.push("/portfolio");
