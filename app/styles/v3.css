@@ -1454,3 +1454,6 @@ dialog.v3.mo-player,.mo-player>iframe{background:#000}
 @media (max-width:700px){.v3 .pj-top{position:relative}
 .v3 .pj-mark-top{display:block;position:absolute;right:var(--gr);top:calc(40px + .5lh - 14px);line-height:0;color:var(--ink)}
 .v3 .pj-big .pj-mark{display:none}.v3 .pj-big:has(.pj-mark)::after{content:none}}
+/* The frames under the title at their own shape (P3, 2026-10-29): no crop, and no side bars
+   from `contain` in a box of another shape. Capped by the cell on both sides. */
+@media (min-width:901px){.v3 .pj-hero:not(.two) .pj-lead .pj-r img{height:auto;max-height:100%;width:auto;max-width:100%;object-fit:contain}}
