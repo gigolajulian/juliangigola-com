@@ -1078,7 +1078,7 @@ dialog.v3.mo-player,.mo-player>iframe{background:#000}
 .mo-player .pl-tint{position:absolute;inset:0;z-index:1;background:rgb(var(--scrim) / .3);opacity:0;pointer-events:none;transition:opacity .4s ease}
 .mo-player[data-paused] .pl-tint{opacity:1}
 .mo-player{outline:0}
-.mo-player .pl-wake{position:absolute;inset:0;z-index:1;cursor:none}
+.mo-player .pl-wake{position:absolute;inset:0;z-index:1}
 .mo-player[data-shown] .pl-wake{cursor:pointer}
 .mo-player .pl-bar,.mo-player .pl-meta{display:flex;justify-content:space-between;align-items:center;gap:20px}
 .mo-player .pl-bar,.mo-player .pl-info{position:absolute;left:0;right:0;z-index:2;padding:24px var(--gr) 24px var(--g);pointer-events:none;opacity:0;transition:opacity .4s ease}
@@ -1403,3 +1403,16 @@ dialog.v3.mo-player,.mo-player>iframe{background:#000}
 @media (hover:hover) and (pointer:fine) and (prefers-reduced-motion:no-preference){
 .v3 .a-seq a.fig .ph img{transition:transform .7s var(--ease-out-strong)}
 .v3 .a-seq a.fig:hover .ph img{transform:scale(1.04)}}
+/* A gallery's frame full size (`FrameView`, work.tsx): the photo on black,
+   the count and Close along the top, arrows at the sides. */
+.fv{position:fixed;inset:0;width:100vw;height:100dvh;max-width:none;max-height:none;margin:0;padding:0;border:0;background:#000;color:rgb(var(--on-photo));outline:0}
+.fv::backdrop{background:#000}
+.fv>img{object-fit:contain;padding:64px var(--gr) 32px var(--g);pointer-events:none}
+.fv-bar{position:absolute;top:0;left:0;right:0;display:flex;justify-content:space-between;align-items:center;padding:20px var(--gr) 0 var(--g)}
+.fv button{min-height:44px;min-width:44px;padding:0 4px;background:none;border:0;color:inherit;font:inherit;letter-spacing:inherit;text-transform:inherit;cursor:pointer}
+.fv-step{position:absolute;top:50%;translate:0 -50%;font-size:16px}
+.fv-step.prev{left:calc(var(--g) - 12px)}
+.fv-step.next{right:calc(var(--gr) - 12px)}
+@media (hover:hover){.fv button:hover{color:var(--accent)}}
+.fv button:focus-visible{outline:1px solid currentColor;outline-offset:2px}
+@media (max-width:700px){.fv>img{padding:56px 0 24px}.fv-step{display:none}}

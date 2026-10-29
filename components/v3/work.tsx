@@ -94,15 +94,71 @@ function Tile({ p, swatch, first }: { p: WorkItem; swatch?: string[]; first?: bo
 export type FrameItem = { s: string; src: string; alt: string; wide: boolean; sq: boolean };
 const WIDE_SIZES = "(max-width: 700px) 100vw, (max-width: 1000px) 66vw, 50vw";
 
-function FrameTile({ f, first }: { f: FrameItem; first?: boolean }) {
+function FrameTile({ f, first, onOpen }: { f: FrameItem; first?: boolean; onOpen: () => void }) {
   return (
     <figure className={f.wide ? "wt wide" : "wt"}>
-      <Link href={`/portfolio/${f.s}`}>
+      {/* A gallery's frame opens full size here, not its project: Graduation
+          and Headshots have none, and their address leads to the booking page. */}
+      <Link
+        href={`/portfolio/${f.s}`}
+        onClick={(e) => {
+          if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+          e.preventDefault();
+          onOpen();
+        }}
+      >
         <div className="ph">
           <Image src={f.src} alt={f.alt} fill sizes={f.wide ? WIDE_SIZES : GRID_SIZES} loading={first ? "eager" : "lazy"} />
         </div>
       </Link>
     </figure>
+  );
+}
+
+/** A gallery's frames full size over the page: arrows step, Escape or Back closes. */
+function FrameView({ list, at, onGo, onClose }: { list: FrameItem[]; at: number | null; onGo: (n: number) => void; onClose: () => void }) {
+  const ref = React.useRef<HTMLDialogElement>(null);
+  const open = at !== null;
+  React.useEffect(() => {
+    const d = ref.current;
+    if (!open || !d) return;
+    d.showModal();
+    history.pushState({ frame: 1 }, "");
+    const pop = () => onClose();
+    addEventListener("popstate", pop);
+    return () => {
+      removeEventListener("popstate", pop);
+      if (d.open) d.close();
+      if (history.state?.frame) history.back();
+    };
+  }, [open, onClose]);
+  if (at === null) return null;
+  const f = list[at];
+  const step = (by: number) => onGo((at + by + list.length) % list.length);
+  return (
+    <dialog
+      ref={ref}
+      className="v3 fv"
+      aria-label={f.alt}
+      onClose={onClose}
+      onKeyDown={(e) => {
+        if (e.key === "ArrowRight") step(1);
+        if (e.key === "ArrowLeft") step(-1);
+      }}
+      onClick={(e) => e.target === e.currentTarget && onClose()}
+    >
+      <Image key={f.src} src={f.src} alt={f.alt} fill sizes="100vw" />
+      <div className="fv-bar lbl">
+        <span>{String(at + 1).padStart(2, "0")} / {String(list.length).padStart(2, "0")}</span>
+        <button type="button" onClick={onClose}>Close</button>
+      </div>
+      {list.length > 1 ? (
+        <>
+          <button type="button" className="fv-step prev lbl" aria-label="Previous frame" onClick={() => step(-1)}>&larr;</button>
+          <button type="button" className="fv-step next lbl" aria-label="Next frame" onClick={() => step(1)}>&rarr;</button>
+        </>
+      ) : null}
+    </dialog>
   );
 }
 
@@ -116,6 +172,8 @@ export function V3Work({
   frames?: Record<string, FrameItem[]>;
 }) {
   const [filter, setFilter] = React.useState("All");
+  const [at, setAt] = React.useState<number | null>(null);
+  const closeView = React.useCallback(() => setAt(null), []);
   /* `?d=<slug>`: the retired discipline pages and the site's links land here
      with that chip on. Read after mount, so the page itself stays static. */
   React.useEffect(() => {
@@ -568,10 +626,11 @@ export function V3Work({
         {view === "grid" && shown ? (
           <div className={shown.every((f) => f.sq) ? "wgrid wframes square" : "wgrid wframes"}>
             {shown.map((f, n) => (
-              <FrameTile key={f.src} f={f} first={n < 12} />
+              <FrameTile key={f.src} f={f} first={n < 12} onOpen={() => setAt(n)} />
             ))}
           </div>
         ) : null}
+        {shown ? <FrameView list={shown} at={at} onGo={setAt} onClose={closeView} /> : null}
         {view === "grid" && !shown ? (
           <div className="wgrid">
             {list.map((p, n) => (

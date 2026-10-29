@@ -301,7 +301,16 @@ function Recent() {
   );
 }
 
-function Commissions() {
+/** A discipline's top projects for the Commissions tabs (app/page.tsx). */
+export type TopWork = { s: string; n: string; src: string; meta: string };
+
+function Commissions({ top }: { top: Record<string, TopWork[]> }) {
+  const [tab, setTab] = React.useState(0);
+  /* A tab with projects swaps the sheet in place; All keeps the curated nine. */
+  const d = new URLSearchParams(COMMISSION_TABS[tab][1].split("?")[1]).get("d");
+  const items = d && top[d]
+    ? top[d].map((p) => ({ d: { src: p.src, name: p.n, meta: p.meta }, l: { src: p.src, name: p.n, meta: p.meta }, s: p.s }))
+    : COMMISSIONS.map((p) => ({ ...p, s: undefined }));
   const tabs = React.useRef<HTMLDivElement>(null);
   const bar = React.useRef<HTMLDivElement>(null);
   /* The tabs' drawn scrollbar: only when they overflow. */
@@ -330,20 +339,36 @@ function Commissions() {
     <>
       <div className="b-head">
         <h2>Commissions</h2>
-        <Link className="btn" href="/portfolio">See all projects</Link>
+        <Link className="btn" href={COMMISSION_TABS[tab][1]}>See all projects</Link>
       </div>
       {/* Focusable so the row scrolls from the keyboard too (axe). */}
       <div className="tabs lbl" ref={tabs} tabIndex={0} aria-label="Disciplines">
-        {COMMISSION_TABS.map(([t, href], n) => (
-          <Link key={t} href={href} className={n === 0 ? "on" : undefined}>{t}</Link>
-        ))}
+        {COMMISSION_TABS.map(([t, href], n) => {
+          const k = new URLSearchParams(href.split("?")[1]).get("d");
+          const swaps = n === 0 || (k && top[k]?.length);
+          return (
+            <Link
+              key={t}
+              href={href}
+              className={n === tab ? "on" : undefined}
+              aria-current={n === tab ? "true" : undefined}
+              onClick={(e) => {
+                if (!swaps || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+                e.preventDefault();
+                setTab(n);
+              }}
+            >
+              {t}
+            </Link>
+          );
+        })}
       </div>
       <div className="tabs-bar" ref={bar} hidden>
         <i />
       </div>
       <div className="sheet">
-        {COMMISSIONS.map((s, n) => (
-          <figure key={n}>
+        {items.map((s, n) => (
+          <figure key={s.s ?? n}>
             <Duo d={s.d.src} l={s.l.src} alt={s.d.name} altL={s.l.name} sizes={n === 0 ? "(max-width: 700px) 100vw, 50vw" : "(max-width: 700px) 50vw, 25vw"} />
             <figcaption className="lbl">
               <span>
@@ -352,8 +377,8 @@ function Commissions() {
               {s.d.meta ? <span className="mute"><Pick d={s.d.meta} l={s.l.meta!} /></span> : null}
             </figcaption>
             {/* The frame opens its project; the theme hides the other one's link. */}
-            <Link className="v3d tile" href={`/portfolio/${s.d.src.split("/")[2]}`} aria-label={s.d.name} />
-            <Link className="v3l tile" href={`/portfolio/${s.l.src.split("/")[2]}`} aria-label={s.l.name} />
+            <Link className="v3d tile" href={`/portfolio/${s.s ?? s.d.src.split("/")[2]}`} aria-label={s.d.name} />
+            <Link className="v3l tile" href={`/portfolio/${s.s ?? s.l.src.split("/")[2]}`} aria-label={s.l.name} />
           </figure>
         ))}
       </div>
@@ -521,13 +546,13 @@ export function Doors() {
   );
 }
 
-export function V3Home() {
+export function V3Home({ top }: { top: Record<string, TopWork[]> }) {
   return (
     <section className="v3 v3home">
       <Hero />
       <Clients />
       <Recent />
-      <Commissions />
+      <Commissions top={top} />
       <SessionsIndex />
       <Doors />
       <V3Foot />
