@@ -6,6 +6,7 @@ import { PhotoNotice } from "@/components/photo-notice";
 import { GlassLight } from "@/components/glass-light";
 import { PhotoFade } from "@/components/photo-fade";
 import { TextCaret } from "@/components/text-caret";
+import { NavMemo } from "@/components/back-link";
 import { PageFly } from "@/components/v3/page-fly";
 import { THEME_COLOR } from "@/lib/theme-color";
 import "./globals.css";
@@ -267,6 +268,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             mount: it follows the pointer and shows only over `[data-ring]`,
             so every gallery and strip shares it and none carries its own. */}
         <TextCaret />
+        <NavMemo />
         <PageFly />
         {/* fps, finger dots and a frame log, only with `?debug`. The
             overlay itself loads only then: `debug-gate.tsx`. */}

@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Mark } from "@/components/v3/duo";
+import { BackLink } from "@/components/back-link";
 import { billing, markFor, titleCase } from "@/lib/work";
 import { tailHole } from "@/lib/sheet";
 import type { Frame, Project } from "@/lib/work-types";
@@ -91,7 +92,7 @@ export function V3Project({ project, next }: { project: Project; next?: { href: 
       <section className="v3page" id="p-project">
         <div className={across ? "pj-hero two" : "pj-hero"}>
           <header className="pj-top">
-            <Link className="lbl mute pj-back" href="/portfolio">&larr; Portfolio</Link>
+            <BackLink className="lbl mute pj-back" />
             <div className="pj-row">
               <h1 className="pg-t">{name}</h1>
               <p className="lbl mute">{sub}</p>
