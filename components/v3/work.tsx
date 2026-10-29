@@ -98,11 +98,12 @@ function FrameTile({ f, first, onOpen }: { f: FrameItem; first?: boolean; onOpen
   return (
     <figure className={f.wide ? "wt wide" : "wt"}>
       {/* A gallery's frame opens full size here, not its project: Graduation
-          and Headshots have none, and their address leads to the booking page. */}
-      <Link
-        href={`/portfolio/${f.s}`}
+          and Headshots have none, and their address leads to the booking page.
+          Ctrl and cmd click open the viewer too (Julian); a middle click opens
+          the photo itself. */}
+      <a
+        href={f.src}
         onClick={(e) => {
-          if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
           e.preventDefault();
           onOpen();
         }}
@@ -110,7 +111,7 @@ function FrameTile({ f, first, onOpen }: { f: FrameItem; first?: boolean; onOpen
         <div className="ph">
           <Image src={f.src} alt={f.alt} fill sizes={f.wide ? WIDE_SIZES : GRID_SIZES} loading={first ? "eager" : "lazy"} />
         </div>
-      </Link>
+      </a>
     </figure>
   );
 }
