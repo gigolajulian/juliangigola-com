@@ -491,9 +491,6 @@ fieldset.ed-row > legend { float: left; padding: 0; }
 .ed-fields > label.ed-row:has(textarea) { grid-column: 1 / -1; }
 .ed .ed-row input::placeholder, .ed .ed-row textarea.tp-notes::placeholder { text-transform: uppercase; }
 
-/* Under the cursor's fill (`?goo`) the line goes with the number, or the
-   difference turns its teal red. */
-.ed .ed-cell[data-stuck]:not([aria-pressed="true"]) i { background: currentColor; }
 
 /* ── the inquiry (inquire-card.tsx) ─────────────────────────────────
    The inquiry on the same page: six tiles for the kinds, each with who
@@ -532,10 +529,6 @@ fieldset.ed-row > legend { float: left; padding: 0; }
 .ed-kinds input:checked + span :is(em, small) { color: var(--background); }
 .ed-kinds input:focus-visible + span { outline: 1px solid var(--foreground); outline-offset: 3px; }
 @media (hover: hover) { .ed-kinds label:hover > span { border-color: color-mix(in oklab, var(--foreground) 40%, transparent); } }
-/* The pointer's icon rule (pointer.css) scales a stuck target's span 1.2
-   and leans it; a tile is a box, not an icon, so it only takes the fill
-   (Julian, 2026-10-21, "why they lift so much"). */
-.ed .ed-kinds label[data-stick][data-stuck] > span { scale: none; translate: none; }
 /* its questions: the same box, a field line inside */
 .ed-asks { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; padding: 0.75rem 0 0.5rem; flex: none; }
 .ed .ed-ask { border: 1px solid var(--ed-line); padding: 0.75rem 0.8rem 0.65rem; gap: 0; justify-content: space-between; min-height: 4rem; transition: border-color 0.2s; }
