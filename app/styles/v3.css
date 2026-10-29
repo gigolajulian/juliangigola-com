@@ -1429,3 +1429,13 @@ dialog.v3.mo-player,.mo-player>iframe{background:#000}
 .v3 .tbtn::after{content:"";position:absolute;inset:min(0px,calc(50% - 22px))}
 .v3 :is(.chips button,.wsearch)::after,.v3 .wviews button::before{content:"";position:absolute;inset:min(0px,calc(50% - 22px)) 0}
 .v3 .chips{padding-bottom:4px;margin-bottom:-4px}
+/* More 44px hit areas, drawn by nothing (the same way as above). Each grows
+   only into empty space: the frame dots stand side by side, so they grow
+   up and down only (::before; ::after draws the tick), and the doors' rows
+   are 34px apart, so with a mouse they fill the row and no more. */
+.v3 .ticks button::before{content:"";position:absolute;inset:min(0px,calc(50% - 22px)) 0}
+.v3 :is(.b-head .btn,.tabs a){position:relative}
+.v3 :is(.b-head .btn,.tabs a)::after{content:"";position:absolute;inset:min(0px,calc(50% - 22px)) 0}
+.v3 .tabs{padding-bottom:11px;margin-bottom:-11px}
+.v3 .tabs-bar{pointer-events:none} /* drawn only; it sits over the tabs' grown hit areas */
+@media (pointer:fine){.v3 .door li a{position:relative}.v3 .door li a::after{content:"";position:absolute;inset:-10px 0}}
