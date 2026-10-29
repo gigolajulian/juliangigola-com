@@ -119,23 +119,71 @@ function FrameTile({ f, first, onOpen }: { f: FrameItem; first?: boolean; onOpen
 /** A gallery's frames full size over the page: arrows step, Escape or Back closes. */
 function FrameView({ list, at, onGo, onClose }: { list: FrameItem[]; at: number | null; onGo: (n: number) => void; onClose: () => void }) {
   const ref = React.useRef<HTMLDialogElement>(null);
+  /* The frame and its two neighbours sit side by side on one track, the
+     neighbours loading quietly behind it, so a step is the track gliding
+     over, never a swap. GSAP moves it; it loads when the viewer opens. */
+  const track = React.useRef<HTMLDivElement>(null);
+  const G = React.useRef<typeof import("gsap").gsap | null>(null);
+  // The touch in progress: where it went down, the track's x then, its axis once locked, and its speed.
+  const drag = React.useRef<{ x: number; y: number; ox: number; axis: "x" | "y" | null; lx: number; lt: number; v: number } | null>(null);
+  const swiped = React.useRef(false); // a drag's click must not close
+  const queued = React.useRef(0); // a step pressed while the track was still moving
   const open = at !== null;
   React.useEffect(() => {
     const d = ref.current;
     if (!open || !d) return;
     d.showModal();
+    // Into the dialog however it opened (a tap or click left focus on the page).
+    d.querySelector<HTMLButtonElement>(".fv-bar button")?.focus();
     history.pushState({ frame: 1 }, "");
     const pop = () => onClose();
     addEventListener("popstate", pop);
+    void import("gsap").then((g) => (G.current = g.gsap));
     return () => {
       removeEventListener("popstate", pop);
       if (d.open) d.close();
       if (history.state?.frame) history.back();
     };
   }, [open, onClose]);
+  const n = list.length;
+  const wrap = (i: number) => (i + n) % n;
+  const still = () => !G.current || matchMedia("(prefers-reduced-motion: reduce)").matches;
+  /* From frame `from`, glide the track to the frame `by` away (0 = back to it), then make that the frame. */
+  const glide = (from: number, by: number, dur = 0.55) => {
+    const el = track.current!;
+    const g = G.current;
+    const done = () => (by ? onGo(wrap(from + by)) : undefined);
+    if (still() || !g) {
+      el.style.transform = "";
+      return done();
+    }
+    g.killTweensOf(el);
+    g.to(el, { x: -by * el.offsetWidth, y: 0, duration: dur, ease: "expo.out", onComplete: done });
+  };
+  /* A new frame: the photos keep their elements (keyed by photo), so the
+     track goes back to 0 in the same paint and nothing reloads or jumps.
+     Then any step pressed mid-glide runs. */
+  React.useLayoutEffect(() => {
+    const el = track.current;
+    if (at === null || !el) return;
+    if (G.current) G.current.set(el, { x: 0, y: 0 });
+    else el.style.transform = "";
+    const by = queued.current;
+    queued.current = 0;
+    if (by) glide(at, by);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [at]);
   if (at === null) return null;
   const f = list[at];
-  const step = (by: number) => onGo((at + by + list.length) % list.length);
+  const settle = (by: number, dur?: number) => glide(at, by, dur);
+  const step = (by: number) => {
+    const g = G.current;
+    if (g && track.current && g.isTweening(track.current)) {
+      queued.current = by;
+      return;
+    }
+    settle(by);
+  };
   return (
     <dialog
       ref={ref}
@@ -146,14 +194,89 @@ function FrameView({ list, at, onGo, onClose }: { list: FrameItem[]; at: number 
         if (e.key === "ArrowRight") step(1);
         if (e.key === "ArrowLeft") step(-1);
       }}
-      onClick={(e) => e.target === e.currentTarget && onClose()}
+      /* Touch: the track follows the finger. Let go sideways and it glides
+         on at the finger's speed to the next frame, or back; up or down past
+         90px the frame slides off over the page, which shows the moment the drag turns vertical, and the viewer closes. The axis locks
+         after 10px. Grabbing a glide in flight takes it from where it is. */
+      onPointerDown={(e) => {
+        swiped.current = false;
+        if (e.pointerType === "mouse" || (e.target as Element).closest("button")) return void (drag.current = null);
+        const el = track.current!;
+        G.current?.killTweensOf(el);
+        const ox = G.current ? Number(G.current.getProperty(el, "x")) : 0;
+        drag.current = { x: e.clientX, y: e.clientY, ox, axis: null, lx: e.clientX, lt: e.timeStamp, v: 0 };
+      }}
+      onPointerMove={(e) => {
+        const d = drag.current;
+        if (!d) return;
+        const dx = e.clientX - d.x;
+        const dy = e.clientY - d.y;
+        if (!d.axis && Math.max(Math.abs(dx), Math.abs(dy)) > 10) d.axis = Math.abs(dx) > Math.abs(dy) && n > 1 ? "x" : "y";
+        const dt = e.timeStamp - d.lt;
+        if (dt > 0) d.v = 0.8 * ((e.clientX - d.lx) / dt) + 0.2 * d.v;
+        d.lx = e.clientX;
+        d.lt = e.timeStamp;
+        const g = G.current;
+        if (still() || !g) return;
+        if (d.axis === "x") g.set(track.current, { x: d.ox + dx });
+        if (d.axis === "y") {
+          ref.current!.dataset.drop = "";
+          g.set(track.current, { y: dy });
+        }
+      }}
+      onPointerUp={(e) => {
+        const d = drag.current;
+        drag.current = null;
+        if (!d) return;
+        const el = track.current!;
+        if (!d.axis) {
+          // A tap that caught a glide in flight: let it finish.
+          if (d.ox) settle(Math.round(-d.ox / el.offsetWidth));
+          return;
+        }
+        swiped.current = true;
+        const g = G.current;
+        if (d.axis === "y") {
+          const dy = e.clientY - d.y;
+          const back = () => delete ref.current!.dataset.drop;
+          if (Math.abs(dy) < 90) return void (g ? g.to(el, { y: 0, duration: 0.45, ease: "expo.out", onComplete: back }) : back());
+          if (still() || !g) return onClose();
+          return void g.to(el, { y: Math.sign(dy) * innerHeight, duration: 0.3, ease: "power2.in", onComplete: onClose });
+        }
+        // Where the throw would carry the track a fifth of a second on; the nearest frame there wins.
+        const x = d.ox + e.clientX - d.x + d.v * 200;
+        const by = Math.max(-1, Math.min(1, Math.round(-x / el.offsetWidth)));
+        settle(by, Math.abs(d.v) > 0.5 ? 0.45 : 0.6);
+      }}
+      onPointerCancel={() => {
+        if (!drag.current) return;
+        drag.current = null;
+        delete ref.current!.dataset.drop;
+        G.current?.to(track.current, { x: 0, y: 0, duration: 0.45, ease: "expo.out" });
+      }}
+      onClick={(e) => {
+        if (swiped.current) return void (swiped.current = false);
+        if (e.target === e.currentTarget) onClose();
+      }}
     >
-      <Image key={f.src} src={f.src} alt={f.alt} fill sizes="100vw" />
+      {/* The frame centred, its neighbours a screen to each side, fetched at low priority so the frame comes first. */}
+      <div className="fv-track" ref={track}>
+        {(n > 2 ? [-1, 0, 1] : n === 2 ? [0, 1] : [0]).map((k) => {
+          const g = list[wrap(at + k)];
+          // With two frames the other one is both before and after: put it on the side it was left.
+          const side = n === 2 && k === 1 ? (at === 0 ? 1 : -1) : k;
+          return (
+            <div className="fv-ph" key={g.src} style={{ translate: `${side * 100}% 0` }} aria-hidden={k !== 0}>
+              <Image src={g.src} alt={k ? "" : g.alt} fill sizes="100vw" loading="eager" fetchPriority={k ? "low" : "high"} />
+            </div>
+          );
+        })}
+      </div>
       <div className="fv-bar lbl">
-        <span>{String(at + 1).padStart(2, "0")} / {String(list.length).padStart(2, "0")}</span>
+        <span>{String(at + 1).padStart(2, "0")} / {String(n).padStart(2, "0")}</span>
         <button type="button" onClick={onClose}>Close</button>
       </div>
-      {list.length > 1 ? (
+      {n > 1 ? (
         <>
           <button type="button" className="fv-step prev lbl" aria-label="Previous frame" onClick={() => step(-1)}>&larr;</button>
           <button type="button" className="fv-step next lbl" aria-label="Next frame" onClick={() => step(1)}>&rarr;</button>

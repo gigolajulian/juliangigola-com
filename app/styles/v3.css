@@ -1405,9 +1405,14 @@ dialog.v3.mo-player,.mo-player>iframe{background:#000}
 .v3 .a-seq a.fig:hover .ph img{transform:scale(1.04)}}
 /* A gallery's frame full size (`FrameView`, work.tsx): the photo on black,
    the count and Close along the top, arrows at the sides. */
-.fv{position:fixed;inset:0;width:100vw;height:100dvh;max-width:none;max-height:none;margin:0;padding:0;border:0;background:#000;color:rgb(var(--on-photo));outline:0}
+.fv{position:fixed;inset:0;touch-action:pinch-zoom;width:100vw;height:100dvh;max-width:none;max-height:none;margin:0;padding:0;border:0;background:#000;color:rgb(var(--on-photo));outline:0;overflow:hidden}
 .fv::backdrop{background:#000}
-.fv>img{object-fit:contain;padding:64px var(--gr) 32px var(--g);pointer-events:none}
+/* A vertical drag: the page shows under the frame at once. */
+.fv[data-drop],.fv[data-drop]::backdrop{background:transparent}
+.fv[data-drop] .fv-bar,.fv[data-drop] .fv-step{visibility:hidden}
+.fv-track{position:absolute;inset:0;pointer-events:none}
+.fv-ph{position:absolute;inset:0}
+.fv-ph>img{object-fit:contain;padding:64px var(--gr) 32px var(--g);pointer-events:none}
 .fv-bar{position:absolute;top:0;left:0;right:0;display:flex;justify-content:space-between;align-items:center;padding:20px var(--gr) 0 var(--g)}
 .fv button{min-height:44px;min-width:44px;padding:0 4px;background:none;border:0;color:inherit;font:inherit;letter-spacing:inherit;text-transform:inherit;cursor:pointer}
 .fv-step{position:absolute;top:50%;translate:0 -50%;font-size:16px}
@@ -1415,4 +1420,11 @@ dialog.v3.mo-player,.mo-player>iframe{background:#000}
 .fv-step.next{right:calc(var(--gr) - 12px)}
 @media (hover:hover){.fv button:hover{color:var(--accent)}}
 .fv button:focus-visible{outline:1px solid currentColor;outline-offset:2px}
-@media (max-width:700px){.fv>img{padding:56px 0 24px}.fv-step{display:none}}
+@media (max-width:700px){.fv-ph>img{padding:56px 0 24px}.fv-step{display:none}}
+/* 44px targets for a mouse too (touch has its own above): an invisible
+   pseudo-element grows each hit area, so nothing is drawn or moved. */
+.v3 :is(.a-cover .nav,.site-hdr .links,.foot-line) a,.v3 .chips button,.v3 .wviews button,.v3 .wsearch{position:relative}
+.v3 :is(.a-cover .nav,.site-hdr .links,.foot-line) a::after{content:"";position:absolute;inset:min(0px,calc(50% - 22px)) 0}
+.v3 .tbtn::after{content:"";position:absolute;inset:min(0px,calc(50% - 22px))}
+.v3 :is(.chips button,.wsearch)::after,.v3 .wviews button::before{content:"";position:absolute;inset:min(0px,calc(50% - 22px)) 0}
+.v3 .chips{padding-bottom:4px;margin-bottom:-4px}
