@@ -10,7 +10,7 @@ const ctx = vi.hoisted(() => ({ env: {} as Record<string, unknown> }));
 vi.mock("@opennextjs/cloudflare", () => ({ getCloudflareContext: async () => ({ env: ctx.env }) }));
 
 const { POST: start } = await import("@/app/api/deposit/route");
-const { GET: status } = await import("@/app/api/deposit/[id]/route");
+const { GET: status, PUT: putRefs } = await import("@/app/api/deposit/[id]/route");
 const { POST: hook } = await import("@/app/api/stripe/route");
 const { paidFor } = await import("@/lib/deposit");
 
@@ -341,5 +341,35 @@ describe("GET /api/deposit/<id>", () => {
     await deliver(paid());
     const out = await (await read(PI)).json();
     expect(out).toEqual({ status: "booked", booking: { uid: "cal_uid", start: START } });
+  });
+});
+
+describe("references with a deposit", () => {
+  const JPEG = new Uint8Array([0xff, 0xd8, 0xff, 0xe0, 0, 0x10, 0x4a, 0x46, 0x49, 0x46, 0, 1]);
+  const send = (form: FormData, id = PI) =>
+    putRefs(new Request(`https://juliangigola.com/api/deposit/${id}`, { method: "PUT", body: form }), { params: Promise.resolve({ id }) });
+  const refs = () => {
+    const f = new FormData();
+    f.append("refs", new File([JPEG], "mood.jpg", { type: "image/jpeg" }));
+    f.append("refs", new File(["<svg/>"], "x.svg", { type: "image/svg+xml" }));
+    f.append("picks", "/work/sago/01.jpg\nhttps://evil.example/x.jpg");
+    return f;
+  };
+
+  it("keeps the pictures beside the intent and attaches them to the Deposit paid mail", async () => {
+    expect(await (await send(refs())).json()).toEqual({ files: 1, picks: 1 });
+    await deliver(paid());
+    expect(mails[0].subject).toMatch(/^Deposit paid: /);
+    const m = mails[0] as Mail & { attachments?: { filename: string; type: string }[] };
+    expect(m.attachments?.map((a) => [a.filename, a.type])).toEqual([["mood.jpg", "image/jpeg"]]);
+    expect(m.text).toContain("https://juliangigola.com/work/sago/01.jpg");
+    expect(m.text).not.toContain("evil.example");
+  });
+
+  it("refuses a settled or unknown deposit, and the mail goes without", async () => {
+    intent.metadata.outcome = "booked";
+    expect((await send(refs())).status).toBe(404);
+    expect((await send(refs(), "../INBOX")).status).toBe(404);
+    expect(kv().puts.filter((k) => k.startsWith("dref:"))).toEqual([]);
   });
 });

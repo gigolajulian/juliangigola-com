@@ -75,6 +75,8 @@ export type DepositRecord = { status: Status; at: string; booking?: { uid: strin
 const STUCK_MS = 2 * 60 * 1000;
 
 export const recordKey = (intent: string) => `deposit:${intent}`;
+/** A reference sent with the deposit (`app/api/deposit/[id]`): `f<n>` a file, `picks` frames of mine. */
+export const refKey = (intent: string, part: string) => `dref:${intent}:${part}`;
 export const isIntentId = (s: string) => /^pi_[A-Za-z0-9]{8,64}$/.test(s);
 
 const looksLikeEmail = (s: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s);
@@ -258,7 +260,9 @@ const NEXT = {
 };
 
 /** A plain mail to hello@ saying how a deposit ended. A failed send is logged, never a failed webhook. */
-async function mail(email: Env["EMAIL"], subject: string, lines: string[], who?: { name: string; email: string }) {
+type Attachment = { content: string; filename: string; type: string; disposition: "attachment" };
+
+async function mail(email: Env["EMAIL"], subject: string, lines: string[], who?: { name: string; email: string }, attachments: Attachment[] = []) {
   try {
     await email?.send({
       to: MAIL_TO,
@@ -266,16 +270,42 @@ async function mail(email: Env["EMAIL"], subject: string, lines: string[], who?:
       subject,
       text: [...lines, "", "Inbox: https://juliangigola.com/admin"].join("\n"),
       ...(who?.email ? { replyTo: who } : {}),
+      ...(attachments.length ? { attachments } : {}),
     });
   } catch (e) {
     console.error("deposit mail", subject.split(":")[0], String(e));
   }
 }
 
-async function tell(env: Env, status: keyof typeof SAID, b: Booking | string, link: string) {
+/** The references sent with a deposit (`app/api/deposit/[id]`): files to attach, and the frames of mine they picked. Nothing if KV fails. */
+async function refsOf(inbox: Env["INBOX"], intent: string): Promise<{ files: Attachment[]; picks: string[] }> {
+  try {
+    type Key = { name: string; metadata?: { name: string; type: string } };
+    const { keys } = (await inbox.list({ prefix: refKey(intent, "") })) as { keys: Key[] };
+    const files: (Attachment | null)[] = await Promise.all(
+      keys
+        .filter((k: Key) => k.metadata?.type)
+        .map(async (k: Key) => {
+          const buf = (await inbox.get(k.name, "arrayBuffer")) as ArrayBuffer | null;
+          return buf ? { content: Buffer.from(buf).toString("base64"), filename: k.metadata!.name, type: k.metadata!.type, disposition: "attachment" as const } : null;
+        }),
+    );
+    const picks = (((await inbox.get(refKey(intent, "picks"))) as string | null) ?? "").split("\n").filter(Boolean);
+    return { files: files.filter((f): f is Attachment => f !== null), picks };
+  } catch (e) {
+    console.error("deposit refs", String(e));
+    return { files: [], picks: [] };
+  }
+}
+
+async function tell(env: Env, status: keyof typeof SAID, b: Booking | string, link: string, intent: string) {
   const who = typeof b === "string" ? undefined : b;
   const what = who ? [SESSION[who.slug] ?? who.slug, whenPT(who.start), who.name, "$100"].join(", ") : "$100";
-  await mail(env.EMAIL, `${SAID[status]}: ${what}`, [who ? `${who.name} <${who.email}>` : "Unknown client", NEXT[status], `Stripe: ${link}`], who);
+  const refs = await refsOf(env.INBOX, intent);
+  const lines = [who ? `${who.name} <${who.email}>` : "Unknown client", NEXT[status], `Stripe: ${link}`];
+  if (refs.files.length) lines.push("", `References attached: ${refs.files.length}`);
+  if (refs.picks.length) lines.push("", "Picked from my work:", ...refs.picks.map((src) => `https://juliangigola.com${src}`));
+  await mail(env.EMAIL, `${SAID[status]}: ${what}`, lines, who, refs.files);
 }
 
 /**
@@ -345,7 +375,7 @@ export async function settle(env: Env, intent: string, metadata: { [k: string]: 
       if (await isOpen(b)) {
         const booking = await bookCal(b, intent);
         await put({ status: "booked", booking: { uid: booking.uid, start: booking.start } });
-        await tell(env, "booked", b, link);
+        await tell(env, "booked", b, link, intent);
         await sendConfirm(env.CLIENT_EMAIL, {
           ...b,
           session: SESSION[b.slug] ?? b.slug,
@@ -364,7 +394,7 @@ export async function settle(env: Env, intent: string, metadata: { [k: string]: 
   try {
     await stripe(env.STRIPE_SECRET_KEY, "/refunds", { payment_intent: intent }, `refund-${intent}`);
     await put({ status: "refunded" });
-    await tell(env, "refunded", b, link);
+    await tell(env, "refunded", b, link, intent);
     return "refunded";
   } catch {
     await put({ status: "failed" });
@@ -386,7 +416,7 @@ export async function settle(env: Env, intent: string, metadata: { [k: string]: 
       type: "booking",
     };
     await env.INBOX.put(enquiryKey(now, id.slice(0, 8)), JSON.stringify(row), { metadata: summary(row) });
-    await tell(env, "failed", b, link);
+    await tell(env, "failed", b, link, intent);
     return "failed";
   }
 }

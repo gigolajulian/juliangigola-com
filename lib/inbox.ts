@@ -120,6 +120,31 @@ export const isPicture = (head: Uint8Array, type: string) =>
           /^(heic|heix|hevc|hevx|heim|heis|mif1|msf1)$/.test(String.fromCharCode(...head.slice(8, 12)))
         : false;
 
+/** A visitor's uploads, as the server takes them: pictures only, checked by
+    their first bytes, at most `room`, 6MB each and 20MB in all. The Inquire
+    form and the booking card's deposit (`app/api/deposit/[id]`). */
+export async function takeUploads(entries: FormDataEntryValue[], room: number): Promise<File[]> {
+  let budget = 20 * 1024 * 1024;
+  const offered = entries
+    .filter((f): f is File => f instanceof File && f.size > 0)
+    // A HEIC can arrive with no type from a browser that does not know it.
+    .map((f) => (!f.type && /\.hei[cf]$/i.test(f.name) ? new File([f], f.name, { type: "image/heic" }) : f))
+    .filter((f) => SAFE_IMAGE.test(f.type))
+    .slice(0, Math.max(0, room))
+    .filter((f) => f.size <= 6 * 1024 * 1024 && (budget -= f.size) >= 0);
+  return (
+    await Promise.all(offered.map(async (f) => (isPicture(new Uint8Array(await f.slice(0, 12).arrayBuffer()), f.type) ? f : null)))
+  ).filter((f): f is File => f !== null);
+}
+
+/** Frames of the site's own picked from the panel: paths of the site's shape only. */
+export const takePicks = (raw: string): string[] =>
+  raw
+    // A multipart form sends its line breaks as CRLF.
+    .split(/\r?\n/)
+    .filter((src) => /^\/(work\/[\w-]+|hero|covers)\/[\w.-]+\.(jpe?g|png|webp)$/i.test(src))
+    .slice(0, MAX_REFS);
+
 /** Their company's site, read off a work address; none for a free one. */
 export const companySite = (email: string): string | undefined => {
   const domain = email.split("@")[1]?.toLowerCase();

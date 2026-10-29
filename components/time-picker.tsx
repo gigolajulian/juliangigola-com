@@ -5,6 +5,7 @@ import Link from "next/link";
 import { gsap } from "gsap";
 import { cn } from "@/lib/utils";
 import { DepositStep, type DepositBody } from "@/components/deposit-step";
+import { ReferencePicks } from "@/components/reference-picks";
 import { isPaid } from "@/lib/paid";
 import { Orb, ORB_ROUND } from "@/components/orb";
 import { Calendar, dlabel, duration, fmt, type Shell } from "@/components/v3/flow";
@@ -192,6 +193,8 @@ export function TimePicker({
   /* A paid session, its deposit taken here (`?deposit`, deposit-step.tsx). */
   const [paid, setPaid] = React.useState(false);
   const [deposit, setDeposit] = React.useState<DepositBody | null>(null);
+  /* JG V3: references picked on the details step, sent with the deposit (Julian, 2026-10-28). */
+  const [refs, setRefs] = React.useState<FormData | null>(null);
   /* What was typed, put back when the deposit step goes back to the form. */
   const typed = React.useRef<Record<string, string>>({});
   /* `?smooth`, while Julian looks: each step slides in from the side it
@@ -724,6 +727,10 @@ export function TimePicker({
     if (paid) {
       setBooked({ name: firstName, email: String(form.get("email")).trim(), where, phone, via: "" });
       setDeposit({ slug, start: new Date(pick.start).toISOString(), timeZone: tz, name, email: String(form.get("email")), phone, ...(notes ? { notes } : {}), ...(needsWhere ? { where } : {}), session });
+      const sent = new FormData();
+      form.getAll("refs").forEach((f) => f instanceof File && f.size && sent.append("refs", f));
+      if (form.get("picks")) sent.append("picks", String(form.get("picks")));
+      setRefs(sent.has("refs") || sent.has("picks") ? sent : null);
       setStep("pay");
       return;
     }
@@ -948,6 +955,7 @@ export function TimePicker({
           v3={(p) => shell(p)}
           head={<div className="fig"><b>$100</b><span className="lbl mute">Holds {dlabel(date)}, {fmt(pick.min)}</span></div>}
           body={deposit}
+          refs={refs}
           rows={[
             [`${v3.name}, ${duration(length)}`, price],
             ["Deposit today", "$100"],
@@ -1037,6 +1045,7 @@ export function TimePicker({
                 {asking ? f("detail", asking) : null}
                 {needsWhere && !WHERE[slug] ? f("where", "Where") : null}
                 {f("notes", "Anything I should know")}
+                {paid ? <ReferencePicks resync={null} v3 /> : null}
                 {error ? <p className="err" role="alert">{error}</p> : null}
               </>
             ),
