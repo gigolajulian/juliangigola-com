@@ -552,6 +552,10 @@ export function V3Work({
                 onClick={() => flipped(() => setFilter(d))}
               >
                 {d}
+                {/* The count only on the chip that is on (Julian). */}
+                {d === filter && (d === "All" || counts[d] > 1) ? (
+                  <span>{d === "All" ? work.length : counts[d]}</span>
+                ) : null}
               </button>
             ))}
           </div>
