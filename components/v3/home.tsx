@@ -366,6 +366,8 @@ function Commissions({ top }: { top: Record<string, TopWork[]> }) {
       <div className="tabs-bar" ref={bar} hidden>
         <i />
       </div>
+      {/* The tabs swap the sheet in place: say so to a screen reader. */}
+      <p className="sr-only" aria-live="polite">{tab ? `${COMMISSION_TABS[tab][0]}, ${items.length} projects` : ""}</p>
       <div className="sheet">
         {items.map((s, n) => (
           <figure key={s.s ?? n}>

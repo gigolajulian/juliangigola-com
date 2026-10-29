@@ -133,6 +133,8 @@ function FrameView({ list, at, onGo, onClose }: { list: FrameItem[]; at: number 
     const d = ref.current;
     if (!open || !d) return;
     d.showModal();
+    // Into the dialog however it opened (a tap or click left focus on the page).
+    d.querySelector<HTMLButtonElement>(".fv-bar button")?.focus();
     history.pushState({ frame: 1 }, "");
     const pop = () => onClose();
     addEventListener("popstate", pop);
