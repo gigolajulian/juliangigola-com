@@ -868,3 +868,11 @@ h2.contact-title {
     --mark-cap: 5rem;
   }
 }
+
+/* The caret over a text field (`text-caret.tsx`): a dot that draws itself
+   out into an upright bar, drawn large and scaled down so the edge stays
+   clean. White, difference blended, so it reads on any ground. */
+[data-caret] { cursor: none !important; }
+.text-caret { position: fixed; left: 0; top: 0; z-index: 9999; color: white; mix-blend-mode: difference; pointer-events: none; }
+.text-caret i { position: absolute; left: -60px; top: -60px; width: 120px; height: 120px; border-radius: 50%; background: currentColor; opacity: 0; scale: calc(18.5 / 120); transition: scale 450ms var(--ease-out-strong), opacity var(--dur-xs) var(--ease-out-strong); }
+.text-caret[data-on] i { opacity: 1; scale: calc(2.5 / 120) calc(24 / 120); }
