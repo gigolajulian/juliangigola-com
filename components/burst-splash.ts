@@ -117,15 +117,29 @@ export function burst(sizes: string[][], heroes: { d: string[]; l: string[] }) {
     if (whole && r && r.width > 0) {
       const b = last.getBoundingClientRect(), a = last.naturalWidth / last.naturalHeight;
       const w = Math.min(b.width, b.height * a), ht = w / a;
-      if (h) last.style.objectPosition = getComputedStyle(h).objectPosition;
-      last.style.objectFit = "cover";
-      last.animate(
-        [
-          { left: `${b.left + (b.width - w) / 2}px`, top: `${b.top + (b.height - ht) / 2}px`, width: `${w}px`, height: `${ht}px` },
-          { left: `${r.left}px`, top: `${r.top}px`, width: `${r.width}px`, height: `${r.height}px` },
-        ],
-        { duration: LAND, easing: EASE, fill: "forwards" },
-      );
+      const cl = b.left + (b.width - w) / 2, ct = b.top + (b.height - ht) / 2;
+      /* The same glide as a box going from the whole photograph to the
+         hero's, cropping as \`cover\` with the hero's object-position would,
+         but drawn with transform and clip-path on the photograph's own
+         box, which never moves: no layout shift (CLS). Sampled, and the
+         one easing runs over the samples, so the path and timing match. */
+      const pos = (h ? getComputedStyle(h).objectPosition : "50% 50%").split(" ");
+      const at = (v = "50%", room: number) => (v.endsWith("%") ? (room * parseFloat(v)) / 100 : parseFloat(v));
+      const lerp = (x: number, y: number, p: number) => x + (y - x) * p;
+      const frames: Keyframe[] = [];
+      for (let i = 0; i <= 24; i++) {
+        const p = i / 24;
+        const bl = lerp(cl, r.left, p), bt = lerp(ct, r.top, p), bw = lerp(w, r.width, p), bh = lerp(ht, r.height, p);
+        const dw = Math.max(bw, bh * a), dh = dw / a, k = dw / w;
+        const tx = bl + at(pos[0], bw - dw) - b.left - k * (cl - b.left), ty = bt + at(pos[1], bh - dh) - b.top - k * (ct - b.top);
+        const L = (bl - b.left - tx) / k, T = (bt - b.top - ty) / k;
+        frames.push({
+          transform: `translate(${tx}px, ${ty}px) scale(${k})`,
+          clipPath: `inset(${T}px ${b.width - L - bw / k}px ${b.height - T - bh / k}px ${L}px)`,
+        });
+      }
+      last.style.transformOrigin = "0 0";
+      last.animate(frames, { duration: LAND, easing: EASE, fill: "forwards" });
     }
     await sleep(LAND);
     root.dataset.landed = ""; // the type comes in now the photograph is in place (splash.css)
