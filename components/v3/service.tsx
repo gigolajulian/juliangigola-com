@@ -89,7 +89,7 @@ export function V3Service({ page, frames }: { page: BookingPage; frames: Frame[]
             <h2 className="lbl mute">Also booking</h2>
             <ul>
               {others.map((p) => (
-                <li key={p.slug}><Link href={bookingHref(p)}>{p.h1}<span aria-hidden>→</span></Link></li>
+                <li key={p.slug}><Link href={bookingHref(p)}>{p.h1.replace(/\b(?!in\b)\w/g, (c) => c.toUpperCase())}<span aria-hidden>→</span></Link></li>
               ))}
             </ul>
           </section>
