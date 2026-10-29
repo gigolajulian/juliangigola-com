@@ -124,8 +124,11 @@ export function DepositStep({
   editorial,
   head,
   v3,
+  refs,
 }: {
   className?: string;
+  /** The card's References (`refs` files, `picks`), sent once the intent exists. */
+  refs?: FormData | null;
   /** JG V3: the step's parts for the page's stepper; `head` is the $100
       figure, `rows` the bill (the "Deposit today" row is the live one). */
   v3?: (p: { head: string; sub?: string; body: React.ReactNode; bar: React.ReactNode }) => React.ReactNode;
@@ -200,7 +203,10 @@ export function DepositStep({
       return null;
     }
     if (!res.ok) throw new Error(String(res.status));
-    return res.json();
+    const made: { clientSecret: string; intentId: string } = await res.json();
+    // References ride beside the intent before the charge, so the "Deposit paid" mail finds them. Never in the way of paying.
+    if (refs) await fetch(`/api/deposit/${encodeURIComponent(made.intentId)}`, { method: "PUT", body: refs }).catch(() => {});
+    return made;
   };
   const back = (msg: string) => {
     setError(msg);
