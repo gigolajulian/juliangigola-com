@@ -1392,6 +1392,17 @@ dialog.v3.mo-player,.mo-player>iframe{background:#000}
 /* The row whose photo is open and under the center line stays inked; the
    scroll band above only inks a row while its header sits on that line. */
 @media (max-width:800px){:root[data-scrollfx=rows] .v3 .a-index .row.on[data-open] .t{animation:none;color:var(--ink)}}
+/* Recent work links to each project. On a mouse the photo eases in a little
+   and the name takes the accent; touch and reduced motion skip it. */
+.v3 .a-seq a.fig{display:block;color:inherit;text-decoration:none}
+.v3 .a-seq a.fig .ph{cursor:pointer}
+.v3 .a-seq a.fig:focus-visible{outline:1px solid var(--accent);outline-offset:4px}
+@media (hover:hover) and (pointer:fine){
+.v3 .a-seq a.fig .nm{transition:color .3s var(--ease-out-strong)}
+.v3 .a-seq a.fig:hover .nm{color:var(--accent)}}
+@media (hover:hover) and (pointer:fine) and (prefers-reduced-motion:no-preference){
+.v3 .a-seq a.fig .ph img{transition:transform .7s var(--ease-out-strong)}
+.v3 .a-seq a.fig:hover .ph img{transform:scale(1.04)}}
 /* A gallery's frame full size (`FrameView`, work.tsx): the photo on black,
    the count and Close along the top, arrows at the sides. */
 .fv{position:fixed;inset:0;width:100vw;height:100dvh;max-width:none;max-height:none;margin:0;padding:0;border:0;background:#000;color:rgb(var(--on-photo));outline:0}

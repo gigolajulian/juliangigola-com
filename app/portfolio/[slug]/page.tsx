@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import Link from "next/link";
+import { BackLink } from "@/components/back-link";
 import { notFound } from "next/navigation";
 import { CoverArt } from "@/components/v3/sleeves";
 import { CallToAction } from "@/components/call-to-action";
@@ -133,15 +133,12 @@ export default async function ProjectPage(props: PageProps<"/portfolio/[slug]">)
 function Crumb() {
   return (
     <nav aria-label="Breadcrumb">
-      <Link
-        href="/portfolio"
+      <BackLink
         /* One line: on a phone the head's middle column left it 37px
            and the arrow stood over the word. Padded to a 26px target
            and pulled back by as much. */
         className="label -my-1.5 inline-block whitespace-nowrap py-1.5 text-muted-foreground transition-colors duration-200 hoverable:hover:text-foreground"
-      >
-        &larr; Portfolio
-      </Link>
+      />
     </nav>
   );
 }
