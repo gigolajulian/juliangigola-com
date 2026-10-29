@@ -1454,3 +1454,5 @@ dialog.v3.mo-player,.mo-player>iframe{background:#000}
 @media (max-width:700px){.v3 .pj-top{position:relative}
 .v3 .pj-mark-top{display:block;position:absolute;right:var(--gr);top:calc(40px + .5lh - 14px);line-height:0;color:var(--ink)}
 .v3 .pj-big .pj-mark{display:none}.v3 .pj-big:has(.pj-mark)::after{content:none}}
+/* A short tab ("All", 25px) grows sideways to 44px, never past half the 28px gap to its neighbour. */
+.v3 .tabs a[href]::after{left:max(-14px,min(0px,calc(50% - 22px)));right:max(-14px,min(0px,calc(50% - 22px)))}
