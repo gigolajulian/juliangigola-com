@@ -1409,7 +1409,7 @@ dialog.v3.mo-player,.mo-player>iframe{background:#000}
 .fv::backdrop{background:#000}
 /* A vertical drag: the page shows under the frame at once. */
 .fv[data-drop],.fv[data-drop]::backdrop{background:transparent}
-.fv[data-drop] .fv-bar,.fv[data-drop] .fv-step{visibility:hidden}
+.fv[data-drop] .fv-bar,.fv[data-drop] .fv-step{opacity:0}
 .fv-track{position:absolute;inset:0;pointer-events:none}
 .fv-ph{position:absolute;inset:0}
 .fv-ph>img{object-fit:contain;padding:64px var(--gr) 32px var(--g);pointer-events:none}

@@ -25,6 +25,7 @@ import { LegacyHeader, LegacyMenu, MotionGate, OnLegacy, OnV3, V3Footer, V3Heade
 import { ScrollThumb } from "@/components/v3/scroll-thumb";
 import { SmoothScroll } from "@/components/v3/smooth-scroll";
 import { ScrollReveal } from "@/components/v3/scroll-reveal";
+import { keepNames } from "@/lib/keep-names";
 
 /* JG V3 (DESIGN.md): Inter Tight for the display type and the wordmark,
    IBM Plex Mono for everything else. No other faces. Served from this site
@@ -110,7 +111,7 @@ export const metadata: Metadata = {
    The cover's two lines (`LATE`) and text in clipping boxes (`clips`) are
    left to that later pass, as before. Chrome holds the first paint until then
    (`rel="expect"` in the head). */
-const TYPE_EARLY = `(function(){try{if(document.documentElement.dataset.font!=="v2")return;var s=(${typeSizer.toString()})(${JSON.stringify(LEVELS)},${JSON.stringify(sizesOf(DEFAULTS))},${JSON.stringify(SKIP)},${JSON.stringify(LIQUID)});s.scan([document.body],${JSON.stringify(`${SKIP}, ${LATE}`)},${clips.toString()});s.fit();window.__jgType=s}catch(e){}})()`;
+const TYPE_EARLY = keepNames(`(function(){try{if(document.documentElement.dataset.font!=="v2")return;var s=(${typeSizer.toString()})(${JSON.stringify(LEVELS)},${JSON.stringify(sizesOf(DEFAULTS))},${JSON.stringify(SKIP)},${JSON.stringify(LIQUID)});s.scan([document.body],${JSON.stringify(`${SKIP}, ${LATE}`)},${clips.toString()});s.fit();window.__jgType=s}catch(e){}})()`);
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
