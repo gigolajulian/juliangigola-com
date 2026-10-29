@@ -10,9 +10,8 @@ import { isPaid } from "@/lib/paid";
 import { Orb, ORB_ROUND } from "@/components/orb";
 import { Calendar, dlabel, duration, fmt, type Shell } from "@/components/v3/flow";
 
-/* Goo (Julian, 2026-10-20, OKd 10-21): the cursor pours into the card's
-   buttons, times and open days, as on the inquiry chips (`pointer-mark.tsx`).
-   `?goo=0` turns it off. */
+/* Goo (Julian, 2026-10-20, OKd 10-21) on the card's buttons, times and
+   open days. `?goo=0` turns it off. */
 const goo = typeof location === "undefined" || new URLSearchParams(location.search).get("goo") !== "0";
 
 /* ── the time picker ──────────────────────────────────────────────

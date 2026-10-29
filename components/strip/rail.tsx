@@ -554,8 +554,7 @@ export function StripRail({
            gap above the rail and the 16px foot below it, without moving
            a pixel of the drawing. */
         data-cue={cue ? "" : undefined}
-        /* Julian: one word at the pointer, always, and on a rail
-           that word is VIEW (`pointer-mark.tsx`). The names stay on the
+        /* On a rail the hover word is VIEW. The names stay on the
            rail itself. */
         data-ring={over !== null || overAway !== null ? "View" : ""}
         className={cn(

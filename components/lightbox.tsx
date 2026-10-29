@@ -1113,7 +1113,6 @@ function LightboxButton({
       // "Previous frame" for a screen reader, which has no picture in
       // front of it; a tag over the picture does.
       data-ring={label.replace(" frame", "")}
-      // The pointer sticks to it (`pointer-mark.tsx`).
       data-stick=""
       // 44px minimum target: the control someone taps repeatedly on a
       // phone gets a real hit area rather than an icon's worth.

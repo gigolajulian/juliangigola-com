@@ -872,7 +872,6 @@ export function WorkShell({
             aria-pressed={view === mode && !scoping}
             aria-label={`${WORD[mode]} view`}
             data-ring={WORD[mode]}
-            /* Julian: the pointer sticks to these four (`pointer-mark.tsx`). */
             data-stick=""
             onClick={() =>
               morphView(() => {
@@ -1206,7 +1205,6 @@ function Chip({
          and the pointer was repeating it back a few pixels lower down.
          Julian asked. */
       data-ring=""
-      // The pointer sticks to the chip (`pointer-mark.tsx`).
       data-stick=""
       /* So the strip that is about to mount knows it is a filter change
          and fades in where it stands, instead of sliding in from a
