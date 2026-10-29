@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { CoverNav, V3Foot } from "@/components/v3/chrome";
 import { Duo, Marks, Pick } from "@/components/v3/duo";
 import { shiftScroll } from "@/components/v3/smooth-scroll";
+import { useSiteTheme } from "@/lib/site-theme";
 import { COMMISSIONS, COMMISSION_TABS, DOORS, HERO, HERO_ALT, INDEX_ORDER, RECENT, SESSIONS, rate, type SessionSlug } from "@/lib/v3";
 
 /* JG V3 homepage (master v39, section A): hero crossfade, logo strip,
@@ -221,8 +222,12 @@ function Clients() {
 }
 
 /* Recent work: three columns, a smooth lerp parallax clamped to ±56px. */
+/* A shot's project, from its path: /work/<slug>/.. or /hero/<slug>-NN.jpg. */
+const slugOf = (src: string) => /\/work\/([^/]+)\//.exec(src)?.[1] ?? /\/hero\/(.+)-\d+\./.exec(src)?.[1];
+
 function Recent() {
   const seq = React.useRef<HTMLDivElement>(null);
+  const theme = useSiteTheme();
   React.useEffect(() => {
     if (calm()) return;
     const el = seq.current!;
@@ -278,13 +283,15 @@ function Recent() {
                 these), so neither column waits on the other. */}
             {[...c.shots.map((s) => ({ s, m: false })), ...(k < 2 && RECENT[2] ? [{ s: RECENT[2].shots[k], m: true }] : [])].map(({ s, m }, n) => (
               <figure key={n} className={m ? "m-only" : undefined}>
-                <div className="ph">
-                  <Duo d={s.d.src} l={s.l.src} alt={s.d.name} altL={s.l.name} sizes="(max-width: 700px) 50vw, 30vw" />
-                </div>
-                <figcaption className="lbl">
-                  <span className="nm"><Pick d={s.d.name} l={s.l.name} /></span>
-                  <span className="mute"><Pick d={s.d.meta!} l={s.l.meta!} /></span>
-                </figcaption>
+                <Link className="fig" href={`/portfolio/${slugOf(theme === "light" ? s.l.src : s.d.src)}`}>
+                  <div className="ph">
+                    <Duo d={s.d.src} l={s.l.src} alt={s.d.name} altL={s.l.name} sizes="(max-width: 700px) 50vw, 30vw" />
+                  </div>
+                  <figcaption className="lbl">
+                    <span className="nm"><Pick d={s.d.name} l={s.l.name} /></span>
+                    <span className="mute"><Pick d={s.d.meta!} l={s.l.meta!} /></span>
+                  </figcaption>
+                </Link>
               </figure>
             ))}
           </div>
