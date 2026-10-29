@@ -275,7 +275,6 @@ html[data-sb]{scrollbar-width:none}html[data-sb]::-webkit-scrollbar{display:none
 .v3 .chips::-webkit-scrollbar{display:none}
 .v3 .chips button{flex:none;height:36px;padding:0 14px;background:none;border:1px solid var(--line);border-radius:999px;color:var(--mute);font:inherit;letter-spacing:inherit;text-transform:inherit;cursor:pointer}
 .v3 .chips button[aria-pressed="true"]{border-color:var(--ink);color:var(--ink)}
-.v3 .chips button span{margin-left:6px;color:var(--mute)}
 .v3 .wgrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:28px 12px;padding:28px var(--gr) 48px var(--g)}
 .v3 .wt{margin:0}
 .v3 .wt .ph{aspect-ratio:4/5;overflow:hidden;background:var(--card);border-radius:4px}
