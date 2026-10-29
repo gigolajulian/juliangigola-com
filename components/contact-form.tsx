@@ -118,8 +118,6 @@ function Asks({ asks, onChange }: { asks: Ask[]; onChange: (detail: string) => v
               return (
                 <label
                   key={o}
-                  /* Julian: the pointer sticks to the options a little
-                     (`pointer-mark.tsx`); the word grows less than an icon. */
                   data-stick="fill"
                   className={cn(
                     "[&[data-stuck]>span]:!scale-[1.06] label cursor-pointer border px-3 py-1.5 transition-colors duration-200 [@media(pointer:coarse)]:py-2.5 has-[:focus-visible]:outline has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-[var(--ring)]",

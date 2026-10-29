@@ -64,10 +64,8 @@ body:has([data-quiet-footer]) .site-footer-row {
    without this the first screen carries the same words twice. Opacity and
    not `display`, so the header keeps its height and nothing reflows as it
    comes and goes. The attribute is set by the strip's own scroll reader. */
-/* The system cursor is replaced by the site's mark (`.pointer-mark`), and
-   the mark is a transform and nothing else. There used to be a glass drop
-   drawn under the pointer and the arrow was hidden for it; Julian asked
-   for the arrow back and the label on its own. A blurred element moving
+/* No glass drop under the pointer: Julian asked for the arrow back and the
+   label on its own. A blurred element moving
    with the pointer is the most expensive thing that can be on a screen —
    every pointer move repaints the region behind it — and the trip into
    the lightbox was stuttering under exactly that. So no blur and no filter

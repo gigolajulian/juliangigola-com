@@ -16,9 +16,7 @@ import { useDevice } from "@/lib/device";
  * the credits under it, so the list opens to make room for it; and going
  * from one name to the next, the drop slides across as the portfolio's
  * filter bar does (`effect="move"`, wobble 0.25), the card going with it,
- * rather than one card draining and another pouring. The pointer's dot
- * sticks to the name as it does to a filter chip (`data-stick`,
- * `pointer-mark.tsx`), so the mouse runs into the tag.
+ * rather than one card draining and another pouring.
  *
  * One liquid for the whole list (`CreditList`), mounted only while a card
  * is open: a group that is not there measures nothing, so the credits cost

@@ -1078,7 +1078,7 @@ dialog.v3.mo-player,.mo-player>iframe{background:#000}
 .mo-player .pl-tint{position:absolute;inset:0;z-index:1;background:rgb(var(--scrim) / .3);opacity:0;pointer-events:none;transition:opacity .4s ease}
 .mo-player[data-paused] .pl-tint{opacity:1}
 .mo-player{outline:0}
-.mo-player .pl-wake{position:absolute;inset:0;z-index:1;cursor:none}
+.mo-player .pl-wake{position:absolute;inset:0;z-index:1}
 .mo-player[data-shown] .pl-wake{cursor:pointer}
 .mo-player .pl-bar,.mo-player .pl-meta{display:flex;justify-content:space-between;align-items:center;gap:20px}
 .mo-player .pl-bar,.mo-player .pl-info{position:absolute;left:0;right:0;z-index:2;padding:24px var(--gr) 24px var(--g);pointer-events:none;opacity:0;transition:opacity .4s ease}

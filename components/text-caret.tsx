@@ -23,6 +23,7 @@ export function TextCaret() {
       if (!field) return;
       field.removeAttribute("data-caret");
       field.removeEventListener("pointermove", move);
+      field.removeEventListener("pointerleave", leave);
       field = null;
       el.removeAttribute("data-on");
     };
@@ -37,14 +38,14 @@ export function TextCaret() {
       move(e);
       t.setAttribute("data-caret", "");
       t.addEventListener("pointermove", move);
+      // Fires on leaving the window from inside the field too.
+      t.addEventListener("pointerleave", leave);
       el.setAttribute("data-on", "");
     };
     document.addEventListener("pointerover", over);
-    document.addEventListener("pointerleave", leave);
     return () => {
       leave();
       document.removeEventListener("pointerover", over);
-      document.removeEventListener("pointerleave", leave);
     };
   }, []);
   return (

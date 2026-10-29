@@ -159,7 +159,6 @@ export function ThemeToggle({ className }: { className?: string }) {
       onClick={toggle}
       // What a press switches to, since the icon alone does not say.
       data-ring={theme ? (theme === "dark" ? "Light" : "Dark") : ""}
-      // The pointer sticks to it (`pointer-mark.tsx`).
       data-stick=""
       // A thumb target, like the burger beside it, rather than the 18px of
       // artwork.
