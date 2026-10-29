@@ -247,6 +247,7 @@ export function V3Commission() {
           <Hidden type={TYPE[kinds[0]] ?? "other"} detail={detail} />
           <input type="hidden" name="message" value={message} />
           <FlowShell
+            h1
             steps={["Project", "Scope", "You", "Sent"]}
             at={at}
             ok={at === 4 ? "Sent" : undefined}

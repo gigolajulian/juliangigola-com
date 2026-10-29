@@ -686,6 +686,11 @@ html{font-family:var(--font-mono),ui-monospace,monospace}
   .v3 .a-cover .right>.lbl .ticks button{width:24px;margin:-12px 0}
   .v3 .a-cover .right>.lbl .ticks button::after{left:5px;right:5px}
   .v3 .lg-toc a{min-height:44px;align-items:center}
+  .v3 .sv-info li:has(>a){padding:0}
+  .v3 .sv-info li>a{padding:12px 0}
+  .v3 .tabs{padding-top:0}
+  .v3 .tabs a{padding-top:21px}
+  .v3 .pj-cr li a{padding:10px 0;margin:-10px 0}
 }
 /* Mouse at phone widths: the cover nav's 28px gaps pushed Portfolio off the
    left edge and squeezed the toggle to 14px; ticks and links get 24px hit
