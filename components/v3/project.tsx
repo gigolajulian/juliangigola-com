@@ -161,7 +161,7 @@ export function V3Project({ project, next }: { project: Project; next?: { href: 
                 </span>
               ) : null}
               {/* --lw: its longest word, so a phone shrinks the name to keep each word whole (Julian). */}
-              <b style={{ "--lw": Math.max(...next.name.replace(/^Next: /, "").split(/s+/).map((w) => w.length)) } as React.CSSProperties}>{titleCase(next.name.replace(/^Next: /, ""))}</b>
+              <b style={{ "--lw": Math.max(...next.name.replace(/^Next: /, "").split(" ").map((w) => w.length)) } as React.CSSProperties}>{titleCase(next.name.replace(/^Next: /, ""))}</b>
               <span aria-hidden>&rarr;</span>
             </Link>
           ) : null}
