@@ -11,6 +11,9 @@ import { useEffect, useRef, useState } from "react";
 export function BtsClip({ src, label }: { src: string; label: string }) {
   const ref = useRef<HTMLVideoElement>(null);
   const [on, setOn] = useState(false);
+  // The pointer that pressed, read on `pointerdown`: WebKit sends the click
+  // after a tap as `pointerType: "mouse"`, so the click's own type lies.
+  const pressed = useRef("");
 
   const play = () => {
     const v = ref.current;
@@ -40,10 +43,16 @@ export function BtsClip({ src, label }: { src: string; label: string }) {
       aria-pressed={on}
       onPointerEnter={(e) => e.pointerType === "mouse" && play()}
       onPointerLeave={(e) => e.pointerType === "mouse" && pause()}
-      onClick={(e) => {
+      onPointerDown={(e) => {
+        pressed.current = e.pointerType;
+      }}
+      onClick={() => {
         // A mouse already plays it on hover; its click is left alone so the
-        // clip does not stop under the pointer that started it.
-        if ((e.nativeEvent as PointerEvent).pointerType === "mouse") return;
+        // clip does not stop under the pointer that started it. A key press
+        // has no pointerdown, so Enter and Space toggle.
+        const by = pressed.current;
+        pressed.current = "";
+        if (by === "mouse") return;
         if (on) pause();
         else play();
       }}
