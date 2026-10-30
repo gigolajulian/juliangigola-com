@@ -1463,10 +1463,11 @@ dialog.v3.mo-player,.mo-player>iframe{background:#000}
 /* The form's quiet way out to a call or an email (critique, 2026-10-29). */
 .v3 .in-alt{margin:20px 0 0;display:flex;flex-wrap:wrap;gap:6px 10px}
 /* Taller to the finger, the line unmoved (audit, 2026-10-30). On a phone the email wraps 6px under the call:
-   the call stays on top and stops just short of that row, so neither covers the other's words. */
+   the call stays on top and stops just short of that row, and the email reaches up only 4px, so neither
+   covers the other's words or "Prefer to talk?" above it. */
 .v3 .in-alt a{color:var(--ink);text-underline-offset:3px;position:relative;padding:16px 0;margin:-16px 0}
 .v3 .in-alt a:first-of-type{z-index:1}
-@media (max-width:700px){.v3 .in-alt a:first-of-type{padding-bottom:4px;margin-bottom:-4px}}
+@media (max-width:700px){.v3 .in-alt a:first-of-type{padding-bottom:4px;margin-bottom:-4px}.v3 .in-alt a:last-of-type{padding-top:4px;margin-top:-4px}}
 /* Desktop: the ask a little in from the left, the button halfway out (Julian). */
 @media (min-width:701px){.v3 .pj-ask{padding-left:clamp(16px,2vw,32px);justify-content:flex-start;gap:20px 48px}
 .v3 .pj-ask>.btn{margin:0 clamp(40px,7vw,140px) 0 auto} /* toward the right edge, a little in (Julian) */}
