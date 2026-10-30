@@ -37,7 +37,7 @@ export function V3About() {
               </ol>
             </div>
             <div className="ctas">
-              <Link className="btn fill" href="/contact">Inquire</Link>
+              <Link className="btn fill" href="/contact/form">Inquire</Link>
               <Link className="btn" href="/portfolio">See the work</Link>
             </div>
           </div>

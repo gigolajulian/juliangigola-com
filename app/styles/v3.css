@@ -1454,6 +1454,24 @@ dialog.v3.mo-player,.mo-player>iframe{background:#000}
 @media (max-width:700px){.v3 .pj-top{position:relative}
 .v3 .pj-mark-top{display:block;position:absolute;right:var(--gr);top:calc(40px + .5lh - 14px);line-height:0;color:var(--ink)}
 .v3 .pj-big .pj-mark{display:none}.v3 .pj-big:has(.pj-mark)::after{content:none}}
+/* A short tab ("All", 25px) grows sideways to 44px, never past half the 28px gap to its neighbour. */
+.v3 .tabs a[href]::after{left:max(-14px,min(0px,calc(50% - 22px)));right:max(-14px,min(0px,calc(50% - 22px)))}
+/* Project page: the closing ask, after the credits (critique, 2026-10-29). */
+.v3 .pj-ask{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:20px 40px;padding:40px 0;border-bottom:1px solid var(--line)}
+.v3 .pj-ask h2{margin:0;font:900 clamp(2rem,calc(4*var(--v3u)),3.75rem)/.95 var(--display);letter-spacing:-.045em}
+.v3 .pj-ask p{margin:12px 0 0;max-width:44ch}
+/* The form's quiet way out to a call or an email (critique, 2026-10-29). */
+.v3 .in-alt{margin:20px 0 0;display:flex;flex-wrap:wrap;gap:6px 10px}
+.v3 .in-alt a{color:var(--ink);text-underline-offset:3px}
+/* Desktop: the ask a little in from the left, the button halfway out (Julian). */
+@media (min-width:701px){.v3 .pj-ask{padding-left:clamp(16px,2vw,32px);justify-content:flex-start;gap:20px 48px}
+.v3 .pj-ask>.btn{margin:0 clamp(40px,7vw,140px) 0 auto} /* toward the right edge, a little in (Julian) */}
+/* Phone: the Next name keeps each word whole, shrinking to fit its longest word (Julian). */
+@media (max-width:700px){.v3 .pj-next b{overflow-wrap:normal;font-size:min(2.5rem,calc((100vw - 2 * var(--g) - 88px) / (var(--lw,8) * .6)))}}
+/* /book: the call as a quiet link under the session grid (critique, 2026-10-29). */
+.v3 .stabs-call{align-self:flex-start;margin:-4px 0 0;padding:12px 0;background:none;border:0;color:var(--mute);font:inherit;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+.v3 .stabs-call[aria-pressed="true"]{color:var(--accent)}
+@media (hover:hover){.v3 .stabs-call:hover{color:var(--ink)}}
 /* The frames under the title at their own shape (P3, 2026-10-29): no crop, and no side bars
    from `contain` in a box of another shape. Capped by the cell on both sides. */
 @media (min-width:901px){.v3 .pj-hero:not(.two) .pj-lead .pj-r img{height:auto;max-height:100%;width:auto;max-width:100%;object-fit:contain}}
