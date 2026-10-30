@@ -1472,3 +1472,6 @@ dialog.v3.mo-player,.mo-player>iframe{background:#000}
 .v3 .stabs-call{align-self:flex-start;margin:-4px 0 0;padding:12px 0;background:none;border:0;color:var(--mute);font:inherit;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
 .v3 .stabs-call[aria-pressed="true"]{color:var(--accent)}
 @media (hover:hover){.v3 .stabs-call:hover{color:var(--ink)}}
+/* The frames under the title at their own shape (P3, 2026-10-29): no crop, and no side bars
+   from `contain` in a box of another shape. Capped by the cell on both sides. */
+@media (min-width:901px){.v3 .pj-hero:not(.two) .pj-lead .pj-r img{height:auto;max-height:100%;width:auto;max-width:100%;object-fit:contain}}
