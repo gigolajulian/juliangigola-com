@@ -8,8 +8,9 @@
  *
  * 2026-10-30: the wordmark's letters rise out of their line; the run is
  * the portfolio's first covers (`lib/splash-run.ts`) on a quickening
- * beat, every one in the same 4:5 frame, which opens out to the hero.
+ * beat, every one in the same 4:5 frame, which glides into the hero.
  * Every other page plays the wordmark alone (`data-splash="name"`).
+ * The wordmark stays where it is and the run comes up over it.
  *
  * Like the sheet, it is written into the page as source and run as the
  * document is read, so it touches nothing but the browser and its
@@ -31,12 +32,9 @@ export function burst(sizes: string[][], heroes: { d: string[]; l: string[] }) {
   const STAGGER = 28; // between letters of the wordmark rising
   const RISE = 620; // one letter rising out of its line
   const HOLD = 200; // the wordmark whole, once everything has loaded
-  const LEAVE = 420; // one letter rising out the top, and the stagger below
-  const LEAVE_STAGGER = 18;
+  const DROP = 760; // the first frame tipping in and settling flat over the wordmark
   const BEAT = [220, 90]; // the run's cuts, first and last: it quickens as it goes
-  const OPEN = 380; // the frame opening out to the whole hero
-  const SIT = 150; // the hero, whole screen, before it moves
-  const LAND = 1000; // the hero gliding into its place, the page coming up round it
+  const LAND = 1100; // the hero gliding from the frame into its place, the page coming up round it
   const CLEAR = 350; // the splash's copy of the hero giving way to the page's own
   const LOAD = 3500; // the longest the wordmark waits for the loader to fill
   const MAX = 6000; // the whole splash, whatever has not arrived by then is skipped
@@ -45,8 +43,8 @@ export function burst(sizes: string[][], heroes: { d: string[]; l: string[] }) {
   const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
   /* Julian's pick (2026-10-30): the letters rise out of their line, one
-     after another, "Julian" then "Gigola", and the tracking closes up as
-     they settle. Each word clips at its own line, so a letter is never
+     after another, "Julian" then "Gigola", already at their final
+     tracking, and then the name holds still. Each word clips at its own line, so a letter is never
      seen below it. No fades on the type, as on the cover. */
   const word = document.createElement("div");
   word.className = "jg-burst-word";
@@ -111,15 +109,12 @@ export function burst(sizes: string[][], heroes: { d: string[]; l: string[] }) {
       l.animate([{ transform: "translateY(105%)" }, { transform: "none" }],
         { duration: RISE, delay: i * STAGGER, easing: OUT_EASE, fill: "forwards" }));
     const risen = RISE + (letters.length - 1) * STAGGER;
-    word.animate([{ letterSpacing: "0.02em" }, { letterSpacing: "-0.05em" }], { duration: risen + HOLD, easing: OUT_EASE, fill: "forwards" });
     bar.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 450, easing: EASE, fill: "forwards" });
     await sleep(risen + HOLD);
     while (shownP < 0.995 && performance.now() - start < LOAD) await sleep(30);
-    letters.forEach((l, i) =>
-      l.animate([{ transform: "none" }, { transform: "translateY(-105%)" }],
-        { duration: LEAVE, delay: i * LEAVE_STAGGER, easing: EASE, fill: "forwards" }));
+    /* Julian (2026-10-31): the wordmark never animates out. It stays put
+       and the run's frames come up over it, so it goes under the photos. */
     bar.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 300, easing: EASE, fill: "forwards" });
-    await sleep(LEAVE + (letters.length - 1) * LEAVE_STAGGER * 0.6);
     filling = false;
 
     /* Anywhere but the homepage: the name was the whole opening. */
@@ -127,7 +122,8 @@ export function burst(sizes: string[][], heroes: { d: string[]; l: string[] }) {
       root.dataset.intro = "half";
       root.dataset.splashed = "";
       document.getElementById("jg-intro")?.classList.add("jg-intro-open");
-      layer.querySelector(".jg-sheet-ground")?.animate([{ opacity: 1 }, { opacity: 0 }], { duration: CLEAR, easing: EASE, fill: "forwards" });
+      for (const el of [layer.querySelector(".jg-sheet-ground"), word])
+        el?.animate([{ opacity: 1 }, { opacity: 0 }], { duration: CLEAR, easing: EASE, fill: "forwards" });
       await sleep(CLEAR);
       root.removeAttribute("data-intro");
       return;
@@ -141,60 +137,53 @@ export function burst(sizes: string[][], heroes: { d: string[]; l: string[] }) {
     if (left() > 2500)
       for (let k = 0; k < run.length; k++) {
         show(run[k]);
+        /* Julian (2026-10-31): the first frame stacks over the name in 3D,
+           coming down from just in front of the camera, a little turned,
+           and settling flat on top of it. No flip, no shadow. */
+        if (k === 0) {
+          run[0].animate([
+            { transform: "perspective(1400px) translate3d(0, -3%, 260px) rotateX(-7deg) rotateY(5deg) rotateZ(-2deg)", opacity: 0 },
+            { opacity: 1, offset: 0.3 },
+            { transform: "perspective(1400px) translate3d(0, 0, 0) rotateX(0) rotateY(0) rotateZ(0)", opacity: 1 },
+          ], { duration: DROP, easing: OUT_EASE });
+          await sleep(DROP);
+        }
         await sleep(BEAT[0] + ((BEAT[1] - BEAT[0]) * k) / Math.max(1, run.length - 1));
       }
 
     /* The hero, once it is decoded (not long: it was asked for first
-       thing). It comes up in the run's 4:5 frame and the frame opens out
-       to the whole photograph, then holds while the page's own copy
-       arrives. */
-    while (!shown.has(last) && left() > SIT + LAND + CLEAR) await sleep(30);
+       thing), cut into the run's 4:5 frame, and from there one move into
+       its place on the page (Julian, 2026-10-31: no opening out to the
+       whole photograph and no pause on the way). */
+    while (!shown.has(last) && left() > LAND + CLEAR) await sleep(30);
     const whole = shown.has(last); // if it never came, the page simply comes up
-    if (whole) {
-      const f = (run.at(-1) ?? pics[0])?.getBoundingClientRect();
-      const b = last.getBoundingClientRect(), a = last.naturalWidth / last.naturalHeight;
-      const w = Math.min(b.width, b.height * a), ht = w / a;
-      const cl = b.left + (b.width - w) / 2, ct = b.top + (b.height - ht) / 2;
-      show(last);
-      if (f && f.width > 0) {
-        last.animate([
-          { clipPath: `inset(${f.top - b.top}px ${b.right - f.right}px ${b.bottom - f.bottom}px ${f.left - b.left}px)` },
-          { clipPath: `inset(${ct - b.top}px ${b.right - cl - w}px ${b.bottom - ct - ht}px ${cl - b.left}px)` },
-        ], { duration: OPEN, easing: EASE, fill: "forwards" });
-        await sleep(OPEN);
-      }
-      await sleep(SIT);
-      for (; left() > LAND + CLEAR; await sleep(30)) {
-        const h = real();
-        if (!h || (h.complete && h.naturalWidth > 0)) break;
-      }
+    for (; whole && left() > LAND + CLEAR; await sleep(30)) {
+      const h = real();
+      if (!h || (h.complete && h.naturalWidth > 0)) break;
     }
 
-    /* Into the hero's place. It starts as the whole photograph, in a box of
-       its own shape (so `cover` crops nothing yet), and that box glides to
-       the hero's, taking on the hero's crop as it goes. Meanwhile the
-       ground thins so the page comes up round it, and the cover's nav and
-       name come up over it (`data-landing`, splash.css). */
+    /* The box glides from the frame to the hero's, cropping as `cover`
+       with the hero's object-position would, drawn with transform and
+       clip-path on the photograph's own box, which never moves: no layout
+       shift (CLS). Sampled, and the one easing runs over the samples, so
+       the path and timing match. Meanwhile the ground thins so the page
+       comes up round it, and the cover's nav and name come up over it
+       (`data-landing`, splash.css). */
     const h = real(), r = (h ?? document.querySelector(".a-cover .slides"))?.getBoundingClientRect();
+    const f = (run.at(-1) ?? pics[0])?.getBoundingClientRect();
     root.dataset.landing = "";
-    // the ground thins once the photograph has mostly reached its frame, so the page's copy never shows round a smaller one
     layer.querySelector(".jg-sheet-ground")?.animate([{ opacity: 1 }, { opacity: 0 }], { duration: LAND * 0.5, delay: LAND * 0.5, easing: EASE, fill: "forwards" });
-    if (whole && r && r.width > 0) {
+    if (whole && r && r.width > 0 && f && f.width > 0) {
       const b = last.getBoundingClientRect(), a = last.naturalWidth / last.naturalHeight;
       const w = Math.min(b.width, b.height * a), ht = w / a;
       const cl = b.left + (b.width - w) / 2, ct = b.top + (b.height - ht) / 2;
-      /* The same glide as a box going from the whole photograph to the
-         hero's, cropping as \`cover\` with the hero's object-position would,
-         but drawn with transform and clip-path on the photograph's own
-         box, which never moves: no layout shift (CLS). Sampled, and the
-         one easing runs over the samples, so the path and timing match. */
       const pos = (h ? getComputedStyle(h).objectPosition : "50% 50%").split(" ");
       const at = (v = "50%", room: number) => (v.endsWith("%") ? (room * parseFloat(v)) / 100 : parseFloat(v));
       const lerp = (x: number, y: number, p: number) => x + (y - x) * p;
       const frames: Keyframe[] = [];
       for (let i = 0; i <= 24; i++) {
         const p = i / 24;
-        const bl = lerp(cl, r.left, p), bt = lerp(ct, r.top, p), bw = lerp(w, r.width, p), bh = lerp(ht, r.height, p);
+        const bl = lerp(f.left, r.left, p), bt = lerp(f.top, r.top, p), bw = lerp(f.width, r.width, p), bh = lerp(f.height, r.height, p);
         const dw = Math.max(bw, bh * a), dh = dw / a, k = dw / w;
         const tx = bl + at(pos[0], bw - dw) - b.left - k * (cl - b.left), ty = bt + at(pos[1], bh - dh) - b.top - k * (ct - b.top);
         const L = (bl - b.left - tx) / k, T = (bt - b.top - ty) / k;
@@ -204,14 +193,15 @@ export function burst(sizes: string[][], heroes: { d: string[]; l: string[] }) {
         });
       }
       last.style.transformOrigin = "0 0";
-      last.animate(frames, { duration: LAND, easing: EASE, fill: "forwards" });
+      last.animate(frames, { duration: LAND, easing: EASE, fill: "both" });
+      show(last);
     }
     await sleep(LAND);
     root.dataset.landed = ""; // the type comes in now the photograph is in place (splash.css)
     root.dataset.intro = "half";
     root.dataset.splashed = "";
     document.getElementById("jg-intro")?.classList.add("jg-intro-open");
-    last.animate([{ opacity: 1 }, { opacity: 0 }], { duration: CLEAR, easing: EASE, fill: "forwards" });
+    for (const el of [last, word]) el.animate([{ opacity: 1 }, { opacity: 0 }], { duration: CLEAR, easing: EASE, fill: "forwards" });
     await sleep(CLEAR);
     root.removeAttribute("data-intro");
     // the name, the buttons and the nav are still finishing their moves (splash.css)

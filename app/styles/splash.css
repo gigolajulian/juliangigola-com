@@ -89,7 +89,7 @@
   justify-content: center;
   gap: 0.22em;
   font: 900 min(13vw, 10rem) / 0.86 var(--font-display);
-  letter-spacing: 0.02em;
+  letter-spacing: -0.05em; /* set, never animated: the name stays exactly where it lands (Julian, 2026-10-31) */
   text-transform: none;
   white-space: nowrap;
   color: var(--foreground);
