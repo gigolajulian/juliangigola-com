@@ -241,7 +241,8 @@ function Recent() {
       let moving = false;
       cols.forEach((c, i) => {
         const t = Math.max(-56, Math.min(56, mid * +c.dataset.speed!));
-        cur[i] += (t - cur[i]) * 0.08;
+        // Lenis already smooths the page; this only steadies a native touch scroll, so it keeps up.
+        cur[i] += (t - cur[i]) * 0.2;
         if (Math.abs(t - cur[i]) > 0.05) moving = true;
         else cur[i] = t;
         c.style.transform = `translate3d(0, ${cur[i].toFixed(2)}px, 0)`;
