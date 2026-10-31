@@ -126,6 +126,26 @@
     opacity: 0;
   }
 }
+
+/* ── how a project opens ──
+   The strip slides in (above), and inside it the title's words rise one
+   after another from under their clips, the credits fade up after them,
+   and the frames arrive in order, each a beat behind the one before. The
+   stagger is capped: the seventh frame and after come together, since
+   past the first screen nobody is watching the order. Julian asked for the
+   title to animate and for the images to come in with a delay in order.
+
+   `translate` and `opacity`, never `transform`: the frames lean with the
+   scroll through `transform` (below), and a finished animation that filled
+   `transform` would hold them upright for good. */
+.title-word {
+  animation: jg-rise var(--dur-2xl) var(--ease-out-strong) both;
+  animation-delay: calc(140ms + var(--i, 0) * 70ms);
+}
+.title-rest {
+  animation: jg-fade-up 640ms var(--ease-out-strong) both;
+  animation-delay: 460ms;
+}
 .strip-cell {
   animation: jg-fade-up 760ms var(--ease-out-strong) both;
   animation-delay: calc(180ms + min(var(--i, 0), 6) * 90ms);
@@ -270,8 +290,14 @@
 .strip-scroll[data-arrive="fade"] .strip-cell,
 .strip-scroll[data-arrive="fly"] .strip-cell,
 .strip-scroll[data-arrive="seat"] .strip-cell,
+.strip-scroll[data-arrive="seat"] .title-word,
+.strip-scroll[data-arrive="seat"] .title-rest,
 .strip-scroll[data-arrive="zoom"] .strip-cell,
-.strip-scroll[data-arrive="dealt"] .strip-cell {
+.strip-scroll[data-arrive="zoom"] .title-word,
+.strip-scroll[data-arrive="zoom"] .title-rest,
+.strip-scroll[data-arrive="dealt"] .strip-cell,
+.strip-scroll[data-arrive="dealt"] .title-word,
+.strip-scroll[data-arrive="dealt"] .title-rest {
   animation: none;
 }
 /* Julian: a discipline's name a fifth bigger than a project's title,
@@ -288,6 +314,11 @@
   :is([data-discipline-page], .discipline-title) h2:has(.title-word) {
     font-size: min(4.5rem, calc((min(30rem, 82vw) - 1.5rem) / var(--word-em, 6)));
   }
+  /* A project's title the same way, at its own 3.75rem: UKIYOSUNKNOWN
+     ran 108px under the first photograph (Julian). */
+  [data-hash="title"] > h2:has(.title-word) {
+    font-size: min(3.75rem, calc((min(30rem, 82vw) - 1.5rem) / var(--word-em, 6)));
+  }
   /* A project's title on one line, and larger. Up to 4.5rem (6rem was
      too large), less where the whole name would not fit 50rem (or 82%
      of the window), and the plate widens to hold it, never narrower
@@ -301,6 +332,31 @@
     min-width: min(24rem, 82vw);
     max-width: min(40rem, 82vw);
   }
+  .project-plate > h2:has(.title-word) {
+    font-size: min(
+      7rem,
+      calc(
+        (min(40rem, 82vw) - 1.5rem) /
+          max(var(--word-em, 4), var(--title-em, 8) / 2 + 0.6)
+      )
+    );
+    white-space: normal;
+    text-wrap: balance;
+  }
+}
+/* The clip each rising word sits in (`project-strip.tsx`,
+   `strip-page.tsx`) was its line box, which cut the descenders off the
+   serif titles: Julian saw the g of Event Coverage lose its tail. The
+   clip reaches below the line now and gives the room back, so nothing
+   moves; the rise starts lower to stay hidden in the deeper clip. */
+:has(> .title-word) {
+  padding-bottom: 0.35em;
+  margin-bottom: -0.35em;
+  /* And past the last letter: set tight, a Black face's final stroke
+     runs beyond its advance, and the clip cut the S off INQUIRIES.
+     Given back, so nothing moves. */
+  padding-inline: 0.1em;
+  margin-inline: -0.1em;
 }
 @keyframes jg-rise {
   from {
@@ -344,9 +400,25 @@
    this never touched. What was missing was a transition, so the picture
    jumped to its new size in one frame. */
 @media (prefers-reduced-motion: reduce) {
+  .title-word,
+  .title-rest,
   .strip-cell {
     animation: none;
   }
+  /* And the cover holds still under the pointer. Without a transition the
+     utility that should do this is a jump to the larger size in one
+     frame, which is the motion somebody asked not to be shown. */
+  .strip-frame {
+    scale: 1 !important;
+  }
+}
+/* Not while a cover is growing into the viewer: `lib/zoom.ts` measures
+   the thumbnail it is playing from, and a picture caught mid hover is not
+   the rectangle it measured. The hover is the `scale` property and not a
+   transform - Tailwind writes it that way, and zoom drives `transform`
+   itself, so the two would otherwise compose. */
+:root[data-zoom] .strip-frame {
+  scale: 1 !important;
 }
 
 /* The sideways cue. The rail is the instrument for moving the page, so
@@ -364,6 +436,189 @@
   100% {
     translate: 0;
   }
+}
+[data-cue] .rail-lit {
+  animation: rail-cue 900ms var(--ease-out-strong);
+}
+@media (prefers-reduced-motion: reduce) {
+  [data-cue] .rail-lit {
+    animation: none;
+  }
+}
+
+/* The archive's rail (`data-rail-names="always"`, `strip.tsx`). At rest
+   it is the one line About has (`rail-sum`), filled as far as the page has
+   got through the discipline it is in. Under the pointer the disciplines
+   come up out of it as an Apple segmented control (Julian): one soft
+   capsule, faint short dividers, and a raised thumb on the discipline you
+   are in. Each discipline is named inside its section, and an open one
+   names the project under the pointer. At rest the sections are the line, shrunk to its height and
+   in its tone, so hovering grows one object rather than swapping two
+   (Julian: seamless). The bar scales rather than growing, so nothing is
+   laid out again. */
+.strip-rail[data-rail-names="always"] {
+  /* Solid, not see-through: two see-through sections meeting on a
+     fraction of a pixel draw a seam where their edges overlap. */
+  --rail-line: color-mix(in oklab, var(--foreground) 20%, var(--background));
+  --rail-track: color-mix(in oklab, var(--foreground) 11%, var(--background));
+  --rail-thumb: color-mix(in oklab, var(--foreground) 24%, var(--background));
+  --rail-shadow: 0 1px 3px rgb(0 0 0 / 0.4), inset 0 0.5px 0 rgb(255 255 255 / 0.08);
+}
+:root[data-theme="light"] .strip-rail[data-rail-names="always"] {
+  --rail-track: color-mix(in oklab, var(--foreground) 8%, var(--background));
+  --rail-thumb: #fff;
+  --rail-shadow: 0 2px 6px rgb(0 0 0 / 0.1), 0 1px 1px rgb(0 0 0 / 0.06), 0 0 0 0.5px rgb(0 0 0 / 0.04);
+}
+.strip-rail[data-rail-names="always"] .rail-chapter {
+  padding-inline: 0;
+  height: 22px;
+}
+.strip-rail[data-rail-names="always"] .rail-bar {
+  position: relative;
+  height: 100%;
+  border-radius: 0;
+  background-color: var(--rail-line);
+  scale: 1 0.36;
+  animation: none;
+  transition:
+    scale 320ms var(--ease-out-strong),
+    background-color 320ms var(--ease-out-strong);
+}
+/* What only the control has: gone while it is the line. */
+.strip-rail[data-rail-names="always"] .rail-bar::before,
+.strip-rail[data-rail-names="always"] .rail-bar::after,
+.strip-rail[data-rail-names="always"] .rail-bar > span {
+  opacity: 0;
+  transition: opacity 120ms var(--ease-out-strong);
+}
+.strip-rail[data-rail-names="always"] .rail-chapter:first-of-type .rail-bar {
+  border-radius: 9999px 0 0 9999px;
+}
+.strip-rail[data-rail-names="always"] .rail-chapter:last-of-type .rail-bar {
+  border-radius: 0 9999px 9999px 0;
+}
+/* Short dividers, gone either side of the thumb. */
+.strip-rail[data-rail-names="always"] .rail-chapter + .rail-chapter .rail-bar::after {
+  content: "";
+  position: absolute;
+  left: -0.5px;
+  top: 6px;
+  bottom: 6px;
+  width: 1px;
+  background: color-mix(in oklab, var(--foreground) 16%, transparent);
+}
+.strip-rail[data-rail-names="always"] .rail-chapter[data-tone="lit"] .rail-bar::after,
+.strip-rail[data-rail-names="always"] .rail-chapter[data-tone="lit"] + .rail-chapter .rail-bar::after,
+.strip-rail[data-rail-names="always"] .rail-chapter[data-tone="near"] .rail-bar::after,
+.strip-rail[data-rail-names="always"] .rail-chapter[data-tone="near"] + .rail-chapter .rail-bar::after {
+  opacity: 0;
+}
+/* The thumb on the discipline you are in, and a quieter one on a
+   discipline elsewhere that the pointer is on. */
+.strip-rail[data-rail-names="always"] .rail-chapter[data-tone="lit"] .rail-bar::before,
+.strip-rail[data-rail-names="always"] .rail-chapter[data-tone="near"] .rail-bar::before {
+  content: "";
+  position: absolute;
+  inset: 2px;
+  border-radius: 9999px;
+  background: var(--rail-thumb);
+  box-shadow: var(--rail-shadow);
+}
+.strip-rail[data-rail-names="always"] .rail-chapter[data-tone="near"] .rail-bar::before {
+  background: color-mix(in oklab, var(--foreground) 8%, transparent);
+  box-shadow: none;
+}
+/* In an open discipline each project is a stretch of the capsule, and the
+   one under the pointer (or where the page is) is lit quietly, as a hover
+   is, so it never competes with the thumb. */
+.strip-rail[data-rail-names="always"] .rail-bar > span {
+  position: relative;
+  background: none;
+  box-shadow: none;
+}
+.strip-rail[data-rail-names="always"] .rail-bar > span.bg-foreground::before {
+  content: "";
+  position: absolute;
+  inset: 2px 1px;
+  min-width: 8px;
+  border-radius: 9999px;
+  background: color-mix(in oklab, var(--foreground) 12%, transparent);
+}
+.strip-rail[data-rail-names="always"] .rail-name {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  padding-inline: 8px;
+  line-height: 22px;
+  text-align: center;
+  /* A discipline too narrow for its name ends it on an ellipsis. */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.5625rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  color: color-mix(in oklab, var(--foreground) 60%, transparent);
+  opacity: 0;
+  pointer-events: none;
+  transition:
+    opacity 120ms var(--ease-out-strong),
+    color var(--dur-xs) var(--ease-out-strong);
+}
+.strip-rail[data-rail-names="always"] .rail-chapter[data-tone] .rail-name {
+  color: var(--foreground);
+}
+/* The name is in the capsule, so no word stands over it. */
+.strip-rail[data-rail-names="always"] .rail-chapter .rail-word {
+  display: none;
+}
+.rail-sum {
+  transition: opacity var(--dur-sm) var(--ease-out-strong) 80ms;
+}
+/* The line grows into the control as one piece, and what the control
+   adds comes up once it is most of the way there. */
+.rail-line:hover .rail-bar,
+[data-dwell] .rail-line .rail-bar {
+  scale: none;
+  background-color: var(--rail-track);
+}
+.rail-line:hover .rail-bar::before,
+.rail-line:hover .rail-bar::after,
+.rail-line:hover .rail-bar > span,
+[data-dwell] .rail-line .rail-bar::before,
+[data-dwell] .rail-line .rail-bar::after,
+[data-dwell] .rail-line .rail-bar > span {
+  opacity: 1;
+  transition: opacity var(--dur-xs) var(--ease-out-strong) 120ms;
+}
+.rail-line:hover .rail-name,
+[data-dwell] .rail-line .rail-name {
+  opacity: 1;
+  transition-delay: 140ms, 0ms;
+}
+.rail-line:hover .rail-sum,
+[data-dwell] .rail-line .rail-sum {
+  opacity: 0;
+  transition: opacity 140ms var(--ease-out-strong);
+}
+@media (prefers-reduced-motion: reduce) {
+  .strip-rail[data-rail-names="always"] .rail-bar,
+  .strip-rail[data-rail-names="always"] .rail-bar::before,
+  .strip-rail[data-rail-names="always"] .rail-bar::after,
+  .strip-rail[data-rail-names="always"] .rail-bar > span,
+  .strip-rail[data-rail-names="always"] .rail-name,
+  .rail-line .rail-sum {
+    transition: none !important;
+  }
+}
+
+/* The rail's drop (`RailFollow`, `strip/rail.tsx`) is the mark, so the
+   lit tick under it is a tick like the others. Made see-through, it showed
+   as a hole in the rail mid-scroll, where the lit tick had moved on and
+   the drop had not reached it yet (Julian). */
+.rail-line:has([data-follow]) [data-ink] {
+  background-color: color-mix(in oklab, var(--foreground) 20%, transparent);
+  scale: 1 0.5;
 }
 /* Over the reel the page is a cinema, not a sheet of paper: the light
    theme keeps a dark ground so the film reads through it and the type
@@ -402,6 +657,14 @@
    has more consistently than any hand-rolled swipe. Only where the
    pointer is a finger: a mouse and a wheel are paged by `strip.tsx`, and
    a snap under a scripted scroll re-aims it as it lands. */
+@media (pointer: coarse) {
+  .strip-paged {
+    scroll-snap-type: x mandatory;
+  }
+  .strip-paged > * {
+    scroll-snap-align: center;
+  }
+}
 /* But not a strip dealt as a deck (the homepage). Every screen of it is
    pinned (`position: sticky`, `lib/deck.ts`), and a pinned screen's snap
    point is wherever it is pinned, which is wherever the strip stands: a

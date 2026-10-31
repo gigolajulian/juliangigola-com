@@ -48,9 +48,73 @@
 /* The bar lies over the first door; its photograph starts under the bar
    so the top of the frame is not hidden behind it (Julian: go up on the
    photo). The fill image sets its box inline, hence the weight. */
+
+/* A field lifts under the pointer and stays up while it is being typed
+   in. Then: lower key, and one glass plane across the card rather than
+   a plate of its own. So the ground is a band running wall to wall
+   through the card's padding (32px, 20px on a phone), square, with a
+   hairline above and below, and the lift is a few pixels toward the
+   hand, nothing tipped. */
+.contact-field {
+  position: relative;
+  transform: perspective(900px);
+  transition: transform 360ms var(--ease-out-strong);
+}
+.contact-field::before {
+  content: "";
+  position: absolute;
+  inset: -0.5rem -1.25rem;
+  z-index: -1;
+  background-color: color-mix(in oklab, var(--foreground) 5%, transparent);
+  box-shadow:
+    inset 0 1px 0 color-mix(in oklab, var(--foreground) 9%, transparent),
+    inset 0 -1px 0 color-mix(in oklab, var(--foreground) 6%, transparent);
+  opacity: 0;
+  transition: opacity var(--dur-md) var(--ease-out-strong);
+  pointer-events: none;
+}
+@media (min-width: 40rem) {
+  .contact-field::before {
+    inset-inline: -2rem;
+  }
+}
+.contact-field:focus-within {
+  transform: perspective(900px) translateZ(8px);
+}
+.contact-field:focus-within::before {
+  opacity: 1;
+}
+@media (hover: hover) and (pointer: fine) {
+  .contact-field:hover::before {
+    opacity: 0.55;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .contact-field,
+  .contact-field:focus-within {
+    transform: none;
+  }
+}
 /* Julian: the first field's light runs up into the card's corner and
    takes its radius (the card's 16px inside its border), and two fields
    side by side split the gap between them rather than overlap. */
+@media (min-width: 40rem) {
+  .contact-card .contact-pair > .contact-field:first-child::before {
+    top: calc(-1 * clamp(1rem, 3vh, 1.5rem));
+    border-radius: 15px 15px 0 0;
+  }
+}
+@media (min-width: 40rem) and (max-height: 56rem), (pointer: coarse) and (min-width: 40rem) and (orientation: portrait) {
+  .contact-card .contact-pair > .contact-field:first-child::before {
+    inset-inline-end: -0.75rem;
+    border-radius: 15px 0 0 0;
+  }
+  .contact-card .contact-pair > .contact-field:last-child::before {
+    top: calc(-1 * clamp(1rem, 3vh, 1.5rem));
+    inset-inline-start: -0.75rem;
+    border-radius: 0 15px 0 0;
+  }
+}
 
 /* ── the inquiry card in depth ──
    The card grows toward you under the pointer, and once somebody
@@ -59,10 +123,61 @@
    until they press Inquire. From a tablet up; on a phone the card is
    the screen already. */
 @media (min-width: 40rem) {
+  /* Flat scales, not a step toward the eye in 3D: drawn once at its
+     size and lifted by `translateZ`, the form stayed soft in focus. A
+     2D scale is drawn again sharp once it settles. 1.042 and 1.053 are
+     what 56px and 70px toward the eye came to at 1400px. */
+  .contact-card {
+    transform: translateX(0) scale(1);
+    transition:
+      transform var(--dur-2xl) var(--ease-out-strong),
+      box-shadow var(--dur-2xl) var(--ease-out-strong);
+  }
+  /* Never a scroll bar on it (Julian). It still scrolls if a short
+     window needs it; the wheel and the keys reach the fields. */
+  .contact-card [data-scroll] {
+    scrollbar-width: none;
+  }
+  .contact-card [data-scroll]::-webkit-scrollbar {
+    display: none;
+  }
   .contact-inquire > :not(.contact-card, style) {
     transition:
       opacity var(--dur-2xl) var(--ease-out-strong),
       filter var(--dur-2xl) var(--ease-out-strong);
+  }
+  /* Further forward (was 44px, now about 1.05x) and a step toward
+     the middle, as on hover, still clear of the text on the left. */
+  .contact-card:focus-within {
+    transform: translateX(-3rem) scale(1.053);
+    box-shadow: 0 50px 90px -40px rgb(0 0 0 / 0.6);
+  }
+  /* The booking card stays at the hover step: a pick focuses a button
+     in it, and the second step moved the times 8px under the finger
+     (Julian, 2026-10-17). The form keeps the deeper step. */
+  .contact-card:has(.ed):focus-within {
+    transform: translateX(-3rem) scale(1.042);
+    box-shadow: 0 36px 70px -36px rgb(0 0 0 / 0.5);
+  }
+  /* Dimmed, not blurred. The column by name: as `> :not(…)` Chrome
+     restyled the whole page on every hover anywhere. */
+  .contact-inquire:has(.contact-card:focus-within) > .contact-copy {
+    opacity: 0.35;
+  }
+  .contact-inquire:has(.contact-card:focus-within) > .enquiry-backdrop {
+    opacity: 0.5;
+  }
+}
+@media (min-width: 40rem) and (hover: hover) and (pointer: fine) {
+  /* The edge's line and glow quieter under the pointer. The beam
+     sets its strength inline, hence !important. */
+  .contact-card:hover {
+    --beam-strength: 0.5 !important;
+  }
+  /* Bigger, and a step toward the middle. */
+  .contact-card:hover:not(:focus-within) {
+    transform: translateX(-3rem) scale(1.042);
+    box-shadow: 0 36px 70px -36px rgb(0 0 0 / 0.5);
   }
 }
 /* A short window with a mouse: a laptop at 150% scaling is about 620px
@@ -73,8 +188,19 @@
   .contact-inquire {
     padding-top: 5.25rem;
   }
+  .contact-card form {
+    gap: 0.5rem;
+  }
+  .contact-card textarea {
+    height: 2.75rem;
+  }
 }
 @media (prefers-reduced-motion: reduce) {
+  .contact-card,
+  .contact-card:hover,
+  .contact-card:focus-within {
+    transform: none !important;
+  }
   .contact-inquire > * {
     filter: none !important;
   }
@@ -294,16 +420,89 @@
     --card-w: 1.5fr !important;
   }
 }
+
+/* The inquiry form in the Sessions booking card (`book-here.tsx`). The
+   card's pane is a size container, so the gaps follow the card's height:
+   close on a laptop, open on a tall screen, the form in the middle. */
+.book-form form {
+  gap: clamp(1rem, 3.2cqh, 2.25rem);
+}
 /* Name and email side by side wherever the card has the width, as on the
    short screens (`contact-pair`, devices.css), so the form keeps one shape. */
+@container (min-width: 30rem) {
+  .book-form .contact-pair {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.5rem;
+  }
+  /* Their light splits the gap, as on the Inquiries card: at -2rem
+     Name's ran 10px into Email (Julian, 2026-10-14). */
+  .book-form .contact-pair > .contact-field:first-child::before {
+    inset-inline-end: -0.75rem;
+  }
+  .book-form .contact-pair > .contact-field:last-child::before {
+    inset-inline-start: -0.75rem;
+  }
+}
 /* A big screen's card: the whole form set larger, so it fills the card
    as it does on a laptop rather than sitting small in the middle. */
+@container (min-height: 50rem) and (min-width: 56rem) {
+  .book-form {
+    zoom: 1.2;
+  }
+}
+@container (min-height: 62rem) and (min-width: 70rem) {
+  .book-form {
+    zoom: 1.4;
+  }
+}
 /* A short card: the shoot type as a dropdown rather than six chips on
    rows of their own. */
+@container (max-height: 38rem) {
+  .book-form form {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: 1.5rem;
+    align-items: end;
+  }
+  .book-form form > * {
+    grid-column: 1 / -1;
+  }
+  .book-form form > fieldset {
+    display: none;
+  }
+}
 /* A laptop's short card (1333x620: 303px for 495 of form): the inquiry
    whole in it, Inquire in sight, as a phone on its side has it
    (devices.css). The fields one line each, the message
    two. */
+@container (max-height: 26rem) {
+  [data-scroll]:has(> .book-form) {
+    padding-block: 0.75rem;
+  }
+  .book-form {
+    gap: 0.5rem;
+  }
+  .book-form form {
+    row-gap: 0.25rem;
+  }
+  .book-form :is(.contact-field :is(input, textarea), #field-type) {
+    margin-top: 0;
+    padding-block: 0.25rem;
+    min-height: 32px;
+  }
+  .book-form .contact-field textarea {
+    height: 2.25rem;
+  }
+  .book-form button[type="submit"] {
+    min-height: 0;
+    padding-block: 0.5rem;
+  }
+}
+.book-form [data-sent] {
+  align-self: center;
+  border: 0;
+}
 
 /* The picker never scrolls (Julian, 2026-10-11). A month and a day's
    times that do not fit together take turns: the month alone, then the
@@ -651,6 +850,22 @@
 .tp-notes::-webkit-scrollbar { width: 6px; }
 .tp-notes::-webkit-scrollbar-track { background: transparent; }
 .tp-notes::-webkit-scrollbar-thumb { background: color-mix(in oklab, var(--foreground) 35%, transparent); border-radius: 3px; }
+
+/* Preview (`?cross=1`, Julian's mock of 2026-10-18): a card opened in
+   place (`book-sheet.tsx`, `chrome`). The wall runs full bleed, no edge
+   fade and no pale wash over it, oversized so its blur has no rim. The
+   bar stays over it at half, the strip's panel and the footer clear over
+   it with a fifth of the ground under the footer's words. */
+.cross-wall::after {
+  display: none;
+}
+.questions-wall.cross-wall {
+  filter: blur(9px);
+}
+.cross-wall .inquire-wall {
+  mask: none;
+  -webkit-mask: none;
+}
 html[data-sheet] header.site-bar {
   background: color-mix(in oklab, var(--background) 50%, transparent);
   backdrop-filter: none;
@@ -659,6 +874,7 @@ html[data-sheet] header.site-bar {
 html[data-sheet] main.rise {
   transform: none;
 }
+html[data-sheet] :has(> .strip-count),
 html[data-sheet] footer {
   position: relative;
   z-index: 39;

@@ -18,6 +18,31 @@
   :root :is(.action, .action-quiet, .cover-cta) {
     min-height: 34px;
   }
+  /* The inquiry whole in the card, no scroll inside it: the fields one
+     line each, the message two. */
+  .contact-card form {
+    gap: 0.5rem;
+  }
+  .contact-card .contact-field :is(input, textarea) {
+    margin-top: 0;
+    padding-block: 0.25rem;
+    min-height: 32px;
+  }
+  .contact-card .contact-field textarea {
+    height: 2.25rem;
+  }
+  .contact-card fieldset > div {
+    margin-top: 0.5rem;
+  }
+  .contact-card fieldset label {
+    padding: 0.375rem 0.75rem;
+  }
+  .contact-card .glass-surface {
+    padding-block: 0.75rem;
+  }
+  .contact-card button[type="submit"] {
+    min-height: 0;
+  }
   /* The wall's overhang under the rail only gave the screen more to
      scroll to, as upright. */
   :root[data-under] .contact-inquire > .enquiry-backdrop {
@@ -191,15 +216,71 @@
 :root[data-theme="light"] [data-tinted] {
   --tint-lit: oklch(from var(--tint) clamp(0.54, l, 0.66) clamp(0.07, calc(c * 1.35), 0.17) h);
 }
+/* Each stretch fades into its neighbours' colours at its edges, so the
+   bar reads as one blend and not as blocks (Julian: smooth). A neighbour
+   with no colour hands over its own, so the blend stops at it. */
+.rail-chapter[data-tinted] {
+  --prev-lit: oklch(from var(--tint-prev) clamp(0.5, l, 0.6) clamp(0.07, calc(c * 1.35), 0.17) h);
+  --next-lit: oklch(from var(--tint-next) clamp(0.5, l, 0.6) clamp(0.07, calc(c * 1.35), 0.17) h);
+}
+:root[data-theme="light"] .rail-chapter[data-tinted] {
+  --prev-lit: oklch(from var(--tint-prev) clamp(0.54, l, 0.66) clamp(0.07, calc(c * 1.35), 0.17) h);
+  --next-lit: oklch(from var(--tint-next) clamp(0.54, l, 0.66) clamp(0.07, calc(c * 1.35), 0.17) h);
+}
 /* The three stops are registered colours, so the blend fades in with
    the capsule growing rather than appearing all at once (Julian: smooth
    animation too). At rest they are the line's own grey. */
 @property --rail-a { syntax: "<color>"; inherits: false; initial-value: transparent; }
 @property --rail-m { syntax: "<color>"; inherits: false; initial-value: transparent; }
 @property --rail-b { syntax: "<color>"; inherits: false; initial-value: transparent; }
+.strip-rail[data-rail-names="always"] .rail-chapter[data-tinted] .rail-bar {
+  --rail-a: var(--rail-line);
+  --rail-m: var(--rail-line);
+  --rail-b: var(--rail-line);
+  background-image: linear-gradient(to right in oklab, var(--rail-a), var(--rail-m) 40% 60%, var(--rail-b));
+  transition:
+    scale 320ms var(--ease-out-strong),
+    background-color 320ms var(--ease-out-strong),
+    --rail-a var(--dur-lg) var(--ease-out-strong),
+    --rail-m var(--dur-lg) var(--ease-out-strong),
+    --rail-b var(--dur-lg) var(--ease-out-strong);
+}
+.rail-line:hover .rail-chapter[data-tinted] .rail-bar,
+[data-dwell] .rail-line .rail-chapter[data-tinted] .rail-bar {
+  --rail-a: color-mix(in oklab, color-mix(in oklab, var(--prev-lit), var(--tint-lit)) 75%, var(--rail-track));
+  --rail-m: color-mix(in oklab, var(--tint-lit) 75%, var(--rail-track));
+  --rail-b: color-mix(in oklab, color-mix(in oklab, var(--tint-lit), var(--next-lit)) 75%, var(--rail-track));
+}
+/* The names on the colours at full strength: the grey at 60% read
+   about 2.5:1 on them. White on the dark ground, where the colours
+   mix down into the track, and dark ink on the light one. The thumb
+   keeps its own (`[data-tone="lit"]`, `"near"`). */
+.rail-line:hover .rail-chapter[data-tinted]:not([data-tone="lit"], [data-tone="near"]) .rail-name,
+[data-dwell] .rail-line .rail-chapter[data-tinted]:not([data-tone="lit"], [data-tone="near"]) .rail-name {
+  color: oklch(0.98 0.003 60);
+}
+:root[data-theme="light"] .rail-line:hover .rail-chapter[data-tinted]:not([data-tone="lit"], [data-tone="near"]) .rail-name,
+:root[data-theme="light"] [data-dwell] .rail-line .rail-chapter[data-tinted]:not([data-tone="lit"], [data-tone="near"]) .rail-name {
+  color: oklch(0.16 0.004 60);
+}
+/* The dividers would cut the blend back into blocks. */
+.rail-line:hover .rail-chapter[data-tinted] .rail-bar::after,
+[data-dwell] .rail-line .rail-chapter[data-tinted] .rail-bar::after,
+.rail-line:hover .rail-chapter[data-tinted] + .rail-chapter .rail-bar::after,
+[data-dwell] .rail-line .rail-chapter[data-tinted] + .rail-chapter .rail-bar::after {
+  opacity: 0;
+}
+.strip-rail[data-rail-names="always"] .rail-bar > span.bg-foreground[data-tinted]::before {
+  background: color-mix(in oklab, var(--tint-lit) 70%, transparent);
+}
 
 /* The grid's names on a phone, two lines (above, with the footer's
    phone rules): sized for the plate, past the one-line formula. */
+@media (max-width: 39.99rem) {
+  .strip-grid .cover-name {
+    font-size: clamp(0.875rem, 9cqw, 1.25rem) !important;
+  }
+}
 
 /* ── an iPad sideways: a slimmer head ──
    Smaller nav links and a thinner bar for more room for the work, and
@@ -207,6 +288,10 @@
    (`.work-filter` above, `filter-trigger` in `work-shell.tsx`).
    Unlayered, so it outranks the `lg:hidden` both carry. */
 @media (pointer: coarse) and (min-width: 64rem) and (orientation: landscape) {
+  /* Then 1.4 times that, bar and contents (Julian, same day). */
+  .site-bar .page-column {
+    padding-block: 0.175rem;
+  }
   .site-bar .logo-grow {
     font-size: 1.75rem;
   }
@@ -253,6 +338,12 @@
        scroll to. */
     overflow-y: visible;
   }
+  .contact-inquire .contact-card {
+    max-width: none;
+  }
+  .contact-card fieldset > div {
+    flex-wrap: nowrap;
+  }
   /* The card as tall as what is in it, in the middle of the screen.
      It was stretched the full height with the message taking the
      rest, so it had nowhere to go when someone wrote at length or
@@ -270,6 +361,10 @@
     max-height: 100%;
     overflow-y: auto;
     overscroll-behavior: contain;
+  }
+  .contact-inquire .contact-field textarea {
+    height: 4.5rem;
+    resize: none;
   }
   /* A booking page's calendar is Google's, and wants all the room there
      is: its card still the full height. */
@@ -326,12 +421,47 @@
     grid-template-columns: minmax(0, 1fr);
     gap: 1rem;
   }
+  .contact-inquire .contact-card {
+    max-width: none;
+    justify-self: stretch;
+  }
+  /* The room left goes to the message, and the two blocks sit as one in
+     the middle of the screen. */
+  .contact-card textarea {
+    height: 9rem;
+  }
+  .contact-pair {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.5rem;
+  }
 }
 
 /* An iPad held sideways reads the page's name under the rail rather
    than over it. Hung from the bar's lower edge with the same gap, and
    grown from that edge: the homepage's screen names
    (`rail-tick-word`) and the archive's (`rail-word`). */
+@media (pointer: coarse) and (min-width: 40rem) and (orientation: landscape) {
+  .strip-rail .rail-tick-word {
+    top: 100%;
+    bottom: auto;
+    margin-top: 0.25rem;
+    margin-bottom: 0;
+  }
+  .strip-rail .rail-word {
+    top: 100%;
+    bottom: auto;
+    margin-top: 0.5rem;
+    margin-bottom: 0;
+    transform-origin: top left;
+  }
+  .strip-rail .rail-word.origin-bottom {
+    transform-origin: top;
+  }
+  .strip-rail .rail-word.origin-bottom-right {
+    transform-origin: top right;
+  }
+}
 
 /* ── a MacBook and smaller ──
    Julian, 2026-10-10: on a 16-inch MacBook and below, the footer a third
@@ -343,5 +473,8 @@
   body:has([data-quiet-footer]) .site-footer-body {
     padding-top: 0.35rem;
     padding-bottom: calc(0.35rem + env(safe-area-inset-bottom));
+  }
+  :root[data-under] .strip-rail {
+    bottom: calc(var(--foot, 38px) - 0.375rem);
   }
 }

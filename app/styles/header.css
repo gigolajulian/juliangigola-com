@@ -142,6 +142,9 @@
    photographs and the last page's wall carry on below it, under the
    glass. From 40rem, where the strip runs sideways. */
 @media (min-width: 40rem) {
+  :root[data-under] .strip-band {
+    position: relative;
+  }
   :root[data-under] .strip-scroll > * {
     align-self: flex-start;
     height: calc(100% - var(--under, 94px));
@@ -157,24 +160,74 @@
   :root[data-under] .enquiry-backdrop {
     bottom: calc(-1 * var(--under, 94px));
   }
+  :root[data-under] .strip-rail,
   :root[data-under] body > footer {
     left: 0;
     right: 0;
   }
+  :root[data-under] .strip-rail {
+    position: absolute;
+    bottom: var(--foot, 38px);
+    z-index: 20;
+    /* Its old margin as padding, so the pane is as tall as the rail was
+       with the space above it and every screen keeps its height. */
+    margin-top: 0;
+    padding-top: 1.5rem;
+  }
   /* Under a finger it was 0.75rem, and the screen's name over the bar
      sat on the pane's hairline (Julian, iPad upright). The same room as a
      desktop now: one pane, one measure. */
+  @media (max-height: 30rem) {
+    :root[data-under] .strip-rail {
+      padding-top: 0.5rem;
+    }
+  }
   :root[data-under] body > footer {
     position: fixed;
     bottom: 0;
     z-index: 30;
     border-top-color: transparent;
   }
+  /* One pane, not two. Julian: make the scroll bar and the footer one
+     panel. Each had a blur of its own, and two blurs meeting draw a
+     seam where each one's edge samples differently. One layer now, the
+     rail's, running on down under the footer. 9px, a little under the
+     12 it was (Julian: lower the blur slightly). The tint and the
+     hairline are this layer's too: a tint each met where the footer's
+     38.19px ran into a `--foot` rounded to 38, and the sliver of both
+     read as a line across the glass. */
+  :root[data-under] .strip-rail::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    bottom: calc(-1 * var(--foot, 38px));
+    z-index: -1;
+    background-color: color-mix(in oklab, var(--background) var(--glass-tint, 34%), transparent);
+    /* The hairline and the light along it as shadows, not a border,
+       which would add a pixel to the pane. */
+    box-shadow:
+      inset 0 1px 0 color-mix(in oklab, var(--foreground) 12%, transparent),
+      inset 0 2px 0 color-mix(in oklab, white 8%, transparent);
+    -webkit-backdrop-filter: blur(var(--glass-blur, 9px)) saturate(1.5);
+    backdrop-filter: blur(var(--glass-blur, 9px)) saturate(1.5);
+    transition:
+      background-color var(--dur-md) var(--ease-out-strong),
+      backdrop-filter var(--dur-md) var(--ease-out-strong),
+      -webkit-backdrop-filter var(--dur-md) var(--ease-out-strong);
+    pointer-events: none;
+  }
   /* Over a wall of photographs (Inquiries, Where next, a booking page's
      Questions) the glass is thicker: through 34% a bright tile left the
      count and the rail's word at 3.4:1 (plan 5.1, WCAG AA wants 4.5). */
   :root[data-under]:has(.strip-scroll:is([data-at="Inquiries"], [data-at="Where next"], [data-at="Questions"])) .strip-rail::after {
     --glass-tint: 62%;
+  }
+  @media (prefers-reduced-transparency: reduce) {
+    :root[data-under] .strip-rail::after {
+      background-color: var(--background);
+      -webkit-backdrop-filter: none;
+      backdrop-filter: none;
+    }
   }
 }
 @media (prefers-reduced-motion: reduce) {
@@ -343,6 +396,10 @@
 [data-fly-hold] {
   visibility: hidden;
 }
+[data-flown] .title-word {
+  animation: none;
+  translate: none;
+}
 
 /* In the light the names standing back went pale grey on the pale
    ground: darker there, the one you are on still the darkest. */
@@ -413,6 +470,8 @@ body > footer,
   }
 }
 @media (prefers-reduced-motion: no-preference) {
+  .site-bar .page-column > a,
+  .site-bar .page-column > div > :not(nav),
   .site-bar nav li {
     animation: bar-rise 500ms var(--ease-out-strong) backwards;
     animation-delay: var(--bar-d, 0ms);
@@ -425,4 +484,5 @@ body > footer,
   .site-bar nav li:nth-child(3) { --bar-d: 75ms; }
   .site-bar nav li:nth-child(4) { --bar-d: 100ms; }
   .site-bar nav li:nth-child(5) { --bar-d: 125ms; }
+  .site-bar .page-column > div > :not(nav) { --bar-d: 150ms; }
 }

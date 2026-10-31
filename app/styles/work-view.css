@@ -82,11 +82,13 @@ img[data-fade][data-loaded] {
      the dark as the panel comes in, rather than cutting to an empty page
      for the moment before the sets are dealt out of the scope
      (`ColourGrid`); and comes back up when it closes. */
+  main .strip-band,
   main .work-list {
     transition:
       opacity 280ms var(--ease-out-strong),
       scale 280ms var(--ease-out-strong);
   }
+  [data-scope-open] main .strip-band,
   [data-scope-open] main .work-list {
     visibility: hidden;
     opacity: 0;
@@ -98,8 +100,10 @@ img[data-fade][data-loaded] {
   }
 }
 @media (min-width: 40rem) and (prefers-reduced-motion: reduce) {
+  main .strip-band,
   main .work-list,
-[data-scope-open] main .work-list {
+  [data-scope-open] main .strip-band,
+  [data-scope-open] main .work-list {
     transition: none;
   }
 }
@@ -305,6 +309,13 @@ h2:not(.label) {
     background: var(--background);
     pointer-events: none;
   }
+}
+
+/* ── small things from the scan ──────────────────────────────────
+ * The page's own count showed faintly through the photo viewer, behind
+ * the viewer's (an iPad: "01 / 06" under "1 / 6"). */
+:root[data-viewer] .strip-count {
+  visibility: hidden;
 }
 /* The homepage's ask over the wall: the muted lines ("hello@",
    "Next", the line under the question, the doors' lines) were faint
