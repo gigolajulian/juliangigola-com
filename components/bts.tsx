@@ -1,12 +1,14 @@
 import Image from "next/image";
 import type { Bts, Frame } from "@/lib/work-types";
+import { BtsClip } from "@/components/bts-clip";
 
 /* Behind the scenes: the plate that names who shot it, and the grid of
    frames. On a project page they sit after the last frame, before the end
    cell (`project-strip.tsx`); on /bts every shoot gets one of each. The
    photo tiles are all cropped 4:3 so the grid reads as a contact sheet and
    not as a second sequence competing with the work; clips keep their shape. Photos show in black and white
-   (the files stay in color); clips keep their color. */
+   (the files stay in color); clips keep their color and hold on their
+   poster until hovered or tapped (`bts-clip.tsx`). */
 
 const pad = (n: number) => String(n).padStart(2, "0");
 
@@ -69,16 +71,9 @@ function Tile({
       }}
     >
       {clip ? (
-        <video
+        <BtsClip
           src={frame.src}
-          poster={frame.src.replace(/\.mp4$/, ".poster.jpg")}
-          muted
-          loop
-          autoPlay
-          playsInline
-          preload="metadata"
-          aria-label={frame.alt || `${name}, behind the scenes, clip ${n}`}
-          className="absolute inset-0 h-full w-full object-cover"
+          label={frame.alt || `${name}, behind the scenes, clip ${n}`}
         />
       ) : (
         <Image
