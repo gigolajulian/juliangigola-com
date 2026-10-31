@@ -14,7 +14,6 @@ import { highlightDials } from "@/lib/dial-highlight";
 import { DialCopyAll, copyText } from "@/components/dial-copy-all";
 import { ArrangeInspector, type ArrangeCard } from "@/components/hero-arrange";
 import { Hero3D } from "@/components/hero-3d";
-import { WarpText } from "@/components/warp-text";
 import { NAME_WARP } from "@/lib/name-warp";
 import { BOOKING_MOVES,
   DEAL,
@@ -909,40 +908,6 @@ export function HeroDials() {
         />
       ) : null}
     </>
-  );
-}
-
-/** The name, through WarpText, on the "Name effect" panel. */
-export function HeroName({
-  className,
-  style,
-}: {
-  className?: string;
-  style?: React.CSSProperties;
-}) {
-  /* The same panel as `HeroDials` reads for its copy. */
-  const n = useDialKit("Name effect", NAME, { id: "hero-name" });
-  return (
-    <WarpText
-      text="Julian Gigola"
-      fontFamily="var(--font-wordmark)"
-      fontWeight={900}
-      fontSize="1em"
-      letterSpacing="-0.045em"
-      warpStrength={n.warpStrength}
-      warpScale={n.warpScale}
-      speed={n.speed}
-      pointerInfluence={n.lensRadius}
-      pointerStrength={n.lensStrength}
-      refraction={n.colorSplit}
-      ripple={n.ripple}
-      sweep
-      className={className}
-      style={{
-        ...style,
-        fontSize: `calc(clamp(44px, 10vw, ${n.size}px) * var(--m-name, 1))`,
-      }}
-    />
   );
 }
 
