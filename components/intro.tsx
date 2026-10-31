@@ -11,12 +11,10 @@ import { keepNames } from "@/lib/keep-names";
 /* `?splash=sand`: the hero's first photograph, small, for the sand to read. */
 const HERO_FIRST = { d: loader({ src: HERO[0].d.src, width: 640 }), l: loader({ src: HERO[0].l.src, width: 640 }) };
 
-/* `?splash=burst`: the run of frames, then the hero's first photograph,
-   each sized for a whole screen: [phone, wider]. */
-const BURST = [
-  "/work/nyx/cover.jpg", "/work/omen/cover.jpg", "/work/vesper/cover.jpg", "/work/ghostlight/cover.jpg", "/work/vendetta/cover.jpg",
-  "/work/novocaine/cover.jpg", "/work/paranoia/cover.jpg", "/work/mirage/cover.jpg", "/work/celestis/cover.jpg",
-].map((src) => [loader({ src, width: 640 }), loader({ src, width: 1080 })]);
+/* `?splash=burst`: the run of frames (the portfolio's first covers,
+   `SPLASH_RUN`, passed in from the server), then the hero's first
+   photograph, each sized for a whole screen: [phone, wider]. */
+const sized = (run: string[]) => run.map((src) => [loader({ src, width: 640 }), loader({ src, width: 1080 })]);
 const HERO_FULL = {
   d: [loader({ src: HERO[0].d.src, width: 1080 }), loader({ src: HERO[0].d.src, width: 1920 })],
   l: [loader({ src: HERO[0].l.src, width: 1080 }), loader({ src: HERO[0].l.src, width: 1920 })],
@@ -78,7 +76,7 @@ function run(picks: string[]) {
     sessionStorage.setItem("jg-intro", "1");
   } catch {}
   if (root.dataset.splash === "basic") return;
-  if (root.dataset.splash === "burst") return; // `burst-splash.ts` plays instead of the sheet
+  if (root.dataset.splash === "burst" || root.dataset.splash === "name") return; // `burst-splash.ts` plays instead of the sheet
   /* `?splash=sand` (`sand-splash.ts`): the sheet waits for the sand. */
   if (root.dataset.splash === "sand") {
     addEventListener("jg-sand-done", () => {
@@ -194,11 +192,11 @@ function run(picks: string[]) {
    `dangerouslySetInnerHTML` alone when it hydrates, so the frames the
    script has added are not "corrected" away, and a script there runs
    only from the server's HTML, never again on a client render. */
-const SHEET =
+const sheet = (frames: string[]) =>
   '<div class="jg-sheet-ground"></div><div class="jg-sheet-plane"></div>' +
-  `<script>${keepNames(`(${run.toString()})(${JSON.stringify(PICKS)});(${sand.toString()})(${JSON.stringify(HERO_FIRST)});(${burst.toString()})(${JSON.stringify(BURST)},${JSON.stringify(HERO_FULL)})`)}</script>`;
+  `<script>${keepNames(`(${run.toString()})(${JSON.stringify(PICKS)});(${sand.toString()})(${JSON.stringify(HERO_FIRST)});(${burst.toString()})(${JSON.stringify(sized(frames))},${JSON.stringify(HERO_FULL)})`)}</script>`;
 
-export function Intro() {
+export function Intro({ run: frames }: { run: string[] }) {
   return (
     <>
       {/* The one rule that cannot wait for the stylesheet. The layer is in
@@ -212,7 +210,7 @@ export function Intro() {
       <div id="jg-intro" aria-hidden="true">
         {/* By hydration the script has filled it, which React reports as a
             mismatch it will not patch; that is the point. */}
-        <div className="jg-sheet-wrap" suppressHydrationWarning dangerouslySetInnerHTML={{ __html: SHEET }} />
+        <div className="jg-sheet-wrap" suppressHydrationWarning dangerouslySetInnerHTML={{ __html: sheet(frames) }} />
         <div className="jg-intro-eye">
           <BlinkingMark still />
         </div>
