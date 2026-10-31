@@ -47,9 +47,10 @@ export function SmoothScroll() {
     // Skip if reduced motion is requested
     if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
+    // A lerp follows the wheel as it moves instead of replaying a fixed
+    // 1.2s glide on every event, which read as lag on a trackpad (2026-10-30).
     const lenis = new Lenis({
-      duration: 1.2,
-      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+      lerp: 0.2,
       orientation: "vertical",
       gestureOrientation: "vertical",
       smoothWheel: true,
