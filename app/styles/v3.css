@@ -270,7 +270,7 @@ html[data-sb]{scrollbar-width:none}html[data-sb]::-webkit-scrollbar{display:none
 .v3 .pmenu-foot .tbtn{margin-left:-13px}
 .v3 .pmenu-foot .lbl{margin-top:0}}
 @media (min-width:701px){.v3 .pmenu.drawer{display:none}}
-@media (prefers-reduced-motion:reduce){.v3 .pmenu.drawer,.v3 .pdim,.v3 .burger-btn i{transition:none}}
+@media (prefers-reduced-motion:reduce){.v3 .pmenu.drawer,.v3 .burger-btn i{transition:none}}
 /* One scrolling row at every width, a fade on the cut chip. */
 .v3 .chips{display:flex;flex-wrap:nowrap;gap:6px;padding:28px var(--gr) 0 var(--g);overflow-x:auto;scrollbar-width:none;-webkit-mask-image:linear-gradient(to right,#000 calc(100% - 48px),transparent);mask-image:linear-gradient(to right,#000 calc(100% - 48px),transparent)}
 .v3 .chips.at-end{-webkit-mask-image:none;mask-image:none}
