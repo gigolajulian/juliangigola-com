@@ -38,34 +38,8 @@
     background-color: var(--foreground);
   }
 }
-
-/* In the light theme a door stays dark, as the reel does
-   (strip-motion.css): its veil was the paper ground at 68 to 90%, and the
-   photographs went milky under it (Julian, 2026-10-14). White type over a
-   dark veil instead. Its dark tokens are the reel's (strip-motion.css). */
-:root[data-theme="light"] :has(> .door-veil) {
-  --muted-foreground: oklch(0.82 0.004 80);
-  color: var(--foreground);
-}
 /* The bar's dark links lay over the first door's dark top: the door
    starts under the bar there, on paper. */
-@media (min-width: 40rem) {
-  :root[data-theme="light"] #where-next > :first-child > :is(.door-photo, .door-veil) {
-    top: var(--bar-h) !important;
-    height: calc(100% - var(--bar-h)) !important;
-  }
-}
-/* The last screen's doors, each over a photograph. The veil is the
-   ground, heavier toward the words, so the type keeps its contrast
-   whatever the frame; a hover lets a little more of it through. */
-.door-veil {
-  background: linear-gradient(
-    to right,
-    color-mix(in oklab, var(--background) 90%, transparent),
-    color-mix(in oklab, var(--background) 68%, transparent)
-  );
-  transition: opacity 400ms var(--ease-out-strong);
-}
 @media (hover: hover) and (pointer: fine) {
   :where(:root[data-hover]) .group:hover > .door-veil {
     opacity: 0.65;
@@ -74,87 +48,9 @@
 /* The bar lies over the first door; its photograph starts under the bar
    so the top of the frame is not hidden behind it (Julian: go up on the
    photo). The fill image sets its box inline, hence the weight. */
-@media (min-width: 40rem) {
-  #where-next > :first-child > .door-photo {
-    /* Half under the bar (Julian: somewhere in between). */
-    top: calc(var(--bar-h) / 2) !important;
-    height: calc(100% - var(--bar-h) / 2) !important;
-  }
-}
-
-/* The Commissions rows' liquid hover (`services-screen.tsx`), Sessions'
-   drop on the same grey a step off the ground. Opaque, as the liquid
-   needs. */
-.services-col {
-  --services-hover: color-mix(in oklab, var(--foreground) 6%, var(--background));
-}
-
-/* A field lifts under the pointer and stays up while it is being typed
-   in. Then: lower key, and one glass plane across the card rather than
-   a plate of its own. So the ground is a band running wall to wall
-   through the card's padding (32px, 20px on a phone), square, with a
-   hairline above and below, and the lift is a few pixels toward the
-   hand, nothing tipped. */
-.contact-field {
-  position: relative;
-  transform: perspective(900px);
-  transition: transform 360ms var(--ease-out-strong);
-}
-.contact-field::before {
-  content: "";
-  position: absolute;
-  inset: -0.5rem -1.25rem;
-  z-index: -1;
-  background-color: color-mix(in oklab, var(--foreground) 5%, transparent);
-  box-shadow:
-    inset 0 1px 0 color-mix(in oklab, var(--foreground) 9%, transparent),
-    inset 0 -1px 0 color-mix(in oklab, var(--foreground) 6%, transparent);
-  opacity: 0;
-  transition: opacity var(--dur-md) var(--ease-out-strong);
-  pointer-events: none;
-}
-@media (min-width: 40rem) {
-  .contact-field::before {
-    inset-inline: -2rem;
-  }
-}
-.contact-field:focus-within {
-  transform: perspective(900px) translateZ(8px);
-}
-.contact-field:focus-within::before {
-  opacity: 1;
-}
-@media (hover: hover) and (pointer: fine) {
-  .contact-field:hover::before {
-    opacity: 0.55;
-  }
-}
-@media (prefers-reduced-motion: reduce) {
-  .contact-field,
-  .contact-field:focus-within {
-    transform: none;
-  }
-}
 /* Julian: the first field's light runs up into the card's corner and
    takes its radius (the card's 16px inside its border), and two fields
    side by side split the gap between them rather than overlap. */
-@media (min-width: 40rem) {
-  .contact-card .contact-pair > .contact-field:first-child::before {
-    top: calc(-1 * clamp(1rem, 3vh, 1.5rem));
-    border-radius: 15px 15px 0 0;
-  }
-}
-@media (min-width: 40rem) and (max-height: 56rem), (pointer: coarse) and (min-width: 40rem) and (orientation: portrait) {
-  .contact-card .contact-pair > .contact-field:first-child::before {
-    inset-inline-end: -0.75rem;
-    border-radius: 15px 0 0 0;
-  }
-  .contact-card .contact-pair > .contact-field:last-child::before {
-    top: calc(-1 * clamp(1rem, 3vh, 1.5rem));
-    inset-inline-start: -0.75rem;
-    border-radius: 0 15px 0 0;
-  }
-}
 
 /* ── the inquiry card in depth ──
    The card grows toward you under the pointer, and once somebody
@@ -163,64 +59,10 @@
    until they press Inquire. From a tablet up; on a phone the card is
    the screen already. */
 @media (min-width: 40rem) {
-  /* Flat scales, not a step toward the eye in 3D: drawn once at its
-     size and lifted by `translateZ`, the form stayed soft in focus. A
-     2D scale is drawn again sharp once it settles. 1.042 and 1.053 are
-     what 56px and 70px toward the eye came to at 1400px. */
-  .contact-card {
-    transform: translateX(0) scale(1);
-    transition:
-      transform var(--dur-2xl) var(--ease-out-strong),
-      box-shadow var(--dur-2xl) var(--ease-out-strong);
-  }
-  /* Never a scroll bar on it (Julian). It still scrolls if a short
-     window needs it; the wheel and the keys reach the fields. */
-  .contact-card [data-scroll] {
-    scrollbar-width: none;
-  }
-  .contact-card [data-scroll]::-webkit-scrollbar {
-    display: none;
-  }
   .contact-inquire > :not(.contact-card, style) {
     transition:
       opacity var(--dur-2xl) var(--ease-out-strong),
       filter var(--dur-2xl) var(--ease-out-strong);
-  }
-  /* Further forward (was 44px, now about 1.05x) and a step toward
-     the middle, as on hover, still clear of the text on the left. */
-  .contact-card:focus-within {
-    transform: translateX(-3rem) scale(1.053);
-    box-shadow: 0 50px 90px -40px rgb(0 0 0 / 0.6);
-  }
-  /* The booking card stays at the hover step: a pick focuses a button
-     in it, and the second step moved the times 8px under the finger
-     (Julian, 2026-10-17). The form keeps the deeper step. */
-  .contact-card:has(.ed):focus-within {
-    transform: translateX(-3rem) scale(1.042);
-    box-shadow: 0 36px 70px -36px rgb(0 0 0 / 0.5);
-  }
-  /* Dimmed, not blurred. The column by name: as `> :not(…)` Chrome
-     restyled the whole page on every hover anywhere. */
-  .contact-inquire:has(.contact-card:focus-within) > .contact-copy {
-    opacity: 0.35;
-  }
-  .contact-inquire:has(.contact-card:focus-within) > .enquiry-backdrop {
-    opacity: 0.5;
-  }
-}
-@media (min-width: 40rem) and (hover: hover) and (pointer: fine) {
-  /* The edge's line and glow quieter under the pointer. The beam
-     sets its strength inline, hence !important. */
-  .contact-card:hover {
-    --beam-strength: 0.5 !important;
-  }
-  .contact-card:hover > .contact-edge {
-    opacity: 0.5;
-  }
-  /* Bigger, and a step toward the middle. */
-  .contact-card:hover:not(:focus-within) {
-    transform: translateX(-3rem) scale(1.042);
-    box-shadow: 0 36px 70px -36px rgb(0 0 0 / 0.5);
   }
 }
 /* A short window with a mouse: a laptop at 150% scaling is about 620px
@@ -231,19 +73,8 @@
   .contact-inquire {
     padding-top: 5.25rem;
   }
-  .contact-card form {
-    gap: 0.5rem;
-  }
-  .contact-card textarea {
-    height: 2.75rem;
-  }
 }
 @media (prefers-reduced-motion: reduce) {
-  .contact-card,
-  .contact-card:hover,
-  .contact-card:focus-within {
-    transform: none !important;
-  }
   .contact-inquire > * {
     filter: none !important;
   }
@@ -463,142 +294,16 @@
     --card-w: 1.5fr !important;
   }
 }
-
-/* The inquiry form in the Sessions booking card (`book-here.tsx`). The
-   card's pane is a size container, so the gaps follow the card's height:
-   close on a laptop, open on a tall screen, the form in the middle. */
-.book-form form {
-  gap: clamp(1rem, 3.2cqh, 2.25rem);
-}
 /* Name and email side by side wherever the card has the width, as on the
    short screens (`contact-pair`, devices.css), so the form keeps one shape. */
-@container (min-width: 30rem) {
-  .book-form .contact-pair {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 1.5rem;
-  }
-  /* Their light splits the gap, as on the Inquiries card: at -2rem
-     Name's ran 10px into Email (Julian, 2026-10-14). */
-  .book-form .contact-pair > .contact-field:first-child::before {
-    inset-inline-end: -0.75rem;
-  }
-  .book-form .contact-pair > .contact-field:last-child::before {
-    inset-inline-start: -0.75rem;
-  }
-}
 /* A big screen's card: the whole form set larger, so it fills the card
    as it does on a laptop rather than sitting small in the middle. */
-@container (min-height: 50rem) and (min-width: 56rem) {
-  .book-form {
-    zoom: 1.2;
-  }
-}
-@container (min-height: 62rem) and (min-width: 70rem) {
-  .book-form {
-    zoom: 1.4;
-  }
-}
 /* A short card: the shoot type as a dropdown rather than six chips on
    rows of their own. */
-@container (max-height: 38rem) {
-  .book-form form {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    column-gap: 1.5rem;
-    align-items: end;
-  }
-  .book-form form > * {
-    grid-column: 1 / -1;
-  }
-  .book-form form > fieldset {
-    display: none;
-  }
-  .book-form form > div:has(#field-type) {
-    display: block;
-  }
-}
 /* A laptop's short card (1333x620: 303px for 495 of form): the inquiry
    whole in it, Inquire in sight, as a phone on its side has it
    (devices.css). The fields one line each, the message
    two. */
-@container (max-height: 26rem) {
-  [data-scroll]:has(> .book-form) {
-    padding-block: 0.75rem;
-  }
-  .book-form {
-    gap: 0.5rem;
-  }
-  .book-form form {
-    row-gap: 0.25rem;
-  }
-  .book-form div:has(> #field-type) {
-    margin-top: 0;
-  }
-  .book-form :is(.contact-field :is(input, textarea), #field-type) {
-    margin-top: 0;
-    padding-block: 0.25rem;
-    min-height: 32px;
-  }
-  .book-form .contact-field textarea {
-    height: 2.25rem;
-  }
-  .book-form button[type="submit"] {
-    min-height: 0;
-    padding-block: 0.5rem;
-  }
-}
-
-/* In the card, "Change" sits by the time it changes, clear of Close in
-   the corner; and the thank-you is the card's own, not a box in it. */
-#book-card [data-part="when"] {
-  justify-content: flex-start;
-}
-.book-form [data-sent] {
-  align-self: center;
-  border: 0;
-}
-/* One language in the Sessions booking card (Julian, 2026-10-11). Close
-   has its own line, so the picker starts just under it. The actions are
-   the site's solid pill (Book a session beside the card, Inquire), the
-   choices the reference chips' pill, and both forms open on a line over
-   the same hairline with the same gap under it. */
-#book-card .tp {
-  padding: 1.25rem var(--card-x) 0;
-}
-/* The card's foot is solid over a hairline: the month's last rows ran
-   under the see-through bar and its words read over the tiles. */
-#book-card .tp > .sticky {
-  background: transparent;
-  backdrop-filter: none;
-  border-top: 0.5px solid var(--border);
-  padding-bottom: 1.25rem;
-}
-#book-card input:not(:checked) + [data-part="chip"] {
-  color: var(--muted-foreground);
-}
-#book-card [data-part="act"] {
-  border-radius: 9999px;
-  font-family: var(--font-display);
-}
-/* Ready reads the same on every action in the card: solid ink, as Book
-   it and Inquire. Teal stays the colour of what is open. */
-#book-card [data-part="act"]:enabled {
-  background: var(--foreground);
-  border-color: var(--foreground);
-  color: var(--background);
-}
-#book-card [data-part="chip"] {
-  border-radius: 9999px;
-  padding: 0.5rem 1rem;
-}
-#book-card .tp form {
-  gap: clamp(1.25rem, 4cqh, 2.5rem);
-}
-#book-card .tp form > [data-part="when"] {
-  padding-bottom: clamp(1.25rem, 4cqh, 2rem);
-  border-bottom: 0.5px solid color-mix(in oklab, var(--foreground) 30%, transparent);
-}
 
 /* The picker never scrolls (Julian, 2026-10-11). A month and a day's
    times that do not fit together take turns: the month alone, then the
@@ -695,10 +400,6 @@
   padding-top: 0.75rem;
   padding-bottom: 0.75rem;
 }
-/* The month alone has no bar under it: the card's own margin instead. */
-#book-card .tp[data-split][data-mstep="days"] {
-  padding-bottom: 1.25rem;
-}
 /* Julian: more room between them, the times lower. The way back keeps the
    top; the times sit in the middle of what is left. */
 .tp[data-split][data-mstep="times"] [data-part="times"] {
@@ -707,14 +408,6 @@
 }
 .tp[data-split][data-tight][data-mstep="times"] [data-part="times"] {
   gap: 0.75rem;
-}
-/* The way back up in the card's top line, across from Close, where the
-   card has nothing else on the left: it cost the times a row there. */
-#book-card:not(:has([aria-label="How to reach me"])) .tp[data-split][data-tight][data-mstep="times"] [data-part="back"] {
-  /* `.tp` starts where that line ends: on its foot, as Close is. */
-  position: absolute;
-  bottom: 100%;
-  left: var(--card-x);
 }
 .tp[data-split][data-mstep="times"] [data-part="times"] > p {
   margin-top: auto;
@@ -731,67 +424,8 @@
 :root:not([data-theme="light"]) {
   --session-pick: color-mix(in oklab, var(--foreground) 14%, transparent);
 }
-
-/* Pressed the moment the finger lands, let go at the old pace (Apple's
-   ~100ms press). One list for the card's buttons, so the scale has a
-   way back on the cells as well; `.press` keeps its own list. */
-#book-card button:not(.press) {
-  transition:
-    scale var(--dur-md) var(--ease-out-strong),
-    opacity var(--dur-md) var(--ease-out-strong),
-    translate var(--dur-md) var(--ease-out-strong),
-    background-color var(--dur-md) var(--ease-out-strong),
-    border-color var(--dur-md) var(--ease-out-strong),
-    color var(--dur-md) var(--ease-out-strong);
-}
-#book-card button:not(:disabled, [aria-disabled="true"]):active {
-  scale: 0.97;
-  transition-duration: var(--dur-2xs);
-  transition-timing-function: var(--ease-in-strong);
-}
 /* The glass made solid where it is asked for (reduced transparency, more
    contrast): Tailwind's blur on the card is not `.glass-surface`. */
-@media (prefers-reduced-transparency: reduce), (prefers-contrast: more) {
-  #book-card {
-    -webkit-backdrop-filter: none;
-    backdrop-filter: none;
-    background-color: var(--card);
-  }
-}
-@media (prefers-contrast: more) {
-  #book-card {
-    border-color: var(--foreground);
-    --muted-foreground: color-mix(in oklab, var(--foreground) 80%, var(--card));
-  }
-}
-
-/* `?smooth` (time-picker.tsx): GSAP brings the steps in, so the CSS
-   entrances stand down; and booked, the whole card turns the teal of the
-   check, its words in the teal's own ink. */
-:root[data-smooth] #book-card :is(.tp-roll, .tp-rise) {
-  animation: none;
-}
-:root[data-smooth] #book-card {
-  transition: background-color var(--dur-2xl) var(--ease-out-strong);
-}
-/* The times are what you tap: 13px, not the 11px of the labels round them. */
-:root[data-smooth] #book-card [data-slot] {
-  font-size: 0.8125rem;
-}
-:root[data-smooth] #book-card:has([data-booked]) {
-  background-color: var(--accent);
-  border-color: transparent;
-  --foreground: var(--accent-foreground);
-  --muted-foreground: color-mix(in oklab, var(--accent-foreground) 80%, var(--accent));
-  --border: color-mix(in oklab, var(--accent-foreground) 25%, transparent);
-  color: var(--foreground);
-}
-
-/* The card's quiet words over the glass in the light theme: at the
-   page's grey they read about 4.2:1 where a dark wall shows through. */
-:root[data-theme="light"] #book-card {
-  --muted-foreground: oklch(0.4 0.003 250);
-}
 
 /* The dense picker (`time-picker-dense.tsx`, behind `?dense`): ruled
    cells that share their hairlines, one bar at the foot, errors in their
@@ -991,18 +625,6 @@
 }
 /* The homepage sheet's card the same: the picker 31rem, the card and
    the sheet as tall as that, not the 46rem the old picker filled. */
-@media (min-width: 40rem) {
-  div:has(> div > #book-card .tpd) {
-    height: auto;
-  }
-  #book-card:has(.tpd) {
-    flex: none;
-    container-type: inline-size;
-  }
-  #book-card .tpd {
-    height: 31rem;
-  }
-}
 @media (prefers-reduced-motion: reduce) {
   .tpd-step,
   .tpd-slide,
@@ -1013,169 +635,7 @@
     animation: none;
   }
 }
-
-/* ── one frame, `?layout` (Julian, 2026-10-16, /impeccable layout): every
-   step of the card reads top to bottom the same way. Where you are at the
-   top, the step's one job in the middle, and a bar on the card's floor
-   with what is chosen so far on the left and the one action on the right,
-   as the picker already has. The details step had its time on top and
-   Book it floating under the note with the room left empty below. ──── */
-:root[data-layout] #book-card .tp > form {
-  flex: 1;
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  grid-template-rows: auto auto auto 1fr auto;
-  column-gap: 0;
-  row-gap: 0;
-  padding-bottom: 0;
-}
-:root[data-layout] #book-card .tp > form > .grid {
-  grid-column: 1 / -1;
-  grid-row: 1;
-  /* Who, then how to reach them: a row each, a breath between. */
-  column-gap: 2rem;
-  row-gap: 1.5rem;
-  padding-top: 0.5rem;
-}
-:root[data-layout] #book-card .tp > form > label {
-  grid-column: 1 / -1;
-  grid-row: 2;
-  margin-top: 1.5rem;
-}
-:root[data-layout] #book-card .tp > form > [role="alert"] {
-  grid-column: 1 / -1;
-  grid-row: 3;
-  margin-top: 1rem;
-}
-/* The floor: the chosen time and Change on the left, Book it on the right. */
-:root[data-layout] #book-card .tp > form > [data-part="when"],
-:root[data-layout] #book-card .tp > form > [data-part="act"] {
-  grid-row: 5;
-  align-self: stretch;
-  margin-top: 1.5rem;
-  border-top: 1px solid var(--border);
-}
-:root[data-layout] #book-card .tp > form > [data-part="when"] {
-  grid-column: 1;
-  justify-content: flex-start;
-  align-items: center;
-  gap: 1.25rem;
-  padding-block: 1rem;
-  /* Tall enough to hold Book it beside it, so the two centre on one line
-     and the button stays off the rule (Julian). */
-  min-height: calc(2.875rem + 2rem);
-  border-bottom: 0;
-}
-:root[data-layout] #book-card .tp > form > [data-part="act"] {
-  grid-column: 2;
-  align-self: center;
-  margin-block: 1.5rem 0;
-  border-top: 0;
-}
-/* The bar's rule runs under the button too. */
-:root[data-layout] #book-card .tp > form::after {
-  content: "";
-  grid-column: 2;
-  grid-row: 5;
-  align-self: start;
-  margin-top: 1.5rem;
-  border-top: 1px solid var(--border);
-}
 /* A phone: the time over a full-width Book it, as Confirm sits. */
-@container card (max-width: 34rem) {
-  :root[data-layout] #book-card .tp > form {
-    grid-template-columns: minmax(0, 1fr);
-    grid-template-rows: auto auto auto 1fr auto auto;
-  }
-  :root[data-layout] #book-card .tp > form > [data-part="when"] {
-    padding-block: 1.25rem 1rem;
-  }
-  :root[data-layout] #book-card .tp > form > [data-part="act"] {
-    grid-column: 1;
-    grid-row: 6;
-    width: 100%;
-  }
-  :root[data-layout] #book-card .tp > form::after {
-    content: none;
-  }
-}
-@media (max-width: 39.99rem) {
-  :root[data-layout] #book-card .tp > form {
-    grid-template-columns: minmax(0, 1fr);
-    grid-template-rows: auto auto auto 1fr auto auto;
-  }
-  :root[data-layout] #book-card .tp > form > [data-part="act"] {
-    grid-column: 1;
-    grid-row: 6;
-    width: 100%;
-  }
-  :root[data-layout] #book-card .tp > form::after {
-    content: none;
-  }
-}
-/* The day's name sits with its days: nothing between them but the week. */
-:root[data-layout] #book-card .tp [data-part="days"] {
-  row-gap: 0.75rem;
-}
-/* The inquiry form takes the same floor: the address on the left, the
-   button on the right, on a rule at the card's bottom (Julian). */
-:root[data-layout] #book-card [data-scroll] {
-  display: flex;
-  flex-direction: column;
-}
-:root[data-layout] #book-card .book-form,
-:root[data-layout] #book-card .book-form > form {
-  flex: 1;
-}
-:root[data-layout] #book-card .book-form form > div:has(> button[type="submit"]) {
-  margin-top: auto;
-  align-items: center;
-  padding-top: 1.5rem;
-  border-top: 1px solid var(--border);
-}
-
-/* The two forms read as one (Julian): the tabs top right, the inquiry's
-   answers in the booking form's mono with the labels' tracking, and the
-   date's label over its field as every other one. */
-:root[data-layout] #book-card [aria-label="How to reach me"] { margin-left: auto; }
-:root[data-layout] #book-card .book-form .contact-field :is(input, textarea) {
-  font-family: var(--font-mono);
-  letter-spacing: calc(0.6875rem * 0.14);
-}
-:root[data-layout] #book-card .book-form label:has(> input[type="date"]) {
-  flex-direction: column; align-items: stretch; gap: 0.5rem;
-}
-/* Focus as the booking form has it: the rule under the field goes to full
-   ink, no lit box, no lift. */
-:root[data-layout] #book-card .book-form .contact-field::before { display: none; }
-:root[data-layout] #book-card .book-form .contact-field:focus-within { transform: none; }
-:root[data-layout] #book-card .book-form .contact-field :is(input, textarea):focus { border-color: var(--foreground); }
-
-/* The deposit on the same floor: the refund line left, Pay right, on the
-   rule at the card's bottom, in the card's solid-ink button. */
-:root[data-layout] #book-card [aria-label="Deposit"] > div:has(> button[type="button"]:last-child) {
-  margin-top: auto; padding-block: 1.5rem;
-}
-:root[data-layout] #book-card [aria-label="Deposit"] > div > button:last-child:not([disabled]) {
-  border-radius: 9999px; font-family: var(--font-display);
-  background: var(--foreground); border-color: var(--foreground); color: var(--background);
-}
-:root[data-layout] #book-card [aria-label="Deposit"] > div > button:last-child[disabled] {
-  border-radius: 9999px; font-family: var(--font-display);
-  background: color-mix(in oklab, var(--foreground) 72%, transparent); border-color: transparent; color: var(--background);
-}
-:root[data-layout] #book-card [aria-label="Deposit"] :is(p.text-base, p.text-sm, dd, [role="status"] p, span.text-sm) {
-  font-family: var(--font-mono);
-  letter-spacing: calc(0.6875rem * 0.14);
-}
-:root[data-layout] #book-card [aria-label="Deposit"] :is(p.text-base, span.text-sm) { max-width: 56ch; }
-/* The card and its note sit down on the floor, the room above them
-   (Julian): the card fields take the slack, the wallet under them. */
-:root[data-layout] #book-card [aria-label="Deposit"] > div[aria-busy] { margin-top: auto; }
-:root[data-layout] #book-card [aria-label="Deposit"] > div:has(> button[type="button"]:last-child) { margin-top: 0; }
-/* ...and it splits the room above and below, so the card sits near the
-   card's middle on a laptop or an iPad (Julian). */
-:root[data-layout] #book-card [aria-label="Deposit"] > p.text-sm { margin-bottom: auto; }
 /* The big day and time over a split month's times, in that step only. */
 .tp:not([data-split][data-mstep="times"]) [data-part="big"] {
   display: none;
@@ -1191,22 +651,6 @@
 .tp-notes::-webkit-scrollbar { width: 6px; }
 .tp-notes::-webkit-scrollbar-track { background: transparent; }
 .tp-notes::-webkit-scrollbar-thumb { background: color-mix(in oklab, var(--foreground) 35%, transparent); border-radius: 3px; }
-
-/* Preview (`?cross=1`, Julian's mock of 2026-10-18): a card opened in
-   place (`book-sheet.tsx`, `chrome`). The wall runs full bleed, no edge
-   fade and no pale wash over it, oversized so its blur has no rim. The
-   bar stays over it at half, the strip's panel and the footer clear over
-   it with a fifth of the ground under the footer's words. */
-.cross-wall::after {
-  display: none;
-}
-.questions-wall.cross-wall {
-  filter: blur(9px);
-}
-.cross-wall .inquire-wall {
-  mask: none;
-  -webkit-mask: none;
-}
 html[data-sheet] header.site-bar {
   background: color-mix(in oklab, var(--background) 50%, transparent);
   backdrop-filter: none;
@@ -1215,7 +659,6 @@ html[data-sheet] header.site-bar {
 html[data-sheet] main.rise {
   transform: none;
 }
-html[data-sheet] :has(> .strip-count),
 html[data-sheet] footer {
   position: relative;
   z-index: 39;

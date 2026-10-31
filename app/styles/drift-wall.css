@@ -135,19 +135,16 @@
   transition: opacity var(--dur-lg) var(--ease-out-strong);
 }
 
-.drift-wall__tile.is-active .drift-wall__inner,
 .drift-wall__tile:focus-visible .drift-wall__inner {
   opacity: 1;
   transform: translateZ(var(--dw-lift));
   box-shadow: 0 24px 60px -18px rgba(0, 0, 0, 0.7);
 }
 
-.drift-wall__tile.is-active img,
 .drift-wall__tile:focus-visible img {
   filter: grayscale(0) saturate(1.05);
 }
 
-.drift-wall__tile.is-active .drift-wall__overlay,
 .drift-wall__tile:focus-visible .drift-wall__overlay {
   opacity: 0;
 }
@@ -165,7 +162,6 @@
   }
   /* A tile under the pointer brightens where it is rather than lifting
      toward you. */
-  .drift-wall__tile.is-active .drift-wall__inner,
   .drift-wall__tile:focus-visible .drift-wall__inner {
     transform: translateZ(0);
   }
@@ -174,19 +170,6 @@
       opacity var(--dur-lg) var(--ease-out-strong),
       box-shadow var(--dur-lg) var(--ease-out-strong);
   }
-}
-
-/* The search's liquid ground (`work-shell.tsx`): there while the box is
-   open, gone a beat after it shuts, once the drop has drawn back in. */
-.finder-liquid > [data-gooey-svg] {
-  transition: opacity 150ms ease var(--dur-xs);
-}
-.finder-liquid:not([data-open]) > [data-gooey-svg] {
-  opacity: 0;
-}
-.finder-liquid[data-open] > [data-gooey-svg] {
-  transition-delay: 0ms;
-  transition-duration: 0ms;
 }
 
 /* The buttons in liquid (`liquid-pair.tsx`). The first button's ground is
@@ -216,9 +199,6 @@
 .liquid-pair [data-on] > .action-quiet {
   color: var(--background);
 }
-.liquid-pair [data-on] > .cover-cta-quiet {
-  color: var(--hero-on-ink);
-}
 
 /* The hero's pair sits in a zoom on a phone (`--m-buttons`, 0.88). The
    liquid measures its buttons as seen, already zoomed, and drew them into
@@ -228,24 +208,6 @@
   /* And the middle's own (`--mid`), which a short wide window takes to
      0.6: the ink came out three fifths of SEE THE WORK. */
   zoom: calc(1 / (var(--m-buttons, 1) * var(--mid, 1)));
-}
-
-/* The drop that fills a quiet button: out of the first button across the
-   gap (`--lp-gap`, the pair's `gap-3`), the width of this one, and back. */
-.liquid-drop {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 2px;
-  height: 100%;
-  border-radius: 9999px;
-  pointer-events: none;
-}
-.liquid-pair [data-on] .liquid-drop {
-  animation: liquid-run var(--dur-xl) var(--ease-out-strong) forwards;
-}
-.liquid-pair [data-was] .liquid-drop {
-  animation: liquid-drain 380ms cubic-bezier(0.4, 0, 0.2, 1) forwards;
 }
 @keyframes liquid-run {
   from {
@@ -272,81 +234,9 @@
     animation-duration: 1ms;
   }
 }
-
-/* Julian: the photographs either side in the image viewer, a little
-   blurred and dim until the pointer is on one (`lightbox.tsx`), turned in
-   3D: the one before faces left, the one after right, each its outer
-   edge back (Julian: the other way). Less turned under the pointer. Turned on its
-   middle and set back, so the outer edge does not swell toward the eye. */
-.lightbox-side {
-  transform: perspective(1400px) translateZ(-160px) rotateY(var(--turn));
-  transition: transform var(--dur-xl) var(--ease-out-strong);
-}
-/* A cover flow, turned away on the edge that meets the picture, so
-   the outer edge recedes. */
-.lightbox-side[data-side="prev"] {
-  --turn: -38deg;
-  transform-origin: right center;
-}
-.lightbox-side[data-side="next"] {
-  --turn: 38deg;
-  transform-origin: left center;
-}
-@media (hover: hover) and (pointer: fine) {
-  .lightbox-side[data-side="prev"]:hover {
-    --turn: -24deg;
-  }
-  .lightbox-side[data-side="next"]:hover {
-    --turn: 24deg;
-  }
-}
-/* Full opacity (Julian: dont fade the images). */
-.lightbox-peek {
-  animation: peek-in var(--dur-xl) var(--ease-out-strong) 120ms backwards;
-  box-shadow: 0 24px 60px -24px rgb(0 0 0 / 0.5);
-}
-/* Glass, not blur. The photograph sharp under a pane: a lit top edge
-   and a darker foot as `.play-glass` draws them, and a broad diagonal
-   sheen that slides across as the card turns to you. */
-.lightbox-glass {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background:
-    linear-gradient(
-      115deg,
-      color-mix(in oklab, white 26%, transparent) 0%,
-      color-mix(in oklab, white 8%, transparent) 28%,
-      transparent 42%,
-      transparent 62%,
-      color-mix(in oklab, white 10%, transparent) 74%,
-      transparent 86%
-    )
-    0 0 / 200% 100% no-repeat,
-    linear-gradient(to bottom, transparent 60%, color-mix(in oklab, black 22%, transparent));
-  box-shadow:
-    inset 0 1px 0.5px color-mix(in oklab, white 70%, transparent),
-    inset 1px 0 0.5px color-mix(in oklab, white 30%, transparent),
-    inset -1px 0 0.5px color-mix(in oklab, white 30%, transparent),
-    inset 0 -1px 0.5px color-mix(in oklab, white 18%, transparent),
-    inset 0 0 2.5rem color-mix(in oklab, white 10%, transparent);
-  transition: background-position var(--dur-2xl) var(--ease-out-strong);
-}
-@media (hover: hover) and (pointer: fine) {
-  button:hover .lightbox-glass {
-    background-position: 100% 0, 0 0;
-  }
-}
 @keyframes peek-in {
   from {
     opacity: 0;
-  }
-}
-@media (prefers-reduced-motion: reduce) {
-  .lightbox-peek,
-  .lightbox-side {
-    transition: none;
-    animation: none;
   }
 }
 
@@ -394,8 +284,7 @@
    words go soft the other way. A pull is a lens's, quick to start and slow
    to settle. Nothing moves; only focus and light. */
 @media (hover: hover) and (pointer: fine) {
-  .questions-wall,
-  .questions-words {
+  .questions-wall {
     transition:
       filter var(--dur-2xl) var(--ease-out-strong),
       opacity var(--dur-2xl) var(--ease-out-strong);
@@ -412,15 +301,10 @@
   [data-look] > .questions-wall::after {
     background: color-mix(in oklab, var(--background) 18%, transparent);
   }
-  [data-look] > .questions-words {
-    opacity: 0.4;
-    filter: blur(2px);
-  }
 }
 @media (prefers-reduced-motion: reduce) {
   .questions-wall,
-  .questions-wall::after,
-  .questions-words {
+.questions-wall::after {
     transition: none;
   }
 }

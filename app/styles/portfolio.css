@@ -18,20 +18,6 @@
     z-index: 10;
   }
 }
-.lead-pane {
-  /* Uncovered as the last screen slides off it by the pull
-     (`--lead-pull`, `strip.tsx`), the screen and the edge on the same
-     curves: the strip's band, and its springing back on release. */
-  position: absolute;
-  inset-block: 0;
-  right: 0;
-  width: 100vw;
-  overflow: hidden;
-  /* The wash, as the portfolio it stands in for sits on it. */
-  background: var(--ground);
-  clip-path: inset(0 0 0 calc(100% - var(--lead-pull, 0px)));
-  transition: clip-path 140ms var(--ease-out-strong);
-}
 .strip-scroll > :has(+ .lead-window) {
   transition:
     translate 140ms var(--ease-out-strong),
@@ -43,70 +29,6 @@
 }
 .strip-scroll[data-dragged] :is(> :has(+ .lead-window), .lead-pane) {
   transition-duration: 0s;
-}
-/* The portfolio's first screen in its strip view, where the page draws
-   it (under its head and chips, over its ruler; the spine and the covers
-   by the same rules), set back and out of focus the way the page comes
-   in under the homepage (`jg-lead-under`), so the crossing has nothing to
-   change. Julian: match the peek and the page. */
-.lead-under {
-  position: absolute;
-  inset: 0;
-  scale: 0.94;
-  filter: blur(10px) brightness(0.6);
-  pointer-events: none;
-}
-.lead-row {
-  position: absolute;
-  inset-block: 11.375rem 0;
-  left: 2.5rem;
-  display: flex;
-  gap: 1rem;
-}
-@media (max-height: 52rem) {
-  .lead-row {
-    top: 10.875rem;
-  }
-}
-.lead-spine {
-  display: flex;
-  align-items: flex-end;
-  gap: 1rem;
-  padding: 0 1.25rem 0.25rem 3rem;
-}
-.lead-all {
-  writing-mode: vertical-rl;
-  rotate: 180deg;
-  white-space: nowrap;
-  border-left: 1px solid var(--border);
-  padding-left: 0.375rem;
-}
-.lead-cover {
-  position: relative;
-  flex: none;
-  height: 100%;
-  overflow: hidden;
-  border-radius: var(--radius-photo) var(--radius-photo) 0 0;
-  /* The plate's type is measured off the cover, as on the page. */
-  container-type: inline-size;
-}
-/* The rack instead, for a visitor who keeps the grid
-   (`lead-window.tsx`): the page's own `strip-grid` rules on the row,
-   so the two rows, the gap, the padding, the column and the plates are
-   the page's and the landing changes nothing. A cover in the rack is
-   4:5 whatever it was shot at (`--ar` default), and the spine stands
-   both rows as the page's does. The card came in as the strip and the
-   page landed as the grid. */
-.lead-row.strip-grid {
-  display: grid;
-}
-.lead-row.strip-grid > .lead-spine {
-  grid-row: 1 / -1;
-}
-.lead-row.strip-grid > .lead-cover {
-  height: 100% !important;
-  width: calc((100cqh - 1rem) / 2 * 0.8) !important;
-  aspect-ratio: auto !important;
 }
 
 /* ── spines ───────────────────────────────────────────────────────
@@ -142,28 +64,8 @@
   .strip-cell:first-child:has(> .chapter-name) {
     padding-left: 3rem;
   }
-  /* "All projects" up beside the name, the same way (Julian: fit it
-     better); across, it broke over two lines in the room the spine left. */
-  /* The portfolio's first spine stands under the word the homepage's
-     window carried in, Portfolio, while the strip is at its start, and
-     takes its own name once it moves (Julian: on All show Portfolio, swap
-     it going into Editorial). The two share one place; the one leaving
-     goes on up the spine and the other comes up from the foot. */
-  .chapter-name:has(> .chapter-alias) {
-    display: grid;
-  }
-  .chapter-name > :is(.chapter-alias, .chapter-own) {
-    grid-area: 1 / 1;
-    transition:
-      opacity 360ms var(--ease-out-strong),
-      translate var(--dur-xl) var(--ease-out-strong);
-  }
-  .strip-scroll[data-moved] .chapter-alias,
   .strip-scroll:not([data-moved]) .chapter-own {
     opacity: 0;
-  }
-  .strip-scroll[data-moved] .chapter-alias {
-    translate: 0 -0.6em;
   }
   .strip-scroll:not([data-moved]) .chapter-own {
     translate: 0 0.6em;
@@ -285,42 +187,10 @@
   z-index: 0;
   animation-name: jg-lead-return;
 }
-/* The default, `?stack=0` for the door before it: the deck the right
-   way round. The pull brings the portfolio in from the
-   right as the card on top, in focus, and the last screen sinks back under
-   it (`strip.tsx` paint); past the count it carries on over the whole
-   window from where the hand left it (`--lead-from`) and the homepage
-   recedes beneath. Back out, the card slides off to the right and the
-   hero comes up from under it. */
-:root[data-stack] .lead-under {
-  scale: 1;
-  filter: none;
-  translate: calc(100% - var(--lead-pull, 0px)) 0;
-  transition: translate 320ms var(--ease-out-strong);
-}
-/* The card runs on down under the glass, as the screens' own pictures
-   do, or the last screen's wall showed through the pane below it; and
-   the homepage's rail gives way as it comes, so the pane never reads
-   Inquire over the portfolio. */
-:root[data-stack][data-under] .lead-pane {
-  bottom: calc(-1 * var(--under, 94px));
-}
-:root[data-stack][data-under] .lead-under {
-  bottom: var(--under, 94px);
-}
-:root[data-stack] .strip-rail > * {
-  opacity: calc(1 - min(1, var(--lead-in, 0) * 2));
-  transition: opacity 320ms var(--ease-out-strong);
-}
 /* The wheel moves the card a screen's worth now, so each notch glides
    rather than jumps; the edge and the screen under it on the same ease. */
-:root[data-stack] .lead-pane,
 :root[data-stack] .strip-scroll > :has(+ .lead-window) {
   transition-duration: 320ms;
-}
-:root[data-stack] .strip-scroll[data-release] .lead-under {
-  transition-duration: 560ms;
-  transition-timing-function: var(--ease-rubber);
 }
 :root[data-stack] .strip-scroll[data-dragged] :is(.lead-under, .lead-pane, > :has(+ .lead-window)) {
   transition-duration: 0s;

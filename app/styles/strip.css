@@ -28,12 +28,6 @@ body:has([data-quiet-footer]) .site-footer-body {
   body:has([data-quiet-footer]) .site-footer-body {
     padding-block: 0.4rem;
   }
-  .strip-band {
-    /* The gap the pages leave between the chip row and the first
-       photograph. A desktop can afford 16px of it; a tablet held in two
-       hands cannot. */
-    margin-top: 0.5rem;
-  }
 }
 body:has([data-quiet-footer]) .site-footer-row {
   margin-top: 0;
@@ -64,24 +58,8 @@ body:has([data-quiet-footer]) .site-footer-row {
    without this the first screen carries the same words twice. Opacity and
    not `display`, so the header keeps its height and nothing reflows as it
    comes and goes. The attribute is set by the strip's own scroll reader. */
-/* No glass drop under the pointer: Julian asked for the arrow back and the
-   label on its own. A blurred element moving
-   with the pointer is the most expensive thing that can be on a screen —
-   every pointer move repaints the region behind it — and the trip into
-   the lightbox was stuttering under exactly that. So no blur and no filter
-   on anything that follows the pointer. */
-
-.running-head {
-  opacity: 0;
-  transition: opacity var(--dur-sm) var(--ease-out-strong);
-}
 article:has(.strip-scroll[data-past-first]) .running-head {
   opacity: 1;
-}
-@media (prefers-reduced-motion: reduce) {
-  .running-head {
-    transition: none;
-  }
 }
 
 /* The same moment for the homepage's wordmark, which is the cover's masthead
@@ -99,27 +77,11 @@ article:has(.strip-scroll[data-past-first]) .running-head {
    photograph. Tabbing to it brings it back, so it is never an invisible
    focus target, and below `lg` the cover stacks under a fixed bar with no
    masthead beside it, so the name simply stays. */
-/* It comes in from the left as the cover goes. */
-.home-wordmark {
-  opacity: 0;
-  pointer-events: none;
-  translate: -48px 0;
-  transition:
-    opacity 360ms var(--ease-out-strong),
-    translate var(--dur-xl) var(--ease-out-strong);
-}
 body:has(.strip-scroll[data-past-first]) .home-wordmark,
-body:has(.strip-scroll[data-past-hero]) .home-wordmark,
-.home-wordmark:focus-visible {
+body:has(.strip-scroll[data-past-hero]) .home-wordmark {
   opacity: 1;
   pointer-events: auto;
   translate: none;
-}
-@media (prefers-reduced-motion: reduce) {
-  .home-wordmark {
-    transition: opacity var(--dur-md) var(--ease-out-strong);
-    translate: none;
-  }
 }
 
 /* And the page is exactly the window, with that one line on it. A strip page
@@ -173,11 +135,6 @@ body:has(.strip-scroll[data-past-hero]) .home-wordmark,
    The list scrolls inside itself either way; this is what keeps the number
    of rows you can see without doing that worth having. */
 /* Same shape as the `short` variant above, and for the same reason. */
-@media (max-height: 52rem) and (min-width: 40rem) {
-  .cover-row {
-    padding-block: 0.375rem;
-  }
-}
 
 /* The filter row, when it runs past the edge of the window: the last chip
    fades rather than being cut through, which is the difference between a
@@ -398,32 +355,12 @@ nav[aria-label="Categories"] ul[data-more] {
   font-size: clamp(1.25rem, min(3rem, calc(22rem / var(--n, 12))), 3rem);
   white-space: nowrap;
 }
-/* The first spine's stand-in word is for the sideways strip only. */
-.chapter-alias {
-  display: none;
-}
-@media (min-width: 40rem) {
-  .chapter-alias {
-    display: block;
-  }
-}
 @media (max-width: 40rem) {
   /* Stacked, the column is the width of the page and a name fits at the
      phone size whatever it is. */
   .chapter-name {
     font-size: 1.875rem;
   }
-}
-/* The name on a plate, sized to the name. A fixed size either set a short
-   title small on a wide cover or cut a long one: `I Wanna Be A Human` came
-   out as `I Wanna Be A Hu...` at the size `Hua` wanted. The count of
-   characters comes in as `--n` and the type takes whichever is smaller,
-   5.7% of the cover's width or the width one line of that many condensed
-   caps can have. Nothing measures anything; it is one division. */
-.cover-name {
-  /* The slate's title: the films' size, as large as the length lets
-     it be. Was 5.7cqw to 2rem on a plate. */
-  font-size: clamp(1rem, min(9cqw, calc(150cqw / var(--n, 12))), 3rem);
 }
 /* In the rack the same formula came out at its floor on every cover —
    13.6px under a 240px photograph, a caption rather than a title. Julian:
@@ -434,56 +371,11 @@ nav[aria-label="Categories"] ul[data-more] {
    more, which is where 160 comes from; every shorter name rises until the
    cap stops it. One line always — the division is what keeps it there,
    and `truncate` is the backstop. */
-/* The strip's covers the same way, larger on a large screen, where
-   the one-line cap of 3rem set SAGO small on a cover 870px wide. The
-   grid's own size follows. */
-.strip-scroll .cover-name {
-  /* One size along the strip, from its height, not each cover's
-     width: sized by width, SAGO and DIESEL beside it sat on different
-     lines. Smaller only where the cover is too narrow. */
-  /* The last term is the longest run that cannot break (`--g`, the last
-     two words held together) inside the slate's 2rem margins: on a
-     phone's narrow cover `140cqw` alone cut WONDERLAND and LADERA GRANOLA
-     at the margin (plan 3.2, iPhone 18 and 18 Pro Max). */
-  font-size: clamp(1rem, min(calc((100dvh - 21rem) * 0.095), calc(215cqw / var(--n, 12)), calc(140cqw / var(--w, 8)), calc((145cqw - 6rem) / var(--g, var(--w, 8)))), 5rem);
-  white-space: normal;
-  overflow: hidden;
-  text-overflow: clip;
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
-  text-wrap: balance;
-}
 /* And the slate's margins the same on every cover, so the names stand on
    one line across the strip. */
 .strip-scroll:not(.strip-grid) .cover-slate {
   padding-inline: 2rem;
   padding-bottom: 1.75rem;
-}
-/* Larger, and a long name runs to two lines rather than shrinking to fit
-   one. Sized for the plate, not the name's length. */
-.strip-grid .cover-name {
-  /* The longest run that cannot break has to fit one line on its own:
-     the longest word (`--w`), or a film's last two words, held together
-     (`--g`, LADERA GRANOLA ran out at 1280x720). 135, not 140, for Neue
-     Haas's wider caps: ANDROMEDA ran 2px out at 1440. `!important` over
-     the type pass's inline size, which is the strip view's (QA: the
-     grid showed cut titles for 2 to 4s after each switch). */
-  font-size: clamp(0.875rem, min(16cqw, calc(230cqw / var(--n, 12)), calc(135cqw / var(--g, var(--w, 8)))), 2.5rem) !important;
-  white-space: normal;
-  overflow: hidden;
-  text-overflow: clip;
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
-  text-wrap: balance;
-}
-/* The cell's own colour, a pixel inside the photograph's edge: painted
-   to the edge it showed as a light hairline round the rounded corners,
-   and taken away the photograph's fade showed what was under it. */
-.strip-cell:has(> img.strip-frame) {
-  padding: 1px;
-  background-clip: content-box;
 }
 /* One plate for every cover, at every size. The rack used to stack the
    credit under the name and a narrow cover used to drop it; the type is
@@ -524,16 +416,6 @@ a.strip-cell {
     -webkit-backdrop-filter: none;
     backdrop-filter: none;
   }
-}
-
-/* Julian: the Selected work tiles came apart at the edge on hover. A
-   backdrop blur is not carried through the card's 3D tilt, so the plate
-   stood flat while the photograph turned and the two edges split. On a
-   tilting tile the plate is solid instead. */
-:root .tilted-card-inner .glass-surface {
-  -webkit-backdrop-filter: none;
-  backdrop-filter: none;
-  background-color: color-mix(in oklab, var(--background) 88%, transparent);
 }
 
 /* Cells arrive from the strip with a height, a width or an aspect of their

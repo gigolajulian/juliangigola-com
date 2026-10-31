@@ -2,7 +2,6 @@
 
 import * as React from "react";
 import Link from "next/link";
-import dynamic from "next/dynamic";
 import { THEME_COLOR } from "@/lib/theme-color";
 import { usePathname } from "next/navigation";
 import { onLenisScroll } from "./smooth-scroll";

@@ -35,79 +35,16 @@
     overflow: visible;
   }
 }
-
-/* ── About, a screen of the homepage (`about-screen.tsx`) ────────
- * Laid out in the markup from Julian's mockup. Here only the client
- * marks along its foot: one line, looping right to left, faded in and
- * out at the ends; held while the pointer is on them, still for reduced
- * motion. */
-.about-marquee {
-  flex: 1;
-  min-width: 0;
-  overflow: hidden;
-  /* Room above and below for each logo's 44px tap area, taken back by
-     the margin so the row sits where it did. */
-  padding-block: 6px;
-  margin-block: -6px;
-  mask-image: linear-gradient(90deg, transparent, #000 13.6%, #000 86.4%, transparent);
-}
-.about-marquee-track {
-  display: flex;
-  width: max-content;
-  animation: about-marquee var(--marquee-s, 40s) linear infinite;
-}
 /* A pointer only: a tap left :hover stuck on a phone and the marks
    stopped for good. */
-@media (hover: hover) and (pointer: fine) {
-  .about-marquee:hover .about-marquee-track {
-    animation-play-state: paused;
-  }
-}
-.about-marquee-list {
-  flex-wrap: nowrap;
-  padding-right: 2.5rem;
-  /* Julian: the marks in full ink and a quarter bigger on a phone. */
-  --mark-box: 1.8125rem;
-  --mark-cap: 8.75rem;
-  column-gap: 2.5rem;
-}
-.about-marquee-list a {
-  color: var(--foreground);
-}
 @keyframes about-marquee {
   to {
     transform: translateX(-50%);
   }
 }
-@media (prefers-reduced-motion: reduce) {
-  .about-marquee-track {
-    animation: none;
-  }
-}
 /* Julian: the loop only where the room is short. A tall screen holds
    the marks still, spread across the foot as in his mockup, in either
    theme. */
-@media (min-width: 40rem) and (min-height: 1000px) {
-  .about-marquee {
-    overflow: visible;
-    mask-image: none;
-  }
-  .about-marquee-track {
-    width: auto;
-    animation: none;
-  }
-  .about-marquee-track > [inert] {
-    display: none;
-  }
-  .about-marquee-track > .about-marquee-list {
-    flex: 1;
-    flex-wrap: wrap;
-    justify-content: space-between;
-    padding-right: 0;
-    /* Julian: too wide on a large screen. The spread stops growing. */
-    max-width: 64rem;
-  }
-}
 
 /* Julian: About's block in the middle of its screen. About is about
    37.75rem from its title to its foot (the client marks are gone),
@@ -167,13 +104,6 @@
   [data-hash="about"] {
     --screen-title-y: max(4.5rem, 50cqh - 18.875rem);
   }
-}
-/* Sessions centred while it fits, from the top once it does not (the
-   open list ran up under the bar at 1440x840). In CSS, not a utility:
-   `items-[safe_center]` never reached the page. */
-.sessions-screen,
-.services-screen {
-  align-items: safe center;
 }
 /* ── the light table (`services-screen.tsx`) ──
    The discipline's frames whole, in justified rows (laid out in JS so
@@ -272,23 +202,6 @@
     filter var(--dur-md) var(--ease-out-strong),
     scale var(--dur-md) var(--ease-out-strong);
 }
-.light-name {
-  /* The slate: a fall of shadow across the foot with the name on it, not
-     a line of text on the photo. */
-  position: absolute;
-  inset-inline: 0;
-  bottom: 0;
-  padding: 2.5rem 0.75rem 0.625rem;
-  opacity: 0;
-  translate: 0 0.25rem;
-  transition:
-    opacity 160ms var(--ease-out-strong),
-    translate 220ms var(--ease-out-strong);
-}
-.light-cell:focus-visible .light-name {
-  opacity: 1;
-  translate: 0 0;
-}
 @media (hover: hover) and (pointer: fine) {
   /* The others' softening is the focus field now (`focus-field.tsx`). */
   :where(:root[data-hover]) .light-cell:hover .light-name {
@@ -317,17 +230,6 @@
   .light-cell {
     animation: jg-fade-in var(--dur-sm) ease-out backwards;
   }
-  /* The slate fades up in place rather than rising. */
-  .light-name {
-    translate: none;
-    transition: opacity 160ms var(--ease-out-strong);
-  }
-  /* The hover drop under the services and sessions lists moves to the
-     row at once rather than gliding there (its glide is an inline
-     style, hence the weight). */
-  :is(.services-ground, .session-ground) div[style*="transition"] {
-    transition: none !important;
-  }
 }
 /* How a commission runs, one step after another as About arrives, and
    the sessions as Sessions does. Hidden
@@ -335,20 +237,6 @@
    strip, or before it has said, shows them as they are. Gone at once on
    the way out, so the next arrival plays it again. */
 @media (prefers-reduced-motion: no-preference) {
-  :is(.about-step, .session-step, .services-step) {
-    transition:
-      opacity 560ms var(--ease-out-strong),
-      translate 640ms var(--ease-out-strong);
-    transition-delay: calc(180ms + var(--i, 0) * 110ms);
-  }
-  /* Sessions' rows land with the screen, not after it: they start as
-     the strip names Sessions, halfway through the turn, and the last
-     was still coming 800ms after the screen stopped (Julian: they come
-     too late). No wait, a third of the stagger, shorter moves. */
-  .session-step {
-    transition-duration: 380ms, 440ms;
-    transition-delay: calc(var(--i, 0) * 40ms);
-  }
   /* In from the right, the way the strip travels (`jg-fade-up`). It
      rose from below once, and the last step rising past the list's foot
      gave the list a scrollbar for as long as it moved (Julian saw it).
@@ -369,21 +257,6 @@
 @media (min-width: 40rem) and (orientation: portrait) {
   [data-hash="about"] {
     --screen-title-y: 6rem;
-  }
-}
-
-/* DialKit (the dev server only). Julian: its background at 85%, so the
-   page reads through the panel. Its own themes set the colour; these
-   match their specificity and win on order. */
-:root .dialkit-root {
-  --dial-glass-bg: rgb(33 33 33 / 0.85);
-}
-:root .dialkit-root[data-theme="light"] {
-  --dial-glass-bg: rgb(250 250 250 / 0.85);
-}
-@media (prefers-color-scheme: light) {
-  :root .dialkit-root[data-theme="system"] {
-    --dial-glass-bg: rgb(250 250 250 / 0.85);
   }
 }
 /* "Copy all" (components/dial-copy-all.tsx), in the panel's header,
@@ -407,9 +280,6 @@
   background: var(--dial-surface-hover);
   color: var(--dial-text-primary);
 }
-.dialkit-folder-root[data-open="false"] .dial-copy-all {
-  display: none;
-}
 
 /* Julian: the line under each card on a phone, in two even lines. The
    label's wide tracking left one word alone on a third line in a half
@@ -426,13 +296,8 @@
 [data-flat] .light-cell {
   animation: none;
 }
-[data-flat] .light-cell,
-[data-flat] :is(.about-step, .session-step, .services-step) {
+[data-flat] .light-cell {
   opacity: 1 !important;
   filter: none !important;
   scale: none !important;
-}
-[data-flat] :is(.about-step, .session-step, .services-step) {
-  translate: none !important;
-  transition-delay: 0s !important;
 }

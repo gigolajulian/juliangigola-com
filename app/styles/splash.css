@@ -244,11 +244,6 @@ html[data-sb]:is([data-intro], [data-landing])::after {
 [data-intro] .jg-intro-eye [data-lids] {
   animation: jg-intro-blink 350ms cubic-bezier(0.45, 0, 0.55, 1) var(--jg-blink-at, 180ms);
 }
-/* An orb that only shows if the wait is long enough to need one
-   (`lightbox.tsx`). */
-.orb-late {
-  animation: jg-fade-in 200ms ease-out 330ms both;
-}
 /* Clearing: the pointer goes through to the page. */
 #jg-intro.jg-intro-open {
   pointer-events: none;
@@ -315,8 +310,7 @@ html[data-sb]:is([data-intro], [data-landing])::after {
   background: var(--background);
   color: var(--foreground);
 }
-[data-splash="basic"] #jg-intro::before,
-[data-splash="basic"] .jg-intro-panel {
+[data-splash="basic"] #jg-intro::before {
   display: none;
 }
 [data-splash="basic"] #jg-intro.jg-intro-open {
@@ -376,8 +370,6 @@ html[data-sb]:is([data-intro], [data-landing])::after {
 .site-bar nav li:nth-child(2) { --i: 2; }
 .site-bar nav li:nth-child(3) { --i: 3; }
 .site-bar nav li:nth-child(4) { --i: 4; }
-.site-bar .page-column > div > :nth-child(2) { --i: 5; }
-.site-bar .page-column > div > :nth-child(3) { --i: 6; }
 @keyframes jg-basic-rise {
   from {
     opacity: 0;

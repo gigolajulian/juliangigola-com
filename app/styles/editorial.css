@@ -75,28 +75,14 @@
 .ed-day[aria-pressed="true"], .ed-cell[aria-pressed="true"] { background: var(--foreground); color: var(--background); }
 .ed-day[aria-pressed="true"] .label { color: var(--background); }
 .ed-day[aria-pressed="true"] i, .ed-cell[aria-pressed="true"] i { background: var(--background); }
-
-/* the time picked, big, only once one is picked, its day under it
-   (Julian, 2026-10-20: the split-flap went). Its room is held, so a pick
-   moves nothing below; it rises in on each new pick. */
-.ed-big { margin-top: 1.5rem; min-height: calc(var(--ed-time, 6rem) * 0.8 + 4.4rem); display: flex; flex-direction: column; justify-content: flex-end; align-items: flex-start; gap: 0.5rem; }
-.ed-bt { display: flex; align-items: flex-end; gap: 0.625rem; font: 900 var(--ed-time, 6rem)/0.8 var(--font-wordmark); letter-spacing: -0.045em; margin-bottom: 0.375rem; animation: ed-bt-in 420ms cubic-bezier(0.16, 1, 0.3, 1) both; }
-.ed-bt small { font: 400 0.6875rem/1 var(--font-mono); letter-spacing: 0.14em; color: var(--muted-foreground); padding-bottom: 0.25rem; }
 @keyframes ed-bt-in { from { opacity: 0; transform: translateY(0.35em); filter: blur(6px); } }
-@media (prefers-reduced-motion: reduce) { .ed-bt { animation-name: ed-fade-in; animation-duration: 200ms; } @keyframes ed-fade-in { from { opacity: 0; } } }
-.ed-when-line { display: flex; flex-direction: column; gap: 0.5rem; }
-.ed-when-line b { font: 500 1.75rem/1.1 var(--font-display); letter-spacing: -0.025em; text-transform: none; }
-.ed-when-line .label { color: var(--muted-foreground); }
-.ed-when-line .ed-hour { font: 400 1rem/1.3 var(--font-mono); letter-spacing: -0.005em; text-transform: none; color: var(--foreground); font-variant-numeric: tabular-nums; }
+@media (prefers-reduced-motion: reduce) { @keyframes ed-fade-in { from { opacity: 0; } } }
 /* A phone month shows the time picked too, as the week does (MAC, 2026-10-20). */
 
 /* the times, a kind to a row */
 .ed-times { margin-top: 1.5rem; }
 .ed-times > .ed-on { display: none; padding-bottom: 0.75rem; }
 .ed[data-view="month"] .ed-times > .ed-on { display: block; }
-.ed-kind { display: grid; grid-template-columns: 6.5rem minmax(0, 1fr); align-items: center; gap: 0.5rem; border-top: 0.5px solid var(--ed-line); padding: 0.875rem 0; }
-.ed-kind:last-child { border-bottom: 0.5px solid var(--ed-line); }
-.ed-kind > .label { color: var(--muted-foreground); }
 /* Bigger, legible times (Julian, 2026-10-20) */
 .ed-slots { display: grid; grid-template-columns: repeat(auto-fill, minmax(5.75rem, 1fr)); gap: 0.5rem; }
 .ed-slot { font: 500 1.0625rem/1 var(--font-mono); letter-spacing: -0.01em; font-variant-numeric: tabular-nums; height: 3.25rem; display: grid; place-items: center; border: 0.5px solid var(--ed-line2); border-radius: 2px; transition: background-color 0.15s, color 0.15s, border-color 0.15s, transform 0.1s ease-out; }
@@ -105,10 +91,6 @@
 @media (hover: hover) { .ed-slot:not([aria-pressed="true"]):hover { border-color: var(--foreground); } }
 .ed-none { padding: 1rem 0; color: var(--muted-foreground); border-top: 0.5px solid var(--ed-line); border-bottom: 0.5px solid var(--ed-line); }
 .ed-back { position: relative; display: none; align-items: center; gap: 0.75rem; align-self: flex-start; margin-bottom: 1rem; }
-
-/* the form and the deposit: credits rows */
-.ed-when { display: flex; justify-content: space-between; align-items: baseline; gap: 1rem; padding-bottom: 1.125rem; border-bottom: 0.5px solid var(--ed-line); }
-.ed-when h2 { font: 900 1.875rem/1 var(--font-display); letter-spacing: -0.03em; text-transform: uppercase; }
 .ed-row { position: relative; display: grid; grid-template-columns: 7.5rem minmax(0, 1fr); align-items: baseline; column-gap: 0.75rem; border-bottom: 0.5px solid var(--ed-line); padding: 0.875rem 0 0.625rem; transition: border-color 0.2s; }
 .ed-row:focus-within { border-bottom-color: var(--accent); }
 .ed-row > .label, .ed-row > legend { color: var(--muted-foreground); }
@@ -130,30 +112,19 @@ fieldset.ed-row > legend { float: left; padding: 0; }
 .ed-exp > .ed-row + .ed-row { grid-template-columns: 3.75rem minmax(0, 1fr); }
 .ed-copy { margin-top: 1rem; font-size: 0.8125rem; line-height: 1.6; color: var(--muted-foreground); text-transform: none; text-wrap: pretty; }
 .ed-wallet { margin-top: 1rem; }
-.ed-amount { display: flex; flex-direction: column; align-items: flex-start; gap: 0.75rem; padding-bottom: 1.375rem; border-bottom: 0.5px solid var(--ed-line); }
-.ed-amount h2 { display: flex; align-items: flex-start; font: 900 6.5rem/0.8 var(--font-wordmark); letter-spacing: -0.05em; }
-.ed-amount h2 sup { font-size: 0.4em; line-height: 1; vertical-align: baseline; top: 0; margin: -0.02em 0.1em 0 0; letter-spacing: 0; }
-.ed-amount > .label { color: var(--muted-foreground); }
 .ed-lock { display: flex; align-items: center; gap: 0.5rem; }
-
-/* booked, declined and the other ends: a headline, then the rows */
-.ed-mark { display: flex; align-items: center; gap: 0.625rem; }
-.ed-mark i { width: 0.625rem; height: 0.625rem; background: currentColor; }
-.ed-huge { font: 900 4.5rem/0.95 var(--font-wordmark); letter-spacing: -0.05em; text-transform: uppercase; margin-top: 0.375rem; text-wrap: balance; overflow-wrap: anywhere; }
 .ed-why { font-size: 0.9375rem; line-height: 1.5; text-transform: none; margin: 1.125rem 0 0.625rem; max-width: 40ch; text-wrap: pretty; }
 .ed-r > .ed-row:first-child { border-top: 0.5px solid var(--ed-line); }
 .ed-next { display: grid; grid-template-columns: 7.5rem minmax(0, 1fr); column-gap: 0.75rem; row-gap: 0.375rem; padding: 1rem 0; font-size: 0.875rem; line-height: 1.5; text-transform: none; }
 .ed-next > .label { color: var(--muted-foreground); grid-row: span 2; }
 .ed-grow { position: absolute; z-index: 30; background: var(--accent); pointer-events: none; }
 .ed-grow[data-bad] { background: var(--ed-bad); }
-#book-card { --ed-bad: oklch(0.5 0.19 25); }
 :root:not([data-classic]) #book-card { transition: background-color var(--dur-xl) var(--ease-out-strong); }
 /* Booked and declined keep the card dark (2026-10-20 mock): the red is
    the card field's line and the words, not the whole card. */
 
 /* fitted to a short card, a step at a time */
 .ed[data-fit="1"] { --ed-time: 4rem; --ed-cell: 2.625rem; }
-.ed[data-fit="1"] .ed-big { margin-top: 1.25rem; gap: 0.625rem; }
 .ed[data-fit="1"] .ed-body { padding-top: 1.125rem; }
 .ed[data-fit="1"] .ed-times { margin-top: 1rem; }
 .ed:is([data-fit="2"], [data-fit="3"]) { --ed-cell: 2.25rem; }
@@ -176,10 +147,6 @@ fieldset.ed-row > legend { float: left; padding: 0; }
   .ed .ed-times > .ed-on { display: block; }
   .ed[data-fit="3"] :is(.ed-times, .ed-l) { display: flex; }
   .ed[data-fit="3"] .ed-back { display: none; }
-  .ed-when, .ed-amount { flex-direction: column; align-items: flex-start; justify-content: flex-start; align-self: start; gap: 1.125rem; border: 0; padding: 0; }
-  .ed-when h2 { font-size: 3.25rem; line-height: 0.92; }
-  .ed-amount > .label { text-align: left; }
-  .ed-huge { font-size: 5.25rem; }
   /* The days share half the card: their numbers follow its width, or at
      40rem they ran together (667x375). */
   .ed-day { padding-inline: min(0.625rem, 0.9cqw); }
@@ -233,22 +200,14 @@ fieldset.ed-row > legend { float: left; padding: 0; }
   .ed-cell { padding: 0.375rem 0 0 0.3125rem; }
   .ed-cell .ed-n { font-size: 1rem; }
   .ed-cell i { left: 0.3125rem; width: 0.75rem; }
-  .ed-big { --ed-time: min(4.5rem, 19cqw); }
-  .ed-when-line b { font-size: 1.5rem; }
-  .ed-kind { grid-template-columns: minmax(0, 1fr); gap: 0.625rem; padding: 1rem 0; }
   /* One line that swipes on a phone (Julian, via MAC, 2026-10-20). The
      fade says there are more; the end padding lets the last clear it. */
   .ed-slots { display: flex; overflow-x: auto; overscroll-behavior-x: contain; scroll-snap-type: x proximity; scrollbar-width: none; padding-right: 2.5rem; mask-image: linear-gradient(to right, #000 calc(100% - 2.5rem), transparent); }
   .ed-slots::-webkit-scrollbar { display: none; }
   .ed-slot { height: 3.5rem; font-size: 1.125rem; flex: 0 0 5.75rem; scroll-snap-align: start; }
-  .ed-when h2 { font-size: 1.375rem; }
   .ed-row, .ed-next { grid-template-columns: 5.25rem minmax(0, 1fr); }
   .ed-exp { grid-template-columns: minmax(0, 1fr); }
   .ed-exp > .ed-row + .ed-row { grid-template-columns: 5.25rem minmax(0, 1fr); }
-  .ed-amount h2 { font-size: 5rem; }
-  .ed-amount > .label { flex: 1 0 100%; text-align: left; }
-  .ed-amount > .label br { display: none; }
-  .ed-huge { font-size: 3.25rem; }
   .ed-floor { flex-wrap: wrap; }
   .ed-floor > .ed-btn { flex: 1 0 100%; }
 }
@@ -275,15 +234,8 @@ fieldset.ed-row > legend { float: left; padding: 0; }
 .ed-handset { width: 1em; height: 1em; flex-shrink: 0; }
 .ed-call { order: 9; margin-left: auto; display: flex; align-items: center; gap: 0.5rem; padding-bottom: 0.5rem; color: var(--muted-foreground); white-space: nowrap; }
 .ed-call .ed-handset { width: 0.875rem; height: 0.875rem; color: var(--foreground); }
-.ed-timer { display: flex; align-items: center; gap: 0.5rem; }
-.ed-timer > span { color: var(--foreground); font-variant-numeric: tabular-nums; padding: 0.125rem 0.375rem; border: 0.5px solid var(--ed-line2); border-radius: 2px; }
-.ed-timer .ed-handset { color: var(--foreground); }
 .ed-via { display: inline-flex; align-items: center; gap: 0.5rem; }
-.ed-mark .ed-handset { width: 1.125rem; height: 1.125rem; }
-.ed-lead { margin-top: 1rem; font-size: 0.9375rem; line-height: 1.4; text-transform: none; }
-.ed-huge.ed-tel { text-transform: none; font-variant-numeric: tabular-nums; font-size: 3.75rem; line-height: 1; overflow-wrap: normal; text-wrap: nowrap; }
-@container card (min-width: 52rem) { .ed-huge.ed-tel { font-size: 4.25rem; } }
-@container card (max-width: 36rem) { .ed-huge.ed-tel { font-size: 2.5rem; } .ed-call { display: none; } }
+@container card (max-width: 36rem) { .ed-call { display: none; } }
 .ed-row textarea.tp-notes { width: 100%; min-width: 0; resize: none; background: transparent; outline: none; font: 400 1rem/1.4 var(--font-mono); color: var(--foreground); text-transform: none; }
 .ed-row textarea.tp-notes::placeholder { color: color-mix(in oklab, var(--foreground) 30%, transparent); }
 
@@ -491,7 +443,6 @@ fieldset.ed-row > legend { float: left; padding: 0; }
 .ed-fields > label.ed-row:has(textarea) { grid-column: 1 / -1; }
 .ed .ed-row input::placeholder, .ed .ed-row textarea.tp-notes::placeholder { text-transform: uppercase; }
 
-
 /* ── the inquiry (inquire-card.tsx) ─────────────────────────────────
    The inquiry on the same page: six tiles for the kinds, each with who
    it is for, its two questions in boxes under it, then the details, then
@@ -557,8 +508,6 @@ fieldset.ed-row > legend { float: left; padding: 0; }
 .ed.ed-inq .ed-ask input { padding-bottom: 0.15rem; }
 .ed.ed-inq .ed-one > div > label.ed-row:not(:has(textarea)) { gap: 0.4rem; padding-bottom: 0.3rem; }
 .ed-inq .ed-refs { border-bottom: 0; }
-.ed-inq .ed-refs .contact-field > div { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; }
-.ed-inq .ed-refs .contact-field > div > p.label { flex-basis: 100%; margin: 0 0 0.25rem; }
 /* The two on one line (Julian, 2026-10-21), a size down so both fit a phone's column. */
 .ed.ed-inq .ed-refs .tap-44 { border-radius: 0; border-color: var(--ed-line); padding: 0.6rem 0.4rem; flex: 1 1 0; min-width: 0; text-align: center; white-space: nowrap; font-size: 0.6875rem !important; }
 /* sent: three equal bands, the first marked */
@@ -570,17 +519,10 @@ fieldset.ed-row > legend { float: left; padding: 0; }
 .ed-nx-row i { grid-row: 1; grid-column: 3; width: 1.25rem; height: 2px; background: var(--ed-line); margin-top: 0.6em; }
 .ed-nx-row[data-on] i { background: var(--accent); }
 .ed-inq .ed-floor a.ed-btn { text-decoration: none; display: inline-flex; align-items: center; }
-/* in its boxes: the card's own padding, not the box's */
-.contact-card > div:has(> .ed-inq), #book-card [data-scroll]:has(.ed-inq) { padding: 0 !important; }
-.contact-card > div:has(> .ed-inq) { display: flex; flex-direction: column; }
-.contact-card > div > .ed-inq { flex: 1 1 auto; min-height: 0; height: auto; }
 /* The Inquiries card is as tall as its one page needs: it grows into the
    screen's padding on a short window (Julian, 2026-10-21, "grow") before
    the body scrolls inside. */
-@media (min-width: 40rem) { .contact-card:has(.ed.ed-inq) { align-self: center; height: auto; max-width: 48rem; margin-block: 0; max-height: calc(100% + 1.5rem) !important; } }
 /* A short window with a mouse sits closer under the bar (contact.css), so less room to grow into. */
-@media (min-width: 40rem) and (pointer: fine) and (max-height: 48rem) { .contact-card:has(.ed.ed-inq) { max-height: calc(100% + 0.5rem) !important; } }
-.book-form:has(> .ed-inq) { display: contents; }
 @container ed (max-width: 39.99rem) {
   .ed-kinds { grid-template-columns: repeat(2, minmax(0, 1fr)); grid-auto-rows: auto; }
   .ed .ed-kinds small { padding-top: 0.9rem; }
