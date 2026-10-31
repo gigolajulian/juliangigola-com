@@ -1,7 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
 import { Intro } from "@/components/intro";
-import { SiteFooter } from "@/components/site-footer";
 import { PhotoNotice } from "@/components/photo-notice";
 import { GlassLight } from "@/components/glass-light";
 import { PhotoFade } from "@/components/photo-fade";
@@ -21,7 +20,7 @@ import { TypeDials } from "@/components/type-dials";
 import { clips, DEFAULTS, LATE, LEVELS, LIQUID, SKIP, sizesOf, typeSizer } from "@/lib/type-size";
 import { VisitTrail } from "@/components/visit-trail";
 import { ClickBeacon } from "@/components/click-beacon";
-import { LegacyHeader, LegacyMenu, MotionGate, OnLegacy, OnV3, V3Footer, V3Header } from "@/components/v3/chrome";
+import { MotionGate, V3Footer, V3Header } from "@/components/v3/chrome";
 import { ScrollThumb } from "@/components/v3/scroll-thumb";
 import { SmoothScroll } from "@/components/v3/smooth-scroll";
 import { ScrollReveal } from "@/components/v3/scroll-reveal";
@@ -218,23 +217,12 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             script above sets `data-intro` on a first arrival unless `?v3motion=0`. */}
         <Intro />
 
-        <OnLegacy>
-          <LegacyHeader />
-        </OnLegacy>
-        <OnV3>
-          <V3Header />
-          <ScrollThumb />
-          <SmoothScroll />
-          <ScrollReveal />
-        </OnV3>
+        <V3Header />
+        <ScrollThumb />
+        <SmoothScroll />
+        <ScrollReveal />
         {/* Where a visit began and what it read, for an inquiry to carry. */}
         <VisitTrail />
-        {/* The drawer the burger opens. A sibling of the header and of
-            `main`, because both of those are what it comes out from under
-            — see `site-menu.tsx`. */}
-        <OnLegacy>
-          <LegacyMenu />
-        </OnLegacy>
         {/* Writes the pointer's position onto whichever glass control is
             under it — see `glass` in globals.css. Renders nothing. */}
         <MotionGate>
@@ -255,12 +243,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
               rebuilt the whole page. It gates its own motion. */}
           <PageTransition>{children}</PageTransition>
         </main>
-        <OnLegacy>
-          <SiteFooter />
-        </OnLegacy>
-        <OnV3>
-          <V3Footer />
-        </OnV3>
+        <V3Footer />
         {/* Focus round the pointer over a gallery: `focus-field.tsx`. */}
         <MotionGate>
           <FocusField />
