@@ -99,27 +99,11 @@ article:has(.strip-scroll[data-past-first]) .running-head {
    photograph. Tabbing to it brings it back, so it is never an invisible
    focus target, and below `lg` the cover stacks under a fixed bar with no
    masthead beside it, so the name simply stays. */
-/* It comes in from the left as the cover goes. */
-.home-wordmark {
-  opacity: 0;
-  pointer-events: none;
-  translate: -48px 0;
-  transition:
-    opacity 360ms var(--ease-out-strong),
-    translate var(--dur-xl) var(--ease-out-strong);
-}
 body:has(.strip-scroll[data-past-first]) .home-wordmark,
-body:has(.strip-scroll[data-past-hero]) .home-wordmark,
-.home-wordmark:focus-visible {
+body:has(.strip-scroll[data-past-hero]) .home-wordmark {
   opacity: 1;
   pointer-events: auto;
   translate: none;
-}
-@media (prefers-reduced-motion: reduce) {
-  .home-wordmark {
-    transition: opacity var(--dur-md) var(--ease-out-strong);
-    translate: none;
-  }
 }
 
 /* And the page is exactly the window, with that one line on it. A strip page
@@ -173,11 +157,6 @@ body:has(.strip-scroll[data-past-hero]) .home-wordmark,
    The list scrolls inside itself either way; this is what keeps the number
    of rows you can see without doing that worth having. */
 /* Same shape as the `short` variant above, and for the same reason. */
-@media (max-height: 52rem) and (min-width: 40rem) {
-  .cover-row {
-    padding-block: 0.375rem;
-  }
-}
 
 /* The filter row, when it runs past the edge of the window: the last chip
    fades rather than being cut through, which is the difference between a
@@ -524,16 +503,6 @@ a.strip-cell {
     -webkit-backdrop-filter: none;
     backdrop-filter: none;
   }
-}
-
-/* Julian: the Selected work tiles came apart at the edge on hover. A
-   backdrop blur is not carried through the card's 3D tilt, so the plate
-   stood flat while the photograph turned and the two edges split. On a
-   tilting tile the plate is solid instead. */
-:root .tilted-card-inner .glass-surface {
-  -webkit-backdrop-filter: none;
-  backdrop-filter: none;
-  background-color: color-mix(in oklab, var(--background) 88%, transparent);
 }
 
 /* Cells arrive from the strip with a height, a width or an aspect of their

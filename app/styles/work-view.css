@@ -116,14 +116,6 @@ img[data-fade][data-loaded] {
     scale: 0.98;
   }
 }
-.scope-in {
-  animation: scope-in 380ms var(--ease-out-strong) both;
-}
-@media (prefers-reduced-motion: reduce) {
-  .scope-in {
-    animation: none;
-  }
-}
 
 /* The 404 is one screen and never scrolls: Julian asked. The document is
    held to the window and the site footer, whose one useful line the page
@@ -201,11 +193,6 @@ body:has([data-fit-page]) footer {
   text-transform: uppercase;
   letter-spacing: 0.18em;
 }
-.warp-tuner-actions {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px;
-}
 .warp-tuner button {
   padding: 8px;
   border: 1px solid var(--border);
@@ -241,31 +228,6 @@ h2:not(.label) {
    hand elsewhere still draws it. */
 .strip-cell:focus-visible:hover {
   outline: none;
-}
-
-/* The lit filter's line, on the pane's hairline (`work-shell.tsx`),
-   sliding from chip to chip. Off on a phone, where the chips sit in a
-   grid and a line at the foot would point at the wrong row. */
-.filter-line {
-  position: absolute;
-  left: 0;
-  bottom: 0;
-  height: 1px;
-  background: var(--foreground);
-  pointer-events: none;
-  transition:
-    transform var(--dur-lg) var(--ease-out-strong),
-    width var(--dur-lg) var(--ease-out-strong);
-}
-@media (max-width: 39.999rem) {
-  .filter-line {
-    display: none;
-  }
-}
-@media (prefers-reduced-motion: reduce) {
-  .filter-line {
-    transition: none;
-  }
 }
 
 /* The vertical discipline name comes up at once: no wait before the
@@ -355,20 +317,11 @@ h2:not(.label) {
 :root[data-viewer] .strip-count {
   visibility: hidden;
 }
-/* A logo reached by Tab while the marks were sliding sat under the
-   heading, so the ring could not be seen: the row holds still at its
-   start while anything in it has the focus. */
-.about-marquee:focus-within .about-marquee-track {
-  animation: none;
-}
 /* The homepage's ask over the wall: the muted lines ("hello@",
    "Next", the line under the question, the doors' lines) were faint
    over a bright tile, under 4.5:1 on a phone in either theme. Nearer
    the ink. */
-.enquiry-backdrop ~ * .text-muted-foreground,
-/* And the doors' lines, over the same wall through a 30% tint: 3.9:1 at
-   a bright tile on the light theme (plan 5.1). */
-.door-veil ~ * .text-muted-foreground {
+.enquiry-backdrop ~ * .text-muted-foreground {
   color: color-mix(in oklab, var(--foreground) 82%, transparent);
 }
 

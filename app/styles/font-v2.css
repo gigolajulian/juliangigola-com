@@ -283,18 +283,6 @@ html[data-font="v2"] .cover-float-ctas {
   }
 }
 
-/* Legal: its long text at 1.5 (Julian), and its contents list showing all
-   twelve rows on a laptop, as before the new faces made the head above it
-   taller. */
-html[data-font="v2"] .legal-text :is(p, li) {
-  line-height: 1.5;
-}
-@media (min-width: 40rem) {
-  html[data-font="v2"] .legal-toc li > button {
-    padding-block: 0.5625rem;
-  }
-}
-
 /* The navbar's names, at the size `type-dials.tsx` gives labels, but from
    the first paint: written there after load they grew and the row jumped
    (Julian). The same ramp: none at 1180 wide or 600 tall, all of it from

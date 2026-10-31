@@ -24,12 +24,6 @@
       padding-block: 0.5rem;
       margin-block: -0.5rem;
     }
-    /* Not the filter chips: their row scrolls sideways, which clips it
-       top and bottom, and the margin shrank the row to 9px of a 28px chip.
-       On an iPad sideways only a 9px band of each chip took a tap. */
-    .chip-row a {
-      margin-block: 0;
-    }
   }
   /* And 44px where the padding cannot reach it (plan 3.2, measured on
      iPhone SE, 18 and 18 Pro Max sizes: rows of 33 to 40px, links of
@@ -426,15 +420,8 @@
  */
 @media (prefers-reduced-motion: reduce) {
   .rise,
-  .emerge,
-  .press,
-  .title-out,
-  .title-in {
+.emerge,
+.press {
     transition: none;
-  }
-  /* The ramp is an animation now, so this is what turns it off. Without a
-     fill there is nothing holding the frame back: it is simply there. */
-  .dissolve {
-    animation: none;
   }
 }

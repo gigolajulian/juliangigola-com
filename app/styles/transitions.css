@@ -268,20 +268,6 @@
 :root[data-nav] .site-bar {
   view-transition-name: site-bar;
 }
-/* Arrived by a press, the cover is already on its way (Julian: Sessions
-   into a booking page "needs to be smooth"). Its entrance waits 420ms and
-   spreads over 1.3s for the opening panel on a cold load; behind a page
-   crossing that was an empty page rising, then the frames, the screen
-   blank in between. Here the frames fly in with the page. */
-:root[data-moved] .cover-float {
-  --h-start: 0ms !important;
-  --h-spread: 0.3ms !important;
-}
-/* Behind the opening, the first one sets off the moment the panel
-   lifts. */
-:root[data-splashed] .cover-float {
-  --h-start: 0ms !important;
-}
 /* No cover flies on a deal. The homepage's selected work and the work
    index share the covers' names (`cover-${slug}`, the morph into a
    project), so dealing one into the other flew the band's covers, pinned

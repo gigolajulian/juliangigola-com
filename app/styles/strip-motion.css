@@ -300,15 +300,6 @@
 .strip-scroll[data-arrive="dealt"] .title-rest {
   animation: none;
 }
-/* Contact's title as wide as its column, on one line (two lines at
-   the cover's scale were too big). The column is a container; the
-   whole title reads as 8.4em of capitals (`titleWidth`'s 0.76 a
-   letter and 0.3 a space, a little over). Never under 2.25rem: an
-   upright iPad's column is too narrow for one line at a heading's
-   size, and there it takes two. */
-h2.contact-title {
-  font-size: clamp(2.25rem, 100cqw / 8.4, 6rem);
-}
 /* Julian: a discipline's name a fifth bigger than a project's title,
    which shares the component (`text-4xl`, `sm:text-6xl` there). Both of
    the discipline page's openings: the galleries' strip and the others'
@@ -629,31 +620,12 @@ h2.contact-title {
   background-color: color-mix(in oklab, var(--foreground) 20%, transparent);
   scale: 1 0.5;
 }
-
-/* ── the reel behind the motion page ──
-   A 16:9 frame cut to cover whatever shape the window is: as wide as the
-   window or as wide as its height needs, whichever is more, centred. The
-   veil is the page's ground at an opacity that runs from a little over a
-   third at the start of the strip to nearly all of it by the end, on
-   `--reel-dim` written by `video-showcase.tsx`. */
-.reel-backdrop-frame {
-  width: max(100vw, calc(100vh * 16 / 9));
-  height: max(100vh, calc(100vw * 9 / 16));
-  translate: -50% -50%;
-  border: 0;
-}
-.reel-veil {
-  background-color: var(--background);
-  opacity: calc(0.38 + var(--reel-dim, 0) * 0.5);
-  transition: opacity 120ms linear;
-}
 /* Over the reel the page is a cinema, not a sheet of paper: the light
    theme keeps a dark ground so the film reads through it and the type
    stays white. Set by `video-showcase.tsx` while the backdrop is up.
    The last screen's doors are the same dark room in the light theme
    (contact.css), so they take their ground from here too. */
-:root[data-theme="light"][data-reel],
-:root[data-theme="light"] :has(> .door-veil) {
+:root[data-theme="light"][data-reel] {
   color-scheme: dark;
   --background: oklch(0.145 0.003 70);
   --foreground: oklch(0.955 0.004 80);
@@ -673,20 +645,10 @@ h2.contact-title {
 :root[data-reel] {
   --muted-foreground: oklch(0.88 0.004 80);
 }
-/* The film runs on under the footer, and the footer is glass over
-   it: it was the one band the reel did not reach. */
-:root[data-reel] .reel-backdrop {
-  bottom: -8rem;
-}
 :root[data-reel] body > footer {
   background-color: color-mix(in oklab, var(--background) 40%, transparent);
   -webkit-backdrop-filter: blur(20px) saturate(1.4);
   backdrop-filter: blur(20px) saturate(1.4);
-}
-@media (prefers-reduced-motion: reduce) {
-  .reel-backdrop {
-    display: none;
-  }
 }
 
 /* ── a paged strip under a finger ──
@@ -735,11 +697,6 @@ h2.contact-title {
 
    Julian asked for the filters to do exactly what the menu does, from the
    other side. */
-@media (max-width: 63.999rem) {
-  .chip-row {
-    display: none;
-  }
-}
 
 /* ── the selected work: a tile a discipline ──
    Julian: the best photo from each discipline (`DISCIPLINE_TILES`),
@@ -749,37 +706,9 @@ h2.contact-title {
 .disc {
   --g: 12px;
 }
-.disc-inner {
-  /* Julian: a phone takes two to a row (eight full-width photographs
-     were five screens of scrolling before Sessions). */
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: var(--g);
-}
-.disc-tile {
-  width: 100%;
-  aspect-ratio: 4 / 5;
-}
 @media (min-width: 40rem) {
   .disc {
     container-type: size;
-  }
-  .disc-inner {
-    display: flex;
-    height: 100%;
-    flex-direction: row;
-    flex-wrap: wrap;
-    justify-content: center;
-    align-content: center;
-    margin-inline: auto;
-  }
-  .disc-tile {
-    flex: none;
-    /* Not stretched to the line: one row is one line, and a stretched
-       tile loses its 4:5. */
-    align-self: center;
-    width: round(down, var(--tw), 1px);
-    height: auto;
   }
   .disc {
     --rows: 2;
@@ -797,32 +726,13 @@ h2.contact-title {
       --rows: 3;
     }
   }
-  /* As wide as a row, so the rest wraps under it, centred. */
-  .disc-inner {
-    max-width: calc(var(--per) * var(--tw) + (var(--per) - 1) * var(--g) + 1px);
-  }
 }
 
 /* A tile's "View more", where its plate has the room: 9.5rem beside a
    one word medium, 13.75rem beside "Photo / Design" (measured: 142, 150
    and 215px wanted). Narrower, the arrow alone. */
-@container (max-width: 9.5rem) {
-  .tile-more {
-    display: none;
-  }
-}
-@container (max-width: 13.75rem) {
-  .tile-more-long {
-    display: none;
-  }
-}
 /* Beside "Photo / Design" on the smallest phone (an iPhone SE's plate is
    8.3rem) not even the arrow fits. */
-@container (max-width: 9rem) {
-  .tile-go-long {
-    display: none;
-  }
-}
 
 /* ── an iPad held sideways ──
    Between an upright tablet and a laptop there is a third shape: 1024 by
