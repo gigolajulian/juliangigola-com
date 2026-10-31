@@ -234,7 +234,8 @@ html[data-sb]{scrollbar-width:none}html[data-sb]::-webkit-scrollbar{display:none
 .v3 .sess-head{margin-bottom:28px}
 .v3 .sess-head h2{font:900 clamp(2.5rem,calc(6*var(--v3u)),5.5rem)/.9 var(--display);letter-spacing:-.05em}
 .v3 .sess-head p{margin:14px 0 0}
-@media (prefers-reduced-motion:reduce){.v3 *{transition:none!important}}
+/* Reduce Motion drops movement, not every change: fades and colour shifts keep their timing, and anything that moved, scaled or slid now jumps (2026-10-31). */
+@media (prefers-reduced-motion:reduce){.v3 *{transition-property:opacity,color,background-color,border-color,outline-color,text-decoration-color,fill,stroke!important}}
 .v3 button.btn{background:none;color:var(--ink)}
 .v3 .door li a{display:flex;justify-content:space-between;width:100%}
 @media (hover:hover){.v3 .door li a:hover{color:var(--accent)}}
@@ -269,7 +270,7 @@ html[data-sb]{scrollbar-width:none}html[data-sb]::-webkit-scrollbar{display:none
 .v3 .pmenu-foot .tbtn{margin-left:-13px}
 .v3 .pmenu-foot .lbl{margin-top:0}}
 @media (min-width:701px){.v3 .pmenu.drawer{display:none}}
-@media (prefers-reduced-motion:reduce){.v3 .pmenu.drawer,.v3 .pdim,.v3 .burger-btn i{transition:none}}
+@media (prefers-reduced-motion:reduce){.v3 .pmenu.drawer,.v3 .burger-btn i{transition:none}}
 /* One scrolling row at every width, a fade on the cut chip. */
 .v3 .chips{display:flex;flex-wrap:nowrap;gap:6px;padding:28px var(--gr) 0 var(--g);overflow-x:auto;scrollbar-width:none;-webkit-mask-image:linear-gradient(to right,#000 calc(100% - 48px),transparent);mask-image:linear-gradient(to right,#000 calc(100% - 48px),transparent)}
 .v3 .chips.at-end{-webkit-mask-image:none;mask-image:none}
@@ -738,7 +739,7 @@ html{font-family:var(--font-mono),ui-monospace,monospace}
 /* Tablets: the name gets the full width and the buttons sit on one row
    under it, the slide label on the left, instead of a cramped column. */
 @media (min-width:701px) and (max-width:1100px){.v3 .a-cover .foot{grid-template-columns:1fr;gap:0}
-.v3 .a-cover .right{flex-direction:row-reverse;justify-content:space-between;align-items:center}
+.v3 .a-cover .right{flex-direction:row-reverse;justify-content:space-between;align-items:center;margin-top:14px}
 .v3 .a-cover .right>.lbl,.v3 .a-cover .ctas .btn{white-space:nowrap}}
 /* Tablets: About in one column, the portrait under What I do (Julian). */
 @media (min-width:801px) and (max-width:1100px){.v3 .about{grid-template-columns:minmax(0,1fr);gap:40px}
@@ -1250,7 +1251,8 @@ dialog.v3.mo-player,.mo-player>iframe{background:#000}
       transform: scale(0.96);
       transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1),
                   transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-      will-change: opacity, transform;
+      /* No will-change: on a long grid it held a layer for every tile at
+         once. The transition promotes each tile only while it runs. */
     }
     .v3 .a-seq figure[data-in-view="true"],
     .v3 .sheet figure[data-in-view="true"],
