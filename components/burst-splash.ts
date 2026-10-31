@@ -195,13 +195,18 @@ export function burst(sizes: string[][], heroes: { d: string[]; l: string[] }) {
       last.style.transformOrigin = "0 0";
       last.animate(frames, { duration: LAND, easing: EASE, fill: "both" });
       show(last);
+      /* The name is wholly under the frame as the glide starts; on a phone
+         the hero's place is far shorter than the frame, so the glide would
+         uncover it. It goes now, unseen, and never shows twice. */
+      word.style.opacity = "0";
     }
     await sleep(LAND);
     root.dataset.landed = ""; // the type comes in now the photograph is in place (splash.css)
     root.dataset.intro = "half";
     root.dataset.splashed = "";
     document.getElementById("jg-intro")?.classList.add("jg-intro-open");
-    for (const el of [last, word]) el.animate([{ opacity: 1 }, { opacity: 0 }], { duration: CLEAR, easing: EASE, fill: "forwards" });
+    // the name already went as the glide began; only without a glide is it still up to clear
+    for (const el of word.style.opacity === "0" ? [last] : [last, word]) el.animate([{ opacity: 1 }, { opacity: 0 }], { duration: CLEAR, easing: EASE, fill: "forwards" });
     await sleep(CLEAR);
     root.removeAttribute("data-intro");
     // the name, the buttons and the nav are still finishing their moves (splash.css)
