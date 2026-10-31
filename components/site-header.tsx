@@ -5,8 +5,6 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn, STRIP_SECTION } from "@/lib/utils";
 import { ThemeToggle } from "@/components/theme-toggle";
-import { WarpTuner } from "@/components/warp-tuner";
-import { NAME_WARP } from "@/lib/name-warp";
 import { installNavFly } from "@/components/nav-fly";
 
 /* The address's hash, kept current: the strip writes the homepage's
@@ -409,20 +407,7 @@ export function SiteHeader() {
               a picture of the words; the words are here for everyone who
               reads them as text. Pulled left by the room the effect keeps
               round the words, so the name still starts on the margin. */}
-          <span className="sr-only">Julian Gigola</span>
-          {/* Sliders with `?tune` on the dev server (`warp-tuner.tsx`). */}
-          <WarpTuner
-            title="Navbar logo"
-            corner="right"
-            text="Julian Gigola"
-            fontFamily="var(--font-wordmark)"
-            fontWeight={900}
-            fontSize="1em"
-            letterSpacing="-0.045em"
-            // Julian: the cover's hover on the logo too, the same values.
-            {...NAME_WARP}
-            style={{ width: "5.9em", height: "1.1em", marginLeft: "-0.18em" }}
-          />
+          <span>Julian Gigola</span>
         </Link>
 
         {/* The right-hand group. Grouping these rather than leaving them as
