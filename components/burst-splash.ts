@@ -17,14 +17,16 @@
  * arguments. Frames that have not loaded by their turn are left out
  * rather than shown blank.
  * ─────────────────────────────────────────────────────────────── */
-export function burst(sizes: string[][], heroes: { d: string[]; l: string[] }) {
+export function burst(sizes: string[][], heroes: { d: [number, string][]; l: [number, string][] }) {
   const big = innerWidth >= 700 ? 1 : 0; // a phone takes the smaller copies
   const root = document.documentElement;
   /* `name`: every page but the homepage, which has no hero to land on and
      its own photographs to show, gets the wordmark alone (2026-10-30). */
   const alone = root.dataset.splash === "name";
   if ((root.dataset.splash !== "burst" && !alone) || root.dataset.intro !== "1") return;
-  const frames = alone ? [] : sizes.map((f) => f[big]), hero = { d: heroes.d[big], l: heroes.l[big] };
+  // the hero at the width the page's srcset picks: the window in device pixels, rounded up the ladder
+  const px = innerWidth * devicePixelRatio, rung = (l: [number, string][]) => (l.find(([w]) => w >= px) ?? l[l.length - 1])[1];
+  const frames = alone ? [] : sizes.map((f) => f[big]), hero = { d: rung(heroes.d), l: rung(heroes.l) };
   // inside the sheet's HTML block, which React leaves alone when it hydrates
   const layer = document.querySelector("#jg-intro .jg-sheet-wrap");
   if (!layer) return;
@@ -74,13 +76,20 @@ export function burst(sizes: string[][], heroes: { d: string[]; l: string[] }) {
     const i = document.createElement("img");
     i.className = cls;
     i.alt = "";
+    i.fetchPriority = "high"; // ahead of the page's own pictures, none of which show until the splash is done
     i.src = src;
     i.decode().then(() => shown.add(i), () => {}).finally(() => done++);
     layer.append(i);
     return i;
   };
-  let done = 0, loaded = document.readyState === "complete";
-  addEventListener("load", () => (loaded = true), { once: true });
+  /* The page's part of the loader is the page having hydrated, not its
+     `load`: that waits on every lazy picture the browser counts as near
+     the fold, which on a slow phone ran past `LOAD`, so the wordmark held
+     its 3.5s and the run was skipped entirely (2026-10-31). */
+  let done = 0, loaded = document.readyState === "complete" || root.hasAttribute("data-ready");
+  const ready = () => (loaded = true);
+  addEventListener("load", ready, { once: true });
+  addEventListener("jg-ready", ready, { once: true });
   const pics = frames.map((f) => stack(f, "jg-burst-pic"));
   const last = alone ? null : stack(root.dataset.theme === "light" ? hero.l : hero.d, "jg-burst-hero");
   const show = (i: HTMLImageElement | null) => {

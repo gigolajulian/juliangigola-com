@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { getImageProps } from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { CoverNav, V3Foot } from "@/components/v3/chrome";
@@ -14,10 +15,30 @@ import { COMMISSIONS, COMMISSION_TABS, DOORS, HERO, HERO_ALT, INDEX_ORDER, RECEN
 
 const calm = () => matchMedia("(prefers-reduced-motion: reduce)").matches;
 
+/* The first frame in each theme, preloaded from the head at the size the
+   page's own <Image> will pick (and the splash glides in, `burst-splash.ts`),
+   so the one copy is on its way before the stylesheet has arrived. By the
+   system theme: a stored choice the other way costs one wasted fetch. */
+const HERO_SRCSET = (src: string) => getImageProps({ src, alt: "", fill: true, sizes: "100vw" }).props.srcSet;
+const HERO_PRELOAD = [
+  { srcSet: HERO_SRCSET(HERO[0].d.src), media: "(prefers-color-scheme: dark)" },
+  { srcSet: HERO_SRCSET(HERO[0].l.src), media: "(prefers-color-scheme: light)" },
+];
+
 /* Hero: four frames, a 1.2s crossfade every 6s; the ticks pick one. */
 function Hero() {
   const [i, setI] = React.useState(0);
   const [round, setRound] = React.useState(0);
+  /* Frames two to four wait for the page's load: stacked under the first
+     they count as on screen, and on a phone they were taking bandwidth
+     from the first frame and the splash. The first turn is 6s after. */
+  const [rest, setRest] = React.useState(false);
+  React.useEffect(() => {
+    const on = () => setRest(true);
+    if (document.readyState === "complete") on();
+    else addEventListener("load", on, { once: true });
+    return () => removeEventListener("load", on);
+  }, []);
   React.useEffect(() => {
     if (calm()) return;
     /* `?splash=sand` and `?splash=burst` land on the first frame, so the turning waits for them. */
@@ -35,15 +56,19 @@ function Hero() {
     };
   }, [round]);
   const pick = (n: number) => {
+    setRest(true);
     setI(n);
     setRound((r) => r + 1);
   };
   return (
     <div className="a-cover">
+      {HERO_PRELOAD.map((p) => (
+        <link key={p.media} rel="preload" as="image" imageSrcSet={p.srcSet} imageSizes="100vw" media={p.media} fetchPriority="high" />
+      ))}
       <div className="slides">
-        {HERO.map((s, n) => (
-          <Duo key={n} d={s.d.src} l={s.l.src} alt={HERO_ALT[n]} altL={s.l.name} sizes="100vw" priority={n === 0} className={n === i ? "on" : undefined} />
-        ))}
+        {HERO.map((s, n) =>
+          n === 0 || rest ? <Duo key={n} d={s.d.src} l={s.l.src} alt={HERO_ALT[n]} altL={s.l.name} sizes="100vw" className={n === i ? "on" : undefined} /> : null,
+        )}
       </div>
       <CoverNav />
       <div className="foot">

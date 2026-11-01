@@ -13,11 +13,15 @@ const HERO_FIRST = { d: loader({ src: HERO[0].d.src, width: 640 }), l: loader({ 
 
 /* `?splash=burst`: the run of frames (the portfolio's first covers,
    `SPLASH_RUN`, passed in from the server), then the hero's first
-   photograph, each sized for a whole screen: [phone, wider]. */
+   photograph, each sized for a whole screen: [phone, wider]. The hero
+   goes as the page's whole ladder (`deviceSizes` in next.config.ts), so
+   the splash asks for the very copy the hero's <Image> and its preload
+   will (`home.tsx`): one download, where 1080 against 1280 was two. */
 const sized = (run: string[]) => run.map((src) => [loader({ src, width: 640 }), loader({ src, width: 1080 })]);
+const LADDER = [640, 1280, 1920, 2500];
 const HERO_FULL = {
-  d: [loader({ src: HERO[0].d.src, width: 1080 }), loader({ src: HERO[0].d.src, width: 1920 })],
-  l: [loader({ src: HERO[0].l.src, width: 1080 }), loader({ src: HERO[0].l.src, width: 1920 })],
+  d: LADDER.map((width): [number, string] => [width, loader({ src: HERO[0].d.src, width })]),
+  l: LADDER.map((width): [number, string] => [width, loader({ src: HERO[0].l.src, width })]),
 };
 
 /* ── the opening ──────────────────────────────────────────────────
@@ -197,6 +201,12 @@ const sheet = (frames: string[]) =>
   `<script>${keepNames(`(${run.toString()})(${JSON.stringify(PICKS)});(${sand.toString()})(${JSON.stringify(HERO_FIRST)});(${burst.toString()})(${JSON.stringify(sized(frames))},${JSON.stringify(HERO_FULL)})`)}</script>`;
 
 export function Intro({ run: frames }: { run: string[] }) {
+  /* The page has hydrated (the root layout's effects run after every
+     child's): the splash's cue that what it uncovers is ready, `burst-splash.ts`. */
+  React.useEffect(() => {
+    document.documentElement.dataset.ready = "";
+    dispatchEvent(new Event("jg-ready"));
+  }, []);
   return (
     <>
       {/* The one rule that cannot wait for the stylesheet. The layer is in
