@@ -1022,7 +1022,8 @@ html{font-family:var(--font-mono),ui-monospace,monospace}
 .v3 .mo-steps>div{height:calc(100svh - 64px)}
 .v3 .mo-shot{position:absolute;inset:0;overflow:hidden;opacity:0;transition:opacity .6s ease}
 .v3 .mo-shot[data-on]{opacity:1}
-.v3 .mo-stage::after{content:"";position:absolute;inset:0;background:linear-gradient(20deg,rgb(var(--scrim) / .5) 0%,rgb(var(--scrim) / 0) 42%);pointer-events:none;z-index:1}
+/* The caption over a bright reel (audit, 2026-11-01): Ladera's still put the label at 1.9:1 and the title at 3:1. A shade up from the bottom, long-tailed so it shows no edge, under the corner one: 7:1 and up on every reel. */
+.v3 .mo-stage::after{content:"";position:absolute;inset:0;background:linear-gradient(to top,rgb(var(--scrim) / .8),rgb(var(--scrim) / .66) 16%,rgb(var(--scrim) / .4) 30%,rgb(var(--scrim) / .16) 44%,rgb(var(--scrim) / .04) 54%,rgb(var(--scrim) / 0) 62%),linear-gradient(20deg,rgb(var(--scrim) / .5) 0%,rgb(var(--scrim) / 0) 42%);pointer-events:none;z-index:1}
 .v3 .mo-stage::before{content:"";position:absolute;inset:0 0 auto;height:300px;background:linear-gradient(to bottom,rgb(var(--scrim) / .72),rgb(var(--scrim) / .36) 55%,rgb(var(--scrim) / 0));pointer-events:none;z-index:1}
 .v3 .mo-hit{all:unset;position:absolute;inset:0;z-index:2;cursor:pointer}
 .v3 .mo-h,.v3 .mo-cap,.v3 .mo-index,.v3 .mo-play{position:absolute;z-index:3}
