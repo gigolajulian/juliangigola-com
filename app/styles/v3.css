@@ -546,6 +546,9 @@ html[data-sb]{scrollbar-width:none}html[data-sb]::-webkit-scrollbar{display:none
 .v3 .rc-in{position:relative;display:flex;flex-direction:column;gap:14px;width:100%;padding:96px 28px 28px;background:linear-gradient(to top,rgb(var(--scrim) / .82),rgb(var(--scrim) / 0))}
 .v3 .rc-in .lbl{color:rgb(var(--on-photo) / .72)}
 .v3 .rc-in p{margin:0;color:rgb(var(--on-photo) / .82)}
+/* Light theme (audit, 2026-11-01): its consultation photo is bright, and the label sat at 1.5:1 and the title at 2.4:1. A taller, deeper shade with a long tail so it shows no edge, and a brighter label: 6:1 and 9.8:1 now. */
+:root[data-theme="light"] .v3 .rc-in{padding-top:240px;background:linear-gradient(to top,rgb(var(--scrim) / .88),rgb(var(--scrim) / .8) 40%,rgb(var(--scrim) / .6) 62%,rgb(var(--scrim) / .36) 78%,rgb(var(--scrim) / .15) 90%,rgb(var(--scrim) / .04) 97%,rgb(var(--scrim) / 0))}
+:root[data-theme="light"] .v3 .rc-in .lbl{color:rgb(var(--on-photo) / .9)}
 .v3 .reach-call .btn.fill{background:rgb(var(--on-photo));color:var(--night);border-color:rgb(var(--on-photo))}
 .v3 .reach-call{--btn-ink:rgb(var(--on-photo))}
 @media (hover:hover){.v3 .reach-call .btn.fill:hover{background:transparent;color:rgb(var(--on-photo))}}
