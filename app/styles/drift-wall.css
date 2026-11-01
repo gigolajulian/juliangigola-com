@@ -176,19 +176,6 @@
   }
 }
 
-/* The search's liquid ground (`work-shell.tsx`): there while the box is
-   open, gone a beat after it shuts, once the drop has drawn back in. */
-.finder-liquid > [data-gooey-svg] {
-  transition: opacity 150ms ease var(--dur-xs);
-}
-.finder-liquid:not([data-open]) > [data-gooey-svg] {
-  opacity: 0;
-}
-.finder-liquid[data-open] > [data-gooey-svg] {
-  transition-delay: 0ms;
-  transition-duration: 0ms;
-}
-
 /* The buttons in liquid (`liquid-pair.tsx`). The first button's ground is
    the liquid under it, so its own ground and blur step aside at rest; its
    hover is its own, as before. The quiet ones keep their glass at rest,
@@ -216,9 +203,6 @@
 .liquid-pair [data-on] > .action-quiet {
   color: var(--background);
 }
-.liquid-pair [data-on] > .cover-cta-quiet {
-  color: var(--hero-on-ink);
-}
 
 /* The hero's pair sits in a zoom on a phone (`--m-buttons`, 0.88). The
    liquid measures its buttons as seen, already zoomed, and drew them into
@@ -228,24 +212,6 @@
   /* And the middle's own (`--mid`), which a short wide window takes to
      0.6: the ink came out three fifths of SEE THE WORK. */
   zoom: calc(1 / (var(--m-buttons, 1) * var(--mid, 1)));
-}
-
-/* The drop that fills a quiet button: out of the first button across the
-   gap (`--lp-gap`, the pair's `gap-3`), the width of this one, and back. */
-.liquid-drop {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 2px;
-  height: 100%;
-  border-radius: 9999px;
-  pointer-events: none;
-}
-.liquid-pair [data-on] .liquid-drop {
-  animation: liquid-run var(--dur-xl) var(--ease-out-strong) forwards;
-}
-.liquid-pair [data-was] .liquid-drop {
-  animation: liquid-drain 380ms cubic-bezier(0.4, 0, 0.2, 1) forwards;
 }
 @keyframes liquid-run {
   from {
@@ -394,8 +360,7 @@
    words go soft the other way. A pull is a lens's, quick to start and slow
    to settle. Nothing moves; only focus and light. */
 @media (hover: hover) and (pointer: fine) {
-  .questions-wall,
-  .questions-words {
+  .questions-wall {
     transition:
       filter var(--dur-2xl) var(--ease-out-strong),
       opacity var(--dur-2xl) var(--ease-out-strong);
@@ -412,15 +377,10 @@
   [data-look] > .questions-wall::after {
     background: color-mix(in oklab, var(--background) 18%, transparent);
   }
-  [data-look] > .questions-words {
-    opacity: 0.4;
-    filter: blur(2px);
-  }
 }
 @media (prefers-reduced-motion: reduce) {
   .questions-wall,
-  .questions-wall::after,
-  .questions-words {
+.questions-wall::after {
     transition: none;
   }
 }

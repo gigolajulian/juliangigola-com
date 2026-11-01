@@ -2,39 +2,21 @@
 
 import * as React from "react";
 import Link from "next/link";
-import dynamic from "next/dynamic";
 import { THEME_COLOR } from "@/lib/theme-color";
 import { usePathname } from "next/navigation";
 import { onLenisScroll } from "./smooth-scroll";
 
 /* JG V3 chrome (master v39): the glass header, the phone menu, the theme
-   toggle and the footer line. /admin keeps the old chrome. */
+   toggle and the footer line. Every route uses it, /admin included (2026-10-31). */
 
 const noop = () => () => {};
 
-/** /admin is out of V3's scope and keeps the old chrome. */
-export const isLegacy = (path: string) => /^\/admin(\/|$)/.test(path);
-
-export function OnLegacy({ children }: { children: React.ReactNode }) {
-  return isLegacy(usePathname()) ? <>{children}</> : null;
-}
-
-/* The old header and drawer, loaded only when /admin renders them, so their
-   code stays out of every public page's JavaScript. */
-export const LegacyHeader = dynamic(() => import("@/components/site-header").then((m) => m.SiteHeader), { ssr: false });
-export const LegacyMenu = dynamic(() => import("@/components/site-menu").then((m) => m.SiteMenu), { ssr: false });
-
-export function OnV3({ children }: { children: React.ReactNode }) {
-  return isLegacy(usePathname()) ? null : <>{children}</>;
-}
-
 /* Motion that is not in the master (the splash, the page zoom, the pointer
    mark, tilt, glass light, fades) stays off unless `?v3motion` is on for
-   the tab (`app/layout.tsx` sets `data-v3motion`). The old chrome keeps it. */
+   the tab (`app/layout.tsx` sets `data-v3motion`). */
 export function MotionGate({ children, fallback = null }: { children: React.ReactNode; fallback?: React.ReactNode }) {
-  const legacy = isLegacy(usePathname());
   const on = React.useSyncExternalStore(noop, () => document.documentElement.hasAttribute("data-v3motion"), () => false);
-  return <>{legacy || on ? children : fallback}</>;
+  return <>{on ? children : fallback}</>;
 }
 
 /* ── theme toggle: half-disc, 14px. Hover tilts it 90°; a click spins a
@@ -440,7 +422,7 @@ export function V3Foot() {
 
 /* Screens built from the master carry their own footer line (`V3Foot`);
    the pages restyled by tokens only get it here, after `main`. */
-const OWN_FOOT = /^\/($|portfolio(\/video)?$|bts$|about$|contact(\/form)?$|book(\/|$)|portraits$|headshots$|graduation-photos$|model-digitals$|weddings$|music-photography$|brand-photography$)/;
+const OWN_FOOT = /^\/($|portfolio(\/video)?$|bts$|about$|contact(\/form)?$|book(\/|$)|portraits$|headshots$|graduation-photos$|model-digitals$|weddings$|music-photography$|brand-photography$|admin(\/|$))/;
 
 export function V3Footer() {
   if (OWN_FOOT.test(usePathname())) return null;

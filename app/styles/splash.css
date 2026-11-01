@@ -347,8 +347,7 @@ html[data-sb]:is([data-intro], [data-landing])::after {
   background: var(--background);
   color: var(--foreground);
 }
-[data-splash="basic"] #jg-intro::before,
-[data-splash="basic"] .jg-intro-panel {
+[data-splash="basic"] #jg-intro::before {
   display: none;
 }
 [data-splash="basic"] #jg-intro.jg-intro-open {
