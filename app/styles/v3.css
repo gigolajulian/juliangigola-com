@@ -371,6 +371,9 @@ html[data-sb]{scrollbar-width:none}html[data-sb]::-webkit-scrollbar{display:none
 .v3 .fld input,.v3 .fld textarea{background:transparent;border:0;border-bottom:1px solid color-mix(in srgb,var(--ink) 22%,transparent);color:var(--ink);font:inherit;padding:10px 0;border-radius:0;resize:none;color-scheme:inherit}
 .v3 .fld input:focus,.v3 .fld textarea:focus{outline:0;border-bottom-color:var(--accent)}
 .v3 .fld.bad input{border-bottom-color:var(--err)}
+/* Keyboard focus (audit, 2026-11-01): the 1px colour change alone was easy to miss, so the rule thickens to 2px. A shadow, so nothing shifts. */
+.v3 .fld input:focus-visible,.v3 .fld textarea:focus-visible{box-shadow:0 1px 0 var(--accent)}
+.v3 .fld.bad input:focus-visible{box-shadow:0 1px 0 var(--err)}
 .v3 .err{margin:6px 0 0;padding:10px 12px;border:1px solid color-mix(in srgb,var(--err) 55%,transparent);font-size:13px}
 .v3 .kinds{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
 /* Seven tiles: Other takes the last row whole at three columns and at two. */
