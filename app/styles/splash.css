@@ -188,7 +188,7 @@
 }
 [data-splash="burst"]:is([data-intro], [data-landing]) .v3 .a-cover::before,
 [data-splash="burst"]:is([data-intro], [data-landing]) .v3 .a-cover::after {
-  transition: opacity 1s cubic-bezier(0.65, 0, 0.35, 1);
+  transition: opacity 0.75s cubic-bezier(0.65, 0, 0.35, 1);
 }
 [data-splash="burst"][data-intro]:not([data-landing]) .v3 .a-cover::before,
 [data-splash="burst"][data-intro]:not([data-landing]) .v3 .a-cover::after {

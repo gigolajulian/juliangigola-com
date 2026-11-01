@@ -31,13 +31,15 @@ export function burst(sizes: string[][], heroes: { d: [number, string][]; l: [nu
   const layer = document.querySelector("#jg-intro .jg-sheet-wrap");
   if (!layer) return;
 
-  const STAGGER = 28; // between letters of the wordmark rising
-  const RISE = 620; // one letter rising out of its line
-  const HOLD = 200; // the wordmark whole, once everything has loaded
-  const DROP = 760; // the first frame tipping in and settling flat over the wordmark
-  const BEAT = [220, 90]; // the run's cuts, first and last: it quickens as it goes
-  const LAND = 1100; // the hero gliding from the frame into its place, the page coming up round it
-  const CLEAR = 350; // the splash's copy of the hero giving way to the page's own
+  /* Tightened (Julian, 2026-10-31: the desktop splash down from 4.7s to
+     about 3.2s). Same moves in the same order, each one shorter. */
+  const STAGGER = 18; // between letters of the wordmark rising
+  const RISE = 460; // one letter rising out of its line
+  const HOLD = 80; // the wordmark whole, once everything has loaded
+  const DROP = 520; // the first frame tipping in and settling flat over the wordmark
+  const BEAT = [140, 60]; // the run's cuts, first and last: it quickens as it goes
+  const LAND = 780; // the hero gliding from the frame into its place, the page coming up round it
+  const CLEAR = 220; // the splash's copy of the hero giving way to the page's own
   const LOAD = 3500; // the longest the wordmark waits for the loader to fill
   const MAX = 6000; // the whole splash, whatever has not arrived by then is skipped
   const EASE = "cubic-bezier(0.65, 0, 0.35, 1)";
@@ -109,7 +111,7 @@ export function burst(sizes: string[][], heroes: { d: [number, string][]; l: [nu
   const total = Math.max(1, frames.length);
   const tick = () => {
     const p = frames.length ? done / total : loaded ? 1 : 0;
-    shownP += (p - shownP) * 0.12;
+    shownP += (p - shownP) * 0.22;
     fill.style.transform = `scaleX(${shownP})`;
     if (filling) requestAnimationFrame(tick);
   };
