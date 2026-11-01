@@ -201,12 +201,6 @@ const sheet = (frames: string[]) =>
   `<script>${keepNames(`(${run.toString()})(${JSON.stringify(PICKS)});(${sand.toString()})(${JSON.stringify(HERO_FIRST)});(${burst.toString()})(${JSON.stringify(sized(frames))},${JSON.stringify(HERO_FULL)})`)}</script>`;
 
 export function Intro({ run: frames }: { run: string[] }) {
-  /* The page has hydrated (the root layout's effects run after every
-     child's): the splash's cue that what it uncovers is ready, `burst-splash.ts`. */
-  React.useEffect(() => {
-    document.documentElement.dataset.ready = "";
-    dispatchEvent(new Event("jg-ready"));
-  }, []);
   return (
     <>
       {/* The one rule that cannot wait for the stylesheet. The layer is in

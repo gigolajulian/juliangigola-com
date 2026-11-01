@@ -76,20 +76,21 @@ export function burst(sizes: string[][], heroes: { d: [number, string][]; l: [nu
     const i = document.createElement("img");
     i.className = cls;
     i.alt = "";
-    i.fetchPriority = "high"; // ahead of the page's own pictures, none of which show until the splash is done
+    if (cls !== "jg-burst-hero") i.fetchPriority = "high"; // the frames first: the hero shows only after them
     i.src = src;
-    i.decode().then(() => shown.add(i), () => {}).finally(() => done++);
+    // the hero has its own wait, after the run, so only the frames hold the wordmark
+    i.decode().then(() => shown.add(i), () => {}).finally(() => cls !== "jg-burst-hero" && done++);
     layer.append(i);
     return i;
   };
-  /* The page's part of the loader is the page having hydrated, not its
-     `load`: that waits on every lazy picture the browser counts as near
-     the fold, which on a slow phone ran past `LOAD`, so the wordmark held
-     its 3.5s and the run was skipped entirely (2026-10-31). */
-  let done = 0, loaded = document.readyState === "complete" || root.hasAttribute("data-ready");
-  const ready = () => (loaded = true);
-  addEventListener("load", ready, { once: true });
-  addEventListener("jg-ready", ready, { once: true });
+  /* Only the frames hold the wordmark. The page's \`load\` waits on every
+     lazy picture the browser counts as near the fold, and even hydration
+     lands past \`LOAD\` on a slow phone, so either one held the wordmark its
+     3.5s and the run was skipped entirely (2026-10-31). The page has the
+     run's length to come up, and the hero waits for it below. With no
+     run (the name alone, on other pages) the page's \`load\` is the cue. */
+  let done = 0, loaded = document.readyState === "complete";
+  addEventListener("load", () => (loaded = true), { once: true });
   const pics = frames.map((f) => stack(f, "jg-burst-pic"));
   const last = alone ? null : stack(root.dataset.theme === "light" ? hero.l : hero.d, "jg-burst-hero");
   const show = (i: HTMLImageElement | null) => {
@@ -103,9 +104,11 @@ export function burst(sizes: string[][], heroes: { d: [number, string][]; l: [nu
   /* The loader: what has arrived of the frames, the hero and the page,
      drawn eased so it glides rather than steps. */
   let shownP = 0, filling = true;
-  const total = frames.length + (last ? 1 : 0) + 1;
+  /* The frames, not the hero: it shows only after the run, and in dark it
+     is the heaviest file (Diesel, 139KB on a phone). */
+  const total = Math.max(1, frames.length);
   const tick = () => {
-    const p = (done + (loaded ? 1 : 0)) / total;
+    const p = frames.length ? done / total : loaded ? 1 : 0;
     shownP += (p - shownP) * 0.12;
     fill.style.transform = `scaleX(${shownP})`;
     if (filling) requestAnimationFrame(tick);

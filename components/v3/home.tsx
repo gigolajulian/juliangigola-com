@@ -17,7 +17,8 @@ const calm = () => matchMedia("(prefers-reduced-motion: reduce)").matches;
 
 /* The first frame in each theme, preloaded from the head at the size the
    page's own <Image> will pick (and the splash glides in, `burst-splash.ts`),
-   so the one copy is on its way before the stylesheet has arrived. By the
+   so the one copy is on its way before the stylesheet has arrived. At the
+   browser's own priority, not high: under the splash it is needed last. By the
    system theme: a stored choice the other way costs one wasted fetch. */
 const HERO_SRCSET = (src: string) => getImageProps({ src, alt: "", fill: true, sizes: "100vw" }).props.srcSet;
 const HERO_PRELOAD = [
@@ -63,7 +64,7 @@ function Hero() {
   return (
     <div className="a-cover">
       {HERO_PRELOAD.map((p) => (
-        <link key={p.media} rel="preload" as="image" imageSrcSet={p.srcSet} imageSizes="100vw" media={p.media} fetchPriority="high" />
+        <link key={p.media} rel="preload" as="image" imageSrcSet={p.srcSet} imageSizes="100vw" media={p.media} />
       ))}
       <div className="slides">
         {HERO.map((s, n) =>
