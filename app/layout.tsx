@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
 import { Intro } from "@/components/intro";
+import { SPLASH_RUN } from "@/lib/splash-run";
 import { PhotoNotice } from "@/components/photo-notice";
 import { GlassLight } from "@/components/glass-light";
 import { PhotoFade } from "@/components/photo-fade";
@@ -174,8 +175,10 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             `?intro=1` to see it again on demand. `?splash=basic` plays
             the basicagency.com preview instead (`intro.tsx`). On the
             homepage the opening is the burst (`burst-splash.ts`, Julian
-            2026-10-28), which lands on the hero; other pages, which have
-            no hero to land on, and `?splash=sheet` keep the contact sheet.
+            2026-10-28), which lands on the hero. Other pages have no hero
+            to land on and their own photographs to show, so they get the
+            name alone (`data-splash="name"`, 2026-10-30); `?splash=sheet`
+            keeps the contact sheet.
             `sessionStorage` throws outright in some privacy modes rather
             than returning null, so the whole thing is wrapped and a
             failure simply means no opening.
@@ -185,7 +188,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             sweep's clock rather than the script's. */}
         <script
           dangerouslySetInnerHTML={{
-            __html: `(function(){var mo=true;try{var k3="jg-v3motion-off",q3=location.search;if(/[?&]v3motion=0/.test(q3))sessionStorage.setItem(k3,"1");else if(/[?&]v3motion/.test(q3))sessionStorage.removeItem(k3);mo=!sessionStorage.getItem(k3)}catch(e){}if(mo)document.documentElement.dataset.v3motion="";try{var kb="jg-solidhdr";if(/[?&]blur=0/.test(q3))sessionStorage.setItem(kb,"1");else if(/[?&]blur/.test(q3))sessionStorage.removeItem(kb);if(sessionStorage.getItem(kb))document.documentElement.dataset.solidhdr=""}catch(e){}try{if(!matchMedia("(prefers-reduced-motion: reduce)").matches){document.documentElement.dataset.gather="";document.documentElement.dataset.moves=""}}catch(e){}try{var q=location.search;try{if(/[?&]menu3d=1/.test(q))sessionStorage.setItem("jg-menu3d","1");if(/[?&]menu3d=0/.test(q))sessionStorage.removeItem("jg-menu3d");if(sessionStorage.getItem("jg-menu3d"))document.documentElement.dataset.menu3d=""}catch(e){}try{if(/[?&]sleeve=1/.test(q))sessionStorage.setItem("jg-sleeve","1");if(/[?&]sleeve=0/.test(q))sessionStorage.removeItem("jg-sleeve");if(sessionStorage.getItem("jg-sleeve"))document.documentElement.dataset.sleeve=""}catch(e){}if(/[?&]intro=0/.test(q)||!mo)return;var basic=/[?&]splash=basic/.test(q);var sand=/[?&]splash=sand/.test(q);var burst=/[?&]splash=burst/.test(q);var force=basic||sand||burst||/[?&]intro=1/.test(q);var seen=false;try{seen=!!sessionStorage.getItem("jg-intro")}catch(e){}var calm=matchMedia("(prefers-reduced-motion: reduce)").matches;var admin=location.pathname.indexOf("/admin")===0;if(force||(!admin&&!seen&&!calm)){var r=document.documentElement;r.dataset.intro="1";if(sand)r.dataset.splash="sand";if(burst||(location.pathname==="/"&&!basic&&!sand&&!/[?&]splash=sheet/.test(q)))r.dataset.splash="burst";if(basic){r.dataset.splash="basic";setTimeout(function(){r.dataset.intro="half";r.dataset.splashed="";setTimeout(function(){r.removeAttribute("data-intro");r.removeAttribute("data-splash")},1200)},500)}r.style.setProperty("--jg-blink-at",Math.round(100+Math.random()*160)+"ms")}}catch(e){}})()`,
+            __html: `(function(){var mo=true;try{var k3="jg-v3motion-off",q3=location.search;if(/[?&]v3motion=0/.test(q3))sessionStorage.setItem(k3,"1");else if(/[?&]v3motion/.test(q3))sessionStorage.removeItem(k3);mo=!sessionStorage.getItem(k3)}catch(e){}if(mo)document.documentElement.dataset.v3motion="";try{var kb="jg-solidhdr";if(/[?&]blur=0/.test(q3))sessionStorage.setItem(kb,"1");else if(/[?&]blur/.test(q3))sessionStorage.removeItem(kb);if(sessionStorage.getItem(kb))document.documentElement.dataset.solidhdr=""}catch(e){}try{if(!matchMedia("(prefers-reduced-motion: reduce)").matches){document.documentElement.dataset.gather="";document.documentElement.dataset.moves=""}}catch(e){}try{var q=location.search;try{if(/[?&]menu3d=1/.test(q))sessionStorage.setItem("jg-menu3d","1");if(/[?&]menu3d=0/.test(q))sessionStorage.removeItem("jg-menu3d");if(sessionStorage.getItem("jg-menu3d"))document.documentElement.dataset.menu3d=""}catch(e){}try{if(/[?&]sleeve=1/.test(q))sessionStorage.setItem("jg-sleeve","1");if(/[?&]sleeve=0/.test(q))sessionStorage.removeItem("jg-sleeve");if(sessionStorage.getItem("jg-sleeve"))document.documentElement.dataset.sleeve=""}catch(e){}if(/[?&]intro=0/.test(q)||!mo)return;var basic=/[?&]splash=basic/.test(q);var sand=/[?&]splash=sand/.test(q);var burst=/[?&]splash=burst/.test(q);var force=basic||sand||burst||/[?&]intro=1/.test(q);var seen=false;try{seen=!!sessionStorage.getItem("jg-intro")}catch(e){}var calm=matchMedia("(prefers-reduced-motion: reduce)").matches;var admin=location.pathname.indexOf("/admin")===0;if(force||(!admin&&!seen&&!calm)){var r=document.documentElement;r.dataset.intro="1";if(sand)r.dataset.splash="sand";if(burst||(location.pathname==="/"&&!basic&&!sand&&!/[?&]splash=sheet/.test(q)))r.dataset.splash="burst";else if(!basic&&!sand&&!/[?&]splash=sheet/.test(q))r.dataset.splash="name";if(basic){r.dataset.splash="basic";setTimeout(function(){r.dataset.intro="half";r.dataset.splashed="";setTimeout(function(){r.removeAttribute("data-intro");r.removeAttribute("data-splash")},1200)},500)}r.style.setProperty("--jg-blink-at",Math.round(100+Math.random()*160)+"ms")}}catch(e){}})()`,
           }}
         />
         {process.env.NODE_ENV === "production" ? (
@@ -215,7 +218,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             MotionGate: that renders nothing on the server, and the sheet
             has to be in the HTML to start before hydration. The head
             script above sets `data-intro` on a first arrival unless `?v3motion=0`. */}
-        <Intro />
+        <Intro run={SPLASH_RUN} />
 
         <V3Header />
         <ScrollThumb />
