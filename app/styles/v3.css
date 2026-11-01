@@ -9,6 +9,8 @@
   --v3u:1vw;
   /* Text and scrims over photos: the same in both themes. */
   --on-photo:242 241 238; --scrim:10 10 9;
+  /* The ground under photos and film, and the dark text on a light photo button: dark in both themes. */
+  --night:#0b0a09;
   --g:max(16px,env(safe-area-inset-left,0px)); --gr:max(16px,env(safe-area-inset-right,0px));
   color-scheme:dark;}
 @media (prefers-color-scheme:light){:root:not([data-theme="dark"]){--bg:var(--l-bg);--ink:var(--l-ink);--mute:var(--l-mute);--line:var(--l-line);--card:var(--l-card);--accent:var(--l-accent);color-scheme:light}}
@@ -544,7 +546,7 @@ html[data-sb]{scrollbar-width:none}html[data-sb]::-webkit-scrollbar{display:none
 .v3 .rc-in{position:relative;display:flex;flex-direction:column;gap:14px;width:100%;padding:96px 28px 28px;background:linear-gradient(to top,rgb(var(--scrim) / .82),rgb(var(--scrim) / 0))}
 .v3 .rc-in .lbl{color:rgb(var(--on-photo) / .72)}
 .v3 .rc-in p{margin:0;color:rgb(var(--on-photo) / .82)}
-.v3 .reach-call .btn.fill{background:rgb(var(--on-photo));color:#0b0b0a;border-color:rgb(var(--on-photo))}
+.v3 .reach-call .btn.fill{background:rgb(var(--on-photo));color:var(--night);border-color:rgb(var(--on-photo))}
 .v3 .reach-call{--btn-ink:rgb(var(--on-photo))}
 @media (hover:hover){.v3 .reach-call .btn.fill:hover{background:transparent;color:rgb(var(--on-photo))}}
 @media (max-width:800px){.v3 .reach-call{border-top:0;padding-top:0}}
@@ -972,7 +974,7 @@ html{font-family:var(--font-mono),ui-monospace,monospace}
 .v3 .nf-list .row:focus-visible{outline:1px solid var(--accent);outline-offset:3px}
 @media (hover:none){.v3 .nf-list .row .t{color:var(--ink)}.v3 .nf-list .row .p{opacity:1}}
 /* Video, direction C "Cinema" (components/v3/video.tsx): the reel under the title, then chapters. */
-.v3 .cn-hero{position:relative;height:min(calc(100svh - 64px),900px);min-height:520px;overflow:hidden;background:#0b0a09}
+.v3 .cn-hero{position:relative;height:min(calc(100svh - 64px),900px);min-height:520px;overflow:hidden;background:var(--night)}
 .v3 .cn-hero iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
 .v3 .cn-hero::after{content:"";position:absolute;inset:auto 0 0;height:50%;background:linear-gradient(to top,rgb(var(--scrim) / .38),rgb(var(--scrim) / 0));pointer-events:none}
 .v3 .cn-hero-foot{position:absolute;z-index:1;left:var(--g);right:var(--gr);bottom:28px;display:flex;justify-content:space-between;align-items:flex-end;gap:24px;color:rgb(var(--on-photo))}
@@ -1013,7 +1015,7 @@ html{font-family:var(--font-mono),ui-monospace,monospace}
 .v3 .mo-mob{display:none}
 .v3 .mo-desk{display:grid}
 .v3 .mo-stage,.v3 .mo-steps{grid-area:1/1}
-.v3 .mo-stage{position:sticky;top:64px;height:calc(100svh - 64px);overflow:hidden;background:#0b0a09;color:rgb(var(--on-photo))}
+.v3 .mo-stage{position:sticky;top:64px;height:calc(100svh - 64px);overflow:hidden;background:var(--night);color:rgb(var(--on-photo))}
 .v3 .mo-steps>div{height:calc(100svh - 64px)}
 .v3 .mo-shot{position:absolute;inset:0;overflow:hidden;opacity:0;transition:opacity .6s ease}
 .v3 .mo-shot[data-on]{opacity:1}
@@ -1101,7 +1103,7 @@ dialog.v3.mo-player,.mo-player>iframe{background:#000}
 :root[data-v3motion] .v3 .btn:not(.cn-light){background:linear-gradient(var(--btn-ink,var(--ink)),var(--btn-ink,var(--ink))) bottom/100% 0 no-repeat transparent;transition:background-size .12s cubic-bezier(.4,0,.2,1),color .12s,scale .08s}
 :root[data-v3motion] .v3 .btn.fill:not(.cn-light){background-size:100% 100%}
 @media (hover:hover){:root[data-v3motion] .v3 .btn:not(.cn-light):hover{background-size:100% 100%;color:var(--bg);transition-duration:.18s,.18s,.08s}
-:root[data-v3motion] .v3 .reach-call .btn:hover{color:#0b0b0a}
+:root[data-v3motion] .v3 .reach-call .btn:hover{color:var(--night)}
 :root[data-v3motion] .v3 .btn.fill:not(.cn-light):hover{background-size:100% 0;color:var(--btn-ink,var(--ink))}}
 :root[data-v3motion] .v3 .btn{transition-property:background-size,color,scale}
 :root[data-v3motion] .v3 .btn:active{scale:.97}
@@ -1336,7 +1338,7 @@ dialog.v3.mo-player,.mo-player>iframe{background:#000}
    is always there on a phone. The handle opens their Instagram in a new tab. */
 .v3 .sv-row li a{display:inline-flex;align-items:center;justify-content:flex-end;width:auto}
 .v3 .sv-info li>a{display:flex;justify-content:space-between;gap:24px;width:100%}
-.v3 .cr-av{position:relative;display:inline-grid;place-items:center;flex:none;width:0;height:28px;margin-right:0;border-radius:50%;overflow:hidden;background:var(--accent);color:#fff;font:600 15px/1 var(--mono);text-transform:uppercase;opacity:0;transition:width .3s cubic-bezier(.2,.7,.2,1),margin-right .3s cubic-bezier(.2,.7,.2,1),opacity .2s}
+.v3 .cr-av{position:relative;display:inline-grid;place-items:center;flex:none;width:0;height:28px;margin-right:0;border-radius:50%;overflow:hidden;background:var(--accent);color:var(--accent-foreground);font:600 15px/1 var(--mono);text-transform:uppercase;opacity:0;transition:width .3s cubic-bezier(.2,.7,.2,1),margin-right .3s cubic-bezier(.2,.7,.2,1),opacity .2s}
 .v3 .cr-av img{object-fit:cover}
 @media (hover:hover){.v3 .sv-row li:hover .cr-av,.v3 .sv-row li a:focus-visible .cr-av{width:28px;margin-right:10px;opacity:1}
 .v3 .sv-row li a:hover{color:var(--accent)}}
