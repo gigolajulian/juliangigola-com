@@ -85,13 +85,6 @@ body { background: var(--bg); color: var(--ink); font-family: var(--display); fo
 @media (prefers-reduced-transparency: reduce) { .lbl.door { background: var(--card); -webkit-backdrop-filter: none; backdrop-filter: none; } }
 .lbl.door b { font: 700 14px/1 var(--display); letter-spacing: -0.02em; text-transform: none; }
 
-.cap { position: absolute; left: max(14px, env(safe-area-inset-left, 0px)); top: 14px; display: flex; align-items: baseline; gap: 10px; padding: 10px 13px; border-radius: var(--radius); color: var(--ink);
-  background: color-mix(in oklab, var(--bg) 26%, transparent); -webkit-backdrop-filter: blur(24px) saturate(1.9) brightness(1.06); backdrop-filter: blur(24px) saturate(1.9) brightness(1.06);
-  opacity: 0; transform: translateY(-4px); transition: opacity 500ms var(--ease), transform 500ms var(--ease); pointer-events: none; }
-.cap.on { opacity: 1; transform: none; }
-.cap span { font: 500 10.5px/1 var(--mono); letter-spacing: .14em; color: var(--muted); }
-.cap b { font: 700 15px/1.2 var(--display); letter-spacing: -0.02em; }
-@media (prefers-reduced-transparency: reduce) { .cap { background: var(--card); -webkit-backdrop-filter: none; backdrop-filter: none; } }
 .hud { position: absolute; left: max(14px, env(safe-area-inset-left, 0px)); bottom: 14px; display: flex; gap: 6px; flex-wrap: wrap; }
 .hud button { font: 500 11px/1 var(--mono); letter-spacing: .14em; text-transform: uppercase; color: var(--ink); background: oklch(0.185 0.003 70 / 0.9); border: 0; border-radius: var(--radius); padding: 11px 13px; cursor: pointer; backdrop-filter: blur(8px); transition: color var(--dur, 200ms) var(--ease), background var(--dur, 200ms) var(--ease); }
 .hud button:hover { color: var(--accent); }
@@ -171,7 +164,6 @@ a.eyebrow:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px;
     <div class="hud" role="group" aria-label="Map view">
       <button id="v-top" aria-pressed="true">From above</button>
     </div>
-    <div class="cap" id="cap" aria-live="polite"><span></span><b></b></div>
     <div class="hint">Drag to turn<br>Scroll or pinch to zoom</div>
   </div>
 
