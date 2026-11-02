@@ -5,13 +5,8 @@ import { frameDt, springSettled, stepSpring, type SpringState } from "@/lib/moti
 
 /* The page's own scrollbar (`?sb=0` turns it off, `?sb=1` back on):
    a hairline thumb that trails the scroll on the lift's spring, so it
-   glides and settles instead of jumping. Drag it to scroll with a mouse
-   or trackpad. A touch screen keeps its own indicator: there the
-   invisible grab strip took a thumb scrolling down the right edge and
-   threw the page the other way, and the two bars sat side by side
-   (iPhone simulator, 2026-11-02). `data-sb` still goes on there: it hides
-   a desktop browser's classic bar, and without it a touch-emulated
-   Firefox lost 15px of width and the booking times ran under Confirm. */
+   glides and settles instead of jumping. Drag it to scroll, mouse or
+   finger. */
 export function ScrollThumb() {
   const ref = React.useRef<HTMLDivElement>(null);
 
@@ -27,10 +22,6 @@ export function ScrollThumb() {
     if (!on || !el) return;
     const root = document.documentElement;
     root.dataset.sb = "";
-    if (!matchMedia("(hover: hover) and (pointer: fine)").matches) {
-      el.style.display = "none";
-      return () => { delete root.dataset.sb; };
-    }
     const calm = matchMedia("(prefers-reduced-motion: reduce)").matches;
     const PAD = 6;
     let s: SpringState = { x: 0, v: 0 };
