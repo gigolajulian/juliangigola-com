@@ -309,7 +309,7 @@ const DATA = {"buildings":[{"p":[[52.7,-62.8],[44.7,-53.3],[35.3,-61.0],[2.7,-21
   function viewFor(name) {
     const portrait = camera.aspect < 0.9;
     // C: straight down over Latitude 37, every parking spot and the entrance in frame, the drive kept at A's angle
-    if (name === 'top') return sph([8, 40], 0.72, 0.02, fitDist(100) * (portrait ? 2.0 : 1.65));
+    if (name === 'top') return sph([8, 40], 0.72, 0.02, fitDist(100) * (portrait ? 1.45 : 1.1));
     if (name === 'curtner' || name === 'masonic' || name === 'turn') {
       const p = name === 'curtner' ? [150, 330] : name === 'masonic' ? DATA.meta.p_masonic : DATA.meta.p_babb;
       const t = V(p);
