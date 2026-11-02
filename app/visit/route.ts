@@ -202,7 +202,8 @@ a.eyebrow:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px;
         <li><span class="sw route"></span>Driving route<span></span></li>
         <li><span class="sw p">P</span>East bend, as you enter<span class="dist">~130 m walk</span></li>
         <li><span class="sw p">P</span>Inner drive, by the entrance<span class="dist">~60 m walk</span></li>
-        <li><span class="sw p no">P</span>West curb, no visitor parking<span></span></li>
+        <li><span class="sw p">P</span>West curb, end of the drive<span class="dist">~130 m walk</span></li>
+        <li><span class="sw p no">P</span>No parking for visitors<span></span></li>
         <li><span class="sw door"></span>Studio entrance<span></span></li>
         <li><span class="sw rail"></span>Curtner light rail station<span></span></li>
       </ul>
