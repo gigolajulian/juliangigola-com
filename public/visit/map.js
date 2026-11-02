@@ -14,7 +14,7 @@ const DATA = {"buildings":[{"p":[[52.7,-62.8],[44.7,-53.3],[35.3,-61.0],[2.7,-21
   // route to the street address so Google lands on the building, not on a road junction
   // Google's listing for the complex says 1255, so Google gets the 1277 address on its own;
   // Apple takes a custom label, so it gets a named pin at the entrance
-  const PLACE = 'Latitude 37 Apartments', ADDR = '1277 Babb Ct, San Jose, CA 95125', LL = DATA.meta.door_ll.join(',');
+  const ADDR = '1277 Babb Ct, San Jose, CA 95125', LL = DATA.meta.door_ll.join(',');
   const enc = encodeURIComponent;
   document.getElementById('go').href = 'https://www.google.com/maps/dir/?api=1&travelmode=driving&destination=' + enc(ADDR);
   document.getElementById('go-apple').href = 'https://maps.apple.com/?q=' + enc('Latitude 37, 1277 Babb Ct, #520, San Jose, CA') + '&address=' + enc(ADDR) + '&ll=' + LL + '&daddr=' + LL + '&dirflg=d';
@@ -23,7 +23,7 @@ const DATA = {"buildings":[{"p":[[52.7,-62.8],[44.7,-53.3],[35.3,-61.0],[2.7,-21
       const b = e.currentTarget;
       const done = ok => { b.textContent = ok ? 'Copied' : 'Select it'; setTimeout(() => (b.textContent = 'Copy'), 1600); };
       const fallback = () => { const r = document.createRange(); r.selectNodeContents(document.getElementById(sel)); const s = getSelection(); s.removeAllRanges(); s.addRange(r); done(false); };
-      try { navigator.clipboard.writeText(text).then(() => done(true), fallback); } catch (_) { fallback(); }
+      try { navigator.clipboard.writeText(text).then(() => done(true), fallback); } catch { fallback(); }
     });
   }
   copyBtn('copy', '1277 Babb Ct, #520, San Jose, CA 95125', 'addr-text');
@@ -213,6 +213,7 @@ const DATA = {"buildings":[{"p":[[52.7,-62.8],[44.7,-53.3],[35.3,-61.0],[2.7,-21
   // parking spots
   const pFill = new THREE.MeshBasicMaterial({ color: INK, transparent: true, opacity: 0.12, depthWrite: false });
   const pEdge = new THREE.LineBasicMaterial({ color: INK });
+  const pStall = new THREE.LineBasicMaterial({ color: INK, transparent: true, opacity: 0.4 });
   const spotCenters = [];
   DATA.spots.forEach(s => {
     const dx = s.b[0] - s.a[0], dy = s.b[1] - s.a[1], L = Math.hypot(dx, dy);
@@ -228,7 +229,7 @@ const DATA = {"buildings":[{"p":[[52.7,-62.8],[44.7,-53.3],[35.3,-61.0],[2.7,-21
       const t = i / n, mx = s.a[0] + dx * t, my = s.a[1] + dy * t;
       pts.push(V([mx + nx, my + ny], 0.5), V([mx - nx, my - ny], 0.5));
     }
-    if (pts.length) scene.add(new THREE.LineSegments(new THREE.BufferGeometry().setFromPoints(pts), new THREE.LineBasicMaterial({ color: INK, transparent: true, opacity: 0.4 })));
+    if (pts.length) scene.add(new THREE.LineSegments(new THREE.BufferGeometry().setFromPoints(pts), pStall));
     spotCenters.push([(s.a[0] + s.b[0]) / 2, (s.a[1] + s.b[1]) / 2]);
   });
 
@@ -300,17 +301,15 @@ const DATA = {"buildings":[{"p":[[52.7,-62.8],[44.7,-53.3],[35.3,-61.0],[2.7,-21
   const center = box.getCenter(new THREE.Vector3());
   const size = box.getSize(new THREE.Vector3());
 
-  function fitDist(radius, polar) {
+  function fitDist(radius) {
     const vfov = camera.fov * Math.PI / 180;
     const hfov = 2 * Math.atan(Math.tan(vfov / 2) * camera.aspect);
     return radius / Math.sin(Math.min(vfov, hfov) / 2) * (camera.aspect < 0.9 ? 0.78 : 0.62);
   }
   function viewFor(name) {
     const portrait = camera.aspect < 0.9;
-    if (name === 'top') {
-      const d = fitDist(Math.max(size.x, size.z) / 2, 0.01);
-      return { target: center.clone(), pos: center.clone().add(new THREE.Vector3(0, d * 1.05, 0.01)) };
-    }
+    // C: straight down over Latitude 37, every parking spot and the entrance in frame, the drive kept at A's angle
+    if (name === 'top') return sph([8, 40], 0.72, 0.02, fitDist(100) * (portrait ? 2.0 : 1.65));
     if (name === 'curtner' || name === 'masonic' || name === 'turn') {
       const p = name === 'curtner' ? [150, 330] : name === 'masonic' ? DATA.meta.p_masonic : DATA.meta.p_babb;
       const t = V(p);
@@ -340,15 +339,19 @@ const DATA = {"buildings":[{"p":[[52.7,-62.8],[44.7,-53.3],[35.3,-61.0],[2.7,-21
   }
 
   let tween = null, drive = null;
-  function flyTo(v, ms = 1100, at = 1, cb = null) {
+  // the parking highlight, eased toward its target each frame; on only while the camera sits at C
+  let hl = 0, hlTarget = 0;
+  const highlight = () => { hlTarget = 1; };
+  function flyTo(v, ms = 1100, at = 1, cb = null, then = null) {
     drive = null;
+    hlTarget = 0;
     if (reduce) { camera.position.copy(v.pos); controls.target.copy(v.target); return; }
     // orbit around the moving target (angle, tilt and distance eased together) rather than cutting straight through
     const s0 = new THREE.Spherical().setFromVector3(camera.position.clone().sub(controls.target));
     const s1 = new THREE.Spherical().setFromVector3(v.pos.clone().sub(v.target));
     let dTheta = s1.theta - s0.theta;
     dTheta = Math.atan2(Math.sin(dTheta), Math.cos(dTheta));
-    tween = { t0: performance.now(), ms, s0, s1, dTheta, q0: controls.target.clone(), q1: v.target, at, cb };
+    tween = { t0: performance.now(), ms, s0, s1, dTheta, q0: controls.target.clone(), q1: v.target, at, cb, then };
   }
   const tmpS = new THREE.Spherical();
   const ease = t => t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
@@ -363,7 +366,7 @@ const DATA = {"buildings":[{"p":[[52.7,-62.8],[44.7,-53.3],[35.3,-61.0],[2.7,-21
   const btns = { overview: 'v-overview', drive: 'v-drive', top: 'v-top' };
   function press(which) { Object.entries(btns).forEach(([k, id]) => document.getElementById(id).setAttribute('aria-pressed', String(k === which))); }
   document.getElementById('v-overview').onclick = () => { press('overview'); flyTo(viewFor('overview')); };
-  document.getElementById('v-top').onclick = () => { press('top'); flyTo(viewFor('top')); };
+  document.getElementById('v-top').onclick = () => { press('top'); flyTo(viewFor('top'), 1100, 1, highlight); };
   document.getElementById('v-drive').onclick = () => { press('drive'); startDrive(); };
   document.querySelectorAll('ol.steps li').forEach(li => {
     const go = () => { press(null); flyTo(viewFor(li.dataset.view), 1100, 0.6, li.dataset.view === 'door' ? arrive : null); if (innerWidth <= 820) stage.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'start' }); };
@@ -385,7 +388,9 @@ const DATA = {"buildings":[{"p":[[52.7,-62.8],[44.7,-53.3],[35.3,-61.0],[2.7,-21
   // open wide on the approach (B), hold a beat, then glide in to Latitude 37 (A)
   { const v = viewFor(reduce ? 'overview' : 'intro'); camera.position.copy(v.pos); controls.target.copy(v.target); }
   // the glide in starts as the train pulls out of Curtner
-  if (!reduce) setTimeout(() => { if (!tween && !drive && !userMoved) flyTo(viewFor('overview'), 5200, 0.84, arrive); else if (arrive0 === null) arrive(); }, TRAIN_DEPART_MS);
+  // then, once the entrance has landed at A, rise to C over the parking
+  const toC = () => setTimeout(() => { if (!tween && !drive && !userMoved) { press('top'); flyTo(viewFor('top'), 2800, 1, highlight); } }, 1900);
+  if (!reduce) setTimeout(() => { if (!tween && !drive && !userMoved) flyTo(viewFor('overview'), 5200, 0.84, arrive, toC); else if (arrive0 === null) arrive(); }, TRAIN_DEPART_MS);
 
   // keep panning near the route, parking and entrance
   const panBox = box.clone().expandByVector(new THREE.Vector3(70, 0, 70));
@@ -419,7 +424,7 @@ const DATA = {"buildings":[{"p":[[52.7,-62.8],[44.7,-53.3],[35.3,-61.0],[2.7,-21
       tmpS.set(tween.s0.radius + (tween.s1.radius - tween.s0.radius) * e, tween.s0.phi + (tween.s1.phi - tween.s0.phi) * e, tween.s0.theta + tween.dTheta * e);
       camera.position.setFromSpherical(tmpS).add(controls.target);
       if (tween.cb && k >= tween.at) { const cb = tween.cb; tween.cb = null; cb(); }
-      if (k >= 1) tween = null;
+      if (k >= 1) { const then = tween.then; tween = null; if (then) then(); }
     } else if (drive) {
       const k = Math.min(1, (now - drive.t0) / drive.ms), e = ease(k) * 0.985;
       const p = curve.getPointAt(e), ahead = curve.getPointAt(Math.min(1, e + 0.04));
@@ -435,6 +440,10 @@ const DATA = {"buildings":[{"p":[[52.7,-62.8],[44.7,-53.3],[35.3,-61.0],[2.7,-21
       pinHead.rotation.y += dt * 0.8;
     }
     animateEntrance(now);
+    hl += (hlTarget - hl) * Math.min(1, dt * 4);
+    const breathe = reduce ? 0 : (Math.sin(now / 700) + 1) * 0.04;
+    pFill.opacity = 0.12 + hl * (0.2 + breathe);
+    pStall.opacity = 0.4 + hl * 0.35;
     placeTrain(trainS(now));
     renderer.render(scene, camera);
 
