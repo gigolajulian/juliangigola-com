@@ -26,6 +26,11 @@
   TDM-Reservation: 1
   TDM-Policy: https://juliangigola.com/legal#terms
 
+# /visit is unlisted: Julian sends the link to clients, search engines leave it
+# out. Cloudflare joins this with the `/*` X-Robots-Tag above.
+/visit
+  X-Robots-Tag: noindex, nofollow
+
 # Caching, for the same responses.
 #
 # Workers Static Assets serves every file with `max-age=0, must-revalidate`
@@ -66,4 +71,14 @@
   Cache-Control: public, max-age=86400, stale-while-revalidate=604800
 
 /og.jpg
+  Cache-Control: public, max-age=86400, stale-while-revalidate=604800
+
+# The /visit map's library (three.js and its orbit controls, a pinned copy)
+# and its fonts never change in place, so they get the same day and week as
+# the photographs. `map.js` is left out: it is still being tuned, and a
+# change to it should reach the next visitor at once.
+/visit/vendor/*
+  Cache-Control: public, max-age=86400, stale-while-revalidate=604800
+
+/visit/fonts/*
   Cache-Control: public, max-age=86400, stale-while-revalidate=604800
