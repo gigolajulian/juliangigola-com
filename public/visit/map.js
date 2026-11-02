@@ -264,6 +264,9 @@ const DATA = {"buildings":[{"p":[[52.7,-62.8],[44.7,-53.3],[35.3,-61.0],[2.7,-21
   function viewFor(name) {
     const portrait = camera.aspect < 0.9;
     // the one view: nearly straight down over Latitude 37, Babb Ct coming in at the top right, every spot and the entrance in frame
+    // the lead-in: behind the car at the turn into Babb Ct, then tilted over the spots, highlighted
+    if (name === 'in') return sph([175, 20], 2.2, 0.85, fitDist(80) * (portrait ? 1.5 : 1.1));
+    if (name === 'spots') return sph([15, 42], -0.85, 0.68, fitDist(110) * (portrait ? 0.95 : 1.1));
     if (name === 'top') return sph([5, 45], -0.85, 0.3, fitDist(100) * (portrait ? 1.0 : 1.45));
     if (name === 'curtner' || name === 'masonic' || name === 'turn') {
       const p = name === 'curtner' ? [150, 330] : name === 'masonic' ? DATA.meta.p_masonic : DATA.meta.p_babb;
@@ -313,13 +316,13 @@ const DATA = {"buildings":[{"p":[[52.7,-62.8],[44.7,-53.3],[35.3,-61.0],[2.7,-21
 
   const btns = { top: 'v-top' };
   function press(which) { Object.entries(btns).forEach(([k, id]) => document.getElementById(id).setAttribute('aria-pressed', String(k === which))); }
-  document.getElementById('v-top').onclick = () => { press('top'); flyTo(viewFor('top'), 1100, 1, highlight); };
+  document.getElementById('v-top').onclick = () => { endIntro(); press('top'); flyTo(viewFor('top'), 1100, 1, highlight); };
   document.querySelectorAll('ol.steps li').forEach(li => {
-    const go = () => { press(null); flyTo(viewFor(li.dataset.view), 1100, 0.6, li.dataset.view === 'door' ? arrive : null); if (innerWidth <= 820) stage.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'start' }); };
+    const go = () => { endIntro(); press(null); flyTo(viewFor(li.dataset.view), 1100, 0.6, li.dataset.view === 'door' ? arrive : null); if (innerWidth <= 820) stage.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'start' }); };
     li.addEventListener('click', go);
     li.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); go(); } });
   });
-  controls.addEventListener('start', () => { tween = null; if (arrive0 === null) arrive(); });
+  controls.addEventListener('start', () => { tween = null; endIntro(); if (arrive0 === null) arrive(); });
 
   function resize() {
     const w = stage.clientWidth, h = stage.clientHeight;
@@ -330,9 +333,26 @@ const DATA = {"buildings":[{"p":[[52.7,-62.8],[44.7,-53.3],[35.3,-61.0],[2.7,-21
   function capZoom() { const r = viewFor('route'), b = viewFor('intro'); controls.maxDistance = Math.max(r.pos.distanceTo(r.target), b.pos.distanceTo(b.target)) * 1.1; }
   new ResizeObserver(() => { resize(); capZoom(); }).observe(stage);
   resize(); capZoom();
-  // open straight down over the parking (C), highlight on, then the entrance lands
-  { const v = viewFor('top'); camera.position.copy(v.pos); controls.target.copy(v.target); highlight(); }
-  setTimeout(() => { if (arrive0 === null) arrive(); }, reduce ? 0 : 600);
+  // on load: the turn into Babb Ct, then the spots by the entrance, then settle on the top-down view
+  const cap = document.getElementById('cap');
+  let intro = !reduce;
+  function caption(n, text) {
+    if (!text) { cap.classList.remove('on'); return; }
+    cap.firstChild.textContent = n; cap.lastChild.textContent = text; cap.classList.add('on');
+  }
+  function endIntro() { if (!intro) return; intro = false; caption(); }
+  function settle() { endIntro(); press('top'); flyTo(viewFor('top'), 2600, 0.85, () => { highlight(); if (arrive0 === null) arrive(); }); }
+  { const v = viewFor(intro ? 'in' : 'top'); camera.position.copy(v.pos); controls.target.copy(v.target); }
+  if (intro) {
+    press(null);
+    setTimeout(() => intro && caption('01', 'Turn in at Babb Ct'), 300);
+    setTimeout(() => {
+      if (!intro) return;
+      caption();
+      flyTo(viewFor('spots'), 3200, 0.7, () => { if (intro) { caption('02', 'Park in any unmarked spot'); highlight(); } },
+        () => setTimeout(() => intro && settle(), 2200));
+    }, 2300);
+  } else { highlight(); arrive(); }
 
   // keep panning near the route, parking and entrance
   const panBox = box.clone().expandByVector(new THREE.Vector3(70, 0, 70));
