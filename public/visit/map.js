@@ -316,10 +316,8 @@ const DATA = {"buildings":[{"p":[[52.7,-62.8],[44.7,-53.3],[35.3,-61.0],[2.7,-21
   const btns = { top: 'v-top' };
   function press(which) { Object.entries(btns).forEach(([k, id]) => document.getElementById(id).setAttribute('aria-pressed', String(k === which))); }
   document.getElementById('v-top').onclick = () => { endIntro(); press('top'); flyTo(viewFor('top'), 1100, 1, highlight); };
-  document.querySelectorAll('ol.steps li').forEach(li => {
-    const go = () => { endIntro(); press(null); flyTo(viewFor(li.dataset.view), 1100, 0.6, li.dataset.view === 'door' ? arrive : null); if (innerWidth <= 820) stage.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'start' }); };
-    li.addEventListener('click', go);
-    li.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); go(); } });
+  document.querySelectorAll('ol.steps button').forEach(step => {
+    step.addEventListener('click', () => { endIntro(); press(null); flyTo(viewFor(step.dataset.view), 1100, 0.6, step.dataset.view === 'door' ? arrive : null); if (innerWidth <= 820) stage.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'start' }); });
   });
   controls.addEventListener('start', () => { tween = null; endIntro(); if (arrive0 === null) arrive(); });
 
