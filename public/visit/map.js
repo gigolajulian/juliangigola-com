@@ -265,7 +265,7 @@ const DATA = {"buildings":[{"p":[[52.7,-62.8],[44.7,-53.3],[35.3,-61.0],[2.7,-21
     const portrait = camera.aspect < 0.9;
     // the one view: nearly straight down over Latitude 37, Babb Ct coming in at the top right, every spot and the entrance in frame
     // the opening: the same angle pulled well back, so the load is a straight zoom in
-    if (name === 'far') return sph([5, 45], -0.85, 0.3, fitDist(100) * (portrait ? 2.2 : 2.7));
+    if (name === 'far') return sph([5, 45], -0.85, 0.3, fitDist(100) * (portrait ? 3.4 : 4.2));
     if (name === 'top') return sph([5, 45], -0.85, 0.3, fitDist(100) * (portrait ? 1.0 : 1.45));
     if (name === 'curtner' || name === 'masonic' || name === 'turn') {
       const p = name === 'curtner' ? [150, 330] : name === 'masonic' ? DATA.meta.p_masonic : DATA.meta.p_babb;
@@ -329,16 +329,16 @@ const DATA = {"buildings":[{"p":[[52.7,-62.8],[44.7,-53.3],[35.3,-61.0],[2.7,-21
     camera.aspect = w / h; camera.updateProjectionMatrix();
   }
   // zoom out only as far as the whole route from Curtner Ave
-  function capZoom() { const r = viewFor('route'), b = viewFor('intro'); controls.maxDistance = Math.max(r.pos.distanceTo(r.target), b.pos.distanceTo(b.target)) * 1.1; }
+  function capZoom() { const r = viewFor('route'), b = viewFor('intro'), f = viewFor('far'); controls.maxDistance = Math.max(r.pos.distanceTo(r.target), b.pos.distanceTo(b.target), f.pos.distanceTo(f.target)) * 1.02; }
   new ResizeObserver(() => { resize(); capZoom(); }).observe(stage);
   resize(); capZoom();
-  // on load: one zoom in, about 5 s, from far out down to the top-down view
+  // on load: one slow zoom in, about 7.5 s, from far out down to the top-down view
   let intro = !reduce;
   function endIntro() { intro = false; }
   { const v = viewFor(intro ? 'far' : 'top'); camera.position.copy(v.pos); controls.target.copy(v.target); }
   if (intro) {
     press(null);
-    setTimeout(() => intro && (endIntro(), press('top'), flyTo(viewFor('top'), 4800, 0.85, () => { highlight(); if (arrive0 === null) arrive(); })), 200);
+    setTimeout(() => intro && (endIntro(), press('top'), flyTo(viewFor('top'), 7500, 0.85, () => { highlight(); if (arrive0 === null) arrive(); })), 200);
   } else { highlight(); arrive(); }
 
   // keep panning near the route, parking and entrance
