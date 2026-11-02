@@ -162,9 +162,7 @@ a.eyebrow:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px;
     <div class="labels" id="labels"></div>
     <div class="compass" aria-hidden="true"><span id="needle"><i></i>N</span></div>
     <div class="hud" role="group" aria-label="Map view">
-      <button id="v-overview" aria-pressed="true">Overview</button>
-      <button id="v-drive" aria-pressed="false">Drive the route</button>
-      <button id="v-top" aria-pressed="false">From above</button>
+      <button id="v-top" aria-pressed="true">From above</button>
     </div>
     <div class="hint">Drag to turn<br>Scroll or pinch to zoom</div>
   </div>
